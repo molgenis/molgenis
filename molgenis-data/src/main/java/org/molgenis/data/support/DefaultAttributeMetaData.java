@@ -220,6 +220,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setExpression(String expression)
 	{
 		this.expression = expression;
+		this.readOnly = true;
 		return this;
 	}
 
