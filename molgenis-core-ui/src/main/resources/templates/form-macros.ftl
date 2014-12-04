@@ -2,9 +2,9 @@
 <div id="list-holder" class="row-fluid">
 	<div id="list-navigation">
 		<div class="span4">
-			<h3 class="pull-left">${form.title} (<span id="entity-count-${index}"></span>)</h3>
+			<h3 class="pull-left">${form.title?html} (<span id="entity-count-${index}"></span>)</h3>
 			<#if form.hasWritePermission>
-				<a id="create-${index}" style="margin:30px 10px" class="pull-left" href="${form.getBaseUri(context_url)}/create?back=${current_uri?url('UTF-8')}">
+				<a id="create-${index}" style="margin:30px 10px" class="pull-left" href="${form.getBaseUri(context_url)?html}/create?back=${current_uri?url('UTF-8')?html}">
 					<img src="/img/new.png" />
 				</a>
 			</#if>
@@ -19,7 +19,7 @@
 				<select id="query-fields">
 					<#list form.metaData.fields as field>
 						<#if field.dataType.enumType == 'STRING'>
-							<option id="${field.name}">${field.name}</option>
+							<option id="${field.name?html}">${field.name?html}</option>
 						</#if>
 					</#list>
 				</select>
@@ -45,7 +45,7 @@
 						<th class="edit-icon-holder">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
 					</#if>
 					<#list form.metaData.fields as field>
-						<th>${field.name}</th>
+						<th>${field.name?html}</th>
 					</#list>
 				</tr>
 			</thead>
@@ -60,37 +60,37 @@
 <#macro meta form index=0>
 <script>
 	forms[${index}] = {
-		title: '${form.title}',
+		title: '${form.title?html}',
 		hasWritePermission: ${form.getHasWritePermission()?string},
 		<#if form.primaryKey??>
-			primaryKey: '${form.primaryKey}',
+			primaryKey: '${form.primaryKey?html}',
 		</#if>
 		<#if form.xrefFieldName??>
-			xrefFieldName: '${form.xrefFieldName}',
+			xrefFieldName: '${form.xrefFieldName?html}',
 		</#if>
-		baseUri: '${form.getBaseUri(context_url)}'
+		baseUri: '${form.getBaseUri(context_url)?html}'
 	}
 	
 	//Build metadata to be used by the js
 	forms[${index}].meta = {
-		name:'${form.metaData.name?lower_case}'
+		name:'${form.metaData.name?lower_case?html}'
 	}
 	
 	//The fieldnames of the entity
 	forms[${index}].meta.fields = [<#list form.metaData.fields as field>
 					{
-						name:'${field.name}', 
+						name:'${field.name?html}', 
 						xref:${(field.dataType.enumType == 'XREF' || field.dataType.enumType == 'CATEGORICAL')?string('true', 'false')},
 						mref:${(field.dataType.enumType == 'MREF')?string('true', 'false')},
-						type:'${field.dataType.enumType}',
+						type:'${field.dataType.enumType?html}',
 						readOnly:${field.isReadonly()?string('true', 'false')},
 						unique:false,
 						<#if field.refEntity??>
 							<#if field.refEntity.labelAttribute??>
-								xrefLabelName: '${field.refEntity.labelAttribute.name}',
+								xrefLabelName: '${field.refEntity.labelAttribute.name?html}',
 							</#if>
-						xrefLabel: '${field.refEntity.name}',
-						xrefEntityName: '${field.refEntity.name?lower_case}'
+						xrefLabel: '${field.refEntity.name?html}',
+						xrefEntityName: '${field.refEntity.name?lower_case?html}'
 						</#if>
 					}
 					<#if field_has_next>,</#if>
@@ -98,7 +98,7 @@
 				
 	//Get the label attribute
 	<#if form.metaData.labelAttribute??>
-		forms[${index}].meta.labelFieldName = '${form.metaData.labelAttribute.name}';
+		forms[${index}].meta.labelFieldName = '${form.metaData.labelAttribute.name?html}';
 	</#if>
 	
 	//Get a field by name				
@@ -142,13 +142,13 @@
 	var remoteRules = {
 		<#list form.metaData.fields as field>
 			<#if field.isUnique()?string('true', 'false') == 'true'>
-				${field.name}: {
+				${field.name?html}: {
 					remote: {
-						url: '/api/v1/${form.metaData.name?lower_case}?q[0].operator=EQUALS&q[0].field=${field.name}',
+						url: '/api/v1/${form.metaData.name?lower_case?html}?q[0].operator=EQUALS&q[0].field=${field.name?html}',
 						async: false,
 						data: {
 							'q[0].value': function() {//Bit cheesy, but it works, is appended to the url
-								return $('#${field.name}').val();
+								return $('#${field.name?html}').val();
 							}
 						},
 						dataFilter: function(data) {
@@ -182,8 +182,8 @@
 	var remoteMessages = {
 		<#list form.metaData.fields as field>
 			<#if field.isUnique()?string('true', 'false') == 'true'>
-				${field.name}: {
-					remote: "This ${field.name} already exists. It must be unique"
+				${field.name?html}: {
+					remote: "This ${field.name?html} already exists. It must be unique"
 				},
 			</#if>
 		</#list>

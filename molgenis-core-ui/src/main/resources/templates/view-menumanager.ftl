@@ -103,7 +103,7 @@
 	<div class="controls">
 		<select name="menu-item-select" required<#if is_edit> disabled</#if>>
 		<#list plugins as plugin>
-			<option value="${plugin.id}">${plugin.id}</option>
+			<option value="${plugin.id?html}">${plugin.id?html}</option>
 		</#list>
 		</select>
 	</div>
@@ -125,11 +125,11 @@
 	<#if is_root>
 	<ol class="vertical root">
 	</#if>
-		<li class="node highlight<#if is_root> root</#if>" data-id="${menu.id}" data-label="${menu.name}">
+		<li class="node highlight<#if is_root> root</#if>" data-id="${menu.id?html}" data-label="${menu.name?html}">
 		<#if !is_root>
 			<i class="icon-move"></i>
 		</#if>
-			<span>${menu.name}</span>
+			<span>${menu.name?html}</span>
 			<div class="pull-right">
 			<#if !is_root>
 				<i class="icon-edit edit-menu-btn" data-toggle="modal" data-target="#edit-menu-modal"></i>
@@ -144,9 +144,9 @@
 			<@create_menu_list item false/>
 		<#else>
 		<#-- extract query string from url -->
-		<li class="node" data-id="${item.id}" data-label="${item.name}" <#if item.id != item.url> data-params="${item.url?substring(item.id?length + 1)?html}"</#if>>
+		<li class="node" data-id="${item.id?html}" data-label="${item.name?html}" <#if item.id != item.url> data-params="${item.url?substring(item.id?length + 1)?html}"</#if>>
 			<i class="icon-move"></i>
-			<span>${item.name}</span>
+			<span>${item.name?html}</span>
 			<div class="pull-right">
 				<i class="icon-edit edit-item-btn" data-toggle="modal" data-target="#edit-item-modal"></i>
 				<i class="icon-trash"></i>
