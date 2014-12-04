@@ -45,18 +45,6 @@ public class CgdDataProvider
 					CgdData cgdData = new CgdData(split[1], split[2], split[3], split[4], split[5], split[6], split[7],
 							split[8], split[9], split[10], split[11]);
 
-					cgdData.getHgnc_id();
-					cgdData.getEntrez_gene_id();
-					cgdData.getCondition();
-					cgdData.getInheritance();
-					cgdData.getAge_group();
-					cgdData.getAllelic_conditions();
-					cgdData.getManifestation_categories();
-					cgdData.getIntervention_categories();
-					cgdData.getComments();
-					cgdData.getIntervention_rationale();
-					cgdData.getReferences();
-
 					result.put(split[0], cgdData);
 				}
 			}
