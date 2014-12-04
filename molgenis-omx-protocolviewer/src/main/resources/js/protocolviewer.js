@@ -1,6 +1,5 @@
 (function($, molgenis) {
 	var restApi = new molgenis.RestClient();
-	var catalogContainer;
 	var Catalog = molgenis.Catalog = molgenis.Catalog || {};
 	var maxItems = 10000;
 	
@@ -15,20 +14,9 @@
 	Catalog.getProtocol = function(featureUri) {
 		return restApi.get(featureUri);
 	};
-	
-	var onCatalogChange = function(catalogId) {
-		$.ajax({
-			type : 'GET',
-			url : molgenis.getContextUrl() + '/selection/' + catalogId,
-			success : function(selection) {
-				updateCatalog(catalogId, selection);
-			}
-		});
-	};
 
 	var updateCatalog = function(catalogId, selection) {
-		
-		catalogContainer.catalog({
+		$('#catalog-container').catalog({
 			'selection' : Catalog.getEnableSelection(),
 			'protocolId' : catalogId,
 			'selectedItems' : selection.items ? $.map(selection.items, function(selectedItem) { return selectedItem.protocol.toLowerCase(); }) : null, // FIXME catalog requires group info
@@ -37,9 +25,7 @@
 				updateFeatureDetails(featureUri);
 			},
 			'onFolderSelect' : function(protocolUri, select) {
-				updateShoppingCart(protocolUri, select, catalogId, function() {
-					updateFeatureSelection(catalogId);
-				});
+				updateShoppingCart(protocolUri, select, catalogId);
 			},
 			'onInit' : function() {
 				updateFeatureSelection(catalogId);
@@ -89,7 +75,7 @@
 	};
 
 	var getFeature = function(id, callback) {
-		var data = restApi.get(id); // TODO async instead of sync
+		var data = restApi.get(id);
 		$.ajax({
 			type : 'POST',
 			url : '/api/v1/category?_method=GET',
@@ -119,127 +105,134 @@
 		callback(data);
 	};
 
-	var updateFeatureSelection = function(catalogId) {
+	var updateFeatureSelection = function(catalogId, newPageObject) {
+		var nrItemsPerPage = 20;
+		var pager;
 		
-		function updateFeatureSelectionContainer(page) {
-			var nrItemsPerPage = 20;
-			var start = page ? page.start : 0;
-			var end = page ? page.end : nrItemsPerPage;
+		if(newPageObject){
+			pager = newPageObject;
+		}
+		else {
+			pager = {page:1, start:0, end:nrItemsPerPage};
+		}
 
-			$.ajax({
-				url: molgenis.getContextUrl() + '/selection/' + catalogId + '?start=' + start + '&end=' + end,
-				success : function(selection) {
-					var selectionTable = $('#feature-selection-table-container');
-					var selectionTablePager = $('#feature-selection-table-pager');
-					
-					if(selection.total === 0) {
-						$('#orderdata-href-btn').addClass('disabled');
-						selectionTable.html('<p>No variables selected</p>');
-						selectionTablePager.empty();
-					} else {
-						$('#orderdata-href-btn').removeClass('disabled');
-						if(page === undefined) {
-							selectionTablePager.pager({
-								'nrItems' : selection.total,
-								'nrItemsPerPage' : nrItemsPerPage,
-								'onPageChange' : updateFeatureSelectionContainer
-							});	
-						}
-						
-						var catalogItems = selection.items;
-						
-						// get protocols
-						var q = {
-							q : [ {
-								field : 'id',
-								operator : 'IN',
-								value : $.map(catalogItems, function(catalogItem) {
-									return restApi.getPrimaryKeyFromHref(catalogItem.protocol); 
-								})
-							} ],
-							num : maxItems
-						};
-						restApi.getAsync('/api/v1/protocol', {'q': q}, function(protocols) {
-							if (protocols.total > maxItems) { 
-								molgenis.createAlert([ {
-									'message' : 'Maximum number of selected items reached (' + maxItems + ')'
-								} ], 'error');
+		$.ajax({
+			url: molgenis.getContextUrl() + '/selection/' + catalogId + '?start=' + pager.start + '&end=' + pager.end,
+			success : function(selection) {
+				var selectionTable = $('#feature-selection-table-container');
+				var selectionTablePager = $('#feature-selection-table-pager');
+				
+				if(selection.total === 0) {
+					$('#orderdata-href-btn').addClass('disabled');
+					selectionTable.html('<p>No variables selected</p>');
+					selectionTablePager.empty();
+				} else {
+					$('#orderdata-href-btn').removeClass('disabled');
+					if(!newPageObject) {
+						selectionTablePager.pager({
+							'nrItems' : selection.total,
+							'nrItemsPerPage' : nrItemsPerPage,
+							'onPageChange' : function(pageObject){
+								updateFeatureSelection(catalogId, pageObject);
 							}
-							
-							var protocolMap = {};
-							$.each(protocols.items, function() {
-								protocolMap[this.href.toLowerCase()] = this;
-							});
-							var table = $('<table id="feature-selection-table" class="table table-striped table-condensed table-hover" />');
-							$('<thead />').append('<th>Variable Name</th><th>Variable Identifier</th><th>Description</th><th>Remove</th>').appendTo(table);
-							$.each(catalogItems, function() {
-								var protocol = protocolMap[this.path[this.path.length - 1]];
-								var protocolName = protocol.Name;
-								var protocolIdentifier = protocol.Identifier;
-								var description = molgenis.i18n.get(protocol.description);
-								var row = $('<tr />').data('key', this);
-								$('<td />').text(typeof protocolName !== 'undefined' ? protocolName : "").appendTo(row);
-								$('<td />').text(typeof protocolIdentifier !== 'undefined' ? protocolIdentifier : "").appendTo(row);
-								$('<td />').text(typeof description !== 'undefined' ? description : "").appendTo(row);
-								var deleteButton = $('<i class="icon-remove"></i>');
-								
-								deleteButton.click(function() {
-									var item = $(this).closest('tr').data('key');
-									catalogContainer.catalog('selectItem', {
-										'feature' : item.protocol,
-										'path' : $.map(item.path, function(pathPart){return pathPart.toLowerCase()}),
-										'select' : false
-									});
-									return false; // TODO do we need this?
-								});
-								$('<td class="center" />').append(deleteButton).appendTo(row);
-		
-								row.appendTo(table);
-							});
-							table.addClass('listtable selection-table');
-							selectionTable.html(table);
 						});
 					}
+					
+					var catalogItems = selection.items;
+					
+					// get protocols
+					var q = {
+						q : [ {
+							field : 'id',
+							operator : 'IN',
+							value : $.map(catalogItems, function(catalogItem) {
+								return restApi.getPrimaryKeyFromHref(catalogItem.protocol); 
+							})
+						} ],
+						num : maxItems
+					};
+					restApi.getAsync('/api/v1/protocol', {'q': q}, function(protocols) {
+						if (protocols.total > maxItems) { 
+							molgenis.createAlert([ {
+								'message' : 'Maximum number of selected items reached (' + maxItems + ')'
+							} ], 'error');
+						}
+						
+						var protocolMap = {};
+						$.each(protocols.items, function() {
+							protocolMap[this.href.toLowerCase()] = this;
+						});
+						var table = $('<table id="feature-selection-table" class="table table-striped table-condensed table-hover" />');
+						$('<thead />').append('<th>Variable Name</th><th>Variable Identifier</th><th>Description</th><th>Remove</th>').appendTo(table);
+						$.each(catalogItems, function() {								
+							var protocol = protocolMap[this.path[this.path.length - 1]];
+							var protocolName = protocol.Name;
+							var protocolIdentifier = protocol.Identifier;
+							var description = molgenis.i18n.get(protocol.description);
+							var row = $('<tr />').data('key', this);
+							$('<td />').text(typeof protocolName !== 'undefined' ? protocolName : "").appendTo(row);
+							$('<td />').text(typeof protocolIdentifier !== 'undefined' ? protocolIdentifier : "").appendTo(row);
+							$('<td />').text(typeof description !== 'undefined' ? description : "").appendTo(row);
+							var deleteButton = $('<i class="icon-remove"></i>');
+							
+							deleteButton.click(function() {
+								var item = $(this).closest('tr').data('key');
+								$('#catalog-container').catalog('selectItem', {
+									'feature' : item.protocol,
+									'path' : $.map(item.path, function(pathPart){return pathPart.toLowerCase()}),
+									'select' : false
+								});
+								return false;
+							});
+							$('<td class="center" />').append(deleteButton).appendTo(row);
+	
+							row.appendTo(table);
+						});
+						table.addClass('listtable selection-table');
+						selectionTable.html(table);
+					});
 				}
-			});
-		};
-		
-		// create selection table with pager
-		updateFeatureSelectionContainer();
+			}
+		});
 	};
 	
-	var updateShoppingCart = function(protocolUri, select, catalogId, callback) {
+	var updateShoppingCart = function(protocolUri, select, catalogId) {
 		var protocolId = restApi.getPrimaryKeyFromHref(protocolUri);
 		
-        $('.catalog-tree').fancytree('disable');
+        $('#catalog-tree').fancytree('disable');
 		$.ajax({
 			type : 'POST',
+			async : false,
 			url : molgenis.getContextUrl() + '/cart/' + (select ? 'add' : 'remove') + '/' + catalogId,
 			data : JSON.stringify({'protocolId' : protocolId}),
 			contentType : 'application/json',
 			success: function() {
-				callback();
+				updateFeatureSelection(catalogId);
 			},
 			error : function(xhr) {
 				molgenis.createAlert(JSON.parse(xhr.responseText).errors);
-				callback();
+				updateFeatureSelection(catalogId);
 			},
 			complete : function() {
-				$('.catalog-tree').fancytree('enable');
+				$('#catalog-tree').fancytree('enable');
 			}
 		});
 	};
 
 	$(function() {
-		catalogContainer = $('#catalog-container');
-		var catalogSelect = $('#catalog-select');
-
-		catalogSelect.change(function() {
-			onCatalogChange($(this).val());
+		$('#catalog-select').change(function() {
+			var catalogId = $(this).val();
+			$.ajax({
+				type : 'GET',
+				url : molgenis.getContextUrl() + '/selection/' + catalogId,
+				success : function(selection) {
+					updateCatalog(catalogId, selection);
+				}
+			});
 		});
 
 		$('#download-xls-button').click(function() {
-			window.location = molgenis.getContextUrl() + '/download/' + catalogSelect.val();
+			window.location = molgenis.getContextUrl() + '/download/' + $('#catalog-select').val();
 		});
 
 		// prevent user form submission by pressing enter
@@ -270,6 +263,6 @@
 			} ], 'success');
 		});
 
-		catalogSelect.change();
+		$('#catalog-select').change();
 	});
 }($, window.top.molgenis = window.top.molgenis || {}));
