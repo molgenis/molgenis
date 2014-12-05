@@ -48,7 +48,6 @@ public class ClinvarDataProvider
 							split[21], split[22], split[23], split[24]);
 
 					List<String> clinvarKeys = getChromosomePositionReferenceAlternativeInformationFromClinvarLine(split);
-					// FIXME dont use immutable object as key
 					result.put(clinvarKeys, clinvarData);
 				}
 			}
@@ -86,15 +85,10 @@ public class ClinvarDataProvider
 			}
 			else if (type.equals("single nucleotide variant"))
 			{
-				// NM_003159.2(CDKL5):c.1721C>T
-
-				System.out.println(hgvs);
+				// NM_003159.2(CDKL5):c.1721C>T				
 				int gtIndex = hgvs.lastIndexOf('>');
-
 				reference = hgvs.substring(gtIndex - 1, gtIndex);
-				alternative = hgvs.substring(gtIndex + 1, gtIndex + 2);
-
-				System.out.println(reference + " " + alternative);
+				alternative = hgvs.substring(gtIndex + 1, gtIndex + 2);	
 			}
 		} else {
 			// Some lines do not have a standard notation of variants, we cant handle these at the moment

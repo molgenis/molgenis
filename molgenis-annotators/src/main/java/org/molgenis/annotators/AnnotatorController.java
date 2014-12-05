@@ -24,6 +24,7 @@ import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -91,6 +92,7 @@ public class AnnotatorController
 	 * */
 	@RequestMapping(value = "/annotate-data", method = RequestMethod.POST)
 	@ResponseBody
+	@Transactional
 	public String annotateData(@RequestParam(value = "annotatorNames", required = false) String[] annotatorNames,
 			@RequestParam("dataset-identifier") String entityName,
 			@RequestParam(value = "createCopy", required = false) boolean createCopy)
