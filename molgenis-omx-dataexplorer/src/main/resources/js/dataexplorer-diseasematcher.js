@@ -65,7 +65,7 @@
 	var patientPanel = $('#diseasematcher-patientpanel');
 	var selectionContainer = $('#disease-selection-container');
 	var selectionList = $('#diseasematcher-selection-list');
-	var selectionNav = $("#diseasematcher-selection-navbar");
+	var selectionNav = $("#diseasematcher-selection-navbar-nav");
 	var selectionTitle = $('#diseasematcher-selection-title');
 	
 	//handlebars templates
@@ -137,7 +137,7 @@
 		if (!toolAvailable) return;
 		
 		//reset navbar and activate the clicked button
-		selectionNav.find('li').attr('class', '');
+		selectionNav.find('li').removeClass('active');
 		$(element).parent().attr("class", "active");
 		
 		if (selectionMode === SelectionMode.PATIENT){
@@ -217,10 +217,18 @@
 						//extract omim name from the item and remove the omim id from it
 						//also prepare all names for string matching (removing disease types)
 						var omimName = $(suggestedDisorder).find('.title');
-						omimName = $(omimName).html().replace(/^[^a-zA-Z]+/, '').replace(/\b\S{1,3}\b/g, '');
-										
-						suggestionObjects[omimId] = omimName;
+						var originalName = $(omimName).html();
+						matchingName = originalName.replace(/^[^a-zA-Z]+/, '').replace(/\b\S{1,3}\b/g, '');
+						
+						var suggestion = {
+								'originalName' : originalName,
+								'matchingName' : matchingName
+								}
+						
+						suggestionObjects[omimId] = suggestion;
 					});
+					
+					console.log(suggestionObjects);
 					
 					if (suggestionObjects.length === 0){
 						alert("phenotips offline");
@@ -240,38 +248,61 @@
 							// no perfect match found, try to find similar diseases
 							var disNameBroad = dis.diseaseName.replace(/\b\S{1,3}\b/g, '').toUpperCase();
 							var found = false;
+							dis['matches'] = [];
 							for(var k in suggestionObjects) {
-							    if(suggestionObjects[k] === disNameBroad) {
-							        includeSimilar.push(dis);
-							        found = true;
-							        break;
+							    if(suggestionObjects[k].matchingName === disNameBroad) {
+							        dis.matches.push(suggestionObjects[k].originalName);
+							        found = true;							        
 							    }
+							    
 							}
 							
-							if (found === false) exclude.push(dis);
+							if (found === false){
+								exclude.push(dis);
+							}else{
+								includeSimilar.push(dis);
+							}
 						}
 					});
+					
 					
 					includeIds = [];
 					
 					// print output
-					var outputDiv = $('#diseasematcher-phenotips-output');
-					outputDiv.empty();
+					var outputDivPerfect = $('#diseasematcher-filter-perfect');
+					var outputDivSimilar = $('#diseasematcher-filter-similar');
+					var outputDivNo = $('#diseasematcher-filter-no');
+					outputDivPerfect.empty();
+					outputDivSimilar.empty();
+					outputDivNo.empty();
 					includePerfect.forEach(function(dis){
 						var itemLine = '<font color="green"><strong>' + dis.diseaseId + '</strong> ' + dis.diseaseName + '</font></br>';
-						outputDiv.append(itemLine);
+						outputDivPerfect.append(itemLine);
 						includeIds.push(dis.diseaseId);
 					});
+					$('#perfectMatchTitle').text("Perfect matches (" + includePerfect.length + ")");
+					
+					outputDivSimilar.css("color", "orange");
+					outputDivSimilar.append('<ul class="rootlist" style="list-style-type:none;"></ul>');
+					list = outputDivSimilar.find('ul');
+					
 					includeSimilar.forEach(function(dis){
-						var itemLine = '<font color="orange"><strong>' + dis.diseaseId + '</strong> ' + dis.diseaseName + '</font></br>';
-						outputDiv.append(itemLine);
+						var itemLine = '<li><strong>' + dis.diseaseId + '</strong> ' + dis.diseaseName + '<ul style="list-style-type:none; color: grey;"></ul></li>';
+						list.append(itemLine);
+						
+						lastItem = $('ul.rootlist > li ul').last();
+						for (m in dis.matches){
+							lastItem.append('<li><em>' + dis.matches[m] + '</em></li>');
+						}
 						includeIds.push(dis.diseaseId);
-					});
+					});					
+					$('#similarMatchTitle').text("Similar matches (" + includeSimilar.length + ")");
+					
 					exclude.forEach(function(dis){
 						var itemLine = '<font color="red"><strong>' + dis.diseaseId + '</strong> ' + dis.diseaseName + '</font></br>';
-						outputDiv.append(itemLine);
+						outputDivNo.append(itemLine);
 					});
-					outputDiv.show();
+					$('#noMatchTitle').text("No matches (" + exclude.length + ")");
 					
 					// get genes from DiseaseMapping for every OMIM id and use these genes to filter the patient variants
 					var queryRules = [];
@@ -323,6 +354,8 @@
 						phenotipsFilteredQuery = [filterRules];
 						
 						$('#diseasematcher-download-button').show();
+						$('#diseasematcher-filter-output').show();
+						
 						
 					});
 				});
