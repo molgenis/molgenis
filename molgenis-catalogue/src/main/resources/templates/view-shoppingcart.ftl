@@ -15,10 +15,10 @@
 						<tr><th/><th>name</th><th>type</th><th>description</th></tr>
 						<#list attributes as attribute>
 						<tr>
-							<td><a class="remove-attribute" data-attribute-name='${attribute.name}'><span class="glyphicon glyphicon-remove"></span></a></td>
-							<th>${attribute.label!}</th>
-							<td>${attribute.dataType!}</td>
-							<td>${attribute.description!}</td>
+							<td><a class="remove-attribute" data-attribute-name='${attribute.name?html}'><span class="glyphicon glyphicon-remove"></span></a></td>
+							<th>${attribute.label!?html}</th>
+							<td>${attribute.dataType!?html}</td>
+							<td>${attribute.description!?html}</td>
 						</tr>
 						</#list>
 					</table>

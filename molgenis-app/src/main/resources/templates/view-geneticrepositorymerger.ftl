@@ -26,8 +26,8 @@
                     <tbody>
                         <#list entitiesMeta.iterator() as entityMeta>
                             <tr>
-                                <td><#if entityMeta.label?has_content>${entityMeta.label}<#else>${entityMeta.name}</#if></td>
-                                <td><input type="checkbox" name="datasets" value="${entityMeta.name}" checked></td>
+                                <td><#if entityMeta.label?has_content>${entityMeta.label?html}<#else>${entityMeta.name?html}</#if></td>
+                                <td><input type="checkbox" name="datasets" value="${entityMeta.name?html}" checked></td>
                             </tr>
                         </#list>
                     </tbody>
@@ -59,7 +59,7 @@
                     type: 'POST',
                     data: form.serialize(),
                     contentType: 'application/x-www-form-urlencoded',
-                    url: '${context_url}/mergeRepositories',
+                    url: '${context_url?html}/mergeRepositories',
                     success: function (name) {
                         molgenis.createAlert([{'message': 'Merge completed. <a href=/menu/main/dataexplorer?entity='+name+'>Show result</a>'}], 'success');
                     }

@@ -35,7 +35,7 @@
 	<h3 id="entity-class-name"></h3>
 	<span id="entity-class-description"></span>
 </div>
-     
+
 <div class="row">
 	<div class="col-md-3">
 		<div class="well well-sm">
@@ -45,7 +45,7 @@
                     	<div class="form-group">
                         	<div class="col-md-12">
                             	<div class="input-group" <#if hideSearchBox == true> style="display:none"</#if>>
-                                	<input type="text" class="form-control" id="observationset-search" placeholder="Search data values" autofocus="autofocus"<#if searchTerm??> value="${searchTerm}"</#if> />
+                                	<input type="text" class="form-control" id="observationset-search" placeholder="Search data values" autofocus="autofocus"<#if searchTerm??> value="${searchTerm?html}"</#if> />
                                 	<span class="input-group-btn">
                                     	<button id="search-clear-button" class="btn btn-default" type="button"><span class="glyphicon glyphicon-remove"></span></button>
                                     	<button id="search-button" class="btn btn-default" type="button"><span class="glyphicon glyphicon-search"></span></button>
@@ -70,7 +70,7 @@
                             </div>
                             <div class="row">
                                 <div class="col-md-12">
-                                    <a href="#" id="filter-wizard-btn" class="btn btn-default btn-xs pull-right"><img src=<@resource_href "/img/filter-bw.png"/>> ${i18n.dataexplorer_wizard_button}</a>
+                                    <a href="#" id="filter-wizard-btn" class="btn btn-default btn-xs pull-right"><img src=<@resource_href "/img/filter-bw.png"/>> ${i18n.dataexplorer_wizard_button?html}</a>
                                 </div>
                             </div>
                         </div>
@@ -101,7 +101,7 @@
 			    			<select class="form-control" id="dataset-select" data-placeholder="Choose an Entity (example: dataset, protocol...">
 			    			<#if entitiesMeta?has_content>
 			        			<#list entitiesMeta.iterator() as entityMeta>
-			            			<option value="/api/v1/${entityMeta.name}" <#if entityMeta.name == selectedEntityName> selected</#if>><#if entityMeta.label?has_content>${entityMeta.label}<#else>${entityMeta.name}</#if></option>
+			            			<option value="/api/v1/${entityMeta.name?html}" <#if entityMeta.name == selectedEntityName> selected</#if>><#if entityMeta.label?has_content>${entityMeta.label?html}<#else>${entityMeta.name?html}</#if></option>
 			           			</#list>
 			           		</#if>
 			        		</select>
@@ -114,13 +114,13 @@
 	</div>
 </div>
 
-<script id="filter-wizard-modal-template" type="text/x-handlebars-template">   
+<script id="filter-wizard-modal-template" type="text/x-handlebars-template">
     <div class="modal" id="filter-wizard-modal" tabindex="-1" role="dialog" aria-labelledby="filter-wizard-modal-label" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 
                 <div class="modal-header">
-                    <h4 class="modal-title" id="filter-wizard-modal-label">${i18n.dataexplorer_wizard_title}</h4>
+                    <h4 class="modal-title" id="filter-wizard-modal-label">${i18n.dataexplorer_wizard_title?html}</h4>
                     <button type="button" class="close" data-dismiss="modal">
                     	<span aria-hidden="true">&times;</span>
                     	<span class="sr-only">Close</span>
@@ -141,8 +141,8 @@
                 </div>
                 
                 <div class="modal-footer">
-                	<a href="#" class="btn btn-default" data-dismiss="modal">${i18n.dataexplorer_wizard_cancel}</a>
-                    <a href="#" class="btn btn-primary filter-wizard-apply-btn" data-dismiss="modal">${i18n.dataexplorer_wizard_apply}</a>
+                	<a href="#" class="btn btn-default" data-dismiss="modal">${i18n.dataexplorer_wizard_cancel?html}</a>
+                    <a href="#" class="btn btn-primary filter-wizard-apply-btn" data-dismiss="modal">${i18n.dataexplorer_wizard_apply?html}</a>
                 </div>
                 
             </div>
@@ -168,8 +168,8 @@
 				</div>
 				
 				<div class="modal-footer">
-					<a href="#" class="btn btn-default" data-dismiss="modal">${i18n.dataexplorer_wizard_cancel}</a>
-					<a href="#" class="btn btn-primary filter-apply-btn" data-dismiss="modal">${i18n.dataexplorer_wizard_apply}</a>
+					<a href="#" class="btn btn-default" data-dismiss="modal">${i18n.dataexplorer_wizard_cancel?html}</a>
+					<a href="#" class="btn btn-primary filter-apply-btn" data-dismiss="modal">${i18n.dataexplorer_wizard_apply?html}</a>
 				</div>	
 			</div>
 		</div>

@@ -39,7 +39,7 @@
 				</form>
 					
 				<legend>Upload logo</legend>
-				<form name="upload-new-logo" class="form-horizontal" role="form" action="${context_url}/upload-logo" method="POST" enctype="multipart/form-data">
+				<form name="upload-new-logo" class="form-horizontal" role="form" action="${context_url?html}/upload-logo" method="POST" enctype="multipart/form-data">
 					<@upload_new_logo />
 					<div class="form-group">
 						<div class="col-md-9 col-md-offset-3">
@@ -55,7 +55,7 @@
 
 		<div class="row">
 			<div class="col-md-2 col-md-offset-10">
-				<form name="save-menu-form" action="${context_url}/save" method="POST">
+				<form name="save-menu-form" action="${context_url?html}/save" method="POST">
 					<button type="submit" class="btn btn-primary pull-right">Save</button>
 				</form>
 			</div>
@@ -140,7 +140,7 @@
 		<div class="col-md-9">
 			<select class="form-control" name="menu-item-select" required<#if is_edit> disabled</#if>>
 			<#list plugins as plugin>
-				<option value="${plugin.id}">${plugin.id}</option>
+				<option value="${plugin.id?html}">${plugin.id?html}</option>
 			</#list>
 			</select>
 		</div>
@@ -171,11 +171,11 @@
 	<#if is_root>
 	<ol class="vertical root">
 	</#if>
-		<li class="node highlight<#if is_root> root</#if>" data-id="${menu.id}" data-label="${menu.name}">
+		<li class="node highlight<#if is_root> root</#if>" data-id="${menu.id?html}" data-label="${menu.name?html}">
 		<#if !is_root>
             <span class="glyphicon glyphicon-move"></span>
 		</#if>
-			<span>${menu.name}</span>
+			<span>${menu.name?html}</span>
 			<div class="pull-right">
 			<#if !is_root>
                 <span class="glyphicon glyphicon-edit edit-menu-btn" data-toggle="modal" data-target="#edit-menu-modal"></span>
@@ -190,9 +190,9 @@
 			<@create_menu_list item false/>
 		<#else>
 		<#-- extract query string from url -->
-		<li class="node" data-id="${item.id}" data-label="${item.name}" <#if item.id != item.url> data-params="${item.url?substring(item.id?length + 1)?html}"</#if>>
+		<li class="node" data-id="${item.id?html}" data-label="${item.name?html}" <#if item.id != item.url> data-params="${item.url?substring(item.id?length + 1)?html}"</#if>>
 			<span class="glyphicon glyphicon-move"></span>
-			<span>${item.name}</span>
+			<span>${item.name?html}</span>
 			<div class="pull-right">
                 <span class="glyphicon glyphicon-edit edit-item-btn" data-toggle="modal" data-target="#edit-item-modal"></span>
 				<span class="glyphicon glyphicon-trash"></span>

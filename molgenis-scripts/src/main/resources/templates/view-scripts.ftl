@@ -46,13 +46,13 @@
 										<a href="#" class="delete-script-btn"><img src="/img/delete.png"></a>
 									</td>
 								</@hasPermission>
-								<td class="name">${script.name!}</td>
-								<td>${script.type.name!}</td>
-								<td>${script.resultFileExtension!}</td>
+								<td class="name">${script.name!?html}</td>
+								<td>${script.type.name!?html}</td>
+								<td>${script.resultFileExtension!?html}</td>
 								<td class="parameters">
 									<#if script.parameters?has_content>
 										<#list script.parameters as parameter>
-											${parameter.name}<#if parameter_has_next>,</#if>
+											${parameter.name?html}<#if parameter_has_next>,</#if>
 										</#list>
 									</#if>
 								</td>
@@ -91,7 +91,7 @@
 					<#if parameters?has_content>
 						<#list parameters as parameter>
 							<tr>
-								<td class="name">${parameter.name!}</td>
+								<td class="name">${parameter.name!?html}</td>
 							</tr>
 						</#list>
 					</#if>
