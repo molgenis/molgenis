@@ -51,7 +51,6 @@ import org.springframework.jdbc.core.RowMapper;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.gson.Gson;
 
 public class MysqlRepository extends AbstractCrudRepository implements Manageable
 {
@@ -959,10 +958,17 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		// create sql
 		StringBuilder sql = new StringBuilder("UPDATE ").append('`').append(getTableName()).append('`').append(" SET ");
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
+		{
+			if (att.getExpression() != null)
+			{
+				// computed attributes are not persisted
+				continue;
+			}
 			if (!(att.getDataType() instanceof MrefField))
 			{
 				sql.append('`').append(att.getName()).append('`').append(" = ?, ");
 			}
+		}
 		if (sql.charAt(sql.length() - 1) == ' ' && sql.charAt(sql.length() - 2) == ',')
 		{
 			sql.setLength(sql.length() - 2);
@@ -1202,6 +1208,11 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 					}
 					else
 					{
+						if (att.getExpression() != null)
+						{
+							// computed attributes are not persisted
+							continue;
+						}
 						// default value, if any
 						if (e.get(att.getName()) == null)
 						{

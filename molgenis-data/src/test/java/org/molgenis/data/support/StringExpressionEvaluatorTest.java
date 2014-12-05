@@ -80,7 +80,8 @@ public class StringExpressionEvaluatorTest
 		}
 		catch (IllegalArgumentException expected)
 		{
-			assertEquals(expected.getMessage(), "String attribute expression bogus references non-existant attribute.");
+			assertEquals(expected.getMessage(),
+					"Expression for attribute '#CHROM' references non-existant attribute 'bogus'.");
 		}
 
 	}
