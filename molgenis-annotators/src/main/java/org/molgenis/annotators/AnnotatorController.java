@@ -24,6 +24,7 @@ import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -61,11 +62,10 @@ public class AnnotatorController
 	@Autowired
 	EntityValidator entityValidator;
 
-    @Autowired
-    MysqlRepositoryCollection mysqlRepositoryCollection;
+	@Autowired
+	MysqlRepositoryCollection mysqlRepositoryCollection;
 
-
-    /**
+	/**
 	 * Gets a map of all available annotators.
 	 * 
 	 * @param dataSetName
@@ -92,31 +92,41 @@ public class AnnotatorController
 	 * */
 	@RequestMapping(value = "/annotate-data", method = RequestMethod.POST)
 	@ResponseBody
+	@Transactional
 	public String annotateData(@RequestParam(value = "annotatorNames", required = false) String[] annotatorNames,
-			@RequestParam("dataset-identifier") String dataSetIdentifier,
+			@RequestParam("dataset-identifier") String entityName,
 			@RequestParam(value = "createCopy", required = false) boolean createCopy)
-	{
-		CrudRepositoryAnnotator crudRepositoryAnnotator = new CrudRepositoryAnnotator(mysqlRepositoryCollection);
-		Repository repository = dataService.getRepositoryByEntityName(dataSetIdentifier);
-		String name = dataSetIdentifier;
-
+	{		
+		Repository repository = dataService.getRepositoryByEntityName(entityName);
 		if (annotatorNames != null && repository != null)
 		{
+			CrudRepositoryAnnotator crudRepositoryAnnotator = new CrudRepositoryAnnotator(mysqlRepositoryCollection,
+					getNewRepositoryName(annotatorNames, repository.getEntityMetaData().getSimpleName()));
+			
 			for (String annotatorName : annotatorNames)
 			{
 				RepositoryAnnotator annotator = annotationService.getAnnotatorByName(annotatorName);
 				if (annotator != null)
 				{
 					// running annotator
-					Repository repo = dataService.getRepositoryByEntityName(name);
-
+					Repository repo = dataService.getRepositoryByEntityName(entityName);
 					repository = crudRepositoryAnnotator.annotate(annotator, repo, createCopy);
-					name = repository.getName();
+					entityName = repository.getName();
 					createCopy = false;
 				}
 			}
 		}
-		return name;
+		return entityName;
+	}
+
+	private String getNewRepositoryName(String[] annotatorNames, String repositoryName)
+	{
+		String newRepositoryName = repositoryName;
+		for (String annotatorName : annotatorNames)
+		{
+			newRepositoryName = newRepositoryName + "_" + annotatorName;
+		}	
+		return newRepositoryName;
 	}
 
 	/**

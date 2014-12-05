@@ -124,11 +124,10 @@ public class OmimHpoAnnotator extends LocusAnnotator
 		{
 			for (String geneSymbol : geneSymbols)
 			{
+				HashMap<String, Object> resultMap = new HashMap<String, Object>();
 				if (geneSymbol != null && geneToOmimTerms.containsKey(geneSymbol)
 						&& geneToHpoTerms.containsKey(geneSymbol))
 				{
-					HashMap<String, Object> resultMap = new HashMap<String, Object>();
-
 					Set<String> OMIMDisorders = new HashSet<String>();
 					Set<String> OMIMCytoLocations = new HashSet<String>();
 					Set<String> OMIMHgncIdentifiers = new HashSet<String>();
@@ -183,6 +182,10 @@ public class OmimHpoAnnotator extends LocusAnnotator
 					resultMap.put(HPO_DISEASE_DATABASE_ENTRY, HPODiseaseDatabaseEntries);
 					resultMap.put(HPO_ENTREZ_ID, HPOEntrezIdentifiers);
 
+					results.add(getAnnotatedEntity(entity, resultMap));
+				}
+				else
+				{
 					results.add(getAnnotatedEntity(entity, resultMap));
 				}
 			}
