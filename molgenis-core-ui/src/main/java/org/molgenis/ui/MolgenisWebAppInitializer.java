@@ -34,7 +34,7 @@ public class MolgenisWebAppInitializer
 	 * @param servletContext
 	 * @param appConfig
 	 * @param isDasUsed
-	 *            is the molgenis-omx-das module used?
+	 *            is the molgenis-das module used?
 	 * @throws ServletException
 	 */
 	protected void onStartup(ServletContext servletContext, Class<?> appConfig, boolean isDasUsed, int maxFileSize)

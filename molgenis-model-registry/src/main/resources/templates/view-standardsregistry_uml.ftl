@@ -91,13 +91,13 @@
 	<#list package.entityMetaDatas as emd>
 		<#if emd.extends??>
 			if (classes['<@entityName emd.extends />']) {
-				graph.addCell(new uml.Generalization({ source: { id: classes.<@entityName emd />.id }, target: { id: classes.<@entityName emd.extends />.id }}));	  
+				graph.addCell(new uml.Generalization({ source: { id: classes['<@entityName emd />'].id }, target: { id: classes['<@entityName emd.extends />'].id }}));	  
 			}
 		</#if>
 		<#list emd.attributes as amd>
 			<#if amd.dataType == 'xref' || amd.dataType == 'mref' || amd.dataType == 'categorical'>
 				if (classes['<@entityName amd.refEntity />']) {
-				  graph.addCell(new uml.Aggregation({ source: { id: classes.<@entityName emd />.id }, target: { id: classes.<@entityName amd.refEntity />.id }}));	  
+				  graph.addCell(new uml.Aggregation({ source: { id: classes['<@entityName emd />'].id }, target: { id: classes['<@entityName amd.refEntity />'].id }}));	  
 				}
 			</#if>
 		</#list>
@@ -112,16 +112,16 @@
 <#macro listClasses package classes=[]>
 	<#list package.entityMetaDatas as emd>
 		<#if emd.abstract == true >
-			<@entityName emd />: new uml.Abstract({
+			'<@entityName emd />': new uml.Abstract({
 	      	 	size: { width: RECT_WIDTH, height: ${(50 + 12 * emd.attributes?size)?c} },
-	        	name: '${emd.simpleName}',
+	        	name: '${emd.simpleName?js_string}',
 	       		attributes: [<#list emd.attributes as amd>'${amd.name?js_string}: ${amd.dataType}'<#if amd_has_next>,</#if></#list>]
 	    	}),
 	    <#else>
-			<@entityName emd />: new uml.Class({
+			'<@entityName emd />': new uml.Class({
 	      	 	size: { width: RECT_WIDTH, height: ${(50 + 12 * emd.attributes?size)?c} },
-	        	name: '${emd.simpleName}',
-	       	 	attributes: [<#list emd.attributes as amd>'${amd.name?js_string}: ${amd.dataType}'<#if amd_has_next>,</#if></#list>]
+	        	name: '${emd.simpleName?js_string}',
+	       	 	attributes: [<#list emd.attributes as amd>'${amd.name?js_string}: ${amd.dataType?js_string}'<#if amd_has_next>,</#if></#list>]
 	    	}),
 	    </#if>
 	</#list>

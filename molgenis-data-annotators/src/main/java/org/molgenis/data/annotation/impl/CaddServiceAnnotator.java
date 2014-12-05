@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -19,6 +21,7 @@ import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 /**
  * <p>
@@ -37,6 +40,8 @@ import org.springframework.stereotype.Component;
 @Component("caddService")
 public class CaddServiceAnnotator extends VariantAnnotator
 {
+	private static final Logger logger = Logger.getLogger(CaddServiceAnnotator.class);
+
 	private final MolgenisSettings molgenisSettings;
 	private final AnnotationService annotatorService;
 
@@ -84,37 +89,51 @@ public class CaddServiceAnnotator extends VariantAnnotator
 		String reference = entity.getString(REFERENCE);
 		String alternative = entity.getString(ALTERNATIVE);
 
-		String caddAbs = "";
-		String caddScaled = "";
+		Double caddAbs = 0.0;
+		Double caddScaled = 0.0;
 
 		TabixReader txr = new TabixReader(caddFile);
-		String line = txr.query(chromosome + ":" + position).next();
+		TabixReader.Iterator tabixIterator = txr.query(chromosome + ":" + position);
 
-		String[] split = null;
-
-		if (line != null)
+		// TabixReaderIterator does not have a hasNext();
+		boolean done = false;
+		int i = 0;
+		while (done == false)
 		{
-			split = line.split("\t");
+			String line = tabixIterator.next();
+			String[] split = null;
+			if (line != null)
+			{
+				i++;
+				split = line.split("\t");
 
-			if (split[2].equals(reference) && split[3].equals(alternative))
-			{
-				caddAbs = split[4];
-				caddScaled = split[5];
+				if (split[2].equals(reference) && split[3].equals(alternative))
+				{
+					caddAbs = Double.parseDouble(split[4]);
+					caddScaled = Double.parseDouble(split[5]);
+                    done = true;
+				}
+				// In some cases, the ref and alt are swapped. If this is the case, the initial if statement above will
+				// fail, we can just check whether such a swapping has occured
+				else if (split[3].equals(reference) && split[2].equals(alternative))
+				{
+					caddAbs = Double.parseDouble(split[4]);
+					caddScaled = Double.parseDouble(split[5]);
+                    done = true;
+				}
 			}
-			// In some cases, the ref and alt are swapped. If this is the case, the initial if statement above will
-			// fail, we can just check whether such a swapping has occured
-			else if (split[3].equals(reference) && split[2].equals(alternative))
-			{
-				caddAbs = split[4];
-				caddScaled = split[5];
-			}
-			// If both matchings are incorrect, there is something really wrong with the source files,
-			// which we cant do anything about.
 			else
 			{
-				caddAbs = "0";
-				caddScaled = "0";
+				if (i > 3)
+				{
+					logger.warn("More than 3 hits in the CADD file!");
+				}
+				done = true;
 			}
+		}
+		if (caddAbs == 0.0 && caddScaled == 0.0)
+		{
+			throw new RuntimeException("Something went wrong with the CADD annotator");
 		}
 
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();

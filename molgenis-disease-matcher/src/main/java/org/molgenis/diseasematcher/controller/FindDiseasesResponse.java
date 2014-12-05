@@ -2,7 +2,7 @@ package org.molgenis.diseasematcher.controller;
 
 import java.util.List;
 
-import org.molgenis.omx.diseasemapping.Disease;
+import org.molgenis.diseasemapping.Disease;
 
 /**
  * Response object for when diseases were requested. Stores the results and paging information.

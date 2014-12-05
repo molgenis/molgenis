@@ -10,9 +10,9 @@ import javax.validation.Valid;
 import org.apache.log4j.Logger;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotBlank;
+import org.molgenis.auth.MolgenisUser;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.captcha.CaptchaException;
 import org.molgenis.security.captcha.CaptchaRequest;
 import org.molgenis.security.captcha.CaptchaService;
@@ -41,7 +41,7 @@ public class FeedbackController extends AbstractStaticContentController
 	public static final String ID = "feedback";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	private static final String MESSAGING_EXCEPTION_MESSAGE = "Unfortunately, we were unable to create an email message for the feedback you specified.";
-	private static final String MAIL_AUTHENTICATION_EXCEPTION_MESSAGE = "Unfortunately, we were unable to send the mail containing your feedback.<br/>Please contact the administrator.";
+	private static final String MAIL_AUTHENTICATION_EXCEPTION_MESSAGE = "Unfortunately, we were unable to send the mail containing your feedback. Please contact the administrator.";
 	private static final String MAIL_SEND_EXCEPTION_MESSAGE = MAIL_AUTHENTICATION_EXCEPTION_MESSAGE;
 	private static final Logger LOGGER = Logger.getLogger(MolgenisPluginController.class);
 
@@ -50,7 +50,7 @@ public class FeedbackController extends AbstractStaticContentController
 
 	@Autowired
 	private MolgenisSettings molgenisSettings;
-	
+
 	@Autowired
 	private CaptchaService captchaService;
 
@@ -65,6 +65,7 @@ public class FeedbackController extends AbstractStaticContentController
 	/**
 	 * Serves feedback form.
 	 */
+	@Override
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(final Model model)
 	{
@@ -81,12 +82,15 @@ public class FeedbackController extends AbstractStaticContentController
 
 	/**
 	 * Handles feedback form submission.
-	 * @throws CaptchaException if no valid captcha is supplied
+	 * 
+	 * @throws CaptchaException
+	 *             if no valid captcha is supplied
 	 */
 	@RequestMapping(method = RequestMethod.POST)
-	public String submitFeedback(@Valid FeedbackForm form, @Valid @ModelAttribute CaptchaRequest captchaRequest) throws CaptchaException
+	public String submitFeedback(@Valid FeedbackForm form, @Valid @ModelAttribute CaptchaRequest captchaRequest)
+			throws CaptchaException
 	{
-		if(!captchaService.consumeCaptcha(captchaRequest.getCaptcha()))
+		if (!captchaService.consumeCaptcha(captchaRequest.getCaptcha()))
 		{
 			form.setErrorMessage("Invalid captcha.");
 			return "view-feedback";

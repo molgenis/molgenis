@@ -1,0 +1,214 @@
+package org.molgenis.das.impl;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.ServletContext;
+
+import com.google.common.collect.Iterables;
+import org.apache.commons.lang3.StringUtils;
+import org.molgenis.das.RangeHandlingDataSource;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Query;
+import org.molgenis.data.support.GenomeConfig;
+import org.molgenis.data.support.QueryImpl;
+
+import uk.ac.ebi.mydas.configuration.DataSourceConfiguration;
+import uk.ac.ebi.mydas.configuration.PropertyType;
+import uk.ac.ebi.mydas.datasource.RangeHandlingAnnotationDataSource;
+import uk.ac.ebi.mydas.exceptions.BadReferenceObjectException;
+import uk.ac.ebi.mydas.exceptions.DataSourceException;
+import uk.ac.ebi.mydas.model.DasAnnotatedSegment;
+import uk.ac.ebi.mydas.model.DasFeature;
+import uk.ac.ebi.mydas.model.DasMethod;
+import uk.ac.ebi.mydas.model.DasType;
+
+import static org.molgenis.util.ApplicationContextProvider.*;
+
+public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource implements
+		RangeHandlingAnnotationDataSource
+{
+	private final DataService dataService;
+	private final GenomeConfig config;
+	private DasType mutationType;
+	private DasMethod method;
+	private String type;
+
+	@Override
+	public void init(ServletContext servletContext, Map<String, PropertyType> globalParameters,
+			DataSourceConfiguration dataSourceConfig) throws DataSourceException
+	{
+		this.type = dataSourceConfig.getDataSourceProperties().get("type").getValue();
+		this.mutationType = new DasType(type, null, "?", type);
+		this.method = new DasMethod("not_recorded", "not_recorded", "ECO:0000037");
+	}
+
+	public RepositoryRangeHandlingDataSource() throws DataSourceException
+	{
+		dataService = getApplicationContext().getBean(DataService.class);
+		config = getApplicationContext().getBean(GenomeConfig.class);
+	}
+
+	@Override
+	public DasAnnotatedSegment getFeatures(String segmentParamString, int start, int stop, Integer maxbins)
+			throws BadReferenceObjectException, DataSourceException
+	{
+		String[] segmentParts = segmentParamString.split(",");
+		String dataSet = null;
+		String customParam;
+		String segmentId = null;
+
+		String posAttribute = null;
+		String chromosomeAttribute = null;
+		String idAttribute = null;
+		String stopAttribute = null;
+        String refAttribute = null;
+        String altAttribute = null;
+        String descriptionAttribute = null;
+        String nameAttribute = null;
+        String linkAttribute = null;
+        String patientAttribute = null;
+
+		if (segmentParts.length > 1)
+		{
+			segmentId = segmentParts[0];
+			customParam = segmentParts[1];
+			if (customParam.indexOf(DasURLFilter.DATASET_PREFIX) != -1)
+			{
+				dataSet = customParam.substring(11);
+			}
+		}
+		if (maxbins == null || maxbins < 0)
+		{
+			maxbins = 1000;
+		}
+		Iterable<Entity> entityIterable = queryDataSet(segmentId, dataSet, maxbins);
+		List<DasFeature> features = new ArrayList<DasFeature>();
+
+		Integer score = 0;
+		Map<String, DasType> patients = new HashMap<String, DasType>();
+		for (Entity entity : entityIterable)
+		{
+            DasFeature feature;
+
+            Integer valueStart = null;
+            Integer valueStop = null;
+            String valueDescription = null;
+            String valueIdentifier = null;
+            String valueName = null;
+            String valueLink = null;
+            String valuePatient = null;
+            String valueRef = null;
+            String valueAlt = null;
+
+            posAttribute = getAttributeName(posAttribute, config.GENOMEBROWSER_POS, entity);
+            chromosomeAttribute = getAttributeName(chromosomeAttribute, config.GENOMEBROWSER_CHROM, entity);
+            idAttribute = getAttributeName(idAttribute, config.GENOMEBROWSER_ID, entity);
+            stopAttribute = getAttributeName(stopAttribute, config.GENOMEBROWSER_STOP, entity);
+            descriptionAttribute = getAttributeName(descriptionAttribute, config.GENOMEBROWSER_DESCRIPTION, entity);
+            refAttribute = getAttributeName(refAttribute, config.GENOMEBROWSER_REF, entity);
+            altAttribute = getAttributeName(altAttribute, config.GENOMEBROWSER_ALT, entity);
+            nameAttribute = getAttributeName(nameAttribute, config.GENOMEBROWSER_NAME, entity);
+            linkAttribute = getAttributeName(linkAttribute, config.GENOMEBROWSER_LINK, entity);
+            patientAttribute = getAttributeName(patientAttribute, config.GENOMEBROWSER_PATIENT_ID , entity);
+
+			try
+			{
+				valueStart = entity.getInt(posAttribute);
+				valueIdentifier = StringUtils.isNotEmpty(idAttribute)&&StringUtils.isNotEmpty(entity.getString(idAttribute))?entity.getString(idAttribute):"-";
+            }
+			catch (ClassCastException e)
+			{
+				// start of identifier not correctly specified? exclude this mutation fore it can not be plotted
+				break;
+			}
+			// no end position? assume mutation of 1 position, so stop == start
+			Iterable<String> attributes = entity.getAttributeNames();
+
+			valueStop = Iterables.contains(attributes, stopAttribute) ? entity.getInt(stopAttribute) : valueStart;
+            valueDescription = Iterables.contains(attributes, descriptionAttribute) ? entity
+					.getString(descriptionAttribute) : "";
+            valueName = Iterables.contains(attributes, nameAttribute) ? entity.getString(nameAttribute) : "";
+			valueLink = Iterables.contains(attributes, linkAttribute) ? entity.getString(linkAttribute) : "";
+			valuePatient = Iterables.contains(attributes, patientAttribute) ? entity.getString(patientAttribute) : "";
+
+            valueRef = StringUtils.isNotEmpty(refAttribute)&&StringUtils.isNotEmpty(entity.getString(refAttribute))?entity.getString(refAttribute):"";
+            valueAlt = StringUtils.isNotEmpty(altAttribute)&&StringUtils.isNotEmpty(entity.getString(altAttribute))?entity.getString(altAttribute):"";
+
+            List<String> notes = new ArrayList<String>();
+            if(StringUtils.isNotEmpty(valueRef)) notes.add(refAttribute+"~"+valueRef);
+            if(StringUtils.isNotEmpty(valueAlt)) notes.add(altAttribute+"~"+valueAlt);
+
+            if (valueStart != null
+					&& ((valueStart >= start && valueStart <= stop) || (valueStop >= start && valueStop <= stop)))
+			{
+				DasType type;// used for label colours in Dalliance
+                if (!StringUtils.isEmpty(valueRef)&&!StringUtils.isEmpty(valueAlt))
+                {
+                    if(valueRef.length()==1&&valueAlt.length()==1)
+                        type = new DasType(valueAlt, "", "", "");
+                    else if(valueRef.length()==1&&valueAlt.length()>1){
+                        type = new DasType("insert", "", "", "");
+                    }
+                    else if(valueRef.length()>1&&valueAlt.length()==1){
+                        type = new DasType("delete", "", "", "");
+                    }
+                    else{
+                        type = new DasType("delete", "", "", "");;
+                    }
+                }
+                else if (patients.containsKey(valuePatient))
+                {
+                    type = patients.get(valuePatient);
+                }
+                else
+				{
+					type = new DasType(score.toString(), "", "", "");
+					patients.put(valuePatient, type);
+					++score;
+				}
+
+				feature = createDasFeature(valueStart, valueStop, valueIdentifier, valueName, valueDescription,
+						valueLink, type, method, dataSet, valuePatient, notes);
+				features.add(feature);
+			}
+		}
+		DasAnnotatedSegment segment = new DasAnnotatedSegment(segmentId, start, stop, "1.00", segmentId, features);
+		return segment;
+	}
+
+    public String getAttributeName(String attribute, String fieldName, Entity entity) {
+        if (attribute == null)
+        {
+            attribute = config.getAttributeNameForAttributeNameArray(fieldName,
+                    entity.getEntityMetaData());
+        }
+        return attribute;
+    }
+
+    protected Iterable<Entity> queryDataSet(String segmentId, String dataSet, int maxbins)
+	{
+		String chromosomeAttribute = config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_CHROM,
+				dataService.getEntityMetaData(dataSet));
+		Query q = new QueryImpl().eq(chromosomeAttribute, segmentId);
+		q.pageSize(maxbins);
+		return dataService.findAll(dataSet, q);
+	}
+
+	@Override
+	public Integer getTotalCountForType(DasType type) throws DataSourceException
+	{
+		return 1000;
+	}
+
+	@Override
+	public Collection<DasType> getTypes() throws DataSourceException
+	{
+		return Collections.singleton(mutationType);
+	}
+}

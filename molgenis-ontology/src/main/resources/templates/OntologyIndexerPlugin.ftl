@@ -21,14 +21,14 @@
 		<div class="row">
 			<div class="alert alert-danger">
 				<button type="button" class="close" data-dismiss="alert">&times;</button>
-		  		<p class="text-error"><strong>Message : </strong> ${message}</p>
+		  		<p class="text-error"><strong>Message : </strong> ${message?html}</p>
 			</div>
 		</div>
 	<#elseif removeSuccess??>
 		<div class="row">
 			<div <#if removeSuccess>class="alert alert-info"<#else>class="alert alert-danger</#if>">
 				<button type="button" class="close" data-dismiss="alert">&times;</button>
-		  		<p><strong>Message : </strong> ${message}</p>
+		  		<p><strong>Message : </strong> ${message?html}</p>
 			</div>
 		</div>
 	</#if>
@@ -135,7 +135,7 @@
 			var molgenis = window.top.molgenis;
 			var ontologyUri = null;
 			<#if ontologyUri ??> 
-				ontologyUri = "${ontologyUri}"; 
+				ontologyUri = "${ontologyUri?js_string}"; 
 			</#if>
 			molgenis.searchAvailableIndices(ontologyUri);
 			<#if isIndexRunning ?? && isIndexRunning>

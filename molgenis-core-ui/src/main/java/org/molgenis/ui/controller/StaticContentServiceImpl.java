@@ -1,6 +1,6 @@
 package org.molgenis.ui.controller;
 
-import org.molgenis.data.MolgenisDataException;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +59,6 @@ public class StaticContentServiceImpl implements StaticContentService
 	@Override
 	public String getContent(final String uniqueReference)
 	{
-		return this.molgenisSettings.getProperty(PREFIX_KEY + uniqueReference);
+		return StringEscapeUtils.unescapeHtml4(this.molgenisSettings.getProperty(PREFIX_KEY + uniqueReference));
 	}
 }

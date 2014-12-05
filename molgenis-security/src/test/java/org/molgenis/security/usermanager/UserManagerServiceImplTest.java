@@ -8,12 +8,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.molgenis.auth.MolgenisGroup;
+import org.molgenis.auth.MolgenisGroupMember;
+import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.omx.auth.MolgenisGroup;
-import org.molgenis.omx.auth.MolgenisGroupMember;
-import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserDetailsService;
 import org.molgenis.security.usermanager.UserManagerServiceImplTest.Config;
@@ -80,13 +80,12 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		{
 			return super.authenticationManagerBean();
 		}
-		
+
 		@Autowired
 		@Override
-		public void configure(AuthenticationManagerBuilder auth) throws Exception {
-		    auth
-		        .inMemoryAuthentication()
-		            .withUser("user").password("password").authorities("ROLE_USER");
+		public void configure(AuthenticationManagerBuilder auth) throws Exception
+		{
+			auth.inMemoryAuthentication().withUser("user").password("password").authorities("ROLE_USER");
 		}
 	}
 

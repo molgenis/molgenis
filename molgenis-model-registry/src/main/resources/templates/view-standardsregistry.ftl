@@ -9,7 +9,7 @@
 <div id="standards-registry-search">
     <div class="row">
     	<div class="col-md-4">
-    		<form class="form-horizontal" name="search-form" action="${context_url}/search" method="post">
+    		<form class="form-horizontal" name="search-form" action="${context_url?html}/search" method="post">
     			<div class="form-group">
                 	<div class="col-md-12">
                     	<div class="input-group">
@@ -29,7 +29,7 @@
     </div>
     <div class="row">
     	<div class="col-md-12">
-    		<div id="package-search-results"></div>  
+    		<div id="package-search-results" <#if packageSearchResponse?has_content>data-package-search-results='${packageSearchResponse?html}'</#if>></div>  
     	</div>
     </div>
 </div>
@@ -52,12 +52,11 @@
   		<p>{{package.description}}</p>
   		<p>
   			{{#each tags}}
-  				{{#equal this.relation 'link'}}
+  				{{#if this.iri}}
   					<span class="label label-primary"><a href='{{this.iri}}' target="_blank">{{this.label}}</a></span>
-  				{{/equal}}
-  				{{#notequal this.relation 'link'}}
+  				{{else}}
   					<span class="label label-primary">{{this.label}}</span>
-  				{{/notequal}}
+  				{{/if}}
   			{{/each}}
   		</p>
   		{{#if package.matchDescription}}

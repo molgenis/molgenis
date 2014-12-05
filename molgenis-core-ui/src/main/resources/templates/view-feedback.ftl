@@ -12,14 +12,14 @@
 		</div>
 	<#else>
 		<div class="alert alert-danger">
-			<strong>Error!</strong><br/>${feedbackForm.errorMessage}
+			<strong>Error!</strong><br/>${feedbackForm.errorMessage?html}
 		</div>
 	</#if>
 <#elseif adminEmails?has_content>
 	<#if isCurrentUserCanEdit?has_content && isCurrentUserCanEdit>	
 		<div class="row">
 			<div class="col-md-12">
-        		<a href="${context_url}/edit" class="btn btn-default pull-right">Edit page header</a>
+        		<a href="${context_url?html}/edit" class="btn btn-default pull-right">Edit page header</a>
         	</div>
 		</div>
 	</#if>
@@ -27,7 +27,7 @@
 	<#if content?has_content>
 		<div class="row">
 			<div class="col-md-12">
-				${content}
+				${content?html}
 			</div>
 		</div>
 	</#if>
@@ -42,7 +42,7 @@
 
 	<div class="row">
 		<div class="col-md-10 col-md-offset-1">	
-			<p>Feel free to email us at <a href='mailto:${adminEmailsString}'>${adminEmailsString}</a></p>
+			<p>Feel free to email us at <a href='mailto:${adminEmailsString?html}'>${adminEmailsString?html}</a></p>
 		</div>
 	</div>
 		
@@ -53,7 +53,7 @@
 			</div>
 			
 			<div class="col-md-4">
-            	<input class="form-control" name="name" size="30" id="form_name" <#if userName??>value="${userName}"</#if> type="text" />
+            	<input class="form-control" name="name" size="30" id="form_name" <#if userName??>value="${userName?html}"</#if> type="text" />
             </div>
 		</div>
 
@@ -63,7 +63,7 @@
 			</div>	
 			
 			<div class="col-md-4">
-				<input class="form-control" name="email" id="form_email" size="30" type="email" <#if userEmail??>value="${userEmail}"</#if>/>
+				<input class="form-control" name="email" id="form_email" size="30" type="email" <#if userEmail??>value="${userEmail?html}"</#if>/>
 			</div>
 		</div>
 		

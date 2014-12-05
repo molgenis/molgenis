@@ -21,9 +21,9 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMessage.RecipientType;
 
+import org.molgenis.auth.MolgenisUser;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
-import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.captcha.CaptchaException;
 import org.molgenis.security.captcha.CaptchaService;
 import org.molgenis.security.user.MolgenisUserService;
@@ -230,7 +230,7 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 								"feedbackForm",
 								hasProperty("errorMessage",
 										equalTo("Unfortunately, we were unable to send the mail containing "
-												+ "your feedback.<br/>Please contact the administrator."))));
+												+ "your feedback. Please contact the administrator."))));
 		verify(captchaService, times(1)).consumeCaptcha("validCaptcha");
 	}
 

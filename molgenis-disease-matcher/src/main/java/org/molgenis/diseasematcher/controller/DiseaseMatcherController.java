@@ -20,8 +20,8 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.omx.diseasemapping.Disease;
-import org.molgenis.omx.diseasemapping.DiseaseMapping;
+import org.molgenis.diseasemapping.Disease;
+import org.molgenis.diseasemapping.DiseaseMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -48,7 +48,7 @@ public class DiseaseMatcherController
 	 */
 	public static final String BASE_URI = "/diseasematcher";
 
-	private DataService dataService;
+	private final DataService dataService;
 
 	/**
 	 * Constructor for the DiseaseMatcher controller.

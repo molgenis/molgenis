@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mydasserver xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:noNamespaceSchemaLocation="http://mydas.googlecode.com/svn/trunk/mydas/server_core/src/main/resources/mydasserverconfig.xsd">
+    <!-- The global element holds details of configuration common to the entire server. -->
+    <global>
+        <baseurl>http://localhost:8080/das/</baseurl>
+        <gzipped>false</gzipped>
+        <slash-das-points-to-dsn>true</slash-das-points-to-dsn>
+        <default-stylesheet>TEST.style</default-stylesheet>
+    </global>
+        <datasources>
+            <datasource uri="molgenis"
+                    title="molgenis"
+                    description="Data source test using the molgenis database"
+                    doc_href="http://www.molgenis.org"
+                    mapmaster="http://mapmaster.esemblTest">
+            <maintainer email="molgenis@gmail.org" />
+            <version uri="molgenis" created="2013-10-01">
+                <class>org.molgenis.das.impl.RepositoryRangeHandlingDataSource</class>
+                <coordinates 	uri="http://www.dasregistry.org/dasregistry/coordsys/CS_DS94"
+                                source="Gene_ID"
+                                authority="Ensembl"
+                                taxid="9606"
+                                test_range="ENSG00000114270">Ensembl,Gene_ID,Homo sapiens</coordinates>
+                <capability type="das1:sources"		 	query_uri="http://localhost:8080/das/molgenis" />
+                <capability type="das1:types"			query_uri="http://localhost:8080/das/molgenis/types" />
+                <capability type="das1:features"		query_uri="http://localhost:8080/das/molgenis/features" />
+                <capability type="das1:feature-by-id"	query_uri="http://localhost:8080/das/molgenis/featuresid" />
+                <capability type="das1:unknown-feature"	/>
+                <capability type="das1:entry_points" />
+                <property key="dataset" value="molgenis2"/>
+                <property key="type" value="type"/>
+            </version>
+            <stylesheet>molgenis.style</stylesheet>
+            <dna-command-enabled>true</dna-command-enabled>
+            <use-feature-id-for-feature-label>true</use-feature-id-for-feature-label>
+            <include-types-with-zero-count>true</include-types-with-zero-count>
+        </datasource>
+    </datasources>
+</mydasserver>
+

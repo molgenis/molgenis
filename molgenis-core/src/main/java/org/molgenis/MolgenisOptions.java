@@ -101,9 +101,6 @@ public class MolgenisOptions implements Serializable
 	@Option(name = "exclude_system", param = Option.Param.BOOLEAN, type = Option.Type.REQUIRED_ARGUMENT, usage = "Expert option: Whether system tables should be excluded from generation. Default: true")
 	public boolean exclude_system = true;
 
-	@Option(name = "generate_doc", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Should documentation be generated. Default: true.")
-	public boolean generate_doc = true;
-
 	@Option(name = "generate_entityio", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Should entity importers and exporters be generated. Default: true.")
 	public boolean generate_entityio = true;
 

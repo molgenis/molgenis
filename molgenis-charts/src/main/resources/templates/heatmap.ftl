@@ -21,7 +21,7 @@ $.ajax({
 // read csv data
 var data;
 $.ajax({
-	url: '/charts/get/${fileName}.csv',
+	url: '/charts/get/${fileName?js_string}.csv',
 	async: false
 }).done(function(csv){
 	data = $.csv.toArrays(csv);
@@ -33,20 +33,20 @@ $.ajax({
 var colAnnotations = [
 	<#if colAnnotations??>
 		<#list colAnnotations as ca>
-			<#t> "${ca}"<#if ca_has_next>,</#if>
+			<#t> "${ca?js_string}"<#if ca_has_next>,</#if>
 		</#list>
 	</#if>
 ];
 
 </#compress>
 
-var nCol = ${nCol}; 
-var nRow = ${nRow};
+var nCol = ${nCol?js_string}; 
+var nRow = ${nRow?js_string};
 var nRowAnnotations = 0;
 var nColAnnotations = 0;
 
 $.ajax({
-	url: '/charts/get/${fileName}_annotated.svg',
+	url: '/charts/get/${fileName?js_string}_annotated.svg',
 	async: false
 }).done(function (svgDoc){
 	//import contents of the svg document into this document
