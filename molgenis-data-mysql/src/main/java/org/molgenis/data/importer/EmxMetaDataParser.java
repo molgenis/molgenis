@@ -719,7 +719,8 @@ public class EmxMetaDataParser implements MetaDataParser
 				{
 					for (AttributeMetaData att : s.getEntityMetaData().getAttributes())
 					{
-						boolean known = target.getAttribute(att.getName()) != null;
+						AttributeMetaData attribute = target.getAttribute(att.getName());
+						boolean known = attribute != null && attribute.getExpression() == null;
 						report = report.addAttribute(att.getName(),
 								known ? AttributeState.IMPORTABLE : AttributeState.UNKNOWN);
 					}
@@ -727,7 +728,8 @@ public class EmxMetaDataParser implements MetaDataParser
 					{
 						if (!(att.getDataType() instanceof CompoundField))
 						{
-							if (!att.isAuto() && !report.getFieldsImportable().get(sheet).contains(att.getName()))
+							if (!att.isAuto() && att.getExpression() == null
+									&& !report.getFieldsImportable().get(sheet).contains(att.getName()))
 							{
 								boolean required = !att.isNillable();
 								report = report.addAttribute(att.getName(),
