@@ -34,7 +34,7 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 	private final HgncLocationsProvider hgncLocationsProvider;
 	private final CgdDataProvider cgdDataProvider;
 
-	private static final String NAME = "Clinical-Genomics-Database";
+	private static final String NAME = "ClinicalGenomicsDatabase";
 
 	public static final String REFERENCES = "REFERENCES";
 	public static final String INTERVENTION_RATIONALE = "INTERVENTION/RATIONALE";
