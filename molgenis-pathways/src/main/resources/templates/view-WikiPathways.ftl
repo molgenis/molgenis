@@ -51,4 +51,10 @@
 		<input id="pathway-select2" value="" /> 
 	</div>
 </div>
+<div class="row">
+	<div class="col-md-6"> <#--Remember, bootstrap grid system consists of 12 columns-->
+		</p>
+		<div id="colored-pathway-svg-image"></div>
+	</div>
+</div>
 <@footer />

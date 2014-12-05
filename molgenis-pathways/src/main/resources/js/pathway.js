@@ -39,6 +39,8 @@
 			contentType : 'application/json',
 			data : JSON.stringify(selectedVcf),
 			success : function(data) {
+				$('#hiding-select2').show();
+				getPathwaysByGenes(event);
 				// console.log(data);
 			}
 		});
@@ -73,8 +75,7 @@
 		});
 	}
 
-	function getPathwaysByGenes(event) {
-
+	function getPathwaysByGenes(event) {		
 		$.ajax({
 			type : 'POST',
 			url : molgenis.getContextUrl() + "/pathwaysByGenes",
@@ -93,15 +94,25 @@
 	}
 
 	function getGPML(pathwayId, event) {
-
 		$.ajax({
 			type : 'GET',
 			url : molgenis.getContextUrl() + "/getGPML/" + pathwayId,
 			contentType : 'application/json',
 			success : function(data) {
-				var gpml = data;
+				$("#colored-pathway-svg-image").empty();
+				$('#colored-pathway-svg-image').append(data);
 			}
-
+		});
+	}
+	
+	function getColoredPathwayImage(pathwayId2, event) {
+		$.ajax({
+			type : 'GET',
+			url : molgenis.getContextUrl() + "/getColoredPathway/" + pathwayId2,
+			success : function(data) {
+				$("#colored-pathway-svg-image").empty();
+				$('#colored-pathway-svg-image').append(data);
+			}
 		});
 	}
 
@@ -118,7 +129,6 @@
 		}).on("select2-selecting", function(event) {
 			pathwayId = event.val;
 			getPathwayImage(pathwayId, event);
-			getGPML(pathwayId, event);
 		});
 		$('#submit-genename-btn').on('click', function(event) {
 			var submittedGene = $('#gene-search').val();
@@ -127,8 +137,6 @@
 		$('#submit-vcfFile-btn').on('click', function(event) {
 			var selectedVcf = $('#dataset-select').val();
 			getVcfComponents(selectedVcf, event);
-			$('#hiding-select2').show();
-			getPathwaysByGenes(event);
 		});
 		$('#pathway-select2').select2({
 			placeholder : "Select a pathway",
@@ -140,8 +148,7 @@
 			},
 		}).on("select2-selecting", function(event) {
 			pathwayId2 = event.val;
-			getPathwayImage(pathwayId2, event);
-			getGPML(pathwayId2, event);
+			getGPML(pathwayId2, event);			
 		});
 		getPathways(event);
 	});
