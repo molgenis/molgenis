@@ -31,7 +31,7 @@ public class UploadProgress
 	public synchronized float getPercentage(String userName)
 	{
 		if (userTotalNumber.containsKey(userName) && userFinishedNumber.containsKey(userName)
-				&& userTotalNumber.get(userName) != ILLEGAL_DENOMINATOR)
+				&& ILLEGAL_DENOMINATOR.equals(userTotalNumber.get(userName)))
 		{
 			return userFinishedNumber.get(userName).floatValue() / userTotalNumber.get(userName).floatValue() * 100;
 		}
