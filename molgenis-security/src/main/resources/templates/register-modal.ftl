@@ -130,7 +130,7 @@
         form.validate();
         
         $('#reg-password').rules('add', {
-            minlength: ${min_password_length?js_script}
+            minlength: ${min_password_length?js_string}
         });
         $('#reg-password-confirm').rules('add', {
             equalTo: '#reg-password'

@@ -21,6 +21,7 @@ import com.google.common.collect.Maps;
 import freemarker.core.Environment;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.StringModel;
+import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateDirectiveBody;
 import freemarker.template.TemplateException;
@@ -37,7 +38,8 @@ public class FormLinkDirectiveTest
 	{
 		directive = new FormLinkDirective();
 		envWriter = new StringWriter();
-		fakeTemplate = Template.getPlainTextTemplate("name", "content", null);
+		fakeTemplate = Template
+				.getPlainTextTemplate("name", "content", new Configuration(Configuration.VERSION_2_3_21));
 	}
 
 	@Test
