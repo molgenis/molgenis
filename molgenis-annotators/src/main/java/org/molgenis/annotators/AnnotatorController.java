@@ -99,7 +99,7 @@ public class AnnotatorController
 		if (annotatorNames != null && repository != null)
 		{
 			CrudRepositoryAnnotator crudRepositoryAnnotator = new CrudRepositoryAnnotator(mysqlRepositoryCollection,
-					getNewRepositoryName(annotatorNames, repository.getEntityMetaData().getLabel()));
+					getNewRepositoryName(annotatorNames, repository.getEntityMetaData().getSimpleName()));
 			
 			for (String annotatorName : annotatorNames)
 			{
