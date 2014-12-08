@@ -40,6 +40,7 @@ import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.ontology.OntologyService;
 import org.molgenis.ontology.OntologyServiceResult;
 import org.molgenis.ontology.beans.OntologyServiceResultImpl;
 import org.molgenis.ontology.matching.AdaptedCsvRepository;
@@ -77,7 +78,7 @@ public class OntologyServiceController extends MolgenisPluginController
 	private DataService dataService;
 
 	@Autowired
-	private OntologyServiceImpl ontologyService;
+	private OntologyService ontologyService;
 
 	@Autowired
 	private ProcessInputTermService processInputTermService;
