@@ -5,16 +5,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.commons.codec.binary.Base64;
 
 import javax.validation.Valid;
 import javax.xml.parsers.DocumentBuilder;
@@ -28,7 +27,6 @@ import org.molgenis.data.Repository;
 import org.molgenis.dataWikiPathways.WSPathway;
 import org.molgenis.dataWikiPathways.WSPathwayInfo;
 import org.molgenis.dataWikiPathways.WSSearchResult;
-import org.molgenis.dataWikiPathways.WikiPathways;
 import org.molgenis.dataWikiPathways.WikiPathwaysPortType;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +42,9 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import com.google.common.base.Function;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Iterables;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -61,13 +62,33 @@ public class WikiPathwaysController extends MolgenisPluginController
 	public final WikiPathwaysPortType service;
 	public final String organism = "Homo sapiens";
 	public Map<String, Integer> genes = new HashMap<>();
-	/**
-	 * Maps text label onto graphId
-	 */
-	// public final Map<String, String> nodeList = new HashMap<>();
 	public Map<Integer, String> variantColor = new HashMap<>();
-
 	private Map<String, String> pathwayNames;
+
+	private final LoadingCache<String, List<WSPathwayInfo>> ALL_PATHWAY_CACHED = CacheBuilder.newBuilder()
+			.maximumSize(Integer.MAX_VALUE).refreshAfterWrite(1, TimeUnit.DAYS)
+			.build(new CacheLoader<String, List<WSPathwayInfo>>()
+			{
+				@Override
+				public List<WSPathwayInfo> load(String organism) throws Exception
+				{
+					return service.listPathways(organism);
+
+				}
+			});
+	
+	private final LoadingCache<String, byte[]> PATHWAY_IMAGE_CACHED = CacheBuilder.newBuilder()
+			.maximumSize(Integer.MAX_VALUE).refreshAfterWrite(1, TimeUnit.DAYS)
+			.build(new CacheLoader<String, byte[]>()
+			{
+				@Override
+				public byte[] load(String pathwayId) throws Exception
+				{
+					return service.getPathwayAs("svg", pathwayId, 0);
+
+				}
+			});
+
 
 	@Autowired
 	DataService dataService;
@@ -80,12 +101,8 @@ public class WikiPathwaysController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = GET)
-	public String init(Model model) throws IOException
+	public String init(Model model) throws IOException, ExecutionException
 	{
-		if (pathwayNames == null)
-		{
-			// pathwayNames = getListOfPathwayNames();
-		}
 
 		model.addAttribute("listOfPathwayNames", pathwayNames);
 
@@ -107,17 +124,20 @@ public class WikiPathwaysController extends MolgenisPluginController
 	// No spring annotations, used by methods in this class
 	@RequestMapping(value = "/allPathways", method = POST)
 	@ResponseBody
-	private Map<String, String> getListOfPathwayNames()
+	private Map<String, String> getListOfPathwayNames() throws ExecutionException
 	{
 		// model.addAttribute("firstOrganism", service.listOrganisms().get(0));
 		Map<String, String> pathwayNames = new HashMap<String, String>();
-		List<WSPathwayInfo> listOfPathways = service.listPathways(organism);
+		Long t1 = System.currentTimeMillis();
+		List<WSPathwayInfo> listOfPathways = ALL_PATHWAY_CACHED.get(organism);
 
 		for (WSPathwayInfo info : listOfPathways)
 		{
 			pathwayNames.put(info.getId(), info.getName());
 		}
 
+		Long t2 = System.currentTimeMillis();
+		System.out.println(t2 - t1);
 		return pathwayNames;
 	}
 
@@ -139,10 +159,10 @@ public class WikiPathwaysController extends MolgenisPluginController
 
 	@RequestMapping(value = "/pathwayViewer/{pathwayId}", method = GET)
 	@ResponseBody
-	public String getPathway(@PathVariable String pathwayId) throws MalformedURLException
+	public String getPathway(@PathVariable String pathwayId) throws MalformedURLException, ExecutionException
 	{
 
-		byte[] source = service.getPathwayAs("svg", pathwayId, 0);
+		byte[] source = PATHWAY_IMAGE_CACHED.get(pathwayId);
 		ByteArrayInputStream bis = new ByteArrayInputStream(source);
 
 		@SuppressWarnings("resource")
@@ -197,8 +217,8 @@ public class WikiPathwaysController extends MolgenisPluginController
 		variantColor.put(3, "FF0000"); // red
 		variantColor.put(2, "FFA500"); // orange
 		variantColor.put(1, "FFFF00"); // yellow
-//		variantColor.put(0, "0000FF"); // blue
-		variantColor.put(0, "219AD7"); //lighter blue, so the gene symbol is still visible
+		// variantColor.put(0, "0000FF"); // blue
+		variantColor.put(0, "219AD7"); // lighter blue, so the gene symbol is still visible
 	}
 
 	@RequestMapping(value = "/pathwaysByGenes", method = POST)
@@ -257,8 +277,8 @@ public class WikiPathwaysController extends MolgenisPluginController
 		{
 			if (info3.getSpecies().equals("Homo sapiens"))
 			{
-				pathwayByGenes.put(info3.getId(), info3.getName()+" ("+info3.getId()+")");
-				
+				pathwayByGenes.put(info3.getId(), info3.getName() + " (" + info3.getId() + ")");
+
 			}
 
 		}
@@ -273,7 +293,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 
 		WSPathway wsPathway = service.getPathway(pathwayId, 0);
 		String gpml = wsPathway.getGpml();
-//		System.out.println(gpml);
+		// System.out.println(gpml);
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 		InputStream is = new ByteArrayInputStream(gpml.getBytes());
@@ -346,8 +366,8 @@ public class WikiPathwaysController extends MolgenisPluginController
 		for (String gene : genes.keySet())
 		{
 			int impact = genes.get(gene);
-//			System.out.println("NODELIST KEYS: " + nodeList.keySet());
-//			System.out.println("GENES KEYS: " + genes.keySet());
+			// System.out.println("NODELIST KEYS: " + nodeList.keySet());
+			// System.out.println("GENES KEYS: " + genes.keySet());
 			if (nodeList.containsKey(gene))
 			{
 				if (graphIdToColor.containsKey(impact))
@@ -376,11 +396,12 @@ public class WikiPathwaysController extends MolgenisPluginController
 		}
 
 		System.out.println(graphIds + " " + colors);
-		
-		//base64Binary = service.getPathway();
-		
-		//Check if graphIds and colors are empty
-		if(!graphIds.isEmpty() && !colors.isEmpty()){
+
+		// base64Binary = service.getPathway();
+
+		// Check if graphIds and colors are empty
+		if (!graphIds.isEmpty() && !colors.isEmpty())
+		{
 			base64Binary = service.getColoredPathway(pathwayId2, "0", graphIds, colors, "svg");
 			// base64Binary = idsToPathways(graphIds, colors, pathwayId2);
 			ByteArrayInputStream bis = new ByteArrayInputStream(base64Binary);
@@ -393,20 +414,21 @@ public class WikiPathwaysController extends MolgenisPluginController
 
 			return coloredPathway;
 		}
-		else{
+		else
+		{
 			System.out.println("normal pathway, uncolored");
-			
-			//if graphIds and colors are empty, getPathway() -> so uncolored
+
+			// if graphIds and colors are empty, getPathway() -> so uncolored
 			byte[] uncoloredPathway = service.getPathwayAs("svg", pathwayId2, 0);
 			ByteArrayInputStream byteis = new ByteArrayInputStream(uncoloredPathway);
 
 			@SuppressWarnings("resource")
 			Scanner scanner = new Scanner(byteis);
 			scanner.useDelimiter("\\Z");// To read all scanner content in one String
-			String regulatPathway = "";
-			if (scanner.hasNext()) regulatPathway = scanner.next();
+			String regularPathway = "";
+			if (scanner.hasNext()) regularPathway = scanner.next();
 
-			return regulatPathway;
+			return regularPathway;
 		}
 	}
 
