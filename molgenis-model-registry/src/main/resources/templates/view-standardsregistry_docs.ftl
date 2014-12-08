@@ -13,9 +13,9 @@
         <link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css">
         <link rel="stylesheet" href="/css/standardsregistry.css" type="text/css">
         <link rel="stylesheet" href="/css/molgenis.css" type="text/css">
-        <#--<script src="<@resource_href "/js/jquery-1.8.3.min.js"/>"></script>-->
+        <#--<script src="<@resource_href "/js/jquery-2.1.1.min.js"/>"></script>-->
         <#--<script src="<@resource_href "/js/bootstrap.min.js"/>"></script>-->
-        <script src="/js/jquery-1.8.3.min.js"></script>
+        <script src="/js/jquery-2.1.1.min.js"></script>
         <script src="/js/bootstrap.min.js"></script>
         <script src="/js/standardsregistry-doc.js"></script>
     </head>
