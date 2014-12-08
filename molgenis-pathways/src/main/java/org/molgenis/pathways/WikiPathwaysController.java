@@ -61,6 +61,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	public final WikiPathwaysPortType service;
 	public final String organism = "Homo sapiens";
+	public final List<String> codes = new ArrayList<String>();
 	public Map<String, Integer> genes = new HashMap<>();
 	public Map<Integer, String> variantColor = new HashMap<>();
 	private Map<String, String> pathwayNames;
@@ -72,26 +73,43 @@ public class WikiPathwaysController extends MolgenisPluginController
 				@Override
 				public List<WSPathwayInfo> load(String organism) throws Exception
 				{
-					return service.listPathways(organism);
+					List<WSPathwayInfo> listPathways = service.listPathways(organism);
+					// asyncWikiPathwayLoader.asyncLoadPathways(listPathways, PATHWAY_IMAGE_CACHED);
+					return listPathways;
 
 				}
 			});
-	
+
 	private final LoadingCache<String, byte[]> PATHWAY_IMAGE_CACHED = CacheBuilder.newBuilder()
-			.maximumSize(Integer.MAX_VALUE).refreshAfterWrite(1, TimeUnit.DAYS)
-			.build(new CacheLoader<String, byte[]>()
+			.maximumSize(Integer.MAX_VALUE).refreshAfterWrite(1, TimeUnit.DAYS).build(new CacheLoader<String, byte[]>()
 			{
 				@Override
-				public byte[] load(String pathwayId) throws Exception
+				public synchronized byte[] load(String pathwayId) throws Exception
 				{
 					return service.getPathwayAs("svg", pathwayId, 0);
 
 				}
 			});
 
+	private final LoadingCache<List<String>, List<WSSearchResult>> ALL_VCF_PATHWAY_CACHED = CacheBuilder.newBuilder()
+			.maximumSize(Integer.MAX_VALUE).refreshAfterWrite(1, TimeUnit.DAYS)
+			.build(new CacheLoader<List<String>, List<WSSearchResult>>()
+			{
+				public List<WSSearchResult> load(List<String> genesForPathwaySearch) throws Exception
+				{
+					codes.add("H"); // H for HGNC database (human gene symbols)
+					List<WSSearchResult> listPathways = service.findPathwaysByXref(genesForPathwaySearch, codes);
+					// asyncWikiPathwayLoader.asyncLoadPathways(listPathways, PATHWAY_IMAGE_CACHED);
+					return listPathways;
+
+				}
+			});
 
 	@Autowired
-	DataService dataService;
+	private AsyncWikiPathwayLoader asyncWikiPathwayLoader;
+
+	@Autowired
+	private DataService dataService;
 
 	@Autowired
 	public WikiPathwaysController(WikiPathwaysPortType service)
@@ -223,7 +241,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 
 	@RequestMapping(value = "/pathwaysByGenes", method = POST)
 	@ResponseBody
-	public Map<String, String> getListOfPathwayNamesByGenes()
+	public Map<String, String> getListOfPathwayNamesByGenes() throws ExecutionException
 	{
 		Map<String, String> pathwayByGenes = new HashMap<String, String>();
 		List<String> geneSymbols = new ArrayList<String>();
@@ -260,7 +278,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 
 	// private void genesToPathways(Map<String, String> pathwayByGenes, List<String> temporaryList, String query)
 	private void genesToPathways(Map<String, String> pathwayByGenes, List<String> temporaryList,
-			List<String> genesForPathwaySearch)
+			List<String> genesForPathwaySearch) throws ExecutionException
 	{
 		List<WSSearchResult> listOfPathwaysByGenes = new ArrayList<WSSearchResult>();
 		for (String gene : temporaryList)
@@ -269,10 +287,9 @@ public class WikiPathwaysController extends MolgenisPluginController
 			genesForPathwaySearch.add(gene);
 		}
 		// listOfPathwaysByGenes = service.findPathwaysByText(query, organism);
-		List<String> codes = new ArrayList<String>();
-		codes.add("H"); // H for HGNC database (human gene symbols)
-		listOfPathwaysByGenes = service.findPathwaysByXref(genesForPathwaySearch, codes);
-
+		// List<String> codes = new ArrayList<String>();
+		// codes.add("H"); // H for HGNC database (human gene symbols)
+		listOfPathwaysByGenes = ALL_VCF_PATHWAY_CACHED.get(genesForPathwaySearch);
 		for (WSSearchResult info3 : listOfPathwaysByGenes)
 		{
 			if (info3.getSpecies().equals("Homo sapiens"))
@@ -287,7 +304,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 	@RequestMapping(value = "/getGPML/{pathwayId}", method = GET)
 	@ResponseBody
 	public String getGPML(@PathVariable String pathwayId) throws ParserConfigurationException, SAXException,
-			IOException
+			IOException, ExecutionException
 	{
 		Map<String, List<String>> nodeList = new HashMap<>();
 
@@ -352,7 +369,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 		return geneSymbols;
 	}
 
-	private String getColoredPathway(String pathwayId2, Map<String, List<String>> nodeList)
+	private String getColoredPathway(String pathwayId, Map<String, List<String>> nodeList) throws ExecutionException
 	{
 		Map<Integer, List<String>> graphIdToColor = new HashMap<Integer, List<String>>();
 		List<String> colors = new ArrayList<String>();
@@ -402,8 +419,8 @@ public class WikiPathwaysController extends MolgenisPluginController
 		// Check if graphIds and colors are empty
 		if (!graphIds.isEmpty() && !colors.isEmpty())
 		{
-			base64Binary = service.getColoredPathway(pathwayId2, "0", graphIds, colors, "svg");
-			// base64Binary = idsToPathways(graphIds, colors, pathwayId2);
+			base64Binary = service.getColoredPathway(pathwayId, "0", graphIds, colors, "svg");
+			// base64Binary = idsToPathways(graphIds, colors, pathwayId);
 			ByteArrayInputStream bis = new ByteArrayInputStream(base64Binary);
 
 			Scanner scan = new Scanner(bis);
@@ -419,7 +436,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 			System.out.println("normal pathway, uncolored");
 
 			// if graphIds and colors are empty, getPathway() -> so uncolored
-			byte[] uncoloredPathway = service.getPathwayAs("svg", pathwayId2, 0);
+			byte[] uncoloredPathway = PATHWAY_IMAGE_CACHED.get(pathwayId);
 			ByteArrayInputStream byteis = new ByteArrayInputStream(uncoloredPathway);
 
 			@SuppressWarnings("resource")
@@ -432,12 +449,12 @@ public class WikiPathwaysController extends MolgenisPluginController
 		}
 	}
 
-	// private byte[] idsToPathways(List<String> graphIds, List<String> colors, String pathwayId2)
+	// private byte[] idsToPathways(List<String> graphIds, List<String> colors, String pathwayId)
 	// {
 	// System.out.println(graphIds + " " + colors);
 	//
-	// byte[] base64Binary = service.getColoredPathway(pathwayId2, "0", graphIds, colors, "svg");
-	// byte[] base64Binary = service.getColoredPathway(pathwayId2, "0", Arrays.asList(new String[]{"cf3", "cd6"}),
+	// byte[] base64Binary = service.getColoredPathway(pathwayId, "0", graphIds, colors, "svg");
+	// byte[] base64Binary = service.getColoredPathway(pathwayId, "0", Arrays.asList(new String[]{"cf3", "cd6"}),
 	// Arrays.asList(new String[]{"FFA500", "FF0000"}), "svg");
 
 	// return base64Binary;

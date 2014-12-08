@@ -5,7 +5,6 @@
 	var select2_items2 = [];
 	var pathway_info = [];
 	var pathwayId = "";
-	var pathwayId2 = "";
 
 	function getPathwaysForGene(submittedGene, event) {
 		event.preventDefault(); // otherwise, the <form> will be displayed.
@@ -105,10 +104,10 @@
 		});
 	}
 	
-	function getColoredPathwayImage(pathwayId2, event) {
+	function getColoredPathwayImage(pathwayId, event) {
 		$.ajax({
 			type : 'GET',
-			url : molgenis.getContextUrl() + "/getColoredPathway/" + pathwayId2,
+			url : molgenis.getContextUrl() + "/getColoredPathway/" + pathwayId,
 			success : function(data) {
 				$("#colored-pathway-svg-image").empty();
 				$('#colored-pathway-svg-image').append(data);
@@ -147,8 +146,8 @@
 				};
 			},
 		}).on("select2-selecting", function(event) {
-			pathwayId2 = event.val;
-			getGPML(pathwayId2, event);			
+			pathwayId = event.val;
+			getGPML(pathwayId, event);			
 		});
 		getPathways(event);
 	});

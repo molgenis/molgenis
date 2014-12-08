@@ -57,7 +57,7 @@ public class WikiPathwaysControllerTest
 				+ "</DataNode></gpml>");
 		when(serviceMock.getPathway("WP2377", 0)).thenReturn(pathway);
 				
-		controller.getGPML("WP2377");
+//		controller.getGPML("WP2377");
 		
 //		assertEquals(controller.nodeList, ImmutableMap.<String, String>of("TUSC2","cf7548","IPO4","d9af5"));
 	}
