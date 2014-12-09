@@ -28,8 +28,11 @@ import org.molgenis.vcf.VcfReader;
 import org.molgenis.vcf.VcfRecord;
 import org.molgenis.vcf.VcfSample;
 import org.molgenis.vcf.meta.VcfMeta;
+import org.molgenis.vcf.meta.VcfMetaAlt;
+import org.molgenis.vcf.meta.VcfMetaContig;
 import org.molgenis.vcf.meta.VcfMetaFormat;
 import org.molgenis.vcf.meta.VcfMetaInfo;
+import org.molgenis.vcf.meta.VcfMetaSample;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
@@ -74,6 +77,7 @@ public class VcfRepository extends AbstractRepository
 	@Override
 	public Iterator<Entity> iterator()
 	{
+
 		final VcfReader vcfReader;
 		try
 		{
@@ -88,11 +92,43 @@ public class VcfRepository extends AbstractRepository
 		return new Iterator<Entity>()
 		{
 			Iterator<VcfRecord> vcfRecordIterator = finalVcfReader.iterator();
+			private VcfRecord vcfRecord;
 
 			@Override
 			public boolean hasNext()
 			{
+
+				if (vcfRecordIterator.hasNext())
+				{
+
+					vcfRecord = vcfRecordIterator.next();
+
+					String reference = null;
+					try
+					{
+						reference = finalVcfReader.getVcfMeta().get("reference");
+					}
+					catch (IOException e)
+					{
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+
+					while (!vkglChromosomeAccessionFilter(vcfRecord.getChromosome().toString())
+							&& !vkglReferenceGenomeFilter(reference))
+					{
+						if (vcfRecordIterator.hasNext())
+						{
+							vcfRecord = vcfRecordIterator.next();
+						}
+						else
+						{
+							return false;
+						}
+					}
+				}
 				return vcfRecordIterator.hasNext();
+
 			}
 
 			@Override
@@ -102,7 +138,6 @@ public class VcfRepository extends AbstractRepository
 				Entity entity = new MapEntity();
 				try
 				{
-					VcfRecord vcfRecord = vcfRecordIterator.next();
 					entity.set(CHROM, vcfRecord.getChromosome());
 					entity.set(
 							ALT,
@@ -170,18 +205,44 @@ public class VcfRepository extends AbstractRepository
 						entity.set(SAMPLES, samples);
 					}
 				}
+
 				catch (IOException e)
 				{
 					logger.error("Unable to load VCF metadata. " + e.getStackTrace());
 				}
 				return entity;
 			}
-
+			
+			
+			
 			@Override
 			public void remove()
 			{
 				throw new UnsupportedOperationException();
 			}
+
+			private boolean vkglChromosomeAccessionFilter(String chromosome)
+			{
+
+				if (!chromosome.contains("|"))
+				{
+					return false;
+				}
+				return true;
+			}
+			
+		    
+
+			private boolean vkglReferenceGenomeFilter(String reference)
+			{
+
+				if (!reference.isEmpty())
+				{
+					return false;
+				}
+				return true;
+			}
+
 		};
 	}
 
