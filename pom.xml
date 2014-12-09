@@ -606,5 +606,6 @@
         <module>molgenis-scripts</module>
         <module>molgenis-data-import</module>
         <module>molgenis-catalogue</module>
+        <module>molgenis-compute-ui</module>
     </modules>
 </project>

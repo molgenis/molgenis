@@ -22,6 +22,9 @@
             <plugin id="news" name="News" url="news"/>
             <plugin id="references" name="References" url="references"/>
             <plugin id="scripts" name="Scripts" url="scripts" />
+            <menu label="Compute" name="compute">
+            	<plugin id="workflow" name="Workflows" url="workflow" />
+            </menu>
 	    </menu>
 		<menu label="Entities" name ="entities">
         	<plugin id="form.RuntimeProperty" name="RuntimeProperty" url="form.RuntimeProperty"/>
