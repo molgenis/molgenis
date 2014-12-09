@@ -182,6 +182,10 @@ public class AccountService
 		StringBuilder strBuilder = new StringBuilder();
 		strBuilder.append("User registration for ").append(getAppName()).append('\n');
 		strBuilder.append("User name: ").append(user.getUsername()).append(" Full name: ").append(user.getFirstName());
+		String middleNames = user.getMiddleNames();
+		if(middleNames != null && !middleNames.isEmpty()) {
+			strBuilder.append(' ').append(middleNames);	
+		}
 		strBuilder.append(' ').append(user.getLastName()).append('\n');
 		strBuilder.append("In order to activate the user visit the following URL:").append('\n');
 		strBuilder.append(activationUri).append('\n').append('\n');
@@ -191,7 +195,12 @@ public class AccountService
 	private String createActivatedEmailText(MolgenisUser user, String appName)
 	{
 		StringBuilder strBuilder = new StringBuilder();
-		strBuilder.append("Dear ").append(user.getFirstName()).append(" ").append(user.getLastName()).append(",\n\n");
+		strBuilder.append("Dear ").append(user.getFirstName());
+		String middleNames = user.getMiddleNames();
+		if(middleNames != null && !middleNames.isEmpty()) {
+			strBuilder.append(' ').append(middleNames);	
+		}
+		strBuilder.append(' ').append(user.getLastName()).append(",\n\n");
 		strBuilder.append("your registration request for ").append(appName).append(" was approved.\n");
 		strBuilder.append("Your account is now active.\n");
 		return strBuilder.toString();
