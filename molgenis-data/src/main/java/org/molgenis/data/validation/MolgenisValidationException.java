@@ -36,7 +36,7 @@ public class MolgenisValidationException extends MolgenisDataException
 				return violation.getMessage();
 			}
 
-		}), '.');
+		}), ' ');
 	}
 
 }
