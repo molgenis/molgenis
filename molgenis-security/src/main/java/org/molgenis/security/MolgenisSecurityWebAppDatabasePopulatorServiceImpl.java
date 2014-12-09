@@ -58,8 +58,8 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl implements
 		anonymousUser.setActive(true);
 		anonymousUser.setSuperuser(false);
 		anonymousUser.setChangePassword(false);
-		anonymousUser.setFirstName(USERNAME_ADMIN);
-		anonymousUser.setLastName(USERNAME_ADMIN);
+		anonymousUser.setFirstName(SecurityUtils.ANONYMOUS_USERNAME);
+		anonymousUser.setLastName(SecurityUtils.ANONYMOUS_USERNAME);
 		dataService.add(MolgenisUser.ENTITY_NAME, anonymousUser);
 
 		// set anonymous role for anonymous user
