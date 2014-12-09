@@ -9,9 +9,9 @@
 			<field name="activationCode" label="Activation code" type="string" nillable="true" description="Used as alternative authentication mechanism to verify user email and/or if user has lost password."/>
 			<field name="active" label="Active" type="bool" default="false" description="Boolean to indicate if this account can be used to login"/>
 			<field name="superuser" label="Superuser" type="bool" default="false"/>
-			<field name="FirstName" label="First name" nillable="true"/>
+			<field name="FirstName" label="First name" nillable="false"/>
 			<field name="MiddleNames" label="Middle names" nillable="true"/>
-			<field name="LastName" label="Last name" nillable="true"/>
+			<field name="LastName" label="Last name" nillable="false"/>
 			<field name="Title" label="Title" nillable="true" description="An academic title, e.g. Prof.dr, PhD"/>
 			<field name="Affiliation" type="string" nillable="true"/>
 			<field name="Department" type="string" nillable="true" description="Added from the old definition of MolgenisUser. Department of this contact."/>	

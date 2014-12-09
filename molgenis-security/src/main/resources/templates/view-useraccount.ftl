@@ -75,9 +75,9 @@
 							</div>
 						</div>
 						<div class="control-group">
-							<label class="control-label" for="firstname">First name</label>
+							<label class="control-label" for="firstname">First name *</label>
 							<div class="controls">
-								<input type="text" name="firstname"<#if user.firstname??> value="${user.firstname?html}"</#if>>
+								<input type="text" name="firstname"<#if user.firstname??> value="${user.firstname?html}"</#if> required>
 							</div>
 						</div>
 						<div class="control-group">
@@ -87,9 +87,9 @@
 							</div>
 						</div>
 						<div class="control-group">
-							<label class="control-label" for="lastname">Last name</label>
+							<label class="control-label" for="lastname">Last name *</label>
 							<div class="controls">
-								<input type="text" name="lastname"<#if user.lastname??> value="${user.lastname?html}"</#if>>
+								<input type="text" name="lastname"<#if user.lastname??> value="${user.lastname?html}"</#if> required>
 							</div>
 						</div>
 					</div>

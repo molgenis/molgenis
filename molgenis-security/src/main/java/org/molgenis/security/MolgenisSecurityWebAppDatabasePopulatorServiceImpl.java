@@ -46,6 +46,8 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl implements
 		userAdmin.setActive(true);
 		userAdmin.setSuperuser(true);
 		userAdmin.setChangePassword(false);
+		userAdmin.setFirstName(USERNAME_ADMIN);
+		userAdmin.setLastName(USERNAME_ADMIN);
 		dataService.add(MolgenisUser.ENTITY_NAME, userAdmin);
 
 		// create anonymous user
@@ -56,6 +58,8 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl implements
 		anonymousUser.setActive(true);
 		anonymousUser.setSuperuser(false);
 		anonymousUser.setChangePassword(false);
+		anonymousUser.setFirstName(SecurityUtils.ANONYMOUS_USERNAME);
+		anonymousUser.setLastName(SecurityUtils.ANONYMOUS_USERNAME);
 		dataService.add(MolgenisUser.ENTITY_NAME, anonymousUser);
 
 		// set anonymous role for anonymous user
