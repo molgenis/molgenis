@@ -1,6 +1,6 @@
 package org.molgenis.compute.ui.model;
 
-public enum ParameterType
+public enum SchedulerType
 {
-	INPUT, OUTPUT
+	SLURM, PBS
 }
