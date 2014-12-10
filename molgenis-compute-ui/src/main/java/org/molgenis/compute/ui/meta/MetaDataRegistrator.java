@@ -1,5 +1,6 @@
 package org.molgenis.compute.ui.meta;
 
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
@@ -11,11 +12,13 @@ import org.springframework.stereotype.Component;
 public class MetaDataRegistrator implements ApplicationListener<ContextRefreshedEvent>, Ordered
 {
 	private final MysqlRepositoryCollection repositoryCollection;
+	private final MetaDataService metaDataService;
 
 	@Autowired
-	public MetaDataRegistrator(MysqlRepositoryCollection repositoryCollection)
+	public MetaDataRegistrator(MysqlRepositoryCollection repositoryCollection, MetaDataService metaDataService)
 	{
 		this.repositoryCollection = repositoryCollection;
+		this.metaDataService = metaDataService;
 	}
 
 	@Override
@@ -29,6 +32,8 @@ public class MetaDataRegistrator implements ApplicationListener<ContextRefreshed
 		repositoryCollection.add(UIParameterValueMetaData.INSTANCE);
 		repositoryCollection.add(AnalysisJobMetaData.INSTANCE);
 		repositoryCollection.add(UIBackendMetaData.INSTANCE);
+		repositoryCollection.add(AnalysisMetaData.INSTANCE);
+		metaDataService.refreshCaches();
 	}
 
 	@Override
