@@ -261,15 +261,18 @@ public class ProtocolViewerController extends MolgenisPluginController
 		if (!getEnableOrderAction()) throw new MolgenisDataAccessException("Action not allowed");
 
 		Iterable<StudyDefinitionResponse> ordersIterable = Iterables.transform(
-				protocolViewerService.getStudyDefinitionsForCurrentUser(),
-				new Function<StudyDefinition, StudyDefinitionResponse>()
-				{
+				Iterables.filter(protocolViewerService.getStudyDefinitionsForCurrentUser(),
+						new Predicate<StudyDefinition>() {
+							@Override
+							public boolean apply(StudyDefinition studyDefinition) {
+								return studyDefinition != null && studyDefinition.getStatus() != Status.DRAFT;
+							}
+						}),
+				new Function<StudyDefinition, StudyDefinitionResponse>() {
 					@Override
 					@Nullable
-					public StudyDefinitionResponse apply(@Nullable StudyDefinition studyDefinition)
-					{
-						return studyDefinition != null ? (studyDefinition.getStatus() != Status.DRAFT ? new StudyDefinitionResponse(
-								studyDefinition) : null) : null;
+					public StudyDefinitionResponse apply(@Nullable StudyDefinition studyDefinition) {
+						return new StudyDefinitionResponse(studyDefinition);
 					}
 				});
 
