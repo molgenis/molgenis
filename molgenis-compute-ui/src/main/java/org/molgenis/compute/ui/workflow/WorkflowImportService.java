@@ -37,7 +37,10 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.dataexplorer.controller.RegisterDataExplorerActionEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,16 +48,21 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 @Component
-public class WorkflowImportService
+public class WorkflowImportService implements ApplicationEventPublisherAware
 {
 	private static Logger logger = Logger.getLogger(WorkflowImportService.class);
 	private final DataService dataService;
 	private final SearchService searchService;
 
+	private final WorkflowManageService workflowManageService;
+	private ApplicationEventPublisher publisher;
+
 	@Autowired
-	public WorkflowImportService(DataService dataService, SearchService searchService)
+	public WorkflowImportService(DataService dataService, WorkflowManageService workflowManageService,
+			SearchService searchService)
 	{
 		this.dataService = dataService;
+		this.workflowManageService = workflowManageService;
 		this.searchService = searchService;
 	}
 
@@ -181,12 +189,16 @@ public class WorkflowImportService
 		List<UIWorkflowParameter> uiWorkflowParameters = parseParametersFile(parameterFile);
 		dataService.add(UIWorkflowParameterMetaData.INSTANCE.getName(), uiWorkflowParameters);
 
+		String uiWorkflowId = IdGenerator.generateId();
 		UIWorkflow uiWorkflow = new UIWorkflow(IdGenerator.generateId(), workflowName);
 		uiWorkflow.setNodes(Lists.newArrayList(nodesByName.values()));
 		uiWorkflow.setGenerateScript(computeProperties.customSubmit);// ????
 		uiWorkflow.setParameters(uiWorkflowParameters);
 
 		dataService.add(UIWorkflowMetaData.INSTANCE.getName(), uiWorkflow);
+
+		// publish data explorer action event
+		publisher.publishEvent(new RegisterDataExplorerActionEvent(workflowManageService, uiWorkflowId, workflowName));
 
 		logger.info("Import pipeline '" + workflowName + "' done.");
 	}
@@ -220,6 +232,12 @@ public class WorkflowImportService
 		}
 
 		return params;
+	}
+
+	@Override
+	public void setApplicationEventPublisher(ApplicationEventPublisher publisher)
+	{
+		this.publisher = publisher;
 	}
 
 	private void rebuildIndices()
