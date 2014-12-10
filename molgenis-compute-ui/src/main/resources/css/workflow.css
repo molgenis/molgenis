@@ -1,0 +1,13 @@
+.nav-tabs {
+	margin-top: 20px;
+}
+
+.tab-content {
+	margin-top: 10px;
+}
+
+#paper {
+	width: 100%; 
+	height: 100%;
+	overflow: scroll;	
+}

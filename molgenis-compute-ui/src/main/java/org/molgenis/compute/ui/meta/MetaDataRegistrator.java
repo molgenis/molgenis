@@ -26,6 +26,9 @@ public class MetaDataRegistrator implements ApplicationListener<ContextRefreshed
 		repositoryCollection.add(UIWorkflowProtocolMetaData.INSTANCE);
 		repositoryCollection.add(UIWorkflowNodeMetaData.INSTANCE);
 		repositoryCollection.add(UIWorkflowMetaData.INSTANCE);
+		repositoryCollection.add(UIParameterValueMetaData.INSTANCE);
+		repositoryCollection.add(AnalysisJobMetaData.INSTANCE);
+		repositoryCollection.add(UIBackendMetaData.INSTANCE);
 	}
 
 	@Override

@@ -1,12 +1,10 @@
-
-/*
 $(function() {
-	$('#import-workflow-button').click(function(){
-			var form = $('#parametersForm');
-			form.validate();
-			if (form.valid()) {
+	$('#submitFormButton').on('click', function() {
+		var form = $('#workflowForm');
+		if (form.valid()) {
+			showSpinner(function() {
 				form.submit();
-			}
-		});
-}
-*/
+			});
+		}
+	});
+});

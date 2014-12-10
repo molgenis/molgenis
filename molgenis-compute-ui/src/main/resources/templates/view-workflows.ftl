@@ -2,7 +2,7 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=['molgenis-form.css']>
-<#assign js=['jquery.validate.min.js']>
+<#assign js=['jquery.validate.min.js','workflows.js']>
 
 <@header css js/>
 
@@ -38,7 +38,7 @@
 	<div class="modal" id="formModal" tabindex="-1" role="dialog" aria-labelledby="formModalTitle" aria-hidden="true">
 		<div class="modal-dialog modal-lg">
 			<div class="modal-content">	
-				<form class="form-horizontal" role="form" action="" method="POST">	 						
+				<form class="form-horizontal" id="workflowForm" role="form" action="" method="POST">	 						
 	      			<div class="modal-header">
 	        			<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
 	        			<h4 class="modal-title" id="formModalTitle">Import workflow</h4>
@@ -69,7 +69,7 @@
 	      			</div>
 	      			<div class="modal-footer">
 	        			<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-	        			<button type="submit" id="submitFormButton" class="btn btn-primary">Import</button>
+	        			<button type="button" id="submitFormButton" class="btn btn-primary">Import</button>
 	      			</div>
 	      		</form>
 	    	</div>
