@@ -30,7 +30,6 @@
 	"jquery.molgenis.table.js"]>
 
 <@header css js/>
-
 <div id="entity-class" class="well">
 	<h3 id="entity-class-name"></h3>
 	<span id="entity-class-description"></span>
