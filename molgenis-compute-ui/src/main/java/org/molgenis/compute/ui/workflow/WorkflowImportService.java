@@ -32,7 +32,10 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.dataexplorer.controller.RegisterDataExplorerActionEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,11 +43,13 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 @Component
-public class WorkflowImportService
+public class WorkflowImportService implements ApplicationEventPublisherAware
 {
 	private static Logger logger = Logger.getLogger(WorkflowImportService.class);
 	private final DataService dataService;
 
+	private ApplicationEventPublisher publisher;
+	
 	@Autowired
 	public WorkflowImportService(DataService dataService)
 	{
@@ -132,6 +137,7 @@ public class WorkflowImportService
 		List<UIWorkflowParameter> uiWorkflowParameters = parseParametersFile(parameterFile);
 		dataService.add(UIWorkflowParameterMetaData.INSTANCE.getName(), uiWorkflowParameters);
 
+		String uiWorkflowId = IdGenerator.generateId();
 		UIWorkflow uiWorkflow = new UIWorkflow(IdGenerator.generateId(), workflowName);
 		uiWorkflow.setNodes(Lists.newArrayList(nodesByName.values()));
 		uiWorkflow.setGenerateScript(computeProperties.customSubmit);// ????
@@ -142,7 +148,10 @@ public class WorkflowImportService
 		uiWorkflow.setTargetType(target);
 
 		dataService.add(UIWorkflowMetaData.INSTANCE.getName(), uiWorkflow);
-
+		
+		// publish data explorer action event
+		publisher.publishEvent(new RegisterDataExplorerActionEvent(this, uiWorkflowId));
+		
 		logger.info("Import pipeline '" + workflowName + "' done.");
 	}
 
@@ -175,5 +184,10 @@ public class WorkflowImportService
 		}
 
 		return params;
+	}
+	
+	@Override
+	public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
+		this.publisher = publisher;
 	}
 }
