@@ -11,6 +11,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.compute.ui.ComputeUiException;
 import org.molgenis.compute.ui.IdGenerator;
+import org.molgenis.compute.ui.meta.UIParameterMappingMetaData;
 import org.molgenis.compute.ui.meta.UIParameterMetaData;
 import org.molgenis.compute.ui.meta.UIWorkflowMetaData;
 import org.molgenis.compute.ui.meta.UIWorkflowNodeMetaData;
@@ -18,6 +19,7 @@ import org.molgenis.compute.ui.meta.UIWorkflowParameterMetaData;
 import org.molgenis.compute.ui.meta.UIWorkflowProtocolMetaData;
 import org.molgenis.compute.ui.model.ParameterType;
 import org.molgenis.compute.ui.model.UIParameter;
+import org.molgenis.compute.ui.model.UIParameterMapping;
 import org.molgenis.compute.ui.model.UIWorkflow;
 import org.molgenis.compute.ui.model.UIWorkflowNode;
 import org.molgenis.compute.ui.model.UIWorkflowParameter;
@@ -101,6 +103,8 @@ public class WorkflowImportService
 		Workflow workflow = new WorkflowCsvParser().parse(workflowFileName, computeProperties);
 
 		Map<String, UIWorkflowNode> nodesByName = Maps.newLinkedHashMap();
+		Map<String, UIParameter> parametersByName = Maps.newLinkedHashMap();
+
 		for (Step step : workflow.getSteps())
 		{
 			UIWorkflowProtocol protocol = dataService.findOne(UIWorkflowProtocolMetaData.INSTANCE.getName(),
@@ -120,6 +124,7 @@ public class WorkflowImportService
 					parameter.setType(ParameterType.INPUT);
 					parameter.setDataType(input.getType());
 					parameters.add(parameter);
+					parametersByName.put(parameter.getName(), parameter);
 				}
 
 				for (Output output : step.getProtocol().getOutputs())
@@ -128,6 +133,7 @@ public class WorkflowImportService
 					parameter.setType(ParameterType.OUTPUT);
 					parameter.setDataType(output.getType());
 					parameters.add(parameter);
+					parametersByName.put(parameter.getName(), parameter);
 				}
 
 				dataService.add(UIParameterMetaData.INSTANCE.getName(), parameters);
@@ -142,6 +148,7 @@ public class WorkflowImportService
 			nodesByName.put(step.getName(), node);
 		}
 
+		// Set previous nodes and parametermappings
 		for (Step step : workflow.getSteps())
 		{
 			if (!step.getPreviousSteps().isEmpty())
@@ -151,6 +158,21 @@ public class WorkflowImportService
 				{
 					node.addPreviousNode(nodesByName.get(prevStepName));
 				}
+
+				List<UIParameterMapping> uiParameterMappings = Lists.newArrayList();
+				for (Map.Entry<String, String> mapping : step.getParametersMapping().entrySet())
+				{
+					UIParameter from = parametersByName.get(mapping.getKey());
+					if (from == null) throw new ComputeUiException("Unknown parameter '" + mapping.getKey() + "'");
+
+					UIParameter to = parametersByName.get(mapping.getValue());
+					if (to == null) throw new ComputeUiException("Unknown parameter '" + mapping.getValue() + "'");
+
+					uiParameterMappings.add(new UIParameterMapping(IdGenerator.generateId(), from, to));
+				}
+
+				dataService.add(UIParameterMappingMetaData.INSTANCE.getName(), uiParameterMappings);
+				node.setParameterMappings(uiParameterMappings);
 			}
 		}
 

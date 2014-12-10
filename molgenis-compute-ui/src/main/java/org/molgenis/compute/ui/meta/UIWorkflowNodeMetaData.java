@@ -14,6 +14,7 @@ public class UIWorkflowNodeMetaData extends DefaultEntityMetaData
 	public static final String NAME = "name";
 	public static final String PROTOCOL = "protocol";
 	public static final String PREVIOUS_NODES = "previousNodes";
+	public static final String PARAMETER_MAPPINGS = "parameterMappings";
 
 	private UIWorkflowNodeMetaData()
 	{
@@ -22,5 +23,6 @@ public class UIWorkflowNodeMetaData extends DefaultEntityMetaData
 		addAttribute(NAME).setNillable(false).setUnique(true).setLabelAttribute(true);
 		addAttribute(PROTOCOL).setDataType(XREF).setRefEntity(UIWorkflowProtocolMetaData.INSTANCE).setNillable(false);
 		addAttribute(PREVIOUS_NODES).setDataType(MREF).setRefEntity(this);
+		addAttribute(PARAMETER_MAPPINGS).setDataType(MREF).setRefEntity(UIParameterMappingMetaData.INSTANCE);
 	}
 }
