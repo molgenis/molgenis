@@ -11,7 +11,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.compute.ui.ComputeUiException;
 import org.molgenis.compute.ui.IdGenerator;
-import org.molgenis.compute.ui.meta.UIParameterMappingMetaData;
 import org.molgenis.compute.ui.meta.UIParameterMetaData;
 import org.molgenis.compute.ui.meta.UIWorkflowMetaData;
 import org.molgenis.compute.ui.meta.UIWorkflowNodeMetaData;
@@ -19,7 +18,6 @@ import org.molgenis.compute.ui.meta.UIWorkflowParameterMetaData;
 import org.molgenis.compute.ui.meta.UIWorkflowProtocolMetaData;
 import org.molgenis.compute.ui.model.ParameterType;
 import org.molgenis.compute.ui.model.UIParameter;
-import org.molgenis.compute.ui.model.UIParameterMapping;
 import org.molgenis.compute.ui.model.UIWorkflow;
 import org.molgenis.compute.ui.model.UIWorkflowNode;
 import org.molgenis.compute.ui.model.UIWorkflowParameter;
@@ -167,20 +165,22 @@ public class WorkflowImportService implements ApplicationEventPublisherAware
 					node.addPreviousNode(nodesByName.get(prevStepName));
 				}
 
-				List<UIParameterMapping> uiParameterMappings = Lists.newArrayList();
-				for (Map.Entry<String, String> mapping : step.getParametersMapping().entrySet())
-				{
-					UIParameter from = parametersByName.get(mapping.getKey());
-					if (from == null) throw new ComputeUiException("Unknown parameter '" + mapping.getKey() + "'");
+				// TODO how exactly do parameter mappings / parameters.csv work?
 
-					UIParameter to = parametersByName.get(mapping.getValue());
-					if (to == null) throw new ComputeUiException("Unknown parameter '" + mapping.getValue() + "'");
-
-					uiParameterMappings.add(new UIParameterMapping(IdGenerator.generateId(), from, to));
-				}
-
-				dataService.add(UIParameterMappingMetaData.INSTANCE.getName(), uiParameterMappings);
-				node.setParameterMappings(uiParameterMappings);
+				// List<UIParameterMapping> uiParameterMappings = Lists.newArrayList();
+				// for (Map.Entry<String, String> mapping : step.getParametersMapping().entrySet())
+				// {
+				// UIParameter from = parametersByName.get(mapping.getKey());
+				// if (from == null) throw new ComputeUiException("Unknown parameter '" + mapping.getKey() + "'");
+				//
+				// UIParameter to = parametersByName.get(mapping.getValue());
+				// if (to == null) throw new ComputeUiException("Unknown parameter '" + mapping.getValue() + "'");
+				//
+				// uiParameterMappings.add(new UIParameterMapping(IdGenerator.generateId(), from, to));
+				// }
+				//
+				// dataService.add(UIParameterMappingMetaData.INSTANCE.getName(), uiParameterMappings);
+				// node.setParameterMappings(uiParameterMappings);
 			}
 		}
 

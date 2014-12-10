@@ -24,8 +24,8 @@
 					<#if workflows?has_content>
 						<#list workflows as workflow>
 							<tr>
-								<td>${workflow.name}</td>
-								<td>${workflow.description!}</td>
+								<td>${workflow.name!?html}</td>
+								<td>${workflow.description!?html}</td>
 								<td><a href="workflow/${workflow.name?url('UTF-8')}">view</a></td>
 							</tr>
 						</#list>
