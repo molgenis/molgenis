@@ -48,12 +48,14 @@ public class WorkflowImportService implements ApplicationEventPublisherAware
 	private static Logger logger = Logger.getLogger(WorkflowImportService.class);
 	private final DataService dataService;
 
+	private final WorkflowManageService workflowManageService;
 	private ApplicationEventPublisher publisher;
-	
+
 	@Autowired
-	public WorkflowImportService(DataService dataService)
+	public WorkflowImportService(DataService dataService, WorkflowManageService workflowManageService)
 	{
 		this.dataService = dataService;
+		this.workflowManageService = workflowManageService;
 	}
 
 	@Transactional
@@ -144,10 +146,10 @@ public class WorkflowImportService implements ApplicationEventPublisherAware
 		uiWorkflow.setParameters(uiWorkflowParameters);
 
 		dataService.add(UIWorkflowMetaData.INSTANCE.getName(), uiWorkflow);
-		
+
 		// publish data explorer action event
-		publisher.publishEvent(new RegisterDataExplorerActionEvent(this, uiWorkflowId));
-		
+		publisher.publishEvent(new RegisterDataExplorerActionEvent(workflowManageService, uiWorkflowId));
+
 		logger.info("Import pipeline '" + workflowName + "' done.");
 	}
 
@@ -181,9 +183,10 @@ public class WorkflowImportService implements ApplicationEventPublisherAware
 
 		return params;
 	}
-	
+
 	@Override
-	public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
+	public void setApplicationEventPublisher(ApplicationEventPublisher publisher)
+	{
 		this.publisher = publisher;
 	}
 }
