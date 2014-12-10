@@ -143,10 +143,6 @@ public class WorkflowImportService implements ApplicationEventPublisherAware
 		uiWorkflow.setGenerateScript(computeProperties.customSubmit);// ????
 		uiWorkflow.setParameters(uiWorkflowParameters);
 
-		// TODO remove TEST code
-		Entity target = dataService.findOne("entities", "Script");
-		uiWorkflow.setTargetType(target);
-
 		dataService.add(UIWorkflowMetaData.INSTANCE.getName(), uiWorkflow);
 		
 		// publish data explorer action event
