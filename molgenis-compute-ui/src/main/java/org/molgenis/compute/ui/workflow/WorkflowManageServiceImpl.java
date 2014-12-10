@@ -1,11 +1,17 @@
 package org.molgenis.compute.ui.workflow;
 
+import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.molgenis.compute.ui.meta.UIWorkflowMetaData;
 import org.molgenis.compute.ui.model.UIWorkflow;
 import org.molgenis.data.DataService;
+import org.molgenis.data.QueryRule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.google.common.escape.Escaper;
+import com.google.common.net.UrlEscapers;
 
 @Service
 public class WorkflowManageServiceImpl implements WorkflowManageService
@@ -31,5 +37,14 @@ public class WorkflowManageServiceImpl implements WorkflowManageService
 
 		String targetType = uiWorkflow.getTargetType();
 		return entityName != null && targetType != null && entityName.equals(targetType);
+	}
+
+	@Override
+	public String performAction(String actionId, String entityName, List<QueryRule> queryRules)
+	{
+		// TODO how to get analysis URL?
+		Escaper escaper = UrlEscapers.urlPathSegmentEscaper();
+		return "/menu/main/analysis?workflow=" + escaper.escape(actionId) + "&target=" + escaper.escape(entityName)
+				+ "&q=" + escaper.escape(queryRules.toString());
 	}
 }

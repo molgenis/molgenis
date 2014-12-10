@@ -176,7 +176,7 @@ public class WorkflowImportService implements ApplicationEventPublisherAware
 		dataService.add(UIWorkflowMetaData.INSTANCE.getName(), uiWorkflow);
 
 		// publish data explorer action event
-		publisher.publishEvent(new RegisterDataExplorerActionEvent(workflowManageService, uiWorkflowId));
+		publisher.publishEvent(new RegisterDataExplorerActionEvent(workflowManageService, uiWorkflowId, workflowName));
 
 		logger.info("Import pipeline '" + workflowName + "' done.");
 	}

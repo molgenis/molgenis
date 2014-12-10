@@ -385,6 +385,32 @@ public class DataExplorerController extends MolgenisPluginController implements
 		return attributeStartPosition != null && attributeChromosome != null;
 	}
 
+	// TODO register actions for CSV download and galaxy export
+	@RequestMapping(value = "/action", method = POST)
+	@ResponseBody
+	public Map<String, Object> processAction(@Valid @RequestBody ActionRequest actionRequest, Model model)
+			throws IOException
+	{
+		// retrieve action handler for given action
+		String actionId = actionRequest.getActionId();
+		RegisterDataExplorerActionEventHandler actionHandler = actionHandlers.get(actionId);
+		if (actionHandler == null) throw new RuntimeException("Invalid action id [" + actionId + "]");
+
+		// perform action
+		String redirectLocation = actionHandler.performAction(actionId, actionRequest.getEntityName(), actionRequest
+				.getQuery().getRules());
+
+		// optionally respond with redirect
+		if (redirectLocation != null)
+		{
+			return Collections.<String, Object> singletonMap("location", redirectLocation);
+		}
+		else
+		{
+			return Collections.emptyMap();
+		}
+	}
+
 	@RequestMapping(value = "/download", method = POST)
 	public void download(@RequestParam("dataRequest") String dataRequestStr, HttpServletResponse response)
 			throws IOException
