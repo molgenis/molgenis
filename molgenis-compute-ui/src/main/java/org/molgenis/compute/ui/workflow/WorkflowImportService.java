@@ -137,10 +137,6 @@ public class WorkflowImportService
 		uiWorkflow.setGenerateScript(computeProperties.customSubmit);// ????
 		uiWorkflow.setParameters(uiWorkflowParameters);
 
-		// TODO remove TEST code
-		Entity target = dataService.findOne("entities", "Script");
-		uiWorkflow.setTargetType(target);
-
 		dataService.add(UIWorkflowMetaData.INSTANCE.getName(), uiWorkflow);
 
 		logger.info("Import pipeline '" + workflowName + "' done.");
