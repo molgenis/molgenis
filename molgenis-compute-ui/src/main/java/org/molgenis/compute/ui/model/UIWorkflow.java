@@ -3,7 +3,6 @@ package org.molgenis.compute.ui.model;
 import java.util.List;
 
 import org.molgenis.compute.ui.meta.UIWorkflowMetaData;
-import org.molgenis.data.Entity;
 import org.molgenis.data.support.MapEntity;
 
 import com.google.common.collect.Lists;
@@ -59,14 +58,14 @@ public class UIWorkflow extends MapEntity
 		set(UIWorkflowMetaData.GENERATE_SCRIPT, generateScript);
 	}
 
-	public Entity getTargetType()
+	public String getTargetType()
 	{
-		return getEntity(UIWorkflowMetaData.TARGET_TYPE);
+		return getString(UIWorkflowMetaData.TARGET_TYPE);
 	}
 
-	public void setTargetType(Entity entityMetaData)
+	public void setTargetType(String entityMetaDataName)
 	{
-		set(UIWorkflowMetaData.TARGET_TYPE, entityMetaData);
+		set(UIWorkflowMetaData.TARGET_TYPE, entityMetaDataName);
 	}
 
 	public List<UIWorkflowNode> getNodes()
