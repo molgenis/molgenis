@@ -3,6 +3,7 @@ package org.molgenis.compute.ui.workflow;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +31,9 @@ import org.molgenis.compute5.parsers.WorkflowCsvParser;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.csv.CsvRepository;
+import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.RegisterDataExplorerActionEvent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,19 +50,44 @@ public class WorkflowImportService implements ApplicationEventPublisherAware
 {
 	private static Logger logger = Logger.getLogger(WorkflowImportService.class);
 	private final DataService dataService;
+	private final SearchService searchService;
 
 	private final WorkflowManageService workflowManageService;
 	private ApplicationEventPublisher publisher;
 
 	@Autowired
-	public WorkflowImportService(DataService dataService, WorkflowManageService workflowManageService)
+	public WorkflowImportService(DataService dataService, WorkflowManageService workflowManageService,
+			SearchService searchService)
 	{
 		this.dataService = dataService;
 		this.workflowManageService = workflowManageService;
+		this.searchService = searchService;
 	}
 
 	@Transactional
 	public void importWorkflow(ComputeProperties computeProperties) throws IOException
+	{
+		try
+		{
+			doImportWorkflow(computeProperties);
+		}
+		catch (Exception e)
+		{
+			try
+			{
+				rebuildIndices();
+			}
+			catch (Exception e1)
+			{
+				logger.error("Exception rebuilding indices after importWorkflow", e1);
+			}
+
+			throw e;
+		}
+	}
+
+	@Transactional
+	public void doImportWorkflow(ComputeProperties computeProperties) throws IOException
 	{
 		String baseDir = computeProperties.path;
 		if (!new File(baseDir).exists()) throw new IOException("Directory '" + baseDir + "' does not exist.");
@@ -188,5 +216,17 @@ public class WorkflowImportService implements ApplicationEventPublisherAware
 	public void setApplicationEventPublisher(ApplicationEventPublisher publisher)
 	{
 		this.publisher = publisher;
+	}
+
+	private void rebuildIndices()
+	{
+		List<EntityMetaData> metasToReIndex = Arrays.<EntityMetaData> asList(UIParameterMetaData.INSTANCE,
+				UIWorkflowProtocolMetaData.INSTANCE, UIWorkflowNodeMetaData.INSTANCE,
+				UIWorkflowParameterMetaData.INSTANCE, UIWorkflowMetaData.INSTANCE);
+
+		for (EntityMetaData meta : metasToReIndex)
+		{
+			searchService.rebuildIndex(dataService.findAll(meta.getName()), meta);
+		}
 	}
 }
