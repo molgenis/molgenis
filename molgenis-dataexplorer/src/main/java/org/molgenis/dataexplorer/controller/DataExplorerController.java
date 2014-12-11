@@ -134,7 +134,7 @@ public class DataExplorerController extends MolgenisPluginController implements
 	private static final boolean DEFAULT_VAL_KEY_HIDE_SELECT = true;
 	private static final boolean DEFAULT_VAL_KEY_HIGLIGHTREGION = false;
 
-	private Map<String, RegisterDataExplorerActionEventHandler> actionHandlers = new HashMap<String, RegisterDataExplorerActionEventHandler>();
+	private Map<String, RegisterDataExplorerActionEvent> actionHandlers = new HashMap<String, RegisterDataExplorerActionEvent>();
 
 	@Autowired
 	private DataService dataService;
@@ -393,12 +393,12 @@ public class DataExplorerController extends MolgenisPluginController implements
 	{
 		// retrieve action handler for given action
 		String actionId = actionRequest.getActionId();
-		RegisterDataExplorerActionEventHandler actionHandler = actionHandlers.get(actionId);
+		RegisterDataExplorerActionEvent actionHandler = actionHandlers.get(actionId);
 		if (actionHandler == null) throw new RuntimeException("Invalid action id [" + actionId + "]");
 
 		// perform action
-		String redirectLocation = actionHandler.performAction(actionId, actionRequest.getEntityName(), actionRequest
-				.getQuery().getRules());
+		String redirectLocation = actionHandler.getSource().performAction(actionId, actionRequest.getEntityName(),
+				actionRequest.getQuery().getRules());
 
 		// optionally respond with redirect
 		if (redirectLocation != null)
@@ -701,22 +701,21 @@ public class DataExplorerController extends MolgenisPluginController implements
 		return null;
 	}
 
-	private Map<String, RegisterDataExplorerActionEventHandler> getActionHandlers(final String entityName)
+	private Map<String, RegisterDataExplorerActionEvent> getActionHandlers(final String entityName)
 	{
-		return Maps.filterEntries(actionHandlers,
-				new Predicate<Entry<String, RegisterDataExplorerActionEventHandler>>()
-				{
-					@Override
-					public boolean apply(Entry<String, RegisterDataExplorerActionEventHandler> entry)
-					{
-						return entry.getValue().allowAction(entry.getKey(), entityName);
-					}
-				});
+		return Maps.filterEntries(actionHandlers, new Predicate<Entry<String, RegisterDataExplorerActionEvent>>()
+		{
+			@Override
+			public boolean apply(Entry<String, RegisterDataExplorerActionEvent> entry)
+			{
+				return entry.getValue().getSource().allowAction(entry.getKey(), entityName);
+			}
+		});
 	}
 
 	@Override
 	public void onApplicationEvent(RegisterDataExplorerActionEvent event)
 	{
-		actionHandlers.put(event.getActionId(), event.getSource());
+		actionHandlers.put(event.getActionId(), event);
 	}
 }
