@@ -11,7 +11,7 @@
 <h1>Workflow id: ${workflowId!"not specified"?html}</h1>
 <h1>Target id: ${targetId!"not specified"?html}</h1>
 <h1>Query: ${q!"not specified"?html}</h1>
-<form name="execute-workflow-form" class="form-horizontal" action="${context_url?html}/execute method="POST">
+<form name="execute-workflow-form" class="form-horizontal" action="${context_url?html}/execute" method="POST">
 	<input type="hidden" name="workflowId" value="${workflowId?html}">
 	<input type="hidden" name="targetId" value="${targetId?html}">
 	<button type="submit" class="btn btn-default">Run</button>	
