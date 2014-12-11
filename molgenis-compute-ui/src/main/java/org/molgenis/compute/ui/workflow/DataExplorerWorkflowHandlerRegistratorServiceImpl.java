@@ -34,11 +34,18 @@ public class DataExplorerWorkflowHandlerRegistratorServiceImpl implements
 		Iterable<UIWorkflow> uiWorkflows = dataService.findAll(UIWorkflowMetaData.INSTANCE.getName(), UIWorkflow.class);
 		for (UIWorkflow uiWorkflow : uiWorkflows)
 		{
-			String uiWorkflowId = uiWorkflow.getIdValue().toString();
-			String uiWorkflowName = uiWorkflow.getName();
-			applicationEventPublisher.publishEvent(new RegisterDataExplorerActionEvent(workflowManageService,
-					uiWorkflowId, uiWorkflowName));
+			registerWorkflowHandler(uiWorkflow);
 		}
+	}
+
+	@Override
+	@RunAsSystem
+	public void registerWorkflowHandler(UIWorkflow uiWorkflow)
+	{
+		String uiWorkflowId = uiWorkflow.getIdValue().toString();
+		String uiWorkflowName = uiWorkflow.getName();
+		applicationEventPublisher.publishEvent(new RegisterDataExplorerActionEvent(workflowManageService, uiWorkflowId,
+				uiWorkflowName));
 	}
 
 	@Override
