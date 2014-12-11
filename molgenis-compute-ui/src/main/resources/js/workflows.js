@@ -7,4 +7,8 @@ $(function() {
 			});
 		}
 	});
+	
+	$('#clearSearchButton').on('mousedown', function() {
+		$('#search').val('');
+	});
 });

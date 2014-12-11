@@ -24,7 +24,7 @@ public class UIWorkflowMetaData extends DefaultEntityMetaData
 	{
 		super(ENTITY_NAME, ComputeUiPackage.INSTANCE);
 		addAttribute(IDENTIFIER).setIdAttribute(true).setNillable(false).setVisible(false);
-		addAttribute(NAME).setUnique(true).setLabelAttribute(true);
+		addAttribute(NAME).setUnique(true).setNillable(false).setLabelAttribute(true);
 		addAttribute(DESCRIPTION);
 		addAttribute(NODES).setNillable(false).setDataType(MREF).setRefEntity(UIWorkflowNodeMetaData.INSTANCE);
 		addAttribute(TARGET_TYPE);

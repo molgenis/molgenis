@@ -1,7 +1,7 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 
-<#assign css=['molgenis-form.css']>
+<#assign css=['molgenis-form.css', 'workflows.css']>
 <#assign js=['jquery.validate.min.js','workflows.js']>
 
 <@header css js/>
@@ -12,6 +12,21 @@
 			<legend>
 				Workflows <a data-toggle="modal" href="#" data-target="#formModal" style="margin:30px 10px"><img src="/img/new.png"></a>
 			</legend>
+			
+			<form name="search">
+	    		<div class="clearfix">
+					<div class="col-md-3 pull-right">	
+	    				<div class="input-group">
+	    					<input id="search" type="search" class="search-query form-control" name="q" placeholder="SEARCH" <#if q??>value="${q!?html}"</#if> >
+		            		<span class="input-group-btn">
+		            			<button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
+		            			<button type="submit" id="clearSearchButton" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span></button>
+		            		</span>
+		            	</div>
+	        		</div>
+	        	</div>
+	        </form>
+	        
 			<table class="table table-condensed table-bordered">
 				<thead>
 					<tr>
