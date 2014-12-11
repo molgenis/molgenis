@@ -2,7 +2,7 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=['joint.min.css', 'molgenis-form.css', 'select2.css', 'workflow.css']>
-<#assign js=['lodash.js', 'backbone-min.js', 'geometry.min.js', 'vectorizer.min.js', 'joint.clean.min.js','joint.layout.DirectedGraph.min.js', 'select2.min.js', 'workflow.js']>
+<#assign js=['lodash.js', 'backbone-min.js', 'geometry.min.js', 'vectorizer.min.js', 'joint.clean.min.js','joint.layout.DirectedGraph.min.js', 'ace/src-min-noconflict/ace.js', 'select2.min.js', 'workflow.js']>
 
 <@header css js/>
 
@@ -85,16 +85,22 @@
    
 </div>
 
-<div class="modal" id="formModal" tabindex="-1" role="dialog" aria-labelledby="formModalTitle" aria-hidden="true">
+<div class="modal" id="protocolModal" tabindex="-1" role="dialog" aria-labelledby="formModalTitle" aria-hidden="true">
 	<div class="modal-dialog modal-lg">
 		<div class="modal-content">	
 			<div class="modal-header">
 	       		<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-	        	<h4 class="modal-title" id="formModalTitle">Import workflow</h4>
+	        	<h4 class="modal-title" id="formModalTitle"></h4>
 	     	</div>
 	      	<div class="modal-body">
-				
-	      	</div>
+	      		<label for="parameterMapping">Parameter mapping</label>
+	      		<div id="parameterMappingHolder">
+	      			<input type="text" id="parameterMapping" disabled />
+	      		</div>
+	      		
+				<label for="protocolTemplate">Protocol</label>
+				<div id="protocolTemplate"></div>
+			</div>
 	      	<div class="modal-footer">
 	        	<button type="button" class="btn btn-default" data-dismiss="modal">Ok</button>
 	      	</div>

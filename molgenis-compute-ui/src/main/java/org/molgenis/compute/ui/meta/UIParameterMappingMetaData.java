@@ -1,6 +1,6 @@
 package org.molgenis.compute.ui.meta;
 
-import static org.molgenis.MolgenisFieldTypes.XREF;
+import static org.molgenis.MolgenisFieldTypes.STRING;
 
 import org.molgenis.data.support.DefaultEntityMetaData;
 
@@ -16,8 +16,8 @@ public class UIParameterMappingMetaData extends DefaultEntityMetaData
 	{
 		super(ENTITY_NAME, ComputeUiPackage.INSTANCE);
 		addAttribute(IDENTIFIER).setIdAttribute(true).setNillable(false);
-		addAttribute(FROM).setDataType(XREF).setRefEntity(UIParameterMetaData.INSTANCE).setNillable(false);
-		addAttribute(TO).setDataType(XREF).setRefEntity(UIParameterMetaData.INSTANCE).setNillable(false);
+		addAttribute(FROM).setDataType(STRING).setNillable(false);
+		addAttribute(TO).setDataType(STRING).setNillable(false);
 	}
 
 }
