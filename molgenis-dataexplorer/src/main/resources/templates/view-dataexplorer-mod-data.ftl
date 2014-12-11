@@ -34,7 +34,7 @@
 					  <ul class="dropdown-menu" role="menu">
 					  	<#list actionHandlers?keys as key>
 					  		<#-- FIXME use action name instead of id as label -->
-							<li><a href="#" class="action-btn" data-id="${key?html}">${key?html}</a></li>
+							<li><a href="#" class="action-btn" data-id="${key?html}">${actionHandlers[key].actionLabel?html}</a></li>
 						</#list>
 					  </ul>
 					</div>
