@@ -114,7 +114,7 @@ public class WorkflowPluginController extends MolgenisPluginController
 		try
 		{
 			workflowManageService.updateWorkflow(workflow.getIdentifier(), form.getName(), form.getDescription(),
-					form.getTargetType());
+					form.getTargetType(), form.isActive());
 			model.addAttribute("successMessage", "Workflow saved.");
 		}
 		catch (Exception e)

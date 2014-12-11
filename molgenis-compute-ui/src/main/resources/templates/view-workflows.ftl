@@ -16,7 +16,9 @@
 				<thead>
 					<tr>
 						<th>Name</th>
+						<th>Active</th>
 						<th>Description</th>
+						<th>Targets</th>
 						<th></th>
 					</tr>
 				</thead>
@@ -25,7 +27,9 @@
 						<#list workflows as workflow>
 							<tr>
 								<td>${workflow.name!?html}</td>
+								<td><input type="checkbox" <#if workflow.active> checked</#if> disabled /></td>
 								<td>${workflow.description!?html}</td>
+								<td>${workflow.targetType!?html}</td>
 								<td><a href="workflow/${workflow.name?url('UTF-8')}">view</a></td>
 							</tr>
 						</#list>

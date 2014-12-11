@@ -1,35 +1,36 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 
-<#assign css=['joint.min.css', 'molgenis-form.css', 'workflow.css']>
-<#assign js=['lodash.js', 'backbone-min.js', 'geometry.min.js', 'vectorizer.min.js', 'joint.clean.min.js','joint.layout.DirectedGraph.min.js', 'workflow.js']>
+<#assign css=['joint.min.css', 'molgenis-form.css', 'select2.css', 'workflow.css']>
+<#assign js=['lodash.js', 'backbone-min.js', 'geometry.min.js', 'vectorizer.min.js', 'joint.clean.min.js','joint.layout.DirectedGraph.min.js', 'select2.min.js', 'workflow.js']>
 
 <@header css js/>
 
-<a href="#" id="backButton" class="btn btn-default btn-md"><span class="glyphicon glyphicon-chevron-left"></span> Back to workflows</a>
-
 <div class="container-fluid">
-
+	
 	<form class="form-horizontal" id="workflowForm" role="form" action="" method="POST">	
 		<div class="row">
-			<div class="col-md-12">
+			<div class="col-md-2">
+				<a href="#" id="backButton" class="btn btn-default btn-md"><span class="glyphicon glyphicon-chevron-left"></span> Back to workflows</a>
+			</div>
+			<div class="col-md-10">
 				<div class="form-group">
-    				<label for="name" class="col-md-2 control-label">Workflow name:</label>
+    				<label for="name" class="col-md-2 control-label">Name:</label>
     				<div class="col-md-4">
       					<input type="text" name="name" class="form-control" id="name" placeholder="Enter workflow name" value="${workflow.name!?html}" required>
     				</div>
   				</div>
   				<div class="form-group">
-    				<label for="description" class="col-md-2 control-label">Workflow description:</label>
+    				<label for="description" class="col-md-2 control-label">Description:</label>
     				<div class="col-md-4">
     					<textarea id="description" name="description" class="form-control" >${workflow.description!?html}</textarea>
       				</div>
   				</div>
   				<div class="form-group">
-    				<label for="targetType" class="col-md-2 control-label">Workflow targets:</label>
+    				<label for="targetType" class="col-md-2 control-label">Targets:</label>
     				<div class="col-md-4">
-    					<select id="targetType" name="targetType" class="form-control" required>
-    						<option value="">Select a target</option>
+    					<select id="targetType" name="targetType" class="form-control" placeholder="Select target type" required>
+    						<option value=""></option>
     						<#list entities as entity>
     							<option <#if workflow.targetType! == entity.name>selected</#if> value="${entity.name!?html}">${entity.simpleName!?html}</option>
     						</#list>
@@ -37,21 +38,20 @@
     				</div>
   				</div>
   				<div class="form-group">
+    				<label for="active" class="col-md-2 control-label">Active:</label>
+    				<div class="col-md-4">
+    					<input type="checkbox" id="active" name="active" <#if workflow.active> checked</#if> />
+      				</div>
+  				</div>
+  				<div class="form-group">
     				<div class="col-md-offset-2 col-sm-10">
-      					<button type="submit" class="btn btn-default">Save</button>
+      					<button type="submit" id="submitFormButton"class="btn btn-default">Save</button>
     				</div>
   				</div>
   			</div>
 		</div>					
 	</form>
 	
-	<div id="popover" class="popover right">
-      <div class="arrow"></div>
-      <div class="popover-content">
-      	<p id="popover-content"><p>
-      </div>
-    </div>
-    
 	<ul class="nav nav-tabs">
   		<li role="presentation" class="active"><a href="#steps" aria-controls="steps" role="tab" data-toggle="tab">Steps</a></li>
   		<li role="presentation"><a href="#parameters" aria-controls="parameters" role="tab" data-toggle="tab">Parameters</a></li>
@@ -85,6 +85,23 @@
    
 </div>
 
+<div class="modal" id="formModal" tabindex="-1" role="dialog" aria-labelledby="formModalTitle" aria-hidden="true">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">	
+			<div class="modal-header">
+	       		<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+	        	<h4 class="modal-title" id="formModalTitle">Import workflow</h4>
+	     	</div>
+	      	<div class="modal-body">
+				
+	      	</div>
+	      	<div class="modal-footer">
+	        	<button type="button" class="btn btn-default" data-dismiss="modal">Ok</button>
+	      	</div>
+	    </div>
+	</div>
+</div>
+	
 <script>
 	<#include "steps.ftl">
 </script>

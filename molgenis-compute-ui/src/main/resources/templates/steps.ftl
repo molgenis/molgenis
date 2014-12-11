@@ -66,8 +66,8 @@ $(function() {
 	paper.fitToContent();
 	
 	paper.on('cell:pointerup', function(cellView, evt, x, y) { 
-		$('#popover-content').html(cellView.model.id);
-		$('#popover').css({top: y + $('#workflowForm').height(), left: x});
-    	$('#popover').show();
+		//$('#popover-content').html(cellView.model.id);
+		//$('#popover').css({top: y + $('#workflowForm').height(), left: x});
+    	//$('#popover').show();
     });
 });	

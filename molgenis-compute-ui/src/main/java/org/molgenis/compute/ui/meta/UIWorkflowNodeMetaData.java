@@ -9,7 +9,7 @@ public class UIWorkflowNodeMetaData extends DefaultEntityMetaData
 {
 	public static final UIWorkflowNodeMetaData INSTANCE = new UIWorkflowNodeMetaData();
 
-	public static final String ENTITY_NAME = "WorkflowNode";
+	private static final String ENTITY_NAME = "WorkflowNode";
 	public static final String IDENTIFIER = "identifier";
 	public static final String NAME = "name";
 	public static final String PROTOCOL = "protocol";

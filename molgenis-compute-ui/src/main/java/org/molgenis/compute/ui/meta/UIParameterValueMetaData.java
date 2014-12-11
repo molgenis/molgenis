@@ -8,7 +8,7 @@ public class UIParameterValueMetaData extends DefaultEntityMetaData
 {
 	public static final UIParameterValueMetaData INSTANCE = new UIParameterValueMetaData();
 
-	public static final String ENTITY_NAME = "ParameteValue";
+	private static final String ENTITY_NAME = "ParameteValue";
 	public static final String IDENTIFIER = "identifier";
 	public static final String PARAMETER = "parameter";
 	public static final String VALUE = "value";

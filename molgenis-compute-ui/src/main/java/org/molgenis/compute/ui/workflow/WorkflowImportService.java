@@ -39,6 +39,7 @@ import org.molgenis.dataexplorer.controller.RegisterDataExplorerActionEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,6 +66,7 @@ public class WorkflowImportService implements ApplicationEventPublisherAware
 	}
 
 	@Transactional
+	@PreAuthorize("hasAnyRole('ROLE_SYSTEM, ROLE_SU')")
 	public void importWorkflow(ComputeProperties computeProperties) throws IOException
 	{
 		try
@@ -178,7 +180,7 @@ public class WorkflowImportService implements ApplicationEventPublisherAware
 				//
 				// uiParameterMappings.add(new UIParameterMapping(IdGenerator.generateId(), from, to));
 				// }
-				//
+
 				// dataService.add(UIParameterMappingMetaData.INSTANCE.getName(), uiParameterMappings);
 				// node.setParameterMappings(uiParameterMappings);
 			}

@@ -16,5 +16,5 @@ public interface WorkflowManageService extends RegisterDataExplorerActionEventHa
 	 * @param targetFullName
 	 *            , the fully qaulified entitymetadata name
 	 */
-	void updateWorkflow(String identifier, String name, String description, String targetFullName);
+	void updateWorkflow(String identifier, String name, String description, String targetFullName, boolean active);
 }

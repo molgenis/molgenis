@@ -6,7 +6,7 @@ public class UIBackendMetaData extends DefaultEntityMetaData
 {
 	public static final UIBackendMetaData INSTANCE = new UIBackendMetaData();
 
-	public static final String ENTITY_NAME = "Backend";
+	private static final String ENTITY_NAME = "Backend";
 	public static final String URL = "url";
 	public static final String WORK_DIR = "workDir";
 	public static final String BACKEND_TYPE = "backendType";

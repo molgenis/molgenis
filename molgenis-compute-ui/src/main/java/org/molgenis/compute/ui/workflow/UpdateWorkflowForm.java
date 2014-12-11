@@ -7,6 +7,7 @@ public class UpdateWorkflowForm
 	@NotEmpty
 	private String name;
 	private String description;
+	private boolean active = false;
 
 	@NotEmpty
 	private String targetType;
@@ -39,6 +40,16 @@ public class UpdateWorkflowForm
 	public void setTargetType(String targetType)
 	{
 		this.targetType = targetType;
+	}
+
+	public boolean isActive()
+	{
+		return active;
+	}
+
+	public void setActive(boolean active)
+	{
+		this.active = active;
 	}
 
 }
