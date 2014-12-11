@@ -3,10 +3,12 @@ package org.molgenis.compute.ui.workflow;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.molgenis.compute.ui.ComputeUiException;
 import org.molgenis.compute.ui.meta.UIWorkflowMetaData;
 import org.molgenis.compute.ui.model.UIWorkflow;
 import org.molgenis.data.DataService;
 import org.molgenis.data.QueryRule;
+import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -47,4 +49,28 @@ public class WorkflowManageServiceImpl implements WorkflowManageService
 		return "/menu/main/analysis?workflow=" + escaper.escape(actionId) + "&target=" + escaper.escape(entityName)
 				+ "&q=" + escaper.escape(queryRules.toString());
 	}
+
+	@Override
+	public void updateWorkflow(String identifier, String name, String description, String targetFullName)
+	{
+		UIWorkflow workflow = dataService.findOne(UIWorkflowMetaData.INSTANCE.getName(), identifier, UIWorkflow.class);
+
+		if (workflow == null) throw new ComputeUiException("Unknown workflow '" + identifier + "'");
+
+		// Check if target EntityMetaData exists
+		if (!dataService.hasRepository(targetFullName)) throw new ComputeUiException("Unknown target entity '"
+				+ targetFullName + "'");
+
+		// If name is updated check if it not already exists
+		if (!workflow.getName().equals(name)
+				&& (dataService.findOne(UIWorkflowMetaData.INSTANCE.getName(),
+						new QueryImpl().eq(UIWorkflowMetaData.NAME, name))) != null) throw new ComputeUiException(
+				"There is already a workflow named '" + name + "'");
+
+		workflow.setName(name);
+		workflow.setDescription(description);
+		workflow.setTargetType(targetFullName);
+		dataService.update(UIWorkflowMetaData.INSTANCE.getName(), workflow);
+	}
+
 }

@@ -35,15 +35,17 @@ public class WorkflowPluginController extends MolgenisPluginController
 	private final DataService dataService;
 	private final WorkflowImportService workflowImportService;
 	private final MetaDataService metaDataService;
+	private final WorkflowManageService workflowManageService;
 
 	@Autowired
 	public WorkflowPluginController(DataService dataService, MetaDataService metaDataService,
-			WorkflowImportService workflowImportService)
+			WorkflowImportService workflowImportService, WorkflowManageService workflowManageService)
 	{
 		super(URI);
 		this.dataService = dataService;
 		this.workflowImportService = workflowImportService;
 		this.metaDataService = metaDataService;
+		this.workflowManageService = workflowManageService;
 	}
 
 	@RequestMapping(method = GET)
@@ -92,6 +94,37 @@ public class WorkflowPluginController extends MolgenisPluginController
 
 		model.addAttribute("entities", Lists.newArrayList(metaDataService.getEntityMetaDatas()));
 		model.addAttribute("workflow", workflow);
+
+		return "view-workflow";
+	}
+
+	@RequestMapping(value = "{workflowName}", method = POST)
+	public String updateWorkflow(@PathVariable("workflowName") String workflowName, @Valid UpdateWorkflowForm form,
+			Model model, HttpServletResponse response) throws IOException
+	{
+		UIWorkflow workflow = dataService.findOne(UIWorkflowMetaData.INSTANCE.getName(),
+				new QueryImpl().eq(UIWorkflowMetaData.NAME, workflowName), UIWorkflow.class);
+
+		if (workflow == null)
+		{
+			response.sendError(404);
+			return null;
+		}
+
+		try
+		{
+			workflowManageService.updateWorkflow(workflow.getIdentifier(), form.getName(), form.getDescription(),
+					form.getTargetType());
+			model.addAttribute("successMessage", "Workflow saved.");
+		}
+		catch (Exception e)
+		{
+			model.addAttribute("errorMessage", e.getMessage());
+		}
+
+		model.addAttribute("entities", Lists.newArrayList(metaDataService.getEntityMetaDatas()));
+		model.addAttribute("workflow",
+				dataService.findOne(UIWorkflowMetaData.INSTANCE.getName(), workflow.getIdentifier(), UIWorkflow.class));
 
 		return "view-workflow";
 	}
