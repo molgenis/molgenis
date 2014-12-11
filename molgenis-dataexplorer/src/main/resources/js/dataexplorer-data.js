@@ -380,55 +380,33 @@
 			setDallianceFilter();
 		});
 		
-		$('form[name=action-form]').submit(function(e) {
-			e.preventDefault();
-			if($(this).valid()) {
+		$('div.btn-group ul.dropdown-menu li a').click(function (e) {
+			var actionId = $(this).data('id');
+			if(actionId) {
+				var method = $('form[name=action-form]').attr('method');
+				var action = $('form[name=action-form]').attr('action');
+				
+				var actionDataRequest = {
+					actionId: actionId,
+					entityName : getEntity().name,
+					query : {
+						rules : [getQuery().q]
+					}
+				};
+				
 				$.ajax({
-					type : $(this).attr('method'),
-					url : $(this).attr('action'),
-					data : JSON.stringify($.extend({}, $(this).serializeObject(), {dataRequest : createDownloadDataRequest()})),
+					type : method,
+					url : action,
+					data : JSON.stringify(actionDataRequest),
 					contentType: 'application/json'
-				}).done(function() {
-					molgenis.createAlert([{'message' : 'Exported data set to Galaxy'}], 'success');
-				}).always(function() {
-					$('#galaxy-export-modal').modal('hide');
+				}).done(function(data) {
+					if(data.location) {
+						window.location = data.location;
+					} else {
+						molgenis.createAlert([{'message' : 'Data send to ' + actionId}], 'success');
+					}
 				});
 			}
 		});
-		
-		$('div.btn-group ul.dropdown-menu li a').click(function (e) {
-			var actionId = $(this).data('id'); 
-			var method = $('form[name=action-form]').attr('method');
-			var action = $('form[name=action-form]').attr('action');
-			
-			var actionDataRequest = {
-				actionId: actionId,
-				entityName : getEntity().name,
-				query : {
-					rules : [getQuery().q]
-				}
-			};
-			
-			$.ajax({
-				type : method,
-				url : action,
-				data : JSON.stringify(actionDataRequest),
-				contentType: 'application/json'
-			}).done(function(data) {
-				console.log('data', data);
-				if(data.location) {
-					window.location = data.location;
-				} else {
-					molgenis.createAlert([{'message' : 'Data send to ' + actionId}], 'success');
-				}
-			});
-		});
-		
-		$('.btn-group').change(function() {
-			console.log('btn-group', this);
-		});
-		$('#action-btn-group').change(function() {
-			console.log('action-btn-group', this);
-		})
 	});
 })($, window.top.molgenis = window.top.molgenis || {});
