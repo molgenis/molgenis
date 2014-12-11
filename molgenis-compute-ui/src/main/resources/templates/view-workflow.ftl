@@ -2,9 +2,11 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=['joint.min.css', 'molgenis-form.css', 'workflow.css']>
-<#assign js=['lodash.js', 'backbone-min.js', 'geometry.min.js', 'vectorizer.min.js', 'joint.clean.min.js','joint.layout.DirectedGraph.min.js']>
+<#assign js=['lodash.js', 'backbone-min.js', 'geometry.min.js', 'vectorizer.min.js', 'joint.clean.min.js','joint.layout.DirectedGraph.min.js', 'workflow.js']>
 
 <@header css js/>
+
+<a href="#" id="backButton" class="btn btn-default btn-md"><span class="glyphicon glyphicon-chevron-left"></span> Back to workflows</a>
 
 <div class="container-fluid">
 
@@ -14,24 +16,29 @@
 				<div class="form-group">
     				<label for="name" class="col-md-2 control-label">Workflow name:</label>
     				<div class="col-md-4">
-      					<input type="text" name="name" class="form-control" id="name" placeholder="Enter workflow name" value="${workflow.name!}" required>
+      					<input type="text" name="name" class="form-control" id="name" placeholder="Enter workflow name" value="${workflow.name!?html}" required>
     				</div>
   				</div>
   				<div class="form-group">
     				<label for="description" class="col-md-2 control-label">Workflow description:</label>
     				<div class="col-md-4">
-    					<textarea id="description" name="description" class="form-control" >${workflow.description!}</textarea>
+    					<textarea id="description" name="description" class="form-control" >${workflow.description!?html}</textarea>
       				</div>
   				</div>
   				<div class="form-group">
-    				<label for="target" class="col-md-2 control-label">Workflow targets:</label>
+    				<label for="targetType" class="col-md-2 control-label">Workflow targets:</label>
     				<div class="col-md-4">
-    					<select id="target" name="target" class="form-control" required>
+    					<select id="targetType" name="targetType" class="form-control" required>
     						<option value="">Select a target</option>
     						<#list entities as entity>
-    							<option <#if workflow.targetType?? && (workflow.targetType['fullName'] == entity.name)>selected</#if> value="${entity.name}">${entity.simpleName}</option>
+    							<option <#if workflow.targetType! == entity.name>selected</#if> value="${entity.name!?html}">${entity.simpleName!?html}</option>
     						</#list>
     					</select>
+    				</div>
+  				</div>
+  				<div class="form-group">
+    				<div class="col-md-offset-2 col-sm-10">
+      					<button type="submit" class="btn btn-default">Save</button>
     				</div>
   				</div>
   			</div>

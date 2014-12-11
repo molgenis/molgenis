@@ -63,6 +63,19 @@ public class UIWorkflowNode extends MapEntity
 		set(UIWorkflowNodeMetaData.PREVIOUS_NODES, prevNodes);
 	}
 
+	public List<UIParameterMapping> getParameterMappings()
+	{
+		Iterable<UIParameterMapping> mappings = getEntities(UIWorkflowNodeMetaData.PARAMETER_MAPPINGS,
+				UIParameterMapping.class);
+		if (mappings == null) return Lists.newArrayList();
+		return Lists.newArrayList(mappings);
+	}
+
+	public void setParameterMappings(List<UIParameterMapping> mappings)
+	{
+		set(UIWorkflowNodeMetaData.PARAMETER_MAPPINGS, mappings);
+	}
+
 	@Override
 	public int hashCode()
 	{
