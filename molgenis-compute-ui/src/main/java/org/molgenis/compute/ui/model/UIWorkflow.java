@@ -11,6 +11,9 @@ public class UIWorkflow extends MapEntity
 {
 	private static final long serialVersionUID = 8684330466397478937L;
 
+	public static final String WORKFLOW_DEFAULT = "workflow.csv";
+	public static final String PARAMETERS_DEFAULT = "parameters.csv";
+
 	public UIWorkflow()
 	{
 		super(UIWorkflowMetaData.IDENTIFIER);
@@ -67,6 +70,27 @@ public class UIWorkflow extends MapEntity
 	{
 		set(UIWorkflowMetaData.TARGET_TYPE, entityMetaDataName);
 	}
+
+	public String getWorkflowFile()
+	{
+		return getString(UIWorkflowMetaData.WORKFLOW_FILE);
+	}
+
+	public void setWorkflowFile(String workflowFile)
+	{
+		set(UIWorkflowMetaData.WORKFLOW_FILE, workflowFile);
+	}
+
+	public String getParametersFile()
+	{
+		return getString(UIWorkflowMetaData.PARAMETERS_FILE);
+	}
+
+	public void setParametersFile(String parametersFile)
+	{
+		set(UIWorkflowMetaData.PARAMETERS_FILE, parametersFile);
+	}
+
 
 	public List<UIWorkflowNode> getNodes()
 	{

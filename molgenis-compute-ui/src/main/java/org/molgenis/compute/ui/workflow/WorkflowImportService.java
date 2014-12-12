@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.compute.ui.ComputeUiException;
@@ -188,7 +189,14 @@ public class WorkflowImportService
 
 		UIWorkflow uiWorkflow = new UIWorkflow(IdGenerator.generateId(), workflowName);
 		uiWorkflow.setNodes(Lists.newArrayList(nodesByName.values()));
-		uiWorkflow.setGenerateScript(computeProperties.customSubmit);// ????
+
+		String workflowFile = FileUtils.readFileToString
+				(new File(computeProperties.path + File.separator + UIWorkflow.WORKFLOW_DEFAULT));
+		uiWorkflow.setWorkflowFile(workflowFile);
+		String parametersFile = FileUtils.readFileToString
+				(new File(computeProperties.path + File.separator + UIWorkflow.PARAMETERS_DEFAULT));
+		uiWorkflow.setWorkflowFile(parametersFile);
+
 		uiWorkflow.setParameters(uiWorkflowParameters);
 
 		dataService.add(UIWorkflowMetaData.INSTANCE.getName(), uiWorkflow);

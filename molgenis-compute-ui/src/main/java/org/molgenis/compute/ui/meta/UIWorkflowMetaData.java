@@ -2,6 +2,7 @@ package org.molgenis.compute.ui.meta;
 
 import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.SCRIPT;
+import static org.molgenis.MolgenisFieldTypes.STRING;
 
 import org.molgenis.data.support.DefaultEntityMetaData;
 
@@ -16,6 +17,8 @@ public class UIWorkflowMetaData extends DefaultEntityMetaData
 	public static final String NODES = "nodes";
 	public static final String TARGET_TYPE = "targetType";
 	public static final String GENERATE_SCRIPT = "generateScript";
+	public static final String WORKFLOW_FILE = "workflowFile";
+	public static final String PARAMETERS_FILE = "parametersFile";
 	public static final String PARAMETERS = "parameters";
 
 	private UIWorkflowMetaData()
@@ -27,6 +30,8 @@ public class UIWorkflowMetaData extends DefaultEntityMetaData
 		addAttribute(NODES).setNillable(false).setDataType(MREF).setRefEntity(UIWorkflowNodeMetaData.INSTANCE);
 		addAttribute(TARGET_TYPE);
 		addAttribute(GENERATE_SCRIPT).setDataType(SCRIPT);
+		addAttribute(WORKFLOW_FILE).setDataType(STRING).setVisible(false);
+		addAttribute(PARAMETERS_FILE).setDataType(STRING).setVisible(false);
 		addAttribute(PARAMETERS).setNillable(false).setDataType(MREF)
 				.setRefEntity(UIWorkflowParameterMetaData.INSTANCE);
 	}
