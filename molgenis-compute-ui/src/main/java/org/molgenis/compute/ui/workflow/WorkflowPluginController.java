@@ -8,11 +8,13 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.compute.ui.meta.UIWorkflowMetaData;
 import org.molgenis.compute.ui.model.UIWorkflow;
 import org.molgenis.compute5.ComputeProperties;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Query;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.google.common.collect.Lists;
 
@@ -49,10 +52,17 @@ public class WorkflowPluginController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = GET)
-	public String init(Model model)
+	public String init(@RequestParam(value = "q", required = false) String search, Model model)
 	{
+		Query q = new QueryImpl();
+		if (StringUtils.isNotEmpty(search))
+		{
+			q.search(search);
+			model.addAttribute("q", search);
+		}
+
 		model.addAttribute("workflows",
-				Lists.newArrayList(dataService.findAll(UIWorkflowMetaData.INSTANCE.getName(), UIWorkflow.class)));
+				Lists.newArrayList(dataService.findAll(UIWorkflowMetaData.INSTANCE.getName(), q, UIWorkflow.class)));
 
 		return "view-workflows";
 	}
@@ -76,7 +86,7 @@ public class WorkflowPluginController extends MolgenisPluginController
 			model.addAttribute("errorMessage", e.getMessage());
 		}
 
-		return init(model);
+		return init(model, null);
 	}
 
 	@RequestMapping(value = "{workflowName}", method = GET)
@@ -114,7 +124,7 @@ public class WorkflowPluginController extends MolgenisPluginController
 		try
 		{
 			workflowManageService.updateWorkflow(workflow.getIdentifier(), form.getName(), form.getDescription(),
-					form.getTargetType());
+					form.getTargetType(), form.isActive());
 			model.addAttribute("successMessage", "Workflow saved.");
 		}
 		catch (Exception e)

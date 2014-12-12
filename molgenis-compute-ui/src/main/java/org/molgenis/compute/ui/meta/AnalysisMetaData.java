@@ -12,7 +12,7 @@ public class AnalysisMetaData extends DefaultEntityMetaData
 {
 	public static final AnalysisMetaData INSTANCE = new AnalysisMetaData();
 
-	public static final String ENTITY_NAME = "Analysis";
+	private static final String ENTITY_NAME = "Analysis";
 	public static final String IDENTIFIER = "identifier";
 	public static final String NAME = "name";
 	public static final String DESCRIPTION = "description";

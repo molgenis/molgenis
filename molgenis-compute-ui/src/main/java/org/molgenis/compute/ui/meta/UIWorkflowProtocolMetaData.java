@@ -8,7 +8,7 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 public class UIWorkflowProtocolMetaData extends DefaultEntityMetaData
 {
 	public static final UIWorkflowProtocolMetaData INSTANCE = new UIWorkflowProtocolMetaData();
-	public static final String ENTITY_NAME = "WorkflowProtocol";
+	private static final String ENTITY_NAME = "WorkflowProtocol";
 	public static final String IDENTIFIER = "identifier";
 	public static final String NAME = "name";
 	public static final String TEMPLATE = "template";

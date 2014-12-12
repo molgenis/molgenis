@@ -12,7 +12,7 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 public class AnalysisJobMetaData extends DefaultEntityMetaData
 {
 	public static final AnalysisJobMetaData INSTANCE = new AnalysisJobMetaData();
-	public static final String ENTITY_NAME = "AnalysisJob";
+	private static final String ENTITY_NAME = "AnalysisJob";
 	public static final String IDENTIFIER = "identifier";
 	public static final String SCHEDULER_ID = "schedulerId";
 	public static final String WORKFLOW_NODE = "workflowNode";

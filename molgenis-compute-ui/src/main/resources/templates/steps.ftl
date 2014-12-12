@@ -4,12 +4,15 @@ $(function() {
 	var RECT_WIDTH = 200;
 	var RECT_HEIGHT = 20;
 	
+	var editor;
+	var restApi = new window.top.molgenis.RestClient();
 	var graph = new joint.dia.Graph;
 	var paper = new joint.dia.Paper({
 		el: $('#paper'),
 		width: PAPER_WIDTH,
 		height: PAPER_HEIGHT,
-		model: graph
+		model: graph,
+		interactive: false
 	});
 	
 	var rects = {
@@ -66,8 +69,26 @@ $(function() {
 	paper.fitToContent();
 	
 	paper.on('cell:pointerup', function(cellView, evt, x, y) { 
-		$('#popover-content').html(cellView.model.id);
-		$('#popover').css({top: y + $('#workflowForm').height(), left: x});
-    	$('#popover').show();
+		if (rects.hasOwnProperty(cellView.model.id)) {
+			var node = restApi.get('/api/v1/computeui_WorkflowNode/' + cellView.model.id, {expand:['protocol', 'parameterMappings']});
+		
+			$('#formModalTitle').text(node.name);
+			
+			var parameterMappings = [];
+			$.each(node.parameterMappings.items, function(index, mapping) {
+				parameterMappings.push(mapping.from + '=' + mapping.to);
+			});
+			$('#parameterMapping').val(parameterMappings.join(','));
+			
+			//Create protocol editor if it does not exist yet
+			if (!editor) {
+				editor = ace.edit("protocolTemplate");
+				editor.setTheme("ace/theme/monokai");
+				editor.getSession().setMode("ace/mode/sh");
+			}
+			editor.setValue(node.protocol.template);
+	
+			$('#protocolModal').modal('show');
+		}
     });
 });	
