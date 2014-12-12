@@ -46,8 +46,8 @@ public class WorkflowManageServiceImpl implements WorkflowManageService
 	{
 		// TODO how to get analysis URL?
 		Escaper escaper = UrlEscapers.urlPathSegmentEscaper();
-		return "/menu/main/analysis?workflow=" + escaper.escape(actionId) + "&target=" + escaper.escape(entityName)
-				+ "&q=" + escaper.escape(queryRules.toString());
+		return "/menu/main/analysis/create?workflow=" + escaper.escape(actionId) + "&target="
+				+ escaper.escape(entityName) + "&q=" + escaper.escape(queryRules.toString());
 	}
 
 	@Override

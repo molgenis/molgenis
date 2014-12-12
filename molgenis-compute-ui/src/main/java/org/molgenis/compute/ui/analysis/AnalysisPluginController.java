@@ -25,14 +25,20 @@ public class AnalysisPluginController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = GET)
-	public String init(Model model, @RequestParam(value = "workflow", required = false) String workflowId,
+	public String init()
+	{
+		return "view-analysis";
+	}
+
+	@RequestMapping(value = "/create", method = GET)
+	public String create(Model model, @RequestParam(value = "workflow", required = false) String workflowId,
 			@RequestParam(value = "target", required = false) String targetId,
 			@RequestParam(value = "q", required = false) String query)
 	{
 		model.addAttribute("workflowId", workflowId);
 		model.addAttribute("targetId", targetId);
 		model.addAttribute("q", query);
-		return "view-analysis";
+		return "view-analysis-create";
 	}
 
 	// TODO include query
