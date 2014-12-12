@@ -3,8 +3,21 @@ package org.molgenis.compute.ui.analysis;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
+import java.util.Date;
+
 import org.apache.log4j.Logger;
+import org.elasticsearch.common.collect.Iterables;
+import org.molgenis.compute.ui.IdGenerator;
+import org.molgenis.compute.ui.meta.AnalysisMetaData;
+import org.molgenis.compute.ui.meta.UIBackendMetaData;
+import org.molgenis.compute.ui.meta.UIWorkflowMetaData;
+import org.molgenis.compute.ui.model.Analysis;
+import org.molgenis.compute.ui.model.UIBackend;
+import org.molgenis.compute.ui.model.UIWorkflow;
+import org.molgenis.data.DataService;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,9 +32,13 @@ public class AnalysisPluginController extends MolgenisPluginController
 	public static final String ID = "analysis";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
-	public AnalysisPluginController()
+	private final DataService dataService;
+
+	@Autowired
+	public AnalysisPluginController(DataService dataService)
 	{
 		super(URI);
+		this.dataService = dataService;
 	}
 
 	@RequestMapping(method = GET)
@@ -35,7 +52,51 @@ public class AnalysisPluginController extends MolgenisPluginController
 			@RequestParam(value = "target", required = false) String targetId,
 			@RequestParam(value = "q", required = false) String query)
 	{
-		model.addAttribute("workflowId", workflowId);
+		// TODO discuss how to select backend
+		Iterable<UIBackend> backends = dataService.findAll(UIBackendMetaData.INSTANCE.getName(), UIBackend.class);
+		if (Iterables.isEmpty(backends))
+		{
+			throw new RuntimeException("Database does not contain any backend");
+		}
+		UIBackend backend = backends.iterator().next();
+		Date creationDate = new Date();
+
+		UIWorkflow workflow;
+		if (workflowId != null && !workflowId.isEmpty())
+		{
+			workflow = dataService.findOne(UIWorkflowMetaData.INSTANCE.getName(), workflowId, UIWorkflow.class);
+			if (workflow == null)
+			{
+				throw new UnknownEntityException("Unknown " + UIWorkflow.class.getSimpleName() + " [" + workflowId
+						+ "]");
+			}
+
+		}
+		else
+		{
+			// TODO discuss how to select initial workflow if not specified
+			Iterable<UIWorkflow> workflows = dataService.findAll(UIWorkflowMetaData.INSTANCE.getName(),
+					UIWorkflow.class);
+			if (Iterables.isEmpty(backends))
+			{
+				throw new RuntimeException("Database does not contain any workflows");
+			}
+			workflow = workflows.iterator().next();
+
+		}
+
+		Iterable<UIWorkflow> workflows = dataService.findAll(UIWorkflowMetaData.INSTANCE.getName(), UIWorkflow.class);
+
+		String analysisId = IdGenerator.generateId();
+		String analysisName = "Analysis-" + creationDate.getTime();
+		Analysis analysis = new Analysis(analysisId, analysisName);
+		analysis.setBackend(backend);
+		analysis.setCreationDate(creationDate);
+		analysis.setWorkflow(workflow);
+		dataService.add(AnalysisMetaData.INSTANCE.getName(), analysis);
+
+		model.addAttribute("analysis", analysis);
+		model.addAttribute("workflows", workflows);
 		model.addAttribute("targetId", targetId);
 		model.addAttribute("q", query);
 		return "view-analysis-create";

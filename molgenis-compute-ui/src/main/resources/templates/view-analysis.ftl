@@ -8,7 +8,9 @@
 <div class="row">
 	<div class="col-md-offset-3 col-md-6">
 		<div id="analysis-table-container"></div>
-		<button class="btn btn-default" id="create-analysis-btn" type="button">Create analysis</button>
+		<form class="form-horizontal" role="form" action="${context_url?html}/create" method="GET">	
+			<button class="btn btn-default" id="create-analysis-btn" type="submit">Create analysis</button>
+		</form>
 	</div>
 </div>
 <@footer/>

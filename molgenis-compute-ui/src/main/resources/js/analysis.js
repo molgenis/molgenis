@@ -499,28 +499,25 @@
 
 	$(function() {
 		var container = $('#analysis-table-container');
-		
-		restApi.getAsync('/api/v1/computeui_analysis/meta', {
-			'expand' : [ 'attributes' ]
-		}, function(entityMetaData) {
-			container.analysisTable({
-				'entityMetaData' : entityMetaData,
-				'attributes' : $.map(entityMetaData.attributes, function(attr) {
-					switch(attr.name) {
-						case 'name':
-						case 'workflow':
-							return attr;
-						default:
-							return null;
-					}
-				}),
-				'maxRows' : 10
+		if(container.length > 0) {
+			restApi.getAsync('/api/v1/computeui_analysis/meta', {
+				'expand' : [ 'attributes' ]
+			}, function(entityMetaData) {
+				container.analysisTable({
+					'entityMetaData' : entityMetaData,
+					'attributes' : $.map(entityMetaData.attributes, function(attr) {
+						switch(attr.name) {
+							case 'name':
+							case 'workflow':
+								return attr;
+							default:
+								return null;
+						}
+					}),
+					'maxRows' : 10
+				});
 			});
-		});
-		
-		$('#create-analysis-btn').click(function() {
-			console.log("TODO implement create analysis")
-		});
+		}
 		
 		$(document).on('click', '.view-analysis-btn', function(e) {
 			e.preventDefault();
@@ -530,6 +527,34 @@
 		$(document).on('click', '.create-analysis-btn', function(e) {
 			e.preventDefault();
 			console.log("TODO implement create analysis")
+		});
+		
+		$(document).on('change', '#analysis-workflow-name', function() {
+			restApi.update($(this).data('id'), $(this).val());
+		});
+		
+		$(document).on('change', '#analysis-workflow-description', function() {
+			restApi.update($(this).data('id'), $(this).val());
+		});
+		
+		$(document).on('change', '#analysis-workflow-select', function() {
+			restApi.update($(this).data('id'), $(this).val());
+		});
+		
+		$(document).on('click', '#view-workflow-btn', function() {
+			// FIXME use id instead of name
+			var workflowName = $('#analysis-workflow-select option:selected').text();
+			window.location = '/menu/compute/workflow/' + workflowName;
+		});
+		
+		$(document).on('click', '#delete-analysis-btn', function(e) {
+			e.preventDefault();
+			var ok = confirm('Are you sure you want to delete this analysis?');
+			if (ok === true) {
+				var analysisId = $('#delete-analysis-btn').closest('form').data('id');
+				restApi.remove(analysisId);
+				window.location = '/menu/main/analysis';
+			}
 		});
 	});
 }($, window.top.molgenis = window.top.molgenis || {}));
