@@ -34,6 +34,7 @@ public class MetaDataRegistrator implements ApplicationListener<ContextRefreshed
 		repositoryCollection.add(AnalysisJobMetaData.INSTANCE);
 		repositoryCollection.add(UIBackendMetaData.INSTANCE);
 		repositoryCollection.add(AnalysisMetaData.INSTANCE);
+		repositoryCollection.add(AnalysisTargetMetaData.INSTANCE);
 		metaDataService.refreshCaches();
 	}
 
