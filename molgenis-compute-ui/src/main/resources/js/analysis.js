@@ -1,6 +1,8 @@
 (function($, molgenis) {
 	"use strict";
 
+	var self = molgenis.analysis = molgenis.analysis || {};
+	
 	var restApi = new molgenis.RestClient();
 
 	/**
@@ -497,13 +499,16 @@
 
 	var restApi = new molgenis.RestClient();
 
+	var analysisId = null;
+	
 	$(function() {
-		var container = $('#analysis-table-container');
-		if(container.length > 0) {
+		// analysis overview screen
+		var tableContainer = $('#analysis-table-container');
+		if(tableContainer.length > 0) {
 			restApi.getAsync('/api/v1/computeui_analysis/meta', {
 				'expand' : [ 'attributes' ]
 			}, function(entityMetaData) {
-				container.analysisTable({
+				tableContainer.analysisTable({
 					'entityMetaData' : entityMetaData,
 					'attributes' : $.map(entityMetaData.attributes, function(attr) {
 						switch(attr.name) {
@@ -519,16 +524,24 @@
 			});
 		}
 		
+		// analysis create screen
+		var analysisContainer = $('#analysis-container');
+		if(analysisContainer.length > 0) {
+			analysisId = analysisContainer.data('id');
+		}
+		
+		// analysis overview screen event handlers
 		$(document).on('click', '.view-analysis-btn', function(e) {
 			e.preventDefault();
-			console.log("TODO implement create analysis")
+			confirm('TODO implement view functionality');
 		});
 		
-		$(document).on('click', '.create-analysis-btn', function(e) {
+		$(document).on('click', '.stop-analysis-btn', function(e) {
 			e.preventDefault();
-			console.log("TODO implement create analysis")
+			confirm('TODO implement stop functionality');
 		});
 		
+		// analysis create screen event handlers
 		$(document).on('change', '#analysis-workflow-name', function() {
 			restApi.update($(this).data('id'), $(this).val());
 		});
@@ -555,6 +568,11 @@
 				restApi.remove(analysisId);
 				window.location = '/menu/main/analysis';
 			}
+		});
+		
+		$(document).on('click', '#clone-analysis-btn', function(e) {
+			e.preventDefault();
+			confirm('TODO implement clone functionality');
 		});
 	});
 }($, window.top.molgenis = window.top.molgenis || {}));
