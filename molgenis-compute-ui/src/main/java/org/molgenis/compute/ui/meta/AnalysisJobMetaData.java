@@ -23,14 +23,17 @@ public class AnalysisJobMetaData extends DefaultEntityMetaData
 	public static final String ERROR_MESSAGE = "errorMessage";
 	public static final String OUTPUT_MESSAGE = "outputMessage";
 	public static final String PARAMETER_VALUES = "parameterValues";
+	public static final String NAME = "name";
+
 
 	private AnalysisJobMetaData()
 	{
 		super(ENTITY_NAME, ComputeUiPackage.INSTANCE);
 		addAttribute(IDENTIFIER).setIdAttribute(true).setNillable(false);
+		addAttribute(NAME).setNillable(false).setLabelAttribute(true);
 		addAttribute(SCHEDULER_ID).setDataType(INT);
 		addAttribute(WORKFLOW_NODE).setDataType(XREF).setRefEntity(UIWorkflowNodeMetaData.INSTANCE);
-		addAttribute(GENERATED_SCRIPT).setDataType(SCRIPT);
+		addAttribute(GENERATED_SCRIPT).setDataType(SCRIPT).setNillable(false);
 		addAttribute(STATUS);
 		addAttribute(START_TIME).setDataType(DATETIME);
 		addAttribute(END_TIME).setDataType(DATETIME);
