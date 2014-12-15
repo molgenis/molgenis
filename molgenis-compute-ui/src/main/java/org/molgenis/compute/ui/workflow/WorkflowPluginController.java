@@ -86,7 +86,7 @@ public class WorkflowPluginController extends MolgenisPluginController
 			model.addAttribute("errorMessage", e.getMessage());
 		}
 
-		return init(model, null);
+		return init(null, model);
 	}
 
 	@RequestMapping(value = "{workflowName}", method = GET)

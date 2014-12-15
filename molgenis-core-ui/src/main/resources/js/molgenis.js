@@ -501,8 +501,8 @@ function createInput(attr, attrs, val, lbl) {
 			url : href,
 			data : '_method=DELETE',
 			async : false,
-			success : callback.success,
-			error : callback.error
+			success : callback && callback.success ? callback.success : function() {},
+			error : callback && callback.error ? callback.error : function() {}
 		});
 	};
 
