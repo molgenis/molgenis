@@ -648,17 +648,17 @@
 		});
 		
 		$(document).on('change', '#analysis-name', function() {
-			var href = '/api/v1/computeui_Analysis/' + analysis.identifier + '/name';
+			var href = '/api/v1/computeui_Analysis/' + settings.analysis.identifier + '/name';
 			restApi.update(href, $(this).val());
 		});
 		
 		$(document).on('change', '#analysis-description', function() {
-			var href = '/api/v1/computeui_Analysis/' + analysis.identifier + '/description';
+			var href = '/api/v1/computeui_Analysis/' + settings.analysis.identifier + '/description';
 			restApi.update(href, $(this).val());
 		});
 		
 		$(document).on('change', '#analysis-workflow', function() {
-			var href = '/api/v1/computeui_Analysis/' + analysis.identifier + '/workflow';
+			var href = '/api/v1/computeui_Analysis/' + settings.analysis.identifier + '/workflow';
 			restApi.update(href, $(this).val());
 		});
 		
@@ -681,6 +681,11 @@
 		$(document).on('click', '#clone-analysis-btn', function(e) {
 			e.preventDefault();
 			confirm('TODO implement clone functionality');
+		});
+		
+		$(document).on('click', '#run-analysis-btn', function(e) {
+			e.preventDefault();
+			$.post('/run/' settings.analysis.identifier);
 		});
 		
 		$(document).on('click', '#add-target-btn', function(e) {

@@ -37,11 +37,13 @@ import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -67,7 +69,6 @@ public class AnalysisPluginController extends MolgenisPluginController
 
 	private List<String> writtenProtocols = null;
 
-	private UIWorkflow uiWorkflow = null;
 	private final DataService dataService;
 
 	@Autowired
@@ -190,17 +191,17 @@ public class AnalysisPluginController extends MolgenisPluginController
 		return "rediect:" + AnalysisPluginController.URI + "?analysis=" + analysisId;
 	}
 
-	// TODO include query
-	@RequestMapping(value = "/execute", method = POST)
-	public String executeWorkflow(Model model, @RequestParam(value = "workflowId") String workflowId,
-			@RequestParam(value = "targetId") String targetId)
+	@RequestMapping(value = "/run/{analysisId}", method = POST)
+	@ResponseStatus(HttpStatus.OK)
+	public void runAnalysis(@PathVariable(value = "analysisId") String analysisId)
 	{
-		logger.info("Executing workflow [" + workflowId + "] for target [" + targetId + "]");
+		Analysis analysis = dataService.findOne(AnalysisMetaData.INSTANCE.getName(), analysisId, Analysis.class);
+		if (analysis == null) throw new UnknownEntityException("Unknown Analysis [" + analysisId + "]");
+		logger.info("Running analysis [" + analysisId + "]");
 
 		try
 		{
-			uiWorkflow = dataService.findOne(UIWorkflowMetaData.INSTANCE.getName(),
-					new QueryImpl().eq(UIWorkflowMetaData.IDENTIFIER, workflowId), UIWorkflow.class);
+			UIWorkflow uiWorkflow = analysis.getWorkflow();
 
 			String workflowFile = uiWorkflow.getWorkflowFile();
 			String parametersFile = uiWorkflow.getParametersFile();
@@ -209,25 +210,47 @@ public class AnalysisPluginController extends MolgenisPluginController
 			FileUtils.writeStringToFile(new File(path + PARAMETERS_DEFAULT), parametersFile);
 
 			CsvWriter csvWriter = new CsvWriter(new File(path + WORKSHEET), ',');
-
-			EntityMetaData metaData = dataService.getEntityMetaData(targetId);
-			Iterable<AttributeMetaData> attributeMetaDatas = metaData.getAtomicAttributes();
-			ArrayList<String> strMeta = new ArrayList<String>();
-			for (AttributeMetaData attributeMetaData : attributeMetaDatas)
+			try
 			{
-				String str = attributeMetaData.getName();
-				strMeta.add(str);
+				Iterable<AnalysisTarget> targets = dataService.findAll(AnalysisTargetMetaData.INSTANCE.getName(),
+						new QueryImpl().eq(AnalysisTargetMetaData.ANALYSIS, analysis), AnalysisTarget.class);
+				if (targets == null || Iterables.isEmpty(targets))
+				{
+					throw new UnknownEntityException("Expected at least one analysis target");
+				}
+
+				String targetEntityName = analysis.getWorkflow().getTargetType();
+
+				EntityMetaData metaData = dataService.getEntityMetaData(targetEntityName);
+				csvWriter.writeAttributeNames(Iterables.transform(metaData.getAtomicAttributes(),
+						new Function<AttributeMetaData, String>()
+						{
+							@Override
+							public String apply(AttributeMetaData attribute)
+							{
+								return attribute.getName();
+							}
+						}));
+
+				Iterable<Entity> entities = dataService.findAll(targetEntityName,
+						Iterables.transform(targets, new Function<AnalysisTarget, Object>()
+						{
+
+							@Override
+							public Object apply(AnalysisTarget analysisTarget)
+							{
+								return analysisTarget.getIdValue();
+							}
+						}));
+				for (Entity entity : entities)
+				{
+					csvWriter.add(entity);
+				}
 			}
-
-			csvWriter.writeAttributeNames(strMeta);
-
-			Iterable<Entity> entities = dataService.findAll(targetId);
-			for (Entity entity : entities)
+			finally
 			{
-				csvWriter.add(entity);
+				csvWriter.close();
 			}
-			csvWriter.close();
-
 			List<UIWorkflowNode> nodes = uiWorkflow.getNodes();
 
 			writtenProtocols = new ArrayList<String>();
@@ -257,11 +280,6 @@ public class AnalysisPluginController extends MolgenisPluginController
 			properties.runDir = path + "rundir";
 			CommandLineRunContainer container = new ComputeCommandLine().execute(properties);
 
-			Analysis analysis = new Analysis(IdGenerator.generateId(), runID);
-			analysis.setCreationDate(new Date());
-			analysis.setWorkflow(uiWorkflow);
-			analysis.setSubmitScsript(container.getSumbitScript());
-
 			List<GeneratedScript> generatedScripts = container.getTasks();
 			List<AnalysisJob> jobs = new ArrayList<AnalysisJob>();
 			for (GeneratedScript generatedScript : generatedScripts)
@@ -270,34 +288,31 @@ public class AnalysisPluginController extends MolgenisPluginController
 				job.setName(generatedScript.getName());
 				job.setGeneratedScript(generatedScript.getScript());
 
-				UIWorkflowNode node = findNode(generatedScript.getStepName());
+				UIWorkflowNode node = findNode(uiWorkflow, generatedScript.getStepName());
 				job.setWorkflowNode(node);
 				jobs.add(job);
 				dataService.add(AnalysisJobMetaData.INSTANCE.getName(), job);
 			}
 
+			// update analysis
+			analysis.setSubmitScsript(container.getSumbitScript());
 			analysis.setJobs(jobs);
-			dataService.add(AnalysisMetaData.INSTANCE.getName(), analysis);
+			dataService.update(AnalysisMetaData.INSTANCE.getName(), analysis);
 
 		}
 		catch (IOException e)
 		{
-			e.printStackTrace();
+			logger.error("", e);
+			throw new RuntimeException(e);
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			logger.error("", e);
+			throw new RuntimeException(e);
 		}
-
-		// here analysis submission to be done
-
-		model.addAttribute("workflowId", workflowId);
-		model.addAttribute("targetId", targetId);
-		model.addAttribute("message", "Executing workflow [" + workflowId + "] for target [" + targetId + "]");
-		return "view-analysis";
 	}
 
-	private UIWorkflowNode findNode(String stepName)
+	private UIWorkflowNode findNode(UIWorkflow uiWorkflow, String stepName)
 	{
 		for (UIWorkflowNode node : uiWorkflow.getNodes())
 		{
