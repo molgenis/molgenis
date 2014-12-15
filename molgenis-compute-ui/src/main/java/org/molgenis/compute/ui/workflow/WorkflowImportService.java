@@ -195,7 +195,7 @@ public class WorkflowImportService
 		uiWorkflow.setWorkflowFile(workflowFile);
 		String parametersFile = FileUtils.readFileToString
 				(new File(computeProperties.path + File.separator + UIWorkflow.PARAMETERS_DEFAULT));
-		uiWorkflow.setWorkflowFile(parametersFile);
+		uiWorkflow.setParametersFile(parametersFile);
 
 		uiWorkflow.setParameters(uiWorkflowParameters);
 
