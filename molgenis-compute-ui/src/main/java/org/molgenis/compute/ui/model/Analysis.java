@@ -68,6 +68,16 @@ public class Analysis extends MapEntity
 		set(AnalysisMetaData.WORKFLOW, workflow);
 	}
 
+	public Iterable<AnalysisTarget> getTargets()
+	{
+		return getEntities(AnalysisMetaData.TARGETS, AnalysisTarget.class);
+	}
+
+	public void setTargets(Iterable<AnalysisTarget> targets)
+	{
+		set(AnalysisMetaData.TARGETS, targets);
+	}
+
 	public List<AnalysisJob> getJobs()
 	{
 		Iterable<AnalysisJob> jobs = getEntities(AnalysisMetaData.JOBS, AnalysisJob.class);
