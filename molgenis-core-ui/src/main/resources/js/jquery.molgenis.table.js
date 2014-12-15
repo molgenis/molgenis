@@ -11,6 +11,25 @@
 		var items = [];
 		items.push('<div class="row">');
 		items.push('<div class="col-md-12">');
+		if(settings.searchable) {
+			items.push('<div class="row">');
+			items.push('<div class="col-md-offset-3 col-md-6">');
+			items.push('<div class="form-horizontal">');
+			items.push('<div class="form-group">');
+			items.push('<div class="col-md-12">');
+			items.push('<div class="input-group">');
+			items.push('<input type="text" class="form-control" id="observationset-search" placeholder="Search data values" autofocus="autofocus"/>');
+			items.push('<span class="input-group-btn">');
+			items.push('<button class="btn btn-default search-clear-btn" type="button"><span class="glyphicon glyphicon-remove"></span></button>');
+			items.push('<button class="btn btn-default search-btn" type="button"><span class="glyphicon glyphicon-search"></span></button>');
+			items.push('</span>');
+			items.push('</div>');
+			items.push('</div>');   
+			items.push('</div>');
+			items.push('</div>');
+			items.push('</div>');
+			items.push('</div>');	
+		}
 		items.push('<div class="molgenis-table-container">');
 		if(settings.rowClickable){
 			items.push('<table class="table table-striped table-condensed molgenis-table table-hover"><thead></thead><tbody></tbody></table>');
@@ -854,6 +873,14 @@
 			});
 		});
 		
+		$(container).on('click', 'search-btn', function() {
+			console.log('search-btn', settings.query);
+		});
+		
+		$(container).on('click', 'search-clear-btn', function() {
+			console.log('search-clear-btn', settings.query);
+		});
+		
 		return this;
 	};
 
@@ -864,6 +891,7 @@
 		'attributes' : null,
 		'query' : null,
 		'editable' : false,
+		'searchable' : false,
 		'rowClickable': false
 	};
 }($, window.top.molgenis = window.top.molgenis || {}));

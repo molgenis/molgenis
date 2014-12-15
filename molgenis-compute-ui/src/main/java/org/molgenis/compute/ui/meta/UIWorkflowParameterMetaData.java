@@ -5,7 +5,7 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 public class UIWorkflowParameterMetaData extends DefaultEntityMetaData
 {
 	public static final UIWorkflowParameterMetaData INSTANCE = new UIWorkflowParameterMetaData();
-	public static final String ENTITY_NAME = "WorkflowParameter";
+	private static final String ENTITY_NAME = "WorkflowParameter";
 
 	public static final String IDENTIFIER = "identifier";
 	public static final String KEY = "key";

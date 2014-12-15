@@ -12,12 +12,13 @@ public class AnalysisMetaData extends DefaultEntityMetaData
 {
 	public static final AnalysisMetaData INSTANCE = new AnalysisMetaData();
 
-	public static final String ENTITY_NAME = "Analysis";
+	private static final String ENTITY_NAME = "Analysis";
 	public static final String IDENTIFIER = "identifier";
 	public static final String NAME = "name";
 	public static final String DESCRIPTION = "description";
 	public static final String CREATION_DATE = "creationDate";
 	public static final String WORKFLOW = "workflow";
+	public static final String TARGETS = "targets";
 	public static final String JOBS = "jobs";
 	public static final String BACKEND = "backend";
 	public static final String SUBMIT_SCRIPT = "submitScript";
@@ -31,6 +32,7 @@ public class AnalysisMetaData extends DefaultEntityMetaData
 		addAttribute(DESCRIPTION).setDataType(TEXT);
 		addAttribute(CREATION_DATE).setDataType(DATETIME);
 		addAttribute(WORKFLOW).setDataType(XREF).setNillable(false).setRefEntity(UIWorkflowMetaData.INSTANCE);
+		addAttribute(TARGETS).setDataType(MREF).setRefEntity(AnalysisTargetMetaData.INSTANCE);
 		addAttribute(JOBS).setDataType(MREF).setRefEntity(AnalysisJobMetaData.INSTANCE);
 		addAttribute(BACKEND).setDataType(XREF).setRefEntity(UIBackendMetaData.INSTANCE);
 		addAttribute(SUBMIT_SCRIPT).setDataType(SCRIPT).setNillable(false);

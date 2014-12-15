@@ -18,7 +18,7 @@ public class UIParameterMapping extends MapEntity
 		set(UIParameterMappingMetaData.IDENTIFIER, identifier);
 	}
 
-	public UIParameterMapping(String identifier, UIParameter from, UIParameter to)
+	public UIParameterMapping(String identifier, String from, String to)
 	{
 		this(identifier);
 		setFrom(from);
@@ -30,22 +30,22 @@ public class UIParameterMapping extends MapEntity
 		return getString(UIParameterMappingMetaData.IDENTIFIER);
 	}
 
-	public UIParameter getFrom()
+	public String getFrom()
 	{
-		return getEntity(UIParameterMappingMetaData.FROM, UIParameter.class);
+		return getString(UIParameterMappingMetaData.FROM);
 	}
 
-	public void setFrom(UIParameter parameter)
+	public void setFrom(String from)
 	{
-		set(UIParameterMappingMetaData.FROM, parameter);
+		set(UIParameterMappingMetaData.FROM, from);
 	}
 
-	public UIParameter getTo()
+	public String getTo()
 	{
-		return getEntity(UIParameterMappingMetaData.TO, UIParameter.class);
+		return getString(UIParameterMappingMetaData.TO);
 	}
 
-	public void setTo(UIParameter to)
+	public void setTo(String to)
 	{
 		set(UIParameterMappingMetaData.TO, to);
 	}

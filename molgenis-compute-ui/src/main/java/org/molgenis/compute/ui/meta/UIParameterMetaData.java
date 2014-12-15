@@ -5,7 +5,7 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 public class UIParameterMetaData extends DefaultEntityMetaData
 {
 	public static final UIParameterMetaData INSTANCE = new UIParameterMetaData();
-	public static final String ENTITY_NAME = "Parameter";
+	private static final String ENTITY_NAME = "Parameter";
 	public static final String IDENTIFIER = "identifier";
 	public static final String NAME = "name";
 	public static final String TYPE = "type";

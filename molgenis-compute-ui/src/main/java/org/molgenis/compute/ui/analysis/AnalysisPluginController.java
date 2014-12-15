@@ -3,19 +3,26 @@ package org.molgenis.compute.ui.analysis;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.compute.ui.IdGenerator;
-import org.molgenis.compute.ui.meta.*;
+import org.molgenis.compute.ui.meta.AnalysisJobMetaData;
+import org.molgenis.compute.ui.meta.AnalysisMetaData;
+import org.molgenis.compute.ui.meta.UIBackendMetaData;
+import org.molgenis.compute.ui.meta.UIWorkflowMetaData;
 import org.molgenis.compute.ui.model.*;
 import org.molgenis.compute5.CommandLineRunContainer;
 import org.molgenis.compute5.ComputeCommandLine;
 import org.molgenis.compute5.ComputeProperties;
 import org.molgenis.compute5.GeneratedScript;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.*;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
@@ -24,10 +31,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
 
 @Controller
 @RequestMapping(AnalysisPluginController.URI)
@@ -38,7 +41,7 @@ public class AnalysisPluginController extends MolgenisPluginController
 	public static final String ID = "analysis";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
-	private String runID = "testEmpty11";
+	private String runID = "testEmpty12";
 	private String path = ".tmp"+ File.separator + runID + File.separator;
 	private String pathProtocols = path + "protocols" + File.separator;
 
@@ -46,12 +49,12 @@ public class AnalysisPluginController extends MolgenisPluginController
 	private static final String PARAMETERS_DEFAULT = "parameters.csv";
 	private static final String WORKSHEET = "worksheet.csv";
 
-	private final DataService dataService;
 	private String extension = ".sh";
 
 	private List<String> writtenProtocols = null;
 
 	private UIWorkflow uiWorkflow = null;
+	private final DataService dataService;
 
 	@Autowired
 	public AnalysisPluginController(DataService dataService)
@@ -61,14 +64,64 @@ public class AnalysisPluginController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = GET)
-	public String init(Model model, @RequestParam(value = "workflow", required = false) String workflowId,
+	public String init()
+	{
+		return "view-analysis";
+	}
+
+	@RequestMapping(value = "/create", method = GET)
+	public String create(Model model, @RequestParam(value = "workflow", required = false) String workflowId,
 			@RequestParam(value = "target", required = false) String targetId,
 			@RequestParam(value = "q", required = false) String query)
 	{
-		model.addAttribute("workflowId", workflowId);
+		// TODO discuss how to select backend
+		Iterable<UIBackend> backends = dataService.findAll(UIBackendMetaData.INSTANCE.getName(), UIBackend.class);
+		if (Iterables.isEmpty(backends))
+		{
+			throw new RuntimeException("Database does not contain any backend");
+		}
+		UIBackend backend = backends.iterator().next();
+		Date creationDate = new Date();
+
+		UIWorkflow workflow;
+		if (workflowId != null && !workflowId.isEmpty())
+		{
+			workflow = dataService.findOne(UIWorkflowMetaData.INSTANCE.getName(), workflowId, UIWorkflow.class);
+			if (workflow == null)
+			{
+				throw new UnknownEntityException("Unknown " + UIWorkflow.class.getSimpleName() + " [" + workflowId
+						+ "]");
+			}
+
+		}
+		else
+		{
+			// TODO discuss how to select initial workflow if not specified
+			Iterable<UIWorkflow> workflows = dataService.findAll(UIWorkflowMetaData.INSTANCE.getName(),
+					UIWorkflow.class);
+			if (Iterables.isEmpty(backends))
+			{
+				throw new RuntimeException("Database does not contain any workflows");
+			}
+			workflow = workflows.iterator().next();
+
+		}
+
+		Iterable<UIWorkflow> workflows = dataService.findAll(UIWorkflowMetaData.INSTANCE.getName(), UIWorkflow.class);
+
+		String analysisId = IdGenerator.generateId();
+		String analysisName = "Analysis-" + creationDate.getTime();
+		Analysis analysis = new Analysis(analysisId, analysisName);
+		analysis.setBackend(backend);
+		analysis.setCreationDate(creationDate);
+		analysis.setWorkflow(workflow);
+		dataService.add(AnalysisMetaData.INSTANCE.getName(), analysis);
+
+		model.addAttribute("analysis", analysis);
+		model.addAttribute("workflows", workflows);
 		model.addAttribute("targetId", targetId);
 		model.addAttribute("q", query);
-		return "view-analysis";
+		return "view-analysis-create";
 	}
 
 	// TODO include query

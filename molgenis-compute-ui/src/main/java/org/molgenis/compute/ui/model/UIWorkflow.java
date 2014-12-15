@@ -10,6 +10,7 @@ import com.google.common.collect.Lists;
 public class UIWorkflow extends MapEntity
 {
 	private static final long serialVersionUID = 8684330466397478937L;
+	private static boolean DEFAULT_ACTIVE = true;
 
 	public static final String WORKFLOW_DEFAULT = "workflow.csv";
 	public static final String PARAMETERS_DEFAULT = "parameters.csv";
@@ -17,6 +18,7 @@ public class UIWorkflow extends MapEntity
 	public UIWorkflow()
 	{
 		super(UIWorkflowMetaData.IDENTIFIER);
+		setActive(DEFAULT_ACTIVE);
 	}
 
 	public UIWorkflow(String identifier, String name)
@@ -114,6 +116,16 @@ public class UIWorkflow extends MapEntity
 	public void setParameters(List<UIWorkflowParameter> parameters)
 	{
 		set(UIWorkflowMetaData.PARAMETERS, parameters);
+	}
+
+	public boolean isActive()
+	{
+		return getBoolean(UIWorkflowMetaData.ACTIVE);
+	}
+
+	public void setActive(boolean active)
+	{
+		set(UIWorkflowMetaData.ACTIVE, active);
 	}
 
 	@Override

@@ -7,9 +7,11 @@ import org.molgenis.compute.ui.ComputeUiException;
 import org.molgenis.compute.ui.meta.UIWorkflowMetaData;
 import org.molgenis.compute.ui.model.UIWorkflow;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.google.common.escape.Escaper;
@@ -46,15 +48,15 @@ public class WorkflowManageServiceImpl implements WorkflowManageService
 	{
 		// TODO how to get analysis URL?
 		Escaper escaper = UrlEscapers.urlPathSegmentEscaper();
-		return "/menu/main/analysis?workflow=" + escaper.escape(actionId) + "&target=" + escaper.escape(entityName)
-				+ "&q=" + escaper.escape(queryRules.toString());
+		return "/menu/main/analysis/create?workflow=" + escaper.escape(actionId) + "&target="
+				+ escaper.escape(entityName) + "&q=" + escaper.escape(queryRules.toString());
 	}
 
 	@Override
-	public void updateWorkflow(String identifier, String name, String description, String targetFullName)
+	@PreAuthorize("hasAnyRole('ROLE_SYSTEM, ROLE_SU')")
+	public void updateWorkflow(String identifier, String name, String description, String targetFullName, boolean active)
 	{
 		UIWorkflow workflow = dataService.findOne(UIWorkflowMetaData.INSTANCE.getName(), identifier, UIWorkflow.class);
-
 		if (workflow == null) throw new ComputeUiException("Unknown workflow '" + identifier + "'");
 
 		// Check if target EntityMetaData exists
@@ -62,15 +64,17 @@ public class WorkflowManageServiceImpl implements WorkflowManageService
 				+ targetFullName + "'");
 
 		// If name is updated check if it not already exists
-		if (!workflow.getName().equals(name)
-				&& (dataService.findOne(UIWorkflowMetaData.INSTANCE.getName(),
-						new QueryImpl().eq(UIWorkflowMetaData.NAME, name))) != null) throw new ComputeUiException(
-				"There is already a workflow named '" + name + "'");
+		if (!workflow.getName().equals(name))
+		{
+			Entity existing = dataService.findOne(UIWorkflowMetaData.INSTANCE.getName(),
+					new QueryImpl().eq(UIWorkflowMetaData.NAME, name));
+			if (existing != null) throw new ComputeUiException("There is already a workflow named '" + name + "'");
+		}
 
 		workflow.setName(name);
 		workflow.setDescription(description);
 		workflow.setTargetType(targetFullName);
+		workflow.setActive(active);
 		dataService.update(UIWorkflowMetaData.INSTANCE.getName(), workflow);
 	}
-
 }
