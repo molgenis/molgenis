@@ -136,7 +136,7 @@ public class RestController
 	private final MolgenisRSQL molgenisRSQL;
 	private final ResourceFingerprintRegistry resourceFingerprintRegistry;
 
-    @Autowired
+	@Autowired
 	public RestController(DataService dataService, TokenService tokenService,
 			AuthenticationManager authenticationManager, MolgenisPermissionService molgenisPermissionService,
 			MolgenisRSQL molgenisRSQL, ResourceFingerprintRegistry resourceFingerprintRegistry)
@@ -453,27 +453,33 @@ public class RestController
 			meta = dataService.getEntityMetaData(entityName);
 			Query q = new QueryStringParser(meta, molgenisRSQL).parseQueryString(req.getParameterMap());
 
-            String[] sortAttributeArray = req.getParameterMap().get("sortColumn");
-            if(sortAttributeArray != null && sortAttributeArray.length > 0){
-                String sortAttribute = sortAttributeArray[0];
-                String sortOrderArray[] = req.getParameterMap().get("sortOrder");
-                Sort.Direction order= Sort.DEFAULT_DIRECTION;
+			String[] sortAttributeArray = req.getParameterMap().get("sortColumn");
+			if (sortAttributeArray != null && sortAttributeArray.length > 0)
+			{
+				String sortAttribute = sortAttributeArray[0];
+				String sortOrderArray[] = req.getParameterMap().get("sortOrder");
+				Sort.Direction order = Sort.DEFAULT_DIRECTION;
 
-                if(sortOrderArray!=null && sortOrderArray.length > 0){
-                    String sortOrder = sortOrderArray[0];
-                    if(sortOrder.equals("ASC")){
-                        order = Sort.Direction.ASC;
-                    }
-                    else if(sortOrder.equals("DESC")){
-                        order = Sort.Direction.DESC;
-                    }else{
-                        throw new RuntimeException("unknown sort order");
-                    }
-                }
-                q.sort(order, sortAttribute);
-            }
+				if (sortOrderArray != null && sortOrderArray.length > 0)
+				{
+					String sortOrder = sortOrderArray[0];
+					if (sortOrder.equals("ASC"))
+					{
+						order = Sort.Direction.ASC;
+					}
+					else if (sortOrder.equals("DESC"))
+					{
+						order = Sort.Direction.DESC;
+					}
+					else
+					{
+						throw new RuntimeException("unknown sort order");
+					}
+				}
+				q.sort(order, sortAttribute);
+			}
 
-            if (q.getPageSize() == 0)
+			if (q.getPageSize() == 0)
 			{
 				q.pageSize(EntityCollectionRequest.DEFAULT_ROW_COUNT);
 			}

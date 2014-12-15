@@ -94,16 +94,16 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		entity.set("name", "Piet");
 		entity.set("xrefAttribute", entityXref);
 
-        Entity entity2 = new MapEntity("id");
-        entity2.set("id", "p2");
-        entity2.set("name", "Klaas");
-        entity2.set("xrefAttribute", entityXref);
+		Entity entity2 = new MapEntity("id");
+		entity2.set("id", "p2");
+		entity2.set("name", "Klaas");
+		entity2.set("xrefAttribute", entityXref);
 
-        List<Entity> entities = new ArrayList();
-        entities.add(entity2);
-        entities.add(entity);
+		List<Entity> entities = new ArrayList();
+		entities.add(entity2);
+		entities.add(entity);
 
-        when(dataService.getEntityNames()).thenReturn(Arrays.asList(ENTITY_NAME));
+		when(dataService.getEntityNames()).thenReturn(Arrays.asList(ENTITY_NAME));
 		when(dataService.getRepositoryByEntityName(ENTITY_NAME)).thenReturn(repo);
 
 		when(dataService.findOne(ENTITY_NAME, ENTITY_ID)).thenReturn(entity);
@@ -111,11 +111,10 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		Query q = new QueryImpl().eq("name", "Piet").pageSize(10).offset(5);
 		when(dataService.findAll(ENTITY_NAME, q)).thenReturn(Arrays.asList(entity));
 
-        Query q2 = new QueryImpl().sort(Sort.Direction.DESC,"name").pageSize(100).offset(0);
-        when(dataService.findAll(ENTITY_NAME, q2)).thenReturn(entities);
+		Query q2 = new QueryImpl().sort(Sort.Direction.DESC, "name").pageSize(100).offset(0);
+		when(dataService.findAll(ENTITY_NAME, q2)).thenReturn(entities);
 
-
-        DefaultAttributeMetaData attrName = new DefaultAttributeMetaData("name", FieldTypeEnum.STRING);
+		DefaultAttributeMetaData attrName = new DefaultAttributeMetaData("name", FieldTypeEnum.STRING);
 		attrName.setLookupAttribute(true);
 
 		DefaultAttributeMetaData attrId = new DefaultAttributeMetaData("id", FieldTypeEnum.STRING);
@@ -473,12 +472,13 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 				.andExpect(content().string("\"name\",\"id\"\n\"Piet\",\"p1\"\n"));
 	}
 
-    @Test
-    public void retrieveSortedEntityCollectionCsv() throws Exception {
-        mockMvc.perform(get(BASE_URI + "/csv/Person").param("sortColumn", "name").param("sortOrder", "DESC"))
-                .andExpect(status().isOk()).andExpect(content().contentType("text/csv"))
-                .andExpect(content().string("\"name\",\"id\"\n\"Klaas\",\"p2\"\n\"Piet\",\"p1\"\n"));
-    }
+	@Test
+	public void retrieveSortedEntityCollectionCsv() throws Exception
+	{
+		mockMvc.perform(get(BASE_URI + "/csv/Person").param("sortColumn", "name").param("sortOrder", "DESC"))
+				.andExpect(status().isOk()).andExpect(content().contentType("text/csv"))
+				.andExpect(content().string("\"name\",\"id\"\n\"Klaas\",\"p2\"\n\"Piet\",\"p1\"\n"));
+	}
 
 	@Configuration
 	public static class RestControllerConfig extends WebMvcConfigurerAdapter
