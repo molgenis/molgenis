@@ -1,5 +1,7 @@
 package org.molgenis.compute.ui.meta;
 
+import static org.molgenis.MolgenisFieldTypes.XREF;
+
 import org.molgenis.data.support.DefaultEntityMetaData;
 
 public class AnalysisTargetMetaData extends DefaultEntityMetaData
@@ -9,6 +11,7 @@ public class AnalysisTargetMetaData extends DefaultEntityMetaData
 	private static final String ENTITY_NAME = "AnalysisTarget";
 	public static final String IDENTIFIER = "identifier";
 	public static final String TARGET_ID = "targetId";
+	public static final String ANALYSIS = "analysis";
 
 	private AnalysisTargetMetaData()
 	{
@@ -16,5 +19,6 @@ public class AnalysisTargetMetaData extends DefaultEntityMetaData
 
 		addAttribute(IDENTIFIER).setIdAttribute(true).setNillable(false).setVisible(false);
 		addAttribute(TARGET_ID).setLabelAttribute(true).setNillable(false);
+		addAttribute(ANALYSIS).setNillable(false).setDataType(XREF).setRefEntity(AnalysisMetaData.INSTANCE);
 	}
 }

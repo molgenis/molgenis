@@ -12,11 +12,12 @@ public class AnalysisTarget extends MapEntity
 		super(AnalysisTargetMetaData.IDENTIFIER);
 	}
 
-	public AnalysisTarget(String identifier, String targetId)
+	public AnalysisTarget(String identifier, String targetId, Analysis analysis)
 	{
 		this();
 		setIdentifier(identifier);
 		setTargetId(targetId);
+		setAnalysis(analysis);
 	}
 
 	private void setIdentifier(String identifier)
@@ -27,6 +28,16 @@ public class AnalysisTarget extends MapEntity
 	public String getIdentifier()
 	{
 		return getString(AnalysisTargetMetaData.IDENTIFIER);
+	}
+
+	public Analysis getAnalysis()
+	{
+		return getEntity(AnalysisTargetMetaData.ANALYSIS, Analysis.class);
+	}
+
+	public void setAnalysis(Analysis analysis)
+	{
+		set(AnalysisTargetMetaData.ANALYSIS, analysis);
 	}
 
 	public String getTargetId()
