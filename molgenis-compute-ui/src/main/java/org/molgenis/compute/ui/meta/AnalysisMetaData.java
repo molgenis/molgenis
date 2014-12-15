@@ -32,7 +32,7 @@ public class AnalysisMetaData extends DefaultEntityMetaData
 		addAttribute(CREATION_DATE).setDataType(DATETIME);
 		addAttribute(WORKFLOW).setDataType(XREF).setNillable(false).setRefEntity(UIWorkflowMetaData.INSTANCE);
 		addAttribute(JOBS).setDataType(MREF).setRefEntity(AnalysisJobMetaData.INSTANCE);
-		addAttribute(BACKEND).setDataType(XREF).setNillable(false).setRefEntity(UIBackendMetaData.INSTANCE);
+		addAttribute(BACKEND).setDataType(XREF).setRefEntity(UIBackendMetaData.INSTANCE);
 		addAttribute(SUBMIT_SCRIPT).setDataType(SCRIPT);
 	}
 
