@@ -12,7 +12,7 @@ public class AnalysisTarget extends MapEntity
 		super(AnalysisTargetMetaData.IDENTIFIER);
 	}
 
-	public AnalysisTarget(String identifier, Analysis analysis, String targetId)
+	public AnalysisTarget(String identifier, String targetId)
 	{
 		this();
 		setIdentifier(identifier);
