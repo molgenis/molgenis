@@ -6,22 +6,29 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import java.util.Date;
 
 import org.apache.log4j.Logger;
-import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.compute.ui.IdGenerator;
 import org.molgenis.compute.ui.meta.AnalysisMetaData;
+import org.molgenis.compute.ui.meta.AnalysisTargetMetaData;
 import org.molgenis.compute.ui.meta.UIBackendMetaData;
 import org.molgenis.compute.ui.meta.UIWorkflowMetaData;
 import org.molgenis.compute.ui.model.Analysis;
+import org.molgenis.compute.ui.model.AnalysisTarget;
 import org.molgenis.compute.ui.model.UIBackend;
 import org.molgenis.compute.ui.model.UIWorkflow;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 
 @Controller
 @RequestMapping(AnalysisPluginController.URI)
@@ -42,14 +49,47 @@ public class AnalysisPluginController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = GET)
-	public String init()
+	public String init(Model model, @RequestParam(value = "analysis", required = false) String analysisId)
 	{
+		if (analysisId != null)
+		{
+			Analysis analysis = dataService.findOne(AnalysisMetaData.INSTANCE.getName(), analysisId, Analysis.class);
+			if (analysis == null) throw new UnknownEntityException("Unknown Analysis [" + analysisId + "]");
+
+			long nrTargets = dataService.count(AnalysisTargetMetaData.INSTANCE.getName(),
+					new QueryImpl().eq(AnalysisTargetMetaData.ANALYSIS, analysis));
+
+			model.addAttribute("analysis", analysis);
+			model.addAttribute("hasAnalysisTargets", nrTargets > 0);
+		}
+
+		Iterable<UIWorkflow> workflows = dataService.findAll(UIWorkflowMetaData.INSTANCE.getName(), UIWorkflow.class);
+		model.addAttribute("workflows", workflows);
+
+		return "view-analysis";
+	}
+
+	@RequestMapping(value = "/view/{analysisId}", method = GET)
+	public String viewAnalysis(Model model, @PathVariable(value = "analysisId") String analysisId)
+	{
+		Analysis analysis = dataService.findOne(AnalysisMetaData.INSTANCE.getName(), analysisId, Analysis.class);
+		if (analysis == null) throw new UnknownEntityException("Unknown Analysis [" + analysisId + "]");
+
+		long nrTargets = dataService.count(AnalysisTargetMetaData.INSTANCE.getName(),
+				new QueryImpl().eq(AnalysisTargetMetaData.ANALYSIS, analysis));
+
+		model.addAttribute("analysis", analysis);
+		model.addAttribute("hasAnalysisTargets", nrTargets > 0);
+
+		Iterable<UIWorkflow> workflows = dataService.findAll(UIWorkflowMetaData.INSTANCE.getName(), UIWorkflow.class);
+		model.addAttribute("workflows", workflows);
+
 		return "view-analysis";
 	}
 
 	@RequestMapping(value = "/create", method = GET)
 	public String create(Model model, @RequestParam(value = "workflow", required = false) String workflowId,
-			@RequestParam(value = "target", required = false) String targetId,
+			@RequestParam(value = "target", required = false) String targetEntityName,
 			@RequestParam(value = "q", required = false) String query)
 	{
 		// TODO discuss how to select backend
@@ -85,21 +125,40 @@ public class AnalysisPluginController extends MolgenisPluginController
 
 		}
 
-		Iterable<UIWorkflow> workflows = dataService.findAll(UIWorkflowMetaData.INSTANCE.getName(), UIWorkflow.class);
-
 		String analysisId = IdGenerator.generateId();
 		String analysisName = "Analysis-" + creationDate.getTime();
-		Analysis analysis = new Analysis(analysisId, analysisName);
+		final Analysis analysis = new Analysis(analysisId, analysisName);
 		analysis.setBackend(backend);
 		analysis.setCreationDate(creationDate);
 		analysis.setWorkflow(workflow);
 		dataService.add(AnalysisMetaData.INSTANCE.getName(), analysis);
 
-		model.addAttribute("analysis", analysis);
-		model.addAttribute("workflows", workflows);
-		model.addAttribute("targetId", targetId);
-		model.addAttribute("q", query);
-		return "view-analysis-create";
+		if (targetEntityName != null && !targetEntityName.isEmpty())
+		{
+			Iterable<Entity> targets;
+			if (query != null)
+			{
+				targets = dataService.findAll(targetEntityName);
+			}
+			else
+			{
+				// FIXME apply query
+				targets = dataService.findAll(targetEntityName);
+			}
+
+			dataService.add(AnalysisTargetMetaData.INSTANCE.getName(),
+					Iterables.transform(targets, new Function<Entity, AnalysisTarget>()
+					{
+						@Override
+						public AnalysisTarget apply(Entity entity)
+						{
+							return new AnalysisTarget(IdGenerator.generateId(), entity.getIdValue().toString(),
+									analysis);
+						}
+					}));
+		}
+
+		return "rediect:" + AnalysisPluginController.URI + "?analysis=" + analysisId;
 	}
 
 	// TODO include query
