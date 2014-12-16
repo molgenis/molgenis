@@ -46,7 +46,7 @@
 		</ul>
 		<div class="tab-content">
     		<div role="tabpanel" class="tab-pane active" id="target">
-    			<div class="row">
+    			<div class="row" id="analysis-target-select-container">
 					<div class="col-md-12">
 		    			<button id="add-target-btn" type="button" class="btn btn-default"><span class="glyphicon glyphicon-plus"></span></button>
 		    			<select id="analysis-target-select"></select>
