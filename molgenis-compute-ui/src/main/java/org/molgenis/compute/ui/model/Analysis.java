@@ -95,7 +95,7 @@ public class Analysis extends MapEntity
 		return getString(AnalysisMetaData.SUBMIT_SCRIPT);
 	}
 
-	public void setSubmitScsript(String submitScript)
+	public void setSubmitScript(String submitScript)
 	{
 		set(AnalysisMetaData.SUBMIT_SCRIPT, submitScript);
 	}
