@@ -526,7 +526,7 @@
 		settings.showOverview = false;
 		settings.showDetails = true;
 		
-		restApi.getAsync('/api/v1/computeui_Analysis/' + analysisId, {'expand' : [ 'workflow' ]}, function(analysis) {
+		restApi.getAsync('/api/v1/computeui_Analysis/' + analysisId, {'expand' : [ 'jobs', 'workflow' ]}, function(analysis) {
 			settings.analysis = analysis;
 			renderPlugin();
 		});
@@ -586,6 +586,8 @@
 			
 			// enable/disable workflow select
 			$('#analysis-workflow').prop('disabled', data.items.length > 0);
+			var disableRunBtn = data.items.length === 0 || settings.analysis.jobs.items.length > 0;
+			$('#run-analysis-btn').prop('disabled', disableRunBtn);
 			
 			// update analysis target table
 			var targetType = settings.analysis.workflow.targetType;
@@ -666,6 +668,11 @@
 		history.back();
 	}
 	
+	function runAnalysis(analysisId) {
+		$.post(molgenis.getContextUrl() + '/run/' + analysisId).done(function() {
+			changeAnalysis(analysisId);
+		});
+	}
 	/**
 	 * @memberOf molgenis.analysis
 	 */
@@ -757,7 +764,7 @@
 		
 		$(document).on('click', '#run-analysis-btn', function(e) {
 			e.preventDefault();
-			$.post(molgenis.getContextUrl() + '/run/' + settings.analysis.identifier);
+			runAnalysis(settings.analysis.identifier);
 		});
 		
 		$(document).on('click', '#add-target-btn', function(e) {
