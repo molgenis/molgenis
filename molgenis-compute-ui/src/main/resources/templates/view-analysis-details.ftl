@@ -63,7 +63,7 @@
 </div>
 <div class="row">
 	<div class="col-md-12">
-		<button id="delete-analysis-btn" "type="button" class="btn btn-default">Delete</button>
+		<button id="delete-analysis-btn" type="button" class="btn btn-default">Delete</button>
 		<button id="clone-analysis-btn" type="button" class="btn btn-default">Clone</button>	
 		<button id="run-analysis-btn" type="button" class="btn btn-default">Run</button>
 	</div>

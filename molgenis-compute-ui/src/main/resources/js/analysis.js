@@ -640,7 +640,7 @@
 						}
 					});
 				} else {
-					$('#analysis-target-table-container').empty();
+					$('#analysis-target-table-container').html('No target selected. Use the + button to add targets');
 				}
 			});
 		});
