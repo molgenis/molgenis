@@ -4,7 +4,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
 
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
@@ -47,7 +46,7 @@ public class CrudRepositoryAnnotator
 
 	/**
 	 * @param annotator
-	 * @param repo
+	 * @param sourceRepo
 	 * @param createCopy
 	 * 
 	 *            FIXME: currently the annotators have to have knowledge about mySQL to add the annotated attributes
@@ -76,7 +75,7 @@ public class CrudRepositoryAnnotator
 		CrudRepository targetRepo = addAnnotatorMetadataToRepositories(entityMetaData, createCopy,
 				compoundAttributeMetaData);
 
-		CrudRepository crudRepository = iterateOverEntitiesAndAnnotate(createCopy, sourceRepo, targetRepo, annotator);
+		CrudRepository crudRepository = iterateOverEntitiesAndAnnotate(sourceRepo, targetRepo, annotator);
 
 		logger.info("Finished annotating " + sourceRepo.getName() + " with the " + annotator.getName() + " annotator");
 
@@ -86,14 +85,13 @@ public class CrudRepositoryAnnotator
 	/**
 	 * Iterates over all the entities within a repository and annotates.
 	 * 
-	 * @param createCopy
 	 * @param targetRepo
-	 * @param crudRepository
+	 * @param targetRepo
 	 * @param annotator
 	 * @return
 	 */
-	private CrudRepository iterateOverEntitiesAndAnnotate(boolean createCopy, Repository sourceRepo,
-			CrudRepository targetRepo, RepositoryAnnotator annotator)
+	private CrudRepository iterateOverEntitiesAndAnnotate(Repository sourceRepo, CrudRepository targetRepo,
+			RepositoryAnnotator annotator)
 	{
 		Iterator<Entity> entityIterator = annotator.annotate(sourceRepo.iterator());
 		if (targetRepo == null)
@@ -145,7 +143,7 @@ public class CrudRepositoryAnnotator
 			{
 				DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(metadata);
 				newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData);
-				mysqlRepositoryCollection.update(newEntityMetaData);
+				mysqlRepositoryCollection.updateSync(newEntityMetaData);
 				return null;
 			}
 			else
@@ -167,7 +165,7 @@ public class CrudRepositoryAnnotator
 	{
 		DefaultAttributeMetaData compoundAttributeMetaData = new DefaultAttributeMetaData(attributeName,
 				MolgenisFieldTypes.FieldTypeEnum.COMPOUND);
-		compoundAttributeMetaData.setLabel(annotator.getName());
+		compoundAttributeMetaData.setLabel(annotator.getLabel());
 
 		Iterator<AttributeMetaData> amdIterator = annotator.getOutputMetaData().getAtomicAttributes().iterator();
 
@@ -197,8 +195,7 @@ public class CrudRepositoryAnnotator
 		String attributeName = annotator.getName();
 		if ((entityMetaData.getAttribute(annotator.getName()) != null))
 		{
-			// TODO make it something more human readible then random ID
-			attributeName = annotator.getName() + UUID.randomUUID();
+			throw new RuntimeException("attribute with id: " + annotator.getName() + "already exists");
 		}
 		return attributeName;
 	}
