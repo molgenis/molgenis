@@ -140,7 +140,7 @@ public class CaddServiceAnnotator extends VariantAnnotator
 		}
 		if (caddAbs == 0.0 && caddScaled == 0.0)
 		{
-			throw new RuntimeException("Something went wrong with the CADD annotator");
+            logger.warn("no CADD hits");
 		}
 
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
