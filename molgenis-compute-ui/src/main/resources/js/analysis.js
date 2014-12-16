@@ -557,6 +557,9 @@
 		$('#analysis-description').val(settings.analysis.description || '');
 		$('#analysis-workflow').val(settings.analysis.workflow.identifier);
 		
+		//Load progress script
+		$.getScript(molgenis.getContextUrl() + '/' + settings.analysis.identifier + '/progress.js');
+		
 		// update analysis target select and table
 		renderAnalysisTargets();
 	}
