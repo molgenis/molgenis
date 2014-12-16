@@ -43,10 +43,11 @@
 	<div class="col-md-12">
 		<div role="tabpanel">
 			<ul class="nav nav-tabs" role="tablist">
-			   <li role="presentation" class="active"><a href="#target" aria-controls="target" role="tab" data-toggle="tab">Target</a></li>
-			</ul>
+			   <li role="presentation"><a href="#target" aria-controls="target" id="target-tab" role="tab" data-toggle="tab">Target</a></li>
+			   <li role="presentation" class="active"><a href="#progress" aria-controls="progress" id="progress-tab" role="tab" data-toggle="tab">Progress</a></li>
+			 </ul>
 			<div class="tab-content">
-	    		<div role="tabpanel" class="tab-pane active" id="target">
+	    		<div role="tabpanel" class="tab-pane" id="target">
 	    			<div class="row" id="analysis-target-select-container">
 						<div class="col-md-3">
 							<div class="input-group analysis-target-select2">
@@ -66,6 +67,11 @@
 						</div>
 		    		</div>
 	    		</div>
+	    	
+	    		<div role="tabpanel" class="tab-pane active" id="progress">
+	    			<div id="paper"></div>
+	    		</div>
+	    	
 	    	</div>
     	</div>
 	</div>

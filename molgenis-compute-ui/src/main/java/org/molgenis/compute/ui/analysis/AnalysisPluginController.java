@@ -57,15 +57,15 @@ public class AnalysisPluginController extends MolgenisPluginController
 	public static final String ID = "analysis";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
-	private String runID = "testEmpty12";
-	private String path = ".tmp" + File.separator + runID + File.separator;
-	private String pathProtocols = path + "protocols" + File.separator;
+	private final String runID = "testEmpty12";
+	private final String path = ".tmp" + File.separator + runID + File.separator;
+	private final String pathProtocols = path + "protocols" + File.separator;
 
 	private static final String WORKFLOW_DEFAULT = "workflow.csv";
 	private static final String PARAMETERS_DEFAULT = "parameters.csv";
 	private static final String WORKSHEET = "worksheet.csv";
 
-	private String extension = ".sh";
+	private final String extension = ".sh";
 
 	private List<String> writtenProtocols = null;
 
@@ -330,6 +330,15 @@ public class AnalysisPluginController extends MolgenisPluginController
 	{
 		// TODO implement stop analysis
 		logger.info("TODO implement stop analysis");
+	}
+
+	@RequestMapping("/{analysisId}/progress.js")
+	public String getProgressScript(@PathVariable(value = "analysisId") String analysisId, Model model)
+	{
+		Analysis analysis = dataService.findOne(AnalysisMetaData.INSTANCE.getName(), analysisId, Analysis.class);
+		model.addAttribute("analysis", analysis);
+
+		return "progress";
 	}
 
 	private UIWorkflowNode findNode(UIWorkflow uiWorkflow, String stepName)
