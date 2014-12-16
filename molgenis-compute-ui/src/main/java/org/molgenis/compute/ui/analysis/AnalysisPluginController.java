@@ -324,6 +324,14 @@ public class AnalysisPluginController extends MolgenisPluginController
 		}
 	}
 
+	@RequestMapping(value = "/stop/{analysisId}", method = POST)
+	@ResponseStatus(HttpStatus.OK)
+	public void stopAnalysis(@PathVariable(value = "analysisId") String analysisId)
+	{
+		// TODO implement stop analysis
+		logger.info("TODO implement stop analysis");
+	}
+
 	private UIWorkflowNode findNode(UIWorkflow uiWorkflow, String stepName)
 	{
 		for (UIWorkflowNode node : uiWorkflow.getNodes())

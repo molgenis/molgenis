@@ -611,6 +611,7 @@
 					else
 						$('#analysis-target-select-container').removeClass('hidden');
 					$('#analysis-target-select').html(items.join(''));
+					$('#analysis-target-select').select2();
 				});
 				
 				// create table
@@ -640,14 +641,14 @@
 						}
 					});
 				} else {
-					$('#analysis-target-table-container').empty();
+					$('#analysis-target-table-container').html('No target selected. Use the + button to add targets');
 				}
 			});
 		});
 	}
 	
 	function stopAnalysis(analysisId) {
-		confirm('TODO stop ' + analysis);
+		$.post(molgenis.getContextUrl() + '/stop/' + analysisId);
 	}
 	
 	$(function() {
@@ -721,7 +722,7 @@
 		
 		$(document).on('click', '#run-analysis-btn', function(e) {
 			e.preventDefault();
-			$.post('/run/' + settings.analysis.identifier);
+			$.post(molgenis.getContextUrl() + '/run/' + settings.analysis.identifier);
 		});
 		
 		$(document).on('click', '#add-target-btn', function(e) {

@@ -41,29 +41,38 @@
 </div>
 <div class="row">
 	<div class="col-md-12">
-		<ul class="nav nav-tabs" role="tablist">
-		   <li role="presentation" class="active"><a href="#target" aria-controls="target" role="tab" data-toggle="tab">Target</a></li>
-		</ul>
-		<div class="tab-content">
-    		<div role="tabpanel" class="tab-pane active" id="target">
-    			<div class="row" id="analysis-target-select-container">
-					<div class="col-md-12">
-		    			<button id="add-target-btn" type="button" class="btn btn-default"><span class="glyphicon glyphicon-plus"></span></button>
-		    			<select id="analysis-target-select"></select>
-					</div>
+		<div role="tabpanel">
+			<ul class="nav nav-tabs" role="tablist">
+			   <li role="presentation" class="active"><a href="#target" aria-controls="target" role="tab" data-toggle="tab">Target</a></li>
+			</ul>
+			<div class="tab-content">
+	    		<div role="tabpanel" class="tab-pane active" id="target">
+	    			<div class="row" id="analysis-target-select-container">
+						<div class="col-md-3">
+							<div class="input-group analysis-target-select2">
+								<span class="input-group-btn">
+									<button id="add-target-btn" class="btn btn-default" type="button" data-select2-open="analysis-target-select">
+										<span class="glyphicon glyphicon-plus"></span>
+									</button>
+								</span>
+								<select id="analysis-target-select" class="form-control select2">
+								</select>
+							</div>
+						</div>
+		    		</div>
+		    		<div class="row">
+						<div class="col-md-12">
+							<div id="analysis-target-table-container"></div>
+						</div>
+		    		</div>
 	    		</div>
-	    		<div class="row">
-					<div class="col-md-12">
-						<div id="analysis-target-table-container"></div>
-					</div>
-	    		</div>
-    		</div>
+	    	</div>
     	</div>
 	</div>
 </div>
 <div class="row">
 	<div class="col-md-12">
-		<button id="delete-analysis-btn" "type="button" class="btn btn-default">Delete</button>
+		<button id="delete-analysis-btn" type="button" class="btn btn-default">Delete</button>
 		<button id="clone-analysis-btn" type="button" class="btn btn-default">Clone</button>	
 		<button id="run-analysis-btn" type="button" class="btn btn-default">Run</button>
 	</div>
