@@ -132,7 +132,7 @@
 		var container = $('.molgenis-table thead', settings.container);
 
 		var items = [];
-		if (settings.editenabled)
+		if (settings.editenabled || settings.deletable)
 			items.push($('<th>'));
 		$.each(settings.colAttributes, function(i, attribute) {
 			var header;
@@ -169,7 +169,7 @@
 		for ( var i = 0; i < data.items.length; ++i) {
 			var entity = data.items[i];
 			var row = $('<tr>').data('entity', entity).data('id', entity.href);
-			if (settings.editenabled) {
+			if (settings.editenabled || settings.deletable) {
 				var cell = $('<td class="trash" tabindex="' + tabindex++ + '">');
 				$('<span class="glyphicon glyphicon-trash delete-row-btn"></span>').appendTo(cell);
 				row.append(cell);
@@ -890,7 +890,8 @@
 		'maxRows' : 20,
 		'attributes' : null,
 		'query' : null,
-		'editable' : false,
+		'editable' : false,  //delete rows allowed, editing rows allowed
+		'deletable' : false, //delete rows allowed, editing rows not allowed
 		'searchable' : false,
 		'rowClickable': false
 	};

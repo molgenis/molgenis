@@ -24,6 +24,7 @@
             <plugin id="scripts" name="Scripts" url="scripts" />
             <menu label="Compute" name="compute">
             	<plugin id="workflow" name="Workflows" url="workflow" />
+            	<plugin id="analysis" name="Analysis" url="analysis" />
             </menu>
 	    </menu>
 		<menu label="Entities" name ="entities">
