@@ -727,7 +727,11 @@
 		
 		$(document).on('change', '#analysis-workflow', function() {
 			var href = '/api/v1/computeui_Analysis/' + settings.analysis.identifier + '/workflow';
-			restApi.update(href, $(this).val());
+			restApi.update(href, $(this).val(), {
+				success: function() {
+					renderAnalysisTargets();
+				}
+			});
 		});
 		
 		$(document).on('click', '#view-workflow-btn', function() {
