@@ -386,6 +386,15 @@ public class AnalysisPluginController extends MolgenisPluginController
 	}
 
 	@Transactional
+	@RequestMapping(value = "/pause/{analysisId}", method = POST)
+	@ResponseStatus(HttpStatus.OK)
+	public void pauseAnalysis(@PathVariable(value = "analysisId") String analysisId)
+	{
+		// TODO implement stop analysis
+		logger.info("TODO implement stop analysis");
+	}
+
+	@Transactional
 	@RequestMapping(value = "/stop/{analysisId}", method = POST)
 	@ResponseStatus(HttpStatus.OK)
 	public void stopAnalysis(@PathVariable(value = "analysisId") String analysisId)
