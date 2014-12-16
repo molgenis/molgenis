@@ -1,9 +1,12 @@
 package org.molgenis.compute.ui.workflow;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.molgenis.compute.ui.ComputeUiException;
+import org.molgenis.compute.ui.analysis.AnalysisPluginController;
 import org.molgenis.compute.ui.meta.UIWorkflowMetaData;
 import org.molgenis.compute.ui.model.UIWorkflow;
 import org.molgenis.data.DataService;
@@ -13,9 +16,6 @@ import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-
-import com.google.common.escape.Escaper;
-import com.google.common.net.UrlEscapers;
 
 @Service
 public class WorkflowManageServiceImpl implements WorkflowManageService
@@ -44,12 +44,18 @@ public class WorkflowManageServiceImpl implements WorkflowManageService
 	}
 
 	@Override
-	public String performAction(String actionId, String entityName, List<QueryRule> queryRules)
+	public Map<String, Object> performAction(String actionId, String entityName, List<QueryRule> queryRules)
 	{
-		// TODO how to get analysis URL?
-		Escaper escaper = UrlEscapers.urlPathSegmentEscaper();
-		return "/menu/main/analysis/create?workflow=" + escaper.escape(actionId) + "&target="
-				+ escaper.escape(entityName) + "&q=" + escaper.escape(queryRules.toString());
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("workflowId", actionId);
+		params.put("targetEntityName", entityName);
+		params.put("q", queryRules);
+
+		Map<String, Object> properties = new HashMap<String, Object>();
+		properties.put("href", AnalysisPluginController.URI_CREATE);
+		properties.put("params", params);
+
+		return properties;
 	}
 
 	@Override

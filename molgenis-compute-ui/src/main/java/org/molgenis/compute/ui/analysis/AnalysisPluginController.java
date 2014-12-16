@@ -8,8 +8,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.validation.Valid;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -34,6 +37,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.QueryRule;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.support.QueryImpl;
@@ -44,6 +48,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -60,6 +65,9 @@ public class AnalysisPluginController extends MolgenisPluginController
 
 	public static final String ID = "analysis";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+
+	private static final String CREATE_MAPPING = "/create";
+	public static final String URI_CREATE = URI + CREATE_MAPPING;
 
 	private String runID = "testEmpty12";
 	private String path = ".tmp" + File.separator + runID + File.separator;
@@ -122,11 +130,13 @@ public class AnalysisPluginController extends MolgenisPluginController
 	}
 
 	@Transactional
-	@RequestMapping(value = "/create", method = GET)
-	public String createAnalysis(Model model, @RequestParam(value = "workflow", required = false) String workflowId,
-			@RequestParam(value = "target", required = false) String targetEntityName,
-			@RequestParam(value = "q", required = false) String query)
+	@RequestMapping(value = CREATE_MAPPING, method = POST)
+	@ResponseBody
+	public Map<String, Object> createAnalysis(Model model,
+			@Valid @RequestBody CreateAnalysisRequest createAnalysisRequest)
 	{
+		String workflowId = createAnalysisRequest.getWorkflowId();
+
 		// TODO discuss how to select backend
 		Iterable<UIBackend> backends = dataService.findAll(UIBackendMetaData.INSTANCE.getName(), UIBackend.class);
 		if (Iterables.isEmpty(backends))
@@ -168,16 +178,17 @@ public class AnalysisPluginController extends MolgenisPluginController
 		analysis.setWorkflow(workflow);
 		dataService.add(AnalysisMetaData.INSTANCE.getName(), analysis);
 
+		String targetEntityName = createAnalysisRequest.getTargetEntityName();
 		if (targetEntityName != null && !targetEntityName.isEmpty())
 		{
 			Iterable<Entity> targets;
-			if (query != null)
+			List<QueryRule> queryRules = createAnalysisRequest.getQ();
+			if (queryRules != null)
 			{
-				targets = dataService.findAll(targetEntityName);
+				targets = dataService.findAll(targetEntityName, new QueryImpl(queryRules));
 			}
 			else
 			{
-				// FIXME apply query
 				targets = dataService.findAll(targetEntityName);
 			}
 
@@ -193,7 +204,10 @@ public class AnalysisPluginController extends MolgenisPluginController
 					}));
 		}
 
-		return "forward:" + AnalysisPluginController.URI + "/view/" + analysisId;
+		Map<String, Object> response = new HashMap<String, Object>();
+		response.put("href", "/menu/main/analysis/view/" + analysisId); // for data explorer
+		response.put(AnalysisMetaData.IDENTIFIER, analysisId);
+		return response;
 	}
 
 	@Transactional
@@ -398,5 +412,45 @@ public class AnalysisPluginController extends MolgenisPluginController
 	private String generateAnalysisName(Date creationDate)
 	{
 		return "Analysis-" + creationDate.getTime();
+	}
+
+	private static class CreateAnalysisRequest
+	{
+
+		private String workflowId;
+
+		private String targetEntityName;
+
+		private List<QueryRule> q;
+
+		public String getWorkflowId()
+		{
+			return workflowId;
+		}
+
+		public void setWorkflowId(String workflowId)
+		{
+			this.workflowId = workflowId;
+		}
+
+		public String getTargetEntityName()
+		{
+			return targetEntityName;
+		}
+
+		public void setTargetEntityName(String targetEntityName)
+		{
+			this.targetEntityName = targetEntityName;
+		}
+
+		public List<QueryRule> getQ()
+		{
+			return q;
+		}
+
+		public void setQ(List<QueryRule> q)
+		{
+			this.q = q;
+		}
 	}
 }

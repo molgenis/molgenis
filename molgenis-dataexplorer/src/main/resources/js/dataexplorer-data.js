@@ -400,8 +400,16 @@
 					data : JSON.stringify(actionDataRequest),
 					contentType: 'application/json'
 				}).done(function(data) {
-					if(data.location) {
-						window.location = data.location;
+					if(data.href) {
+						$.ajax({
+							type : 'POST',
+							url : data.href,
+							data : JSON.stringify(data.params),
+							contentType: 'application/json'
+						}).done(function(data) {
+							if(data.href)
+								window.location = data.href;
+						});
 					} else {
 						molgenis.createAlert([{'message' : 'Data send to ' + actionId}], 'success');
 					}

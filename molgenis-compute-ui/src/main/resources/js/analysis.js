@@ -716,6 +716,20 @@
 			});
 		}
 		
+		$(document).on('click', '#create-analysis-btn', function(e) {
+			e.preventDefault();
+			$.ajax({
+				type : 'POST',
+				url : molgenis.getContextUrl() + '/create',
+				data: '{}',
+				contentType: 'application/json'
+			}).done(function(analysis) {
+				console.log('analysis.identifier', analysis);
+				changeAnalysis(analysis.identifier);
+			});
+		});
+		
+		
 		// analysis create screen event handlers
 		$(document).on('click', '#analysis-back-btn', function(e) {
 			e.preventDefault();
