@@ -12,18 +12,13 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.compute.ui.IdGenerator;
+import org.molgenis.compute.ui.clusterexecutor.ClusterManager;
 import org.molgenis.compute.ui.meta.AnalysisJobMetaData;
 import org.molgenis.compute.ui.meta.AnalysisMetaData;
 import org.molgenis.compute.ui.meta.AnalysisTargetMetaData;
 import org.molgenis.compute.ui.meta.UIBackendMetaData;
 import org.molgenis.compute.ui.meta.UIWorkflowMetaData;
-import org.molgenis.compute.ui.model.Analysis;
-import org.molgenis.compute.ui.model.AnalysisJob;
-import org.molgenis.compute.ui.model.AnalysisTarget;
-import org.molgenis.compute.ui.model.UIBackend;
-import org.molgenis.compute.ui.model.UIWorkflow;
-import org.molgenis.compute.ui.model.UIWorkflowNode;
-import org.molgenis.compute.ui.model.UIWorkflowProtocol;
+import org.molgenis.compute.ui.model.*;
 import org.molgenis.compute5.CommandLineRunContainer;
 import org.molgenis.compute5.ComputeCommandLine;
 import org.molgenis.compute5.ComputeProperties;
@@ -70,6 +65,9 @@ public class AnalysisPluginController extends MolgenisPluginController
 	private List<String> writtenProtocols = null;
 
 	private final DataService dataService;
+
+	@Autowired
+	private ClusterManager clusterManager;
 
 	@Autowired
 	public AnalysisPluginController(DataService dataService)
@@ -240,6 +238,7 @@ public class AnalysisPluginController extends MolgenisPluginController
 							@Override
 							public String apply(AttributeMetaData attribute)
 							{
+								System.out.println("attribute: " + attribute.getName());
 								return attribute.getName();
 							}
 						}));
@@ -251,7 +250,8 @@ public class AnalysisPluginController extends MolgenisPluginController
 							@Override
 							public Object apply(AnalysisTarget analysisTarget)
 							{
-								return analysisTarget.getIdValue();
+								System.out.println("analysis target value: " + analysisTarget.getIdValue());
+								return analysisTarget.getTargetId();
 							}
 						}));
 				for (Entity entity : entities)
@@ -302,7 +302,9 @@ public class AnalysisPluginController extends MolgenisPluginController
 
 				UIWorkflowNode node = findNode(uiWorkflow, generatedScript.getStepName());
 				job.setWorkflowNode(node);
+			    job.setStatus(JobStatus.GENERATED);
 				jobs.add(job);
+
 				dataService.add(AnalysisJobMetaData.INSTANCE.getName(), job);
 			}
 
@@ -322,6 +324,9 @@ public class AnalysisPluginController extends MolgenisPluginController
 			logger.error("", e);
 			throw new RuntimeException(e);
 		}
+
+		clusterManager.executeAnalysis(analysis);
+
 	}
 
 	@RequestMapping(value = "/stop/{analysisId}", method = POST)
