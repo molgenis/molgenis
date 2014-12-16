@@ -140,7 +140,7 @@ public class CaddServiceAnnotator extends VariantAnnotator
 		}
 		if (caddAbs == 0.0 && caddScaled == 0.0)
 		{
-            logger.warn("no CADD hits");
+			logger.warn("no CADD hits");
 		}
 
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
