@@ -206,7 +206,7 @@ public class ClusterExecutor
 			channelExec.disconnect();
 			session.disconnect();
 
-			updateDatabaseWithTaskIDs(idList);
+			updateDatabaseWithTaskIDs(idList, analysis);
 
 			LOG.info("Analysis [" + analysis.getName() + "] is submitted");
 			return true;
@@ -226,25 +226,37 @@ public class ClusterExecutor
 		return false;
 	}
 
-	private void updateDatabaseWithTaskIDs(List<String> idList)
+	private void updateDatabaseWithTaskIDs(List<String> idList, Analysis analysis)
 	{
 		for(String str: idList)
 		{
 			int index = str.indexOf(":");
 			if(index > 0)
 			{
-				String idJob = str.substring(0, index);
-				String idSub = str.substring(index + 1);
+				String jobName = str.substring(0, index);
+				String submittedID = str.substring(index + 1);
 
-				AnalysisJob analysisJob = dataService.findOne(AnalysisJobMetaData.IDENTIFIER, idJob, AnalysisJob.class);
+				AnalysisJob analysisJob = findJob(analysis, jobName);
+				if(analysisJob != null)
+				{
+					analysisJob.setStatus(JobStatus.SUBMITTED);
+					analysisJob.setSchedulerId(Integer.parseInt(submittedID));
 
-				analysisJob.setStatus(JobStatus.SUBMITTED);
-				analysisJob.setSchedulerId(Integer.parseInt(idSub));
-
-				dataService.update(AnalysisJobMetaData.INSTANCE.getName(), analysisJob);
+					dataService.update(AnalysisJobMetaData.INSTANCE.getName(), analysisJob);
+				}
 
 			}
 		}
+	}
+
+	private AnalysisJob findJob(Analysis analysis, String jobName)
+	{
+		for(AnalysisJob job : analysis.getJobs())
+		{
+			if(job.getName().equalsIgnoreCase(jobName))
+				return job;
+		}
+		return null;
 	}
 
 

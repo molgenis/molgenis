@@ -7,6 +7,7 @@ import java.util.Properties;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.molgenis.compute.ui.model.AnalysisJob;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,24 +62,16 @@ public class ClusterCurlBuilder
 
 	private void readTemplates()
 	{
-		InputStream inStreamHeader = getClass().getClassLoader().getResourceAsStream("templates/cluster/header.ftl");
-		InputStream inStreamFooter = getClass().getClassLoader().getResourceAsStream("templates/cluster/footer.ftl");
-
-		StringWriter writer = new StringWriter();
 		try
 		{
-			IOUtils.copy(inStreamHeader, writer);
-			curlHeaderTemplate = writer.toString();
-
-			writer = new StringWriter();
-			IOUtils.copy(inStreamFooter, writer);
-			curlFooterTemplate = writer.toString();
-
+			curlHeaderTemplate = FileUtils.readFileToString(new File("templates/cluster/header.ftl"));
+			curlFooterTemplate = FileUtils.readFileToString(new File("templates/cluster/footer.ftl"));
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
 		}
+
 	}
 
 	private void readServerProperties()

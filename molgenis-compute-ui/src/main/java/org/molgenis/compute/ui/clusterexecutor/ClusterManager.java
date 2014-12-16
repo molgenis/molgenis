@@ -12,8 +12,8 @@ public class ClusterManager
 	public static final String USER = "user";
 	public static final String ROOT = "root";
 	public static final String URL = "url";
-	public static final String API_USER = "api_user";
-	public static final String API_PASS = "api_pass";
+	public static final String API_USER = "apiuser";
+	public static final String API_PASS = "apipass";
 	public static final String SERVER_IP = "server_ip";
 	public static final String SERVER_PORT = "server_port";
 	public static final String SCHEDULER = "scheduler";
