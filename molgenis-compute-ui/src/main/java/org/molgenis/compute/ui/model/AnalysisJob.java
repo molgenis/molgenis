@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.compute.ui.meta.AnalysisJobMetaData;
-import org.molgenis.compute.ui.meta.AnalysisMetaData;
 import org.molgenis.data.support.MapEntity;
 
 public class AnalysisJob extends MapEntity
@@ -120,7 +119,6 @@ public class AnalysisJob extends MapEntity
 	{
 		set(AnalysisJobMetaData.NAME, name);
 	}
-
 
 	public List<UIParameterValue> getParameters()
 	{

@@ -42,4 +42,6 @@ public interface RepositoryAnnotator
 	 * @return name
 	 */
 	String getName();
+
+    String getLabel();
 }

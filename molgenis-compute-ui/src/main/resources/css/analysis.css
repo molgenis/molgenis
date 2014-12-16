@@ -5,3 +5,11 @@
 #analysis-target-table-container {
 	padding: 5px;
 }
+
+#paper {
+	width: 100%px; 
+	height: 100%px;
+	min-height: 200px;
+	overflow: hidden;
+	margin: 20px;
+}

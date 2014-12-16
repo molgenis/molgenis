@@ -144,4 +144,9 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 		}
 		return resultEntity;
 	}
+
+	public String getLabel()
+	{
+		return getName();
+	}
 }

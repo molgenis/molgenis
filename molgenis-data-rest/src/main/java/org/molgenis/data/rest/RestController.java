@@ -82,6 +82,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConversionFailedException;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -288,8 +289,7 @@ public class RestController
 	 * 
 	 * @param entityName
 	 * @param id
-	 * @param attributes
-	 * @param attributeExpands
+	 * @param request
 	 * @return
 	 */
 	@RequestMapping(value = "/{entityName}/{id:.+}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
@@ -351,7 +351,6 @@ public class RestController
 	 * @param id
 	 * @param refAttributeName
 	 * @param request
-	 * @param attributeExpands
 	 * @return
 	 * @throws UnknownEntityException
 	 */
@@ -400,8 +399,7 @@ public class RestController
 	 * Returns json
 	 * 
 	 * @param request
-	 * @param attributes
-	 * @param attributeExpands
+	 * @param entityName
 	 * @return
 	 */
 	@RequestMapping(value = "/{entityName}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
@@ -454,6 +452,32 @@ public class RestController
 		{
 			meta = dataService.getEntityMetaData(entityName);
 			Query q = new QueryStringParser(meta, molgenisRSQL).parseQueryString(req.getParameterMap());
+
+			String[] sortAttributeArray = req.getParameterMap().get("sortColumn");
+			if (sortAttributeArray != null && sortAttributeArray.length > 0)
+			{
+				String sortAttribute = sortAttributeArray[0];
+				String sortOrderArray[] = req.getParameterMap().get("sortOrder");
+				Sort.Direction order = Sort.DEFAULT_DIRECTION;
+
+				if (sortOrderArray != null && sortOrderArray.length > 0)
+				{
+					String sortOrder = sortOrderArray[0];
+					if (sortOrder.equals("ASC"))
+					{
+						order = Sort.Direction.ASC;
+					}
+					else if (sortOrder.equals("DESC"))
+					{
+						order = Sort.Direction.DESC;
+					}
+					else
+					{
+						throw new RuntimeException("unknown sort order");
+					}
+				}
+				q.sort(order, sortAttribute);
+			}
 
 			if (q.getPageSize() == 0)
 			{
