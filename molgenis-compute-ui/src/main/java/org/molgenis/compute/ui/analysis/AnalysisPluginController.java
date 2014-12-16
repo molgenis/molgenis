@@ -118,7 +118,7 @@ public class AnalysisPluginController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/create", method = GET)
-	public String create(Model model, @RequestParam(value = "workflow", required = false) String workflowId,
+	public String createAnalysis(Model model, @RequestParam(value = "workflow", required = false) String workflowId,
 			@RequestParam(value = "target", required = false) String targetEntityName,
 			@RequestParam(value = "q", required = false) String query)
 	{
@@ -188,7 +188,19 @@ public class AnalysisPluginController extends MolgenisPluginController
 					}));
 		}
 
-		return "rediect:" + AnalysisPluginController.URI + "?analysis=" + analysisId;
+		return "forward:" + AnalysisPluginController.URI + "/view/" + analysisId;
+	}
+
+	@RequestMapping(value = "/create/{analysisId}/target/{targetId}", method = POST)
+	@ResponseStatus(HttpStatus.OK)
+	public void createAnalysisTarget(@PathVariable(value = "analysisId") String analysisId,
+			@PathVariable(value = "targetId") String targetId)
+	{
+		Analysis analysis = dataService.findOne(AnalysisMetaData.INSTANCE.getName(), analysisId, Analysis.class);
+		if (analysis == null) throw new UnknownEntityException("Unknown Analysis [" + analysisId + "]");
+
+		AnalysisTarget analysisTarget = new AnalysisTarget(IdGenerator.generateId(), targetId, analysis);
+		dataService.add(AnalysisTargetMetaData.INSTANCE.getName(), analysisTarget);
 	}
 
 	@RequestMapping(value = "/run/{analysisId}", method = POST)
@@ -310,6 +322,14 @@ public class AnalysisPluginController extends MolgenisPluginController
 			logger.error("", e);
 			throw new RuntimeException(e);
 		}
+	}
+
+	@RequestMapping(value = "/stop/{analysisId}", method = POST)
+	@ResponseStatus(HttpStatus.OK)
+	public void stopAnalysis(@PathVariable(value = "analysisId") String analysisId)
+	{
+		// TODO implement stop analysis
+		logger.info("TODO implement stop analysis");
 	}
 
 	private UIWorkflowNode findNode(UIWorkflow uiWorkflow, String stepName)

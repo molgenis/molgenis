@@ -1,8 +1,8 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 
-<#assign css=["jquery-ui-1.9.2.custom.min.css", "jquery.molgenis.table.css", "analysis.css"]>
-<#assign js=["jquery-ui-1.9.2.custom.min.js", "jquery.bootstrap.pager.js", "jquery.molgenis.table.js", "analysis.js"]>
+<#assign css=["jquery-ui-1.9.2.custom.min.css", "select2.css", "jquery.molgenis.table.css", "analysis.css"]>
+<#assign js=["jquery-ui-1.9.2.custom.min.js", "select2.min.js", "jquery.bootstrap.pager.js", "jquery.molgenis.table.js", "analysis.js"]>
 
 <@header css js/>
 <#-- Analysis overview -->
@@ -19,7 +19,9 @@
 </div>
 <#if analysisId??>
 <script>
-	molgenis.analysis.changeAnalysis("${analysisId?js_string}");
+	$(function() {
+		molgenis.analysis.changeAnalysis("${analysisId?js_string}");
+	});
 </script>
 </#if>
 <@footer/>

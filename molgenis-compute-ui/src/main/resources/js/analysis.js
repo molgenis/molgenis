@@ -548,17 +548,29 @@
 		$('#analysis-description').val(settings.analysis.description || '');
 		$('#analysis-workflow').val(settings.analysis.workflow.identifier);
 		
-		// update analysis targets
-		
+		// update analysis target select and table
+		renderAnalysisTargets();
+	}
+	
+	function deleteAnalysisTarget(targetId) {
+		// map worksheet row to analysis target and delete analysis target
+		var q = [{field: 'analysis', operator: 'EQUALS', value: settings.analysis.identifier}, {operator:'AND'}, {field: 'targetId', operator: 'EQUALS', value: targetId}];							
+		restApi.getAsync('/api/v1/computeui_AnalysisTarget', {'q' : q, 'attributes' : []}, function(targets) {
+			var target = targets.items[0];
+			restApi.remove(target.href, {
+				success: function() {
+					renderAnalysisTargets();
+				}
+			});
+		});
+	}
+	
+	function renderAnalysisTargets() {
 		// FIXME fails for data sets with > 10.000 entities
 		restApi.getAsync('/api/v1/computeui_AnalysisTarget', {'q' : [{field:'analysis', operator:'EQUALS', value:settings.analysis.identifier}], 'num': 10000}, function(data) {
 			
-			// disable workflow select
-			if(data.items.length > 0) {
-				$('#analysis-workflow').prop('disabled', false);
-			} else {
-				$('#analysis-workflow').prop('disabled', true);
-			}
+			// enable/disable workflow select
+			$('#analysis-workflow').prop('disabled', data.items.length > 0);
 			
 			// update analysis target table
 			var targetType = settings.analysis.workflow.targetType;
@@ -570,7 +582,8 @@
 				var q = [];
 				var targetIds = {};
 				for(var i = 0; i < data.items.length; ++i) {
-					targetIds[data.items[i].targetId] = null;
+					var item = data.items[i];
+					targetIds[item.targetId] = item.identifier;
 					
 					if (i > 0) {
 						q.push({
@@ -580,7 +593,7 @@
 					q.push({
 						field : idAttrName,
 						operator : 'EQUALS',
-						value : data.items[i].targetId
+						value : item.targetId
 					});
 				}
 
@@ -593,25 +606,49 @@
 							items.push('<option value="' + item[idAttrName] + '">' + item[labelAttrName] + '</option>');
 						}
 					}
-					
+					if(items.length === 0)
+						$('#analysis-target-select-container').addClass('hidden');
+					else
+						$('#analysis-target-select-container').removeClass('hidden');
 					$('#analysis-target-select').html(items.join(''));
+					$('#analysis-target-select').select2();
 				});
 				
 				// create table
-				$('#analysis-target-table-container').table({
-					'entityMetaData' : targetMeta,
-					'attributes' : $.map(targetMeta.attributes, function(attr) { return attr; }),
-					'query' : q,
-					'deletable' : true,
-					'maxRows' : 10
-				});
-				
+				if(data.items.length > 0) {
+					var rules = [];
+					for(var i = 0; i < data.items.length; ++i) {
+						if (i > 0) {
+							rules.push({
+								operator : 'OR'
+							});
+						}
+						rules.push({
+							field : idAttrName,
+							operator : 'EQUALS',
+							value : data.items[i].targetId
+						});
+					}
+					
+					$('#analysis-target-table-container').table({
+						'entityMetaData' : targetMeta,
+						'attributes' : $.map(targetMeta.attributes, function(attr) { return attr; }),
+						'query' : {'q': rules},
+						'deletable' : true,
+						'maxRows' : 10,
+						'onDeleteRow' : function(href) {
+							deleteAnalysisTarget(restApi.getPrimaryKeyFromHref(href));
+						}
+					});
+				} else {
+					$('#analysis-target-table-container').html('No target selected. Use the + button to add targets');
+				}
 			});
 		});
 	}
 	
 	function stopAnalysis(analysisId) {
-		confirm('TODO stop ' + analysis);
+		$.post(molgenis.getContextUrl() + '/stop/' + analysisId);
 	}
 	
 	$(function() {
@@ -685,14 +722,15 @@
 		
 		$(document).on('click', '#run-analysis-btn', function(e) {
 			e.preventDefault();
-			$.post('/run/' settings.analysis.identifier);
+			$.post(molgenis.getContextUrl() + '/run/' + settings.analysis.identifier);
 		});
 		
 		$(document).on('click', '#add-target-btn', function(e) {
 			e.preventDefault();
 			var targetId = $('#analysis-target-select option:selected').val();
-			
-			confirm('TODO implement add target functionality');
+			$.post(molgenis.getContextUrl() + '/create/' + settings.analysis.identifier + '/target/' + targetId).done(function() {
+				renderAnalysisTargets();
+			});
 		});
 
 		window.onpopstate = function(event) {
