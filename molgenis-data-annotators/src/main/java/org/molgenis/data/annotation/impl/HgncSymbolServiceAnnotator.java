@@ -26,7 +26,8 @@ public class HgncSymbolServiceAnnotator extends LocusAnnotator
 	private final HgncLocationsProvider hgncLocationsProvider;
 
 	static final String HGNC_SYMBOL = "HGNC_SYMBOL";
-	private static final String NAME = "HGNC-Symbol";
+	private static final String NAME = "HGNC-SymbolAnnotator";
+    private static final String LABEL = "HGNC-Symbol";
 
 	@Autowired
 	public HgncSymbolServiceAnnotator(AnnotationService annotatorService, HgncLocationsProvider hgncLocationsProvider)
@@ -42,6 +43,13 @@ public class HgncSymbolServiceAnnotator extends LocusAnnotator
 	}
 
 	@Override
+	public String getLabel()
+	{
+		return LABEL;
+	}
+
+
+    @Override
 	protected boolean annotationDataExists()
 	{
 		// FIXME Check if web service is available

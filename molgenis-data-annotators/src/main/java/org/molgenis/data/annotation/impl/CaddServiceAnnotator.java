@@ -49,7 +49,8 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	static final String CADD_SCALED = "CADD_SCALED";
 	static final String CADD_ABS = "CADD_ABS";
 
-	private static final String NAME = "CADD";
+	private static final String NAME = "CADDAnnotator";
+	private static final String LABEL = "CADDAnnotator";
 
 	public static final String CADD_FILE_LOCATION_PROPERTY = "cadd_location";
 
@@ -76,6 +77,12 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	public String getName()
 	{
 		return NAME;
+	}
+
+	@Override
+	public String getLabel()
+	{
+		return LABEL;
 	}
 
 	@Override
@@ -111,7 +118,7 @@ public class CaddServiceAnnotator extends VariantAnnotator
 				{
 					caddAbs = Double.parseDouble(split[4]);
 					caddScaled = Double.parseDouble(split[5]);
-                    done = true;
+					done = true;
 				}
 				// In some cases, the ref and alt are swapped. If this is the case, the initial if statement above will
 				// fail, we can just check whether such a swapping has occured
@@ -119,7 +126,7 @@ public class CaddServiceAnnotator extends VariantAnnotator
 				{
 					caddAbs = Double.parseDouble(split[4]);
 					caddScaled = Double.parseDouble(split[5]);
-                    done = true;
+					done = true;
 				}
 			}
 			else
