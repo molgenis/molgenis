@@ -519,6 +519,9 @@
 		analysis: null
 	}
 	
+	/**
+	 * @memberOf molgenis.analysis
+	 */
 	function changeAnalysis(analysisId) {
 		settings.showOverview = false;
 		settings.showDetails = true;
@@ -529,6 +532,9 @@
 		});
 	}
 	
+	/**
+	 * @memberOf molgenis.analysis
+	 */
 	function renderPlugin() {
 		if(settings.showOverview) {
 			$('#analysis-overview-container').removeClass('hidden');
@@ -540,6 +546,9 @@
 		}
 	}
 	
+	/**
+	 * @memberOf molgenis.analysis
+	 */
 	function renderAnalysis() {
 		history.pushState(settings, '', molgenis.getContextUrl() + '/view/' + settings.analysis.identifier);
 			
@@ -552,6 +561,9 @@
 		renderAnalysisTargets();
 	}
 	
+	/**
+	 * @memberOf molgenis.analysis
+	 */
 	function deleteAnalysisTarget(targetId) {
 		// map worksheet row to analysis target and delete analysis target
 		var q = [{field: 'analysis', operator: 'EQUALS', value: settings.analysis.identifier}, {operator:'AND'}, {field: 'targetId', operator: 'EQUALS', value: targetId}];							
@@ -565,6 +577,9 @@
 		});
 	}
 	
+	/**
+	 * @memberOf molgenis.analysis
+	 */
 	function renderAnalysisTargets() {
 		// FIXME fails for data sets with > 10.000 entities
 		restApi.getAsync('/api/v1/computeui_AnalysisTarget', {'q' : [{field:'analysis', operator:'EQUALS', value:settings.analysis.identifier}], 'num': 10000}, function(data) {
@@ -647,8 +662,24 @@
 		});
 	}
 	
+	function showAnalysisOverview() {
+		history.back();
+	}
+	
+	/**
+	 * @memberOf molgenis.analysis
+	 */
 	function stopAnalysis(analysisId) {
 		$.post(molgenis.getContextUrl() + '/stop/' + analysisId);
+	}
+	
+	/**
+	 * @memberOf molgenis.analysis
+	 */
+	function cloneAnalysis(analysisId) {
+		$.post(molgenis.getContextUrl() + '/clone/' + analysisId).done(function(clonedAnalysis) {
+			changeAnalysis(clonedAnalysis.identifier);
+		});
 	}
 	
 	$(function() {
@@ -681,7 +712,7 @@
 		// analysis create screen event handlers
 		$(document).on('click', '#analysis-back-btn', function(e) {
 			e.preventDefault();
-			history.back();
+			showAnalysisOverview();
 		});
 		
 		$(document).on('change', '#analysis-name', function() {
@@ -696,7 +727,11 @@
 		
 		$(document).on('change', '#analysis-workflow', function() {
 			var href = '/api/v1/computeui_Analysis/' + settings.analysis.identifier + '/workflow';
-			restApi.update(href, $(this).val());
+			restApi.update(href, $(this).val(), {
+				success: function() {
+					renderAnalysisTargets();
+				}
+			});
 		});
 		
 		$(document).on('click', '#view-workflow-btn', function() {
@@ -717,7 +752,7 @@
 		
 		$(document).on('click', '#clone-analysis-btn', function(e) {
 			e.preventDefault();
-			confirm('TODO implement clone functionality');
+			cloneAnalysis(settings.analysis.identifier);
 		});
 		
 		$(document).on('click', '#run-analysis-btn', function(e) {
