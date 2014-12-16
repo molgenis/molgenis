@@ -54,7 +54,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring.version>4.0.6.RELEASE</spring.version>
+        <spring.version>4.0.8.RELEASE</spring.version>
         <spring.security.version>3.2.5.RELEASE</spring.security.version>
         <mysql.connector.java.version>5.1.28</mysql.connector.java.version>
 
@@ -288,11 +288,9 @@
                         <reload>manual</reload>
                         <webAppConfig>
                             <contextPath>/</contextPath>
-                            <baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
-                                <resourcesAsCSV>
-                                    ${basedir}/src/main/resources,${basedir}/target/generated-sources/molgenis/doc
-                                </resourcesAsCSV>
-                            </baseResource>
+							<baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
+								<resourcesAsCSV>${basedir}/src/main/resources</resourcesAsCSV>
+							</baseResource>
                             <webInfIncludeJarPattern>.*/molgenis-[^/]*\.jar$|.*spring-[^/]*\.jar$
                             </webInfIncludeJarPattern>
                         </webAppConfig>
@@ -576,6 +574,7 @@
     <modules>
         <module>molgenis-core</module>
         <module>molgenis-core-ui</module>
+        <module>molgenis-ontology-core</module>
         <module>molgenis-ontology</module>
         <module>molgenis-das</module>
         <module>molgenis-dataexplorer</module>

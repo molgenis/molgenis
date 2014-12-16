@@ -56,7 +56,8 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	static final String CADD_SCALED = "CADDSCALED";
 	static final String CADD_ABS = "CADDABS";
 
-	private static final String NAME = "CADD";
+	private static final String NAME = "CADDAnnotator";
+	private static final String LABEL = "CADDAnnotator";
 	
 	final List<String> infoFields = Arrays.asList(new String[]{
 			"##INFO=<ID="+CADD_SCALED+",Number=1,Type=Float,Description=\"CADD scaled C score, ie. phred-like. See Kircher et al. 2014 (http://www.ncbi.nlm.nih.gov/pubmed/24487276) or CADD website (http://cadd.gs.washington.edu/) for more information.\">",
@@ -150,6 +151,12 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	}
 
 	@Override
+	public String getLabel()
+	{
+		return LABEL;
+	}
+
+	@Override
 	public List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException
 	{
 		List<Entity> results = new ArrayList<Entity>();
@@ -189,7 +196,7 @@ public class CaddServiceAnnotator extends VariantAnnotator
 				{
 					caddAbs = Double.parseDouble(split[4]);
 					caddScaled = Double.parseDouble(split[5]);
-                    done = true;
+					done = true;
 				}
 				// In some cases, the ref and alt are swapped. If this is the case, the initial if statement above will
 				// fail, we can just check whether such a swapping has occured
@@ -197,7 +204,7 @@ public class CaddServiceAnnotator extends VariantAnnotator
 				{
 					caddAbs = Double.parseDouble(split[4]);
 					caddScaled = Double.parseDouble(split[5]);
-                    done = true;
+					done = true;
 				}
 				else
 				{

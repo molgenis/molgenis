@@ -12,18 +12,18 @@
  		spacingRight: 20	
  	},
  	title: {
- 		text: '${chart.title}'
+ 		text: '${chart.title?js_string}'
  	},
  	yAxis: {
  		title: {
- 			text: '${chart.yLabel}'
+ 			text: '${chart.yLabel?js_string}'
  		}
  	},
  	xAxis: {
  		type: 'datetime',
 		maxZoom: 5 * 24 * 3600000, // fourteen days
 		title: {
-			text: '${chart.xLabel}'
+			text: '${chart.xLabel?js_string}'
 		}
 	},
 	navigator:{
@@ -50,12 +50,12 @@
   	},
 	series: [{
 		<#list chart.data as series>
-		name: '${series.name}',
+		name: '${series.name?js_string}',
 		pointInterval: 24 * 3600 * 1000,
 		pointStart: Date.UTC(2013, 00, 01),
 		data: [
 			<#list series.data as point>
-			${point.yvalue!"null"} <#if point_has_next>,</#if>
+			${point.yvalue!"null"?js_string} <#if point_has_next>,</#if>
 			</#list>
 		]
 			<#if series_has_next> 

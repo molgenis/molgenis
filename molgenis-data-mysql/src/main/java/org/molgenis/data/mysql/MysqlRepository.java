@@ -216,6 +216,36 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		}
 	}
 
+    public void addAttributeSync(AttributeMetaData attributeMetaData)
+    {
+        try
+        {
+            if (attributeMetaData.getDataType() instanceof MrefField)
+            {
+                jdbcTemplate.execute(getMrefCreateSql(attributeMetaData));
+            }
+            else
+            {
+                jdbcTemplate.execute(getAlterSql(attributeMetaData));
+            }
+
+            if (attributeMetaData.getDataType() instanceof XrefField)
+            {
+                jdbcTemplate.execute(getCreateFKeySql(attributeMetaData));
+            }
+
+            if (attributeMetaData.isUnique())
+            {
+                jdbcTemplate.execute(getUniqueSql(attributeMetaData));
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error("Exception updating MysqlRepository.", e);
+            throw new MolgenisDataException(e);
+        }
+    }
+
 	protected String getMrefCreateSql(AttributeMetaData att) throws MolgenisModelException
 	{
 		AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();

@@ -44,7 +44,8 @@ import org.springframework.stereotype.Component;
 @Component("omimHpoService")
 public class OmimHpoAnnotator extends LocusAnnotator
 {
-	private static final String NAME = "OmimHpo";
+	private static final String NAME = "OmimHpoAnnotator";
+	private static final String LABEL = "OmimHpo";
 
 	public static final String OMIM_CAUSAL_IDENTIFIER = "OMIM_Causal_ID";
 	public static final String OMIM_DISORDERS = "OMIM_Disorders";
@@ -97,6 +98,12 @@ public class OmimHpoAnnotator extends LocusAnnotator
 	}
 
 	@Override
+	public String getLabel()
+	{
+		return LABEL;
+	}
+
+	@Override
 	public boolean annotationDataExists()
 	{
 		boolean dataExists = true;
@@ -124,11 +131,10 @@ public class OmimHpoAnnotator extends LocusAnnotator
 		{
 			for (String geneSymbol : geneSymbols)
 			{
+				HashMap<String, Object> resultMap = new HashMap<String, Object>();
 				if (geneSymbol != null && geneToOmimTerms.containsKey(geneSymbol)
 						&& geneToHpoTerms.containsKey(geneSymbol))
 				{
-					HashMap<String, Object> resultMap = new HashMap<String, Object>();
-
 					Set<String> OMIMDisorders = new HashSet<String>();
 					Set<String> OMIMCytoLocations = new HashSet<String>();
 					Set<String> OMIMHgncIdentifiers = new HashSet<String>();
@@ -183,6 +189,10 @@ public class OmimHpoAnnotator extends LocusAnnotator
 					resultMap.put(HPO_DISEASE_DATABASE_ENTRY, HPODiseaseDatabaseEntries);
 					resultMap.put(HPO_ENTREZ_ID, HPOEntrezIdentifiers);
 
+					results.add(getAnnotatedEntity(entity, resultMap));
+				}
+				else
+				{
 					results.add(getAnnotatedEntity(entity, resultMap));
 				}
 			}

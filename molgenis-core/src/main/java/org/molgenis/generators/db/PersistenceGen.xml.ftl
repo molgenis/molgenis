@@ -8,7 +8,7 @@
 		<provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
 <#list model.entities as entity>
 	<#if !entity.isAbstract()>
-		<class>${entity.namespace}.${JavaName(entity)}</class>
+		<class>${entity.namespace?xml}.${JavaName(entity)}</class>
 	</#if>
 </#list>
 	    <properties>

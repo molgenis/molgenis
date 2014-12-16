@@ -16,18 +16,18 @@
 		
 		<div class="row">
 			<div class="col-md-6">
-				<form role="form" id="gaflist-import-file-form" method="post" action="${context_url}${action}" enctype="${enctype}" onsubmit="parent.showSpinner(function(){$('.modal-body').html('Work in progress..');});  return true;">
+				<form role="form" id="gaflist-import-file-form" method="post" action="${context_url?html}${action?html}" enctype="${enctype?html}" onsubmit="parent.showSpinner(function(){$('.modal-body').html('Work in progress..');});  return true;">
 					<h4>Import CSV file</h4>
 					<#if submit_state?? && submit_state>
 						<div class="row">
 							<div class="col-md-12">
 								<i>File:</i>
 								<span>
-									<#if fileName?has_content>${fileName}</#if>
+									<#if fileName?has_content>${fileName?html}</#if>
 								</span>
 							
 								<span class="pull-right">
-									<a id="backButton" href="${context_url}" class="btn btn-default">Back</a>
+									<a id="backButton" href="${context_url?html}" class="btn btn-default">Back</a>
 									<input id="submitButton" type="submit" value="Import file" class="btn btn-success"/>
 								</span>
 							</div>
@@ -58,7 +58,7 @@
 					<ul>
 						<#list messages as message>
 							<li>
-								<p>${message?if_exists}</p>
+								<p>${message!?html}</p>
 							</li>
 						</#list>
 					</ul>
@@ -70,7 +70,7 @@
 			<div class="col-md-12">
 				<#if (hasValidationError?? == true) && (hasValidationError == true)>
 					<h4>Validation error report</h4>
-					${validationReport?if_exists}
+					${validationReport!?html}
 				</#if>
 			</div>
 		</div>
