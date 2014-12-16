@@ -6,8 +6,10 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -39,10 +41,12 @@ import org.molgenis.framework.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.google.common.base.Function;
@@ -117,6 +121,7 @@ public class AnalysisPluginController extends MolgenisPluginController
 		return "view-analysis";
 	}
 
+	@Transactional
 	@RequestMapping(value = "/create", method = GET)
 	public String createAnalysis(Model model, @RequestParam(value = "workflow", required = false) String workflowId,
 			@RequestParam(value = "target", required = false) String targetEntityName,
@@ -156,7 +161,7 @@ public class AnalysisPluginController extends MolgenisPluginController
 		}
 
 		String analysisId = IdGenerator.generateId();
-		String analysisName = "Analysis-" + creationDate.getTime();
+		String analysisName = generateAnalysisName(creationDate);
 		final Analysis analysis = new Analysis(analysisId, analysisName);
 		analysis.setBackend(backend);
 		analysis.setCreationDate(creationDate);
@@ -191,6 +196,47 @@ public class AnalysisPluginController extends MolgenisPluginController
 		return "forward:" + AnalysisPluginController.URI + "/view/" + analysisId;
 	}
 
+	@Transactional
+	@RequestMapping(value = "/clone/{analysisId}", method = POST)
+	@ResponseBody
+	public Map<String, String> cloneAnalysis(@PathVariable(value = "analysisId") String analysisId)
+	{
+		Analysis analysis = dataService.findOne(AnalysisMetaData.INSTANCE.getName(), analysisId, Analysis.class);
+		if (analysis == null) throw new UnknownEntityException("Unknown Analysis [" + analysisId + "]");
+
+		Date clonedCreationDate = new Date();
+		String clonedAnalysisId = IdGenerator.generateId();
+		String clonedAnalysisName = generateAnalysisName(clonedCreationDate);
+
+		final Analysis clonedAnalysis = new Analysis(clonedAnalysisId, clonedAnalysisName);
+		clonedAnalysis.setBackend(analysis.getBackend());
+		clonedAnalysis.setCreationDate(clonedCreationDate);
+		clonedAnalysis.setDescription(analysis.getDescription());
+		// do not set jobs, submitScript
+		clonedAnalysis.setWorkflow(analysis.getWorkflow());
+		dataService.add(AnalysisMetaData.INSTANCE.getName(), clonedAnalysis);
+
+		Iterable<AnalysisTarget> targets = dataService.findAll(AnalysisTargetMetaData.INSTANCE.getName(),
+				new QueryImpl().eq(AnalysisTargetMetaData.ANALYSIS, analysis), AnalysisTarget.class);
+
+		Iterable<AnalysisTarget> clonedTargets = Iterables.transform(targets,
+				new Function<AnalysisTarget, AnalysisTarget>()
+				{
+
+					@Override
+					public AnalysisTarget apply(AnalysisTarget analysisTarget)
+					{
+						String clonedTargetIdentifier = IdGenerator.generateId();
+						String clonedTargetId = analysisTarget.getTargetId();
+						return new AnalysisTarget(clonedTargetIdentifier, clonedTargetId, clonedAnalysis);
+					}
+				});
+
+		dataService.add(AnalysisTargetMetaData.INSTANCE.getName(), clonedTargets);
+		return Collections.singletonMap(AnalysisMetaData.IDENTIFIER, clonedAnalysisId);
+	}
+
+	@Transactional
 	@RequestMapping(value = "/create/{analysisId}/target/{targetId}", method = POST)
 	@ResponseStatus(HttpStatus.OK)
 	public void createAnalysisTarget(@PathVariable(value = "analysisId") String analysisId,
@@ -203,6 +249,7 @@ public class AnalysisPluginController extends MolgenisPluginController
 		dataService.add(AnalysisTargetMetaData.INSTANCE.getName(), analysisTarget);
 	}
 
+	@Transactional
 	@RequestMapping(value = "/run/{analysisId}", method = POST)
 	@ResponseStatus(HttpStatus.OK)
 	public void runAnalysis(@PathVariable(value = "analysisId") String analysisId)
@@ -307,7 +354,7 @@ public class AnalysisPluginController extends MolgenisPluginController
 			}
 
 			// update analysis
-			analysis.setSubmitScsript(container.getSumbitScript());
+			analysis.setSubmitScript(container.getSumbitScript());
 			analysis.setJobs(jobs);
 			dataService.update(AnalysisMetaData.INSTANCE.getName(), analysis);
 
@@ -324,6 +371,7 @@ public class AnalysisPluginController extends MolgenisPluginController
 		}
 	}
 
+	@Transactional
 	@RequestMapping(value = "/stop/{analysisId}", method = POST)
 	@ResponseStatus(HttpStatus.OK)
 	public void stopAnalysis(@PathVariable(value = "analysisId") String analysisId)
@@ -354,5 +402,10 @@ public class AnalysisPluginController extends MolgenisPluginController
 	private boolean isWritten(String protocolName)
 	{
 		return writtenProtocols.contains(protocolName);
+	}
+
+	private String generateAnalysisName(Date creationDate)
+	{
+		return "Analysis-" + creationDate.getTime();
 	}
 }
