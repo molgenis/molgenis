@@ -19,7 +19,9 @@
 </div>
 <#if analysisId??>
 <script>
-	molgenis.analysis.changeAnalysis("${analysisId?js_string}");
+	$(function() {
+		molgenis.analysis.changeAnalysis("${analysisId?js_string}");
+	});
 </script>
 </#if>
 <@footer/>

@@ -770,15 +770,24 @@
 			
 			if(confirm('Are you sure you want to delete this row?')) {
 				var href = $(this).closest('tr').data('id');
-				restApi.remove(href, {
-					success: function() {
-						getTableData(settings, function(data) {
-							createTableBody(data, settings);
-							createTablePager(data, settings);
-							createTableFooter(data, settings);
-						});
-					}
-				});
+				
+				if(settings.onDeleteRow) {
+					// use user-defined delete instead of default delete behavior
+					settings.onDeleteRow(href);
+				}
+				else {
+					restApi.remove(href, {
+						success: function() {
+							getTableData(settings, function(data) {
+								createTableBody(data, settings);
+								createTablePager(data, settings);
+								createTableFooter(data, settings);
+							});
+							
+							
+						}
+					});
+				}
 			}
 		});
 		
@@ -893,6 +902,7 @@
 		'editable' : false,  //delete rows allowed, editing rows allowed
 		'deletable' : false, //delete rows allowed, editing rows not allowed
 		'searchable' : false,
-		'rowClickable': false
+		'rowClickable': false,
+		'onDeleteRow': function(){}
 	};
 }($, window.top.molgenis = window.top.molgenis || {}));
