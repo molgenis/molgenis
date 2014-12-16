@@ -55,7 +55,7 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData implements Edi
 		this(entityMetaData);
 		this.simpleName = newName;
 	}
-	
+
 	/**
 	 * Copy-constructor
 	 * 
@@ -124,9 +124,15 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData implements Edi
 		attributes.put(attributeMetaData.getName().toLowerCase(), attributeMetaData);
 	}
 
+	@Override
+	public void removeAttributeMetaData(String attributeName)
+	{
+		this.attributes.remove(attributeName);
+	}
+
 	public void removeAttributeMetaData(AttributeMetaData attributeMetaData)
 	{
-		this.attributes.remove(attributeMetaData.getName());
+		removeAttributeMetaData(attributeMetaData.getName());
 	}
 
 	public void addAllAttributeMetaData(List<AttributeMetaData> attributeMetaDataList)
