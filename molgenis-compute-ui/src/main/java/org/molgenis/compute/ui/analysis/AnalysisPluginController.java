@@ -350,7 +350,6 @@ public class AnalysisPluginController extends MolgenisPluginController
 
 				UIWorkflowNode node = findNode(uiWorkflow, generatedScript.getStepName());
 				job.setWorkflowNode(node);
-			    job.setStatus(JobStatus.GENERATED);
 				jobs.add(job);
 
 				dataService.add(AnalysisJobMetaData.INSTANCE.getName(), job);
