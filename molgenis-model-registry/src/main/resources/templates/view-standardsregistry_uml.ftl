@@ -97,7 +97,14 @@
 		<#list emd.attributes as amd>
 			<#if amd.dataType == 'xref' || amd.dataType == 'mref' || amd.dataType == 'categorical'>
 				if (classes['<@entityName amd.refEntity />']) {
-				  graph.addCell(new uml.Aggregation({ source: { id: classes['<@entityName emd />'].id }, target: { id: classes['<@entityName amd.refEntity />'].id }}));	  
+        		  graph.addCell(
+        		  	myUML.createEdge("${amd.label?js_string}", 
+        		  	{ id: classes['<@entityName emd />'].id }, 
+        		  	{ id: classes['<@entityName amd.refEntity />'].id }, 
+        		  	{lowerBound : '<#if amd.nillable>0<#else>1</#if>',
+        		  	 upperBound: '<#if amd.dataType == 'xref'>1<#else>*</#if>',
+        		  	 navigable: true}, 
+        		  	{name: '', navigable: false}));
 				}
 			</#if>
 		</#list>
