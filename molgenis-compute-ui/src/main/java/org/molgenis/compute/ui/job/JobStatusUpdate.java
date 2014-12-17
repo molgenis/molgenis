@@ -1,24 +1,22 @@
 package org.molgenis.compute.ui.job;
 
-import javax.validation.constraints.NotNull;
-
 import org.molgenis.compute.ui.model.JobStatus;
 
 public class JobStatusUpdate
 {
-	private String jobId;
+	private final String jobId;
+	private final JobStatus status;
+	private String outputMessage;
 
-	@NotNull
-	private JobStatus status;
+	public JobStatusUpdate(String jobId, JobStatus status)
+	{
+		this.jobId = jobId;
+		this.status = status;
+	}
 
 	public String getJobId()
 	{
 		return jobId;
-	}
-
-	public void setJobId(String jobId)
-	{
-		this.jobId = jobId;
 	}
 
 	public JobStatus getStatus()
@@ -26,9 +24,14 @@ public class JobStatusUpdate
 		return status;
 	}
 
-	public void setStatus(JobStatus status)
+	public String getOutputMessage()
 	{
-		this.status = status;
+		return outputMessage;
+	}
+
+	public void setOutputMessage(String outputMessage)
+	{
+		this.outputMessage = outputMessage;
 	}
 
 }

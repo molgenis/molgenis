@@ -1,5 +1,7 @@
 package org.molgenis.compute.ui.job;
 
+import java.util.Date;
+
 import org.apache.log4j.Logger;
 import org.molgenis.compute.ui.meta.AnalysisJobMetaData;
 import org.molgenis.compute.ui.model.AnalysisJob;
@@ -33,6 +35,19 @@ public class JobServiceImpl implements JobService
 		}
 
 		job.setStatus(statusUpdate.getStatus());
+		job.setOutputMessage(statusUpdate.getOutputMessage());
+
+		switch (job.getStatus())
+		{
+			case RUNNING:
+				job.setStartTime(new Date());
+				break;
+			case COMPLETE:
+			case FAILED:
+				job.setEndTime(new Date());
+				break;
+		}
+
 		dataService.update(AnalysisJobMetaData.INSTANCE.getName(), job);
 	}
 
