@@ -391,8 +391,8 @@ public class AnalysisPluginController extends MolgenisPluginController
 	@ResponseStatus(HttpStatus.OK)
 	public void stopAnalysis(@PathVariable(value = "analysisId") String analysisId)
 	{
-		// TODO implement stop analysis
-		logger.info("TODO implement stop analysis");
+		Analysis analysis = dataService.findOne(AnalysisMetaData.INSTANCE.getName(), analysisId, Analysis.class);
+		clusterManager.cancelRunJobs(analysis);
 		throw new RuntimeException("'Stop analysis' not implemented");
 	}
 
