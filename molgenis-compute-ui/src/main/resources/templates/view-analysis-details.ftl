@@ -64,6 +64,7 @@
 		    		<div class="row">
 						<div class="col-md-12">
 							<div id="analysis-target-table-container"></div>
+							<div id="analysis-target-footer"><span>No target selected. Use the + button to add targets</span></div>
 						</div>
 		    		</div>
 	    		</div>
@@ -79,7 +80,8 @@
 <div class="row">
 	<div class="col-md-12">
 		<button id="delete-analysis-btn" type="button" class="btn btn-default">Delete</button>
-		<button id="clone-analysis-btn" type="button" class="btn btn-default">Clone</button>	
+		<button id="clone-analysis-btn" type="button" class="btn btn-default">Clone</button>
+		<button id="pause-analysis-btn" type="button" class="btn btn-default hidden">Pause</button>
 		<button id="run-analysis-btn" type="button" class="btn btn-default">Run</button>
 	</div>
 </div>
