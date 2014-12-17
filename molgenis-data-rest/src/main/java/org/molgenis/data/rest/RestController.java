@@ -454,13 +454,14 @@ public class RestController
 			Query q = new QueryStringParser(meta, molgenisRSQL).parseQueryString(req.getParameterMap());
 
 			String[] sortAttributeArray = req.getParameterMap().get("sortColumn");
-			if (sortAttributeArray != null && sortAttributeArray.length > 0)
+			if (sortAttributeArray != null && sortAttributeArray.length == 1
+					&& StringUtils.isNotEmpty(sortAttributeArray[0]))
 			{
 				String sortAttribute = sortAttributeArray[0];
 				String sortOrderArray[] = req.getParameterMap().get("sortOrder");
 				Sort.Direction order = Sort.DEFAULT_DIRECTION;
 
-				if (sortOrderArray != null && sortOrderArray.length > 0)
+				if (sortOrderArray != null && sortOrderArray.length == 1 && StringUtils.isNotEmpty(sortOrderArray[0]))
 				{
 					String sortOrder = sortOrderArray[0];
 					if (sortOrder.equals("ASC"))
