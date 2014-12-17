@@ -8,6 +8,7 @@ $(function() {
 	});
 	
 	function submitForm() {
+		$('#workflowForm').validate();
 		$('#workflowForm').submit();
 	}
 	
