@@ -19,9 +19,9 @@
 		
 		var rects = {
 		<#list analysis.workflow.nodes as node>
-			<#assign totalJobCount=analysis.getTotalJobCount(node.identifier)>
-			<#assign completedJobCount=analysis.getCompletedJobCount(node.identifier)>
-			<#assign failedJobCount=analysis.getFailedJobCount(node.identifier)>
+			<#assign totalJobCount=jobCount.getTotalJobCount(node.identifier)>
+			<#assign completedJobCount=jobCount.getCompletedJobCount(node.identifier)>
+			<#assign failedJobCount=jobCount.getFailedJobCount(node.identifier)>
 			
 			'${node.identifier?js_string}': new joint.shapes.basic.Rect({
 				id: '${node.identifier?js_string}',

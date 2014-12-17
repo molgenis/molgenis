@@ -13,10 +13,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-
-import java.util.Properties;
 import java.util.Map;
-import java.util.Set;
+import java.util.Properties;
 
 import javax.validation.Valid;
 
@@ -28,9 +26,9 @@ import org.molgenis.compute.ui.meta.AnalysisJobMetaData;
 import org.molgenis.compute.ui.meta.AnalysisMetaData;
 import org.molgenis.compute.ui.meta.UIBackendMetaData;
 import org.molgenis.compute.ui.meta.UIWorkflowMetaData;
-import org.molgenis.compute.ui.model.*;
 import org.molgenis.compute.ui.model.Analysis;
 import org.molgenis.compute.ui.model.AnalysisJob;
+import org.molgenis.compute.ui.model.JobStatus;
 import org.molgenis.compute.ui.model.UIBackend;
 import org.molgenis.compute.ui.model.UIWorkflow;
 import org.molgenis.compute.ui.model.UIWorkflowNode;
@@ -64,8 +62,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 @Controller
 @RequestMapping(AnalysisPluginController.URI)
@@ -332,8 +328,8 @@ public class AnalysisPluginController extends MolgenisPluginController
 			readUserProperties();
 			String[] args =
 			{ "--generate", "--workflow", path + WORKFLOW_DEFAULT, "--parameters", path + PARAMETERS_DEFAULT,
-					"--parameters", path + WORKSHEET, "-b", scheduler, "--runid", runID, "--weave", "--url",
-					url, "--path", "", "-rundir", path + "rundir" };
+					"--parameters", path + WORKSHEET, "-b", scheduler, "--runid", runID, "--weave", "--url", url,
+					"--path", "", "-rundir", path + "rundir" };
 
 			ComputeProperties properties = new ComputeProperties(args);
 			properties.execute = false;
@@ -341,23 +337,20 @@ public class AnalysisPluginController extends MolgenisPluginController
 			CommandLineRunContainer container = new ComputeCommandLine().execute(properties);
 
 			List<GeneratedScript> generatedScripts = container.getTasks();
-			List<AnalysisJob> jobs = new ArrayList<AnalysisJob>();
 			for (GeneratedScript generatedScript : generatedScripts)
 			{
+				UIWorkflowNode node = findNode(uiWorkflow, generatedScript.getStepName());
+
 				AnalysisJob job = new AnalysisJob(IdGenerator.generateId());
 				job.setName(generatedScript.getName());
 				job.setGeneratedScript(generatedScript.getScript());
-
-				UIWorkflowNode node = findNode(uiWorkflow, generatedScript.getStepName());
 				job.setWorkflowNode(node);
-				jobs.add(job);
-
+				job.setAnalysis(analysis);
 				dataService.add(AnalysisJobMetaData.INSTANCE.getName(), job);
 			}
 
 			// update analysis
 			analysis.setSubmitScript(container.getSumbitScript());
-			analysis.setJobs(jobs);
 			dataService.update(AnalysisMetaData.INSTANCE.getName(), analysis);
 
 		}
@@ -401,27 +394,70 @@ public class AnalysisPluginController extends MolgenisPluginController
 	{
 		Analysis analysis = dataService.findOne(AnalysisMetaData.INSTANCE.getName(), analysisId, Analysis.class);
 
-		// Mref goes only one deep, we need two, set it now
-		Set<Object> jobIds = Sets.newHashSet();
-		for (AnalysisJob job : analysis.getJobs())
-		{
-			jobIds.add(job.getIdentifier());
-		}
-
-		if (jobIds.isEmpty())
-		{
-			analysis.setJobs(Collections.<AnalysisJob> emptyList());
-		}
-		else
-		{
-			Iterable<AnalysisJob> jobs = dataService.findAll(AnalysisJobMetaData.INSTANCE.getName(), jobIds,
-					AnalysisJob.class);
-			analysis.setJobs(Lists.newArrayList(jobs));
-		}
+		Iterable<AnalysisJob> analysisJobs = dataService.findAll(AnalysisJobMetaData.INSTANCE.getName(),
+				new QueryImpl().eq(AnalysisJobMetaData.ANALYSIS, analysis), AnalysisJob.class);
 
 		model.addAttribute("analysis", analysis);
-
+		model.addAttribute("jobCount", new AnalysisJobCount(analysisJobs));
 		return "progress";
+	}
+
+	private static class AnalysisJobCount
+	{
+		private final Iterable<AnalysisJob> analysisJobs;
+
+		public AnalysisJobCount(Iterable<AnalysisJob> analysisJobs)
+		{
+			this.analysisJobs = analysisJobs;
+		}
+
+		/**
+		 * Get the nr of jobs generated for a WorkflowNode
+		 *
+		 * @param nodeId
+		 * @return
+		 */
+		@SuppressWarnings("unused")
+		public int getTotalJobCount(String nodeId)
+		{
+			int count = 0;
+			for (AnalysisJob job : analysisJobs)
+			{
+				if ((job.getWorkflowNode() != null) && job.getWorkflowNode().getIdentifier().equals(nodeId))
+				{
+					count++;
+				}
+			}
+
+			return count;
+		}
+
+		@SuppressWarnings("unused")
+		public int getCompletedJobCount(String nodeId)
+		{
+			return getJobCount(nodeId, JobStatus.COMPLETED);
+		}
+
+		@SuppressWarnings("unused")
+		public int getFailedJobCount(String nodeId)
+		{
+			return getJobCount(nodeId, JobStatus.FAILED);
+		}
+
+		private int getJobCount(String nodeId, JobStatus status)
+		{
+			int count = 0;
+			for (AnalysisJob job : analysisJobs)
+			{
+				if ((job.getWorkflowNode() != null) && (job.getStatus() == status)
+						&& job.getWorkflowNode().getIdentifier().equals(nodeId))
+				{
+					count++;
+				}
+			}
+
+			return count;
+		}
 	}
 
 	private UIWorkflowNode findNode(UIWorkflow uiWorkflow, String stepName)
@@ -438,7 +474,6 @@ public class AnalysisPluginController extends MolgenisPluginController
 	{
 		return writtenProtocols.contains(protocolName);
 	}
-
 
 	private void readUserProperties()
 	{
@@ -475,7 +510,6 @@ public class AnalysisPluginController extends MolgenisPluginController
 			}
 		}
 	}
-
 
 	private String generateAnalysisName(Date creationDate)
 	{
