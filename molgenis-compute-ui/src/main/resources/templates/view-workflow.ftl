@@ -43,11 +43,6 @@
     					<input type="checkbox" id="active" name="active" <#if workflow.active> checked</#if> />
       				</div>
   				</div>
-  				<div class="form-group">
-    				<div class="col-md-offset-2 col-sm-10">
-      					<button type="submit" id="submitFormButton"class="btn btn-default">Save</button>
-    				</div>
-  				</div>
   			</div>
 		</div>					
 	</form>
