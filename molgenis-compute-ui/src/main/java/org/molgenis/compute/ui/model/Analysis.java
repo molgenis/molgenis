@@ -1,9 +1,7 @@
 package org.molgenis.compute.ui.model;
 
 import java.util.Date;
-import java.util.List;
 
-import org.elasticsearch.common.collect.Lists;
 import org.molgenis.compute.ui.meta.AnalysisMetaData;
 import org.molgenis.data.support.MapEntity;
 
@@ -68,18 +66,6 @@ public class Analysis extends MapEntity
 		set(AnalysisMetaData.WORKFLOW, workflow);
 	}
 
-	public List<AnalysisJob> getJobs()
-	{
-		Iterable<AnalysisJob> jobs = getEntities(AnalysisMetaData.JOBS, AnalysisJob.class);
-		if (jobs == null) return Lists.newArrayList();
-		return Lists.newArrayList(jobs);
-	}
-
-	public void setJobs(List<AnalysisJob> jobs)
-	{
-		set(AnalysisMetaData.JOBS, jobs);
-	}
-
 	public UIBackend getBackend()
 	{
 		return getEntity(AnalysisMetaData.BACKEND, UIBackend.class);
@@ -100,49 +86,17 @@ public class Analysis extends MapEntity
 		set(AnalysisMetaData.SUBMIT_SCRIPT, submitScript);
 	}
 
-	/**
-	 * Get the nr of jobs generated for a WorkflowNode
-	 * 
-	 * @param nodeId
-	 * @return
-	 */
-	public int getTotalJobCount(String nodeId)
+	public AnalysisStatus getStatus()
 	{
-		int count = 0;
-		for (AnalysisJob job : getJobs())
-		{
-			if ((job.getWorkflowNode() != null) && job.getWorkflowNode().getIdentifier().equals(nodeId))
-			{
-				count++;
-			}
-		}
+		String status = getString(AnalysisMetaData.STATUS);
+		if (status == null) return null;
 
-		return count;
+		return AnalysisStatus.valueOf(status);
 	}
 
-	public int getCompletedJobCount(String nodeId)
+	public void setStatus(AnalysisStatus status)
 	{
-		return getJobCount(nodeId, JobStatus.COMPLETE);
-	}
-
-	public int getFailedJobCount(String nodeId)
-	{
-		return getJobCount(nodeId, JobStatus.FAILED);
-	}
-
-	private int getJobCount(String nodeId, JobStatus status)
-	{
-		int count = 0;
-		for (AnalysisJob job : getJobs())
-		{
-			if ((job.getWorkflowNode() != null) && (job.getStatus() == status)
-					&& job.getWorkflowNode().getIdentifier().equals(nodeId))
-			{
-				count++;
-			}
-		}
-
-		return count;
+		set(AnalysisMetaData.STATUS, status.toString());
 	}
 
 	@Override
