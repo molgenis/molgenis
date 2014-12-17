@@ -70,14 +70,9 @@ public class AnalysisPluginController extends MolgenisPluginController
 	private static final String CREATE_MAPPING = "/create";
 	public static final String URI_CREATE = URI + CREATE_MAPPING;
 
-	private final String runID = "testEmpty12";
-	private final String path = ".tmp" + File.separator + runID + File.separator;
-
 	private static final String WORKFLOW_DEFAULT = "workflow.csv";
 	private static final String PARAMETERS_DEFAULT = "parameters.csv";
 	private static final String WORKSHEET = "worksheet.csv";
-
-	private List<String> writtenProtocols = null;
 
 	private final DataService dataService;
 
@@ -250,6 +245,9 @@ public class AnalysisPluginController extends MolgenisPluginController
 		if (analysis == null) throw new UnknownEntityException("Unknown Analysis [" + analysisId + "]");
 		logger.info("Running analysis [" + analysisId + "]");
 
+		String runID = analysisId;
+		String path = ".tmp" + File.separator + runID + File.separator;
+
 		try
 		{
 			UIWorkflow uiWorkflow = analysis.getWorkflow();
@@ -302,15 +300,14 @@ public class AnalysisPluginController extends MolgenisPluginController
 			}
 			List<UIWorkflowNode> nodes = uiWorkflow.getNodes();
 
-			writtenProtocols = new ArrayList<String>();
+			List<String> writtenProtocols = new ArrayList<String>();
 			for (UIWorkflowNode node : nodes)
 			{
-				String name = node.getName();
 				UIWorkflowProtocol protocol = node.getProtocol();
 				String protocolName = protocol.getName();
 				String template = protocol.getTemplate();
 
-				if (!isWritten(protocolName))
+				if (!isWritten(writtenProtocols, protocolName))
 				{
 					// FileUtils.writeStringToFile(new File(pathProtocols + protocolName + extension), template);
 					FileUtils.writeStringToFile(new File(path + protocolName), template);
@@ -366,8 +363,9 @@ public class AnalysisPluginController extends MolgenisPluginController
 	@ResponseStatus(HttpStatus.OK)
 	public void pauseAnalysis(@PathVariable(value = "analysisId") String analysisId)
 	{
-		// TODO implement stop analysis
-		logger.info("TODO implement stop analysis");
+		// TODO implement pause analysis
+		logger.info("TODO implement pause analysis");
+		throw new RuntimeException("'Pause analysis' not implemented");
 	}
 
 	@Transactional
@@ -377,6 +375,7 @@ public class AnalysisPluginController extends MolgenisPluginController
 	{
 		// TODO implement stop analysis
 		logger.info("TODO implement stop analysis");
+		throw new RuntimeException("'Stop analysis' not implemented");
 	}
 
 	@RequestMapping("/{analysisId}/progress.js")
@@ -398,7 +397,7 @@ public class AnalysisPluginController extends MolgenisPluginController
 		return null;
 	}
 
-	private boolean isWritten(String protocolName)
+	private boolean isWritten(List<String> writtenProtocols, String protocolName)
 	{
 		return writtenProtocols.contains(protocolName);
 	}
