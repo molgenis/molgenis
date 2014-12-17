@@ -34,7 +34,7 @@ public class AnalysisJobMetaData extends DefaultEntityMetaData
 		addAttribute(IDENTIFIER).setIdAttribute(true).setNillable(false);
 		addAttribute(NAME).setNillable(false).setLabelAttribute(true);
 		addAttribute(SCHEDULER_ID).setDataType(INT);
-		addAttribute(WORKFLOW_NODE).setDataType(XREF).setRefEntity(UIWorkflowNodeMetaData.INSTANCE);
+		addAttribute(WORKFLOW_NODE).setDataType(XREF).setNillable(false).setRefEntity(UIWorkflowNodeMetaData.INSTANCE);
 		addAttribute(GENERATED_SCRIPT).setDataType(SCRIPT).setNillable(false);
 		addAttribute(STATUS).setDataType(ENUM).setNillable(false).setEnumOptions(JobStatus.names())
 				.setDefaultValue(JobStatus.CREATED.toString());

@@ -1,7 +1,7 @@
 		var PAPER_WIDTH = 600;
 		var PAPER_HEIGHT = 300;
 		var RECT_WIDTH = 200;
-		var RECT_HEIGHT = 20;
+		var RECT_HEIGHT = 42;
 		
 		$('#paper').unbind();
 		$('#paper').empty();
@@ -19,6 +19,10 @@
 		
 		var rects = {
 		<#list analysis.workflow.nodes as node>
+			<#assign totalJobCount=jobCount.getTotalJobCount(node.identifier)>
+			<#assign completedJobCount=jobCount.getCompletedJobCount(node.identifier)>
+			<#assign failedJobCount=jobCount.getFailedJobCount(node.identifier)>
+			
 			'${node.identifier?js_string}': new joint.shapes.basic.Rect({
 				id: '${node.identifier?js_string}',
 				size: { 
@@ -27,15 +31,14 @@
 				},
 				attrs: {
         			rect: {
-            			fill:'#5B82A4',
+        				fill:<#if failedJobCount gt 0 >'#f2dede'<#elseif completedJobCount==0>'#ffffff'<#elseif completedJobCount==totalJobCount>'#dff0d8'<#else>'#d9edf7'</#if>,
             			cursor: 'pointer'
         			},
         			text: {
-            			text: '${node.name?js_string}',
-           	 			fill: '#fefefe',
+            			text: '${node.name?js_string}\n jobs:${totalJobCount} complete:${completedJobCount} failed:${failedJobCount}',
+           	 			fill:  '#000000',
             			'font-size': 12,
             			'font-weight': 'bold', 
-            			'font-variant': 'small-caps',
             			cursor: 'pointer'
         			}
     			}
@@ -46,6 +49,8 @@
 		_.each(rects, function(rect) { 
 			graph.addCell(rect); 
 		});
+		
+	
 
 		<#list analysis.workflow.nodes as node>
 			<#if node.previousNodes?has_content>
