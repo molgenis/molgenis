@@ -4,7 +4,9 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -12,12 +14,14 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.validation.Valid;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.compute.ui.IdGenerator;
+import org.molgenis.compute.ui.clusterexecutor.ClusterManager;
 import org.molgenis.compute.ui.meta.AnalysisJobMetaData;
 import org.molgenis.compute.ui.meta.AnalysisMetaData;
 import org.molgenis.compute.ui.meta.UIBackendMetaData;
@@ -77,6 +81,11 @@ public class AnalysisPluginController extends MolgenisPluginController
 	private static final String WORKSHEET = "worksheet.csv";
 
 	private final DataService dataService;
+
+	@Autowired
+	private ClusterManager clusterManager;
+
+	private String url, scheduler;
 
 	@Autowired
 	public AnalysisPluginController(DataService dataService)
@@ -290,7 +299,6 @@ public class AnalysisPluginController extends MolgenisPluginController
 								return attribute.getName();
 							}
 						}));
-
 				for (Entity entity : targets)
 				{
 					csvWriter.add(entity);
@@ -317,11 +325,11 @@ public class AnalysisPluginController extends MolgenisPluginController
 				}
 			}
 
-			// generate jobs
+			readUserProperties();
 			String[] args =
 			{ "--generate", "--workflow", path + WORKFLOW_DEFAULT, "--parameters", path + PARAMETERS_DEFAULT,
-					"--parameters", path + WORKSHEET, "-b", "slurm", "--runid", runID, "--weave", "--url",
-					"umcg.hpc.rug.nl", "--path", "", "-rundir", path + "rundir" };
+					"--parameters", path + WORKSHEET, "-b", scheduler, "--runid", runID, "--weave", "--url", url,
+					"--path", "", "-rundir", path + "rundir" };
 
 			ComputeProperties properties = new ComputeProperties(args);
 			properties.execute = false;
@@ -356,6 +364,9 @@ public class AnalysisPluginController extends MolgenisPluginController
 			logger.error("", e);
 			throw new RuntimeException(e);
 		}
+
+		clusterManager.executeAnalysis(analysis);
+
 	}
 
 	@Transactional
@@ -462,6 +473,42 @@ public class AnalysisPluginController extends MolgenisPluginController
 	private boolean isWritten(List<String> writtenProtocols, String protocolName)
 	{
 		return writtenProtocols.contains(protocolName);
+	}
+
+	private void readUserProperties()
+	{
+		Properties prop = new Properties();
+		InputStream input = null;
+
+		try
+		{
+			input = new FileInputStream(".cluster.properties");
+
+			// load a properties file
+			prop.load(input);
+
+			url = prop.getProperty(ClusterManager.URL);
+			scheduler = prop.getProperty(ClusterManager.SCHEDULER);
+
+		}
+		catch (IOException ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			if (input != null)
+			{
+				try
+				{
+					input.close();
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
 	private String generateAnalysisName(Date creationDate)
