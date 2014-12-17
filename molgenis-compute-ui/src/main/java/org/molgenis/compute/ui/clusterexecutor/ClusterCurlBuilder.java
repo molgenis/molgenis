@@ -87,9 +87,6 @@ public class ClusterCurlBuilder
 			values.put("IP", prop.getProperty(ClusterManager.SERVER_IP));
 			values.put("PORT", prop.getProperty(ClusterManager.SERVER_PORT));
 
-			values.put(ClusterManager.API_USER, prop.getProperty(ClusterManager.API_USER));
-			values.put(ClusterManager.API_PASS, prop.getProperty(ClusterManager.API_PASS));
-
 			values.put(ClusterManager.BACKEND, prop.getProperty(ClusterManager.URL));
 
 
