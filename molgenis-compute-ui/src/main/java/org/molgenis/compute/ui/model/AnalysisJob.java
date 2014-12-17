@@ -32,7 +32,7 @@ public class AnalysisJob extends MapEntity
 		return getInt(AnalysisJobMetaData.SCHEDULER_ID);
 	}
 
-	public void setSchedulerId(Integer schedulerId)
+	public void setSchedulerId(String schedulerId)
 	{
 		set(AnalysisJobMetaData.SCHEDULER_ID, schedulerId);
 	}
