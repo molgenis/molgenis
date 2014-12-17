@@ -100,6 +100,51 @@ public class Analysis extends MapEntity
 		set(AnalysisMetaData.SUBMIT_SCRIPT, submitScript);
 	}
 
+	/**
+	 * Get the nr of jobs generated for a WorkflowNode
+	 * 
+	 * @param nodeId
+	 * @return
+	 */
+	public int getTotalJobCount(String nodeId)
+	{
+		int count = 0;
+		for (AnalysisJob job : getJobs())
+		{
+			if ((job.getWorkflowNode() != null) && job.getWorkflowNode().getIdentifier().equals(nodeId))
+			{
+				count++;
+			}
+		}
+
+		return count;
+	}
+
+	public int getCompletedJobCount(String nodeId)
+	{
+		return getJobCount(nodeId, JobStatus.COMPLETE);
+	}
+
+	public int getFailedJobCount(String nodeId)
+	{
+		return getJobCount(nodeId, JobStatus.FAILED);
+	}
+
+	private int getJobCount(String nodeId, JobStatus status)
+	{
+		int count = 0;
+		for (AnalysisJob job : getJobs())
+		{
+			if ((job.getWorkflowNode() != null) && (job.getStatus() == status)
+					&& job.getWorkflowNode().getIdentifier().equals(nodeId))
+			{
+				count++;
+			}
+		}
+
+		return count;
+	}
+
 	@Override
 	public int hashCode()
 	{

@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -51,6 +52,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 @Controller
 @RequestMapping(AnalysisPluginController.URI)
@@ -384,6 +387,18 @@ public class AnalysisPluginController extends MolgenisPluginController
 	public String getProgressScript(@PathVariable(value = "analysisId") String analysisId, Model model)
 	{
 		Analysis analysis = dataService.findOne(AnalysisMetaData.INSTANCE.getName(), analysisId, Analysis.class);
+
+		// Mref goes only one deep, we need two, set it now
+		Set<Object> jobIds = Sets.newHashSet();
+		for (AnalysisJob job : analysis.getJobs())
+		{
+			jobIds.add(job.getIdentifier());
+		}
+
+		Iterable<AnalysisJob> jobs = dataService.findAll(AnalysisJobMetaData.INSTANCE.getName(), jobIds,
+				AnalysisJob.class);
+		analysis.setJobs(Lists.newArrayList(jobs));
+
 		model.addAttribute("analysis", analysis);
 
 		return "progress";
