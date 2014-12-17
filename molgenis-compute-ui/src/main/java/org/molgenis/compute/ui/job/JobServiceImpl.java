@@ -42,9 +42,13 @@ public class JobServiceImpl implements JobService
 			case RUNNING:
 				job.setStartTime(new Date());
 				break;
-			case COMPLETE:
+			case COMPLETED:
 			case FAILED:
 				job.setEndTime(new Date());
+				break;
+			case CREATED:
+				break;
+			default:
 				break;
 		}
 
