@@ -6,7 +6,7 @@
 	/**
 	 * @memberOf molgenis.table
 	 */
-	function createTable(settings) {
+	function createTable(settings, callback) {
 		// create elements
 		var items = [];
 		items.push('<div class="row">');
@@ -59,6 +59,7 @@
 				createTableBody(data, settings);
 				createTablePager(data, settings);
 				createTableFooter(data, settings);
+				if(callback) callback();
 			});
 		});
 	}
@@ -158,10 +159,6 @@
 	 * @memberOf molgenis.table
 	 */
 	function createTableBody(data, settings) {
-		
-		
-		
-		
 		var container = $('.molgenis-table tbody', settings.container);
 
 		var items = [];
@@ -704,13 +701,13 @@
 			},
 			'getSort' : function() {
 				return settings.sort;
+			},
+			'getNrItems' : function() {
+				return settings.data.total;
 			}
 		});
 
-		createTable(settings, function() {
-			if(settings.onInit)
-				setting.onInit();
-		});
+		createTable(settings, settings.onInit);
 
 		// sort column ascending/descending
 		$(container).on('click', 'thead th .ui-icon', function(e) {
@@ -903,6 +900,7 @@
 		'deletable' : false, //delete rows allowed, editing rows not allowed
 		'searchable' : false,
 		'rowClickable': false,
-		'onDeleteRow': function(){}
+		'onDeleteRow': function(){},
+		'onInit' : null
 	};
 }($, window.top.molgenis = window.top.molgenis || {}));

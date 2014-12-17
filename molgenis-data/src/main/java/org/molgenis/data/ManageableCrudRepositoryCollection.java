@@ -10,6 +10,11 @@ public interface ManageableCrudRepositoryCollection extends RepositoryCollection
 	CrudRepository add(EntityMetaData entityMetaData);
 
 	/**
+	 * Create and add a new CrudRepository for an EntityMetaData with repository decorators applied
+	 */
+	CrudRepository add(EntityMetaData entityMetaData, RepositoryDecoratorFactory decoratorFactory);
+
+	/**
 	 * Update EntityMetaData.
 	 * 
 	 * At the moment only adding of AttributeMetaData is supported.

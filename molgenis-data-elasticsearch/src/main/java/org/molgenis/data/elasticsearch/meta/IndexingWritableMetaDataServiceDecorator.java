@@ -4,11 +4,13 @@ import java.io.IOException;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Package;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.meta.WritableMetaDataService;
+import org.molgenis.data.support.DefaultEntityMetaData;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -36,7 +38,12 @@ public class IndexingWritableMetaDataServiceDecorator implements WritableMetaDat
 	public void addAttributeMetaData(String entityName, AttributeMetaData attribute)
 	{
 		delegate.addAttributeMetaData(entityName, attribute);
-		updateMappings(entityName);
+
+		EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
+		EditableEntityMetaData updatedEntityMetaData = new DefaultEntityMetaData(entityMetaData);
+		updatedEntityMetaData.addAttributeMetaData(attribute);
+
+		updateMappings(updatedEntityMetaData);
 	}
 
 	@Override
@@ -44,14 +51,19 @@ public class IndexingWritableMetaDataServiceDecorator implements WritableMetaDat
 	public void removeAttributeMetaData(String entityName, String attributeName)
 	{
 		delegate.removeAttributeMetaData(entityName, attributeName);
-		updateMappings(entityName);
+
+		EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
+		EditableEntityMetaData updatedEntityMetaData = new DefaultEntityMetaData(entityMetaData);
+		updatedEntityMetaData.removeAttributeMetaData(attributeName);
+
+		updateMappings(updatedEntityMetaData);
 	}
 
-	private void updateMappings(String entityName)
+	private void updateMappings(EntityMetaData entityMetaData)
 	{
 		try
 		{
-			elasticSearchService.createMappings(dataService.getEntityMetaData(entityName));
+			elasticSearchService.createMappings(entityMetaData);
 		}
 		catch (IOException e)
 		{
@@ -65,14 +77,7 @@ public class IndexingWritableMetaDataServiceDecorator implements WritableMetaDat
 	{
 		delegate.addEntityMetaData(entityMetaData);
 
-		try
-		{
-			elasticSearchService.createMappings(entityMetaData);
-		}
-		catch (IOException e)
-		{
-			throw new MolgenisDataException(e);
-		}
+		updateMappings(entityMetaData);
 	}
 
 	@Override
