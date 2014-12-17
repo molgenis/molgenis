@@ -394,9 +394,16 @@ public class AnalysisPluginController extends MolgenisPluginController
 			jobIds.add(job.getIdentifier());
 		}
 
-		Iterable<AnalysisJob> jobs = dataService.findAll(AnalysisJobMetaData.INSTANCE.getName(), jobIds,
-				AnalysisJob.class);
-		analysis.setJobs(Lists.newArrayList(jobs));
+		if (jobIds.isEmpty())
+		{
+			analysis.setJobs(Collections.<AnalysisJob> emptyList());
+		}
+		else
+		{
+			Iterable<AnalysisJob> jobs = dataService.findAll(AnalysisJobMetaData.INSTANCE.getName(), jobIds,
+					AnalysisJob.class);
+			analysis.setJobs(Lists.newArrayList(jobs));
+		}
 
 		model.addAttribute("analysis", analysis);
 

@@ -26,9 +26,9 @@ public class JobStatusUpdate
 		return status;
 	}
 
-	public void setStatus(String status)
+	public void setStatus(JobStatus status)
 	{
-		this.status = JobStatus.valueOf(status);
+		this.status = status;
 	}
 
 }

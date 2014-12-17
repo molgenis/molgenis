@@ -694,6 +694,9 @@
 	}
 	
 	function showAnalysisOverview() {
+		if (timer) {
+			clearTimeout(timer);
+		}
 		history.back();
 	}
 	

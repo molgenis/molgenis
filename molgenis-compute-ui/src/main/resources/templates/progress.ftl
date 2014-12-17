@@ -31,7 +31,7 @@
 				},
 				attrs: {
         			rect: {
-        				fill:<#if completedJobCount==0>'#ffffff'<#elseif completedJobCount==totalJobCount>'#dff0d8'<#elseif failedJobCount gt 0 >'#f2dede'<#else>'#d9edf7'</#if>,
+        				fill:<#if failedJobCount gt 0 >'#f2dede'<#elseif completedJobCount==0>'#ffffff'<#elseif completedJobCount==totalJobCount>'#dff0d8'<#else>'#d9edf7'</#if>,
             			cursor: 'pointer'
         			},
         			text: {
