@@ -4,10 +4,13 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -68,6 +71,8 @@ public class AnalysisPluginController extends MolgenisPluginController
 
 	@Autowired
 	private ClusterManager clusterManager;
+
+	private String url, scheduler;
 
 	@Autowired
 	public AnalysisPluginController(DataService dataService)
@@ -268,7 +273,6 @@ public class AnalysisPluginController extends MolgenisPluginController
 			writtenProtocols = new ArrayList<String>();
 			for (UIWorkflowNode node : nodes)
 			{
-				String name = node.getName();
 				UIWorkflowProtocol protocol = node.getProtocol();
 				String protocolName = protocol.getName();
 				String template = protocol.getTemplate();
@@ -281,11 +285,11 @@ public class AnalysisPluginController extends MolgenisPluginController
 				}
 			}
 
-			// generate jobs
+			readUserProperties();
 			String[] args =
 			{ "--generate", "--workflow", path + WORKFLOW_DEFAULT, "--parameters", path + PARAMETERS_DEFAULT,
-					"--parameters", path + WORKSHEET, "-b", "slurm", "--runid", runID, "--weave", "--url",
-					"umcg.hpc.rug.nl", "--path", "", "-rundir", path + "rundir" };
+					"--parameters", path + WORKSHEET, "-b", scheduler, "--runid", runID, "--weave", "--url",
+					url, "--path", "", "-rundir", path + "rundir" };
 
 			ComputeProperties properties = new ComputeProperties(args);
 			properties.execute = false;
@@ -351,4 +355,41 @@ public class AnalysisPluginController extends MolgenisPluginController
 	{
 		return writtenProtocols.contains(protocolName);
 	}
+
+	private void readUserProperties()
+	{
+		Properties prop = new Properties();
+		InputStream input = null;
+
+		try
+		{
+			input = new FileInputStream(".cluster.properties");
+
+			// load a properties file
+			prop.load(input);
+
+			url = prop.getProperty(ClusterManager.URL);
+			scheduler = prop.getProperty(ClusterManager.SCHEDULER);
+
+		}
+		catch (IOException ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			if (input != null)
+			{
+				try
+				{
+					input.close();
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
 }

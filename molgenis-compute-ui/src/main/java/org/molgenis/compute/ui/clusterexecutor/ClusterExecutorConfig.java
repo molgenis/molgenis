@@ -24,7 +24,7 @@ public class ClusterExecutorConfig
 	@Bean
 	public ClusterExecutor clusterExecutor()
 	{
-		return new ClusterExecutor();
+		return new ClusterExecutorImpl();
 	}
 
 	@Bean
