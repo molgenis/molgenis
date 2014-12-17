@@ -511,7 +511,7 @@
 
 	var self = molgenis.analysis = molgenis.analysis || {};
 	self.changeAnalysis = changeAnalysis;
-
+	
 	// state
 	var settings = {
 		showOverview: true,
@@ -520,7 +520,7 @@
 	}
 	
 	var timer;
-	
+	 
 	/**
 	 * @memberOf molgenis.analysis
 	 */
@@ -560,13 +560,13 @@
 		$('#analysis-workflow').val(settings.analysis.workflow.identifier);
 		
 		//Start progress polling
-		pollProgress();
+		startProgressPolling();
 		
 		// update analysis target select and table
 		renderAnalysisTargets();
 	}
 	
-	function pollProgress() {
+	function startProgressPolling() {
 		
 		//Load progress script
 		$.getScript(molgenis.getContextUrl() + '/' + settings.analysis.identifier + '/progress.js');
@@ -575,7 +575,13 @@
 			clearTimeout(timer);
 		}
 		
-		timer = setTimeout(pollProgress, 2000);
+		timer = setTimeout(startProgressPolling, 2000);
+	}
+	
+	function stopProgressPolling() {
+		if (timer) {
+			clearTimeout(timer);
+		}
 	}
 	
 	/**
@@ -694,9 +700,7 @@
 	}
 	
 	function showAnalysisOverview() {
-		if (timer) {
-			clearTimeout(timer);
-		}
+		stopProgressPolling();
 		history.back();
 	}
 	
@@ -825,5 +829,14 @@
 				renderPlugin();
 			}
 		};
+		
+		$('#jobModal').on('show.bs.modal', function () {
+			stopProgressPolling();
+		});
+		
+		$('#jobModal').on('hidden.bs.modal', function () {
+			startProgressPolling();
+		});
+		  
 	});
 }($, window.top.molgenis = window.top.molgenis || {}));

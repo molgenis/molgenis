@@ -7,14 +7,10 @@ $(function() {
 		window.location.href = url;
 	});
 	
-	$('#submitFormButton').on('click', function() {
-		var form = $('#workflowForm');
-		if (form.valid()) {
-			showSpinner(function() {
-				form.submit();
-			});
-		}
-	});
+	function submitForm() {
+		$('#workflowForm').validate();
+		$('#workflowForm').submit();
+	}
 	
-	
+	$('#workflowForm input, #workflowForm textarea, #workflowForm select').on('change', submitForm);
 });

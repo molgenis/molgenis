@@ -21,3 +21,12 @@
 	overflow: hidden;
 	margin: 20px;
 }
+
+/* Prevent detaching of relationship vertices in jointjs */
+.marker-arrowheads { display: none } 
+.tool-remove { display: none }
+.tool-options { display: none }
+
+#message {
+	height: 200px;
+}

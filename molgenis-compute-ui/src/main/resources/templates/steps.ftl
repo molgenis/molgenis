@@ -53,14 +53,15 @@ $(function() {
     				target: { id: rects['${node.identifier?js_string}'].id},
     				attrs: {
         				'.connection': {
-            			stroke: '#333333',
-            			'stroke-width': 3
-        			},
-        			'.marker-target': {
-            			fill: '#333333',
-            			d: 'M 10 0 L 0 5 L 10 10 z'
-        			}
-    			}}));
+            				stroke: '#333333',
+            				'stroke-width': 3
+        				},
+        				'.marker-target': {
+            				fill: '#333333',
+            				d: 'M 10 0 L 0 5 L 10 10 z'
+        				}
+    				}
+    			}));
 			</#list>
 		</#if>
 	</#list>
