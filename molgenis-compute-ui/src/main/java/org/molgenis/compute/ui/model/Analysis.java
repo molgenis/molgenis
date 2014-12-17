@@ -122,7 +122,7 @@ public class Analysis extends MapEntity
 
 	public int getCompletedJobCount(String nodeId)
 	{
-		return getJobCount(nodeId, JobStatus.COMPLETED);
+		return getJobCount(nodeId, JobStatus.COMPLETE);
 	}
 
 	public int getFailedJobCount(String nodeId)

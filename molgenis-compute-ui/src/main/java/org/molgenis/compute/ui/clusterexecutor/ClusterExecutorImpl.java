@@ -241,7 +241,7 @@ public class ClusterExecutorImpl implements ClusterExecutor
 				AnalysisJob analysisJob = findJob(analysis, jobName);
 				if(analysisJob != null)
 				{
-					analysisJob.setStatus(JobStatus.SUBMITTED);
+//					analysisJob.setStatus(JobStatus.SUBMITTED);
 					analysisJob.setSchedulerId(Integer.parseInt(submittedID));
 
 					dataService.update(AnalysisJobMetaData.INSTANCE.getName(), analysisJob);
