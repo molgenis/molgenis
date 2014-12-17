@@ -1,16 +1,21 @@
 package org.molgenis.compute.ui.job;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import javax.validation.Valid;
+import javax.servlet.http.Part;
 
 import org.apache.log4j.Logger;
+import org.molgenis.compute.ui.model.JobStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
@@ -30,11 +35,24 @@ public class JobStatusController
 	}
 
 	@ResponseBody
-	@RequestMapping(value = "/{jobid}/status", method = RequestMethod.POST)
-	public void updateJobStatus(@PathVariable("jobid") String jobId, @Valid JobStatusUpdate statusUpdate)
+	@RequestMapping(value = "/{jobid}/status", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
+	public void updateJobStatus(@PathVariable("jobid") String jobId, @RequestParam("status") JobStatus status,
+			@RequestParam(value = "outLogFile", required = false) Part outLogFile)
 	{
+		JobStatusUpdate statusUpdate = new JobStatusUpdate(jobId, status);
 
-		statusUpdate.setJobId(jobId);
+		if (outLogFile != null)
+		{
+			try
+			{
+				statusUpdate.setOutputMessage(FileCopyUtils.copyToString(new InputStreamReader(outLogFile
+						.getInputStream())));
+			}
+			catch (IOException e)
+			{
+				logger.error("Exception reading outLogFile", e);
+			}
+		}
 
 		try
 		{
@@ -44,7 +62,6 @@ public class JobStatusController
 		{
 			logger.error("Error putting status update for job '" + jobId + "' in queue", e);
 		}
-
 	}
 
 	private class QueueHandler implements Runnable

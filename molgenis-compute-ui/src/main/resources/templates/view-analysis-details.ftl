@@ -86,3 +86,44 @@
 		<button id="run-analysis-btn" type="button" class="btn btn-default">Run</button>
 	</div>
 </div>
+
+<div class="modal" id="jobModal" tabindex="-1" role="dialog" aria-hidden="true">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">	
+			<div class="modal-header clearfix">
+				<div id="jobPager" class="pull-right"></div>
+	        </div>
+	      	<div class="modal-body">
+	      		<div class="form-horizontal">
+  					<div class="form-group">
+    					<label for="step" class="col-md-2 control-label">Step:</label>
+    					<div class="col-md-4">
+      						<input type="text" class="form-control" id="step">
+    					</div>
+  					</div>
+  					<div class="form-group">
+    					<label for="Job" class="col-md-2 control-label">Job:</label>
+    					<div class="col-md-4">
+      						<input type="text" class="form-control" id="job">
+    					</div>
+  					</div>
+  					<div class="form-group">
+    					<label for="status" class="col-md-2 control-label">Status:</label>
+    					<div class="col-md-4">
+      						<input type="text" class="form-control" id="status">
+    					</div>
+  					</div>
+  					<div class="form-group">
+    					<label for="message" class="col-md-2 control-label"></label>
+    					<div class="col-md-10">
+      						<textarea class="col-md-10" id="message"></textarea>
+    					</div>
+  					</div>
+	      		<div>	
+			</div>
+	      	<div class="modal-footer">
+	        	<button type="button" class="btn btn-default" data-dismiss="modal">Ok</button>
+	      	</div>
+	    </div>
+	</div>
+</div>
