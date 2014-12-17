@@ -10,11 +10,11 @@ import org.springframework.stereotype.Component;
 public class DataExplorerWorkflowHandlerRegistrator implements ApplicationListener<ContextRefreshedEvent>, Ordered
 {
 
-	private final DataExplorerWorkflowHandlerRegistratorService dataExplorerWorkflowHandlerRegistratorService;
+	private final WorkflowHandlerRegistratorService dataExplorerWorkflowHandlerRegistratorService;
 
 	@Autowired
 	public DataExplorerWorkflowHandlerRegistrator(
-			DataExplorerWorkflowHandlerRegistratorService dataExplorerWorkflowHandlerRegistratorService)
+			WorkflowHandlerRegistratorService dataExplorerWorkflowHandlerRegistratorService)
 	{
 		if (dataExplorerWorkflowHandlerRegistratorService == null) throw new IllegalArgumentException(
 				"dataExplorerWorkflowHandlerRegistratorService is null");

@@ -1,6 +1,7 @@
 package org.molgenis.compute.ui.meta;
 
 import org.molgenis.compute.ui.model.decorator.UIWorkflowDecorator;
+import org.molgenis.compute.ui.workflow.WorkflowHandlerRegistratorService;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryDecoratorFactory;
@@ -17,12 +18,15 @@ public class MetaDataRegistrator implements ApplicationListener<ContextRefreshed
 {
 	private final MysqlRepositoryCollection repositoryCollection;
 	private final MetaDataService metaDataService;
+	private final WorkflowHandlerRegistratorService workflowHandlerRegistratorService;
 
 	@Autowired
-	public MetaDataRegistrator(MysqlRepositoryCollection repositoryCollection, MetaDataService metaDataService)
+	public MetaDataRegistrator(MysqlRepositoryCollection repositoryCollection, MetaDataService metaDataService,
+			WorkflowHandlerRegistratorService workflowHandlerRegistratorService)
 	{
 		this.repositoryCollection = repositoryCollection;
 		this.metaDataService = metaDataService;
+		this.workflowHandlerRegistratorService = workflowHandlerRegistratorService;
 	}
 
 	@Override
@@ -42,7 +46,8 @@ public class MetaDataRegistrator implements ApplicationListener<ContextRefreshed
 				{
 					throw new RuntimeException("Repository [" + repository.getName() + "] must be a CrudRepository");
 				}
-				return new UIWorkflowDecorator((CrudRepository) repository, repositoryCollection);
+				return new UIWorkflowDecorator((CrudRepository) repository, repositoryCollection,
+						workflowHandlerRegistratorService);
 			}
 		});
 		repositoryCollection.add(UIParameterValueMetaData.INSTANCE);

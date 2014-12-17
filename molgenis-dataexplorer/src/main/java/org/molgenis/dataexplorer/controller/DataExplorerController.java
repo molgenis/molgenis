@@ -706,6 +706,16 @@ public class DataExplorerController extends MolgenisPluginController implements
 	@Override
 	public void onApplicationEvent(RegisterDataExplorerActionEvent event)
 	{
-		actionHandlers.put(event.getActionId(), event);
+		switch (event.getType())
+		{
+			case DEREGISTER:
+				actionHandlers.remove(event.getActionId());
+				break;
+			case REGISTER:
+				actionHandlers.put(event.getActionId(), event);
+				break;
+			default:
+				throw new RuntimeException("Unknown type [" + event.getType() + "]");
+		}
 	}
 }

@@ -4,6 +4,8 @@ import static org.molgenis.MolgenisFieldTypes.MREF;
 
 import org.molgenis.compute.ui.meta.AnalysisMetaData;
 import org.molgenis.compute.ui.meta.UIWorkflowMetaData;
+import org.molgenis.compute.ui.model.UIWorkflow;
+import org.molgenis.compute.ui.workflow.WorkflowHandlerRegistratorService;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.CrudRepositoryDecorator;
@@ -16,7 +18,8 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 
 /**
- * Compute UIWorkflow decorator that adds an analysis column to each entity refered to by a UIWorkflow
+ * Compute UIWorkflow decorator that adds an analysis column to each entity referred to by a UIWorkflow and registers
+ * the workflow
  */
 public class UIWorkflowDecorator extends CrudRepositoryDecorator
 {
@@ -30,14 +33,17 @@ public class UIWorkflowDecorator extends CrudRepositoryDecorator
 
 	private final CrudRepository decoratedRepository;
 	private final ManageableCrudRepositoryCollection repositoryCollection;
+	private final WorkflowHandlerRegistratorService dataExplorerWorkflowHandlerRegistratorService;
 
 	// TODO use WritableMetaDataService instead of ManageableCrudRepositoryCollection
 	public UIWorkflowDecorator(CrudRepository decoratedRepository,
-			ManageableCrudRepositoryCollection repositoryCollection)
+			ManageableCrudRepositoryCollection repositoryCollection,
+			WorkflowHandlerRegistratorService dataExplorerWorkflowHandlerRegistratorService)
 	{
 		super(decoratedRepository);
 		this.decoratedRepository = decoratedRepository;
 		this.repositoryCollection = repositoryCollection;
+		this.dataExplorerWorkflowHandlerRegistratorService = dataExplorerWorkflowHandlerRegistratorService;
 	}
 
 	@Override
@@ -45,6 +51,7 @@ public class UIWorkflowDecorator extends CrudRepositoryDecorator
 	{
 		decoratedRepository.add(entity);
 		addTargetTypeAnalysis(entity);
+		registerWorkflowHandler(entity);
 	}
 
 	@Override
@@ -52,6 +59,7 @@ public class UIWorkflowDecorator extends CrudRepositoryDecorator
 	{
 		decoratedRepository.update(entity);
 		addTargetTypeAnalysis(entity);
+		registerWorkflowHandler(entity);
 	}
 
 	@Override
@@ -59,6 +67,7 @@ public class UIWorkflowDecorator extends CrudRepositoryDecorator
 	{
 		Integer count = decoratedRepository.add(entities);
 		addTargetTypeAnalysis(entities);
+		registerWorkflowHandler(entities);
 		return count;
 	}
 
@@ -67,6 +76,22 @@ public class UIWorkflowDecorator extends CrudRepositoryDecorator
 	{
 		decoratedRepository.update(records);
 		addTargetTypeAnalysis(records);
+		registerWorkflowHandler(records);
+	}
+
+	private void registerWorkflowHandler(Entity entity)
+	{
+		UIWorkflow uiWorkflow = new UIWorkflow();
+		uiWorkflow.set(entity);
+
+		// publish data explorer action event
+		dataExplorerWorkflowHandlerRegistratorService.registerWorkflowHandler(uiWorkflow);
+	}
+
+	private void registerWorkflowHandler(Iterable<? extends Entity> entities)
+	{
+		for (Entity entity : entities)
+			registerWorkflowHandler(entity);
 	}
 
 	private void addTargetTypeAnalysis(Entity entity)
