@@ -519,6 +519,8 @@
 		analysis: null
 	}
 	
+	var timer;
+	
 	/**
 	 * @memberOf molgenis.analysis
 	 */
@@ -557,11 +559,23 @@
 		$('#analysis-description').val(settings.analysis.description || '');
 		$('#analysis-workflow').val(settings.analysis.workflow.identifier);
 		
-		//Load progress script
-		$.getScript(molgenis.getContextUrl() + '/' + settings.analysis.identifier + '/progress.js');
+		//Start progress polling
+		pollProgress();
 		
 		// update analysis target select and table
 		renderAnalysisTargets();
+	}
+	
+	function pollProgress() {
+		
+		//Load progress script
+		$.getScript(molgenis.getContextUrl() + '/' + settings.analysis.identifier + '/progress.js');
+		
+		if (timer) {
+			clearTimeout(timer);
+		}
+		
+		timer = setTimeout(pollProgress, 2000);
 	}
 	
 	/**
@@ -680,6 +694,9 @@
 	}
 	
 	function showAnalysisOverview() {
+		if (timer) {
+			clearTimeout(timer);
+		}
 		history.back();
 	}
 	

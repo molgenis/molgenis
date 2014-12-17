@@ -50,7 +50,7 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	static final String CADD_ABS = "CADD_ABS";
 
 	private static final String NAME = "CADDAnnotator";
-	private static final String LABEL = "CADDAnnotator";
+	private static final String LABEL = "CADD";
 
 	public static final String CADD_FILE_LOCATION_PROPERTY = "cadd_location";
 
@@ -140,7 +140,7 @@ public class CaddServiceAnnotator extends VariantAnnotator
 		}
 		if (caddAbs == 0.0 && caddScaled == 0.0)
 		{
-			throw new RuntimeException("Something went wrong with the CADD annotator");
+			logger.warn("no CADD hits");
 		}
 
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
