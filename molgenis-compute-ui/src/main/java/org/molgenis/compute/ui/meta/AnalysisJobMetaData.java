@@ -1,12 +1,14 @@
 package org.molgenis.compute.ui.meta;
 
 import static org.molgenis.MolgenisFieldTypes.DATETIME;
+import static org.molgenis.MolgenisFieldTypes.ENUM;
 import static org.molgenis.MolgenisFieldTypes.INT;
 import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.SCRIPT;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
 import static org.molgenis.MolgenisFieldTypes.XREF;
 
+import org.molgenis.compute.ui.model.JobStatus;
 import org.molgenis.data.support.DefaultEntityMetaData;
 
 public class AnalysisJobMetaData extends DefaultEntityMetaData
@@ -24,7 +26,7 @@ public class AnalysisJobMetaData extends DefaultEntityMetaData
 	public static final String OUTPUT_MESSAGE = "outputMessage";
 	public static final String PARAMETER_VALUES = "parameterValues";
 	public static final String NAME = "name";
-
+	public static final String ANALYSIS = "analysis";
 
 	private AnalysisJobMetaData()
 	{
@@ -34,7 +36,8 @@ public class AnalysisJobMetaData extends DefaultEntityMetaData
 		addAttribute(SCHEDULER_ID).setDataType(INT);
 		addAttribute(WORKFLOW_NODE).setDataType(XREF).setRefEntity(UIWorkflowNodeMetaData.INSTANCE);
 		addAttribute(GENERATED_SCRIPT).setDataType(SCRIPT).setNillable(false);
-		addAttribute(STATUS);
+		addAttribute(STATUS).setDataType(ENUM).setNillable(false).setEnumOptions(JobStatus.names())
+				.setDefaultValue(JobStatus.CREATED.toString());
 		addAttribute(START_TIME).setDataType(DATETIME);
 		addAttribute(END_TIME).setDataType(DATETIME);
 		addAttribute(ERROR_MESSAGE).setDataType(TEXT);

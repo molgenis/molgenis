@@ -1,9 +1,7 @@
 package org.molgenis.compute.ui.model;
 
 import java.util.Date;
-import java.util.List;
 
-import org.elasticsearch.common.collect.Lists;
 import org.molgenis.compute.ui.meta.AnalysisMetaData;
 import org.molgenis.data.support.MapEntity;
 
@@ -68,18 +66,6 @@ public class Analysis extends MapEntity
 		set(AnalysisMetaData.WORKFLOW, workflow);
 	}
 
-	public List<AnalysisJob> getJobs()
-	{
-		Iterable<AnalysisJob> jobs = getEntities(AnalysisMetaData.JOBS, AnalysisJob.class);
-		if (jobs == null) return Lists.newArrayList();
-		return Lists.newArrayList(jobs);
-	}
-
-	public void setJobs(List<AnalysisJob> jobs)
-	{
-		set(AnalysisMetaData.JOBS, jobs);
-	}
-
 	public UIBackend getBackend()
 	{
 		return getEntity(AnalysisMetaData.BACKEND, UIBackend.class);
@@ -98,6 +84,19 @@ public class Analysis extends MapEntity
 	public void setSubmitScript(String submitScript)
 	{
 		set(AnalysisMetaData.SUBMIT_SCRIPT, submitScript);
+	}
+
+	public AnalysisStatus getStatus()
+	{
+		String status = getString(AnalysisMetaData.STATUS);
+		if (status == null) return null;
+
+		return AnalysisStatus.valueOf(status);
+	}
+
+	public void setStatus(AnalysisStatus status)
+	{
+		set(AnalysisMetaData.STATUS, status.toString());
 	}
 
 	@Override

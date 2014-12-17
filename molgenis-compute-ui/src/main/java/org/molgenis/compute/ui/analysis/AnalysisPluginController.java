@@ -328,22 +328,20 @@ public class AnalysisPluginController extends MolgenisPluginController
 			CommandLineRunContainer container = new ComputeCommandLine().execute(properties);
 
 			List<GeneratedScript> generatedScripts = container.getTasks();
-			List<AnalysisJob> jobs = new ArrayList<AnalysisJob>();
 			for (GeneratedScript generatedScript : generatedScripts)
 			{
+				UIWorkflowNode node = findNode(uiWorkflow, generatedScript.getStepName());
+
 				AnalysisJob job = new AnalysisJob(IdGenerator.generateId());
 				job.setName(generatedScript.getName());
 				job.setGeneratedScript(generatedScript.getScript());
-
-				UIWorkflowNode node = findNode(uiWorkflow, generatedScript.getStepName());
 				job.setWorkflowNode(node);
-				jobs.add(job);
+				job.setAnalysis(analysis);
 				dataService.add(AnalysisJobMetaData.INSTANCE.getName(), job);
 			}
 
 			// update analysis
 			analysis.setSubmitScript(container.getSumbitScript());
-			analysis.setJobs(jobs);
 			dataService.update(AnalysisMetaData.INSTANCE.getName(), analysis);
 
 		}

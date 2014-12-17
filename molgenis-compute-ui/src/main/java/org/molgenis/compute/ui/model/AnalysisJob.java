@@ -132,6 +132,16 @@ public class AnalysisJob extends MapEntity
 		set(AnalysisJobMetaData.PARAMETER_VALUES, params);
 	}
 
+	public Analysis getAnalysis()
+	{
+		return getEntity(AnalysisJobMetaData.ANALYSIS, Analysis.class);
+	}
+
+	public void setAnalysis(Analysis analysis)
+	{
+		set(AnalysisJobMetaData.ANALYSIS, analysis);
+	}
+
 	@Override
 	public int hashCode()
 	{

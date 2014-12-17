@@ -79,6 +79,8 @@ public class UIWorkflowDecorator extends CrudRepositoryDecorator
 		registerWorkflowHandler(records);
 	}
 
+	// FIXME decorate delete methods and map to unregisterWorkflowHandler
+
 	private void registerWorkflowHandler(Entity entity)
 	{
 		UIWorkflow uiWorkflow = new UIWorkflow();
