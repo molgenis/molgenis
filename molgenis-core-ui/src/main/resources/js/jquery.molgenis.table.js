@@ -6,11 +6,30 @@
 	/**
 	 * @memberOf molgenis.table
 	 */
-	function createTable(settings) {
+	function createTable(settings, callback) {
 		// create elements
 		var items = [];
 		items.push('<div class="row">');
 		items.push('<div class="col-md-12">');
+		if(settings.searchable) {
+			items.push('<div class="row">');
+			items.push('<div class="col-md-offset-3 col-md-6">');
+			items.push('<div class="form-horizontal">');
+			items.push('<div class="form-group">');
+			items.push('<div class="col-md-12">');
+			items.push('<div class="input-group">');
+			items.push('<input type="text" class="form-control" id="observationset-search" placeholder="Search data values" autofocus="autofocus"/>');
+			items.push('<span class="input-group-btn">');
+			items.push('<button class="btn btn-default search-clear-btn" type="button"><span class="glyphicon glyphicon-remove"></span></button>');
+			items.push('<button class="btn btn-default search-btn" type="button"><span class="glyphicon glyphicon-search"></span></button>');
+			items.push('</span>');
+			items.push('</div>');
+			items.push('</div>');   
+			items.push('</div>');
+			items.push('</div>');
+			items.push('</div>');
+			items.push('</div>');	
+		}
 		items.push('<div class="molgenis-table-container">');
 		if(settings.rowClickable){
 			items.push('<table class="table table-striped table-condensed molgenis-table table-hover"><thead></thead><tbody></tbody></table>');
@@ -40,6 +59,7 @@
 				createTableBody(data, settings);
 				createTablePager(data, settings);
 				createTableFooter(data, settings);
+				if(callback) callback();
 			});
 		});
 	}
@@ -113,7 +133,7 @@
 		var container = $('.molgenis-table thead', settings.container);
 
 		var items = [];
-		if (settings.editenabled)
+		if (settings.editenabled || settings.deletable)
 			items.push($('<th>'));
 		$.each(settings.colAttributes, function(i, attribute) {
 			var header;
@@ -139,10 +159,6 @@
 	 * @memberOf molgenis.table
 	 */
 	function createTableBody(data, settings) {
-		
-		
-		
-		
 		var container = $('.molgenis-table tbody', settings.container);
 
 		var items = [];
@@ -150,7 +166,7 @@
 		for ( var i = 0; i < data.items.length; ++i) {
 			var entity = data.items[i];
 			var row = $('<tr>').data('entity', entity).data('id', entity.href);
-			if (settings.editenabled) {
+			if (settings.editenabled || settings.deletable) {
 				var cell = $('<td class="trash" tabindex="' + tabindex++ + '">');
 				$('<span class="glyphicon glyphicon-trash delete-row-btn"></span>').appendTo(cell);
 				row.append(cell);
@@ -685,13 +701,13 @@
 			},
 			'getSort' : function() {
 				return settings.sort;
+			},
+			'getNrItems' : function() {
+				return settings.data.total;
 			}
 		});
 
-		createTable(settings, function() {
-			if(settings.onInit)
-				setting.onInit();
-		});
+		createTable(settings, settings.onInit);
 
 		// sort column ascending/descending
 		$(container).on('click', 'thead th .ui-icon', function(e) {
@@ -751,15 +767,24 @@
 			
 			if(confirm('Are you sure you want to delete this row?')) {
 				var href = $(this).closest('tr').data('id');
-				restApi.remove(href, {
-					success: function() {
-						getTableData(settings, function(data) {
-							createTableBody(data, settings);
-							createTablePager(data, settings);
-							createTableFooter(data, settings);
-						});
-					}
-				});
+				
+				if(settings.onDeleteRow) {
+					// use user-defined delete instead of default delete behavior
+					settings.onDeleteRow(href);
+				}
+				else {
+					restApi.remove(href, {
+						success: function() {
+							getTableData(settings, function(data) {
+								createTableBody(data, settings);
+								createTablePager(data, settings);
+								createTableFooter(data, settings);
+							});
+							
+							
+						}
+					});
+				}
 			}
 		});
 		
@@ -854,6 +879,14 @@
 			});
 		});
 		
+		$(container).on('click', 'search-btn', function() {
+			console.log('search-btn', settings.query);
+		});
+		
+		$(container).on('click', 'search-clear-btn', function() {
+			console.log('search-clear-btn', settings.query);
+		});
+		
 		return this;
 	};
 
@@ -863,7 +896,11 @@
 		'maxRows' : 20,
 		'attributes' : null,
 		'query' : null,
-		'editable' : false,
-		'rowClickable': false
+		'editable' : false,  //delete rows allowed, editing rows allowed
+		'deletable' : false, //delete rows allowed, editing rows not allowed
+		'searchable' : false,
+		'rowClickable': false,
+		'onDeleteRow': function(){},
+		'onInit' : null
 	};
 }($, window.top.molgenis = window.top.molgenis || {}));

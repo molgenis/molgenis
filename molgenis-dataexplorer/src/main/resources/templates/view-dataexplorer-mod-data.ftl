@@ -26,12 +26,26 @@
     <div class="row">
     	<div class="col-md-12">
 			<div class="data-table-pager-container">
-				<div class="pull-right">
-					<a id="download-modal-button" class="btn btn-default" data-toggle="modal" data-target="#downloadModal">Download as CSV</a>
-				<#if galaxyEnabled?? && galaxyEnabled == true>
-					<a id="galaxy-export-modal-button" class="btn btn-default" data-toggle="modal" data-target="#galaxy-export-modal">Export to Galaxy</a>
-				</#if>
-				</div>
+				<form name="action-form" class="form-horizontal" action="${context_url?html}/action" method="POST">
+					<div class="btn-group pull-right">
+					  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+					    Send to ... <span class="caret"></span>
+					  </button>
+					  <ul class="dropdown-menu" role="menu">
+					  		<li><a href="#" class="download-csv-btn" data-toggle="modal" data-target="#downloadModal">CSV Download</a></li>
+					  	<#if galaxyEnabled?? && galaxyEnabled == true>
+					  		<li><a href="#" class="export-galaxy-btn" data-toggle="modal" data-target="#galaxy-export-modal">Galaxy</a></li>
+					  	</#if>
+						<#if actionHandlers?keys?size != 0>
+							<li role="presentation" class="divider"></li>
+					  		<li role="presentation" class="dropdown-header">Workflows</li>
+					  	</#if>
+					  	<#list actionHandlers?keys as key>
+							<li><a href="#" class="action-btn" data-id="${key?html}">${actionHandlers[key].actionLabel?html}</a></li>
+						</#list>
+					  </ul>
+					</div>
+				</form>
 			</div>
 		</div>
 	</div>

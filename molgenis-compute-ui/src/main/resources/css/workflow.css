@@ -1,0 +1,35 @@
+.nav-tabs {
+	margin-top: 20px;
+}
+
+.tab-content {
+	margin-top: 10px;
+}
+
+#paper {
+	width: 100%; 
+	height: 100%;
+	overflow: scroll;	
+}
+
+.select2-choice {
+	min-width: 200px !important;
+}
+
+#protocolTemplate {
+	width: 100%;
+	height: 400px;
+}
+
+#parameterMapping {
+	width: 100%;
+}
+
+#parameterMappingHolder {
+	margin-bottom: 10px;
+}
+
+/* Prevent detaching of relationship vertices in jointjs */
+.marker-arrowheads { display: none } 
+.tool-remove { display: none }
+.tool-options { display: none }

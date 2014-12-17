@@ -379,5 +379,42 @@
 		$('#genomebrowser-filter-button').click(function() {
 			setDallianceFilter();
 		});
+		
+		$('div.btn-group ul.dropdown-menu li a').click(function (e) {
+			var actionId = $(this).data('id');
+			if(actionId) {
+				var method = $('form[name=action-form]').attr('method');
+				var action = $('form[name=action-form]').attr('action');
+				
+				var actionDataRequest = {
+					actionId: actionId,
+					entityName : getEntity().name,
+					query : {
+						rules : [getQuery().q]
+					}
+				};
+				
+				$.ajax({
+					type : method,
+					url : action,
+					data : JSON.stringify(actionDataRequest),
+					contentType: 'application/json'
+				}).done(function(data) {
+					if(data.href) {
+						$.ajax({
+							type : 'POST',
+							url : data.href,
+							data : JSON.stringify(data.params),
+							contentType: 'application/json'
+						}).done(function(data) {
+							if(data.href)
+								window.location = data.href;
+						});
+					} else {
+						molgenis.createAlert([{'message' : 'Data send to ' + actionId}], 'success');
+					}
+				});
+			}
+		});
 	});
 })($, window.top.molgenis = window.top.molgenis || {});

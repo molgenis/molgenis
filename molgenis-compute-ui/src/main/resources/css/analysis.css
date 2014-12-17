@@ -1,0 +1,23 @@
+.tab-content {
+	padding: 0px 10px 0px 10px;
+}
+
+#analysis-target-select-container {
+	padding: 5px 0px 5px 0px;
+}
+
+#analysis-target-table-container {
+	padding: 5px 0px 5px 0px;
+}
+
+#analysis-target-footer {
+	padding: 5px 0px 5px 0px;
+}
+
+#paper {
+	width: 100%px; 
+	height: 100%px;
+	min-height: 200px;
+	overflow: hidden;
+	margin: 20px;
+}

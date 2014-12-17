@@ -44,9 +44,15 @@ public interface EditableEntityMetaData extends EntityMetaData
 
 	/**
 	 * 
-	 * @param defaultAttributeMetaData
+	 * @param attributeMetaData
 	 */
 	void addAttributeMetaData(AttributeMetaData attributeMetaData);
+
+	/**
+	 * 
+	 * @param attributeMetaData
+	 */
+	void removeAttributeMetaData(String attributeName);
 
 	/**
 	 * Set id attribute

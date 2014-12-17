@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.ResourceBundle;
 import java.util.Set;
 
@@ -53,6 +54,7 @@ import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -69,6 +71,7 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
 
 /**
  * Controller class for the data explorer.
@@ -77,7 +80,8 @@ import com.google.common.collect.Iterables;
 @RequestMapping(URI)
 @SessionAttributes(
 { ATTR_GALAXY_URL, ATTR_GALAXY_API_KEY })
-public class DataExplorerController extends MolgenisPluginController
+public class DataExplorerController extends MolgenisPluginController implements
+		ApplicationListener<RegisterDataExplorerActionEvent>
 {
 	private static final Logger logger = Logger.getLogger(DataExplorerController.class);
 
@@ -129,6 +133,8 @@ public class DataExplorerController extends MolgenisPluginController
 	private static final boolean DEFAULT_VAL_DATAEXPLORER_ROW_CLICKABLE = false;
 	private static final boolean DEFAULT_VAL_KEY_HIDE_SELECT = true;
 	private static final boolean DEFAULT_VAL_KEY_HIGLIGHTREGION = false;
+
+	private Map<String, RegisterDataExplorerActionEvent> actionHandlers = new HashMap<String, RegisterDataExplorerActionEvent>();
 
 	@Autowired
 	private DataService dataService;
@@ -207,7 +213,6 @@ public class DataExplorerController extends MolgenisPluginController
 		model.addAttribute("searchTerm", searchTerm);
 		model.addAttribute("hideSearchBox", molgenisSettings.getBooleanProperty(KEY_HIDE_SEARCH_BOX, false));
 		model.addAttribute("hideDataItemSelect", molgenisSettings.getBooleanProperty(KEY_HIDE_ITEM_SELECTION, false));
-
 		return "view-dataexplorer";
 	}
 
@@ -245,6 +250,8 @@ public class DataExplorerController extends MolgenisPluginController
 			String galaxyUrl = molgenisSettings.getProperty(KEY_GALAXY_URL);
 			model.addAttribute("rowClickable", isRowClickable());
 			if (galaxyUrl != null) model.addAttribute(ATTR_GALAXY_URL, galaxyUrl);
+
+			model.addAttribute("actionHandlers", getActionHandlers(entityName));
 		}
 		else if (moduleId.equals("diseasematcher"))
 		{
@@ -376,6 +383,22 @@ public class DataExplorerController extends MolgenisPluginController
 		AttributeMetaData attributeChromosome = genomeConfig.getAttributeMetadataForAttributeNameArray(
 				GenomeConfig.GENOMEBROWSER_CHROM, entityMetaData);
 		return attributeStartPosition != null && attributeChromosome != null;
+	}
+
+	@RequestMapping(value = "/action", method = POST)
+	@ResponseBody
+	public Map<String, Object> processAction(@Valid @RequestBody ActionRequest actionRequest, Model model)
+			throws IOException
+	{
+		// retrieve action handler for given action
+		String actionId = actionRequest.getActionId();
+		RegisterDataExplorerActionEvent actionHandler = actionHandlers.get(actionId);
+		if (actionHandler == null) throw new RuntimeException("Invalid action id [" + actionId + "]");
+
+		// perform action
+		Map<String, Object> actionResponse = actionHandler.getSource().performAction(actionId,
+				actionRequest.getEntityName(), actionRequest.getQuery().getRules());
+		return actionResponse;
 	}
 
 	@RequestMapping(value = "/download", method = POST)
@@ -607,8 +630,7 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/settings", method = RequestMethod.GET)
-	public @ResponseBody
-	Map<String, String> getSettings(@RequestParam(required = false) String keyStartsWith)
+	public @ResponseBody Map<String, String> getSettings(@RequestParam(required = false) String keyStartsWith)
 	{
 		if (keyStartsWith == null)
 		{
@@ -651,17 +673,49 @@ public class DataExplorerController extends MolgenisPluginController
 	private String parseEntitiesReportRuntimeProperty(String entityName)
 	{
 		String modEntitiesReportRTP = molgenisSettings.getProperty(KEY_MOD_ENTITIESREPORT, null);
-        if(modEntitiesReportRTP != null) {
-            String[] entitiesReports = modEntitiesReportRTP.split(",");
-            for (String entitiesReport : entitiesReports) {
-                String[] entitiesReportParts = entitiesReport.split(":");
-                if (entitiesReportParts.length == 2) {
-                    if (entitiesReportParts[0].equals(entityName)) {
-                        return entitiesReportParts[1];
-                    }
-                }
-            }
-        }
+		if (modEntitiesReportRTP != null)
+		{
+			String[] entitiesReports = modEntitiesReportRTP.split(",");
+			for (String entitiesReport : entitiesReports)
+			{
+				String[] entitiesReportParts = entitiesReport.split(":");
+				if (entitiesReportParts.length == 2)
+				{
+					if (entitiesReportParts[0].equals(entityName))
+					{
+						return entitiesReportParts[1];
+					}
+				}
+			}
+		}
 		return null;
+	}
+
+	private Map<String, RegisterDataExplorerActionEvent> getActionHandlers(final String entityName)
+	{
+		return Maps.filterEntries(actionHandlers, new Predicate<Entry<String, RegisterDataExplorerActionEvent>>()
+		{
+			@Override
+			public boolean apply(Entry<String, RegisterDataExplorerActionEvent> entry)
+			{
+				return entry.getValue().getSource().allowAction(entry.getKey(), entityName);
+			}
+		});
+	}
+
+	@Override
+	public void onApplicationEvent(RegisterDataExplorerActionEvent event)
+	{
+		switch (event.getType())
+		{
+			case DEREGISTER:
+				actionHandlers.remove(event.getActionId());
+				break;
+			case REGISTER:
+				actionHandlers.put(event.getActionId(), event);
+				break;
+			default:
+				throw new RuntimeException("Unknown type [" + event.getType() + "]");
+		}
 	}
 }

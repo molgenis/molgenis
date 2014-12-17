@@ -58,6 +58,8 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 
 				.antMatchers("/omim/**").authenticated()
 
+				.antMatchers("/job/**").authenticated()
+
 				.antMatchers("/charts/**").authenticated();
 	}
 
