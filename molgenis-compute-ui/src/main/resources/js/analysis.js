@@ -660,8 +660,15 @@
 					
 					// enable/disable workflow select
 					$('#analysis-workflow').prop('disabled', nrItems > 0);
-					var disableRunBtn = nrItems === 0 || settings.analysis.jobs.items.length > 0;
-					$('#run-analysis-btn').prop('disabled', disableRunBtn);
+					$('#run-analysis-btn').prop('disabled', nrItems === 0);
+					
+					if(settings.analysis.jobs.items.length > 0) {
+						$('#pause-analysis-btn').removeClass('hidden');
+						$('#run-analysis-btn').addClass('hidden');
+					} else {
+						$('#run-analysis-btn').removeClass('hidden');
+						$('#pause-analysis-btn').addClass('hidden');
+					}
 					
 					if(nrItems === 0)
 						$('#analysis-target-footer').removeClass('hidden');
