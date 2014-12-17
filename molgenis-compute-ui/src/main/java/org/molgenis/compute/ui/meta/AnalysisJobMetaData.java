@@ -13,7 +13,10 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 
 public class AnalysisJobMetaData extends DefaultEntityMetaData
 {
+	// TODO workaround for #1810 'EMX misses DefaultValue'
+	public static final JobStatus STATUS_DEFAULT = JobStatus.CREATED;
 	public static final AnalysisJobMetaData INSTANCE = new AnalysisJobMetaData();
+
 	private static final String ENTITY_NAME = "AnalysisJob";
 	public static final String IDENTIFIER = "identifier";
 	public static final String SCHEDULER_ID = "schedulerId";
@@ -37,7 +40,7 @@ public class AnalysisJobMetaData extends DefaultEntityMetaData
 		addAttribute(WORKFLOW_NODE).setDataType(XREF).setNillable(false).setRefEntity(UIWorkflowNodeMetaData.INSTANCE);
 		addAttribute(GENERATED_SCRIPT).setDataType(SCRIPT).setNillable(false);
 		addAttribute(STATUS).setDataType(ENUM).setNillable(false).setEnumOptions(JobStatus.names())
-				.setDefaultValue(JobStatus.CREATED.toString());
+				.setDefaultValue(STATUS_DEFAULT.toString());
 		addAttribute(START_TIME).setDataType(DATETIME);
 		addAttribute(END_TIME).setDataType(DATETIME);
 		addAttribute(ERROR_MESSAGE).setDataType(TEXT);

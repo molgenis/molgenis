@@ -74,4 +74,3 @@
 	
 		joint.layout.DirectedGraph.layout(graph, { setLinkVertices: false });
 		paper.fitToContent();
-

@@ -14,6 +14,8 @@ public class AnalysisJob extends MapEntity
 	public AnalysisJob()
 	{
 		super(AnalysisJobMetaData.IDENTIFIER);
+		// TODO workaround for #1810 'EMX misses DefaultValue'
+		setStatus(AnalysisJobMetaData.STATUS_DEFAULT);
 	}
 
 	public AnalysisJob(String identifier)
@@ -60,7 +62,11 @@ public class AnalysisJob extends MapEntity
 	public JobStatus getStatus()
 	{
 		String status = getString(AnalysisJobMetaData.STATUS);
-		if (status == null) return null;
+		if (status == null)
+		{
+			// TODO workaround for #1810 'EMX misses DefaultValue'
+			return AnalysisJobMetaData.STATUS_DEFAULT;
+		}
 
 		return JobStatus.valueOf(status);
 	}

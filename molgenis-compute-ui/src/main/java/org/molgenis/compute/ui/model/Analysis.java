@@ -12,6 +12,8 @@ public class Analysis extends MapEntity
 	public Analysis()
 	{
 		super(AnalysisMetaData.IDENTIFIER);
+		// TODO workaround for #1810 'EMX misses DefaultValue'
+		setStatus(AnalysisMetaData.STATUS_DEFAULT);
 	}
 
 	public Analysis(String identifier, String name)
@@ -89,7 +91,11 @@ public class Analysis extends MapEntity
 	public AnalysisStatus getStatus()
 	{
 		String status = getString(AnalysisMetaData.STATUS);
-		if (status == null) return null;
+		if (status == null)
+		{
+			// TODO workaround for #1810 'EMX misses DefaultValue'
+			return AnalysisMetaData.STATUS_DEFAULT;
+		}
 
 		return AnalysisStatus.valueOf(status);
 	}
