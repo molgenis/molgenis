@@ -53,15 +53,10 @@ public class WorkflowImportService
 	private final DataService dataService;
 	private final SearchService searchService;
 
-	private final DataExplorerWorkflowHandlerRegistratorService dataExplorerWorkflowHandlerRegistratorService;
-
 	@Autowired
-	public WorkflowImportService(DataService dataService,
-			DataExplorerWorkflowHandlerRegistratorService dataExplorerWorkflowHandlerRegistratorService,
-			SearchService searchService)
+	public WorkflowImportService(DataService dataService, SearchService searchService)
 	{
 		this.dataService = dataService;
-		this.dataExplorerWorkflowHandlerRegistratorService = dataExplorerWorkflowHandlerRegistratorService;
 		this.searchService = searchService;
 	}
 
@@ -189,19 +184,16 @@ public class WorkflowImportService
 		UIWorkflow uiWorkflow = new UIWorkflow(IdGenerator.generateId(), workflowName);
 		uiWorkflow.setNodes(Lists.newArrayList(nodesByName.values()));
 
-		String workflowFile = FileUtils.readFileToString
-				(new File(computeProperties.path + File.separator + UIWorkflow.WORKFLOW_DEFAULT));
+		String workflowFile = FileUtils.readFileToString(new File(computeProperties.path + File.separator
+				+ UIWorkflow.WORKFLOW_DEFAULT));
 		uiWorkflow.setWorkflowFile(workflowFile);
-		String parametersFile = FileUtils.readFileToString
-				(new File(computeProperties.path + File.separator + UIWorkflow.PARAMETERS_DEFAULT));
+		String parametersFile = FileUtils.readFileToString(new File(computeProperties.path + File.separator
+				+ UIWorkflow.PARAMETERS_DEFAULT));
 		uiWorkflow.setParametersFile(parametersFile);
 
 		uiWorkflow.setParameters(uiWorkflowParameters);
 
 		dataService.add(UIWorkflowMetaData.INSTANCE.getName(), uiWorkflow);
-
-		// publish data explorer action event
-		dataExplorerWorkflowHandlerRegistratorService.registerWorkflowHandler(uiWorkflow);
 
 		logger.info("Import pipeline '" + workflowName + "' done.");
 	}

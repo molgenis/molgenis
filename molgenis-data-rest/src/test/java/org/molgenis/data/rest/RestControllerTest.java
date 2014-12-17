@@ -19,7 +19,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.mockito.Matchers;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -47,6 +49,7 @@ import org.molgenis.util.ResourceFingerprintRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -91,6 +94,15 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		entity.set("name", "Piet");
 		entity.set("xrefAttribute", entityXref);
 
+		Entity entity2 = new MapEntity("id");
+		entity2.set("id", "p2");
+		entity2.set("name", "Klaas");
+		entity2.set("xrefAttribute", entityXref);
+
+		List<Entity> entities = new ArrayList();
+		entities.add(entity2);
+		entities.add(entity);
+
 		when(dataService.getEntityNames()).thenReturn(Arrays.asList(ENTITY_NAME));
 		when(dataService.getRepositoryByEntityName(ENTITY_NAME)).thenReturn(repo);
 
@@ -98,6 +110,9 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 
 		Query q = new QueryImpl().eq("name", "Piet").pageSize(10).offset(5);
 		when(dataService.findAll(ENTITY_NAME, q)).thenReturn(Arrays.asList(entity));
+
+		Query q2 = new QueryImpl().sort(Sort.Direction.DESC, "name").pageSize(100).offset(0);
+		when(dataService.findAll(ENTITY_NAME, q2)).thenReturn(entities);
 
 		DefaultAttributeMetaData attrName = new DefaultAttributeMetaData("name", FieldTypeEnum.STRING);
 		attrName.setLookupAttribute(true);
@@ -455,6 +470,14 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		mockMvc.perform(get(BASE_URI + "/csv/Person").param("start", "5").param("num", "10").param("q", "name==Piet"))
 				.andExpect(status().isOk()).andExpect(content().contentType("text/csv"))
 				.andExpect(content().string("\"name\",\"id\"\n\"Piet\",\"p1\"\n"));
+	}
+
+	@Test
+	public void retrieveSortedEntityCollectionCsv() throws Exception
+	{
+		mockMvc.perform(get(BASE_URI + "/csv/Person").param("sortColumn", "name").param("sortOrder", "DESC"))
+				.andExpect(status().isOk()).andExpect(content().contentType("text/csv"))
+				.andExpect(content().string("\"name\",\"id\"\n\"Klaas\",\"p2\"\n\"Piet\",\"p1\"\n"));
 	}
 
 	@Configuration

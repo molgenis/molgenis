@@ -385,7 +385,6 @@ public class DataExplorerController extends MolgenisPluginController implements
 		return attributeStartPosition != null && attributeChromosome != null;
 	}
 
-	// TODO register actions for CSV download and galaxy export
 	@RequestMapping(value = "/action", method = POST)
 	@ResponseBody
 	public Map<String, Object> processAction(@Valid @RequestBody ActionRequest actionRequest, Model model)
@@ -397,18 +396,9 @@ public class DataExplorerController extends MolgenisPluginController implements
 		if (actionHandler == null) throw new RuntimeException("Invalid action id [" + actionId + "]");
 
 		// perform action
-		String redirectLocation = actionHandler.getSource().performAction(actionId, actionRequest.getEntityName(),
-				actionRequest.getQuery().getRules());
-
-		// optionally respond with redirect
-		if (redirectLocation != null)
-		{
-			return Collections.<String, Object> singletonMap("location", redirectLocation);
-		}
-		else
-		{
-			return Collections.emptyMap();
-		}
+		Map<String, Object> actionResponse = actionHandler.getSource().performAction(actionId,
+				actionRequest.getEntityName(), actionRequest.getQuery().getRules());
+		return actionResponse;
 	}
 
 	@RequestMapping(value = "/download", method = POST)
@@ -716,6 +706,16 @@ public class DataExplorerController extends MolgenisPluginController implements
 	@Override
 	public void onApplicationEvent(RegisterDataExplorerActionEvent event)
 	{
-		actionHandlers.put(event.getActionId(), event);
+		switch (event.getType())
+		{
+			case DEREGISTER:
+				actionHandlers.remove(event.getActionId());
+				break;
+			case REGISTER:
+				actionHandlers.put(event.getActionId(), event);
+				break;
+			default:
+				throw new RuntimeException("Unknown type [" + event.getType() + "]");
+		}
 	}
 }

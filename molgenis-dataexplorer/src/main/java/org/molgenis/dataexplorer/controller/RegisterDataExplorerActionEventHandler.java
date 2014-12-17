@@ -1,6 +1,7 @@
 package org.molgenis.dataexplorer.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.molgenis.data.QueryRule;
 
@@ -18,7 +19,7 @@ public interface RegisterDataExplorerActionEventHandler
 	 * @param actionId
 	 * @param entityName
 	 * @param queryRules
-	 * @return location of resource to navigate to after performing action or null
+	 * @return map with properties resulting from action
 	 */
-	String performAction(String actionId, String entityName, List<QueryRule> queryRules);
+	Map<String, Object> performAction(String actionId, String entityName, List<QueryRule> queryRules);
 }

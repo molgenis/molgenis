@@ -519,16 +519,24 @@
 		analysis: null
 	}
 	
+	var timer;
+	
+	/**
+	 * @memberOf molgenis.analysis
+	 */
 	function changeAnalysis(analysisId) {
 		settings.showOverview = false;
 		settings.showDetails = true;
 		
-		restApi.getAsync('/api/v1/computeui_Analysis/' + analysisId, {'expand' : [ 'workflow' ]}, function(analysis) {
+		restApi.getAsync('/api/v1/computeui_Analysis/' + analysisId, {'expand' : [ 'jobs', 'workflow' ]}, function(analysis) {
 			settings.analysis = analysis;
 			renderPlugin();
 		});
 	}
 	
+	/**
+	 * @memberOf molgenis.analysis
+	 */
 	function renderPlugin() {
 		if(settings.showOverview) {
 			$('#analysis-overview-container').removeClass('hidden');
@@ -540,6 +548,9 @@
 		}
 	}
 	
+	/**
+	 * @memberOf molgenis.analysis
+	 */
 	function renderAnalysis() {
 		history.pushState(settings, '', molgenis.getContextUrl() + '/view/' + settings.analysis.identifier);
 			
@@ -548,16 +559,37 @@
 		$('#analysis-description').val(settings.analysis.description || '');
 		$('#analysis-workflow').val(settings.analysis.workflow.identifier);
 		
+		//Start progress polling
+		pollProgress();
+		
 		// update analysis target select and table
 		renderAnalysisTargets();
 	}
 	
-	function deleteAnalysisTarget(targetId) {
-		// map worksheet row to analysis target and delete analysis target
-		var q = [{field: 'analysis', operator: 'EQUALS', value: settings.analysis.identifier}, {operator:'AND'}, {field: 'targetId', operator: 'EQUALS', value: targetId}];							
-		restApi.getAsync('/api/v1/computeui_AnalysisTarget', {'q' : q, 'attributes' : []}, function(targets) {
-			var target = targets.items[0];
-			restApi.remove(target.href, {
+	function pollProgress() {
+		
+		//Load progress script
+		$.getScript(molgenis.getContextUrl() + '/' + settings.analysis.identifier + '/progress.js');
+		
+		if (timer) {
+			clearTimeout(timer);
+		}
+		
+		timer = setTimeout(pollProgress, 2000);
+	}
+	
+	/**
+	 * @memberOf molgenis.analysis
+	 */
+	function addAnalysisTarget(targetHref) {
+		restApi.getAsync(targetHref, {'attributes' : ['analysis'], 'expand': ['analysis[identifier]']}, function(target) {
+			// FIXME fails for data sets with more than the max mref items
+			var identifiers = $.map(target.analysis.items, function(analysis) {
+				return analysis.identifier;
+			});
+			identifiers.push(settings.analysis.identifier);
+			// update target analysis list
+			restApi.update(targetHref + '/analysis', identifiers, {
 				success: function() {
 					renderAnalysisTargets();
 				}
@@ -565,90 +597,128 @@
 		});
 	}
 	
-	function renderAnalysisTargets() {
-		// FIXME fails for data sets with > 10.000 entities
-		restApi.getAsync('/api/v1/computeui_AnalysisTarget', {'q' : [{field:'analysis', operator:'EQUALS', value:settings.analysis.identifier}], 'num': 10000}, function(data) {
-			
-			// enable/disable workflow select
-			$('#analysis-workflow').prop('disabled', data.items.length > 0);
-			
-			// update analysis target table
-			var targetType = settings.analysis.workflow.targetType;
-			restApi.getAsync('/api/v1/' + targetType + '/meta', {'expand' : [ 'attributes' ]}, function(targetMeta) {
-				var idAttrName = targetMeta.idAttribute;
-				var labelAttrName = targetMeta.labelAttribute;
-			
-				// construct entity query
-				var q = [];
-				var targetIds = {};
-				for(var i = 0; i < data.items.length; ++i) {
-					var item = data.items[i];
-					targetIds[item.targetId] = item.identifier;
-					
-					if (i > 0) {
-						q.push({
-							operator : 'OR'
-						});
-					}
-					q.push({
-						field : idAttrName,
-						operator : 'EQUALS',
-						value : item.targetId
-					});
-				}
-
-				// FIXME fails for data sets with > 10.000 entities
-				restApi.getAsync('/api/v1/' + targetType, {'attributes' : [ idAttrName, labelAttrName ], 'num': 10000}, function(data) {
-					var items = [];
-					for(var i = 0; i < data.items.length; ++i) {
-						var item = data.items[i];
-						if(!targetIds.hasOwnProperty(item[idAttrName])) {
-							items.push('<option value="' + item[idAttrName] + '">' + item[labelAttrName] + '</option>');
-						}
-					}
-					if(items.length === 0)
-						$('#analysis-target-select-container').addClass('hidden');
-					else
-						$('#analysis-target-select-container').removeClass('hidden');
-					$('#analysis-target-select').html(items.join(''));
-					$('#analysis-target-select').select2();
-				});
-				
-				// create table
-				if(data.items.length > 0) {
-					var rules = [];
-					for(var i = 0; i < data.items.length; ++i) {
-						if (i > 0) {
-							rules.push({
-								operator : 'OR'
-							});
-						}
-						rules.push({
-							field : idAttrName,
-							operator : 'EQUALS',
-							value : data.items[i].targetId
-						});
-					}
-					
-					$('#analysis-target-table-container').table({
-						'entityMetaData' : targetMeta,
-						'attributes' : $.map(targetMeta.attributes, function(attr) { return attr; }),
-						'query' : {'q': rules},
-						'deletable' : true,
-						'maxRows' : 10,
-						'onDeleteRow' : function(href) {
-							deleteAnalysisTarget(restApi.getPrimaryKeyFromHref(href));
-						}
-					});
-				} else {
-					$('#analysis-target-table-container').html('No target selected. Use the + button to add targets');
+	/**
+	 * @memberOf molgenis.analysis
+	 */
+	function deleteAnalysisTarget(targetHref) {
+		restApi.getAsync(targetHref, {'attributes' : ['analysis'], 'expand': ['analysis[identifier]']}, function(target) {
+			// FIXME fails for data sets with more than the max mref items
+			var identifiers = $.map(target.analysis.items, function(analysis) {
+				// remove analysis from target
+				return analysis.identifier !== settings.analysis.identifier ? analysis.identifier : null;
+			});
+			// update target analysis list
+			restApi.update(targetHref + '/analysis', identifiers, {
+				success: function() {
+					renderAnalysisTargets();
 				}
 			});
 		});
 	}
 	
+	/**
+	 * @memberOf molgenis.analysis
+	 */
+	function renderAnalysisTargets() {
+		var targetType = settings.analysis.workflow.targetType;
+		
+		// FIXME fails for data sets with > 10.000 entities
+		restApi.getAsync('/api/v1/' + targetType + '/meta', {'expand' : [ 'attributes' ]}, function(targetMeta) {
+			var idAttrName = targetMeta.idAttribute;
+			var labelAttrName = targetMeta.labelAttribute;
+			
+			// update analysis targets select
+			// TODO use NOT operator in query
+			restApi.getAsync('/api/v1/' + targetType, {'attributes' : [ idAttrName, labelAttrName, 'analysis'], 'expand' : [ 'analysis[identifier]' ], 'num': 10000}, function(data) {
+				var items = [];
+				for(var i = 0; i < data.items.length; ++i) {
+					var item = data.items[i];
+					
+					var equalsAnalysis = false;
+					for(var j = 0; j < item.analysis.items.length; ++j) {
+						if(settings.analysis.identifier === item.analysis.items[j].identifier) {
+							equalsAnalysis = true;
+							break;
+						}
+					}
+					if(!equalsAnalysis)
+						items.push('<option value="' + item[idAttrName] + '">' + item[labelAttrName] + '</option>');
+				}
+				if(items.length === 0)
+					$('#analysis-target-select-container').addClass('hidden');
+				else
+					$('#analysis-target-select-container').removeClass('hidden');
+				$('#analysis-target-select').html(items.join(''));
+				$('#analysis-target-select').select2();
+			});
+			
+			// update analysis targets table
+			$('#analysis-target-table-container').table({
+				'entityMetaData' : targetMeta,
+				'attributes' : $.map(targetMeta.attributes, function(attr) {
+					switch(attr.name) {
+						case 'analysis':
+							return null;
+						default:
+							return attr;
+					}
+				}),
+				'query' : {'q' : [{field:'analysis', operator:'EQUALS', value:settings.analysis.identifier}]},
+				'deletable' : true,
+				'maxRows' : 10,
+				'onDeleteRow' : function(href) {
+					deleteAnalysisTarget(href);
+				},
+				'onInit' : function() {
+					var nrItems = $('#analysis-target-table-container').table('getNrItems');
+					
+					// enable/disable workflow select
+					$('#analysis-workflow').prop('disabled', nrItems > 0);
+					$('#run-analysis-btn').prop('disabled', nrItems === 0);
+					
+					if(settings.analysis.jobs.items.length > 0) {
+						$('#pause-analysis-btn').removeClass('hidden');
+						$('#run-analysis-btn').addClass('hidden');
+					} else {
+						$('#run-analysis-btn').removeClass('hidden');
+						$('#pause-analysis-btn').addClass('hidden');
+					}
+					
+					if(nrItems === 0)
+						$('#analysis-target-footer').removeClass('hidden');
+					else
+						$('#analysis-target-footer').addClass('hidden');
+				}
+			});
+		});
+	}
+	
+	function showAnalysisOverview() {
+		if (timer) {
+			clearTimeout(timer);
+		}
+		history.back();
+	}
+	
+	function runAnalysis(analysisId) {
+		$.post(molgenis.getContextUrl() + '/run/' + analysisId).done(function() {
+			changeAnalysis(analysisId);
+		});
+	}
+	/**
+	 * @memberOf molgenis.analysis
+	 */
 	function stopAnalysis(analysisId) {
 		$.post(molgenis.getContextUrl() + '/stop/' + analysisId);
+	}
+	
+	/**
+	 * @memberOf molgenis.analysis
+	 */
+	function cloneAnalysis(analysisId) {
+		$.post(molgenis.getContextUrl() + '/clone/' + analysisId).done(function(clonedAnalysis) {
+			changeAnalysis(clonedAnalysis.identifier);
+		});
 	}
 	
 	$(function() {
@@ -678,10 +748,24 @@
 			});
 		}
 		
+		$(document).on('click', '#create-analysis-btn', function(e) {
+			e.preventDefault();
+			$.ajax({
+				type : 'POST',
+				url : molgenis.getContextUrl() + '/create',
+				data: '{}',
+				contentType: 'application/json'
+			}).done(function(analysis) {
+				console.log('analysis.identifier', analysis);
+				changeAnalysis(analysis.identifier);
+			});
+		});
+		
+		
 		// analysis create screen event handlers
 		$(document).on('click', '#analysis-back-btn', function(e) {
 			e.preventDefault();
-			history.back();
+			showAnalysisOverview();
 		});
 		
 		$(document).on('change', '#analysis-name', function() {
@@ -696,7 +780,11 @@
 		
 		$(document).on('change', '#analysis-workflow', function() {
 			var href = '/api/v1/computeui_Analysis/' + settings.analysis.identifier + '/workflow';
-			restApi.update(href, $(this).val());
+			restApi.update(href, $(this).val(), {
+				success: function() {
+					renderAnalysisTargets();
+				}
+			});
 		});
 		
 		$(document).on('click', '#view-workflow-btn', function() {
@@ -717,20 +805,18 @@
 		
 		$(document).on('click', '#clone-analysis-btn', function(e) {
 			e.preventDefault();
-			confirm('TODO implement clone functionality');
+			cloneAnalysis(settings.analysis.identifier);
 		});
 		
 		$(document).on('click', '#run-analysis-btn', function(e) {
 			e.preventDefault();
-			$.post(molgenis.getContextUrl() + '/run/' + settings.analysis.identifier);
+			runAnalysis(settings.analysis.identifier);
 		});
 		
 		$(document).on('click', '#add-target-btn', function(e) {
 			e.preventDefault();
 			var targetId = $('#analysis-target-select option:selected').val();
-			$.post(molgenis.getContextUrl() + '/create/' + settings.analysis.identifier + '/target/' + targetId).done(function() {
-				renderAnalysisTargets();
-			});
+			addAnalysisTarget('/api/v1/' + settings.analysis.workflow.targetType + '/' + targetId);
 		});
 
 		window.onpopstate = function(event) {

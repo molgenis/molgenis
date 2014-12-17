@@ -7,13 +7,20 @@ public class RegisterDataExplorerActionEvent extends ApplicationEvent
 	private static final long serialVersionUID = 1L;
 
 	private final RegisterDataExplorerActionEventHandler source;
+	private final Type type;
 	private final String actionId;
 	private final String actionLabel;
 
-	public RegisterDataExplorerActionEvent(RegisterDataExplorerActionEventHandler source, String actionId,
+	public static enum Type
+	{
+		REGISTER, DEREGISTER
+	}
+
+	public RegisterDataExplorerActionEvent(Type type, RegisterDataExplorerActionEventHandler source, String actionId,
 			String actionLabel)
 	{
 		super(source);
+		this.type = type;
 		this.source = source;
 		this.actionId = actionId;
 		this.actionLabel = actionLabel;
@@ -32,6 +39,11 @@ public class RegisterDataExplorerActionEvent extends ApplicationEvent
 	public String getActionLabel()
 	{
 		return actionLabel;
+	}
+
+	public Type getType()
+	{
+		return type;
 	}
 
 	@Override
