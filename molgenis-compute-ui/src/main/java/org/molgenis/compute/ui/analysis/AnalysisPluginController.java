@@ -70,6 +70,7 @@ public class AnalysisPluginController extends MolgenisPluginController
 	private static final String CREATE_MAPPING = "/create";
 	public static final String URI_CREATE = URI + CREATE_MAPPING;
 
+	// FIXME do not use files, use entities from database
 	private static final String WORKFLOW_DEFAULT = "workflow.csv";
 	private static final String PARAMETERS_DEFAULT = "parameters.csv";
 	private static final String WORKSHEET = "worksheet.csv";
