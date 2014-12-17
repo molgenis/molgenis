@@ -20,9 +20,9 @@
 		
 	var rects = {
 	<#list analysis.workflow.nodes as node>
-		<#assign totalJobCount=jobCount.getTotalJobCount(node.identifier)>
-		<#assign completedJobCount=jobCount.getCompletedJobCount(node.identifier)>
-		<#assign failedJobCount=jobCount.getFailedJobCount(node.identifier)>
+		<#assign totalJobCount=jobCount.getTotalJobCount(node.identifier) >
+		<#assign completedJobCount=jobCount.getCompletedJobCount(node.identifier) >
+		<#assign failedJobCount=jobCount.getFailedJobCount(node.identifier) >
 			
 		'${node.identifier?js_string}': new joint.shapes.basic.Rect({
 			id: '${node.identifier?js_string}',
@@ -59,14 +59,15 @@
     				target: { id: rects['${node.identifier?js_string}'].id},
     				attrs: {
         				'.connection': {
-            			stroke: '#333333',
-            			'stroke-width': 3
-        			},
-        			'.marker-target': {
-            			fill: '#333333',
-            			d: 'M 10 0 L 0 5 L 10 10 z'
-        			}
-    			}}));
+            				stroke: '#333333',
+            				'stroke-width': 3
+        				},
+        				'.marker-target': {
+            				fill: '#333333',
+            				d: 'M 10 0 L 0 5 L 10 10 z'
+        				}
+    				}
+    			}));
 			</#list>
 		</#if>
 	</#list>
