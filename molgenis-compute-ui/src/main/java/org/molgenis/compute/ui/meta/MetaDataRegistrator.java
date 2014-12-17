@@ -55,6 +55,8 @@ public class MetaDataRegistrator implements ApplicationListener<ContextRefreshed
 			}
 		});
 		repositoryCollection.add(UIParameterValueMetaData.INSTANCE);
+		repositoryCollection.add(UIBackendMetaData.INSTANCE);
+		repositoryCollection.add(AnalysisMetaData.INSTANCE);
 		repositoryCollection.add(AnalysisJobMetaData.INSTANCE, new RepositoryDecoratorFactory()
 		{
 			@Override
@@ -67,8 +69,6 @@ public class MetaDataRegistrator implements ApplicationListener<ContextRefreshed
 				return new AnalysisJobDecorator((CrudRepository) repository, dataService);
 			}
 		});
-		repositoryCollection.add(UIBackendMetaData.INSTANCE);
-		repositoryCollection.add(AnalysisMetaData.INSTANCE);
 		metaDataService.refreshCaches();
 	}
 

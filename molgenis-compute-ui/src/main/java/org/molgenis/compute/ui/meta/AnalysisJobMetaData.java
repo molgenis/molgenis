@@ -43,6 +43,7 @@ public class AnalysisJobMetaData extends DefaultEntityMetaData
 		addAttribute(ERROR_MESSAGE).setDataType(TEXT);
 		addAttribute(OUTPUT_MESSAGE).setDataType(TEXT);
 		addAttribute(PARAMETER_VALUES).setDataType(MREF).setRefEntity(UIParameterValueMetaData.INSTANCE);
+		addAttribute(ANALYSIS).setDataType(XREF).setNillable(false).setRefEntity(AnalysisMetaData.INSTANCE);
 	}
 
 }

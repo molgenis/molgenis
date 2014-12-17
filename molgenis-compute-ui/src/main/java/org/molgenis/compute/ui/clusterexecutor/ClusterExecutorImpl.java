@@ -1,22 +1,31 @@
 package org.molgenis.compute.ui.clusterexecutor;
 
-import com.jcraft.jsch.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import org.molgenis.compute.ui.meta.AnalysisJobMetaData;
-import org.molgenis.compute.ui.meta.AnalysisMetaData;
 import org.molgenis.compute.ui.model.Analysis;
 import org.molgenis.compute.ui.model.AnalysisJob;
-import org.molgenis.compute.ui.model.JobStatus;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.concurrent.TimeUnit;
+import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
+import com.jcraft.jsch.SftpException;
 
 /**
  * Created by hvbyelas on 10/14/14.
@@ -25,6 +34,7 @@ public class ClusterExecutorImpl implements ClusterExecutor
 {
 	private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(ClusterManager.class);
 
+	// FIXME bug remove
 	private List<String> idList = new ArrayList<String>();
 
 	@Autowired
@@ -33,22 +43,22 @@ public class ClusterExecutorImpl implements ClusterExecutor
 	@Autowired
 	private ClusterCurlBuilder builder;
 
+	// FIXME bug removes
 	private Analysis run = null;
 
-	//variables, that should come from userUI, DB and config files
+	// variables, that should come from userUI, DB and config files
 	private String password, username, root, url, scheduler;
 
 	@RunAsSystem
 	@Override
 	public boolean submitRun(Analysis analysis)
 	{
-		//here read properties, which later will come from username interface (username, password)
+		// here read properties, which later will come from username interface (username, password)
 		// and DB (clusterRoot)
 		readUserProperties();
 
-		LOG.info("SUBMIT Analysis [" + analysis.getName() +"]");
+		LOG.info("SUBMIT Analysis [" + analysis.getName() + "]");
 		this.run = analysis;
-
 
 		String runName = analysis.getName();
 		String clusterRoot = root;
@@ -56,7 +66,7 @@ public class ClusterExecutorImpl implements ClusterExecutor
 
 		boolean prepared = prepareRun(analysis, username, password, runDir);
 
-		if(prepared)
+		if (prepared)
 		{
 			boolean submitted = submit(analysis, username, password, runDir);
 			return submitted;
@@ -104,7 +114,7 @@ public class ClusterExecutorImpl implements ClusterExecutor
 			LOG.info("shell channel connected....");
 
 			ChannelSftp channelSftp = (ChannelSftp) channel;
-			ChannelExec channelExec = (ChannelExec)session.openChannel("exec");
+			ChannelExec channelExec = (ChannelExec) session.openChannel("exec");
 
 			LOG.info("create run directory...");
 
@@ -112,21 +122,21 @@ public class ClusterExecutorImpl implements ClusterExecutor
 			channelExec.connect();
 			channelExec.disconnect();
 
-//			give some time to create directory
+			// give some time to create directory
 			TimeUnit.SECONDS.sleep(1);
-
 
 			LOG.info("scripts transferring...");
 			InputStream is = new ByteArrayInputStream(analysis.getSubmitScript().getBytes());
 			channelSftp.put(is, runDir + "/submit.sh");
 
-			Iterable<AnalysisJob> jobs = analysis.getJobs();
-			for(AnalysisJob job : jobs)
+			Iterable<AnalysisJob> jobs = dataService.findAll(AnalysisJobMetaData.INSTANCE.getName(),
+					new QueryImpl().eq(AnalysisJobMetaData.ANALYSIS, analysis), AnalysisJob.class);
+			for (AnalysisJob job : jobs)
 			{
 				String taskName = job.getName();
 				String builtScript = builder.buildScript(job);
 				is = new ByteArrayInputStream(builtScript.getBytes());
-				channelSftp.put(is, runDir + "/" + taskName +".sh");
+				channelSftp.put(is, runDir + "/" + taskName + ".sh");
 			}
 
 			channelSftp.exit();
@@ -150,7 +160,6 @@ public class ClusterExecutorImpl implements ClusterExecutor
 
 		return false;
 	}
-
 
 	public boolean submit(Analysis analysis, String username, String password, String runDir)
 	{
@@ -185,7 +194,7 @@ public class ClusterExecutorImpl implements ClusterExecutor
 			channel.connect();
 			LOG.info("shell channel connected....");
 
-			ChannelExec channelExec = (ChannelExec)session.openChannel("exec");
+			ChannelExec channelExec = (ChannelExec) session.openChannel("exec");
 
 			InputStream answer = channelExec.getInputStream();
 
@@ -230,18 +239,18 @@ public class ClusterExecutorImpl implements ClusterExecutor
 
 	private void updateDatabaseWithTaskIDs(List<String> idList, Analysis analysis)
 	{
-		for(String str: idList)
+		for (String str : idList)
 		{
 			int index = str.indexOf(":");
-			if(index > 0)
+			if (index > 0)
 			{
 				String jobName = str.substring(0, index);
 				String submittedID = str.substring(index + 1);
 
 				AnalysisJob analysisJob = findJob(analysis, jobName);
-				if(analysisJob != null)
+				if (analysisJob != null)
 				{
-//					analysisJob.setStatus(JobStatus.SUBMITTED);
+					// analysisJob.setStatus(JobStatus.SUBMITTED);
 					analysisJob.setSchedulerId(Integer.parseInt(submittedID));
 
 					dataService.update(AnalysisJobMetaData.INSTANCE.getName(), analysisJob);
@@ -253,14 +262,14 @@ public class ClusterExecutorImpl implements ClusterExecutor
 
 	private AnalysisJob findJob(Analysis analysis, String jobName)
 	{
-		for(AnalysisJob job : analysis.getJobs())
+		Iterable<AnalysisJob> jobs = dataService.findAll(AnalysisJobMetaData.INSTANCE.getName(),
+				new QueryImpl().eq(AnalysisJobMetaData.ANALYSIS, analysis), AnalysisJob.class);
+		for (AnalysisJob job : jobs)
 		{
-			if(job.getName().equalsIgnoreCase(jobName))
-				return job;
+			if (job.getName().equalsIgnoreCase(jobName)) return job;
 		}
 		return null;
 	}
-
 
 	public boolean cancelRun(Analysis run)
 	{
@@ -279,9 +288,9 @@ public class ClusterExecutorImpl implements ClusterExecutor
 			// load a properties file
 			prop.load(input);
 
-			password =  prop.getProperty(ClusterManager.PASS);
-			username =  prop.getProperty(ClusterManager.USER);
-			root =  prop.getProperty(ClusterManager.ROOT);
+			password = prop.getProperty(ClusterManager.PASS);
+			username = prop.getProperty(ClusterManager.USER);
+			root = prop.getProperty(ClusterManager.ROOT);
 			url = prop.getProperty(ClusterManager.URL);
 			scheduler = prop.getProperty(ClusterManager.SCHEDULER);
 		}
