@@ -654,90 +654,22 @@
 				'maxRows' : 10,
 				'onDeleteRow' : function(href) {
 					deleteAnalysisTarget(href);
+				},
+				'onInit' : function() {
+					var nrItems = $('#analysis-target-table-container').table('getNrItems');
+					
+					// enable/disable workflow select
+					$('#analysis-workflow').prop('disabled', nrItems > 0);
+					var disableRunBtn = nrItems === 0 || settings.analysis.jobs.items.length > 0;
+					$('#run-analysis-btn').prop('disabled', disableRunBtn);
+					
+					if(nrItems === 0)
+						$('#analysis-target-footer').removeClass('hidden');
+					else
+						$('#analysis-target-footer').addClass('hidden');
 				}
 			});
 		});
-		
-//		restApi.getAsync('/api/v1/computeui_AnalysisTarget', {'q' : [{field:'analysis', operator:'EQUALS', value:settings.analysis.identifier}], 'num': 10000}, function(data) {
-//			
-//			// enable/disable workflow select
-//			$('#analysis-workflow').prop('disabled', data.items.length > 0);
-//			var disableRunBtn = data.items.length === 0 || settings.analysis.jobs.items.length > 0;
-//			$('#run-analysis-btn').prop('disabled', disableRunBtn);
-//			
-//			// update analysis target table
-//			var targetType = settings.analysis.workflow.targetType;
-//			restApi.getAsync('/api/v1/' + targetType + '/meta', {'expand' : [ 'attributes' ]}, function(targetMeta) {
-//				var idAttrName = targetMeta.idAttribute;
-//				var labelAttrName = targetMeta.labelAttribute;
-//			
-//				// construct entity query
-//				var q = [];
-//				var targetIds = {};
-//				for(var i = 0; i < data.items.length; ++i) {
-//					var item = data.items[i];
-//					targetIds[item.targetId] = item.identifier;
-//					
-//					if (i > 0) {
-//						q.push({
-//							operator : 'OR'
-//						});
-//					}
-//					q.push({
-//						field : idAttrName,
-//						operator : 'EQUALS',
-//						value : item.targetId
-//					});
-//				}
-//
-//				// FIXME fails for data sets with > 10.000 entities
-//				restApi.getAsync('/api/v1/' + targetType, {'attributes' : [ idAttrName, labelAttrName ], 'num': 10000}, function(data) {
-//					var items = [];
-//					for(var i = 0; i < data.items.length; ++i) {
-//						var item = data.items[i];
-//						if(!targetIds.hasOwnProperty(item[idAttrName])) {
-//							items.push('<option value="' + item[idAttrName] + '">' + item[labelAttrName] + '</option>');
-//						}
-//					}
-//					if(items.length === 0)
-//						$('#analysis-target-select-container').addClass('hidden');
-//					else
-//						$('#analysis-target-select-container').removeClass('hidden');
-//					$('#analysis-target-select').html(items.join(''));
-//					$('#analysis-target-select').select2();
-//				});
-//				
-//				// create table
-//				if(data.items.length > 0) {
-//					var rules = [];
-//					for(var i = 0; i < data.items.length; ++i) {
-//						if (i > 0) {
-//							rules.push({
-//								operator : 'OR'
-//							});
-//						}
-//						rules.push({
-//							field : idAttrName,
-//							operator : 'EQUALS',
-//							value : data.items[i].targetId
-//						});
-//					}
-//					
-//					$('#analysis-target-table-container').table({
-//						'entityMetaData' : targetMeta,
-//						'attributes' : $.map(targetMeta.attributes, function(attr) { return attr; }),
-//						'query' : {'q': rules},
-//						'deletable' : true,
-//						'maxRows' : 10,
-//						'onDeleteRow' : function(href) {
-//							deleteAnalysisTarget(restApi.getPrimaryKeyFromHref(href));
-//						}
-//					});
-//				} else {
-//					$('#analysis-target-table-container').html('No target selected. Use the + button to add targets');
-//				}
-//			});
-//		});
 	}
 	
 	function showAnalysisOverview() {
