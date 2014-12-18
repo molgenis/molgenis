@@ -58,11 +58,16 @@ public class CaddServiceAnnotator extends VariantAnnotator
 
 	private static final String NAME = "CADDAnnotator";
 	private static final String LABEL = "CADD";
-	
-	final List<String> infoFields = Arrays.asList(new String[]{
-			"##INFO=<ID="+CADD_SCALED+",Number=1,Type=Float,Description=\"CADD scaled C score, ie. phred-like. See Kircher et al. 2014 (http://www.ncbi.nlm.nih.gov/pubmed/24487276) or CADD website (http://cadd.gs.washington.edu/) for more information.\">",
-			"##INFO=<ID="+CADD_ABS+",Number=1,Type=Float,Description=\"CADD absolute C score, ie. unscaled SVM output. Useful as  reference when the scaled score may be unexpected.\">"
-	});
+
+	final List<String> infoFields = Arrays
+			.asList(new String[]
+			{
+					"##INFO=<ID="
+							+ CADD_SCALED
+							+ ",Number=1,Type=Float,Description=\"CADD scaled C score, ie. phred-like. See Kircher et al. 2014 (http://www.ncbi.nlm.nih.gov/pubmed/24487276) or CADD website (http://cadd.gs.washington.edu/) for more information.\">",
+					"##INFO=<ID="
+							+ CADD_ABS
+							+ ",Number=1,Type=Float,Description=\"CADD absolute C score, ie. unscaled SVM output. Useful as  reference when the scaled score may be unexpected.\">" });
 
 	public static final String CADD_FILE_LOCATION_PROPERTY = "cadd_location";
 	TabixReader tr;
@@ -73,12 +78,13 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	{
 		this.molgenisSettings = molgenisSettings;
 		this.annotatorService = annotatorService;
-
-		tr = new TabixReader(molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY));
+		if (molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY) != null)
+		{
+			tr = new TabixReader(molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY));
+		}
 	}
 
-	public CaddServiceAnnotator(File caddTsvGzFile, File inputVcfFile, File outputVCFFile)
-			throws Exception
+	public CaddServiceAnnotator(File caddTsvGzFile, File inputVcfFile, File outputVCFFile) throws Exception
 	{
 
 		this.molgenisSettings = new MolgenisSimpleSettings();
@@ -92,25 +98,24 @@ public class CaddServiceAnnotator extends VariantAnnotator
 
 		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
 		Iterator<Entity> vcfIter = vcfRepo.iterator();
-		
-		//VcfReader vcfReader= new VcfReader();
-		
-		
+
+		// VcfReader vcfReader= new VcfReader();
+
 		VcfUtils.checkInput(inputVcfFile, outputVCFWriter, infoFields, CADD_SCALED);
-		
-        System.out.println("Now starting to process the data.");
-		
+
+		System.out.println("Now starting to process the data.");
+
 		while (vcfIter.hasNext())
 		{
 			Entity record = vcfIter.next();
-			
-		//	System.out.println("record, before:");
-		//	System.out.println(record.toString());
+
+			// System.out.println("record, before:");
+			// System.out.println(record.toString());
 
 			List<Entity> annotatedRecord = annotateEntity(record);
-			
-		//	System.out.println("record, annotated:");
-		//	System.out.println(annotatedRecord.toString());
+
+			// System.out.println("record, annotated:");
+			// System.out.println(annotatedRecord.toString());
 
 			if (annotatedRecord.size() > 1)
 			{
@@ -160,12 +165,13 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	public List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException
 	{
 		List<Entity> results = new ArrayList<Entity>();
-		//FIXME need to solve this! duplicate notation for CHROM in VcfRepository.CHROM and LocusAnnotator.CHROMOSOME
-		String chromosome = entity.getString(VcfRepository.CHROM) != null ? entity.getString(VcfRepository.CHROM) : entity.getString(CHROMOSOME);
-		
-		Long position = entity.getLong(POSITION); //FIXME use VcfRepository.POS ?
-		String reference = entity.getString(REFERENCE); //FIXME use VcfRepository.REF ?
-		String alternative = entity.getString(ALTERNATIVE); //FIXME use VcfRepository.ALT ?
+		// FIXME need to solve this! duplicate notation for CHROM in VcfRepository.CHROM and LocusAnnotator.CHROMOSOME
+		String chromosome = entity.getString(VcfRepository.CHROM) != null ? entity.getString(VcfRepository.CHROM) : entity
+				.getString(CHROMOSOME);
+
+		Long position = entity.getLong(POSITION); // FIXME use VcfRepository.POS ?
+		String reference = entity.getString(REFERENCE); // FIXME use VcfRepository.REF ?
+		String alternative = entity.getString(ALTERNATIVE); // FIXME use VcfRepository.ALT ?
 
 		Double caddAbs = null;
 		Double caddScaled = null;
@@ -174,19 +180,21 @@ public class CaddServiceAnnotator extends VariantAnnotator
 
 		// TabixReaderIterator does not have a hasNext();
 		boolean done = false;
-		
+
 		while (done == false)
 		{
 			String line = tabixIterator.next();
 			int i = 0;
-			
+
 			if (line != null)
 			{
 				String[] split = null;
 				i++;
 				split = line.split("\t");
-				if(split.length != 6){
-					logger.error("bad CADD output for CHROM: "+chromosome + " POS: "+ position  + " REF: "+ reference + " ALT: "+ alternative + " LINE: " + line);
+				if (split.length != 6)
+				{
+					logger.error("bad CADD output for CHROM: " + chromosome + " POS: " + position + " REF: "
+							+ reference + " ALT: " + alternative + " LINE: " + line);
 					continue;
 				}
 				if (split[2].equals(reference) && split[3].equals(alternative))
@@ -207,15 +215,19 @@ public class CaddServiceAnnotator extends VariantAnnotator
 				{
 					if (i > 3)
 					{
-						logger.warn("More than 3 hits in the CADD file! for CHROM: "+chromosome + " POS: "+ position  + " REF: "+ reference + " ALT: "+ alternative);
+						logger.warn("More than 3 hits in the CADD file! for CHROM: " + chromosome + " POS: " + position
+								+ " REF: " + reference + " ALT: " + alternative);
 					}
 					done = true;
 				}
 				if (caddAbs == null && caddScaled == null)
 				{
-					logger.warn("No hit found in CADD file for CHROM: "+chromosome + " POS: "+ position  + " REF: "+ reference + " ALT: "+ alternative);
+					logger.warn("No hit found in CADD file for CHROM: " + chromosome + " POS: " + position + " REF: "
+							+ reference + " ALT: " + alternative);
 				}
-			}else{
+			}
+			else
+			{
 				done = true;
 			}
 		}
