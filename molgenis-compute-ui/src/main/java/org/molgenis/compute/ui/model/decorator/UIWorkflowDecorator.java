@@ -2,10 +2,11 @@ package org.molgenis.compute.ui.model.decorator;
 
 import static org.molgenis.MolgenisFieldTypes.MREF;
 
+import org.molgenis.compute.ui.analysis.event.AnalysisHandlerRegistratorService;
 import org.molgenis.compute.ui.meta.AnalysisMetaData;
 import org.molgenis.compute.ui.meta.UIWorkflowMetaData;
 import org.molgenis.compute.ui.model.UIWorkflow;
-import org.molgenis.compute.ui.workflow.WorkflowHandlerRegistratorService;
+import org.molgenis.compute.ui.workflow.event.WorkflowHandlerRegistratorService;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.CrudRepositoryDecorator;
@@ -33,17 +34,20 @@ public class UIWorkflowDecorator extends CrudRepositoryDecorator
 
 	private final CrudRepository decoratedRepository;
 	private final ManageableCrudRepositoryCollection repositoryCollection;
-	private final WorkflowHandlerRegistratorService dataExplorerWorkflowHandlerRegistratorService;
+	private final WorkflowHandlerRegistratorService workflowHandlerRegistratorService;
+	private final AnalysisHandlerRegistratorService analysisHandlerRegistratorService;
 
 	// TODO use WritableMetaDataService instead of ManageableCrudRepositoryCollection
 	public UIWorkflowDecorator(CrudRepository decoratedRepository,
 			ManageableCrudRepositoryCollection repositoryCollection,
-			WorkflowHandlerRegistratorService dataExplorerWorkflowHandlerRegistratorService)
+			WorkflowHandlerRegistratorService workflowHandlerRegistratorService,
+			AnalysisHandlerRegistratorService analysisHandlerRegistratorService)
 	{
 		super(decoratedRepository);
 		this.decoratedRepository = decoratedRepository;
 		this.repositoryCollection = repositoryCollection;
-		this.dataExplorerWorkflowHandlerRegistratorService = dataExplorerWorkflowHandlerRegistratorService;
+		this.workflowHandlerRegistratorService = workflowHandlerRegistratorService;
+		this.analysisHandlerRegistratorService = analysisHandlerRegistratorService;
 	}
 
 	@Override
@@ -87,7 +91,7 @@ public class UIWorkflowDecorator extends CrudRepositoryDecorator
 		uiWorkflow.set(entity);
 
 		// publish data explorer action event
-		dataExplorerWorkflowHandlerRegistratorService.registerWorkflowHandler(uiWorkflow);
+		workflowHandlerRegistratorService.registerWorkflowHandler(uiWorkflow);
 	}
 
 	private void registerWorkflowHandler(Iterable<? extends Entity> entities)
@@ -116,6 +120,8 @@ public class UIWorkflowDecorator extends CrudRepositoryDecorator
 				EditableEntityMetaData updatedEntityMetaData = new DefaultEntityMetaData(entityMetaData);
 				updatedEntityMetaData.addAttributeMetaData(ANALYSIS_ATTRIBUTE);
 				repositoryCollection.update(updatedEntityMetaData);
+
+				analysisHandlerRegistratorService.registerAnalysisHandler(targetType, ANALYSIS_ATTRIBUTE.getName());
 			}
 		}
 	}

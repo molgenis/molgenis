@@ -1,4 +1,4 @@
-package org.molgenis.compute.ui.workflow;
+package org.molgenis.compute.ui.workflow.event;
 
 import org.molgenis.compute.ui.model.UIWorkflow;
 

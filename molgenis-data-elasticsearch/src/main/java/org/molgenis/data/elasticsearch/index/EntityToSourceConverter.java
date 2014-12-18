@@ -49,6 +49,7 @@ public class EntityToSourceConverter
 		{
 			String attrName = attributeMetaData.getName();
 			Object value = convertAttribute(entity, attributeMetaData, nestRefs);
+			if (value == null) value = attributeMetaData.getDefaultValue();
 			doc.put(attrName, value);
 		}
 

@@ -71,7 +71,7 @@
 			</#list>
 		</#if>
 	</#list>
-	
+
 	joint.layout.DirectedGraph.layout(graph, { setLinkVertices: false });
 	paper.fitToContent();
 	

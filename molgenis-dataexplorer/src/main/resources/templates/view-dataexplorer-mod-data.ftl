@@ -163,7 +163,16 @@
 			if (tableEditable) {
 				tableEditable = molgenis.hasWritePermission(molgenis.dataexplorer.getSelectedEntityMeta().name);
 			}
-			molgenis.dataexplorer.data.createDataTable(tableEditable, rowClickable);
+			
+			<#-- register custom cell click handlers -->
+			var cellClickHandlers = {
+		<#list cellClickHandlers?keys as id>
+			<#assign cellClickHandler=cellClickHandlers[id]>
+			'${cellClickHandler.attributeName?js_string}' : function(attribute, refEntity, refAttribute, rawValue) { window.location = '${cellClickHandler.source.refRedirectUrlTemplate}'.replace('{{id}}', rawValue.href.substring(rawValue.href.lastIndexOf('/') + 1)); }
+		</#list>
+			};
+		
+			molgenis.dataexplorer.data.createDataTable(tableEditable, rowClickable, cellClickHandlers);
 		})
 		.fail(function() {
 			molgenis.createAlert([{'message': 'An error occured. Please contact the administrator.'}], 'error');

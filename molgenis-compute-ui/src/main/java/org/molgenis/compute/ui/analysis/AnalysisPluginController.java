@@ -28,7 +28,6 @@ import org.molgenis.compute.ui.meta.UIBackendMetaData;
 import org.molgenis.compute.ui.meta.UIWorkflowMetaData;
 import org.molgenis.compute.ui.model.Analysis;
 import org.molgenis.compute.ui.model.AnalysisJob;
-import org.molgenis.compute.ui.model.JobStatus;
 import org.molgenis.compute.ui.model.UIBackend;
 import org.molgenis.compute.ui.model.UIWorkflow;
 import org.molgenis.compute.ui.model.UIWorkflowNode;
@@ -46,6 +45,7 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.dataexplorer.event.DataExplorerRegisterRefCellClickEventHandler;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -65,7 +65,8 @@ import com.google.common.collect.Iterables;
 
 @Controller
 @RequestMapping(AnalysisPluginController.URI)
-public class AnalysisPluginController extends MolgenisPluginController
+public class AnalysisPluginController extends MolgenisPluginController implements
+		DataExplorerRegisterRefCellClickEventHandler
 {
 	private static Logger logger = Logger.getLogger(AnalysisPluginController.class);
 
@@ -380,6 +381,16 @@ public class AnalysisPluginController extends MolgenisPluginController
 	}
 
 	@Transactional
+	@RequestMapping(value = "/continue/{analysisId}", method = POST)
+	@ResponseStatus(HttpStatus.OK)
+	public void continueAnalysis(@PathVariable(value = "analysisId") String analysisId)
+	{
+		// TODO implement continue analysis
+		logger.info("TODO implement continue analysis");
+		throw new RuntimeException("'Continue analysis' not implemented");
+	}
+
+	@Transactional
 	@RequestMapping(value = "/stop/{analysisId}", method = POST)
 	@ResponseStatus(HttpStatus.OK)
 	public void stopAnalysis(@PathVariable(value = "analysisId") String analysisId)
@@ -400,64 +411,6 @@ public class AnalysisPluginController extends MolgenisPluginController
 		model.addAttribute("analysis", analysis);
 		model.addAttribute("jobCount", new AnalysisJobCount(analysisJobs));
 		return "progress";
-	}
-
-	private static class AnalysisJobCount
-	{
-		private final Iterable<AnalysisJob> analysisJobs;
-
-		public AnalysisJobCount(Iterable<AnalysisJob> analysisJobs)
-		{
-			this.analysisJobs = analysisJobs;
-		}
-
-		/**
-		 * Get the nr of jobs generated for a WorkflowNode
-		 *
-		 * @param nodeId
-		 * @return
-		 */
-		@SuppressWarnings("unused")
-		public int getTotalJobCount(String nodeId)
-		{
-			int count = 0;
-			for (AnalysisJob job : analysisJobs)
-			{
-				if ((job.getWorkflowNode() != null) && job.getWorkflowNode().getIdentifier().equals(nodeId))
-				{
-					count++;
-				}
-			}
-
-			return count;
-		}
-
-		@SuppressWarnings("unused")
-		public int getCompletedJobCount(String nodeId)
-		{
-			return getJobCount(nodeId, JobStatus.COMPLETED);
-		}
-
-		@SuppressWarnings("unused")
-		public int getFailedJobCount(String nodeId)
-		{
-			return getJobCount(nodeId, JobStatus.FAILED);
-		}
-
-		private int getJobCount(String nodeId, JobStatus status)
-		{
-			int count = 0;
-			for (AnalysisJob job : analysisJobs)
-			{
-				if ((job.getWorkflowNode() != null) && (job.getStatus() == status)
-						&& job.getWorkflowNode().getIdentifier().equals(nodeId))
-				{
-					count++;
-				}
-			}
-
-			return count;
-		}
 	}
 
 	private UIWorkflowNode findNode(UIWorkflow uiWorkflow, String stepName)
@@ -538,5 +491,12 @@ public class AnalysisPluginController extends MolgenisPluginController
 		{
 			return q;
 		}
+	}
+
+	@Override
+	public String getRefRedirectUrlTemplate()
+	{
+		// FIXME do not hardcode menu reference
+		return "/menu/main/analysis/view/{{id}}";
 	}
 }

@@ -11,6 +11,8 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 
 public class AnalysisMetaData extends DefaultEntityMetaData
 {
+	// TODO workaround for #1810 'EMX misses DefaultValue'
+	public static final AnalysisStatus STATUS_DEFAULT = AnalysisStatus.CREATED;
 	public static final AnalysisMetaData INSTANCE = new AnalysisMetaData();
 
 	private static final String ENTITY_NAME = "Analysis";
@@ -28,14 +30,15 @@ public class AnalysisMetaData extends DefaultEntityMetaData
 		super(ENTITY_NAME, ComputeUiPackage.INSTANCE);
 
 		addAttribute(IDENTIFIER).setIdAttribute(true).setNillable(false).setVisible(false);
-		addAttribute(NAME).setNillable(false).setUnique(true).setLabelAttribute(true);
-		addAttribute(DESCRIPTION).setDataType(TEXT);
-		addAttribute(CREATION_DATE).setDataType(DATETIME);
-		addAttribute(WORKFLOW).setDataType(XREF).setNillable(false).setRefEntity(UIWorkflowMetaData.INSTANCE);
-		addAttribute(BACKEND).setDataType(XREF).setRefEntity(UIBackendMetaData.INSTANCE);
-		addAttribute(SUBMIT_SCRIPT).setDataType(SCRIPT);
+		addAttribute(NAME).setNillable(false).setUnique(true).setLabelAttribute(true).setLabel("Name");
+		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description");
+		addAttribute(CREATION_DATE).setDataType(DATETIME).setLabel("Creation date");
+		addAttribute(WORKFLOW).setDataType(XREF).setNillable(false).setRefEntity(UIWorkflowMetaData.INSTANCE)
+				.setLabel("Workflow");
+		addAttribute(BACKEND).setDataType(XREF).setRefEntity(UIBackendMetaData.INSTANCE).setLabel("Backend");
+		addAttribute(SUBMIT_SCRIPT).setDataType(SCRIPT).setLabel("Submit script");
 		addAttribute(STATUS).setDataType(ENUM).setNillable(false).setEnumOptions(AnalysisStatus.names())
-				.setDefaultValue(AnalysisStatus.CREATED.toString());
+				.setDefaultValue(STATUS_DEFAULT.toString()).setLabel("Status");
 	}
 
 }
