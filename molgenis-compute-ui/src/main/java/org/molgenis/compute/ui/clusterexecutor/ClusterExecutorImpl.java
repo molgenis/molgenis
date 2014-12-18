@@ -12,8 +12,11 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import org.molgenis.compute.ui.meta.AnalysisJobMetaData;
+import org.molgenis.compute.ui.meta.AnalysisMetaData;
 import org.molgenis.compute.ui.model.Analysis;
 import org.molgenis.compute.ui.model.AnalysisJob;
+import org.molgenis.compute.ui.model.AnalysisStatus;
+import org.molgenis.compute.ui.model.JobStatus;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.runas.RunAsSystem;
@@ -34,7 +37,13 @@ public class ClusterExecutorImpl implements ClusterExecutor
 {
 	private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(ClusterManager.class);
 
-	// FIXME bug remove
+
+	private static final String SLURM_CANCEL = "scancel ";
+	private static final String PBS_CANCEL = "qdel ";
+
+	public static final String SLURM = "slurm";
+	public static final String PBS = "pbs";
+
 	private List<String> idList = new ArrayList<String>();
 
 	@Autowired
@@ -78,7 +87,7 @@ public class ClusterExecutorImpl implements ClusterExecutor
 		}
 	}
 
-	public boolean prepareRun(Analysis analysis, String username, String password, String runDir)
+	private boolean prepareRun(Analysis analysis, String username, String password, String runDir)
 	{
 		LOG.info("Prepare Analysis: " + analysis.getName());
 
@@ -161,7 +170,8 @@ public class ClusterExecutorImpl implements ClusterExecutor
 		return false;
 	}
 
-	public boolean submit(Analysis analysis, String username, String password, String runDir)
+
+	private boolean submit(Analysis analysis, String username, String password, String runDir)
 	{
 		try
 		{
@@ -250,8 +260,8 @@ public class ClusterExecutorImpl implements ClusterExecutor
 				AnalysisJob analysisJob = findJob(analysis, jobName);
 				if (analysisJob != null)
 				{
-					// analysisJob.setStatus(JobStatus.SUBMITTED);
-					analysisJob.setSchedulerId(Integer.parseInt(submittedID));
+//					analysisJob.setStatus(JobStatus.SUBMITTED);
+					analysisJob.setSchedulerId(submittedID);
 
 					dataService.update(AnalysisJobMetaData.INSTANCE.getName(), analysisJob);
 				}
@@ -271,9 +281,111 @@ public class ClusterExecutorImpl implements ClusterExecutor
 		return null;
 	}
 
-	public boolean cancelRun(Analysis run)
+	public boolean cancelRun(Analysis analysis)
 	{
-		return false;
+		readUserProperties();
+		LOG.info("Canceling Analysis [" + analysis.getName() + "]");
+
+		try
+		{
+			Thread.sleep(90000);
+
+			JSch jsch = new JSch();
+
+			String user = username;
+			String host = url;
+			int port = 22;
+			String privateKey = ".ssh/id_rsa";
+
+			jsch.addIdentity(privateKey, password);
+			LOG.info("identity added ");
+
+			Session session = jsch.getSession(user, host, port);
+
+			LOG.info("session created.");
+
+			java.util.Properties config = new java.util.Properties();
+			config.put("StrictHostKeyChecking", "no");
+			session.setConfig(config);
+
+			session.connect();
+			LOG.info("session connected.....");
+
+			Channel channel = session.openChannel("sftp");
+			channel.setInputStream(System.in);
+			channel.setOutputStream(System.out);
+			channel.connect();
+			LOG.info("shell channel connected....");
+
+			ChannelExec channelExec = (ChannelExec)session.openChannel("exec");
+
+			InputStream answer = channelExec.getInputStream();
+
+			LOG.info("cancelling jobs ...");
+
+			Iterable<AnalysisJob> jobs = dataService.findAll(AnalysisJobMetaData.INSTANCE.getName(),
+					new QueryImpl().eq(AnalysisJobMetaData.ANALYSIS, analysis), AnalysisJob.class);
+
+			String schedulerType = scheduler;
+
+			boolean anyJobCancelled = false;
+			for(AnalysisJob job : jobs)
+			{
+				if(job.getStatus() == JobStatus.RUNNING)
+				{
+					anyJobCancelled = true;
+					String command = "";
+					if (schedulerType.equalsIgnoreCase(SLURM))
+						command = SLURM_CANCEL + job.getSchedulerId();
+					else if (schedulerType.equalsIgnoreCase(PBS))
+						command = PBS_CANCEL + job.getSchedulerId();
+					else
+						LOG.error("Unsupported scheduler type [" + schedulerType + "]");
+
+					channelExec.setCommand(command);
+					channelExec.connect();
+
+					BufferedReader reader = new BufferedReader(new InputStreamReader(answer));
+					String line;
+
+					while ((line = reader.readLine()) != null)
+					{
+						LOG.info(line);
+					}
+
+					//TODO: it would be nice to update jobs and analysis statuses
+					//				job.setStatus(JobStatus.CANCELLED);
+					//				dataService.update(AnalysisJobMetaData.INSTANCE.getName(), job);
+				}
+			}
+
+			channelExec.disconnect();
+			session.disconnect();
+
+			if(anyJobCancelled)
+			{
+				analysis.setStatus(AnalysisStatus.CANCELLED);
+				dataService.update(AnalysisMetaData.INSTANCE.getName(), analysis);
+			}
+
+			LOG.info("Analysis [" + analysis.getName() + "] is cancelled");
+			return true;
+		}
+		catch (JSchException e)
+		{
+			LOG.error(e);
+			return false;
+		}
+		catch (IOException e)
+		{
+			LOG.error(e);
+			return false;
+		}
+		catch (InterruptedException e)
+		{
+			LOG.error(e);
+			return false;
+		}
 	}
 
 	private void readUserProperties()

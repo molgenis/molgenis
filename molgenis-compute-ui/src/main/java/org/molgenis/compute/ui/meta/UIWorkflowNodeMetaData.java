@@ -20,7 +20,7 @@ public class UIWorkflowNodeMetaData extends DefaultEntityMetaData
 	{
 		super(ENTITY_NAME, ComputeUiPackage.INSTANCE);
 		addAttribute(IDENTIFIER).setIdAttribute(true).setNillable(false).setVisible(false);
-		addAttribute(NAME).setNillable(false).setUnique(true).setLabelAttribute(true);
+		addAttribute(NAME).setNillable(false).setLabelAttribute(true);
 		addAttribute(PROTOCOL).setDataType(XREF).setRefEntity(UIWorkflowProtocolMetaData.INSTANCE).setNillable(false);
 		addAttribute(PREVIOUS_NODES).setDataType(MREF).setRefEntity(this);
 		addAttribute(PARAMETER_MAPPINGS).setDataType(MREF).setRefEntity(UIParameterMappingMetaData.INSTANCE);

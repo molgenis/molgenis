@@ -2,7 +2,6 @@ package org.molgenis.compute.ui.meta;
 
 import static org.molgenis.MolgenisFieldTypes.DATETIME;
 import static org.molgenis.MolgenisFieldTypes.ENUM;
-import static org.molgenis.MolgenisFieldTypes.INT;
 import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.SCRIPT;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
@@ -10,6 +9,8 @@ import static org.molgenis.MolgenisFieldTypes.XREF;
 
 import org.molgenis.compute.ui.model.JobStatus;
 import org.molgenis.data.support.DefaultEntityMetaData;
+
+import static org.molgenis.MolgenisFieldTypes.*;
 
 public class AnalysisJobMetaData extends DefaultEntityMetaData
 {
@@ -36,7 +37,7 @@ public class AnalysisJobMetaData extends DefaultEntityMetaData
 		super(ENTITY_NAME, ComputeUiPackage.INSTANCE);
 		addAttribute(IDENTIFIER).setIdAttribute(true).setNillable(false);
 		addAttribute(NAME).setNillable(false).setLabelAttribute(true);
-		addAttribute(SCHEDULER_ID).setDataType(INT);
+		addAttribute(SCHEDULER_ID).setDataType(STRING);
 		addAttribute(WORKFLOW_NODE).setDataType(XREF).setNillable(false).setRefEntity(UIWorkflowNodeMetaData.INSTANCE);
 		addAttribute(GENERATED_SCRIPT).setDataType(SCRIPT).setNillable(false);
 		addAttribute(STATUS).setDataType(ENUM).setNillable(false).setEnumOptions(JobStatus.names())
