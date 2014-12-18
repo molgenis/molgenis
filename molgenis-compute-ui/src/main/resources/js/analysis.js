@@ -675,9 +675,13 @@
 					$('#analysis-workflow').prop('disabled', nrItems > 0);
 					$('#run-analysis-btn').prop('disabled', nrItems === 0);
 					
-					if(settings.analysis.status === 'RUNNING') {
+					if(settings.analysis.status === 'CREATED') {
+						$('#delete-analysis-btn').removeClass('hidden');
+					}
+					else if(settings.analysis.status === 'RUNNING') {
 						$('#pause-analysis-btn').removeClass('hidden');
 						$('#run-analysis-btn').addClass('hidden');
+						$('#delete-analysis-btn').addClass('hidden');
 					} 
 					else if(settings.analysis.status === 'PAUSED') {
 						$('#pause-analysis-btn').addClass('hidden');
