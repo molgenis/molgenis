@@ -2,35 +2,40 @@ package org.molgenis.data.annotation;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.vcf.VcfRepository;
+import org.springframework.util.StringUtils;
 
 public class VcfUtils {
 	
-	public static String convertToVCF(Entity e)
+	/**
+	 * Convert an entity to a VCF line
+	 * @param entity
+	 * @return
+	 */
+	public static String convertToVCF(Entity entity)
 	{
 		StringBuilder vcfRecord = new StringBuilder();
 		
-		vcfRecord.append(e.getString(LocusAnnotator.CHROMOSOME) + "\t");
-		vcfRecord.append(e.getString(LocusAnnotator.POSITION) + "\t");
-		vcfRecord.append(e.getString(VcfRepository.ID) + "\t");
-		vcfRecord.append(e.getString(VariantAnnotator.REFERENCE) + "\t");
-		vcfRecord.append(e.getString(VariantAnnotator.ALTERNATIVE) + "\t");
-		//etc
+		List<String> vcfAttributes = Arrays.asList(new String[]{VariantAnnotator.CHROMOSOME,VariantAnnotator.POSITION,VcfRepository.ID,VariantAnnotator.REFERENCE,VariantAnnotator.ALTERNATIVE});
 		
-		//TODO
-	//	vcfRecord.append(e.getString(VcfRepository.CHROM) + "\t");
-	//	vcfRecord.append(e.getString(VcfRepository.POS) + "\t");
-	//	vcfRecord.append(e.getString(VcfRepository.ID) + "\t");
-	//	vcfRecord.append(e.getString(VcfRepository.REF) + "\t");
-	//	vcfRecord.append(e.getString(VcfRepository.ALT) + "\t");
-	//	etc
+		for(String attribute : vcfAttributes){
+			vcfRecord.append(entity.getString(attribute) + "\t");
+		}
+		for(AttributeMetaData attributeMetaData : entity.getEntityMetaData().getAtomicAttributes()){
+			if(!vcfAttributes.contains(attributeMetaData.getName()) && attributeMetaData.isVisible() && !StringUtils.isEmpty(entity.getString(attributeMetaData.getName())))
+			{
+				vcfRecord.append(attributeMetaData.getName() +"=" + entity.getString(attributeMetaData.getName()) + ";");
+			}
+				
+		}
 		
 		return vcfRecord.toString();
-	//	FIXME: why not return (VcfRecord(e)).toString(); ???
 	}
 	
 	/**

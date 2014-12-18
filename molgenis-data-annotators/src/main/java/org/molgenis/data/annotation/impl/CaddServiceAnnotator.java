@@ -53,11 +53,11 @@ public class CaddServiceAnnotator extends VariantAnnotator
 
 	// the cadd service returns these two values
 	// must be compatible with VCF format, ie no funny characters
-	static final String CADD_SCALED = "CADDSCALED";
-	static final String CADD_ABS = "CADDABS";
+	public static final String CADD_SCALED = "CADDSCALED";
+	public static final String CADD_ABS = "CADDABS";
 
 	private static final String NAME = "CADDAnnotator";
-	private static final String LABEL = "CADDAnnotator";
+	private static final String LABEL = "CADD";
 	
 	final List<String> infoFields = Arrays.asList(new String[]{
 			"##INFO=<ID="+CADD_SCALED+",Number=1,Type=Float,Description=\"CADD scaled C score, ie. phred-like. See Kircher et al. 2014 (http://www.ncbi.nlm.nih.gov/pubmed/24487276) or CADD website (http://cadd.gs.washington.edu/) for more information.\">",
@@ -167,11 +167,8 @@ public class CaddServiceAnnotator extends VariantAnnotator
 		String reference = entity.getString(REFERENCE); //FIXME use VcfRepository.REF ?
 		String alternative = entity.getString(ALTERNATIVE); //FIXME use VcfRepository.ALT ?
 
-		String next;
-
-		//TODO: check if result is correctly written to db/file, or do we need Double...
-		double caddAbs = 0.0;
-		double caddScaled = 0.0;
+		Double caddAbs = null;
+		Double caddScaled = null;
 
 		TabixReader.Iterator tabixIterator = tr.query(chromosome + ":" + position);
 
@@ -214,7 +211,7 @@ public class CaddServiceAnnotator extends VariantAnnotator
 					}
 					done = true;
 				}
-				if (caddAbs == 0.0 && caddScaled == 0.0)
+				if (caddAbs == null && caddScaled == null)
 				{
 					logger.warn("No hit found in CADD file for CHROM: "+chromosome + " POS: "+ position  + " REF: "+ reference + " ALT: "+ alternative);
 				}
@@ -227,10 +224,6 @@ public class CaddServiceAnnotator extends VariantAnnotator
 
 		resultMap.put(CADD_ABS, caddAbs);
 		resultMap.put(CADD_SCALED, caddScaled);
-		resultMap.put(CHROMOSOME, chromosome);
-		resultMap.put(POSITION, position);
-		resultMap.put(ALTERNATIVE, alternative);
-		resultMap.put(REFERENCE, reference);
 
 		results.add(getAnnotatedEntity(entity, resultMap));
 

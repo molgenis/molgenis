@@ -49,7 +49,7 @@ public class CmdLineAnnotator
 		File outputVCFFile = new File(args[3]);
 		if (outputVCFFile.exists())
 		{
-			throw new Exception("Output VCF file already exists at " + outputVCFFile.getAbsolutePath());
+			//TODO terugzetten!! throw new Exception("Output VCF file already exists at " + outputVCFFile.getAbsolutePath());
 		}
 
 		// engage!
