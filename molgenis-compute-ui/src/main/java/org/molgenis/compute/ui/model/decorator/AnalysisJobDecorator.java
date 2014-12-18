@@ -1,5 +1,7 @@
 package org.molgenis.compute.ui.model.decorator;
 
+import java.util.EnumSet;
+
 import org.molgenis.compute.ui.meta.AnalysisJobMetaData;
 import org.molgenis.compute.ui.meta.AnalysisMetaData;
 import org.molgenis.compute.ui.model.Analysis;
@@ -32,6 +34,8 @@ public class AnalysisJobDecorator extends CrudRepositoryDecorator
 	@Override
 	public void add(Entity entity)
 	{
+		// validate job status
+		validateNewAnalysisJobStatus(entity);
 		decoratedRepository.add(entity);
 		updateAnalysisStatus(entity);
 	}
@@ -39,6 +43,10 @@ public class AnalysisJobDecorator extends CrudRepositoryDecorator
 	@Override
 	public Integer add(Iterable<? extends Entity> entities)
 	{
+		// validate job status
+		for (Entity entity : entities)
+			validateNewAnalysisJobStatus(entity);
+
 		Integer count = decoratedRepository.add(entities);
 		updateAnalysisStatus(entities);
 		return count;
@@ -47,14 +55,50 @@ public class AnalysisJobDecorator extends CrudRepositoryDecorator
 	@Override
 	public void update(Entity entity)
 	{
+		// validate job status
+		validateExistingAnalysisJobStatus(entity);
 		decoratedRepository.update(entity);
 	}
 
 	@Override
 	public void update(Iterable<? extends Entity> entities)
 	{
+		// validate job status
+		for (Entity entity : entities)
+			validateExistingAnalysisJobStatus(entity);
+
 		decoratedRepository.update(entities);
 		updateAnalysisStatus(entities);
+	}
+
+	private void validateNewAnalysisJobStatus(Entity entity)
+	{
+		JobStatus jobStatus = JobStatus.valueOf(entity.getString(AnalysisJobMetaData.STATUS));
+		if (!jobStatus.isInitialState())
+		{
+			String attributeLabel = AnalysisJobMetaData.INSTANCE.getAttribute(AnalysisJobMetaData.STATUS).getLabel();
+			throw new RuntimeException(attributeLabel + " is not an initial state");
+		}
+	}
+
+	private void validateExistingAnalysisJobStatus(Entity entity)
+	{
+		AnalysisJob currentAnalysisJob = dataService.findOne(AnalysisJobMetaData.INSTANCE.getName(),
+				entity.getIdValue(), AnalysisJob.class);
+		JobStatus currentJobStatus = currentAnalysisJob.getStatus();
+
+		JobStatus jobStatus = JobStatus.valueOf(entity.getString(AnalysisJobMetaData.STATUS));
+		if (jobStatus != currentJobStatus)
+		{
+			EnumSet<JobStatus> allowedStateTransitions = currentJobStatus.getStateTransitions();
+			if (!allowedStateTransitions.contains(jobStatus))
+			{
+				String attributeLabel = AnalysisJobMetaData.INSTANCE.getAttribute(AnalysisJobMetaData.STATUS)
+						.getLabel();
+				throw new RuntimeException(attributeLabel + " transition from " + currentJobStatus + " to " + jobStatus
+						+ " is not allowed. Allowed transitions " + allowedStateTransitions);
+			}
+		}
 	}
 
 	private void updateAnalysisStatus(Entity entity)
@@ -67,7 +111,7 @@ public class AnalysisJobDecorator extends CrudRepositoryDecorator
 
 		// do not update analysis status if status is a final state
 		AnalysisStatus currentAnalysisStatus = analysis.getStatus();
-		if (!currentAnalysisStatus.isEndPoint())
+		if (!currentAnalysisStatus.isFinalState())
 		{
 			Iterable<AnalysisJob> analysisJobs = dataService.findAll(AnalysisJobMetaData.INSTANCE.getName(),
 					new QueryImpl().eq(AnalysisJobMetaData.ANALYSIS, analysis), AnalysisJob.class);

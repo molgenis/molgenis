@@ -1,6 +1,7 @@
 package org.molgenis.compute.ui.meta;
 
 import org.molgenis.compute.ui.analysis.event.AnalysisHandlerRegistratorService;
+import org.molgenis.compute.ui.model.decorator.AnalysisDecorator;
 import org.molgenis.compute.ui.model.decorator.AnalysisJobDecorator;
 import org.molgenis.compute.ui.model.decorator.UIWorkflowDecorator;
 import org.molgenis.compute.ui.workflow.event.WorkflowHandlerRegistratorService;
@@ -60,7 +61,18 @@ public class MetaDataRegistrator implements ApplicationListener<ContextRefreshed
 		});
 		repositoryCollection.add(UIParameterValueMetaData.INSTANCE);
 		repositoryCollection.add(UIBackendMetaData.INSTANCE);
-		repositoryCollection.add(AnalysisMetaData.INSTANCE);
+		repositoryCollection.add(AnalysisMetaData.INSTANCE, new RepositoryDecoratorFactory()
+		{
+			@Override
+			public Repository createDecoratedRepository(Repository repository)
+			{
+				if (!(repository instanceof CrudRepository))
+				{
+					throw new RuntimeException("Repository [" + repository.getName() + "] must be a CrudRepository");
+				}
+				return new AnalysisDecorator((CrudRepository) repository, dataService);
+			}
+		});
 		repositoryCollection.add(AnalysisJobMetaData.INSTANCE, new RepositoryDecoratorFactory()
 		{
 			@Override
