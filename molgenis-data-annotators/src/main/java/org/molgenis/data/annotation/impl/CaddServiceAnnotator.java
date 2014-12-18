@@ -94,8 +94,6 @@ public class CaddServiceAnnotator extends VariantAnnotator
 		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
 		Iterator<Entity> vcfIter = vcfRepo.iterator();
 
-		// VcfReader vcfReader= new VcfReader();
-
 		VcfUtils.checkInput(inputVcfFile, outputVCFWriter, infoFields, CADD_SCALED);
 
 		System.out.println("Now starting to process the data.");
@@ -104,13 +102,7 @@ public class CaddServiceAnnotator extends VariantAnnotator
 		{
 			Entity record = vcfIter.next();
 
-			// System.out.println("record, before:");
-			// System.out.println(record.toString());
-
 			List<Entity> annotatedRecord = annotateEntity(record);
-
-			// System.out.println("record, annotated:");
-			// System.out.println(annotatedRecord.toString());
 
 			if (annotatedRecord.size() > 1)
 			{
