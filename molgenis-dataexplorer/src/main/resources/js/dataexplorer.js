@@ -380,11 +380,8 @@ function($, molgenis, settingsXhr) {
 			$(document).trigger('removeAttributeFilter', {'attributeUri': $(this).data('href')});
 		});
 		
-		// fire event handler
-		if($('#dataset-select').val() !== null) 
-		{	
-			$('#dataset-select').change();
-		}
+		// select first entity in dropdown
+		$(document).trigger('changeEntity', $('#dataset-select option:not(:empty)').first().val());
 		
 		// restore the search term and trigger change event to filter data table
 		if(searchTerm){
