@@ -101,7 +101,7 @@
 		// TODO do not construct uri from other uri
 		var entityCollectionUri = settings.entityMetaData.href.replace("/meta", "");
 		var q = $.extend({}, settings.query, {'start': settings.start, 'num': settings.maxRows, 'sort': settings.sort});
-		restApi.getAsync(entityCollectionUri, {'expand' : ['workflow[name]', 'jobs[status]'], 'q' : q}, function(data) {
+		restApi.getAsync(entityCollectionUri, {'expand' : ['workflow[name]'], 'q' : q}, function(data) {
 			settings.data = data;
 			callback(data);
 		});
@@ -132,7 +132,6 @@
 			items.push(header);
 		});
 		items.push($('<th>No. Jobs</th>'));
-		items.push($('<th>Status</th>'));
 		items.push($('<th>Actions</th>'));
 		container.html(items);
 	}
@@ -152,14 +151,15 @@
 				var cell = $('<td>').data('id', entity.href + '/' + attribute.name);
 				renderCell(cell, entity, attribute, settings);
 				row.append(cell);
-			
 			});
-			
-			var jobs = entity.jobs.items;
-			if(jobs.length > 0) {
+
+			// FIXME fails for data sets with > 10.000 entities
+			var jobs = restApi.get('/api/v1/computeui_AnalysisJob', {'attributes' : [ 'status' ], 'q' : { 'q' : [{field:'analysis',operator:'EQUALS',value: entity.identifier}]}, 'num': 10000});
+			var cellValue = '';
+			if(jobs.items.length > 0) {
 				var jobCount = {};
-				for(var j = 0; j < jobs.length; ++j) {
-					var status = jobs[j].status;
+				for(var j = 0; j < jobs.items.length; ++j) {
+					var status = jobs.items[j].status;
 					if(!jobCount.hasOwnProperty(status)) {
 						jobCount[status] = 1;
 					} else {
@@ -167,36 +167,28 @@
 					}
 				}
 				
-				var cellValue = '';
+				
 				for (var key in jobCount) {
 					if(cellValue.length > 0)
 						cellValue += ' | ';
-					cellValue += 'jobs ' + key + ' ' + jobCount[key];
+					cellValue += 'jobs ' + key.toLowerCase() + ' ' + jobCount[key];
 				}
-				
-				var analysisStatus;
-				if(jobCount.hasOwnProperty('running'))
-					analysisStatus = 'running';
-				else if(jobCount.hasOwnProperty('failed'))
-					analysisStatus = 'failed';
-				else if(jobCount.hasOwnProperty('complete'))
-					analysisStatus = 'complete';
-				else
-					analysisStatus = '';
-				row.append($('<td>' + cellValue + '</td>'));
-				row.append($('<td>' + analysisStatus + '</td>'));
+			}
+			row.append($('<td>' + cellValue + '</td>'));
+			
+
 				
 				var actions = '';
-				if(analysisStatus === 'running')
+				if(entity.status === 'RUNNING')
 					actions = '<a href="#" class="view-analysis-btn" data-id="' + entity.identifier + '">view</a>&nbsp<a href="#" class="stop-analysis-btn" data-id="' + entity.identifier + '">stop</a>';
 				else
 					actions = '<a href="#" class="view-analysis-btn" data-id="' + entity.identifier + '">view</a>';
 				row.append($('<td>' + actions + '</td>'));
-			} else {
-				row.append($('<td>'));
-				row.append($('<td>'));
-				row.append($('<td><a href="#" class="view-analysis-btn" data-id="' + entity.identifier + '">view</a></td>'));
-			}
+//			} else {
+//				row.append($('<td>'));
+//				row.append($('<td>'));
+//				row.append($('<td><a href="#" class="view-analysis-btn" data-id="' + entity.identifier + '">view</a></td>'));
+//			}
 			items.push(row);
 		}
 		container.html(items);
@@ -511,7 +503,7 @@
 
 	var self = molgenis.analysis = molgenis.analysis || {};
 	self.changeAnalysis = changeAnalysis;
-
+	
 	// state
 	var settings = {
 		showOverview: true,
@@ -520,7 +512,7 @@
 	}
 	
 	var timer;
-	
+	 
 	/**
 	 * @memberOf molgenis.analysis
 	 */
@@ -528,7 +520,7 @@
 		settings.showOverview = false;
 		settings.showDetails = true;
 		
-		restApi.getAsync('/api/v1/computeui_Analysis/' + analysisId, {'expand' : [ 'jobs', 'workflow' ]}, function(analysis) {
+		restApi.getAsync('/api/v1/computeui_Analysis/' + analysisId, {'expand' : [ 'workflow' ]}, function(analysis) {
 			settings.analysis = analysis;
 			renderPlugin();
 		});
@@ -560,13 +552,13 @@
 		$('#analysis-workflow').val(settings.analysis.workflow.identifier);
 		
 		//Start progress polling
-		pollProgress();
+		startProgressPolling();
 		
 		// update analysis target select and table
 		renderAnalysisTargets();
 	}
 	
-	function pollProgress() {
+	function startProgressPolling() {
 		
 		//Load progress script
 		$.getScript(molgenis.getContextUrl() + '/' + settings.analysis.identifier + '/progress.js');
@@ -575,7 +567,13 @@
 			clearTimeout(timer);
 		}
 		
-		timer = setTimeout(pollProgress, 2000);
+		timer = setTimeout(startProgressPolling, 2000);
+	}
+	
+	function stopProgressPolling() {
+		if (timer) {
+			clearTimeout(timer);
+		}
 	}
 	
 	/**
@@ -627,31 +625,32 @@
 			var idAttrName = targetMeta.idAttribute;
 			var labelAttrName = targetMeta.labelAttribute;
 			
-			// update analysis targets select
-			// TODO use NOT operator in query
-			restApi.getAsync('/api/v1/' + targetType, {'attributes' : [ idAttrName, labelAttrName, 'analysis'], 'expand' : [ 'analysis[identifier]' ], 'num': 10000}, function(data) {
-				var items = [];
-				for(var i = 0; i < data.items.length; ++i) {
-					var item = data.items[i];
-					
-					var equalsAnalysis = false;
-					for(var j = 0; j < item.analysis.items.length; ++j) {
-						if(settings.analysis.identifier === item.analysis.items[j].identifier) {
-							equalsAnalysis = true;
-							break;
+			if(settings.analysis === 'CREATED') {
+				// update analysis targets select
+				// TODO use NOT operator in query
+				restApi.getAsync('/api/v1/' + targetType, {'attributes' : [ idAttrName, labelAttrName, 'analysis'], 'expand' : [ 'analysis[identifier]' ], 'num': 10000}, function(data) {
+					var items = [];
+					for(var i = 0; i < data.items.length; ++i) {
+						var item = data.items[i];
+						
+						var equalsAnalysis = false;
+						for(var j = 0; j < item.analysis.items.length; ++j) {
+							if(settings.analysis.identifier === item.analysis.items[j].identifier) {
+								equalsAnalysis = true;
+								break;
+							}
 						}
+						if(!equalsAnalysis)
+							items.push('<option value="' + item[idAttrName] + '">' + item[labelAttrName] + '</option>');
 					}
-					if(!equalsAnalysis)
-						items.push('<option value="' + item[idAttrName] + '">' + item[labelAttrName] + '</option>');
-				}
-				if(items.length === 0)
-					$('#analysis-target-select-container').addClass('hidden');
-				else
-					$('#analysis-target-select-container').removeClass('hidden');
-				$('#analysis-target-select').html(items.join(''));
-				$('#analysis-target-select').select2();
-			});
-			
+					if(items.length === 0)
+						$('#analysis-target-select-container').addClass('hidden');
+					else
+						$('#analysis-target-select-container').removeClass('hidden');
+					$('#analysis-target-select').html(items.join(''));
+					$('#analysis-target-select').select2();
+				});
+			}
 			// update analysis targets table
 			$('#analysis-target-table-container').table({
 				'entityMetaData' : targetMeta,
@@ -664,7 +663,7 @@
 					}
 				}),
 				'query' : {'q' : [{field:'analysis', operator:'EQUALS', value:settings.analysis.identifier}]},
-				'deletable' : true,
+				'deletable' : settings.analysis.status === 'CREATED',
 				'maxRows' : 10,
 				'onDeleteRow' : function(href) {
 					deleteAnalysisTarget(href);
@@ -676,10 +675,15 @@
 					$('#analysis-workflow').prop('disabled', nrItems > 0);
 					$('#run-analysis-btn').prop('disabled', nrItems === 0);
 					
-					if(settings.analysis.jobs.items.length > 0) {
+					if(settings.analysis.status === 'RUNNING') {
 						$('#pause-analysis-btn').removeClass('hidden');
 						$('#run-analysis-btn').addClass('hidden');
-					} else {
+					} 
+					else if(settings.analysis.status === 'PAUSED') {
+						$('#pause-analysis-btn').addClass('hidden');
+						$('#continue-analysis-btn').removeClass('hidden');
+					}
+					else {
 						$('#run-analysis-btn').removeClass('hidden');
 						$('#pause-analysis-btn').addClass('hidden');
 					}
@@ -694,9 +698,7 @@
 	}
 	
 	function showAnalysisOverview() {
-		if (timer) {
-			clearTimeout(timer);
-		}
+		stopProgressPolling();
 		history.back();
 	}
 	
@@ -736,6 +738,7 @@
 						switch(attr.name) {
 							case 'name':
 							case 'workflow':
+							case 'status':
 								return attr;
 							default:
 								return null;
@@ -825,5 +828,14 @@
 				renderPlugin();
 			}
 		};
+		
+		$('#jobModal').on('show.bs.modal', function () {
+			stopProgressPolling();
+		});
+		
+		$('#jobModal').on('hidden.bs.modal', function () {
+			startProgressPolling();
+		});
+		  
 	});
 }($, window.top.molgenis = window.top.molgenis || {}));

@@ -229,9 +229,13 @@
                 		switch(attribute.fieldType) {
 							case 'CATEGORICAL':
 							case 'XREF':
-								var cellValue = $('<a href="#">' + formatTableCellValue(rawValue[refAttribute], refAttributeType) + '</a>'); 
+								var cellValue = $('<a href="#">' + formatTableCellValue(rawValue[refAttribute], refAttributeType) + '</a>');
 								cellValue.click(function(event) {
-									openRefAttributeModal(attribute, refEntity, refAttribute, rawValue);
+									if(settings.cellClickHandlers && settings.cellClickHandlers[attribute.name]) {
+										settings.cellClickHandlers[attribute.name](attribute, refEntity, refAttribute, rawValue);
+									} else {
+										openRefAttributeModal(attribute, refEntity, refAttribute, rawValue);
+									}
 									event.stopPropagation();
 								});
 								cell.append(cellValue);

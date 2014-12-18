@@ -13,10 +13,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-
-import java.util.Properties;
 import java.util.Map;
-import java.util.Set;
+import java.util.Properties;
 
 import javax.validation.Valid;
 
@@ -28,7 +26,6 @@ import org.molgenis.compute.ui.meta.AnalysisJobMetaData;
 import org.molgenis.compute.ui.meta.AnalysisMetaData;
 import org.molgenis.compute.ui.meta.UIBackendMetaData;
 import org.molgenis.compute.ui.meta.UIWorkflowMetaData;
-import org.molgenis.compute.ui.model.*;
 import org.molgenis.compute.ui.model.Analysis;
 import org.molgenis.compute.ui.model.AnalysisJob;
 import org.molgenis.compute.ui.model.UIBackend;
@@ -48,6 +45,7 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.dataexplorer.event.DataExplorerRegisterRefCellClickEventHandler;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -64,12 +62,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 @Controller
 @RequestMapping(AnalysisPluginController.URI)
-public class AnalysisPluginController extends MolgenisPluginController
+public class AnalysisPluginController extends MolgenisPluginController implements
+		DataExplorerRegisterRefCellClickEventHandler
 {
 	private static Logger logger = Logger.getLogger(AnalysisPluginController.class);
 
@@ -332,8 +329,8 @@ public class AnalysisPluginController extends MolgenisPluginController
 			readUserProperties();
 			String[] args =
 			{ "--generate", "--workflow", path + WORKFLOW_DEFAULT, "--parameters", path + PARAMETERS_DEFAULT,
-					"--parameters", path + WORKSHEET, "-b", scheduler, "--runid", runID, "--weave", "--url",
-					url, "--path", "", "-rundir", path + "rundir" };
+					"--parameters", path + WORKSHEET, "-b", scheduler, "--runid", runID, "--weave", "--url", url,
+					"--path", "", "-rundir", path + "rundir" };
 
 			ComputeProperties properties = new ComputeProperties(args);
 			properties.execute = false;
@@ -341,23 +338,20 @@ public class AnalysisPluginController extends MolgenisPluginController
 			CommandLineRunContainer container = new ComputeCommandLine().execute(properties);
 
 			List<GeneratedScript> generatedScripts = container.getTasks();
-			List<AnalysisJob> jobs = new ArrayList<AnalysisJob>();
 			for (GeneratedScript generatedScript : generatedScripts)
 			{
+				UIWorkflowNode node = findNode(uiWorkflow, generatedScript.getStepName());
+
 				AnalysisJob job = new AnalysisJob(IdGenerator.generateId());
 				job.setName(generatedScript.getName());
 				job.setGeneratedScript(generatedScript.getScript());
-
-				UIWorkflowNode node = findNode(uiWorkflow, generatedScript.getStepName());
 				job.setWorkflowNode(node);
-				jobs.add(job);
-
+				job.setAnalysis(analysis);
 				dataService.add(AnalysisJobMetaData.INSTANCE.getName(), job);
 			}
 
 			// update analysis
 			analysis.setSubmitScript(container.getSumbitScript());
-			analysis.setJobs(jobs);
 			dataService.update(AnalysisMetaData.INSTANCE.getName(), analysis);
 
 		}
@@ -387,6 +381,16 @@ public class AnalysisPluginController extends MolgenisPluginController
 	}
 
 	@Transactional
+	@RequestMapping(value = "/continue/{analysisId}", method = POST)
+	@ResponseStatus(HttpStatus.OK)
+	public void continueAnalysis(@PathVariable(value = "analysisId") String analysisId)
+	{
+		// TODO implement continue analysis
+		logger.info("TODO implement continue analysis");
+		throw new RuntimeException("'Continue analysis' not implemented");
+	}
+
+	@Transactional
 	@RequestMapping(value = "/stop/{analysisId}", method = POST)
 	@ResponseStatus(HttpStatus.OK)
 	public void stopAnalysis(@PathVariable(value = "analysisId") String analysisId)
@@ -401,26 +405,11 @@ public class AnalysisPluginController extends MolgenisPluginController
 	{
 		Analysis analysis = dataService.findOne(AnalysisMetaData.INSTANCE.getName(), analysisId, Analysis.class);
 
-		// Mref goes only one deep, we need two, set it now
-		Set<Object> jobIds = Sets.newHashSet();
-		for (AnalysisJob job : analysis.getJobs())
-		{
-			jobIds.add(job.getIdentifier());
-		}
-
-		if (jobIds.isEmpty())
-		{
-			analysis.setJobs(Collections.<AnalysisJob> emptyList());
-		}
-		else
-		{
-			Iterable<AnalysisJob> jobs = dataService.findAll(AnalysisJobMetaData.INSTANCE.getName(), jobIds,
-					AnalysisJob.class);
-			analysis.setJobs(Lists.newArrayList(jobs));
-		}
+		Iterable<AnalysisJob> analysisJobs = dataService.findAll(AnalysisJobMetaData.INSTANCE.getName(),
+				new QueryImpl().eq(AnalysisJobMetaData.ANALYSIS, analysis), AnalysisJob.class);
 
 		model.addAttribute("analysis", analysis);
-
+		model.addAttribute("jobCount", new AnalysisJobCount(analysisJobs));
 		return "progress";
 	}
 
@@ -438,7 +427,6 @@ public class AnalysisPluginController extends MolgenisPluginController
 	{
 		return writtenProtocols.contains(protocolName);
 	}
-
 
 	private void readUserProperties()
 	{
@@ -476,7 +464,6 @@ public class AnalysisPluginController extends MolgenisPluginController
 		}
 	}
 
-
 	private String generateAnalysisName(Date creationDate)
 	{
 		return "Analysis-" + creationDate.getTime();
@@ -504,5 +491,12 @@ public class AnalysisPluginController extends MolgenisPluginController
 		{
 			return q;
 		}
+	}
+
+	@Override
+	public String getRefRedirectUrlTemplate()
+	{
+		// FIXME do not hardcode menu reference
+		return "/menu/main/analysis/view/{{id}}";
 	}
 }
