@@ -27,7 +27,6 @@ import org.molgenis.framework.server.MolgenisSimpleSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 /**
  * <p>
@@ -70,7 +69,7 @@ public class CaddServiceAnnotator extends VariantAnnotator
 							+ ",Number=1,Type=Float,Description=\"CADD absolute C score, ie. unscaled SVM output. Useful as  reference when the scaled score may be unexpected.\">" });
 
 	public static final String CADD_FILE_LOCATION_PROPERTY = "cadd_location";
-	TabixReader tr;
+	TabixReader tabixReader;
 
 	@Autowired
 	public CaddServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService)
@@ -78,10 +77,6 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	{
 		this.molgenisSettings = molgenisSettings;
 		this.annotatorService = annotatorService;
-		if (molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY) != null)
-		{
-			tr = new TabixReader(molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY));
-		}
 	}
 
 	public CaddServiceAnnotator(File caddTsvGzFile, File inputVcfFile, File outputVCFFile) throws Exception
@@ -92,7 +87,7 @@ public class CaddServiceAnnotator extends VariantAnnotator
 
 		this.annotatorService = new AnnotationServiceImpl();
 
-		tr = new TabixReader(molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY));
+		tabixReader = new TabixReader(molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY));
 
 		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
 
@@ -164,6 +159,10 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	@Override
 	public List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException
 	{
+		if (tabixReader == null)
+		{
+			tabixReader = new TabixReader(molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY));
+		}
 		List<Entity> results = new ArrayList<Entity>();
 		// FIXME need to solve this! duplicate notation for CHROM in VcfRepository.CHROM and LocusAnnotator.CHROMOSOME
 		String chromosome = entity.getString(VcfRepository.CHROM) != null ? entity.getString(VcfRepository.CHROM) : entity
@@ -176,7 +175,7 @@ public class CaddServiceAnnotator extends VariantAnnotator
 		Double caddAbs = null;
 		Double caddScaled = null;
 
-		TabixReader.Iterator tabixIterator = tr.query(chromosome + ":" + position);
+		TabixReader.Iterator tabixIterator = tabixReader.query(chromosome + ":" + position);
 
 		// TabixReaderIterator does not have a hasNext();
 		boolean done = false;
