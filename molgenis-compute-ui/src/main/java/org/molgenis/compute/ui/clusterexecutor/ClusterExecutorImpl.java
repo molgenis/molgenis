@@ -338,11 +338,21 @@ public class ClusterExecutorImpl implements ClusterExecutor
 					{
 						LOG.info(line);
 					}
+
+					//TODO: it would be nice to update jobs and analysis statuses
+					//				job.setStatus(JobStatus.CANCELLED);
+					//				dataService.update(AnalysisJobMetaData.INSTANCE.getName(), job);
 				}
 			}
 
 			channelExec.disconnect();
 			session.disconnect();
+
+//			if(anyJobCancelled)
+//			{
+//				analysis.setStatus(AnalysisStatus.CANCELLED);
+//				dataService.update(AnalysisMetaData.INSTANCE.getName(), analysis);
+//			}
 
 			LOG.info("Analysis [" + analysis.getName() + "] is cancelled");
 			return true;
