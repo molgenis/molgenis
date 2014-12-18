@@ -29,9 +29,9 @@ public class AnalysisJob extends MapEntity
 		return getString(AnalysisJobMetaData.IDENTIFIER);
 	}
 
-	public Integer getSchedulerId()
+	public String getSchedulerId()
 	{
-		return getInt(AnalysisJobMetaData.SCHEDULER_ID);
+		return getString(AnalysisJobMetaData.SCHEDULER_ID);
 	}
 
 	public void setSchedulerId(String schedulerId)

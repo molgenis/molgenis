@@ -12,8 +12,10 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import org.molgenis.compute.ui.meta.AnalysisJobMetaData;
+import org.molgenis.compute.ui.meta.AnalysisMetaData;
 import org.molgenis.compute.ui.model.Analysis;
 import org.molgenis.compute.ui.model.AnalysisJob;
+import org.molgenis.compute.ui.model.AnalysisStatus;
 import org.molgenis.compute.ui.model.JobStatus;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
@@ -360,29 +362,30 @@ public class ClusterExecutorImpl implements ClusterExecutor
 			channelExec.disconnect();
 			session.disconnect();
 
-//			if(anyJobCancelled)
-//			{
-//				analysis.setStatus(AnalysisStatus.CANCELLED);
-//				dataService.update(AnalysisMetaData.INSTANCE.getName(), analysis);
-//			}
+			if(anyJobCancelled)
+			{
+				analysis.setStatus(AnalysisStatus.CANCELLED);
+				dataService.update(AnalysisMetaData.INSTANCE.getName(), analysis);
+			}
 
 			LOG.info("Analysis [" + analysis.getName() + "] is cancelled");
 			return true;
 		}
 		catch (JSchException e)
 		{
-			e.printStackTrace();
+			LOG.error(e);
+			return false;
 		}
 		catch (IOException e)
 		{
-			e.printStackTrace();
+			LOG.error(e);
+			return false;
 		}
 		catch (InterruptedException e)
 		{
-			e.printStackTrace();
+			LOG.error(e);
+			return false;
 		}
-		return false;
-
 	}
 
 	private void readUserProperties()

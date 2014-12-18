@@ -397,7 +397,6 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 	{
 		Analysis analysis = dataService.findOne(AnalysisMetaData.INSTANCE.getName(), analysisId, Analysis.class);
 		clusterManager.cancelRunJobs(analysis);
-		throw new RuntimeException("'Stop analysis' not implemented");
 	}
 
 	@RequestMapping("/{analysisId}/progress.js")
