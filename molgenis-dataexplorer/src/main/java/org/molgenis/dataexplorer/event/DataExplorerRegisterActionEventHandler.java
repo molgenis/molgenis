@@ -1,11 +1,11 @@
-package org.molgenis.dataexplorer.controller;
+package org.molgenis.dataexplorer.event;
 
 import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.QueryRule;
 
-public interface RegisterDataExplorerActionEventHandler
+public interface DataExplorerRegisterActionEventHandler
 {
 	/**
 	 * @param actionId

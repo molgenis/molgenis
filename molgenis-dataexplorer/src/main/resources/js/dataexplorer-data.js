@@ -46,14 +46,15 @@
 	/**
 	 * @memberOf molgenis.dataexplorer.data
 	 */
-	function createDataTable(editable, rowClickable) {
+	function createDataTable(editable, rowClickable, cellClickHandlers) {
 		var attributes = getAttributes();
 		$('#data-table-container').table({
 			'entityMetaData' : getEntity(),
 			'attributes' : attributes,
 			'query' : getQuery(),
 			'editable' : editable,
-			'rowClickable': rowClickable
+			'rowClickable': rowClickable,
+			'cellClickHandlers' : cellClickHandlers 
 		});
 	}
 	

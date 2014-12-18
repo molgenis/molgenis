@@ -45,6 +45,7 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.dataexplorer.event.DataExplorerRegisterRefCellClickEventHandler;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -64,7 +65,8 @@ import com.google.common.collect.Iterables;
 
 @Controller
 @RequestMapping(AnalysisPluginController.URI)
-public class AnalysisPluginController extends MolgenisPluginController
+public class AnalysisPluginController extends MolgenisPluginController implements
+		DataExplorerRegisterRefCellClickEventHandler
 {
 	private static Logger logger = Logger.getLogger(AnalysisPluginController.class);
 
@@ -489,5 +491,12 @@ public class AnalysisPluginController extends MolgenisPluginController
 		{
 			return q;
 		}
+	}
+
+	@Override
+	public String getRefRedirectUrlTemplate()
+	{
+		// FIXME do not hardcode menu reference
+		return "/menu/main/analysis/view/{{id}}";
 	}
 }

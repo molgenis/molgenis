@@ -1,4 +1,4 @@
-package org.molgenis.compute.ui.workflow;
+package org.molgenis.compute.ui.workflow.event;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;

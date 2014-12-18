@@ -1,8 +1,8 @@
 package org.molgenis.compute.ui.workflow;
 
-import org.molgenis.dataexplorer.controller.RegisterDataExplorerActionEventHandler;
+import org.molgenis.dataexplorer.event.DataExplorerRegisterActionEventHandler;
 
-public interface WorkflowManageService extends RegisterDataExplorerActionEventHandler
+public interface WorkflowManageService extends DataExplorerRegisterActionEventHandler
 {
 	/**
 	 * Update workflow info

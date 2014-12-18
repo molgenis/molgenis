@@ -40,6 +40,9 @@ import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.GenomeConfig;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataRequest.ColNames;
+import org.molgenis.dataexplorer.event.DataExplorerRegisterActionEvent;
+import org.molgenis.dataexplorer.event.DataExplorerRegisterEvent;
+import org.molgenis.dataexplorer.event.DataExplorerRegisterRefCellClickEvent;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExportException;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExportRequest;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExporter;
@@ -81,7 +84,7 @@ import com.google.common.collect.Maps;
 @SessionAttributes(
 { ATTR_GALAXY_URL, ATTR_GALAXY_API_KEY })
 public class DataExplorerController extends MolgenisPluginController implements
-		ApplicationListener<RegisterDataExplorerActionEvent>
+		ApplicationListener<DataExplorerRegisterEvent>
 {
 	private static final Logger logger = Logger.getLogger(DataExplorerController.class);
 
@@ -134,7 +137,8 @@ public class DataExplorerController extends MolgenisPluginController implements
 	private static final boolean DEFAULT_VAL_KEY_HIDE_SELECT = true;
 	private static final boolean DEFAULT_VAL_KEY_HIGLIGHTREGION = false;
 
-	private Map<String, RegisterDataExplorerActionEvent> actionHandlers = new HashMap<String, RegisterDataExplorerActionEvent>();
+	private Map<String, DataExplorerRegisterRefCellClickEvent> refCellClickHandlers = new HashMap<String, DataExplorerRegisterRefCellClickEvent>();
+	private Map<String, DataExplorerRegisterActionEvent> actionHandlers = new HashMap<String, DataExplorerRegisterActionEvent>();
 
 	@Autowired
 	private DataService dataService;
@@ -251,6 +255,7 @@ public class DataExplorerController extends MolgenisPluginController implements
 			model.addAttribute("rowClickable", isRowClickable());
 			if (galaxyUrl != null) model.addAttribute(ATTR_GALAXY_URL, galaxyUrl);
 
+			model.addAttribute("cellClickHandlers", getCellClickHandlers(entityName));
 			model.addAttribute("actionHandlers", getActionHandlers(entityName));
 		}
 		else if (moduleId.equals("diseasematcher"))
@@ -392,7 +397,7 @@ public class DataExplorerController extends MolgenisPluginController implements
 	{
 		// retrieve action handler for given action
 		String actionId = actionRequest.getActionId();
-		RegisterDataExplorerActionEvent actionHandler = actionHandlers.get(actionId);
+		DataExplorerRegisterActionEvent actionHandler = actionHandlers.get(actionId);
 		if (actionHandler == null) throw new RuntimeException("Invalid action id [" + actionId + "]");
 
 		// perform action
@@ -691,12 +696,25 @@ public class DataExplorerController extends MolgenisPluginController implements
 		return null;
 	}
 
-	private Map<String, RegisterDataExplorerActionEvent> getActionHandlers(final String entityName)
+	private Map<String, DataExplorerRegisterRefCellClickEvent> getCellClickHandlers(final String entityName)
 	{
-		return Maps.filterEntries(actionHandlers, new Predicate<Entry<String, RegisterDataExplorerActionEvent>>()
+		return Maps.filterEntries(refCellClickHandlers,
+				new Predicate<Entry<String, DataExplorerRegisterRefCellClickEvent>>()
+				{
+					@Override
+					public boolean apply(Entry<String, DataExplorerRegisterRefCellClickEvent> entry)
+					{
+						return entry.getValue().getEntityName().equals(entityName);
+					}
+				});
+	}
+
+	private Map<String, DataExplorerRegisterActionEvent> getActionHandlers(final String entityName)
+	{
+		return Maps.filterEntries(actionHandlers, new Predicate<Entry<String, DataExplorerRegisterActionEvent>>()
 		{
 			@Override
-			public boolean apply(Entry<String, RegisterDataExplorerActionEvent> entry)
+			public boolean apply(Entry<String, DataExplorerRegisterActionEvent> entry)
 			{
 				return entry.getValue().getSource().allowAction(entry.getKey(), entityName);
 			}
@@ -704,18 +722,39 @@ public class DataExplorerController extends MolgenisPluginController implements
 	}
 
 	@Override
-	public void onApplicationEvent(RegisterDataExplorerActionEvent event)
+	public void onApplicationEvent(DataExplorerRegisterEvent event)
 	{
-		switch (event.getType())
+		logger.info("Application event: " + event);
+
+		if (event instanceof DataExplorerRegisterActionEvent)
 		{
-			case DEREGISTER:
-				actionHandlers.remove(event.getActionId());
-				break;
-			case REGISTER:
-				actionHandlers.put(event.getActionId(), event);
-				break;
-			default:
-				throw new RuntimeException("Unknown type [" + event.getType() + "]");
+			DataExplorerRegisterActionEvent actionEvent = (DataExplorerRegisterActionEvent) event;
+			switch (actionEvent.getType())
+			{
+				case DEREGISTER:
+					actionHandlers.remove(actionEvent.getId());
+					break;
+				case REGISTER:
+					actionHandlers.put(actionEvent.getId(), actionEvent);
+					break;
+				default:
+					throw new RuntimeException("Unknown type [" + actionEvent.getType() + "]");
+			}
+		}
+		else if (event instanceof DataExplorerRegisterRefCellClickEvent)
+		{
+			DataExplorerRegisterRefCellClickEvent refCellClickEvent = (DataExplorerRegisterRefCellClickEvent) event;
+			switch (refCellClickEvent.getType())
+			{
+				case DEREGISTER:
+					refCellClickHandlers.remove(refCellClickEvent.getId());
+					break;
+				case REGISTER:
+					refCellClickHandlers.put(refCellClickEvent.getId(), refCellClickEvent);
+					break;
+				default:
+					throw new RuntimeException("Unknown type [" + refCellClickEvent.getType() + "]");
+			}
 		}
 	}
 }

@@ -12,6 +12,11 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
 
+/**
+ * AnalysisJob decorator that updates analysis status on job status change
+ * 
+ * TODO handle analysis job deletes
+ */
 public class AnalysisJobDecorator extends CrudRepositoryDecorator
 {
 	private final CrudRepository decoratedRepository;
@@ -43,6 +48,13 @@ public class AnalysisJobDecorator extends CrudRepositoryDecorator
 	public void update(Entity entity)
 	{
 		decoratedRepository.update(entity);
+	}
+
+	@Override
+	public void update(Iterable<? extends Entity> entities)
+	{
+		decoratedRepository.update(entities);
+		updateAnalysisStatus(entities);
 	}
 
 	private void updateAnalysisStatus(Entity entity)
