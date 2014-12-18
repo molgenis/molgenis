@@ -1,60 +1,131 @@
 package org.molgenis.compute.ui.model;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 
-public enum AnalysisStatus
+public enum AnalysisStatus implements State<AnalysisStatus>
 {
 	CREATED
 	{
 		@Override
-		public boolean isEndPoint()
+		public boolean isFinalState()
 		{
 			return false;
+		}
+
+		@Override
+		public boolean isInitialState()
+		{
+			return true;
+		}
+
+		@Override
+		public EnumSet<AnalysisStatus> getStateTransitions()
+		{
+			return EnumSet.of(RUNNING);
 		}
 	},
 	RUNNING
 	{
 		@Override
-		public boolean isEndPoint()
+		public boolean isFinalState()
 		{
 			return false;
+		}
+
+		@Override
+		public boolean isInitialState()
+		{
+			return false;
+		}
+
+		@Override
+		public EnumSet<AnalysisStatus> getStateTransitions()
+		{
+			return EnumSet.of(PAUSED, COMPLETED, FAILED, CANCELLED);
 		}
 	},
 	PAUSED
 	{
 		@Override
-		public boolean isEndPoint()
+		public boolean isFinalState()
 		{
 			return false;
+		}
+
+		@Override
+		public boolean isInitialState()
+		{
+			return false;
+		}
+
+		@Override
+		public EnumSet<AnalysisStatus> getStateTransitions()
+		{
+			return EnumSet.of(RUNNING);
 		}
 	},
 	COMPLETED
 	{
 		@Override
-		public boolean isEndPoint()
+		public boolean isFinalState()
 		{
 			return true;
+		}
+
+		@Override
+		public boolean isInitialState()
+		{
+			return false;
+		}
+
+		@Override
+		public EnumSet<AnalysisStatus> getStateTransitions()
+		{
+			return EnumSet.noneOf(AnalysisStatus.class);
 		}
 	},
 	FAILED
 	{
 		@Override
-		public boolean isEndPoint()
+		public boolean isFinalState()
 		{
-			return true;
+			return false;
+		}
+
+		@Override
+		public boolean isInitialState()
+		{
+			return false;
+		}
+
+		@Override
+		public EnumSet<AnalysisStatus> getStateTransitions()
+		{
+			return EnumSet.of(RUNNING);
 		}
 	},
 	CANCELLED
 	{
 		@Override
-		public boolean isEndPoint()
+		public boolean isFinalState()
 		{
-			return true;
+			return false;
+		}
+
+		@Override
+		public boolean isInitialState()
+		{
+			return false;
+		}
+
+		@Override
+		public EnumSet<AnalysisStatus> getStateTransitions()
+		{
+			return EnumSet.of(RUNNING);
 		}
 	};
-
-	public abstract boolean isEndPoint();
 
 	public static List<String> names()
 	{
