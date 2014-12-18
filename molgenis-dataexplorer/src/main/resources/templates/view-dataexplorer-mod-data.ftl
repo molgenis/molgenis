@@ -48,26 +48,24 @@
 	     	</div>
 
 	      	<div class="modal-body">
-	      		<div class="form-group form-horizontal">
-		      		<div class="row">
-						<div class="control-group">
-							<label class="col-md-3 control-label">As column names I want:</label>
-							<div class="controls col-md-9">
-								<label class="radio">
-		  							<input type="radio" name="colNames" value="ATTRIBUTE_LABELS" checked> Attribute Labels
-			    				</label>
-								<label class="radio">
-		  							<input type="radio" name="colNames" value="ATTRIBUTE_NAMES">Attribute Names
-								</label>
-		  					</div>
-						</div>
-					</div>
-				</div>
+	      	    <form class="form" role="form">
+                    <span id="helpBlock" class="help-block">As column names I want:</span>
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="colNames" value="ATTRIBUTE_LABELS" checked> Attribute Labels
+                        </label>
+                    </div>
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="colNames" value="ATTRIBUTE_NAMES">  Attribute Names
+                        </label>   
+                    </div>
+	      	    </form>
 			</div>
 
 	      	<div class="modal-footer">
 	        	<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-	        	<button id="download-button" class="btn btn-primary">Download</button>
+	        	<button type="button" id="download-button" class="btn btn-primary">Download</button>
 	      	</div>
 
 	    </div>
