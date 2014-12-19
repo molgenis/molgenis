@@ -69,7 +69,7 @@ public class ClusterExecutorImpl implements ClusterExecutor
 		LOG.info("SUBMIT Analysis [" + analysis.getName() + "]");
 		this.run = analysis;
 
-		String runName = analysis.getName();
+		String runName = analysis.getIdentifier();
 		String clusterRoot = root;
 		String runDir = clusterRoot + runName;
 
@@ -274,6 +274,7 @@ public class ClusterExecutorImpl implements ClusterExecutor
 	{
 		Iterable<AnalysisJob> jobs = dataService.findAll(AnalysisJobMetaData.INSTANCE.getName(),
 				new QueryImpl().eq(AnalysisJobMetaData.ANALYSIS, analysis), AnalysisJob.class);
+		//TODO: put it into query
 		for (AnalysisJob job : jobs)
 		{
 			if (job.getName().equalsIgnoreCase(jobName)) return job;
