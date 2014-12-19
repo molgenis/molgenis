@@ -44,7 +44,7 @@
                                 <option value=""></option><#-- Required for placeholder to work with select2 -->
                         <#if entitiesMeta?has_content>
                             <#list entitiesMeta.iterator() as entityMeta>
-                                <option value="/api/v1/${entityMeta.name?html}"><#if entityMeta.label?has_content>${entityMeta.label?html}<#else>${entityMeta.name?html}</#if></option>
+                                <option value="/api/v1/${entityMeta.name?html}"<#if selectedEntityName?? && (entityMeta.name == selectedEntityName)> selected</#if>><#if entityMeta.label?has_content>${entityMeta.label?html}<#else>${entityMeta.name?html}</#if></option>
                             </#list>
                         </#if>
                         </select>
