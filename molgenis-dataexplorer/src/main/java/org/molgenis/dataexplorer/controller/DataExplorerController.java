@@ -16,7 +16,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -196,11 +195,6 @@ public class DataExplorerController extends MolgenisPluginController
 					message.append(", please specify the fully qualified entity name");
 				}
 				model.addAttribute("warningMessage", message.toString());
-			}
-			Iterator<EntityMetaData> entitiesIterator = entitiesMeta.iterator();
-			if (entitiesIterator.hasNext())
-			{
-				selectedEntityName = entitiesIterator.next().getName();
 			}
 		}
 		model.addAttribute("selectedEntityName", selectedEntityName);
@@ -607,8 +601,7 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/settings", method = RequestMethod.GET)
-	public @ResponseBody
-	Map<String, String> getSettings(@RequestParam(required = false) String keyStartsWith)
+	public @ResponseBody Map<String, String> getSettings(@RequestParam(required = false) String keyStartsWith)
 	{
 		if (keyStartsWith == null)
 		{
@@ -651,17 +644,21 @@ public class DataExplorerController extends MolgenisPluginController
 	private String parseEntitiesReportRuntimeProperty(String entityName)
 	{
 		String modEntitiesReportRTP = molgenisSettings.getProperty(KEY_MOD_ENTITIESREPORT, null);
-        if(modEntitiesReportRTP != null) {
-            String[] entitiesReports = modEntitiesReportRTP.split(",");
-            for (String entitiesReport : entitiesReports) {
-                String[] entitiesReportParts = entitiesReport.split(":");
-                if (entitiesReportParts.length == 2) {
-                    if (entitiesReportParts[0].equals(entityName)) {
-                        return entitiesReportParts[1];
-                    }
-                }
-            }
-        }
+		if (modEntitiesReportRTP != null)
+		{
+			String[] entitiesReports = modEntitiesReportRTP.split(",");
+			for (String entitiesReport : entitiesReports)
+			{
+				String[] entitiesReportParts = entitiesReport.split(":");
+				if (entitiesReportParts.length == 2)
+				{
+					if (entitiesReportParts[0].equals(entityName))
+					{
+						return entitiesReportParts[1];
+					}
+				}
+			}
+		}
 		return null;
 	}
 }
