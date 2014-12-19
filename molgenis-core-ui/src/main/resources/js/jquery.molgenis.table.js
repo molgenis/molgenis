@@ -18,7 +18,7 @@
 			items.push('<div class="form-group">');
 			items.push('<div class="col-md-12">');
 			items.push('<div class="input-group">');
-			items.push('<input type="text" class="form-control" autofocus="autofocus"/>');
+			items.push('<input type="text" class="form-control table-search" autofocus="autofocus"/>');
 			items.push('<span class="input-group-btn">');
 			items.push('<button class="btn btn-default search-clear-btn" type="button"><span class="glyphicon glyphicon-remove"></span></button>');
 			items.push('<button class="btn btn-default search-btn" type="button"><span class="glyphicon glyphicon-search"></span></button>');
@@ -889,12 +889,49 @@
 			});
 		});
 		
-		$(container).on('click', 'search-btn', function() {
-			console.log('search-btn', settings.query);
+		function clearSearch() {
+			$('.table-search', settings.container).val('');
+			container.analysisTable('setQuery', settings.originalQuery);
+		}
+		
+		function performSearch() {
+			if(settings.query) {
+				settings.originalQuery = $.extend( true, {}, settings.query );
+			}
+			else
+				settings.originalQuery = null;
+			
+			if(settings.query.q) {
+				if(settings.query.q.length > 0)
+					settings.query.q.push({operator : 'AND'});
+				settings.query.q.push({
+					operator : 'SEARCH',
+					value : $('.table-search', settings.container).val().trim()
+				});	
+			}
+			
+			container.analysisTable('setQuery', settings.query);
+		}
+		
+		$(container).on('click', '.search-btn', function() {
+			performSearch();
 		});
 		
-		$(container).on('click', 'search-clear-btn', function() {
-			console.log('search-clear-btn', settings.query);
+		$(container).on('click', '.search-clear-btn', function() {
+			clearSearch();
+		});
+		
+		$(container).on('keyup', '.table-search', function(e) {
+			switch(e.which) {
+				case 13: // enter
+					performSearch();
+					break;
+				case 27: // escape
+					clearSearch();
+					break;
+				default:
+					break;
+			}
 		});
 		
 		return this;
