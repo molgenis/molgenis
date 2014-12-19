@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -465,7 +466,7 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 
 	private String generateAnalysisName(Date creationDate)
 	{
-		return "Analysis-" + creationDate.getTime();
+		return "Analysis (" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(creationDate) + ')';
 	}
 
 	private static class CreateAnalysisRequest

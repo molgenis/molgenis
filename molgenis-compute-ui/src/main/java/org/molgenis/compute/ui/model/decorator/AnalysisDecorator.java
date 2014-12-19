@@ -64,6 +64,64 @@ public class AnalysisDecorator extends CrudRepositoryDecorator
 		decoratedRepository.update(entities);
 	}
 
+	@Override
+	public void delete(Entity entity)
+	{
+		// validate if delete is allowed
+		validateIsAnalysisDeleteAllowed(entity);
+
+		decoratedRepository.delete(entity);
+	}
+
+	@Override
+	public void delete(Iterable<? extends Entity> entities)
+	{
+		// validate if delete is allowed
+		for (Entity entity : entities)
+			validateIsAnalysisDeleteAllowed(entity);
+
+		decoratedRepository.delete(entities);
+	}
+
+	@Override
+	public void deleteById(Iterable<Object> ids)
+	{
+		// validate if delete is allowed
+		Iterable<Analysis> analysis = dataService.findAll(AnalysisMetaData.INSTANCE.getName(), ids, Analysis.class);
+		for (Entity entity : analysis)
+			validateIsAnalysisDeleteAllowed(entity);
+
+		decoratedRepository.deleteById(ids);
+	}
+
+	@Override
+	public void deleteAll()
+	{
+		// validate if delete is allowed
+		Iterable<Analysis> analysis = dataService.findAll(AnalysisMetaData.INSTANCE.getName(), Analysis.class);
+		for (Entity entity : analysis)
+			validateIsAnalysisDeleteAllowed(entity);
+
+		decoratedRepository.deleteAll();
+	}
+
+	@Override
+	public void deleteById(Object id)
+	{
+		// validate if delete is allowed
+		Analysis analysis = dataService.findOne(AnalysisMetaData.INSTANCE.getName(), id, Analysis.class);
+		validateIsAnalysisDeleteAllowed(analysis);
+
+		decoratedRepository.deleteById(id);
+	}
+
+	private boolean validateIsAnalysisDeleteAllowed(Entity entity)
+	{
+		AnalysisStatus analysisStatus = AnalysisStatus.valueOf(entity.getString(AnalysisMetaData.STATUS));
+		if (analysisStatus == AnalysisStatus.CREATED) return true;
+		else throw new RuntimeException("Deleting analysis with status " + analysisStatus + " is not allowed");
+	}
+
 	private void validateNewAnalysisStatus(Entity entity)
 	{
 		AnalysisStatus analysisStatus = AnalysisStatus.valueOf(entity.getString(AnalysisMetaData.STATUS));

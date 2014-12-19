@@ -5,9 +5,11 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.vcf.VcfRepository;
 
 public abstract class VariantAnnotator extends LocusAnnotator
 {
+
 	public static final String REFERENCE = "REF";
 	public static final String ALTERNATIVE = "ALT";
 
