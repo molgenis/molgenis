@@ -650,7 +650,10 @@
 					$('#analysis-target-select').html(items.join(''));
 					$('#analysis-target-select').select2();
 				});
+			} else {
+				$('#analysis-target-select-container').addClass('hidden');
 			}
+			
 			// update analysis targets table
 			$('#analysis-target-table-container').table({
 				'entityMetaData' : targetMeta,
@@ -664,6 +667,7 @@
 				}),
 				'query' : {'q' : [{field:'analysis', operator:'EQUALS', value:settings.analysis.identifier}]},
 				'deletable' : settings.analysis.status === 'CREATED',
+				'searchable': true,
 				'maxRows' : 10,
 				'onDeleteRow' : function(href) {
 					deleteAnalysisTarget(href);

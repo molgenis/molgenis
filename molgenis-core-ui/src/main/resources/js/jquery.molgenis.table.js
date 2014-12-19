@@ -18,7 +18,7 @@
 			items.push('<div class="form-group">');
 			items.push('<div class="col-md-12">');
 			items.push('<div class="input-group">');
-			items.push('<input type="text" class="form-control" id="observationset-search" placeholder="Search data values" autofocus="autofocus"/>');
+			items.push('<input type="text" class="form-control" autofocus="autofocus"/>');
 			items.push('<span class="input-group-btn">');
 			items.push('<button class="btn btn-default search-clear-btn" type="button"><span class="glyphicon glyphicon-remove"></span></button>');
 			items.push('<button class="btn btn-default search-btn" type="button"><span class="glyphicon glyphicon-search"></span></button>');

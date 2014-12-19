@@ -25,6 +25,7 @@
             <menu label="Compute" name="compute">
             	<plugin id="workflow" name="Workflows" url="workflow" />
             	<plugin id="analysis" name="Analysis" url="analysis" />
+            	<plugin id="form.UIBackend" name="Backend" url="form.UIBackend"/>
             </menu>
 	    </menu>
 		<menu label="Entities" name ="entities">
