@@ -625,7 +625,7 @@
 			var idAttrName = targetMeta.idAttribute;
 			var labelAttrName = targetMeta.labelAttribute;
 			
-			if(settings.analysis === 'CREATED') {
+			if(settings.analysis.status === 'CREATED') {
 				// update analysis targets select
 				// TODO use NOT operator in query
 				restApi.getAsync('/api/v1/' + targetType, {'attributes' : [ idAttrName, labelAttrName, 'analysis'], 'expand' : [ 'analysis[identifier]' ], 'num': 10000}, function(data) {
