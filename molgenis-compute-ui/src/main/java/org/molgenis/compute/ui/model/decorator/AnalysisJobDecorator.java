@@ -58,6 +58,7 @@ public class AnalysisJobDecorator extends CrudRepositoryDecorator
 		// validate job status
 		validateExistingAnalysisJobStatus(entity);
 		decoratedRepository.update(entity);
+		updateAnalysisStatus(entity);
 	}
 
 	@Override
