@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
@@ -30,6 +29,8 @@ import org.molgenis.vcf.VcfSample;
 import org.molgenis.vcf.meta.VcfMeta;
 import org.molgenis.vcf.meta.VcfMetaFormat;
 import org.molgenis.vcf.meta.VcfMetaInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
@@ -41,7 +42,7 @@ import com.google.common.collect.Lists;
  */
 public class VcfRepository extends AbstractRepository
 {
-	private static final Logger logger = Logger.getLogger(VcfRepository.class);
+	private static final Logger LOG = LoggerFactory.getLogger(VcfRepository.class);
 
 	public static final String BASE_URL = "vcf://";
 	public static final String CHROM = "#CHROM";
@@ -172,9 +173,9 @@ public class VcfRepository extends AbstractRepository
 				}
 				catch (IOException e)
 				{
-					logger.error("Unable to load VCF metadata. " + e.getStackTrace());
+					LOG.error("Unable to load VCF metadata. " + e.getStackTrace());
 				}
-				
+
 				return entity;
 			}
 
@@ -403,7 +404,7 @@ public class VcfRepository extends AbstractRepository
 				}
 				catch (IOException e)
 				{
-					logger.warn(e);
+					LOG.warn("", e);
 				}
 			}
 		}

@@ -13,7 +13,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import org.apache.log4j.Logger;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
@@ -25,6 +24,8 @@ import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.util.CountryCodes;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -48,11 +49,11 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @RequestMapping(URI)
 public class AccountController
 {
+	private static final Logger LOG = LoggerFactory.getLogger(AccountController.class);
+
 	public static final String URI = "/account";
 	private static final String CHANGE_PASSWORD_RELATIVE_URI = "/password/change";
 	public static final String CHANGE_PASSWORD_URI = URI + CHANGE_PASSWORD_RELATIVE_URI;
-
-	private static final Logger logger = Logger.getLogger(AccountController.class);
 
 	static final String REGISTRATION_SUCCESS_MESSAGE_USER = "You have successfully registered, an activation e-mail has been sent to your email.";
 	static final String REGISTRATION_SUCCESS_MESSAGE_ADMIN = "You have successfully registered, your request has been forwarded to the administrator.";
@@ -214,7 +215,7 @@ public class AccountController
 	@ResponseBody
 	public ErrorMessageResponse handleMolgenisUserException(MolgenisUserException e)
 	{
-		logger.debug("", e);
+		LOG.debug("", e);
 		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
 	}
 
@@ -223,7 +224,7 @@ public class AccountController
 	@ResponseBody
 	public ErrorMessageResponse handleMolgenisDataException(MolgenisDataException e)
 	{
-		logger.error("", e);
+		LOG.error("", e);
 		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
 	}
 
@@ -232,7 +233,7 @@ public class AccountController
 	@ResponseBody
 	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
 	{
-		logger.error("", e);
+		LOG.error("", e);
 		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
 	}
 

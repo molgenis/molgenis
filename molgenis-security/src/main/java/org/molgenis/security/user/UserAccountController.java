@@ -8,7 +8,8 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.util.CountryCodes;
@@ -30,7 +31,7 @@ import com.google.common.collect.Lists;
 @RequestMapping(URI)
 public class UserAccountController extends MolgenisPluginController
 {
-	private static final Logger logger = Logger.getLogger(UserAccountController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(UserAccountController.class);
 
 	public static final int MIN_PASSWORD_LENGTH = 6;
 
@@ -122,7 +123,7 @@ public class UserAccountController extends MolgenisPluginController
 	@ResponseBody
 	private ErrorMessageResponse handleMolgenisUserException(MolgenisUserException e)
 	{
-		logger.debug("", e);
+		LOG.debug("", e);
 		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
 	}
 
@@ -131,7 +132,7 @@ public class UserAccountController extends MolgenisPluginController
 	@ResponseBody
 	private ErrorMessageResponse handleRuntimeException(RuntimeException e)
 	{
-		logger.error("", e);
+		LOG.error("", e);
 		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
 	}
 

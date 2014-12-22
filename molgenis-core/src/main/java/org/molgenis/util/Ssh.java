@@ -8,7 +8,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ch.ethz.ssh2.ChannelCondition;
 import ch.ethz.ssh2.Connection;
@@ -20,19 +21,18 @@ import ch.ethz.ssh2.Session;
 /**
  * Wrapper arround ssh. Build on top of
  * 
- * http://www.cleondris.ch/opensource/ssh2/javadoc/ (BSD type license)
- * http://www.ganymed.ethz.ch/ssh2/FAQ.html
+ * http://www.cleondris.ch/opensource/ssh2/javadoc/ (BSD type license) http://www.ganymed.ethz.ch/ssh2/FAQ.html
  */
 public class Ssh
 {
+	private static final Logger LOG = LoggerFactory.getLogger(Ssh.class);
+
 	// general ssh settings
 	private String hostname;
 	private String username;
 	private String password;
 	private int timeout = 10000;
 	private int port = 22;
-
-	Logger logger = Logger.getLogger(Ssh.class);
 
 	// implementation specific
 	Connection conn;
@@ -75,7 +75,7 @@ public class Ssh
 
 	public void forward(int local_port, String host_to_connect, int port_to_connect) throws IOException
 	{
-		logger.debug("creating a tunnel from L:" + local_port + "->" + host_to_connect + ":" + port_to_connect);
+		LOG.debug("creating a tunnel from L:" + local_port + "->" + host_to_connect + ":" + port_to_connect);
 		lpf = conn.createLocalPortForwarder(local_port, host_to_connect, port_to_connect);
 
 		// conn.requestRemotePortForwarding("127.0.0.1", local_port,
@@ -89,7 +89,7 @@ public class Ssh
 	 */
 	private void connect() throws IOException
 	{
-		logger.debug("trying to connect to " + this.username + "@" + this.hostname + ":" + this.port);
+		LOG.debug("trying to connect to " + this.username + "@" + this.hostname + ":" + this.port);
 		/* Create a connection instance */
 		conn = new Connection(this.hostname, this.port);
 
@@ -126,7 +126,7 @@ public class Ssh
 			});
 		}
 
-		logger.debug("connected to " + this.username + "@" + this.hostname + ":" + this.port);
+		LOG.debug("connected to " + this.username + "@" + this.hostname + ":" + this.port);
 	}
 
 	public SshResult executeCommand(String command) throws IOException
@@ -137,7 +137,7 @@ public class Ssh
 	/** Execute one command and wait for the result to return */
 	public SshResult executeCommand(String command, int timeout) throws IOException
 	{
-		logger.debug("executing command: " + command);
+		LOG.debug("executing command: " + command);
 
 		try
 		{
@@ -161,11 +161,9 @@ public class Ssh
 				if ((stdout.available() == 0) && (stderr.available() == 0))
 				{
 					/*
-					 * Even though currently there is no data available, it may
-					 * be that new data arrives and the session's underlying
-					 * channel is closed before we call waitForCondition(). This
-					 * means that EOF and STDOUT_DATA (or STDERR_DATA, or both)
-					 * may be set together.
+					 * Even though currently there is no data available, it may be that new data arrives and the
+					 * session's underlying channel is closed before we call waitForCondition(). This means that EOF and
+					 * STDOUT_DATA (or STDERR_DATA, or both) may be set together.
 					 */
 
 					int conditions = sess.waitForCondition(ChannelCondition.STDOUT_DATA | ChannelCondition.STDERR_DATA
@@ -180,8 +178,7 @@ public class Ssh
 					}
 
 					/*
-					 * Here we do not need to check separately for CLOSED, since
-					 * CLOSED implies EOF
+					 * Here we do not need to check separately for CLOSED, since CLOSED implies EOF
 					 */
 
 					if ((conditions & ChannelCondition.EOF) != 0)
@@ -191,8 +188,7 @@ public class Ssh
 						if ((conditions & (ChannelCondition.STDOUT_DATA | ChannelCondition.STDERR_DATA)) == 0)
 						{
 							/*
-							 * ... and we have consumed all data in the local
-							 * arrival window.
+							 * ... and we have consumed all data in the local arrival window.
 							 */
 							break;
 						}
@@ -208,12 +204,10 @@ public class Ssh
 				}
 
 				/*
-				 * If you below replace "while" with "if", then the way the
-				 * output appears on the local stdout and stder streams is more
-				 * "balanced". Addtionally reducing the buffer size will also
-				 * improve the interleaving, but performance will slightly
-				 * suffer. OKOK, that all matters only if you get HUGE amounts
-				 * of stdout and stderr data =)
+				 * If you below replace "while" with "if", then the way the output appears on the local stdout and stder
+				 * streams is more "balanced". Addtionally reducing the buffer size will also improve the interleaving,
+				 * but performance will slightly suffer. OKOK, that all matters only if you get HUGE amounts of stdout
+				 * and stderr data =)
 				 */
 
 				while (stdout.available() > 0)
@@ -266,7 +260,7 @@ public class Ssh
 	 */
 	public void uploadFile(File localFile, String remoteFile) throws IOException
 	{
-		logger.debug("upload local file '" + localFile + "' to remote file '" + remoteFile + "'");
+		LOG.debug("upload local file '" + localFile + "' to remote file '" + remoteFile + "'");
 
 		SCPClient scp = conn.createSCPClient();
 
@@ -291,7 +285,7 @@ public class Ssh
 
 			out.close();
 		}
-		logger.debug("upload file complete");
+		LOG.debug("upload file complete");
 	}
 
 	/**
@@ -305,7 +299,7 @@ public class Ssh
 	 */
 	public void uploadStringToFile(String string, String remoteFile) throws IOException
 	{
-		logger.debug("upload string to remote file '" + remoteFile + "'");
+		LOG.debug("upload string to remote file '" + remoteFile + "'");
 
 		SCPClient scp = conn.createSCPClient();
 
@@ -319,7 +313,7 @@ public class Ssh
 		{
 			scp.put(string.getBytes("UTF-8"), remoteFile, "", "0600");
 		}
-		logger.debug("upload file complete");
+		LOG.debug("upload file complete");
 
 	}
 
@@ -356,7 +350,7 @@ public class Ssh
 	 */
 	public void downloadFile(String remoteFile, File localFile) throws IOException
 	{
-		logger.debug("download remote file '" + remoteFile + "' to local file " + localFile);
+		LOG.debug("download remote file '" + remoteFile + "' to local file " + localFile);
 		SCPClient scp = conn.createSCPClient();
 
 		OutputStream out = new FileOutputStream(localFile);
@@ -371,12 +365,12 @@ public class Ssh
 			out.close();
 		}
 
-		logger.debug("download file complete");
+		LOG.debug("download file complete");
 	}
 
 	public String downloadFileIntoString(String remoteFile) throws IOException
 	{
-		logger.debug("download remote file '" + remoteFile);
+		LOG.debug("download remote file '" + remoteFile);
 		SCPClient scp = conn.createSCPClient();
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -436,7 +430,7 @@ public class Ssh
 
 	public String downloadFile(String remoteFile) throws IOException
 	{
-		logger.debug("download remoteFile file '" + remoteFile + "' as string");
+		LOG.debug("download remoteFile file '" + remoteFile + "' as string");
 
 		SCPClient scp = conn.createSCPClient();
 
@@ -444,7 +438,7 @@ public class Ssh
 
 		scp.get(remoteFile, out);
 
-		logger.debug("download file complete");
+		LOG.debug("download file complete");
 
 		return out.toString("UTF-8");
 	}
