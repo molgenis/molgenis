@@ -41,6 +41,8 @@ public class JobStatusController
 	{
 		JobStatusUpdate statusUpdate = new JobStatusUpdate(jobId, status);
 
+		logger.info("Job [" + jobId + "] reported status [" + status + "]");
+
 		if (outLogFile != null)
 		{
 			try
