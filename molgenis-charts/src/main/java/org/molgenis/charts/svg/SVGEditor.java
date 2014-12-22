@@ -20,13 +20,14 @@ import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.molgenis.charts.charttypes.HeatMapChart;
 
 public class SVGEditor
 {
 
-	private static final Logger logger = Logger.getLogger(SVGEditor.class);
+	private static final Logger LOG = LoggerFactory.getLogger(SVGEditor.class);
 
 	XMLEventFactory eventFactory = XMLEventFactory.newInstance();
 
@@ -137,7 +138,7 @@ public class SVGEditor
 				StartElement se = event.asStartElement();
 				if (se.getName().getLocalPart().equals(G) && se.getAttributeByName(ID) != null)
 				{
-					logger.info("<g id=\"\"> reached");
+					LOG.info("<g id=\"\"> reached");
 					writer.add(event);
 					break;
 				}
@@ -149,23 +150,23 @@ public class SVGEditor
 		// ROW ANNOTATIONS
 		if (nRowAnnotations > 0)
 		{
-			logger.info("parsing " + nRowAnnotations + " row annotations");
+			LOG.info("parsing " + nRowAnnotations + " row annotations");
 			annotateHeatMapBlock(nRow, nRowAnnotations, "rowAnnotation", writer, reader);
 		}
 
 		// COLUMN ANNOTATIONS
 		if (nColAnnotations > 0)
 		{
-			logger.info("parsing " + nColAnnotations + " col annotations");
+			LOG.info("parsing " + nColAnnotations + " col annotations");
 			annotateHeatMapBlock(nColAnnotations, nCol, "colAnnotatation", writer, reader);
 		}
 
 		// MATRIX ANNOTATIONS
-		logger.info("parsing " + (nRow * nCol) + " matrix values");
+		LOG.info("parsing " + (nRow * nCol) + " matrix values");
 		annotateHeatMapBlock(nRow, nCol, "matrix", writer, reader);
 
 		// COLUMN NAMES
-		logger.info("parsing " + nCol + " column names");
+		LOG.info("parsing " + nCol + " column names");
 		int counter = 0;
 		while (counter < nCol)
 		{
@@ -190,7 +191,7 @@ public class SVGEditor
 		}
 
 		// ROW NAMES
-		logger.info("parsing " + nRow + " row names");
+		LOG.info("parsing " + nRow + " row names");
 		counter = 0;
 		while (counter < nRow)
 		{

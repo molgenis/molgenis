@@ -112,13 +112,13 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 
 		entity.set("intRef", Arrays.asList(intRef1, intRef2));
 
-		logger.debug("mref: " + entity);
+		LOG.debug("mref: " + entity);
 		mrefRepo.add(entity);
 
 		entity.set("identifier", "two");
 		entity.set("stringRef", "ref3");
 		entity.set("intRef", null);
-		logger.debug("mref: " + entity);
+		LOG.debug("mref: " + entity);
 		mrefRepo.add(entity);
 
 		Assert.assertEquals(mrefRepo.count(), 2);
@@ -130,7 +130,7 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 		assertEquals(mrefRepo.query().eq("identifier", "one").count(), Long.valueOf(1));
 		for (Entity e : mrefRepo.findAll(new QueryImpl().eq("identifier", "one")))
 		{
-			logger.info("found: " + e);
+			LOG.info("found: " + e);
 			Assert.assertEquals(e.getList("stringRef"), Arrays.asList(new String[]
 			{ "ref1", "ref2" }));
 			Assert.assertEquals(e.getIntList("intRef"), Arrays.asList(new Integer[]
@@ -148,7 +148,7 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 		assertEquals(mrefRepo.query().eq("stringRef", "ref3").count(), Long.valueOf(1));
 		for (Entity e : mrefRepo.findAll(new QueryImpl().eq("stringRef", "ref3")))
 		{
-			logger.debug("found: " + e);
+			LOG.debug("found: " + e);
 			Assert.assertEquals(e.getList("stringRef"), Arrays.asList(new String[]
 			{ "ref3" }));
 		}
@@ -156,7 +156,7 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 		assertEquals(mrefRepo.query().eq("stringRef", "ref1").count(), Long.valueOf(1));
 		for (Entity e : mrefRepo.findAll(new QueryImpl().eq("stringRef", "ref1")))
 		{
-			logger.debug("found: " + e);
+			LOG.debug("found: " + e);
 			Object obj = e.get("stringRef");
 			assertTrue(obj instanceof Iterable<?>);
 			Assert.assertEquals(Sets.newHashSet((Iterable<?>) obj), Sets.newHashSet(new String[]
@@ -166,7 +166,7 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 		assertEquals(mrefRepo.query().gt("intRef", 1).count(), Long.valueOf(1));
 		for (Entity e : mrefRepo.findAll(new QueryImpl().gt("intRef", 1)))
 		{
-			logger.debug("found: " + e);
+			LOG.debug("found: " + e);
 			Assert.assertEquals(e.getIntList("intRef"), Arrays.asList(new Integer[]
 			{ 1, 2 }));
 		}

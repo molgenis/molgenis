@@ -5,22 +5,24 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
-import org.molgenis.data.Repository;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Repository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 public class CrudRepositoryAnnotator
 {
-	private static final Logger logger = Logger.getLogger(CrudRepositoryAnnotator.class);
+	private static final Logger LOG = LoggerFactory.getLogger(CrudRepositoryAnnotator.class);
+
 	private final MysqlRepositoryCollection mysqlRepositoryCollection;
 	private String newRepositoryName;
 
@@ -62,11 +64,11 @@ public class CrudRepositoryAnnotator
 			throw new UnsupportedOperationException("Currently only CrudRepositories can be annotated");
 		}
 
-		if (createCopy) logger.info("Creating a copy of " + sourceRepo.getName() + " repository, which will be called "
+		if (createCopy) LOG.info("Creating a copy of " + sourceRepo.getName() + " repository, which will be called "
 				+ newRepositoryName);
 
-		if (!createCopy) logger.info("Annotating " + sourceRepo.getName() + " repository with the "
-				+ annotator.getName() + " annotator");
+		if (!createCopy) LOG.info("Annotating " + sourceRepo.getName() + " repository with the " + annotator.getName()
+				+ " annotator");
 
 		EntityMetaData entityMetaData = sourceRepo.getEntityMetaData();
 		DefaultAttributeMetaData compoundAttributeMetaData = getCompoundResultAttribute(annotator,
@@ -77,7 +79,7 @@ public class CrudRepositoryAnnotator
 
 		CrudRepository crudRepository = iterateOverEntitiesAndAnnotate(sourceRepo, targetRepo, annotator);
 
-		logger.info("Finished annotating " + sourceRepo.getName() + " with the " + annotator.getName() + " annotator");
+		LOG.info("Finished annotating " + sourceRepo.getName() + " with the " + annotator.getName() + " annotator");
 
 		return crudRepository;
 	}

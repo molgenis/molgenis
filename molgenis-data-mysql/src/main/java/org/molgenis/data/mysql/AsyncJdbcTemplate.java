@@ -9,7 +9,8 @@ import java.util.concurrent.TimeoutException;
 
 import javax.persistence.QueryTimeoutException;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -18,10 +19,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
  */
 public class AsyncJdbcTemplate
 {
+	private final static Logger LOG = LoggerFactory.getLogger(AsyncJdbcTemplate.class);
+
 	private final ExecutorService executors = Executors.newCachedThreadPool();
 	private JdbcTemplate jdbcTemplate;
-
-	private final static Logger LOG = Logger.getLogger(AsyncJdbcTemplate.class);
 
 	public AsyncJdbcTemplate(JdbcTemplate jdbcTemplate)
 	{

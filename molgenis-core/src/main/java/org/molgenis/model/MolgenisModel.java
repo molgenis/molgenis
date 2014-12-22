@@ -7,7 +7,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
 
-import org.apache.log4j.Logger;
 import org.molgenis.MolgenisOptions;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
@@ -15,10 +14,12 @@ import org.molgenis.model.elements.Entity;
 import org.molgenis.model.elements.Field;
 import org.molgenis.model.elements.Model;
 import org.molgenis.model.elements.Module;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MolgenisModel
 {
-	private static final Logger logger = Logger.getLogger(MolgenisModel.class);
+	private static final Logger LOG = LoggerFactory.getLogger(MolgenisModel.class);
 
 	public static Model parse(MolgenisOptions options) throws Exception
 	{
@@ -26,7 +27,7 @@ public class MolgenisModel
 
 		try
 		{
-			logger.info("parsing db-schema from " + options.model_database);
+			LOG.info("parsing db-schema from " + options.model_database);
 
 			model = MolgenisModelParser.parseDbSchema(options.model_database);
 
@@ -75,18 +76,18 @@ public class MolgenisModel
 				}
 			}
 
-			logger.info("read model");
-			if (logger.isTraceEnabled()) logger.trace(model);
+			LOG.info("read model");
+			if (LOG.isTraceEnabled()) LOG.trace(model.toString());
 
-			logger.debug("validating model ...");
+			LOG.debug("validating model ...");
 			MolgenisModelValidator.validate(model, options);
-			logger.info("validated model");
+			LOG.info("validated model");
 
-			if (logger.isTraceEnabled()) logger.trace(model);
+			if (LOG.isTraceEnabled()) LOG.trace(model.toString());
 		}
 		catch (MolgenisModelException e)
 		{
-			logger.error("Parsing failed: " + e.getMessage());
+			LOG.error("Parsing failed: " + e.getMessage());
 			e.printStackTrace();
 			throw e;
 		}
@@ -141,14 +142,14 @@ public class MolgenisModel
 		// list not empty, cyclic?
 		for (Entity e : entityList)
 		{
-			logger.error("cyclic relations to '" + e.getName() + "' depends on " + getDependencies(e, model));
+			LOG.error("cyclic relations to '" + e.getName() + "' depends on " + getDependencies(e, model));
 			result.add(e);
 		}
 
 		// result
 		for (Entity e : result)
 		{
-			logger.info(e.getName());
+			LOG.info(e.getName());
 		}
 
 		return result;

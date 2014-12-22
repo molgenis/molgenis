@@ -25,7 +25,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Aggregateable;
 import org.molgenis.data.AttributeMetaData;
@@ -78,7 +79,7 @@ import com.google.common.collect.Iterables;
 { ATTR_GALAXY_URL, ATTR_GALAXY_API_KEY })
 public class DataExplorerController extends MolgenisPluginController
 {
-	private static final Logger logger = Logger.getLogger(DataExplorerController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DataExplorerController.class);
 
 	public static final String ID = "dataexplorer";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
@@ -379,7 +380,7 @@ public class DataExplorerController extends MolgenisPluginController
 		// Workaround because binding with @RequestBody is not possible:
 		// http://stackoverflow.com/a/9970672
 		dataRequestStr = URLDecoder.decode(dataRequestStr, "UTF-8");
-		logger.info("Download request: [" + dataRequestStr + "]");
+		LOG.info("Download request: [" + dataRequestStr + "]");
 		DataRequest dataRequest = new GsonHttpMessageConverter().getGson().fromJson(dataRequestStr, DataRequest.class);
 
 		String entityName = dataRequest.getEntityName();
@@ -545,13 +546,13 @@ public class DataExplorerController extends MolgenisPluginController
 		{
 			if (distinctAttributeName != null)
 			{
-				logger.info("[mod-aggregate] Overriding distinct attribute from request! Request specifies "
+				LOG.info("[mod-aggregate] Overriding distinct attribute from request! Request specifies "
 						+ distinctAttributeName + ", runtime property " + rtpKey + " specifies "
 						+ overrideDistinctAttributeName);
 			}
 			else
 			{
-				logger.debug("[mod-aggregate] Using distinct attribute " + overrideDistinctAttributeName
+				LOG.debug("[mod-aggregate] Using distinct attribute " + overrideDistinctAttributeName
 						+ " from runtime property " + rtpKey);
 			}
 			return overrideDistinctAttributeName;
@@ -615,7 +616,7 @@ public class DataExplorerController extends MolgenisPluginController
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ErrorMessageResponse handleGalaxyDataExportException(GalaxyDataExportException e)
 	{
-		logger.debug("", e);
+		LOG.debug("", e);
 		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
 	}
 
@@ -624,7 +625,7 @@ public class DataExplorerController extends MolgenisPluginController
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	public Map<String, String> handleRuntimeException(RuntimeException e)
 	{
-		logger.error(null, e);
+		LOG.error(null, e);
 		return Collections.singletonMap("errorMessage",
 				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage());
 	}
