@@ -43,7 +43,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.AttributeMetaData;
@@ -78,6 +77,8 @@ import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.util.MolgenisDateFormat;
 import org.molgenis.util.ResourceFingerprintRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionException;
@@ -125,8 +126,9 @@ import cz.jirutka.rsql.parser.RSQLParserException;
 @RequestMapping(BASE_URI)
 public class RestController
 {
+	private static final Logger LOG = LoggerFactory.getLogger(RestController.class);
+
 	public static final String BASE_URI = "/api/v1";
-	private static final Logger logger = Logger.getLogger(RestController.class);
 	private static final Pattern PATTERN_EXPANDS = Pattern.compile("([^\\[^\\]]+)(?:\\[(.+)\\])?");
 	private final DataService dataService;
 	private final TokenService tokenService;
@@ -815,7 +817,7 @@ public class RestController
 	@ResponseBody
 	public ErrorMessageResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException e)
 	{
-		logger.error("", e);
+		LOG.error("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
@@ -824,7 +826,7 @@ public class RestController
 	@ResponseBody
 	public ErrorMessageResponse handleUnknownTokenException(UnknownTokenException e)
 	{
-		logger.debug("", e);
+		LOG.debug("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
@@ -833,7 +835,7 @@ public class RestController
 	@ResponseBody
 	public ErrorMessageResponse handleUnknownEntityException(UnknownEntityException e)
 	{
-		logger.debug("", e);
+		LOG.debug("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
@@ -842,7 +844,7 @@ public class RestController
 	@ResponseBody
 	public ErrorMessageResponse handleUnknownAttributeException(UnknownAttributeException e)
 	{
-		logger.debug("", e);
+		LOG.debug("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
@@ -851,7 +853,7 @@ public class RestController
 	@ResponseBody
 	public ErrorMessageResponse handleMolgenisValidationException(MolgenisValidationException e)
 	{
-		logger.info("", e);
+		LOG.info("", e);
 
 		List<ErrorMessage> messages = Lists.newArrayList();
 		for (ConstraintViolation violation : e.getViolations())
@@ -867,7 +869,7 @@ public class RestController
 	@ResponseBody
 	public ErrorMessageResponse handleConversionException(ConversionException e)
 	{
-		logger.info("", e);
+		LOG.info("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
@@ -876,7 +878,7 @@ public class RestController
 	@ResponseBody
 	public ErrorMessageResponse handleMolgenisDataException(MolgenisDataException e)
 	{
-		logger.error("", e);
+		LOG.error("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
@@ -885,7 +887,7 @@ public class RestController
 	@ResponseBody
 	public ErrorMessageResponse handleAuthenticationException(AuthenticationException e)
 	{
-		logger.info("", e);
+		LOG.info("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
@@ -894,7 +896,7 @@ public class RestController
 	@ResponseBody
 	public ErrorMessageResponse handleMolgenisDataAccessException(MolgenisDataAccessException e)
 	{
-		logger.info("", e);
+		LOG.info("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
@@ -903,7 +905,7 @@ public class RestController
 	@ResponseBody
 	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
 	{
-		logger.error("", e);
+		LOG.error("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 

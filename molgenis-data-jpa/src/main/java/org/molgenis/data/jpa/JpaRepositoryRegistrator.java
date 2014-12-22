@@ -1,6 +1,7 @@
 package org.molgenis.data.jpa;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
@@ -20,7 +21,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class JpaRepositoryRegistrator implements ApplicationListener<ContextRefreshedEvent>, Ordered
 {
-	private static final Logger LOG = Logger.getLogger(JpaRepositoryRegistrator.class);
+	private static final Logger LOG = LoggerFactory.getLogger(JpaRepositoryRegistrator.class);
 
 	private final DataService dataService;
 	private final RepositoryCollection repositoryCollection;

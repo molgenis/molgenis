@@ -8,16 +8,17 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.molgenis.MolgenisOptions;
 import org.molgenis.generators.Generator;
 import org.molgenis.model.elements.Model;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import freemarker.template.Template;
 
 public class PersistenceGen extends Generator
 {
-	private final static Logger logger = Logger.getLogger(PersistenceGen.class);
+	private static final Logger LOG = LoggerFactory.getLogger(PersistenceGen.class);
 
 	@Override
 	public String getDescription()
@@ -50,7 +51,7 @@ public class PersistenceGen extends Generator
 			template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
 			targetOut.close();
 
-			logger.info("generated " + target);
+			LOG.info("generated " + target);
 		}
 	}
 }

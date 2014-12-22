@@ -1,13 +1,14 @@
 package org.molgenis.framework.db;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.Ordered;
 
 public class WebAppDatabasePopulator implements ApplicationListener<ContextRefreshedEvent>, Ordered
 {
-	private static final Logger logger = Logger.getLogger(WebAppDatabasePopulator.class);
+	private static final Logger LOG = LoggerFactory.getLogger(WebAppDatabasePopulator.class);
 
 	private final WebAppDatabasePopulatorService webAppDatabasePopulatorService;
 
@@ -23,9 +24,9 @@ public class WebAppDatabasePopulator implements ApplicationListener<ContextRefre
 	{
 		if (!webAppDatabasePopulatorService.isDatabasePopulated())
 		{
-			logger.info("initializing application database");
+			LOG.info("initializing application database");
 			webAppDatabasePopulatorService.populateDatabase();
-			logger.info("initialized application database");
+			LOG.info("initialized application database");
 		}
 	}
 
