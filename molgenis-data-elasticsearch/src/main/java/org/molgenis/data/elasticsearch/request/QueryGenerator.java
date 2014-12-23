@@ -43,21 +43,23 @@ public class QueryGenerator implements QueryPartGenerator
 		final int nrQueryRules = queryRules.size();
 		if (nrQueryRules == 1)
 		{
+			// simple query consisting of one query clause
 			queryBuilder = createQueryClause(queryRules.get(0), entityMetaData);
 		}
 		else
 		{
-
+			// boolean query consisting of combination of query clauses
 			Operator occur = null;
 			BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
 			for (int i = 0; i < nrQueryRules; i += 2)
 			{
 				QueryRule queryRule = queryRules.get(i);
 
-				// read ahead to retrieve and validate occur operator
-				if (nrQueryRules == 1)
+				// determine whether this query is a 'not' query
+				if (queryRule.getOperator() == Operator.NOT)
 				{
-					occur = Operator.AND;
+					occur = Operator.NOT;
+					queryRule = queryRules.get(i + 1);
 				}
 				else if (i + 1 < nrQueryRules)
 				{
@@ -69,7 +71,6 @@ public class QueryGenerator implements QueryPartGenerator
 					{
 						case AND:
 						case OR:
-						case NOT:
 							if (occur != null && occurOperator != occur)
 							{
 								throw new MolgenisQueryException(
@@ -294,7 +295,6 @@ public class QueryGenerator implements QueryPartGenerator
 					default:
 						throw new RuntimeException("Unknown data type [" + dataType + "]");
 				}
-
 				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
 				break;
 			}
