@@ -84,9 +84,10 @@ public class CaseInsensitiveLinkedHashMap<V> extends LinkedHashMap<String, V>
 		{
 			return false;
 		}
-		for (String key : keySet())
+		for (java.util.Map.Entry<String, V> entry : entrySet())
 		{
-			Object value = get(key);
+			String key = entry.getKey();
+			Object value = entry.getValue();
 			if (value == null)
 			{
 				if (other.get(key) != null)
