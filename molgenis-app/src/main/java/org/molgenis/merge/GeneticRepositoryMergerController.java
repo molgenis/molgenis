@@ -71,7 +71,6 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 		commonAttributes.add(ALT);
 	}
 
-	@SuppressWarnings("unchecked")
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(Model model) throws Exception
 	{
