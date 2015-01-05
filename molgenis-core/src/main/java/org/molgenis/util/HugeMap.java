@@ -14,11 +14,11 @@ import org.mapdb.DBMaker;
 public class HugeMap<K, V> implements Map<K, V>, Closeable
 {
 	private final DB mapDB;
-	private final File dbFile;
 	private final Map<K, V> mapDBMap;
 
 	public HugeMap()
 	{
+		File dbFile;
 		try
 		{
 			dbFile = File.createTempFile("mapdb", "temp");
@@ -28,7 +28,7 @@ public class HugeMap<K, V> implements Map<K, V>, Closeable
 			throw new RuntimeException(e);
 		}
 
-		mapDB = DBMaker.newFileDB(dbFile).transactionDisable().make();
+		mapDB = DBMaker.newFileDB(dbFile).deleteFilesAfterClose().transactionDisable().make();
 		mapDBMap = mapDB.createHashMap("map").make();
 	}
 
@@ -108,13 +108,12 @@ public class HugeMap<K, V> implements Map<K, V>, Closeable
 	public void close() throws IOException
 	{
 		mapDB.close();
-		dbFile.delete();
 	}
 
 	@Override
 	public String toString()
 	{
-		return new HashMap(this.mapDBMap).toString();
+		return new HashMap<K, V>(this.mapDBMap).toString();
 	}
 
 }
