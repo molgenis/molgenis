@@ -72,6 +72,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @RequestMapping(URI)
 public class OntologyServiceController extends MolgenisPluginController
 {
+	@SuppressWarnings("unused")
 	private static final Logger LOG = LoggerFactory.getLogger(OntologyServiceController.class);
 
 	@Autowired
@@ -414,7 +415,6 @@ public class OntologyServiceController extends MolgenisPluginController
 		{
 			private String entityName = name;
 
-			@SuppressWarnings("resource")
 			@Override
 			public Repository getRepositoryByEntityName(String name)
 			{
