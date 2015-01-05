@@ -1166,6 +1166,260 @@ public class QueryGeneratorTest
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
+	@Test
+	public void generateOneQueryRuleNotEqualsEqualsBool()
+	{
+		Boolean value = Boolean.TRUE;
+		Query q = new QueryImpl().not().eq(boolAttributeName, value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(
+				QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+						FilterBuilders.termFilter(boolAttributeName, value)));
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
+	// FIXME add test for ref entity where id attribute is int
+	// FIXME add test where value is entity
+	@Test
+	public void generateOneQueryRuleNotEqualsCategorical()
+	{
+		String value = "id";
+		Query q = new QueryImpl().not().eq(categoricalAttributeName, value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(
+				QueryBuilders.filteredQuery(
+						QueryBuilders.matchAllQuery(),
+						FilterBuilders.nestedFilter(
+								categoricalAttributeName,
+								FilterBuilders.termFilter(categoricalAttributeName + ".xid."
+										+ MappingsBuilder.FIELD_NOT_ANALYZED, value))));
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
+	@Test(expectedExceptions = MolgenisQueryException.class)
+	public void generateOneQueryRuleNotEqualsCompound()
+	{
+		Object value = "value";
+		Query q = new QueryImpl().not().eq(compoundAttributeName, value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+	}
+
+	@Test
+	public void generateOneQueryRuleNotEqualsCompoundPartString()
+	{
+		String value = "value";
+		Query q = new QueryImpl().not().eq(compoundPart0AttributeName, value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(
+				QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders.termFilter(
+						compoundPart0AttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, value)));
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
+	@Test
+	public void generateOneQueryRuleNotEqualsDate()
+	{
+		Date value = new Date();
+		Query q = new QueryImpl().not().eq(dateAttributeName, value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(
+				QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+						FilterBuilders.termFilter(dateAttributeName, value)));
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
+	@Test
+	public void generateOneQueryRuleNotEqualsDateTime()
+	{
+		Date value = new Date();
+		Query q = new QueryImpl().not().eq(dateTimeAttributeName, value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(
+				QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+						FilterBuilders.termFilter(dateTimeAttributeName, value)));
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
+	@Test
+	public void generateOneQueryRuleNotEqualsDecimal()
+	{
+		Double value = Double.valueOf(1.23);
+		Query q = new QueryImpl().not().eq(dateTimeAttributeName, value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(
+				QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+						FilterBuilders.termFilter(dateTimeAttributeName, value)));
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
+	@Test
+	public void generateOneQueryRuleNotEqualsEmail()
+	{
+		String value = "e@mail.com";
+		Query q = new QueryImpl().not().eq(emailAttributeName, value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery()
+				.mustNot(
+						QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders.termFilter(
+								emailAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, value)));
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
+	@Test
+	public void generateOneQueryRuleNotEqualsEnum()
+	{
+		String value = "enum0";
+		Query q = new QueryImpl().not().eq(enumAttributeName, value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery()
+				.mustNot(
+						QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders.termFilter(
+								enumAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, value)));
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
+	@Test
+	public void generateOneQueryRuleNotEqualsHtml()
+	{
+		String value = "<h1>html</h1>";
+		Query q = new QueryImpl().not().eq(htmlAttributeName, value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery()
+				.mustNot(
+						QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders.termFilter(
+								htmlAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, value)));
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
+	@Test
+	public void generateOneQueryRuleNotEqualsHyperlink()
+	{
+		String value = "http://www.website.com/";
+		Query q = new QueryImpl().not().eq(hyperlinkAttributeName, value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(
+				QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders.termFilter(
+						hyperlinkAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, value)));
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
+	@Test
+	public void generateOneQueryRuleNotEqualsInt()
+	{
+		Integer value = Integer.valueOf(1);
+		Query q = new QueryImpl().not().eq(intAttributeName, value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(
+				QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+						FilterBuilders.termFilter(intAttributeName, value)));
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
+	@Test
+	public void generateOneQueryRuleNotEqualsLong()
+	{
+		Long value = Long.valueOf(1);
+		Query q = new QueryImpl().not().eq(longAttributeName, value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(
+				QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+						FilterBuilders.termFilter(longAttributeName, value)));
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
+	// TODO enable when implemented in QueryGenerator (see note in QueryGenerator)
+	// @Test
+	// public void generateOneQueryRuleNotEqualsMref()
+	// {
+	// }
+
+	@Test
+	public void generateOneQueryRuleNotEqualsScript()
+	{
+		String value = "int a = 1;";
+		Query q = new QueryImpl().not().eq(scriptAttributeName, value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(
+				QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders.termFilter(
+						scriptAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, value)));
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
+	@Test
+	public void generateOneQueryRuleNotEqualsString()
+	{
+		String value = "value";
+		Query q = new QueryImpl().not().eq(stringAttributeName, value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(
+				QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders.termFilter(
+						stringAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, value)));
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
+	@Test
+	public void generateOneQueryRuleNotEqualsText()
+	{
+		String value = "some long text";
+		Query q = new QueryImpl().not().eq(textAttributeName, value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery()
+				.mustNot(
+						QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders.termFilter(
+								textAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, value)));
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
+	// FIXME add test for ref entity where id attribute is int
+	// FIXME add test where value is entity
+	@Test
+	public void generateOneQueryRuleNotEqualsXref()
+	{
+		String value = "id";
+		Query q = new QueryImpl().not().eq(xrefAttributeName, value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(
+				QueryBuilders.filteredQuery(
+						QueryBuilders.matchAllQuery(),
+						FilterBuilders.nestedFilter(
+								xrefAttributeName,
+								FilterBuilders.termFilter(xrefAttributeName + ".xid."
+										+ MappingsBuilder.FIELD_NOT_ANALYZED, value))));
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
 	@Test(expectedExceptions = MolgenisQueryException.class)
 	public void generateOneQueryRuleSearchOneFieldBool()
 	{
