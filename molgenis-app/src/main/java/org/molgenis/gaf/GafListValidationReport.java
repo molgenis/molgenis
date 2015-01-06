@@ -11,8 +11,9 @@ import java.util.UUID;
 
 import javax.annotation.PreDestroy;
 
-import org.apache.log4j.Logger;
 import org.molgenis.util.FileStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -22,7 +23,8 @@ import org.springframework.web.multipart.MultipartFile;
 @Scope("session")
 public class GafListValidationReport
 {
-	private static final Logger logger = Logger.getLogger(GafListValidationReport.class);
+	private static final Logger LOG = LoggerFactory.getLogger(GafListValidationReport.class);
+
 	private final Map<String, List<GafListValidationError>> validationErrorsPerRunId;
 	private final List<String> validationGlobalErrorMessages;
 	private final List<String> validRunIds = new ArrayList<String>();
@@ -43,7 +45,6 @@ public class GafListValidationReport
 		validationGlobalErrorMessages = new ArrayList<String>();
 	}
 
-	@SuppressWarnings("unchecked")
 	public void addEntry(String runId, GafListValidationError validationError)
 	{
 		List<GafListValidationError> gafListValidationErrorList = validationErrorsPerRunId.get(runId);
@@ -85,12 +86,12 @@ public class GafListValidationReport
 	public String toString()
 	{
 		StringBuilder strBuilder = new StringBuilder();
-		
+
 		for (String error : validationGlobalErrorMessages)
 		{
 			strBuilder.append('\t').append(error).append('\n');
 		}
-		
+
 		for (Entry<String, List<GafListValidationError>> reportEntry : validationErrorsPerRunId.entrySet())
 		{
 			String runId = reportEntry.getKey();
@@ -113,14 +114,12 @@ public class GafListValidationReport
 			String runId = reportEntry.getKey();
 			if (runId == null) runId = "NO RUN ID!";
 			strBuilder.append("Run: ").append(runId).append('\n');
-			strBuilder.append("<div class=\"molgenis-table-container\" id=\"table-container\">").append(
-					'\n');
-			strBuilder.append(
-"<table class=\"table molgenis-table table-striped table-bordered table-hover table-condensed listtable\">")
+			strBuilder.append("<div class=\"molgenis-table-container\" id=\"table-container\">").append('\n');
+			strBuilder
+					.append("<table class=\"table molgenis-table table-striped table-bordered table-hover table-condensed listtable\">")
 					.append('\n');
 			strBuilder.append("<thead><tr><th>Row</th><th>Column</th><th>Value</th><th>Message</th></tr></thead>")
-					.append('\n')
-			.append("<tbody>");
+					.append('\n').append("<tbody>");
 			for (GafListValidationError validationError : reportEntry.getValue())
 			{
 				strBuilder.append(validationError.toStringHtml()).append('\n');
@@ -217,7 +216,7 @@ public class GafListValidationReport
 			boolean deleted = fileStore.delete(fileName);
 			if (!deleted)
 			{
-				logger.error("File " + this.getTempFileName() + " cannot be deleted from filestore!");
+				LOG.error("File " + this.getTempFileName() + " cannot be deleted from filestore!");
 			}
 		}
 
@@ -272,4 +271,3 @@ public class GafListValidationReport
 	}
 
 }
-

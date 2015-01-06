@@ -4,6 +4,7 @@ import static org.molgenis.ontology.controller.OntologyIndexerController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +20,7 @@ import org.molgenis.ontology.utils.OntologyLoader;
 import org.molgenis.ontology.utils.OntologyServiceUtil;
 import org.molgenis.ontology.utils.ZipFileUtil;
 import org.molgenis.util.FileStore;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -73,9 +75,7 @@ public class OntologyIndexerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/index", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
-	public String indexOntology(@RequestParam
-	String ontologyName, @RequestParam
-	Part file, Model model)
+	public String indexOntology(@RequestParam String ontologyName, @RequestParam Part file, Model model)
 	{
 		try
 		{
@@ -84,7 +84,7 @@ public class OntologyIndexerController extends MolgenisPluginController
 			if (uploadedFiles.size() > 0) ontologyIndexer.index(new OntologyLoader(ontologyName, uploadedFiles.get(0)));
 			model.addAttribute("isIndexRunning", true);
 		}
-		catch (Exception e)
+		catch (IOException | OWLOntologyCreationException e)
 		{
 			model.addAttribute("message", "Please upload a valid zip file!");
 			model.addAttribute("isCorrectZipFile", false);
@@ -93,8 +93,7 @@ public class OntologyIndexerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/remove", method = RequestMethod.POST)
-	public String removeOntology(@RequestParam
-	String ontologyUri, Model model)
+	public String removeOntology(@RequestParam String ontologyUri, Model model)
 	{
 		try
 		{

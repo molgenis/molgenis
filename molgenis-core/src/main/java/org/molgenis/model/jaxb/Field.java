@@ -7,12 +7,13 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlEnumValue;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Field
 {
-	private static final Logger logger = Logger.getLogger(Field.class.getSimpleName());
+	private static final Logger LOG = LoggerFactory.getLogger(Field.class);
 
 	// jaxb orders properties in reverse order :-s
 	@XmlAttribute(name = "mref_remoteid")
@@ -91,8 +92,7 @@ public class Field
 		@XmlEnumValue("decimal")
 		DECIMAL("decimal", "%.20g"),
 		/**
-		 * The type is a variable character string. More information can be
-		 * found with the appropriate functions.
+		 * The type is a variable character string. More information can be found with the appropriate functions.
 		 */
 		@XmlEnumValue("string")
 		STRING("string", "%s"),
@@ -109,8 +109,7 @@ public class Field
 		@XmlEnumValue("datetime")
 		DATETIME("datetime", "%s"),
 		/**
-		 * The type of the field is user, which basically references a hidden
-		 * table.
+		 * The type of the field is user, which basically references a hidden table.
 		 */
 		@XmlEnumValue("user")
 		USER("user", "%s"),
@@ -137,8 +136,7 @@ public class Field
 
 		// access
 		/**
-		 * The standard constructor, which binds a string to the
-		 * enumeration-type.
+		 * The standard constructor, which binds a string to the enumeration-type.
 		 */
 		private Type(String tag, String format_type)
 		{
@@ -153,8 +151,7 @@ public class Field
 		}
 
 		/**
-		 * With this method the enumeration-type can be found based on the given
-		 * int conforming to java.sql.Types
+		 * With this method the enumeration-type can be found based on the given int conforming to java.sql.Types
 		 * 
 		 * @param type
 		 *            The string-representation of the type.
@@ -218,7 +215,7 @@ public class Field
 						{
 							if (((Integer) f.get(null)).equals(type))
 							{
-								logger.error("Unknown type: " + f.getName());
+								LOG.error("Unknown type: " + f.getName());
 								return UNKNOWN;
 							}
 						}
@@ -227,15 +224,14 @@ public class Field
 						}
 					}
 
-					logger.error("Unknown type: " + type);
+					LOG.error("Unknown type: " + type);
 					return UNKNOWN;
 				}
 			}
 		}
 
 		/**
-		 * With this method the enumeration-type can be found based on the given
-		 * string.
+		 * With this method the enumeration-type can be found based on the given string.
 		 * 
 		 * @param tag
 		 *            The string-representation of the tag.
@@ -258,8 +254,7 @@ public class Field
 			else if (tag.equals(XREF_MULTIPLE.tag)) return XREF_MULTIPLE;
 			else if (tag.equals(HYPERLINK.tag)) return HYPERLINK;
 			else if (tag.equals(LIST.tag)) return LIST;
-			else
-				return UNKNOWN;
+			else return UNKNOWN;
 		}
 
 		/** The string-representation of the enumeration-type. */

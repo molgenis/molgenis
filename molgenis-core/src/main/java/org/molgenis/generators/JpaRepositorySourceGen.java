@@ -9,9 +9,10 @@ import java.nio.charset.Charset;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
 import org.molgenis.MolgenisOptions;
 import org.molgenis.model.elements.Model;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import freemarker.template.Template;
 
@@ -20,8 +21,7 @@ import freemarker.template.Template;
  */
 public class JpaRepositorySourceGen extends Generator
 {
-
-	private static Logger logger = Logger.getLogger(JpaRepositorySourceGen.class);
+	private static final Logger LOG = LoggerFactory.getLogger(JpaRepositorySourceGen.class);
 
 	@Override
 	public void generate(Model model, MolgenisOptions options) throws Exception
@@ -56,7 +56,7 @@ public class JpaRepositorySourceGen extends Generator
 			IOUtils.closeQuietly(targetOut);
 		}
 
-		logger.info("generated " + target);
+		LOG.info("generated " + target);
 	}
 
 	@Override

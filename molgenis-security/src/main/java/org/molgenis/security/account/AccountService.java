@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.molgenis.auth.MolgenisGroup;
 import org.molgenis.auth.MolgenisGroupMember;
 import org.molgenis.auth.MolgenisUser;
@@ -25,7 +26,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class AccountService
 {
-	private static final Logger logger = Logger.getLogger(AccountService.class);
+	private static final Logger LOG = LoggerFactory.getLogger(AccountService.class);
 
 	public static final String KEY_PLUGIN_AUTH_ACTIVATIONMODE = "plugin.auth.activation_mode";
 	public static final String KEY_PLUGIN_AUTH_ENABLE_SELFREGISTRATION = "plugin.auth.enable_self_registration";
@@ -73,7 +74,7 @@ public class AccountService
 		molgenisUser.setActivationCode(activationCode);
 		molgenisUser.setActive(false);
 		dataService.add(MolgenisUser.ENTITY_NAME, molgenisUser);
-		logger.debug("created user " + molgenisUser.getUsername());
+		LOG.debug("created user " + molgenisUser.getUsername());
 
 		// add user to group
 		MolgenisGroup group = dataService.findOne(MolgenisGroup.ENTITY_NAME,
@@ -95,7 +96,7 @@ public class AccountService
 		mailMessage.setSubject("User registration for " + getAppName());
 		mailMessage.setText(createActivationEmailText(molgenisUser, activationUri));
 		mailSender.send(mailMessage);
-		logger.debug("send activation email for user " + molgenisUser.getUsername() + " to "
+		LOG.debug("send activation email for user " + molgenisUser.getUsername() + " to "
 				+ StringUtils.join(activationEmailAddresses, ','));
 	}
 
@@ -144,7 +145,7 @@ public class AccountService
 		molgenisUser.setChangePassword(false);
 		dataService.update(MolgenisUser.ENTITY_NAME, molgenisUser);
 
-		logger.info("Changed password of user [" + username + "]");
+		LOG.info("Changed password of user [" + username + "]");
 	}
 
 	@RunAsSystem

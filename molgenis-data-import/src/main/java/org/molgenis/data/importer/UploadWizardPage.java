@@ -5,12 +5,13 @@ import java.io.File;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
-import org.apache.log4j.Logger;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.ui.wizard.AbstractWizardPage;
 import org.molgenis.ui.wizard.Wizard;
 import org.molgenis.util.FileUploadUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
@@ -20,7 +21,7 @@ import org.springframework.validation.ObjectError;
 public class UploadWizardPage extends AbstractWizardPage
 {
 	private static final long serialVersionUID = 1L;
-	private static final Logger logger = Logger.getLogger(UploadWizardPage.class);
+	private static final Logger LOG = LoggerFactory.getLogger(UploadWizardPage.class);
 
 	private final ImportServiceFactory importServiceFactory;
 	private final FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
@@ -79,7 +80,7 @@ public class UploadWizardPage extends AbstractWizardPage
 		catch (Exception e)
 		{
 			result.addError(new ObjectError("wizard", "Error uploading file: " + e.getMessage()));
-			logger.error("Exception uploading file", e);
+			LOG.error("Exception uploading file", e);
 		}
 
 		return null;

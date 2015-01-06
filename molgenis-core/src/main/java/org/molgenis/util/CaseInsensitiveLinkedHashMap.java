@@ -1,5 +1,6 @@
 package org.molgenis.util;
 
+import java.util.AbstractMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -68,8 +69,13 @@ public class CaseInsensitiveLinkedHashMap<V> extends LinkedHashMap<String, V>
 	@Override
 	public Set<java.util.Map.Entry<String, V>> entrySet()
 	{
-		// We broke this method
-		throw new UnsupportedOperationException();
+		Set<java.util.Map.Entry<String, V>> entries = Sets.newLinkedHashSet();
+		for (String key : keySet())
+		{
+			entries.add(new AbstractMap.SimpleEntry<String, V>(key, get(key)));
+		}
+
+		return entries;
 	}
 
 	@Override
@@ -84,9 +90,10 @@ public class CaseInsensitiveLinkedHashMap<V> extends LinkedHashMap<String, V>
 		{
 			return false;
 		}
-		for (String key : keySet())
+		for (java.util.Map.Entry<String, V> entry : entrySet())
 		{
-			Object value = get(key);
+			String key = entry.getKey();
+			Object value = entry.getValue();
 			if (value == null)
 			{
 				if (other.get(key) != null)

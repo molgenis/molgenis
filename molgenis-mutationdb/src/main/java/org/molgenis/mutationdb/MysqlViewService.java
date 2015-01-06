@@ -8,7 +8,8 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
@@ -19,7 +20,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class MysqlViewService
 {
-	private static final Logger logger = Logger.getLogger(MysqlViewService.class);
+	private static final Logger LOG = LoggerFactory.getLogger(MysqlViewService.class);
 
 	@Autowired
 	private DataService dataService;
@@ -205,7 +206,7 @@ public class MysqlViewService
 		}
 		catch (Exception e)
 		{
-			logger.error("Exception executing query: [" + insertQuery + "]", e);
+			LOG.error("Exception executing query: [" + insertQuery + "]", e);
 			throw new MolgenisDataException(e);
 		}
 	}

@@ -9,7 +9,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Aggregateable;
@@ -36,7 +37,7 @@ import com.google.common.collect.Lists;
 @Component
 public class DataServiceImpl implements DataService
 {
-	private static final Logger LOG = Logger.getLogger(DataServiceImpl.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DataServiceImpl.class);
 
 	private final Map<String, Repository> repositories;
 	private final Set<String> repositoryNames;
