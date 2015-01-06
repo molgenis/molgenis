@@ -4,7 +4,6 @@ import java.sql.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.elasticsearch.common.collect.Lists;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
@@ -15,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 /**
  * Converts entities to Elasticsearch documents
