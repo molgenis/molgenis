@@ -30,12 +30,30 @@
 	"jquery.molgenis.table.js"]>
 
 <@header css js/>
-
-<div id="entity-class" class="well">
-	<h3 id="entity-class-name"></h3>
-	<span id="entity-class-description"></span>
+<div class="row">
+    <div class="col-md-12">
+        <div id="entity-class" class="well well-sm">
+            <div class="row">
+                <div class="col-md-9">
+                    <h3 id="entity-class-name"></h3>
+                    <span id="entity-class-description"></span>
+                </div>
+                <div class="col-md-3">
+                    <div id="dataset-select-container" class="pull-right" <#if hideDatasetSelect??>style="display:none"</#if>>
+                        <select class="form-control" id="dataset-select" data-placeholder="Choose an Entity">
+                                <option value=""></option><#-- Required for placeholder to work with select2 -->
+                        <#if entitiesMeta?has_content>
+                            <#list entitiesMeta.iterator() as entityMeta>
+                                <option value="/api/v1/${entityMeta.name?html}"<#if selectedEntityName?? && (entityMeta.name == selectedEntityName)> selected</#if>><#if entityMeta.label?has_content>${entityMeta.label?html}<#else>${entityMeta.name?html}</#if></option>
+                            </#list>
+                        </#if>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-
 <div class="row">
 	<div class="col-md-3">
 		<div class="well well-sm">
@@ -92,24 +110,6 @@
 		</div>		
 	</div>
 	<div class="col-md-9">
-        <div id="dataset-select-container" class="pull-right" <#if hideDatasetSelect??>style="display:none"</#if>>
-			<div class="col-md-12">
-				<div class="form-horizontal">
-					<div class="form-group">
-		    			<label class="col-md-6 control-label" for="dataset-select">Choose a dataset:</label>
-		    			<div class="col-md-6">
-			    			<select class="form-control" id="dataset-select" data-placeholder="Choose an Entity (example: dataset, protocol...">
-			    			<#if entitiesMeta?has_content>
-			        			<#list entitiesMeta.iterator() as entityMeta>
-			            			<option value="/api/v1/${entityMeta.name?html}" <#if entityMeta.name == selectedEntityName> selected</#if>><#if entityMeta.label?has_content>${entityMeta.label?html}<#else>${entityMeta.name?html}</#if></option>
-			           			</#list>
-			           		</#if>
-			        		</select>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
 		<div id="module-nav"></div>
 	</div>
 </div>

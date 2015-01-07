@@ -313,7 +313,7 @@
 			 * Validation before using the setLocation of the browser
 			 */
 			function setLocation(chr, viewStart, viewEnd){
-				var maxViewWidth = 500000; // The maximum width of the visible region, configured in bases. Default is 500000.
+				var maxViewWidth = 999999999;
 				if(chr){
 					viewStart = viewStart && viewStart > 0 ? viewStart : 1;
 					viewEnd = viewEnd && viewEnd > 0 ? viewEnd : viewStart + maxViewWidth;
@@ -323,7 +323,7 @@
 			
 			// TODO implement elegant solution for genome browser specific code
 			$.each(data.filters, function() {
-				if(this.getComplexFilterElements()[0]){
+				if(this.getComplexFilterElements && this.getComplexFilterElements()[0]){
 					if(this.attribute === genomebrowserStartAttribute){
 						setLocation(genomeBrowser.chr,
 								parseInt(this.getComplexFilterElements()[0].simpleFilter.fromValue),

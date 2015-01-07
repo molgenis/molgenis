@@ -2,15 +2,16 @@ package org.molgenis.molgenis.utils;
 
 import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.net.URL;
-import java.util.Iterator;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.data.Entity;
 import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.ontology.repository.AbstractOntologyRepository;
 import org.molgenis.ontology.repository.OntologyTermIndexRepository;
 import org.molgenis.ontology.utils.OntologyLoader;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -41,73 +42,79 @@ public class OntologyTermIndexRepositoryTest
 	@Test
 	public void iterator() throws OWLOntologyCreationException
 	{
+		Map<String, Entity> entities = new HashMap<String, Entity>();
+		for (Entity entity : repository)
+		{
+			entities.put(entity.getString(AbstractOntologyRepository.SYNONYMS), entity);
+		}
 
-		Iterator<Entity> it = repository.iterator();
-		assertTrue(it.hasNext());
-		it.next();
+		{
+			Entity entity = entities.get("Person label test");
+			assertEquals(entity.getString(AbstractOntologyRepository.ONTOLOGY_TERM), "Person label test");
+			assertEquals(entity.getString(AbstractOntologyRepository.ENTITY_TYPE), "ontologyTerm");
+			assertEquals(entity.getString(AbstractOntologyRepository.ONTOLOGY_TERM_IRI),
+					"http://harmonization/test/owl/1.0.0#Person");
+		}
 
-		assertTrue(it.hasNext());
-		Entity tuple0 = it.next();
-		assertEquals(tuple0.get("ontologyTerm"), "Person label test");
-		assertEquals(tuple0.get("entity_type"), "ontologyTerm");
+		{
+			Entity entity = entities.get("Child");
+			assertEquals(entity.getString(AbstractOntologyRepository.ONTOLOGY_TERM_IRI),
+					"http://harmonization/test/owl/1.0.0#Child");
+		}
 
-		assertTrue(it.hasNext());
-		Entity tuple1 = it.next();
-		assertEquals(tuple1.get("ontologyTerm"), "Person label test");
-		assertEquals(tuple1.get("ontologyTermSynonym"), "Person label test");
-		assertEquals(tuple1.get("entity_type"), "ontologyTerm");
-		assertEquals(tuple1.get("ontologyTermIRI"), "http://harmonization/test/owl/1.0.0#Person");
+		{
+			Entity entity = entities.get("Strange childhood");
+			assertEquals(entity.getString(AbstractOntologyRepository.ONTOLOGY_TERM_IRI),
+					"http://harmonization/test/owl/1.0.0#Child");
+		}
 
-		assertTrue(it.hasNext());
-		Entity tuple2 = it.next();
-		assertEquals(tuple2.get("ontologyTermSynonym"), "Parent");
-		assertEquals(tuple2.get("ontologyTermIRI"), "http://harmonization/test/owl/1.0.0#Parent");
+		{
+			Entity entity = entities.get("Daughter");
+			assertEquals(entity.getString(AbstractOntologyRepository.ONTOLOGY_TERM_IRI),
+					"http://harmonization/test/owl/1.0.0#Daughter");
+		}
 
-		assertTrue(it.hasNext());
-		Entity tuple3 = it.next();
-		assertEquals(tuple3.get("ontologyTerm"), "Father");
-		assertEquals(tuple3.get("ontologyTermIRI"), "http://harmonization/test/owl/1.0.0#Father");
+		{
+			Entity entity = entities.get("Son");
+			assertEquals(entity.getString(AbstractOntologyRepository.ONTOLOGY_TERM_IRI),
+					"http://harmonization/test/owl/1.0.0#Son");
+		}
 
-		assertTrue(it.hasNext());
-		Entity tuple4 = it.next();
-		assertEquals(tuple4.get("ontologyTermSynonym"), "Mother");
-		assertEquals(tuple4.get("ontologyTermIRI"), "http://harmonization/test/owl/1.0.0#Mother");
+		{
+			Entity entity = entities.get("Parent");
+			assertEquals(entity.getString(AbstractOntologyRepository.ONTOLOGY_TERM_IRI),
+					"http://harmonization/test/owl/1.0.0#Parent");
+		}
 
-		assertTrue(it.hasNext());
-		Entity tuple5 = it.next();
-		assertEquals(tuple5.get("ontologyTermSynonym"), "Mummy");
-		assertEquals(tuple5.get("ontologyTermIRI"), "http://harmonization/test/owl/1.0.0#Mother");
+		{
+			Entity entity = entities.get("Dad");
+			assertEquals(entity.getString(AbstractOntologyRepository.ONTOLOGY_TERM_IRI),
+					"http://harmonization/test/owl/1.0.0#Father");
+		}
 
-		assertTrue(it.hasNext());
-		Entity tuple6 = it.next();
-		assertEquals(tuple6.get("ontologyTerm"), "Father");
-		assertEquals(tuple6.get("ontologyTermIRI"), "http://harmonization/test/owl/1.0.0#Father");
+		{
+			Entity entity = entities.get("Mother");
+			assertEquals(entity.getString(AbstractOntologyRepository.ONTOLOGY_TERM_IRI),
+					"http://harmonization/test/owl/1.0.0#Mother");
+		}
 
-		assertTrue(it.hasNext());
-		Entity tuple7 = it.next();
-		assertEquals(tuple7.get("ontologyTermSynonym"), "Dad");
-		assertEquals(tuple7.get("ontologyTermIRI"), "http://harmonization/test/owl/1.0.0#Father");
+		{
+			Entity entity = entities.get("Mummy");
+			assertEquals(entity.getString(AbstractOntologyRepository.ONTOLOGY_TERM_IRI),
+					"http://harmonization/test/owl/1.0.0#Mother");
+		}
 
-		assertTrue(it.hasNext());
-		Entity tuple8 = it.next();
-		assertEquals(tuple8.get("ontologyTermSynonym"), "Child");
-		assertEquals(tuple8.get("ontologyTermIRI"), "http://harmonization/test/owl/1.0.0#Child");
+		{
+			Entity entity = entities.get("Papa");
+			assertEquals(entity.getString(AbstractOntologyRepository.ONTOLOGY_TERM_IRI),
+					"http://harmonization/test/owl/1.0.0#Father");
+		}
 
-		assertTrue(it.hasNext());
-		Entity tuple9 = it.next();
-		assertEquals(tuple9.get("ontologyTermSynonym"), "Daughter");
-		assertEquals(tuple9.get("ontologyTermIRI"), "http://harmonization/test/owl/1.0.0#Daughter");
-
-		assertTrue(it.hasNext());
-		Entity tuple10 = it.next();
-		assertEquals(tuple10.get("ontologyTermSynonym"), "Son");
-		assertEquals(tuple10.get("ontologyTermIRI"), "http://harmonization/test/owl/1.0.0#Son");
-
-		assertTrue(it.hasNext());
-		Entity tuple11 = it.next();
-		assertEquals(tuple11.get("ontologyTermSynonym"), "Strange childhood");
-		assertEquals(tuple11.get("ontologyTermIRI"), "http://harmonization/test/owl/1.0.0#Child");
-
+		{
+			Entity entity = entities.get("Dad");
+			assertEquals(entity.getString(AbstractOntologyRepository.ONTOLOGY_TERM_IRI),
+					"http://harmonization/test/owl/1.0.0#Father");
+		}
 	}
 
 }

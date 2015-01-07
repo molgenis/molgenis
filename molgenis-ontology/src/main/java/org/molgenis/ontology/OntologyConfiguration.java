@@ -10,10 +10,13 @@ import org.molgenis.ontology.matching.UploadProgress;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 @Configuration
 @EnableAsync
+@Import(
+{ OntologyCoreConfiguration.class })
 public class OntologyConfiguration
 {
 	@Autowired

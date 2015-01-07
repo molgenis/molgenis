@@ -22,7 +22,6 @@ import javax.servlet.http.Part;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -40,6 +39,7 @@ import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.ontology.OntologyService;
 import org.molgenis.ontology.OntologyServiceResult;
 import org.molgenis.ontology.beans.OntologyServiceResultImpl;
 import org.molgenis.ontology.matching.AdaptedCsvRepository;
@@ -53,6 +53,8 @@ import org.molgenis.ontology.service.OntologyServiceImpl;
 import org.molgenis.ontology.utils.OntologyServiceUtil;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.FileStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpStatus;
@@ -70,6 +72,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @RequestMapping(URI)
 public class OntologyServiceController extends MolgenisPluginController
 {
+	@SuppressWarnings("unused")
+	private static final Logger LOG = LoggerFactory.getLogger(OntologyServiceController.class);
+
 	@Autowired
 	private UserAccountService userAccountService;
 
@@ -77,7 +82,7 @@ public class OntologyServiceController extends MolgenisPluginController
 	private DataService dataService;
 
 	@Autowired
-	private OntologyServiceImpl ontologyService;
+	private OntologyService ontologyService;
 
 	@Autowired
 	private ProcessInputTermService processInputTermService;
@@ -93,7 +98,6 @@ public class OntologyServiceController extends MolgenisPluginController
 
 	public static final String ID = "ontologyservice";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
-	public static final Logger logger = Logger.getLogger(OntologyServiceController.class);
 	public static final int INVALID_TOTAL_NUMBER = -1;
 	private static final String ILLEGAL_PATTERN = "[^0-9a-zA-Z_]";
 	private static final String ILLEGAL_PATTERN_REPLACEMENT = "_";
@@ -411,7 +415,6 @@ public class OntologyServiceController extends MolgenisPluginController
 		{
 			private String entityName = name;
 
-			@SuppressWarnings("resource")
 			@Override
 			public Repository getRepositoryByEntityName(String name)
 			{

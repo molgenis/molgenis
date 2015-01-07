@@ -34,7 +34,8 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 	private final HgncLocationsProvider hgncLocationsProvider;
 	private final CgdDataProvider cgdDataProvider;
 
-	private static final String NAME = "ClinicalGenomicsDatabase";
+	private static final String NAME = "ClinicalGenomicsDatabaseAnnotator";
+	private static final String LABEL = "ClinicalGenomicsDatabase";
 
 	public static final String REFERENCES = "REFERENCES";
 	public static final String INTERVENTION_RATIONALE = "INTERVENTION/RATIONALE";
@@ -74,6 +75,12 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 	public String getName()
 	{
 		return NAME;
+	}
+
+	@Override
+	public String getLabel()
+	{
+		return LABEL;
 	}
 
 	@Override
@@ -141,7 +148,8 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GENE, MolgenisFieldTypes.FieldTypeEnum.STRING));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HGNC_ID, MolgenisFieldTypes.FieldTypeEnum.LONG));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ENTREZ_GENE_ID, MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ENTREZ_GENE_ID,
+				MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CONDITION, MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(INHERITANCE, MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(AGE_GROUP, MolgenisFieldTypes.FieldTypeEnum.TEXT));

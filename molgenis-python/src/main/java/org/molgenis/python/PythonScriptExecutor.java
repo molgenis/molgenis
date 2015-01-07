@@ -3,7 +3,8 @@ package org.molgenis.python;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,7 +16,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class PythonScriptExecutor
 {
-	private static final Logger logger = Logger.getLogger(PythonScriptExecutor.class);
+	private static final Logger LOG = LoggerFactory.getLogger(PythonScriptExecutor.class);
+
 	private final String pythonScriptExecutable;
 
 	@Autowired
@@ -57,19 +59,20 @@ public class PythonScriptExecutor
 		try
 		{
 			// Create r process
-			logger.info("Running python script [" + script.getAbsolutePath() + "]");
+			LOG.info("Running python script [" + script.getAbsolutePath() + "]");
 			Process process = Runtime.getRuntime().exec(pythonScriptExecutable + " " + script.getAbsolutePath());
 
 			// Capture the error output
 			final StringBuilder sb = new StringBuilder();
-			PythonStreamHandler errorHandler = new PythonStreamHandler(process.getErrorStream(), new PythonOutputHandler()
-			{
-				@Override
-				public void outputReceived(String output)
-				{
-					sb.append(output).append("\n");
-				}
-			});
+			PythonStreamHandler errorHandler = new PythonStreamHandler(process.getErrorStream(),
+					new PythonOutputHandler()
+					{
+						@Override
+						public void outputReceived(String output)
+						{
+							sb.append(output).append("\n");
+						}
+					});
 			errorHandler.start();
 
 			// Capture r output if an Python output handler is defined
@@ -88,7 +91,7 @@ public class PythonScriptExecutor
 				throw new MolgenisPythonException("Error running [" + script.getAbsolutePath() + "]." + sb.toString());
 			}
 
-			logger.info("Script [" + script.getAbsolutePath() + "] done");
+			LOG.info("Script [" + script.getAbsolutePath() + "] done");
 		}
 		catch (IOException e)
 		{

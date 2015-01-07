@@ -43,7 +43,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.AttributeMetaData;
@@ -78,10 +77,13 @@ import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.util.MolgenisDateFormat;
 import org.molgenis.util.ResourceFingerprintRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConversionFailedException;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -124,8 +126,9 @@ import cz.jirutka.rsql.parser.RSQLParserException;
 @RequestMapping(BASE_URI)
 public class RestController
 {
+	private static final Logger LOG = LoggerFactory.getLogger(RestController.class);
+
 	public static final String BASE_URI = "/api/v1";
-	private static final Logger logger = Logger.getLogger(RestController.class);
 	private static final Pattern PATTERN_EXPANDS = Pattern.compile("([^\\[^\\]]+)(?:\\[(.+)\\])?");
 	private final DataService dataService;
 	private final TokenService tokenService;
@@ -288,8 +291,7 @@ public class RestController
 	 * 
 	 * @param entityName
 	 * @param id
-	 * @param attributes
-	 * @param attributeExpands
+	 * @param request
 	 * @return
 	 */
 	@RequestMapping(value = "/{entityName}/{id:.+}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
@@ -351,7 +353,6 @@ public class RestController
 	 * @param id
 	 * @param refAttributeName
 	 * @param request
-	 * @param attributeExpands
 	 * @return
 	 * @throws UnknownEntityException
 	 */
@@ -400,8 +401,7 @@ public class RestController
 	 * Returns json
 	 * 
 	 * @param request
-	 * @param attributes
-	 * @param attributeExpands
+	 * @param entityName
 	 * @return
 	 */
 	@RequestMapping(value = "/{entityName}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
@@ -454,6 +454,33 @@ public class RestController
 		{
 			meta = dataService.getEntityMetaData(entityName);
 			Query q = new QueryStringParser(meta, molgenisRSQL).parseQueryString(req.getParameterMap());
+
+			String[] sortAttributeArray = req.getParameterMap().get("sortColumn");
+			if (sortAttributeArray != null && sortAttributeArray.length == 1
+					&& StringUtils.isNotEmpty(sortAttributeArray[0]))
+			{
+				String sortAttribute = sortAttributeArray[0];
+				String sortOrderArray[] = req.getParameterMap().get("sortOrder");
+				Sort.Direction order = Sort.DEFAULT_DIRECTION;
+
+				if (sortOrderArray != null && sortOrderArray.length == 1 && StringUtils.isNotEmpty(sortOrderArray[0]))
+				{
+					String sortOrder = sortOrderArray[0];
+					if (sortOrder.equals("ASC"))
+					{
+						order = Sort.Direction.ASC;
+					}
+					else if (sortOrder.equals("DESC"))
+					{
+						order = Sort.Direction.DESC;
+					}
+					else
+					{
+						throw new RuntimeException("unknown sort order");
+					}
+				}
+				q.sort(order, sortAttribute);
+			}
 
 			if (q.getPageSize() == 0)
 			{
@@ -790,7 +817,7 @@ public class RestController
 	@ResponseBody
 	public ErrorMessageResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException e)
 	{
-		logger.error("", e);
+		LOG.error("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
@@ -799,7 +826,7 @@ public class RestController
 	@ResponseBody
 	public ErrorMessageResponse handleUnknownTokenException(UnknownTokenException e)
 	{
-		logger.debug("", e);
+		LOG.debug("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
@@ -808,7 +835,7 @@ public class RestController
 	@ResponseBody
 	public ErrorMessageResponse handleUnknownEntityException(UnknownEntityException e)
 	{
-		logger.debug("", e);
+		LOG.debug("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
@@ -817,7 +844,7 @@ public class RestController
 	@ResponseBody
 	public ErrorMessageResponse handleUnknownAttributeException(UnknownAttributeException e)
 	{
-		logger.debug("", e);
+		LOG.debug("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
@@ -826,7 +853,7 @@ public class RestController
 	@ResponseBody
 	public ErrorMessageResponse handleMolgenisValidationException(MolgenisValidationException e)
 	{
-		logger.info("", e);
+		LOG.info("", e);
 
 		List<ErrorMessage> messages = Lists.newArrayList();
 		for (ConstraintViolation violation : e.getViolations())
@@ -842,7 +869,7 @@ public class RestController
 	@ResponseBody
 	public ErrorMessageResponse handleConversionException(ConversionException e)
 	{
-		logger.info("", e);
+		LOG.info("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
@@ -851,7 +878,7 @@ public class RestController
 	@ResponseBody
 	public ErrorMessageResponse handleMolgenisDataException(MolgenisDataException e)
 	{
-		logger.error("", e);
+		LOG.error("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
@@ -860,7 +887,7 @@ public class RestController
 	@ResponseBody
 	public ErrorMessageResponse handleAuthenticationException(AuthenticationException e)
 	{
-		logger.info("", e);
+		LOG.info("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
@@ -869,7 +896,7 @@ public class RestController
 	@ResponseBody
 	public ErrorMessageResponse handleMolgenisDataAccessException(MolgenisDataAccessException e)
 	{
-		logger.info("", e);
+		LOG.info("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
@@ -878,7 +905,7 @@ public class RestController
 	@ResponseBody
 	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
 	{
-		logger.error("", e);
+		LOG.error("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 

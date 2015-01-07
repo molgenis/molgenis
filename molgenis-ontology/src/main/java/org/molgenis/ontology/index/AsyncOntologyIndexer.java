@@ -13,7 +13,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.exists.types.TypesExistsRequest;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
@@ -44,11 +43,15 @@ import org.molgenis.ontology.repository.OntologyTermIndexRepository;
 import org.molgenis.ontology.repository.OntologyTermQueryRepository;
 import org.molgenis.ontology.utils.OntologyLoader;
 import org.molgenis.security.runas.RunAsSystem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 
 public class AsyncOntologyIndexer implements OntologyIndexer
 {
+	private static final Logger LOG = LoggerFactory.getLogger(AsyncOntologyIndexer.class);
+
 	@Autowired
 	private MolgenisSettings molgenisSettings;
 	private final DataService dataService;
@@ -58,7 +61,6 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 	private boolean isCorrectOntology = true;
 	private static int BATCH_SIZE = 10000;
 	private static final String SYNONYM_FIELDS = "plugin.ontology.synonym.field";
-	private static final Logger logger = Logger.getLogger(AsyncOntologyIndexer.class);
 
 	private final AtomicInteger runningIndexProcesses = new AtomicInteger();
 
@@ -104,7 +106,7 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 		catch (Exception e)
 		{
 			isCorrectOntology = false;
-			logger.error("Exception imported file is not a valid ontology", e);
+			LOG.error("Exception imported file is not a valid ontology", e);
 		}
 		finally
 		{
@@ -120,8 +122,8 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 	}
 
 	/**
-	 * Created a specific indexer to index list of primitive types (string),
-	 * because the standard molgenis index does not handle List<String>
+	 * Created a specific indexer to index list of primitive types (string), because the standard molgenis index does
+	 * not handle List<String>
 	 * 
 	 * @param ontologyLoader
 	 * @throws IOException
@@ -181,7 +183,7 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 					}
 
 					long t = (System.currentTimeMillis() - t0) / 1000;
-					logger.info("Imported [" + count + "] rows in [" + t + "] sec.");
+					LOG.info("Imported [" + count + "] rows in [" + t + "] sec.");
 				}
 			}
 
@@ -193,8 +195,8 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 			}
 
 			long t = (System.currentTimeMillis() - t0) / 1000;
-			logger.info("Import of ontology term from ontology [" + documentType + "] completed in " + t
-					+ " sec. Added [" + count + "] rows.");
+			LOG.info("Import of ontology term from ontology [" + documentType + "] completed in " + t + " sec. Added ["
+					+ count + "] rows.");
 		}
 		finally
 		{
@@ -206,7 +208,7 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 	{
 		String documentType = MapperTypeSanitizer.sanitizeMapperType(repository.getName());
 		XContentBuilder jsonBuilder = MappingsBuilder.buildMapping(repository);
-		logger.info("Going to create mapping [" + jsonBuilder.string() + "]");
+		LOG.info("Going to create mapping [" + jsonBuilder.string() + "]");
 
 		PutMappingResponse response = client.admin().indices().preparePutMapping("molgenis").setType(documentType)
 				.setSource(jsonBuilder).execute().actionGet();
@@ -217,7 +219,7 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 					+ response);
 		}
 
-		logger.info("Mapping for documentType [" + documentType + "] created");
+		LOG.info("Mapping for documentType [" + documentType + "] created");
 	}
 
 	@SuppressWarnings("deprecation")

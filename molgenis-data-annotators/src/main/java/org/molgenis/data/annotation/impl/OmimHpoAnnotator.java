@@ -44,7 +44,8 @@ import org.springframework.stereotype.Component;
 @Component("omimHpoService")
 public class OmimHpoAnnotator extends LocusAnnotator
 {
-	private static final String NAME = "OmimHpo";
+	private static final String NAME = "OmimHpoAnnotator";
+	private static final String LABEL = "OmimHpo";
 
 	public static final String OMIM_CAUSAL_IDENTIFIER = "OMIM_Causal_ID";
 	public static final String OMIM_DISORDERS = "OMIM_Disorders";
@@ -94,6 +95,12 @@ public class OmimHpoAnnotator extends LocusAnnotator
 	public String getName()
 	{
 		return NAME;
+	}
+
+	@Override
+	public String getLabel()
+	{
+		return LABEL;
 	}
 
 	@Override
