@@ -4,7 +4,6 @@
 	<div class="col-md-12" id="disease-matcher">
 	
 		<#-- ANALYSIS ZONE -->
-
 		<div class="col-md-9">
 			<div class="row well" id="diseasematcher-infopanel">
 				<div class="col-md-12" id="diseasematcher-variant-panel"></div>
