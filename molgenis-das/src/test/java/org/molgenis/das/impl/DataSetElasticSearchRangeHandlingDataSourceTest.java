@@ -13,8 +13,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.mockito.Mockito;
-import org.molgenis.das.impl.MolgenisDasTarget;
-import org.molgenis.das.impl.RepositoryRangeHandlingDataSource;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -68,7 +66,8 @@ public class DataSetElasticSearchRangeHandlingDataSourceTest
 
 		EntityMetaData metaData = new DefaultEntityMetaData("dataset");
 		when(dataService.getEntityMetaData("dataset")).thenReturn(metaData);
-		when(config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_CHROM, metaData)).thenReturn("CHROM");
+		when(config.getAttributeNameForAttributeNameArray(GenomeConfig.GENOMEBROWSER_CHROM, metaData)).thenReturn(
+				"CHROM");
 
 		DasType type = new DasType("0", "", "", "type");
 		DasMethod method = new DasMethod("not_recorded", "not_recorded", "ECO:0000037");
@@ -111,19 +110,20 @@ public class DataSetElasticSearchRangeHandlingDataSourceTest
 		when(dataService.findAll("dataset", q)).thenReturn(Arrays.<Entity> asList(entity));
 		when(result.iterator()).thenReturn(resultList.iterator());
 
-		when(config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_CHROM, entity.getEntityMetaData()))
+		when(config.getAttributeNameForAttributeNameArray(GenomeConfig.GENOMEBROWSER_CHROM, entity.getEntityMetaData()))
 				.thenReturn("CHROM");
-		when(config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_POS, entity.getEntityMetaData()))
+		when(config.getAttributeNameForAttributeNameArray(GenomeConfig.GENOMEBROWSER_POS, entity.getEntityMetaData()))
 				.thenReturn("POS");
-		when(config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_STOP, entity.getEntityMetaData()))
+		when(config.getAttributeNameForAttributeNameArray(GenomeConfig.GENOMEBROWSER_STOP, entity.getEntityMetaData()))
 				.thenReturn("STOP");
-		when(config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_ID, entity.getEntityMetaData()))
+		when(config.getAttributeNameForAttributeNameArray(GenomeConfig.GENOMEBROWSER_ID, entity.getEntityMetaData()))
 				.thenReturn("ID");
-		when(config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_DESCRIPTION, entity.getEntityMetaData()))
-				.thenReturn("INFO");
-		when(config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_NAME, entity.getEntityMetaData()))
+		when(
+				config.getAttributeNameForAttributeNameArray(GenomeConfig.GENOMEBROWSER_DESCRIPTION,
+						entity.getEntityMetaData())).thenReturn("INFO");
+		when(config.getAttributeNameForAttributeNameArray(GenomeConfig.GENOMEBROWSER_NAME, entity.getEntityMetaData()))
 				.thenReturn("NAME");
-		when(config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_LINK, entity.getEntityMetaData()))
+		when(config.getAttributeNameForAttributeNameArray(GenomeConfig.GENOMEBROWSER_LINK, entity.getEntityMetaData()))
 				.thenReturn("linkout");
 
 	}

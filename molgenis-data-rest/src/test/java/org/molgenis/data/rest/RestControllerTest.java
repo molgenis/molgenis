@@ -99,7 +99,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		entity2.set("name", "Klaas");
 		entity2.set("xrefAttribute", entityXref);
 
-		List<Entity> entities = new ArrayList();
+		List<Entity> entities = new ArrayList<Entity>();
 		entities.add(entity2);
 		entities.add(entity);
 

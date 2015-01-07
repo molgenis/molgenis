@@ -45,7 +45,6 @@ public class GafListValidationReport
 		validationGlobalErrorMessages = new ArrayList<String>();
 	}
 
-	@SuppressWarnings("unchecked")
 	public void addEntry(String runId, GafListValidationError validationError)
 	{
 		List<GafListValidationError> gafListValidationErrorList = validationErrorsPerRunId.get(runId);
