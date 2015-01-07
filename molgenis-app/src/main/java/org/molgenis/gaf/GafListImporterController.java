@@ -9,7 +9,8 @@ import java.util.List;
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.util.ErrorMessageResponse;
@@ -33,7 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Scope("request")
 public class GafListImporterController extends MolgenisPluginController
 {
-	private static final Logger logger = Logger.getLogger(GafListImporterController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(GafListImporterController.class);
 
 	public static final String ID = "gaflistimporter";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
@@ -120,14 +121,14 @@ public class GafListImporterController extends MolgenisPluginController
 			{
 				String errorMessage = "Failed to validate this file";
 				messages.add(errorMessage);
-				logger.error(errorMessage, e);
+				LOG.error(errorMessage, e);
 			}
 		}
 		else
 		{
 			String errorMessage = "The file you try to upload is empty! Filename: " + csvFile.getOriginalFilename();
 			messages.add(errorMessage);
-			logger.error(errorMessage);
+			LOG.error(errorMessage);
 		}
 		model.addAttribute("action", action);
 		model.addAttribute("enctype", enctype);
@@ -162,7 +163,7 @@ public class GafListImporterController extends MolgenisPluginController
 		{
 			String errorMessage = "Failed to import this file";
 			messages.add(errorMessage);
-			logger.error(errorMessage, e);
+			LOG.error(errorMessage, e);
 		}
 		finally
 		{
@@ -181,7 +182,7 @@ public class GafListImporterController extends MolgenisPluginController
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	public ErrorMessageResponse handleThrowable(Throwable t)
 	{
-		logger.error("", t);
+		LOG.error("", t);
 		return new ErrorMessageResponse(new ErrorMessage(t.getMessage()));
 	}
 }

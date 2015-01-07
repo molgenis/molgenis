@@ -20,7 +20,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
@@ -36,6 +35,8 @@ import org.molgenis.data.support.ConvertingIterable;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.QueryResolver;
 import org.molgenis.generators.GeneratorHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,10 +48,11 @@ import com.google.common.collect.Lists;
  */
 public class JpaRepository extends AbstractCrudRepository
 {
+	private static final Logger LOG = LoggerFactory.getLogger(JpaRepository.class);
+
 	public static final String BASE_URL = "jpa://";
 	private final EntityMetaData entityMetaData;
 	private final QueryResolver queryResolver;
-	private final Logger logger = Logger.getLogger(getClass());
 	@PersistenceContext
 	private EntityManager entityManager;
 
@@ -89,9 +91,9 @@ public class JpaRepository extends AbstractCrudRepository
 	{
 		Entity jpaEntity = getTypedEntity(entity);
 
-		if (logger.isDebugEnabled()) logger.debug("persisting " + entity.getClass().getSimpleName() + " " + entity);
+		if (LOG.isDebugEnabled()) LOG.debug("persisting " + entity.getClass().getSimpleName() + " " + entity);
 		getEntityManager().persist(jpaEntity);
-		if (logger.isDebugEnabled()) logger.debug("persisted " + entity.getClass().getSimpleName() + " ["
+		if (LOG.isDebugEnabled()) LOG.debug("persisted " + entity.getClass().getSimpleName() + " ["
 				+ jpaEntity.getIdValue() + "]");
 
 		entity.set(getEntityMetaData().getIdAttribute().getName(), jpaEntity.getIdValue());
@@ -144,7 +146,7 @@ public class JpaRepository extends AbstractCrudRepository
 
 		// execute the query
 		TypedQuery<Long> tq = em.createQuery(cq);
-		if (logger.isDebugEnabled()) logger.debug("execute count query " + q);
+		if (LOG.isDebugEnabled()) LOG.debug("execute count query " + q);
 		return tq.getSingleResult();
 	}
 
@@ -152,8 +154,7 @@ public class JpaRepository extends AbstractCrudRepository
 	@Transactional(readOnly = true)
 	public Entity findOne(Object id)
 	{
-		if (logger.isDebugEnabled()) logger
-				.debug("finding by key" + getEntityClass().getSimpleName() + " [" + id + "]");
+		if (LOG.isDebugEnabled()) LOG.debug("finding by key" + getEntityClass().getSimpleName() + " [" + id + "]");
 
 		return getEntityManager()
 				.find(getEntityClass(), getEntityMetaData().getIdAttribute().getDataType().convert(id));
@@ -180,9 +181,9 @@ public class JpaRepository extends AbstractCrudRepository
 		cq.select(from).where(from.get(idAttrName).in(Lists.newArrayList(ids)));
 
 		TypedQuery<Entity> tq = em.createQuery(cq);
-		if (logger.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			logger.debug("finding by key " + getEntityClass().getSimpleName() + " [" + StringUtils.join(ids, ',') + "]");
+			LOG.debug("finding by key " + getEntityClass().getSimpleName() + " [" + StringUtils.join(ids, ',') + "]");
 		}
 		return tq.getResultList();
 	}
@@ -211,9 +212,9 @@ public class JpaRepository extends AbstractCrudRepository
 
 		if (q.getPageSize() > 0) tq.setMaxResults(q.getPageSize());
 		if (q.getOffset() > 0) tq.setFirstResult(q.getOffset());
-		if (logger.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			logger.debug("finding " + getEntityClass().getSimpleName() + " " + q);
+			LOG.debug("finding " + getEntityClass().getSimpleName() + " " + q);
 		}
 		return tq.getResultList();
 	}
@@ -238,11 +239,11 @@ public class JpaRepository extends AbstractCrudRepository
 	{
 		EntityManager em = getEntityManager();
 
-		if (logger.isDebugEnabled()) logger.debug("merging" + getEntityClass().getSimpleName() + " ["
-				+ entity.getIdValue() + "]");
+		if (LOG.isDebugEnabled()) LOG.debug("merging" + getEntityClass().getSimpleName() + " [" + entity.getIdValue()
+				+ "]");
 		em.merge(getTypedEntity(entity));
 
-		if (logger.isDebugEnabled()) logger.debug("flushing entity manager");
+		if (LOG.isDebugEnabled()) LOG.debug("flushing entity manager");
 		em.flush();
 	}
 
@@ -257,22 +258,22 @@ public class JpaRepository extends AbstractCrudRepository
 		{
 			Entity entity = getTypedEntity(r);
 
-			if (logger.isDebugEnabled()) logger.debug("merging" + getEntityClass().getSimpleName() + " ["
-					+ r.getIdValue() + "]");
+			if (LOG.isDebugEnabled()) LOG.debug("merging" + getEntityClass().getSimpleName() + " [" + r.getIdValue()
+					+ "]");
 			em.merge(entity);
 
 			batchCount++;
 			if (batchCount == batchSize)
 			{
-				if (logger.isDebugEnabled()) logger.debug("flushing entity manager");
+				if (LOG.isDebugEnabled()) LOG.debug("flushing entity manager");
 				em.flush();
 
-				if (logger.isDebugEnabled()) logger.debug("clearing entity manager");
+				if (LOG.isDebugEnabled()) LOG.debug("clearing entity manager");
 				em.clear();
 				batchCount = 0;
 			}
 		}
-		if (logger.isDebugEnabled()) logger.debug("flushing entity manager");
+		if (LOG.isDebugEnabled()) LOG.debug("flushing entity manager");
 		em.flush();
 	}
 
@@ -280,7 +281,7 @@ public class JpaRepository extends AbstractCrudRepository
 	@Transactional
 	public void deleteById(Object id)
 	{
-		if (logger.isDebugEnabled()) logger.debug("removing " + getEntityClass().getSimpleName() + " [" + id + "]");
+		if (LOG.isDebugEnabled()) LOG.debug("removing " + getEntityClass().getSimpleName() + " [" + id + "]");
 
 		Entity entity = findOne(getEntityMetaData().getIdAttribute().getDataType().convert(id));
 		if (entity == null)
@@ -297,13 +298,13 @@ public class JpaRepository extends AbstractCrudRepository
 	public void delete(Entity entity)
 	{
 		EntityManager em = getEntityManager();
-		if (logger.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			logger.debug("removing " + getEntityClass().getSimpleName() + " [" + entity.getIdValue() + "]");
+			LOG.debug("removing " + getEntityClass().getSimpleName() + " [" + entity.getIdValue() + "]");
 		}
 
 		em.remove(findOne(entity.getIdValue()));
-		if (logger.isDebugEnabled()) logger.debug("flushing entity manager");
+		if (LOG.isDebugEnabled()) LOG.debug("flushing entity manager");
 		em.flush();
 	}
 
@@ -316,13 +317,13 @@ public class JpaRepository extends AbstractCrudRepository
 		for (Entity r : entities)
 		{
 			em.remove(findOne(r.getIdValue()));
-			if (logger.isDebugEnabled())
+			if (LOG.isDebugEnabled())
 			{
-				logger.debug("removing " + getEntityClass().getSimpleName() + " [" + r.getIdValue() + "]");
+				LOG.debug("removing " + getEntityClass().getSimpleName() + " [" + r.getIdValue() + "]");
 			}
 		}
 
-		if (logger.isDebugEnabled()) logger.debug("flushing entity manager");
+		if (LOG.isDebugEnabled()) LOG.debug("flushing entity manager");
 		em.flush();
 	}
 
@@ -541,14 +542,14 @@ public class JpaRepository extends AbstractCrudRepository
 	@Transactional(readOnly = true)
 	public void flush()
 	{
-		logger.debug("flushing entity manager");
+		LOG.debug("flushing entity manager");
 		getEntityManager().flush();
 	}
 
 	@Override
 	public void clearCache()
 	{
-		logger.debug("clearing entity manager");
+		LOG.debug("clearing entity manager");
 		getEntityManager().clear();
 	}
 

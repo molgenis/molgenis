@@ -2,6 +2,7 @@ package org.molgenis.util;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.molgenis.data.AttributeMetaData;
@@ -58,10 +59,11 @@ public class DependencyResolver
 			final List<String> ready = Lists.newArrayList();
 
 			// Get all metadata without dependencies
-			for (String name : dependenciesByName.keySet())
+			for (Entry<String, Set<EntityMetaData>> entry : dependenciesByName.entrySet())
 			{
-				if (dependenciesByName.get(name).isEmpty())
+				if (entry.getValue().isEmpty())
 				{
+					String name = entry.getKey();
 					ready.add(name);
 					resolved.add(metaDataByName.get(name));
 				}
@@ -166,10 +168,11 @@ public class DependencyResolver
 			final List<Object> ready = Lists.newArrayList();
 
 			// Get all entities without dependencies
-			for (Object id : dependenciesById.keySet())
+			for (Entry<Object, Set<Object>> entry : dependenciesById.entrySet())
 			{
-				if (dependenciesById.get(id).isEmpty())
+				if (entry.getValue().isEmpty())
 				{
+					Object id = entry.getKey();
 					ready.add(id);
 					resolved.add(entitiesById.get(id));
 				}

@@ -19,7 +19,8 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of a simple tree
@@ -27,7 +28,7 @@ import org.apache.log4j.Logger;
 @SuppressWarnings("unchecked")
 public class SimpleTree<T extends Tree> implements Tree<T>, Serializable
 {
-	private static final Logger logger = Logger.getLogger(SimpleTree.class);
+	private static final Logger LOG = LoggerFactory.getLogger(SimpleTree.class);
 
 	/** Unique name of this element */
 	protected String name;
@@ -64,7 +65,7 @@ public class SimpleTree<T extends Tree> implements Tree<T>, Serializable
 		}
 		catch (NullPointerException e)
 		{
-			logger.error("NullPointer in constructor op SimpleTree", e);
+			LOG.error("NullPointer in constructor op SimpleTree", e);
 		}
 
 		// body

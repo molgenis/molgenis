@@ -8,7 +8,8 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.molgenis.MolgenisOptions;
 import org.molgenis.model.elements.Matrix;
 import org.molgenis.model.elements.Model;
@@ -27,7 +28,7 @@ import freemarker.template.Template;
  */
 public abstract class ForEachMatrixGenerator extends Generator
 {
-	private static final Logger logger = Logger.getLogger(ForEachMatrixGenerator.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ForEachMatrixGenerator.class);
 
 	// private boolean includeAbstract = false;
 
@@ -80,7 +81,7 @@ public abstract class ForEachMatrixGenerator extends Generator
 				template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
 				targetOut.close();
 
-				logger.info("generated " + targetFile);
+				LOG.info("generated " + targetFile);
 
 			}
 		}

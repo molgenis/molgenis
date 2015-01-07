@@ -7,7 +7,6 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import javax.validation.Valid;
 
-import org.apache.log4j.Logger;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotBlank;
 import org.molgenis.auth.MolgenisUser;
@@ -18,6 +17,8 @@ import org.molgenis.security.captcha.CaptchaRequest;
 import org.molgenis.security.captcha.CaptchaService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailAuthenticationException;
 import org.springframework.mail.MailSendException;
@@ -38,12 +39,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @RequestMapping(FeedbackController.URI)
 public class FeedbackController extends AbstractStaticContentController
 {
+	private static final Logger LOG = LoggerFactory.getLogger(FeedbackController.class);
+
 	public static final String ID = "feedback";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	private static final String MESSAGING_EXCEPTION_MESSAGE = "Unfortunately, we were unable to create an email message for the feedback you specified.";
 	private static final String MAIL_AUTHENTICATION_EXCEPTION_MESSAGE = "Unfortunately, we were unable to send the mail containing your feedback. Please contact the administrator.";
 	private static final String MAIL_SEND_EXCEPTION_MESSAGE = MAIL_AUTHENTICATION_EXCEPTION_MESSAGE;
-	private static final Logger LOGGER = Logger.getLogger(MolgenisPluginController.class);
 
 	@Autowired
 	private MolgenisUserService molgenisUserService;
@@ -97,24 +99,24 @@ public class FeedbackController extends AbstractStaticContentController
 		}
 		try
 		{
-			LOGGER.info("Sending feedback:" + form);
+			LOG.info("Sending feedback:" + form);
 			MimeMessage message = createFeedbackMessage(form);
 			mailSender.send(message);
 			form.setSubmitted(true);
 		}
 		catch (MessagingException e)
 		{
-			LOGGER.warn("Unable to create mime message for feedback form.", e);
+			LOG.warn("Unable to create mime message for feedback form.", e);
 			form.setErrorMessage(MESSAGING_EXCEPTION_MESSAGE);
 		}
 		catch (MailAuthenticationException e)
 		{
-			LOGGER.error("Error authenticating with email server.", e);
+			LOG.error("Error authenticating with email server.", e);
 			form.setErrorMessage(MAIL_AUTHENTICATION_EXCEPTION_MESSAGE);
 		}
 		catch (MailSendException e)
 		{
-			LOGGER.error("Error sending mail", e);
+			LOG.error("Error sending mail", e);
 			form.setErrorMessage(MAIL_SEND_EXCEPTION_MESSAGE);
 		}
 		return "view-feedback";
