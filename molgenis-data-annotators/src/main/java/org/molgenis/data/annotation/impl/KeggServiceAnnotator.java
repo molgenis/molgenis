@@ -56,7 +56,7 @@ public class KeggServiceAnnotator extends LocusAnnotator
 	}
 
 	@Override
-	public String getName()
+	public String getSimpleName()
 	{
 		return "KEGG";
 	}

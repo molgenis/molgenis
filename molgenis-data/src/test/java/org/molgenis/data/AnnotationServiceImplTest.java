@@ -28,17 +28,17 @@ public class AnnotationServiceImplTest
 		metaData = mock(EntityMetaData.class);
 
 		annotator1 = mock(RepositoryAnnotator.class);
-		when(annotator1.getName()).thenReturn("annotator1");
+		when(annotator1.getSimpleName()).thenReturn("annotator1");
 		when(annotator1.canAnnotate(metaData)).thenReturn(false);
 		annotationService.addAnnotator(annotator1);
 
 		annotator2 = mock(RepositoryAnnotator.class);
-		when(annotator2.getName()).thenReturn("annotator2");
+		when(annotator2.getSimpleName()).thenReturn("annotator2");
 		when(annotator2.canAnnotate(metaData)).thenReturn(true);
 		annotationService.addAnnotator(annotator2);
 
 		annotator3 = mock(RepositoryAnnotator.class);
-		when(annotator3.getName()).thenReturn("annotator3");
+		when(annotator3.getSimpleName()).thenReturn("annotator3");
 		when(annotator3.canAnnotate(metaData)).thenReturn(true);
 		annotationService.addAnnotator(annotator3);
 	}
