@@ -69,9 +69,11 @@
 	var selectionTitle = $('#diseasematcher-selection-title');
 	
 	//handlebars templates
-	var hbColumnWarning = $("#hb-column-warning");
-	var hbDatasetWarning = $("#hb-dataset-warning");
-	var hbSelectionList = $("#hb-selection-list");
+	var hbColumnWarning = $('#hb-column-warning');
+	var hbColumnWarningComp = Handlebars.compile(hbColumnWarning.html());
+	var hbDatasetWarning = $('#hb-dataset-warning');
+	var hbDatasetWarningComp = Handlebars.compile(hbDatasetWarning.html());
+	var hbSelectionList = $('#hb-selection-list');
 
 	
 	/**
@@ -100,8 +102,7 @@
 		restApi.getAsync(entityUri + '/meta', {}, function(data) {
 			if (data === null || !data.attributes.hasOwnProperty(geneSymbolColumn)) {
 				
-				var template = Handlebars.compile(hbColumnWarning.html());
-				var warning = template({column: geneSymbolColumn});
+				var warning = hbColumnWarningComp({column: geneSymbolColumn});
 				infoPanel.append(warning);
 				toolAvailable = false;
 		
@@ -119,8 +120,7 @@
 	function checkDatasetAvailable(dataset) {
 		restApi.getAsync('/api/v1/' + dataset, {'num' : 1},	function(data){
 			if (data.total === 0) {
-				var template = Handlebars.compile(hbDatasetWarning.html());
-				var warning = template({dataset: dataset});
+				var warning = hbDatasetWarningComp({dataset: dataset});
 				infoPanel.append(warning);
 				toolAvailable = false;
 			}
@@ -165,7 +165,7 @@
 			}else{
 				queryString += '?';
 			}
-			t.replace(':', '%3A');
+			t = encodeURIComponent(t)
 			queryString += 'symptom=' + t;
 		});
 			
@@ -227,8 +227,6 @@
 						
 						suggestionObjects[omimId] = suggestion;
 					});
-					
-					console.log(suggestionObjects);
 					
 					if (suggestionObjects.length === 0){
 						alert("phenotips offline");

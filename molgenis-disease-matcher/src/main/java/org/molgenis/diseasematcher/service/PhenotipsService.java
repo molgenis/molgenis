@@ -3,7 +3,9 @@ package org.molgenis.diseasematcher.service;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.List;
 
 import javax.servlet.ServletOutputStream;
@@ -19,9 +21,8 @@ public class PhenotipsService
 	public static final int Q = 1;
 	public static final String URL = "http://playground.phenotips.org/bin/get/PhenoTips/OmimPredictService";
 
-	protected String buildQueryURIString(List<String> hpoTerms)
+	protected String buildQueryURIString(List<String> hpoTerms) throws UnsupportedEncodingException
 	{
-		System.out.println(hpoTerms.toString());
 		StringBuilder sb = new StringBuilder();
 
 		sb.append(URL);
@@ -31,7 +32,7 @@ public class PhenotipsService
 
 		for (String term : hpoTerms)
 		{
-			sb.append("&symptom=" + term);
+			sb.append("&symptom=" + URLEncoder.encode(term, "UTF-8"));
 		}
 		return sb.toString();
 	}
@@ -50,8 +51,7 @@ public class PhenotipsService
 		}
 		catch (IOException e)
 		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 
 	}

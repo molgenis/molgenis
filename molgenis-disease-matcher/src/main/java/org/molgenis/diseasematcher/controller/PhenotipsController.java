@@ -33,7 +33,7 @@ public class PhenotipsController
 
 	private static final Logger LOG = LoggerFactory.getLogger(OmimClientController.class);
 
-	private PhenotipsService phenotipsService;
+	private final PhenotipsService phenotipsService;
 
 	private static final String CONTENT_TYPE_HTML = "text/html";
 	private static final String CONTENT_TYPE_JSON = "application/json";
@@ -41,7 +41,6 @@ public class PhenotipsController
 	@Autowired
 	public PhenotipsController(PhenotipsService phenotipsService)
 	{
-		super();
 		this.phenotipsService = phenotipsService;
 	}
 
@@ -55,7 +54,7 @@ public class PhenotipsController
 		}
 		catch (Exception e)
 		{
-			LOG.error("Phenotips API query unsuccessfull", e);
+			LOG.error("Phenotips API query unsuccessful", e);
 			response.setContentType(CONTENT_TYPE_JSON);
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
