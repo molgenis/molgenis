@@ -37,10 +37,14 @@ public class CaddServiceAnnotatorTest
 	private AttributeMetaData attributeMetaDataCantAnnotatePos;
 	private AttributeMetaData attributeMetaDataCantAnnotateRef;
 	private AttributeMetaData attributeMetaDataCantAnnotateAlt;
-	private Entity entity;
 	private ArrayList<Entity> input1;
 	private ArrayList<Entity> input2;
+	private ArrayList<Entity> input3;
+	private ArrayList<Entity> input4;
+	private Entity entity1;
 	private Entity entity2;
+	private Entity entity3;
+	private Entity entity4;
 
 	@BeforeMethod
 	public void beforeMethod() throws IOException
@@ -50,7 +54,7 @@ public class CaddServiceAnnotatorTest
 		MolgenisSettings settings = mock(MolgenisSettings.class);
 
 		when(settings.getProperty(CaddServiceAnnotator.CADD_FILE_LOCATION_PROPERTY)).thenReturn(
-				ResourceUtils.getFile(getClass(), "/1000G.vcf.gz").getPath());
+				ResourceUtils.getFile(getClass(), "/cadd_test.vcf.gz").getPath());
 
 		attributeMetaDataChrom = mock(AttributeMetaData.class);
 		attributeMetaDataPos = mock(AttributeMetaData.class);
@@ -111,47 +115,59 @@ public class CaddServiceAnnotatorTest
 		when(metaDataCantAnnotate.getAttribute(CaddServiceAnnotator.ALTERNATIVE)).thenReturn(
 				attributeMetaDataCantAnnotateAlt);
 
-		entity = mock(Entity.class);
-
-		when(entity.getString(CaddServiceAnnotator.CHROMOSOME)).thenReturn("11");
-		when(entity.getLong(CaddServiceAnnotator.POSITION)).thenReturn(new Long(19207841));
-		when(entity.getString(CaddServiceAnnotator.REFERENCE)).thenReturn("C");
-		when(entity.getString(CaddServiceAnnotator.ALTERNATIVE)).thenReturn("T");
-
+		entity1 = mock(Entity.class);
+		when(entity1.getString(CaddServiceAnnotator.CHROMOSOME)).thenReturn("1");
+		when(entity1.getLong(CaddServiceAnnotator.POSITION)).thenReturn(new Long(100));
+		when(entity1.getString(CaddServiceAnnotator.REFERENCE)).thenReturn("C");
+		when(entity1.getString(CaddServiceAnnotator.ALTERNATIVE)).thenReturn("T");
 		input1 = new ArrayList<Entity>();
-		input1.add(entity);
-		when(entity.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
+		input1.add(entity1);
+		when(entity1.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
 
 		entity2 = mock(Entity.class);
-
 		when(entity2.getString(CaddServiceAnnotator.CHROMOSOME)).thenReturn("2");
-		when(entity2.getLong(CaddServiceAnnotator.POSITION)).thenReturn(new Long(19207841));
-		when(entity2.getString(CaddServiceAnnotator.REFERENCE)).thenReturn("C");
-		when(entity2.getString(CaddServiceAnnotator.ALTERNATIVE)).thenReturn("T");
-
+		when(entity2.getLong(CaddServiceAnnotator.POSITION)).thenReturn(new Long(200));
+		when(entity2.getString(CaddServiceAnnotator.REFERENCE)).thenReturn("A");
+		when(entity2.getString(CaddServiceAnnotator.ALTERNATIVE)).thenReturn("C");
 		input2 = new ArrayList<Entity>();
 		input2.add(entity2);
-
 		annotator = new CaddServiceAnnotator(settings, null);
-
 		when(entity2.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
+
+		entity3 = mock(Entity.class);
+		when(entity3.getString(CaddServiceAnnotator.CHROMOSOME)).thenReturn("3");
+		when(entity3.getLong(CaddServiceAnnotator.POSITION)).thenReturn(new Long(300));
+		when(entity3.getString(CaddServiceAnnotator.REFERENCE)).thenReturn("G");
+		when(entity3.getString(CaddServiceAnnotator.ALTERNATIVE)).thenReturn("C");
+		input3 = new ArrayList<Entity>();
+		input3.add(entity3);
+		annotator = new CaddServiceAnnotator(settings, null);
+		when(entity3.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
+
+		entity4 = mock(Entity.class);
+		when(entity4.getString(CaddServiceAnnotator.CHROMOSOME)).thenReturn("1");
+		when(entity4.getLong(CaddServiceAnnotator.POSITION)).thenReturn(new Long(100));
+		when(entity4.getString(CaddServiceAnnotator.REFERENCE)).thenReturn("T");
+		when(entity4.getString(CaddServiceAnnotator.ALTERNATIVE)).thenReturn("C");
+		input4 = new ArrayList<Entity>();
+		input4.add(entity4);
+		annotator = new CaddServiceAnnotator(settings, null);
+		when(entity4.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
 	}
 
 	@Test
-	public void annotateTestLineOne()
+	public void testThreeOccurencesOneMatch()
 	{
 		List<Entity> expectedList = new ArrayList<Entity>();
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
 
-		resultMap.put(CaddServiceAnnotator.CADD_ABS, 0.180916);
-		resultMap.put(CaddServiceAnnotator.CADD_SCALED, 4.974);
+		resultMap.put(CaddServiceAnnotator.CADD_ABS, -0.03);
+		resultMap.put(CaddServiceAnnotator.CADD_SCALED, 2.003);
 
 		Entity expectedEntity = new MapEntity(resultMap);
-
 		expectedList.add(expectedEntity);
 
 		Iterator<Entity> results = annotator.annotate(input1.iterator());
-
 		Entity resultEntity = results.next();
 
 		assertEquals(resultEntity.get(CaddServiceAnnotator.CADD_ABS), expectedEntity.get(CaddServiceAnnotator.CADD_ABS));
@@ -160,20 +176,55 @@ public class CaddServiceAnnotatorTest
 	}
 
 	@Test
-	public void annotateTestLineTwo()
+	public void testTwoOccurencesNoMatch()
 	{
 		List<Entity> expectedList = new ArrayList<Entity>();
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
 
-		resultMap.put(CaddServiceAnnotator.CADD_ABS, 0.18026);
-		resultMap.put(CaddServiceAnnotator.CADD_SCALED, 5.974);
-
 		Entity expectedEntity = new MapEntity(resultMap);
-
 		expectedList.add(expectedEntity);
 
 		Iterator<Entity> results = annotator.annotate(input2.iterator());
+		Entity resultEntity = results.next();
 
+		assertEquals(resultEntity.get(CaddServiceAnnotator.CADD_ABS), expectedEntity.get(CaddServiceAnnotator.CADD_ABS));
+		assertEquals(resultEntity.get(CaddServiceAnnotator.CADD_SCALED),
+				expectedEntity.get(CaddServiceAnnotator.CADD_SCALED));
+	}
+
+	@Test
+	public void testFourOccurences()
+	{
+		List<Entity> expectedList = new ArrayList<Entity>();
+		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
+
+		resultMap.put(CaddServiceAnnotator.CADD_ABS, 0.5);
+		resultMap.put(CaddServiceAnnotator.CADD_SCALED, 14.5);
+		
+		Entity expectedEntity = new MapEntity(resultMap);
+		expectedList.add(expectedEntity);
+
+		Iterator<Entity> results = annotator.annotate(input3.iterator());
+		Entity resultEntity = results.next();
+
+		assertEquals(resultEntity.get(CaddServiceAnnotator.CADD_ABS), expectedEntity.get(CaddServiceAnnotator.CADD_ABS));
+		assertEquals(resultEntity.get(CaddServiceAnnotator.CADD_SCALED),
+				expectedEntity.get(CaddServiceAnnotator.CADD_SCALED));
+	}
+
+	@Test
+	public void testSwappedAllelesThreeOccurencesOneMatch()
+	{
+		List<Entity> expectedList = new ArrayList<Entity>();
+		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
+
+		resultMap.put(CaddServiceAnnotator.CADD_ABS, -0.03);
+		resultMap.put(CaddServiceAnnotator.CADD_SCALED, 2.003);
+
+		Entity expectedEntity = new MapEntity(resultMap);
+		expectedList.add(expectedEntity);
+
+		Iterator<Entity> results = annotator.annotate(input4.iterator());
 		Entity resultEntity = results.next();
 
 		assertEquals(resultEntity.get(CaddServiceAnnotator.CADD_ABS), expectedEntity.get(CaddServiceAnnotator.CADD_ABS));
