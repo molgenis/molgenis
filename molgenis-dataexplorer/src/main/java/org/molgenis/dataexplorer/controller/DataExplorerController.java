@@ -26,8 +26,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Aggregateable;
 import org.molgenis.data.AttributeMetaData;
@@ -56,6 +54,8 @@ import org.molgenis.ui.MolgenisInterceptor;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.util.GsonHttpMessageConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.http.HttpStatus;
@@ -719,7 +719,7 @@ public class DataExplorerController extends MolgenisPluginController implements
 	@Override
 	public void onApplicationEvent(DataExplorerRegisterEvent event)
 	{
-		logger.info("Application event: " + event);
+		LOG.info("Application event: " + event);
 
 		if (event instanceof DataExplorerRegisterActionEvent)
 		{

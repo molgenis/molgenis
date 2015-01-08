@@ -24,6 +24,7 @@ public class AnalysisMetaData extends DefaultEntityMetaData
 	public static final String BACKEND = "backend";
 	public static final String SUBMIT_SCRIPT = "submitScript";
 	public static final String STATUS = "status";
+	public static final String USER = "user";
 
 	private AnalysisMetaData()
 	{
