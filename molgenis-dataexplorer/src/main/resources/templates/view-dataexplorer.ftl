@@ -51,6 +51,11 @@
                     </div>
                 </div>
             </div>
+            <div class="row">
+            	<div class="col-md-1">
+            		<a id="delete" class="btn btn-danger">delete</a>
+            	</div>
+            </div>
         </div>
     </div>
 </div>

@@ -380,6 +380,12 @@ function($, molgenis, settingsXhr) {
 			$(document).trigger('removeAttributeFilter', {'attributeUri': $(this).data('href')});
 		});
 		
+		$('#delete').on('click', function(e){
+			$.ajax('/api/v1/'+selectedEntityMetaData.name+'/meta', {'type': 'DELETE'}).done(function(){
+				document.location.href = "/menu/main/dataexplorer";
+			});
+		});
+
 		// fire change event for selected option or first option in case of no selection
 		var selectedOption = $('#dataset-select option:not(:empty):selected');
 		if(selectedOption.length === 0)
