@@ -94,6 +94,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -757,11 +758,10 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/meta", method = DELETE)
 	@ResponseStatus(NO_CONTENT)
+	@Transactional
 	public void deleteMeta(@PathVariable("entityName") String entityName)
 	{
-		dataService.deleteAll(entityName);
-		metaDataService.removeEntityMetaData(entityName);
-		metaDataService.refreshCaches();
+		deleteMetaInternal(entityName);
 	}
 
 	/**
@@ -773,9 +773,16 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/meta", method = POST, params = "_method=DELETE")
 	@ResponseStatus(NO_CONTENT)
+	@Transactional
 	public void deleteMetaPost(@PathVariable("entityName") String entityName)
 	{
-		dataService.deleteAll(entityName);
+		deleteMetaInternal(entityName);
+	}
+
+	private void deleteMetaInternal(String entityName)
+	{
+		dataService.drop(entityName);
+		dataService.removeRepository(entityName);
 		metaDataService.removeEntityMetaData(entityName);
 		metaDataService.refreshCaches();
 	}

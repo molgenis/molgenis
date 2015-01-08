@@ -86,6 +86,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public void beforeMethod()
 	{
 		reset(dataService);
+		reset(metaDataService);
 
 		Repository repo = mock(Repository.class, withSettings().extraInterfaces(Updateable.class, Queryable.class));
 
@@ -190,7 +191,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public void deleteMetaDelete() throws Exception
 	{
 		mockMvc.perform(delete(HREF_ENTITY_META)).andExpect(status().isNoContent());
-		verify(dataService).deleteAll(ENTITY_NAME);
+		verify(dataService).drop(ENTITY_NAME);
+		verify(dataService).removeRepository(ENTITY_NAME);
 		verify(metaDataService).removeEntityMetaData(ENTITY_NAME);
 	}
 
@@ -198,8 +200,9 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public void deleteMetaPost() throws Exception
 	{
 		mockMvc.perform(post(HREF_ENTITY_META).param("_method", "DELETE")).andExpect(status().isNoContent());
+		verify(dataService).drop(ENTITY_NAME);
+		verify(dataService).removeRepository(ENTITY_NAME);
 		verify(metaDataService).removeEntityMetaData(ENTITY_NAME);
-		verify(dataService).deleteAll(ENTITY_NAME);
 	}
 
 	@Test

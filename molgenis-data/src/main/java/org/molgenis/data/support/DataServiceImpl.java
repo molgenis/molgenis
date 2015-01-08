@@ -16,6 +16,7 @@ import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Manageable;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Queryable;
@@ -209,6 +210,12 @@ public class DataServiceImpl implements DataService
 		getUpdateable(entityName).deleteAll();
 	}
 
+	@Override
+	public void drop(String entityName)
+	{
+		getManageableRepository(entityName).drop();
+	}
+
 	private <E extends Entity> Queryable getQueryable(String entityName)
 	{
 		Repository repo = getRepositoryByEntityName(entityName);
@@ -275,6 +282,17 @@ public class DataServiceImpl implements DataService
 		}
 		throw new MolgenisDataException("Repository [" + repository.getName() + "] is not Queryable");
 
+	}
+
+	@Override
+	public Manageable getManageableRepository(String entityName)
+	{
+		Repository repository = getRepositoryByEntityName(entityName);
+		if (repository instanceof Manageable)
+		{
+			return (Manageable) repository;
+		}
+		throw new MolgenisDataException("Repository [" + repository.getName() + "] is not Manageable");
 	}
 
 	@Override
