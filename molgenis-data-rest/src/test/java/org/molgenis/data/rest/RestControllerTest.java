@@ -35,6 +35,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Queryable;
 import org.molgenis.data.Repository;
 import org.molgenis.data.Updateable;
+import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.data.rest.RestControllerTest.RestControllerConfig;
 import org.molgenis.data.rsql.MolgenisRSQL;
 import org.molgenis.data.support.DefaultAttributeMetaData;
@@ -76,12 +77,16 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	private DataService dataService;
 
+	@Autowired
+	private WritableMetaDataService metaDataService;
+
 	private MockMvc mockMvc;
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
 		reset(dataService);
+		reset(metaDataService);
 
 		Repository repo = mock(Repository.class, withSettings().extraInterfaces(Updateable.class, Queryable.class));
 
@@ -166,6 +171,38 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	{
 		mockMvc.perform(post(HREF_ENTITY_ID).param("_method", "DELETE")).andExpect(status().isNoContent());
 		verify(dataService).delete(ENTITY_NAME, ENTITY_ID);
+	}
+
+	@Test
+	public void deleteAllDelete() throws Exception
+	{
+		mockMvc.perform(delete(HREF_ENTITY)).andExpect(status().isNoContent());
+		verify(dataService).deleteAll(ENTITY_NAME);
+	}
+
+	@Test
+	public void deleteAllPost() throws Exception
+	{
+		mockMvc.perform(post(HREF_ENTITY).param("_method", "DELETE")).andExpect(status().isNoContent());
+		verify(dataService).deleteAll(ENTITY_NAME);
+	}
+
+	@Test
+	public void deleteMetaDelete() throws Exception
+	{
+		mockMvc.perform(delete(HREF_ENTITY_META)).andExpect(status().isNoContent());
+		verify(dataService).drop(ENTITY_NAME);
+		verify(dataService).removeRepository(ENTITY_NAME);
+		verify(metaDataService).removeEntityMetaData(ENTITY_NAME);
+	}
+
+	@Test
+	public void deleteMetaPost() throws Exception
+	{
+		mockMvc.perform(post(HREF_ENTITY_META).param("_method", "DELETE")).andExpect(status().isNoContent());
+		verify(dataService).drop(ENTITY_NAME);
+		verify(dataService).removeRepository(ENTITY_NAME);
+		verify(metaDataService).removeEntityMetaData(ENTITY_NAME);
 	}
 
 	@Test
@@ -490,6 +527,12 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
+		public WritableMetaDataService metaDataService()
+		{
+			return mock(WritableMetaDataService.class);
+		}
+
+		@Bean
 		public TokenService tokenService()
 		{
 			return mock(TokenService.class);
@@ -516,7 +559,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		@Bean
 		public RestController restController()
 		{
-			return new RestController(dataService(), tokenService(), authenticationManager(),
+			return new RestController(dataService(), metaDataService(), tokenService(), authenticationManager(),
 					molgenisPermissionService(), new MolgenisRSQL(), new ResourceFingerprintRegistry());
 		}
 	}
