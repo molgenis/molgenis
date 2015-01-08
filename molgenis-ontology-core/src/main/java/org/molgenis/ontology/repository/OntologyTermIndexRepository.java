@@ -52,6 +52,10 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository
 		}
 	}
 
+	/**
+	 * Returns an iterator over all ontology terms including ontology term synonyms. The first entity of this iterator
+	 * is the root ontology term containing the name of the ontology.
+	 */
 	@Override
 	public Iterator<Entity> iterator()
 	{
