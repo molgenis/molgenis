@@ -169,6 +169,20 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
+	public void deleteAllDelete() throws Exception
+	{
+		mockMvc.perform(delete(HREF_ENTITY)).andExpect(status().isNoContent());
+		verify(dataService).deleteAll(ENTITY_NAME);
+	}
+
+	@Test
+	public void deleteAllPost() throws Exception
+	{
+		mockMvc.perform(post(HREF_ENTITY).param("_method", "DELETE")).andExpect(status().isNoContent());
+		verify(dataService).deleteAll(ENTITY_NAME);
+	}
+
+	@Test
 	public void retrieveEntityMeta() throws Exception
 	{
 		mockMvc.perform(get(HREF_ENTITY_META))

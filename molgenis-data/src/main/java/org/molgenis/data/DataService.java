@@ -209,6 +209,14 @@ public interface DataService extends RepositoryCollection
 	void delete(String entityName, Object id);
 
 	/**
+	 * Deletes all entities
+	 * 
+	 * @param entityName
+	 *            entity name (case insensitive)
+	 */
+	void deleteAll(String entityName);
+
+	/**
 	 * Get a CrudRepository by entity name
 	 * 
 	 * @throws UnknownEntityException

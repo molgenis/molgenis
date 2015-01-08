@@ -9,8 +9,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Aggregateable;
@@ -25,6 +23,8 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.Updateable;
 import org.molgenis.data.Writable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Predicate;
@@ -201,6 +201,12 @@ public class DataServiceImpl implements DataService
 	public void delete(String entityName, Object id)
 	{
 		getUpdateable(entityName).deleteById(id);
+	}
+
+	@Override
+	public void deleteAll(String entityName)
+	{
+		getUpdateable(entityName).deleteAll();
 	}
 
 	private <E extends Entity> Queryable getQueryable(String entityName)

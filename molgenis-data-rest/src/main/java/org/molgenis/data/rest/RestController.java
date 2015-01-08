@@ -716,6 +716,34 @@ public class RestController
 		delete(entityName, id);
 	}
 
+	/**
+	 * Deletes all entities for the given entity name
+	 * 
+	 * @param entityName
+	 * @param id
+	 * @throws EntityNotFoundException
+	 */
+	@RequestMapping(value = "/{entityName}", method = DELETE)
+	@ResponseStatus(NO_CONTENT)
+	public void deleteAll(@PathVariable("entityName") String entityName)
+	{
+		dataService.deleteAll(entityName);
+	}
+
+	/**
+	 * Deletes all entities for the given entity name but tunnels DELETE through POST
+	 * 
+	 * @param entityName
+	 * @param id
+	 * @throws EntityNotFoundException
+	 */
+	@RequestMapping(value = "/{entityName}", method = POST, params = "_method=DELETE")
+	@ResponseStatus(NO_CONTENT)
+	public void deleteAllPost(@PathVariable("entityName") String entityName)
+	{
+		dataService.deleteAll(entityName);
+	}
+
 	@RequestMapping(value = "/{entityName}/create", method = GET)
 	public String createForm(@PathVariable("entityName") String entityName, Model model)
 	{
