@@ -18,6 +18,7 @@ import java.util.Properties;
 
 import javax.validation.Valid;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.compute.ui.IdGenerator;
 import org.molgenis.compute.ui.clusterexecutor.ClusterManager;
@@ -251,11 +252,11 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 		if (analysis == null) throw new UnknownEntityException("Unknown Analysis [" + analysisId + "]");
 		LOG.info("Running analysis [" + analysisId + "]");
 
-		String runID = analysisId;
+		String runID = "test02";
+//		String runID = analysisId;
 		String path = ".tmp" + File.separator + runID + File.separator;
 
-		String pathTest = ".tmp" + File.separator + runID + "TEST" + File.separator;
-		new AnalysisToFilesWriter().writeToFiles(dataService, analysis, pathTest);
+		new AnalysisToFilesWriter().writeToFiles(dataService, analysis, path);
 
 
 			readUserProperties();
@@ -293,8 +294,9 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 			}
 
 			// update analysis
-			analysis.setSubmitScript(container.getSumbitScript());
-			dataService.update(AnalysisMetaData.INSTANCE.getName(), analysis);
+		analysis.setSubmitScript(container.getSumbitScript());
+
+		dataService.update(AnalysisMetaData.INSTANCE.getName(), analysis);
 
 		clusterManager.executeAnalysis(analysis);
 
