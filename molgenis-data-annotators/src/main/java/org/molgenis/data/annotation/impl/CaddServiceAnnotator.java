@@ -163,7 +163,7 @@ public class CaddServiceAnnotator extends VariantAnnotator
 		Double caddAbs = null;
 		Double caddScaled = null;
 
-		TabixReader.Iterator tabixIterator = tabixReader.query(chromosome + ":" + position);
+		TabixReader.Iterator tabixIterator = tabixReader.query(chromosome + ":" + position + "-" + position);
 		if (tabixIterator == null)
 		{
 			System.out.print("");
@@ -206,8 +206,6 @@ public class CaddServiceAnnotator extends VariantAnnotator
 				}
 				else
 				{
-					LOG.info("No match for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
-							+ " ALT: " + alternative + " LINE: " + line);
 					if (i > 3)
 					{
 						LOG.warn("More than 3 hits in the CADD file! for CHROM: " + chromosome + " POS: " + position
