@@ -59,6 +59,7 @@ import org.molgenis.data.Queryable;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.data.rsql.MolgenisRSQL;
 import org.molgenis.data.support.DefaultEntityCollection;
 import org.molgenis.data.support.MapEntity;
@@ -131,6 +132,7 @@ public class RestController
 	public static final String BASE_URI = "/api/v1";
 	private static final Pattern PATTERN_EXPANDS = Pattern.compile("([^\\[^\\]]+)(?:\\[(.+)\\])?");
 	private final DataService dataService;
+	private final WritableMetaDataService metaDataService;
 	private final TokenService tokenService;
 	private final AuthenticationManager authenticationManager;
 	private final String ENTITY_FORM_MODEL_ATTRIBUTE = "form";
@@ -139,11 +141,12 @@ public class RestController
 	private final ResourceFingerprintRegistry resourceFingerprintRegistry;
 
 	@Autowired
-	public RestController(DataService dataService, TokenService tokenService,
+	public RestController(DataService dataService, WritableMetaDataService metaDataService, TokenService tokenService,
 			AuthenticationManager authenticationManager, MolgenisPermissionService molgenisPermissionService,
 			MolgenisRSQL molgenisRSQL, ResourceFingerprintRegistry resourceFingerprintRegistry)
 	{
 		if (dataService == null) throw new IllegalArgumentException("dataService is null");
+		if (metaDataService == null) throw new IllegalArgumentException("metaDataService is null");
 		if (tokenService == null) throw new IllegalArgumentException("tokenService is null");
 		if (authenticationManager == null) throw new IllegalArgumentException("authenticationManager is null");
 		if (molgenisPermissionService == null) throw new IllegalArgumentException("molgenisPermissionService is null");
@@ -151,6 +154,7 @@ public class RestController
 				"resourceFingerprintRegistry is null");
 
 		this.dataService = dataService;
+		this.metaDataService = metaDataService;
 		this.tokenService = tokenService;
 		this.authenticationManager = authenticationManager;
 		this.molgenisPermissionService = molgenisPermissionService;
@@ -742,6 +746,38 @@ public class RestController
 	public void deleteAllPost(@PathVariable("entityName") String entityName)
 	{
 		dataService.deleteAll(entityName);
+	}
+
+	/**
+	 * Deletes all entities and entity meta data for the given entity name
+	 * 
+	 * @param entityName
+	 * @param id
+	 * @throws EntityNotFoundException
+	 */
+	@RequestMapping(value = "/{entityName}/meta", method = DELETE)
+	@ResponseStatus(NO_CONTENT)
+	public void deleteMeta(@PathVariable("entityName") String entityName)
+	{
+		dataService.deleteAll(entityName);
+		metaDataService.removeEntityMetaData(entityName);
+		metaDataService.refreshCaches();
+	}
+
+	/**
+	 * Deletes all entities and entity meta data for the given entity name but tunnels DELETE through POST
+	 * 
+	 * @param entityName
+	 * @param id
+	 * @throws EntityNotFoundException
+	 */
+	@RequestMapping(value = "/{entityName}/meta", method = POST, params = "_method=DELETE")
+	@ResponseStatus(NO_CONTENT)
+	public void deleteMetaPost(@PathVariable("entityName") String entityName)
+	{
+		dataService.deleteAll(entityName);
+		metaDataService.removeEntityMetaData(entityName);
+		metaDataService.refreshCaches();
 	}
 
 	@RequestMapping(value = "/{entityName}/create", method = GET)

@@ -35,6 +35,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Queryable;
 import org.molgenis.data.Repository;
 import org.molgenis.data.Updateable;
+import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.data.rest.RestControllerTest.RestControllerConfig;
 import org.molgenis.data.rsql.MolgenisRSQL;
 import org.molgenis.data.support.DefaultAttributeMetaData;
@@ -75,6 +76,9 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 
 	@Autowired
 	private DataService dataService;
+
+	@Autowired
+	private WritableMetaDataService metaDataService;
 
 	private MockMvc mockMvc;
 
@@ -179,6 +183,22 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public void deleteAllPost() throws Exception
 	{
 		mockMvc.perform(post(HREF_ENTITY).param("_method", "DELETE")).andExpect(status().isNoContent());
+		verify(dataService).deleteAll(ENTITY_NAME);
+	}
+
+	@Test
+	public void deleteMetaDelete() throws Exception
+	{
+		mockMvc.perform(delete(HREF_ENTITY_META)).andExpect(status().isNoContent());
+		verify(dataService).deleteAll(ENTITY_NAME);
+		verify(metaDataService).removeEntityMetaData(ENTITY_NAME);
+	}
+
+	@Test
+	public void deleteMetaPost() throws Exception
+	{
+		mockMvc.perform(post(HREF_ENTITY_META).param("_method", "DELETE")).andExpect(status().isNoContent());
+		verify(metaDataService).removeEntityMetaData(ENTITY_NAME);
 		verify(dataService).deleteAll(ENTITY_NAME);
 	}
 
@@ -504,6 +524,12 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
+		public WritableMetaDataService metaDataService()
+		{
+			return mock(WritableMetaDataService.class);
+		}
+
+		@Bean
 		public TokenService tokenService()
 		{
 			return mock(TokenService.class);
@@ -530,7 +556,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		@Bean
 		public RestController restController()
 		{
-			return new RestController(dataService(), tokenService(), authenticationManager(),
+			return new RestController(dataService(), metaDataService(), tokenService(), authenticationManager(),
 					molgenisPermissionService(), new MolgenisRSQL(), new ResourceFingerprintRegistry());
 		}
 	}
