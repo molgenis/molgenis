@@ -2,6 +2,7 @@ package org.molgenis.data.annotation;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
@@ -22,12 +23,12 @@ public class CrudRepositoryAnnotator
 	private static final Logger LOG = LoggerFactory.getLogger(CrudRepositoryAnnotator.class);
 
 	private final MysqlRepositoryCollection mysqlRepositoryCollection;
-	private String newRepositoryName;
+	private String newRepositoryLabel;
 
 	public CrudRepositoryAnnotator(MysqlRepositoryCollection mysqlRepositoryCollection, String newRepositoryName)
 	{
 		this.mysqlRepositoryCollection = mysqlRepositoryCollection;
-		this.newRepositoryName = newRepositoryName;
+		this.newRepositoryLabel = newRepositoryName;
 	}
 
 	/**
@@ -62,8 +63,8 @@ public class CrudRepositoryAnnotator
 			throw new UnsupportedOperationException("Currently only CrudRepositories can be annotated");
 		}
 
-		if (createCopy) LOG.info("Creating a copy of " + sourceRepo.getName() + " repository, which will be called "
-				+ newRepositoryName);
+		if (createCopy) LOG.info("Creating a copy of " + sourceRepo.getName() + " repository, which will be labelled "
+				+ newRepositoryLabel + "an UUID will be generated for the name/identifier");
 
 		if (!createCopy) LOG.info("Annotating " + sourceRepo.getName() + " repository with the " + annotator.getSimpleName()
 				+ " annotator");
@@ -131,9 +132,9 @@ public class CrudRepositoryAnnotator
 	{
 		if (createCopy)
 		{
-			DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(newRepositoryName, entityMetaData);
+			DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(UUID.randomUUID().toString(), entityMetaData);
 			newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData);
-			newEntityMetaData.setLabel(newRepositoryName);
+			newEntityMetaData.setLabel(newRepositoryLabel);
 			return mysqlRepositoryCollection.add(newEntityMetaData);
 		}
 		else
