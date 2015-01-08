@@ -719,7 +719,7 @@ public class DataExplorerController extends MolgenisPluginController implements
 	@Override
 	public void onApplicationEvent(DataExplorerRegisterEvent event)
 	{
-		logger.info("Application event: " + event);
+		LOG.info("Application event: " + event);
 
 		if (event instanceof DataExplorerRegisterActionEvent)
 		{

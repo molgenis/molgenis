@@ -8,7 +8,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -19,7 +18,6 @@ import java.util.Properties;
 
 import javax.validation.Valid;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.compute.ui.IdGenerator;
 import org.molgenis.compute.ui.clusterexecutor.ClusterManager;
@@ -32,19 +30,15 @@ import org.molgenis.compute.ui.model.AnalysisJob;
 import org.molgenis.compute.ui.model.UIBackend;
 import org.molgenis.compute.ui.model.UIWorkflow;
 import org.molgenis.compute.ui.model.UIWorkflowNode;
-import org.molgenis.compute.ui.model.UIWorkflowProtocol;
 import org.molgenis.compute.ui.model.decorator.UIWorkflowDecorator;
 import org.molgenis.compute5.CommandLineRunContainer;
 import org.molgenis.compute5.ComputeCommandLine;
 import org.molgenis.compute5.ComputeProperties;
 import org.molgenis.compute5.GeneratedScript;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.event.DataExplorerRegisterRefCellClickEventHandler;
 import org.molgenis.framework.ui.MolgenisPluginController;
@@ -61,7 +55,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 
 @Controller
@@ -69,7 +62,7 @@ import com.google.common.collect.Iterables;
 public class AnalysisPluginController extends MolgenisPluginController implements
 		DataExplorerRegisterRefCellClickEventHandler
 {
-	private static Logger logger = Logger.getLogger(AnalysisPluginController.class);
+	private static Logger LOG = Logger.getLogger(AnalysisPluginController.class);
 
 	public static final String ID = "analysis";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
@@ -78,9 +71,9 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 	public static final String URI_CREATE = URI + CREATE_MAPPING;
 
 	// FIXME do not use files, use entities from database
-	private static final String WORKFLOW_DEFAULT = "workflow.csv";
-	private static final String PARAMETERS_DEFAULT = "parameters.csv";
-	private static final String WORKSHEET = "worksheet.csv";
+	public static final String WORKFLOW_DEFAULT = "workflow.csv";
+	public static final String PARAMETERS_DEFAULT = "parameters.csv";
+	public static final String WORKSHEET = "worksheet.csv";
 
 	private final DataService dataService;
 
@@ -256,76 +249,14 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 	{
 		Analysis analysis = dataService.findOne(AnalysisMetaData.INSTANCE.getName(), analysisId, Analysis.class);
 		if (analysis == null) throw new UnknownEntityException("Unknown Analysis [" + analysisId + "]");
-		logger.info("Running analysis [" + analysisId + "]");
+		LOG.info("Running analysis [" + analysisId + "]");
 
 		String runID = analysisId;
 		String path = ".tmp" + File.separator + runID + File.separator;
 
-		try
-		{
-			UIWorkflow uiWorkflow = analysis.getWorkflow();
+		String pathTest = ".tmp" + File.separator + runID + "TEST" + File.separator;
+		new AnalysisToFilesWriter().writeToFiles(dataService, analysis, pathTest);
 
-			String workflowFile = uiWorkflow.getWorkflowFile();
-			String parametersFile = uiWorkflow.getParametersFile();
-
-			FileUtils.writeStringToFile(new File(path + WORKFLOW_DEFAULT), workflowFile);
-			FileUtils.writeStringToFile(new File(path + PARAMETERS_DEFAULT), parametersFile);
-
-			CsvWriter csvWriter = new CsvWriter(new File(path + WORKSHEET), ',');
-			try
-			{
-				String targetEntityName = analysis.getWorkflow().getTargetType();
-				final String analysisAttrName = UIWorkflowDecorator.ANALYSIS_ATTRIBUTE.getName();
-				Iterable<Entity> targets = dataService.findAll(targetEntityName,
-						new QueryImpl().eq(analysisAttrName, analysis));
-				if (targets == null || Iterables.isEmpty(targets))
-				{
-					throw new UnknownEntityException("Expected at least one analysis target");
-				}
-
-				EntityMetaData metaData = dataService.getEntityMetaData(targetEntityName);
-				csvWriter.writeAttributeNames(Iterables.transform(
-						Iterables.filter(metaData.getAtomicAttributes(), new Predicate<AttributeMetaData>()
-						{
-							@Override
-							public boolean apply(AttributeMetaData attribute)
-							{
-								// exclude analysis attribute
-								return !attribute.getName().equals(analysisAttrName);
-							}
-						}), new Function<AttributeMetaData, String>()
-						{
-							@Override
-							public String apply(AttributeMetaData attribute)
-							{
-								return attribute.getName();
-							}
-						}));
-				for (Entity entity : targets)
-				{
-					csvWriter.add(entity);
-				}
-			}
-			finally
-			{
-				csvWriter.close();
-			}
-			List<UIWorkflowNode> nodes = uiWorkflow.getNodes();
-
-			List<String> writtenProtocols = new ArrayList<String>();
-			for (UIWorkflowNode node : nodes)
-			{
-				UIWorkflowProtocol protocol = node.getProtocol();
-				String protocolName = protocol.getName();
-				String template = protocol.getTemplate();
-
-				if (!isWritten(writtenProtocols, protocolName))
-				{
-					// FileUtils.writeStringToFile(new File(pathProtocols + protocolName + extension), template);
-					FileUtils.writeStringToFile(new File(path + protocolName), template);
-					writtenProtocols.add(protocolName);
-				}
-			}
 
 			readUserProperties();
 			String[] args =
@@ -336,9 +267,19 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 			ComputeProperties properties = new ComputeProperties(args);
 			properties.execute = false;
 			properties.runDir = path + "rundir";
-			CommandLineRunContainer container = new ComputeCommandLine().execute(properties);
+		CommandLineRunContainer container = null;
+		try
+		{
+			container = new ComputeCommandLine().execute(properties);
+		}
+		catch (Exception e)
+		{
+			LOG.error("", e);
+			throw new RuntimeException(e);
+		}
 
-			List<GeneratedScript> generatedScripts = container.getTasks();
+		UIWorkflow uiWorkflow = analysis.getWorkflow();
+		List<GeneratedScript> generatedScripts = container.getTasks();
 			for (GeneratedScript generatedScript : generatedScripts)
 			{
 				UIWorkflowNode node = findNode(uiWorkflow, generatedScript.getStepName());
@@ -355,21 +296,10 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 			analysis.setSubmitScript(container.getSumbitScript());
 			dataService.update(AnalysisMetaData.INSTANCE.getName(), analysis);
 
-		}
-		catch (IOException e)
-		{
-			logger.error("", e);
-			throw new RuntimeException(e);
-		}
-		catch (Exception e)
-		{
-			logger.error("", e);
-			throw new RuntimeException(e);
-		}
-
 		clusterManager.executeAnalysis(analysis);
 
 	}
+
 
 	@Transactional
 	@RequestMapping(value = "/pause/{analysisId}", method = POST)
@@ -377,7 +307,7 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 	public void pauseAnalysis(@PathVariable(value = "analysisId") String analysisId)
 	{
 		// TODO implement pause analysis
-		logger.info("TODO implement pause analysis");
+		LOG.info("TODO implement pause analysis");
 		throw new RuntimeException("'Pause analysis' not implemented");
 	}
 
@@ -387,7 +317,7 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 	public void continueAnalysis(@PathVariable(value = "analysisId") String analysisId)
 	{
 		// TODO implement continue analysis
-		logger.info("TODO implement continue analysis");
+		LOG.info("TODO implement continue analysis");
 		throw new RuntimeException("'Continue analysis' not implemented");
 	}
 
@@ -421,11 +351,6 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 			if (stepName.equalsIgnoreCase(name)) return node;
 		}
 		return null;
-	}
-
-	private boolean isWritten(List<String> writtenProtocols, String protocolName)
-	{
-		return writtenProtocols.contains(protocolName);
 	}
 
 	private void readUserProperties()

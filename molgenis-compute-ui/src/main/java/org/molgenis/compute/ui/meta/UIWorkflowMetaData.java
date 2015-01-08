@@ -23,7 +23,7 @@ public class UIWorkflowMetaData extends DefaultEntityMetaData
 	public static final String PARAMETERS = "parameters";
 	public static final String ACTIVE = "active";
 
-	private UIWorkflowMetaData()
+	public UIWorkflowMetaData()
 	{
 		super(ENTITY_NAME, ComputeUiPackage.INSTANCE);
 		addAttribute(IDENTIFIER).setIdAttribute(true).setNillable(false).setVisible(false);
@@ -31,7 +31,7 @@ public class UIWorkflowMetaData extends DefaultEntityMetaData
 		addAttribute(DESCRIPTION);
 		addAttribute(NODES).setNillable(false).setDataType(MREF).setRefEntity(UIWorkflowNodeMetaData.INSTANCE);
 		addAttribute(TARGET_TYPE);
-		addAttribute(GENERATE_SCRIPT).setDataType(SCRIPT);
+		addAttribute(GENERATE_SCRIPT).setDataType(SCRIPT).setVisible(true);
 		addAttribute(WORKFLOW_FILE).setDataType(TEXT).setVisible(false);
 		addAttribute(PARAMETERS_FILE).setDataType(TEXT).setVisible(false);
 		addAttribute(PARAMETERS).setNillable(false).setDataType(MREF)

@@ -214,7 +214,6 @@ public class WorkflowImportService
 		try
 		{
 			Entity e = csv.iterator().next();
-
 			for (AttributeMetaData attr : csv.getEntityMetaData().getAttributes())
 			{
 				params.add(new UIWorkflowParameter(IdGenerator.generateId(), attr.getName(),
