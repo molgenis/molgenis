@@ -56,8 +56,7 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	public static final String CADD_SCALED = "CADDSCALED";
 	public static final String CADD_ABS = "CADDABS";
 
-	private static final String NAME = "CADDAnnotator";
-	private static final String LABEL = "CADD";
+	private static final String NAME = "CADD";
 
 	final List<String> infoFields = Arrays
 			.asList(new String[]
@@ -138,15 +137,9 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	}
 
 	@Override
-	public String getName()
+	public String getSimpleName()
 	{
 		return NAME;
-	}
-
-	@Override
-	public String getLabel()
-	{
-		return LABEL;
 	}
 
 	@Override
@@ -156,6 +149,8 @@ public class CaddServiceAnnotator extends VariantAnnotator
 		{
 			tabixReader = new TabixReader(molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY));
 		}
+		boolean done;
+		int i;
 		List<Entity> results = new ArrayList<Entity>();
 		// FIXME need to solve this! duplicate notation for CHROM in VcfRepository.CHROM and LocusAnnotator.CHROMOSOME
 		String chromosome = entity.getString(VcfRepository.CHROM) != null ? entity.getString(VcfRepository.CHROM) : entity
@@ -168,15 +163,17 @@ public class CaddServiceAnnotator extends VariantAnnotator
 		Double caddAbs = null;
 		Double caddScaled = null;
 
-		TabixReader.Iterator tabixIterator = tabixReader.query(chromosome + ":" + position);
-
+		TabixReader.Iterator tabixIterator = tabixReader.query(chromosome + ":" + position + "-" + position);
+		if (tabixIterator == null)
+		{
+			System.out.print("");
+		}
 		// TabixReaderIterator does not have a hasNext();
-		boolean done = false;
-
-		while (done == false)
+		done = false;
+		i = 0;
+		while (!done)
 		{
 			String line = tabixIterator.next();
-			int i = 0;
 
 			if (line != null)
 			{
@@ -185,12 +182,14 @@ public class CaddServiceAnnotator extends VariantAnnotator
 				split = line.split("\t");
 				if (split.length != 6)
 				{
-					LOG.error("bad CADD output for CHROM: " + chromosome + " POS: " + position + " REF: "
-							+ reference + " ALT: " + alternative + " LINE: " + line);
+					LOG.error("bad CADD output for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
+							+ " ALT: " + alternative + " LINE: " + line);
 					continue;
 				}
 				if (split[2].equals(reference) && split[3].equals(alternative))
 				{
+					LOG.info("CADD scores found for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
+							+ " ALT: " + alternative + " LINE: " + line);
 					caddAbs = Double.parseDouble(split[4]);
 					caddScaled = Double.parseDouble(split[5]);
 					done = true;
@@ -199,6 +198,8 @@ public class CaddServiceAnnotator extends VariantAnnotator
 				// fail, we can just check whether such a swapping has occured
 				else if (split[3].equals(reference) && split[2].equals(alternative))
 				{
+					LOG.info("CADD scores found [swapped REF and ALT!] for CHROM: " + chromosome + " POS: " + position
+							+ " REF: " + reference + " ALT: " + alternative + " LINE: " + line);
 					caddAbs = Double.parseDouble(split[4]);
 					caddScaled = Double.parseDouble(split[5]);
 					done = true;
@@ -210,16 +211,12 @@ public class CaddServiceAnnotator extends VariantAnnotator
 						LOG.warn("More than 3 hits in the CADD file! for CHROM: " + chromosome + " POS: " + position
 								+ " REF: " + reference + " ALT: " + alternative);
 					}
-					done = true;
-				}
-				if (caddAbs == null && caddScaled == null)
-				{
-					LOG.warn("No hit found in CADD file for CHROM: " + chromosome + " POS: " + position + " REF: "
-							+ reference + " ALT: " + alternative);
 				}
 			}
 			else
 			{
+				LOG.warn("No hit found in CADD file for CHROM: " + chromosome + " POS: " + position + " REF: "
+						+ reference + " ALT: " + alternative);
 				done = true;
 			}
 		}

@@ -150,7 +150,7 @@ public class AnnotatorController
 				map.put("canAnnotate", annotator.canAnnotate(entityMetaData));
 				map.put("inputMetadata", metaDataToStringList(annotator.getInputMetaData()));
 				map.put("outputMetadata", metaDataToStringList(annotator.getOutputMetaData()));
-				mapOfAnnotators.put(annotator.getName(), map);
+				mapOfAnnotators.put(annotator.getSimpleName(), map);
 			}
 
 		}
