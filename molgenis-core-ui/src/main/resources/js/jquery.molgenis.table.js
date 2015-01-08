@@ -948,6 +948,7 @@
 		'searchable' : false,
 		'rowClickable': false,
 		'onDeleteRow': function(){},
+		'cellClickHandlers' : null,
 		'onInit' : null
 	};
 }($, window.top.molgenis = window.top.molgenis || {}));

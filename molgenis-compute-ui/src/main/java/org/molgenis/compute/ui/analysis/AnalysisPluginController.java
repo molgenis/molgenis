@@ -234,7 +234,7 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 			public Entity apply(Entity entity)
 			{
 				Iterable<Analysis> targetAnalysis = entity.getEntities(analysisAttrName, Analysis.class);
-				entity.set(analysisAttrName, Iterables.concat(targetAnalysis, Arrays.asList(analysis)));
+				entity.set(analysisAttrName, Iterables.concat(targetAnalysis, Arrays.asList(clonedAnalysis)));
 				return entity;
 			}
 		}));

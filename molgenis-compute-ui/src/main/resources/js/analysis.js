@@ -223,7 +223,12 @@
 							case 'XREF':
 								var cellValue = $('<a href="#">' + formatTableCellValue(rawValue[refAttribute], refAttributeType) + '</a>'); 
 								cellValue.click(function(event) {
-									openRefAttributeModal(attribute, refEntity, refAttribute, rawValue);
+									if(settings.cellClickHandlers && settings.cellClickHandlers[attribute.name]) {
+										settings.cellClickHandlers[attribute.name](attribute, refEntity, refAttribute, rawValue);
+									} else {
+										// execute default cell click handler
+										openRefAttributeModal(attribute, refEntity, refAttribute, rawValue);
+									}
 									event.stopPropagation();
 								});
 								cell.append(cellValue);
@@ -232,7 +237,12 @@
 								$.each(rawValue.items, function(i, rawValue) {
 									var cellValuePart = $('<a href="#">' + formatTableCellValue(rawValue[refAttribute], refAttributeType) + '</a>');
 									cellValuePart.click(function(event) {
-										openRefAttributeModal(attribute, refEntity, refAttribute, rawValue);
+										if(settings.cellClickHandlers && settings.cellClickHandlers[attribute.name]) {
+											settings.cellClickHandlers[attribute.name](attribute, refEntity, refAttribute, rawValue);
+										} else {
+											// execute default cell click handler
+											openRefAttributeModal(attribute, refEntity, refAttribute, rawValue);
+										}
 										event.stopPropagation();
 									});
 									if (i > 0)
@@ -493,6 +503,7 @@
 		'searchable' : true,
 		'onViewAnalysis': function(){},
 		'onStopAnalysis': function(){},
+		'cellClickHandlers' : null
 	};
 }($, window.top.molgenis = window.top.molgenis || {}));
 
@@ -754,7 +765,9 @@
 					}),
 					'maxRows' : 10,
 					'onViewAnalysis' : changeAnalysis,
-					'onStopAnalysis' : stopAnalysis
+					'onStopAnalysis' : stopAnalysis,
+					// FIXME remove hardcoded reference
+					'cellClickHandlers' : {'workflow': function(){window.location='/menu/main/workflow';}}
 				});
 			});
 		}
