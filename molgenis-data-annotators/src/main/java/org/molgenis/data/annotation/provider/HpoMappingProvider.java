@@ -18,7 +18,7 @@ public class HpoMappingProvider
 
 	// TODO: more fancy symptom information by using
 	// http://compbio.charite.de/hudson/job/hpo.annotations/lastStableBuild/artifact/misc/phenotype_annotation.tab
-	private static final String DEFAULT_HPO_MAPPING_VALUE = "http://compbio.charite.de/hudson/job/hpo.annotations.monthly/lastStableBuild/artifact/annotation/ALL_SOURCES_ALL_FREQUENCIES_diseases_to_genes_to_phenotypes.txt";
+	public final String default_hpo_mapping_value = "http://compbio.charite.de/hudson/job/hpo.annotations.monthly/lastStableBuild/artifact/annotation/ALL_SOURCES_ALL_FREQUENCIES_diseases_to_genes_to_phenotypes.txt";
 
 	private final MolgenisSettings molgenisSettings;
 
@@ -31,7 +31,7 @@ public class HpoMappingProvider
 
 	public Reader getHpoMapping() throws MalformedURLException, IOException
 	{
-		String url = molgenisSettings.getProperty(KEY_HPO_MAPPING, DEFAULT_HPO_MAPPING_VALUE);
+		String url = molgenisSettings.getProperty(KEY_HPO_MAPPING, default_hpo_mapping_value);
 		return new InputStreamReader(new URL(url).openStream(), Charset.forName("UTF-8"));
 	}
 }
