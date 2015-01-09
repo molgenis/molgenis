@@ -27,7 +27,8 @@
 	"bootstrap-switch.min.js",
 	"jquery.molgenis.xrefmrefsearch.js",
 	"dataexplorer.js",
-	"jquery.molgenis.table.js"]>
+	"jquery.molgenis.table.js",
+	"bootbox.min.js"]>
 
 <@header css js/>
 <div class="row">

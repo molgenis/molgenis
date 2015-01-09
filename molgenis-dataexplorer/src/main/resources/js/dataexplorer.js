@@ -380,10 +380,14 @@ function($, molgenis, settingsXhr) {
 			$(document).trigger('removeAttributeFilter', {'attributeUri': $(this).data('href')});
 		});
 		
-		$('#delete').on('click', function(e){
-			$.ajax('/api/v1/'+selectedEntityMetaData.name+'/meta', {'type': 'DELETE'}).done(function(){
-				document.location.href = "/menu/main/dataexplorer";
-			});
+		$('#delete').on('click', function(){
+			bootbox.confirm("Are you sure you want to delete all data and metadata for this entity?", function(confirmed){
+				if(confirmed){
+					$.ajax('/api/v1/'+selectedEntityMetaData.name+'/meta', {'type': 'DELETE'}).done(function(){
+						document.location.href = "/menu/main/dataexplorer";
+					});
+				}
+			})
 		});
 
 		// fire change event for selected option or first option in case of no selection
