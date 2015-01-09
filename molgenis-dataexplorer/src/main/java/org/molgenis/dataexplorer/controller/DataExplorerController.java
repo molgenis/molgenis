@@ -603,7 +603,8 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/settings", method = RequestMethod.GET)
-	public @ResponseBody Map<String, String> getSettings(@RequestParam(required = false) String keyStartsWith)
+	public @ResponseBody
+	Map<String, String> getSettings(@RequestParam(required = false) String keyStartsWith)
 	{
 		if (keyStartsWith == null)
 		{
@@ -624,11 +625,11 @@ public class DataExplorerController extends MolgenisPluginController
 	@ExceptionHandler(RuntimeException.class)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-	public Map<String, String> handleRuntimeException(RuntimeException e)
+	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
 	{
-		LOG.error(null, e);
-		return Collections.singletonMap("errorMessage",
-				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage());
+		LOG.error(e.getMessage(), e);
+		return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(
+				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage()));
 	}
 
 	private boolean isTableEditable()

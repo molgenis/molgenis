@@ -133,7 +133,9 @@ public class CrudRepositoryAnnotator
 		if (createCopy)
 		{
 			DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(UUID.randomUUID().toString(), entityMetaData);
-			newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData);
+            if(newEntityMetaData.getAttribute(compoundAttributeMetaData.getName())==null) {
+                newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData);
+            }
 			newEntityMetaData.setLabel(newRepositoryLabel);
 			return mysqlRepositoryCollection.add(newEntityMetaData);
 		}
@@ -143,7 +145,9 @@ public class CrudRepositoryAnnotator
 			{
                 if(entityMetaData.getAttribute(compoundAttributeMetaData.getName())==null) {
                     DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(entityMetaData);
-                    newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData);
+                    if(newEntityMetaData.getAttribute(compoundAttributeMetaData.getName())==null) {
+                        newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData);
+                    }
                     mysqlRepositoryCollection.updateSync(newEntityMetaData);
                 }
 				return null;
