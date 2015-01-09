@@ -70,7 +70,7 @@ public class CrudRepositoryAnnotator
 				+ " annotator");
 
 		EntityMetaData entityMetaData = sourceRepo.getEntityMetaData();
-		DefaultAttributeMetaData compoundAttributeMetaData = getCompoundResultAttribute(annotator,entityMetaData);
+		DefaultAttributeMetaData compoundAttributeMetaData = getCompoundResultAttribute(annotator,entityMetaData, createCopy);
 
 		CrudRepository targetRepo = addAnnotatorMetadataToRepositories(entityMetaData, createCopy,
 				compoundAttributeMetaData);
@@ -163,7 +163,7 @@ public class CrudRepositoryAnnotator
 	}
 
 	public DefaultAttributeMetaData getCompoundResultAttribute(RepositoryAnnotator annotator,
-			EntityMetaData entityMetaData)
+			EntityMetaData entityMetaData, boolean createCopy)
 	{
 		DefaultAttributeMetaData compoundAttributeMetaData = new DefaultAttributeMetaData(annotator.getFullName(),
 				MolgenisFieldTypes.FieldTypeEnum.COMPOUND);
@@ -175,7 +175,7 @@ public class CrudRepositoryAnnotator
 		{
 			AttributeMetaData currentAmd = attributeMetaDataIterator.next();
 			String currentAttributeName = currentAmd.getName();
-			if (entityMetaData.getAttribute(currentAttributeName) == null)
+			if (entityMetaData.getAttribute(currentAttributeName) == null || createCopy)
 			{
 				compoundAttributeMetaData.addAttributePart(currentAmd);
 			}
