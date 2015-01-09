@@ -64,7 +64,7 @@ public class CrudRepositoryAnnotator
 		}
 
 		if (createCopy) LOG.info("Creating a copy of " + sourceRepo.getName() + " repository, which will be labelled "
-				+ newRepositoryLabel + "an UUID will be generated for the name/identifier");
+				+ newRepositoryLabel + ". A UUID will be generated for the name/identifier");
 
 		if (!createCopy) LOG.info("Annotating " + sourceRepo.getName() + " repository with the " + annotator.getSimpleName()
 				+ " annotator");
