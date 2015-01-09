@@ -1,6 +1,8 @@
 package org.molgenis.data.annotation.impl;
 
 import java.io.IOException;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -22,6 +24,7 @@ import org.molgenis.data.annotation.impl.datastructures.OMIMTerm;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
 import org.molgenis.data.annotation.provider.HpoMappingProvider;
 import org.molgenis.data.annotation.provider.OmimMorbidMapProvider;
+import org.molgenis.data.annotation.provider.OnlineDataAvailableUtil;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -99,10 +102,12 @@ public class OmimHpoAnnotator extends LocusAnnotator
 	@Override
 	public boolean annotationDataExists()
 	{
-		boolean dataExists = true;
-
-		// TODO Check if online resources are available
-
+		boolean dataExists = false;
+		if (OnlineDataAvailableUtil.ping(hpoMappingProvider.default_hpo_mapping_value, 500)
+				&& OnlineDataAvailableUtil.ping(hgncLocationsProvider.default_hgnc_locations_value, 500))
+		{
+			dataExists = true;
+		}
 		return dataExists;
 	}
 
