@@ -27,129 +27,121 @@ public class AnalysisToFilesWriter
 
 	private static Logger LOG = Logger.getLogger(AnalysisToFilesWriter.class);
 
-
 	public static final String SEP = ",";
 
 	public void writeToFiles(DataService dataService, Analysis analysis, String path)
 	{
 		UIWorkflow workflow = analysis.getWorkflow();
 
-		parameters = workflow.getParameters();
 		try
 		{
+			//write parameters
 			String keys = "";
 			String values = "";
+			parameters = workflow.getParameters();
 			for (UIWorkflowParameter p : parameters)
 			{
 				keys += p.getKey() + SEP;
 				values += p.getValue() + SEP;
 			}
 
-			keys = keys.substring(0,keys.length() - 1);
-			values = values.substring(0,values.length() - 1);
+			keys = keys.substring(0, keys.length() - 1);
+			values = values.substring(0, values.length() - 1);
 
 			keys += System.getProperty("line.separator") + values + System.getProperty("line.separator");
 
 			FileUtils.writeStringToFile(new File(path + AnalysisPluginController.PARAMETERS_DEFAULT), keys);
 
-			String nodes = "step"+ SEP + "protocol" + SEP + "dependencies\n";
-			for(UIWorkflowNode node : workflow.getNodes())
+			//write workflow
+			String nodes = "step" + SEP + "protocol" + SEP + "dependencies\n";
+			for (UIWorkflowNode node : workflow.getNodes())
 			{
-				 nodes += node.getName() + SEP + node.getProtocol().getName() + SEP;
+				nodes += node.getName() + SEP + node.getProtocol().getName() + SEP;
 
 				List<UIWorkflowNode> previous = node.getPreviousNodes();
-				for(UIWorkflowNode pre : previous)
+				for (UIWorkflowNode pre : previous)
 				{
 					nodes += pre.getName() + ";";
 				}
 
 				List<UIParameterMapping> parameterMappings = node.getParameterMappings();
 
-				if(previous.size() > 0 && parameterMappings.size() == 0)
-					nodes = nodes.substring(0,nodes.length() - 1);
+				if (previous.size() > 0 && parameterMappings.size() == 0) nodes = nodes
+						.substring(0, nodes.length() - 1);
 
-				 for(UIParameterMapping mapping : parameterMappings)
-				 {
-					 String from = mapping.getFrom();
-					 String to = mapping.getTo();
+				for (UIParameterMapping mapping : parameterMappings)
+				{
+					String from = mapping.getFrom();
+					String to = mapping.getTo();
 
-					 nodes += from + "=" + to + ";";
+					nodes += from + "=" + to + ";";
 
-				 }
-				if(parameterMappings.size() > 0)
-					nodes = nodes.substring(0,nodes.length() - 1);
+				}
+				if (parameterMappings.size() > 0) nodes = nodes.substring(0, nodes.length() - 1);
 
 				nodes += System.getProperty("line.separator");
 			}
 			FileUtils.writeStringToFile(new File(path + AnalysisPluginController.WORKFLOW_DEFAULT), nodes);
 
-				UIWorkflow uiWorkflow = analysis.getWorkflow();
-
-				String workflowFile = uiWorkflow.getWorkflowFile();
-				String parametersFile = uiWorkflow.getParametersFile();
-
-				FileUtils.writeStringToFile(new File(path + AnalysisPluginController.WORKFLOW_DEFAULT), workflowFile);
-				FileUtils.writeStringToFile(new File(path + AnalysisPluginController.PARAMETERS_DEFAULT), parametersFile);
-
-				CsvWriter csvWriter = new CsvWriter(new File(path + AnalysisPluginController.WORKSHEET), ',');
-				try
+			// worksheet writing
+			CsvWriter csvWriter = new CsvWriter(new File(path + AnalysisPluginController.WORKSHEET), ',');
+			try
+			{
+				String targetEntityName = analysis.getWorkflow().getTargetType();
+				final String analysisAttrName = UIWorkflowDecorator.ANALYSIS_ATTRIBUTE.getName();
+				Iterable<Entity> targets = dataService.findAll(targetEntityName,
+						new QueryImpl().eq(analysisAttrName, analysis));
+				if (targets == null || Iterables.isEmpty(targets))
 				{
-					String targetEntityName = analysis.getWorkflow().getTargetType();
-					final String analysisAttrName = UIWorkflowDecorator.ANALYSIS_ATTRIBUTE.getName();
-					Iterable<Entity> targets = dataService.findAll(targetEntityName,
-							new QueryImpl().eq(analysisAttrName, analysis));
-					if (targets == null || Iterables.isEmpty(targets))
-					{
-						throw new UnknownEntityException("Expected at least one analysis target");
-					}
+					throw new UnknownEntityException("Expected at least one analysis target");
+				}
 
-					EntityMetaData metaData = dataService.getEntityMetaData(targetEntityName);
-					csvWriter.writeAttributeNames(Iterables.transform(
-							Iterables.filter(metaData.getAtomicAttributes(), new Predicate<AttributeMetaData>()
+				EntityMetaData metaData = dataService.getEntityMetaData(targetEntityName);
+				csvWriter.writeAttributeNames(Iterables.transform(
+						Iterables.filter(metaData.getAtomicAttributes(), new Predicate<AttributeMetaData>()
+						{
+							@Override
+							public boolean apply(AttributeMetaData attribute)
 							{
-								@Override
-								public boolean apply(AttributeMetaData attribute)
-								{
-									// exclude analysis attribute
-									return !attribute.getName().equals(analysisAttrName);
-								}
-							}), new Function<AttributeMetaData, String>()
+								// exclude analysis attribute
+								return !attribute.getName().equals(analysisAttrName);
+							}
+						}), new Function<AttributeMetaData, String>()
+						{
+							@Override
+							public String apply(AttributeMetaData attribute)
 							{
-								@Override
-								public String apply(AttributeMetaData attribute)
-								{
-									return attribute.getName();
-								}
-							}));
-					for (Entity entity : targets)
-					{
-						csvWriter.add(entity);
-					}
-				}
-				finally
+								return attribute.getName();
+							}
+						}));
+				for (Entity entity : targets)
 				{
-					csvWriter.close();
+					csvWriter.add(entity);
 				}
-				List<UIWorkflowNode> WNodes = uiWorkflow.getNodes();
+			}
+			finally
+			{
+				csvWriter.close();
+			}
+			List<UIWorkflowNode> WNodes = workflow.getNodes();
 
-				List<String> writtenProtocols = new ArrayList<String>();
-				for (UIWorkflowNode node : WNodes)
+			List<String> writtenProtocols = new ArrayList<String>();
+			for (UIWorkflowNode node : WNodes)
+			{
+				UIWorkflowProtocol protocol = node.getProtocol();
+				String protocolName = protocol.getName();
+				String template = protocol.getTemplate();
+
+				if (!isWritten(writtenProtocols, protocolName))
 				{
-					UIWorkflowProtocol protocol = node.getProtocol();
-					String protocolName = protocol.getName();
-					String template = protocol.getTemplate();
-
-					if (!isWritten(writtenProtocols, protocolName))
-					{
-						// FileUtils.writeStringToFile(new File(pathProtocols + protocolName + extension), template);
-						FileUtils.writeStringToFile(new File(path + protocolName), template);
-						writtenProtocols.add(protocolName);
-					}
+					FileUtils.writeStringToFile(new File(path + protocolName), template);
+					writtenProtocols.add(protocolName);
 				}
+			}
 
 			int i = 0;
 
-			}
+		}
 		catch (IOException e)
 		{
 			LOG.error("", e);
