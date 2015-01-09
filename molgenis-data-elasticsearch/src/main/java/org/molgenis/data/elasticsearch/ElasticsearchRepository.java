@@ -31,6 +31,12 @@ public class ElasticsearchRepository extends AbstractElasticsearchRepository
 	}
 
 	@Override
+	public void create()
+	{
+		// FIXME
+	}
+
+	@Override
 	public void drop()
 	{
 		// FIXME
@@ -52,5 +58,4 @@ public class ElasticsearchRepository extends AbstractElasticsearchRepository
 		}
 		elasticSearchService.refresh();
 	}
-
 }

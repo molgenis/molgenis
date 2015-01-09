@@ -72,7 +72,7 @@ public class CosmicServiceAnnotator extends AbstractRepositoryAnnotator implemen
 	}
 
 	@Override
-	public String getName()
+	public String getSimpleName()
 	{
 		return NAME;
 	}
