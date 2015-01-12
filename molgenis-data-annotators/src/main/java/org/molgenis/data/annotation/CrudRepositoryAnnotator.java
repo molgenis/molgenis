@@ -66,18 +66,20 @@ public class CrudRepositoryAnnotator
 		if (createCopy) LOG.info("Creating a copy of " + sourceRepo.getName() + " repository, which will be labelled "
 				+ newRepositoryLabel + ". A UUID will be generated for the name/identifier");
 
-		if (!createCopy) LOG.info("Annotating " + sourceRepo.getName() + " repository with the " + annotator.getSimpleName()
-				+ " annotator");
+		if (!createCopy) LOG.info("Annotating " + sourceRepo.getName() + " repository with the "
+				+ annotator.getSimpleName() + " annotator");
 
 		EntityMetaData entityMetaData = sourceRepo.getEntityMetaData();
-		DefaultAttributeMetaData compoundAttributeMetaData = getCompoundResultAttribute(annotator,entityMetaData, createCopy);
+		DefaultAttributeMetaData compoundAttributeMetaData = getCompoundResultAttribute(annotator, entityMetaData,
+				createCopy);
 
 		CrudRepository targetRepo = addAnnotatorMetadataToRepositories(entityMetaData, createCopy,
 				compoundAttributeMetaData);
 
 		CrudRepository crudRepository = iterateOverEntitiesAndAnnotate(sourceRepo, targetRepo, annotator);
 
-		LOG.info("Finished annotating " + sourceRepo.getName() + " with the " + annotator.getSimpleName() + " annotator");
+		LOG.info("Finished annotating " + sourceRepo.getName() + " with the " + annotator.getSimpleName()
+				+ " annotator");
 
 		return crudRepository;
 	}
@@ -132,10 +134,12 @@ public class CrudRepositoryAnnotator
 	{
 		if (createCopy)
 		{
-			DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(UUID.randomUUID().toString(), entityMetaData);
-            if(newEntityMetaData.getAttribute(compoundAttributeMetaData.getName())==null) {
-                newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData);
-            }
+			DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(UUID.randomUUID().toString(),
+					entityMetaData);
+			if (newEntityMetaData.getAttribute(compoundAttributeMetaData.getName()) == null)
+			{
+				newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData);
+			}
 			newEntityMetaData.setLabel(newRepositoryLabel);
 			return mysqlRepositoryCollection.add(newEntityMetaData);
 		}
@@ -143,13 +147,15 @@ public class CrudRepositoryAnnotator
 		{
 			if (mysqlRepositoryCollection.getRepositoryByEntityName(entityMetaData.getName()) != null)
 			{
-                if(entityMetaData.getAttribute(compoundAttributeMetaData.getName())==null) {
-                    DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(entityMetaData);
-                    if(newEntityMetaData.getAttribute(compoundAttributeMetaData.getName())==null) {
-                        newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData);
-                    }
-                    mysqlRepositoryCollection.updateSync(newEntityMetaData);
-                }
+				if (entityMetaData.getAttribute(compoundAttributeMetaData.getName()) == null)
+				{
+					DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(entityMetaData);
+					if (newEntityMetaData.getAttribute(compoundAttributeMetaData.getName()) == null)
+					{
+						newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData);
+					}
+					mysqlRepositoryCollection.updateSync(newEntityMetaData);
+				}
 				return null;
 			}
 			else
@@ -173,7 +179,8 @@ public class CrudRepositoryAnnotator
 				MolgenisFieldTypes.FieldTypeEnum.COMPOUND);
 		compoundAttributeMetaData.setLabel(annotator.getSimpleName());
 
-		Iterator<AttributeMetaData> attributeMetaDataIterator = annotator.getOutputMetaData().getAtomicAttributes().iterator();
+		Iterator<AttributeMetaData> attributeMetaDataIterator = annotator.getOutputMetaData().getAtomicAttributes()
+				.iterator();
 
 		while (attributeMetaDataIterator.hasNext())
 		{
