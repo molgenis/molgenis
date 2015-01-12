@@ -12,7 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
@@ -76,7 +77,7 @@ import com.google.common.collect.Iterables;
  */
 public class ElasticSearchService implements SearchService
 {
-	private static final Logger LOG = Logger.getLogger(ElasticSearchService.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ElasticSearchService.class);
 
 	private static BulkProcessorFactory BULK_PROCESSOR_FACTORY = new BulkProcessorFactory();
 

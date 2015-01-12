@@ -9,7 +9,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -45,7 +46,7 @@ import org.springframework.stereotype.Component;
 @Component("caddService")
 public class CaddServiceAnnotator extends VariantAnnotator
 {
-	private static final Logger logger = Logger.getLogger(CaddServiceAnnotator.class);
+	private static final Logger LOG = LoggerFactory.getLogger(CaddServiceAnnotator.class);
 
 	private final MolgenisSettings molgenisSettings;
 	private final AnnotationService annotatorService;
@@ -184,7 +185,7 @@ public class CaddServiceAnnotator extends VariantAnnotator
 				split = line.split("\t");
 				if (split.length != 6)
 				{
-					logger.error("bad CADD output for CHROM: " + chromosome + " POS: " + position + " REF: "
+					LOG.error("bad CADD output for CHROM: " + chromosome + " POS: " + position + " REF: "
 							+ reference + " ALT: " + alternative + " LINE: " + line);
 					continue;
 				}
@@ -206,14 +207,14 @@ public class CaddServiceAnnotator extends VariantAnnotator
 				{
 					if (i > 3)
 					{
-						logger.warn("More than 3 hits in the CADD file! for CHROM: " + chromosome + " POS: " + position
+						LOG.warn("More than 3 hits in the CADD file! for CHROM: " + chromosome + " POS: " + position
 								+ " REF: " + reference + " ALT: " + alternative);
 					}
 					done = true;
 				}
 				if (caddAbs == null && caddScaled == null)
 				{
-					logger.warn("No hit found in CADD file for CHROM: " + chromosome + " POS: " + position + " REF: "
+					LOG.warn("No hit found in CADD file for CHROM: " + chromosome + " POS: " + position + " REF: "
 							+ reference + " ALT: " + alternative);
 				}
 			}

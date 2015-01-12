@@ -6,8 +6,9 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
 import org.molgenis.diseasematcher.service.OmimService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,12 +24,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping(BASE_URI)
 public class OmimClientController
 {
+	private static final Logger LOG = LoggerFactory.getLogger(OmimClientController.class);
+
 	/**
 	 * The URI to which this controller is mapped.
 	 */
 	public static final String BASE_URI = "/omim";
-
-	private static final Logger logger = Logger.getLogger(OmimClientController.class);
 
 	private OmimService omimService;
 
@@ -65,7 +66,7 @@ public class OmimClientController
 		}
 		catch (Exception e)
 		{
-			logger.error("OMIM API query unsuccessfull", e);
+			LOG.error("OMIM API query unsuccessfull", e);
 			response.setContentType(CONTENT_TYPE_JSON);
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}

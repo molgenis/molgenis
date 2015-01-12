@@ -20,7 +20,6 @@ import java.util.Properties;
 import javax.validation.Valid;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
 import org.molgenis.compute.ui.IdGenerator;
 import org.molgenis.compute.ui.clusterexecutor.ClusterManager;
 import org.molgenis.compute.ui.meta.AnalysisJobMetaData;
@@ -48,6 +47,9 @@ import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.event.DataExplorerRegisterRefCellClickEventHandler;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.security.core.utils.SecurityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -69,7 +71,7 @@ import com.google.common.collect.Iterables;
 public class AnalysisPluginController extends MolgenisPluginController implements
 		DataExplorerRegisterRefCellClickEventHandler
 {
-	private static Logger logger = Logger.getLogger(AnalysisPluginController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(AnalysisPluginController.class);
 
 	public static final String ID = "analysis";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
@@ -172,6 +174,7 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 		analysis.setBackend(backend);
 		analysis.setCreationDate(creationDate);
 		analysis.setWorkflow(workflow);
+		analysis.setUser(SecurityUtils.getCurrentUsername());
 		dataService.add(AnalysisMetaData.INSTANCE.getName(), analysis);
 
 		String targetEntityName = createAnalysisRequest.getTargetEntityName();
@@ -227,6 +230,7 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 		clonedAnalysis.setDescription(analysis.getDescription());
 		// do not set jobs, submitScript
 		clonedAnalysis.setWorkflow(analysis.getWorkflow());
+		clonedAnalysis.setUser(analysis.getUser());
 		dataService.add(AnalysisMetaData.INSTANCE.getName(), clonedAnalysis);
 
 		String targetEntityName = analysis.getWorkflow().getTargetType();
@@ -256,7 +260,7 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 	{
 		Analysis analysis = dataService.findOne(AnalysisMetaData.INSTANCE.getName(), analysisId, Analysis.class);
 		if (analysis == null) throw new UnknownEntityException("Unknown Analysis [" + analysisId + "]");
-		logger.info("Running analysis [" + analysisId + "]");
+		LOG.info("Running analysis [" + analysisId + "]");
 
 		String runID = analysisId;
 		String path = ".tmp" + File.separator + runID + File.separator;
@@ -358,12 +362,12 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 		}
 		catch (IOException e)
 		{
-			logger.error("", e);
+			LOG.error("", e);
 			throw new RuntimeException(e);
 		}
 		catch (Exception e)
 		{
-			logger.error("", e);
+			LOG.error("", e);
 			throw new RuntimeException(e);
 		}
 
@@ -377,7 +381,7 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 	public void pauseAnalysis(@PathVariable(value = "analysisId") String analysisId)
 	{
 		// TODO implement pause analysis
-		logger.info("TODO implement pause analysis");
+		LOG.info("TODO implement pause analysis");
 		throw new RuntimeException("'Pause analysis' not implemented");
 	}
 
@@ -387,7 +391,7 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 	public void continueAnalysis(@PathVariable(value = "analysisId") String analysisId)
 	{
 		// TODO implement continue analysis
-		logger.info("TODO implement continue analysis");
+		LOG.info("TODO implement continue analysis");
 		throw new RuntimeException("'Continue analysis' not implemented");
 	}
 

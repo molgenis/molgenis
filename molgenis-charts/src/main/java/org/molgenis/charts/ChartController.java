@@ -16,7 +16,6 @@ import javax.validation.Valid;
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLStreamException;
 
-import org.apache.log4j.Logger;
 import org.molgenis.charts.AbstractChart.MolgenisChartType;
 import org.molgenis.charts.charttypes.HeatMapChart;
 import org.molgenis.charts.data.DataMatrix;
@@ -27,6 +26,8 @@ import org.molgenis.charts.requests.XYDataChartRequest;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.util.FileStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -46,8 +47,9 @@ import freemarker.template.TemplateException;
 @RequestMapping(URI)
 public class ChartController
 {
+	private static final Logger LOG = LoggerFactory.getLogger(ChartController.class);
+
 	public static final String URI = "/charts";
-	private static final Logger logger = Logger.getLogger(ChartController.class);
 
 	private final ChartDataService chartDataService;
 	private final ChartVisualizationServiceFactory chartVisualizationServiceFactory;
@@ -76,9 +78,7 @@ public class ChartController
 
 	@RequestMapping(value = "/xydatachart", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Options renderXYDataChart(@Valid
-	@RequestBody
-	XYDataChartRequest request, Model model)
+	public Options renderXYDataChart(@Valid @RequestBody XYDataChartRequest request, Model model)
 	{
 		Query query = request.getQuery();
 		XYDataChart xYDataChart = chartDataService.getXYDataChart(request.getEntity(), request.getX(), request.getY(),
@@ -99,9 +99,7 @@ public class ChartController
 
 	@RequestMapping(value = "/boxplot", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Options renderPlotBoxChart(@Valid
-	@RequestBody
-	BoxPlotChartRequest request, Model model)
+	public Options renderPlotBoxChart(@Valid @RequestBody BoxPlotChartRequest request, Model model)
 	{
 		Query query = request.getQuery();
 		BoxPlotChart chart = chartDataService.getBoxPlotChart(request.getEntity(), request.getObservableFeature(),
@@ -131,14 +129,13 @@ public class ChartController
 	 * @throws IOException
 	 */
 	@RequestMapping("/get/{name}.{extension}")
-	public void getFile(OutputStream out, @PathVariable("name")
-	String name, @PathVariable("extension")
-	String extension, HttpServletResponse response) throws IOException
+	public void getFile(OutputStream out, @PathVariable("name") String name,
+			@PathVariable("extension") String extension, HttpServletResponse response) throws IOException
 	{
 		File f = fileStore.getFile(name + "." + extension);
 		if (!f.exists())
 		{
-			logger.warn("Chart file not found [" + name + "]");
+			LOG.warn("Chart file not found [" + name + "]");
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
@@ -165,10 +162,8 @@ public class ChartController
 	 */
 	@RequestMapping(value = "/heatmap", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public String renderHeatMap(@Valid
-	@RequestBody
-	HeatMapRequest request, Model model) throws IOException, TemplateException, XMLStreamException,
-			FactoryConfigurationError
+	public String renderHeatMap(@Valid @RequestBody HeatMapRequest request, Model model) throws IOException,
+			TemplateException, XMLStreamException, FactoryConfigurationError
 	{
 		DataMatrix matrix = chartDataService.getDataMatrix(request.getEntity(), request.getX(), request.getY(),
 				request.getQueryRules());
@@ -192,7 +187,7 @@ public class ChartController
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	public Map<String, String> handleRuntimeException(RuntimeException e)
 	{
-		logger.error(null, e);
+		LOG.error(null, e);
 		return Collections.singletonMap("errorMessage",
 				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage());
 	}

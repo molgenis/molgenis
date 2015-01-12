@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.molgenis.compute.ui.meta.UIWorkflowMetaData;
 import org.molgenis.compute.ui.model.UIWorkflow;
 import org.molgenis.compute5.ComputeProperties;
@@ -18,6 +17,8 @@ import org.molgenis.data.Query;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -31,10 +32,11 @@ import com.google.common.collect.Lists;
 @RequestMapping(WorkflowPluginController.URI)
 public class WorkflowPluginController extends MolgenisPluginController
 {
+	private static Logger logger = LoggerFactory.getLogger(WorkflowPluginController.class);
+
 	public static final String ID = "workflow";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
-	private static Logger logger = Logger.getLogger(WorkflowPluginController.class);
 	private final DataService dataService;
 	private final WorkflowImportService workflowImportService;
 	private final MetaDataService metaDataService;

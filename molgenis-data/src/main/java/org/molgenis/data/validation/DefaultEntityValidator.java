@@ -4,13 +4,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +21,8 @@ import com.google.common.collect.Sets;
 @Component
 public class DefaultEntityValidator implements EntityValidator
 {
-	private static Logger logger = Logger.getLogger(DefaultEntityValidator.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DefaultEntityValidator.class);
+
 	private final DataService dataService;
 	private final EntityAttributesValidator entityAttributesValidator;
 
@@ -52,7 +54,7 @@ public class DefaultEntityValidator implements EntityValidator
 
 		if (!violations.isEmpty())
 		{
-			logger.info("Validation violations:" + violations);
+			LOG.info("Validation violations:" + violations);
 			throw new MolgenisValidationException(violations);
 		}
 	}

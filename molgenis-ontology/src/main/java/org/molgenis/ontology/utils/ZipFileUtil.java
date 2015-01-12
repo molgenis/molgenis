@@ -13,11 +13,12 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ZipFileUtil
 {
-	private static final Logger logger = Logger.getLogger(ZipFileUtil.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ZipFileUtil.class);
 
 	private static void copyInputStream(InputStream in, OutputStream out) throws IOException
 	{
@@ -50,11 +51,11 @@ public class ZipFileUtil
 				ZipEntry entry = (ZipEntry) entries.nextElement();
 				if (entry.isDirectory())
 				{
-					logger.info("Extracting directory: " + entry.getName());
+					LOG.info("Extracting directory: " + entry.getName());
 					(new File(file.getParentFile(), entry.getName())).mkdir();
 					continue;
 				}
-				logger.info("Extracting directory: " + entry.getName());
+				LOG.info("Extracting directory: " + entry.getName());
 				File newFile = new File(file.getParent(), entry.getName());
 				copyInputStream(zipFile.getInputStream(entry), new BufferedOutputStream(new FileOutputStream(newFile)));
 				unzippedFiles.add(newFile);

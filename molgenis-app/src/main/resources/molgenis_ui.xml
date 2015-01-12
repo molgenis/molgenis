@@ -25,7 +25,8 @@
             <menu label="Compute" name="compute">
             	<plugin id="workflow" name="Workflows" url="workflow" />
             	<plugin id="analysis" name="Analysis" url="analysis" />
-            	<plugin id="form.UIBackend" name="Backend" url="form.UIBackend"/>
+            	<plugin id="form.computeui_Backend" name="Backend" url="form.computeui_Backend"/>
+            	<plugin id="form.computeui_MolgenisUserKey" name="MolgenisUserKey" url="form.computeui_MolgenisUserKey"/>
             </menu>
 	    </menu>
 		<menu label="Entities" name ="entities">
@@ -41,6 +42,7 @@
 	        <plugin id="permissionmanager" name="Permission Manager" url="permissionmanager"/>
         	<plugin id="menumanager" name="Menu Manager" url="menumanager"/>
         	<plugin id="indexmanager" name="Index manager" url="indexmanager"/>
+        	<plugin id="logmanager" name="Log manager" url="logmanager"/>
 		</menu>
 		<menu label="About" name="background">
             <plugin id="feedback" name="Feedback" url="feedback"/>

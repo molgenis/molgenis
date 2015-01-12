@@ -17,7 +17,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
@@ -42,6 +41,8 @@ import org.molgenis.fieldtypes.StringField;
 import org.molgenis.fieldtypes.TextField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.model.MolgenisModelException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -53,9 +54,10 @@ import com.google.common.collect.Lists;
 
 public class MysqlRepository extends AbstractCrudRepository implements Manageable
 {
+	private static final Logger LOG = LoggerFactory.getLogger(MysqlRepository.class);
+
 	public static final String URL_PREFIX = "mysql://";
 	public static final int BATCH_SIZE = 1000;
-	private static final Logger logger = Logger.getLogger(MysqlRepository.class);
 	private EntityMetaData metaData;
 	private final JdbcTemplate jdbcTemplate;
 	private final AsyncJdbcTemplate asyncJdbcTemplate;
@@ -147,7 +149,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 	{
 		if (tableExists())
 		{
-			logger.warn("Table for entity " + getName() + " already exists. Skipping creation");
+			LOG.warn("Table for entity " + getName() + " already exists. Skipping creation");
 			return;
 		}
 		try
@@ -174,7 +176,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		}
 		catch (Exception e)
 		{
-			logger.error("Exception creating MysqlRepository.", e);
+			LOG.error("Exception creating MysqlRepository.", e);
 			try
 			{
 				drop();
@@ -211,40 +213,40 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		}
 		catch (Exception e)
 		{
-			logger.error("Exception updating MysqlRepository.", e);
+			LOG.error("Exception updating MysqlRepository.", e);
 			throw new MolgenisDataException(e);
 		}
 	}
 
-    public void addAttributeSync(AttributeMetaData attributeMetaData)
-    {
-        try
-        {
-            if (attributeMetaData.getDataType() instanceof MrefField)
-            {
-                jdbcTemplate.execute(getMrefCreateSql(attributeMetaData));
-            }
-            else
-            {
-                jdbcTemplate.execute(getAlterSql(attributeMetaData));
-            }
+	public void addAttributeSync(AttributeMetaData attributeMetaData)
+	{
+		try
+		{
+			if (attributeMetaData.getDataType() instanceof MrefField)
+			{
+				jdbcTemplate.execute(getMrefCreateSql(attributeMetaData));
+			}
+			else
+			{
+				jdbcTemplate.execute(getAlterSql(attributeMetaData));
+			}
 
-            if (attributeMetaData.getDataType() instanceof XrefField)
-            {
-                jdbcTemplate.execute(getCreateFKeySql(attributeMetaData));
-            }
+			if (attributeMetaData.getDataType() instanceof XrefField)
+			{
+				jdbcTemplate.execute(getCreateFKeySql(attributeMetaData));
+			}
 
-            if (attributeMetaData.isUnique())
-            {
-                jdbcTemplate.execute(getUniqueSql(attributeMetaData));
-            }
-        }
-        catch (Exception e)
-        {
-            logger.error("Exception updating MysqlRepository.", e);
-            throw new MolgenisDataException(e);
-        }
-    }
+			if (attributeMetaData.isUnique())
+			{
+				jdbcTemplate.execute(getUniqueSql(attributeMetaData));
+			}
+		}
+		catch (Exception e)
+		{
+			LOG.error("Exception updating MysqlRepository.", e);
+			throw new MolgenisDataException(e);
+		}
+	}
 
 	protected String getMrefCreateSql(AttributeMetaData att) throws MolgenisModelException
 	{
@@ -295,9 +297,9 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		// close
 		sql.append(") ENGINE=InnoDB;");
 
-		if (logger.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			logger.debug("sql: " + sql);
+			LOG.debug("sql: " + sql);
 		}
 
 		return sql.toString();
@@ -501,9 +503,9 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 			public void setValues(PreparedStatement preparedStatement, int i) throws SQLException
 			{
 
-				if (logger.isDebugEnabled())
+				if (LOG.isDebugEnabled())
 				{
-					logger.debug("mref: " + mrefs.get(i).get(idAttribute.getName()) + ", "
+					LOG.debug("mref: " + mrefs.get(i).get(idAttribute.getName()) + ", "
 							+ mrefs.get(i).get(att.getName()));
 				}
 
@@ -555,9 +557,9 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		List<Object> parameters = Lists.newArrayList();
 		String sql = getCountSql(q, parameters);
 
-		if (logger.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			logger.debug("sql: " + sql + ",parameters:" + parameters);
+			LOG.debug("sql: " + sql + ",parameters:" + parameters);
 		}
 
 		return jdbcTemplate.queryForObject(sql, parameters.toArray(new Object[0]), Long.class);
@@ -627,10 +629,10 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		List<Object> parameters = Lists.newArrayList();
 		String sql = getSelectSql(q, parameters);
 
-		if (logger.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			logger.debug("query: " + q);
-			logger.debug("sql: " + sql + ",parameters:" + parameters);
+			LOG.debug("query: " + q);
+			LOG.debug("sql: " + sql + ",parameters:" + parameters);
 		}
 
 		return jdbcTemplate.query(sql, parameters.toArray(new Object[0]), new EntityMapper(getEntityMetaData()));
@@ -1132,7 +1134,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 					}
 				}
 
-				logger.debug("Added " + count.get() + " " + getTableName() + " entities.");
+				LOG.debug("Added " + count.get() + " " + getTableName() + " entities.");
 				batch.clear();
 			}
 		}
@@ -1175,9 +1177,9 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 			{
 				Entity e = batch.get(rowIndex);
 
-				if (logger.isDebugEnabled())
+				if (LOG.isDebugEnabled())
 				{
-					logger.debug("updating: " + e);
+					LOG.debug("updating: " + e);
 				}
 
 				Object idValue = idAttribute.getDataType().convert(e.get(idAttribute.getName()));

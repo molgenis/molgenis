@@ -105,6 +105,16 @@ public class Analysis extends MapEntity
 		set(AnalysisMetaData.STATUS, status.toString());
 	}
 
+	public String getUser()
+	{
+		return getString(AnalysisMetaData.USER);
+	}
+
+	public void setUser(String username)
+	{
+		set(AnalysisMetaData.USER, username);
+	}
+
 	@Override
 	public int hashCode()
 	{

@@ -11,6 +11,8 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -20,6 +22,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class MetaDataRegistrator implements ApplicationListener<ContextRefreshedEvent>, Ordered
 {
+	private static final Logger LOG = LoggerFactory.getLogger(MetaDataRegistrator.class);
+
 	private final MysqlRepositoryCollection repositoryCollection;
 	private final DataService dataService;
 	private final MetaDataService metaDataService;
@@ -41,6 +45,8 @@ public class MetaDataRegistrator implements ApplicationListener<ContextRefreshed
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
+		LOG.info("Registering ComputeUI MySQL repositories ...");
+		repositoryCollection.add(MolgenisUserKeyMetaData.INSTANCE);
 		repositoryCollection.add(UIParameterMetaData.INSTANCE);
 		repositoryCollection.add(UIParameterMappingMetaData.INSTANCE);
 		repositoryCollection.add(UIWorkflowParameterMetaData.INSTANCE);
@@ -86,11 +92,13 @@ public class MetaDataRegistrator implements ApplicationListener<ContextRefreshed
 			}
 		});
 		metaDataService.refreshCaches();
+
+		LOG.info("Registered ComputeUI MySQL repositories");
 	}
 
 	@Override
 	public int getOrder()
 	{
-		return Ordered.HIGHEST_PRECEDENCE;
+		return Ordered.HIGHEST_PRECEDENCE + 1;
 	}
 }

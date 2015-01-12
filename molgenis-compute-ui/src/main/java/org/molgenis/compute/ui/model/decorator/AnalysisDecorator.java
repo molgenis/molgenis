@@ -2,6 +2,7 @@ package org.molgenis.compute.ui.model.decorator;
 
 import java.util.EnumSet;
 
+import org.molgenis.auth.MolgenisUser;
 import org.molgenis.compute.ui.meta.AnalysisMetaData;
 import org.molgenis.compute.ui.model.Analysis;
 import org.molgenis.compute.ui.model.AnalysisStatus;
@@ -9,6 +10,8 @@ import org.molgenis.data.CrudRepository;
 import org.molgenis.data.CrudRepositoryDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.core.utils.SecurityUtils;
 
 /**
  * AnalysisJob decorator that updates analysis status on job status change
@@ -33,6 +36,7 @@ public class AnalysisDecorator extends CrudRepositoryDecorator
 		// validate job status
 		validateNewAnalysisStatus(entity);
 
+		// assign current user
 		decoratedRepository.add(entity);
 	}
 
@@ -113,6 +117,15 @@ public class AnalysisDecorator extends CrudRepositoryDecorator
 		validateIsAnalysisDeleteAllowed(analysis);
 
 		decoratedRepository.deleteById(id);
+	}
+
+	private void assignCurrentUser(Entity entity)
+	{
+
+		String username = SecurityUtils.getCurrentUsername();
+		MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisUser.USERNAME, username), MolgenisUser.class);
+		entity.set(AnalysisMetaData.USER, user);
 	}
 
 	private boolean validateIsAnalysisDeleteAllowed(Entity entity)

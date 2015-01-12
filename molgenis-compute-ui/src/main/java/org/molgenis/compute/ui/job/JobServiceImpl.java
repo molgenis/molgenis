@@ -2,18 +2,20 @@ package org.molgenis.compute.ui.job;
 
 import java.util.Date;
 
-import org.apache.log4j.Logger;
 import org.molgenis.compute.ui.meta.AnalysisJobMetaData;
 import org.molgenis.compute.ui.model.AnalysisJob;
 import org.molgenis.data.DataService;
 import org.molgenis.security.runas.RunAsSystem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class JobServiceImpl implements JobService
 {
-	private static Logger logger = Logger.getLogger(JobServiceImpl.class);
+	private static Logger logger = LoggerFactory.getLogger(JobServiceImpl.class);
+
 	private final DataService dataService;
 
 	@Autowired

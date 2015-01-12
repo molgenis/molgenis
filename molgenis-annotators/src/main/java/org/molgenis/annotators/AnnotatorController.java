@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
@@ -17,15 +16,15 @@ import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.CrudRepositoryAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.util.FileStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,8 +43,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @RequestMapping(URI)
 public class AnnotatorController
 {
+	private static final Logger LOG = LoggerFactory.getLogger(AnnotatorController.class);
+
 	public static final String URI = "/annotators";
-	private static final Logger logger = Logger.getLogger(AnnotatorController.class);
 
 	@Autowired
 	DataService dataService;
@@ -96,13 +96,13 @@ public class AnnotatorController
 	public String annotateData(@RequestParam(value = "annotatorNames", required = false) String[] annotatorNames,
 			@RequestParam("dataset-identifier") String entityName,
 			@RequestParam(value = "createCopy", required = false) boolean createCopy)
-	{		
+	{
 		Repository repository = dataService.getRepositoryByEntityName(entityName);
 		if (annotatorNames != null && repository != null)
 		{
 			CrudRepositoryAnnotator crudRepositoryAnnotator = new CrudRepositoryAnnotator(mysqlRepositoryCollection,
 					getNewRepositoryName(annotatorNames, repository.getEntityMetaData().getSimpleName()));
-			
+
 			for (String annotatorName : annotatorNames)
 			{
 				RepositoryAnnotator annotator = annotationService.getAnnotatorByName(annotatorName);
@@ -125,7 +125,7 @@ public class AnnotatorController
 		for (String annotatorName : annotatorNames)
 		{
 			newRepositoryName = newRepositoryName + "_" + annotatorName;
-		}	
+		}
 		return newRepositoryName;
 	}
 
@@ -179,7 +179,7 @@ public class AnnotatorController
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	public Map<String, String> handleRuntimeException(RuntimeException e)
 	{
-		logger.error(e.getMessage(), e);
+		LOG.error(e.getMessage(), e);
 		return Collections.singletonMap("errorMessage",
 				"An error occured. Please contact the administrator.<br />Message:" + e.getMessage());
 	}

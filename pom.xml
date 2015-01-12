@@ -35,16 +35,20 @@
         <profile>
             <id>dev</id>
             <properties>
-                <minify.skipMinify>true</minify.skipMinify>
                 <molgenis.build.profile>dev</molgenis.build.profile>
+                <logger.level.root>DEBUG</logger.level.root>
+                <logger.level.org.molgenis>DEBUG</logger.level.org.molgenis>
+                <minify.skipMinify>true</minify.skipMinify>
             </properties>
         </profile>
         <!-- release profile (default) -->
         <profile>
             <id>release</id>
             <properties>
-                <minify.skipMinify>false</minify.skipMinify>
                 <molgenis.build.profile>release</molgenis.build.profile>
+                <logger.level.root>WARN</logger.level.root>
+                <logger.level.org.molgenis>INFO</logger.level.org.molgenis>
+                <minify.skipMinify>false</minify.skipMinify>
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -54,6 +58,9 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <slf4j.version>1.7.9</slf4j.version>
+        <logback.version>1.1.2</logback.version>
+        
         <spring.version>4.0.8.RELEASE</spring.version>
         <spring.security.version>3.2.5.RELEASE</spring.security.version>
         <mysql.connector.java.version>5.1.28</mysql.connector.java.version>
@@ -81,14 +88,14 @@
         </resources>
         <pluginManagement>
             <plugins>
-                <!-- use java 1.7 -->
+                <!-- use java 1.8 -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.0</version>
+                    <version>3.2</version>
                     <configuration>
-                        <source>1.7</source>
-                        <target>1.7</target>
+                        <source>1.8</source>
+                        <target>1.8</target>
                         <compilerArguments>
                             <Xlint/>
                         </compilerArguments>
@@ -531,13 +538,22 @@
     </dependencyManagement>
 
     <dependencies>
-        <!-- scope: compile -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>1.7.5</version>
-            <scope>compile</scope>
-        </dependency>
+        <!-- logging -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>${logback.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-core</artifactId>
+			<version>${logback.version}</version>
+		</dependency>
         <!-- scope: test -->
         <dependency>
             <groupId>org.testng</groupId>

@@ -28,7 +28,8 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.model.elements.Entity;
@@ -51,7 +52,7 @@ import org.w3c.dom.NodeList;
  */
 public class MolgenisModelParser
 {
-	private static final Logger logger = Logger.getLogger(MolgenisModelParser.class);
+	private static final Logger LOG = LoggerFactory.getLogger(MolgenisModelParser.class);
 
 	/**
 	 * 
@@ -81,7 +82,7 @@ public class MolgenisModelParser
 		if (element.getAttribute("name").trim().isEmpty())
 		{
 			String message = "name is missing for entity " + element.toString();
-			logger.error(message);
+			LOG.error(message);
 			throw new MolgenisModelException(message);
 		}
 
@@ -301,7 +302,7 @@ public class MolgenisModelParser
 			entity.setAllocationSize(allocationSize);
 		}
 
-		logger.debug("read: " + entity.getName());
+		LOG.debug("read: " + entity.getName());
 		return entity;
 	}
 
@@ -324,7 +325,7 @@ public class MolgenisModelParser
 		if (element.getAttribute("name") != null && element.getAttribute("name").isEmpty())
 		{
 			String message = "name is missing for entity " + element.toString();
-			logger.error(message);
+			LOG.error(message);
 			throw new MolgenisModelException(message);
 		}
 
@@ -338,7 +339,7 @@ public class MolgenisModelParser
 		matrix.setRowEntityName(element.getAttribute("row_entity"));
 		matrix.setContent(element.getAttribute("content"));
 
-		logger.debug("read: " + matrix.toString());
+		LOG.debug("read: " + matrix.toString());
 	}
 
 	public static void parseField(Entity entity, Element element) throws MolgenisModelException
@@ -499,7 +500,7 @@ public class MolgenisModelParser
 		// construct
 		Field field = new Field(entity, MolgenisFieldTypes.getType(type), name, label, Boolean.parseBoolean(auto),
 				Boolean.parseBoolean(nillable), Boolean.parseBoolean(readonly), default_value, jpaCascade);
-		logger.debug("read: " + field.toString());
+		LOG.debug("read: " + field.toString());
 
 		if (aggregateable.isEmpty())
 		{
@@ -528,9 +529,9 @@ public class MolgenisModelParser
 		}
 		if (filter.equals("true"))
 		{
-			logger.warn("filter set for field '" + name + "' of entity '" + entity.getName() + "'");
-			logger.warn(filterfield + " " + filtertype + " " + filtervalue);
-			logger.warn(System.currentTimeMillis() + " - filter bool: '" + Boolean.parseBoolean(filter) + "'");
+			LOG.warn("filter set for field '" + name + "' of entity '" + entity.getName() + "'");
+			LOG.warn(filterfield + " " + filtertype + " " + filtervalue);
+			LOG.warn(System.currentTimeMillis() + " - filter bool: '" + Boolean.parseBoolean(filter) + "'");
 			if ((filtertype != null && filtertype.isEmpty()) || (filterfield != null && filterfield.isEmpty()))
 			{
 				throw new MolgenisModelException("field '" + name + "' of entity '" + entity.getName()
@@ -538,7 +539,7 @@ public class MolgenisModelParser
 			}
 			if (filtervalue != null && filtervalue.isEmpty())
 			{
-				logger.warn("no value specified for filter in field '" + name + "' of entity '" + entity.getName()
+				LOG.warn("no value specified for filter in field '" + name + "' of entity '" + entity.getName()
 						+ "'");
 			}
 			field.setFilter(Boolean.parseBoolean(filter));
@@ -726,7 +727,7 @@ public class MolgenisModelParser
 		if (element.getAttribute("name") != null && element.getAttribute("name").isEmpty())
 		{
 			String message = "name is missing for method " + element.toString();
-			logger.error(message);
+			LOG.error(message);
 			throw new MolgenisModelException(message);
 		}
 
@@ -768,14 +769,14 @@ public class MolgenisModelParser
 		if (element.getAttribute("name") != null && element.getAttribute("name").isEmpty())
 		{
 			String message = "name is missing for parameter " + element.toString();
-			logger.error(message);
+			LOG.error(message);
 			throw new MolgenisModelException(message);
 		}
 		// TYPE
 		if (element.getAttribute("type") != null && element.getAttribute("type").isEmpty())
 		{
 			String message = "type is missing for parameter " + element.toString();
-			logger.error(message);
+			LOG.error(message);
 			throw new MolgenisModelException(message);
 		}
 
@@ -801,7 +802,7 @@ public class MolgenisModelParser
 		if (element.getAttribute("type") != null && element.getAttribute("type").isEmpty())
 		{
 			String message = "type is missing for returntype " + element.toString();
-			logger.error(message);
+			LOG.error(message);
 			throw new MolgenisModelException(message);
 		}
 
@@ -824,7 +825,7 @@ public class MolgenisModelParser
 		if (element.getAttribute("entity") != null && element.getAttribute("entity").isEmpty())
 		{
 			String message = "type is missing for returntype " + element.toString();
-			logger.error(message);
+			LOG.error(message);
 			throw new MolgenisModelException(message);
 		}
 
@@ -856,19 +857,19 @@ public class MolgenisModelParser
 		if (element.getAttribute("field") != null && element.getAttribute("field").isEmpty())
 		{
 			String message = "type is missing for field " + element.toString();
-			logger.error(message);
+			LOG.error(message);
 			throw new MolgenisModelException(message);
 		}
 		if (element.getAttribute("operator") != null && element.getAttribute("operator").isEmpty())
 		{
 			String message = "type is missing for operator " + element.toString();
-			logger.error(message);
+			LOG.error(message);
 			throw new MolgenisModelException(message);
 		}
 		if (element.getAttribute("parameter") != null && element.getAttribute("parameter").isEmpty())
 		{
 			String message = "type is missing for parameter " + element.toString();
-			logger.error(message);
+			LOG.error(message);
 			throw new MolgenisModelException(message);
 		}
 
@@ -999,7 +1000,7 @@ public class MolgenisModelParser
 		if (element.getAttribute("name").trim().isEmpty())
 		{
 			String message = "name is missing for module " + element.toString();
-			logger.error(message);
+			LOG.error(message);
 			throw new MolgenisModelException(message);
 		}
 
@@ -1058,7 +1059,7 @@ public class MolgenisModelParser
 			}
 			catch (Exception e2)
 			{
-				logger.error("parsing of file '" + filename + "' failed.");
+				LOG.error("parsing of file '" + filename + "' failed.");
 				e.printStackTrace();
 				throw new MolgenisModelException("Parsing of DSL (ui) failed: " + e.getMessage());
 			}

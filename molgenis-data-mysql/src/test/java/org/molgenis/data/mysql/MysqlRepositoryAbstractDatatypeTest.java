@@ -1,9 +1,10 @@
 package org.molgenis.data.mysql;
 
-import org.apache.log4j.Logger;
 import org.molgenis.AppConfig;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -14,10 +15,11 @@ import org.testng.annotations.Test;
 @ContextConfiguration(classes = AppConfig.class)
 public abstract class MysqlRepositoryAbstractDatatypeTest extends AbstractTestNGSpringContextTests
 {
+	protected static final Logger LOG = LoggerFactory.getLogger(MysqlRepositoryAbstractDatatypeTest.class);
+
 	@Autowired
 	MysqlRepositoryCollection coll;
 
-	Logger logger = Logger.getLogger(getClass());
 	private EntityMetaData metaData;
 
 	/** Define a data model to test */
@@ -50,15 +52,15 @@ public abstract class MysqlRepositoryAbstractDatatypeTest extends AbstractTestNG
 
 		// verify default value
 		Entity defaultEntity = defaultEntity();
-		logger.debug("inserting: " + defaultEntity);
+		LOG.debug("inserting: " + defaultEntity);
 		repo.add(defaultEntity());
 
 		for (Entity e : repo)
 		{
-			logger.debug("found back " + e);
+			LOG.debug("found back " + e);
 			Object value = e.get("col3");
 			Object defaultValue = repo.getEntityMetaData().getAttribute("col3").getDefaultValue();
-			logger.debug("defaultClass=" + defaultValue.getClass().getName() + " - valueClass="
+			LOG.debug("defaultClass=" + defaultValue.getClass().getName() + " - valueClass="
 					+ value.getClass().getName());
 			Assert.assertEquals(defaultValue, value);
 
