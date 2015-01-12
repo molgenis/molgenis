@@ -601,7 +601,7 @@ function showSpinner(callback) {
 	if (count === 0) {
 		var timeout = setTimeout(function() {
 			spinner.modal('show');
-		}, 5000);//500
+		}, 500);
 		$('#spinner').data('timeout', timeout);
 		$('#spinner').data('count', 1);
 	} else {
