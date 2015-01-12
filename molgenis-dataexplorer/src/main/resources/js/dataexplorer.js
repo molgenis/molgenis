@@ -272,7 +272,6 @@ function($, molgenis, settingsXhr) {
 				createModuleNav(data.modules, $('#module-nav'));
 			
 				selectedAttributes = $.map(entityMetaData.attributes, function(attribute) {
-					console.log(state.attrs);
 					if(state.attrs === undefined || state.attrs === null) return attribute.fieldType !== 'COMPOUND' ? attribute : null;
 					else if(state.attrs === 'none') return null;
 					else return state.attrs.indexOf(attribute.name) !== -1 && attribute.fieldType !== 'COMPOUND' ? attribute : null;
@@ -312,6 +311,20 @@ function($, molgenis, settingsXhr) {
 		    	}
 		    }
 		}
+		
+		// FIXME remove if clause as part of http://www.molgenis.org/ticket/3110
+		if(state.query) {
+			delete cleanState.query;
+	    	for (var i = 0; i < state.query.q.length; ++i) {
+				var rule = state.query.q[i];
+				if(rule.field === undefined && rule.operator === 'SEARCH') {
+					cleanState.query = { q: [rule] };
+					break;
+				}
+			}
+		}
+		
+		// update browser state
 		history.pushState(state, '', molgenis.getContextUrl() + '?' + $.param(cleanState));
 	}
 	
@@ -362,7 +375,7 @@ function($, molgenis, settingsXhr) {
 		});
 		
 		$(document).on('changeModule', function(e, mod) {
-			state.mod = mod;console.log(state);
+			state.mod = mod;
 			pushState();
 		});
 		
@@ -465,18 +478,19 @@ function($, molgenis, settingsXhr) {
 			$('#dataset-select').select2('val', state.entity);
 			
 			if (state.query) {
+				// set query in searchbox
 				for (var i = 0; i < state.query.q.length; ++i) {
 					var rule = state.query.q[i];
-					if(rule.operator === 'SEARCH') {
+					if(rule.field === undefined && rule.operator === 'SEARCH') {
 						$('#observationset-search').val(rule.value);
 						break;
 					}
 				}
-				// set query in searchbox
 				
 				// set filters in filter list
+				// FIXME implement as part of http://www.molgenis.org/ticket/3110
 			}
-
+			
 			render();
 		}
 		
