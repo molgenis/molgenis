@@ -26,8 +26,10 @@ import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
 import org.molgenis.data.annotation.provider.HpoMappingProvider;
 import org.molgenis.data.annotation.provider.OmimMorbidMapProvider;
+import org.molgenis.data.annotation.provider.UrlPinger;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.framework.server.MolgenisSettings;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -141,10 +143,17 @@ public class OmimHpoAnnotatorTest
 		Map<String, HGNCLocations> hgncLocations = Collections.singletonMap("CUL7", new HGNCLocations("CUL7",
 				19207841l - 10, 19207841l + 10, "11"));
 		when(hgncLocationsProvider.getHgncLocations()).thenReturn(hgncLocations);
-
-		annotator = new OmimHpoAnnotator(annotationService, omimMorbidMapProvider, hgncLocationsProvider,
-				hpoMappingProvider);
 		when(entity.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
+
+		UrlPinger urlPinger = mock(UrlPinger.class);
+		MolgenisSettings molgenisSettings = mock(MolgenisSettings.class);
+		when(molgenisSettings.getProperty(HpoMappingProvider.KEY_HPO_MAPPING)).thenReturn("testUrl1");
+		when(molgenisSettings.getProperty(HgncLocationsProvider.KEY_HGNC_LOCATIONS_VALUE)).thenReturn("testUrl2");
+		when(urlPinger.ping("testUrl1", 500)).thenReturn(true);
+		when(urlPinger.ping("testUrl2", 500)).thenReturn(true);
+		
+		annotator = new OmimHpoAnnotator(annotationService, omimMorbidMapProvider, hgncLocationsProvider,
+				hpoMappingProvider, molgenisSettings, urlPinger);
 	}
 
 	@Test

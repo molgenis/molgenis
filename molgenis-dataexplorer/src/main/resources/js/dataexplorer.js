@@ -34,6 +34,15 @@ function($, molgenis, settingsXhr) {
 	}
 	var settings = settingsXhr[0];
 	self.settings = settings;
+
+	var stateDefault = {
+		entity: null,
+		query: null,
+		attrs: null,
+		mod: null
+	};
+	
+	var state;
 	
 	/**
 	 * @memberOf molgenis.dataexplorer
@@ -53,7 +62,7 @@ function($, molgenis, settingsXhr) {
 	 * @memberOf molgenis.dataexplorer
 	 */
 	function getEntityQuery() {
-		return createEntityQuery();
+		return state.query || { q: [] };
 	}
 	
 	/**
@@ -64,14 +73,12 @@ function($, molgenis, settingsXhr) {
 		items.push('<ul class="nav nav-tabs pull-left" role="tablist">');
 		$.each(modules, function() {
 			var href = molgenis.getContextUrl() + '/module/' + this.id+'?entity=' + selectedEntityMetaData.name;
-
-
-			items.push('<li data-id="' + this.id + '"><a href="' + href + '" data-target="#tab-' + this.id + '" role="tab" data-toggle="tab"><img src="/img/' + this.icon + '"> ' + this.label + '</a></li>');
+			items.push('<li data-id="' + this.id + '"><a href="' + href + '" data-target="#tab-' + this.id + '" data-id="' + this.id + '" role="tab" data-toggle="tab"><img src="/img/' + this.icon + '"> ' + this.label + '</a></li>');
 		});
 		items.push('</ul>');
 		items.push('<div class="tab-content">');
 		$.each(modules, function() {
-			items.push('<div class="tab-pane" id="tab-' + this.id + '">Loading...</div>');
+			items.push('<div class="tab-pane" id="tab-' + this.id + '" data-id="' + this.id + '">Loading...</div>');
 		});
 		items.push('</div>');
 		
@@ -89,7 +96,7 @@ function($, molgenis, settingsXhr) {
 			'selectedAttributes' : attributes,
 			'onAttributesSelect' : function(selects) {
 				selectedAttributes = container.tree('getSelectedAttributes');
-				$(document).trigger('changeAttributeSelection', {'attributes': selectedAttributes});
+				$(document).trigger('changeAttributeSelection', {'attributes': selectedAttributes, 'totalNrAttributes': Object.keys(entityMetaData.attributes).length});
 			},
 			'onAttributeClick' : function(attribute) {
 				$(document).trigger('clickAttribute', {'attribute': attribute});
@@ -255,13 +262,76 @@ function($, molgenis, settingsXhr) {
 		return entityCollectionRequest;
 	}
 	
+	function render() {
+		restApi.getAsync('/api/v1/' + state.entity + '/meta', {'expand': ['attributes']}, function(entityMetaData) {
+			selectedEntityMetaData = entityMetaData;
+
+			// get modules config for this entity
+			$.get(molgenis.getContextUrl() + '/modules?entity=' + entityMetaData.name).done(function(data) {
+				modules = data.modules;
+				createModuleNav(data.modules, $('#module-nav'));
+			
+				selectedAttributes = $.map(entityMetaData.attributes, function(attribute) {
+					if(state.attrs === undefined || state.attrs === null) return attribute.fieldType !== 'COMPOUND' ? attribute : null;
+					else if(state.attrs === 'none') return null;
+					else return state.attrs.indexOf(attribute.name) !== -1 && attribute.fieldType !== 'COMPOUND' ? attribute : null;
+				});
+				
+				createEntityMetaTree(entityMetaData, selectedAttributes);
+				
+				// select first tab
+				var moduleTab;
+				if(state.mod) {
+					moduleTab = $('a[data-toggle="tab"][data-target="#tab-' + state.mod + '"]', $('#module-nav'));
+				} else {
+					moduleTab = $('a[data-toggle="tab"]', $('#module-nav')).first();
+				}
+				moduleTab.tab('show');
+				
+				//Show wizard on show of dataexplorer if url param 'wizard=true' is added
+				if (settings['wizard.oninit'] && settings['wizard.oninit'] === 'true') {
+					self.filter.wizard.openFilterWizardModal(selectedEntityMetaData, attributeFilters);
+				}
+				
+			});
+			
+			self.createHeader(entityMetaData);
+			$('#observationset-search').focus();
+		});
+	}
+	
+	function pushState() {
+		// shorten URL by removing attributes with null or undefined values
+		var cleanState = {};
+		for (var key in state) {
+		    if (state.hasOwnProperty(key)) {
+		    	var val = state[key];
+		    	if(val) {
+		    		cleanState[key] = val;
+		    	}
+		    }
+		}
+		
+		// FIXME remove if clause as part of http://www.molgenis.org/ticket/3110
+		if(state.query) {
+			delete cleanState.query;
+	    	for (var i = 0; i < state.query.q.length; ++i) {
+				var rule = state.query.q[i];
+				if(rule.field === undefined && rule.operator === 'SEARCH') {
+					cleanState.query = { q: [rule] };
+					break;
+				}
+			}
+		}
+		
+		// update browser state
+		history.pushState(state, '', molgenis.getContextUrl() + '?' + $.param(cleanState));
+	}
+	
 	/**
 	 * @memberOf molgenis.dataexplorer
 	 */
 	$(function() {
-		
-		var searchTerm = $("#observationset-search").val();
-		
 		// lazy load tab contents
 		$(document).on('show.bs.tab', 'a[data-toggle="tab"]', function(e) {
 			var target = $($(e.target).attr('data-target'));
@@ -271,8 +341,21 @@ function($, molgenis, settingsXhr) {
 				});
 			}
 		});
+		
+		$(document).on('changeQuery', function(e, query) {
+			state.query = query;
+			pushState();
+		});
 			
-		$(document).on('changeEntity', function(e, entityUri) {
+		$(document).on('changeEntity', function(e, entity) {
+			// reset state
+			state = {
+				entity: entity,
+				attributes: [],
+				mod : null
+			};
+			pushState();
+			
 			// reset			
 			selectedEntityMetaData = null;
 			attributeFilters = {};
@@ -288,32 +371,27 @@ function($, molgenis, settingsXhr) {
 				$(document).off('.' + this.id);	
 			});
 			
-			restApi.getAsync(entityUri + '/meta', {'expand': ['attributes']}, function(entityMetaData) {
-				selectedEntityMetaData = entityMetaData;
-
-				// get modules config for this entity
-				$.get(molgenis.getContextUrl() + '/modules?entity=' + entityMetaData.name).done(function(data) {
-					modules = data.modules;
-					createModuleNav(data.modules, $('#module-nav'));
-				
-					selectedAttributes = $.map(entityMetaData.attributes, function(attribute) {
-						return attribute.fieldType !== 'COMPOUND' ? attribute : null;
-					});
-					
-					createEntityMetaTree(entityMetaData, selectedAttributes);
-					
-					// select first tab
-					$('a[data-toggle="tab"]', $('#module-nav')).first().click();
-					
-					//Show wizard on show of dataexplorer if url param 'wizard=true' is added
-					if (settings['wizard.oninit'] && settings['wizard.oninit'] === 'true') {
-						self.filter.wizard.openFilterWizardModal(selectedEntityMetaData, attributeFilters);
-					}
-					
+			render();
+		});
+		
+		$(document).on('changeModule', function(e, mod) {
+			state.mod = mod;
+			pushState();
+		});
+		
+		$(document).on('changeAttributeSelection', function(e, data) {
+			if(data.attributes.length === 0) {
+				state.attrs = 'none';
+			}
+			else if(data.attributes.length === data.totalNrAttributes) {
+				state.attrs = null;
+			}
+			else { 
+				state.attrs = $.map(data.attributes, function(attribute) {
+					return attribute.name;
 				});
-				
-				self.createHeader(entityMetaData);
-			});
+			}
+			pushState();
 		});
 		
 		$(document).on('updateAttributeFilters', function(e, data) {
@@ -348,8 +426,6 @@ function($, molgenis, settingsXhr) {
 			});
 		}
 
-		$("#observationset-search").focus();
-		
 		$("#observationset-search").change(function(e) {
 			searchQuery = $(this).val().trim();
 			$(document).trigger('changeQuery', createEntityQuery());
@@ -369,6 +445,10 @@ function($, molgenis, settingsXhr) {
 			self.filter.wizard.openFilterWizardModal(selectedEntityMetaData, attributeFilters);
 		});
 
+		$('#module-nav').on('click', 'a', function(e) {
+			$(document).trigger('changeModule', $(this).data('id'));
+		});
+	
 		$(container).on('click', '.feature-filter-edit', function(e) {
 			e.preventDefault();
 			var filter = attributeFilters[$(this).data('href')];
@@ -390,16 +470,48 @@ function($, molgenis, settingsXhr) {
 			})
 		});
 
-		// fire change event for selected option or first option in case of no selection
-		var selectedOption = $('#dataset-select option:not(:empty):selected');
-		if(selectedOption.length === 0)
-			selectedOption = $('#dataset-select option:not(:empty)').first();
-		$(document).trigger('changeEntity', selectedOption.val());
-		
-		// restore the search term and trigger change event to filter data table
-		if(searchTerm){
-			$("#observationset-search").val(searchTerm).change();
+		function init() {
+			// set entity in dropdown
+			if(!state.entity) {
+				state.entity = $('#dataset-select option:not(:empty)').first().val();
+			}
+			$('#dataset-select').select2('val', state.entity);
+			
+			if (state.query) {
+				// set query in searchbox
+				for (var i = 0; i < state.query.q.length; ++i) {
+					var rule = state.query.q[i];
+					if(rule.field === undefined && rule.operator === 'SEARCH') {
+						$('#observationset-search').val(rule.value);
+						break;
+					}
+				}
+				
+				// set filters in filter list
+				// FIXME implement as part of http://www.molgenis.org/ticket/3110
+			}
+			
+			render();
 		}
 		
+		// set state from url
+		if(window.location.search && window.location.search.length > 0) {
+			var querystring = window.location.search.substring(1); // remove '?'
+			if(querystring.length > 0) {
+				state = $.deparam(querystring);
+			}
+		} else {
+			state = stateDefault;
+		}
+
+		// handle browser back event
+		window.onpopstate = function(event) {
+			if (event.state !== null) {
+				state = event.state;
+				init();
+			}
+		};
+		
+		init();
 	});
 });
