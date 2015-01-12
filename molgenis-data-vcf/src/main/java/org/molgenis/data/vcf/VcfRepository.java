@@ -173,7 +173,7 @@ public class VcfRepository extends AbstractRepository
 				}
 				catch (IOException e)
 				{
-					LOG.error("Unable to load VCF metadata. " + e.getStackTrace());
+					LOG.error("Unable to load VCF metadata. ", e);
 				}
 
 				return entity;
@@ -288,7 +288,7 @@ public class VcfRepository extends AbstractRepository
 		try
 		{
 			isListValue = number.equals("A") || number.equals("R") || number.equals("G") || number.equals(".")
-					|| Integer.valueOf(number) > 1;
+					|| Integer.parseInt(number) > 1;
 		}
 		catch (NumberFormatException ex)
 		{
@@ -339,7 +339,7 @@ public class VcfRepository extends AbstractRepository
 		try
 		{
 			isListValue = number.equals("A") || number.equals("R") || number.equals("G") || number.equals(".")
-					|| Integer.valueOf(number) > 1;
+					|| Integer.parseInt(number) > 1;
 		}
 		catch (NumberFormatException ex)
 		{
