@@ -34,8 +34,7 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 	private final HgncLocationsProvider hgncLocationsProvider;
 	private final CgdDataProvider cgdDataProvider;
 
-	private static final String NAME = "ClinicalGenomicsDatabaseAnnotator";
-	private static final String LABEL = "ClinicalGenomicsDatabase";
+	private static final String NAME = "ClinicalGenomicsDatabase";
 
 	public static final String REFERENCES = "REFERENCES";
 	public static final String INTERVENTION_RATIONALE = "INTERVENTION/RATIONALE";
@@ -72,15 +71,9 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 	}
 
 	@Override
-	public String getName()
+	public String getSimpleName()
 	{
 		return NAME;
-	}
-
-	@Override
-	public String getLabel()
-	{
-		return LABEL;
 	}
 
 	@Override

@@ -12,12 +12,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
 import org.elasticsearch.action.admin.indices.exists.types.TypesExistsRequest;
+import org.elasticsearch.action.admin.indices.exists.types.TypesExistsResponse;
 import org.elasticsearch.action.admin.indices.mapping.delete.DeleteMappingResponse;
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
@@ -65,6 +64,8 @@ import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.util.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -880,17 +881,25 @@ public class ElasticSearchService implements SearchService
 	public void delete(String entityName)
 	{
 		String type = sanitizeMapperType(entityName);
+
 		if (LOG.isTraceEnabled())
 		{
 			LOG.trace("Deleting all Elasticsearch '" + type + "' docs ...");
 		}
 
-		DeleteMappingResponse deleteMappingResponse = client.admin().indices().prepareDeleteMapping(indexName)
-				.setType(type).execute().actionGet();
-		if (!deleteMappingResponse.isAcknowledged())
+		TypesExistsResponse typesExistsResponse = client.admin().indices().prepareTypesExists(indexName).setTypes(type)
+				.execute().actionGet();
+		if (typesExistsResponse.isExists())
 		{
-			throw new ElasticsearchException("Delete failed. Returned headers:" + deleteMappingResponse.getHeaders());
+			DeleteMappingResponse deleteMappingResponse = client.admin().indices().prepareDeleteMapping(indexName)
+					.setType(type).execute().actionGet();
+			if (!deleteMappingResponse.isAcknowledged())
+			{
+				throw new ElasticsearchException("Delete failed. Returned headers:"
+						+ deleteMappingResponse.getHeaders());
+			}
 		}
+
 		if (LOG.isDebugEnabled())
 		{
 			LOG.debug("Deleted all Elasticsearch '" + type + "' docs");

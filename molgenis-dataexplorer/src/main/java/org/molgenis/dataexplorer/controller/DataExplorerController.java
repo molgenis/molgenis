@@ -25,15 +25,12 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Aggregateable;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.data.Queryable;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.GenomeConfig;
@@ -47,11 +44,12 @@ import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.system.core.FreemarkerTemplate;
 import org.molgenis.ui.MolgenisInterceptor;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.util.GsonHttpMessageConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -65,6 +63,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -142,6 +141,9 @@ public class DataExplorerController extends MolgenisPluginController
 	@Autowired
 	private GenomeConfig genomeConfig;
 
+	@Autowired
+	private FreeMarkerConfigurer freemarkerConfigurer;
+
 	public DataExplorerController()
 	{
 		super(URI);
@@ -202,6 +204,7 @@ public class DataExplorerController extends MolgenisPluginController
 		model.addAttribute("searchTerm", searchTerm);
 		model.addAttribute("hideSearchBox", molgenisSettings.getBooleanProperty(KEY_HIDE_SEARCH_BOX, false));
 		model.addAttribute("hideDataItemSelect", molgenisSettings.getBooleanProperty(KEY_HIDE_ITEM_SELECTION, false));
+		model.addAttribute("isAdmin", SecurityUtils.currentUserIsSu());
 
 		return "view-dataexplorer";
 	}
@@ -597,8 +600,14 @@ public class DataExplorerController extends MolgenisPluginController
 
 	private boolean viewExists(String viewName)
 	{
-		Queryable templateRepository = dataService.getQueryableRepository(FreemarkerTemplate.ENTITY_NAME);
-		return templateRepository.count(new QueryImpl().eq("Name", viewName + ".ftl")) > 0;
+		try
+		{
+			return freemarkerConfigurer.getConfiguration().getTemplate(viewName + ".ftl") != null;
+		}
+		catch (IOException e)
+		{
+			return false;
+		}
 	}
 
 	@RequestMapping(value = "/settings", method = RequestMethod.GET)

@@ -1,9 +1,8 @@
 package org.molgenis.data.annotation;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
@@ -24,12 +23,12 @@ public class CrudRepositoryAnnotator
 	private static final Logger LOG = LoggerFactory.getLogger(CrudRepositoryAnnotator.class);
 
 	private final MysqlRepositoryCollection mysqlRepositoryCollection;
-	private String newRepositoryName;
+	private String newRepositoryLabel;
 
 	public CrudRepositoryAnnotator(MysqlRepositoryCollection mysqlRepositoryCollection, String newRepositoryName)
 	{
 		this.mysqlRepositoryCollection = mysqlRepositoryCollection;
-		this.newRepositoryName = newRepositoryName;
+		this.newRepositoryLabel = newRepositoryName;
 	}
 
 	/**
@@ -64,22 +63,21 @@ public class CrudRepositoryAnnotator
 			throw new UnsupportedOperationException("Currently only CrudRepositories can be annotated");
 		}
 
-		if (createCopy) LOG.info("Creating a copy of " + sourceRepo.getName() + " repository, which will be called "
-				+ newRepositoryName);
+		if (createCopy) LOG.info("Creating a copy of " + sourceRepo.getName() + " repository, which will be labelled "
+				+ newRepositoryLabel + "an UUID will be generated for the name/identifier");
 
-		if (!createCopy) LOG.info("Annotating " + sourceRepo.getName() + " repository with the " + annotator.getName()
+		if (!createCopy) LOG.info("Annotating " + sourceRepo.getName() + " repository with the " + annotator.getSimpleName()
 				+ " annotator");
 
 		EntityMetaData entityMetaData = sourceRepo.getEntityMetaData();
-		DefaultAttributeMetaData compoundAttributeMetaData = getCompoundResultAttribute(annotator,
-				getAttributeName(entityMetaData, annotator), entityMetaData);
+		DefaultAttributeMetaData compoundAttributeMetaData = getCompoundResultAttribute(annotator,entityMetaData);
 
 		CrudRepository targetRepo = addAnnotatorMetadataToRepositories(entityMetaData, createCopy,
 				compoundAttributeMetaData);
 
 		CrudRepository crudRepository = iterateOverEntitiesAndAnnotate(sourceRepo, targetRepo, annotator);
 
-		LOG.info("Finished annotating " + sourceRepo.getName() + " with the " + annotator.getName() + " annotator");
+		LOG.info("Finished annotating " + sourceRepo.getName() + " with the " + annotator.getSimpleName() + " annotator");
 
 		return crudRepository;
 	}
@@ -124,66 +122,60 @@ public class CrudRepositoryAnnotator
 	 * {@link #mysqlRepositoryCollection} or an existing CrudRepository which is not part of
 	 * {@link #mysqlRepositoryCollection}.
 	 * 
-	 * @param metadata
+	 * @param entityMetaData
 	 *            {@link EntityMetaData} for the existing repository
 	 * @param createCopy
 	 * @param compoundAttributeMetaData
 	 */
-	public CrudRepository addAnnotatorMetadataToRepositories(EntityMetaData metadata, boolean createCopy,
+	public CrudRepository addAnnotatorMetadataToRepositories(EntityMetaData entityMetaData, boolean createCopy,
 			DefaultAttributeMetaData compoundAttributeMetaData)
 	{
 		if (createCopy)
 		{
-			DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(newRepositoryName, metadata);
+			DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(UUID.randomUUID().toString(), entityMetaData);
 			newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData);
-			newEntityMetaData.setLabel(newRepositoryName);
+			newEntityMetaData.setLabel(newRepositoryLabel);
 			return mysqlRepositoryCollection.add(newEntityMetaData);
 		}
 		else
 		{
-			if (mysqlRepositoryCollection.getRepositoryByEntityName(metadata.getName()) != null)
+			if (mysqlRepositoryCollection.getRepositoryByEntityName(entityMetaData.getName()) != null)
 			{
-				DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(metadata);
-				newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData);
-				mysqlRepositoryCollection.updateSync(newEntityMetaData);
+                if(entityMetaData.getAttribute(compoundAttributeMetaData.getName())==null) {
+                    DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(entityMetaData);
+                    newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData);
+                    mysqlRepositoryCollection.updateSync(newEntityMetaData);
+                }
 				return null;
 			}
 			else
 			{
-				if (!(metadata instanceof EditableEntityMetaData))
+				if (!(entityMetaData instanceof EditableEntityMetaData))
 				{
 					throw new UnsupportedOperationException(
 							"EntityMetadata should be editable to make annotation possible");
 				}
-				EditableEntityMetaData editableMetadata = (EditableEntityMetaData) metadata;
+				EditableEntityMetaData editableMetadata = (EditableEntityMetaData) entityMetaData;
 				editableMetadata.addAttributeMetaData(compoundAttributeMetaData);
 				return null;
 			}
 		}
 	}
 
-	public DefaultAttributeMetaData getCompoundResultAttribute(RepositoryAnnotator annotator, String attributeName,
+	public DefaultAttributeMetaData getCompoundResultAttribute(RepositoryAnnotator annotator,
 			EntityMetaData entityMetaData)
 	{
-		DefaultAttributeMetaData compoundAttributeMetaData = new DefaultAttributeMetaData(attributeName,
+		DefaultAttributeMetaData compoundAttributeMetaData = new DefaultAttributeMetaData(annotator.getFullName(),
 				MolgenisFieldTypes.FieldTypeEnum.COMPOUND);
-		compoundAttributeMetaData.setLabel(annotator.getLabel());
+		compoundAttributeMetaData.setLabel(annotator.getSimpleName());
 
-		Iterator<AttributeMetaData> amdIterator = annotator.getOutputMetaData().getAtomicAttributes().iterator();
+		Iterator<AttributeMetaData> attributeMetaDataIterator = annotator.getOutputMetaData().getAtomicAttributes().iterator();
 
-		while (amdIterator.hasNext())
+		while (attributeMetaDataIterator.hasNext())
 		{
-			AttributeMetaData currentAmd = amdIterator.next();
+			AttributeMetaData currentAmd = attributeMetaDataIterator.next();
 			String currentAttributeName = currentAmd.getName();
-			if (entityMetaData.getAttribute(currentAttributeName) != null)
-			{
-				String date = new SimpleDateFormat("yyMMddhhmmss").format(new Date());
-				String newName = annotator.getName() + "_" + currentAttributeName + "_" + date;
-				DefaultAttributeMetaData amd = new DefaultAttributeMetaData(newName, currentAmd);
-				amd.setLabel(newName);
-				compoundAttributeMetaData.addAttributePart(amd);
-			}
-			else
+			if (entityMetaData.getAttribute(currentAttributeName) == null)
 			{
 				compoundAttributeMetaData.addAttributePart(currentAmd);
 			}
@@ -191,15 +183,4 @@ public class CrudRepositoryAnnotator
 
 		return compoundAttributeMetaData;
 	}
-
-	private String getAttributeName(EntityMetaData entityMetaData, RepositoryAnnotator annotator)
-	{
-		String attributeName = annotator.getName();
-		if ((entityMetaData.getAttribute(annotator.getName()) != null))
-		{
-			throw new RuntimeException("attribute with id: " + annotator.getName() + "already exists");
-		}
-		return attributeName;
-	}
-
 }

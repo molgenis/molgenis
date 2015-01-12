@@ -28,6 +28,15 @@ public class CaseInsensitiveLinkedHashMap<V> extends LinkedHashMap<String, V>
 	}
 
 	@Override
+	public void putAll(Map<? extends String, ? extends V> m)
+	{
+		for (Map.Entry<? extends String, ? extends V> entry : m.entrySet())
+		{
+			put(entry.getKey(), entry.getValue());
+		}
+	}
+
+	@Override
 	public V remove(Object key)
 	{
 		if (!(key instanceof String))

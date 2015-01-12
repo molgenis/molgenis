@@ -11,6 +11,7 @@ import java.util.Iterator;
 
 public interface RepositoryAnnotator
 {
+    final static String ANNOTATOR_PREFIX = "molgenis_annotated_";
 
 	Iterator<Entity> annotate(Iterator<Entity> source);
 
@@ -41,7 +42,7 @@ public interface RepositoryAnnotator
 	 * 
 	 * @return name
 	 */
-	String getName();
+	String getSimpleName();
 
-    String getLabel();
+    String getFullName();
 }

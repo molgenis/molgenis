@@ -213,6 +213,22 @@ public interface DataService extends RepositoryCollection
 	void delete(String entityName, Object id);
 
 	/**
+	 * Deletes all entities
+	 * 
+	 * @param entityName
+	 *            entity name (case insensitive)
+	 */
+	void deleteAll(String entityName);
+
+	/**
+	 * Drops the repository for the given entity (but does not remove the repository)
+	 * 
+	 * @param entityName
+	 *            entity name (case insensitive)
+	 */
+	void drop(String entityName);
+
+	/**
 	 * Get a CrudRepository by entity name
 	 * 
 	 * @throws UnknownEntityException
@@ -227,6 +243,8 @@ public interface DataService extends RepositoryCollection
 	 */
 	@Override
 	CrudRepository getRepository(String entityName);
+
+	Manageable getManageableRepository(String entityName);
 
 	Query query(String entityName);
 

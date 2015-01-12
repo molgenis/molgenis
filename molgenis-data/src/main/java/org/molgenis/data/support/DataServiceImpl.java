@@ -15,6 +15,7 @@ import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Manageable;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
@@ -196,11 +197,34 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
+	public void deleteAll(String entityName)
+	{
+		getRepository(entityName).deleteAll();
+	}
+
+	@Override
+	public void drop(String entityName)
+	{
+		getManageableRepository(entityName).drop();
+	}
+
+	@Override
 	public CrudRepository getRepository(String entityName)
 	{
 		CrudRepository repository = repositories.get(entityName.toLowerCase());
 		if (repository == null) throw new UnknownEntityException("Unknown entity [" + entityName + "]");
 		else return repository;
+	}
+
+	@Override
+	public Manageable getManageableRepository(String entityName)
+	{
+		Repository repository = getRepository(entityName);
+		if (repository instanceof Manageable)
+		{
+			return (Manageable) repository;
+		}
+		throw new MolgenisDataException("Repository [" + repository.getName() + "] is not Manageable");
 	}
 
 	@Override
