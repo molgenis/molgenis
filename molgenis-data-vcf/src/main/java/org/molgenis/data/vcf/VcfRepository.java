@@ -173,7 +173,7 @@ public class VcfRepository extends AbstractRepository
 				}
 				catch (IOException e)
 				{
-					LOG.error("Unable to load VCF metadata. " + e.getStackTrace());
+					LOG.error("Unable to load VCF metadata. ", e);
 				}
 
 				return entity;
