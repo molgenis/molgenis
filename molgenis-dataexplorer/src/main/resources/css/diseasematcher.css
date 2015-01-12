@@ -11,3 +11,27 @@
 	font-size: 15px;
 	font-weight: normal;
 }
+
+.divider-vertical {
+	 border-right:1px solid #ddd;
+}
+
+.top-buffer { margin-top:20px; }
+
+textarea#hpoTermsInput{
+	resize: none;
+}
+
+.filter-menu{
+	position: relative;
+}
+
+.center-aligned{
+	position: absolute;
+	bottom: 20%;
+	right: 0;
+}
+
+.tab-indent{
+	padding-left:5em
+}
