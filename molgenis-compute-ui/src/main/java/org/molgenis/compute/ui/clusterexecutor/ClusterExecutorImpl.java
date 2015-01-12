@@ -71,8 +71,8 @@ public class ClusterExecutorImpl implements ClusterExecutor
 
 		String runName = analysis.getIdentifier();
 		String clusterRoot = root;
-//		String runDir = clusterRoot + runName;
-		String runDir = clusterRoot + "test02";
+		String runDir = clusterRoot + runName;
+//		String runDir = clusterRoot + "test04";
 
 		boolean prepared = prepareRun(analysis, username, password, runDir);
 
