@@ -177,7 +177,7 @@ public class ImportWriter
 				{
 					LOG.debug("trying to create: " + name);
 					metaDataChanges.addEntity(name);
-					Repository repo = targetCollection.add(entityMetaData);
+					Repository repo = targetCollection.addEntityMeta(entityMetaData);
 					if (repo != null)
 					{
 						report.addNewEntity(name);

@@ -16,5 +16,5 @@ public interface RepositoryCollection
 	 * 
 	 * @throws UnknownEntityException
 	 */
-	Repository getRepositoryByEntityName(String name);
+	Repository getRepository(String name);
 }

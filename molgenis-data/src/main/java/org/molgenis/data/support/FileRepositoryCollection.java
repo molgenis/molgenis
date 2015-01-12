@@ -46,5 +46,5 @@ public abstract class FileRepositoryCollection implements RepositoryCollection
 	public abstract Iterable<String> getEntityNames();
 
 	@Override
-	public abstract Repository getRepositoryByEntityName(String name);
+	public abstract Repository getRepository(String name);
 }

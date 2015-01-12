@@ -36,14 +36,14 @@ import com.google.common.collect.Lists;
 class EntityMetaDataRepository
 {
 	public static final EntityMetaDataMetaData META_DATA = new EntityMetaDataMetaData();
-	private CrudRepository repository;
-	private PackageRepository packageRepository;
-	private Map<String, DefaultEntityMetaData> entityMetaDataCache = new HashMap<String, DefaultEntityMetaData>();
+	private final CrudRepository repository;
+	private final PackageRepository packageRepository;
+	private final Map<String, DefaultEntityMetaData> entityMetaDataCache = new HashMap<String, DefaultEntityMetaData>();
 
 	public EntityMetaDataRepository(ManageableCrudRepositoryCollection collection, PackageRepository packageRepository)
 	{
 		this.packageRepository = packageRepository;
-		this.repository = collection.add(META_DATA);
+		this.repository = collection.addEntityMeta(META_DATA);
 		fillEntityMetaDataCache();
 	}
 
@@ -78,7 +78,7 @@ class EntityMetaDataRepository
 				entityMetaData.setExtends(extendsEntityMetaData);
 			}
 			final Entity packageEntity = entity.getEntity(PACKAGE);
-			
+
 			PackageImpl p = (PackageImpl) packageRepository.getPackage(packageEntity
 					.getString(PackageMetaData.FULL_NAME));
 			if (null != p)

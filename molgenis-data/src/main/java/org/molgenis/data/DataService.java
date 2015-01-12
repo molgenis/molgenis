@@ -2,6 +2,8 @@ package org.molgenis.data;
 
 import java.util.List;
 
+import org.molgenis.data.meta.MetaDataService;
+
 /**
  * DataService is a façade that manages data sources Entity names should be unique over all data sources.
  * 
@@ -9,6 +11,8 @@ import java.util.List;
  */
 public interface DataService extends RepositoryCollection
 {
+	MetaDataService getMeta();
+
 	/**
 	 * Add a repository to the DataService
 	 * 
@@ -16,7 +20,7 @@ public interface DataService extends RepositoryCollection
 	 *             if entity name is already registered
 	 * @param repository
 	 */
-	void addRepository(Repository repository);
+	void addRepository(CrudRepository repository);
 
 	/**
 	 * Remove a repository from the DataService
@@ -221,11 +225,8 @@ public interface DataService extends RepositoryCollection
 	 * @param entityName
 	 *            entity name (case insensitive)
 	 */
-	CrudRepository getCrudRepository(String entityName);
-
-	Writable getWritableRepository(String entityName);
-
-	Queryable getQueryableRepository(String entityName);
+	@Override
+	CrudRepository getRepository(String entityName);
 
 	Query query(String entityName);
 

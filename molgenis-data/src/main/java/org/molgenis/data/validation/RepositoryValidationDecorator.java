@@ -1,15 +1,20 @@
 package org.molgenis.data.validation;
 
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
+import org.molgenis.data.AggregateQuery;
+import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
-import org.molgenis.data.CrudRepositoryDecorator;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Query;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
@@ -18,15 +23,16 @@ import org.molgenis.util.HugeSet;
 
 import com.google.common.collect.Sets;
 
-public class RepositoryValidationDecorator extends CrudRepositoryDecorator
+public class RepositoryValidationDecorator implements CrudRepository
 {
 	private final EntityAttributesValidator entityAttributesValidator;
 	private final DataService dataService;
+	private final CrudRepository decoratedRepository;
 
 	public RepositoryValidationDecorator(DataService dataService, CrudRepository repository,
 			EntityAttributesValidator entityAttributesValidator)
 	{
-		super(repository);
+		this.decoratedRepository = repository;
 		this.dataService = dataService;
 		this.entityAttributesValidator = entityAttributesValidator;
 	}
@@ -35,34 +41,34 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator
 	public void update(Entity entity)
 	{
 		validate(Arrays.asList(entity), true);
-		getDecoratedRepository().update(entity);
+		decoratedRepository.update(entity);
 	}
 
 	@Override
 	public void update(Iterable<? extends Entity> entities)
 	{
 		validate(entities, true);
-		getDecoratedRepository().update(entities);
+		decoratedRepository.update(entities);
 	}
 
 	@Override
 	public void delete(Entity entity)
 	{
-		getDecoratedRepository().delete(entity);
+		decoratedRepository.delete(entity);
 	}
 
 	@Override
 	public void add(Entity entity)
 	{
 		validate(Arrays.asList(entity), false);
-		getDecoratedRepository().add(entity);
+		decoratedRepository.add(entity);
 	}
 
 	@Override
 	public Integer add(Iterable<? extends Entity> entities)
 	{
 		validate(entities, false);
-		return getDecoratedRepository().add(entities);
+		return decoratedRepository.add(entities);
 	}
 
 	private void validate(Iterable<? extends Entity> entities, boolean forUpdate)
@@ -88,10 +94,10 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator
 				}
 			}
 
-			if (!getDecoratedRepository().getName().equalsIgnoreCase("UserAuthority"))// FIXME MolgenisUserDecorator
-																						// adds UserAuthority in add
-																						// method so it is not yet
-																						// indexed and can not be found
+			if (!decoratedRepository.getName().equalsIgnoreCase("UserAuthority"))// FIXME MolgenisUserDecorator
+																					// adds UserAuthority in add
+																					// method so it is not yet
+																					// indexed and can not be found
 			{
 				if (attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
 				{
@@ -334,6 +340,150 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator
 	{
 		FieldType idDataType = getEntityMetaData().getIdAttribute().getDataType();
 		return idDataType.convert(id).equals(idDataType.convert(entity.getIdValue()));
+	}
+
+	@Override
+	public String getName()
+	{
+		return decoratedRepository.getName();
+	}
+
+	@Override
+	public EntityMetaData getEntityMetaData()
+	{
+		return decoratedRepository.getEntityMetaData();
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
+	{
+		return decoratedRepository.iterator(clazz);
+	}
+
+	@Override
+	public String getUrl()
+	{
+		return decoratedRepository.getUrl();
+	}
+
+	@Override
+	public Iterator<Entity> iterator()
+	{
+		return decoratedRepository.iterator();
+	}
+
+	@Override
+	public void close() throws IOException
+	{
+		decoratedRepository.close();
+	}
+
+	@Override
+	public void flush()
+	{
+		decoratedRepository.flush();
+	}
+
+	@Override
+	public void clearCache()
+	{
+		decoratedRepository.clearCache();
+	}
+
+	@Override
+	public long count()
+	{
+		return decoratedRepository.count();
+	}
+
+	@Override
+	public Query query()
+	{
+		return decoratedRepository.query();
+	}
+
+	@Override
+	public long count(Query q)
+	{
+		return decoratedRepository.count(q);
+	}
+
+	@Override
+	public Iterable<Entity> findAll(Query q)
+	{
+		return decoratedRepository.findAll(q);
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz)
+	{
+		return decoratedRepository.findAll(q, clazz);
+	}
+
+	@Override
+	public Entity findOne(Query q)
+	{
+		return decoratedRepository.findOne(q);
+	}
+
+	@Override
+	public Entity findOne(Object id)
+	{
+		return decoratedRepository.findOne(id);
+	}
+
+	@Override
+	public Iterable<Entity> findAll(Iterable<Object> ids)
+	{
+		return decoratedRepository.findAll(ids);
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> findAll(Iterable<Object> ids, Class<E> clazz)
+	{
+		return decoratedRepository.findAll(ids, clazz);
+	}
+
+	@Override
+	public <E extends Entity> E findOne(Object id, Class<E> clazz)
+	{
+		return decoratedRepository.findOne(id, clazz);
+	}
+
+	@Override
+	public <E extends Entity> E findOne(Query q, Class<E> clazz)
+	{
+		return decoratedRepository.findOne(q, clazz);
+	}
+
+	@Override
+	public void delete(Iterable<? extends Entity> entities)
+	{
+		decoratedRepository.delete(entities);
+	}
+
+	@Override
+	public void deleteById(Object id)
+	{
+		decoratedRepository.deleteById(id);
+	}
+
+	@Override
+	public void deleteById(Iterable<Object> ids)
+	{
+		decoratedRepository.deleteById(ids);
+	}
+
+	@Override
+	public void deleteAll()
+	{
+		decoratedRepository.deleteAll();
+	}
+
+	@Override
+	public AggregateResult aggregate(AggregateQuery aggregateQuery)
+	{
+		return decoratedRepository.aggregate(aggregateQuery);
 	}
 
 }

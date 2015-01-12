@@ -1,5 +1,7 @@
 package org.molgenis.data.meta;
 
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Package;
 
@@ -22,6 +24,13 @@ public interface MetaDataService
 	Package getPackage(String name);
 
 	/**
+	 * Adds a new Package
+	 * 
+	 * @param pack
+	 */
+	void addPackage(Package pack);
+
+	/**
 	 * Gets the entity meta data for a given entity.
 	 * 
 	 * @param name
@@ -31,10 +40,56 @@ public interface MetaDataService
 	EntityMetaData getEntityMetaData(String name);
 
 	/**
-	 * Rebuilds all meta data chaches
+	 * @deprecated Rebuilds all meta data chaches
 	 * 
+	 *             TODO remove
 	 */
+	@Deprecated
 	void refreshCaches();
 
 	Iterable<EntityMetaData> getEntityMetaDatas();
+
+	/**
+	 * Adds new EntityMeta and creates a new CrudRepository for the default backend
+	 * 
+	 * @param entityMeta
+	 * @return
+	 */
+	CrudRepository addEntityMeta(EntityMetaData entityMeta);
+
+	/**
+	 * Deletes an EntityMeta of the default backend
+	 */
+	void deleteEntityMeta(String entityName);
+
+	/**
+	 * Updates EntityMeta for the default backend
+	 * 
+	 * @param entityMeta
+	 */
+	void updateEntityMeta(EntityMetaData entityMeta);
+
+	/**
+	 * Adds an Attribute to an EntityMeta for the default backend
+	 * 
+	 * @param entityName
+	 * @param attribute
+	 */
+	void addAttribute(String entityName, AttributeMetaData attribute);
+
+	/**
+	 * Updates an Attribute to an EntityMeta for the default backend
+	 * 
+	 * @param entityName
+	 * @param attribute
+	 */
+	void updateAttribute(String entityName, AttributeMetaData attribute);
+
+	/**
+	 * Deletes an Attribute for the default backend
+	 * 
+	 * @param entityName
+	 * @param attributeName
+	 */
+	void deleteAttribute(String entityName, String attributeName);
 }

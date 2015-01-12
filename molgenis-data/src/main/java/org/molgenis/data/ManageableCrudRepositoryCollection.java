@@ -1,25 +1,49 @@
 package org.molgenis.data;
 
-import java.util.List;
-
-public interface ManageableCrudRepositoryCollection extends RepositoryCollection, Iterable<CrudRepository>
+public interface ManageableCrudRepositoryCollection extends CrudRepositoryCollection, Iterable<CrudRepository>
 {
 	/**
 	 * Create and add a new CrudRepository for an EntityMetaData
 	 */
-	CrudRepository add(EntityMetaData entityMetaData);
+	CrudRepository addEntityMeta(EntityMetaData entityMeta);
 
 	/**
-	 * Update EntityMetaData.
+	 * Removes an entity definition from this ManageableCrudRepositoryCollection
+	 * 
+	 * @param entityName
+	 */
+	void deleteEntityMeta(String entityName);
+
+	/**
+	 * Updates EntityMetaData
 	 * 
 	 * At the moment only adding of AttributeMetaData is supported.
 	 * 
-	 * @param entityMetaData
-	 * @return The newly added AttributeMetaData's
+	 * @param entityMeta
 	 */
-	List<AttributeMetaData> update(EntityMetaData entityMetaData);
+	void updateEntityMeta(EntityMetaData entityMeta);
 
-	void dropAttributeMetaData(String entityName, String attributeName);
+	/**
+	 * Adds an Attribute to an EntityMeta
+	 * 
+	 * @param entityName
+	 * @param attribute
+	 */
+	void addAttribute(String entityName, AttributeMetaData attribute);
 
-	void dropEntityMetaData(String entityName);
+	/**
+	 * Removes an attribute from an entity
+	 * 
+	 * @param entityName
+	 * @param attributeName
+	 */
+	void deleteAttribute(String entityName, String attributeName);
+
+	/**
+	 * Updates an Attribute
+	 * 
+	 * @param entityName
+	 * @param attribute
+	 */
+	void updateAttribute(String entityName, AttributeMetaData attribute);
 }

@@ -6,12 +6,12 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.Queryable;
 import org.springframework.data.domain.Sort;
 
 public class QueryImpl implements Query
@@ -21,14 +21,14 @@ public class QueryImpl implements Query
 	private int pageSize;
 	private int offset;
 	private Sort sort;
-	private Queryable repository;
+	private CrudRepository repository;
 
 	public QueryImpl()
 	{
 		this.rules.add(new ArrayList<QueryRule>());
 	}
 
-	public QueryImpl(Queryable repository)
+	public QueryImpl(CrudRepository repository)
 	{
 		this();
 		this.repository = repository;

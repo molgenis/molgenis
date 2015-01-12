@@ -26,9 +26,9 @@ import org.testng.annotations.Test;
 public class DataServiceImplTest
 {
 	private final List<String> entityNames = Arrays.asList("Entity1", "Entity2", "Entity3");
-	private Repository repo1;
-	private Repository repo2;
-	private Repository repoToRemove;
+	private CrudRepository repo1;
+	private CrudRepository repo2;
+	private CrudRepository repoToRemove;
 	private DataServiceImpl dataService;
 
 	@BeforeMethod
@@ -50,15 +50,15 @@ public class DataServiceImplTest
 
 		dataService = new DataServiceImpl();
 
-		repo1 = mock(Repository.class);
+		repo1 = mock(CrudRepository.class);
 		when(repo1.getName()).thenReturn("Entity1");
 		dataService.addRepository(repo1);
 
-		repo2 = mock(Repository.class);
+		repo2 = mock(CrudRepository.class);
 		when(repo2.getName()).thenReturn("Entity2");
 		dataService.addRepository(repo2);
 
-		repoToRemove = mock(Repository.class);
+		repoToRemove = mock(CrudRepository.class);
 		when(repoToRemove.getName()).thenReturn("Entity3");
 		dataService.addRepository(repoToRemove);
 
@@ -81,29 +81,29 @@ public class DataServiceImplTest
 	@Test
 	public void getRepositoryByEntityName()
 	{
-		assertEquals(dataService.getRepositoryByEntityName("Entity1"), repo1);
-		assertEquals(dataService.getRepositoryByEntityName("Entity2"), repo2);
+		assertEquals(dataService.getRepository("Entity1"), repo1);
+		assertEquals(dataService.getRepository("Entity2"), repo2);
 	}
 
 	@Test
 	public void removeRepositoryByEntityName()
 	{
-		assertEquals(dataService.getRepositoryByEntityName("Entity3"), repoToRemove);
+		assertEquals(dataService.getRepository("Entity3"), repoToRemove);
 		dataService.removeRepository("Entity3");
 	}
 
 	@Test(expectedExceptions = UnknownEntityException.class)
 	public void removeRepositoryByEntityNameUnknownEntityException()
 	{
-		assertEquals(dataService.getRepositoryByEntityName("Entity3"), repoToRemove);
+		assertEquals(dataService.getRepository("Entity3"), repoToRemove);
 		dataService.removeRepository("Entity3");
-		dataService.getRepositoryByEntityName("Entity3");
+		dataService.getRepository("Entity3");
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void removeRepositoryByEntityNameMolgenisDataException()
 	{
-		assertEquals(dataService.getRepositoryByEntityName("Entity3"), repoToRemove);
+		assertEquals(dataService.getRepository("Entity3"), repoToRemove);
 		dataService.removeRepository("Entity4");
 	}
 }

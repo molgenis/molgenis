@@ -99,7 +99,7 @@ public abstract class MysqlRepositoryCollection implements ManageableCrudReposit
 
 	@Override
 	@Transactional
-	public CrudRepository add(EntityMetaData emd)
+	public CrudRepository addEntityMeta(EntityMetaData emd)
 	{
 		CrudRepository result = null;
 
@@ -165,6 +165,34 @@ public abstract class MysqlRepositoryCollection implements ManageableCrudReposit
 		return getDecoratedRepository(repo);
 	}
 
+	@Override
+	public CrudRepository getCrudRepository(String name)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void deleteEntityMeta(String entityName)
+	{
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void deleteAttribute(String entityName, String attributeName)
+	{
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void updateAttribute(String entityName, AttributeMetaData attribute)
+	{
+		// TODO Auto-generated method stub
+
+	}
+
 	public MysqlRepository getUndecoratedRepository(String name)
 	{
 		return repositories.get(name);
@@ -209,11 +237,10 @@ public abstract class MysqlRepositoryCollection implements ManageableCrudReposit
 	 */
 	@Override
 	@Transactional
-	public List<AttributeMetaData> update(EntityMetaData sourceEntityMetaData)
+	public void updateEntityMeta(EntityMetaData sourceEntityMetaData)
 	{
 		MysqlRepository repository = repositories.get(sourceEntityMetaData.getName());
 		EntityMetaData existingEntityMetaData = repository.getEntityMetaData();
-		List<AttributeMetaData> addedAttributes = Lists.newArrayList();
 
 		for (AttributeMetaData attr : existingEntityMetaData.getAttributes())
 		{
@@ -259,70 +286,67 @@ public abstract class MysqlRepositoryCollection implements ManageableCrudReposit
 				{
 					repository.addAttribute(attr);
 				}
+			}
+		}
+	}
+
+	@Transactional
+	public List<AttributeMetaData> updateSync(EntityMetaData sourceEntityMetaData)
+	{
+		MysqlRepository repository = repositories.get(sourceEntityMetaData.getName());
+		EntityMetaData existingEntityMetaData = repository.getEntityMetaData();
+		List<AttributeMetaData> addedAttributes = Lists.newArrayList();
+
+		for (AttributeMetaData attr : existingEntityMetaData.getAttributes())
+		{
+			if (sourceEntityMetaData.getAttribute(attr.getName()) == null)
+			{
+				throw new MolgenisDataException(
+						"Removing of existing attributes is currently not sypported. You tried to remove attribute ["
+								+ attr.getName() + "]");
+			}
+		}
+
+		for (AttributeMetaData attr : sourceEntityMetaData.getAttributes())
+		{
+			AttributeMetaData currentAttribute = existingEntityMetaData.getAttribute(attr.getName());
+			if (currentAttribute != null)
+			{
+				if (!currentAttribute.isSameAs(attr))
+				{
+					throw new MolgenisDataException(
+							"Changing existing attributes is not currently supported. You tried to alter attribute ["
+									+ attr.getName() + "] of entity [" + sourceEntityMetaData.getName()
+									+ "]. Only adding of new atrtibutes to existing entities is supported.");
+				}
+			}
+			else if (!attr.isNillable())
+			{
+				throw new MolgenisDataException("Adding non-nillable attributes is not currently supported");
+			}
+			else
+			{
+				// TODO: use decorated repository!
+				metaDataRepositories.addAttributeMetaData(sourceEntityMetaData.getName(), attr);
+				DefaultEntityMetaData defaultEntityMetaData = (DefaultEntityMetaData) repository.getEntityMetaData();
+				defaultEntityMetaData.addAttributeMetaData(attr);
+				if (attr.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
+				{
+					for (AttributeMetaData attrPart : attr.getAttributeParts())
+					{
+						repository.addAttributeSync(attrPart);
+					}
+				}
+				else
+				{
+					repository.addAttributeSync(attr);
+				}
 				addedAttributes.add(attr);
 			}
 		}
 
 		return addedAttributes;
 	}
-
-    @Transactional
-    public List<AttributeMetaData> updateSync(EntityMetaData sourceEntityMetaData)
-    {
-        MysqlRepository repository = repositories.get(sourceEntityMetaData.getName());
-        EntityMetaData existingEntityMetaData = repository.getEntityMetaData();
-        List<AttributeMetaData> addedAttributes = Lists.newArrayList();
-
-        for (AttributeMetaData attr : existingEntityMetaData.getAttributes())
-        {
-            if (sourceEntityMetaData.getAttribute(attr.getName()) == null)
-            {
-                throw new MolgenisDataException(
-                        "Removing of existing attributes is currently not sypported. You tried to remove attribute ["
-                                + attr.getName() + "]");
-            }
-        }
-
-        for (AttributeMetaData attr : sourceEntityMetaData.getAttributes())
-        {
-            AttributeMetaData currentAttribute = existingEntityMetaData.getAttribute(attr.getName());
-            if (currentAttribute != null)
-            {
-                if (!currentAttribute.isSameAs(attr))
-                {
-                    throw new MolgenisDataException(
-                            "Changing existing attributes is not currently supported. You tried to alter attribute ["
-                                    + attr.getName() + "] of entity [" + sourceEntityMetaData.getName()
-                                    + "]. Only adding of new atrtibutes to existing entities is supported.");
-                }
-            }
-            else if (!attr.isNillable())
-            {
-                throw new MolgenisDataException("Adding non-nillable attributes is not currently supported");
-            }
-            else
-            {
-                // TODO: use decorated repository!
-                metaDataRepositories.addAttributeMetaData(sourceEntityMetaData.getName(), attr);
-                DefaultEntityMetaData defaultEntityMetaData = (DefaultEntityMetaData) repository.getEntityMetaData();
-                defaultEntityMetaData.addAttributeMetaData(attr);
-                if (attr.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
-                {
-                    for (AttributeMetaData attrPart : attr.getAttributeParts())
-                    {
-                        repository.addAttributeSync(attrPart);
-                    }
-                }
-                else
-                {
-                    repository.addAttributeSync(attr);
-                }
-                addedAttributes.add(attr);
-            }
-        }
-
-        return addedAttributes;
-    }
 
 	/**
 	 * Returns an optionally decorated repository (e.g. security, indexing, validation) for the given repository

@@ -52,9 +52,11 @@ public class MetaDataServiceImplTest extends AbstractTestNGSpringContextTests
 	public void readPackageTree()
 	{
 		reset(manageableCrudRepositoryCollection, attributeRepository, packageRepository, entityRepository);
-		when(manageableCrudRepositoryCollection.add(new AttributeMetaDataMetaData())).thenReturn(attributeRepository);
-		when(manageableCrudRepositoryCollection.add(new EntityMetaDataMetaData())).thenReturn(entityRepository);
-		when(manageableCrudRepositoryCollection.add(new PackageMetaData())).thenReturn(packageRepository);
+		when(manageableCrudRepositoryCollection.addEntityMeta(new AttributeMetaDataMetaData())).thenReturn(
+				attributeRepository);
+		when(manageableCrudRepositoryCollection.addEntityMeta(new EntityMetaDataMetaData())).thenReturn(
+				entityRepository);
+		when(manageableCrudRepositoryCollection.addEntityMeta(new PackageMetaData())).thenReturn(packageRepository);
 
 		defaultPackage = PackageImpl.defaultPackage;
 		PackageImpl org = new PackageImpl("org", "the org package", null);
@@ -117,7 +119,7 @@ public class MetaDataServiceImplTest extends AbstractTestNGSpringContextTests
 		coderEntity.set(EntityMetaDataMetaData.LABEL, "Coder");
 		coderEntity.set(EntityMetaDataMetaData.EXTENDS, personEntity);
 
-		metaDataServiceImpl.addEntityMetaData(coderMetaData);
+		metaDataServiceImpl.addEntityMeta(coderMetaData);
 
 		verify(entityRepository, times(1)).add(coderEntity);
 		assertEquals(coderMetaData, metaDataServiceImpl.getEntityMetaData("Coder"));

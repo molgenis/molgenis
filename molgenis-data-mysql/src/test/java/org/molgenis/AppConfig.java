@@ -12,7 +12,7 @@ import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.meta.WritableMetaDataService;
-import org.molgenis.data.meta.WritableMetaDataServiceDecorator;
+import org.molgenis.data.meta.MetaDataServiceDecoratorFactory;
 import org.molgenis.data.mysql.AsyncJdbcTemplate;
 import org.molgenis.data.mysql.EmbeddedMysqlDatabaseBuilder;
 import org.molgenis.data.mysql.MysqlRepository;
@@ -123,9 +123,9 @@ public class AppConfig
 	/**
 	 * non-decorating decorator, to be overrided if you wish to decorate the MetaDataRepositories
 	 */
-	WritableMetaDataServiceDecorator writableMetaDataServiceDecorator()
+	MetaDataServiceDecoratorFactory writableMetaDataServiceDecorator()
 	{
-		return new WritableMetaDataServiceDecorator()
+		return new MetaDataServiceDecoratorFactory()
 		{
 			@Override
 			public WritableMetaDataService decorate(WritableMetaDataService writableMetaDataService)

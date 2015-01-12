@@ -60,7 +60,7 @@ class AttributeMetaDataRepository
 			EntityMetaDataRepository entityMetaDataRepository)
 	{
 		this.entityMetaDataRepository = entityMetaDataRepository;
-		this.repository = collection.add(META_DATA);
+		this.repository = collection.addEntityMeta(META_DATA);
 		fillAllEntityAttributes();
 	}
 

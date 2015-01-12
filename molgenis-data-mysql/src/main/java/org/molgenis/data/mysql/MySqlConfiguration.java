@@ -16,7 +16,7 @@ import org.molgenis.data.importer.MetaDataParser;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.meta.WritableMetaDataService;
-import org.molgenis.data.meta.WritableMetaDataServiceDecorator;
+import org.molgenis.data.meta.MetaDataServiceDecoratorFactory;
 import org.molgenis.data.semantic.TagRepository;
 import org.molgenis.data.semantic.UntypedTagService;
 import org.molgenis.security.permission.PermissionSystemService;
@@ -94,9 +94,9 @@ public class MySqlConfiguration
 	/**
 	 * non-decorating decorator, to be overrided if you wish to decorate the MetaDataRepositories
 	 */
-	WritableMetaDataServiceDecorator writableMetaDataServiceDecorator()
+	MetaDataServiceDecoratorFactory writableMetaDataServiceDecorator()
 	{
-		return new WritableMetaDataServiceDecorator()
+		return new MetaDataServiceDecoratorFactory()
 		{
 			@Override
 			public WritableMetaDataService decorate(WritableMetaDataService metaDataRepositories)

@@ -29,7 +29,7 @@ import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.PackageMetaData;
 import org.molgenis.data.meta.WritableMetaDataService;
-import org.molgenis.data.meta.WritableMetaDataServiceDecorator;
+import org.molgenis.data.meta.MetaDataServiceDecoratorFactory;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.IndexedRepositoryValidationDecorator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
@@ -348,9 +348,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	// temporary workaround for module dependencies
 
 	@Bean
-	WritableMetaDataServiceDecorator writableMetaDataServiceDecorator()
+	MetaDataServiceDecoratorFactory writableMetaDataServiceDecorator()
 	{
-		return new WritableMetaDataServiceDecorator()
+		return new MetaDataServiceDecoratorFactory()
 		{
 			@Override
 			public WritableMetaDataService decorate(WritableMetaDataService metaDataRepositories)

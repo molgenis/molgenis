@@ -49,7 +49,7 @@ class PackageRepository
 	 */
 	public PackageRepository(ManageableCrudRepositoryCollection coll)
 	{
-		repository = coll.add(META_DATA);
+		repository = coll.addEntityMeta(META_DATA);
 		updatePackageCache();
 		addDefaultPackage();
 	}

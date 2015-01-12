@@ -8,13 +8,12 @@ import java.util.Iterator;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.Permission;
 
-public class CrudRepositorySecurityDecorator extends CrudRepositoryDecorator
+public class CrudRepositorySecurityDecorator implements CrudRepository
 {
 	private final CrudRepository decoratedRepository;
 
 	public CrudRepositorySecurityDecorator(CrudRepository decoratedRepository)
 	{
-		super(decoratedRepository);
 		this.decoratedRepository = decoratedRepository;
 	}
 
@@ -208,6 +207,13 @@ public class CrudRepositorySecurityDecorator extends CrudRepositoryDecorator
 	{
 		validatePermission(decoratedRepository.getName(), Permission.WRITE);
 		decoratedRepository.clearCache();
+	}
+
+	@Override
+	public AggregateResult aggregate(AggregateQuery aggregateQuery)
+	{
+		validatePermission(decoratedRepository.getName(), Permission.COUNT);
+		return decoratedRepository.aggregate(aggregateQuery);
 	}
 
 }
