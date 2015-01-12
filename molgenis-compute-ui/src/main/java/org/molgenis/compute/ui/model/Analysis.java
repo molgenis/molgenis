@@ -2,7 +2,6 @@ package org.molgenis.compute.ui.model;
 
 import java.util.Date;
 
-import org.molgenis.auth.MolgenisUser;
 import org.molgenis.compute.ui.meta.AnalysisMetaData;
 import org.molgenis.data.support.MapEntity;
 
@@ -106,14 +105,14 @@ public class Analysis extends MapEntity
 		set(AnalysisMetaData.STATUS, status.toString());
 	}
 
-	public MolgenisUser getUser()
+	public String getUser()
 	{
-		return getEntity(AnalysisMetaData.USER, MolgenisUser.class);
+		return getString(AnalysisMetaData.USER);
 	}
 
-	public void setUser(MolgenisUser user)
+	public void setUser(String username)
 	{
-		set(AnalysisMetaData.USER, user);
+		set(AnalysisMetaData.USER, username);
 	}
 
 	@Override

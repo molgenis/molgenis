@@ -48,6 +48,7 @@ import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.event.DataExplorerRegisterRefCellClickEventHandler;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -172,6 +173,7 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 		analysis.setBackend(backend);
 		analysis.setCreationDate(creationDate);
 		analysis.setWorkflow(workflow);
+		analysis.setUser(SecurityUtils.getCurrentUsername());
 		dataService.add(AnalysisMetaData.INSTANCE.getName(), analysis);
 
 		String targetEntityName = createAnalysisRequest.getTargetEntityName();
@@ -227,6 +229,7 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 		clonedAnalysis.setDescription(analysis.getDescription());
 		// do not set jobs, submitScript
 		clonedAnalysis.setWorkflow(analysis.getWorkflow());
+		clonedAnalysis.setUser(analysis.getUser());
 		dataService.add(AnalysisMetaData.INSTANCE.getName(), clonedAnalysis);
 
 		String targetEntityName = analysis.getWorkflow().getTargetType();

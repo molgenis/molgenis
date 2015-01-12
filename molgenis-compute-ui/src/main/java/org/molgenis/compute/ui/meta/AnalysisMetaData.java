@@ -40,6 +40,8 @@ public class AnalysisMetaData extends DefaultEntityMetaData
 		addAttribute(SUBMIT_SCRIPT).setDataType(SCRIPT).setLabel("Submit script");
 		addAttribute(STATUS).setDataType(ENUM).setNillable(false).setEnumOptions(AnalysisStatus.names())
 				.setDefaultValue(STATUS_DEFAULT.toString()).setLabel("Status");
+		// FIXME user xref to MolgenisUser when https://github.com/molgenis/molgenis/issues/2054 is fixed
+		addAttribute(USER).setNillable(false).setLabel("User");
 	}
 
 }
