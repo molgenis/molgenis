@@ -7,8 +7,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.servlet.http.Part;
 
-import org.apache.log4j.Logger;
 import org.molgenis.compute.ui.model.JobStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
@@ -22,7 +23,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping("/job")
 public class JobStatusController
 {
-	private static Logger logger = Logger.getLogger(JobStatusController.class);
+	private static Logger logger = LoggerFactory.getLogger(JobStatusController.class);
+
 	private final BlockingQueue<JobStatusUpdate> queue = new LinkedBlockingQueue<>();
 	private final QueueHandler queueHandler = new QueueHandler();
 	private final JobService jobService;

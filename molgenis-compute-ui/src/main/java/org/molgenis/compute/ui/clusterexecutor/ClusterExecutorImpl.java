@@ -22,6 +22,8 @@ import org.molgenis.compute.ui.model.MolgenisUserKey;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.runas.RunAsSystem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jcraft.jsch.Channel;
@@ -37,7 +39,7 @@ import com.jcraft.jsch.SftpException;
  */
 public class ClusterExecutorImpl implements ClusterExecutor
 {
-	private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(ClusterManager.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ClusterExecutorImpl.class);
 
 	private static final String SLURM_CANCEL = "scancel ";
 	private static final String PBS_CANCEL = "qdel ";
@@ -347,17 +349,17 @@ public class ClusterExecutorImpl implements ClusterExecutor
 		}
 		catch (JSchException e)
 		{
-			LOG.error(e);
+			LOG.error("", e);
 			return false;
 		}
 		catch (IOException e)
 		{
-			LOG.error(e);
+			LOG.error("", e);
 			return false;
 		}
 		catch (InterruptedException e)
 		{
-			LOG.error(e);
+			LOG.error("", e);
 			return false;
 		}
 	}

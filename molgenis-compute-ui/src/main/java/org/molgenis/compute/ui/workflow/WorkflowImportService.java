@@ -9,7 +9,6 @@ import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
 import org.molgenis.compute.ui.ComputeUiException;
 import org.molgenis.compute.ui.IdGenerator;
 import org.molgenis.compute.ui.meta.UIParameterMappingMetaData;
@@ -38,6 +37,8 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.support.QueryImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
@@ -49,7 +50,8 @@ import com.google.common.collect.Maps;
 @Component
 public class WorkflowImportService
 {
-	private static Logger logger = Logger.getLogger(WorkflowImportService.class);
+	private static Logger logger = LoggerFactory.getLogger(WorkflowImportService.class);
+
 	private final DataService dataService;
 	private final SearchService searchService;
 
