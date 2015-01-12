@@ -24,6 +24,7 @@ public class AnalysisMetaData extends DefaultEntityMetaData
 	public static final String BACKEND = "backend";
 	public static final String SUBMIT_SCRIPT = "submitScript";
 	public static final String STATUS = "status";
+	public static final String USER = "user";
 
 	private AnalysisMetaData()
 	{
@@ -39,6 +40,8 @@ public class AnalysisMetaData extends DefaultEntityMetaData
 		addAttribute(SUBMIT_SCRIPT).setDataType(SCRIPT).setLabel("Submit script");
 		addAttribute(STATUS).setDataType(ENUM).setNillable(false).setEnumOptions(AnalysisStatus.names())
 				.setDefaultValue(STATUS_DEFAULT.toString()).setLabel("Status");
+		// FIXME user xref to MolgenisUser when https://github.com/molgenis/molgenis/issues/2054 is fixed
+		addAttribute(USER).setNillable(false).setLabel("User");
 	}
 
 }

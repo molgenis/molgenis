@@ -243,6 +243,7 @@ public class QueryImpl implements Query
 	public Query rng(String field, Object smaller, Object bigger)
 	{
 		this.gt(field, smaller);
+		this.and();
 		this.lt(field, bigger);
 		return this;
 	}

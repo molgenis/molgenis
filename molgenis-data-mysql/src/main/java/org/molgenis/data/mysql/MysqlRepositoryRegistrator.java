@@ -40,6 +40,6 @@ public class MysqlRepositoryRegistrator implements ApplicationListener<ContextRe
 	@Override
 	public int getOrder()
 	{
-		return Ordered.HIGHEST_PRECEDENCE - 1;
+		return Ordered.HIGHEST_PRECEDENCE;
 	}
 }

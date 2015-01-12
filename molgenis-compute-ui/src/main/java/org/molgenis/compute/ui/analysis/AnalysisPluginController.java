@@ -19,7 +19,6 @@ import java.util.Properties;
 import javax.validation.Valid;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
 import org.molgenis.compute.ui.IdGenerator;
 import org.molgenis.compute.ui.clusterexecutor.ClusterManager;
 import org.molgenis.compute.ui.meta.AnalysisJobMetaData;
@@ -43,6 +42,9 @@ import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.event.DataExplorerRegisterRefCellClickEventHandler;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.security.core.utils.SecurityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -63,7 +65,7 @@ import com.google.common.collect.Iterables;
 public class AnalysisPluginController extends MolgenisPluginController implements
 		DataExplorerRegisterRefCellClickEventHandler
 {
-	private static Logger LOG = Logger.getLogger(AnalysisPluginController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(AnalysisPluginController.class);
 
 	public static final String ID = "analysis";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
@@ -166,6 +168,7 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 		analysis.setBackend(backend);
 		analysis.setCreationDate(creationDate);
 		analysis.setWorkflow(workflow);
+		analysis.setUser(SecurityUtils.getCurrentUsername());
 		dataService.add(AnalysisMetaData.INSTANCE.getName(), analysis);
 
 		String targetEntityName = createAnalysisRequest.getTargetEntityName();
@@ -221,6 +224,7 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 		clonedAnalysis.setDescription(analysis.getDescription());
 		// do not set jobs, submitScript
 		clonedAnalysis.setWorkflow(analysis.getWorkflow());
+		clonedAnalysis.setUser(analysis.getUser());
 		dataService.add(AnalysisMetaData.INSTANCE.getName(), clonedAnalysis);
 
 		String targetEntityName = analysis.getWorkflow().getTargetType();

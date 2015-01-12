@@ -132,10 +132,11 @@ public abstract class MysqlRepositoryCollection implements ManageableCrudReposit
 					+ "] registered in entities table but missing in the MysqlRepositoryCollection");
 
 			result = getDecoratedRepository(result);
-			if (!dataService.hasRepository(emd.getName()))
+			if (dataService.hasRepository(emd.getName()))
 			{
-				dataService.addRepository(result);
+				dataService.removeRepository(emd.getName());
 			}
+			dataService.addRepository(result);
 
 			return result;
 		}

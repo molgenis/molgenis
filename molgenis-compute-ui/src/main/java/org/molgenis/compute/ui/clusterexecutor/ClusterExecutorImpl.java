@@ -13,13 +13,17 @@ import java.util.concurrent.TimeUnit;
 
 import org.molgenis.compute.ui.meta.AnalysisJobMetaData;
 import org.molgenis.compute.ui.meta.AnalysisMetaData;
+import org.molgenis.compute.ui.meta.MolgenisUserKeyMetaData;
 import org.molgenis.compute.ui.model.Analysis;
 import org.molgenis.compute.ui.model.AnalysisJob;
 import org.molgenis.compute.ui.model.AnalysisStatus;
 import org.molgenis.compute.ui.model.JobStatus;
+import org.molgenis.compute.ui.model.MolgenisUserKey;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.runas.RunAsSystem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jcraft.jsch.Channel;
@@ -35,8 +39,7 @@ import com.jcraft.jsch.SftpException;
  */
 public class ClusterExecutorImpl implements ClusterExecutor
 {
-	private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(ClusterManager.class);
-
+	private static final Logger LOG = LoggerFactory.getLogger(ClusterExecutorImpl.class);
 
 	private static final String SLURM_CANCEL = "scancel ";
 	private static final String PBS_CANCEL = "qdel ";
@@ -44,208 +47,182 @@ public class ClusterExecutorImpl implements ClusterExecutor
 	public static final String SLURM = "slurm";
 	public static final String PBS = "pbs";
 
-	private List<String> idList = new ArrayList<String>();
-
 	@Autowired
 	private DataService dataService;
 
 	@Autowired
 	private ClusterCurlBuilder builder;
 
-	// FIXME bug removes
-	private Analysis run = null;
-
-	// variables, that should come from userUI, DB and config files
+	// FIXME variables, that should come from userUI, DB and config files
 	private String password, username, root, url, scheduler;
 
 	@RunAsSystem
 	@Override
 	public boolean submitRun(Analysis analysis)
 	{
+		String clusterRoot = root;
+		String runDir = clusterRoot + analysis.getIdentifier();
 		// here read properties, which later will come from username interface (username, password)
 		// and DB (clusterRoot)
 		readUserProperties();
 
 		LOG.info("SUBMIT Analysis [" + analysis.getName() + "]");
-		this.run = analysis;
 
-		String runName = analysis.getIdentifier();
-		String clusterRoot = root;
-		String runDir = clusterRoot + runName;
-//		String runDir = clusterRoot + "test04";
+		// get SSH key pair for current user
+		MolgenisUserKey userKeyPair = dataService.findOne(MolgenisUserKeyMetaData.INSTANCE.getName(),
+				new QueryImpl().eq(MolgenisUserKeyMetaData.USER, analysis.getUser()), MolgenisUserKey.class);
 
-		boolean prepared = prepareRun(analysis, username, password, runDir);
-
-		if (prepared)
+		// submit analysis through SSH channel
+		MolgenisUserSecureChannel userSecureChannel = null;
+		try
 		{
-			boolean submitted = submit(analysis, username, password, runDir);
-			return submitted;
+			userSecureChannel = new MolgenisUserSecureChannel(userKeyPair);
+
+			Session session = null;
+			try
+			{
+				session = userSecureChannel.getSession(analysis.getBackend().getHost(), 22);
+
+				session.connect();
+				LOG.info("session connected.....");
+
+				// copy files to backend
+				prepareAnalysis(analysis, session, runDir);
+
+			}
+			finally
+			{
+				if (session != null)
+				{
+					session.disconnect();
+					LOG.info("session disconnected.....");
+				}
+			}
+
+			LOG.debug("sleeping 90 seconds ...");
+			Thread.sleep(90000);
+			LOG.debug("finished sleeping 90 seconds");
+
+			try
+			{
+				session = userSecureChannel.getSession(analysis.getBackend().getHost(), 22);
+
+				session.connect();
+				LOG.info("session connected.....");
+
+				// execute submit script on backend
+				submitAnalysis(analysis, session, runDir);
+			}
+			finally
+			{
+				if (session != null)
+				{
+					session.disconnect();
+					LOG.info("session disconnected.....");
+				}
+			}
+
 		}
-		else
+		catch (IOException | JSchException | InterruptedException | SftpException e)
 		{
-			LOG.error("Error in preparing ComputeRun");
-			return false;
+			LOG.error("Failed to submit analysis", e);
+			throw new RuntimeException(e);
 		}
+		finally
+		{
+			if (userSecureChannel != null)
+			{
+				try
+				{
+					userSecureChannel.close();
+				}
+				catch (IOException e)
+				{
+					throw new RuntimeException(e);
+				}
+			}
+		}
+
+		return true;
 	}
 
-	private boolean prepareRun(Analysis analysis, String username, String password, String runDir)
+	private void prepareAnalysis(Analysis analysis, Session session, String runDir) throws JSchException,
+			InterruptedException, SftpException
 	{
 		LOG.info("Prepare Analysis: " + analysis.getName());
 
-		try
+		Channel channel = session.openChannel("sftp");
+		channel.setInputStream(System.in);
+		channel.setOutputStream(System.out);
+		channel.connect();
+		LOG.info("shell channel connected....");
+
+		ChannelSftp channelSftp = (ChannelSftp) channel;
+		ChannelExec channelExec = (ChannelExec) session.openChannel("exec");
+
+		LOG.info("create run directory...");
+
+		channelExec.setCommand("mkdir " + runDir);
+		channelExec.connect();
+		channelExec.disconnect();
+
+		// give some time to create directory
+		TimeUnit.SECONDS.sleep(1);
+
+		LOG.info("scripts transferring...");
+		InputStream is = new ByteArrayInputStream(analysis.getSubmitScript().getBytes());
+		channelSftp.put(is, runDir + "/submit.sh");
+
+		Iterable<AnalysisJob> jobs = dataService.findAll(AnalysisJobMetaData.INSTANCE.getName(),
+				new QueryImpl().eq(AnalysisJobMetaData.ANALYSIS, analysis), AnalysisJob.class);
+		for (AnalysisJob job : jobs)
 		{
-			Thread.sleep(90000);
-
-			JSch jsch = new JSch();
-
-			String user = username;
-			String host = url;
-			int port = 22;
-			String privateKey = ".ssh/id_rsa";
-
-			jsch.addIdentity(privateKey, password);
-			LOG.info("identity added ");
-
-			Session session = jsch.getSession(user, host, port);
-
-			LOG.info("session created.");
-
-			java.util.Properties config = new java.util.Properties();
-			config.put("StrictHostKeyChecking", "no");
-			session.setConfig(config);
-
-			session.connect();
-			LOG.info("session connected.....");
-
-			Channel channel = session.openChannel("sftp");
-			channel.setInputStream(System.in);
-			channel.setOutputStream(System.out);
-			channel.connect();
-			LOG.info("shell channel connected....");
-
-			ChannelSftp channelSftp = (ChannelSftp) channel;
-			ChannelExec channelExec = (ChannelExec) session.openChannel("exec");
-
-			LOG.info("create run directory...");
-
-			channelExec.setCommand("mkdir " + runDir);
-			channelExec.connect();
-			channelExec.disconnect();
-
-			// give some time to create directory
-			TimeUnit.SECONDS.sleep(1);
-
-			LOG.info("scripts transferring...");
-			InputStream is = new ByteArrayInputStream(analysis.getSubmitScript().getBytes());
-			channelSftp.put(is, runDir + "/submit.sh");
-
-			Iterable<AnalysisJob> jobs = dataService.findAll(AnalysisJobMetaData.INSTANCE.getName(),
-					new QueryImpl().eq(AnalysisJobMetaData.ANALYSIS, analysis), AnalysisJob.class);
-			for (AnalysisJob job : jobs)
-			{
-				String taskName = job.getName();
-				String builtScript = builder.buildScript(job);
-				is = new ByteArrayInputStream(builtScript.getBytes());
-				channelSftp.put(is, runDir + "/" + taskName + ".sh");
-			}
-
-			channelSftp.exit();
-			session.disconnect();
-
-			LOG.info("... run [" + analysis.getName() + "] is prepared");
-			return true;
-		}
-		catch (JSchException e)
-		{
-			e.printStackTrace();
-		}
-		catch (SftpException e)
-		{
-			e.printStackTrace();
-		}
-		catch (InterruptedException e)
-		{
-			e.printStackTrace();
+			String taskName = job.getName();
+			String builtScript = builder.buildScript(job);
+			is = new ByteArrayInputStream(builtScript.getBytes());
+			channelSftp.put(is, runDir + "/" + taskName + ".sh");
 		}
 
-		return false;
+		channelSftp.exit();
+		session.disconnect();
+
+		LOG.info("... run [" + analysis.getName() + "] is prepared");
 	}
 
-
-	private boolean submit(Analysis analysis, String username, String password, String runDir)
+	private void submitAnalysis(Analysis analysis, Session session, String runDir) throws JSchException, IOException
 	{
-		try
+		Channel channel = session.openChannel("sftp");
+		channel.setInputStream(System.in);
+		channel.setOutputStream(System.out);
+		channel.connect();
+		LOG.info("shell channel connected....");
+
+		ChannelExec channelExec = (ChannelExec) session.openChannel("exec");
+
+		InputStream answer = channelExec.getInputStream();
+
+		LOG.info("submitting ...");
+
+		String command = "cd " + runDir + "; sh submit.sh";
+		channelExec.setCommand(command);
+		channelExec.connect();
+
+		BufferedReader reader = new BufferedReader(new InputStreamReader(answer));
+		String line;
+
+		List<String> idList = new ArrayList<String>();
+		while ((line = reader.readLine()) != null)
 		{
-			Thread.sleep(90000);
-
-			JSch jsch = new JSch();
-
-			String user = username;
-			String host = url;
-			int port = 22;
-			String privateKey = ".ssh/id_rsa";
-
-			jsch.addIdentity(privateKey, password);
-			LOG.info("identity added ");
-
-			Session session = jsch.getSession(user, host, port);
-
-			LOG.info("session created.");
-
-			java.util.Properties config = new java.util.Properties();
-			config.put("StrictHostKeyChecking", "no");
-			session.setConfig(config);
-
-			session.connect();
-			LOG.info("session connected.....");
-
-			Channel channel = session.openChannel("sftp");
-			channel.setInputStream(System.in);
-			channel.setOutputStream(System.out);
-			channel.connect();
-			LOG.info("shell channel connected....");
-
-			ChannelExec channelExec = (ChannelExec) session.openChannel("exec");
-
-			InputStream answer = channelExec.getInputStream();
-
-			LOG.info("submitting ...");
-
-			String command = "cd " + runDir + "; sh submit.sh";
-			channelExec.setCommand(command);
-			channelExec.connect();
-
-			BufferedReader reader = new BufferedReader(new InputStreamReader(answer));
-			String line;
-			idList.clear();
-
-			while ((line = reader.readLine()) != null)
-			{
-				LOG.info(line);
-				idList.add(line);
-			}
-
-			channelExec.disconnect();
-			session.disconnect();
-
-			updateDatabaseWithTaskIDs(idList, analysis);
-
-			LOG.info("Analysis [" + analysis.getName() + "] is submitted");
-			return true;
+			LOG.info(line);
+			idList.add(line);
 		}
-		catch (JSchException e)
-		{
-			e.printStackTrace();
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
-		catch (InterruptedException e)
-		{
-			e.printStackTrace();
-		}
-		return false;
+
+		channelExec.disconnect();
+		session.disconnect();
+
+		updateDatabaseWithTaskIDs(idList, analysis);
+
+		LOG.info("Analysis [" + analysis.getName() + "] is submitted");
 	}
 
 	private void updateDatabaseWithTaskIDs(List<String> idList, Analysis analysis)
@@ -261,7 +238,7 @@ public class ClusterExecutorImpl implements ClusterExecutor
 				AnalysisJob analysisJob = findJob(analysis, jobName);
 				if (analysisJob != null)
 				{
-//					analysisJob.setStatus(JobStatus.SUBMITTED);
+					// analysisJob.setStatus(JobStatus.SUBMITTED);
 					analysisJob.setSchedulerId(submittedID);
 
 					dataService.update(AnalysisJobMetaData.INSTANCE.getName(), analysisJob);
@@ -275,7 +252,7 @@ public class ClusterExecutorImpl implements ClusterExecutor
 	{
 		Iterable<AnalysisJob> jobs = dataService.findAll(AnalysisJobMetaData.INSTANCE.getName(),
 				new QueryImpl().eq(AnalysisJobMetaData.ANALYSIS, analysis), AnalysisJob.class);
-		//TODO: put it into query
+		// TODO: put it into query
 		for (AnalysisJob job : jobs)
 		{
 			if (job.getName().equalsIgnoreCase(jobName)) return job;
@@ -319,7 +296,7 @@ public class ClusterExecutorImpl implements ClusterExecutor
 			channel.connect();
 			LOG.info("shell channel connected....");
 
-			ChannelExec channelExec = (ChannelExec)session.openChannel("exec");
+			ChannelExec channelExec = (ChannelExec) session.openChannel("exec");
 
 			InputStream answer = channelExec.getInputStream();
 
@@ -331,18 +308,15 @@ public class ClusterExecutorImpl implements ClusterExecutor
 			String schedulerType = scheduler;
 
 			boolean anyJobCancelled = false;
-			for(AnalysisJob job : jobs)
+			for (AnalysisJob job : jobs)
 			{
-				if(job.getStatus() == JobStatus.RUNNING)
+				if (job.getStatus() == JobStatus.RUNNING)
 				{
 					anyJobCancelled = true;
 					String command = "";
-					if (schedulerType.equalsIgnoreCase(SLURM))
-						command = SLURM_CANCEL + job.getSchedulerId();
-					else if (schedulerType.equalsIgnoreCase(PBS))
-						command = PBS_CANCEL + job.getSchedulerId();
-					else
-						LOG.error("Unsupported scheduler type [" + schedulerType + "]");
+					if (schedulerType.equalsIgnoreCase(SLURM)) command = SLURM_CANCEL + job.getSchedulerId();
+					else if (schedulerType.equalsIgnoreCase(PBS)) command = PBS_CANCEL + job.getSchedulerId();
+					else LOG.error("Unsupported scheduler type [" + schedulerType + "]");
 
 					channelExec.setCommand(command);
 					channelExec.connect();
@@ -355,16 +329,16 @@ public class ClusterExecutorImpl implements ClusterExecutor
 						LOG.info(line);
 					}
 
-					//TODO: it would be nice to update jobs and analysis statuses
-					//				job.setStatus(JobStatus.CANCELLED);
-					//				dataService.update(AnalysisJobMetaData.INSTANCE.getName(), job);
+					// TODO: it would be nice to update jobs and analysis statuses
+					// job.setStatus(JobStatus.CANCELLED);
+					// dataService.update(AnalysisJobMetaData.INSTANCE.getName(), job);
 				}
 			}
 
 			channelExec.disconnect();
 			session.disconnect();
 
-			if(anyJobCancelled)
+			if (anyJobCancelled)
 			{
 				analysis.setStatus(AnalysisStatus.CANCELLED);
 				dataService.update(AnalysisMetaData.INSTANCE.getName(), analysis);
@@ -375,17 +349,17 @@ public class ClusterExecutorImpl implements ClusterExecutor
 		}
 		catch (JSchException e)
 		{
-			LOG.error(e);
+			LOG.error("", e);
 			return false;
 		}
 		catch (IOException e)
 		{
-			LOG.error(e);
+			LOG.error("", e);
 			return false;
 		}
 		catch (InterruptedException e)
 		{
-			LOG.error(e);
+			LOG.error("", e);
 			return false;
 		}
 	}
