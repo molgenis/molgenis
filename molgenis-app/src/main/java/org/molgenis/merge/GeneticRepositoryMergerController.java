@@ -16,15 +16,19 @@ import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.merge.RepositoryMerger;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.util.ErrorMessageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -148,5 +152,15 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 		repositoryMerger.merge(geneticRepositories, commonAttributes, mergedRepository, ID_FIELD);
 
 		return resultSet;
+	}
+
+	@ExceptionHandler(RuntimeException.class)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
+	{
+		LOG.error(e.getMessage(), e);
+		return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(
+				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage()));
 	}
 }

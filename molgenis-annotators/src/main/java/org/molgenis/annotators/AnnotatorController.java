@@ -18,6 +18,7 @@ import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.validation.EntityValidator;
+import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.FileStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -177,10 +178,10 @@ public class AnnotatorController
 	@ExceptionHandler(RuntimeException.class)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-	public Map<String, String> handleRuntimeException(RuntimeException e)
+	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
 	{
 		LOG.error(e.getMessage(), e);
-		return Collections.singletonMap("errorMessage",
-				"An error occured. Please contact the administrator.<br />Message:" + e.getMessage());
+		return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(
+				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage()));
 	}
 }
