@@ -147,8 +147,8 @@ public class OmimHpoAnnotatorTest
 
 		UrlPinger urlPinger = mock(UrlPinger.class);
 		MolgenisSettings molgenisSettings = mock(MolgenisSettings.class);
-		when(molgenisSettings.getProperty(HpoMappingProvider.KEY_HPO_MAPPING)).thenReturn("testUrl1");
-		when(molgenisSettings.getProperty(HgncLocationsProvider.KEY_HGNC_LOCATIONS_VALUE)).thenReturn("testUrl2");
+		when(molgenisSettings.getProperty(HpoMappingProvider.KEY_HPO_MAPPING, "")).thenReturn("testUrl1");
+		when(molgenisSettings.getProperty(HgncLocationsProvider.KEY_HGNC_LOCATIONS_VALUE, "")).thenReturn("testUrl2");
 		when(urlPinger.ping("testUrl1", 500)).thenReturn(true);
 		when(urlPinger.ping("testUrl2", 500)).thenReturn(true);
 		
