@@ -110,9 +110,9 @@ public class OmimHpoAnnotator extends LocusAnnotator
 	public boolean annotationDataExists()
 	{
 		boolean dataExists = false;
-		if (urlPinger.ping(molgenisSettings.getProperty(HpoMappingProvider.KEY_HPO_MAPPING), 500)
+		if (urlPinger.ping(molgenisSettings.getProperty(HpoMappingProvider.KEY_HPO_MAPPING, ""), 500)
 				&& urlPinger.ping(
-						molgenisSettings.getProperty(HgncLocationsProvider.KEY_HGNC_LOCATIONS_VALUE), 500))
+						molgenisSettings.getProperty(HgncLocationsProvider.KEY_HGNC_LOCATIONS_VALUE, ""), 500))
 		{
 			dataExists = true;
 		}
