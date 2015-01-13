@@ -97,7 +97,7 @@ public class CatalogManagerController extends MolgenisPluginController
 	 * @return
 	 */
 	@RequestMapping(value = "/activation", params = "activate", method = RequestMethod.POST)
-	public String loadCatalog(@RequestParam(value = "id", required = false) String id, Model model)
+	public synchronized String loadCatalog(@RequestParam(value = "id", required = false) String id, Model model)
 	{
 		try
 		{
@@ -133,7 +133,7 @@ public class CatalogManagerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/activation", params = "deactivate", method = RequestMethod.POST)
-	public String deactivateCatalog(@RequestParam(value = "id", required = false) String id, Model model)
+	public synchronized String deactivateCatalog(@RequestParam(value = "id", required = false) String id, Model model)
 	{
 		try
 		{
