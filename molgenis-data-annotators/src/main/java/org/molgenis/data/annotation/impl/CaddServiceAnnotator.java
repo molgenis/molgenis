@@ -10,8 +10,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -26,6 +24,8 @@ import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.server.MolgenisSimpleSettings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -70,7 +70,8 @@ public class CaddServiceAnnotator extends VariantAnnotator
 							+ ",Number=1,Type=Float,Description=\"CADD absolute C score, ie. unscaled SVM output. Useful as  reference when the scaled score may be unexpected.\">" });
 
 	public static final String CADD_FILE_LOCATION_PROPERTY = "cadd_location";
-	TabixReader tabixReader;
+
+	private volatile TabixReader tabixReader;
 
 	@Autowired
 	public CaddServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService)
@@ -146,7 +147,7 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	@Override
 	public List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException
 	{
-		getTabixReader();
+		checkTabixReader();
 
 		// FIXME need to solve this! duplicate notation for CHROM in VcfRepository.CHROM and LocusAnnotator.CHROMOSOME
 		String chromosome = entity.getString(VcfRepository.CHROM) != null ? entity.getString(VcfRepository.CHROM) : entity
@@ -158,11 +159,20 @@ public class CaddServiceAnnotator extends VariantAnnotator
 		return Collections.<Entity> singletonList(getAnnotatedEntity(entity, resultMap));
 	}
 
-	private synchronized void getTabixReader() throws IOException
+	/**
+	 * Makes sure the tabixReader exists.
+	 */
+	private void checkTabixReader() throws IOException
 	{
 		if (tabixReader == null)
 		{
-			tabixReader = new TabixReader(molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY));
+			synchronized (this)
+			{
+				if (tabixReader == null)
+				{
+					tabixReader = new TabixReader(molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY));
+				}
+			}
 		}
 	}
 
