@@ -227,7 +227,6 @@ public class MappingsBuilder
 				break;
 			case EMAIL:
 			case ENUM:
-			case HTML:
 			case HYPERLINK:
 			case STRING:
 				// enable/disable norms based on given value
@@ -241,6 +240,7 @@ public class MappingsBuilder
 						.field("type", "string").field("analyzer", ElasticsearchIndexCreator.NGRAM_ANALYZER)
 						.endObject().endObject();
 				break;
+			case HTML:
 			case SCRIPT:
 			case TEXT:
 				// enable/disable norms based on given value
