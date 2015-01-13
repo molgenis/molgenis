@@ -3,11 +3,12 @@ package org.molgenis.data.annotation.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -145,32 +146,38 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	@Override
 	public List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException
 	{
-		if (tabixReader == null)
-		{
-			tabixReader = new TabixReader(molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY));
-		}
-		boolean done;
-		int i;
-		List<Entity> results = new ArrayList<Entity>();
+		getTabixReader();
+
 		// FIXME need to solve this! duplicate notation for CHROM in VcfRepository.CHROM and LocusAnnotator.CHROMOSOME
 		String chromosome = entity.getString(VcfRepository.CHROM) != null ? entity.getString(VcfRepository.CHROM) : entity
 				.getString(CHROMOSOME);
 
-		Long position = entity.getLong(POSITION); // FIXME use VcfRepository.POS ?
-		String reference = entity.getString(REFERENCE); // FIXME use VcfRepository.REF ?
-		String alternative = entity.getString(ALTERNATIVE); // FIXME use VcfRepository.ALT ?
+		// FIXME use VcfRepository.POS, use VcfRepository.REF, use VcfRepository.ALT ?
+		Map<String, Object> resultMap = annotateEntityWithCadd(chromosome, entity.getLong(POSITION),
+				entity.getString(REFERENCE), entity.getString(ALTERNATIVE));
+		return Collections.<Entity> singletonList(getAnnotatedEntity(entity, resultMap));
+	}
 
+	private synchronized void getTabixReader() throws IOException
+	{
+		if (tabixReader == null)
+		{
+			tabixReader = new TabixReader(molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY));
+		}
+	}
+
+	private synchronized Map<String, Object> annotateEntityWithCadd(String chromosome, Long position, String reference,
+			String alternative) throws IOException
+	{
 		Double caddAbs = null;
 		Double caddScaled = null;
 
 		TabixReader.Iterator tabixIterator = tabixReader.query(chromosome + ":" + position + "-" + position);
-		if (tabixIterator == null)
-		{
-			System.out.print("");
-		}
+
 		// TabixReaderIterator does not have a hasNext();
-		done = false;
-		i = 0;
+		boolean done = tabixIterator == null;
+		int i = 0;
+
 		while (!done)
 		{
 			String line = tabixIterator.next();
@@ -221,14 +228,10 @@ public class CaddServiceAnnotator extends VariantAnnotator
 			}
 		}
 
-		HashMap<String, Object> resultMap = new HashMap<String, Object>();
-
+		Map<String, Object> resultMap = new HashMap<String, Object>();
 		resultMap.put(CADD_ABS, caddAbs);
 		resultMap.put(CADD_SCALED, caddScaled);
-
-		results.add(getAnnotatedEntity(entity, resultMap));
-
-		return results;
+		return resultMap;
 	}
 
 	@Override
