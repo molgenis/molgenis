@@ -345,22 +345,17 @@ public class QueryGenerator implements QueryPartGenerator
 					case CATEGORICAL:
 					case MREF:
 					case XREF:
+					case SCRIPT: // due to size would result in large amount of ngrams
+					case TEXT: // due to size would result in large amount of ngrams
+					case HTML: // due to size would result in large amount of ngrams
 						throw new UnsupportedOperationException("Query with operator [" + queryOperator
 								+ "] and data type [" + dataType + "] not supported");
 					case EMAIL:
 					case ENUM:
-					case HTML:
 					case HYPERLINK:
-					case SCRIPT:
 					case STRING:
-					case TEXT:
-						// see note about extremely slow wildcard queries:
-						// http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/query-dsl-wildcard-query.html
-						String wildcardQueryValue = new StringBuilder("*")
-								.append(queryValue.toString().replaceAll("\\*", "\\\\*").replaceAll("\\?", "\\\\?"))
-								.append('*').toString();
-						queryBuilder = QueryBuilders.wildcardQuery(queryField + '.'
-								+ MappingsBuilder.FIELD_NOT_ANALYZED, wildcardQueryValue);
+						queryBuilder = QueryBuilders.matchQuery(
+								queryField + '.' + MappingsBuilder.FIELD_NGRAM_ANALYZED, queryValue);
 						break;
 					case FILE:
 					case IMAGE:
