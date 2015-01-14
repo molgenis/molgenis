@@ -4,10 +4,10 @@
 <#assign css=['mapper.css']>
 <#assign js=['mapper.js']>
 
+<#include "mapping-project-overview.ftl" />
+
 <@header css js/>
 
-<div>
-	Mapping service!
-</div>
+<@mappingProjectOverview />
 
 <@footer/>
