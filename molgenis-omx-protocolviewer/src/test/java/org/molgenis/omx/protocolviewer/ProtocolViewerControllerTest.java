@@ -3,11 +3,7 @@ package org.molgenis.omx.protocolviewer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.URL;
 import java.util.Arrays;
 
 import org.molgenis.catalog.CatalogFolder;
@@ -64,11 +60,11 @@ public class ProtocolViewerControllerTest
 		when(group.getId()).thenReturn("group");
 		CatalogFolder folder1 = mock(CatalogFolder.class);
 		when(folder1.getId()).thenReturn("1");
-		when(folder1.getGroup()).thenReturn("Lifelines->Group->Folder 1");
+		when(folder1.getGroup()).thenReturn(Arrays.asList("Lifelines", "Group", "Folder 1"));
 		when(folder1.getPath()).thenReturn(Arrays.asList(lifelines, group, folder1));
 		CatalogFolder folder2 = mock(CatalogFolder.class);
 		when(folder2.getId()).thenReturn("2");
-		when(folder2.getGroup()).thenReturn("Lifelines->Group->Folder 2");
+		when(folder2.getGroup()).thenReturn(Arrays.asList("Lifelines", "Group", "Folder 2"));
 		when(folder2.getPath()).thenReturn(Arrays.asList(lifelines, group, folder2));
 		when(studyDefinition.getItems()).thenReturn(Arrays.asList(folder1, folder2));
 

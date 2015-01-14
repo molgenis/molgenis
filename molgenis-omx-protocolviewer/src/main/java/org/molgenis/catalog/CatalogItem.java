@@ -1,5 +1,7 @@
 package org.molgenis.catalog;
 
+import java.util.List;
+
 public interface CatalogItem
 {
 	public String getId();
@@ -8,7 +10,7 @@ public interface CatalogItem
 
 	public String getDescription();
 	
-	public String getGroup();
+	public List<String> getGroup();
 
 	/**
 	 * Return catalog item code or null if code does not exist

@@ -168,7 +168,7 @@
 							var protocol = protocolMap[this.path[this.path.length - 1]];
 							var protocolName = protocol.Name;
 							var protocolIdentifier = protocol.Identifier;
-							var description = this.group;
+							var description = this.group.join(' &rarr; ');
 							var row = $('<tr />').data('key', this);
 							$('<td />').text(typeof protocolName !== 'undefined' ? protocolName : "").appendTo(row);
 							$('<td />').text(typeof protocolIdentifier !== 'undefined' ? protocolIdentifier : "").appendTo(row);

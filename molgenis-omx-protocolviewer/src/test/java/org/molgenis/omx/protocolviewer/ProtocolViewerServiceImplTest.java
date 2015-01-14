@@ -20,8 +20,6 @@ import javax.mail.internet.MimeMessage;
 import javax.servlet.http.Part;
 
 import org.mockito.ArgumentCaptor;
-import org.mockito.InOrder;
-import org.mockito.internal.InOrderImpl;
 import org.molgenis.catalog.Catalog;
 import org.molgenis.catalog.CatalogFolder;
 import org.molgenis.catalog.CatalogMeta;
@@ -31,7 +29,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.excel.ExcelSheetWriter;
 import org.molgenis.data.excel.ExcelWriter;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.protocolviewer.ProtocolViewerServiceImplTest.Config;
@@ -307,8 +304,7 @@ public class ProtocolViewerServiceImplTest extends AbstractTestNGSpringContextTe
 		ExcelSheetWriter sheetWriter = mock(ExcelSheetWriter.class);
 		when(writer.createWritable("Variables", Arrays.asList("Id", "Variable", "Description", "Group"))).thenReturn(sheetWriter);
 		
-		when(catalogItem0.getGroup()).thenReturn("Lifelines->Blah->blah");
-		
+		when(catalogItem0.getGroup()).thenReturn(Arrays.asList("Lifelines","Blah","blah"));
 		
 		protocolViewerService.createStudyDefinitionDraftXlsForCurrentUser(writer, catalog0.getId());
 		
@@ -322,7 +318,7 @@ public class ProtocolViewerServiceImplTest extends AbstractTestNGSpringContextTe
 		assertEquals("1", rows.get(1).get("Id"));
 		assertEquals("2", rows.get(2).get("Id"));
 		
-		assertEquals("Lifelines->Blah->blah", rows.get(0).get("Group"));
+		assertEquals(rows.get(0).get("Group"), "Lifelines→Blah→blah");
 	}
 
 	@Test

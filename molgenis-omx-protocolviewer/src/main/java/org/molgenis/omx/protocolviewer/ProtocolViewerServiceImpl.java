@@ -369,7 +369,7 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 						entity.set(header.get(0), catalogItem.getExternalId());
 						entity.set(header.get(1), catalogItem.getName());
 						entity.set(header.get(2), catalogItem.getDescription());
-						entity.set(header.get(3), catalogItem.getGroup());
+						entity.set(header.get(3), org.apache.commons.lang3.StringUtils.join(catalogItem.getGroup(),'\u2192'));
 						writable.add(entity);
 					}
 				}

@@ -462,9 +462,9 @@ public class ProtocolViewerController extends MolgenisPluginController
 	{
 		private final String protocol;
 		private final List<String> path;
-		private final String group;
+		private final List<String> group;
 
-		public SelectedItemResponse(String protocol, List<String> path, String group)
+		public SelectedItemResponse(String protocol, List<String> path, List<String> group)
 		{
 			this.protocol = protocol;
 			this.path = path;
@@ -481,7 +481,7 @@ public class ProtocolViewerController extends MolgenisPluginController
 			return path;
 		}
 		
-		public String getGroup()
+		public List<String> getGroup()
 		{
 			return group;
 		}

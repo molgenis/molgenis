@@ -350,7 +350,7 @@ public class StudyManagerController extends MolgenisPluginController
 						entity.set(header.get(0), catalogItem.getExternalId());
 						entity.set(header.get(1), catalogItem.getName());
 						entity.set(header.get(2), catalogItem.getDescription());
-						entity.set(header.get(3), catalogItem.getGroup());
+						entity.set(header.get(3), StringUtils.join(catalogItem.getGroup(),'\u2192'));
 						sheetWriter.add(entity);
 					}
 				}

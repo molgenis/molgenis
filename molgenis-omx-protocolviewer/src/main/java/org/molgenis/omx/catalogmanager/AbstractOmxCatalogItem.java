@@ -38,13 +38,13 @@ public abstract class AbstractOmxCatalogItem implements CatalogItem
 		return Lists.reverse(protocolPath);
 	}
 	
-	public String getGroup()
+	public List<String> getGroup()
 	{
 		List<String> pathItemNames = new ArrayList<String>();
 		for(CatalogFolder pathItem: getPath())
 		{
 			pathItemNames.add(pathItem.getName());
 		}
-		return StringUtils.join(pathItemNames, '→');
+		return pathItemNames;
 	}
 }
