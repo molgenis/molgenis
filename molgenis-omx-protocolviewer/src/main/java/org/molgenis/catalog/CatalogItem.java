@@ -7,6 +7,8 @@ public interface CatalogItem
 	public String getName();
 
 	public String getDescription();
+	
+	public String getGroup();
 
 	/**
 	 * Return catalog item code or null if code does not exist

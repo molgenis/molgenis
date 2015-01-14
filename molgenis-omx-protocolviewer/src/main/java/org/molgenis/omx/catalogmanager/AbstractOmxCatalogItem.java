@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.catalog.CatalogFolder;
 import org.molgenis.catalog.CatalogItem;
 import org.molgenis.omx.observ.Protocol;
@@ -19,7 +20,7 @@ public abstract class AbstractOmxCatalogItem implements CatalogItem
 	 * @param srcProtocol
 	 * @return
 	 */
-	protected Iterable<CatalogFolder> getPath(Protocol srcProtocol)
+	protected static Iterable<CatalogFolder> getPath(Protocol srcProtocol)
 	{
 		List<CatalogFolder> protocolPath = new ArrayList<CatalogFolder>();
 		Collection<Protocol> protocols = Collections.singletonList(srcProtocol);
@@ -35,5 +36,15 @@ public abstract class AbstractOmxCatalogItem implements CatalogItem
 			protocols = protocol.getSubprotocolsProtocolCollection();
 		}
 		return Lists.reverse(protocolPath);
+	}
+	
+	public String getGroup()
+	{
+		List<String> pathItemNames = new ArrayList<String>();
+		for(CatalogFolder pathItem: getPath())
+		{
+			pathItemNames.add(pathItem.getName());
+		}
+		return StringUtils.join(pathItemNames, '→');
 	}
 }
