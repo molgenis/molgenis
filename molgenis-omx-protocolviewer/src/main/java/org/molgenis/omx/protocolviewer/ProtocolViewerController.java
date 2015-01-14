@@ -30,6 +30,7 @@ import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
@@ -210,7 +211,7 @@ public class ProtocolViewerController extends MolgenisPluginController
 		response.setContentType("application/vnd.ms-excel");
 		response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
 
-		protocolViewerService.createStudyDefinitionDraftXlsForCurrentUser(response.getOutputStream(),
+		protocolViewerService.createStudyDefinitionDraftXlsForCurrentUser(new ExcelWriter(response.getOutputStream()),
 				catalogId.toString());
 	}
 

@@ -5,7 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -302,12 +301,12 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 	@PreAuthorize("isAuthenticated() and hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_PROTOCOLVIEWER')")
 	@Transactional(rollbackFor =
 	{ IOException.class, UnknownCatalogException.class })
-	public void createStudyDefinitionDraftXlsForCurrentUser(OutputStream outputStream, String catalogId)
+	public void createStudyDefinitionDraftXlsForCurrentUser(ExcelWriter writer, String catalogId)
 			throws IOException, UnknownCatalogException
 	{
 		StudyDefinition studyDefinition = getStudyDefinitionDraftForCurrentUser(catalogId);
 		if (studyDefinition == null) return;
-		writeStudyDefinitionXls(studyDefinition, outputStream);
+		writeStudyDefinitionXls(studyDefinition, writer);
 	}
 
 	private String createOrderConfirmationEmailText(String appName)
@@ -328,7 +327,7 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		try
 		{
-			writeStudyDefinitionXls(studyDefinition, bos);
+			writeStudyDefinitionXls(studyDefinition, new ExcelWriter(bos));
 			return new ByteArrayInputStream(bos.toByteArray());
 		}
 		finally
@@ -337,12 +336,12 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 		}
 	}
 
-	private void writeStudyDefinitionXls(StudyDefinition studyDefinition, OutputStream outputStream) throws IOException
+	void writeStudyDefinitionXls(StudyDefinition studyDefinition, ExcelWriter excelWriter) throws IOException
 	{
 		if (studyDefinition == null) return;
 
 		// write excel file
-		List<String> header = Arrays.asList("Id", "Variable", "Description");
+		List<String> header = Arrays.asList("Id", "Variable", "Description", "Group");
 
 		List<CatalogFolder> catalogItems = Lists.newArrayList(studyDefinition.getItems());
 		if (catalogItems != null)
@@ -357,7 +356,6 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 			});
 		}
 
-		ExcelWriter excelWriter = new ExcelWriter(outputStream);
 		try
 		{
 			Writable writable = excelWriter.createWritable("Variables", header);
@@ -371,6 +369,7 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 						entity.set(header.get(0), catalogItem.getExternalId());
 						entity.set(header.get(1), catalogItem.getName());
 						entity.set(header.get(2), catalogItem.getDescription());
+						entity.set(header.get(3), catalogItem.getGroup());
 						writable.add(entity);
 					}
 				}

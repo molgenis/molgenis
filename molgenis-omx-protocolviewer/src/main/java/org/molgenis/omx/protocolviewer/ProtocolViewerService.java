@@ -8,6 +8,7 @@ import javax.servlet.http.Part;
 
 import org.molgenis.catalog.CatalogMeta;
 import org.molgenis.catalog.UnknownCatalogException;
+import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.study.StudyDefinition;
 import org.molgenis.study.UnknownStudyDefinitionException;
 
@@ -90,6 +91,6 @@ public interface ProtocolViewerService
 	 * @throws IOException
 	 * @throws UnknownCatalogException
 	 */
-	void createStudyDefinitionDraftXlsForCurrentUser(OutputStream outputStream, String catalogId) throws IOException,
+	void createStudyDefinitionDraftXlsForCurrentUser(ExcelWriter writer, String catalogId) throws IOException,
 			UnknownCatalogException;
 }
