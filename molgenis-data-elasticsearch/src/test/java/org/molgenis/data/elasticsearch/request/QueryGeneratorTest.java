@@ -781,8 +781,8 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.wildcardQuery(compoundPart0AttributeName + '.'
-				+ MappingsBuilder.FIELD_NOT_ANALYZED, '*' + value + '*');
+		QueryBuilder expectedQuery = QueryBuilders.matchQuery(compoundPart0AttributeName + '.'
+				+ MappingsBuilder.FIELD_NGRAM_ANALYZED, value);
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -818,8 +818,8 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.wildcardQuery(emailAttributeName + '.'
-				+ MappingsBuilder.FIELD_NOT_ANALYZED, '*' + value + '*');
+		QueryBuilder expectedQuery = QueryBuilders.matchQuery(emailAttributeName + '.'
+				+ MappingsBuilder.FIELD_NGRAM_ANALYZED, value);
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -831,22 +831,17 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.wildcardQuery(enumAttributeName + '.'
-				+ MappingsBuilder.FIELD_NOT_ANALYZED, '*' + value + '*');
+		QueryBuilder expectedQuery = QueryBuilders.matchQuery(enumAttributeName + '.'
+				+ MappingsBuilder.FIELD_NGRAM_ANALYZED, value);
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
-	@Test
+	@Test(expectedExceptions = UnsupportedOperationException.class)
 	public void generateOneQueryRuleLikeHtml()
 	{
 		String value = "<h1>html</h1>";
 		Query q = new QueryImpl().like(htmlAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
-		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
-		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.wildcardQuery(htmlAttributeName + '.'
-				+ MappingsBuilder.FIELD_NOT_ANALYZED, '*' + value + '*');
-		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
 	@Test
@@ -857,8 +852,8 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.wildcardQuery(hyperlinkAttributeName + '.'
-				+ MappingsBuilder.FIELD_NOT_ANALYZED, '*' + value + '*');
+		QueryBuilder expectedQuery = QueryBuilders.matchQuery(hyperlinkAttributeName + '.'
+				+ MappingsBuilder.FIELD_NGRAM_ANALYZED, value);
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -886,17 +881,12 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 	}
 
-	@Test
+	@Test(expectedExceptions = UnsupportedOperationException.class)
 	public void generateOneQueryRuleLikeScript()
 	{
 		String value = "int a = 1;";
 		Query q = new QueryImpl().like(scriptAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
-		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
-		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.wildcardQuery(scriptAttributeName + '.'
-				+ MappingsBuilder.FIELD_NOT_ANALYZED, '*' + value + '*');
-		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
 	@Test
@@ -907,22 +897,17 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.wildcardQuery(stringAttributeName + '.'
-				+ MappingsBuilder.FIELD_NOT_ANALYZED, '*' + value + '*');
+		QueryBuilder expectedQuery = QueryBuilders.matchQuery(stringAttributeName + '.'
+				+ MappingsBuilder.FIELD_NGRAM_ANALYZED, value);
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
-	@Test
+	@Test(expectedExceptions = UnsupportedOperationException.class)
 	public void generateOneQueryRuleLikeText()
 	{
 		String value = "some long text";
 		Query q = new QueryImpl().like(textAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
-		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
-		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.wildcardQuery(textAttributeName + '.'
-				+ MappingsBuilder.FIELD_NOT_ANALYZED, '*' + value + '*');
-		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
 	@Test(expectedExceptions = UnsupportedOperationException.class)
