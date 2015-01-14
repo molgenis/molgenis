@@ -164,7 +164,7 @@ public class ProtocolViewerController extends MolgenisPluginController
 
 										}));
 
-								return new SelectedItemResponse(protocolUri, protocolUris);
+								return new SelectedItemResponse(protocolUri, protocolUris, catalogItem.getGroup());
 							}
 						}));
 
@@ -422,7 +422,7 @@ public class ProtocolViewerController extends MolgenisPluginController
 		}
 	}
 
-	private static class SelectedItemsResponse
+	static class SelectedItemsResponse
 	{
 		private final Integer start;
 		private final Integer end;
@@ -437,52 +437,53 @@ public class ProtocolViewerController extends MolgenisPluginController
 			this.items = items;
 		}
 
-		@SuppressWarnings("unused")
 		public Integer getStart()
 		{
 			return start;
 		}
 
-		@SuppressWarnings("unused")
 		public Integer getEnd()
 		{
 			return end;
 		}
 
-		@SuppressWarnings("unused")
 		public Integer getTotal()
 		{
 			return total;
 		}
 
-		@SuppressWarnings("unused")
 		public List<SelectedItemResponse> getItems()
 		{
 			return items;
 		}
 	}
 
-	private static class SelectedItemResponse
+	static class SelectedItemResponse
 	{
 		private final String protocol;
 		private final List<String> path;
+		private final String group;
 
-		public SelectedItemResponse(String protocol, List<String> path)
+		public SelectedItemResponse(String protocol, List<String> path, String group)
 		{
 			this.protocol = protocol;
 			this.path = path;
+			this.group = group;
 		}
 
-		@SuppressWarnings("unused")
 		public String getProtocol()
 		{
 			return protocol;
 		}
 
-		@SuppressWarnings("unused")
 		public List<String> getPath()
 		{
 			return path;
+		}
+		
+		public String getGroup()
+		{
+			return group;
 		}
 	}
 

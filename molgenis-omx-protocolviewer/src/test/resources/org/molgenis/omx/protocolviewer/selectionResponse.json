@@ -1,0 +1,25 @@
+{
+  "start": 0,
+  "end": 2,
+  "total": 2,
+  "items": [
+    {
+      "protocol": "/api/v1/protocol/1",
+      "path": [
+        "/api/v1/protocol/ll",
+        "/api/v1/protocol/group",
+        "/api/v1/protocol/1"
+      ],
+      "group": "Lifelines->Group->Folder 1"
+    },
+    {
+      "protocol": "/api/v1/protocol/2",
+      "path": [
+        "/api/v1/protocol/ll",
+        "/api/v1/protocol/group",
+        "/api/v1/protocol/2"
+      ],
+      "group": "Lifelines->Group->Folder 2"
+    }
+  ]
+}
