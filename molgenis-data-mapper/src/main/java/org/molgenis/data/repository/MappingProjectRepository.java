@@ -5,6 +5,8 @@ import org.molgenis.data.meta.EntityMappingMetaData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
 
+import java.util.*;
+
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.*;
 
 /**

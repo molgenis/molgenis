@@ -1,13 +1,14 @@
 package org.molgenis.data.mapping;
 
-import org.molgenis.data.AttributeMetaData;
+import org.molgenis.auth.MolgenisUser;
+
+import java.util.List;
 
 /**
  * Created by charbonb on 14/01/15.
  */
 public class MappingProject {
 	private String id;
-	private AttributeMetaData sourceAttribureMetaData;
-	private AttributeMetaData targetAttribureMetaData;
-	private String algorithm;
+	private MolgenisUser owner;
+	private List<EntityMapping> entityMappings;
 }
