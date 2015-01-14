@@ -323,7 +323,7 @@ public class StudyManagerController extends MolgenisPluginController
 
 		// TODO remove code duplication (see ProtocolViewerController)
 		// write excel file
-		List<String> header = Arrays.asList("Id", "Variable", "Description");
+		List<String> header = Arrays.asList("Id", "Variable", "Description", "Group");
 		List<CatalogFolder> catalogItems = Lists.newArrayList(studyDefinition.getItems());
 		if (catalogItems != null)
 		{
@@ -350,6 +350,7 @@ public class StudyManagerController extends MolgenisPluginController
 						entity.set(header.get(0), catalogItem.getExternalId());
 						entity.set(header.get(1), catalogItem.getName());
 						entity.set(header.get(2), catalogItem.getDescription());
+						entity.set(header.get(3), catalogItem.getGroup());
 						sheetWriter.add(entity);
 					}
 				}
