@@ -918,13 +918,12 @@ $(function() {
 	};
 
 }(jQuery));
-// IE9 
-if(window.history === undefined) {
-	window.history = {
-		pushState : function(){},
-		replaceState : function(){}
-	}
-}
-if(window.onpopstate === undefined) {
+// IE9
+if(window.history === undefined)
+	window.history = {};
+if(window.history.pushState === undefined)
+	window.history.pushState = function(){};
+if(window.history.replaceState === undefined)
+	window.history.replaceState = function(){};
+if(window.onpopstate === undefined)
 	window.onpopstate = function(){}
-}
