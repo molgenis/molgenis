@@ -5,6 +5,7 @@
         <plugin id="importwizard" name="Upload" url="importwizard"/>
         <plugin id="catalogue" name="Catalogue" url="catalogue"/>
 		<plugin id="dataexplorer" name="Data Explorer" url="dataexplorer"/>
+		<plugin id="mappingservice" name="Mapping Service" url="mappingservice"/>
         <menu label="Plugins" name="plugins">
             <plugin id="standardsregistry" name="Model registry" url="standardsregistry" />
             <plugin id="geneticrepositorymerger" name="Merge Genetic Data" url="geneticrepositorymerger"/>
