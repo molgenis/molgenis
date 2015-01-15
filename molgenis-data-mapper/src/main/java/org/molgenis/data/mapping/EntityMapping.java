@@ -9,28 +9,28 @@ import java.util.List;
  */
 public class EntityMapping
 {
-	private String id;
+	private String identifier;
 	private EntityMetaData sourceEntityMetaData;
 	private EntityMetaData targetEntityMetaData;
 	private List<AttributeMapping> entityMappings;
 
-	public EntityMapping(String id, EntityMetaData sourceEntityMetaData, EntityMetaData targetEntityMetaData,
+	public EntityMapping(String identifier, EntityMetaData sourceEntityMetaData, EntityMetaData targetEntityMetaData,
 			List<AttributeMapping> entityMappings)
 	{
-		this.id = id;
+		this.identifier = identifier;
 		this.sourceEntityMetaData = sourceEntityMetaData;
 		this.targetEntityMetaData = targetEntityMetaData;
 		this.entityMappings = entityMappings;
 	}
 
-	public String getId()
+	public String getIdentifier()
 	{
-		return id;
+		return identifier;
 	}
 
-	public void setId(String id)
+	public void setIdentifier(String identifier)
 	{
-		this.id = id;
+		this.identifier = identifier;
 	}
 
 	public EntityMetaData getSourceEntityMetaData()

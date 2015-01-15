@@ -7,28 +7,28 @@ import org.molgenis.data.AttributeMetaData;
  */
 public class AttributeMapping
 {
-	private String id;
+	private String identifier;
 	private AttributeMetaData sourceAttribureMetaData;
 	private AttributeMetaData targetAttribureMetaData;
 	private String algorithm;
 
-	public AttributeMapping(String id, AttributeMetaData sourceAttribureMetaData,
+	public AttributeMapping(String identifier, AttributeMetaData sourceAttribureMetaData,
 			AttributeMetaData targetAttribureMetaData, String algorithm)
 	{
-		this.id = id;
+		this.identifier = identifier;
 		this.sourceAttribureMetaData = sourceAttribureMetaData;
 		this.targetAttribureMetaData = targetAttribureMetaData;
 		this.algorithm = algorithm;
 	}
 
-	public String getId()
+	public String getIdentifier()
 	{
-		return id;
+		return identifier;
 	}
 
-	public void setId(String id)
+	public void setIdentifier(String identifier)
 	{
-		this.id = id;
+		this.identifier = identifier;
 	}
 
 	public AttributeMetaData getSourceAttribureMetaData()
