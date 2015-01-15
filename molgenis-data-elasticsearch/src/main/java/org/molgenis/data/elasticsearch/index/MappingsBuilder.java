@@ -240,6 +240,7 @@ public class MappingsBuilder
 				jsonBuilder.startObject("fields").startObject(FIELD_NOT_ANALYZED).field("type", "string")
 						.field("index", "not_analyzed").endObject().endObject();
 				break;
+			//FIXME think about script fields
 			case SCRIPT:
 				jsonBuilder.field("type", "string");
 				jsonBuilder.field("norms").startObject().field("enabled", enableNorms).endObject();

@@ -8,6 +8,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import javax.servlet.http.Part;
 
 import org.molgenis.compute.ui.model.JobStatus;
+import org.molgenis.security.runas.SystemSecurityToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +63,7 @@ public class JobStatusController
 		{
 			queue.put(statusUpdate);
 		}
-		catch (InterruptedException e)
+		catch (Exception e)
 		{
 			logger.error("Error putting status update for job '" + jobId + "' in queue", e);
 		}
@@ -73,19 +74,20 @@ public class JobStatusController
 		@Override
 		public void run()
 		{
-			try
-			{
+
 				while (true)
 				{
-					JobStatusUpdate statusUpdate = queue.take();
-					jobService.updateJobStatus(statusUpdate);
+					JobStatusUpdate statusUpdate = null;
+					try
+					{
+						statusUpdate = queue.take();
+						jobService.updateJobStatus(statusUpdate);
+					} catch (Throwable t)
+					{
+						logger.error("Error updating jobStatus [" + statusUpdate + "]", t);
+					}
 				}
 
-			}
-			catch (InterruptedException e)
-			{
-				logger.error("Exception taking statusUpdate from queue", e);
-			}
 
 		}
 

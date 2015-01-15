@@ -36,8 +36,6 @@ public class JobServiceImpl implements JobService
 			return;
 		}
 
-		logger.info("Job[" + job.getIdentifier() + "] with status [" + job.getStatus() +
-				"] got new status [" + statusUpdate.getStatus() + "]");
 		job.setStatus(statusUpdate.getStatus());
 		job.setOutputMessage(statusUpdate.getOutputMessage());
 
@@ -55,8 +53,9 @@ public class JobServiceImpl implements JobService
 			default:
 				break;
 		}
-		logger.info("Job[" + job.getIdentifier() + "] with status [" + job.getStatus() + "] updated in DB" );
+
 		dataService.update(AnalysisJobMetaData.INSTANCE.getName(), job);
+		logger.info("Job[" + job.getIdentifier() + "] with status [" + job.getStatus() + "] updated in DB" );
 	}
 
 }

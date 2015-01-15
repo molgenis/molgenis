@@ -12,6 +12,8 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.utils.SecurityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * AnalysisJob decorator that updates analysis status on job status change
@@ -22,6 +24,8 @@ public class AnalysisDecorator extends CrudRepositoryDecorator
 {
 	private final CrudRepository decoratedRepository;
 	private final DataService dataService;
+
+	private static final Logger LOG = LoggerFactory.getLogger(AnalysisDecorator.class);
 
 	public AnalysisDecorator(CrudRepository decoratedRepository, DataService dataService)
 	{
@@ -158,7 +162,7 @@ public class AnalysisDecorator extends CrudRepositoryDecorator
 			if (!allowedStateTransitions.contains(analysisStatus))
 			{
 				String attributeLabel = AnalysisMetaData.INSTANCE.getAttribute(AnalysisMetaData.STATUS).getLabel();
-				throw new RuntimeException(attributeLabel + " transition from " + currentAnalysisStatus + " to "
+				LOG.warn(attributeLabel + " transition from " + currentAnalysisStatus + " to "
 						+ analysisStatus + " is not allowed. Allowed transitions " + allowedStateTransitions);
 			}
 		}

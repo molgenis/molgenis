@@ -4,12 +4,13 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
 import org.molgenis.compute.ui.model.*;
 import org.molgenis.compute.ui.model.decorator.UIWorkflowDecorator;
 import org.molgenis.data.*;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.support.QueryImpl;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -25,7 +26,7 @@ public class AnalysisToFilesWriter
 	List<UIWorkflowProtocol> processedNodes = new ArrayList<UIWorkflowProtocol>();
 	List<UIWorkflowParameter> parameters = new ArrayList<UIWorkflowParameter>();
 
-	private static Logger LOG = Logger.getLogger(AnalysisToFilesWriter.class);
+	private static Logger LOG = LoggerFactory.getLogger(AnalysisToFilesWriter.class);
 
 	public static final String SEP = ",";
 

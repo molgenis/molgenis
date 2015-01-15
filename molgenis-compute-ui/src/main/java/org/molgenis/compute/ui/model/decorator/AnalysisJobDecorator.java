@@ -136,13 +136,6 @@ public class AnalysisJobDecorator extends CrudRepositoryDecorator
 			Iterable<AnalysisJob> analysisJobs)
 	{
 
-		System.out.println("HERE WE ARE!!!");
-
-		for (AnalysisJob analysisJob : analysisJobs)
-		{
-			System.out.println("job [ "+ analysisJob.getIdentifier() +" ] has status [" + analysisJob.getStatus() + "]");
-		}
-
 		for (AnalysisJob analysisJob : analysisJobs)
 		{
 			if (analysisJob.getStatus() == JobStatus.RUNNING) return AnalysisStatus.RUNNING;
