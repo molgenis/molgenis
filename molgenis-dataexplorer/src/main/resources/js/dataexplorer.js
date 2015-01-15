@@ -68,11 +68,11 @@ function($, molgenis, settingsXhr) {
 	/**
 	 * @memberOf molgenis.dataexplorer
 	 */
-	function createModuleNav(modules, container) {
+	function createModuleNav(modules, entity, container) {
 		var items = [];
 		items.push('<ul class="nav nav-tabs pull-left" role="tablist">');
 		$.each(modules, function() {
-			var href = molgenis.getContextUrl() + '/module/' + this.id+'?entity=' + selectedEntityMetaData.name;
+			var href = molgenis.getContextUrl() + '/module/' + this.id+'?entity=' + entity;
 			items.push('<li data-id="' + this.id + '"><a href="' + href + '" data-target="#tab-' + this.id + '" data-id="' + this.id + '" role="tab" data-toggle="tab"><img src="/img/' + this.icon + '"> ' + this.label + '</a></li>');
 		});
 		items.push('</ul>');
@@ -263,41 +263,46 @@ function($, molgenis, settingsXhr) {
 	}
 	
 	function render() {
-		restApi.getAsync('/api/v1/' + state.entity + '/meta', {'expand': ['attributes']}, function(entityMetaData) {
+		// get entity meta data and update header and tree 
+		var entityMetaDataRequest = restApi.getAsync('/api/v1/' + state.entity + '/meta', {'expand': ['attributes']}, function(entityMetaData) {
 			selectedEntityMetaData = entityMetaData;
-
-			// get modules config for this entity
-			$.get(molgenis.getContextUrl() + '/modules?entity=' + entityMetaData.name).done(function(data) {
-				modules = data.modules;
-				createModuleNav(data.modules, $('#module-nav'));
-			
-				selectedAttributes = $.map(entityMetaData.attributes, function(attribute) {
-					if(state.attrs === undefined || state.attrs === null) return attribute.fieldType !== 'COMPOUND' ? attribute : null;
-					else if(state.attrs === 'none') return null;
-					else return state.attrs.indexOf(attribute.name) !== -1 && attribute.fieldType !== 'COMPOUND' ? attribute : null;
-				});
-				
-				createEntityMetaTree(entityMetaData, selectedAttributes);
-				
-				// select first tab
-				var moduleTab;
-				if(state.mod) {
-					moduleTab = $('a[data-toggle="tab"][data-target="#tab-' + state.mod + '"]', $('#module-nav'));
-				} else {
-					moduleTab = $('a[data-toggle="tab"]', $('#module-nav')).first();
-				}
-				moduleTab.tab('show');
-				
-				//Show wizard on show of dataexplorer if url param 'wizard=true' is added
-				if (settings['wizard.oninit'] && settings['wizard.oninit'] === 'true') {
-					self.filter.wizard.openFilterWizardModal(selectedEntityMetaData, attributeFilters);
-				}
-				
-			});
 			
 			self.createHeader(entityMetaData);
-			$('#observationset-search').focus();
+			
+			selectedAttributes = $.map(entityMetaData.attributes, function(attribute) {
+				if(state.attrs === undefined || state.attrs === null) return attribute.fieldType !== 'COMPOUND' ? attribute : null;
+				else if(state.attrs === 'none') return null;
+				else return state.attrs.indexOf(attribute.name) !== -1 && attribute.fieldType !== 'COMPOUND' ? attribute : null;
+			});
+			
+			createEntityMetaTree(entityMetaData, selectedAttributes);
+			
+			//Show wizard on show of dataexplorer if url param 'wizard=true' is added
+			if (settings['wizard.oninit'] && settings['wizard.oninit'] === 'true') {
+				self.filter.wizard.openFilterWizardModal(entityMetaData, attributeFilters);
+			}
 		});
+		
+		// get entity modules and load visible module
+		$.get(molgenis.getContextUrl() + '/modules?entity=' + state.entity).done(function(data) {
+			var container = $('#module-nav');
+			createModuleNav(data.modules, state.entity, container);
+			
+			// select first tab
+			var moduleTab;
+			if(state.mod) {
+				moduleTab = $('a[data-toggle="tab"][data-target="#tab-' + state.mod + '"]', container);
+			} else {
+				moduleTab = $('a[data-toggle="tab"]', container).first();
+			}
+			
+			// show tab once entity meta data is available
+			$.when(entityMetaDataRequest).done(function(){
+				moduleTab.tab('show');
+			});
+		});
+		
+		$('#observationset-search').focus();
 	}
 	
 	function pushState() {

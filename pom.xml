@@ -36,7 +36,7 @@
             <id>dev</id>
             <properties>
                 <molgenis.build.profile>dev</molgenis.build.profile>
-                <logger.level.root>DEBUG</logger.level.root>
+                <logger.level.root>INFO</logger.level.root>
                 <logger.level.org.molgenis>DEBUG</logger.level.org.molgenis>
                 <minify.skipMinify>true</minify.skipMinify>
             </properties>
