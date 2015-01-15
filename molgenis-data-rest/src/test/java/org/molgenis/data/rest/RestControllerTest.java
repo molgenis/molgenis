@@ -215,7 +215,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 						content().string(
 								"{\"href\":\"" + HREF_ENTITY_META + "\",\"name\":\"" + ENTITY_NAME
 										+ "\",\"attributes\":{\"name\":{\"href\":\"" + HREF_ENTITY_META
-										+ "/name\"}},\"idAttribute\":\"id\"}"));
+										+ "/name\"}},\"idAttribute\":\"id\",\"isAbstract\":false}"));
 	}
 
 	@Test
@@ -251,7 +251,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 										+ ENTITY_NAME
 										+ "\",\"attributes\":{\"name\":{\"href\":\""
 										+ HREF_ENTITY_META
-										+ "/name\",\"fieldType\":\"STRING\",\"name\":\"name\",\"label\":\"name\",\"attributes\":[],\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"lookupAttribute\":true,\"aggregateable\":false}},\"idAttribute\":\"id\"}"));
+										+ "/name\",\"fieldType\":\"STRING\",\"name\":\"name\",\"label\":\"name\",\"attributes\":[],\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"lookupAttribute\":true,\"aggregateable\":false}},\"idAttribute\":\"id\",\"isAbstract\":false}"));
 
 	}
 
