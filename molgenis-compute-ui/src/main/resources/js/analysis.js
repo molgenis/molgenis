@@ -578,7 +578,7 @@
 			clearTimeout(timer);
 		}
 		
-		timer = setTimeout(startProgressPolling, 2000);
+		timer = setTimeout(startProgressPolling, 5000);
 	}
 	
 	function stopProgressPolling() {

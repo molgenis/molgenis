@@ -2,6 +2,7 @@ package org.molgenis.compute.ui.model.decorator;
 
 import java.util.EnumSet;
 
+import com.google.common.collect.Iterables;
 import org.molgenis.compute.ui.meta.AnalysisJobMetaData;
 import org.molgenis.compute.ui.meta.AnalysisMetaData;
 import org.molgenis.compute.ui.model.Analysis;
@@ -134,6 +135,7 @@ public class AnalysisJobDecorator extends CrudRepositoryDecorator
 	private AnalysisStatus determineAnalysisStatus(AnalysisStatus currentAnalysisStatus,
 			Iterable<AnalysisJob> analysisJobs)
 	{
+
 		for (AnalysisJob analysisJob : analysisJobs)
 		{
 			if (analysisJob.getStatus() == JobStatus.RUNNING) return AnalysisStatus.RUNNING;
@@ -144,9 +146,19 @@ public class AnalysisJobDecorator extends CrudRepositoryDecorator
 			if (analysisJob.getStatus() == JobStatus.FAILED) return AnalysisStatus.FAILED;
 		}
 
-		for (AnalysisJob analysisJob : analysisJobs)
+		if(!Iterables.isEmpty(analysisJobs))
 		{
-			if (analysisJob.getStatus() == JobStatus.COMPLETED) return AnalysisStatus.COMPLETED;
+			boolean completed = true;
+			for (AnalysisJob analysisJob : analysisJobs)
+			{
+				if (analysisJob.getStatus() != JobStatus.COMPLETED)
+				{
+					completed = false;
+					break;
+				}
+			}
+			if (completed)
+				return AnalysisStatus.COMPLETED;
 		}
 
 		return currentAnalysisStatus;

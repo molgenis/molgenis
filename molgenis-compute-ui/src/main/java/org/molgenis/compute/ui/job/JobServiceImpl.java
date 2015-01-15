@@ -55,6 +55,7 @@ public class JobServiceImpl implements JobService
 		}
 
 		dataService.update(AnalysisJobMetaData.INSTANCE.getName(), job);
+		logger.info("Job[" + job.getIdentifier() + "] with status [" + job.getStatus() + "] updated in DB" );
 	}
 
 }

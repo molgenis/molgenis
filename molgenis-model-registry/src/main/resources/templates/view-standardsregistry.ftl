@@ -64,7 +64,7 @@
         {{/if}}
         <form class="form-inline">
             <div class="form-group">
-        	   <a class="btn btn-primary details-btn" href="#" role="button">View Model Details</a>
+        	   <a class="btn btn-primary details-btn" href="?package={{package.name}}#" role="button">View Model Details</a>
         	</div>
             <div class="form-group{{#unless entities.length}} hidden{{/unless}}">
                 <div class="input-group select2-bootstrap-append entity-select-control">

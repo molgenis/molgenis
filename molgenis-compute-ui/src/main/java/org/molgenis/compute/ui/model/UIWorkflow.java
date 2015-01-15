@@ -73,27 +73,6 @@ public class UIWorkflow extends MapEntity
 		set(UIWorkflowMetaData.TARGET_TYPE, entityMetaDataName);
 	}
 
-	public String getWorkflowFile()
-	{
-		return getString(UIWorkflowMetaData.WORKFLOW_FILE);
-	}
-
-	public void setWorkflowFile(String workflowFile)
-	{
-		set(UIWorkflowMetaData.WORKFLOW_FILE, workflowFile);
-	}
-
-	public String getParametersFile()
-	{
-		return getString(UIWorkflowMetaData.PARAMETERS_FILE);
-	}
-
-	public void setParametersFile(String parametersFile)
-	{
-		set(UIWorkflowMetaData.PARAMETERS_FILE, parametersFile);
-	}
-
-
 	public List<UIWorkflowNode> getNodes()
 	{
 		Iterable<UIWorkflowNode> nodes = getEntities(UIWorkflowMetaData.NODES, UIWorkflowNode.class);

@@ -34,4 +34,12 @@ public class JobStatusUpdate
 		this.outputMessage = outputMessage;
 	}
 
+	@Override
+	public String toString()
+	{
+		return "JobStatusUpdate{" +
+				"jobId='" + jobId + '\'' +
+				", status=" + status +
+				'}';
+	}
 }
