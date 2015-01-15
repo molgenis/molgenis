@@ -13,8 +13,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.elasticsearch.ElasticsearchException;
-import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
-import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
 import org.elasticsearch.action.admin.indices.exists.types.TypesExistsRequest;
 import org.elasticsearch.action.admin.indices.exists.types.TypesExistsResponse;
 import org.elasticsearch.action.admin.indices.mapping.delete.DeleteMappingResponse;
@@ -51,6 +49,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
+import org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator;
 import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.data.elasticsearch.index.IndexRequestGenerator;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
@@ -126,7 +125,17 @@ public class ElasticSearchService implements SearchService
 		this.dataService = dataService;
 		this.entityToSourceConverter = entityToSourceConverter;
 
-		if (createIndexIfNotExists) createIndexIfNotExists();
+		if (createIndexIfNotExists)
+		{
+			try
+			{
+				new ElasticsearchIndexCreator(client).createIndexIfNotExists(indexName);
+			}
+			catch (IOException e)
+			{
+				throw new RuntimeException(e);
+			}
+		}
 	}
 
 	/*
@@ -475,23 +484,6 @@ public class ElasticSearchService implements SearchService
 		//
 		// LOG.info("Update done.");
 		// FIXME
-	}
-
-	private void createIndexIfNotExists()
-	{
-		// Wait until elasticsearch is ready
-		client.admin().cluster().prepareHealth().setWaitForYellowStatus().execute().actionGet();
-		boolean hasIndex = client.admin().indices().exists(new IndicesExistsRequest(indexName)).actionGet().isExists();
-		if (!hasIndex)
-		{
-			if (LOG.isTraceEnabled()) LOG.trace("Creating Elasticsearch index [" + indexName + "] ...");
-			CreateIndexResponse response = client.admin().indices().prepareCreate(indexName).execute().actionGet();
-			if (!response.isAcknowledged())
-			{
-				throw new ElasticsearchException("Creation of index [" + indexName + "] failed. Response=" + response);
-			}
-			LOG.info("Created Elasticsearch index [" + indexName + "]");
-		}
 	}
 
 	/*

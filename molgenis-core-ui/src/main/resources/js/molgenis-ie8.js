@@ -1,7 +1,4 @@
-(function($) {
-	"use strict";
-
-	$(function() {
-		$('body').prepend('<div class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Warning!</strong> You are using an old browser, this website only works on HTML5 browsers (IE9+, Chrome, Firefox, Safari)</div>');
-	});
-}($));
+var ok = window.confirm('Your browser (Internet Explorer 8) is out of date. It has known security flaws and can not display all features of this website. Please download an up-to-date browser. Clicking OK will open the Google Chrome browser website.');
+if (ok) {
+	window.location = 'https://www.google.com/chrome/';
+}

@@ -36,7 +36,7 @@
             <id>dev</id>
             <properties>
                 <molgenis.build.profile>dev</molgenis.build.profile>
-                <logger.level.root>DEBUG</logger.level.root>
+                <logger.level.root>INFO</logger.level.root>
                 <logger.level.org.molgenis>DEBUG</logger.level.org.molgenis>
                 <minify.skipMinify>true</minify.skipMinify>
             </properties>
@@ -410,6 +410,19 @@
                                         <ignore/>
                                     </action>
                                 </pluginExecution>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>org.jacoco</groupId>
+                                        <artifactId>jacoco-maven-plugin</artifactId>
+                                        <versionRange>[0.7,)</versionRange>
+                                        <goals>
+                                            <goal>prepare-agent</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore/>
+                                    </action>
+                                </pluginExecution>
                             </pluginExecutions>
                         </lifecycleMappingMetadata>
                     </configuration>
@@ -497,11 +510,13 @@
 				</executions>
 			</plugin>
             <plugin>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <configuration>
-                        <argLine>${argLine}</argLine>
-                    </configuration>
-                </plugin>
+            	<groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.18.1</version>
+                <configuration>
+                    <argLine>${argLine}</argLine>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
@@ -511,6 +526,7 @@
             <plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.7.2.201409121644</version>
 			</plugin>
             <!-- code analysis -->
             <plugin>
