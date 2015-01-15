@@ -1,13 +1,8 @@
 package org.molgenis.data.repository;
 
-import org.molgenis.data.*;
+import org.molgenis.data.CrudRepository;
+import org.molgenis.data.ManageableCrudRepositoryCollection;
 import org.molgenis.data.meta.EntityMappingMetaData;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.MapEntity;
-
-import java.util.*;
-
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.*;
 
 /**
  * Helper class around the {@link org.molgenis.data.meta.AttributeMetaDataMetaData} repository. Internal implementation
@@ -22,22 +17,5 @@ public class EntityMappingRepository
 	public EntityMappingRepository(ManageableCrudRepositoryCollection collection)
 	{
 		this.repository = collection.add(META_DATA);
-		fillAllEntityAttributes();
-	}
-
-	public void fillAllEntityAttributes()
-	{
-
-	}
-
-	private void toEntityMappingEntity(Entity entity, AttributeMetaData att, AttributeMetaData parentCompoundAtt)
-	{
-		Entity attributeMetaDataEntity = new MapEntity();
-	}
-
-	private DefaultAttributeMetaData toAttributeMetaData(Entity entity)
-	{
-		DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData(entity.getString(NAME));
-		return attributeMetaData;
 	}
 }
