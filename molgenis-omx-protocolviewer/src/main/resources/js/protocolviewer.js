@@ -163,7 +163,7 @@
 							protocolMap[this.href.toLowerCase()] = this;
 						});
 						var table = $('<table id="feature-selection-table" class="table table-striped table-condensed table-hover" />');
-						$('<thead />').append('<th>Variable Name</th><th>Variable Identifier</th><th>Description</th><th>Remove</th>').appendTo(table);
+						$('<thead />').append('<th>Variable Name</th><th>Variable Identifier</th><th>Group</th><th>Remove</th>').appendTo(table);
 						$.each(catalogItems, function() {								
 							var protocol = protocolMap[this.path[this.path.length - 1]];
 							var protocolName = protocol.Name;
