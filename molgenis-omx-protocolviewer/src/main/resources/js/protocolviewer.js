@@ -163,16 +163,16 @@
 							protocolMap[this.href.toLowerCase()] = this;
 						});
 						var table = $('<table id="feature-selection-table" class="table table-striped table-condensed table-hover" />');
-						$('<thead />').append('<th>Variable Name</th><th>Variable Identifier</th><th>Description</th><th>Remove</th>').appendTo(table);
+						$('<thead />').append('<th>Variable Name</th><th>Variable Identifier</th><th>Group</th><th>Remove</th>').appendTo(table);
 						$.each(catalogItems, function() {								
 							var protocol = protocolMap[this.path[this.path.length - 1]];
 							var protocolName = protocol.Name;
 							var protocolIdentifier = protocol.Identifier;
-							var description = molgenis.i18n.get(protocol.description);
+							var description = this.group.map(window.htmlEscape).join(' &rarr; ');
 							var row = $('<tr />').data('key', this);
 							$('<td />').text(typeof protocolName !== 'undefined' ? protocolName : "").appendTo(row);
 							$('<td />').text(typeof protocolIdentifier !== 'undefined' ? protocolIdentifier : "").appendTo(row);
-							$('<td />').text(typeof description !== 'undefined' ? description : "").appendTo(row);
+							$('<td />').html(typeof description !== 'undefined' ? description : "").appendTo(row);
 							var deleteButton = $('<i class="icon-remove"></i>');
 							
 							deleteButton.click(function() {

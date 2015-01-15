@@ -30,6 +30,7 @@ import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
@@ -163,7 +164,7 @@ public class ProtocolViewerController extends MolgenisPluginController
 
 										}));
 
-								return new SelectedItemResponse(protocolUri, protocolUris);
+								return new SelectedItemResponse(protocolUri, protocolUris, catalogItem.getGroup());
 							}
 						}));
 
@@ -210,7 +211,7 @@ public class ProtocolViewerController extends MolgenisPluginController
 		response.setContentType("application/vnd.ms-excel");
 		response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
 
-		protocolViewerService.createStudyDefinitionDraftXlsForCurrentUser(response.getOutputStream(),
+		protocolViewerService.createStudyDefinitionDraftXlsForCurrentUser(new ExcelWriter(response.getOutputStream()),
 				catalogId.toString());
 	}
 
@@ -421,7 +422,7 @@ public class ProtocolViewerController extends MolgenisPluginController
 		}
 	}
 
-	private static class SelectedItemsResponse
+	static class SelectedItemsResponse
 	{
 		private final Integer start;
 		private final Integer end;
@@ -436,52 +437,53 @@ public class ProtocolViewerController extends MolgenisPluginController
 			this.items = items;
 		}
 
-		@SuppressWarnings("unused")
 		public Integer getStart()
 		{
 			return start;
 		}
 
-		@SuppressWarnings("unused")
 		public Integer getEnd()
 		{
 			return end;
 		}
 
-		@SuppressWarnings("unused")
 		public Integer getTotal()
 		{
 			return total;
 		}
 
-		@SuppressWarnings("unused")
 		public List<SelectedItemResponse> getItems()
 		{
 			return items;
 		}
 	}
 
-	private static class SelectedItemResponse
+	static class SelectedItemResponse
 	{
 		private final String protocol;
 		private final List<String> path;
+		private final List<String> group;
 
-		public SelectedItemResponse(String protocol, List<String> path)
+		public SelectedItemResponse(String protocol, List<String> path, List<String> group)
 		{
 			this.protocol = protocol;
 			this.path = path;
+			this.group = group;
 		}
 
-		@SuppressWarnings("unused")
 		public String getProtocol()
 		{
 			return protocol;
 		}
 
-		@SuppressWarnings("unused")
 		public List<String> getPath()
 		{
 			return path;
+		}
+		
+		public List<String> getGroup()
+		{
+			return group;
 		}
 	}
 

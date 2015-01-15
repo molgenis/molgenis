@@ -4,12 +4,11 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,12 +19,16 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import javax.servlet.http.Part;
 
+import org.mockito.ArgumentCaptor;
 import org.molgenis.catalog.Catalog;
 import org.molgenis.catalog.CatalogFolder;
 import org.molgenis.catalog.CatalogMeta;
 import org.molgenis.catalog.CatalogService;
 import org.molgenis.catalog.UnknownCatalogException;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.excel.ExcelSheetWriter;
+import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.protocolviewer.ProtocolViewerServiceImplTest.Config;
@@ -297,19 +300,33 @@ public class ProtocolViewerServiceImplTest extends AbstractTestNGSpringContextTe
 	@Test
 	public void createStudyDefinitionDraftXlsForCurrentUser() throws IOException, UnknownCatalogException
 	{
-
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		protocolViewerService.createStudyDefinitionDraftXlsForCurrentUser(bos, catalog0.getId());
-		assertTrue(bos.size() > 0);
+		ExcelWriter writer = mock(ExcelWriter.class);
+		ExcelSheetWriter sheetWriter = mock(ExcelSheetWriter.class);
+		when(writer.createWritable("Variables", Arrays.asList("Id", "Variable", "Description", "Group"))).thenReturn(sheetWriter);
+		
+		when(catalogItem0.getGroup()).thenReturn(Arrays.asList("Lifelines","Blah","blah"));
+		
+		protocolViewerService.createStudyDefinitionDraftXlsForCurrentUser(writer, catalog0.getId());
+		
+		ArgumentCaptor<Entity> entityCaptor = ArgumentCaptor.forClass(Entity.class);
+		verify(sheetWriter, times(3)).add(entityCaptor.capture());
+		verify(sheetWriter).close();
+		verify(writer).close();
+		
+		List<Entity> rows = entityCaptor.getAllValues();
+		assertEquals("0", rows.get(0).get("Id"));
+		assertEquals("1", rows.get(1).get("Id"));
+		assertEquals("2", rows.get(2).get("Id"));
+		
+		assertEquals(rows.get(0).get("Group"), "Lifelines→Blah→blah");
 	}
 
 	@Test
 	public void createStudyDefinitionDraftXlsForCurrentUser_UnknownCatalogException() throws IOException,
 			UnknownCatalogException
 	{
-
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		protocolViewerService.createStudyDefinitionDraftXlsForCurrentUser(bos, "unknown");
-		assertEquals(bos.size(), 0);
+		ExcelWriter writer = mock(ExcelWriter.class);
+		protocolViewerService.createStudyDefinitionDraftXlsForCurrentUser(writer, "unknown");
+		verifyNoMoreInteractions(writer);
 	}
 }
