@@ -70,13 +70,13 @@ molgenis.logout <- local(function() {
 # Example: molgenis.get(entity = "Person", q = "firstName==Piet", start = 6, num = 10)
 
 #######################################################################
-molgenis.get <- local(function(entity, q = NULL, start = 0, num = 1000, attributes = NULL) {
-  url <- paste0(molgenis.api.url, "csv/", entity, "?molgenis-token=", molgenis.token, "&start=", start, "&num=", num)
+molgenis.get <- local(function(entity, q = NULL, start = 0, num = 1000, sortColumn= NULL, sortOrder = NULL, attributes = NULL) {
+  url <- paste0(molgenis.api.url, "csv/", entity, "?molgenis-token=", molgenis.token, "&start=", start, "&num=", num, "&sortColumn=", sortColumn, "&sortOrder=", sortOrder)
   
   if (!is.null(q)) {
     url <- paste0(url, "&q=", curlEscape(q))
   }
-  
+
   if (!is.null(attributes)) {
   	url <- paste0(url, "&attributes=", curlEscape(paste0(attributes, collapse = ",")))
   }

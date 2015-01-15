@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.Client;
@@ -16,6 +15,8 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.util.MapperTypeSanitizer;
 import org.molgenis.util.RepositoryUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Creates an IndexRequest for indexing entities with ElasticSearch
@@ -25,7 +26,8 @@ import org.molgenis.util.RepositoryUtils;
  */
 public class IndexRequestGenerator
 {
-	private static final Logger LOG = Logger.getLogger(IndexRequestGenerator.class);
+	private static final Logger LOG = LoggerFactory.getLogger(IndexRequestGenerator.class);
+
 	private final Client client;
 	private final String indexName;
 	private final EntityToSourceConverter entityToSourceConverter;

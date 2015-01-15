@@ -59,7 +59,7 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 
 		return true;
 	}
-	
+
 	/**
 	 * Checks if folder and files that were set with a runtime property actually exist, or if a webservice can be
 	 * reached
@@ -88,14 +88,14 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 			@Override
 			public Entity next()
 			{
-                Entity sourceEntity = null;
+				Entity sourceEntity = null;
 				if (current >= size)
 				{
 					if (source.hasNext())
 					{
 						try
 						{
-                            sourceEntity = source.next();
+							sourceEntity = source.next();
 							results = annotateEntity(sourceEntity);
 						}
 						catch (IOException e)
@@ -106,7 +106,7 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 						{
 							throw new RuntimeException(e);
 						}
-						
+
 						size = results.size();
 					}
 					current = 0;
@@ -133,13 +133,21 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 
 	public abstract List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException;
 
-    public Entity getAnnotatedEntity(Entity entity, Map<String, Object> resultMap) {
-        DefaultEntityMetaData resultEntityMetadata = new DefaultEntityMetaData(entity.getEntityMetaData());
-        MapEntity resultEntity = new MapEntity(entity, resultEntityMetadata);
-        for(AttributeMetaData attributeMetaData : getOutputMetaData().getAtomicAttributes()) {
-            resultEntityMetadata.addAttributeMetaData(attributeMetaData);
-            resultEntity.set(attributeMetaData.getName(), resultMap.get(attributeMetaData.getName()));
-        }
-        return resultEntity;
+	public Entity getAnnotatedEntity(Entity entity, Map<String, Object> resultMap)
+	{
+		DefaultEntityMetaData resultEntityMetadata = new DefaultEntityMetaData(entity.getEntityMetaData());
+		MapEntity resultEntity = new MapEntity(entity, resultEntityMetadata);
+		for (AttributeMetaData attributeMetaData : getOutputMetaData().getAtomicAttributes())
+		{
+			resultEntityMetadata.addAttributeMetaData(attributeMetaData);
+			resultEntity.set(attributeMetaData.getName(), resultMap.get(attributeMetaData.getName()));
+		}
+		return resultEntity;
+	}
+
+    @Override
+	public String getFullName()
+    {
+        return RepositoryAnnotator.ANNOTATOR_PREFIX + getSimpleName();
     }
 }

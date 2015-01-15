@@ -74,7 +74,7 @@ public class Wizard implements Serializable
 	public WizardButton getNextButton()
 	{
 		boolean lastPage = isLastPage();
-		String title = lastPage ? "Finish" : "Next &rarr;";
+		String title = lastPage ? "Finish" : "Next";
 		String uri = lastPage ? "/restart" : "/next";
 
 		return new WizardButton(title, true, uri);
@@ -82,6 +82,6 @@ public class Wizard implements Serializable
 
 	public WizardButton getPreviousButton()
 	{
-		return new WizardButton("&larr; Previous", !isFirstPage(), "/previous");
+		return new WizardButton("Previous", !isFirstPage(), "/previous");
 	}
 }

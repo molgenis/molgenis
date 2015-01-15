@@ -3,7 +3,6 @@ package org.molgenis.data.mysql;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -13,6 +12,8 @@ import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -20,8 +21,7 @@ import com.google.common.collect.Iterables;
 public class MysqlEntity extends MapEntity
 {
 	private static final long serialVersionUID = 1L;
-
-	private static final Logger logger = Logger.getLogger(MysqlEntity.class);
+	private static final Logger LOG = LoggerFactory.getLogger(MysqlEntity.class);
 
 	private final EntityMetaData metaData;
 	private final MysqlRepositoryCollection repositoryCollection;
@@ -108,7 +108,7 @@ public class MysqlEntity extends MapEntity
 	@Override
 	public Iterable<Entity> getEntities(String attributeName)
 	{
-		logger.debug("trying getEntities(" + attributeName + ")");
+		LOG.debug("trying getEntities(" + attributeName + ")");
 		if (repositoryCollection == null) throw new RuntimeException(
 				"getEntities() failed: repositoryCollection not set");
 
@@ -121,7 +121,7 @@ public class MysqlEntity extends MapEntity
 			return r.findAll(new QueryImpl().in(ref.getIdAttribute().getName(), getList(attributeName)));
 		}
 		List<Entity> result = new ArrayList<Entity>();
-		logger.debug("getEntities(" + attributeName + "): found " + result.size());
+		LOG.debug("getEntities(" + attributeName + "): found " + result.size());
 		return result;
 	}
 

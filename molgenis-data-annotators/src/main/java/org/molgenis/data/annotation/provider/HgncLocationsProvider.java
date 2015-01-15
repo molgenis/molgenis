@@ -18,9 +18,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class HgncLocationsProvider
 {
-	private static final String KEY_HGNC_LOCATIONS_VALUE = "plugin.annotators.hgcn.locations.url";
-	private static final String DEFAULT_HGNC_LOCATIONS_VALUE = "https://molgenis26.target.rug.nl/downloads/5gpm/GRCh37p13_HGNC_GeneLocations_noPatches.tsv";
-
+	public static final String KEY_HGNC_LOCATIONS_VALUE = "plugin.annotators.hgcn.locations.url";
+	public static final String DEFAULT_HGNC_LOCATIONS_VALUE = "https://molgenis26.target.rug.nl/downloads/5gpm/GRCh37p13_HGNC_GeneLocations_noPatches.tsv";
 	private final MolgenisSettings molgenisSettings;
 
 	@Autowired
@@ -56,7 +55,7 @@ public class HgncLocationsProvider
 
 	private Reader getHgncLocationsReader() throws IOException
 	{
-		String url = molgenisSettings.getProperty(KEY_HGNC_LOCATIONS_VALUE, DEFAULT_HGNC_LOCATIONS_VALUE);
+		String url = molgenisSettings.getProperty(KEY_HGNC_LOCATIONS_VALUE);
 		return new InputStreamReader(new URL(url).openStream(), Charset.forName("UTF-8"));
 	}
 }

@@ -20,17 +20,17 @@
 	<#if molgenis_ui.hrefCss?has_content>
 		<link rel="stylesheet" href="<@resource_href "/css/${molgenis_ui.hrefCss?html}"/>" type="text/css">
 	</#if>
-		<script src="<@resource_href "/js/jquery-1.8.3.min.js"/>"></script>
+    <!--[if lt IE 9]>
+        <script src="<@resource_href "/js/molgenis-ie8.js"/>"></script>
+    <![endif]-->
+		<script src="<@resource_href "/js/jquery-2.1.1.min.js"/>"></script>
 		<script src="<@resource_href "/js/bootstrap.min.js"/>"></script>
 		<script src="<@resource_href "/js/jquery.validate.min.js"/>"></script>
 		<script src="<@resource_href "/js/handlebars.min.js"/>"></script>
 		<script src="<@resource_href "/js/molgenis.js"/>"></script>
 	<#if context_url??>
-		<script>top.molgenis.setContextUrl('${context_url}');</script>
+		<script>top.molgenis.setContextUrl('${context_url?js_string}');</script>
 	</#if>
-	<!--[if lt IE 9]>
-		<script src="<@resource_href "/js/molgenis-ie8.js"/>"></script>
-	<![endif]-->
 	<#list js as js_file_name>
 		<script src="<@resource_href "/js/${js_file_name?html}"/>"></script>
 	</#list>		
@@ -80,7 +80,7 @@
 						</#if>
 						
 						<#if messageType??>
-							<div class="alert alert-${messageType}"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>${messageType?capitalize}!</strong> ${message}</div>
+							<div class="alert alert-${messageType}"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>${messageType?capitalize}!</strong> ${message?html}</div>
 						</#if>
 				   </div>
                 </div>

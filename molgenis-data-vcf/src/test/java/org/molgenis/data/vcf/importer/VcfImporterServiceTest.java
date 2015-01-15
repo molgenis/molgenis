@@ -34,7 +34,8 @@ public class VcfImporterServiceTest
 	{
 		DataService dataService = new DataServiceImpl();
 
-		EmbeddedElasticSearchServiceFactory factory = new EmbeddedElasticSearchServiceFactory("vcf-import-test");
+		EmbeddedElasticSearchServiceFactory factory = new EmbeddedElasticSearchServiceFactory("vcf-import-test"
+				+ Math.random());
 		try
 		{
 			SearchService searchService = factory.create(dataService, new EntityToSourceConverter());

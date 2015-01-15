@@ -12,11 +12,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.log4j.Logger;
 import org.elasticsearch.ElasticsearchException;
-import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
-import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
 import org.elasticsearch.action.admin.indices.exists.types.TypesExistsRequest;
+import org.elasticsearch.action.admin.indices.exists.types.TypesExistsResponse;
 import org.elasticsearch.action.admin.indices.mapping.delete.DeleteMappingResponse;
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
@@ -51,6 +49,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
+import org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator;
 import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.data.elasticsearch.index.IndexRequestGenerator;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
@@ -64,6 +63,8 @@ import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.util.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -76,7 +77,7 @@ import com.google.common.collect.Iterables;
  */
 public class ElasticSearchService implements SearchService
 {
-	private static final Logger LOG = Logger.getLogger(ElasticSearchService.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ElasticSearchService.class);
 
 	private static BulkProcessorFactory BULK_PROCESSOR_FACTORY = new BulkProcessorFactory();
 
@@ -124,7 +125,17 @@ public class ElasticSearchService implements SearchService
 		this.dataService = dataService;
 		this.entityToSourceConverter = entityToSourceConverter;
 
-		if (createIndexIfNotExists) createIndexIfNotExists();
+		if (createIndexIfNotExists)
+		{
+			try
+			{
+				new ElasticsearchIndexCreator(client).createIndexIfNotExists(indexName);
+			}
+			catch (IOException e)
+			{
+				throw new RuntimeException(e);
+			}
+		}
 	}
 
 	/*
@@ -473,23 +484,6 @@ public class ElasticSearchService implements SearchService
 		//
 		// LOG.info("Update done.");
 		// FIXME
-	}
-
-	private void createIndexIfNotExists()
-	{
-		// Wait until elasticsearch is ready
-		client.admin().cluster().prepareHealth().setWaitForYellowStatus().execute().actionGet();
-		boolean hasIndex = client.admin().indices().exists(new IndicesExistsRequest(indexName)).actionGet().isExists();
-		if (!hasIndex)
-		{
-			if (LOG.isTraceEnabled()) LOG.trace("Creating Elasticsearch index [" + indexName + "] ...");
-			CreateIndexResponse response = client.admin().indices().prepareCreate(indexName).execute().actionGet();
-			if (!response.isAcknowledged())
-			{
-				throw new ElasticsearchException("Creation of index [" + indexName + "] failed. Response=" + response);
-			}
-			LOG.info("Created Elasticsearch index [" + indexName + "]");
-		}
 	}
 
 	/*
@@ -879,17 +873,25 @@ public class ElasticSearchService implements SearchService
 	public void delete(String entityName)
 	{
 		String type = sanitizeMapperType(entityName);
+
 		if (LOG.isTraceEnabled())
 		{
 			LOG.trace("Deleting all Elasticsearch '" + type + "' docs ...");
 		}
 
-		DeleteMappingResponse deleteMappingResponse = client.admin().indices().prepareDeleteMapping(indexName)
-				.setType(type).execute().actionGet();
-		if (!deleteMappingResponse.isAcknowledged())
+		TypesExistsResponse typesExistsResponse = client.admin().indices().prepareTypesExists(indexName).setTypes(type)
+				.execute().actionGet();
+		if (typesExistsResponse.isExists())
 		{
-			throw new ElasticsearchException("Delete failed. Returned headers:" + deleteMappingResponse.getHeaders());
+			DeleteMappingResponse deleteMappingResponse = client.admin().indices().prepareDeleteMapping(indexName)
+					.setType(type).execute().actionGet();
+			if (!deleteMappingResponse.isAcknowledged())
+			{
+				throw new ElasticsearchException("Delete failed. Returned headers:"
+						+ deleteMappingResponse.getHeaders());
+			}
 		}
+
 		if (LOG.isDebugEnabled())
 		{
 			LOG.debug("Deleted all Elasticsearch '" + type + "' docs");

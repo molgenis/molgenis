@@ -8,7 +8,7 @@
 		<link rel="icon" href="<@resource_href "/img/molgenis.ico"/>" type="image/x-icon">
 		<link rel="stylesheet" href="<@resource_href "/css/bootstrap.min.css"/>" type="text/css">
 		<link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
-		<script src="<@resource_href "/js/jquery-1.8.3.min.js"/>"></script>
+		<script src="<@resource_href "/js/jquery-2.1.1.min.js"/>"></script>
 		<script src="<@resource_href "/js/bootstrap.min.js"/>"></script>
 		<script src="<@resource_href "/js/jquery.validate.min.js"/>"></script>
 		<script src="<@resource_href "/js/handlebars.min.js"/>"></script>
@@ -21,7 +21,7 @@
 			$(function() {
 		  		$('#login-modal').modal({backdrop: 'static'});
 		  	<#if errorMessage??>
-		  		$('#loginPassword').after($('<p class="text-error">${errorMessage}</p>'));
+		  		$('#loginPassword').after($('<p class="text-error">${errorMessage?html}</p>'));
 		  	</#if>
 	   		});
 	   </script>

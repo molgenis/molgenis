@@ -16,7 +16,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -26,14 +25,12 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Aggregateable;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.data.Queryable;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.GenomeConfig;
@@ -47,11 +44,12 @@ import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.system.core.FreemarkerTemplate;
 import org.molgenis.ui.MolgenisInterceptor;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.util.GsonHttpMessageConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -65,6 +63,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -79,7 +78,7 @@ import com.google.common.collect.Iterables;
 { ATTR_GALAXY_URL, ATTR_GALAXY_API_KEY })
 public class DataExplorerController extends MolgenisPluginController
 {
-	private static final Logger logger = Logger.getLogger(DataExplorerController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DataExplorerController.class);
 
 	public static final String ID = "dataexplorer";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
@@ -142,6 +141,9 @@ public class DataExplorerController extends MolgenisPluginController
 	@Autowired
 	private GenomeConfig genomeConfig;
 
+	@Autowired
+	private FreeMarkerConfigurer freemarkerConfigurer;
+
 	public DataExplorerController()
 	{
 		super(URI);
@@ -197,16 +199,12 @@ public class DataExplorerController extends MolgenisPluginController
 				}
 				model.addAttribute("warningMessage", message.toString());
 			}
-			Iterator<EntityMetaData> entitiesIterator = entitiesMeta.iterator();
-			if (entitiesIterator.hasNext())
-			{
-				selectedEntityName = entitiesIterator.next().getName();
-			}
 		}
 		model.addAttribute("selectedEntityName", selectedEntityName);
 		model.addAttribute("searchTerm", searchTerm);
 		model.addAttribute("hideSearchBox", molgenisSettings.getBooleanProperty(KEY_HIDE_SEARCH_BOX, false));
 		model.addAttribute("hideDataItemSelect", molgenisSettings.getBooleanProperty(KEY_HIDE_ITEM_SELECTION, false));
+		model.addAttribute("isAdmin", SecurityUtils.currentUserIsSu());
 
 		return "view-dataexplorer";
 	}
@@ -385,7 +383,7 @@ public class DataExplorerController extends MolgenisPluginController
 		// Workaround because binding with @RequestBody is not possible:
 		// http://stackoverflow.com/a/9970672
 		dataRequestStr = URLDecoder.decode(dataRequestStr, "UTF-8");
-		logger.info("Download request: [" + dataRequestStr + "]");
+		LOG.info("Download request: [" + dataRequestStr + "]");
 		DataRequest dataRequest = new GsonHttpMessageConverter().getGson().fromJson(dataRequestStr, DataRequest.class);
 
 		String entityName = dataRequest.getEntityName();
@@ -551,13 +549,13 @@ public class DataExplorerController extends MolgenisPluginController
 		{
 			if (distinctAttributeName != null)
 			{
-				logger.info("[mod-aggregate] Overriding distinct attribute from request! Request specifies "
+				LOG.info("[mod-aggregate] Overriding distinct attribute from request! Request specifies "
 						+ distinctAttributeName + ", runtime property " + rtpKey + " specifies "
 						+ overrideDistinctAttributeName);
 			}
 			else
 			{
-				logger.debug("[mod-aggregate] Using distinct attribute " + overrideDistinctAttributeName
+				LOG.debug("[mod-aggregate] Using distinct attribute " + overrideDistinctAttributeName
 						+ " from runtime property " + rtpKey);
 			}
 			return overrideDistinctAttributeName;
@@ -602,8 +600,14 @@ public class DataExplorerController extends MolgenisPluginController
 
 	private boolean viewExists(String viewName)
 	{
-		Queryable templateRepository = dataService.getQueryableRepository(FreemarkerTemplate.ENTITY_NAME);
-		return templateRepository.count(new QueryImpl().eq("Name", viewName + ".ftl")) > 0;
+		try
+		{
+			return freemarkerConfigurer.getConfiguration().getTemplate(viewName + ".ftl") != null;
+		}
+		catch (IOException e)
+		{
+			return false;
+		}
 	}
 
 	@RequestMapping(value = "/settings", method = RequestMethod.GET)
@@ -622,18 +626,18 @@ public class DataExplorerController extends MolgenisPluginController
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ErrorMessageResponse handleGalaxyDataExportException(GalaxyDataExportException e)
 	{
-		logger.debug("", e);
+		LOG.debug("", e);
 		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
 	}
 
 	@ExceptionHandler(RuntimeException.class)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-	public Map<String, String> handleRuntimeException(RuntimeException e)
+	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
 	{
-		logger.error(null, e);
-		return Collections.singletonMap("errorMessage",
-				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage());
+		LOG.error(e.getMessage(), e);
+		return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(
+				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage()));
 	}
 
 	private boolean isTableEditable()
@@ -651,17 +655,21 @@ public class DataExplorerController extends MolgenisPluginController
 	private String parseEntitiesReportRuntimeProperty(String entityName)
 	{
 		String modEntitiesReportRTP = molgenisSettings.getProperty(KEY_MOD_ENTITIESREPORT, null);
-        if(modEntitiesReportRTP != null) {
-            String[] entitiesReports = modEntitiesReportRTP.split(",");
-            for (String entitiesReport : entitiesReports) {
-                String[] entitiesReportParts = entitiesReport.split(":");
-                if (entitiesReportParts.length == 2) {
-                    if (entitiesReportParts[0].equals(entityName)) {
-                        return entitiesReportParts[1];
-                    }
-                }
-            }
-        }
+		if (modEntitiesReportRTP != null)
+		{
+			String[] entitiesReports = modEntitiesReportRTP.split(",");
+			for (String entitiesReport : entitiesReports)
+			{
+				String[] entitiesReportParts = entitiesReport.split(":");
+				if (entitiesReportParts.length == 2)
+				{
+					if (entitiesReportParts[0].equals(entityName))
+					{
+						return entitiesReportParts[1];
+					}
+				}
+			}
+		}
 		return null;
 	}
 }

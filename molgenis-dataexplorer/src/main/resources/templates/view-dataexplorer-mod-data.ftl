@@ -48,26 +48,24 @@
 	     	</div>
 
 	      	<div class="modal-body">
-	      		<div class="form-group form-horizontal">
-		      		<div class="row">
-						<div class="control-group">
-							<label class="col-md-3 control-label">As column names I want:</label>
-							<div class="controls col-md-9">
-								<label class="radio">
-		  							<input type="radio" name="colNames" value="ATTRIBUTE_LABELS" checked> Attribute Labels
-			    				</label>
-								<label class="radio">
-		  							<input type="radio" name="colNames" value="ATTRIBUTE_NAMES">Attribute Names
-								</label>
-		  					</div>
-						</div>
-					</div>
-				</div>
+	      	    <form class="form" role="form">
+                    <span id="helpBlock" class="help-block">As column names I want:</span>
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="colNames" value="ATTRIBUTE_LABELS" checked> Attribute Labels
+                        </label>
+                    </div>
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="colNames" value="ATTRIBUTE_NAMES">  Attribute Names
+                        </label>   
+                    </div>
+	      	    </form>
 			</div>
 
 	      	<div class="modal-footer">
 	        	<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-	        	<button id="download-button" class="btn btn-primary">Download</button>
+	        	<button type="button" id="download-button" class="btn btn-primary">Download</button>
 	      	</div>
 
 	    </div>
@@ -79,7 +77,7 @@
 
 <#if galaxyEnabled?? && galaxyEnabled == true>
 <#-- Galaxy export modal -->
-<form name="galaxy-export-form" class="form-horizontal" action="${context_url}/galaxy/export" method="POST">
+<form name="galaxy-export-form" class="form-horizontal" action="${context_url?html}/galaxy/export" method="POST">
 	<div class="modal" id="galaxy-export-modal" tabindex="-1" role="dialog" aria-labelledby="galaxy-export-modal-label" aria-hidden="true">
 		<div class="modal-dialog modal-lg">
 			<div class="modal-content">
@@ -113,7 +111,7 @@
     </div>
 </div>
 <script>
-    molgenis.dataexplorer.setGenomeAttributes('${genomebrowser_start_list}', '${genomebrowser_chrom_list}', '${genomebrowser_id_list}', '${genomebrowser_patient_list}');
+    molgenis.dataexplorer.setGenomeAttributes('${genomebrowser_start_list?js_string}', '${genomebrowser_chrom_list?js_string}', '${genomebrowser_id_list?js_string}', '${genomebrowser_patient_list?js_string}');
     <#-- load css dependencies -->
 	if (!$('link[href="<@resource_href '/css/jquery.molgenis.table.css'/>"]').length)
 		$('head').append('<link rel="stylesheet" href="<@resource_href "/css/jquery.molgenis.table.css"/>" type="text/css" />');
@@ -124,19 +122,19 @@
 		$.ajax("<@resource_href "/js/dalliance-compiled.js"/>", {'cache': true}),
 		$.ajax("<@resource_href "/js/dataexplorer-data.js"/>", {'cache': true}))
 		.done(function() {
-    			molgenis.dataexplorer.data.setGenomeBrowserAttributes('${genomebrowser_start_list}', '${genomebrowser_chrom_list}', '${genomebrowser_id_list}', '${genomebrowser_patient_list}');
-
+    			molgenis.dataexplorer.data.setGenomeBrowserAttributes('${genomebrowser_start_list?js_string}', '${genomebrowser_chrom_list?js_string}', '${genomebrowser_id_list?js_string}', '${genomebrowser_patient_list?js_string}');
+                <#-- do *not* js escape values below -->    
                 molgenis.dataexplorer.data.setGenomeBrowserSettings({
 			    ${initLocation},
 				coordSystem: ${coordSystem},
 				sources: ${sources},
 				browserLinks: ${browserLinks}
 			});
-			molgenis.dataexplorer.data.setGenomeBrowserEntities([<#list genomeEntities?keys as entityName>{'name': '${entityName}', 'label': '${genomeEntities[entityName]}'}<#if entityName_has_next>,</#if></#list>])
+			molgenis.dataexplorer.data.setGenomeBrowserEntities([<#list genomeEntities?keys as entityName>{'name': '${entityName?js_string}', 'label': '${genomeEntities[entityName]?js_string}'}<#if entityName_has_next>,</#if></#list>]);
 			
-			if(molgenis.dataexplorer.data.doShowGenomeBrowser() == true)
+			if(molgenis.dataexplorer.data.doShowGenomeBrowser() === true)
 		        {
-		            molgenis.dataexplorer.data.createGenomeBrowser({showHighlight: ${showHighlight}});
+		            molgenis.dataexplorer.data.createGenomeBrowser({showHighlight: ${showHighlight?js_string}});
 		        }
 		    else
 		        {

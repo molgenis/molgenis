@@ -4,10 +4,11 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 
-import org.apache.log4j.Logger;
 import org.molgenis.data.Queryable;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.system.core.FreemarkerTemplate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import freemarker.cache.TemplateLoader;
 
@@ -16,9 +17,9 @@ import freemarker.cache.TemplateLoader;
  */
 public class RepositoryTemplateLoader implements TemplateLoader
 {
-	private final Queryable repository;
+	private static final Logger LOG = LoggerFactory.getLogger(RepositoryTemplateLoader.class);
 
-	private static final Logger LOGGER = Logger.getLogger(RepositoryTemplateLoader.class);
+	private final Queryable repository;
 
 	public RepositoryTemplateLoader(Queryable repository)
 	{
@@ -40,7 +41,7 @@ public class RepositoryTemplateLoader implements TemplateLoader
 			return null;
 		}
 		TemplateSource templateSource = new TemplateSource(template);
-		LOGGER.debug("Created " + templateSource);
+		LOG.debug("Created " + templateSource);
 		return templateSource;
 	}
 

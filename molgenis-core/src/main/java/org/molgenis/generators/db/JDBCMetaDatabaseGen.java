@@ -9,7 +9,8 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.molgenis.MolgenisOptions;
 import org.molgenis.generators.Generator;
 import org.molgenis.model.MolgenisModel;
@@ -20,7 +21,7 @@ import freemarker.template.Template;
 
 public class JDBCMetaDatabaseGen extends Generator
 {
-	private static final Logger logger = Logger.getLogger(JDBCMetaDatabaseGen.class);
+	private static final Logger LOG = LoggerFactory.getLogger(JDBCMetaDatabaseGen.class);
 
 	@Override
 	public String getDescription()
@@ -57,7 +58,7 @@ public class JDBCMetaDatabaseGen extends Generator
 			template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
 			targetOut.close();
 
-			logger.info("generated " + target);
+			LOG.info("generated " + target);
 		}
 	}
 

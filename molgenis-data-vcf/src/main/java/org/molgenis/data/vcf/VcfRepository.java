@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
@@ -33,6 +32,9 @@ import org.molgenis.vcf.meta.VcfMetaContig;
 import org.molgenis.vcf.meta.VcfMetaFormat;
 import org.molgenis.vcf.meta.VcfMetaInfo;
 import org.molgenis.vcf.meta.VcfMetaSample;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
@@ -44,7 +46,7 @@ import com.google.common.collect.Lists;
  */
 public class VcfRepository extends AbstractRepository
 {
-	private static final Logger logger = Logger.getLogger(VcfRepository.class);
+	private static final Logger LOG = LoggerFactory.getLogger(VcfRepository.class);
 
 	public static final String BASE_URL = "vcf://";
 	public static final String CHROM = "#CHROM";
@@ -166,8 +168,6 @@ public class VcfRepository extends AbstractRepository
 			public Entity next()
 			{
 				Entity entity = new MapEntity();
-				// return null;
-				
 				try
 				{
 					entity.set(CHROM, vcfRecord.getChromosome());
@@ -255,7 +255,7 @@ public class VcfRepository extends AbstractRepository
 
 				catch (IOException e)
 				{
-					logger.error("Unable to load VCF metadata. " + e.getStackTrace());
+					LOG.error("Unable to load VCF metadata. ", e);
 				}
 				// If the next iteration means hold no more samples set vcfRecord and sampleIterator to null
 				if (--numberOfSamples == 0)
@@ -344,6 +344,7 @@ public class VcfRepository extends AbstractRepository
 						MolgenisFieldTypes.FieldTypeEnum.STRING));
 				DefaultAttributeMetaData idAttributeMetaData = new DefaultAttributeMetaData(INTERNAL_ID,
 						MolgenisFieldTypes.FieldTypeEnum.STRING);
+				idAttributeMetaData.setNillable(false);
 				idAttributeMetaData.setIdAttribute(true);
 				idAttributeMetaData.setVisible(false);
 				entityMetaData.addAttributeMetaData(idAttributeMetaData);
@@ -408,7 +409,7 @@ public class VcfRepository extends AbstractRepository
 		try
 		{
 			isListValue = number.equals("A") || number.equals("R") || number.equals("G") || number.equals(".")
-					|| Integer.valueOf(number) > 1;
+					|| Integer.parseInt(number) > 1;
 		}
 		catch (NumberFormatException ex)
 		{
@@ -459,7 +460,7 @@ public class VcfRepository extends AbstractRepository
 		try
 		{
 			isListValue = number.equals("A") || number.equals("R") || number.equals("G") || number.equals(".")
-					|| Integer.valueOf(number) > 1;
+					|| Integer.parseInt(number) > 1;
 		}
 		catch (NumberFormatException ex)
 		{
@@ -524,7 +525,7 @@ public class VcfRepository extends AbstractRepository
 				}
 				catch (IOException e)
 				{
-					logger.warn(e);
+					LOG.warn("", e);
 				}
 			}
 		}

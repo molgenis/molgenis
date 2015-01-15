@@ -2,7 +2,8 @@ package org.molgenis.util;
 
 import javax.mail.internet.MimeMessage;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
@@ -14,7 +15,7 @@ import org.springframework.scheduling.annotation.Async;
  */
 public class AsyncJavaMailSender extends JavaMailSenderImpl
 {
-	private static final Logger logger = Logger.getLogger(AsyncJavaMailSender.class);
+	private static final Logger LOG = LoggerFactory.getLogger(AsyncJavaMailSender.class);
 
 	@Override
 	@Async
@@ -54,7 +55,7 @@ public class AsyncJavaMailSender extends JavaMailSenderImpl
 		}
 		catch (Exception e)
 		{
-			logger.error("Error sending e-mail.", e);
+			LOG.error("Error sending e-mail.", e);
 		}
 	}
 

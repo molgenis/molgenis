@@ -14,9 +14,6 @@ import java.util.concurrent.Executors;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.molgenis.fieldtypes.BoolField;
 import org.molgenis.fieldtypes.DateField;
 import org.molgenis.fieldtypes.DatetimeField;
@@ -41,13 +38,10 @@ import org.molgenis.generators.db.EntitiesImporterGen;
 import org.molgenis.generators.db.EntitiesValidatorGen;
 import org.molgenis.generators.db.JDBCMetaDatabaseGen;
 import org.molgenis.generators.db.PersistenceGen;
-import org.molgenis.generators.doc.DotDocGen;
-import org.molgenis.generators.doc.DotDocMinimalGen;
-import org.molgenis.generators.doc.DotDocModuleDependencyGen;
-import org.molgenis.generators.doc.FileFormatDocGen;
-import org.molgenis.generators.doc.ObjectModelDocGen;
 import org.molgenis.model.MolgenisModel;
 import org.molgenis.model.elements.Model;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
@@ -59,7 +53,7 @@ import com.google.common.collect.Lists;
  */
 public class Molgenis
 {
-	private static final Logger logger = Logger.getLogger(Molgenis.class);
+	private static final Logger LOG = LoggerFactory.getLogger(Molgenis.class);
 
 	public static void main(String[] args)
 	{
@@ -162,15 +156,12 @@ public class Molgenis
 	public <E extends Generator> Molgenis(MolgenisOptions options, String outputPath,
 			Class<? extends Generator>... generatorsToUse) throws Exception
 	{
-		BasicConfigurator.configure();
-
 		this.loadFieldTypes();
 
 		this.options = options;
 
-		Logger.getLogger("freemarker.cache").setLevel(Level.INFO);
-		logger.debug("\nMOLGENIS version " + org.molgenis.Version.convertToString());
-		logger.debug("working dir: " + System.getProperty("user.dir"));
+		LOG.debug("\nMOLGENIS version " + org.molgenis.Version.convertToString());
+		LOG.debug("working dir: " + System.getProperty("user.dir"));
 
 		// clean options
 		if (outputPath != null)
@@ -189,29 +180,6 @@ public class Molgenis
 		if (!options.output_web.endsWith("/")) options.output_web = options.output_web + "/";
 		options.output_doc = outputPath != null ? outputPath + options.output_doc : options.output_doc;
 		if (!options.output_doc.endsWith("/")) options.output_doc = options.output_doc + "/";
-
-		// DOCUMENTATION
-		if (options.generate_doc)
-		{
-			generators.add(new FileFormatDocGen());
-			// check if dot is available to prevent error lists in the build logs
-			try
-			{
-				Runtime.getRuntime().exec("dot -?");
-				generators.add(new DotDocGen());
-				generators.add(new DotDocMinimalGen());
-			}
-			catch (Exception e)
-			{
-				// dot not available
-			}
-			generators.add(new ObjectModelDocGen());
-			generators.add(new DotDocModuleDependencyGen());
-		}
-		else
-		{
-			logger.debug("Skipping documentation ....");
-		}
 
 		if (options.generate_jpa)
 		{
@@ -237,7 +205,7 @@ public class Molgenis
 		}
 		else
 		{
-			logger.warn("SEVERE: Skipping ALL SQL ....");
+			LOG.warn("SEVERE: Skipping ALL SQL ....");
 		}
 
 		if (options.generate_entityio)
@@ -257,7 +225,7 @@ public class Molgenis
 			generators = use;
 		}
 
-		logger.debug("\nUsing generators:\n" + toString());
+		LOG.debug("\nUsing generators:\n" + toString());
 
 		// parsing model
 		model = MolgenisModel.parse(options);
@@ -294,13 +262,13 @@ public class Molgenis
 	 */
 	public void generate() throws Exception
 	{
-		logger.info("Generating ...");
-		logger.debug("\nUsing options:\n" + options.toString());
+		LOG.info("Generating ...");
+		LOG.debug("\nUsing options:\n" + options.toString());
 
 		File generatedFolder = new File(options.output_dir);
 		if (generatedFolder.exists() && options.delete_generated_folder)
 		{
-			logger.debug("removing previous generated folder " + generatedFolder);
+			LOG.debug("removing previous generated folder " + generatedFolder);
 			deleteContentOfDirectory(generatedFolder);
 			deleteContentOfDirectory(new File(options.output_src));
 			deleteContentOfDirectory(new File(options.output_sql));
@@ -334,7 +302,7 @@ public class Molgenis
 			executorService.shutdown();
 		}
 
-		logger.info("Generation completed at " + new Date());
+		LOG.info("Generation completed at " + new Date());
 	}
 
 	/**
@@ -358,7 +326,7 @@ public class Molgenis
 					{
 						result &= deleteContentOfDirectory(f);
 						boolean ok = f.delete();
-						if (!ok) logger.warn("file delete failed: " + f.getName());
+						if (!ok) LOG.warn("file delete failed: " + f.getName());
 					}
 					else
 					{
