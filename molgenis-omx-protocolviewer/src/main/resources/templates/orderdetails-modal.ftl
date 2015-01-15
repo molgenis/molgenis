@@ -11,13 +11,13 @@
         <table class="table table-striped table-condensed listtable">
             <thead>
             <th>Variable</th>
-            <th>Description</th>
+            <th>Group</th>
             </thead>
             <tbody>
             <#list order.items as item>
             <tr>
                 <td><#if item.name??>${item.name}</#if></td>
-                <td><#if item.description??>${i18n.get(item.description)}</#if></td>
+                <td><#if item.group??><#list item.group as group>${group}<#if group_has_next> &rarr; </#if></#list></#if></td>
             </tr>
             </#list>
             </tbody>
