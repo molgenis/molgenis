@@ -168,11 +168,11 @@
 							var protocol = protocolMap[this.path[this.path.length - 1]];
 							var protocolName = protocol.Name;
 							var protocolIdentifier = protocol.Identifier;
-							var description = this.group.join(' &rarr; ');
+							var description = this.group.map(window.htmlEscape).join(' &rarr; ');
 							var row = $('<tr />').data('key', this);
 							$('<td />').text(typeof protocolName !== 'undefined' ? protocolName : "").appendTo(row);
 							$('<td />').text(typeof protocolIdentifier !== 'undefined' ? protocolIdentifier : "").appendTo(row);
-							$('<td />').text(typeof description !== 'undefined' ? description : "").appendTo(row);
+							$('<td />').html(typeof description !== 'undefined' ? description : "").appendTo(row);
 							var deleteButton = $('<i class="icon-remove"></i>');
 							
 							deleteButton.click(function() {

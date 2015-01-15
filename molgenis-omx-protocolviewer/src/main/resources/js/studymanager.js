@@ -134,7 +134,7 @@
 						items.push('<td>' + (item.externalId || '') + '</td>');
 						items.push('<td>');
 						for(var j = 0; j < item.path.length; ++j) {
-							items.push(item.path[j]);
+							items.push(window.htmlEscape(item.path[j]));
 							if (j < item.path.length - 1)
 								items.push(' &rarr; ');
 						}
