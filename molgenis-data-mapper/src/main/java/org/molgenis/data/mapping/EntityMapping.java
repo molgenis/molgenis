@@ -12,15 +12,15 @@ public class EntityMapping
 	private String identifier;
 	private EntityMetaData sourceEntityMetaData;
 	private EntityMetaData targetEntityMetaData;
-	private List<AttributeMapping> entityMappings;
+	private List<AttributeMapping> attributeMappings;
 
 	public EntityMapping(String identifier, EntityMetaData sourceEntityMetaData, EntityMetaData targetEntityMetaData,
-			List<AttributeMapping> entityMappings)
+			List<AttributeMapping> attributeMappings)
 	{
 		this.identifier = identifier;
 		this.sourceEntityMetaData = sourceEntityMetaData;
 		this.targetEntityMetaData = targetEntityMetaData;
-		this.entityMappings = entityMappings;
+		this.attributeMappings = attributeMappings;
 	}
 
 	public String getIdentifier()
@@ -53,13 +53,13 @@ public class EntityMapping
 		this.targetEntityMetaData = targetEntityMetaData;
 	}
 
-	public List<AttributeMapping> getEntityMappings()
+	public List<AttributeMapping> getAttributeMappings()
 	{
-		return entityMappings;
+		return attributeMappings;
 	}
 
-	public void setEntityMappings(List<AttributeMapping> entityMappings)
+	public void setAttributeMappings(List<AttributeMapping> attributeMappings)
 	{
-		this.entityMappings = entityMappings;
+		this.attributeMappings = attributeMappings;
 	}
 }
