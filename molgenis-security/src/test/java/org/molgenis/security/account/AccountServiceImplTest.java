@@ -37,7 +37,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 @ContextConfiguration
-public class AccountServiceTest extends AbstractTestNGSpringContextTests
+public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 {
 	@Configuration
 	static class Config
@@ -45,7 +45,7 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 		@Bean
 		public AccountService accountService()
 		{
-			return new AccountService();
+			return new AccountServiceImpl();
 		}
 
 		@Bean
