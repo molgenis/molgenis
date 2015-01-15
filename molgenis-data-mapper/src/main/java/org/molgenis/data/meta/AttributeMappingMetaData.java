@@ -6,7 +6,7 @@ import static org.molgenis.MolgenisFieldTypes.XREF;
 
 public class AttributeMappingMetaData extends DefaultEntityMetaData
 {
-	public static final String ENTITY_NAME = "attributes";
+	public static final String ENTITY_NAME = "AttributeMapping";
 	public static final String IDENTIFIER = "identifier";
 	public static final String SOURCEATTRIBUTEMETADATA = "sourceAttribureMetaData";
 	public static final String TARGETATTRIBUTEMETADATA = "targetAttribureMetaData";

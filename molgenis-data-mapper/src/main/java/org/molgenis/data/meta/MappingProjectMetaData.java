@@ -14,7 +14,7 @@ public class MappingProjectMetaData extends DefaultEntityMetaData
 	@Autowired
 	private DataService dataService;
 
-	public static final String ENTITY_NAME = "attributes";
+	public static final String ENTITY_NAME = "MappingProject";
 	public static final String IDENTIFIER = "identifier";
 	public static final String OWNER = "owner";
 	public static final String ENTITYMAPPINGS = "entityMappings";
