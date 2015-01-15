@@ -58,6 +58,8 @@ public class VcfRepository extends AbstractRepository
 	public static final String INFO = "INFO";
 	public static final String SAMPLES = "SAMPLES";
 	public static final String NAME = "NAME";
+	public static final String REFERENCE = "reference";
+	public static final String SOURCENAME = "SOURCENAME";
 
 	private final File file;
 	private final String entityName;
@@ -93,20 +95,44 @@ public class VcfRepository extends AbstractRepository
 		{
 			Iterator<VcfRecord> vcfRecordIterator = finalVcfReader.iterator();
 			private VcfRecord vcfRecord;
+			private int numberOfSamples;
+			Iterator<VcfSample> sampleIterator = null;
+			String reference;
+			int row;
 
 			@Override
 			public boolean hasNext()
 			{
-
+				// If this is set to null the record has been drained dry and no more samples can be split into
+				// individual entities
+				if (vcfRecord != null)
+				{
+					return true;
+				}
+				Boolean hasNext = vcfRecordIterator.hasNext();
+				
+				// If the original record has a next element
 				if (vcfRecordIterator.hasNext())
 				{
-
+					// Set the next vcfRecord
 					vcfRecord = vcfRecordIterator.next();
+					row++;
+					if (row % 500 == 0)
+					{
+						System.out.println("processing row: " + row);
+					}
+					// If there are no samples it will not pass this filter
+					numberOfSamples = vcfRecord.getNrSamples();
+					if (numberOfSamples == 0)
+					{
+						return false;
+					}
 
-					String reference = null;
+					reference = null;
 					try
 					{
-						reference = finalVcfReader.getVcfMeta().get("reference");
+						reference = finalVcfReader.getVcfMeta().get(REFERENCE);
+
 					}
 					catch (IOException e)
 					{
@@ -114,28 +140,34 @@ public class VcfRepository extends AbstractRepository
 						e.printStackTrace();
 					}
 
+					// While the record does not pass the filter check till a valid record is found
 					while (!vkglChromosomeAccessionFilter(vcfRecord.getChromosome().toString())
-							&& !vkglReferenceGenomeFilter(reference))
+					 && !vkglReferenceGenomeFilter(reference))
+					//while (!vkglReferenceGenomeFilter(reference))
 					{
+
 						if (vcfRecordIterator.hasNext())
 						{
 							vcfRecord = vcfRecordIterator.next();
 						}
+						// If no next element is present return false
 						else
 						{
 							return false;
 						}
 					}
 				}
-				return vcfRecordIterator.hasNext();
+
+				return hasNext;
 
 			}
 
 			@Override
 			public Entity next()
 			{
-
 				Entity entity = new MapEntity();
+				// return null;
+				
 				try
 				{
 					entity.set(CHROM, vcfRecord.getChromosome());
@@ -156,7 +188,9 @@ public class VcfRepository extends AbstractRepository
 					entity.set(FILTER, vcfRecord.getFilterStatus());
 					entity.set(QUAL, vcfRecord.getQuality());
 					entity.set(ID, StringUtils.join(vcfRecord.getIdentifiers(), ','));
-
+					entity.set(REFERENCE, reference);		
+					entity.set(SOURCENAME, file.getName());
+					
 					StringBuilder id = new StringBuilder();
 					id.append(StringUtils.strip(entity.get(CHROM).toString()));
 					id.append("_");
@@ -180,17 +214,25 @@ public class VcfRepository extends AbstractRepository
 					if (hasFormatMetaData)
 					{
 						List<Entity> samples = new ArrayList<Entity>();
-						Iterator<VcfSample> sampleIterator = vcfRecord.getSamples().iterator();
+
 						if (vcfRecord.getNrSamples() > 0)
 						{
+							// If sampleIterator is null get a new one
+							if (sampleIterator == null)
+							{
+								sampleIterator = vcfRecord.getSamples().iterator();
+							}
+
 							Iterator<String> sampleNameIterator = finalVcfReader.getVcfMeta().getSampleNames()
 									.iterator();
-							while (sampleIterator.hasNext())
+							
+							if (sampleIterator.hasNext())
 							{
 								String[] format = vcfRecord.getFormat();
 								VcfSample sample = sampleIterator.next();
 								Entity sampleEntity = new MapEntity(sampleEntityMetaData);
-								for (int i = 0; i < format.length; i = i + 1)
+
+								for (int i = 0; i < format.length; i++)
 								{
 									sampleEntity.set(format[i], sample.getData(i));
 								}
@@ -201,8 +243,13 @@ public class VcfRepository extends AbstractRepository
 										+ sampleNameIterator.next());
 								samples.add(sampleEntity);
 							}
+							else
+							{
+								sampleIterator = null;
+							}
 						}
 						entity.set(SAMPLES, samples);
+
 					}
 				}
 
@@ -210,17 +257,28 @@ public class VcfRepository extends AbstractRepository
 				{
 					logger.error("Unable to load VCF metadata. " + e.getStackTrace());
 				}
+				// If the next iteration means hold no more samples set vcfRecord and sampleIterator to null
+				if (--numberOfSamples == 0)
+				{
+					vcfRecord = null;
+					sampleIterator = null;
+				}
+
 				return entity;
 			}
-			
-			
-			
+
 			@Override
 			public void remove()
 			{
 				throw new UnsupportedOperationException();
 			}
 
+			/**
+			 * Checks is chromosome has valid format if not return false.
+			 * 
+			 * @param chromosome
+			 * @return boolean
+			 */
 			private boolean vkglChromosomeAccessionFilter(String chromosome)
 			{
 
@@ -230,13 +288,17 @@ public class VcfRepository extends AbstractRepository
 				}
 				return true;
 			}
-			
-		    
 
+			/**
+			 * Checks if there is a reference otherwise returns false
+			 * 
+			 * @param reference
+			 * @return boolean
+			 */
 			private boolean vkglReferenceGenomeFilter(String reference)
 			{
 
-				if (!reference.isEmpty())
+				if (reference.isEmpty())
 				{
 					return false;
 				}

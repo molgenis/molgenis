@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +47,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.auth.MolgenisUser;
+import org.molgenis.data.AggregateQuery;
+import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
@@ -56,11 +59,13 @@ import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Queryable;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.rsql.MolgenisRSQL;
+import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.DefaultEntityCollection;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -82,6 +87,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConversionFailedException;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -366,6 +373,207 @@ public class RestController
 
 		return retrieveEntityAttributeInternal(entityName, id, refAttributeName, request, attributesSet,
 				attributeExpandSet);
+	}
+
+	/**
+	 * Do a VKGL aggregate query
+	 * 
+	 * Will return aggregate of all hits.
+	 * 
+	 * Returns json
+	 * 
+	 * @param entityName
+	 * @param request
+	 * @param attributeExpands
+	 * @return
+	 * @throws UnknownEntityException
+	 */
+	@RequestMapping(value = "/vkgl", method = POST, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public VkglResponse vkglQueryResponse(@Valid @RequestBody VkglRequest request)
+	{
+		request = request != null ? request : new VkglRequest();
+
+		String entityName = "vkgl_vkgl";
+		EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
+
+		String chr = "";
+
+		AttributeMetaData posXAttributeMeta = entityMeta.getAttribute("REF");
+		AttributeMetaData posYAttributeMeta = entityMeta.getAttribute("ALT");
+		ArrayList<VkglResult> results = new ArrayList<VkglResult>();
+		AggregateResult result = null;
+
+		if (request.getQuery().getCoordinate() != null)
+		{
+			for (int i = 0; i < request.getQuery().getCoordinate().length; i++)
+			{
+				HashMap<String, Iterable<Entity>> lookupTables = new HashMap<String, Iterable<Entity>>();
+
+				if (request.getQuery().getCoordinate()[i].getSource().equals("HGNC"))
+				{
+
+					String geneSymbol = request.getQuery().getCoordinate()[i].getReference();
+
+					// get lookup table if its build 37
+
+					lookupTables.put("GRCh37", dataService.findAll("GRCh37", new QueryImpl().eq("HGNC", geneSymbol)));
+					lookupTables.put("GRCh38", dataService.findAll("GRCh38", new QueryImpl().eq("HGNC", geneSymbol)));
+
+				}
+				for (String reference : lookupTables.keySet())
+				{
+					System.out.println(reference);
+					Entity e = lookupTables.get(reference).iterator().next();
+					Query q = new QueryImpl();
+
+					for (int position = Integer.parseInt(request.getQuery().getCoordinate()[i].getStart()); position < Integer
+							.parseInt(request.getQuery().getCoordinate()[i].getEnd()) - 1; position++)
+					{
+						chr = (String) e.get("Chromosome");
+						int positionStart = position + (int) e.get("Start");
+						int positionEnd = position + (int) e.get("Start") + 2;
+
+						System.out.println("positions: " + positionStart + ":" + positionEnd);
+						if (request.getQuery().getCoordinate()[i].getOperator().equals("IS"))
+						{
+							q = q.eq("#CHROM", chr).and().rng("POS", positionStart, positionEnd);
+
+							AggregateQuery coordinateAggregateQuery = new AggregateQueryImpl().attrX(posXAttributeMeta)
+									.attrY(posYAttributeMeta).query(q);
+
+							coordinateAggregateQuery.getAttributeX();
+
+							result = dataService.aggregate(entityName, coordinateAggregateQuery);
+
+							List<String> resultxLabel = new ArrayList<>();
+							List<String> resultyLabel = new ArrayList<>();
+							List<List<Long>> resultMatrix = new ArrayList<>();
+							if (result.getxLabels().get(0) == null && result.getyLabels().get(0) == null)
+							{
+								resultxLabel.add("No hits found");
+								resultyLabel.add("No hits found");
+								System.out.println(dataService.count(entityName, new QueryImpl()));
+								List<Long> totalLengthRepo = new ArrayList<Long>();
+								totalLengthRepo.add(dataService.count(entityName, new QueryImpl()));
+								resultMatrix.add(totalLengthRepo);
+							}
+							else
+							{
+								resultxLabel = result.getxLabels();
+								resultyLabel = result.getyLabels();
+								resultMatrix = result.getMatrix();
+							}
+							
+							
+							VkglResult vkglResult = new VkglResult();
+							vkglResult.setChromosome(chr);
+							vkglResult.setPosition(positionStart + 1);
+							vkglResult.setResultType("coordinate");
+							vkglResult.setResult(resultMatrix);
+							vkglResult.setReferenceAllele(resultxLabel);
+							vkglResult.setAlternativeAllele(resultyLabel);
+							vkglResult.setReference(reference);
+							
+							results.add(vkglResult);
+						}
+						else if(request.getQuery().getCoordinate()[i].getOperator().equals("")){
+							
+						}
+					}
+				}
+
+			}
+
+		}
+		// if its an allele query
+		if (request.getQuery().getAllele() != null)
+		{
+			for (int i = 0; i < request.getQuery().getAllele().length; i++)
+			{
+
+				HashMap<String, Iterable<Entity>> lookupTables = new HashMap<String, Iterable<Entity>>();
+				if (request.getQuery().getAllele()[i].getSource().equals("HGNC"))
+				{
+					String geneSymbol = request.getQuery().getAllele()[i].getReference();
+					// get lookup table if its build 37
+					lookupTables.put("GRCh37", dataService.findAll("GRCh37", new QueryImpl().eq("HGNC", geneSymbol)));
+					lookupTables.put("GRCh38", dataService.findAll("GRCh38", new QueryImpl().eq("HGNC", geneSymbol)));
+
+				}
+				for (String reference : lookupTables.keySet())
+				{
+					System.out.println(reference);
+					Entity e = lookupTables.get(reference).iterator().next();
+
+					chr = (String) e.get("Chromosome");
+
+					// int positionStart = Integer.parseInt(request.getQuery().getAllele()[i].getStart())
+					// + (int) e.get("Start");
+					// int positionEnd = Integer.parseInt(request.getQuery().getAllele()[i].getEnd())
+					// + (int) e.get("Start");
+
+					for (int position = Integer.parseInt(request.getQuery().getAllele()[i].getStart()); position < Integer
+							.parseInt(request.getQuery().getAllele()[i].getEnd()) - 1; position++)
+
+					{
+						chr = (String) e.get("Chromosome");
+						int positionStart = position + (int) e.get("Start");
+						int positionEnd = position + (int) e.get("Start") + 2;
+
+						for (int j = 0; j < request.getQuery().getAllele()[i].getAllele_sequence().length; j++)
+						{
+
+							Query q = new QueryImpl();
+							q = q.eq("#CHROM", chr).and().rng("POS", positionStart, positionEnd).and().nest()
+									.eq("REF", request.getQuery().getAllele()[i].getAllele_sequence()[j]).or()
+									.eq("ALT", request.getQuery().getAllele()[i].getAllele_sequence()[j]).unnest();
+
+							AggregateQuery alleleAggregateQuery = new AggregateQueryImpl().attrX(posXAttributeMeta)
+									.attrY(posYAttributeMeta).query(q);
+
+							result = dataService.aggregate(entityName, alleleAggregateQuery);
+
+							List<String> resultxLabel = new ArrayList<>();
+							List<String> resultyLabel = new ArrayList<>();
+							List<List<Long>> resultMatrix = new ArrayList<>();
+							if (result.getxLabels().get(0) == null && result.getyLabels().get(0) == null)
+							{
+								resultxLabel.add("No hits found");
+								resultyLabel.add("No hits found");
+								System.out.println(dataService.count(entityName, new QueryImpl()));
+								List<Long> totalLengthRepo = new ArrayList<Long>();
+								totalLengthRepo.add(dataService.count(entityName, new QueryImpl()));
+								resultMatrix.add(totalLengthRepo);
+							}
+							else
+							{
+								resultxLabel = result.getxLabels();
+								resultyLabel = result.getyLabels();
+								resultMatrix = result.getMatrix();
+							}
+
+							VkglResult vkglResult = new VkglResult();
+							vkglResult.setChromosome(chr);
+							vkglResult.setPosition(positionStart + 1);
+							vkglResult.setResultType("coordinate");
+							vkglResult.setResult(resultMatrix);
+							vkglResult.setReferenceAllele(resultxLabel);
+							vkglResult.setAlternativeAllele(resultyLabel);
+							vkglResult.setReference(reference);
+
+							results.add(vkglResult);
+
+						}
+					}
+				}
+			}
+		}
+
+		VkglResponse vkglResponse = new VkglResponse();
+		vkglResponse.setResults(results);
+
+		return vkglResponse;
 	}
 
 	/**
