@@ -83,14 +83,14 @@
 								});	
 							}
 							var table = $('<table id="orderdata-selection-table" class="table table-striped table-condensed listtable"></table>');
-	                        table.append($('<thead><tr><th>Variable</th><th>Description</th><th>Remove</th></tr></thead>'));
+	                        table.append($('<thead><tr><th>Variable</th><th>Group</th><th>Remove</th></tr></thead>'));
 	                        var body = $('<tbody>');
 	
 	                        $.each(selection.items, function (i, item) {
 	                        	var protocol = molgenis.Catalog.getProtocol(item.protocol);
 	                            var row = $('<tr>');
 	                            row.append('<td>' + protocol.Name + '</td>');
-	                            row.append('<td>' + (protocol.description ? molgenis.i18n.get(protocol.description) : '') + '</td>');
+	                            row.append('<td>' + (this.group ? this.group.map(window.htmlEscape).join(' &rarr; ') : '') + '</td>');
 	
 	                            var deleteCol = $('<td class="center">');
 	                            var deleteBtn = $('<i class="icon-remove"></i>');
