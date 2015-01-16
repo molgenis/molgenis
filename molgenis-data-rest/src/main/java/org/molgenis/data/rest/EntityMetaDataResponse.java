@@ -19,6 +19,7 @@ public class EntityMetaDataResponse
 	private final Map<String, Object> attributes;
 	private final String labelAttribute;
 	private final String idAttribute;
+	private final Boolean isAbstract;
 
 	/**
 	 * 
@@ -89,6 +90,12 @@ public class EntityMetaDataResponse
 			this.idAttribute = idAttribute != null ? idAttribute.getName() : null;
 		}
 		else this.idAttribute = null;
+
+		if (attributesSet == null || attributesSet.contains("abstract".toLowerCase()))
+		{
+			isAbstract = meta.isAbstract();
+		}
+		else this.isAbstract = null;
 	}
 
 	public String getHref()
@@ -124,5 +131,10 @@ public class EntityMetaDataResponse
 	public String getLabelAttribute()
 	{
 		return labelAttribute;
+	}
+
+	public boolean isAbstract()
+	{
+		return isAbstract;
 	}
 }
