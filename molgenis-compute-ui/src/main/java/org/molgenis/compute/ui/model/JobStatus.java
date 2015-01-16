@@ -23,7 +23,8 @@ public enum JobStatus implements State<JobStatus>
 		@Override
 		public EnumSet<JobStatus> getStateTransitions()
 		{
-			return EnumSet.of(SCHEDULED, RUNNING);
+			//FIXME temp
+			return EnumSet.of(SCHEDULED, RUNNING, FAILED, COMPLETED, CANCELLED);
 		}
 	},
 	SCHEDULED
@@ -41,9 +42,10 @@ public enum JobStatus implements State<JobStatus>
 		}
 
 		@Override
+		//FIXME temp
 		public EnumSet<JobStatus> getStateTransitions()
 		{
-			return EnumSet.of(RUNNING);
+			return EnumSet.of(RUNNING, COMPLETED, FAILED, CANCELLED);
 		}
 	},
 	RUNNING

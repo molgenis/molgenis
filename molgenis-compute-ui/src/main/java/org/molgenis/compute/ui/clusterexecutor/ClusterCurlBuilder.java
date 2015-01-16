@@ -23,7 +23,6 @@ public class ClusterCurlBuilder
 
 	private String curlHeaderTemplate;
 	private String curlFooterTemplate;
-
 	private Hashtable<String, String> values = null;
 
 	public String buildScript(AnalysisJob analysisJob)
@@ -88,9 +87,7 @@ public class ClusterCurlBuilder
 			values.put("PORT", prop.getProperty(ClusterManager.SERVER_PORT));
 
 			values.put(ClusterManager.BACKEND, prop.getProperty(ClusterManager.URL));
-
-
-		}
+ 		}
 		catch (IOException ex)
 		{
 			ex.printStackTrace();

@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class JobServiceImpl implements JobService
@@ -26,6 +27,7 @@ public class JobServiceImpl implements JobService
 
 	@RunAsSystem
 	@Override
+	@Transactional
 	public void updateJobStatus(JobStatusUpdate statusUpdate)
 	{
 		AnalysisJob job = dataService.findOne(AnalysisJobMetaData.INSTANCE.getName(), statusUpdate.getJobId(),
@@ -37,7 +39,8 @@ public class JobServiceImpl implements JobService
 		}
 
 		job.setStatus(statusUpdate.getStatus());
-		job.setOutputMessage(statusUpdate.getOutputMessage());
+//		job.setOutputMessage(statusUpdate.getOutputMessage());
+
 
 		switch (job.getStatus())
 		{
