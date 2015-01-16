@@ -239,47 +239,51 @@ function getCurrentTimezoneOffset() {
  * Create a table cell to show data of a certain type Is used by the
  * dataexplorer and the forms plugin
  */
-function formatTableCellValue(value, dataType, editable) {
+function formatTableCellValue(rawValue, dataType, editable, nillable) {
+	var htmlElement;
+	
 	if (dataType.toLowerCase() == 'bool') {
-		var checked = (value === true);
-		value = '<input type="checkbox" ';
-		if (checked) {
-			value = value + 'checked ';
+		htmlElement = '<input type="checkbox" ';
+		if (rawValue === true) {
+			htmlElement += 'checked ';
 		}
 		if (editable !== true) {
-			value = value + 'disabled="disabled"';
+			htmlElement += 'disabled="disabled"';
 		}
-
-		return value + '/>';
+		
+		htmlElement += '/>';
+		
+		if(dataType.toLowerCase() == 'bool' && nillable === true && (rawValue === undefined || rawValue === '')) {
+			htmlElement = $(htmlElement);
+			htmlElement.prop('indeterminate', true);
+		}
+		
+		return htmlElement;
 	}
 
-	if (typeof value === 'undefined' || value === null) {
-		return '';
+	if (typeof rawValue === 'undefined' || rawValue === null) {
+		return '<span></span>';
 	}
 
 	if (dataType.toLowerCase() == "hyperlink") {
-		value = '<a target="_blank" href="' + value + '">' + htmlEscape(value)
-				+ '</a>';
+		return htmlElement = '<a target="_blank" href="' + rawValue + '">' + htmlEscape(rawValue) + '</a>';
 
 	} else if (dataType.toLowerCase() == "email") {
-		value = '<a href="mailto:' + value + '">' + htmlEscape(value) + '</a>';
+		return htmlElement = '<a href="mailto:' + rawValue + '">' + htmlEscape(rawValue) + '</a>';
 
 	} else if (dataType.toLowerCase() != 'html') {
-
-		if (value.length > 50) {
-			var abbr = htmlEscape(abbreviate(value, 50));
-			value = '<span class="show-popover"  data-content="'
-					+ htmlEscape(value) + '" data-toggle="popover">' + abbr
+		if (rawValue.length > 50) {
+			var abbr = htmlEscape(abbreviate(rawValue, 50));
+			return htmlElement = '<span class="show-popover"  data-content="'
+					+ htmlEscape(rawValue) + '" data-toggle="popover">' + abbr
 					+ "</span>";
 		} else {
-			value = htmlEscape(value);
+			return '<span>' + htmlEscape(rawValue) + '</span>';
 		}
 
 	} else {
-		value = htmlEscape(value);
+		return '<span>' + htmlEscape(rawValue) + '</span>';
 	}
-
-	return value;
 }
 
 /**
