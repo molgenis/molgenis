@@ -26,7 +26,7 @@
 					
 					<div class="col-md-6">
 						<label for="hpoTerms">HPO terms:</label><br/>
-						<textarea id="hpoTermsInput" name="hpoTerms" rows="3" cols="40" rows="4">HP%3A0000252,HP%3A0004322,HP%3A0009900,HP%3A0001263,HP%3A0007369,HP%3A0001272,HP%3A0002011</textarea>		
+						<textarea id="hpoTermsInput" name="hpoTerms" rows="3" cols="40" rows="4">HP:0000252,HP:0004322,HP:0009900,HP:0001263,HP:0007369,HP:0001272,HP:0002011</textarea>		
 					</div>
 					<div class="col-md-6 center-aligned text-center">
 							<button type="button" class="btn btn-primary" id="btn-filter-phenotips-complete">Match PhenoTips Predictions</button>
