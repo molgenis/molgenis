@@ -83,7 +83,7 @@
 								});	
 							}
 							var table = $('<table id="orderdata-selection-table" class="table table-striped table-condensed listtable"></table>');
-	                        table.append($('<thead><tr><th>Variable</th><th>Group</th><th>Remove</th></tr></thead>'));
+	                        table.append($('<thead><tr><th>Variable</th><th>Group</th></tr></thead>'));
 	                        var body = $('<tbody>');
 	
 	                        $.each(selection.items, function (i, item) {
@@ -91,18 +91,6 @@
 	                            var row = $('<tr>');
 	                            row.append('<td>' + protocol.Name + '</td>');
 	                            row.append('<td>' + (this.group ? this.group.map(window.htmlEscape).join(' &rarr; ') : '') + '</td>');
-	
-	                            var deleteCol = $('<td class="center">');
-	                            var deleteBtn = $('<i class="icon-remove"></i>');
-	                            deleteBtn.click(function () {
-	                                pendingDeletes.push(protocol.href);
-	                                updateFeatureSelectionContainer();
-	                                // restore focus
-	                                form.find('input:visible:first').focus();
-	                            });
-	                            deleteBtn.appendTo(deleteCol);
-	
-	                            row.append(deleteCol);
 	                            body.append(row);
 	                        });
 	                        table.append(body);
