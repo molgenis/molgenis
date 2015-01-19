@@ -146,24 +146,7 @@
             e.preventDefault();
             e.stopPropagation();
             if (form.valid()) {
-                if (pendingDeletes.length > 0) {
-                    $.ajax({
-                        type: 'POST',
-                        url: pluginUri + '/cart/remove/' + catalogId,
-                        data: JSON.stringify({features: pendingDeletes}),
-                        contentType: 'application/json',
-                        success: function () {
-                            order();
-                        },
-                        error: function (xhr) {
-                            molgenis.createAlert(JSON.parse(xhr.responseText).errors, 'error', $('.modal-body', modal));
-                            modal.modal('hide');
-                        }
-                    });
-                }
-                else {
-                    order();
-                }
+                order();
             }
         });
         submitBtn.click(function (e) {
@@ -182,20 +165,23 @@
 
         function order() {
             submitBtn.addClass('disabled');
-            $.ajax({
-                type: 'POST',
-                url: pluginUri + '/order',
-                data: new FormData($('#orderdata-form')[0]),
+            console.log('query');
+            $.ajax(pluginUri + '/order', {
+            	type: 'POST',
+                data: $(':text,:hidden', '#orderdata-form').serializeArray(),
+                files: $('#orderdata-form').find(':file'),
+                iframe: true,
                 cache: false,
-                contentType: false,
-                processData: false,
-                success: function () {
-                    $(document).trigger('molgenis-order-placed', 'Your submission has been received');
-                    modal.modal('hide');
-                },
-                error: function (xhr) {
-                    modal.modal('hide');
-                }
+                processData: false
+            }).complete(function(data){
+            	modal.modal('hide');
+            	console.log(data.responseText);
+            	var responseText = JSON.parse(data.responseText);
+            	if(responseText.ok){
+            		$(document).trigger('molgenis-order-placed', responseText.message);
+            	} else {
+            		console.log(responseText);
+            	}
             });
         }
     });
