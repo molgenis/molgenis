@@ -137,13 +137,9 @@
         form.submit(function (e) {
             e.preventDefault();
             e.stopPropagation();
-<<<<<<< HEAD
             if (form.valid()) {
                 order();
             }
-=======
-            if (form.valid()) {order();}
->>>>>>> 016c6ec76a592d30005cf68b7cc1e377315bf347
         });
         
         submitBtn.click(function (e) {
