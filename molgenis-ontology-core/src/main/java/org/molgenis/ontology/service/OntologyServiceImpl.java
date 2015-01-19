@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -19,7 +20,6 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.Ontology;
 import org.molgenis.ontology.OntologyService;
@@ -36,6 +36,7 @@ import org.molgenis.ontology.repository.OntologyQueryRepository;
 import org.molgenis.ontology.repository.OntologyTermIndexRepository;
 import org.molgenis.ontology.repository.OntologyTermQueryRepository;
 import org.molgenis.ontology.utils.NGramMatchingModel;
+import org.molgenis.ontology.utils.PostProcessOntologyTermAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.tartarus.snowball.ext.PorterStemmer;
 
@@ -244,55 +245,62 @@ public class OntologyServiceImpl implements OntologyService
 		String maxScoreField = null;
 		int count = 0;
 		EntityMetaData entityMetaData = dataService.getEntityMetaData(getEntityName(ontologyIri));
+		Set<String> processedOntologyTerms = new HashSet<String>();
 		for (Entity entity : searchService.search(new QueryImpl(finalQueryRule).pageSize(MAX_NUMBER_MATCHES),
 				entityMetaData))
 		{
-			BigDecimal maxNgramScore = new BigDecimal(0);
-			for (String inputAttrName : inputEntity.getAttributeNames())
+			if (!processedOntologyTerms.contains(entity.getString(OntologyTermQueryRepository.SYNONYMS)))
 			{
-				if (!StringUtils.isEmpty(inputEntity.getString(inputAttrName)))
+				processedOntologyTerms.add(entity.getString(OntologyTermQueryRepository.SYNONYMS));
+
+				BigDecimal maxNgramScore = new BigDecimal(0);
+				for (String inputAttrName : inputEntity.getAttributeNames())
 				{
-					if (DEFAULT_MATCHING_NAME_FIELD.equals(inputAttrName.toLowerCase())
-							|| inputAttrName.toLowerCase().startsWith(DEFAULT_MATCHING_SYNONYM_FIELD))
+					if (!StringUtils.isEmpty(inputEntity.getString(inputAttrName)))
 					{
-						BigDecimal ngramScore = matchOntologyTerm(inputEntity.getString(inputAttrName), entity);
-						if (maxNgramScore.doubleValue() < ngramScore.doubleValue())
+						if (DEFAULT_MATCHING_NAME_FIELD.equals(inputAttrName.toLowerCase())
+								|| inputAttrName.toLowerCase().startsWith(DEFAULT_MATCHING_SYNONYM_FIELD))
 						{
-							maxNgramScore = ngramScore;
-							maxScoreField = inputAttrName;
-						}
-						if (count == 0) inputData.put(inputAttrName, inputEntity.getString(inputAttrName));
-					}
-					else
-					{
-						for (String attributeName : entity.getAttributeNames())
-						{
-							// Check if indexed ontology term contains such
-							// external database reference
-							if (attributeName.equalsIgnoreCase(inputAttrName))
+							BigDecimal ngramScore = matchOntologyTerm(inputEntity.getString(inputAttrName), entity);
+							if (maxNgramScore.doubleValue() < ngramScore.doubleValue())
 							{
-								String listOfDatabaseIds = entity.getString(attributeName);
-								if (!StringUtils.isEmpty(listOfDatabaseIds) && listOfDatabaseIds.length() > 2)
+								maxNgramScore = ngramScore;
+								maxScoreField = inputAttrName;
+							}
+							if (count == 0) inputData.put(inputAttrName, inputEntity.getString(inputAttrName));
+						}
+						else
+						{
+							for (String attributeName : entity.getAttributeNames())
+							{
+								// Check if indexed ontology term contains such
+								// external database reference
+								if (attributeName.equalsIgnoreCase(inputAttrName))
 								{
-									for (String databaseId : listOfDatabaseIds.substring(1,
-											listOfDatabaseIds.length() - 1).split(COMMOM_SEPARATOR))
+									String listOfDatabaseIds = entity.getString(attributeName);
+									if (!StringUtils.isEmpty(listOfDatabaseIds) && listOfDatabaseIds.length() > 2)
 									{
-										if (databaseId.trim().equalsIgnoreCase(
-												inputEntity.getString(inputAttrName).trim()))
+										for (String databaseId : listOfDatabaseIds.substring(1,
+												listOfDatabaseIds.length() - 1).split(COMMOM_SEPARATOR))
 										{
-											maxNgramScore = new BigDecimal(100);
-											maxScoreField = attributeName;
+											if (databaseId.trim().equalsIgnoreCase(
+													inputEntity.getString(inputAttrName).trim()))
+											{
+												maxNgramScore = new BigDecimal(100);
+												maxScoreField = attributeName;
+											}
 										}
+										if (count == 0) inputData.put(inputAttrName,
+												inputEntity.getString(inputAttrName));
 									}
-									if (count == 0) inputData.put(inputAttrName, inputEntity.getString(inputAttrName));
 								}
 							}
 						}
 					}
 				}
+				count++;
+				comparableEntities.add(new ComparableEntity(entity, maxNgramScore, maxScoreField));
 			}
-			count++;
-			comparableEntities.add(new ComparableEntity(entity, maxNgramScore, maxScoreField));
 		}
 		return convertResults(comparableEntities, inputData);
 	}
@@ -333,29 +341,31 @@ public class OntologyServiceImpl implements OntologyService
 		return stringBuilder.toString().trim();
 	}
 
-	private OntologyServiceResult convertResults(List<ComparableEntity> comparableEntities,
-			Map<String, Object> inputData)
+	private OntologyServiceResult convertResults(List<ComparableEntity> comparableEntities, Map<String, Object> inputData)
 	{
 		Collections.sort(comparableEntities);
-		List<Entity> entities = new ArrayList<Entity>();
-		Set<String> uniqueIdentifiers = new HashSet<String>();
-		for (ComparableEntity comparableHit : comparableEntities)
+		List<ComparableEntity> entities = new ArrayList<ComparableEntity>();
+		Map<String, PostProcessOntologyTermAlgorithm> uniqueOntologyTerms = new HashMap<String, PostProcessOntologyTermAlgorithm>();
+		for (ComparableEntity compEntity : comparableEntities)
 		{
-			Entity entity = comparableHit.getEntity();
-			String identifier = entity.getString(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI);
-			if (!uniqueIdentifiers.contains(identifier))
+			String identifier = compEntity.getString(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI);
+
+			if (!uniqueOntologyTerms.containsKey(identifier))
 			{
-				uniqueIdentifiers.add(identifier);
-				MapEntity copyEntity = new MapEntity();
-				for (String attributeName : entity.getAttributeNames())
-				{
-					copyEntity.set(attributeName, entity.get(attributeName));
-				}
-				copyEntity.set(SCORE, comparableHit.getSimilarityScore().doubleValue());
-				copyEntity.set(MAX_SCORE_FIELD, comparableHit.getMaxScoreField());
-				entities.add(copyEntity);
+				uniqueOntologyTerms.put(identifier, new PostProcessOntologyTermAlgorithm(inputData));
 			}
+			uniqueOntologyTerms.get(identifier).addOntologyTerm(compEntity.getString(MAX_SCORE_FIELD), compEntity);
+
+			entities.add(compEntity);
 		}
+
+		for (Entry<String, PostProcessOntologyTermAlgorithm> entrySet : uniqueOntologyTerms.entrySet())
+		{
+			entrySet.getValue().process(entities);
+		}
+
+		Collections.sort(entities);
+
 		return new OntologyServiceResultImpl(inputData, entities, comparableEntities.size());
 	}
 

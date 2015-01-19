@@ -3,38 +3,31 @@ package org.molgenis.ontology.beans;
 import java.math.BigDecimal;
 
 import org.molgenis.data.Entity;
+import org.molgenis.data.support.MapEntity;
+import org.molgenis.ontology.service.OntologyServiceImpl;
 
-public class ComparableEntity implements Comparable<ComparableEntity>
+public class ComparableEntity extends MapEntity implements Comparable<ComparableEntity>
 {
-	private final String maxScoreField;
-	private final Entity entity;
-	private final BigDecimal similarityScore;
+	private static final long serialVersionUID = 1L;
 
-	public ComparableEntity(Entity entity, BigDecimal similarityScore, String maxScoreField)
+	public ComparableEntity(Entity entity, BigDecimal maxNgramScore, String maxScoreField)
 	{
-		this.entity = entity;
-		this.similarityScore = similarityScore;
-		this.maxScoreField = maxScoreField;
-	}
-
-	public String getMaxScoreField()
-	{
-		return maxScoreField;
-	}
-
-	public BigDecimal getSimilarityScore()
-	{
-		return similarityScore;
-	}
-
-	public Entity getEntity()
-	{
-		return entity;
+		for (String attributeName : entity.getAttributeNames())
+		{
+			set(attributeName, entity.get(attributeName));
+		}
+		set(OntologyServiceImpl.SCORE, maxNgramScore.doubleValue());
+		set(OntologyServiceImpl.MAX_SCORE_FIELD, maxScoreField);
 	}
 
 	@Override
 	public int compareTo(ComparableEntity other)
 	{
-		return similarityScore.compareTo(other.getSimilarityScore()) * (-1);
+		return (getDecimal().compareTo(other.getDecimal())) * (-1);
+	}
+
+	public BigDecimal getDecimal()
+	{
+		return new BigDecimal(Double.parseDouble(getString(OntologyServiceImpl.SCORE)));
 	}
 }

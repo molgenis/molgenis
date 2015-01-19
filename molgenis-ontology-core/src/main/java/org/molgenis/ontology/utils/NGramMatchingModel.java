@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.tartarus.snowball.ext.PorterStemmer;
 
 /**
@@ -85,15 +86,18 @@ public class NGramMatchingModel
 		// Padding the string
 		for (String singleWord : wordsInString)
 		{
-			singleWord = stemmerString(singleWord);
-			// The s$ will be the produced from two words.
-			StringBuilder singleString = new StringBuilder(singleWord.length() + 2);
-			singleString.append('^').append(singleWord.toLowerCase()).append('$');
-			int length = singleString.length();
-			for (int i = 0; i < length; i++)
+			if (!StringUtils.isEmpty(singleWord))
 			{
-				if (i + nGrams < length) tokens.add(singleString.substring(i, i + nGrams));
-				else tokens.add(singleString.substring(length - 2));
+				singleWord = stemmerString(singleWord);
+				// The s$ will be the produced from two words.
+				StringBuilder singleString = new StringBuilder(singleWord.length() + 2);
+				singleString.append('^').append(singleWord.toLowerCase()).append('$');
+				int length = singleString.length();
+				for (int i = 0; i < length; i++)
+				{
+					if (i + nGrams < length) tokens.add(singleString.substring(i, i + nGrams));
+					else tokens.add(singleString.substring(length - 2));
+				}
 			}
 		}
 		return tokens;
