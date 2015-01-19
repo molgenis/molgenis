@@ -36,7 +36,6 @@
 <script type="text/javascript">
     $(function () {
     	var nrFeatures = 0;
-        var pendingDeletes = [];
         var modal = $('#orderdata-modal');
         var submitBtn = $('#orderdata-btn');
         var cancelBtn = $('#orderdata-btn-close');
@@ -53,10 +52,9 @@
 
         form.validate();
 
-    <#-- modal events -->
+	<#-- modal events -->
         modal.on('show', function () {
         	submitBtn.addClass('disabled');
-            pendingDeletes = [];
             
             function updateFeatureSelectionContainer(page) {
 	            var nrItemsPerPage = 20;
@@ -64,7 +62,7 @@
 				var end = page ? page.end : nrItemsPerPage;
 				
 				$.ajax({
-					url: molgenis.getContextUrl() + '/selection/' + catalogId + '?start=' + start + '&end=' + end + '&excludes[]=' + pendingDeletes.join(','),
+					url: molgenis.getContextUrl() + '/selection/' + catalogId + '?start=' + start + '&end=' + end,
 					success : function(selection) {
 						var selectionTable = $('#orderdata-selection-table-container');
 						var selectionTablePager = $('#orderdata-selection-table-pager');
@@ -83,7 +81,7 @@
 								});	
 							}
 							var table = $('<table id="orderdata-selection-table" class="table table-striped table-condensed listtable"></table>');
-	                        table.append($('<thead><tr><th>Variable</th><th>Group</th><th>Remove</th></tr></thead>'));
+	                        table.append($('<thead><tr><th>Variable</th><th>Group</th></tr></thead>'));
 	                        var body = $('<tbody>');
 	
 	                        $.each(selection.items, function (i, item) {
@@ -91,18 +89,6 @@
 	                            var row = $('<tr>');
 	                            row.append('<td>' + protocol.Name + '</td>');
 	                            row.append('<td>' + (this.group ? this.group.map(window.htmlEscape).join(' &rarr; ') : '') + '</td>');
-	
-	                            var deleteCol = $('<td class="center">');
-	                            var deleteBtn = $('<i class="icon-remove"></i>');
-	                            deleteBtn.click(function () {
-	                                pendingDeletes.push(protocol.href);
-	                                updateFeatureSelectionContainer();
-	                                // restore focus
-	                                form.find('input:visible:first').focus();
-	                            });
-	                            deleteBtn.appendTo(deleteCol);
-	
-	                            row.append(deleteCol);
 	                            body.append(row);
 	                        });
 	                        table.append(body);
@@ -118,19 +104,25 @@
             // create selection table with pager
 			updateFeatureSelectionContainer();
         });
+        
         modal.on('shown', function () {
             form.find('input:visible:first').focus();
         });
+        
         modal.on('hide', function () {
             form[0].reset();
             $('#orderdata-selection-table-container').empty();
 
         });
-        $('.close', modal).click(function (e) {<#-- workaround: Bootstrap closes the whole stack of modals when closing one modal -->
+        
+        <#-- workaround: Bootstrap closes the whole stack of modals when closing one modal -->
+        $('.close', modal).click(function (e) {
             e.preventDefault();
             modal.modal('hide');
         });
-        modal.keydown(function (e) {<#-- workaround: Bootstrap closes the whole stack of modals when closing one modal -->
+        
+        <#-- workaround: Bootstrap closes the whole stack of modals when closing one modal -->
+        modal.keydown(function (e) {
             if (e.which == 27) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -145,34 +137,18 @@
         form.submit(function (e) {
             e.preventDefault();
             e.stopPropagation();
-            if (form.valid()) {
-                if (pendingDeletes.length > 0) {
-                    $.ajax({
-                        type: 'POST',
-                        url: pluginUri + '/cart/remove/' + catalogId,
-                        data: JSON.stringify({features: pendingDeletes}),
-                        contentType: 'application/json',
-                        success: function () {
-                            order();
-                        },
-                        error: function (xhr) {
-                            molgenis.createAlert(JSON.parse(xhr.responseText).errors, 'error', $('.modal-body', modal));
-                            modal.modal('hide');
-                        }
-                    });
-                }
-                else {
-                    order();
-                }
-            }
+            if (form.valid()) {order();}
         });
+        
         submitBtn.click(function (e) {
             e.preventDefault();
             e.stopPropagation();
             if(!submitBtn.hasClass('disabled'))
             	form.submit();
         });
-        $('input', form).add(submitBtn).keydown(function (e) { <#-- use keydown, because keypress doesn't work cross-browser -->
+        
+        <#-- use keydown, because keypress doesn't work cross-browser -->
+        $('input', form).add(submitBtn).keydown(function (e) { 
             if (e.which == 13) {
                 e.preventDefault();
                 e.stopPropagation();

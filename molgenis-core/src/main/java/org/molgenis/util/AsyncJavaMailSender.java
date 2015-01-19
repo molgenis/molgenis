@@ -54,7 +54,7 @@ public class AsyncJavaMailSender extends JavaMailSenderImpl
 		}
 		catch (Exception e)
 		{
-			logger.error("Error sending e-mail.", e);
+			logger.error("Error sending email.", e);
 		}
 	}
 
