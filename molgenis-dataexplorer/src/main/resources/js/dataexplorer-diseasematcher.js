@@ -196,7 +196,6 @@
 			url : '/diseasematcher/diseases',
 			data : JSON.stringify(request),
 			success : function(diseases) {
-				
 				//call Phenotips and put the suggestions in a hidden div
 				rankHPOTerms(terms, function(suggestions){		
 					
