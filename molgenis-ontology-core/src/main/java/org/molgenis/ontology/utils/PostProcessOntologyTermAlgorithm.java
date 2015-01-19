@@ -10,9 +10,22 @@ import org.molgenis.ontology.beans.ComparableEntity;
 import org.molgenis.ontology.repository.OntologyTermQueryRepository;
 import org.molgenis.ontology.service.OntologyServiceImpl;
 
+/**
+ * An algorithm container to deal with the case where matching term is mapped to multiple synonyms of the same ontology
+ * term at the same time leading to a low final score. E.g. protruding eyeball (exophthalmos, proptosis) mapped to
+ * 'protruding eye' by 30%, 'exophthalmos' by 30% and 'proptosis' by 26%. For such cases, the score should be
+ * re-calculated by combining multiple synonyms together in order to give a fair score
+ * 
+ * @author chaopang
+ *
+ */
 public class PostProcessOntologyTermAlgorithm
 {
+	// A map where key indicates which field of the input entity is used in the matching, such as 'name' and 'HP', value
+	// is list of ontology terms matched
 	private final Map<String, List<ComparableEntity>> matchedFieldToEntity;
+
+	// A map representing the input entity converted to Map data structure
 	private final Map<String, Object> inputData;
 
 	public PostProcessOntologyTermAlgorithm(Map<String, Object> inputData)
@@ -30,13 +43,6 @@ public class PostProcessOntologyTermAlgorithm
 		matchedFieldToEntity.get(matchedField).add(entity);
 	}
 
-	/**
-	 * Algorithm to deal with the case where input is mapped to multiple synonyms of the same ontology term. E.g.
-	 * protruding eyeball (exophthalmos, proptosis). The algorithm re-assign the similarity score if same ontology terms
-	 * are mapped by synonym for multiple times
-	 * 
-	 * @param allEntities
-	 */
 	public void process(List<ComparableEntity> allEntities)
 	{
 		for (Entry<String, List<ComparableEntity>> entry : matchedFieldToEntity.entrySet())
