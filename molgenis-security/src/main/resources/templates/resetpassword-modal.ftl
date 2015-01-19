@@ -70,7 +70,7 @@
 		            url:  '/account/password/reset',
 		            data: form.serialize(),
 		            success: function () {
-		            	$(document).trigger('molgenis-passwordresetted', 'Password resetted, an email has been sent to you');
+		            	$(document).trigger('molgenis-passwordresetted', 'Password reset, an email has been sent to you');
 		        		modal.modal('hide');
 		            },
 		            error: function(xhr) {
