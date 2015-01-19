@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -62,14 +63,14 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 	@Test
 	public void test() throws Exception
 	{
-		coll.dropEntityMetaData(getMetaData().getName());
-		coll.dropEntityMetaData(getMetaData().getAttribute("stringRef").getRefEntity().getName());
-		coll.dropEntityMetaData(getMetaData().getAttribute("intRef").getRefEntity().getName());
+		coll.deleteEntityMeta(getMetaData().getName());
+		coll.deleteEntityMeta(getMetaData().getAttribute("stringRef").getRefEntity().getName());
+		coll.deleteEntityMeta(getMetaData().getAttribute("intRef").getRefEntity().getName());
 
 		// create
-		MysqlRepository stringRepo = (MysqlRepository) coll.add(getMetaData().getAttribute("stringRef").getRefEntity());
-		MysqlRepository intRepo = (MysqlRepository) coll.add(getMetaData().getAttribute("intRef").getRefEntity());
-		MysqlRepository mrefRepo = (MysqlRepository) coll.add(getMetaData());
+		CrudRepository stringRepo = coll.addEntityMeta(getMetaData().getAttribute("stringRef").getRefEntity());
+		CrudRepository intRepo = coll.addEntityMeta(getMetaData().getAttribute("intRef").getRefEntity());
+		MysqlRepository mrefRepo = (MysqlRepository) coll.addEntityMeta(getMetaData());
 
 		Assert.assertEquals(stringRepo.count(), 0);
 		Assert.assertEquals(intRepo.count(), 0);

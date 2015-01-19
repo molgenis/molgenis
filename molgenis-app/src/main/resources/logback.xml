@@ -4,8 +4,11 @@
 			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
 		</encoder>
 	</appender>
+	<appender name="MOLGENIS" class="org.molgenis.data.elasticsearch.logback.MolgenisAppender">
+	</appender>
 	<logger name="org.molgenis" level="${logger.level.org.molgenis}"/>
 	<root level="${logger.level.root}">
 		<appender-ref ref="STDOUT" />
+		<appender-ref ref="MOLGENIS" />
 	</root>
 </configuration>

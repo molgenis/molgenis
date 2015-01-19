@@ -18,7 +18,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.sql.DataSource;
 
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.AggregateQuery;
+import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -26,12 +29,11 @@ import org.molgenis.data.Manageable;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
-import org.molgenis.data.Queryable;
-import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.support.AbstractCrudRepository;
 import org.molgenis.data.support.BatchingQueryResult;
 import org.molgenis.data.support.ConvertingIterable;
+import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.FieldType;
@@ -62,7 +64,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 	private final JdbcTemplate jdbcTemplate;
 	private final AsyncJdbcTemplate asyncJdbcTemplate;
 	private MysqlRepositoryCollection repositoryCollection;
-	private DataSource dataSource;
+	private final DataSource dataSource;
 
 	/**
 	 * Creates a new MysqlRepository.
@@ -75,7 +77,6 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 	 */
 	public MysqlRepository(DataSource dataSource, AsyncJdbcTemplate asyncJdbcTemplate)
 	{
-		super(null);// TODO url
 		this.dataSource = dataSource;
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 		this.asyncJdbcTemplate = asyncJdbcTemplate;
@@ -137,6 +138,9 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		String sql = String.format("ALTER TABLE `%s` DROP COLUMN `%s`", getTableName(), attributeName);
 		asyncJdbcTemplate.execute(sql);
 
+		DefaultEntityMetaData demd = new DefaultEntityMetaData(metaData);
+		demd.removeAttributeMetaData(demd.getAttribute(attributeName));
+		setMetaData(demd);
 	}
 
 	protected String getDropSql()
@@ -210,6 +214,18 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 			{
 				asyncJdbcTemplate.execute(getUniqueSql(attributeMetaData));
 			}
+
+			if (attributeMetaData.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
+			{
+				for (AttributeMetaData attrPart : attributeMetaData.getAttributeParts())
+				{
+					addAttribute(attrPart);
+				}
+			}
+
+			DefaultEntityMetaData demd = new DefaultEntityMetaData(metaData);
+			demd.addAttributeMetaData(attributeMetaData);
+			setMetaData(demd);
 		}
 		catch (Exception e)
 		{
@@ -240,6 +256,18 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 			{
 				jdbcTemplate.execute(getUniqueSql(attributeMetaData));
 			}
+
+			if (attributeMetaData.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
+			{
+				for (AttributeMetaData attrPart : attributeMetaData.getAttributeParts())
+				{
+					addAttributeSync(attrPart);
+				}
+			}
+
+			DefaultEntityMetaData demd = new DefaultEntityMetaData(metaData);
+			demd.addAttributeMetaData(attributeMetaData);
+			setMetaData(demd);
 		}
 		catch (Exception e)
 		{
@@ -794,31 +822,29 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 						}
 						else if (att.getDataType() instanceof XrefField)
 						{
-							Repository repo = repositoryCollection.getRepositoryByEntityName(att.getRefEntity()
-									.getName());
-							if (repo instanceof Queryable)
+							CrudRepository repo = repositoryCollection.getCrudRepository(att.getRefEntity().getName());
+
+							Query refQ = new QueryImpl().like(att.getRefEntity().getLabelAttribute().getName(), r
+									.getValue().toString());
+							Iterator<Entity> it = repo.findAll(refQ).iterator();
+							if (it.hasNext())
 							{
-								Query refQ = new QueryImpl().like(att.getRefEntity().getLabelAttribute().getName(), r
-										.getValue().toString());
-								Iterator<Entity> it = ((Queryable) repo).findAll(refQ).iterator();
-								if (it.hasNext())
+								search.append(" OR this.").append('`').append(att.getName()).append('`')
+										.append(" IN (");
+								while (it.hasNext())
 								{
-									search.append(" OR this.").append('`').append(att.getName()).append('`')
-											.append(" IN (");
-									while (it.hasNext())
+									Entity ref = it.next();
+									search.append("?");
+									parameters.add(att.getDataType().convert(
+											ref.get(att.getRefEntity().getIdAttribute().getName())));
+									if (it.hasNext())
 									{
-										Entity ref = it.next();
-										search.append("?");
-										parameters.add(att.getDataType().convert(
-												ref.get(att.getRefEntity().getIdAttribute().getName())));
-										if (it.hasNext())
-										{
-											search.append(",");
-										}
+										search.append(",");
 									}
-									search.append(")");
 								}
+								search.append(")");
 							}
+
 						}
 						else if (att.getDataType() instanceof MrefField)
 						{
@@ -1411,6 +1437,12 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public AggregateResult aggregate(AggregateQuery aggregateQuery)
+	{
+		throw new UnsupportedOperationException();
 	}
 
 }

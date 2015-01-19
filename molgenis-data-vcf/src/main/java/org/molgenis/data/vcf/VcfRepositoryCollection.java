@@ -48,7 +48,7 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 	}
 
 	@Override
-	public Repository getRepositoryByEntityName(String name)
+	public Repository getRepository(String name)
 	{
 		if (!entityName.equals(name)) throw new MolgenisDataException("Unknown entity name [" + name + "]");
 		try

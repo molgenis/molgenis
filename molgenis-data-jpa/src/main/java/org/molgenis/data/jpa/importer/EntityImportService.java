@@ -73,13 +73,7 @@ public class EntityImportService
 	@Transactional
 	public int importEntity(String entityName, Repository source, DatabaseAction dbAction)
 	{
-		final Repository repo = dataService.getRepositoryByEntityName(entityName);
-		if (!(repo instanceof CrudRepository))
-		{
-			throw new MolgenisDataException(repo.getName() + " is not a CrudRepository");
-		}
-
-		CrudRepository jpaRepository = (CrudRepository) repo;
+		final CrudRepository jpaRepository = dataService.getRepository(entityName);
 
 		// Convert to MapEntity so we can be sure we can set xref/mref fields on it
 		List<Entity> entitiesToImport = Lists.newArrayList();
@@ -88,7 +82,7 @@ public class EntityImportService
 			entitiesToImport.add(new MapEntity(entity));
 		}
 
-		EntityMetaData entityMetaData = repo.getEntityMetaData();
+		EntityMetaData entityMetaData = jpaRepository.getEntityMetaData();
 
 		String updateKey = entityMetaData.getLabelAttribute().getName();
 		List<Entity> batch = Lists.newArrayListWithCapacity(BATCH_SIZE);

@@ -7,10 +7,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 public abstract class AbstractCrudRepository extends AbstractRepository implements CrudRepository
 {
-	public AbstractCrudRepository(String url)
-	{
-		super(url);
-	}
 
 	@Override
 	public Query query()

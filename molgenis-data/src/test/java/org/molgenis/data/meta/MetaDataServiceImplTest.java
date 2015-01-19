@@ -14,6 +14,7 @@ import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
 import org.molgenis.data.ManageableCrudRepositoryCollection;
 import org.molgenis.data.Package;
+import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,8 +85,8 @@ public class MetaDataServiceImplTest extends AbstractTestNGSpringContextTests
 		when(entityRepository.iterator()).thenReturn(Arrays.asList((Entity) personEntity).iterator());
 		when(attributeRepository.iterator()).thenReturn(Collections.<Entity> emptyList().iterator());
 
-		metaDataServiceImpl = new MetaDataServiceImpl();
-		metaDataServiceImpl.setManageableCrudRepositoryCollection(manageableCrudRepositoryCollection);
+		metaDataServiceImpl = new MetaDataServiceImpl(new DataServiceImpl());
+		metaDataServiceImpl.setDefaultBackend(manageableCrudRepositoryCollection);
 
 		assertEquals(metaDataServiceImpl.getRootPackages(), Arrays.asList(defaultPackage, org));
 	}

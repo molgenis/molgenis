@@ -59,7 +59,7 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 	}
 
 	@Override
-	public Repository getRepositoryByEntityName(String name)
+	public Repository getRepository(String name)
 	{
 		if (!entityNamesLowerCase.contains(name.toLowerCase()))
 		{

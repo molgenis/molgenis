@@ -1,6 +1,7 @@
 package org.molgenis.data.meta;
 
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.BACKEND;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.EXTENDS;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.FULL_NAME;
@@ -25,6 +26,8 @@ import org.molgenis.data.ManageableCrudRepositoryCollection;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.util.DependencyResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
@@ -35,6 +38,8 @@ import com.google.common.collect.Lists;
  */
 class EntityMetaDataRepository
 {
+	private static final Logger LOG = LoggerFactory.getLogger(EntityMetaDataRepository.class);
+
 	public static final EntityMetaDataMetaData META_DATA = new EntityMetaDataMetaData();
 	private final CrudRepository repository;
 	private final PackageRepository packageRepository;
@@ -44,7 +49,38 @@ class EntityMetaDataRepository
 	{
 		this.packageRepository = packageRepository;
 		this.repository = collection.addEntityMeta(META_DATA);
+		applyPatches(collection);
 		fillEntityMetaDataCache();
+	}
+
+	CrudRepository getRepository()
+	{
+		return repository;
+	}
+
+	private void applyPatches(ManageableCrudRepositoryCollection collection)
+	{
+		try
+		{
+			// TODO how can we check if patch is already deployed?
+			collection.addAttribute(META_DATA.getName(), META_DATA.getAttribute(BACKEND));
+		}
+		catch (Exception e)
+		{
+			LOG.warn(
+					"Error applying patch add backend attribute to enitymetadata. Problably this patch is already deployed, then you can ignore this",
+					e);
+		}
+
+		// Add default value MySQL if backend is null
+		for (Entity emd : repository)
+		{
+			if (emd.getString(BACKEND) == null)
+			{
+				emd.set(BACKEND, "MySQL");
+				repository.update(emd);
+			}
+		}
 	}
 
 	/**
@@ -65,6 +101,7 @@ class EntityMetaDataRepository
 			entityMetaData.setLabelAttribute(entity.getString(LABEL_ATTRIBUTE));
 			entityMetaData.setLabel(entity.getString(LABEL));
 			entityMetaData.setDescription(entity.getString(DESCRIPTION));
+			entityMetaData.setBackend(entity.getString(BACKEND));
 			entityMetaDataCache.put(entity.getString(FULL_NAME), entityMetaData);
 		}
 		for (Entity entity : entities)
@@ -115,6 +152,7 @@ class EntityMetaDataRepository
 		emd.setLabel(entityMetaData.getLabel());
 		emd.setAbstract(entityMetaData.isAbstract());
 		emd.setDescription(entityMetaData.getDescription());
+		emd.setBackend(entityMetaData.getBackend());
 		if (entityMetaData.getExtends() != null)
 		{
 			emd.setExtends(entityMetaDataCache.get(entityMetaData.getExtends().getName()));
@@ -159,6 +197,7 @@ class EntityMetaDataRepository
 		entityMetaDataEntity.set(DESCRIPTION, emd.getDescription());
 		entityMetaDataEntity.set(ABSTRACT, emd.isAbstract());
 		entityMetaDataEntity.set(LABEL, emd.getLabel());
+		entityMetaDataEntity.set(BACKEND, emd.getBackend());
 		if (emd.getExtends() != null)
 		{
 			entityMetaDataEntity.set(EXTENDS, getEntity(emd.getExtends().getName()));

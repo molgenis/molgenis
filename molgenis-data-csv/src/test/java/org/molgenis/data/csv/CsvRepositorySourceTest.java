@@ -83,9 +83,8 @@ public class CsvRepositorySourceTest
 		CsvRepositoryCollection repo = new CsvRepositoryCollection(zip);
 		assertNotNull(repo.getEntityNames());
 		assertEquals(Iterables.size(repo.getEntityNames()), 3);
-		assertNotNull(repo.getRepositoryByEntityName("0"));
-		assertNotNull(repo.getRepositoryByEntityName("1"));
-		// ??assertNotNull(repo.getRepository("2"));
+		assertNotNull(repo.getRepository("0"));
+		assertNotNull(repo.getRepository("1"));
 
 	}
 }

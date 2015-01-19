@@ -1,7 +1,8 @@
 package org.molgenis.data.meta;
 
+
 /**
- * Quick and dirty hack to allow the easy decoration of the {@link WritableMetaDataService}
+ * Quick and dirty hack to allow the easy decoration of the {@link MetaDataService}
  */
 public interface MetaDataServiceDecoratorFactory
 {

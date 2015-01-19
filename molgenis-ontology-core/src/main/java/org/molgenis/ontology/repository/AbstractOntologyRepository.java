@@ -94,7 +94,7 @@ public abstract class AbstractOntologyRepository implements Repository
 
 	}
 
+	@Override
 	public abstract <E extends Entity> Iterable<E> iterator(Class<E> clazz);
 
-	public abstract String getUrl();
 }

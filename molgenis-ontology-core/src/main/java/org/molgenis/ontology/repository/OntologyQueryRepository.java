@@ -2,6 +2,8 @@ package org.molgenis.ontology.repository;
 
 import javax.annotation.Nullable;
 
+import org.molgenis.data.AggregateQuery;
+import org.molgenis.data.AggregateResult;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -17,7 +19,6 @@ import com.google.common.collect.Iterables;
 public class OntologyQueryRepository extends AbstractOntologyQueryRepository
 {
 	public final static String DEFAULT_ONTOLOGY_REPO = "ontologyindex";
-	private final static String BASE_URL = "ontologyindex://";
 	private final OntologyService ontologyService;
 	private final DataService dataService;
 
@@ -39,8 +40,7 @@ public class OntologyQueryRepository extends AbstractOntologyQueryRepository
 		{
 			@Override
 			@Nullable
-			public Entity apply(@Nullable
-			Entity entity)
+			public Entity apply(@Nullable Entity entity)
 			{
 				return new OntologyEntity(entity, entityMetaData, dataService, searchService, ontologyService);
 			}
@@ -86,8 +86,114 @@ public class OntologyQueryRepository extends AbstractOntologyQueryRepository
 	}
 
 	@Override
-	public String getUrl()
+	public long count()
 	{
-		return BASE_URL + entityName;
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Iterable<Entity> findAll(Iterable<Object> ids)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> findAll(Iterable<Object> ids, Class<E> clazz)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public <E extends Entity> E findOne(Object id, Class<E> clazz)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public <E extends Entity> E findOne(Query q, Class<E> clazz)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void update(Entity entity)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void update(Iterable<? extends Entity> records)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void delete(Entity entity)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void delete(Iterable<? extends Entity> entities)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void deleteById(Object id)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void deleteById(Iterable<Object> ids)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void deleteAll()
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public AggregateResult aggregate(AggregateQuery aggregateQuery)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void add(Entity entity)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Integer add(Iterable<? extends Entity> entities)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void flush()
+	{
+	}
+
+	@Override
+	public void clearCache()
+	{
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
+	{
+		throw new UnsupportedOperationException();
 	}
 }

@@ -9,11 +9,11 @@ import java.util.Iterator;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
-import org.molgenis.data.Aggregateable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IndexedCrudRepository;
 import org.molgenis.data.Manageable;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.ElasticSearchService.IndexingMode;
 import org.molgenis.data.support.ConvertingIterable;
@@ -22,10 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Iterables;
 
-public abstract class AbstractElasticsearchRepository implements IndexedCrudRepository, Aggregateable, Manageable
+public abstract class AbstractElasticsearchRepository implements IndexedCrudRepository, Manageable
 {
-	public static final String BASE_URL = "elasticsearch://";
-
 	protected final SearchService elasticSearchService;
 
 	public AbstractElasticsearchRepository(SearchService elasticSearchService)
@@ -50,12 +48,6 @@ public abstract class AbstractElasticsearchRepository implements IndexedCrudRepo
 				return self.iterator();
 			}
 		});
-	}
-
-	@Override
-	public String getUrl()
-	{
-		return BASE_URL + getName() + '/';
 	}
 
 	@Override
@@ -234,6 +226,19 @@ public abstract class AbstractElasticsearchRepository implements IndexedCrudRepo
 	{
 		elasticSearchService.deleteDocumentsByType(getEntityMetaData().getName());
 		elasticSearchService.refresh();
+	}
+
+	@Override
+	public void create()
+	{
+		try
+		{
+			elasticSearchService.createMappings(getEntityMetaData());
+		}
+		catch (IOException e)
+		{
+			throw new MolgenisDataException(e);
+		}
 	}
 
 	@Override

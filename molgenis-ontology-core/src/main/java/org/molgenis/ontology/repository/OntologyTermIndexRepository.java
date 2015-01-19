@@ -234,9 +234,4 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
-	public String getUrl()
-	{
-		throw new UnsupportedOperationException();
-	}
 }

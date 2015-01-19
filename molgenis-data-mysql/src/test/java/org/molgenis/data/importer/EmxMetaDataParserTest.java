@@ -45,7 +45,7 @@ public class EmxMetaDataParserTest extends AbstractTestNGSpringContextTests
 	{
 		dataService = mock(DataService.class);
 		metaDataService = mock(MetaDataService.class);
-		parser = new EmxMetaDataParser(dataService, metaDataService);
+		parser = new EmxMetaDataParser(dataService);
 		when(metaDataService.getEntityMetaDatas()).thenReturn(ImmutableList.<EntityMetaData> of());
 	}
 
@@ -56,7 +56,7 @@ public class EmxMetaDataParserTest extends AbstractTestNGSpringContextTests
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
 
 		assertEquals(source.getNumberOfSheets(), 4);
-		assertNotNull(source.getRepositoryByEntityName("attributes"));
+		assertNotNull(source.getRepository("attributes"));
 
 		EntitiesValidationReport report = parser.validate(source);
 		// test report
@@ -75,7 +75,7 @@ public class EmxMetaDataParserTest extends AbstractTestNGSpringContextTests
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
 
 		assertEquals(source.getNumberOfSheets(), 6);
-		assertNotNull(source.getRepositoryByEntityName("attributes"));
+		assertNotNull(source.getRepository("attributes"));
 
 		EntitiesValidationReport report = parser.validate(source);
 		// test report
@@ -95,7 +95,7 @@ public class EmxMetaDataParserTest extends AbstractTestNGSpringContextTests
 		MysqlRepository repositoryCity = mock(MysqlRepository.class);
 		DefaultEntityMetaData entityMetaDataCity = new DefaultEntityMetaData("import_city");
 		entityMetaDataCity.addAttribute("name").setIdAttribute(true).setNillable(false);
-		when(dataService.getRepositoryByEntityName("import_city")).thenReturn(repositoryCity);
+		when(dataService.getRepository("import_city")).thenReturn(repositoryCity);
 		when(repositoryCity.getEntityMetaData()).thenReturn(entityMetaDataCity);
 
 		MysqlRepository repositoryPerson = mock(MysqlRepository.class);
@@ -110,7 +110,7 @@ public class EmxMetaDataParserTest extends AbstractTestNGSpringContextTests
 				.setRefEntity(entityMetaDataCity);
 		entityMetaDataPerson.addAttribute("otherAttribute").setNillable(true);
 
-		when(dataService.getRepositoryByEntityName("import_person")).thenReturn(repositoryPerson);
+		when(dataService.getRepository("import_person")).thenReturn(repositoryPerson);
 		when(repositoryPerson.getEntityMetaData()).thenReturn(entityMetaDataPerson);
 
 		// create test excel

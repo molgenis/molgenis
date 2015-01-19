@@ -50,15 +50,15 @@ public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTe
 	public void addAndGetAttributeMetaData()
 	{
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("test");
-		metaDataRepositories.addEntityMetaData(emd);
+		metaDataRepositories.addEntityMeta(emd);
 
 		List<String> enumOptions = Arrays.asList("enum1", "enum2");
 		AttributeMetaData enumAttr = emd.addAttribute("enum").setDataType(new EnumField()).setEnumOptions(enumOptions);
-		metaDataRepositories.addAttributeMetaData(emd.getName(), enumAttr);
+		metaDataRepositories.addAttribute(emd.getName(), enumAttr);
 
 		AttributeMetaData intRangeAttr = emd.addAttribute("intrange").setDataType(MolgenisFieldTypes.INT)
 				.setRange(new Range(1l, 5l));
-		metaDataRepositories.addAttributeMetaData(emd.getName(), intRangeAttr);
+		metaDataRepositories.addAttribute(emd.getName(), intRangeAttr);
 
 		List<AttributeMetaData> retrieved = Lists.newArrayList(metaDataRepositories.getEntityMetaData(emd.getName())
 				.getAttributes());
@@ -83,11 +83,11 @@ public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTe
 	public void addAndGetEntityMetaData()
 	{
 		DefaultEntityMetaData test = new DefaultEntityMetaData("test");
-		metaDataRepositories.addEntityMetaData(test);
+		metaDataRepositories.addEntityMeta(test);
 
 		DefaultEntityMetaData extendsTest = new DefaultEntityMetaData("extendstest");
 		extendsTest.setExtends(test);
-		metaDataRepositories.addEntityMetaData(extendsTest);
+		metaDataRepositories.addEntityMeta(extendsTest);
 
 		EntityMetaData retrieved = metaDataRepositories.getEntityMetaData("extendstest");
 		assertNotNull(retrieved);
@@ -105,13 +105,13 @@ public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTe
 	public void getEntityMetaDatas()
 	{
 		DefaultEntityMetaData test = new DefaultEntityMetaData("test");
-		metaDataRepositories.addEntityMetaData(test);
+		metaDataRepositories.addEntityMeta(test);
 
 		DefaultEntityMetaData test1 = new DefaultEntityMetaData("test1");
-		metaDataRepositories.addEntityMetaData(test1);
+		metaDataRepositories.addEntityMeta(test1);
 
 		DefaultEntityMetaData test2 = new DefaultEntityMetaData("test2");
-		metaDataRepositories.addEntityMetaData(test2);
+		metaDataRepositories.addEntityMeta(test2);
 
 		List<EntityMetaData> meta = Lists.newArrayList(metaDataRepositories.getEntityMetaDatas());
 		assertNotNull(meta);
@@ -132,16 +132,16 @@ public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTe
 		metaDataRepositories.addPackage(p2);
 
 		DefaultEntityMetaData test = new DefaultEntityMetaData("test");
-		metaDataRepositories.addEntityMetaData(test);
+		metaDataRepositories.addEntityMeta(test);
 
 		DefaultEntityMetaData test1 = new DefaultEntityMetaData("test1", p1);
-		metaDataRepositories.addEntityMetaData(test1);
+		metaDataRepositories.addEntityMeta(test1);
 
 		DefaultEntityMetaData test2 = new DefaultEntityMetaData("test2", p2);
-		metaDataRepositories.addEntityMetaData(test2);
+		metaDataRepositories.addEntityMeta(test2);
 
 		DefaultEntityMetaData test3 = new DefaultEntityMetaData("test3", p2);
-		metaDataRepositories.addEntityMetaData(test3);
+		metaDataRepositories.addEntityMeta(test3);
 
 		assertEquals(metaDataRepositories.getPackage("p1_p2").getEntityMetaDatas(),
 				Collections.unmodifiableList(Arrays.asList(test2, test3)));

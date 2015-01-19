@@ -44,7 +44,7 @@ public class BioSampleModelMaker
 		File biosampleFile = ResourceUtils.getFile("src/test/resources/BioSample-Model.xlsx");
 
 		ExcelRepositoryCollection modelFile = new ExcelRepositoryCollection(biosampleFile);
-		Repository entities = modelFile.getRepositoryByEntityName("entities");
+		Repository entities = modelFile.getRepository("entities");
 		Writable attributes = modelFile.createWritable("attributes", Arrays.asList("entity", "name", "dataType",
 				"refEntity", "nillable", "idAttribute", "description", "unique"));
 

@@ -37,7 +37,7 @@ public class MolgenisUserDecoratorTest
 		userAuthorityRepository = mock(UserAuthorityRepository.class);
 		DataService dataService = mock(DataService.class);
 		when(ctx.getBean(DataService.class)).thenReturn(dataService);
-		when(dataService.getCrudRepository(UserAuthority.ENTITY_NAME)).thenReturn(userAuthorityRepository);
+		when(dataService.getRepository(UserAuthority.ENTITY_NAME)).thenReturn(userAuthorityRepository);
 		new ApplicationContextProvider().setApplicationContext(ctx);
 	}
 

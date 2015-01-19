@@ -25,6 +25,7 @@ public class AdaptedCsvRepository implements Repository
 		this.entityName = entityName;
 	}
 
+	@Override
 	public EntityMetaData getEntityMetaData()
 	{
 		DefaultEntityMetaData defaultEntityMetaData = new DefaultEntityMetaData(entityName);
@@ -96,12 +97,6 @@ public class AdaptedCsvRepository implements Repository
 
 	@Override
 	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public String getUrl()
 	{
 		throw new UnsupportedOperationException();
 	}

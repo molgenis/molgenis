@@ -67,9 +67,8 @@ public class MutationsViewController extends MolgenisPluginController
 		List<Row> rows = null;
 		if (dataService.hasRepository(ENTITYNAME_MUTATIONSVIEW) && dataService.hasRepository(ENTITYNAME_MUTATIONS))
 		{
-			CrudRepository mutationsViewRepo = (CrudRepository) dataService
-					.getRepositoryByEntityName(ENTITYNAME_MUTATIONSVIEW);
-			CrudRepository mutationsRepo = (CrudRepository) dataService.getRepositoryByEntityName(ENTITYNAME_MUTATIONS);
+			CrudRepository mutationsViewRepo = dataService.getRepository(ENTITYNAME_MUTATIONSVIEW);
+			CrudRepository mutationsRepo = dataService.getRepository(ENTITYNAME_MUTATIONS);
 			rows = createRows(mutationsViewRepo, mutationsRepo);
 		}
 		model.addAttribute("rows", rows);
@@ -83,7 +82,7 @@ public class MutationsViewController extends MolgenisPluginController
 	{
 		if (dataService.hasRepository(ENTITYNAME_MUTATIONSVIEW))
 		{
-			Repository mutationsViewRepo = dataService.getRepositoryByEntityName(ENTITYNAME_MUTATIONSVIEW);
+			Repository mutationsViewRepo = dataService.getRepository(ENTITYNAME_MUTATIONSVIEW);
 			this.mysqlViewService.truncate(mutationsViewRepo.getEntityMetaData().getName());
 			try
 			{

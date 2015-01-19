@@ -1,10 +1,10 @@
 package org.molgenis.data.examples;
 
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
-import org.molgenis.data.Updateable;
 import org.molgenis.data.Writable;
 import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.support.MapEntity;
@@ -22,15 +22,15 @@ public class DataApiExample extends AbstractTestNGSpringContextTests
 	@Test
 	public void test()
 	{
-		Repository r = dataService.getRepositoryByEntityName("Users");
+		Repository r = dataService.getRepository("Users");
 
 		for (Entity e : r)
 		{
 			System.out.println(e);
-            //outputs
+			// outputs
 		}
 
-		Writable repo = dataService.getWritableRepository("Users");
+		Writable repo = dataService.getRepository("Users");
 
 		// untyped
 		MapEntity user = new MapEntity();
@@ -68,7 +68,7 @@ public class DataApiExample extends AbstractTestNGSpringContextTests
 			System.out.println(p.getUsername());
 		}
 
-		Updateable dao = dataService.getCrudRepository("Users");
+		CrudRepository dao = dataService.getRepository("Users");
 
 		u.setUsername("jane2");
 
@@ -83,9 +83,6 @@ public class DataApiExample extends AbstractTestNGSpringContextTests
 
 		// delete streaming
 		dao.delete(q.lt("age", 21));
-
-		// adding a repo
-		dataService.addRepository(new CsvRepository("browseThis.csv"));
 
 	}
 

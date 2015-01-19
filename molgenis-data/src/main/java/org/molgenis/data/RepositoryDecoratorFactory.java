@@ -12,5 +12,5 @@ public interface RepositoryDecoratorFactory
 	 * @param repository
 	 * @return
 	 */
-	Repository createDecoratedRepository(Repository repository);
+	CrudRepository createDecoratedRepository(CrudRepository repository);
 }

@@ -15,10 +15,10 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
@@ -86,11 +86,10 @@ public class MutationsViewControllerTest extends AbstractTestNGSpringContextTest
 	@Test
 	public void refreshReturnTrue() throws Exception
 	{
-		MysqlRepository mutationsViewRepo = mock(MysqlRepository.class);
+		CrudRepository mutationsViewRepo = mock(CrudRepository.class);
 
 		when(dataService.hasRepository(MutationsViewController.ENTITYNAME_MUTATIONSVIEW)).thenReturn(true);
-		when(dataService.getRepositoryByEntityName(MutationsViewController.ENTITYNAME_MUTATIONSVIEW)).thenReturn(
-				mutationsViewRepo);
+		when(dataService.getRepository(MutationsViewController.ENTITYNAME_MUTATIONSVIEW)).thenReturn(mutationsViewRepo);
 
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
 		when(mutationsViewRepo.getEntityMetaData()).thenReturn(entityMetaData);
@@ -115,8 +114,8 @@ public class MutationsViewControllerTest extends AbstractTestNGSpringContextTest
 	@Test
 	public void create() throws Exception
 	{
-		MysqlRepository mutationsViewRepo = mock(MysqlRepository.class);
-		MysqlRepository mutaionRepo = mock(MysqlRepository.class);
+		CrudRepository mutationsViewRepo = mock(CrudRepository.class);
+		CrudRepository mutaionRepo = mock(CrudRepository.class);
 
 		Entity entity = mock(Entity.class);
 		when(entity.getString(MutationsViewController.MUTATIONS__MUTATION_ID)).thenReturn("M1");
@@ -134,11 +133,9 @@ public class MutationsViewControllerTest extends AbstractTestNGSpringContextTest
 				this.mysqlViewService.createRowByMergingValuesIfEquales(MutationsViewController.HEADERS_NAMES,
 						valuesPerHeader)).thenReturn(new Row());
 
-		when((MysqlRepository) dataService.getRepositoryByEntityName(MutationsViewController.ENTITYNAME_MUTATIONSVIEW))
-				.thenReturn(mutationsViewRepo);
+		when(dataService.getRepository(MutationsViewController.ENTITYNAME_MUTATIONSVIEW)).thenReturn(mutationsViewRepo);
 
-		when((MysqlRepository) dataService.getRepositoryByEntityName(MutationsViewController.ENTITYNAME_MUTATIONS))
-				.thenReturn(mutaionRepo);
+		when(dataService.getRepository(MutationsViewController.ENTITYNAME_MUTATIONS)).thenReturn(mutaionRepo);
 
 		when(dataService.hasRepository(MutationsViewController.ENTITYNAME_MUTATIONS)).thenReturn(true);
 		when(dataService.hasRepository(MutationsViewController.ENTITYNAME_MUTATIONSVIEW)).thenReturn(true);

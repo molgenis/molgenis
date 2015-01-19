@@ -21,6 +21,8 @@ import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AggregateQuery;
+import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
@@ -58,7 +60,6 @@ public class JpaRepository extends AbstractCrudRepository
 
 	public JpaRepository(EntityMetaData entityMetaData, QueryResolver queryResolver)
 	{
-		super(BASE_URL + entityMetaData.getEntityClass().getName());
 		this.entityMetaData = entityMetaData;
 		this.queryResolver = queryResolver;
 	}
@@ -746,5 +747,11 @@ public class JpaRepository extends AbstractCrudRepository
 		}
 
 		return searchRules;
+	}
+
+	@Override
+	public AggregateResult aggregate(AggregateQuery aggregateQuery)
+	{
+		throw new UnsupportedOperationException();
 	}
 }

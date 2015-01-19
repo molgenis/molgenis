@@ -32,7 +32,6 @@ import org.molgenis.util.CaseInsensitiveLinkedHashMap;
  */
 public class ExcelRepository extends AbstractRepository
 {
-	public static final String BASE_URL = "excel://";
 	private final Sheet sheet;
 
 	/** process cells after reading */
@@ -48,7 +47,6 @@ public class ExcelRepository extends AbstractRepository
 
 	public ExcelRepository(String fileName, Sheet sheet, List<CellProcessor> cellProcessors)
 	{
-		super(BASE_URL + fileName + "/" + sheet.getSheetName());
 		this.sheet = sheet;
 		this.cellProcessors = cellProcessors;
 	}
@@ -142,7 +140,7 @@ public class ExcelRepository extends AbstractRepository
 			try
 			{
 				String header = AbstractCellProcessor.processCell(ExcelUtils.toValue(it.next()), true, cellProcessors);
-				if(null != header) columnIdx.put(header, i++);
+				if (null != header) columnIdx.put(header, i++);
 			}
 			catch (final IllegalStateException ex)
 			{

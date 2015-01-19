@@ -49,12 +49,6 @@ public class MyFirstRepo implements Repository
 	}
 
 	@Override
-	public String getUrl()
-	{
-		return null;
-	}
-
-	@Override
 	public void close() throws IOException
 	{
 

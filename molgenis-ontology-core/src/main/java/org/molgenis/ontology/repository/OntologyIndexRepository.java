@@ -2,14 +2,13 @@ package org.molgenis.ontology.repository;
 
 import java.util.Iterator;
 
-import org.molgenis.data.Countable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.util.MapperTypeSanitizer;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.ontology.utils.OntologyLoader;
 
-public class OntologyIndexRepository extends AbstractOntologyRepository implements Countable
+public class OntologyIndexRepository extends AbstractOntologyRepository
 {
 	private final OntologyLoader ontologyLoader;
 	public final static String TYPE_ONTOLOGY = "indexedOntology";
@@ -70,9 +69,4 @@ public class OntologyIndexRepository extends AbstractOntologyRepository implemen
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
-	public String getUrl()
-	{
-		throw new UnsupportedOperationException();
-	}
 }

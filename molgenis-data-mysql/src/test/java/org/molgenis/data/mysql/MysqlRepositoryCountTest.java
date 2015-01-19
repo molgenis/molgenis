@@ -43,10 +43,10 @@ public class MysqlRepositoryCountTest extends AbstractTestNGSpringContextTests
 		personMD.addAttribute("active").setDataType(MolgenisFieldTypes.BOOL);
 		personMD.addAttribute("country").setDataType(MolgenisFieldTypes.XREF).setRefEntity(countryMD);
 
-		coll.dropEntityMetaData(personMD.getName());
-		coll.dropEntityMetaData(countryMD.getName());
-		MysqlRepository countries = (MysqlRepository) coll.add(countryMD);
-		MysqlRepository persons = (MysqlRepository) coll.add(personMD);
+		coll.deleteEntityMeta(personMD.getName());
+		coll.deleteEntityMeta(countryMD.getName());
+		MysqlRepository countries = (MysqlRepository) coll.addEntityMeta(countryMD);
+		MysqlRepository persons = (MysqlRepository) coll.addEntityMeta(personMD);
 
 		// add country entities to repo
 		Entity c = new MapEntity();

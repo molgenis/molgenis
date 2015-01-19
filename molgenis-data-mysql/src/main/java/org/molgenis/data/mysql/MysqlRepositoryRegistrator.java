@@ -31,8 +31,8 @@ public class MysqlRepositoryRegistrator implements ApplicationListener<ContextRe
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
-		LOG.info("Registering MySQL repositories ...");
-		repositoryCollection.registerMysqlRepos();
+		// LOG.info("Registering MySQL repositories ...");
+		// repositoryCollection.registerMysqlRepos();
 		importServiceFactory.addImportService(emxImportService);
 		LOG.info("Registered MySQL repositories");
 	}

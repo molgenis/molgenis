@@ -64,8 +64,7 @@ public class PatientsViewController extends MolgenisPluginController
 	{
 		if (dataService.hasRepository(ENTITYNAME_PATIENTSVIEW))
 		{
-			CrudRepository patientsViewRepo = (CrudRepository) dataService
-					.getRepositoryByEntityName(ENTITYNAME_PATIENTSVIEW);
+			CrudRepository patientsViewRepo = dataService.getRepository(ENTITYNAME_PATIENTSVIEW);
 			this.mysqlViewService.truncate(patientsViewRepo.getEntityMetaData().getName());
 			patientsViewRepo.deleteAll();
 			try
@@ -90,9 +89,8 @@ public class PatientsViewController extends MolgenisPluginController
 		List<Row> rows = null;
 		if (dataService.hasRepository(ENTITYNAME_PATIENTS) && dataService.hasRepository(ENTITYNAME_PATIENTSVIEW))
 		{
-			CrudRepository patientsViewRepo = (CrudRepository) dataService
-					.getRepositoryByEntityName(ENTITYNAME_PATIENTSVIEW);
-			CrudRepository patientsRepo = (CrudRepository) dataService.getRepositoryByEntityName(ENTITYNAME_PATIENTS);
+			CrudRepository patientsViewRepo = dataService.getRepository(ENTITYNAME_PATIENTSVIEW);
+			CrudRepository patientsRepo = dataService.getRepository(ENTITYNAME_PATIENTS);
 			rows = createRows(patientsRepo, patientsViewRepo);
 		}
 		model.addAttribute("rows", rows);

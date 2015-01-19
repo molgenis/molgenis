@@ -44,7 +44,6 @@ public class VcfRepository extends AbstractRepository
 {
 	private static final Logger LOG = LoggerFactory.getLogger(VcfRepository.class);
 
-	public static final String BASE_URL = "vcf://";
 	public static final String CHROM = "#CHROM";
 	public static final String ALT = "ALT";
 	public static final String POS = "POS";
@@ -67,7 +66,6 @@ public class VcfRepository extends AbstractRepository
 
 	public VcfRepository(File file, String entityName) throws IOException
 	{
-		super(BASE_URL + file.getName());
 		this.file = file;
 		this.entityName = entityName;
 	}

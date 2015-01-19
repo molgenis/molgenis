@@ -1,7 +1,8 @@
 package org.molgenis.data.elasticsearch;
 
+import org.molgenis.data.CrudRepositoryCollection;
 import org.molgenis.data.DataService;
-import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.elasticsearch.logback.LoggingEventMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationListener;
@@ -16,11 +17,11 @@ import org.springframework.stereotype.Component;
 public class ElasticsearchRepositoryRegistrator implements ApplicationListener<ContextRefreshedEvent>, Ordered
 {
 	private final DataService dataService;
-	private final RepositoryCollection repositoryCollection;
+	private final CrudRepositoryCollection repositoryCollection;
 
 	@Autowired
 	public ElasticsearchRepositoryRegistrator(DataService dataService,
-			@Qualifier("ElasticsearchRepositoryCollection") RepositoryCollection repositoryCollection)
+			@Qualifier("ElasticsearchRepositoryCollection") CrudRepositoryCollection repositoryCollection)
 	{
 		if (dataService == null) throw new IllegalArgumentException("DataService is null");
 		if (repositoryCollection == null) throw new IllegalArgumentException(
@@ -32,11 +33,7 @@ public class ElasticsearchRepositoryRegistrator implements ApplicationListener<C
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
-		for (String name : repositoryCollection.getEntityNames())
-		{
-			if (!dataService.hasRepository(name)) dataService.addRepository(repositoryCollection
-					.getRepositoryByEntityName(name));
-		}
+		dataService.getMeta().addEntityMeta(LoggingEventMetaData.INSTANCE);
 	}
 
 	@Override

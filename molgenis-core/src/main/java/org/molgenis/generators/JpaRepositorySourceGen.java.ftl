@@ -6,9 +6,10 @@ package org.molgenis.data.jpa;
 
 import java.util.Map;
 
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.CrudRepository;
-import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.CrudRepositoryCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -16,9 +17,9 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Maps;
 
 @Component("JpaRepositoryCollection")
-public class JpaRepositoryCollection implements RepositoryCollection
+public class JpaRepositoryCollection implements CrudRepositoryCollection
 {
-	private final Map<String, Repository> repositories = Maps.newLinkedHashMap();
+	private final Map<String, CrudRepository> repositories = Maps.newLinkedHashMap();
      
 	<#list model.entities as entity>
 	<#if !entity.abstract>
@@ -44,8 +45,26 @@ public class JpaRepositoryCollection implements RepositoryCollection
 	}
 
 	@Override
-	public Repository getRepositoryByEntityName(String name)
+	public Repository getRepository(String name)
 	{
 		return repositories.get(name);
+	}
+	
+	@Override
+	public CrudRepository getCrudRepository(String name)
+	{
+		return repositories.get(name);
+	}
+	
+	@Override
+	public String getName()
+	{
+		return "JPA";
+	}
+	
+	@Override
+	public CrudRepository addEntityMeta(EntityMetaData entityMeta)
+	{
+		return getCrudRepository(entityMeta.getName());
 	}
 }

@@ -13,10 +13,7 @@ import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.importer.ImportWriter;
 import org.molgenis.data.importer.MetaDataParser;
-import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.TagMetaData;
-import org.molgenis.data.meta.WritableMetaDataService;
-import org.molgenis.data.meta.MetaDataServiceDecoratorFactory;
 import org.molgenis.data.semantic.TagRepository;
 import org.molgenis.data.semantic.UntypedTagService;
 import org.molgenis.security.permission.PermissionSystemService;
@@ -43,16 +40,13 @@ public class MySqlConfiguration
 	@Autowired
 	private RepositoryDecoratorFactory repositoryDecoratorFactory;
 
-	private MetaDataServiceImpl writableMetaDataService;
-
 	@Autowired
 	private PermissionSystemService permissionSystemService;
 
 	@Bean
 	TagRepository tagRepository()
 	{
-		CrudRepository repo = (CrudRepository) mysqlRepositoryCollection().getRepositoryByEntityName(
-				TagMetaData.ENTITY_NAME);
+		CrudRepository repo = mysqlRepositoryCollection().getCrudRepository(TagMetaData.ENTITY_NAME);
 		return new TagRepository(repo, new IdGenerator()
 		{
 
@@ -84,33 +78,10 @@ public class MySqlConfiguration
 	}
 
 	@Bean
-	public WritableMetaDataService writableMetaDataService()
-	{
-		writableMetaDataService = new MetaDataServiceImpl();
-		return writableMetaDataServiceDecorator().decorate(writableMetaDataService);
-	}
-
-	@Bean
-	/**
-	 * non-decorating decorator, to be overrided if you wish to decorate the MetaDataRepositories
-	 */
-	MetaDataServiceDecoratorFactory writableMetaDataServiceDecorator()
-	{
-		return new MetaDataServiceDecoratorFactory()
-		{
-			@Override
-			public WritableMetaDataService decorate(WritableMetaDataService metaDataRepositories)
-			{
-				return metaDataRepositories;
-			}
-		};
-	}
-
-	@Bean
 	public MysqlRepositoryCollection mysqlRepositoryCollection()
 	{
-		MysqlRepositoryCollection mysqlRepositoryCollection = new MysqlRepositoryCollection(dataSource, dataService,
-				writableMetaDataService(), repositoryDecoratorFactory)
+		MysqlRepositoryCollection mysqlRepositoryCollection = new MysqlRepositoryCollection(dataSource,
+				repositoryDecoratorFactory)
 
 		{
 			@Override
@@ -122,27 +93,25 @@ public class MySqlConfiguration
 			}
 		};
 
-		writableMetaDataService.setManageableCrudRepositoryCollection(mysqlRepositoryCollection);
-
 		return mysqlRepositoryCollection;
 	}
 
 	@Bean
 	public ImportService emxImportService()
 	{
-		return new EmxImportService(emxMetaDataParser(), importWriter());
+		return new EmxImportService(emxMetaDataParser(), importWriter(), dataService);
 	}
 
 	@Bean
 	public ImportWriter importWriter()
 	{
-		return new ImportWriter(dataService, writableMetaDataService, permissionSystemService, tagService());
+		return new ImportWriter(dataService, permissionSystemService, tagService());
 	}
 
 	@Bean
 	public MetaDataParser emxMetaDataParser()
 	{
-		return new EmxMetaDataParser(dataService, writableMetaDataService);
+		return new EmxMetaDataParser(dataService);
 	}
 
 	@Bean

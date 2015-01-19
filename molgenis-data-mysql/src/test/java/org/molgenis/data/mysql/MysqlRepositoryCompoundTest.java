@@ -48,7 +48,7 @@ public class MysqlRepositoryCompoundTest extends MysqlRepositoryAbstractDatatype
 	@Override
 	public void test() throws Exception
 	{
-		coll.dropEntityMetaData("CompoundTest");
+		coll.deleteEntityMeta("CompoundTest");
 		super.test();
 	}
 

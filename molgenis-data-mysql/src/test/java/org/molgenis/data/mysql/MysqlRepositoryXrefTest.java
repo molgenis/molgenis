@@ -57,14 +57,16 @@ public class MysqlRepositoryXrefTest extends MysqlRepositoryAbstractDatatypeTest
 	@Test
 	public void test() throws Exception
 	{
-		coll.dropEntityMetaData(getMetaData().getName());
-		coll.dropEntityMetaData(getMetaData().getAttribute("stringRef").getRefEntity().getName());
-		coll.dropEntityMetaData(getMetaData().getAttribute("intRef").getRefEntity().getName());
+		coll.deleteEntityMeta(getMetaData().getName());
+		coll.deleteEntityMeta(getMetaData().getAttribute("stringRef").getRefEntity().getName());
+		coll.deleteEntityMeta(getMetaData().getAttribute("intRef").getRefEntity().getName());
 
 		// create
-		MysqlRepository stringRepo = (MysqlRepository) coll.add(getMetaData().getAttribute("stringRef").getRefEntity());
-		MysqlRepository intRepo = (MysqlRepository) coll.add(getMetaData().getAttribute("intRef").getRefEntity());
-		MysqlRepository xrefRepo = (MysqlRepository) coll.add(getMetaData());
+		MysqlRepository stringRepo = (MysqlRepository) coll.addEntityMeta(getMetaData().getAttribute("stringRef")
+				.getRefEntity());
+		MysqlRepository intRepo = (MysqlRepository) coll.addEntityMeta(getMetaData().getAttribute("intRef")
+				.getRefEntity());
+		MysqlRepository xrefRepo = (MysqlRepository) coll.addEntityMeta(getMetaData());
 
 		Assert.assertEquals(xrefRepo.getCreateSql(), createSql());
 

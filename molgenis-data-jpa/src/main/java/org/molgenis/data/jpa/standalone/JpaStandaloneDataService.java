@@ -28,6 +28,7 @@ public class JpaStandaloneDataService extends DataServiceImpl
 	public JpaStandaloneDataService(String dbUrl, String dbUsername, String dbPassword) throws ClassNotFoundException,
 			NoSuchMethodException, SecurityException
 	{
+		super();
 		Map<String, String> props = Maps.newHashMap();
 		props.put("javax.persistence.jdbc.driver", "com.mysql.jdbc.Driver");
 		props.put("javax.persistence.jdbc.url", dbUrl);
@@ -64,7 +65,7 @@ public class JpaStandaloneDataService extends DataServiceImpl
 			public Object execute()
 			{
 				JpaStandaloneDataService.super.add(entityName, entity);
-                return null;
+				return null;
 			}
 
 		});

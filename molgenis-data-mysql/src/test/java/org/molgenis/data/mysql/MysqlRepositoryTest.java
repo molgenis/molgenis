@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.molgenis.AppConfig;
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.meta.MetaDataServiceImpl;
@@ -48,8 +49,8 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		DefaultEntityMetaData metaData = new DefaultEntityMetaData("IntValue");
 		metaData.addAttribute("intAttr").setDataType(MolgenisFieldTypes.INT).setIdAttribute(true).setNillable(false);
 
-		coll.dropEntityMetaData(metaData.getName());
-		MysqlRepository repo = (MysqlRepository) coll.add(metaData);
+		coll.deleteEntityMeta(metaData.getName());
+		CrudRepository repo = coll.addEntityMeta(metaData);
 
 		int count = 2099;
 		for (int i = 0; i < count; i++)
@@ -95,8 +96,8 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		metaData.setIdAttribute("lastName");
 		Assert.assertEquals(metaData.getIdAttribute().getName(), "lastName");
 
-		coll.dropEntityMetaData(metaData.getName());
-		MysqlRepository repo = (MysqlRepository) coll.add(metaData);
+		coll.deleteEntityMeta(metaData.getName());
+		MysqlRepository repo = (MysqlRepository) coll.addEntityMeta(metaData);
 
 		Assert.assertEquals(repo.iteratorSql(), "SELECT firstName, lastName FROM `MysqlPerson`");
 		Assert.assertEquals(repo.getInsertSql(), "INSERT INTO `MysqlPerson` (`firstName`, `lastName`) VALUES (?, ?)");
@@ -146,8 +147,8 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		// test delete clauses
 		Assert.assertEquals(repo.getDeleteSql(), "DELETE FROM `MysqlPerson` WHERE `lastName` = ?");
 
-		coll.dropEntityMetaData(metaData.getName());
-		repo = (MysqlRepository) coll.add(metaData);
+		coll.deleteEntityMeta(metaData.getName());
+		repo = (MysqlRepository) coll.addEntityMeta(metaData);
 
 		// Entity generator to monitor performance (set batch to 100000 to show up to >10,000 records/second)
 		final int SIZE = 1000;
@@ -250,7 +251,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		idAttributeMetaData.setNillable(false);
 		entityMetaData.addAttributeMetaData(idAttributeMetaData);
 
-		MysqlRepository testRepository = (MysqlRepository) coll.add(entityMetaData);
+		CrudRepository testRepository = coll.addEntityMeta(entityMetaData);
 
 		MapEntity entity = new MapEntity();
 		entity.set(idAttributeName, exampleId);

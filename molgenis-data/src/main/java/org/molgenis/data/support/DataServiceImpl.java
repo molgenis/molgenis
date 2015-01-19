@@ -21,10 +21,8 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -33,21 +31,33 @@ import com.google.common.collect.Lists;
 /**
  * Implementation of the DataService interface
  */
-@Component
+
 public class DataServiceImpl implements DataService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(DataServiceImpl.class);
 
 	private final Map<String, CrudRepository> repositories;
 	private final Set<String> repositoryNames;
-	private final MetaDataService metaDataService;
+	private MetaDataService metaDataService;
 
-	public DataServiceImpl(MetaDataServiceImpl metaDataService)
+	public DataServiceImpl()
 	{
 		this.repositories = new LinkedHashMap<String, CrudRepository>();
 		this.repositoryNames = new TreeSet<String>();
+	}
+
+	/**
+	 * For testing purposes
+	 */
+	public void resetRepositories()
+	{
+		repositories.clear();
+		repositoryNames.clear();
+	}
+
+	public void setMetaDataService(MetaDataService metaDataService)
+	{
 		this.metaDataService = metaDataService;
-		metaDataService.setDataService(this);
 	}
 
 	@Override
@@ -200,12 +210,6 @@ public class DataServiceImpl implements DataService
 	public void deleteAll(String entityName)
 	{
 		getRepository(entityName).deleteAll();
-	}
-
-	@Override
-	public void drop(String entityName)
-	{
-		getManageableRepository(entityName).drop();
 	}
 
 	@Override

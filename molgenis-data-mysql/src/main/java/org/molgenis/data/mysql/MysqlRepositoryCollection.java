@@ -2,57 +2,44 @@ package org.molgenis.data.mysql;
 
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
-import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableCrudRepositoryCollection;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryDecoratorFactory;
-import org.molgenis.data.meta.WritableMetaDataService;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
-import com.google.common.collect.Lists;
 
-public abstract class MysqlRepositoryCollection implements ManageableCrudRepositoryCollection, InitializingBean
+public abstract class MysqlRepositoryCollection implements ManageableCrudRepositoryCollection
 {
+	public static final String NAME = "MySQL";
 	private final DataSource ds;
-	private final DataService dataService;
 	final private Map<String, MysqlRepository> repositories = new LinkedHashMap<String, MysqlRepository>();
 	// temporary workaround for module dependencies
 	private final RepositoryDecoratorFactory repositoryDecoratorFactory;
-	private final WritableMetaDataService metaDataRepositories;
 
-	public MysqlRepositoryCollection(DataSource ds, DataService dataService,
-			WritableMetaDataService metaDataRepositories)
+	public MysqlRepositoryCollection(DataSource ds)
 	{
-		this(ds, dataService, metaDataRepositories, null);
+		this(ds, null);
 	}
 
-	public MysqlRepositoryCollection(DataSource ds, DataService dataService,
-			WritableMetaDataService metaDataRepositories, RepositoryDecoratorFactory repositoryDecoratorFactory)
+	public MysqlRepositoryCollection(DataSource ds, RepositoryDecoratorFactory repositoryDecoratorFactory)
 	{
 		this.ds = ds;
-		this.dataService = dataService;
-		this.metaDataRepositories = metaDataRepositories;
 		this.repositoryDecoratorFactory = repositoryDecoratorFactory;
 	}
 
 	@Override
-	public void afterPropertiesSet() throws Exception
+	public String getName()
 	{
-		refreshRepositories();
+		return NAME;
 	}
 
 	public DataSource getDataSource()
@@ -65,86 +52,16 @@ public abstract class MysqlRepositoryCollection implements ManageableCrudReposit
 	 */
 	protected abstract MysqlRepository createMysqlRepository();
 
-	public void refreshRepositories()
-	{
-		Iterable<EntityMetaData> metadata = metaDataRepositories.getEntityMetaDatas();
-
-		// instantiate the repos
-		for (EntityMetaData emd : metadata)
-		{
-			if (!emd.isAbstract())
-			{
-				MysqlRepository repo = createMysqlRepository();
-				repo.setMetaData(emd);
-				repositories.put(emd.getName(), repo);
-			}
-		}
-
-		registerMysqlRepos();
-	}
-
-	public void registerMysqlRepos()
-	{
-		for (String name : getEntityNames())
-		{
-			if (dataService.hasRepository(name))
-			{
-				dataService.removeRepository(name);
-			}
-
-			Repository repo = getRepositoryByEntityName(name);
-			dataService.addRepository(repo);
-		}
-	}
-
 	@Override
 	@Transactional
 	public CrudRepository addEntityMeta(EntityMetaData emd)
 	{
-		CrudRepository result = null;
+		MysqlRepository repository = createMysqlRepository();
+		repository.setMetaData(emd);
+		repository.create();
+		repositories.put(emd.getName(), repository);
 
-		if (metaDataRepositories.getEntityMetaData(emd.getName()) != null)
-		{
-			if (emd.isAbstract())
-			{
-				return null;
-			}
-
-			result = repositories.get(emd.getName());
-			if (result == null) throw new IllegalStateException("Repository [" + emd.getName()
-					+ "] registered in entities table but missing in the MysqlRepositoryCollection");
-
-			result = getDecoratedRepository(result);
-			if (!dataService.hasRepository(emd.getName()))
-			{
-				dataService.addRepository(result);
-			}
-
-			return result;
-		}
-
-		if (dataService.hasRepository(emd.getName()))
-		{
-			throw new MolgenisDataException("Entity with name [" + emd.getName() + "] already exists.");
-		}
-
-		// if not abstract add to repositories
-		if (!emd.isAbstract())
-		{
-			MysqlRepository repository = createMysqlRepository();
-			repository.setMetaData(emd);
-			repository.create();
-			repositories.put(emd.getName(), repository);
-			result = getDecoratedRepository(repository);
-			dataService.addRepository(result);
-		}
-
-		// Add to entities and attributes tables, this should be done AFTER the creation of new tables because create
-		// table statements are ddl statements and when these are executed mysql does an implicit commit. So when the
-		// create table fails a rollback does not work anymore
-		metaDataRepositories.addEntityMetaData(emd);
-
-		return result;
+		return getDecoratedRepository(repository);
 	}
 
 	@Override
@@ -154,7 +71,7 @@ public abstract class MysqlRepositoryCollection implements ManageableCrudReposit
 	}
 
 	@Override
-	public Repository getRepositoryByEntityName(String name)
+	public CrudRepository getCrudRepository(String name)
 	{
 		MysqlRepository repo = repositories.get(name);
 		if (repo == null)
@@ -166,31 +83,19 @@ public abstract class MysqlRepositoryCollection implements ManageableCrudReposit
 	}
 
 	@Override
-	public CrudRepository getCrudRepository(String name)
+	public Repository getRepository(String name)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return getCrudRepository(name);
 	}
 
 	@Override
-	public void deleteEntityMeta(String entityName)
+	public void addAttribute(String entityName, AttributeMetaData attribute)
 	{
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void deleteAttribute(String entityName, String attributeName)
-	{
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void updateAttribute(String entityName, AttributeMetaData attribute)
-	{
-		// TODO Auto-generated method stub
-
+		MysqlRepository r = repositories.get(entityName);
+		if (r != null)
+		{
+			r.addAttribute(attribute);
+		}
 	}
 
 	public MysqlRepository getUndecoratedRepository(String name)
@@ -201,151 +106,36 @@ public abstract class MysqlRepositoryCollection implements ManageableCrudReposit
 	public void drop(EntityMetaData md)
 	{
 		assert md != null;
-		dropEntityMetaData(md.getName());
+		deleteEntityMeta(md.getName());
 	}
 
-	public void dropEntityMetaData(String name)
+	@Override
+	public void deleteEntityMeta(String entityName)
 	{
 		// remove the repo
-		MysqlRepository r = repositories.get(name);
+		MysqlRepository r = repositories.get(entityName);
 		if (r != null)
 		{
 			r.drop();
-			repositories.remove(name);
-			dataService.removeRepository(r.getName());
-			metaDataRepositories.removeEntityMetaData(name);
+			repositories.remove(entityName);
 		}
 	}
 
-	public void dropAttributeMetaData(String entityName, String attributeName)
+	@Override
+	public void deleteAttribute(String entityName, String attributeName)
 	{
 		MysqlRepository r = repositories.get(entityName);
 		if (r != null)
 		{
 			r.dropAttribute(attributeName);
-			metaDataRepositories.removeAttributeMetaData(entityName, attributeName);
 		}
-		refreshRepositories();
 	}
 
-	/**
-	 * Add new AttributeMetaData to an existing EntityMetaData. Trying to edit an existing AttributeMetaData will throw
-	 * an exception
-	 * 
-	 * @param sourceEntityMetaData
-	 * @return the added AttributeMetaData
-	 */
 	@Override
-	@Transactional
-	public void updateEntityMeta(EntityMetaData sourceEntityMetaData)
+	public void addAttributeSync(String entityName, AttributeMetaData attribute)
 	{
-		MysqlRepository repository = repositories.get(sourceEntityMetaData.getName());
-		EntityMetaData existingEntityMetaData = repository.getEntityMetaData();
-
-		for (AttributeMetaData attr : existingEntityMetaData.getAttributes())
-		{
-			if (sourceEntityMetaData.getAttribute(attr.getName()) == null)
-			{
-				throw new MolgenisDataException(
-						"Removing of existing attributes is currently not sypported. You tried to remove attribute ["
-								+ attr.getName() + "]");
-			}
-		}
-
-		for (AttributeMetaData attr : sourceEntityMetaData.getAttributes())
-		{
-			AttributeMetaData currentAttribute = existingEntityMetaData.getAttribute(attr.getName());
-			if (currentAttribute != null)
-			{
-				if (!currentAttribute.isSameAs(attr))
-				{
-					throw new MolgenisDataException(
-							"Changing existing attributes is not currently supported. You tried to alter attribute ["
-									+ attr.getName() + "] of entity [" + sourceEntityMetaData.getName()
-									+ "]. Only adding of new atrtibutes to existing entities is supported.");
-				}
-			}
-			else if (!attr.isNillable())
-			{
-				throw new MolgenisDataException("Adding non-nillable attributes is not currently supported");
-			}
-			else
-			{
-				// TODO: use decorated repository!
-				metaDataRepositories.addAttributeMetaData(sourceEntityMetaData.getName(), attr);
-				DefaultEntityMetaData defaultEntityMetaData = (DefaultEntityMetaData) repository.getEntityMetaData();
-				defaultEntityMetaData.addAttributeMetaData(attr);
-				if (attr.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
-				{
-					for (AttributeMetaData attrPart : attr.getAttributeParts())
-					{
-						repository.addAttribute(attrPart);
-					}
-				}
-				else
-				{
-					repository.addAttribute(attr);
-				}
-			}
-		}
-	}
-
-	@Transactional
-	public List<AttributeMetaData> updateSync(EntityMetaData sourceEntityMetaData)
-	{
-		MysqlRepository repository = repositories.get(sourceEntityMetaData.getName());
-		EntityMetaData existingEntityMetaData = repository.getEntityMetaData();
-		List<AttributeMetaData> addedAttributes = Lists.newArrayList();
-
-		for (AttributeMetaData attr : existingEntityMetaData.getAttributes())
-		{
-			if (sourceEntityMetaData.getAttribute(attr.getName()) == null)
-			{
-				throw new MolgenisDataException(
-						"Removing of existing attributes is currently not sypported. You tried to remove attribute ["
-								+ attr.getName() + "]");
-			}
-		}
-
-		for (AttributeMetaData attr : sourceEntityMetaData.getAttributes())
-		{
-			AttributeMetaData currentAttribute = existingEntityMetaData.getAttribute(attr.getName());
-			if (currentAttribute != null)
-			{
-				if (!currentAttribute.isSameAs(attr))
-				{
-					throw new MolgenisDataException(
-							"Changing existing attributes is not currently supported. You tried to alter attribute ["
-									+ attr.getName() + "] of entity [" + sourceEntityMetaData.getName()
-									+ "]. Only adding of new atrtibutes to existing entities is supported.");
-				}
-			}
-			else if (!attr.isNillable())
-			{
-				throw new MolgenisDataException("Adding non-nillable attributes is not currently supported");
-			}
-			else
-			{
-				// TODO: use decorated repository!
-				metaDataRepositories.addAttributeMetaData(sourceEntityMetaData.getName(), attr);
-				DefaultEntityMetaData defaultEntityMetaData = (DefaultEntityMetaData) repository.getEntityMetaData();
-				defaultEntityMetaData.addAttributeMetaData(attr);
-				if (attr.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
-				{
-					for (AttributeMetaData attrPart : attr.getAttributeParts())
-					{
-						repository.addAttributeSync(attrPart);
-					}
-				}
-				else
-				{
-					repository.addAttributeSync(attr);
-				}
-				addedAttributes.add(attr);
-			}
-		}
-
-		return addedAttributes;
+		MysqlRepository repository = repositories.get(entityName);
+		repository.addAttributeSync(attribute);
 	}
 
 	/**

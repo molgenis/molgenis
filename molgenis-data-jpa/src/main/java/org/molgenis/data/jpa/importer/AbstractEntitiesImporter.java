@@ -49,7 +49,7 @@ public abstract class AbstractEntitiesImporter implements EntitiesImporter
 		// import entities in order defined by entities map
 		for (String entityName : getEntitiesImportable())
 		{
-			Repository repository = sourceRepositories.getRepositoryByEntityName(entityName);
+			Repository repository = sourceRepositories.getRepository(entityName);
 			if (repository != null)
 			{
 				try

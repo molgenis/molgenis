@@ -11,6 +11,7 @@ public class EntityMetaDataMetaData extends DefaultEntityMetaData
 {
 	public static final String ENTITY_NAME = "entities";
 	public static final String SIMPLE_NAME = "simpleName";
+	public static final String BACKEND = "backend";
 	public static final String FULL_NAME = "fullName";
 	public static final String ID_ATTRIBUTE = "idAttribute";
 	public static final String LABEL_ATTRIBUTE = "labelAttribute";
@@ -26,6 +27,7 @@ public class EntityMetaDataMetaData extends DefaultEntityMetaData
 		super(ENTITY_NAME);
 		addAttribute(FULL_NAME).setIdAttribute(true).setUnique(true).setNillable(false);
 		addAttribute(SIMPLE_NAME).setNillable(false);
+		addAttribute(BACKEND);
 		addAttribute(PACKAGE).setDataType(XREF).setRefEntity(PackageRepository.META_DATA);
 		addAttribute(ID_ATTRIBUTE);
 		addAttribute(LABEL_ATTRIBUTE);

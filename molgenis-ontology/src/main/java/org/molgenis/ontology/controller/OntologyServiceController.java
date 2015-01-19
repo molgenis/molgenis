@@ -140,7 +140,7 @@ public class OntologyServiceController extends MolgenisPluginController
 				Double threshold_value = Double.parseDouble(threshold);
 				entity.set(MatchingTaskEntity.THRESHOLD, threshold_value);
 				dataService.update(MatchingTaskEntity.ENTITY_NAME, entity);
-				dataService.getCrudRepository(MatchingTaskEntity.ENTITY_NAME).flush();
+				dataService.getRepository(MatchingTaskEntity.ENTITY_NAME).flush();
 			}
 			catch (Exception e)
 			{
@@ -206,9 +206,9 @@ public class OntologyServiceController extends MolgenisPluginController
 			dataService.delete(MatchingTaskEntity.ENTITY_NAME, matchingSummaryEntity);
 
 			// Drop the table that contains the information for raw data (input terms)
-			mysqlRepositoryCollection.dropEntityMetaData(entityName);
+			mysqlRepositoryCollection.deleteEntityMeta(entityName);
 
-			dataService.getCrudRepository(MatchingTaskEntity.ENTITY_NAME).flush();
+			dataService.getRepository(MatchingTaskEntity.ENTITY_NAME).flush();
 		}
 	}
 
@@ -257,7 +257,7 @@ public class OntologyServiceController extends MolgenisPluginController
 		}
 
 		uploadProgress.setUserClickMode(userAccountService.getCurrentUser().getUsername(), isMatched);
-		EntityPager pager = new EntityPager(start, num, (long) count, null);
+		EntityPager pager = new EntityPager(start, num, count, null);
 		return new EntityCollectionResponse(pager, entityMaps, "/match/retrieve");
 	}
 
@@ -413,10 +413,10 @@ public class OntologyServiceController extends MolgenisPluginController
 	{
 		return new RepositoryCollection()
 		{
-			private String entityName = name;
+			private final String entityName = name;
 
 			@Override
-			public Repository getRepositoryByEntityName(String name)
+			public Repository getRepository(String name)
 			{
 				CsvRepository csvRepository = new CsvRepository(file, Arrays.<CellProcessor> asList(
 						new LowerCaseProcessor(), new TrimProcessor()), OntologyServiceImpl.DEFAULT_SEPARATOR);

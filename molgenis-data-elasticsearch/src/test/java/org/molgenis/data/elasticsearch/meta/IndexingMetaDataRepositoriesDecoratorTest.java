@@ -11,39 +11,38 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.elasticsearch.ElasticSearchService;
-import org.molgenis.data.meta.WritableMetaDataService;
+import org.molgenis.data.meta.MetaDataService;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class IndexingMetaDataRepositoriesDecoratorTest
 {
 	private IndexingWritableMetaDataServiceDecorator decorator;
-	private WritableMetaDataService metaDataRepositories;
+	private MetaDataService metaDataService;
 	private DataService dataService;
 	private ElasticSearchService elasticSearchService;
 
 	@BeforeMethod
 	public void setUp()
 	{
-		metaDataRepositories = mock(WritableMetaDataService.class);
+		metaDataService = mock(MetaDataService.class);
 		dataService = mock(DataService.class);
 		elasticSearchService = mock(ElasticSearchService.class);
-		decorator = new IndexingWritableMetaDataServiceDecorator(metaDataRepositories, dataService,
-				elasticSearchService);
+		decorator = new IndexingWritableMetaDataServiceDecorator(metaDataService, elasticSearchService);
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void ElasticsearchAttributeMetaDataRepository()
 	{
-		new IndexingWritableMetaDataServiceDecorator(null, null, null);
+		new IndexingWritableMetaDataServiceDecorator(null, null);
 	}
 
 	@Test
 	public void addEntityMetaData()
 	{
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
-		decorator.addEntityMetaData(entityMetaData);
-		verify(metaDataRepositories).addEntityMetaData(entityMetaData);
+		decorator.addEntityMeta(entityMetaData);
+		verify(metaDataService).addEntityMeta(entityMetaData);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -51,7 +50,7 @@ public class IndexingMetaDataRepositoriesDecoratorTest
 	public void getEntityMetaDatas()
 	{
 		Iterable<EntityMetaData> entityMetaDatas = mock(Iterable.class);
-		when(metaDataRepositories.getEntityMetaDatas()).thenReturn(entityMetaDatas);
+		when(metaDataService.getEntityMetaDatas()).thenReturn(entityMetaDatas);
 		assertEquals(decorator.getEntityMetaDatas(), entityMetaDatas);
 	}
 
@@ -63,8 +62,8 @@ public class IndexingMetaDataRepositoriesDecoratorTest
 		when(dataService.getEntityMetaData(entityName)).thenReturn(entityMetaData);
 
 		AttributeMetaData attribute = mock(AttributeMetaData.class);
-		decorator.addAttributeMetaData(entityName, attribute);
-		verify(metaDataRepositories).addAttributeMetaData(entityName, attribute);
+		decorator.addAttribute(entityName, attribute);
+		verify(metaDataService).addAttribute(entityName, attribute);
 		verify(elasticSearchService).createMappings(entityMetaData);
 	}
 
@@ -75,8 +74,8 @@ public class IndexingMetaDataRepositoriesDecoratorTest
 		String entityName = "entity";
 		String attributeName = "attribute";
 		when(dataService.getEntityMetaData(entityName)).thenReturn(entityMetaData);
-		decorator.removeAttributeMetaData(entityName, attributeName);
-		verify(metaDataRepositories).removeAttributeMetaData(entityName, attributeName);
+		decorator.deleteAttribute(entityName, attributeName);
+		verify(metaDataService).deleteAttribute(entityName, attributeName);
 		verify(elasticSearchService).createMappings(entityMetaData);
 	}
 }

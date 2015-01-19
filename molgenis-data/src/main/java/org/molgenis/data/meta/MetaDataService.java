@@ -1,12 +1,32 @@
 package org.molgenis.data.meta;
 
+import java.util.List;
+
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.ManageableCrudRepositoryCollection;
 import org.molgenis.data.Package;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.core.Ordered;
 
-public interface MetaDataService
+public interface MetaDataService extends ApplicationListener<ContextRefreshedEvent>, Ordered
 {
+	/**
+	 * Sets the Backend, in wich the meta data and the user data is saved
+	 *
+	 * @param ManageableCrudRepositoryCollection
+	 */
+	void setDefaultBackend(ManageableCrudRepositoryCollection backend);
+
+	/**
+	 * Get the default backend
+	 * 
+	 * @return
+	 */
+	ManageableCrudRepositoryCollection getDefaultBackend();
+
 	/**
 	 * Lists all packages.
 	 * 
@@ -66,8 +86,11 @@ public interface MetaDataService
 	 * Updates EntityMeta for the default backend
 	 * 
 	 * @param entityMeta
+	 * @return added attributes
+	 * 
+	 *         FIXME remove return value or change it to ChangeSet with all changes
 	 */
-	void updateEntityMeta(EntityMetaData entityMeta);
+	List<AttributeMetaData> updateEntityMeta(EntityMetaData entityMeta);
 
 	/**
 	 * Adds an Attribute to an EntityMeta for the default backend
@@ -77,13 +100,8 @@ public interface MetaDataService
 	 */
 	void addAttribute(String entityName, AttributeMetaData attribute);
 
-	/**
-	 * Updates an Attribute to an EntityMeta for the default backend
-	 * 
-	 * @param entityName
-	 * @param attribute
-	 */
-	void updateAttribute(String entityName, AttributeMetaData attribute);
+	// FIXME remove this method
+	void addAttributeSync(String entityName, AttributeMetaData attribute);
 
 	/**
 	 * Deletes an Attribute for the default backend
@@ -92,4 +110,7 @@ public interface MetaDataService
 	 * @param attributeName
 	 */
 	void deleteAttribute(String entityName, String attributeName);
+
+	// FIXME remove this method
+	List<AttributeMetaData> updateSync(EntityMetaData sourceEntityMetaData);
 }

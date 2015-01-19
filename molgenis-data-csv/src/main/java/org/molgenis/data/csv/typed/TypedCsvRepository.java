@@ -35,10 +35,9 @@ public class TypedCsvRepository<T extends Entity> extends AbstractRepository
 	private final int skipLines;
 	private final LineMapper<T> lineMapper;
 
-	public TypedCsvRepository(String url, File file, EntityMetaData entityMetaData, char separatorChar, int skipLines,
+	public TypedCsvRepository(File file, EntityMetaData entityMetaData, char separatorChar, int skipLines,
 			LineMapper<T> lineMapper)
 	{
-		super(url);
 		this.entityMetaData = entityMetaData;
 		this.file = file;
 		this.separatorChar = separatorChar;

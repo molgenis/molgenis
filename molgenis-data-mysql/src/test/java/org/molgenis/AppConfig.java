@@ -7,12 +7,10 @@ import javax.sql.DataSource;
 
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
-import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryDecoratorFactory;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.TagMetaData;
-import org.molgenis.data.meta.WritableMetaDataService;
-import org.molgenis.data.meta.MetaDataServiceDecoratorFactory;
 import org.molgenis.data.mysql.AsyncJdbcTemplate;
 import org.molgenis.data.mysql.EmbeddedMysqlDatabaseBuilder;
 import org.molgenis.data.mysql.MysqlRepository;
@@ -44,13 +42,11 @@ import org.springframework.util.IdGenerator;
 { "org.molgenis.data.mysql", "org.molgenis.data.importer" })
 public class AppConfig
 {
-	private MetaDataServiceImpl mysqlWritableMetaDataService;
 
 	@Bean
 	TagRepository tagRepository()
 	{
-		CrudRepository repo = (CrudRepository) mysqlRepositoryCollection().getRepositoryByEntityName(
-				TagMetaData.ENTITY_NAME);
+		CrudRepository repo = mysqlRepositoryCollection().getCrudRepository(TagMetaData.ENTITY_NAME);
 		return new TagRepository(repo, new IdGenerator()
 		{
 
@@ -75,8 +71,11 @@ public class AppConfig
 	}
 
 	@PostConstruct
-	public void login()
+	public void init()
 	{
+		metaDataService().setDefaultBackend(mysqlRepositoryCollection());
+
+		// Login
 		SecurityContextHolder.getContext().setAuthentication(
 				new TestingAuthenticationToken("admin", "admin", "ROLE_SYSTEM"));
 	}
@@ -113,33 +112,19 @@ public class AppConfig
 	}
 
 	@Bean
-	public WritableMetaDataService writableMetaDataService()
+	public MetaDataService metaDataService()
 	{
-		mysqlWritableMetaDataService = new MetaDataServiceImpl();
-		return writableMetaDataServiceDecorator().decorate(mysqlWritableMetaDataService);
-	}
+		MetaDataService metaDataService = new MetaDataServiceImpl(dataService());
+		((DataServiceImpl) dataService()).setMetaDataService(metaDataService);
 
-	@Bean
-	/**
-	 * non-decorating decorator, to be overrided if you wish to decorate the MetaDataRepositories
-	 */
-	MetaDataServiceDecoratorFactory writableMetaDataServiceDecorator()
-	{
-		return new MetaDataServiceDecoratorFactory()
-		{
-			@Override
-			public WritableMetaDataService decorate(WritableMetaDataService writableMetaDataService)
-			{
-				return writableMetaDataService;
-			}
-		};
+		return metaDataService;
 	}
 
 	@Bean
 	public MysqlRepositoryCollection mysqlRepositoryCollection()
 	{
 		MysqlRepositoryCollection mysqlRepositoryCollection = new MysqlRepositoryCollection(dataSource(),
-				dataService(), writableMetaDataService(), repositoryDecoratorFactory())
+				repositoryDecoratorFactory())
 
 		{
 			@Override
@@ -151,8 +136,6 @@ public class AppConfig
 			}
 		};
 
-		mysqlWritableMetaDataService.setManageableCrudRepositoryCollection(mysqlRepositoryCollection);
-
 		return mysqlRepositoryCollection;
 	}
 
@@ -162,14 +145,13 @@ public class AppConfig
 		return new MolgenisPluginRegistryImpl();
 	}
 
-	// temporary workaround for module dependencies
 	@Bean
 	public RepositoryDecoratorFactory repositoryDecoratorFactory()
 	{
 		return new RepositoryDecoratorFactory()
 		{
 			@Override
-			public Repository createDecoratedRepository(Repository repository)
+			public CrudRepository createDecoratedRepository(CrudRepository repository)
 			{
 				return repository;
 			}

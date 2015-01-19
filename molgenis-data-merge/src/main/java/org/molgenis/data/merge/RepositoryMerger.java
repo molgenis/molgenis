@@ -1,26 +1,25 @@
 package org.molgenis.data.merge;
 
-import org.molgenis.MolgenisFieldTypes;
-
-import org.molgenis.data.CrudRepository;
-import org.molgenis.data.Repository;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.Query;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.AbstractEntity;
-import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.support.QueryImpl;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+
+import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.CrudRepository;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
+import org.molgenis.data.support.AbstractEntity;
+import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.QueryImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Created by charbonb on 01/09/14.
@@ -30,7 +29,7 @@ public class RepositoryMerger
 {
 
 	private final static String ID = "ID";
-	private DataService dataService;
+	private final DataService dataService;
 	private String idField;
 
 	@Autowired
@@ -79,8 +78,7 @@ public class RepositoryMerger
 	{
 		this.idField = idField;
 		dataService.addRepository(mergedRepository);
-		mergeData(repositoryList, (CrudRepository) dataService.getRepositoryByEntityName(mergedRepository.getName()),
-				commonAttributes, batchSize);
+		mergeData(repositoryList, dataService.getRepository(mergedRepository.getName()), commonAttributes, batchSize);
 
 		return mergedRepository;
 	}
@@ -178,7 +176,7 @@ public class RepositoryMerger
 					entity.get(attributeMetaData.getName()));
 		}
 
-		Entity result = (Entity) crudRepository.findOne(findMergedEntityQuery);
+		Entity result = crudRepository.findOne(findMergedEntityQuery);
 		return result;
 	}
 
@@ -245,9 +243,9 @@ public class RepositoryMerger
 		for (AttributeMetaData originalRepositorySubAttributeMetaData : originalRepositoryAttributeMetaData
 				.getAttributeParts())
 		{
-			DefaultAttributeMetaData subAttributePartMetaData = copyAndRename(originalRepositorySubAttributeMetaData, getMergedAttributeName(
-					repository, originalRepositorySubAttributeMetaData.getName()),
-                    getMergedAttributeLabel(repository, originalRepositoryAttributeMetaData.getLabel()));
+			DefaultAttributeMetaData subAttributePartMetaData = copyAndRename(originalRepositorySubAttributeMetaData,
+					getMergedAttributeName(repository, originalRepositorySubAttributeMetaData.getName()),
+					getMergedAttributeLabel(repository, originalRepositoryAttributeMetaData.getLabel()));
 			subAttributePartMetaData.setLabel(getMergedAttributeLabel(repository,
 					originalRepositorySubAttributeMetaData.getLabel()));
 			if (subAttributePartMetaData.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))

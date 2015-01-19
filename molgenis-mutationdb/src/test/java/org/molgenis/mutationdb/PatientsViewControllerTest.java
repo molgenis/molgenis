@@ -16,10 +16,10 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
@@ -88,13 +88,14 @@ public class PatientsViewControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void refreshReturnTrue() throws Exception
 	{
-		MysqlRepository patientsViewRepo = mock(MysqlRepository.class);
+		CrudRepository patientsViewRepo = mock(CrudRepository.class);
 
 		when(dataService.hasRepository(PatientsViewController.ENTITYNAME_PATIENTSVIEW)).thenReturn(true);
 		doNothing().when(mysqlViewService).truncate(PatientsViewController.ENTITYNAME_PATIENTSVIEW);
-		doNothing().when(mysqlViewService).populateWithQuery(ResourceUtils.getString(getClass(), PatientsViewController.PATH_TO_INSERT_QUERY));
-		when(dataService.getRepositoryByEntityName(PatientsViewController.ENTITYNAME_PATIENTSVIEW)).thenReturn(
-				patientsViewRepo).getMock();
+		doNothing().when(mysqlViewService).populateWithQuery(
+				ResourceUtils.getString(getClass(), PatientsViewController.PATH_TO_INSERT_QUERY));
+		when(dataService.getRepository(PatientsViewController.ENTITYNAME_PATIENTSVIEW)).thenReturn(patientsViewRepo)
+				.getMock();
 
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
 		when(patientsViewRepo.getEntityMetaData()).thenReturn(entityMetaData);
@@ -118,8 +119,8 @@ public class PatientsViewControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void create() throws Exception
 	{
-		MysqlRepository patientsViewRepo = mock(MysqlRepository.class);
-		MysqlRepository patientsRepo = mock(MysqlRepository.class);
+		CrudRepository patientsViewRepo = mock(CrudRepository.class);
+		CrudRepository patientsRepo = mock(CrudRepository.class);
 
 		Entity entity = mock(Entity.class);
 		when(entity.getString(PatientsViewController.PATIENT_ID)).thenReturn("P1");
@@ -137,11 +138,9 @@ public class PatientsViewControllerTest extends AbstractTestNGSpringContextTests
 				this.mysqlViewService.createRowByMergingValuesIfEquales(PatientsViewController.HEADERS_NAMES,
 						valuesPerHeader)).thenReturn(new Row());
 
-		when((MysqlRepository) dataService.getRepositoryByEntityName(PatientsViewController.ENTITYNAME_PATIENTSVIEW))
-				.thenReturn(patientsViewRepo);
+		when(dataService.getRepository(PatientsViewController.ENTITYNAME_PATIENTSVIEW)).thenReturn(patientsViewRepo);
 
-		when((MysqlRepository) dataService.getRepositoryByEntityName(PatientsViewController.ENTITYNAME_PATIENTS))
-				.thenReturn(patientsRepo);
+		when(dataService.getRepository(PatientsViewController.ENTITYNAME_PATIENTS)).thenReturn(patientsRepo);
 
 		when(dataService.hasRepository(PatientsViewController.ENTITYNAME_PATIENTS)).thenReturn(true);
 		when(dataService.hasRepository(PatientsViewController.ENTITYNAME_PATIENTSVIEW)).thenReturn(true);

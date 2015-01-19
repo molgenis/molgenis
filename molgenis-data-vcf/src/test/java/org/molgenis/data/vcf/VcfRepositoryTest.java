@@ -47,7 +47,7 @@ public class VcfRepositoryTest
 		try
 		{
 			RepositoryCollection collection = new VcfRepositoryCollection(testdata);
-			vcfRepository = (VcfRepository) collection.getRepositoryByEntityName("testdata");
+			vcfRepository = (VcfRepository) collection.getRepository("testdata");
 
 			assertEquals(vcfRepository.getName(), "testdata");
 			Iterator<AttributeMetaData> it = vcfRepository.getEntityMetaData().getAttributes().iterator();
@@ -90,7 +90,7 @@ public class VcfRepositoryTest
 		try
 		{
 			RepositoryCollection collection = new VcfRepositoryCollection(testdata);
-			vcfRepository = (VcfRepository) collection.getRepositoryByEntityName("testdata");
+			vcfRepository = (VcfRepository) collection.getRepository("testdata");
 			Iterator<Entity> it = vcfRepository.iterator();
 
 			assertTrue(it.hasNext());
@@ -142,7 +142,7 @@ public class VcfRepositoryTest
 	public void iterator_noValues() throws IOException, InvalidFormatException
 	{
 		RepositoryCollection collection = new VcfRepositoryCollection(testnodata);
-		VcfRepository vcfRepository = (VcfRepository) collection.getRepositoryByEntityName("testnodata");
+		VcfRepository vcfRepository = (VcfRepository) collection.getRepository("testnodata");
 		try
 		{
 			Iterator<Entity> it = vcfRepository.iterator();

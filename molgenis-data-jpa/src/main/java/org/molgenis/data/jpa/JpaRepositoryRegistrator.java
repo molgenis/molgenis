@@ -1,13 +1,13 @@
 package org.molgenis.data.jpa;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.molgenis.data.CrudRepository;
+import org.molgenis.data.CrudRepositoryCollection;
 import org.molgenis.data.DataService;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.jpa.importer.JpaImportService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationListener;
@@ -24,14 +24,14 @@ public class JpaRepositoryRegistrator implements ApplicationListener<ContextRefr
 	private static final Logger LOG = LoggerFactory.getLogger(JpaRepositoryRegistrator.class);
 
 	private final DataService dataService;
-	private final RepositoryCollection repositoryCollection;
+	private final CrudRepositoryCollection repositoryCollection;
 	private final RepositoryDecoratorFactory repositoryDecoratorFactory;
 	private final JpaImportService jpaImportService;
 	private final ImportServiceFactory importServiceFactory;
 
 	@Autowired
 	public JpaRepositoryRegistrator(DataService dataService,
-			@Qualifier("JpaRepositoryCollection") RepositoryCollection repositoryCollection,
+			@Qualifier("JpaRepositoryCollection") CrudRepositoryCollection repositoryCollection,
 			RepositoryDecoratorFactory repositoryDecoratorFactory, JpaImportService jpaImportService,
 			ImportServiceFactory importServiceFactory)
 	{
@@ -49,7 +49,7 @@ public class JpaRepositoryRegistrator implements ApplicationListener<ContextRefr
 		for (String name : repositoryCollection.getEntityNames())
 		{
 			LOG.debug("Registering JPA repository [" + name + "]");
-			Repository repository = repositoryCollection.getRepositoryByEntityName(name);
+			CrudRepository repository = repositoryCollection.getCrudRepository(name);
 
 			// apply repository decorators (e.g. security, indexing, validation)
 			dataService.addRepository(repositoryDecoratorFactory.createDecoratedRepository(repository));

@@ -1,11 +1,17 @@
 package org.molgenis.security.user;
 
+import java.io.IOException;
+import java.util.Iterator;
+
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.UserAuthority;
+import org.molgenis.data.AggregateQuery;
+import org.molgenis.data.AggregateResult;
 import org.molgenis.data.CrudRepository;
-import org.molgenis.data.CrudRepositoryDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.util.ApplicationContextProvider;
@@ -16,21 +22,23 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 
-public class MolgenisUserDecorator extends CrudRepositoryDecorator
+public class MolgenisUserDecorator implements CrudRepository
 {
+	private final CrudRepository decoratedRepository;
+
 	public MolgenisUserDecorator(CrudRepository decoratedRepository)
 	{
-		super(decoratedRepository);
+		this.decoratedRepository = decoratedRepository;
 	}
 
 	@Override
 	public void add(Entity entity)
 	{
 		encodePassword(entity);
-		super.add(entity);
+		decoratedRepository.add(entity);
 
 		// id is only guaranteed to be generated at flush time
-		super.flush();
+		decoratedRepository.flush();
 		addSuperuserAuthority(entity);
 	}
 
@@ -38,17 +46,17 @@ public class MolgenisUserDecorator extends CrudRepositoryDecorator
 	public void update(Entity entity)
 	{
 		updatePassword(entity);
-		super.update(entity);
+		decoratedRepository.update(entity);
 
 		// id is only guaranteed to be generated at flush time
-		super.flush();
+		decoratedRepository.flush();
 		updateSuperuserAuthority(entity);
 	}
 
 	@Override
 	public Integer add(Iterable<? extends Entity> entities)
 	{
-		Integer nr = super.add(Iterables.transform(entities, new Function<Entity, Entity>()
+		Integer nr = decoratedRepository.add(Iterables.transform(entities, new Function<Entity, Entity>()
 		{
 			@Override
 			public Entity apply(Entity entity)
@@ -59,7 +67,7 @@ public class MolgenisUserDecorator extends CrudRepositoryDecorator
 		}));
 
 		// id is only guaranteed to be generated at flush time
-		super.flush();
+		decoratedRepository.flush();
 		addSuperuserAuthorities(entities);
 
 		return nr;
@@ -68,7 +76,7 @@ public class MolgenisUserDecorator extends CrudRepositoryDecorator
 	@Override
 	public void update(Iterable<? extends Entity> entities)
 	{
-		super.update(Iterables.transform(entities, new Function<Entity, Entity>()
+		decoratedRepository.update(Iterables.transform(entities, new Function<Entity, Entity>()
 		{
 			@Override
 			public Entity apply(Entity entity)
@@ -79,7 +87,7 @@ public class MolgenisUserDecorator extends CrudRepositoryDecorator
 		}));
 
 		// id is only guaranteed to be generated at flush time
-		super.flush();
+		decoratedRepository.flush();
 		updateSuperuserAuthorities(entities);
 	}
 
@@ -193,12 +201,158 @@ public class MolgenisUserDecorator extends CrudRepositoryDecorator
 		{
 			throw new RuntimeException(new ApplicationContextException("missing required DataService bean"));
 		}
-		CrudRepository userAuthorityRepository = dataService.getCrudRepository(UserAuthority.class.getSimpleName());
+		CrudRepository userAuthorityRepository = dataService.getRepository(UserAuthority.class.getSimpleName());
 		if (userAuthorityRepository == null)
 		{
 			throw new RuntimeException("missing required UserAuthority repository");
 		}
 		return userAuthorityRepository;
+	}
+
+	@Override
+	public String getName()
+	{
+		return decoratedRepository.getName();
+	}
+
+	@Override
+	public EntityMetaData getEntityMetaData()
+	{
+		return decoratedRepository.getEntityMetaData();
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
+	{
+		return decoratedRepository.iterator(clazz);
+	}
+
+	@Override
+	public Iterator<Entity> iterator()
+	{
+		return decoratedRepository.iterator();
+	}
+
+	@Override
+	public void close() throws IOException
+	{
+		decoratedRepository.close();
+	}
+
+	@Override
+	public void flush()
+	{
+		decoratedRepository.flush();
+	}
+
+	@Override
+	public void clearCache()
+	{
+		decoratedRepository.clearCache();
+	}
+
+	@Override
+	public long count()
+	{
+		return decoratedRepository.count();
+	}
+
+	@Override
+	public Query query()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public long count(Query q)
+	{
+		return decoratedRepository.count(q);
+	}
+
+	@Override
+	public Iterable<Entity> findAll(Query q)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz)
+	{
+		return decoratedRepository.findAll(q, clazz);
+	}
+
+	@Override
+	public Entity findOne(Query q)
+	{
+		return decoratedRepository.findOne(q);
+	}
+
+	@Override
+	public Entity findOne(Object id)
+	{
+		return decoratedRepository.findOne(id);
+	}
+
+	@Override
+	public Iterable<Entity> findAll(Iterable<Object> ids)
+	{
+		return decoratedRepository.findAll(ids);
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> findAll(Iterable<Object> ids, Class<E> clazz)
+	{
+		return decoratedRepository.findAll(ids, clazz);
+	}
+
+	@Override
+	public <E extends Entity> E findOne(Object id, Class<E> clazz)
+	{
+		return decoratedRepository.findOne(id, clazz);
+	}
+
+	@Override
+	public <E extends Entity> E findOne(Query q, Class<E> clazz)
+	{
+		return decoratedRepository.findOne(q, clazz);
+	}
+
+	@Override
+	public void delete(Entity entity)
+	{
+		decoratedRepository.delete(entity);
+	}
+
+	@Override
+	public void delete(Iterable<? extends Entity> entities)
+	{
+		decoratedRepository.delete(entities);
+	}
+
+	@Override
+	public void deleteById(Object id)
+	{
+		decoratedRepository.deleteById(id);
+	}
+
+	@Override
+	public void deleteById(Iterable<Object> ids)
+	{
+		decoratedRepository.deleteById(ids);
+	}
+
+	@Override
+	public void deleteAll()
+	{
+		decoratedRepository.deleteAll();
+	}
+
+	@Override
+	public AggregateResult aggregate(AggregateQuery aggregateQuery)
+	{
+		return decoratedRepository.aggregate(aggregateQuery);
 	}
 
 }

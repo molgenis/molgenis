@@ -1,49 +1,48 @@
 package org.molgenis.data.elasticsearch.meta;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataService;
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.ManageableCrudRepositoryCollection;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Package;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.meta.WritableMetaDataService;
+import org.molgenis.data.meta.MetaDataService;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Meta data repository for attributes that wraps an existing repository
  */
-public class IndexingWritableMetaDataServiceDecorator implements WritableMetaDataService
+public class IndexingWritableMetaDataServiceDecorator implements MetaDataService
 {
-	private final WritableMetaDataService delegate;
-	private final DataService dataService;
+	private final MetaDataService delegate;
 	private final SearchService elasticSearchService;
 
-	public IndexingWritableMetaDataServiceDecorator(WritableMetaDataService delegate, DataService dataService,
-			SearchService elasticSearchService)
+	public IndexingWritableMetaDataServiceDecorator(MetaDataService delegate, SearchService elasticSearchService)
 	{
 		if (delegate == null) throw new IllegalArgumentException("metaDataRepositories is null");
-		if (dataService == null) throw new IllegalArgumentException("dataService is null");
 		if (elasticSearchService == null) throw new IllegalArgumentException("elasticSearchService is null");
 		this.delegate = delegate;
-		this.dataService = dataService;
 		this.elasticSearchService = elasticSearchService;
 	}
 
 	@Override
 	@Transactional
-	public void addAttributeMetaData(String entityName, AttributeMetaData attribute)
+	public void addAttribute(String entityName, AttributeMetaData attribute)
 	{
-		delegate.addAttributeMetaData(entityName, attribute);
+		delegate.addAttribute(entityName, attribute);
 		updateMappings(entityName);
 	}
 
 	@Override
 	@Transactional
-	public void removeAttributeMetaData(String entityName, String attributeName)
+	public void deleteAttribute(String entityName, String attributeName)
 	{
-		delegate.removeAttributeMetaData(entityName, attributeName);
+		delegate.deleteAttribute(entityName, attributeName);
 		updateMappings(entityName);
 	}
 
@@ -51,7 +50,7 @@ public class IndexingWritableMetaDataServiceDecorator implements WritableMetaDat
 	{
 		try
 		{
-			elasticSearchService.createMappings(dataService.getEntityMetaData(entityName));
+			elasticSearchService.createMappings(delegate.getEntityMetaData(entityName));
 		}
 		catch (IOException e)
 		{
@@ -61,9 +60,9 @@ public class IndexingWritableMetaDataServiceDecorator implements WritableMetaDat
 
 	@Override
 	@Transactional
-	public void addEntityMetaData(EntityMetaData entityMetaData)
+	public CrudRepository addEntityMeta(EntityMetaData entityMetaData)
 	{
-		delegate.addEntityMetaData(entityMetaData);
+		CrudRepository repo = delegate.addEntityMeta(entityMetaData);
 
 		try
 		{
@@ -73,6 +72,8 @@ public class IndexingWritableMetaDataServiceDecorator implements WritableMetaDat
 		{
 			throw new MolgenisDataException(e);
 		}
+
+		return repo;
 	}
 
 	@Override
@@ -82,9 +83,9 @@ public class IndexingWritableMetaDataServiceDecorator implements WritableMetaDat
 	}
 
 	@Override
-	public void removeEntityMetaData(String name)
+	public void deleteEntityMeta(String name)
 	{
-		delegate.removeEntityMetaData(name);
+		delegate.deleteEntityMeta(name);
 		elasticSearchService.delete(name);
 	}
 
@@ -116,6 +117,51 @@ public class IndexingWritableMetaDataServiceDecorator implements WritableMetaDat
 	public void refreshCaches()
 	{
 		delegate.refreshCaches();
+	}
+
+	@Override
+	public List<AttributeMetaData> updateEntityMeta(EntityMetaData entityMeta)
+	{
+		List<AttributeMetaData> attributes = delegate.updateEntityMeta(entityMeta);
+		updateMappings(entityMeta.getName());
+
+		return attributes;
+	}
+
+	@Override
+	public void setDefaultBackend(ManageableCrudRepositoryCollection backend)
+	{
+		delegate.setDefaultBackend(backend);
+	}
+
+	@Override
+	public List<AttributeMetaData> updateSync(EntityMetaData sourceEntityMetaData)
+	{
+		return delegate.updateSync(sourceEntityMetaData);
+	}
+
+	@Override
+	public ManageableCrudRepositoryCollection getDefaultBackend()
+	{
+		return delegate.getDefaultBackend();
+	}
+
+	@Override
+	public void onApplicationEvent(ContextRefreshedEvent event)
+	{
+		delegate.onApplicationEvent(event);
+	}
+
+	@Override
+	public int getOrder()
+	{
+		return delegate.getOrder();
+	}
+
+	@Override
+	public void addAttributeSync(String entityName, AttributeMetaData attribute)
+	{
+		delegate.addAttributeSync(entityName, attribute);
 	}
 
 }

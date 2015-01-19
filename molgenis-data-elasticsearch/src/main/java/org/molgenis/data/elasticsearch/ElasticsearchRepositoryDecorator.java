@@ -1,16 +1,11 @@
 package org.molgenis.data.elasticsearch;
 
-import java.io.IOException;
-
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IndexedCrudRepository;
 import org.molgenis.data.Manageable;
 import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Repository;
-import org.molgenis.data.Updateable;
-import org.molgenis.data.Writable;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -18,11 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
  */
 public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepository implements IndexedCrudRepository
 {
-	public static final String BASE_URL = "elasticsearch://";
+	private final CrudRepository repository;
 
-	private final Repository repository;
-
-	public ElasticsearchRepositoryDecorator(Repository repository, SearchService elasticSearchService)
+	public ElasticsearchRepositoryDecorator(CrudRepository repository, SearchService elasticSearchService)
 	{
 		super(elasticSearchService);
 		if (repository == null) throw new IllegalArgumentException("repository is null");
@@ -39,12 +32,7 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	@Transactional
 	public void add(Entity entity)
 	{
-		if (!(repository instanceof Writable))
-		{
-			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Writable");
-		}
-		((Writable) repository).add(entity);
-
+		repository.add(entity);
 		super.add(entity);
 	}
 
@@ -52,37 +40,23 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	@Transactional
 	public Integer add(Iterable<? extends Entity> entities)
 	{
-		if (!(repository instanceof Writable))
-		{
-			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Writable");
-		}
-		Integer count = ((Writable) repository).add(entities);
-
+		Integer count = repository.add(entities);
 		super.add(entities);
+
 		return count;
 	}
 
 	@Override
 	public void flush()
 	{
-		if (!(repository instanceof Writable))
-		{
-			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Updateable");
-		}
-		((Writable) repository).flush();
-
+		repository.flush();
 		super.flush();
 	}
 
 	@Override
 	public void clearCache()
 	{
-		if (!(repository instanceof Writable))
-		{
-			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Updateable");
-		}
-		((Writable) repository).clearCache();
-
+		repository.clearCache();
 		super.clearCache();
 	}
 
@@ -90,12 +64,7 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	@Transactional
 	public void update(Entity entity)
 	{
-		if (!(repository instanceof Updateable))
-		{
-			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Updateable");
-		}
-		((Updateable) repository).update(entity);
-
+		repository.update(entity);
 		super.update(entity);
 	}
 
@@ -103,12 +72,7 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	@Transactional
 	public void update(Iterable<? extends Entity> entities)
 	{
-		if (!(repository instanceof Updateable))
-		{
-			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Updateable");
-		}
-		((Updateable) repository).update(entities);
-
+		repository.update(entities);
 		super.update(entities);
 	}
 
@@ -116,12 +80,7 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	@Transactional
 	public void delete(Entity entity)
 	{
-		if (!(repository instanceof Updateable))
-		{
-			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Updateable");
-		}
-		((Updateable) repository).delete(entity);
-
+		repository.delete(entity);
 		super.delete(entity);
 	}
 
@@ -129,12 +88,7 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	@Transactional
 	public void delete(Iterable<? extends Entity> entities)
 	{
-		if (!(repository instanceof Updateable))
-		{
-			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Updateable");
-		}
-		((Updateable) repository).delete(entities);
-
+		repository.delete(entities);
 		super.delete(entities);
 	}
 
@@ -142,12 +96,7 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	@Transactional
 	public void deleteById(Object id)
 	{
-		if (!(repository instanceof Updateable))
-		{
-			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Updateable");
-		}
-		((Updateable) repository).deleteById(id);
-
+		repository.deleteById(id);
 		super.deleteById(id);
 	}
 
@@ -155,12 +104,7 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	@Transactional
 	public void deleteById(Iterable<Object> ids)
 	{
-		if (!(repository instanceof Updateable))
-		{
-			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Updateable");
-		}
-		((Updateable) repository).deleteById(ids);
-
+		repository.deleteById(ids);
 		super.deleteById(ids);
 	}
 
@@ -168,12 +112,7 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	@Transactional
 	public void deleteAll()
 	{
-		if (!(repository instanceof Updateable))
-		{
-			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Updateable");
-		}
-		((Updateable) repository).deleteAll();
-
+		repository.deleteAll();
 		super.deleteAll();
 	}
 
@@ -181,19 +120,6 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	public void rebuildIndex()
 	{
 		elasticSearchService.rebuildIndex(repository, getEntityMetaData());
-	}
-
-	@Override
-	public void create()
-	{
-		try
-		{
-			elasticSearchService.createMappings(getEntityMetaData());
-		}
-		catch (IOException e)
-		{
-			throw new MolgenisDataException(e);
-		}
 	}
 
 	@Override

@@ -46,6 +46,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -55,11 +56,10 @@ import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
-import org.molgenis.data.Queryable;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.meta.WritableMetaDataService;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.rsql.MolgenisRSQL;
 import org.molgenis.data.support.DefaultEntityCollection;
 import org.molgenis.data.support.MapEntity;
@@ -133,7 +133,7 @@ public class RestController
 	public static final String BASE_URI = "/api/v1";
 	private static final Pattern PATTERN_EXPANDS = Pattern.compile("([^\\[^\\]]+)(?:\\[(.+)\\])?");
 	private final DataService dataService;
-	private final WritableMetaDataService metaDataService;
+	private final MetaDataService metaDataService;
 	private final TokenService tokenService;
 	private final AuthenticationManager authenticationManager;
 	private final String ENTITY_FORM_MODEL_ATTRIBUTE = "form";
@@ -142,7 +142,7 @@ public class RestController
 	private final ResourceFingerprintRegistry resourceFingerprintRegistry;
 
 	@Autowired
-	public RestController(DataService dataService, WritableMetaDataService metaDataService, TokenService tokenService,
+	public RestController(DataService dataService, MetaDataService metaDataService, TokenService tokenService,
 			AuthenticationManager authenticationManager, MolgenisPermissionService molgenisPermissionService,
 			MolgenisRSQL molgenisRSQL, ResourceFingerprintRegistry resourceFingerprintRegistry)
 	{
@@ -172,7 +172,7 @@ public class RestController
 	{
 		try
 		{
-			dataService.getRepositoryByEntityName(entityName);
+			dataService.getRepository(entityName);
 			return true;
 		}
 		catch (UnknownEntityException e)
@@ -677,8 +677,8 @@ public class RestController
 	public void updateFromFormPost(@PathVariable("entityName") String entityName, @PathVariable("id") Object id,
 			HttpServletRequest request)
 	{
-		Object typedId = dataService.getRepositoryByEntityName(entityName).getEntityMetaData().getIdAttribute()
-				.getDataType().convert(id);
+		Object typedId = dataService.getRepository(entityName).getEntityMetaData().getIdAttribute().getDataType()
+				.convert(id);
 
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		for (String param : request.getParameterMap().keySet())
@@ -700,8 +700,8 @@ public class RestController
 	@ResponseStatus(NO_CONTENT)
 	public void delete(@PathVariable("entityName") String entityName, @PathVariable Object id)
 	{
-		Object typedId = dataService.getRepositoryByEntityName(entityName).getEntityMetaData().getIdAttribute()
-				.getDataType().convert(id);
+		Object typedId = dataService.getRepository(entityName).getEntityMetaData().getIdAttribute().getDataType()
+				.convert(id);
 		dataService.delete(entityName, typedId);
 	}
 
@@ -781,17 +781,14 @@ public class RestController
 
 	private void deleteMetaInternal(String entityName)
 	{
-		dataService.drop(entityName);
-		dataService.removeRepository(entityName);
-		metaDataService.removeEntityMetaData(entityName);
-		metaDataService.refreshCaches();
+		dataService.getMeta().deleteEntityMeta(entityName);
 	}
 
 	@RequestMapping(value = "/{entityName}/create", method = GET)
 	public String createForm(@PathVariable("entityName") String entityName, Model model)
 	{
 
-		Repository repo = dataService.getRepositoryByEntityName(entityName);
+		Repository repo = dataService.getRepository(entityName);
 		Entity entity = null;
 		if (repo.getEntityMetaData().getEntityClass() != Entity.class) entity = BeanUtils.instantiateClass(repo
 				.getEntityMetaData().getEntityClass());
@@ -1167,15 +1164,14 @@ public class RestController
 			EntityCollectionRequest request, Set<String> attributesSet, Map<String, Set<String>> attributeExpandsSet)
 	{
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
-		Repository repository = dataService.getRepositoryByEntityName(entityName);
+		CrudRepository repository = dataService.getRepository(entityName);
 
-		// TODO non queryable
 		List<QueryRule> queryRules = request.getQ() == null ? Collections.<QueryRule> emptyList() : request.getQ();
 		Query q = new QueryImpl(queryRules).pageSize(request.getNum()).offset(request.getStart())
 				.sort(request.getSort());
 
 		Iterable<Entity> it = dataService.findAll(entityName, q);
-		Long count = ((Queryable) repository).count(q);
+		Long count = repository.count(q);
 		EntityPager pager = new EntityPager(request.getStart(), request.getNum(), count, it);
 
 		List<Map<String, Object>> entities = new ArrayList<Map<String, Object>>();

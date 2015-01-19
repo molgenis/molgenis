@@ -37,7 +37,7 @@ public class ElasticsearchIndexManagerServiceImpl implements ElasticsearchIndexM
 		List<EntityMetaData> indexedEntityMetaDataList = new ArrayList<EntityMetaData>();
 		for (String entityName : dataService.getEntityNames())
 		{
-			Repository repository = dataService.getRepositoryByEntityName(entityName);
+			Repository repository = dataService.getRepository(entityName);
 			if (repository instanceof IndexedRepository)
 			{
 				indexedEntityMetaDataList.add(repository.getEntityMetaData());
@@ -60,7 +60,7 @@ public class ElasticsearchIndexManagerServiceImpl implements ElasticsearchIndexM
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	public void rebuildIndex(String entityName)
 	{
-		Repository repository = dataService.getRepositoryByEntityName(entityName);
+		Repository repository = dataService.getRepository(entityName);
 		if (!(repository instanceof IndexedRepository))
 		{
 			throw new MolgenisDataAccessException("Repository [" + entityName + "] is not an indexed repository");

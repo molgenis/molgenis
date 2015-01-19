@@ -24,7 +24,7 @@ public class MysqlRepositoryCollectionTest extends AbstractTestNGSpringContextTe
 	public void test()
 	{
 		// delete old stuff
-		coll.dropEntityMetaData("coll_person");
+		coll.deleteEntityMeta("coll_person");
 
 		// create collection, add repo, destroy and reload
 		DefaultEntityMetaData personMD = new DefaultEntityMetaData("coll_person");
@@ -37,12 +37,12 @@ public class MysqlRepositoryCollectionTest extends AbstractTestNGSpringContextTe
 		personMD.addAttribute("active").setDataType(MolgenisFieldTypes.BOOL);
 
 		// autowired ds
-		coll.add(personMD);
+		coll.addEntityMeta(personMD);
 
 		// destroy and rebuild
-		Assert.assertNotNull(coll.getRepositoryByEntityName("coll_person"));
+		Assert.assertNotNull(coll.getRepository("coll_person"));
 
-		CrudRepository repo = (CrudRepository) coll.getRepositoryByEntityName("coll_person");
+		CrudRepository repo = (CrudRepository) coll.getRepository("coll_person");
 		String[] locale = Locale.getISOCountries();
 		for (int i = 0; i < 10; i++)
 		{
@@ -56,7 +56,7 @@ public class MysqlRepositoryCollectionTest extends AbstractTestNGSpringContextTe
 		}
 
 		// and again
-		repo = (CrudRepository) coll.getRepositoryByEntityName("coll_person");
+		repo = (CrudRepository) coll.getRepository("coll_person");
 		Assert.assertEquals(repo.count(), 10);
 	}
 }

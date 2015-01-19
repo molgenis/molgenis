@@ -312,13 +312,6 @@ public class ElasticsearchRepositoryDecoratorTest
 		assertEquals(elasticSearchRepository.getName(), repositoryEntityMetaData.getName());
 	}
 
-	@Test
-	public void getUrl()
-	{
-		when(repositoryEntityMetaData.getName()).thenReturn("entity");
-		assertEquals(elasticSearchRepository.getUrl(), "elasticsearch://entity/");
-	}
-
 	// FIXME
 	// @Test
 	// public void iteratorClassE()

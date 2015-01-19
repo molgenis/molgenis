@@ -47,7 +47,7 @@ public abstract class MysqlRepositoryAbstractDatatypeTest extends AbstractTestNG
 		coll.drop(getMetaData());
 
 		// test create table
-		MysqlRepository repo = (MysqlRepository) coll.add(getMetaData());
+		MysqlRepository repo = (MysqlRepository) coll.addEntityMeta(getMetaData());
 		Assert.assertEquals(repo.getCreateSql(), createSql());
 
 		// verify default value

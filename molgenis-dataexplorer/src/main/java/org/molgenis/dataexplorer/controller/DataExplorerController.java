@@ -26,7 +26,6 @@ import javax.validation.Valid;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.AggregateResult;
-import org.molgenis.data.Aggregateable;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
@@ -275,12 +274,6 @@ public class DataExplorerController extends MolgenisPluginController
 				DEFAULT_VAL_MOD_DISEASEMATCHER);
 
 		String modEntitiesReportName = parseEntitiesReportRuntimeProperty(entityName);
-
-		if (modAggregates)
-		{
-			// Check if the repository is aggregateable
-			modAggregates = dataService.getRepositoryByEntityName(entityName) instanceof Aggregateable;
-		}
 
 		// set data explorer permission
 		Permission pluginPermission = null;
@@ -578,7 +571,7 @@ public class DataExplorerController extends MolgenisPluginController
 	public String viewEntityDetails(@RequestParam(value = "entityName") String entityName,
 			@RequestParam(value = "entityId") String entityId, Model model) throws Exception
 	{
-		model.addAttribute("entity", dataService.getQueryableRepository(entityName).findOne(entityId));
+		model.addAttribute("entity", dataService.getRepository(entityName).findOne(entityId));
 		model.addAttribute("entityMetadata", dataService.getEntityMetaData(entityName));
 		model.addAttribute("viewName", getViewName(entityName));
 		return "view-entityreport";
@@ -611,8 +604,7 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/settings", method = RequestMethod.GET)
-	public @ResponseBody
-	Map<String, String> getSettings(@RequestParam(required = false) String keyStartsWith)
+	public @ResponseBody Map<String, String> getSettings(@RequestParam(required = false) String keyStartsWith)
 	{
 		if (keyStartsWith == null)
 		{

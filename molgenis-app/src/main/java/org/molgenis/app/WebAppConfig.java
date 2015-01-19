@@ -5,7 +5,9 @@ import java.util.Map;
 
 import org.molgenis.DatabaseConfig;
 import org.molgenis.data.DataService;
+import org.molgenis.data.ManageableCrudRepositoryCollection;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
+import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.system.RepositoryTemplateLoader;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
 import org.molgenis.security.user.MolgenisUserService;
@@ -33,10 +35,21 @@ public class WebAppConfig extends MolgenisWebAppConfig
 {
 	@Autowired
 	private DataService dataService;
+
 	@Autowired
 	private MolgenisUserService molgenisUserService;
+
 	@Autowired
 	private FreemarkerTemplateRepository freemarkerTemplateRepository;
+
+	@Autowired
+	private MysqlRepositoryCollection mysqlRepositoryCollection;
+
+	@Override
+	public ManageableCrudRepositoryCollection getBackend()
+	{
+		return mysqlRepositoryCollection;
+	}
 
 	@Override
 	protected void addFreemarkerVariables(Map<String, Object> freemarkerVariables)

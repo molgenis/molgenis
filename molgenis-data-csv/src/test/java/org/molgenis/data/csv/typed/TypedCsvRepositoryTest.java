@@ -48,8 +48,8 @@ public class TypedCsvRepositoryTest
 		File csvFile = new File(FileUtils.getTempDirectory(), "testdata.csv");
 		FileCopyUtils.copy(in, new FileOutputStream(csvFile));
 
-		TypedCsvRepository<TestEntity> repo = new TypedCsvRepository<TestEntity>("csv://test", csvFile,
-				ENTITY_META_DATA, ',', 1, new TestEntityLineMapper());
+		TypedCsvRepository<TestEntity> repo = new TypedCsvRepository<TestEntity>(csvFile, ENTITY_META_DATA, ',', 1,
+				new TestEntityLineMapper());
 
 		assertEquals(Iterables.size(repo), 5);
 

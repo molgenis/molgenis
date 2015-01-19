@@ -51,12 +51,6 @@ public class CrudRepositorySecurityDecorator implements CrudRepository
 	}
 
 	@Override
-	public String getUrl()
-	{
-		return decoratedRepository.getUrl();
-	}
-
-	@Override
 	public Query query()
 	{
 		return new QueryImpl(this);

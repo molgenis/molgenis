@@ -11,25 +11,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.annotation.PostConstruct;
+
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.CrudRepositorySecurityDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IndexedCrudRepository;
 import org.molgenis.data.IndexedCrudRepositorySecurityDecorator;
+import org.molgenis.data.ManageableCrudRepositoryCollection;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.elasticsearch.ElasticsearchRepositoryDecorator;
 import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.elasticsearch.meta.IndexingWritableMetaDataServiceDecorator;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
-import org.molgenis.data.meta.PackageMetaData;
-import org.molgenis.data.meta.WritableMetaDataService;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceDecoratorFactory;
+import org.molgenis.data.meta.MetaDataServiceImpl;
+import org.molgenis.data.meta.PackageMetaData;
+import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.IndexedRepositoryValidationDecorator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
@@ -95,11 +100,11 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Autowired
 	private WebAppDatabasePopulatorService webAppDatabasePopulatorService;
 
-	// temporary workaround for module dependencies
 	@Autowired
-	private DataService dataService;
+	public SearchService searchService;
+
 	@Autowired
-	private SearchService elasticSearchService;
+	public EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory;
 
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry)
@@ -345,18 +350,40 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		return new CorsInterceptor();
 	}
 
-	// temporary workaround for module dependencies
+	protected abstract ManageableCrudRepositoryCollection getBackend();
+
+	@PostConstruct
+	public void initRepositories()
+	{
+		metaDataService().setDefaultBackend(getBackend());
+	}
 
 	@Bean
-	MetaDataServiceDecoratorFactory writableMetaDataServiceDecorator()
+	public DataService dataService()
+	{
+		return new DataServiceImpl();
+	}
+
+	@Bean
+	public MetaDataService metaDataService()
+	{
+		DataService dataService = dataService();
+		MetaDataService metaDataService = metaDataServiceDecoratorFactory().decorate(
+				new MetaDataServiceImpl(dataService));
+		((DataServiceImpl) dataService).setMetaDataService(metaDataService);
+
+		return metaDataService;
+	}
+
+	@Bean
+	protected MetaDataServiceDecoratorFactory metaDataServiceDecoratorFactory()
 	{
 		return new MetaDataServiceDecoratorFactory()
 		{
 			@Override
-			public WritableMetaDataService decorate(WritableMetaDataService metaDataRepositories)
+			public MetaDataService decorate(MetaDataService metaDataService)
 			{
-				return new IndexingWritableMetaDataServiceDecorator(metaDataRepositories, dataService,
-						elasticSearchService);
+				return new IndexingWritableMetaDataServiceDecorator(metaDataService, searchService);
 			}
 		};
 	}
@@ -367,7 +394,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		return new RepositoryDecoratorFactory()
 		{
 			@Override
-			public Repository createDecoratedRepository(Repository repository)
+			public CrudRepository createDecoratedRepository(CrudRepository repository)
 			{
 				// do not index an indexed repository
 				if (repository instanceof IndexedCrudRepository)
@@ -376,7 +403,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 					// 2. validation decorator
 					// 3. indexed repository
 					return new IndexedCrudRepositorySecurityDecorator(new IndexedRepositoryValidationDecorator(
-							dataService, (IndexedCrudRepository) repository, new EntityAttributesValidator()),
+							dataService(), (IndexedCrudRepository) repository, new EntityAttributesValidator()),
 							molgenisSettings);
 				}
 				else
@@ -388,16 +415,16 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 						// Do not index RuntimeProperty, because lucene term has a max of 32766 bytes and the content of
 						// a RuntimeProperty can exceed this (for example the menu structure in JSON and the static
 						// plugin contents are stored in a RuntimeProperty)
-						return new CrudRepositorySecurityDecorator(new RepositoryValidationDecorator(dataService,
-								(CrudRepository) repository, new EntityAttributesValidator()));
+						return new CrudRepositorySecurityDecorator(new RepositoryValidationDecorator(dataService(),
+								repository, new EntityAttributesValidator()));
 					}
 
 					// create indexing meta data if meta data does not exist
-					if (!elasticSearchService.hasMapping(entityMetaData))
+					if (!searchService.hasMapping(entityMetaData))
 					{
 						try
 						{
-							elasticSearchService.createMappings(entityMetaData);
+							searchService.createMappings(entityMetaData);
 						}
 						catch (IOException e)
 						{
@@ -409,8 +436,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 					// 2. validation decorator
 					// 3. indexing decorator
 					// 4. repository
-					IndexedCrudRepository indexedRepo = new ElasticsearchRepositoryDecorator(repository,
-							elasticSearchService);
+					IndexedCrudRepository indexedRepo = new ElasticsearchRepositoryDecorator(repository, searchService);
 					if (AttributeMetaDataMetaData.ENTITY_NAME.equals(entityMetaData.getName())
 							|| EntityMetaDataMetaData.ENTITY_NAME.equals(entityMetaData.getName())
 							|| PackageMetaData.ENTITY_NAME.equals(entityMetaData.getName()))
@@ -421,7 +447,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 					}
 
 					return new IndexedCrudRepositorySecurityDecorator(new IndexedRepositoryValidationDecorator(
-							dataService, indexedRepo, new EntityAttributesValidator()), molgenisSettings);
+							dataService(), indexedRepo, new EntityAttributesValidator()), molgenisSettings);
 				}
 			}
 		};

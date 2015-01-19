@@ -25,8 +25,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableCrudRepositoryCollection;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.PackageImpl;
-import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semantic.Tag;
@@ -48,7 +48,7 @@ import com.google.common.collect.Lists;
 public class ImportWriterTest
 {
 	private DataService dataService;
-	private WritableMetaDataService metaDataService;
+	private MetaDataService metaDataService;
 	private PermissionSystemService permissionSystemService;
 	private RepositoryCollection source;
 	private ManageableCrudRepositoryCollection target;
@@ -59,12 +59,12 @@ public class ImportWriterTest
 	public void beforeMethod()
 	{
 		dataService = mock(DataService.class);
-		metaDataService = mock(WritableMetaDataService.class);
+		metaDataService = mock(MetaDataService.class);
 		permissionSystemService = mock(PermissionSystemService.class);
 		source = mock(RepositoryCollection.class);
 		target = mock(ManageableCrudRepositoryCollection.class);
 		tagService = mock(UntypedTagService.class);
-		writer = new ImportWriter(dataService, metaDataService, permissionSystemService, tagService);
+		writer = new ImportWriter(dataService, permissionSystemService, tagService);
 	}
 
 	@Test
@@ -85,15 +85,15 @@ public class ImportWriterTest
 		ParsedMetaData parsedMetaData = new ParsedMetaData(Collections.<EntityMetaData> singletonList(emd), packages,
 				ImmutableSetMultimap.<String, Tag<AttributeMetaData, LabeledResource, LabeledResource>> of(),
 				ImmutableList.<Tag<EntityMetaData, LabeledResource, LabeledResource>> of(entityTag));
-		EmxImportJob job = new EmxImportJob(DatabaseAction.ADD, source, parsedMetaData, target);
+		EmxImportJob job = new EmxImportJob(DatabaseAction.ADD, source, parsedMetaData);
 
 		CrudRepository targetRepo = mock(CrudRepository.class);
 		CrudRepository sourceRepo = mock(CrudRepository.class);
 
-		when(source.getRepositoryByEntityName("entityName")).thenReturn(sourceRepo);
+		when(source.getRepository("entityName")).thenReturn(sourceRepo);
 		when(source.getEntityNames()).thenReturn(Collections.singletonList("entityName"));
-		when(target.add(emd)).thenReturn(targetRepo);
-		when(target.getRepositoryByEntityName("pack_entityName")).thenReturn(targetRepo);
+		when(target.addEntityMeta(emd)).thenReturn(targetRepo);
+		when(target.getRepository("pack_entityName")).thenReturn(targetRepo);
 		when(targetRepo.getEntityMetaData()).thenReturn(emd);
 		when(targetRepo.add(Mockito.argThat(new BaseMatcher<Iterable<Entity>>()
 		{
@@ -134,7 +134,7 @@ public class ImportWriterTest
 		assertEquals(job.report.getNrImportedEntitiesMap().get("pack_entityName"), (Integer) 1);
 
 		verify(metaDataService).addPackage(p);
-		verify(target).add(emd);
+		verify(target).addEntityMeta(emd);
 		// once for the IDs, once for the update
 		verify(sourceRepo, Mockito.atMost(2)).iterator();
 		verify(tagService).addEntityTag(entityTag);

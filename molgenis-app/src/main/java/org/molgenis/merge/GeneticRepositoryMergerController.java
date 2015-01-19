@@ -23,11 +23,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.google.common.base.Function;
@@ -54,9 +54,9 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 			MolgenisFieldTypes.FieldTypeEnum.STRING);
 
 	private final ArrayList<AttributeMetaData> commonAttributes;
-	private RepositoryMerger repositoryMerger;
-	private DataService dataService;
-	private SearchService searchService;
+	private final RepositoryMerger repositoryMerger;
+	private final DataService dataService;
+	private final SearchService searchService;
 
 	@Autowired
 	public GeneticRepositoryMergerController(RepositoryMerger repositoryMerger, DataService dataService,
@@ -118,7 +118,7 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 			{
 				if (dataService.hasRepository(name))
 				{
-					geneticRepositories.add(dataService.getRepositoryByEntityName(name));
+					geneticRepositories.add(dataService.getRepository(name));
 				}
 				else
 				{
@@ -146,7 +146,8 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 
 		EntityMetaData mergedEntityMetaData = repositoryMerger.mergeMetaData(geneticRepositories, commonAttributes,
 				resultSet);
-		searchService.createMappings(mergedEntityMetaData, true, true, true, true);
+		// TODO
+		// searchService.createMappings(mergedEntityMetaData, true, true, true, true);
 
 		ElasticsearchRepository mergedRepository = new ElasticsearchRepository(mergedEntityMetaData, searchService);
 		repositoryMerger.merge(geneticRepositories, commonAttributes, mergedRepository, ID_FIELD);

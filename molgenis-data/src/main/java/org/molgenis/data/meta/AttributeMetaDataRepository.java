@@ -64,6 +64,11 @@ class AttributeMetaDataRepository
 		fillAllEntityAttributes();
 	}
 
+	CrudRepository getRepository()
+	{
+		return repository;
+	}
+
 	/**
 	 * Creates {@link AttributeMetaData} for all {@link AttributeMetaDataMetaData} entities in the repository and adds
 	 * them to the {@link EntityMetaData} in the {@link EntityMetaDataRepository}.
@@ -186,6 +191,8 @@ class AttributeMetaDataRepository
 		if (att.getRefEntity() != null)
 		{
 			Entity refEntity = entityMetaDataRepository.getEntity(att.getRefEntity().getName());
+			if (refEntity == null) throw new RuntimeException("Missing refEntity [" + att.getRefEntity().getName()
+					+ "] of attribute [" + att.getName() + "]");
 			attributeMetaDataEntity.set(REF_ENTITY, refEntity);
 		}
 		repository.add(attributeMetaDataEntity);

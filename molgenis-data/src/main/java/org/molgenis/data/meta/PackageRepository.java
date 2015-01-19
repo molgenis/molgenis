@@ -54,6 +54,11 @@ class PackageRepository
 		addDefaultPackage();
 	}
 
+	CrudRepository getRepository()
+	{
+		return repository;
+	}
+
 	/**
 	 * Adds the default package to the repository if it does not yet exist.
 	 */

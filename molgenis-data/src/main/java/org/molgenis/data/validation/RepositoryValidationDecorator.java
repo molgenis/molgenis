@@ -212,7 +212,7 @@ public class RepositoryValidationDecorator implements CrudRepository
 				refEntityIdValues.add(refEntity.getIdValue());
 			}
 
-			if (attr.getRefEntity().getName().equalsIgnoreCase(attr.getName()))// Self reference
+			if (attr.getRefEntity().getName().equalsIgnoreCase(getName()))// Self reference
 			{
 				for (Entity entity : entities)
 				{
@@ -358,12 +358,6 @@ public class RepositoryValidationDecorator implements CrudRepository
 	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
 	{
 		return decoratedRepository.iterator(clazz);
-	}
-
-	@Override
-	public String getUrl()
-	{
-		return decoratedRepository.getUrl();
 	}
 
 	@Override

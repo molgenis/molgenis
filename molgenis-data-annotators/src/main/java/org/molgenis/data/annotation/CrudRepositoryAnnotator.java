@@ -7,11 +7,10 @@ import java.util.UUID;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
-import org.molgenis.data.EditableEntityMetaData;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
-import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.slf4j.Logger;
@@ -22,12 +21,12 @@ public class CrudRepositoryAnnotator
 {
 	private static final Logger LOG = LoggerFactory.getLogger(CrudRepositoryAnnotator.class);
 
-	private final MysqlRepositoryCollection mysqlRepositoryCollection;
-	private String newRepositoryLabel;
+	private final DataService dataService;
+	private final String newRepositoryLabel;
 
-	public CrudRepositoryAnnotator(MysqlRepositoryCollection mysqlRepositoryCollection, String newRepositoryName)
+	public CrudRepositoryAnnotator(DataService dataService, String newRepositoryName)
 	{
-		this.mysqlRepositoryCollection = mysqlRepositoryCollection;
+		this.dataService = dataService;
 		this.newRepositoryLabel = newRepositoryName;
 	}
 
@@ -140,35 +139,17 @@ public class CrudRepositoryAnnotator
 				newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData);
 			}
 			newEntityMetaData.setLabel(newRepositoryLabel);
-			return mysqlRepositoryCollection.add(newEntityMetaData);
+
+			return dataService.getMeta().addEntityMeta(newEntityMetaData);
 		}
-		else
+		else if (entityMetaData.getAttribute(compoundAttributeMetaData.getName()) == null)
 		{
-			if (mysqlRepositoryCollection.getRepositoryByEntityName(entityMetaData.getName()) != null)
-			{
-				if (entityMetaData.getAttribute(compoundAttributeMetaData.getName()) == null)
-				{
-					DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(entityMetaData);
-					if (newEntityMetaData.getAttribute(compoundAttributeMetaData.getName()) == null)
-					{
-						newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData);
-					}
-					mysqlRepositoryCollection.updateSync(newEntityMetaData);
-				}
-				return null;
-			}
-			else
-			{
-				if (!(entityMetaData instanceof EditableEntityMetaData))
-				{
-					throw new UnsupportedOperationException(
-							"EntityMetadata should be editable to make annotation possible");
-				}
-				EditableEntityMetaData editableMetadata = (EditableEntityMetaData) entityMetaData;
-				editableMetadata.addAttributeMetaData(compoundAttributeMetaData);
-				return null;
-			}
+			DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(entityMetaData);
+			newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData);
+			dataService.getMeta().updateSync(newEntityMetaData);
 		}
+
+		return null;
 	}
 
 	public DefaultAttributeMetaData getCompoundResultAttribute(RepositoryAnnotator annotator,

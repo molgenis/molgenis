@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 
-import org.molgenis.data.Queryable;
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.system.core.FreemarkerTemplate;
 import org.slf4j.Logger;
@@ -19,9 +19,9 @@ public class RepositoryTemplateLoader implements TemplateLoader
 {
 	private static final Logger LOG = LoggerFactory.getLogger(RepositoryTemplateLoader.class);
 
-	private final Queryable repository;
+	private final CrudRepository repository;
 
-	public RepositoryTemplateLoader(Queryable repository)
+	public RepositoryTemplateLoader(CrudRepository repository)
 	{
 		this.repository = repository;
 	}

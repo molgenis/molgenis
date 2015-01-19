@@ -22,6 +22,7 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData implements Edi
 	private String description;
 	private EntityMetaData extends_;
 	private Package pack;
+	private String backend;
 
 	public DefaultEntityMetaData(String simpleName)
 	{
@@ -55,7 +56,7 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData implements Edi
 		this(entityMetaData);
 		this.simpleName = newName;
 	}
-	
+
 	/**
 	 * Copy-constructor
 	 * 
@@ -71,6 +72,8 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData implements Edi
 		this.description = entityMetaData.getDescription();
 		EntityMetaData extends_ = entityMetaData.getExtends();
 		this.extends_ = extends_ != null ? new DefaultEntityMetaData(extends_) : null;
+		this.backend = entityMetaData.getBackend();
+
 		// deep copy attributes
 		// TODO: Fails dramatically for self-referencing entities.
 		Iterable<AttributeMetaData> attributes = entityMetaData.getAttributes();
@@ -110,6 +113,19 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData implements Edi
 	public String getSimpleName()
 	{
 		return simpleName;
+	}
+
+	@Override
+	public String getBackend()
+	{
+		return backend;
+	}
+
+	@Override
+	public EditableEntityMetaData setBackend(String backend)
+	{
+		this.backend = backend;
+		return this;
 	}
 
 	@Override
@@ -188,6 +204,7 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData implements Edi
 		return entityClass;
 	}
 
+	@Override
 	public DefaultAttributeMetaData addAttribute(String name)
 	{
 		DefaultAttributeMetaData result = new DefaultAttributeMetaData(name);
@@ -264,4 +281,5 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData implements Edi
 		else if (!getName().equals(other.getName())) return false;
 		return true;
 	}
+
 }
