@@ -8,7 +8,7 @@ import org.molgenis.omx.auth.MolgenisUser;
 public interface MolgenisUserService
 {
 	/**
-	 * Returns e-mail addresses of super users
+	 * Returns email addresses of super users
 	 * 
 	 * @return
 	 */

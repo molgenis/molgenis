@@ -52,7 +52,7 @@ public class AccountController
 
 	private static final Logger logger = Logger.getLogger(AccountController.class);
 
-	static final String REGISTRATION_SUCCESS_MESSAGE_USER = "You have successfully registered, an activation e-mail has been send to your email.";
+	static final String REGISTRATION_SUCCESS_MESSAGE_USER = "You have successfully registered, an activation email has been sent to your email.";
 	static final String REGISTRATION_SUCCESS_MESSAGE_ADMIN = "You have successfully registered, your request has been forwarded to the administrator.";
 
 	@Autowired
