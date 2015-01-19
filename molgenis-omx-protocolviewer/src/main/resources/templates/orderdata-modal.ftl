@@ -160,7 +160,6 @@
 
         function order() {
             submitBtn.addClass('disabled');
-            console.log('query');
             $.ajax(pluginUri + '/order', {
             	type: 'POST',
                 data: $(':text,:hidden', '#orderdata-form').serializeArray(),
@@ -170,12 +169,9 @@
                 processData: false
             }).complete(function(data){
             	modal.modal('hide');
-            	console.log(data.responseText);
             	var responseText = JSON.parse(data.responseText);
             	if(responseText.ok){
             		$(document).trigger('molgenis-order-placed', responseText.message);
-            	} else {
-            		console.log(responseText);
             	}
             });
         }
