@@ -4,9 +4,6 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
@@ -14,11 +11,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.validation.Valid;
 
-import org.apache.commons.io.FileUtils;
 import org.molgenis.compute.ui.IdGenerator;
 import org.molgenis.compute.ui.clusterexecutor.ClusterManager;
 import org.molgenis.compute.ui.meta.AnalysisJobMetaData;
@@ -82,8 +77,6 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 
 	@Autowired
 	private ClusterManager clusterManager;
-
-	private String url, scheduler;
 
 	@Autowired
 	public AnalysisPluginController(DataService dataService)
@@ -261,16 +254,17 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 
 		new AnalysisToFilesWriter().writeToFiles(dataService, analysis, path);
 
+		UIBackend backend = analysis.getBackend();
+		String backendHost = backend.getHost();
+		String schedulerType = backend.getSchedulerType().toString();
+		String[] args =
+		{ "--generate", "--workflow", path + WORKFLOW_DEFAULT, "--parameters", path + PARAMETERS_DEFAULT,
+				"--parameters", path + WORKSHEET, "-b", schedulerType, "--runid", runID, "--weave", "--url",
+				backendHost, "--path", "", "-rundir", path + "rundir" };
 
-			readUserProperties();
-			String[] args =
-			{ "--generate", "--workflow", path + WORKFLOW_DEFAULT, "--parameters", path + PARAMETERS_DEFAULT,
-					"--parameters", path + WORKSHEET, "-b", scheduler, "--runid", runID, "--weave", "--url", url,
-					"--path", "", "-rundir", path + "rundir" };
-
-			ComputeProperties properties = new ComputeProperties(args);
-			properties.execute = false;
-			properties.runDir = path + "rundir";
+		ComputeProperties properties = new ComputeProperties(args);
+		properties.execute = false;
+		properties.runDir = path + "rundir";
 		CommandLineRunContainer container = null;
 		try
 		{
@@ -284,19 +278,19 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 
 		UIWorkflow uiWorkflow = analysis.getWorkflow();
 		List<GeneratedScript> generatedScripts = container.getTasks();
-			for (GeneratedScript generatedScript : generatedScripts)
-			{
-				UIWorkflowNode node = findNode(uiWorkflow, generatedScript.getStepName());
+		for (GeneratedScript generatedScript : generatedScripts)
+		{
+			UIWorkflowNode node = findNode(uiWorkflow, generatedScript.getStepName());
 
-				AnalysisJob job = new AnalysisJob(IdGenerator.generateId());
-				job.setName(generatedScript.getName());
-				job.setGeneratedScript(generatedScript.getScript());
-				job.setWorkflowNode(node);
-				job.setAnalysis(analysis);
-				dataService.add(AnalysisJobMetaData.INSTANCE.getName(), job);
-			}
+			AnalysisJob job = new AnalysisJob(IdGenerator.generateId());
+			job.setName(generatedScript.getName());
+			job.setGeneratedScript(generatedScript.getScript());
+			job.setWorkflowNode(node);
+			job.setAnalysis(analysis);
+			dataService.add(AnalysisJobMetaData.INSTANCE.getName(), job);
+		}
 
-			// update analysis
+		// update analysis
 		analysis.setSubmitScript(container.getSumbitScript());
 
 		dataService.update(AnalysisMetaData.INSTANCE.getName(), analysis);
@@ -304,7 +298,6 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 		clusterManager.executeAnalysis(analysis);
 
 	}
-
 
 	@Transactional
 	@RequestMapping(value = "/pause/{analysisId}", method = POST)
@@ -356,42 +349,6 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 			if (stepName.equalsIgnoreCase(name)) return node;
 		}
 		return null;
-	}
-
-	private void readUserProperties()
-	{
-		Properties prop = new Properties();
-		InputStream input = null;
-
-		try
-		{
-			input = new FileInputStream(".cluster.properties");
-
-			// load a properties file
-			prop.load(input);
-
-			url = prop.getProperty(ClusterManager.URL);
-			scheduler = prop.getProperty(ClusterManager.SCHEDULER);
-
-		}
-		catch (IOException ex)
-		{
-			ex.printStackTrace();
-		}
-		finally
-		{
-			if (input != null)
-			{
-				try
-				{
-					input.close();
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
-				}
-			}
-		}
 	}
 
 	private String generateAnalysisName(Date creationDate)
