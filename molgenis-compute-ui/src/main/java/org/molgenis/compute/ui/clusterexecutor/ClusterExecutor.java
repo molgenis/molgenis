@@ -7,7 +7,7 @@ import org.molgenis.compute.ui.model.Analysis;
  */
 public interface ClusterExecutor
 {
-	boolean submitRun(Analysis analysis);
+	boolean submitRun(Analysis analysis, String callbackUri);
 
-	boolean cancelRun(Analysis analysis);
+	boolean cancelRun(Analysis analysis, String callbackUri);
 }
