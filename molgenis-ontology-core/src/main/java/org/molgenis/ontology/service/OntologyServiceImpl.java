@@ -327,8 +327,7 @@ public class OntologyServiceImpl implements OntologyService
 			if (!StringUtils.isEmpty(term) && !term.matches(OntologyTermQueryRepository.MULTI_WHITESPACES)
 					&& !(ELASTICSEARCH_RESERVED_WORDS.contains(term)))
 			{
-				stemmer.setCurrent(term.replaceAll(OntologyTermQueryRepository.ILLEGAL_CHARACTERS_PATTERN,
-						StringUtils.EMPTY));
+				stemmer.setCurrent(removeIllegalCharWithEmptyString(term));
 				stemmer.stem();
 				String afterStem = stemmer.getCurrent();
 				if (!StringUtils.isEmpty(afterStem))
@@ -341,7 +340,8 @@ public class OntologyServiceImpl implements OntologyService
 		return stringBuilder.toString().trim();
 	}
 
-	private OntologyServiceResult convertResults(List<ComparableEntity> comparableEntities, Map<String, Object> inputData)
+	private OntologyServiceResult convertResults(List<ComparableEntity> comparableEntities,
+			Map<String, Object> inputData)
 	{
 		Collections.sort(comparableEntities);
 		List<ComparableEntity> entities = new ArrayList<ComparableEntity>();
@@ -371,8 +371,11 @@ public class OntologyServiceImpl implements OntologyService
 
 	private BigDecimal matchOntologyTerm(String queryString, Entity entity)
 	{
-		String ontologyTermSynonym = entity.getString(OntologyTermIndexRepository.SYNONYMS);
-		String ontologyTerm = entity.getString(OntologyTermIndexRepository.ONTOLOGY_TERM);
+		String ontologyTermSynonym = removeIllegalCharWithSingleWhiteSpace(entity
+				.getString(OntologyTermIndexRepository.SYNONYMS));
+		String ontologyTerm = removeIllegalCharWithSingleWhiteSpace(entity
+				.getString(OntologyTermIndexRepository.ONTOLOGY_TERM));
+		queryString = removeIllegalCharWithSingleWhiteSpace(queryString);
 
 		BigDecimal ngramScore = null;
 		if (!ontologyTerm.equalsIgnoreCase(ontologyTermSynonym))
@@ -386,7 +389,6 @@ public class OntologyServiceImpl implements OntologyService
 		{
 			ngramScore = new BigDecimal(NGramMatchingModel.stringMatching(queryString, ontologyTermSynonym));
 		}
-
 		return ngramScore;
 	}
 
@@ -465,6 +467,17 @@ public class OntologyServiceImpl implements OntologyService
 				};
 			}
 		};
+	}
+
+	private String removeIllegalCharWithSingleWhiteSpace(String string)
+	{
+		return string.replaceAll(OntologyTermQueryRepository.ILLEGAL_CHARACTERS_PATTERN,
+				OntologyTermQueryRepository.SINGLE_WHITESPACE);
+	}
+
+	private String removeIllegalCharWithEmptyString(String string)
+	{
+		return string.replaceAll(OntologyTermQueryRepository.ILLEGAL_CHARACTERS_PATTERN, StringUtils.EMPTY);
 	}
 
 	private String getEntityName(String ontologyIri)
