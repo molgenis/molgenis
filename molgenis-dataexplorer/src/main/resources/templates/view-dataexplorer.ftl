@@ -183,4 +183,11 @@
 		</div>
 	</div>
 </script>
+<script id="bool-filter-template" type="text/x-handlebars-template">
+    {{#each state}}
+    <label class="radio-inline">
+      <input type="radio" value="{{value}}"> {{label}}
+    </label>
+    {{/each}}
+</script>
 <@footer/>
