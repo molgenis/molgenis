@@ -2,6 +2,7 @@ package org.molgenis.data.mapping;
 
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
+import org.molgenis.data.ManageableCrudRepositoryCollection;
 import org.molgenis.data.meta.AttributeMappingMetaData;
 import org.molgenis.data.meta.EntityMappingMetaData;
 import org.molgenis.data.meta.MappingProjectMetaData;
@@ -21,7 +22,7 @@ import org.springframework.context.annotation.Configuration;
 public class MappingConfig
 {
 	@Autowired
-	WritableMetaDataService writableMetaDataService;
+	ManageableCrudRepositoryCollection repoCollection;
 
 	@Autowired
 	DataService dataService;
@@ -58,7 +59,7 @@ public class MappingConfig
 	{
 		if (!dataService.hasRepository(AttributeMappingMetaData.ENTITY_NAME))
 		{
-			writableMetaDataService.addEntityMetaData(AttributeMappingRepositoryImpl.META_DATA);
+			repoCollection.add(AttributeMappingRepositoryImpl.META_DATA);
 		}
 		return dataService.getCrudRepository(AttributeMappingMetaData.ENTITY_NAME);
 
@@ -68,7 +69,7 @@ public class MappingConfig
 	{
 		if (!dataService.hasRepository(EntityMappingMetaData.ENTITY_NAME))
 		{
-			writableMetaDataService.addEntityMetaData(EntityMappingRepositoryImpl.META_DATA);
+			repoCollection.add(EntityMappingRepositoryImpl.META_DATA);
 		}
 		return dataService.getCrudRepository(EntityMappingMetaData.ENTITY_NAME);
 	}
@@ -77,7 +78,7 @@ public class MappingConfig
 	{
 		if (!dataService.hasRepository(MappingProjectMetaData.ENTITY_NAME))
 		{
-			writableMetaDataService.addEntityMetaData(MappingProjectRepositoryImpl.META_DATA);
+			repoCollection.add(MappingProjectRepositoryImpl.META_DATA);
 		}
 		return dataService.getCrudRepository(MappingProjectMetaData.ENTITY_NAME);
 	}
