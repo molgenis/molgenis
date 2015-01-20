@@ -69,7 +69,7 @@
 <@footer/>
 
 <#-- TODO -->
-<#-- Generate owner and target entity list dynamicly -->
+<#-- Generate target entity list dynamicly -->
 <#macro createNewMappingProjectModal>
 	<div class="modal fade" id="create-new-mapping-project-modal" tabindex="-1" role="dialog" aria-labelledby="create-new-mapping-project-modal" aria-hidden="true">
 		<div class="modal-dialog">
@@ -100,7 +100,7 @@
         		</div>
         		
 	        	<div class="modal-footer">
-	        		<button type="button" id="submit-new-mapping-project-button" class="btn btn-primary">Create project</button>
+	        		<button type="button" id="submit-new-mapping-project-btn" class="btn btn-primary">Create project</button>
 	                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
 	    		</div>	    				
     		</div>
