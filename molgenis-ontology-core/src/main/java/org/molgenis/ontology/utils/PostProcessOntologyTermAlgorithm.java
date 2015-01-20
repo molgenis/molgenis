@@ -1,14 +1,18 @@
 package org.molgenis.ontology.utils;
 
+import static org.molgenis.ontology.repository.AbstractOntologyRepository.ILLEGAL_CHARACTERS_PATTERN;
+import static org.molgenis.ontology.repository.AbstractOntologyRepository.ONTOLOGY_TERM_IRI;
+import static org.molgenis.ontology.repository.AbstractOntologyRepository.SINGLE_WHITESPACE;
+import static org.molgenis.ontology.repository.AbstractOntologyRepository.SYNONYMS;
+import static org.molgenis.ontology.service.OntologyServiceImpl.MAX_SCORE_FIELD;
+import static org.molgenis.ontology.service.OntologyServiceImpl.SCORE;
+
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
+import org.molgenis.data.Entity;
 import org.molgenis.ontology.beans.ComparableEntity;
-import org.molgenis.ontology.repository.OntologyTermQueryRepository;
-import org.molgenis.ontology.service.OntologyServiceImpl;
 
 /**
  * An algorithm container to deal with the case where matching term is mapped to multiple synonyms of the same ontology
@@ -21,68 +25,50 @@ import org.molgenis.ontology.service.OntologyServiceImpl;
  */
 public class PostProcessOntologyTermAlgorithm
 {
-	// A map where key indicates which field of the input entity is used in the matching, such as 'name' and 'HP', value
-	// is list of ontology terms matched
-	private final Map<String, List<ComparableEntity>> matchedFieldToEntity;
-
-	// A map representing the input entity converted to Map data structure
-	private final Map<String, Object> inputData;
-
-	public PostProcessOntologyTermAlgorithm(Map<String, Object> inputData)
+	public static List<ComparableEntity> process(List<ComparableEntity> comparableEntities,
+			Map<String, Object> inputData)
 	{
-		matchedFieldToEntity = new HashMap<String, List<ComparableEntity>>();
-		this.inputData = inputData;
-	}
-
-	public void addOntologyTerm(String matchedField, ComparableEntity entity)
-	{
-		if (!matchedFieldToEntity.containsKey(matchedField))
+		List<ComparableEntity> entities = new ArrayList<ComparableEntity>(comparableEntities);
+		for (int i = 0; i < comparableEntities.size(); i++)
 		{
-			matchedFieldToEntity.put(matchedField, new ArrayList<ComparableEntity>());
-		}
-		matchedFieldToEntity.get(matchedField).add(entity);
-	}
+			Entity currentEntity = comparableEntities.get(i);
+			String currentMaxScoreField = currentEntity.getString(MAX_SCORE_FIELD);
+			String currentEntityIdentifier = currentEntity.getString(ONTOLOGY_TERM_IRI);
+			String currentSynonym = currentEntity.getString(SYNONYMS);
+			Double firstScore = Double.parseDouble(currentEntity.get(SCORE).toString());
+			String inputDataQuery = inputData.get(currentMaxScoreField).toString();
 
-	public void process(List<ComparableEntity> allEntities)
-	{
-		for (Entry<String, List<ComparableEntity>> entry : matchedFieldToEntity.entrySet())
-		{
-			// Get input data query
-			String inputDataQuery = inputData.get(entry.getKey()).toString();
-			// Get a list of mapped candidate ontology terms
-			List<ComparableEntity> synonymousEntities = entry.getValue();
-			if (synonymousEntities.size() > 0)
+			StringBuilder combinedSynonym = new StringBuilder();
+			combinedSynonym.append(currentSynonym);
+
+			for (int j = i + 1; j < comparableEntities.size(); j++)
 			{
-				StringBuilder combinedSynonym = new StringBuilder();
-				ComparableEntity firstEntity = synonymousEntities.get(0);
-				String firstSynonym = firstEntity.getString(OntologyTermQueryRepository.SYNONYMS);
-				Double firstScore = Double.parseDouble(firstEntity.get(OntologyServiceImpl.SCORE).toString());
-				combinedSynonym.append(firstSynonym);
-				for (int i = 1; i < synonymousEntities.size(); i++)
+				Entity nextEntity = comparableEntities.get(j);
+				String nextMaxScoreField = nextEntity.getString(MAX_SCORE_FIELD);
+				String nextEntityIdentifier = nextEntity.getString(ONTOLOGY_TERM_IRI);
+
+				if (currentEntityIdentifier.equals(nextEntityIdentifier)
+						&& currentMaxScoreField.equals(nextMaxScoreField))
 				{
-					ComparableEntity nextEntity = synonymousEntities.get(i);
-					String nextEntitySynonym = nextEntity.getString(OntologyTermQueryRepository.SYNONYMS);
-					if (!combinedSynonym.toString().contains(nextEntitySynonym))
+					String nextSynonym = nextEntity.getString(SYNONYMS);
+					if (!combinedSynonym.toString().contains(nextSynonym))
 					{
 						StringBuilder tempCombinedSynonym = new StringBuilder().append(combinedSynonym)
-								.append(OntologyTermQueryRepository.SINGLE_WHITESPACE).append(nextEntitySynonym);
-
-						Double newScore = NGramMatchingModel.stringMatching(
-								inputDataQuery.replaceAll(OntologyTermQueryRepository.ILLEGAL_CHARACTERS_PATTERN,
-										OntologyTermQueryRepository.SINGLE_WHITESPACE),
-								tempCombinedSynonym.toString().replaceAll(
-										OntologyTermQueryRepository.ILLEGAL_CHARACTERS_PATTERN,
-										OntologyTermQueryRepository.SINGLE_WHITESPACE));
+								.append(SINGLE_WHITESPACE).append(nextSynonym);
+						Double newScore = NGramMatchingModel.stringMatching(inputDataQuery.replaceAll(
+								ILLEGAL_CHARACTERS_PATTERN, SINGLE_WHITESPACE), tempCombinedSynonym.toString()
+								.replaceAll(ILLEGAL_CHARACTERS_PATTERN, SINGLE_WHITESPACE));
 						if (newScore.intValue() > firstScore.intValue())
 						{
 							firstScore = newScore;
-							firstEntity.set(OntologyServiceImpl.SCORE, newScore);
+							currentEntity.set(SCORE, newScore);
 							combinedSynonym.delete(0, combinedSynonym.length()).append(tempCombinedSynonym);
 						}
-						allEntities.remove(nextEntity);
+						entities.remove(nextEntity);
 					}
 				}
 			}
 		}
+		return entities;
 	}
 }

@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -344,27 +343,7 @@ public class OntologyServiceImpl implements OntologyService
 			Map<String, Object> inputData)
 	{
 		Collections.sort(comparableEntities);
-		List<ComparableEntity> entities = new ArrayList<ComparableEntity>();
-		Map<String, PostProcessOntologyTermAlgorithm> uniqueOntologyTerms = new HashMap<String, PostProcessOntologyTermAlgorithm>();
-		for (ComparableEntity compEntity : comparableEntities)
-		{
-			String identifier = compEntity.getString(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI);
-
-			if (!uniqueOntologyTerms.containsKey(identifier))
-			{
-				uniqueOntologyTerms.put(identifier, new PostProcessOntologyTermAlgorithm(inputData));
-			}
-			uniqueOntologyTerms.get(identifier).addOntologyTerm(compEntity.getString(MAX_SCORE_FIELD), compEntity);
-
-			entities.add(compEntity);
-		}
-
-		for (Entry<String, PostProcessOntologyTermAlgorithm> entrySet : uniqueOntologyTerms.entrySet())
-		{
-			entrySet.getValue().process(entities);
-		}
-
-		Collections.sort(entities);
+		List<ComparableEntity> entities = PostProcessOntologyTermAlgorithm.process(comparableEntities, inputData);
 
 		return new OntologyServiceResultImpl(inputData, entities, entities.size());
 	}
