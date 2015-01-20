@@ -640,6 +640,7 @@
 			
 			var cs = hbClinicalSynopsisComp({all: allPhenotypes, inheritance: inheritancePhenotypes});
 			diseasePanel.append(cs);
+			
 		}else{
 			// no clinicalSynopsis: this might belong to phenotypic series, for example http://omim.org/phenotypicSeries/249000
 			// TODO what to do with phenotypic series? 
@@ -677,10 +678,10 @@
 								if (!isNaN(subPart)) {
 									// OMIM id, add a link
 									link = subPart.replace('.', '#');
-									linkedText += '<a href="http://www.omim.org/entry/' + link + '" target="_blank">' + subPart + '</a>';
+									linkedText += '<a href="http://www.omim.org/entry/' + escapeHtml(link) + '" target="_blank">' + subPart + '</a>';
 									
 								} else {
-									linkedText += subPart;
+									linkedText += escapeHtml(subPart);
 								};
 							})
 							textParts[index] = linkedText;
@@ -985,5 +986,20 @@
 			return false;
 		}
 	}
+	
+	var entityMap = {
+		"&": "&amp;",
+		"<": "&lt;",
+		">": "&gt;",
+		'"': '&quot;',
+		"'": '&#39;',
+		"/": '&#x2F;'
+	};
+
+function escapeHtml(string) {
+	return String(string).replace(/[&<>"'\/]/g, function (s) {
+		return entityMap[s];
+	});
+}
 
 })($, window.top.molgenis = window.top.molgenis || {});
