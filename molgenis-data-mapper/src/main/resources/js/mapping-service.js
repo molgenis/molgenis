@@ -3,14 +3,14 @@
 	var restApi = new molgenis.RestClient();
 	
 	$(function() {
-		$("#submit-new-mapping-project-button").click(function() {
+		$("#submit-new-mapping-project-btn").click(function() {
 			$("#create-new-mapping-project-form .submit").click();
 		});
 		
-//		$("a.mapping-project-name").click(function() {
-//			// value of clicked anchor: $(this).attr('value')
-//			
-//		});
+		$("#submit-new-source-column-btn").click(function() {
+			var newSourceEntity = $("#new-source-entity").val();
+			alert(newSourceEntity);
+		});
 	});
 	
 	
