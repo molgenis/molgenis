@@ -1,5 +1,6 @@
 package org.molgenis.data.mapping;
 
+import java.util.HashMap;
 import java.util.List;
 
 import org.molgenis.auth.MolgenisUser;
@@ -28,11 +29,6 @@ public class MappingServiceImpl implements MappingService
 		entityMappingRepository.addEntityMapping();
 	}
 
-	public void updateMappingProject(MappingProject mappingProject)
-	{
-
-	}
-
 	@Override
 	public void addMappingProject(String projectName, MolgenisUser owner)
 	{
@@ -44,5 +40,23 @@ public class MappingServiceImpl implements MappingService
 	public List<MappingProject> getAllMappingProjects()
 	{
 		return mappingProjectRepository.getAllMappingProjects();
+	}
+
+	@Override
+	public void updateMappingProject(MappingProject mappingProject)
+	{
+		mappingProjectRepository.update(mappingProject);
+	}
+
+	@Override
+	public MappingProject getMappingProject(String identifier)
+	{
+		return mappingProjectRepository.getMappingProject(identifier);
+	}
+
+	@Override
+	public List<AttributeMapping> getAttributeMappings(String identifier)
+	{
+		return null; // TODO: Implement
 	}
 }
