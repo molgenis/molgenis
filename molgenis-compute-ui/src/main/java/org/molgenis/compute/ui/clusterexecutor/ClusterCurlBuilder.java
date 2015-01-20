@@ -1,136 +1,68 @@
 package org.molgenis.compute.ui.clusterexecutor;
 
-import java.io.*;
-import java.util.Hashtable;
-import java.util.Properties;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.io.FileUtils;
+import org.molgenis.compute.ui.model.AnalysisJob;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.molgenis.compute.ui.model.AnalysisJob;
-import org.springframework.beans.factory.annotation.Autowired;
 
-/**
- * Created by hvbyelas on 5/19/14.
- */
 public class ClusterCurlBuilder
 {
-
+	private static final String CALLBACK_URI = "callbackUri";
+	private static final String BACKEND_HOST = "backend";
 	private static final String JOB_ID = "jobid";
 	private static final String JOB_NAME = "jobname";
 
-	private String curlHeaderTemplate;
-	private String curlFooterTemplate;
-	private Hashtable<String, String> values = null;
+	private final String curlHeaderTemplate;
+	private final String curlFooterTemplate;
 
-	public String buildScript(AnalysisJob analysisJob)
+	public ClusterCurlBuilder() throws IOException
 	{
-		readTemplates();
+		String templateDir = "templates/cluster";
+		curlHeaderTemplate = FileUtils.readFileToString(new File(templateDir + "/header.ftl"), "UTF-8");
+		curlFooterTemplate = FileUtils.readFileToString(new File(templateDir + "/footer.ftl"), "UTF-8");
+	}
 
-		StringBuilder sb = new StringBuilder();
+	public String buildScript(AnalysisJob analysisJob, String callbackUri)
+	{
+		Map<String, String> model = new HashMap<String, String>();
+		model.put(CALLBACK_URI, callbackUri);
+		model.put(BACKEND_HOST, analysisJob.getAnalysis().getBackend().getHost());
+		model.put(JOB_ID, analysisJob.getIdentifier());
+		model.put(JOB_NAME, analysisJob.getName());
 
-		values = new Hashtable<String, String>();
-		//
-		readServerProperties();
+		String prefix = renderTemplate(curlHeaderTemplate, model);
+		String postfix = renderTemplate(curlFooterTemplate, model);
 
-		values.put(JOB_ID, analysisJob.getIdentifier());
-
-		values.put(JOB_NAME, analysisJob.getName());
-
-
-		String prefix = weaveFreemarker(curlHeaderTemplate, values);
-		String postfix = weaveFreemarker(curlFooterTemplate, values);
-
+		// insert the prefix after generated script header
+		// insert the postfix after generated script
 		String script = analysisJob.getGenerateScript();
-
 		String lookup = analysisJob.getName() + ".sh.started";
-
 		int index = script.indexOf(lookup);
 		String top = script.substring(0, index + lookup.length() + 2);
 		String bottom = script.substring(index + lookup.length() + 3);
 
-		sb.append(top);
-		sb.append(prefix);
-		sb.append(bottom);
-		sb.append(postfix);
-
-		return sb.toString();
+		return new StringBuilder().append(top).append(prefix).append(bottom).append(postfix).toString();
 	}
 
-	private void readTemplates()
+	private String renderTemplate(String strTemplate, Map<String, String> model)
 	{
+		StringWriter writer = new StringWriter();
 		try
 		{
-			curlHeaderTemplate = FileUtils.readFileToString(new File("templates/cluster/header.ftl"));
-			curlFooterTemplate = FileUtils.readFileToString(new File("templates/cluster/footer.ftl"));
+			new Template("name", strTemplate, new Configuration(Configuration.VERSION_2_3_21)).process(model, writer);
 		}
-		catch (IOException e)
+		catch (TemplateException | IOException e)
 		{
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
-
+		return writer.toString();
 	}
-
-	private void readServerProperties()
-	{
-		Properties prop = new Properties();
-		InputStream input = null;
-
-		try
-		{
-			input = new FileInputStream(".cluster.properties");
-			prop.load(input);
-
-			values.put("IP", prop.getProperty(ClusterManager.SERVER_IP));
-			values.put("PORT", prop.getProperty(ClusterManager.SERVER_PORT));
-
-			values.put(ClusterManager.BACKEND, prop.getProperty(ClusterManager.URL));
- 		}
-		catch (IOException ex)
-		{
-			ex.printStackTrace();
-		}
-		finally
-		{
-			if (input != null)
-			{
-				try
-				{
-					input.close();
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-
-	public static String weaveFreemarker(String strTemplate, Hashtable<String, String> values)
-	{
-		Configuration cfg = new Configuration();
-
-		Template t = null;
-		StringWriter out = new StringWriter();
-		try
-		{
-			t = new Template("name", new StringReader(strTemplate), cfg);
-			t.process(values, out);
-		}
-		catch (TemplateException e)
-		{
-			//e.printStackTrace();
-		}
-		catch (IOException e)
-		{
-			//e.printStackTrace();
-		}
-
-		return out.toString();
-	}
-
-
-
 }

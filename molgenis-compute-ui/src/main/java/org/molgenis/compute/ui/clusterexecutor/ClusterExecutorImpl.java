@@ -58,11 +58,10 @@ public class ClusterExecutorImpl implements ClusterExecutor
 
 	@RunAsSystem
 	@Override
-	public boolean submitRun(Analysis analysis)
+	public boolean submitRun(Analysis analysis, String callbackUri)
 	{
 		String clusterRoot = root;
-		String runDir = clusterRoot + "test23";
-//		String runDir = clusterRoot + analysis.getIdentifier();
+		String runDir = clusterRoot + analysis.getIdentifier();
 		// here read properties, which later will come from username interface (username, password)
 		// and DB (clusterRoot)
 		readUserProperties();
@@ -88,7 +87,7 @@ public class ClusterExecutorImpl implements ClusterExecutor
 				LOG.info("session connected.....");
 
 				// copy files to backend
-				prepareAnalysis(analysis, session, runDir);
+				prepareAnalysis(analysis, session, runDir, callbackUri);
 
 			}
 			finally
@@ -147,8 +146,8 @@ public class ClusterExecutorImpl implements ClusterExecutor
 		return true;
 	}
 
-	private void prepareAnalysis(Analysis analysis, Session session, String runDir) throws JSchException,
-			InterruptedException, SftpException
+	private void prepareAnalysis(Analysis analysis, Session session, String runDir, String callbackUri)
+			throws JSchException, InterruptedException, SftpException
 	{
 		LOG.info("Prepare Analysis: " + analysis.getName());
 
@@ -179,7 +178,7 @@ public class ClusterExecutorImpl implements ClusterExecutor
 		for (AnalysisJob job : jobs)
 		{
 			String taskName = job.getName();
-			String builtScript = builder.buildScript(job);
+			String builtScript = builder.buildScript(job, callbackUri);
 			is = new ByteArrayInputStream(builtScript.getBytes());
 			channelSftp.put(is, runDir + "/" + taskName + ".sh");
 		}
@@ -261,7 +260,7 @@ public class ClusterExecutorImpl implements ClusterExecutor
 		return null;
 	}
 
-	public boolean cancelRun(Analysis analysis)
+	public boolean cancelRun(Analysis analysis, String callbackUri)
 	{
 		readUserProperties();
 		LOG.info("Canceling Analysis [" + analysis.getName() + "]");

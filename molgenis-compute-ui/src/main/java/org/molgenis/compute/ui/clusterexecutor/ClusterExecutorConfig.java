@@ -1,5 +1,7 @@
 package org.molgenis.compute.ui.clusterexecutor;
 
+import java.io.IOException;
+
 import org.molgenis.data.DataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -28,7 +30,7 @@ public class ClusterExecutorConfig
 	}
 
 	@Bean
-	public ClusterCurlBuilder clusterCurlBuilder()
+	public ClusterCurlBuilder clusterCurlBuilder() throws IOException
 	{
 		return new ClusterCurlBuilder();
 	}
