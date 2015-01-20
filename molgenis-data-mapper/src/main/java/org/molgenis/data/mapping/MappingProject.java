@@ -1,7 +1,5 @@
 package org.molgenis.data.mapping;
 
-import org.molgenis.auth.MolgenisUser;
-
 import java.util.List;
 
 /**
@@ -10,10 +8,10 @@ import java.util.List;
 public class MappingProject
 {
 	private String identifier;
-	private MolgenisUser owner;
+	private String owner;
 	private List<EntityMapping> entityMappings;
 
-	public MappingProject(String identifier, MolgenisUser owner, List<EntityMapping> entityMappings)
+	public MappingProject(String identifier, String owner, List<EntityMapping> entityMappings)
 	{
 		this.identifier = identifier;
 		this.owner = owner;
@@ -30,12 +28,12 @@ public class MappingProject
 		this.identifier = identifier;
 	}
 
-	public MolgenisUser getOwner()
+	public String getOwner()
 	{
 		return owner;
 	}
 
-	public void setOwner(MolgenisUser owner)
+	public void String(String owner)
 	{
 		this.owner = owner;
 	}

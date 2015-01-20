@@ -5,6 +5,7 @@ import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.MolgenisFieldTypes.XREF;
 
 import org.molgenis.data.repository.EntityMappingRepository;
+import org.molgenis.data.repository.impl.EntityMappingRepositoryImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
 
 public class EntityMappingMetaData extends DefaultEntityMetaData
@@ -22,6 +23,6 @@ public class EntityMappingMetaData extends DefaultEntityMetaData
 		addAttribute(IDENTIFIER).setIdAttribute(true).setNillable(false).setDataType(STRING);
 		addAttribute(SOURCEENTITYMETADATA).setDataType(XREF).setRefEntity(EntityMetaDataRepository.META_DATA);
 		addAttribute(TARGETENTITYMETADATA).setDataType(XREF).setRefEntity(EntityMetaDataRepository.META_DATA);
-		addAttribute(ENTITYMAPPINGS).setDataType(MREF).setRefEntity(EntityMappingRepository.META_DATA);
+		addAttribute(ENTITYMAPPINGS).setDataType(MREF).setRefEntity(EntityMappingRepositoryImpl.META_DATA);
 	}
 }

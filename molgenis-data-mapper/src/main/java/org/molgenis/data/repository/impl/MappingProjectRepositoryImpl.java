@@ -2,9 +2,7 @@ package org.molgenis.data.repository.impl;
 
 import com.google.common.collect.Lists;
 
-import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.CrudRepository;
-import org.molgenis.data.ManageableCrudRepositoryCollection;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -13,6 +11,7 @@ import org.molgenis.data.meta.MappingProjectMetaData;
 import org.molgenis.data.repository.MappingProjectRepository;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -23,17 +22,19 @@ import java.util.ArrayList;
 @Component
 public class MappingProjectRepositoryImpl implements MappingProjectRepository
 {
+	public static final MappingProjectMetaData META_DATA = new MappingProjectMetaData();
+
 	private final CrudRepository repository;
 	private MolgenisUserService molgenisUserService;
 
 	@Autowired
-	public MappingProjectRepositoryImpl(ManageableCrudRepositoryCollection collection,
-			MolgenisUserService molgenisUserService, MappingProjectMetaData mappingProjectMetaData)
+	public MappingProjectRepositoryImpl(CrudRepository repository,
+			MolgenisUserService molgenisUserService)
 	{
-		this.repository = collection.add(mappingProjectMetaData);
+		this.repository = repository;
 		this.molgenisUserService = molgenisUserService;
 	}
-
+	
 	@Override
 	public void add(MappingProject mappingProject)
 	{
@@ -110,8 +111,8 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 		String identifier = entityMappingEntity.getString(MappingProjectMetaData.IDENTIFIER);
 		List entityMappings = Lists
 				.newArrayList(entityMappingEntity.getEntities(MappingProjectMetaData.ENTITYMAPPINGS));
-		MolgenisUser owner = molgenisUserService.getUser(entityMappingEntity.getEntity(MappingProjectMetaData.OWNER)
-				.getString(MolgenisUser.USERNAME));
+		// FIXME When xref to molgenis user change this to MolgenisUser object
+		String owner = molgenisUserService.getUser(SecurityUtils.getCurrentUsername()).getUsername();
 		return new MappingProject(identifier, owner, entityMappings);
 	}
 }
