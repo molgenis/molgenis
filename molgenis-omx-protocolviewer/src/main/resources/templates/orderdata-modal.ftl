@@ -172,6 +172,8 @@
             	var responseText = JSON.parse(data.responseText);
             	if(responseText.ok){
             		$(document).trigger('molgenis-order-placed', responseText.message);
+            	} else {
+            		molgenis.createAlert([{'message': responseText.message}], 'error');
             	}
             });
         }
