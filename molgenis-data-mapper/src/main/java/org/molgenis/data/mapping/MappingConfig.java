@@ -1,6 +1,5 @@
 package org.molgenis.data.mapping;
 
-import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.AttributeMappingMetaData;
@@ -57,35 +56,30 @@ public class MappingConfig
 
 	private CrudRepository attributeMappingCrudRepository()
 	{
-		CrudRepository result = dataService.getCrudRepository(AttributeMappingMetaData.ENTITY_NAME);
-		if (result == null)
+		if (!dataService.hasRepository(AttributeMappingMetaData.ENTITY_NAME))
 		{
 			writableMetaDataService.addEntityMetaData(AttributeMappingRepositoryImpl.META_DATA);
-			result = dataService.getCrudRepository(AttributeMappingMetaData.ENTITY_NAME);
 		}
-		return result;
+		return dataService.getCrudRepository(AttributeMappingMetaData.ENTITY_NAME);
+
 	}
 
 	private CrudRepository entityMappingCrudRepository()
 	{
-		CrudRepository result = dataService.getCrudRepository(EntityMappingMetaData.ENTITY_NAME);
-		if (result == null)
+		if (!dataService.hasRepository(EntityMappingMetaData.ENTITY_NAME))
 		{
 			writableMetaDataService.addEntityMetaData(EntityMappingRepositoryImpl.META_DATA);
-			result = dataService.getCrudRepository(EntityMappingMetaData.ENTITY_NAME);
 		}
-		return result;
+		return dataService.getCrudRepository(EntityMappingMetaData.ENTITY_NAME);
 	}
 
 	private CrudRepository mappingProjectCrudRepository()
 	{
-		CrudRepository result = dataService.getCrudRepository(MappingProjectMetaData.ENTITY_NAME);
-		if (result == null)
+		if (!dataService.hasRepository(MappingProjectMetaData.ENTITY_NAME))
 		{
 			writableMetaDataService.addEntityMetaData(MappingProjectRepositoryImpl.META_DATA);
-			result = dataService.getCrudRepository(MappingProjectMetaData.ENTITY_NAME);
 		}
-		return result;
+		return dataService.getCrudRepository(MappingProjectMetaData.ENTITY_NAME);
 	}
 
 }
