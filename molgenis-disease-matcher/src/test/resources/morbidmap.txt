@@ -1,3 +1,0 @@
-17,20-lyase deficiency, isolated, 202110 (3)|CYP17A1, CYP17, P450C17|609300|10q24.32
-?Moebius syndrome (2)|MBS, MBS1|157900|13q12.2-q13
-Aicardi-Goutieres syndrome 2, 610181 (3)|RNASEH2B, DLEU8, FLJ11712, AGS2|610326|13q14.3
