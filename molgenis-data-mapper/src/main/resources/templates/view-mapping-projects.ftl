@@ -7,56 +7,62 @@
 <@header css js/>
 <@createNewMappingProjectModal />
 
-<div class="row">
-	<div class="col-md-12">
-		<h1>Mapping projects overview</h1>
-		<p>Create and view mapping projects</p>
-	</div>
-</div>
-
-<hr></hr>
-
 <!--Table containing mapping projects-->
 <#-- TODO -->
-<#-- Generate table with mapping projects dynamicly -->
 <#-- Make Project name link to attribute mapping screen  -->
 <div class="row">
 	<div class="col-md-12">
-		<table class="table">
- 			<thead>
- 				<tr>
- 					<th>Mapping name</th>
- 					<th>Owner</th>
- 					<th>Target entity</th>
- 					<th>Mapped sources</th>
- 				</tr>
- 			</thead>
- 			<tbody>
- 				<tr>
- 					<td><a href="${context_url}/attributemapping" value="HOP-minimal">HOP-minimal project</a></td>
- 					<td>Mark</td>
- 					<td>HOP-minimal</td>
- 					<td>Source1, Source2, Source4</td>
- 				</tr>
- 				<tr>
- 					<td><a href="${context_url}/attributemapping" value="FinRisk">FinRisk project</a></td>
- 					<td>Chao</td>
- 					<td>FinRisk</td>
- 					<td>Source3, Source4</td>
- 				</tr>
- 			</tbody>
-		</table>
+		<div class="col-md-6">
+			<h1>Mapping projects overview</h1>
+			<p>Create and view mapping projects</p>
+			<hr></hr>
+			<table class="table">
+	 			<thead>
+	 				<tr>
+	 					<th>Mapping name</th>
+	 					<th>Owner</th>
+	 					<th>Target entity</th>
+	 					<th>Mapped sources</th>
+	 				</tr>
+	 			</thead>
+	 			<tbody>
+	 				<#list mappingProjects as project>
+	 				<tr>	 					
+	 					<td><a href="${context_url}/attributemapping/${project.getIdentifier()}">${project.getIdentifier()}</a></td>
+	 					<td>${project.getOwner()}</td>
+	 					<td>Target entity</td>
+	 					<td>
+	 					<#list project.getEntityMappings() as source>>
+	 						${source.getIdentifier()}<#if source_has_next>, </#if>
+ 						</#list>
+	 					</td>	
+	 				</tr>
+	 				</#list>
+	 			</tbody>
+			</table>
+		</div>
+		<div class="col-md-6">
+			More possible content...
+		</div>
 	</div>
 </div>
 	
 <div class="row">
 	<div class="col-md-12">
-		<div class="btn-group" role="group">
-			<a href="#" class="btn btn-primary" data-toggle="modal" data-target="#create-new-mapping-project-modal">Create a new mapping</a>  				
+		<div class="col-md-6">
+			<div class="btn-group" role="group">
+				<a href="#" class="btn btn-primary" data-toggle="modal" data-target="#create-new-mapping-project-modal">Create a new mapping</a>  				
+			</div>
+			<div class="btn-group" role="group">
+				<button type="button" class="btn btn-success">Edit</button>  				
+			</div>
 		</div>
-		<div class="btn-group" role="group">
-			<button type="button" class="btn btn-success">Edit</button>  				
-		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-12">
+	<br>
 	</div>
 </div>
 
@@ -64,7 +70,6 @@
 
 <#-- TODO -->
 <#-- Generate owner and target entity list dynamicly -->
-<#-- Process input to database and update table containing mapping projects -->
 <#macro createNewMappingProjectModal>
 	<div class="modal fade" id="create-new-mapping-project-modal" tabindex="-1" role="dialog" aria-labelledby="create-new-mapping-project-modal" aria-hidden="true">
 		<div class="modal-dialog">
@@ -74,27 +79,17 @@
 	        		<h4 class="modal-title" id="create-new-mapping-project-label">Create a new mapping project</h4>
 	        	</div>
 	        	<div class="modal-body">
-      				<form id ="create-new-mapping-project-form">	
+      				<form id="create-new-mapping-project-form" method="post" action="${context_url}/addmappingproject">	
   						<div class="form-group">
 		            		<label>Mapping project name</label>
-		  					<input type="text" class="form-control" placeholder="Mapping name" required="required">
+		  					<input name="mapping-project-name" type="text" class="form-control" placeholder="Mapping name" required="required">
 						</div>
 					
-						<hr></hr>	
-		
-						<div class="form-group">
-							<label>Select the owner of this project</label>
-							<select class="form-control" required="required" placeholder="Select a project owner">
-		    					<option value="mark">Mark</option>
-		    					<option value="chao">Chao</option>
-							</select>
-						</div>
-						
 						<hr></hr>	
 						
 						<div class="form-group">
 							<label>Select the Target entity</label>
-							<select class="form-control" required="required" placeholder="Select a target entity">
+							<select name="target-entity" class="form-control" required="required" placeholder="Select a target entity">
 		    					<option value="hop-minimal">HOP-minimal</option>
 		    					<option value="finrisk">FinRisk</option>
 							</select>
