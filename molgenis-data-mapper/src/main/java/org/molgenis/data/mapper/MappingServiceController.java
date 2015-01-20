@@ -2,11 +2,13 @@ package org.molgenis.data.mapper;
 
 import static org.molgenis.data.mapper.MappingServiceController.URI;
 
+import java.util.HashMap;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.molgenis.auth.MolgenisUser;
+import org.molgenis.data.mapping.AttributeMapping;
 import org.molgenis.data.mapping.EntityMapping;
 import org.molgenis.data.mapping.MappingProject;
 import org.molgenis.data.mapping.MappingService;
@@ -23,8 +25,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -58,19 +63,38 @@ public class MappingServiceController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/addmappingproject", method = RequestMethod.POST)
-	public String addMappingProject(HttpServletRequest request, Model model)
+	public String addMappingProject(@RequestParam("mapping-project-name") String identifier, Model model)
 	{
-		mappingService.addMappingProject(request.getParameter("mapping-project-name").toString(), getCurrentUser());
+		mappingService.addMappingProject(identifier, getCurrentUser());
 
 		model = setModelAttributes(model);
 		return VIEW_MAPPING_PROJECTS;
 	}
+	
+	@RequestMapping(value = "/editmappingproject", method = RequestMethod.POST)
+	public String editMappingProject(@RequestParam("mapping-project-name") String identifier, Model model) {
+		MappingProject mappingProject = mappingService.getMappingProject(identifier);
+		mappingService.updateMappingProject(mappingProject);
+		
+		model = setModelAttributes(model);
+		
+		return VIEW_MAPPING_PROJECTS;
+	}
 
-	@RequestMapping("/mappingproject/{id}")
-	public String getAttributeMappingScreen(Model model)
+	@RequestMapping("/attributemapping/{id}")
+	public String getAttributeMappingScreen(@PathVariable("id") String identifier, Model model)
 	{
+		model.addAttribute("mappingProject", mappingService.getMappingProject(identifier));
+		model.addAttribute("entityMappings", mappingService.getMappingProject(identifier).getEntityMappings());
+		model.addAttribute("attributeMappings", mappingService.getAttributeMappings(identifier));
 		// TODO Put attribute mapping information based on mapping project ID into the model
 		return VIEW_ATTRIBUTE_MAPPING;
+	}
+	
+	@RequestMapping("/getsourcecolumn")
+	public ResponseBody getAttributesForNewSourceColumn(@RequestBody String newSourceEntityName){
+		
+		return null; 
 	}
 
 	private Model setModelAttributes(Model model)
