@@ -105,6 +105,7 @@
 				row.append(gatherOntologyInfoHelper(inputEntity, ontologyTerm));
 				row.append('<td>' + ontologyTerm.Score.toFixed(2) + '%</td>');
 				row.append('<td><button type="button" class="btn btn-default"><span class="glyphicon glyphicon-ok"></span></button></td>');
+				row.data('ontologyTerm', ontologyTerm);
 				row.find('button:eq(0)').click(function(){
 					getMappingEntity(inputEntity.Identifier, ontologyServiceRequest.entityName, function(data){
 						if(data.items.length > 0){
@@ -112,8 +113,10 @@
 							var href = '/api/v1/MatchingTaskContent/' + mappedEntity.Identifier;
 							var updatedMappedEntity = {};
 							$.map(mappedEntity, function(val, key){
-								if(key !== 'Identifier') updatedMappedEntity[key] = val;
 								if(key === 'Validated') updatedMappedEntity[key] = true;
+								else if(key === 'Match_term') updatedMappedEntity['Match_term'] = row.data('ontologyTerm').ontologyTermIRI;
+								else if(key === 'Score') updatedMappedEntity['Score'] = row.data('ontologyTerm').Score;
+								else if(key !== 'Identifier') updatedMappedEntity[key] = val;
 							});
 							restApi.update(href, updatedMappedEntity);
 							location.reload();
