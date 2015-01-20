@@ -366,7 +366,7 @@ public class OntologyServiceImpl implements OntologyService
 
 		Collections.sort(entities);
 
-		return new OntologyServiceResultImpl(inputData, entities, comparableEntities.size());
+		return new OntologyServiceResultImpl(inputData, entities, entities.size());
 	}
 
 	private BigDecimal matchOntologyTerm(String queryString, Entity entity)
