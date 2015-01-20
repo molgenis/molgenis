@@ -257,7 +257,7 @@ public class ProtocolViewerController extends MolgenisPluginController
 			model.addObject("ok", true);
 			model.addObject("message", "Your submission has been received.");
 			return model;
-		} catch (Exception ex){
+		} catch (RuntimeException ex){
 			ModelAndView model = new ModelAndView("order-response");
 			model.addObject("ok", false);
 			model.addObject("message", ex.getMessage());
