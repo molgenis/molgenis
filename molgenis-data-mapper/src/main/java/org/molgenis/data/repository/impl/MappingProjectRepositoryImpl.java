@@ -14,12 +14,9 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.util.List;
 import java.util.ArrayList;
 
-@Component
 public class MappingProjectRepositoryImpl implements MappingProjectRepository
 {
 	public static final MappingProjectMetaData META_DATA = new MappingProjectMetaData();
@@ -27,7 +24,6 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 	private final CrudRepository repository;
 	private MolgenisUserService molgenisUserService;
 
-	@Autowired
 	public MappingProjectRepositoryImpl(CrudRepository repository,
 			MolgenisUserService molgenisUserService)
 	{
