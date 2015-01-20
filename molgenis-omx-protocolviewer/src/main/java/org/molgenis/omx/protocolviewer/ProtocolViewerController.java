@@ -247,12 +247,22 @@ public class ProtocolViewerController extends MolgenisPluginController
 	// Spring's StandardServletMultipartResolver can't bind a RequestBody or
 	// ModelAttribute
 	@RequestMapping(value = "/order", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void orderData(@RequestParam Integer catalogId, @RequestParam String name, @RequestParam Part file)
+	public ModelAndView orderData(@RequestParam Integer catalogId, @RequestParam String name, @RequestParam Part file)
 			throws IOException, MessagingException, UnknownCatalogException, UnknownStudyDefinitionException
 	{
 		if (!getEnableOrderAction()) throw new MolgenisDataAccessException("Action not allowed");
-		protocolViewerService.submitStudyDefinitionDraftForCurrentUser(name, file, catalogId.toString());
+		try {
+			protocolViewerService.submitStudyDefinitionDraftForCurrentUser(name, file, catalogId.toString());
+			ModelAndView model = new ModelAndView("order-response");
+			model.addObject("ok", true);
+			model.addObject("message", "Your submission has been received.");
+			return model;
+		} catch (RuntimeException ex){
+			ModelAndView model = new ModelAndView("order-response");
+			model.addObject("ok", false);
+			model.addObject("message", ex.getMessage());
+			return model;
+		}
 	}
 
 	@RequestMapping(value = "/orders", method = RequestMethod.GET)
