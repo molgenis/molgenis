@@ -622,18 +622,19 @@
 			}
 			
 			for (var propt in clinicalSynopsis){
-				// remove links, id's between { and }
-				var phenotype = clinicalSynopsis[propt].replace(/ *\{[^}]*\} */g, '');
+				// remove links, id's between { and }, and linebreaks
+				var phenotypes = clinicalSynopsis[propt].replace(/ *\{[^}]*\} */g, '');
+				phenotypes = phenotypes.split(";");
 				
-				// give each phenotype in one string it's own line
-				phenotype = replaceAll(phenotype, ';', '');
-				phenotype = phenotype.replace(lineBreaks, '<br />');
-				
-				if (propt == 'Inheritance' || propt == 'inheritance'){
-					synopsisParagraph.prepend('<span class="diseasematcher label label-success">' + phenotype + '</span><br />');		
-				}else{							
-					synopsisParagraph.append(phenotype + '<br />');
-				}
+				for (var phen in phenotypes){
+					if (propt == 'Inheritance' || propt == 'inheritance'){
+						synopsisParagraph.prepend('<span class="diseasematcher label label-success">' + phenotypes[phen] + '</span><br />');		
+					}else if(phenotypes[phen] == ''){
+						continue;
+					}else{					
+						synopsisParagraph.append(phenotypes[phen] + '<br />');
+					}
+				}			
 			}
 		}else{
 			// no clinicalSynopsis: this might belong to phenotypic series, for example http://omim.org/phenotypicSeries/249000
@@ -671,8 +672,8 @@
 							$.each(subParts, function(index, subPart) {
 								if (!isNaN(subPart)) {
 									// OMIM id, add a link
-									subPart.replace('.', '#');
-									linkedText += '<a href="http://www.omim.org/entry/' + subPart + '" target="_blank">' + subPart + '</a>';
+									link = subPart.replace('.', '#');
+									linkedText += '<a href="http://www.omim.org/entry/' + link + '" target="_blank">' + subPart + '</a>';
 									
 								} else {
 									linkedText += subPart;
