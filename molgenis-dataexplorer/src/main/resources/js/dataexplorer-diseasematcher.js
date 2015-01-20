@@ -74,6 +74,8 @@
 	var hbDatasetWarning = $('#hb-dataset-warning');
 	var hbDatasetWarningComp = Handlebars.compile(hbDatasetWarning.html());
 	var hbSelectionList = $('#hb-selection-list');
+	var hbClinicalSynopsis = $('#hb-clinical-synopsis');
+	var hbClinicalSynopsisComp = Handlebars.compile(hbClinicalSynopsis.html());
 
 	
 	/**
@@ -620,22 +622,24 @@
 			if ('oldFormat' in clinicalSynopsis){
 				clinicalSynopsis = clinicalSynopsis.oldFormat;
 			}
-			
+			var allPhenotypes = [];
+			var inheritancePhenotypes = [];
 			for (var propt in clinicalSynopsis){
 				// remove links, id's between { and }, and linebreaks
 				var phenotypes = clinicalSynopsis[propt].replace(/ *\{[^}]*\} */g, '');
 				phenotypes = phenotypes.split(";");
 				
-				for (var phen in phenotypes){
-					if (propt == 'Inheritance' || propt == 'inheritance'){
-						synopsisParagraph.prepend('<span class="diseasematcher label label-success">' + phenotypes[phen] + '</span><br />');		
-					}else if(phenotypes[phen] == ''){
-						continue;
-					}else{					
-						synopsisParagraph.append(phenotypes[phen] + '<br />');
+				if (propt.toUpperCase() === 'INHERITANCE'){
+					for (var phen in phenotypes){
+						inheritancePhenotypes.push(phenotypes[phen]);
 					}
-				}			
+				}else{
+					allPhenotypes.push.apply(allPhenotypes, phenotypes);
+				}
 			}
+			
+			var cs = hbClinicalSynopsisComp({all: allPhenotypes, inheritance: inheritancePhenotypes});
+			diseasePanel.append(cs);
 		}else{
 			// no clinicalSynopsis: this might belong to phenotypic series, for example http://omim.org/phenotypicSeries/249000
 			// TODO what to do with phenotypic series? 
@@ -719,7 +723,7 @@
 					if (omimObject != undefined){
 						showOmimObject(omimObject);
 					}else{
-						
+						//TODO
 					}
 					
 				}

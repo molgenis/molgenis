@@ -186,6 +186,21 @@
 	{{/if}}
 </script>
 
+<script id="hb-clinical-synopsis" class="diseasematcher" type="text/x-handlebars-template">
+	<ul class="clinical-synopsis">
+	{{#if inheritance}}
+		{{#each inheritance}}
+			<li><span class="diseasematcher label label-success">{{this}}</span></li>
+		{{/each}}
+	{{/if}}
+	{{#if all}}
+		{{#each all}}
+			<li>{{this}}</li>
+		{{/each}}
+	{{/if}}
+	</ul>
+</script>
+
 <script>
 	var tableEditable = ${tableEditable?string('true', 'false')};
 	$.when($.ajax("<@resource_href "/js/dataexplorer-diseasematcher.js"/>", {'cache': true}))
