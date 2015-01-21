@@ -74,6 +74,8 @@
 	var hbDatasetWarning = $('#hb-dataset-warning');
 	var hbDatasetWarningComp = Handlebars.compile(hbDatasetWarning.html());
 	var hbSelectionList = $('#hb-selection-list');
+	var hbClinicalSynopsis = $('#hb-clinical-synopsis');
+	var hbClinicalSynopsisComp = Handlebars.compile(hbClinicalSynopsis.html());
 
 	
 	/**
@@ -620,21 +622,25 @@
 			if ('oldFormat' in clinicalSynopsis){
 				clinicalSynopsis = clinicalSynopsis.oldFormat;
 			}
-			
+			var allPhenotypes = [];
+			var inheritancePhenotypes = [];
 			for (var propt in clinicalSynopsis){
-				// remove links, id's between { and }
-				var phenotype = clinicalSynopsis[propt].replace(/ *\{[^}]*\} */g, '');
+				// remove links, id's between { and }, and linebreaks
+				var phenotypes = clinicalSynopsis[propt].replace(/ *\{[^}]*\} */g, '');
+				phenotypes = phenotypes.split(";");
 				
-				// give each phenotype in one string it's own line
-				phenotype = replaceAll(phenotype, ';', '');
-				phenotype = phenotype.replace(lineBreaks, '<br />');
-				
-				if (propt == 'Inheritance' || propt == 'inheritance'){
-					synopsisParagraph.prepend('<span class="diseasematcher label label-success">' + phenotype + '</span><br />');		
-				}else{							
-					synopsisParagraph.append(phenotype + '<br />');
+				if (propt.toUpperCase() === 'INHERITANCE'){
+					for (var phen in phenotypes){
+						inheritancePhenotypes.push(phenotypes[phen]);
+					}
+				}else{
+					allPhenotypes.push.apply(allPhenotypes, phenotypes);
 				}
 			}
+			
+			var cs = hbClinicalSynopsisComp({all: allPhenotypes, inheritance: inheritancePhenotypes});
+			diseasePanel.append(cs);
+			
 		}else{
 			// no clinicalSynopsis: this might belong to phenotypic series, for example http://omim.org/phenotypicSeries/249000
 			// TODO what to do with phenotypic series? 
@@ -671,11 +677,11 @@
 							$.each(subParts, function(index, subPart) {
 								if (!isNaN(subPart)) {
 									// OMIM id, add a link
-									subPart.replace('.', '#');
-									linkedText += '<a href="http://www.omim.org/entry/' + subPart + '" target="_blank">' + subPart + '</a>';
+									link = subPart.replace('.', '#');
+									linkedText += '<a href="http://www.omim.org/entry/' + escapeHtml(link) + '" target="_blank">' + subPart + '</a>';
 									
 								} else {
-									linkedText += subPart;
+									linkedText += escapeHtml(subPart);
 								};
 							})
 							textParts[index] = linkedText;
@@ -718,7 +724,7 @@
 					if (omimObject != undefined){
 						showOmimObject(omimObject);
 					}else{
-						
+						//TODO
 					}
 					
 				}
@@ -980,5 +986,20 @@
 			return false;
 		}
 	}
+	
+	var entityMap = {
+		"&": "&amp;",
+		"<": "&lt;",
+		">": "&gt;",
+		'"': '&quot;',
+		"'": '&#39;',
+		"/": '&#x2F;'
+	};
+
+function escapeHtml(string) {
+	return String(string).replace(/[&<>"'\/]/g, function (s) {
+		return entityMap[s];
+	});
+}
 
 })($, window.top.molgenis = window.top.molgenis || {});
