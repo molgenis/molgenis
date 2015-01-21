@@ -22,6 +22,8 @@
 						<div class="col-md-12"><h3 class="text-center">PhenoTips disease filter</h3></div>
 					</div>
 					
+					<div class="diseasematcher-warnings"></div>
+					
 					<div class="top-buffer"/>
 					
 					<div class="col-md-6">
@@ -149,18 +151,6 @@
 		</div>
 	</div>		
 </div>
-
-<script id="hb-dataset-warning" class="diseasematcher" type="text/x-handlebars-template">
-	<div class="alert alert-warning" id="{{dataset}}-warning">
-		<strong>{{dataset}} not loaded!</strong> For this tool to work, please upload a valid <em>{{dataset}}</em> dataset.
-	</div>	
-</script>
-
-<script id="hb-column-warning" class="diseasematcher" type="text/x-handlebars-template">
-	<div class="alert alert-warning" id="{{column}}-warning">
-		<strong>No {{column}} column found!</strong> For this tool to work, make sure your dataset has a <em>{{column}}</em> column.
-	</div>	
-</script>
 
 <script id="hb-selection-list" class="diseasematcher" type="text/x-handlebars-template">
 	{{#if this.0.diseaseId}}

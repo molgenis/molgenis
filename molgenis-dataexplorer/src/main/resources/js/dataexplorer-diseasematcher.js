@@ -76,10 +76,6 @@
 	var selectionTitle = $('#diseasematcher-selection-title');
 	
 	//handlebars templates
-	var hbColumnWarning = $('#hb-column-warning');
-	var hbColumnWarningComp = Handlebars.compile(hbColumnWarning.html());
-	var hbDatasetWarning = $('#hb-dataset-warning');
-	var hbDatasetWarningComp = Handlebars.compile(hbDatasetWarning.html());
 	var hbSelectionList = $('#hb-selection-list');
 	var hbClinicalSynopsis = $('#hb-clinical-synopsis');
 	var hbClinicalSynopsisComp = Handlebars.compile(hbClinicalSynopsis.html());
@@ -109,13 +105,13 @@
 
 		// if an entity is selected, check if it has a gene symbol column and show a warning if it does not
 		restApi.getAsync(entityUri + '/meta', {}, function(data) {
-			if (data === null || !data.attributes.hasOwnProperty(geneSymbolColumn)) {
+			if (data === null || !data.attributes.hasOwnProperty(geneSymbolColumn)) {			
+				molgenis.createAlert([{
+					message: 'No geneSymbol column found!</strong> For this tool to work, make sure your dataset has a <em>geneSymbol</em> column.'}], 
+					'warning',
+					infoPanel);
 				
-				var warning = hbColumnWarningComp({column: geneSymbolColumn});
-				infoPanel.append(warning);
 				toolAvailable = false;
-		
-				// TODO determine which annotators to propose
 			}
 		});
 	}
@@ -130,8 +126,11 @@
 	function checkDatasetAvailable(dataset) {
 		restApi.getAsync('/api/v1/' + dataset, {'num' : 1},	function(data){
 			if (data.total === 0) {
-				var warning = hbDatasetWarningComp({dataset: dataset});
-				infoPanel.append(warning);
+				molgenis.createAlert([{
+					message: '<strong>' + dataset + ' not loaded!</strong> For this tool to work, please upload a valid <em>' + dataset + '</em> dataset.'}], 
+					'warning',
+					infoPanel);
+				
 				toolAvailable = false;
 			}
 		});
@@ -248,7 +247,10 @@
 					});
 					
 					if (suggestionObjects.length === 0){
-						molgenis.createAlert([{message: 'PhenoTips is offline or (one of) the HPO terms you entered is not valid!'}], 'warning');
+						molgenis.createAlert([{
+							message: 'PhenoTips is offline or (one of) the HPO terms you entered is not valid!'}], 
+							'warning',
+							$('.diseasematcher-warnings'));
 						return;
 					}
 					
@@ -467,7 +469,10 @@
 			var terms = $('#hpoTermsInput').val();
 						
 			if (/^(HP:\d{7})(,HP:\d{7})*$/.test(terms) === false){
-				molgenis.createAlert([{message: 'Incorrect input. Make sure to use HPO terms and separate them with a comma (without spaces).'}], 'warning');	
+				molgenis.createAlert([{
+					message: 'Incorrect input. Make sure to use HPO terms and separate them with a comma (without spaces).'}], 
+					'warning',
+					$('.diseasematcher-warnings'));	
 			}else{
 				terms = terms.split(',');		
 				filterPhenotipsOutputComplete(terms);
