@@ -25,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
@@ -427,6 +428,24 @@ public class OntologyServiceController extends MolgenisPluginController
 			public Iterable<String> getEntityNames()
 			{
 				return Arrays.asList(entityName);
+			}
+
+			@Override
+			public Iterator<Repository> iterator()
+			{
+				return null;
+			}
+
+			@Override
+			public String getName()
+			{
+				return "ONTOLOGY";
+			}
+
+			@Override
+			public Repository addEntityMeta(EntityMetaData entityMeta)
+			{
+				return getRepository(entityMeta.getName());
 			}
 		};
 	}

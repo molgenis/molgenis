@@ -9,9 +9,9 @@ import static org.mockito.Mockito.when;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.UserAuthority;
 import org.molgenis.auth.UserAuthorityRepository;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.Repository;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.context.ApplicationContext;
@@ -21,7 +21,7 @@ import org.testng.annotations.Test;
 
 public class MolgenisUserDecoratorTest
 {
-	private CrudRepository decoratedRepository;
+	private Repository decoratedRepository;
 	private MolgenisUserDecorator molgenisUserDecorator;
 	private PasswordEncoder passwordEncoder;
 	private UserAuthorityRepository userAuthorityRepository;
@@ -29,7 +29,7 @@ public class MolgenisUserDecoratorTest
 	@BeforeMethod
 	public void setUp()
 	{
-		decoratedRepository = mock(CrudRepository.class);
+		decoratedRepository = mock(Repository.class);
 		molgenisUserDecorator = new MolgenisUserDecorator(decoratedRepository);
 		ApplicationContext ctx = mock(ApplicationContext.class);
 		passwordEncoder = mock(PasswordEncoder.class);

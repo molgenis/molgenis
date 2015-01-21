@@ -6,11 +6,11 @@ import java.util.UUID;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.slf4j.Logger;
@@ -49,17 +49,14 @@ public class CrudRepositoryAnnotator
 	 * @param sourceRepo
 	 * @param createCopy
 	 * 
-	 *            FIXME: currently the annotators have to have knowledge about mySQL to add the annotated attributes
-	 *            FIXME: annotators only work for MySQL and Repositories that update their metadata when an
-	 *            Repository.update(Entity) is called. (like the workaround in the elasticSearchRepository)
 	 * 
 	 * */
 	@Transactional
 	public Repository annotate(RepositoryAnnotator annotator, Repository sourceRepo, boolean createCopy)
 	{
-		if (!(sourceRepo instanceof CrudRepository) && !createCopy)
+		if (!sourceRepo.getCapabilities().contains(RepositoryCapability.UPDATEABLE) && !createCopy)
 		{
-			throw new UnsupportedOperationException("Currently only CrudRepositories can be annotated");
+			throw new UnsupportedOperationException("Currently only updateable repositories can be annotated");
 		}
 
 		if (createCopy) LOG.info("Creating a copy of " + sourceRepo.getName() + " repository, which will be labelled "
@@ -71,10 +68,10 @@ public class CrudRepositoryAnnotator
 		EntityMetaData entityMetaData = sourceRepo.getEntityMetaData();
 		DefaultAttributeMetaData compoundAttributeMetaData = getCompoundResultAttribute(annotator, entityMetaData);
 
-		CrudRepository targetRepo = addAnnotatorMetadataToRepositories(entityMetaData, createCopy,
+		Repository targetRepo = addAnnotatorMetadataToRepositories(entityMetaData, createCopy,
 				compoundAttributeMetaData);
 
-		CrudRepository crudRepository = iterateOverEntitiesAndAnnotate(sourceRepo, targetRepo, annotator);
+		Repository crudRepository = iterateOverEntitiesAndAnnotate(sourceRepo, targetRepo, annotator);
 
 		LOG.info("Finished annotating " + sourceRepo.getName() + " with the " + annotator.getSimpleName()
 				+ " annotator");
@@ -90,14 +87,14 @@ public class CrudRepositoryAnnotator
 	 * @param annotator
 	 * @return
 	 */
-	private CrudRepository iterateOverEntitiesAndAnnotate(Repository sourceRepo, CrudRepository targetRepo,
+	private Repository iterateOverEntitiesAndAnnotate(Repository sourceRepo, Repository targetRepo,
 			RepositoryAnnotator annotator)
 	{
 		Iterator<Entity> entityIterator = annotator.annotate(sourceRepo.iterator());
 		if (targetRepo == null)
 		{
 			// annotate repository to itself
-			CrudRepository annotatedSourceRepository = (CrudRepository) sourceRepo;
+			Repository annotatedSourceRepository = sourceRepo;
 			while (entityIterator.hasNext())
 			{
 				Entity entity = entityIterator.next();
@@ -127,7 +124,7 @@ public class CrudRepositoryAnnotator
 	 * @param createCopy
 	 * @param compoundAttributeMetaData
 	 */
-	public CrudRepository addAnnotatorMetadataToRepositories(EntityMetaData entityMetaData, boolean createCopy,
+	public Repository addAnnotatorMetadataToRepositories(EntityMetaData entityMetaData, boolean createCopy,
 			DefaultAttributeMetaData compoundAttributeMetaData)
 	{
 		if (createCopy)

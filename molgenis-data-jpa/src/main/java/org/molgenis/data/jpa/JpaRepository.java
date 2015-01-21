@@ -1,11 +1,16 @@
 package org.molgenis.data.jpa;
 
+import static org.molgenis.data.RepositoryCapability.QUERYABLE;
+import static org.molgenis.data.RepositoryCapability.UPDATEABLE;
+import static org.molgenis.data.RepositoryCapability.WRITABLE;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -21,8 +26,6 @@ import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AggregateQuery;
-import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
@@ -31,8 +34,9 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.support.AbstractCrudRepository;
+import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.ConvertingIterable;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.QueryResolver;
@@ -44,11 +48,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 /**
  * Repository implementation for (generated) jpa entities
  */
-public class JpaRepository extends AbstractCrudRepository
+public class JpaRepository extends AbstractRepository
 {
 	private static final Logger LOG = LoggerFactory.getLogger(JpaRepository.class);
 
@@ -750,8 +755,8 @@ public class JpaRepository extends AbstractCrudRepository
 	}
 
 	@Override
-	public AggregateResult aggregate(AggregateQuery aggregateQuery)
+	public Set<RepositoryCapability> getCapabilities()
 	{
-		throw new UnsupportedOperationException();
+		return Sets.newHashSet(QUERYABLE, UPDATEABLE, WRITABLE);
 	}
 }

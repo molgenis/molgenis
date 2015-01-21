@@ -1,9 +1,8 @@
 package org.molgenis.data.jpa;
 
-import org.molgenis.data.CrudRepository;
-import org.molgenis.data.CrudRepositoryCollection;
 import org.molgenis.data.DataService;
-import org.molgenis.data.RepositoryDecoratorFactory;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.jpa.importer.JpaImportService;
 import org.slf4j.Logger;
@@ -24,20 +23,17 @@ public class JpaRepositoryRegistrator implements ApplicationListener<ContextRefr
 	private static final Logger LOG = LoggerFactory.getLogger(JpaRepositoryRegistrator.class);
 
 	private final DataService dataService;
-	private final CrudRepositoryCollection repositoryCollection;
-	private final RepositoryDecoratorFactory repositoryDecoratorFactory;
+	private final RepositoryCollection repositoryCollection;
 	private final JpaImportService jpaImportService;
 	private final ImportServiceFactory importServiceFactory;
 
 	@Autowired
 	public JpaRepositoryRegistrator(DataService dataService,
-			@Qualifier("JpaRepositoryCollection") CrudRepositoryCollection repositoryCollection,
-			RepositoryDecoratorFactory repositoryDecoratorFactory, JpaImportService jpaImportService,
-			ImportServiceFactory importServiceFactory)
+			@Qualifier("JpaRepositoryCollection") RepositoryCollection repositoryCollection,
+			JpaImportService jpaImportService, ImportServiceFactory importServiceFactory)
 	{
 		this.dataService = dataService;
 		this.repositoryCollection = repositoryCollection;
-		this.repositoryDecoratorFactory = repositoryDecoratorFactory;
 		this.jpaImportService = jpaImportService;
 		this.importServiceFactory = importServiceFactory;
 	}
@@ -45,16 +41,11 @@ public class JpaRepositoryRegistrator implements ApplicationListener<ContextRefr
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
-		LOG.info("Registering JPA repositories ...");
 		for (String name : repositoryCollection.getEntityNames())
 		{
-			LOG.debug("Registering JPA repository [" + name + "]");
-			CrudRepository repository = repositoryCollection.getCrudRepository(name);
-
-			// apply repository decorators (e.g. security, indexing, validation)
-			dataService.addRepository(repositoryDecoratorFactory.createDecoratedRepository(repository));
+			Repository repository = repositoryCollection.getRepository(name);
+			dataService.getMeta().addEntityMeta(repository.getEntityMetaData());
 		}
-		LOG.info("Registered JPA repositories");
 
 		importServiceFactory.addImportService(jpaImportService);
 		LOG.info("Registered JPA importer");

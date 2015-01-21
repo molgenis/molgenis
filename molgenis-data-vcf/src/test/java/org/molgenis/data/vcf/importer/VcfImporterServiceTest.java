@@ -20,6 +20,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.FileRepositoryCollection;
+import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
 import org.molgenis.data.vcf.VcfRepositoryCollection;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.util.ResourceUtils;
@@ -30,7 +31,7 @@ public class VcfImporterServiceTest
 	@Test
 	public void testImport() throws IOException
 	{
-		DataService dataService = new DataServiceImpl();
+		DataService dataService = new DataServiceImpl(new NonDecoratingRepositoryDecoratorFactory());
 
 		EmbeddedElasticSearchServiceFactory factory = new EmbeddedElasticSearchServiceFactory("vcf-import-test"
 				+ Math.random());

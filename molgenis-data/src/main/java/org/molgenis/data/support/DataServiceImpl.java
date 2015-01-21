@@ -3,7 +3,7 @@ package org.molgenis.data.support;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserHasRole;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -11,7 +11,6 @@ import java.util.TreeSet;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -19,6 +18,8 @@ import org.molgenis.data.Manageable;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.MetaDataService;
 import org.slf4j.Logger;
@@ -27,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 /**
  * Implementation of the DataService interface
@@ -36,14 +38,16 @@ public class DataServiceImpl implements DataService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(DataServiceImpl.class);
 
-	private final Map<String, CrudRepository> repositories;
+	private final Map<String, Repository> repositories;
 	private final Set<String> repositoryNames;
 	private MetaDataService metaDataService;
+	private final RepositoryDecoratorFactory repositoryDecoratorFactory;
 
-	public DataServiceImpl()
+	public DataServiceImpl(RepositoryDecoratorFactory repositoryDecoratorFactory)
 	{
-		this.repositories = new LinkedHashMap<String, CrudRepository>();
+		this.repositories = Maps.newLinkedHashMap();
 		this.repositoryNames = new TreeSet<String>();
+		this.repositoryDecoratorFactory = repositoryDecoratorFactory;
 	}
 
 	/**
@@ -60,8 +64,7 @@ public class DataServiceImpl implements DataService
 		this.metaDataService = metaDataService;
 	}
 
-	@Override
-	public void addRepository(CrudRepository newRepository)
+	public void addRepository(Repository newRepository)
 	{
 		String repositoryName = newRepository.getName();
 		if (repositories.containsKey(repositoryName.toLowerCase()))
@@ -70,10 +73,11 @@ public class DataServiceImpl implements DataService
 		}
 		if (LOG.isDebugEnabled()) LOG.debug("Adding repository [" + repositoryName + "]");
 		repositoryNames.add(repositoryName);
-		repositories.put(repositoryName.toLowerCase(), newRepository);
+
+		Repository decoratedRepo = repositoryDecoratorFactory.createDecoratedRepository(newRepository);
+		repositories.put(repositoryName.toLowerCase(), decoratedRepo);
 	}
 
-	@Override
 	public void removeRepository(String repositoryName)
 	{
 		if (null == repositoryName)
@@ -213,11 +217,12 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public CrudRepository getRepository(String entityName)
+	public Repository getRepository(String entityName)
 	{
-		CrudRepository repository = repositories.get(entityName.toLowerCase());
+		Repository repository = repositories.get(entityName.toLowerCase());
 		if (repository == null) throw new UnknownEntityException("Unknown entity [" + entityName + "]");
-		else return repository;
+
+		return repository;
 	}
 
 	@Override
@@ -290,6 +295,18 @@ public class DataServiceImpl implements DataService
 	public MetaDataService getMeta()
 	{
 		return metaDataService;
+	}
+
+	@Override
+	public Iterator<Repository> iterator()
+	{
+		return repositories.values().iterator();
+	}
+
+	@Override
+	public Set<RepositoryCapability> getCapabilities(String repositoryName)
+	{
+		return getRepository(repositoryName).getCapabilities();
 	}
 
 }

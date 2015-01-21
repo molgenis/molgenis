@@ -1,10 +1,11 @@
 package org.molgenis.data.csv;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -12,12 +13,15 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.springframework.util.StringUtils;
+
+import com.google.common.collect.Iterables;
 
 /**
  * Repository implementation for csv files.
@@ -85,7 +89,15 @@ public class CsvRepository extends AbstractRepository
 	}
 
 	@Override
-	public void close() throws IOException
+	public Set<RepositoryCapability> getCapabilities()
 	{
+		return Collections.emptySet();
 	}
+
+	@Override
+	public long count()
+	{
+		return Iterables.size(this);
+	}
+
 }

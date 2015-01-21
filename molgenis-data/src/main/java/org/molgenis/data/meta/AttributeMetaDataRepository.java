@@ -29,12 +29,12 @@ import java.util.UUID;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.ManageableCrudRepositoryCollection;
+import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Query;
 import org.molgenis.data.Range;
+import org.molgenis.data.Repository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -52,11 +52,11 @@ class AttributeMetaDataRepository
 {
 	public static final AttributeMetaDataMetaData META_DATA = new AttributeMetaDataMetaData();
 
-	private final CrudRepository repository;
+	private final Repository repository;
 
 	private final EntityMetaDataRepository entityMetaDataRepository;
 
-	public AttributeMetaDataRepository(ManageableCrudRepositoryCollection collection,
+	public AttributeMetaDataRepository(ManageableRepositoryCollection collection,
 			EntityMetaDataRepository entityMetaDataRepository)
 	{
 		this.entityMetaDataRepository = entityMetaDataRepository;
@@ -64,7 +64,7 @@ class AttributeMetaDataRepository
 		fillAllEntityAttributes();
 	}
 
-	CrudRepository getRepository()
+	Repository getRepository()
 	{
 		return repository;
 	}
@@ -177,7 +177,7 @@ class AttributeMetaDataRepository
 		{
 			attributeMetaDataEntity.set(PART_OF_ATTRIBUTE, parentCompoundAtt.getName());
 		}
-		if (att.getDataType() instanceof EnumField)
+		if ((att.getDataType() instanceof EnumField) && (att.getEnumOptions() != null))
 		{
 			attributeMetaDataEntity.set(ENUM_OPTIONS, Joiner.on(",").join(att.getEnumOptions()));
 		}

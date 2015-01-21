@@ -11,7 +11,6 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
-import org.molgenis.data.elasticsearch.ElasticsearchRepository;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.merge.RepositoryMerger;
 import org.molgenis.data.support.DefaultAttributeMetaData;
@@ -37,7 +36,6 @@ import com.google.common.collect.Iterables;
 @RequestMapping(URI)
 public class GeneticRepositoryMergerController extends MolgenisPluginController
 {
-	@SuppressWarnings("unused")
 	private static final Logger LOG = LoggerFactory.getLogger(GeneticRepositoryMergerController.class);
 
 	public static final String ID = "geneticrepositorymerger";
@@ -133,23 +131,12 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 		// Delete if exists
 		if (dataService.hasRepository(resultSet))
 		{
-			if (searchService.documentTypeExists(resultSet))
-			{
-				searchService.deleteDocumentsByType(resultSet);
-				dataService.removeRepository(resultSet);
-			}
-			else
-			{
-				throw new RuntimeException("Repository " + resultSet + " is not a ElasticSearchRepository");
-			}
+			dataService.getMeta().deleteEntityMeta(resultSet);
 		}
 
 		EntityMetaData mergedEntityMetaData = repositoryMerger.mergeMetaData(geneticRepositories, commonAttributes,
 				resultSet);
-		// TODO
-		// searchService.createMappings(mergedEntityMetaData, true, true, true, true);
-
-		ElasticsearchRepository mergedRepository = new ElasticsearchRepository(mergedEntityMetaData, searchService);
+		Repository mergedRepository = dataService.getMeta().addEntityMeta(mergedEntityMetaData);
 		repositoryMerger.merge(geneticRepositories, commonAttributes, mergedRepository, ID_FIELD);
 
 		return resultSet;

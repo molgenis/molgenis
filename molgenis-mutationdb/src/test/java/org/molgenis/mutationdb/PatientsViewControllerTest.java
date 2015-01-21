@@ -16,10 +16,10 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Repository;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
@@ -88,7 +88,7 @@ public class PatientsViewControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void refreshReturnTrue() throws Exception
 	{
-		CrudRepository patientsViewRepo = mock(CrudRepository.class);
+		Repository patientsViewRepo = mock(Repository.class);
 
 		when(dataService.hasRepository(PatientsViewController.ENTITYNAME_PATIENTSVIEW)).thenReturn(true);
 		doNothing().when(mysqlViewService).truncate(PatientsViewController.ENTITYNAME_PATIENTSVIEW);
@@ -119,8 +119,8 @@ public class PatientsViewControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void create() throws Exception
 	{
-		CrudRepository patientsViewRepo = mock(CrudRepository.class);
-		CrudRepository patientsRepo = mock(CrudRepository.class);
+		Repository patientsViewRepo = mock(Repository.class);
+		Repository patientsRepo = mock(Repository.class);
 
 		Entity entity = mock(Entity.class);
 		when(entity.getString(PatientsViewController.PATIENT_ID)).thenReturn("P1");

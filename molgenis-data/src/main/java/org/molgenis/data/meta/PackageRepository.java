@@ -6,11 +6,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.ManageableCrudRepositoryCollection;
+import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Package;
+import org.molgenis.data.Repository;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Tag;
 import org.molgenis.data.semantic.TagImpl;
@@ -34,7 +34,7 @@ class PackageRepository
 	/**
 	 * The repository where the package entities are stored.
 	 */
-	private final CrudRepository repository;
+	private final Repository repository;
 
 	/**
 	 * In-memory cache of all packages, filled with entities and attributes.
@@ -45,16 +45,16 @@ class PackageRepository
 	 * Creates a new PackageRepository.
 	 * 
 	 * @param coll
-	 *            {@link ManageableCrudRepositoryCollection} that will be used to store the package entities.
+	 *            {@link ManageableRepositoryCollection} that will be used to store the package entities.
 	 */
-	public PackageRepository(ManageableCrudRepositoryCollection coll)
+	public PackageRepository(ManageableRepositoryCollection coll)
 	{
 		repository = coll.addEntityMeta(META_DATA);
 		updatePackageCache();
 		addDefaultPackage();
 	}
 
-	CrudRepository getRepository()
+	Repository getRepository()
 	{
 		return repository;
 	}

@@ -9,7 +9,6 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
@@ -174,7 +173,7 @@ public class VcfImporterService implements ImportService
 			throws IOException
 	{
 		EntityImportReport report = new EntityImportReport();
-		CrudRepository sampleRepository = null;
+		Repository sampleRepository = null;
 		String entityName = inRepository.getName();
 
 		if (dataService.hasRepository(entityName))
@@ -194,7 +193,7 @@ public class VcfImporterService implements ImportService
 			addedEntities.add(sampleAttribute.getRefEntity());
 		}
 
-		CrudRepository outRepository = dataService.getMeta().addEntityMeta(entityMetaData);
+		Repository outRepository = dataService.getMeta().addEntityMeta(entityMetaData);
 		addedEntities.add(entityMetaData);
 
 		Iterator<Entity> inIterator = inRepository.iterator();

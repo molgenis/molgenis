@@ -1,19 +1,24 @@
 package org.molgenis.ontology.matching;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.csv.CsvRepository;
+import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 
-public class AdaptedCsvRepository implements Repository
+import com.google.common.collect.Iterables;
+
+public class AdaptedCsvRepository extends AbstractRepository
 {
 	private final CsvRepository csvRepository;
 	private final String entityName;
@@ -96,8 +101,15 @@ public class AdaptedCsvRepository implements Repository
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
+	public Set<RepositoryCapability> getCapabilities()
 	{
-		throw new UnsupportedOperationException();
+		return Collections.emptySet();
 	}
+
+	@Override
+	public long count()
+	{
+		return Iterables.size(this);
+	}
+
 }

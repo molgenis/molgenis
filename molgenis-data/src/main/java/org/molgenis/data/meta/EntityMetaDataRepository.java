@@ -19,10 +19,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.ManageableCrudRepositoryCollection;
+import org.molgenis.data.ManageableRepositoryCollection;
+import org.molgenis.data.Repository;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.util.DependencyResolver;
@@ -41,24 +41,25 @@ class EntityMetaDataRepository
 	private static final Logger LOG = LoggerFactory.getLogger(EntityMetaDataRepository.class);
 
 	public static final EntityMetaDataMetaData META_DATA = new EntityMetaDataMetaData();
-	private final CrudRepository repository;
+	private final Repository repository;
 	private final PackageRepository packageRepository;
+	private final ManageableRepositoryCollection collection;
 	private final Map<String, DefaultEntityMetaData> entityMetaDataCache = new HashMap<String, DefaultEntityMetaData>();
 
-	public EntityMetaDataRepository(ManageableCrudRepositoryCollection collection, PackageRepository packageRepository)
+	public EntityMetaDataRepository(ManageableRepositoryCollection collection, PackageRepository packageRepository)
 	{
 		this.packageRepository = packageRepository;
 		this.repository = collection.addEntityMeta(META_DATA);
-		applyPatches(collection);
+		this.collection = collection;
 		fillEntityMetaDataCache();
 	}
 
-	CrudRepository getRepository()
+	Repository getRepository()
 	{
 		return repository;
 	}
 
-	private void applyPatches(ManageableCrudRepositoryCollection collection)
+	private void applyPatches(ManageableRepositoryCollection collection)
 	{
 		try
 		{
@@ -152,7 +153,8 @@ class EntityMetaDataRepository
 		emd.setLabel(entityMetaData.getLabel());
 		emd.setAbstract(entityMetaData.isAbstract());
 		emd.setDescription(entityMetaData.getDescription());
-		emd.setBackend(entityMetaData.getBackend());
+		emd.setBackend(entityMetaData.getBackend() == null ? collection.getName() : entityMetaData.getBackend());
+
 		if (entityMetaData.getExtends() != null)
 		{
 			emd.setExtends(entityMetaDataCache.get(entityMetaData.getExtends().getName()));

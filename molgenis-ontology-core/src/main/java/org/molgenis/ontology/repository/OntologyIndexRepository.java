@@ -1,8 +1,11 @@
 package org.molgenis.ontology.repository;
 
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.molgenis.data.Entity;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.util.MapperTypeSanitizer;
 import org.molgenis.data.support.MapEntity;
@@ -58,15 +61,16 @@ public class OntologyIndexRepository extends AbstractOntologyRepository
 		};
 	}
 
+	@Override
 	public long count()
 	{
 		return 1;
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
+	public Set<RepositoryCapability> getCapabilities()
 	{
-		throw new UnsupportedOperationException();
+		return Collections.emptySet();
 	}
 
 }

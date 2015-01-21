@@ -2,6 +2,7 @@ package org.molgenis.ontology.service;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.ontology.Ontology;
 import org.molgenis.ontology.OntologyService;
 import org.molgenis.ontology.repository.OntologyQueryRepository;
@@ -15,7 +16,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class OntologyRepositoryRegistrator implements ApplicationListener<ContextRefreshedEvent>, Ordered
 {
-	private final DataService dataService;
+	private final DataServiceImpl dataService;
 	private final SearchService searchService;
 	private final OntologyService ontologyService;
 
@@ -24,7 +25,7 @@ public class OntologyRepositoryRegistrator implements ApplicationListener<Contex
 			OntologyService ontologyService)
 	{
 		this.searchService = searchService;
-		this.dataService = dataService;
+		this.dataService = (DataServiceImpl) dataService;// FIXME
 		this.ontologyService = ontologyService;
 	}
 
@@ -40,6 +41,8 @@ public class OntologyRepositoryRegistrator implements ApplicationListener<Contex
 		// // Register ontology info
 		OntologyQueryRepository ontologyRepository = new OntologyQueryRepository(
 				OntologyQueryRepository.DEFAULT_ONTOLOGY_REPO, ontologyService, searchService, dataService);
+
+		// TODO use dataService.getMeta().addEntityMetaData
 		dataService.addRepository(ontologyRepository);
 
 		for (Ontology ontology : ontologyService.getAllOntologies())

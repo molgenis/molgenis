@@ -1,21 +1,24 @@
 package org.molgenis.data.elasticsearch;
 
-import org.molgenis.data.CrudRepository;
+import java.util.Set;
+
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.IndexedCrudRepository;
+import org.molgenis.data.IndexedRepository;
 import org.molgenis.data.Manageable;
 import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Repository that wraps an existing repository and retrieves count/aggregate information from a Elasticsearch index
  */
-public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepository implements IndexedCrudRepository
+public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepository implements IndexedRepository
 {
-	private final CrudRepository repository;
+	private final Repository repository;
 
-	public ElasticsearchRepositoryDecorator(CrudRepository repository, SearchService elasticSearchService)
+	public ElasticsearchRepositoryDecorator(Repository repository, SearchService elasticSearchService)
 	{
 		super(elasticSearchService);
 		if (repository == null) throw new IllegalArgumentException("repository is null");
@@ -132,5 +135,15 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 		((Manageable) repository).drop();
 
 		super.drop();
+	}
+
+	@Override
+	public Set<RepositoryCapability> getCapabilities()
+	{
+		Set<RepositoryCapability> capabilities = repository.getCapabilities();
+		capabilities.add(RepositoryCapability.QUERYABLE);
+		capabilities.add(RepositoryCapability.AGGREGATEABLE);
+
+		return capabilities;
 	}
 }

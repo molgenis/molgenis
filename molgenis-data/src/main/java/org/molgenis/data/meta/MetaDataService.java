@@ -3,10 +3,10 @@ package org.molgenis.data.meta;
 import java.util.List;
 
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.ManageableCrudRepositoryCollection;
+import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Package;
+import org.molgenis.data.Repository;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.Ordered;
@@ -16,16 +16,16 @@ public interface MetaDataService extends ApplicationListener<ContextRefreshedEve
 	/**
 	 * Sets the Backend, in wich the meta data and the user data is saved
 	 *
-	 * @param ManageableCrudRepositoryCollection
+	 * @param ManageableRepositoryCollection
 	 */
-	void setDefaultBackend(ManageableCrudRepositoryCollection backend);
+	void setDefaultBackend(ManageableRepositoryCollection backend);
 
 	/**
 	 * Get the default backend
 	 * 
 	 * @return
 	 */
-	ManageableCrudRepositoryCollection getDefaultBackend();
+	ManageableRepositoryCollection getDefaultBackend();
 
 	/**
 	 * Lists all packages.
@@ -75,7 +75,7 @@ public interface MetaDataService extends ApplicationListener<ContextRefreshedEve
 	 * @param entityMeta
 	 * @return
 	 */
-	CrudRepository addEntityMeta(EntityMetaData entityMeta);
+	Repository addEntityMeta(EntityMetaData entityMeta);
 
 	/**
 	 * Deletes an EntityMeta of the default backend

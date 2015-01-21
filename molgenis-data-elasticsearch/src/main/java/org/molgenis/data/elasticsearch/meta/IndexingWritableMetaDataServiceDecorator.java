@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.util.List;
 
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.ManageableCrudRepositoryCollection;
+import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Package;
+import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.meta.MetaDataService;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -60,9 +60,9 @@ public class IndexingWritableMetaDataServiceDecorator implements MetaDataService
 
 	@Override
 	@Transactional
-	public CrudRepository addEntityMeta(EntityMetaData entityMetaData)
+	public Repository addEntityMeta(EntityMetaData entityMetaData)
 	{
-		CrudRepository repo = delegate.addEntityMeta(entityMetaData);
+		Repository repo = delegate.addEntityMeta(entityMetaData);
 
 		try
 		{
@@ -129,7 +129,7 @@ public class IndexingWritableMetaDataServiceDecorator implements MetaDataService
 	}
 
 	@Override
-	public void setDefaultBackend(ManageableCrudRepositoryCollection backend)
+	public void setDefaultBackend(ManageableRepositoryCollection backend)
 	{
 		delegate.setDefaultBackend(backend);
 	}
@@ -141,7 +141,7 @@ public class IndexingWritableMetaDataServiceDecorator implements MetaDataService
 	}
 
 	@Override
-	public ManageableCrudRepositoryCollection getDefaultBackend()
+	public ManageableRepositoryCollection getDefaultBackend()
 	{
 		return delegate.getDefaultBackend();
 	}

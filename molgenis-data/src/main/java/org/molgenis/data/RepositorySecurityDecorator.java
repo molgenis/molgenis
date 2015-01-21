@@ -4,15 +4,16 @@ import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.Permission;
 
-public class CrudRepositorySecurityDecorator implements CrudRepository
+public class RepositorySecurityDecorator implements Repository
 {
-	private final CrudRepository decoratedRepository;
+	private final Repository decoratedRepository;
 
-	public CrudRepositorySecurityDecorator(CrudRepository decoratedRepository)
+	public RepositorySecurityDecorator(Repository decoratedRepository)
 	{
 		this.decoratedRepository = decoratedRepository;
 	}
@@ -208,6 +209,12 @@ public class CrudRepositorySecurityDecorator implements CrudRepository
 	{
 		validatePermission(decoratedRepository.getName(), Permission.COUNT);
 		return decoratedRepository.aggregate(aggregateQuery);
+	}
+
+	@Override
+	public Set<RepositoryCapability> getCapabilities()
+	{
+		return decoratedRepository.getCapabilities();
 	}
 
 }

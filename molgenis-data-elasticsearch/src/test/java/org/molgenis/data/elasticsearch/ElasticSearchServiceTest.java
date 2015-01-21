@@ -35,6 +35,7 @@ import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
 import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -55,7 +56,7 @@ public class ElasticSearchServiceTest
 		indexName = "molgenis";
 		client = mock(Client.class);
 		entityToSourceConverter = mock(EntityToSourceConverter.class);
-		dataService = spy(new DataServiceImpl());
+		dataService = spy(new DataServiceImpl(new NonDecoratingRepositoryDecoratorFactory()));
 		searchService = spy(new ElasticSearchService(client, indexName, dataService, entityToSourceConverter, false));
 		BulkProcessorFactory bulkProcessorFactory = mock(BulkProcessorFactory.class);
 		ElasticSearchService.setBulkProcessorFactory(bulkProcessorFactory);

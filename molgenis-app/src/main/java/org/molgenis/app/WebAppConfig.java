@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.molgenis.DatabaseConfig;
 import org.molgenis.data.DataService;
-import org.molgenis.data.ManageableCrudRepositoryCollection;
+import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.system.RepositoryTemplateLoader;
@@ -46,7 +46,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	private MysqlRepositoryCollection mysqlRepositoryCollection;
 
 	@Override
-	public ManageableCrudRepositoryCollection getBackend()
+	public ManageableRepositoryCollection getBackend()
 	{
 		return mysqlRepositoryCollection;
 	}

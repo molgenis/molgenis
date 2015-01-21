@@ -11,9 +11,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.Repository;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.util.ResourceUtils;
@@ -64,7 +64,7 @@ public class PatientsViewController extends MolgenisPluginController
 	{
 		if (dataService.hasRepository(ENTITYNAME_PATIENTSVIEW))
 		{
-			CrudRepository patientsViewRepo = dataService.getRepository(ENTITYNAME_PATIENTSVIEW);
+			Repository patientsViewRepo = dataService.getRepository(ENTITYNAME_PATIENTSVIEW);
 			this.mysqlViewService.truncate(patientsViewRepo.getEntityMetaData().getName());
 			patientsViewRepo.deleteAll();
 			try
@@ -89,8 +89,8 @@ public class PatientsViewController extends MolgenisPluginController
 		List<Row> rows = null;
 		if (dataService.hasRepository(ENTITYNAME_PATIENTS) && dataService.hasRepository(ENTITYNAME_PATIENTSVIEW))
 		{
-			CrudRepository patientsViewRepo = dataService.getRepository(ENTITYNAME_PATIENTSVIEW);
-			CrudRepository patientsRepo = dataService.getRepository(ENTITYNAME_PATIENTS);
+			Repository patientsViewRepo = dataService.getRepository(ENTITYNAME_PATIENTSVIEW);
+			Repository patientsRepo = dataService.getRepository(ENTITYNAME_PATIENTS);
 			rows = createRows(patientsRepo, patientsViewRepo);
 		}
 		model.addAttribute("rows", rows);
@@ -98,7 +98,7 @@ public class PatientsViewController extends MolgenisPluginController
 		return "view-col7a1-table";
 	}
 
-	private List<Row> createRows(CrudRepository patientsRepo, CrudRepository patientsViewRepo)
+	private List<Row> createRows(Repository patientsRepo, Repository patientsViewRepo)
 	{
 		Iterator<Entity> iterator = patientsRepo.iterator();
 		List<Row> rows = new ArrayList<Row>();

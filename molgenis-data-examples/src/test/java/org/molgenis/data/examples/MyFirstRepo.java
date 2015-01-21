@@ -1,16 +1,22 @@
 package org.molgenis.data.examples;
 
-import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
-import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 
-public class MyFirstRepo implements Repository
+import com.google.common.collect.Iterables;
+
+import com.google.common.collect.Iterables;
+
+public class MyFirstRepo extends AbstractRepository
 {
 	@Override
 	public String getName()
@@ -43,15 +49,15 @@ public class MyFirstRepo implements Repository
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
+	public Set<RepositoryCapability> getCapabilities()
 	{
-		return null;
+		return Collections.emptySet();
 	}
 
 	@Override
-	public void close() throws IOException
+	public long count()
 	{
-
+		return Iterables.size(this);
 	}
 
 }

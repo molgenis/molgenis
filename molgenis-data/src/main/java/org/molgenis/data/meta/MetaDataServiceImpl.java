@@ -5,15 +5,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.CrudRepository;
-import org.molgenis.data.CrudRepositoryCollection;
-import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.ManageableCrudRepositoryCollection;
+import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Package;
-import org.molgenis.data.RepositoryDecoratorFactory;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.util.DependencyResolver;
 import org.slf4j.Logger;
@@ -39,20 +38,13 @@ public class MetaDataServiceImpl implements MetaDataService
 	private PackageRepository packageRepository;
 	private EntityMetaDataRepository entityMetaDataRepository;
 	private AttributeMetaDataRepository attributeMetaDataRepository;
-	private ManageableCrudRepositoryCollection defaultBackend;
-	private final Map<String, CrudRepositoryCollection> backends = Maps.newHashMap();
-	private final DataService dataService;
-	private final RepositoryDecoratorFactory repositoryDecoratorFactory;
+	private ManageableRepositoryCollection defaultBackend;
+	private final Map<String, RepositoryCollection> backends = Maps.newHashMap();
+	private final DataServiceImpl dataService;
 
-	public MetaDataServiceImpl(DataService dataService)
-	{
-		this(dataService, null);
-	}
-
-	public MetaDataServiceImpl(DataService dataService, RepositoryDecoratorFactory repositoryDecoratorFactory)
+	public MetaDataServiceImpl(DataServiceImpl dataService)
 	{
 		this.dataService = dataService;
-		this.repositoryDecoratorFactory = repositoryDecoratorFactory;
 	}
 
 	/**
@@ -61,10 +53,10 @@ public class MetaDataServiceImpl implements MetaDataService
 	 * Setter for the ManageableCrudRepositoryCollection, to be called after it's created. This resolves the circular
 	 * dependency {@link MysqlRepositoryCollection} => decorated {@link MetaDataService} => {@link RepositoryCreator}
 	 * 
-	 * @param ManageableCrudRepositoryCollection
+	 * @param ManageableRepositoryCollection
 	 */
 	@Override
-	public void setDefaultBackend(ManageableCrudRepositoryCollection backend)
+	public void setDefaultBackend(ManageableRepositoryCollection backend)
 	{
 		this.defaultBackend = backend;
 		backends.put(backend.getName(), backend);
@@ -74,26 +66,20 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	private void bootstrapMetaRepos()
 	{
-		CrudRepository tagRepo = defaultBackend.addEntityMeta(new TagMetaData());
-		dataService.addRepository(decorate(tagRepo));
+		Repository tagRepo = defaultBackend.addEntityMeta(new TagMetaData());
+		dataService.addRepository(tagRepo);
 
 		packageRepository = new PackageRepository(defaultBackend);
 		entityMetaDataRepository = new EntityMetaDataRepository(defaultBackend, packageRepository);
 		attributeMetaDataRepository = new AttributeMetaDataRepository(defaultBackend, entityMetaDataRepository);
 
-		dataService.addRepository(decorate(packageRepository.getRepository()));
-		dataService.addRepository(decorate(entityMetaDataRepository.getRepository()));
-		dataService.addRepository(decorate(attributeMetaDataRepository.getRepository()));
-	}
-
-	private CrudRepository decorate(CrudRepository repo)
-	{
-		if (repositoryDecoratorFactory == null) return repo;
-		return repositoryDecoratorFactory.createDecoratedRepository(repo);
+		dataService.addRepository(packageRepository.getRepository());
+		dataService.addRepository(entityMetaDataRepository.getRepository());
+		dataService.addRepository(attributeMetaDataRepository.getRepository());
 	}
 
 	@Override
-	public ManageableCrudRepositoryCollection getDefaultBackend()
+	public ManageableRepositoryCollection getDefaultBackend()
 	{
 		return defaultBackend;
 	}
@@ -109,7 +95,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		attributeMetaDataRepository.deleteAllAttributes(entityName);
 		EntityMetaData emd = getEntityMetaData(entityName);
 		entityMetaDataRepository.delete(entityName);
-		getBackend(emd).deleteEntityMeta(entityName);
+		getManageableRepositoryCollection(emd).deleteEntityMeta(entityName);
 	}
 
 	/**
@@ -122,39 +108,47 @@ public class MetaDataServiceImpl implements MetaDataService
 		// Update AttributeMetaDataRepository
 		attributeMetaDataRepository.remove(entityName, attributeName);
 		EntityMetaData emd = getEntityMetaData(entityName);
-		getBackend(emd).deleteAttribute(entityName, attributeName);
+		getManageableRepositoryCollection(emd).deleteAttribute(entityName, attributeName);
 	}
 
-	private ManageableCrudRepositoryCollection getBackend(EntityMetaData emd)
+	private ManageableRepositoryCollection getManageableRepositoryCollection(EntityMetaData emd)
+	{
+		RepositoryCollection backend = getRepositoryCollection(emd);
+		if (!(backend instanceof ManageableRepositoryCollection)) throw new RuntimeException(
+				"Backend  is not a ManageableCrudRepositoryCollection");
+
+		return (ManageableRepositoryCollection) backend;
+	}
+
+	private RepositoryCollection getRepositoryCollection(EntityMetaData emd)
 	{
 		String backendName = emd.getBackend() == null ? getDefaultBackend().getName() : emd.getBackend();
-		CrudRepositoryCollection backend = backends.get(backendName);
+		RepositoryCollection backend = backends.get(backendName);
 		if (backend == null) throw new RuntimeException("Unknown backend [" + backendName + "]");
-		if (!(backend instanceof ManageableCrudRepositoryCollection)) throw new RuntimeException("Backend ["
-				+ backendName + "] is not a ManageableCrudRepositoryCollection");
-		return (ManageableCrudRepositoryCollection) backend;
+
+		return backend;
 	}
 
 	@Transactional
 	@Override
-	public synchronized CrudRepository addEntityMeta(EntityMetaData emd)
+	public synchronized Repository addEntityMeta(EntityMetaData emd)
 	{
 		if (emd.isAbstract())
 		{
 			return null;
 		}
 
-		CrudRepositoryCollection backend = getBackend(emd);
+		RepositoryCollection backend = getRepositoryCollection(emd);
 
 		if (getEntityMetaData(emd.getName()) != null)
 		{
-			CrudRepository repo = backend.getCrudRepository(emd.getName());
 			if (!dataService.hasRepository(emd.getName()))
 			{
-				dataService.addRepository(repo);
+				dataService.addRepository(backend.getRepository(emd.getName()));
 			}
 
-			return repo;
+			// Return decorated repo
+			return dataService.getRepository(emd.getName());
 		}
 
 		if (dataService.hasRepository(emd.getName()))
@@ -180,10 +174,10 @@ public class MetaDataServiceImpl implements MetaDataService
 			attributeMetaDataRepository.add(mdEntity, att);
 		}
 
-		CrudRepository repo = backend.addEntityMeta(getEntityMetaData(emd.getName()));
-		dataService.addRepository(repo);
+		dataService.addRepository(backend.addEntityMeta(getEntityMetaData(emd.getName())));
 
-		return repo;
+		// Return decorated repo
+		return dataService.getRepository(emd.getName());
 	}
 
 	@Transactional
@@ -194,7 +188,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		attributeMetaDataRepository.add(entity, attr);
 
 		DefaultEntityMetaData emd = getEntityMetaData(fullyQualifiedEntityName);
-		getBackend(emd).addAttribute(fullyQualifiedEntityName, attr);
+		getManageableRepositoryCollection(emd).addAttribute(fullyQualifiedEntityName, attr);
 	}
 
 	@Override
@@ -273,7 +267,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		DefaultEntityMetaData emd = getEntityMetaData(entityName);
 		emd.addAttributeMetaData(attribute);
 		attributeMetaDataRepository.add(entity, attribute);
-		getBackend(emd).addAttributeSync(entityName, attribute);
+		getManageableRepositoryCollection(emd).addAttributeSync(entityName, attribute);
 	}
 
 	@Override
@@ -293,10 +287,10 @@ public class MetaDataServiceImpl implements MetaDataService
 	public synchronized void onApplicationEvent(ContextRefreshedEvent event)
 	{
 		// Discover all backends
-		Map<String, CrudRepositoryCollection> backendBeans = event.getApplicationContext().getBeansOfType(
-				CrudRepositoryCollection.class);
+		Map<String, RepositoryCollection> backendBeans = event.getApplicationContext().getBeansOfType(
+				RepositoryCollection.class);
 
-		for (CrudRepositoryCollection col : backendBeans.values())
+		for (RepositoryCollection col : backendBeans.values())
 		{
 			backends.put(col.getName(), col);
 		}
@@ -306,9 +300,9 @@ public class MetaDataServiceImpl implements MetaDataService
 		{
 			if (!emd.isAbstract())
 			{
-				CrudRepositoryCollection col = backends.get(emd.getBackend());
+				RepositoryCollection col = backends.get(emd.getBackend());
 				if (col == null) throw new MolgenisDataException("Unknown backend [" + emd.getBackend() + "]");
-				CrudRepository repo = col.addEntityMeta(emd);
+				Repository repo = col.addEntityMeta(emd);
 				dataService.addRepository(repo);
 			}
 		}

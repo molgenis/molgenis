@@ -2,16 +2,18 @@ package org.molgenis.security.user;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.UserAuthority;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.util.ApplicationContextProvider;
@@ -22,11 +24,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 
-public class MolgenisUserDecorator implements CrudRepository
+public class MolgenisUserDecorator implements Repository
 {
-	private final CrudRepository decoratedRepository;
+	private final Repository decoratedRepository;
 
-	public MolgenisUserDecorator(CrudRepository decoratedRepository)
+	public MolgenisUserDecorator(Repository decoratedRepository)
 	{
 		this.decoratedRepository = decoratedRepository;
 	}
@@ -147,7 +149,7 @@ public class MolgenisUserDecorator implements CrudRepository
 	{
 		MolgenisUser molgenisUser = findOne(entity.getIdValue(), MolgenisUser.class);
 
-		CrudRepository userAuthorityRepository = getUserAuthorityRepository();
+		Repository userAuthorityRepository = getUserAuthorityRepository();
 
 		UserAuthority suAuthority = userAuthorityRepository.findOne(
 				new QueryImpl().eq(UserAuthority.MOLGENISUSER, molgenisUser).and()
@@ -189,7 +191,7 @@ public class MolgenisUserDecorator implements CrudRepository
 		return passwordEncoder;
 	}
 
-	private CrudRepository getUserAuthorityRepository()
+	private Repository getUserAuthorityRepository()
 	{
 		ApplicationContext applicationContext = ApplicationContextProvider.getApplicationContext();
 		if (applicationContext == null)
@@ -201,7 +203,7 @@ public class MolgenisUserDecorator implements CrudRepository
 		{
 			throw new RuntimeException(new ApplicationContextException("missing required DataService bean"));
 		}
-		CrudRepository userAuthorityRepository = dataService.getRepository(UserAuthority.class.getSimpleName());
+		Repository userAuthorityRepository = dataService.getRepository(UserAuthority.class.getSimpleName());
 		if (userAuthorityRepository == null)
 		{
 			throw new RuntimeException("missing required UserAuthority repository");
@@ -260,8 +262,7 @@ public class MolgenisUserDecorator implements CrudRepository
 	@Override
 	public Query query()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return decoratedRepository.query();
 	}
 
 	@Override
@@ -273,8 +274,7 @@ public class MolgenisUserDecorator implements CrudRepository
 	@Override
 	public Iterable<Entity> findAll(Query q)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return decoratedRepository.findAll(q);
 	}
 
 	@Override
@@ -353,6 +353,12 @@ public class MolgenisUserDecorator implements CrudRepository
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
 		return decoratedRepository.aggregate(aggregateQuery);
+	}
+
+	@Override
+	public Set<RepositoryCapability> getCapabilities()
+	{
+		return decoratedRepository.getCapabilities();
 	}
 
 }

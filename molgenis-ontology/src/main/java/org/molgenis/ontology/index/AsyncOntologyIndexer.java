@@ -33,6 +33,7 @@ import org.molgenis.data.elasticsearch.util.Hit;
 import org.molgenis.data.elasticsearch.util.MapperTypeSanitizer;
 import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
+import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.ontology.Ontology;
@@ -75,6 +76,7 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 		this.ontologyService = ontologyService;
 	}
 
+	@Override
 	public boolean isIndexingRunning()
 	{
 		return (runningIndexProcesses.get() > 0);
@@ -113,8 +115,9 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 			String ontologyName = ontologyLoader.getOntologyName();
 			if (!dataService.hasRepository(ontologyName))
 			{
-				dataService.addRepository(new OntologyTermQueryRepository(ontologyName, searchService, dataService,
-						ontologyService));
+				// FIXME use dataService.getMeta().addEntityMetaData
+				((DataServiceImpl) dataService).addRepository(new OntologyTermQueryRepository(ontologyName,
+						searchService, dataService, ontologyService));
 			}
 			runningIndexProcesses.decrementAndGet();
 			indexingOntologyIri = null;
@@ -252,11 +255,13 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 		{ indexName }, documentTypeSantized)).actionGet().isExists();
 	}
 
+	@Override
 	public String getOntologyUri()
 	{
 		return indexingOntologyIri;
 	}
 
+	@Override
 	public boolean isCorrectOntology()
 	{
 		return isCorrectOntology;

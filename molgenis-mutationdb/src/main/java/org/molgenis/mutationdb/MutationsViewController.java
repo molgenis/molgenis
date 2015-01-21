@@ -11,7 +11,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
@@ -67,8 +66,8 @@ public class MutationsViewController extends MolgenisPluginController
 		List<Row> rows = null;
 		if (dataService.hasRepository(ENTITYNAME_MUTATIONSVIEW) && dataService.hasRepository(ENTITYNAME_MUTATIONS))
 		{
-			CrudRepository mutationsViewRepo = dataService.getRepository(ENTITYNAME_MUTATIONSVIEW);
-			CrudRepository mutationsRepo = dataService.getRepository(ENTITYNAME_MUTATIONS);
+			Repository mutationsViewRepo = dataService.getRepository(ENTITYNAME_MUTATIONSVIEW);
+			Repository mutationsRepo = dataService.getRepository(ENTITYNAME_MUTATIONS);
 			rows = createRows(mutationsViewRepo, mutationsRepo);
 		}
 		model.addAttribute("rows", rows);
@@ -101,7 +100,7 @@ public class MutationsViewController extends MolgenisPluginController
 		}
 	}
 
-	private List<Row> createRows(CrudRepository mutationsViewRepo, CrudRepository mutationsRepo)
+	private List<Row> createRows(Repository mutationsViewRepo, Repository mutationsRepo)
 	{
 		Iterator<Entity> iterator = mutationsRepo.iterator();
 		List<Row> rows = new ArrayList<Row>();

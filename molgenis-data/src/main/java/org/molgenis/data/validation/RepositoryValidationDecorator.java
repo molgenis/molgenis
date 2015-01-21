@@ -9,12 +9,13 @@ import org.apache.commons.io.IOUtils;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
@@ -23,13 +24,13 @@ import org.molgenis.util.HugeSet;
 
 import com.google.common.collect.Sets;
 
-public class RepositoryValidationDecorator implements CrudRepository
+public class RepositoryValidationDecorator implements Repository
 {
 	private final EntityAttributesValidator entityAttributesValidator;
 	private final DataService dataService;
-	private final CrudRepository decoratedRepository;
+	private final Repository decoratedRepository;
 
-	public RepositoryValidationDecorator(DataService dataService, CrudRepository repository,
+	public RepositoryValidationDecorator(DataService dataService, Repository repository,
 			EntityAttributesValidator entityAttributesValidator)
 	{
 		this.decoratedRepository = repository;
@@ -478,6 +479,12 @@ public class RepositoryValidationDecorator implements CrudRepository
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
 		return decoratedRepository.aggregate(aggregateQuery);
+	}
+
+	@Override
+	public Set<RepositoryCapability> getCapabilities()
+	{
+		return decoratedRepository.getCapabilities();
 	}
 
 }

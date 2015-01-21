@@ -1,18 +1,15 @@
 package org.molgenis.ontology.repository;
 
-import java.io.IOException;
-
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public abstract class AbstractOntologyRepository implements Repository
+public abstract class AbstractOntologyRepository extends AbstractRepository
 {
 	protected DefaultEntityMetaData entityMetaData = null;
 	protected final SearchService searchService;
@@ -87,14 +84,5 @@ public abstract class AbstractOntologyRepository implements Repository
 	{
 		return getEntityMetaData().getName();
 	}
-
-	@Override
-	public void close() throws IOException
-	{
-
-	}
-
-	@Override
-	public abstract <E extends Entity> Iterable<E> iterator(Class<E> clazz);
 
 }

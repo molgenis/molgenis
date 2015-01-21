@@ -4,9 +4,9 @@ import java.util.UUID;
 
 import javax.sql.DataSource;
 
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
-import org.molgenis.data.RepositoryDecoratorFactory;
+import org.molgenis.data.Repository;
+import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.importer.EmxImportService;
 import org.molgenis.data.importer.EmxMetaDataParser;
 import org.molgenis.data.importer.ImportService;
@@ -36,17 +36,59 @@ public class MySqlConfiguration
 	@Autowired
 	private ImportServiceFactory importServiceFactory;
 
-	// temporary workaround for module dependencies
-	@Autowired
-	private RepositoryDecoratorFactory repositoryDecoratorFactory;
-
 	@Autowired
 	private PermissionSystemService permissionSystemService;
+
+	@Autowired
+	private SearchService searchService;
+
+	@Bean
+	public AsyncJdbcTemplate asyncJdbcTemplate()
+	{
+		return new AsyncJdbcTemplate(new JdbcTemplate(dataSource));
+	}
+
+	@Bean
+	@Scope("prototype")
+	public MysqlRepository mysqlRepository()
+	{
+		return new MysqlRepository(dataSource, asyncJdbcTemplate());
+	}
+
+	@Bean
+	public MysqlRepositoryCollection mysqlRepositoryCollection()
+	{
+		MysqlRepositoryCollection mysqlRepositoryCollection = new MysqlRepositoryCollection(searchService, dataService)
+		{
+			@Override
+			protected MysqlRepository createMysqlRepository()
+			{
+				MysqlRepository repo = mysqlRepository();
+				repo.setRepositoryCollection(this);
+				return repo;
+			}
+		};
+
+		return mysqlRepositoryCollection;
+	}
+
+	// TODO emx importer to own module
+	@Bean
+	public ImportService emxImportService()
+	{
+		return new EmxImportService(emxMetaDataParser(), importWriter(), dataService);
+	}
+
+	@Bean
+	public ImportWriter importWriter()
+	{
+		return new ImportWriter(dataService, permissionSystemService, tagService());
+	}
 
 	@Bean
 	TagRepository tagRepository()
 	{
-		CrudRepository repo = mysqlRepositoryCollection().getCrudRepository(TagMetaData.ENTITY_NAME);
+		Repository repo = mysqlRepositoryCollection().getRepository(TagMetaData.ENTITY_NAME);
 		return new TagRepository(repo, new IdGenerator()
 		{
 
@@ -65,58 +107,14 @@ public class MySqlConfiguration
 	}
 
 	@Bean
-	public AsyncJdbcTemplate asyncJdbcTemplate()
-	{
-		return new AsyncJdbcTemplate(new JdbcTemplate(dataSource));
-	}
-
-	@Bean
-	@Scope("prototype")
-	public MysqlRepository mysqlRepository()
-	{
-		return new MysqlRepository(dataSource, asyncJdbcTemplate());
-	}
-
-	@Bean
-	public MysqlRepositoryCollection mysqlRepositoryCollection()
-	{
-		MysqlRepositoryCollection mysqlRepositoryCollection = new MysqlRepositoryCollection(dataSource,
-				repositoryDecoratorFactory)
-
-		{
-			@Override
-			protected MysqlRepository createMysqlRepository()
-			{
-				MysqlRepository repo = mysqlRepository();
-				repo.setRepositoryCollection(this);
-				return repo;
-			}
-		};
-
-		return mysqlRepositoryCollection;
-	}
-
-	@Bean
-	public ImportService emxImportService()
-	{
-		return new EmxImportService(emxMetaDataParser(), importWriter(), dataService);
-	}
-
-	@Bean
-	public ImportWriter importWriter()
-	{
-		return new ImportWriter(dataService, permissionSystemService, tagService());
-	}
-
-	@Bean
 	public MetaDataParser emxMetaDataParser()
 	{
 		return new EmxMetaDataParser(dataService);
 	}
 
 	@Bean
-	public MysqlRepositoryRegistrator mysqlRepositoryRegistrator()
+	public EmxImportServiceRegistrator mysqlRepositoryRegistrator()
 	{
-		return new MysqlRepositoryRegistrator(mysqlRepositoryCollection(), importServiceFactory, emxImportService());
+		return new EmxImportServiceRegistrator(importServiceFactory, emxImportService());
 	}
 }

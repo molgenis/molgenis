@@ -1,9 +1,7 @@
 package org.molgenis.data;
 
-
-public interface ManageableCrudRepositoryCollection extends CrudRepositoryCollection, Iterable<CrudRepository>
+public interface ManageableRepositoryCollection extends RepositoryCollection
 {
-
 	/**
 	 * Removes an entity definition from this ManageableCrudRepositoryCollection
 	 * 

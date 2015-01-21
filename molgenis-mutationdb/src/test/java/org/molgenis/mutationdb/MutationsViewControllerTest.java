@@ -15,10 +15,10 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Repository;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
@@ -86,7 +86,7 @@ public class MutationsViewControllerTest extends AbstractTestNGSpringContextTest
 	@Test
 	public void refreshReturnTrue() throws Exception
 	{
-		CrudRepository mutationsViewRepo = mock(CrudRepository.class);
+		Repository mutationsViewRepo = mock(Repository.class);
 
 		when(dataService.hasRepository(MutationsViewController.ENTITYNAME_MUTATIONSVIEW)).thenReturn(true);
 		when(dataService.getRepository(MutationsViewController.ENTITYNAME_MUTATIONSVIEW)).thenReturn(mutationsViewRepo);
@@ -114,8 +114,8 @@ public class MutationsViewControllerTest extends AbstractTestNGSpringContextTest
 	@Test
 	public void create() throws Exception
 	{
-		CrudRepository mutationsViewRepo = mock(CrudRepository.class);
-		CrudRepository mutaionRepo = mock(CrudRepository.class);
+		Repository mutationsViewRepo = mock(Repository.class);
+		Repository mutaionRepo = mock(Repository.class);
 
 		Entity entity = mock(Entity.class);
 		when(entity.getString(MutationsViewController.MUTATIONS__MUTATION_ID)).thenReturn("M1");

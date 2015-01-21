@@ -11,8 +11,7 @@ import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.IndexedCrudRepository;
-import org.molgenis.data.Manageable;
+import org.molgenis.data.IndexedRepository;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.ElasticSearchService.IndexingMode;
@@ -22,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Iterables;
 
-public abstract class AbstractElasticsearchRepository implements IndexedCrudRepository, Manageable
+public abstract class AbstractElasticsearchRepository implements IndexedRepository
 {
 	protected final SearchService elasticSearchService;
 

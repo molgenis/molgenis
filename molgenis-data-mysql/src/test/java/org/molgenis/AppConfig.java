@@ -5,9 +5,8 @@ import java.util.UUID;
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
-import org.molgenis.data.RepositoryDecoratorFactory;
+import org.molgenis.data.Repository;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.TagMetaData;
@@ -46,7 +45,7 @@ public class AppConfig
 	@Bean
 	TagRepository tagRepository()
 	{
-		CrudRepository repo = mysqlRepositoryCollection().getCrudRepository(TagMetaData.ENTITY_NAME);
+		Repository repo = mysqlRepositoryCollection().getRepository(TagMetaData.ENTITY_NAME);
 		return new TagRepository(repo, new IdGenerator()
 		{
 
@@ -120,12 +119,15 @@ public class AppConfig
 		return metaDataService;
 	}
 
+	public SearchService searchService()
+	{
+		return new ElasticSearchSservice();
+	}
+
 	@Bean
 	public MysqlRepositoryCollection mysqlRepositoryCollection()
 	{
-		MysqlRepositoryCollection mysqlRepositoryCollection = new MysqlRepositoryCollection(dataSource(),
-				repositoryDecoratorFactory())
-
+		MysqlRepositoryCollection mysqlRepositoryCollection = new MysqlRepositoryCollection(dataSource())
 		{
 			@Override
 			protected MysqlRepository createMysqlRepository()
@@ -143,19 +145,6 @@ public class AppConfig
 	public MolgenisPluginRegistry molgenisPluginRegistry()
 	{
 		return new MolgenisPluginRegistryImpl();
-	}
-
-	@Bean
-	public RepositoryDecoratorFactory repositoryDecoratorFactory()
-	{
-		return new RepositoryDecoratorFactory()
-		{
-			@Override
-			public CrudRepository createDecoratedRepository(CrudRepository repository)
-			{
-				return repository;
-			}
-		};
 	}
 
 }

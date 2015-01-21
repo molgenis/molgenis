@@ -16,12 +16,12 @@ import org.molgenis.charts.MolgenisChartException;
 import org.molgenis.charts.MolgenisSerieType;
 import org.molgenis.charts.XYDataChart;
 import org.molgenis.charts.calculations.BoxPlotCalcUtil;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
+import org.molgenis.data.Repository;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -43,7 +43,7 @@ public class ChartDataServiceImpl implements ChartDataService
 	public XYDataChart getXYDataChart(String entityName, String attributeNameXaxis, String attributeNameYaxis,
 			String split, List<QueryRule> queryRules)
 	{
-		CrudRepository repo = dataService.getRepository(entityName);
+		Repository repo = dataService.getRepository(entityName);
 		EntityMetaData entityMetaData = repo.getEntityMetaData();
 
 		final FieldTypeEnum attributeXFieldTypeEnum = entityMetaData.getAttribute(attributeNameXaxis).getDataType()
@@ -85,7 +85,7 @@ public class ChartDataServiceImpl implements ChartDataService
 	}
 
 	@Override
-	public XYDataSerie getXYDataSerie(CrudRepository repo, String entityName, String attributeNameXaxis,
+	public XYDataSerie getXYDataSerie(Repository repo, String entityName, String attributeNameXaxis,
 			String attributeNameYaxis, FieldTypeEnum attributeXFieldTypeEnum, FieldTypeEnum attributeYFieldTypeEnum,
 			List<QueryRule> queryRules)
 	{
@@ -110,7 +110,7 @@ public class ChartDataServiceImpl implements ChartDataService
 	}
 
 	@Override
-	public List<XYDataSerie> getXYDataSeries(CrudRepository repo, String entityName, String attributeNameXaxis,
+	public List<XYDataSerie> getXYDataSeries(Repository repo, String entityName, String attributeNameXaxis,
 			String attributeNameYaxis, FieldTypeEnum attributeXFieldTypeEnum, FieldTypeEnum attributeYFieldTypeEnum,
 			String split, List<QueryRule> queryRules)
 
@@ -207,7 +207,7 @@ public class ChartDataServiceImpl implements ChartDataService
 	public BoxPlotChart getBoxPlotChart(String entityName, String attributeName, List<QueryRule> queryRules,
 			String split, double scaleToCalcOutliers)
 	{
-		CrudRepository repo = dataService.getRepository(entityName);
+		Repository repo = dataService.getRepository(entityName);
 		EntityMetaData entityMetaData = repo.getEntityMetaData();
 
 		BoxPlotChart boxPlotChart = new BoxPlotChart();
@@ -324,7 +324,7 @@ public class ChartDataServiceImpl implements ChartDataService
 	 * @return
 	 */
 
-	private Iterable<Entity> getIterable(String entityName, CrudRepository repo, List<QueryRule> queryRules, Sort sort)
+	private Iterable<Entity> getIterable(String entityName, Repository repo, List<QueryRule> queryRules, Sort sort)
 	{
 
 		final Query q;
@@ -395,7 +395,7 @@ public class ChartDataServiceImpl implements ChartDataService
 				q.addRule(queryRule);
 			}
 
-			iterable = ((CrudRepository) iterable).findAll(q);
+			iterable = ((Repository) iterable).findAll(q);
 		}
 
 		List<Target> rowTargets = new ArrayList<Target>();

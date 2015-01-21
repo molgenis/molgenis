@@ -25,13 +25,13 @@ import java.util.List;
 import org.mockito.Matchers;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.rest.RestControllerTest.RestControllerConfig;
 import org.molgenis.data.rsql.MolgenisRSQL;
@@ -85,7 +85,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		reset(dataService);
 		reset(metaDataService);
 
-		CrudRepository repo = mock(CrudRepository.class);
+		Repository repo = mock(Repository.class);
 
 		Entity entityXref = new MapEntity("id");
 		entityXref.set("id", ENTITY_ID);
@@ -188,7 +188,6 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public void deleteMetaDelete() throws Exception
 	{
 		mockMvc.perform(delete(HREF_ENTITY_META)).andExpect(status().isNoContent());
-		verify(dataService).removeRepository(ENTITY_NAME);
 		verify(metaDataService).deleteEntityMeta(ENTITY_NAME);
 	}
 
@@ -196,7 +195,6 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public void deleteMetaPost() throws Exception
 	{
 		mockMvc.perform(post(HREF_ENTITY_META).param("_method", "DELETE")).andExpect(status().isNoContent());
-		verify(dataService).removeRepository(ENTITY_NAME);
 		verify(metaDataService).deleteEntityMeta(ENTITY_NAME);
 	}
 
@@ -325,7 +323,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void retrieveEntityAttributeUnknownAttribute() throws Exception
 	{
-		CrudRepository repo = mock(CrudRepository.class);
+		Repository repo = mock(Repository.class);
 
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
 		when(entityMetaData.getAttribute("name")).thenReturn(null);
@@ -347,7 +345,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	{
 		reset(dataService);
 
-		CrudRepository repo = mock(CrudRepository.class);
+		Repository repo = mock(Repository.class);
 		when(dataService.getRepository(ENTITY_NAME)).thenReturn(repo);
 		when(dataService.getEntityNames()).thenReturn(Arrays.asList(ENTITY_NAME));
 		Entity entityXref = new MapEntity("id");
@@ -401,7 +399,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void updateInternalRepoNotUpdateable() throws Exception
 	{
-		CrudRepository repo = mock(CrudRepository.class);
+		Repository repo = mock(Repository.class);
 		when(dataService.getRepository(ENTITY_NAME)).thenReturn(repo);
 		doThrow(new MolgenisDataException()).when(dataService).update(anyString(), any(Entity.class));
 		mockMvc.perform(put(HREF_ENTITY_ID).content("{name:Klaas}").contentType(APPLICATION_JSON)).andExpect(
@@ -411,7 +409,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void updateInternalRepoIdAttributeIsNull() throws Exception
 	{
-		CrudRepository repo = mock(CrudRepository.class);
+		Repository repo = mock(Repository.class);
 		when(dataService.getRepository(ENTITY_NAME)).thenReturn(repo);
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
 		when(entityMetaData.getIdAttribute()).thenReturn(null);
@@ -554,7 +552,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		@Bean
 		public RestController restController()
 		{
-			return new RestController(dataService(), metaDataService(), tokenService(), authenticationManager(),
+			return new RestController(dataService(), tokenService(), authenticationManager(),
 					molgenisPermissionService(), new MolgenisRSQL(), new ResourceFingerprintRegistry());
 		}
 	}

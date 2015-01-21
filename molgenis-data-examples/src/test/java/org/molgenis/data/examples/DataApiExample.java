@@ -1,11 +1,9 @@
 package org.molgenis.data.examples;
 
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
-import org.molgenis.data.Writable;
 import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.support.MapEntity;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +28,7 @@ public class DataApiExample extends AbstractTestNGSpringContextTests
 			// outputs
 		}
 
-		Writable repo = dataService.getRepository("Users");
+		Repository repo = dataService.getRepository("Users");
 
 		// untyped
 		MapEntity user = new MapEntity();
@@ -68,7 +66,7 @@ public class DataApiExample extends AbstractTestNGSpringContextTests
 			System.out.println(p.getUsername());
 		}
 
-		CrudRepository dao = dataService.getRepository("Users");
+		Repository dao = dataService.getRepository("Users");
 
 		u.setUsername("jane2");
 

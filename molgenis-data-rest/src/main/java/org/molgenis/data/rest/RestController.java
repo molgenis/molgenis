@@ -46,7 +46,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -59,7 +58,6 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.rsql.MolgenisRSQL;
 import org.molgenis.data.support.DefaultEntityCollection;
 import org.molgenis.data.support.MapEntity;
@@ -133,7 +131,6 @@ public class RestController
 	public static final String BASE_URI = "/api/v1";
 	private static final Pattern PATTERN_EXPANDS = Pattern.compile("([^\\[^\\]]+)(?:\\[(.+)\\])?");
 	private final DataService dataService;
-	private final MetaDataService metaDataService;
 	private final TokenService tokenService;
 	private final AuthenticationManager authenticationManager;
 	private final String ENTITY_FORM_MODEL_ATTRIBUTE = "form";
@@ -142,12 +139,11 @@ public class RestController
 	private final ResourceFingerprintRegistry resourceFingerprintRegistry;
 
 	@Autowired
-	public RestController(DataService dataService, MetaDataService metaDataService, TokenService tokenService,
+	public RestController(DataService dataService, TokenService tokenService,
 			AuthenticationManager authenticationManager, MolgenisPermissionService molgenisPermissionService,
 			MolgenisRSQL molgenisRSQL, ResourceFingerprintRegistry resourceFingerprintRegistry)
 	{
 		if (dataService == null) throw new IllegalArgumentException("dataService is null");
-		if (metaDataService == null) throw new IllegalArgumentException("metaDataService is null");
 		if (tokenService == null) throw new IllegalArgumentException("tokenService is null");
 		if (authenticationManager == null) throw new IllegalArgumentException("authenticationManager is null");
 		if (molgenisPermissionService == null) throw new IllegalArgumentException("molgenisPermissionService is null");
@@ -155,7 +151,6 @@ public class RestController
 				"resourceFingerprintRegistry is null");
 
 		this.dataService = dataService;
-		this.metaDataService = metaDataService;
 		this.tokenService = tokenService;
 		this.authenticationManager = authenticationManager;
 		this.molgenisPermissionService = molgenisPermissionService;
@@ -1164,7 +1159,7 @@ public class RestController
 			EntityCollectionRequest request, Set<String> attributesSet, Map<String, Set<String>> attributeExpandsSet)
 	{
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
-		CrudRepository repository = dataService.getRepository(entityName);
+		Repository repository = dataService.getRepository(entityName);
 
 		List<QueryRule> queryRules = request.getQ() == null ? Collections.<QueryRule> emptyList() : request.getQ();
 		Query q = new QueryImpl(queryRules).pageSize(request.getNum()).offset(request.getStart())

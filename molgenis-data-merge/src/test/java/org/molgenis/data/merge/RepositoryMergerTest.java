@@ -15,7 +15,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -41,7 +40,7 @@ public class RepositoryMergerTest
 	private AttributeMetaData metaDataa;
 	private AttributeMetaData metaDatab;
 	private Repository repository1;
-	private CrudRepository elasticSearchRepository;
+	private Repository elasticSearchRepository;
 	private DataService dataService;
 	private DefaultEntityMetaData entityMetaData1;
 	private SearchService searchService;
@@ -51,7 +50,7 @@ public class RepositoryMergerTest
 	@BeforeMethod
 	public void setUp() throws IOException
 	{
-		repository1 = mock(CrudRepository.class);
+		repository1 = mock(Repository.class);
 		elasticSearchRepository = mock(ElasticsearchRepository.class);
 
 		entityMetaData1 = new DefaultEntityMetaData("meta1");

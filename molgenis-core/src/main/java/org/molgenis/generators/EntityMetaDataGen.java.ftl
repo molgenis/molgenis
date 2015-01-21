@@ -22,6 +22,7 @@ public class ${JavaName(entity)}MetaData extends DefaultEntityMetaData
 		super("${JavaName(entity)}", ${JavaName(entity)}.class);
 		setLabel("${entity.label}");
 		setDescription("${entity.description?j_string}");
+		setBackend("JPA");
 		
 <#list entity.allFields as f>
 		DefaultAttributeMetaData ${name(f)} = new DefaultAttributeMetaData("${f.name}", ${f.type.enumType});

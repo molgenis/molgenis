@@ -1,6 +1,7 @@
 package org.molgenis.data;
 
 import java.util.List;
+import java.util.Set;
 
 import org.molgenis.data.meta.MetaDataService;
 
@@ -9,30 +10,22 @@ import org.molgenis.data.meta.MetaDataService;
  * 
  * Main entry point for the DataApi
  */
-public interface DataService extends RepositoryCollection
+public interface DataService extends Iterable<Repository>
 {
+	/**
+	 * Get the MetaDataService
+	 * 
+	 * @return
+	 */
 	MetaDataService getMeta();
 
 	/**
-	 * Add a repository to the DataService
+	 * Get the capabilities of a repository
 	 * 
-	 * @throws MolgenisDataException
-	 *             if entity name is already registered
-	 * @param repository
-	 */
-	void addRepository(CrudRepository repository);
-
-	/**
-	 * Remove a repository from the DataService
-	 * 
-	 * @throws MolgenisDataException
-	 *             if repository/entity name is null
-	 * 
-	 * @throws MolgenisDataException
-	 *             if repository/entity name doesn't exists
 	 * @param repositoryName
+	 * @return
 	 */
-	void removeRepository(String repositoryName);
+	Set<RepositoryCapability> getCapabilities(String repositoryName);
 
 	/**
 	 * check ia a repository for this entity already exists
@@ -233,8 +226,7 @@ public interface DataService extends RepositoryCollection
 	 * @param entityName
 	 *            entity name (case insensitive)
 	 */
-	@Override
-	CrudRepository getRepository(String entityName);
+	Repository getRepository(String entityName);
 
 	Manageable getManageableRepository(String entityName);
 
@@ -309,4 +301,10 @@ public interface DataService extends RepositoryCollection
 	 * @return
 	 */
 	AggregateResult aggregate(String entityName, AggregateQuery aggregateQuery);
+
+	/**
+	 * Get names of all the entities in this source
+	 */
+	Iterable<String> getEntityNames();
+
 }

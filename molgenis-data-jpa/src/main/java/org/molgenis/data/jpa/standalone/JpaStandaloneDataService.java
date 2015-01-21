@@ -10,6 +10,7 @@ import javax.persistence.metamodel.EntityType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.jpa.JpaRepository;
 import org.molgenis.data.support.DataServiceImpl;
+import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
 import org.molgenis.data.support.QueryResolver;
 import org.molgenis.data.validation.DefaultEntityValidator;
 import org.molgenis.data.validation.EntityAttributesValidator;
@@ -28,7 +29,8 @@ public class JpaStandaloneDataService extends DataServiceImpl
 	public JpaStandaloneDataService(String dbUrl, String dbUsername, String dbPassword) throws ClassNotFoundException,
 			NoSuchMethodException, SecurityException
 	{
-		super();
+		super(new NonDecoratingRepositoryDecoratorFactory());
+
 		Map<String, String> props = Maps.newHashMap();
 		props.put("javax.persistence.jdbc.driver", "com.mysql.jdbc.Driver");
 		props.put("javax.persistence.jdbc.url", dbUrl);

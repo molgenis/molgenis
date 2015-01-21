@@ -12,6 +12,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
 import org.molgenis.data.support.TransformedEntity;
 import org.testng.annotations.Test;
 
@@ -70,7 +71,7 @@ public class DependencyResolverTest
 		Entity marie = new MapEntity("name");
 		marie.set("name", "Marie");
 
-		DataService ds = new DataServiceImpl();
+		DataService ds = new DataServiceImpl(new NonDecoratingRepositoryDecoratorFactory());
 		Iterable<Entity> entities = Arrays.<Entity> asList(new TransformedEntity(piet, emd, ds), new TransformedEntity(
 				klaas, emd, ds), new TransformedEntity(jan, emd, ds), new TransformedEntity(katrijn, emd, ds),
 				new TransformedEntity(marie, emd, ds));

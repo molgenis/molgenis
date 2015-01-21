@@ -17,10 +17,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.ElasticSearchService.IndexingMode;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.MapEntity;
@@ -31,7 +31,7 @@ public class ElasticsearchRepositoryDecoratorTest
 {
 	private ElasticsearchRepositoryDecorator elasticSearchRepository;
 	private ElasticSearchService elasticSearchService;
-	private CrudRepository repository;
+	private Repository repository;
 	private EntityMetaData repositoryEntityMetaData;
 	private String entityName;
 	private String idAttrName;
@@ -40,7 +40,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	public void setUp() throws IOException
 	{
 		elasticSearchService = mock(ElasticSearchService.class);
-		repository = mock(CrudRepository.class);
+		repository = mock(Repository.class);
 		entityName = "";
 		repositoryEntityMetaData = mock(EntityMetaData.class);
 		when(repositoryEntityMetaData.getName()).thenReturn(entityName);

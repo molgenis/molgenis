@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.molgenis.data.support.DataServiceImpl;
+import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -26,9 +27,9 @@ import org.testng.annotations.Test;
 public class DataServiceImplTest
 {
 	private final List<String> entityNames = Arrays.asList("Entity1", "Entity2", "Entity3");
-	private CrudRepository repo1;
-	private CrudRepository repo2;
-	private CrudRepository repoToRemove;
+	private Repository repo1;
+	private Repository repo2;
+	private Repository repoToRemove;
 	private DataServiceImpl dataService;
 
 	@BeforeMethod
@@ -48,17 +49,17 @@ public class DataServiceImplTest
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
-		dataService = new DataServiceImpl();
+		dataService = new DataServiceImpl(new NonDecoratingRepositoryDecoratorFactory());
 
-		repo1 = mock(CrudRepository.class);
+		repo1 = mock(Repository.class);
 		when(repo1.getName()).thenReturn("Entity1");
 		dataService.addRepository(repo1);
 
-		repo2 = mock(CrudRepository.class);
+		repo2 = mock(Repository.class);
 		when(repo2.getName()).thenReturn("Entity2");
 		dataService.addRepository(repo2);
 
-		repoToRemove = mock(CrudRepository.class);
+		repoToRemove = mock(Repository.class);
 		when(repoToRemove.getName()).thenReturn("Entity3");
 		dataService.addRepository(repoToRemove);
 

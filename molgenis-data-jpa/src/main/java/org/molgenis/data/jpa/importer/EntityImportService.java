@@ -16,7 +16,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
@@ -73,7 +72,7 @@ public class EntityImportService
 	@Transactional
 	public int importEntity(String entityName, Repository source, DatabaseAction dbAction)
 	{
-		final CrudRepository jpaRepository = dataService.getRepository(entityName);
+		final Repository jpaRepository = dataService.getRepository(entityName);
 
 		// Convert to MapEntity so we can be sure we can set xref/mref fields on it
 		List<Entity> entitiesToImport = Lists.newArrayList();
@@ -227,8 +226,7 @@ public class EntityImportService
 		return entitiesToImport.size();
 	}
 
-	public void update(CrudRepository repo, List<? extends Entity> entities, DatabaseAction dbAction,
-			String... keyNames)
+	public void update(Repository repo, List<? extends Entity> entities, DatabaseAction dbAction, String... keyNames)
 	{
 		if (keyNames.length == 0) throw new MolgenisDataException("At least one key must be provided, e.g. 'name'");
 

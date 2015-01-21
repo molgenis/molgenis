@@ -9,7 +9,6 @@ import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
@@ -108,9 +107,9 @@ public class ImportWriter
 		for (final EntityMetaData entityMetaData : resolved)
 		{
 			String name = entityMetaData.getName();
-			CrudRepository crudRepository = dataService.getRepository(name);
+			Repository repository = dataService.getRepository(name);
 
-			if (crudRepository != null)
+			if (repository != null)
 			{
 				Repository fileEntityRepository = source.getRepository(entityMetaData.getSimpleName());
 
@@ -136,7 +135,7 @@ public class ImportWriter
 
 					entities = DependencyResolver.resolveSelfReferences(entities, entityMetaData);
 
-					int count = update(crudRepository, entities, dbAction);
+					int count = update(repository, entities, dbAction);
 					report.addEntityCount(name, count);
 				}
 			}
@@ -312,7 +311,7 @@ public class ImportWriter
 	 *            {@link DatabaseAction} describing how to merge the existing entities
 	 * @return number of updated entities
 	 */
-	public int update(CrudRepository repo, Iterable<? extends Entity> entities, DatabaseAction dbAction)
+	public int update(Repository repo, Iterable<? extends Entity> entities, DatabaseAction dbAction)
 	{
 		if (entities == null) return 0;
 

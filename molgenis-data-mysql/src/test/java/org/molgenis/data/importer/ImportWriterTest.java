@@ -23,7 +23,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.ManageableCrudRepositoryCollection;
+import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.PackageImpl;
@@ -51,7 +51,7 @@ public class ImportWriterTest
 	private MetaDataService metaDataService;
 	private PermissionSystemService permissionSystemService;
 	private RepositoryCollection source;
-	private ManageableCrudRepositoryCollection target;
+	private ManageableRepositoryCollection target;
 	private ImportWriter writer;
 	private UntypedTagService tagService;
 
@@ -62,7 +62,7 @@ public class ImportWriterTest
 		metaDataService = mock(MetaDataService.class);
 		permissionSystemService = mock(PermissionSystemService.class);
 		source = mock(RepositoryCollection.class);
-		target = mock(ManageableCrudRepositoryCollection.class);
+		target = mock(ManageableRepositoryCollection.class);
 		tagService = mock(UntypedTagService.class);
 		writer = new ImportWriter(dataService, permissionSystemService, tagService);
 	}
