@@ -2,6 +2,7 @@ package org.molgenis.data.rest;
 
 public class VkglAlleleQuery
 {
+	private String id;
 	private String operator;
 	private String source;
 	private String reference;
@@ -56,5 +57,13 @@ public class VkglAlleleQuery
 	public void setAllele_sequence(String[] allele_sequence)
 	{
 		this.allele_sequence = allele_sequence;
+	}
+	public String getId()
+	{
+		return id;
+	}
+	public void setId(String id)
+	{
+		this.id = id;
 	}
 }

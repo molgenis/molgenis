@@ -2,6 +2,7 @@ package org.molgenis.data.rest;
 
 public class VkglCoordinateQuery
 {
+	private String id;
 	private String operator;
 	private String source;
 	private String reference;
@@ -47,6 +48,14 @@ public class VkglCoordinateQuery
 	public void setEnd(String end)
 	{
 		this.end = end;
+	}
+	public String getId()
+	{
+		return id;
+	}
+	public void setId(String id)
+	{
+		this.id = id;
 	}
 	
 }

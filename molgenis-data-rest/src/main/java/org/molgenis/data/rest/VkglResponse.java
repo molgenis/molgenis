@@ -4,8 +4,9 @@ import java.util.List;
 
 public class VkglResponse
 {
-	private List<VkglResult> results;
 	private VkglResponseMetadata metadata;
+	private List<VkglResult> results;
+	
 	
 	public List<VkglResult> getResults()
 	{

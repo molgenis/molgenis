@@ -14,7 +14,8 @@ public class VkglEntityMetaData extends DefaultEntityMetaData
 
 	public static final String INTERNAL_ID = "INTERNAL_ID";
 	public static final String CHROM = "#CHROM";
-	public static final String ALT = "ALT";
+	public static final String ALLELE1 = "ALLELE1";
+	public static final String ALLELE2 = "ALLELE2";
 	public static final String POS = "POS";
 	public static final String REF = "REF";
 	public static final String FILTER = "FILTER";
@@ -30,7 +31,9 @@ public class VkglEntityMetaData extends DefaultEntityMetaData
 				.setIdAttribute(true).setNillable(false).setVisible(false));
 		addAttributeMetaData(new DefaultAttributeMetaData(CHROM, MolgenisFieldTypes.FieldTypeEnum.STRING)
 				.setAggregateable(true));
-		addAttributeMetaData(new DefaultAttributeMetaData(ALT, MolgenisFieldTypes.FieldTypeEnum.STRING)
+		addAttributeMetaData(new DefaultAttributeMetaData(ALLELE1, MolgenisFieldTypes.FieldTypeEnum.STRING)
+				.setAggregateable(true));
+		addAttributeMetaData(new DefaultAttributeMetaData(ALLELE2, MolgenisFieldTypes.FieldTypeEnum.STRING)
 				.setAggregateable(true));
 		addAttributeMetaData(new DefaultAttributeMetaData(POS, MolgenisFieldTypes.FieldTypeEnum.LONG)
 				.setAggregateable(true));

@@ -1158,6 +1158,7 @@ public class QueryGeneratorTest
 	{
 		Boolean value = Boolean.TRUE;
 		Query q = new QueryImpl().not().eq(boolAttributeName, value);
+		System.out.println(q);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
