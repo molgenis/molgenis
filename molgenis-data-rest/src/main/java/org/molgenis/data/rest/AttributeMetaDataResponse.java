@@ -22,6 +22,7 @@ public class AttributeMetaDataResponse
 	private final String label;
 	private final String description;
 	private final List<?> attributes;
+	private final List<String> enumOptions;
 	private final Object refEntity;
 	private final Boolean nillable;
 	private final Boolean readOnly;
@@ -77,6 +78,12 @@ public class AttributeMetaDataResponse
 		}
 		else this.description = null;
 
+		if (attributesSet == null || attributesSet.contains("enumOptions".toLowerCase()))
+		{
+			this.enumOptions = attr.getEnumOptions();
+		}
+		else this.enumOptions = null;
+
 		if (attributesSet == null || attributesSet.contains("refEntity".toLowerCase()))
 		{
 			EntityMetaData refEntity = attr.getRefEntity();
@@ -88,7 +95,7 @@ public class AttributeMetaDataResponse
 			else
 			{
 				this.refEntity = refEntity != null ? new Href(String.format("%s/%s/meta", RestController.BASE_URI,
-						refEntity.getName())) : null;
+						refEntity.getName()), String.format("%s/%s", RestController.BASE_URI, refEntity.getName())) : null;
 			}
 		}
 		else this.refEntity = null;

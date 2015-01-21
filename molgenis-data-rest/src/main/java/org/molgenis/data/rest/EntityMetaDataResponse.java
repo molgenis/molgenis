@@ -13,6 +13,7 @@ import com.google.common.collect.ImmutableMap;
 public class EntityMetaDataResponse
 {
 	private final String href;
+	private final String hrefCollection;
 	private final String name;
 	private final String label;
 	private final String description;
@@ -20,6 +21,14 @@ public class EntityMetaDataResponse
 	private final String labelAttribute;
 	private final String idAttribute;
 	private final Boolean isAbstract;
+
+	/**
+	 * @param meta
+	 */
+	public EntityMetaDataResponse(EntityMetaData meta)
+	{
+		this(meta, null, null);
+	}
 
 	/**
 	 * 
@@ -34,6 +43,7 @@ public class EntityMetaDataResponse
 	{
 		String name = meta.getName();
 		this.href = String.format("%s/%s/meta", RestController.BASE_URI, name);
+		this.hrefCollection = String.format("%s/%s", RestController.BASE_URI, name);
 
 		if (attributesSet == null || attributesSet.contains("name".toLowerCase()))
 		{
@@ -101,6 +111,11 @@ public class EntityMetaDataResponse
 	public String getHref()
 	{
 		return href;
+	}
+
+	public String getHrefCollection()
+	{
+		return hrefCollection;
 	}
 
 	public String getName()

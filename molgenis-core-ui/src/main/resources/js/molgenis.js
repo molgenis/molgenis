@@ -1,3 +1,21 @@
+// remove elements with the given value from an array
+Array.prototype.clean = function(deleteValue) {
+	for (var i = 0; i < this.length; i++) {
+		if (this[i] === deleteValue) {
+			this.splice(i, 1);
+			i--;
+		}
+	}
+	return this;
+};
+function isFloat(n) {
+    return n === +n && n !== (n|0);
+}
+
+function isInteger(n) {
+    return n === +n && n === (n|0);
+}
+
 (function($, molgenis) {
 	"use strict";
 
@@ -568,6 +586,9 @@ function createInput(attr, attrs, val, lbl) {
 		});
 	};
 
+	molgenis.RestClient.prototype.getNumMax = function() {
+		return 10000;
+	};
 }($, window.top.molgenis = window.top.molgenis || {}));
 
 function showSpinner(callback) {

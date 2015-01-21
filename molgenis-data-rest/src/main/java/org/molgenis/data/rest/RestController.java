@@ -1148,7 +1148,7 @@ public class RestController
 				}
 
 				EntityPager pager = new EntityPager(request.getStart(), request.getNum(), (long) count, mrefEntities);
-				return new EntityCollectionResponse(pager, refEntityMaps, attrHref);
+				return new EntityCollectionResponse(pager, refEntityMaps, attrHref, null);
 			case XREF:
 				Map<String, Object> entityXrefAttributeMap = getEntityAsMap((Entity) entity.get(refAttributeName),
 						attr.getRefEntity(), attributesSet, attributeExpandSet);
@@ -1184,7 +1184,7 @@ public class RestController
 			entities.add(getEntityAsMap(entity, meta, attributesSet, attributeExpandsSet));
 		}
 
-		return new EntityCollectionResponse(pager, entities, BASE_URI + "/" + entityName);
+		return new EntityCollectionResponse(pager, entities, BASE_URI + "/" + entityName, meta);
 	}
 
 	// Transforms an entity to a Map so it can be transformed to json
@@ -1286,7 +1286,7 @@ public class RestController
 							(long) refEntityMaps.size(), mrefEntities);
 
 					String uri = String.format(BASE_URI + "/%s/%s/%s", meta.getName(), entity.getIdValue(), attrName);
-					EntityCollectionResponse ecr = new EntityCollectionResponse(pager, refEntityMaps, uri);
+					EntityCollectionResponse ecr = new EntityCollectionResponse(pager, refEntityMaps, uri, null);
 					entityMap.put(attrName, ecr);
 				}
 				else if ((attrType == XREF && entity.get(attr.getName()) != null)
