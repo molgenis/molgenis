@@ -53,11 +53,18 @@
 	
 	var phenotipsFilteredQuery;
 	
+	var currentQuery;
+	
 	/**
 	 * Listens for data explorer query changes and updates the selected gene/disease lists.
 	 */
 	$(document).on('changeQuery', function(e, query) {	
 		updateSelectionList(currentSelectionMode);
+	});
+	
+	$(document).on('dataChange.data', function(e) {
+		//TODO: implement table refresh
+		$('#diseasematcher-variant-panel').table('setQuery', currentQuery);
 	});
 	
 	//disease matcher parts
@@ -87,7 +94,6 @@
 			variantPanel.table('setAttributes', data.attributes);
 		}
 	});
-
 	
 	/**
 	 * Checks if the current state of Molgenis meets the requirements of this tool. 
@@ -95,6 +101,7 @@
 	 * a gene symbol column. All calls are async to avoid hanging of the application.
 	 *
 	 * @param entityUri the URI of the entity to check for a gene symbol column
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function checkToolAvailable(entityUri) {
 		checkDatasetAvailable('Disease');
@@ -118,6 +125,7 @@
 	 * Checks if a dataset is loaded. Shows a warning when it is not. 
 	 * 
 	 * @param dataset the dataset to check for
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function checkDatasetAvailable(dataset) {
 		restApi.getAsync('/api/v1/' + dataset, {'num' : 1},	function(data){
@@ -134,6 +142,7 @@
 	 * 
 	 * @param element the selected link
 	 * @selectionMode the appropriate selection mode to use
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function onClickNavBtn(element, selectionMode){
 		if (!toolAvailable) return;
@@ -159,6 +168,9 @@
 		}
 	}
 	
+	/**
+	 * @memberOf molgenis.dataexplorer.diseasematcher
+	 */
 	function rankHPOTerms(terms, callback){
 		var queryString = '';
 		$.each(terms, function(index, t){
@@ -182,6 +194,9 @@
 		
 	}
 	
+	/**
+	 * @memberOf molgenis.dataexplorer.diseasematcher
+	 */
 	function filterPhenotipsOutputComplete(terms){
 		var entityName = getEntity().name;
 		var request = {
@@ -367,7 +382,7 @@
 	}
 	
 	/**
-	 * 
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function downloadFilteredVariants() {
 		$.download(molgenis.getContextUrl() + '/download', {
@@ -379,10 +394,9 @@
 	}
 	
 	/**
-	 * 
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function createDiseaseMatcherDownloadDataRequest() {
-		//TODO: combine phenotips filter with search/item filters on download	
 		var entityQuery = getQuery();
 		
 		var dataRequest = {
@@ -391,7 +405,7 @@
 			query : {
 				rules : phenotipsFilteredQuery
 			},
-			colNames : $('input[name=ColNames]:checked').val()
+			colNames : 'ATTRIBUTE_LABELS'
 		};
 
 		//dataRequest.query.sort = $('#data-table-container').table('getSort');	
@@ -488,6 +502,7 @@
 	 * refreshing of the selection list.
 	 * 
 	 * @param selectionMode 
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function updateSelectionList(selectionMode) {
 		var entityName = getEntity().name;
@@ -511,8 +526,7 @@
 					populateSelectionList(data.genes, selectionMode);		
 				}
 				
-				window.setTimeout(initPager(data.total, selectionMode), 3000);
-				
+				initPager(data.total, selectionMode);
 			}
 		});
 	}
@@ -523,6 +537,7 @@
 	 * 
 	 * @param list the list of diseases or genes
 	 * @param selectionMode the current selection mode
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function populateSelectionList(list, selectionMode) {
 		//TODO handle nulls
@@ -558,6 +573,7 @@
 	 * 
 	 * @param total the total amount of items 
 	 * @param selectionMode the selection mode for this list
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function initPager(total, selectionMode) {
 		var container = $('#diseasematcher-selection-pager');
@@ -582,6 +598,7 @@
 	 * @param pageStart index of the first item of this page
 	 * @param pageEnd index of the last item of this page
 	 * @param selectionMode the selection mode for this list
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function onPageChange(pageStart, pageEnd, selectionMode) {
 		var entityName = getEntity().name;
@@ -613,6 +630,7 @@
 	 * Takes an OMIM object and transforms the data to content which is shown in a disease tab.
 	 * 
 	 * @param omimObject the OMIM object to show
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function showOmimObject(omimObject){
 		
@@ -724,6 +742,7 @@
 	 * 
 	 * @param diseaseId
 	 * @returns
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function onSelectDiseaseTab(diseaseId) {
 		if (localStorageSupported && diseaseId in localStorage){
@@ -757,6 +776,7 @@
 	 * 
 	 * @param link the item that was selected
 	 * @param selectionMode the current selection mode
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function onSelectListItem(link, selectionMode) {
 		// visually select the right item in the list
@@ -802,6 +822,7 @@
 	 * Sets readable names for disease tabs (replace the default OMIM identifier).
 	 * 
 	 * @param diseaseIds the OMIM identifiers to get names for
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function setDiseaseTabNames(diseaseIds){
 		var requestParams = '?';
@@ -830,6 +851,7 @@
 	 * 
 	 * @param id OMIM id or gene symbol
 	 * @param selectionMode selection mode for the id
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function showDiseases(id, selectionMode) {
 		// empty disease tabs
@@ -904,6 +926,7 @@
 	 * 
 	 * @param genes the genes to get variants for
 	 * @param panel the panel to add/update
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function showVariants(genes, panel) {
 		var queryRules = [];
@@ -920,31 +943,33 @@
 			});
 		});
 		
-		var query = {'q' : queryRules};
-
+		currentQuery = {'q' : queryRules};
+		
 		// show associated variants in info panel	
 		if (tableEditable) {
 			tableEditable = molgenis.hasWritePermission(molgenis.dataexplorer.getSelectedEntityMeta().name);
 		}
 	
 		if (panel.has('table').length){
-			panel.table('setQuery', query);
+			panel.table('setQuery', currentQuery);
 		}else{
-			panel.table({
+			var table = panel.table({
 				'entityMetaData' : getEntity(),
 				'attributes' : getAttributes(),
-				'query' : query,
-				'editable': tableEditable
+				'query' : currentQuery,
+				'editable': tableEditable,
+				'onDataChange' : function(){
+					$(document).trigger('dataChange.diseasematcher');
+				}
 			});
 		}
 	}
-	
-	
 
 	/**
 	 * Escapes regular expression characters within a string.
 	 * 
 	 * @param string the string in which to escape regular expression characters
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function escapeRegExp(string) {
 	    return string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
@@ -957,6 +982,7 @@
 	 * @param string the string in which to replace
 	 * @param find the substring(s) to be replaced
 	 * @param replace the value to replace the targets with
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function replaceAll(string, find, replace) {
 		  return string.replace(new RegExp(escapeRegExp(find), 'g'), replace);
@@ -967,6 +993,7 @@
 	 * Returns the selected entity from the data explorer.
 	 * 
 	 * @returns the selected entity
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function getEntity() {
 		return molgenis.dataexplorer.getSelectedEntityMeta();
@@ -977,6 +1004,7 @@
 	 * Returns the currently active data explorer query.
 	 * 
 	 * @returns a data explorer query
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function getQuery() {
 		return molgenis.dataexplorer.getEntityQuery();
@@ -987,6 +1015,7 @@
 	 * Returns the currently selected attributes.
 	 * 
 	 * @returns attributes
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function getAttributes() {
 		return molgenis.dataexplorer.getSelectedAttributes();
@@ -997,6 +1026,7 @@
 	 * Checks if a browser supports local storage.
 	 * 
 	 * @returns boolean telling if a browser supports local storage
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function browserSupportsLocalStorage() {
 		try {

@@ -203,7 +203,13 @@
 
 <script>
 	var tableEditable = ${tableEditable?string('true', 'false')};
-	$.when($.ajax("<@resource_href "/js/dataexplorer-diseasematcher.js"/>", {'cache': true}))
-			.then(function() {
+	<#-- load css dependencies -->
+	if (!$('link[href="<@resource_href '/css/jquery.molgenis.table.css'/>"]').length)
+		$('head').append('<link rel="stylesheet" href="<@resource_href "/css/jquery.molgenis.table.css"/>" type="text/css" />');
+	<#-- load js dependencies -->
+	$.when(
+		$.ajax("<@resource_href "/js/dataexplorer-diseasematcher.js"/>", {'cache': true}),
+		$.ajax("<@resource_href "/js/jquery.bootstrap.pager.js"/>", {'cache': true})
+		).then(function() {
 	});
 </script>
