@@ -39,6 +39,26 @@ public class UIBackend extends MapEntity
 		return getString(UIBackendMetaData.HOST);
 	}
 
+	public void setHeaderCallback(String headerCallback)
+	{
+		set(UIBackendMetaData.HEADER_CALLBACK, headerCallback);
+	}
+
+	public String getHeaderCallback()
+	{
+		return getString(UIBackendMetaData.HEADER_CALLBACK);
+	}
+
+	public String getFooterCallback()
+	{
+		return getString(UIBackendMetaData.FOOTER_CALLBACK);
+	}
+
+	public void setFooterCallback(String footerCallback)
+	{
+		set(UIBackendMetaData.FOOTER_CALLBACK, footerCallback);
+	}
+
 	public String getWorkDir()
 	{
 		return getString(UIBackendMetaData.WORK_DIR);

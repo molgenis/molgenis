@@ -1,13 +1,12 @@
 package org.molgenis.compute.ui.clusterexecutor;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
 import org.molgenis.compute.ui.model.AnalysisJob;
+import org.molgenis.security.token.MolgenisToken;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -19,24 +18,19 @@ public class ClusterCurlBuilder
 	private static final String BACKEND_HOST = "backend";
 	private static final String JOB_ID = "jobid";
 	private static final String JOB_NAME = "jobname";
+	private static final String TOKEN = "token";
 
-	private final String curlHeaderTemplate;
-	private final String curlFooterTemplate;
-
-	public ClusterCurlBuilder() throws IOException
-	{
-		String templateDir = "templates/cluster";
-		curlHeaderTemplate = FileUtils.readFileToString(new File(templateDir + "/header.ftl"), "UTF-8");
-		curlFooterTemplate = FileUtils.readFileToString(new File(templateDir + "/footer.ftl"), "UTF-8");
-	}
-
-	public String buildScript(AnalysisJob analysisJob, String callbackUri)
+	public String buildScript(MolgenisToken token, AnalysisJob analysisJob, String callbackUri)
 	{
 		Map<String, String> model = new HashMap<String, String>();
 		model.put(CALLBACK_URI, callbackUri);
 		model.put(BACKEND_HOST, analysisJob.getAnalysis().getBackend().getHost());
 		model.put(JOB_ID, analysisJob.getIdentifier());
 		model.put(JOB_NAME, analysisJob.getName());
+		model.put(TOKEN, token.getToken());
+
+		String curlHeaderTemplate = analysisJob.getAnalysis().getBackend().getHeaderCallback();
+		String curlFooterTemplate = analysisJob.getAnalysis().getBackend().getFooterCallback();
 
 		String prefix = renderTemplate(curlHeaderTemplate, model);
 		String postfix = renderTemplate(curlFooterTemplate, model);
@@ -49,7 +43,8 @@ public class ClusterCurlBuilder
 		String top = script.substring(0, index + lookup.length() + 2);
 		String bottom = script.substring(index + lookup.length() + 3);
 
-		return new StringBuilder().append(top).append(prefix).append(bottom).append(postfix).toString();
+		return new StringBuilder().append(top).append(prefix).append("\n\n")
+				.append(bottom).append(postfix).toString();
 	}
 
 	private String renderTemplate(String strTemplate, Map<String, String> model)

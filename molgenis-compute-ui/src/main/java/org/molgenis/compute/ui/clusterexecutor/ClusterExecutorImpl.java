@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
+import org.molgenis.auth.MolgenisUser;
 import org.molgenis.compute.ui.meta.AnalysisJobMetaData;
 import org.molgenis.compute.ui.meta.AnalysisMetaData;
 import org.molgenis.compute.ui.meta.MolgenisUserKeyMetaData;
@@ -22,6 +23,7 @@ import org.molgenis.compute.ui.model.MolgenisUserKey;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.runas.RunAsSystem;
+import org.molgenis.security.token.MolgenisToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -147,6 +149,14 @@ public class ClusterExecutorImpl implements ClusterExecutor
 	{
 		LOG.info("Prepare Analysis: " + analysis.getName());
 
+		MolgenisUser molgenisUser = dataService.findOne(MolgenisUser.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisUser.USERNAME,
+						analysis.getUser()), MolgenisUser.class);
+
+		MolgenisToken token = dataService.findOne(MolgenisToken.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisToken.MOLGENISUSER,
+						molgenisUser), MolgenisToken.class);
+
 		Channel channel = session.openChannel("sftp");
 		channel.setInputStream(System.in);
 		channel.setOutputStream(System.out);
@@ -171,10 +181,11 @@ public class ClusterExecutorImpl implements ClusterExecutor
 
 		Iterable<AnalysisJob> jobs = dataService.findAll(AnalysisJobMetaData.INSTANCE.getName(),
 				new QueryImpl().eq(AnalysisJobMetaData.ANALYSIS, analysis), AnalysisJob.class);
+
 		for (AnalysisJob job : jobs)
 		{
 			String taskName = job.getName();
-			String builtScript = builder.buildScript(job, callbackUri);
+			String builtScript = builder.buildScript(token, job, callbackUri);
 			is = new ByteArrayInputStream(builtScript.getBytes());
 			channelSftp.put(is, runDir + "/" + taskName + ".sh");
 		}
