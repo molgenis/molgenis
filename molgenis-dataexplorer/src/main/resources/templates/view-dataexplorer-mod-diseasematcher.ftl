@@ -181,7 +181,7 @@
 				{{this}}
 			</a></li>
 		{{else}}
-			<p>No genes found...</p>
+			<p>No genes or diseases found...</p>
 		{{/each}}
 	{{/if}}
 </script>

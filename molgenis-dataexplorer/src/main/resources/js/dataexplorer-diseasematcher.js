@@ -198,6 +198,9 @@
 			url : '/diseasematcher/diseases',
 			data : JSON.stringify(request),
 			success : function(diseases) {
+				
+				if (diseases.total === 0) return;
+				
 				//call Phenotips and put the suggestions in a hidden div
 				rankHPOTerms(terms, function(suggestions){		
 					
@@ -230,7 +233,7 @@
 					});
 					
 					if (suggestionObjects.length === 0){
-						alert("phenotips offline");
+						molgenis.createAlert([{message: 'PhenoTips is offline or (one of) the HPO terms you entered is not valid!'}], 'warning');
 						return;
 					}
 					
@@ -263,7 +266,6 @@
 							}
 						}
 					});
-					
 					
 					includeIds = [];
 					
@@ -326,6 +328,7 @@
 						'attributes' : [ 'geneSymbol']
 						
 					}, function(diseaseGenes) {
+						
 						// get unique genes for this disease
 						var uniqueGenes = [];
 						$.each(diseaseGenes.items, function(index, disease) {
@@ -431,9 +434,10 @@
 			e.preventDefault();
 			var terms = $('#hpoTermsInput').val();
 			terms = terms.split(',');
-			rankHPOTerms(terms);
 			
+			rankHPOTerms(terms);
 		});
+		
 		$('#btn-filter-phenotips').click(function(e){
 			e.preventDefault();
 			filterPhenotipsOutput();
@@ -447,8 +451,13 @@
 		$('#btn-filter-phenotips-complete').click(function(e){
 			e.preventDefault();
 			var terms = $('#hpoTermsInput').val();
-			terms = terms.split(',');
-			filterPhenotipsOutputComplete(terms);
+						
+			if (/^(HP:\d{7})(,HP:\d{7})*$/.test(terms) === false){
+				molgenis.createAlert([{message: 'Incorrect input. Make sure to use HPO terms and separate them with a comma (without spaces).'}], 'warning');	
+			}else{
+				terms = terms.split(',');		
+				filterPhenotipsOutputComplete(terms);
+			}
 		});
 		
 		$('#diseasematcher-download-button').click(function() {
@@ -502,7 +511,8 @@
 					populateSelectionList(data.genes, selectionMode);		
 				}
 				
-				initPager(data.total, selectionMode);
+				window.setTimeout(initPager(data.total, selectionMode), 3000);
+				
 			}
 		});
 	}
@@ -521,7 +531,16 @@
 		var selectionListFilled = template(list);
 		selectionList.html(selectionListFilled);
 
-		if (list === null || list.length === 0) return;
+		if (list === null || list.length === 0) {
+			// no genes/diseases found, empty the view, disable phenotips filter button
+			$('#btn-filter-phenotips-complete').prop('disabled', true);
+			$('#diseasematcher-variant-panel').empty();
+			$('#diseasematcher-disease-panel').hide();
+			return;
+		}else{
+			$('#btn-filter-phenotips-complete').prop('disabled', false);
+			$('#diseasematcher-disease-panel').show();
+		}
 
 		selectionList.find('a').click(function(e) {
 			e.preventDefault(); // stop jumping to top of page
@@ -996,10 +1015,10 @@
 		"/": '&#x2F;'
 	};
 
-function escapeHtml(string) {
-	return String(string).replace(/[&<>"'\/]/g, function (s) {
-		return entityMap[s];
-	});
-}
+	function escapeHtml(string) {
+		return String(string).replace(/[&<>"'\/]/g, function (s) {
+			return entityMap[s];
+		});
+	}
 
 })($, window.top.molgenis = window.top.molgenis || {});
