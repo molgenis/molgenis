@@ -22,8 +22,8 @@ public class EntityMappingMetaData extends DefaultEntityMetaData
 		super(ENTITY_NAME);
 
 		addAttribute(IDENTIFIER).setIdAttribute(true).setNillable(false).setDataType(STRING);
-		addAttribute(SOURCEENTITYMETADATA).setDataType(XREF).setRefEntity(EntityMetaDataRepository.META_DATA);
-		addAttribute(TARGETENTITYMETADATA).setDataType(XREF).setRefEntity(EntityMetaDataRepository.META_DATA);
+		addAttribute(SOURCEENTITYMETADATA);
+		addAttribute(TARGETENTITYMETADATA);
 		addAttribute(ATTRIBUTEMAPPINGS).setDataType(MREF).setRefEntity(AttributeMappingRepositoryImpl.META_DATA);
 	}
 }

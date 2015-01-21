@@ -90,8 +90,9 @@
 						<div class="form-group">
 							<label>Select the Target entity</label>
 							<select name="target-entity" class="form-control" required="required" placeholder="Select a target entity">
-		    					<option value="hop-minimal">HOP-minimal</option>
-		    					<option value="finrisk">FinRisk</option>
+		    					<#list entitiesMeta.iterator() as entityMetaData>
+		    						<option value="${entityMetaData.name?html}">${entityMetaData.name?html}</option>
+		    					</#list>
 							</select>
 						</div>
 						

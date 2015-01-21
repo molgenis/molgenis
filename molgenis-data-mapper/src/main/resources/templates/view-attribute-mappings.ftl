@@ -35,8 +35,6 @@
 
 <div class="row">
 	<div id="attribute-mapping-table-container" class="col-md-12">
-		<#--TODO-->
-		<#--For every new source, create a div and table component-->
 		<div class="col-md-3">
 			<table class="table">
 				<thead>
@@ -45,8 +43,9 @@
 					</tr>
 				</thead>
 				<tbody>
-					<#--TODO-->
-					<#--Generate list of target model attributes-->			
+				<#list targetEntityAttributes as targetAttribute>
+					<tr><td>${targetAttribute}<td></tr>		
+				</#list>
 				</tbody>
 			</table>
 		</div>

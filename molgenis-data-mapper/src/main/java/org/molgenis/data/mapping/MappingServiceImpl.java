@@ -1,16 +1,22 @@
 package org.molgenis.data.mapping;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import org.molgenis.auth.MolgenisUser;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.repository.AttributeMappingRepository;
 import org.molgenis.data.repository.EntityMappingRepository;
 import org.molgenis.data.repository.MappingProjectRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class MappingServiceImpl implements MappingService
 {
-
+	@Autowired
+	private MetaDataService metaDataService;
+	private static final String SEPARATOR = "_";
 	private AttributeMappingRepository attributeMappingRepository;
 	private EntityMappingRepository entityMappingRepository;
 	private MappingProjectRepository mappingProjectRepository;
@@ -24,15 +30,23 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	@Override
-	public void addEntityMapping(MappingProject mappingProject, EntityMapping entityMapping)
+	public void addEntityMapping(EntityMapping entityMapping)
 	{
-		entityMappingRepository.addEntityMapping();
+		entityMappingRepository.add(entityMapping);
 	}
 
 	@Override
-	public void addMappingProject(String projectName, MolgenisUser owner)
+	public void addMappingProject(String projectName, MolgenisUser owner, List<String> targetEntityIdentifiers)
 	{
-		List<EntityMapping> entityMappings = null;
+		List<EntityMapping> entityMappings = new ArrayList<EntityMapping>();
+		for (String targetEntityIdentifier : targetEntityIdentifiers)
+		{
+			EntityMetaData entityMetaData = metaDataService.getEntityMetaData(targetEntityIdentifier);
+			entityMappings.add(new EntityMapping(createEntityMappingIdentifier(projectName, targetEntityIdentifier),
+					entityMetaData, entityMetaData, null));
+		}
+
+		entityMappingRepository.add(entityMappings);
 		mappingProjectRepository.add(new MappingProject(projectName, owner.getUsername(), entityMappings));
 	}
 
@@ -58,5 +72,12 @@ public class MappingServiceImpl implements MappingService
 	public List<AttributeMapping> getAttributeMappings(String identifier)
 	{
 		return null; // TODO: Implement
+	}
+
+	private String createEntityMappingIdentifier(String projectMappingIdentifier, String targetEntityIdentifier)
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append(projectMappingIdentifier).append(SEPARATOR).append(targetEntityIdentifier);
+		return stringBuilder.toString();
 	}
 }
