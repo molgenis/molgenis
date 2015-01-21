@@ -1,21 +1,15 @@
 package org.molgenis.data.repository;
 
-import org.molgenis.data.CrudRepository;
-import org.molgenis.data.ManageableCrudRepositoryCollection;
-import org.molgenis.data.meta.EntityMappingMetaData;
+import java.util.List;
 
-/**
- * Helper class around the {@link org.molgenis.data.meta.AttributeMetaDataMetaData} repository. Internal implementation
- * class, use {@link org.molgenis.data.meta.MetaDataServiceImpl} instead.
- */
-public class EntityMappingRepository
+import org.molgenis.data.Entity;
+import org.molgenis.data.mapping.EntityMapping;
+
+public interface EntityMappingRepository
 {
-	public static final EntityMappingMetaData META_DATA = new EntityMappingMetaData();
+	public abstract void add(EntityMapping entityMapping);
 
-	private final CrudRepository repository;
+	public abstract void add(List<EntityMapping> entityMappings);
 
-	public EntityMappingRepository(ManageableCrudRepositoryCollection collection)
-	{
-		this.repository = collection.add(META_DATA);
-	}
+	public abstract EntityMapping toEntityMappingEntity(Entity entityMappingEntity);
 }

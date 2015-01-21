@@ -12,6 +12,7 @@ public class EntityMapping
 	private String identifier;
 	private EntityMetaData sourceEntityMetaData;
 	private EntityMetaData targetEntityMetaData;
+	// TODO Create a map with TargetAttribute 2 SourceAttribute, will serve as a quick lookup
 	private List<AttributeMapping> attributeMappings;
 
 	public EntityMapping(String identifier, EntityMetaData sourceEntityMetaData, EntityMetaData targetEntityMetaData,

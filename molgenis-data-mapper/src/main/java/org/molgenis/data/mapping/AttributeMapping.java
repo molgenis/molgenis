@@ -8,16 +8,16 @@ import org.molgenis.data.AttributeMetaData;
 public class AttributeMapping
 {
 	private String identifier;
-	private AttributeMetaData sourceAttribureMetaData;
-	private AttributeMetaData targetAttribureMetaData;
+	private AttributeMetaData sourceAttributeMetaData;
+	private AttributeMetaData targetAttributeMetaData;
 	private String algorithm;
 
-	public AttributeMapping(String identifier, AttributeMetaData sourceAttribureMetaData,
-			AttributeMetaData targetAttribureMetaData, String algorithm)
+	public AttributeMapping(String identifier, AttributeMetaData sourceAttributeMetaData,
+			AttributeMetaData targetAttributeMetaData, String algorithm)
 	{
 		this.identifier = identifier;
-		this.sourceAttribureMetaData = sourceAttribureMetaData;
-		this.targetAttribureMetaData = targetAttribureMetaData;
+		this.sourceAttributeMetaData = sourceAttributeMetaData;
+		this.targetAttributeMetaData = targetAttributeMetaData;
 		this.algorithm = algorithm;
 	}
 
@@ -31,24 +31,24 @@ public class AttributeMapping
 		this.identifier = identifier;
 	}
 
-	public AttributeMetaData getSourceAttribureMetaData()
+	public AttributeMetaData getSourceAttributeMetaData()
 	{
-		return sourceAttribureMetaData;
+		return sourceAttributeMetaData;
 	}
 
-	public void setSourceAttribureMetaData(AttributeMetaData sourceAttribureMetaData)
+	public void setSourceAttributeMetaData(AttributeMetaData sourceAttributeMetaData)
 	{
-		this.sourceAttribureMetaData = sourceAttribureMetaData;
+		this.sourceAttributeMetaData = sourceAttributeMetaData;
 	}
 
-	public AttributeMetaData getTargetAttribureMetaData()
+	public AttributeMetaData getTargetAttributeMetaData()
 	{
-		return targetAttribureMetaData;
+		return targetAttributeMetaData;
 	}
 
-	public void setTargetAttribureMetaData(AttributeMetaData targetAttribureMetaData)
+	public void setTargetAttributeMetaData(AttributeMetaData targetAttributeMetaData)
 	{
-		this.targetAttribureMetaData = targetAttribureMetaData;
+		this.targetAttributeMetaData = targetAttributeMetaData;
 	}
 
 	public String getAlgorithm()

@@ -8,8 +8,8 @@ public class AttributeMappingMetaData extends DefaultEntityMetaData
 {
 	public static final String ENTITY_NAME = "AttributeMapping";
 	public static final String IDENTIFIER = "identifier";
-	public static final String SOURCEATTRIBUTEMETADATA = "sourceAttribureMetaData";
-	public static final String TARGETATTRIBUTEMETADATA = "targetAttribureMetaData";
+	public static final String SOURCEATTRIBUTEMETADATA = "sourceAttributeMetaData";
+	public static final String TARGETATTRIBUTEMETADATA = "targetAttributeMetaData";
 	public static final String ALGORITHM = "algorithm";
 
 	public AttributeMappingMetaData()
@@ -17,8 +17,8 @@ public class AttributeMappingMetaData extends DefaultEntityMetaData
 		super(ENTITY_NAME);
 
 		addAttribute(IDENTIFIER).setIdAttribute(true).setNillable(false).setDataType(STRING);
-		addAttribute(SOURCEATTRIBUTEMETADATA).setDataType(XREF).setRefEntity(AttributeMetaDataRepository.META_DATA);
-		addAttribute(TARGETATTRIBUTEMETADATA).setDataType(XREF).setRefEntity(AttributeMetaDataRepository.META_DATA);
+		addAttribute(SOURCEATTRIBUTEMETADATA);
+		addAttribute(TARGETATTRIBUTEMETADATA);
 		addAttribute(ALGORITHM).setDataType(STRING);
 	}
 }
