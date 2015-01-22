@@ -35,7 +35,7 @@ import org.molgenis.ontology.repository.OntologyQueryRepository;
 import org.molgenis.ontology.repository.OntologyTermIndexRepository;
 import org.molgenis.ontology.repository.OntologyTermQueryRepository;
 import org.molgenis.ontology.utils.NGramMatchingModel;
-import org.molgenis.ontology.utils.PostProcessOntologyTermAlgorithm;
+import org.molgenis.ontology.utils.PostProcessOntologyTermCombineSynonymAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.tartarus.snowball.ext.PorterStemmer;
 
@@ -49,6 +49,7 @@ public class OntologyServiceImpl implements OntologyService
 	private static final String NON_WORD_SEPARATOR = "[^a-zA-Z0-9]";
 	private static final int MAX_NUMBER_MATCHES = 500;
 	public static final String SCORE = "Score";
+	public static final String SIGNIFICANT_VALUE = "Significant";
 	public static final Character DEFAULT_SEPARATOR = ';';
 	public static final String COMMOM_SEPARATOR = ",";
 	public static final String DEFAULT_MATCHING_NAME_FIELD = "name";
@@ -130,6 +131,26 @@ public class OntologyServiceImpl implements OntologyService
 	{
 		Entity ontologyTermEntity = getOntologyTermEntity(ontologyTermIri, ontologyIri);
 		return ontologyTermEntity != null ? new OntologyTermImpl(ontologyTermEntity, this) : null;
+	}
+
+	@Override
+	public List<String> getOntologyTermSynonyms(String ontologyTermIri, String ontologyIri)
+	{
+		List<String> synonyms = new ArrayList<String>();
+		EntityMetaData entityMetaDataIndexedOntologyTerm = dataService.getEntityMetaData(getEntityName(ontologyIri));
+		for (Entity entity : searchService.search(
+				new QueryImpl()
+						.eq(OntologyTermQueryRepository.ENTITY_TYPE, OntologyTermQueryRepository.TYPE_ONTOLOGYTERM)
+						.and().eq(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI, ontologyTermIri),
+				entityMetaDataIndexedOntologyTerm))
+		{
+			String ontologyTermSynonym = entity.getString(OntologyTermQueryRepository.SYNONYMS);
+			if (!synonyms.contains(ontologyTermSynonym))
+			{
+				synonyms.add(ontologyTermSynonym);
+			}
+		}
+		return synonyms;
 	}
 
 	@Override
@@ -342,10 +363,11 @@ public class OntologyServiceImpl implements OntologyService
 	private OntologyServiceResult convertResults(List<ComparableEntity> comparableEntities,
 			Map<String, Object> inputData)
 	{
-		Collections.sort(comparableEntities);
-		List<ComparableEntity> entities = PostProcessOntologyTermAlgorithm.process(comparableEntities, inputData);
+		comparableEntities = PostProcessOntologyTermCombineSynonymAlgorithm.process(comparableEntities, inputData);
+		// PostProcessOntologyTermIDFAlgorithm.process(comparableEntities, inputData, this);
 
-		return new OntologyServiceResultImpl(inputData, entities, entities.size());
+		Collections.sort(comparableEntities);
+		return new OntologyServiceResultImpl(inputData, comparableEntities, comparableEntities.size());
 	}
 
 	private BigDecimal matchOntologyTerm(String queryString, Entity entity)
@@ -448,13 +470,13 @@ public class OntologyServiceImpl implements OntologyService
 		};
 	}
 
-	private String removeIllegalCharWithSingleWhiteSpace(String string)
+	public String removeIllegalCharWithSingleWhiteSpace(String string)
 	{
 		return string.replaceAll(OntologyTermQueryRepository.ILLEGAL_CHARACTERS_PATTERN,
 				OntologyTermQueryRepository.SINGLE_WHITESPACE);
 	}
 
-	private String removeIllegalCharWithEmptyString(String string)
+	public String removeIllegalCharWithEmptyString(String string)
 	{
 		return string.replaceAll(OntologyTermQueryRepository.ILLEGAL_CHARACTERS_PATTERN, StringUtils.EMPTY);
 	}
