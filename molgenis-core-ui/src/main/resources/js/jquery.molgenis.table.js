@@ -498,6 +498,7 @@
 				if(value !== editValue) {
 					restApi.update(cell.data('id'), editValue, {
 						success: function() {
+							settings.onDataChange();
 							value = editValue;
 							settings.data.items[row][attribute.name] = value;
 							cell.addClass('edited');
@@ -513,6 +514,7 @@
 				if(value !== editValue) {
 					restApi.update(cell.data('id'), editValue, {
 						success: function() {
+							settings.onDataChange();
 							if (editValue === '')
 								delete entity[attribute.name];
 							else {
@@ -532,6 +534,7 @@
 					if(value !== editValue) {
 						restApi.update(cell.data('id'), editValue, {
 							success: function() {
+								settings.onDataChange();
 								settings.data.items[row][attribute.name] = editValue;
 								cell.removeClass('invalid-input').addClass('edited');
 							}
@@ -551,6 +554,7 @@
 						var editValue = $.map(data, function(val){ return restApi.getPrimaryKeyFromHref(val.href);});
 						restApi.update(cell.data('id'), editValue, {
 							success: function() {
+								settings.onDataChange();
 								entity[attribute.name].total = data.length;
 								entity[attribute.name].items = data;
 								cell.addClass('edited');
@@ -575,6 +579,7 @@
 	            		editValue = editValue !== '' ? restApi.getPrimaryKeyFromHref(editValue) : ''; 
 						restApi.update(cell.data('id'), editValue, {
 							success: function() {
+								settings.onDataChange();
 								if (editValue === '')
 									delete entity[attribute.name];
 								else {
@@ -595,6 +600,7 @@
 				if(value !== editValue) {
 					restApi.update(cell.data('id'), editValue, {
 						success: function() {
+							settings.onDataChange();
 							value = editValue;
 							settings.data.items[row][attribute.name] = value;
 							cell.addClass('edited');
@@ -864,6 +870,7 @@
 		'attributes' : null,
 		'query' : null,
 		'editable' : false,
-		'rowClickable': false
+		'rowClickable': false,
+		'onDataChange': function(){}
 	};
 }($, window.top.molgenis = window.top.molgenis || {}));
