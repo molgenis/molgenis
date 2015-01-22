@@ -74,7 +74,7 @@ public class VkglImportJob
 					}
 					catch (Exception e)
 					{
-						e.printStackTrace();
+						//e.printStackTrace();
 						logger.error("Exception importing '" + vcfFile + "'", e);
 						report.set(ImportedFilesEntityMetaData.ERROR_MESSAGE, e.getMessage());
 					}

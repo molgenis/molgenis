@@ -148,7 +148,7 @@ public class VcfRepository extends AbstractRepository
 
 					while (!vkglReferenceGenomeFilter(reference))
 					{
-						System.out.println(reference);
+						//System.out.println(reference);
 						if (vcfRecordIterator.hasNext())
 						{
 							vcfRecord = vcfRecordIterator.next();
@@ -243,12 +243,12 @@ public class VcfRepository extends AbstractRepository
 								if (sampleEntity.getString("GT").contains("/"))
 								{
 									genoTypes = sampleEntity.getString("GT").split("/");
-									System.out.println("/: " + sampleEntity.getString("GT"));
+						//			System.out.println("/: " + sampleEntity.getString("GT"));
 								}
 								else if (sampleEntity.getString("GT").contains("|"))
 								{
 									genoTypes = sampleEntity.getString("GT").split("\\|");
-									System.out.println("|: " + sampleEntity.getString("GT"));
+							//		System.out.println("|: " + sampleEntity.getString("GT"));
 									
 							
 								}
@@ -259,14 +259,14 @@ public class VcfRepository extends AbstractRepository
 									{
 
 										alleles.add(entity.get(REF).toString());
-										System.out.println("ref 1: " + entity.get(REF).toString());
+							//			System.out.println("ref 1: " + entity.get(REF).toString());
 									}
 									else
 									{
-										System.out.println("GT: " + genoType);
+							//			System.out.println("GT: " + genoType);
 										String allele2 = vcfRecord.getAlternateAlleles()
 												.get(Integer.parseInt(genoType) - 1).toString();
-										System.out.println("alt: " + allele2);
+								//		System.out.println("alt: " + allele2);
 										alleles.add(allele2);
 									}
 

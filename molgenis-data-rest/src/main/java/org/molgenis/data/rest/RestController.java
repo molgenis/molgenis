@@ -34,6 +34,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -280,6 +281,7 @@ public class RestController
 			@PathVariable("id") Object id, @RequestParam(value = "attributes", required = false) String[] attributes,
 			@RequestParam(value = "expand", required = false) String[] attributeExpands)
 	{
+
 		Set<String> attributesSet = toAttributeSet(attributes);
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
 
@@ -380,7 +382,7 @@ public class RestController
 	public ArrayList<VkglResult> getAlleleQueryResults(VkglAlleleQuery alleleQuery, String reference, String chr,
 			int positionStart, int positionEnd, ArrayList<VkglResult> results)
 	{
-		
+
 		String entityName = "vkgl_vkgl";
 		EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
 
@@ -399,7 +401,7 @@ public class RestController
 			for (int j = 0; j < alleleQuery.getAllele_sequence().length; j++)
 			{
 				Query q = new QueryImpl();
-			
+
 				if (alleleQuery.getOperator().equals("IS"))
 				{
 
@@ -410,7 +412,7 @@ public class RestController
 				else if (alleleQuery.getOperator().equals("NOT"))
 				{
 					// Query q = new QueryImpl().not().eq(boolAttributeName, value);
-//"queryStatement" : "(#1 & #2) | #3"
+					// "queryStatement" : "(#1 & #2) | #3"
 					q = q.eq("#CHROM", chr).and().rng("POS", positionStart, positionEnd).and().not()
 							.eq("ALLELE1", alleleQuery.getAllele_sequence()[j]).and().not()
 							.eq("ALLELE2", alleleQuery.getAllele_sequence());
@@ -455,30 +457,149 @@ public class RestController
 
 		return results;
 	}
-	public Query getQAll(int positionStart, int positionEnd, String chr, VkglCoordinateQuery[] allQueries, String queryStatement){
-		Query q =  new QueryImpl();
-		String[] statement = queryStatement.split("(?<=[-+*/])|(?=[-+*/])");
-		System.out.println("statementarray: " + Arrays.toString(statement));
-		for(VkglCoordinateQuery query: allQueries){
-			
-			if (query.getOperator().equals("IS"))
+
+	public Map<String, List<String>> getPositions(VkglCoordinateQuery[] allQueries)
+	{
+
+		Map<String, List<String>> positionsToQueryId = new HashMap<>();
+		for (VkglCoordinateQuery query : allQueries)
+		{
+			if (query.getSource().equals("HGNC"))
 			{
 
-				q = q.eq("#CHROM", chr).and().rng("POS", positionStart, positionEnd);
-			}
-			else if (query.getOperator().equals("NOT"))
-			{
-				// Query q = new QueryImpl().not().eq(boolAttributeName, value);
+				String geneSymbol = query.getReference();
 
-				q = q.eq("#CHROM", chr).and().rng("POS", positionStart, positionEnd);
+				HashMap<String, Iterable<Entity>> lookupTables = new HashMap<>();
+				lookupTables.put("GRCh37", dataService.findAll("GRCh37", new QueryImpl().eq("HGNC", geneSymbol)));
+				lookupTables.put("GRCh38", dataService.findAll("GRCh38", new QueryImpl().eq("HGNC", geneSymbol)));
+
+				for (String reference : lookupTables.keySet())
+				{
+					Entity e = lookupTables.get(reference).iterator().next();
+
+					for (int position = Integer.parseInt(query.getStart()); position < Integer.parseInt(query.getEnd()) - 1; position++)
+					{
+						String chr = (String) e.get("Chromosome");
+						int positionStart = position + (int) e.get("Start");
+						int positionStop = position + (int) e.get("End");
+						
+						for (int start = positionStart; start < positionStop; start++)
+						{
+							String pos = chr + ":" + start + ":"+ reference;
+							System.out.println("Postitions for id  " + query.getId() + ": " + chr + ":" + start + ":"
+									+ reference);
+							if (positionsToQueryId.get(start) != null)
+							{
+								positionsToQueryId.get(start).add(query.getId());
+							}
+							else
+							{
+								List<String> iDs = new ArrayList<>();
+								iDs.add(query.getId());
+								positionsToQueryId.put(pos, iDs);
+							}
+
+						}
+
+					}
+				}
+
 			}
+			if (query.getSource().equals("GRCBUILD"))
+			{
+				for (int start = Integer.parseInt(query.getStart()); start < Integer.parseInt(query.getEnd()); start++)
+				{
+					String chr = query.getReference().split("\\.")[0];
+					System.out.println("Postitions for id  " + query.getId() + ": " + chr + ":" + start + ":"
+							+ query.getReference().split("\\.")[1]);
+					String pos = chr + ":" + start + ":"+ query.getReference().split("\\.")[1];
+					if (positionsToQueryId.get(start) != null)
+					{
+						positionsToQueryId.get(start).add(query.getId());
+					}
+					else
+					{
+						List<String> iDs = new ArrayList<>();
+						iDs.add(query.getId());
+						positionsToQueryId.put(pos, iDs);
+					}
+				}
+			}
+
 		}
+
+		return positionsToQueryId;
+	}
+
+	public Query getQAll(int positionStart, int positionEnd, String chr, VkglCoordinateQuery[] allQueries,
+			String queryStatement)
+	{
 		
-		return q;
+		String[] statement = queryStatement.split("(?<=[-+*/\\|\\!])|(?=[-+*/\\|\\!])");
+		System.out.println("statementarray: " + Arrays.toString(statement));
+		HashMap<String, Query> idToQuery = new HashMap<>();
+
+		ArrayList<Query> queries = new ArrayList<>();
+		HashMap<String, Integer> queryIdToStart = new HashMap<>();
+		Map<String, List<String>> positionsToIds = getPositions(allQueries);
+		for (String position : positionsToIds.keySet())
+		{
+			Query q = new QueryImpl();
+			for (String qEl : statement)
+			{
+				
+				System.out.println(qEl);
+
+				if (qEl.equals("!"))
+				{
+					q = q.and().not();
+				}
+				else if (qEl.equals("|"))
+				{
+					q = q.or();
+				}
+
+				// doesn't contain correct chr and start and end positions
+
+				for (VkglCoordinateQuery query : allQueries)
+				{
+					for (String id : positionsToIds.get(position))
+					{
+						if (query.getId().equals(qEl) && query.getId().equals(id))
+						{
+							
+							String[] splittedPos = position.split(":");
+							chr = splittedPos[0];
+							positionStart = Integer.parseInt(splittedPos[1]);
+							positionEnd = positionStart + 2;
+							
+							if (query.getOperator().equals("IS"))
+							{
+								q = q.nest().eq("#CHROM", chr).and().rng("POS", positionStart, positionEnd).unnest();
+								
+							}
+							else if (query.getOperator().equals("NOT"))
+							{
+								q = q.nest().eq("#CHROM", chr).and().rng("POS", positionStart, positionEnd).unnest();
+							}
+						}
+					}
+				}
+				
+				
+
+			}
+			System.out.println(q);
+			queries.add(q);
+
+		}
+		//System.out.println("new query: " + q);
+		return null;
 	}
 
 	public ArrayList<VkglResult> getCoordinateQueryResults(VkglCoordinateQuery coordinateQuery, String reference,
-			String chr, int positionStart, int positionEnd, ArrayList<VkglResult> results, VkglCoordinateQuery[] allQueries, String queryStatement)
+			String chr, int positionStart, int positionEnd, ArrayList<VkglResult> results,
+			VkglCoordinateQuery[] allQueries, String queryStatement)
 	{
 
 		String entityName = "vkgl_vkgl";
@@ -492,16 +613,24 @@ public class RestController
 		// + (int) e.get("Start");
 		// int positionEnd = Integer.parseInt(request.getQuery().getAllele()[i].getEnd())
 		// + (int) e.get("Start");
-		Query qAll = new QueryImpl();
+
 		for (int position = positionStart; position < positionEnd - 1; position++)
 		{
+			Query qAll = new QueryImpl();
 			qAll = getQAll(positionStart, positionEnd, chr, allQueries, queryStatement);
 			// start stop
+
+			AggregateQuery newAggregateQuery = new AggregateQueryImpl().attrX(posXAttributeMeta)
+					.attrY(posYAttributeMeta).query(qAll);
+
+			AggregateResult result = dataService.aggregate(entityName, newAggregateQuery);
+
+			System.out.println("New Result: " + result.getMatrix());
+
 			Query q = new QueryImpl();
 
 			if (coordinateQuery.getOperator().equals("IS"))
 			{
-
 				q = q.eq("#CHROM", chr).and().rng("POS", positionStart, positionEnd);
 			}
 			else if (coordinateQuery.getOperator().equals("NOT"))
@@ -510,10 +639,10 @@ public class RestController
 
 				q = q.eq("#CHROM", chr).and().rng("POS", positionStart, positionEnd);
 			}
-			AggregateQuery alleleAggregateQuery = new AggregateQueryImpl().attrX(posXAttributeMeta)
-					.attrY(posYAttributeMeta).query(q);
+			// AggregateQuery alleleAggregateQuery = new AggregateQueryImpl().attrX(posXAttributeMeta)
+			// .attrY(posYAttributeMeta).query(q);
 
-			AggregateResult result = dataService.aggregate(entityName, alleleAggregateQuery);
+			// AggregateResult result = dataService.aggregate(entityName, alleleAggregateQuery);
 
 			List<String> resultxLabel = new ArrayList<>();
 			List<String> resultyLabel = new ArrayList<>();
@@ -574,6 +703,21 @@ public class RestController
 
 		if (request.getQuery().getCoordinate() != null)
 		{
+
+			Query qAll = new QueryImpl();
+			qAll = getQAll(0, 0, chr, request.getQuery().getCoordinate(), request.getQuery().getQueryStatement());
+			// start stop
+			String entityName = "vkgl_vkgl";
+			EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
+			//getPositions(request.getQuery().getCoordinate());
+			AttributeMetaData posXAttributeMeta = entityMeta.getAttribute("ALLELE1");
+			AttributeMetaData posYAttributeMeta = entityMeta.getAttribute("ALLELE2");
+			// AggregateQuery newAggregateQuery = new AggregateQueryImpl().attrX(posXAttributeMeta)
+			// .attrY(posYAttributeMeta).query(qAll);
+
+			// AggregateResult result = dataService.aggregate(entityName, newAggregateQuery);
+			// System.out.println("NEw NEw result: "+result);
+
 			for (int i = 0; i < request.getQuery().getCoordinate().length; i++)
 			{
 				HashMap<String, Iterable<Entity>> lookupTables = new HashMap<String, Iterable<Entity>>();
@@ -587,7 +731,7 @@ public class RestController
 					lookupTables.put("GRCh38", dataService.findAll("GRCh38", new QueryImpl().eq("HGNC", geneSymbol)));
 					for (String reference : lookupTables.keySet())
 					{
-						System.out.println(reference);
+						// System.out.println(reference);
 						Entity e = lookupTables.get(reference).iterator().next();
 
 						for (int position = Integer.parseInt(request.getQuery().getCoordinate()[i].getStart()); position < Integer
@@ -596,9 +740,10 @@ public class RestController
 							chr = (String) e.get("Chromosome");
 							int positionStart = position + (int) e.get("Start");
 							int positionEnd = position + (int) e.get("Start") + 2;
-							results = getCoordinateQueryResults(coordinateQuery, reference, chr, positionStart,
-									positionEnd, results, request.getQuery().getCoordinate(), request.getQuery().getQueryStatement());
-							System.out.println("New method outcome: " + results.get(0).getReferenceAllele());
+							// results = getCoordinateQueryResults(coordinateQuery, reference, chr, positionStart,
+							// positionEnd, results, request.getQuery().getCoordinate(), request.getQuery()
+							// .getQueryStatement());
+							// System.out.println("New method outcome: " + results.get(0).getReferenceAllele());
 						}
 					}
 				}
@@ -614,11 +759,12 @@ public class RestController
 
 						String[] source = request.getQuery().getCoordinate()[i].getReference().split("\\.");
 						chr = source[0];
-						System.out.println("chr: " + chr);
+						// System.out.println("chr: " + chr);
 						int positionStart = position;
 						int positionEnd = position + 2;
-						results = getCoordinateQueryResults(coordinateQuery, source[1], chr, positionStart,
-								positionEnd, results, request.getQuery().getCoordinate(), request.getQuery().getQueryStatement());
+						// results = getCoordinateQueryResults(coordinateQuery, source[1], chr, positionStart,
+						// positionEnd, results, request.getQuery().getCoordinate(), request.getQuery()
+						// .getQueryStatement());
 					}
 				}
 			}
