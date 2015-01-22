@@ -36,6 +36,7 @@ import org.molgenis.ontology.repository.OntologyTermIndexRepository;
 import org.molgenis.ontology.repository.OntologyTermQueryRepository;
 import org.molgenis.ontology.utils.NGramMatchingModel;
 import org.molgenis.ontology.utils.PostProcessOntologyTermCombineSynonymAlgorithm;
+import org.molgenis.ontology.utils.PostProcessOntologyTermIDFAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.tartarus.snowball.ext.PorterStemmer;
 
@@ -48,13 +49,11 @@ public class OntologyServiceImpl implements OntologyService
 	private static final String FUZZY_MATCH_SIMILARITY = "~0.8";
 	private static final String NON_WORD_SEPARATOR = "[^a-zA-Z0-9]";
 	private static final int MAX_NUMBER_MATCHES = 500;
-	public static final String SCORE = "Score";
 	public static final String SIGNIFICANT_VALUE = "Significant";
 	public static final Character DEFAULT_SEPARATOR = ';';
 	public static final String COMMOM_SEPARATOR = ",";
 	public static final String DEFAULT_MATCHING_NAME_FIELD = "name";
 	public static final String DEFAULT_MATCHING_SYNONYM_FIELD = "synonym";
-	public static final String MAX_SCORE_FIELD = "maxScoreField";
 	public static final String ALLOWED_IDENTIFIER = "Identifier";
 
 	private final SearchService searchService;
@@ -364,7 +363,7 @@ public class OntologyServiceImpl implements OntologyService
 			Map<String, Object> inputData)
 	{
 		comparableEntities = PostProcessOntologyTermCombineSynonymAlgorithm.process(comparableEntities, inputData);
-		// PostProcessOntologyTermIDFAlgorithm.process(comparableEntities, inputData, this);
+		PostProcessOntologyTermIDFAlgorithm.process(comparableEntities, inputData, this);
 
 		Collections.sort(comparableEntities);
 		return new OntologyServiceResultImpl(inputData, comparableEntities, comparableEntities.size());

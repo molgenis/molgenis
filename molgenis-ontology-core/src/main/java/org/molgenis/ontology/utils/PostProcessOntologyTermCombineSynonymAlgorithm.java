@@ -1,11 +1,11 @@
 package org.molgenis.ontology.utils;
 
+import static org.molgenis.ontology.beans.ComparableEntity.MAX_SCORE_FIELD;
+import static org.molgenis.ontology.beans.ComparableEntity.SCORE;
 import static org.molgenis.ontology.repository.AbstractOntologyRepository.ILLEGAL_CHARACTERS_PATTERN;
 import static org.molgenis.ontology.repository.AbstractOntologyRepository.ONTOLOGY_TERM_IRI;
 import static org.molgenis.ontology.repository.AbstractOntologyRepository.SINGLE_WHITESPACE;
 import static org.molgenis.ontology.repository.AbstractOntologyRepository.SYNONYMS;
-import static org.molgenis.ontology.service.OntologyServiceImpl.MAX_SCORE_FIELD;
-import static org.molgenis.ontology.service.OntologyServiceImpl.SCORE;
 
 import java.util.ArrayList;
 import java.util.Collections;
