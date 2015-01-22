@@ -290,7 +290,7 @@
                     <artifactId>jetty-maven-plugin</artifactId>
                     <version>8.1.12.v20130726</version>
                     <configuration>
-                        <stopPort>12345</stopPort>
+                        <stopPort>${jetty.stop.http.port}</stopPort>
                         <stopKey>jetty-stop</stopKey>
                         <reload>manual</reload>
                         <webAppConfig>
