@@ -8,6 +8,7 @@ import static org.molgenis.ontology.service.OntologyServiceImpl.MAX_SCORE_FIELD;
 import static org.molgenis.ontology.service.OntologyServiceImpl.SCORE;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -23,11 +24,12 @@ import org.molgenis.ontology.beans.ComparableEntity;
  * @author chaopang
  *
  */
-public class PostProcessOntologyTermAlgorithm
+public class PostProcessOntologyTermCombineSynonymAlgorithm
 {
 	public static List<ComparableEntity> process(List<ComparableEntity> comparableEntities,
 			Map<String, Object> inputData)
 	{
+		Collections.sort(comparableEntities);
 		List<ComparableEntity> entities = new ArrayList<ComparableEntity>(comparableEntities);
 		for (int i = 0; i < comparableEntities.size(); i++)
 		{
