@@ -1,17 +1,22 @@
 <#macro render field hasWritePermission entity='' forUpdate=true>
 
-	<#assign fieldName=field.name/>
-	<#assign readonly = (forUpdate && field.readonly) || !hasWritePermission>
-	<#assign nillable = field.nillable>
+	<#assign fieldName = field.name/>
+	<#assign readonly  = (forUpdate && field.readonly) || !hasWritePermission>
+	<#assign nillable  = field.nillable>
 	
 	<div class="form-group">
 		<div class="col-md-3">
     		<label class="control-label pull-right" for="${fieldName?html}">${field.label?html}&nbsp;<#if !nillable>*</#if></label>
     	</div>
     	
-    	<div class="col-md-9">	
-    		<#if field.dataType.enumType == 'BOOL'>
+    	<div class="col-md-9">
+    		<#if field.dataType.enumType == 'BOOL' && !field.nillable>
 				<input type="checkbox" name="${fieldName?html}" id="${fieldName?html}" value="true" <#if entity!='' && entity.get(fieldName)?? && entity.get(fieldName)?string("true", "false") == "true">checked</#if>  <#if field.readonly || hasWritePermission?string("true", "false") == "false" >readonly="readonly"</#if>>
+	
+			<#elseif field.dataType.enumType == 'BOOL' && field.nillable>
+					<label class="radio-inline"><input <#if entity!='' && entity.get(fieldName)?? && entity.get(fieldName)?string("true", "false") == "true">checked</#if> id="${fieldName?html}Yes" type="radio" name="${fieldName?html}" 	value="true"	<#if field.readonly || hasWritePermission?string("true", "false") == "false" >readonly="readonly"</#if>>Yes</label>
+					<label class="radio-inline"><input <#if entity!='' && entity.get(fieldName)?? && entity.get(fieldName)?string("true", "false") == "false">checked</#if> id="${fieldName?html}No" type="radio" name="${fieldName?html}" 	value="false"	<#if field.readonly || hasWritePermission?string("true", "false") == "false" >readonly="readonly"</#if>>No</label>
+					<label class="radio-inline"><input <#if entity!='' && !entity.get(fieldName)??>checked</#if> id="${fieldName?html}NA" type="radio" name="${fieldName?html}" value= <#if field.readonly || hasWritePermission?string("true", "false") == "false" >readonly="readonly"</#if>>N/A</label>
 	
 			<#elseif field.dataType.enumType == 'TEXT' || field.dataType.enumType =='HTML'>
 				<textarea class="form-control" name="${fieldName?html}" id="${fieldName?html}" <#if readonly>readonly="readonly"</#if> <#if !nillable>required="required"</#if> ><#if entity!='' && entity.get(fieldName)??>${entity.get(fieldName)!?html}</#if></textarea>
