@@ -53,11 +53,18 @@
 	
 	var phenotipsFilteredQuery;
 	
+	var currentQuery;
+	
 	/**
 	 * Listens for data explorer query changes and updates the selected gene/disease lists.
 	 */
 	$(document).on('changeQuery', function(e, query) {	
 		updateSelectionList(currentSelectionMode);
+	});
+	
+	$(document).on('dataChange.data', function(e) {
+		//TODO: implement table refresh
+		$('#diseasematcher-variant-panel').table('setQuery', currentQuery);
 	});
 	
 	//disease matcher parts
@@ -69,10 +76,6 @@
 	var selectionTitle = $('#diseasematcher-selection-title');
 	
 	//handlebars templates
-	var hbColumnWarning = $('#hb-column-warning');
-	var hbColumnWarningComp = Handlebars.compile(hbColumnWarning.html());
-	var hbDatasetWarning = $('#hb-dataset-warning');
-	var hbDatasetWarningComp = Handlebars.compile(hbDatasetWarning.html());
 	var hbSelectionList = $('#hb-selection-list');
 	var hbClinicalSynopsis = $('#hb-clinical-synopsis');
 	var hbClinicalSynopsisComp = Handlebars.compile(hbClinicalSynopsis.html());
@@ -87,7 +90,6 @@
 			variantPanel.table('setAttributes', data.attributes);
 		}
 	});
-
 	
 	/**
 	 * Checks if the current state of Molgenis meets the requirements of this tool. 
@@ -95,6 +97,7 @@
 	 * a gene symbol column. All calls are async to avoid hanging of the application.
 	 *
 	 * @param entityUri the URI of the entity to check for a gene symbol column
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function checkToolAvailable(entityUri) {
 		checkDatasetAvailable('Disease');
@@ -102,13 +105,13 @@
 
 		// if an entity is selected, check if it has a gene symbol column and show a warning if it does not
 		restApi.getAsync(entityUri + '/meta', {}, function(data) {
-			if (data === null || !data.attributes.hasOwnProperty(geneSymbolColumn)) {
+			if (data === null || !data.attributes.hasOwnProperty(geneSymbolColumn)) {			
+				molgenis.createAlert([{
+					message: 'No geneSymbol column found!</strong> For this tool to work, make sure your dataset has a <em>geneSymbol</em> column.'}], 
+					'warning',
+					infoPanel);
 				
-				var warning = hbColumnWarningComp({column: geneSymbolColumn});
-				infoPanel.append(warning);
 				toolAvailable = false;
-		
-				// TODO determine which annotators to propose
 			}
 		});
 	}
@@ -118,12 +121,16 @@
 	 * Checks if a dataset is loaded. Shows a warning when it is not. 
 	 * 
 	 * @param dataset the dataset to check for
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function checkDatasetAvailable(dataset) {
 		restApi.getAsync('/api/v1/' + dataset, {'num' : 1},	function(data){
 			if (data.total === 0) {
-				var warning = hbDatasetWarningComp({dataset: dataset});
-				infoPanel.append(warning);
+				molgenis.createAlert([{
+					message: '<strong>' + dataset + ' not loaded!</strong> For this tool to work, please upload a valid <em>' + dataset + '</em> dataset.'}], 
+					'warning',
+					infoPanel);
+				
 				toolAvailable = false;
 			}
 		});
@@ -134,6 +141,7 @@
 	 * 
 	 * @param element the selected link
 	 * @selectionMode the appropriate selection mode to use
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function onClickNavBtn(element, selectionMode){
 		if (!toolAvailable) return;
@@ -159,6 +167,9 @@
 		}
 	}
 	
+	/**
+	 * @memberOf molgenis.dataexplorer.diseasematcher
+	 */
 	function rankHPOTerms(terms, callback){
 		var queryString = '';
 		$.each(terms, function(index, t){
@@ -182,6 +193,9 @@
 		
 	}
 	
+	/**
+	 * @memberOf molgenis.dataexplorer.diseasematcher
+	 */
 	function filterPhenotipsOutputComplete(terms){
 		var entityName = getEntity().name;
 		var request = {
@@ -198,6 +212,9 @@
 			url : '/diseasematcher/diseases',
 			data : JSON.stringify(request),
 			success : function(diseases) {
+				
+				if (diseases.total === 0) return;
+				
 				//call Phenotips and put the suggestions in a hidden div
 				rankHPOTerms(terms, function(suggestions){		
 					
@@ -230,7 +247,10 @@
 					});
 					
 					if (suggestionObjects.length === 0){
-						alert("phenotips offline");
+						molgenis.createAlert([{
+							message: 'PhenoTips is offline or (one of) the HPO terms you entered is not valid!'}], 
+							'warning',
+							$('.diseasematcher-warnings'));
 						return;
 					}
 					
@@ -263,7 +283,6 @@
 							}
 						}
 					});
-					
 					
 					includeIds = [];
 					
@@ -326,6 +345,7 @@
 						'attributes' : [ 'geneSymbol']
 						
 					}, function(diseaseGenes) {
+						
 						// get unique genes for this disease
 						var uniqueGenes = [];
 						$.each(diseaseGenes.items, function(index, disease) {
@@ -364,7 +384,7 @@
 	}
 	
 	/**
-	 * 
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function downloadFilteredVariants() {
 		$.download(molgenis.getContextUrl() + '/download', {
@@ -376,10 +396,9 @@
 	}
 	
 	/**
-	 * 
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function createDiseaseMatcherDownloadDataRequest() {
-		//TODO: combine phenotips filter with search/item filters on download	
 		var entityQuery = getQuery();
 		
 		var dataRequest = {
@@ -388,7 +407,7 @@
 			query : {
 				rules : phenotipsFilteredQuery
 			},
-			colNames : $('input[name=ColNames]:checked').val()
+			colNames : 'ATTRIBUTE_LABELS'
 		};
 
 		//dataRequest.query.sort = $('#data-table-container').table('getSort');	
@@ -431,9 +450,10 @@
 			e.preventDefault();
 			var terms = $('#hpoTermsInput').val();
 			terms = terms.split(',');
-			rankHPOTerms(terms);
 			
+			rankHPOTerms(terms);
 		});
+		
 		$('#btn-filter-phenotips').click(function(e){
 			e.preventDefault();
 			filterPhenotipsOutput();
@@ -447,8 +467,16 @@
 		$('#btn-filter-phenotips-complete').click(function(e){
 			e.preventDefault();
 			var terms = $('#hpoTermsInput').val();
-			terms = terms.split(',');
-			filterPhenotipsOutputComplete(terms);
+						
+			if (/^(HP:\d{7})(,HP:\d{7})*$/.test(terms) === false){
+				molgenis.createAlert([{
+					message: 'Incorrect input. Make sure to use HPO terms and separate them with a comma (without spaces).'}], 
+					'warning',
+					$('.diseasematcher-warnings'));	
+			}else{
+				terms = terms.split(',');		
+				filterPhenotipsOutputComplete(terms);
+			}
 		});
 		
 		$('#diseasematcher-download-button').click(function() {
@@ -479,6 +507,7 @@
 	 * refreshing of the selection list.
 	 * 
 	 * @param selectionMode 
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function updateSelectionList(selectionMode) {
 		var entityName = getEntity().name;
@@ -513,6 +542,7 @@
 	 * 
 	 * @param list the list of diseases or genes
 	 * @param selectionMode the current selection mode
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function populateSelectionList(list, selectionMode) {
 		//TODO handle nulls
@@ -521,7 +551,16 @@
 		var selectionListFilled = template(list);
 		selectionList.html(selectionListFilled);
 
-		if (list === null || list.length === 0) return;
+		if (list === null || list.length === 0) {
+			// no genes/diseases found, empty the view, disable phenotips filter button
+			$('#btn-filter-phenotips-complete').prop('disabled', true);
+			$('#diseasematcher-variant-panel').empty();
+			$('#diseasematcher-disease-panel').hide();
+			return;
+		}else{
+			$('#btn-filter-phenotips-complete').prop('disabled', false);
+			$('#diseasematcher-disease-panel').show();
+		}
 
 		selectionList.find('a').click(function(e) {
 			e.preventDefault(); // stop jumping to top of page
@@ -539,6 +578,7 @@
 	 * 
 	 * @param total the total amount of items 
 	 * @param selectionMode the selection mode for this list
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function initPager(total, selectionMode) {
 		var container = $('#diseasematcher-selection-pager');
@@ -563,6 +603,7 @@
 	 * @param pageStart index of the first item of this page
 	 * @param pageEnd index of the last item of this page
 	 * @param selectionMode the selection mode for this list
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function onPageChange(pageStart, pageEnd, selectionMode) {
 		var entityName = getEntity().name;
@@ -594,6 +635,7 @@
 	 * Takes an OMIM object and transforms the data to content which is shown in a disease tab.
 	 * 
 	 * @param omimObject the OMIM object to show
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function showOmimObject(omimObject){
 		
@@ -705,6 +747,7 @@
 	 * 
 	 * @param diseaseId
 	 * @returns
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function onSelectDiseaseTab(diseaseId) {
 		if (localStorageSupported && diseaseId in localStorage){
@@ -738,6 +781,7 @@
 	 * 
 	 * @param link the item that was selected
 	 * @param selectionMode the current selection mode
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function onSelectListItem(link, selectionMode) {
 		// visually select the right item in the list
@@ -783,6 +827,7 @@
 	 * Sets readable names for disease tabs (replace the default OMIM identifier).
 	 * 
 	 * @param diseaseIds the OMIM identifiers to get names for
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function setDiseaseTabNames(diseaseIds){
 		var requestParams = '?';
@@ -811,6 +856,7 @@
 	 * 
 	 * @param id OMIM id or gene symbol
 	 * @param selectionMode selection mode for the id
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function showDiseases(id, selectionMode) {
 		// empty disease tabs
@@ -885,6 +931,7 @@
 	 * 
 	 * @param genes the genes to get variants for
 	 * @param panel the panel to add/update
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function showVariants(genes, panel) {
 		var queryRules = [];
@@ -901,31 +948,33 @@
 			});
 		});
 		
-		var query = {'q' : queryRules};
-
+		currentQuery = {'q' : queryRules};
+		
 		// show associated variants in info panel	
 		if (tableEditable) {
 			tableEditable = molgenis.hasWritePermission(molgenis.dataexplorer.getSelectedEntityMeta().name);
 		}
 	
 		if (panel.has('table').length){
-			panel.table('setQuery', query);
+			panel.table('setQuery', currentQuery);
 		}else{
-			panel.table({
+			var table = panel.table({
 				'entityMetaData' : getEntity(),
 				'attributes' : getAttributes(),
-				'query' : query,
-				'editable': tableEditable
+				'query' : currentQuery,
+				'editable': tableEditable,
+				'onDataChange' : function(){
+					$(document).trigger('dataChange.diseasematcher');
+				}
 			});
 		}
 	}
-	
-	
 
 	/**
 	 * Escapes regular expression characters within a string.
 	 * 
 	 * @param string the string in which to escape regular expression characters
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function escapeRegExp(string) {
 	    return string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
@@ -938,6 +987,7 @@
 	 * @param string the string in which to replace
 	 * @param find the substring(s) to be replaced
 	 * @param replace the value to replace the targets with
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function replaceAll(string, find, replace) {
 		  return string.replace(new RegExp(escapeRegExp(find), 'g'), replace);
@@ -948,6 +998,7 @@
 	 * Returns the selected entity from the data explorer.
 	 * 
 	 * @returns the selected entity
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function getEntity() {
 		return molgenis.dataexplorer.getSelectedEntityMeta();
@@ -958,6 +1009,7 @@
 	 * Returns the currently active data explorer query.
 	 * 
 	 * @returns a data explorer query
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function getQuery() {
 		return molgenis.dataexplorer.getEntityQuery();
@@ -968,6 +1020,7 @@
 	 * Returns the currently selected attributes.
 	 * 
 	 * @returns attributes
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function getAttributes() {
 		return molgenis.dataexplorer.getSelectedAttributes();
@@ -978,6 +1031,7 @@
 	 * Checks if a browser supports local storage.
 	 * 
 	 * @returns boolean telling if a browser supports local storage
+	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
 	function browserSupportsLocalStorage() {
 		try {
@@ -996,10 +1050,10 @@
 		"/": '&#x2F;'
 	};
 
-function escapeHtml(string) {
-	return String(string).replace(/[&<>"'\/]/g, function (s) {
-		return entityMap[s];
-	});
-}
+	function escapeHtml(string) {
+		return String(string).replace(/[&<>"'\/]/g, function (s) {
+			return entityMap[s];
+		});
+	}
 
 })($, window.top.molgenis = window.top.molgenis || {});
