@@ -21,7 +21,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.security.account.AccountService.ActivationMode;
 import org.molgenis.security.captcha.CaptchaService;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.util.GsonHttpMessageConverter;
