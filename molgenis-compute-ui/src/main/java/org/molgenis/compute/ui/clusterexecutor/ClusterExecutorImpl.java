@@ -61,7 +61,6 @@ public class ClusterExecutorImpl implements ClusterExecutor
 	{
 		String clusterRoot = analysis.getBackend().getWorkDir();
 		String runDir = clusterRoot + analysis.getName();
-//		String runDir = clusterRoot + analysis.getIdentifier();
 		// here read properties, which later will come from username interface (username, password)
 		// and DB (clusterRoot)
 

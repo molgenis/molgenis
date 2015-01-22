@@ -249,7 +249,6 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 		if (analysis == null) throw new UnknownEntityException("Unknown Analysis [" + analysisId + "]");
 		LOG.info("Running analysis [" + analysisId + "]");
 
-//		String runID = analysisId;
 		String runID = analysis.getName();
 
 		String path = ".tmp" + File.separator + runID + File.separator;
