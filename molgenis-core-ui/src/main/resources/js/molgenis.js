@@ -239,47 +239,51 @@ function getCurrentTimezoneOffset() {
  * Create a table cell to show data of a certain type Is used by the
  * dataexplorer and the forms plugin
  */
-function formatTableCellValue(value, dataType, editable) {
+function formatTableCellValue(rawValue, dataType, editable, nillable) {
+	var htmlElement;
+	
 	if (dataType.toLowerCase() == 'bool') {
-		var checked = (value === true);
-		value = '<input type="checkbox" ';
-		if (checked) {
-			value = value + 'checked ';
+		htmlElement = '<input type="checkbox" ';
+		if (rawValue === true) {
+			htmlElement += 'checked ';
 		}
 		if (editable !== true) {
-			value = value + 'disabled="disabled"';
+			htmlElement += 'disabled="disabled"';
 		}
-
-		return value + '/>';
+		
+		htmlElement += '/>';
+		
+		if(dataType.toLowerCase() == 'bool' && nillable === true && (rawValue === undefined || rawValue === '')) {
+			htmlElement = $(htmlElement);
+			htmlElement.prop('indeterminate', true);
+		}
+		
+		return htmlElement;
 	}
 
-	if (typeof value === 'undefined' || value === null) {
-		return '';
+	if (typeof rawValue === 'undefined' || rawValue === null) {
+		return '<span></span>';
 	}
 
 	if (dataType.toLowerCase() == "hyperlink") {
-		value = '<a target="_blank" href="' + value + '">' + htmlEscape(value)
-				+ '</a>';
+		return htmlElement = '<a target="_blank" href="' + rawValue + '">' + htmlEscape(rawValue) + '</a>';
 
 	} else if (dataType.toLowerCase() == "email") {
-		value = '<a href="mailto:' + value + '">' + htmlEscape(value) + '</a>';
+		return htmlElement = '<a href="mailto:' + rawValue + '">' + htmlEscape(rawValue) + '</a>';
 
 	} else if (dataType.toLowerCase() != 'html') {
-
-		if (value.length > 50) {
-			var abbr = htmlEscape(abbreviate(value, 50));
-			value = '<span class="show-popover"  data-content="'
-					+ htmlEscape(value) + '" data-toggle="popover">' + abbr
+		if (rawValue.length > 50) {
+			var abbr = htmlEscape(abbreviate(rawValue, 50));
+			return htmlElement = '<span class="show-popover"  data-content="'
+					+ htmlEscape(rawValue) + '" data-toggle="popover">' + abbr
 					+ "</span>";
 		} else {
-			value = htmlEscape(value);
+			return '<span>' + htmlEscape(rawValue) + '</span>';
 		}
 
 	} else {
-		value = htmlEscape(value);
+		return '<span>' + htmlEscape(rawValue) + '</span>';
 	}
-
-	return value;
 }
 
 /**
@@ -392,32 +396,32 @@ function createInput(attr, attrs, val, lbl) {
 	};
 
 	molgenis.RestClient.prototype.get = function(resourceUri, options) {
-		return this._get(resourceUri, options);
+		return this._get(resourceUri, options, false);
 	};
 
-	molgenis.RestClient.prototype.getAsync = function(resourceUri, options,
-			callback) {
-		this._get(resourceUri, options, callback);
+	molgenis.RestClient.prototype.getAsync = function(resourceUri, options, callback) {
+		return this._get(resourceUri, options, true, callback);
 	};
 
-	molgenis.RestClient.prototype._get = function(resourceUri, options,
-			callback) {
+	molgenis.RestClient.prototype._get = function(resourceUri, options, async, callback) {
 		var resource = null;
-
-		var async = callback !== undefined;
 		
 		var config = {
 			'dataType' : 'json',
 			'cache' : true,
-			'async' : async,
-			'success' : function(data) {
-				if (async)
-					callback(data);
-				else
-					resource = data;
-			}
+			'async' : async
 		};
-
+		
+		if(callback) {
+			config['success'] = function(data) {
+				callback(data);
+			}
+		} else if(async === false) {
+			config['success'] = function(data) {
+				resource = data;
+			}
+		}
+		
 		// tunnel get requests with options through a post,
 		// because it might not fit in the URL
 		if(options) {
@@ -451,10 +455,12 @@ function createInput(attr, attrs, val, lbl) {
 			});
 		}
 
-		this._ajax(config);
+		var promise = this._ajax(config);
 
-		if (!async)
+		if (async === false)
 			return resource;
+		else
+			return promise;
 	};
 
 	molgenis.RestClient.prototype._ajax = function(config) {
@@ -466,7 +472,7 @@ function createInput(attr, attrs, val, lbl) {
 			});
 		}
 
-		$.ajax(config);
+		return $.ajax(config);
 	};
 
 	molgenis.RestClient.prototype._toApiUri = function(resourceUri, options) {
@@ -496,18 +502,18 @@ function createInput(attr, attrs, val, lbl) {
 	};
 
 	molgenis.RestClient.prototype.remove = function(href, callback) {
-		this._ajax({
+		return this._ajax({
 			type : 'POST',
 			url : href,
 			data : '_method=DELETE',
 			async : false,
-			success : callback.success,
-			error : callback.error
+			success : callback && callback.success ? callback.success : function() {},
+			error : callback && callback.error ? callback.error : function() {}
 		});
 	};
 
 	molgenis.RestClient.prototype.update = function(href, entity, callback) {
-		this._ajax({
+		return this._ajax({
 			type : 'POST',
 			url : href + '?_method=PUT',
 			contentType : 'application/json',

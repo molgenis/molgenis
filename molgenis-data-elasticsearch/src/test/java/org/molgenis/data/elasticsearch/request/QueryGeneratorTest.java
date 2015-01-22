@@ -8,7 +8,9 @@ import java.util.Arrays;
 import java.util.Date;
 
 import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.FilteredQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.mockito.ArgumentCaptor;
@@ -1613,6 +1615,56 @@ public class QueryGeneratorTest
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.nestedQuery(xrefAttributeName,
 				QueryBuilders.matchQuery(xrefAttributeName + "._all", value));
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
+	@Test
+	public void generateMultipleQueryRule()
+	{
+		// query: a or (b and c)
+		Boolean booleanValue = Boolean.TRUE;
+		String stringValue = "str";
+		Integer intValue = 1;
+		Query q = new QueryImpl().eq(boolAttributeName, booleanValue).or().nest().eq(stringAttributeName, stringValue)
+				.and().eq(intAttributeName, intValue).unnest();
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+
+		FilteredQueryBuilder booleanQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.termFilter(boolAttributeName, booleanValue));
+		QueryBuilder stringQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.termFilter(stringAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, stringValue));
+		QueryBuilder intQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.termFilter(intAttributeName, intValue));
+		BoolQueryBuilder stringIntQuery = QueryBuilders.boolQuery().must(stringQuery).must(intQuery);
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery().should(booleanQuery).should(stringIntQuery)
+				.minimumNumberShouldMatch(1);
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
+	// regression test for https://github.com/molgenis/molgenis/issues/2326
+	@Test
+	public void generateMultipleQueryRuleMultipleNotClauses()
+	{
+		// query: a or (b and c)
+		Boolean booleanValue = Boolean.TRUE;
+		String stringValue = "str";
+		Integer intValue = 1;
+		Query q = new QueryImpl().eq(boolAttributeName, booleanValue).and().not().eq(stringAttributeName, stringValue)
+				.and().not().eq(intAttributeName, intValue);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+
+		FilteredQueryBuilder booleanQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.termFilter(boolAttributeName, booleanValue));
+		QueryBuilder stringQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.termFilter(stringAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, stringValue));
+		QueryBuilder intQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.termFilter(intAttributeName, intValue));
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery().must(booleanQuery).mustNot(stringQuery)
+				.mustNot(intQuery);
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
