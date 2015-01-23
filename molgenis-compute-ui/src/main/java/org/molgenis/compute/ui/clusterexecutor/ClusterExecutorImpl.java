@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
+import org.molgenis.auth.MolgenisUser;
 import org.molgenis.compute.ui.meta.AnalysisJobMetaData;
 import org.molgenis.compute.ui.meta.AnalysisMetaData;
 import org.molgenis.compute.ui.meta.MolgenisUserKeyMetaData;
@@ -22,6 +23,7 @@ import org.molgenis.compute.ui.model.MolgenisUserKey;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.runas.RunAsSystem;
+import org.molgenis.security.token.MolgenisToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,18 +55,14 @@ public class ClusterExecutorImpl implements ClusterExecutor
 	@Autowired
 	private ClusterCurlBuilder builder;
 
-	// FIXME variables, that should come from userUI, DB and config files
-	private String password, username, root, url, scheduler;
-
 	@RunAsSystem
 	@Override
 	public boolean submitRun(Analysis analysis, String callbackUri)
 	{
-		String clusterRoot = root;
-		String runDir = clusterRoot + analysis.getIdentifier();
+		String clusterRoot = analysis.getBackend().getWorkDir();
+		String runDir = clusterRoot + analysis.getName();
 		// here read properties, which later will come from username interface (username, password)
 		// and DB (clusterRoot)
-		readUserProperties();
 
 		LOG.info("SUBMIT Analysis [" + analysis.getName() + "]");
 
@@ -151,6 +149,14 @@ public class ClusterExecutorImpl implements ClusterExecutor
 	{
 		LOG.info("Prepare Analysis: " + analysis.getName());
 
+		MolgenisUser molgenisUser = dataService.findOne(MolgenisUser.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisUser.USERNAME,
+						analysis.getUser()), MolgenisUser.class);
+
+		MolgenisToken token = dataService.findOne(MolgenisToken.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisToken.MOLGENISUSER,
+						molgenisUser), MolgenisToken.class);
+
 		Channel channel = session.openChannel("sftp");
 		channel.setInputStream(System.in);
 		channel.setOutputStream(System.out);
@@ -175,10 +181,11 @@ public class ClusterExecutorImpl implements ClusterExecutor
 
 		Iterable<AnalysisJob> jobs = dataService.findAll(AnalysisJobMetaData.INSTANCE.getName(),
 				new QueryImpl().eq(AnalysisJobMetaData.ANALYSIS, analysis), AnalysisJob.class);
+
 		for (AnalysisJob job : jobs)
 		{
 			String taskName = job.getName();
-			String builtScript = builder.buildScript(job, callbackUri);
+			String builtScript = builder.buildScript(token, job, callbackUri);
 			is = new ByteArrayInputStream(builtScript.getBytes());
 			channelSftp.put(is, runDir + "/" + taskName + ".sh");
 		}
@@ -238,7 +245,7 @@ public class ClusterExecutorImpl implements ClusterExecutor
 				AnalysisJob analysisJob = findJob(analysis, jobName);
 				if (analysisJob != null)
 				{
-					// analysisJob.setStatus(JobStatus.SUBMITTED);
+					analysisJob.setStatus(JobStatus.SCHEDULED);
 					analysisJob.setSchedulerId(submittedID);
 
 					dataService.update(AnalysisJobMetaData.INSTANCE.getName(), analysisJob);
@@ -262,26 +269,23 @@ public class ClusterExecutorImpl implements ClusterExecutor
 
 	public boolean cancelRun(Analysis analysis, String callbackUri)
 	{
-		readUserProperties();
 		LOG.info("Canceling Analysis [" + analysis.getName() + "]");
+
+		MolgenisUserSecureChannel userSecureChannel = null;
 
 		try
 		{
 			Thread.sleep(90000);
 
-			JSch jsch = new JSch();
+			MolgenisUserKey userKeyPair = dataService.findOne(MolgenisUserKeyMetaData.INSTANCE.getName(),
+					new QueryImpl().eq(MolgenisUserKeyMetaData.USER, analysis.getUser()), MolgenisUserKey.class);
 
-			String user = username;
-			String host = url;
-			int port = 22;
-			String privateKey = ".ssh/id_rsa";
+			// submit analysis through SSH channel
+			userSecureChannel = new MolgenisUserSecureChannel(userKeyPair);
 
-			jsch.addIdentity(privateKey, password);
-			LOG.info("identity added ");
-
-			Session session = jsch.getSession(user, host, port);
-
-			LOG.info("session created.");
+			Session session = userSecureChannel.getSession(analysis.getBackend().getHost(), 22);
+			session.connect();
+			LOG.info("session connected.....");
 
 			java.util.Properties config = new java.util.Properties();
 			config.put("StrictHostKeyChecking", "no");
@@ -305,7 +309,7 @@ public class ClusterExecutorImpl implements ClusterExecutor
 			Iterable<AnalysisJob> jobs = dataService.findAll(AnalysisJobMetaData.INSTANCE.getName(),
 					new QueryImpl().eq(AnalysisJobMetaData.ANALYSIS, analysis), AnalysisJob.class);
 
-			String schedulerType = scheduler;
+			String schedulerType = analysis.getBackend().getSchedulerType().toString();
 
 			boolean anyJobCancelled = false;
 			for (AnalysisJob job : jobs)
@@ -318,6 +322,7 @@ public class ClusterExecutorImpl implements ClusterExecutor
 					else if (schedulerType.equalsIgnoreCase(PBS)) command = PBS_CANCEL + job.getSchedulerId();
 					else LOG.error("Unsupported scheduler type [" + schedulerType + "]");
 
+					LOG.info(command);
 					channelExec.setCommand(command);
 					channelExec.connect();
 
@@ -329,9 +334,8 @@ public class ClusterExecutorImpl implements ClusterExecutor
 						LOG.info(line);
 					}
 
-					// TODO: it would be nice to update jobs and analysis statuses
-					// job.setStatus(JobStatus.CANCELLED);
-					// dataService.update(AnalysisJobMetaData.INSTANCE.getName(), job);
+					job.setStatus(JobStatus.CANCELLED);
+					dataService.update(AnalysisJobMetaData.INSTANCE.getName(), job);
 				}
 			}
 
@@ -347,59 +351,25 @@ public class ClusterExecutorImpl implements ClusterExecutor
 			LOG.info("Analysis [" + analysis.getName() + "] is cancelled");
 			return true;
 		}
-		catch (JSchException e)
-		{
-			LOG.error("", e);
-			return false;
-		}
-		catch (IOException e)
-		{
-			LOG.error("", e);
-			return false;
-		}
-		catch (InterruptedException e)
-		{
-			LOG.error("", e);
-			return false;
-		}
-	}
-
-	private void readUserProperties()
-	{
-		Properties prop = new Properties();
-		InputStream input = null;
-
-		try
-		{
-			input = new FileInputStream(".cluster.properties");
-
-			// load a properties file
-			prop.load(input);
-
-			password = prop.getProperty(ClusterManager.PASS);
-			username = prop.getProperty(ClusterManager.USER);
-			root = prop.getProperty(ClusterManager.ROOT);
-			url = prop.getProperty(ClusterManager.URL);
-			scheduler = prop.getProperty(ClusterManager.SCHEDULER);
-		}
-		catch (IOException ex)
-		{
-			ex.printStackTrace();
-		}
-		finally
-		{
-			if (input != null)
+		catch (IOException | JSchException | InterruptedException e)
 			{
-				try
+				LOG.error("Failed to submit analysis", e);
+				throw new RuntimeException(e);
+			}
+			finally
+			{
+				if (userSecureChannel != null)
 				{
-					input.close();
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
+					try
+					{
+						userSecureChannel.close();
+					}
+					catch (IOException e)
+					{
+						throw new RuntimeException(e);
+					}
 				}
 			}
-		}
 	}
 
 }

@@ -12,6 +12,8 @@ public class UIBackendMetaData extends DefaultEntityMetaData
 	public static final String WORK_DIR = "workDir";
 	public static final String BACKEND_TYPE = "backendType";
 	public static final String SCHEDULER_TYPE = "scheduleType";
+	public static final String HEADER_CALLBACK = "headerCallback";
+	public static final String FOOTER_CALLBACK = "footerCallback";
 
 	private UIBackendMetaData()
 	{
@@ -21,6 +23,9 @@ public class UIBackendMetaData extends DefaultEntityMetaData
 		addAttribute(WORK_DIR);
 		addAttribute(BACKEND_TYPE);
 		addAttribute(SCHEDULER_TYPE);
+		addAttribute(HEADER_CALLBACK);
+		addAttribute(FOOTER_CALLBACK);
+
 	}
 
 }

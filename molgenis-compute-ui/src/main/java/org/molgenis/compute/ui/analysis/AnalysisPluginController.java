@@ -249,14 +249,15 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 		if (analysis == null) throw new UnknownEntityException("Unknown Analysis [" + analysisId + "]");
 		LOG.info("Running analysis [" + analysisId + "]");
 
-		String runID = analysisId;
+		String runID = analysis.getName();
+
 		String path = ".tmp" + File.separator + runID + File.separator;
 
 		new AnalysisToFilesWriter().writeToFiles(dataService, analysis, path);
 
 		UIBackend backend = analysis.getBackend();
 		String backendHost = backend.getHost();
-		String schedulerType = backend.getSchedulerType().toString();
+		String schedulerType = backend.getSchedulerType().toString().toLowerCase();
 		String[] args =
 		{ "--generate", "--workflow", path + WORKFLOW_DEFAULT, "--parameters", path + PARAMETERS_DEFAULT,
 				"--parameters", path + WORKSHEET, "-b", schedulerType, "--runid", runID, "--weave", "--url",
