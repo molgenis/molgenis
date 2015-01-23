@@ -240,7 +240,9 @@ function getCurrentTimezoneOffset() {
 	var entityMap = {
 		"&" : "&amp;",
 		"<" : "&lt;",
+		"\u2264": "&lte;",
 		">" : "&gt;",
+		"\u2265": "&gte;",
 		'"' : '&quot;',
 		"'" : '&#39;',
 		"/" : '&#x2F;'

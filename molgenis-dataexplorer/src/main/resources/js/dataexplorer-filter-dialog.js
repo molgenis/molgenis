@@ -13,16 +13,17 @@
 	molgenis.dataexplorer.filter = molgenis.dataexplorer.filter || {};
 	var self = molgenis.dataexplorer.filter.dialog = molgenis.dataexplorer.filter.dialog || {};
 	
-	self.openFilterModal = function(attribute, attributeFilter) {
+	var filter;
+	
+	self.openFilterModal = function(attribute, query) {
 		var modal = createFilterModal();
-		var title = attribute.label || attribute.name;
+		var title = attribute.label;
 		var description = attribute.description ? attribute.description : 'No description available';
-		var controls = molgenis.dataexplorer.filter.createFilter(attribute, attributeFilter, false);
 		
 		$('.filter-title', modal).html(title);
 		$('.filter-description', modal).html(description);
-		$('.form-horizontal', modal).html(controls);
-		
+
+		filter = molgenis.filters.create(attribute, {query: query}, $('.form-horizontal', modal));
 		modal.modal('show');
 	};
 	
@@ -37,10 +38,7 @@
 	function createFilterModalControls(modal) {
 		$('.filter-apply-btn', modal).unbind('click');
 		$('.filter-apply-btn', modal).click(function() {
-			var filters = molgenis.dataexplorer.filter.createFilters($('form', modal));
-			$(document).trigger('updateAttributeFilters', {
-				'filters' : filters
-			});
+			$(document).trigger('updateAttributeFilters', {filters: [{attr: filter.getAttribute().name, query: filter.getQuery()}]}); // FIXME check if changed
 		});
 		
 		$(modal).unbind('shown.bs.modal');

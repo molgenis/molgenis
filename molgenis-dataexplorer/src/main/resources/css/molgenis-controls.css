@@ -1,0 +1,8 @@
+/* Css fix in case of multiple addons */
+.input-group-addon:not(:first-child):not(:last-child) {
+    border-left: 0px;
+}
+.ui-editRangeSlider-inputValue {
+    width: 4em;
+    color: black; // JQEditRangeSlider-Bootstrap conflict
+}

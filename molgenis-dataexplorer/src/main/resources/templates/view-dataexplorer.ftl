@@ -11,7 +11,8 @@
 	"bootstrap-switch.min.css",
 	"dataexplorer.css",
 	"dataexplorer-filter.css",
-	"diseasematcher.css"]>
+	"diseasematcher.css",
+	"molgenis-controls.css"]>
 <#assign js=[
 	"jquery-ui-1.9.2.custom.min.js",
 	"jquery.bootstrap.wizard.min.js",
@@ -28,7 +29,9 @@
 	"jquery.molgenis.xrefmrefsearch.js",
 	"dataexplorer.js",
 	"jquery.molgenis.table.js",
-	"bootbox.min.js"]>
+	"bootbox.min.js",
+	"molgenis-controls.js",
+	"molgenis-filters.js"]>
 
 <@header css js/>
 <div class="row">

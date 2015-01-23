@@ -95,9 +95,9 @@
 			
 			$container.on('change', 'input', function(e) {
 				var rawVal = $(this).val();
-				self.value = rawVal !== '' ? rawVal : null;
+				self.value = rawVal !== '' ? (rawVal !== '%%null%%' ? rawVal : null) : undefined;
 				if(props.onValueChange) {
-					props.onValueChange(e.val);
+					props.onValueChange(self.value);
 				}
 			});
 			
@@ -111,17 +111,20 @@
 			var props = self.props;
 			var $container = self.$container;
 			
-			function _render() {				
+			function _render() {
+				var idAttr = attr.refEntity.idAttribute;
+				var labelAttr = attr.refEntity.labelAttribute;
+				
 				var format = function(item) {
 					if (item)
-						return item[attr.refEntity.labelAttribute];
+						return item[labelAttr];
 				};
 				
 				var opts = {
-					id: attr.refEntity.idAttribute,
+					id: idAttr,
 					multiple: props.multiple,
 					allowClear : attr.nillable ? true : false,
-					placeholder : ' ', // cannot be an empty string
+					placeholder : props.placeholder || ' ', // cannot be an empty string
 					initSelection: function(element, callback) {
 						if(self.value)
 							callback(self.value);
@@ -136,7 +139,16 @@
 						};
 				    	
 				    	api.getAsync(attr.refEntity.hrefCollection, q).done(function(data) {
-				    		query.callback({results: data.items, more: data.nextHref ? true : false});
+				    		var items = data.items;
+				    		
+				    		// add entry to dropdown for 'null' item 
+				    		if(props.includeNillable && query.page === 1) {
+				    			var nillableItem = {};
+				    			nillableItem[idAttr] = '%%null%%';
+				    			nillableItem[labelAttr] = 'N/A';
+				    			items.unshift(nillableItem);
+				    		}
+				    		query.callback({results: items, more: data.nextHref ? true : false});
 				    	});
 				    },
 				    formatResult: format,
@@ -160,6 +172,12 @@
 			}
 		},
 		
+
+		/**
+		 * Returns undefined in case no value is selected, returns null
+		 * in case the nillable value is part of the dropdown and is
+		 * selected else returns the selected value.
+		 */
 		getValue: function() {
 			return this.value;
 		}
@@ -191,7 +209,8 @@
 			$container.empty();
 			
 			$container.on('change', 'input', function(e) {
-				self.value = $(this).val();
+				var rawVal = $(this).val();
+				self.value = rawVal !== '' ? rawVal : undefined;
 				if(props.onValueChange) {
 					props.onValueChange(self.value);
 				}
@@ -213,7 +232,7 @@
 		},
 		
 		getValue: function() {
-			return self.value;
+			return this.value;
 		}
 	};
 	
@@ -271,6 +290,7 @@
 	var BoolControl = function(attr, props, $container) {
 		this.attr = attr;
 		this.props = props;
+		this.value = this._normalizeValue(this.props.value);
 		this.$container = $container;
 		
 		this.init();
@@ -311,7 +331,7 @@
 					var val = $('input:checked', $container).val();
 					self.value = val === 'true' ? true : (val === 'false' ? false : null);
 					if(props.onValueChange) {
-						props.onValueChange(props.value);
+						props.onValueChange(self.value);
 					}
 				});
 			} else {
@@ -323,11 +343,11 @@
 				});
 			}
 			
-			this.value = this.props.value;
 			this.render();
 		},
 		
 		render: function() {
+			var self = this;
 			var attr = this.attr;
 			var props = this.props;
 			var $container = this.$container;
@@ -335,13 +355,26 @@
 			$container.html(this.template({
 				id: props.id,
 				nillable: attr.nillable,
-				value : props.value === true ? 'true' : (props.value === false ? 'false' : 'null'),
+				value : self.value === true ? 'true' : (self.value === false ? 'false' : (self.value === null ? 'null' : undefined)),
 				label: props.label
 			}));
 		},
 		
 		getValue: function() {
 			return this.value;
+		},
+		
+		_normalizeValue : function(value) {
+			switch(value) {
+				case 'true':
+					return true;
+				case 'false':
+					return false;
+				case 'null':
+					return null;
+				default:
+					return value;
+			}
 		}
 	};
 	
@@ -410,7 +443,7 @@
 					dateFormat : self.attr.fieldType === 'DATE' ? 'YYYY-MM-DD' : 'YYYY-MM-DDTHH:mm:ssZZ',
 					value: self.value,
 					nillable: self.attr.nillable,
-					placeholder: self.placeholder
+					placeholder: self.props.placeholder
 				}));
 				
 				var datetimepickerSettings = self.attr.fieldType === 'DATE' ? { pickTime : false } : { pickTime : true, useSeconds : true };
@@ -565,26 +598,34 @@
 			case 'BOOL':
 				return new BoolControl(attr, props, container);
 			case 'CATEGORICAL':
-				return new CategoricalControl(attr, props, container);
+				var controlProps = $.extend({}, {placeholder: 'Select a Category'}, props);
+				return new CategoricalControl(attr, controlProps, container);
 			case 'DATE':
 			case 'DATE_TIME':
 				return new DateControl(attr, props, container);
 			case 'DECIMAL':
-				return new DecimalControl(attr, props, container);
+				var controlProps = $.extend({}, {placeholder: 'Number'}, props);
+				return new DecimalControl(attr, controlProps, container);
 			case 'EMAIL':
-				return new EmailControl(attr, props, container);
+				var controlProps = $.extend({}, {placeholder: 'Email'}, props);
+				return new EmailControl(attr, controlProps, container);
 			case 'ENUM':
-				return new EnumControl(attr, props, container);
+				var controlProps = $.extend({}, {placeholder: 'Select an Option'}, props);
+				return new EnumControl(attr, controlProps, container);
 			case 'HTML':
 				return new HtmlControl(attr, props, container);
 			case 'HYPERLINK':
-				return new HyperlinkControl(attr, props, container);
+				var controlProps = $.extend({}, {placeholder: 'URL'}, props);
+				return new HyperlinkControl(attr, controlProps, container);
 			case 'INT':
-				return new IntControl(attr, props, container);
+				var controlProps = $.extend({}, {placeholder: 'Number'}, props);
+				return new IntControl(attr, controlProps, container);
 			case 'LONG':
-				return new LongControl(attr, props, container);
+				var controlProps = $.extend({}, {placeholder: 'Number'}, props);
+				return new LongControl(attr, controlProps, container);
 			case 'MREF':
-				return new MrefControl(attr, props, container);
+				var controlProps = $.extend({}, {placeholder: 'Search for values'}, props);
+				return new MrefControl(attr, controlProps, container);
 			case 'SCRIPT':
 				return new ScriptControl(attr, props, container);
 			case 'STRING':
@@ -592,7 +633,8 @@
 			case 'TEXT':
 				return new TextControl(attr, props, container);
 			case 'XREF':
-				return new XrefControl(attr, props, container);
+				var controlProps = $.extend({}, {placeholder: 'Search for a Value'}, props);
+				return new XrefControl(attr, controlProps, container);
 			case 'COMPOUND' :
 				throw 'TODO discuss';
 			case 'FILE':
