@@ -1,10 +1,10 @@
 package org.molgenis.ontology.utils;
 
+import static org.molgenis.ontology.beans.ComparableEntity.SCORE;
 import static org.molgenis.ontology.repository.AbstractOntologyRepository.ONTOLOGY_IRI;
 import static org.molgenis.ontology.repository.AbstractOntologyRepository.ONTOLOGY_TERM_IRI;
 import static org.molgenis.ontology.repository.AbstractOntologyRepository.SINGLE_WHITESPACE;
 import static org.molgenis.ontology.repository.AbstractOntologyRepository.SYNONYMS;
-import static org.molgenis.ontology.service.OntologyServiceImpl.SCORE;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -31,6 +31,7 @@ public class PostProcessOntologyTermIDFAlgorithm
 		{
 			String queryString = inputData.get(DEFAULT_FIELD).toString();
 
+			int totalDocs = comparableEntities.size() > 10 ? 10 : comparableEntities.size();
 			// Collect the frequencies for all of the unique words from query string
 			Map<String, Integer> wordFreqMap = new HashMap<String, Integer>();
 			Set<String> wordsInQueryString = medicalStemProxy(queryString);
@@ -39,13 +40,11 @@ public class PostProcessOntologyTermIDFAlgorithm
 				wordFreqMap.put(word, 0);
 			}
 
-			int totalDocs = comparableEntities.size() > 10 ? 10 : comparableEntities.size();
-			for (ComparableEntity comparableEntity : comparableEntities.subList(0, totalDocs))
+			for (ComparableEntity entity : comparableEntities.subList(0, totalDocs))
 			{
-				Set<String> listOfWordsInSynonymGroup = medicalStemProxy(StringUtils.join(ontologyService
-						.getOntologyTermSynonyms(comparableEntity.getString(ONTOLOGY_TERM_IRI),
-								comparableEntity.getString(ONTOLOGY_IRI)), SINGLE_WHITESPACE));
-
+				Set<String> listOfWordsInSynonymGroup = medicalStemProxy(StringUtils.join(
+						ontologyService.getOntologyTermSynonyms(entity.getString(ONTOLOGY_TERM_IRI),
+								entity.getString(ONTOLOGY_IRI)), SINGLE_WHITESPACE));
 				for (String word : wordFreqMap.keySet())
 				{
 					if (listOfWordsInSynonymGroup.contains(word))
@@ -58,25 +57,25 @@ public class PostProcessOntologyTermIDFAlgorithm
 			for (ComparableEntity entity : comparableEntities.subList(0, totalDocs))
 			{
 				String combineSynonyms = combineSynonyms(entity, wordFreqMap, queryString, ontologyService);
+
 				Set<String> wordsInOntologyTerm = medicalStemProxy(combineSynonyms);
 				int termLength = StringUtils.join(wordsInOntologyTerm, SINGLE_WHITESPACE).length();
 				int queryStringLength = StringUtils.join(wordsInQueryString, SINGLE_WHITESPACE).length();
 				if (queryStringLength > termLength) termLength = queryStringLength;
 
-				BigDecimal unmatchedPart = new BigDecimal(100).subtract(entity.getDecimal());
+				BigDecimal unmatchedPart = new BigDecimal(100).subtract(entity.getScore());
 				// Weight the matched key word based on inverse document frequency (IDF)
 				wordsInOntologyTerm.retainAll(wordFreqMap.keySet());
 				for (String word : wordsInOntologyTerm)
 				{
 					if (wordFreqMap.containsKey(word))
 					{
-						BigDecimal score = entity.getDecimal();
+						BigDecimal score = entity.getScore();
 						BigDecimal idfValue = new BigDecimal(1 + Math.log((double) totalDocs
 								/ (wordFreqMap.get(word) + 1)));
 						BigDecimal partialScore = score.multiply(new BigDecimal((double) word.length() / termLength));
-						double doubleValue = score.subtract(partialScore).add(partialScore.multiply(idfValue))
-								.doubleValue();
-						entity.set(SCORE, doubleValue);
+						entity.set(SCORE, score.subtract(partialScore).add(partialScore.multiply(idfValue))
+								.doubleValue());
 					}
 				}
 
@@ -94,7 +93,7 @@ public class PostProcessOntologyTermIDFAlgorithm
 						BigDecimal incrementalValue = partialScore.multiply(idfValue).subtract(partialScore);
 						if (incrementalValue.doubleValue() > 0)
 						{
-							entity.set(SCORE, entity.getDecimal().subtract(incrementalValue).doubleValue());
+							entity.set(SCORE, entity.getScore().subtract(incrementalValue).doubleValue());
 						}
 					}
 				}
@@ -165,4 +164,74 @@ public class PostProcessOntologyTermIDFAlgorithm
 		}
 		return uniqueTerms;
 	}
+
+	// private static Map<String, BigDecimal> redistributedScore(String queryString,
+	// List<ComparableEntity> comparableEntities, int totalDocs, OntologyServiceImpl ontologyService)
+	// {
+	// // Collect the frequencies for all of the unique words from query string
+	// Map<String, Integer> wordFreqMap = new HashMap<String, Integer>();
+	// Set<String> wordsInQueryString = medicalStemProxy(queryString);
+	// double queryStringLength = StringUtils.join(wordsInQueryString, SINGLE_WHITESPACE).trim().length();
+	// for (String word : wordsInQueryString)
+	// {
+	// wordFreqMap.put(word, 0);
+	// }
+	//
+	// for (ComparableEntity entity : comparableEntities.subList(0, totalDocs))
+	// {
+	// Set<String> listOfWordsInSynonymGroup = medicalStemProxy(StringUtils.join(
+	// ontologyService.getOntologyTermSynonyms(entity.getString(ONTOLOGY_TERM_IRI),
+	// entity.getString(ONTOLOGY_IRI)), SINGLE_WHITESPACE));
+	// for (String word : wordFreqMap.keySet())
+	// {
+	// if (listOfWordsInSynonymGroup.contains(word))
+	// {
+	// wordFreqMap.put(word, (wordFreqMap.get(word) + 1));
+	// }
+	// }
+	//
+	// }
+	// Map<String, Double> redistributedScores = new HashMap<String, Double>();
+	// double averageIDFValue = 0;
+	// for (Entry<String, Integer> entry : wordFreqMap.entrySet())
+	// {
+	// BigDecimal idfValue = new BigDecimal(1 + Math.log((double) totalDocs / (entry.getValue() + 1)));
+	// averageIDFValue += idfValue.doubleValue();
+	// redistributedScores.put(entry.getKey(), entry.getKey().length() / queryStringLength);
+	// }
+	// averageIDFValue = averageIDFValue / wordFreqMap.size();
+	//
+	// double totalDifference = 0;
+	// Map<String, Double> rareWords = new HashMap<String, Double>();
+	// for (Entry<String, Integer> entry : wordFreqMap.entrySet())
+	// {
+	// BigDecimal idfValue = new BigDecimal(1 + Math.log((double) totalDocs / (entry.getValue() + 1)));
+	//
+	// if (idfValue.doubleValue() > averageIDFValue)
+	// {
+	// rareWords.put(entry.getKey(), (idfValue.doubleValue() - averageIDFValue));
+	// totalDifference += idfValue.doubleValue() - averageIDFValue;
+	// }
+	// }
+	//
+	// for (Entry<String, Integer> entry : wordFreqMap.entrySet())
+	// {
+	// BigDecimal idfValue = new BigDecimal(1 + Math.log((double) totalDocs / (entry.getValue() + 1)));
+	//
+	// if (idfValue.doubleValue() < averageIDFValue)
+	// {
+	// double movedScore = (averageIDFValue - idfValue.doubleValue()) / idfValue.doubleValue()
+	// * redistributedScores.get(entry.getKey()).doubleValue();
+	//
+	// // for (String rareWord : rareWords.keySet())
+	// // {
+	// // redistributedScores.put(redistributedScores.get(rareWord)
+	// // + (rareWords.get(rareWord) / totalDifference) * movedScore);
+	// // }
+	// }
+	// }
+	//
+	// return null;
+	// }
+
 }
