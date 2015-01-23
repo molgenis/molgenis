@@ -3,8 +3,10 @@ package org.molgenis.ontology.utils;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -78,10 +80,10 @@ public class NGramMatchingModel
 	 * @param nGrams
 	 * @return
 	 */
-	private static Set<String> createNGrams(String inputQuery, boolean removeStopWords)
+	private static Map<String, Integer> createNGrams(String inputQuery, boolean removeStopWords)
 	{
 		Set<String> wordsInString = new HashSet<String>(Arrays.asList(inputQuery.trim().split(" ")));
-		Set<String> tokens = new HashSet<String>();
+		Map<String, Integer> tokens = new HashMap<String, Integer>();
 		if (removeStopWords) wordsInString.removeAll(STOPWORDSLIST);
 		// Padding the string
 		for (String singleWord : wordsInString)
@@ -93,32 +95,69 @@ public class NGramMatchingModel
 				StringBuilder singleString = new StringBuilder(singleWord.length() + 2);
 				singleString.append('^').append(singleWord.toLowerCase()).append('$');
 				int length = singleString.length();
-				for (int i = 0; i < length; i++)
+				for (int i = 0; i < length - 1; i++)
 				{
-					if (i + nGrams < length) tokens.add(singleString.substring(i, i + nGrams));
-					else tokens.add(singleString.substring(length - 2));
+					String token = null;
+					if (i + nGrams < length)
+					{
+						token = singleString.substring(i, i + nGrams);
+
+					}
+					else
+					{
+						token = singleString.substring(length - 2);
+					}
+
+					if (!tokens.containsKey(token))
+					{
+						tokens.put(token, 1);
+					}
+					else
+					{
+						tokens.put(token, (tokens.get(token) + 1));
+					}
 				}
 			}
 		}
+
 		return tokens;
 	}
 
 	/**
-	 * Calculate the levenshtein distance
+	 * Calculate the ngram distance
 	 * 
 	 * @param inputStringTokens
 	 * @param ontologyTermTokens
 	 * @return
 	 */
-	private static double calculateScore(Set<String> inputStringTokens, Set<String> ontologyTermTokens)
+	private static double calculateScore(Map<String, Integer> inputStringTokens, Map<String, Integer> ontologyTermTokens)
 	{
 		if (inputStringTokens.size() == 0 || ontologyTermTokens.size() == 0) return (double) 0;
-		int matchedTokens = 0;
-		double totalToken = Math.max(inputStringTokens.size(), ontologyTermTokens.size());
-		inputStringTokens.retainAll(ontologyTermTokens);
-		matchedTokens = inputStringTokens.size();
+		double totalToken = Math.max(getTotalNumTokens(inputStringTokens), getTotalNumTokens(ontologyTermTokens));
+
+		int numMatchedToken = 0;
+
+		for (String token : inputStringTokens.keySet())
+		{
+			if (ontologyTermTokens.containsKey(token))
+			{
+				numMatchedToken += Math.min(inputStringTokens.get(token), ontologyTermTokens.get(token));
+			}
+		}
+
 		DecimalFormat df = new DecimalFormat("##.###", new DecimalFormatSymbols(Locale.ENGLISH));
-		return Double.parseDouble(df.format(matchedTokens / totalToken * 100));
+		return Double.parseDouble(df.format(numMatchedToken / totalToken * 100));
+	}
+
+	private static int getTotalNumTokens(Map<String, Integer> inputStringTokens)
+	{
+		int totalNum = 0;
+
+		for (Integer frequency : inputStringTokens.values())
+		{
+			totalNum += frequency;
+		}
+		return totalNum;
 	}
 
 	private static synchronized String stemmerString(String originalString)
