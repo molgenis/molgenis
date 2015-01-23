@@ -19,6 +19,9 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 {
 	private final MolgenisUi molgenisUi;
 
+	public static final String KEY_FOOTER = "molgenis.footer";
+	public static final String DEFAULT_VAL_FOOTER = "null";
+
 	@Autowired
 	private MolgenisSettings molgenisSettings;
 
@@ -57,7 +60,7 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 			{
 				modelAndView.addObject(KEY_PLUGIN_ID, molgenisPlugin.getId());
 			}
-			modelAndView.addObject("footerText", molgenisSettings.getProperty("molgenis.footer"));
+			modelAndView.addObject("footerText", molgenisSettings.getProperty(KEY_FOOTER));
 			modelAndView.addObject(KEY_MOLGENIS_UI, molgenisUi);
 			modelAndView.addObject(KEY_AUTHENTICATED, SecurityUtils.currentUserIsAuthenticated());
 		}

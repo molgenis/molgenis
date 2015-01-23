@@ -1,5 +1,8 @@
 package org.molgenis.app;
 
+import static org.molgenis.ui.MolgenisPluginInterceptor.DEFAULT_VAL_FOOTER;
+import static org.molgenis.ui.MolgenisPluginInterceptor.KEY_FOOTER;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -35,9 +38,6 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 {
 	private final DataService dataService;
 	private final MolgenisSecurityWebAppDatabasePopulatorService molgenisSecurityWebAppDatabasePopulatorService;
-	
-	private static final String KEY_FOOTER = "molgenis.footer";
-	private static final String DEFAULT_VAL_FOOTER = "null";
 
 	@Autowired
 	public WebAppDatabasePopulatorServiceImpl(DataService dataService,
@@ -124,7 +124,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 				molgenisHomeDirAnnotationResources + "/Clinvar/variant_summary.txt");
 
 		runtimePropertyMap.put(KEY_FOOTER, DEFAULT_VAL_FOOTER);
-		
+
 		runtimePropertyMap.put(DataExplorerController.KEY_HIDE_SEARCH_BOX, String.valueOf(false));
 		runtimePropertyMap.put(DataExplorerController.KEY_HIDE_ITEM_SELECTION, String.valueOf(false));
 		runtimePropertyMap.put(DataExplorerController.KEY_HEADER_ABBREVIATE,
