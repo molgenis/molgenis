@@ -1,5 +1,8 @@
 package org.molgenis.app;
 
+import static org.molgenis.ui.MolgenisPluginInterceptor.DEFAULT_VAL_FOOTER;
+import static org.molgenis.ui.MolgenisPluginInterceptor.KEY_FOOTER;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -119,6 +122,8 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 				molgenisHomeDirAnnotationResources + "/dbnsfp/dbNSFP2.3_variant.chr");
 		runtimePropertyMap.put(ClinVarServiceAnnotator.CLINVAR_FILE_LOCATION_PROPERTY,
 				molgenisHomeDirAnnotationResources + "/Clinvar/variant_summary.txt");
+
+		runtimePropertyMap.put(KEY_FOOTER, DEFAULT_VAL_FOOTER);
 
 		runtimePropertyMap.put(DataExplorerController.KEY_HIDE_SEARCH_BOX, String.valueOf(false));
 		runtimePropertyMap.put(DataExplorerController.KEY_HIDE_ITEM_SELECTION, String.valueOf(false));
