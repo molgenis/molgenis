@@ -22,7 +22,6 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 	public static final String KEY_FOOTER = "molgenis.footer";
 	public static final String DEFAULT_VAL_FOOTER = "null";
 
-	@Autowired
 	private MolgenisSettings molgenisSettings;
 
 	@Override
@@ -41,10 +40,11 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 	}
 
 	@Autowired
-	public MolgenisPluginInterceptor(MolgenisUi molgenisUi)
+	public MolgenisPluginInterceptor(MolgenisUi molgenisUi, MolgenisSettings molgenisSettings)
 	{
 		if (molgenisUi == null) throw new IllegalArgumentException("molgenis ui is null");
 		this.molgenisUi = molgenisUi;
+		this.molgenisSettings = molgenisSettings;
 	}
 
 	@Override
