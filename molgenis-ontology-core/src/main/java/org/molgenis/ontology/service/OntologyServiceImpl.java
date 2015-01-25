@@ -326,7 +326,10 @@ public class OntologyServiceImpl implements OntologyService
 
 	public OntologyServiceResult search(String ontologyUrl, String queryString)
 	{
-		return null;
+		Iterable<Entity> entities = searchService.search(
+				new QueryImpl().eq(OntologyTermQueryRepository.SYNONYMS, medicalStemProxy(queryString)).pageSize(
+						MAX_NUMBER_MATCHES), getOntologyEntity(ontologyUrl).getEntityMetaData());
+		return new OntologyServiceResultImpl(null, entities, Iterables.size(entities));
 	}
 
 	/**

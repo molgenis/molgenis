@@ -310,6 +310,21 @@ public class OntologyServiceController extends MolgenisPluginController
 		return new OntologyServiceResultImpl("Please check entityName, inputTermIdentifier exist in input!");
 	}
 
+	@RequestMapping(method = POST, value = "/search")
+	@ResponseBody
+	public OntologyServiceResult search(@RequestBody Map<String, Object> request, HttpServletRequest httpServletRequest)
+	{
+		if (request.containsKey("queryString") && !StringUtils.isEmpty(request.get("queryString").toString())
+				&& request.containsKey(OntologyTermQueryRepository.ONTOLOGY_IRI)
+				&& !StringUtils.isEmpty(request.get(OntologyTermQueryRepository.ONTOLOGY_IRI).toString()))
+		{
+			String queryString = request.get("queryString").toString();
+			String ontologyIri = request.get(OntologyTermQueryRepository.ONTOLOGY_IRI).toString();
+			return ontologyService.search(ontologyIri, queryString);
+		}
+		return new OntologyServiceResultImpl("Please check entityName, inputTermIdentifier exist in input!");
+	}
+
 	@RequestMapping(method = GET, value = "/match/download/{entityName}")
 	public void download(@PathVariable String entityName, HttpServletResponse response, Model model) throws IOException
 	{
