@@ -26,12 +26,22 @@
 			success : function(data) {
 				result_container.empty();
 				if(data.items.length > 0){
-					var slimDiv = $('<div style="width:96%;margin-left:2%;"></div>').appendTo(result_container).
-						append('<p style="font-size:20px;margin-top:-20px;"><strong>' + (ontologyServiceRequest.matched ? 'Matched result' : 'Unmatched result') + '</strong></p>');
+					var searchButton = $('<button class="btn btn-default" style="float:left;margin-left:10px;margin-bottom:10px;"><span class="glyphicon glyphicon-search"></span></button>');
+					var searchBox = $('<input id="filterQuery" type="text" class="form-control" style="float:left;width:200px;margin-bottom:10px;">');
+					var slimDiv = $('<div style="width:96%;margin-left:2%;"></div>').appendTo(result_container);
+					$('<div></div>').append('<p align="center" style="font-size:25px;margin-top:10px;margin-bottom:-10px;"><strong>' + (ontologyServiceRequest.matched ? 'Matched result' : 'Unmatched result') + '</strong></p>').appendTo(slimDiv);
+					$('<div></div>').append(searchBox).append(searchButton).appendTo(slimDiv);
 					var table = $('<table align="center"></table>').addClass('table').appendTo(slimDiv);
-					$('<tr />').append('<th style="width:38%;">Input term</th><th style="width:38%;">Matched term</th><th style="width:10%;">Score</th><th style="width:10%;">Manual Match</th>' + (ontologyServiceRequest.matched ? '<th>Remove</th>' : '')).appendTo(table);
+					$('<tr />').append('<th style="width:38%;">Input term</th><th style="width:38%;">Best candidate</th><th style="width:10%;">Score</th><th style="width:10%;">Manual Match</th>' + (ontologyServiceRequest.matched ? '<th>Remove</th>' : '')).appendTo(table);
 					$.each(data.items, function(index, entity){
 						table.append(createRowForMatchedTerm(entity, ontologyServiceRequest.matched));
+					});
+					$(searchButton).click(function(){
+						if($(searchBox).val() !== ''){
+							ontologyServiceRequest.filterQuery = $(searchBox).val();
+							molgenis.OntologyService.prototype.updatePageFunction(page);
+						}
+						return false;
 					});
 				}else{
 					result_container.append('<center>There are no results!</center>');
@@ -96,7 +106,7 @@
 			var backButton = $('<button type="button" class="btn btn-warning">Cancel</button>').css({'margin-bottom':'10px','float':'right'});
 			var unknownButton = $('<button type="button" class="btn btn-danger">No match</button>').css({'margin-bottom':'10px','margin-right':'10px','float':'right'});
 			var hintInformation = $('<center><p style="font-size:15px;">The candidate ontology terms are sorted based on similarity score, please select one of them by clicking <span class="glyphicon glyphicon-ok"></span> button</p></center>');
-			var table = $('<table class="table"></table>').append('<tr><th style="width:40%;">Input Term</th><th style="width:40%;">Candidate mapping</th><th style="width:10%;">Score</th><th>Select</th></tr>');
+			var table = $('<table class="table"></table>').append('<tr><th style="width:30%;">Input Term</th><th style="width:40%;">Candidate mapping</th><th style="width:8%;">Score</th><th style="width:12%;">Adjusted Score</th><th>Select</th></tr>');
 			var count = 0;
 			$.each(data.ontologyTerms, function(index, ontologyTerm){
 				if(count >= 10) return;
@@ -104,6 +114,7 @@
 				row.append(count == 0 ? gatherInputInfoHelper(inputEntity) : '<td></td>');
 				row.append(gatherOntologyInfoHelper(inputEntity, ontologyTerm));
 				row.append('<td>' + ontologyTerm.Score.toFixed(2) + '%</td>');
+				row.append('<td>' + ontologyTerm.Combined_Score.toFixed(2) + '%</td>');
 				row.append('<td><button type="button" class="btn btn-default"><span class="glyphicon glyphicon-ok"></span></button></td>');
 				row.data('ontologyTerm', ontologyTerm);
 				row.find('button:eq(0)').click(function(){
