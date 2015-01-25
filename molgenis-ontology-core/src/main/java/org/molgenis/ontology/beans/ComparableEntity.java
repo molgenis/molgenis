@@ -11,6 +11,7 @@ public class ComparableEntity extends MapEntity implements Comparable<Comparable
 	private static final long serialVersionUID = 1L;
 	public static final String SCORE = "Score";
 	public static final String MAX_SCORE_FIELD = "maxScoreField";
+	public static final String COMBINED_SCORE = "Combined_Score";
 
 	public ComparableEntity(Entity entity, BigDecimal maxNgramScore, String maxScoreField)
 	{
@@ -19,13 +20,14 @@ public class ComparableEntity extends MapEntity implements Comparable<Comparable
 			set(attributeName, entity.get(attributeName));
 		}
 		set(SCORE, maxNgramScore.doubleValue());
+		set(COMBINED_SCORE, maxNgramScore.doubleValue());
 		set(MAX_SCORE_FIELD, maxScoreField);
 	}
 
 	@Override
 	public int compareTo(ComparableEntity other)
 	{
-		int compareTo = other.getScore().compareTo(getScore());
+		int compareTo = other.getCombinedScore().compareTo(getCombinedScore());
 
 		if (compareTo == 0)
 		{
@@ -38,6 +40,11 @@ public class ComparableEntity extends MapEntity implements Comparable<Comparable
 		}
 
 		return compareTo;
+	}
+
+	public BigDecimal getCombinedScore()
+	{
+		return new BigDecimal(Double.parseDouble(getString(COMBINED_SCORE)));
 	}
 
 	public BigDecimal getScore()
