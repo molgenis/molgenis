@@ -52,8 +52,8 @@ public class OntologyServiceImpl implements OntologyService
 	public static final String SIGNIFICANT_VALUE = "Significant";
 	public static final Character DEFAULT_SEPARATOR = ';';
 	public static final String COMMOM_SEPARATOR = ",";
-	public static final String DEFAULT_MATCHING_NAME_FIELD = "name";
-	public static final String DEFAULT_MATCHING_SYNONYM_FIELD = "synonym";
+	public static final String DEFAULT_MATCHING_NAME_FIELD = "Name";
+	public static final String DEFAULT_MATCHING_SYNONYM_FIELD = "Synonym";
 	public static final String ALLOWED_IDENTIFIER = "Identifier";
 
 	private final SearchService searchService;
@@ -234,8 +234,8 @@ public class OntologyServiceImpl implements OntologyService
 			{
 				// The attribute name is either equal to 'Name' or starts
 				// with string 'Synonym'
-				if (DEFAULT_MATCHING_NAME_FIELD.equals(attributeName.toLowerCase())
-						|| attributeName.toLowerCase().startsWith(DEFAULT_MATCHING_SYNONYM_FIELD))
+				if (DEFAULT_MATCHING_NAME_FIELD.equalsIgnoreCase(attributeName)
+						|| attributeName.toLowerCase().startsWith(DEFAULT_MATCHING_SYNONYM_FIELD.toLowerCase()))
 				{
 					String medicalStemProxy = medicalStemProxy(inputEntity.getString(attributeName));
 					if (!StringUtils.isEmpty(medicalStemProxy))
@@ -277,8 +277,8 @@ public class OntologyServiceImpl implements OntologyService
 				{
 					if (!StringUtils.isEmpty(inputEntity.getString(inputAttrName)))
 					{
-						if (DEFAULT_MATCHING_NAME_FIELD.equals(inputAttrName.toLowerCase())
-								|| inputAttrName.toLowerCase().startsWith(DEFAULT_MATCHING_SYNONYM_FIELD))
+						if (DEFAULT_MATCHING_NAME_FIELD.equalsIgnoreCase(inputAttrName)
+								|| inputAttrName.toLowerCase().startsWith(DEFAULT_MATCHING_SYNONYM_FIELD.toLowerCase()))
 						{
 							BigDecimal ngramScore = matchOntologyTerm(inputEntity.getString(inputAttrName), entity);
 							if (maxNgramScore.doubleValue() < ngramScore.doubleValue())
@@ -326,10 +326,22 @@ public class OntologyServiceImpl implements OntologyService
 
 	public OntologyServiceResult search(String ontologyUrl, String queryString)
 	{
-		Iterable<Entity> entities = searchService.search(
-				new QueryImpl().eq(OntologyTermQueryRepository.SYNONYMS, medicalStemProxy(queryString)).pageSize(
-						MAX_NUMBER_MATCHES), getOntologyEntity(ontologyUrl).getEntityMetaData());
-		return new OntologyServiceResultImpl(null, entities, Iterables.size(entities));
+		List<QueryRule> queryRules = Arrays.asList(new QueryRule(OntologyTermQueryRepository.SYNONYMS, Operator.EQUALS,
+				medicalStemProxy(queryString)));
+		QueryRule finalQueryRule = new QueryRule(queryRules);
+		finalQueryRule.setOperator(Operator.DIS_MAX);
+
+		List<ComparableEntity> entities = new ArrayList<ComparableEntity>();
+		for (Entity entity : searchService.search(new QueryImpl(finalQueryRule).pageSize(MAX_NUMBER_MATCHES),
+				dataService.getEntityMetaData(getOntology(ontologyUrl).getLabel())))
+		{
+			BigDecimal ngramScore = matchOntologyTerm(queryString, entity);
+			entities.add(new ComparableEntity(entity, ngramScore, DEFAULT_MATCHING_NAME_FIELD));
+		}
+
+		Map<String, Object> inputData = new HashMap<String, Object>();
+		inputData.put(DEFAULT_MATCHING_NAME_FIELD, queryString);
+		return convertResults(entities, inputData);
 	}
 
 	/**

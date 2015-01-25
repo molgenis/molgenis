@@ -16,14 +16,12 @@ import org.molgenis.ontology.service.OntologyServiceImpl;
 
 public class PostProcessRedistributionScoreAlgorithm
 {
-	private static final String DEFAULT_FIELD = "Name";
-
 	public static void process(List<ComparableEntity> entities, Map<String, Object> inputData,
 			OntologyServiceImpl ontologyService)
 	{
-		if (inputData.size() == 1 && inputData.containsKey(DEFAULT_FIELD))
+		if (inputData.size() == 1 && inputData.containsKey(OntologyServiceImpl.DEFAULT_MATCHING_NAME_FIELD))
 		{
-			String queryString = inputData.get(DEFAULT_FIELD).toString();
+			String queryString = inputData.get(OntologyServiceImpl.DEFAULT_MATCHING_NAME_FIELD).toString();
 			Set<String> wordsInQueryString = AlgorithmHelper.medicalStemProxy(queryString);
 			int totalDocs = entities.size() > 10 ? 10 : entities.size();
 
