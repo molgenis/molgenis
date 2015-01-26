@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
+import org.molgenis.data.QueryRule;
 import org.molgenis.data.support.QueryImpl;
 
 public class DataRequest
@@ -40,6 +41,11 @@ public class DataRequest
 	public void setQuery(QueryImpl query)
 	{
 		this.query = query;
+        List<QueryRule> rules = query.getRules();
+        List<QueryRule> rules2 = query.getRules();
+        rules.addAll(rules2);
+
+        new QueryImpl(rules);
 	}
 
 	public List<String> getAttributeNames()
