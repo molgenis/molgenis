@@ -94,7 +94,10 @@
 
 <#-- Topmenu -->
 <#macro topmenu menu plugin_id> <#--TODO refactor to remove depency on 'Home'-->
-	<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div id="Intro">
+        <img src="http://molgenis03.target.rug.nl/logos/DEBRegister_header_v3_color-b.png" alt="" border="0" height="150">
+    </div>
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
 		<div class="container-fluid">
 			<#-- Logo start -->
             <#list menu.items as item> 
