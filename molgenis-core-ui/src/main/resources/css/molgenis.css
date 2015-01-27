@@ -1,5 +1,4 @@
 /* Sticky footer - start */
-
 html {
 	position: relative;
 	min-height: 100%;
@@ -26,10 +25,6 @@ body>.container-fluid {
     padding-top: 60px;
 }
 /* Sticky footer - end */
-
-.navbar-fixed-top {
-    top: 60px;
-}
 
 /* Support collapsable panels */
 .panel-title {
