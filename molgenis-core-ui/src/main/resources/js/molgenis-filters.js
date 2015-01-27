@@ -58,7 +58,8 @@
 		
 		render: function() {
 			var $container = this.$container;
-			$container.html(this.template({hideButton: this.Filter.getQuery() === null}));
+			var query = this.Filter.getQuery();
+			$container.html(this.template({hideButton: query === null || query === undefined}));
 			this.Filter.init($('.filter-container', $container));
 		},
 		
@@ -336,7 +337,7 @@
 				<div class="form-group">\
 					<div class="col-md-offset-3 col-md-3">\
 					{{#ifCond operators.length "===" 1}}\
-						<span>{{operators.[0]}}</span>\
+						<div class="text-center">{{operators.[0]}}</div>\
 					{{else}}\
 						<select class="form-control input-sm">\
 						{{#each operators}}\

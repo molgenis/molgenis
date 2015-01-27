@@ -1,0 +1,69 @@
+<!doctype html>
+<html>
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+        <link href="../css/jquery-ui-1.9.2.custom.min.css" rel="stylesheet">
+        <link href="../css/select2.css" rel="stylesheet">
+        <link href="../css/iThing-min.css" rel="stylesheet">
+        <link href="../css/molgenis-controls.css" rel="stylesheet">
+        <link href="../css/molgenis.css" rel="stylesheet">
+        <script src="../js/react-with-addons.js"></script>
+        <script src="../js/JSXTransformer.js"></script>
+        <script src="../js/jquery-2.1.1.min.js"></script>
+        <script src="../js/bootstrap.min.js"></script>
+        <script src="../js/jquery-ui-1.9.2.custom.min.js"></script>
+        <script src="../js/moment-with-locales.min.js"></script>
+        <script src="../js/bootstrap-datetimepicker.min.js"></script>
+        <script src="../js/handlebars.min.js"></script>
+        <script src="../js/select2.min.js"></script>
+        <script src="../js/jQEditRangeSlider-min.js"></script>        
+        <script src="../js/molgenis.js"></script>
+        <script type="text/jsx" src="../js/molgenis-controls-react.js"></script>
+        <script type="text/jsx" src="../js/molgenis-filters-react.js"></script>
+        <script type="text/jsx" src="../js/molgenis-filters-react-test.js"></script>
+    </head>
+    <body>
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-md-9">
+					<div role="tabpanel">
+						<!-- Nav tabs -->
+						<ul class="nav nav-tabs" role="tablist">
+							<li role="presentation" class="active"><a href="#novalue"
+								aria-controls="home" role="tab" data-toggle="tab">No Value</a></li>
+							<li role="presentation"><a href="#values"
+								aria-controls="profile" role="tab" data-toggle="tab">Values</a></li>
+						</ul>
+	
+						<!-- Tab panes -->
+						<div class="tab-content">
+							<div role="tabpanel" class="tab-pane active" id="novalue">
+								<div id="input-container"></div>
+							</div>
+							<div role="tabpanel" class="tab-pane" id="values">
+                                <div id="value-input-container"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-3">
+					<h1 id="query-result-header"></h1>
+					<span id="query-result" style="white-space: pre;"></span>
+				</div>
+			</div>
+		</div>
+		<script id="attr-filter-form-template" type="text/x-handlebars-template">
+        <form class="form-horizontal">
+	        <div class="form-group">
+	            <label for="something" class="col-md-4 control-label">{{name}}: {{type}}</label>
+	            <div class="col-md-8" id="{{name}}{{type}}-filter-container">
+	            </div>
+	        </div>
+        </form>
+        </script>
+	</body>
+</html>
