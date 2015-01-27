@@ -9,7 +9,7 @@ public class AttributeMapping
 {
 	private String identifier;
 	private AttributeMetaData sourceAttributeMetaData;
-	private AttributeMetaData targetAttributeMetaData;
+	private final AttributeMetaData targetAttributeMetaData;
 	private String algorithm;
 
 	public AttributeMapping(String identifier, AttributeMetaData sourceAttributeMetaData,
@@ -21,14 +21,33 @@ public class AttributeMapping
 		this.algorithm = algorithm;
 	}
 
+	/**
+	 * Creates a new empty AttributeMapping
+	 * 
+	 * @param targetAttributeMetaData2
+	 */
+	public AttributeMapping(AttributeMetaData target)
+	{
+		this.identifier = null;
+		this.sourceAttributeMetaData = null;
+		this.targetAttributeMetaData = target;
+		this.algorithm = null;
+	}
+
+	/**
+	 * Sets the source, this will set the algorithm to a direct map.
+	 * 
+	 * @param attributeMetaData the source attribute
+	 */
+	public void setSource(AttributeMetaData source)
+	{
+		this.sourceAttributeMetaData = source;
+		this.algorithm = "${" + sourceAttributeMetaData.getName() + "}";
+	}
+
 	public String getIdentifier()
 	{
 		return identifier;
-	}
-
-	public void setIdentifier(String identifier)
-	{
-		this.identifier = identifier;
 	}
 
 	public AttributeMetaData getSourceAttributeMetaData()
@@ -36,19 +55,9 @@ public class AttributeMapping
 		return sourceAttributeMetaData;
 	}
 
-	public void setSourceAttributeMetaData(AttributeMetaData sourceAttributeMetaData)
-	{
-		this.sourceAttributeMetaData = sourceAttributeMetaData;
-	}
-
 	public AttributeMetaData getTargetAttributeMetaData()
 	{
 		return targetAttributeMetaData;
-	}
-
-	public void setTargetAttributeMetaData(AttributeMetaData targetAttributeMetaData)
-	{
-		this.targetAttributeMetaData = targetAttributeMetaData;
 	}
 
 	public String getAlgorithm()
@@ -56,8 +65,4 @@ public class AttributeMapping
 		return algorithm;
 	}
 
-	public void setAlgorithm(String algorithm)
-	{
-		this.algorithm = algorithm;
-	}
 }

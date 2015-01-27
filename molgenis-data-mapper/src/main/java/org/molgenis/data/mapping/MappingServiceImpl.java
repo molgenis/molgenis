@@ -1,11 +1,9 @@
 package org.molgenis.data.mapping;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
 
 import org.molgenis.auth.MolgenisUser;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.repository.AttributeMappingRepository;
 import org.molgenis.data.repository.EntityMappingRepository;
@@ -16,15 +14,12 @@ public class MappingServiceImpl implements MappingService
 {
 	@Autowired
 	private MetaDataService metaDataService;
-	private static final String SEPARATOR = "_";
-	private AttributeMappingRepository attributeMappingRepository;
 	private EntityMappingRepository entityMappingRepository;
 	private MappingProjectRepository mappingProjectRepository;
 
 	public MappingServiceImpl(AttributeMappingRepository attributeMappingRepository,
 			EntityMappingRepository entityMappingRepository, MappingProjectRepository mappingProjectRepository)
 	{
-		this.attributeMappingRepository = attributeMappingRepository;
 		this.entityMappingRepository = entityMappingRepository;
 		this.mappingProjectRepository = mappingProjectRepository;
 	}
@@ -32,22 +27,15 @@ public class MappingServiceImpl implements MappingService
 	@Override
 	public void addEntityMapping(EntityMapping entityMapping)
 	{
-		entityMappingRepository.add(entityMapping);
+		entityMappingRepository.upsert(Arrays.asList(entityMapping));
 	}
 
 	@Override
-	public void addMappingProject(String projectName, MolgenisUser owner, List<String> targetEntityIdentifiers)
+	public void addMappingProject(String projectName, MolgenisUser owner, String target)
 	{
-		List<EntityMapping> entityMappings = new ArrayList<EntityMapping>();
-		for (String targetEntityIdentifier : targetEntityIdentifiers)
-		{
-			EntityMetaData entityMetaData = metaDataService.getEntityMetaData(targetEntityIdentifier);
-			entityMappings.add(new EntityMapping(createEntityMappingIdentifier(projectName, targetEntityIdentifier),
-					entityMetaData, entityMetaData, null));
-		}
-
-		entityMappingRepository.add(entityMappings);
-		mappingProjectRepository.add(new MappingProject(projectName, owner.getUsername(), entityMappings));
+		MappingProject mappingProject = new MappingProject(projectName, owner.getUsername());
+		mappingProject.addTarget(metaDataService.getEntityMetaData(target));
+		mappingProjectRepository.add(mappingProject);
 	}
 
 	@Override
@@ -68,16 +56,4 @@ public class MappingServiceImpl implements MappingService
 		return mappingProjectRepository.getMappingProject(identifier);
 	}
 
-	@Override
-	public List<AttributeMapping> getAttributeMappings(String identifier)
-	{
-		return null; // TODO: Implement
-	}
-
-	private String createEntityMappingIdentifier(String projectMappingIdentifier, String targetEntityIdentifier)
-	{
-		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append(projectMappingIdentifier).append(SEPARATOR).append(targetEntityIdentifier);
-		return stringBuilder.toString();
-	}
 }

@@ -16,9 +16,9 @@ public class AttributeMappingMetaData extends DefaultEntityMetaData
 	{
 		super(ENTITY_NAME);
 
-		addAttribute(IDENTIFIER).setIdAttribute(true).setNillable(false).setDataType(STRING);
-		addAttribute(SOURCEATTRIBUTEMETADATA);
-		addAttribute(TARGETATTRIBUTEMETADATA);
-		addAttribute(ALGORITHM).setDataType(STRING);
+		addAttribute(IDENTIFIER).setIdAttribute(true).setNillable(false);
+		addAttribute(SOURCEATTRIBUTEMETADATA).setNillable(false);
+		addAttribute(TARGETATTRIBUTEMETADATA).setNillable(false);
+		addAttribute(ALGORITHM);
 	}
 }

@@ -1,8 +1,12 @@
 package org.molgenis.data.mapping;
 
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by charbonb on 14/01/15.
@@ -10,10 +14,20 @@ import java.util.List;
 public class EntityMapping
 {
 	private String identifier;
-	private EntityMetaData sourceEntityMetaData;
-	private EntityMetaData targetEntityMetaData;
-	// TODO Create a map with TargetAttribute 2 SourceAttribute, will serve as a quick lookup
-	private List<AttributeMapping> attributeMappings;
+	private final EntityMetaData sourceEntityMetaData;
+	private final EntityMetaData targetEntityMetaData;
+	private final Map<String, AttributeMapping> attributeMappings;
+
+	/**
+	 * Creates a new empty EntityMapping with no {@link AttributeMapping}s.
+	 */
+	public EntityMapping(EntityMetaData source, EntityMetaData target)
+	{
+		this.identifier = null;
+		this.sourceEntityMetaData = source;
+		this.targetEntityMetaData = target;
+		this.attributeMappings = new LinkedHashMap<String, AttributeMapping>();
+	}
 
 	public EntityMapping(String identifier, EntityMetaData sourceEntityMetaData, EntityMetaData targetEntityMetaData,
 			List<AttributeMapping> attributeMappings)
@@ -21,7 +35,11 @@ public class EntityMapping
 		this.identifier = identifier;
 		this.sourceEntityMetaData = sourceEntityMetaData;
 		this.targetEntityMetaData = targetEntityMetaData;
-		this.attributeMappings = attributeMappings;
+		this.attributeMappings = new LinkedHashMap<String, AttributeMapping>();
+		for (AttributeMapping mapping : attributeMappings)
+		{
+			this.attributeMappings.put(mapping.getTargetAttributeMetaData().getName(), mapping);
+		}
 	}
 
 	public String getIdentifier()
@@ -39,28 +57,27 @@ public class EntityMapping
 		return sourceEntityMetaData;
 	}
 
-	public void setSourceEntityMetaData(EntityMetaData sourceEntityMetaData)
-	{
-		this.sourceEntityMetaData = sourceEntityMetaData;
-	}
-
 	public EntityMetaData getTargetEntityMetaData()
 	{
 		return targetEntityMetaData;
 	}
 
-	public void setTargetEntityMetaData(EntityMetaData targetEntityMetaData)
-	{
-		this.targetEntityMetaData = targetEntityMetaData;
-	}
-
-	public List<AttributeMapping> getAttributeMappings()
+	public Map<String, AttributeMapping> getAttributeMappings()
 	{
 		return attributeMappings;
 	}
 
-	public void setAttributeMappings(List<AttributeMapping> attributeMappings)
+	/**
+	 * Adds a new empty attribute mapping to a target attribute
+	 * 
+	 * @param targetAttributeName
+	 * @return the newly created attribute mapping.
+	 */
+	public AttributeMapping addAttributeMapping(String targetAttributeName)
 	{
-		this.attributeMappings = attributeMappings;
+		AttributeMetaData targetAttributeMetaData = targetEntityMetaData.getAttribute(targetAttributeName);
+		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
+		attributeMappings.put(targetAttributeName, attributeMapping);
+		return attributeMapping;
 	}
 }

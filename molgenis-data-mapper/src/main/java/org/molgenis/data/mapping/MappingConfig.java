@@ -6,7 +6,6 @@ import org.molgenis.data.ManageableCrudRepositoryCollection;
 import org.molgenis.data.meta.AttributeMappingMetaData;
 import org.molgenis.data.meta.EntityMappingMetaData;
 import org.molgenis.data.meta.MappingProjectMetaData;
-import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.data.repository.AttributeMappingRepository;
 import org.molgenis.data.repository.EntityMappingRepository;
 import org.molgenis.data.repository.MappingProjectRepository;
@@ -17,6 +16,7 @@ import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.IdGenerator;
 
 @Configuration
 public class MappingConfig
@@ -30,13 +30,19 @@ public class MappingConfig
 	@Autowired
 	MolgenisUserService userService;
 
+	private AttributeMappingRepository attributeMappingRepository;
+
+	private EntityMappingRepository entityMappingRepository;
+
+	private MappingProjectRepository mappingProjectRepository;
+
 	@Bean
 	public MappingService mappingService()
 	{
 		// create in order of dependency!
-		AttributeMappingRepository attributeMappingRepository = attributeMappingRepository();
-		EntityMappingRepository entityMappingRepository = entityMappingRepository();
-		MappingProjectRepository mappingProjectRepository = mappingProjectRepository();
+		attributeMappingRepository = attributeMappingRepository();
+		entityMappingRepository = entityMappingRepository();
+		mappingProjectRepository = mappingProjectRepository();
 		return new MappingServiceImpl(attributeMappingRepository, entityMappingRepository, mappingProjectRepository);
 	}
 
@@ -47,12 +53,12 @@ public class MappingConfig
 
 	private EntityMappingRepository entityMappingRepository()
 	{
-		return new EntityMappingRepositoryImpl(entityMappingCrudRepository());
+		return new EntityMappingRepositoryImpl(entityMappingCrudRepository(), attributeMappingRepository);
 	}
 
 	private MappingProjectRepository mappingProjectRepository()
 	{
-		return new MappingProjectRepositoryImpl(mappingProjectCrudRepository(), userService);
+		return new MappingProjectRepositoryImpl(mappingProjectCrudRepository(), entityMappingRepository);
 	}
 
 	private CrudRepository attributeMappingCrudRepository()

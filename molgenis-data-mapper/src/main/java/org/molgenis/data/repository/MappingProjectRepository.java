@@ -46,13 +46,4 @@ public interface MappingProjectRepository
 	 */
 	public abstract List<MappingProject> getMappingProjects(Query q);
 
-	/**
-	 * Converts an {@link Entity} to a {@link MappingProject}
-	 * 
-	 * @param entityMappingEntity
-	 * @return
-	 */
-	public abstract MappingProject toMappingProject(Entity entityMappingEntity);
-
-
 }

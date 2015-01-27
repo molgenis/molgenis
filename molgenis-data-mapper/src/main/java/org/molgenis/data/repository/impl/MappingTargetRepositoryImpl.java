@@ -3,14 +3,18 @@ package org.molgenis.data.repository.impl;
 import com.google.common.collect.Lists;
 
 import org.molgenis.data.CrudRepository;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.mapping.EntityMapping;
 import org.molgenis.data.mapping.MappingProject;
+import org.molgenis.data.mapping.MappingTarget;
 import org.molgenis.data.meta.MappingProjectMetaData;
+import org.molgenis.data.meta.MappingTargetMetaData;
 import org.molgenis.data.repository.EntityMappingRepository;
 import org.molgenis.data.repository.MappingProjectRepository;
+import org.molgenis.data.repository.MappingTargetRepository;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -22,19 +26,17 @@ import org.springframework.util.IdGenerator;
 import java.util.List;
 import java.util.ArrayList;
 
-public class MappingProjectRepositoryImpl implements MappingProjectRepository
+public class MappingTargetRepositoryImpl implements MappingTargetRepository
 {
-	public static final MappingProjectMetaData META_DATA = new MappingProjectMetaData();
+	public static final EntityMetaData META_DATA = new MappingTargetMetaData();
 
 	private final CrudRepository repository;
-	@Autowired
-	private MolgenisUserService molgenisUserService;
 	@Autowired
 	private IdGenerator idGenerator;
 
 	private EntityMappingRepository entityMappingRepository;
 
-	public MappingProjectRepositoryImpl(CrudRepository repository, EntityMappingRepository entityMappingRepository)
+	public MappingTargetRepositoryImpl(CrudRepository repository, EntityMappingRepository entityMappingRepository)
 	{
 		this.repository = repository;
 		this.entityMappingRepository = entityMappingRepository;
@@ -42,13 +44,9 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 
 	@Override
 	@Transactional
-	public void add(MappingProject mappingProject)
+	public void upsert(MappingTarget mappingTarget)
 	{
-		if (mappingProject.getIdentifier() != null)
-		{
-			throw new MolgenisDataException("MappingProject already exists");
-		}
-		Entity mappingProjectEntity = toMappingProjectEntity(mappingProject);
+		Entity mappingProjectEntity = toMappingTargetEntity(mappingTarget);
 		List<EntityMapping> entityMappings = mappingProject.getEntityMappings();
 		List<Entity> entityMappingEntities = entityMappingRepository.upsert(entityMappings);
 		mappingProjectEntity.set(MappingProjectMetaData.ENTITYMAPPINGS, entityMappingEntities);
@@ -129,19 +127,18 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 	/**
 	 * Creates a new {@link MapEntity} for this MappingProject. Doesn't yet fill the {@link EntityMapping}s.
 	 */
-	private Entity toMappingProjectEntity(MappingProject mappingProject)
+	private Entity toMappingTargetEntity(MappingTarget mappingTarget)
 	{
 		Entity mappingProjectEntity = new MapEntity();
-		if (mappingProject.getIdentifier() == null)
+		if (mappingTarget.getIdentifier() == null)
 		{
 			mappingProjectEntity.set(MappingProjectMetaData.IDENTIFIER, idGenerator.generateId().toString());
 		}
 		else
 		{
-			mappingProjectEntity.set(MappingProjectMetaData.IDENTIFIER, mappingProject.getIdentifier());
+			mappingProjectEntity.set(MappingProjectMetaData.IDENTIFIER, mappingTarget.getIdentifier());
 		}
-		mappingProjectEntity.set(MappingProjectMetaData.OWNER, mappingProject.getOwner());
-		mappingProjectEntity.set(MappingProjectMetaData.NAME, mappingProject.getName());
+		mappingProjectEntity.set(MappingTargetMetaData.ENTITY_NAME);
 		return mappingProjectEntity;
 	}
 }

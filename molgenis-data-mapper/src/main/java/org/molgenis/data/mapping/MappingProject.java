@@ -1,6 +1,13 @@
 package org.molgenis.data.mapping;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+
+import org.elasticsearch.repositories.Repository;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.repository.MappingProjectRepository;
 
 /**
  * Created by charbonb on 14/01/15.
@@ -8,14 +15,35 @@ import java.util.List;
 public class MappingProject
 {
 	private String identifier;
+	private String name;
 	private String owner;
-	private List<EntityMapping> entityMappings;
+	private Map<String, MappingTarget> mappingTargets;
 
-	public MappingProject(String identifier, String owner, List<EntityMapping> entityMappings)
+	/**
+	 * Creates a new empty mapping project. Used by the {@link MappingService}.
+	 */
+	public MappingProject(String name, String owner)
+	{
+		this.identifier = null;
+		this.name = name;
+		this.owner = owner;
+		this.mappingTargets = new LinkedHashMap<String, MappingTarget>();
+	}
+
+	/**
+	 * Creates a new instance of {@link MappingProject}. Used by the {@link MappingProjectRepository} when recreating a
+	 * MappingProject from the {@link Repository}.
+	 */
+	public MappingProject(String identifier, String name, String owner, List<MappingTarget> mappingTargets)
 	{
 		this.identifier = identifier;
+		this.name = name;
 		this.owner = owner;
-		this.entityMappings = entityMappings;
+		this.mappingTargets = new LinkedHashMap<String, MappingTarget>();
+		for (MappingTarget mappingTarget : mappingTargets)
+		{
+			this.mappingTargets.put(mappingTarget.getTarget().getName(), mappingTarget);
+		}
 	}
 
 	public String getIdentifier()
@@ -28,6 +56,16 @@ public class MappingProject
 		this.identifier = identifier;
 	}
 
+	public String getName()
+	{
+		return name;
+	}
+
+	public void setName(String name)
+	{
+		this.name = name;
+	}
+
 	public String getOwner()
 	{
 		return owner;
@@ -38,13 +76,15 @@ public class MappingProject
 		this.owner = owner;
 	}
 
-	public List<EntityMapping> getEntityMappings()
+	public Map<String, MappingTarget> getTargets()
 	{
-		return entityMappings;
+		return mappingTargets;
 	}
 
-	public void setEntityMappings(List<EntityMapping> entityMappings)
+	public MappingTarget addTarget(EntityMetaData target)
 	{
-		this.entityMappings = entityMappings;
+		MappingTarget result = new MappingTarget(target);
+		mappingTargets.put(target.getName(), result);
+		return result;
 	}
 }

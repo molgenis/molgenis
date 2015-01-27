@@ -8,7 +8,13 @@ public interface MappingService
 {
 	abstract void addEntityMapping(EntityMapping entityMapping);
 
-	abstract void addMappingProject(String string, MolgenisUser currentUser, List<String> targetEntityIdentifiers);
+	/**
+	 * Creates a new {@link MappingProject}
+	 * 
+	 * @param target
+	 *            name of the first target entity
+	 */
+	abstract void addMappingProject(String name, MolgenisUser owner, String target);
 
 	abstract List<MappingProject> getAllMappingProjects();
 
@@ -16,6 +22,4 @@ public interface MappingService
 
 	abstract MappingProject getMappingProject(String identifier);
 
-	abstract List<AttributeMapping> getAttributeMappings(String identifier);
-	
 }
