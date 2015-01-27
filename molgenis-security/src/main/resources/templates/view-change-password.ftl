@@ -67,7 +67,7 @@
 	   </script>
 	</head>
 	<body>
-	   <div class="modal" id="change-password-modal" tabindex="-1" aria-labelledby="change-password-modal-label" aria-hidden="true">
+	   <div class="modal" id="change-password-modal" tabindex="-1" aria-labelledby="change-password-modal-label">
 	       <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
