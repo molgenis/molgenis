@@ -171,7 +171,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Bean
 	public MolgenisPluginInterceptor molgenisPluginInterceptor()
 	{
-		return new MolgenisPluginInterceptor(molgenisUi());
+		return new MolgenisPluginInterceptor(molgenisUi(), molgenisSettings);
 	}
 
 	@Bean

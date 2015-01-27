@@ -381,23 +381,22 @@
                 		switch(attribute.fieldType) {
 							case 'CATEGORICAL':
 							case 'XREF':
-								var cellValue = $('<a href="#">' + formatTableCellValue(rawValue[refAttribute], refAttributeType) + '</a>'); 
-								cellValue.click(function(event) {
+								var $cellValue = $('<a href="#">').append(formatTableCellValue(rawValue[refAttribute], refAttributeType)); 
+								$cellValue.click(function(event) {
 									openRefAttributeModal(attribute, refEntity, refAttribute, rawValue);
 									event.stopPropagation();
 								});
-								cell.append(cellValue);
+								cell.append($cellValue);
 								break;
 							case 'MREF':
 								$.each(rawValue.items, function(i, rawValue) {
-									var cellValuePart = $('<a href="#">' + formatTableCellValue(rawValue[refAttribute], refAttributeType) + '</a>');
-									cellValuePart.click(function(event) {
+									var $cellValuePart = $('<a href="#">').append(formatTableCellValue(rawValue[refAttribute], refAttributeType));
+									$cellValuePart.click(function(event) {
 										openRefAttributeModal(attribute, refEntity, refAttribute, rawValue);
 										event.stopPropagation();
 									});
-									if (i > 0)
-										cell.append(',');
-									cell.append(cellValuePart);
+									if (i > 0) cell.append(',');
+									cell.append($cellValuePart);
 								});
 								break;
 							default:
@@ -407,16 +406,10 @@
                 }
 				break;
             case 'BOOL':
-            	// FIXME refactor formatTableCellValue to accept attribute instead of attribute field type and move nillable boolean code to this function
-            	var cellValuePart = $(formatTableCellValue(rawValue, attribute.fieldType));
-            	if(attribute.nillable && rawValue === undefined) {
-            		cellValuePart.prop('indeterminate', true);
-            	}
-				cell.append(cellValuePart);
+				cell.append(formatTableCellValue(rawValue, attribute.fieldType, undefined, attribute.nillable));
             	break;
 			default :
-				var value = formatTableCellValue(rawValue, attribute.fieldType);
-				cell.append(value);
+				cell.append(formatTableCellValue(rawValue, attribute.fieldType));
 				break;
 		}
 	}
@@ -498,6 +491,7 @@
 				if(value !== editValue) {
 					restApi.update(cell.data('id'), editValue, {
 						success: function() {
+							settings.onDataChange();
 							value = editValue;
 							settings.data.items[row][attribute.name] = value;
 							cell.addClass('edited');
@@ -513,6 +507,7 @@
 				if(value !== editValue) {
 					restApi.update(cell.data('id'), editValue, {
 						success: function() {
+							settings.onDataChange();
 							if (editValue === '')
 								delete entity[attribute.name];
 							else {
@@ -532,6 +527,7 @@
 					if(value !== editValue) {
 						restApi.update(cell.data('id'), editValue, {
 							success: function() {
+								settings.onDataChange();
 								settings.data.items[row][attribute.name] = editValue;
 								cell.removeClass('invalid-input').addClass('edited');
 							}
@@ -551,6 +547,7 @@
 						var editValue = $.map(data, function(val){ return restApi.getPrimaryKeyFromHref(val.href);});
 						restApi.update(cell.data('id'), editValue, {
 							success: function() {
+								settings.onDataChange();
 								entity[attribute.name].total = data.length;
 								entity[attribute.name].items = data;
 								cell.addClass('edited');
@@ -575,6 +572,7 @@
 	            		editValue = editValue !== '' ? restApi.getPrimaryKeyFromHref(editValue) : ''; 
 						restApi.update(cell.data('id'), editValue, {
 							success: function() {
+								settings.onDataChange();
 								if (editValue === '')
 									delete entity[attribute.name];
 								else {
@@ -595,6 +593,7 @@
 				if(value !== editValue) {
 					restApi.update(cell.data('id'), editValue, {
 						success: function() {
+							settings.onDataChange();
 							value = editValue;
 							settings.data.items[row][attribute.name] = value;
 							cell.addClass('edited');
@@ -864,6 +863,7 @@
 		'attributes' : null,
 		'query' : null,
 		'editable' : false,
-		'rowClickable': false
+		'rowClickable': false,
+		'onDataChange': function(){}
 	};
 }($, window.top.molgenis = window.top.molgenis || {}));
