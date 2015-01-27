@@ -23,26 +23,12 @@ body {
 }
 
 body>.container-fluid {
-    padding-top: 210px;
+    padding-top: 60px;
 }
 /* Sticky footer - end */
 
-#Intro {
-    top: 0;
-    position: fixed;
-}
-
 .navbar-fixed-top {
-    top: 150px;
-}
-
-#Intro {
-    top: 0;
-    position: fixed;
-    background-color: #FFFFFF;
-    height: 150px;
-    width: 100%;
-    z-index: 9999;
+    top: 60px;
 }
 
 /* Support collapsable panels */
