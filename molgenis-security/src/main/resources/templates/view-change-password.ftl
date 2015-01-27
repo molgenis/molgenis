@@ -11,13 +11,13 @@
 		<script src="<@resource_href "/js/jquery-2.1.1.min.js"/>"></script>
 		<script src="<@resource_href "/js/bootstrap.min.js"/>"></script>
 		<script src="<@resource_href "/js/jquery.validate.min.js"/>"></script>
-		<script src="<@resource_href "/js/molgenis.js"/>"></script>
+
 		<script type="text/javascript">
-			$(function() {
-		  		var modal = $('#change-password-modal');
-	   			modal.modal();
-  				var submitBtn = $('#change-password-btn');
-  				var form = $('#change-password-form');
+                        $(function() {
+                            var modal = $('#change-password-modal');
+                            modal.modal();
+                            var submitBtn = $('#change-password-btn');
+                            var form = $('#change-password-form');
   				form.validate({
   					rules: {
   						password1: {
@@ -36,7 +36,7 @@
   							}
   						}
   				});
-  		
+
   				<#-- modal events -->
   				modal.on('hide.bs.modal', function (e) {
   					e.stopPropagation();
@@ -44,7 +44,7 @@
 	  				$('.text-error', modal).remove();
 	  				$('.alert', modal).remove();
   				});
-	    
+
   				<#-- form events -->
   				form.submit(function(e) {
 	    			if(!form.valid()) {
@@ -68,7 +68,7 @@
 	   </script>
 	</head>
 	<body>
-	   <div class="modal" id="change-password-modal" tabindex="-1" aria-labelledby="change-password-modal-label" aria-hidden="true">
+	   <div class="modal" id="change-password-modal" tabindex="-1" aria-labelledby="change-password-modal-label">
 	       <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
