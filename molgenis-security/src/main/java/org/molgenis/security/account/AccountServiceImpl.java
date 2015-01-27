@@ -154,6 +154,7 @@ public class AccountServiceImpl implements AccountService
 		}
 
 		molgenisUser.setPassword(newPassword);
+		molgenisUser.setChangePassword(true);
 		molgenisUser.setChangePassword(false);
 		dataService.update(MolgenisUser.ENTITY_NAME, molgenisUser);
 
