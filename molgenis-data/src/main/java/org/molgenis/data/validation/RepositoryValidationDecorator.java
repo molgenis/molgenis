@@ -356,12 +356,6 @@ public class RepositoryValidationDecorator implements Repository
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
-	{
-		return decoratedRepository.iterator(clazz);
-	}
-
-	@Override
 	public Iterator<Entity> iterator()
 	{
 		return decoratedRepository.iterator();
@@ -410,12 +404,6 @@ public class RepositoryValidationDecorator implements Repository
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz)
-	{
-		return decoratedRepository.findAll(q, clazz);
-	}
-
-	@Override
 	public Entity findOne(Query q)
 	{
 		return decoratedRepository.findOne(q);
@@ -431,24 +419,6 @@ public class RepositoryValidationDecorator implements Repository
 	public Iterable<Entity> findAll(Iterable<Object> ids)
 	{
 		return decoratedRepository.findAll(ids);
-	}
-
-	@Override
-	public <E extends Entity> Iterable<E> findAll(Iterable<Object> ids, Class<E> clazz)
-	{
-		return decoratedRepository.findAll(ids, clazz);
-	}
-
-	@Override
-	public <E extends Entity> E findOne(Object id, Class<E> clazz)
-	{
-		return decoratedRepository.findOne(id, clazz);
-	}
-
-	@Override
-	public <E extends Entity> E findOne(Query q, Class<E> clazz)
-	{
-		return decoratedRepository.findOne(q, clazz);
 	}
 
 	@Override

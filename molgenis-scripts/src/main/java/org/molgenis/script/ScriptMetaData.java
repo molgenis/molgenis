@@ -2,7 +2,9 @@ package org.molgenis.script;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ScriptMetaData extends DefaultEntityMetaData
 {
 	public ScriptMetaData()

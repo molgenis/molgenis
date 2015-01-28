@@ -7,9 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.Ordered;
-import org.springframework.stereotype.Component;
 
-@Component
+//@Component
 public class MatchingTaskEntityRegistrator implements ApplicationListener<ContextRefreshedEvent>, Ordered
 {
 	private static final Logger LOG = LoggerFactory.getLogger(MatchingTaskEntityRegistrator.class);

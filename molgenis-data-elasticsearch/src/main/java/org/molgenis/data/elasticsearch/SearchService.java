@@ -115,7 +115,7 @@ public interface SearchService
 	 * @param entityMetaData
 	 * @return
 	 */
-	ElasticsearchDocumentEntity get(Object entityId, EntityMetaData entityMetaData);
+	Entity get(Object entityId, EntityMetaData entityMetaData);
 
 	Iterable<Entity> get(Iterable<Object> entityIds, EntityMetaData entityMetaData);
 

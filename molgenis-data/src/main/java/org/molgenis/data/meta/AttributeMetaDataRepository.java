@@ -20,6 +20,7 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.READ_ONLY;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.REF_ENTITY;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.UNIQUE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.VISIBLE;
+import static org.molgenis.data.support.QueryImpl.EQ;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -240,7 +241,7 @@ class AttributeMetaDataRepository
 	 */
 	public void deleteAllAttributes(String entityName)
 	{
-		repository.delete(repository.findAll(new QueryImpl().eq(AttributeMetaDataMetaData.ENTITY, entityName)));
+		repository.delete(repository.findAll(EQ(AttributeMetaDataMetaData.ENTITY, entityName)));
 	}
 
 	/**

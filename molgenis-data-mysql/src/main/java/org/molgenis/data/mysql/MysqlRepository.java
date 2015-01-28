@@ -22,6 +22,7 @@ import javax.sql.DataSource;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Manageable;
@@ -30,8 +31,8 @@ import org.molgenis.data.Query;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.BatchingQueryResult;
+import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.IntField;
 import org.molgenis.fieldtypes.MrefField;
@@ -54,7 +55,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	private EntityMetaData metaData;
 	private final JdbcTemplate jdbcTemplate;
 	private final AsyncJdbcTemplate asyncJdbcTemplate;
-	private MysqlRepositoryCollection repositoryCollection;
+	private final DataService dataService;
 	private final DataSource dataSource;
 
 	/**
@@ -66,8 +67,9 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	 *            {@link AsyncJdbcTemplate} to use to execute DDL statements in an isolated transaction on the Mysql
 	 *            database
 	 */
-	public MysqlRepository(DataSource dataSource, AsyncJdbcTemplate asyncJdbcTemplate)
+	public MysqlRepository(DataService dataService, DataSource dataSource, AsyncJdbcTemplate asyncJdbcTemplate)
 	{
+		this.dataService = dataService;
 		this.dataSource = dataSource;
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 		this.asyncJdbcTemplate = asyncJdbcTemplate;
@@ -76,11 +78,6 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	public void setMetaData(EntityMetaData metaData)
 	{
 		this.metaData = metaData;
-	}
-
-	public void setRepositoryCollection(MysqlRepositoryCollection repositoryCollection)
-	{
-		this.repositoryCollection = repositoryCollection;
 	}
 
 	@Override
@@ -501,7 +498,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		});
 	}
 
-	private void addMrefs(final List<Entity> mrefs, final AttributeMetaData att)
+	private void addMrefs(final List<Map<String, Object>> mrefs, final AttributeMetaData att)
 	{
 		final AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
 		final AttributeMetaData refEntityIdAttribute = att.getRefEntity().getIdAttribute();
@@ -733,7 +730,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 			if ((batch.size() == BATCH_SIZE) || !it.hasNext())
 			{
 				final AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
-				final Map<String, List<Entity>> mrefs = new HashMap<String, List<Entity>>();
+				final Map<String, List<Map<String, Object>>> mrefs = new HashMap<>();
 
 				jdbcTemplate.batchUpdate(getInsertSql(), new BatchPreparedStatementSetter()
 				{
@@ -746,14 +743,14 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 							// create the mref records
 							if (att.getDataType() instanceof MrefField)
 							{
-								if (mrefs.get(att.getName()) == null) mrefs.put(att.getName(), new ArrayList<Entity>());
+								if (mrefs.get(att.getName()) == null) mrefs.put(att.getName(), new ArrayList<>());
 								if (batch.get(rowIndex).get(att.getName()) != null)
 								{
-									for (Object val : batch.get(rowIndex).getList(att.getName()))
+									for (Entity val : batch.get(rowIndex).getEntities(att.getName()))
 									{
-										Entity mref = new MapEntity();
-										mref.set(idAttribute.getName(), batch.get(rowIndex).get(idAttribute.getName()));
-										mref.set(att.getName(), val);
+										Map<String, Object> mref = new HashMap<>();
+										mref.put(idAttribute.getName(), batch.get(rowIndex).get(idAttribute.getName()));
+										mref.put(att.getName(), val.getIdValue());
 
 										mrefs.get(att.getName()).add(mref);
 									}
@@ -836,7 +833,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		}
 		final AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
 		final List<Object> ids = new ArrayList<Object>();
-		final Map<String, List<Entity>> mrefs = new HashMap<String, List<Entity>>();
+		final Map<String, List<Map<String, Object>>> mrefs = new HashMap<>();
 
 		jdbcTemplate.batchUpdate(getUpdateSql(), new BatchPreparedStatementSetter()
 		{
@@ -858,7 +855,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 					// create the mref records
 					if (att.getDataType() instanceof MrefField)
 					{
-						if (mrefs.get(att.getName()) == null) mrefs.put(att.getName(), new ArrayList<Entity>());
+						if (mrefs.get(att.getName()) == null) mrefs.put(att.getName(), new ArrayList<>());
 						if (e.get(att.getName()) != null)
 						{
 							List<Entity> vals = Lists.newArrayList(e.getEntities(att.getName()));
@@ -866,9 +863,9 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 							{
 								for (Entity val : vals)
 								{
-									Entity mref = new MapEntity();
-									mref.set(idAttribute.getName(), idValue);
-									mref.set(att.getName(), val.get(att.getRefEntity().getIdAttribute().getName()));
+									Map<String, Object> mref = new HashMap<>();
+									mref.put(idAttribute.getName(), idValue);
+									mref.put(att.getName(), val.get(att.getRefEntity().getIdAttribute().getName()));
 									mrefs.get(att.getName()).add(mref);
 								}
 							}
@@ -945,7 +942,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		@Override
 		public Entity mapRow(ResultSet resultSet, int i) throws SQLException
 		{
-			Entity e = new MysqlEntity(entityMetaData, repositoryCollection);
+			Entity e = new DefaultEntity(entityMetaData, dataService);
 
 			for (AttributeMetaData att : entityMetaData.getAtomicAttributes())
 			{

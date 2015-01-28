@@ -23,6 +23,21 @@ public class QueryImpl implements Query
 	private Sort sort;
 	private Repository repository;
 
+	public static Query query()
+	{
+		return new QueryImpl();
+	}
+
+	public static Query EQ(String attributeName, Object value)
+	{
+		return query().eq(attributeName, value);
+	}
+
+	public static Query IN(String attributeName, Iterable<?> values)
+	{
+		return query().in(attributeName, values);
+	}
+
 	public QueryImpl()
 	{
 		this.rules.add(new ArrayList<QueryRule>());
@@ -69,10 +84,10 @@ public class QueryImpl implements Query
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> findAll(Class<E> klazz)
+	public Iterable<Entity> findAll()
 	{
 		if (repository == null) throw new RuntimeException("Query failed: repository not set");
-		return repository.findAll(this, klazz);
+		return repository.findAll(this);
 	}
 
 	@Override

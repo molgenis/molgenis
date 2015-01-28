@@ -1,6 +1,5 @@
 package org.molgenis.data;
 
-import java.util.List;
 import java.util.Set;
 
 import org.molgenis.data.meta.MetaDataService;
@@ -90,17 +89,6 @@ public interface DataService extends Iterable<Repository>
 	 * @return
 	 */
 	Iterable<Entity> findAll(String entityName, Iterable<Object> ids);
-
-	@Deprecated
-	/**
-	 * Find entities that match a query. Returns empty List if no matches.
-	 * Use Iterable<E> findAll instead or count(String entityName, Query q);
-	 * 
-	 * @param entityName entity name (case insensitive)
-	 * @param q
-	 * @return
-	 */
-	<E extends Entity> List<E> findAllAsList(String entityName, Query q);
 
 	/**
 	 * Find one entity based on id. Returns null if not exists
@@ -228,19 +216,11 @@ public interface DataService extends Iterable<Repository>
 	 */
 	Repository getRepository(String entityName);
 
+	Repository repo(String entityName);
+
 	Manageable getManageableRepository(String entityName);
 
 	Query query(String entityName);
-
-	// TODO remove
-	/**
-	 * Returns all entity classes. Returns empty Iterable if no entity classes.
-	 * 
-	 * @throws MolgenisDataAccessException
-	 * 
-	 * @return
-	 */
-	Iterable<Class<? extends Entity>> getEntityClasses();
 
 	/**
 	 * type-safe find entities that match a query

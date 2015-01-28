@@ -7,7 +7,6 @@ import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Base class for repositories. Subclasses can override supported methods
@@ -24,22 +23,9 @@ public abstract class AbstractRepository implements Repository
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
-	{
-		return new ConvertingIterable<E>(clazz, this);
-	}
-
-	@Override
 	public Query query()
 	{
 		return new QueryImpl(this);
-	}
-
-	@Override
-	@Transactional(readOnly = true)
-	public <E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz)
-	{
-		return new ConvertingIterable<E>(clazz, findAll(q));
 	}
 
 	@Override
@@ -73,24 +59,6 @@ public abstract class AbstractRepository implements Repository
 
 	@Override
 	public Iterable<Entity> findAll(Iterable<Object> ids)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public <E extends Entity> Iterable<E> findAll(Iterable<Object> ids, Class<E> clazz)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public <E extends Entity> E findOne(Object id, Class<E> clazz)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public <E extends Entity> E findOne(Query q, Class<E> clazz)
 	{
 		throw new UnsupportedOperationException();
 	}

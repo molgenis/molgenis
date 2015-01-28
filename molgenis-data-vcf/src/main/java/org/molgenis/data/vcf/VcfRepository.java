@@ -162,7 +162,7 @@ public class VcfRepository extends AbstractRepository
 								{
 									sampleEntity.set(format[i], sample.getData(i));
 								}
-								sampleEntity.set(ID, UUID.randomUUID());
+								sampleEntity.set(ID, UUID.randomUUID().toString().replaceAll("-", ""));
 								// FIXME remove entity ID from Sample label after #1400 is fixed, see also:
 								// jquery.molgenis.table.js line 152
 								sampleEntity.set(NAME, entity.get(POS) + "_" + entity.get(ALT) + "_"
@@ -181,11 +181,6 @@ public class VcfRepository extends AbstractRepository
 				return entity;
 			}
 
-			@Override
-			public void remove()
-			{
-				throw new UnsupportedOperationException();
-			}
 		};
 	}
 

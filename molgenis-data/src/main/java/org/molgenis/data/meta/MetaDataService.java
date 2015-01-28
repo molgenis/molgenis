@@ -7,11 +7,14 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Package;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.RepositoryDecoratorFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.Ordered;
 
-public interface MetaDataService extends ApplicationListener<ContextRefreshedEvent>, Ordered
+public interface MetaDataService extends Iterable<RepositoryCollection>, ApplicationListener<ContextRefreshedEvent>,
+		Ordered
 {
 	/**
 	 * Sets the Backend, in wich the meta data and the user data is saved
@@ -70,7 +73,7 @@ public interface MetaDataService extends ApplicationListener<ContextRefreshedEve
 	Iterable<EntityMetaData> getEntityMetaDatas();
 
 	/**
-	 * Adds new EntityMeta and creates a new CrudRepository for the default backend
+	 * Adds new EntityMeta and creates a new Repository
 	 * 
 	 * @param entityMeta
 	 * @return
@@ -78,12 +81,24 @@ public interface MetaDataService extends ApplicationListener<ContextRefreshedEve
 	Repository addEntityMeta(EntityMetaData entityMeta);
 
 	/**
-	 * Deletes an EntityMeta of the default backend
+	 * Create and add a new Repository for an EntityMetaData with repository decorators applied
+	 */
+	Repository add(EntityMetaData entityMetaData, RepositoryDecoratorFactory decoratorFactory);
+
+	/**
+	 * Deletes an EntityMeta
 	 */
 	void deleteEntityMeta(String entityName);
 
 	/**
-	 * Updates EntityMeta for the default backend
+	 * Deletes a list of EntityMetaData
+	 * 
+	 * @param entities
+	 */
+	void delete(List<EntityMetaData> entities);
+
+	/**
+	 * Updates EntityMeta
 	 * 
 	 * @param entityMeta
 	 * @return added attributes
@@ -93,7 +108,7 @@ public interface MetaDataService extends ApplicationListener<ContextRefreshedEve
 	List<AttributeMetaData> updateEntityMeta(EntityMetaData entityMeta);
 
 	/**
-	 * Adds an Attribute to an EntityMeta for the default backend
+	 * Adds an Attribute to an EntityMeta
 	 * 
 	 * @param entityName
 	 * @param attribute
@@ -104,7 +119,7 @@ public interface MetaDataService extends ApplicationListener<ContextRefreshedEve
 	void addAttributeSync(String entityName, AttributeMetaData attribute);
 
 	/**
-	 * Deletes an Attribute for the default backend
+	 * Deletes an Attribute
 	 * 
 	 * @param entityName
 	 * @param attributeName

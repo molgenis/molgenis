@@ -1,7 +1,6 @@
 package org.molgenis.ontology.beans;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -32,6 +31,12 @@ public abstract class AbstractSemanticEntity extends AbstractEntity
 	}
 
 	@Override
+	public void set(Entity values)
+	{
+		entity.set(values);
+	}
+
+	@Override
 	public Iterable<String> getAttributeNames()
 	{
 		List<String> attributeNames = new ArrayList<String>();
@@ -49,19 +54,7 @@ public abstract class AbstractSemanticEntity extends AbstractEntity
 	}
 
 	@Override
-	public List<String> getLabelAttributeNames()
-	{
-		return Arrays.asList(getEntityMetaData().getLabelAttribute().getName());
-	}
-
-	@Override
 	public void set(String attributeName, Object value)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void set(Entity entity, boolean strict)
 	{
 		throw new UnsupportedOperationException();
 	}

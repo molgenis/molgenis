@@ -2,7 +2,9 @@ package org.molgenis.data.elasticsearch.logback;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.springframework.stereotype.Component;
 
+@Component
 public class LoggingEventMetaData extends DefaultEntityMetaData
 {
 	public static final LoggingEventMetaData INSTANCE = new LoggingEventMetaData();

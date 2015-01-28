@@ -2,18 +2,21 @@ package org.molgenis.data.support;
 
 import java.util.Iterator;
 
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.springframework.beans.BeanUtils;
+import org.molgenis.util.EntityUtils;
 
 public class ConvertingIterator<E extends Entity> implements Iterator<E>
 {
 	private final Iterator<Entity> iterator;
 	private final Class<E> entityClass;
+	private final DataService dataService;
 
-	public ConvertingIterator(Class<E> entityClass, Iterator<Entity> iterator)
+	public ConvertingIterator(Class<E> entityClass, Iterator<Entity> iterator, DataService dataService)
 	{
 		this.iterator = iterator;
 		this.entityClass = entityClass;
+		this.dataService = dataService;
 	}
 
 	@Override
@@ -22,19 +25,10 @@ public class ConvertingIterator<E extends Entity> implements Iterator<E>
 		return iterator.hasNext();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public E next()
 	{
-		Entity next = iterator.next();
-		if (entityClass.isAssignableFrom(next.getClass()))
-		{
-			return (E) next;
-		}
-
-		E e = BeanUtils.instantiate(entityClass);
-		e.set(next);
-		return e;
+		return EntityUtils.convert(iterator.next(), entityClass, dataService);
 	}
 
 	@Override

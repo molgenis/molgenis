@@ -24,9 +24,7 @@ import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
-import org.molgenis.data.elasticsearch.meta.IndexingWritableMetaDataServiceDecorator;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.MetaDataServiceDecoratorFactory;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.validation.EntityAttributesValidator;
@@ -361,24 +359,10 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	public MetaDataService metaDataService()
 	{
 		DataService dataService = dataService();
-		MetaDataService metaDataService = metaDataServiceDecoratorFactory().decorate(
-				new MetaDataServiceImpl((DataServiceImpl) dataService));
+		MetaDataService metaDataService = new MetaDataServiceImpl((DataServiceImpl) dataService);
 		((DataServiceImpl) dataService).setMetaDataService(metaDataService);
 
 		return metaDataService;
-	}
-
-	@Bean
-	protected MetaDataServiceDecoratorFactory metaDataServiceDecoratorFactory()
-	{
-		return new MetaDataServiceDecoratorFactory()
-		{
-			@Override
-			public MetaDataService decorate(MetaDataService metaDataService)
-			{
-				return new IndexingWritableMetaDataServiceDecorator(metaDataService, searchService);
-			}
-		};
 	}
 
 	@Bean

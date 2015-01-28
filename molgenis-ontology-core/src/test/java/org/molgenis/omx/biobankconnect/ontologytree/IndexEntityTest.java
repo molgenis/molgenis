@@ -66,15 +66,4 @@ public class IndexEntityTest
 	{
 		assertEquals(indexEntity.getIdValue(), "forged-ID");
 	}
-
-	@Test
-	public void getLabelAttributeNames()
-	{
-		assertEquals(Iterables.size(indexEntity.getLabelAttributeNames()), 1);
-
-		for (String name : indexEntity.getLabelAttributeNames())
-		{
-			assertEquals(name, "id");
-		}
-	}
 }

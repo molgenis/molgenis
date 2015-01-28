@@ -95,7 +95,9 @@ public class MolgenisUserDecorator implements Repository
 
 	private void updatePassword(Entity entity)
 	{
-		MolgenisUser currentUser = findOne(entity.getIdValue(), MolgenisUser.class);
+		MolgenisUser currentUser = new MolgenisUser();
+		currentUser.set(findOne(entity.getIdValue()));
+
 		String currentPassword = currentUser.getPassword();
 		String password = entity.getString(MolgenisUser.PASSWORD_);
 
@@ -126,7 +128,8 @@ public class MolgenisUserDecorator implements Repository
 		Boolean isSuperuser = entity.getBoolean(MolgenisUser.SUPERUSER);
 		if (isSuperuser != null && isSuperuser == true)
 		{
-			MolgenisUser molgenisUser = findOne(entity.getIdValue(), MolgenisUser.class);
+			MolgenisUser molgenisUser = new MolgenisUser();
+			molgenisUser.set(findOne(entity.getIdValue()));
 
 			UserAuthority userAuthority = new UserAuthority();
 			userAuthority.setMolgenisUser(molgenisUser);
@@ -147,18 +150,17 @@ public class MolgenisUserDecorator implements Repository
 
 	private void updateSuperuserAuthority(Entity entity)
 	{
-		MolgenisUser molgenisUser = findOne(entity.getIdValue(), MolgenisUser.class);
+		MolgenisUser molgenisUser = new MolgenisUser();
+		molgenisUser.set(findOne(entity.getIdValue()));
 
 		Repository userAuthorityRepository = getUserAuthorityRepository();
-
-		UserAuthority suAuthority = userAuthorityRepository.findOne(
-				new QueryImpl().eq(UserAuthority.MOLGENISUSER, molgenisUser).and()
-						.eq(UserAuthority.ROLE, SecurityUtils.AUTHORITY_SU), UserAuthority.class);
+		Entity suAuthorityEntity = userAuthorityRepository.findOne(new QueryImpl()
+				.eq(UserAuthority.MOLGENISUSER, molgenisUser).and().eq(UserAuthority.ROLE, SecurityUtils.AUTHORITY_SU));
 
 		Boolean isSuperuser = entity.getBoolean(MolgenisUser.SUPERUSER);
 		if (isSuperuser != null && isSuperuser == true)
 		{
-			if (suAuthority == null)
+			if (suAuthorityEntity == null)
 			{
 
 				UserAuthority userAuthority = new UserAuthority();
@@ -169,9 +171,9 @@ public class MolgenisUserDecorator implements Repository
 		}
 		else
 		{
-			if (suAuthority != null)
+			if (suAuthorityEntity != null)
 			{
-				userAuthorityRepository.deleteById(suAuthority.getId());
+				userAuthorityRepository.deleteById(suAuthorityEntity.getIdValue());
 			}
 		}
 	}
@@ -224,12 +226,6 @@ public class MolgenisUserDecorator implements Repository
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
-	{
-		return decoratedRepository.iterator(clazz);
-	}
-
-	@Override
 	public Iterator<Entity> iterator()
 	{
 		return decoratedRepository.iterator();
@@ -278,12 +274,6 @@ public class MolgenisUserDecorator implements Repository
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz)
-	{
-		return decoratedRepository.findAll(q, clazz);
-	}
-
-	@Override
 	public Entity findOne(Query q)
 	{
 		return decoratedRepository.findOne(q);
@@ -299,24 +289,6 @@ public class MolgenisUserDecorator implements Repository
 	public Iterable<Entity> findAll(Iterable<Object> ids)
 	{
 		return decoratedRepository.findAll(ids);
-	}
-
-	@Override
-	public <E extends Entity> Iterable<E> findAll(Iterable<Object> ids, Class<E> clazz)
-	{
-		return decoratedRepository.findAll(ids, clazz);
-	}
-
-	@Override
-	public <E extends Entity> E findOne(Object id, Class<E> clazz)
-	{
-		return decoratedRepository.findOne(id, clazz);
-	}
-
-	@Override
-	public <E extends Entity> E findOne(Query q, Class<E> clazz)
-	{
-		return decoratedRepository.findOne(q, clazz);
 	}
 
 	@Override

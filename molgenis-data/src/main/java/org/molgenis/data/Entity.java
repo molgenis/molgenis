@@ -28,9 +28,6 @@ public interface Entity extends Serializable
 	 */
 	String getLabelValue();
 
-	// TODO discuss: move to meta data
-	List<String> getLabelAttributeNames();
-
 	/**
 	 * Get attribute value
 	 */
@@ -115,7 +112,4 @@ public interface Entity extends Serializable
 	 * Copy attribute values from another entity
 	 */
 	void set(Entity values);
-
-	// TODO document strict behavior
-	void set(Entity entity, boolean strict);
 }

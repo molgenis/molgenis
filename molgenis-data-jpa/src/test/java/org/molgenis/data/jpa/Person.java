@@ -144,7 +144,7 @@ public class Person extends AbstractMetaDataEntity
 	}
 
 	@Override
-	public void set(Entity values, boolean strict)
+	public void set(Entity values)
 	{
 		for (String attributeName : values.getAttributeNames())
 		{
@@ -162,13 +162,6 @@ public class Person extends AbstractMetaDataEntity
 	public String getLabelValue()
 	{
 		return getFirstName() + " " + getLastName();
-	}
-
-	@Override
-	public List<String> getLabelAttributeNames()
-	{
-		return Arrays.asList(new String[]
-		{ "firstName" });
 	}
 
 	@Override

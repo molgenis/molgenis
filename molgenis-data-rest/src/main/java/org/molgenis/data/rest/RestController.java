@@ -1169,7 +1169,7 @@ public class RestController
 		Long count = repository.count(q);
 		EntityPager pager = new EntityPager(request.getStart(), request.getNum(), count, it);
 
-		List<Map<String, Object>> entities = new ArrayList<Map<String, Object>>();
+		List<Map<String, Object>> entities = new ArrayList<>();
 		for (Entity entity : it)
 		{
 			entities.add(getEntityAsMap(entity, meta, attributesSet, attributeExpandsSet));

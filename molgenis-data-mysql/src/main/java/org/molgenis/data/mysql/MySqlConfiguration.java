@@ -52,7 +52,7 @@ public class MySqlConfiguration
 	@Scope("prototype")
 	public MysqlRepository mysqlRepository()
 	{
-		return new MysqlRepository(dataSource, asyncJdbcTemplate());
+		return new MysqlRepository(dataService, dataSource, asyncJdbcTemplate());
 	}
 
 	@Bean
@@ -63,9 +63,7 @@ public class MySqlConfiguration
 			@Override
 			protected MysqlRepository createMysqlRepository()
 			{
-				MysqlRepository repo = mysqlRepository();
-				repo.setRepositoryCollection(this);
-				return repo;
+				return mysqlRepository();
 			}
 		};
 

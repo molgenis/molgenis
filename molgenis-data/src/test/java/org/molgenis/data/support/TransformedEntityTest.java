@@ -26,28 +26,28 @@ public class TransformedEntityTest
 	private Entity transformedEntity;
 	private EntityMetaData transformedEntityMetaData;
 
-	private String idAttributeName = "id";
-	private String boolAttributeName = "xbool";
-	private String categoricalAttributeName = "xcategorical";
-	private String compoundAttributeName = "xcompound";
-	private String compoundPart0AttributeName = "xcompoundpart0";
-	private String compoundPart1AttributeName = "xcompoundpart1";
-	private String dateAttributeName = "xdate";
-	private String dateTimeAttributeName = "xdatetime";
-	private String decimalAttributeName = "xdecimal";
-	private String emailAttributeName = "xemail";
-	private String enumAttributeName = "xenum";
-	private String htmlAttributeName = "xhtml";
-	private String hyperlinkAttributeName = "xhyperlink";
-	private String intAttributeName = "xint";
-	private String longAttributeName = "xlong";
-	private String mrefAttributeName = "xmref";
-	private String scriptAttributeName = "xscript";
-	private String stringAttributeName = "xstring";
-	private String textAttributeName = "xtext";
-	private String xrefAttributeName = "xxref";
+	private final String idAttributeName = "id";
+	private final String boolAttributeName = "xbool";
+	private final String categoricalAttributeName = "xcategorical";
+	private final String compoundAttributeName = "xcompound";
+	private final String compoundPart0AttributeName = "xcompoundpart0";
+	private final String compoundPart1AttributeName = "xcompoundpart1";
+	private final String dateAttributeName = "xdate";
+	private final String dateTimeAttributeName = "xdatetime";
+	private final String decimalAttributeName = "xdecimal";
+	private final String emailAttributeName = "xemail";
+	private final String enumAttributeName = "xenum";
+	private final String htmlAttributeName = "xhtml";
+	private final String hyperlinkAttributeName = "xhyperlink";
+	private final String intAttributeName = "xint";
+	private final String longAttributeName = "xlong";
+	private final String mrefAttributeName = "xmref";
+	private final String scriptAttributeName = "xscript";
+	private final String stringAttributeName = "xstring";
+	private final String textAttributeName = "xtext";
+	private final String xrefAttributeName = "xxref";
 
-	private String refIdAttributeName = "refid";
+	private final String refIdAttributeName = "refid";
 
 	@BeforeMethod
 	public void setUp()
@@ -217,12 +217,6 @@ public class TransformedEntityTest
 	public void getIntList()
 	{
 		assertEquals(transformedEntity.getIntList(compoundPart0AttributeName), Arrays.asList(0, 1, 2));
-	}
-
-	@Test
-	public void getLabelAttributeNames()
-	{
-		assertEquals(transformedEntity.getLabelAttributeNames(), Arrays.asList(stringAttributeName));
 	}
 
 	@Test

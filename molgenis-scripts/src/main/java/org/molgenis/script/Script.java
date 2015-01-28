@@ -12,8 +12,9 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.FileWriterWithEncoding;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.util.FileStore;
 
 import com.google.common.collect.Lists;
@@ -22,7 +23,7 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
-public class Script extends MapEntity
+public class Script extends DefaultEntity
 {
 	private static final long serialVersionUID = 2462642767382046869L;
 	public static final String ENTITY_NAME = "Script";
@@ -40,9 +41,9 @@ public class Script extends MapEntity
 	public static final EntityMetaData META_DATA = new ScriptMetaData();
 	private static final Charset CHARSET = Charset.forName("utf-8");
 
-	public Script()
+	public Script(DataService dataService)
 	{
-		super(NAME);
+		super(META_DATA, dataService);
 	}
 
 	public String getName()

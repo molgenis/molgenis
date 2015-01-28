@@ -20,7 +20,7 @@ public abstract class AbstractSearchRepositoryCollection implements ManageableRe
 
 	protected final SearchService searchService;
 	protected final Map<String, AbstractElasticsearchRepository> repositories = Maps.newLinkedHashMap();
-	private final DataService dataService;
+	protected final DataService dataService;
 	private final String name;
 
 	public AbstractSearchRepositoryCollection(SearchService searchService, DataService dataService, String name)

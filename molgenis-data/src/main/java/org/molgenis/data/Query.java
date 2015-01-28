@@ -16,7 +16,7 @@ public interface Query extends Iterable<Entity>
 	 */
 	Long count();
 
-	<E extends Entity> Iterable<E> findAll(Class<E> klazz);
+	Iterable<Entity> findAll();
 
 	/**
 	 * Filtering rules, seperated by QueryRule.AND and QueryRule.OR clauses

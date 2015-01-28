@@ -393,16 +393,6 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 
 		return attributeNames;
 	}
-	
-	@Override
-	public java.util.List<String> getLabelAttributeNames()
-	{
-		java.util.List<String> result = new java.util.ArrayList<String>();
-		<#if entity.getXrefLabels()?exists><#list entity.getXrefLabels() as label>
-		result.add("${label}");
-		</#list></#if>
-		return result;
-	}
 
 	@Override
 	public void set(String attributeName, Object value)

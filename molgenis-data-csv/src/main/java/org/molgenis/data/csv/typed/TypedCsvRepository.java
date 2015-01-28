@@ -124,12 +124,6 @@ public class TypedCsvRepository<T extends Entity> extends AbstractRepository
 				}
 
 				@Override
-				public void remove()
-				{
-					throw new UnsupportedOperationException();
-				}
-
-				@Override
 				public void close()
 				{
 					IOUtils.closeQuietly(csvReader);

@@ -1,7 +1,9 @@
 package org.molgenis.script;
 
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ScriptParameterMetaData extends DefaultEntityMetaData
 {
 	public ScriptParameterMetaData()

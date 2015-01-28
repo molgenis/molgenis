@@ -1,6 +1,5 @@
 package org.molgenis.data.importer;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -23,8 +22,8 @@ import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Tag;
 import org.molgenis.data.semantic.UntypedTagService;
+import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.support.TransformedEntity;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -122,6 +121,7 @@ public class ImportWriter
 				// check to prevent nullpointer when importing metadata only
 				if (fileEntityRepository != null)
 				{
+
 					// transforms entities so that they match the entity meta data of the output repository
 					Iterable<Entity> entities = Iterables.transform(fileEntityRepository,
 							new Function<Entity, Entity>()
@@ -129,7 +129,7 @@ public class ImportWriter
 								@Override
 								public Entity apply(Entity entity)
 								{
-									return new TransformedEntity(entity, entityMetaData, dataService);
+									return new DefaultEntity(entityMetaData, dataService, entity);
 								}
 							});
 
@@ -210,7 +210,7 @@ public class ImportWriter
 		{
 			for (Entity tag : tagRepo)
 			{
-				Entity transformed = new TransformedEntity(tag, new TagMetaData(), dataService);
+				Entity transformed = new DefaultEntity(new TagMetaData(), dataService, tag);
 				Entity existingTag = dataService
 						.findOne(TagMetaData.ENTITY_NAME, tag.getString(TagMetaData.IDENTIFIER));
 
@@ -291,13 +291,7 @@ public class ImportWriter
 	private void dropAddedEntities(List<String> addedEntities)
 	{
 		// Rollback metadata, create table statements cannot be rolled back, we have to do it ourselves
-		ArrayList<String> reversedEntities = new ArrayList<String>(addedEntities);
-		Collections.reverse(reversedEntities);
-
-		for (String entityName : reversedEntities)
-		{
-			dataService.getMeta().deleteEntityMeta(entityName);
-		}
+		Lists.reverse(addedEntities).forEach(dataService.getMeta()::deleteEntityMeta);
 	}
 
 	/**

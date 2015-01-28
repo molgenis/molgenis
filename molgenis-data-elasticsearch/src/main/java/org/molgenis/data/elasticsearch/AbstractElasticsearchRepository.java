@@ -4,7 +4,6 @@ import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toEl
 import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchIds;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Iterator;
 
 import org.molgenis.data.AggregateQuery;
@@ -15,7 +14,6 @@ import org.molgenis.data.IndexedRepository;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.ElasticSearchService.IndexingMode;
-import org.molgenis.data.support.ConvertingIterable;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,21 +31,6 @@ public abstract class AbstractElasticsearchRepository implements IndexedReposito
 
 	@Override
 	public abstract EntityMetaData getEntityMetaData();
-
-	@Override
-	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
-	{
-		@SuppressWarnings("resource")
-		final AbstractElasticsearchRepository self = this;
-		return new ConvertingIterable<E>(clazz, new Iterable<Entity>()
-		{
-			@Override
-			public Iterator<Entity> iterator()
-			{
-				return self.iterator();
-			}
-		});
-	}
 
 	@Override
 	public long count()
@@ -74,12 +57,6 @@ public abstract class AbstractElasticsearchRepository implements IndexedReposito
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz)
-	{
-		return new ConvertingIterable<E>(clazz, findAll(q));
-	}
-
-	@Override
 	public Entity findOne(Query q)
 	{
 		Iterable<Entity> entities = elasticSearchService.search(q, getEntityMetaData());
@@ -96,26 +73,6 @@ public abstract class AbstractElasticsearchRepository implements IndexedReposito
 	public Iterable<Entity> findAll(Iterable<Object> ids)
 	{
 		return elasticSearchService.get(ids, getEntityMetaData());
-	}
-
-	@Override
-	public <E extends Entity> Iterable<E> findAll(Iterable<Object> ids, Class<E> clazz)
-	{
-		return new ConvertingIterable<E>(clazz, findAll(ids));
-	}
-
-	@Override
-	public <E extends Entity> E findOne(Object id, Class<E> clazz)
-	{
-		Entity entity = findOne(id);
-		return entity != null ? new ConvertingIterable<E>(clazz, Arrays.asList(entity)).iterator().next() : null;
-	}
-
-	@Override
-	public <E extends Entity> E findOne(Query q, Class<E> clazz)
-	{
-		Entity entity = findOne(q);
-		return entity != null ? new ConvertingIterable<E>(clazz, Arrays.asList(entity)).iterator().next() : null;
 	}
 
 	@Override

@@ -1,6 +1,10 @@
 package org.molgenis.data.meta;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.reverse;
+
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -12,8 +16,10 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Package;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
 import org.molgenis.util.DependencyResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +27,6 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.Ordered;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -70,11 +75,12 @@ public class MetaDataServiceImpl implements MetaDataService
 		dataService.addRepository(tagRepo);
 
 		packageRepository = new PackageRepository(defaultBackend);
-		entityMetaDataRepository = new EntityMetaDataRepository(defaultBackend, packageRepository);
-		attributeMetaDataRepository = new AttributeMetaDataRepository(defaultBackend, entityMetaDataRepository);
-
 		dataService.addRepository(packageRepository.getRepository());
+
+		entityMetaDataRepository = new EntityMetaDataRepository(defaultBackend, packageRepository);
 		dataService.addRepository(entityMetaDataRepository.getRepository());
+
+		attributeMetaDataRepository = new AttributeMetaDataRepository(defaultBackend, entityMetaDataRepository);
 		dataService.addRepository(attributeMetaDataRepository.getRepository());
 	}
 
@@ -96,6 +102,14 @@ public class MetaDataServiceImpl implements MetaDataService
 		EntityMetaData emd = getEntityMetaData(entityName);
 		entityMetaDataRepository.delete(entityName);
 		getManageableRepositoryCollection(emd).deleteEntityMeta(entityName);
+	}
+
+	@Transactional
+	@Override
+	public void delete(List<EntityMetaData> entities)
+	{
+		reverse(DependencyResolver.resolve(Sets.newHashSet(entities))).stream().map(emd -> emd.getName())
+				.forEach(this::deleteEntityMeta);
 	}
 
 	/**
@@ -131,7 +145,7 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	@Transactional
 	@Override
-	public synchronized Repository addEntityMeta(EntityMetaData emd)
+	public Repository add(EntityMetaData emd, RepositoryDecoratorFactory decoratorFactory)
 	{
 		if (emd.isAbstract())
 		{
@@ -144,7 +158,9 @@ public class MetaDataServiceImpl implements MetaDataService
 		{
 			if (!dataService.hasRepository(emd.getName()))
 			{
-				dataService.addRepository(backend.getRepository(emd.getName()));
+				Repository repo = backend.getRepository(emd.getName());
+				Repository decoratedRepo = decoratorFactory.createDecoratedRepository(repo);
+				dataService.addRepository(decoratedRepo);
 			}
 
 			// Return decorated repo
@@ -174,10 +190,19 @@ public class MetaDataServiceImpl implements MetaDataService
 			attributeMetaDataRepository.add(mdEntity, att);
 		}
 
-		dataService.addRepository(backend.addEntityMeta(getEntityMetaData(emd.getName())));
+		Repository repo = backend.addEntityMeta(getEntityMetaData(emd.getName()));
+		Repository decoratedRepo = decoratorFactory.createDecoratedRepository(repo);
+		dataService.addRepository(decoratedRepo);
 
 		// Return decorated repo
 		return dataService.getRepository(emd.getName());
+	}
+
+	@Transactional
+	@Override
+	public synchronized Repository addEntityMeta(EntityMetaData emd)
+	{
+		return add(emd, new NonDecoratingRepositoryDecoratorFactory());
 	}
 
 	@Transactional
@@ -226,11 +251,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Transactional
 	public void recreateMetaDataRepositories()
 	{
-		for (EntityMetaData emd : Lists
-				.reverse(DependencyResolver.resolve(Sets.newLinkedHashSet(getEntityMetaDatas()))))
-		{
-			deleteEntityMeta(emd.getName());
-		}
+		delete(newArrayList(getEntityMetaDatas()));
 
 		attributeMetaDataRepository.deleteAll();
 		entityMetaDataRepository.deleteAll();
@@ -289,11 +310,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		// Discover all backends
 		Map<String, RepositoryCollection> backendBeans = event.getApplicationContext().getBeansOfType(
 				RepositoryCollection.class);
-
-		for (RepositoryCollection col : backendBeans.values())
-		{
-			backends.put(col.getName(), col);
-		}
+		backendBeans.values().forEach((col) -> backends.put(col.getName(), col));
 
 		// Create repositories from EntityMetaData in EntityMetaData repo
 		for (EntityMetaData emd : entityMetaDataRepository.getMetaDatas())
@@ -306,5 +323,16 @@ public class MetaDataServiceImpl implements MetaDataService
 				dataService.addRepository(repo);
 			}
 		}
+
+		// Discover EntityMetaData
+		Map<String, EntityMetaData> emds = event.getApplicationContext().getBeansOfType(EntityMetaData.class);
+		DependencyResolver.resolve(Sets.newHashSet(emds.values())).forEach(this::addEntityMeta);
 	}
+
+	@Override
+	public Iterator<RepositoryCollection> iterator()
+	{
+		return backends.values().iterator();
+	}
+
 }

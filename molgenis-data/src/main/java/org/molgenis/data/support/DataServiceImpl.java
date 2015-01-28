@@ -2,9 +2,7 @@ package org.molgenis.data.support;
 
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserHasRole;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -22,12 +20,12 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 /**
@@ -150,13 +148,6 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public List<Entity> findAllAsList(String entityName, Query q)
-	{
-		Iterable<Entity> iterable = findAll(entityName, q);
-		return Lists.newArrayList(iterable);
-	}
-
-	@Override
 	public Entity findOne(String entityName, Object id)
 	{
 		return getRepository(entityName).findOne(id);
@@ -243,40 +234,33 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public Iterable<Class<? extends Entity>> getEntityClasses()
-	{
-		List<Class<? extends Entity>> entityClasses = new ArrayList<Class<? extends Entity>>();
-		for (String entityName : getEntityNames())
-		{
-			Repository repo = getRepository(entityName);
-			entityClasses.add(repo.getEntityMetaData().getEntityClass());
-		}
-
-		return entityClasses;
-	}
-
-	@Override
 	public <E extends Entity> Iterable<E> findAll(String entityName, Query q, Class<E> clazz)
 	{
-		return getRepository(entityName).findAll(q, clazz);
+		Iterable<Entity> entities = getRepository(entityName).findAll(q);
+		return new ConvertingIterable<E>(clazz, entities, this);
 	}
 
 	@Override
 	public <E extends Entity> Iterable<E> findAll(String entityName, Iterable<Object> ids, Class<E> clazz)
 	{
-		return getRepository(entityName).findAll(ids, clazz);
+		Iterable<Entity> entities = getRepository(entityName).findAll(ids);
+		return new ConvertingIterable<E>(clazz, entities, this);
 	}
 
 	@Override
 	public <E extends Entity> E findOne(String entityName, Object id, Class<E> clazz)
 	{
-		return getRepository(entityName).findOne(id, clazz);
+		Entity entity = getRepository(entityName).findOne(id);
+		if (entity == null) return null;
+		return EntityUtils.convert(entity, clazz, this);
 	}
 
 	@Override
 	public <E extends Entity> E findOne(String entityName, Query q, Class<E> clazz)
 	{
-		return getRepository(entityName).findOne(q, clazz);
+		Entity entity = getRepository(entityName).findOne(q);
+		if (entity == null) return null;
+		return EntityUtils.convert(entity, clazz, this);
 	}
 
 	@Override
@@ -307,6 +291,12 @@ public class DataServiceImpl implements DataService
 	public Set<RepositoryCapability> getCapabilities(String repositoryName)
 	{
 		return getRepository(repositoryName).getCapabilities();
+	}
+
+	@Override
+	public Repository repo(String entityName)
+	{
+		return getRepository(entityName);
 	}
 
 }

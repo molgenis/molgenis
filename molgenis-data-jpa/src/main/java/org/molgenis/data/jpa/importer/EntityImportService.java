@@ -434,7 +434,7 @@ public class EntityImportService
 							{
 								mapEntity.set(field, newEntity.get(field));
 							}
-							entityInDb.set(mapEntity, false);
+							entityInDb.set(mapEntity);
 						}
 						catch (Exception ex)
 						{

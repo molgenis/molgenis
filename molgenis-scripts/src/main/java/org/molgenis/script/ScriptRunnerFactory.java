@@ -34,7 +34,7 @@ public class ScriptRunnerFactory
 
 		if (dataService.count(ScriptType.ENTITY_NAME, new QueryImpl().eq(ScriptType.NAME, type)) == 0)
 		{
-			dataService.add(ScriptType.ENTITY_NAME, new ScriptType(type));
+			dataService.add(ScriptType.ENTITY_NAME, new ScriptType(type, dataService));
 		}
 	}
 

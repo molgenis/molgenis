@@ -45,13 +45,6 @@ public class RepositorySecurityDecorator implements Repository
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
-	{
-		validatePermission(decoratedRepository.getName(), Permission.READ);
-		return decoratedRepository.iterator(clazz);
-	}
-
-	@Override
 	public Query query()
 	{
 		return new QueryImpl(this);
@@ -69,13 +62,6 @@ public class RepositorySecurityDecorator implements Repository
 	{
 		validatePermission(decoratedRepository.getName(), Permission.READ);
 		return decoratedRepository.findAll(q);
-	}
-
-	@Override
-	public <E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz)
-	{
-		validatePermission(decoratedRepository.getName(), Permission.READ);
-		return decoratedRepository.findAll(q, clazz);
 	}
 
 	@Override
@@ -97,27 +83,6 @@ public class RepositorySecurityDecorator implements Repository
 	{
 		validatePermission(decoratedRepository.getName(), Permission.READ);
 		return decoratedRepository.findAll(ids);
-	}
-
-	@Override
-	public <E extends Entity> Iterable<E> findAll(Iterable<Object> ids, Class<E> clazz)
-	{
-		validatePermission(decoratedRepository.getName(), Permission.READ);
-		return decoratedRepository.findAll(ids, clazz);
-	}
-
-	@Override
-	public <E extends Entity> E findOne(Object id, Class<E> clazz)
-	{
-		validatePermission(decoratedRepository.getName(), Permission.READ);
-		return decoratedRepository.findOne(id, clazz);
-	}
-
-	@Override
-	public <E extends Entity> E findOne(Query q, Class<E> clazz)
-	{
-		validatePermission(decoratedRepository.getName(), Permission.READ);
-		return decoratedRepository.findOne(q, clazz);
 	}
 
 	@Override

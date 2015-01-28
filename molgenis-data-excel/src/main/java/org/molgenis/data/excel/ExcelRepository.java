@@ -167,5 +167,4 @@ public class ExcelRepository extends AbstractRepository
 	{
 		return Iterables.size(this);
 	}
-
 }

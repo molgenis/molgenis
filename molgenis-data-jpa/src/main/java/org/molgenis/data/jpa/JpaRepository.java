@@ -37,7 +37,6 @@ import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.support.AbstractRepository;
-import org.molgenis.data.support.ConvertingIterable;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.QueryResolver;
 import org.molgenis.generators.GeneratorHelper;
@@ -571,55 +570,6 @@ public class JpaRepository extends AbstractRepository
 		jpaEntity.set(entity);
 
 		return jpaEntity;
-	}
-
-	@Override
-	@Transactional(readOnly = true)
-	public <E extends Entity> Iterable<E> findAll(Iterable<Object> ids, Class<E> clazz)
-	{
-		return new ConvertingIterable<E>(clazz, findAll(ids));
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	@Transactional(readOnly = true)
-	public <E extends Entity> E findOne(Object id, Class<E> clazz)
-	{
-		Entity entity = findOne(id);
-		if (entity == null)
-		{
-			return null;
-		}
-
-		if (clazz.isAssignableFrom(entity.getClass()))
-		{
-			return (E) entity;
-		}
-
-		E e = BeanUtils.instantiate(clazz);
-		e.set(entity);
-		return e;
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	@Transactional(readOnly = true)
-	public <E extends Entity> E findOne(Query q, Class<E> clazz)
-	{
-		Entity entity = findOne(q);
-		if (entity == null)
-		{
-			return null;
-		}
-
-		if (clazz.isAssignableFrom(entity.getClass()))
-		{
-			return (E) entity;
-		}
-
-		E e = BeanUtils.instantiate(clazz);
-		e.set(entity);
-		return e;
 	}
 
 	/*
