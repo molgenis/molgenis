@@ -2,10 +2,8 @@ package org.molgenis.data.repository;
 
 import java.util.List;
 
-import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-import org.molgenis.data.mapping.MappingProject;
-import org.molgenis.data.meta.MappingProjectMetaData;
+import org.molgenis.data.mapping.model.MappingProject;
 
 public interface MappingProjectRepository
 {

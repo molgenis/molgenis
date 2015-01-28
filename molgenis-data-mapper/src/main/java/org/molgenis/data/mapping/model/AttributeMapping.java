@@ -1,4 +1,4 @@
-package org.molgenis.data.mapping;
+package org.molgenis.data.mapping.model;
 
 import org.molgenis.data.AttributeMetaData;
 

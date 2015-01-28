@@ -2,11 +2,8 @@ package org.molgenis.data.meta;
 
 import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.STRING;
-import static org.molgenis.MolgenisFieldTypes.XREF;
 
-import org.molgenis.data.repository.EntityMappingRepository;
 import org.molgenis.data.repository.impl.AttributeMappingRepositoryImpl;
-import org.molgenis.data.repository.impl.EntityMappingRepositoryImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
 
 public class EntityMappingMetaData extends DefaultEntityMetaData

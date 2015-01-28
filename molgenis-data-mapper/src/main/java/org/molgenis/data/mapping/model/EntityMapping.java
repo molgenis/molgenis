@@ -1,12 +1,11 @@
-package org.molgenis.data.mapping;
+package org.molgenis.data.mapping.model;
 
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EntityMetaData;
-
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.EntityMetaData;
 
 /**
  * Created by charbonb on 14/01/15.
