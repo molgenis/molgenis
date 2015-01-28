@@ -366,14 +366,15 @@
 	function renderViewCell(cell, entity, attribute, settings) {
 		cell.empty();
 		
-		var rawValue = entity[attribute.name];				
+		var rawValue = entity[attribute.name];
+
 		switch(attribute.fieldType) {
 			case 'XREF':
 			case 'MREF':
             case 'CATEGORICAL':
                 if (rawValue) {
                 	var refEntity = settings.refEntitiesMeta[attribute.refEntity.href];
-                	var refAttribute = refEntity.labelAttribute;
+                    var refAttribute = refEntity.labelAttribute;
                 	var refValue = refEntity.attributes[refAttribute];
 					
                 	if (refValue) {
@@ -385,7 +386,7 @@
                 		switch(attribute.fieldType) {
 							case 'CATEGORICAL':
 							case 'XREF':
-								var $cellValue = $('<a href="#">').append(formatTableCellValue(rawValue[refAttribute], refAttributeType)); 
+								var $cellValue = $('<a href="#">').append(formatTableCellValue(rawValue[refAttribute], refAttributeType));
 								$cellValue.click(function(event) {
 									openRefAttributeModal(attribute, refEntity, refAttribute, rawValue);
 									event.stopPropagation();
@@ -445,21 +446,14 @@
 			items.push('</div>');
 			modal = $(items.join(''));
 		}
-		
+
 		// inject modal data
 		var refAttributes = molgenis.getAtomicAttributes(refEntity.attributes, restApi);
-		
-		// TODO use idAttribute once github #1400 is fixed
-		// TODO remove trim() once github #1401 is fixed
-		var val = refValue[refEntity.labelAttribute];
-		if (typeof val.trim == 'function') {
-			val = val.trim();
-		}
-		
+        var val = restApi.get(refValue.href)[refEntity.idAttribute];
+
 		var refQuery = {
 			'q' : [ {
-				// TODO use idAttribute once github #1400 is fixed
-				'field' : refEntity.labelAttribute, 
+				'field' : refEntity.idAttribute,
 				'operator' : 'EQUALS',
 				'value' : val
 			} ]
