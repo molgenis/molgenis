@@ -14,6 +14,9 @@
 		<link rel="icon" href="<@resource_href "/img/molgenis.ico"/>" type="image/x-icon">
 		<link rel="stylesheet" href="<@resource_href "/css/bootstrap.min.css"/>" type="text/css">
 		<link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
+    <#if app_top_logo?has_content>
+        <link rel="stylesheet" href="<@resource_href "/css/molgenis-top-logo.css"/>" type="text/css">
+    </#if>
 	<#list css as css_file_name>
 		<link rel="stylesheet" href="<@resource_href "/css/${css_file_name?html}"/>" type="text/css">
 	</#list>
@@ -94,6 +97,11 @@
 
 <#-- Topmenu -->
 <#macro topmenu menu plugin_id> <#--TODO refactor to remove depency on 'Home'-->
+    <#if app_top_logo?has_content>
+        <div id="Intro">
+            <img src=${app_top_logo} alt="" border="0" height="150">
+        </div>
+    </#if>
 	<div class="navbar navbar-default navbar-fixed-top" role="navigation">
 		<div class="container-fluid">
 			<#-- Logo start -->
