@@ -1,16 +1,18 @@
 package org.molgenis.data.repository.impl;
 
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import org.molgenis.data.CrudRepository;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
-import org.molgenis.data.mapping.EntityMapping;
-import org.molgenis.data.mapping.MappingProject;
+import org.molgenis.data.mapping.model.MappingProject;
+import org.molgenis.data.mapping.model.MappingTarget;
 import org.molgenis.data.meta.MappingProjectMetaData;
-import org.molgenis.data.repository.EntityMappingRepository;
 import org.molgenis.data.repository.MappingProjectRepository;
+import org.molgenis.data.repository.MappingTargetRepository;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -19,25 +21,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.IdGenerator;
 
-import java.util.List;
-import java.util.ArrayList;
+import com.google.common.collect.Lists;
 
 public class MappingProjectRepositoryImpl implements MappingProjectRepository
 {
 	public static final MappingProjectMetaData META_DATA = new MappingProjectMetaData();
-
 	private final CrudRepository repository;
 	@Autowired
 	private MolgenisUserService molgenisUserService;
 	@Autowired
 	private IdGenerator idGenerator;
+	private MappingTargetRepository mappingTargetRepository;
 
-	private EntityMappingRepository entityMappingRepository;
-
-	public MappingProjectRepositoryImpl(CrudRepository repository, EntityMappingRepository entityMappingRepository)
+	public MappingProjectRepositoryImpl(CrudRepository repository, MappingTargetRepository mappingTargetRepository)
 	{
 		this.repository = repository;
-		this.entityMappingRepository = entityMappingRepository;
+		this.mappingTargetRepository = mappingTargetRepository;
 	}
 
 	@Override
@@ -48,11 +47,7 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 		{
 			throw new MolgenisDataException("MappingProject already exists");
 		}
-		Entity mappingProjectEntity = toMappingProjectEntity(mappingProject);
-		List<EntityMapping> entityMappings = mappingProject.getEntityMappings();
-		List<Entity> entityMappingEntities = entityMappingRepository.upsert(entityMappings);
-		mappingProjectEntity.set(MappingProjectMetaData.ENTITYMAPPINGS, entityMappingEntities);
-		repository.add(mappingProjectEntity);
+		repository.add(toEntity(mappingProject));
 	}
 
 	@Override
@@ -60,18 +55,12 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 	public void update(MappingProject mappingProject)
 	{
 		MappingProject existing = getMappingProject(mappingProject.getIdentifier());
-		if (existing != null)
-		{
-			Entity mappingProjectEntity = toMappingProjectEntity(mappingProject);
-			List<EntityMapping> entityMappings = mappingProject.getEntityMappings();
-			List<Entity> entityMappingEntities = entityMappingRepository.upsert(entityMappings);
-			mappingProjectEntity.set(MappingProjectMetaData.ENTITYMAPPINGS, entityMappingEntities);
-			repository.update(mappingProjectEntity);
-		}
-		else
+		if (existing == null)
 		{
 			throw new MolgenisDataException("MappingProject does not exists");
 		}
+		Entity mappingProjectEntity = toEntity(mappingProject);
+		repository.update(mappingProjectEntity);
 	}
 
 	@Override
@@ -120,28 +109,36 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 		String name = mappingProjectEntity.getString(MappingProjectMetaData.NAME);
 		// FIXME When xref to molgenis user change this to MolgenisUser object
 		String owner = molgenisUserService.getUser(SecurityUtils.getCurrentUsername()).getUsername();
-		List<Entity> entityMappingEntities = Lists.newArrayList(mappingProjectEntity
-				.getEntities(MappingProjectMetaData.ENTITYMAPPINGS));
-		List<EntityMapping> entityMappings = entityMappingRepository.toEntityMappings(entityMappingEntities);
-		return new MappingProject(identifier, name, owner, entityMappings);
+		List<Entity> mappingTargetEntities = Lists.newArrayList(mappingProjectEntity
+				.getEntities(MappingProjectMetaData.MAPPINGTARGETS));
+		List<MappingTarget> mappingTargets = mappingTargetRepository.toMappingTargets(mappingTargetEntities);
+		return new MappingProject(identifier, name, owner, mappingTargets);
 	}
 
 	/**
-	 * Creates a new {@link MapEntity} for this MappingProject. Doesn't yet fill the {@link EntityMapping}s.
+	 * Creates a new Entity for a MappingProject. Upserts the {@link MappingProject}'s {@link MappingTarget}s in the
+	 * {@link #mappingTargetRepository}.
+	 * 
+	 * @param mappingProject
+	 *            the {@link MappingProject} used to create an Entity
+	 * @return Entity filled with the data from the MappingProject
 	 */
-	private Entity toMappingProjectEntity(MappingProject mappingProject)
+	private Entity toEntity(MappingProject mappingProject)
 	{
-		Entity mappingProjectEntity = new MapEntity();
+		Entity result = new MapEntity();
 		if (mappingProject.getIdentifier() == null)
 		{
-			mappingProjectEntity.set(MappingProjectMetaData.IDENTIFIER, idGenerator.generateId().toString());
+			result.set(MappingProjectMetaData.IDENTIFIER, idGenerator.generateId().toString());
 		}
 		else
 		{
-			mappingProjectEntity.set(MappingProjectMetaData.IDENTIFIER, mappingProject.getIdentifier());
+			result.set(MappingProjectMetaData.IDENTIFIER, mappingProject.getIdentifier());
 		}
-		mappingProjectEntity.set(MappingProjectMetaData.OWNER, mappingProject.getOwner());
-		mappingProjectEntity.set(MappingProjectMetaData.NAME, mappingProject.getName());
-		return mappingProjectEntity;
+		result.set(MappingProjectMetaData.OWNER, mappingProject.getOwner());
+		result.set(MappingProjectMetaData.NAME, mappingProject.getName());
+		Map<String, MappingTarget> targets = mappingProject.getTargets();
+		List<Entity> mappingTargetEntities = mappingTargetRepository.upsert(targets.values());
+		result.set(MappingProjectMetaData.MAPPINGTARGETS, mappingTargetEntities);
+		return result;
 	}
 }

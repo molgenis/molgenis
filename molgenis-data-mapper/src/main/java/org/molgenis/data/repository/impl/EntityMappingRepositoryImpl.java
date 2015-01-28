@@ -1,13 +1,14 @@
 package org.molgenis.data.repository.impl;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.mapping.AttributeMapping;
-import org.molgenis.data.mapping.EntityMapping;
+import org.molgenis.data.mapping.model.AttributeMapping;
+import org.molgenis.data.mapping.model.EntityMapping;
 import org.molgenis.data.meta.EntityMappingMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.repository.AttributeMappingRepository;
@@ -70,20 +71,16 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 	}
 
 	@Override
-	public List<Entity> upsert(List<EntityMapping> entityMappings)
+	public List<Entity> upsert(Collection<EntityMapping> entityMappings)
 	{
-		List<Entity> result = new ArrayList<Entity>();
-		for (EntityMapping entityMapping : entityMappings)
-		{
-			result.add(upsert(entityMapping));
-		}
-		return result;
+		return entityMappings.stream().map(this::upsert).collect(Collectors.toList());
 	}
 
 	private Entity upsert(EntityMapping entityMapping)
 	{
 		Entity entityMappingEntity = toEntityMappingEntity(entityMapping);
-		List<Entity> attributeMappingEntities = attributeMappingRepository.upsert(entityMapping.getAttributeMappings().values());
+		List<Entity> attributeMappingEntities = attributeMappingRepository.upsert(entityMapping.getAttributeMappings()
+				.values());
 		entityMappingEntity.set(EntityMappingMetaData.ATTRIBUTEMAPPINGS, attributeMappingEntities);
 		if (entityMapping.getIdentifier() != null)
 		{

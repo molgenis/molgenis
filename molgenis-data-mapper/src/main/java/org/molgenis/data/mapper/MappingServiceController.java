@@ -3,20 +3,13 @@ package org.molgenis.data.mapper;
 import static org.molgenis.data.mapper.MappingServiceController.URI;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
 
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.mapping.AttributeMapping;
-import org.molgenis.data.mapping.EntityMapping;
-import org.molgenis.data.mapping.MappingProject;
 import org.molgenis.data.mapping.MappingService;
-import org.molgenis.data.repository.MappingProjectRepository;
-import org.molgenis.data.repository.impl.MappingProjectRepositoryImpl;
+import org.molgenis.data.mapping.model.MappingProject;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserService;
@@ -58,7 +51,7 @@ public class MappingServiceController extends MolgenisPluginController
 
 	@Autowired
 	private DataService dataService;
-	
+
 	public MappingServiceController()
 	{
 		super(URI);
@@ -73,12 +66,9 @@ public class MappingServiceController extends MolgenisPluginController
 
 	@RequestMapping(value = "/addmappingproject", method = RequestMethod.POST)
 	public String addMappingProject(@RequestParam("mapping-project-name") String identifier,
-			@RequestParam("target-entity") List<String> targetEntities, Model model)
+			@RequestParam("target-entity") String targetEntity, Model model)
 	{
-		System.out.println(targetEntities);
-
-		mappingService.addMappingProject(identifier, getCurrentUser(), targetEntities);
-
+		mappingService.addMappingProject(identifier, getCurrentUser(), targetEntity);
 		model = setModelAttributes(model);
 		return VIEW_MAPPING_PROJECTS;
 	}
@@ -97,24 +87,7 @@ public class MappingServiceController extends MolgenisPluginController
 	@RequestMapping("/attributemapping/{id}")
 	public String getAttributeMappingScreen(@PathVariable("id") String identifier, Model model)
 	{
-
-		MappingProject mappingProject = mappingService.getMappingProject(identifier);
-
-		// TODO Put attribute mapping information based on mapping project ID into the model
 		model.addAttribute("mappingProject", mappingService.getMappingProject(identifier));
-
-		model.addAttribute("entityMappings", mappingService.getMappingProject(identifier).getEntityMappings());
-		model.addAttribute("attributeMappings", mappingService.getAttributeMappings(identifier));
-
-		List<String> mockAttributesForTargetEntity = new ArrayList<String>(); // TODO use dataservice to get a
-																				// List<Attributes>
-		mockAttributesForTargetEntity.add("targetAttr1");
-		mockAttributesForTargetEntity.add("targetAttr2");
-		mockAttributesForTargetEntity.add("targetAttr3");
-		mockAttributesForTargetEntity.add("targetAttr4");
-		mockAttributesForTargetEntity.add("targetAttr5");
-		model.addAttribute("targetEntityAttributes", mockAttributesForTargetEntity);
-
 		return VIEW_ATTRIBUTE_MAPPING;
 	}
 
@@ -137,7 +110,7 @@ public class MappingServiceController extends MolgenisPluginController
 		model.addAttribute("activeUser", getCurrentUser().getUsername());
 		if (mappingService == null) model.addAttribute("mappingProjects", null);
 		else model.addAttribute("mappingProjects", mappingService.getAllMappingProjects());
-		
+
 		Iterable<EntityMetaData> entitiesMeta = Iterables.transform(dataService.getEntityNames(),
 				new Function<String, EntityMetaData>()
 				{
@@ -148,7 +121,7 @@ public class MappingServiceController extends MolgenisPluginController
 					}
 				});
 		model.addAttribute("entitiesMeta", entitiesMeta);
-		
+
 		return model;
 	}
 

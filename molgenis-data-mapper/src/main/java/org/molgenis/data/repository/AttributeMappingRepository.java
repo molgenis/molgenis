@@ -6,8 +6,8 @@ import java.util.List;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.mapping.AttributeMapping;
-import org.molgenis.data.mapping.EntityMapping;
+import org.molgenis.data.mapping.model.AttributeMapping;
+import org.molgenis.data.mapping.model.EntityMapping;
 import org.molgenis.data.meta.AttributeMappingMetaData;
 import org.molgenis.data.meta.EntityMappingMetaData;
 

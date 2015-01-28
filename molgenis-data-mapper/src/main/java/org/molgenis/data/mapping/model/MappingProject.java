@@ -1,12 +1,12 @@
-package org.molgenis.data.mapping;
+package org.molgenis.data.mapping.model;
 
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.elasticsearch.repositories.Repository;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.mapping.MappingService;
 import org.molgenis.data.repository.MappingProjectRepository;
 
 /**

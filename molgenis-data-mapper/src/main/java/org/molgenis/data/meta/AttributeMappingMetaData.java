@@ -1,8 +1,6 @@
 package org.molgenis.data.meta;
 
 import org.molgenis.data.support.DefaultEntityMetaData;
-import static org.molgenis.MolgenisFieldTypes.STRING;
-import static org.molgenis.MolgenisFieldTypes.XREF;
 
 public class AttributeMappingMetaData extends DefaultEntityMetaData
 {

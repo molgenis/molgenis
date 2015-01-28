@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.molgenis.auth.MolgenisUser;
+import org.molgenis.data.mapping.model.EntityMapping;
+import org.molgenis.data.mapping.model.MappingProject;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.repository.AttributeMappingRepository;
 import org.molgenis.data.repository.EntityMappingRepository;
