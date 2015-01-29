@@ -286,6 +286,23 @@ public class OntologyServiceController extends MolgenisPluginController
 		return startMatchJob(entityName, ontologyIri, uploadFile, model);
 	}
 
+	@RequestMapping(method = POST, value = "/ontologyterm/synonyms")
+	@ResponseBody
+	public Map<String, Object> getOntologyTermSynonyms(@RequestBody Map<String, Object> request)
+	{
+		Map<String, Object> results = new HashMap<String, Object>();
+		if (request.containsKey(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI)
+				&& !StringUtils.isEmpty(request.get(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI).toString())
+				&& request.containsKey(OntologyTermQueryRepository.ONTOLOGY_IRI)
+				&& !StringUtils.isEmpty(request.get(OntologyTermQueryRepository.ONTOLOGY_IRI).toString()))
+		{
+			String ontologyTermIri = request.get(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI).toString();
+			String ontologyIri = request.get(OntologyTermQueryRepository.ONTOLOGY_IRI).toString();
+			results.put("synonyms", ontologyService.getOntologyTermSynonyms(ontologyTermIri, ontologyIri));
+		}
+		return results;
+	}
+
 	@RequestMapping(method = POST, value = "/match/entity")
 	@ResponseBody
 	public OntologyServiceResult matchResult(@RequestBody Map<String, Object> request,
@@ -320,7 +337,9 @@ public class OntologyServiceController extends MolgenisPluginController
 		{
 			String queryString = request.get("queryString").toString();
 			String ontologyIri = request.get(OntologyTermQueryRepository.ONTOLOGY_IRI).toString();
-			return ontologyService.search(ontologyIri, queryString);
+			Entity entity = new MapEntity();
+			entity.set(OntologyServiceImpl.DEFAULT_MATCHING_NAME_FIELD, queryString);
+			return ontologyService.searchEntity(ontologyIri, entity);
 		}
 		return new OntologyServiceResultImpl("Please check entityName, inputTermIdentifier exist in input!");
 	}

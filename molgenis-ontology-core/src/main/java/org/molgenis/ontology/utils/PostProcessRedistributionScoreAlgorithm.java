@@ -12,23 +12,25 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.ontology.beans.ComparableEntity;
+import org.molgenis.ontology.repository.OntologyTermQueryRepository;
 import org.molgenis.ontology.service.OntologyServiceImpl;
 
 public class PostProcessRedistributionScoreAlgorithm
 {
+	private static final int MAX_NUM = 100;
+
 	public static void process(List<ComparableEntity> entities, Map<String, Object> inputData,
 			OntologyServiceImpl ontologyService)
 	{
-		if (inputData.size() == 1 && inputData.containsKey(OntologyServiceImpl.DEFAULT_MATCHING_NAME_FIELD))
+		if (inputData.size() == 1 && inputData.containsKey(OntologyServiceImpl.DEFAULT_MATCHING_NAME_FIELD)
+				&& entities.size() > 0)
 		{
 			String queryString = inputData.get(OntologyServiceImpl.DEFAULT_MATCHING_NAME_FIELD).toString();
 			Set<String> wordsInQueryString = AlgorithmHelper.medicalStemProxy(queryString);
-			int totalDocs = entities.size() > 10 ? 10 : entities.size();
 
-			Map<String, Double> wordAdjustedScore = redistributedScore(queryString, entities, totalDocs,
-					ontologyService);
+			Map<String, Double> wordAdjustedScore = redistributedScore(queryString, entities, ontologyService);
 
-			for (ComparableEntity entity : entities.subList(0, totalDocs))
+			for (ComparableEntity entity : entities.subList(0, entities.size() > MAX_NUM ? MAX_NUM : entities.size()))
 			{
 				String combineSynonyms = AlgorithmHelper.combineSynonyms(entity, queryString, ontologyService);
 				Set<String> wordsInOntologyTerm = AlgorithmHelper.medicalStemProxy(combineSynonyms);
@@ -46,19 +48,20 @@ public class PostProcessRedistributionScoreAlgorithm
 	}
 
 	private static Map<String, Double> redistributedScore(String queryString, List<ComparableEntity> entities,
-			int totalDocs, OntologyServiceImpl ontologyService)
+			OntologyServiceImpl ontologyService)
 	{
 		// Collect the frequencies for all of the unique words from query string
+		String ontologyIri = entities.get(0).getString(OntologyTermQueryRepository.ONTOLOGY_IRI);
+		int totalDocs = (int) ontologyService.getTotalNumDocument(ontologyIri);
 		Set<String> wordsInQueryString = AlgorithmHelper.medicalStemProxy(queryString);
 		double queryStringLength = StringUtils.join(wordsInQueryString, SINGLE_WHITESPACE).trim().length();
-		Map<String, Integer> wordFreqMap = AlgorithmHelper.createWordFreq(queryString, entities, totalDocs,
-				ontologyService);
+		Map<String, Integer> wordFreqMap = AlgorithmHelper.createWordFreq(queryString, ontologyIri, ontologyService);
 
 		Map<String, Double> wordWeightedSimilarity = new HashMap<String, Double>();
 		double averageIDFValue = 0;
 		for (Entry<String, Integer> entry : wordFreqMap.entrySet())
 		{
-			BigDecimal idfValue = new BigDecimal(1 + Math.log10((double) totalDocs / (entry.getValue() + 1)));
+			BigDecimal idfValue = new BigDecimal(1 + Math.log((double) totalDocs / (entry.getValue() + 1)));
 			averageIDFValue += idfValue.doubleValue();
 			wordWeightedSimilarity.put(entry.getKey(), entry.getKey().length() / queryStringLength * 100);
 		}
@@ -68,7 +71,7 @@ public class PostProcessRedistributionScoreAlgorithm
 		double totalDenominator = 0;
 		for (Entry<String, Integer> entry : wordFreqMap.entrySet())
 		{
-			BigDecimal idfValue = new BigDecimal(1 + Math.log10((double) totalDocs / (entry.getValue() + 1)));
+			BigDecimal idfValue = new BigDecimal(1 + Math.log((double) totalDocs / (entry.getValue() + 1)));
 			double diff = idfValue.doubleValue() - averageIDFValue;
 			if (diff < 0)
 			{
@@ -84,7 +87,7 @@ public class PostProcessRedistributionScoreAlgorithm
 
 		for (Entry<String, Integer> entry : wordFreqMap.entrySet())
 		{
-			BigDecimal idfValue = new BigDecimal(1 + Math.log10((double) totalDocs / (entry.getValue() + 1)));
+			BigDecimal idfValue = new BigDecimal(1 + Math.log((double) totalDocs / (entry.getValue() + 1)));
 			double diff = idfValue.doubleValue() - averageIDFValue;
 			if (diff > 0)
 			{

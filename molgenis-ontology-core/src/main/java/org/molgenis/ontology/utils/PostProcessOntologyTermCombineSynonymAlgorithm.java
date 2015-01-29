@@ -26,14 +26,13 @@ import org.molgenis.ontology.beans.ComparableEntity;
  */
 public class PostProcessOntologyTermCombineSynonymAlgorithm
 {
-	public static List<ComparableEntity> process(List<ComparableEntity> comparableEntities,
-			Map<String, Object> inputData)
+	public static void process(List<ComparableEntity> comparableEntities, Map<String, Object> inputData)
 	{
-		Collections.sort(comparableEntities);
-		List<ComparableEntity> entities = new ArrayList<ComparableEntity>(comparableEntities);
-		for (int i = 0; i < comparableEntities.size(); i++)
+		List<ComparableEntity> sortedEntities = new ArrayList<ComparableEntity>(comparableEntities);
+		Collections.sort(sortedEntities);
+		for (int i = 0; i < sortedEntities.size(); i++)
 		{
-			Entity currentEntity = comparableEntities.get(i);
+			Entity currentEntity = sortedEntities.get(i);
 			String currentMaxScoreField = currentEntity.getString(MAX_SCORE_FIELD);
 			String currentEntityIdentifier = currentEntity.getString(ONTOLOGY_TERM_IRI);
 			String currentSynonym = currentEntity.getString(SYNONYMS);
@@ -43,9 +42,9 @@ public class PostProcessOntologyTermCombineSynonymAlgorithm
 			StringBuilder combinedSynonym = new StringBuilder();
 			combinedSynonym.append(currentSynonym);
 
-			for (int j = i + 1; j < comparableEntities.size(); j++)
+			for (int j = i + 1; j < sortedEntities.size(); j++)
 			{
-				Entity nextEntity = comparableEntities.get(j);
+				ComparableEntity nextEntity = sortedEntities.get(j);
 				String nextMaxScoreField = nextEntity.getString(MAX_SCORE_FIELD);
 				String nextEntityIdentifier = nextEntity.getString(ONTOLOGY_TERM_IRI);
 
@@ -65,12 +64,11 @@ public class PostProcessOntologyTermCombineSynonymAlgorithm
 							firstScore = newScore;
 							currentEntity.set(SCORE, newScore);
 							combinedSynonym.delete(0, combinedSynonym.length()).append(tempCombinedSynonym);
+							comparableEntities.remove(nextEntity);
 						}
-						entities.remove(nextEntity);
 					}
 				}
 			}
 		}
-		return entities;
 	}
 }

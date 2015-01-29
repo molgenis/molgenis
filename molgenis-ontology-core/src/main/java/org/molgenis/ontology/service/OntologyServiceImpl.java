@@ -36,7 +36,7 @@ import org.molgenis.ontology.repository.OntologyTermIndexRepository;
 import org.molgenis.ontology.repository.OntologyTermQueryRepository;
 import org.molgenis.ontology.utils.NGramMatchingModel;
 import org.molgenis.ontology.utils.PostProcessOntologyTermCombineSynonymAlgorithm;
-import org.molgenis.ontology.utils.PostProcessOntologyTermIDFAlgorithm;
+import org.molgenis.ontology.utils.PostProcessRemoveRedundantOntologyTerm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.tartarus.snowball.ext.PorterStemmer;
 
@@ -47,8 +47,8 @@ public class OntologyServiceImpl implements OntologyService
 	private final PorterStemmer stemmer = new PorterStemmer();
 	private static final List<String> ELASTICSEARCH_RESERVED_WORDS = Arrays.asList("or", "and", "if");
 	private static final String FUZZY_MATCH_SIMILARITY = "~0.8";
-	private static final String NON_WORD_SEPARATOR = "[^a-zA-Z0-9]";
 	private static final int MAX_NUMBER_MATCHES = 500;
+	public static final String NON_WORD_SEPARATOR = "[^a-zA-Z0-9]";
 	public static final String SIGNIFICANT_VALUE = "Significant";
 	public static final Character DEFAULT_SEPARATOR = ';';
 	public static final String COMMOM_SEPARATOR = ",";
@@ -66,6 +66,33 @@ public class OntologyServiceImpl implements OntologyService
 		if (dataService == null) throw new IllegalArgumentException("DataService is null");
 		this.searchService = searchService;
 		this.dataService = dataService;
+	}
+
+	public long getWordFrequency(String ontologyIri, String word)
+	{
+		Ontology ontology = getOntology(ontologyIri);
+
+		if (ontology != null && !StringUtils.isEmpty(ontology.getLabel()))
+		{
+			QueryRule queryRule = new QueryRule(Arrays.asList(new QueryRule(OntologyTermQueryRepository.SYNONYMS,
+					Operator.EQUALS, word)));
+			queryRule.setOperator(Operator.DIS_MAX);
+			return searchService.count(new QueryImpl(queryRule),
+					dataService.getEntityMetaData(getOntology(ontologyIri).getLabel()));
+		}
+		return 0;
+	}
+
+	public long getTotalNumDocument(String ontologyIri)
+	{
+		Ontology ontology = getOntology(ontologyIri);
+
+		if (ontology != null && !StringUtils.isEmpty(ontology.getLabel()))
+		{
+			return searchService.count(new QueryImpl(),
+					dataService.getEntityMetaData(getOntology(ontologyIri).getLabel()));
+		}
+		return 0;
 	}
 
 	@Override
@@ -265,8 +292,10 @@ public class OntologyServiceImpl implements OntologyService
 		int count = 0;
 		EntityMetaData entityMetaData = dataService.getEntityMetaData(getEntityName(ontologyIri));
 		Set<String> processedOntologyTerms = new HashSet<String>();
-		for (Entity entity : searchService.search(new QueryImpl(finalQueryRule).pageSize(MAX_NUMBER_MATCHES),
-				entityMetaData))
+		Iterable<Entity> entities = searchService.search(new QueryImpl(finalQueryRule).pageSize(MAX_NUMBER_MATCHES),
+				entityMetaData);
+
+		for (Entity entity : entities)
 		{
 			if (!processedOntologyTerms.contains(entity.getString(OntologyTermQueryRepository.SYNONYMS)))
 			{
@@ -321,27 +350,23 @@ public class OntologyServiceImpl implements OntologyService
 				comparableEntities.add(new ComparableEntity(entity, maxNgramScore, maxScoreField));
 			}
 		}
-		return convertResults(comparableEntities, inputData);
+		return convertResults(comparableEntities, inputData, comparableEntities.size());
+	}
+
+	private OntologyServiceResult convertResults(List<ComparableEntity> comparableEntities,
+			Map<String, Object> inputData, int count)
+	{
+		PostProcessOntologyTermCombineSynonymAlgorithm.process(comparableEntities, inputData);
+		PostProcessRemoveRedundantOntologyTerm.process(comparableEntities);
+		// PostProcessOntologyTermIDFAlgorithm.process(comparableEntities, inputData, this);
+		// PostProcessRedistributionScoreAlgorithm.process(comparableEntities, inputData, this);
+		Collections.sort(comparableEntities);
+		return new OntologyServiceResultImpl(inputData, comparableEntities, count);
 	}
 
 	public OntologyServiceResult search(String ontologyUrl, String queryString)
 	{
-		List<QueryRule> queryRules = Arrays.asList(new QueryRule(OntologyTermQueryRepository.SYNONYMS, Operator.EQUALS,
-				medicalStemProxy(queryString)));
-		QueryRule finalQueryRule = new QueryRule(queryRules);
-		finalQueryRule.setOperator(Operator.DIS_MAX);
-
-		List<ComparableEntity> entities = new ArrayList<ComparableEntity>();
-		for (Entity entity : searchService.search(new QueryImpl(finalQueryRule).pageSize(MAX_NUMBER_MATCHES),
-				dataService.getEntityMetaData(getOntology(ontologyUrl).getLabel())))
-		{
-			BigDecimal ngramScore = matchOntologyTerm(queryString, entity);
-			entities.add(new ComparableEntity(entity, ngramScore, DEFAULT_MATCHING_NAME_FIELD));
-		}
-
-		Map<String, Object> inputData = new HashMap<String, Object>();
-		inputData.put(DEFAULT_MATCHING_NAME_FIELD, queryString);
-		return convertResults(entities, inputData);
+		return null;
 	}
 
 	/**
@@ -372,16 +397,6 @@ public class OntologyServiceImpl implements OntologyService
 			}
 		}
 		return stringBuilder.toString().trim();
-	}
-
-	private OntologyServiceResult convertResults(List<ComparableEntity> comparableEntities,
-			Map<String, Object> inputData)
-	{
-		comparableEntities = PostProcessOntologyTermCombineSynonymAlgorithm.process(comparableEntities, inputData);
-		PostProcessOntologyTermIDFAlgorithm.process(comparableEntities, inputData, this);
-		// PostProcessRedistributionScoreAlgorithm.process(comparableEntities, inputData, this);
-		Collections.sort(comparableEntities);
-		return new OntologyServiceResultImpl(inputData, comparableEntities, comparableEntities.size());
 	}
 
 	private BigDecimal matchOntologyTerm(String queryString, Entity entity)

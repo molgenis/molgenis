@@ -10,25 +10,27 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.ontology.beans.ComparableEntity;
+import org.molgenis.ontology.repository.OntologyTermQueryRepository;
 import org.molgenis.ontology.service.OntologyServiceImpl;
 
 public class PostProcessOntologyTermIDFAlgorithm
 {
+	private static final int MAX_NUM = 100;
 	private static final String DEFAULT_FIELD = "Name";
 
 	public static void process(List<ComparableEntity> entities, Map<String, Object> inputData,
 			OntologyServiceImpl ontologyService)
 	{
-		if (inputData.size() == 1 && inputData.containsKey(DEFAULT_FIELD))
+		if (inputData.size() == 1 && inputData.containsKey(DEFAULT_FIELD) && entities.size() > 0)
 		{
 			String queryString = inputData.get(DEFAULT_FIELD).toString();
 
-			int totalDocs = entities.size() > 10 ? 10 : entities.size();
+			int totalDocs = entities.size() > MAX_NUM ? MAX_NUM : entities.size();
 
 			Set<String> wordsInQueryString = AlgorithmHelper.medicalStemProxy(queryString);
 			// Collect the frequencies for all of the unique words from query string
-			Map<String, Integer> wordFreqMap = AlgorithmHelper.createWordFreq(queryString, entities, totalDocs,
-					ontologyService);
+			Map<String, Integer> wordFreqMap = AlgorithmHelper.createWordFreq(queryString,
+					entities.get(0).getString(OntologyTermQueryRepository.ONTOLOGY_IRI), ontologyService);
 
 			for (ComparableEntity entity : entities.subList(0, totalDocs))
 			{
