@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.elasticsearch.repositories.Repository;
+import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.mapping.MappingService;
 import org.molgenis.data.repository.MappingProjectRepository;
@@ -16,13 +17,13 @@ public class MappingProject
 {
 	private String identifier;
 	private String name;
-	private String owner;
+	private MolgenisUser owner;
 	private Map<String, MappingTarget> mappingTargets;
 
 	/**
 	 * Creates a new empty mapping project. Used by the {@link MappingService}.
 	 */
-	public MappingProject(String name, String owner)
+	public MappingProject(String name, MolgenisUser owner)
 	{
 		this.identifier = null;
 		this.name = name;
@@ -34,7 +35,7 @@ public class MappingProject
 	 * Creates a new instance of {@link MappingProject}. Used by the {@link MappingProjectRepository} when recreating a
 	 * MappingProject from the {@link Repository}.
 	 */
-	public MappingProject(String identifier, String name, String owner, List<MappingTarget> mappingTargets)
+	public MappingProject(String identifier, String name, MolgenisUser owner, List<MappingTarget> mappingTargets)
 	{
 		this.identifier = identifier;
 		this.name = name;
@@ -66,12 +67,12 @@ public class MappingProject
 		this.name = name;
 	}
 
-	public String getOwner()
+	public MolgenisUser getOwner()
 	{
 		return owner;
 	}
 
-	public void String(String owner)
+	public void setOwner(MolgenisUser owner)
 	{
 		this.owner = owner;
 	}
@@ -87,4 +88,54 @@ public class MappingProject
 		mappingTargets.put(target.getName(), result);
 		return result;
 	}
+
+	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((identifier == null) ? 0 : identifier.hashCode());
+		result = prime * result + ((mappingTargets == null) ? 0 : mappingTargets.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((owner == null) ? 0 : owner.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+		MappingProject other = (MappingProject) obj;
+		if (identifier == null)
+		{
+			if (other.identifier != null) return false;
+		}
+		else if (!identifier.equals(other.identifier)) return false;
+		if (mappingTargets == null)
+		{
+			if (other.mappingTargets != null) return false;
+		}
+		else if (!mappingTargets.equals(other.mappingTargets)) return false;
+		if (name == null)
+		{
+			if (other.name != null) return false;
+		}
+		else if (!name.equals(other.name)) return false;
+		if (owner == null)
+		{
+			if (other.owner != null) return false;
+		}
+		else if (!owner.equals(other.owner)) return false;
+		return true;
+	}
+
+	@Override
+	public String toString()
+	{
+		return "MappingProject [identifier=" + identifier + ", name=" + name + ", owner=" + owner + ", mappingTargets="
+				+ mappingTargets + "]";
+	}
+
 }

@@ -3,7 +3,6 @@ package org.molgenis.data.repository.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
@@ -50,13 +49,16 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 
 	private Entity upsert(AttributeMapping attributeMapping)
 	{
-		Entity result = toAttributeMappingEntity(attributeMapping);
+		Entity result;
 		if (attributeMapping.getIdentifier() == null)
 		{
-			repository.update(result);
+			attributeMapping.setIdentifier(idGenerator.generateId().toString());
+			result = toAttributeMappingEntity(attributeMapping);
+			repository.add(result);
 		}
 		else
 		{
+			result = toAttributeMappingEntity(attributeMapping);
 			repository.add(result);
 		}
 		return result;
@@ -93,18 +95,12 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 	private Entity toAttributeMappingEntity(AttributeMapping attributeMapping)
 	{
 		Entity attributeMappingEntity = new MapEntity();
-		String id = attributeMapping.getIdentifier();
-		if (id == null)
-		{
-			id = UUID.randomUUID().toString();
-		}
-		attributeMappingEntity.set(AttributeMappingMetaData.IDENTIFIER, id);
+		attributeMappingEntity.set(AttributeMappingMetaData.IDENTIFIER, attributeMapping.getIdentifier());
 		attributeMappingEntity.set(AttributeMappingMetaData.SOURCEATTRIBUTEMETADATA, attributeMapping
 				.getSourceAttributeMetaData() != null ? attributeMapping.getSourceAttributeMetaData().getName() : null);
 		attributeMappingEntity.set(AttributeMappingMetaData.TARGETATTRIBUTEMETADATA, attributeMapping
 				.getTargetAttributeMetaData() != null ? attributeMapping.getTargetAttributeMetaData().getName() : null);
 		attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHM, attributeMapping.getAlgorithm());
-
 		return attributeMappingEntity;
 	}
 }

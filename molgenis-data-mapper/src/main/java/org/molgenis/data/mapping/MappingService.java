@@ -13,7 +13,7 @@ public interface MappingService
 	 * @param target
 	 *            name of the first target entity
 	 */
-	abstract void addMappingProject(String name, MolgenisUser owner, String target);
+	abstract MappingProject addMappingProject(String name, MolgenisUser owner, String target);
 
 	abstract List<MappingProject> getAllMappingProjects();
 
