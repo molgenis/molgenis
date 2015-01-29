@@ -66,11 +66,10 @@ public class MappingServiceController extends MolgenisPluginController
 
 	@RequestMapping(value = "/addmappingproject", method = RequestMethod.POST)
 	public String addMappingProject(@RequestParam("mapping-project-name") String identifier,
-			@RequestParam("target-entity") String targetEntity, Model model)
+			@RequestParam("target-entity") String targetEntity)
 	{
 		mappingService.addMappingProject(identifier, getCurrentUser(), targetEntity);
-		model = setModelAttributes(model);
-		return VIEW_MAPPING_PROJECTS;
+		return "redirect:mappingproject/" + identifier;
 	}
 
 	@RequestMapping(value = "/editmappingproject", method = RequestMethod.POST)
@@ -84,8 +83,8 @@ public class MappingServiceController extends MolgenisPluginController
 		return VIEW_MAPPING_PROJECTS;
 	}
 
-	@RequestMapping("/attributemapping/{id}")
-	public String getAttributeMappingScreen(@PathVariable("id") String identifier, Model model)
+	@RequestMapping("/mappingproject/{id}")
+	public String getMappingProjectScreen(@PathVariable("id") String identifier, Model model)
 	{
 		model.addAttribute("mappingProject", mappingService.getMappingProject(identifier));
 		return VIEW_ATTRIBUTE_MAPPING;
@@ -108,8 +107,7 @@ public class MappingServiceController extends MolgenisPluginController
 	private Model setModelAttributes(Model model)
 	{
 		model.addAttribute("activeUser", getCurrentUser().getUsername());
-		if (mappingService == null) model.addAttribute("mappingProjects", null);
-		else model.addAttribute("mappingProjects", mappingService.getAllMappingProjects());
+		if (mappingService != null) model.addAttribute("mappingProjects", mappingService.getAllMappingProjects());
 
 		Iterable<EntityMetaData> entitiesMeta = Iterables.transform(dataService.getEntityNames(),
 				new Function<String, EntityMetaData>()
