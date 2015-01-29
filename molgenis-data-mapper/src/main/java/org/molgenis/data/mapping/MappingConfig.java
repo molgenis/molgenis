@@ -1,5 +1,7 @@
 package org.molgenis.data.mapping;
 
+import java.util.UUID;
+
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.ManageableCrudRepositoryCollection;
@@ -19,6 +21,7 @@ import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.IdGenerator;
 
 @Configuration
 public class MappingConfig
@@ -39,6 +42,19 @@ public class MappingConfig
 	private MappingProjectRepository mappingProjectRepository;
 
 	private MappingTargetRepository mappingTargetRepository;
+
+	@Bean
+	public IdGenerator idGenerator()
+	{
+		return new IdGenerator() // TODO something more efficient..
+		{
+			@Override
+			public UUID generateId()
+			{
+				return UUID.randomUUID();
+			}
+		};
+	}
 
 	@Bean
 	public MappingService mappingService()
