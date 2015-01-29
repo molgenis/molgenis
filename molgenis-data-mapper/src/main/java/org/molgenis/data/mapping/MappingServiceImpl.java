@@ -20,11 +20,12 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	@Override
-	public void addMappingProject(String projectName, MolgenisUser owner, String target)
+	public MappingProject addMappingProject(String projectName, MolgenisUser owner, String target)
 	{
-		MappingProject mappingProject = new MappingProject(projectName, owner.getUsername());
+		MappingProject mappingProject = new MappingProject(projectName, owner);
 		mappingProject.addTarget(metaDataService.getEntityMetaData(target));
 		mappingProjectRepository.add(mappingProject);
+		return mappingProject;
 	}
 
 	@Override

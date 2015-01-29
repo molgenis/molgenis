@@ -49,29 +49,32 @@ public class MappingTargetRepositoryImpl implements MappingTargetRepository
 
 	private Entity upsert(MappingTarget mappingTarget)
 	{
-		Entity mappingTargetEntity = toMappingTargetEntity(mappingTarget);
 		Map<String, EntityMapping> entityMappings = mappingTarget.getEntityMappings();
 		List<Entity> entityMappingEntities = entityMappingRepository.upsert(entityMappings.values());
-		mappingTargetEntity.set(MappingTargetMetaData.ENTITYMAPPINGS, entityMappingEntities);
-		repository.add(mappingTargetEntity);
+		Entity mappingTargetEntity;
+		if (mappingTarget.getIdentifier() == null)
+		{
+			mappingTarget.setIdentifier(idGenerator.generateId().toString());
+			mappingTargetEntity = toMappingTargetEntity(mappingTarget, entityMappingEntities);
+			repository.add(mappingTargetEntity);
+		}
+		else
+		{
+			mappingTargetEntity = toMappingTargetEntity(mappingTarget, entityMappingEntities);
+			repository.update(mappingTargetEntity);
+		}
 		return mappingTargetEntity;
 	}
 
 	/**
 	 * Creates a new {@link MapEntity} for this MappingProject. Doesn't yet fill the {@link EntityMapping}s.
 	 */
-	private Entity toMappingTargetEntity(MappingTarget mappingTarget)
+	private Entity toMappingTargetEntity(MappingTarget mappingTarget, List<Entity> entityMappingEntities)
 	{
 		Entity mappingTargetEntity = new MapEntity(MappingProjectRepositoryImpl.META_DATA);
-		if (mappingTarget.getIdentifier() == null)
-		{
-			mappingTargetEntity.set(MappingProjectMetaData.IDENTIFIER, idGenerator.generateId().toString());
-		}
-		else
-		{
-			mappingTargetEntity.set(MappingProjectMetaData.IDENTIFIER, mappingTarget.getIdentifier());
-		}
+		mappingTargetEntity.set(MappingProjectMetaData.IDENTIFIER, mappingTarget.getIdentifier());
 		mappingTargetEntity.set(MappingTargetMetaData.TARGET, mappingTarget.getTarget().getName());
+		mappingTargetEntity.set(MappingTargetMetaData.ENTITYMAPPINGS, entityMappingEntities);
 		return mappingTargetEntity;
 	}
 
