@@ -78,33 +78,25 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 
 	private Entity upsert(EntityMapping entityMapping)
 	{
-		Entity entityMappingEntity = toEntityMappingEntity(entityMapping);
 		List<Entity> attributeMappingEntities = attributeMappingRepository.upsert(entityMapping.getAttributeMappings()
 				.values());
-		entityMappingEntity.set(EntityMappingMetaData.ATTRIBUTEMAPPINGS, attributeMappingEntities);
-		if (entityMapping.getIdentifier() != null)
+		Entity entityMappingEntity = toEntityMappingEntity(entityMapping, attributeMappingEntities);
+		if (entityMapping.getIdentifier() == null)
 		{
-			repository.update(entityMappingEntity);
+			entityMapping.setIdentifier(idGenerator.generateId().toString());
+			repository.add(entityMappingEntity);
 		}
 		else
 		{
-			repository.add(entityMappingEntity);
+			repository.update(entityMappingEntity);
 		}
 		return entityMappingEntity;
 	}
 
-	private Entity toEntityMappingEntity(EntityMapping entityMapping)
+	private Entity toEntityMappingEntity(EntityMapping entityMapping, List<Entity> attributeMappingEntities)
 	{
 		Entity entityMappingEntity = new MapEntity();
-		if (entityMapping.getIdentifier() != null)
-		{
-
-			entityMappingEntity.set(EntityMappingMetaData.IDENTIFIER, entityMapping.getIdentifier());
-		}
-		else
-		{
-			entityMappingEntity.set(EntityMappingMetaData.IDENTIFIER, idGenerator.generateId().toString());
-		}
+		entityMappingEntity.set(EntityMappingMetaData.IDENTIFIER, entityMapping.getIdentifier());
 		entityMappingEntity
 				.set(EntityMappingMetaData.SOURCEENTITYMETADATA,
 						entityMapping.getSourceEntityMetaData() != null ? entityMapping.getSourceEntityMetaData()
@@ -113,6 +105,7 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 				.set(EntityMappingMetaData.TARGETENTITYMETADATA,
 						entityMapping.getTargetEntityMetaData() != null ? entityMapping.getTargetEntityMetaData()
 								.getName() : null);
+		entityMappingEntity.set(EntityMappingMetaData.ATTRIBUTEMAPPINGS, attributeMappingEntities);
 		return entityMappingEntity;
 	}
 }

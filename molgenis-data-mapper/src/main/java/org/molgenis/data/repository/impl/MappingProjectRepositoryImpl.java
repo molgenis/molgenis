@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
@@ -15,7 +16,6 @@ import org.molgenis.data.repository.MappingProjectRepository;
 import org.molgenis.data.repository.MappingTargetRepository;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -107,8 +107,7 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 	{
 		String identifier = mappingProjectEntity.getString(MappingProjectMetaData.IDENTIFIER);
 		String name = mappingProjectEntity.getString(MappingProjectMetaData.NAME);
-		// FIXME When xref to molgenis user change this to MolgenisUser object
-		String owner = molgenisUserService.getUser(SecurityUtils.getCurrentUsername()).getUsername();
+		MolgenisUser owner = molgenisUserService.getUser(mappingProjectEntity.getString(MappingProjectMetaData.OWNER));
 		List<Entity> mappingTargetEntities = Lists.newArrayList(mappingProjectEntity
 				.getEntities(MappingProjectMetaData.MAPPINGTARGETS));
 		List<MappingTarget> mappingTargets = mappingTargetRepository.toMappingTargets(mappingTargetEntities);
@@ -128,13 +127,11 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 		Entity result = new MapEntity();
 		if (mappingProject.getIdentifier() == null)
 		{
-			result.set(MappingProjectMetaData.IDENTIFIER, idGenerator.generateId().toString());
+			mappingProject.setIdentifier(idGenerator.generateId().toString());
 		}
-		else
-		{
-			result.set(MappingProjectMetaData.IDENTIFIER, mappingProject.getIdentifier());
-		}
-		result.set(MappingProjectMetaData.OWNER, mappingProject.getOwner());
+		result.set(MappingProjectMetaData.IDENTIFIER, mappingProject.getIdentifier());
+		// FIXME: Once cross-repo references allow it, change this to mappingProject.getOwner()
+		result.set(MappingProjectMetaData.OWNER, mappingProject.getOwner().getUsername());
 		result.set(MappingProjectMetaData.NAME, mappingProject.getName());
 		Map<String, MappingTarget> targets = mappingProject.getTargets();
 		List<Entity> mappingTargetEntities = mappingTargetRepository.upsert(targets.values());
