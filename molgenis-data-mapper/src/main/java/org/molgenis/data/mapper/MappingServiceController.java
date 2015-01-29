@@ -41,7 +41,7 @@ public class MappingServiceController extends MolgenisPluginController
 	public static final String ID = "mappingservice";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	private static final String VIEW_MAPPING_PROJECTS = "view-mapping-projects";
-	private static final String VIEW_ATTRIBUTE_MAPPING = "view-attribute-mappings";
+	private static final String VIEW_ATTRIBUTE_MAPPING = "view-single-mapping-project";
 
 	@Autowired
 	private MolgenisUserService molgenisUserService;
@@ -65,11 +65,15 @@ public class MappingServiceController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/addmappingproject", method = RequestMethod.POST)
-	public String addMappingProject(@RequestParam("mapping-project-name") String identifier,
+	public String addMappingProject(@RequestParam("mapping-project-name") String name,
 			@RequestParam("target-entity") String targetEntity)
 	{
-		mappingService.addMappingProject(identifier, getCurrentUser(), targetEntity);
-		return "redirect:mappingproject/" + identifier;
+		MappingProject newMappingProject = mappingService.addMappingProject(name, getCurrentUser(), targetEntity);
+		System.out.println(newMappingProject.getIdentifier());
+		System.out.println(newMappingProject.getName());
+		System.out.println(newMappingProject.getOwner());
+		System.out.println(newMappingProject.getTargets());
+		return "redirect:mappingproject/" + "";
 	}
 
 	@RequestMapping(value = "/editmappingproject", method = RequestMethod.POST)
