@@ -32,7 +32,7 @@
 	 					<td>${project.getOwner()}</td>
 	 					<td>Target entity</td>
 	 					<td>
-	 					<#list project.getEntityMappings() as source>>
+	 					<#list project.getMappingTargets() as source>>
 	 						${source.getIdentifier()}<#if source_has_next>, </#if>
  						</#list>
 	 					</td>	

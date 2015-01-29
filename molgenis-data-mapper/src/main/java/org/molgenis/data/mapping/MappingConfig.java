@@ -9,10 +9,6 @@ import org.molgenis.data.meta.AttributeMappingMetaData;
 import org.molgenis.data.meta.EntityMappingMetaData;
 import org.molgenis.data.meta.MappingProjectMetaData;
 import org.molgenis.data.meta.MappingTargetMetaData;
-import org.molgenis.data.repository.AttributeMappingRepository;
-import org.molgenis.data.repository.EntityMappingRepository;
-import org.molgenis.data.repository.MappingProjectRepository;
-import org.molgenis.data.repository.MappingTargetRepository;
 import org.molgenis.data.repository.impl.AttributeMappingRepositoryImpl;
 import org.molgenis.data.repository.impl.EntityMappingRepositoryImpl;
 import org.molgenis.data.repository.impl.MappingProjectRepositoryImpl;
@@ -35,13 +31,10 @@ public class MappingConfig
 	@Autowired
 	MolgenisUserService userService;
 
-	private AttributeMappingRepository attributeMappingRepository;
-
-	private EntityMappingRepository entityMappingRepository;
-
-	private MappingProjectRepository mappingProjectRepository;
-
-	private MappingTargetRepository mappingTargetRepository;
+	private CrudRepository mappingProjectCrudRepository;
+	private CrudRepository mappingTargetCrudRepository;
+	private CrudRepository attributeMappingCrudRepository;
+	private CrudRepository entityMappingCrudRepository;
 
 	@Bean
 	public IdGenerator idGenerator()
@@ -59,15 +52,38 @@ public class MappingConfig
 	@Bean
 	public MappingService mappingService()
 	{
-		// create in order of dependency!
-		attributeMappingRepository = new AttributeMappingRepositoryImpl(attributeMappingCrudRepository());
-		entityMappingRepository = new EntityMappingRepositoryImpl(entityMappingCrudRepository(),
-				attributeMappingRepository);
-		mappingTargetRepository = new MappingTargetRepositoryImpl(mappingTargetCrudRepository(),
-				entityMappingRepository);
-		mappingProjectRepository = new MappingProjectRepositoryImpl(mappingProjectCrudRepository(),
-				mappingTargetRepository);
-		return new MappingServiceImpl(attributeMappingRepository, entityMappingRepository, mappingProjectRepository);
+		attributeMappingCrudRepository = attributeMappingCrudRepository();
+		entityMappingCrudRepository = entityMappingCrudRepository();
+		mappingTargetCrudRepository = mappingTargetCrudRepository();
+		mappingProjectCrudRepository = mappingProjectCrudRepository();
+		return new MappingServiceImpl(mappingProjectRepository());
+	}
+
+	@Bean
+	public MappingProjectRepositoryImpl mappingProjectRepository()
+	{
+		return new MappingProjectRepositoryImpl(mappingProjectCrudRepository,
+				mappingTargetRepository());
+	}
+
+	@Bean
+	public MappingTargetRepositoryImpl mappingTargetRepository()
+	{
+		return new MappingTargetRepositoryImpl(mappingTargetCrudRepository,
+				entityMappingRepository());
+	}
+	
+	@Bean
+	public EntityMappingRepositoryImpl entityMappingRepository()
+	{
+		return new EntityMappingRepositoryImpl(entityMappingCrudRepository,
+				attributeMappingRepository());
+	}
+
+	@Bean
+	public AttributeMappingRepositoryImpl attributeMappingRepository()
+	{
+		return new AttributeMappingRepositoryImpl(attributeMappingCrudRepository);
 	}
 
 	private CrudRepository attributeMappingCrudRepository()

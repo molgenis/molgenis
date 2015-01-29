@@ -1,6 +1,7 @@
 package org.molgenis.data.repository.impl;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -70,7 +71,7 @@ public class MappingTargetRepositoryImpl implements MappingTargetRepository
 		{
 			mappingTargetEntity.set(MappingProjectMetaData.IDENTIFIER, mappingTarget.getIdentifier());
 		}
-		mappingTargetEntity.set(MappingTargetMetaData.ENTITY_NAME, mappingTarget.getTarget().getName());
+		mappingTargetEntity.set(MappingTargetMetaData.TARGET, mappingTarget.getTarget().getName());
 		return mappingTargetEntity;
 	}
 
@@ -89,12 +90,16 @@ public class MappingTargetRepositoryImpl implements MappingTargetRepository
 	 */
 	private MappingTarget toMappingTarget(Entity mappingProjectEntity)
 	{
+		List<EntityMapping> entityMappings = Collections.emptyList();
 		String identifier = mappingProjectEntity.getString(MappingTargetMetaData.IDENTIFIER);
 		EntityMetaData target = metaDataService.getEntityMetaData(mappingProjectEntity
 				.getString(MappingTargetMetaData.TARGET));
-		List<Entity> entityMappingEntities = Lists.newArrayList(mappingProjectEntity
-				.getEntities(MappingTargetMetaData.ENTITYMAPPINGS));
-		List<EntityMapping> entityMappings = entityMappingRepository.toEntityMappings(entityMappingEntities);
+		if (mappingProjectEntity.getEntities(MappingTargetMetaData.ENTITYMAPPINGS) != null)
+		{
+			List<Entity> entityMappingEntities = Lists.newArrayList(mappingProjectEntity
+					.getEntities(MappingTargetMetaData.ENTITYMAPPINGS));
+			entityMappings = entityMappingRepository.toEntityMappings(entityMappingEntities);
+		}
 		return new MappingTarget(identifier, target, entityMappings);
 	}
 }

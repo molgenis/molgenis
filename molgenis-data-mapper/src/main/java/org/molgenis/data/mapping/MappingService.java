@@ -3,13 +3,10 @@ package org.molgenis.data.mapping;
 import java.util.List;
 
 import org.molgenis.auth.MolgenisUser;
-import org.molgenis.data.mapping.model.EntityMapping;
 import org.molgenis.data.mapping.model.MappingProject;
 
 public interface MappingService
 {
-	abstract void addEntityMapping(EntityMapping entityMapping);
-
 	/**
 	 * Creates a new {@link MappingProject}
 	 * 
