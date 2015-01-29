@@ -322,8 +322,12 @@ public class OntologyServiceImpl implements OntologyService
 				stemmer.setCurrent(term.replaceAll(OntologyTermQueryRepository.ILLEGAL_CHARACTERS_PATTERN,
 						StringUtils.EMPTY));
 				stemmer.stem();
-				stringBuilder.append(stemmer.getCurrent()).append(FUZZY_MATCH_SIMILARITY)
-						.append(OntologyTermQueryRepository.SINGLE_WHITESPACE);
+				String afterStem = stemmer.getCurrent();
+				if (!StringUtils.isEmpty(afterStem))
+				{
+					stringBuilder.append(afterStem).append(FUZZY_MATCH_SIMILARITY)
+							.append(OntologyTermQueryRepository.SINGLE_WHITESPACE);
+				}
 			}
 		}
 		return stringBuilder.toString().trim();

@@ -1,24 +1,43 @@
 package org.molgenis.data.repository;
 
-import org.molgenis.data.*;
-import org.molgenis.data.meta.AttributeMappingMetaData;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.MapEntity;
+import java.util.Collection;
+import java.util.List;
 
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.*;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.mapping.model.AttributeMapping;
+import org.molgenis.data.mapping.model.EntityMapping;
+import org.molgenis.data.meta.AttributeMappingMetaData;
+import org.molgenis.data.meta.EntityMappingMetaData;
 
 /**
- * Helper class around the {@link org.molgenis.data.meta.AttributeMetaDataMetaData} repository. Internal implementation
- * class, use {@link org.molgenis.data.meta.MetaDataServiceImpl} instead.
+ * O/R Mapping between {@link EntityMappingMetaData} Entities and {@link EntityMapping} s.
  */
-public class AttributeMappingRepository
+public interface AttributeMappingRepository
 {
-	public static final AttributeMappingMetaData META_DATA = new AttributeMappingMetaData();
+	/**
+	 * Creates a list of fully reconstructed {@link AttributeMapping}s.
+	 * 
+	 * @param attributeMappingEntities
+	 *            List of {@link Entity}s with {@link AttributeMappingMetaData} metadata
+	 * @param sourceEntityMetaData
+	 *            {@link EntityMetaData} of the source entity of the attribute mapping, used to look up the
+	 *            {@link AttributeMetaData}
+	 * @param targetEntityMetaData
+	 *            {@link EntityMetaData} of the target entity of the attribute mapping, used to look up the
+	 *            {@link AttributeMetaData}
+	 * @return a list of {@link AttributeMapping}s.
+	 */
+	abstract List<AttributeMapping> getAttributeMappings(List<Entity> attributeMappingEntities,
+			EntityMetaData sourceEntityMetaData, EntityMetaData targetEntityMetaData);
 
-	private final CrudRepository repository;
+	/**
+	 * Inserts or updates a {@link Collection} of {@link AttributeMapping}. Will generate IDs if they are not yet
+	 * specified.
+	 * 
+	 * @return a list of Entities that have been added or updated
+	 */
+	abstract List<Entity> upsert(Collection<AttributeMapping> collection);
 
-	public AttributeMappingRepository(ManageableCrudRepositoryCollection collection)
-	{
-		this.repository = collection.add(META_DATA);
-	}
 }

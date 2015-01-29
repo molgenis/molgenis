@@ -1,21 +1,32 @@
 package org.molgenis.data.repository;
 
-import org.molgenis.data.CrudRepository;
-import org.molgenis.data.ManageableCrudRepositoryCollection;
+import java.util.Collection;
+import java.util.List;
+
+import org.molgenis.data.Entity;
+import org.molgenis.data.mapping.model.EntityMapping;
 import org.molgenis.data.meta.EntityMappingMetaData;
 
 /**
- * Helper class around the {@link org.molgenis.data.meta.AttributeMetaDataMetaData} repository. Internal implementation
- * class, use {@link org.molgenis.data.meta.MetaDataServiceImpl} instead.
+ * O/R Mapping between {@link EntityMappingMetaData} Entities and {@link EntityMapping} s.
  */
-public class EntityMappingRepository
+public interface EntityMappingRepository
 {
-	public static final EntityMappingMetaData META_DATA = new EntityMappingMetaData();
+	/**
+	 * Creates a list of fully reconstructed {@link EntityMapping}s.
+	 * 
+	 * @param entityMappingEntities
+	 *            List of {@link Entity}s with {@link EntityMappingMetaData} metadata
+	 * @return a list of {@link EntityMapping}s.
+	 */
+	abstract List<EntityMapping> toEntityMappings(List<Entity> entityMappingEntities);
 
-	private final CrudRepository repository;
+	/**
+	 * Inserts or updates a list of EntityMappings and their AttributeMappings. Will generate IDs if they are not yet
+	 * specified.
+	 * 
+	 * @return a list of Entities that have been added or updated
+	 */
+	abstract List<Entity> upsert(Collection<EntityMapping> collection);
 
-	public EntityMappingRepository(ManageableCrudRepositoryCollection collection)
-	{
-		this.repository = collection.add(META_DATA);
-	}
 }
