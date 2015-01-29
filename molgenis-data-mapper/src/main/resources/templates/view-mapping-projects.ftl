@@ -21,23 +21,25 @@
 	 				<tr>
 	 					<th>Mapping name</th>
 	 					<th>Owner</th>
-	 					<th>Target entity</th>
+	 					<th>Target entities</th>
 	 					<th>Mapped sources</th>
 	 				</tr>
 	 			</thead>
 	 			<tbody>
-	 				<#list mappingProjects as project>
-	 				<tr>	 					
-	 					<td><a href="${context_url}/attributemapping/${project.getIdentifier()}">${project.getIdentifier()}</a></td>
-	 					<td>${project.getOwner()}</td>
-	 					<td>Target entity</td>
-	 					<td>
-	 					<#list project.getMappingTargets() as source>>
-	 						${source.getIdentifier()}<#if source_has_next>, </#if>
- 						</#list>
-	 					</td>	
-	 				</tr>
-	 				</#list>
+	 				<#if mappingProjects??>
+		 				<#list mappingProjects as project>
+		 				<tr>	 					
+		 					<td><a href="${context_url}/attributemapping/${project.identifier}">${project.name}</a></td>
+		 					<td>${project.owner}</td>
+		 					<td>
+		 					<#list project.targets?keys as target>
+		 						${target}<#if target_has_next>, </#if>
+	 						</#list>
+	 						</td>
+		 					<td></td>	
+		 				</tr>
+		 				</#list>
+	 				</#if>
 	 			</tbody>
 			</table>
 		</div>
