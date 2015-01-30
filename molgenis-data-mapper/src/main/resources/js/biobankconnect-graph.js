@@ -7,7 +7,8 @@
 			return jStat.normal.pdf(element, mean, stdev);
 		});
 		var data = { "points" : [] };
-		var graphId = this.attr('id');
+		var graphId = 'graph-id-' + new Date().getMilliseconds();
+		this.attr('id', graphId);
 		
 		var settings = $.extend({}, $.fn.bcgraph.defaults, options); 
 		array.forEach(function(d,i){data.points.push({"x":array[i],"y":cdfValues[i]});});
