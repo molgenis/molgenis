@@ -29,8 +29,8 @@
 	 				<#if mappingProjects??>
 		 				<#list mappingProjects as project>
 		 				<tr>	 					
-		 					<td><a href="${context_url}/attributemapping/${project.identifier}">${project.name}</a></td>
-		 					<td>${project.owner}</td>
+		 					<td><a href="${context_url}/mappingproject/${project.identifier}">${project.name}</a></td>
+		 					<td>${project.owner.username}</td>
 		 					<td>
 		 					<#list project.targets?keys as target>
 		 						${target}<#if target_has_next>, </#if>

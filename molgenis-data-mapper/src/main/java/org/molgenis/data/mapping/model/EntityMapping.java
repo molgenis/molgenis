@@ -79,4 +79,54 @@ public class EntityMapping
 		attributeMappings.put(targetAttributeName, attributeMapping);
 		return attributeMapping;
 	}
+
+	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((attributeMappings == null) ? 0 : attributeMappings.hashCode());
+		result = prime * result + ((identifier == null) ? 0 : identifier.hashCode());
+		result = prime * result + ((sourceEntityMetaData == null) ? 0 : sourceEntityMetaData.hashCode());
+		result = prime * result + ((targetEntityMetaData == null) ? 0 : targetEntityMetaData.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+		EntityMapping other = (EntityMapping) obj;
+		if (attributeMappings == null)
+		{
+			if (other.attributeMappings != null) return false;
+		}
+		else if (!attributeMappings.equals(other.attributeMappings)) return false;
+		if (identifier == null)
+		{
+			if (other.identifier != null) return false;
+		}
+		else if (!identifier.equals(other.identifier)) return false;
+		if (sourceEntityMetaData == null)
+		{
+			if (other.sourceEntityMetaData != null) return false;
+		}
+		else if (!sourceEntityMetaData.equals(other.sourceEntityMetaData)) return false;
+		if (targetEntityMetaData == null)
+		{
+			if (other.targetEntityMetaData != null) return false;
+		}
+		else if (!targetEntityMetaData.equals(other.targetEntityMetaData)) return false;
+		return true;
+	}
+
+	@Override
+	public String toString()
+	{
+		return "EntityMapping [identifier=" + identifier + ", sourceEntityMetaData=" + sourceEntityMetaData
+				+ ", targetEntityMetaData=" + targetEntityMetaData + ", attributeMappings=" + attributeMappings + "]";
+	}
+
 }

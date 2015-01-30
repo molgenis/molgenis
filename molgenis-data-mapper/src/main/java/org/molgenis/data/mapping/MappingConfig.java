@@ -33,11 +33,6 @@ public class MappingConfig
 	@Autowired
 	MolgenisUserService userService;
 
-	private CrudRepository mappingProjectCrudRepository;
-	private CrudRepository mappingTargetCrudRepository;
-	private CrudRepository attributeMappingCrudRepository;
-	private CrudRepository entityMappingCrudRepository;
-
 	@Bean
 	public IdGenerator idGenerator()
 	{
@@ -54,10 +49,6 @@ public class MappingConfig
 	@Bean
 	public MappingService mappingService()
 	{
-		attributeMappingCrudRepository = attributeMappingCrudRepository();
-		entityMappingCrudRepository = entityMappingCrudRepository();
-		mappingTargetCrudRepository = mappingTargetCrudRepository();
-		mappingProjectCrudRepository = mappingProjectCrudRepository();
 		return new MappingServiceImpl(mappingProjectRepository());
 	}
 
@@ -70,28 +61,29 @@ public class MappingConfig
 	@Bean
 	public MappingProjectRepositoryImpl mappingProjectRepository()
 	{
-		return new MappingProjectRepositoryImpl(mappingProjectCrudRepository, mappingTargetRepository());
+		return new MappingProjectRepositoryImpl(mappingProjectCrudRepository(), mappingTargetRepository());
 	}
 
 	@Bean
 	public MappingTargetRepositoryImpl mappingTargetRepository()
 	{
-		return new MappingTargetRepositoryImpl(mappingTargetCrudRepository, entityMappingRepository());
+		return new MappingTargetRepositoryImpl(mappingTargetCrudRepository(), entityMappingRepository());
 	}
 
 	@Bean
 	public EntityMappingRepositoryImpl entityMappingRepository()
 	{
-		return new EntityMappingRepositoryImpl(entityMappingCrudRepository, attributeMappingRepository());
+		return new EntityMappingRepositoryImpl(entityMappingCrudRepository(), attributeMappingRepository());
 	}
 
 	@Bean
 	public AttributeMappingRepositoryImpl attributeMappingRepository()
 	{
-		return new AttributeMappingRepositoryImpl(attributeMappingCrudRepository);
+		return new AttributeMappingRepositoryImpl(attributeMappingCrudRepository());
 	}
 
-	private CrudRepository attributeMappingCrudRepository()
+	@Bean
+	public CrudRepository attributeMappingCrudRepository()
 	{
 		if (!dataService.hasRepository(AttributeMappingMetaData.ENTITY_NAME))
 		{
@@ -101,8 +93,10 @@ public class MappingConfig
 
 	}
 
-	private CrudRepository entityMappingCrudRepository()
+	@Bean
+	public CrudRepository entityMappingCrudRepository()
 	{
+		attributeMappingCrudRepository();
 		if (!dataService.hasRepository(EntityMappingMetaData.ENTITY_NAME))
 		{
 			repoCollection.add(EntityMappingRepositoryImpl.META_DATA);
@@ -110,8 +104,10 @@ public class MappingConfig
 		return dataService.getCrudRepository(EntityMappingMetaData.ENTITY_NAME);
 	}
 
-	private CrudRepository mappingTargetCrudRepository()
+	@Bean
+	public CrudRepository mappingTargetCrudRepository()
 	{
+		entityMappingCrudRepository();
 		if (!dataService.hasRepository(MappingTargetMetaData.ENTITY_NAME))
 		{
 			repoCollection.add(MappingTargetRepositoryImpl.META_DATA);
@@ -119,8 +115,10 @@ public class MappingConfig
 		return dataService.getCrudRepository(MappingTargetMetaData.ENTITY_NAME);
 	}
 
-	private CrudRepository mappingProjectCrudRepository()
+	@Bean
+	public CrudRepository mappingProjectCrudRepository()
 	{
+		mappingTargetCrudRepository();
 		if (!dataService.hasRepository(MappingProjectMetaData.ENTITY_NAME))
 		{
 			repoCollection.add(MappingProjectRepositoryImpl.META_DATA);
