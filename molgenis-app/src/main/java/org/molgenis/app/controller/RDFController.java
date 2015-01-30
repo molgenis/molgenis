@@ -64,13 +64,13 @@ public class RDFController extends MolgenisPluginController
                 String restPrefix = org.molgenis.data.rest.RestController.BASE_URI;
                 for (AttributeMetaData metaData : entity.getEntityMetaData().getAtomicAttributes()) {
                     if (metaData.isIdAtrribute()) {
-                        Resource subject = model.createResource(restPrefix.concat(entity.getEntityMetaData().getName()).concat("/").concat(entity.getString(metaData.getName())));
+                        Resource subject = model.createResource(restPrefix.concat("/"+entity.getEntityMetaData().getName()).concat("/").concat(entity.getIdValue().toString()));
                         Property predicate = model.createProperty(ns.concat("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"));
                         Resource object = model.createResource(ns.concat(entity.getEntityMetaData().getName()));
 
                         connect(subject, predicate, object, model);
                     } else {
-                        Resource subject = model.createResource(restPrefix.concat(entity.getEntityMetaData().getName()).concat("/").concat(entity.getString(metaData.getName())));
+                        Resource subject = model.createResource(restPrefix.concat("/"+entity.getEntityMetaData().getName()).concat("/").concat(entity.getIdValue().toString()));
                         Property predicate = model.createProperty(metaData.getPredicateIri()!=null?metaData.getPredicateIri():"");
                         Resource object = model.createResource(entity.getString(metaData.getName())!=null?entity.getString(metaData.getName()):"");
 
