@@ -50,8 +50,8 @@
 						statisticsContainer.empty();
 						if(data.results.length > 0){
 							var layout = $('<div class="row"></div>').appendTo(statisticsContainer);
-							$('<div class="col-md-6"></div>').append('<div class="legend-align-center">Summary statistics</div>').append(statisticsTable(data.results, data.totalCount)).appendTo(layout);
-							$('<div class="col-md-6"></div>').append('<div class="legend-align-center">Distribution plot</div>').bcgraph(data.results).appendTo(layout);
+							$('<div class="col-md-6"></div>').append('<center><legend>Summary statistics</legend></center>').append(statisticsTable(data.results, data.totalCount)).appendTo(layout);
+							$('<div class="col-md-6"></div>').append('<center><legend>Distribution plot</legend></center>').bcgraph(data.results).appendTo(layout);
 						}else{
 							molgenis.createAlert([{'message':'There are no values generated for this algorithm'}],'error');
 						}
