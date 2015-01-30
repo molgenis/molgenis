@@ -65,7 +65,7 @@
 </div>
 
 <#macro createNewSourceColumnModal>
-	<div class="modal fade" id="create-new-source-column-modal" tabindex="-1" role="dialog" aria-labelledby="create-new-source-column-modal" aria-hidden="true">
+	<div class="modal" id="create-new-source-column-modal" tabindex="-1" role="dialog" aria-labelledby="create-new-source-column-modal" aria-hidden="true">
 		<div class="modal-dialog">
 	    	<div class="modal-content">
 	        	<div class="modal-header">
@@ -76,14 +76,15 @@
 					<div class="form-group">
 	            		<label>Select a new source to map against the target attribute</label>
   						<select id="new-source-entity" class="form-control" required="required" placeholder="Select a target entity">
-	    					<option value="hop-minimal">HOP-minimal</option>
-	    					<option value="finrisk">FinRisk</option>
+	    					<#list entityMetaDatas.iterator() as entityMetaData>
+    							<option value="${entityMetaData.name?html}">${entityMetaData.name?html}</option>
+	    					</#list>
 						</select>
 					</div>
         		</div>
         		
 	        	<div class="modal-footer">
-	        		<button type="button" id="submit-new-source-column-btn" class="btn btn-primary">Create project</button>
+	        		<button type="button" id="submit-new-source-column-btn" class="btn btn-primary">Add source</button>
 	                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
 	    		</div>	    				
     		</div>

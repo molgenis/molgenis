@@ -73,7 +73,7 @@ public class MappingServiceController extends MolgenisPluginController
 			@RequestParam("target-entity") String targetEntity)
 	{
 		MappingProject newMappingProject = mappingService.addMappingProject(name, getCurrentUser(), targetEntity);
-		// FIXME need to wright complete URL else it will use /plugin as root and the molgenis header and footer wont be
+		// FIXME need to write complete URL else it will use /plugin as root and the molgenis header and footer wont be
 		// loaded
 		return "redirect:/menu/main/mappingservice/mappingproject/" + newMappingProject.getIdentifier();
 	}
@@ -100,47 +100,40 @@ public class MappingServiceController extends MolgenisPluginController
 			targetAttributes.put(target, selectedMappingProject.getTargets().get(target).getTarget().getAttributes());
 		}
 		String selectedTarget = targetAttributes.keySet().toArray()[0].toString();
-		
+
 		// Fill the model
 		model.addAttribute("selectedTarget", selectedTarget);
 		model.addAttribute("selectedTargetAttributes", targetAttributes.get(selectedTarget));
 		model.addAttribute("targetAttributes", targetAttributes);
 		model.addAttribute("mappingProject", selectedMappingProject);
+		model.addAttribute("entityMetaDatas", getEntityMetaDatas());
 
 		return VIEW_ATTRIBUTE_MAPPING;
 	}
-
-	@RequestMapping("/getsourcecolumn")
-	@ResponseBody
-	public List<String> getAttributesForNewSourceColumn(@RequestBody String newSourceEntityName)
-	{
-		List<String> mockAttributesForNewColumn = new ArrayList<String>(); // TODO use dataservice to return a
-																			// List<Attributes>
-		mockAttributesForNewColumn.add("sourceAttr1");
-		mockAttributesForNewColumn.add("sourceAttr2");
-		mockAttributesForNewColumn.add("sourceAttr3");
-		mockAttributesForNewColumn.add("sourceAttr4");
-		mockAttributesForNewColumn.add("sourceAttr5");
-		return mockAttributesForNewColumn;
+	
+	@RequestMapping(value = "/get-new-attributes", method = RequestMethod.POST)
+	public @ResponseBody Iterable<AttributeMetaData> getAttributesForNewEntity(@RequestBody String newEntityName){
+		return dataService.getEntityMetaData(newEntityName).getAttributes();
 	}
 
 	private Model setModelAttributes(Model model)
 	{
-		model.addAttribute("activeUser", getCurrentUser().getUsername());
 		if (mappingService != null) model.addAttribute("mappingProjects", mappingService.getAllMappingProjects());
-
-		Iterable<EntityMetaData> entitiesMeta = Iterables.transform(dataService.getEntityNames(),
-				new Function<String, EntityMetaData>()
-				{
-					@Override
-					public EntityMetaData apply(String entityName)
-					{
-						return dataService.getEntityMetaData(entityName);
-					}
-				});
-		model.addAttribute("entitiesMeta", entitiesMeta);
+		model.addAttribute("entityMetaDatas", getEntityMetaDatas());
 
 		return model;
+	}
+
+	private Iterable<EntityMetaData> getEntityMetaDatas()
+	{
+		return Iterables.transform(dataService.getEntityNames(), new Function<String, EntityMetaData>()
+		{
+			@Override
+			public EntityMetaData apply(String entityName)
+			{
+				return dataService.getEntityMetaData(entityName);
+			}
+		});
 	}
 
 	@ExceptionHandler(RuntimeException.class)

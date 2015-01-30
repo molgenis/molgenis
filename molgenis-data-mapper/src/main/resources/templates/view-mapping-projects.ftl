@@ -8,8 +8,6 @@
 <@createNewMappingProjectModal />
 
 <!--Table containing mapping projects-->
-<#-- TODO -->
-<#-- Make Project name link to attribute mapping screen  -->
 <div class="row">
 	<div class="col-md-12">
 		<div class="col-md-6">
@@ -70,8 +68,6 @@
 
 <@footer/>
 
-<#-- TODO -->
-<#-- Generate target entity list dynamicly -->
 <#macro createNewMappingProjectModal>
 	<div class="modal fade" id="create-new-mapping-project-modal" tabindex="-1" role="dialog" aria-labelledby="create-new-mapping-project-modal" aria-hidden="true">
 		<div class="modal-dialog">
@@ -92,7 +88,7 @@
 						<div class="form-group">
 							<label>Select the Target entity</label>
 							<select name="target-entity" class="form-control" required="required" placeholder="Select a target entity">
-		    					<#list entitiesMeta.iterator() as entityMetaData>
+		    					<#list entityMetaDatas.iterator() as entityMetaData>
 		    						<option value="${entityMetaData.name?html}">${entityMetaData.name?html}</option>
 		    					</#list>
 							</select>
