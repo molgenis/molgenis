@@ -4,40 +4,40 @@ import java.util.List;
 
 public class MappingServiceRequest
 {
-	private final String targetEntityIdentifier;
-	private final String sourceEntityIdentifier;
-	private final String targetAttributeIdentifier;
-	private final List<String> sourceAttributeIdentifiers;
+	private final String targetEntityName;
+	private final String sourceEntityName;
+	private final String targetAttributeName;
+	private final List<String> sourceAttributeNames;
 	private final String algorithm;
 
 	public MappingServiceRequest(String targetEntityIdentifier, String sourceEntityIdentifier,
 			String targetAttributeIdentifier, List<String> sourceAttributeIdentifiers, String algorithm)
 	{
-		this.targetEntityIdentifier = targetEntityIdentifier;
-		this.sourceEntityIdentifier = sourceEntityIdentifier;
-		this.targetAttributeIdentifier = targetAttributeIdentifier;
-		this.sourceAttributeIdentifiers = sourceAttributeIdentifiers;
+		this.targetEntityName = targetEntityIdentifier;
+		this.sourceEntityName = sourceEntityIdentifier;
+		this.targetAttributeName = targetAttributeIdentifier;
+		this.sourceAttributeNames = sourceAttributeIdentifiers;
 		this.algorithm = algorithm;
 	}
 
-	public String getTargetEntityIdentifier()
+	public String getTargetEntityName()
 	{
-		return targetEntityIdentifier;
+		return targetEntityName;
 	}
 
-	public String getSourceEntityIdentifier()
+	public String getSourceEntityName()
 	{
-		return sourceEntityIdentifier;
+		return sourceEntityName;
 	}
 
-	public String getTargetAttributeIdentifier()
+	public String getTargetAttributeName()
 	{
-		return targetAttributeIdentifier;
+		return targetAttributeName;
 	}
 
-	public List<String> getSourceAttributeIdentifiers()
+	public List<String> getSourceAttributeNames()
 	{
-		return sourceAttributeIdentifiers;
+		return sourceAttributeNames;
 	}
 
 	public String getAlgorithm()

@@ -51,7 +51,7 @@
 			<table class="table">
 	 			<thead>
 	 				<tr>
-	 					<th>Target model</th>
+	 					<th>Target model: ${selectedTarget}</th>
 	 				</tr>
 	 			</thead>
 	 			<tbody>
