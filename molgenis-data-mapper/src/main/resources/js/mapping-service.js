@@ -22,14 +22,29 @@
 		});
 		
 		$('#target-entity-select').change(function() {
-			var newTargetName = $('#target-entity').val();
-			var attributeMetaDatas = getNewAttributeMetaData(newTargetName);
+			var selectedTargetName = $('#target-entity').val();
+			var attributeMetaDataIteratable = getNewAttributeMetaData(newSourceName, function(attributeMetaDataIteratable){
+				// TODO Update the first colomn of the #target-mapping-table
+			});
 		});
 		
 		$('#submit-new-source-column-btn').click(function() {
-			var targetMappingTable = $('#target-mapping-table')
+			//var targetMappingTable = $('#target-mapping-table')
+			var currentTarget = $('#target-entity').val();
 			var newSourceName = $('#new-source-entity').val();
 			$('#create-new-source-column-modal').modal('toggle');
+			
+			var data = ["target" : newSourceName, 'source' : ]
+			
+			$.ajax({
+				type : 'POST',
+				url : molgenis.getContextUrl() + '/mappingattribute',
+				data : JSON.stringify(currentTargetnewEntityName),
+				contentType : 'application/json',
+				success : function(attributeMetaDataIteratable) {
+					if(callback !== null && typeof callback === 'function') callback(attributeMetaDataIteratable);
+				}
+			});
 			
 //			var attributeMetaDataIteratable = getNewAttributeMetaData(newSourceName, function(attributeMetaDataIteratable){
 //				targetMappingTable.find('tr').each(function(){

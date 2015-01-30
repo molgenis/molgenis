@@ -131,42 +131,56 @@ public class MappingServiceController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/mappingattribute", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public MappingServiceResponse getMappingAttributeScreen(@RequestBody MappingServiceRequest mappingServiceRequest)
+	public @ResponseBody MappingServiceResponse getMappingAttributeScreen(@RequestBody MappingServiceRequest mappingServiceRequest)
 	{
 		EntityMetaData targetEntityMetaData = dataService.getEntityMetaData(mappingServiceRequest
-				.getTargetEntityIdentifier());
+				.getTargetEntityName());
 
 		EntityMetaData sourceEntityMetaData = dataService.getEntityMetaData(mappingServiceRequest
-				.getSourceEntityIdentifier());
+				.getSourceEntityName());
 
 		AttributeMetaData targetAttribute = targetEntityMetaData != null ? targetEntityMetaData
-				.getAttribute(mappingServiceRequest.getTargetAttributeIdentifier()) : null;
+				.getAttribute(mappingServiceRequest.getTargetAttributeName()) : null;
 
 		// TODO : biobankconnect algorithm will be placed here!
 		Iterable<AttributeMetaData> sourceAttributes = sourceEntityMetaData != null ? sourceEntityMetaData
 				.getAtomicAttributes() : Collections.emptyList();
 
-		return new MappingServiceResponse(mappingServiceRequest.getTargetEntityIdentifier(),
-				mappingServiceRequest.getSourceEntityIdentifier(), targetAttribute, sourceAttributes);
+		return new MappingServiceResponse(mappingServiceRequest.getTargetEntityName(),
+				mappingServiceRequest.getSourceEntityName(), targetAttribute, sourceAttributes);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/mappingattribute/testscript", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public Map<String, Object> testScrpit(@RequestBody MappingServiceRequest mappingServiceRequest)
+	public @ResponseBody Map<String, Object> testScrpit(@RequestBody MappingServiceRequest mappingServiceRequest)
 	{
 		Map<String, Object> results = new HashMap<String, Object>();
 
 		EntityMetaData targetEntityMetaData = dataService.getEntityMetaData(mappingServiceRequest
-				.getTargetEntityIdentifier());
+				.getTargetEntityName());
 
 		EntityMetaData sourceEntityMetaData = dataService.getEntityMetaData(mappingServiceRequest
-				.getSourceEntityIdentifier());
+				.getSourceEntityName());
 
 		AttributeMetaData targetAttribute = targetEntityMetaData != null ? targetEntityMetaData
-				.getAttribute(mappingServiceRequest.getTargetAttributeIdentifier()) : null;
+				.getAttribute(mappingServiceRequest.getTargetAttributeName()) : null;
 
-		Iterable<AttributeMetaData> sourceAttributes = Iterables.filter(Iterables.transform(
+		Iterable<AttributeMetaData> sourceAttributes = extractFeatureIdentifiersAsAttributeMetaData(
+				mappingServiceRequest, sourceEntityMetaData);
+
+		Repository sourceRepo = dataService.getRepositoryByEntityName(sourceEntityMetaData.getName());
+		List<Object> calculatedValues = algorithmService.applyAlgorithm(targetAttribute, sourceAttributes,
+				mappingServiceRequest.getAlgorithm(), sourceRepo);
+
+		results.put("results", calculatedValues);
+		results.put("totalCount", Iterables.size(sourceRepo));
+
+		return results;
+	}
+
+	private Iterable<AttributeMetaData> extractFeatureIdentifiersAsAttributeMetaData(
+			MappingServiceRequest mappingServiceRequest, EntityMetaData sourceEntityMetaData)
+	{
+		return Iterables.filter(Iterables.transform(
 				AlgorithmServiceImpl.extractFeatureName(mappingServiceRequest.getAlgorithm()),
 				new Function<String, AttributeMetaData>()
 				{
@@ -176,15 +190,6 @@ public class MappingServiceController extends MolgenisPluginController
 								.getAttribute(attributeName) : null;
 					}
 				}), Predicates.notNull());
-
-		Repository sourceRepo = dataService.getRepositoryByEntityName(sourceEntityMetaData.getName());
-		List<Object> calcualtedValues = algorithmService.applyAlgorithm(targetAttribute, sourceAttributes,
-				mappingServiceRequest.getAlgorithm(), sourceRepo);
-
-		results.put("results", calcualtedValues);
-		results.put("totalCount", Iterables.size(sourceRepo));
-
-		return results;
 	}
 
 	private Model setModelAttributes(Model model)

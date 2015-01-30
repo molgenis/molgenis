@@ -24,7 +24,7 @@
 <script>
 	$(function(){
 		
-		var attributeMappingRequest = {'targetEntityIdentifier' : 'HOP', 'sourceEntityIdentifier' : 'FinRisk', 'targetAttributeIdentifier' : 'HOP_HEIGHT'};
+		var attributeMappingRequest = {'targetEntityName' : 'HOP', 'sourceEntityName' : 'FinRisk', 'targetAttributeName' : 'HOP_HEIGHT'};
 		
 		createAttributeTable($('#attribut-table-container'), attributeMappingRequest);
 		
