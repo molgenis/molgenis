@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -75,16 +76,31 @@ public class ExcelRepository extends AbstractRepository
 
 		return new Iterator<Entity>()
 		{
-			@Override
+            ExcelEntity next = null;
+            @Override
 			public boolean hasNext()
 			{
-				return it.hasNext();
+                if(it.hasNext() && next == null){
+                    ExcelEntity entity = new ExcelEntity(it.next(), colNamesMap, cellProcessors, getEntityMetaData());
+
+                    //check if there is any column containing a value
+                    for(String name : entity.getAttributeNames()){
+                        if(StringUtils.isNotEmpty(entity.getString(name))){
+                            next = entity;
+                            break;
+                        }
+                    }
+                }
+                return next != null;
 			}
 
 			@Override
 			public ExcelEntity next()
 			{
-				return new ExcelEntity(it.next(), colNamesMap, cellProcessors, getEntityMetaData());
+                hasNext();
+                ExcelEntity result = next;
+                next = null;
+                return result;
 			}
 
 			@Override
