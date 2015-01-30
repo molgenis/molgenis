@@ -13,6 +13,7 @@
 	"dataexplorer-filter.css",
 	"diseasematcher.css"]>
 <#assign js=[
+	"ace/src-min-noconflict/ace.js",
 	"jquery-ui-1.9.2.custom.min.js",
 	"jquery.bootstrap.wizard.min.js",
 	"moment-with-locales.min.js",
