@@ -3,13 +3,17 @@ package org.molgenis.data.mapper;
 import static org.molgenis.data.mapper.MappingServiceController.URI;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.molgenis.auth.MolgenisUser;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.mapping.MappingService;
 import org.molgenis.data.mapping.model.MappingProject;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserService;
@@ -69,11 +73,9 @@ public class MappingServiceController extends MolgenisPluginController
 			@RequestParam("target-entity") String targetEntity)
 	{
 		MappingProject newMappingProject = mappingService.addMappingProject(name, getCurrentUser(), targetEntity);
-		System.out.println(newMappingProject.getIdentifier());
-		System.out.println(newMappingProject.getName());
-		System.out.println(newMappingProject.getOwner());
-		System.out.println(newMappingProject.getTargets());
-		return "redirect:mappingproject/" + "";
+		// FIXME need to wright complete URL else it will use /plugin as root and the molgenis header and footer wont be
+		// loaded
+		return "redirect:/menu/main/mappingservice/mappingproject/" + newMappingProject.getIdentifier();
 	}
 
 	@RequestMapping(value = "/editmappingproject", method = RequestMethod.POST)
@@ -90,7 +92,21 @@ public class MappingServiceController extends MolgenisPluginController
 	@RequestMapping("/mappingproject/{id}")
 	public String getMappingProjectScreen(@PathVariable("id") String identifier, Model model)
 	{
-		model.addAttribute("mappingProject", mappingService.getMappingProject(identifier));
+		MappingProject selectedMappingProject = mappingService.getMappingProject(identifier);
+		Map<String, Iterable<AttributeMetaData>> targetAttributes = new HashMap<String, Iterable<AttributeMetaData>>();
+		for (String target : selectedMappingProject.getTargets().keySet())
+		{
+			// Get the entity metadata for every target
+			targetAttributes.put(target, selectedMappingProject.getTargets().get(target).getTarget().getAttributes());
+		}
+		String selectedTarget = targetAttributes.keySet().toArray()[0].toString();
+		
+		// Fill the model
+		model.addAttribute("selectedTarget", selectedTarget);
+		model.addAttribute("selectedTargetAttributes", targetAttributes.get(selectedTarget));
+		model.addAttribute("targetAttributes", targetAttributes);
+		model.addAttribute("mappingProject", selectedMappingProject);
+
 		return VIEW_ATTRIBUTE_MAPPING;
 	}
 
