@@ -12,6 +12,7 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.LOOKUP_ATTRIBUTE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.NAME;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.NILLABLE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.PART_OF_ATTRIBUTE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.PREDICATE_IRI;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MAX;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MIN;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.READ_ONLY;
@@ -88,7 +89,8 @@ public class EmxMetaDataParser implements MetaDataParser
 			ID_ATTRIBUTE.toLowerCase(), LABEL.toLowerCase(), LABEL_ATTRIBUTE.toLowerCase(),
 			LOOKUP_ATTRIBUTE.toLowerCase(), NAME, NILLABLE.toLowerCase(), PART_OF_ATTRIBUTE.toLowerCase(),
 			RANGE_MAX.toLowerCase(), RANGE_MIN.toLowerCase(), READ_ONLY.toLowerCase(), REF_ENTITY.toLowerCase(),
-			VISIBLE.toLowerCase(), UNIQUE.toLowerCase(), org.molgenis.data.meta.AttributeMetaDataMetaData.TAGS);
+			VISIBLE.toLowerCase(), UNIQUE.toLowerCase(), org.molgenis.data.meta.AttributeMetaDataMetaData.TAGS,
+			AttributeMetaDataMetaData.PREDICATE_IRI);
 
 	private final DataService dataService;
 	private final MetaDataService metaDataService;
@@ -226,6 +228,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			Boolean readOnly = attributeEntity.getBoolean(READ_ONLY);
 			Boolean unique = attributeEntity.getBoolean(UNIQUE);
 			List<String> tagIds = attributeEntity.getList(TAGS);
+			String predicateIri = attributeEntity.getString(PREDICATE_IRI);
 
 			if (attributeNillable != null) attribute.setNillable(attributeNillable);
 			if (attributeIdAttribute != null) attribute.setIdAttribute(attributeIdAttribute);
@@ -234,6 +237,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			// cannot update ref entities yet, will do so later on
 			if (readOnly != null) attribute.setReadOnly(readOnly);
 			if (unique != null) attribute.setUnique(unique);
+			if (predicateIri != null) attribute.setPredicateIri(predicateIri);
 
 			if (lookupAttribute != null)
 			{
@@ -610,7 +614,8 @@ public class EmxMetaDataParser implements MetaDataParser
 		{
 			IntermediateParseResults intermediateResults = getEntityMetaDataFromSource(source);
 			return new ParsedMetaData(resolveEntityDependencies(intermediateResults.getEntities()),
-					intermediateResults.getPackages(), intermediateResults.getAttributeTags(), intermediateResults.getEntityTags());
+					intermediateResults.getPackages(), intermediateResults.getAttributeTags(),
+					intermediateResults.getEntityTags());
 		}
 		else
 		{
