@@ -6,6 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
@@ -23,31 +24,34 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			String algorithm, Repository sourceRepository)
 	{
 		List<Object> derivedValues = new ArrayList<Object>();
-		FieldTypeEnum dataType = targetAttribute.getDataType().getEnumType();
-		for (Entity entity : sourceRepository)
+		if (Iterables.size(sourceAttributes) > 0)
 		{
-			MapEntity mapEntity = new MapEntity();
-			for (AttributeMetaData attributeMetaData : sourceAttributes)
+			FieldTypeEnum dataType = targetAttribute.getDataType().getEnumType();
+			for (Entity entity : sourceRepository)
 			{
-				mapEntity.set(attributeMetaData.getName(), entity.get(attributeMetaData.getName()));
-			}
-			if (!StringUtils.isEmpty(algorithm))
-			{
-				Object result = ScriptEvaluator.eval(algorithm, mapEntity);
-
-				if (result != null)
+				MapEntity mapEntity = new MapEntity();
+				for (AttributeMetaData attributeMetaData : sourceAttributes)
 				{
-					switch (dataType)
+					mapEntity.set(attributeMetaData.getName(), entity.get(attributeMetaData.getName()));
+				}
+				if (!StringUtils.isEmpty(algorithm))
+				{
+					Object result = ScriptEvaluator.eval(algorithm, mapEntity);
+
+					if (result != null)
 					{
-						case INT:
-							derivedValues.add(Integer.parseInt(Context.toString(result)));
-							break;
-						case DECIMAL:
-							derivedValues.add(Context.toNumber(result));
-							break;
-						default:
-							derivedValues.add(Context.toString(result));
-							break;
+						switch (dataType)
+						{
+							case INT:
+								derivedValues.add(Integer.parseInt(Context.toString(result)));
+								break;
+							case DECIMAL:
+								derivedValues.add(Context.toNumber(result));
+								break;
+							default:
+								derivedValues.add(Context.toString(result));
+								break;
+						}
 					}
 				}
 			}

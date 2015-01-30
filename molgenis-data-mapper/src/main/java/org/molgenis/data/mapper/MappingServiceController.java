@@ -9,16 +9,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Repository;
 import org.molgenis.data.algorithm.AlgorithmService;
 import org.molgenis.data.algorithm.AlgorithmServiceImpl;
 import org.molgenis.data.mapping.MappingService;
 import org.molgenis.data.mapping.model.MappingProject;
-import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserService;
@@ -39,8 +38,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 
 @Controller
 @RequestMapping(URI)
@@ -162,23 +161,23 @@ public class MappingServiceController extends MolgenisPluginController
 		AttributeMetaData targetAttribute = targetEntityMetaData != null ? targetEntityMetaData
 				.getAttribute(mappingServiceRequest.getTargetAttributeIdentifier()) : null;
 
-		Iterable<AttributeMetaData> sourceAttributes = Lists.transform(
+		Iterable<AttributeMetaData> sourceAttributes = Iterables.filter(Iterables.transform(
 				AlgorithmServiceImpl.extractFeatureName(mappingServiceRequest.getAlgorithm()),
 				new Function<String, AttributeMetaData>()
 				{
-					@Override
 					public AttributeMetaData apply(final String attributeName)
 					{
 						return sourceEntityMetaData != null && sourceEntityMetaData.getAttribute(attributeName) != null ? sourceEntityMetaData
-								.getAttribute(attributeName) : new DefaultAttributeMetaData(StringUtils.EMPTY);
+								.getAttribute(attributeName) : null;
 					}
-				});
+				}), Predicates.notNull());
 
+		Repository sourceRepo = dataService.getRepositoryByEntityName(sourceEntityMetaData.getName());
 		List<Object> calcualtedValues = algorithmService.applyAlgorithm(targetAttribute, sourceAttributes,
-				mappingServiceRequest.getAlgorithm(),
-				dataService.getRepositoryByEntityName(sourceEntityMetaData.getName()));
+				mappingServiceRequest.getAlgorithm(), sourceRepo);
 
-		results.put("result", calcualtedValues);
+		results.put("results", calcualtedValues);
+		results.put("totalCount", Iterables.size(sourceRepo));
 
 		return results;
 	}
