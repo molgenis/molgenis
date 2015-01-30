@@ -53,7 +53,7 @@
 							$('<div class="col-md-6"></div>').append('<div class="legend-align-center">Summary statistics</div>').append(statisticsTable(data.results, data.totalCount)).appendTo(layout);
 							$('<div class="col-md-6"></div>').append('<div class="legend-align-center">Distribution plot</div>').bcgraph(data.results).appendTo(layout);
 						}else{
-							$('<div />').append('<center>There are no values generated for this algorithm</center>').appendTo(statisticsContainer);
+							molgenis.createAlert([{'message':'There are no values generated for this algorithm'}],'error');
 						}
 					}
 				});
