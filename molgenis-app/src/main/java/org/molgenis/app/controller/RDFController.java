@@ -8,6 +8,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
+import org.molgenis.data.rest.*;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -60,16 +61,17 @@ public class RDFController extends MolgenisPluginController
             while (iter.hasNext()){
                 Entity entity = iter.next();
                 String ns = "http://www.molgenis.org/";
+                String restPrefix = org.molgenis.data.rest.RestController.BASE_URI;
                 for (AttributeMetaData metaData : entity.getEntityMetaData().getAtomicAttributes()) {
                     if (metaData.isIdAtrribute()) {
-                        Resource subject = model.createResource(ns.concat(entity.getString(metaData.getName())));
-                        Property predicate = model.createProperty(ns.concat("is_a"));
+                        Resource subject = model.createResource(restPrefix.concat(entity.getEntityMetaData().getName()).concat("/").concat(entity.getString(metaData.getName())));
+                        Property predicate = model.createProperty(ns.concat("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"));
                         Resource object = model.createResource(ns.concat(entity.getEntityMetaData().getName()));
 
                         connect(subject, predicate, object, model);
                     } else {
-                        Resource subject = model.createResource(entity.getString(entity.getEntityMetaData().getIdAttribute().getName()));
-                        Property predicate = model.createProperty(metaData.getName());
+                        Resource subject = model.createResource(restPrefix.concat(entity.getEntityMetaData().getName()).concat("/").concat(entity.getString(metaData.getName())));
+                        Property predicate = model.createProperty(metaData.getPredicateIri()!=null?metaData.getPredicateIri():"");
                         Resource object = model.createResource(entity.getString(metaData.getName())!=null?entity.getString(metaData.getName()):"");
 
                         connect(subject, predicate, object, model);

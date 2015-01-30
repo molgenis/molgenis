@@ -285,5 +285,12 @@
 			<artifactId>molgenis-data-semanticsearch</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+        <dependency>
+            <groupId>org.apache.jena</groupId>
+            <artifactId>apache-jena-libs</artifactId>
+            <type>pom</type>
+            <version>2.12.1</version>
+        </dependency>
+
 	</dependencies>
 </project>
