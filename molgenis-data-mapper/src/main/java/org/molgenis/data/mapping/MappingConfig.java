@@ -5,6 +5,8 @@ import java.util.UUID;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.ManageableCrudRepositoryCollection;
+import org.molgenis.data.algorithm.AlgorithmService;
+import org.molgenis.data.algorithm.AlgorithmServiceImpl;
 import org.molgenis.data.meta.AttributeMappingMetaData;
 import org.molgenis.data.meta.EntityMappingMetaData;
 import org.molgenis.data.meta.MappingProjectMetaData;
@@ -48,6 +50,12 @@ public class MappingConfig
 	public MappingService mappingService()
 	{
 		return new MappingServiceImpl(mappingProjectRepository());
+	}
+
+	@Bean
+	public AlgorithmService algorithmServiceImpl()
+	{
+		return new AlgorithmServiceImpl();
 	}
 
 	@Bean
