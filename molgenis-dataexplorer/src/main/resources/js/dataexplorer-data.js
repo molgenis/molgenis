@@ -58,6 +58,7 @@
 		$('#data-table-container').table({
 			'entityMetaData' : getEntity(),
 			'attributes' : attributes,
+			'maxRows' : 18,
 			'query' : getQuery(),
 			'editable' : editable,
 			'rowClickable': rowClickable,

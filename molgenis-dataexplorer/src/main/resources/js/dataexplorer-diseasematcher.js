@@ -170,7 +170,7 @@
 	/**
 	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
-	function rankHPOTerms(terms, callback){
+	function getPhenotipsSuggestions(terms, callback){
 		var queryString = '';
 		$.each(terms, function(index, t){
 			if (index > 0){
@@ -216,7 +216,7 @@
 				if (diseases.total === 0) return;
 				
 				//call Phenotips and put the suggestions in a hidden div
-				rankHPOTerms(terms, function(suggestions){		
+				getPhenotipsSuggestions(terms, function(suggestions){		
 					
 					var hiddenOutput = $('#diseasematcher-phenotips-hiddenoutput');			
 					hiddenOutput.hide();
@@ -254,7 +254,7 @@
 						return;
 					}
 					
-					// filter diseases
+					// group diseases in perfect/similar matches and diseases that will be excluded 
 					var exclude = [];
 					var includePerfect = [];
 					var includeSimilar = [];
@@ -272,8 +272,7 @@
 							    if(suggestionObjects[k].matchingName === disNameBroad) {
 							        dis.matches.push(suggestionObjects[k].originalName);
 							        found = true;							        
-							    }
-							    
+							    } 
 							}
 							
 							if (found === false){
@@ -354,7 +353,7 @@
 							}
 						});
 						
-						showVariants(uniqueGenes, $('#diseasematcher-filtered-variants'));
+						showVariants(uniqueGenes, $('#diseasematcher-filtered-variants'), getQuery());
 						
 						var filterRules = [];
 						$.each(uniqueGenes, function(index, gene) {
@@ -444,14 +443,6 @@
 		$('#diseasematcher-patient-select-button').click(function(e){
 			e.preventDefault();
 			onClickNavBtn(this, SelectionMode.PATIENT);
-		});
-		
-		$('#btn-get-phenotips').click(function(e){
-			e.preventDefault();
-			var terms = $('#hpoTermsInput').val();
-			terms = terms.split(',');
-			
-			rankHPOTerms(terms);
 		});
 		
 		$('#btn-filter-phenotips').click(function(e){
@@ -720,10 +711,10 @@
 								if (!isNaN(subPart)) {
 									// OMIM id, add a link
 									link = subPart.replace('.', '#');
-									linkedText += '<a href="http://www.omim.org/entry/' + escapeHtml(link) + '" target="_blank">' + subPart + '</a>';
+									linkedText += '<a href="http://www.omim.org/entry/' + window.htmlEscape(link) + '" target="_blank">' + subPart + '</a>';
 									
 								} else {
-									linkedText += escapeHtml(subPart);
+									linkedText += window.htmlEscape(subPart);
 								};
 							})
 							textParts[index] = linkedText;
@@ -933,35 +924,56 @@
 	 * @param panel the panel to add/update
 	 * @memberOf molgenis.dataexplorer.diseasematcher
 	 */
-	function showVariants(genes, panel) {
-		var queryRules = [];
+	function showVariants(genes, panel, itemFilterQuery) {
+		var geneRules = [];
 		$.each(genes, function(index, gene) {
-			if (queryRules.length > 0) {
-				queryRules.push({
+			if (geneRules.length > 0) {
+				geneRules.push({
 					'operator' : 'OR'
 				});
 			}
-			queryRules.push({
+			geneRules.push({
 				'field' : geneSymbolColumn,
 				'operator' : 'EQUALS',
 				'value' : gene
 			});
 		});
 		
-		currentQuery = {'q' : queryRules};
-		
+		if (typeof itemFilterQuery != 'undefined'){	
+			if (itemFilterQuery.q.length === 0){
+				renderVariantTable(panel, {q: geneRules});
+			}else{
+				q = {q: [{
+	    	        	operator: "NESTED",
+	    	        	nestedRules: itemFilterQuery.q
+	    	    	}, {
+	    	    		operator: "AND"
+	    	    	}, {
+	    	    		operator: "NESTED",
+	    	    		nestedRules: geneRules
+	    	    	}]
+				};
+				renderVariantTable(panel, q);
+			}				
+		}else{
+			currentQuery = {'q' : geneRules};
+			renderVariantTable(panel, currentQuery);	
+		}
+	}
+	
+	function renderVariantTable(panel, query){
 		// show associated variants in info panel	
 		if (tableEditable) {
 			tableEditable = molgenis.hasWritePermission(molgenis.dataexplorer.getSelectedEntityMeta().name);
 		}
 	
 		if (panel.has('table').length){
-			panel.table('setQuery', currentQuery);
+			panel.table('setQuery', query);
 		}else{
 			var table = panel.table({
 				'entityMetaData' : getEntity(),
 				'attributes' : getAttributes(),
-				'query' : currentQuery,
+				'query' : query,
 				'editable': tableEditable,
 				'onDataChange' : function(){
 					$(document).trigger('dataChange.diseasematcher');
@@ -1041,19 +1053,4 @@
 		}
 	}
 	
-	var entityMap = {
-		"&": "&amp;",
-		"<": "&lt;",
-		">": "&gt;",
-		'"': '&quot;',
-		"'": '&#39;',
-		"/": '&#x2F;'
-	};
-
-	function escapeHtml(string) {
-		return String(string).replace(/[&<>"'\/]/g, function (s) {
-			return entityMap[s];
-		});
-	}
-
 })($, window.top.molgenis = window.top.molgenis || {});

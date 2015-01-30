@@ -530,7 +530,6 @@ public class DataExplorerController extends MolgenisPluginController
 
 		AggregateQueryImpl aggregateQuery = new AggregateQueryImpl().attrX(xAttributeMeta).attrY(yAttributeMeta)
 				.attrDistinct(distinctAttributeMeta).query(new QueryImpl(request.getQ()));
-
 		return dataService.aggregate(entityName, aggregateQuery);
 	}
 
