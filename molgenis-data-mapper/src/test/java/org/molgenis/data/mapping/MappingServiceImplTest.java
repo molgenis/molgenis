@@ -4,6 +4,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.fail;
 
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
@@ -71,46 +72,74 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	private MolgenisUserService userService;
 
+	private MolgenisUser user;
+
+	private DefaultEntityMetaData hopMetaData;
+
+	private DefaultEntityMetaData geneMetaData;
+
 	@BeforeMethod
-	public void beforeTest()
+	public void beforeMethod()
 	{
+		user = new MolgenisUser();
+		user.setUsername("Piet");
+		when(userService.getUser("Piet")).thenReturn(user);
+
+		hopMetaData = new DefaultEntityMetaData("HopEntity", PackageImpl.defaultPackage);
+		hopMetaData.addAttribute("identifier").setIdAttribute(true);
+		when(metaDataService.getEntityMetaData("HopEntity")).thenReturn(hopMetaData);
+
+		geneMetaData = new DefaultEntityMetaData("Gene", PackageImpl.defaultPackage);
+		geneMetaData.addAttribute("Gene").setIdAttribute(true);
+		when(metaDataService.getEntityMetaData("Gene")).thenReturn(geneMetaData);
+
 		dataService.getEntityNames().forEach(dataService::removeRepository);
 	}
 
 	@Test
-	public void testAdd()
+	public void testAddMappingProject()
 	{
-		DefaultEntityMetaData targetEntityMetaData = new DefaultEntityMetaData("TargetEntity",
-				PackageImpl.defaultPackage);
-		targetEntityMetaData.addAttribute("identifier").setIdAttribute(true);
-
-		MolgenisUser user = new MolgenisUser();
-		user.setUsername("Piet");
-
-		when(metaDataService.getEntityMetaData("TargetEntity")).thenReturn(targetEntityMetaData);
-		when(userService.getUser("Piet")).thenReturn(user);
-
-		// add the project
-		MappingProject added = mappingService.addMappingProject("Test123", user, "TargetEntity");
+		MappingProject added = mappingService.addMappingProject("Test123", user, "HopEntity");
 		assertEquals(added.getName(), "Test123");
 
-		System.out.println(added);
-
 		MappingProject expected = new MappingProject("Test123", user);
-		expected.addTarget(targetEntityMetaData);
+		expected.addTarget(hopMetaData);
 
 		final String mappingProjectId = added.getIdentifier();
 		assertNotNull(mappingProjectId);
 		expected.setIdentifier(mappingProjectId);
-		final String mappingTargetId = added.getTargets().get("TargetEntity").getIdentifier();
+		final String mappingTargetId = added.getTargets().get("HopEntity").getIdentifier();
 		assertNotNull(mappingTargetId);
-		expected.getTargets().get("TargetEntity").setIdentifier(mappingTargetId);
+		expected.getTargets().get("HopEntity").setIdentifier(mappingTargetId);
 		assertEquals(added, expected);
 
 		MappingProject retrieved = mappingService.getMappingProject(mappingProjectId);
-		// Gson gson = new Gson();
-		// String retrievedJson = gson.toJson(retrieved);
-		// String expectedJson = gson.toJson(expected);
 		assertEquals(retrieved, expected);
+	}
+
+	@Test
+	public void testAddTarget()
+	{
+		MappingProject mappingProject = mappingService.addMappingProject("Test123", user, "HopEntity");
+		mappingProject.addTarget(geneMetaData);
+		mappingService.updateMappingProject(mappingProject);
+
+		MappingProject retrieved = mappingService.getMappingProject(mappingProject.getIdentifier());
+		assertEquals(mappingProject, retrieved);
+	}
+
+	@Test
+	public void testAddExistingTarget()
+	{
+		MappingProject mappingProject = mappingService.addMappingProject("Test123", user, "HopEntity");
+		try
+		{
+			mappingProject.addTarget(hopMetaData);
+			fail("Cannot add same target twice");
+		}
+		catch (Exception expected)
+		{
+
+		}
 	}
 }

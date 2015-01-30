@@ -84,6 +84,10 @@ public class MappingProject
 
 	public MappingTarget addTarget(EntityMetaData target)
 	{
+		if (mappingTargets.containsKey(target.getName()))
+		{
+			throw new IllegalStateException("Cannot have multiple mappings for same target.");
+		}
 		MappingTarget result = new MappingTarget(target);
 		mappingTargets.put(target.getName(), result);
 		return result;

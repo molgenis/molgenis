@@ -80,14 +80,16 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 	{
 		List<Entity> attributeMappingEntities = attributeMappingRepository.upsert(entityMapping.getAttributeMappings()
 				.values());
-		Entity entityMappingEntity = toEntityMappingEntity(entityMapping, attributeMappingEntities);
+		Entity entityMappingEntity;
 		if (entityMapping.getIdentifier() == null)
 		{
 			entityMapping.setIdentifier(idGenerator.generateId().toString());
+			entityMappingEntity = toEntityMappingEntity(entityMapping, attributeMappingEntities);
 			repository.add(entityMappingEntity);
 		}
 		else
 		{
+			entityMappingEntity = toEntityMappingEntity(entityMapping, attributeMappingEntities);
 			repository.update(entityMappingEntity);
 		}
 		return entityMappingEntity;
