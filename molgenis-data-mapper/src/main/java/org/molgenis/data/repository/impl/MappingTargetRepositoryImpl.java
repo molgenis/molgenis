@@ -3,7 +3,6 @@ package org.molgenis.data.repository.impl;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.molgenis.data.CrudRepository;
@@ -49,8 +48,7 @@ public class MappingTargetRepositoryImpl implements MappingTargetRepository
 
 	private Entity upsert(MappingTarget mappingTarget)
 	{
-		Map<String, EntityMapping> entityMappings = mappingTarget.getEntityMappings();
-		List<Entity> entityMappingEntities = entityMappingRepository.upsert(entityMappings.values());
+		List<Entity> entityMappingEntities = entityMappingRepository.upsert(mappingTarget.getEntityMappings());
 		Entity mappingTargetEntity;
 		if (mappingTarget.getIdentifier() == null)
 		{

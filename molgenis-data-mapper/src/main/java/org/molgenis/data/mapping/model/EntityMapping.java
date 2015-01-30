@@ -56,6 +56,11 @@ public class EntityMapping
 		return sourceEntityMetaData;
 	}
 
+	public String getName()
+	{
+		return sourceEntityMetaData.getName();
+	}
+
 	public EntityMetaData getTargetEntityMetaData()
 	{
 		return targetEntityMetaData;

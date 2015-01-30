@@ -16,7 +16,6 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.algorithm.AlgorithmService;
 import org.molgenis.data.algorithm.AlgorithmServiceImpl;
 import org.molgenis.data.mapping.MappingService;
-import org.molgenis.data.mapping.model.EntityMapping;
 import org.molgenis.data.mapping.model.MappingProject;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -98,41 +97,31 @@ public class MappingServiceController extends MolgenisPluginController
 
 		return VIEW_MAPPING_PROJECTS;
 	}
-	
+
 	@RequestMapping(value = "/addentitymapping", method = RequestMethod.POST)
 	public String addEntityMapping(@RequestParam("target") String target, @RequestParam("source") String source,
 			@RequestParam("mappingProjectId") String mappingProjectIdentifier)
 	{
 		MappingProject project = mappingService.getMappingProject(mappingProjectIdentifier);
-		project.getTargets().get(target).addSource(dataService.getEntityMetaData(source));
+		project.getMappingTarget(target).addSource(dataService.getEntityMetaData(source));
 		mappingService.updateMappingProject(project);
-		
+
 		return "redirect:/menu/main/mappingservice/mappingproject/" + mappingProjectIdentifier;
 	}
 
 	@RequestMapping("/mappingproject/{id}")
-	public String getMappingProjectScreen(@PathVariable("id") String identifier, Model model)
+	public String getMappingProjectScreen(@PathVariable("id") String identifier,
+			@RequestParam(value = "target", required = false) String target, Model model)
 	{
 		MappingProject selectedMappingProject = mappingService.getMappingProject(identifier);
-		Map<String, Iterable<AttributeMetaData>> targetAttributes = new HashMap<String, Iterable<AttributeMetaData>>();
-		for (String target : selectedMappingProject.getTargets().keySet())
+		if (target == null)
 		{
-			// Get the entity metadata for every target
-			targetAttributes.put(target, selectedMappingProject.getTargets().get(target).getTarget().getAttributes());
+			target = selectedMappingProject.getMappingTargets().get(0).getName();
 		}
-		String selectedTarget = targetAttributes.keySet().toArray()[0].toString();
-
-		// FIXME entityMapping might not be the correct term for a map with sources as keys
-		Map<String, EntityMapping> entityMappings = selectedMappingProject.getTargets().get(selectedTarget)
-				.getEntityMappings();
-
 		// Fill the model
-		model.addAttribute("selectedTarget", selectedTarget);
-		model.addAttribute("selectedTargetAttributes", targetAttributes.get(selectedTarget));
-		model.addAttribute("targetAttributes", targetAttributes);
+		model.addAttribute("selectedTarget", target);
 		model.addAttribute("mappingProject", selectedMappingProject);
 		model.addAttribute("entityMetaDatas", getEntityMetaDatas());
-		model.addAttribute("entityMappings", entityMappings);
 
 		return VIEW_ATTRIBUTE_MAPPING;
 	}
@@ -167,7 +156,7 @@ public class MappingServiceController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/mappingattribute/testscript", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-	public @ResponseBody Map<String, Object> testScrpit(@RequestBody MappingServiceRequest mappingServiceRequest)
+	public @ResponseBody Map<String, Object> testScript(@RequestBody MappingServiceRequest mappingServiceRequest)
 	{
 		Map<String, Object> results = new HashMap<String, Object>();
 
@@ -200,6 +189,7 @@ public class MappingServiceController extends MolgenisPluginController
 				AlgorithmServiceImpl.extractFeatureName(mappingServiceRequest.getAlgorithm()),
 				new Function<String, AttributeMetaData>()
 				{
+					@Override
 					public AttributeMetaData apply(final String attributeName)
 					{
 						return sourceEntityMetaData != null && sourceEntityMetaData.getAttribute(attributeName) != null ? sourceEntityMetaData

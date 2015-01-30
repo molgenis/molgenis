@@ -28,32 +28,32 @@
 <div class="row">
 	<div class="col-md-12">
 		<div class="col-md-6">
-			<table class="table table-bordered">
-	 			<thead>
-	 				<tr>
-	 					<th>Mapping name</th>
-	 					<th>Owner</th>
-	 					<th>Target entities</th>
-	 					<th>Mapped sources</th>
-	 				</tr>
-	 			</thead>
-	 			<tbody>
-	 				<#if mappingProjects??>
+			<#if mappingProjects??>
+				<table class="table table-bordered">
+		 			<thead>
+		 				<tr>
+		 					<th>Mapping name</th>
+		 					<th>Owner</th>
+		 					<th>Target entities</th>
+		 					<th>Mapped sources</th>
+		 				</tr>
+		 			</thead>
+		 			<tbody>
 		 				<#list mappingProjects as project>
 		 				<tr>	 					
-		 					<td><a href="${context_url}/mappingproject/${project.identifier}">${project.name}</a></td>
-		 					<td>${project.owner.username}</td>
+		 					<td><a href="${context_url}/mappingproject/${project.identifier}">${project.name?html}</a></td>
+		 					<td>${project.owner.username?html}</td>
 		 					<td>
-		 					<#list project.targets?keys as target>
-		 						${target}<#if target_has_next>, </#if>
+		 					<#list project.mappingTargets as target>
+		 						${target.name?html}<#if target_has_next>, </#if>
 	 						</#list>
 	 						</td>
 		 					<td></td>	
 		 				</tr>
 		 				</#list>
-	 				</#if>
-	 			</tbody>
-			</table>
+		 			</tbody>
+				</table>
+			</#if>
 		</div>
 	</div>
 </div>

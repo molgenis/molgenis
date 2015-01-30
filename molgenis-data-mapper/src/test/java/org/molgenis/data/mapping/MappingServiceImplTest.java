@@ -108,9 +108,9 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		final String mappingProjectId = added.getIdentifier();
 		assertNotNull(mappingProjectId);
 		expected.setIdentifier(mappingProjectId);
-		final String mappingTargetId = added.getTargets().get("HopEntity").getIdentifier();
+		final String mappingTargetId = added.getMappingTarget("HopEntity").getIdentifier();
 		assertNotNull(mappingTargetId);
-		expected.getTargets().get("HopEntity").setIdentifier(mappingTargetId);
+		expected.getMappingTarget("HopEntity").setIdentifier(mappingTargetId);
 		assertEquals(added, expected);
 
 		MappingProject retrieved = mappingService.getMappingProject(mappingProjectId);
@@ -142,4 +142,18 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 
 		}
 	}
+
+	@Test
+	public void testAddNewSource()
+	{
+		MappingProject mappingProject = mappingService.addMappingProject("Test123", user, "HopEntity");
+
+		// now add new source
+		mappingProject.getMappingTarget("HopEntity").addSource(geneMetaData);
+		mappingService.updateMappingProject(mappingProject);
+
+		MappingProject retrieved = mappingService.getMappingProject(mappingProject.getIdentifier());
+		assertEquals(retrieved, mappingProject);
+	}
+
 }

@@ -129,7 +129,12 @@ public class InMemoryRepository implements CrudRepository
 	@Override
 	public void update(Entity entity)
 	{
-		entities.put(getId(entity), entity);
+		Object id = getId(entity);
+		if (!entities.containsKey(id))
+		{
+			throw new IllegalStateException("No entity with id " + id);
+		}
+		entities.put(id, entity);
 	}
 
 	@Override
@@ -176,7 +181,12 @@ public class InMemoryRepository implements CrudRepository
 	@Override
 	public void add(Entity entity)
 	{
-		entities.put(getId(entity), entity);
+		Object id = getId(entity);
+		if (entities.containsKey(id))
+		{
+			throw new IllegalStateException("Entity with id " + id + " already exists");
+		}
+		entities.put(id, entity);
 	}
 
 	@Override
