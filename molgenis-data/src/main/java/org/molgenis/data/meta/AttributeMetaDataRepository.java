@@ -14,6 +14,7 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.LOOKUP_ATTRIBUTE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.NAME;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.NILLABLE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.PART_OF_ATTRIBUTE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.PREDICATE_IRI;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MAX;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MIN;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.READ_ONLY;
@@ -168,6 +169,7 @@ class AttributeMetaDataRepository
 		attributeMetaDataEntity.set(LABEL_ATTRIBUTE, att.isLabelAttribute());
 		attributeMetaDataEntity.set(READ_ONLY, att.isReadonly());
 		attributeMetaDataEntity.set(UNIQUE, att.isUnique());
+		attributeMetaDataEntity.set(PREDICATE_IRI, att.getPredicateIri());
 		if (parentCompoundAtt != null)
 		{
 			attributeMetaDataEntity.set(PART_OF_ATTRIBUTE, parentCompoundAtt.getName());
@@ -270,6 +272,7 @@ class AttributeMetaDataRepository
 				.getBoolean(LABEL_ATTRIBUTE));
 		attributeMetaData.setReadOnly(entity.getBoolean(READ_ONLY) == null ? false : entity.getBoolean(READ_ONLY));
 		attributeMetaData.setUnique(entity.getBoolean(UNIQUE) == null ? false : entity.getBoolean(UNIQUE));
+		attributeMetaData.setPredicateIri(entity.getString(PREDICATE_IRI));
 
 		Long rangeMin = entity.getLong(RANGE_MIN);
 		Long rangeMax = entity.getLong(RANGE_MAX);
