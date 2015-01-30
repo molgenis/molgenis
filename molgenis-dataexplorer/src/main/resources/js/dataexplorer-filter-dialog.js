@@ -23,7 +23,11 @@
 		$('.filter-title', modal).html(title);
 		$('.filter-description', modal).html(description);
 
-		filter = molgenis.filters.create(attribute, {query: query}, $('.form-horizontal', modal));
+		molgenis.filters.create(attribute, { // FIXME replace with react call
+			query: query, onQueryChange: function(event) {
+				filter = event;
+			}
+		}, $('.form-horizontal', modal));
 		modal.modal('show');
 	};
 	
@@ -38,7 +42,7 @@
 	function createFilterModalControls(modal) {
 		$('.filter-apply-btn', modal).unbind('click');
 		$('.filter-apply-btn', modal).click(function() {
-			$(document).trigger('updateAttributeFilters', {filters: [{attr: filter.getAttribute().name, query: filter.getQuery()}]}); // FIXME check if changed
+			$(document).trigger('updateAttributeFilters', {filters: [{attr: filter.attr, query: filter.query}]}); // FIXME check if changed
 		});
 		
 		$(modal).unbind('shown.bs.modal');

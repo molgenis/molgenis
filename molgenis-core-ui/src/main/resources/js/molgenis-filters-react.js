@@ -28,7 +28,41 @@
 		}
 	};
 	
-	
+	var FilterGroup = React.createClass({
+		getInitialState: function() {
+			return {query: this.props.query, queries: {}}; // FIXME split query in queries
+		},
+		componentWillReceiveProps : function(nextProps) {
+			this.setState({query: this.props.query}); // FIXME split query in queries
+		},
+		render: function() {console.log('render FilterGroup', this.state, this.props);
+			var self = this;
+			var filters = $.map(self.props.attrs, function(attr, index) {console.log(attr, index);
+				var query = self.state.queries[attr.name] || null;
+				return (
+					<div className="form-group">
+						<label for="something" className="col-md-4 control-label">{attr.label}</label>
+						<div className="col-md-8">
+							<Filter attr={attr} query={query} onQueryChange={self._handleOnQueryChange} />
+						</div>
+					</div>
+				); // FIXME label-for
+			});
+			return (<div className="form-horizontal">{filters}</div>);
+		},
+		_handleOnQueryChange: function(event) {console.log('_handleOnQueryChange FilterGroup', event);
+			this.state.queries[event.attr] = event.query;
+			this.setState({queries: this.state.queries});
+// FIXME boxes not ticked
+			var rules = $.map(this.state.queries, function(query) {
+				return [query, {operator: 'AND'}];
+			});
+			// FIXME remove trailing operator
+			// FIXME return query instead of array of query rules
+			this.props.onQueryChange({query: rules});
+		}
+	});
+
 	/**
 	 * Attribute filter with clear control
 	 */
@@ -46,17 +80,17 @@
 			var attr = this.props.attr;
 			switch(this.props.attr.fieldType) {
 				case 'BOOL':
-					var cols = 9;
+					var cols = 9; // align value filters with composed filters
 					filter = <ValueFilter cols={cols} {...this.props} query={query} onQueryChange={this._handleOnQueryChange} />;
 					break;
 				case 'CATEGORICAL':
+				case 'XREF':
+				case 'ENUM':
 					var multiple = true;
-					var cols = 9;
+					var cols = 9; // align value filters with composed filters
 					filter = <ValueFilter cols={cols} {...this.props} multiple={multiple} query={query} onQueryChange={this._handleOnQueryChange} />;
 					break;
-				case 'XREF':
 				case 'EMAIL':
-				case 'ENUM':
 				case 'HTML':
 				case 'HYPERLINK':
 				case 'MREF':
@@ -85,7 +119,7 @@
 						{filter}
 					</div>
 					<div className="col-md-2">
-						<button className={clearBtnClasses} type="button" onClick={this._handleOnClearFilterClick}>
+						<button className={clearBtnClasses} type="button" title="Reset this filter" onClick={this._handleOnClearFilterClick}>
 							<span className="glyphicon glyphicon-remove"></span>
 						</button>
 					</div>
@@ -102,6 +136,9 @@
 		}
 	});
 
+	/**
+	 * Attribute filter composed of attribute filters that can be added/removed and operators that define the relations between them
+	 */
 	var ComposedFilter = React.createClass({
 		getInitialState: function() {
 			return {filters: this._toFilters(this.props.query)};
@@ -109,12 +146,12 @@
 		componentWillReceiveProps : function(nextProps) {
 			this.setState({filters: this._toFilters(nextProps.query)});
 		},
-		render: function() {console.log('render Filter', this.state, this.props);
+		render: function() {console.log('render ComposedFilter', this.state, this.props);
 			var self = this;
 			var filterParts = $.map(this.state.filters, function(query, index) {
 				return <ComposedFilterPart {...self.props} query={query} index={index} key={'part-' + index}
 							hideAddBtn={self.props.query === null}
-							hideRemoveBtn={self.props.query === null || self.state.filters.length == 1}
+							hideRemoveBtn={self.props.query === null || self.state.filters.length === 1}
 							onAddFilterPart={self._handleAddFilterPart}
 							onRemoveFilterPart={self._handleRemoveFilterPart}
 							onFilterPartQueryChange={self._handleOnFilterPartQueryChange} />;
@@ -137,23 +174,19 @@
 		_handleRemoveFilterPart: function(event) {console.log('_handleRemoveFilterPart ComposedFilter', event);
 			var filters = this.state.filters;
 			var removed = filters.splice(event.index > 0 ? event.index - 1 : 0, filters.length > 1 ? 2 : 1); // remove filter and operator
+			console.log('removed', event.index, removed, filters);
 			this.setState({filters: filters});
 			
-			if(removed[removed.length - 1] !== null) {
-				this.props.onQueryChange({
-					attr: event.attr,
-					query: this._toQuery(filters)
-				});
-			}
+			this.props.onQueryChange({
+				attr: event.attr,
+				query: this._toQuery(filters)
+			});
 		},
 		_toFilters: function(query) {
 			var filters = [];
 			if(query) {
 				if(query.operator === 'NESTED') {
 					for(var i = 0; i < query.nestedRules.length; ++i) {
-						if(i > 0) {
-							filters.push({operator: 'OR'}); // FIXME can be and for mref
-						}
 						filters.push(query.nestedRules[i]);
 					}
 				} else {
@@ -176,7 +209,7 @@
 			} else {
 				// remove nulls and related operators
 				var rules = []; // TODO remove duplicates
-				for(var i = 0; i < filters.length; i +=2) { // FIXME query on two inputs, first empty, second filled, extra OR clause
+				for(var i = 0; i < filters.length; i +=2) {
 					if(filters[i] !== null) {
 						if(i > 0) {
 							rules.push(filters[i - 1]);
@@ -219,10 +252,10 @@
 						{filter}
 					</div>
 					<div className="col-md-3">
-						<button className={addBtnClasses} type="button" onClick={this._handleAddFilterPartClick}>
+						<button className={addBtnClasses} type="button" title="Add a filter clause" onClick={this._handleAddFilterPartClick}>
 							<span className="glyphicon glyphicon-plus"></span>
 						</button>
-						<button className={removeBtnClasses} type="button" onClick={this._handleRemoveFilterPartClick}>
+						<button className={removeBtnClasses} type="button" title="Remove this filter clause" onClick={this._handleRemoveFilterPartClick}>
 							<span className="glyphicon glyphicon-minus"></span>
 						</button>
 					</div>
@@ -236,7 +269,7 @@
 			this.props.onAddFilterPart();
 		},
 		_handleRemoveFilterPartClick: function() {console.log('_handleRemoveFilterPartClick ComposedFilterPart');
-			this.props.onRemoveFilterPart({index: this.props.index, attr: this.props.attr.name}); // FIXME add query?
+			this.props.onRemoveFilterPart({index: this.props.index, attr: this.props.attr.name});
 		},
 	});
 	
@@ -249,14 +282,17 @@
 			if(this.props.query) {
 				switch(this.props.query.operator) {
 					case 'GREATER_EQUAL':
-						event.query.operator = 'GREATER_EQUAL';
+						if(event.query !== null) {
+							event.query.operator = 'GREATER_EQUAL';
+						}
 						break;		
 					case 'LESS_EQUAL':
 						event.query.operator = 'RANGE';
-						event.query.value = [event.query.value, this.props.query.value];
+						event.query.value = [event.query ? event.query.value : undefined, this.props.query.value];
 						break;
-					case 'RANGE': // FIXME from > to check
-						event.query.value = [event.query.value, this.props.query.value];
+					case 'RANGE':
+						event.query.operator = 'RANGE';
+						event.query.value = [event.query ? event.query.value : undefined, this.props.query.value[1]];
 						break;
 					default:
 						return null;
@@ -272,13 +308,16 @@
 				switch(this.props.query.operator) {
 					case 'GREATER_EQUAL':
 						event.query.operator = 'RANGE';
-						event.query.value = [this.props.query.value, event.query.value];
+						event.query.value = [this.props.query.value, event.query ? event.query.value : undefined];
 						break;	
 					case 'LESS_EQUAL':
-						event.query.operator = 'LESS_EQUAL';
+						if(event.query !== null) {
+							event.query.operator = 'LESS_EQUAL';
+						}
 						break;
-					case 'RANGE': // FIXME from > to check
-						event.query.value = [this.props.query.value, event.query.value];
+					case 'RANGE':
+						event.query.operator = 'RANGE';
+						event.query.value = [this.props.query.value[0], event.query ? event.query.value : undefined];
 						break;
 					default:
 						return null;
@@ -353,10 +392,10 @@
 			return (
 				<div className="form-group">
 					<div className="col-md-6">
-						<AttributeFilter {...this.props} query={this._extractFromQuery()} onQueryChange={this._handleFromQueryChange} />
+						<AttributeFilter {...this.props} placeholder="From" query={this._extractFromQuery()} onQueryChange={this._handleFromQueryChange} />
 					</div>
 					<div className="col-md-6">
-						<AttributeFilter {...this.props} query={this._extractToQuery()} onQueryChange={this._handleToQueryChange} />
+						<AttributeFilter {...this.props} placeholder="To" query={this._extractToQuery()} onQueryChange={this._handleToQueryChange} />
 					</div>
 				</div>	
 		    );
@@ -373,12 +412,12 @@
 				<div>
 					<div className="form-group">
 						<div className="col-md-12">
-							<AttributeFilter {...this.props} query={this._extractFromQuery()} onQueryChange={this._handleFromQueryChange} />
+							<AttributeFilter {...this.props} placeholder="From" query={this._extractFromQuery()} onQueryChange={this._handleFromQueryChange} />
 						</div>
 					</div>
 					<div className="form-group">
 						<div className="col-md-12">
-							<AttributeFilter {...this.props} query={this._extractToQuery()} onQueryChange={this._handleToQueryChange} />
+							<AttributeFilter {...this.props} placeholder="To" query={this._extractToQuery()} onQueryChange={this._handleToQueryChange} />
 						</div>
 					</div>
 				</div>
@@ -392,29 +431,78 @@
 	var RangeSliderFilter = React.createClass({// FIXME init with value
 		mixins: [RangeValueFilterMixin],
 		render: function() {console.log('render RangeSliderFilter', this.state, this.props);
+			var value = this._toValue(this.props.query);
 			return(
 				<div className="form-group">
 					<div className="col-md-offset-1 col-md-10">
-						<controls.RangeSliderControl range={this.props.attr.range} disabled={this.props.disabled} />
+						<controls.RangeSliderControl range={this.props.attr.range} step={this.props.step} disabled={this.props.disabled} value={value} onValueChange={this._handleValueChange} />
 					</div>
 				</div>
 			); //FIXME handle change event
+		},
+		_handleValueChange: function(event) {console.log('_handleValueChange RangeSliderFilter', event);
+			var attr = this.props.attr;
+
+			var fromValue = event.value[0] !== attr.range.min ? event.value[0] : undefined;
+			var toValue = event.value[1] !== attr.range.max ? event.value[1] : undefined;
+
+			var query;
+			if(fromValue && toValue) {
+				query = {
+					field : attr.name,
+					operator : 'RANGE',
+					value : [fromValue, toValue]
+				};
+			} else if(fromValue) {
+				query = {
+					field : attr.name,
+					operator : 'GREATER_EQUAL',
+					value : fromValue
+				};
+			} else if(toValue) {
+				query = {
+					field : attr.name,
+					operator : 'LESS_EQUAL',
+					value : toValue
+				};
+			} else {
+				query = null;
+			}
+			
+			this.props.onQueryChange({attr: attr.name, query: query});
+		},
+		_toValue: function(query) {
+			var value;
+			if(query) {
+				if(query.operator === 'GREATER_EQUAL') {
+					value = [query.value, undefined];
+				} else if(query.operator === 'LESS_EQUAL') {
+					value = [undefined, query.value];
+				} else if(query.operator === 'RANGE') {
+					value = query.value;
+				}
+			}
+			return value;
 		}
 	});
 	
 	/**
-	 * Attribute RANGE filter with a 'from' and 'to' input
+	 * Attribute range filter with a 'from' and 'to' input
 	 */
 	var RangeValueFilter = React.createClass({
 		render: function() {console.log('render RangeValueFilter', this.state, this.props);
-			switch(this.props.attr.fieldType) {
+			var attrType = this.props.attr.fieldType;
+			switch(attrType) {
 				case 'DECIMAL':
 				case 'INT':
 				case 'LONG':
-					if(this.props.attr.range)
-						return (<RangeSliderFilter {...this.props} onQueryChange={this.props.onQueryChange} />); // FIXME value
-					else
+					if(this.props.attr.range) {
+						var step = attrType === 'DECIMAL' ? false : '1';
+						return (<RangeSliderFilter {...this.props} step={step} onQueryChange={this.props.onQueryChange} />);
+					}
+					else {
 						return (<HorizontalRangeValueFilter {...this.props} onQueryChange={this.props.onQueryChange} />);
+					}
 				default:
 					return (<VerticalRangeValueFilter {...this.props} onQueryChange={this.props.onQueryChange} />);
 			}
@@ -464,7 +552,7 @@
 		},
 		getInitialState: function() {
 			return {
-				disabled: false
+				disabled: this._disableFilter(this.props.query)
 			};
 		},
 		componentWillReceiveProps : function(nextProps) {
@@ -497,7 +585,7 @@
 				disabled: event.value
 			});
 			event.value = event.value === true ? null : undefined;
-			this.props.onQueryChange({attr: this.props.attr.name, query: this._toQuery(event)});
+			this.props.onQueryChange({attr: this.props.attr.name, query: this._toQuery({attr: this.props.attr.name, value: event.value})});
 		},
 		_disableFilter: function(query) {
 			return this._toValue(query) === null;
@@ -542,9 +630,15 @@
 									
 	molgenis.filters.create = function(attr, props, $container) {
 		props.attr = attr; // FIXME
-		props.initialQuery = props.query;
-		props.query = null;
+		props.query = props.query || null;
 		
 		React.render(<Filter {...props} />, $container[0]);
+	};
+
+	molgenis.filters.createGroup = function(attrs, props, $container) {
+		props.attrs = attrs; // FIXME
+		props.query = props.query || null;
+		
+		React.render(<FilterGroup {...props} />, $container[0]);
 	};
 }($, window.top.molgenis = window.top.molgenis || {}));

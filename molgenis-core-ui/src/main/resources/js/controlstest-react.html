@@ -6,29 +6,32 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link href="../css/bootstrap.min.css" rel="stylesheet">
         <link href="../css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+        <link href="../css/jquery-ui-1.9.2.custom.min.css" rel="stylesheet">
         <link href="../css/select2.css" rel="stylesheet">
+        <link href="../css/iThing-min.css" rel="stylesheet">
         <link href="../css/molgenis-controls.css" rel="stylesheet">
         <link href="../css/molgenis.css" rel="stylesheet">
-        <script src="http://fb.me/react-with-addons-0.12.2.js"></script>
-        <script src="http://fb.me/JSXTransformer-0.12.2.js"></script>
+        <script src="../js/react-with-addons.js"></script>
+        <script src="../js/JSXTransformer.js"></script>
+        <script src="../js/underscore-min.js"></script>
         <script src="../js/jquery-2.1.1.min.js"></script>
         <script src="../js/bootstrap.min.js"></script>
+        <script src="../js/jquery-ui-1.9.2.custom.min.js"></script>
         <script src="../js/moment-with-locales.min.js"></script>
         <script src="../js/bootstrap-datetimepicker.min.js"></script>
         <script src="../js/handlebars.min.js"></script>
         <script src="../js/select2.min.js"></script>
+        <script src="../js/jQEditRangeSlider-min.js"></script>        
         <script src="../js/molgenis.js"></script>
-        <script type="text/jsx" src="../js/molgenis-controls-react.js"></script>        
+        <script type="text/jsx" src="../js/molgenis-controls-react.js"></script>
+        <script type="text/jsx" src="../js/molgenis-controls-react-test.js"></script>       
     </head>
     <body>
-    <div class="alert alert-success alert-dismissible" role="alert">
-	  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-	  <p> Better check yourself, you're not looking too good.</p>
-	</div>
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-6">
 				    <div id="input-container"></div>
+				    <div id="input-container-enum"></div>
                 </div>
             </div>
         </div>
@@ -40,34 +43,5 @@
             </div>
         </form>
         </script>
-	    <script>
-			$(function() {
-				var template = Handlebars.compile($("#attr-control-form-template").html());
-				
-				$.get('/api/v1/org_molgenis_test_TypeTest/meta?expand=attributes').done(function(meta) {
-	                var $container = $('#input-container');
-	                for(var key in meta.attributes) {
-	                    var attr = meta.attributes[key];
-	                    if(attr.name !== 'id') {
-	                    	
-	                    	if(attr.name === 'xstring') {
-		                    	var type = 'x';
-	                            $container.append(template({name: attr.name}));
-	                            //try {
-	                                molgenis.controls.create(attr, {
-	                                	attr: attr,
-	                                    onValueChange : function(value) {
-	                                        console.log(value);
-	                                    }
-	                                }, $('#' + attr.name + '-filter-container'));
-	                            //} catch(err) {
-	                                //console.log(err);
-	                            //}
-	                    	}
-	                    }
-	                }
-				});
-			});
-		</script>
 	</body>
 </html>

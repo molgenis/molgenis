@@ -16,6 +16,8 @@
 <#assign js=[
 	"jquery-ui-1.9.2.custom.min.js",
 	"jquery.bootstrap.wizard.min.js",
+	"react-with-addons.js",
+    "JSXTransformer.js",
 	"moment-with-locales.min.js",
 	"bootstrap-datetimepicker.min.js",
 	"dataexplorer-filter.js",
@@ -29,9 +31,7 @@
 	"jquery.molgenis.xrefmrefsearch.js",
 	"dataexplorer.js",
 	"jquery.molgenis.table.js",
-	"bootbox.min.js",
-	"molgenis-controls.js",
-	"molgenis-filters.js"]>
+	"bootbox.min.js"]>
 
 <@header css js/>
 <div class="row">

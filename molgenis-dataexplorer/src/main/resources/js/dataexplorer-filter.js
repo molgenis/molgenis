@@ -40,6 +40,9 @@
 				case 'EQUALS':
 					str += query.value;
 					break;
+				case 'RANGE':
+					str += query.value[0] + ' \u2264 x \u2264 ' + query.value[1];
+					break;
 				case 'LESS_EQUAL':
 					str += '\u2264 ' + query.value; // unicode for less-than or equal to char 
 					break;

@@ -25,6 +25,7 @@
     <![endif]-->
 		<script src="<@resource_href "/js/jquery-2.1.1.min.js"/>"></script>
 		<script src="<@resource_href "/js/bootstrap.min.js"/>"></script>
+		<script src="<@resource_href "/js/underscore-min.js"/>"></script>
 		<script src="<@resource_href "/js/jquery.validate.min.js"/>"></script>
 		<script src="<@resource_href "/js/handlebars.min.js"/>"></script>
 		<script src="<@resource_href "/js/molgenis.js"/>"></script>
@@ -37,6 +38,8 @@
 	<#if molgenis_ui.hrefJs?has_content>
 		<script src="<@resource_href "/js/${molgenis_ui.hrefJs?html}"/>"></script>
 	</#if>
+        <script type="text/jsx" src="<@resource_href "/js/molgenis-controls-react.js"/>"></script>
+        <script type="text/jsx" src="<@resource_href "/js/molgenis-filters-react.js"/>"></script>
 	</head>
 	<body>
 		<#-- Navbar menu -->

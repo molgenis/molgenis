@@ -13,6 +13,13 @@ import org.testng.annotations.Test;
 
 public class QueryImplTest
 {
+	@Test
+	public void rng()
+	{
+		Query q = new QueryImpl().rng("field", "min", "max");
+		QueryRule expectedRule = new QueryRule("field", Operator.RANGE, Arrays.asList("min", "max"));
+		assertEquals(q.getRules(), Arrays.asList(expectedRule));
+	}
 
 	@Test
 	public void nest()
