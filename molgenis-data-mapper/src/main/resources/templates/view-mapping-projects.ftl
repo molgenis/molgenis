@@ -13,8 +13,22 @@
 		<div class="col-md-6">
 			<h1>Mapping projects overview</h1>
 			<p>Create and view mapping projects</p>
+			
+			<div class="btn-group" role="group">
+				<a href="#" class="btn btn-primary" data-toggle="modal" data-target="#create-new-mapping-project-modal">Create a new mapping</a>  				
+			</div>
+			<div class="btn-group" role="group">
+				<button type="button" class="btn btn-success">Edit</button>  				
+			</div>
+			
 			<hr></hr>
-			<table class="table">
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-12">
+		<div class="col-md-6">
+			<table class="table table-bordered">
 	 			<thead>
 	 				<tr>
 	 					<th>Mapping name</th>
@@ -41,28 +55,6 @@
 	 			</tbody>
 			</table>
 		</div>
-		<div class="col-md-6">
-			More possible content...
-		</div>
-	</div>
-</div>
-	
-<div class="row">
-	<div class="col-md-12">
-		<div class="col-md-6">
-			<div class="btn-group" role="group">
-				<a href="#" class="btn btn-primary" data-toggle="modal" data-target="#create-new-mapping-project-modal">Create a new mapping</a>  				
-			</div>
-			<div class="btn-group" role="group">
-				<button type="button" class="btn btn-success">Edit</button>  				
-			</div>
-		</div>
-	</div>
-</div>
-
-<div class="row">
-	<div class="col-md-12">
-	<br>
 	</div>
 </div>
 

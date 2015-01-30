@@ -27,11 +27,11 @@
 
 <div class="row">
 	<div class="col-md-12">
-		<div class="col-md-3">
+		<div class="col-md-6">
 			<form class="form-inline">
 				<div class="form-group">
 					<label>Select the Target entity</label>
-					<select id="target-entity-select" name="target-entity" class="form-control" required="required" placeholder="Select a target entity" style="width:100px">
+					<select id="target-entity-select" name="target-entity" class="form-control" required="required" placeholder="Select a target entity" style="width:200px">
 						<#list targets as target>
 							<option value="${target}" <#if selectedTarget?? && (target == selectedTarget)>selected</#if>>${target}</option>
 						</#list>
@@ -47,16 +47,43 @@
 
 <div class="row">
 	<div class="col-md-12" id="target-mapping-table">
-		<div class="col-md-3">
+		<div class="col-md-6">
 			<table class="table">
 	 			<thead>
 	 				<tr>
 	 					<th>Target model: ${selectedTarget}</th>
+ 					<#if entityMappings??>
+ 						<#list entityMappings?keys as source>
+ 						<th>Source: ${source}</th>
+ 						</#list>
+					</#if>
 	 				</tr>
 	 			</thead>
 	 			<tbody>
 				<#list selectedTargetAttributes as attribute>
-					<tr><td>${attribute.name}</td></tr>
+					<tr>
+						<td>
+							${attribute.name}
+						</td>
+					<#if entityMappings??>
+						<#list entityMappings?keys as source>
+							
+						<td>
+							<#if entityMappings[source].attributeMappings[attribute.name]??>
+							${entityMappings[source].attributeMappings[attribute.name].sourceAttributeMetaData.name}
+							<button class="btn btn-primary btn-xs">
+								<span class="glyphicon glyphicon-pencil"></span>
+							</button>
+							<#else>
+								Spinner here...
+								<button class="btn btn-primary btn-xs">
+									<span class="glyphicon glyphicon-pencil"></span>
+								</button>
+							</#if>
+						</td>
+						</#list>
+					</#if>
+					</tr>
 				</#list>
 				</tbody>
 			</table>
@@ -73,14 +100,21 @@
 	        		<h4 class="modal-title" id="create-new-source-column-modal-label">Create a new mapping project</h4>
 	        	</div>
 	        	<div class="modal-body">	
-					<div class="form-group">
-	            		<label>Select a new source to map against the target attribute</label>
-  						<select id="new-source-entity" class="form-control" required="required" placeholder="Select a target entity">
-	    					<#list entityMetaDatas.iterator() as entityMetaData>
-    							<option value="${entityMetaData.name?html}">${entityMetaData.name?html}</option>
-	    					</#list>
-						</select>
-					</div>
+	        		<form id="create-new-source-form" method="post" action="${context_url}/addentitymapping">	
+						<div class="form-group">
+		            		<label>Select a new source to map against the target attribute</label>
+	  						<select name="source" class="form-control" required="required" placeholder="Select a target entity">
+		    					<#list entityMetaDatas.iterator() as entityMetaData>
+	    							<option value="${entityMetaData.name?html}">${entityMetaData.name?html}</option>
+		    					</#list>
+							</select>
+						</div>
+						
+						<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}">
+						<input type="hidden" name="target" value="${selectedTarget}">
+						<input type="submit" class="submit" style="display:none;">
+					</form>
+	        	
         		</div>
         		
 	        	<div class="modal-footer">
