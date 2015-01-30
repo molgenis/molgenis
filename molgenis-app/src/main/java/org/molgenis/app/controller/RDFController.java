@@ -69,7 +69,7 @@ public class RDFController extends MolgenisPluginController
                         connect(subject, predicate, object, model);
                     } else {
                         Resource subject = model.createResource(entity.getString(entity.getEntityMetaData().getIdAttribute().getName()));
-                        Property predicate = model.createProperty(ns.concat(metaData.getName()));
+                        Property predicate = model.createProperty(metaData.getName());
                         Resource object = model.createResource(entity.getString(metaData.getName())!=null?entity.getString(metaData.getName()):"");
 
                         connect(subject, predicate, object, model);
