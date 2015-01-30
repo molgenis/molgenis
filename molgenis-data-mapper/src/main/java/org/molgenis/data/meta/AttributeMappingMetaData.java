@@ -1,8 +1,6 @@
 package org.molgenis.data.meta;
 
 import org.molgenis.data.support.DefaultEntityMetaData;
-import static org.molgenis.MolgenisFieldTypes.STRING;
-import static org.molgenis.MolgenisFieldTypes.XREF;
 
 public class AttributeMappingMetaData extends DefaultEntityMetaData
 {
@@ -16,9 +14,9 @@ public class AttributeMappingMetaData extends DefaultEntityMetaData
 	{
 		super(ENTITY_NAME);
 
-		addAttribute(IDENTIFIER).setIdAttribute(true).setNillable(false).setDataType(STRING);
-		addAttribute(SOURCEATTRIBUTEMETADATA);
-		addAttribute(TARGETATTRIBUTEMETADATA);
-		addAttribute(ALGORITHM).setDataType(STRING);
+		addAttribute(IDENTIFIER).setIdAttribute(true).setNillable(false);
+		addAttribute(SOURCEATTRIBUTEMETADATA).setNillable(false);
+		addAttribute(TARGETATTRIBUTEMETADATA).setNillable(false);
+		addAttribute(ALGORITHM);
 	}
 }

@@ -29,6 +29,13 @@
     var genomeBrowserSettings = {};
     var featureInfoMap = {};
 
+    $(document).on('dataChange.diseasematcher', function(e) {
+    	if (e.namespace !== 'data'){
+    		//TODO: implement refresh table functionality
+        	$('#data-table-container').table('setQuery', getQuery());
+    	}
+	});
+    
     /**
 	 * @memberOf molgenis.dataexplorer.data
 	 */
@@ -51,9 +58,13 @@
 		$('#data-table-container').table({
 			'entityMetaData' : getEntity(),
 			'attributes' : attributes,
+			'maxRows' : 18,
 			'query' : getQuery(),
 			'editable' : editable,
-			'rowClickable': rowClickable
+			'rowClickable': rowClickable,
+			'onDataChange' : function(){
+				$(document).trigger('dataChange.data');
+			}
 		});
 	}
 	

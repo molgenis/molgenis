@@ -8,8 +8,6 @@
 <@createNewMappingProjectModal />
 
 <!--Table containing mapping projects-->
-<#-- TODO -->
-<#-- Make Project name link to attribute mapping screen  -->
 <div class="row">
 	<div class="col-md-12">
 		<div class="col-md-6">
@@ -21,23 +19,25 @@
 	 				<tr>
 	 					<th>Mapping name</th>
 	 					<th>Owner</th>
-	 					<th>Target entity</th>
+	 					<th>Target entities</th>
 	 					<th>Mapped sources</th>
 	 				</tr>
 	 			</thead>
 	 			<tbody>
-	 				<#list mappingProjects as project>
-	 				<tr>	 					
-	 					<td><a href="${context_url}/attributemapping/${project.getIdentifier()}">${project.getIdentifier()}</a></td>
-	 					<td>${project.getOwner()}</td>
-	 					<td>Target entity</td>
-	 					<td>
-	 					<#list project.getEntityMappings() as source>>
-	 						${source.getIdentifier()}<#if source_has_next>, </#if>
- 						</#list>
-	 					</td>	
-	 				</tr>
-	 				</#list>
+	 				<#if mappingProjects??>
+		 				<#list mappingProjects as project>
+		 				<tr>	 					
+		 					<td><a href="${context_url}/mappingproject/${project.identifier}">${project.name}</a></td>
+		 					<td>${project.owner.username}</td>
+		 					<td>
+		 					<#list project.targets?keys as target>
+		 						${target}<#if target_has_next>, </#if>
+	 						</#list>
+	 						</td>
+		 					<td></td>	
+		 				</tr>
+		 				</#list>
+	 				</#if>
 	 			</tbody>
 			</table>
 		</div>
@@ -68,8 +68,6 @@
 
 <@footer/>
 
-<#-- TODO -->
-<#-- Generate target entity list dynamicly -->
 <#macro createNewMappingProjectModal>
 	<div class="modal fade" id="create-new-mapping-project-modal" tabindex="-1" role="dialog" aria-labelledby="create-new-mapping-project-modal" aria-hidden="true">
 		<div class="modal-dialog">
@@ -90,7 +88,7 @@
 						<div class="form-group">
 							<label>Select the Target entity</label>
 							<select name="target-entity" class="form-control" required="required" placeholder="Select a target entity">
-		    					<#list entitiesMeta.iterator() as entityMetaData>
+		    					<#list entityMetaDatas.iterator() as entityMetaData>
 		    						<option value="${entityMetaData.name?html}">${entityMetaData.name?html}</option>
 		    					</#list>
 							</select>
