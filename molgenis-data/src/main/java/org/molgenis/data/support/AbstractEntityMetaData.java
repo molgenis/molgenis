@@ -162,6 +162,12 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 			{
 				throw new UnsupportedOperationException();
 			}
+
+			@Override
+			public String getPredicateIri()
+			{
+				throw new UnsupportedOperationException();
+			}
 		}).skip(1);
 	}
 

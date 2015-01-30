@@ -41,6 +41,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	private List<AttributeMetaData> attributesMetaData;
 	private boolean aggregateable = false;
 	private Range range;
+	private String predicateIri;
 
 	public DefaultAttributeMetaData(String name, FieldTypeEnum fieldType)
 	{
@@ -56,7 +57,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		this.name = name;
 		this.fieldType = MolgenisFieldTypes.STRING;
 	}
-	
+
 	public DefaultAttributeMetaData(String newName, AttributeMetaData attributeMetaData)
 	{
 		this(attributeMetaData);
@@ -87,6 +88,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		this.auto = attributeMetaData.isAuto();
 		this.aggregateable = attributeMetaData.isAggregateable();
 		this.range = attributeMetaData.getRange();
+		this.predicateIri = attributeMetaData.getPredicateIri();
 
 		// deep copy
 		Iterable<AttributeMetaData> attributeParts = attributeMetaData.getAttributeParts();
@@ -156,6 +158,11 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public void setReadOnly(boolean readOnly)
 	{
 		this.readOnly = readOnly;
+	}
+
+	public void setPredicateIri(String iri)
+	{
+		this.predicateIri = iri;
 	}
 
 	@Override
@@ -451,5 +458,11 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		}
 
 		return true;
+	}
+
+	@Override
+	public String getPredicateIri()
+	{
+		return predicateIri;
 	}
 }

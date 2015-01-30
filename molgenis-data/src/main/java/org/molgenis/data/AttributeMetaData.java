@@ -103,4 +103,11 @@ public interface AttributeMetaData
 	List<String> getEnumOptions();
 
 	boolean isSameAs(AttributeMetaData attributeMetaData);
+
+	/**
+	 * IRI describing the relation between the entity and this attribute's value.
+	 * 
+	 * @return namespace prefixed String for the IRI, e.g. foaf:name
+	 */
+	String getPredicateIri();
 }
