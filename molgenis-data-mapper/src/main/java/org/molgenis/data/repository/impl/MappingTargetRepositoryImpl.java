@@ -71,7 +71,7 @@ public class MappingTargetRepositoryImpl implements MappingTargetRepository
 	 */
 	private Entity toMappingTargetEntity(MappingTarget mappingTarget, List<Entity> entityMappingEntities)
 	{
-		Entity mappingTargetEntity = new MapEntity(MappingProjectRepositoryImpl.META_DATA);
+		Entity mappingTargetEntity = new MapEntity(META_DATA);
 		mappingTargetEntity.set(MappingProjectMetaData.IDENTIFIER, mappingTarget.getIdentifier());
 		mappingTargetEntity.set(MappingTargetMetaData.TARGET, mappingTarget.getTarget().getName());
 		mappingTargetEntity.set(MappingTargetMetaData.ENTITYMAPPINGS, entityMappingEntities);

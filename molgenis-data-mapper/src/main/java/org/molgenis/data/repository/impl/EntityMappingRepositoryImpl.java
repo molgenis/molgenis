@@ -25,6 +25,8 @@ import com.google.common.collect.Lists;
  */
 public class EntityMappingRepositoryImpl implements EntityMappingRepository
 {
+	public static final EntityMetaData META_DATA = new EntityMappingMetaData();
+	
 	@Autowired
 	private MetaDataService metaDataService;
 
@@ -33,7 +35,6 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 
 	private AttributeMappingRepository attributeMappingRepository;
 
-	public static final EntityMetaData META_DATA = new EntityMappingMetaData();
 	private final CrudRepository repository;
 
 	public EntityMappingRepositoryImpl(CrudRepository repository, AttributeMappingRepository attributeMappingRepository)
@@ -97,7 +98,7 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 
 	private Entity toEntityMappingEntity(EntityMapping entityMapping, List<Entity> attributeMappingEntities)
 	{
-		Entity entityMappingEntity = new MapEntity();
+		Entity entityMappingEntity = new MapEntity(META_DATA);
 		entityMappingEntity.set(EntityMappingMetaData.IDENTIFIER, entityMapping.getIdentifier());
 		entityMappingEntity
 				.set(EntityMappingMetaData.SOURCEENTITYMETADATA,

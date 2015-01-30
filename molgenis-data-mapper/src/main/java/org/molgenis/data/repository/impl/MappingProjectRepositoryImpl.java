@@ -124,7 +124,7 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 	 */
 	private Entity toEntity(MappingProject mappingProject)
 	{
-		Entity result = new MapEntity();
+		Entity result = new MapEntity(META_DATA);
 		if (mappingProject.getIdentifier() == null)
 		{
 			mappingProject.setIdentifier(idGenerator.generateId().toString());

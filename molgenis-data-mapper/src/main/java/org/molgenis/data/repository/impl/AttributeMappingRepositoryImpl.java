@@ -22,13 +22,14 @@ import com.google.common.collect.Lists;
 
 public class AttributeMappingRepositoryImpl implements AttributeMappingRepository
 {
+	public static final EntityMetaData META_DATA = new AttributeMappingMetaData();
+	
 	@Autowired
 	private MetaDataService metaDataService;
 
 	@Autowired
 	private IdGenerator idGenerator;
 
-	public static final EntityMetaData META_DATA = new AttributeMappingMetaData();
 	private CrudRepository repository;
 
 	public AttributeMappingRepositoryImpl(CrudRepository repository)
@@ -94,7 +95,7 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 
 	private Entity toAttributeMappingEntity(AttributeMapping attributeMapping)
 	{
-		Entity attributeMappingEntity = new MapEntity();
+		Entity attributeMappingEntity = new MapEntity(META_DATA);
 		attributeMappingEntity.set(AttributeMappingMetaData.IDENTIFIER, attributeMapping.getIdentifier());
 		attributeMappingEntity.set(AttributeMappingMetaData.SOURCEATTRIBUTEMETADATA, attributeMapping
 				.getSourceAttributeMetaData() != null ? attributeMapping.getSourceAttributeMetaData().getName() : null);
