@@ -40,11 +40,13 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter
 		{
 			modelAndView.addObject(KEY_RESOURCE_FINGERPRINT_REGISTRY, resourceFingerprintRegistry);
 			String i18nLocale = molgenisSettings.getProperty(I18N_LOCALE, "en");
+			String topLogo = molgenisSettings.getProperty("app.top.logo", "");
 
 			Locale locale = new Locale(i18nLocale, i18nLocale);
 			ResourceBundle i18n = ResourceBundle.getBundle("i18n", locale);
 
 			modelAndView.addObject("i18n", i18n);
+			modelAndView.addObject("app_top_logo", topLogo);
 		}
 	}
 }

@@ -1,22 +1,25 @@
 package org.molgenis.data.mapping;
 
+import java.util.UUID;
+
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.ManageableCrudRepositoryCollection;
+import org.molgenis.data.algorithm.AlgorithmService;
+import org.molgenis.data.algorithm.AlgorithmServiceImpl;
 import org.molgenis.data.meta.AttributeMappingMetaData;
 import org.molgenis.data.meta.EntityMappingMetaData;
 import org.molgenis.data.meta.MappingProjectMetaData;
-import org.molgenis.data.meta.WritableMetaDataService;
-import org.molgenis.data.repository.AttributeMappingRepository;
-import org.molgenis.data.repository.EntityMappingRepository;
-import org.molgenis.data.repository.MappingProjectRepository;
+import org.molgenis.data.meta.MappingTargetMetaData;
 import org.molgenis.data.repository.impl.AttributeMappingRepositoryImpl;
 import org.molgenis.data.repository.impl.EntityMappingRepositoryImpl;
 import org.molgenis.data.repository.impl.MappingProjectRepositoryImpl;
+import org.molgenis.data.repository.impl.MappingTargetRepositoryImpl;
 import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.IdGenerator;
 
 @Configuration
 public class MappingConfig
@@ -31,31 +34,56 @@ public class MappingConfig
 	MolgenisUserService userService;
 
 	@Bean
-	public MappingService mappingService()
+	public IdGenerator idGenerator()
 	{
-		// create in order of dependency!
-		AttributeMappingRepository attributeMappingRepository = attributeMappingRepository();
-		EntityMappingRepository entityMappingRepository = entityMappingRepository();
-		MappingProjectRepository mappingProjectRepository = mappingProjectRepository();
-		return new MappingServiceImpl(attributeMappingRepository, entityMappingRepository, mappingProjectRepository);
+		return new IdGenerator() // TODO something more efficient..
+		{
+			@Override
+			public UUID generateId()
+			{
+				return UUID.randomUUID();
+			}
+		};
 	}
 
-	private AttributeMappingRepository attributeMappingRepository()
+	@Bean
+	public MappingService mappingService()
+	{
+		return new MappingServiceImpl(mappingProjectRepository());
+	}
+
+	@Bean
+	public AlgorithmService algorithmServiceImpl()
+	{
+		return new AlgorithmServiceImpl();
+	}
+
+	@Bean
+	public MappingProjectRepositoryImpl mappingProjectRepository()
+	{
+		return new MappingProjectRepositoryImpl(mappingProjectCrudRepository(), mappingTargetRepository());
+	}
+
+	@Bean
+	public MappingTargetRepositoryImpl mappingTargetRepository()
+	{
+		return new MappingTargetRepositoryImpl(mappingTargetCrudRepository(), entityMappingRepository());
+	}
+
+	@Bean
+	public EntityMappingRepositoryImpl entityMappingRepository()
+	{
+		return new EntityMappingRepositoryImpl(entityMappingCrudRepository(), attributeMappingRepository());
+	}
+
+	@Bean
+	public AttributeMappingRepositoryImpl attributeMappingRepository()
 	{
 		return new AttributeMappingRepositoryImpl(attributeMappingCrudRepository());
 	}
 
-	private EntityMappingRepository entityMappingRepository()
-	{
-		return new EntityMappingRepositoryImpl(entityMappingCrudRepository());
-	}
-
-	private MappingProjectRepository mappingProjectRepository()
-	{
-		return new MappingProjectRepositoryImpl(mappingProjectCrudRepository(), userService);
-	}
-
-	private CrudRepository attributeMappingCrudRepository()
+	@Bean
+	public CrudRepository attributeMappingCrudRepository()
 	{
 		if (!dataService.hasRepository(AttributeMappingMetaData.ENTITY_NAME))
 		{
@@ -65,8 +93,10 @@ public class MappingConfig
 
 	}
 
-	private CrudRepository entityMappingCrudRepository()
+	@Bean
+	public CrudRepository entityMappingCrudRepository()
 	{
+		attributeMappingCrudRepository();
 		if (!dataService.hasRepository(EntityMappingMetaData.ENTITY_NAME))
 		{
 			repoCollection.add(EntityMappingRepositoryImpl.META_DATA);
@@ -74,8 +104,21 @@ public class MappingConfig
 		return dataService.getCrudRepository(EntityMappingMetaData.ENTITY_NAME);
 	}
 
-	private CrudRepository mappingProjectCrudRepository()
+	@Bean
+	public CrudRepository mappingTargetCrudRepository()
 	{
+		entityMappingCrudRepository();
+		if (!dataService.hasRepository(MappingTargetMetaData.ENTITY_NAME))
+		{
+			repoCollection.add(MappingTargetRepositoryImpl.META_DATA);
+		}
+		return dataService.getCrudRepository(MappingTargetMetaData.ENTITY_NAME);
+	}
+
+	@Bean
+	public CrudRepository mappingProjectCrudRepository()
+	{
+		mappingTargetCrudRepository();
 		if (!dataService.hasRepository(MappingProjectMetaData.ENTITY_NAME))
 		{
 			repoCollection.add(MappingProjectRepositoryImpl.META_DATA);

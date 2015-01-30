@@ -1,22 +1,23 @@
 package org.molgenis.data.mapper;
 
 import static org.molgenis.data.mapper.MappingServiceController.URI;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
 
 import org.molgenis.auth.MolgenisUser;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.mapping.AttributeMapping;
-import org.molgenis.data.mapping.EntityMapping;
-import org.molgenis.data.mapping.MappingProject;
+import org.molgenis.data.Repository;
+import org.molgenis.data.algorithm.AlgorithmService;
+import org.molgenis.data.algorithm.AlgorithmServiceImpl;
 import org.molgenis.data.mapping.MappingService;
-import org.molgenis.data.repository.MappingProjectRepository;
-import org.molgenis.data.repository.impl.MappingProjectRepositoryImpl;
+import org.molgenis.data.mapping.model.EntityMapping;
+import org.molgenis.data.mapping.model.MappingProject;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserService;
@@ -37,6 +38,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 
 @Controller
@@ -48,7 +51,8 @@ public class MappingServiceController extends MolgenisPluginController
 	public static final String ID = "mappingservice";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	private static final String VIEW_MAPPING_PROJECTS = "view-mapping-projects";
-	private static final String VIEW_ATTRIBUTE_MAPPING = "view-attribute-mappings";
+	private static final String VIEW_ATTRIBUTE_MAPPING = "view-single-mapping-project";
+	private static final String VIEW_EDIT_ATTRIBUTE_MAPPING = "attribute-mapping-editor";
 
 	@Autowired
 	private MolgenisUserService molgenisUserService;
@@ -57,8 +61,11 @@ public class MappingServiceController extends MolgenisPluginController
 	private MappingService mappingService;
 
 	@Autowired
+	private AlgorithmService algorithmService;
+
+	@Autowired
 	private DataService dataService;
-	
+
 	public MappingServiceController()
 	{
 		super(URI);
@@ -72,15 +79,13 @@ public class MappingServiceController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/addmappingproject", method = RequestMethod.POST)
-	public String addMappingProject(@RequestParam("mapping-project-name") String identifier,
-			@RequestParam("target-entity") List<String> targetEntities, Model model)
+	public String addMappingProject(@RequestParam("mapping-project-name") String name,
+			@RequestParam("target-entity") String targetEntity)
 	{
-		System.out.println(targetEntities);
-
-		mappingService.addMappingProject(identifier, getCurrentUser(), targetEntities);
-
-		model = setModelAttributes(model);
-		return VIEW_MAPPING_PROJECTS;
+		MappingProject newMappingProject = mappingService.addMappingProject(name, getCurrentUser(), targetEntity);
+		// FIXME need to write complete URL else it will use /plugin as root and the molgenis header and footer wont be
+		// loaded
+		return "redirect:/menu/main/mappingservice/mappingproject/" + newMappingProject.getIdentifier();
 	}
 
 	@RequestMapping(value = "/editmappingproject", method = RequestMethod.POST)
@@ -93,63 +98,134 @@ public class MappingServiceController extends MolgenisPluginController
 
 		return VIEW_MAPPING_PROJECTS;
 	}
-
-	@RequestMapping("/attributemapping/{id}")
-	public String getAttributeMappingScreen(@PathVariable("id") String identifier, Model model)
+	
+	@RequestMapping(value = "/addentitymapping", method = RequestMethod.POST)
+	public String addEntityMapping(@RequestParam("target") String target, @RequestParam("source") String source,
+			@RequestParam("mappingProjectId") String mappingProjectIdentifier)
 	{
+		MappingProject project = mappingService.getMappingProject(mappingProjectIdentifier);
+		project.getTargets().get(target).addSource(dataService.getEntityMetaData(source));
+		mappingService.updateMappingProject(project);
+		
+		return "redirect:/menu/main/mappingservice/mappingproject/" + mappingProjectIdentifier;
+	}
 
-		MappingProject mappingProject = mappingService.getMappingProject(identifier);
+	@RequestMapping("/mappingproject/{id}")
+	public String getMappingProjectScreen(@PathVariable("id") String identifier, Model model)
+	{
+		MappingProject selectedMappingProject = mappingService.getMappingProject(identifier);
+		Map<String, Iterable<AttributeMetaData>> targetAttributes = new HashMap<String, Iterable<AttributeMetaData>>();
+		for (String target : selectedMappingProject.getTargets().keySet())
+		{
+			// Get the entity metadata for every target
+			targetAttributes.put(target, selectedMappingProject.getTargets().get(target).getTarget().getAttributes());
+		}
+		String selectedTarget = targetAttributes.keySet().toArray()[0].toString();
 
-		// TODO Put attribute mapping information based on mapping project ID into the model
-		model.addAttribute("mappingProject", mappingService.getMappingProject(identifier));
+		// FIXME entityMapping might not be the correct term for a map with sources as keys
+		Map<String, EntityMapping> entityMappings = selectedMappingProject.getTargets().get(selectedTarget)
+				.getEntityMappings();
 
-		model.addAttribute("entityMappings", mappingService.getMappingProject(identifier).getEntityMappings());
-		model.addAttribute("attributeMappings", mappingService.getAttributeMappings(identifier));
-
-		List<String> mockAttributesForTargetEntity = new ArrayList<String>(); // TODO use dataservice to get a
-																				// List<Attributes>
-		mockAttributesForTargetEntity.add("targetAttr1");
-		mockAttributesForTargetEntity.add("targetAttr2");
-		mockAttributesForTargetEntity.add("targetAttr3");
-		mockAttributesForTargetEntity.add("targetAttr4");
-		mockAttributesForTargetEntity.add("targetAttr5");
-		model.addAttribute("targetEntityAttributes", mockAttributesForTargetEntity);
+		// Fill the model
+		model.addAttribute("selectedTarget", selectedTarget);
+		model.addAttribute("selectedTargetAttributes", targetAttributes.get(selectedTarget));
+		model.addAttribute("targetAttributes", targetAttributes);
+		model.addAttribute("mappingProject", selectedMappingProject);
+		model.addAttribute("entityMetaDatas", getEntityMetaDatas());
+		model.addAttribute("entityMappings", entityMappings);
 
 		return VIEW_ATTRIBUTE_MAPPING;
 	}
 
-	@RequestMapping("/getsourcecolumn")
-	@ResponseBody
-	public List<String> getAttributesForNewSourceColumn(@RequestBody String newSourceEntityName)
+	@RequestMapping(value = "/get-new-attributes", method = RequestMethod.POST)
+	public @ResponseBody Iterable<AttributeMetaData> getAttributesForNewEntity(@RequestBody String newEntityName)
 	{
-		List<String> mockAttributesForNewColumn = new ArrayList<String>(); // TODO use dataservice to return a
-																			// List<Attributes>
-		mockAttributesForNewColumn.add("sourceAttr1");
-		mockAttributesForNewColumn.add("sourceAttr2");
-		mockAttributesForNewColumn.add("sourceAttr3");
-		mockAttributesForNewColumn.add("sourceAttr4");
-		mockAttributesForNewColumn.add("sourceAttr5");
-		return mockAttributesForNewColumn;
+		return dataService.getEntityMetaData(newEntityName).getAttributes();
+	}
+
+	@RequestMapping("/editattributemapping")
+	public String getMappingAttributeScreen(@RequestBody MappingServiceRequest mappingServiceRequest, Model model)
+	{
+		// add to model: Target Entity, targetAttribute, Source Entity, source attributes (all?)
+		EntityMetaData targetEntityMetaData = dataService
+				.getEntityMetaData(mappingServiceRequest.getTargetEntityName());
+
+		EntityMetaData sourceEntityMetaData = dataService
+				.getEntityMetaData(mappingServiceRequest.getSourceEntityName());
+
+		AttributeMetaData targetAttribute = targetEntityMetaData != null ? targetEntityMetaData
+				.getAttribute(mappingServiceRequest.getTargetAttributeName()) : null;
+
+		// TODO : biobankconnect algorithm will be placed here!
+		Iterable<AttributeMetaData> sourceAttributes = sourceEntityMetaData != null ? sourceEntityMetaData
+				.getAtomicAttributes() : Collections.emptyList();
+
+		model.addAllAttributes(ImmutableMap.of("targetEntityMetaData", targetEntityMetaData, "sourceEntityMetaData",
+				sourceEntityMetaData, "targetAttribute", targetAttribute, "sourceAttributes", sourceAttributes));
+
+		return VIEW_EDIT_ATTRIBUTE_MAPPING;
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/mappingattribute/testscript", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+	public @ResponseBody Map<String, Object> testScrpit(@RequestBody MappingServiceRequest mappingServiceRequest)
+	{
+		Map<String, Object> results = new HashMap<String, Object>();
+
+		EntityMetaData targetEntityMetaData = dataService
+				.getEntityMetaData(mappingServiceRequest.getTargetEntityName());
+
+		EntityMetaData sourceEntityMetaData = dataService
+				.getEntityMetaData(mappingServiceRequest.getSourceEntityName());
+
+		AttributeMetaData targetAttribute = targetEntityMetaData != null ? targetEntityMetaData
+				.getAttribute(mappingServiceRequest.getTargetAttributeName()) : null;
+
+		Iterable<AttributeMetaData> sourceAttributes = extractFeatureIdentifiersAsAttributeMetaData(
+				mappingServiceRequest, sourceEntityMetaData);
+
+		Repository sourceRepo = dataService.getRepositoryByEntityName(sourceEntityMetaData.getName());
+		List<Object> calculatedValues = algorithmService.applyAlgorithm(targetAttribute, sourceAttributes,
+				mappingServiceRequest.getAlgorithm(), sourceRepo);
+
+		results.put("results", calculatedValues);
+		results.put("totalCount", Iterables.size(sourceRepo));
+
+		return results;
+	}
+
+	private Iterable<AttributeMetaData> extractFeatureIdentifiersAsAttributeMetaData(
+			MappingServiceRequest mappingServiceRequest, EntityMetaData sourceEntityMetaData)
+	{
+		return Iterables.filter(Iterables.transform(
+				AlgorithmServiceImpl.extractFeatureName(mappingServiceRequest.getAlgorithm()),
+				new Function<String, AttributeMetaData>()
+				{
+					public AttributeMetaData apply(final String attributeName)
+					{
+						return sourceEntityMetaData != null && sourceEntityMetaData.getAttribute(attributeName) != null ? sourceEntityMetaData
+								.getAttribute(attributeName) : null;
+					}
+				}), Predicates.notNull());
 	}
 
 	private Model setModelAttributes(Model model)
 	{
-		model.addAttribute("activeUser", getCurrentUser().getUsername());
-		if (mappingService == null) model.addAttribute("mappingProjects", null);
-		else model.addAttribute("mappingProjects", mappingService.getAllMappingProjects());
-		
-		Iterable<EntityMetaData> entitiesMeta = Iterables.transform(dataService.getEntityNames(),
-				new Function<String, EntityMetaData>()
-				{
-					@Override
-					public EntityMetaData apply(String entityName)
-					{
-						return dataService.getEntityMetaData(entityName);
-					}
-				});
-		model.addAttribute("entitiesMeta", entitiesMeta);
-		
+		if (mappingService != null) model.addAttribute("mappingProjects", mappingService.getAllMappingProjects());
+		model.addAttribute("entityMetaDatas", getEntityMetaDatas());
+
 		return model;
+	}
+
+	private Iterable<EntityMetaData> getEntityMetaDatas()
+	{
+		return Iterables.transform(dataService.getEntityNames(), new Function<String, EntityMetaData>()
+		{
+			@Override
+			public EntityMetaData apply(String entityName)
+			{
+				return dataService.getEntityMetaData(entityName);
+			}
+		});
 	}
 
 	@ExceptionHandler(RuntimeException.class)
