@@ -1,4 +1,4 @@
-package org.molgenis.data.rest;
+package org.molgenis.vkgl.api;
 
 public class VkglQuery
 {

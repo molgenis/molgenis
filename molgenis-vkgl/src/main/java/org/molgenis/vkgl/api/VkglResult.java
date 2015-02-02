@@ -1,4 +1,4 @@
-package org.molgenis.data.rest;
+package org.molgenis.vkgl.api;
 
 import java.util.List;
 

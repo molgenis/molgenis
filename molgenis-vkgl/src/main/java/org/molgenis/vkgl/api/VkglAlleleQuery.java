@@ -1,6 +1,6 @@
-package org.molgenis.data.rest;
+package org.molgenis.vkgl.api;
 
-public class VkglCoordinateQuery
+public class VkglAlleleQuery
 {
 	private String id;
 	private String operator;
@@ -8,6 +8,7 @@ public class VkglCoordinateQuery
 	private String reference;
 	private String start;
 	private String end;
+	private String[] allele_sequence;
 	
 	public String getOperator()
 	{
@@ -49,6 +50,14 @@ public class VkglCoordinateQuery
 	{
 		this.end = end;
 	}
+	public String[] getAllele_sequence()
+	{
+		return allele_sequence;
+	}
+	public void setAllele_sequence(String[] allele_sequence)
+	{
+		this.allele_sequence = allele_sequence;
+	}
 	public String getId()
 	{
 		return id;
@@ -57,5 +66,4 @@ public class VkglCoordinateQuery
 	{
 		this.id = id;
 	}
-	
 }
