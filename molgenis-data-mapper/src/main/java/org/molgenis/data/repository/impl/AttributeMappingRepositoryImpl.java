@@ -23,7 +23,7 @@ import com.google.common.collect.Lists;
 public class AttributeMappingRepositoryImpl implements AttributeMappingRepository
 {
 	public static final EntityMetaData META_DATA = new AttributeMappingMetaData();
-	
+
 	@Autowired
 	private MetaDataService metaDataService;
 
@@ -60,7 +60,7 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 		else
 		{
 			result = toAttributeMappingEntity(attributeMapping);
-			repository.add(result);
+			repository.update(result);
 		}
 		return result;
 	}

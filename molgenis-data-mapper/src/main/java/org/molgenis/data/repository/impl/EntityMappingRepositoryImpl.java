@@ -17,7 +17,6 @@ import org.molgenis.data.support.MapEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.IdGenerator;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 
 /**
@@ -46,14 +45,7 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 	@Override
 	public List<EntityMapping> toEntityMappings(List<Entity> entityMappingEntities)
 	{
-		return Lists.transform(entityMappingEntities, new Function<Entity, EntityMapping>()
-		{
-			@Override
-			public EntityMapping apply(Entity entityMappingEntity)
-			{
-				return toEntityMapping(entityMappingEntity);
-			}
-		});
+		return Lists.transform(entityMappingEntities, this::toEntityMapping);
 	}
 
 	private EntityMapping toEntityMapping(Entity entityMappingEntity)

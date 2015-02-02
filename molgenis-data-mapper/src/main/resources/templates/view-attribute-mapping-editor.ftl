@@ -9,19 +9,23 @@
 <script src="<@resource_href "/js/ace/src-min-noconflict/ace.js"/>" type="text/javascript" charset="utf-8"></script>
 <script src="<@resource_href "/js/ace/src-min-noconflict/ext-language_tools.js"/>" type="text/javascript" charset="utf-8"></script>
 
+<#if attributeMapping.sourceAttributeMetaData??>
+	<#assign selected=attributeMapping.sourceAttributeMetaData.name>
+<#else>
+	<#assign selected="null">
+</#if>
 <div class="row">
 	<div class="col-md-12">
 		<h3>Mapping to <u>${entityMapping.targetEntityMetaData.name}.${attributeMapping.targetAttributeMetaData.name}</u> from <u>${entityMapping.targetEntityMetaData.name}</u></h3>
 	</div><br /><br /><br />
-	
 </div>
 <div class="row">
 	<div id="attribute-table-container" class="col-md-6">
 		<form method="POST" action="${context_url}/saveattributemapping">
 			<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
 			<input type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name}"/>
-			<input type="hidden" name="source" value="${entityMapping.targetEntityMetaData.name}"/>
-			<input type="hidden" name="attribute" value="${attributeMapping.targetAttributeMetaData.name}"/>
+			<input type="hidden" name="source" value="${entityMapping.sourceEntityMetaData.name}"/>
+			<input type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name}"/>
 			<table>
 				<thead>
 					<tr><th>Name</th><th>Description</th><th>Score</th><th>Select</th></tr>
@@ -32,14 +36,14 @@
 							<td>${source.name}</td>
 							<td><#if source.description??>${source.description}</#if></td>
 							<td>0</td>
-							<td><input type="checkbox" name="${source.name}"/></td>
+							<td><input type="radio" name="sourceAttribute" value="${source.name}"<#if source.name == selected> checked="checked"</#if>/></td>
 						</tr>
 					</#list>
 				</tbody>
 			</table>
 			<button type="submit" class="btn btn-primary">Save</button>
 			<button type="reset" class="btn btn-default">Reset</button>
-	        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+	        <button type="button" class="btn btn-default" onclick="window.history.back()">Cancel</button>
 		</form>
 	</div>
 	<div id="edit-algorithm-container" class="col-md-6"></div>

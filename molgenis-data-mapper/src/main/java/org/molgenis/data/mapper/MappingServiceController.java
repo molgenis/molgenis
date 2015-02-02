@@ -47,14 +47,14 @@ import com.google.common.collect.Iterables;
 @RequestMapping(URI)
 public class MappingServiceController extends MolgenisPluginController
 {
-	private static final String VIEW_SINGLE_MAPPING_PROJECT = "view-single-mapping-project";
 
 	private static final Logger LOG = LoggerFactory.getLogger(MappingServiceController.class);
 
 	public static final String ID = "mappingservice";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	private static final String VIEW_MAPPING_PROJECTS = "view-mapping-projects";
-	private static final String VIEW_EDIT_ATTRIBUTE_MAPPING = "attribute-mapping-editor";
+	private static final String VIEW_EDIT_ATTRIBUTE_MAPPING = "view-attribute-mapping-editor";
+	private static final String VIEW_SINGLE_MAPPING_PROJECT = "view-single-mapping-project";
 
 	@Autowired
 	private MolgenisUserService molgenisUserService;
@@ -119,8 +119,7 @@ public class MappingServiceController extends MolgenisPluginController
 	 * @return redirect URL for the mapping project
 	 */
 	@RequestMapping(value = "/addentitymapping", method = RequestMethod.POST)
-	public String addEntityMapping(@RequestParam("mappingProjectId") String mappingProjectId,
-			@RequestParam("target") String target, @RequestParam("source") String source)
+	public String addEntityMapping(@RequestParam String mappingProjectId, String target, String source)
 	{
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
 		project.getMappingTarget(target).addSource(dataService.getEntityMetaData(source));
@@ -137,18 +136,29 @@ public class MappingServiceController extends MolgenisPluginController
 	 *            name of the target entity
 	 * @param source
 	 *            name of the source entity
-	 * @targetAttribute name of the target attribute
+	 * @param targetAttribute
+	 *            name of the target attribute
+	 * @param sourceAttribute
+	 *            name of the source attribute
 	 * @return redirect URL for the attributemapping
 	 */
-	@RequestMapping(value = "/addattributemapping", method = RequestMethod.POST)
-	public String addAttributeMapping(@RequestParam String mappingProjectId, @RequestParam String target,
-			@RequestParam String source, @RequestParam String targetAttribute)
+	@RequestMapping(value = "/saveattributemapping", method = RequestMethod.POST)
+	public String saveAttributeMapping(@RequestParam(required = true) String mappingProjectId,
+			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
+			@RequestParam(required = true) String targetAttribute, @RequestParam(required = true) String sourceAttribute)
 	{
-		MappingProject project = mappingService.getMappingProject(mappingProjectId);
-		AttributeMapping mapping = project.getMappingTarget(target).getMappingForSource(source)
-				.addAttributeMapping(targetAttribute);
-		mappingService.updateMappingProject(project);
-		return "redirect:/menu/main/mappingservice/editattributemapping/" + mapping.getIdentifier();
+		MappingProject mappingProject = mappingService.getMappingProject(mappingProjectId);
+		MappingTarget mappingTarget = mappingProject.getMappingTarget(target);
+		EntityMapping mappingForSource = mappingTarget.getMappingForSource(source);
+		AttributeMapping attributeMapping = mappingForSource.getAttributeMapping(targetAttribute);
+		if (attributeMapping == null)
+		{
+			attributeMapping = mappingForSource.addAttributeMapping(targetAttribute);
+		}
+		EntityMetaData sourceEmd = dataService.getEntityMetaData(source);
+		attributeMapping.setSource(sourceEmd.getAttribute(sourceAttribute));
+		mappingService.updateMappingProject(mappingProject);
+		return "redirect:/menu/main/mappingservice/mappingproject/" + mappingProject.getIdentifier();
 	}
 
 	/**
@@ -195,7 +205,7 @@ public class MappingServiceController extends MolgenisPluginController
 	 * @return name of the attributemapping view
 	 */
 	@RequestMapping("/editattributemapping")
-	public String getMappingAttributeScreen(@RequestParam String mappingProjectId, @RequestParam String target,
+	public String editAttributeMapping(@RequestParam String mappingProjectId, @RequestParam String target,
 			@RequestParam String source, @RequestParam String attribute, Model model)
 	{
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
