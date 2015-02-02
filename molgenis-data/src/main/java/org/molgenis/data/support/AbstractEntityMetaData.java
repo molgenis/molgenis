@@ -92,6 +92,12 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 			}
 
 			@Override
+			public String getExpression()
+			{
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
 			public String getName()
 			{
 				throw new UnsupportedOperationException();

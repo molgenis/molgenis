@@ -89,6 +89,9 @@
 			return attribute.name;
 		});
 		var expandAttributeNames = $.map(settings.colAttributes, function(attribute) {
+			if(attribute.expression){
+				return attribute.name;
+			}
 			if(attribute.fieldType === 'XREF' || attribute.fieldType === 'CATEGORICAL' ||attribute.fieldType === 'MREF') {
 				// partially expand reference entities (only request label attribute)
 				var refEntity = settings.refEntitiesMeta[attribute.refEntity.href];
@@ -96,6 +99,11 @@
 			}
 			return null;
 		});
+		
+		if(settings.data){
+			callback(settings.data);
+			return;
+		}
 
 		// TODO do not construct uri from other uri
 		var entityCollectionUri = settings.entityMetaData.href.replace("/meta", "");
@@ -139,10 +147,6 @@
 	 * @memberOf molgenis.table
 	 */
 	function createTableBody(data, settings) {
-		
-		
-		
-		
 		var container = $('.molgenis-table tbody', settings.container);
 
 		var items = [];
@@ -457,7 +461,12 @@
 		$('.ref-title', modal).html(attribute.label || attribute.name);
 		$('.ref-description-header', modal).html((refEntity.label || refEntity.name) + ' description');
 		$('.ref-description', modal).html(refEntity.description || 'No description available');
-		$('.ref-table', modal).table({'entityMetaData' : refEntity, 'attributes': refAttributes, 'query' : refQuery});
+		if(attribute.expression){
+			// computed attribute, don't query but show the computed value
+			$('.ref-table', modal).table({'entityMetaData' : refEntity, 'attributes': refAttributes, 'data': {items:[refValue], total: 1} });
+		} else {
+			$('.ref-table', modal).table({'entityMetaData' : refEntity, 'attributes': refAttributes, 'query' : refQuery });
+		}
 		
 		// show modal
 		modal.modal({'show': true});
@@ -683,7 +692,7 @@
 
 		createTable(settings, function() {
 			if(settings.onInit)
-				setting.onInit();
+				settings.onInit();
 		});
 
 		// sort column ascending/descending
