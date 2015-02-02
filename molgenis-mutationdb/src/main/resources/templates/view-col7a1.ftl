@@ -20,7 +20,7 @@
 	"dataexplorer-filter-wizard.js",
 	"jquery.fancytree.min.js",
 	"jquery.molgenis.tree.js",
-	"select2.min.js",
+	"select2-patched.js",
 	"jQEditRangeSlider-min.js",
 	"bootstrap-switch.min.js",
 	"jquery.molgenis.xrefmrefsearch.js",
