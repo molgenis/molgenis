@@ -7,8 +7,6 @@
 <@header css js/>
 <@createNewSourceColumnModal />
 
-<#assign targets = targetAttributes?keys>
-
 <div class="row">
 	<div class="col-md-12">
 		<a href="${context_url}" class="btn btn-danger btn-sm">Back to mapping project overview</a>	
@@ -32,8 +30,8 @@
 				<div class="form-group">
 					<label>Select the Target entity</label>
 					<select id="target-entity-select" name="target-entity" class="form-control" required="required" placeholder="Select a target entity" style="width:200px">
-						<#list targets as target>
-							<option value="${target}" <#if selectedTarget?? && (target == selectedTarget)>selected</#if>>${target}</option>
+						<#list mappingProject.mappingTargets as target>
+							<option value="${target}" <#if target == selectedTarget>selected</#if>>${target.name}</option>
 						</#list>
 					</select>
 				</div>
@@ -52,39 +50,39 @@
 	 			<thead>
 	 				<tr>
 	 					<th>Target model: ${selectedTarget}</th>
- 					<#if entityMappings??>
- 						<#list entityMappings?keys as source>
- 						<th>Source: ${source}</th>
- 						</#list>
-					</#if>
+ 					<#list mappingProject.getMappingTarget(selectedTarget).entityMappings as source>
+ 						<th>Source: ${source.name}</th>
+					</#list>
 	 				</tr>
 	 			</thead>
 	 			<tbody>
-				<#list selectedTargetAttributes as attribute>
-					<tr>
-						<td>
-							${attribute.name}
-						</td>
-					<#if entityMappings??>
-						<#list entityMappings?keys as source>
-							
-						<td>
-							<#if entityMappings[source].attributeMappings[attribute.name]??>
-							${entityMappings[source].attributeMappings[attribute.name].sourceAttributeMetaData.name}
-							<button class="btn btn-primary btn-xs">
-								<span class="glyphicon glyphicon-pencil"></span>
-							</button>
-							<#else>
-								Spinner here...
-								<button class="btn btn-primary btn-xs">
-									<span class="glyphicon glyphicon-pencil"></span>
-								</button>
-							</#if>
-						</td>
-						</#list>
-					</#if>
-					</tr>
-				</#list>
+					<#list mappingProject.getMappingTarget(selectedTarget).target.attributes as attribute>
+						<tr>
+							<td>
+								${attribute.name}
+							</td>
+							<#list mappingProject.getMappingTarget(selectedTarget).entityMappings as source>
+							<td>
+								<#if source.getAttributeMapping(attribute.name)??>
+									${source.getAttributeMapping(attribute.name).sourceAttributeMetaData.name}
+									<button class="btn btn-primary btn-xs">
+										<span class="glyphicon glyphicon-pencil"></span>
+									</button>
+								<#else>
+									<form method="get" action="${context_url}/editattributemapping">
+										<button type="submit" class="btn btn-primary btn-xs">
+											<span class="glyphicon glyphicon-pencil"></span>
+										</button>
+										<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
+										<input type="hidden" name="target" value="${selectedTarget}"/>
+										<input type="hidden" name="source" value="${source.name}"/>
+										<input type="hidden" name="attribute" value="${attribute.name}"/>
+									</form>
+								</#if>
+							</td>
+							</#list>
+						</tr>
+					</#list>
 				</tbody>
 			</table>
 		</div>
@@ -104,7 +102,7 @@
 						<div class="form-group">
 		            		<label>Select a new source to map against the target attribute</label>
 	  						<select name="source" class="form-control" required="required" placeholder="Select a target entity">
-		    					<#list entityMetaDatas.iterator() as entityMetaData>
+		    					<#list entityMetaDatas as entityMetaData>
 	    							<option value="${entityMetaData.name?html}">${entityMetaData.name?html}</option>
 		    					</#list>
 							</select>

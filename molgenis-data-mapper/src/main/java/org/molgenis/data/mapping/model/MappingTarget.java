@@ -49,9 +49,9 @@ public class MappingTarget
 		return target;
 	}
 
-	public Map<String, EntityMapping> getEntityMappings()
+	public EntityMapping getMappingForSource(String source)
 	{
-		return entityMappings;
+		return entityMappings.get(source);
 	}
 
 	/**
@@ -117,4 +117,13 @@ public class MappingTarget
 				+ "]";
 	}
 
+	public String getName()
+	{
+		return target.getName();
+	}
+
+	public Collection<EntityMapping> getEntityMappings()
+	{
+		return entityMappings.values();
+	}
 }
