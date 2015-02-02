@@ -54,7 +54,9 @@ public class VcfRepositoryTest
 			assertTrue(it.hasNext());
 			testAttribute(it.next(), VcfRepository.CHROM, MolgenisFieldTypes.STRING);
 			assertTrue(it.hasNext());
-			testAttribute(it.next(), VcfRepository.ALT, MolgenisFieldTypes.STRING);
+			testAttribute(it.next(), VcfRepository.ALLELE1, MolgenisFieldTypes.STRING);
+			assertTrue(it.hasNext());
+			testAttribute(it.next(), VcfRepository.ALLELE2, MolgenisFieldTypes.STRING);
 			assertTrue(it.hasNext());
 			testAttribute(it.next(), VcfRepository.POS, MolgenisFieldTypes.LONG);
 			assertTrue(it.hasNext());
