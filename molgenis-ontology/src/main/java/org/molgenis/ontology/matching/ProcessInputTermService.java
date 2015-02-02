@@ -18,8 +18,8 @@ import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.OntologyService;
 import org.molgenis.ontology.OntologyServiceResult;
+import org.molgenis.ontology.beans.ComparableEntity;
 import org.molgenis.ontology.repository.OntologyTermQueryRepository;
-import org.molgenis.ontology.service.OntologyServiceImpl;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.runas.RunAsSystem;
@@ -94,7 +94,7 @@ public class ProcessInputTermService
 				OntologyServiceResult searchEntity = ontologyService.searchEntity(ontologyIri, entity);
 				for (Map<String, Object> ontologyTerm : searchEntity.getOntologyTerms())
 				{
-					Double score = Double.parseDouble(ontologyTerm.get(OntologyServiceImpl.SCORE).toString());
+					Double score = Double.parseDouble(ontologyTerm.get(ComparableEntity.SCORE).toString());
 					MapEntity matchingTaskContentEntity = new MapEntity();
 					matchingTaskContentEntity.set(MatchingTaskContentEntity.IDENTIFIER,
 							entityName + "_" + entity.getIdValue());

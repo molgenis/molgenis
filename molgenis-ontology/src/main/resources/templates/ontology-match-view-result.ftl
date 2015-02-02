@@ -87,12 +87,12 @@
 					
 					$('#unmatched-result-button').click(function(){
 						request['matched'] = false;
-						initEventHelper(request, ${numberOfUnmatched?js_string});
+						initEventHelper(request, ${numberOfUnmatched?c});
 					});
 					
 					$('#matched-result-button').click(function(){
 						request['matched'] = true;
-						initEventHelper(request, ${numberOfMatched?js_string});
+						initEventHelper(request, ${numberOfMatched?c});
 					});
 					
 					<#if isMatched?? && isMatched>

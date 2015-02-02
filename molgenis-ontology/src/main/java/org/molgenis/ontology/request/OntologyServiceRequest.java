@@ -6,15 +6,18 @@ public class OntologyServiceRequest
 {
 	private final String entityName;
 	private final String ontologyIri;
+	private final String filterQuery;
 	private final boolean matched;
 	private final EntityPager entityPager;
 
-	public OntologyServiceRequest(String entityName, String ontologyIri, boolean matched, EntityPager entityPager)
+	public OntologyServiceRequest(String entityName, String ontologyIri, String filterQuery, boolean matched,
+			EntityPager entityPager)
 	{
 		this.entityName = entityName;
 		this.ontologyIri = ontologyIri;
 		this.matched = matched;
 		this.entityPager = entityPager;
+		this.filterQuery = filterQuery;
 	}
 
 	public String getEntityName()
@@ -35,5 +38,10 @@ public class OntologyServiceRequest
 	public String getOntologyIri()
 	{
 		return ontologyIri;
+	}
+
+	public String getFilterQuery()
+	{
+		return filterQuery;
 	}
 }
