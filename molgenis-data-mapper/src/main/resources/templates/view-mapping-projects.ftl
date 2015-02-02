@@ -80,7 +80,7 @@
 						<div class="form-group">
 							<label>Select the Target entity</label>
 							<select name="target-entity" class="form-control" required="required" placeholder="Select a target entity">
-		    					<#list entityMetaDatas.iterator() as entityMetaData>
+		    					<#list entityMetaDatas as entityMetaData>
 		    						<option value="${entityMetaData.name?html}">${entityMetaData.name?html}</option>
 		    					</#list>
 							</select>

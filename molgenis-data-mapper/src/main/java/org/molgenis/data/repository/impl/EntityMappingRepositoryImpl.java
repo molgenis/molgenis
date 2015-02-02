@@ -26,7 +26,7 @@ import com.google.common.collect.Lists;
 public class EntityMappingRepositoryImpl implements EntityMappingRepository
 {
 	public static final EntityMetaData META_DATA = new EntityMappingMetaData();
-	
+
 	@Autowired
 	private MetaDataService metaDataService;
 
@@ -79,8 +79,7 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 
 	private Entity upsert(EntityMapping entityMapping)
 	{
-		List<Entity> attributeMappingEntities = attributeMappingRepository.upsert(entityMapping.getAttributeMappings()
-				.values());
+		List<Entity> attributeMappingEntities = attributeMappingRepository.upsert(entityMapping.getAttributeMappings());
 		Entity entityMappingEntity;
 		if (entityMapping.getIdentifier() == null)
 		{

@@ -11,22 +11,48 @@
 
 <div class="row">
 	<div class="col-md-12">
-		<h3>Mappping to <u>HOP_HEIGHT</u> from <u>FinRisk</u></h3>
-	</div></br></br></br>
+		<h3>Mapping to <u>${entityMapping.targetEntityMetaData.name}.${attributeMapping.targetAttributeMetaData.name}</u> from <u>${entityMapping.targetEntityMetaData.name}</u></h3>
+	</div><br /><br /><br />
+	
 </div>
 <div class="row">
-	<div id="attribut-table-container" class="col-md-6"></div>
+	<div id="attribute-table-container" class="col-md-6">
+		<form method="POST" action="${context_url}/saveattributemapping">
+			<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
+			<input type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name}"/>
+			<input type="hidden" name="source" value="${entityMapping.targetEntityMetaData.name}"/>
+			<input type="hidden" name="attribute" value="${attributeMapping.targetAttributeMetaData.name}"/>
+			<table>
+				<thead>
+					<tr><th>Name</th><th>Description</th><th>Score</th><th>Select</th></tr>
+				</thead>
+				<tbody>
+					<#list entityMapping.sourceEntityMetaData.attributes as source>
+						<tr>
+							<td>${source.name}</td>
+							<td><#if source.description??>${source.description}</#if></td>
+							<td>0</td>
+							<td><input type="checkbox" name="${source.name}"/></td>
+						</tr>
+					</#list>
+				</tbody>
+			</table>
+			<button type="submit" class="btn btn-primary">Save</button>
+			<button type="reset" class="btn btn-default">Reset</button>
+	        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+		</form>
+	</div>
 	<div id="edit-algorithm-container" class="col-md-6"></div>
 </div>
 <div class="row">
 	<div id="statistics-container" class="col-md-12"></div>
 </div>
-<script>
+<#--<script>
 	$(function(){
 		
 		var attributeMappingRequest = {'targetEntityName' : 'HOP', 'sourceEntityName' : 'FinRisk', 'targetAttributeName' : 'HOP_HEIGHT'};
 		
-		createAttributeTable($('#attribut-table-container'), attributeMappingRequest);
+		createAttributeTable($('#attribute-table-container'), attributeMappingRequest);
 		
 		createEditor($('#edit-algorithm-container'), $('#statistics-container'), attributeMappingRequest);
 		
@@ -92,4 +118,5 @@
 		}
 	});
 </script>
+-->
 <@footer/>
