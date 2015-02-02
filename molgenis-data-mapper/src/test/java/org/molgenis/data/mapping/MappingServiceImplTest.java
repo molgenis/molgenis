@@ -2,28 +2,40 @@ package org.molgenis.data.mapping;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.MolgenisFieldTypes.DECIMAL;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.fail;
 
+import java.util.List;
+
+import org.elasticsearch.common.collect.Lists;
 import org.molgenis.auth.MolgenisUser;
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.ManageableCrudRepositoryCollection;
+import org.molgenis.data.mapping.model.AttributeMapping;
 import org.molgenis.data.mapping.model.EntityMapping;
 import org.molgenis.data.mapping.model.MappingProject;
+import org.molgenis.data.mapping.model.MappingTarget;
 import org.molgenis.data.mem.InMemoryRepositoryCollection;
-import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.PackageImpl;
 import org.molgenis.data.support.DataServiceImpl;
+import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.util.IdGenerator;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.google.common.collect.ImmutableList;
 
 @ContextConfiguration(classes =
 { MappingServiceImplTest.Config.class, MappingConfig.class })
@@ -39,12 +51,6 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		MetaDataService metaDataService()
-		{
-			return mock(MetaDataService.class);
-		}
-
-		@Bean
 		MolgenisUserService userService()
 		{
 			return mock(MolgenisUserService.class);
@@ -55,7 +61,7 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		{
 			return new InMemoryRepositoryCollection(dataService());
 		}
-
+		
 	}
 
 	@Autowired
@@ -66,9 +72,6 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 
 	@Autowired
 	private MappingService mappingService;
-
-	@Autowired
-	private MetaDataService metaDataService;
 
 	@Autowired
 	private MolgenisUserService userService;
@@ -82,17 +85,28 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 	@BeforeMethod
 	public void beforeMethod()
 	{
+
 		user = new MolgenisUser();
 		user.setUsername("Piet");
 		when(userService.getUser("Piet")).thenReturn(user);
 
 		hopMetaData = new DefaultEntityMetaData("HopEntity", PackageImpl.defaultPackage);
 		hopMetaData.addAttribute("identifier").setIdAttribute(true);
-		when(metaDataService.getEntityMetaData("HopEntity")).thenReturn(hopMetaData);
+		hopMetaData.addAttribute("hoogte").setDataType(DECIMAL).setNillable(false);
 
 		geneMetaData = new DefaultEntityMetaData("Gene", PackageImpl.defaultPackage);
-		geneMetaData.addAttribute("Gene").setIdAttribute(true);
-		when(metaDataService.getEntityMetaData("Gene")).thenReturn(geneMetaData);
+		geneMetaData.addAttribute("id").setIdAttribute(true);
+		geneMetaData.addAttribute("lengte").setDataType(DECIMAL).setNillable(false);
+
+		if (!dataService.hasRepository("HopEntity"))
+		{
+			repoCollection.add(hopMetaData);
+			CrudRepository gene = repoCollection.add(geneMetaData);
+			MapEntity geneEntity = new MapEntity(hopMetaData);
+			geneEntity.set("identifier", "1");
+			geneEntity.set("lengte", 123.4);
+			gene.add(geneEntity);
+		}
 
 		dataService.getEntityNames().forEach(dataService::removeRepository);
 	}
@@ -174,5 +188,32 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		catch (IllegalStateException expected)
 		{
 		}
+	}
+
+	@Test
+	public void testRun()
+	{
+		MappingProject mappingProject = mappingService.addMappingProject("TestRun", user, "HopEntity");
+		MappingTarget target = mappingProject.getMappingTarget("HopEntity");
+		EntityMapping mapping = target.addSource(geneMetaData);
+		AttributeMapping attrMapping = mapping.addAttributeMapping("hoogte");
+		attrMapping.setSource(geneMetaData.getAttribute("lengte"));
+
+		mappingService.updateMappingProject(mappingProject);
+		mappingService.run(mappingProject.getIdentifier(), "HopEntity", "Koetjeboe");
+
+		CrudRepository actual = dataService.getCrudRepository("Koetjeboe");
+		DefaultEntityMetaData expectedMetadata = new DefaultEntityMetaData("Koetjeboe", hopMetaData);
+		expectedMetadata.addAttribute("source");
+		assertEquals(actual.getEntityMetaData(),
+				expectedMetadata);
+		List<Entity> created = Lists.newArrayList(actual.iterator());
+		
+		MapEntity koetje = new MapEntity(expectedMetadata);
+		
+		koetje.set("identifier", created.get(0).getString("identifier"));
+		koetje.set("hoogte", 123.4);
+		koetje.set("source", "Gene");
+		assertEquals(created, ImmutableList.<Entity> of(koetje));
 	}
 }

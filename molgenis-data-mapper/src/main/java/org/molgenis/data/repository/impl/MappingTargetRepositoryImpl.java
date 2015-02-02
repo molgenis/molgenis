@@ -6,13 +6,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.molgenis.data.CrudRepository;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.mapping.model.EntityMapping;
 import org.molgenis.data.mapping.model.MappingTarget;
 import org.molgenis.data.meta.MappingProjectMetaData;
 import org.molgenis.data.meta.MappingTargetMetaData;
-import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.repository.EntityMappingRepository;
 import org.molgenis.data.repository.MappingTargetRepository;
 import org.molgenis.data.support.MapEntity;
@@ -32,7 +32,7 @@ public class MappingTargetRepositoryImpl implements MappingTargetRepository
 	private EntityMappingRepository entityMappingRepository;
 
 	@Autowired
-	private MetaDataService metaDataService;
+	private DataService dataService;
 
 	public MappingTargetRepositoryImpl(CrudRepository repository, EntityMappingRepository entityMappingRepository)
 	{
@@ -93,7 +93,7 @@ public class MappingTargetRepositoryImpl implements MappingTargetRepository
 	{
 		List<EntityMapping> entityMappings = Collections.emptyList();
 		String identifier = mappingProjectEntity.getString(MappingTargetMetaData.IDENTIFIER);
-		EntityMetaData target = metaDataService.getEntityMetaData(mappingProjectEntity
+		EntityMetaData target = dataService.getEntityMetaData(mappingProjectEntity
 				.getString(MappingTargetMetaData.TARGET));
 		if (mappingProjectEntity.getEntities(MappingTargetMetaData.ENTITYMAPPINGS) != null)
 		{

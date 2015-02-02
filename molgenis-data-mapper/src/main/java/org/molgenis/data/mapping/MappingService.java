@@ -21,4 +21,6 @@ public interface MappingService
 
 	abstract MappingProject getMappingProject(String identifier);
 
+	void run(String mappingProjectId, String target, String newEntityName);
+
 }

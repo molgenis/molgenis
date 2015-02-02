@@ -5,12 +5,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.molgenis.data.CrudRepository;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.mapping.model.AttributeMapping;
 import org.molgenis.data.mapping.model.EntityMapping;
 import org.molgenis.data.meta.EntityMappingMetaData;
-import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.repository.AttributeMappingRepository;
 import org.molgenis.data.repository.EntityMappingRepository;
 import org.molgenis.data.support.MapEntity;
@@ -27,7 +27,7 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 	public static final EntityMetaData META_DATA = new EntityMappingMetaData();
 
 	@Autowired
-	private MetaDataService metaDataService;
+	private DataService dataService;
 
 	@Autowired
 	private IdGenerator idGenerator;
@@ -51,9 +51,9 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 	private EntityMapping toEntityMapping(Entity entityMappingEntity)
 	{
 		String identifier = entityMappingEntity.getString(EntityMappingMetaData.IDENTIFIER);
-		EntityMetaData targetEntityMetaData = metaDataService.getEntityMetaData(entityMappingEntity
+		EntityMetaData targetEntityMetaData = dataService.getEntityMetaData(entityMappingEntity
 				.getString(EntityMappingMetaData.TARGETENTITYMETADATA));
-		EntityMetaData sourceEntityMetaData = metaDataService.getEntityMetaData(entityMappingEntity
+		EntityMetaData sourceEntityMetaData = dataService.getEntityMetaData(entityMappingEntity
 				.getString(EntityMappingMetaData.SOURCEENTITYMETADATA));
 		List<Entity> attributeMappingEntities = Lists.<Entity> newArrayList(entityMappingEntity
 				.getEntities(EntityMappingMetaData.ATTRIBUTEMAPPINGS));

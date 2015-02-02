@@ -11,7 +11,6 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.mapping.model.AttributeMapping;
 import org.molgenis.data.meta.AttributeMappingMetaData;
 import org.molgenis.data.meta.EntityMappingMetaData;
-import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.repository.AttributeMappingRepository;
 import org.molgenis.data.support.MapEntity;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +22,6 @@ import com.google.common.collect.Lists;
 public class AttributeMappingRepositoryImpl implements AttributeMappingRepository
 {
 	public static final EntityMetaData META_DATA = new AttributeMappingMetaData();
-
-	@Autowired
-	private MetaDataService metaDataService;
 
 	@Autowired
 	private IdGenerator idGenerator;
