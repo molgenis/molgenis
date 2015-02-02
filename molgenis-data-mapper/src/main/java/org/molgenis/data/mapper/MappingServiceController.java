@@ -6,6 +6,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.auth.MolgenisUser;
@@ -127,6 +129,15 @@ public class MappingServiceController extends MolgenisPluginController
 		return "redirect:/menu/main/mappingservice/mappingproject/" + mappingProjectId;
 	}
 
+	@RequestMapping(value = "/removeentitymapping", method = RequestMethod.POST)
+	public String removeEntityMapping(@RequestParam String mappingProjectId, String target, String source)
+	{
+		MappingProject project = mappingService.getMappingProject(mappingProjectId);
+		project.getMappingTarget(target).removeSource(source);
+		mappingService.updateMappingProject(project);
+		return "redirect:/menu/main/mappingservice/mappingproject/" + mappingProjectId;
+	}
+
 	/**
 	 * Adds a new {@link AttributeMapping} to an {@link EntityMapping}.
 	 * 
@@ -184,9 +195,36 @@ public class MappingServiceController extends MolgenisPluginController
 		// Fill the model
 		model.addAttribute("selectedTarget", target);
 		model.addAttribute("mappingProject", selectedMappingProject);
-		model.addAttribute("entityMetaDatas", getEntityMetaDatas());
+		model.addAttribute("entityMetaDatas", getNewSources(selectedMappingProject.getMappingTarget(target)));
 
 		return VIEW_SINGLE_MAPPING_PROJECT;
+	}
+
+	@RequestMapping("/createintegratedentity")
+	public String createIntegratedEntity(@RequestParam String mappingProjectId, @RequestParam String target,
+			@RequestParam() String newEntityName)
+	{
+		// TODO some entity mapping merging play here. Run
+		return "redirect:/menu/main/dataexplorer?entity=" + newEntityName;
+	}
+
+	/**
+	 * Lists the entities that may be added as new sources to this mapping project's selected target
+	 * 
+	 * @param target
+	 *            the selected target
+	 * @return
+	 */
+	private List<EntityMetaData> getNewSources(MappingTarget target)
+	{
+		return StreamSupport.stream(dataService.getEntityNames().spliterator(), false)
+				.filter((name) -> isValidSource(target, name)).map(dataService::getEntityMetaData)
+				.collect(Collectors.toList());
+	}
+
+	private static boolean isValidSource(MappingTarget target, String name)
+	{
+		return !target.hasMappingFor(name);
 	}
 
 	/**

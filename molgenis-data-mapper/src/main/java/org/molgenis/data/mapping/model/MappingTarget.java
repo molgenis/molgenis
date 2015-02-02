@@ -129,4 +129,14 @@ public class MappingTarget
 	{
 		return entityMappings.values();
 	}
+
+	public void removeSource(String source)
+	{
+		entityMappings.remove(source);
+	}
+
+	public boolean hasMappingFor(String name)
+	{
+		return entityMappings.containsKey(name);
+	}
 }
