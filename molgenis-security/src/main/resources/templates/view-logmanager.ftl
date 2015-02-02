@@ -2,7 +2,7 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=["select2.css"]>
-<#assign js=["select2.min.js","logmanager.js"]>
+<#assign js=["select2-patched.js","logmanager.js"]>
 
 <@header css js/>
 <div class="row">
