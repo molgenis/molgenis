@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.molgenis.ontology.utils.OntologyLoader;
+import org.molgenis.util.ResourceUtils;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -24,8 +25,8 @@ public class OntologyLoaderTest
 	@BeforeMethod
 	public void setUp() throws OWLOntologyCreationException
 	{
-		URL url = Thread.currentThread().getContextClassLoader().getResource("test-ontology-loader.owl");
-		File file = new File(url.getPath());
+	
+		File file = ResourceUtils.getFile("test-ontology-loader.owl");
 
 		loader = new OntologyLoader("ontology-test", file);
 	}

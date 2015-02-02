@@ -13,6 +13,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.ontology.repository.OntologyIndexRepository;
 import org.molgenis.ontology.utils.OntologyLoader;
+import org.molgenis.util.ResourceUtils;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -25,8 +26,7 @@ public class OntologyRepositoryTest
 	@BeforeMethod
 	public void setUp() throws OWLOntologyCreationException
 	{
-		URL url = Thread.currentThread().getContextClassLoader().getResource("test-ontology-loader.owl");
-		File file = new File(url.getPath());
+		File file = ResourceUtils.getFile("test-ontology-loader.owl");
 
 		loader = new OntologyLoader("ontology-test", file);
 		repository = new OntologyIndexRepository(loader, "test", mock(SearchService.class));
