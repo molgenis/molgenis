@@ -158,7 +158,7 @@ public class MappingServiceController extends MolgenisPluginController
 		EntityMetaData sourceEmd = dataService.getEntityMetaData(source);
 		attributeMapping.setSource(sourceEmd.getAttribute(sourceAttribute));
 		mappingService.updateMappingProject(mappingProject);
-		return "redirect:/menu/main/mappingservice/mappingProject/" + mappingProject.getIdentifier();
+		return "redirect:/menu/main/mappingservice/mappingproject/" + mappingProject.getIdentifier();
 	}
 
 	/**

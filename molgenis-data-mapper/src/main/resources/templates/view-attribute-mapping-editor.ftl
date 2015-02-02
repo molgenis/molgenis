@@ -9,11 +9,14 @@
 <script src="<@resource_href "/js/ace/src-min-noconflict/ace.js"/>" type="text/javascript" charset="utf-8"></script>
 <script src="<@resource_href "/js/ace/src-min-noconflict/ext-language_tools.js"/>" type="text/javascript" charset="utf-8"></script>
 
+<#if attributeMapping.sourceAttributeMetaData??>
+	<#assign selected=attributeMapping.sourceAttributeMetaData.name>
+</#if>
 <div class="row">
 	<div class="col-md-12">
 		<h3>Mapping to <u>${entityMapping.targetEntityMetaData.name}.${attributeMapping.targetAttributeMetaData.name}</u> from <u>${entityMapping.targetEntityMetaData.name}</u></h3>
 	</div><br /><br /><br />
-	
+	${selected}
 </div>
 <div class="row">
 	<div id="attribute-table-container" class="col-md-6">
@@ -32,14 +35,14 @@
 							<td>${source.name}</td>
 							<td><#if source.description??>${source.description}</#if></td>
 							<td>0</td>
-							<td><input type="radio" name="sourceAttribute" value="${source.name}"/></td>
+							<td><input type="radio" name="sourceAttribute" value="${source.name}"<#if source.name == selected> checked="checked"</#if>/></td>
 						</tr>
 					</#list>
 				</tbody>
 			</table>
 			<button type="submit" class="btn btn-primary">Save</button>
 			<button type="reset" class="btn btn-default">Reset</button>
-	        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+	        <button type="button" class="btn btn-default" onclick="window.history.back()">Cancel</button>
 		</form>
 	</div>
 	<div id="edit-algorithm-container" class="col-md-6"></div>

@@ -62,13 +62,7 @@
 								${attribute.name}
 							</td>
 							<#list mappingProject.getMappingTarget(selectedTarget).entityMappings as source>
-							<td>
-								<#if source.getAttributeMapping(attribute.name)??>
-									${source.getAttributeMapping(attribute.name).sourceAttributeMetaData.name}
-									<button class="btn btn-primary btn-xs">
-										<span class="glyphicon glyphicon-pencil"></span>
-									</button>
-								<#else>
+								<td>
 									<form method="get" action="${context_url}/editattributemapping">
 										<button type="submit" class="btn btn-primary btn-xs">
 											<span class="glyphicon glyphicon-pencil"></span>
@@ -77,9 +71,11 @@
 										<input type="hidden" name="target" value="${selectedTarget}"/>
 										<input type="hidden" name="source" value="${source.name}"/>
 										<input type="hidden" name="attribute" value="${attribute.name}"/>
+										<#if source.getAttributeMapping(attribute.name)??>
+											${source.getAttributeMapping(attribute.name).sourceAttributeMetaData.name}
+										</#if>
 									</form>
-								</#if>
-							</td>
+								</td>
 							</#list>
 						</tr>
 					</#list>
