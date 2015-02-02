@@ -76,31 +76,41 @@ public class ExcelRepository extends AbstractRepository
 
 		return new Iterator<Entity>()
 		{
-            ExcelEntity next = null;
-            @Override
+			ExcelEntity next = null;
+
+			@Override
 			public boolean hasNext()
 			{
-                if(it.hasNext() && next == null){
-                    ExcelEntity entity = new ExcelEntity(it.next(), colNamesMap, cellProcessors, getEntityMetaData());
+				// iterator skips empty lines.
+				if (it.hasNext() && next == null)
+				{
+					ExcelEntity entity = new ExcelEntity(it.next(), colNamesMap, cellProcessors, getEntityMetaData());
 
-                    //check if there is any column containing a value
-                    for(String name : entity.getAttributeNames()){
-                        if(StringUtils.isNotEmpty(entity.getString(name))){
-                            next = entity;
-                            break;
-                        }
-                    }
-                }
-                return next != null;
+					// check if there is any column containing a value
+					for (String name : entity.getAttributeNames())
+					{
+						if (StringUtils.isNotEmpty(entity.getString(name)))
+						{
+							next = entity;
+							break;
+						}
+					}
+					// next line not empty?
+					if (next == null)
+					{
+						hasNext();
+					}
+				}
+				return next != null;
 			}
 
 			@Override
 			public ExcelEntity next()
 			{
-                hasNext();
-                ExcelEntity result = next;
-                next = null;
-                return result;
+				hasNext();
+				ExcelEntity result = next;
+				next = null;
+				return result;
 			}
 
 			@Override
@@ -158,7 +168,7 @@ public class ExcelRepository extends AbstractRepository
 			try
 			{
 				String header = AbstractCellProcessor.processCell(ExcelUtils.toValue(it.next()), true, cellProcessors);
-				if(null != header) columnIdx.put(header, i++);
+				if (null != header) columnIdx.put(header, i++);
 			}
 			catch (final IllegalStateException ex)
 			{
