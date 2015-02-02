@@ -20,8 +20,8 @@
 		<form method="POST" action="${context_url}/saveattributemapping">
 			<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
 			<input type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name}"/>
-			<input type="hidden" name="source" value="${entityMapping.targetEntityMetaData.name}"/>
-			<input type="hidden" name="attribute" value="${attributeMapping.targetAttributeMetaData.name}"/>
+			<input type="hidden" name="source" value="${entityMapping.sourceEntityMetaData.name}"/>
+			<input type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name}"/>
 			<table>
 				<thead>
 					<tr><th>Name</th><th>Description</th><th>Score</th><th>Select</th></tr>
@@ -32,7 +32,7 @@
 							<td>${source.name}</td>
 							<td><#if source.description??>${source.description}</#if></td>
 							<td>0</td>
-							<td><input type="checkbox" name="${source.name}"/></td>
+							<td><input type="radio" name="sourceAttribute" value="${source.name}"/></td>
 						</tr>
 					</#list>
 				</tbody>

@@ -63,7 +63,10 @@ public class MappingTarget
 	 */
 	public EntityMapping addSource(EntityMetaData source)
 	{
-		// TODO: check existence?
+		if (entityMappings.containsKey(source.getName()))
+		{
+			throw new IllegalStateException("Mapping already present for source " + source.getName());
+		}
 		EntityMapping result = new EntityMapping(source, target);
 		entityMappings.put(source.getName(), result);
 		return result;

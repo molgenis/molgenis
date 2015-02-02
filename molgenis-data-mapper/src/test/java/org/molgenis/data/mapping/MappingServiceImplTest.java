@@ -9,6 +9,7 @@ import static org.testng.Assert.fail;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
 import org.molgenis.data.ManageableCrudRepositoryCollection;
+import org.molgenis.data.mapping.model.EntityMapping;
 import org.molgenis.data.mapping.model.MappingProject;
 import org.molgenis.data.mem.InMemoryRepositoryCollection;
 import org.molgenis.data.meta.MetaDataService;
@@ -149,11 +150,29 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		MappingProject mappingProject = mappingService.addMappingProject("Test123", user, "HopEntity");
 
 		// now add new source
-		mappingProject.getMappingTarget("HopEntity").addSource(geneMetaData);
+		EntityMapping mapping = mappingProject.getMappingTarget("HopEntity").addSource(geneMetaData);
 		mappingService.updateMappingProject(mappingProject);
 
 		MappingProject retrieved = mappingService.getMappingProject(mappingProject.getIdentifier());
 		assertEquals(retrieved, mappingProject);
+
+		assertEquals(retrieved.getMappingTarget("HopEntity").getMappingForSource("Gene"), mapping);
 	}
 
+	@Test
+	public void testAddExistingSource()
+	{
+		MappingProject mappingProject = mappingService.addMappingProject("Test123", user, "HopEntity");
+		mappingProject.getMappingTarget("HopEntity").addSource(geneMetaData);
+		mappingService.updateMappingProject(mappingProject);
+		MappingProject retrieved = mappingService.getMappingProject(mappingProject.getIdentifier());
+		try
+		{
+			retrieved.getMappingTarget("HopEntity").addSource(geneMetaData);
+			fail("Expected exception");
+		}
+		catch (IllegalStateException expected)
+		{
+		}
+	}
 }
