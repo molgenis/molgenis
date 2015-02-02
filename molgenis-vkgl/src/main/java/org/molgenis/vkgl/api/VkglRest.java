@@ -23,12 +23,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.data.rest.RestController;
-import org.molgenis.data.rest.VkglAlleleQuery;
-import org.molgenis.data.rest.VkglCoordinateQuery;
-import org.molgenis.data.rest.VkglRequest;
-import org.molgenis.data.rest.VkglResponse;
-import org.molgenis.data.rest.VkglResponseMetadata;
-import org.molgenis.data.rest.VkglResult;
+
 import org.molgenis.data.rsql.MolgenisRSQL;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.QueryImpl;
