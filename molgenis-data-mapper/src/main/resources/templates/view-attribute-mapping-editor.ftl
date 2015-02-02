@@ -11,12 +11,13 @@
 
 <#if attributeMapping.sourceAttributeMetaData??>
 	<#assign selected=attributeMapping.sourceAttributeMetaData.name>
+<#else>
+	<#assign selected="null">
 </#if>
 <div class="row">
 	<div class="col-md-12">
 		<h3>Mapping to <u>${entityMapping.targetEntityMetaData.name}.${attributeMapping.targetAttributeMetaData.name}</u> from <u>${entityMapping.targetEntityMetaData.name}</u></h3>
 	</div><br /><br /><br />
-	${selected}
 </div>
 <div class="row">
 	<div id="attribute-table-container" class="col-md-6">
