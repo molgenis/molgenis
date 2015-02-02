@@ -374,6 +374,8 @@ public class VcfRepository extends AbstractRepository
 						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ALLELE1,
 						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true));
+				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ALLELE2,
+						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(POS,
 						MolgenisFieldTypes.FieldTypeEnum.LONG).setAggregateable(true));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(REF,
