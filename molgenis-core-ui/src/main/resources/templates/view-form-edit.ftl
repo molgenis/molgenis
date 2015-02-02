@@ -4,7 +4,7 @@
 <#import "form-macros.ftl" as f>
 
 <#assign css=['select2.css', 'bootstrap-datetimepicker.min.css', 'molgenis-form.css']>
-<#assign js=['jquery.validate.min.js', 'select2.min.js', 'moment-with-locales.min.js', 'bootstrap-datetimepicker.min.js', 'molgenis-form-edit.js', 'ace/src-min-noconflict/ace.js']>
+<#assign js=['jquery.validate.min.js', 'select2-patched.js', 'moment-with-locales.min.js', 'bootstrap-datetimepicker.min.js', 'molgenis-form-edit.js', 'ace/src-min-noconflict/ace.js']>
 
 <@header css js/>
 

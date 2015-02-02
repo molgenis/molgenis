@@ -3,6 +3,7 @@
 
 	var restApi = new molgenis.RestClient();
 
+	
 	/**
 	 * @memberOf molgenis.table
 	 */
@@ -21,9 +22,12 @@
 		items.push('</div>');
 		items.push('</div>');
 		items.push('<div class="row">');
-		items.push('<div class="col-md-3"><div class="molgenis-table-controls pull-left">');
-		if(settings.editable)
-			items.push('<a class="btn btn-default edit-table-btn" href="#" data-toggle="button"><span class="glyphicon glyphicon-edit"></span></a>');
+		items.push('<div class="col-md-3"><div class="molgenis-table-controls">');
+		if(settings.editable) {
+			items.push('<a class="btn btn-default btn-primary edit-table-btn" href="#" data-toggle="button" title="Edit"><span class="glyphicon glyphicon-edit"></span></a>');
+			items.push('<a class="btn btn-default btn-success add-row-btn" style="display: none" href="#" data-toggle="button" title="Add row"><span class="glyphicon glyphicon-plus"></span></a>');
+		}
+		
 		items.push('</div></div>');
 		items.push('<div class="col-md-6"><div class="molgenis-table-pager"></div></div>');
 		items.push('<div class="col-md-3"><div class="molgenis-table-info pull-right"></div></div>');
@@ -152,7 +156,7 @@
 			var row = $('<tr>').data('entity', entity).data('id', entity.href);
 			if (settings.editenabled) {
 				var cell = $('<td class="trash" tabindex="' + tabindex++ + '">');
-				$('<span class="glyphicon glyphicon-trash delete-row-btn"></span>').appendTo(cell);
+				$('<a class="btn btn-xs btn-danger delete-row-btn" href="#" data-toggle="button" title="Delete"><span class="glyphicon glyphicon-minus"></span></button>').appendTo(cell);
 				row.append(cell);
 			}
 
@@ -362,14 +366,15 @@
 	function renderViewCell(cell, entity, attribute, settings) {
 		cell.empty();
 		
-		var rawValue = entity[attribute.name];				
+		var rawValue = entity[attribute.name];
+
 		switch(attribute.fieldType) {
 			case 'XREF':
 			case 'MREF':
             case 'CATEGORICAL':
                 if (rawValue) {
                 	var refEntity = settings.refEntitiesMeta[attribute.refEntity.href];
-                	var refAttribute = refEntity.labelAttribute;
+                    var refAttribute = refEntity.labelAttribute;
                 	var refValue = refEntity.attributes[refAttribute];
 					
                 	if (refValue) {
@@ -381,7 +386,7 @@
                 		switch(attribute.fieldType) {
 							case 'CATEGORICAL':
 							case 'XREF':
-								var $cellValue = $('<a href="#">').append(formatTableCellValue(rawValue[refAttribute], refAttributeType)); 
+								var $cellValue = $('<a href="#">').append(formatTableCellValue(rawValue[refAttribute], refAttributeType));
 								$cellValue.click(function(event) {
 									openRefAttributeModal(attribute, refEntity, refAttribute, rawValue);
 									event.stopPropagation();
@@ -441,21 +446,14 @@
 			items.push('</div>');
 			modal = $(items.join(''));
 		}
-		
+
 		// inject modal data
 		var refAttributes = molgenis.getAtomicAttributes(refEntity.attributes, restApi);
-		
-		// TODO use idAttribute once github #1400 is fixed
-		// TODO remove trim() once github #1401 is fixed
-		var val = refValue[refEntity.labelAttribute];
-		if (typeof val.trim == 'function') {
-			val = val.trim();
-		}
-		
+        var val = restApi.get(refValue.href)[refEntity.idAttribute];
+
 		var refQuery = {
 			'q' : [ {
-				// TODO use idAttribute once github #1400 is fixed
-				'field' : refEntity.labelAttribute, 
+				'field' : refEntity.idAttribute,
 				'operator' : 'EQUALS',
 				'value' : val
 			} ]
@@ -625,6 +623,14 @@
 		} else container.hide();
 	}
 
+	function refresh(settings) {
+		getTableData(settings, function(data) {
+			createTableBody(data, settings);
+			createTablePager(data, settings);
+			createTableFooter(data, settings);
+		});
+	}
+	
 	/**
 	 * @memberOf molgenis.table
 	 */
@@ -672,12 +678,7 @@
 			'setQuery' : function(query) {
 				settings.query = query;
 				settings.start = 0;
-				
-				getTableData(settings, function(data) {
-					createTableBody(data, settings);
-					createTablePager(data, settings);
-					createTableFooter(data, settings);
-				});
+				refresh(settings);
 			},
 			'getQuery' : function() {
 				return settings.query;
@@ -727,7 +728,7 @@
 		$(container).on('click', '.edit-table-btn', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
-			
+			  
 			settings.editenabled = !settings.editenabled;
 			createTableHeader(settings);
 			createTableBody(settings.data, settings);
@@ -735,12 +736,77 @@
 				createTableBody(settings.data, settings);
 				$('.molgenis-table tbody').addClass('editable');
 				$('.molgenis-table tbody td:not(.trash)', settings.container).first().focus();
+				$('.add-row-btn').show();
+				 
+				$('.edit-table-btn').html('Done');
 			} else {
+				$('.add-row-btn').hide();
 				getTableData(settings, function(data) {
 					createTableBody(data, settings);
 				});
 				$('.molgenis-table tbody').removeClass('editable');
+				$('.edit-table-btn').html('<span class="glyphicon glyphicon-edit"></span>');
 			}
+		});
+		
+		//Add row
+		$(container).on('click', '.add-row-btn', function(e) {
+			e.preventDefault();
+			e.stopPropagation();
+			getCreateForm(settings.entityMetaData);
+		});
+		
+		function getCreateForm(entityMetaData) {
+			$.ajax({
+				type : 'GET',
+				url : '/api/v1/' + entityMetaData.name + '/create',
+				success : function(form) {
+					openFormModal(entityMetaData, form);
+				}
+			});
+		}
+		
+		function openFormModal(entityMetaData, form) {
+			// create modal structure
+			var modal = $('#form-modal');
+			if(!modal.length) {
+				var items = [];
+				items.push('<div class="modal" id="form-modal" tabindex="-1" role="dialog" aria-labelledby="form-modal-title" aria-hidden="true">');
+				items.push('<div class="modal-dialog">');
+				items.push('<div class="modal-content">');				
+				items.push('<div class="modal-header">');
+				items.push('<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>');
+				items.push('<h4 class="modal-title"></h4>');
+				items.push('</div>');
+				items.push('<div class="modal-body">');
+				items.push('</div>');
+				items.push('<div class="modal-footer">');
+				items.push('<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>');
+				items.push('<button type="button" id="submit-form-btn" class="btn btn-primary">Save</button>');
+				items.push('</div>');
+				items.push('</div>');
+				items.push('</div>');
+				items.push('</div>');
+				modal = $(items.join(''));
+			}
+			
+			$('.modal-title', modal).html(entityMetaData.label);
+			$('.modal-body', modal).html(form);
+			
+			modal.on('click', '#submit-form-btn', function(e) {
+				e.preventDefault();
+				e.stopPropagation();
+				$('#entity-form').submit();			
+			});
+			
+			// show modal
+			modal.modal({'show': true});
+		}
+		
+		$(document).on('onFormSubmitSuccess', function() {
+			$('#form-modal .modal-body').html('');
+			$('#form-modal').modal('hide');
+			refresh(settings);
 		});
 		
 		// toggle edit table mode
@@ -752,11 +818,7 @@
 				var href = $(this).closest('tr').data('id');
 				restApi.remove(href, {
 					success: function() {
-						getTableData(settings, function(data) {
-							createTableBody(data, settings);
-							createTablePager(data, settings);
-							createTableFooter(data, settings);
-						});
+						refresh(settings);
 					}
 				});
 			}
