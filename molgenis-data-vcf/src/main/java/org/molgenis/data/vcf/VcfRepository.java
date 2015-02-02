@@ -27,8 +27,11 @@ import org.molgenis.vcf.VcfReader;
 import org.molgenis.vcf.VcfRecord;
 import org.molgenis.vcf.VcfSample;
 import org.molgenis.vcf.meta.VcfMeta;
+import org.molgenis.vcf.meta.VcfMetaAlt;
+import org.molgenis.vcf.meta.VcfMetaContig;
 import org.molgenis.vcf.meta.VcfMetaFormat;
 import org.molgenis.vcf.meta.VcfMetaInfo;
+import org.molgenis.vcf.meta.VcfMetaSample;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +49,8 @@ public class VcfRepository extends AbstractRepository
 
 	public static final String BASE_URL = "vcf://";
 	public static final String CHROM = "#CHROM";
-	public static final String ALT = "ALT";
+	public static final String ALLELE1 = "ALLELE1";
+	public static final String ALLELE2 = "ALLELE2";
 	public static final String POS = "POS";
 	public static final String REF = "REF";
 	public static final String FILTER = "FILTER";
@@ -56,6 +60,8 @@ public class VcfRepository extends AbstractRepository
 	public static final String INFO = "INFO";
 	public static final String SAMPLES = "SAMPLES";
 	public static final String NAME = "NAME";
+	public static final String REFERENCE = "reference";
+	public static final String SOURCENAME = "SOURCENAME";
 
 	private final File file;
 	private final String entityName;
@@ -75,6 +81,7 @@ public class VcfRepository extends AbstractRepository
 	@Override
 	public Iterator<Entity> iterator()
 	{
+
 		final VcfReader vcfReader;
 		try
 		{
@@ -89,49 +96,111 @@ public class VcfRepository extends AbstractRepository
 		return new Iterator<Entity>()
 		{
 			Iterator<VcfRecord> vcfRecordIterator = finalVcfReader.iterator();
+			private VcfRecord vcfRecord;
+			private int numberOfSamples;
+			Iterator<VcfSample> sampleIterator = null;
+			String reference;
+			int row;
 
 			@Override
 			public boolean hasNext()
 			{
-				return vcfRecordIterator.hasNext();
+				// If this is set to null the record has been drained dry and no more samples can be split into
+				// individual entities
+				if (vcfRecord != null)
+				{
+					return true;
+				}
+				Boolean hasNext = vcfRecordIterator.hasNext();
+
+				// If the original record has a next element
+				if (vcfRecordIterator.hasNext())
+				{
+					// Set the next vcfRecord
+					vcfRecord = vcfRecordIterator.next();
+					row++;
+					if (row % 500 == 0)
+					{
+						System.out.println("processing row: " + row);
+					}
+					// If there are no samples it will not pass this filter
+					numberOfSamples = vcfRecord.getNrSamples();
+					if (numberOfSamples == 0)
+					{
+
+						return false;
+					}
+					reference = null;
+					try
+					{
+						reference = finalVcfReader.getVcfMeta().get(REFERENCE);
+
+					}
+					catch (IOException e)
+					{
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+
+					// While the record does not pass the filter check till a valid record is found
+					// while (!vkglChromosomeAccessionFilter(vcfRecord.getChromosome().toString())
+					// && !vkglReferenceGenomeFilter(reference))
+
+					while (!vkglReferenceGenomeFilter(reference))
+					{
+						//System.out.println(reference);
+						if (vcfRecordIterator.hasNext())
+						{
+							vcfRecord = vcfRecordIterator.next();
+						}
+						// If no next element is present return false
+						else
+						{
+
+							return false;
+						}
+					}
+				}
+
+				return hasNext;
+
 			}
 
 			@Override
 			public Entity next()
 			{
-
-				Entity entity = new MapEntity(getEntityMetaData());
+				Entity entity = new MapEntity();
 				try
 				{
-					VcfRecord vcfRecord = vcfRecordIterator.next();
 					entity.set(CHROM, vcfRecord.getChromosome());
-					entity.set(
-							ALT,
-							StringUtils.join(
-									Lists.transform(vcfRecord.getAlternateAlleles(), new Function<Allele, String>()
-									{
-										@Override
-										public String apply(Allele allele)
-										{
-											return allele.toString();
-										}
-									}), ','));
+					// entity.set(
+					// ALT,
+					// StringUtils.join(
+					// Lists.transform(vcfRecord.getAlternateAlleles(), new Function<Allele, String>()
+					// {
+					// @Override
+					// public String apply(Allele allele)
+					// {
+					// return allele.toString();
+					// }
+					// }), ','));
 
 					entity.set(POS, vcfRecord.getPosition());
 					entity.set(REF, vcfRecord.getReferenceAllele().toString());
 					entity.set(FILTER, vcfRecord.getFilterStatus());
 					entity.set(QUAL, vcfRecord.getQuality());
 					entity.set(ID, StringUtils.join(vcfRecord.getIdentifiers(), ','));
+					entity.set(REFERENCE, reference);
+					entity.set(SOURCENAME, file.getName());
 
 					StringBuilder id = new StringBuilder();
+
 					id.append(StringUtils.strip(entity.get(CHROM).toString()));
 					id.append("_");
 					id.append(StringUtils.strip(entity.get(POS).toString()));
 					id.append("_");
 					id.append(StringUtils.strip(entity.get(REF).toString()));
 					id.append("_");
-					id.append(StringUtils.strip(entity.get(ALT).toString()));
-					entity.set(INTERNAL_ID, id.toString());
 
 					for (VcfInfo vcfInfo : vcfRecord.getInformation())
 					{
@@ -146,34 +215,95 @@ public class VcfRepository extends AbstractRepository
 					if (hasFormatMetaData)
 					{
 						List<Entity> samples = new ArrayList<Entity>();
-						Iterator<VcfSample> sampleIterator = vcfRecord.getSamples().iterator();
+
 						if (vcfRecord.getNrSamples() > 0)
 						{
+							// If sampleIterator is null get a new one
+							if (sampleIterator == null)
+							{
+								sampleIterator = vcfRecord.getSamples().iterator();
+							}
+
 							Iterator<String> sampleNameIterator = finalVcfReader.getVcfMeta().getSampleNames()
 									.iterator();
-							while (sampleIterator.hasNext())
+
+							if (sampleIterator.hasNext())
 							{
 								String[] format = vcfRecord.getFormat();
 								VcfSample sample = sampleIterator.next();
 								Entity sampleEntity = new MapEntity(sampleEntityMetaData);
-								for (int i = 0; i < format.length; i = i + 1)
+
+								for (int i = 0; i < format.length; i++)
 								{
 									sampleEntity.set(format[i], sample.getData(i));
 								}
+
+								List<String> alleles = new ArrayList<String>();
+								String[] genoTypes = null;
+								if (sampleEntity.getString("GT").contains("/"))
+								{
+									genoTypes = sampleEntity.getString("GT").split("/");
+						//			System.out.println("/: " + sampleEntity.getString("GT"));
+								}
+								else if (sampleEntity.getString("GT").contains("|"))
+								{
+									genoTypes = sampleEntity.getString("GT").split("\\|");
+							//		System.out.println("|: " + sampleEntity.getString("GT"));
+									
+							
+								}
+								
+								for (String genoType : genoTypes)
+								{
+									if (genoType.equals("0"))
+									{
+
+										alleles.add(entity.get(REF).toString());
+							//			System.out.println("ref 1: " + entity.get(REF).toString());
+									}
+									else
+									{
+							//			System.out.println("GT: " + genoType);
+										String allele2 = vcfRecord.getAlternateAlleles()
+												.get(Integer.parseInt(genoType) - 1).toString();
+								//		System.out.println("alt: " + allele2);
+										alleles.add(allele2);
+									}
+
+								}
+								entity.set(ALLELE1, alleles.get(0));
+								entity.set(ALLELE2, alleles.get(1));
+								id.append(StringUtils.strip(entity.get(ALLELE1).toString()));
+								id.append("_");
+								id.append(StringUtils.strip(entity.get(ALLELE2).toString()));
+								entity.set(INTERNAL_ID, id.toString());
 								sampleEntity.set(ID, UUID.randomUUID());
 								// FIXME remove entity ID from Sample label after #1400 is fixed, see also:
 								// jquery.molgenis.table.js line 152
-								sampleEntity.set(NAME, entity.get(POS) + "_" + entity.get(ALT) + "_"
-										+ sampleNameIterator.next());
+								sampleEntity.set(NAME,
+										entity.get(POS) + "_" + entity.get(ALLELE1) + "_" + entity.get(ALLELE2)
+												+ "_" + sampleNameIterator.next());
 								samples.add(sampleEntity);
+							}
+							else
+							{
+								sampleIterator = null;
 							}
 						}
 						entity.set(SAMPLES, samples);
+
 					}
 				}
+
 				catch (IOException e)
 				{
 					LOG.error("Unable to load VCF metadata. ", e);
+				}
+				// If the next iteration means hold no more samples set vcfRecord and sampleIterator to null
+				if (--numberOfSamples == 0)
+				{
+					vcfRecord = null;
+					sampleIterator = null;
 				}
 
 				return entity;
@@ -184,6 +314,39 @@ public class VcfRepository extends AbstractRepository
 			{
 				throw new UnsupportedOperationException();
 			}
+
+			/**
+			 * Checks is chromosome has valid format if not return false.
+			 * 
+			 * @param chromosome
+			 * @return boolean
+			 */
+			private boolean vkglChromosomeAccessionFilter(String chromosome)
+			{
+
+				if (!chromosome.contains("|"))
+				{
+					return false;
+				}
+				return true;
+			}
+
+			/**
+			 * Checks if there is a reference otherwise returns false
+			 * 
+			 * @param reference
+			 * @return boolean
+			 */
+			private boolean vkglReferenceGenomeFilter(String reference)
+			{
+
+				if (reference.isEmpty())
+				{
+					return false;
+				}
+				return true;
+			}
+
 		};
 	}
 
@@ -209,7 +372,7 @@ public class VcfRepository extends AbstractRepository
 				}
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(CHROM,
 						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true));
-				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ALT,
+				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ALLELE1,
 						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(POS,
 						MolgenisFieldTypes.FieldTypeEnum.LONG).setAggregateable(true));

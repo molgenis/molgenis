@@ -34,6 +34,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,6 +46,8 @@ import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.auth.MolgenisUser;
+import org.molgenis.data.AggregateQuery;
+import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
@@ -61,6 +64,7 @@ import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.data.rsql.MolgenisRSQL;
+import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.DefaultEntityCollection;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -277,6 +281,7 @@ public class RestController
 			@PathVariable("id") Object id, @RequestParam(value = "attributes", required = false) String[] attributes,
 			@RequestParam(value = "expand", required = false) String[] attributeExpands)
 	{
+
 		Set<String> attributesSet = toAttributeSet(attributes);
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
 
@@ -542,6 +547,7 @@ public class RestController
 				return attributeMetaData.getName();
 			}
 		});
+		// 69881447
 
 		if (attributesSet != null)
 		{
