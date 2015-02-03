@@ -35,7 +35,7 @@ public class MappingTarget
 		this.entityMappings = new LinkedHashMap<String, EntityMapping>();
 		for (EntityMapping mapping : entityMappings)
 		{
-			this.entityMappings.put(mapping.getSourceEntityMetaData().getName(), mapping);
+			this.entityMappings.put(mapping.getName(), mapping);
 		}
 	}
 

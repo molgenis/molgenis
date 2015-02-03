@@ -10,10 +10,12 @@ import org.molgenis.data.mapping.model.EntityMapping;
 
 public interface AlgorithmService
 {
-	public List<Object> applyAlgorithm(AttributeMetaData targetAttribute, Iterable<AttributeMetaData> sourceAttributes,
+	List<Object> applyAlgorithm(AttributeMetaData targetAttribute, Iterable<AttributeMetaData> sourceAttributes,
 			String algorithm, Repository sourceRepo);
 
-	public List<Object> applyAlgorithm(AttributeMapping attributeMapping, Repository sourceRepo);
+	List<Object> applyAlgorithm(AttributeMapping attributeMapping, Repository sourceRepo);
 
-	public List<Entity> applyAlgorithms(EntityMapping entityMappings);
+	List<Entity> applyAlgorithms(EntityMapping entityMappings);
+
+	Object map(AttributeMapping attributeMapping, Entity sourceEntity);
 }

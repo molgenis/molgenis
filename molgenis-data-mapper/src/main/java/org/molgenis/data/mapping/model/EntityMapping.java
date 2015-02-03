@@ -52,13 +52,12 @@ public class EntityMapping
 		this.identifier = identifier;
 	}
 
-	public EntityMetaData getSourceEntityMetaData()
-	{
-		return sourceEntityMetaData;
-	}
-
 	public String getName()
 	{
+		if (sourceEntityMetaData == null)
+		{
+			return null;
+		}
 		return sourceEntityMetaData.getName();
 	}
 
