@@ -50,7 +50,7 @@ public class MappingConfig
 	@Bean
 	public MappingService mappingService()
 	{
-		return new MappingServiceImpl(mappingProjectRepository());
+		return new MappingServiceImpl();
 	}
 
 	@Bean

@@ -91,10 +91,7 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 	{
 		Entity entityMappingEntity = new MapEntity(META_DATA);
 		entityMappingEntity.set(EntityMappingMetaData.IDENTIFIER, entityMapping.getIdentifier());
-		entityMappingEntity
-				.set(EntityMappingMetaData.SOURCEENTITYMETADATA,
-						entityMapping.getSourceEntityMetaData() != null ? entityMapping.getSourceEntityMetaData()
-								.getName() : null);
+		entityMappingEntity.set(EntityMappingMetaData.SOURCEENTITYMETADATA, entityMapping.getName());
 		entityMappingEntity
 				.set(EntityMappingMetaData.TARGETENTITYMETADATA,
 						entityMapping.getTargetEntityMetaData() != null ? entityMapping.getTargetEntityMetaData()
