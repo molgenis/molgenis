@@ -50,7 +50,7 @@
 	 						</td>
 		 					<td>
 		 					<#list project.mappingTargets[0].entityMappings as mapping>
-		 						${mapping.sourceEntityMetaData.name}<#if mapping_has_next>, </#if> 
+		 						${mapping.name}<#if mapping_has_next>, </#if> 
 	 						</#list>
 		 					</td>	
 		 				</tr>

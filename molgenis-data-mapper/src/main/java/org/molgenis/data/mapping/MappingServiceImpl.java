@@ -68,7 +68,7 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	@Override
-	public void applyMappings(MappingTarget mappingTarget, String newEntityName)
+	public String applyMappings(MappingTarget mappingTarget, String newEntityName)
 	{
 		DefaultEntityMetaData targetMetaData = new DefaultEntityMetaData(newEntityName, mappingTarget.getTarget());
 		targetMetaData.addAttribute("source");
@@ -76,11 +76,13 @@ public class MappingServiceImpl implements MappingService
 		try
 		{
 			applyMappingsToRepositories(mappingTarget, targetRepo);
+			return targetMetaData.getName();
 		}
 		catch (RuntimeException ex)
 		{
 			LOG.error("Error applying mappings, dropping created repository.", ex);
 			manageableCrudRepositoryCollection.dropEntityMetaData(targetMetaData.getName());
+			throw ex;
 		}
 	}
 
@@ -117,6 +119,6 @@ public class MappingServiceImpl implements MappingService
 	private void applyMappingToAttribute(AttributeMapping attributeMapping, Entity sourceEntity, MapEntity target)
 	{
 		target.set(attributeMapping.getTargetAttributeMetaData().getName(),
-				algorithmService.map(attributeMapping, sourceEntity));
+				algorithmService.apply(attributeMapping, sourceEntity));
 	}
 }

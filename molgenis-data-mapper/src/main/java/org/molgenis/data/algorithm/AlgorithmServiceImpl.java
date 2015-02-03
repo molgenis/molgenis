@@ -1,6 +1,9 @@
 package org.molgenis.data.algorithm;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -12,7 +15,6 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.mapping.model.AttributeMapping;
-import org.molgenis.data.mapping.model.EntityMapping;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.js.RhinoConfig;
 import org.molgenis.js.ScriptEvaluator;
@@ -65,19 +67,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	}
 
 	@Override
-	public List<Object> applyAlgorithm(AttributeMapping attributeMapping, Repository sourceRepo)
-	{
-		return null;
-	}
-
-	@Override
-	public List<Entity> applyAlgorithms(EntityMapping entityMappings)
-	{
-		return null;
-	}
-
-	@Override
-	public Object map(AttributeMapping attributeMapping, Entity sourceEntity)
+	public Object apply(AttributeMapping attributeMapping, Entity sourceEntity)
 	{
 		String algorithm = attributeMapping.getAlgorithm();
 		if (StringUtils.isEmpty(algorithm))
@@ -111,27 +101,30 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		return convertedValue;
 	}
 
-	public static List<String> getSourceAttributeNames(String algorithmScript)
+	@Override
+	public Collection<String> getSourceAttributeNames(String algorithmScript)
 	{
-		List<String> featureNames = new ArrayList<String>();
+		Collection<String> result = Collections.emptyList();
 		if (!StringUtils.isEmpty(algorithmScript))
 		{
-			Pattern pattern = Pattern.compile("\\$\\('([^\\$\\(\\)]*)'\\)");
-			Matcher matcher = pattern.matcher(algorithmScript);
-			while (matcher.find())
+			result = findMatchesForPattern(algorithmScript, "\\$\\('([^\\$\\(\\)]+)'\\)");
+			if (result.isEmpty())
 			{
-				if (!featureNames.contains(matcher.group(1))) featureNames.add(matcher.group(1));
-			}
-			if (featureNames.size() > 0) return featureNames;
-
-			pattern = Pattern.compile("\\$\\(([^\\$\\(\\)]*)\\)");
-			matcher = pattern.matcher(algorithmScript);
-			while (matcher.find())
-			{
-				if (!featureNames.contains(matcher.group(1))) featureNames.add(matcher.group(1));
+				result = findMatchesForPattern(algorithmScript, "\\$\\(([^\\$\\(\\)]+)\\)");
 			}
 		}
-		return featureNames;
+		return result;
+	}
+
+	private static Collection<String> findMatchesForPattern(String algorithmScript, String patternString)
+	{
+		LinkedHashSet<String> result = new LinkedHashSet<String>();
+		Matcher matcher = Pattern.compile(patternString).matcher(algorithmScript);
+		while (matcher.find())
+		{
+			result.add(matcher.group(1));
+		}
+		return result;
 	}
 
 }

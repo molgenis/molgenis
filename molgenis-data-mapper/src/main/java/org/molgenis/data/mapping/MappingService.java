@@ -50,7 +50,8 @@ public interface MappingService
 	 *            the MappingTarget whose mappings are applied
 	 * @param newEntityName
 	 *            the name of the new entity to create.
+	 * @return fully qualified name of the generated entity
 	 */
-	void applyMappings(MappingTarget mappingTarget, String newEntityName);
+	String applyMappings(MappingTarget mappingTarget, String newEntityName);
 
 }

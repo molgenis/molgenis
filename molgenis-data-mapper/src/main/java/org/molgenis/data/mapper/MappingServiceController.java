@@ -16,7 +16,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.algorithm.AlgorithmService;
-import org.molgenis.data.algorithm.AlgorithmServiceImpl;
 import org.molgenis.data.mapping.MappingService;
 import org.molgenis.data.mapping.model.AttributeMapping;
 import org.molgenis.data.mapping.model.EntityMapping;
@@ -204,8 +203,9 @@ public class MappingServiceController extends MolgenisPluginController
 	public String createIntegratedEntity(@RequestParam String mappingProjectId, @RequestParam String target,
 			@RequestParam() String newEntityName)
 	{
-		// TODO some entity mapping merging play here. Run
-		return "redirect:/menu/main/dataexplorer?entity=" + newEntityName;
+		MappingTarget mappingTarget = mappingService.getMappingProject(mappingProjectId).getMappingTarget(target);
+		String name = mappingService.applyMappings(mappingTarget, newEntityName);
+		return "redirect:/menu/main/dataexplorer?entity=" + name;
 	}
 
 	/**
@@ -291,7 +291,7 @@ public class MappingServiceController extends MolgenisPluginController
 			MappingServiceRequest mappingServiceRequest, EntityMetaData sourceEntityMetaData)
 	{
 		return Iterables.filter(Iterables.transform(
-				AlgorithmServiceImpl.getSourceAttributeNames(mappingServiceRequest.getAlgorithm()),
+				algorithmService.getSourceAttributeNames(mappingServiceRequest.getAlgorithm()),
 				new Function<String, AttributeMetaData>()
 				{
 					@Override

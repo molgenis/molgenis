@@ -24,7 +24,7 @@
 		<form method="POST" action="${context_url}/saveattributemapping">
 			<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
 			<input type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name}"/>
-			<input type="hidden" name="source" value="${entityMapping.sourceEntityMetaData.name}"/>
+			<input type="hidden" name="source" value="${entityMapping.name}"/>
 			<input type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name}"/>
 			<table>
 				<thead>
