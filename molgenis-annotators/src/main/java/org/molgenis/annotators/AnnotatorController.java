@@ -2,6 +2,7 @@ package org.molgenis.annotators;
 
 import static org.molgenis.annotators.AnnotatorController.URI;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -86,7 +87,7 @@ public class AnnotatorController
 	 * option is ticked by the user.
 	 * 
 	 * @param annotatorNames
-	 * @param dataSetIdentifier
+	 * @param entityName
 	 * @param createCopy
 	 * @return repositoryName
 	 * 
@@ -102,18 +103,26 @@ public class AnnotatorController
 		if (annotatorNames != null && repository != null)
 		{
 			CrudRepositoryAnnotator crudRepositoryAnnotator = new CrudRepositoryAnnotator(mysqlRepositoryCollection,
-					getNewRepositoryName(annotatorNames, repository.getEntityMetaData().getSimpleName()));
+					getNewRepositoryName(annotatorNames, repository.getEntityMetaData().getSimpleName()),
+					searchService, dataService);
 
 			for (String annotatorName : annotatorNames)
 			{
 				RepositoryAnnotator annotator = annotationService.getAnnotatorByName(annotatorName);
 				if (annotator != null)
 				{
-					// running annotator
-					Repository repo = dataService.getRepositoryByEntityName(entityName);
-					repository = crudRepositoryAnnotator.annotate(annotator, repo, createCopy);
-					entityName = repository.getName();
-					createCopy = false;
+					try
+					{
+						// running annotator
+						Repository repo = dataService.getRepositoryByEntityName(entityName);
+						repository = crudRepositoryAnnotator.annotate(annotator, repo, createCopy);
+						entityName = repository.getName();
+						createCopy = false;
+					}
+					catch (IOException e)
+					{
+						throw new RuntimeException(e.getMessage());
+					}
 				}
 			}
 		}
