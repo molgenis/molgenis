@@ -199,7 +199,8 @@ public class MappingServiceController extends MolgenisPluginController
 	@RequestMapping(value = "/saveattributemapping", method = RequestMethod.POST)
 	public String saveAttributeMapping(@RequestParam(required = true) String mappingProjectId,
 			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
-			@RequestParam(required = true) String targetAttribute, @RequestParam(required = true) String sourceAttribute)
+			@RequestParam(required = true) String targetAttribute,
+			@RequestParam(required = true) String sourceAttribute, @RequestParam(required = true) String algorithm)
 	{
 		MappingProject mappingProject = mappingService.getMappingProject(mappingProjectId);
 		if (mayChange(mappingProject))
@@ -213,6 +214,7 @@ public class MappingServiceController extends MolgenisPluginController
 			}
 			EntityMetaData sourceEmd = dataService.getEntityMetaData(source);
 			attributeMapping.setSource(sourceEmd.getAttribute(sourceAttribute));
+			attributeMapping.setAlgorithm(algorithm);
 			mappingService.updateMappingProject(mappingProject);
 		}
 		return "redirect:/menu/main/mappingservice/mappingproject/" + mappingProject.getIdentifier();

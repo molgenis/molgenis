@@ -29,6 +29,7 @@
 				<input type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name?html}"/>
 				<input type="hidden" name="source" value="${entityMapping.name?html}"/>
 				<input type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name?html}"/>
+				<textarea class="form-control" name="algorithm" id="edit-algorithm-textarea"></textarea>
 				<table id="attribute-mapping-table" class="table table-bordered">
 					<thead>
 						<tr>
@@ -70,7 +71,7 @@
 	<div class="col-md-6">
 		<h5>Algorithm</h5>
 		<div id="edit-algorithm-editor" style="width: 100%; height:380px" class="uneditable-input">
-			<textarea class="form-control" name="edit-algorithm-textarea" id="edit-algorithm-container"></textarea>
+			
 		</div>
 		<hr />
 		<button type="submit" class="btn btn-primary" id="btn-test">Test</button>
@@ -105,7 +106,7 @@
 
 <script>
 	var editor = ace.edit("edit-algorithm-editor");
-	var textarea = $("edit-algorithm-textarea").hide();
+	var textarea = $("#edit-algorithm-textarea");
 	$('#statistics-container').hide();
 	
 	var showStatistics = function(data){

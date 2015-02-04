@@ -120,4 +120,9 @@ public class AttributeMapping
 				+ ", targetAttributeMetaData=" + targetAttributeMetaData + ", algorithm=" + algorithm + "]";
 	}
 
+	public void setAlgorithm(String algorithm)
+	{
+		this.algorithm = algorithm;
+	}
+
 }
