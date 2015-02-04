@@ -42,13 +42,24 @@
 				<#list mappingProject.getMappingTarget(selectedTarget).target.attributes as attribute>
 					<tr>
 						<td>
-							<b>${attribute.name?html}</b><#if attribute.description??><br />test${attribute.description?html}</#if>
+							<b>${attribute.name?html}</b> (${attribute.dataType})
+							<#if !attribute.nillable> <span class="label label-default">required</span></#if>
+							<#if attribute.unique> <span class="label label-default">unique</span></#if>
+							<#if attribute.description??><br />test${attribute.description?html}</#if>
 						</td>
 						<#list mappingProject.getMappingTarget(selectedTarget).entityMappings as source>
 							<td>
 								<form method="get" action="${context_url}/editattributemapping">
 									<#if source.getAttributeMapping(attribute.name)??>
-										${source.getAttributeMapping(attribute.name).sourceAttributeMetaData.name}
+										${source.getAttributeMapping(attribute.name).sourceAttributeMetaData.name} (${source.getAttributeMapping(attribute.name).sourceAttributeMetaData.dataType})
+										<#if !attribute.nillable && source.getAttributeMapping(attribute.name).sourceAttributeMetaData.nillable>
+											<span class="label label-warning">nillable</span>
+										</#if>
+										<#if attribute.unique && !source.getAttributeMapping(attribute.name).sourceAttributeMetaData.unique>
+											<span class="label label-warning">not unique</span>
+										</#if>
+									<#elseif !attribute.nillable>
+										<span class="label label-danger">missing</span>
 									</#if>
 									<button type="submit" class="btn btn-primary btn-xs pull-right">
 										<span class="glyphicon glyphicon-pencil"></span>
