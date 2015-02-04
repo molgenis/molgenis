@@ -193,7 +193,7 @@ public class CrudRepositoryAnnotator
 		{
 			newRepository = new ElasticsearchRepository(newEntityMetaData, searchService);
 			dataService.addRepository(newRepository);
-			searchService.createMappings(entityMetaData, true, true, true, true);
+			searchService.createMappings(newEntityMetaData, true, true, true, true);
 		}
 		return newRepository;
 	}
