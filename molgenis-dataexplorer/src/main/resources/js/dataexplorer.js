@@ -480,10 +480,8 @@ function($, molgenis, settingsXhr) {
 			
 			// hide entity dropdown
 			if(state.hideselect === 'true') {
-				console.log('hide container');
 				$('#dataset-select-container').addClass('hidden');
 			} else {
-				console.log('show container');
 				$('#dataset-select-container').removeClass('hidden');
 			}
 			
