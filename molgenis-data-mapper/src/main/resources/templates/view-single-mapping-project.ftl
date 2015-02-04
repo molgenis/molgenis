@@ -26,15 +26,17 @@
 		<table id="attribute-mapping-table" class="table table-bordered">
  			<thead>
  				<tr>
- 					<th>Target model: ${selectedTarget}</th>
+ 					<th>Target model: ${selectedTarget?html}</th>
 				<#list mappingProject.getMappingTarget(selectedTarget).entityMappings as source>
-					<th>
-						<form method="post" action="${context_url}/removeEntityMapping">
-							<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
-							<input type="hidden" name="target" value="${selectedTarget}"/>
-							<input type="hidden" name="source" value="${source.label}"/>
-							Source: ${source.name} <button type="submit" class="btn btn-danger btn-xs pull-right"><span class="glyphicon glyphicon-minus"></span></button>
-						</form>	
+					<th>Source: ${source.name?html}
+						<#if mayChange>
+							<form method="post" action="${context_url}/removeEntityMapping">
+								<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
+								<input type="hidden" name="target" value="${selectedTarget}"/>
+								<input type="hidden" name="source" value="${source.name}"/>
+								<button type="submit" class="btn btn-danger btn-xs pull-right"><span class="glyphicon glyphicon-minus"></span></button>
+							</form>
+						</#if>	
 					</th>
 				</#list>
  				</tr>
@@ -79,7 +81,7 @@
 		</table>
 		
 	</div>
-	<#if entityMetaDatas?has_content>
+	<#if entityMetaDatas?has_content && mayChange>
 		<div class="col-md-1">
 			<a id="add-new-attr-mapping-btn" href="#" class="btn btn-success btn-xs" data-toggle="modal" data-target="#create-new-source-column-modal"><span class="glyphicon glyphicon-plus"></span>Add source</a>
 		</div>
@@ -110,7 +112,6 @@
 	    					</#list>
 						</select>
 					</div>
-					
 					<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}">
 					<input type="hidden" name="target" value="${selectedTarget}">
 					<input type="submit" class="submit" style="display:none;">

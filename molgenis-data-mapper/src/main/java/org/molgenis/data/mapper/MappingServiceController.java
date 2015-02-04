@@ -233,15 +233,16 @@ public class MappingServiceController extends MolgenisPluginController
 	public String viewMappingProject(@PathVariable("id") String identifier,
 			@RequestParam(value = "target", required = false) String target, Model model)
 	{
-		MappingProject selectedMappingProject = mappingService.getMappingProject(identifier);
+		MappingProject project = mappingService.getMappingProject(identifier);
 		if (target == null)
 		{
-			target = selectedMappingProject.getMappingTargets().get(0).getName();
+			target = project.getMappingTargets().get(0).getName();
 		}
 		// Fill the model
 		model.addAttribute("selectedTarget", target);
-		model.addAttribute("mappingProject", selectedMappingProject);
-		model.addAttribute("entityMetaDatas", getNewSources(selectedMappingProject.getMappingTarget(target)));
+		model.addAttribute("mappingProject", project);
+		model.addAttribute("entityMetaDatas", getNewSources(project.getMappingTarget(target)));
+		model.addAttribute("mayChange", mayChange(project, false));
 
 		return VIEW_SINGLE_MAPPING_PROJECT;
 	}
