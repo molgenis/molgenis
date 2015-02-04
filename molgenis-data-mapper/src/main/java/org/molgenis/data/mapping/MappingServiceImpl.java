@@ -13,6 +13,7 @@ import org.molgenis.data.mapping.model.AttributeMapping;
 import org.molgenis.data.mapping.model.EntityMapping;
 import org.molgenis.data.mapping.model.MappingProject;
 import org.molgenis.data.mapping.model.MappingTarget;
+import org.molgenis.data.meta.PackageImpl;
 import org.molgenis.data.repository.MappingProjectRepository;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -84,6 +85,8 @@ public class MappingServiceImpl implements MappingService
 	public String applyMappings(MappingTarget mappingTarget, String newEntityName)
 	{
 		DefaultEntityMetaData targetMetaData = new DefaultEntityMetaData(newEntityName, mappingTarget.getTarget());
+		targetMetaData.setPackage(PackageImpl.defaultPackage);
+		targetMetaData.setLabel(newEntityName);
 		targetMetaData.addAttribute("source");
 		CrudRepository targetRepo = manageableCrudRepositoryCollection.add(targetMetaData);
 		try

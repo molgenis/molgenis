@@ -61,6 +61,15 @@ public class EntityMapping
 		return sourceEntityMetaData.getName();
 	}
 
+	public String getLabel()
+	{
+		if (sourceEntityMetaData == null)
+		{
+			return null;
+		}
+		return sourceEntityMetaData.getLabel();
+	}
+
 	public EntityMetaData getSourceEntityMetaData()
 	{
 		return sourceEntityMetaData;

@@ -31,7 +31,7 @@
 						<form method="post" action="${context_url}/removeEntityMapping">
 							<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
 							<input type="hidden" name="target" value="${selectedTarget}"/>
-							<input type="hidden" name="source" value="${source.name}"/>
+							<input type="hidden" name="source" value="${source.label}"/>
 							Source: ${source.name} <button type="submit" class="btn btn-danger btn-xs pull-right"><span class="glyphicon glyphicon-minus"></span></button>
 						</form>	
 					</th>
