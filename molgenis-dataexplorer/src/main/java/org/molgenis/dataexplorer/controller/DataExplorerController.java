@@ -91,7 +91,6 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String KEY_GALAXY_ENABLED = "plugin.dataexplorer.galaxy.enabled";
 	public static final String KEY_GALAXY_URL = "plugin.dataexplorer.galaxy.url";
 	public static final String KEY_SHOW_WIZARD_ONINIT = "plugin.dataexplorer.wizard.oninit";
-	public static final String KEY_HIDE_SELECT = "plugin.dataexplorer.select.hide";
 	public static final String KEY_HEADER_ABBREVIATE = "plugin.dataexplorer.header.abbreviate";
 	public static final String KEY_HIDE_SEARCH_BOX = "plugin.dataexplorer.hide.searchbox";
 	public static final String KEY_HIDE_ITEM_SELECTION = "plugin.dataexplorer.hide.itemselection";
@@ -178,12 +177,7 @@ public class DataExplorerController extends MolgenisPluginController
 
 		}
 
-		if (entityExists && hasEntityPermission)
-		{
-			if (molgenisSettings.getBooleanProperty(KEY_HIDE_SELECT, DEFAULT_VAL_KEY_HIDE_SELECT)) model.addAttribute(
-					"hideDatasetSelect", true);
-		}
-		else
+		if (!(entityExists && hasEntityPermission))
 		{
 			if (selectedEntityName != null)
 			{
@@ -611,8 +605,7 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/settings", method = RequestMethod.GET)
-	public @ResponseBody
-	Map<String, String> getSettings(@RequestParam(required = false) String keyStartsWith)
+	public @ResponseBody Map<String, String> getSettings(@RequestParam(required = false) String keyStartsWith)
 	{
 		if (keyStartsWith == null)
 		{
