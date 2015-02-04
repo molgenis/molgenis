@@ -43,22 +43,28 @@ public class AlgorithmServiceImpl implements AlgorithmService
 				}
 				if (!StringUtils.isEmpty(algorithm))
 				{
-					Object result = ScriptEvaluator.eval(algorithm, mapEntity);
-
-					if (result != null)
+					try
 					{
-						switch (targetAttribute.getDataType().getEnumType())
+						Object result = ScriptEvaluator.eval(algorithm, mapEntity);
+
+						if (result != null)
 						{
-							case INT:
-								derivedValues.add(Integer.parseInt(Context.toString(result)));
-								break;
-							case DECIMAL:
-								derivedValues.add(Context.toNumber(result));
-								break;
-							default:
-								derivedValues.add(Context.toString(result));
-								break;
+							switch (targetAttribute.getDataType().getEnumType())
+							{
+								case INT:
+									derivedValues.add(Integer.parseInt(Context.toString(result)));
+									break;
+								case DECIMAL:
+									derivedValues.add(Context.toNumber(result));
+									break;
+								default:
+									derivedValues.add(Context.toString(result));
+									break;
+							}
 						}
+					}
+					catch (RuntimeException ignored)
+					{
 					}
 				}
 			}
