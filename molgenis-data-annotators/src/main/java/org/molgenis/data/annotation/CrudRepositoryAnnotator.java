@@ -4,13 +4,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import org.elasticsearch.bootstrap.Elasticsearch;
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.CrudRepository;
-import org.molgenis.data.EditableEntityMetaData;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Repository;
+import org.molgenis.data.*;
+import org.molgenis.data.elasticsearch.ElasticsearchRepository;
+import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -24,11 +22,16 @@ public class CrudRepositoryAnnotator
 
 	private final MysqlRepositoryCollection mysqlRepositoryCollection;
 	private String newRepositoryLabel;
+	private SearchService searchService;
+	DataService dataService;
 
-	public CrudRepositoryAnnotator(MysqlRepositoryCollection mysqlRepositoryCollection, String newRepositoryName)
+	public CrudRepositoryAnnotator(MysqlRepositoryCollection mysqlRepositoryCollection, String newRepositoryName,
+			SearchService searchService, DataService dataService)
 	{
 		this.mysqlRepositoryCollection = mysqlRepositoryCollection;
 		this.newRepositoryLabel = newRepositoryName;
+		this.searchService = searchService;
+		this.dataService = dataService;
 	}
 
 	/**
@@ -85,11 +88,6 @@ public class CrudRepositoryAnnotator
 
 	/**
 	 * Iterates over all the entities within a repository and annotates.
-	 * 
-	 * @param targetRepo
-	 * @param targetRepo
-	 * @param annotator
-	 * @return
 	 */
 	private CrudRepository iterateOverEntitiesAndAnnotate(Repository sourceRepo, CrudRepository targetRepo,
 			RepositoryAnnotator annotator)
@@ -131,47 +129,67 @@ public class CrudRepositoryAnnotator
 	public CrudRepository addAnnotatorMetadataToRepositories(EntityMetaData entityMetaData, boolean createCopy,
 			DefaultAttributeMetaData compoundAttributeMetaData)
 	{
+		CrudRepository newRepository = null;
 		if (createCopy)
 		{
-			DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(UUID.randomUUID().toString(),
-					entityMetaData);
-			if (newEntityMetaData.getAttribute(compoundAttributeMetaData.getName()) == null)
-			{
-				newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData);
-			}
-			newEntityMetaData.setLabel(newRepositoryLabel);
-			return mysqlRepositoryCollection.add(newEntityMetaData);
+            newRepository = getOutputRepository(entityMetaData, compoundAttributeMetaData);
 		}
 		else
 		{
-			if (mysqlRepositoryCollection.getRepositoryByEntityName(entityMetaData.getName()) != null)
-			{
-				if (entityMetaData.getAttribute(compoundAttributeMetaData.getName()) == null)
-				{
-					DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(entityMetaData);
-					if (newEntityMetaData.getAttribute(compoundAttributeMetaData.getName()) == null)
-					{
-						newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData);
-					}
-					mysqlRepositoryCollection.updateSync(newEntityMetaData);
-				}
-				return null;
-			}
-			else
-			{
-				if (!(entityMetaData instanceof EditableEntityMetaData))
-				{
-					throw new UnsupportedOperationException(
-							"EntityMetadata should be editable to make annotation possible");
-				}
-				EditableEntityMetaData editableMetadata = (EditableEntityMetaData) entityMetaData;
-				editableMetadata.addAttributeMetaData(compoundAttributeMetaData);
-				return null;
-			}
-		}
+            updateRepositoryMetadata(entityMetaData, compoundAttributeMetaData);
+        }
+		return newRepository;
 	}
 
-	public DefaultAttributeMetaData getCompoundResultAttribute(RepositoryAnnotator annotator,
+    public void updateRepositoryMetadata(EntityMetaData entityMetaData, DefaultAttributeMetaData compoundAttributeMetaData) {
+        // mySQL repository
+        if (mysqlRepositoryCollection.getRepositoryByEntityName(entityMetaData.getName()) != null)
+        {
+            if (entityMetaData.getAttribute(compoundAttributeMetaData.getName()) == null)
+            {
+                DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(entityMetaData);
+                if (newEntityMetaData.getAttribute(compoundAttributeMetaData.getName()) == null)
+                {
+                    newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData);
+                }
+                mysqlRepositoryCollection.updateSync(newEntityMetaData);
+            }
+        }
+        else // ElasticSearch Repository
+        {
+            if (!(entityMetaData instanceof EditableEntityMetaData))
+            {
+                throw new UnsupportedOperationException(
+                        "EntityMetadata should be editable to make annotation possible");
+            }
+            EditableEntityMetaData editableMetadata = (EditableEntityMetaData) entityMetaData;
+            editableMetadata.addAttributeMetaData(compoundAttributeMetaData);
+        }
+    }
+
+    public CrudRepository getOutputRepository(EntityMetaData entityMetaData, DefaultAttributeMetaData compoundAttributeMetaData) {
+        CrudRepository newRepository;DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(UUID.randomUUID().toString(),
+                entityMetaData);
+        if (newEntityMetaData.getAttribute(compoundAttributeMetaData.getName()) == null)
+        {
+            newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData);
+        }
+        newEntityMetaData.setLabel(newRepositoryLabel);
+
+        // mySQL source repository
+        if (mysqlRepositoryCollection.getRepositoryByEntityName(entityMetaData.getName()) != null)
+        {
+            newRepository = mysqlRepositoryCollection.add(newEntityMetaData);
+        }
+        else // ElasticSearch source Repository
+        {
+            newRepository = new ElasticsearchRepository(newEntityMetaData, searchService);
+            dataService.addRepository(newRepository);
+        }
+        return newRepository;
+    }
+
+    public DefaultAttributeMetaData getCompoundResultAttribute(RepositoryAnnotator annotator,
 			EntityMetaData entityMetaData)
 	{
 		DefaultAttributeMetaData compoundAttributeMetaData = new DefaultAttributeMetaData(annotator.getFullName(),

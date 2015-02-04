@@ -86,7 +86,7 @@ public class AnnotatorController
 	 * option is ticked by the user.
 	 * 
 	 * @param annotatorNames
-	 * @param dataSetIdentifier
+	 * @param entityName
 	 * @param createCopy
 	 * @return repositoryName
 	 * 
@@ -102,7 +102,7 @@ public class AnnotatorController
 		if (annotatorNames != null && repository != null)
 		{
 			CrudRepositoryAnnotator crudRepositoryAnnotator = new CrudRepositoryAnnotator(mysqlRepositoryCollection,
-					getNewRepositoryName(annotatorNames, repository.getEntityMetaData().getSimpleName()));
+					getNewRepositoryName(annotatorNames, repository.getEntityMetaData().getSimpleName()), searchService, dataService);
 
 			for (String annotatorName : annotatorNames)
 			{
