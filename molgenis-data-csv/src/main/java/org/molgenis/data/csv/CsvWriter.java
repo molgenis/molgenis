@@ -188,10 +188,10 @@ public class CsvWriter extends AbstractWritable
 		{
 			value = ((Entity) obj).getLabelValue();
 		}
-		else if (obj instanceof List<?>)
+		else if (obj instanceof Iterable<?>)
 		{
 			StringBuilder strBuilder = new StringBuilder();
-			for (Object listItem : (List<?>) obj)
+			for (Object listItem : (Iterable<?>) obj)
 			{
 				if (strBuilder.length() > 0) strBuilder.append(',');
 				strBuilder.append(toValue(listItem));
