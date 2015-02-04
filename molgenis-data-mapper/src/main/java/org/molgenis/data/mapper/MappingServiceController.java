@@ -129,6 +129,39 @@ public class MappingServiceController extends MolgenisPluginController
 		return "redirect:/menu/main/mappingservice/mappingproject/" + mappingProjectId;
 	}
 
+	/**
+	 * Displays an {@link AttributeMapping}
+	 * 
+	 * @param mappingProjectId
+	 *            ID of the {@link MappingProject}
+	 * @param target
+	 *            name of the target entity
+	 * @param source
+	 *            name of the source entity
+	 * @param attribute
+	 *            name of the target attribute
+	 * @param model
+	 *            the model
+	 * @return name of the attributemapping view
+	 */
+	@RequestMapping("/editattributemapping")
+	public String editAttributeMapping(@RequestParam String mappingProjectId, @RequestParam String target,
+			@RequestParam String source, @RequestParam String attribute, Model model)
+	{
+		MappingProject project = mappingService.getMappingProject(mappingProjectId);
+		MappingTarget mappingTarget = project.getMappingTarget(target);
+		EntityMapping entityMapping = mappingTarget.getMappingForSource(source);
+		AttributeMapping attributeMapping = entityMapping.getAttributeMapping(attribute);
+		if (attributeMapping == null)
+		{
+			attributeMapping = entityMapping.addAttributeMapping(attribute);
+		}
+		model.addAttribute("mappingProject", project);
+		model.addAttribute("entityMapping", entityMapping);
+		model.addAttribute("attributeMapping", attributeMapping);
+		return VIEW_EDIT_ATTRIBUTE_MAPPING;
+	}
+
 	@RequestMapping(value = "/removeentitymapping", method = RequestMethod.POST)
 	public String removeEntityMapping(@RequestParam String mappingProjectId, String target, String source)
 	{
@@ -227,39 +260,6 @@ public class MappingServiceController extends MolgenisPluginController
 		return !target.hasMappingFor(name);
 	}
 
-	/**
-	 * Displays an {@link AttributeMapping}
-	 * 
-	 * @param mappingProjectId
-	 *            ID of the {@link MappingProject}
-	 * @param target
-	 *            name of the target entity
-	 * @param source
-	 *            name of the source entity
-	 * @param attribute
-	 *            name of the target attribute
-	 * @param model
-	 *            the model
-	 * @return name of the attributemapping view
-	 */
-	@RequestMapping("/editattributemapping")
-	public String editAttributeMapping(@RequestParam String mappingProjectId, @RequestParam String target,
-			@RequestParam String source, @RequestParam String attribute, Model model)
-	{
-		MappingProject project = mappingService.getMappingProject(mappingProjectId);
-		MappingTarget mappingTarget = project.getMappingTarget(target);
-		EntityMapping entityMapping = mappingTarget.getMappingForSource(source);
-		AttributeMapping attributeMapping = entityMapping.getAttributeMapping(attribute);
-		if (attributeMapping == null)
-		{
-			attributeMapping = entityMapping.addAttributeMapping(attribute);
-		}
-		model.addAttribute("mappingProject", project);
-		model.addAttribute("entityMapping", entityMapping);
-		model.addAttribute("attributeMapping", attributeMapping);
-		return VIEW_EDIT_ATTRIBUTE_MAPPING;
-	}
-
 	@RequestMapping(method = RequestMethod.POST, value = "/mappingattribute/testscript", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	public @ResponseBody Map<String, Object> testScript(@RequestBody MappingServiceRequest mappingServiceRequest)
 	{
@@ -308,6 +308,11 @@ public class MappingServiceController extends MolgenisPluginController
 		return Lists.newArrayList(Iterables.transform(dataService.getEntityNames(), dataService::getEntityMetaData));
 	}
 
+	private MolgenisUser getCurrentUser()
+	{
+		return molgenisUserService.getUser(SecurityUtils.getCurrentUsername());
+	}
+
 	@ExceptionHandler(RuntimeException.class)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -316,10 +321,5 @@ public class MappingServiceController extends MolgenisPluginController
 		LOG.error(e.getMessage(), e);
 		return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(
 				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage()));
-	}
-
-	private MolgenisUser getCurrentUser()
-	{
-		return molgenisUserService.getUser(SecurityUtils.getCurrentUsername());
 	}
 }
