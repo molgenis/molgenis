@@ -49,7 +49,7 @@
 						</td>
 						<#list mappingProject.getMappingTarget(selectedTarget).entityMappings as source>
 							<td>
-								<form method="get" action="${context_url}/editattributemapping">
+								<form method="get" action="${context_url}/attributeMapping">
 									<#if source.getAttributeMapping(attribute.name)??>
 										${source.getAttributeMapping(attribute.name).sourceAttributeMetaData.name} (${source.getAttributeMapping(attribute.name).sourceAttributeMetaData.dataType})
 										<#if !attribute.nillable && source.getAttributeMapping(attribute.name).sourceAttributeMetaData.nillable>

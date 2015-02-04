@@ -57,7 +57,7 @@ public class MappingServiceController extends MolgenisPluginController
 	public static final String ID = "mappingservice";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	private static final String VIEW_MAPPING_PROJECTS = "view-mapping-projects";
-	private static final String VIEW_EDIT_ATTRIBUTE_MAPPING = "view-attribute-mapping-editor";
+	private static final String VIEW_ATTRIBUTE_MAPPING = "view-attribute-mapping";
 	private static final String VIEW_SINGLE_MAPPING_PROJECT = "view-single-mapping-project";
 
 	@Autowired
@@ -119,8 +119,25 @@ public class MappingServiceController extends MolgenisPluginController
 	@RequestMapping(value = "/removeMappingProject", method = RequestMethod.POST)
 	public String deleteMappingProject(@RequestParam(required = true) String mappingProjectId)
 	{
-		mappingService.deleteMappingProject(mappingProjectId);
+		MappingProject project = mappingService.getMappingProject(mappingProjectId);
+		if (mayChange(project))
+		{
+			LOG.info("Deleting mappingProject " + project.getName());
+			mappingService.deleteMappingProject(mappingProjectId);
+		}
 		return "redirect:/menu/main/mappingservice/";
+	}
+
+	private boolean mayChange(MappingProject project)
+	{
+		boolean result = SecurityUtils.currentUserIsSu()
+				|| !project.getOwner().getUsername().equals(SecurityUtils.getCurrentUsername());
+		if (!result)
+		{
+			LOG.warn("User " + SecurityUtils.getCurrentUsername()
+					+ " illegally tried to modify mapping project with id " + project.getIdentifier());
+		}
+		return result;
 	}
 
 	/**
@@ -138,8 +155,11 @@ public class MappingServiceController extends MolgenisPluginController
 	public String addEntityMapping(@RequestParam String mappingProjectId, String target, String source)
 	{
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
-		project.getMappingTarget(target).addSource(dataService.getEntityMetaData(source));
-		mappingService.updateMappingProject(project);
+		if (mayChange(project))
+		{
+			project.getMappingTarget(target).addSource(dataService.getEntityMetaData(source));
+			mappingService.updateMappingProject(project);
+		}
 		return "redirect:/menu/main/mappingservice/mappingproject/" + mappingProjectId;
 	}
 
@@ -147,8 +167,11 @@ public class MappingServiceController extends MolgenisPluginController
 	public String removeEntityMapping(@RequestParam String mappingProjectId, String target, String source)
 	{
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
-		project.getMappingTarget(target).removeSource(source);
-		mappingService.updateMappingProject(project);
+		if (mayChange(project))
+		{
+			project.getMappingTarget(target).removeSource(source);
+			mappingService.updateMappingProject(project);
+		}
 		return "redirect:/menu/main/mappingservice/mappingproject/" + mappingProjectId;
 	}
 
@@ -173,16 +196,19 @@ public class MappingServiceController extends MolgenisPluginController
 			@RequestParam(required = true) String targetAttribute, @RequestParam(required = true) String sourceAttribute)
 	{
 		MappingProject mappingProject = mappingService.getMappingProject(mappingProjectId);
-		MappingTarget mappingTarget = mappingProject.getMappingTarget(target);
-		EntityMapping mappingForSource = mappingTarget.getMappingForSource(source);
-		AttributeMapping attributeMapping = mappingForSource.getAttributeMapping(targetAttribute);
-		if (attributeMapping == null)
+		if (mayChange(mappingProject))
 		{
-			attributeMapping = mappingForSource.addAttributeMapping(targetAttribute);
+			MappingTarget mappingTarget = mappingProject.getMappingTarget(target);
+			EntityMapping mappingForSource = mappingTarget.getMappingForSource(source);
+			AttributeMapping attributeMapping = mappingForSource.getAttributeMapping(targetAttribute);
+			if (attributeMapping == null)
+			{
+				attributeMapping = mappingForSource.addAttributeMapping(targetAttribute);
+			}
+			EntityMetaData sourceEmd = dataService.getEntityMetaData(source);
+			attributeMapping.setSource(sourceEmd.getAttribute(sourceAttribute));
+			mappingService.updateMappingProject(mappingProject);
 		}
-		EntityMetaData sourceEmd = dataService.getEntityMetaData(source);
-		attributeMapping.setSource(sourceEmd.getAttribute(sourceAttribute));
-		mappingService.updateMappingProject(mappingProject);
 		return "redirect:/menu/main/mappingservice/mappingproject/" + mappingProject.getIdentifier();
 	}
 
@@ -220,11 +246,8 @@ public class MappingServiceController extends MolgenisPluginController
 	{
 		MappingTarget mappingTarget = mappingService.getMappingProject(mappingProjectId).getMappingTarget(target);
 		String name = mappingService.applyMappings(mappingTarget, newEntityName);
-		if (!SecurityUtils.currentUserIsSu())
-		{
-			permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
-					Collections.singletonList(name));
-		}
+		permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
+				Collections.singletonList(name));
 		return "redirect:/menu/main/dataexplorer?entity=" + name;
 	}
 
@@ -262,8 +285,8 @@ public class MappingServiceController extends MolgenisPluginController
 	 *            the model
 	 * @return name of the attributemapping view
 	 */
-	@RequestMapping("/editattributemapping")
-	public String editAttributeMapping(@RequestParam String mappingProjectId, @RequestParam String target,
+	@RequestMapping("/attributeMapping")
+	public String viewAttributeMapping(@RequestParam String mappingProjectId, @RequestParam String target,
 			@RequestParam String source, @RequestParam String attribute, Model model)
 	{
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
@@ -277,7 +300,7 @@ public class MappingServiceController extends MolgenisPluginController
 		model.addAttribute("mappingProject", project);
 		model.addAttribute("entityMapping", entityMapping);
 		model.addAttribute("attributeMapping", attributeMapping);
-		return VIEW_EDIT_ATTRIBUTE_MAPPING;
+		return VIEW_ATTRIBUTE_MAPPING;
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/mappingattribute/testscript", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
