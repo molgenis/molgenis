@@ -2,10 +2,11 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=['mapping-service.css']>
-<#assign js=['mapping-service.js','d3.min.js','vega.min.js','jstat.min.js', 'biobankconnect-graph.js']>
+<#assign js=['mapping-service.js','d3.min.js','vega.min.js','jstat.min.js', 'biobankconnect-graph.js', 'jquery.scroll.table.body.js']>
 
 <@header css js/>
 
+<#--TODO why not in js assign?-->
 <script src="<@resource_href "/js/ace/src-min-noconflict/ace.js"/>" type="text/javascript" charset="utf-8"></script>
 <script src="<@resource_href "/js/ace/src-min-noconflict/ext-language_tools.js"/>" type="text/javascript" charset="utf-8"></script>
 
@@ -14,43 +15,89 @@
 <#else>
 	<#assign selected="null">
 </#if>
+
 <div class="row">
 	<div class="col-md-12">
-		<h3>Mapping to <u>${entityMapping.targetEntityMetaData.name}.${attributeMapping.targetAttributeMetaData.name}</u> from <u>${entityMapping.targetEntityMetaData.name}</u></h3>
-	</div><br /><br /><br />
-</div>
-<div class="row">
-	<div id="attribute-table-container" class="col-md-6">
-		<form method="POST" action="${context_url}/saveattributemapping">
-			<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
-			<input type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name}"/>
-			<input type="hidden" name="source" value="${entityMapping.sourceEntityMetaData.name}"/>
-			<input type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name}"/>
-			<table>
-				<thead>
-					<tr><th>Name</th><th>Description</th><th>Score</th><th>Select</th></tr>
-				</thead>
-				<tbody>
-					<#list entityMapping.sourceEntityMetaData.attributes as source>
-						<tr>
-							<td>${source.name}</td>
-							<td><#if source.description??>${source.description}</#if></td>
-							<td>0</td>
-							<td><input type="radio" name="sourceAttribute" value="${source.name}"<#if source.name == selected> checked="checked"</#if>/></td>
-						</tr>
-					</#list>
-				</tbody>
-			</table>
-			<button type="submit" class="btn btn-primary">Save</button>
-			<button type="reset" class="btn btn-default">Reset</button>
-	        <button type="button" class="btn btn-default" onclick="window.history.back()">Cancel</button>
-		</form>
+		<h4>Mapping to <i>${entityMapping.targetEntityMetaData.name}.${attributeMapping.targetAttributeMetaData.name}</i> from <i>${entityMapping.targetEntityMetaData.name}</i></h4>
+		<hr />
 	</div>
-	<div id="edit-algorithm-container" class="col-md-6"></div>
 </div>
+
+<div class="row">
+	<div class="col-md-6">
+		<div id="attribute-table-container" >
+			<form method="POST" action="${context_url}/saveattributemapping">
+				<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
+				<input type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name}"/>
+				<input type="hidden" name="source" value="${entityMapping.sourceEntityMetaData.name}"/>
+				<input type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name}"/>
+				<table id="attribute-mapping-table" class="table table-bordered">
+					<thead>
+						<tr>
+							<th>Name</th>
+							<th>Description</th>
+							<th>Score</th>
+							<th>Select</th>
+						</tr>
+					</thead>
+					<tbody>
+						<#list entityMapping.sourceEntityMetaData.attributes as source>
+							<tr>
+								<td>${source.name}</td>
+								<td>
+								<#if source.description??>
+									${source.description}
+								</#if>
+								</td>
+								<td>0</td>
+								<td>
+									<input type="radio" name="sourceAttribute" value="${source.name}"<#if source.name == selected> checked="checked"</#if> />
+								</td>
+							</tr>
+						</#list>
+					</tbody>
+				</table>
+				
+				<#--if ($('input[name=gender]:checked').length > 0)  to check ifs a source is selected-->
+				<button type="submit" class="btn btn-primary">Save</button> 
+				<button type="reset" class="btn btn-danger">Reset</button>
+		        <button type="button" class="btn btn-default" onclick="window.history.back()">Cancel</button>
+			</form>
+		</div>
+	</div>
+	<div class="col-md-6">
+		<div id="edit-algorithm-editor" style="width: 100%; height:380px" class="uneditable-input">
+			<textarea class="form-control" name="edit-algorithm-textarea" id="edit-algorithm-container"></textarea>
+		</div>
+		
+		<hr />
+		
+		<button type="submit" class="btn btn-primary">Test</button>
+	</div>
+</div>
+
 <div class="row">
 	<div id="statistics-container" class="col-md-12"></div>
 </div>
+
+<script>
+	// https://github.com/nheldman/jquery.scrollTableBody
+	// $('table').scrollTableBody({rowsToDisplay:5});
+	$('#attribute-mapping-table').scrollTableBody();
+	
+    
+	var editor = ace.edit("edit-algorithm-editor");
+	editor.setTheme("ace/theme/eclipse");
+	editor.getSession().setMode("ace/mode/r");
+		
+	var textarea = $("edit-algorithm-textarea").hide();
+	editor.getSession().setValue(textarea.val());
+	editor.getSession().on('change', function(){
+		textarea.val(editor.getSession().getValue());
+	});	
+
+</script>
+
 <#--<script>
 	$(function(){
 		
