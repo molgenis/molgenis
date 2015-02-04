@@ -15,12 +15,8 @@
 			<p>Create and view mapping projects</p>
 			
 			<div class="btn-group" role="group">
-				<a href="#" class="btn btn-primary" data-toggle="modal" data-target="#create-new-mapping-project-modal">Create a new mapping</a>  				
-			</div>
-			<div class="btn-group" role="group">
-				<button type="button" class="btn btn-success">Edit</button>  				
-			</div>
-			
+				<button type="button" id="submit-new-source-column-btn" class="btn btn-primary" data-toggle="modal" data-target="#create-new-mapping-project-modal"><span class="glyphicon glyphicon-plus"></span>&nbsp;Add Mapping Project</button>
+			</div>			
 			<hr></hr>
 		</div>
 	</div>
@@ -32,6 +28,7 @@
 				<table class="table table-bordered">
 		 			<thead>
 		 				<tr>
+		 					<th></th>
 		 					<th>Mapping name</th>
 		 					<th>Owner</th>
 		 					<th>Target entities</th>
@@ -40,13 +37,17 @@
 		 			</thead>
 		 			<tbody>
 		 				<#list mappingProjects as project>
-		 				<tr>	 					
+		 				<tr>	
 		 					<td>
-		 						<form method="post" action="${context_url}/removeMappingProject" class="pull-left">
-									<input type="hidden" name="mappingProjectId" value="${project.identifier}"/>
-									<button type="submit" class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-minus"></span></button>
-								</form>
-								&nbsp;<a href="${context_url}/mappingproject/${project.identifier}">${project.name?html}</a></td>
+		 						<#if user==project.owner.username || admin>
+			 						<form method="post" action="${context_url}/removeMappingProject" class="pull-left">
+										<input type="hidden" name="mappingProjectId" value="${project.identifier}"/>
+										<button type="submit" class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-minus"></span></button>
+									</form>
+								</#if>
+		 					</td> 					
+		 					<td>
+		 						<a href="${context_url}/mappingproject/${project.identifier}">${project.name?html}</a></td>
 		 					<td>${project.owner.username?html}</td>
 		 					<td>
 		 					<#list project.mappingTargets as target>

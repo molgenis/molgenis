@@ -86,6 +86,8 @@ public class MappingServiceController extends MolgenisPluginController
 	{
 		model.addAttribute("mappingProjects", mappingService.getAllMappingProjects());
 		model.addAttribute("entityMetaDatas", getEntityMetaDatas());
+		model.addAttribute("user", SecurityUtils.getCurrentUsername());
+		model.addAttribute("admin", SecurityUtils.currentUserIsSu());
 		return VIEW_MAPPING_PROJECTS;
 	}
 
@@ -126,7 +128,7 @@ public class MappingServiceController extends MolgenisPluginController
 	 *            the ID of the {@link MappingTarget}'s {@link MappingProject}
 	 * @return redirect URL for the mapping project
 	 */
-	@RequestMapping(value = "/addentitymapping", method = RequestMethod.POST)
+	@RequestMapping(value = "/addEntityMapping", method = RequestMethod.POST)
 	public String addEntityMapping(@RequestParam String mappingProjectId, String target, String source)
 	{
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
@@ -135,7 +137,7 @@ public class MappingServiceController extends MolgenisPluginController
 		return "redirect:/menu/main/mappingservice/mappingproject/" + mappingProjectId;
 	}
 
-	@RequestMapping(value = "/removeentitymapping", method = RequestMethod.POST)
+	@RequestMapping(value = "/removeEntityMapping", method = RequestMethod.POST)
 	public String removeEntityMapping(@RequestParam String mappingProjectId, String target, String source)
 	{
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);

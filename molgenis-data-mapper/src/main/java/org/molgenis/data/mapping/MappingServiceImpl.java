@@ -16,6 +16,7 @@ import org.molgenis.data.mapping.model.MappingTarget;
 import org.molgenis.data.repository.MappingProjectRepository;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.security.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,7 @@ public class MappingServiceImpl implements MappingService
 	private MappingProjectRepository mappingProjectRepository;
 
 	@Override
+	@RunAsSystem
 	public MappingProject addMappingProject(String projectName, MolgenisUser owner, String target)
 	{
 		MappingProject mappingProject = new MappingProject(projectName, owner);
@@ -50,30 +52,35 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	@Override
+	@RunAsSystem
 	public void deleteMappingProject(String mappingProjectId)
 	{
 		mappingProjectRepository.delete(mappingProjectId);
 	}
 
 	@Override
+	@RunAsSystem
 	public List<MappingProject> getAllMappingProjects()
 	{
 		return mappingProjectRepository.getAllMappingProjects();
 	}
 
 	@Override
+	@RunAsSystem
 	public void updateMappingProject(MappingProject mappingProject)
 	{
 		mappingProjectRepository.update(mappingProject);
 	}
 
 	@Override
+	@RunAsSystem
 	public MappingProject getMappingProject(String identifier)
 	{
 		return mappingProjectRepository.getMappingProject(identifier);
 	}
 
 	@Override
+	@RunAsSystem
 	public String applyMappings(MappingTarget mappingTarget, String newEntityName)
 	{
 		DefaultEntityMetaData targetMetaData = new DefaultEntityMetaData(newEntityName, mappingTarget.getTarget());

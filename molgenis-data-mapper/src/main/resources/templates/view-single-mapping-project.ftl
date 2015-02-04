@@ -28,7 +28,7 @@
  					<th>Target model: ${selectedTarget}</th>
 				<#list mappingProject.getMappingTarget(selectedTarget).entityMappings as source>
 					<th>
-						<form method="post" action="${context_url}/removeentitymapping">
+						<form method="post" action="${context_url}/removeEntityMapping">
 							<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
 							<input type="hidden" name="target" value="${selectedTarget}"/>
 							<input type="hidden" name="source" value="${source.name}"/>
@@ -86,7 +86,7 @@
         		<h4 class="modal-title" id="create-new-source-column-modal-label">Create a new mapping project</h4>
         	</div>
         	<div class="modal-body">	
-        		<form id="create-new-source-form" method="post" action="${context_url}/addentitymapping">	
+        		<form id="create-new-source-form" method="post" action="${context_url}/addEntityMapping">	
 					<div class="form-group">
 	            		<label>Select a new source to map against the target attribute</label>
   						<select name="source" class="form-control" required="required" placeholder="Select a target entity">
