@@ -1,28 +1,6 @@
-table.scroll {
-    width: 100%; /* Optional */
-    /* border-collapse: collapse; */
-    border-spacing: 0;
-}
-
-table.scroll tbody,
-table.scroll thead { display: block; }
-
-thead tr th { 
-    height: 30px;
-    line-height: 30px;
-    /*text-align: left;*/
-}
-
-table.scroll tbody {
-    height: 300px;
-    overflow-y: auto;
-    overflow-x: hidden;
-}
-
-tbody td, thead th {
-    width: 20%; /* Optional */
-}
-
-tbody td:last-child, thead th:last-child {
-    border-right: none;
+#edit-algorithm-container { 
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
 }

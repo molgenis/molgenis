@@ -745,7 +745,7 @@
 			} else {
 				if(values){
 					// determine query operator for attribute type
-					var operator;
+					var attrOperator;
 					switch(attribute.fieldType) {
 						case 'BOOL':
 						case 'CATEGORICAL':
@@ -757,7 +757,7 @@
 						case 'LONG':
 						case 'MREF':
 						case 'XREF':
-							operator = 'EQUALS';
+							attrOperator = 'EQUALS';
 							break;
 						case 'EMAIL':
 						case 'HTML':
@@ -765,7 +765,7 @@
 						case 'SCRIPT':
 						case 'STRING':
 						case 'TEXT':
-							operator = 'SEARCH';
+							attrOperator = 'SEARCH';
 							break;
 						case 'COMPOUND':
 						case 'FILE':
@@ -784,13 +784,13 @@
 						$.each(values, function(index, value) {
 							if (index > 0) {
 								nestedRule.nestedRules.push({
-									operator : operator
+									operator : operator || 'OR'
 								});
 							}
 		
 							nestedRule.nestedRules.push({
 								field : attribute.name,
-								operator : operator,
+								operator : attrOperator,
 								value : value
 							});
 						});
@@ -798,7 +798,7 @@
 					} else {
 						rule = {
 							field : attribute.name,
-							operator : operator,
+							operator : attrOperator,
 							value : values[0]
 						};
 					}

@@ -2,7 +2,7 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=['mapping-service.css']>
-<#assign js=['mapping-service.js']>
+<#assign js=['mapping-service.js', 'jquery.scroll.table.body.js']>
 
 <@header css js/>
 
@@ -20,9 +20,10 @@
 	</div>
 </div>
 
+<!--Table for Target and Source attribute metadata-->
 <div class="row">
 	<div class="col-md-11">
-		<table class="table table-bordered scroll">
+		<table id="attribute-mapping-table" class="table table-bordered">
  			<thead>
  				<tr>
  					<th>Target model: ${selectedTarget}</th>
@@ -76,6 +77,7 @@
 				</#list>
 			</tbody>
 		</table>
+		
 	</div>
 	<#if entityMetaDatas?has_content>
 		<div class="col-md-1">
@@ -153,3 +155,9 @@
 	</div>
 </div>
 
+
+<script>
+	// https://github.com/nheldman/jquery.scrollTableBody
+	// $('table').scrollTableBody({rowsToDisplay:5});
+	$('#attribute-mapping-table').scrollTableBody();
+</script>
