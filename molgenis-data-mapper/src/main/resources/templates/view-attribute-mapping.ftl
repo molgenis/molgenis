@@ -24,6 +24,7 @@
 <div class="row">
 
 	<div class="col-md-6">
+		<h5>Source attributes</h5>
 		<div id="attribute-table-container" >
 			<form method="POST" action="${context_url}/saveattributemapping">
 				<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
@@ -69,8 +70,9 @@
 		</div>
 	</div>
 	<div class="col-md-6">
+		<h5>Algorithm</h5>
 		<div id="edit-algorithm-editor" style="width: 100%; height:380px" class="uneditable-input">
-			<textarea class="form-control" name="edit-algorithm-textarea" id="edit-algorithm-container">${attributeMapping.algorithm!""}</textarea>
+			<textarea class="form-control" name="edit-algorithm-textarea" id="edit-algorithm-container"></textarea>
 		</div>
 		
 		<hr />
@@ -94,10 +96,10 @@
 		
 	var textarea = $("edit-algorithm-textarea").hide();
 	<#if !mayChange>editor.setReadOnly(true);</#if>
-	editor.getSession().setValue(textarea.val());
 	editor.getSession().on('change', function(){
 		textarea.val(editor.getSession().getValue());
 	});
+	editor.setValue("${(attributeMapping.algorithm!"")?html}");
 	
 	$('input[name="sourceAttribute"]').click(function(){
 		editor.setValue("$('"+$(this).val()+"')");
