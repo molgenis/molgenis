@@ -136,4 +136,10 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 		result.set(MappingProjectMetaData.MAPPINGTARGETS, mappingTargetEntities);
 		return result;
 	}
+
+	@Override
+	public void delete(String mappingProjectId)
+	{
+		repository.deleteById(mappingProjectId);
+	}
 }

@@ -98,7 +98,7 @@ public class MappingServiceController extends MolgenisPluginController
 	 *            name of the project's first {@link MappingTarget}'s target entity
 	 * @return redirect URL for the newly created mapping project
 	 */
-	@RequestMapping(value = "/addmappingproject", method = RequestMethod.POST)
+	@RequestMapping(value = "/addMappingProject", method = RequestMethod.POST)
 	public String addMappingProject(@RequestParam("mapping-project-name") String name,
 			@RequestParam("target-entity") String targetEntity)
 	{
@@ -106,6 +106,13 @@ public class MappingServiceController extends MolgenisPluginController
 		// FIXME need to write complete URL else it will use /plugin as root and the molgenis header and footer wont be
 		// loaded
 		return "redirect:/menu/main/mappingservice/mappingproject/" + newMappingProject.getIdentifier();
+	}
+
+	@RequestMapping(value = "/removeMappingProject", method = RequestMethod.POST)
+	public String deleteMappingProject(@RequestParam(required = true) String mappingProjectId)
+	{
+		mappingService.deleteMappingProject(mappingProjectId);
+		return "redirect:/menu/main/mappingservice/";
 	}
 
 	/**

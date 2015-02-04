@@ -44,4 +44,12 @@ public interface MappingProjectRepository
 	 */
 	public abstract List<MappingProject> getMappingProjects(Query q);
 
+	/**
+	 * Delete a mapping project.
+	 * 
+	 * @param mappingProjectId
+	 *            id of the {@link MappingProject} to delete
+	 */
+	public abstract void delete(String mappingProjectId);
+
 }

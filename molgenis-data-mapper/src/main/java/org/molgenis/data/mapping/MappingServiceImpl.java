@@ -50,6 +50,12 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	@Override
+	public void deleteMappingProject(String mappingProjectId)
+	{
+		mappingProjectRepository.delete(mappingProjectId);
+	}
+
+	@Override
 	public List<MappingProject> getAllMappingProjects()
 	{
 		return mappingProjectRepository.getAllMappingProjects();

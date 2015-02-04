@@ -54,4 +54,12 @@ public interface MappingService
 	 */
 	String applyMappings(MappingTarget mappingTarget, String newEntityName);
 
+	/**
+	 * Deletes a {@link MappingProject}
+	 * 
+	 * @param mappingProjectId
+	 *            id of the {@link MappingProject} to delete
+	 */
+	void deleteMappingProject(String mappingProjectId);
+
 }

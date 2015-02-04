@@ -28,7 +28,7 @@
 <div class="row">
 	<div class="col-md-12">
 		<div class="col-md-6">
-			<#if mappingProjects??>
+			<#if mappingProjects?has_content>
 				<table class="table table-bordered">
 		 			<thead>
 		 				<tr>
@@ -41,7 +41,12 @@
 		 			<tbody>
 		 				<#list mappingProjects as project>
 		 				<tr>	 					
-		 					<td><a href="${context_url}/mappingproject/${project.identifier}">${project.name?html}</a></td>
+		 					<td>
+		 						<form method="post" action="${context_url}/removeMappingProject" class="pull-left">
+									<input type="hidden" name="mappingProjectId" value="${project.identifier}"/>
+									<button type="submit" class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-minus"></span></button>
+								</form>
+								&nbsp;<a href="${context_url}/mappingproject/${project.identifier}">${project.name?html}</a></td>
 		 					<td>${project.owner.username?html}</td>
 		 					<td>
 		 					<#list project.mappingTargets as target>
@@ -73,7 +78,7 @@
 	        		<h4 class="modal-title" id="create-new-mapping-project-label">Create a new mapping project</h4>
 	        	</div>
 	        	<div class="modal-body">
-      				<form id="create-new-mapping-project-form" method="post" action="${context_url}/addmappingproject">	
+      				<form id="create-new-mapping-project-form" method="post" action="${context_url}/addMappingProject">
   						<div class="form-group">
 		            		<label>Mapping project name</label>
 		  					<input name="mapping-project-name" type="text" class="form-control" placeholder="Mapping name" required="required">
