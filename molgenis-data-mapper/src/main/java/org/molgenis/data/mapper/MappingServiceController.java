@@ -131,11 +131,12 @@ public class MappingServiceController extends MolgenisPluginController
 	private boolean mayChange(MappingProject project)
 	{
 		boolean result = SecurityUtils.currentUserIsSu()
-				|| !project.getOwner().getUsername().equals(SecurityUtils.getCurrentUsername());
+				|| project.getOwner().getUsername().equals(SecurityUtils.getCurrentUsername());
 		if (!result)
 		{
 			LOG.warn("User " + SecurityUtils.getCurrentUsername()
-					+ " illegally tried to modify mapping project with id " + project.getIdentifier());
+					+ " illegally tried to modify mapping project with id " + project.getIdentifier() + " owned by "
+					+ project.getOwner().getUsername());
 		}
 		return result;
 	}
