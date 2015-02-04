@@ -20,6 +20,8 @@
 			$('#create-integrated-entity-form .submit').click();
 		});
 		
+		$('#create-new-mapping-project-form').validate();
+
 		// Change the selector if needed
 		var $table = $('table.scroll'),
 		    $bodyCells = $table.find('tbody tr:first').children(),
