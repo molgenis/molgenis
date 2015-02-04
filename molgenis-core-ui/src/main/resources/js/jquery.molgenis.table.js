@@ -157,7 +157,7 @@
 			}
 
 			$.each(settings.colAttributes, function(i, attribute) {
-				var cell = $('<td>').data('id', entity.href + '/' + attribute.name);
+				var cell = $('<td>').data('id', entity.href + '/' + encodeURIComponent(attribute.name));
 				renderCell(cell, entity, attribute, settings);
 				if(settings.editenabled) {
 					cell.attr('tabindex', tabindex++);
