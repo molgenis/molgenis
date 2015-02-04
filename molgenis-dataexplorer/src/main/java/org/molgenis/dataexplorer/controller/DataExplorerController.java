@@ -125,7 +125,6 @@ public class DataExplorerController extends MolgenisPluginController
 
 	private static final boolean DEFAULT_VAL_DATAEXPLORER_EDITABLE = false;
 	private static final boolean DEFAULT_VAL_DATAEXPLORER_ROW_CLICKABLE = false;
-	private static final boolean DEFAULT_VAL_KEY_HIDE_SELECT = true;
 	private static final boolean DEFAULT_VAL_KEY_HIGLIGHTREGION = false;
 
 	@Autowired
