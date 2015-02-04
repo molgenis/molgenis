@@ -17,7 +17,7 @@
 </#if>
 <div class="row">
 	<div class="col-md-12">
-		<h4>Mapping to <i>${entityMapping.targetEntityMetaData.name}.${attributeMapping.targetAttributeMetaData.name}</i> from <i>${entityMapping.targetEntityMetaData.name}</i></h4>
+		<h4>Mapping to <i>${entityMapping.targetEntityMetaData.name}.${attributeMapping.targetAttributeMetaData.name}</i> from <i>${entityMapping.sourceEntityMetaData.name}</i></h4>
 		<hr />
 	</div>
 </div>
@@ -50,28 +50,32 @@
 								</td>
 								<td>0</td>
 								<td>
-									<input type="radio" name="sourceAttribute" value="${source.name}"<#if source.name == selected> checked="checked"</#if> />
+									<input type="radio" name="sourceAttribute" value="${source.name}"
+										<#if source.name == selected> checked="checked"</#if>
+										<#if !mayChange> disabled="disabled"</#if> />
 								</td>
 							</tr>
 						</#list>
 					</tbody>
 				</table>
-				
-				<#--if ($('input[name=gender]:checked').length > 0)  to check ifs a source is selected-->
-				<button type="submit" class="btn btn-primary">Save</button> 
-				<button type="reset" class="btn btn-danger">Reset</button>
-		        <button type="button" class="btn btn-default" onclick="window.history.back()">Cancel</button>
+				<#if mayChange>
+					<button type="submit" class="btn btn-primary">Save</button> 
+					<button type="reset" class="btn btn-danger">Reset</button>
+			        <button type="button" class="btn btn-default" onclick="window.history.back()">Cancel</button>
+			    <#else>
+			    	<button type="button" class="btn btn-primary" onclick="window.history.back()">Back</button>
+		        </#if>
 			</form>
 		</div>
 	</div>
 	<div class="col-md-6">
 		<div id="edit-algorithm-editor" style="width: 100%; height:380px" class="uneditable-input">
-			<textarea class="form-control" name="edit-algorithm-textarea" id="edit-algorithm-container"></textarea>
+			<textarea class="form-control" name="edit-algorithm-textarea" id="edit-algorithm-container">${attributeMapping.algorithm!""}</textarea>
 		</div>
 		
 		<hr />
 		
-		<button type="submit" class="btn btn-primary">Test</button>
+		<button type="submit" class="btn btn-primary" id="btn-test">Test</button>
 	</div>
 </div>
 <div class="row">
@@ -79,20 +83,60 @@
 </div>
 
 <script>
-	// https://github.com/nheldman/jquery.scrollTableBody
-	// $('table').scrollTableBody({rowsToDisplay:5});
-	$('#attribute-mapping-table').scrollTableBody();
-	
-    
+	var $statisticsContainer = $('#statistics-container');
 	var editor = ace.edit("edit-algorithm-editor");
+	$('#attribute-mapping-table').scrollTableBody();
+	editor.setOptions({
+		enableBasicAutocompletion: true
+	});
 	editor.setTheme("ace/theme/eclipse");
-	editor.getSession().setMode("ace/mode/r");
+	editor.getSession().setMode("ace/mode/javascript");
 		
 	var textarea = $("edit-algorithm-textarea").hide();
+	<#if !mayChange>editor.setReadOnly(true);</#if>
 	editor.getSession().setValue(textarea.val());
 	editor.getSession().on('change', function(){
 		textarea.val(editor.getSession().getValue());
-	});	
+	});
+	
+	$('input[name="sourceAttribute"]').click(function(){
+		editor.setValue("$('"+$(this).val()+"')");
+	});
+	
+	$('#btn-test').click(function(){
+		$.ajax({
+			type : 'POST',
+			url : molgenis.getContextUrl() + '/mappingattribute/testscript',
+			async : false,
+			data : JSON.stringify({
+				targetEntityName : '${entityMapping.targetEntityMetaData.name}', 
+				sourceEntityName : '${entityMapping.name}', 
+				targetAttributeName : '${attributeMapping.targetAttributeMetaData.name}',
+				algorithm: editor.getValue()
+			}),
+			contentType : 'application/json',
+			success : function(data) {
+				$statisticsContainer.empty();
+				if(data.results.length > 0){
+					var layout = $('<div class="row"></div>').appendTo($statisticsContainer);
+					$('<div class="col-md-6"></div>').append('<center><legend>Summary statistics</legend></center>').append(statisticsTable(data.results, data.totalCount)).appendTo(layout);
+					$('<div class="col-md-6"></div>').append('<center><legend>Distribution plot</legend></center>').bcgraph(data.results).appendTo(layout);
+				} else {
+					molgenis.createAlert([{'message':'There are no values generated for this algorithm'}],'error');
+				}
+			}
+		});
+	});
+	
+	function statisticsTable(dataset, totalCount){
+			var table = $('<table />').addClass('table table-bordered');
+			table.append('<tr><th>Total cases</th><td>' + totalCount + '</td></tr>');
+			table.append('<tr><th>Valid cases</th><td>' + dataset.length + '</td></tr>');
+			table.append('<tr><th>Mean</th><td>' + jStat.mean(dataset) + '</td></tr>');
+			table.append('<tr><th>Median</th><td>' + jStat.median(dataset) + '</td></tr>');
+			table.append('<tr><th>Standard Deviation</th><td>' + jStat.stdev(dataset) + '</td></tr>');
+			return table;
+		}
 
 </script>
 

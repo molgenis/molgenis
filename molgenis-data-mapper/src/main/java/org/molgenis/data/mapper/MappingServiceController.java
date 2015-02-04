@@ -88,7 +88,7 @@ public class MappingServiceController extends MolgenisPluginController
 	 * @return view name of the mapping projects list
 	 */
 	@RequestMapping
-	public String init(Model model)
+	public String viewMappingProjects(Model model)
 	{
 		model.addAttribute("mappingProjects", mappingService.getAllMappingProjects());
 		model.addAttribute("entityMetaDatas", getEntityMetaDatas());
@@ -130,9 +130,14 @@ public class MappingServiceController extends MolgenisPluginController
 
 	private boolean mayChange(MappingProject project)
 	{
+		return mayChange(project, true);
+	}
+
+	private boolean mayChange(MappingProject project, boolean logInfractions)
+	{
 		boolean result = SecurityUtils.currentUserIsSu()
 				|| project.getOwner().getUsername().equals(SecurityUtils.getCurrentUsername());
-		if (!result)
+		if (logInfractions && !result)
 		{
 			LOG.warn("User " + SecurityUtils.getCurrentUsername()
 					+ " illegally tried to modify mapping project with id " + project.getIdentifier() + " owned by "
@@ -225,7 +230,7 @@ public class MappingServiceController extends MolgenisPluginController
 	 * @return View name of the
 	 */
 	@RequestMapping("/mappingproject/{id}")
-	public String getMappingProjectScreen(@PathVariable("id") String identifier,
+	public String viewMappingProject(@PathVariable("id") String identifier,
 			@RequestParam(value = "target", required = false) String target, Model model)
 	{
 		MappingProject selectedMappingProject = mappingService.getMappingProject(identifier);
@@ -301,6 +306,7 @@ public class MappingServiceController extends MolgenisPluginController
 		model.addAttribute("mappingProject", project);
 		model.addAttribute("entityMapping", entityMapping);
 		model.addAttribute("attributeMapping", attributeMapping);
+		model.addAttribute("mayChange", mayChange(project, false));
 		return VIEW_ATTRIBUTE_MAPPING;
 	}
 
