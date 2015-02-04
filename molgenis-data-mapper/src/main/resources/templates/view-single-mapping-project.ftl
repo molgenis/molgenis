@@ -66,9 +66,11 @@
 			</tbody>
 		</table>
 	</div>
-	<div class="col-md-1">
-		<a id="add-new-attr-mapping-btn" href="#" class="btn btn-success btn-xs" data-toggle="modal" data-target="#create-new-source-column-modal"><span class="glyphicon glyphicon-plus"></span>Add source</a>
-	</div>
+	<#if entityMetaDatas?has_content>
+		<div class="col-md-1">
+			<a id="add-new-attr-mapping-btn" href="#" class="btn btn-success btn-xs" data-toggle="modal" data-target="#create-new-source-column-modal"><span class="glyphicon glyphicon-plus"></span>Add source</a>
+		</div>
+	</#if>
 </div>
 
 <div class="row">
