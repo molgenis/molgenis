@@ -39,7 +39,8 @@ function($, molgenis, settingsXhr) {
 		entity: null,
 		query: null,
 		attrs: null,
-		mod: null
+		mod: null,
+		hideselect: 'false'
 	};
 	
 	var state;
@@ -476,6 +477,15 @@ function($, molgenis, settingsXhr) {
 				state.entity = $('#dataset-select option:not(:empty)').first().val();
 			}
 			$('#dataset-select').select2('val', state.entity);
+			
+			// hide entity dropdown
+			if(state.hideselect === 'true') {
+				console.log('hide container');
+				$('#dataset-select-container').addClass('hidden');
+			} else {
+				console.log('show container');
+				$('#dataset-select-container').removeClass('hidden');
+			}
 			
 			if (state.query) {
 				// set query in searchbox
