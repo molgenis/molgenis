@@ -14,11 +14,17 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.mapping.model.AttributeMapping;
 import org.molgenis.data.mapping.model.EntityMapping;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.js.RhinoConfig;
 import org.molgenis.js.ScriptEvaluator;
 import org.mozilla.javascript.Context;
 
 public class AlgorithmServiceImpl implements AlgorithmService
 {
+	public AlgorithmServiceImpl()
+	{
+		new RhinoConfig().init();
+	}
+
 	@Override
 	public List<Object> applyAlgorithm(AttributeMetaData targetAttribute, Iterable<AttributeMetaData> sourceAttributes,
 			String algorithm, Repository sourceRepository)
@@ -26,7 +32,6 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		List<Object> derivedValues = new ArrayList<Object>();
 		if (Iterables.size(sourceAttributes) > 0)
 		{
-			FieldTypeEnum dataType = targetAttribute.getDataType().getEnumType();
 			for (Entity entity : sourceRepository)
 			{
 				MapEntity mapEntity = new MapEntity();
@@ -40,7 +45,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 
 					if (result != null)
 					{
-						switch (dataType)
+						switch (targetAttribute.getDataType().getEnumType())
 						{
 							case INT:
 								derivedValues.add(Integer.parseInt(Context.toString(result)));
@@ -71,7 +76,42 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		return null;
 	}
 
-	public static List<String> extractFeatureName(String algorithmScript)
+	@Override
+	public Object map(AttributeMapping attributeMapping, Entity sourceEntity)
+	{
+		String algorithm = attributeMapping.getAlgorithm();
+		if (StringUtils.isEmpty(algorithm))
+		{
+			return null;
+		}
+		Object value = ScriptEvaluator.eval(algorithm, sourceEntity);
+		return AlgorithmServiceImpl.convert(value, attributeMapping.getTargetAttributeMetaData().getDataType()
+				.getEnumType());
+	}
+
+	private static Object convert(Object value, FieldTypeEnum targetDataType)
+	{
+		if (value == null)
+		{
+			return null;
+		}
+		Object convertedValue;
+		switch (targetDataType)
+		{
+			case INT:
+				convertedValue = Integer.parseInt(Context.toString(value));
+				break;
+			case DECIMAL:
+				convertedValue = Context.toNumber(value);
+				break;
+			default:
+				convertedValue = Context.toString(value);
+				break;
+		}
+		return convertedValue;
+	}
+
+	public static List<String> getSourceAttributeNames(String algorithmScript)
 	{
 		List<String> featureNames = new ArrayList<String>();
 		if (!StringUtils.isEmpty(algorithmScript))
@@ -93,4 +133,5 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		}
 		return featureNames;
 	}
+
 }

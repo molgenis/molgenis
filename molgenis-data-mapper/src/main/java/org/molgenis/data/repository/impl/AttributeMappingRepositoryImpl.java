@@ -84,7 +84,7 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 		AttributeMetaData sourceAttributeMetaData = sourceEntityMetaData.getAttribute(sourceAttributeName);
 		String targetAtributeName = attributeMappingEntity.getString(AttributeMappingMetaData.TARGETATTRIBUTEMETADATA);
 		AttributeMetaData targetAttributeMetaData = targetEntityMetaData.getAttribute(targetAtributeName);
-		String algorithm = AttributeMappingMetaData.ALGORITHM;
+		String algorithm = attributeMappingEntity.getString(AttributeMappingMetaData.ALGORITHM);
 
 		return new AttributeMapping(identifier, sourceAttributeMetaData, targetAttributeMetaData, algorithm);
 	}

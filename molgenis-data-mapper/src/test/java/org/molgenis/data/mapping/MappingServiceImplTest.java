@@ -22,7 +22,6 @@ import org.molgenis.data.mapping.model.MappingTarget;
 import org.molgenis.data.mem.InMemoryRepositoryCollection;
 import org.molgenis.data.meta.PackageImpl;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.security.user.MolgenisUserService;
@@ -31,7 +30,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.springframework.util.IdGenerator;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -61,7 +59,7 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		{
 			return new InMemoryRepositoryCollection(dataService());
 		}
-		
+
 	}
 
 	@Autowired
@@ -191,7 +189,7 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void testRun()
+	public void testApplyMappings()
 	{
 		MappingProject mappingProject = mappingService.addMappingProject("TestRun", user, "HopEntity");
 		MappingTarget target = mappingProject.getMappingTarget("HopEntity");
@@ -199,20 +197,20 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		AttributeMapping attrMapping = mapping.addAttributeMapping("hoogte");
 		attrMapping.setSource(geneMetaData.getAttribute("lengte"));
 
-		mappingService.updateMappingProject(mappingProject);
-		mappingService.run(mappingProject.getIdentifier(), "HopEntity", "Koetjeboe");
+		mappingService.applyMappings(target, "Koetjeboe");
 
 		CrudRepository actual = dataService.getCrudRepository("Koetjeboe");
 		DefaultEntityMetaData expectedMetadata = new DefaultEntityMetaData("Koetjeboe", hopMetaData);
 		expectedMetadata.addAttribute("source");
-		assertEquals(actual.getEntityMetaData(),
-				expectedMetadata);
+		assertEquals(actual.getEntityMetaData(), expectedMetadata);
 		List<Entity> created = Lists.newArrayList(actual.iterator());
-		
+
 		MapEntity koetje = new MapEntity(expectedMetadata);
-		
-		koetje.set("identifier", created.get(0).getString("identifier"));
-		koetje.set("hoogte", 123.4);
+
+		String identifier = created.get(0).getString("identifier");
+		assertNotNull(identifier);
+		koetje.set("identifier", identifier);
+		koetje.set("hoogte", new Double(123.4));
 		koetje.set("source", "Gene");
 		assertEquals(created, ImmutableList.<Entity> of(koetje));
 	}

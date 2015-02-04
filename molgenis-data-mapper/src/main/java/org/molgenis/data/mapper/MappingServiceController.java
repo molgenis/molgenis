@@ -291,7 +291,7 @@ public class MappingServiceController extends MolgenisPluginController
 			MappingServiceRequest mappingServiceRequest, EntityMetaData sourceEntityMetaData)
 	{
 		return Iterables.filter(Iterables.transform(
-				AlgorithmServiceImpl.extractFeatureName(mappingServiceRequest.getAlgorithm()),
+				AlgorithmServiceImpl.getSourceAttributeNames(mappingServiceRequest.getAlgorithm()),
 				new Function<String, AttributeMetaData>()
 				{
 					@Override

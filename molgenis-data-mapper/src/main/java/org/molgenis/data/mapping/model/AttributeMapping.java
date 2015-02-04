@@ -43,7 +43,7 @@ public class AttributeMapping
 	public void setSource(AttributeMetaData source)
 	{
 		this.sourceAttributeMetaData = source;
-		this.algorithm = "${" + sourceAttributeMetaData.getName() + "}";
+		this.algorithm = "$('" + sourceAttributeMetaData.getName() + "')";
 	}
 
 	public String getIdentifier()
