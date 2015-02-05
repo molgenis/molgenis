@@ -82,7 +82,9 @@
 				});
 				callback(colAttributes, refEntitiesMeta);
 			});
-		} else callback([], {});
+		} else {
+			callback([], {});
+		}
 	}
 
 	/**
@@ -117,12 +119,13 @@
 		var container = $('.molgenis-table thead', settings.container);
 
 		var items = [];
-		if (settings.editenabled)
+		if (settings.editenabled) {
 			items.push($('<th>'));
+		}
 		$.each(settings.colAttributes, function(i, attribute) {
 			var header;
 			if (settings.sort && settings.sort.orders[0].property === attribute.name) {
-				if (settings.sort.orders[0].direction == 'ASC') {
+				if (settings.sort.orders[0].direction === 'ASC') {
 					header = $('<th>' + attribute.label + '<span data-attribute="' + attribute.name
 							+ '" class="ui-icon ui-icon-triangle-1-s down"></span></th>');
 				} else {
@@ -176,10 +179,12 @@
 	 * @memberOf molgenis.table.cell
 	 */
 	function renderCell(cell, entity, attribute, settings) {
-		if(settings.editenabled && !attribute.readOnly)
+		if(settings.editenabled && !attribute.readOnly) {
 			renderEditCell(cell, entity, attribute, settings);
-		else
+		}
+		else {
 			renderViewCell(cell, entity, attribute, settings);
+		}
 	}
 	
 	/**
@@ -194,14 +199,14 @@
 				var items = [];
 				items.push('<div class="bool-btn-group btn-group-xs">');
 				items.push('<button type="button" class="btn btn-default');
-				if(value === true) items.push(' active');
+				if(value === true) {items.push(' active');}
 				items.push('" data-state="true">Yes</button>');
 				items.push('<button type="button" class="btn btn-default');
-				if(value === false) items.push(' active');
+				if(value === false) {items.push(' active');}
 				items.push('" data-state="false">No</button>');
 				if(attribute.nillable) {
 					items.push('<button type="button" class="btn btn-default');
-					if(value === undefined) items.push(' active');
+					if(value === undefined) {items.push(' active');}
 					items.push('" data-state="undefined">N/A</button>');
 				}
 				items.push('</div>');
@@ -213,8 +218,9 @@
 				var refEntityCollectionUri = attribute.refEntity.href.replace("/meta", "");
 				
 				var format = function(item) {
-					if (item)
+					if (item) {
 						return item[refEntityMeta.labelAttribute];
+					}
 				};
 				
 				var opts = {
@@ -311,8 +317,9 @@
 				var refEntityCollectionUri = attribute.refEntity.href.replace("/meta", "");
 				
 				var format = function(item) {
-					if(item)
+					if(item) {
 						return item[refEntityMeta.labelAttribute];
+					}
 				};
 				
 				var opts = {
@@ -396,7 +403,7 @@
 										openRefAttributeModal(attribute, refEntity, refAttribute, rawValue);
 										event.stopPropagation();
 									});
-									if (i > 0) cell.append(',');
+									if (i > 0) {cell.append(',');}
 									cell.append($cellValuePart);
 								});
 								break;
@@ -477,10 +484,10 @@
 				var editValue;
 				
 				var state = cell.find('button.active').data('state');
-				if(state === true) editValue = true;
-				else if(state === false) editValue = false;
-				else if(state === 'undefined' && attribute.nillable) editValue = undefined;
-				else throw 'invalid state: ' + state;
+				if(state === true) {editValue = true;}
+				else if(state === false) {editValue = false;}
+				else if(state === 'undefined' && attribute.nillable) {editValue = undefined;}
+				else {throw 'invalid state: ' + state;}
 				
 				if(value !== editValue) {
 					restApi.update(cell.data('id'), editValue, {
@@ -502,8 +509,9 @@
 					restApi.update(cell.data('id'), editValue, {
 						success: function() {
 							settings.onDataChange();
-							if (editValue === '')
+							if (editValue === '') {
 								delete entity[attribute.name];
+							}
 							else {
 								entity[attribute.name] = editValue;	
 							}
@@ -567,11 +575,13 @@
 						restApi.update(cell.data('id'), editValue, {
 							success: function() {
 								settings.onDataChange();
-								if (editValue === '')
+								if (editValue === '') {
 									delete entity[attribute.name];
+								}
 								else {
-									if(!entity[attribute.name])
+									if(!entity[attribute.name]) {
 										entity[attribute.name] = {};
+									}
 									entity[attribute.name].href = editValue;
 									entity[attribute.name][refEntityMeta.labelAttribute] = editLabel;	
 								}
@@ -616,7 +626,9 @@
 				}
 			});
 			container.show();
-		} else container.hide();
+		} else {
+			container.hide();
+		}
 	}
 
 	function refresh(settings) {
@@ -685,8 +697,9 @@
 		});
 
 		createTable(settings, function() {
-			if(settings.onInit)
+			if(settings.onInit) {
 				setting.onInit();
+			}
 		});
 
 		// sort column ascending/descending
