@@ -8,7 +8,6 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes;
@@ -151,7 +150,7 @@ public class VcfRepository extends AbstractRepository
 						{
 							Iterator<String> sampleNameIterator = finalVcfReader.getVcfMeta().getSampleNames()
 									.iterator();
-							while (sampleIterator.hasNext())
+							for (int j = 0; sampleIterator.hasNext(); ++j)
 							{
 								String[] format = vcfRecord.getFormat();
 								VcfSample sample = sampleIterator.next();
@@ -160,7 +159,7 @@ public class VcfRepository extends AbstractRepository
 								{
 									sampleEntity.set(format[i], sample.getData(i));
 								}
-								sampleEntity.set(ID, UUID.randomUUID());
+								sampleEntity.set(ID, id.toString() + j);
 								// FIXME remove entity ID from Sample label after #1400 is fixed, see also:
 								// jquery.molgenis.table.js line 152
 								sampleEntity.set(NAME, entity.get(POS) + "_" + entity.get(ALT) + "_"
