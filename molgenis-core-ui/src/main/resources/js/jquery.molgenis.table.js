@@ -452,15 +452,16 @@
 
 		// inject modal data
 		var refAttributes = molgenis.getAtomicAttributes(refEntity.attributes, restApi);
-        var val = restApi.get(refValue.href)[refEntity.idAttribute];
-
-		var refQuery = {
+		var val = restApi.get(refValue.href)[refEntity.idAttribute];
+        
+        var refQuery = {
 			'q' : [ {
 				'field' : refEntity.idAttribute,
 				'operator' : 'EQUALS',
 				'value' : val
 			} ]
 		}; 
+	
 		$('.ref-title', modal).html(attribute.label || attribute.name);
 		$('.ref-description-header', modal).html((refEntity.label || refEntity.name) + ' description');
 		$('.ref-description', modal).html(refEntity.description || 'No description available');

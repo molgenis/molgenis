@@ -1,20 +1,28 @@
 package org.molgenis.data.annotation;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
-import org.elasticsearch.bootstrap.Elasticsearch;
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.*;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.CrudRepository;
+import org.molgenis.data.DataService;
+import org.molgenis.data.EditableEntityMetaData;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.ElasticsearchRepository;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.security.permission.PermissionSystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
 public class CrudRepositoryAnnotator
@@ -22,17 +30,19 @@ public class CrudRepositoryAnnotator
 	private static final Logger LOG = LoggerFactory.getLogger(CrudRepositoryAnnotator.class);
 
 	private final MysqlRepositoryCollection mysqlRepositoryCollection;
-	private String newRepositoryLabel;
-	private SearchService searchService;
-	DataService dataService;
+	private final String newRepositoryLabel;
+	private final SearchService searchService;
+	private final DataService dataService;
+	private final PermissionSystemService permissionSystemService;
 
 	public CrudRepositoryAnnotator(MysqlRepositoryCollection mysqlRepositoryCollection, String newRepositoryName,
-			SearchService searchService, DataService dataService)
+			SearchService searchService, DataService dataService, PermissionSystemService permissionSystemService)
 	{
 		this.mysqlRepositoryCollection = mysqlRepositoryCollection;
 		this.newRepositoryLabel = newRepositoryName;
 		this.searchService = searchService;
 		this.dataService = dataService;
+		this.permissionSystemService = permissionSystemService;
 	}
 
 	/**
@@ -135,6 +145,10 @@ public class CrudRepositoryAnnotator
 		if (createCopy)
 		{
 			newRepository = getOutputRepository(entityMetaData, compoundAttributeMetaData);
+
+			// Give current user permissions on the created repo
+			permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
+					Arrays.asList(newRepository.getEntityMetaData().getName()));
 		}
 		else
 		{
