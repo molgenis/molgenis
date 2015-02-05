@@ -131,7 +131,6 @@
 				browserLinks: ${browserLinks}
 			});
 			molgenis.dataexplorer.data.setGenomeBrowserEntities([<#list genomeEntities?keys as entityName>{'name': '${entityName?js_string}', 'label': '${genomeEntities[entityName]?js_string}'}<#if entityName_has_next>,</#if></#list>]);
-			alert('molgenis.dataexplorer.data.doShowGenomeBrowser()' + molgenis.dataexplorer.data.doShowGenomeBrowser());
 			if(molgenis.dataexplorer.data.doShowGenomeBrowser() === true)
 		        {
 		            molgenis.dataexplorer.data.createGenomeBrowser({showHighlight: ${showHighlight?js_string}});
@@ -149,7 +148,7 @@
 			}
 			molgenis.dataexplorer.data.createDataTable(tableEditable, rowClickable);
 		})
-		.fail(function(jqXHR, textStatus, errorThrown) {
+		.fail(function() {
 			molgenis.createAlert([{'message': 'An error occured. Please contact the administrator.'}], 'error');
 		});
 </script>
