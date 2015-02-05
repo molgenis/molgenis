@@ -37,6 +37,7 @@ import org.molgenis.util.FileStore;
 import org.molgenis.util.FileUploadUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -52,7 +53,7 @@ import com.google.common.collect.Lists;
 @Service
 public class ProtocolViewerServiceImpl implements ProtocolViewerService
 {
-	private static final Logger logger = Logger.getLogger(ProtocolViewerServiceImpl.class);
+    private static final Logger logger = Logger.getLogger(ProtocolViewerServiceImpl.class);
 	@Autowired
 	@Qualifier("catalogService")
 	private CatalogService catalogService;
@@ -68,6 +69,9 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 	private MolgenisUserService molgenisUserService;
 	@Autowired
 	private DataService dataService;
+
+    @Value("${catalog.mail}")
+    private String catalogMail;
 
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_PROTOCOLVIEWER')")
@@ -207,8 +211,7 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 		MimeMessage message = mailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(message, true);
 		helper.setTo(molgenisUser.getEmail());
-		helper.setBcc(molgenisUserService.getSuEmailAddresses().toArray(new String[]
-		{}));
+        helper.setBcc(catalogMail);
 		helper.setSubject("Submission confirmation from " + appName);
 		helper.setText(createOrderConfirmationEmailText(appName));
 		helper.addAttachment(fileName, new FileSystemResource(orderFile));
