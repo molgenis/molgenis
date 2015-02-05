@@ -3,7 +3,7 @@
 	<parent>
 	    <groupId>org.molgenis</groupId>
 	    <artifactId>molgenis</artifactId>
-	    <version>1.4.0-SNAPSHOT</version>
+	    <version>1.4.0</version>
 	</parent>
 	<artifactId>molgenis-ontology-core</artifactId>
 	<packaging>jar</packaging>
@@ -17,12 +17,12 @@
   		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
 		    <artifactId>owlapi-api</artifactId>
-		    <version>3.4.5</version>
+		    <version>3.4.10</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
 		    <artifactId>owlapi-apibinding</artifactId>
-		    <version>3.4.5</version>
+		    <version>3.4.10</version>
 		</dependency>
         <dependency>
 			<groupId>org.molgenis</groupId>

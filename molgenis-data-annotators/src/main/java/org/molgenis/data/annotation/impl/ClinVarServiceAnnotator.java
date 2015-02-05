@@ -30,6 +30,7 @@ public class ClinVarServiceAnnotator extends VariantAnnotator
 	private final AnnotationService annotatorService;
 
 	private static final String NAME = "Clinvar";
+
 	public static final String CLINVAR_FILE_LOCATION_PROPERTY = "clinvar_location";
 	private final ClinvarDataProvider clinvarDataProvider;
 
@@ -75,7 +76,7 @@ public class ClinVarServiceAnnotator extends VariantAnnotator
 	}
 
 	@Override
-	public String getName()
+	public String getSimpleName()
 	{
 		return NAME;
 	}

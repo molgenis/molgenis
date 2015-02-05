@@ -71,7 +71,7 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 	}
 
 	@Override
-	public String getName()
+	public String getSimpleName()
 	{
 		return NAME;
 	}
@@ -141,7 +141,8 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GENE, MolgenisFieldTypes.FieldTypeEnum.STRING));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HGNC_ID, MolgenisFieldTypes.FieldTypeEnum.LONG));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ENTREZ_GENE_ID, MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ENTREZ_GENE_ID,
+				MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CONDITION, MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(INHERITANCE, MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(AGE_GROUP, MolgenisFieldTypes.FieldTypeEnum.TEXT));

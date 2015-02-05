@@ -36,12 +36,12 @@ public class HgncSymbolServiceAnnotator extends LocusAnnotator
 	}
 
 	@Override
-	public String getName()
+	public String getSimpleName()
 	{
 		return NAME;
 	}
 
-	@Override
+    @Override
 	protected boolean annotationDataExists()
 	{
 		// FIXME Check if web service is available

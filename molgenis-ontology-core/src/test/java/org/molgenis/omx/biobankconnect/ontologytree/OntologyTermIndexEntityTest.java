@@ -1,15 +1,12 @@
 package org.molgenis.omx.biobankconnect.ontologytree;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.validateMockitoUsage;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;

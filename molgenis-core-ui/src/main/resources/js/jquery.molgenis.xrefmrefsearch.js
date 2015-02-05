@@ -133,7 +133,12 @@
 				var query = createQuery(lookupAttrNames, options.term.match(/[^ ]+/g),'LIKE', true);
 				if(query)
 				{
-					restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {num: 1000, q: query}}, function(data) {
+					restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {num: 1000, q: query}, sort : {
+						orders : [ {
+							direction : 'ASC',
+							property : lookupAttrNames[0]
+						} ]
+					}}, function(data) {
 						options.callback({results: data.items, more: false});
 					});
 				}

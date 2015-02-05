@@ -60,7 +60,7 @@
 				}
 			});
 		});
-	};
+	}
 	
 	/**
 	 * Returns the selected attributes from the data explorer
@@ -92,19 +92,27 @@
 	
 	// on document ready
 	$(function() {
-		$("#disabled-tooltip").tooltip();
-
         var submitBtn = $('#annotate-dataset-button');
         var form = $('#annotate-dataset-form');
-        
+
+        $("#disabled-tooltip").tooltip();
+
+        $('#annotate-dataset-form').click(function() {
+            if( $('#annotate-dataset-form input:checked').size() > 0) {
+                submitBtn.removeAttr("disabled", "disabled");
+            }else{
+                submitBtn.attr("disabled", "disabled");
+            }
+        });
+
         annotatorTemplate = Handlebars.compile($("#annotator-template").html());
-        
+
         submitBtn.click(function (e) {
             e.preventDefault();
             e.stopPropagation();
             form.submit();
         });    
-        
+
         form.submit(function (e) {
             e.preventDefault();
             e.stopPropagation();
@@ -120,5 +128,7 @@
                 });
             }
         });
+
+        submitBtn.attr("disabled", "disabled");
 	});
 }($, window.top.molgenis = window.top.molgenis || {}));	

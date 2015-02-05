@@ -4,7 +4,7 @@
 <form id="genetic-repository-merger-form" class="form-horizontal" role="form">
     <div class="well">
         <div>
-            <legend>Merge repositories containing '#CHROM','POS','REF' and 'ALT' columns, result data is overwritten if repository already exists</legend>
+            <legend>Merge repositories containing '#CHROM','POS','REF' and 'ALT' columns</legend>
         </div>
         <div class="form-group">
             <div class="col-md-10">
@@ -45,6 +45,7 @@
     $(function() {
         var submitBtn = $('#genetic-repository-merge-button');
         var form = $('#genetic-repository-merger-form');
+        var restApi = new molgenis.RestClient();
 
         form.submit(function (e) {
             e.preventDefault();
@@ -52,6 +53,11 @@
             if($("input[name='datasets']:checked").size() < 2){
                 molgenis.createAlert([
                     {'message': 'Select at least 2 datasets to merge.'}
+                ], 'warning');
+            }
+            else if(restApi.entityExists("/api/v1/"+$('[name=resultDataset]').val())){
+                molgenis.createAlert([
+                    {'message': 'An entity with this name already exists.'}
                 ], 'warning');
             }
             else if (form.valid()) {

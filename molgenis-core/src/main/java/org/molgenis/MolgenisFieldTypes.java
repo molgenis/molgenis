@@ -3,7 +3,6 @@ package org.molgenis;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.log4j.Logger;
 import org.molgenis.fieldtypes.BoolField;
 import org.molgenis.fieldtypes.CategoricalField;
 import org.molgenis.fieldtypes.CompoundField;
@@ -26,6 +25,8 @@ import org.molgenis.fieldtypes.TextField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.model.MolgenisModelException;
 import org.molgenis.model.elements.Field;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Singleton class that holds all known field types in MOLGENIS. For each FieldType it can be defined how to behave in
@@ -35,7 +36,7 @@ import org.molgenis.model.elements.Field;
  */
 public class MolgenisFieldTypes
 {
-	private static final Logger logger = Logger.getLogger(MolgenisFieldTypes.class);
+	private static final Logger LOG = LoggerFactory.getLogger(MolgenisFieldTypes.class);
 
 	private static Map<String, FieldType> types = new TreeMap<String, FieldType>();
 	private static boolean init = false;
@@ -123,7 +124,7 @@ public class MolgenisFieldTypes
 		}
 		else
 		{
-			logger.warn("couldn't get type for name '" + name + "'");
+			LOG.warn("couldn't get type for name '" + name + "'");
 			return null;
 		}
 	}
@@ -139,12 +140,12 @@ public class MolgenisFieldTypes
 		}
 		catch (InstantiationException e)
 		{
-			logger.error(e);
+			LOG.error("", e);
 			throw new MolgenisModelException(e.getMessage());
 		}
 		catch (IllegalAccessException e)
 		{
-			logger.error(e);
+			LOG.error("", e);
 			throw new MolgenisModelException(e.getMessage());
 		}
 	}
@@ -190,7 +191,7 @@ public class MolgenisFieldTypes
 				return new DatetimeField();
 
 			default:
-				logger.error("UNKNOWN sql code: " + sqlCode);
+				LOG.error("UNKNOWN sql code: " + sqlCode);
 				return null;
 		}
 	}

@@ -36,6 +36,7 @@
 	        <plugin id="permissionmanager" name="Permission Manager" url="permissionmanager"/>
         	<plugin id="menumanager" name="Menu Manager" url="menumanager"/>
         	<plugin id="indexmanager" name="Index manager" url="indexmanager"/>
+        	<plugin id="logmanager" name="Log manager" url="logmanager"/>
 		</menu>
 		<menu label="About" name="background">
             <plugin id="feedback" name="Feedback" url="feedback"/>

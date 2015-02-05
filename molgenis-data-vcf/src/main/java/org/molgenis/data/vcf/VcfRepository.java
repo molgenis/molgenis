@@ -8,10 +8,8 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
@@ -30,6 +28,8 @@ import org.molgenis.vcf.VcfSample;
 import org.molgenis.vcf.meta.VcfMeta;
 import org.molgenis.vcf.meta.VcfMetaFormat;
 import org.molgenis.vcf.meta.VcfMetaInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
@@ -41,7 +41,7 @@ import com.google.common.collect.Lists;
  */
 public class VcfRepository extends AbstractRepository
 {
-	private static final Logger logger = Logger.getLogger(VcfRepository.class);
+	private static final Logger LOG = LoggerFactory.getLogger(VcfRepository.class);
 
 	public static final String BASE_URL = "vcf://";
 	public static final String CHROM = "#CHROM";
@@ -99,7 +99,7 @@ public class VcfRepository extends AbstractRepository
 			public Entity next()
 			{
 
-				Entity entity = new MapEntity();
+				Entity entity = new MapEntity(getEntityMetaData());
 				try
 				{
 					VcfRecord vcfRecord = vcfRecordIterator.next();
@@ -150,7 +150,7 @@ public class VcfRepository extends AbstractRepository
 						{
 							Iterator<String> sampleNameIterator = finalVcfReader.getVcfMeta().getSampleNames()
 									.iterator();
-							while (sampleIterator.hasNext())
+							for (int j = 0; sampleIterator.hasNext(); ++j)
 							{
 								String[] format = vcfRecord.getFormat();
 								VcfSample sample = sampleIterator.next();
@@ -159,7 +159,7 @@ public class VcfRepository extends AbstractRepository
 								{
 									sampleEntity.set(format[i], sample.getData(i));
 								}
-								sampleEntity.set(ID, UUID.randomUUID());
+								sampleEntity.set(ID, id.toString() + j);
 								// FIXME remove entity ID from Sample label after #1400 is fixed, see also:
 								// jquery.molgenis.table.js line 152
 								sampleEntity.set(NAME, entity.get(POS) + "_" + entity.get(ALT) + "_"
@@ -172,8 +172,9 @@ public class VcfRepository extends AbstractRepository
 				}
 				catch (IOException e)
 				{
-					logger.error("Unable to load VCF metadata. " + e.getStackTrace());
+					LOG.error("Unable to load VCF metadata. ", e);
 				}
+
 				return entity;
 			}
 
@@ -268,7 +269,7 @@ public class VcfRepository extends AbstractRepository
 			sampleEntityMetaData.addAttributeMetaData(idAttributeMetaData);
 			DefaultAttributeMetaData nameAttributeMetaData = new DefaultAttributeMetaData(NAME,
 					MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true);
-			nameAttributeMetaData.setLabelAttribute(true);
+			nameAttributeMetaData.setLabelAttribute(true).setLookupAttribute(true);
 			sampleEntityMetaData.addAttributeMetaData(nameAttributeMetaData);
 			for (VcfMetaFormat meta : formatMetaData)
 			{
@@ -286,7 +287,7 @@ public class VcfRepository extends AbstractRepository
 		try
 		{
 			isListValue = number.equals("A") || number.equals("R") || number.equals("G") || number.equals(".")
-					|| Integer.valueOf(number) > 1;
+					|| Integer.parseInt(number) > 1;
 		}
 		catch (NumberFormatException ex)
 		{
@@ -337,7 +338,7 @@ public class VcfRepository extends AbstractRepository
 		try
 		{
 			isListValue = number.equals("A") || number.equals("R") || number.equals("G") || number.equals(".")
-					|| Integer.valueOf(number) > 1;
+					|| Integer.parseInt(number) > 1;
 		}
 		catch (NumberFormatException ex)
 		{
@@ -402,7 +403,7 @@ public class VcfRepository extends AbstractRepository
 				}
 				catch (IOException e)
 				{
-					logger.warn(e);
+					LOG.warn("", e);
 				}
 			}
 		}

@@ -8,10 +8,9 @@
 		<link rel="icon" href="<@resource_href "/img/molgenis.ico"/>" type="image/x-icon">
 		<link rel="stylesheet" href="<@resource_href "/css/bootstrap.min.css"/>" type="text/css">
 		<link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
-		<script src="<@resource_href "/js/jquery-1.8.3.min.js"/>"></script>
+		<script src="<@resource_href "/js/jquery-2.1.1.min.js"/>"></script>
 		<script src="<@resource_href "/js/bootstrap.min.js"/>"></script>
 		<script src="<@resource_href "/js/jquery.validate.min.js"/>"></script>
-		<script src="<@resource_href "/js/molgenis.js"/>"></script>
 		<script type="text/javascript">
 			$(function() {
 		  		var modal = $('#change-password-modal');
@@ -68,7 +67,7 @@
 	   </script>
 	</head>
 	<body>
-	   <div class="modal" id="change-password-modal" tabindex="-1" aria-labelledby="change-password-modal-label" aria-hidden="true">
+	   <div class="modal" id="change-password-modal" tabindex="-1" aria-labelledby="change-password-modal-label">
 	       <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">

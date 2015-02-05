@@ -5,8 +5,6 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -46,8 +44,8 @@ public class OntologyLoaderTest
 		int count = 0;
 		for (OWLClass childClass : loader.getChildClass(topClasses.get(0)))
 		{
-			if (count == 0) assertEquals(childClass.getIRI(), childEntity.getIRI());
-			if (count == 1) assertEquals(childClass.getIRI(), parentEntity.getIRI());
+			if (count == 0) assertEquals(childClass.getIRI(), parentEntity.getIRI());
+			if (count == 1) assertEquals(childClass.getIRI(), childEntity.getIRI());
 			count++;
 		}
 	}

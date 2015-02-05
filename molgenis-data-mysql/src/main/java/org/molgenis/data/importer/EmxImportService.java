@@ -4,13 +4,14 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
@@ -21,7 +22,7 @@ import com.google.common.collect.Lists;
 @Component
 public class EmxImportService implements ImportService
 {
-	static final Logger logger = Logger.getLogger(EmxImportService.class);
+	private static final Logger LOG = LoggerFactory.getLogger(EmxImportService.class);
 
 	private static final List<String> SUPPORTED_FILE_EXTENSIONS = Arrays.asList("xls", "xlsx", "csv", "zip");
 
@@ -35,7 +36,7 @@ public class EmxImportService implements ImportService
 	{
 		if (parser == null) throw new IllegalArgumentException("parser is null");
 		if (writer == null) throw new IllegalArgumentException("writer is null");
-		logger.debug("EmxImportService created");
+		LOG.debug("EmxImportService created");
 		this.parser = parser;
 		this.writer = writer;
 	}
@@ -46,7 +47,7 @@ public class EmxImportService implements ImportService
 	{
 		this.targetCollection = targetCollection;
 		this.metaDataService = metaDataService;
-		logger.debug("EmxImportService created with targetCollection=" + targetCollection + " and metaDataService="
+		LOG.debug("EmxImportService created with targetCollection=" + targetCollection + " and metaDataService="
 				+ metaDataService);
 	}
 

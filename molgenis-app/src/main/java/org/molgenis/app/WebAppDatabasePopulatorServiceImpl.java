@@ -1,5 +1,8 @@
 package org.molgenis.app;
 
+import static org.molgenis.ui.MolgenisPluginInterceptor.DEFAULT_VAL_FOOTER;
+import static org.molgenis.ui.MolgenisPluginInterceptor.KEY_FOOTER;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -14,6 +17,8 @@ import org.molgenis.data.annotation.impl.ClinVarServiceAnnotator;
 import org.molgenis.data.annotation.impl.DbnsfpGeneServiceAnnotator;
 import org.molgenis.data.annotation.impl.DbnsfpVariantServiceAnnotator;
 import org.molgenis.data.annotation.provider.CgdDataProvider;
+import org.molgenis.data.annotation.provider.HgncLocationsProvider;
+import org.molgenis.data.annotation.provider.HpoMappingProvider;
 import org.molgenis.data.support.GenomeConfig;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
@@ -84,9 +89,6 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		// DataExplorer rows clickable yes / no
 		runtimePropertyMap.put(DataExplorerController.KEY_DATAEXPLORER_ROW_CLICKABLE, String.valueOf(false));
 
-		// DataExplorer hide select if dataset selected through url
-		runtimePropertyMap.put(DataExplorerController.KEY_HIDE_SELECT, String.valueOf(true));
-
 		// Aggregate anonymization threshold (default no threshold)
 		runtimePropertyMap.put(IndexedCrudRepositorySecurityDecorator.SETTINGS_KEY_AGGREGATE_ANONYMIZATION_THRESHOLD,
 				Integer.toString(0));
@@ -98,6 +100,11 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		{
 			throw new IllegalArgumentException("missing required java system property 'molgenis.home'");
 		}
+
+		// HPO and HGNC Download URLs
+		runtimePropertyMap.put(HpoMappingProvider.KEY_HPO_MAPPING, HpoMappingProvider.DEFAULT_HPO_MAPPING_VALUE);
+		runtimePropertyMap.put(HgncLocationsProvider.KEY_HGNC_LOCATIONS_VALUE,
+				HgncLocationsProvider.DEFAULT_HGNC_LOCATIONS_VALUE);
 
 		if (!molgenisHomeDir.endsWith("/")) molgenisHomeDir = molgenisHomeDir + '/';
 		String molgenisHomeDirAnnotationResources = molgenisHomeDir + "data/annotation_resources";
@@ -112,6 +119,8 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 				molgenisHomeDirAnnotationResources + "/dbnsfp/dbNSFP2.3_variant.chr");
 		runtimePropertyMap.put(ClinVarServiceAnnotator.CLINVAR_FILE_LOCATION_PROPERTY,
 				molgenisHomeDirAnnotationResources + "/Clinvar/variant_summary.txt");
+
+		runtimePropertyMap.put(KEY_FOOTER, DEFAULT_VAL_FOOTER);
 
 		runtimePropertyMap.put(DataExplorerController.KEY_HIDE_SEARCH_BOX, String.valueOf(false));
 		runtimePropertyMap.put(DataExplorerController.KEY_HIDE_ITEM_SELECTION, String.valueOf(false));

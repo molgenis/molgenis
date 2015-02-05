@@ -30,6 +30,12 @@ public class IndexedRepositoryValidationDecorator extends RepositoryValidationDe
 	}
 
 	@Override
+	public void create()
+	{
+		decoratedRepository.create();
+	}
+
+	@Override
 	public void drop()
 	{
 		decoratedRepository.drop();
