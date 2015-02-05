@@ -80,7 +80,6 @@ import org.molgenis.util.MolgenisDateFormat;
 import org.molgenis.util.ResourceFingerprintRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConversionFailedException;
@@ -792,14 +791,10 @@ public class RestController
 	{
 
 		Repository repo = dataService.getRepositoryByEntityName(entityName);
-		Entity entity = null;
-		if (repo.getEntityMetaData().getEntityClass() != Entity.class) entity = BeanUtils.instantiateClass(repo
-				.getEntityMetaData().getEntityClass());
-		else entity = new MapEntity();
+
 		EntityMetaData entityMeta = repo.getEntityMetaData();
-		model.addAttribute(ENTITY_FORM_MODEL_ATTRIBUTE, new EntityForm(entityMeta, true, entity));
+		model.addAttribute(ENTITY_FORM_MODEL_ATTRIBUTE, new EntityForm(entityMeta, true, null));
 		model.addAttribute(KEY_RESOURCE_FINGERPRINT_REGISTRY, resourceFingerprintRegistry);
-		model.addAttribute("entity", entity);
 
 		return "view-entity-create";
 	}
@@ -808,8 +803,6 @@ public class RestController
 	public String editForm(@PathVariable("entityName") String entityName, @PathVariable Object id, Model model)
 	{
 		Entity entity = dataService.findOne(entityName, id);
-
-		// dataService.getRepositoryByEntityName(entityName);
 		EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
 
 		boolean hasWritePermission = molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITE);
