@@ -53,7 +53,7 @@ import com.google.common.collect.Lists;
 @Service
 public class ProtocolViewerServiceImpl implements ProtocolViewerService
 {
-    private static final Logger logger = Logger.getLogger(ProtocolViewerServiceImpl.class);
+	private static final Logger logger = Logger.getLogger(ProtocolViewerServiceImpl.class);
 	@Autowired
 	@Qualifier("catalogService")
 	private CatalogService catalogService;
@@ -70,8 +70,8 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 	@Autowired
 	private DataService dataService;
 
-    @Value("${catalog.mail}")
-    private String catalogMail;
+	@Value("${catalog.mail}")
+	private String catalogMail;
 
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_PROTOCOLVIEWER')")
@@ -211,7 +211,7 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 		MimeMessage message = mailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(message, true);
 		helper.setTo(molgenisUser.getEmail());
-        helper.setBcc(catalogMail);
+		helper.setBcc(catalogMail);
 		helper.setSubject("Submission confirmation from " + appName);
 		helper.setText(createOrderConfirmationEmailText(appName));
 		helper.addAttachment(fileName, new FileSystemResource(orderFile));
@@ -304,8 +304,8 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 	@PreAuthorize("isAuthenticated() and hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_PROTOCOLVIEWER')")
 	@Transactional(rollbackFor =
 	{ IOException.class, UnknownCatalogException.class })
-	public void createStudyDefinitionDraftXlsForCurrentUser(ExcelWriter writer, String catalogId)
-			throws IOException, UnknownCatalogException
+	public void createStudyDefinitionDraftXlsForCurrentUser(ExcelWriter writer, String catalogId) throws IOException,
+			UnknownCatalogException
 	{
 		StudyDefinition studyDefinition = getStudyDefinitionDraftForCurrentUser(catalogId);
 		if (studyDefinition == null) return;
@@ -372,7 +372,8 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 						entity.set(header.get(0), catalogItem.getExternalId());
 						entity.set(header.get(1), catalogItem.getName());
 						entity.set(header.get(2), catalogItem.getDescription());
-						entity.set(header.get(3), org.apache.commons.lang3.StringUtils.join(catalogItem.getGroup(),'\u2192'));
+						entity.set(header.get(3),
+								org.apache.commons.lang3.StringUtils.join(catalogItem.getGroup(), '\u2192'));
 						writable.add(entity);
 					}
 				}
