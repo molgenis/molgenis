@@ -37,6 +37,7 @@ import org.molgenis.util.FileStore;
 import org.molgenis.util.FileUploadUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -68,6 +69,9 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 	private MolgenisUserService molgenisUserService;
 	@Autowired
 	private DataService dataService;
+
+	@Value("${catalog.mail}")
+	private String catalogMail;
 
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_PROTOCOLVIEWER')")
@@ -207,8 +211,7 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 		MimeMessage message = mailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(message, true);
 		helper.setTo(molgenisUser.getEmail());
-		helper.setBcc(molgenisUserService.getSuEmailAddresses().toArray(new String[]
-		{}));
+		helper.setBcc(catalogMail);
 		helper.setSubject("Submission confirmation from " + appName);
 		helper.setText(createOrderConfirmationEmailText(appName));
 		helper.addAttachment(fileName, new FileSystemResource(orderFile));
@@ -301,8 +304,8 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 	@PreAuthorize("isAuthenticated() and hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_PROTOCOLVIEWER')")
 	@Transactional(rollbackFor =
 	{ IOException.class, UnknownCatalogException.class })
-	public void createStudyDefinitionDraftXlsForCurrentUser(ExcelWriter writer, String catalogId)
-			throws IOException, UnknownCatalogException
+	public void createStudyDefinitionDraftXlsForCurrentUser(ExcelWriter writer, String catalogId) throws IOException,
+			UnknownCatalogException
 	{
 		StudyDefinition studyDefinition = getStudyDefinitionDraftForCurrentUser(catalogId);
 		if (studyDefinition == null) return;
@@ -369,7 +372,8 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 						entity.set(header.get(0), catalogItem.getExternalId());
 						entity.set(header.get(1), catalogItem.getName());
 						entity.set(header.get(2), catalogItem.getDescription());
-						entity.set(header.get(3), org.apache.commons.lang3.StringUtils.join(catalogItem.getGroup(),'\u2192'));
+						entity.set(header.get(3),
+								org.apache.commons.lang3.StringUtils.join(catalogItem.getGroup(), '\u2192'));
 						writable.add(entity);
 					}
 				}
