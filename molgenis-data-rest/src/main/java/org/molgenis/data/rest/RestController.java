@@ -803,8 +803,6 @@ public class RestController
 	public String editForm(@PathVariable("entityName") String entityName, @PathVariable Object id, Model model)
 	{
 		Entity entity = dataService.findOne(entityName, id);
-
-		// dataService.getRepositoryByEntityName(entityName);
 		EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
 
 		boolean hasWritePermission = molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITE);
