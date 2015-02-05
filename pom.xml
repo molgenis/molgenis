@@ -463,6 +463,7 @@
                                 </jsSourceIncludes>
                                 <jsSourceExcludes>
                                     <jsSourceExclude>**/*.min.js</jsSourceExclude>
+                                    <jsSourceExclude>**/src-min-noconflict/**</jsSourceExclude>
                                     <jsSourceExclude>**/ace-min/**</jsSourceExclude>
                                 </jsSourceExcludes>
                                 <skipMerge>true</skipMerge>
