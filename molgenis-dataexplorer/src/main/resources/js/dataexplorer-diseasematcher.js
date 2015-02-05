@@ -178,7 +178,7 @@
 			}else{
 				queryString += '?';
 			}
-			t = encodeURIComponent(t)
+			t = encodeURIComponent(t);
 			queryString += 'symptom=' + t;
 		});
 			

@@ -60,7 +60,7 @@
 				}
 			});
 		});
-	};
+	}
 	
 	/**
 	 * Returns the selected attributes from the data explorer
