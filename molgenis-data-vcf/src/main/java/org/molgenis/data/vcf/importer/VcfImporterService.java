@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.molgenis.data.AttributeMetaData;
@@ -17,13 +18,16 @@ import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.elasticsearch.ElasticsearchRepository;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.importer.EntitiesValidationReportImpl;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
+import org.molgenis.security.permission.PermissionSystemService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
@@ -36,19 +40,25 @@ public class VcfImporterService implements ImportService
 	private final FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
 	private final DataService dataService;
 	private final SearchService searchService;
+	private final RepositoryDecoratorFactory repositoryDecoratorFactory;
+	private final PermissionSystemService permissionSystemService;
 
 	@Autowired
 	public VcfImporterService(FileRepositoryCollectionFactory fileRepositoryCollectionFactory, DataService dataService,
-			SearchService searchService)
+			SearchService searchService, RepositoryDecoratorFactory repositoryDecoratorFactory,
+			PermissionSystemService permissionSystemService)
 	{
 		if (fileRepositoryCollectionFactory == null) throw new IllegalArgumentException(
 				"fileRepositoryCollectionFactory is null");
 		if (dataService == null) throw new IllegalArgumentException("dataservice is null");
 		if (searchService == null) throw new IllegalArgumentException("seachservice is null");
-
+		if (repositoryDecoratorFactory == null) throw new IllegalArgumentException("repositoryDecoratorFactory is null");
+		if (permissionSystemService == null) throw new IllegalArgumentException("permissionSystemService is null");
 		this.fileRepositoryCollectionFactory = fileRepositoryCollectionFactory;
 		this.dataService = dataService;
 		this.searchService = searchService;
+		this.repositoryDecoratorFactory = repositoryDecoratorFactory;
+		this.permissionSystemService = permissionSystemService;
 	}
 
 	@Override
@@ -67,6 +77,10 @@ public class VcfImporterService implements ImportService
 				try
 				{
 					report = importVcf(repo, DEFAULT_BATCH_SIZE, addedEntities);
+					List<String> entityNames = addedEntities.stream().map(emd -> emd.getName())
+							.collect(Collectors.toList());
+					permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
+							entityNames);
 				}
 				finally
 				{
@@ -248,7 +262,7 @@ public class VcfImporterService implements ImportService
 			outRepository.close();
 		}
 
-		dataService.addRepository(outRepository);
+		dataService.addRepository(repositoryDecoratorFactory.createDecoratedRepository(outRepository));
 		report.addNewEntity(entityName);
 
 		if (sampleRepository != null)

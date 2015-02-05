@@ -301,6 +301,28 @@ public class DataExplorerController extends MolgenisPluginController
 					}
 					break;
 				case READ:
+					if (modData)
+					{
+						modulesConfig.add(new ModuleConfig("data", "Data", "grid-icon.png"));
+					}
+					if (modAggregates)
+					{
+						modulesConfig.add(new ModuleConfig("aggregates", aggregatesTitle, "aggregate-icon.png"));
+					}
+					if (modCharts)
+					{
+						modulesConfig.add(new ModuleConfig("charts", "Charts", "chart-icon.png"));
+					}
+					if (modDiseasematcher)
+					{
+						modulesConfig.add(new ModuleConfig("diseasematcher", "Disease Matcher",
+								"diseasematcher-icon.png"));
+					}
+					if (modEntitiesReportName != null)
+					{
+						modulesConfig.add(new ModuleConfig("entitiesreport", modEntitiesReportName, "report-icon.png"));
+					}
+					break;
 				case WRITE:
 					if (modData)
 					{
