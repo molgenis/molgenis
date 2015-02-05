@@ -114,8 +114,8 @@
 	 * @memberOf molgenis.dataexplorer.data
 	 */
 	function doShowGenomeBrowser() {
-		return genomebrowserStartAttribute !== undefined &&
-            genomebrowserChromosomeAttribute !== undefined;
+		// dalliance is not compatible with IE9
+		return molgenis.ie9 !== true && genomebrowserStartAttribute !== undefined && genomebrowserChromosomeAttribute !== undefined;
 	}
 
     function getAttributeFromList(attributesString){
@@ -394,4 +394,4 @@
 			setDallianceFilter();
 		});
 	});
-})($, window.top.molgenis = window.top.molgenis || {});
+}($, window.top.molgenis = window.top.molgenis || {}));
