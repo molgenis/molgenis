@@ -8,7 +8,7 @@
 
 <div class="row">
 	<div class="col-md-12">
-		<a href="${context_url}" class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-chevron-left"></span>    Back to mapping project overview</a>	
+		<a href="${context_url}" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-chevron-left"></span>    Back to mapping project overview</a>	
 	</div>
 </div>
 
