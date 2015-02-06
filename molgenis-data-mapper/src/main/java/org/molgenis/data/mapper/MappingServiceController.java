@@ -309,7 +309,7 @@ public class MappingServiceController extends MolgenisPluginController
 		model.addAttribute("mappingProject", project);
 		model.addAttribute("entityMapping", entityMapping);
 		model.addAttribute("attributeMapping", attributeMapping);
-		model.addAttribute("mayChange", hasWritePermission(project, false));
+		model.addAttribute("hasWritePermission", hasWritePermission(project, false));
 		return VIEW_ATTRIBUTE_MAPPING;
 	}
 

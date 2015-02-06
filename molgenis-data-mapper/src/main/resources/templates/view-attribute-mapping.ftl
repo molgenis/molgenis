@@ -50,7 +50,7 @@
 								</td>
 								<td>0</td>
 								<td>
-									<input type="radio" name="sourceAttribute" value="${source.name}"
+									<input required type="radio" name="sourceAttribute" value="${source.name}"
 										<#if source.name == selected> checked="checked"</#if>
 										<#if !hasWritePermission> disabled="disabled"</#if> />
 								</td>
