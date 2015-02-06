@@ -14,11 +14,7 @@
             </menu>
             <plugin id="background" name="Background" url="background"/>
             <plugin id="contact" name="Contact" url="contact"/>
-            <menu label="Custom Views" name="custom_views">
-                <plugin id="col7a1-patients" name="COL7A1-Patients" url="col7a1_patients"/>
-                <plugin id="col7a1-mutations" name="COL7A1-Mutations" url="col7a1_mutations"/>
-            </menu>
-	        <plugin id="gaflistimporter" name="GAF List Importer" url="gaflistimporter"/>
+            <plugin id="gaflistimporter" name="GAF List Importer" url="gaflistimporter"/>
             <plugin id="news" name="News" url="news"/>
             <plugin id="references" name="References" url="references"/>
             <plugin id="scripts" name="Scripts" url="scripts" />
