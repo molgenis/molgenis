@@ -207,19 +207,19 @@ public class VcfRepository extends AbstractRepository
 					if (vcfReader != null) vcfReader.close();
 				}
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(CHROM,
-						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true));
+						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ALT,
-						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true));
+						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(POS,
-						MolgenisFieldTypes.FieldTypeEnum.LONG).setAggregateable(true));
+						MolgenisFieldTypes.FieldTypeEnum.LONG).setAggregateable(true).setNillable(false));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(REF,
-						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true));
+						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(FILTER,
-						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true));
+						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(true));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(QUAL,
-						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true));
+						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(true));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ID,
-						MolgenisFieldTypes.FieldTypeEnum.STRING));
+						MolgenisFieldTypes.FieldTypeEnum.STRING).setNillable(true));
 				DefaultAttributeMetaData idAttributeMetaData = new DefaultAttributeMetaData(INTERNAL_ID,
 						MolgenisFieldTypes.FieldTypeEnum.STRING);
 				idAttributeMetaData.setNillable(false);
@@ -227,7 +227,7 @@ public class VcfRepository extends AbstractRepository
 				idAttributeMetaData.setVisible(false);
 				entityMetaData.addAttributeMetaData(idAttributeMetaData);
 				DefaultAttributeMetaData infoMetaData = new DefaultAttributeMetaData(INFO,
-						MolgenisFieldTypes.FieldTypeEnum.COMPOUND);
+						MolgenisFieldTypes.FieldTypeEnum.COMPOUND).setNillable(true);
 				List<AttributeMetaData> metadataInfoField = new ArrayList<AttributeMetaData>();
 				for (VcfMetaInfo info : vcfMeta.getInfoMeta())
 				{
@@ -266,6 +266,7 @@ public class VcfRepository extends AbstractRepository
 					MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true);
 			idAttributeMetaData.setIdAttribute(true);
 			idAttributeMetaData.setVisible(false);
+
 			sampleEntityMetaData.addAttributeMetaData(idAttributeMetaData);
 			DefaultAttributeMetaData nameAttributeMetaData = new DefaultAttributeMetaData(NAME,
 					MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true);

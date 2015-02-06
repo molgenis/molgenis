@@ -31,6 +31,12 @@
 		<script src="<@resource_href "/js/jquery.validate.min.js"/>"></script>
 		<script src="<@resource_href "/js/handlebars.min.js"/>"></script>
 		<script src="<@resource_href "/js/molgenis.js"/>"></script>
+    <!--[if IE 9]>
+        <#-- used to disable the genomebrowser in IE9 -->
+        <script>top.molgenis.ie9 = true;</script>
+        <#-- required by dalliance-compiled.js to load the genomebrowsers in IE9 -->        
+        <script src="<@resource_href "/js/typedarray.min.js"/>"></script>
+    <![endif]-->		
 	<#if context_url??>
 		<script>top.molgenis.setContextUrl('${context_url?js_string}');</script>
 	</#if>

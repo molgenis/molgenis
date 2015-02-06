@@ -1207,7 +1207,7 @@ public class RestController
 			if (attributesSet != null && !attributesSet.contains(attr.getName().toLowerCase())) continue;
 
 			// TODO remove __Type from jpa entities
-			if (attr.isVisible() && !attr.getName().equals("__Type"))
+			if (!attr.getName().equals("__Type"))
 			{
 				String attrName = attr.getName();
 				FieldTypeEnum attrType = attr.getDataType().getEnumType();

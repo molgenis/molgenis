@@ -4,7 +4,6 @@ import static org.molgenis.annotators.AnnotatorController.URI;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +18,7 @@ import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.validation.EntityValidator;
+import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.FileStore;
 import org.slf4j.Logger;
@@ -67,6 +67,9 @@ public class AnnotatorController
 	@Autowired
 	MysqlRepositoryCollection mysqlRepositoryCollection;
 
+	@Autowired
+	PermissionSystemService permissionSystemService;
+
 	/**
 	 * Gets a map of all available annotators.
 	 * 
@@ -104,7 +107,7 @@ public class AnnotatorController
 		{
 			CrudRepositoryAnnotator crudRepositoryAnnotator = new CrudRepositoryAnnotator(mysqlRepositoryCollection,
 					getNewRepositoryName(annotatorNames, repository.getEntityMetaData().getSimpleName()),
-					searchService, dataService);
+					searchService, dataService, permissionSystemService);
 
 			for (String annotatorName : annotatorNames)
 			{

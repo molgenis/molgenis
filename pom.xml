@@ -463,6 +463,7 @@
                                 </jsSourceIncludes>
                                 <jsSourceExcludes>
                                     <jsSourceExclude>**/*.min.js</jsSourceExclude>
+                                    <jsSourceExclude>**/src-min-noconflict/**</jsSourceExclude>
                                     <jsSourceExclude>**/ace-min/**</jsSourceExclude>
                                 </jsSourceExcludes>
                                 <skipMerge>true</skipMerge>
@@ -643,7 +644,6 @@
         <module>molgenis-model-registry</module>
         <module>molgenis-disease-matcher</module>
         <module>molgenis-data-examples</module>
-        <module>molgenis-mutationdb</module>
         <module>molgenis-scripts</module>
         <module>molgenis-data-import</module>
         <module>molgenis-catalogue</module>
