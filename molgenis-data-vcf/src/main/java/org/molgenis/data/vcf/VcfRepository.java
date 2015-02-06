@@ -270,7 +270,7 @@ public class VcfRepository extends AbstractRepository
 			sampleEntityMetaData.addAttributeMetaData(idAttributeMetaData);
 			DefaultAttributeMetaData nameAttributeMetaData = new DefaultAttributeMetaData(NAME,
 					MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true);
-			nameAttributeMetaData.setLabelAttribute(true);
+			nameAttributeMetaData.setLabelAttribute(true).setLookupAttribute(true);
 			sampleEntityMetaData.addAttributeMetaData(nameAttributeMetaData);
 			for (VcfMetaFormat meta : formatMetaData)
 			{

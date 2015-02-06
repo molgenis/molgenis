@@ -14,13 +14,11 @@
 			<h1>Mapping projects overview</h1>
 			<p>Create and view mapping projects</p>
 			
-			<div class="btn-group" role="group">
-				<a href="#" class="btn btn-primary" data-toggle="modal" data-target="#create-new-mapping-project-modal">Create a new mapping</a>  				
-			</div>
-			<div class="btn-group" role="group">
-				<button type="button" class="btn btn-success">Edit</button>  				
-			</div>
-			
+			<#if entityMetaDatas?has_content>
+				<div class="btn-group" role="group">
+					<button type="button" id="submit-new-source-column-btn" class="btn btn-primary" data-toggle="modal" data-target="#create-new-mapping-project-modal"><span class="glyphicon glyphicon-plus"></span>&nbsp;Add Mapping Project</button>
+				</div>
+			</#if>	
 			<hr></hr>
 		</div>
 	</div>
@@ -28,32 +26,46 @@
 <div class="row">
 	<div class="col-md-12">
 		<div class="col-md-6">
-			<table class="table table-bordered">
-	 			<thead>
-	 				<tr>
-	 					<th>Mapping name</th>
-	 					<th>Owner</th>
-	 					<th>Target entities</th>
-	 					<th>Mapped sources</th>
-	 				</tr>
-	 			</thead>
-	 			<tbody>
-	 				<#if mappingProjects??>
+			<#if mappingProjects?has_content>
+				<table class="table table-bordered">
+		 			<thead>
+		 				<tr>
+		 					<th></th>
+		 					<th>Mapping name</th>
+		 					<th>Owner</th>
+		 					<th>Target entities</th>
+		 					<th>Mapped sources</th>
+		 				</tr>
+		 			</thead>
+		 			<tbody>
 		 				<#list mappingProjects as project>
-		 				<tr>	 					
-		 					<td><a href="${context_url}/mappingproject/${project.identifier}">${project.name}</a></td>
-		 					<td>${project.owner.username}</td>
+		 				<tr>	
 		 					<td>
-		 					<#list project.targets?keys as target>
-		 						${target}<#if target_has_next>, </#if>
+		 						<#if user==project.owner.username || admin>
+			 						<form method="post" action="${context_url}/removeMappingProject" class="pull-left">
+										<input type="hidden" name="mappingProjectId" value="${project.identifier}"/>
+										<button type="submit" class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-minus"></span></button>
+									</form>
+								</#if>
+		 					</td> 					
+		 					<td>
+		 						<a href="${context_url}/mappingproject/${project.identifier}">${project.name?html}</a></td>
+		 					<td>${project.owner.username?html}</td>
+		 					<td>
+		 					<#list project.mappingTargets as target>
+		 						${target.name?html}<#if target_has_next>, </#if>
 	 						</#list>
 	 						</td>
-		 					<td></td>	
+		 					<td>
+		 					<#list project.mappingTargets[0].entityMappings as mapping>
+		 						${mapping.name}<#if mapping_has_next>, </#if> 
+	 						</#list>
+		 					</td>	
 		 				</tr>
 		 				</#list>
-	 				</#if>
-	 			</tbody>
-			</table>
+		 			</tbody>
+				</table>
+			</#if>
 		</div>
 	</div>
 </div>
@@ -69,7 +81,7 @@
 	        		<h4 class="modal-title" id="create-new-mapping-project-label">Create a new mapping project</h4>
 	        	</div>
 	        	<div class="modal-body">
-      				<form id="create-new-mapping-project-form" method="post" action="${context_url}/addmappingproject">	
+      				<form id="create-new-mapping-project-form" method="post" action="${context_url}/addMappingProject">
   						<div class="form-group">
 		            		<label>Mapping project name</label>
 		  					<input name="mapping-project-name" type="text" class="form-control" placeholder="Mapping name" required="required">
@@ -80,7 +92,7 @@
 						<div class="form-group">
 							<label>Select the Target entity</label>
 							<select name="target-entity" class="form-control" required="required" placeholder="Select a target entity">
-		    					<#list entityMetaDatas.iterator() as entityMetaData>
+		    					<#list entityMetaDatas as entityMetaData>
 		    						<option value="${entityMetaData.name?html}">${entityMetaData.name?html}</option>
 		    					</#list>
 							</select>

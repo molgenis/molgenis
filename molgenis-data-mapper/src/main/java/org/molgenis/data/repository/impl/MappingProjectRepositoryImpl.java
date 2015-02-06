@@ -2,7 +2,6 @@ package org.molgenis.data.repository.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.CrudRepository;
@@ -133,9 +132,14 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 		// FIXME: Once cross-repo references allow it, change this to mappingProject.getOwner()
 		result.set(MappingProjectMetaData.OWNER, mappingProject.getOwner().getUsername());
 		result.set(MappingProjectMetaData.NAME, mappingProject.getName());
-		Map<String, MappingTarget> targets = mappingProject.getTargets();
-		List<Entity> mappingTargetEntities = mappingTargetRepository.upsert(targets.values());
+		List<Entity> mappingTargetEntities = mappingTargetRepository.upsert(mappingProject.getMappingTargets());
 		result.set(MappingProjectMetaData.MAPPINGTARGETS, mappingTargetEntities);
 		return result;
+	}
+
+	@Override
+	public void delete(String mappingProjectId)
+	{
+		repository.deleteById(mappingProjectId);
 	}
 }

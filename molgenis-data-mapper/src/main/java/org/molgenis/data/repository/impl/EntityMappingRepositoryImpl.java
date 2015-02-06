@@ -5,19 +5,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.molgenis.data.CrudRepository;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.mapping.model.AttributeMapping;
 import org.molgenis.data.mapping.model.EntityMapping;
 import org.molgenis.data.meta.EntityMappingMetaData;
-import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.repository.AttributeMappingRepository;
 import org.molgenis.data.repository.EntityMappingRepository;
 import org.molgenis.data.support.MapEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.IdGenerator;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 
 /**
@@ -26,9 +25,9 @@ import com.google.common.collect.Lists;
 public class EntityMappingRepositoryImpl implements EntityMappingRepository
 {
 	public static final EntityMetaData META_DATA = new EntityMappingMetaData();
-	
+
 	@Autowired
-	private MetaDataService metaDataService;
+	private DataService dataService;
 
 	@Autowired
 	private IdGenerator idGenerator;
@@ -46,22 +45,15 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 	@Override
 	public List<EntityMapping> toEntityMappings(List<Entity> entityMappingEntities)
 	{
-		return Lists.transform(entityMappingEntities, new Function<Entity, EntityMapping>()
-		{
-			@Override
-			public EntityMapping apply(Entity entityMappingEntity)
-			{
-				return toEntityMapping(entityMappingEntity);
-			}
-		});
+		return Lists.transform(entityMappingEntities, this::toEntityMapping);
 	}
 
 	private EntityMapping toEntityMapping(Entity entityMappingEntity)
 	{
 		String identifier = entityMappingEntity.getString(EntityMappingMetaData.IDENTIFIER);
-		EntityMetaData targetEntityMetaData = metaDataService.getEntityMetaData(entityMappingEntity
+		EntityMetaData targetEntityMetaData = dataService.getEntityMetaData(entityMappingEntity
 				.getString(EntityMappingMetaData.TARGETENTITYMETADATA));
-		EntityMetaData sourceEntityMetaData = metaDataService.getEntityMetaData(entityMappingEntity
+		EntityMetaData sourceEntityMetaData = dataService.getEntityMetaData(entityMappingEntity
 				.getString(EntityMappingMetaData.SOURCEENTITYMETADATA));
 		List<Entity> attributeMappingEntities = Lists.<Entity> newArrayList(entityMappingEntity
 				.getEntities(EntityMappingMetaData.ATTRIBUTEMAPPINGS));
@@ -79,8 +71,7 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 
 	private Entity upsert(EntityMapping entityMapping)
 	{
-		List<Entity> attributeMappingEntities = attributeMappingRepository.upsert(entityMapping.getAttributeMappings()
-				.values());
+		List<Entity> attributeMappingEntities = attributeMappingRepository.upsert(entityMapping.getAttributeMappings());
 		Entity entityMappingEntity;
 		if (entityMapping.getIdentifier() == null)
 		{
@@ -100,10 +91,7 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 	{
 		Entity entityMappingEntity = new MapEntity(META_DATA);
 		entityMappingEntity.set(EntityMappingMetaData.IDENTIFIER, entityMapping.getIdentifier());
-		entityMappingEntity
-				.set(EntityMappingMetaData.SOURCEENTITYMETADATA,
-						entityMapping.getSourceEntityMetaData() != null ? entityMapping.getSourceEntityMetaData()
-								.getName() : null);
+		entityMappingEntity.set(EntityMappingMetaData.SOURCEENTITYMETADATA, entityMapping.getName());
 		entityMappingEntity
 				.set(EntityMappingMetaData.TARGETENTITYMETADATA,
 						entityMapping.getTargetEntityMetaData() != null ? entityMapping.getTargetEntityMetaData()

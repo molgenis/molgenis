@@ -1,19 +1,35 @@
 package org.molgenis.data.algorithm;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.mapping.model.AttributeMapping;
-import org.molgenis.data.mapping.model.EntityMapping;
 
 public interface AlgorithmService
 {
-	public List<Object> applyAlgorithm(AttributeMetaData targetAttribute, Iterable<AttributeMetaData> sourceAttributes,
+	List<Object> applyAlgorithm(AttributeMetaData targetAttribute, Iterable<AttributeMetaData> sourceAttributes,
 			String algorithm, Repository sourceRepo);
 
-	public List<Object> applyAlgorithm(AttributeMapping attributeMapping, Repository sourceRepo);
+	/**
+	 * Applies an {@link AttributeMapping} to a source {@link Entity}
+	 * 
+	 * @param attributeMapping
+	 *            {@link AttributeMapping} to apply
+	 * @param sourceEntity
+	 *            {@link Entity} to apply the mapping to
+	 * @return Object containing the mapped value
+	 */
+	Object apply(AttributeMapping attributeMapping, Entity sourceEntity);
 
-	public List<Entity> applyAlgorithms(EntityMapping entityMappings);
+	/**
+	 * Retrieves the names of the source attributes in an algorithm
+	 * 
+	 * @param algorithmScript
+	 *            String with the algorithm script
+	 * @return Collection of source attribute name Strings
+	 */
+	Collection<String> getSourceAttributeNames(String algorithmScript);
 }

@@ -1,6 +1,9 @@
 package org.molgenis.data.algorithm;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -12,13 +15,18 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.mapping.model.AttributeMapping;
-import org.molgenis.data.mapping.model.EntityMapping;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.js.RhinoConfig;
 import org.molgenis.js.ScriptEvaluator;
 import org.mozilla.javascript.Context;
 
 public class AlgorithmServiceImpl implements AlgorithmService
 {
+	public AlgorithmServiceImpl()
+	{
+		new RhinoConfig().init();
+	}
+
 	@Override
 	public List<Object> applyAlgorithm(AttributeMetaData targetAttribute, Iterable<AttributeMetaData> sourceAttributes,
 			String algorithm, Repository sourceRepository)
@@ -26,7 +34,6 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		List<Object> derivedValues = new ArrayList<Object>();
 		if (Iterables.size(sourceAttributes) > 0)
 		{
-			FieldTypeEnum dataType = targetAttribute.getDataType().getEnumType();
 			for (Entity entity : sourceRepository)
 			{
 				MapEntity mapEntity = new MapEntity();
@@ -36,22 +43,28 @@ public class AlgorithmServiceImpl implements AlgorithmService
 				}
 				if (!StringUtils.isEmpty(algorithm))
 				{
-					Object result = ScriptEvaluator.eval(algorithm, mapEntity);
-
-					if (result != null)
+					try
 					{
-						switch (dataType)
+						Object result = ScriptEvaluator.eval(algorithm, mapEntity);
+
+						if (result != null)
 						{
-							case INT:
-								derivedValues.add(Integer.parseInt(Context.toString(result)));
-								break;
-							case DECIMAL:
-								derivedValues.add(Context.toNumber(result));
-								break;
-							default:
-								derivedValues.add(Context.toString(result));
-								break;
+							switch (targetAttribute.getDataType().getEnumType())
+							{
+								case INT:
+									derivedValues.add(Integer.parseInt(Context.toString(result)));
+									break;
+								case DECIMAL:
+									derivedValues.add(Context.toNumber(result));
+									break;
+								default:
+									derivedValues.add(Context.toString(result));
+									break;
+							}
 						}
+					}
+					catch (RuntimeException ignored)
+					{
 					}
 				}
 			}
@@ -60,37 +73,70 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	}
 
 	@Override
-	public List<Object> applyAlgorithm(AttributeMapping attributeMapping, Repository sourceRepo)
+	public Object apply(AttributeMapping attributeMapping, Entity sourceEntity)
 	{
-		return null;
+		String algorithm = attributeMapping.getAlgorithm();
+		if (StringUtils.isEmpty(algorithm))
+		{
+			return null;
+		}
+		try
+		{
+			Object value = ScriptEvaluator.eval(algorithm, sourceEntity);
+			return convert(value, attributeMapping.getTargetAttributeMetaData().getDataType().getEnumType());
+		}
+		catch (RuntimeException e)
+		{
+			return null;
+		}
+	}
+
+	private static Object convert(Object value, FieldTypeEnum targetDataType)
+	{
+		if (value == null)
+		{
+			return null;
+		}
+		Object convertedValue;
+		switch (targetDataType)
+		{
+			case INT:
+				convertedValue = Integer.parseInt(Context.toString(value));
+				break;
+			case DECIMAL:
+				convertedValue = Context.toNumber(value);
+				break;
+			default:
+				convertedValue = Context.toString(value);
+				break;
+		}
+		return convertedValue;
 	}
 
 	@Override
-	public List<Entity> applyAlgorithms(EntityMapping entityMappings)
+	public Collection<String> getSourceAttributeNames(String algorithmScript)
 	{
-		return null;
-	}
-
-	public static List<String> extractFeatureName(String algorithmScript)
-	{
-		List<String> featureNames = new ArrayList<String>();
+		Collection<String> result = Collections.emptyList();
 		if (!StringUtils.isEmpty(algorithmScript))
 		{
-			Pattern pattern = Pattern.compile("\\$\\('([^\\$\\(\\)]*)'\\)");
-			Matcher matcher = pattern.matcher(algorithmScript);
-			while (matcher.find())
+			result = findMatchesForPattern(algorithmScript, "\\$\\('([^\\$\\(\\)]+)'\\)");
+			if (result.isEmpty())
 			{
-				if (!featureNames.contains(matcher.group(1))) featureNames.add(matcher.group(1));
-			}
-			if (featureNames.size() > 0) return featureNames;
-
-			pattern = Pattern.compile("\\$\\(([^\\$\\(\\)]*)\\)");
-			matcher = pattern.matcher(algorithmScript);
-			while (matcher.find())
-			{
-				if (!featureNames.contains(matcher.group(1))) featureNames.add(matcher.group(1));
+				result = findMatchesForPattern(algorithmScript, "\\$\\(([^\\$\\(\\)]+)\\)");
 			}
 		}
-		return featureNames;
+		return result;
 	}
+
+	private static Collection<String> findMatchesForPattern(String algorithmScript, String patternString)
+	{
+		LinkedHashSet<String> result = new LinkedHashSet<String>();
+		Matcher matcher = Pattern.compile(patternString).matcher(algorithmScript);
+		while (matcher.find())
+		{
+			result.add(matcher.group(1));
+		}
+		return result;
+	}
+
 }

@@ -1,5 +1,6 @@
 package org.molgenis.data.mapping.model;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +52,24 @@ public class EntityMapping
 		this.identifier = identifier;
 	}
 
+	public String getName()
+	{
+		if (sourceEntityMetaData == null)
+		{
+			return null;
+		}
+		return sourceEntityMetaData.getName();
+	}
+
+	public String getLabel()
+	{
+		if (sourceEntityMetaData == null)
+		{
+			return null;
+		}
+		return sourceEntityMetaData.getLabel();
+	}
+
 	public EntityMetaData getSourceEntityMetaData()
 	{
 		return sourceEntityMetaData;
@@ -61,9 +80,14 @@ public class EntityMapping
 		return targetEntityMetaData;
 	}
 
-	public Map<String, AttributeMapping> getAttributeMappings()
+	public Collection<AttributeMapping> getAttributeMappings()
 	{
-		return attributeMappings;
+		return attributeMappings.values();
+	}
+
+	public AttributeMapping getAttributeMapping(String name)
+	{
+		return attributeMappings.get(name);
 	}
 
 	/**
@@ -74,6 +98,11 @@ public class EntityMapping
 	 */
 	public AttributeMapping addAttributeMapping(String targetAttributeName)
 	{
+		if (attributeMappings.containsKey(targetAttributeName))
+		{
+			throw new IllegalStateException("AttributeMapping already exists for target attribute "
+					+ targetAttributeName);
+		}
 		AttributeMetaData targetAttributeMetaData = targetEntityMetaData.getAttribute(targetAttributeName);
 		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
 		attributeMappings.put(targetAttributeName, attributeMapping);

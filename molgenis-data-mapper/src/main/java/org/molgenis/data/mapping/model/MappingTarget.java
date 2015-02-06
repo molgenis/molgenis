@@ -35,7 +35,7 @@ public class MappingTarget
 		this.entityMappings = new LinkedHashMap<String, EntityMapping>();
 		for (EntityMapping mapping : entityMappings)
 		{
-			this.entityMappings.put(mapping.getSourceEntityMetaData().getName(), mapping);
+			this.entityMappings.put(mapping.getName(), mapping);
 		}
 	}
 
@@ -49,9 +49,9 @@ public class MappingTarget
 		return target;
 	}
 
-	public Map<String, EntityMapping> getEntityMappings()
+	public EntityMapping getMappingForSource(String source)
 	{
-		return entityMappings;
+		return entityMappings.get(source);
 	}
 
 	/**
@@ -63,7 +63,10 @@ public class MappingTarget
 	 */
 	public EntityMapping addSource(EntityMetaData source)
 	{
-		// TODO: check existence?
+		if (entityMappings.containsKey(source.getName()))
+		{
+			throw new IllegalStateException("Mapping already present for source " + source.getName());
+		}
 		EntityMapping result = new EntityMapping(source, target);
 		entityMappings.put(source.getName(), result);
 		return result;
@@ -117,4 +120,23 @@ public class MappingTarget
 				+ "]";
 	}
 
+	public String getName()
+	{
+		return target.getName();
+	}
+
+	public Collection<EntityMapping> getEntityMappings()
+	{
+		return entityMappings.values();
+	}
+
+	public void removeSource(String source)
+	{
+		entityMappings.remove(source);
+	}
+
+	public boolean hasMappingFor(String name)
+	{
+		return entityMappings.containsKey(name);
+	}
 }

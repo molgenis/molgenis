@@ -36,12 +36,13 @@ public class MappingConfig
 	@Bean
 	public IdGenerator idGenerator()
 	{
-		return new IdGenerator() // TODO something more efficient..
+		return new IdGenerator()
 		{
 			@Override
 			public UUID generateId()
 			{
-				return UUID.randomUUID();
+				com.eaio.uuid.UUID uuid = new com.eaio.uuid.UUID();
+				return UUID.fromString(uuid.toString());
 			}
 		};
 	}
@@ -49,7 +50,7 @@ public class MappingConfig
 	@Bean
 	public MappingService mappingService()
 	{
-		return new MappingServiceImpl(mappingProjectRepository());
+		return new MappingServiceImpl();
 	}
 
 	@Bean

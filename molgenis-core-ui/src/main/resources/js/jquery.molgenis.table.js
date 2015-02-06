@@ -143,15 +143,11 @@
 	 * @memberOf molgenis.table
 	 */
 	function createTableBody(data, settings) {
-		
-		
-		
-		
 		var container = $('.molgenis-table tbody', settings.container);
 
 		var items = [];
 		var tabindex = 1;
-		for ( var i = 0; i < data.items.length; ++i) {
+		for (var i = 0; i < data.items.length; ++i) {
 			var entity = data.items[i];
 			var row = $('<tr>').data('entity', entity).data('id', entity.href);
 			if (settings.editenabled) {
@@ -806,6 +802,7 @@
 		$(document).on('onFormSubmitSuccess', function() {
 			$('#form-modal .modal-body').html('');
 			$('#form-modal').modal('hide');
+			settings.start = 0;
 			refresh(settings);
 		});
 		
@@ -818,6 +815,7 @@
 				var href = $(this).closest('tr').data('id');
 				restApi.remove(href, {
 					success: function() {
+						settings.start = 0;
 						refresh(settings);
 					}
 				});

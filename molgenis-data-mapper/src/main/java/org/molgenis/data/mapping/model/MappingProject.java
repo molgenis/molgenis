@@ -10,6 +10,8 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.mapping.MappingService;
 import org.molgenis.data.repository.MappingProjectRepository;
 
+import com.google.common.collect.Lists;
+
 /**
  * Created by charbonb on 14/01/15.
  */
@@ -77,9 +79,14 @@ public class MappingProject
 		this.owner = owner;
 	}
 
-	public Map<String, MappingTarget> getTargets()
+	public List<MappingTarget> getMappingTargets()
 	{
-		return mappingTargets;
+		return Lists.newArrayList(mappingTargets.values());
+	}
+
+	public MappingTarget getMappingTarget(String name)
+	{
+		return mappingTargets.get(name);
 	}
 
 	public MappingTarget addTarget(EntityMetaData target)

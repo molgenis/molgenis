@@ -60,7 +60,8 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 			{
 				modelAndView.addObject(KEY_PLUGIN_ID, molgenisPlugin.getId());
 			}
-			
+
+
 			modelAndView.addObject("footerText", molgenisSettings.getProperty(KEY_FOOTER));
 			modelAndView.addObject(KEY_MOLGENIS_UI, molgenisUi);
 			modelAndView.addObject(KEY_AUTHENTICATED, SecurityUtils.currentUserIsAuthenticated());
