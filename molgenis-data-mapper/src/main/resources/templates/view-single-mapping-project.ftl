@@ -29,7 +29,7 @@
  					<th>Target model: ${selectedTarget?html}</th>
 				<#list mappingProject.getMappingTarget(selectedTarget).entityMappings as source>
 					<th>Source: ${source.name?html}
-						<#if mayChange>
+						<#if hasWritePermission>
 							<form method="post" action="${context_url}/removeEntityMapping">
 								<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
 								<input type="hidden" name="target" value="${selectedTarget}"/>
@@ -83,7 +83,7 @@
 		</table>
 		
 	</div>
-	<#if entityMetaDatas?has_content && mayChange>
+	<#if entityMetaDatas?has_content && hasWritePermission>
 		<div class="col-md-1">
 			<a id="add-new-attr-mapping-btn" href="#" class="btn btn-success btn-xs" data-toggle="modal" data-target="#create-new-source-column-modal"><span class="glyphicon glyphicon-plus"></span>Add source</a>
 		</div>

@@ -120,7 +120,7 @@ public class MappingServiceController extends MolgenisPluginController
 	public String deleteMappingProject(@RequestParam(required = true) String mappingProjectId)
 	{
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
-		if (mayChange(project))
+		if (hasWritePermission(project))
 		{
 			LOG.info("Deleting mappingProject " + project.getName());
 			mappingService.deleteMappingProject(mappingProjectId);
@@ -128,12 +128,12 @@ public class MappingServiceController extends MolgenisPluginController
 		return "redirect:/menu/main/mappingservice/";
 	}
 
-	private boolean mayChange(MappingProject project)
+	private boolean hasWritePermission(MappingProject project)
 	{
-		return mayChange(project, true);
+		return hasWritePermission(project, true);
 	}
 
-	private boolean mayChange(MappingProject project, boolean logInfractions)
+	private boolean hasWritePermission(MappingProject project, boolean logInfractions)
 	{
 		boolean result = SecurityUtils.currentUserIsSu()
 				|| project.getOwner().getUsername().equals(SecurityUtils.getCurrentUsername());
@@ -161,7 +161,7 @@ public class MappingServiceController extends MolgenisPluginController
 	public String addEntityMapping(@RequestParam String mappingProjectId, String target, String source)
 	{
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
-		if (mayChange(project))
+		if (hasWritePermission(project))
 		{
 			project.getMappingTarget(target).addSource(dataService.getEntityMetaData(source));
 			mappingService.updateMappingProject(project);
@@ -173,7 +173,7 @@ public class MappingServiceController extends MolgenisPluginController
 	public String removeEntityMapping(@RequestParam String mappingProjectId, String target, String source)
 	{
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
-		if (mayChange(project))
+		if (hasWritePermission(project))
 		{
 			project.getMappingTarget(target).removeSource(source);
 			mappingService.updateMappingProject(project);
@@ -203,7 +203,7 @@ public class MappingServiceController extends MolgenisPluginController
 			@RequestParam(required = true) String sourceAttribute, @RequestParam(required = true) String algorithm)
 	{
 		MappingProject mappingProject = mappingService.getMappingProject(mappingProjectId);
-		if (mayChange(mappingProject))
+		if (hasWritePermission(mappingProject))
 		{
 			MappingTarget mappingTarget = mappingProject.getMappingTarget(target);
 			EntityMapping mappingForSource = mappingTarget.getMappingForSource(source);
@@ -244,7 +244,7 @@ public class MappingServiceController extends MolgenisPluginController
 		model.addAttribute("selectedTarget", target);
 		model.addAttribute("mappingProject", project);
 		model.addAttribute("entityMetaDatas", getNewSources(project.getMappingTarget(target)));
-		model.addAttribute("mayChange", mayChange(project, false));
+		model.addAttribute("hasWritePermission", hasWritePermission(project, false));
 
 		return VIEW_SINGLE_MAPPING_PROJECT;
 	}
@@ -309,7 +309,7 @@ public class MappingServiceController extends MolgenisPluginController
 		model.addAttribute("mappingProject", project);
 		model.addAttribute("entityMapping", entityMapping);
 		model.addAttribute("attributeMapping", attributeMapping);
-		model.addAttribute("mayChange", mayChange(project, false));
+		model.addAttribute("mayChange", hasWritePermission(project, false));
 		return VIEW_ATTRIBUTE_MAPPING;
 	}
 
