@@ -80,9 +80,15 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		{
 			return null;
 		}
-		Object value = ScriptEvaluator.eval(algorithm, sourceEntity);
-		return AlgorithmServiceImpl.convert(value, attributeMapping.getTargetAttributeMetaData().getDataType()
-				.getEnumType());
+		try
+		{
+			Object value = ScriptEvaluator.eval(algorithm, sourceEntity);
+			return convert(value, attributeMapping.getTargetAttributeMetaData().getDataType().getEnumType());
+		}
+		catch (RuntimeException e)
+		{
+			return null;
+		}
 	}
 
 	private static Object convert(Object value, FieldTypeEnum targetDataType)
