@@ -106,7 +106,7 @@
 
 <script>
 	var editor = ace.edit("edit-algorithm-editor");
-	var textarea = $("#edit-algorithm-textarea");
+	var textarea = $("#edit-algorithm-textarea").hide();
 	$('#statistics-container').hide();
 	
 	var showStatistics = function(data){
