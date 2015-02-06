@@ -137,10 +137,10 @@
                 </plugin>
                 <!-- specify java 8 compatible plugin version -->
                 <plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>2.10.1</version>
-				</plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>2.10.1</version>
+                </plugin>
                 <!-- specify plugin version -->
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
