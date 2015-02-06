@@ -134,7 +134,10 @@ public class MappingServiceImpl implements MappingService
 
 	private void applyMappingToAttribute(AttributeMapping attributeMapping, Entity sourceEntity, MapEntity target)
 	{
-		target.set(attributeMapping.getTargetAttributeMetaData().getName(),
-				algorithmService.apply(attributeMapping, sourceEntity));
+		if (!attributeMapping.getTargetAttributeMetaData().isIdAtrribute())
+		{
+			target.set(attributeMapping.getTargetAttributeMetaData().getName(),
+					algorithmService.apply(attributeMapping, sourceEntity));
+		}
 	}
 }
