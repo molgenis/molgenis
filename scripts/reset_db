@@ -1,5 +1,0 @@
-drop database omx;
-create database omx;
-GRANT ALL ON omx.* TO 'molgenis'@'localhost' identified by 'molgenis';
-flush privileges;
-
