@@ -29,7 +29,7 @@ public class PostProcessOntologyTermIDFAlgorithm
 
 			Set<String> wordsInQueryString = AlgorithmHelper.medicalStemProxy(queryString);
 			// Collect the frequencies for all of the unique words from query string
-			Map<String, Integer> wordFreqMap = AlgorithmHelper.createWordFreq(queryString,
+			Map<String, Double> wordIDFMap = AlgorithmHelper.createWordFreq(queryString,
 					entities.get(0).getString(OntologyTermQueryRepository.ONTOLOGY_IRI), ontologyService);
 
 			for (ComparableEntity entity : entities.subList(0, totalDocs))
@@ -43,14 +43,13 @@ public class PostProcessOntologyTermIDFAlgorithm
 
 				BigDecimal unmatchedPart = new BigDecimal(100).subtract(entity.getCombinedScore());
 				// Weight the matched key word based on inverse document frequency (IDF)
-				wordsInOntologyTerm.retainAll(wordFreqMap.keySet());
+				wordsInOntologyTerm.retainAll(wordIDFMap.keySet());
 				for (String word : wordsInOntologyTerm)
 				{
-					if (wordFreqMap.containsKey(word) && wordFreqMap.get(word) != 0)
+					if (wordIDFMap.containsKey(word) && wordIDFMap.get(word) != 0)
 					{
 						BigDecimal score = entity.getCombinedScore();
-						BigDecimal idfValue = new BigDecimal(1 + Math.log((double) totalDocs
-								/ (wordFreqMap.get(word) + 1)));
+						BigDecimal idfValue = new BigDecimal(wordIDFMap.get(word));
 						BigDecimal partialScore = score.multiply(new BigDecimal((double) word.length() / termLength));
 						entity.set(COMBINED_SCORE, score.subtract(partialScore).add(partialScore.multiply(idfValue))
 								.doubleValue());
@@ -59,12 +58,11 @@ public class PostProcessOntologyTermIDFAlgorithm
 
 				// Weight unmatched key word based on inverse doucment frequency
 				wordsInOntologyTerm = AlgorithmHelper.medicalStemProxy(combineSynonyms);
-				for (String word : wordFreqMap.keySet())
+				for (String word : wordIDFMap.keySet())
 				{
-					if (!wordsInOntologyTerm.contains(word) && wordFreqMap.get(word) != 0)
+					if (!wordsInOntologyTerm.contains(word) && wordIDFMap.get(word) != 0)
 					{
-						BigDecimal idfValue = new BigDecimal(1 + Math.log((double) totalDocs
-								/ (wordFreqMap.get(word) + 1)));
+						BigDecimal idfValue = new BigDecimal(wordIDFMap.get(word));
 						BigDecimal partialScore = unmatchedPart.multiply(new BigDecimal((double) word.length()
 								/ termLength));
 

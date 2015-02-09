@@ -10,6 +10,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
@@ -36,10 +38,14 @@ import org.molgenis.ontology.repository.OntologyTermIndexRepository;
 import org.molgenis.ontology.repository.OntologyTermQueryRepository;
 import org.molgenis.ontology.utils.NGramMatchingModel;
 import org.molgenis.ontology.utils.PostProcessOntologyTermCombineSynonymAlgorithm;
+import org.molgenis.ontology.utils.PostProcessRedistributionScoreAlgorithm;
 import org.molgenis.ontology.utils.PostProcessRemoveRedundantOntologyTerm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.tartarus.snowball.ext.PorterStemmer;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Iterables;
 
 public class OntologyServiceImpl implements OntologyService
@@ -59,6 +65,21 @@ public class OntologyServiceImpl implements OntologyService
 	private final SearchService searchService;
 	private final DataService dataService;
 
+	private final LoadingCache<String, Long> CACHED_TOTAL_WORD_COUNT = CacheBuilder.newBuilder()
+			.maximumSize(Integer.MAX_VALUE).expireAfterWrite(1, TimeUnit.DAYS).build(new CacheLoader<String, Long>()
+			{
+				public Long load(String ontologyIri)
+				{
+					Ontology ontology = getOntology(ontologyIri);
+
+					if (ontology != null && !StringUtils.isEmpty(ontology.getLabel()))
+					{
+						return searchService.count(new QueryImpl(), dataService.getEntityMetaData(ontology.getLabel()));
+					}
+					return (long) 0;
+				}
+			});
+
 	@Autowired
 	public OntologyServiceImpl(SearchService searchService, DataService dataService)
 	{
@@ -68,7 +89,7 @@ public class OntologyServiceImpl implements OntologyService
 		this.dataService = dataService;
 	}
 
-	public long getWordFrequency(String ontologyIri, String word)
+	public double getWordInverseDocumentFrequency(String ontologyIri, String word)
 	{
 		Ontology ontology = getOntology(ontologyIri);
 
@@ -77,20 +98,24 @@ public class OntologyServiceImpl implements OntologyService
 			QueryRule queryRule = new QueryRule(Arrays.asList(new QueryRule(OntologyTermQueryRepository.SYNONYMS,
 					Operator.EQUALS, word)));
 			queryRule.setOperator(Operator.DIS_MAX);
-			return searchService.count(new QueryImpl(queryRule),
-					dataService.getEntityMetaData(getOntology(ontologyIri).getLabel()));
+			long wordCount = searchService.count(new QueryImpl(queryRule),
+					dataService.getEntityMetaData(ontology.getLabel()));
+			BigDecimal idfValue = new BigDecimal(1 + Math.log((double) getTotalNumDocument(ontologyIri)
+					/ (wordCount + 1)));
+			return idfValue.doubleValue();
 		}
 		return 0;
 	}
 
 	public long getTotalNumDocument(String ontologyIri)
 	{
-		Ontology ontology = getOntology(ontologyIri);
-
-		if (ontology != null && !StringUtils.isEmpty(ontology.getLabel()))
+		try
 		{
-			return searchService.count(new QueryImpl(),
-					dataService.getEntityMetaData(getOntology(ontologyIri).getLabel()));
+			return CACHED_TOTAL_WORD_COUNT.get(ontologyIri);
+		}
+		catch (ExecutionException e)
+		{
+			new RuntimeException(e.getMessage());
 		}
 		return 0;
 	}
@@ -359,7 +384,7 @@ public class OntologyServiceImpl implements OntologyService
 		PostProcessOntologyTermCombineSynonymAlgorithm.process(comparableEntities, inputData);
 		PostProcessRemoveRedundantOntologyTerm.process(comparableEntities);
 		// PostProcessOntologyTermIDFAlgorithm.process(comparableEntities, inputData, this);
-		// PostProcessRedistributionScoreAlgorithm.process(comparableEntities, inputData, this);
+		PostProcessRedistributionScoreAlgorithm.process(comparableEntities, inputData, this);
 		Collections.sort(comparableEntities);
 		return new OntologyServiceResultImpl(inputData, comparableEntities, count);
 	}
