@@ -8,10 +8,6 @@
         <menu label="Plugins" name="plugins">
             <plugin id="standardsregistry" name="Model registry" url="standardsregistry" />
             <plugin id="geneticrepositorymerger" name="Merge Genetic Data" url="geneticrepositorymerger"/>
-            <menu label="Ontology" name="ontology_view">
-            	<plugin id="ontologyservice" name="Ontology service" url="ontologyservice"/>
-            	<plugin id="ontologyindexer" name="Ontology index" url="ontologyindexer"/>
-            </menu>
             <plugin id="background" name="Background" url="background"/>
             <plugin id="contact" name="Contact" url="contact"/>
             <plugin id="gaflistimporter" name="GAF List Importer" url="gaflistimporter"/>
