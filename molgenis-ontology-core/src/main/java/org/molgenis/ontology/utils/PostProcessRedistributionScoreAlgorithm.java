@@ -53,20 +53,20 @@ public class PostProcessRedistributionScoreAlgorithm
 		String ontologyIri = entities.get(0).getString(OntologyTermQueryRepository.ONTOLOGY_IRI);
 		Set<String> wordsInQueryString = AlgorithmHelper.medicalStemProxy(queryString);
 		double queryStringLength = StringUtils.join(wordsInQueryString, SINGLE_WHITESPACE).trim().length();
-		Map<String, Double> wordFreqMap = AlgorithmHelper.createWordFreq(queryString, ontologyIri, ontologyService);
+		Map<String, Double> wordIDFMap = AlgorithmHelper.createWordIDF(queryString, ontologyIri, ontologyService);
 
 		Map<String, Double> wordWeightedSimilarity = new HashMap<String, Double>();
 		double averageIDFValue = 0;
-		for (Entry<String, Double> entry : wordFreqMap.entrySet())
+		for (Entry<String, Double> entry : wordIDFMap.entrySet())
 		{
 			averageIDFValue += entry.getValue();
 			wordWeightedSimilarity.put(entry.getKey(), entry.getKey().length() / queryStringLength * 100);
 		}
-		averageIDFValue = averageIDFValue / wordFreqMap.size();
+		averageIDFValue = averageIDFValue / wordIDFMap.size();
 
 		double totalContribution = 0;
 		double totalDenominator = 0;
-		for (Entry<String, Double> entry : wordFreqMap.entrySet())
+		for (Entry<String, Double> entry : wordIDFMap.entrySet())
 		{
 			// BigDecimal idfValue = new BigDecimal(1 + Math.log((double) totalDocs / (entry.getValue() + 1)));
 			double diff = entry.getValue() - averageIDFValue;
@@ -82,7 +82,7 @@ public class PostProcessRedistributionScoreAlgorithm
 			}
 		}
 
-		for (Entry<String, Double> entry : wordFreqMap.entrySet())
+		for (Entry<String, Double> entry : wordIDFMap.entrySet())
 		{
 			double diff = entry.getValue() - averageIDFValue;
 			if (diff > 0)

@@ -29,7 +29,7 @@ public class PostProcessOntologyTermIDFAlgorithm
 
 			Set<String> wordsInQueryString = AlgorithmHelper.medicalStemProxy(queryString);
 			// Collect the frequencies for all of the unique words from query string
-			Map<String, Double> wordIDFMap = AlgorithmHelper.createWordFreq(queryString,
+			Map<String, Double> wordIDFMap = AlgorithmHelper.createWordIDF(queryString,
 					entities.get(0).getString(OntologyTermQueryRepository.ONTOLOGY_IRI), ontologyService);
 
 			for (ComparableEntity entity : entities.subList(0, totalDocs))

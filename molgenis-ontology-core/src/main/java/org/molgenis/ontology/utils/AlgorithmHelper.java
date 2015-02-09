@@ -20,7 +20,7 @@ public class AlgorithmHelper
 {
 	private static final String NON_WORD_SEPARATOR = "[^a-zA-Z0-9]";
 
-	public static Map<String, Double> createWordFreq(String queryString, String ontologyIri,
+	public static Map<String, Double> createWordIDF(String queryString, String ontologyIri,
 			OntologyServiceImpl ontologyService)
 	{
 		Map<String, Double> wordFreqMap = new HashMap<String, Double>();
