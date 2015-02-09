@@ -166,6 +166,10 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		if (getDataType() instanceof XrefField || getDataType() instanceof MrefField
 				|| getDataType() instanceof CategoricalField)
 		{
+			if (getExpression() != null)
+			{
+				return null;
+			}
 			if (getRefEntity() == null) throw new MolgenisDataException("refEntity is missing for " + getName());
 			if (getRefEntity().getIdAttribute() == null) throw new MolgenisDataException(
 					"idAttribute is missing for entity [" + getRefEntity().getName() + "]");
