@@ -7,6 +7,7 @@ import static org.molgenis.ui.MolgenisPluginAttributes.KEY_PLUGIN_ID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,11 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 {
 	private final MolgenisUi molgenisUi;
+
+	public static final String KEY_FOOTER = "molgenis.footer";
+	public static final String DEFAULT_VAL_FOOTER = "null";
+
+	private MolgenisSettings molgenisSettings;
 
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception
@@ -34,10 +40,11 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 	}
 
 	@Autowired
-	public MolgenisPluginInterceptor(MolgenisUi molgenisUi)
+	public MolgenisPluginInterceptor(MolgenisUi molgenisUi, MolgenisSettings molgenisSettings)
 	{
 		if (molgenisUi == null) throw new IllegalArgumentException("molgenis ui is null");
 		this.molgenisUi = molgenisUi;
+		this.molgenisSettings = molgenisSettings;
 	}
 
 	@Override
@@ -53,6 +60,9 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 			{
 				modelAndView.addObject(KEY_PLUGIN_ID, molgenisPlugin.getId());
 			}
+
+
+			modelAndView.addObject("footerText", molgenisSettings.getProperty(KEY_FOOTER));
 			modelAndView.addObject(KEY_MOLGENIS_UI, molgenisUi);
 			modelAndView.addObject(KEY_AUTHENTICATED, SecurityUtils.currentUserIsAuthenticated());
 		}

@@ -1643,6 +1643,31 @@ public class QueryGeneratorTest
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
+	// regression test for https://github.com/molgenis/molgenis/issues/2326
+	@Test
+	public void generateMultipleQueryRuleMultipleNotClauses()
+	{
+		// query: a or (b and c)
+		Boolean booleanValue = Boolean.TRUE;
+		String stringValue = "str";
+		Integer intValue = 1;
+		Query q = new QueryImpl().eq(boolAttributeName, booleanValue).and().not().eq(stringAttributeName, stringValue)
+				.and().not().eq(intAttributeName, intValue);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+
+		FilteredQueryBuilder booleanQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.termFilter(boolAttributeName, booleanValue));
+		QueryBuilder stringQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.termFilter(stringAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, stringValue));
+		QueryBuilder intQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.termFilter(intAttributeName, intValue));
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery().must(booleanQuery).mustNot(stringQuery)
+				.mustNot(intQuery);
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
 	private void assertQueryBuilderEquals(QueryBuilder actual, QueryBuilder expected)
 	{
 		// QueryBuilder classes do not implement equals

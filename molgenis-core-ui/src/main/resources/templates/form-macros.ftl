@@ -100,6 +100,7 @@
 						mref:${(field.dataType.enumType == 'MREF')?string('true', 'false')},
 						type:'${field.dataType.enumType?js_string}',
 						readOnly:${field.isReadonly()?string('true', 'false')},
+						nillable:${field.isNillable()?string('true', 'false')},
 						unique:false,
 						<#if field.refEntity??>
 							<#if field.refEntity.labelAttribute??>

@@ -39,7 +39,8 @@ function($, molgenis, settingsXhr) {
 		entity: null,
 		query: null,
 		attrs: null,
-		mod: null
+		mod: null,
+		hideselect: 'false'
 	};
 	
 	var state;
@@ -446,11 +447,6 @@ function($, molgenis, settingsXhr) {
 			$(document).trigger('changeQuery', createEntityQuery());
 		});
 		
-		$("#observationset-search").change(function(e) {
-			searchQuery = $(this).val().trim();
-			$(document).trigger('changeQuery', createEntityQuery());
-		});
-		
 		$('#search-clear-button').click(function(){
 			$("#observationset-search").val('');
 			$("#observationset-search").change();
@@ -493,6 +489,27 @@ function($, molgenis, settingsXhr) {
 				state.entity = $('#dataset-select option:not(:empty)').first().val();
 			}
 			$('#dataset-select').select2('val', state.entity);
+		
+			// hide entity dropdown
+			if(state.hideselect === 'true') {
+				$('#dataset-select-container').addClass('hidden');
+			} else {
+				$('#dataset-select-container').removeClass('hidden');
+			}
+			
+			if (state.query) {
+				// set query in searchbox
+				for (var i = 0; i < state.query.q.length; ++i) {
+					var rule = state.query.q[i];
+					if(rule.field === undefined && rule.operator === 'SEARCH') {
+						$('#observationset-search').val(rule.value);
+						break;
+					}
+				}
+				
+				// set filters in filter list
+				// FIXME implement as part of http://www.molgenis.org/ticket/3110
+			}
 			
 			render();
 		}

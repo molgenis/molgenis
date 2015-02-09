@@ -14,6 +14,7 @@
 	"diseasematcher.css",
 	"molgenis-controls.css"]>
 <#assign js=[
+	"ace/src-min-noconflict/ace.js",
 	"jquery-ui-1.9.2.custom.min.js",
 	"jquery.bootstrap.wizard.min.js",
 	"react-with-addons.js",
@@ -25,7 +26,7 @@
 	"dataexplorer-filter-wizard.js",
 	"jquery.fancytree.min.js",
 	"jquery.molgenis.tree.js",
-	"select2.min.js",
+	"select2-patched.js",
 	"jQEditRangeSlider-min.js",
 	"bootstrap-switch.min.js",
 	"jquery.molgenis.xrefmrefsearch.js",
@@ -38,7 +39,7 @@
     <div class="col-md-12">
         <div id="entity-class" class="well well-sm">
             <div class="row">
-                <div class="col-md-9">
+                <div class="col-md-8">
                     <h3 id="entity-class-name"></h3>
                     <span id="entity-class-description"></span>
                 </div>
@@ -54,14 +55,14 @@
                         </select>
                     </div>
                 </div>
+                <#if isAdmin?has_content && isAdmin>
+		            <div class="row">
+		            	<div class="col-md-1">
+		            		<a id="delete" class="btn btn-danger">Delete</a>
+		            	</div>
+		            </div>
+            	</#if>
             </div>
-            <#if isAdmin?has_content && isAdmin>
-	            <div class="row">
-	            	<div class="col-md-1">
-	            		<a id="delete" class="btn btn-danger">delete</a>
-	            	</div>
-	            </div>
-            </#if>
         </div>
     </div>
 </div>

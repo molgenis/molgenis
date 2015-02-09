@@ -94,3 +94,21 @@
 .molgenis-table input,select,div.group-append {
 	margin-bottom: 0px;
 }
+
+.molgenis-table-controls .btn {
+	margin-right: 6px;
+}
+
+.molgenis-table .btn {
+	margin: 4px;
+}
+
+label.error {
+	color: red;
+	padding-top: .5em;
+	vertical-align: top;
+}
+
+input.error {
+	border: 1px solid red;
+}

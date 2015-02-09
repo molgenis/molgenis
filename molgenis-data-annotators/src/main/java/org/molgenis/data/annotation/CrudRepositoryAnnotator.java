@@ -1,5 +1,7 @@
 package org.molgenis.data.annotation;
 
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -7,15 +9,20 @@ import java.util.UUID;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
+import org.molgenis.data.DataService;
 import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
+import org.molgenis.data.elasticsearch.ElasticsearchRepository;
+import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.security.permission.PermissionSystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
 public class CrudRepositoryAnnotator
@@ -23,12 +30,19 @@ public class CrudRepositoryAnnotator
 	private static final Logger LOG = LoggerFactory.getLogger(CrudRepositoryAnnotator.class);
 
 	private final MysqlRepositoryCollection mysqlRepositoryCollection;
-	private String newRepositoryLabel;
+	private final String newRepositoryLabel;
+	private final SearchService searchService;
+	private final DataService dataService;
+	private final PermissionSystemService permissionSystemService;
 
-	public CrudRepositoryAnnotator(MysqlRepositoryCollection mysqlRepositoryCollection, String newRepositoryName)
+	public CrudRepositoryAnnotator(MysqlRepositoryCollection mysqlRepositoryCollection, String newRepositoryName,
+			SearchService searchService, DataService dataService, PermissionSystemService permissionSystemService)
 	{
 		this.mysqlRepositoryCollection = mysqlRepositoryCollection;
 		this.newRepositoryLabel = newRepositoryName;
+		this.searchService = searchService;
+		this.dataService = dataService;
+		this.permissionSystemService = permissionSystemService;
 	}
 
 	/**
@@ -36,7 +50,7 @@ public class CrudRepositoryAnnotator
 	 * @param repo
 	 * @param createCopy
 	 */
-	public void annotate(List<RepositoryAnnotator> annotators, Repository repo, boolean createCopy)
+	public void annotate(List<RepositoryAnnotator> annotators, Repository repo, boolean createCopy) throws IOException
 	{
 		for (RepositoryAnnotator annotator : annotators)
 		{
@@ -57,6 +71,7 @@ public class CrudRepositoryAnnotator
 	 * */
 	@Transactional
 	public Repository annotate(RepositoryAnnotator annotator, Repository sourceRepo, boolean createCopy)
+			throws IOException
 	{
 		if (!(sourceRepo instanceof CrudRepository) && !createCopy)
 		{
@@ -85,11 +100,6 @@ public class CrudRepositoryAnnotator
 
 	/**
 	 * Iterates over all the entities within a repository and annotates.
-	 * 
-	 * @param targetRepo
-	 * @param targetRepo
-	 * @param annotator
-	 * @return
 	 */
 	private CrudRepository iterateOverEntitiesAndAnnotate(Repository sourceRepo, CrudRepository targetRepo,
 			RepositoryAnnotator annotator)
@@ -129,46 +139,77 @@ public class CrudRepositoryAnnotator
 	 * @param compoundAttributeMetaData
 	 */
 	public CrudRepository addAnnotatorMetadataToRepositories(EntityMetaData entityMetaData, boolean createCopy,
-			DefaultAttributeMetaData compoundAttributeMetaData)
+			DefaultAttributeMetaData compoundAttributeMetaData) throws IOException
 	{
+		CrudRepository newRepository = null;
 		if (createCopy)
 		{
-			DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(UUID.randomUUID().toString(),
-					entityMetaData);
-			if (newEntityMetaData.getAttribute(compoundAttributeMetaData.getName()) == null)
-			{
-				newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData);
-			}
-			newEntityMetaData.setLabel(newRepositoryLabel);
-			return mysqlRepositoryCollection.add(newEntityMetaData);
+			newRepository = getOutputRepository(entityMetaData, compoundAttributeMetaData);
+
+			// Give current user permissions on the created repo
+			permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
+					Arrays.asList(newRepository.getEntityMetaData().getName()));
 		}
 		else
 		{
-			if (mysqlRepositoryCollection.getRepositoryByEntityName(entityMetaData.getName()) != null)
+			updateRepositoryMetadata(entityMetaData, compoundAttributeMetaData);
+		}
+		return newRepository;
+	}
+
+	public void updateRepositoryMetadata(EntityMetaData entityMetaData,
+			DefaultAttributeMetaData compoundAttributeMetaData)
+	{
+		// mySQL repository
+		if (mysqlRepositoryCollection.getRepositoryByEntityName(entityMetaData.getName()) != null)
+		{
+			if (entityMetaData.getAttribute(compoundAttributeMetaData.getName()) == null)
 			{
-				if (entityMetaData.getAttribute(compoundAttributeMetaData.getName()) == null)
+				DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(entityMetaData);
+				if (newEntityMetaData.getAttribute(compoundAttributeMetaData.getName()) == null)
 				{
-					DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(entityMetaData);
-					if (newEntityMetaData.getAttribute(compoundAttributeMetaData.getName()) == null)
-					{
-						newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData);
-					}
-					mysqlRepositoryCollection.updateSync(newEntityMetaData);
+					newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData);
 				}
-				return null;
-			}
-			else
-			{
-				if (!(entityMetaData instanceof EditableEntityMetaData))
-				{
-					throw new UnsupportedOperationException(
-							"EntityMetadata should be editable to make annotation possible");
-				}
-				EditableEntityMetaData editableMetadata = (EditableEntityMetaData) entityMetaData;
-				editableMetadata.addAttributeMetaData(compoundAttributeMetaData);
-				return null;
+				mysqlRepositoryCollection.updateSync(newEntityMetaData);
 			}
 		}
+		else
+		// ElasticSearch Repository
+		{
+			if (!(entityMetaData instanceof EditableEntityMetaData))
+			{
+				throw new UnsupportedOperationException("EntityMetadata should be editable to make annotation possible");
+			}
+			EditableEntityMetaData editableMetadata = (EditableEntityMetaData) entityMetaData;
+			editableMetadata.addAttributeMetaData(compoundAttributeMetaData);
+		}
+	}
+
+	public CrudRepository getOutputRepository(EntityMetaData entityMetaData,
+			DefaultAttributeMetaData compoundAttributeMetaData) throws IOException
+	{
+		CrudRepository newRepository;
+		DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(UUID.randomUUID().toString(),
+				entityMetaData);
+		if (newEntityMetaData.getAttribute(compoundAttributeMetaData.getName()) == null)
+		{
+			newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData);
+		}
+		newEntityMetaData.setLabel(newRepositoryLabel);
+
+		// mySQL source repository
+		if (mysqlRepositoryCollection.getRepositoryByEntityName(entityMetaData.getName()) != null)
+		{
+			newRepository = mysqlRepositoryCollection.add(newEntityMetaData);
+		}
+		else
+		// ElasticSearch source Repository
+		{
+			newRepository = new ElasticsearchRepository(newEntityMetaData, searchService);
+			dataService.addRepository(newRepository);
+			searchService.createMappings(newEntityMetaData, true, true, true, true);
+		}
+		return newRepository;
 	}
 
 	public DefaultAttributeMetaData getCompoundResultAttribute(RepositoryAnnotator annotator,

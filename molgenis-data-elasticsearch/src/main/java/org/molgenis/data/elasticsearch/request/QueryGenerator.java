@@ -60,6 +60,7 @@ public class QueryGenerator implements QueryPartGenerator
 				{
 					occur = Operator.NOT;
 					queryRule = queryRules.get(i + 1);
+					i += 1;
 				}
 				else if (i + 1 < nrQueryRules)
 				{
