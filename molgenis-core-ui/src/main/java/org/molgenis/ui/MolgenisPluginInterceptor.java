@@ -21,6 +21,8 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 
 	public static final String KEY_FOOTER = "molgenis.footer";
 	public static final String DEFAULT_VAL_FOOTER = "null";
+	public static final String MOLGENIS_CSS_THEME = "molgenis.css.theme";
+	public static final String CSS_VARIABLE = "molgeniscsstheme";
 
 	private MolgenisSettings molgenisSettings;
 
@@ -61,6 +63,9 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 				modelAndView.addObject(KEY_PLUGIN_ID, molgenisPlugin.getId());
 			}
 
+			if(molgenisSettings.getProperty(MOLGENIS_CSS_THEME) != null)
+				modelAndView.addObject(CSS_VARIABLE, molgenisSettings
+						.getProperty(MOLGENIS_CSS_THEME));
 
 			modelAndView.addObject("footerText", molgenisSettings.getProperty(KEY_FOOTER));
 			modelAndView.addObject(KEY_MOLGENIS_UI, molgenisUi);
