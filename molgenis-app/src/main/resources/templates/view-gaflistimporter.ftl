@@ -27,7 +27,7 @@
 								</span>
 							
 								<span class="pull-right">
-									<a id="backButton" href="${context_url?html}" class="btn btn-default">Back</a>
+									<a id="backButton" href="${context_url?url('UTF-8')}" class="btn btn-default">Back</a>
 									<input id="submitButton" type="submit" value="Import file" class="btn btn-success"/>
 								</span>
 							</div>
@@ -58,7 +58,7 @@
 					<ul>
 						<#list messages as message>
 							<li>
-								<p>${message!?html}</p>
+								<p>${message!}</p>
 							</li>
 						</#list>
 					</ul>
@@ -70,7 +70,7 @@
 			<div class="col-md-12">
 				<#if (hasValidationError?? == true) && (hasValidationError == true)>
 					<h4>Validation error report</h4>
-					${validationReport!?html}
+					${validationReport!}
 				</#if>
 			</div>
 		</div>

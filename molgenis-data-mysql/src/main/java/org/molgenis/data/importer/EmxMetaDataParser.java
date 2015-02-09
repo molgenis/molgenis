@@ -362,6 +362,13 @@ public class EmxMetaDataParser implements MetaDataParser
 			{
 				DefaultAttributeMetaData compoundAttribute = entityMap.get(partOfAttribute);
 
+				if (compoundAttribute == null)
+				{
+					throw new IllegalArgumentException("partOfAttribute [" + partOfAttribute + "] of attribute ["
+							+ attributeName + "] of entity [" + entityName
+							+ "] must refer to an existing compound attribute on line " + i);
+				}
+
 				if (compoundAttribute.getDataType().getEnumType() != FieldTypeEnum.COMPOUND)
 				{
 					throw new IllegalArgumentException("partOfAttribute [" + partOfAttribute + "] of attribute ["
@@ -610,7 +617,8 @@ public class EmxMetaDataParser implements MetaDataParser
 		{
 			IntermediateParseResults intermediateResults = getEntityMetaDataFromSource(source);
 			return new ParsedMetaData(resolveEntityDependencies(intermediateResults.getEntities()),
-					intermediateResults.getPackages(), intermediateResults.getAttributeTags(), intermediateResults.getEntityTags());
+					intermediateResults.getPackages(), intermediateResults.getAttributeTags(),
+					intermediateResults.getEntityTags());
 		}
 		else
 		{

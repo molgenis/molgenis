@@ -4,10 +4,20 @@
 	<parent>
 		<groupId>org.molgenis</groupId>
 		<artifactId>molgenis</artifactId>
-		<version>1.4.0</version>
+		<version>1.5.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>molgenis-scripts</artifactId>
 	
+	<build>
+        <plugins>
+            <!-- minify css/js -->
+            <plugin>
+                <groupId>com.samaxes.maven</groupId>
+                <artifactId>minify-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+    
 	<dependencies>
 		<dependency>
 			<groupId>org.molgenis</groupId>
