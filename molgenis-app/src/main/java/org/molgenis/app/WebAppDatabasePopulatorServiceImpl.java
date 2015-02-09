@@ -89,9 +89,6 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		// DataExplorer rows clickable yes / no
 		runtimePropertyMap.put(DataExplorerController.KEY_DATAEXPLORER_ROW_CLICKABLE, String.valueOf(false));
 
-		// DataExplorer hide select if dataset selected through url
-		runtimePropertyMap.put(DataExplorerController.KEY_HIDE_SELECT, String.valueOf(true));
-
 		// Aggregate anonymization threshold (default no threshold)
 		runtimePropertyMap.put(IndexedCrudRepositorySecurityDecorator.SETTINGS_KEY_AGGREGATE_ANONYMIZATION_THRESHOLD,
 				Integer.toString(0));

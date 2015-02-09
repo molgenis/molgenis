@@ -114,8 +114,8 @@
 	 * @memberOf molgenis.dataexplorer.data
 	 */
 	function doShowGenomeBrowser() {
-		return genomebrowserStartAttribute !== undefined &&
-            genomebrowserChromosomeAttribute !== undefined;
+		// dalliance is not compatible with IE9
+		return molgenis.ie9 !== true && genomebrowserStartAttribute !== undefined && genomebrowserChromosomeAttribute !== undefined;
 	}
 
     function getAttributeFromList(attributesString){
@@ -136,7 +136,7 @@
 	 */
 	function createGenomeBrowser(specificSettings) {
         var showHighlight = false;
-        if(specificSettings != null) {
+        if(specificSettings !== null) {
             showHighlight = specificSettings.highlightRegion;
         }
 		var settings = $.extend(true, {}, genomeBrowserSettings, specificSettings || {});
@@ -174,7 +174,7 @@
         if(showHighlight === true) {
             genomeBrowser.highlightRegion(genomeBrowser.chr, (genomeBrowser.viewStart + 9990), (genomeBrowser.viewEnd - 9990));
         }
-        genomeBrowser.addFeatureInfoPlugin(function(f, info){createGenomeBrowserInfoPopup(f, info, entity)});
+        genomeBrowser.addFeatureInfoPlugin(function(f, info){createGenomeBrowserInfoPopup(f, info, entity);});
 	}
 
     function createGenomeBrowserInfoPopup(f, info, entity) {
@@ -187,10 +187,12 @@
         }
         else{
             var molgenisIndex = f.notes.indexOf("source:MOLGENIS");
-            if(info.feature.score==="0.0")
+            if(info.feature.score==="0.0") {
                 info.feature.score = undefined;
-            if(info.feature.method==="not_recorded")
+            }
+            if(info.feature.method==="not_recorded") {
                 info.feature.method = undefined;
+            }
 
             var selectedTrack = false;
             if(molgenisIndex!==-1){
@@ -200,7 +202,7 @@
 
                     var trackName;
                     var trackIndex = f.notes[note].indexOf("track:");
-                    if (trackIndex != -1) {
+                    if (trackIndex !== -1) {
                         trackName = f.notes[note].substr(trackIndex + 6);
                         if (entity.name === trackName) {
                             selectedTrack = true;
@@ -315,8 +317,9 @@
 	 */
 	$(function() {
 		$(document).on('changeAttributeSelection.data', function(e, data) {
-			if($('#data-table-container'))
+			if($('#data-table-container')) {
 				$('#data-table-container').table('setAttributes', data.attributes);
+			}
 		});
 
 		$(document).on('updateAttributeFilters.data', function(e, data) {
@@ -391,4 +394,4 @@
 			setDallianceFilter();
 		});
 	});
-})($, window.top.molgenis = window.top.molgenis || {});
+}($, window.top.molgenis = window.top.molgenis || {}));

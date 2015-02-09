@@ -13,6 +13,7 @@
 	"dataexplorer-filter.css",
 	"diseasematcher.css"]>
 <#assign js=[
+	"ace/src-min-noconflict/ace.js",
 	"jquery-ui-1.9.2.custom.min.js",
 	"jquery.bootstrap.wizard.min.js",
 	"moment-with-locales.min.js",
@@ -22,7 +23,7 @@
 	"dataexplorer-filter-wizard.js",
 	"jquery.fancytree.min.js",
 	"jquery.molgenis.tree.js",
-	"select2.min.js",
+	"select2-patched.js",
 	"jQEditRangeSlider-min.js",
 	"bootstrap-switch.min.js",
 	"jquery.molgenis.xrefmrefsearch.js",
