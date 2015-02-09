@@ -40,6 +40,17 @@
 		    });    
 		}).resize(); // Trigger resize handler
 		
+		$('form.verify').on('submit',function(e) {
+			console.log('submit');
+	        var currentForm = this;
+	        e.preventDefault();
+	        bootbox.confirm("Are you sure?", function(result) {
+	            if (result) {
+	                currentForm.submit();
+	            }
+	        });
+	    });
+
 	});
 		
 }($, window.top.molgenis = window.top.molgenis || {}));

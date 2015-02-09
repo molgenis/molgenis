@@ -2,7 +2,7 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=['mapping-service.css']>
-<#assign js=['mapping-service.js', 'jquery.scroll.table.body.js']>
+<#assign js=['mapping-service.js', 'jquery.scroll.table.body.js', 'bootbox.min.js']>
 
 <@header css js/>
 
@@ -30,7 +30,7 @@
 				<#list mappingProject.getMappingTarget(selectedTarget).entityMappings as source>
 					<th>Source: ${source.name?html}
 						<#if hasWritePermission>
-							<form method="post" action="${context_url}/removeEntityMapping">
+							<form method="post" action="${context_url}/removeEntityMapping" class="verify">
 								<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
 								<input type="hidden" name="target" value="${selectedTarget}"/>
 								<input type="hidden" name="source" value="${source.name}"/>
