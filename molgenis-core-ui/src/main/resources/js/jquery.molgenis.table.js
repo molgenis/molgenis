@@ -106,18 +106,19 @@
 			return null;
 		});
 		
-		if(settings.data){
-			callback(settings.data);
-			return;
-		}
-
 		// TODO do not construct uri from other uri
 		var entityCollectionUri = settings.entityMetaData.href.replace("/meta", "");
-		var q = $.extend({}, settings.query, {'start': settings.start, 'num': settings.maxRows, 'sort': settings.sort});
-		restApi.getAsync(entityCollectionUri, {'attributes' : attributeNames, 'expand' : expandAttributeNames, 'q' : q}, function(data) {
-			settings.data = data;
-			callback(data);
-		});
+		if(settings.query) {
+			var q = $.extend({}, settings.query, {'start': settings.start, 'num': settings.maxRows, 'sort': settings.sort});
+			restApi.getAsync(entityCollectionUri, {'attributes' : attributeNames, 'expand' : expandAttributeNames, 'q' : q}, function(data) {
+				settings.data = data;
+				callback(data);
+			});
+		} else {
+			// don't query but use the predefined value
+			settings.data = settings.value;
+			callback(settings.value);
+		}
 	}
 
 	/**
@@ -475,7 +476,7 @@
 		$('.ref-description', modal).html(refEntity.description || 'No description available');
 		if(attribute.expression){
 			// computed attribute, don't query but show the computed value
-			$('.ref-table', modal).table({'entityMetaData' : refEntity, 'attributes': refAttributes, 'data': {items:[refValue], total: 1} });
+			$('.ref-table', modal).table({'entityMetaData' : refEntity, 'attributes': refAttributes, 'value': {items:[refValue], total: 1} });
 		} else {
 			$('.ref-table', modal).table({'entityMetaData' : refEntity, 'attributes': refAttributes, 'query' : refQuery });
 		}
