@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.molgenis</groupId>
 		<artifactId>molgenis</artifactId>
-		<version>1.2.2</version>
+		<version>1.2.3-SNAPSHOT</version>
 	</parent>
 	<artifactId>molgenis-search-elasticsearch</artifactId>
 	<packaging>jar</packaging>
@@ -12,12 +12,12 @@
         <dependency>
          	<groupId>org.molgenis</groupId>
             <artifactId>molgenis-search</artifactId>
-            <version>1.2.2</version>
+            <version>1.2.3-SNAPSHOT</version>
         </dependency>
         <dependency>
          	<groupId>org.molgenis</groupId>
             <artifactId>molgenis-data</artifactId>
-            <version>1.2.2</version>
+            <version>1.2.3-SNAPSHOT</version>
         </dependency>
         <dependency>
     		<groupId>org.elasticsearch</groupId>
