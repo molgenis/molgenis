@@ -109,7 +109,7 @@
 			var table = $('<table class="table"></table>').append('<tr><th style="width:30%;">Input Term</th><th style="width:40%;">Candidate mapping</th><th style="width:8%;">Score</th><th style="width:12%;">Adjusted Score</th><th>Select</th></tr>');
 			var count = 0;
 			$.each(data.ontologyTerms, function(index, ontologyTerm){
-				if(count >= 10) return;
+				if(count >= 20) return;
 				var row = $('<tr />').appendTo(table);
 				row.append(count == 0 ? gatherInputInfoHelper(inputEntity) : '<td></td>');
 				row.append(gatherOntologyInfoHelper(inputEntity, ontologyTerm));
