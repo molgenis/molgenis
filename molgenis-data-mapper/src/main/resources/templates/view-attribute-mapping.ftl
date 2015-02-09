@@ -50,15 +50,15 @@
 								</td>
 								<td>0</td>
 								<td>
-									<input type="radio" name="sourceAttribute" value="${source.name}"
+									<input required type="radio" name="sourceAttribute" value="${source.name}"
 										<#if source.name == selected> checked="checked"</#if>
-										<#if !mayChange> disabled="disabled"</#if> />
+										<#if !hasWritePermission> disabled="disabled"</#if> />
 								</td>
 							</tr>
 						</#list>
 					</tbody>
 				</table>
-				<#if mayChange>
+				<#if hasWritePermission>
 					<button type="submit" class="btn btn-primary">Save</button> 
 					<button type="reset" class="btn btn-danger">Reset</button>
 			        <button type="button" class="btn btn-default" onclick="window.history.back()">Cancel</button>
@@ -106,7 +106,7 @@
 
 <script>
 	var editor = ace.edit("edit-algorithm-editor");
-	var textarea = $("#edit-algorithm-textarea");
+	var textarea = $("#edit-algorithm-textarea").hide();
 	$('#statistics-container').hide();
 	
 	var showStatistics = function(data){
@@ -131,7 +131,7 @@
 	});
 	editor.setTheme("ace/theme/eclipse");
 	editor.getSession().setMode("ace/mode/javascript");
-	<#if !mayChange>editor.setReadOnly(true);</#if>
+	<#if !hasWritePermission>editor.setReadOnly(true);</#if>
 	editor.getSession().on('change', function(){
 		textarea.val(editor.getSession().getValue());
 	});
