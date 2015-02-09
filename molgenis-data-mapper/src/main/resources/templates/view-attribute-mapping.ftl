@@ -16,7 +16,7 @@
 </#if>
 <div class="row">
 	<div class="col-md-12">
-		<h4>Mapping to <i>${entityMapping.targetEntityMetaData.name}.${attributeMapping.targetAttributeMetaData.name}</i> from <i>${entityMapping.sourceEntityMetaData.name}</i></h4>
+		<h4>Mapping to <i>${entityMapping.targetEntityMetaData.name}.${attributeMapping.targetAttributeMetaData.label}</i> from <i>${entityMapping.sourceEntityMetaData.name}</i></h4>
 		<hr />
 	</div>
 </div>
