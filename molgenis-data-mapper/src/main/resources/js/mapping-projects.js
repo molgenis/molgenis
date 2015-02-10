@@ -3,6 +3,17 @@
 	var restApi = new molgenis.RestClient();
 	
 	$(function() {
+		
+		$('form.verify').submit(function(e) {
+	        var currentForm = this;
+	        e.preventDefault();
+	        bootbox.confirm("Are you sure?", function(result) {
+	            if (result) {
+	                currentForm.submit();
+	            }
+	        });
+	    });
+		
 		$('#submit-new-mapping-project-btn').click(function() {
 			$('#create-new-mapping-project-form .submit').click();
 		});
@@ -28,9 +39,6 @@
 		        $(v).width(colWidth[i]);
 		    });    
 		}).resize(); // Trigger resize handler
-		
-		
-		
 	});
 		
 }($, window.top.molgenis = window.top.molgenis || {}));

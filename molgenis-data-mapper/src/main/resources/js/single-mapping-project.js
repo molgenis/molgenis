@@ -1,10 +1,20 @@
 (function($, molgenis) {	
-	"use strict";
-	var restApi = new molgenis.RestClient();
-	
 	$(function() {
-		$('#create-integrated-entity-btn').click(function() {
-			$('#create-integrated-entity-form .submit').click();
+		$('#attribute-mapping-table').scrollTableBody();
+		
+		$('form.verify').submit(function(e) {
+	        var currentForm = this;
+	        e.preventDefault();
+	        bootbox.confirm("Are you sure?", function(result) {
+	            if (result) {
+	                currentForm.submit();
+	            }
+	        });
+	    });
+		
+		$('#submit-new-source-column-btn').click(function() {
+			console.log('click!');
+			$('#create-new-source-form').submit();
 		});
 		
 		var $table = $('table.scroll');

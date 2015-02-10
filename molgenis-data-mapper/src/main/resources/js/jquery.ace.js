@@ -38,8 +38,6 @@
                     var wrapperDiv = $('<div/>').insertAfter(textarea).height(h).width(w).addClass(config.wrapperClass);
                     // Check if we have a toolbar.
 
-
-
                     var editorDiv = $('<div/>').appendTo(wrapperDiv).attr('id', id).height(h).width(w);
                     var editor = ace.edit(id);
                     if (typeof config.toolbarCallback == 'function')

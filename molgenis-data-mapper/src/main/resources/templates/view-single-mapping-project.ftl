@@ -2,7 +2,7 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=['mapping-service.css']>
-<#assign js=['mapping-service.js', 'single-mapping-project.js', 'jquery.scroll.table.body.js', 'bootbox.min.js', 'jquery.ace.js']>
+<#assign js=['mapping-service.js', 'single-mapping-project.js', 'bootbox.min.js', 'jquery.scroll.table.body.js', 'jquery.ace.js']>
 
 <@header css js/>
 
@@ -56,19 +56,6 @@
 							</td>
 							<#list mappingProject.getMappingTarget(selectedTarget).entityMappings as source>
 								<td>
-									<div>
-										<#if source.getAttributeMapping(attribute.name)??>
-											<textarea rows="1" class="ace readonly" id="algorithm-${attribute.name?js_string}-${source.name?js_string}">${(source.getAttributeMapping(attribute.name).algorithm!"")?html}</textarea>
-										<#if !attribute.nillable && source.getAttributeMapping(attribute.name).sourceAttributeMetaData.nillable>
-											<span class="label label-warning">nillable</span>
-										</#if>
-										<#if attribute.unique && !source.getAttributeMapping(attribute.name).sourceAttributeMetaData.unique>
-											<span class="label label-warning">not unique</span>
-										</#if>
-										<#elseif !attribute.nillable>
-											<span class="label label-danger">missing</span>
-										</#if>
-									</div>
 									<div class="pull-right">
 										<form method="get" action="${context_url}/attributeMapping" class="pull-right">
 											<button type="submit" class="btn btn-primary btn-xs">
@@ -79,6 +66,21 @@
 											<input type="hidden" name="source" value="${source.name}"/>
 											<input type="hidden" name="attribute" value="${attribute.name}"/>
 										</form>
+									</div>
+									<div>
+										<#if source.getAttributeMapping(attribute.name)??>
+										<span width="100%">
+											<textarea rows="1" class="ace readonly" id="algorithm-${attribute.name?js_string}-${source.name?js_string}">${(source.getAttributeMapping(attribute.name).algorithm!"")?html}</textarea>
+										</span>
+										<#if !attribute.nillable && source.getAttributeMapping(attribute.name).sourceAttributeMetaData.nillable>
+											<span class="label label-warning">nillable</span>
+										</#if>
+										<#if attribute.unique && !source.getAttributeMapping(attribute.name).sourceAttributeMetaData.unique>
+											<span class="label label-warning">not unique</span>
+										</#if>
+										<#elseif !attribute.nillable>
+											<span class="label label-danger">missing</span>
+										</#if>
 									</div>
 								</td>
 							</#list>
@@ -108,7 +110,7 @@
     	<div class="modal-content">
         	<div class="modal-header">
         		<button type="button" class="close" data-dismiss="modal">&times;</button>
-        		<h4 class="modal-title" id="create-new-source-column-modal-label">Create a new mapping project</h4>
+        		<h4 class="modal-title" id="create-new-source-column-modal-label">Add new source</h4>
         	</div>
         	<div class="modal-body">	
         		<form id="create-new-source-form" method="post" action="${context_url}/addEntityMapping">	
@@ -141,10 +143,10 @@
     	<div class="modal-content">
         	<div class="modal-header">
         		<button type="button" class="close" data-dismiss="modal">&times;</button>
-        		<h4 class="modal-title" id="create-integrated-entity-modal-label">Create a new mapping project</h4>
+        		<h4 class="modal-title" id="create-integrated-entity-modal-label">Create integrated dataset</h4>
         	</div>
-        	<div class="modal-body">	
-        		<form id="create-integrated-entity-form" method="post" action="${context_url}/createintegratedentity">
+        	<div class="modal-body">
+        		<form id="create-integrated-entity-form" method="post" action="${context_url}/createIntegratedEntity">
         			
         			<label>Enter a name for the integrated dataset</label>
         			<input name="newEntityName" type="text" value="" required></input>

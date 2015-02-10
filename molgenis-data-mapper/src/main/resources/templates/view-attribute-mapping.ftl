@@ -30,7 +30,7 @@
 				<input type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name?html}"/>
 				<input type="hidden" name="source" value="${entityMapping.name?html}"/>
 				<input type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name?html}"/>
-				<table id="attribute-mapping-table" class="table table-bordered">
+				<table id="attribute-mapping-table" class="table table-bordered scroll">
 					<thead>
 						<tr>
 							<th>Name</th>
@@ -67,7 +67,7 @@
 	</div>
 	<div class="col-md-6">
 		<h5>Algorithm</h5>
-		<textarea class="form-control" name="algorithm" id="edit-algorithm-textarea">${(attributeMapping.algorithm!"")?html}</textarea>
+		<textarea class="form-control" name="algorithm" id="edit-algorithm-textarea" <#if !hasWritePermission>data-readOnly="true"</#if>></textarea>
 		<hr />
 		<button class="btn btn-primary" id="btn-test">Test</button>
 	</div>
@@ -99,64 +99,4 @@
 		</div>
 	</div>
 </div>
-
-<script>
-	$("#edit-algorithm-textarea").ace({
-		options: {
-			enableBasicAutocompletion: true
-		},
-		<#if !hasWritePermission>readOnly: true,</#if>
-		theme: 'eclipse',
-		mode: 'javascript',
-		showGutter: true,
-		highlightActiveLine: false
-	});
-	var editor = $('#edit-algorithm-textarea').data('ace').editor;
-
-	$('#statistics-container').hide();
-	
-	var showStatistics = function(data){
-		if(data.results.length > 0) {
-			$('#stats-total').text(data.totalCount);
-			$('#stats-valid').text(data.results.length);
-			$('#stats-mean').text(jStat.mean(data.results));
-			$('#stats-median').text(jStat.median(data.results));
-			$('#stats-stdev').text(jStat.stdev(data.results));
-			
-			$('#statistics-container').show();
-			$('.distribution').bcgraph(data.results);
-		} else {
-			$('#statistics-container').hide();
-			molgenis.createAlert([{'message':'There are no values generated for this algorithm'}],'error');
-		}
-	};
-		
-	$('#attribute-mapping-table').scrollTableBody();
-	
-	var updateEditor = function(){
-		editor.setValue("$('"+$(this).val()+"');", -1);
-	}
-	$('input[name="sourceAttribute"]').change(updateEditor);
-	$('#attribute-table-container form').on('reset', function() {
-		editor.setValue("${(attributeMapping.algorithm+';'!"")?html}",-1);
-	});
-	
-	$('#btn-test').click(function(){
-		$.ajax({
-			type : 'POST',
-			url : molgenis.getContextUrl() + '/mappingattribute/testscript',
-			async : false,
-			data : JSON.stringify({
-				targetEntityName : '${entityMapping.targetEntityMetaData.name?js_string}', 
-				sourceEntityName : '${entityMapping.name?js_string}', 
-				targetAttributeName : '${attributeMapping.targetAttributeMetaData.name?js_string}',
-				algorithm: editor.getValue()
-			}),
-			contentType : 'application/json',
-			success : showStatistics
-		});
-		return false;
-	});
-
-</script>
 <@footer/>
