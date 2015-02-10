@@ -2,7 +2,7 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=['mapping-service.css']>
-<#assign js=['mapping-service.js','d3.min.js','vega.min.js','jstat.min.js', 'biobankconnect-graph.js', 'jquery.scroll.table.body.js']>
+<#assign js=['mapping-service.js','d3.min.js','vega.min.js','jstat.min.js', 'biobankconnect-graph.js', 'jquery.scroll.table.body.js', 'bootbox.min.js']>
 
 <@header css js/>
 
@@ -16,7 +16,8 @@
 </#if>
 <div class="row">
 	<div class="col-md-12">
-		<h4>Mapping to <i>${entityMapping.targetEntityMetaData.name}.${attributeMapping.targetAttributeMetaData.name}</i> from <i>${entityMapping.sourceEntityMetaData.name}</i></h4>
+		<h4>Mapping from <i>${entityMapping.sourceEntityMetaData.name}</i> to <i>${entityMapping.targetEntityMetaData.name?html}.${attributeMapping.targetAttributeMetaData.label?html}</i>.</h4>
+		${(attributeMapping.targetAttributeMetaData.description!"")?html}
 		<hr />
 	</div>
 </div>
@@ -50,15 +51,15 @@
 								</td>
 								<td>0</td>
 								<td>
-									<input type="radio" name="sourceAttribute" value="${source.name}"
+									<input required type="radio" name="sourceAttribute" value="${source.name}"
 										<#if source.name == selected> checked="checked"</#if>
-										<#if !mayChange> disabled="disabled"</#if> />
+										<#if !hasWritePermission> disabled="disabled"</#if> />
 								</td>
 							</tr>
 						</#list>
 					</tbody>
 				</table>
-				<#if mayChange>
+				<#if hasWritePermission>
 					<button type="submit" class="btn btn-primary">Save</button> 
 					<button type="reset" class="btn btn-danger">Reset</button>
 			        <button type="button" class="btn btn-default" onclick="window.history.back()">Cancel</button>
@@ -131,7 +132,7 @@
 	});
 	editor.setTheme("ace/theme/eclipse");
 	editor.getSession().setMode("ace/mode/javascript");
-	<#if !mayChange>editor.setReadOnly(true);</#if>
+	<#if !hasWritePermission>editor.setReadOnly(true);</#if>
 	editor.getSession().on('change', function(){
 		textarea.val(editor.getSession().getValue());
 	});

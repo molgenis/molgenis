@@ -2,13 +2,13 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=['mapping-service.css']>
-<#assign js=['mapping-service.js', 'jquery.scroll.table.body.js']>
+<#assign js=['mapping-service.js', 'jquery.scroll.table.body.js', 'bootbox.min.js']>
 
 <@header css js/>
 
 <div class="row">
 	<div class="col-md-12">
-		<a href="${context_url}" class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-chevron-left"></span>    Back to mapping project overview</a>	
+		<a href="${context_url}" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-chevron-left"></span>    Back to mapping project overview</a>	
 	</div>
 </div>
 
@@ -29,8 +29,8 @@
  					<th>Target model: ${selectedTarget?html}</th>
 				<#list mappingProject.getMappingTarget(selectedTarget).entityMappings as source>
 					<th>Source: ${source.name?html}
-						<#if mayChange>
-							<form method="post" action="${context_url}/removeEntityMapping">
+						<#if hasWritePermission>
+							<form method="post" action="${context_url}/removeEntityMapping" class="verify">
 								<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
 								<input type="hidden" name="target" value="${selectedTarget}"/>
 								<input type="hidden" name="source" value="${source.name}"/>
@@ -49,7 +49,7 @@
 								<b>${attribute.name?html}</b> (${attribute.dataType})
 								<#if !attribute.nillable> <span class="label label-default">required</span></#if>
 								<#if attribute.unique> <span class="label label-default">unique</span></#if>
-								<#if attribute.description??><br />test${attribute.description?html}</#if>
+								<#if attribute.description??><br />${attribute.description?html}</#if>
 							</td>
 							<#list mappingProject.getMappingTarget(selectedTarget).entityMappings as source>
 								<td>
@@ -83,7 +83,7 @@
 		</table>
 		
 	</div>
-	<#if entityMetaDatas?has_content && mayChange>
+	<#if entityMetaDatas?has_content && hasWritePermission>
 		<div class="col-md-1">
 			<a id="add-new-attr-mapping-btn" href="#" class="btn btn-success btn-xs" data-toggle="modal" data-target="#create-new-source-column-modal"><span class="glyphicon glyphicon-plus"></span>Add source</a>
 		</div>
