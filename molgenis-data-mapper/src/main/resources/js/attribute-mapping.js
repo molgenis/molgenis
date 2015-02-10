@@ -52,8 +52,9 @@
 			}
 		};
 		
-		$('input[name="sourceAttribute"]').change(function(){
-			editor.setValue("$('"+$(this).val()+"');", -1);
+		$('button.select').click(function(){
+			editor.setValue("$('"+$(this).data('attribute')+"');", -1);
+			return false;
 		});
 		
 		$('#attribute-table-container form').on('reset', function() {
@@ -65,12 +66,12 @@
 				type : 'POST',
 				url : molgenis.getContextUrl() + '/mappingattribute/testscript',
 				async : false,
-				/*data : JSON.stringify({
-					targetEntityName : '${entityMapping.targetEntityMetaData.name?js_string}', 
-					sourceEntityName : '${entityMapping.name?js_string}', 
-					targetAttributeName : '${attributeMapping.targetAttributeMetaData.name?js_string}',
+				data : JSON.stringify({
+					targetEntityName : $('input[name="target"]').val(), 
+					sourceEntityName : $('input[name="source"]').val(), 
+					targetAttributeName : $('input[name="targetAttribute"]').val(),
 					algorithm: editor.getValue()
-				}),*/
+				}),
 				contentType : 'application/json',
 				success : showStatistics
 			});

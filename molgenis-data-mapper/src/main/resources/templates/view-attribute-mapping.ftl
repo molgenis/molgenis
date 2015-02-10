@@ -35,6 +35,7 @@
 						<tr>
 							<th>Name</th>
 							<th>Description</th>
+							<th>Selected</th>
 							<th>Select</th>
 						</tr>
 					</thead>
@@ -48,9 +49,10 @@
 								</#if>
 								</td>
 								<td>
-									<input required type="radio" name="sourceAttribute" value="${source.name}"
-										<#if source.name == selected> checked="checked"</#if>
-										<#if !hasWritePermission> disabled="disabled"</#if> />
+									<input type="checkbox" name="${source.name}"/>
+								</td>
+								<td>
+									<button class="btn btn-default select" data-attribute="${source.name}"><span class="glyphicon glyphicon-chevron-right"></span></button>
 								</td>
 							</tr>
 						</#list>
@@ -67,7 +69,8 @@
 	</div>
 	<div class="col-md-6">
 		<h5>Algorithm</h5>
-		<textarea class="form-control" name="algorithm" id="edit-algorithm-textarea" <#if !hasWritePermission>data-readOnly="true"</#if>></textarea>
+		<textarea class="form-control" name="algorithm" rows="15"
+			id="edit-algorithm-textarea" <#if !hasWritePermission>data-readOnly="true"</#if>></textarea>
 		<hr />
 		<button class="btn btn-primary" id="btn-test">Test</button>
 	</div>
