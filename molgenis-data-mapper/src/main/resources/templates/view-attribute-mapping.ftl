@@ -2,7 +2,7 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=['mapping-service.css']>
-<#assign js=['mapping-service.js','d3.min.js','vega.min.js','jstat.min.js', 'biobankconnect-graph.js', 'jquery.scroll.table.body.js', 'bootbox.min.js']>
+<#assign js=['mapping-service.js', 'attribute-mapping.js', 'd3.min.js','vega.min.js','jstat.min.js', 'biobankconnect-graph.js', 'jquery.scroll.table.body.js', 'bootbox.min.js', 'jquery.ace.js']>
 
 <@header css js/>
 
@@ -30,13 +30,11 @@
 				<input type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name?html}"/>
 				<input type="hidden" name="source" value="${entityMapping.name?html}"/>
 				<input type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name?html}"/>
-				<textarea class="form-control" name="algorithm" id="edit-algorithm-textarea"></textarea>
 				<table id="attribute-mapping-table" class="table table-bordered">
 					<thead>
 						<tr>
 							<th>Name</th>
 							<th>Description</th>
-							<th>Score</th>
 							<th>Select</th>
 						</tr>
 					</thead>
@@ -49,7 +47,6 @@
 									${source.description?html}
 								</#if>
 								</td>
-								<td>0</td>
 								<td>
 									<input required type="radio" name="sourceAttribute" value="${source.name}"
 										<#if source.name == selected> checked="checked"</#if>
@@ -66,17 +63,15 @@
 			    <#else>
 			    	<button type="button" class="btn btn-primary" onclick="window.history.back()">Back</button>
 		        </#if>
-			</form>
 		</div>
 	</div>
 	<div class="col-md-6">
 		<h5>Algorithm</h5>
-		<div id="edit-algorithm-editor" style="width: 100%; height:380px" class="uneditable-input">
-			
-		</div>
+		<textarea class="form-control" name="algorithm" id="edit-algorithm-textarea">${(attributeMapping.algorithm!"")?html}</textarea>
 		<hr />
-		<button type="submit" class="btn btn-primary" id="btn-test">Test</button>
+		<button class="btn btn-primary" id="btn-test">Test</button>
 	</div>
+	</form>
 </div>
 <div id="statistics-container" class="row">
 	<div class="col-md-12">
@@ -106,8 +101,18 @@
 </div>
 
 <script>
-	var editor = ace.edit("edit-algorithm-editor");
-	var textarea = $("#edit-algorithm-textarea").hide();
+	$("#edit-algorithm-textarea").ace({
+		options: {
+			enableBasicAutocompletion: true
+		},
+		<#if !hasWritePermission>readOnly: true,</#if>
+		theme: 'eclipse',
+		mode: 'javascript',
+		showGutter: true,
+		highlightActiveLine: false
+	});
+	var editor = $('#edit-algorithm-textarea').data('ace').editor;
+
 	$('#statistics-container').hide();
 	
 	var showStatistics = function(data){
@@ -127,24 +132,13 @@
 	};
 		
 	$('#attribute-mapping-table').scrollTableBody();
-	editor.setOptions({
-		enableBasicAutocompletion: true
-	});
-	editor.setTheme("ace/theme/eclipse");
-	editor.getSession().setMode("ace/mode/javascript");
-	<#if !hasWritePermission>editor.setReadOnly(true);</#if>
-	editor.getSession().on('change', function(){
-		textarea.val(editor.getSession().getValue());
-	});
-	editor.setValue("${(attributeMapping.algorithm!"")?html}");
 	
 	var updateEditor = function(){
-		editor.setValue("$('"+$(this).val()+"')");
+		editor.setValue("$('"+$(this).val()+"');", -1);
 	}
-	
 	$('input[name="sourceAttribute"]').change(updateEditor);
 	$('#attribute-table-container form').on('reset', function() {
-		editor.setValue("${(attributeMapping.algorithm!"")?html}");
+		editor.setValue("${(attributeMapping.algorithm+';'!"")?html}",-1);
 	});
 	
 	$('#btn-test').click(function(){
@@ -161,6 +155,7 @@
 			contentType : 'application/json',
 			success : showStatistics
 		});
+		return false;
 	});
 
 </script>

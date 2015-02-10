@@ -2,9 +2,12 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=['mapping-service.css']>
-<#assign js=['mapping-service.js', 'jquery.scroll.table.body.js', 'bootbox.min.js']>
+<#assign js=['mapping-service.js', 'single-mapping-project.js', 'jquery.scroll.table.body.js', 'bootbox.min.js', 'jquery.ace.js']>
 
 <@header css js/>
+
+<script src="<@resource_href "/js/ace/src-min-noconflict/ace.js"/>" type="text/javascript" charset="utf-8"></script>
+<script src="<@resource_href "/js/ace/src-min-noconflict/ext-language_tools.js"/>" type="text/javascript" charset="utf-8"></script>
 
 <div class="row">
 	<div class="col-md-12">
@@ -27,18 +30,18 @@
  			<thead>
  				<tr>
  					<th>Target model: ${selectedTarget?html}</th>
-				<#list mappingProject.getMappingTarget(selectedTarget).entityMappings as source>
-					<th>Source: ${source.name?html}
-						<#if hasWritePermission>
-							<form method="post" action="${context_url}/removeEntityMapping" class="verify">
-								<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
-								<input type="hidden" name="target" value="${selectedTarget}"/>
-								<input type="hidden" name="source" value="${source.name}"/>
-								<button type="submit" class="btn btn-danger btn-xs pull-right"><span class="glyphicon glyphicon-minus"></span></button>
-							</form>
-						</#if>	
-					</th>
-				</#list>
+					<#list mappingProject.getMappingTarget(selectedTarget).entityMappings as source>
+						<th>Source: ${source.name?html}
+							<#if hasWritePermission>
+								<form method="post" action="${context_url}/removeEntityMapping" class="verify">
+									<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
+									<input type="hidden" name="target" value="${selectedTarget}"/>
+									<input type="hidden" name="source" value="${source.name}"/>
+									<button type="submit" class="btn btn-danger btn-xs pull-right"><span class="glyphicon glyphicon-minus"></span></button>
+								</form>
+							</#if>	
+						</th>
+					</#list>
  				</tr>
  			</thead>
  			<tbody>
@@ -53,27 +56,30 @@
 							</td>
 							<#list mappingProject.getMappingTarget(selectedTarget).entityMappings as source>
 								<td>
-									<form method="get" action="${context_url}/attributeMapping">
+									<div>
 										<#if source.getAttributeMapping(attribute.name)??>
-											${source.getAttributeMapping(attribute.name).sourceAttributeMetaData.name} (${source.getAttributeMapping(attribute.name).sourceAttributeMetaData.dataType})
-											<#if !attribute.nillable && source.getAttributeMapping(attribute.name).sourceAttributeMetaData.nillable>
-												<span class="label label-warning">nillable</span>
-											</#if>
-											<#if attribute.unique && !source.getAttributeMapping(attribute.name).sourceAttributeMetaData.unique>
-												<span class="label label-warning">not unique</span>
-											</#if>
+											<textarea rows="1" class="ace readonly" id="algorithm-${attribute.name?js_string}-${source.name?js_string}">${(source.getAttributeMapping(attribute.name).algorithm!"")?html}</textarea>
+										<#if !attribute.nillable && source.getAttributeMapping(attribute.name).sourceAttributeMetaData.nillable>
+											<span class="label label-warning">nillable</span>
+										</#if>
+										<#if attribute.unique && !source.getAttributeMapping(attribute.name).sourceAttributeMetaData.unique>
+											<span class="label label-warning">not unique</span>
+										</#if>
 										<#elseif !attribute.nillable>
 											<span class="label label-danger">missing</span>
 										</#if>
-										<button type="submit" class="btn btn-primary btn-xs pull-right">
-											<span class="glyphicon glyphicon-pencil"></span>
-										</button>
-										<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
-										<input type="hidden" name="target" value="${selectedTarget}"/>
-										<input type="hidden" name="source" value="${source.name}"/>
-										<input type="hidden" name="attribute" value="${attribute.name}"/>
-										
-									</form>
+									</div>
+									<div class="pull-right">
+										<form method="get" action="${context_url}/attributeMapping" class="pull-right">
+											<button type="submit" class="btn btn-primary btn-xs">
+												<span class="glyphicon glyphicon-pencil"></span>
+											</button>
+											<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
+											<input type="hidden" name="target" value="${selectedTarget}"/>
+											<input type="hidden" name="source" value="${source.name}"/>
+											<input type="hidden" name="attribute" value="${attribute.name}"/>
+										</form>
+									</div>
 								</td>
 							</#list>
 						</tr>
@@ -149,7 +155,6 @@
         			<input type="submit" class="submit" style="display:none;">
 				</form>
     		</div>
-    		
         	<div class="modal-footer">
         		<button type="button" id="create-integrated-entity-btn" class="btn btn-primary">Create integrated dataset</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
@@ -157,10 +162,3 @@
 		</div>
 	</div>
 </div>
-
-
-<script>
-	// https://github.com/nheldman/jquery.scrollTableBody
-	// $('table').scrollTableBody({rowsToDisplay:5});
-	$('#attribute-mapping-table').scrollTableBody();
-</script>

@@ -2,7 +2,7 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=['mapping-service.css']>
-<#assign js=['mapping-service.js', 'bootbox.min.js']>
+<#assign js=['mapping-service.js', 'mapping-projects.js', 'bootbox.min.js', 'jquery.scroll.table.body.js']>
 
 <@header css js/>
 <@createNewMappingProjectModal />
