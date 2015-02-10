@@ -26,6 +26,10 @@
 			$('#create-new-source-form').submit();
 		});
 		
+		$('#create-integrated-entity-btn').click(function(){
+			$('#create-integrated-entity-form').submit();
+		});
+		
 		var $table = $('table.scroll');
 		var $bodyCells = $table.find('tbody tr:first').children();
 	    var colWidth;

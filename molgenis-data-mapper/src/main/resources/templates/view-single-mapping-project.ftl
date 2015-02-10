@@ -25,7 +25,7 @@
 
 <!--Table for Target and Source attribute metadata-->
 <div class="row">
-	<div class="col-md-11">
+	<div class="col-md-10">
 		<table id="attribute-mapping-table" class="table table-bordered">
  			<thead>
  				<tr>
@@ -85,17 +85,19 @@
 		
 	</div>
 	<#if entityMetaDatas?has_content && hasWritePermission>
-		<div class="col-md-1">
+		<div class="col-md-2">
 			<a id="add-new-attr-mapping-btn" href="#" class="btn btn-success btn-xs" data-toggle="modal" data-target="#create-new-source-column-modal"><span class="glyphicon glyphicon-plus"></span>Add source</a>
 		</div>
 	</#if>
 </div>
 
-<div class="row">
-	<div class="col-md-12">
-		<a id="add-new-attr-mapping-btn" href="#" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#create-integrated-entity-modal">Create integrated dataset</a>
+<#if mappingProject.getMappingTarget(selectedTarget).entityMappings?has_content>
+	<div class="row">
+		<div class="col-md-12">
+			<a id="add-new-attr-mapping-btn" href="#" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#create-integrated-entity-modal">Create integrated dataset</a>
+		</div>
 	</div>
-</div>
+</#if>
 
 <!--Create new source dialog-->
 <div class="modal" id="create-new-source-column-modal" tabindex="-1" role="dialog">

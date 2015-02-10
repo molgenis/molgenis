@@ -36,7 +36,7 @@
 							<th>Name</th>
 							<th>Description</th>
 							<th>Selected</th>
-							<th>Insert</th>
+							<#if hasWritePermission><th>Insert</th></#if>
 						</tr>
 					</thead>
 					<tbody>
@@ -51,9 +51,11 @@
 								<td>
 									<input type="checkbox" name="${source.name}" disabled="disabled"/>
 								</td>
-								<td>
-									<button class="btn btn-default insert" data-attribute="${source.name}"><span class="glyphicon glyphicon-chevron-right"></span></button>
-								</td>
+								<#if hasWritePermission>
+									<td>
+										<button class="btn btn-default insert" data-attribute="${source.name}"><span class="glyphicon glyphicon-log-in"></span></button>
+									</td>
+								</#if>
 							</tr>
 						</#list>
 					</tbody>
@@ -70,7 +72,7 @@
 	<div class="col-md-6">
 		<h5>Algorithm</h5>
 		<textarea class="form-control" name="algorithm" rows="15"
-			id="edit-algorithm-textarea" <#if !hasWritePermission>data-readOnly="true"</#if>></textarea>
+			id="edit-algorithm-textarea" <#if !hasWritePermission>data-readonly="true"</#if> width="100%">${(attributeMapping.algorithm!"")?html}</textarea>
 		<hr />
 		<button class="btn btn-primary" id="btn-test">Test</button>
 	</div>
