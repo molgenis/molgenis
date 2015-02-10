@@ -195,7 +195,7 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		MappingTarget target = mappingProject.getMappingTarget("HopEntity");
 		EntityMapping mapping = target.addSource(geneMetaData);
 		AttributeMapping attrMapping = mapping.addAttributeMapping("hoogte");
-		attrMapping.setSource(geneMetaData.getAttribute("lengte"));
+		attrMapping.setAlgorithm("$('lengte')");
 
 		mappingService.applyMappings(target, "Koetjeboe");
 

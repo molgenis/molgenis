@@ -1,7 +1,10 @@
 (function($, molgenis) {	
 	"use strict";
 	$(function() {
-		var initialValue = $("#edit-algorithm-textarea").val();
+		var $textarea = $("#edit-algorithm-textarea");
+		var initialValue = $textarea.val();
+		
+		$('#attribute-mapping-table').scrollTableBody();
 		
 		$("#edit-algorithm-textarea").ace({
 			options: {
@@ -16,8 +19,6 @@
 		var editor = $('#edit-algorithm-textarea').data('ace').editor;
 
 		$('#statistics-container').hide();
-
-		$('#attribute-mapping-table').scrollTableBody();
 		
 		var $table = $('table.scroll');
 		var $bodyCells = $table.find('tbody tr:first').children();
@@ -52,8 +53,8 @@
 			}
 		};
 		
-		$('button.select').click(function(){
-			editor.setValue("$('"+$(this).data('attribute')+"');", -1);
+		$('button.insert').click(function(){
+			editor.insert("$('"+$(this).data('attribute')+"')", -1);
 			return false;
 		});
 		
@@ -61,7 +62,35 @@
 			editor.setValue(initialValue,-1);
 		});
 		
+		function getSourceAttrs(algorithm){
+			var regex = /\$\(['"]([^\$\(\)]+)['"]\)/g;
+			var match;
+			var result = [];
+			
+			while ((match = regex.exec($textarea.val()))) {
+				if(match){
+					result.push(match[1]);
+				}
+			}
+			return result;
+		}
+		
+		editor.getSession().on('change', function(){
+			var sourceAttrs = getSourceAttrs($textarea.val());
+			$('input:checkbox').each(function(){
+				var name = $(this).attr('name');
+				var inArray = $.inArray(name,sourceAttrs);
+				console.log(name);
+				console.log(sourceAttrs);
+				console.log(inArray);
+				$(this).prop('checked', inArray != -1);
+			});
+		});
+		
 		$('#btn-test').click(function(){
+			
+			
+			
 			$.ajax({
 				type : 'POST',
 				url : molgenis.getContextUrl() + '/mappingattribute/testscript',

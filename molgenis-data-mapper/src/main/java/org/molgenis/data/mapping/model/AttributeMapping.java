@@ -8,15 +8,12 @@ import org.molgenis.data.AttributeMetaData;
 public class AttributeMapping
 {
 	private String identifier;
-	private AttributeMetaData sourceAttributeMetaData;
 	private final AttributeMetaData targetAttributeMetaData;
 	private String algorithm;
 
-	public AttributeMapping(String identifier, AttributeMetaData sourceAttributeMetaData,
-			AttributeMetaData targetAttributeMetaData, String algorithm)
+	public AttributeMapping(String identifier, AttributeMetaData targetAttributeMetaData, String algorithm)
 	{
 		this.identifier = identifier;
-		this.sourceAttributeMetaData = sourceAttributeMetaData;
 		this.targetAttributeMetaData = targetAttributeMetaData;
 		this.algorithm = algorithm;
 	}
@@ -29,31 +26,13 @@ public class AttributeMapping
 	public AttributeMapping(AttributeMetaData target)
 	{
 		this.identifier = null;
-		this.sourceAttributeMetaData = null;
 		this.targetAttributeMetaData = target;
 		this.algorithm = null;
-	}
-
-	/**
-	 * Sets the source, this will set the algorithm to a direct map.
-	 * 
-	 * @param attributeMetaData
-	 *            the source attribute
-	 */
-	public void setSource(AttributeMetaData source)
-	{
-		this.sourceAttributeMetaData = source;
-		this.algorithm = "$('" + sourceAttributeMetaData.getName() + "')";
 	}
 
 	public String getIdentifier()
 	{
 		return identifier;
-	}
-
-	public AttributeMetaData getSourceAttributeMetaData()
-	{
-		return sourceAttributeMetaData;
 	}
 
 	public AttributeMetaData getTargetAttributeMetaData()
@@ -73,7 +52,6 @@ public class AttributeMapping
 		int result = 1;
 		result = prime * result + ((algorithm == null) ? 0 : algorithm.hashCode());
 		result = prime * result + ((identifier == null) ? 0 : identifier.hashCode());
-		result = prime * result + ((sourceAttributeMetaData == null) ? 0 : sourceAttributeMetaData.hashCode());
 		result = prime * result + ((targetAttributeMetaData == null) ? 0 : targetAttributeMetaData.hashCode());
 		return result;
 	}
@@ -95,11 +73,6 @@ public class AttributeMapping
 			if (other.identifier != null) return false;
 		}
 		else if (!identifier.equals(other.identifier)) return false;
-		if (sourceAttributeMetaData == null)
-		{
-			if (other.sourceAttributeMetaData != null) return false;
-		}
-		else if (!sourceAttributeMetaData.equals(other.sourceAttributeMetaData)) return false;
 		if (targetAttributeMetaData == null)
 		{
 			if (other.targetAttributeMetaData != null) return false;
@@ -116,8 +89,8 @@ public class AttributeMapping
 	@Override
 	public String toString()
 	{
-		return "AttributeMapping [identifier=" + identifier + ", sourceAttributeMetaData=" + sourceAttributeMetaData
-				+ ", targetAttributeMetaData=" + targetAttributeMetaData + ", algorithm=" + algorithm + "]";
+		return "AttributeMapping [identifier=" + identifier + ", targetAttributeMetaData=" + targetAttributeMetaData
+				+ ", algorithm=" + algorithm + "]";
 	}
 
 	public void setAlgorithm(String algorithm)

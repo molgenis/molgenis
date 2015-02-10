@@ -2,7 +2,7 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=['mapping-service.css']>
-<#assign js=['mapping-service.js', 'attribute-mapping.js', 'd3.min.js','vega.min.js','jstat.min.js', 'biobankconnect-graph.js', 'jquery.scroll.table.body.js', 'bootbox.min.js', 'jquery.ace.js']>
+<#assign js=['attribute-mapping.js', 'd3.min.js','vega.min.js','jstat.min.js', 'biobankconnect-graph.js', 'jquery.scroll.table.body.js', 'bootbox.min.js', 'jquery.ace.js']>
 
 <@header css js/>
 
@@ -36,7 +36,7 @@
 							<th>Name</th>
 							<th>Description</th>
 							<th>Selected</th>
-							<th>Select</th>
+							<th>Insert</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -49,10 +49,10 @@
 								</#if>
 								</td>
 								<td>
-									<input type="checkbox" name="${source.name}"/>
+									<input type="checkbox" name="${source.name}" disabled="disabled"/>
 								</td>
 								<td>
-									<button class="btn btn-default select" data-attribute="${source.name}"><span class="glyphicon glyphicon-chevron-right"></span></button>
+									<button class="btn btn-default insert" data-attribute="${source.name}"><span class="glyphicon glyphicon-chevron-right"></span></button>
 								</td>
 							</tr>
 						</#list>
