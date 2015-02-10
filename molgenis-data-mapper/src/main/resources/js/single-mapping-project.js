@@ -2,18 +2,27 @@
 	$(function() {
 		$('#attribute-mapping-table').scrollTableBody();
 		
-		$('form.verify').submit(function(e) {
+		$('.ace.readonly').each(function(){
+			var id = $(this).attr('id');
+			var editor = ace.edit(id);
+			editor.setTheme("ace/theme/eclipse");
+		    editor.getSession().setMode("ace/mode/javascript");
+		    editor.setReadOnly(true);
+            editor.renderer.setShowGutter(false);
+            editor.setHighlightActiveLine(false);
+		});
+		
+		$('form.verify').submit(function() {
 	        var currentForm = this;
-	        e.preventDefault();
 	        bootbox.confirm("Are you sure?", function(result) {
 	            if (result) {
 	                currentForm.submit();
 	            }
 	        });
+	        return false;
 	    });
 		
 		$('#submit-new-source-column-btn').click(function() {
-			console.log('click!');
 			$('#create-new-source-form').submit();
 		});
 		
@@ -31,16 +40,8 @@
 		    // Set the width of thead columns
 		    $table.find('thead tr').children().each(function(i, v) {
 		        $(v).width(colWidth[i]);
-		    });    
+		    });
 		}).resize(); // Trigger resize handler
-		
-		$('textarea.ace.readonly').ace({
-			mode: 'javascript',
-			readOnly: true,
-			showGutter: false,
-			highlightActiveLine: false,
-			theme: 'eclipse'
-		});
 	});
 		
 }($, window.top.molgenis = window.top.molgenis || {}));

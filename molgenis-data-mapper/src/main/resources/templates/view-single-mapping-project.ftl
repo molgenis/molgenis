@@ -2,7 +2,7 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=['mapping-service.css']>
-<#assign js=['single-mapping-project.js', 'bootbox.min.js', 'jquery.scroll.table.body.js', 'jquery.ace.js']>
+<#assign js=['single-mapping-project.js', 'bootbox.min.js', 'jquery.scroll.table.body.js']>
 
 <@header css js/>
 
@@ -69,15 +69,8 @@
 									</div>
 									<div>
 										<#if source.getAttributeMapping(attribute.name)??>
-										<span width="100%">
-											<textarea rows="1" class="ace readonly" id="algorithm-${attribute.name?js_string}-${source.name?js_string}">${(source.getAttributeMapping(attribute.name).algorithm!"")?html}</textarea>
-										</span>
-										<#if !attribute.nillable && source.getAttributeMapping(attribute.name).sourceAttributeMetaData.nillable>
-											<span class="label label-warning">nillable</span>
-										</#if>
-										<#if attribute.unique && !source.getAttributeMapping(attribute.name).sourceAttributeMetaData.unique>
-											<span class="label label-warning">not unique</span>
-										</#if>
+											<div class="ace readonly" id="algorithm-${attribute.name?js_string}-${source.name?js_string}"
+												style="height: 25px">${(source.getAttributeMapping(attribute.name).algorithm!"")?html}</div>
 										<#elseif !attribute.nillable>
 											<span class="label label-danger">missing</span>
 										</#if>
