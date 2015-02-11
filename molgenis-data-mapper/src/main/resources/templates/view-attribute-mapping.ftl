@@ -25,11 +25,6 @@
 	<div class="col-md-6">
 		<h5>Source attributes</h5>
 		<div id="attribute-table-container" >
-			<form method="POST" action="${context_url}/saveattributemapping">
-				<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
-				<input type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name?html}"/>
-				<input type="hidden" name="source" value="${entityMapping.name?html}"/>
-				<input type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name?html}"/>
 				<table id="attribute-mapping-table" class="table table-bordered scroll">
 					<thead>
 						<tr>
@@ -59,23 +54,28 @@
 						</#list>
 					</tbody>
 				</table>
-				<#if hasWritePermission>
-					<button type="submit" class="btn btn-primary">Save</button> 
-					<button type="reset" class="btn btn-danger">Reset</button>
-			        <button type="button" class="btn btn-default" onclick="window.history.back()">Cancel</button>
-			    <#else>
-			    	<button type="button" class="btn btn-primary" onclick="window.history.back()">Back</button>
-		        </#if>
 		</div>
 	</div>
 	<div class="col-md-6">
 		<h5>Algorithm</h5>
-		<textarea class="form-control" name="algorithm" rows="15"
-			id="edit-algorithm-textarea" <#if !hasWritePermission>data-readonly="true"</#if> width="100%">${(attributeMapping.algorithm!"")?html}</textarea>
-		<hr />
-		<button class="btn btn-primary" id="btn-test">Test</button>
+		<form method="POST" action="${context_url}/saveattributemapping">
+			<textarea class="form-control" name="algorithm" rows="15"
+				id="edit-algorithm-textarea" <#if !hasWritePermission>data-readonly="true"</#if> width="100%">${(attributeMapping.algorithm!"")?html}</textarea>
+			<hr />
+			<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
+			<input type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name?html}"/>
+			<input type="hidden" name="source" value="${entityMapping.name?html}"/>
+			<input type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name?html}"/>
+			<button class="btn btn-primary" id="btn-test">Test</button>
+			<#if hasWritePermission>
+				<button type="submit" class="btn btn-primary">Save</button> 
+				<button type="reset" class="btn btn-warning">Reset</button>
+		        <button type="button" class="btn btn-default" onclick="window.history.back()">Cancel</button>
+		    <#else>
+		    	<button type="button" class="btn btn-primary" onclick="window.history.back()">Back</button>
+	        </#if>
+		</form>
 	</div>
-	</form>
 </div>
 <div id="statistics-container" class="row">
 	<div class="col-md-12">

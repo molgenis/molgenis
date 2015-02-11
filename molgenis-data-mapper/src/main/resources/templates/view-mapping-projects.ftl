@@ -44,7 +44,7 @@
 		 						<#if user==project.owner.username || admin>
 			 						<form method="post" action="${context_url}/removeMappingProject" class="pull-left verify">
 										<input type="hidden" name="mappingProjectId" value="${project.identifier}"/>
-										<button type="submit" class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-minus"></span></button>
+										<button type="submit" class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-trash"></span></button>
 									</form>
 								</#if>
 		 					</td> 					
@@ -97,8 +97,6 @@
 		    					</#list>
 							</select>
 						</div>
-						
-						<input type="submit" class="submit" style="display:none;">
 					</form>
         		</div>
         		
