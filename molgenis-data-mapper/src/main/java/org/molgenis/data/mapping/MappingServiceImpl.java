@@ -81,7 +81,6 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	@Override
-	@RunAsSystem
 	public String applyMappings(MappingTarget mappingTarget, String newEntityName)
 	{
 		DefaultEntityMetaData targetMetaData = new DefaultEntityMetaData(newEntityName, mappingTarget.getTarget());
