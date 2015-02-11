@@ -15,11 +15,7 @@
 	    });
 		
 		$('#submit-new-mapping-project-btn').click(function() {
-			$('#create-new-mapping-project-form .submit').click();
-		});
-		
-		$('#submit-new-source-column-btn').click(function() {
-			$('#create-new-source-form .submit').click();
+			$('#create-new-mapping-project-form').submit();
 		});
 		
 		$('#create-new-mapping-project-form').validate();

@@ -66,7 +66,7 @@
 			<input type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name?html}"/>
 			<input type="hidden" name="source" value="${entityMapping.name?html}"/>
 			<input type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name?html}"/>
-			<button class="btn btn-primary" id="btn-test">Test</button>
+			<button type="button" class="btn btn-primary" id="btn-test">Test</button>
 			<#if hasWritePermission>
 				<button type="submit" class="btn btn-primary">Save</button> 
 				<button type="reset" class="btn btn-warning">Reset</button>
