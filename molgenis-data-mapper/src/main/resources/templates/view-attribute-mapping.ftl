@@ -2,7 +2,7 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=['mapping-service.css']>
-<#assign js=['mapping-service.js','d3.min.js','vega.min.js','jstat.min.js', 'biobankconnect-graph.js', 'jquery.scroll.table.body.js', 'bootbox.min.js']>
+<#assign js=['attribute-mapping.js', 'd3.min.js','vega.min.js','jstat.min.js', 'biobankconnect-graph.js', 'jquery.scroll.table.body.js', 'bootbox.min.js', 'jquery.ace.js']>
 
 <@header css js/>
 
@@ -30,14 +30,13 @@
 				<input type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name?html}"/>
 				<input type="hidden" name="source" value="${entityMapping.name?html}"/>
 				<input type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name?html}"/>
-				<textarea class="form-control" name="algorithm" id="edit-algorithm-textarea"></textarea>
-				<table id="attribute-mapping-table" class="table table-bordered">
+				<table id="attribute-mapping-table" class="table table-bordered scroll">
 					<thead>
 						<tr>
 							<th>Name</th>
 							<th>Description</th>
-							<th>Score</th>
-							<th>Select</th>
+							<th>Selected</th>
+							<#if hasWritePermission><th>Insert</th></#if>
 						</tr>
 					</thead>
 					<tbody>
@@ -49,12 +48,14 @@
 									${source.description?html}
 								</#if>
 								</td>
-								<td>0</td>
 								<td>
-									<input required type="radio" name="sourceAttribute" value="${source.name}"
-										<#if source.name == selected> checked="checked"</#if>
-										<#if !hasWritePermission> disabled="disabled"</#if> />
+									<input type="checkbox" name="${source.name}" disabled="disabled"/>
 								</td>
+								<#if hasWritePermission>
+									<td>
+										<button class="btn btn-default insert" data-attribute="${source.name}"><span class="glyphicon glyphicon-log-in"></span></button>
+									</td>
+								</#if>
 							</tr>
 						</#list>
 					</tbody>
@@ -66,17 +67,16 @@
 			    <#else>
 			    	<button type="button" class="btn btn-primary" onclick="window.history.back()">Back</button>
 		        </#if>
-			</form>
 		</div>
 	</div>
 	<div class="col-md-6">
 		<h5>Algorithm</h5>
-		<div id="edit-algorithm-editor" style="width: 100%; height:380px" class="uneditable-input">
-			
-		</div>
+		<textarea class="form-control" name="algorithm" rows="15"
+			id="edit-algorithm-textarea" <#if !hasWritePermission>data-readonly="true"</#if> width="100%">${(attributeMapping.algorithm!"")?html}</textarea>
 		<hr />
-		<button type="submit" class="btn btn-primary" id="btn-test">Test</button>
+		<button class="btn btn-primary" id="btn-test">Test</button>
 	</div>
+	</form>
 </div>
 <div id="statistics-container" class="row">
 	<div class="col-md-12">
@@ -104,64 +104,4 @@
 		</div>
 	</div>
 </div>
-
-<script>
-	var editor = ace.edit("edit-algorithm-editor");
-	var textarea = $("#edit-algorithm-textarea").hide();
-	$('#statistics-container').hide();
-	
-	var showStatistics = function(data){
-		if(data.results.length > 0) {
-			$('#stats-total').text(data.totalCount);
-			$('#stats-valid').text(data.results.length);
-			$('#stats-mean').text(jStat.mean(data.results));
-			$('#stats-median').text(jStat.median(data.results));
-			$('#stats-stdev').text(jStat.stdev(data.results));
-			
-			$('#statistics-container').show();
-			$('.distribution').bcgraph(data.results);
-		} else {
-			$('#statistics-container').hide();
-			molgenis.createAlert([{'message':'There are no values generated for this algorithm'}],'error');
-		}
-	};
-		
-	$('#attribute-mapping-table').scrollTableBody();
-	editor.setOptions({
-		enableBasicAutocompletion: true
-	});
-	editor.setTheme("ace/theme/eclipse");
-	editor.getSession().setMode("ace/mode/javascript");
-	<#if !hasWritePermission>editor.setReadOnly(true);</#if>
-	editor.getSession().on('change', function(){
-		textarea.val(editor.getSession().getValue());
-	});
-	editor.setValue("${(attributeMapping.algorithm!"")?html}");
-	
-	var updateEditor = function(){
-		editor.setValue("$('"+$(this).val()+"')");
-	}
-	
-	$('input[name="sourceAttribute"]').change(updateEditor);
-	$('#attribute-table-container form').on('reset', function() {
-		editor.setValue("${(attributeMapping.algorithm!"")?html}");
-	});
-	
-	$('#btn-test').click(function(){
-		$.ajax({
-			type : 'POST',
-			url : molgenis.getContextUrl() + '/mappingattribute/testscript',
-			async : false,
-			data : JSON.stringify({
-				targetEntityName : '${entityMapping.targetEntityMetaData.name?js_string}', 
-				sourceEntityName : '${entityMapping.name?js_string}', 
-				targetAttributeName : '${attributeMapping.targetAttributeMetaData.name?js_string}',
-				algorithm: editor.getValue()
-			}),
-			contentType : 'application/json',
-			success : showStatistics
-		});
-	});
-
-</script>
 <@footer/>

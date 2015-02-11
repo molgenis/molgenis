@@ -3,30 +3,30 @@
 	var restApi = new molgenis.RestClient();
 	
 	$(function() {
+		
+		$('form.verify').submit(function(e) {
+	        var currentForm = this;
+	        e.preventDefault();
+	        bootbox.confirm("Are you sure?", function(result) {
+	            if (result) {
+	                currentForm.submit();
+	            }
+	        });
+	    });
+		
 		$('#submit-new-mapping-project-btn').click(function() {
 			$('#create-new-mapping-project-form .submit').click();
 		});
 		
-		$('#target-entity-select').change(function() {
-			// TODO rerender page with different selectedTarget
-		});
-		
 		$('#submit-new-source-column-btn').click(function() {
 			$('#create-new-source-form .submit').click();
-			
-		});
-		
-		$('#create-integrated-entity-btn').click(function() {
-			$('#create-integrated-entity-form .submit').click();
 		});
 		
 		$('#create-new-mapping-project-form').validate();
-
-		// Change the selector if needed
-		var $table = $('table.scroll'),
-		    $bodyCells = $table.find('tbody tr:first').children(),
-		    colWidth;
-
+		
+		var $table = $('table.scroll');
+		var $bodyCells = $table.find('tbody tr:first').children();
+	    var colWidth;
 		// Adjust the width of thead cells when window resizes
 		$(window).resize(function() {
 		    // Get the tbody columns width array
@@ -39,18 +39,6 @@
 		        $(v).width(colWidth[i]);
 		    });    
 		}).resize(); // Trigger resize handler
-		
-		$('form.verify').on('submit',function(e) {
-			console.log('submit');
-	        var currentForm = this;
-	        e.preventDefault();
-	        bootbox.confirm("Are you sure?", function(result) {
-	            if (result) {
-	                currentForm.submit();
-	            }
-	        });
-	    });
-
 	});
 		
 }($, window.top.molgenis = window.top.molgenis || {}));

@@ -80,21 +80,17 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 			EntityMetaData targetEntityMetaData)
 	{
 		String identifier = attributeMappingEntity.getString(EntityMappingMetaData.IDENTIFIER);
-		String sourceAttributeName = attributeMappingEntity.getString(AttributeMappingMetaData.SOURCEATTRIBUTEMETADATA);
-		AttributeMetaData sourceAttributeMetaData = sourceEntityMetaData.getAttribute(sourceAttributeName);
 		String targetAtributeName = attributeMappingEntity.getString(AttributeMappingMetaData.TARGETATTRIBUTEMETADATA);
 		AttributeMetaData targetAttributeMetaData = targetEntityMetaData.getAttribute(targetAtributeName);
 		String algorithm = attributeMappingEntity.getString(AttributeMappingMetaData.ALGORITHM);
 
-		return new AttributeMapping(identifier, sourceAttributeMetaData, targetAttributeMetaData, algorithm);
+		return new AttributeMapping(identifier, targetAttributeMetaData, algorithm);
 	}
 
 	private Entity toAttributeMappingEntity(AttributeMapping attributeMapping)
 	{
 		Entity attributeMappingEntity = new MapEntity(META_DATA);
 		attributeMappingEntity.set(AttributeMappingMetaData.IDENTIFIER, attributeMapping.getIdentifier());
-		attributeMappingEntity.set(AttributeMappingMetaData.SOURCEATTRIBUTEMETADATA, attributeMapping
-				.getSourceAttributeMetaData() != null ? attributeMapping.getSourceAttributeMetaData().getName() : null);
 		attributeMappingEntity.set(AttributeMappingMetaData.TARGETATTRIBUTEMETADATA, attributeMapping
 				.getTargetAttributeMetaData() != null ? attributeMapping.getTargetAttributeMetaData().getName() : null);
 		attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHM, attributeMapping.getAlgorithm());
