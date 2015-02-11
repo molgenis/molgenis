@@ -66,6 +66,17 @@
 											<input type="hidden" name="source" value="${source.name}"/>
 											<input type="hidden" name="attribute" value="${attribute.name}"/>
 										</form>
+										<#if source.getAttributeMapping(attribute.name)??>
+											<form method="post" action="${context_url}/removeAttributeMapping" class="pull-right verify">
+												<button type="submit" class="btn btn-default btn-xs">
+													<span class="glyphicon glyphicon-remove"></span>
+												</button>
+												<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
+												<input type="hidden" name="target" value="${selectedTarget}"/>
+												<input type="hidden" name="source" value="${source.name}"/>
+												<input type="hidden" name="attribute" value="${attribute.name}"/>
+											</form>
+										</#if>
 									</div>
 									<div>
 										<#if source.getAttributeMapping(attribute.name)??>

@@ -128,6 +128,20 @@ public class MappingServiceController extends MolgenisPluginController
 		return "redirect:/menu/main/mappingservice/";
 	}
 
+	@RequestMapping(value = "/removeAttributeMapping", method = RequestMethod.POST)
+	public String removeAttributeMapping(@RequestParam(required = true) String mappingProjectId,
+			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
+			@RequestParam(required = true) String attribute)
+	{
+		MappingProject project = mappingService.getMappingProject(mappingProjectId);
+		if (hasWritePermission(project))
+		{
+			project.getMappingTarget(target).getMappingForSource(source).deleteAttributeMapping(attribute);
+			mappingService.updateMappingProject(project);
+		}
+		return "redirect:/menu/main/mappingservice/mappingproject/" + project.getIdentifier();
+	}
+
 	private boolean hasWritePermission(MappingProject project)
 	{
 		return hasWritePermission(project, true);
