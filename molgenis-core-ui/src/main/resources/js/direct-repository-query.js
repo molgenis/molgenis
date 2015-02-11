@@ -4,7 +4,7 @@
         $(function () {
             $(button).on('click', function () {
                 var queryValue = $(searchbox).val();
-                window.location = dataexplorer+"?" + $.param({dataset: dataset, searchTerm: queryValue});
+                window.location = dataexplorer+"?" + $.param({entity: dataset, searchTerm: queryValue});
             });
         });
     }
