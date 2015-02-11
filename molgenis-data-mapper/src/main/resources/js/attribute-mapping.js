@@ -148,6 +148,9 @@
 		});
 
 		$('form').on('reset', function() {
+			if(editor.getValue() === initialValue){
+				return false;
+			}
 			bootbox.confirm("Are you sure?", function(result) {
 	            if (result) {
 	                editor.setValue(initialValue, -1);
