@@ -14,6 +14,8 @@
 
 	var api = new molgenis.RestClient();
 	
+	var div = React.DOM.div, input = React.DOM.input, label = React.DOM.label, textarea = React.DOM.textarea, span = React.DOM.span;
+	
 	/**
 	 * Only render components if their state or props changed
 	 */
@@ -28,6 +30,13 @@
 	 */
 	var Select2Component = React.createClass({
 		mixins: [DeepPureRenderMixin],
+		displayName: 'Select2Component',
+		propTypes: {
+			options: React.PropTypes.object,
+			disabled: React.PropTypes.bool,
+			value: React.PropTypes.oneOfType([React.PropTypes.object, React.PropTypes.array]),
+			onChange: React.PropTypes.func
+		},
 		getInitialState: function() {
 			return {value: this.props.value};
 		},
@@ -63,7 +72,7 @@
 			if (this.isMounted()) {
 				this._updateSelect2();
 			}
-			return(<input type="hidden" ref="select2" />);
+			return input({type: 'hidden', ref: 'select2', onChange: function(){}}); // empty onChange callback to suppress React warning 
 		},
 		_handleChange: function(value) {console.log('_handleChange Select2Component', value);
 			this.setState({value: value});
@@ -82,6 +91,12 @@
 	 */
 	var JQRangeSliderComponent = React.createClass({
 		mixins: [DeepPureRenderMixin],
+		displayName: 'JQRangeSliderComponent',
+		propTypes: {
+			options: React.PropTypes.object,
+			disabled: React.PropTypes.array,
+			onChange: React.PropTypes.func
+		},
 		componentDidMount: function() {console.log('componentDidMount JQRangeSliderComponent');
 			var $container = $(this.refs.rangeslider.getDOMNode());
 			$container.editRangeSlider(this.props.options);
@@ -106,9 +121,7 @@
 				$container.editRangeSlider(this.props.disabled ? 'disable' : 'enable');
 				$container.editRangeSlider('values', this.props.value[0], this.props.value[1]);
 			}
-			return(
-				<div ref="rangeslider"></div>		
-			);
+			return div({ref: 'rangeslider'});
 		}
 	});
 	
@@ -117,6 +130,15 @@
 	 */
 	var DateTimePickerComponent = React.createClass({
 		mixins: [DeepPureRenderMixin],
+		displayName: 'DateTimePickerComponent',
+		propTypes: {
+			time: React.PropTypes.bool.isRequired,
+			placeholder: React.PropTypes.string,
+			required: React.PropTypes.bool,
+			disabled: React.PropTypes.bool,
+			value: React.PropTypes.string,
+			onChange: React.PropTypes.func
+		},
 		componentDidMount: function() {console.log('componentDidMount DateTimePickerComponent');
 			var props = this.props;
 
@@ -145,17 +167,16 @@
 			var required = this.props.required;
 			var disabled = this.props.disabled;
 
-			return(
-				<div className="input-group date group-append" ref="datepicker">
-					<input type="text" className="form-control" value={this.props.value}
-		    			placeholder={placeholder} required={required} disabled={disabled} />
-		    		<span className="input-group-addon">
-						<span className="glyphicon glyphicon-remove empty-date-input" ref="clearbtn"></span>
-					</span>
-					<span className="input-group-addon datepickerbutton">
-						<span className="glyphicon glyphicon-calendar"></span>
-					</span>
-				</div>
+			return (
+				div({className: 'input-group date group-append', ref: 'datepicker'},
+					input({type: 'text', className: 'form-control', value: this.props.value, placeholder: placeholder, required: required, disabled: disabled, onChange: this.props.onChange}),
+					span({className: 'input-group-addon'},
+						span({className: 'glyphicon glyphicon-remove empty-date-input', ref: 'clearbtn'})
+					),
+					span({className: 'input-group-addon datepickerbutton'},
+							span({className: 'glyphicon glyphicon-calendar'})
+					)
+				)
 			);
 		},
 	});
@@ -165,6 +186,14 @@
 	 */
 	var RangeSliderControl = React.createClass({
 		mixins: [DeepPureRenderMixin],
+		displayName: 'RangeSliderControl',
+		propTypes: {
+			range: React.PropTypes.shape({min: React.PropTypes.number.isRequired, max: React.PropTypes.number.isRequired}).isRequired,
+			value: React.PropTypes.arrayOf(React.PropTypes.number),
+			step: React.PropTypes.string,
+			disabled: React.PropTypes.bool,
+			onChange: React.PropTypes.func
+		},
 		render: function() {console.log('render RangeSliderControl', this.state, this.props);
 			var range = this.props.range;
 			var value = this.props.value;
@@ -177,10 +206,9 @@
 				defaultValues: {min: fromValue, max: toValue},
 				step: this.props.step,
 				type: 'number'
-			}
-			return(
-				<JQRangeSliderComponent options={options} disabled={this.props.disabled} value={[fromValue, toValue]} onChange={this._handleChange} />
-			);
+			};
+			
+			return React.createElement(JQRangeSliderComponent, {options: options, disabled: this.props.disabled, value: [fromValue, toValue], onChange: this._handleChange});
 		},
 		_handleChange: function(event) {console.log('_handleChange RangeSliderControl', event);
 			this.props.onValueChange({value: event.value});
@@ -192,6 +220,18 @@
 	 */
 	var InputControl = React.createClass({
 		mixins: [DeepPureRenderMixin],
+		displayName: 'InputControl',
+		propTypes: {
+			type: React.PropTypes.string.isRequired,
+			placeholder: React.PropTypes.string,
+			required: React.PropTypes.bool,
+			disabled: React.PropTypes.bool,
+			step: React.PropTypes.string,
+			min: React.PropTypes.string,
+			max: React.PropTypes.string,
+			maxLength: React.PropTypes.number,
+			onValueChange: React.PropTypes.func.isRequired
+		},
 		getInitialState: function() {
 			return {value: this.props.value};
 		},
@@ -207,28 +247,29 @@
 			};
 		},
 		render: function() {
-			var type = this.props.type;
-			var placeholder = this.props.placeholder;
-			var required = this.props.required;
-			var disabled = this.props.disabled;
-			var step = this.props.step;
-			var min = this.props.min;
-			var max = this.props.max;
-			var maxlength = this.props.maxlength;
-			
-			var value = this.state.value;
-		    return (
-	    		<input type={type} className="form-control"
-	    			placeholder={placeholder} required={required} disabled={disabled} step={step} min={min} max={max}
-	    			value={value} onChange={this._handleChange} />
-		    );
+			var props = this.props;
+			return input({
+				type: props.type,
+				className: 'form-control',
+				placeholder: props.placeholder,
+				required: props.required,
+				disabled: props.disabled,
+				step: props.step,
+				min: props.min,
+				max: props.max,
+				maxLength: props.maxLength,
+				value: this.state.value,
+				onChange: this._handleChange
+			});
 		},
 		_handleChange: function(event) {console.log('_handleChange InputControl', event);
 			var value = event.target.value;
 			if(this.props.type === 'number') {
 				if(value.length > 0 && value.charAt(value.length - 1) === '.') {
-					return;
+					// ignore number value changes that result in invalid number values
+					return function(){};
 				} else if(value !== '') {
+					// convert js string to js number
 					value = parseFloat(value);
 				}
 			}
@@ -237,24 +278,17 @@
 	});
 	
 	/**
-	 * Input control for BOOL type with checkbox or radio buttons
-	 */
-	var BoolControl = React.createClass({
-		mixins: [DeepPureRenderMixin],
-		render: function() {console.log('render BoolControl', this.state, this.props);
-			if(this.props.nillable || this.props.layout === 'radio') {
-				return <BoolRadioControl {...this.props} />
-			} else {
-				return <BoolCheckboxControl {...this.props} />
-			}
-		}
-	});
-	
-	/**
 	 * Input control for BOOL type with radio buttons for different states
 	 */
 	var BoolRadioControl = React.createClass({
 		mixins: [DeepPureRenderMixin],
+		displayName: 'BoolRadioControl',
+		propTypes: {
+			nillable: React.PropTypes.bool,
+			disabled: React.PropTypes.bool,
+			value: React.PropTypes.bool,
+			onValueChange: React.PropTypes.func
+		},
 		getInitialState: function() {
 			return {
 				value: this._valueToInputValue(this.props.value)
@@ -272,14 +306,14 @@
 			}
 
 			var self = this;
-			var inputs = $.map(states, function(state) {
+			var inputs = $.map(states, function(state, i) {
 				return (
-					<label className="radio-inline">
-						<input type="radio" name="bool-radio" checked={state.value === self.state.value} disabled={self.props.disabled} value={state.value} onChange={self._handleChange} /> {state.label}
-					</label>
+					label({className: 'radio-inline', key: 'r' + i},
+						input({type: 'radio', name: 'bool-radio', checked: state.value === self.state.value, disabled: self.props.disabled, value: state.value, onChange: self._handleChange}), state.label
+					)
 				);	
 			});
-			return (<div>{inputs}</div>);
+			return div({}, inputs);
 		},
 		_handleChange: function(event) {console.log('_handleChange BoolRadioControl', event);
 			var value = this._inputToValue(event.target.value);
@@ -306,14 +340,21 @@
 	 */
 	var BoolCheckboxControl = React.createClass({
 		mixins: [DeepPureRenderMixin],
+		displayName: 'BoolCheckboxControl',
+		propTypes: {
+			label: React.PropTypes.string,
+			disabled: React.PropTypes.bool,
+			value: React.PropTypes.bool,
+			onValueChange: React.PropTypes.func
+		},
 		render: function() {console.log('render BoolCheckboxControl', this.state, this.props);
-			var label = this.props.label || '\u00A0'; // workaround for https://github.com/facebook/react/issues/183
+			var lbl = this.props.label || '\u00A0'; // workaround for https://github.com/facebook/react/issues/183
 		    return (
-		    		<div className="checkbox">
-		    			<label>
-		    				<input type="checkbox" disabled={this.props.disabled} checked={this.props.value === true} onChange={this._handleChange} /> {label}   
-	    				</label>
-		    		</div>
+		    	div({className: 'checkbox'},
+					label({},
+						input({type: 'checkbox', disabled: this.props.disabled, checked: this.props.value === true, onChange: this._handleChange}), lbl
+					)
+		    	)
 		    );
 		},
 		_handleChange: function(event) {console.log('_handleChange BoolCheckboxControl', event);
@@ -326,10 +367,41 @@
 	});
 
 	/**
+	 * Input control for BOOL type with checkbox or radio buttons
+	 */
+	var BoolControl = React.createClass({
+		mixins: [DeepPureRenderMixin],
+		displayName: 'BoolControl',
+		propTypes: {
+			layout: React.PropTypes.string,
+			nillable: React.PropTypes.bool,
+			disabled: React.PropTypes.bool,
+			value: React.PropTypes.bool,
+			onValueChange: React.PropTypes.func
+		},
+		render: function() {console.log('render BoolControl', this.state, this.props);
+			if(this.props.nillable || this.props.layout === 'radio') {
+				return React.createElement(BoolRadioControl, {nillable: this.props.nillable, disabled: this.props.disabled, value: this.props.value, onValueChange: this.props.onValueChange}); // FIXME check if works
+			} else {
+				return React.createElement(BoolCheckboxControl, {nillable: this.props.nillable, disabled: this.props.disabled, value: this.props.value, onValueChange: this.props.onValueChange}); // FIXME check if works
+			}
+		}
+	});
+	
+	/**
 	 * Input control for DATE and DATE_TIME types
 	 */
 	var DateControl = React.createClass({
 		mixins: [DeepPureRenderMixin],
+		displayName: 'DateControl',
+		propTypes: {
+			time: React.PropTypes.bool,
+			placeholder: React.PropTypes.string,
+			required: React.PropTypes.bool,
+			disabled: React.PropTypes.bool,
+			value: React.PropTypes.string,
+			onValueChange: React.PropTypes.func
+		},
 		getInitialState: function() {
 			return {value: this.props.value};
 		},
@@ -339,7 +411,7 @@
 			});
 		},
 		render: function() {console.log('render DateControl', this.state, this.props);
-			return <DateTimePickerComponent {...this.props} value={this.state.value} onChange={this._handleChange} />
+			return React.createElement(DateTimePickerComponent, {time: this.props.time, placeholder: this.props.placeholder, required: this.props.required, disabled: this.props.disabled, value: this.state.value, onChange: this._handleChange});
 		},
 		_handleChange: function(value) {console.log('_handleChange DateControl', value);
 			this.setState(value);
@@ -349,6 +421,16 @@
 
 	var EnumControl = React.createClass({
 		mixins: [DeepPureRenderMixin],
+		displayName: 'EnumControl',
+		propTypes: {
+			options: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
+			disabled: React.PropTypes.bool,
+			multiple: React.PropTypes.bool,
+			placeholder: React.PropTypes.string,
+			required: React.PropTypes.bool,
+			value: React.PropTypes.arrayOf(React.PropTypes.string),
+			onValueChange: React.PropTypes.func
+		},
 		render: function() {console.log('render EnumControl', this.state, this.props);
 			var data = this.props.options.map(function(option) {
 				return {id: option, text: option};
@@ -375,22 +457,30 @@
 						return {id: option, text: option};
 					});
 				} else {
-					value = {id: this.props.value, text: this.props.value}
+					value = {id: this.props.value, text: this.props.value};
 				}
+			} else {
+				value = undefined;
 			}
 
-			return (
-				<Select2Component options={options} disabled={this.props.disabled} value={value} onChange={this._handleChange} />
-			);
+			return React.createElement(Select2Component, {options: options, disabled: this.props.disabled, value: value, onChange: this._handleChange});
 		},
 		_handleChange: function(value) {console.log('_handleChange EnumControl', value);
-			var value = value !== '' ? value : null;
-			this.props.onValueChange({value: value});
+			var val = value !== '' ? value : null;
+			this.props.onValueChange({value: val});
 		}
 	});
 	
 	var CategoricalControl = React.createClass({
 		mixins: [DeepPureRenderMixin],
+		displayName: 'CategoricalControl',
+		propTypes: {
+			multiple: React.PropTypes.bool,
+			nillable: React.PropTypes.bool,
+			placeholder: React.PropTypes.string,
+			value: React.PropTypes.oneOfType([React.PropTypes.object, React.PropTypes.array]),
+			onValueChange: React.PropTypes.func
+		},
 		getInitialState: function() {
 			// initialize with entity meta if exists
 			var entity = this.props.entity;
@@ -413,7 +503,7 @@
 		render: function() {console.log('render CategoricalControl', this.state, this.props);
 			if(this.state.entity === null) {
 				// entity meta data not fetched yet
-				return (<div></div>);
+				return div({});
 			}
 			
 			var props = this.props;
@@ -451,29 +541,36 @@
 			    formatResult: format,
 			    formatSelection: format
 			};
-			return (
-				<Select2Component options={options} disabled={this.props.disabled} value={this.props.value} onChange={this._handleChange} />
-			);
+			return React.createElement(Select2Component, {options: options, disabled: this.props.disabled, value: this.props.value, onChange: this._handleChange});
 		},
 		_handleChange: function(value) {console.log('_handleChange CategoricalControl', value);
-			var value = this.props.multiple && value.length === 0 ? undefined : value;
-			this.props.onValueChange({value: value});
+			var val = this.props.multiple && value.length === 0 ? undefined : value;
+			this.props.onValueChange({value: val});
 		}
 	});
 	
 	var TextControl = React.createClass({
 		mixins: [DeepPureRenderMixin],
+		displayName: 'TextControl',
+		propTypes: {
+			placeholder: React.PropTypes.string,
+			required: React.PropTypes.bool,
+			disabled: React.PropTypes.bool,
+			value: React.PropTypes.string,
+			onValueChange: React.PropTypes.func
+		},
 		render: function() {console.log('render TextControl', this.state, this.props);
-			return (<textarea className="form-control" placeholder={this.props.placeholder} required={this.props.required} disabled={this.props.disabled} onChange={this._handleChange}>{this.props.value}</textarea>);
+			return textarea({className: 'form-control', placeholder: this.props.placeholder, required: this.props.required, disabled: this.props.disabled, value: this.props.value, onChange: this._handleChange});
 		},
 		_handleChange: function(value) {console.log('_handleChange TextControl', value);
-			var value = value !== '' ? value : null;
-			this.props.onValueChange({value: value});
+			var val = value !== '' ? value : null;
+			this.props.onValueChange({value: val});
 		}
 	});
 		
 	var AttributeControl = React.createClass({
 		mixins: [DeepPureRenderMixin],
+		displayName: 'AttributeControl',
 		render: function() {console.log('render AttributeControl', this.state, this.props);
 			var props = this.props;
 			var attr = props.attr;
@@ -481,7 +578,7 @@
 			switch(attr.fieldType) {
 				case 'BOOL':
 					var layout = props.layout || 'checkbox';
-					return <BoolControl label={props.label} nillable={attr.nillable} disabled={props.disabled} layout={layout} value={props.value} onValueChange={this._handleValueChange} />
+					return React.createElement(BoolControl, {label: props.label, nillable: attr.nillable, disabled: props.disabled, layout: layout, value: props.value, onValueChange: this._handleValueChange});
 				case 'CATEGORICAL':
 					var placeholder = props.placeholder || 'Select a Category';
 					var multiple = props.multiple || false;
@@ -500,7 +597,7 @@
 				case 'ENUM':
 					var placeholder = props.placeholder || 'Select an Option';
 					var multiple = props.multiple || false;
-					return <EnumControl multiple={multiple} placeholder={placeholder} required={props.required} disabled={props.disabled} options={attr.enumOptions} value={props.value} onValueChange={this._handleValueChange} />
+					return React.createElement(EnumControl, {multiple: multiple, placeholder: placeholder, required: props.required, disabled: props.disabled, options: attr.enumOptions, value: props.value, onValueChange: this._handleValueChange});
 				case 'HTML':
 					return this._createTextControl();
 				case 'HYPERLINK':
@@ -539,20 +636,20 @@
 			var min = this.props.range ? this.props.range.min : undefined;
 			var max = this.props.range ? this.props.range.max : undefined;
 			var placeholder = this.props.placeholder || 'Number';
-			return <InputControl type="number" placeholder={placeholder} required={this.props.required} disabled={this.props.disabled} step={step} min={min} max={max} value={this.props.value} onValueChange={this._handleValueChange} />
+			return React.createElement(InputControl, {type: 'number', placeholder: placeholder, required: this.props.required, disabled: this.props.disabled, step: step, min: min, max: max, value: this.props.value, onValueChange: this._handleValueChange});
 		},
 		_createStringControl: function(type, placeholder) {
-			return <InputControl type={type} placeholder={placeholder} required={this.props.required} disabled={this.props.disabled} maxlength="255" value={this.props.value} onValueChange={this._handleValueChange} />
+			return React.createElement(InputControl, {type: type, placeholder: placeholder, required: this.props.required, disabled: this.props.disabled, maxlength: '255', value: this.props.value, onValueChange: this._handleValueChange});
 		},
 		_createDateControl: function(time, placeholder) {
-			return <DateControl placeholder={placeholder} required={this.props.required} disabled={this.props.disabled} time={time} value={this.props.value} onValueChange={this._handleValueChange} />
+			return React.createElement(DateControl, {placeholder: placeholder, required: this.props.required, disabled: this.props.disabled, time: time, value: this.props.value, onValueChange: this._handleValueChange});
 		},
 		_createTextControl: function() {
-			return <TextControl placeholder={this.props.placeholder} required={this.props.required} disabled={this.props.disabled} value={this.props.value} onValueChange={this._handleValueChange} />
+			return React.createElement(TextControl, {placeholder: this.props.placeholder, required: this.props.required, disabled: this.props.disabled, value: this.props.value, onValueChange: this._handleValueChange});
 		},
 		_createEntityControl: function(multiple, placeholder) {
 			var props = this.props;
-			return <CategoricalControl placeholder={placeholder} nillable={props.attr.nillable} multiple={multiple} disabled={this.props.disabled} entity={props.attr.refEntity} value={props.value} onValueChange={this._handleValueChange} />
+			return React.createElement(CategoricalControl, {placeholder: placeholder, nillable: props.attr.nillable, multiple: multiple, disabled: this.props.disabled, entity: props.attr.refEntity, value: props.value, onValueChange: this._handleValueChange});
 		}
 	});
 	
@@ -562,5 +659,5 @@
 			RangeSliderControl: RangeSliderControl,
 			CategoricalControl: CategoricalControl,
 			EnumControl: EnumControl
-	}
+	};
 }($, window.top.molgenis = window.top.molgenis || {}));
