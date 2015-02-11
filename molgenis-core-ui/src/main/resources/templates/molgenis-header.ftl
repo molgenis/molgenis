@@ -13,7 +13,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<link rel="icon" href="<@resource_href "/img/molgenis.ico"/>" type="image/x-icon">
 		<link rel="stylesheet" href="<@resource_href "/css/bootstrap.min.css"/>" type="text/css">
-		<link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
+        <link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
     <#if app_top_logo?has_content>
         <link rel="stylesheet" href="<@resource_href "/css/molgenis-top-logo.css"/>" type="text/css">
     </#if>
@@ -31,6 +31,12 @@
 		<script src="<@resource_href "/js/jquery.validate.min.js"/>"></script>
 		<script src="<@resource_href "/js/handlebars.min.js"/>"></script>
 		<script src="<@resource_href "/js/molgenis.js"/>"></script>
+    <!--[if IE 9]>
+        <#-- used to disable the genomebrowser in IE9 -->
+        <script>top.molgenis.ie9 = true;</script>
+        <#-- required by dalliance-compiled.js to load the genomebrowsers in IE9 -->        
+        <script src="<@resource_href "/js/typedarray.min.js"/>"></script>
+    <![endif]-->		
 	<#if context_url??>
 		<script>top.molgenis.setContextUrl('${context_url?js_string}');</script>
 	</#if>
@@ -138,7 +144,7 @@
 									</li>
 								<#else>
 									<li>
-										<a href="/menu/${menu.id?html}/${item.url?html}">${item.name?html}</a>
+										<a href="/menu/${menu.id?url('UTF-8')}/${item.url?url('UTF-8')}">${item.name?html}</a>
 									</li>
 								</#if>
 							</#if>
@@ -181,7 +187,7 @@
 	<#list sub_menu.items as sub_item>
 		<#if sub_item.type != "MENU">
 			<li>
-				<a <#if this_menu_counter gt 1>style="margin-left: ${this_menu_counter * 12}px;"</#if> href="/menu/${sub_menu.id?html}/${sub_item.url?html}">${sub_item.name?html}</a>
+				<a <#if this_menu_counter gt 1>style="margin-left: ${this_menu_counter * 12}px;"</#if> href="/menu/${sub_menu.id?url('UTF-8')}/${sub_item.url?url('UTF-8')}">${sub_item.name?html}</a>
 			</li>
 		<#elseif sub_item.type == "MENU">
 			<li class="dropdown-header disabled sub-menu-${this_menu_counter}" role="presentation">

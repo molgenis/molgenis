@@ -37,7 +37,7 @@
 }
 
 body:not(.modal-open) #feature-selection .molgenis-tree {
-	height: 400px;
+	height: 367px;
 	overflow: auto;
 	margin-bottom: 10px;
 }
@@ -216,4 +216,12 @@ ul.fancytree-container {
 
 #chartCreationButtons {
 	padding-top: 10px;
+}
+
+.molgenis-table {
+	margin-bottom: 0px;
+}
+
+.molgenis-table-pager .pagination {
+	margin: 0px;
 }

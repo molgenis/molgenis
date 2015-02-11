@@ -9,7 +9,7 @@
     </parent>
     <groupId>org.molgenis</groupId>
     <artifactId>molgenis</artifactId>
-    <version>1.4.0-SNAPSHOT</version>
+    <version>1.5.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <!-- More Project Information -->
@@ -135,6 +135,15 @@
                     <artifactId>maven-resources-plugin</artifactId>
                     <version>2.6</version>
                 </plugin>
+                <!-- specify java 8 compatible plugin version -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>2.10.1</version>
+                    <configuration>
+                        <additionalparam>-Xdoclint:none</additionalparam>
+                    </configuration>
+                </plugin>
                 <!-- specify plugin version -->
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
@@ -217,18 +226,6 @@
                             </configuration>
                         </execution>
                         <execution>
-                            <id>reserve-network-port-jetty</id>
-                            <goals>
-                                <goal>reserve-network-port</goal>
-                            </goals>
-                            <phase>process-resources</phase>
-                            <configuration>
-                                <portNames>
-                                    <portName>jetty.stop.http.port</portName>
-                                </portNames>
-                            </configuration>
-                        </execution>
-                        <execution>
                             <id>execution-molgenis-generator</id>
                             <phase>generate-sources</phase>
                             <goals>
@@ -286,19 +283,29 @@
                 </plugin>
                 <!-- servlet container -->
                 <plugin>
-                    <groupId>org.mortbay.jetty</groupId>
-                    <artifactId>jetty-maven-plugin</artifactId>
-                    <version>8.1.12.v20130726</version>
+                    <groupId>org.eclipse.jetty</groupId>
+					<artifactId>jetty-maven-plugin</artifactId>
+					<version>9.2.6.v20141205</version>
                     <configuration>
-                        <stopPort>${jetty.stop.http.port}</stopPort>
+                        <stopPort>8079</stopPort>
                         <stopKey>jetty-stop</stopKey>
                         <reload>manual</reload>
+                        <systemProperties>
+							<systemProperty>
+								<name>molgenis.home</name>
+								<value>${user.home}${file.separator}.molgenis${file.separator}omx</value>
+							</systemProperty>
+							<systemProperty>
+								<name>log4j.configuration</name>
+								<value>log4j-molgenis.properties</value>
+							</systemProperty>
+						</systemProperties>
                         <webAppConfig>
                             <contextPath>/</contextPath>
-							<baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
-								<resourcesAsCSV>${basedir}/src/main/resources</resourcesAsCSV>
-							</baseResource>
-                            <webInfIncludeJarPattern>.*/molgenis-[^/]*\.jar$|.*spring-[^/]*\.jar$
+                            <baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
+      							<resourcesAsCSV>${basedir}/src/main/resources</resourcesAsCSV>
+    						</baseResource>
+							<webInfIncludeJarPattern>.*/molgenis-[^/]*\.jar$|.*spring-[^/]*\.jar$
                             </webInfIncludeJarPattern>
                         </webAppConfig>
                     </configuration>
@@ -465,6 +472,7 @@
                                 </jsSourceIncludes>
                                 <jsSourceExcludes>
                                     <jsSourceExclude>**/*.min.js</jsSourceExclude>
+                                    <jsSourceExclude>**/src-min-noconflict/**</jsSourceExclude>
                                     <jsSourceExclude>**/ace-min/**</jsSourceExclude>
                                 </jsSourceExcludes>
                                 <skipMerge>true</skipMerge>
@@ -618,7 +626,6 @@
         <module>molgenis-core</module>
         <module>molgenis-core-ui</module>
         <module>molgenis-ontology-core</module>
-        <module>molgenis-ontology</module>
         <module>molgenis-das</module>
         <module>molgenis-dataexplorer</module>
         <module>molgenis-app</module>
@@ -645,7 +652,6 @@
         <module>molgenis-model-registry</module>
         <module>molgenis-disease-matcher</module>
         <module>molgenis-data-examples</module>
-        <module>molgenis-mutationdb</module>
         <module>molgenis-scripts</module>
         <module>molgenis-data-import</module>
         <module>molgenis-catalogue</module>

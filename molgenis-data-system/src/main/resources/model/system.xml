@@ -15,11 +15,5 @@
 			<field name="Value" type="script" nillable="false" />
 			<unique fields="Name" />
 		</entity>
-		<entity name="Location" xref_label = "Position">
-			<field name="id" type="autoid" hidden="true"
-				description="automatically generated internal id, only for internal use." />
-			<field name="Chromosome" type="string" description="Chromosome name" nillable="false" />
-			<field name="Position" type="long" description="Position" nillable="false" />
-		</entity>
 	</module>
 </molgenis>
