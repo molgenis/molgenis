@@ -147,9 +147,13 @@
 			return false;
 		});
 
-		$('#attribute-table-container form').on('reset', function() {
-			editor.setValue(initialValue, -1);
-			updateCheckboxes(initialValue);
+		$('form').on('reset', function() {
+			bootbox.confirm("Are you sure?", function(result) {
+	            if (result) {
+	                editor.setValue(initialValue, -1);
+	                updateCheckboxes(initialValue);
+	            }
+	        });
 			return false;
 		});
 
