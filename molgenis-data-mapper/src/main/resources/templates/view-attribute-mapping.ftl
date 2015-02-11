@@ -33,8 +33,7 @@
 				<table id="attribute-mapping-table" class="table table-bordered scroll">
 					<thead>
 						<tr>
-							<th>Name</th>
-							<th>Description</th>
+							<th>Attribute</th>
 							<th>Selected</th>
 							<#if hasWritePermission><th>Insert</th></#if>
 						</tr>
@@ -42,11 +41,11 @@
 					<tbody>
 						<#list entityMapping.sourceEntityMetaData.attributes as source>
 							<tr>
-								<td>${source.label?html}</td>
 								<td>
-								<#if source.description??>
-									${source.description?html}
-								</#if>
+									<b>${source.label?html}</b> (${source.dataType})
+									<#if source.nillable> <span class="label label-warning">nillable</span></#if>
+									<#if source.unique> <span class="label label-default">unique</span></#if>
+									<#if source.description??><br />${source.description?html}</#if>
 								</td>
 								<td>
 									<input type="checkbox" name="${source.name}" disabled="disabled"/>
@@ -90,17 +89,22 @@
   						<#case "long">
   						<#case "decimal">
   						<#case "int">
-						<tr><th>Mean</th><td id="stats-mean"></td></tr>
-						<tr><th>Median</th><td id="stats-median"></td></tr>
-						<tr><th>Standard deviation</th><td id="stats-stdev"></td></tr>
+							<tr><th>Mean</th><td id="stats-mean"></td></tr>
+							<tr><th>Median</th><td id="stats-median"></td></tr>
+							<tr><th>Standard deviation</th><td id="stats-stdev"></td></tr>
 					</#switch>
 				</table>
 			</div>
-			<div class="col-md-6">
-				<center><legend>Distribution plot</legend></center>
-				<div class="distribution">
-				</div>
-			</div>
+			<#switch attributeMapping.targetAttributeMetaData.dataType>
+				<#case "long">
+				<#case "decimal">
+				<#case "int">
+					<div class="col-md-6">
+						<center><legend>Distribution plot</legend></center>
+						<div class="distribution">
+						</div>
+					</div>
+			</#switch>
 		</div>
 	</div>
 </div>

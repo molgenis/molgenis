@@ -49,7 +49,7 @@
 					<#if !attribute.isIdAtrribute()>
 						<tr>
 							<td>
-								<b>${attribute.name?html}</b> (${attribute.dataType})
+								<b>${attribute.label?html}</b> (${attribute.dataType})
 								<#if !attribute.nillable> <span class="label label-default">required</span></#if>
 								<#if attribute.unique> <span class="label label-default">unique</span></#if>
 								<#if attribute.description??><br />${attribute.description?html}</#if>
