@@ -11,7 +11,7 @@
 
 <div class="row">
 	<div class="col-md-12">
-		<a href="${context_url}" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-chevron-left"></span>    Back to mapping project overview</a>	
+		<a href="${context_url}" class="btn btn-default"><span class="glyphicon glyphicon-chevron-left"></span> Back to mapping project overview</a>	
 	</div>
 </div>
 
@@ -33,12 +33,14 @@
 					<#list mappingProject.getMappingTarget(selectedTarget).entityMappings as source>
 						<th>Source: ${source.name?html}
 							<#if hasWritePermission>
-								<form method="post" action="${context_url}/removeEntityMapping" class="verify">
-									<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
-									<input type="hidden" name="target" value="${selectedTarget}"/>
-									<input type="hidden" name="source" value="${source.name}"/>
-									<button type="submit" class="btn btn-danger btn-xs pull-right"><span class="glyphicon glyphicon-minus"></span></button>
-								</form>
+								<div class="pull-right">
+									<form method="post" action="${context_url}/removeEntityMapping" class="verify">
+										<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
+										<input type="hidden" name="target" value="${selectedTarget}"/>
+										<input type="hidden" name="source" value="${source.name}"/>
+										<button type="submit" class="btn btn-danger btn-xs pull-right"><span class="glyphicon glyphicon-trash"></span></button>
+									</form>
+								</div>
 							</#if>	
 						</th>
 					</#list>
@@ -58,7 +60,7 @@
 								<td>
 									<div class="pull-right">
 										<form method="get" action="${context_url}/attributeMapping" class="pull-right">
-											<button type="submit" class="btn btn-primary btn-xs">
+											<button type="submit" class="btn btn-default btn-xs">
 												<span class="glyphicon glyphicon-pencil"></span>
 											</button>
 											<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
@@ -97,7 +99,7 @@
 	</div>
 	<#if entityMetaDatas?has_content && hasWritePermission>
 		<div class="col-md-2">
-			<a id="add-new-attr-mapping-btn" href="#" class="btn btn-success btn-xs" data-toggle="modal" data-target="#create-new-source-column-modal"><span class="glyphicon glyphicon-plus"></span>Add source</a>
+			<a id="add-new-attr-mapping-btn" href="#" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#create-new-source-column-modal"><span class="glyphicon glyphicon-plus"></span>Add source</a>
 		</div>
 	</#if>
 </div>
@@ -105,7 +107,8 @@
 <#if mappingProject.getMappingTarget(selectedTarget).entityMappings?has_content>
 	<div class="row">
 		<div class="col-md-12">
-			<a id="add-new-attr-mapping-btn" href="#" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#create-integrated-entity-modal">Create integrated dataset</a>
+			<a id="add-new-attr-mapping-btn" href="#" class="btn btn-success" 
+				data-toggle="modal" data-target="#create-integrated-entity-modal"><span class="glyphicon glyphicon-play"></span> Create integrated dataset</a>
 		</div>
 	</div>
 </#if>
@@ -130,9 +133,7 @@
 					</div>
 					<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}">
 					<input type="hidden" name="target" value="${selectedTarget}">
-					<input type="submit" class="submit" style="display:none;">
 				</form>
-        	
     		</div>
     		
         	<div class="modal-footer">
@@ -159,8 +160,6 @@
         		
         			<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}">
         			<input type="hidden" name="target" value="${selectedTarget}">
-        			
-        			<input type="submit" class="submit" style="display:none;">
 				</form>
     		</div>
         	<div class="modal-footer">
