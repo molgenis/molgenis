@@ -47,7 +47,7 @@
 								</td>
 								<#if hasWritePermission>
 									<td>
-										<button class="btn btn-default insert" data-attribute="${source.name}"><span class="glyphicon glyphicon-log-in"></span></button>
+										<button type="button" class="btn btn-default insert" data-attribute="${source.name}"><span class="glyphicon glyphicon-log-in"></span></button>
 									</td>
 								</#if>
 							</tr>

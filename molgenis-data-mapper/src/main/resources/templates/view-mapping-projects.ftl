@@ -18,7 +18,7 @@
 				<button type="button" id="submit-new-source-column-btn" class="btn btn-primary" data-toggle="modal" data-target="#create-new-mapping-project-modal"><span class="glyphicon glyphicon-plus"></span>&nbsp;Add Mapping Project</button>
 			</div>
 		</#if>	
-		<hr></hr>
+		<hr/>
 	</div>
 </div>
 <div class="row">
@@ -63,6 +63,7 @@
 	 			</tbody>
 			</table>
 		</#if>
+	</div>
 </div>
 
 <@footer/>
