@@ -1,5 +1,6 @@
 package org.molgenis.data.mapping;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.molgenis.auth.MolgenisUser;
@@ -17,10 +18,12 @@ import org.molgenis.data.meta.PackageImpl;
 import org.molgenis.data.repository.MappingProjectRepository;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.security.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.IdGenerator;
 
 public class MappingServiceImpl implements MappingService
@@ -41,6 +44,9 @@ public class MappingServiceImpl implements MappingService
 
 	@Autowired
 	private MappingProjectRepository mappingProjectRepository;
+
+	@Autowired
+	private PermissionSystemService permissionSystemService;
 
 	@Override
 	@RunAsSystem
@@ -88,6 +94,8 @@ public class MappingServiceImpl implements MappingService
 		targetMetaData.setLabel(newEntityName);
 		targetMetaData.addAttribute("source");
 		CrudRepository targetRepo = manageableCrudRepositoryCollection.add(targetMetaData);
+		permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
+				Collections.singletonList(targetRepo.getName()));
 		try
 		{
 			applyMappingsToRepositories(mappingTarget, targetRepo);

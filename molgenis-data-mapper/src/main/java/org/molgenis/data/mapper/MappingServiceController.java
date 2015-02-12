@@ -3,7 +3,6 @@ package org.molgenis.data.mapper;
 import static org.molgenis.data.mapper.MappingServiceController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -23,14 +22,12 @@ import org.molgenis.data.mapping.model.MappingProject;
 import org.molgenis.data.mapping.model.MappingTarget;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -69,9 +66,6 @@ public class MappingServiceController extends MolgenisPluginController
 
 	@Autowired
 	private DataService dataService;
-
-	@Autowired
-	private PermissionSystemService permissionSystemService;
 
 	public MappingServiceController()
 	{
@@ -288,8 +282,6 @@ public class MappingServiceController extends MolgenisPluginController
 		{
 			MappingTarget mappingTarget = mappingService.getMappingProject(mappingProjectId).getMappingTarget(target);
 			String name = mappingService.applyMappings(mappingTarget, newEntityName);
-			permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
-					Collections.singletonList(name));
 			return "redirect:/menu/main/dataexplorer?entity=" + name;
 		}
 		catch (RuntimeException ex)
