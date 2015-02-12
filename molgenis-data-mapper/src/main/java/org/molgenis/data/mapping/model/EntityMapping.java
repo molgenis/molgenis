@@ -158,4 +158,9 @@ public class EntityMapping
 				+ ", targetEntityMetaData=" + targetEntityMetaData + ", attributeMappings=" + attributeMappings + "]";
 	}
 
+	public void deleteAttributeMapping(String attribute)
+	{
+		attributeMappings.remove(attribute);
+	}
+
 }

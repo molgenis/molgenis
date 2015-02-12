@@ -2,71 +2,67 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=['mapping-service.css']>
-<#assign js=['mapping-service.js', 'bootbox.min.js']>
+<#assign js=['mapping-projects.js', 'bootbox.min.js', 'jquery.scroll.table.body.js']>
 
 <@header css js/>
 <@createNewMappingProjectModal />
 
 <!--Table containing mapping projects-->
 <div class="row">
-	<div class="col-md-12">
-		<div class="col-md-6">
-			<h1>Mapping projects overview</h1>
-			<p>Create and view mapping projects</p>
-			
-			<#if entityMetaDatas?has_content>
-				<div class="btn-group" role="group">
-					<button type="button" id="submit-new-source-column-btn" class="btn btn-primary" data-toggle="modal" data-target="#create-new-mapping-project-modal"><span class="glyphicon glyphicon-plus"></span>&nbsp;Add Mapping Project</button>
-				</div>
-			</#if>	
-			<hr></hr>
-		</div>
+	<div class="col-md-6">
+		<h1>Mapping projects overview</h1>
+		<p>Create and view mapping projects</p>
+		
+		<#if entityMetaDatas?has_content>
+			<div class="btn-group" role="group">
+				<button type="button" id="submit-new-source-column-btn" class="btn btn-primary" data-toggle="modal" data-target="#create-new-mapping-project-modal"><span class="glyphicon glyphicon-plus"></span>&nbsp;Add Mapping Project</button>
+			</div>
+		</#if>	
+		<hr/>
 	</div>
 </div>
 <div class="row">
-	<div class="col-md-12">
-		<div class="col-md-6">
-			<#if mappingProjects?has_content>
-				<table class="table table-bordered">
-		 			<thead>
-		 				<tr>
-		 					<th></th>
-		 					<th>Mapping name</th>
-		 					<th>Owner</th>
-		 					<th>Target entities</th>
-		 					<th>Mapped sources</th>
-		 				</tr>
-		 			</thead>
-		 			<tbody>
-		 				<#list mappingProjects as project>
-		 				<tr>	
-		 					<td>
-		 						<#if user==project.owner.username || admin>
-			 						<form method="post" action="${context_url}/removeMappingProject" class="pull-left verify">
-										<input type="hidden" name="mappingProjectId" value="${project.identifier}"/>
-										<button type="submit" class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-minus"></span></button>
-									</form>
-								</#if>
-		 					</td> 					
-		 					<td>
-		 						<a href="${context_url}/mappingproject/${project.identifier}">${project.name?html}</a></td>
-		 					<td>${project.owner.username?html}</td>
-		 					<td>
-		 					<#list project.mappingTargets as target>
-		 						${target.name?html}<#if target_has_next>, </#if>
-	 						</#list>
-	 						</td>
-		 					<td>
-		 					<#list project.mappingTargets[0].entityMappings as mapping>
-		 						${mapping.name}<#if mapping_has_next>, </#if> 
-	 						</#list>
-		 					</td>	
-		 				</tr>
-		 				</#list>
-		 			</tbody>
-				</table>
-			</#if>
-		</div>
+	<div class="col-md-6">
+		<#if mappingProjects?has_content>
+			<table class="table table-bordered">
+	 			<thead>
+	 				<tr>
+	 					<th></th>
+	 					<th>Mapping name</th>
+	 					<th>Owner</th>
+	 					<th>Target entities</th>
+	 					<th>Mapped sources</th>
+	 				</tr>
+	 			</thead>
+	 			<tbody>
+	 				<#list mappingProjects as project>
+	 				<tr>	
+	 					<td>
+	 						<#if user==project.owner.username || admin>
+		 						<form method="post" action="${context_url}/removeMappingProject" class="pull-left verify">
+									<input type="hidden" name="mappingProjectId" value="${project.identifier}"/>
+									<button type="submit" class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-trash"></span></button>
+								</form>
+							</#if>
+	 					</td> 					
+	 					<td>
+	 						<a href="${context_url}/mappingproject/${project.identifier}">${project.name?html}</a></td>
+	 					<td>${project.owner.username?html}</td>
+	 					<td>
+	 					<#list project.mappingTargets as target>
+	 						${target.name?html}<#if target_has_next>, </#if>
+ 						</#list>
+ 						</td>
+	 					<td>
+	 					<#list project.mappingTargets[0].entityMappings as mapping>
+	 						${mapping.name}<#if mapping_has_next>, </#if> 
+ 						</#list>
+	 					</td>	
+	 				</tr>
+	 				</#list>
+	 			</tbody>
+			</table>
+		</#if>
 	</div>
 </div>
 
@@ -97,8 +93,6 @@
 		    					</#list>
 							</select>
 						</div>
-						
-						<input type="submit" class="submit" style="display:none;">
 					</form>
         		</div>
         		

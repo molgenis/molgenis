@@ -28,7 +28,7 @@
         
         var headerTable = $('<table style="table-layout:fixed;width:auto;margin-bottom:0;" class="jqstb-header-table ' + existingClasses + '"><thead><tr><td></td></tr></thead></table>'),
             footerTable = $('<table style="table-layout:fixed;width:auto;margin-bottom:' + existingMarginBottom + ';" class="jqstb-footer-table ' + existingClasses + '"><tfoot><tr><td></td></tr></tfoot></table>'),
-            scrollDiv = '<div class="jqstb-scroll" style="height:' + tableHeight + 'px;overflow-y:scroll"></div>';
+            scrollDiv = '<div class="jqstb-scroll" style="max-height:' + tableHeight + 'px;overflow-y:scroll"></div>';
         
         // Insert the table that will hold the fixed header and footer, and insert the div that will get scrolled
         table.before(headerTable).before(scrollDiv).after(footerTable);

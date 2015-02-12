@@ -128,6 +128,20 @@ public class MappingServiceController extends MolgenisPluginController
 		return "redirect:/menu/main/mappingservice/";
 	}
 
+	@RequestMapping(value = "/removeAttributeMapping", method = RequestMethod.POST)
+	public String removeAttributeMapping(@RequestParam(required = true) String mappingProjectId,
+			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
+			@RequestParam(required = true) String attribute)
+	{
+		MappingProject project = mappingService.getMappingProject(mappingProjectId);
+		if (hasWritePermission(project))
+		{
+			project.getMappingTarget(target).getMappingForSource(source).deleteAttributeMapping(attribute);
+			mappingService.updateMappingProject(project);
+		}
+		return "redirect:/menu/main/mappingservice/mappingproject/" + project.getIdentifier();
+	}
+
 	private boolean hasWritePermission(MappingProject project)
 	{
 		return hasWritePermission(project, true);
@@ -169,6 +183,17 @@ public class MappingServiceController extends MolgenisPluginController
 		return "redirect:/menu/main/mappingservice/mappingproject/" + mappingProjectId;
 	}
 
+	/**
+	 * Removes entity mapping
+	 * 
+	 * @param mappingProjectId
+	 *            ID of the mapping project to remove entity mapping from
+	 * @param target
+	 *            entity name of the mapping target
+	 * @param source
+	 *            entity name of the mapping source
+	 * @return redirect url of the mapping project's page
+	 */
 	@RequestMapping(value = "/removeEntityMapping", method = RequestMethod.POST)
 	public String removeEntityMapping(@RequestParam String mappingProjectId, String target, String source)
 	{
@@ -192,15 +217,14 @@ public class MappingServiceController extends MolgenisPluginController
 	 *            name of the source entity
 	 * @param targetAttribute
 	 *            name of the target attribute
-	 * @param sourceAttribute
-	 *            name of the source attribute
+	 * @param algorithm
+	 *            the mapping algorithm
 	 * @return redirect URL for the attributemapping
 	 */
 	@RequestMapping(value = "/saveattributemapping", method = RequestMethod.POST)
 	public String saveAttributeMapping(@RequestParam(required = true) String mappingProjectId,
 			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
-			@RequestParam(required = true) String targetAttribute,
-			@RequestParam(required = true) String sourceAttribute, @RequestParam(required = true) String algorithm)
+			@RequestParam(required = true) String targetAttribute, @RequestParam(required = true) String algorithm)
 	{
 		MappingProject mappingProject = mappingService.getMappingProject(mappingProjectId);
 		if (hasWritePermission(mappingProject))
@@ -212,8 +236,6 @@ public class MappingServiceController extends MolgenisPluginController
 			{
 				attributeMapping = mappingForSource.addAttributeMapping(targetAttribute);
 			}
-			EntityMetaData sourceEmd = dataService.getEntityMetaData(source);
-			attributeMapping.setSource(sourceEmd.getAttribute(sourceAttribute));
 			attributeMapping.setAlgorithm(algorithm);
 			mappingService.updateMappingProject(mappingProject);
 		}
@@ -249,15 +271,36 @@ public class MappingServiceController extends MolgenisPluginController
 		return VIEW_SINGLE_MAPPING_PROJECT;
 	}
 
-	@RequestMapping("/createintegratedentity")
+	/**
+	 * Creates the integrated entity for a mapping project's target
+	 * 
+	 * @param mappingProjectId
+	 *            ID of the mapping project
+	 * @param target
+	 *            name of the target of the {@link EntityMapping}
+	 * @param newEntityName
+	 *            name of the new entity to create
+	 * @return redirect URL to the data explorer displaying the newly generated entity
+	 */
+	@RequestMapping("/createIntegratedEntity")
 	public String createIntegratedEntity(@RequestParam String mappingProjectId, @RequestParam String target,
-			@RequestParam() String newEntityName)
+			@RequestParam() String newEntityName, Model model)
 	{
-		MappingTarget mappingTarget = mappingService.getMappingProject(mappingProjectId).getMappingTarget(target);
-		String name = mappingService.applyMappings(mappingTarget, newEntityName);
-		permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
-				Collections.singletonList(name));
-		return "redirect:/menu/main/dataexplorer?entity=" + name;
+		try
+		{
+			MappingTarget mappingTarget = mappingService.getMappingProject(mappingProjectId).getMappingTarget(target);
+			String name = mappingService.applyMappings(mappingTarget, newEntityName);
+			permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
+					Collections.singletonList(name));
+			return "redirect:/menu/main/dataexplorer?entity=" + name;
+		}
+		catch (RuntimeException ex)
+		{
+			model.addAttribute("heading", "Failed to create integrated entity.");
+			model.addAttribute("message", ex.getMessage());
+			model.addAttribute("href", "/menu/main/mappingservice/mappingproject/" + mappingProjectId);
+			return "error-msg";
+		}
 	}
 
 	/**
