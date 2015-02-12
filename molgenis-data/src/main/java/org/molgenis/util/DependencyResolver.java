@@ -45,7 +45,7 @@ public class DependencyResolver
 
 			for (AttributeMetaData attr : meta.getAttributes())
 			{
-				if ((attr.getRefEntity() != null) && !attr.getRefEntity().equals(meta) && attr.getExpression() == null)
+				if ((attr.getRefEntity() != null) && !attr.getRefEntity().equals(meta))// self reference
 				{
 					dependencies.add(attr.getRefEntity());
 				}
