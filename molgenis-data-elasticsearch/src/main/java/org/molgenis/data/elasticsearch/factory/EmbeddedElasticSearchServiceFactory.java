@@ -77,6 +77,16 @@ public class EmbeddedElasticSearchServiceFactory implements Closeable
 		LOG.info("Embedded elasticsearch server started, data path=[" + settings.get("path.data") + "]");
 	}
 
+	public Client getClient()
+	{
+		return client;
+	}
+
+	public String getIndexName()
+	{
+		return indexName;
+	}
+
 	public SearchService create(DataService dataService, EntityToSourceConverter entityToSourceConverter)
 	{
 		return new ElasticSearchService(client, indexName, dataService, entityToSourceConverter);
