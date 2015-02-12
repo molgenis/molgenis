@@ -144,7 +144,7 @@
 									</li>
 								<#else>
 									<li>
-										<a href="/menu/${menu.id?url('UTF-8')}/${item.url?url('UTF-8')}">${item.name?html}</a>
+										<a href="/menu/${menu.id?url('UTF-8')}/${item.url}">${item.name?html}</a>
 									</li>
 								</#if>
 							</#if>
