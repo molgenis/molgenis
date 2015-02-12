@@ -35,6 +35,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableCrudRepositoryCollection;
 import org.molgenis.data.Query;
 import org.molgenis.data.Range;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -186,6 +187,11 @@ class AttributeMetaDataRepository
 		if (att.getRefEntity() != null)
 		{
 			Entity refEntity = entityMetaDataRepository.getEntity(att.getRefEntity().getName());
+			if (refEntity == null)
+			{
+				throw new MolgenisDataException("RefEntity: " + att.getRefEntity().getName()
+						+ " could not be found in entityMetaDataRepository!");
+			}
 			attributeMetaDataEntity.set(REF_ENTITY, refEntity);
 		}
 		repository.add(attributeMetaDataEntity);
