@@ -144,7 +144,7 @@
 									</li>
 								<#else>
 									<li>
-										<a href="/menu/${menu.id?url('UTF-8')}/${item.url?url('UTF-8')}">${item.name?html}</a>
+										<a href="/menu/${menu.id?url('UTF-8')}/${item.url?html}">${item.name?html}</a>
 									</li>
 								</#if>
 							</#if>
@@ -187,7 +187,7 @@
 	<#list sub_menu.items as sub_item>
 		<#if sub_item.type != "MENU">
 			<li>
-				<a <#if this_menu_counter gt 1>style="margin-left: ${this_menu_counter * 12}px;"</#if> href="/menu/${sub_menu.id?url('UTF-8')}/${sub_item.url?url('UTF-8')}">${sub_item.name?html}</a>
+				<a <#if this_menu_counter gt 1>style="margin-left: ${this_menu_counter * 12}px;"</#if> href="/menu/${sub_menu.id?url('UTF-8')}/${sub_item.url?html}">${sub_item.name?html}</a>
 			</li>
 		<#elseif sub_item.type == "MENU">
 			<li class="dropdown-header disabled sub-menu-${this_menu_counter}" role="presentation">
