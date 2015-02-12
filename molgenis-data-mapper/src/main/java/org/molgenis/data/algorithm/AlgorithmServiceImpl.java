@@ -3,13 +3,13 @@ package org.molgenis.data.algorithm;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
@@ -19,28 +19,28 @@ import org.molgenis.data.support.MapEntity;
 import org.molgenis.js.RhinoConfig;
 import org.molgenis.js.ScriptEvaluator;
 import org.mozilla.javascript.Context;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AlgorithmServiceImpl implements AlgorithmService
 {
+	private static final Logger LOG = LoggerFactory.getLogger(AlgorithmServiceImpl.class);
+
 	public AlgorithmServiceImpl()
 	{
 		new RhinoConfig().init();
 	}
 
 	@Override
-	public List<Object> applyAlgorithm(AttributeMetaData targetAttribute, Iterable<AttributeMetaData> sourceAttributes,
-			String algorithm, Repository sourceRepository)
+	public List<Object> applyAlgorithm(AttributeMetaData targetAttribute, String algorithm, Repository sourceRepository)
 	{
 		List<Object> derivedValues = new ArrayList<Object>();
-		if (Iterables.size(sourceAttributes) > 0)
+		Collection<String> attributeNames = getSourceAttributeNames(algorithm);
+		if (!attributeNames.isEmpty())
 		{
 			for (Entity entity : sourceRepository)
 			{
-				MapEntity mapEntity = new MapEntity();
-				for (AttributeMetaData attributeMetaData : sourceAttributes)
-				{
-					mapEntity.set(attributeMetaData.getName(), entity.get(attributeMetaData.getName()));
-				}
+				MapEntity mapEntity = createMapEntity(attributeNames, entity);
 				if (!StringUtils.isEmpty(algorithm))
 				{
 					try
@@ -51,6 +51,10 @@ public class AlgorithmServiceImpl implements AlgorithmService
 						{
 							switch (targetAttribute.getDataType().getEnumType())
 							{
+								case DATE:
+								case DATE_TIME:
+									derivedValues.add(new Date(Math.round(Context.toNumber(result))));
+									break;
 								case INT:
 									derivedValues.add(Integer.parseInt(Context.toString(result)));
 									break;
@@ -63,13 +67,25 @@ public class AlgorithmServiceImpl implements AlgorithmService
 							}
 						}
 					}
-					catch (RuntimeException ignored)
+					catch (RuntimeException e)
 					{
+						LOG.error("error converting result", e);
 					}
 				}
 			}
 		}
 		return derivedValues;
+	}
+
+	private MapEntity createMapEntity(Collection<String> attributeNames, Entity entity)
+	{
+		MapEntity mapEntity = new MapEntity();
+		for (String attributeName : attributeNames)
+		{
+			Object value = entity.get(attributeName);
+			mapEntity.set(attributeName, value);
+		}
+		return mapEntity;
 	}
 
 	@Override
@@ -82,7 +98,8 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		}
 		try
 		{
-			Object value = ScriptEvaluator.eval(algorithm, sourceEntity);
+			MapEntity entity = createMapEntity(getSourceAttributeNames(attributeMapping.getAlgorithm()), sourceEntity);
+			Object value = ScriptEvaluator.eval(algorithm, entity);
 			return convert(value, attributeMapping.getTargetAttributeMetaData().getDataType().getEnumType());
 		}
 		catch (RuntimeException e)

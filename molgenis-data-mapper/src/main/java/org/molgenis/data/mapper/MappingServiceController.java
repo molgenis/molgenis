@@ -4,7 +4,6 @@ import static org.molgenis.data.mapper.MappingServiceController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -43,8 +42,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 
 @Controller
@@ -356,47 +354,24 @@ public class MappingServiceController extends MolgenisPluginController
 		return VIEW_ATTRIBUTE_MAPPING;
 	}
 
+	/**
+	 * Tests an algoritm by computing it for all entities in the source repository.
+	 * 
+	 * @param mappingServiceRequest
+	 *            the {@link MappingServiceRequest} sent by the client
+	 * @return Map with the results and size of the source
+	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/mappingattribute/testscript", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	public @ResponseBody Map<String, Object> testScript(@RequestBody MappingServiceRequest mappingServiceRequest)
 	{
-		Map<String, Object> results = new HashMap<String, Object>();
-
 		EntityMetaData targetEntityMetaData = dataService
 				.getEntityMetaData(mappingServiceRequest.getTargetEntityName());
-
-		EntityMetaData sourceEntityMetaData = dataService
-				.getEntityMetaData(mappingServiceRequest.getSourceEntityName());
-
 		AttributeMetaData targetAttribute = targetEntityMetaData != null ? targetEntityMetaData
 				.getAttribute(mappingServiceRequest.getTargetAttributeName()) : null;
-
-		Iterable<AttributeMetaData> sourceAttributes = extractFeatureIdentifiersAsAttributeMetaData(
-				mappingServiceRequest, sourceEntityMetaData);
-
-		Repository sourceRepo = dataService.getRepositoryByEntityName(sourceEntityMetaData.getName());
-		List<Object> calculatedValues = algorithmService.applyAlgorithm(targetAttribute, sourceAttributes,
+		Repository sourceRepo = dataService.getRepositoryByEntityName(mappingServiceRequest.getSourceEntityName());
+		List<Object> calculatedValues = algorithmService.applyAlgorithm(targetAttribute,
 				mappingServiceRequest.getAlgorithm(), sourceRepo);
-
-		results.put("results", calculatedValues);
-		results.put("totalCount", Iterables.size(sourceRepo));
-
-		return results;
-	}
-
-	private Iterable<AttributeMetaData> extractFeatureIdentifiersAsAttributeMetaData(
-			MappingServiceRequest mappingServiceRequest, EntityMetaData sourceEntityMetaData)
-	{
-		return Iterables.filter(Iterables.transform(
-				algorithmService.getSourceAttributeNames(mappingServiceRequest.getAlgorithm()),
-				new Function<String, AttributeMetaData>()
-				{
-					@Override
-					public AttributeMetaData apply(final String attributeName)
-					{
-						return sourceEntityMetaData != null && sourceEntityMetaData.getAttribute(attributeName) != null ? sourceEntityMetaData
-								.getAttribute(attributeName) : null;
-					}
-				}), Predicates.notNull());
+		return ImmutableMap.<String, Object> of("results", calculatedValues, "totalCount", Iterables.size(sourceRepo));
 	}
 
 	private List<EntityMetaData> getEntityMetaDatas()

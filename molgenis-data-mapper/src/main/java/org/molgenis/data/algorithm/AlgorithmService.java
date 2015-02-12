@@ -10,8 +10,7 @@ import org.molgenis.data.mapping.model.AttributeMapping;
 
 public interface AlgorithmService
 {
-	List<Object> applyAlgorithm(AttributeMetaData targetAttribute, Iterable<AttributeMetaData> sourceAttributes,
-			String algorithm, Repository sourceRepo);
+	List<Object> applyAlgorithm(AttributeMetaData targetAttribute, String algorithm, Repository sourceRepo);
 
 	/**
 	 * Applies an {@link AttributeMapping} to a source {@link Entity}
