@@ -79,7 +79,6 @@
 		$.ajax({
 			type : 'POST',
 			url : molgenis.getContextUrl() + '/mappingattribute/testscript',
-			async : false,
 			data : JSON.stringify({
 				targetEntityName : $('input[name="target"]').val(),
 				sourceEntityName : $('input[name="source"]').val(),
@@ -151,7 +150,7 @@
 			if(editor.getValue() === initialValue){
 				return false;
 			}
-			bootbox.confirm("Are you sure?", function(result) {
+			bootbox.confirm("Do you want to revert your changes?", function(result) {
 	            if (result) {
 	                editor.setValue(initialValue, -1);
 	                updateCheckboxes(initialValue);
