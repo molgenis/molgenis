@@ -14,6 +14,9 @@
 		<link rel="icon" href="<@resource_href "/img/molgenis.ico"/>" type="image/x-icon">
 		<link rel="stylesheet" href="<@resource_href "/css/bootstrap.min.css"/>" type="text/css">
         <link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
+        <#if molgeniscsstheme??>
+            <link rel="stylesheet" href="<@resource_href "/css/${molgeniscsstheme}"/>" type="text/css">
+        </#if>
     <#if app_top_logo?has_content>
         <link rel="stylesheet" href="<@resource_href "/css/molgenis-top-logo.css"/>" type="text/css">
     </#if>
