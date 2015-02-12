@@ -625,7 +625,6 @@
     <modules>
         <module>molgenis-core</module>
         <module>molgenis-core-ui</module>
-        <module>molgenis-ontology-core</module>
         <module>molgenis-das</module>
         <module>molgenis-dataexplorer</module>
         <module>molgenis-app</module>
