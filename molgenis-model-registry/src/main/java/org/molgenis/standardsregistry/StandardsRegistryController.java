@@ -117,7 +117,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 		packageSearchRequest.setQuery(packageSearchValue);
 		packageSearchRequest.setOffset(0);
 		packageSearchRequest.setNum(3);
-		
+
 		PackageSearchResponse packageSearchResponse = search(packageSearchRequest, model);
 		if (packageSearchRequest != null)
 		{
@@ -412,7 +412,6 @@ public class StandardsRegistryController extends MolgenisPluginController
 			return query;
 		}
 
-		@SuppressWarnings("unused")
 		public void setQuery(String query)
 		{
 			this.query = query;
@@ -423,7 +422,6 @@ public class StandardsRegistryController extends MolgenisPluginController
 			return offset;
 		}
 
-		@SuppressWarnings("unused")
 		public void setOffset(Integer offset)
 		{
 			this.offset = offset;
@@ -434,7 +432,6 @@ public class StandardsRegistryController extends MolgenisPluginController
 			return num;
 		}
 
-		@SuppressWarnings("unused")
 		public void setNum(Integer num)
 		{
 			this.num = num;

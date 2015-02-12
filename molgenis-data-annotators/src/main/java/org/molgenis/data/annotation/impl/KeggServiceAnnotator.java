@@ -56,7 +56,7 @@ public class KeggServiceAnnotator extends LocusAnnotator
 	}
 
 	@Override
-	public String getName()
+	public String getSimpleName()
 	{
 		return "KEGG";
 	}
@@ -286,9 +286,9 @@ public class KeggServiceAnnotator extends LocusAnnotator
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(KEGG_GENE_ID,
 				MolgenisFieldTypes.FieldTypeEnum.STRING));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(KEGG_PATHWAYS_IDS,
-				MolgenisFieldTypes.FieldTypeEnum.STRING));
+				MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(KEGG_PATHWAYS_NAMES,
-				MolgenisFieldTypes.FieldTypeEnum.STRING));
+				MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		return metadata;
 	}
 }

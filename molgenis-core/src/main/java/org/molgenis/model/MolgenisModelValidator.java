@@ -10,7 +10,6 @@ import java.util.Set;
 import java.util.Vector;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.molgenis.MolgenisOptions;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.IntField;
@@ -25,14 +24,16 @@ import org.molgenis.model.elements.Module;
 import org.molgenis.model.elements.Unique;
 import org.molgenis.model.elements.View;
 import org.molgenis.util.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MolgenisModelValidator
 {
-	private static final Logger logger = Logger.getLogger(MolgenisModelValidator.class.getSimpleName());
+	private static final Logger LOG = LoggerFactory.getLogger(MolgenisModelValidator.class);
 
 	public static void validate(Model model, MolgenisOptions options) throws MolgenisModelException
 	{
-		logger.debug("validating model and adding defaults:");
+		LOG.debug("validating model and adding defaults:");
 
 		// validate the model
 		validateNamesAndReservedWords(model, options);
@@ -79,7 +80,7 @@ public class MolgenisModelValidator
 	 */
 	public static void moveMrefsFromInterfaceAndCopyToSubclass(Model model) throws MolgenisModelException
 	{
-		logger.debug("copy fields to subclass for constrain checking...");
+		LOG.debug("copy fields to subclass for constrain checking...");
 
 		// copy mrefs from interfaces to implementing entities
 		// also rename the target from interface to entity
@@ -162,7 +163,7 @@ public class MolgenisModelValidator
 							&& field.getDefaultValue().equals(""))
 					{
 
-						logger.warn("you can get trouble with hiding field '" + fieldName + "' for form name="
+						LOG.warn("you can get trouble with hiding field '" + fieldName + "' for form name="
 								+ form.getName()
 								+ ": record is not null and doesn't have a default value (unless decorator fixes this!");
 					}
@@ -194,7 +195,7 @@ public class MolgenisModelValidator
 					e.setXrefLabels(result);
 				}
 
-				logger.debug("added default xref_label=" + e.getXrefLabels() + " to entity=" + e.getName());
+				LOG.debug("added default xref_label=" + e.getXrefLabels() + " to entity=" + e.getName());
 
 			}
 		}
@@ -230,7 +231,7 @@ public class MolgenisModelValidator
 						Entity xref_entity = f.getXrefEntity();
 						if (xref_entity.getXrefLabels() != null)
 						{
-							logger.debug("copying xref_label " + xref_entity.getXrefLabels() + " from "
+							LOG.debug("copying xref_label " + xref_entity.getXrefLabels() + " from "
 									+ f.getXrefEntityName() + " to field " + f.getEntity().getName() + "."
 									+ f.getName());
 							f.setXrefLabelNames(xref_entity.getXrefLabels());
@@ -251,7 +252,7 @@ public class MolgenisModelValidator
 	 */
 	public static void addTypeFieldInSubclasses(Model model) throws MolgenisModelException
 	{
-		logger.debug("add a 'type' field in subclasses to enable instanceof at database level...");
+		LOG.debug("add a 'type' field in subclasses to enable instanceof at database level...");
 		for (Entity e : model.getEntities())
 		{
 			if (e.isRootAncestor())
@@ -297,7 +298,7 @@ public class MolgenisModelValidator
 	 */
 	public static void createLinkTablesForMrefs(Model model, MolgenisOptions options) throws MolgenisModelException
 	{
-		logger.debug("add linktable entities for mrefs...");
+		LOG.debug("add linktable entities for mrefs...");
 		// find the multi-ref fields
 		for (Entity xref_entity_from : model.getEntities())
 		{
@@ -500,7 +501,7 @@ public class MolgenisModelValidator
 	 */
 	public static void validateForeignKeys(Model model) throws MolgenisModelException
 	{
-		logger.debug("validate xref_field and xref_label references...");
+		LOG.debug("validate xref_field and xref_label references...");
 
 		// validate foreign key relations
 		for (Entity entity : model.getEntities())
@@ -533,7 +534,7 @@ public class MolgenisModelValidator
 						xref_field_name = xref_entity.getPrimaryKey().getName();
 						field.setXrefField(xref_field_name);
 
-						logger.debug("automatically set " + entityname + "." + fieldname + " xref_field="
+						LOG.debug("automatically set " + entityname + "." + fieldname + " xref_field="
 								+ xref_field_name);
 					}
 
@@ -666,7 +667,7 @@ public class MolgenisModelValidator
 	 */
 	public static void validateKeys(Model model) throws MolgenisModelException
 	{
-		logger.debug("validate the fields used in 'unique' constraints...");
+		LOG.debug("validate the fields used in 'unique' constraints...");
 		// validate the keys
 		for (Entity entity : model.getEntities())
 		{
@@ -736,7 +737,7 @@ public class MolgenisModelValidator
 	 */
 	public static void validateExtendsAndImplements(Model model) throws MolgenisModelException
 	{
-		logger.debug("validate 'extends' and 'implements' relationships...");
+		LOG.debug("validate 'extends' and 'implements' relationships...");
 		// validate the extends and implements relations
 		for (Entity entity : model.getEntities())
 		{
@@ -768,7 +769,7 @@ public class MolgenisModelValidator
 							field.setXRefVariables(iface.getName(), pkeyField.getName(), null);
 							field.setHidden(true);
 
-							logger.debug("copy primary key " + field.getName() + " from interface " + iface.getName()
+							LOG.debug("copy primary key " + field.getName() + " from interface " + iface.getName()
 									+ " to " + entity.getName());
 							entity.addField(field);
 
@@ -849,7 +850,7 @@ public class MolgenisModelValidator
 	 */
 	public static void addInterfaces(Model model) throws MolgenisModelException
 	{
-		logger.debug("add root entities for interfaces...");
+		LOG.debug("add root entities for interfaces...");
 		for (Entity entity : model.getEntities())
 		{
 			// Generate the interface if rootAncestor (so has subclasses) and
@@ -924,7 +925,7 @@ public class MolgenisModelValidator
 	public static void validateNamesAndReservedWords(Model model, MolgenisOptions options)
 			throws MolgenisModelException
 	{
-		logger.debug("check for JAVA and SQL reserved words...");
+		LOG.debug("check for JAVA and SQL reserved words...");
 		Set<String> keywords = new HashSet<String>();
 		keywords.addAll(Arrays.asList(JAVA_KEYWORDS));
 		keywords.addAll(Arrays.asList(JAVASCRIPT_KEYWORDS));
@@ -1063,7 +1064,7 @@ public class MolgenisModelValidator
 	/** test for case sensitivity */
 	public static void correctXrefCaseSensitivity(Model model) throws MolgenisModelException
 	{
-		logger.debug("correct case of names in xrefs...");
+		LOG.debug("correct case of names in xrefs...");
 		for (Entity e : model.getEntities())
 		{
 			for (Field f : e.getFields())
@@ -1105,7 +1106,7 @@ public class MolgenisModelValidator
 	 */
 	public static void copyDecoratorsToSubclass(Model model) throws MolgenisModelException
 	{
-		logger.debug("copying decorators to subclasses...");
+		LOG.debug("copying decorators to subclasses...");
 		for (Entity e : model.getEntities())
 		{
 			if (e.getDecorator() == null)
@@ -1138,7 +1139,7 @@ public class MolgenisModelValidator
 	 */
 	public static void copyFieldsToSubclassToEnforceConstraints(Model model) throws MolgenisModelException
 	{
-		logger.debug("copy fields to subclass for constrain checking...");
+		LOG.debug("copy fields to subclass for constrain checking...");
 		for (Entity e : model.getEntities())
 		{
 			// copy keyfields to subclasses to ensure that keys can be
@@ -1157,7 +1158,7 @@ public class MolgenisModelValidator
 							copy.setAuto(f.isAuto());
 							e.addField(copy);
 
-							logger.debug(aKey.toString() + " cannot be enforced on " + e.getName() + ", copying "
+							LOG.debug(aKey.toString() + " cannot be enforced on " + e.getName() + ", copying "
 									+ f.getEntity().getName() + "." + f.getName() + " to subclass as " + copy.getName());
 						}
 					}

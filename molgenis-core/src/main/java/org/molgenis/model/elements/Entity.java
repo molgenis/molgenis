@@ -16,13 +16,14 @@ import java.util.Map.Entry;
 import java.util.Vector;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.IntField;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.model.MolgenisModelException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
@@ -34,10 +35,11 @@ import com.google.common.collect.Lists;
  */
 public class Entity extends DBSchema implements Record
 {
+	private static final Logger LOG = LoggerFactory.getLogger(Entity.class);
+
 	/** Convenience variable for retrieving the primary key from the keys */
 	public static final int PRIMARY_KEY = 0;
 
-	private static final Logger logger = Logger.getLogger(Entity.class.getSimpleName());
 	// member variables
 	/** namespace, e.g. used for package name */
 	private String namespace;
@@ -1040,7 +1042,7 @@ public class Entity extends DBSchema implements Record
 	{
 		for (Field field : getAllFields())
 			if (name.equalsIgnoreCase(field.getName())) return field;
-		logger.debug("couldn't find " + this.getName() + "." + name);
+		LOG.debug("couldn't find " + this.getName() + "." + name);
 
 		return null;
 	}
@@ -1272,7 +1274,7 @@ public class Entity extends DBSchema implements Record
 		}
 		else
 		{
-			logger.warn("[WARNING]: missing key " + index + " for entity " + this.getName());
+			LOG.warn("[WARNING]: missing key " + index + " for entity " + this.getName());
 		}
 
 		return fields;

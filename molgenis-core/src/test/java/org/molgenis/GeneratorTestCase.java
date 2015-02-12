@@ -9,7 +9,8 @@ import java.util.List;
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.molgenis.generators.DataTypeGen;
 import org.molgenis.generators.Generator;
 import org.molgenis.model.MolgenisModel;
@@ -23,7 +24,7 @@ import org.testng.annotations.BeforeSuite;
 
 public abstract class GeneratorTestCase
 {
-	private static final Logger LOG = Logger.getLogger(GeneratorTestCase.class);
+	private static final Logger LOG = LoggerFactory.getLogger(GeneratorTestCase.class);
 
 	private static final String SRC_PATH = "generated/test/java/";
 	private static final String BUILD_PATH = "build/test/classes/";

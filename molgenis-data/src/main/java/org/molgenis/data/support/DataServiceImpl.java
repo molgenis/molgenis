@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.log4j.Logger;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Aggregateable;
@@ -17,6 +16,7 @@ import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Manageable;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Queryable;
@@ -24,6 +24,8 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.Updateable;
 import org.molgenis.data.Writable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Predicate;
@@ -36,7 +38,7 @@ import com.google.common.collect.Lists;
 @Component
 public class DataServiceImpl implements DataService
 {
-	private static final Logger LOG = Logger.getLogger(DataServiceImpl.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DataServiceImpl.class);
 
 	private final Map<String, Repository> repositories;
 	private final Set<String> repositoryNames;
@@ -202,6 +204,18 @@ public class DataServiceImpl implements DataService
 		getUpdateable(entityName).deleteById(id);
 	}
 
+	@Override
+	public void deleteAll(String entityName)
+	{
+		getUpdateable(entityName).deleteAll();
+	}
+
+	@Override
+	public void drop(String entityName)
+	{
+		getManageableRepository(entityName).drop();
+	}
+
 	private <E extends Entity> Queryable getQueryable(String entityName)
 	{
 		Repository repo = getRepositoryByEntityName(entityName);
@@ -268,6 +282,17 @@ public class DataServiceImpl implements DataService
 		}
 		throw new MolgenisDataException("Repository [" + repository.getName() + "] is not Queryable");
 
+	}
+
+	@Override
+	public Manageable getManageableRepository(String entityName)
+	{
+		Repository repository = getRepositoryByEntityName(entityName);
+		if (repository instanceof Manageable)
+		{
+			return (Manageable) repository;
+		}
+		throw new MolgenisDataException("Repository [" + repository.getName() + "] is not Manageable");
 	}
 
 	@Override

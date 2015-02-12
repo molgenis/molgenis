@@ -7,14 +7,15 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration.Dynamic;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.WebApplicationInitializer;
 
 import uk.ac.ebi.mydas.controller.MydasServlet;
 
 public class WebAppInitializer implements WebApplicationInitializer
 {
-	private static final Logger logger = Logger.getLogger(WebAppInitializer.class);
+	private static final Logger LOG = LoggerFactory.getLogger(WebAppInitializer.class);
 
 	@Override
 	public void onStartup(ServletContext servletContext) throws ServletException
@@ -23,7 +24,7 @@ public class WebAppInitializer implements WebApplicationInitializer
 		javax.servlet.FilterRegistration.Dynamic filter = servletContext.addFilter("dasFilter", new DasURLFilter());
 		if (filter == null)
 		{
-			logger.warn("ServletContext already contains a complete FilterRegistration for servlet 'dasFilter'");
+			LOG.warn("ServletContext already contains a complete FilterRegistration for servlet 'dasFilter'");
 		}
 		else
 		{
@@ -33,7 +34,7 @@ public class WebAppInitializer implements WebApplicationInitializer
 		Dynamic dasServlet = servletContext.addServlet("dasServlet", new MydasServlet());
 		if (dasServlet == null)
 		{
-			logger.warn("ServletContext already contains a complete ServletRegistration for servlet 'dasServlet'");
+			LOG.warn("ServletContext already contains a complete ServletRegistration for servlet 'dasServlet'");
 		}
 		else
 		{

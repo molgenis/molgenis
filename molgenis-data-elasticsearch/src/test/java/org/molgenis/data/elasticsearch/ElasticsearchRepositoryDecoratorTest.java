@@ -151,7 +151,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	{
 		elasticSearchRepository.deleteAll();
 		verify(repository).deleteAll();
-		verify(elasticSearchService).delete(repositoryEntityMetaData.getName());
+		verify(elasticSearchService).deleteDocumentsByType(repositoryEntityMetaData.getName());
 	}
 
 	@Test

@@ -4,7 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
@@ -27,7 +28,7 @@ import com.google.gson.GsonBuilder;
 
 public class MenuManagerServiceImpl implements MenuManagerService, ApplicationListener<ContextRefreshedEvent>
 {
-	private static final Logger logger = Logger.getLogger(MenuManagerServiceImpl.class);
+	private static final Logger LOG = LoggerFactory.getLogger(MenuManagerServiceImpl.class);
 
 	public static final String KEY_MOLGENIS_MENU = "molgenis.menu";
 
@@ -94,7 +95,7 @@ public class MenuManagerServiceImpl implements MenuManagerService, ApplicationLi
 				return;
 			}
 
-			logger.info("Creating default menu from XML");
+			LOG.info("Creating default menu from XML");
 			loadDefaultMenu(molgenis);
 		}
 	}

@@ -76,12 +76,12 @@ public class OmimKeyPoolTest
 	public void testBlockedPoolWhenEmpty() throws Exception
 	{
 		// borrow three objects to fill the pool
-		String key1 = pool.borrowObject();
-		String key2 = pool.borrowObject();
-		String key3 = pool.borrowObject();
+		pool.borrowObject();
+		pool.borrowObject();
+		pool.borrowObject();
 
 		// borrow one more, should time out and throw NoSuchElementException
-		String key4 = pool.borrowObject();
+		pool.borrowObject();
 	}
 
 	@Test

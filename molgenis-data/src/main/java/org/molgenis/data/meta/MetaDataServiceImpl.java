@@ -3,12 +3,13 @@ package org.molgenis.data.meta;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableCrudRepositoryCollection;
 import org.molgenis.data.Package;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * MetaData service. Administration of the {@link Package}, {@link EntityMetaData} and {@link AttributeMetaData} of the
@@ -18,10 +19,11 @@ import org.molgenis.data.Package;
  */
 public class MetaDataServiceImpl implements WritableMetaDataService
 {
+	private static final Logger LOG = LoggerFactory.getLogger(MetaDataServiceImpl.class);
+
 	private PackageRepository packageRepository;
 	private EntityMetaDataRepository entityMetaDataRepository;
 	private AttributeMetaDataRepository attributeMetaDataRepository;
-	private static final Logger LOG = Logger.getLogger(MetaDataServiceImpl.class);
 
 	/**
 	 * Setter for the MysqlRepositoryCollection, to be called after it's created. This resolves the circular dependency

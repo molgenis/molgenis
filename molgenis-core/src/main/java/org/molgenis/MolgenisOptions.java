@@ -13,7 +13,8 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.molgenis.util.cmdline.CmdLineException;
 import org.molgenis.util.cmdline.CmdLineParser;
 import org.molgenis.util.cmdline.Option;
@@ -27,7 +28,7 @@ public class MolgenisOptions implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
-	private static final Logger logger = Logger.getLogger(MolgenisOptions.class);
+	private static final Logger LOG = LoggerFactory.getLogger(MolgenisOptions.class);
 
 	final public static String CLASS_PER_TABLE = "class_per_table";
 	final public static String SUBCLASS_PER_TABLE = "subclass_per_table";
@@ -212,7 +213,7 @@ public class MolgenisOptions implements Serializable
 		parser.parse(props);
 		this.molgenis_properties = propertiesFile;
 
-		logger.debug("parsed properties file.");
+		LOG.debug("parsed properties file.");
 	}
 
 	/**
@@ -230,7 +231,7 @@ public class MolgenisOptions implements Serializable
 		{
 			parser = new CmdLineParser(this);
 			parser.parse(properties);
-			logger.debug("parsed properties file.");
+			LOG.debug("parsed properties file.");
 		}
 		catch (Exception e)
 		{

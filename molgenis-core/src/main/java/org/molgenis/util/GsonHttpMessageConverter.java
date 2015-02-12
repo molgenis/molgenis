@@ -24,7 +24,8 @@ import java.lang.reflect.Type;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -48,8 +49,8 @@ import com.google.gson.JsonSyntaxException;
  */
 public class GsonHttpMessageConverter extends BaseHttpMessageConverter<Object>
 {
+	private static final Logger LOG = LoggerFactory.getLogger(GsonHttpMessageConverter.class);
 
-	private static final Logger LOG = Logger.getLogger(GsonHttpMessageConverter.class);
 	private final Gson gson;
 	private Type type = null;
 	private boolean prefixJson = false;

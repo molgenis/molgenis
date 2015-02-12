@@ -17,6 +17,7 @@ import org.testng.annotations.Test;
 import com.google.common.collect.Maps;
 
 import freemarker.core.Environment;
+import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateDirectiveBody;
 import freemarker.template.TemplateException;
@@ -35,7 +36,8 @@ public class HasPermissionDirectiveTest
 		molgenisPermissionService = mock(MolgenisPermissionService.class);
 		directive = new HasPermissionDirective(molgenisPermissionService);
 		envWriter = new StringWriter();
-		fakeTemplate = Template.getPlainTextTemplate("name", "content", null);
+		fakeTemplate = Template
+				.getPlainTextTemplate("name", "content", new Configuration(Configuration.VERSION_2_3_21));
 	}
 
 	@Test

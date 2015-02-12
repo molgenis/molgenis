@@ -14,7 +14,7 @@ import org.molgenis.util.CaseInsensitiveLinkedHashMap;
 
 public class DefaultEntityMetaData extends AbstractEntityMetaData implements EditableEntityMetaData
 {
-	private final String simpleName;
+	private String simpleName;
 	private final Map<String, AttributeMetaData> attributes = new CaseInsensitiveLinkedHashMap<AttributeMetaData>();
 	private final Class<? extends Entity> entityClass;
 	private String label;
@@ -50,6 +50,12 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData implements Edi
 		this.pack = pack;
 	}
 
+	public DefaultEntityMetaData(String newName, EntityMetaData entityMetaData)
+	{
+		this(entityMetaData);
+		this.simpleName = newName;
+	}
+	
 	/**
 	 * Copy-constructor
 	 * 

@@ -24,7 +24,7 @@ import com.google.common.collect.Lists;
  */
 public class DefaultAttributeMetaData implements AttributeMetaData
 {
-	private final String name;
+	private String name;
 	private FieldType fieldType = MolgenisFieldTypes.STRING;
 	private String description;
 	private boolean nillable = true;
@@ -56,6 +56,12 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		if (name == null) throw new IllegalArgumentException("Name cannot be null");
 		this.name = name;
 		this.fieldType = MolgenisFieldTypes.STRING;
+	}
+	
+	public DefaultAttributeMetaData(String newName, AttributeMetaData attributeMetaData)
+	{
+		this(attributeMetaData);
+		this.name = newName;
 	}
 
 	/**
@@ -160,6 +166,10 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		if (getDataType() instanceof XrefField || getDataType() instanceof MrefField
 				|| getDataType() instanceof CategoricalField)
 		{
+			if (getExpression() != null)
+			{
+				return null;
+			}
 			if (getRefEntity() == null) throw new MolgenisDataException("refEntity is missing for " + getName());
 			if (getRefEntity().getIdAttribute() == null) throw new MolgenisDataException(
 					"idAttribute is missing for entity [" + getRefEntity().getName() + "]");

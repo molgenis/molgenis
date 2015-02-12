@@ -6,13 +6,14 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.validation.EntityNameValidator;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.ui.wizard.AbstractWizardPage;
 import org.molgenis.ui.wizard.Wizard;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.FileCopyUtils;
@@ -23,7 +24,8 @@ import org.springframework.validation.ObjectError;
 public class OptionsWizardPage extends AbstractWizardPage
 {
 	private static final long serialVersionUID = -2931051095557369343L;
-	private static final Logger logger = Logger.getLogger(OptionsWizardPage.class);
+	private static final Logger LOG = LoggerFactory.getLogger(OptionsWizardPage.class);
+
 	private final transient FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
 	private final transient ImportServiceFactory importServiceFactory;
 
@@ -88,7 +90,7 @@ public class OptionsWizardPage extends AbstractWizardPage
 			catch (IOException e)
 			{
 				result.addError(new ObjectError("wizard", "Error importing file: " + e.getMessage()));
-				logger.error("Exception importing file", e);
+				LOG.error("Exception importing file", e);
 			}
 			finally
 			{
@@ -103,7 +105,7 @@ public class OptionsWizardPage extends AbstractWizardPage
 		catch (Exception e)
 		{
 			result.addError(new ObjectError("wizard", "Error validating import file: " + e.getMessage()));
-			logger.error("Exception validating import file", e);
+			LOG.error("Exception validating import file", e);
 		}
 
 		return null;

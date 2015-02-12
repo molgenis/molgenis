@@ -5,7 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils;
@@ -16,7 +17,7 @@ import com.mysql.management.MysqldResourceI;
 
 public class EmbeddedMysqlDatabaseBuilder
 {
-	private static final Logger LOG = Logger.getLogger(EmbeddedMysqlDatabaseBuilder.class);
+	private static final Logger LOG = LoggerFactory.getLogger(EmbeddedMysqlDatabaseBuilder.class);
 
 	private final String baseDatabaseDir = System.getProperty("java.io.tmpdir");
 	private String databaseName = "test_db_" + System.nanoTime();

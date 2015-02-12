@@ -7,7 +7,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.molgenis.auth.GroupAuthority;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.UserAuthority;
@@ -36,7 +37,7 @@ import com.google.common.collect.Lists;
 @RequestMapping(URI)
 public class PermissionManagerController extends MolgenisPluginController
 {
-	private static final Logger logger = Logger.getLogger(PermissionManagerController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(PermissionManagerController.class);
 
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + "permissionmanager";
 
@@ -190,7 +191,7 @@ public class PermissionManagerController extends MolgenisPluginController
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	public Map<String, String> handleRuntimeException(RuntimeException e)
 	{
-		logger.error(null, e);
+		LOG.error(null, e);
 		return Collections.singletonMap("errorMessage",
 				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage());
 	}

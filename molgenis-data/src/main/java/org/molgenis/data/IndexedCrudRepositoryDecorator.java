@@ -23,6 +23,12 @@ public class IndexedCrudRepositoryDecorator extends CrudRepositoryDecorator impl
 	}
 
 	@Override
+	public void create()
+	{
+		decoratedRepository.create();
+	}
+
+	@Override
 	public void drop()
 	{
 		decoratedRepository.drop();

@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -16,6 +15,8 @@ import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Tag;
 import org.molgenis.data.semantic.TagImpl;
 import org.molgenis.util.DependencyResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -26,9 +27,9 @@ import com.google.common.collect.Lists;
  */
 class PackageRepository
 {
-	public static final PackageMetaData META_DATA = new PackageMetaData();
+	private static final Logger LOG = LoggerFactory.getLogger(PackageRepository.class);
 
-	final static Logger LOG = Logger.getLogger(PackageRepository.class);
+	public static final PackageMetaData META_DATA = new PackageMetaData();
 
 	/**
 	 * The repository where the package entities are stored.

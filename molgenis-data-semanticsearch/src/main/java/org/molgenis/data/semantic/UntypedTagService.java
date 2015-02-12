@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -16,6 +15,8 @@ import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.PackageMetaData;
 import org.molgenis.data.support.QueryImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -25,10 +26,10 @@ import com.google.common.collect.Lists;
  */
 public class UntypedTagService implements TagService<LabeledResource, LabeledResource>
 {
+	private static final Logger LOG = LoggerFactory.getLogger(UntypedTagService.class);
+
 	private final DataService dataService;
 	private final TagRepository tagRepository;
-
-	private final static Logger LOG = Logger.getLogger(UntypedTagService.class);
 
 	public UntypedTagService(DataService dataService, TagRepository tagRepository)
 	{

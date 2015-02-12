@@ -32,7 +32,6 @@ public class ChartDataServiceImplTest
 		chartDataService = new ChartDataServiceImpl(dataServiceMock);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void getDataMatrix()
 	{

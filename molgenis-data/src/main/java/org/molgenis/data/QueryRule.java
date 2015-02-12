@@ -261,7 +261,7 @@ public class QueryRule
 	 */
 	public QueryRule(Operator operator)
 	{
-		if (operator == Operator.AND || operator == Operator.OR)
+		if (operator == Operator.AND || operator == Operator.OR || operator == Operator.NOT)
 		{
 			this.operator = operator;
 		}

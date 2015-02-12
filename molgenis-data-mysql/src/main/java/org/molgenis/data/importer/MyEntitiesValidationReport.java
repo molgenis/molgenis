@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.molgenis.framework.db.EntitiesValidationReport;
 
@@ -149,9 +150,9 @@ public class MyEntitiesValidationReport implements EntitiesValidationReport
 	private static ImmutableMap<String, Collection<String>> getImmutableCopy(Map<String, Collection<String>> map)
 	{
 		Builder<String, Collection<String>> builder = ImmutableMap.<String, Collection<String>> builder();
-		for (String key : map.keySet())
+		for (Entry<String, Collection<String>> entry : map.entrySet())
 		{
-			builder.put(key, ImmutableList.<String> copyOf(map.get(key)));
+			builder.put(entry.getKey(), ImmutableList.<String> copyOf(entry.getValue()));
 		}
 		return builder.build();
 	}

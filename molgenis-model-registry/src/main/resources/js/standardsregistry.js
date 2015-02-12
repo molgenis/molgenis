@@ -172,8 +172,16 @@
 		countTemplate = Handlebars.compile($("#count-template").html());
 		modelTemplate = Handlebars.compile($("#model-template").html());
 		
-		if(window.location.hash) {
-			showPackageDetails(window.location.hash.substring(1));
+		if(window.location.search) {
+			var query = window.location.search.substring(1);
+			var pairs, keyValuePair = [];
+			if(query !== undefined){
+				pairs = query.split('&');
+				jQuery.each(pairs,function(indexInArray, value){
+					var keyValuePair = value.split('='); 
+					if('package' === keyValuePair[0]) {showPackageDetails(keyValuePair[1]);}
+				});
+			}
 		}
 		
 		$(document).on('click', '#zoom-in', function() {

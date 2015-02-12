@@ -3,7 +3,6 @@ package org.molgenis.gaf;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Writable;
@@ -12,6 +11,8 @@ import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.FileStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,7 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class GafListFileImporterService
 {
-	private static final Logger logger = Logger.getLogger(GafListFileImporterService.class);
+	private static final Logger LOG = LoggerFactory.getLogger(GafListFileImporterService.class);
 
 	@Autowired
 	private MolgenisSettings molgenisSettings;
@@ -79,7 +80,7 @@ public class GafListFileImporterService
 				}
 				catch (IOException e)
 				{
-					logger.error(e);
+					LOG.error("Error while importing " + key_gaf_list_protocol_name, e);
 				}
 			}
 		}

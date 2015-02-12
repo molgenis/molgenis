@@ -8,10 +8,11 @@ import java.util.Map;
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
-import org.molgenis.data.DataService;
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.RepositoryDecoratorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,14 +24,16 @@ public class ElasticsearchRepositoryCollection implements RepositoryCollection
 	public static final String INDEX_NAME = "molgenis";
 
 	private final ElasticSearchService elasticSearchService;
-	private final DataService dataService;
+	private final RepositoryDecoratorFactory repositoryDecoratorFactory;
 
 	@Autowired
-	public ElasticsearchRepositoryCollection(ElasticSearchService elasticSearchService, DataService dataService)
+	public ElasticsearchRepositoryCollection(ElasticSearchService elasticSearchService,
+			RepositoryDecoratorFactory repositoryDecoratorFactory)
 	{
 		if (elasticSearchService == null) throw new IllegalArgumentException("elasticSearchClient is null");
+		if (repositoryDecoratorFactory == null) throw new IllegalArgumentException("repositoryDecoratorFactory is null");
 		this.elasticSearchService = elasticSearchService;
-		this.dataService = dataService;
+		this.repositoryDecoratorFactory = repositoryDecoratorFactory;
 	}
 
 	@Override
@@ -78,6 +81,9 @@ public class ElasticsearchRepositoryCollection implements RepositoryCollection
 		{
 			throw new RuntimeException(e);
 		}
-		return new ElasticsearchRepository(entityMetaData, elasticSearchService);
+
+		CrudRepository repo = new ElasticsearchRepository(entityMetaData, elasticSearchService);
+		return repositoryDecoratorFactory.createDecoratedRepository(repo);
 	}
+
 }

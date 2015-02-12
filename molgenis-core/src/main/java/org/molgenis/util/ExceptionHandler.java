@@ -3,7 +3,8 @@ package org.molgenis.util;
 import java.io.PrintStream;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The idea is to use this in every exception, then exception is handle in the

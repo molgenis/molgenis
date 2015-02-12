@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
@@ -35,6 +34,8 @@ import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.DependencyResolver;
 import org.molgenis.util.HugeSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,12 +50,12 @@ import com.google.common.collect.Sets;
  */
 public class ImportWriter
 {
+	private static final Logger LOG = LoggerFactory.getLogger(ImportWriter.class);
+
 	private final DataService dataService;
 	private final WritableMetaDataService metaDataService;
 	private final PermissionSystemService permissionSystemService;
 	private final UntypedTagService tagService;
-
-	private final static Logger logger = Logger.getLogger(ImportWriter.class);
 
 	/**
 	 * Creates the ImportWriter
@@ -174,7 +175,7 @@ public class ImportWriter
 			{
 				if (metaDataService.getEntityMetaData(entityMetaData.getName()) == null)
 				{
-					logger.debug("trying to create: " + name);
+					LOG.debug("trying to create: " + name);
 					metaDataChanges.addEntity(name);
 					Repository repo = targetCollection.add(entityMetaData);
 					if (repo != null)
@@ -235,7 +236,7 @@ public class ImportWriter
 	 */
 	public void rollbackSchemaChanges(EmxImportJob job)
 	{
-		logger.info("Rolling back changes.");
+		LOG.info("Rolling back changes.");
 		dropAddedEntities(job.target, job.metaDataChanges.getAddedEntities());
 		List<String> entities = dropAddedAttributes(job.target, job.metaDataChanges.getAddedAttributes());
 

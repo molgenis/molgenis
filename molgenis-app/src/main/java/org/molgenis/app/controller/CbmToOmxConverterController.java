@@ -22,7 +22,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.molgenis.cbm.CbmXmlParser;
 import org.molgenis.data.Entity;
 import org.molgenis.data.csv.CsvWriter;
@@ -48,7 +49,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping(URI)
 public class CbmToOmxConverterController extends MolgenisPluginController
 {
-	private static final Logger logger = Logger.getLogger(CbmToOmxConverterController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(CbmToOmxConverterController.class);
 
 	public static final String ID = "cbmtoomxconverter";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
@@ -366,7 +367,7 @@ public class CbmToOmxConverterController extends MolgenisPluginController
 			IOUtils.closeQuietly(observableFeature);
 
 			boolean ok = file.delete();
-			if (!ok) logger.warn("unable to delete " + file.getPath());
+			if (!ok) LOG.warn("unable to delete " + file.getPath());
 		}
 
 		File zipFile = new File(outputDir, "cbm.zip");
@@ -382,7 +383,7 @@ public class CbmToOmxConverterController extends MolgenisPluginController
 			for (File f : sourceFiles)
 			{
 
-				logger.info("Adding " + f.getAbsolutePath());
+				LOG.info("Adding " + f.getAbsolutePath());
 				FileInputStream fin = new FileInputStream(f);
 				try
 				{
@@ -435,7 +436,7 @@ public class CbmToOmxConverterController extends MolgenisPluginController
 		IOUtils.closeQuietly(out);
 		IOUtils.closeQuietly(in);
 
-		logger.info("serving " + request.getRequestURI());
+		LOG.info("serving " + request.getRequestURI());
 	}
 
 	private void setCurrentFile(File file)

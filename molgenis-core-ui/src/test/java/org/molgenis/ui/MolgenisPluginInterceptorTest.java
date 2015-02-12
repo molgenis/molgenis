@@ -6,6 +6,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.Authentication;
@@ -32,7 +33,7 @@ public class MolgenisPluginInterceptorTest
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void MolgenisPluginInterceptor()
 	{
-		new MolgenisPluginInterceptor(null);
+		new MolgenisPluginInterceptor(null, null);
 	}
 
 	@Test
@@ -44,7 +45,10 @@ public class MolgenisPluginInterceptorTest
 		};
 		HandlerMethod handlerMethod = mock(HandlerMethod.class);
 		when(handlerMethod.getBean()).thenReturn(molgenisPlugin);
-		MolgenisPluginInterceptor molgenisPluginInterceptor = new MolgenisPluginInterceptor(molgenisUi);
+
+		MolgenisSettings settings = mock(MolgenisSettings.class);
+		when(settings.getProperty(MolgenisPluginInterceptor.KEY_FOOTER)).thenReturn("footerTest");
+		MolgenisPluginInterceptor molgenisPluginInterceptor = new MolgenisPluginInterceptor(molgenisUi, settings);
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		assertTrue(molgenisPluginInterceptor.preHandle(request, null, handlerMethod));
@@ -60,19 +64,25 @@ public class MolgenisPluginInterceptorTest
 		};
 		HandlerMethod handlerMethod = mock(HandlerMethod.class);
 		when(handlerMethod.getBean()).thenReturn(molgenisPlugin);
-		MolgenisPluginInterceptor molgenisPluginInterceptor = new MolgenisPluginInterceptor(molgenisUi);
+
+		MolgenisSettings settings = mock(MolgenisSettings.class);
+		when(settings.getProperty(MolgenisPluginInterceptor.KEY_FOOTER)).thenReturn("footerTest");
+		MolgenisPluginInterceptor molgenisPluginInterceptor = new MolgenisPluginInterceptor(molgenisUi, settings);
 
 		String contextUri = "/plugin/not-test";
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setAttribute(MolgenisPluginAttributes.KEY_CONTEXT_URL, contextUri);
 		assertTrue(molgenisPluginInterceptor.preHandle(request, null, handlerMethod));
 		assertEquals(request.getAttribute(MolgenisPluginAttributes.KEY_CONTEXT_URL), contextUri);
+
 	}
 
 	@Test
 	public void postHandle() throws Exception
 	{
-		MolgenisPluginInterceptor molgenisPluginInterceptor = new MolgenisPluginInterceptor(molgenisUi);
+		MolgenisSettings settings = mock(MolgenisSettings.class);
+		when(settings.getProperty(MolgenisPluginInterceptor.KEY_FOOTER)).thenReturn("footerTest");
+		MolgenisPluginInterceptor molgenisPluginInterceptor = new MolgenisPluginInterceptor(molgenisUi, settings);
 		String uri = MolgenisPluginController.PLUGIN_URI_PREFIX + "test";
 		ModelAndView modelAndView = new ModelAndView();
 		HandlerMethod handlerMethod = mock(HandlerMethod.class);
@@ -83,12 +93,15 @@ public class MolgenisPluginInterceptorTest
 		assertEquals(modelAndView.getModel().get(MolgenisPluginAttributes.KEY_PLUGIN_ID), "test");
 		assertNotNull(modelAndView.getModel().get(MolgenisPluginAttributes.KEY_MOLGENIS_UI));
 		assertEquals(modelAndView.getModel().get(MolgenisPluginAttributes.KEY_AUTHENTICATED), false);
+		assertEquals(modelAndView.getModel().get("footerText"), "footerTest");
 	}
 
 	@Test
 	public void postHandle_pluginIdExists() throws Exception
 	{
-		MolgenisPluginInterceptor molgenisPluginInterceptor = new MolgenisPluginInterceptor(molgenisUi);
+		MolgenisSettings settings = mock(MolgenisSettings.class);
+		when(settings.getProperty(MolgenisPluginInterceptor.KEY_FOOTER)).thenReturn("footerTest");
+		MolgenisPluginInterceptor molgenisPluginInterceptor = new MolgenisPluginInterceptor(molgenisUi, settings);
 		String uri = MolgenisPluginController.PLUGIN_URI_PREFIX + "test";
 		ModelAndView modelAndView = new ModelAndView();
 		modelAndView.addObject(MolgenisPluginAttributes.KEY_PLUGIN_ID, "plugin_id");
@@ -100,6 +113,7 @@ public class MolgenisPluginInterceptorTest
 		assertEquals(modelAndView.getModel().get(MolgenisPluginAttributes.KEY_PLUGIN_ID), "plugin_id");
 		assertNotNull(modelAndView.getModel().get(MolgenisPluginAttributes.KEY_MOLGENIS_UI));
 		assertEquals(modelAndView.getModel().get(MolgenisPluginAttributes.KEY_AUTHENTICATED), false);
+		assertEquals(modelAndView.getModel().get("footerText"), "footerTest");
 	}
 
 	@Test
@@ -108,7 +122,9 @@ public class MolgenisPluginInterceptorTest
 		boolean isAuthenticated = true;
 		when(authentication.isAuthenticated()).thenReturn(isAuthenticated);
 
-		MolgenisPluginInterceptor molgenisPluginInterceptor = new MolgenisPluginInterceptor(molgenisUi);
+		MolgenisSettings settings = mock(MolgenisSettings.class);
+		when(settings.getProperty(MolgenisPluginInterceptor.KEY_FOOTER)).thenReturn("footerTest");
+		MolgenisPluginInterceptor molgenisPluginInterceptor = new MolgenisPluginInterceptor(molgenisUi, settings);
 		String uri = MolgenisPluginController.PLUGIN_URI_PREFIX + "test";
 		ModelAndView modelAndView = new ModelAndView();
 		HandlerMethod handlerMethod = mock(HandlerMethod.class);
@@ -119,6 +135,7 @@ public class MolgenisPluginInterceptorTest
 		assertEquals(modelAndView.getModel().get(MolgenisPluginAttributes.KEY_PLUGIN_ID), "test");
 		assertNotNull(modelAndView.getModel().get(MolgenisPluginAttributes.KEY_MOLGENIS_UI));
 		assertEquals(modelAndView.getModel().get(MolgenisPluginAttributes.KEY_AUTHENTICATED), isAuthenticated);
+		assertEquals(modelAndView.getModel().get("footerText"), "footerTest");
 	}
 
 	@Test
@@ -127,7 +144,9 @@ public class MolgenisPluginInterceptorTest
 		boolean isAuthenticated = false;
 		when(authentication.isAuthenticated()).thenReturn(isAuthenticated);
 
-		MolgenisPluginInterceptor molgenisPluginInterceptor = new MolgenisPluginInterceptor(molgenisUi);
+		MolgenisSettings settings = mock(MolgenisSettings.class);
+		when(settings.getProperty(MolgenisPluginInterceptor.KEY_FOOTER)).thenReturn("footerTest");
+		MolgenisPluginInterceptor molgenisPluginInterceptor = new MolgenisPluginInterceptor(molgenisUi, settings);
 		String uri = MolgenisPluginController.PLUGIN_URI_PREFIX + "test";
 		ModelAndView modelAndView = new ModelAndView();
 		HandlerMethod handlerMethod = mock(HandlerMethod.class);
@@ -138,5 +157,6 @@ public class MolgenisPluginInterceptorTest
 		assertEquals(modelAndView.getModel().get(MolgenisPluginAttributes.KEY_PLUGIN_ID), "test");
 		assertNotNull(modelAndView.getModel().get(MolgenisPluginAttributes.KEY_MOLGENIS_UI));
 		assertEquals(modelAndView.getModel().get(MolgenisPluginAttributes.KEY_AUTHENTICATED), isAuthenticated);
+		assertEquals(modelAndView.getModel().get("footerText"), "footerTest");
 	}
 }

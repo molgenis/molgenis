@@ -43,7 +43,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.AttributeMetaData;
@@ -60,6 +59,7 @@ import org.molgenis.data.Queryable;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.data.rsql.MolgenisRSQL;
 import org.molgenis.data.support.DefaultEntityCollection;
 import org.molgenis.data.support.MapEntity;
@@ -78,10 +78,12 @@ import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.util.MolgenisDateFormat;
 import org.molgenis.util.ResourceFingerprintRegistry;
-import org.springframework.beans.BeanUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConversionFailedException;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -91,6 +93,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -124,10 +127,12 @@ import cz.jirutka.rsql.parser.RSQLParserException;
 @RequestMapping(BASE_URI)
 public class RestController
 {
+	private static final Logger LOG = LoggerFactory.getLogger(RestController.class);
+
 	public static final String BASE_URI = "/api/v1";
-	private static final Logger logger = Logger.getLogger(RestController.class);
 	private static final Pattern PATTERN_EXPANDS = Pattern.compile("([^\\[^\\]]+)(?:\\[(.+)\\])?");
 	private final DataService dataService;
+	private final WritableMetaDataService metaDataService;
 	private final TokenService tokenService;
 	private final AuthenticationManager authenticationManager;
 	private final String ENTITY_FORM_MODEL_ATTRIBUTE = "form";
@@ -136,11 +141,12 @@ public class RestController
 	private final ResourceFingerprintRegistry resourceFingerprintRegistry;
 
 	@Autowired
-	public RestController(DataService dataService, TokenService tokenService,
+	public RestController(DataService dataService, WritableMetaDataService metaDataService, TokenService tokenService,
 			AuthenticationManager authenticationManager, MolgenisPermissionService molgenisPermissionService,
 			MolgenisRSQL molgenisRSQL, ResourceFingerprintRegistry resourceFingerprintRegistry)
 	{
 		if (dataService == null) throw new IllegalArgumentException("dataService is null");
+		if (metaDataService == null) throw new IllegalArgumentException("metaDataService is null");
 		if (tokenService == null) throw new IllegalArgumentException("tokenService is null");
 		if (authenticationManager == null) throw new IllegalArgumentException("authenticationManager is null");
 		if (molgenisPermissionService == null) throw new IllegalArgumentException("molgenisPermissionService is null");
@@ -148,6 +154,7 @@ public class RestController
 				"resourceFingerprintRegistry is null");
 
 		this.dataService = dataService;
+		this.metaDataService = metaDataService;
 		this.tokenService = tokenService;
 		this.authenticationManager = authenticationManager;
 		this.molgenisPermissionService = molgenisPermissionService;
@@ -288,8 +295,7 @@ public class RestController
 	 * 
 	 * @param entityName
 	 * @param id
-	 * @param attributes
-	 * @param attributeExpands
+	 * @param request
 	 * @return
 	 */
 	@RequestMapping(value = "/{entityName}/{id:.+}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
@@ -351,7 +357,6 @@ public class RestController
 	 * @param id
 	 * @param refAttributeName
 	 * @param request
-	 * @param attributeExpands
 	 * @return
 	 * @throws UnknownEntityException
 	 */
@@ -400,8 +405,7 @@ public class RestController
 	 * Returns json
 	 * 
 	 * @param request
-	 * @param attributes
-	 * @param attributeExpands
+	 * @param entityName
 	 * @return
 	 */
 	@RequestMapping(value = "/{entityName}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
@@ -454,6 +458,33 @@ public class RestController
 		{
 			meta = dataService.getEntityMetaData(entityName);
 			Query q = new QueryStringParser(meta, molgenisRSQL).parseQueryString(req.getParameterMap());
+
+			String[] sortAttributeArray = req.getParameterMap().get("sortColumn");
+			if (sortAttributeArray != null && sortAttributeArray.length == 1
+					&& StringUtils.isNotEmpty(sortAttributeArray[0]))
+			{
+				String sortAttribute = sortAttributeArray[0];
+				String sortOrderArray[] = req.getParameterMap().get("sortOrder");
+				Sort.Direction order = Sort.DEFAULT_DIRECTION;
+
+				if (sortOrderArray != null && sortOrderArray.length == 1 && StringUtils.isNotEmpty(sortOrderArray[0]))
+				{
+					String sortOrder = sortOrderArray[0];
+					if (sortOrder.equals("ASC"))
+					{
+						order = Sort.Direction.ASC;
+					}
+					else if (sortOrder.equals("DESC"))
+					{
+						order = Sort.Direction.DESC;
+					}
+					else
+					{
+						throw new RuntimeException("unknown sort order");
+					}
+				}
+				q.sort(order, sortAttribute);
+			}
 
 			if (q.getPageSize() == 0)
 			{
@@ -689,19 +720,81 @@ public class RestController
 		delete(entityName, id);
 	}
 
+	/**
+	 * Deletes all entities for the given entity name
+	 * 
+	 * @param entityName
+	 * @param id
+	 * @throws EntityNotFoundException
+	 */
+	@RequestMapping(value = "/{entityName}", method = DELETE)
+	@ResponseStatus(NO_CONTENT)
+	public void deleteAll(@PathVariable("entityName") String entityName)
+	{
+		dataService.deleteAll(entityName);
+	}
+
+	/**
+	 * Deletes all entities for the given entity name but tunnels DELETE through POST
+	 * 
+	 * @param entityName
+	 * @param id
+	 * @throws EntityNotFoundException
+	 */
+	@RequestMapping(value = "/{entityName}", method = POST, params = "_method=DELETE")
+	@ResponseStatus(NO_CONTENT)
+	public void deleteAllPost(@PathVariable("entityName") String entityName)
+	{
+		dataService.deleteAll(entityName);
+	}
+
+	/**
+	 * Deletes all entities and entity meta data for the given entity name
+	 * 
+	 * @param entityName
+	 * @param id
+	 * @throws EntityNotFoundException
+	 */
+	@RequestMapping(value = "/{entityName}/meta", method = DELETE)
+	@ResponseStatus(NO_CONTENT)
+	@Transactional
+	public void deleteMeta(@PathVariable("entityName") String entityName)
+	{
+		deleteMetaInternal(entityName);
+	}
+
+	/**
+	 * Deletes all entities and entity meta data for the given entity name but tunnels DELETE through POST
+	 * 
+	 * @param entityName
+	 * @param id
+	 * @throws EntityNotFoundException
+	 */
+	@RequestMapping(value = "/{entityName}/meta", method = POST, params = "_method=DELETE")
+	@ResponseStatus(NO_CONTENT)
+	@Transactional
+	public void deleteMetaPost(@PathVariable("entityName") String entityName)
+	{
+		deleteMetaInternal(entityName);
+	}
+
+	private void deleteMetaInternal(String entityName)
+	{
+		dataService.drop(entityName);
+		dataService.removeRepository(entityName);
+		metaDataService.removeEntityMetaData(entityName);
+		metaDataService.refreshCaches();
+	}
+
 	@RequestMapping(value = "/{entityName}/create", method = GET)
 	public String createForm(@PathVariable("entityName") String entityName, Model model)
 	{
 
 		Repository repo = dataService.getRepositoryByEntityName(entityName);
-		Entity entity = null;
-		if (repo.getEntityMetaData().getEntityClass() != Entity.class) entity = BeanUtils.instantiateClass(repo
-				.getEntityMetaData().getEntityClass());
-		else entity = new MapEntity();
+
 		EntityMetaData entityMeta = repo.getEntityMetaData();
-		model.addAttribute(ENTITY_FORM_MODEL_ATTRIBUTE, new EntityForm(entityMeta, true, entity));
+		model.addAttribute(ENTITY_FORM_MODEL_ATTRIBUTE, new EntityForm(entityMeta, true, null));
 		model.addAttribute(KEY_RESOURCE_FINGERPRINT_REGISTRY, resourceFingerprintRegistry);
-		model.addAttribute("entity", entity);
 
 		return "view-entity-create";
 	}
@@ -710,8 +803,6 @@ public class RestController
 	public String editForm(@PathVariable("entityName") String entityName, @PathVariable Object id, Model model)
 	{
 		Entity entity = dataService.findOne(entityName, id);
-
-		// dataService.getRepositoryByEntityName(entityName);
 		EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
 
 		boolean hasWritePermission = molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITE);
@@ -790,7 +881,7 @@ public class RestController
 	@ResponseBody
 	public ErrorMessageResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException e)
 	{
-		logger.error("", e);
+		LOG.error("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
@@ -799,7 +890,7 @@ public class RestController
 	@ResponseBody
 	public ErrorMessageResponse handleUnknownTokenException(UnknownTokenException e)
 	{
-		logger.debug("", e);
+		LOG.debug("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
@@ -808,7 +899,7 @@ public class RestController
 	@ResponseBody
 	public ErrorMessageResponse handleUnknownEntityException(UnknownEntityException e)
 	{
-		logger.debug("", e);
+		LOG.debug("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
@@ -817,7 +908,7 @@ public class RestController
 	@ResponseBody
 	public ErrorMessageResponse handleUnknownAttributeException(UnknownAttributeException e)
 	{
-		logger.debug("", e);
+		LOG.debug("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
@@ -826,7 +917,7 @@ public class RestController
 	@ResponseBody
 	public ErrorMessageResponse handleMolgenisValidationException(MolgenisValidationException e)
 	{
-		logger.info("", e);
+		LOG.info("", e);
 
 		List<ErrorMessage> messages = Lists.newArrayList();
 		for (ConstraintViolation violation : e.getViolations())
@@ -842,7 +933,7 @@ public class RestController
 	@ResponseBody
 	public ErrorMessageResponse handleConversionException(ConversionException e)
 	{
-		logger.info("", e);
+		LOG.info("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
@@ -851,7 +942,7 @@ public class RestController
 	@ResponseBody
 	public ErrorMessageResponse handleMolgenisDataException(MolgenisDataException e)
 	{
-		logger.error("", e);
+		LOG.error("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
@@ -860,7 +951,7 @@ public class RestController
 	@ResponseBody
 	public ErrorMessageResponse handleAuthenticationException(AuthenticationException e)
 	{
-		logger.info("", e);
+		LOG.info("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
@@ -869,7 +960,7 @@ public class RestController
 	@ResponseBody
 	public ErrorMessageResponse handleMolgenisDataAccessException(MolgenisDataAccessException e)
 	{
-		logger.info("", e);
+		LOG.info("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
@@ -878,7 +969,7 @@ public class RestController
 	@ResponseBody
 	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
 	{
-		logger.error("", e);
+		LOG.error("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
@@ -1116,7 +1207,7 @@ public class RestController
 			if (attributesSet != null && !attributesSet.contains(attr.getName().toLowerCase())) continue;
 
 			// TODO remove __Type from jpa entities
-			if (attr.isVisible() && !attr.getName().equals("__Type"))
+			if (!attr.getName().equals("__Type"))
 			{
 				String attrName = attr.getName();
 				FieldTypeEnum attrType = attr.getDataType().getEnumType();

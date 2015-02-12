@@ -7,7 +7,6 @@ import java.util.concurrent.Executors;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.FileRepositoryCollectionFactory;
@@ -15,6 +14,8 @@ import org.molgenis.data.RepositoryCollection;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.ui.wizard.AbstractWizardPage;
 import org.molgenis.ui.wizard.Wizard;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -24,8 +25,9 @@ import org.springframework.validation.ObjectError;
 @Component
 public class ValidationResultWizardPage extends AbstractWizardPage
 {
-	private static final Logger logger = Logger.getLogger(ValidationResultWizardPage.class);
 	private static final long serialVersionUID = 1L;
+	private static final Logger LOG = LoggerFactory.getLogger(ValidationResultWizardPage.class);
+
 	private final ExecutorService asyncImportJobs = Executors.newCachedThreadPool();
 
 	@Autowired
@@ -88,13 +90,13 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 			catch (RuntimeException e)
 			{
 				File file = importWizard.getFile();
-				logger.warn("Import of file [" + file.getName() + "] failed for action [" + entityImportOption + "]", e);
+				LOG.warn("Import of file [" + file.getName() + "] failed for action [" + entityImportOption + "]", e);
 				result.addError(new ObjectError("wizard", "<b>Your import failed:</b><br />" + e.getMessage()));
 			}
 			catch (IOException e)
 			{
 				File file = importWizard.getFile();
-				logger.warn("Import of file [" + file.getName() + "] failed for action [" + entityImportOption + "]", e);
+				LOG.warn("Import of file [" + file.getName() + "] failed for action [" + entityImportOption + "]", e);
 				result.addError(new ObjectError("wizard", "<b>Your import failed:</b><br />" + e.getMessage()));
 			}
 

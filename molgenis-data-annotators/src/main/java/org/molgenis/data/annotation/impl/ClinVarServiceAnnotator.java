@@ -1,22 +1,20 @@
 package org.molgenis.data.annotation.impl;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import org.apache.commons.io.IOUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.HgncLocationsUtils;
-import org.molgenis.data.annotation.LocusAnnotator;
-import org.molgenis.data.annotation.impl.datastructures.Locus;
-import org.molgenis.data.annotation.provider.HgncLocationsProvider;
+import org.molgenis.data.annotation.VariantAnnotator;
+import org.molgenis.data.annotation.impl.datastructures.ClinvarData;
+import org.molgenis.data.annotation.provider.ClinvarDataProvider;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -26,14 +24,15 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 @Component("clinvarService")
-public class ClinVarServiceAnnotator extends LocusAnnotator
+public class ClinVarServiceAnnotator extends VariantAnnotator
 {
 	private final MolgenisSettings molgenisSettings;
 	private final AnnotationService annotatorService;
-	private final HgncLocationsProvider hgncLocationsProvider;
 
 	private static final String NAME = "Clinvar";
+
 	public static final String CLINVAR_FILE_LOCATION_PROPERTY = "clinvar_location";
+	private final ClinvarDataProvider clinvarDataProvider;
 
 	public final static String ALLELEID = "AlleleID";
 	public final static String TYPE = "Type";
@@ -59,14 +58,15 @@ public class ClinVarServiceAnnotator extends LocusAnnotator
 	public final static String LASTEVALUATED = "LastEvaluated";
 	public final static String GUIDELINES = "Guidelines";
 	public final static String OTHERIDS = "OtherIDs";
+	public final static String VARIANTIDS = "VariantID";
 
 	@Autowired
 	public ClinVarServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService,
-			HgncLocationsProvider hgncLocationsProvider) throws IOException
+			ClinvarDataProvider clinvarDataProvider) throws IOException
 	{
 		this.molgenisSettings = molgenisSettings;
 		this.annotatorService = annotatorService;
-		this.hgncLocationsProvider = hgncLocationsProvider;
+		this.clinvarDataProvider = clinvarDataProvider;
 	}
 
 	@Override
@@ -76,7 +76,7 @@ public class ClinVarServiceAnnotator extends LocusAnnotator
 	}
 
 	@Override
-	public String getName()
+	public String getSimpleName()
 	{
 		return NAME;
 	}
@@ -94,80 +94,51 @@ public class ClinVarServiceAnnotator extends LocusAnnotator
 
 		String chromosome = entity.getString(CHROMOSOME);
 		Long position = entity.getLong(POSITION);
+		String referenceAllele = entity.getString(REFERENCE);
+		String alternativeAllele = entity.getString(ALTERNATIVE);
 
-		List<String> geneSymbols = HgncLocationsUtils.locationToHgcn(hgncLocationsProvider.getHgncLocations(),
-				new Locus(chromosome, position));
-
-		try
+		List<String> clinvarKeys = Arrays.asList(chromosome, Long.toString(position), referenceAllele,
+				alternativeAllele);
+		Map<List<String>, ClinvarData> clinvarData = clinvarDataProvider.getClinvarData();
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+		if (clinvarData.containsKey(clinvarKeys))
 		{
-			if (!isAllNulls(geneSymbols))
-			{
-				List<String> fileLines = IOUtils.readLines(new InputStreamReader(new FileInputStream(new File(
-						molgenisSettings.getProperty(CLINVAR_FILE_LOCATION_PROPERTY))), "UTF-8"));
+			ClinvarData data = clinvarData.get(clinvarKeys);
 
-				for (String line : fileLines)
-				{
-					if (!line.startsWith("#"))
-					{
-						String[] split = line.split("\t");
-						for (String gene : geneSymbols)
-						{
-							if (gene.equals(split[4]))
+			resultMap.put(ALLELEID, data.getAlleleid());
+			resultMap.put(TYPE, data.getType());
+			resultMap.put(GENE_NAME, data.getGene_name());
+			resultMap.put(GENEID, data.getGeneid());
+			resultMap.put(GENESYMBOL, data.getGenesymbol());
+			resultMap.put(CLINICALSIGNIFICANCE, data.getClinicalsignificance());
+			resultMap.put(RS_DBSNP, data.getRs_dbsnp());
+			resultMap.put(NSV_DBVAR, data.getNsv_dbvar());
+			resultMap.put(RCVACCESSION, data.getRcvaccession());
+			resultMap.put(TESTEDINGTR, data.getTestedingtr());
+			resultMap.put(PHENOTYPEIDS, data.getPhenotypeids());
+			resultMap.put(ORIGIN, data.getOrigin());
+			resultMap.put(ASSEMBLY, data.getAssembly());
+			resultMap.put(CLINVAR_CHROMOSOME, data.getClinvar_chromosome());
+			resultMap.put(START, data.getStart());
+			resultMap.put(STOP, data.getStop());
+			resultMap.put(CYTOGENETIC, data.getCytogenetic());
+			resultMap.put(REVIEWSTATUS, data.getReviewstatus());
+			resultMap.put(HGVS_C, data.getHgvs_c());
+			resultMap.put(HGVS_P, data.getHgvs_p());
+			resultMap.put(NUMBERSUBMITTERS, data.getNumbersubmitters());
+			resultMap.put(LASTEVALUATED, data.getLastevaluated());
+			resultMap.put(GUIDELINES, data.getGuidelines());
+			resultMap.put(OTHERIDS, data.getOtherids());
+			resultMap.put(VARIANTIDS, data.getVariantids());
 
-							{
-								HashMap<String, Object> resultMap = new HashMap<String, Object>();
-
-								resultMap.put(ALLELEID, split[0]);
-								resultMap.put(TYPE, split[1]);
-								resultMap.put(GENE_NAME, split[2]);
-								resultMap.put(GENEID, split[3]);
-								resultMap.put(GENESYMBOL, split[4]);
-								resultMap.put(CLINICALSIGNIFICANCE, split[5]);
-								resultMap.put(RS_DBSNP, split[6]);
-								resultMap.put(NSV_DBVAR, split[7]);
-								resultMap.put(RCVACCESSION, split[8]);
-								resultMap.put(TESTEDINGTR, split[9]);
-								resultMap.put(PHENOTYPEIDS, split[10]);
-								resultMap.put(ORIGIN, split[11]);
-								resultMap.put(ASSEMBLY, split[12]);
-								resultMap.put(CLINVAR_CHROMOSOME, split[13]);
-								resultMap.put(START, split[14]);
-								resultMap.put(STOP, split[15]);
-								resultMap.put(CYTOGENETIC, split[16]);
-								resultMap.put(REVIEWSTATUS, split[17]);
-								resultMap.put(HGVS_C, split[18]);
-								resultMap.put(HGVS_P, split[19]);
-								resultMap.put(NUMBERSUBMITTERS, split[20]);
-								resultMap.put(LASTEVALUATED, split[21]);
-								resultMap.put(GUIDELINES, split[22]);
-								resultMap.put(OTHERIDS, split[23]);
-
-								results.add(getAnnotatedEntity(entity, resultMap));
-							}
-						}
-					}
-				}
-			}
-			else
-			{
-				HashMap<String, Object> resultMap = new HashMap<String, Object>();
-				results.add(getAnnotatedEntity(entity, resultMap));
-
-			}
+			results.add(getAnnotatedEntity(entity, resultMap));
 		}
-		catch (Exception e)
+		else
 		{
-			throw new RuntimeException(e);
+			results.add(getAnnotatedEntity(entity, resultMap));
 		}
 
 		return results;
-	}
-
-	private boolean isAllNulls(Iterable<?> array)
-	{
-		for (Object element : array)
-			if (element != null) return false;
-		return true;
 	}
 
 	@Override
@@ -175,7 +146,7 @@ public class ClinVarServiceAnnotator extends LocusAnnotator
 	{
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
 
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ALLELEID, FieldTypeEnum.TEXT));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ALLELEID, FieldTypeEnum.STRING));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(TYPE, FieldTypeEnum.TEXT));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GENE_NAME, FieldTypeEnum.TEXT));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GENEID, FieldTypeEnum.TEXT));

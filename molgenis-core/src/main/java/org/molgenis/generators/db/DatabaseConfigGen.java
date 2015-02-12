@@ -8,16 +8,17 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.molgenis.MolgenisOptions;
 import org.molgenis.generators.Generator;
 import org.molgenis.model.elements.Model;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import freemarker.template.Template;
 
 public class DatabaseConfigGen extends Generator
 {
-	private final static Logger logger = Logger.getLogger(DatabaseConfigGen.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DatabaseConfigGen.class);
 
 	@Override
 	public String getDescription()
@@ -54,7 +55,7 @@ public class DatabaseConfigGen extends Generator
 				targetOut.close();
 			}
 
-			logger.info("generated " + target);
+			LOG.info("generated " + target);
 		}
 	}
 }

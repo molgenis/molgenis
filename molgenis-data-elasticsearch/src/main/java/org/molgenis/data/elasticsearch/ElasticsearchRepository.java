@@ -1,10 +1,10 @@
 package org.molgenis.data.elasticsearch;
 
+import java.io.IOException;
+
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.io.IOException;
 
 public class ElasticsearchRepository extends AbstractElasticsearchRepository
 {
@@ -31,23 +31,31 @@ public class ElasticsearchRepository extends AbstractElasticsearchRepository
 	}
 
 	@Override
+	public void create()
+	{
+		// FIXME
+	}
+
+	@Override
 	public void drop()
 	{
 		// FIXME
 	}
 
-    @Override
-    @Transactional
-    public void update(Entity entity)
-    {
-        elasticSearchService.index(entity, getEntityMetaData(), ElasticSearchService.IndexingMode.UPDATE);
-        //FIXME: use metadataService when ElasticSearch uses this service instead of managing its own metadata
-        try {
-            elasticSearchService.createMappings(getEntityMetaData(),true,true,true,true);
-        } catch (IOException e) {
-            throw new RuntimeException("Could not update the ElasticSeach mapping");
-        }
-        elasticSearchService.refresh();
-    }
-
+	@Override
+	@Transactional
+	public void update(Entity entity)
+	{
+		elasticSearchService.index(entity, getEntityMetaData(), ElasticSearchService.IndexingMode.UPDATE);
+		// FIXME: use metadataService when ElasticSearch uses this service instead of managing its own metadata
+		try
+		{
+			elasticSearchService.createMappings(getEntityMetaData(), true, true, true, true);
+		}
+		catch (IOException e)
+		{
+			throw new RuntimeException("Could not update the ElasticSeach mapping");
+		}
+		elasticSearchService.refresh();
+	}
 }

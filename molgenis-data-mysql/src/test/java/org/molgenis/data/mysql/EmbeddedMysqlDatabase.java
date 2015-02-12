@@ -3,14 +3,16 @@ package org.molgenis.data.mysql;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 import com.mysql.management.MysqldResource;
 
 public class EmbeddedMysqlDatabase extends DriverManagerDataSource
 {
-	private final Logger logger = Logger.getLogger(EmbeddedMysqlDatabase.class);
+	private static final Logger LOG = LoggerFactory.getLogger(EmbeddedMysqlDatabase.class);
+
 	private final MysqldResource mysqldResource;
 
 	public EmbeddedMysqlDatabase(MysqldResource mysqldResource)
@@ -25,14 +27,14 @@ public class EmbeddedMysqlDatabase extends DriverManagerDataSource
 			mysqldResource.shutdown();
 			if (!mysqldResource.isRunning())
 			{
-				logger.info(">>>>>>>>>> DELETING MYSQL BASE DIR [{" + mysqldResource.getBaseDir() + "}] <<<<<<<<<<");
+				LOG.info(">>>>>>>>>> DELETING MYSQL BASE DIR [{" + mysqldResource.getBaseDir() + "}] <<<<<<<<<<");
 				try
 				{
 					FileUtils.forceDelete(mysqldResource.getBaseDir());
 				}
 				catch (IOException e)
 				{
-					logger.error(e.getMessage(), e);
+					LOG.error(e.getMessage(), e);
 				}
 			}
 		}

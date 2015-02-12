@@ -40,7 +40,7 @@ public class WizardTest
 		WizardButton nextButton = wizard.getNextButton();
 		assertNotNull(nextButton);
 		assertTrue(nextButton.isEnabled());
-		assertEquals(nextButton.getTitle(), "Next &rarr;");
+		assertEquals(nextButton.getTitle(), "Next");
 		assertEquals(nextButton.getTargetUri(), "/next");
 
 		wizard.next();
@@ -72,7 +72,7 @@ public class WizardTest
 		WizardButton prevButton = wizard.getPreviousButton();
 		assertNotNull(prevButton);
 		assertFalse(prevButton.isEnabled());
-		assertEquals(prevButton.getTitle(), "&larr; Previous");
+		assertEquals(prevButton.getTitle(), "Previous");
 	}
 
 	@Test

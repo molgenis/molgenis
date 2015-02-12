@@ -117,7 +117,7 @@ public class MysqlRepositoryXrefTest extends MysqlRepositoryAbstractDatatypeTest
 
 		for (Entity e : xrefRepo)
 		{
-			logger.debug(e);
+			LOG.debug(e.toString());
 
 			Assert.assertNotNull(e.getEntity("stringRef"));
 			Assert.assertEquals(e.getEntity("stringRef").get("identifier"), "ref1");

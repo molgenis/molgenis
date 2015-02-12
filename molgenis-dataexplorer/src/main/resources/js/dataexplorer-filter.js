@@ -744,6 +744,37 @@
 				}
 			} else {
 				if(values){
+					// determine query operator for attribute type
+					var attrOperator;
+					switch(attribute.fieldType) {
+						case 'BOOL':
+						case 'CATEGORICAL':
+						case 'DATE':
+						case 'DATE_TIME':
+						case 'DECIMAL':
+						case 'ENUM':
+						case 'INT':
+						case 'LONG':
+						case 'MREF':
+						case 'XREF':
+							attrOperator = 'EQUALS';
+							break;
+						case 'EMAIL':
+						case 'HTML':
+						case 'HYPERLINK':
+						case 'SCRIPT':
+						case 'STRING':
+						case 'TEXT':
+							attrOperator = 'SEARCH';
+							break;
+						case 'COMPOUND':
+						case 'FILE':
+						case 'IMAGE':
+							throw 'Unsupported data type: ' + attribute.fieldType;
+						default:
+							throw 'Unknown data type: ' + attribute.fieldType;
+					}
+					
 					if (values.length > 1) {
 						var nestedRule = {
 							operator: 'NESTED',
@@ -753,13 +784,13 @@
 						$.each(values, function(index, value) {
 							if (index > 0) {
 								nestedRule.nestedRules.push({
-									operator : operator
+									operator : operator || 'OR'
 								});
 							}
 		
 							nestedRule.nestedRules.push({
 								field : attribute.name,
-								operator : 'EQUALS',
+								operator : attrOperator,
 								value : value
 							});
 						});
@@ -767,7 +798,7 @@
 					} else {
 						rule = {
 							field : attribute.name,
-							operator : 'EQUALS',
+							operator : attrOperator,
 							value : values[0]
 						};
 					}

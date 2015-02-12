@@ -18,11 +18,11 @@ import org.mapdb.DBMaker;
 public class HugeSet<E> implements Set<E>, Closeable
 {
 	private final DB mapDB;
-	private final File dbFile;
 	private final Set<E> mapDBSet;
 
 	public HugeSet()
 	{
+		File dbFile;
 		try
 		{
 			dbFile = File.createTempFile("mapdb", "temp");
@@ -32,7 +32,7 @@ public class HugeSet<E> implements Set<E>, Closeable
 			throw new RuntimeException(e);
 		}
 
-		mapDB = DBMaker.newFileDB(dbFile).transactionDisable().make();
+		mapDB = DBMaker.newFileDB(dbFile).deleteFilesAfterClose().transactionDisable().make();
 		mapDBSet = mapDB.createHashSet("set").make();
 	}
 
@@ -118,7 +118,6 @@ public class HugeSet<E> implements Set<E>, Closeable
 	public void close() throws IOException
 	{
 		mapDB.close();
-		dbFile.delete();
 	}
 
 }

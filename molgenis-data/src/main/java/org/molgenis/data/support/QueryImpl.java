@@ -154,6 +154,13 @@ public class QueryImpl implements Query
 	}
 
 	@Override
+	public Query not()
+	{
+		rules.get(this.rules.size() - 1).add(new QueryRule(Operator.NOT));
+		return this;
+	}
+
+	@Override
 	public Query like(String field, String value)
 	{
 		rules.get(this.rules.size() - 1).add(new QueryRule(field, Operator.LIKE, value));

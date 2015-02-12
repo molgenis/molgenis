@@ -11,7 +11,8 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -28,7 +29,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class GafListValidator
 {
-	private static final Logger logger = Logger.getLogger(GafListValidator.class);
+	private static final Logger LOG = LoggerFactory.getLogger(GafListValidator.class);
 
 	/**
 	 * RuntimeProperty.class.getSimpleName() + "_gafList.validator.";
@@ -507,7 +508,7 @@ public class GafListValidator
 		}
 		else
 		{
-			logger.warn("unknown col [" + colName + "]");
+			LOG.warn("unknown col [" + colName + "]");
 		}
 	}
 

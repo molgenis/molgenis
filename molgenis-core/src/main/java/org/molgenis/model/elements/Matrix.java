@@ -1,6 +1,7 @@
 package org.molgenis.model.elements;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.molgenis.model.MolgenisModelException;
 
 /*
@@ -138,8 +139,8 @@ public class Matrix extends DBSchema
 		// e.g. textdata.assay
 		Field container_field = ce.getField(container);
 
-		Logger.getLogger("TEST").info("container_field: " + container_field);
-		// Logger.getLogger("TEST").debug("container_entity:
+		LoggerFactory.getLogger("TEST").info("container_field: " + container_field);
+		// LoggerFactory.getLogger("TEST").debug("container_entity:
 		// "+container_field.getXRefEntity());
 		// get from the field the entity that is 'xref-ed' by the row
 		return container_field.getXrefEntity();

@@ -13,6 +13,7 @@ import org.molgenis.data.Aggregateable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IndexedCrudRepository;
+import org.molgenis.data.Manageable;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.ElasticSearchService.IndexingMode;
 import org.molgenis.data.support.ConvertingIterable;
@@ -21,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Iterables;
 
-public abstract class AbstractElasticsearchRepository implements IndexedCrudRepository, Aggregateable
+public abstract class AbstractElasticsearchRepository implements IndexedCrudRepository, Aggregateable, Manageable
 {
 	public static final String BASE_URL = "elasticsearch://";
 
@@ -184,7 +185,7 @@ public abstract class AbstractElasticsearchRepository implements IndexedCrudRepo
 	public void update(Entity entity)
 	{
 		elasticSearchService.index(entity, getEntityMetaData(), IndexingMode.UPDATE);
-        elasticSearchService.refresh();
+		elasticSearchService.refresh();
 	}
 
 	@Override
@@ -231,7 +232,13 @@ public abstract class AbstractElasticsearchRepository implements IndexedCrudRepo
 	@Transactional
 	public void deleteAll()
 	{
-		elasticSearchService.delete(getEntityMetaData().getName());
+		elasticSearchService.deleteDocumentsByType(getEntityMetaData().getName());
 		elasticSearchService.refresh();
+	}
+
+	@Override
+	public void drop()
+	{
+		elasticSearchService.delete(getEntityMetaData().getName());
 	}
 }

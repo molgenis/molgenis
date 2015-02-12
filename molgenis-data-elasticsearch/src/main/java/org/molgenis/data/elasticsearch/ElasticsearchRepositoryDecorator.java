@@ -1,9 +1,13 @@
 package org.molgenis.data.elasticsearch;
 
+import java.io.IOException;
+
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IndexedCrudRepository;
+import org.molgenis.data.Manageable;
 import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.Updateable;
 import org.molgenis.data.Writable;
@@ -180,8 +184,27 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	}
 
 	@Override
+	public void create()
+	{
+		try
+		{
+			elasticSearchService.createMappings(getEntityMetaData());
+		}
+		catch (IOException e)
+		{
+			throw new MolgenisDataException(e);
+		}
+	}
+
+	@Override
 	public void drop()
 	{
-		elasticSearchService.delete(getEntityMetaData().getName());
+		if (!(repository instanceof Manageable))
+		{
+			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Manageable");
+		}
+		((Manageable) repository).drop();
+
+		super.drop();
 	}
 }

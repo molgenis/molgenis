@@ -53,11 +53,12 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class InstallCert
 {
-	private static final Logger logger = Logger.getLogger(InstallCert.class);
+	private static final Logger LOG = LoggerFactory.getLogger(InstallCert.class);
 
 	public static void main(String[] args) throws Exception
 	{
@@ -74,7 +75,7 @@ public class InstallCert
 		}
 		else
 		{
-			logger.debug("Usage: java InstallCert <host>[:port] [passphrase]");
+			LOG.debug("Usage: java InstallCert <host>[:port] [passphrase]");
 			return;
 		}
 
@@ -89,7 +90,7 @@ public class InstallCert
 				file = new File(dir, "cacerts");
 			}
 		}
-		logger.info("Loading KeyStore " + file + "...");
+		LOG.info("Loading KeyStore " + file + "...");
 		InputStream in = new FileInputStream(file);
 		KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
 		ks.load(in, passphrase);
@@ -104,15 +105,15 @@ public class InstallCert
 		{ tm }, null);
 		SSLSocketFactory factory = context.getSocketFactory();
 
-		logger.info("Opening connection to " + host + ":" + port + "...");
+		LOG.info("Opening connection to " + host + ":" + port + "...");
 		SSLSocket socket = (SSLSocket) factory.createSocket(host, port);
 		socket.setSoTimeout(10000);
 		try
 		{
-			logger.info("Starting SSL handshake...");
+			LOG.info("Starting SSL handshake...");
 			socket.startHandshake();
 			socket.close();
-			logger.info("No errors, certificate is already trusted");
+			LOG.info("No errors, certificate is already trusted");
 		}
 		catch (SSLException e)
 		{
@@ -122,28 +123,28 @@ public class InstallCert
 		X509Certificate[] chain = tm.chain;
 		if (chain == null)
 		{
-			logger.error("Could not obtain server certificate chain");
+			LOG.error("Could not obtain server certificate chain");
 			return;
 		}
 
 		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in, Charset.forName("UTF-8")));
 
-		logger.info("Server sent " + chain.length + " certificate(s):");
+		LOG.info("Server sent " + chain.length + " certificate(s):");
 		MessageDigest sha1 = MessageDigest.getInstance("SHA1");
 		MessageDigest md5 = MessageDigest.getInstance("MD5");
 		for (int i = 0; i < chain.length; i++)
 		{
 			X509Certificate cert = chain[i];
-			logger.info(" " + (i + 1) + " Subject " + cert.getSubjectDN());
-			logger.info("   Issuer  " + cert.getIssuerDN());
+			LOG.info(" " + (i + 1) + " Subject " + cert.getSubjectDN());
+			LOG.info("   Issuer  " + cert.getIssuerDN());
 			sha1.update(cert.getEncoded());
-			logger.info("   sha1    " + toHexString(sha1.digest()));
+			LOG.info("   sha1    " + toHexString(sha1.digest()));
 			md5.update(cert.getEncoded());
-			logger.info("   md5     " + toHexString(md5.digest()));
+			LOG.info("   md5     " + toHexString(md5.digest()));
 
 		}
 
-		logger.info("Enter certificate to add to trusted keystore or 'q' to quit: [1]");
+		LOG.info("Enter certificate to add to trusted keystore or 'q' to quit: [1]");
 		String line = reader.readLine();
 		if (line == null) throw new RuntimeException("unexpected end of stream");
 		line = line.trim();
@@ -154,7 +155,7 @@ public class InstallCert
 		}
 		catch (NumberFormatException e)
 		{
-			logger.info("KeyStore not changed");
+			LOG.info("KeyStore not changed");
 			return;
 		}
 
@@ -166,9 +167,9 @@ public class InstallCert
 		ks.store(out, passphrase);
 		out.close();
 
-		logger.info(cert);
+		LOG.info(cert.toString());
 
-		logger.info("Added certificate to keystore 'jssecacerts' using alias '" + alias + "'");
+		LOG.info("Added certificate to keystore 'jssecacerts' using alias '" + alias + "'");
 	}
 
 	private static final char[] HEXDIGITS = "0123456789abcdef".toCharArray();

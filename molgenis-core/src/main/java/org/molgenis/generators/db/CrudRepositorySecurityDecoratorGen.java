@@ -97,7 +97,7 @@ public class CrudRepositorySecurityDecoratorGen extends ForEachEntityGenerator
 
 				// logger.info("generated " +
 				// targetFile.getAbsolutePath());
-				logger.info("generated " + targetFile);
+				LOG.info("generated " + targetFile);
 			}
 		}
 	}

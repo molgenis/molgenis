@@ -9,7 +9,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.molgenis.security.CorsFilter;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.request.RequestContextListener;
@@ -19,7 +20,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 
 public class MolgenisWebAppInitializer
 {
-	private static final Logger logger = Logger.getLogger(MolgenisWebAppInitializer.class);
+	private static final Logger LOG = LoggerFactory.getLogger(MolgenisWebAppInitializer.class);
 
 	protected void onStartup(ServletContext servletContext, Class<?> appConfig, boolean isDasUsed)
 			throws ServletException
@@ -52,7 +53,7 @@ public class MolgenisWebAppInitializer
 				rootContext));
 		if (dispatcherServlet == null)
 		{
-			logger.warn("ServletContext already contains a complete ServletRegistration for servlet 'dispatcher'");
+			LOG.warn("ServletContext already contains a complete ServletRegistration for servlet 'dispatcher'");
 		}
 		else
 		{

@@ -2,6 +2,7 @@ package org.molgenis.data;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -105,5 +106,24 @@ public class DataServiceImplTest
 	{
 		assertEquals(dataService.getRepositoryByEntityName("Entity3"), repoToRemove);
 		dataService.removeRepository("Entity4");
+	}
+
+	@Test
+	public void drop()
+	{
+		String name = "manageable_repo";
+		Manageable manageable = when(mock(Manageable.class).getName()).thenReturn(name).getMock();
+		dataService.addRepository(manageable);
+		dataService.drop(name);
+		verify(manageable).drop();
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class)
+	public void dropNotManageable()
+	{
+		String name = "non_manageable_repo";
+		Repository repository = when(mock(Repository.class).getName()).thenReturn(name).getMock();
+		dataService.addRepository(repository);
+		dataService.drop(name);
 	}
 }

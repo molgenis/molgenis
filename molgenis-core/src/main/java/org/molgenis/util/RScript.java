@@ -11,7 +11,8 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class provides an handle to an R script
@@ -26,11 +27,10 @@ import org.apache.log4j.Logger;
  */
 public class RScript
 {
+	private static final Logger LOG = LoggerFactory.getLogger(RScript.class);
+
 	/** command to run R */
 	public String R_COMMAND = "R CMD BATCH --vanilla --slave";
-
-	/** logger */
-	private final Logger logger = Logger.getLogger(RScript.class.getSimpleName());
 
 	/** buffer containing the script */
 	private final StringBuffer script = new StringBuffer();
@@ -165,7 +165,7 @@ public class RScript
 				command += R_COMMAND + " \"" + inputfile.getCanonicalPath() + "\" \"" + outputfile.getCanonicalPath()
 						+ "\"";
 			}
-			logger.debug("Executing: " + command);
+			LOG.debug("Executing: " + command);
 			Process process = Runtime.getRuntime().exec(command);
 			process.waitFor();
 
@@ -173,14 +173,14 @@ public class RScript
 			error = this.streamToString(process.getErrorStream());
 			if (error.length() > 0)
 			{
-				logger.error("R script printed errors: " + error);
+				LOG.error("R script printed errors: " + error);
 			}
 
 			// get output messages
 			output = this.streamToString(process.getInputStream());
 			if (error.length() > 0)
 			{
-				logger.debug("R script printed messages: " + output);
+				LOG.debug("R script printed messages: " + output);
 			}
 
 			result = this.streamToString(new FileInputStream(outputfile));
@@ -193,7 +193,7 @@ public class RScript
 		}
 		catch (Exception e)
 		{
-			logger.debug("Script failed: return code " + e.getMessage() + "\nScript:\n" + scriptCode + "\nOutput:\n"
+			LOG.debug("Script failed: return code " + e.getMessage() + "\nScript:\n" + scriptCode + "\nOutput:\n"
 					+ result);
 			// throw new RScriptException(result + "\n\nScript:\n" +
 			// scriptCode);
@@ -204,7 +204,7 @@ public class RScript
 			// inputfile.delete();
 			// outputfile.delete();
 		}
-		logger.debug("Script completed succesfully.\nScript:\n" + scriptCode + "\nOutput:\n" + result);
+		LOG.debug("Script completed succesfully.\nScript:\n" + scriptCode + "\nOutput:\n" + result);
 
 		return result;
 	}

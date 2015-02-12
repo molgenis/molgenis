@@ -20,12 +20,13 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
-import org.apache.log4j.Logger;
 import org.molgenis.model.jaxb.Entity;
 import org.molgenis.model.jaxb.Field;
 import org.molgenis.model.jaxb.Field.Type;
 import org.molgenis.model.jaxb.Model;
 import org.molgenis.model.jaxb.Unique;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Tool to create molgenis_db.xml from an existing database
@@ -34,7 +35,7 @@ import org.molgenis.model.jaxb.Unique;
  */
 public class DatabaseModelExtractor
 {
-	private static final Logger logger = Logger.getLogger(DatabaseModelExtractor.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DatabaseModelExtractor.class);
 
 	public static void main(String[] args) throws Exception
 	{
@@ -51,7 +52,7 @@ public class DatabaseModelExtractor
 		}
 		catch (JAXBException e)
 		{
-			logger.error(e);
+			LOG.error("", e);
 			return null;
 		}
 		catch (ClassNotFoundException e)
@@ -76,7 +77,7 @@ public class DatabaseModelExtractor
 			int end = url.indexOf("?") == -1 ? url.length() : url.indexOf("?");
 
 			String SCHEMA_NAME = url.substring(start, end);
-			logger.debug("trying to extract: " + SCHEMA_NAME);
+			LOG.debug("trying to extract: " + SCHEMA_NAME);
 
 			Connection conn = DriverManager.getConnection(url, user, password);
 			try
@@ -90,7 +91,7 @@ public class DatabaseModelExtractor
 
 				while (tableInfo.next())
 				{
-					logger.debug("TABLE: " + tableInfo);
+					LOG.debug("TABLE: " + tableInfo);
 
 					Entity e = new Entity();
 					e.setName(tableInfo.getString("TABLE_NAME"));
@@ -100,7 +101,7 @@ public class DatabaseModelExtractor
 					ResultSet fieldInfo = md.getColumns(SCHEMA_NAME, null, tableInfo.getString("TABLE_NAME"), null);
 					while (fieldInfo.next())
 					{
-						logger.debug("COLUMN: " + fieldInfo);
+						LOG.debug("COLUMN: " + fieldInfo);
 
 						Field f = new Field();
 						f.setName(fieldInfo.getString("COLUMN_NAME"));
@@ -185,7 +186,7 @@ public class DatabaseModelExtractor
 					}
 					catch (Exception exc)
 					{
-						logger.error("didn't retrieve autoinc/sequence: " + exc.getMessage());
+						LOG.error("didn't retrieve autoinc/sequence: " + exc.getMessage());
 						// e.printStackTrace();
 					}
 					finally
@@ -200,7 +201,7 @@ public class DatabaseModelExtractor
 					Map<String, List<String>> uniques = new LinkedHashMap<String, List<String>>();
 					while (rsIndex.next())
 					{
-						logger.debug("UNIQUE: " + rsIndex);
+						LOG.debug("UNIQUE: " + rsIndex);
 
 						// TABLE_CAT='molgenistest' TABLE_SCHEM='null'
 						// TABLE_NAME='boolentity' NON_UNIQUE='false'
@@ -265,7 +266,7 @@ public class DatabaseModelExtractor
 									// otherF.type == int
 									if (otherF.getName().equals(f.getName()) && otherF.getType().equals(Field.Type.INT))
 									{
-										logger.debug("Guessed that " + otherE.getName() + "." + otherF.getName()
+										LOG.debug("Guessed that " + otherE.getName() + "." + otherF.getName()
 												+ " references " + e.getName() + "." + f.getName());
 										otherF.setType(Field.Type.XREF_SINGLE);
 										// otherF.setXrefEntity(;
@@ -302,7 +303,7 @@ public class DatabaseModelExtractor
 										&& Boolean.TRUE.equals(labelField.getUnique())
 										&& Boolean.FALSE.equals(labelField.getNillable()))
 								{
-									logger.debug("guessed label " + e.getName() + "." + labelField.getName());
+									LOG.debug("guessed label " + e.getName() + "." + labelField.getName());
 									f.setXrefLabel(labelField.getName());
 								}
 							}
@@ -433,14 +434,14 @@ public class DatabaseModelExtractor
 
 								// remove the link table as separate entity
 								toBeRemoved.add(e);
-								logger.debug("guessed mref " + e.getName());
+								LOG.debug("guessed mref " + e.getName());
 							}
 						}
 					}
 				m.getEntities().removeAll(toBeRemoved);
 
 				// logger.info(MolgenisLanguage.summarize(m));
-				logger.info(toString(m));
+				LOG.info(toString(m));
 				return m;
 
 			}
@@ -451,13 +452,13 @@ public class DatabaseModelExtractor
 		}
 		catch (SQLException e)
 		{
-			logger.error(e);
+			LOG.error("", e);
 			e.printStackTrace();
 			return null;
 		}
 		catch (JAXBException e1)
 		{
-			logger.error(e1);
+			LOG.error("", e1);
 			e1.printStackTrace();
 			return null;
 		}

@@ -3,7 +3,8 @@ package org.molgenis.r;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,7 +16,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class RScriptExecutor
 {
-	private static final Logger logger = Logger.getLogger(RScriptExecutor.class);
+	private static final Logger LOG = LoggerFactory.getLogger(RScriptExecutor.class);
+
 	private final String rScriptExecutable;
 
 	@Autowired
@@ -57,7 +59,7 @@ public class RScriptExecutor
 		try
 		{
 			// Create r process
-			logger.info("Running r script [" + script.getAbsolutePath() + "]");
+			LOG.info("Running r script [" + script.getAbsolutePath() + "]");
 			Process process = Runtime.getRuntime().exec(rScriptExecutable + " " + script.getAbsolutePath());
 
 			// Capture the error output
@@ -88,7 +90,7 @@ public class RScriptExecutor
 				throw new MolgenisRException("Error running [" + script.getAbsolutePath() + "]." + sb.toString());
 			}
 
-			logger.info("Script [" + script.getAbsolutePath() + "] done");
+			LOG.info("Script [" + script.getAbsolutePath() + "] done");
 		}
 		catch (IOException e)
 		{

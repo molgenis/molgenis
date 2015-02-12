@@ -2,16 +2,18 @@ package org.molgenis.data.importer;
 
 import java.util.Date;
 
-import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
 import org.molgenis.security.runas.RunAsSystem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ImportRunService
 {
-	private static final Logger logger = Logger.getLogger(ImportRunService.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ImportRunService.class);
+
 	private final DataService dataService;
 
 	@Autowired
@@ -49,7 +51,7 @@ public class ImportRunService
 		}
 		catch (Exception e)
 		{
-			logger.error("Error updating run status", e);
+			LOG.error("Error updating run status", e);
 		}
 	}
 
@@ -69,7 +71,7 @@ public class ImportRunService
 		}
 		catch (Exception e)
 		{
-			logger.error("Error updating run status", e);
+			LOG.error("Error updating run status", e);
 		}
 	}
 }

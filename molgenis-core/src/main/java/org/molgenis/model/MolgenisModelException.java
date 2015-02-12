@@ -10,17 +10,18 @@
 
 package org.molgenis.model;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MolgenisModelException extends Exception
 {
 	private static final long serialVersionUID = -4778664169051832691L;
 
-	private static final Logger logger = Logger.getLogger(MolgenisModelException.class);
+	private static final Logger LOG = LoggerFactory.getLogger(MolgenisModelException.class);
 
 	public MolgenisModelException(String error)
 	{
 		super(error);
-		logger.error(error);
+		LOG.error(error);
 	}
 }

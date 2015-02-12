@@ -3,7 +3,6 @@ package org.molgenis.data.system;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.log4j.Logger;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
@@ -12,6 +11,8 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.security.runas.RunAsSystem;
 import org.molgenis.system.core.RuntimeProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +20,7 @@ import org.springframework.stereotype.Component;
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "NP_BOOLEAN_RETURN_NULL", justification = "We want to return Boolean.TRUE, Boolean.FALSE or null")
 public class MolgenisDbSettings implements MolgenisSettings
 {
-	private static final Logger logger = Logger.getLogger(MolgenisDbSettings.class);
+	private static final Logger LOG = LoggerFactory.getLogger(MolgenisDbSettings.class);
 
 	private final DataService dataService;
 
@@ -50,13 +51,13 @@ public class MolgenisDbSettings implements MolgenisSettings
 		}
 		catch (MolgenisDataException e)
 		{
-			logger.warn(e);
+			LOG.warn("", e);
 			return defaultValue;
 		}
 
 		if (property == null)
 		{
-			logger.debug(RuntimeProperty.class.getSimpleName() + " '" + name + "' is null");
+			LOG.debug(RuntimeProperty.class.getSimpleName() + " '" + name + "' is null");
 			return defaultValue;
 		}
 
@@ -130,7 +131,7 @@ public class MolgenisDbSettings implements MolgenisSettings
 		}
 		catch (MolgenisDataException e)
 		{
-			logger.warn(e);
+			LOG.warn("", e);
 		}
 
 		return false;

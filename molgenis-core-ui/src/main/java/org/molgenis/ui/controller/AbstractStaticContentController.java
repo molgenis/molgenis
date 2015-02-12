@@ -5,12 +5,13 @@ import java.io.IOException;
 
 import javax.servlet.http.Part;
 
-import org.apache.log4j.Logger;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ui.XmlMolgenisUi;
 import org.molgenis.util.FileStore;
 import org.molgenis.util.FileUploadUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.ui.Model;
@@ -20,7 +21,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 public abstract class AbstractStaticContentController extends MolgenisPluginController
 {
-	private static final Logger logger = Logger.getLogger(AbstractStaticContentController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(AbstractStaticContentController.class);
+
 	private static final String ERRORMESSAGE_PAGE = "An error occurred trying loading this page.";
 	private static final String ERRORMESSAGE_SUBMIT = "An error occurred trying to save the content.";
 	private static final String ERRORMESSAGE_LOGO = "The logo needs to be an image file like png or jpg.";
@@ -52,7 +54,7 @@ public abstract class AbstractStaticContentController extends MolgenisPluginCont
 		}
 		catch (RuntimeException re)
 		{
-			logger.error(re);
+			LOG.error("", re);
 			model.addAttribute("errorMessage", ERRORMESSAGE_PAGE);
 		}
 
@@ -69,7 +71,7 @@ public abstract class AbstractStaticContentController extends MolgenisPluginCont
 		}
 		catch (RuntimeException re)
 		{
-			logger.error(re);
+			LOG.error("", re);
 			model.addAttribute("errorMessage", ERRORMESSAGE_PAGE);
 		}
 
@@ -77,8 +79,8 @@ public abstract class AbstractStaticContentController extends MolgenisPluginCont
 	}
 
 	@RequestMapping(value = "/edit", method = RequestMethod.POST)
-	public String submitContent(@RequestParam(value = "content", required = true)
-	final String content, final Model model)
+	public String submitContent(@RequestParam(value = "content", required = true) final String content,
+			final Model model)
 	{
 		try
 		{
@@ -86,7 +88,7 @@ public abstract class AbstractStaticContentController extends MolgenisPluginCont
 		}
 		catch (RuntimeException re)
 		{
-			logger.error(re);
+			LOG.error("", re);
 			model.addAttribute("errorMessage", ERRORMESSAGE_SUBMIT);
 		}
 		return this.initEditView(model);
@@ -102,8 +104,7 @@ public abstract class AbstractStaticContentController extends MolgenisPluginCont
 	 */
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@RequestMapping(value = "/upload-logo", method = RequestMethod.POST)
-	public String uploadLogo(@RequestParam("logo")
-	Part part, Model model) throws IOException
+	public String uploadLogo(@RequestParam("logo") Part part, Model model) throws IOException
 	{
 		String contentType = part.getContentType();
 		if ((contentType == null) || !contentType.startsWith("image"))

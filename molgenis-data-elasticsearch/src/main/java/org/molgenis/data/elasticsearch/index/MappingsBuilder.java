@@ -16,7 +16,6 @@ import org.elasticsearch.common.xcontent.XContentFactory;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Range;
@@ -64,6 +63,7 @@ public class MappingsBuilder
 	private static final String ATTRIBUTE_DATA_TYPE = "dataType";
 
 	public static final String FIELD_NOT_ANALYZED = "raw";
+	public static final String FIELD_NGRAM_ANALYZED = "ngram";
 
 	/**
 	 * Creates entity meta data for the given repository, documents are stored in the index
@@ -227,10 +227,21 @@ public class MappingsBuilder
 				break;
 			case EMAIL:
 			case ENUM:
-			case HTML:
 			case HYPERLINK:
-			case SCRIPT:
 			case STRING:
+				// enable/disable norms based on given value
+				jsonBuilder.field("type", "string");
+				jsonBuilder.field("norms").startObject().field("enabled", enableNorms).endObject();
+				// not-analyzed field for sorting and wildcard queries
+				// note: the include_in_all setting is ignored on any field that is defined in the fields options
+				// note: the norms settings defaults to false for not_analyzed fields
+				jsonBuilder.startObject("fields").startObject(FIELD_NOT_ANALYZED).field("type", "string")
+						.field("index", "not_analyzed").endObject().startObject(FIELD_NGRAM_ANALYZED)
+						.field("type", "string").field("analyzer", ElasticsearchIndexCreator.NGRAM_ANALYZER)
+						.endObject().endObject();
+				break;
+			case HTML:
+			case SCRIPT:
 			case TEXT:
 				// enable/disable norms based on given value
 				jsonBuilder.field("type", "string");

@@ -8,10 +8,11 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.molgenis.MolgenisOptions;
 import org.molgenis.model.elements.Entity;
 import org.molgenis.model.elements.Model;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import freemarker.template.Template;
 
@@ -27,7 +28,7 @@ import freemarker.template.Template;
  */
 public abstract class ForEachEntityGenerator extends Generator
 {
-	public final transient Logger logger = Logger.getLogger(this.getClass());
+	protected static final Logger LOG = LoggerFactory.getLogger(ForEachEntityGenerator.class);
 
 	private boolean includeAbstract = false;
 
@@ -111,7 +112,7 @@ public abstract class ForEachEntityGenerator extends Generator
 					template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
 					targetOut.close();
 
-					logger.info("generated " + targetFile);
+					LOG.info("generated " + targetFile);
 				}
 			}
 		}

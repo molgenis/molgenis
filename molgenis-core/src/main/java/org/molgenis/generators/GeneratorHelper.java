@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisOptions;
 import org.molgenis.fieldtypes.EnumField;
@@ -22,10 +21,13 @@ import org.molgenis.model.elements.Entity;
 import org.molgenis.model.elements.Field;
 import org.molgenis.model.elements.Model;
 import org.molgenis.model.elements.Unique;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GeneratorHelper
 {
-	private static final Logger logger = Logger.getLogger(GeneratorHelper.class.getSimpleName());
+	private static final Logger LOG = LoggerFactory.getLogger(GeneratorHelper.class);
+
 	MolgenisOptions options;
 	MolgenisFieldTypes typeRegistry;
 
@@ -222,7 +224,7 @@ public class GeneratorHelper
 
 	public String getHsqlType(Field field) throws Exception
 	{
-		Logger.getLogger("TEST").debug("trying " + field);
+		LoggerFactory.getLogger("TEST").debug("trying " + field);
 		return MolgenisFieldTypes.get(field).getHsqlType();
 	}
 
@@ -556,7 +558,7 @@ public class GeneratorHelper
 					}
 				}
 				if (inTable) table_keys.add(aKey);
-				else logger.warn("key " + aKey + " cannot be enforced on entity " + e.getName() + ": column '" + field
+				else LOG.warn("key " + aKey + " cannot be enforced on entity " + e.getName() + ": column '" + field
 						+ "' is not in the subclass table.");
 			}
 		}

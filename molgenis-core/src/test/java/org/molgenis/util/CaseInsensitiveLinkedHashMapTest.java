@@ -66,4 +66,21 @@ public class CaseInsensitiveLinkedHashMapTest
 		assertEquals(map.size(), 2);
 		assertEquals(map.keySet(), Sets.<String> newLinkedHashSet(Arrays.asList("Test", "XXX")));
 	}
+
+	@Test
+	public void entrySet()
+	{
+		Map<String, Integer> map = new CaseInsensitiveLinkedHashMap<Integer>();
+		map.put("1", 1);
+		map.put("2", 2);
+		map.put("3", 3);
+
+		int i = 1;
+		for (Map.Entry<String, Integer> entry : map.entrySet())
+		{
+			assertEquals(entry.getKey(), String.valueOf(i));
+			assertEquals(entry.getValue(), Integer.valueOf(i));
+			i++;
+		}
+	}
 }

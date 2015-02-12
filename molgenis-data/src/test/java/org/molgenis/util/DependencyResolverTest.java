@@ -77,8 +77,8 @@ public class DependencyResolverTest
 		Iterable<Entity> sorted = DependencyResolver.resolveSelfReferences(entities, emd);
 		List<Entity> sortedList = Lists.newArrayList(sorted);
 		assertEquals(sortedList.size(), 5);
-		assertEquals(sortedList.get(0).getIdValue(), "Piet");
-		assertEquals(sortedList.get(1).getIdValue(), "Marie");
+		assertEquals(sortedList.get(0).getIdValue(), "Marie");
+		assertEquals(sortedList.get(1).getIdValue(), "Piet");
 		assertEquals(sortedList.get(2).getIdValue(), "Jan");
 		assertEquals(sortedList.get(3).getIdValue(), "Katrijn");
 		assertEquals(sortedList.get(4).getIdValue(), "Klaas");
