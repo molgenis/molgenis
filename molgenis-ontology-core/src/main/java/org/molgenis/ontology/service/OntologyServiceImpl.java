@@ -383,7 +383,6 @@ public class OntologyServiceImpl implements OntologyService
 	{
 		PostProcessOntologyTermCombineSynonymAlgorithm.process(comparableEntities, inputData);
 		PostProcessRemoveRedundantOntologyTerm.process(comparableEntities);
-		// PostProcessOntologyTermIDFAlgorithm.process(comparableEntities, inputData, this);
 		PostProcessRedistributionScoreAlgorithm.process(comparableEntities, inputData, this);
 		Collections.sort(comparableEntities);
 		return new OntologyServiceResultImpl(inputData, comparableEntities, count);
