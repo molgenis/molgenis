@@ -3,8 +3,6 @@ package org.molgenis.data.semantic;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Package;
-import org.molgenis.ontology.Ontology;
-import org.molgenis.ontology.OntologyTerm;
 
 /**
  * Service that administrates tags on attributes, entities and packages of a particular code system.
