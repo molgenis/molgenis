@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.molgenis.data.annotation.impl.CaddServiceAnnotator;
+import org.molgenis.data.annotation.impl.GoNLServiceAnnotator;
 
 public class CmdLineAnnotator
 {
@@ -49,7 +50,7 @@ public class CmdLineAnnotator
 		File outputVCFFile = new File(args[3]);
 		if (outputVCFFile.exists())
 		{
-			//TODO terugzetten!! throw new Exception("Output VCF file already exists at " + outputVCFFile.getAbsolutePath());
+			throw new Exception("Output VCF file already exists at " + outputVCFFile.getAbsolutePath());
 		}
 
 		// engage!
@@ -79,7 +80,7 @@ public class CmdLineAnnotator
 		}
 		else if(annotator.equals("gonl"))
 		{
-			//TODO
+			new GoNLServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
 		else if(annotator.equals("gwascatalog"))
 		{
