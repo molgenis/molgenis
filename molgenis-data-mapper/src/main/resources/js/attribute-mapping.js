@@ -105,7 +105,9 @@
 			$('#stats-stdev').text(jStat.stdev(data.results));
 
 			$('#statistics-container').show();
-			$('.distribution').bcgraph(data.results);
+			if($('.distribution').length){
+				$('.distribution').bcgraph(data.results);
+			}
 		} else {
 			$('#statistics-container').hide();
 			molgenis.createAlert([ {
