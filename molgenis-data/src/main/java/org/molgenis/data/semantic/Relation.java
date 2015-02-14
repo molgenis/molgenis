@@ -30,7 +30,8 @@ public enum Relation {
 
 	public static Relation forIRI(String string) {
 		for (Relation relation : values()) {
-			if (relation.getIRI().equals(string)) {
+			if (relation.getIRI().equals(string))
+			{
 				return relation;
 			}
 		}
