@@ -7,9 +7,11 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.fail;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.elasticsearch.common.collect.Lists;
+import org.mockito.Mockito;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
@@ -24,10 +26,13 @@ import org.molgenis.data.meta.PackageImpl;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeMethod;
@@ -60,6 +65,12 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 			return new InMemoryRepositoryCollection(dataService());
 		}
 
+		@Bean
+		PermissionSystemService permissionSystemService()
+		{
+			return mock(PermissionSystemService.class);
+		}
+
 	}
 
 	@Autowired
@@ -73,6 +84,9 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 
 	@Autowired
 	private MolgenisUserService userService;
+
+	@Autowired
+	private PermissionSystemService permissionSystemService;
 
 	private MolgenisUser user;
 
@@ -107,6 +121,10 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		}
 
 		dataService.getEntityNames().forEach(dataService::removeRepository);
+
+		TestingAuthenticationToken authentication = new TestingAuthenticationToken("userName", null);
+		authentication.setAuthenticated(false);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
 	}
 
 	@Test
@@ -213,5 +231,8 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		koetje.set("hoogte", new Double(123.4));
 		koetje.set("source", "Gene");
 		assertEquals(created, ImmutableList.<Entity> of(koetje));
+
+		Mockito.verify(permissionSystemService).giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
+				Arrays.asList("Koetjeboe"));
 	}
 }
