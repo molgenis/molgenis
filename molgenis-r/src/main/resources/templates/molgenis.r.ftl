@@ -81,8 +81,11 @@ molgenis.get <- local(function(entity, q = NULL, start = 0, num = 1000, sortColu
   	url <- paste0(url, "&attributes=", curlEscape(paste0(attributes, collapse = ",")))
   }
   
-  # Specific notation setting ref and alt allele columns to character in case of a T allele. CSV reader sets it to True instead of keeping the string value
-  names(colClasses) <- c("Reference_allele", "Alternative_allele")
+  # Specific notation setting ref and alt allele columns to character in case of a T allele. 
+  # CSV reader sets it to True instead of keeping the string value
+  if(!is.na(colClasses)){
+  	names(colClasses) <- c("Reference_allele", "Alternative_allele")
+  }
     
   dataFrame <- read.csv(url, colClasses = colClasses)
   
