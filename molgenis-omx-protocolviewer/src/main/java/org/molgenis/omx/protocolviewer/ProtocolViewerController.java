@@ -22,6 +22,8 @@ import javax.servlet.http.Part;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import com.google.common.base.CharMatcher;
+import com.google.common.base.Splitter;
 import org.apache.log4j.Logger;
 import org.molgenis.catalog.CatalogFolder;
 import org.molgenis.catalog.CatalogItem;
@@ -251,13 +253,16 @@ public class ProtocolViewerController extends MolgenisPluginController
 			throws IOException, MessagingException, UnknownCatalogException, UnknownStudyDefinitionException
 	{
 		if (!getEnableOrderAction()) throw new MolgenisDataAccessException("Action not allowed");
-		try {
+		try
+		{
 			protocolViewerService.submitStudyDefinitionDraftForCurrentUser(name, file, catalogId.toString());
 			ModelAndView model = new ModelAndView("order-response");
 			model.addObject("ok", true);
 			model.addObject("message", "Your submission has been received.");
 			return model;
-		} catch (RuntimeException ex){
+		}
+		catch (RuntimeException ex)
+		{
 			ModelAndView model = new ModelAndView("order-response");
 			model.addObject("ok", false);
 			model.addObject("message", ex.getMessage());
@@ -271,21 +276,23 @@ public class ProtocolViewerController extends MolgenisPluginController
 	{
 		if (!getEnableOrderAction()) throw new MolgenisDataAccessException("Action not allowed");
 
-		Iterable<StudyDefinitionResponse> ordersIterable = Iterables.transform(
-				Iterables.filter(protocolViewerService.getStudyDefinitionsForCurrentUser(),
-						new Predicate<StudyDefinition>() {
-							@Override
-							public boolean apply(StudyDefinition studyDefinition) {
-								return studyDefinition != null && studyDefinition.getStatus() != Status.DRAFT;
-							}
-						}),
-				new Function<StudyDefinition, StudyDefinitionResponse>() {
+		Iterable<StudyDefinitionResponse> ordersIterable = Iterables.transform(Iterables.filter(
+				protocolViewerService.getStudyDefinitionsForCurrentUser(), new Predicate<StudyDefinition>()
+				{
 					@Override
-					@Nullable
-					public StudyDefinitionResponse apply(@Nullable StudyDefinition studyDefinition) {
-						return new StudyDefinitionResponse(studyDefinition);
+					public boolean apply(StudyDefinition studyDefinition)
+					{
+						return studyDefinition != null && studyDefinition.getStatus() != Status.DRAFT;
 					}
-				});
+				}), new Function<StudyDefinition, StudyDefinitionResponse>()
+		{
+			@Override
+			@Nullable
+			public StudyDefinitionResponse apply(@Nullable StudyDefinition studyDefinition)
+			{
+				return new StudyDefinitionResponse(studyDefinition);
+			}
+		});
 
 		return new StudyDefinitionsResponse(Lists.newArrayList(ordersIterable));
 	}
@@ -354,11 +361,13 @@ public class ProtocolViewerController extends MolgenisPluginController
 		if (catalogId == null) return new SearchResult("The catalogID cannot be null");
 		if (queryString == null) return new SearchResult("The queryString items cannot be null");
 		List<QueryRule> rules = new ArrayList<QueryRule>();
-		for (String term : queryString.toString().split("\\s*"))
+		for (String term : Splitter.on(CharMatcher.anyOf("*-.\\s\\t")).split(queryString.toString()))
 		{
 			if (rules.size() > 0) rules.add(new QueryRule(Operator.AND));
 			rules.add(new QueryRule(Operator.SEARCH, term));
 		}
+		rules.add(new QueryRule(Operator.OR));
+		rules.add(new QueryRule(Operator.SEARCH, queryString));
 		return searchService.search(new SearchRequest("protocolTree-" + catalogId.toString(), new QueryImpl(rules)
 				.pageSize(Integer.MAX_VALUE), null));
 	}
@@ -490,7 +499,7 @@ public class ProtocolViewerController extends MolgenisPluginController
 		{
 			return path;
 		}
-		
+
 		public List<String> getGroup()
 		{
 			return group;
