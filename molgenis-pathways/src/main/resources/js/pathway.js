@@ -5,6 +5,7 @@
 	var select2_items2 = [];
 	var pathway_info = [];
 	var pathwayId = "";
+	var selectedVcf;
 
 	function getPathwaysForGene(submittedGene, event) {
 		event.preventDefault(); // otherwise, the <form> will be displayed.
@@ -28,23 +29,8 @@
 			}
 		});
 	}
+	
 
-	function getVcfComponents(selectedVcf, event) {
-		event.preventDefault();
-		// console.log(JSON.stringify(selectedVcf));
-		$.ajax({
-			type : 'POST',
-			url : molgenis.getContextUrl() + "/vcfFile",
-			dataType : 'json',
-			contentType : 'application/json',
-			data : JSON.stringify(selectedVcf),
-			success : function(data) {
-				$('#hiding-select2').show();
-				getPathwaysByGenes(event);
-				// console.log(data);
-			}
-		});
-	}
 
 	function getPathways(event) {
 
@@ -99,15 +85,18 @@
 		// test.updateBBox();
 		// test.fit();
 	}
+	
+	function getPathwaysByGenes(selectedVcf) {
+//		console.log("in function getPathwaysByGenes");
 
-	function getPathwaysByGenes(event) {
 		$.ajax({
 			type : 'POST',
 			url : molgenis.getContextUrl() + "/pathwaysByGenes",
 			contentType : 'application/json',
+			data : selectedVcf,
 			success : function(data) {
 				select2_items2 = [];
-				// console.log(data);
+//				 console.log(data);
 				for ( var item in data) {
 					select2_items2.push({
 						text : data[item],
@@ -118,10 +107,10 @@
 		});
 	}
 
-	function getGPML(pathwayId, event) {
+	function getGPML(selectedVcf, pathwayId, event) {
 		$.ajax({
 			type : 'GET',
-			url : molgenis.getContextUrl() + "/getGPML/" + pathwayId,
+			url : molgenis.getContextUrl() + "/getGPML/" + selectedVcf + "/" + pathwayId,
 			contentType : 'application/json',
 			success : function(data) {
 				$("#colored-pathway-svg-image").empty();
@@ -176,8 +165,10 @@
 			width : '400px'
 		});
 		$('#submit-vcfFile-btn').on('click', function(event) {
-			var selectedVcf = $('#dataset-select').val();
-			getVcfComponents(selectedVcf, event);
+			selectedVcf = $('#dataset-select').val();
+			$('#hiding-select2').show();
+			getPathwaysByGenes(selectedVcf);
+			return false;
 		});
 		$('#pathway-select2').select2({
 			placeholder : "Select a pathway",
@@ -189,7 +180,8 @@
 			},
 		}).on("select2-selecting", function(event) {
 			pathwayId = event.val;
-			getGPML(pathwayId, event);
+			getGPML(selectedVcf, pathwayId, event);
+			return false;
 		});
 		getPathways(event);
 	});

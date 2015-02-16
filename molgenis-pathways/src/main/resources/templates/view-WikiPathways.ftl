@@ -2,8 +2,7 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=[
-	"select2.css",
-	"style.css"
+	"select2.css"
 	]>
 	
 <#assign js=[
@@ -26,7 +25,7 @@
 			<div class="col-md-6 col-md-offset-2"> <#--Remember, bootstrap grid system consists of 12 columns-->
 				<h5>Search for a pathway (by gene, description, disease etc.) </h5>
 				<form>
-					<input type="text" name="geneName" id="gene-search" data-placeholder="enter a gene or description">	
+					<input type="text" name="searchTerm" id="gene-search" data-placeholder="enter a gene or description">	
 					<option val=""></option>
 					<button type="btn" id="submit-genename-btn">submit</button>
 				</form>
