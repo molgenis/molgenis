@@ -685,7 +685,13 @@
 				},
 				'onInit' : function() {
 					var nrItems = $('#analysis-target-table-container').table('getNrItems');
-					
+
+                    var entities = restApi.get('/api/v1/computeui_Analysis',
+                        {q : { field : analysis.identifier, operator : 'EQUALS',
+                            value : settings.analysis.identifier } });
+                    var obj = JSON && JSON.parse(entities) || $.parseJSON(entities);
+                    var wasRun = obj.wasRun;
+
 					// enable/disable workflow select
 					$('#analysis-workflow').prop('disabled', nrItems > 0);
 					$('#run-analysis-btn').prop('disabled', nrItems === 0);
@@ -706,7 +712,13 @@
 						$('#run-analysis-btn').removeClass('hidden');
 						$('#pause-analysis-btn').addClass('hidden');
 					}
-					
+
+                    if(settings.analysis.wasRun)
+                    {
+                        $('#rerun-analysis-btn').removeClass('hidden');
+                        $('#run-analysis-btn').addClass('hidden');
+                    }
+
 					if(nrItems === 0)
 						$('#analysis-target-footer').removeClass('hidden');
 					else
@@ -724,9 +736,20 @@
 	function runAnalysis(analysisId) {
 		$.post(molgenis.getContextUrl() + '/run/' + analysisId).done(function() {
 			changeAnalysis(analysisId);
+//            settings.analysis.wasRun = true;
+//            settings.analysis.status = 'RUNNING';
 		});
 	}
-	/**
+
+    function rerunAnalysis(analysisId) {
+        $.post(molgenis.getContextUrl() + '/rerun/' + analysisId).done(function() {
+
+        });
+
+    }
+
+
+    /**
 	 * @memberOf molgenis.analysis
 	 */
 	function stopAnalysis(analysisId) {
@@ -836,8 +859,14 @@
 			e.preventDefault();
 			runAnalysis(settings.analysis.identifier);
 		});
-		
-		$(document).on('click', '#add-target-btn', function(e) {
+
+        $(document).on('click', '#rerun-analysis-btn', function(e) {
+            e.preventDefault();
+            rerunAnalysis(settings.analysis.identifier);
+        });
+
+
+        $(document).on('click', '#add-target-btn', function(e) {
 			e.preventDefault();
 			var targetId = $('#analysis-target-select option:selected').val();
 			addAnalysisTarget('/api/v1/' + settings.analysis.workflow.targetType + '/' + targetId);

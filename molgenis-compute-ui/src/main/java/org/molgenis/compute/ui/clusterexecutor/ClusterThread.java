@@ -12,6 +12,8 @@ public class ClusterThread implements Runnable
 {
 	public static final String SUBMIT = "submit";
 	public static final String CANCEL = "cancel";
+	public static final String RERUN = "rerun";
+
 	private final String operation;
 
 	private Analysis analysis = null;
@@ -38,5 +40,7 @@ public class ClusterThread implements Runnable
 	{
 		if (operation.equalsIgnoreCase(SUBMIT)) executor.submitRun(analysis, callbackUri);
 		else if (operation.equalsIgnoreCase(CANCEL)) executor.cancelRun(analysis, callbackUri);
+		else if (operation.equalsIgnoreCase(RERUN)) executor.reRun(analysis, callbackUri);
+
 	}
 }

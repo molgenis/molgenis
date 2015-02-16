@@ -84,7 +84,7 @@
 		<button id="pause-analysis-btn" type="button" class="btn btn-default hidden">Pause</button>
 		<button id="pause-analysis-btn" type="button" class="btn btn-default hidden">Continue</button>
 		<button id="run-analysis-btn" type="button" class="btn btn-default">Run</button>
-        <button id="rerun-analysis-btn" type="button" class="btn btn-default">ReRun</button>
+        <button id="rerun-analysis-btn" type="button" class="btn btn-default hidden">ReRun</button>
 	</div>
 </div>
 

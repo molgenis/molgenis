@@ -88,6 +88,17 @@ public class Analysis extends MapEntity
 		set(AnalysisMetaData.SUBMIT_SCRIPT, submitScript);
 	}
 
+	public void setWasRun(boolean wasRun)
+	{
+		set(AnalysisMetaData.WAS_RUN, wasRun);
+	}
+
+	public boolean isWasRun()
+	{
+		return getBoolean(AnalysisMetaData.WAS_RUN);
+	}
+
+
 	public AnalysisStatus getStatus()
 	{
 		String status = getString(AnalysisMetaData.STATUS);

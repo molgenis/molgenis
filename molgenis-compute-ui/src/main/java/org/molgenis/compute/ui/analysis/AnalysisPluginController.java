@@ -20,11 +20,7 @@ import org.molgenis.compute.ui.meta.AnalysisJobMetaData;
 import org.molgenis.compute.ui.meta.AnalysisMetaData;
 import org.molgenis.compute.ui.meta.UIBackendMetaData;
 import org.molgenis.compute.ui.meta.UIWorkflowMetaData;
-import org.molgenis.compute.ui.model.Analysis;
-import org.molgenis.compute.ui.model.AnalysisJob;
-import org.molgenis.compute.ui.model.UIBackend;
-import org.molgenis.compute.ui.model.UIWorkflow;
-import org.molgenis.compute.ui.model.UIWorkflowNode;
+import org.molgenis.compute.ui.model.*;
 import org.molgenis.compute.ui.model.decorator.UIWorkflowDecorator;
 import org.molgenis.compute5.CommandLineRunContainer;
 import org.molgenis.compute5.ComputeCommandLine;
@@ -294,6 +290,8 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 		// update analysis
 		analysis.setSubmitScript(container.getSumbitScript());
 
+		analysis.setWasRun(true);
+		analysis.setStatus(AnalysisStatus.RUNNING);
 		dataService.update(AnalysisMetaData.INSTANCE.getName(), analysis);
 
 		clusterManager.executeAnalysis(analysis);
@@ -309,9 +307,9 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 
 		Analysis analysis = dataService.findOne(AnalysisMetaData.INSTANCE.getName(), analysisId, Analysis.class);
 		if (analysis == null) throw new UnknownEntityException("Unknown Analysis [" + analysisId + "]");
-		LOG.info("Running analysis [" + analysisId + "]");
+		LOG.info("Re-Running analysis [" + analysisId + "]");
 
-		//TODO: continue here
+		clusterManager.reRunJobs(analysis);
 	}
 
 	@Transactional

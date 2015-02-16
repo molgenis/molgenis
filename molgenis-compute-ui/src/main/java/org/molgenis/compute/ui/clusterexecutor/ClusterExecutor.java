@@ -10,4 +10,6 @@ public interface ClusterExecutor
 	boolean submitRun(Analysis analysis, String callbackUri);
 
 	boolean cancelRun(Analysis analysis, String callbackUri);
+
+	boolean reRun(Analysis analysis, String callbackUri);
 }
