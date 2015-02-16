@@ -88,16 +88,36 @@ public class WikiPathwaysController extends MolgenisPluginController
 				}
 			});
 
-	private final LoadingCache<String, byte[]> PATHWAY_IMAGE_CACHED = CacheBuilder.newBuilder()
-			.maximumSize(Integer.MAX_VALUE).refreshAfterWrite(1, TimeUnit.DAYS).build(new CacheLoader<String, byte[]>()
+	private final LoadingCache<String, String> uncoloredPathwayImageCache = CacheBuilder.newBuilder()
+			.maximumSize(Integer.MAX_VALUE).refreshAfterWrite(1, TimeUnit.DAYS).build(new CacheLoader<String, String>()
 			{
 				@Override
-				public synchronized byte[] load(String pathwayId) throws Exception
+				public synchronized String load(String pathwayId) throws Exception
 				{
-					return wikiPathwaysService.getPathwayAs("svg", pathwayId, 0);
+					return toSingleLineString(wikiPathwaysService.getPathwayAs("svg", pathwayId, 0));
 
 				}
 			});
+
+	private static String toSingleLineString(byte[] source)
+	{
+		ByteArrayInputStream bis = new ByteArrayInputStream(source);
+		Scanner scanner = new Scanner(bis);
+		scanner.useDelimiter("\\Z");// To read all scanner content in one String
+		String pathway = "";
+		try
+		{
+			if (scanner.hasNext())
+			{
+				pathway = scanner.next();
+			}
+		}
+		finally
+		{
+			scanner.close();
+		}
+		return pathway;
+	}
 
 	private final LoadingCache<List<String>, List<WSSearchResult>> ALL_VCF_PATHWAY_CACHED = CacheBuilder.newBuilder()
 			.maximumSize(Integer.MAX_VALUE).refreshAfterWrite(1, TimeUnit.DAYS)
@@ -105,8 +125,9 @@ public class WikiPathwaysController extends MolgenisPluginController
 			{
 				public List<WSSearchResult> load(List<String> genesForPathwaySearch) throws Exception
 				{
-					
-					List<WSSearchResult> listPathways = wikiPathwaysService.findPathwaysByXref(genesForPathwaySearch, Collections.singletonList("H")); // H for HGNC database (human gene symbols)
+
+					List<WSSearchResult> listPathways = wikiPathwaysService.findPathwaysByXref(genesForPathwaySearch,
+							Collections.singletonList("H")); // H for HGNC database (human gene symbols)
 					return listPathways;
 
 				}
@@ -122,8 +143,8 @@ public class WikiPathwaysController extends MolgenisPluginController
 				{
 					List a = (List) coloredPathwayParameters.get(GRAPH_IDS);
 					List b = (List) coloredPathwayParameters.get(COLORS2);
-					return wikiPathwaysService.getColoredPathway(coloredPathwayParameters.get(PATHWAY_ID).toString(), "0", a, b,
-							"svg");
+					return wikiPathwaysService.getColoredPathway(coloredPathwayParameters.get(PATHWAY_ID).toString(),
+							"0", a, b, "svg");
 				}
 			});
 
@@ -139,7 +160,9 @@ public class WikiPathwaysController extends MolgenisPluginController
 
 	/**
 	 * Shows the start screen.
-	 * @param model the {@link Model} to fill
+	 * 
+	 * @param model
+	 *            the {@link Model} to fill
 	 * @return the view name
 	 */
 	@RequestMapping(method = GET)
@@ -153,23 +176,33 @@ public class WikiPathwaysController extends MolgenisPluginController
 
 	/**
 	 * Retrieves the list of VCF entities. They are recognized by the fact that they have an "EFF" attribute.
+	 * 
 	 * @return {@link List} of {@link EntityMetaData} for the VCF entities
 	 */
 	private List<EntityMetaData> getVCFEntities()
 	{
 		List<EntityMetaData> entitiesMeta = new ArrayList<EntityMetaData>();
-		for(String entityName: dataService.getEntityNames()){
+		for (String entityName : dataService.getEntityNames())
+		{
 			EntityMetaData emd = dataService.getEntityMetaData(entityName);
-			if(emd.getAttribute("EFF") != null){
+			if (emd.getAttribute("EFF") != null)
+			{
 				entitiesMeta.add(emd);
 			}
 		}
 		return entitiesMeta;
 	}
 
+	/**
+	 * Retrieves all pathways.
+	 * 
+	 * @return Map with all pathway ids mapped to pathway name
+	 * @throws ExecutionException
+	 *             if load from cache fails
+	 */
 	@RequestMapping(value = "/allPathways", method = POST)
 	@ResponseBody
-	public Map<String, String> getListOfPathwayNames() throws ExecutionException
+	public Map<String, String> getAllPathways() throws ExecutionException
 	{
 		List<WSPathwayInfo> listOfPathways = allPathwaysCache.get(HOMO_SAPIENS);
 
@@ -181,9 +214,16 @@ public class WikiPathwaysController extends MolgenisPluginController
 		return result;
 	}
 
-	@RequestMapping(value = "/geneName", method = POST)
+	/**
+	 * Searches pathways.
+	 * 
+	 * @param searchTerm
+	 *            string to search for
+	 * @return Map with all matching pathway ids mapped to pathway name
+	 */
+	@RequestMapping(value = "/filteredPathways", method = POST)
 	@ResponseBody
-	public Map<String, String> getPathwayByGeneName(@Valid @RequestBody String searchTerm)
+	public Map<String, String> getFilteredPathways(@Valid @RequestBody String searchTerm)
 	{
 		List<WSSearchResult> pathwaysByText = wikiPathwaysService.findPathwaysByText(searchTerm, HOMO_SAPIENS);
 
@@ -195,21 +235,20 @@ public class WikiPathwaysController extends MolgenisPluginController
 		return result;
 	}
 
+	/**
+	 * Retrieves pathway image.
+	 * 
+	 * @param pathwayId
+	 *            the id of the pathway
+	 * @return single-line svg string of the pathway image
+	 * @throws ExecutionException
+	 *             if load from cache failsÏ
+	 */
 	@RequestMapping(value = "/pathwayViewer/{pathwayId}", method = GET)
 	@ResponseBody
-	public String getPathway(@PathVariable String pathwayId) throws MalformedURLException, ExecutionException
+	public String getPathway(@PathVariable String pathwayId) throws ExecutionException
 	{
-
-		byte[] source = PATHWAY_IMAGE_CACHED.get(pathwayId);
-		ByteArrayInputStream bis = new ByteArrayInputStream(source);
-
-		@SuppressWarnings("resource")
-		Scanner scanner = new Scanner(bis);
-		scanner.useDelimiter("\\Z");// To read all scanner content in one String
-		String pathway = "";
-		if (scanner.hasNext()) pathway = scanner.next();
-
-		return pathway;
+		return uncoloredPathwayImageCache.get(pathwayId);
 	}
 
 	@RequestMapping(value = "/vcfFile", method = POST)
@@ -255,11 +294,11 @@ public class WikiPathwaysController extends MolgenisPluginController
 				genes.put(geneSymbol, impact);
 			}
 
-//			for (String symbol : allGeneSymbols)
-//			{
-//				int occurrence = StringUtils.countOccurrencesOf(allGeneSymbols.toString(), symbol);
-				// rankingList.put(symbol, occurrence);
-//			}
+			// for (String symbol : allGeneSymbols)
+			// {
+			// int occurrence = StringUtils.countOccurrencesOf(allGeneSymbols.toString(), symbol);
+			// rankingList.put(symbol, occurrence);
+			// }
 
 		}
 		System.out.println("genes with impact: " + genes);
@@ -282,7 +321,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 		Map<String, String> pathwayByGenes = new HashMap<String, String>();
 		List<String> geneSymbols = new ArrayList<String>();
 		System.out.println("the size of genes is: " + genes.size());
-		
+
 		for (String symbol : genes.keySet())
 		{
 			geneSymbols.add(symbol);
@@ -521,36 +560,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 		else
 		{
 			System.out.println("normal pathway, uncolored");
-			Long t5 = System.currentTimeMillis();
-			// if graphIds and colors are empty, getPathway() -> uncolored
-			byte[] uncoloredPathway = PATHWAY_IMAGE_CACHED.get(pathwayId);
-			ByteArrayInputStream byteis = new ByteArrayInputStream(uncoloredPathway);
-
-			Scanner scanner = new Scanner(byteis);
-			scanner.useDelimiter("\\Z");// To read all scanner content in one String
-			String regularPathway = "";
-			if (scanner.hasNext()) regularPathway = scanner.next();
-			scanner.close();
-			Long t6 = System.currentTimeMillis();
-			System.out.println(t6 - t5);
-			return regularPathway;
+			return uncoloredPathwayImageCache.get(pathwayId);
 		}
 	}
-
-	// private byte[] idsToPathways(List<String> graphIds, List<String> colors, String pathwayId)
-	// {
-	// System.out.println(graphIds + " " + colors);
-	//
-	// byte[] base64Binary = service.getColoredPathway(pathwayId, "0", graphIds, colors, "svg");
-	// byte[] base64Binary = service.getColoredPathway(pathwayId, "0", Arrays.asList(new String[]{"cf3", "cd6"}),
-	// Arrays.asList(new String[]{"FFA500", "FF0000"}), "svg");
-
-	// return base64Binary;
-	// }
-
-	// "FF0000" red
-	// "FFA500" orange
-	// "FFFF00" yellow
-	// "0000FF" blue
-
 }
