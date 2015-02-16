@@ -301,6 +301,20 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 	}
 
 	@Transactional
+	@RequestMapping(value = "/rerun/{analysisId}", method = POST)
+	@ResponseStatus(HttpStatus.OK)
+	public void reRunAnalysis(@PathVariable(value = "analysisId") String analysisId)
+	{
+		System.out.println("In ReRun");
+
+		Analysis analysis = dataService.findOne(AnalysisMetaData.INSTANCE.getName(), analysisId, Analysis.class);
+		if (analysis == null) throw new UnknownEntityException("Unknown Analysis [" + analysisId + "]");
+		LOG.info("Running analysis [" + analysisId + "]");
+
+		//TODO: continue here
+	}
+
+	@Transactional
 	@RequestMapping(value = "/pause/{analysisId}", method = POST)
 	@ResponseStatus(HttpStatus.OK)
 	public void pauseAnalysis(@PathVariable(value = "analysisId") String analysisId)
