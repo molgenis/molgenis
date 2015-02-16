@@ -52,7 +52,7 @@
 	   				<select class="form-control" id="dataset-select" data-placeholder="Select a vcf file">
 	   				<option val=""></option><#--Need empty option tag, otherwise placeholder does not work!-->
 			   		<#if entitiesMeta?has_content>
-			        	<#list entitiesMeta.iterator() as entityMeta>
+			        	<#list entitiesMeta as entityMeta>
 			            <option value="${entityMeta.name}" <#if entityMeta.name == selectedEntityName> selected</#if>><#if entityMeta.label?has_content>${entityMeta.label}<#else>${entityMeta.name}</#if></option>
 			        	</#list>
 			   		</#if>

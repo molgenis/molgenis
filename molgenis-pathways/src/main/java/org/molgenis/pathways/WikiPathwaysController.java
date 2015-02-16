@@ -5,7 +5,6 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -47,11 +46,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import com.google.common.base.Function;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.Iterables;
 
 @Controller
 @RequestMapping(URI)
@@ -65,7 +62,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 	private static final String ID = "wikipathways";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	private final WikiPathwaysPortType wikiPathwaysService;
-	private static final String organism = "Homo sapiens";
+	private static final String HOMO_SAPIENS = "Homo sapiens";
 	private Map<String, List<String>> nodeList = new HashMap<>();
 	private String geneSymbol = "";
 	private Map<String, Integer> genes = new HashMap<>();
@@ -78,7 +75,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 	private int countModerateImpact = 0;
 	private int countLowImpact = 0;
 
-	private final LoadingCache<String, List<WSPathwayInfo>> ALL_PATHWAY_CACHED = CacheBuilder.newBuilder()
+	private final LoadingCache<String, List<WSPathwayInfo>> allPathwaysCache = CacheBuilder.newBuilder()
 			.maximumSize(Integer.MAX_VALUE).refreshAfterWrite(1, TimeUnit.DAYS)
 			.build(new CacheLoader<String, List<WSPathwayInfo>>()
 			{
@@ -131,165 +128,71 @@ public class WikiPathwaysController extends MolgenisPluginController
 			});
 
 	@Autowired
-	private AsyncWikiPathwayLoader asyncWikiPathwayLoader;
-
-	@Autowired
 	private DataService dataService;
 
 	@Autowired
-	public WikiPathwaysController(WikiPathwaysPortType service)
+	public WikiPathwaysController(WikiPathwaysPortType wikiPathwaysService)
 	{
 		super(URI);
-		this.wikiPathwaysService = service;
+		this.wikiPathwaysService = wikiPathwaysService;
 	}
 
+	/**
+	 * Shows the start screen.
+	 * @param model the {@link Model} to fill
+	 * @return the view name
+	 */
 	@RequestMapping(method = GET)
-	public String init(Model model) throws IOException, ExecutionException
+	public String init(Model model)
 	{
 		model.addAttribute("listOfPathwayNames", pathwayNames);
-
-		Iterable<EntityMetaData> entitiesMeta = Iterables.transform(dataService.getEntityNames(),
-				new Function<String, EntityMetaData>()
-				{
-					@Override
-					public EntityMetaData apply(String entityName)
-					{
-						return dataService.getEntityMetaData(entityName);
-					}
-				});
-		model.addAttribute("entitiesMeta", entitiesMeta);
+		model.addAttribute("entitiesMeta", getVCFEntities());
 		model.addAttribute("selectedEntityName", "");
-
 		return "view-WikiPathways";
 	}
 
-	// No spring annotations, used by methods in this class
-	@RequestMapping(value = "/allPathways", method = POST)
-	@ResponseBody
-	private Map<String, String> getListOfPathwayNames() throws ExecutionException, IOException, SAXException,
-			ParserConfigurationException
+	/**
+	 * Retrieves the list of VCF entities. They are recognized by the fact that they have an "EFF" attribute.
+	 * @return {@link List} of {@link EntityMetaData} for the VCF entities
+	 */
+	private List<EntityMetaData> getVCFEntities()
 	{
-		Map<String, String> pathwayNames = new HashMap<String, String>();
-		Long t1 = System.currentTimeMillis();
-		List<WSPathwayInfo> listOfPathways = ALL_PATHWAY_CACHED.get(organism);
-
-		for (WSPathwayInfo info : listOfPathways)
-		{
-			pathwayNames.put(info.getId(), info.getName());
+		List<EntityMetaData> entitiesMeta = new ArrayList<EntityMetaData>();
+		for(String entityName: dataService.getEntityNames()){
+			EntityMetaData emd = dataService.getEntityMetaData(entityName);
+			if(emd.getAttribute("EFF") != null){
+				entitiesMeta.add(emd);
+			}
 		}
-
-		Long t2 = System.currentTimeMillis();
-		System.out.println(t2 - t1);
-
-		// getAllGenesPerPathway(pathwayNames);
-
-		return pathwayNames;
+		return entitiesMeta;
 	}
 
-	// public Map<String, List<String>> getAllGenesPerPathway(Map<String, String> pathwayNames) throws IOException,
-	// SAXException, ParserConfigurationException
-	// {
-	// System.out.println("in method getAllGenesPerPathway()");
-	//
-	// String everyGene = "";
-	// List<String> genesForRanking = new ArrayList<>();
-	// List<String> allPwIds = new ArrayList<>();
-	//
-	// for (String id : pathwayNames.keySet())
-	// {
-	// allPwIds.add(id);
-	// }
-	// pwGPML = getAllPathwayGpml(allPwIds);
+	@RequestMapping(value = "/allPathways", method = POST)
+	@ResponseBody
+	public Map<String, String> getListOfPathwayNames() throws ExecutionException
+	{
+		List<WSPathwayInfo> listOfPathways = allPathwaysCache.get(HOMO_SAPIENS);
 
-	// DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-	// DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-	// InputStream is = new ByteArrayInputStream(pwGPML.getBytes());
-	// Document doc = dBuilder.parse(is);
-	// NodeList dataNodes = doc.getElementsByTagName("DataNode");
-	//
-	// for (int i = 0; i < dataNodes.getLength(); i++)
-	// {
-	// Element dataNode = (Element) dataNodes.item(i);
-	// everyGene = dataNode.getAttribute("TextLabel");
-	// // System.out.println(textLabel);
-	//
-	// }
-	//
-	// Pattern pat = Pattern.compile("^[0-9A-Za-z\\-]*");
-	// if (everyGene.contains("&quot;"))
-	// {
-	// System.out.println("WARNING: textlabel(" + everyGene + ") contains quotes, removing those...");
-	// everyGene = everyGene.replace("&quot;", "");// FIXME: nasty construction, but wikipathways data is not
-	// // consistent. How to do this properly
-	// }
-	//
-	// for (String id : pathwayNames.keySet())
-	// {
-	// Matcher mat = pat.matcher(everyGene);
-	// if (mat.find())
-	// {
-	// genesForRanking.add(mat.group(0));
-	// allGenesPerPathway.put(id, genesForRanking);
-	// }
-	// }
-	// return genesForRanking;
+		Map<String, String> result = new HashMap<String, String>();
+		for (WSPathwayInfo pathwayInfo : listOfPathways)
+		{
+			result.put(pathwayInfo.getId(), pathwayInfo.getName());
+		}
+		return result;
+	}
 
-	// idsAndGpml = writeToFile(allGenesPerPathway);
-	// System.out.println("pathway id: " + allGenesPerPathway.keySet());
-
-	// return allGenesPerPathway;
-	// return null;
-	//
-	// }
-	//
-	// public String getAllPathwayGpml(List<String> allPwIds)
-	// {
-	// // System.out.println("in method getAllGpmlFiles()");
-	//
-	// for (String id : allPwIds)
-	// {
-	// // System.out.println(id);
-	// WSPathway pw = service.getPathway(id, 0);
-	// pwGPML = pw.getGpml();
-	// }
-	//
-	// return pwGPML;
-	//
-	// }
-
-	// public File writeToFile(Map<String, List<String>> allGPMLs) throws IOException
-	// {
-	// if (!idsAndGpml.exists())
-	// {
-	// idsAndGpml.createNewFile();
-	// }
-	//
-	// FileWriter fw = new FileWriter(idsAndGpml.getAbsoluteFile());
-	// BufferedWriter bw = new BufferedWriter(fw);
-	//
-	// for (String id : allGPMLs.keySet())
-	// {
-	// bw.write(id + "\t" + allGPMLs.get(id) + "\n");
-	// }
-	// bw.close();
-	//
-	// return idsAndGpml;
-	// }
-
-	// With spring annotation, can be called via url by, for example javascript
 	@RequestMapping(value = "/geneName", method = POST)
 	@ResponseBody
-	public Map<String, String> getPathwayByGeneName(@Valid @RequestBody String submittedGene)
+	public Map<String, String> getPathwayByGeneName(@Valid @RequestBody String searchTerm)
 	{
-		Map<String, String> pathwayNames2 = new HashMap<String, String>();
-		List<WSSearchResult> listOfPathways2 = wikiPathwaysService.findPathwaysByText(submittedGene, organism);
+		List<WSSearchResult> pathwaysByText = wikiPathwaysService.findPathwaysByText(searchTerm, HOMO_SAPIENS);
 
-		for (WSSearchResult info2 : listOfPathways2)
+		Map<String, String> result = new HashMap<String, String>();
+		for (WSSearchResult pathwayInfo : pathwaysByText)
 		{
-			pathwayNames2.put(info2.getId(), info2.getName());
+			result.put(pathwayInfo.getId(), pathwayInfo.getName());
 		}
-
-		return pathwayNames2;
+		return result;
 	}
 
 	@RequestMapping(value = "/pathwayViewer/{pathwayId}", method = GET)

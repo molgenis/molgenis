@@ -13,7 +13,7 @@
 
 		$.ajax({
 			type : 'POST',
-			url : molgenis.getContextUrl() + "/geneName",
+			url : molgenis.getContextUrl() + "/filteredPathways",
 			contentType : 'application/json',
 			data : JSON.stringify(submittedGene),
 			success : function(data) {
