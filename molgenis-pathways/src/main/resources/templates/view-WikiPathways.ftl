@@ -1,60 +1,82 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 
-<#assign css=["select2.css"]>
+<#assign css=[
+	"select2.css",
+	"style.css"
+	]>
+	
 <#assign js=[
 	"pathway.js",
-	"select2.min.js"
+	"select2.min.js",
+	"svg-pan-zoom.min.js"
 	]>	
+
 <@header css js/>
 
-<div class="row">
-	<div class="col-md-6 col-md-offset-3"> <#--Remember, bootstrap grid system consists of 12 columns-->
-		<h5>Search for pathway (gene, description): </h5>
-		<form>
-			<input type="text" name="geneName" id="gene-search" data-placeholder="enter a gene or description">	
-		<#-->	<option val=""></option>-->
-			<button type="btn" id="submit-genename-btn">submit</button>
-		</form>
-		</p>
-		<h5>Select a pathway: </h5>
-		<input id="pathway-select" value="" /> 
+<div role="tabpanel">
+	<ul class="nav nav-tabs" role="tablist">
+		<li role="presentation" class="active"><a href="#searchTab" aria-controls="searchTab" role="tab" data-toggle="tab">search</a></li>
+		<li role="presentation"><a href="#pathway-selectTab" aria-controls="pathway-selectTab" role="tab" data-toggle="tab">pathway select</a></li>
+	</ul>
+
+	<div class="tab-content">
+	<div role="tabpanel" class="tab-pane active" id="searchTab">
+		<div class="row" id="search">
+			<div class="col-md-6 col-md-offset-2"> <#--Remember, bootstrap grid system consists of 12 columns-->
+				<h5>Search for a pathway (by gene, description, disease etc.) </h5>
+				<form>
+					<input type="text" name="geneName" id="gene-search" data-placeholder="enter a gene or description">	
+					<option val=""></option>
+					<button type="btn" id="submit-genename-btn">submit</button>
+				</form>
+				<br/>
+					<input id="pathway-select" value="" /> 
+					<br/>
+					<small>This menu will be updated according to the search term that is used.
+					<br/>When no search term is used, all available pathways can be selected.</small>
+				<br/><br/><br/>
+			</div>
+			<div class="row" id="pathwaySelect">
+				<div class="col-md-6 col-md-offset-1"> <#--Remember, bootstrap grid system consists of 12 columns-->
+					<div id="pathway-svg-image"></div>
+				</div>
+			</div>
+		</div>	
+	</div>
+    <div role="tabpanel" class="tab-pane" id="pathway-selectTab">
+		<div class="row">
+			<div class="col-md-6 col-md-offset-2">	
+				<br/>
+				<form>
+	   				<select class="form-control" id="dataset-select" data-placeholder="Select a vcf file">
+	   				<option val=""></option><#--Need empty option tag, otherwise placeholder does not work!-->
+			   		<#if entitiesMeta?has_content>
+			        	<#list entitiesMeta.iterator() as entityMeta>
+			            <option value="${entityMeta.name}" <#if entityMeta.name == selectedEntityName> selected</#if>><#if entityMeta.label?has_content>${entityMeta.label}<#else>${entityMeta.name}</#if></option>
+			        	</#list>
+			   		</#if>
+		  			</select>
+		  			<br/>	  
+					<button type="btn" id="submit-vcfFile-btn">submit</button>
+				</form> 
+			</div>
+		</div>
+		
+		<div class="row">
+			<div class="col-md-6 col-md-offset-2" id="hiding-select2">	
+				<br/>
+				<input id="pathway-select2" value="" /> 
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-6 col-md-offset-1"> <#--Remember, bootstrap grid system consists of 12 columns-->
+				<div id="colored-pathway-svg-image">
+				<!--<g class="svg-pan-zoom_viewport"></g>-->
+				</div>
+			</div>
+		</div>		
 	</div>
 </div>
-<div class="row">
-	<div class="col-md-6"> <#--Remember, bootstrap grid system consists of 12 columns-->
-		</p>
-		<div id="pathway-svg-image"></div>
-	</div>
-</div>
-<div class="row">
-	<div class="col-md-6 col-md-offset-3">	
-		</p>
-		<form>
-			<h5>Select a vcf file:</h5>
-   			<select class="form-control" id="dataset-select" data-placeholder="Choose an Entity">
-		   		<#if entitiesMeta?has_content>
-		        	<#list entitiesMeta.iterator() as entityMeta>
-		            	<option value="${entityMeta.name}" <#if entityMeta.name == selectedEntityName> selected</#if>><#if entityMeta.label?has_content>${entityMeta.label}<#else>${entityMeta.name}</#if></option>
-		        	</#list>
-		   		</#if>
-	  		</select>
-	  	</p>	  
-		<button type="btn" id="submit-vcfFile-btn">submit</button>
-		</form> 
-	</div>
-</div>
-<div class="row">
-	<div class="col-md-6 col-md-offset-3" id="hiding-select2">	
-		</p></p>
-		<h5>Select a pathway: </h5>
-		<input id="pathway-select2" value="" /> 
-	</div>
-</div>
-<div class="row">
-	<div class="col-md-6"> <#--Remember, bootstrap grid system consists of 12 columns-->
-		</p>
-		<div id="colored-pathway-svg-image"></div>
-	</div>
-</div>
+
 <@footer />
