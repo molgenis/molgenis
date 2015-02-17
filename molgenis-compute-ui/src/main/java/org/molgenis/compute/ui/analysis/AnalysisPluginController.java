@@ -301,8 +301,6 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 	@ResponseStatus(HttpStatus.OK)
 	public void reRunAnalysis(@PathVariable(value = "analysisId") String analysisId)
 	{
-		System.out.println("In ReRun");
-
 		Analysis analysis = dataService.findOne(AnalysisMetaData.INSTANCE.getName(), analysisId, Analysis.class);
 		if (analysis == null) throw new UnknownEntityException("Unknown Analysis [" + analysisId + "]");
 		LOG.info("Re-Running analysis [" + analysisId + "]");
