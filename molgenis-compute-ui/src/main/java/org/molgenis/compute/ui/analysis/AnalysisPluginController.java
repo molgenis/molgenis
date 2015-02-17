@@ -157,6 +157,7 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 		analysis.setBackend(backend);
 		analysis.setCreationDate(creationDate);
 		analysis.setWorkflow(workflow);
+		analysis.setWasRun(false);
 		analysis.setUser(SecurityUtils.getCurrentUsername());
 		dataService.add(AnalysisMetaData.INSTANCE.getName(), analysis);
 
@@ -289,9 +290,6 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 
 		// update analysis
 		analysis.setSubmitScript(container.getSumbitScript());
-
-		analysis.setWasRun(true);
-		analysis.setStatus(AnalysisStatus.RUNNING);
 		dataService.update(AnalysisMetaData.INSTANCE.getName(), analysis);
 
 		clusterManager.executeAnalysis(analysis);

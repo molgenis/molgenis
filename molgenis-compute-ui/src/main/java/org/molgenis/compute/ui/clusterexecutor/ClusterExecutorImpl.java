@@ -111,8 +111,8 @@ public class ClusterExecutorImpl implements ClusterExecutor
 				// execute submit script on backend
 				submitAnalysis(analysis, session, runDir);
 
+				analysis.setStatus(AnalysisStatus.RUNNING);
 				analysis.setWasRun(true);
-
 				dataService.update(AnalysisMetaData.INSTANCE.getName(), analysis);
 			}
 			finally
@@ -380,8 +380,6 @@ public class ClusterExecutorImpl implements ClusterExecutor
 	{
 		String clusterRoot = analysis.getBackend().getWorkDir();
 		String runDir = clusterRoot + analysis.getName();
-		// here read properties, which later will come from username interface (username, password)
-		// and DB (clusterRoot)
 
 		LOG.info("SUBMIT Analysis [" + analysis.getName() + "]");
 

@@ -687,10 +687,12 @@
 					var nrItems = $('#analysis-target-table-container').table('getNrItems');
 
                     var entities = restApi.get('/api/v1/computeui_Analysis',
-                        {q : { field : analysis.identifier, operator : 'EQUALS',
-                            value : settings.analysis.identifier } });
-                    var obj = JSON && JSON.parse(entities) || $.parseJSON(entities);
-                    var wasRun = obj.wasRun;
+                        {q: {q : [{ field : 'identifier', operator : 'EQUALS',
+                            value : settings.analysis.identifier }] }});
+
+                    console.log(JSON.stringify(entities))
+                    var obj = entities.items[0];
+                    var wasRun = obj.was_run;
 
 					// enable/disable workflow select
 					$('#analysis-workflow').prop('disabled', nrItems > 0);
@@ -713,7 +715,7 @@
 						$('#pause-analysis-btn').addClass('hidden');
 					}
 
-                    if(settings.analysis.wasRun)
+                    if(wasRun)
                     {
                         $('#rerun-analysis-btn').removeClass('hidden');
                         $('#run-analysis-btn').addClass('hidden');
