@@ -29,7 +29,7 @@ public class CrudRepositoryAnnotator
 	private final DataService dataService;
 	private final PermissionSystemService permissionSystemService;
 
-	public CrudRepositoryAnnotator(String newRepositoryName, DataService dataService,
+	public CrudRepositoryAnnotator(DataService dataService, String newRepositoryName,
 			PermissionSystemService permissionSystemService)
 	{
 		this.dataService = dataService;
