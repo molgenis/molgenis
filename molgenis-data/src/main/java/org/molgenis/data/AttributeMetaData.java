@@ -80,6 +80,13 @@ public interface AttributeMetaData
 	EntityMetaData getRefEntity();
 
 	/**
+	 * Expression used to compute this attribute.
+	 * 
+	 * @return String representation of expression, in JSON format
+	 */
+	String getExpression();
+
+	/**
 	 * When getDataType=compound, get compound attribute parts
 	 * 
 	 * @return Iterable of attributes or empty Iterable if no attribute parts exist
