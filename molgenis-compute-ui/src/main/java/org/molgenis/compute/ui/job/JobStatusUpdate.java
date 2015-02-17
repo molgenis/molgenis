@@ -7,6 +7,7 @@ public class JobStatusUpdate
 	private final String jobId;
 	private final JobStatus status;
 	private String outputMessage;
+	private String errorMessage;
 
 	public JobStatusUpdate(String jobId, JobStatus status)
 	{
@@ -29,10 +30,21 @@ public class JobStatusUpdate
 		return outputMessage;
 	}
 
+	public String getErrorMessage()
+	{
+		return errorMessage;
+	}
+
 	public void setOutputMessage(String outputMessage)
 	{
 		this.outputMessage = outputMessage;
 	}
+
+	public void setErrorMessage(String errorMessage)
+	{
+		this.errorMessage = errorMessage;
+	}
+
 
 	@Override
 	public String toString()

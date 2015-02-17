@@ -40,7 +40,8 @@ public class JobStatusController
 	@ResponseBody
 	@RequestMapping(value = "/{jobid}/status", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
 	public void updateJobStatus(@PathVariable("jobid") String jobId, @RequestParam("status") JobStatus status,
-			@RequestParam(value = "outLogFile", required = false) Part outLogFile)
+			@RequestParam(value = "outLogFile", required = false) Part outLogFile,
+			@RequestParam(value = "errLogFile", required = false) Part errLogFile)
 	{
 		JobStatusUpdate statusUpdate = new JobStatusUpdate(jobId, status);
 
@@ -58,6 +59,20 @@ public class JobStatusController
 				logger.error("Exception reading outLogFile", e);
 			}
 		}
+
+		if (outLogFile != null)
+		{
+			try
+			{
+				statusUpdate.setErrorMessage(FileCopyUtils.copyToString(new InputStreamReader(errLogFile
+						.getInputStream())));
+			}
+			catch (IOException e)
+			{
+				logger.error("Exception reading errLogFile", e);
+			}
+		}
+
 
 		try
 		{

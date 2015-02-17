@@ -39,8 +39,8 @@ public class JobServiceImpl implements JobService
 		}
 
 		job.setStatus(statusUpdate.getStatus());
-//		job.setOutputMessage(statusUpdate.getOutputMessage());
-
+//TODO: HERE FIX SIZES:		job.setOutputMessage(statusUpdate.getOutputMessage());
+//							job.setErrorMessage(statusUpdate.getErrorMessage());
 
 		switch (job.getStatus())
 		{
