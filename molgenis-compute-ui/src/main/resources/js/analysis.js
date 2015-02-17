@@ -685,7 +685,14 @@
 				},
 				'onInit' : function() {
 					var nrItems = $('#analysis-target-table-container').table('getNrItems');
-					
+
+                    var entities = restApi.get('/api/v1/computeui_Analysis',
+                        {q: {q : [{ field : 'identifier', operator : 'EQUALS',
+                            value : settings.analysis.identifier }] }});
+
+                    var obj = entities.items[0];
+                    var wasRun = obj.was_run;
+
 					// enable/disable workflow select
 					$('#analysis-workflow').prop('disabled', nrItems > 0);
 					$('#run-analysis-btn').prop('disabled', nrItems === 0);
@@ -706,7 +713,13 @@
 						$('#run-analysis-btn').removeClass('hidden');
 						$('#pause-analysis-btn').addClass('hidden');
 					}
-					
+
+                    if(wasRun)
+                    {
+                        $('#rerun-analysis-btn').removeClass('hidden');
+                        $('#run-analysis-btn').addClass('hidden');
+                    }
+
 					if(nrItems === 0)
 						$('#analysis-target-footer').removeClass('hidden');
 					else
@@ -726,7 +739,16 @@
 			changeAnalysis(analysisId);
 		});
 	}
-	/**
+
+    function rerunAnalysis(analysisId) {
+        $.post(molgenis.getContextUrl() + '/rerun/' + analysisId).done(function() {
+
+        });
+
+    }
+
+
+    /**
 	 * @memberOf molgenis.analysis
 	 */
 	function stopAnalysis(analysisId) {
@@ -836,8 +858,14 @@
 			e.preventDefault();
 			runAnalysis(settings.analysis.identifier);
 		});
-		
-		$(document).on('click', '#add-target-btn', function(e) {
+
+        $(document).on('click', '#rerun-analysis-btn', function(e) {
+            e.preventDefault();
+            rerunAnalysis(settings.analysis.identifier);
+        });
+
+
+        $(document).on('click', '#add-target-btn', function(e) {
 			e.preventDefault();
 			var targetId = $('#analysis-target-select option:selected').val();
 			addAnalysisTarget('/api/v1/' + settings.analysis.workflow.targetType + '/' + targetId);

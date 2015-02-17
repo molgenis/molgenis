@@ -110,6 +110,10 @@ public class ClusterExecutorImpl implements ClusterExecutor
 
 				// execute submit script on backend
 				submitAnalysis(analysis, session, runDir);
+
+				analysis.setStatus(AnalysisStatus.RUNNING);
+				analysis.setWasRun(true);
+				dataService.update(AnalysisMetaData.INSTANCE.getName(), analysis);
 			}
 			finally
 			{
@@ -370,6 +374,69 @@ public class ClusterExecutorImpl implements ClusterExecutor
 					}
 				}
 			}
+	}
+
+	public boolean reRun(Analysis analysis, String callbackUri)
+	{
+		String clusterRoot = analysis.getBackend().getWorkDir();
+		String runDir = clusterRoot + analysis.getName();
+
+		LOG.info("SUBMIT Analysis [" + analysis.getName() + "]");
+
+		// get SSH key pair for current user
+		MolgenisUserKey userKeyPair = dataService.findOne(MolgenisUserKeyMetaData.INSTANCE.getName(),
+				new QueryImpl().eq(MolgenisUserKeyMetaData.USER, analysis.getUser()), MolgenisUserKey.class);
+
+		// submit analysis through SSH channel
+		MolgenisUserSecureChannel userSecureChannel = null;
+		try
+		{
+			userSecureChannel = new MolgenisUserSecureChannel(userKeyPair);
+
+			Session session = null;
+			try
+			{
+				session = userSecureChannel.getSession(analysis.getBackend().getHost(), 22);
+
+				session.connect();
+				LOG.info("session connected.....");
+
+				submitAnalysis(analysis, session, runDir);
+
+				analysis.setWasRun(true);
+				dataService.update(AnalysisMetaData.INSTANCE.getName(), analysis);
+			}
+			finally
+			{
+				if (session != null)
+				{
+					session.disconnect();
+					LOG.info("session disconnected.....");
+				}
+			}
+
+		}
+		catch (IOException | JSchException  e)
+		{
+			LOG.error("Failed to submit analysis", e);
+			throw new RuntimeException(e);
+		}
+		finally
+		{
+			if (userSecureChannel != null)
+			{
+				try
+				{
+					userSecureChannel.close();
+				}
+				catch (IOException e)
+				{
+					throw new RuntimeException(e);
+				}
+			}
+		}
+
+		return true;
 	}
 
 }

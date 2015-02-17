@@ -23,7 +23,6 @@ import java.util.List;
  */
 public class AnalysisToFilesWriter
 {
-	List<UIWorkflowProtocol> processedNodes = new ArrayList<UIWorkflowProtocol>();
 	List<UIWorkflowParameter> parameters = new ArrayList<UIWorkflowParameter>();
 
 	private static Logger LOG = LoggerFactory.getLogger(AnalysisToFilesWriter.class);

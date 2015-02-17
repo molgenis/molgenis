@@ -14,13 +14,17 @@ public class ClusterManager
 
 	public void executeAnalysis(Analysis analysis)
 	{
-
 		(new Thread(new ClusterThread(clusterExecutor, analysis, ClusterThread.SUBMIT))).start();
 	}
 
 	public void cancelRunJobs(Analysis analysis)
 	{
 			(new Thread(new ClusterThread(clusterExecutor, analysis, ClusterThread.CANCEL))).start();
-
 	}
+
+	public void reRunJobs(Analysis analysis)
+	{
+		(new Thread(new ClusterThread(clusterExecutor, analysis, ClusterThread.RERUN))).start();
+	}
+
 }

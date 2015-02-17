@@ -1,13 +1,9 @@
 package org.molgenis.compute.ui.meta;
 
-import static org.molgenis.MolgenisFieldTypes.DATETIME;
-import static org.molgenis.MolgenisFieldTypes.ENUM;
-import static org.molgenis.MolgenisFieldTypes.SCRIPT;
-import static org.molgenis.MolgenisFieldTypes.TEXT;
-import static org.molgenis.MolgenisFieldTypes.XREF;
-
 import org.molgenis.compute.ui.model.AnalysisStatus;
 import org.molgenis.data.support.DefaultEntityMetaData;
+
+import static org.molgenis.MolgenisFieldTypes.*;
 
 public class AnalysisMetaData extends DefaultEntityMetaData
 {
@@ -25,6 +21,7 @@ public class AnalysisMetaData extends DefaultEntityMetaData
 	public static final String SUBMIT_SCRIPT = "submitScript";
 	public static final String STATUS = "status";
 	public static final String USER = "user";
+	public static final String WAS_RUN = "was_run";
 
 	private AnalysisMetaData()
 	{
@@ -42,6 +39,8 @@ public class AnalysisMetaData extends DefaultEntityMetaData
 				.setDefaultValue(STATUS_DEFAULT.toString()).setLabel("Status");
 		// FIXME user xref to MolgenisUser when https://github.com/molgenis/molgenis/issues/2054 is fixed
 		addAttribute(USER).setNillable(false).setLabel("User");
+		addAttribute(WAS_RUN).setDataType(BOOL).
+				setDefaultValue(false).setNillable(false).setLabel("was Run");
 	}
 
 }

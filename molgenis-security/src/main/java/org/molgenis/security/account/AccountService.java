@@ -158,6 +158,7 @@ public class AccountService
 		{
 			String newPassword = UUID.randomUUID().toString().substring(0, 8);
 			molgenisUser.setPassword(newPassword);
+			molgenisUser.setChangePassword(true);
 			dataService.update(MolgenisUser.ENTITY_NAME, molgenisUser);
 
 			// send password reseted email to user
