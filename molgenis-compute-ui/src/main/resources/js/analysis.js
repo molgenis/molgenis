@@ -738,8 +738,6 @@
 	function runAnalysis(analysisId) {
 		$.post(molgenis.getContextUrl() + '/run/' + analysisId).done(function() {
 			changeAnalysis(analysisId);
-//            settings.analysis.wasRun = true;
-//            settings.analysis.status = 'RUNNING';
 		});
 	}
 
