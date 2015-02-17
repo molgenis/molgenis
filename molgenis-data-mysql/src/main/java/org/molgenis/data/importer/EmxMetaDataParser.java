@@ -5,6 +5,7 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.DATA_TYPE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.DESCRIPTION;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENTITY;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENUM_OPTIONS;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.EXPRESSION;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ID_ATTRIBUTE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL_ATTRIBUTE;
@@ -88,7 +89,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			ID_ATTRIBUTE.toLowerCase(), LABEL.toLowerCase(), LABEL_ATTRIBUTE.toLowerCase(),
 			LOOKUP_ATTRIBUTE.toLowerCase(), NAME, NILLABLE.toLowerCase(), PART_OF_ATTRIBUTE.toLowerCase(),
 			RANGE_MAX.toLowerCase(), RANGE_MIN.toLowerCase(), READ_ONLY.toLowerCase(), REF_ENTITY.toLowerCase(),
-			VISIBLE.toLowerCase(), UNIQUE.toLowerCase(), org.molgenis.data.meta.AttributeMetaDataMetaData.TAGS);
+			VISIBLE.toLowerCase(), UNIQUE.toLowerCase(), TAGS.toLowerCase(), EXPRESSION.toLowerCase());
 
 	private final DataService dataService;
 	private final MetaDataService metaDataService;
@@ -225,6 +226,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			Boolean labelAttribute = attributeEntity.getBoolean(LABEL_ATTRIBUTE);
 			Boolean readOnly = attributeEntity.getBoolean(READ_ONLY);
 			Boolean unique = attributeEntity.getBoolean(UNIQUE);
+			String expression = attributeEntity.getString(EXPRESSION);
 			List<String> tagIds = attributeEntity.getList(TAGS);
 
 			if (attributeNillable != null) attribute.setNillable(attributeNillable);
@@ -234,6 +236,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			// cannot update ref entities yet, will do so later on
 			if (readOnly != null) attribute.setReadOnly(readOnly);
 			if (unique != null) attribute.setUnique(unique);
+			if (expression != null) attribute.setExpression(expression);
 
 			if (lookupAttribute != null)
 			{
@@ -592,6 +595,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			final String refEntityName = (String) attribute.get(REF_ENTITY);
 			final String entityName = attribute.getString(ENTITY);
 			final String attributeName = attribute.getString(NAME);
+			final String expression = attribute.getString(EXPRESSION);
 			i++;
 			if (refEntityName != null)
 			{
@@ -599,13 +603,22 @@ public class EmxMetaDataParser implements MetaDataParser
 				DefaultAttributeMetaData defaultAttributeMetaData = (DefaultAttributeMetaData) defaultEntityMetaData
 						.getAttribute(attributeName);
 
-				if (!intermediateResults.knowsEntity(refEntityName))
+				if (intermediateResults.knowsEntity(refEntityName))
 				{
-					throw new IllegalArgumentException("attributes.refEntity error on line " + i + ": " + refEntityName
-							+ " unknown");
+					defaultAttributeMetaData.setRefEntity(intermediateResults.getEntityMetaData(refEntityName));
+				}
+				else
+				{
+					EntityMetaData refEntityMeta = dataService.getEntityMetaData(refEntityName);
+					if (expression == null || refEntityMeta == null)
+					{
+						throw new IllegalArgumentException("attributes.refEntity error on line " + i + ": "
+								+ refEntityName + " unknown");
+					}
+					// allow computed xref attributes to refer to pre-existing entities
+					defaultAttributeMetaData.setRefEntity(refEntityMeta);
 				}
 
-				defaultAttributeMetaData.setRefEntity(intermediateResults.getEntityMetaData(refEntityName));
 			}
 		}
 	}
@@ -713,7 +726,8 @@ public class EmxMetaDataParser implements MetaDataParser
 				{
 					for (AttributeMetaData att : s.getEntityMetaData().getAttributes())
 					{
-						boolean known = target.getAttribute(att.getName()) != null;
+						AttributeMetaData attribute = target.getAttribute(att.getName());
+						boolean known = attribute != null && attribute.getExpression() == null;
 						report = report.addAttribute(att.getName(),
 								known ? AttributeState.IMPORTABLE : AttributeState.UNKNOWN);
 					}
@@ -721,7 +735,8 @@ public class EmxMetaDataParser implements MetaDataParser
 					{
 						if (!(att.getDataType() instanceof CompoundField))
 						{
-							if (!att.isAuto() && !report.getFieldsImportable().get(sheet).contains(att.getName()))
+							if (!att.isAuto() && att.getExpression() == null
+									&& !report.getFieldsImportable().get(sheet).contains(att.getName()))
 							{
 								boolean required = !att.isNillable();
 								report = report.addAttribute(att.getName(),
