@@ -5,20 +5,13 @@
         <plugin id="importwizard" name="Upload" url="importwizard"/>
         <plugin id="catalogue" name="Catalogue" url="catalogue"/>
 		<plugin id="dataexplorer" name="Data Explorer" url="dataexplorer"/>
+		<plugin id="mappingservice" name="Mapping Service" url="mappingservice"/>
         <menu label="Plugins" name="plugins">
             <plugin id="standardsregistry" name="Model registry" url="standardsregistry" />
             <plugin id="geneticrepositorymerger" name="Merge Genetic Data" url="geneticrepositorymerger"/>
-            <menu label="Ontology" name="ontology_view">
-            	<plugin id="ontologyservice" name="Ontology service" url="ontologyservice"/>
-            	<plugin id="ontologyindexer" name="Ontology index" url="ontologyindexer"/>
-            </menu>
             <plugin id="background" name="Background" url="background"/>
             <plugin id="contact" name="Contact" url="contact"/>
-            <menu label="Custom Views" name="custom_views">
-                <plugin id="col7a1-patients" name="COL7A1-Patients" url="col7a1_patients"/>
-                <plugin id="col7a1-mutations" name="COL7A1-Mutations" url="col7a1_mutations"/>
-            </menu>
-	        <plugin id="gaflistimporter" name="GAF List Importer" url="gaflistimporter"/>
+            <plugin id="gaflistimporter" name="GAF List Importer" url="gaflistimporter"/>
             <plugin id="news" name="News" url="news"/>
             <plugin id="references" name="References" url="references"/>
             <plugin id="scripts" name="Scripts" url="scripts" />

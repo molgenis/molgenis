@@ -7,9 +7,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import org.molgenis.framework.ui.MolgenisPluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.molgenis.framework.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -66,7 +66,7 @@ public class MolgenisMenuController
 		model.addAttribute(KEY_CONTEXT_URL, contextUri);
 		model.addAttribute(KEY_MOLGENIS_VERSION, molgenisVersion);
 		model.addAttribute(KEY_MOLGENIS_BUILD_DATE, molgenisBuildData);
-		return getForwardPluginUri(pluginId, null);
+		return getForwardPluginUri(activeItem.getUrl(), null);
 	}
 
 	@RequestMapping("/{menuId}")

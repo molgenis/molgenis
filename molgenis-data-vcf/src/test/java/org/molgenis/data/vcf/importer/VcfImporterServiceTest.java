@@ -1,5 +1,6 @@
 package org.molgenis.data.vcf.importer;
 
+import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -23,6 +24,7 @@ import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
 import org.molgenis.data.vcf.VcfRepositoryCollection;
 import org.molgenis.framework.db.EntityImportReport;
+import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.ResourceUtils;
 import org.testng.annotations.Test;
 
@@ -40,7 +42,8 @@ public class VcfImporterServiceTest
 			File f = ResourceUtils.getFile(getClass(), "/testdata.vcf");
 			VcfRepositoryCollection source = new VcfRepositoryCollection(f);
 
-			VcfImporterService importer = new VcfImporterService(new FileRepositoryCollectionFactory(), dataService);
+			VcfImporterService importer = new VcfImporterService(new FileRepositoryCollectionFactory(), dataService,
+					mock(PermissionSystemService.class));
 
 			EntityImportReport report = importer.doImport(source, DatabaseAction.ADD);
 
@@ -61,12 +64,6 @@ public class VcfImporterServiceTest
 
 	}
 
-	@Test(expectedExceptions = IllegalArgumentException.class)
-	public void VcfImporterService()
-	{
-		new VcfImporterService(null, null);
-	}
-
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void importVcf_repositoryExists() throws IOException
 	{
@@ -76,7 +73,9 @@ public class VcfImporterServiceTest
 
 		FileRepositoryCollectionFactory fileRepositoryCollectionFactory = Mockito
 				.mock(FileRepositoryCollectionFactory.class);
-		VcfImporterService vcfImporterService = new VcfImporterService(fileRepositoryCollectionFactory, dataService);
+		VcfImporterService vcfImporterService = new VcfImporterService(fileRepositoryCollectionFactory, dataService,
+				mock(PermissionSystemService.class));
+
 		FileRepositoryCollection fileRepositoryCollection = Mockito.mock(FileRepositoryCollection.class);
 
 		File testdata = new File(FileUtils.getTempDirectory(), "testdata.vcf");
@@ -91,5 +90,4 @@ public class VcfImporterServiceTest
 
 		vcfImporterService.importVcf(testdata);
 	}
-
 }

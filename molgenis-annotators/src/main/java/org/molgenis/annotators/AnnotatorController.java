@@ -2,6 +2,7 @@ package org.molgenis.annotators;
 
 import static org.molgenis.annotators.AnnotatorController.URI;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +17,7 @@ import org.molgenis.data.annotation.CrudRepositoryAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.validation.EntityValidator;
+import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.FileStore;
 import org.slf4j.Logger;
@@ -61,6 +63,9 @@ public class AnnotatorController
 	@Autowired
 	EntityValidator entityValidator;
 
+	@Autowired
+	PermissionSystemService permissionSystemService;
+
 	/**
 	 * Gets a map of all available annotators.
 	 * 
@@ -81,7 +86,7 @@ public class AnnotatorController
 	 * option is ticked by the user.
 	 * 
 	 * @param annotatorNames
-	 * @param dataSetIdentifier
+	 * @param entityName
 	 * @param createCopy
 	 * @return repositoryName
 	 * 
@@ -97,7 +102,8 @@ public class AnnotatorController
 		if (annotatorNames != null && repository != null)
 		{
 			CrudRepositoryAnnotator crudRepositoryAnnotator = new CrudRepositoryAnnotator(dataService,
-					getNewRepositoryName(annotatorNames, repository.getEntityMetaData().getSimpleName()));
+					getNewRepositoryName(annotatorNames, repository.getEntityMetaData().getSimpleName()),
+					permissionSystemService);
 
 			for (String annotatorName : annotatorNames)
 			{
@@ -105,10 +111,17 @@ public class AnnotatorController
 				if (annotator != null)
 				{
 					// running annotator
-					Repository repo = dataService.getRepository(entityName);
-					repository = crudRepositoryAnnotator.annotate(annotator, repo, createCopy);
-					entityName = repository.getName();
-					createCopy = false;
+					try
+					{
+						Repository repo = dataService.getRepository(entityName);
+						repository = crudRepositoryAnnotator.annotate(annotator, repo, createCopy);
+						entityName = repository.getName();
+						createCopy = false;
+					}
+					catch (IOException e)
+					{
+						throw new RuntimeException(e.getMessage());
+					}
 				}
 			}
 		}

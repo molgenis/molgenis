@@ -153,7 +153,7 @@ public class VcfRepository extends AbstractRepository
 						{
 							Iterator<String> sampleNameIterator = finalVcfReader.getVcfMeta().getSampleNames()
 									.iterator();
-							while (sampleIterator.hasNext())
+							for (int j = 0; sampleIterator.hasNext(); ++j)
 							{
 								String[] format = vcfRecord.getFormat();
 								VcfSample sample = sampleIterator.next();
@@ -163,6 +163,7 @@ public class VcfRepository extends AbstractRepository
 									sampleEntity.set(format[i], sample.getData(i));
 								}
 								sampleEntity.set(ID, UUID.randomUUID().toString().replaceAll("-", ""));
+
 								// FIXME remove entity ID from Sample label after #1400 is fixed, see also:
 								// jquery.molgenis.table.js line 152
 								sampleEntity.set(NAME, entity.get(POS) + "_" + entity.get(ALT) + "_"
@@ -205,19 +206,19 @@ public class VcfRepository extends AbstractRepository
 					if (vcfReader != null) vcfReader.close();
 				}
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(CHROM,
-						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true));
+						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ALT,
-						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true));
+						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(POS,
-						MolgenisFieldTypes.FieldTypeEnum.LONG).setAggregateable(true));
+						MolgenisFieldTypes.FieldTypeEnum.LONG).setAggregateable(true).setNillable(false));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(REF,
-						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true));
+						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(FILTER,
-						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true));
+						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(true));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(QUAL,
-						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true));
+						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(true));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ID,
-						MolgenisFieldTypes.FieldTypeEnum.STRING));
+						MolgenisFieldTypes.FieldTypeEnum.STRING).setNillable(true));
 				DefaultAttributeMetaData idAttributeMetaData = new DefaultAttributeMetaData(INTERNAL_ID,
 						MolgenisFieldTypes.FieldTypeEnum.STRING);
 				idAttributeMetaData.setNillable(false);
@@ -225,7 +226,7 @@ public class VcfRepository extends AbstractRepository
 				idAttributeMetaData.setVisible(false);
 				entityMetaData.addAttributeMetaData(idAttributeMetaData);
 				DefaultAttributeMetaData infoMetaData = new DefaultAttributeMetaData(INFO,
-						MolgenisFieldTypes.FieldTypeEnum.COMPOUND);
+						MolgenisFieldTypes.FieldTypeEnum.COMPOUND).setNillable(true);
 				List<AttributeMetaData> metadataInfoField = new ArrayList<AttributeMetaData>();
 				for (VcfMetaInfo info : vcfMeta.getInfoMeta())
 				{
@@ -264,10 +265,11 @@ public class VcfRepository extends AbstractRepository
 					MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true);
 			idAttributeMetaData.setIdAttribute(true);
 			idAttributeMetaData.setVisible(false);
+
 			sampleEntityMetaData.addAttributeMetaData(idAttributeMetaData);
 			DefaultAttributeMetaData nameAttributeMetaData = new DefaultAttributeMetaData(NAME,
 					MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true);
-			nameAttributeMetaData.setLabelAttribute(true);
+			nameAttributeMetaData.setLabelAttribute(true).setLookupAttribute(true);
 			sampleEntityMetaData.addAttributeMetaData(nameAttributeMetaData);
 			for (VcfMetaFormat meta : formatMetaData)
 			{

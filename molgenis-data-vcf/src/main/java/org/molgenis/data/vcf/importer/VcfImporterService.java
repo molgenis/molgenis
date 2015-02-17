@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.molgenis.data.AttributeMetaData;
@@ -23,9 +24,11 @@ import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
+import org.molgenis.security.permission.PermissionSystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
@@ -39,16 +42,16 @@ public class VcfImporterService implements ImportService
 	private static final String BACKEND = ElasticsearchRepositoryCollection.NAME;
 	private final FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
 	private final DataService dataService;
+	private final PermissionSystemService permissionSystemService;
 
 	@Autowired
-	public VcfImporterService(FileRepositoryCollectionFactory fileRepositoryCollectionFactory, DataService dataService)
-	{
-		if (fileRepositoryCollectionFactory == null) throw new IllegalArgumentException(
-				"fileRepositoryCollectionFactory is null");
-		if (dataService == null) throw new IllegalArgumentException("dataservice is null");
+	public VcfImporterService(FileRepositoryCollectionFactory fileRepositoryCollectionFactory, DataService dataService,
+			PermissionSystemService permissionSystemService)
 
+	{
 		this.fileRepositoryCollectionFactory = fileRepositoryCollectionFactory;
 		this.dataService = dataService;
+		this.permissionSystemService = permissionSystemService;
 	}
 
 	@Override
@@ -66,6 +69,10 @@ public class VcfImporterService implements ImportService
 				try (Repository repo = source.getRepository(it.next());)
 				{
 					report = importVcf(repo, DEFAULT_BATCH_SIZE, addedEntities);
+					List<String> entityNames = addedEntities.stream().map(emd -> emd.getName())
+							.collect(Collectors.toList());
+					permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
+							entityNames);
 				}
 			}
 			else
@@ -218,14 +225,14 @@ public class VcfImporterService implements ImportService
 						while (sampleIterator.hasNext())
 						{
 							sampleRepository.add(sampleIterator.next());
-							// sampleEntities.add(sampleIterator.next());
-							//
-							// if (sampleEntities.size() == batchSize)
-							// {
-							// sampleRepository.add(sampleEntities);
-							// sampleEntityCount += sampleEntities.size();
-							// sampleEntities.clear();
-							// }
+							sampleEntities.add(sampleIterator.next());
+
+							if (sampleEntities.size() == batchSize)
+							{
+								sampleRepository.add(sampleEntities);
+								sampleEntityCount += sampleEntities.size();
+								sampleEntities.clear();
+							}
 						}
 					}
 				}
@@ -233,11 +240,11 @@ public class VcfImporterService implements ImportService
 				outRepository.add(entity);
 			}
 
-			// if (sampleRepository != null)
-			// {
-			// sampleRepository.add(sampleEntities);
-			// sampleEntityCount += sampleEntities.size();
-			// }
+			if (sampleRepository != null)
+			{
+				sampleRepository.add(sampleEntities);
+				sampleEntityCount += sampleEntities.size();
+			}
 
 		}
 

@@ -208,7 +208,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 						content().string(
 								"{\"href\":\"" + HREF_ENTITY_META + "\",\"name\":\"" + ENTITY_NAME
 										+ "\",\"attributes\":{\"name\":{\"href\":\"" + HREF_ENTITY_META
-										+ "/name\"}},\"idAttribute\":\"id\"}"));
+										+ "/name\"}},\"idAttribute\":\"id\",\"isAbstract\":false}"));
 	}
 
 	@Test
@@ -244,7 +244,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 										+ ENTITY_NAME
 										+ "\",\"attributes\":{\"name\":{\"href\":\""
 										+ HREF_ENTITY_META
-										+ "/name\",\"fieldType\":\"STRING\",\"name\":\"name\",\"label\":\"name\",\"attributes\":[],\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"lookupAttribute\":true,\"aggregateable\":false}},\"idAttribute\":\"id\"}"));
+										+ "/name\",\"fieldType\":\"STRING\",\"name\":\"name\",\"label\":\"name\",\"attributes\":[],\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"lookupAttribute\":true,\"aggregateable\":false}},\"idAttribute\":\"id\",\"isAbstract\":false}"));
 
 	}
 
@@ -257,7 +257,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 
 		mockMvc.perform(get(HREF_ENTITY_ID)).andExpect(status().isOk())
 				.andExpect(content().contentType(APPLICATION_JSON))
-				.andExpect(content().string("{\"href\":\"" + HREF_ENTITY_ID + "\",\"name\":\"Piet\"}"));
+				.andExpect(content().string("{\"href\":\"" + HREF_ENTITY_ID + "\",\"name\":\"Piet\",\"id\":\"p1\"}"));
 
 	}
 
@@ -282,7 +282,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 						content().string(
 								"{\"href\":\"" + HREF_ENTITY + "\",\"start\":5,\"num\":10,\"total\":0,\"prevHref\":\""
 										+ HREF_ENTITY + "?start=0&num=10\",\"items\":[{\"href\":\"" + HREF_ENTITY_ID
-										+ "\",\"name\":\"Piet\"}]}"));
+										+ "\",\"name\":\"Piet\",\"id\":\"p1\"}]}"));
 
 	}
 
@@ -298,7 +298,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 						content().string(
 								"{\"href\":\"" + HREF_ENTITY + "\",\"start\":5,\"num\":10,\"total\":0,\"prevHref\":\""
 										+ HREF_ENTITY + "?start=0&num=10\",\"items\":[{\"href\":\"" + HREF_ENTITY_ID
-										+ "\",\"name\":\"Piet\"}]}"));
+										+ "\",\"name\":\"Piet\",\"id\":\"p1\"}]}"));
 
 	}
 

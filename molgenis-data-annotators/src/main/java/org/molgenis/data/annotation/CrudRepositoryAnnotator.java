@@ -1,5 +1,7 @@
 package org.molgenis.data.annotation;
 
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -13,21 +15,26 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.security.permission.PermissionSystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
 public class CrudRepositoryAnnotator
 {
 	private static final Logger LOG = LoggerFactory.getLogger(CrudRepositoryAnnotator.class);
 
-	private final DataService dataService;
 	private final String newRepositoryLabel;
+	private final DataService dataService;
+	private final PermissionSystemService permissionSystemService;
 
-	public CrudRepositoryAnnotator(DataService dataService, String newRepositoryName)
+	public CrudRepositoryAnnotator(String newRepositoryName, DataService dataService,
+			PermissionSystemService permissionSystemService)
 	{
 		this.dataService = dataService;
 		this.newRepositoryLabel = newRepositoryName;
+		this.permissionSystemService = permissionSystemService;
 	}
 
 	/**
@@ -35,7 +42,7 @@ public class CrudRepositoryAnnotator
 	 * @param repo
 	 * @param createCopy
 	 */
-	public void annotate(List<RepositoryAnnotator> annotators, Repository repo, boolean createCopy)
+	public void annotate(List<RepositoryAnnotator> annotators, Repository repo, boolean createCopy) throws IOException
 	{
 		for (RepositoryAnnotator annotator : annotators)
 		{
@@ -53,6 +60,7 @@ public class CrudRepositoryAnnotator
 	 * */
 	@Transactional
 	public Repository annotate(RepositoryAnnotator annotator, Repository sourceRepo, boolean createCopy)
+			throws IOException
 	{
 		if (!sourceRepo.getCapabilities().contains(RepositoryCapability.UPDATEABLE) && !createCopy)
 		{
@@ -81,11 +89,6 @@ public class CrudRepositoryAnnotator
 
 	/**
 	 * Iterates over all the entities within a repository and annotates.
-	 * 
-	 * @param targetRepo
-	 * @param targetRepo
-	 * @param annotator
-	 * @return
 	 */
 	private Repository iterateOverEntitiesAndAnnotate(Repository sourceRepo, Repository targetRepo,
 			RepositoryAnnotator annotator)
@@ -136,6 +139,10 @@ public class CrudRepositoryAnnotator
 				newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData);
 			}
 			newEntityMetaData.setLabel(newRepositoryLabel);
+
+			// Give current user permissions on the created repo
+			permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
+					Arrays.asList(newEntityMetaData.getName()));
 
 			return dataService.getMeta().addEntityMeta(newEntityMetaData);
 		}

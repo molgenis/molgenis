@@ -45,7 +45,7 @@ public class DependencyResolver
 				dependencies.add(meta.getExtends());
 			}
 
-			for (AttributeMetaData attr : meta.getAttributes())
+			for (AttributeMetaData attr : meta.getAtomicAttributes())
 			{
 				if ((attr.getRefEntity() != null) && !attr.getRefEntity().equals(meta))// self reference
 				{

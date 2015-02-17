@@ -194,6 +194,7 @@ class AttributeMetaDataRepository
 			Entity refEntity = entityMetaDataRepository.getEntity(att.getRefEntity().getName());
 			if (refEntity == null) throw new RuntimeException("Missing refEntity [" + att.getRefEntity().getName()
 					+ "] of attribute [" + att.getName() + "]");
+
 			attributeMetaDataEntity.set(REF_ENTITY, refEntity);
 		}
 		repository.add(attributeMetaDataEntity);

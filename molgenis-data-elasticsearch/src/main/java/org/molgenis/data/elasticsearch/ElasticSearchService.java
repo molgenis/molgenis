@@ -1,16 +1,19 @@
 package org.molgenis.data.elasticsearch;
 
+import static java.util.stream.StreamSupport.stream;
 import static org.elasticsearch.client.Requests.refreshRequest;
 import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchId;
 import static org.molgenis.data.elasticsearch.util.MapperTypeSanitizer.sanitizeMapperType;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.exists.types.TypesExistsRequest;
@@ -734,6 +737,12 @@ public class ElasticSearchService implements SearchService
 		String entityName = entityMetaData.getName();
 		String type = sanitizeMapperType(entityName);
 
+		if (!canBeDeleted(Arrays.asList(id), entityMetaData))
+		{
+			throw new MolgenisDataException(
+					"Cannot delete entity because there are other entities referencing it. Delete these first.");
+		}
+
 		if (LOG.isTraceEnabled())
 		{
 			LOG.trace("Deleting Elasticsearch '" + type + "' doc with id [" + id + "] ...");
@@ -761,6 +770,12 @@ public class ElasticSearchService implements SearchService
 	{
 		String entityName = entityMetaData.getName();
 		String type = sanitizeMapperType(entityName);
+
+		if (!canBeDeleted(ids, entityMetaData))
+		{
+			throw new MolgenisDataException(
+					"Cannot delete entity because there are other entities referencing it. Delete these first.");
+		}
 
 		if (LOG.isTraceEnabled())
 		{
@@ -808,6 +823,13 @@ public class ElasticSearchService implements SearchService
 	{
 		String entityName = entityMetaData.getName();
 		String type = sanitizeMapperType(entityName);
+
+		List<Object> ids = stream(entities.spliterator(), true).map(e -> e.getIdValue()).collect(Collectors.toList());
+		if (!canBeDeleted(ids, entityMetaData))
+		{
+			throw new MolgenisDataException(
+					"Cannot delete entity because there are other entities referencing it. Delete these first.");
+		}
 
 		if (LOG.isTraceEnabled())
 		{
@@ -1143,6 +1165,29 @@ public class ElasticSearchService implements SearchService
 	public GetMappingsResponse getMappings()
 	{
 		return client.admin().indices().prepareGetMappings(indexName).execute().actionGet();
+	}
+
+	// Checks if entities can be deleted, have no ref entities pointing to it
+	private boolean canBeDeleted(Iterable<?> ids, EntityMetaData meta)
+	{
+		List<Pair<EntityMetaData, List<AttributeMetaData>>> referencingMetas = getReferencingEntityMetaData(meta);
+		if (referencingMetas.isEmpty()) return true;
+
+		for (Pair<EntityMetaData, List<AttributeMetaData>> pair : referencingMetas)
+		{
+			EntityMetaData refEntityMetaData = pair.getA();
+			QueryImpl q = null;
+			for (AttributeMetaData attributeMetaData : pair.getB())
+			{
+				if (q == null) q = new QueryImpl();
+				else q.or();
+				q.in(attributeMetaData.getName(), ids);
+			}
+
+			if (dataService.count(refEntityMetaData.getName(), q) > 0) return false;
+		}
+
+		return true;
 	}
 
 	/**
