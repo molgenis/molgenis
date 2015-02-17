@@ -60,7 +60,7 @@ public class JobStatusController
 			}
 		}
 
-		if (outLogFile != null)
+		if (errLogFile != null)
 		{
 			try
 			{
