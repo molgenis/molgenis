@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.molgenis.auth.MolgenisUser;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
 import org.molgenis.data.mapping.model.MappingProject;
 import org.molgenis.data.mapping.model.MappingTarget;
 import org.molgenis.data.meta.MappingProjectMetaData;
@@ -25,14 +25,14 @@ import com.google.common.collect.Lists;
 public class MappingProjectRepositoryImpl implements MappingProjectRepository
 {
 	public static final MappingProjectMetaData META_DATA = new MappingProjectMetaData();
-	private final CrudRepository repository;
+	private final Repository repository;
 	@Autowired
 	private MolgenisUserService molgenisUserService;
 	@Autowired
 	private IdGenerator idGenerator;
-	private MappingTargetRepository mappingTargetRepository;
+	private final MappingTargetRepository mappingTargetRepository;
 
-	public MappingProjectRepositoryImpl(CrudRepository repository, MappingTargetRepository mappingTargetRepository)
+	public MappingProjectRepositoryImpl(Repository repository, MappingTargetRepository mappingTargetRepository)
 	{
 		this.repository = repository;
 		this.mappingTargetRepository = mappingTargetRepository;

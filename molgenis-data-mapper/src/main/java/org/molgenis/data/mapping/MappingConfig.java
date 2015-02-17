@@ -2,9 +2,8 @@ package org.molgenis.data.mapping;
 
 import java.util.UUID;
 
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
-import org.molgenis.data.ManageableCrudRepositoryCollection;
+import org.molgenis.data.Repository;
 import org.molgenis.data.algorithm.AlgorithmService;
 import org.molgenis.data.algorithm.AlgorithmServiceImpl;
 import org.molgenis.data.meta.AttributeMappingMetaData;
@@ -24,9 +23,6 @@ import org.springframework.util.IdGenerator;
 @Configuration
 public class MappingConfig
 {
-	@Autowired
-	ManageableCrudRepositoryCollection repoCollection;
-
 	@Autowired
 	DataService dataService;
 
@@ -84,47 +80,47 @@ public class MappingConfig
 	}
 
 	@Bean
-	public CrudRepository attributeMappingCrudRepository()
+	public Repository attributeMappingCrudRepository()
 	{
 		if (!dataService.hasRepository(AttributeMappingMetaData.ENTITY_NAME))
 		{
-			repoCollection.add(AttributeMappingRepositoryImpl.META_DATA);
+			dataService.getMeta().addEntityMeta(AttributeMappingRepositoryImpl.META_DATA);
 		}
-		return dataService.getCrudRepository(AttributeMappingMetaData.ENTITY_NAME);
+		return dataService.getRepository(AttributeMappingMetaData.ENTITY_NAME);
 
 	}
 
 	@Bean
-	public CrudRepository entityMappingCrudRepository()
+	public Repository entityMappingCrudRepository()
 	{
 		attributeMappingCrudRepository();
 		if (!dataService.hasRepository(EntityMappingMetaData.ENTITY_NAME))
 		{
-			repoCollection.add(EntityMappingRepositoryImpl.META_DATA);
+			dataService.getMeta().addEntityMeta(EntityMappingRepositoryImpl.META_DATA);
 		}
-		return dataService.getCrudRepository(EntityMappingMetaData.ENTITY_NAME);
+		return dataService.getRepository(EntityMappingMetaData.ENTITY_NAME);
 	}
 
 	@Bean
-	public CrudRepository mappingTargetCrudRepository()
+	public Repository mappingTargetCrudRepository()
 	{
 		entityMappingCrudRepository();
 		if (!dataService.hasRepository(MappingTargetMetaData.ENTITY_NAME))
 		{
-			repoCollection.add(MappingTargetRepositoryImpl.META_DATA);
+			dataService.getMeta().addEntityMeta(MappingTargetRepositoryImpl.META_DATA);
 		}
-		return dataService.getCrudRepository(MappingTargetMetaData.ENTITY_NAME);
+		return dataService.getRepository(MappingTargetMetaData.ENTITY_NAME);
 	}
 
 	@Bean
-	public CrudRepository mappingProjectCrudRepository()
+	public Repository mappingProjectCrudRepository()
 	{
 		mappingTargetCrudRepository();
 		if (!dataService.hasRepository(MappingProjectMetaData.ENTITY_NAME))
 		{
-			repoCollection.add(MappingProjectRepositoryImpl.META_DATA);
+			dataService.getMeta().addEntityMeta(MappingProjectRepositoryImpl.META_DATA);
 		}
-		return dataService.getCrudRepository(MappingProjectMetaData.ENTITY_NAME);
+		return dataService.getRepository(MappingProjectMetaData.ENTITY_NAME);
 	}
 
 }

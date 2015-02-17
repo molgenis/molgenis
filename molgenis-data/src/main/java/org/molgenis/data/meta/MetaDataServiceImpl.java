@@ -315,7 +315,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		// Create repositories from EntityMetaData in EntityMetaData repo
 		for (EntityMetaData emd : entityMetaDataRepository.getMetaDatas())
 		{
-			if (!emd.isAbstract())
+			if (!emd.isAbstract() && !dataService.hasRepository(emd.getName()))
 			{
 				RepositoryCollection col = backends.get(emd.getBackend());
 				if (col == null) throw new MolgenisDataException("Unknown backend [" + emd.getBackend() + "]");

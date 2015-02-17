@@ -5,9 +5,9 @@ import java.util.Collection;
 import java.util.List;
 
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Repository;
 import org.molgenis.data.mapping.model.AttributeMapping;
 import org.molgenis.data.meta.AttributeMappingMetaData;
 import org.molgenis.data.meta.EntityMappingMetaData;
@@ -26,9 +26,9 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 	@Autowired
 	private IdGenerator idGenerator;
 
-	private CrudRepository repository;
+	private final Repository repository;
 
-	public AttributeMappingRepositoryImpl(CrudRepository repository)
+	public AttributeMappingRepositoryImpl(Repository repository)
 	{
 		this.repository = repository;
 	}

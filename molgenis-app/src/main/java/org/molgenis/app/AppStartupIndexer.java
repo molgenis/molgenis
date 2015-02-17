@@ -6,17 +6,11 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import org.molgenis.data.CrudRepository;
+import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.jpa.JpaRepositoryCollection;
-import org.molgenis.data.meta.MetaDataServiceImpl;
-import org.molgenis.data.mysql.AsyncJdbcTemplate;
-import org.molgenis.data.mysql.MysqlRepository;
-import org.molgenis.data.mysql.MysqlRepositoryCollection;
-import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.ui.StartupIndexer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 /**
@@ -38,40 +32,44 @@ public class AppStartupIndexer extends StartupIndexer
 	}
 
 	@Override
-	protected Iterable<CrudRepository> getCrudRepositories()
+	protected Iterable<Repository> getRepositories()
 	{
-		List<CrudRepository> repos = new ArrayList<>();
+		List<Repository> repos = new ArrayList<>();
 
 		// JPA
-		jpaRepositoryCollection.getEntityNames().forEach(
-				name -> repos.add(((CrudRepository) jpaRepositoryCollection.getRepositoryByEntityName(name))));
+		jpaRepositoryCollection.getEntityNames()
+				.forEach(name -> repos.add(jpaRepositoryCollection.getRepository(name)));
 
 		// MYSQL
-		createMysqlRepositoryCollection().forEach(repos::add);
+		// createMysqlRepositoryCollection().forEach(repos::add);
 
 		return repos;
 	}
 
-	private MysqlRepositoryCollection createMysqlRepositoryCollection()
-	{
-		MetaDataServiceImpl metaDataService = new MetaDataServiceImpl();
-		MysqlRepositoryCollection mysqlRepositoryCollection = new MysqlRepositoryCollection(dataSource,
-				new DataServiceImpl(), metaDataService)
-		{
-			@Override
-			protected MysqlRepository createMysqlRepository()
-			{
-				MysqlRepository mysqlRepository = new MysqlRepository(dataSource, new AsyncJdbcTemplate(
-						new JdbcTemplate(dataSource)));
-				mysqlRepository.setRepositoryCollection(this);
-
-				return mysqlRepository;
-			}
-		};
-		metaDataService.setManageableCrudRepositoryCollection(mysqlRepositoryCollection);
-		mysqlRepositoryCollection.refreshRepositories();
-
-		return mysqlRepositoryCollection;
-	}
+	// TODO
+	// private MysqlRepositoryCollection createMysqlRepositoryCollection()
+	// {
+	// DataServiceImpl dataService = new DataServiceImpl(new NonDecoratingRepositoryDecoratorFactory());
+	// MetaDataServiceImpl metaDataService = new MetaDataServiceImpl(dataService);
+	// dataService.setMetaDataService(metaDataService);
+	//
+	// MysqlRepositoryCollection mysqlRepositoryCollection = new MysqlRepositoryCollection(dataSource,
+	// new DataServiceImpl(), metaDataService)
+	// {
+	// @Override
+	// protected MysqlRepository createMysqlRepository()
+	// {
+	// MysqlRepository mysqlRepository = new MysqlRepository(dataSource, new AsyncJdbcTemplate(
+	// new JdbcTemplate(dataSource)));
+	// mysqlRepository.setRepositoryCollection(this);
+	//
+	// return mysqlRepository;
+	// }
+	// };
+	// metaDataService.setManageableCrudRepositoryCollection(mysqlRepositoryCollection);
+	// mysqlRepositoryCollection.refreshRepositories();
+	//
+	// return mysqlRepositoryCollection;
+	// }
 
 }

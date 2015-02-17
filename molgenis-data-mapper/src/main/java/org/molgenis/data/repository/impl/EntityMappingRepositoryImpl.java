@@ -4,10 +4,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Repository;
 import org.molgenis.data.mapping.model.AttributeMapping;
 import org.molgenis.data.mapping.model.EntityMapping;
 import org.molgenis.data.meta.EntityMappingMetaData;
@@ -32,11 +32,11 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 	@Autowired
 	private IdGenerator idGenerator;
 
-	private AttributeMappingRepository attributeMappingRepository;
+	private final AttributeMappingRepository attributeMappingRepository;
 
-	private final CrudRepository repository;
+	private final Repository repository;
 
-	public EntityMappingRepositoryImpl(CrudRepository repository, AttributeMappingRepository attributeMappingRepository)
+	public EntityMappingRepositoryImpl(Repository repository, AttributeMappingRepository attributeMappingRepository)
 	{
 		this.repository = repository;
 		this.attributeMappingRepository = attributeMappingRepository;

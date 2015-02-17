@@ -5,10 +5,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Repository;
 import org.molgenis.data.mapping.model.EntityMapping;
 import org.molgenis.data.mapping.model.MappingTarget;
 import org.molgenis.data.meta.MappingProjectMetaData;
@@ -25,16 +25,16 @@ public class MappingTargetRepositoryImpl implements MappingTargetRepository
 {
 	public static final EntityMetaData META_DATA = new MappingTargetMetaData();
 
-	private final CrudRepository repository;
+	private final Repository repository;
 	@Autowired
 	private IdGenerator idGenerator;
 
-	private EntityMappingRepository entityMappingRepository;
+	private final EntityMappingRepository entityMappingRepository;
 
 	@Autowired
 	private DataService dataService;
 
-	public MappingTargetRepositoryImpl(CrudRepository repository, EntityMappingRepository entityMappingRepository)
+	public MappingTargetRepositoryImpl(Repository repository, EntityMappingRepository entityMappingRepository)
 	{
 		this.repository = repository;
 		this.entityMappingRepository = entityMappingRepository;

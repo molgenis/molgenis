@@ -2,7 +2,7 @@ package org.molgenis.ui;
 
 import javax.annotation.PostConstruct;
 
-import org.molgenis.data.CrudRepository;
+import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.slf4j.Logger;
@@ -43,7 +43,7 @@ public abstract class StartupIndexer implements Ordered
 
 	private void indexRepos()
 	{
-		getCrudRepositories().forEach(repo -> searchService.rebuildIndex(repo, repo.getEntityMetaData()));
+		getRepositories().forEach(repo -> searchService.rebuildIndex(repo, repo.getEntityMetaData()));
 	}
 
 	@Override
@@ -52,5 +52,5 @@ public abstract class StartupIndexer implements Ordered
 		return Ordered.HIGHEST_PRECEDENCE;
 	}
 
-	protected abstract Iterable<CrudRepository> getCrudRepositories();
+	protected abstract Iterable<Repository> getRepositories();
 }
