@@ -4,12 +4,13 @@
  */
 package org.molgenis.data.jpa;
 
-import java.util.Iterator;
 import java.util.Map;
 
+import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.elasticsearch.SearchRepositoryDecoratorCollection;
+import org.molgenis.data.elasticsearch.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -17,10 +18,16 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Maps;
 
 @Component("JpaRepositoryCollection")
-public class JpaRepositoryCollection implements RepositoryCollection
+public class JpaRepositoryCollection extends SearchRepositoryDecoratorCollection
 {
 	private final Map<String, Repository> repositories = Maps.newLinkedHashMap();
-     
+    
+    @Autowired
+	public JpaRepositoryCollection(SearchService searchService, DataService dataService)
+	{
+		super(searchService, dataService, "JPA");
+	}
+
 	<#list model.entities as entity>
 	<#if !entity.abstract>
 	@Autowired
@@ -39,32 +46,8 @@ public class JpaRepositoryCollection implements RepositoryCollection
 	</#list>
 	
 	@Override
-	public Iterable<String> getEntityNames()
+	protected Repository createRepository(EntityMetaData entityMeta)
 	{
-		return repositories.keySet();
-	}
-
-	@Override
-	public Repository getRepository(String name)
-	{
-		return repositories.get(name);
-	}
-	
-	@Override
-	public String getName()
-	{
-		return "JPA";
-	}
-	
-	@Override
-	public Repository addEntityMeta(EntityMetaData entityMeta)
-	{
-		return getRepository(entityMeta.getName());
-	}
-	
-	@Override
-	public Iterator<Repository> iterator()
-	{
-		return repositories.values().iterator();
+		return repositories.get(entityMeta.getName());
 	}
 }

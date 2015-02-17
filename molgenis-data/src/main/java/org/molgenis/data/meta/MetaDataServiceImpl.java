@@ -17,6 +17,7 @@ import org.molgenis.data.Package;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.RepositoryDecoratorFactory;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
@@ -159,6 +160,8 @@ public class MetaDataServiceImpl implements MetaDataService
 			if (!dataService.hasRepository(emd.getName()))
 			{
 				Repository repo = backend.getRepository(emd.getName());
+				if (repo == null) throw new UnknownEntityException(String.format(
+						"Unknown entity '%s' for backend '%s'", emd.getName(), backend.getName()));
 				Repository decoratedRepo = decoratorFactory.createDecoratedRepository(repo);
 				dataService.addRepository(decoratedRepo);
 			}

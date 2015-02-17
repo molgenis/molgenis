@@ -12,9 +12,13 @@
 package ${package};
 
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.*;
+
+import org.springframework.stereotype.Component;
+
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 
+@Component
 public class ${JavaName(entity)}MetaData extends DefaultEntityMetaData
 {
 	public ${JavaName(entity)}MetaData()
