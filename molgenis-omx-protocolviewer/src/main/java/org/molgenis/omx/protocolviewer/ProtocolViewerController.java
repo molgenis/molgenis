@@ -361,13 +361,16 @@ public class ProtocolViewerController extends MolgenisPluginController
 		if (catalogId == null) return new SearchResult("The catalogID cannot be null");
 		if (queryString == null) return new SearchResult("The queryString items cannot be null");
 		List<QueryRule> rules = new ArrayList<QueryRule>();
-		for (String term : Splitter.on(CharMatcher.anyOf("*-.\\s\\t")).split(queryString.toString()))
+		for (String term : Splitter.on(CharMatcher.WHITESPACE).omitEmptyStrings().split(queryString.toString()))
 		{
 			if (rules.size() > 0) rules.add(new QueryRule(Operator.AND));
 			rules.add(new QueryRule(Operator.SEARCH, term));
 		}
-		rules.add(new QueryRule(Operator.OR));
-		rules.add(new QueryRule(Operator.SEARCH, queryString));
+		if(rules.size() > 1)
+		{
+			QueryRule nested = new QueryRule(Operator.NESTED, rules);
+			rules = Lists.newArrayList(nested, new QueryRule(Operator.OR),new QueryRule(Operator.SEARCH, queryString));
+		}
 		return searchService.search(new SearchRequest("protocolTree-" + catalogId.toString(), new QueryImpl(rules)
 				.pageSize(Integer.MAX_VALUE), null));
 	}
