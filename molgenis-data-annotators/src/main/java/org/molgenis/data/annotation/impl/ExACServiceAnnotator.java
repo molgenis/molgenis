@@ -34,51 +34,52 @@ import org.springframework.stereotype.Component;
 import com.sun.corba.se.spi.ior.iiop.GIOPVersion;
 
 /**
- * TODO: test and polish
+ * 
+ * 
+ * TODO: parse multiple alternative allele frequencies, test, polish, etc
+ * 
+ * 10	75832614	.	C	T,A,G		->		AF=5.848e-04,1.647e-05,4.118e-05
+ * 
+ * 
  * */
-@Component("gonlService")
-public class GoNLServiceAnnotator extends VariantAnnotator
+@Component("exacService")
+public class ExACServiceAnnotator extends VariantAnnotator
 {
-	private static final Logger LOG = LoggerFactory.getLogger(GoNLServiceAnnotator.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ExACServiceAnnotator.class);
 
 	private final MolgenisSettings molgenisSettings;
 	private final AnnotationService annotatorService;
 
-	// the cadd service returns these two values
-	// must be compatible with VCF format, ie no funny characters
-	public static final String GONL_MAF = "GONLMAF";
-	public static final String GONL_GTC = "GONLGTC";
 
-	private static final String NAME = "GONL";
+	public static final String EXAC_MAF = "EXACMAF";
+
+	private static final String NAME = "EXAC";
 
 	final List<String> infoFields = Arrays
 			.asList(new String[]
 			{
 					"##INFO=<ID="
-							+ GONL_MAF
-							+ ",Number=1,Type=Float,Description=\"GoNL minor allele frequency. Calculated by dividing AC by AN. For example: AC=23;AN=996 = 0.02309237\">",
-					"##INFO=<ID="
-							+ GONL_GTC
-							+ ",Number=G,Type=Integer,Description=\"GoNL genotype counts. For example: GONLGTC=69,235,194. Listed in the same order as the ALT alleles in case multiple ALT alleles are present = 0/0,0/1,1/1,0/2,1/2,2/2,0/3,1/3,2/3,3/3,etc. Phasing is ignored; hence 0/1, 1/0, 0|1 and 1|0 are all counted as 0/1. Incomplete gentotypes (./., ./0, ./1, ./2, etc.) are completely discarded for calculating GTC.\">"
+							+ EXAC_MAF
+							+ ",Number=1,Type=Float,Description=\"ExAC minor allele frequency. Taken straight for AF field, inverted when alleles are swapped\">"
 							});
 
-	public static final String GONL_DIRECTORY_LOCATION_PROPERTY = "gonl_location";
+	public static final String EXAC_VCFGZ_LOCATION = "exac_location";
 	
-	HashMap<String, TabixReader> tabixReaders = null;
+	private volatile TabixReader tabixReader;
 
 	@Autowired
-	public GoNLServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService)
+	public ExACServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService)
 			throws IOException
 	{
 		this.molgenisSettings = molgenisSettings;
 		this.annotatorService = annotatorService;
 	}
 
-	public GoNLServiceAnnotator(File gonlR5directory, File inputVcfFile, File outputVCFFile) throws Exception
+	public ExACServiceAnnotator(File exacFileLocation, File inputVcfFile, File outputVCFFile) throws Exception
 	{
 
 		this.molgenisSettings = new MolgenisSimpleSettings();
-		molgenisSettings.setProperty(GONL_DIRECTORY_LOCATION_PROPERTY, gonlR5directory.getAbsolutePath());
+		molgenisSettings.setProperty(EXAC_VCFGZ_LOCATION, exacFileLocation.getAbsolutePath());
 
 		this.annotatorService = new AnnotationServiceImpl();
 
@@ -90,7 +91,7 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
 		Iterator<Entity> vcfIter = vcfRepo.iterator();
 
-		VcfUtils.checkInput(inputVcfFile, outputVCFWriter, infoFields, GONL_MAF);
+		VcfUtils.checkInput(inputVcfFile, outputVCFWriter, infoFields, EXAC_MAF);
 
 		System.out.println("Now starting to process the data.");
 
@@ -129,7 +130,7 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 	@Override
 	public boolean annotationDataExists()
 	{
-		return new File(molgenisSettings.getProperty(GONL_DIRECTORY_LOCATION_PROPERTY)).exists();
+		return new File(molgenisSettings.getProperty(EXAC_VCFGZ_LOCATION)).exists();
 	}
 
 	@Override
@@ -148,7 +149,7 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 				.getString(CHROMOSOME);
 
 		// FIXME use VcfRepository.POS, use VcfRepository.REF, use VcfRepository.ALT ?
-		Map<String, Object> resultMap = annotateEntityWithGoNL(chromosome, entity.getLong(POSITION),
+		Map<String, Object> resultMap = annotateEntityWithExAC(chromosome, entity.getLong(POSITION),
 				entity.getString(REFERENCE), entity.getString(ALTERNATIVE));
 		return Collections.<Entity> singletonList(getAnnotatedEntity(entity, resultMap));
 	}
@@ -158,39 +159,24 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 	 */
 	private void checkTabixReader() throws IOException
 	{
-		if (tabixReaders == null)
+		if (tabixReader == null)
 		{
 			synchronized (this)
 			{
-				if (tabixReaders == null)
+				if (tabixReader == null)
 				{
-					tabixReaders = new HashMap<String, TabixReader>();
-					
-					String chroms = "1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|X";
-				//	tabixReader = new TabixReader(molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY));
-					
-					for(String chr : chroms.split("\\|"))
-					{
-						String gonlchrom = new String(
-								molgenisSettings.getProperty(GONL_DIRECTORY_LOCATION_PROPERTY) + File.separator
-										//small hack to use chrX from release 4.. (5 isn't out yet!)
-										+ (!chr.equals("X") ? "gonl.chr"+chr+".snps_indels.r5.vcf.gz" : "gonl.chrX.release4.gtc.vcf.gz")
-								);
-						TabixReader tr = new TabixReader(gonlchrom);
-						tabixReaders.put(chr, tr);
-					}
+					tabixReader = new TabixReader(molgenisSettings.getProperty(EXAC_VCFGZ_LOCATION));
 				}
 			}
 		}
 	}
 
-	private synchronized Map<String, Object> annotateEntityWithGoNL(String chromosome, Long position, String reference,
+	private synchronized Map<String, Object> annotateEntityWithExAC(String chromosome, Long position, String reference,
 			String alternative) throws IOException
 	{
 		Double maf = null;
-		String gtc = null;
 
-		TabixReader.Iterator tabixIterator = tabixReaders.get(chromosome).query(chromosome + ":" + position + "-" + position);
+		TabixReader.Iterator tabixIterator = tabixReader.query(chromosome + ":" + position + "-" + position);
 
 		// TabixReaderIterator does not have a hasNext();
 		boolean done = tabixIterator == null;
@@ -222,52 +208,37 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 				split = line.split("\t");
 				if (split.length != 8)
 				{
-					LOG.error("Bad GoNL data (split was not 8 elements) for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
+					LOG.error("Bad ExAC data (split was not 8 elements) for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
 							+ " ALT: " + alternative + " LINE: " + line);
 					continue;
 				}
 				
-				LOG.info("GoNL variant found for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
+				LOG.info("ExAC variant found for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
 						+ " ALT: " + alternative + " LINE: " + line);
 				
 				String[] infoFields = split[7].split(";", -1);
-				double ac = -1;
-				double an = -1;
-				
+					
 				for(String info : infoFields)
 				{
-					if(info.startsWith("AC="))
+					if(info.startsWith("AF="))
 					{
-						ac = Double.parseDouble(info.replace("AC=", ""));
+						try{
+							maf = Double.parseDouble(info.replace("AF=", ""));
+							break;
+						}catch( java.lang.NumberFormatException e)
+						{
+							LOG.error("Bad number: " + info.replace("AF=", "") + " for line \n" + line);
+						}
 					}
-					if(info.startsWith("AN="))
-					{
-						an = Double.parseDouble(info.replace("AN=", ""));
-					}
-					if(info.startsWith("GTC="))
-					{
-						gtc = info.replace("GTC=", "");
-					}
+				
 				}
 				
-				if(ac!=-1 && an!= -1)
+				if(maf == -1)
 				{
-					maf = ac/an;
-				}
-				else
-				{
-					LOG.error("Bad GoNL data (no AC or AN info field) for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
+					LOG.error("Bad 1000G data (no AF field) for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
 							+ " ALT: " + alternative + " LINE: " + line);
 					continue;
 				}
-				
-				if(gtc == null)
-				{
-					LOG.error("Bad GoNL data (no GTC info field) for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
-							+ " ALT: " + alternative + " LINE: " + line);
-				}
-
-					
 				
 				if (split[3].equals(reference) && split[4].equals(alternative))
 				{
@@ -278,7 +249,7 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 				// fail, we can just check whether such a swapping has occured
 				else if (split[4].equals(reference) && split[3].equals(alternative))
 				{
-					LOG.info("GoNL variant found [swapped MAF by 1-MAF!] for CHROM: " + chromosome + " POS: " + position
+					LOG.info("ExAC variant found [swapped MAF by 1-MAF!] for CHROM: " + chromosome + " POS: " + position
 							+ " REF: " + reference + " ALT: " + alternative + " LINE: " + line);
 					
 					maf = 1-maf; //swap MAF in this case!
@@ -288,12 +259,12 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 				{
 					if (i > 1)
 					{
-						LOG.warn("More than 1 hit in the GoNL! for CHROM: " + chromosome + " POS: " + position
+						LOG.warn("More than 1 hit in the ExAC! for CHROM: " + chromosome + " POS: " + position
 								+ " REF: " + reference + " ALT: " + alternative);
 					}
 					else
 					{
-						LOG.info("GoNL variant position found but ref/alt not matched! for CHROM: " + chromosome + " POS: " + position
+						LOG.info("ExAC variant position found but ref/alt not matched! for CHROM: " + chromosome + " POS: " + position
 								+ " REF: " + reference + " ALT: " + alternative + " LINE: " + line);
 					}
 					
@@ -301,15 +272,14 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 			}
 			else
 			{
-				LOG.warn("No hit found in GoNL for CHROM: " + chromosome + " POS: " + position + " REF: "
+				LOG.warn("No hit found in ExAC for CHROM: " + chromosome + " POS: " + position + " REF: "
 						+ reference + " ALT: " + alternative);
 				done = true;
 			}
 		}
 
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		resultMap.put(GONL_MAF, maf);
-		resultMap.put(GONL_GTC, gtc);
+		resultMap.put(EXAC_MAF, maf);
 		return resultMap;
 	}
 
@@ -318,8 +288,7 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 	{
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
 
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GONL_MAF, FieldTypeEnum.DECIMAL));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GONL_GTC, FieldTypeEnum.STRING)); //FIXME: correct type?
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(EXAC_MAF, FieldTypeEnum.DECIMAL));
 
 		return metadata;
 	}

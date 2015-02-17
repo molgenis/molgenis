@@ -5,7 +5,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.molgenis.data.annotation.impl.CaddServiceAnnotator;
+import org.molgenis.data.annotation.impl.ExACServiceAnnotator;
 import org.molgenis.data.annotation.impl.GoNLServiceAnnotator;
+import org.molgenis.data.annotation.impl.ThousandGenomesServiceAnnotator;
 
 public class CmdLineAnnotator
 {
@@ -72,11 +74,11 @@ public class CmdLineAnnotator
 		}
 		else if(annotator.equals("exac"))
 		{
-			//TODO
+			new ExACServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
 		else if(annotator.equals("1kg"))
 		{
-			//TODO
+			new ThousandGenomesServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
 		else if(annotator.equals("gonl"))
 		{
