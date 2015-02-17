@@ -690,7 +690,6 @@
                         {q: {q : [{ field : 'identifier', operator : 'EQUALS',
                             value : settings.analysis.identifier }] }});
 
-                    console.log(JSON.stringify(entities))
                     var obj = entities.items[0];
                     var wasRun = obj.was_run;
 
