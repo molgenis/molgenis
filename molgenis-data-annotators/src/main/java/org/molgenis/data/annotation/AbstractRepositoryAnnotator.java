@@ -32,7 +32,7 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 	}
 
 	@Override
-	public boolean canAnnotate(EntityMetaData repoMetaData)
+	public String canAnnotate(EntityMetaData repoMetaData)
 	{
 		Iterable<AttributeMetaData> annotatorAttributes = getInputMetaData().getAttributes();
 		for (AttributeMetaData annotatorAttribute : annotatorAttributes)
@@ -40,24 +40,24 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 			// one of the needed attributes not present? we can not annotate
 			if (repoMetaData.getAttribute(annotatorAttribute.getName()) == null)
 			{
-				return false;
+				return "missing required attribute";
 			}
 
 			// one of the needed attributes not of the correct type? we can not annotate
 			if (!repoMetaData.getAttribute(annotatorAttribute.getName()).getDataType()
 					.equals(annotatorAttribute.getDataType()))
 			{
-				return false;
+				return "a required attribute has the wrong datatype";
 			}
 
 			// Are the runtime property files not available, or is a webservice down? we can not annotate
 			if (!annotationDataExists())
 			{
-				return false;
+				return "annotation datasource unreachable";
 			}
 		}
 
-		return true;
+		return "true";
 	}
 
 	/**
