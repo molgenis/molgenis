@@ -1,11 +1,11 @@
 package org.molgenis.data.annotation.impl;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -32,9 +32,12 @@ import org.springframework.stereotype.Component;
 
 /**
  * 
- * TRICKY !!!
+ * new ANN field replacing EFF:
  * 
- * EFF=NON_SYNONYMOUS_CODING(MODERATE|MISSENSE|aAc/aTc|N419I|526|NCF2|protein_coding|CODING|NM_000433.3|13|1)
+ * ANN=A|missense_variant|MODERATE|NEXN|NEXN|transcript|NM_144573.3|Coding|8/13|c.733G>A|p.Gly245Arg|1030/3389|733/2028|245/675||
+ * 
+ * 
+ * -lof doesnt seem to work? would be great... http://snpeff.sourceforge.net/snpEff_lof_nmd.pdf
  * 
  * 
  * */
@@ -48,7 +51,7 @@ public class SnpEffServiceAnnotator extends VariantAnnotator
 
 	// the cadd service returns these two values
 	// must be compatible with VCF format, ie no funny characters
-	public static final String SNPEFF_EFF = "EFF";
+	public static final String SNPEFF_EFF = "ANN";
 	private static final String NAME = "SnpEff";
 	public static final String SNPEFF_PATH = "snpeff_path";
 	
@@ -62,11 +65,33 @@ public class SnpEffServiceAnnotator extends VariantAnnotator
 		this.annotatorService = annotatorService;
 	}
 
-	public SnpEffServiceAnnotator(File gonlR5directory, File inputVcfFile, File outputVCFFile) throws Exception
+	public SnpEffServiceAnnotator(File snpEffLocation, File inputVcfFile, File outputVCFFile) throws Exception
 	{
-
+		Process p = Runtime.getRuntime().exec("java -jar \"" + snpEffLocation + "\"");
+		BufferedInputStream pOutput= new BufferedInputStream(p.getInputStream());
+		synchronized (p) {
+			   p.waitFor();
+			}
+		
+		int read = 0;
+		byte[] output = new byte[1024];
+		
+		System.out.printf("Testing if SnpEff can be ran from " + snpEffLocation + " ...");
+		while ((read = pOutput.read(output)) != -1) {
+		    System.out.println(output[read]);
+		}
+		
+		if(p.exitValue() != 0)
+		{
+			LOG.error("SnpEff not runnable from location " + snpEffLocation + " !");
+			
+		}
+		else{
+			LOG.info("Exit value 0, all is well...");
+		}
+		
 		this.molgenisSettings = new MolgenisSimpleSettings();
-		molgenisSettings.setProperty(SNPEFF_PATH, gonlR5directory.getAbsolutePath());
+		molgenisSettings.setProperty(SNPEFF_PATH, snpEffLocation.getAbsolutePath());
 
 		this.annotatorService = new AnnotationServiceImpl();
 
@@ -78,7 +103,7 @@ public class SnpEffServiceAnnotator extends VariantAnnotator
 		
 		
 		//Process process = new ProcessBuilder("path/to/myexe.exe","param1","param2").start();
-		Process process = new ProcessBuilder("java -Xmx2g -jar "+SNPEFF_PATH+" hg19 -v -canon -ud 0 -spliceSiteSize 5 "+inputVcfFile+" > " + outputVCFFile).start();
+		Process process = new ProcessBuilder("java -Xmx2g -jar "+SNPEFF_PATH+" hg19 -v -lof -canon -ud 0 -spliceSiteSize 5 "+inputVcfFile+" > " + outputVCFFile).start();
 		InputStream is = process.getInputStream();
 		InputStreamReader isr = new InputStreamReader(is);
 		BufferedReader br = new BufferedReader(isr);
