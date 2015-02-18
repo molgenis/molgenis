@@ -133,8 +133,7 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator,
 
     private boolean checkSnpEffPath()
 	{
-		return false;
-        /*File snpEffpath = new File(molgenisSettings.getProperty(SNPEFF_PATH));
+        File snpEffpath = new File("/Applications/snpEff/snpEff.jar");
 		if(snpEffpath.exists() && snpEffpath.isFile())
 		{
 			LOG.info("SnpEff found at + " + snpEffpath.getAbsolutePath());
@@ -143,7 +142,7 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator,
 		else{
 			LOG.error("SnpEff NOT found at + " + snpEffpath.getAbsolutePath());
 			return false;
-		} **/
+		}
 	}
 
     @Override
@@ -153,16 +152,16 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator,
         try {
             temp = File.createTempFile(tempFileName, ".vcf");
             BufferedWriter bw = new BufferedWriter(new FileWriter(temp));
-            bw.write("This is the temporary file content");
             for(Entity entity : source){
                 StringBuilder builder = new StringBuilder();
                 builder.append(entity.getString(CHROMOSOME));
-                builder.append(entity.getString("\t"));
+                builder.append("\t");
                 builder.append(entity.getString(POSITION));
-                builder.append(entity.getString(".\t"));
+                builder.append("\t.\t");
                 builder.append(entity.getString(REFERENCE));
-                builder.append(entity.getString("\t"));
+                builder.append("\t");
                 builder.append(entity.getString(ALTERNATIVE));
+                builder.append("\n");
                 bw.write(builder.toString());
             }
             bw.close();
