@@ -17,10 +17,12 @@ import org.molgenis.data.annotation.impl.datastructures.CgdData;
 import org.molgenis.data.annotation.impl.datastructures.Locus;
 import org.molgenis.data.annotation.provider.CgdDataProvider;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
+import org.molgenis.data.support.AnnotationServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.framework.server.MolgenisSimpleSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -48,6 +50,8 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 	public static final String ENTREZ_GENE_ID = "ENTREZ GENE ID";
 	public static final String GENE = "GENE";
 	public static final String HGNC_ID = "HGNC ID";
+	
+	public static final String CGD_FILE_LOCATION = "cgd_location";
 
 	@Autowired
 	public ClinicalGenomicsDatabaseServiceAnnotator(MolgenisSettings molgenisSettings,
@@ -62,6 +66,19 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 		this.annotatorService = annotationService;
 		this.hgncLocationsProvider = hgncLocationsProvider;
 		this.cgdDataProvider = cgdDataProvider;
+	}
+	
+	public ClinicalGenomicsDatabaseServiceAnnotator(File exacFileLocation, File inputVcfFile, File outputVCFFile) throws Exception
+	{
+
+		//TODO: replace with snpeff
+		hgncLocationsProvider = null;
+		cgdDataProvider = null;
+		
+		this.molgenisSettings = new MolgenisSimpleSettings();
+		molgenisSettings.setProperty(CGD_FILE_LOCATION, exacFileLocation.getAbsolutePath());
+
+		this.annotatorService = new AnnotationServiceImpl();
 	}
 
 	@Override

@@ -5,13 +5,18 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.molgenis.data.annotation.impl.CaddServiceAnnotator;
+import org.molgenis.data.annotation.impl.ClinicalGenomicsDatabaseServiceAnnotatorTest;
+import org.molgenis.data.annotation.impl.ExACServiceAnnotator;
+import org.molgenis.data.annotation.impl.GoNLServiceAnnotator;
+import org.molgenis.data.annotation.impl.SnpEffServiceAnnotator;
+import org.molgenis.data.annotation.impl.ThousandGenomesServiceAnnotator;
 
 public class CmdLineAnnotator
 {
 
 	public static void main(String[] args) throws Exception
 	{
-		List<String> annotators = Arrays.asList(new String[]{"cadd", "clinvar", "ase", "ccgg", "exac", "1kg", "gonl", "gwascatalog", "vkgl", "cgd", "enhancers", "proteinatlas"});
+		List<String> annotators = Arrays.asList(new String[]{"cadd", "snpeff", "clinvar", "ase", "ccgg", "exac", "1kg", "gonl", "gwascatalog", "vkgl", "cgd", "enhancers", "proteinatlas"});
 		
 		if (args.length != 4)
 		{
@@ -49,13 +54,17 @@ public class CmdLineAnnotator
 		File outputVCFFile = new File(args[3]);
 		if (outputVCFFile.exists())
 		{
-			//TODO terugzetten!! throw new Exception("Output VCF file already exists at " + outputVCFFile.getAbsolutePath());
+			throw new Exception("Output VCF file already exists at " + outputVCFFile.getAbsolutePath());
 		}
 
 		// engage!
 		if(annotator.equals("cadd"))
 		{
 			new CaddServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
+		}
+		else if(annotator.equals("snpeff"))
+		{
+			new SnpEffServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
 		else if(annotator.equals("clinvar"))
 		{
@@ -71,15 +80,15 @@ public class CmdLineAnnotator
 		}
 		else if(annotator.equals("exac"))
 		{
-			//TODO
+			new ExACServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
 		else if(annotator.equals("1kg"))
 		{
-			//TODO
+			new ThousandGenomesServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
 		else if(annotator.equals("gonl"))
 		{
-			//TODO
+			new GoNLServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
 		else if(annotator.equals("gwascatalog"))
 		{
@@ -91,7 +100,7 @@ public class CmdLineAnnotator
 		}
 		else if(annotator.equals("cgd"))
 		{
-			//TODO
+			new ClinicalGenomicsDatabaseServiceAnnotatorTest(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
 		else if(annotator.equals("enhancers"))
 		{

@@ -89,7 +89,8 @@ public class CaddServiceAnnotator extends VariantAnnotator
 
 		this.annotatorService = new AnnotationServiceImpl();
 
-		tabixReader = new TabixReader(molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY));
+		//tabixReader = new TabixReader(molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY));
+		checkTabixReader();
 
 		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
 
