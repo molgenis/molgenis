@@ -54,7 +54,7 @@ public class AnnotationServiceImpl implements AnnotationService
 
 		for (RepositoryAnnotator annotator : annotators)
 		{
-			if (annotator.canAnnotate(metaData))
+			if (annotator.canAnnotate(metaData).equals("true"))
 			{
 				result.add(annotator);
 			}
