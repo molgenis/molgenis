@@ -158,12 +158,12 @@ public class AnnotatorController
 			for (RepositoryAnnotator annotator : annotationService.getAllAnnotators())
 			{
 				Map<String, Object> map = new HashMap<String, Object>();
-                map.put("description", annotator.getDescription());
-                map.put("canAnnotate", annotator.canAnnotate(entityMetaData));
+				map.put("description", annotator.getDescription());
+				map.put("canAnnotate", annotator.canAnnotate(entityMetaData));
 				map.put("inputAttributes", annotator.getInputMetaData().getAttributes());
-                map.put("inputAttributeTypes", toMap(annotator.getInputMetaData().getAttributes()));
-                map.put("outputAttributes", annotator.getOutputMetaData().getAttributes());
-                map.put("outputAttributeTypes", toMap(annotator.getOutputMetaData().getAttributes()));
+				map.put("inputAttributeTypes", toMap(annotator.getInputMetaData().getAttributes()));
+				map.put("outputAttributes", annotator.getOutputMetaData().getAttributes());
+				map.put("outputAttributeTypes", toMap(annotator.getOutputMetaData().getAttributes()));
 				mapOfAnnotators.put(annotator.getSimpleName(), map);
 			}
 
@@ -172,13 +172,15 @@ public class AnnotatorController
 		return mapOfAnnotators;
 	}
 
-    private Map<String,String> toMap(Iterable<AttributeMetaData> attrs){
-        Map<String, String> result = new HashMap<>();
-        for(AttributeMetaData attr : attrs){
-            result.put(attr.getName(),attr.getDataType().toString());
-        }
-        return result;
-    }
+	private Map<String, String> toMap(Iterable<AttributeMetaData> attrs)
+	{
+		Map<String, String> result = new HashMap<>();
+		for (AttributeMetaData attr : attrs)
+		{
+			result.put(attr.getName(), attr.getDataType().toString());
+		}
+		return result;
+	}
 
 	@ExceptionHandler(RuntimeException.class)
 	@ResponseBody
