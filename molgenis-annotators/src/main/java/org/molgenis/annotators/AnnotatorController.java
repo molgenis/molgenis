@@ -3,9 +3,7 @@ package org.molgenis.annotators;
 import static org.molgenis.annotators.AnnotatorController.URI;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
@@ -160,9 +158,12 @@ public class AnnotatorController
 			for (RepositoryAnnotator annotator : annotationService.getAllAnnotators())
 			{
 				Map<String, Object> map = new HashMap<String, Object>();
+				map.put("description", annotator.getDescription());
 				map.put("canAnnotate", annotator.canAnnotate(entityMetaData));
-				map.put("inputMetadata", metaDataToStringList(annotator.getInputMetaData()));
-				map.put("outputMetadata", metaDataToStringList(annotator.getOutputMetaData()));
+				map.put("inputAttributes", annotator.getInputMetaData().getAttributes());
+				map.put("inputAttributeTypes", toMap(annotator.getInputMetaData().getAttributes()));
+				map.put("outputAttributes", annotator.getOutputMetaData().getAttributes());
+				map.put("outputAttributeTypes", toMap(annotator.getOutputMetaData().getAttributes()));
 				mapOfAnnotators.put(annotator.getSimpleName(), map);
 			}
 
@@ -171,18 +172,12 @@ public class AnnotatorController
 		return mapOfAnnotators;
 	}
 
-	/**
-	 * Transforms metadata to a List of strings
-	 * 
-	 * @param metaData
-	 * @return result
-	 * */
-	private List<String> metaDataToStringList(EntityMetaData metaData)
+	private Map<String, String> toMap(Iterable<AttributeMetaData> attrs)
 	{
-		List<String> result = new ArrayList<String>();
-		for (AttributeMetaData attribute : metaData.getAttributes())
+		Map<String, String> result = new HashMap<>();
+		for (AttributeMetaData attr : attrs)
 		{
-			result.add(attribute.getLabel() + "(" + attribute.getDataType().toString() + ")\n");
+			result.put(attr.getName(), attr.getDataType().toString());
 		}
 		return result;
 	}
