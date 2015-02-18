@@ -39,9 +39,6 @@ public class JobServiceImpl implements JobService
 		}
 
 		job.setStatus(statusUpdate.getStatus());
-//TODO: HERE FIX SIZES:		job.setOutputMessage(statusUpdate.getOutputMessage());
-//							job.setErrorMessage(statusUpdate.getErrorMessage());
-
 		switch (job.getStatus())
 		{
 			case RUNNING:
@@ -49,6 +46,8 @@ public class JobServiceImpl implements JobService
 				break;
 			case COMPLETED:
 			case FAILED:
+				job.setOutputMessage(tail50(statusUpdate.getOutputMessage()));
+				job.setErrorMessage(tail50(statusUpdate.getErrorMessage()));
 				job.setEndTime(new Date());
 				break;
 			case CREATED:
@@ -59,6 +58,22 @@ public class JobServiceImpl implements JobService
 
 		dataService.update(AnalysisJobMetaData.INSTANCE.getName(), job);
 		logger.info("Job[" + job.getIdentifier() + "] with status [" + job.getStatus() + "] updated in DB" );
+	}
+
+	private String tail50(String string)
+	{
+		String result = "";
+		StringBuilder builder = new StringBuilder();
+		String lines [] = string.split("\\n");
+		if(lines.length > 50)
+		{
+			for (int i = lines.length - 50; i < lines.length; i++)
+				builder.append(lines[i]).append("\n");
+			result = builder.toString();
+		}
+		else
+			result = string;
+		return result;
 	}
 
 }
