@@ -130,7 +130,7 @@ public class ExACServiceAnnotator extends VariantAnnotator
 	@Override
 	public boolean annotationDataExists()
 	{
-		return new File(molgenisSettings.getProperty(EXAC_VCFGZ_LOCATION)).exists();
+		return false;//Returns null -> new File(molgenisSettings.getProperty(EXAC_VCFGZ_LOCATION)).exists();
 	}
 
 	@Override

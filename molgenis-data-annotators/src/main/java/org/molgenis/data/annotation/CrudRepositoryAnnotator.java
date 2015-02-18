@@ -106,7 +106,7 @@ public class CrudRepositoryAnnotator
 	private CrudRepository iterateOverEntitiesAndAnnotate(Repository sourceRepo, CrudRepository targetRepo,
 			RepositoryAnnotator annotator)
 	{
-		Iterator<Entity> entityIterator = annotator.annotate(sourceRepo.iterator());
+		Iterator<Entity> entityIterator = annotator.annotate(sourceRepo);
 		List<Entity> annotatedEntities = new ArrayList<>();
 
 		if (targetRepo == null)

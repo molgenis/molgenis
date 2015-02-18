@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.molgenis.data.annotation.impl.CaddServiceAnnotator;
-import org.molgenis.data.annotation.impl.ClinicalGenomicsDatabaseServiceAnnotatorTest;
+import org.molgenis.data.annotation.impl.ClinicalGenomicsDatabaseServiceAnnotator;
 import org.molgenis.data.annotation.impl.ExACServiceAnnotator;
 import org.molgenis.data.annotation.impl.GoNLServiceAnnotator;
 import org.molgenis.data.annotation.impl.SnpEffServiceAnnotator;
@@ -100,7 +100,7 @@ public class CmdLineAnnotator
 		}
 		else if(annotator.equals("cgd"))
 		{
-			new ClinicalGenomicsDatabaseServiceAnnotatorTest(annotationSourceFile, inputVcfFile, outputVCFFile);
+			new ClinicalGenomicsDatabaseServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
 		else if(annotator.equals("enhancers"))
 		{

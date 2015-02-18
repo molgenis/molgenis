@@ -129,7 +129,7 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 	@Override
 	public boolean annotationDataExists()
 	{
-		return new File(molgenisSettings.getProperty(GONL_DIRECTORY_LOCATION_PROPERTY)).exists();
+		return false;
 	}
 
 	@Override

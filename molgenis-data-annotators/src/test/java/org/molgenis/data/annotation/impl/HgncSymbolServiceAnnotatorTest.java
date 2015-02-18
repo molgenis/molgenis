@@ -110,7 +110,7 @@ public class HgncSymbolServiceAnnotatorTest
 
 		expectedList.add(expectedEntity);
 
-		Iterator<Entity> results = annotator.annotate(input.iterator());
+		Iterator<Entity> results = annotator.annotate(input);
 
 		Entity resultEntity = results.next();
 
