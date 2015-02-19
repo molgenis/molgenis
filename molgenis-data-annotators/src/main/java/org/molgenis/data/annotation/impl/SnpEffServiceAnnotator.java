@@ -1,10 +1,23 @@
 package org.molgenis.data.annotation.impl;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.File;
+import java.io.BufferedInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.UUID;
+import java.util.regex.Pattern;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -27,7 +40,8 @@ import org.springframework.stereotype.Component;
  * 
  * new ANN field replacing EFF:
  * 
- * ANN=A|missense_variant|MODERATE|NEXN|NEXN|transcript|NM_144573.3|Coding|8/13|c.733G>A|p.Gly245Arg|1030/3389|733/2028|245/675||
+ * ANN=A|missense_variant|MODERATE|NEXN|NEXN|transcript|NM_144573.3|Coding|8/13|c.733G>A|p.Gly245Arg|1030/3389|733/2028|
+ * 245/675||
  * 
  * 
  * -lof doesnt seem to work? would be great... http://snpeff.sourceforge.net/snpEff_lof_nmd.pdf
@@ -35,27 +49,44 @@ import org.springframework.stereotype.Component;
  * 
  * */
 @Component("SnpEffServiceAnnotator")
-public class SnpEffServiceAnnotator implements RepositoryAnnotator,
-        ApplicationListener<ContextRefreshedEvent> {
+public class SnpEffServiceAnnotator implements RepositoryAnnotator, ApplicationListener<ContextRefreshedEvent>
+{
 	private static final Logger LOG = LoggerFactory.getLogger(SnpEffServiceAnnotator.class);
+    public static final String SNPEFF_JAR_LOCATION_PROPERTY = "snpeff_jar_location";
 
-	private final MolgenisSettings molgenisSettings;
+    private final MolgenisSettings molgenisSettings;
 	private final AnnotationService annotatorService;
+    public static String snpEffPath = "";
 
-	public static final String SNPEFF_EFF = "ANN";
 	private static final String NAME = "SnpEff";
-	public static final String SNPEFF_PATH = "snpeff_path";
+	public static final String REFERENCE = "REF";
+	public static final String ALTERNATIVE = "ALT";
+	public static final String CHROMOSOME = "#CHROM";
+	public static final String POSITION = "POS";
+    public static final String ANNOTATION = "Annotation";
+    public static final String PUTATIVE_IMPACT = "Putative_impact";
+    public static final String GENE_NAME = "Gene_Name";
+    public static final String GENE_ID = "Gene_ID";
+    public static final String FEATURE_TYPE = "Feature_type";
+    public static final String FEATURE_ID = "Feature_ID";
+    public static final String TRANSCRIPT_BIOTYPE = "Transcript_biotype";
+    public static final String RANK_TOTAL = "Rank_total";
+    public static final String HGVS_C = "HGVS_c";
+    public static final String HGVS_P = "HGVS_p";
+    public static final String C_DNA_POSITION = "cDNA_position";
+    public static final String CDS_POSITION = "CDS_position";
+    public static final String PROTEIN_POSITION = "Protein_position";
+    public static final String DISTANCE_TO_FEATURE = "Distance_to_feature";
+    public static final String ERRORS = "Errors";
+    public static final String LOF = "LOF";
+    public static final String NMD = "NMD";
 
-    public static final String REFERENCE = "REF";
-    public static final String ALTERNATIVE = "ALT";
-    public static final String CHROMOSOME = "#CHROM";
-    public static final String POSITION = "POS";
 
     @Override
-    public void onApplicationEvent(ContextRefreshedEvent event)
-    {
-        annotatorService.addAnnotator(this);
-    }
+	public void onApplicationEvent(ContextRefreshedEvent event)
+	{
+		annotatorService.addAnnotator(this);
+	}
 
 	@Autowired
 	public SnpEffServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService)
@@ -68,39 +99,45 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator,
 	public SnpEffServiceAnnotator(File snpEffLocation, File inputVcfFile, File outputVCFFile) throws Exception
 	{
 		Process p = Runtime.getRuntime().exec("java -jar \"" + snpEffLocation + "\"");
-		BufferedInputStream pOutput= new BufferedInputStream(p.getInputStream());
-		synchronized (p) {
-			   p.waitFor();
-			}
-		
+		BufferedInputStream pOutput = new BufferedInputStream(p.getInputStream());
+		synchronized (p)
+		{
+			p.waitFor();
+		}
+
 		int read = 0;
 		byte[] output = new byte[1024];
-		
+
 		System.out.printf("Testing if SnpEff can be ran from " + snpEffLocation + " ...");
-		while ((read = pOutput.read(output)) != -1) {
-		    System.out.println(output[read]);
+		while ((read = pOutput.read(output)) != -1)
+		{
+			System.out.println(output[read]);
 		}
-		
-		if(p.exitValue() != 0)
+
+		if (p.exitValue() != 0)
 		{
 			LOG.error("SnpEff not runnable from location " + snpEffLocation + " !");
-			
+
 		}
-		else{
+		else
+		{
 			LOG.info("Exit value 0, all is well...");
 		}
-		
+
 		this.molgenisSettings = new MolgenisSimpleSettings();
-		molgenisSettings.setProperty(SNPEFF_PATH, snpEffLocation.getAbsolutePath());
+		molgenisSettings.setProperty(snpEffPath, snpEffLocation.getAbsolutePath());
 
 		this.annotatorService = new AnnotationServiceImpl();
 
-		if(!checkSnpEffPath()){
-            throw new FileNotFoundException("SnpEff executable not found");
-        }
-		
-		//java -Xmx2g -jar /gcc/resources/snpEff/3.6c/snpEff.jar hg19 -v -canon -ud 0 -spliceSiteSize 5 nc_SNPs.vcf > nc_SNPs_snpeff_no_ud_ss5bp_canon_out.txt
-		Process process = new ProcessBuilder("java -Xmx2g -jar "+SNPEFF_PATH+" hg19 -v -lof -canon -ud 0 -spliceSiteSize 5 "+inputVcfFile+" > " + outputVCFFile).start();
+		if (!checkSnpEffPath())
+		{
+			throw new FileNotFoundException("SnpEff executable not found");
+		}
+
+		// java -Xmx2g -jar /gcc/resources/snpEff/3.6c/snpEff.jar hg19 -v -canon -ud 0 -spliceSiteSize 5 nc_SNPs.vcf >
+		// nc_SNPs_snpeff_no_ud_ss5bp_canon_out.txt
+		Process process = new ProcessBuilder("java -Xmx2g -jar " + snpEffPath
+				+ " hg19 -v -lof -canon -ud 0 -spliceSiteSize 5 " + inputVcfFile + " > " + outputVCFFile).start();
 		InputStream is = process.getInputStream();
 		InputStreamReader isr = new InputStreamReader(is);
 		BufferedReader br = new BufferedReader(isr);
@@ -108,10 +145,11 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator,
 
 		System.out.printf("Output of running SnpEff is:");
 
-		while ((line = br.readLine()) != null) {
-		  System.out.println(line);
+		while ((line = br.readLine()) != null)
+		{
+			System.out.println(line);
 		}
-		
+
 		System.out.println("All done!");
 	}
 
@@ -121,198 +159,310 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator,
 		return NAME;
 	}
 
-    @Override
-    public String getFullName() {
-        return getSimpleName();
-    }
-
-    @Override
-    public String getDescription() {
-        return "TODO: nice SnpEff description";
-    }
-
-    private boolean checkSnpEffPath()
+	@Override
+	public String getFullName()
 	{
-        File snpEffpath = new File("/Applications/snpEff/snpEff.jar");
-		if(snpEffpath.exists() && snpEffpath.isFile())
+		return getSimpleName();
+	}
+
+	@Override
+	public String getDescription()
+	{
+		return "SnpEff is a variant annotation and effect prediction tool. It annotates and predicts the effects of genetic variants (such as amino acid changes).";
+	}
+
+	private boolean checkSnpEffPath()
+	{
+        snpEffPath = molgenisSettings.getProperty(SNPEFF_JAR_LOCATION_PROPERTY);
+        File snpEffpath = new File(snpEffPath);
+		if (snpEffpath.exists() && snpEffpath.isFile())
 		{
-			LOG.info("SnpEff found at + " + snpEffpath.getAbsolutePath());
-            return true;
+			LOG.info("SnpEff found at: " + snpEffpath.getAbsolutePath());
+			return true;
 		}
-		else{
-			LOG.error("SnpEff NOT found at + " + snpEffpath.getAbsolutePath());
+		else
+		{
+			LOG.error("SnpEff not found at: " + snpEffpath.getAbsolutePath());
 			return false;
 		}
 	}
 
-    @Override
-    public Iterator<Entity> annotate(Iterable<Entity> source) {
-        String tempFileName = UUID.randomUUID().toString();
-        File temp = null;
-        try {
-            temp = File.createTempFile(tempFileName, ".vcf");
-            BufferedWriter bw = new BufferedWriter(new FileWriter(temp));
-            for(Entity entity : source){
-                StringBuilder builder = new StringBuilder();
-                builder.append(entity.getString(CHROMOSOME));
-                builder.append("\t");
-                builder.append(entity.getString(POSITION));
-                builder.append("\t.\t");
-                builder.append(entity.getString(REFERENCE));
-                builder.append("\t");
-                builder.append(entity.getString(ALTERNATIVE));
-                builder.append("\n");
-                bw.write(builder.toString());
+	@Override
+	public Iterator<Entity> annotate(Iterable<Entity> source)
+	{
+		String inputTempFileName = UUID.randomUUID().toString();
+		String outputTempFileName = UUID.randomUUID().toString();
+		File inputTempFile;
+		File outputTempFile;
+		List<Entity> results = new ArrayList<>();// FIXME: everything to a List is not very nice!
+
+		try
+		{
+            outputTempFile = File.createTempFile(outputTempFileName, ".vcf");
+            inputTempFile = getInputTempFile(source, inputTempFileName);
+
+            runSnpEff(inputTempFile, outputTempFile);
+
+			BufferedReader br = new BufferedReader(new FileReader(outputTempFile.getAbsolutePath()));
+			String line;
+			Iterator<Entity> entityIterator = source.iterator();
+			while ((line = br.readLine()) != null)
+			{
+				if (!line.startsWith("##"))
+				{
+					if (entityIterator.hasNext())
+					{
+						Entity entity = entityIterator.next();
+                        parseOutputLineToEntity(line, entity);
+						results.add(entity);
+					}
+					else
+					{
+						throw new RuntimeException("File has more lines than input iterable");
+					}
+				}
+			}
+		}
+		catch (IOException e)
+		{
+			throw new RuntimeException("Could not read or create an intermediate file during annotation", e);
+		}
+		catch (InterruptedException e)
+		{
+			throw new RuntimeException("Exception during annotation", e);
+		}
+		return results.iterator();// FIXME: not nice!
+	}
+
+    public void runSnpEff(File tempInput, File tempOutput) throws IOException, InterruptedException {
+        ProcessBuilder pb = new ProcessBuilder("java", "-jar", "-Xmx2g", snpEffPath, "hg19", "-noStats", "-lof",
+                "-canon", "-ud", "0", "-spliceSiteSize", "5", tempInput.getAbsolutePath());
+        pb.redirectOutput(tempOutput);
+        //Error logging to standard logging.
+        pb.redirectError(ProcessBuilder.Redirect.INHERIT);
+
+        Process p = pb.start();
+        p.waitFor();
+    }
+
+    public File getInputTempFile(Iterable<Entity> source, String tempInputFileName) throws IOException {
+        File tempInput;
+        tempInput = File.createTempFile(tempInputFileName, ".vcf");
+
+        BufferedWriter bw = new BufferedWriter(new FileWriter(tempInput));
+        for (Entity entity : source)
+        {
+            StringBuilder builder = new StringBuilder();
+            builder.append(entity.getString(CHROMOSOME));
+            builder.append("\t");
+            builder.append(entity.getString(POSITION));
+            builder.append("\t.\t");
+            builder.append(entity.getString(REFERENCE));
+            builder.append("\t");
+            builder.append(entity.getString(ALTERNATIVE));
+            builder.append("\n");
+            bw.write(builder.toString());
+        }
+        bw.close();
+        return tempInput;
+    }
+
+    public void parseOutputLineToEntity(String line, Entity entity) {
+        String lof = "";
+        String nmd = "";
+        String[] fields = line.split("\t");
+        LOG.info(fields[0] + "==" + entity.getString(CHROMOSOME));
+        LOG.info(fields[1] + "==" + entity.getString(POSITION));
+        String[] ann_field = fields[7].split(";");
+        String[] annotation = ann_field[0].split(Pattern.quote("|"), -1);
+        if (ann_field.length > 1)
+        {
+            if (ann_field[1].startsWith("LOF="))
+            {
+                lof = ann_field[1];
             }
-            bw.close();
-        } catch (Exception e) {
-            //TODO clean error handling
-            e.printStackTrace();
+            else if (ann_field[1].startsWith("NMD="))
+            {
+                nmd = ann_field[1];
+            }
+        }
+        if (ann_field.length > 2)
+        {
+            if (ann_field[2].startsWith("LOF="))
+            {
+                lof = ann_field[2];
+            }
+            else if (ann_field[2].startsWith("NMD="))
+            {
+                nmd = ann_field[2];
+            }
         }
 
-        //execute SnpEff with file as input
-        //output to temp directory?
-
-        /**
-         * Example process code from Python runner:
-         *
-         * 	public void executeScript(File script, PythonOutputHandler outputHandler)
-         {
-         // Check if r is installed
-         File file = new File(pythonScriptExecutable);
-         if (!file.exists())
-         {
-         throw new MolgenisPythonException("File [" + pythonScriptExecutable + "] does not exist");
-         }
-
-         // Check if r has execution rights
-         if (!file.canExecute())
-         {
-         throw new MolgenisPythonException("Can not execute [" + pythonScriptExecutable
-         + "]. Does it have executable permissions?");
-         }
-
-         // Check if the r script exists
-         if (!script.exists())
-         {
-         throw new MolgenisPythonException("File [" + script + "] does not exist");
-         }
-
-         try
-         {
-         // Create r process
-         LOG.info("Running python script [" + script.getAbsolutePath() + "]");
-         Process process = Runtime.getRuntime().exec(pythonScriptExecutable + " " + script.getAbsolutePath());
-
-         // Capture the error output
-         final StringBuilder sb = new StringBuilder();
-         PythonStreamHandler errorHandler = new PythonStreamHandler(process.getErrorStream(),
-         new PythonOutputHandler()
-         {
-         @Override
-         public void outputReceived(String output)
-         {
-         sb.append(output).append("\n");
-         }
-         });
-         errorHandler.start();
-
-         // Capture r output if an Python output handler is defined
-         if (outputHandler != null)
-         {
-         PythonStreamHandler streamHandler = new PythonStreamHandler(process.getInputStream(), outputHandler);
-         streamHandler.start();
-         }
-
-         // Wait until script is finished
-         process.waitFor();
-
-         // Check for errors
-         if (process.exitValue() > 0)
-         {
-         throw new MolgenisPythonException("Error running [" + script.getAbsolutePath() + "]." + sb.toString());
-         }
-
-         LOG.info("Script [" + script.getAbsolutePath() + "] done");
-         }
-         catch (IOException e)
-         {
-         throw new MolgenisPythonException("Exception executing PythonScipt.", e);
-         }
-         catch (InterruptedException e)
-         {
-         throw new MolgenisPythonException("Exception waiting for PythonScipt to finish", e);
-         }
-         }
-         * */
-
-
-
-         //iterate over input again and read from file for SnpEff and annotate Entity
-
-        return null;
+        entity.set(ANNOTATION, annotation[1]);
+        entity.set(PUTATIVE_IMPACT, annotation[2]);
+        entity.set(GENE_NAME, annotation[3]);
+        entity.set(GENE_ID, annotation[4]);
+        entity.set(FEATURE_TYPE, annotation[5]);
+        entity.set(FEATURE_ID, annotation[6]);
+        entity.set(TRANSCRIPT_BIOTYPE, annotation[7]);
+        entity.set(RANK_TOTAL, annotation[8]);
+        entity.set(HGVS_C, annotation[9]);
+        entity.set(HGVS_P, annotation[10]);
+        entity.set(C_DNA_POSITION, annotation[11]);
+        entity.set(CDS_POSITION, annotation[12]);
+        entity.set(PROTEIN_POSITION, annotation[13]);
+        entity.set(DISTANCE_TO_FEATURE, annotation[14]);
+        entity.set(ERRORS, annotation[15]);
+        entity.set(LOF, lof.replace("LOF=", ""));
+        entity.set(NMD, nmd.replace("NMD=", ""));
     }
 
     @Override
 	public EntityMetaData getOutputMetaData()
 	{
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(SNPEFF_EFF, FieldTypeEnum.STRING)); //FIXME: correct type?
+
+		DefaultAttributeMetaData annotation = new DefaultAttributeMetaData(ANNOTATION,
+				MolgenisFieldTypes.FieldTypeEnum.STRING);
+		annotation
+				.setDescription("Annotated using Sequence Ontology terms. Multiple effects can be concatenated using ‘&’");
+		metadata.addAttributeMetaData(annotation);
+
+		DefaultAttributeMetaData putative_impact = new DefaultAttributeMetaData(PUTATIVE_IMPACT,
+				MolgenisFieldTypes.FieldTypeEnum.STRING);
+		putative_impact
+				.setDescription(" A simple estimation of putative impact / deleteriousness : {HIGH, MODERATE, LOW, MODIFIER}");
+		metadata.addAttributeMetaData(putative_impact);
+
+		DefaultAttributeMetaData gene_name = new DefaultAttributeMetaData(GENE_NAME,
+				MolgenisFieldTypes.FieldTypeEnum.STRING);
+		gene_name
+				.setDescription("Common gene name (HGNC). Optional: use closest gene when the variant is “intergenic”");
+		metadata.addAttributeMetaData(gene_name);
+
+		DefaultAttributeMetaData gene_id = new DefaultAttributeMetaData(GENE_ID,
+				MolgenisFieldTypes.FieldTypeEnum.STRING);
+		gene_id.setDescription("Gene ID");
+		metadata.addAttributeMetaData(gene_id);
+
+		DefaultAttributeMetaData feature_type = new DefaultAttributeMetaData(FEATURE_TYPE,
+				MolgenisFieldTypes.FieldTypeEnum.STRING);
+		feature_type
+				.setDescription("Which type of feature is in the next field (e.g. transcript, motif, miRNA, etc.). It is preferred to use Sequence Ontology (SO) terms, but ‘custom’ (user defined) are allowed. ANN=A|stop_gained|HIGH|||transcript|... Tissue specific features may include cell type / tissue information separated by semicolon e.g.: ANN=A|histone_binding_site|LOW|||H3K4me3:HeLa-S3|...\n"
+						+ "Feature ID: Depending on the annotation, this may be: Transcript ID (preferably using version number), Motif ID, miRNA, ChipSeq peak, Histone mark, etc. Note: Some features may not have ID (e.g. histone marks from custom Chip-Seq experiments may not have a unique ID).");
+		metadata.addAttributeMetaData(feature_type);
+
+		DefaultAttributeMetaData feature_id = new DefaultAttributeMetaData(FEATURE_ID,
+				MolgenisFieldTypes.FieldTypeEnum.STRING);
+		feature_id
+				.setDescription("Depending on the annotation, this may be: Transcript ID (preferably using version number), Motif ID, miRNA, ChipSeq peak, Histone mark, etc. Note: Some features may not have ID (e.g. histone marks from custom Chip-Seq experiments may not have a unique ID).");
+		metadata.addAttributeMetaData(feature_id);
+
+		DefaultAttributeMetaData transcript_biotype = new DefaultAttributeMetaData(TRANSCRIPT_BIOTYPE,
+				MolgenisFieldTypes.FieldTypeEnum.STRING);
+		transcript_biotype
+				.setDescription("The bare minimum is at least a description on whether the transcript is {“Coding”, “Noncoding”}. Whenever possible, use ENSEMBL biotypes.");
+		metadata.addAttributeMetaData(transcript_biotype);
+
+		DefaultAttributeMetaData rank_total = new DefaultAttributeMetaData(RANK_TOTAL,
+				MolgenisFieldTypes.FieldTypeEnum.STRING);
+		rank_total.setDescription("Exon or Intron rank / total number of exons or introns");
+		metadata.addAttributeMetaData(rank_total);
+
+		DefaultAttributeMetaData HGVS_c = new DefaultAttributeMetaData(HGVS_C, MolgenisFieldTypes.FieldTypeEnum.STRING);
+		HGVS_c.setDescription("Variant using HGVS notation (DNA level)");
+		metadata.addAttributeMetaData(HGVS_c);
+
+		DefaultAttributeMetaData HGVS_p = new DefaultAttributeMetaData(HGVS_P, MolgenisFieldTypes.FieldTypeEnum.STRING);
+		HGVS_p.setDescription("If variant is coding, this field describes the variant using HGVS notation (Protein level). Since transcript ID is already mentioned in ‘feature ID’, it may be omitted here.");
+		metadata.addAttributeMetaData(HGVS_p);
+
+		DefaultAttributeMetaData cDNA_position = new DefaultAttributeMetaData(C_DNA_POSITION,
+				MolgenisFieldTypes.FieldTypeEnum.STRING);
+		cDNA_position.setDescription("Position in cDNA and trancript’s cDNA length (one based)");
+		metadata.addAttributeMetaData(cDNA_position);
+
+		DefaultAttributeMetaData CDS_position = new DefaultAttributeMetaData(CDS_POSITION,
+				MolgenisFieldTypes.FieldTypeEnum.STRING);
+		CDS_position.setDescription("Position and number of coding bases (one based includes START and STOP codons)");
+		metadata.addAttributeMetaData(CDS_position);
+
+		DefaultAttributeMetaData Protein_position = new DefaultAttributeMetaData(PROTEIN_POSITION,
+				MolgenisFieldTypes.FieldTypeEnum.STRING);
+		Protein_position.setDescription("Position and number of AA (one based, including START, but not STOP)");
+		metadata.addAttributeMetaData(Protein_position);
+
+		DefaultAttributeMetaData Distance_to_feature = new DefaultAttributeMetaData(DISTANCE_TO_FEATURE,
+				MolgenisFieldTypes.FieldTypeEnum.STRING);
+		Distance_to_feature
+				.setDescription("All items in this field are options, so the field could be empty. Up/Downstream: Distance to first / last codon Intergenic: Distance to closest gene Distance to closest Intron boundary in exon (+/- up/downstream). If same, use positive number. Distance to closest exon boundary in Intron (+/- up/downstream) Distance to first base in MOTIF Distance to first base in miRNA Distance to exon-intron boundary in splice_site or splice _region ChipSeq peak: Distance to summit (or peak center) Histone mark / Histone state: Distance to summit (or peak center)");
+		metadata.addAttributeMetaData(Distance_to_feature);
+
+		DefaultAttributeMetaData Errors = new DefaultAttributeMetaData(ERRORS, MolgenisFieldTypes.FieldTypeEnum.STRING);
+		Errors.setDescription("Add errors, warnings oErrors, Warnings or Information messages: Add errors, warnings or r informative message that can affect annotation accuracy. It can be added using either ‘codes’ (as shown in column 1, e.g. W1) or ‘message types’ (as shown in column 2, e.g. WARNING_REF_DOES_NOT_MATCH_GENOME). All these errors, warnings or information messages messages are optional.");
+		metadata.addAttributeMetaData(Errors);
+
+		DefaultAttributeMetaData lof = new DefaultAttributeMetaData(LOF, MolgenisFieldTypes.FieldTypeEnum.STRING);
+		lof.setDescription("snpEff can estimate if a variant is deemed to have a loss of function on the protein.");
+		metadata.addAttributeMetaData(lof);
+
+		DefaultAttributeMetaData nmd = new DefaultAttributeMetaData(NMD, MolgenisFieldTypes.FieldTypeEnum.STRING);
+		nmd.setDescription("Nonsense mediate decay assessment. Some mutations may cause mRNA to be degraded thus not translated into a protein. NMD analysis marks mutations that are estimated to trigger nonsense mediated decay.");
+		metadata.addAttributeMetaData(nmd);
 
 		return metadata;
 	}
 
-    @Override
-    public EntityMetaData getInputMetaData()
-    {
-        DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-        DefaultAttributeMetaData chrom = new DefaultAttributeMetaData(CHROMOSOME,
-                MolgenisFieldTypes.FieldTypeEnum.STRING);
-        chrom.setDescription("The chromosome on which the variant is observed");
-        DefaultAttributeMetaData pos = new DefaultAttributeMetaData(POSITION, MolgenisFieldTypes.FieldTypeEnum.LONG);
-        pos.setDescription("The position on the chromosome which the variant is observed");
-        DefaultAttributeMetaData ref = new DefaultAttributeMetaData(REFERENCE, MolgenisFieldTypes.FieldTypeEnum.STRING);
-        ref.setDescription("The reference allele");
-        DefaultAttributeMetaData alt = new DefaultAttributeMetaData(ALTERNATIVE,
-                MolgenisFieldTypes.FieldTypeEnum.STRING);
-        alt.setDescription("The alternative allele observed");
+	@Override
+	public EntityMetaData getInputMetaData()
+	{
+		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
+		DefaultAttributeMetaData chrom = new DefaultAttributeMetaData(CHROMOSOME,
+				MolgenisFieldTypes.FieldTypeEnum.STRING);
+		chrom.setDescription("The chromosome on which the variant is observed");
+		DefaultAttributeMetaData pos = new DefaultAttributeMetaData(POSITION, MolgenisFieldTypes.FieldTypeEnum.LONG);
+		pos.setDescription("The position on the chromosome which the variant is observed");
+		DefaultAttributeMetaData ref = new DefaultAttributeMetaData(REFERENCE, MolgenisFieldTypes.FieldTypeEnum.STRING);
+		ref.setDescription("The reference allele");
+		DefaultAttributeMetaData alt = new DefaultAttributeMetaData(ALTERNATIVE,
+				MolgenisFieldTypes.FieldTypeEnum.STRING);
+		alt.setDescription("The alternative allele observed");
 
-        metadata.addAttributeMetaData(chrom);
-        metadata.addAttributeMetaData(pos);
-        metadata.addAttributeMetaData(ref);
-        metadata.addAttributeMetaData(alt);
+		metadata.addAttributeMetaData(chrom);
+		metadata.addAttributeMetaData(pos);
+		metadata.addAttributeMetaData(ref);
+		metadata.addAttributeMetaData(alt);
 
-        return metadata;
-    }
+		return metadata;
+	}
 
-    @Override
-    public String canAnnotate(EntityMetaData repoMetaData)
-    {
-        Iterable<AttributeMetaData> annotatorAttributes = getInputMetaData().getAttributes();
-        for (AttributeMetaData annotatorAttribute : annotatorAttributes)
-        {
-            // one of the needed attributes not present? we can not annotate
-            if (repoMetaData.getAttribute(annotatorAttribute.getName()) == null)
-            {
-                return "missing required attribute";
-            }
+	@Override
+	public String canAnnotate(EntityMetaData repoMetaData)
+	{
+		Iterable<AttributeMetaData> annotatorAttributes = getInputMetaData().getAttributes();
+		for (AttributeMetaData annotatorAttribute : annotatorAttributes)
+		{
+			// one of the needed attributes not present? we can not annotate
+			if (repoMetaData.getAttribute(annotatorAttribute.getName()) == null)
+			{
+				return "missing required attribute";
+			}
 
-            // one of the needed attributes not of the correct type? we can not annotate
-            if (!repoMetaData.getAttribute(annotatorAttribute.getName()).getDataType()
-                    .equals(annotatorAttribute.getDataType()))
-            {
-                return "a required attribute has the wrong datatype";
-            }
+			// one of the needed attributes not of the correct type? we can not annotate
+			if (!repoMetaData.getAttribute(annotatorAttribute.getName()).getDataType()
+					.equals(annotatorAttribute.getDataType()))
+			{
+				return "a required attribute has the wrong datatype";
+			}
 
-            // Are the runtime property files not available, or is a webservice down? we can not annotate
-            if (!checkSnpEffPath())
-            {
-                return "SnpEff not found";
-            }
-        }
+			// Are the runtime property files not available, or is a webservice down? we can not annotate
+			if (!checkSnpEffPath())
+			{
+				return "SnpEff not found";
+			}
+		}
 
-        return "true";
-    }
-
+		return "true";
+	}
 
 }
