@@ -7,9 +7,7 @@
 	var pathwayId = "";
 	var selectedVcf;
 
-	function getPathwaysForGene(submittedGene, event) {
-		event.preventDefault(); // otherwise, the <form> will be displayed.
-
+	function getPathwaysForGene(submittedGene) {
 		$("#pathway-select").select2("val", "");
 
 		$.ajax({
@@ -22,15 +20,14 @@
 				for ( var item in data) {
 					select2_items.push({
 						text : data[item], // value (pathway name)
-						id : item
-					// key (pathway id)
+						id : item // key (pathway id)
 					});
 				}
 			}
 		});
 	}
 
-	function getPathways(event) {
+	function getPathways() {
 
 		$.ajax({
 			type : 'POST',
@@ -48,7 +45,7 @@
 		});
 	}
 
-	function getPathwayImage(pathwayId, event) {
+	function getPathwayImage(pathwayId) {
 		$.ajax({
 			type : 'GET',
 			url : molgenis.getContextUrl() + "/pathwayViewer/" + pathwayId,
@@ -105,7 +102,7 @@
 		});
 	}
 
-	function getGPML(selectedVcf, pathwayId, event) {
+	function getGPML(selectedVcf, pathwayId) {
 		$.ajax({
 			type : 'GET',
 			url : molgenis.getContextUrl() + "/getGPML/" + selectedVcf + "/" + pathwayId,
@@ -118,7 +115,7 @@
 		});
 	}
 
-	function getColoredPathwayImage(pathwayId, event) {
+	function getColoredPathwayImage(pathwayId) {
 		$.ajax({
 			type : 'GET',
 			url : molgenis.getContextUrl() + "/getColoredPathway/" + pathwayId,
@@ -137,9 +134,9 @@
 	$(function() {
 		$('#hiding-select2').hide();
 
-		$('#tabs').click(function(e) {
-			e.preventDefault()
-			$(this).tab('show')
+		$('#tabs').click(function() {
+			$(this).tab('show');
+			return false;
 		})
 
 		$('#pathway-select').select2({
@@ -152,17 +149,18 @@
 			},
 		}).on("select2-selecting", function(event) {
 			pathwayId = event.val;
-			getPathwayImage(pathwayId, event);
+			getPathwayImage(pathwayId);
 		});
-		$('#submit-genename-btn').on('click', function(event) {
+		$('#submit-genename-btn').on('click', function() {
 			var submittedGene = $('#gene-search').val();
-			getPathwaysForGene(submittedGene, event);
+			getPathwaysForGene(submittedGene);
+			return false;
 		});
 		$('#dataset-select').select2({
 			placeholder : "Select a vcf file",
 			width : '400px'
 		});
-		$('#submit-vcfFile-btn').on('click', function(event) {
+		$('#submit-vcfFile-btn').on('click', function() {
 			selectedVcf = $('#dataset-select').val();
 			$('#hiding-select2').show();
 			getPathwaysByGenes(selectedVcf);
@@ -178,10 +176,9 @@
 			},
 		}).on("select2-selecting", function(event) {
 			pathwayId = event.val;
-			getGPML(selectedVcf, pathwayId, event);
-			return false;
+			getGPML(selectedVcf, pathwayId);
 		});
-		getPathways(event);
+		getPathways();
 	});
 
 }($, window.top.molgenis = window.top.molgenis || {}));

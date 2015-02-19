@@ -3,31 +3,29 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
+import java.rmi.RemoteException;
 import java.util.Arrays;
 
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.mockito.Mockito;
-import org.molgenis.dataWikiPathways.WSPathway;
-import org.molgenis.dataWikiPathways.WikiPathwaysPortType;
 import org.molgenis.pathways.WikiPathwaysController;
-import org.testng.Assert;
+import org.pathvisio.core.model.ConverterException;
+import org.pathvisio.wikipathways.webservice.WSPathway;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+import org.wikipathways.client.WikiPathwaysClient;
 import org.xml.sax.SAXException;
-
-import com.google.common.collect.ImmutableMap;
-
 
 public class WikiPathwaysControllerTest
 {
 	private WikiPathwaysController controller;
-	private WikiPathwaysPortType serviceMock;
+	private WikiPathwaysClient serviceMock;
 	
 	@BeforeTest
 	public void init()
 	{
-		serviceMock = Mockito.mock(WikiPathwaysPortType.class);
+		serviceMock = Mockito.mock(WikiPathwaysClient.class);
 		controller = new WikiPathwaysController(new WikiPathwaysService(serviceMock));
 	}
 	
@@ -42,11 +40,11 @@ public class WikiPathwaysControllerTest
 	}
 	
 	@Test
-	public void testGetGPML() throws ParserConfigurationException, SAXException, IOException
+	public void testGetGPML() throws ParserConfigurationException, SAXException, IOException, ConverterException
 	{
 		// mock inprogrammeren
-		WSPathway pathway = new WSPathway();
-		pathway.setGpml("<gpml>  "
+		WSPathway pathway = Mockito.mock(WSPathway.class);
+		when(pathway.getGpml()).thenReturn("<gpml>  "
 				+ "<DataNode TextLabel='TUSC2 / Fus1 , Fusion' GraphId = 'cf7548' Type='GeneProduct' GroupRef='bced7'>" 
 				+ "<Graphics CenterX='688.6583271016858' CenterY='681.6145075824545' Width='80.0' Height='20.0' ZOrder='32768' FontSize='10' Valign='Middle' />"
 				+ "<Xref Database='Ensembl' ID='ENSG00000197081' />"
@@ -63,7 +61,7 @@ public class WikiPathwaysControllerTest
 	}
 	
 	@Test
-	public void testGetColoredPathway()
+	public void testGetColoredPathway() throws RemoteException
 	{
 		// mock inprogrammeren
 		byte[] base64Binary = null;
