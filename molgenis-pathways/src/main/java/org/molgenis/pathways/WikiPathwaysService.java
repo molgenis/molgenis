@@ -10,15 +10,11 @@ import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-import org.bridgedb.DataSource;
-import org.bridgedb.Xref;
-import org.bridgedb.bio.Organism;
-import org.pathvisio.core.model.ConverterException;
-import org.pathvisio.wikipathways.webservice.WSPathwayInfo;
-import org.pathvisio.wikipathways.webservice.WSSearchResult;
+import org.molgenis.wikipathways.client.WSPathwayInfo;
+import org.molgenis.wikipathways.client.WSSearchResult;
+import org.molgenis.wikipathways.client.WikiPathwaysPortType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.wikipathways.client.WikiPathwaysClient;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -31,17 +27,17 @@ import com.google.common.collect.ImmutableMap;
 @Component
 public class WikiPathwaysService
 {
-	private final WikiPathwaysClient wikiPathwaysProxy;
+	private final WikiPathwaysPortType wikiPathwaysProxy;
 	private static final String COLORS = "colors";
 	private static final String GRAPH_IDS = "graphIds";
 	private static final String PATHWAY_ID = "pathwayId";
 
-	private final LoadingCache<Organism, List<WSPathwayInfo>> allPathwaysCache = CacheBuilder.newBuilder()
+	private final LoadingCache<String, List<WSPathwayInfo>> allPathwaysCache = CacheBuilder.newBuilder()
 			.maximumSize(Integer.MAX_VALUE).refreshAfterWrite(1, TimeUnit.DAYS)
-			.build(new CacheLoader<Organism, List<WSPathwayInfo>>()
+			.build(new CacheLoader<String, List<WSPathwayInfo>>()
 			{
 				@Override
-				public List<WSPathwayInfo> load(Organism organism) throws Exception
+				public List<WSPathwayInfo> load(String organism) throws Exception
 				{
 					WSPathwayInfo[] listPathways = wikiPathwaysProxy.listPathways(organism);
 					return Arrays.asList(listPathways);
@@ -59,9 +55,9 @@ public class WikiPathwaysService
 
 				}
 			});
-	
+
 	@Autowired
-	public WikiPathwaysService(WikiPathwaysClient wikiPathwaysProxy)
+	public WikiPathwaysService(WikiPathwaysPortType wikiPathwaysProxy)
 	{
 		this.wikiPathwaysProxy = wikiPathwaysProxy;
 	}
@@ -97,11 +93,12 @@ public class WikiPathwaysService
 			.maximumSize(Integer.MAX_VALUE).refreshAfterWrite(1, TimeUnit.DAYS)
 			.build(new CacheLoader<String, List<WSSearchResult>>()
 			{
+				@Override
 				public List<WSSearchResult> load(String gene) throws Exception
 				{
-					WSSearchResult[] listPathways = wikiPathwaysProxy.findPathwaysByXref(
-							new Xref(gene,DataSource.getBySystemCode("H"))); // H for HGNC database
-																								// (human gene symbols)
+					WSSearchResult[] listPathways = wikiPathwaysProxy.findPathwaysByXref(new String[]
+					{ gene }, new String[]
+					{ "H" }); // H for HGNC database (human gene symbols)
 					return Arrays.asList(listPathways);
 				}
 			});
@@ -110,6 +107,7 @@ public class WikiPathwaysService
 			.maximumSize(Integer.MAX_VALUE).refreshAfterWrite(1, TimeUnit.DAYS)
 			.build(new CacheLoader<Map<String, Object>, String>()
 			{
+				@Override
 				@SuppressWarnings(
 				{ "unchecked" })
 				public String load(Map<String, Object> coloredPathwayParameters) throws Exception
@@ -117,7 +115,8 @@ public class WikiPathwaysService
 					List<String> graphIds = (List<String>) coloredPathwayParameters.get(GRAPH_IDS);
 					List<String> colors = (List<String>) coloredPathwayParameters.get(COLORS);
 					return toSingleLineString(wikiPathwaysProxy.getColoredPathway(
-							coloredPathwayParameters.get(PATHWAY_ID).toString(), "0", graphIds, colors, "svg"));
+							coloredPathwayParameters.get(PATHWAY_ID).toString(), "0", graphIds.toArray(new String[0]),
+							colors.toArray(new String[0]), "svg"));
 				}
 			});
 
@@ -127,9 +126,9 @@ public class WikiPathwaysService
 	 * @param searchTerm
 	 *            string to search for
 	 * @return Map with all matching pathway ids mapped to pathway name
-	 * @throws RemoteException 
+	 * @throws RemoteException
 	 */
-	public Map<String, String> getFilteredPathways(String searchTerm, Organism species) throws RemoteException
+	public Map<String, String> getFilteredPathways(String searchTerm, String species) throws RemoteException
 	{
 		WSSearchResult[] pathwaysByText = wikiPathwaysProxy.findPathwaysByText(searchTerm, species);
 
@@ -147,10 +146,10 @@ public class WikiPathwaysService
 	 * @param pathwayId
 	 *            ID of the pathway in WikiPathways
 	 * @return String containing the pathway GPML
-	 * @throws ConverterException 
-	 * @throws RemoteException 
+	 * @throws ConverterException
+	 * @throws RemoteException
 	 */
-	public String getCurrentPathwayGPML(String pathwayId) throws RemoteException, ConverterException
+	public String getCurrentPathwayGPML(String pathwayId) throws RemoteException
 	{
 		return wikiPathwaysProxy.getPathway(pathwayId, 0).getGpml();
 	}
@@ -200,12 +199,12 @@ public class WikiPathwaysService
 	 * @throws ExecutionException
 	 *             if loading of the cache fails
 	 */
-	public Map<String, String> getPathwaysForGene(String gene, Organism species) throws ExecutionException
+	public Map<String, String> getPathwaysForGene(String gene, String species) throws ExecutionException
 	{
 		Map<String, String> result = new HashMap<String, String>();
 		for (WSSearchResult pathway : pathwaysByXrefCache.get(gene))
 		{
-			if (pathway.getSpecies().equals(species.latinName()))
+			if (pathway.getSpecies().equals(species))
 			{
 				result.put(pathway.getId(), pathway.getName() + " (" + pathway.getId() + ")");
 			}
@@ -222,7 +221,7 @@ public class WikiPathwaysService
 	 * @throws ExecutionException
 	 *             if loading of the cache fails
 	 */
-	public Map<String, String> getAllPathways(Organism species) throws ExecutionException
+	public Map<String, String> getAllPathways(String species) throws ExecutionException
 	{
 		List<WSPathwayInfo> listOfPathways = allPathwaysCache.get(species);
 

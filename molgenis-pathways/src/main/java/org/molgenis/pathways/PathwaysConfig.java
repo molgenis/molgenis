@@ -1,22 +1,21 @@
 package org.molgenis.pathways;
 
 import java.net.MalformedURLException;
-import java.net.URL;
 
-import javax.xml.rpc.ServiceException;
-
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.molgenis.wikipathways.client.WikiPathwaysPortType;
+import org.molgenis.wikipathways.client.WikiPathwaysRESTBindingStub;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.wikipathways.client.WikiPathwaysClient;
 
 @Configuration
 public class PathwaysConfig
 {
 	@Bean
-	public WikiPathwaysClient service() throws ServiceException, MalformedURLException
+	public WikiPathwaysPortType service() throws MalformedURLException
 	{
-		URL wsURL = new URL("http://webservice.wikipathways.org");
-		return new WikiPathwaysClient(wsURL);
+		return new WikiPathwaysRESTBindingStub(HttpClients.createDefault(), "http://webservice.wikipathways.org");
 	}
-	
+
 }

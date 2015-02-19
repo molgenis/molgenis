@@ -22,13 +22,11 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.bridgedb.bio.Organism;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.pathvisio.core.model.ConverterException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +56,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 	private static final Pattern EFFECT_PATTERN = Pattern
 			.compile("([A-Z]*\\|)(\\|*[0-9]+\\||\\|+)+([0-9A-Z]+)(\\|*)(.*)");
 
-	private static final Organism HOMO_SAPIENS = Organism.HomoSapiens;
+	private static final String HOMO_SAPIENS = "Homo sapiens";
 	private static Map<Integer, String> variantColor = new HashMap<Integer, String>();
 	private Map<String, String> pathwayNames;
 	private final WikiPathwaysService wikiPathwaysService;
@@ -131,14 +129,14 @@ public class WikiPathwaysController extends MolgenisPluginController
 	{
 		return wikiPathwaysService.getAllPathways(HOMO_SAPIENS);
 	}
-	
+
 	/**
 	 * Searches pathways.
 	 * 
 	 * @param searchTerm
 	 *            string to search for
 	 * @return Map with all matching pathway ids mapped to pathway name
-	 * @throws RemoteException 
+	 * @throws RemoteException
 	 */
 	@RequestMapping(value = "/filteredPathways", method = POST)
 	@ResponseBody
@@ -253,7 +251,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 	@RequestMapping(value = "/getGPML/{selectedVcf}/{pathwayId}", method = GET)
 	@ResponseBody
 	public String getGPML(@PathVariable String selectedVcf, @PathVariable String pathwayId)
-			throws ParserConfigurationException, SAXException, IOException, ExecutionException, ConverterException
+			throws ParserConfigurationException, SAXException, IOException, ExecutionException
 	{
 		Multimap<String, String> graphIdsPerGene = analyzeGPML(wikiPathwaysService.getCurrentPathwayGPML(pathwayId));
 		return getColoredPathway(selectedVcf, pathwayId, graphIdsPerGene);
