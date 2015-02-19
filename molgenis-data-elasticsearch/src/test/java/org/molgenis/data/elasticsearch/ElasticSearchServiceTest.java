@@ -25,6 +25,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -138,7 +139,7 @@ public class ElasticSearchServiceTest
 		when(client.prepareSearch(indexName)).thenReturn(searchRequestBuilder);
 
 		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("entity");
-		entityMetaData.addAttribute(idAttrName).setIdAttribute(true);
+		entityMetaData.addAttribute(idAttrName).setDataType(MolgenisFieldTypes.INT).setIdAttribute(true);
 		Query q = new QueryImpl();
 		Iterable<Entity> searchResults = searchService.search(q, entityMetaData);
 		Iterator<Entity> it = searchResults.iterator();
