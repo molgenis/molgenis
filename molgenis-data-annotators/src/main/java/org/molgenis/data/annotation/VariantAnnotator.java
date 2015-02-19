@@ -12,6 +12,9 @@ public abstract class VariantAnnotator extends LocusAnnotator
 
 	public static final String REFERENCE = "REF";
 	public static final String ALTERNATIVE = "ALT";
+	
+	public static final String QUAL = "QUAL";
+	public static final String FILTER = "FILTER";
 
 	@Override
 	public EntityMetaData getInputMetaData()

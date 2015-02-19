@@ -26,11 +26,12 @@ public class VcfUtils
 
 		List<String> vcfAttributes = Arrays.asList(new String[]
 		{ VariantAnnotator.CHROMOSOME, VariantAnnotator.POSITION, VcfRepository.ID, VariantAnnotator.REFERENCE,
-				VariantAnnotator.ALTERNATIVE });
+				VariantAnnotator.ALTERNATIVE, VariantAnnotator.QUAL, VariantAnnotator.FILTER });
 
 		for (String attribute : vcfAttributes)
 		{
-			vcfRecord.append(entity.getString(attribute) + "\t");
+			vcfRecord.append(((entity.getString(attribute) != null && !entity.getString(attribute).equals("")) ? entity.getString(attribute) : ".") + "\t");
+		//	vcfRecord.append(entity.getString(attribute) + "\t");
 		}
 		for (AttributeMetaData attributeMetaData : entity.getEntityMetaData().getAtomicAttributes())
 		{
