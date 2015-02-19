@@ -119,7 +119,7 @@ public class MolgenisPluginInterceptorTest
 	}
 
  	@Test
- 	public void postHandle_pluginid_with_query_string() throws Exception
+ 	public void postHandlePluginidWithQueryString() throws Exception
  	{
  		MolgenisSettings settings = mock(MolgenisSettings.class);
  		when(settings.getProperty(MolgenisPluginInterceptor.KEY_FOOTER)).thenReturn("footerTest");
