@@ -12,10 +12,7 @@ import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.UserAuthority;
 import org.molgenis.data.DataService;
 import org.molgenis.data.IndexedCrudRepositorySecurityDecorator;
-import org.molgenis.data.annotation.impl.CaddServiceAnnotator;
-import org.molgenis.data.annotation.impl.ClinVarServiceAnnotator;
-import org.molgenis.data.annotation.impl.DbnsfpGeneServiceAnnotator;
-import org.molgenis.data.annotation.impl.DbnsfpVariantServiceAnnotator;
+import org.molgenis.data.annotation.impl.*;
 import org.molgenis.data.annotation.provider.CgdDataProvider;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
 import org.molgenis.data.annotation.provider.HpoMappingProvider;
@@ -80,7 +77,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		runtimePropertyMap.put(DataExplorerController.KEY_MOD_CHARTS, String.valueOf(true));
 		runtimePropertyMap.put(DataExplorerController.KEY_MOD_DATA, String.valueOf(true));
 		runtimePropertyMap.put(DataExplorerController.KEY_MOD_DISEASEMATCHER, String.valueOf(false));
-		runtimePropertyMap.put(DataExplorerController.KEY_MOD_ANNOTATORS, String.valueOf(false));
+		runtimePropertyMap.put(DataExplorerController.KEY_MOD_ANNOTATORS, String.valueOf(true));
 
 		// DataExplorer table editable yes/no
 		runtimePropertyMap.put(DataExplorerController.KEY_DATAEXPLORER_EDITABLE, String.valueOf(false));
@@ -119,6 +116,8 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 				molgenisHomeDirAnnotationResources + "/dbnsfp/dbNSFP2.3_variant.chr");
 		runtimePropertyMap.put(ClinVarServiceAnnotator.CLINVAR_FILE_LOCATION_PROPERTY,
 				molgenisHomeDirAnnotationResources + "/Clinvar/variant_summary.txt");
+        runtimePropertyMap.put(SnpEffServiceAnnotator.SNPEFF_JAR_LOCATION_PROPERTY,
+                molgenisHomeDirAnnotationResources + "/Applications/snpEff/snpEff.jar");
 
 		runtimePropertyMap.put(KEY_FOOTER, DEFAULT_VAL_FOOTER);
 
