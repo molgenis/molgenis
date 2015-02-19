@@ -8,14 +8,11 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,10 +25,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
-import org.molgenis.dataWikiPathways.WSPathway;
-import org.molgenis.dataWikiPathways.WSPathwayInfo;
-import org.molgenis.dataWikiPathways.WSSearchResult;
-import org.molgenis.dataWikiPathways.WikiPathwaysPortType;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,23 +41,13 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
-
-//FIX: GONL -> Primary Focal Segmental Glomerulosclerosis FSGS (Homo sapiens) (wel colors & grpahIds, geen plaatje van pathway).
 
 @Controller
 @RequestMapping(URI)
 public class WikiPathwaysController extends MolgenisPluginController
 {
-	private static final String COLORS2 = "colors";
-	private static final String GRAPH_IDS = "graphIds";
-	private static final String PATHWAY_ID = "pathwayId";
-
 	private static final Logger LOG = LoggerFactory.getLogger(WikiPathwaysController.class);
 
 	private static final String ID = "wikipathways";
@@ -72,90 +55,17 @@ public class WikiPathwaysController extends MolgenisPluginController
 	private static final Pattern EFFECT_PATTERN = Pattern
 			.compile("([A-Z]*\\|)(\\|*[0-9]+\\||\\|+)+([0-9A-Z]+)(\\|*)(.*)");
 
-	private final WikiPathwaysPortType wikiPathwaysService;
 	private static final String HOMO_SAPIENS = "Homo sapiens";
 	private static Map<Integer, String> variantColor = new HashMap<Integer, String>();
 	private Map<String, String> pathwayNames;
-
-	private final LoadingCache<String, List<WSPathwayInfo>> allPathwaysCache = CacheBuilder.newBuilder()
-			.maximumSize(Integer.MAX_VALUE).refreshAfterWrite(1, TimeUnit.DAYS)
-			.build(new CacheLoader<String, List<WSPathwayInfo>>()
-			{
-				@Override
-				public List<WSPathwayInfo> load(String organism) throws Exception
-				{
-					List<WSPathwayInfo> listPathways = wikiPathwaysService.listPathways(organism);
-					return listPathways;
-
-				}
-			});
-
-	private final LoadingCache<String, String> uncoloredPathwayImageCache = CacheBuilder.newBuilder()
-			.maximumSize(Integer.MAX_VALUE).refreshAfterWrite(1, TimeUnit.DAYS).build(new CacheLoader<String, String>()
-			{
-				@Override
-				public synchronized String load(String pathwayId) throws Exception
-				{
-					return toSingleLineString(wikiPathwaysService.getPathwayAs("svg", pathwayId, 0));
-
-				}
-			});
-
-	private static String toSingleLineString(byte[] source)
-	{
-		ByteArrayInputStream bis = new ByteArrayInputStream(source);
-		Scanner scanner = new Scanner(bis);
-		scanner.useDelimiter("\\Z");// To read all scanner content in one String
-		String result = "";
-		try
-		{
-			if (scanner.hasNext())
-			{
-				result = scanner.next();
-			}
-		}
-		finally
-		{
-			scanner.close();
-		}
-		return result;
-	}
-
-	private final LoadingCache<String, List<WSSearchResult>> pathwaysByXrefCache = CacheBuilder.newBuilder()
-			.maximumSize(Integer.MAX_VALUE).refreshAfterWrite(1, TimeUnit.DAYS)
-			.build(new CacheLoader<String, List<WSSearchResult>>()
-			{
-				public List<WSSearchResult> load(String gene) throws Exception
-				{
-					List<WSSearchResult> listPathways = wikiPathwaysService.findPathwaysByXref(
-							Collections.singletonList(gene), Collections.singletonList("H")); // H for HGNC database
-																								// (human gene symbols)
-					return listPathways;
-				}
-			});
-
-	private final LoadingCache<Map<String, Object>, String> coloredPathwayImageCache = CacheBuilder.newBuilder()
-			.maximumSize(Integer.MAX_VALUE).refreshAfterWrite(1, TimeUnit.DAYS)
-			.build(new CacheLoader<Map<String, Object>, String>()
-			{
-				@SuppressWarnings(
-				{ "rawtypes", "unchecked" })
-				public String load(Map<String, Object> coloredPathwayParameters) throws Exception
-				{
-					List graphIds = (List) coloredPathwayParameters.get(GRAPH_IDS);
-					List colors = (List) coloredPathwayParameters.get(COLORS2);
-					return toSingleLineString(wikiPathwaysService.getColoredPathway(
-							coloredPathwayParameters.get(PATHWAY_ID).toString(), "0", graphIds, colors, "svg"));
-				}
-			});
-
+	private final WikiPathwaysService wikiPathwaysService;
 	@Autowired
 	private DataService dataService;
 	private static final Pattern GENE_SYMBOL_PATTERN = Pattern.compile("^[0-9A-Za-z\\-]*");
 	private static final DocumentBuilderFactory DB_FACTORY = DocumentBuilderFactory.newInstance();
 
 	@Autowired
-	public WikiPathwaysController(WikiPathwaysPortType wikiPathwaysService)
+	public WikiPathwaysController(WikiPathwaysService wikiPathwaysService)
 	{
 		super(URI);
 		this.wikiPathwaysService = wikiPathwaysService;
@@ -216,16 +126,9 @@ public class WikiPathwaysController extends MolgenisPluginController
 	@ResponseBody
 	public Map<String, String> getAllPathways() throws ExecutionException
 	{
-		List<WSPathwayInfo> listOfPathways = allPathwaysCache.get(HOMO_SAPIENS);
-
-		Map<String, String> result = new HashMap<String, String>();
-		for (WSPathwayInfo pathwayInfo : listOfPathways)
-		{
-			result.put(pathwayInfo.getId(), pathwayInfo.getName());
-		}
-		return result;
+		return wikiPathwaysService.getAllPathways(HOMO_SAPIENS);
 	}
-
+	
 	/**
 	 * Searches pathways.
 	 * 
@@ -237,14 +140,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 	@ResponseBody
 	public Map<String, String> getFilteredPathways(@Valid @RequestBody String searchTerm)
 	{
-		List<WSSearchResult> pathwaysByText = wikiPathwaysService.findPathwaysByText(searchTerm, HOMO_SAPIENS);
-
-		Map<String, String> result = new HashMap<String, String>();
-		for (WSSearchResult pathwayInfo : pathwaysByText)
-		{
-			result.put(pathwayInfo.getId(), pathwayInfo.getName());
-		}
-		return result;
+		return wikiPathwaysService.getFilteredPathways(searchTerm, HOMO_SAPIENS);
 	}
 
 	/**
@@ -260,7 +156,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 	@ResponseBody
 	public String getPathway(@PathVariable String pathwayId) throws ExecutionException
 	{
-		return uncoloredPathwayImageCache.get(pathwayId);
+		return wikiPathwaysService.getUncoloredPathwayImage(pathwayId);
 	}
 
 	/**
@@ -347,15 +243,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 	private Map<String, String> getPathwaysForGene(String gene) throws ExecutionException
 	{
 		LOG.debug("getPathwaysForGene()" + gene);
-		Map<String, String> result = new HashMap<String, String>();
-		for (WSSearchResult pathway : pathwaysByXrefCache.get(gene))
-		{
-			if (HOMO_SAPIENS.equals(pathway.getSpecies()))
-			{
-				result.put(pathway.getId(), pathway.getName() + " (" + pathway.getId() + ")");
-			}
-		}
-		return result;
+		return wikiPathwaysService.getPathwaysForGene(gene, HOMO_SAPIENS);
 	}
 
 	@RequestMapping(value = "/getGPML/{selectedVcf}/{pathwayId}", method = GET)
@@ -363,8 +251,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 	public String getGPML(@PathVariable String selectedVcf, @PathVariable String pathwayId)
 			throws ParserConfigurationException, SAXException, IOException, ExecutionException
 	{
-		WSPathway wsPathway = wikiPathwaysService.getPathway(pathwayId, 0);
-		Multimap<String, String> graphIdsPerGene = analyzeGPML(wsPathway.getGpml());
+		Multimap<String, String> graphIdsPerGene = analyzeGPML(wikiPathwaysService.getCurrentPathwayGPML(pathwayId));
 		return getColoredPathway(selectedVcf, pathwayId, graphIdsPerGene);
 	}
 
@@ -470,13 +357,12 @@ public class WikiPathwaysController extends MolgenisPluginController
 
 		if (!graphIds.isEmpty())
 		{
-			return coloredPathwayImageCache.get(ImmutableMap.<String, Object> of(PATHWAY_ID, pathwayId, GRAPH_IDS,
-					graphIds, COLORS2, colors));
+			return wikiPathwaysService.getColoredPathwayImage(pathwayId, graphIds, colors);
 		}
 		else
 		{
 			LOG.warn("normal pathway, uncolored");
-			return uncoloredPathwayImageCache.get(pathwayId);
+			return wikiPathwaysService.getUncoloredPathwayImage(pathwayId);
 		}
 	}
 }

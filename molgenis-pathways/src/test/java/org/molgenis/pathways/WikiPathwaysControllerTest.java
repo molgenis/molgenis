@@ -28,7 +28,7 @@ public class WikiPathwaysControllerTest
 	public void init()
 	{
 		serviceMock = Mockito.mock(WikiPathwaysPortType.class);
-		controller = new WikiPathwaysController(serviceMock);
+		controller = new WikiPathwaysController(new WikiPathwaysService(serviceMock));
 	}
 	
 	@Test
