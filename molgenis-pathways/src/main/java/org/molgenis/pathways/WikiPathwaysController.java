@@ -51,24 +51,29 @@ import org.xml.sax.SAXException;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Multimap;
+
+//FIX: GONL -> Primary Focal Segmental Glomerulosclerosis FSGS (Homo sapiens) (wel colors & grpahIds, geen plaatje van pathway).
 
 @Controller
 @RequestMapping(URI)
 public class WikiPathwaysController extends MolgenisPluginController
 {
-//	private static final int GENES_PER_PATHWAY_LOOKUP_BATCH_SIZE = 20;
 	private static final String COLORS2 = "colors";
 	private static final String GRAPH_IDS = "graphIds";
 	private static final String PATHWAY_ID = "pathwayId";
 
 	private static final Logger LOG = LoggerFactory.getLogger(WikiPathwaysController.class);
-	// FIXME: proper exception handling
 
 	private static final String ID = "wikipathways";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+	private static final Pattern EFFECT_PATTERN = Pattern
+			.compile("([A-Z]*\\|)(\\|*[0-9]+\\||\\|+)+([0-9A-Z]+)(\\|*)(.*)");
+
 	private final WikiPathwaysPortType wikiPathwaysService;
 	private static final String HOMO_SAPIENS = "Homo sapiens";
-	private Map<String, List<String>> nodeList = new HashMap<>();
 	private static Map<Integer, String> variantColor = new HashMap<Integer, String>();
 	private Map<String, String> pathwayNames;
 
@@ -101,19 +106,19 @@ public class WikiPathwaysController extends MolgenisPluginController
 		ByteArrayInputStream bis = new ByteArrayInputStream(source);
 		Scanner scanner = new Scanner(bis);
 		scanner.useDelimiter("\\Z");// To read all scanner content in one String
-		String pathway = "";
+		String result = "";
 		try
 		{
 			if (scanner.hasNext())
 			{
-				pathway = scanner.next();
+				result = scanner.next();
 			}
 		}
 		finally
 		{
 			scanner.close();
 		}
-		return pathway;
+		return result;
 	}
 
 	private final LoadingCache<String, List<WSSearchResult>> pathwaysByXrefCache = CacheBuilder.newBuilder()
@@ -122,29 +127,32 @@ public class WikiPathwaysController extends MolgenisPluginController
 			{
 				public List<WSSearchResult> load(String gene) throws Exception
 				{
-					List<WSSearchResult> listPathways = wikiPathwaysService.findPathwaysByXref(Collections.singletonList(gene),
-							Collections.singletonList("H")); // H for HGNC database (human gene symbols)
+					List<WSSearchResult> listPathways = wikiPathwaysService.findPathwaysByXref(
+							Collections.singletonList(gene), Collections.singletonList("H")); // H for HGNC database
+																								// (human gene symbols)
 					return listPathways;
 				}
 			});
 
-	private final LoadingCache<Map<String, Object>, byte[]> COLORED_PATHWAY_IMAGE_CACHED = CacheBuilder.newBuilder()
+	private final LoadingCache<Map<String, Object>, String> coloredPathwayImageCache = CacheBuilder.newBuilder()
 			.maximumSize(Integer.MAX_VALUE).refreshAfterWrite(1, TimeUnit.DAYS)
-			.build(new CacheLoader<Map<String, Object>, byte[]>()
+			.build(new CacheLoader<Map<String, Object>, String>()
 			{
 				@SuppressWarnings(
 				{ "rawtypes", "unchecked" })
-				public byte[] load(Map<String, Object> coloredPathwayParameters) throws Exception
+				public String load(Map<String, Object> coloredPathwayParameters) throws Exception
 				{
-					List a = (List) coloredPathwayParameters.get(GRAPH_IDS);
-					List b = (List) coloredPathwayParameters.get(COLORS2);
-					return wikiPathwaysService.getColoredPathway(coloredPathwayParameters.get(PATHWAY_ID).toString(),
-							"0", a, b, "svg");
+					List graphIds = (List) coloredPathwayParameters.get(GRAPH_IDS);
+					List colors = (List) coloredPathwayParameters.get(COLORS2);
+					return toSingleLineString(wikiPathwaysService.getColoredPathway(
+							coloredPathwayParameters.get(PATHWAY_ID).toString(), "0", graphIds, colors, "svg"));
 				}
 			});
 
 	@Autowired
 	private DataService dataService;
+	private static final Pattern GENE_SYMBOL_PATTERN = Pattern.compile("^[0-9A-Za-z\\-]*");
+	private static final DocumentBuilderFactory DB_FACTORY = DocumentBuilderFactory.newInstance();
 
 	@Autowired
 	public WikiPathwaysController(WikiPathwaysPortType wikiPathwaysService)
@@ -268,64 +276,83 @@ public class WikiPathwaysController extends MolgenisPluginController
 		// TODO: cache result per VCF!
 		HashMap<String, Integer> result = new HashMap<String, Integer>();
 		Repository repository = dataService.getRepositoryByEntityName(selectedVcf);
-		// TODO: Nog even kijken naar de regex
-		Pattern effectPattern = Pattern.compile("([A-Z]*\\|)(\\|*[0-9]+\\||\\|+)+([0-9A-Z]+)(\\|*)(.*)");
 		Iterator<Entity> iterator = repository.iterator();
 		while (iterator.hasNext())
 		{
 			Entity entity = iterator.next();
-			String eff = entity.getString("EFF");
-			if (!StringUtils.isEmpty(eff))
-			{
-				Matcher effectMatcher = effectPattern.matcher(eff);
-				if (effectMatcher.find())
-				{
-					String geneSymbol = effectMatcher.group(3);
-					int impact = eff.contains("HIGH") ? 3 : eff.contains("MODERATE") ? 2 : eff.contains("LOW") ? 1 : 0;
-
-					if (result.containsKey(geneSymbol))
-					{
-						if (impact > result.get(geneSymbol))
-						{
-							result.put(geneSymbol, impact);
-						}
-					}
-					else
-					{
-						result.put(geneSymbol, impact);
-					}
-				}
-			}
+			updateEffect(result, entity.getString("EFF"));
 		}
 		return result;
 	}
 
+	/**
+	 * Interprets effect and updates maximum impact.
+	 * 
+	 * @param maximumImpacts
+	 *            Map with maximum impact per gene
+	 * @param eff
+	 *            String with effect attribute of VCF
+	 */
+
+	private void updateEffect(HashMap<String, Integer> maximumImpacts, String eff)
+	{
+		if (!StringUtils.isEmpty(eff))
+		{
+			Matcher effectMatcher = EFFECT_PATTERN.matcher(eff);
+			if (effectMatcher.find())
+			{
+				String geneSymbol = effectMatcher.group(3);
+				int impact = eff.contains("HIGH") ? 3 : eff.contains("MODERATE") ? 2 : eff.contains("LOW") ? 1 : 0;
+
+				if (!maximumImpacts.containsKey(geneSymbol) || impact > maximumImpacts.get(geneSymbol))
+				{
+					maximumImpacts.put(geneSymbol, impact);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Retrieves all pathways for the genes in a vcf.
+	 * 
+	 * @param selectedVcf
+	 *            the name of the vcf entity
+	 * @return Map mapping pathway ID to pathway name plus ID
+	 * @throws ExecutionException
+	 *             if the loading from cache fails
+	 */
 	@RequestMapping(value = "/pathwaysByGenes", method = POST)
 	@ResponseBody
 	public Map<String, String> getListOfPathwayNamesByGenes(@Valid @RequestBody String selectedVcf)
 			throws ExecutionException
 	{
 		LOG.info("getListOfPathwayNamesByGenes() selectedVcf = " + selectedVcf);
-		Map<String, Integer> highestImpactPerGene = getGenesForVcf(selectedVcf);
 		Map<String, String> result = new HashMap<String, String>();
-		for(String gene: highestImpactPerGene.keySet())
+		for (String gene : getGenesForVcf(selectedVcf).keySet())
 		{
-			result.putAll(geneToPathways(gene));
+			result.putAll(getPathwaysForGene(gene));
 		}
 		return result;
 	}
 
-	private Map<String, String> geneToPathways(String gene) throws ExecutionException 
+	/**
+	 * Retrieves all pathways for a gene
+	 * 
+	 * @param gene
+	 *            the HGNC name of the gene
+	 * @return Map mapping pathway ID to pathway name plus ID
+	 * @throws ExecutionException
+	 *             if the loading from cache fails
+	 */
+	private Map<String, String> getPathwaysForGene(String gene) throws ExecutionException
 	{
-		LOG.info("geneToPathways()"+gene);
+		LOG.debug("getPathwaysForGene()" + gene);
 		Map<String, String> result = new HashMap<String, String>();
-		List<WSSearchResult> listOfPathwaysByGenes = new ArrayList<WSSearchResult>();
-		listOfPathwaysByGenes = pathwaysByXrefCache.get(gene);
-		for (WSSearchResult info3 : listOfPathwaysByGenes)
+		for (WSSearchResult pathway : pathwaysByXrefCache.get(gene))
 		{
-			if (HOMO_SAPIENS.equals(info3.getSpecies()))
+			if (HOMO_SAPIENS.equals(pathway.getSpecies()))
 			{
-				result.put(info3.getId(), info3.getName() + " (" + info3.getId() + ")");
+				result.put(pathway.getId(), pathway.getName() + " (" + pathway.getId() + ")");
 			}
 		}
 		return result;
@@ -336,15 +363,33 @@ public class WikiPathwaysController extends MolgenisPluginController
 	public String getGPML(@PathVariable String selectedVcf, @PathVariable String pathwayId)
 			throws ParserConfigurationException, SAXException, IOException, ExecutionException
 	{
-		nodeList = new HashMap<String, List<String>>();
 		WSPathway wsPathway = wikiPathwaysService.getPathway(pathwayId, 0);
-		String gpml = wsPathway.getGpml();
-		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+		Multimap<String, String> graphIdsPerGene = analyzeGPML(wsPathway.getGpml());
+		return getColoredPathway(selectedVcf, pathwayId, graphIdsPerGene);
+	}
+
+	/**
+	 * Analyses pathway GPML. Determines for each gene in which graphIds it is displayed.
+	 * 
+	 * @param gpml
+	 *            String containing the pathway GPML
+	 * @return {@link Multimap} mapping gene symbol to graphIDs
+	 * @throws ParserConfigurationException
+	 *             if the creation of the {@link DocumentBuilder} fails
+	 * @throws IOException
+	 *             If any IO errors occur when parsing the GPML
+	 * @throws SAXException
+	 *             If any parse errors occur when parsing the GPML
+	 */
+	private Multimap<String, String> analyzeGPML(String gpml) throws ParserConfigurationException, IOException,
+			SAXException
+	{
+		DocumentBuilder dBuilder = DB_FACTORY.newDocumentBuilder();
 		InputStream is = new ByteArrayInputStream(gpml.getBytes());
 		Document doc = dBuilder.parse(is);
 		NodeList dataNodes = doc.getElementsByTagName("DataNode");
 
+		Multimap<String, String> result = ArrayListMultimap.create();
 		for (int i = 0; i < dataNodes.getLength(); i++)
 		{
 			Element dataNode = (Element) dataNodes.item(i);
@@ -352,111 +397,85 @@ public class WikiPathwaysController extends MolgenisPluginController
 			String textLabel = dataNode.getAttribute("TextLabel");
 
 			String geneSymbol = getGeneSymbol(textLabel);
-			if (graphId.isEmpty())
+			if (!graphId.isEmpty())
 			{
-				continue;
+				result.put(geneSymbol, graphId);
 			}
-			if (nodeList.containsKey(geneSymbol))
-			{ // if a gene is already in the map
-				nodeList.get(geneSymbol).add(graphId); // get the list, and add the graphId
-			}
-			else
-			{
-				List<String> graphIdList = new ArrayList<String>();
-				graphIdList.add(graphId);
-				nodeList.put(geneSymbol, graphIdList);
-			}
-
 		}
-
-		return getColoredPathway(selectedVcf, pathwayId, nodeList);
+		return result;
 	}
 
+	/**
+	 * Finds the gene symbol in a text label.
+	 * 
+	 * @param textLabel
+	 *            the text label to look in
+	 * @return Gene symbol if found, otherwise ""
+	 */
 	String getGeneSymbol(String textLabel)
 	{
-		String geneSymbols = "";
-		Pattern geneSymbolPattern = Pattern.compile("^[0-9A-Za-z\\-]*");
+		String geneSymbol = "";
 		if (textLabel.contains("&quot;"))
 		{
-			System.out.println("WARNING: textlabel(" + textLabel + ") contains quotes, removing those...");
-			textLabel = textLabel.replace("&quot;", "");// FIXME: nasty construction, but wikipathways data is not
-														// consistent. How to do this properly
+			LOG.warn("Textlabel(" + textLabel
+					+ ") contains quotes, which is inconsistent with the gene names. Removing the quotes.");
+			textLabel = textLabel.replace("&quot;", "");
 		}
-		Matcher geneSymbolMatcher = geneSymbolPattern.matcher(textLabel);
+		Matcher geneSymbolMatcher = GENE_SYMBOL_PATTERN.matcher(textLabel);
 		if (geneSymbolMatcher.find())
 		{
-			geneSymbols = geneSymbolMatcher.group(0);
+			geneSymbol = geneSymbolMatcher.group(0);
 		}
-		return geneSymbols;
+		return geneSymbol;
 	}
 
-	private String getColoredPathway(String selectedVcf, String pathwayId, Map<String, List<String>> nodeList)
+	/**
+	 * Retrieves a colored pathway. Sometimes WikiPathways returns no graphIds for a pathway, then the pathway is
+	 * returned uncolored.
+	 * 
+	 * @param selectedVcf
+	 *            the name of the vcf entity
+	 * @param pathwayId
+	 *            the id of the pathway in WikiPathways
+	 * @param graphIdsPerGene
+	 *            {@link Multimap} mapping gene symbol to graphId
+	 * @return String svg from for the pathway
+	 * @throws ExecutionException
+	 *             if the loading from cache fails
+	 */
+	private String getColoredPathway(String selectedVcf, String pathwayId, Multimap<String, String> graphIdsPerGene)
 			throws ExecutionException
 	{
-		Map<Integer, List<String>> graphIdToColor = new HashMap<Integer, List<String>>();
-		List<String> colors = new ArrayList<String>();
-		List<String> graphIds = new ArrayList<String>();
-		byte[] base64Binary = null;
-
-		// genes: geneSymbol, impact
-		// variantColor: impact, color
-		// nodeList: geneSymbol, graphId
-
 		Map<String, Integer> highestImpactPerGene = getGenesForVcf(selectedVcf);
+		Map<String, Integer> highestImpactPerGraphId = new HashMap<String, Integer>();
 
 		for (String gene : highestImpactPerGene.keySet())
 		{
 			int impact = highestImpactPerGene.get(gene);
-
-			if (nodeList.containsKey(gene))
+			for (String graphId : graphIdsPerGene.get(gene))
 			{
-				if (graphIdToColor.containsKey(impact))
-				{ // Impact already in graphIdToColor
-					graphIdToColor.get(impact).addAll(nodeList.get(gene)); // get list of graphIds for this impact and
-																			// add other graphIds
-				}
-				else
-				{
-					graphIdToColor.put(impact, nodeList.get(gene)); // put new impact and first graphIds in map
-				}
+				highestImpactPerGraphId.put(graphId, impact);
 			}
 		}
 
-		for (int j : graphIdToColor.keySet())
+		List<String> colors = new ArrayList<String>();
+		List<String> graphIds = new ArrayList<String>();
+		for (String graphId : highestImpactPerGraphId.keySet())
 		{
-			// For each graphId for this impact, we put the impact color in the color list
-			for (int i = 0; i < graphIdToColor.get(j).size(); i++)
-			{
-				colors.add(variantColor.get(j));
-			}
-			graphIds.addAll(graphIdToColor.get(j));
+			Integer impact = highestImpactPerGraphId.get(graphId);
+			String color = variantColor.get(impact);
+			graphIds.add(graphId);
+			colors.add(color);
 		}
 
-		// Check if graphIds and colors are empty
-		if (!graphIds.isEmpty() && !colors.isEmpty())
+		if (!graphIds.isEmpty())
 		{
-			Map<String, Object> coloredPathwayParameters = new HashMap<String, Object>();
-
-			coloredPathwayParameters.put(PATHWAY_ID, pathwayId);
-			coloredPathwayParameters.put(GRAPH_IDS, graphIds);
-			coloredPathwayParameters.put(COLORS2, colors);
-
-			// System.out.println(coloredPathwayParameters);
-			base64Binary = COLORED_PATHWAY_IMAGE_CACHED.get(coloredPathwayParameters);
-			// base64Binary = idsToPathways(graphIds, colors, pathwayId);
-			ByteArrayInputStream bis = new ByteArrayInputStream(base64Binary);
-
-			Scanner scan = new Scanner(bis);
-			scan.useDelimiter("\\Z");// To read all scanner content in one String
-			String coloredPathway = "";
-			if (scan.hasNext()) coloredPathway = scan.next();
-			scan.close();
-
-			return coloredPathway.replace("<svg", "<svg viewBox='0 0 1000 1500'");
+			return coloredPathwayImageCache.get(ImmutableMap.<String, Object> of(PATHWAY_ID, pathwayId, GRAPH_IDS,
+					graphIds, COLORS2, colors));
 		}
 		else
 		{
-			System.out.println("normal pathway, uncolored");
+			LOG.warn("normal pathway, uncolored");
 			return uncoloredPathwayImageCache.get(pathwayId);
 		}
 	}
