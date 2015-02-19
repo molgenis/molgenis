@@ -34,11 +34,11 @@ import org.springframework.stereotype.Component;
 import com.sun.corba.se.spi.ior.iiop.GIOPVersion;
 
 /**
+ * ExAC annotator
  * 
+ * TODO: feature enhancement: match multiple alternatives from SOURCE file to multiple alternatives in ExAC
  * 
- * TODO: parse multiple alternative allele frequencies, test, polish, etc
- * 
- * 10	75832614	.	C	T,A,G		->		AF=5.848e-04,1.647e-05,4.118e-05
+ * e.g. 1       237965145       rs115779425     T       TT,TTT,TTTT     .       PASS    AC=31,3,1;AN=70;GTC=0,31,0,3,0,0,1,0,0,0;
  * 
  * 
  * */

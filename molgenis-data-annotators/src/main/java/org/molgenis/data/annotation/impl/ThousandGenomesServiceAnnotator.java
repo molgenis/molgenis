@@ -35,17 +35,13 @@ import com.sun.corba.se.spi.ior.iiop.GIOPVersion;
 
 /**
  * 
- * TODO: test and polish
+ * 1000G annotator
  * 
+ *  TODO: feature enhancement: match multiple alternatives from SOURCE file to multiple alternatives in ExAC
  * 
- * X	47065383	rs200383898	C	A	100	PASS	AC=1;AF=0.000264901;AN=3775;NS=2504;DP=14025;AMR_AF=0;AFR_AF=0.0008;EUR_AF=0;SAS_AF=0;EAS_AF=0;AA=C|||	GT	0	0|0	0|0	[+2500 more samples]
- * 
- * 
- * TODO: multiple alternative alleles!!!
- * 
- * ERROR o.m.d.a.i.ThousandGenomesServiceAnnotator - Bad 1000G data (no AF field) for CHROM: 2 POS: 179631362 REF: A ALT: C LINE: 2	179631362	rs3816782	A	AAAC,C	100	PASS	AC=3,728;AF=0.000599042,0.145367;AN=5008;NS=2504;DP=19666;EAS_AF=0,0.1954;AMR_AF=0,0.245;AFR_AF=0.0023,0.1611;EUR_AF=0,0.0765;SAS_AF=0,0.0726
- * 
- * */
+ *  e.g. 1       237965145       rs115779425     T       TT,TTT,TTTT     .       PASS    AC=31,3,1;AN=70;GTC=0,31,0,3,0,0,1,0,0,0;
+ *
+ **/
 @Component("thousandGenomesService")
 public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 {
@@ -56,7 +52,7 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 
 	// the cadd service returns these two values
 	// must be compatible with VCF format, ie no funny characters
-	public static final String THGEN_MAF = "1000GMAF";
+	public static final String THGEN_MAF = "1KGMAF";
 
 	private static final String NAME = "1000G";
 
@@ -193,105 +189,91 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 	private synchronized Map<String, Object> annotateEntityWith1000G(String chromosome, Long position, String reference,
 			String alternative) throws IOException
 	{
-		Double maf = null;
-
+		
 		TabixReader.Iterator tabixIterator = tabixReaders.get(chromosome).query(chromosome + ":" + position + "-" + position);
-
-		// TabixReaderIterator does not have a hasNext();
-		boolean done = tabixIterator == null;
-		int i = 0;
-
-		while (!done)
+		String line = null;
+	
+		//get line from data, we expect exactly 1
+		try
 		{
-			String line = null;
-			try{
-				line = tabixIterator.next();
-			}
-			catch(net.sf.samtools.SAMFormatException sfx)
+			line = tabixIterator.next();
+		}
+		catch(net.sf.samtools.SAMFormatException sfx)
+		{
+			LOG.error("Bad GZIP file for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
+					+ " ALT: " + alternative + " LINE: " + line);
+			throw sfx;
+		}
+		
+		//if nothing found, return empty list for no hit
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		if(line == null)
+		{
+			return resultMap;
+		}
+		
+		//sanity check on content of line
+		String[] split = null;
+		split = line.split("\t", -1);
+		if (split.length < 1000) //lots of data expected!
+		{
+			LOG.error("Bad 1000G data (split was < 1000 elements) for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
+					+ " ALT: " + alternative + " LINE: " + line.substring(0, (line.length() > 250 ? 250 : line.length())));
+			throw new IOException("Bad data! see log");
+		}
+		
+		// get MAF from info field
+		String[] infoFields = split[7].split(";", -1);
+		String[] mafs = null;
+		for(String info : infoFields)
+		{
+			if(info.startsWith("AF="))
 			{
-				LOG.error("Bad GZIP file for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
-						+ " ALT: " + alternative + " LINE: " + line.substring(0, (line.length() > 250 ? 250 : line.length())));
-				throw sfx;
-			}
-
-			if (line != null)
-			{
-				String[] split = null;
-				i++;
-				split = line.split("\t");
-				if (split.length < 1000) //lots of data expected
+				try
 				{
-					LOG.error("Bad 1000G data (split was < 1000 elements) for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
-							+ " ALT: " + alternative + " LINE: " + line.substring(0, (line.length() > 250 ? 250 : line.length())));
-					continue;
-				}
-				
-				LOG.info("1000G variant found for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
-						+ " ALT: " + alternative + " LINE: " + line.substring(0, (line.length() > 250 ? 250 : line.length())));
-				
-				String[] infoFields = split[7].split(";", -1);
-			
-				for(String info : infoFields)
+					mafs = info.replace("AF=", "").split(",",-1);
+					break;
+				}catch( java.lang.NumberFormatException e)
 				{
-					if(info.startsWith("AF="))
-					{
-						try{
-							maf = Double.parseDouble(info.replace("AF=", ""));
-							break;
-						}catch( java.lang.NumberFormatException e)
-						{
-							LOG.error("Bad number: " + info.replace("AF=", "") + " for line \n" + line.substring(0, (line.length() > 250 ? 250 : line.length())));
-						}
-					}
-					
+					LOG.error("Could not get MAF for line \n" + line.substring(0, (line.length() > 250 ? 250 : line.length())));
 				}
-				
-				if(maf == null)
-				{
-					LOG.error("Bad 1000G data (no AF field) for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
-							+ " ALT: " + alternative + " LINE: " + line.substring(0, (line.length() > 250 ? 250 : line.length())));
-					continue;
-				}
-
-				if (split[3].equals(reference) && split[4].equals(alternative))
-				{
-					//all fine
-					done = true;
-				}
-				// In some cases, the ref and alt are swapped. If this is the case, the initial if statement above will
-				// fail, we can just check whether such a swapping has occured
-				else if (split[4].equals(reference) && split[3].equals(alternative))
-				{
-					LOG.info("1000G variant found [swapped MAF by 1-MAF!] for CHROM: " + chromosome + " POS: " + position
-							+ " REF: " + reference + " ALT: " + alternative + " LINE: " + line.substring(0, (line.length() > 250 ? 250 : line.length())));
-					
-					maf = 1-maf; //swap MAF in this case!
-					done = true;
-				}
-				else
-				{
-					if (i > 1)
-					{
-						LOG.warn("More than 1 hit in the 1000G! for CHROM: " + chromosome + " POS: " + position
-								+ " REF: " + reference + " ALT: " + alternative);
-					}
-					else
-					{
-						LOG.info("1000G variant position found but ref/alt not matched! for CHROM: " + chromosome + " POS: " + position
-								+ " REF: " + reference + " ALT: " + alternative + " LINE: " + line.substring(0, (line.length() > 250 ? 250 : line.length())));
-					}
-					
-				}
-			}
-			else
-			{
-				LOG.warn("No hit found in 1000G for CHROM: " + chromosome + " POS: " + position + " REF: "
-						+ reference + " ALT: " + alternative);
-				done = true;
 			}
 		}
-
-		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		//get alt alleles and check if the amount is equal to MAF list
+		String[] altAlleles = split[4].split(",", -1);
+		if(mafs.length != altAlleles.length)
+		{
+			throw new IOException("Number of alt alleles unequal to number of MAF values for line " + line);
+		}
+		
+		//match alleles and get the MAF from list
+		Double maf = null;
+		for(int i = 0; i < altAlleles.length; i++)
+		{
+			String altAllele = altAlleles[i];
+			if(altAllele.equals(alternative) && split[3].equals(reference))
+			{
+				maf = Double.parseDouble(mafs[i]);
+//				LOG.info("1000G variant found for CHROM: " + chromosome + " POS: " + position + " REF: " + reference + " ALT: " + alternative + ", MAF = " + maf);
+			}
+		}
+		
+		//if nothing found, try swapping ref-alt, and do 1-MAF
+		if(maf == null)
+		{
+			for(int i = 0; i < altAlleles.length; i++)
+			{
+				String altAllele = altAlleles[i];
+				if(altAllele.equals(reference) && split[3].equals(alternative))
+				{
+					maf = 1-Double.parseDouble(mafs[i]);
+					LOG.info("*ref-alt swapped* 1000G variant found for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
+							+ " ALT: " + alternative + ", MAF (1-originalMAF) = " + maf);
+				}
+			}
+		}
+		
 		resultMap.put(THGEN_MAF, maf);
 		return resultMap;
 	}
