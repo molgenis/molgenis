@@ -761,8 +761,6 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 						.append('`').append('.').append('`').append(idAttribute.getName()).append('`').append(')');
 			}
 
-		LOG.debug(from.toString());
-
 		for (int i = 0; i < mrefQueryFields.size(); i++)
 		{
 			// extra join so we can filter on the mrefs
