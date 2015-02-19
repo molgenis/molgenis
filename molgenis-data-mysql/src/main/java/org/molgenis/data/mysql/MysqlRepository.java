@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -570,6 +571,21 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		StringBuilder select = new StringBuilder("SELECT ");
 		StringBuilder group = new StringBuilder();
 		int count = 0;
+
+		HashSet<String> attNames = new HashSet<String>();
+		HashMap<String, AtomicInteger> duplicateNames = new HashMap<String, AtomicInteger>();
+		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
+		{
+			if (attNames.contains(att.getName()))
+			{
+				if (!duplicateNames.containsKey(att.getName())) duplicateNames.put(att.getName(), new AtomicInteger());
+			}
+			else
+			{
+				attNames.add(att.getName());
+			}
+		}
+
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 		{
 			if (count > 0) select.append(", ");
@@ -577,9 +593,19 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 			// TODO needed when autoids are used to join
 			if (att.getDataType() instanceof MrefField)
 			{
-				select.append("GROUP_CONCAT(DISTINCT(").append('`').append(att.getName()).append('`').append('.')
-						.append('`').append(att.getName()).append('`').append(")) AS ").append('`')
-						.append(att.getName()).append('`');
+				String alias = "";
+				if (duplicateNames.containsKey(att.getName()))
+				{
+					alias = att.getName() + duplicateNames.get(att.getName()).getAndIncrement();
+				}
+				else
+				{
+					alias = att.getName();
+				}
+
+				select.append("GROUP_CONCAT(DISTINCT(").append('`').append(alias).append('`').append('.').append('`')
+						.append(att.getName()).append('`').append(")) AS ").append('`').append(att.getName())
+						.append('`');
 			}
 			else
 			{
@@ -701,15 +727,38 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		List<String> mrefQueryFields = Lists.newArrayList();
 		getMrefQueryFields(q.getRules(), mrefQueryFields);
 
+		// if there are double attribute names, use an increment to make unique aliases
+		HashSet<String> attNames = new HashSet<String>();
+		HashMap<String, AtomicInteger> duplicateNames = new HashMap<String, AtomicInteger>();
+		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
+		{
+			if (attNames.contains(att.getName()))
+			{
+				if (!duplicateNames.containsKey(att.getName())) duplicateNames.put(att.getName(), new AtomicInteger());
+			}
+			else
+			{
+				attNames.add(att.getName());
+			}
+		}
+
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 			if (att.getDataType() instanceof MrefField)
 			{
-				from.append(" LEFT JOIN ").append('`').append(getTableName()).append('_').append(att.getName())
-						.append('`').append(" AS ").append('`').append(att.getName()).append('`').append(" ON (this.")
-						.append('`').append(idAttribute.getName()).append('`').append(" = ").append('`')
-						.append(att.getName()).append('`').append('.').append('`').append(idAttribute.getName())
-						.append('`').append(')');
+				String alias = "";
+				if (duplicateNames.containsKey(att.getName()))
+				{
+					alias = att.getName() + duplicateNames.get(att.getName()).getAndIncrement();
+				}
+				else
+				{
+					alias = att.getName();
+				}
 
+				from.append(" LEFT JOIN ").append('`').append(getTableName()).append('_').append(att.getName())
+						.append('`').append(" AS ").append('`').append(alias).append('`').append(" ON (this.")
+						.append('`').append(idAttribute.getName()).append('`').append(" = ").append('`').append(alias)
+						.append('`').append('.').append('`').append(idAttribute.getName()).append('`').append(')');
 			}
 
 		for (int i = 0; i < mrefQueryFields.size(); i++)
