@@ -150,7 +150,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 	 *            the id of the pathway
 	 * @return single-line svg string of the pathway image
 	 * @throws ExecutionException
-	 *             if load from cache failsÏ
+	 *             if load from cache fails
 	 */
 	@RequestMapping(value = "/pathwayViewer/{pathwayId}", method = GET)
 	@ResponseBody

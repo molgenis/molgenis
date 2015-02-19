@@ -71,7 +71,7 @@ public class WikiPathwaysService
 	private static String toSingleLineString(byte[] source)
 	{
 		ByteArrayInputStream bis = new ByteArrayInputStream(source);
-		Scanner scanner = new Scanner(bis);
+		Scanner scanner = new Scanner(bis, "UTF-8");
 		scanner.useDelimiter("\\Z");
 		String result = "";
 		try
@@ -130,7 +130,7 @@ public class WikiPathwaysService
 		Map<String, String> result = new HashMap<String, String>();
 		for (WSSearchResult pathwayInfo : pathwaysByText)
 		{
-			result.put(pathwayInfo.getId(), pathwayInfo.getName());
+			result.put(pathwayInfo.getId(), pathwayInfo.getName() + " (" + pathwayInfo.getId() + ")");
 		}
 		return result;
 	}
