@@ -180,9 +180,7 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 				if (tabixReaders == null)
 				{
 					tabixReaders = new HashMap<String, TabixReader>();
-					
 					String chroms = "1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|X";
-				//	tabixReader = new TabixReader(molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY));
 					
 					for(String chr : chroms.split("\\|"))
 					{
@@ -202,6 +200,12 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 	private synchronized Map<String, Object> annotateEntityWithGoNL(String chromosome, Long position, String reference,
 			String alternative) throws IOException
 	{
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+
+		if(!tabixReaders.containsKey(chromosome)){
+			LOG.info("No chromosome " + chromosome + " in data!");
+			return resultMap;
+		}
 		
 		TabixReader.Iterator tabixIterator = tabixReaders.get(chromosome).query(chromosome + ":" + position + "-" + position);
 		String line = null;
@@ -217,9 +221,14 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 					+ " ALT: " + alternative + " LINE: " + line);
 			throw sfx;
 		}
+		catch(NullPointerException npe)
+		{
+			LOG.error("NullPointerException for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
+					+ " ALT: " + alternative + " LINE: " + line);
+			//throw sfx;
+		}
 		
 		//if nothing found, return empty list for no hit
-		Map<String, Object> resultMap = new HashMap<String, Object>();
 		if(line == null)
 		{
 			return resultMap;
