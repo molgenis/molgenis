@@ -54,7 +54,7 @@
                 <#assign plugin_id="NULL">
             </#if>
             
-            <@topmenu molgenis_ui.getMenu() plugin_id/>
+            <@topmenu molgenis_ui.getMenu() plugin_id pluginid_with_query_string/>
         </#if>
         
 		<#-- Start application content -->
@@ -102,7 +102,7 @@
 
 
 <#-- Topmenu -->
-<#macro topmenu menu plugin_id> <#--TODO refactor to remove depency on 'Home'-->
+<#macro topmenu menu plugin_id pluginid_with_query_string> <#--TODO refactor to remove depency on 'Home'-->
     <#if app_top_logo?has_content>
         <div id="Intro">
             <img src=${app_top_logo} alt="" border="0" height="150">
@@ -138,9 +138,9 @@
 						<#-- Single menu items -->
 						<#if item.type != "MENU">	
 							<#if item.name != "Home">
-								<#if item.id == plugin_id>
+								<#if item.url == pluginid_with_query_string>
 									<li class="active">
-										<a href="#">${item.name?html}</a>
+										<a href="#">${item.name?html} ${item.url} ${pluginid_with_query_string} </a>
 									</li>
 								<#else>
 									<li>
