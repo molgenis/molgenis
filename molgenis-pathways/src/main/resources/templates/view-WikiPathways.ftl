@@ -7,7 +7,7 @@
 	
 <#assign js=[
 	"pathway.js",
-	"select2.min.js",
+	"select2-patched.js",
 	"svg-pan-zoom.min.js"
 	]>	
 
