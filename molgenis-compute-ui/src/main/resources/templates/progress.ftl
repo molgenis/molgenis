@@ -21,6 +21,8 @@
 	var rects = {
 	<#list analysis.workflow.nodes as node>
 		<#assign totalJobCount=jobCount.getTotalJobCount(node.identifier) >
+        <#assign scheduledJobCount=jobCount.getScheduledJobCount(node.identifier) >
+        <#assign runningJobCount=jobCount.getRunningJobCount(node.identifier) >
 		<#assign completedJobCount=jobCount.getCompletedJobCount(node.identifier) >
 		<#assign failedJobCount=jobCount.getFailedJobCount(node.identifier) >
 			
@@ -36,7 +38,7 @@
             		cursor: 'pointer'
         		},
         		text: {
-            		text: '${node.name?js_string}\n jobs:${totalJobCount} complete:${completedJobCount} failed:${failedJobCount}',
+            		text: '${node.name?js_string}\n A:${totalJobCount} S:${scheduledJobCount} R:${runningJobCount} C:${completedJobCount} F:${failedJobCount}',
            	 		fill:  '#000000',
             		'font-size': 12,
             		'font-weight': 'bold', 

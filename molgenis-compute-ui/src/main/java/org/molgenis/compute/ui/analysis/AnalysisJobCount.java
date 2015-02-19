@@ -32,6 +32,16 @@ public class AnalysisJobCount
 		return count;
 	}
 
+	public int getScheduledJobCount(String nodeId)
+	{
+		return getJobCount(nodeId, JobStatus.SCHEDULED);
+	}
+
+	public int getRunningJobCount(String nodeId)
+	{
+		return getJobCount(nodeId, JobStatus.RUNNING);
+	}
+
 	public int getCompletedJobCount(String nodeId)
 	{
 		return getJobCount(nodeId, JobStatus.COMPLETED);
