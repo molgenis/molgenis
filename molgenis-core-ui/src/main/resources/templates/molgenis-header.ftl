@@ -140,7 +140,7 @@
 							<#if item.name != "Home">
 								<#if item.url == pluginid_with_query_string>
 									<li class="active">
-										<a href="#">${item.name?html} ${item.url} ${pluginid_with_query_string} </a>
+										<a href="#">${item.name?html}</a>
 									</li>
 								<#else>
 									<li>
