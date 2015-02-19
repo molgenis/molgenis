@@ -34,7 +34,22 @@ import org.springframework.stereotype.Component;
 import com.sun.corba.se.spi.ior.iiop.GIOPVersion;
 
 /**
- * TODO: test and polish
+ * GoNl annotator
+ * data:
+ * 
+ * https://molgenis26.target.rug.nl/downloads/gonl_public/variants/release5_with_GTC/release5_noContam_noChildren_with_AN_AC_GTC_stripped.tgz
+ * 
+ * PLUS chrX from http://molgenis15.target.rug.nl/release4_noContam_noChildren_with_AN_AC_GTC_stripped.tgz
+ * 
+ * 
+ * 
+ * GoNL example line:
+ * 1	126108	rs146756510	G	A	.	PASS	AC=37;AN=996;DB;GTC=461,37,0;set=SNP
+ * 
+ * 
+ * TODO: right now there are no multiple alternative alleles in GoNL, but will there be in the future??
+ * 
+ * 
  * */
 @Component("gonlService")
 public class GoNLServiceAnnotator extends VariantAnnotator
@@ -187,130 +202,103 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 	private synchronized Map<String, Object> annotateEntityWithGoNL(String chromosome, Long position, String reference,
 			String alternative) throws IOException
 	{
-		Double maf = null;
-		String gtc = null;
-
+		
 		TabixReader.Iterator tabixIterator = tabixReaders.get(chromosome).query(chromosome + ":" + position + "-" + position);
-
-		// TabixReaderIterator does not have a hasNext();
-		boolean done = tabixIterator == null;
-		int i = 0;
-
-		while (!done)
+		String line = null;
+	
+		//get line from data, we expect exactly 1
+		try
 		{
-			String line = null;
-			try{
-				line = tabixIterator.next();
-			}
-			catch(net.sf.samtools.SAMFormatException sfx)
+			line = tabixIterator.next();
+		}
+		catch(net.sf.samtools.SAMFormatException sfx)
+		{
+			LOG.error("Bad GZIP file for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
+					+ " ALT: " + alternative + " LINE: " + line);
+			throw sfx;
+		}
+		
+		//if nothing found, return empty list for no hit
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		if(line == null)
+		{
+			return resultMap;
+		}
+		
+		//sanity check on content of line
+		String[] split = null;
+		split = line.split("\t", -1);
+		if (split.length != 8)
+		{
+			LOG.error("Bad GoNL data (split was not 8 elements) for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
+					+ " ALT: " + alternative + " LINE: " + line);
+			throw new IOException("Bad data! see log");
+		}
+		
+		// get MAF from info field
+		String[] infoFields = split[7].split(";", -1);
+		double ac = -1;
+		double an = -1;
+		String gtc = null;
+		for(String info : infoFields)
+		{
+			if(info.startsWith("AC="))
 			{
-				LOG.error("Bad GZIP file for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
-						+ " ALT: " + alternative + " LINE: " + line);
-				throw sfx;
+				ac = Double.parseDouble(info.replace("AC=", ""));
 			}
-			
-			//typical line:
-			//22      16055070        rs4389403       G       A       .       PASS    AC=93;AN=996;DB;GTC=405,93,0;set=SNP
-			//
-			//but sometimes without DB:
-			//22      16053249        .       C       T       .       PASS    AC=3;AN=996;GTC=495,3,0;set=SNP
-
-			if (line != null)
+			if(info.startsWith("AN="))
 			{
-				String[] split = null;
-				i++;
-				split = line.split("\t");
-				if (split.length != 8)
-				{
-					LOG.error("Bad GoNL data (split was not 8 elements) for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
-							+ " ALT: " + alternative + " LINE: " + line);
-					continue;
-				}
-				
-				LOG.info("GoNL variant found for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
-						+ " ALT: " + alternative + " LINE: " + line);
-				
-				String[] infoFields = split[7].split(";", -1);
-				double ac = -1;
-				double an = -1;
-				
-				for(String info : infoFields)
-				{
-					if(info.startsWith("AC="))
-					{
-						ac = Double.parseDouble(info.replace("AC=", ""));
-					}
-					if(info.startsWith("AN="))
-					{
-						an = Double.parseDouble(info.replace("AN=", ""));
-					}
-					if(info.startsWith("GTC="))
-					{
-						gtc = info.replace("GTC=", "");
-					}
-				}
-				
-				if(ac!=-1 && an!= -1)
-				{
-					maf = ac/an;
-				}
-				else
-				{
-					LOG.error("Bad GoNL data (no AC or AN info field) for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
-							+ " ALT: " + alternative + " LINE: " + line);
-					continue;
-				}
-				
-				if(gtc == null)
-				{
-					LOG.error("Bad GoNL data (no GTC info field) for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
-							+ " ALT: " + alternative + " LINE: " + line);
-				}
-
-					
-				
-				if (split[3].equals(reference) && split[4].equals(alternative))
-				{
-					//all fine
-					done = true;
-				}
-				// In some cases, the ref and alt are swapped. If this is the case, the initial if statement above will
-				// fail, we can just check whether such a swapping has occured
-				else if (split[4].equals(reference) && split[3].equals(alternative))
-				{
-					LOG.info("GoNL variant found [swapped MAF by 1-MAF!] for CHROM: " + chromosome + " POS: " + position
-							+ " REF: " + reference + " ALT: " + alternative + " LINE: " + line);
-					
-					maf = 1-maf; //swap MAF in this case!
-					done = true;
-				}
-				else
-				{
-					if (i > 1)
-					{
-						LOG.warn("More than 1 hit in the GoNL! for CHROM: " + chromosome + " POS: " + position
-								+ " REF: " + reference + " ALT: " + alternative);
-					}
-					else
-					{
-						LOG.info("GoNL variant position found but ref/alt not matched! for CHROM: " + chromosome + " POS: " + position
-								+ " REF: " + reference + " ALT: " + alternative + " LINE: " + line);
-					}
-					
-				}
+				an = Double.parseDouble(info.replace("AN=", ""));
 			}
-			else
+			if(info.startsWith("GTC="))
 			{
-				LOG.warn("No hit found in GoNL for CHROM: " + chromosome + " POS: " + position + " REF: "
-						+ reference + " ALT: " + alternative);
-				done = true;
+				gtc = info.replace("GTC=", "");
 			}
 		}
+		
+		//check if we miss data
+		if(ac == -1 || an == -1)
+		{
+			LOG.error("Bad GoNL data (no AC or AN field) for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
+					+ " ALT: " + alternative + " LINE: " + line);
+			throw new IOException("Bad data (no AC or AN), see log");
+		}
+		if(gtc == null)
+		{
+			LOG.error("Bad GoNL data (no GTC field) for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
+					+ " ALT: " + alternative + " LINE: " + line);
+			throw new IOException("Bad data (no GTC), see log");
+		}
+		
+		String ref = split[3];
+		String alt = split[4];
+		
+		Double maf = null;
+		
+		//match alleles and get the MAF from list
+		if(ref.equals(reference) && alt.equals(alternative))
+		{
+			maf = ac/an;
+//			LOG.info("1000G variant found for CHROM: " + chromosome + " POS: " + position + " REF: " + reference + " ALT: " + alternative + ", MAF = " + maf);
+		}
 
-		Map<String, Object> resultMap = new HashMap<String, Object>();
-		resultMap.put(GONL_MAF, maf);
+		//if nothing found, try swapping ref-alt, and do 1-MAF
+		if(maf == null)
+		{
+			
+			if(ref.equals(alternative) && alt.equals(reference))
+			{
+				maf = 1-(ac/an);
+				LOG.info("*ref-alt swapped* 1000G variant found for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
+						+ " ALT: " + alternative + ", MAF (1-originalMAF) = " + maf);
+			}
+			
+		}
+		
 		resultMap.put(GONL_GTC, gtc);
+		resultMap.put(GONL_MAF, maf);
 		return resultMap;
+
 	}
 
 	@Override

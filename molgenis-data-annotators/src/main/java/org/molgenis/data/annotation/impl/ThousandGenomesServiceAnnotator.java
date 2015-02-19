@@ -37,9 +37,15 @@ import com.sun.corba.se.spi.ior.iiop.GIOPVersion;
  * 
  * 1000G annotator
  * 
- *  TODO: feature enhancement: match multiple alternatives from SOURCE file to multiple alternatives in ExAC
+ * Data @ http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/
+ * 
+ *  TODO: feature enhancement: match multiple alternatives from SOURCE file to multiple alternatives in 1000G
  * 
  *  e.g. 1       237965145       rs115779425     T       TT,TTT,TTTT     .       PASS    AC=31,3,1;AN=70;GTC=0,31,0,3,0,0,1,0,0,0;
+ *  
+ *  
+ *  1000G example line:
+ *  1	10352	rs145072688	T	TA	100	PASS	AC=2191;AF=0.4375;AN=5008;NS=2504;DP=88915;EAS_AF=0.4306;AMR_AF=0.4107;AFR_AF=0.4788;EUR_AF=0.4264;SAS_AF=0.4192;AA=|||unknown(NO_COVERAGE)	G	1|0	1|0	0|1	0|1	1|0	1|0 [+many more genotypes]
  *
  **/
 @Component("thousandGenomesService")

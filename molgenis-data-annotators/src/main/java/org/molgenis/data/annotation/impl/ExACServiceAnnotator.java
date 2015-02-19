@@ -36,6 +36,8 @@ import com.sun.corba.se.spi.ior.iiop.GIOPVersion;
 /**
  * ExAC annotator
  * 
+ * Data @ ftp://ftp.broadinstitute.org/pub/ExAC_release/release0.3/
+ * 
  * TODO: feature enhancement: match multiple alternatives from SOURCE file to multiple alternatives in ExAC
  * 
  * e.g. 1       237965145       rs115779425     T       TT,TTT,TTTT     .       PASS    AC=31,3,1;AN=70;GTC=0,31,0,3,0,0,1,0,0,0;
