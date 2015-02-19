@@ -314,4 +314,36 @@ public class DefaultEntity implements Entity
 	{
 		entityMetaData.getAtomicAttributes().forEach(attr -> set(attr.getName(), entity.get(attr.getName())));
 	}
+
+	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((entityMetaData == null) ? 0 : entityMetaData.hashCode());
+		result = prime * result + ((getIdValue() == null) ? 0 : getIdValue().hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (!(obj instanceof Entity)) return false;
+		Entity other = (Entity) obj;
+
+		if (entityMetaData == null)
+		{
+			if (other.getEntityMetaData() != null) return false;
+		}
+		else if (!entityMetaData.equals(other.getEntityMetaData())) return false;
+		if (getIdValue() == null)
+		{
+			if (other.getIdValue() != null) return false;
+		}
+		else if (!getIdValue().equals(other.getIdValue())) return false;
+		return true;
+	}
+
 }
