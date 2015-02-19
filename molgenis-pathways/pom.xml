@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<parent>
+		<artifactId>molgenis</artifactId>
+		<groupId>org.molgenis</groupId>
+		<version>1.3.0-SNAPSHOT</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>molgenis-pathways</artifactId>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.jvnet.jax-ws-commons</groupId>
+				<artifactId>jaxws-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>wsimport-wikiPathways</id>
+						<goals>
+							<goal>wsimport</goal>
+						</goals>
+						<configuration>
+							<verbose>true</verbose>
+							<extension>true</extension>
+							<wsdlUrls>
+								<wsdlUrl>http://www.wikipathways.org/wpi/webservice/webservice.php?wsdl</wsdlUrl>
+							</wsdlUrls>
+							<packageName>org.molgenis.dataWikiPathways</packageName>
+							<!-- for JDK 6 compilation compatibility -->
+							<xnocompile>false</xnocompile>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+	<dependencies>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-core</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-core-ui</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-data</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+
+
+<!--  
+ 
+		<dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+			<version>2.2</version>
+		</dependency>
+	
+		<dependency>
+			<groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-impl</artifactId>
+			<version>2.2</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-xjc</artifactId>
+			<version>2.2</version>
+		</dependency>
+	-->
+
+		<dependency>
+			<groupId>com.sun.xml.ws</groupId>
+			<artifactId>jaxws-rt</artifactId>
+			<version>2.2.8</version>
+		</dependency>
+
+
+
+
+
+	</dependencies>
+</project>
