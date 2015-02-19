@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.molgenis.AppConfig;
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.meta.MetaDataServiceImpl;
@@ -18,6 +17,7 @@ import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
@@ -99,14 +99,12 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		coll.deleteEntityMeta(metaData.getName());
 		MysqlRepository repo = (MysqlRepository) coll.addEntityMeta(metaData);
 
-		Assert.assertEquals(repo.iteratorSql(), "SELECT firstName, lastName FROM `MysqlPerson`");
 		Assert.assertEquals(repo.getInsertSql(), "INSERT INTO `MysqlPerson` (`firstName`, `lastName`) VALUES (?, ?)");
 		Assert.assertEquals(
 				repo.getCreateSql(),
 				"CREATE TABLE IF NOT EXISTS `MysqlPerson`(`firstName` VARCHAR(255) NOT NULL, `lastName` VARCHAR(255) NOT NULL, PRIMARY KEY (`lastName`)) ENGINE=InnoDB;");
 
 		metaData.addAttributeMetaData(new DefaultAttributeMetaData("age", MolgenisFieldTypes.FieldTypeEnum.INT));
-		Assert.assertEquals(repo.iteratorSql(), "SELECT firstName, lastName, age FROM `MysqlPerson`");
 		Assert.assertEquals(repo.getInsertSql(),
 				"INSERT INTO `MysqlPerson` (`firstName`, `lastName`, `age`) VALUES (?, ?, ?)");
 		Assert.assertEquals(

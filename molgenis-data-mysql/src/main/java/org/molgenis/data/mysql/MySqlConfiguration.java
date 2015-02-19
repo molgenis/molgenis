@@ -5,7 +5,9 @@ import java.util.UUID;
 import javax.sql.DataSource;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
+import org.molgenis.data.elasticsearch.IndexedManageableRepositoryCollectionDecorator;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.importer.EmxImportService;
 import org.molgenis.data.importer.EmxMetaDataParser;
@@ -55,10 +57,11 @@ public class MySqlConfiguration
 		return new MysqlRepository(dataService, dataSource, asyncJdbcTemplate());
 	}
 
-	@Bean
-	public MysqlRepositoryCollection mysqlRepositoryCollection()
+	@Bean(name =
+	{ "MysqlRepositoryCollection" })
+	public ManageableRepositoryCollection mysqlRepositoryCollection()
 	{
-		MysqlRepositoryCollection mysqlRepositoryCollection = new MysqlRepositoryCollection(searchService, dataService)
+		MysqlRepositoryCollection mysqlRepositoryCollection = new MysqlRepositoryCollection()
 		{
 			@Override
 			protected MysqlRepository createMysqlRepository()
@@ -67,7 +70,7 @@ public class MySqlConfiguration
 			}
 		};
 
-		return mysqlRepositoryCollection;
+		return new IndexedManageableRepositoryCollectionDecorator(searchService, mysqlRepositoryCollection);
 	}
 
 	// TODO emx importer to own module

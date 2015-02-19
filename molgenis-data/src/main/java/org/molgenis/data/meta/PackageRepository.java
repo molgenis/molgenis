@@ -47,16 +47,12 @@ class PackageRepository
 	 * @param coll
 	 *            {@link ManageableRepositoryCollection} that will be used to store the package entities.
 	 */
-	public PackageRepository(ManageableRepositoryCollection coll)
+	public PackageRepository(Repository repository)
 	{
-		repository = coll.addEntityMeta(META_DATA);
+		this.repository = repository;
+		// repository = coll.addEntityMeta(META_DATA);
 		updatePackageCache();
 		addDefaultPackage();
-	}
-
-	Repository getRepository()
-	{
-		return repository;
 	}
 
 	/**

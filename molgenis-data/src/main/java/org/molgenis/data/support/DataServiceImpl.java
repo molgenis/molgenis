@@ -41,6 +41,11 @@ public class DataServiceImpl implements DataService
 	private MetaDataService metaDataService;
 	private final RepositoryDecoratorFactory repositoryDecoratorFactory;
 
+	public DataServiceImpl()
+	{
+		this(new NonDecoratingRepositoryDecoratorFactory());
+	}
+
 	public DataServiceImpl(RepositoryDecoratorFactory repositoryDecoratorFactory)
 	{
 		this.repositories = Maps.newLinkedHashMap();

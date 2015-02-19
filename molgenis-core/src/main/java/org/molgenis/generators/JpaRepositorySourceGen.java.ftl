@@ -4,12 +4,15 @@
  */
 package org.molgenis.data.jpa;
 
+import java.util.Iterator;
 import java.util.Map;
 
-import org.molgenis.data.DataService;
+import javax.annotation.PostConstruct;
+
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
-import org.molgenis.data.elasticsearch.SearchRepositoryDecoratorCollection;
+import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.elasticsearch.IndexedRepositoryCollectionDecorator;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -18,15 +21,54 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Maps;
 
 @Component("JpaRepositoryCollection")
-public class JpaRepositoryCollection extends SearchRepositoryDecoratorCollection
+public class JpaRepositoryCollection extends IndexedRepositoryCollectionDecorator
 {
+	public static final String NAME = "JPA";
 	private final Map<String, Repository> repositories = Maps.newLinkedHashMap();
-    
-    @Autowired
-	public JpaRepositoryCollection(SearchService searchService, DataService dataService)
+
+	@Autowired
+	public JpaRepositoryCollection(SearchService searchService)
 	{
-		super(searchService, dataService, "JPA");
+		super(searchService);
 	}
+
+	@PostConstruct
+	public void init()
+	{
+		setDelegate(new RepositoryCollection()
+		{
+			@Override
+			public Iterator<Repository> iterator()
+			{
+				return repositories.values().iterator();
+			}
+
+			@Override
+			public String getName()
+			{
+				return NAME;
+			}
+
+			@Override
+			public Repository addEntityMeta(EntityMetaData entityMeta)
+			{
+				return getRepository(entityMeta.getName());
+			}
+
+			@Override
+			public Iterable<String> getEntityNames()
+			{
+				return repositories.keySet();
+			}
+
+			@Override
+			public Repository getRepository(String name)
+			{
+				return repositories.get(name);
+			}
+		});
+	}
+
 
 	<#list model.entities as entity>
 	<#if !entity.abstract>
@@ -44,10 +86,4 @@ public class JpaRepositoryCollection extends SearchRepositoryDecoratorCollection
 	}
 	</#if>
 	</#list>
-	
-	@Override
-	protected Repository createRepository(EntityMetaData entityMeta)
-	{
-		return repositories.get(entityMeta.getName());
-	}
 }

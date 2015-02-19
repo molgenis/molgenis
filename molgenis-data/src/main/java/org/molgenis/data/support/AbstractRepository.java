@@ -29,6 +29,12 @@ public abstract class AbstractRepository implements Repository
 	}
 
 	@Override
+	public long count()
+	{
+		return count(new QueryImpl());
+	}
+
+	@Override
 	public void close() throws IOException
 	{
 	}

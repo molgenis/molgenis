@@ -1,5 +1,6 @@
 package org.molgenis.data.mysql;
 
+import static org.molgenis.data.RepositoryCapability.QUERYABLE;
 import static org.molgenis.data.RepositoryCapability.UPDATEABLE;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 
@@ -10,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -28,23 +30,30 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Manageable;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule;
+import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.BatchingQueryResult;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.IntField;
 import org.molgenis.fieldtypes.MrefField;
+import org.molgenis.fieldtypes.StringField;
+import org.molgenis.fieldtypes.TextField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.model.MolgenisModelException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -435,24 +444,10 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		return metaData;
 	}
 
-	protected String iteratorSql()
-	{
-		StringBuilder sql = new StringBuilder("SELECT ");
-		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
-		{
-			sql.append(att.getName()).append(", ");
-		}
-		if (sql.charAt(sql.length() - 1) == ' ' && sql.charAt(sql.length() - 2) == ',') sql.setLength(sql.length() - 2);
-		else sql.append('*');
-		sql.append(" FROM ").append('`').append(getTableName()).append('`');
-
-		return sql.toString();
-	}
-
 	@Override
 	public Iterator<Entity> iterator()
 	{
-		return findAll().iterator();
+		return findAll(new QueryImpl()).iterator();
 	}
 
 	protected String getInsertSql()
@@ -544,26 +539,29 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		});
 	}
 
-	public Iterable<Entity> findAll()
+	@Override
+	public Entity findOne(Query q)
 	{
-		return new BatchingQueryResult(BATCH_SIZE, new QueryImpl())
-		{
-			@Override
-			protected Iterable<Entity> getBatch(Query batchQuery)
-			{
-				String sql = getSelectSql();
-
-				if (LOG.isDebugEnabled())
-				{
-					LOG.debug("sql: " + sql);
-				}
-
-				return jdbcTemplate.query(sql, new EntityMapper(getEntityMetaData()));
-			}
-		};
+		Iterator<Entity> iterator = findAll(q).iterator();
+		if (iterator.hasNext()) return iterator.next();
+		return null;
 	}
 
-	protected String getSelectSql()
+	@Override
+	public Entity findOne(Object id)
+	{
+		if (id == null) return null;
+		return findOne(new QueryImpl().eq(getEntityMetaData().getIdAttribute().getName(), id));
+	}
+
+	@Override
+	public Iterable<Entity> findAll(Iterable<Object> ids)
+	{
+		if (ids == null) return Collections.emptyList();
+		return findAll(new QueryImpl().in(getEntityMetaData().getIdAttribute().getName(), ids));
+	}
+
+	protected String getSelectSql(Query q, List<Object> parameters)
 	{
 		StringBuilder select = new StringBuilder("SELECT ");
 		StringBuilder group = new StringBuilder();
@@ -589,46 +587,252 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		}
 
 		// from
-		StringBuilder result = new StringBuilder().append(select).append(getFromSql());
-
+		StringBuilder result = new StringBuilder().append(select).append(getFromSql(q));
+		// where
+		String where = getWhereSql(q, parameters, 0);
+		if (where.length() > 0) result.append(" WHERE ").append(where);
 		// group by
 		if (select.indexOf("GROUP_CONCAT") != -1 && group.length() > 0) result.append(" GROUP BY ").append(group);
+		// order by
+		result.append(' ').append(getSortSql(q));
+		// limit
+		if (q.getPageSize() > 0) result.append(" LIMIT ").append(q.getPageSize());
+		if (q.getOffset() > 0) result.append(" OFFSET ").append(q.getOffset());
 
 		return result.toString().trim();
 	}
 
-	protected String getFromSql()
+	@Override
+	public Iterable<Entity> findAll(Query q)
 	{
-		StringBuilder from = new StringBuilder();
-		from.append(" FROM ").append('`').append(getTableName()).append('`').append(" AS this");
-
-		AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
-		List<String> mrefQueryFields = Lists.newArrayList();
-
-		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
-			if (att.getDataType() instanceof MrefField)
-			{
-				from.append(" LEFT JOIN ").append('`').append(getTableName()).append('_').append(att.getName())
-						.append('`').append(" AS ").append('`').append(att.getName()).append('`').append(" ON (this.")
-						.append('`').append(idAttribute.getName()).append('`').append(" = ").append('`')
-						.append(att.getName()).append('`').append('.').append('`').append(idAttribute.getName())
-						.append('`').append(')');
-
-			}
-
-		for (int i = 0; i < mrefQueryFields.size(); i++)
+		if ((q.getOffset() != 0) || (q.getPageSize() != 0))
 		{
-			// extra join so we can filter on the mrefs
-			AttributeMetaData att = getEntityMetaData().getAttribute(mrefQueryFields.get(i));
-
-			from.append(" LEFT JOIN ").append('`').append(getTableName()).append('_').append(att.getName()).append('`')
-					.append(" AS ").append('`').append(att.getName()).append("_filter").append(i + 1)
-					.append("` ON (this.").append('`').append(idAttribute.getName()).append('`').append(" = ")
-					.append('`').append(att.getName()).append("_filter").append(i + 1).append("`.").append('`')
-					.append(idAttribute.getName()).append('`').append(')');
+			return findAllNoBatching(q);
 		}
 
-		return from.toString();
+		return new BatchingQueryResult(BATCH_SIZE, q)
+		{
+			@Override
+			protected Iterable<Entity> getBatch(Query batchQuery)
+			{
+				return findAllNoBatching(batchQuery);
+			}
+		};
+	}
+
+	private Iterable<Entity> findAllNoBatching(Query q)
+	{
+		List<Object> parameters = Lists.newArrayList();
+		String sql = getSelectSql(q, parameters);
+
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("query: " + q);
+			LOG.debug("sql: " + sql + ",parameters:" + parameters);
+		}
+
+		return jdbcTemplate.query(sql, parameters.toArray(new Object[0]), new EntityMapper(getEntityMetaData()));
+	}
+
+	protected String getWhereSql(Query q, List<Object> parameters, int mrefFilterIndex)
+	{
+		StringBuilder result = new StringBuilder();
+		for (QueryRule r : q.getRules())
+		{
+			AttributeMetaData attr = null;
+			if (r.getField() != null)
+			{
+				attr = getEntityMetaData().getAttribute(r.getField());
+				if (attr == null)
+				{
+					throw new MolgenisDataException("Unknown attribute [" + r.getField() + "]");
+				}
+				if (attr.getDataType() instanceof MrefField)
+				{
+					mrefFilterIndex++;
+				}
+			}
+
+			StringBuilder predicate = new StringBuilder();
+			switch (r.getOperator())
+			{
+				case SEARCH:
+					StringBuilder search = new StringBuilder();
+					for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
+					{
+						// TODO: other data types???
+						if (att.getDataType() instanceof StringField || att.getDataType() instanceof TextField)
+						{
+							search.append(" OR this.").append('`').append(att.getName()).append('`').append(" LIKE ?");
+							parameters.add("%" + DataConverter.toString(r.getValue()) + "%");
+						}
+						else if (att.getDataType() instanceof XrefField)
+						{
+
+							Repository repo = dataService.getRepository(att.getRefEntity().getName());
+							if (repo.getCapabilities().contains(QUERYABLE))
+							{
+								Query refQ = new QueryImpl().like(att.getRefEntity().getLabelAttribute().getName(), r
+										.getValue().toString());
+								Iterator<Entity> it = repo.findAll(refQ).iterator();
+								if (it.hasNext())
+								{
+									search.append(" OR this.").append('`').append(att.getName()).append('`')
+											.append(" IN (");
+									while (it.hasNext())
+									{
+										Entity ref = it.next();
+										search.append("?");
+										parameters.add(att.getDataType().convert(
+												ref.get(att.getRefEntity().getIdAttribute().getName())));
+										if (it.hasNext())
+										{
+											search.append(",");
+										}
+									}
+									search.append(")");
+								}
+							}
+						}
+						else if (att.getDataType() instanceof MrefField)
+						{
+							search.append(" OR CAST(").append(att.getName()).append(".`").append(att.getName())
+									.append('`').append(" as CHAR) LIKE ?");
+							parameters.add("%" + DataConverter.toString(r.getValue()) + "%");
+
+						}
+						else
+						{
+							search.append(" OR CAST(this.").append('`').append(att.getName()).append('`')
+									.append(" as CHAR) LIKE ?");
+							parameters.add("%" + DataConverter.toString(r.getValue()) + "%");
+
+						}
+					}
+					if (search.length() > 0) result.append('(').append(search.substring(4)).append(')');
+					break;
+				case AND:
+					result.append(" AND ");
+					break;
+				case NESTED:
+					result.append("(");
+					result.append(getWhereSql(new QueryImpl(r.getNestedRules()), parameters, mrefFilterIndex));
+					result.append(")");
+					break;
+				case OR:
+					result.append(" OR ");
+					break;
+				case LIKE:
+
+					if (attr.getDataType() instanceof StringField || attr.getDataType() instanceof TextField)
+					{
+						result.append(" this.").append('`').append(attr.getName()).append('`').append(" LIKE ?");
+					}
+					else
+					{
+						result.append(" CAST(this.").append('`').append(attr.getName()).append('`')
+								.append(" as CHAR) LIKE ?");
+					}
+					parameters.add("%" + DataConverter.toString(r.getValue()) + "%");
+					break;
+				case IN:
+					StringBuilder in = new StringBuilder();
+					List<Object> values = new ArrayList<Object>();
+					if (r.getValue() == null)
+					{
+						throw new MolgenisDataException("Missing value for IN query");
+					}
+					else if (!(r.getValue() instanceof Iterable<?>))
+					{
+						for (String str : r.getValue().toString().split(","))
+							values.add(str);
+					}
+					else
+					{
+						Iterables.addAll(values, (Iterable<?>) r.getValue());
+					}
+
+					for (int i = 0; i < values.size(); i++)
+					{
+						if (i > 0)
+						{
+							in.append(",");
+						}
+
+						in.append("?");
+						parameters.add(attr.getDataType().convert(values.get(i)));
+					}
+
+					if (attr.getDataType() instanceof MrefField) result.append(attr.getName()).append("_filter")
+							.append(mrefFilterIndex);
+					else result.append("this");
+
+					result.append(".`").append(r.getField()).append("` IN (").append(in).append(')');
+					break;
+				default:
+					// comparable values...
+					FieldType type = attr.getDataType();
+					if (type instanceof MrefField) predicate.append(attr.getName()).append("_filter")
+							.append(mrefFilterIndex);
+					else predicate.append("this");
+
+					predicate.append(".`").append(r.getField()).append('`');
+
+					switch (r.getOperator())
+					{
+						case EQUALS:
+							predicate.append(" =");
+							break;
+						case GREATER:
+							predicate.append(" >");
+							break;
+						case LESS:
+							predicate.append(" <");
+							break;
+						case GREATER_EQUAL:
+							predicate.append(" >=");
+							break;
+						case LESS_EQUAL:
+							predicate.append(" <=");
+							break;
+						default:
+							throw new MolgenisDataException("cannot solve query rule:  " + r);
+					}
+					predicate.append(" ? ");
+					parameters.add(attr.getDataType().convert(r.getValue()));
+
+					if (result.length() > 0 && !result.toString().endsWith(" OR ")
+							&& !result.toString().endsWith(" AND ")) result.append(" AND ");
+					result.append(predicate);
+			}
+		}
+
+		return result.toString().trim();
+	}
+
+	protected String getSortSql(Query q)
+	{
+		StringBuilder sortSql = new StringBuilder();
+		if (q.getSort() != null)
+		{
+			for (Sort.Order o : q.getSort())
+			{
+				AttributeMetaData att = getEntityMetaData().getAttribute(o.getProperty());
+				if (att.getDataType() instanceof MrefField) sortSql.append(", ").append(att.getName());
+				else sortSql.append(", ").append('`').append(att.getName()).append('`');
+				if (o.getDirection().equals(Sort.Direction.DESC))
+				{
+					sortSql.append(" DESC");
+				}
+				else
+				{
+					sortSql.append(" ASC");
+				}
+			}
+
+			if (sortSql.length() > 0) sortSql = new StringBuilder("ORDER BY ").append(sortSql.substring(2));
+		}
+		return sortSql.toString();
 	}
 
 	protected String getUpdateSql()
@@ -1081,19 +1285,86 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	@Override
 	public Set<RepositoryCapability> getCapabilities()
 	{
-		return Sets.newHashSet(WRITABLE, UPDATEABLE);
+		return Sets.newHashSet(WRITABLE, UPDATEABLE, QUERYABLE);
 	}
 
 	@Override
-	public long count()
+	public long count(Query q)
 	{
-		return jdbcTemplate.queryForObject(getCountSql(), Long.class);
+		List<Object> parameters = Lists.newArrayList();
+		String sql = getCountSql(q, parameters);
+
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("sql: " + sql + ",parameters:" + parameters);
+		}
+
+		return jdbcTemplate.queryForObject(sql, parameters.toArray(new Object[0]), Long.class);
 	}
 
-	protected String getCountSql()
+	protected String getFromSql(Query q)
 	{
-		String from = getFromSql();
+		StringBuilder from = new StringBuilder();
+		from.append(" FROM ").append('`').append(getTableName()).append('`').append(" AS this");
+
+		AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
+		List<String> mrefQueryFields = Lists.newArrayList();
+		getMrefQueryFields(q.getRules(), mrefQueryFields);
+
+		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
+			if (att.getDataType() instanceof MrefField)
+			{
+				from.append(" LEFT JOIN ").append('`').append(getTableName()).append('_').append(att.getName())
+						.append('`').append(" AS ").append('`').append(att.getName()).append('`').append(" ON (this.")
+						.append('`').append(idAttribute.getName()).append('`').append(" = ").append('`')
+						.append(att.getName()).append('`').append('.').append('`').append(idAttribute.getName())
+						.append('`').append(')');
+
+			}
+
+		for (int i = 0; i < mrefQueryFields.size(); i++)
+		{
+			// extra join so we can filter on the mrefs
+			AttributeMetaData att = getEntityMetaData().getAttribute(mrefQueryFields.get(i));
+
+			from.append(" LEFT JOIN ").append('`').append(getTableName()).append('_').append(att.getName()).append('`')
+					.append(" AS ").append('`').append(att.getName()).append("_filter").append(i + 1)
+					.append("` ON (this.").append('`').append(idAttribute.getName()).append('`').append(" = ")
+					.append('`').append(att.getName()).append("_filter").append(i + 1).append("`.").append('`')
+					.append(idAttribute.getName()).append('`').append(')');
+		}
+
+		return from.toString();
+	}
+
+	private void getMrefQueryFields(List<QueryRule> rules, List<String> fields)
+	{
+		for (QueryRule rule : rules)
+		{
+			if (rule.getField() != null)
+			{
+				AttributeMetaData attr = this.getEntityMetaData().getAttribute(rule.getField());
+				if (attr != null && attr.getDataType() instanceof MrefField)
+				{
+					fields.add(rule.getField());
+				}
+			}
+
+			if (rule.getNestedRules() != null && !rule.getNestedRules().isEmpty())
+			{
+				getMrefQueryFields(rule.getNestedRules(), fields);
+			}
+		}
+	}
+
+	protected String getCountSql(Query q, List<Object> parameters)
+	{
+		String where = getWhereSql(q, parameters, 0);
+		String from = getFromSql(q);
 		String idAttribute = getEntityMetaData().getIdAttribute().getName();
+
+		if (where.length() > 0) return new StringBuilder("SELECT COUNT(DISTINCT this.").append('`').append(idAttribute)
+				.append('`').append(')').append(from).append(" WHERE ").append(where).toString();
 
 		return new StringBuilder("SELECT COUNT(DISTINCT this.").append('`').append(idAttribute).append('`').append(')')
 				.append(from).toString();

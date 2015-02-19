@@ -21,7 +21,7 @@ public class MetaUtils
 			if (entityMeta.getAttribute(attr.getName()) == null)
 			{
 				throw new MolgenisDataException(
-						"Removing of existing attributes is currently not sypported. You tried to remove attribute ["
+						"Removing of existing attributes is currently not supported. You tried to remove attribute ["
 								+ attr.getName() + "]");
 			}
 		}

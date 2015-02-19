@@ -26,8 +26,6 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.util.DependencyResolver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
@@ -38,8 +36,6 @@ import com.google.common.collect.Lists;
  */
 class EntityMetaDataRepository
 {
-	private static final Logger LOG = LoggerFactory.getLogger(EntityMetaDataRepository.class);
-
 	public static final EntityMetaDataMetaData META_DATA = new EntityMetaDataMetaData();
 	private final Repository repository;
 	private final PackageRepository packageRepository;
@@ -57,31 +53,6 @@ class EntityMetaDataRepository
 	Repository getRepository()
 	{
 		return repository;
-	}
-
-	private void applyPatches(ManageableRepositoryCollection collection)
-	{
-		try
-		{
-			// TODO how can we check if patch is already deployed?
-			collection.addAttribute(META_DATA.getName(), META_DATA.getAttribute(BACKEND));
-		}
-		catch (Exception e)
-		{
-			LOG.warn(
-					"Error applying patch add backend attribute to enitymetadata. Problably this patch is already deployed, then you can ignore this",
-					e);
-		}
-
-		// Add default value MySQL if backend is null
-		for (Entity emd : repository)
-		{
-			if (emd.getString(BACKEND) == null)
-			{
-				emd.set(BACKEND, "MySQL");
-				repository.update(emd);
-			}
-		}
 	}
 
 	/**

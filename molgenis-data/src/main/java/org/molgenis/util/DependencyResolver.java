@@ -1,14 +1,17 @@
 package org.molgenis.util;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Repository;
 import org.molgenis.fieldtypes.XrefField;
 
 import com.google.common.collect.Iterables;
@@ -18,6 +21,23 @@ import com.google.common.collect.Sets;
 
 public class DependencyResolver
 {
+	/**
+	 * Determine the entity import order
+	 * 
+	 * @param repos
+	 * @return
+	 */
+	public static List<Repository> resolve(Iterable<Repository> repos)
+	{
+		Map<String, Repository> repoByName = new HashMap<>();
+		for (Repository repo : repos)
+		{
+			repoByName.put(repo.getEntityMetaData().getName(), repo);
+		}
+
+		return resolve(repoByName.values().stream().map(repo -> repo.getEntityMetaData()).collect(Collectors.toSet()))
+				.stream().map(emd -> repoByName.get(emd.getName())).collect(Collectors.toList());
+	}
 
 	/**
 	 * Determine the entity import order
@@ -94,6 +114,19 @@ public class DependencyResolver
 		}
 
 		return resolved;
+	}
+
+	public static boolean hasSelfReferences(EntityMetaData emd)
+	{
+		for (AttributeMetaData attr : emd.getAtomicAttributes())
+		{
+			if ((attr.getRefEntity() != null) && attr.getRefEntity().equals(emd))
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**

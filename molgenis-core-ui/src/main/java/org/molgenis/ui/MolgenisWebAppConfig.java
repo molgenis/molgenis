@@ -24,6 +24,8 @@ import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
+import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
+import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.support.DataServiceImpl;
@@ -50,9 +52,12 @@ import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.ui.menumanager.MenuManagerServiceImpl;
 import org.molgenis.ui.security.MolgenisUiPermissionDecorator;
 import org.molgenis.util.ApplicationContextProvider;
+import org.molgenis.util.DependencyResolver;
 import org.molgenis.util.FileStore;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.ResourceFingerprintRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
@@ -82,6 +87,8 @@ import freemarker.template.TemplateException;
 
 public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 {
+	private final Logger LOG = LoggerFactory.getLogger(getClass());
+
 	@Autowired
 	private MolgenisSettings molgenisSettings;
 
@@ -343,10 +350,44 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 	protected abstract ManageableRepositoryCollection getBackend();
 
+	protected abstract void addReposToReindex(DataServiceImpl localDataService);
+
+	protected void reindex()
+	{
+		// Create local dataservice and metadataservice
+		DataServiceImpl localDataService = new DataServiceImpl();
+		new MetaDataServiceImpl(localDataService);
+
+		addReposToReindex(localDataService);
+
+		SearchService localSearchService = embeddedElasticSearchServiceFactory.create(localDataService,
+				new EntityToSourceConverter());
+
+		DependencyResolver.resolve(localDataService).forEach(repo -> {
+			localSearchService.rebuildIndex(repo, repo.getEntityMetaData());
+		});
+	}
+
 	@PostConstruct
 	public void initRepositories()
 	{
+		if (!indexExists())
+		{
+			LOG.info("Reindexing repositories....");
+			reindex();
+			LOG.info("Reindexing done.");
+		}
+		else
+		{
+			LOG.info("Index found no need to reindex.");
+		}
+
 		metaDataService().setDefaultBackend(getBackend());
+	}
+
+	private boolean indexExists()
+	{
+		return searchService.hasMapping(new EntityMetaDataMetaData());
 	}
 
 	@Bean
@@ -360,7 +401,6 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	{
 		DataService dataService = dataService();
 		MetaDataService metaDataService = new MetaDataServiceImpl((DataServiceImpl) dataService);
-		((DataServiceImpl) dataService).setMetaDataService(metaDataService);
 
 		return metaDataService;
 	}

@@ -2,7 +2,6 @@ package org.molgenis.data.vcf.importer;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -208,9 +207,6 @@ public class VcfImporterService implements ImportService
 		{
 			addedEntities.add(entityMetaData);
 
-			// Samples
-			List<Entity> sampleEntities = new ArrayList<>();
-
 			while (inIterator.hasNext())
 			{
 				Entity entity = inIterator.next();
@@ -221,31 +217,12 @@ public class VcfImporterService implements ImportService
 					Iterable<Entity> samples = entity.getEntities("SAMPLES");
 					if (samples != null)
 					{
-						Iterator<Entity> sampleIterator = samples.iterator();
-						while (sampleIterator.hasNext())
-						{
-							sampleRepository.add(sampleIterator.next());
-							sampleEntities.add(sampleIterator.next());
-
-							if (sampleEntities.size() == batchSize)
-							{
-								sampleRepository.add(sampleEntities);
-								sampleEntityCount += sampleEntities.size();
-								sampleEntities.clear();
-							}
-						}
+						sampleRepository.add(samples);
 					}
 				}
 
 				outRepository.add(entity);
 			}
-
-			if (sampleRepository != null)
-			{
-				sampleRepository.add(sampleEntities);
-				sampleEntityCount += sampleEntities.size();
-			}
-
 		}
 
 		report.addNewEntity(entityName);

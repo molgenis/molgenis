@@ -51,6 +51,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	public MetaDataServiceImpl(DataServiceImpl dataService)
 	{
 		this.dataService = dataService;
+		dataService.setMetaDataService(this);
 	}
 
 	/**
@@ -75,8 +76,9 @@ public class MetaDataServiceImpl implements MetaDataService
 		Repository tagRepo = defaultBackend.addEntityMeta(new TagMetaData());
 		dataService.addRepository(tagRepo);
 
-		packageRepository = new PackageRepository(defaultBackend);
-		dataService.addRepository(packageRepository.getRepository());
+		Repository packages = defaultBackend.addEntityMeta(PackageRepository.META_DATA);
+		dataService.addRepository(packages);
+		packageRepository = new PackageRepository(packages);
 
 		entityMetaDataRepository = new EntityMetaDataRepository(defaultBackend, packageRepository);
 		dataService.addRepository(entityMetaDataRepository.getRepository());

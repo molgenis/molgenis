@@ -187,6 +187,7 @@ public class DefaultEntity implements Entity
 	{
 		Object value = values.get(attributeName);
 		if (value == null) return null;
+		if (value instanceof java.util.Date) return (java.util.Date) value;
 
 		try
 		{

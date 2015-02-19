@@ -66,6 +66,7 @@ import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.util.DependencyResolver;
 import org.molgenis.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1038,12 +1039,39 @@ public class ElasticSearchService implements SearchService
 	{
 		try
 		{
-			if (hasMapping(entityMetaData))
+			if (DependencyResolver.hasSelfReferences(entityMetaData))
 			{
-				delete(entityMetaData.getName());
+				Iterable<Entity> iterable = Iterables.transform(entities, new Function<Entity, Entity>()
+				{
+					@Override
+					public Entity apply(Entity input)
+					{
+						return input;
+					}
+				});
+
+				Iterable<Entity> resolved = DependencyResolver.resolveSelfReferences(iterable, entityMetaData);
+				if (hasMapping(entityMetaData))
+				{
+					delete(entityMetaData.getName());
+				}
+				createMappings(entityMetaData);
+
+				for (Entity e : resolved)
+				{
+					index(e, entityMetaData, IndexingMode.ADD);
+				}
 			}
-			createMappings(entityMetaData);
-			index(entities, entityMetaData, IndexingMode.ADD);
+			else
+			{
+				if (hasMapping(entityMetaData))
+				{
+					delete(entityMetaData.getName());
+				}
+				createMappings(entityMetaData);
+
+				index(entities, entityMetaData, IndexingMode.ADD);
+			}
 		}
 		catch (IOException e)
 		{
