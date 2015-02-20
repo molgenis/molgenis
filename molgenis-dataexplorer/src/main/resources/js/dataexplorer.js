@@ -175,7 +175,7 @@ function($, molgenis, settingsXhr) {
 				        	    [{
 				        	        operator: "NESTED",
 				        	        nestedRules: [{
-				        	            field: chromosomeAttribute,
+				        	            field: chromosomeAttribute.name,
 				        	            operator: "EQUALS",
 				        	            value: chromosome
 				        	        }]
@@ -184,7 +184,7 @@ function($, molgenis, settingsXhr) {
 				        	    }, {
 				        	        operator: "NESTED",
 				        	        nestedRules: [{
-				        	            field: posAttribute,
+				        	            field: posAttribute.name,
 				        	            operator: "EQUALS",
 				        	            value: position
 				        	        }]
@@ -208,7 +208,7 @@ function($, molgenis, settingsXhr) {
 						        nestedRules: [{
 							            operator: "NESTED",
 							            nestedRules: [{
-							                field: chromosomeAttribute,
+							                field: chromosomeAttribute.name,
 							                operator: "EQUALS",
 							                value: chromosome
 						            }]
@@ -218,13 +218,13 @@ function($, molgenis, settingsXhr) {
 						    }, {
 						    	operator: "NESTED",
 						        nestedRules: [{
-				                    field: posAttribute,
+				                    field: posAttribute.name,
 				                    operator: "GREATER_EQUAL",
 				                    value: startPosition
 				                }, {
 				                	operator: "AND"
 				                }, {
-				                    field: posAttribute,
+				                    field: posAttribute.name,
 				                    operator: "LESS_EQUAL",
 				                    value: stopPosition
 				                }]
