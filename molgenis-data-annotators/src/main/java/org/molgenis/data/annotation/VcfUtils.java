@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
+import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.vcf.VcfRepository;
@@ -28,22 +29,82 @@ public class VcfUtils
 		{ VariantAnnotator.CHROMOSOME, VariantAnnotator.POSITION, VcfRepository.ID, VariantAnnotator.REFERENCE,
 				VariantAnnotator.ALTERNATIVE, VariantAnnotator.QUAL, VariantAnnotator.FILTER });
 
+		// fixed attributes
 		for (String attribute : vcfAttributes)
 		{
 			vcfRecord.append(((entity.getString(attribute) != null && !entity.getString(attribute).equals("")) ? entity.getString(attribute) : ".") + "\t");
 		//	vcfRecord.append(entity.getString(attribute) + "\t");
 		}
+		
+		// flexible info fields - ignore SAMPLE data!
 		for (AttributeMetaData attributeMetaData : entity.getEntityMetaData().getAtomicAttributes())
 		{
 			if (!vcfAttributes.contains(attributeMetaData.getName()) && attributeMetaData.isVisible()
-					&& !StringUtils.isEmpty(entity.getString(attributeMetaData.getName())))
+					&& !StringUtils.isEmpty(entity.getString(attributeMetaData.getName())) && !attributeMetaData.getName().equals("SAMPLES") )
 			{
 				vcfRecord.append(attributeMetaData.getName() + "=" + entity.getString(attributeMetaData.getName())
 						+ ";");
 			}
 
 		}
+		
+		//if we have SAMPLE data, add to output VCF
+		if(!Iterables.isEmpty(entity.getEntities("SAMPLES")))
+		{
+			//add tab
+			vcfRecord.append("\t");
+			
+			StringBuilder formatColumn = new StringBuilder();
+			StringBuilder sampleColumn = new StringBuilder();
+			outer:
+			for(Entity sample: entity.getEntities("SAMPLES"))
+			{
+				boolean firstSample = true;
+				for(String attribute : sample.getAttributeNames())
+				{
+					//get FORMAT fields, but only for the first time
+					if(firstSample)
+					{
+						if(attribute.equals("ID") || attribute.equals("NAME"))
+						{
+							//ignore ID and NAME
+						}
+						else
+						{
+							formatColumn.append(attribute);
+							formatColumn.append(":");
+						}
+					}
+					
+					//get values for FORMAT for each SAMPLE
+					if(attribute.equals("ID") || attribute.equals("NAME"))
+					{
+						//ignore ID and NAME
+					}
+					else
+					{
+						sampleColumn.append(sample.getString(attribute) != null ? sample.getString(attribute) : ".");
+						sampleColumn.append(":");
+					}
 
+				}
+				
+				//add FORMAT data but only first time
+				if(firstSample)
+				{
+					formatColumn.deleteCharAt(formatColumn.length()-1); //delete trailing ':'
+					vcfRecord.append(formatColumn.toString() + "\t");
+					firstSample = false;
+				}
+				
+				//now add SAMPLE data
+				sampleColumn.deleteCharAt(sampleColumn.length()-1);//delete trailing ':'
+				vcfRecord.append(sampleColumn.toString() + "\t");
+			}
+			//after all samples, delete trailing '\t'
+			vcfRecord.deleteCharAt(vcfRecord.length()-1);
+		}
+		
 		return vcfRecord.toString();
 	}
 
