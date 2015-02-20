@@ -47,8 +47,14 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		dataService.resetRepositories();
-		metaDataService.recreateMetaDataRepositories();
+		if (dataService.hasRepository("import_person"))
+		{
+			dataService.deleteAll("import_person");
+		}
+		if (dataService.hasRepository("import_city"))
+		{
+			dataService.deleteAll("import_city");
+		}
 	}
 
 	@Test

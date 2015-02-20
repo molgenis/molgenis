@@ -16,7 +16,6 @@ import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -78,9 +77,9 @@ public class TagRepositoryTest extends AbstractTestNGSpringContextTests
 	public static class Config
 	{
 		@Bean
-		CrudRepository repository()
+		Repository repository()
 		{
-			return mock(CrudRepository.class);
+			return mock(Repository.class);
 		}
 
 		@Bean

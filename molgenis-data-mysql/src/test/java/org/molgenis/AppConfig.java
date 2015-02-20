@@ -5,7 +5,6 @@ import java.util.UUID;
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
-import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
@@ -37,8 +36,9 @@ import org.springframework.util.IdGenerator;
  */
 @Configuration
 @EnableTransactionManagement(proxyTargetClass = true)
-@ComponentScan(
-{ "org.molgenis.data.mysql", "org.molgenis.data.importer" })
+// @ComponentScan(
+// { "org.molgenis.data.mysql", "org.molgenis.data.importer" })
+@ComponentScan("org.molgenis.data.meta")
 public class AppConfig
 {
 
@@ -86,7 +86,7 @@ public class AppConfig
 	}
 
 	@Bean
-	public DataService dataService()
+	public DataServiceImpl dataService()
 	{
 		return new DataServiceImpl();
 	}
@@ -101,7 +101,7 @@ public class AppConfig
 	@Scope("prototype")
 	public MysqlRepository mysqlRepository()
 	{
-		return new MysqlRepository(dataSource(), asyncJdbcTemplate());
+		return new MysqlRepository(dataService(), dataSource(), asyncJdbcTemplate());
 	}
 
 	@Bean
@@ -113,28 +113,18 @@ public class AppConfig
 	@Bean
 	public MetaDataService metaDataService()
 	{
-		MetaDataService metaDataService = new MetaDataServiceImpl(dataService());
-		((DataServiceImpl) dataService()).setMetaDataService(metaDataService);
-
-		return metaDataService;
-	}
-
-	public SearchService searchService()
-	{
-		return new ElasticSearchSservice();
+		return new MetaDataServiceImpl(dataService());
 	}
 
 	@Bean
 	public MysqlRepositoryCollection mysqlRepositoryCollection()
 	{
-		MysqlRepositoryCollection mysqlRepositoryCollection = new MysqlRepositoryCollection(dataSource())
+		MysqlRepositoryCollection mysqlRepositoryCollection = new MysqlRepositoryCollection()
 		{
 			@Override
 			protected MysqlRepository createMysqlRepository()
 			{
-				MysqlRepository repo = mysqlRepository();
-				repo.setRepositoryCollection(this);
-				return repo;
+				return mysqlRepository();
 			}
 		};
 
@@ -146,5 +136,4 @@ public class AppConfig
 	{
 		return new MolgenisPluginRegistryImpl();
 	}
-
 }

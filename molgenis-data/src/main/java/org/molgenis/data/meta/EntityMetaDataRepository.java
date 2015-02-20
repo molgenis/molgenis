@@ -158,7 +158,7 @@ class EntityMetaDataRepository
 		}
 		repository.add(entity);
 		entityMetaDataCache.put(emd.getName(), emd);
-		return toEntity(emd);
+		return entity;
 	}
 
 	private Entity toEntity(EntityMetaData emd)
@@ -166,7 +166,10 @@ class EntityMetaDataRepository
 		Entity entityMetaDataEntity = new MapEntity();
 		entityMetaDataEntity.set(FULL_NAME, emd.getName());
 		entityMetaDataEntity.set(SIMPLE_NAME, emd.getSimpleName());
-		entityMetaDataEntity.set(PACKAGE, packageRepository.getEntity(emd.getPackage().getName()));
+		if (emd.getPackage() != null)
+		{
+			entityMetaDataEntity.set(PACKAGE, packageRepository.getEntity(emd.getPackage().getName()));
+		}
 		entityMetaDataEntity.set(DESCRIPTION, emd.getDescription());
 		entityMetaDataEntity.set(ABSTRACT, emd.isAbstract());
 		entityMetaDataEntity.set(LABEL, emd.getLabel());

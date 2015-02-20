@@ -84,6 +84,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	{
 		reset(dataService);
 		reset(metaDataService);
+		when(dataService.getMeta()).thenReturn(metaDataService);
 
 		Repository repo = mock(Repository.class);
 

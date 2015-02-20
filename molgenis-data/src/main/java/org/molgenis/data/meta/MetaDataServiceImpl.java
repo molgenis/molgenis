@@ -28,6 +28,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.Ordered;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -103,8 +104,11 @@ public class MetaDataServiceImpl implements MetaDataService
 		if (dataService.hasRepository(entityName)) dataService.removeRepository(entityName);
 		attributeMetaDataRepository.deleteAllAttributes(entityName);
 		EntityMetaData emd = getEntityMetaData(entityName);
-		entityMetaDataRepository.delete(entityName);
-		getManageableRepositoryCollection(emd).deleteEntityMeta(entityName);
+		if (emd != null)
+		{
+			entityMetaDataRepository.delete(entityName);
+			getManageableRepositoryCollection(emd).deleteEntityMeta(entityName);
+		}
 	}
 
 	@Transactional
@@ -125,7 +129,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		// Update AttributeMetaDataRepository
 		attributeMetaDataRepository.remove(entityName, attributeName);
 		EntityMetaData emd = getEntityMetaData(entityName);
-		getManageableRepositoryCollection(emd).deleteAttribute(entityName, attributeName);
+		if (emd != null) getManageableRepositoryCollection(emd).deleteAttribute(entityName, attributeName);
 	}
 
 	private ManageableRepositoryCollection getManageableRepositoryCollection(EntityMetaData emd)
@@ -150,11 +154,6 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public Repository add(EntityMetaData emd, RepositoryDecoratorFactory decoratorFactory)
 	{
-		if (emd.isAbstract())
-		{
-			return null;
-		}
-
 		RepositoryCollection backend = getRepositoryCollection(emd);
 
 		if (getEntityMetaData(emd.getName()) != null)
@@ -192,8 +191,13 @@ public class MetaDataServiceImpl implements MetaDataService
 				LOG.trace("Adding attribute metadata for entity " + emd.getName() + ", attribute " + att.getName());
 			}
 
-			attributeMetaDataRepository.add(mdEntity, att);
+			if ((emd.getExtends() == null) || !Iterables.contains(emd.getExtends().getAtomicAttributes(), att))
+			{
+				attributeMetaDataRepository.add(mdEntity, att);
+			}
 		}
+
+		if (emd.isAbstract()) return null;
 
 		Repository repo = backend.addEntityMeta(getEntityMetaData(emd.getName()));
 		Repository decoratedRepo = decoratorFactory.createDecoratedRepository(repo);
@@ -309,13 +313,18 @@ public class MetaDataServiceImpl implements MetaDataService
 		return Ordered.HIGHEST_PRECEDENCE;
 	}
 
+	public void addBackend(RepositoryCollection backend)
+	{
+		backends.put(backend.getName(), backend);
+	}
+
 	@Override
 	public synchronized void onApplicationEvent(ContextRefreshedEvent event)
 	{
 		// Discover all backends
 		Map<String, RepositoryCollection> backendBeans = event.getApplicationContext().getBeansOfType(
 				RepositoryCollection.class);
-		backendBeans.values().forEach((col) -> backends.put(col.getName(), col));
+		backendBeans.values().forEach(this::addBackend);
 
 		// Create repositories from EntityMetaData in EntityMetaData repo
 		for (EntityMetaData emd : entityMetaDataRepository.getMetaDatas())

@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 @Service
@@ -218,6 +219,7 @@ public class VcfImporterService implements ImportService
 					if (samples != null)
 					{
 						sampleRepository.add(samples);
+						sampleEntityCount += Iterables.size(samples);
 					}
 				}
 

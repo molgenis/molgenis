@@ -18,10 +18,10 @@ import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
-import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
+import org.molgenis.data.mem.InMemoryRepositoryCollection;
+import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.FileRepositoryCollection;
-import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
 import org.molgenis.data.vcf.VcfRepositoryCollection;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.security.permission.PermissionSystemService;
@@ -33,34 +33,27 @@ public class VcfImporterServiceTest
 	@Test
 	public void testImport() throws IOException
 	{
-		DataService dataService = new DataServiceImpl(new NonDecoratingRepositoryDecoratorFactory());
+		DataServiceImpl dataService = new DataServiceImpl();
+		MetaDataServiceImpl metaDataService = new MetaDataServiceImpl(dataService);
+		metaDataService.setDefaultBackend(new InMemoryRepositoryCollection("ElasticSearch"));
 
-		EmbeddedElasticSearchServiceFactory factory = new EmbeddedElasticSearchServiceFactory("vcf-import-test"
-				+ Math.random());
-		try
-		{
-			File f = ResourceUtils.getFile(getClass(), "/testdata.vcf");
-			VcfRepositoryCollection source = new VcfRepositoryCollection(f);
+		File f = ResourceUtils.getFile(getClass(), "/testdata.vcf");
+		VcfRepositoryCollection source = new VcfRepositoryCollection(f);
 
-			VcfImporterService importer = new VcfImporterService(new FileRepositoryCollectionFactory(), dataService,
-					mock(PermissionSystemService.class));
+		VcfImporterService importer = new VcfImporterService(new FileRepositoryCollectionFactory(), dataService,
+				mock(PermissionSystemService.class));
 
-			EntityImportReport report = importer.doImport(source, DatabaseAction.ADD);
+		EntityImportReport report = importer.doImport(source, DatabaseAction.ADD);
 
-			assertNotNull(report);
-			assertEquals(report.getNewEntities(), Arrays.asList("testdata", "testdata_Sample"));
+		assertNotNull(report);
+		assertEquals(report.getNewEntities(), Arrays.asList("testdata", "testdata_Sample"));
 
-			Map<String, Integer> importedEntitiesMap = report.getNrImportedEntitiesMap();
-			assertNotNull(importedEntitiesMap);
-			assertTrue(importedEntitiesMap.containsKey("testdata"));
-			assertEquals(importedEntitiesMap.get("testdata"), Integer.valueOf(7));
-			assertTrue(importedEntitiesMap.containsKey("testdata_Sample"));
-			assertEquals(importedEntitiesMap.get("testdata_Sample"), Integer.valueOf(7));
-		}
-		finally
-		{
-			factory.close();
-		}
+		Map<String, Integer> importedEntitiesMap = report.getNrImportedEntitiesMap();
+		assertNotNull(importedEntitiesMap);
+		assertTrue(importedEntitiesMap.containsKey("testdata"));
+		assertEquals(importedEntitiesMap.get("testdata"), Integer.valueOf(7));
+		assertTrue(importedEntitiesMap.containsKey("testdata_Sample"));
+		assertEquals(importedEntitiesMap.get("testdata_Sample"), Integer.valueOf(7));
 
 	}
 

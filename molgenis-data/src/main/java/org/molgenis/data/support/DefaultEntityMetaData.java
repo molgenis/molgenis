@@ -147,14 +147,7 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData implements Edi
 
 	public void addAllAttributeMetaData(List<AttributeMetaData> attributeMetaDataList)
 	{
-		for (AttributeMetaData attributeMetaData : attributeMetaDataList)
-		{
-			if (attributeMetaData == null) throw new IllegalArgumentException("AttributeMetaData cannot be null");
-			if (attributeMetaData.getName() == null) throw new IllegalArgumentException(
-					"Name of the AttributeMetaData cannot be null");
-
-			attributes.put(attributeMetaData.getName().toLowerCase(), attributeMetaData);
-		}
+		attributeMetaDataList.forEach(this::addAttributeMetaData);
 	}
 
 	@Override

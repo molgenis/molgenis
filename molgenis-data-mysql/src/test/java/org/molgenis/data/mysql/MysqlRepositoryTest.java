@@ -10,6 +10,7 @@ import org.molgenis.AppConfig;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -17,11 +18,9 @@ import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Iterables;
@@ -37,20 +36,13 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	MetaDataServiceImpl metaDataRepositories;
 
-	@BeforeMethod
-	public void reset()
-	{
-		metaDataRepositories.recreateMetaDataRepositories();
-	}
-
 	@Test
 	public void testFindAll()
 	{
 		DefaultEntityMetaData metaData = new DefaultEntityMetaData("IntValue");
 		metaData.addAttribute("intAttr").setDataType(MolgenisFieldTypes.INT).setIdAttribute(true).setNillable(false);
 
-		coll.deleteEntityMeta(metaData.getName());
-		CrudRepository repo = coll.addEntityMeta(metaData);
+		Repository repo = metaDataRepositories.addEntityMeta(metaData);
 
 		int count = 2099;
 		for (int i = 0; i < count; i++)
@@ -96,15 +88,16 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		metaData.setIdAttribute("lastName");
 		Assert.assertEquals(metaData.getIdAttribute().getName(), "lastName");
 
-		coll.deleteEntityMeta(metaData.getName());
-		MysqlRepository repo = (MysqlRepository) coll.addEntityMeta(metaData);
+		MysqlRepository repo = (MysqlRepository) metaDataRepositories.addEntityMeta(metaData);
 
 		Assert.assertEquals(repo.getInsertSql(), "INSERT INTO `MysqlPerson` (`firstName`, `lastName`) VALUES (?, ?)");
 		Assert.assertEquals(
 				repo.getCreateSql(),
 				"CREATE TABLE IF NOT EXISTS `MysqlPerson`(`firstName` VARCHAR(255) NOT NULL, `lastName` VARCHAR(255) NOT NULL, PRIMARY KEY (`lastName`)) ENGINE=InnoDB;");
 
-		metaData.addAttributeMetaData(new DefaultAttributeMetaData("age", MolgenisFieldTypes.FieldTypeEnum.INT));
+		metaData.addAttribute("age").setDataType(MolgenisFieldTypes.INT);
+		metaDataRepositories.updateEntityMeta(metaData);
+
 		Assert.assertEquals(repo.getInsertSql(),
 				"INSERT INTO `MysqlPerson` (`firstName`, `lastName`, `age`) VALUES (?, ?, ?)");
 		Assert.assertEquals(
@@ -179,12 +172,6 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 						count++;
 						return e;
 					}
-
-					@Override
-					public void remove()
-					{
-
-					}
 				};
 			}
 		};
@@ -249,7 +236,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		idAttributeMetaData.setNillable(false);
 		entityMetaData.addAttributeMetaData(idAttributeMetaData);
 
-		CrudRepository testRepository = coll.addEntityMeta(entityMetaData);
+		Repository testRepository = coll.addEntityMeta(entityMetaData);
 
 		MapEntity entity = new MapEntity();
 		entity.set(idAttributeName, exampleId);
