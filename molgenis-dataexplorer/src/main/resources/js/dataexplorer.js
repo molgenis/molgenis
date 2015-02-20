@@ -191,7 +191,6 @@ function($, molgenis, settingsXhr) {
 				        	    }];
 					// chromosome:startPos - endPos	
 					}else if(match[3]) {
-						console.log(match);
 						var chromosome = match[1];
 						var startPosition = match[2];
 						var stopPosition = match[3];
