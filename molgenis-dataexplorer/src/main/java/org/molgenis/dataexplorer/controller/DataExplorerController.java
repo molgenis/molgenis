@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -45,6 +46,9 @@ import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.ui.MolgenisInterceptor;
+import org.molgenis.ui.menu.Menu;
+import org.molgenis.ui.menu.MenuItem;
+import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.util.GsonHttpMessageConverter;
@@ -68,6 +72,7 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 /**
  * Controller class for the data explorer.
@@ -141,6 +146,9 @@ public class DataExplorerController extends MolgenisPluginController
 
 	@Autowired
 	private FreeMarkerConfigurer freemarkerConfigurer;
+
+	@Autowired
+	MenuManagerService menuManager;
 
 	public DataExplorerController()
 	{
@@ -389,6 +397,31 @@ public class DataExplorerController extends MolgenisPluginController
 		AttributeMetaData attributeChromosome = genomeConfig.getAttributeMetadataForAttributeNameArray(
 				GenomeConfig.GENOMEBROWSER_CHROM, entityMetaData);
 		return attributeStartPosition != null && attributeChromosome != null;
+	}
+
+	/**
+	 * Updates the 'Entities' menu when an entity is deleted.
+	 * 
+	 * @param datasetName
+	 */
+	@RequestMapping(value = "/removeEntityFromMenu/{entityName}", method = POST)
+	public void updateMenuOnDeleteEntity(@PathVariable("entityName") String entityName, HttpServletResponse response)
+	{
+		Menu menu = menuManager.getMenu();
+		MenuItem mEntities = menu.findMenuItem("entities");
+
+		List<MenuItem> items = mEntities.getItems();
+		List<MenuItem> newItems = Lists.newArrayList();
+		for (MenuItem i : items)
+		{
+			if (!i.getLabel().equals(entityName))
+			{
+				newItems.add(i);
+			}
+		}
+
+		mEntities.setItems(newItems);
+		menuManager.saveMenu(menu);
 	}
 
 	@RequestMapping(value = "/download", method = POST)
