@@ -1,0 +1,11 @@
+name	package	label	description
+entity0	PhenDB	"qRT-PCR SYBR Green"	"Contains information on measured variables and experimental metadata."
+entity1	PhenDB	"MLPA gain P146-A1"	"Features for the MLPA kit, gain P146-A1 from MRC Holland."
+entity2	PhenDB	"MLPA loss X-006"	"Features for the MLPA kit, loss X-006 from MRC Holland."
+entity3	PhenDB	"qMSP, molecular beacon"	""
+entity4	PhenDB	"High Resolution Melting (dye)"	"Features belonging to the technique High Resolution Melting, performed with a dye."
+entity5	PhenDB	"MSI Analysis System"	"MB version for the Cell line use case.
+Variables in this are for the 5 markers in the kit and the overall call of microsatellite (in)stable."
+entity6	PhenDB	"High Resolution Melting (probe)"	"Features belonging to the technique High Resolution Melting, performed with a probe."
+entity7	PhenDB	"qMSP SYBR Green"	"Contains information on measured variables and experimental metadata."
+entity8	PhenDB	"ABI3500 sequencing"	"For features traditional Sanger sequencing. In this case done with the ABI3500 from Applied Biosystems."
