@@ -48,6 +48,7 @@ public class MetaDataRegistrator implements ApplicationListener<ContextRefreshed
 		LOG.info("Registering ComputeUI MySQL repositories ...");
 		repositoryCollection.add(MolgenisUserKeyMetaData.INSTANCE);
 		repositoryCollection.add(UIParameterMetaData.INSTANCE);
+		repositoryCollection.add(UIWorkflowParameterValueMetaData.INSTANCE);
 		repositoryCollection.add(UIParameterMappingMetaData.INSTANCE);
 		repositoryCollection.add(UIWorkflowParameterMetaData.INSTANCE);
 		repositoryCollection.add(UIWorkflowProtocolMetaData.INSTANCE);
