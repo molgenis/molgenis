@@ -50,6 +50,7 @@
 		<script src="<@resource_href "/js/${molgenis_ui.hrefJs?html}"/>"></script>
 	</#if>
 	</head>
+	<#if app_tracking_code.googleAnalytics?has_content><script type="text/javascript">${app_tracking_code.googleAnalytics?string}</script></#if>
 	<body>
 		<#-- Navbar menu -->
         <#if menu_id??>
