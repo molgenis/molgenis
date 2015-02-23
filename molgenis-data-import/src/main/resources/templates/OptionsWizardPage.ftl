@@ -12,8 +12,8 @@
 	
 	<div class="row">
 		<div class="col-md-4">
-			<div class="panel panel-default">
-				<div class="panel-heading">Entity options</div>
+			<div class="panel">
+				<div class="panel-heading"><h4 class="panel-title">Entity options</h4></div>
 				<div class="panel-body">
 					<#list wizard.supportedDatabaseActions as action>
 						<#if action == 'ADD_UPDATE_EXISTING'>
