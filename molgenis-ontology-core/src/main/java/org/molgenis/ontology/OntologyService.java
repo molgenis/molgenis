@@ -1,5 +1,7 @@
 package org.molgenis.ontology;
 
+import java.util.List;
+
 import org.molgenis.data.Entity;
 
 /**
@@ -51,8 +53,7 @@ public interface OntologyService
 	 * 
 	 * @param ontologyTermIRI
 	 * @param ontologyIri
-	 * @return an ontologyTerm based on specified ontologyTermIri in particular
-	 *         ontology
+	 * @return an ontologyTerm based on specified ontologyTermIri in particular ontology
 	 */
 	OntologyTerm getOntologyTerm(String ontologyTermIri, String ontologyIri);
 
@@ -60,10 +61,17 @@ public interface OntologyService
 	 * 
 	 * @param ontologyTermIri
 	 * @param ontologyIri
-	 * @return an untyped ontologyTerm entity based on specified ontologyTermIri
-	 *         in particular ontology
+	 * @return an untyped ontologyTerm entity based on specified ontologyTermIri in particular ontology
 	 */
 	Entity getOntologyTermEntity(String ontologyTermIri, String ontologyIri);
+
+	/**
+	 * 
+	 * @param ontologyTermIri
+	 * @param ontologyIri
+	 * @return a list of synonyms for ontology term provided
+	 */
+	List<String> getOntologyTermSynonyms(String ontologyTermIri, String ontologyIri);
 
 	/**
 	 * 
@@ -93,8 +101,7 @@ public interface OntologyService
 	/**
 	 * 
 	 * @param ontologyIri
-	 * @return a list of untyped root ontologyterm entities from specified
-	 *         ontology
+	 * @return a list of untyped root ontologyterm entities from specified ontology
 	 * @throws NullPointerException
 	 *             if the ontologyIri is not known
 	 */
@@ -104,8 +111,7 @@ public interface OntologyService
 	 * 
 	 * @param ontologyIri
 	 * @param ontologyTerm
-	 * @return a list of child ontologyTerms from current ontologyTerm in
-	 *         specified ontology
+	 * @return a list of child ontologyTerms from current ontologyTerm in specified ontology
 	 * @throws NullPointerException
 	 *             if the ontologyIri is not known
 	 * @throws NullPointerException
@@ -117,8 +123,7 @@ public interface OntologyService
 	 * 
 	 * @param ontologyIri
 	 * @param ontologyTerm
-	 * @return a list of untyped child ontologyTerm entities from current
-	 *         ontologyTerm in specified ontology
+	 * @return a list of untyped child ontologyTerm entities from current ontologyTerm in specified ontology
 	 * @throws NullPointerException
 	 *             if the ontologyIri is not known
 	 * @throws NullPointerException
@@ -131,8 +136,7 @@ public interface OntologyService
 	 * @param ontologyIri
 	 * @param entity
 	 *            input for storing the query information
-	 * @return a list of relevant ontologyTerms based on the given input stored
-	 *         in an entity
+	 * @return a list of relevant ontologyTerms based on the given input stored in an entity
 	 * @throws NullPointerException
 	 *             if the ontologyIri is not known
 	 */

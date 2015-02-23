@@ -46,7 +46,10 @@ public class OntologyRepositoryRegistrator implements ApplicationListener<Contex
 		{
 			OntologyTermQueryRepository ontologyTermRepository = new OntologyTermQueryRepository(ontology.getLabel(),
 					searchService, dataService, ontologyService);
-			dataService.addRepository(ontologyTermRepository);
+			if (!dataService.hasRepository(ontologyTermRepository.getName()))
+			{
+				dataService.addRepository(ontologyTermRepository);
+			}
 		}
 	}
 }
