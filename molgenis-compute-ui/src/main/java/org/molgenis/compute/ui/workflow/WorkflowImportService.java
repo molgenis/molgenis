@@ -193,14 +193,11 @@ public class WorkflowImportService
 
 		List<UIWorkflowParameter> params = Lists.newArrayList();
 		CsvRepository csv = new CsvRepository(f, null);
-		Iterator<Entity> it = csv.iterator();
 
-		Hashtable<String, List<String>> tmp = new Hashtable<String, List<String>>();
+		HashMap<String, List<String>> tmp = new HashMap<String, List<String>>();
 
-		while(it.hasNext())
+		for(Entity e : csv)
 		{
-			Entity e = it.next();
-
 			for (AttributeMetaData attr : csv.getEntityMetaData().getAttributes())
 			{
 				String name = attr.getName();
