@@ -10,15 +10,15 @@
     </div>
     </#if>
 	
-    <div class="row">
+	<div class="row">
 		<div class="col-md-4">
 			<div class="panel panel-default">
 				<div class="panel-heading">Entity options</div>
 				<div class="panel-body">
 					<#list wizard.supportedDatabaseActions as action>
-	      				<#if action == 'ADD_UPDATE_EXISTING'>
-	      					<div class="radio">
-	        					<label>
+						<#if action == 'ADD_UPDATE_EXISTING'>
+							<div class="radio">
+								<label>
 									<input type="radio" name="entity_option" value="add_update"><strong>Add entities / update existing</strong>
 								</label>
 							</div>
@@ -26,23 +26,23 @@
 						</#if>
 						<#if action == 'ADD'>
 							<div class="radio">
-	        					<label>
+								<label>
 									<input type="radio" name="entity_option" value="add" checked><strong>Add entities</strong>		
 								</label>
 							</div>
 							<span>Importer adds new entities or fails if entity exists</span>
-	                	</#if>
-	                	<#if action == 'UPDATE'>
-	                		<div class="radio">
-	        					<label>
-	            					<input type="radio" name="entity_option" value="update"><strong>Update entities</strong>
-	            				</label>
-	        				</div>
-	            			<span>Importer updates existing entities or fails if entity does not exist</span>
-	            		</#if>
-	            	</#list>
+						</#if>
+						<#if action == 'UPDATE'>
+							<div class="radio">
+								<label>
+									<input type="radio" name="entity_option" value="update"><strong>Update entities</strong>
+								</label>
+							</div>
+							<span>Importer updates existing entities or fails if entity does not exist</span>
+						</#if>
+					</#list>
 				</div>
 			</div>	  		
-    	</div>
+		</div>
 	</div>
 </form>
