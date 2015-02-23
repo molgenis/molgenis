@@ -176,8 +176,16 @@ public class ExACServiceAnnotator extends VariantAnnotator
 	private synchronized Map<String, Object> annotateEntityWithExAC(String chromosome, Long position, String reference,
 			String alternative) throws IOException
 	{
-		
-		TabixReader.Iterator tabixIterator = tabixReader.query(chromosome + ":" + position + "-" + position);
+		TabixReader.Iterator tabixIterator = null;
+		try
+		{
+			tabixIterator = tabixReader.query(chromosome + ":" + position + "-" + position);
+		}
+		catch(Exception e)
+		{
+			LOG.error("Something went wrong (chromosome not in data?) when querying ExAC tabix file for " + chromosome + " POS: " + position + " REF: " + reference
+					+ " ALT: " + alternative + "! skipping...");
+		}
 		String line = null;
 	
 		//get line from data, we expect exactly 1
@@ -190,6 +198,11 @@ public class ExACServiceAnnotator extends VariantAnnotator
 			LOG.error("Bad GZIP file for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
 					+ " ALT: " + alternative + " LINE: " + line);
 			throw sfx;
+		}
+		catch(NullPointerException npe)
+		{
+			LOG.info("No data for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
+					+ " ALT: " + alternative + " LINE: " + line);
 		}
 		
 		//if nothing found, return empty list for no hit

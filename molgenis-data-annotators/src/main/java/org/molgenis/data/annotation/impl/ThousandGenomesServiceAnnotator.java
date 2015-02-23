@@ -195,6 +195,12 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 	private synchronized Map<String, Object> annotateEntityWith1000G(String chromosome, Long position, String reference,
 			String alternative) throws IOException
 	{
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+
+		if(!tabixReaders.containsKey(chromosome)){
+			LOG.info("No chromosome " + chromosome + " in data!");
+			return resultMap;
+		}
 		
 		TabixReader.Iterator tabixIterator = tabixReaders.get(chromosome).query(chromosome + ":" + position + "-" + position);
 		String line = null;
@@ -210,9 +216,14 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 					+ " ALT: " + alternative + " LINE: " + line);
 			throw sfx;
 		}
+		catch(NullPointerException npe)
+		{
+			LOG.info("No data for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
+					+ " ALT: " + alternative + " LINE: " + line);
+			//throw sfx;
+		}
 		
 		//if nothing found, return empty list for no hit
-		Map<String, Object> resultMap = new HashMap<String, Object>();
 		if(line == null)
 		{
 			return resultMap;

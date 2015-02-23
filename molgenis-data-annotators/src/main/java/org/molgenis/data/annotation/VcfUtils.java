@@ -29,34 +29,42 @@ public class VcfUtils
 		{ VariantAnnotator.CHROMOSOME, VariantAnnotator.POSITION, VcfRepository.ID, VariantAnnotator.REFERENCE,
 				VariantAnnotator.ALTERNATIVE, VariantAnnotator.QUAL, VariantAnnotator.FILTER });
 
-		// fixed attributes
+		// fixed attributes: chrom pos id ref alt qual filter
 		for (String attribute : vcfAttributes)
 		{
 			vcfRecord.append(((entity.getString(attribute) != null && !entity.getString(attribute).equals("")) ? entity.getString(attribute) : ".") + "\t");
 		//	vcfRecord.append(entity.getString(attribute) + "\t");
 		}
 		
-		// flexible info fields - ignore SAMPLE data!
-		for (AttributeMetaData attributeMetaData : entity.getEntityMetaData().getAtomicAttributes())
+		// flexible 'info' field, one column with potentially many data items
+		for (AttributeMetaData attributeMetaData : entity.getEntityMetaData().getAttribute("INFO").getAttributeParts())
 		{
-			if (!vcfAttributes.contains(attributeMetaData.getName()) && attributeMetaData.isVisible()
-					&& !StringUtils.isEmpty(entity.getString(attributeMetaData.getName())) && !attributeMetaData.getName().equals("SAMPLES") )
+			if(entity.getString(attributeMetaData.getName()) != null)
 			{
-				vcfRecord.append(attributeMetaData.getName() + "=" + entity.getString(attributeMetaData.getName())
-						+ ";");
+				vcfRecord.append(attributeMetaData.getName().substring(VcfRepository.getInfoPrefix().length()) + "=" + entity.getString(attributeMetaData.getName())+ ";");
 			}
-
 		}
 		
+		//FIXME: dirty hack!! we now look outside INFO attribute for other 'INFO_' prepended fields, that come from the annotator...
+		//when data API is done we should move the annotator column into the INFO compound attribute instead!!
+		for (AttributeMetaData attributeMetaData : entity.getEntityMetaData().getAtomicAttributes())
+		{
+			if(attributeMetaData.getName().startsWith(VcfRepository.getInfoPrefix()) && entity.getString(attributeMetaData.getName()) != null)
+			{
+				vcfRecord.append(attributeMetaData.getName().substring(VcfRepository.getInfoPrefix().length()) + "=" + entity.getString(attributeMetaData.getName())+ ";");
+			}
+		}
+
+		
 		//if we have SAMPLE data, add to output VCF
-		if(!Iterables.isEmpty(entity.getEntities("SAMPLES")))
+		if(!Iterables.isEmpty(entity.getEntities("Samples")))
 		{
 			//add tab
 			vcfRecord.append("\t");
 			
 			StringBuilder formatColumn = new StringBuilder();
 			StringBuilder sampleColumn = new StringBuilder();
-			outer:
+
 			for(Entity sample: entity.getEntities("SAMPLES"))
 			{
 				boolean firstSample = true;
@@ -67,30 +75,39 @@ public class VcfUtils
 					{
 						if(attribute.equals("ID") || attribute.equals("NAME"))
 						{
-							//ignore ID and NAME
+							//FIXME ignore ID and NAME ? hacky?
 						}
 						else
 						{
-							formatColumn.append(attribute);
-							formatColumn.append(":");
+							if(sample.getString(attribute) != null)
+							{
+								formatColumn.append(attribute);
+								formatColumn.append(":");
+							}
+							
 						}
 					}
 					
 					//get values for FORMAT for each SAMPLE
 					if(attribute.equals("ID") || attribute.equals("NAME"))
 					{
-						//ignore ID and NAME
+						//FIXME ignore ID and NAME ? hacky?
 					}
 					else
 					{
-						sampleColumn.append(sample.getString(attribute) != null ? sample.getString(attribute) : ".");
-						sampleColumn.append(":");
+					//	sampleColumn.append(sample.getString(attribute) != null ? sample.getString(attribute) : ".");
+						if(sample.getString(attribute) != null)
+						{
+							sampleColumn.append(sample.getString(attribute));
+							sampleColumn.append(":");
+						}
+						
 					}
 
 				}
 				
 				//add FORMAT data but only first time
-				if(firstSample)
+				if(firstSample && formatColumn.length() > 0) //FIXME: do we expect this??
 				{
 					formatColumn.deleteCharAt(formatColumn.length()-1); //delete trailing ':'
 					vcfRecord.append(formatColumn.toString() + "\t");
@@ -102,7 +119,7 @@ public class VcfUtils
 				vcfRecord.append(sampleColumn.toString() + "\t");
 			}
 			//after all samples, delete trailing '\t'
-			vcfRecord.deleteCharAt(vcfRecord.length()-1);
+			vcfRecord.deleteCharAt(vcfRecord.length()-1); //FIXME: need a check??
 		}
 		
 		return vcfRecord.toString();

@@ -11,13 +11,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.elasticsearch.cluster.metadata.MetaDataService;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.TabixReader;
 import org.molgenis.data.annotation.VariantAnnotator;
 import org.molgenis.data.annotation.VcfUtils;
+import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.support.AnnotationServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -61,8 +64,8 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 
 	// the cadd service returns these two values
 	// must be compatible with VCF format, ie no funny characters
-	public static final String GONL_MAF = "GONLMAF";
-	public static final String GONL_GTC = "GONLGTC";
+	public static final String GONL_MAF = VcfRepository.getInfoPrefix() + "GONLMAF";
+	public static final String GONL_GTC = VcfRepository.getInfoPrefix() + "GONLGTC";
 
 	private static final String NAME = "GONL";
 
@@ -223,7 +226,7 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 		}
 		catch(NullPointerException npe)
 		{
-			LOG.error("NullPointerException for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
+			LOG.info("No data for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
 					+ " ALT: " + alternative + " LINE: " + line);
 			//throw sfx;
 		}
@@ -304,6 +307,7 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 			
 		}
 		
+		//FIXME: actually, they should also be inside INFO compound attribute!!
 		resultMap.put(GONL_GTC, gtc);
 		resultMap.put(GONL_MAF, maf);
 		return resultMap;

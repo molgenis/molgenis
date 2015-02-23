@@ -184,7 +184,7 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 				if(split[3].length() != 0)
 				{
 					geneSymbol = split[3];
-					LOG.info("Gene symbol '" + geneSymbol + "' found for " + entity.toString());
+	//too much..	LOG.info("Gene symbol '" + geneSymbol + "' found for " + entity.toString());
 				}
 				else
 				{
