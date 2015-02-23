@@ -73,10 +73,10 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 			.asList(new String[]
 			{
 					"##INFO=<ID="
-							+ GONL_MAF
+							+ GONL_MAF.substring(VcfRepository.getInfoPrefix().length())
 							+ ",Number=1,Type=Float,Description=\"GoNL minor allele frequency. Calculated by dividing AC by AN. For example: AC=23;AN=996 = 0.02309237\">",
 					"##INFO=<ID="
-							+ GONL_GTC
+							+ GONL_GTC.substring(VcfRepository.getInfoPrefix().length())
 							+ ",Number=G,Type=Integer,Description=\"GoNL genotype counts. For example: GONLGTC=69,235,194. Listed in the same order as the ALT alleles in case multiple ALT alleles are present = 0/0,0/1,1/1,0/2,1/2,2/2,0/3,1/3,2/3,3/3,etc. Phasing is ignored; hence 0/1, 1/0, 0|1 and 1|0 are all counted as 0/1. Incomplete gentotypes (./., ./0, ./1, ./2, etc.) are completely discarded for calculating GTC.\">"
 							});
 
@@ -108,7 +108,7 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
 		Iterator<Entity> vcfIter = vcfRepo.iterator();
 
-		VcfUtils.checkInput(inputVcfFile, outputVCFWriter, infoFields, GONL_MAF);
+		VcfUtils.checkInput(inputVcfFile, outputVCFWriter, infoFields, GONL_MAF.substring(VcfRepository.getInfoPrefix().length()));
 
 		System.out.println("Now starting to process the data.");
 

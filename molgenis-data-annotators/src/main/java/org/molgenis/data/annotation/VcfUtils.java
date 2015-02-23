@@ -57,7 +57,7 @@ public class VcfUtils
 
 		
 		//if we have SAMPLE data, add to output VCF
-		if(!Iterables.isEmpty(entity.getEntities("Samples")))
+		if(entity.getEntities("Samples") != null && !Iterables.isEmpty(entity.getEntities("Samples")))
 		{
 			//add tab
 			vcfRecord.append("\t");

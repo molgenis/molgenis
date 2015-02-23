@@ -58,7 +58,7 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 
 	// the cadd service returns these two values
 	// must be compatible with VCF format, ie no funny characters
-	public static final String THGEN_MAF = "1KGMAF";
+	public static final String THGEN_MAF = VcfRepository.getInfoPrefix() + "1KGMAF";
 
 	private static final String NAME = "1000G";
 
@@ -66,7 +66,7 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 			.asList(new String[]
 			{
 					"##INFO=<ID="
-							+ THGEN_MAF
+							+ THGEN_MAF.substring(VcfRepository.getInfoPrefix().length())
 							+ ",Number=1,Type=Float,Description=\"1000G minor allele frequency.\">"
 							});
 
@@ -98,7 +98,7 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
 		Iterator<Entity> vcfIter = vcfRepo.iterator();
 
-		VcfUtils.checkInput(inputVcfFile, outputVCFWriter, infoFields, THGEN_MAF);
+		VcfUtils.checkInput(inputVcfFile, outputVCFWriter, infoFields, THGEN_MAF.substring(VcfRepository.getInfoPrefix().length()));
 
 		System.out.println("Now starting to process the data.");
 

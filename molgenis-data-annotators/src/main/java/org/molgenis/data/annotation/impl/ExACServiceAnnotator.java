@@ -53,7 +53,7 @@ public class ExACServiceAnnotator extends VariantAnnotator
 	private final AnnotationService annotatorService;
 
 
-	public static final String EXAC_MAF = "EXACMAF";
+	public static final String EXAC_MAF = VcfRepository.getInfoPrefix() + "EXACMAF";
 
 	private static final String NAME = "EXAC";
 
@@ -61,7 +61,7 @@ public class ExACServiceAnnotator extends VariantAnnotator
 			.asList(new String[]
 			{
 					"##INFO=<ID="
-							+ EXAC_MAF
+							+ EXAC_MAF.substring(VcfRepository.getInfoPrefix().length())
 							+ ",Number=1,Type=Float,Description=\"ExAC minor allele frequency. Taken straight for AF field, inverted when alleles are swapped\">"
 							});
 
@@ -93,7 +93,7 @@ public class ExACServiceAnnotator extends VariantAnnotator
 		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
 		Iterator<Entity> vcfIter = vcfRepo.iterator();
 
-		VcfUtils.checkInput(inputVcfFile, outputVCFWriter, infoFields, EXAC_MAF);
+		VcfUtils.checkInput(inputVcfFile, outputVCFWriter, infoFields, EXAC_MAF.substring(VcfRepository.getInfoPrefix().length()));
 
 		System.out.println("Now starting to process the data.");
 
@@ -201,8 +201,8 @@ public class ExACServiceAnnotator extends VariantAnnotator
 		}
 		catch(NullPointerException npe)
 		{
-			LOG.info("No data for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
-					+ " ALT: " + alternative + " LINE: " + line);
+			//overkill to print all missing, since ExAC is exome data 'only'
+			//LOG.info("No data for CHROM: " + chromosome + " POS: " + position + " REF: " + reference + " ALT: " + alternative + " LINE: " + line);
 		}
 		
 		//if nothing found, return empty list for no hit
