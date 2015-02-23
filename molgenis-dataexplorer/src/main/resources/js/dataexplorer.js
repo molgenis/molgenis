@@ -163,7 +163,7 @@ function($, molgenis, settingsXhr) {
 			if (/\S/.test(searchQuery)) {
 				var searchQueryRegex = /^\s*(?:chr)?([\d]{1,2}|X|Y|MT|XY):([\d]+)(?:-([\d]+)+)?\s*$/g;
 				
-				if(searchQueryRegex && searchQuery.match(searchQueryRegex)) {
+				if(searchQueryRegex && searchQuery.match(searchQueryRegex) && chromosomeAttribute !== undefined && posAttribute !== undefined) {
 					var match = searchQueryRegex.exec(searchQuery);
 					
 					// only chromosome and position
