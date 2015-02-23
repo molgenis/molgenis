@@ -18,15 +18,10 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.*;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
-import org.molgenis.data.support.AnnotationServiceImpl;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.*;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.server.MolgenisSimpleSettings;
 import org.slf4j.Logger;
@@ -80,6 +75,7 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator, ApplicationL
     public static final String ERRORS = "Errors";
     public static final String LOF = "LOF";
     public static final String NMD = "NMD";
+    private DataService dataService = null;
 
 
     @Override
@@ -89,11 +85,12 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator, ApplicationL
 	}
 
 	@Autowired
-	public SnpEffServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService)
+	public SnpEffServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService, DataService dataService)
 			throws IOException
 	{
 		this.molgenisSettings = molgenisSettings;
 		this.annotatorService = annotatorService;
+        this.dataService = dataService;
 	}
 
 	public SnpEffServiceAnnotator(File snpEffLocation, File inputVcfFile, File outputVCFFile) throws Exception
@@ -206,20 +203,13 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator, ApplicationL
 			BufferedReader br = new BufferedReader(new FileReader(outputTempFile.getAbsolutePath()));
 			String line;
 			Iterator<Entity> entityIterator = source.iterator();
-			while ((line = br.readLine()) != null)
+            while ((line = br.readLine()) != null)
 			{
 				if (!line.startsWith("##"))
 				{
-					if (entityIterator.hasNext())
-					{
-						Entity entity = entityIterator.next();
-                        parseOutputLineToEntity(line, entity);
-						results.add(entity);
-					}
-					else
-					{
-						throw new RuntimeException("File has more lines than input iterable");
-					}
+					Entity entity = entityIterator.next();
+                    Entity resultEntity = parseOutputLineToEntity(line, entity.getEntityMetaData().getName());
+					results.add(resultEntity);
 				}
 			}
 		}
@@ -267,14 +257,16 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator, ApplicationL
         return tempInput;
     }
 
-    public void parseOutputLineToEntity(String line, Entity entity) {
+    public Entity parseOutputLineToEntity(String line, String entityName) {
         String lof = "";
         String nmd = "";
         String[] fields = line.split("\t");
-        LOG.info(fields[0] + "==" + entity.getString(CHROMOSOME));
-        LOG.info(fields[1] + "==" + entity.getString(POSITION));
         String[] ann_field = fields[7].split(";");
         String[] annotation = ann_field[0].split(Pattern.quote("|"), -1);
+        QueryRule chromRule = new QueryRule(CHROMOSOME,
+                QueryRule.Operator.EQUALS, fields[0]);
+        Query query = new QueryImpl(chromRule).and().eq(POSITION, fields[1]);
+        Entity entity = dataService.findOne(entityName, query);
         if (ann_field.length > 1)
         {
             if (ann_field[1].startsWith("LOF="))
@@ -315,6 +307,8 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator, ApplicationL
         entity.set(ERRORS, annotation[15]);
         entity.set(LOF, lof.replace("LOF=", ""));
         entity.set(NMD, nmd.replace("NMD=", ""));
+
+        return entity;
     }
 
     @Override
