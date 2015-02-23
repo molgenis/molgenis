@@ -1,7 +1,11 @@
 package org.molgenis.compute.ui.model;
 
+import com.google.common.collect.Lists;
+import org.molgenis.compute.ui.meta.UIParameterMetaData;
 import org.molgenis.compute.ui.meta.UIWorkflowParameterMetaData;
 import org.molgenis.data.support.MapEntity;
+
+import java.util.List;
 
 public class UIWorkflowParameter extends MapEntity
 {
@@ -12,12 +16,12 @@ public class UIWorkflowParameter extends MapEntity
 		super(UIWorkflowParameterMetaData.INSTANCE);
 	}
 
-	public UIWorkflowParameter(String identifier, String key, String value)
+	public UIWorkflowParameter(String identifier, String key, List<UIWorkflowParameterValue> values)
 	{
 		this();
 		set(UIWorkflowParameterMetaData.IDENTIFIER, identifier);
 		setKey(key);
-		setValue(value);
+		setValue(values);
 	}
 
 	public String getIdentifier()
@@ -35,14 +39,17 @@ public class UIWorkflowParameter extends MapEntity
 		set(UIWorkflowParameterMetaData.KEY, key);
 	}
 
-	public String getValue()
+	public List<UIWorkflowParameterValue> getValues()
 	{
-		return getString(UIWorkflowParameterMetaData.VALUE);
+		Iterable<UIWorkflowParameterValue> values = getEntities(UIWorkflowParameterMetaData.VALUES,
+				UIWorkflowParameterValue.class);
+		if (values == null) return Lists.newArrayList();
+		return Lists.newArrayList(values);
 	}
 
-	public void setValue(String value)
+	public void setValue(List<UIWorkflowParameterValue> value)
 	{
-		set(UIWorkflowParameterMetaData.VALUE, value);
+		set(UIWorkflowParameterMetaData.VALUES, value);
 	}
 
 }

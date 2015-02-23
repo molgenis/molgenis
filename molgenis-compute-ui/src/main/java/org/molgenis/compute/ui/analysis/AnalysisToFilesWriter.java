@@ -36,19 +36,40 @@ public class AnalysisToFilesWriter
 		try
 		{
 			//write parameters
-			String keys = "";
-			String values = "";
+			StringBuilder keysBuilder = new StringBuilder();
+
+			int max = workflow.getParameters().get(0).getValues().size();
+
+			StringBuilder[] valueBuilders =new StringBuilder[max];
+			for (int i = 0; i < valueBuilders.length; i++)
+			{
+				valueBuilders[i] = new StringBuilder("");
+			}
+
 			parameters = workflow.getParameters();
 			for (UIWorkflowParameter p : parameters)
 			{
-				keys += p.getKey() + SEP;
-				values += p.getValue() + SEP;
+				keysBuilder.append(p.getKey()).append(SEP);
+				for(int i = 0; i < valueBuilders.length; i++)
+					valueBuilders[i].append(p.getValues().get(i).getValue()).append(SEP);
 			}
 
-			keys = keys.substring(0, keys.length() - 1);
-			values = values.substring(0, values.length() - 1);
+			String keys = keysBuilder.toString().substring(0, keysBuilder.toString().length() - 1);
 
-			keys += System.getProperty("line.separator") + values + System.getProperty("line.separator");
+			List<String> values = new ArrayList<>();
+			for (int i = 0; i < valueBuilders.length; i++)
+			{
+				String value = valueBuilders[i].toString()
+						.substring(0, valueBuilders[i].toString().toString().length() - 1);
+				values.add(value);
+			}
+
+			keys += System.getProperty("line.separator");
+
+			for(String value : values)
+			{
+				keys += value + System.getProperty("line.separator");
+			}
 
 			FileUtils.writeStringToFile(new File(path + AnalysisPluginController.PARAMETERS_DEFAULT), keys);
 
@@ -138,9 +159,6 @@ public class AnalysisToFilesWriter
 					writtenProtocols.add(protocolName);
 				}
 			}
-
-			int i = 0;
-
 		}
 		catch (IOException e)
 		{
