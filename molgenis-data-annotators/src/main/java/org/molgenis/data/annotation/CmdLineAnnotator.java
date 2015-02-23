@@ -21,7 +21,9 @@ public class CmdLineAnnotator
 		if (args.length != 4)
 		{
 			throw new Exception(
-					"Usage: java -Xmx4g -jar CmdLineAnnotator.jar [Annotator] [Annotation source file] [input VCF] [output VCF].\n");
+					"Usage: java -Xmx4g -jar CmdLineAnnotator.jar [Annotator] [Annotation source file] [input VCF] [output VCF].\n"
+					+ "Possible annotators are: " + annotators.toString() + ".\n"
+							+ "Example: java -Xmx4g -jar CmdLineAnnotator.jar gonl GoNL/release5_noContam_noChildren_with_AN_AC_GTC_stripped/ Cardio.vcf Cardio_gonl.vcf\n");
 		}
 
 		String annotator = args[0];
@@ -54,7 +56,8 @@ public class CmdLineAnnotator
 		File outputVCFFile = new File(args[3]);
 		if (outputVCFFile.exists())
 		{
-			throw new Exception("Output VCF file already exists at " + outputVCFFile.getAbsolutePath());
+			//TODO: do we make this an input options? or always throw? what is best practice?
+			//throw new Exception("Output VCF file already exists at " + outputVCFFile.getAbsolutePath());
 		}
 
 		// engage!

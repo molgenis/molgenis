@@ -63,10 +63,10 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 	public static final String CGD_FILE_LOCATION = "cgd_location";
 	
 	// FIXME for the commandline VCF output we have to use different names for conciseness/uniqueness..
-	public static final String CGD_CONDITION = "CGDCOND";
-	public static final String CGD_AGE_GROUP = "CGDAGE";
-	public static final String CGD_INHERITANCE = "CGDINH";
-	public static final String CGD_GENERALIZED_INHERITANCE = "CGDGIN";
+	public static final String CGD_CONDITION = VcfRepository.getInfoPrefix() + "CGDCOND";
+	public static final String CGD_AGE_GROUP = VcfRepository.getInfoPrefix() + "CGDAGE";
+	public static final String CGD_INHERITANCE = VcfRepository.getInfoPrefix() + "CGDINH";
+	public static final String CGD_GENERALIZED_INHERITANCE = VcfRepository.getInfoPrefix() + "CGDGIN";
 	
 	
 	final List<String> infoFields = Arrays
@@ -113,7 +113,7 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
 		Iterator<Entity> vcfIter = vcfRepo.iterator();
 
-		VcfUtils.checkInput(inputVcfFile, outputVCFWriter, infoFields, CGD_CONDITION);
+		VcfUtils.checkInput(inputVcfFile, outputVCFWriter, infoFields, CGD_CONDITION.substring(VcfRepository.getInfoPrefix().length()));
 
 		System.out.println("Now starting to process the data.");
 
@@ -174,7 +174,7 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 		
 		String geneSymbol = null;
 
-		String annField = entity.getString("ANN");
+		String annField = entity.getString(VcfRepository.getInfoPrefix()+"ANN");
 		if(annField != null)
 		{
 			String[] split = annField.split("\\|", -1);
@@ -184,7 +184,7 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 				if(split[3].length() != 0)
 				{
 					geneSymbol = split[3];
-					LOG.info("Gene symbol '" + geneSymbol + "' found for " + entity.toString());
+	//too much..	LOG.info("Gene symbol '" + geneSymbol + "' found for " + entity.toString());
 				}
 				else
 				{

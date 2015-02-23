@@ -402,7 +402,7 @@ public class DataExplorerController extends MolgenisPluginController
 		DataRequest dataRequest = new GsonHttpMessageConverter().getGson().fromJson(dataRequestStr, DataRequest.class);
 
 		String entityName = dataRequest.getEntityName();
-		String fileName = entityName + '_' + new SimpleDateFormat("yyyy-mm-dd hh:mm:ss").format(new Date()) + ".csv";
+		String fileName = entityName + '_' + new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date()) + ".csv";
 
 		response.setContentType("text/csv");
 		response.addHeader("Content-Disposition", "attachment; filename=" + fileName);

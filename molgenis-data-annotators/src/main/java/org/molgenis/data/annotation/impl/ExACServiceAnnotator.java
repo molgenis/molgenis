@@ -34,11 +34,13 @@ import org.springframework.stereotype.Component;
 import com.sun.corba.se.spi.ior.iiop.GIOPVersion;
 
 /**
+ * ExAC annotator
  * 
+ * Data @ ftp://ftp.broadinstitute.org/pub/ExAC_release/release0.3/
  * 
- * TODO: parse multiple alternative allele frequencies, test, polish, etc
+ * TODO: feature enhancement: match multiple alternatives from SOURCE file to multiple alternatives in ExAC
  * 
- * 10	75832614	.	C	T,A,G		->		AF=5.848e-04,1.647e-05,4.118e-05
+ * e.g. 1       237965145       rs115779425     T       TT,TTT,TTTT     .       PASS    AC=31,3,1;AN=70;GTC=0,31,0,3,0,0,1,0,0,0;
  * 
  * 
  * */
@@ -51,7 +53,7 @@ public class ExACServiceAnnotator extends VariantAnnotator
 	private final AnnotationService annotatorService;
 
 
-	public static final String EXAC_MAF = "EXACMAF";
+	public static final String EXAC_MAF = VcfRepository.getInfoPrefix() + "EXACMAF";
 
 	private static final String NAME = "EXAC";
 
@@ -59,7 +61,7 @@ public class ExACServiceAnnotator extends VariantAnnotator
 			.asList(new String[]
 			{
 					"##INFO=<ID="
-							+ EXAC_MAF
+							+ EXAC_MAF.substring(VcfRepository.getInfoPrefix().length())
 							+ ",Number=1,Type=Float,Description=\"ExAC minor allele frequency. Taken straight for AF field, inverted when alleles are swapped\">"
 							});
 
@@ -91,7 +93,7 @@ public class ExACServiceAnnotator extends VariantAnnotator
 		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
 		Iterator<Entity> vcfIter = vcfRepo.iterator();
 
-		VcfUtils.checkInput(inputVcfFile, outputVCFWriter, infoFields, EXAC_MAF);
+		VcfUtils.checkInput(inputVcfFile, outputVCFWriter, infoFields, EXAC_MAF.substring(VcfRepository.getInfoPrefix().length()));
 
 		System.out.println("Now starting to process the data.");
 
@@ -174,111 +176,104 @@ public class ExACServiceAnnotator extends VariantAnnotator
 	private synchronized Map<String, Object> annotateEntityWithExAC(String chromosome, Long position, String reference,
 			String alternative) throws IOException
 	{
-		Double maf = null;
-
-		TabixReader.Iterator tabixIterator = tabixReader.query(chromosome + ":" + position + "-" + position);
-
-		// TabixReaderIterator does not have a hasNext();
-		boolean done = tabixIterator == null;
-		int i = 0;
-
-		while (!done)
+		TabixReader.Iterator tabixIterator = null;
+		try
 		{
-			String line = null;
-			try{
-				line = tabixIterator.next();
-			}
-			catch(net.sf.samtools.SAMFormatException sfx)
+			tabixIterator = tabixReader.query(chromosome + ":" + position + "-" + position);
+		}
+		catch(Exception e)
+		{
+			LOG.error("Something went wrong (chromosome not in data?) when querying ExAC tabix file for " + chromosome + " POS: " + position + " REF: " + reference
+					+ " ALT: " + alternative + "! skipping...");
+		}
+		String line = null;
+	
+		//get line from data, we expect exactly 1
+		try
+		{
+			line = tabixIterator.next();
+		}
+		catch(net.sf.samtools.SAMFormatException sfx)
+		{
+			LOG.error("Bad GZIP file for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
+					+ " ALT: " + alternative + " LINE: " + line);
+			throw sfx;
+		}
+		catch(NullPointerException npe)
+		{
+			//overkill to print all missing, since ExAC is exome data 'only'
+			//LOG.info("No data for CHROM: " + chromosome + " POS: " + position + " REF: " + reference + " ALT: " + alternative + " LINE: " + line);
+		}
+		
+		//if nothing found, return empty list for no hit
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		if(line == null)
+		{
+			return resultMap;
+		}
+		
+		//sanity check on content of line
+		String[] split = null;
+		split = line.split("\t", -1);
+		if (split.length != 8)
+		{
+			LOG.error("Bad ExAC data (split was not 8 elements) for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
+					+ " ALT: " + alternative + " LINE: " + line);
+			throw new IOException("Bad data! see log");
+		}
+		
+		// get MAF from info field
+		String[] infoFields = split[7].split(";", -1);
+		String[] mafs = null;
+		for(String info : infoFields)
+		{
+			if(info.startsWith("AF="))
 			{
-				LOG.error("Bad GZIP file for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
-						+ " ALT: " + alternative + " LINE: " + line);
-				throw sfx;
-			}
-			
-			//typical line:
-			//22      16055070        rs4389403       G       A       .       PASS    AC=93;AN=996;DB;GTC=405,93,0;set=SNP
-			//
-			//but sometimes without DB:
-			//22      16053249        .       C       T       .       PASS    AC=3;AN=996;GTC=495,3,0;set=SNP
-
-			if (line != null)
-			{
-				String[] split = null;
-				i++;
-				split = line.split("\t");
-				if (split.length != 8)
+				try
 				{
-					LOG.error("Bad ExAC data (split was not 8 elements) for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
-							+ " ALT: " + alternative + " LINE: " + line);
-					continue;
-				}
-				
-				LOG.info("ExAC variant found for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
-						+ " ALT: " + alternative + " LINE: " + line);
-				
-				String[] infoFields = split[7].split(";", -1);
-					
-				for(String info : infoFields)
+					mafs = info.replace("AF=", "").split(",",-1);
+					break;
+				}catch( java.lang.NumberFormatException e)
 				{
-					if(info.startsWith("AF="))
-					{
-						try{
-							maf = Double.parseDouble(info.replace("AF=", ""));
-							break;
-						}catch( java.lang.NumberFormatException e)
-						{
-							LOG.error("Bad number: " + info.replace("AF=", "") + " for line \n" + line);
-						}
-					}
-				
+					LOG.error("Could not get MAF for line \n" + line);
 				}
-				
-				if(maf == -1)
-				{
-					LOG.error("Bad 1000G data (no AF field) for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
-							+ " ALT: " + alternative + " LINE: " + line);
-					continue;
-				}
-				
-				if (split[3].equals(reference) && split[4].equals(alternative))
-				{
-					//all fine
-					done = true;
-				}
-				// In some cases, the ref and alt are swapped. If this is the case, the initial if statement above will
-				// fail, we can just check whether such a swapping has occured
-				else if (split[4].equals(reference) && split[3].equals(alternative))
-				{
-					LOG.info("ExAC variant found [swapped MAF by 1-MAF!] for CHROM: " + chromosome + " POS: " + position
-							+ " REF: " + reference + " ALT: " + alternative + " LINE: " + line);
-					
-					maf = 1-maf; //swap MAF in this case!
-					done = true;
-				}
-				else
-				{
-					if (i > 1)
-					{
-						LOG.warn("More than 1 hit in the ExAC! for CHROM: " + chromosome + " POS: " + position
-								+ " REF: " + reference + " ALT: " + alternative);
-					}
-					else
-					{
-						LOG.info("ExAC variant position found but ref/alt not matched! for CHROM: " + chromosome + " POS: " + position
-								+ " REF: " + reference + " ALT: " + alternative + " LINE: " + line);
-					}
-					
-				}
-			}
-			else
-			{
-				LOG.warn("No hit found in ExAC for CHROM: " + chromosome + " POS: " + position + " REF: "
-						+ reference + " ALT: " + alternative);
-				done = true;
 			}
 		}
-
-		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		//get alt alleles and check if the amount is equal to MAF list
+		String[] altAlleles = split[4].split(",", -1);
+		if(mafs.length != altAlleles.length)
+		{
+			throw new IOException("Number of alt alleles unequal to number of MAF values for line " + line);
+		}
+		
+		//match alleles and get the MAF from list
+		Double maf = null;
+		for(int i = 0; i < altAlleles.length; i++)
+		{
+			String altAllele = altAlleles[i];
+			if(altAllele.equals(alternative) && split[3].equals(reference))
+			{
+				maf = Double.parseDouble(mafs[i]);
+//				LOG.info("ExAC variant found for CHROM: " + chromosome + " POS: " + position + " REF: " + reference + " ALT: " + alternative + ", MAF = " + maf);
+			}
+		}
+		
+		//if nothing found, try swapping ref-alt, and do 1-MAF
+		if(maf == null)
+		{
+			for(int i = 0; i < altAlleles.length; i++)
+			{
+				String altAllele = altAlleles[i];
+				if(altAllele.equals(reference) && split[3].equals(alternative))
+				{
+					maf = 1-Double.parseDouble(mafs[i]);
+					LOG.info("*ref-alt swapped* ExAC variant found for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
+							+ " ALT: " + alternative + ", MAF (1-originalMAF) = " + maf);
+				}
+			}
+		}
+		
 		resultMap.put(EXAC_MAF, maf);
 		return resultMap;
 	}

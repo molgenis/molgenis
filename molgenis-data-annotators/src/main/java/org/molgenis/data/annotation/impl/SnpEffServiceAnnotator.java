@@ -95,58 +95,13 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator, ApplicationL
 
 	public SnpEffServiceAnnotator(File snpEffLocation, File inputVcfFile, File outputVCFFile) throws Exception
 	{
-		Process p = Runtime.getRuntime().exec("java -jar \"" + snpEffLocation + "\"");
-		BufferedInputStream pOutput = new BufferedInputStream(p.getInputStream());
-		synchronized (p)
-		{
-			p.waitFor();
-		}
-
-		int read = 0;
-		byte[] output = new byte[1024];
-
-		System.out.printf("Testing if SnpEff can be ran from " + snpEffLocation + " ...");
-		while ((read = pOutput.read(output)) != -1)
-		{
-			System.out.println(output[read]);
-		}
-
-		if (p.exitValue() != 0)
-		{
-			LOG.error("SnpEff not runnable from location " + snpEffLocation + " !");
-
-		}
-		else
-		{
-			LOG.info("Exit value 0, all is well...");
-		}
-
 		this.molgenisSettings = new MolgenisSimpleSettings();
-		molgenisSettings.setProperty(snpEffPath, snpEffLocation.getAbsolutePath());
-
+		molgenisSettings.setProperty(SNPEFF_JAR_LOCATION_PROPERTY, snpEffLocation.getAbsolutePath());
 		this.annotatorService = new AnnotationServiceImpl();
-
-		if (!checkSnpEffPath())
-		{
-			throw new FileNotFoundException("SnpEff executable not found");
-		}
-
-		// java -Xmx2g -jar /gcc/resources/snpEff/3.6c/snpEff.jar hg19 -v -canon -ud 0 -spliceSiteSize 5 nc_SNPs.vcf >
-		// nc_SNPs_snpeff_no_ud_ss5bp_canon_out.txt
-		Process process = new ProcessBuilder("java -Xmx2g -jar " + snpEffPath
-				+ " hg19 -v -lof -canon -ud 0 -spliceSiteSize 5 " + inputVcfFile + " > " + outputVCFFile).start();
-		InputStream is = process.getInputStream();
-		InputStreamReader isr = new InputStreamReader(is);
-		BufferedReader br = new BufferedReader(isr);
-		String line;
-
-		System.out.printf("Output of running SnpEff is:");
-
-		while ((line = br.readLine()) != null)
-		{
-			System.out.println(line);
-		}
-
+		
+		checkSnpEffPath();
+		runSnpEff(inputVcfFile, outputVCFFile);
+		
 		System.out.println("All done!");
 	}
 
