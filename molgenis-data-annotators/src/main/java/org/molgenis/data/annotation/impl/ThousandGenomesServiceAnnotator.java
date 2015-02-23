@@ -277,7 +277,7 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 		}
 		
 		//if nothing found, try swapping ref-alt, and do 1-MAF
-		if(maf == null)
+		if(false && maf == null) //FIXME TODO bad idea... ? e.g. C->CT is *not* swappable with CT->CTT,CTTT,C !! one is insertion, other is deletion (both REF is the real reference!), except CTT->CT, but that requires smart parsing!
 		{
 			for(int i = 0; i < altAlleles.length; i++)
 			{

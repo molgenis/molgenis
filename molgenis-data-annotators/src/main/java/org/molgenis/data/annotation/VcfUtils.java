@@ -2,6 +2,7 @@ package org.molgenis.data.annotation;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
@@ -10,7 +11,6 @@ import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.vcf.VcfRepository;
-import org.springframework.util.StringUtils;
 
 public class VcfUtils
 {
@@ -36,10 +36,12 @@ public class VcfUtils
 		//	vcfRecord.append(entity.getString(attribute) + "\t");
 		}
 		
+		List<String> infoFieldsSeen = new ArrayList<String>();
 		// flexible 'info' field, one column with potentially many data items
 		for (AttributeMetaData attributeMetaData : entity.getEntityMetaData().getAttribute("INFO").getAttributeParts())
 		{
-			if(entity.getString(attributeMetaData.getName()) != null)
+			infoFieldsSeen.add(attributeMetaData.getName());
+			if(entity.getString(attributeMetaData.getName()) != null) //FIXME: ehhh... this removes 'FLAG' fields? see http://samtools.github.io/hts-specs/VCFv4.2.pdf !!
 			{
 				vcfRecord.append(attributeMetaData.getName().substring(VcfRepository.getInfoPrefix().length()) + "=" + entity.getString(attributeMetaData.getName())+ ";");
 			}
@@ -49,7 +51,7 @@ public class VcfUtils
 		//when data API is done we should move the annotator column into the INFO compound attribute instead!!
 		for (AttributeMetaData attributeMetaData : entity.getEntityMetaData().getAtomicAttributes())
 		{
-			if(attributeMetaData.getName().startsWith(VcfRepository.getInfoPrefix()) && entity.getString(attributeMetaData.getName()) != null)
+			if(!infoFieldsSeen.contains(attributeMetaData.getName()) && attributeMetaData.getName().startsWith(VcfRepository.getInfoPrefix()) && entity.getString(attributeMetaData.getName()) != null)
 			{
 				vcfRecord.append(attributeMetaData.getName().substring(VcfRepository.getInfoPrefix().length()) + "=" + entity.getString(attributeMetaData.getName())+ ";");
 			}

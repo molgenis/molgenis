@@ -81,6 +81,9 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator, ApplicationL
     public static final String LOF = "LOF";
     public static final String NMD = "NMD";
 
+    public enum impact {
+		MODIFIER, LOW, MODERATE, HIGH
+	}
 
     @Override
 	public void onApplicationEvent(ContextRefreshedEvent event)

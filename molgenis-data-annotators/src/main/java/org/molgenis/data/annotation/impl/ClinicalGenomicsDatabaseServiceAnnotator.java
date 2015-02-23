@@ -72,10 +72,10 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 	final List<String> infoFields = Arrays
 			.asList(new String[]
 			{
-				"##INFO=<ID=" + CGD_CONDITION + ",Number=1,Type=String,Description=\"CGD_CONDITION\">",
-				"##INFO=<ID=" + CGD_AGE_GROUP + ",Number=1,Type=String,Description=\"CGD_AGE_GROUP\">",
-				"##INFO=<ID=" + CGD_INHERITANCE + ",Number=1,Type=String,Description=\"CGD_INHERITANCE\">",
-				"##INFO=<ID=" + CGD_GENERALIZED_INHERITANCE + ",Number=1,Type=String,Description=\"CGD_GENERALIZED_INHERITANCE\">",
+				"##INFO=<ID=" + CGD_CONDITION.substring(VcfRepository.getInfoPrefix().length()) + ",Number=1,Type=String,Description=\"CGD_CONDITION\">",
+				"##INFO=<ID=" + CGD_AGE_GROUP.substring(VcfRepository.getInfoPrefix().length()) + ",Number=1,Type=String,Description=\"CGD_AGE_GROUP\">",
+				"##INFO=<ID=" + CGD_INHERITANCE.substring(VcfRepository.getInfoPrefix().length()) + ",Number=1,Type=String,Description=\"CGD_INHERITANCE\">",
+				"##INFO=<ID=" + CGD_GENERALIZED_INHERITANCE.substring(VcfRepository.getInfoPrefix().length()) + ",Number=1,Type=String,Description=\"CGD_GENERALIZED_INHERITANCE\">",
 			});
 
 

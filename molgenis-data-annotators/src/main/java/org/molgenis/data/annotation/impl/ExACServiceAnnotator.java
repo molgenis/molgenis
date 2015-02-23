@@ -260,7 +260,7 @@ public class ExACServiceAnnotator extends VariantAnnotator
 		}
 		
 		//if nothing found, try swapping ref-alt, and do 1-MAF
-		if(maf == null)
+		if(false && maf == null) //FIXME TODO See 1000G annotator why this is not (always) allowed
 		{
 			for(int i = 0; i < altAlleles.length; i++)
 			{
