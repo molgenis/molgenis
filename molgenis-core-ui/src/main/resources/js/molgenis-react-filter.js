@@ -1,4 +1,3 @@
-/** @jsx React.DOM */
 /**
  * MOLGENIS attribute filters for all data types
  * 

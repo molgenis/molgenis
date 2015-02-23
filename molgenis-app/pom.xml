@@ -90,6 +90,8 @@
 					<groupId>org.mortbay.jetty</groupId>
 					<artifactId>jetty-maven-plugin</artifactId>
 					<configuration>
+                        <webAppSourceDirectory>${project.basedir}/src/main/resources</webAppSourceDirectory>
+                        <scanIntervalSeconds>1</scanIntervalSeconds>
 						<stopPort>8079</stopPort>
 						<stopKey>jetty-stop</stopKey>
 						<systemProperties>

@@ -14,8 +14,7 @@ $(function() {
 					}
 					$container.append(template({name: attr.name}));
 					var value = [{value: "ref2", label: "label2"}];
-//					React.render(<molgenis.controls.CategoricalControl entity={attr.refEntity} multiple={true} onValueChange={onValueChange} value={value} />, $container[0]);
-					React.render(molgenis.controls.CategoricalControl({entity: attr.refEntity, multiple: true, onValueChange: onValueChange, value: value}), $container[0]);
+					React.render(molgenis.controls.EntityControl({entity: attr.refEntity, multiple: true, onValueChange: onValueChange, value: value}), $container[0]);
 
 					//try {
 // 						molgenis.controls.create(attr, {
@@ -31,7 +30,6 @@ $(function() {
 				else if(attr.name === 'xenum') {
 					var $container = $('#input-container-enum');
 					var value = ["enum2"];
-//					React.render(<molgenis.controls.EnumControl options={["enum1", "enum2", "enum3"]} multiple={true} onValueChange={onValueChange} value={value} />, $container[0]);
 					React.render(molgenis.controls.EnumControl({options: ["enum1", "enum2", "enum3"], multiple: true, onValueChange: onValueChange, value: value}), $container[0]);
 				}
 			}
