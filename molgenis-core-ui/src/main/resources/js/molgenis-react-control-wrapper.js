@@ -11,6 +11,8 @@
 	
 	molgenis.controls = molgenis.controls || {};
 	
+	var div = React.DOM.div, input = React.DOM.input, span = React.DOM.span;
+	
 	/**
 	 * React component for Select2
 	 * 

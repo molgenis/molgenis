@@ -495,7 +495,7 @@
 			return(
 				div({className: 'form-group'},
 					div({className: 'col-md-offset-1 col-md-10'},
-						controls.RangeSliderControl({range: this.props.attr.range, step: this.props.step, disabled: this.props.disabled, value: value, onValueChange: this._handleValueChange})
+						controls.RangeSlider({range: this.props.attr.range, step: this.props.step, disabled: this.props.disabled, value: value, onValueChange: this._handleValueChange})
 					)
 				)
 //				<div className="form-group">
@@ -587,7 +587,7 @@
 	
 	
 	var AttributeFilter = React.createClass({
-		mixins: [AttributeFilter],
+		mixins: [ValueQueryMixin],
 		displayName: 'AttributeFilter',
 		getDefaultProps: function() {
 			return {

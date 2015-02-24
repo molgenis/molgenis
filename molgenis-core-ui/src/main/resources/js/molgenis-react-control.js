@@ -14,6 +14,7 @@
 	var api = new molgenis.RestClient();
 	
 	var div = React.DOM.div, input = React.DOM.input, label = React.DOM.label, textarea = React.DOM.textarea;
+	var Select2 = React.createFactory(molgenis.controls.Select2), JQRangeSlider = React.createFactory(molgenis.controls.JQRangeSlider), DateTimePicker = React.createFactory(molgenis.controls.DateTimePicker);
 	var __spread = React.__spread;
 
 	/**
@@ -44,7 +45,7 @@
 				type: 'number'
 			};
 			
-			return React.createElement(JQRangeSlider, {options: options, disabled: this.props.disabled, value: [fromValue, toValue], onChange: this._handleChange});
+			return JQRangeSlider({options: options, disabled: this.props.disabled, value: [fromValue, toValue], onChange: this._handleChange});
 		},
 		_handleChange: function(event) {console.log('_handleChange RangeSlider', event);
 			this.props.onValueChange({value: event.value});
@@ -253,7 +254,7 @@
 			});
 		},
 		render: function() {console.log('render DateControl', this.state, this.props);
-			return React.createElement(DateTimePicker, {time: this.props.time, placeholder: this.props.placeholder, required: this.props.required, disabled: this.props.disabled, value: this.state.value, onChange: this._handleChange});
+			return DateTimePicker({time: this.props.time, placeholder: this.props.placeholder, required: this.props.required, disabled: this.props.disabled, value: this.state.value, onChange: this._handleChange});
 		},
 		_handleChange: function(value) {console.log('_handleChange DateControl', value);
 			this.setState(value);
@@ -309,7 +310,7 @@
 				value = undefined;
 			}
 
-			return React.createElement(Select2, {options: options, disabled: this.props.disabled, value: value, onChange: this._handleChange});
+			return Select2({options: options, disabled: this.props.disabled, value: value, onChange: this._handleChange});
 		},
 		_handleChange: function(value) {console.log('_handleChange EnumControl', value);
 			var val = value !== '' ? value : null;
@@ -392,7 +393,7 @@
 			    formatResult: format,
 			    formatSelection: format
 			};
-			return React.createElement(Select2, {options: options, disabled: this.props.disabled, value: this.props.value, onChange: this._handleChange});
+			return Select2({options: options, disabled: this.props.disabled, value: this.props.value, onChange: this._handleChange});
 		},
 		_handleChange: function(value) {console.log('_handleChange EntityControl', value);
 			var val = this.props.multiple && value.length === 0 ? undefined : value;
