@@ -19,8 +19,8 @@
 				select2_items = [];
 				for ( var item in data) {
 					select2_items.push({
-						text : data[item], // value (pathway name)
-						id : item // key (pathway id)
+						text : data[item],
+						id : item
 					});
 				}
 			}
@@ -52,38 +52,16 @@
 			success : function(data) {
 				$("#pathway-svg-image").empty();
 				$('#pathway-svg-image').append(data);
-				SvgZoomPathway()
+				SvgZoomPathway();
 			}
 		});
 	}
 
 	function SvgZoomPathway() {
-		var test = svgPanZoom(document.getElementById('pathway-svg-image')
-				.getElementsByTagName('svg')[0]);
-
-		// test.pan({x:10, y:0});
-		// test.panBy({x:50, y:50});
-		// test.zoomAtPointBy(1, {x:50, y:50})
-
-		// var viewportGroupElement =
-		// document.getElemenById('pathway-svg-image').querySelector('.svg-pan-zoom_viewport');
-		// svgPanZoom('#pathway-svg-image').getElementsByTagName('svg')[0], {
-		// viewportSelector: viewportGroupElement
-		// });
-
-		// test.fit();
-		// document.getElementById('pathway-svg-image').querySelector('rect').setAttribute('width',
-		// 1200);
-		// document.getElementById('pathway-svg-image').querySelector('rect').setAttribute('height',
-		// 700);
-		// test.fit();
-		// test.updateBBox();
-		// test.fit();
+		var test = svgPanZoom(document.getElementById('pathway-svg-image').getElementsByTagName('svg')[0]);
 	}
 	
 	function getPathwaysByGenes(selectedVcf) {
-//		console.log("in function getPathwaysByGenes");
-
 		$.ajax({
 			type : 'POST',
 			url : molgenis.getContextUrl() + "/pathwaysByGenes",
@@ -91,7 +69,6 @@
 			data : selectedVcf,
 			success : function(data) {
 				select2_items2 = [];
-//				 console.log(data);
 				for ( var item in data) {
 					select2_items2.push({
 						text : data[item],
@@ -127,8 +104,7 @@
 	}
 
 	function SvgZoomColoredPathway() {
-		svgPanZoom(document.getElementById('colored-pathway-svg-image')
-				.getElementsByTagName('svg')[0]);
+		svgPanZoom(document.getElementById('colored-pathway-svg-image').getElementsByTagName('svg')[0]);
 	}
 
 	$(function() {
@@ -151,21 +127,25 @@
 			pathwayId = event.val;
 			getPathwayImage(pathwayId);
 		});
+		
 		$('#submit-genename-btn').on('click', function() {
 			var submittedGene = $('#gene-search').val();
 			getPathwaysForGene(submittedGene);
 			return false;
 		});
+		
 		$('#dataset-select').select2({
 			placeholder : "Select a vcf file",
 			width : '400px'
 		});
+		
 		$('#submit-vcfFile-btn').on('click', function() {
 			selectedVcf = $('#dataset-select').val();
 			$('#hiding-select2').show();
 			getPathwaysByGenes(selectedVcf);
 			return false;
 		});
+		
 		$('#pathway-select2').select2({
 			placeholder : "Select a pathway",
 			width : '400px',
@@ -178,6 +158,7 @@
 			pathwayId = event.val;
 			getGPML(selectedVcf, pathwayId);
 		});
+		
 		getPathways();
 	});
 

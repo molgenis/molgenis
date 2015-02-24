@@ -163,7 +163,7 @@ function($, molgenis, settingsXhr) {
 			if (/\S/.test(searchQuery)) {
 				var searchQueryRegex = /^\s*(?:chr)?([\d]{1,2}|X|Y|MT|XY):([\d]+)(?:-([\d]+)+)?\s*$/g;
 				
-				if(searchQueryRegex && searchQuery.match(searchQueryRegex)) {
+				if(searchQueryRegex && searchQuery.match(searchQueryRegex) && chromosomeAttribute !== undefined && posAttribute !== undefined) {
 					var match = searchQueryRegex.exec(searchQuery);
 					
 					// only chromosome and position
@@ -465,10 +465,12 @@ function($, molgenis, settingsXhr) {
 			bootbox.confirm("Are you sure you want to delete all data and metadata for this entity?", function(confirmed){
 				if(confirmed){
 					$.ajax('/api/v1/'+selectedEntityMetaData.name+'/meta', {'type': 'DELETE'}).done(function(){
-						document.location.href = "/menu/main/dataexplorer";
+						$.post(molgenis.getContextUrl() + '/removeEntityFromMenu/' + selectedEntityMetaData.name).done(function(){
+							document.location.href = "/menu/main/dataexplorer";
+						});
 					});
 				}
-			})
+			});
 		});
 
 		function init() {
