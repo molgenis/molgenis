@@ -1,15 +1,8 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 
-<#assign css=[
-	"select2.css"
-	]>
-	
-<#assign js=[
-	"pathway.js",
-	"select2-patched.js",
-	"svg-pan-zoom.min.js"
-	]>	
+<#assign css=["select2.css"]>
+<#assign js=["pathway.js", "select2-patched.js", "svg-pan-zoom.min.js"]>	
 
 <@header css js/>
 
@@ -22,7 +15,7 @@
 	<div class="tab-content">
 	<div role="tabpanel" class="tab-pane active" id="searchTab">
 		<div class="row" id="search">
-			<div class="col-md-6 col-md-offset-2"> <#--Remember, bootstrap grid system consists of 12 columns-->
+			<div class="col-md-6 col-md-offset-2">
 				<h5>Search for a pathway (by gene, description, disease etc.) </h5>
 				<form>
 					<input type="text" name="searchTerm" id="gene-search" data-placeholder="enter a gene or description">	
@@ -37,7 +30,7 @@
 				<br/><br/><br/>
 			</div>
 			<div class="row" id="pathwaySelect">
-				<div class="col-md-6 col-md-offset-1"> <#--Remember, bootstrap grid system consists of 12 columns-->
+				<div class="col-md-6 col-md-offset-1">
 					<div id="pathway-svg-image"></div>
 				</div>
 			</div>
@@ -49,7 +42,7 @@
 				<br/>
 				<form>
 	   				<select class="form-control" id="dataset-select" data-placeholder="Select a vcf file">
-	   				<option val=""></option><#--Need empty option tag, otherwise placeholder does not work!-->
+	   				<option val=""></option>
 			   		<#if entitiesMeta?has_content>
 			        	<#list entitiesMeta as entityMeta>
 			            <option value="${entityMeta.name}" <#if entityMeta.name == selectedEntityName> selected</#if>><#if entityMeta.label?has_content>${entityMeta.label}<#else>${entityMeta.name}</#if></option>
@@ -69,10 +62,8 @@
 			</div>
 		</div>
 		<div class="row">
-			<div class="col-md-6 col-md-offset-1"> <#--Remember, bootstrap grid system consists of 12 columns-->
-				<div id="colored-pathway-svg-image">
-				<!--<g class="svg-pan-zoom_viewport"></g>-->
-				</div>
+			<div class="col-md-6 col-md-offset-1">
+				<div id="colored-pathway-svg-image"></div>
 			</div>
 		</div>		
 	</div>
