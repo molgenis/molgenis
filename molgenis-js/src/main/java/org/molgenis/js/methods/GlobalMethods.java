@@ -1,5 +1,7 @@
 package org.molgenis.js.methods;
 
+import java.util.Date;
+
 import org.molgenis.data.Entity;
 import org.molgenis.js.MolgenisContext;
 import org.molgenis.js.ScriptableValue;
@@ -37,6 +39,15 @@ public class GlobalMethods
 		MolgenisContext mctx = MolgenisContext.asMolgenisContext(ctx);
 		Entity entity = mctx.getEntity();
 		Object value = entity.get(attributeName);
+
+		// convert java Date to javascript Date
+		if (value != null && value instanceof Date)
+		{
+			long dateLong = ((Date) value).getTime();
+			Scriptable convertedValue = ctx.newObject(mctx.getSharedScope(), "Date", new Object[]
+			{ dateLong });
+			return convertedValue;
+		}
 
 		return new ScriptableValue(thisObj, value);
 	}

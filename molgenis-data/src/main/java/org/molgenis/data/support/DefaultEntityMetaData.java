@@ -188,6 +188,7 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData implements Edi
 		return entityClass;
 	}
 
+	@Override
 	public DefaultAttributeMetaData addAttribute(String name)
 	{
 		DefaultAttributeMetaData result = new DefaultAttributeMetaData(name);
