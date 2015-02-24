@@ -215,6 +215,8 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator, ApplicationL
         return tempInput;
     }
 
+    //FIXME: can be multiple? even when using canonical!
+    // e.g. ANN=G|intron_variant|MODIFIER|LOC101926913|LOC101926913|transcript|NR_110185.1|Noncoding|5/5|n.376+9526G>C||||||,G|non_coding_exon_variant|MODIFIER|LINC01124|LINC01124|transcript|NR_027433.1|Noncoding|1/1|n.590G>C||||||;
     public Entity parseOutputLineToEntity(String line, String entityName) {
         String lof = "";
         String nmd = "";
