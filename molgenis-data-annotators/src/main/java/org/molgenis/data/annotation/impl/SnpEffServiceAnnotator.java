@@ -73,6 +73,9 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator, ApplicationL
     public static final String NMD = "NMD";
     private DataService dataService = null;
 
+    public enum impact {
+		MODIFIER, LOW, MODERATE, HIGH
+	}
 
     @Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
