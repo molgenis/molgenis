@@ -17,5 +17,4 @@ public class PathwaysConfig
 	{
 		return new WikiPathwaysRESTBindingStub(HttpClients.createDefault(), "http://webservice.wikipathways.org");
 	}
-
 }

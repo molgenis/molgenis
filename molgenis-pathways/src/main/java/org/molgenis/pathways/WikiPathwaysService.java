@@ -98,7 +98,7 @@ public class WikiPathwaysService
 				{
 					WSSearchResult[] listPathways = wikiPathwaysProxy.findPathwaysByXref(new String[]
 					{ gene }, new String[]
-					{ "H" }); // H for HGNC database (human gene symbols)
+					{ "H" }); // H for HGNC database
 					return Arrays.asList(listPathways);
 				}
 			});
