@@ -60,6 +60,7 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 	
 	public enum outcome {
 		EXCLUDED,
+		EXCLUDED_COMPOUND_CANDIDATE,
 		INCLUDED_DOMINANT,
 		INCLUDED_DOMINANT_HIGHIMPACT,
 		INCLUDED_RECESSIVE,
@@ -67,6 +68,8 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 		INCLUDED_RECESSIVE_COMPOUND,
 		INCLUDED_OTHER
 	}
+	
+	
 
 	final List<String> infoFields = Arrays
 			.asList(new String[]
@@ -159,6 +162,10 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 	private synchronized Map<String, Object> annotateEntityWithMonogenicDiseaseCandidates(Entity entity) throws IOException
 	{
 		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		//TODO:
+		// check if these annotators have been run:
+		// exac, gonl, 1kg, snpeff, cgd
 		
 		/**
 		 * Important variables to use in monogenic disease filter
@@ -266,8 +273,8 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 		 * We already know that zygosity is HET or HOMALT and MAF < 0.05
 		 */
 	
-		//dominant disease
-		if(cgdGenInh.equals(CgdDataProvider.generalizedInheritance.DOMINANT) || cgdGenInh.equals(CgdDataProvider.generalizedInheritance.DOM_OR_REC))
+		//dominant disorders, including those may may also be recessive, and X-linked, since CGD does not distinguish dominant or recessive for those..
+		if(cgdGenInh.equals(CgdDataProvider.generalizedInheritance.DOMINANT) || cgdGenInh.equals(CgdDataProvider.generalizedInheritance.DOM_OR_REC) || cgdGenInh.equals(CgdDataProvider.generalizedInheritance.XLINKED))
 		{
 			
 			// must be rare enough in EACH database
@@ -284,8 +291,8 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 			}
 		}
 		
-		//recessive disease
-		else if(cgdGenInh.equals(CgdDataProvider.generalizedInheritance.RECESSIVE) || cgdGenInh.equals(CgdDataProvider.generalizedInheritance.XLINKED))
+		//recessive disorders, including those may may also be dominant, and X-linked, since CGD does not distinguish dominant or recessive for those..
+		else if(cgdGenInh.equals(CgdDataProvider.generalizedInheritance.RECESSIVE) || cgdGenInh.equals(CgdDataProvider.generalizedInheritance.DOM_OR_REC) || cgdGenInh.equals(CgdDataProvider.generalizedInheritance.XLINKED))
 		{
 			//must be HOMALT for this
 			if(zygosity.equals(HOMALT))
@@ -304,7 +311,7 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 				else
 				{
 					genesWithCandidates.add(gene);
-					resultMap.put(MONOGENICDISEASECANDIDATE, outcome.EXCLUDED); //exclude the 'first' variant in a potential comp.het.
+					resultMap.put(MONOGENICDISEASECANDIDATE, outcome.EXCLUDED_COMPOUND_CANDIDATE); //exclude the 'first' variant in a potential comp.het.
 					return resultMap;
 				}
 			}
@@ -313,7 +320,7 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 		//other
 		else
 		{
-			LOG.info("INCLUDED variant with weird inheritance mode '"+originalInheritance+"', condition '"+condition+"', keeping variant " + entity.toString());
+			LOG.info("INCLUDED variant with untypical inheritance mode '"+originalInheritance+"', condition '"+condition+"', keeping variant " + entity.toString());
 			resultMap.put(MONOGENICDISEASECANDIDATE, outcome.INCLUDED_OTHER);
 			return resultMap;
 		}
