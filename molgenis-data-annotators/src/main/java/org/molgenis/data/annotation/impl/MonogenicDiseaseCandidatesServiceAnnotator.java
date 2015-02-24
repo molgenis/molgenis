@@ -88,6 +88,8 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 	{
 
 		//TODO: filterSettings in input file??
+		// or... symptoms
+		// then invoke http://compbio.charite.de/phenomizer/phenomizer/PhenomizerServiceURI?mobilequery=true&terms=HP:0001300,HP:0007325&numres=100
 		
 		genesWithCandidates = new HashSet<String>();
 		
@@ -158,9 +160,6 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 	{
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		
-		// TODO: can be multiple!! even with canonical output...
-		// ANN=G|intron_variant|MODIFIER|LOC101926913|LOC101926913|transcript|NR_110185.1|Noncoding|5/5|n.376+9526G>C||||||,G|non_coding_exon_variant|MODIFIER|LINC01124|LINC01124|transcript|NR_027433.1|Noncoding|1/1|n.590G>C||||||;
-		
 		/**
 		 * Important variables to use in monogenic disease filter
 		 */
@@ -173,7 +172,13 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 		SnpEffServiceAnnotator.impact impact = SnpEffServiceAnnotator.impact.valueOf(annSplit[2]);
 		String gene = annSplit[3];
 		String condition = entity.getString(ClinicalGenomicsDatabaseServiceAnnotator.CGD_CONDITION);
-		String hgvsVariant = annSplit[9];
+	//	String hgvsVariant = annSplit[9];
+		
+		// TODO: can be multiple!! even with canonical output...
+		// ANN=G|intron_variant|MODIFIER|LOC101926913|LOC101926913|transcript|NR_110185.1|Noncoding|5/5|n.376+9526G>C||||||,G|non_coding_exon_variant|MODIFIER|LINC01124|LINC01124|transcript|NR_027433.1|Noncoding|1/1|n.590G>C||||||;
+
+		//dealing with multiple ANN values?? not to worry - we don't miss any HIGH or MODERATE effects because they are placed nr.1 in the list by SnpEff
+		//if(annSplit.length != 16 && !impact.equals(SnpEffServiceAnnotator.impact.HIGH) && entity.getString(VcfRepository.getInfoPrefix() + "ANN").contains("HIGH")) { System.out.println(entity.getString(VcfRepository.getInfoPrefix() + "ANN")); }	
 		
 		/**
 		 * Read and check genotype data
@@ -319,7 +324,7 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 	public EntityMetaData getOutputMetaData()
 	{
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(MONOGENICDISEASECANDIDATE, FieldTypeEnum.INT)); //FIXME best type?
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(MONOGENICDISEASECANDIDATE, FieldTypeEnum.STRING)); //FIXME best type?
 		return metadata;
 	}
 
