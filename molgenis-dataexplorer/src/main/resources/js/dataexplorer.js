@@ -465,10 +465,12 @@ function($, molgenis, settingsXhr) {
 			bootbox.confirm("Are you sure you want to delete all data and metadata for this entity?", function(confirmed){
 				if(confirmed){
 					$.ajax('/api/v1/'+selectedEntityMetaData.name+'/meta', {'type': 'DELETE'}).done(function(){
-						document.location.href = "/menu/main/dataexplorer";
+						$.post(molgenis.getContextUrl() + '/removeEntityFromMenu/' + selectedEntityMetaData.name).done(function(){
+							document.location.href = "/menu/main/dataexplorer";
+						});
 					});
 				}
-			})
+			});
 		});
 
 		function init() {
