@@ -55,6 +55,9 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 
 	private static final String NAME = "MONOGENICDISEASE";
 	
+	//helper hashmap to find compound heterozygous pathogenicity
+	Set<String> genesWithCandidates;
+	
 	public enum outcome {
 		EXCLUDED,
 		INCLUDED_DOMINANT,
@@ -84,7 +87,9 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 	public MonogenicDiseaseCandidatesServiceAnnotator(File filterSettings, File inputVcfFile, File outputVCFFile) throws Exception
 	{
 
-		//TODO: filterSettings ??
+		//TODO: filterSettings in input file??
+		
+		genesWithCandidates = new HashSet<String>();
 		
 		this.molgenisSettings = new MolgenisSimpleSettings();
 		this.annotatorService = new AnnotationServiceImpl();
@@ -255,10 +260,7 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 		 * Sensitive filters
 		 * We already know that zygosity is HET or HOMALT and MAF < 0.05
 		 */
-		
-		//helper hashmap to find compound heterozygous pathogenicity
-		Set<String> genesWithCandidates = new HashSet<String>();
-		
+	
 		//dominant disease
 		if(cgdGenInh.equals(CgdDataProvider.generalizedInheritance.DOMINANT) || cgdGenInh.equals(CgdDataProvider.generalizedInheritance.DOM_OR_REC))
 		{
@@ -271,7 +273,7 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 			}
 			else
 			{
-				LOG.info("EXCLUDED candidate for dominant disease because not rare enough! 1KG: " + thGenMAF + ", ExAC: " + exacMAF + ", GoNL: " + gonlMAF +", for :" + entity.toString());
+//				LOG.info("EXCLUDED candidate for dominant disease because not rare enough! 1KG: " + thGenMAF + ", ExAC: " + exacMAF + ", GoNL: " + gonlMAF +", for :" + entity.toString());
 				resultMap.put(MONOGENICDISEASECANDIDATE, outcome.EXCLUDED);
 				return resultMap;
 			}
@@ -296,7 +298,8 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 				}
 				else
 				{
-					resultMap.put(MONOGENICDISEASECANDIDATE, outcome.EXCLUDED); //exclude the 'first' variant in a compound series
+					genesWithCandidates.add(gene);
+					resultMap.put(MONOGENICDISEASECANDIDATE, outcome.EXCLUDED); //exclude the 'first' variant in a potential comp.het.
 					return resultMap;
 				}
 			}
