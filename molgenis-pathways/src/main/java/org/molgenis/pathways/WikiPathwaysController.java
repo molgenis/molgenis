@@ -170,7 +170,6 @@ public class WikiPathwaysController extends MolgenisPluginController
 	 */
 	private HashMap<String, Integer> getGenesForVcf(String selectedVcf)
 	{
-		LOG.info("getGenesForVcf() selectedVcf = " + selectedVcf);
 		// TODO: cache result per VCF!
 		HashMap<String, Integer> result = new HashMap<String, Integer>();
 		Repository repository = dataService.getRepositoryByEntityName(selectedVcf);
@@ -224,7 +223,6 @@ public class WikiPathwaysController extends MolgenisPluginController
 	public Map<String, String> getListOfPathwayNamesByGenes(@Valid @RequestBody String selectedVcf)
 			throws ExecutionException
 	{
-		LOG.info("getListOfPathwayNamesByGenes() selectedVcf = " + selectedVcf);
 		Map<String, String> result = new HashMap<String, String>();
 		for (String gene : getGenesForVcf(selectedVcf).keySet())
 		{
@@ -244,7 +242,6 @@ public class WikiPathwaysController extends MolgenisPluginController
 	 */
 	private Map<String, String> getPathwaysForGene(String gene) throws ExecutionException
 	{
-		LOG.debug("getPathwaysForGene()" + gene);
 		return wikiPathwaysService.getPathwaysForGene(gene, HOMO_SAPIENS);
 	}
 
@@ -363,7 +360,6 @@ public class WikiPathwaysController extends MolgenisPluginController
 		}
 		else
 		{
-			LOG.warn("normal pathway, uncolored");
 			return wikiPathwaysService.getUncoloredPathwayImage(pathwayId);
 		}
 	}
