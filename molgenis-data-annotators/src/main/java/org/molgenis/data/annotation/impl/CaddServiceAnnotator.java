@@ -154,10 +154,73 @@ public class CaddServiceAnnotator extends VariantAnnotator
 		String chromosome = entity.getString(VcfRepository.CHROM) != null ? entity.getString(VcfRepository.CHROM) : entity
 				.getString(CHROMOSOME);
 
-		// FIXME use VcfRepository.POS, use VcfRepository.REF, use VcfRepository.ALT ?
-		Map<String, Object> resultMap = annotateEntityWithCadd(chromosome, entity.getLong(POSITION),
-				entity.getString(REFERENCE), entity.getString(ALTERNATIVE));
-		return Collections.<Entity> singletonList(getAnnotatedEntity(entity, resultMap));
+         long position = entity.getLong(POSITION);
+		String reference = entity.getString(REFERENCE);
+        String alternative = entity.getString(ALTERNATIVE);
+
+
+        Double caddAbs = null;
+        Double caddScaled = null;
+
+        TabixReader.Iterator tabixIterator = tabixReader.query(chromosome + ":" + position + "-" + position);
+
+        // TabixReaderIterator does not have a hasNext();
+        boolean done = tabixIterator == null;
+        int i = 0;
+
+        while (!done)
+        {
+            String line = tabixIterator.next();
+
+            if (line != null)
+            {
+                String[] split = null;
+                i++;
+                split = line.split("\t");
+                if (split.length != 6)
+                {
+                    LOG.error("bad CADD output for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
+                            + " ALT: " + alternative + " LINE: " + line);
+                    continue;
+                }
+                if (split[2].equals(reference) && split[3].equals(alternative))
+                {
+                    LOG.info("CADD scores found for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
+                            + " ALT: " + alternative + " LINE: " + line);
+                    caddAbs = Double.parseDouble(split[4]);
+                    caddScaled = Double.parseDouble(split[5]);
+                    done = true;
+                }
+                // In some cases, the ref and alt are swapped. If this is the case, the initial if statement above will
+                // fail, we can just check whether such a swapping has occured
+                else if (split[3].equals(reference) && split[2].equals(alternative))
+                {
+                    LOG.info("CADD scores found [swapped REF and ALT!] for CHROM: " + chromosome + " POS: " + position
+                            + " REF: " + reference + " ALT: " + alternative + " LINE: " + line);
+                    caddAbs = Double.parseDouble(split[4]);
+                    caddScaled = Double.parseDouble(split[5]);
+                    done = true;
+                }
+                else
+                {
+                    if (i > 3)
+                    {
+                        LOG.warn("More than 3 hits in the CADD file! for CHROM: " + chromosome + " POS: " + position
+                                + " REF: " + reference + " ALT: " + alternative);
+                    }
+                }
+            }
+            else
+            {
+                LOG.warn("No hit found in CADD file for CHROM: " + chromosome + " POS: " + position + " REF: "
+                        + reference + " ALT: " + alternative);
+                done = true;
+            }
+        }
+
+        entity.set(CADD_ABS, caddAbs);
+        entity.set(CADD_SCALED, caddScaled);
+        return Collections.<Entity> singletonList(entity);
 	}
 
 	/**
@@ -175,74 +238,6 @@ public class CaddServiceAnnotator extends VariantAnnotator
 				}
 			}
 		}
-	}
-
-	private synchronized Map<String, Object> annotateEntityWithCadd(String chromosome, Long position, String reference,
-			String alternative) throws IOException
-	{
-		Double caddAbs = null;
-		Double caddScaled = null;
-
-		TabixReader.Iterator tabixIterator = tabixReader.query(chromosome + ":" + position + "-" + position);
-
-		// TabixReaderIterator does not have a hasNext();
-		boolean done = tabixIterator == null;
-		int i = 0;
-
-		while (!done)
-		{
-			String line = tabixIterator.next();
-
-			if (line != null)
-			{
-				String[] split = null;
-				i++;
-				split = line.split("\t");
-				if (split.length != 6)
-				{
-					LOG.error("bad CADD output for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
-							+ " ALT: " + alternative + " LINE: " + line);
-					continue;
-				}
-				if (split[2].equals(reference) && split[3].equals(alternative))
-				{
-					LOG.info("CADD scores found for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
-							+ " ALT: " + alternative + " LINE: " + line);
-					caddAbs = Double.parseDouble(split[4]);
-					caddScaled = Double.parseDouble(split[5]);
-					done = true;
-				}
-				// In some cases, the ref and alt are swapped. If this is the case, the initial if statement above will
-				// fail, we can just check whether such a swapping has occured
-				else if (split[3].equals(reference) && split[2].equals(alternative))
-				{
-					LOG.info("CADD scores found [swapped REF and ALT!] for CHROM: " + chromosome + " POS: " + position
-							+ " REF: " + reference + " ALT: " + alternative + " LINE: " + line);
-					caddAbs = Double.parseDouble(split[4]);
-					caddScaled = Double.parseDouble(split[5]);
-					done = true;
-				}
-				else
-				{
-					if (i > 3)
-					{
-						LOG.warn("More than 3 hits in the CADD file! for CHROM: " + chromosome + " POS: " + position
-								+ " REF: " + reference + " ALT: " + alternative);
-					}
-				}
-			}
-			else
-			{
-				LOG.warn("No hit found in CADD file for CHROM: " + chromosome + " POS: " + position + " REF: "
-						+ reference + " ALT: " + alternative);
-				done = true;
-			}
-		}
-
-		Map<String, Object> resultMap = new HashMap<String, Object>();
-		resultMap.put(CADD_ABS, caddAbs);
-		resultMap.put(CADD_SCALED, caddScaled);
-		return resultMap;
 	}
 
 	@Override
