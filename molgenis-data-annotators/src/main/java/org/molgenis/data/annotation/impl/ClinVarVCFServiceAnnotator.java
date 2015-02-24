@@ -44,15 +44,15 @@ private static final Logger LOG = LoggerFactory.getLogger(ClinVarVCFServiceAnnot
 	private static final String NAME = "ClinvarVCF";
 
 	public static final String CLINVAR_VCF_LOCATION_PROPERTY = "clinvar_location";
-	public final static String CLINVAR_VCF_INFOFIELD = VcfRepository.getInfoPrefix() + "CLINVAR";
+	public final static String CLINVAR_CLINSIG = VcfRepository.getInfoPrefix() + "CLINVAR_CLNSIG";
 	private volatile TabixReader tabixReader;
 	
 	final List<String> infoFields = Arrays
 			.asList(new String[]
 			{
 					"##INFO=<ID="
-							+ CLINVAR_VCF_INFOFIELD.substring(VcfRepository.getInfoPrefix().length())
-							+ ",Number=1,Type=String,Description=\"ClinVar VCF data from INFO field\">"
+							+ CLINVAR_CLINSIG.substring(VcfRepository.getInfoPrefix().length())
+							+ ",Number=1,Type=String,Description=\"ClinVar clinical significance\">"
 							});
 
 
@@ -79,7 +79,7 @@ private static final Logger LOG = LoggerFactory.getLogger(ClinVarVCFServiceAnnot
 		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
 		Iterator<Entity> vcfIter = vcfRepo.iterator();
 
-		VcfUtils.checkInput(inputVcfFile, outputVCFWriter, infoFields, CLINVAR_VCF_INFOFIELD.substring(VcfRepository.getInfoPrefix().length()));
+		VcfUtils.checkInput(inputVcfFile, outputVCFWriter, infoFields, CLINVAR_CLINSIG.substring(VcfRepository.getInfoPrefix().length()));
 
 		System.out.println("Now starting to process the data.");
 
@@ -212,7 +212,17 @@ private static final Logger LOG = LoggerFactory.getLogger(ClinVarVCFServiceAnnot
 		if(split[3].equals(reference) && split[4].equals(alternative))
 		{
 			LOG.info("ClinVar variant found for CHROM: " + chromosome + " POS: " + position + " REF: " + reference + " ALT: " + alternative);
-			resultMap.put(CLINVAR_VCF_INFOFIELD, split[7]);
+			// ...CLNORIGIN=1;CLNSRCID=.;CLNSIG=2;CLNDSDB=MedGen;CLNDSDBID=CN169374;CLNDBN=not_specified;... etc
+			String clinSig = null;
+			String[] infoSplit = split[7].split(";", -1);
+			for(String infoField : infoSplit)
+			{
+				if(infoField.startsWith("CLNSIG="))
+				{
+					clinSig = infoField.replace("CLNSIG=", "");
+					resultMap.put(CLINVAR_CLINSIG, clinSig);
+				}
+			}
 		}
 		
 		return resultMap;
@@ -222,7 +232,7 @@ private static final Logger LOG = LoggerFactory.getLogger(ClinVarVCFServiceAnnot
 	public EntityMetaData getOutputMetaData()
 	{
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CLINVAR_VCF_INFOFIELD, FieldTypeEnum.STRING));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CLINVAR_CLINSIG, FieldTypeEnum.STRING));
 		return metadata;
 	}
 
