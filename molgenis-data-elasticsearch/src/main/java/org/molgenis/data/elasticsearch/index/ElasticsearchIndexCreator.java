@@ -17,6 +17,7 @@ public class ElasticsearchIndexCreator
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ElasticSearchService.class);
 	
+	public static final String DEFAULT_ANALYZER = "default";
 	public static final String NGRAM_ANALYZER = "ngram_analyzer";
 	private static final String NGRAM_TOKENIZER = "ngram_tokenizer";
 	private static final String DEFAULT_TOKENIZER = "default_tokenizer";
@@ -54,7 +55,7 @@ public class ElasticsearchIndexCreator
                 .startObject()
                     .startObject("analysis")
                         .startObject("analyzer")
-                            .startObject("default")
+                            .startObject(DEFAULT_ANALYZER)
                                 .field("type", "custom")
                                 .field("filter", new String[]{"lowercase", DEFAULT_STEMMER})
                                 .field("tokenizer", DEFAULT_TOKENIZER)
