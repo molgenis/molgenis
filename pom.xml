@@ -15,7 +15,7 @@
     <!-- More Project Information -->
     <name>Molgenis</name>
     <description>
-        MOLGENIS is a collaborative open source project on a mission to generate great software infrastructure for life
+        MOLGENIS is an collaborative open source project on a mission to generate great software infrastructure for life
         science research
     </description>
     <url>http://www.molgenis.org</url>
@@ -93,7 +93,6 @@
             </resource>
             <resource>
                 <directory>${project.basedir}/src/main/resources</directory>
-                <filtering>true</filtering>
                 <excludes>
                     <exclude>**molgenis.properties</exclude>
                     <exclude>**git.properties</exclude>
@@ -121,12 +120,12 @@
                     <artifactId>maven-war-plugin</artifactId>
                     <version>2.4</version>
                     <configuration>
-                        <!--Global exclusion for commons and log4j libraries-->
-          				<packagingExcludes>
-            				WEB-INF/lib/commons-logging-*.jar,
-            				%regex[WEB-INF/lib/log4j-(?!over-slf4j).*.jar]
-          				</packagingExcludes>
                         <failOnMissingWebXml>false</failOnMissingWebXml>
+                        <!--
+                            Exclude JCL and LOG4J since all logging should go through SLF4J.
+                            Note that we're excluding log4j-<version>.jar but keeping log4j-over-slf4j-<version>.jar
+                        -->
+                        <packagingExcludes>WEB-INF/lib/commons-logging-*.jar,%regex[WEB-INF/lib/log4j-(?!over-slf4j).*.jar]</packagingExcludes>
                     </configuration>
                 </plugin>
                 <!-- specify plugin version -->
@@ -607,6 +606,12 @@
 			<artifactId>logback-core</artifactId>
 			<version>${logback.version}</version>
 		</dependency>
+        <!-- for third party dependencies that use log4j -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>log4j-over-slf4j</artifactId>
+            <version>1.7.10</version>
+        </dependency>
         <!-- scope: test -->
         <dependency>
             <groupId>org.testng</groupId>
