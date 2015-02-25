@@ -15,7 +15,7 @@
     <!-- More Project Information -->
     <name>Molgenis</name>
     <description>
-        MOLGENIS is an collaborative open source project on a mission to generate great software infrastructure for life
+        MOLGENIS is a collaborative open source project on a mission to generate great software infrastructure for life
         science research
     </description>
     <url>http://www.molgenis.org</url>
@@ -80,6 +80,7 @@
             </resource>
             <resource>
                 <directory>${project.basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
                 <excludes>
                     <exclude>**molgenis.properties</exclude>
                     <exclude>**git.properties</exclude>
@@ -107,8 +108,12 @@
                     <artifactId>maven-war-plugin</artifactId>
                     <version>2.4</version>
                     <configuration>
+                        <!--Global exclusion for commons and log4j libraries-->
+          				<packagingExcludes>
+            				WEB-INF/lib/commons-logging-*.jar,
+            				%regex[WEB-INF/lib/log4j-(?!over-slf4j).*.jar]
+          				</packagingExcludes>
                         <failOnMissingWebXml>false</failOnMissingWebXml>
-                        <warSourceDirectory>${basedir}/src/main/resources</warSourceDirectory>
                     </configuration>
                 </plugin>
                 <!-- specify plugin version -->
