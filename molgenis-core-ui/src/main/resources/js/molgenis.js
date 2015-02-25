@@ -532,6 +532,17 @@ function createInput(attr, attrs, val, lbl) {
 		});
 	};
 
+	molgenis.RestClient.prototype.create = function(href, entity, callback) {
+		return this._ajax({
+			type : 'POST',
+			url : href,
+			contentType : 'application/json',
+			data : JSON.stringify(entity),
+			success : callback && callback.success ? callback.success : function() {},
+			error : callback && callback.error ? callback.error : function() {}
+		});
+	};
+	
 	molgenis.RestClient.prototype.update = function(href, entity, callback) {
 		return this._ajax({
 			type : 'POST',

@@ -7,14 +7,21 @@
 	var api = new molgenis.RestClient();
 	
 	var AttributeFormControl = React.createClass({
-//		mixins: [DeepPureRenderMixin],
+		mixins: [molgenis.DeepPureRenderMixin],
 		displayName: 'AttributeFormControl',
 		getInitialState: function() {
 			return {
 				value: this.props.value,
 				pristine: true,
-				valid: undefined
+				validity: this.props.validate ? this._validate(this.props.value).valid : undefined
 			};
+		},
+		componentWillReceiveProps: function(nextProps) {
+			if(this.state.validity === undefined && nextProps.validate === true) {
+				this.setState({
+					validity: this._validate(nextProps.value)
+				});	
+			}
 		},
 		componentDidMount: function() {console.log('componentDidMount AttributeFormControl');
 			if(this.props.attr.description !== undefined) {
@@ -25,7 +32,7 @@
 			this.props.onValueChange({
 				attr: this.props.attr.name,
 				value: this.state.value,
-				valid: this._validate().valid
+				valid: this._validate(this.state.value).valid
 			});
 		},
 		componentWillUnmount: function() {console.log('componentWillUnmount AttributeFormControl');
@@ -45,6 +52,8 @@
 					)
 				);
 				lbl = ' ' + lbl; // put some space between icon and label text
+			} else {
+				lblInfo = undefined;
 			}
 			
 			if(this.props.attr.nillable === false) {
@@ -52,14 +61,15 @@
 			}
 			
 			// add validation error message
-			var errorMessageSpan = this.state.valid === false ? span({className: 'help-block'}, this.state.errorMessage) : null;
+			var validity = this.state.validity;
+			var errorMessageSpan = validity && validity.valid === false ? span({className: 'help-block'}, validity.errorMessage) : null;
 			
 			// determine success and error classes for control 
 			var formGroupClasses = 'form-group';
-			if(this.state.valid === false) {
-				formGroupClasses += ' has-error';
-			} else if(this.state.pristine === false && this.state.valid === true) {
-				formGroupClasses += ' has-success';
+			if(validity) {
+				if(validity.valid === false) {
+					formGroupClasses += ' has-error';
+				}
 			}
 			 
 			var id = this.props.attr.name;
@@ -74,17 +84,19 @@
 			);	
 		},
 		_handleValueChange: function(e) {
+			var value = e.value;
+			var validity = this._validate(value);
+			
 			this.setState({
-				value: e.value,
-				valid: undefined, // postpone displaying validation errors until blur event
-				validity: e.validity,
+				value: value,
+				validity: validity,
 				pristine: false // mark input as dirty
 			});
 			
 			this.props.onValueChange({
 				attr: this.props.attr.name,
-				value: e.value,
-				valid: this._validate().valid // notify parent of value validity immediately
+				value: value,
+				valid: validity.valid // notify parent of value validity immediately
 			});
 		},
 		_handleBlur: function(e) {
@@ -93,12 +105,11 @@
 				return;
 			}
 			
-			this.setState(this._validate());
+			this.setState(this._validate(this.state.value));
 		},
-		_validate: function() {
+		_validate: function(value) {
 			// apply validation rules
 			var attr = this.props.attr;
-			var value = this.state.value;
 			
 			var report;
 			
@@ -134,7 +145,7 @@
 	});
 	
 	var Form = React.createClass({
-//		mixins: [DeepPureRenderMixin],
+		mixins: [molgenis.DeepPureRenderMixin],
 		displayName: 'Form',
 		propTypes: {
 			entity: React.PropTypes.object
@@ -157,7 +168,7 @@
 			// add control for each attribute
 			var controls = [];
 			for(var key in this.state.entity.attributes) {
-				var control = React.createElement(AttributeFormControl, {attr: this.state.entity.attributes[key], key: key, onValueChange: this._handleValueChange});
+				var control = React.createElement(AttributeFormControl, {attr: this.state.entity.attributes[key], key: key, onValueChange: this._handleValueChange, validate: this.state.validate, ref: key});
 				controls.push(control);
 			}
 			
@@ -184,8 +195,33 @@
 		_handleSubmit: function(e) {
 			e.preventDefault();
 			
-			for(var key in this.state.entity.attributes) {
-				// TODO continue
+			var values = this.state.values;
+			
+			// determine if form is valid
+			var formValid = true;
+			for(var key in values) {
+				if(values.hasOwnProperty(key)) {
+					var value = values[key];
+					if(value.valid === false) {
+						formValid = false;
+						break;
+					}
+				}
+			}
+			
+			if(formValid) {
+				// create updated entity
+				var updatedEntity = {};
+				for(var key in values) {
+					if(values.hasOwnProperty(key)) {
+						updatedEntity[key] = values[key].value; // FIXME continue ... fails for textarea
+					}
+				}
+				
+				// create on server
+				api.create(this.state.entity.hrefCollection, updatedEntity);
+			} else {
+				this.setState({validate: true}); // render validated controls
 			}
 		},
 		_retrieveEntity: function(entity) {
