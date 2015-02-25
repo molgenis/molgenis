@@ -92,9 +92,6 @@ public class OmimHpoAnnotator extends LocusAnnotator
 		this.hpoMappingProvider = hpoMappingProvider;
 		this.molgenisSettings = molgenisSettings;
 		this.urlPinger = urlPinger;
-
-        geneToHpoTerms = getGeneToHpoTerms();
-        geneToOmimTerms = getGeneToOmimTerms();
 	}
 
 	@Override
@@ -134,6 +131,8 @@ public class OmimHpoAnnotator extends LocusAnnotator
 
 		List<String> geneSymbols = HgncLocationsUtils.locationToHgcn(hgncLocationsProvider.getHgncLocations(), locus);
 
+		Map<String, List<HPOTerm>> geneToHpoTerms = getGeneToHpoTerms();
+		Map<String, List<OMIMTerm>> geneToOmimTerms = getGeneToOmimTerms();
 		try
 		{
 			for (String geneSymbol : geneSymbols)
