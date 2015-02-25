@@ -33,7 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
-@Component("clinvarService")
+@Component("clinvarVcfService")
 public class ClinVarVCFServiceAnnotator extends VariantAnnotator
 {
 private static final Logger LOG = LoggerFactory.getLogger(ClinVarVCFServiceAnnotator.class);

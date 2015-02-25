@@ -92,9 +92,6 @@ public class OmimHpoAnnotator extends LocusAnnotator
 		this.hpoMappingProvider = hpoMappingProvider;
 		this.molgenisSettings = molgenisSettings;
 		this.urlPinger = urlPinger;
-
-        geneToHpoTerms = getGeneToHpoTerms();
-        geneToOmimTerms = getGeneToOmimTerms();
 	}
 
 	@Override
@@ -125,6 +122,9 @@ public class OmimHpoAnnotator extends LocusAnnotator
 	@Override
 	public List<Entity> annotateEntity(Entity entity) throws IOException
 	{
+        geneToHpoTerms = getGeneToHpoTerms();
+        geneToOmimTerms = getGeneToOmimTerms();
+        
 		List<Entity> results = new ArrayList<>();
 
 		String chromosome = entity.getString(CHROMOSOME);
