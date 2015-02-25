@@ -225,3 +225,6 @@ ul.fancytree-container {
 .molgenis-table-pager .pagination {
 	margin: 0px;
 }
+
+.place { width: 50px; height: 50px; background-color: #336699; }
+.place.green { background-color: #00cc00; }
