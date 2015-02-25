@@ -39,6 +39,7 @@
                 <logger.level.root>INFO</logger.level.root>
                 <logger.level.org.molgenis>DEBUG</logger.level.org.molgenis>
                 <minify.skipMinify>true</minify.skipMinify>
+                <skip.delivery>true</skip.delivery>
             </properties>
         </profile>
         <!-- release profile (default) -->
@@ -49,10 +50,22 @@
                 <logger.level.root>WARN</logger.level.root>
                 <logger.level.org.molgenis>INFO</logger.level.org.molgenis>
                 <minify.skipMinify>false</minify.skipMinify>
+                <skip.delivery>true</skip.delivery>
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
+        </profile>
+
+        <profile>
+            <id>create-delivery</id>
+            <properties>
+                <molgenis.build.profile>dev</molgenis.build.profile>
+                <logger.level.root>INFO</logger.level.root>
+                <logger.level.org.molgenis>DEBUG</logger.level.org.molgenis>
+                <minify.skipMinify>true</minify.skipMinify>
+                <skip.delivery>false</skip.delivery>
+            </properties>
         </profile>
     </profiles>
 
@@ -108,7 +121,11 @@
                     <version>2.4</version>
                     <configuration>
                         <failOnMissingWebXml>false</failOnMissingWebXml>
-                        <warSourceDirectory>${basedir}/src/main/resources</warSourceDirectory>
+                        <!--
+                            Exclude JCL and LOG4J since all logging should go through SLF4J.
+                            Note that we're excluding log4j-<version>.jar but keeping log4j-over-slf4j-<version>.jar
+                        -->
+                        <packagingExcludes>WEB-INF/lib/commons-logging-*.jar,%regex[WEB-INF/lib/log4j-(?!over-slf4j).*.jar]</packagingExcludes>
                     </configuration>
                 </plugin>
                 <!-- specify plugin version -->
@@ -589,6 +606,12 @@
 			<artifactId>logback-core</artifactId>
 			<version>${logback.version}</version>
 		</dependency>
+        <!-- for third party dependencies that use log4j -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>log4j-over-slf4j</artifactId>
+            <version>1.7.10</version>
+        </dependency>
         <!-- scope: test -->
         <dependency>
             <groupId>org.testng</groupId>
