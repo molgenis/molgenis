@@ -240,7 +240,7 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator
 				}
 				else if (attr.getDataType() instanceof MrefField)
 				{
-					Iterable<Entity> refEntities = entity.getEntities(attr.getName());
+					Iterable<Entity> refEntities = entity.getEntities(attr.getRefEntity().getName());
 					if (refEntities != null)
 					{
 						for (Entity refEntity : refEntities)
