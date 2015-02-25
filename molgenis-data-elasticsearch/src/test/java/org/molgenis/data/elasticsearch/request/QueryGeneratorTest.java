@@ -2,6 +2,7 @@ package org.molgenis.data.elasticsearch.request;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator.DEFAULT_ANALYZER;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
@@ -783,8 +784,9 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.matchQuery(compoundPart0AttributeName + '.'
-				+ MappingsBuilder.FIELD_NGRAM_ANALYZED, value);
+		QueryBuilder expectedQuery = QueryBuilders.matchQuery(
+				compoundPart0AttributeName + '.' + MappingsBuilder.FIELD_NGRAM_ANALYZED, value).analyzer(
+				DEFAULT_ANALYZER);
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -820,8 +822,8 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.matchQuery(emailAttributeName + '.'
-				+ MappingsBuilder.FIELD_NGRAM_ANALYZED, value);
+		QueryBuilder expectedQuery = QueryBuilders.matchQuery(
+				emailAttributeName + '.' + MappingsBuilder.FIELD_NGRAM_ANALYZED, value).analyzer(DEFAULT_ANALYZER);
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -833,8 +835,8 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.matchQuery(enumAttributeName + '.'
-				+ MappingsBuilder.FIELD_NGRAM_ANALYZED, value);
+		QueryBuilder expectedQuery = QueryBuilders.matchQuery(
+				enumAttributeName + '.' + MappingsBuilder.FIELD_NGRAM_ANALYZED, value).analyzer(DEFAULT_ANALYZER);
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -854,8 +856,8 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.matchQuery(hyperlinkAttributeName + '.'
-				+ MappingsBuilder.FIELD_NGRAM_ANALYZED, value);
+		QueryBuilder expectedQuery = QueryBuilders.matchQuery(
+				hyperlinkAttributeName + '.' + MappingsBuilder.FIELD_NGRAM_ANALYZED, value).analyzer(DEFAULT_ANALYZER);
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -899,8 +901,8 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.matchQuery(stringAttributeName + '.'
-				+ MappingsBuilder.FIELD_NGRAM_ANALYZED, value);
+		QueryBuilder expectedQuery = QueryBuilders.matchQuery(
+				stringAttributeName + '.' + MappingsBuilder.FIELD_NGRAM_ANALYZED, value).analyzer(DEFAULT_ANALYZER);
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
