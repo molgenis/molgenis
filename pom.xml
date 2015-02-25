@@ -39,6 +39,7 @@
                 <logger.level.root>INFO</logger.level.root>
                 <logger.level.org.molgenis>DEBUG</logger.level.org.molgenis>
                 <minify.skipMinify>true</minify.skipMinify>
+                <skip.delivery>true</skip.delivery>
             </properties>
         </profile>
         <!-- release profile (default) -->
@@ -49,10 +50,22 @@
                 <logger.level.root>WARN</logger.level.root>
                 <logger.level.org.molgenis>INFO</logger.level.org.molgenis>
                 <minify.skipMinify>false</minify.skipMinify>
+                <skip.delivery>true</skip.delivery>
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
+        </profile>
+
+        <profile>
+            <id>create-delivery</id>
+            <properties>
+                <molgenis.build.profile>dev</molgenis.build.profile>
+                <logger.level.root>INFO</logger.level.root>
+                <logger.level.org.molgenis>DEBUG</logger.level.org.molgenis>
+                <minify.skipMinify>true</minify.skipMinify>
+                <skip.delivery>false</skip.delivery>
+            </properties>
         </profile>
     </profiles>
 
