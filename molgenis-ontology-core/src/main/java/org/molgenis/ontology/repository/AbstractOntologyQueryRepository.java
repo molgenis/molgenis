@@ -7,14 +7,16 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Queryable;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.support.QueryImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class AbstractOntologyQueryRepository extends AbstractOntologyRepository implements Queryable
 {
-	@Autowired
+	protected final SearchService searchService;
+
 	public AbstractOntologyQueryRepository(String entityName, SearchService searchService)
 	{
-		super(entityName, searchService);
+		super(entityName);
+		if (searchService == null) throw new IllegalArgumentException("SearchService is null!");
+		this.searchService = searchService;
 	}
 
 	public Entity findOneInternal(Query query)

@@ -9,7 +9,6 @@ import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.OntologyService;
 import org.molgenis.ontology.beans.OntologyEntity;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -19,13 +18,16 @@ public class OntologyQueryRepository extends AbstractOntologyQueryRepository
 	public final static String DEFAULT_ONTOLOGY_REPO = "ontologyindex";
 	private final static String BASE_URL = "ontologyindex://";
 	private final OntologyService ontologyService;
+	private final SearchService searchService;
 	private final DataService dataService;
 
-	@Autowired
 	public OntologyQueryRepository(String entityName, OntologyService ontologyService, SearchService searchService,
 			DataService dataService)
 	{
 		super(entityName, searchService);
+		if (searchService == null) throw new IllegalArgumentException("SearchService is null!");
+		this.searchService = searchService;
+
 		this.ontologyService = ontologyService;
 		this.dataService = dataService;
 	}

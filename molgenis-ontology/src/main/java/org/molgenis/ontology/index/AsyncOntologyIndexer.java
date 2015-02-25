@@ -46,7 +46,6 @@ import org.molgenis.security.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 
 public class AsyncOntologyIndexer implements OntologyIndexer
 {
@@ -81,8 +80,6 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 	}
 
 	@Override
-	@Async
-	@RunAsSystem
 	public void index(OntologyLoader ontologyLoader)
 	{
 		isCorrectOntology = true;
@@ -97,10 +94,10 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 			}
 			indexingOntologyIri = ontologyLoader.getOntologyIRI() == null ? StringUtils.EMPTY : ontologyLoader
 					.getOntologyIRI();
-			internalIndex(new OntologyIndexRepository(ontologyLoader, OntologyQueryRepository.DEFAULT_ONTOLOGY_REPO,
-					searchService), null);
+			internalIndex(new OntologyIndexRepository(ontologyLoader, OntologyQueryRepository.DEFAULT_ONTOLOGY_REPO),
+					null);
 			OntologyTermIndexRepository ontologyTermIndexRepository = new OntologyTermIndexRepository(ontologyLoader,
-					ontologyLoader.getOntologyName(), searchService);
+					ontologyLoader.getOntologyName());
 			internalIndex(ontologyTermIndexRepository, ontologyTermIndexRepository.getDynamaticFields());
 		}
 		catch (Exception e)
