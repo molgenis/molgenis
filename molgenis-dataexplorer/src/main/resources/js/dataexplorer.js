@@ -347,6 +347,21 @@ function($, molgenis, settingsXhr) {
 				});
 			}
 		});
+	
+		
+		$('#DatasetReport').on('click', function(){
+		
+			var entityName = molgenis.dataexplorer.getSelectedEntityMeta().name;
+			
+			$('#entityReport').load("dataexplorer/datasetRepository",{entityName: entityName}, function() {
+				  $('#entityReportModal').modal("show");
+				  
+				  // Button event handler when a button is placed inside an entity report ftl
+				  //$(".modal-body button", "#entityReport").on('click', function() {
+				  //		$.download($(this).data('href'), {entityName: entityName, entityId: entityId}, "GET");
+				  //});
+			});
+		});
 		
 		$(document).on('changeQuery', function(e, query) {
 			state.query = query;

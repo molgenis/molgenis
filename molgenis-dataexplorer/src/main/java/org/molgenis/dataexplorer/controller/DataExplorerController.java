@@ -29,6 +29,7 @@ import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Aggregateable;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.csv.CsvWriter;
@@ -616,9 +617,46 @@ public class DataExplorerController extends MolgenisPluginController
 		model.addAttribute("viewName", getViewName(entityName));
 		return "view-entityreport";
 	}
+	
+	@RequestMapping(value = "/datasetRepository", method = RequestMethod.POST)
+	public String viewDatasetDetails(@RequestParam(value = "entityName") String entityName, Model model){
+		model.addAttribute("datasetRepository", dataService.getCrudRepository(entityName)); //TODO CRUD ?
+		model.addAttribute("viewName", getViewName(entityName));
+		return "view-entityreport";
+	}
 
 	private String getViewName(String entityName)
 	{
+		//first we check if there are any RuntimeProperty mappings of entity to report template
+		String rtName = "plugin.dataexplorer.mod.entitiesreport";
+		Entity rt = dataService.getCrudRepository("RuntimeProperty").findOne(new QueryImpl().eq("Name", rtName));
+		if(rt != null){
+			String entityMapping = rt.get("Value").toString();
+			String[] mappingSplit = entityMapping.split(",", -1);
+			for(String mapping : mappingSplit)
+			{
+				String[] valSplit = mapping.split(":", -1);
+				if(valSplit.length == 2)
+				{
+					String entity = valSplit[0];
+					String reportTemplate = valSplit[1];
+					//if found, match to the current selected entity and return the associated template
+					if(entity.equals(entityName))
+					{
+						final String specificViewname = "view-entityreport-specific-" + reportTemplate;
+						if (viewExists(specificViewname))
+						{
+							return specificViewname;
+						}	
+					}
+				}
+				else{
+					LOG.error("Bad runtime entity "+rtName+" mapping: " + mapping);
+				}
+			}
+		}
+		
+		//if there are no RuntimeProperty mappings, execute existing behaviour
 		final String specificViewname = "view-entityreport-specific-" + entityName;
 		if (viewExists(specificViewname))
 		{
