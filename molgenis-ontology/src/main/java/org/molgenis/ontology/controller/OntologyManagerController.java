@@ -1,26 +1,19 @@
 package org.molgenis.ontology.controller;
 
-import static org.molgenis.ontology.controller.OntologyIndexerController.URI;
+import static org.molgenis.ontology.controller.OntologyManagerController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.Part;
-
 import org.molgenis.data.Entity;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ontology.OntologyService;
 import org.molgenis.ontology.index.OntologyIndexer;
-import org.molgenis.ontology.utils.OntologyLoader;
 import org.molgenis.ontology.utils.OntologyServiceUtil;
-import org.molgenis.ontology.utils.ZipFileUtil;
 import org.molgenis.util.FileStore;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -31,10 +24,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping(URI)
-public class OntologyIndexerController extends MolgenisPluginController
+public class OntologyManagerController extends MolgenisPluginController
 {
-	public static final String ID = "ontologyindexer";
+	public static final String ID = "ontologymanager";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+	public static final String ONTOLOGY_MANAGER_PLUGIN = "OntologyManagerPlugin";
 
 	@Autowired
 	private FileStore fileStore;
@@ -45,7 +39,7 @@ public class OntologyIndexerController extends MolgenisPluginController
 	@Autowired
 	private OntologyIndexer ontologyIndexer;
 
-	public OntologyIndexerController()
+	public OntologyManagerController()
 	{
 		super(URI);
 	}
@@ -53,11 +47,7 @@ public class OntologyIndexerController extends MolgenisPluginController
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(Model model) throws Exception
 	{
-		model.addAttribute("ontologyUri", ontologyIndexer.getOntologyUri());
-		model.addAttribute("isIndexRunning", ontologyIndexer.isIndexingRunning());
-		model.addAttribute("isCorrectOntology", ontologyIndexer.isCorrectOntology());
-
-		return "OntologyIndexerPlugin";
+		return ONTOLOGY_MANAGER_PLUGIN;
 	}
 
 	@RequestMapping(value = "/ontology", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
@@ -74,24 +64,6 @@ public class OntologyIndexerController extends MolgenisPluginController
 		return results;
 	}
 
-	@RequestMapping(value = "/index", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
-	public String indexOntology(@RequestParam String ontologyName, @RequestParam Part file, Model model)
-	{
-		try
-		{
-			File uploadFile = fileStore.store(file.getInputStream(), ontologyName);
-			List<File> uploadedFiles = ZipFileUtil.unzip(uploadFile);
-			if (uploadedFiles.size() > 0) ontologyIndexer.index(new OntologyLoader(ontologyName, uploadedFiles.get(0)));
-			model.addAttribute("isIndexRunning", true);
-		}
-		catch (IOException | OWLOntologyCreationException e)
-		{
-			model.addAttribute("message", "Please upload a valid zip file!");
-			model.addAttribute("isCorrectZipFile", false);
-		}
-		return "OntologyIndexerPlugin";
-	}
-
 	@RequestMapping(value = "/remove", method = RequestMethod.POST)
 	public String removeOntology(@RequestParam String ontologyUri, Model model)
 	{
@@ -106,6 +78,6 @@ public class OntologyIndexerController extends MolgenisPluginController
 			model.addAttribute("message", "It failed to remove this ontology");
 			model.addAttribute("removeSuccess", false);
 		}
-		return "OntologyIndexerPlugin";
+		return ONTOLOGY_MANAGER_PLUGIN;
 	}
 }

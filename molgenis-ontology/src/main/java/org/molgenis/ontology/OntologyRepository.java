@@ -14,12 +14,10 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 public class OntologyRepository extends AbstractOntologyRepository implements Countable
 {
 	private OntologyLoader ontologyLoader;
-	private File file;
 
 	public OntologyRepository(File file, String name) throws OWLOntologyCreationException
 	{
 		super(name);
-		this.setFile(file);
 		this.ontologyLoader = new OntologyLoader(name, file);
 	}
 
@@ -78,23 +76,6 @@ public class OntologyRepository extends AbstractOntologyRepository implements Co
 	public String getUrl()
 	{
 		throw new UnsupportedOperationException();
-	}
-
-	/**
-	 * @return the file
-	 */
-	public File getFile()
-	{
-		return file;
-	}
-
-	/**
-	 * @param file
-	 *            the file to set
-	 */
-	public void setFile(File file)
-	{
-		this.file = file;
 	}
 
 	/**

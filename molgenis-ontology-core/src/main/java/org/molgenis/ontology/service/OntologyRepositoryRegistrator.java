@@ -39,7 +39,7 @@ public class OntologyRepositoryRegistrator implements ApplicationListener<Contex
 	{
 		// // Register ontology info
 		OntologyQueryRepository ontologyRepository = new OntologyQueryRepository(
-				OntologyQueryRepository.DEFAULT_ONTOLOGY_REPO, ontologyService, searchService, dataService);
+				OntologyQueryRepository.ENTITY_NAME, ontologyService, searchService, dataService);
 		dataService.addRepository(ontologyRepository);
 
 		for (Ontology ontology : ontologyService.getAllOntologies())

@@ -15,7 +15,7 @@ import com.google.common.collect.Iterables;
 
 public class OntologyQueryRepository extends AbstractOntologyQueryRepository
 {
-	public final static String DEFAULT_ONTOLOGY_REPO = "ontologyindex";
+	public final static String ENTITY_NAME = "ontologyindex";
 	private final static String BASE_URL = "ontologyindex://";
 	private final OntologyService ontologyService;
 	private final SearchService searchService;
