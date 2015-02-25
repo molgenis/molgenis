@@ -2,6 +2,8 @@ package org.molgenis.data;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -58,14 +60,23 @@ public class FileRepositoryCollectionFactory
 	{
 		String name = file.getName().toLowerCase();
 		Class<? extends FileRepositoryCollection> clazz = null;
+		
+		List<String> possibleExtensions = new ArrayList<String>();
 		for (Entry<String, Class<? extends FileRepositoryCollection>> entry : fileRepositoryCollection.entrySet())
 		{
 			if (name.endsWith('.' + entry.getKey()))
 			{
-				clazz = entry.getValue();
-				break;
+				possibleExtensions.add(entry.getKey());
 			}
 		}
+
+		String longestExtention = "";
+		for (String possibleExtension : possibleExtensions)
+		{
+			if (longestExtention.length() < possibleExtension.length()) longestExtention = possibleExtension;
+		}
+		
+		clazz = fileRepositoryCollection.get(longestExtention);
 
 		if (clazz == null)
 		{
