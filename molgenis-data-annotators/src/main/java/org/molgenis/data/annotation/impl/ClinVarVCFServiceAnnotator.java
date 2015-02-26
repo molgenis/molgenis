@@ -79,7 +79,7 @@ private static final Logger LOG = LoggerFactory.getLogger(ClinVarVCFServiceAnnot
 		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
 		Iterator<Entity> vcfIter = vcfRepo.iterator();
 
-		VcfUtils.checkInput(inputVcfFile, outputVCFWriter, infoFields, CLINVAR_CLINSIG.substring(VcfRepository.getInfoPrefix().length()));
+		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields, CLINVAR_CLINSIG.substring(VcfRepository.getInfoPrefix().length()));
 
 		System.out.println("Now starting to process the data.");
 
