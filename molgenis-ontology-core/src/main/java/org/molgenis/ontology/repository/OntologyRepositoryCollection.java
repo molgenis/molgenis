@@ -1,4 +1,4 @@
-package org.molgenis.ontology;
+package org.molgenis.ontology.repository;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,7 +20,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	private static final String EXTENSION_OWL_ZIP = "owl.zip";
 	public static final Set<String> EXTENSIONS = ImmutableSet.of(EXTENSION_OBO_ZIP, EXTENSION_OWL_ZIP);
 	private final String entityName;
-	private final OntologyRepository ontologyRepository;
+	private final OntologyIndexRepository ontologyRepository;
 
 	public OntologyRepositoryCollection(File file) throws IOException
 	{
@@ -45,7 +45,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 		{
 			List<File> uploadedFiles;
 			uploadedFiles = ZipFileUtil.unzip(file);
-			this.ontologyRepository = new OntologyRepository(uploadedFiles.get(0), this.entityName);
+			this.ontologyRepository = new OntologyIndexRepository(uploadedFiles.get(0), this.entityName);
 		}
 		catch (OWLOntologyCreationException e)
 		{
@@ -73,7 +73,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	/**
 	 * @return the ontologyRepository
 	 */
-	public OntologyRepository getOntologyRepository()
+	public OntologyIndexRepository getOntologyRepository()
 	{
 		return ontologyRepository;
 	}

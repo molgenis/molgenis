@@ -36,7 +36,6 @@ public abstract class AbstractOntologyRepository implements Repository
 	public final static String NODE_PATH_REPLACEMENT_PATTERN = "\\.[0-9]+$";
 	public final static String MULTI_WHITESPACES = " +";
 	public final static String SINGLE_WHITESPACE = " ";
-	public final static String TYPE_ONTOLOGY = "indexedOntology";
 
 	public AbstractOntologyRepository(String entityName)
 	{

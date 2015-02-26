@@ -1,5 +1,6 @@
 package org.molgenis.ontology.repository;
 
+import java.io.File;
 import java.util.Iterator;
 
 import org.molgenis.data.Countable;
@@ -7,22 +8,30 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.elasticsearch.util.MapperTypeSanitizer;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.ontology.utils.OntologyLoader;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 public class OntologyIndexRepository extends AbstractOntologyRepository implements Countable
 {
-	private final OntologyLoader ontologyLoader;
 	public final static String TYPE_ONTOLOGY = "indexedOntology";
+	private OntologyLoader ontologyLoader;
 
-	public OntologyIndexRepository(OntologyLoader ontologyLoader, String name)
+	public OntologyIndexRepository(File file, String name) throws OWLOntologyCreationException
 	{
 		super(name);
-		if (ontologyLoader == null) throw new IllegalArgumentException("OntologyLoader is null!");
+		this.ontologyLoader = new OntologyLoader(name, file);
+	}
+
+	public OntologyIndexRepository(OntologyLoader ontologyLoader, String name) throws OWLOntologyCreationException
+	{
+		super(name);
 		this.ontologyLoader = ontologyLoader;
 	}
 
 	@Override
 	public Iterator<Entity> iterator()
 	{
+		if (ontologyLoader == null) throw new IllegalArgumentException("OntologyLoader is null!");
+
 		return new Iterator<Entity>()
 		{
 			private int count = 0;
@@ -73,5 +82,22 @@ public class OntologyIndexRepository extends AbstractOntologyRepository implemen
 	public String getUrl()
 	{
 		throw new UnsupportedOperationException();
+	}
+
+	/**
+	 * @return the ontologyLoader
+	 */
+	public OntologyLoader getOntologyLoader()
+	{
+		return ontologyLoader;
+	}
+
+	/**
+	 * @param ontologyLoader
+	 *            the ontologyLoader to set
+	 */
+	public void setOntologyLoader(OntologyLoader ontologyLoader)
+	{
+		this.ontologyLoader = ontologyLoader;
 	}
 }
