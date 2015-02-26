@@ -23,26 +23,6 @@
 	}
 </script>
 
-
-
-
-
-<#-->
-		EXCLUDED,
-		EXCLUDED_FIRST_OF_COMPOUND,
-		EXCLUDED_FIRST_OF_COMPOUND_HIGHIMPACT,
-		INCLUDED_DOMINANT,
-		INCLUDED_DOMINANT_HIGHIMPACT,
-		INCLUDED_RECESSIVE,
-		INCLUDED_RECESSIVE_HIGHIMPACT,
-		INCLUDED_RECESSIVE_COMPOUND,
-		INCLUDED_RECESSIVE_COMPOUND_HIGHIMPACT,
-		INCLUDED_OTHER
-<-->
-
-
-<#assign all_candidate_genes = []>
-
 <#assign dom_high_candidate_genes = {}>
 <#assign dom_mod_candidate_genes = {}>
 <#assign rec_high_candidate_genes = {}>
@@ -183,32 +163,31 @@
 
 <#-- HTML -->
 
-<h2>${dom_high_candidate_genes?size} candidate<#if dom_high_candidate_genes?size!=1>s</#if>: something</h2>
-<#list dom_high_candidate_genes?keys as dom_high_candidate_gene>
-	<#--${topcandidate.getString("INFO_MONGENDISCAND")}, ${topcandidate.getString("CHROM")}, ${topcandidate.getString("POS")}, Phenomizer p-value ${topcandidate.getDouble("INFO_PHENOMIZERPVAL")}<br>-->
-</#list>
 
-<h2>${dom_high_candidate_genes?size} dom high</h2>
-<#list dom_high_candidate_genes?keys as gene><@printGene gene dom_high_candidate_genes[gene]/></#list>
-
-<h2>${dom_mod_candidate_genes?size} dom mod</h2>
-<#list dom_mod_candidate_genes?keys as gene><@printGene gene dom_mod_candidate_genes[gene]/></#list>
-
-<h2>${rec_high_candidate_genes?size} rec high</h2>
-<#list rec_high_candidate_genes?keys as gene><@printGene gene rec_high_candidate_genes[gene]/></#list>
-
-<h2>${rec_mod_candidate_genes?size} rec mod</h2>
-<#list rec_mod_candidate_genes?keys as gene><@printGene gene rec_mod_candidate_genes[gene]/></#list>
-
-<h2>${com_high_candidate_genes?size} comp high</h2>
-<#list com_high_candidate_genes?keys as gene><@printGene gene com_high_candidate_genes[gene]/></#list>
-
-<h2>${com_mod_candidate_genes?size} comp mod</h2>
-<#list com_mod_candidate_genes?keys as gene><@printGene gene com_mod_candidate_genes[gene]/></#list>
-
-<h2>${other_candidate_genes?size} other</h2>
-<#list other_candidate_genes?keys as gene><@printGene gene other_candidate_genes[gene]/></#list>
-
+<table class="table table-bordered table-condensed table-striped">
+	<tr>
+		<th></th>
+		<th><h4>Dominant</h4></th>
+		<th><h4>Recessive</h4></th>
+		<th><h4>Compound</h4></th>
+	</tr>
+	<tr>
+		<td><h4>High impact</h4></td>
+		<td><@printGenes dom_high_candidate_genes /></td>
+		<td><@printGenes rec_high_candidate_genes /></td>
+		<td><@printGenes com_high_candidate_genes /></td>
+	</tr>
+	<tr>
+		<td><h4>Moderate impact</h4></td>
+		<td><@printGenes dom_mod_candidate_genes /></td>
+		<td><@printGenes rec_mod_candidate_genes /></td>
+		<td><@printGenes com_mod_candidate_genes /></td>
+	</tr>
+	<tr>
+		<td><h4>Other</h3></td>
+		<td colspan="3"><@printGenes other_candidate_genes /></td>
+	</tr>
+</table>
 
 <div id="infoDiv">Gene info</div>
 
@@ -219,6 +198,42 @@
 
 	
 
-<#macro printGene geneName geneVariants>
-	<div class="togglediv_<#if geneVariants[0].getDouble("INFO_PHENOMIZERPVAL")??><#if geneVariants[0].getDouble("INFO_PHENOMIZERPVAL") lt 0.05>green<#else>lightgreen</#if><#else>grey</#if>" style="display:inline" onmouseover="changeContent('infoDiv', '<#list geneVariants as row>${row.getString("INFO_CGDCOND")}, ${row.getString("#CHROM")}, ${row.getString("POS")}, ${row.getString("REF")}, ${row.getString("ALT")}, ${row.getString("INFO_ANN")}, <#if row.getDouble("INFO_PHENOMIZERPVAL")??>${row.getDouble("INFO_PHENOMIZERPVAL")}</#if>, ${row.getString("INFO_CGDGIN")}<br></#list>')">${geneName}</div>
+<#macro printGenes genes>
+	<#list genes?keys as geneName>
+		<#--div class="togglediv_<#if genes[geneName][0].getDouble("INFO_PHENOMIZERPVAL")??><#if genes[geneName][0].getDouble("INFO_PHENOMIZERPVAL") lt 0.05>green<#else>lightgreen</#if><#else>grey</#if>" style="display:inline" onmouseover="changeContent('infoDiv', '<#list genes[geneName] as row>${row.getString("INFO_CGDCOND")}, ${row.getString("#CHROM")}, ${row.getString("POS")}, ${row.getString("REF")}, ${row.getString("ALT")}, ${row.getString("INFO_ANN")}, <#if row.getDouble("INFO_PHENOMIZERPVAL")??>${row.getDouble("INFO_PHENOMIZERPVAL")}</#if>, ${row.getString("INFO_CGDGIN")}<br></#list>')">${geneName}</div-->
+	
+	<@compress single_line=true>
+		<div class="togglediv_<#if genes[geneName][0].getDouble("INFO_PHENOMIZERPVAL")??><#if genes[geneName][0].getDouble("INFO_PHENOMIZERPVAL") lt 0.05>green<#else>lightgreen</#if><#else>grey</#if>" style="display:inline" onmouseover="changeContent('infoDiv', '
+		<table class=&quot;table table-bordered table-condensed table-striped&quot;>
+			<tr>
+				<th>Chr</th>
+				<th>Pos</th>
+				<th>Ref</th>
+				<th>Alt</th>
+				<th>Effect</th>
+				<th>Impact</th>
+				<th>Genotype</th>
+				<th>Disorder</th>
+				<th>Inheritance</th>
+				<th>Phenomizer</th>
+			</tr>
+			<#list genes[geneName] as row>
+			<tr>
+				<td>${row.getString("#CHROM")}</td>
+				<td>${row.getString("POS")}</td>
+				<td>${row.getString("REF")}</td>
+				<td>${row.getString("ALT")}</td>
+				<td>${row.getString("INFO_ANN")?split("|")[1]}</td>
+				<td>${row.getString("INFO_ANN")?split("|")[2]}</td>
+				<td></td>
+				<td>${row.getString("INFO_CGDCOND")}</td>
+				<td>${row.getString("INFO_CGDINH")}</td>
+				<td><#if row.getDouble("INFO_PHENOMIZERPVAL")??>${row.getDouble("INFO_PHENOMIZERPVAL")}</#if></td>
+			</tr>
+			</#list>
+		</table>
+		')">${geneName}</div>
+	</@compress>
+	
+	</#list>
 </#macro>
