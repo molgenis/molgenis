@@ -160,13 +160,10 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 		when(entityMetaData.getAttribute(GAFCol.EXTERNAL_SAMPLE_ID.toString())).thenReturn(externalSampleId);
 		when(entityMetaData.getAttribute(GAFCol.PROJECT.toString())).thenReturn(project);
 		when(entityMetaData.getAttribute(GAFCol.BARCODE_1.toString())).thenReturn(barcode1);
-
 		when(repository.getEntityMetaData()).thenReturn(entityMetaData);
-
 		when(molgenisSettings.getProperty(GafListFileRepository.GAFLIST_ENTITYNAME)).thenReturn(
-				"gaflist_gaflist_20141111");
-
-		when(metaDataService.getEntityMetaData("gaflist_gaflist_20141111")).thenReturn(entityMetaData);
+				"gaflist_gaflist_20150217");
+		when(metaDataService.getEntityMetaData("gaflist_gaflist_20150217")).thenReturn(entityMetaData);
 
 		return repository;
 	}

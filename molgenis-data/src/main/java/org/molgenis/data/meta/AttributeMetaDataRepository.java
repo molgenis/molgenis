@@ -6,6 +6,7 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.DATA_TYPE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.DESCRIPTION;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENTITY;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENUM_OPTIONS;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.EXPRESSION;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.IDENTIFIER;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ID_ATTRIBUTE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL;
@@ -35,6 +36,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableCrudRepositoryCollection;
 import org.molgenis.data.Query;
 import org.molgenis.data.Range;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -168,6 +170,7 @@ class AttributeMetaDataRepository
 		attributeMetaDataEntity.set(LABEL_ATTRIBUTE, att.isLabelAttribute());
 		attributeMetaDataEntity.set(READ_ONLY, att.isReadonly());
 		attributeMetaDataEntity.set(UNIQUE, att.isUnique());
+		attributeMetaDataEntity.set(EXPRESSION, att.getExpression());
 		if (parentCompoundAtt != null)
 		{
 			attributeMetaDataEntity.set(PART_OF_ATTRIBUTE, parentCompoundAtt.getName());
@@ -186,6 +189,11 @@ class AttributeMetaDataRepository
 		if (att.getRefEntity() != null)
 		{
 			Entity refEntity = entityMetaDataRepository.getEntity(att.getRefEntity().getName());
+			if (refEntity == null)
+			{
+				throw new MolgenisDataException("RefEntity: " + att.getRefEntity().getName()
+						+ " could not be found in entityMetaDataRepository!");
+			}
 			attributeMetaDataEntity.set(REF_ENTITY, refEntity);
 		}
 		repository.add(attributeMetaDataEntity);
@@ -270,6 +278,7 @@ class AttributeMetaDataRepository
 				.getBoolean(LABEL_ATTRIBUTE));
 		attributeMetaData.setReadOnly(entity.getBoolean(READ_ONLY) == null ? false : entity.getBoolean(READ_ONLY));
 		attributeMetaData.setUnique(entity.getBoolean(UNIQUE) == null ? false : entity.getBoolean(UNIQUE));
+		attributeMetaData.setExpression(entity.getString(EXPRESSION));
 
 		Long rangeMin = entity.getLong(RANGE_MIN);
 		Long rangeMax = entity.getLong(RANGE_MAX);

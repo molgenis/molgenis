@@ -86,6 +86,7 @@ public class KeggServiceAnnotator extends LocusAnnotator
 
 		List<String> geneSymbols = HgncLocationsUtils.locationToHgcn(hgncLocationsProvider.getHgncLocations(), locus);
 
+		// TODO: cache this
 		Map<String, String> hgncToKeggGeneId = hgncToKeggGeneId();
 		Map<String, ArrayList<String>> keggGenePathways = getKeggGenePathways(keggPathwayGenes);
 
@@ -247,6 +248,7 @@ public class KeggServiceAnnotator extends LocusAnnotator
 	 **/
 	private Map<String, String> hgncToKeggGeneId() throws IOException
 	{
+		// TODO: Cache this!!!
 		Map<String, KeggGene> keggGenes = getKeggGenes();
 		Map<String, String> res = new HashMap<String, String>();
 

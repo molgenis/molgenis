@@ -32,6 +32,7 @@ public class AttributeMetaDataResponse
 	private Boolean lookupAttribute;
 	private Boolean aggregateable;
 	private Range range;
+	private String expression;
 
 	public AttributeMetaDataResponse(String entityParentName, AttributeMetaData attr)
 	{
@@ -83,6 +84,13 @@ public class AttributeMetaDataResponse
 			this.enumOptions = attr.getEnumOptions();
 		}
 		else this.enumOptions = null;
+
+		if (attributesSet == null || attributesSet.contains("expression".toLowerCase()))
+		{
+			this.expression = attr.getExpression();
+		}
+		else this.expression = null;
+
 
 		if (attributesSet == null || attributesSet.contains("refEntity".toLowerCase()))
 		{
@@ -274,6 +282,11 @@ public class AttributeMetaDataResponse
 	public Range getRange()
 	{
 		return range;
+	}
+
+	public String getExpression()
+	{
+		return expression;
 	}
 
 }

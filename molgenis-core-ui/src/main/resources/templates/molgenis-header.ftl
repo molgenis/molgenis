@@ -14,6 +14,9 @@
 		<link rel="icon" href="<@resource_href "/img/molgenis.ico"/>" type="image/x-icon">
 		<link rel="stylesheet" href="<@resource_href "/css/bootstrap.min.css"/>" type="text/css">
         <link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
+        <#if molgeniscsstheme??>
+            <link rel="stylesheet" href="<@resource_href "/css/${molgeniscsstheme}"/>" type="text/css">
+        </#if>
     <#if app_top_logo?has_content>
         <link rel="stylesheet" href="<@resource_href "/css/molgenis-top-logo.css"/>" type="text/css">
     </#if>
@@ -48,6 +51,7 @@
 		<script src="<@resource_href "/js/${molgenis_ui.hrefJs?html}"/>"></script>
 	</#if>
 	</head>
+	<#if app_tracking_code.googleAnalytics?has_content><script type="text/javascript">${app_tracking_code.googleAnalytics?string}</script></#if>
 	<body>
 		<#-- Navbar menu -->
         <#if menu_id??>
@@ -55,7 +59,7 @@
                 <#assign plugin_id="NULL">
             </#if>
             
-            <@topmenu molgenis_ui.getMenu() plugin_id/>
+            <@topmenu molgenis_ui.getMenu() plugin_id pluginid_with_query_string/>
         </#if>
         
 		<#-- Start application content -->
@@ -103,7 +107,7 @@
 
 
 <#-- Topmenu -->
-<#macro topmenu menu plugin_id> <#--TODO refactor to remove depency on 'Home'-->
+<#macro topmenu menu plugin_id pluginid_with_query_string> <#--TODO refactor to remove depency on 'Home'-->
     <#if app_top_logo?has_content>
         <div id="Intro">
             <img src=${app_top_logo} alt="" border="0" height="150">
@@ -139,13 +143,13 @@
 						<#-- Single menu items -->
 						<#if item.type != "MENU">	
 							<#if item.name != "Home">
-								<#if item.id == plugin_id>
+								<#if item.url == pluginid_with_query_string>
 									<li class="active">
 										<a href="#">${item.name?html}</a>
 									</li>
 								<#else>
 									<li>
-										<a href="/menu/${menu.id?url('UTF-8')}/${item.url?url('UTF-8')}">${item.name?html}</a>
+										<a href="/menu/${menu.id?url('UTF-8')}/${item.url?html}">${item.name?html}</a>
 									</li>
 								</#if>
 							</#if>
@@ -188,7 +192,7 @@
 	<#list sub_menu.items as sub_item>
 		<#if sub_item.type != "MENU">
 			<li>
-				<a <#if this_menu_counter gt 1>style="margin-left: ${this_menu_counter * 12}px;"</#if> href="/menu/${sub_menu.id?url('UTF-8')}/${sub_item.url?url('UTF-8')}">${sub_item.name?html}</a>
+				<a <#if this_menu_counter gt 1>style="margin-left: ${this_menu_counter * 12}px;"</#if> href="/menu/${sub_menu.id?url('UTF-8')}/${sub_item.url?html}">${sub_item.name?html}</a>
 			</li>
 		<#elseif sub_item.type == "MENU">
 			<li class="dropdown-header disabled sub-menu-${this_menu_counter}" role="presentation">
