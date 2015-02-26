@@ -7,15 +7,12 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
-import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class AbstractOntologyRepository implements Repository
 {
 	protected DefaultEntityMetaData entityMetaData = null;
-	protected final SearchService searchService;
 	protected final String entityName;
 	public final static String ID = "id";
 	public final static String NODE_PATH = "nodePath";
@@ -39,14 +36,12 @@ public abstract class AbstractOntologyRepository implements Repository
 	public final static String NODE_PATH_REPLACEMENT_PATTERN = "\\.[0-9]+$";
 	public final static String MULTI_WHITESPACES = " +";
 	public final static String SINGLE_WHITESPACE = " ";
+	public final static String TYPE_ONTOLOGY = "indexedOntology";
 
-	@Autowired
-	public AbstractOntologyRepository(String entityName, SearchService searchService)
+	public AbstractOntologyRepository(String entityName)
 	{
-		if (searchService == null) throw new IllegalArgumentException("SearchService is null!");
 		if (StringUtils.isEmpty(entityName)) throw new IllegalArgumentException("The ontology entityName is null!");
 		this.entityName = entityName;
-		this.searchService = searchService;
 	}
 
 	@Override

@@ -4,7 +4,6 @@ import java.util.Iterator;
 
 import org.molgenis.data.Countable;
 import org.molgenis.data.Entity;
-import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.util.MapperTypeSanitizer;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.ontology.utils.OntologyLoader;
@@ -14,11 +13,11 @@ public class OntologyIndexRepository extends AbstractOntologyRepository implemen
 	private final OntologyLoader ontologyLoader;
 	public final static String TYPE_ONTOLOGY = "indexedOntology";
 
-	public OntologyIndexRepository(OntologyLoader loader, String name, SearchService searchService)
+	public OntologyIndexRepository(OntologyLoader ontologyLoader, String name)
 	{
-		super(name, searchService);
-		if (loader == null) throw new IllegalArgumentException("OntologyLoader is null!");
-		ontologyLoader = loader;
+		super(name);
+		if (ontologyLoader == null) throw new IllegalArgumentException("OntologyLoader is null!");
+		this.ontologyLoader = ontologyLoader;
 	}
 
 	@Override

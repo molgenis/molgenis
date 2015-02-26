@@ -45,6 +45,8 @@ import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.ui.MolgenisInterceptor;
+import org.molgenis.ui.menu.Menu;
+import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.util.GsonHttpMessageConverter;
@@ -91,7 +93,6 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String KEY_GALAXY_ENABLED = "plugin.dataexplorer.galaxy.enabled";
 	public static final String KEY_GALAXY_URL = "plugin.dataexplorer.galaxy.url";
 	public static final String KEY_SHOW_WIZARD_ONINIT = "plugin.dataexplorer.wizard.oninit";
-	public static final String KEY_HIDE_SELECT = "plugin.dataexplorer.select.hide";
 	public static final String KEY_HEADER_ABBREVIATE = "plugin.dataexplorer.header.abbreviate";
 	public static final String KEY_HIDE_SEARCH_BOX = "plugin.dataexplorer.hide.searchbox";
 	public static final String KEY_HIDE_ITEM_SELECTION = "plugin.dataexplorer.hide.itemselection";
@@ -126,7 +127,6 @@ public class DataExplorerController extends MolgenisPluginController
 
 	private static final boolean DEFAULT_VAL_DATAEXPLORER_EDITABLE = false;
 	private static final boolean DEFAULT_VAL_DATAEXPLORER_ROW_CLICKABLE = false;
-	private static final boolean DEFAULT_VAL_KEY_HIDE_SELECT = true;
 	private static final boolean DEFAULT_VAL_KEY_HIGLIGHTREGION = false;
 
 	@Autowired
@@ -143,6 +143,9 @@ public class DataExplorerController extends MolgenisPluginController
 
 	@Autowired
 	private FreeMarkerConfigurer freemarkerConfigurer;
+
+	@Autowired
+	MenuManagerService menuManager;
 
 	public DataExplorerController()
 	{
@@ -178,12 +181,7 @@ public class DataExplorerController extends MolgenisPluginController
 
 		}
 
-		if (entityExists && hasEntityPermission)
-		{
-			if (molgenisSettings.getBooleanProperty(KEY_HIDE_SELECT, DEFAULT_VAL_KEY_HIDE_SELECT)) model.addAttribute(
-					"hideDatasetSelect", true);
-		}
-		else
+		if (!(entityExists && hasEntityPermission))
 		{
 			if (selectedEntityName != null)
 			{
@@ -308,6 +306,28 @@ public class DataExplorerController extends MolgenisPluginController
 					}
 					break;
 				case READ:
+					if (modData)
+					{
+						modulesConfig.add(new ModuleConfig("data", "Data", "grid-icon.png"));
+					}
+					if (modAggregates)
+					{
+						modulesConfig.add(new ModuleConfig("aggregates", aggregatesTitle, "aggregate-icon.png"));
+					}
+					if (modCharts)
+					{
+						modulesConfig.add(new ModuleConfig("charts", "Charts", "chart-icon.png"));
+					}
+					if (modDiseasematcher)
+					{
+						modulesConfig.add(new ModuleConfig("diseasematcher", "Disease Matcher",
+								"diseasematcher-icon.png"));
+					}
+					if (modEntitiesReportName != null)
+					{
+						modulesConfig.add(new ModuleConfig("entitiesreport", modEntitiesReportName, "report-icon.png"));
+					}
+					break;
 				case WRITE:
 					if (modData)
 					{
@@ -376,6 +396,19 @@ public class DataExplorerController extends MolgenisPluginController
 		return attributeStartPosition != null && attributeChromosome != null;
 	}
 
+	/**
+	 * Updates the 'Entities' menu when an entity is deleted.
+	 * 
+	 * @param entityName
+	 */
+	@RequestMapping(value = "/removeEntityFromMenu/{entityName}", method = POST)
+	public void updateMenuOnDeleteEntity(@PathVariable("entityName") String entityName, HttpServletResponse response)
+	{
+		Menu menu = menuManager.getMenu();
+		menu.deleteMenuItem("form." + entityName);
+		menuManager.saveMenu(menu);
+	}
+
 	@RequestMapping(value = "/download", method = POST)
 	public void download(@RequestParam("dataRequest") String dataRequestStr, HttpServletResponse response)
 			throws IOException
@@ -387,7 +420,7 @@ public class DataExplorerController extends MolgenisPluginController
 		DataRequest dataRequest = new GsonHttpMessageConverter().getGson().fromJson(dataRequestStr, DataRequest.class);
 
 		String entityName = dataRequest.getEntityName();
-		String fileName = entityName + '_' + new SimpleDateFormat("yyyy-mm-dd hh:mm:ss").format(new Date()) + ".csv";
+		String fileName = entityName + '_' + new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date()) + ".csv";
 
 		response.setContentType("text/csv");
 		response.addHeader("Content-Disposition", "attachment; filename=" + fileName);
@@ -611,8 +644,7 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/settings", method = RequestMethod.GET)
-	public @ResponseBody
-	Map<String, String> getSettings(@RequestParam(required = false) String keyStartsWith)
+	public @ResponseBody Map<String, String> getSettings(@RequestParam(required = false) String keyStartsWith)
 	{
 		if (keyStartsWith == null)
 		{

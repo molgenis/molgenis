@@ -131,7 +131,7 @@ public class OntologyServiceImpl implements OntologyService
 	{
 		Query query = new QueryImpl().eq(OntologyQueryRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY)
 				.pageSize(Integer.MAX_VALUE);
-		EntityMetaData entityMetaData = dataService.getEntityMetaData(OntologyQueryRepository.DEFAULT_ONTOLOGY_REPO);
+		EntityMetaData entityMetaData = dataService.getEntityMetaData(OntologyQueryRepository.ENTITY_NAME);
 		return searchService.search(query, entityMetaData);
 	}
 
@@ -146,7 +146,7 @@ public class OntologyServiceImpl implements OntologyService
 	{
 		Query query = new QueryImpl().eq(OntologyQueryRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY)
 				.and().eq(OntologyIndexRepository.ONTOLOGY_IRI, ontologyIri).pageSize(Integer.MAX_VALUE);
-		EntityMetaData entityMetaData = dataService.getEntityMetaData(OntologyQueryRepository.DEFAULT_ONTOLOGY_REPO);
+		EntityMetaData entityMetaData = dataService.getEntityMetaData(OntologyQueryRepository.ENTITY_NAME);
 		for (Entity entity : searchService.search(query, entityMetaData))
 		{
 			return new OntologyEntity(entity, entityMetaData, dataService, searchService, this);

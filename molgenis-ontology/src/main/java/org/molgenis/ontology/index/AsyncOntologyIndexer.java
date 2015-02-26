@@ -35,7 +35,6 @@ import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.ontology.Ontology;
 import org.molgenis.ontology.OntologyService;
 import org.molgenis.ontology.repository.OntologyIndexRepository;
 import org.molgenis.ontology.repository.OntologyQueryRepository;
@@ -46,7 +45,6 @@ import org.molgenis.security.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 
 public class AsyncOntologyIndexer implements OntologyIndexer
 {
@@ -81,8 +79,6 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 	}
 
 	@Override
-	@Async
-	@RunAsSystem
 	public void index(OntologyLoader ontologyLoader)
 	{
 		isCorrectOntology = true;
@@ -97,10 +93,10 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 			}
 			indexingOntologyIri = ontologyLoader.getOntologyIRI() == null ? StringUtils.EMPTY : ontologyLoader
 					.getOntologyIRI();
-			internalIndex(new OntologyIndexRepository(ontologyLoader, OntologyQueryRepository.DEFAULT_ONTOLOGY_REPO,
-					searchService), null);
+			internalIndex(new OntologyIndexRepository(ontologyLoader, OntologyQueryRepository.ENTITY_NAME),
+					null);
 			OntologyTermIndexRepository ontologyTermIndexRepository = new OntologyTermIndexRepository(ontologyLoader,
-					ontologyLoader.getOntologyName(), searchService);
+					ontologyLoader.getOntologyName());
 			internalIndex(ontologyTermIndexRepository, ontologyTermIndexRepository.getDynamaticFields());
 		}
 		catch (Exception e)
@@ -229,19 +225,20 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 	{
 		// TODO : Once the tagService is done, we also need to remove all the
 		// tags
-		Ontology ontology = ontologyService.getOntology(ontologyIri);
-		if (ontology != null)
+		Entity ontologyEntity = ontologyService.getOntologyEntity(ontologyIri);
+		if (ontologyEntity != null)
 		{
-			SearchResult searchResult = searchService.search(new SearchRequest(
-					OntologyQueryRepository.DEFAULT_ONTOLOGY_REPO, new QueryImpl().eq(
-							OntologyQueryRepository.ONTOLOGY_IRI, ontologyIri), null));
+			SearchResult searchResult = searchService.search(new SearchRequest(OntologyQueryRepository.ENTITY_NAME,
+					new QueryImpl().eq(OntologyQueryRepository.ONTOLOGY_IRI, ontologyIri), null));
 
 			for (Hit hit : searchResult.getSearchHits())
 			{
 				searchService.deleteById(hit.getId(),
-						dataService.getEntityMetaData(OntologyQueryRepository.DEFAULT_ONTOLOGY_REPO));
+						dataService.getEntityMetaData(OntologyQueryRepository.ENTITY_NAME));
 			}
-			searchService.deleteDocumentsByType(ontology.getLabel());
+			String ontologyName = ontologyEntity.getString(OntologyQueryRepository.ONTOLOGY_NAME);
+			searchService.delete(ontologyName);
+			dataService.removeRepository(ontologyName);
 		}
 	}
 

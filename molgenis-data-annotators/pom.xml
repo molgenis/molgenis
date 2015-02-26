@@ -3,11 +3,11 @@
 	<parent>
 		<groupId>org.molgenis</groupId>
 		<artifactId>molgenis</artifactId>
-		<version>1.4.0-SNAPSHOT</version>
+		<version>1.5.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>molgenis-data-annotators</artifactId>
 	<packaging>jar</packaging>
-	
+
 	<dependencies>
 		<dependency>
             <groupId>org.molgenis</groupId>
@@ -58,4 +58,35 @@
 			<version>1.102.0</version>
 		</dependency>
 	</dependencies>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>org.molgenis.data.annotation.CmdLineAnnotator</mainClass>
+						</manifest>
+					</archive>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+					<finalName>CmdLineAnnotator</finalName>
+					<appendAssemblyId>false</appendAssemblyId>
+                    <skipAssembly>${skip.delivery}</skipAssembly>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id> <!-- this is used for inheritance merges -->
+						<phase>package</phase> <!-- bind to the packaging phase -->
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+	
 </project>

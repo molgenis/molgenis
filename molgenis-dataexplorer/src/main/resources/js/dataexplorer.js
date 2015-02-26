@@ -39,7 +39,8 @@ function($, molgenis, settingsXhr) {
 		entity: null,
 		query: null,
 		attrs: null,
-		mod: null
+		mod: null,
+		hideselect: 'false'
 	};
 	
 	var state;
@@ -162,7 +163,7 @@ function($, molgenis, settingsXhr) {
 			if (/\S/.test(searchQuery)) {
 				var searchQueryRegex = /^\s*(?:chr)?([\d]{1,2}|X|Y|MT|XY):([\d]+)(?:-([\d]+)+)?\s*$/g;
 				
-				if(searchQueryRegex && searchQuery.match(searchQueryRegex)) {
+				if(searchQueryRegex && searchQuery.match(searchQueryRegex) && chromosomeAttribute !== undefined && posAttribute !== undefined) {
 					var match = searchQueryRegex.exec(searchQuery);
 					
 					// only chromosome and position
@@ -174,7 +175,7 @@ function($, molgenis, settingsXhr) {
 				        	    [{
 				        	        operator: "NESTED",
 				        	        nestedRules: [{
-				        	            field: chromosomeAttribute,
+				        	            field: chromosomeAttribute.name,
 				        	            operator: "EQUALS",
 				        	            value: chromosome
 				        	        }]
@@ -183,7 +184,7 @@ function($, molgenis, settingsXhr) {
 				        	    }, {
 				        	        operator: "NESTED",
 				        	        nestedRules: [{
-				        	            field: posAttribute,
+				        	            field: posAttribute.name,
 				        	            operator: "EQUALS",
 				        	            value: position
 				        	        }]
@@ -207,7 +208,7 @@ function($, molgenis, settingsXhr) {
 						        nestedRules: [{
 							            operator: "NESTED",
 							            nestedRules: [{
-							                field: chromosomeAttribute,
+							                field: chromosomeAttribute.name,
 							                operator: "EQUALS",
 							                value: chromosome
 						            }]
@@ -217,13 +218,13 @@ function($, molgenis, settingsXhr) {
 						    }, {
 						    	operator: "NESTED",
 						        nestedRules: [{
-				                    field: posAttribute,
+				                    field: posAttribute.name,
 				                    operator: "GREATER_EQUAL",
 				                    value: startPosition
 				                }, {
 				                	operator: "AND"
 				                }, {
-				                    field: posAttribute,
+				                    field: posAttribute.name,
 				                    operator: "LESS_EQUAL",
 				                    value: stopPosition
 				                }]
@@ -436,11 +437,6 @@ function($, molgenis, settingsXhr) {
 			$(document).trigger('changeQuery', createEntityQuery());
 		});
 		
-		$("#observationset-search").change(function(e) {
-			searchQuery = $(this).val().trim();
-			$(document).trigger('changeQuery', createEntityQuery());
-		});
-		
 		$('#search-clear-button').click(function(){
 			$("#observationset-search").val('');
 			$("#observationset-search").change();
@@ -469,10 +465,12 @@ function($, molgenis, settingsXhr) {
 			bootbox.confirm("Are you sure you want to delete all data and metadata for this entity?", function(confirmed){
 				if(confirmed){
 					$.ajax('/api/v1/'+selectedEntityMetaData.name+'/meta', {'type': 'DELETE'}).done(function(){
-						document.location.href = "/menu/main/dataexplorer";
+						$.post(molgenis.getContextUrl() + '/removeEntityFromMenu/' + selectedEntityMetaData.name).done(function(){
+							document.location.href = "/menu/main/dataexplorer";
+						});
 					});
 				}
-			})
+			});
 		});
 
 		function init() {
@@ -481,6 +479,13 @@ function($, molgenis, settingsXhr) {
 				state.entity = $('#dataset-select option:not(:empty)').first().val();
 			}
 			$('#dataset-select').select2('val', state.entity);
+			
+			// hide entity dropdown
+			if(state.hideselect === 'true') {
+				$('#dataset-select-container').addClass('hidden');
+			} else {
+				$('#dataset-select-container').removeClass('hidden');
+			}
 			
 			if (state.query) {
 				// set query in searchbox

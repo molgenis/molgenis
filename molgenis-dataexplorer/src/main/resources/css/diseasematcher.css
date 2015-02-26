@@ -10,6 +10,7 @@
 .diseasematcher.label {
 	font-size: 15px;
 	font-weight: normal;
+	padding: 3px;
 }
 
 .divider-vertical {
@@ -34,4 +35,10 @@ textarea#hpoTermsInput{
 
 .tab-indent{
 	padding-left:5em
+}
+
+.clinical-synopsis{
+	list-style-type: none;
+	padding: 0;
+	margin: 0;
 }

@@ -40,6 +40,6 @@ public class MolgenisRController
 
 		model.addAttribute("api_url", apiUrl);
 
-		return "molgenis.r";
+		return "molgenis.R";
 	}
 }

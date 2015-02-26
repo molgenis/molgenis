@@ -34,7 +34,7 @@ public class MolgenisContext extends SandboxedContext
 		}
 		catch (ClassCastException e)
 		{
-			throw new MolgenisJsException("No MolgenisContex available, please call RhinoCongig.init() first.");
+			throw new MolgenisJsException("No MolgenisContext available, please call RhinoConfig.init() first.");
 		}
 	}
 

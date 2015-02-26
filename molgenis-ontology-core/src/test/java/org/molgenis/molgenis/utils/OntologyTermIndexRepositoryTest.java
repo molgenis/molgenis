@@ -1,6 +1,5 @@
 package org.molgenis.molgenis.utils;
 
-import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
 
 import java.io.File;
@@ -10,7 +9,6 @@ import java.util.Map;
 
 import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.data.Entity;
-import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.ontology.repository.AbstractOntologyRepository;
 import org.molgenis.ontology.repository.OntologyTermIndexRepository;
 import org.molgenis.ontology.utils.OntologyLoader;
@@ -30,7 +28,7 @@ public class OntologyTermIndexRepositoryTest
 		File file = new File(url.getPath());
 
 		loader = new OntologyLoader("ontology-test", file);
-		repository = new OntologyTermIndexRepository(loader, "Test", mock(SearchService.class));
+		repository = new OntologyTermIndexRepository(loader, "Test");
 	}
 
 	@Test

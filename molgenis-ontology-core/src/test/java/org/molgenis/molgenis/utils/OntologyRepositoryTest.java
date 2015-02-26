@@ -1,6 +1,5 @@
 package org.molgenis.molgenis.utils;
 
-import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -10,7 +9,6 @@ import java.util.Iterator;
 
 import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.data.Entity;
-import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.ontology.repository.OntologyIndexRepository;
 import org.molgenis.ontology.utils.OntologyLoader;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -29,7 +27,7 @@ public class OntologyRepositoryTest
 		File file = new File(url.getPath());
 
 		loader = new OntologyLoader("ontology-test", file);
-		repository = new OntologyIndexRepository(loader, "test", mock(SearchService.class));
+		repository = new OntologyIndexRepository(loader, "test");
 	}
 
 	@Test

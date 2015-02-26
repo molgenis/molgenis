@@ -12,6 +12,7 @@
 	molgenis.dataexplorer = molgenis.dataexplorer || {};
 	
 	var annotatorTemplate;
+    var attributesTemplate;
 	var self = molgenis.dataexplorer.annotators = molgenis.dataexplorer.annotators || {};
 
 	// module api
@@ -33,25 +34,34 @@
 				contentType : 'application/json',
 				success : function(resultMap) {
 					for(var key in resultMap){
-						var enabled = resultMap[key]['canAnnotate'].toString();
-						var inputMetaData = resultMap[key]["inputMetadata"].toString();
-						var outputMetaData = resultMap[key]["outputMetadata"].toString();
-						
-						if(enabled === 'true') {
-							enabledAnnotatorContainer.append(annotatorTemplate({
-								'enabled' : enabled,
-								'annotatorName' : key, 
-								'inputMetaData' : inputMetaData, 
-								'outputMetaData' : outputMetaData
-							}));
-						} else {
-							disabledAnnotatorContainer.append(annotatorTemplate({
-								'enabled' : enabled,
-								'annotatorName' : key, 
-								'inputMetaData' : inputMetaData, 
-								'outputMetaData' : outputMetaData
-							}));
-						}
+						var enabled = resultMap[key]['canAnnotate'];
+                        var desc = resultMap[key]["description"].toString();
+						var inputAttributes = resultMap[key]["inputAttributes"];
+                        var inputAttributeTypes = resultMap[key]["inputAttributeTypes"];
+
+                        var outputAttributes = resultMap[key]["outputAttributes"];
+                        var outputAttributeTypes = resultMap[key]["outputAttributeTypes"];
+
+                        var inputmetadataString = createAttributeHtml(inputAttributes, inputAttributeTypes);
+                        var outputmetadataString = createAttributeHtml(outputAttributes, outputAttributeTypes);
+
+                        if(enabled === 'true') {
+                            enabledAnnotatorContainer.append(annotatorTemplate({
+                                'enabled' : enabled,
+                                'annotatorName' : key,
+                                'description' : desc,
+                                'inputMetaData' : inputmetadataString,
+                                'outputMetaData' : outputmetadataString
+                            }));
+                        } else {
+                            disabledAnnotatorContainer.append(annotatorTemplate({
+                                'enabled' : enabled,
+                                'annotatorName' : key,
+                                'description' : desc,
+                                'inputMetaData' : inputmetadataString,
+                                'outputMetaData' : outputmetadataString
+                            }));
+                        }
 					}
 					
 					$('#selected-dataset-name').html(dataset.name);
@@ -60,8 +70,21 @@
 				}
 			});
 		});
-	};
-	
+	}
+
+    function createAttributeHtml(inputAttributes, inputAttributeTypes) {
+        var inputParams = [];
+        for (var attr in inputAttributes) {
+            var input = new Object();
+            input.name = inputAttributes[attr].name;
+            input.type = inputAttributeTypes[input.name];
+            input.desc = inputAttributes[attr].description;
+            inputParams.push(input);
+        }
+        console.log(inputParams);
+        return attributesTemplate({
+            'inputParams': inputParams});
+    }
 	/**
 	 * Returns the selected attributes from the data explorer
 	 * 
@@ -92,19 +115,28 @@
 	
 	// on document ready
 	$(function() {
-		$("#disabled-tooltip").tooltip();
-
         var submitBtn = $('#annotate-dataset-button');
         var form = $('#annotate-dataset-form');
-        
+
+        $("#disabled-tooltip").tooltip();
+
+        $('#annotate-dataset-form').click(function() {
+            if( $('#annotate-dataset-form input:checked').size() > 0) {
+                submitBtn.removeAttr("disabled", "disabled");
+            }else{
+                submitBtn.attr("disabled", "disabled");
+            }
+        });
+
         annotatorTemplate = Handlebars.compile($("#annotator-template").html());
-        
+        attributesTemplate = Handlebars.compile($("#attributes-template").html());
+
         submitBtn.click(function (e) {
             e.preventDefault();
             e.stopPropagation();
             form.submit();
-        });    
-        
+        });
+
         form.submit(function (e) {
             e.preventDefault();
             e.stopPropagation();
@@ -120,5 +152,7 @@
                 });
             }
         });
+
+        submitBtn.attr("disabled", "disabled");
 	});
 }($, window.top.molgenis = window.top.molgenis || {}));	
