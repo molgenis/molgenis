@@ -5,10 +5,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
@@ -60,18 +58,18 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	private static final String NAME = "CADD";
 
 	final List<String> infoFields = Arrays
-			.asList(new String[]
-			{
-					"##INFO=<ID="
-							+ CADD_SCALED
-							+ ",Number=1,Type=Float,Description=\"CADD scaled C score, ie. phred-like. See Kircher et al. 2014 (http://www.ncbi.nlm.nih.gov/pubmed/24487276) or CADD website (http://cadd.gs.washington.edu/) for more information.\">",
-					"##INFO=<ID="
-							+ CADD_ABS
-							+ ",Number=1,Type=Float,Description=\"CADD absolute C score, ie. unscaled SVM output. Useful as  reference when the scaled score may be unexpected.\">" });
+        .asList(new String[]
+                {
+                        "##INFO=<ID="
+                                + CADD_SCALED
+                                + ",Number=1,Type=Float,Description=\"CADD scaled C score, ie. phred-like. See Kircher et al. 2014 (http://www.ncbi.nlm.nih.gov/pubmed/24487276) or CADD website (http://cadd.gs.washington.edu/) for more information.\">",
+                        "##INFO=<ID="
+                                + CADD_ABS
+                                + ",Number=1,Type=Float,Description=\"CADD absolute C score, ie. unscaled SVM output. Useful as  reference when the scaled score may be unexpected.\">" });
 
-	public static final String CADD_FILE_LOCATION_PROPERTY = "cadd_location";
+    public static final String CADD_FILE_LOCATION_PROPERTY = "cadd_location";
 
-	private volatile TabixReader tabixReader;
+    private volatile TabixReader tabixReader;
 
 	@Autowired
 	public CaddServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService)
@@ -97,7 +95,7 @@ public class CaddServiceAnnotator extends VariantAnnotator
 		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
 		Iterator<Entity> vcfIter = vcfRepo.iterator();
 
-		VcfUtils.checkInput(inputVcfFile, outputVCFWriter, infoFields, CADD_SCALED);
+		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields, CADD_SCALED);
 
 		System.out.println("Now starting to process the data.");
 
