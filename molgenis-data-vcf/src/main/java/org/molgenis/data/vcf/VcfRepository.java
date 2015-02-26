@@ -55,8 +55,9 @@ public class VcfRepository extends AbstractRepository
 	public static final String INFO = "INFO";
 	public static final String SAMPLES = "SAMPLES";
 	public static final String NAME = "NAME";
+    public static final String PREFIX = "##";
 
-	private final File file;
+    private final File file;
 	private final String entityName;
 
 	private DefaultEntityMetaData entityMetaData;
