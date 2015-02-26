@@ -163,7 +163,10 @@
 
 <#-- HTML -->
 
-
+<h4>Candidate genes</h4>
+<p>
+	<div style="display:inline" class="togglediv_green">Green</div> genes have a strong Phenomizer symptom match (<i>p</i> < 0.05), <div style="display:inline" class="togglediv_lightgreen">light green</div> is a weak symptom match (<i>p</i> > 0.05), and <div style="display:inline" class="togglediv_grey">grey</div> genes do not a match. Hover over a gene to see details and the variants for this candidate below. Click on a gene to 'exclude' this candidate by flagging it with a <div style="display:inline" class="togglediv_red">red</div> color.
+</p>
 <table class="table table-bordered table-condensed table-striped">
 	<tr>
 		<th></th>
@@ -184,12 +187,12 @@
 		<td><@printGenes com_mod_candidate_genes /></td>
 	</tr>
 	<tr>
-		<td><h4>Other</h3></td>
+		<td><h4>Other</h4></td>
 		<td colspan="3"><@printGenes other_candidate_genes /></td>
 	</tr>
 </table>
 
-<div id="infoDiv">Gene info</div>
+<div id="infoDiv"><h4><i>No gene selected</i></h4></div>
 
 </div>
 <div class="modal-footer">
@@ -204,6 +207,22 @@
 	
 	<@compress single_line=true>
 		<div class="togglediv_<#if genes[geneName][0].getDouble("INFO_PHENOMIZERPVAL")??><#if genes[geneName][0].getDouble("INFO_PHENOMIZERPVAL") lt 0.05>green<#else>lightgreen</#if><#else>grey</#if>" style="display:inline" onmouseover="changeContent('infoDiv', '
+		<h4>Gene details</h4>
+		<table class=&quot;table table-bordered table-condensed table-striped&quot;>
+			<tr>
+				<th>Name</th>
+				<th>Disorder</th>
+				<th>Inheritance</th>
+				<th>Phenomizer</th>
+			</tr>
+			<tr>
+				<td>${geneName}</td>
+				<td>${genes[geneName][0].getString("INFO_CGDCOND")}</td>
+				<td>${genes[geneName][0].getString("INFO_CGDINH")}</td>
+				<td><#if genes[geneName][0].getDouble("INFO_PHENOMIZERPVAL")??>${genes[geneName][0].getDouble("INFO_PHENOMIZERPVAL")}</#if></td>
+			</tr>
+		</table>
+		<h4>Variant details</h4>
 		<table class=&quot;table table-bordered table-condensed table-striped&quot;>
 			<tr>
 				<th>Chr</th>
@@ -213,9 +232,6 @@
 				<th>Effect</th>
 				<th>Impact</th>
 				<th>Genotype</th>
-				<th>Disorder</th>
-				<th>Inheritance</th>
-				<th>Phenomizer</th>
 			</tr>
 			<#list genes[geneName] as row>
 			<tr>
@@ -225,10 +241,7 @@
 				<td>${row.getString("ALT")}</td>
 				<td>${row.getString("INFO_ANN")?split("|")[1]}</td>
 				<td>${row.getString("INFO_ANN")?split("|")[2]}</td>
-				<td></td>
-				<td>${row.getString("INFO_CGDCOND")}</td>
-				<td>${row.getString("INFO_CGDINH")}</td>
-				<td><#if row.getDouble("INFO_PHENOMIZERPVAL")??>${row.getDouble("INFO_PHENOMIZERPVAL")}</#if></td>
+				<td><#list row.getEntities("SAMPLES").iterator() as sample>${sample.getString("GT")} </#list></td>
 			</tr>
 			</#list>
 		</table>
