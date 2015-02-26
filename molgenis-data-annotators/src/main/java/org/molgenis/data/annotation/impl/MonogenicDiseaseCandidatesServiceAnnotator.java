@@ -60,7 +60,8 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 	
 	public enum outcome {
 		EXCLUDED,
-		EXCLUDED_BUT_COMPOUND_CANDIDATE,
+		EXCLUDED_FIRST_OF_COMPOUND,
+		EXCLUDED_FIRST_OF_COMPOUND_HIGHIMPACT,
 		INCLUDED_DOMINANT,
 		INCLUDED_DOMINANT_HIGHIMPACT,
 		INCLUDED_RECESSIVE,
@@ -312,7 +313,7 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 				else
 				{
 					genesWithCandidates.add(gene);
-					resultMap.put(MONOGENICDISEASECANDIDATE, outcome.EXCLUDED_BUT_COMPOUND_CANDIDATE); //exclude the 'first' variant in a potential comp.het.
+					resultMap.put(MONOGENICDISEASECANDIDATE, impact.equals(SnpEffServiceAnnotator.impact.HIGH) ? outcome.EXCLUDED_FIRST_OF_COMPOUND_HIGHIMPACT : outcome.EXCLUDED_FIRST_OF_COMPOUND); //exclude the 'first' variant in a potential comp.het.
 					return resultMap;
 				}
 			}
