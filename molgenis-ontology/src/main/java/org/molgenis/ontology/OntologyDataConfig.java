@@ -3,6 +3,7 @@ package org.molgenis.ontology;
 import javax.annotation.PostConstruct;
 
 import org.molgenis.data.FileRepositoryCollectionFactory;
+import org.molgenis.ontology.repository.OntologyRepositoryCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 

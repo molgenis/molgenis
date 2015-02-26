@@ -19,11 +19,11 @@ import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
-import org.molgenis.ontology.OntologyRepository;
-import org.molgenis.ontology.OntologyRepositoryCollection;
 import org.molgenis.ontology.OntologyService;
 import org.molgenis.ontology.index.OntologyIndexer;
 import org.molgenis.ontology.repository.OntologyQueryRepository;
+import org.molgenis.ontology.repository.OntologyIndexRepository;
+import org.molgenis.ontology.repository.OntologyRepositoryCollection;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,7 +76,7 @@ public class OntologyImporterService implements ImportService
 			Iterator<String> it = source.getEntityNames().iterator();
 			if (it.hasNext())
 			{
-				OntologyRepository repo = (OntologyRepository) source.getRepositoryByEntityName(it.next());
+				OntologyIndexRepository repo = (OntologyIndexRepository) source.getRepositoryByEntityName(it.next());
 				try
 				{
 					report = new EntityImportReport();
@@ -137,7 +137,7 @@ public class OntologyImporterService implements ImportService
 			boolean entityExists = dataService.hasRepository(entityName);
 
 			// Check if ontology IRI exists
-			String ontologyIRI = ((OntologyRepository) source.getRepositoryByEntityName(entityName))
+			String ontologyIRI = ((OntologyIndexRepository) source.getRepositoryByEntityName(entityName))
 					.getOntologyLoader().getOntologyIRI();
 
 			Entity ontologyQueryEntity = dataService.findOne(OntologyQueryRepository.ENTITY_NAME,
