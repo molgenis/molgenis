@@ -167,27 +167,27 @@
 <p>
 	<div style="display:inline" class="togglediv_green">Green</div> genes have a strong Phenomizer symptom match (<i>p</i> < 0.05), <div style="display:inline" class="togglediv_lightgreen">light green</div> is a weak symptom match (<i>p</i> > 0.05), and <div style="display:inline" class="togglediv_grey">grey</div> genes do not a match. Hover over a gene to see details and the variants for this candidate below. Click on a gene to 'exclude' this candidate by flagging it with a <div style="display:inline" class="togglediv_red">red</div> color.
 </p>
-<table class="table table-bordered table-condensed table-striped">
-	<tr>
-		<th></th>
+<table class="table table-bordered table-condensed">
+	<tr class="active">
+		<th style="background-color: #FFFFFF; border: 0px; border-color: #FFFFFF;"></th>
 		<th><h4>Dominant</h4></th>
 		<th><h4>Recessive</h4></th>
 		<th><h4>Compound</h4></th>
 	</tr>
 	<tr>
-		<td><h4>High impact</h4></td>
+		<td class="danger"><h4>High impact</h4></td>
 		<td><@printGenes dom_high_candidate_genes /></td>
 		<td><@printGenes rec_high_candidate_genes /></td>
 		<td><@printGenes com_high_candidate_genes /></td>
 	</tr>
 	<tr>
-		<td><h4>Moderate impact</h4></td>
+		<td class="warning"><h4>Moderate impact</h4></td>
 		<td><@printGenes dom_mod_candidate_genes /></td>
 		<td><@printGenes rec_mod_candidate_genes /></td>
 		<td><@printGenes com_mod_candidate_genes /></td>
 	</tr>
 	<tr>
-		<td><h4>Other</h4></td>
+		<td class="info"><h4>Other</h4></td>
 		<td colspan="3"><@printGenes other_candidate_genes /></td>
 	</tr>
 </table>
@@ -206,42 +206,62 @@
 		<#--div class="togglediv_<#if genes[geneName][0].getDouble("INFO_PHENOMIZERPVAL")??><#if genes[geneName][0].getDouble("INFO_PHENOMIZERPVAL") lt 0.05>green<#else>lightgreen</#if><#else>grey</#if>" style="display:inline" onmouseover="changeContent('infoDiv', '<#list genes[geneName] as row>${row.getString("INFO_CGDCOND")}, ${row.getString("#CHROM")}, ${row.getString("POS")}, ${row.getString("REF")}, ${row.getString("ALT")}, ${row.getString("INFO_ANN")}, <#if row.getDouble("INFO_PHENOMIZERPVAL")??>${row.getDouble("INFO_PHENOMIZERPVAL")}</#if>, ${row.getString("INFO_CGDGIN")}<br></#list>')">${geneName}</div-->
 	
 	<@compress single_line=true>
-		<div class="togglediv_<#if genes[geneName][0].getDouble("INFO_PHENOMIZERPVAL")??><#if genes[geneName][0].getDouble("INFO_PHENOMIZERPVAL") lt 0.05>green<#else>lightgreen</#if><#else>grey</#if>" style="display:inline" onmouseover="changeContent('infoDiv', '
+		<div class="togglediv_border togglediv_<#if genes[geneName][0].getDouble("INFO_PHENOMIZERPVAL")??><#if genes[geneName][0].getDouble("INFO_PHENOMIZERPVAL") lt 0.05>green<#else>lightgreen</#if><#else>grey</#if>" style="display:inline" onmouseover="changeContent('infoDiv', '
 		<h4>Gene details</h4>
-		<table class=&quot;table table-bordered table-condensed table-striped&quot;>
-			<tr>
+		<table class=&quot;table table-bordered table-condensed&quot;>
+			<tr class=&quot;active&quot;>
 				<th>Name</th>
 				<th>Disorder</th>
 				<th>Inheritance</th>
+				<th>Generalized inh.</th>
+				<th>Onset</th>
 				<th>Phenomizer</th>
 			</tr>
 			<tr>
 				<td>${geneName}</td>
 				<td>${genes[geneName][0].getString("INFO_CGDCOND")}</td>
 				<td>${genes[geneName][0].getString("INFO_CGDINH")}</td>
+				<td>${genes[geneName][0].getString("INFO_CGDGIN")}</td>
+				<td>${genes[geneName][0].getString("INFO_CGDAGE")}</td>
 				<td><#if genes[geneName][0].getDouble("INFO_PHENOMIZERPVAL")??>${genes[geneName][0].getDouble("INFO_PHENOMIZERPVAL")}</#if></td>
 			</tr>
 		</table>
 		<h4>Variant details</h4>
-		<table class=&quot;table table-bordered table-condensed table-striped&quot;>
-			<tr>
+		<table class=&quot;table table-bordered table-condensed&quot;>
+			<tr class=&quot;active&quot;>
 				<th>Chr</th>
 				<th>Pos</th>
+				<th>Id</th>
 				<th>Ref</th>
 				<th>Alt</th>
 				<th>Effect</th>
 				<th>Impact</th>
+				<th>Transcript</th>
+				<th>AAchange</th>
 				<th>Genotype</th>
+				<th>Al.depth</th>
+				<th>GoNL</th>
+				<th>ExAC</th>
+				<th>1000G</th>
+				<th>ClinVar</th>
 			</tr>
 			<#list genes[geneName] as row>
 			<tr>
 				<td>${row.getString("#CHROM")}</td>
 				<td>${row.getString("POS")}</td>
+				<td>${row.getString("ID")}</td>
 				<td>${row.getString("REF")}</td>
 				<td>${row.getString("ALT")}</td>
 				<td>${row.getString("INFO_ANN")?split("|")[1]}</td>
 				<td>${row.getString("INFO_ANN")?split("|")[2]}</td>
+				<td>${row.getString("INFO_ANN")?split("|")[6]}</td>
+				<td>${row.getString("INFO_ANN")?split("|")[10]}</td>
 				<td><#list row.getEntities("SAMPLES").iterator() as sample>${sample.getString("GT")} </#list></td>
+				<td><#list row.getEntities("SAMPLES").iterator() as sample>${sample.getString("AD")} </#list></td>
+				<td><#if row.getString("INFO_GONLMAF")??>${row.getString("INFO_GONLMAF")}</#if></td>
+				<td><#if row.getString("INFO_EXACMAF")??>${row.getString("INFO_EXACMAF")}</#if></td>
+				<td><#if row.getString("INFO_1KGMAF")??>${row.getString("INFO_1KGMAF")}</#if></td>
+				<td><#if row.getString("INFO_CLINVAR_CLNSIG")??>${row.getString("INFO_CLINVAR_CLNSIG")}</#if></td>
 			</tr>
 			</#list>
 		</table>
