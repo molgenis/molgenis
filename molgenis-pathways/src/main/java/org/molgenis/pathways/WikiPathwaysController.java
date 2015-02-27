@@ -98,7 +98,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 	public String init(Model model)
 	{
 		model.addAttribute("entitiesMeta", getVCFEntities());
-		return "view-WikiPathways";
+		return "view-pathways";
 	}
 
 	/**
