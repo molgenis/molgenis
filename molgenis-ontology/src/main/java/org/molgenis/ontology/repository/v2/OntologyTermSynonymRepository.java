@@ -1,12 +1,15 @@
 package org.molgenis.ontology.repository.v2;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.ontology.model.OntologyTermSynonymMetaData;
 import org.molgenis.ontology.utils.OntologyLoader;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -14,43 +17,53 @@ import org.semanticweb.owlapi.model.OWLClass;
 public class OntologyTermSynonymRepository implements Repository
 {
 	private final OntologyLoader ontologyLoader;
+	private final UuidGenerator uuidGenerator;
+	private final Map<String, Map<String, String>> referenceIds = new HashMap<String, Map<String, String>>();
 
-	public OntologyTermSynonymRepository(OntologyLoader ontologyLoader)
+	public OntologyTermSynonymRepository(OntologyLoader ontologyLoader, UuidGenerator uuidGenerator)
 	{
 		this.ontologyLoader = ontologyLoader;
+		this.uuidGenerator = uuidGenerator;
 	}
 
 	@Override
 	public Iterator<Entity> iterator()
 	{
-		final Iterator<OWLClass> iterator = ontologyLoader.getAllclasses().iterator();
-
 		return new Iterator<Entity>()
 		{
+			final Iterator<OWLClass> iterator = ontologyLoader.getAllclasses().iterator();
 			private OWLClass currentClass = null;
 			private Iterator<String> synonymIterator = null;
 
 			@Override
 			public boolean hasNext()
 			{
-				if ((currentClass == null || !synonymIterator.hasNext()) && iterator.hasNext())
+				while ((currentClass == null || !synonymIterator.hasNext()) && iterator.hasNext())
 				{
 					currentClass = iterator.next();
 					synonymIterator = ontologyLoader.getSynonyms(currentClass).iterator();
 				}
-				return synonymIterator.hasNext();
+				return synonymIterator.hasNext() || iterator.hasNext();
 			}
 
 			@Override
 			public Entity next()
 			{
-				String ontologyIRI = ontologyLoader.getOntologyIRI();
 				String ontologyTermIRI = currentClass.getIRI().toString();
 				String synonym = synonymIterator.next();
-				String id = OntologyRepositoryCollection.createUniqueId(ontologyIRI, ontologyTermIRI, synonym);
+				String id = uuidGenerator.generateId();
+
+				if (!referenceIds.containsKey(ontologyTermIRI))
+				{
+					referenceIds.put(ontologyTermIRI, new HashMap<String, String>());
+				}
+				if (!referenceIds.get(ontologyTermIRI).containsKey(synonym))
+				{
+					referenceIds.get(ontologyTermIRI).put(synonym, id);
+				}
 
 				MapEntity entity = new MapEntity();
-				entity.set(OntologyTermSynonymMetaData.ID, id);
+				entity.set(OntologyTermSynonymMetaData.ID, referenceIds.get(ontologyTermIRI).get(synonym));
 				entity.set(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM, synonym);
 
 				return entity;
@@ -86,5 +99,10 @@ public class OntologyTermSynonymRepository implements Repository
 	public String getUrl()
 	{
 		throw new UnsupportedOperationException();
+	}
+
+	public Map<String, Map<String, String>> getReferenceIds()
+	{
+		return referenceIds;
 	}
 }

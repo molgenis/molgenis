@@ -151,7 +151,8 @@ public class OntologyLoader
 			OWLClassExpression expression = axiom.getSubClass();
 			if (!expression.isAnonymous())
 			{
-				listOfClasses.add(expression.asOWLClass());
+				OWLClass asOWLClass = expression.asOWLClass();
+				listOfClasses.add(asOWLClass);
 			}
 		}
 		return listOfClasses;
@@ -218,7 +219,7 @@ public class OntologyLoader
 		{
 			return annotation;
 		}
-		return StringUtils.EMPTY;
+		return extractOWLClassId(entity);
 	}
 
 	private Set<String> getAnnotation(OWLEntity entity, String property)
@@ -301,6 +302,24 @@ public class OntologyLoader
 		return ontologyLabel;
 	}
 
+	public String extractOWLClassId(OWLEntity cls)
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		String clsIri = cls.getIRI().toString();
+		// Case where id is separated by #
+		String[] split = null;
+		if (clsIri.contains("#"))
+		{
+			split = clsIri.split("#");
+		}
+		else
+		{
+			split = clsIri.split("/");
+		}
+		stringBuilder.append(split[split.length - 1]);
+		return stringBuilder.toString();
+	}
+
 	public String getOntologyIRI()
 	{
 		return ontologyIRI;
@@ -341,7 +360,7 @@ public class OntologyLoader
 		OWLClass owlClass = factory.getOWLClass(IRI.create(iri));
 		for (OWLClass rootClass : rootClasses)
 		{
-			addClass(rootClass, owlClass);
+			if (rootClass != owlClass) addClass(rootClass, owlClass);
 		}
 		return owlClass;
 	}

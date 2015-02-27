@@ -20,6 +20,7 @@ public class OntologyTermDynamicAnnotationMetaData
 		DefaultAttributeMetaData idAttr = new DefaultAttributeMetaData(ID);
 		idAttr.setIdAttribute(true);
 		idAttr.setNillable(false);
+		idAttr.setVisible(false);
 		entityMetaData.addAttributeMetaData(idAttr);
 
 		DefaultAttributeMetaData nameAttr = new DefaultAttributeMetaData(NAME, FieldTypeEnum.STRING);

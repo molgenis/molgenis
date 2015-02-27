@@ -7,11 +7,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.FileRepositoryCollection;
+import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.ontology.model.OntologyMetaData;
 import org.molgenis.ontology.model.OntologyTermDynamicAnnotationMetaData;
 import org.molgenis.ontology.model.OntologyTermMetaData;
@@ -31,6 +31,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	private static final String EXTENSION_OBO_ZIP = "obo.zip";
 	private static final String EXTENSION_OWL_ZIP = "owl.zip";
 	private static final String ESCAPE_VALUES = "[^a-zA-Z0-9_]";
+	private static final String REPLACEMENT_VALUE = "_";
 	public static final Set<String> EXTENSIONS = ImmutableSet.of(EXTENSION_OBO_ZIP, EXTENSION_OWL_ZIP);
 
 	private LinkedHashMap<String, Repository> repositories;
@@ -59,12 +60,18 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 		uploadedFiles = ZipFileUtil.unzip(file);
 		OntologyLoader ontologyLoader = new OntologyLoader(name, uploadedFiles.get(0));
 
+		UuidGenerator uuidGenerator = new UuidGenerator();
+		OntologyTermDynamicAnnotationRepository ontologyTermDynamicAnnotationRepo = new OntologyTermDynamicAnnotationRepository(
+				ontologyLoader, uuidGenerator);
+		OntologyTermSynonymRepository ontologyTermSynonymRepo = new OntologyTermSynonymRepository(ontologyLoader,
+				uuidGenerator);
+
 		repositories = new LinkedHashMap<String, Repository>();
-		repositories.put(OntologyTermDynamicAnnotationMetaData.ENTITY_NAME,
-				new OntologyTermDynamicAnnotationRepository(ontologyLoader));
-		repositories.put(OntologyTermSynonymMetaData.ENTITY_NAME, new OntologyTermSynonymRepository(ontologyLoader));
+		repositories.put(OntologyTermDynamicAnnotationMetaData.ENTITY_NAME, ontologyTermDynamicAnnotationRepo);
+		repositories.put(OntologyTermSynonymMetaData.ENTITY_NAME, ontologyTermSynonymRepo);
 		repositories.put(OntologyMetaData.ENTITY_NAME, new OntologyRepository(ontologyLoader));
-		repositories.put(OntologyTermMetaData.ENTITY_NAME, new OntologyTermRepository(ontologyLoader, dataService));
+		repositories.put(OntologyTermMetaData.ENTITY_NAME, new OntologyTermRepository(ontologyLoader, uuidGenerator,
+				ontologyTermDynamicAnnotationRepo, ontologyTermSynonymRepo));
 	}
 
 	@Override
@@ -84,6 +91,11 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	{
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append(ontologyIRI).append(ontologyTermIRI).append(label);
-		return stringBuilder.toString().replaceAll(ESCAPE_VALUES, StringUtils.EMPTY);
+		return escapeValue(stringBuilder.toString());
+	}
+
+	public static String escapeValue(String value)
+	{
+		return value.replaceAll(ESCAPE_VALUES, REPLACEMENT_VALUE);
 	}
 }

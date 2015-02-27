@@ -18,6 +18,7 @@ public class OntologyTermSynonymMetaData
 		DefaultAttributeMetaData idAttr = new DefaultAttributeMetaData(ID);
 		idAttr.setIdAttribute(true);
 		idAttr.setNillable(false);
+		idAttr.setVisible(false);
 		entityMetaData.addAttributeMetaData(idAttr);
 
 		DefaultAttributeMetaData ontologyTermSynonymAttr = new DefaultAttributeMetaData(ONTOLOGY_TERM_SYNONYM,

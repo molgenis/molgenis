@@ -24,14 +24,13 @@ import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.ontology.OntologyService;
 import org.molgenis.ontology.index.OntologyIndexer;
 import org.molgenis.ontology.model.OntologyMetaData;
-import org.molgenis.ontology.repository.OntologyIndexRepository;
-import org.molgenis.ontology.repository.OntologyQueryRepository;
 import org.molgenis.ontology.repository.v2.OntologyRepositoryCollection;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
 
@@ -68,17 +67,17 @@ public class OntologyImporterService implements ImportService
 		this.permissionSystemService = permissionSystemService;
 	}
 
-	@Override
+	@Transactional
 	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction)
 	{
 		if (databaseAction != DatabaseAction.ADD) throw new IllegalArgumentException("Only ADD is supported");
 
 		List<EntityMetaData> addedEntities = Lists.newArrayList();
-		EntityImportReport report;
+		EntityImportReport report = new EntityImportReport();
 		try
 		{
 			Iterator<String> it = source.getEntityNames().iterator();
-			if (it.hasNext())
+			while (it.hasNext())
 			{
 				String entityNameToImport = it.next();
 				Repository repo = source.getRepositoryByEntityName(entityNameToImport);
@@ -87,6 +86,7 @@ public class OntologyImporterService implements ImportService
 					report = new EntityImportReport();
 
 					CrudRepository crudRepository = dataService.getCrudRepository(entityNameToImport);
+
 					crudRepository.add(repo);
 
 					List<String> entityNames = addedEntities.stream().map(emd -> emd.getName())
@@ -103,10 +103,6 @@ public class OntologyImporterService implements ImportService
 				{
 					IOUtils.closeQuietly(repo);
 				}
-			}
-			else
-			{
-				report = new EntityImportReport();
 			}
 		}
 		catch (Exception e)
@@ -139,26 +135,28 @@ public class OntologyImporterService implements ImportService
 	{
 		EntitiesValidationReport report = new EntitiesValidationReportImpl();
 
-		Repository repositoryByEntityName = source.getRepositoryByEntityName(OntologyMetaData.ENTITY_NAME);
+		if (source.getRepositoryByEntityName(OntologyMetaData.ENTITY_NAME) == null) throw new MolgenisDataException(
+				"Exception Repository [" + OntologyMetaData.ENTITY_NAME + "] is missing");
 
-		Iterator<String> it = source.getEntityNames().iterator();
-		if (it.hasNext())
+		boolean ontologyExists = false;
+		for (Entity ontologyEntity : source.getRepositoryByEntityName(OntologyMetaData.ENTITY_NAME))
 		{
-			String entityName = it.next();
-			boolean entityExists = dataService.hasRepository(entityName);
+			String ontologyIRI = ontologyEntity.getString(OntologyMetaData.ONTOLOGY_IRI);
+			String ontologyName = ontologyEntity.getString(OntologyMetaData.ONTOLOGY_NAME);
 
-			// Check if ontology IRI exists
-			String ontologyIRI = ((OntologyIndexRepository) source.getRepositoryByEntityName(entityName))
-					.getOntologyLoader().getOntologyIRI();
-
-			Entity ontologyQueryEntity = dataService.findOne(OntologyQueryRepository.ENTITY_NAME,
-					new QueryImpl().eq(OntologyQueryRepository.ONTOLOGY_IRI, ontologyIRI));
-
-			boolean ontologyQueryEntityExists = ontologyQueryEntity != null;
-
-			report.getSheetsImportable().put(entityName, !entityExists && !ontologyQueryEntityExists);
+			Entity ontologyQueryEntity = dataService.findOne(
+					OntologyMetaData.ENTITY_NAME,
+					new QueryImpl().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIRI).or()
+							.eq(OntologyMetaData.ONTOLOGY_NAME, ontologyName));
+			ontologyExists = ontologyQueryEntity != null;
 		}
 
+		Iterator<String> it = source.getEntityNames().iterator();
+		while (it.hasNext())
+		{
+			String entityName = it.next();
+			report.getSheetsImportable().put(entityName, !ontologyExists);
+		}
 		return report;
 	}
 

@@ -12,90 +12,111 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.ontology.model.OntologyMetaData;
 import org.molgenis.ontology.model.OntologyTermDynamicAnnotationMetaData;
 import org.molgenis.ontology.model.OntologyTermMetaData;
 import org.molgenis.ontology.model.OntologyTermSynonymMetaData;
 import org.molgenis.ontology.utils.OntologyLoader;
+import org.molgenis.util.ApplicationContextProvider;
 import org.semanticweb.owlapi.model.OWLClass;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.TreeTraverser;
 
 public class OntologyTermRepository implements Repository
 {
-	private final static String PSEUDO_ROOT_CLASS_LABEL = "top";
+	// private final static String PSEUDO_ROOT_CLASS_LABEL = "top";
 	private final OntologyLoader ontologyLoader;
 	private final DataService dataService;
+	private final UuidGenerator uuidGenerator;
+	private final OntologyTermDynamicAnnotationRepository ontologyTermDynamicAnnotationRepo;
+	private final OntologyTermSynonymRepository ontologyTermSynonymRepo;
 
-	public OntologyTermRepository(OntologyLoader ontologyLoader, DataService dataService)
+	public OntologyTermRepository(OntologyLoader ontologyLoader, UuidGenerator uuidGenerator,
+			OntologyTermDynamicAnnotationRepository ontologyTermDynamicAnnotationRepo,
+			OntologyTermSynonymRepository ontologyTermSynonymRepo)
 	{
 		this.ontologyLoader = ontologyLoader;
-		this.dataService = dataService;
+		this.uuidGenerator = uuidGenerator;
+		this.dataService = ApplicationContextProvider.getApplicationContext().getBean(DataService.class);
+		this.ontologyTermDynamicAnnotationRepo = ontologyTermDynamicAnnotationRepo;
+		this.ontologyTermSynonymRepo = ontologyTermSynonymRepo;
 	}
 
 	@Override
 	public Iterator<Entity> iterator()
 	{
-		final TreeTraverser<OWLClass> traverser = new TreeTraverser<OWLClass>()
-		{
-			@Override
-			public Iterable<OWLClass> children(OWLClass owlClass)
-			{
-				return ontologyLoader.getChildClass(owlClass);
-			}
-		};
+		// final TreeTraverser<OWLClassContainer> traverser = new TreeTraverser<OWLClassContainer>()
+		// {
+		// public Iterable<OWLClassContainer> children(OWLClassContainer container)
+		// {
+		// int count = 0;
+		// List<OWLClassContainer> containers = new ArrayList<OWLClassContainer>();
+		// for (OWLClass childClass : ontologyLoader.getChildClass(container.getOwlClass()))
+		// {
+		// containers
+		// .add(new OWLClassContainer(childClass, constructNodePath(container.getNodePath(), count)));
+		// count++;
+		// }
+		// return containers;
+		// }
+		// };
 
 		return new Iterator<Entity>()
 		{
-			// Since there are multiple root classes, in order to use tree
-			// traverse function from Guava, a psudoRoot class is created to
-			// hold all the real root classes
-			private final OWLClass pseudoRootClass = ontologyLoader.createClass(PSEUDO_ROOT_CLASS_LABEL,
-					ontologyLoader.getRootClasses());
-			private final Iterator<OWLClass> iterator = traverser.preOrderTraversal(pseudoRootClass).iterator();
+			// private final OWLClass pseudoRootClass = ontologyLoader.createClass(PSEUDO_ROOT_CLASS_LABEL,
+			// ontologyLoader.getRootClasses());
+			// private final Iterator<OWLClassContainer> iterator = traverser.preOrderTraversal(
+			// new OWLClassContainer(pseudoRootClass, "0[0]")).iterator();
+			private final Iterator<OWLClass> iterator = ontologyLoader.getAllclasses().iterator();
 
-			@Override
 			public boolean hasNext()
 			{
 				return iterator.hasNext();
 			}
 
-			@Override
 			public Entity next()
 			{
+				// OWLClassContainer container = iterator.next();
+				// OWLClass cls = container.getOwlClass();
 				OWLClass cls = iterator.next();
 				String ontologyIRI = ontologyLoader.getOntologyIRI();
 				String ontologyTermIRI = cls.getIRI().toString();
+				String ontologyTermName = ontologyLoader.getLabel(cls);
 
 				Set<String> synonymIds = FluentIterable.from(ontologyLoader.getSynonyms(cls))
 						.transform(new Function<String, String>()
 						{
 							public String apply(String synonym)
 							{
-								return OntologyRepositoryCollection.createUniqueId(ontologyIRI, ontologyTermIRI,
-										synonym);
+								return ontologyTermSynonymRepo.getReferenceIds().get(ontologyTermIRI).get(synonym);
+							}
+						}).filter(new Predicate<String>()
+						{
+							public boolean apply(final String synonym)
+							{
+								return StringUtils.isEmpty(synonym);
 							}
 						}).toSet();
+
 				Set<String> annotationIds = FluentIterable.from(ontologyLoader.getDatabaseIds(cls))
 						.transform(new Function<String, String>()
 						{
-							public String apply(String synonym)
+							public String apply(String annotation)
 							{
-								return OntologyRepositoryCollection.createUniqueId(ontologyIRI, ontologyTermIRI,
-										synonym);
+								return ontologyTermDynamicAnnotationRepo.getReferenceIds().get(ontologyTermIRI)
+										.get(annotation);
 							}
 						}).toSet();
 
 				Entity entity = new MapEntity();
-				entity.set(OntologyTermMetaData.ID,
-						OntologyRepositoryCollection.createUniqueId(ontologyIRI, ontologyTermIRI, StringUtils.EMPTY));
+				entity.set(OntologyTermMetaData.ID, uuidGenerator.generateId());
 				entity.set(OntologyTermMetaData.ONTOLOGY_TERM_IRI, ontologyTermIRI);
-				entity.set(OntologyTermMetaData.ONTOLOGY_TERM_NAME, ontologyLoader.getLabel(cls));
-
+				entity.set(OntologyTermMetaData.ONTOLOGY_TERM_NAME, ontologyTermName);
 				entity.set(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, getSynonymEntities(synonymIds));
 				entity.set(OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
 						getOntologyTermDynamicAnnotationEntities(annotationIds));

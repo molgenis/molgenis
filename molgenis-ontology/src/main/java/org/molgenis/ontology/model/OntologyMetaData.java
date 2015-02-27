@@ -18,6 +18,7 @@ public class OntologyMetaData
 		DefaultAttributeMetaData idAttr = new DefaultAttributeMetaData(ID);
 		idAttr.setIdAttribute(true);
 		idAttr.setNillable(false);
+		idAttr.setVisible(false);
 		entityMetaData.addAttributeMetaData(idAttr);
 
 		DefaultAttributeMetaData ontologyIRIAttr = new DefaultAttributeMetaData(ONTOLOGY_IRI, FieldTypeEnum.STRING);

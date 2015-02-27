@@ -1,12 +1,15 @@
 package org.molgenis.ontology.repository.v2;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.ontology.model.OntologyTermDynamicAnnotationMetaData;
 import org.molgenis.ontology.utils.OntologyLoader;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -14,29 +17,31 @@ import org.semanticweb.owlapi.model.OWLClass;
 public class OntologyTermDynamicAnnotationRepository implements Repository
 {
 	private final OntologyLoader ontologyLoader;
+	private final UuidGenerator uuidGenerator;
+	private final Map<String, Map<String, String>> referenceIds = new HashMap<String, Map<String, String>>();
 
-	public OntologyTermDynamicAnnotationRepository(OntologyLoader ontologyLoader)
+	public OntologyTermDynamicAnnotationRepository(OntologyLoader ontologyLoader, UuidGenerator uuidGenerator)
 	{
 		this.ontologyLoader = ontologyLoader;
+		this.uuidGenerator = uuidGenerator;
 	}
 
 	@Override
 	public Iterator<Entity> iterator()
 	{
-		final Iterator<OWLClass> iterator = ontologyLoader.getAllclasses().iterator();
-
 		return new Iterator<Entity>()
 		{
+			final Iterator<OWLClass> iterator = ontologyLoader.getAllclasses().iterator();
 			private OWLClass currentClass = null;
 			private Iterator<String> databaseIdIterator = null;
 
 			@Override
 			public boolean hasNext()
 			{
-				if ((currentClass == null || !databaseIdIterator.hasNext()) && iterator.hasNext())
+				while ((currentClass == null || !databaseIdIterator.hasNext()) && iterator.hasNext())
 				{
 					currentClass = iterator.next();
-					databaseIdIterator = ontologyLoader.getSynonyms(currentClass).iterator();
+					databaseIdIterator = ontologyLoader.getDatabaseIds(currentClass).iterator();
 				}
 				return databaseIdIterator.hasNext();
 			}
@@ -44,17 +49,27 @@ public class OntologyTermDynamicAnnotationRepository implements Repository
 			@Override
 			public Entity next()
 			{
-				String ontologyIRI = ontologyLoader.getOntologyIRI();
 				String ontologyTermIRI = currentClass.getIRI().toString();
 				String label = databaseIdIterator.next();
 				String fragments[] = label.split(":");
-				String id = OntologyRepositoryCollection.createUniqueId(ontologyIRI, ontologyTermIRI, label);
+				String id = uuidGenerator.generateId();
+
+				if (!referenceIds.containsKey(ontologyTermIRI))
+				{
+					referenceIds.put(ontologyTermIRI, new HashMap<String, String>());
+				}
+
+				if (!referenceIds.get(ontologyTermIRI).containsKey(label))
+				{
+					referenceIds.get(ontologyTermIRI).put(label, id);
+				}
 
 				MapEntity entity = new MapEntity();
-				entity.set(OntologyTermDynamicAnnotationMetaData.ID, id);
+				entity.set(OntologyTermDynamicAnnotationMetaData.ID, referenceIds.get(ontologyTermIRI).get(label));
 				entity.set(OntologyTermDynamicAnnotationMetaData.NAME, fragments[0]);
 				entity.set(OntologyTermDynamicAnnotationMetaData.VALUE, fragments[1]);
 				entity.set(OntologyTermDynamicAnnotationMetaData.LABEL, label);
+
 				return entity;
 			}
 		};
@@ -64,7 +79,6 @@ public class OntologyTermDynamicAnnotationRepository implements Repository
 	public void close() throws IOException
 	{
 		// Do nothing
-
 	}
 
 	@Override
@@ -89,5 +103,10 @@ public class OntologyTermDynamicAnnotationRepository implements Repository
 	public String getUrl()
 	{
 		throw new UnsupportedOperationException();
+	}
+
+	public Map<String, Map<String, String>> getReferenceIds()
+	{
+		return referenceIds;
 	}
 }
