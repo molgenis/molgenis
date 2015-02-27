@@ -20,4 +20,6 @@ public interface ImportService extends Ordered
 	List<DatabaseAction> getSupportedDatabaseActions();
 
 	boolean getMustChangeEntityName();
+
+	List<String> getSupportedFileExtensions();
 }

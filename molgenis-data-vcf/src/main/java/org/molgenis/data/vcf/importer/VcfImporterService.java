@@ -298,4 +298,9 @@ public class VcfImporterService implements ImportService
 		return true;
 	}
 
+	@Override
+	public List<String> getSupportedFileExtensions()
+	{
+		return SUPPORTED_FILE_EXTENSIONS;
+	}
 }

@@ -6,12 +6,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.importer.EntitiesValidationReportImpl;
@@ -21,9 +23,10 @@ import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.ontology.OntologyService;
 import org.molgenis.ontology.index.OntologyIndexer;
-import org.molgenis.ontology.repository.OntologyQueryRepository;
+import org.molgenis.ontology.model.OntologyMetaData;
 import org.molgenis.ontology.repository.OntologyIndexRepository;
-import org.molgenis.ontology.repository.OntologyRepositoryCollection;
+import org.molgenis.ontology.repository.OntologyQueryRepository;
+import org.molgenis.ontology.repository.v2.OntologyRepositoryCollection;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +42,9 @@ public class OntologyImporterService implements ImportService
 	private final SearchService searchService;
 	private final PermissionSystemService permissionSystemService;
 
+	private static final List<String> SUPPORTED_FILE_EXTENSIONS = Lists
+			.newArrayList(OntologyRepositoryCollection.EXTENSIONS);
+
 	@Autowired
 	private FileStore fileStore;
 
@@ -52,8 +58,6 @@ public class OntologyImporterService implements ImportService
 	public OntologyImporterService(FileRepositoryCollectionFactory fileRepositoryCollectionFactory,
 			DataService dataService, SearchService searchService, PermissionSystemService permissionSystemService)
 	{
-		System.out.println("OntologyImporterService");
-
 		if (fileRepositoryCollectionFactory == null) throw new IllegalArgumentException(
 				"fileRepositoryCollectionFactory is null");
 		if (dataService == null) throw new IllegalArgumentException("dataservice is null");
@@ -76,17 +80,21 @@ public class OntologyImporterService implements ImportService
 			Iterator<String> it = source.getEntityNames().iterator();
 			if (it.hasNext())
 			{
-				OntologyIndexRepository repo = (OntologyIndexRepository) source.getRepositoryByEntityName(it.next());
+				String entityNameToImport = it.next();
+				Repository repo = source.getRepositoryByEntityName(entityNameToImport);
 				try
 				{
 					report = new EntityImportReport();
-					ontologyIndexer.index(repo.getOntologyLoader());
+
+					CrudRepository crudRepository = dataService.getCrudRepository(entityNameToImport);
+					crudRepository.add(repo);
+
 					List<String> entityNames = addedEntities.stream().map(emd -> emd.getName())
 							.collect(Collectors.toList());
 					permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
 							entityNames);
 					int count = 1;
-					for(String entityName: entityNames)
+					for (String entityName : entityNames)
 					{
 						report.addEntityCount(entityName, count++);
 					}
@@ -130,6 +138,9 @@ public class OntologyImporterService implements ImportService
 	public EntitiesValidationReport validateImport(File file, RepositoryCollection source)
 	{
 		EntitiesValidationReport report = new EntitiesValidationReportImpl();
+
+		Repository repositoryByEntityName = source.getRepositoryByEntityName(OntologyMetaData.ENTITY_NAME);
+
 		Iterator<String> it = source.getEntityNames().iterator();
 		if (it.hasNext())
 		{
@@ -183,4 +194,9 @@ public class OntologyImporterService implements ImportService
 		return false;
 	}
 
+	@Override
+	public List<String> getSupportedFileExtensions()
+	{
+		return SUPPORTED_FILE_EXTENSIONS;
+	}
 }

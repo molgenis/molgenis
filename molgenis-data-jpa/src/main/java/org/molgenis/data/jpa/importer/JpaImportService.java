@@ -99,4 +99,10 @@ public class JpaImportService implements ImportService
 	{
 		return Ordered.LOWEST_PRECEDENCE;
 	}
+
+	@Override
+	public List<String> getSupportedFileExtensions()
+	{
+		return SUPPORTED_FILE_EXTENSIONS;
+	}
 }

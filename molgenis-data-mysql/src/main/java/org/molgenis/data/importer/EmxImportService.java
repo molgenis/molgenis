@@ -133,4 +133,9 @@ public class EmxImportService implements ImportService
 		return false;
 	}
 
+	@Override
+	public List<String> getSupportedFileExtensions()
+	{
+		return SUPPORTED_FILE_EXTENSIONS;
+	}
 }

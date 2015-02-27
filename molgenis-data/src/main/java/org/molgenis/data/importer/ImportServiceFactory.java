@@ -1,8 +1,11 @@
 package org.molgenis.data.importer;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCollection;
@@ -34,11 +37,42 @@ public class ImportServiceFactory
 	 */
 	public ImportService getImportService(File file, RepositoryCollection source)
 	{
+		List<ImportService> possibleImportServices = new ArrayList<ImportService>();
 		for (ImportService importService : importServices)
 		{
-			if (importService.canImport(file, source)) return importService;
+			if (importService.canImport(file, source))
+			{
+				possibleImportServices.add(importService);
+			}
 		}
 
-		throw new MolgenisDataException("Can not import file. No suitable importer found");
+		String name = file.getName().toLowerCase();
+		Map<String, ImportService> possibleExtensions = new HashMap<String, ImportService>();
+		for (ImportService importSerivce : possibleImportServices)
+		{
+			for (String extension : importSerivce.getSupportedFileExtensions())
+			{
+				if (name.endsWith('.' + extension))
+				{
+					if (possibleExtensions.containsKey(extension)) throw new MolgenisDataException(
+							"Cannot have the same file extension registered in multiple ImportServices : "
+									+ importSerivce.getClass().getSimpleName() + ", "
+									+ possibleExtensions.get(extension).getClass().getSimpleName());
+
+					possibleExtensions.put(extension, importSerivce);
+				}
+			}
+		}
+
+		String longestExtention = "";
+		for (String possibleExtension : possibleExtensions.keySet())
+		{
+			if (longestExtention.length() < possibleExtension.length()) longestExtention = possibleExtension;
+		}
+
+		if (!possibleExtensions.containsKey(longestExtention)) throw new MolgenisDataException(
+				"Can not import file. No suitable importer found");
+
+		return possibleExtensions.get(longestExtention);
 	}
 }

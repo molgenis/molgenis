@@ -196,6 +196,7 @@ public class OntologyLoader
 		{
 			listOfSynonyms.addAll(getAnnotation(cls, eachSynonymProperty));
 		}
+		listOfSynonyms.add(getLabel(cls));
 		return listOfSynonyms;
 	}
 
@@ -260,6 +261,25 @@ public class OntologyLoader
 						dbAnnotations.put(databaseName, new HashSet<String>());
 					}
 					dbAnnotations.get(databaseName).add(value.replaceAll(DB_ID_PATTERN, "$2"));
+				}
+			}
+		}
+		return dbAnnotations;
+	}
+
+	// TODO : FIXME replace the getAllDatabaseIds later on
+	public Set<String> getDatabaseIds(OWLClass entity)
+	{
+		Set<String> dbAnnotations = new HashSet<String>();
+		for (OWLAnnotation annotation : entity.getAnnotations(ontology))
+		{
+			if (annotation.getValue() instanceof OWLLiteral)
+			{
+				OWLLiteral val = (OWLLiteral) annotation.getValue();
+				String value = val.getLiteral().toString();
+				if (value.matches(DB_ID_PATTERN))
+				{
+					dbAnnotations.add(value);
 				}
 			}
 		}
