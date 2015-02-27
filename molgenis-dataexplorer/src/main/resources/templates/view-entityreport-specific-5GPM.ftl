@@ -28,6 +28,7 @@
 <#assign rec_high_candidate_genes = {}>
 <#assign rec_mod_candidate_genes = {}>
 <#assign other_candidate_genes = {}>
+<#assign all_candidates = {}><#-- all genes + counts per category -->
 
 <#-- these need some post-processing -->
 <#assign com_high_candidate_raw = {}>
@@ -45,6 +46,7 @@
 			<#assign dom_high_candidate_genes = dom_high_candidate_genes + {geneName: dom_high_candidate_genes[geneName] + [row] } />
 		<#else>
 			<#assign dom_high_candidate_genes = dom_high_candidate_genes + {geneName : [row]} />
+			<#if all_candidates[geneName]??><#assign all_candidates = all_candidates + {geneName : all_candidates[geneName] + 1 }><#else><#assign all_candidates = all_candidates + {geneName : 1 }></#if>
 		</#if>
 	</#if>
 	<#if row.getString("INFO_MONGENDISCAND") == "INCLUDED_DOMINANT">
@@ -52,6 +54,7 @@
 			<#assign dom_mod_candidate_genes = dom_mod_candidate_genes + {geneName : dom_mod_candidate_genes[geneName] + [row] } />
 		<#else>
 			<#assign dom_mod_candidate_genes = dom_mod_candidate_genes + {geneName : [row]} />
+			<#if all_candidates[geneName]??><#assign all_candidates = all_candidates + {geneName : all_candidates[geneName] + 1 }><#else><#assign all_candidates = all_candidates + {geneName : 1 }></#if>
 		</#if>
 	</#if>
 	
@@ -61,6 +64,7 @@
 			<#assign rec_high_candidate_genes = rec_high_candidate_genes + {geneName: rec_high_candidate_genes[geneName] + [row] } />
 		<#else>
 			<#assign rec_high_candidate_genes = rec_high_candidate_genes + {geneName : [row]} />
+			<#if all_candidates[geneName]??><#assign all_candidates = all_candidates + {geneName : all_candidates[geneName] + 1 }><#else><#assign all_candidates = all_candidates + {geneName : 1 }></#if>
 		</#if>
 	</#if>
 	<#if row.getString("INFO_MONGENDISCAND") == "INCLUDED_RECESSIVE">
@@ -68,6 +72,7 @@
 			<#assign rec_mod_candidate_genes = rec_mod_candidate_genes + {geneName: rec_mod_candidate_genes[geneName] + [row] } />
 		<#else>
 			<#assign rec_mod_candidate_genes = rec_mod_candidate_genes + {geneName : [row]} />
+			<#if all_candidates[geneName]??><#assign all_candidates = all_candidates + {geneName : all_candidates[geneName] + 1 }><#else><#assign all_candidates = all_candidates + {geneName : 1 }></#if>
 		</#if>
 	</#if>
 
@@ -77,6 +82,7 @@
 			<#assign com_high_candidate_raw = com_high_candidate_raw + {geneName: com_high_candidate_raw[geneName] + [row] } />
 		<#else>
 			<#assign com_high_candidate_raw = com_high_candidate_raw + {geneName : [row]} />
+			<#if all_candidates[geneName]??><#assign all_candidates = all_candidates + {geneName : all_candidates[geneName] + 1 }><#else><#assign all_candidates = all_candidates + {geneName : 1 }></#if>
 		</#if>
 	</#if>
 	<#if row.getString("INFO_MONGENDISCAND") == "INCLUDED_RECESSIVE_COMPOUND">
@@ -84,6 +90,7 @@
 			<#assign com_mod_candidate_raw = com_mod_candidate_raw + {geneName: com_mod_candidate_raw[geneName] + [row] } />
 		<#else>
 			<#assign com_mod_candidate_raw = com_mod_candidate_raw + {geneName : [row]} />
+			<#if all_candidates[geneName]??><#assign all_candidates = all_candidates + {geneName : all_candidates[geneName] + 1 }><#else><#assign all_candidates = all_candidates + {geneName : 1 }></#if>
 		</#if>
 	</#if>
 
@@ -110,6 +117,7 @@
 			<#assign other_candidate_genes = other_candidate_genes + {geneName: other_candidate_genes[geneName] + [row] } />
 		<#else>
 			<#assign other_candidate_genes = other_candidate_genes + {geneName : [row] } />
+			<#if all_candidates[geneName]??><#assign all_candidates = all_candidates + {geneName : all_candidates[geneName] + 1 }><#else><#assign all_candidates = all_candidates + {geneName : 1 }></#if>
 		</#if>
 	</#if>
 	
@@ -124,12 +132,16 @@
 
 <#-- if already a candidate HIGH impact variant, always put under 'compound high', and copy over any MODERATE variants, and the EXCLUDED_FIRST_OF_COMPOUND variant (high or mod impact) -->
 <#list com_high_candidate_raw?keys as gene>
+
 	<#-- always add candidate -->
 	<#assign com_high_candidate_genes = com_high_candidate_genes + {gene : com_high_candidate_raw[gene] } />
-	<#-- also add any MODERATE candidates-->
+	<#--assign all_candidate_genes = all_candidate_genes + [geneName]-->
+	
+	<#-- also add any MODERATE variants to the candidate-->
 	<#if com_mod_candidate_raw[gene]??>
 		<#assign com_high_candidate_genes = com_high_candidate_genes + {gene : com_high_candidate_genes[gene] + com_mod_candidate_raw[gene] } />
 	</#if>
+	
 	<#--include FIRST_OF_COMPOUND: either HIGH or MODERATE variant-->
 	<#if excluded_high_compound_raw[gene]??>
 		<#assign com_high_candidate_genes = com_high_candidate_genes + {gene : com_high_candidate_genes[gene] + excluded_high_compound_raw[gene] } />
@@ -140,7 +152,8 @@
 
 <#-- if a candidate MODERATE impact variant, put in HIGH anyway when the EXCLUDED_FIRST_OF_COMPOUND has a HIGH impact.  -->
 <#list com_mod_candidate_raw?keys as gene>
-	<#-- if FIRST_OF_COMPOUND for this gene was HIGH impact, add this variant to HIGH candidates plus the original moderate variants-->
+
+	<#-- if FIRST_OF_COMPOUND for this gene was HIGH impact, add this variant to HIGH candidates plus the original MODERATE variants-->
 	<#if excluded_high_compound_raw[gene]??>
 		<#if com_high_candidate_genes[gene]??>
 			<#assign com_high_candidate_genes = com_high_candidate_genes + {gene : com_high_candidate_genes[gene] + excluded_high_compound_raw[gene] } />
@@ -148,6 +161,7 @@
 			<#assign com_high_candidate_genes = com_high_candidate_genes + {gene : excluded_high_compound_raw[gene] } />
 		</#if>
 		<#assign com_high_candidate_genes = com_high_candidate_genes + {gene : com_high_candidate_genes[gene] + com_mod_candidate_raw[gene] } />
+		
 	<#--FIRST_OF_COMPOUND was a MODERATE, and so is the rest! add them to MODERATE COMPOUND candidates -->
 	<#else>
 		<#if com_mod_candidate_genes[gene]??>
@@ -155,7 +169,6 @@
 		<#else>
 			<#assign com_mod_candidate_genes = com_mod_candidate_genes + {gene : excluded_mod_compound_raw[gene] } />
 		</#if>
-		
 		<#assign com_mod_candidate_genes = com_mod_candidate_genes + {gene : com_mod_candidate_genes[gene] + com_mod_candidate_raw[gene]} />
 	</#if>
 </#list>
@@ -203,7 +216,6 @@
 
 <#macro printGenes genes>
 	<#list genes?keys as geneName>
-		<#--div class="togglediv_<#if genes[geneName][0].getDouble("INFO_PHENOMIZERPVAL")??><#if genes[geneName][0].getDouble("INFO_PHENOMIZERPVAL") lt 0.05>green<#else>lightgreen</#if><#else>grey</#if>" style="display:inline" onmouseover="changeContent('infoDiv', '<#list genes[geneName] as row>${row.getString("INFO_CGDCOND")}, ${row.getString("#CHROM")}, ${row.getString("POS")}, ${row.getString("REF")}, ${row.getString("ALT")}, ${row.getString("INFO_ANN")}, <#if row.getDouble("INFO_PHENOMIZERPVAL")??>${row.getDouble("INFO_PHENOMIZERPVAL")}</#if>, ${row.getString("INFO_CGDGIN")}<br></#list>')">${geneName}</div-->
 	
 	<@compress single_line=true>
 		<div class="togglediv_border togglediv_<#if genes[geneName][0].getDouble("INFO_PHENOMIZERPVAL")??><#if genes[geneName][0].getDouble("INFO_PHENOMIZERPVAL") lt 0.05>green<#else>lightgreen</#if><#else>grey</#if>" style="display:inline" onmouseover="changeContent('infoDiv', '
@@ -265,7 +277,7 @@
 			</tr>
 			</#list>
 		</table>
-		')">${geneName}</div>
+		')"><#if all_candidates[geneName] gt 1><b>${geneName}</b><#else>${geneName}</#if></div>
 	</@compress>
 	
 	</#list>
