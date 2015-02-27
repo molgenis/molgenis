@@ -33,8 +33,7 @@
 
 <@header css js/>
 <div class="row">
-	<button id="DatasetReport">DatasetReport</button>
-    <div class="col-md-12">
+	<div class="col-md-12">
         <div id="entity-class" class="well well-sm">
             <div class="row">
                 <div class="col-md-8">

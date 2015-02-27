@@ -250,6 +250,7 @@ public class DataExplorerController extends MolgenisPluginController
 		}
 		else if (moduleId.equals("entitiesreport"))
 		{
+            model.addAttribute("datasetRepository", dataService.getCrudRepository(entityName));
 			model.addAttribute("viewName", parseEntitiesReportRuntimeProperty(entityName));
 		}
 		return "view-dataexplorer-mod-" + moduleId; // TODO bad request in case of invalid module id
@@ -618,13 +619,6 @@ public class DataExplorerController extends MolgenisPluginController
 		return "view-entityreport";
 	}
 	
-	@RequestMapping(value = "/datasetRepository", method = RequestMethod.POST)
-	public String viewDatasetDetails(@RequestParam(value = "entityName") String entityName, Model model){
-		model.addAttribute("datasetRepository", dataService.getCrudRepository(entityName)); //TODO CRUD ?
-		model.addAttribute("viewName", getViewName(entityName));
-		return "view-entityreport";
-	}
-
 	private String getViewName(String entityName)
 	{
 		//first we check if there are any RuntimeProperty mappings of entity to report template
