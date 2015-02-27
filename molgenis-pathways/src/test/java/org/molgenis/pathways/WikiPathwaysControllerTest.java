@@ -9,11 +9,12 @@ import java.rmi.RemoteException;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.mockito.Mockito;
-import org.molgenis.wikipathways.client.WSPathway;
 import org.molgenis.wikipathways.client.WikiPathwaysPortType;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import org.xml.sax.SAXException;
+
+import com.google.common.collect.ImmutableMultimap;
 
 public class WikiPathwaysControllerTest
 {
@@ -38,25 +39,19 @@ public class WikiPathwaysControllerTest
 	}
 
 	@Test
-	public void testGetGPML() throws ParserConfigurationException, SAXException, IOException
+	public void testAnalyzeGPML() throws ParserConfigurationException, SAXException, IOException
 	{
-		// mock inprogrammeren
-		WSPathway pathway = Mockito.mock(WSPathway.class);
-		when(pathway.getGpml())
-				.thenReturn(
-						"<gpml>  "
-								+ "<DataNode TextLabel='TUSC2 / Fus1 , Fusion' GraphId = 'cf7548' Type='GeneProduct' GroupRef='bced7'>"
-								+ "<Graphics CenterX='688.6583271016858' CenterY='681.6145075824545' Width='80.0' Height='20.0' ZOrder='32768' FontSize='10' Valign='Middle' />"
-								+ "<Xref Database='Ensembl' ID='ENSG00000197081' />"
-								+ "</DataNode>"
-								+ "<DataNode TextLabel='IPO4' GraphId='d9af5' Type='GeneProduct' GroupRef='bced7'>"
-								+ "<Graphics CenterX='688.6583271016858' CenterY='701.6145075824545' Width='80.0' Height='20.0' ZOrder='32768' FontSize='10' Valign='Middle' />"
-								+ "<Xref Database='Ensembl' ID='ENSG00000196497' />" + "</DataNode></gpml>");
-		when(serviceMock.getPathway("WP2377", 0)).thenReturn(pathway);
+		String gpml = "<gpml>  "
+				+ "<DataNode TextLabel='TUSC2 / Fus1 , Fusion' GraphId = 'cf7548' Type='GeneProduct' GroupRef='bced7'>"
+				+ "<Graphics CenterX='688.6583271016858' CenterY='681.6145075824545' Width='80.0' Height='20.0' ZOrder='32768' FontSize='10' Valign='Middle' />"
+				+ "<Xref Database='Ensembl' ID='ENSG00000197081' />"
+				+ "</DataNode>"
+				+ "<DataNode TextLabel='IPO4' GraphId='d9af5' Type='GeneProduct' GroupRef='bced7'>"
+				+ "<Graphics CenterX='688.6583271016858' CenterY='701.6145075824545' Width='80.0' Height='20.0' ZOrder='32768' FontSize='10' Valign='Middle' />"
+				+ "<Xref Database='Ensembl' ID='ENSG00000196497' />" + "</DataNode></gpml>";
 
-		// controller.getGPML("WP2377");
-
-		// assertEquals(controller.nodeList, ImmutableMap.<String, String>of("TUSC2","cf7548","IPO4","d9af5"));
+		assertEquals(controller.analyzeGPML(gpml),
+				ImmutableMultimap.<String, String> of("TUSC2", "cf7548", "IPO4", "d9af5"));
 	}
 
 	@Test

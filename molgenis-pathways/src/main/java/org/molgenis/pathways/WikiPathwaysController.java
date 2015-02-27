@@ -264,8 +264,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 	 * @throws SAXException
 	 *             If any parse errors occur when parsing the GPML
 	 */
-	private Multimap<String, String> analyzeGPML(String gpml) throws ParserConfigurationException, IOException,
-			SAXException
+	Multimap<String, String> analyzeGPML(String gpml) throws ParserConfigurationException, IOException, SAXException
 	{
 		DocumentBuilder dBuilder = DB_FACTORY.newDocumentBuilder();
 		InputStream is = new ByteArrayInputStream(gpml.getBytes());
