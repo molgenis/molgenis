@@ -60,13 +60,18 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 	
 	public enum outcome {
 		EXCLUDED,
+		EXCLUDED_FIRST_OF_COMPOUND,
+		EXCLUDED_FIRST_OF_COMPOUND_HIGHIMPACT,
 		INCLUDED_DOMINANT,
 		INCLUDED_DOMINANT_HIGHIMPACT,
 		INCLUDED_RECESSIVE,
 		INCLUDED_RECESSIVE_HIGHIMPACT,
 		INCLUDED_RECESSIVE_COMPOUND,
+		INCLUDED_RECESSIVE_COMPOUND_HIGHIMPACT,
 		INCLUDED_OTHER
 	}
+	
+	
 
 	final List<String> infoFields = Arrays
 			.asList(new String[]
@@ -159,6 +164,10 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 	private synchronized Map<String, Object> annotateEntityWithMonogenicDiseaseCandidates(Entity entity) throws IOException
 	{
 		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		//TODO:
+		// check if these annotators have been run:
+		// exac, gonl, 1kg, snpeff, cgd
 		
 		/**
 		 * Important variables to use in monogenic disease filter
@@ -266,17 +275,16 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 		 * We already know that zygosity is HET or HOMALT and MAF < 0.05
 		 */
 	
-		//dominant disease
-		if(cgdGenInh.equals(CgdDataProvider.generalizedInheritance.DOMINANT) || cgdGenInh.equals(CgdDataProvider.generalizedInheritance.DOM_OR_REC))
+		//dominant disorders, including those may may also be recessive, and X-linked, since CGD does not distinguish dominant or recessive for those..
+		if(cgdGenInh.equals(CgdDataProvider.generalizedInheritance.DOMINANT) || cgdGenInh.equals(CgdDataProvider.generalizedInheritance.DOM_OR_REC) || cgdGenInh.equals(CgdDataProvider.generalizedInheritance.XLINKED))
 		{
-			
 			// must be rare enough in EACH database
 			if(thGenMAF < 0.0025 && exacMAF < 0.0025 && gonlMAF < 0.0025)
 			{
 				resultMap.put(MONOGENICDISEASECANDIDATE, impact.equals(SnpEffServiceAnnotator.impact.HIGH) ? outcome.INCLUDED_DOMINANT_HIGHIMPACT : outcome.INCLUDED_DOMINANT);
 				return resultMap;
 			}
-			else
+			else if(cgdGenInh.equals(CgdDataProvider.generalizedInheritance.DOMINANT)) //if purely dominant, exclude at this point!
 			{
 //				LOG.info("EXCLUDED candidate for dominant disease because not rare enough! 1KG: " + thGenMAF + ", ExAC: " + exacMAF + ", GoNL: " + gonlMAF +", for :" + entity.toString());
 				resultMap.put(MONOGENICDISEASECANDIDATE, outcome.EXCLUDED);
@@ -284,8 +292,8 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 			}
 		}
 		
-		//recessive disease
-		else if(cgdGenInh.equals(CgdDataProvider.generalizedInheritance.RECESSIVE) || cgdGenInh.equals(CgdDataProvider.generalizedInheritance.XLINKED))
+		//recessive disorders, including those may may also be dominant, and X-linked, since CGD does not distinguish dominant or recessive for those..
+		if(cgdGenInh.equals(CgdDataProvider.generalizedInheritance.RECESSIVE) || cgdGenInh.equals(CgdDataProvider.generalizedInheritance.DOM_OR_REC) || cgdGenInh.equals(CgdDataProvider.generalizedInheritance.XLINKED))
 		{
 			//must be HOMALT for this
 			if(zygosity.equals(HOMALT))
@@ -293,27 +301,32 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 				resultMap.put(MONOGENICDISEASECANDIDATE, impact.equals(SnpEffServiceAnnotator.impact.HIGH) ? outcome.INCLUDED_RECESSIVE_HIGHIMPACT : outcome.INCLUDED_RECESSIVE);
 				return resultMap;
 			}
-			else
+			//only option left: HET, but check just in case
+			else if(zygosity.equals(HET))
 			{
 				if(genesWithCandidates.contains(gene))
 				{
 					LOG.info("INCLUDED heterozygous variant for comp. het. recessive disease because we've seen at least 1 candidate before in gene '"+gene+", for " + entity.toString());
-					resultMap.put(MONOGENICDISEASECANDIDATE, outcome.INCLUDED_RECESSIVE_COMPOUND);
+					resultMap.put(MONOGENICDISEASECANDIDATE, impact.equals(SnpEffServiceAnnotator.impact.HIGH) ? outcome.INCLUDED_RECESSIVE_COMPOUND_HIGHIMPACT : outcome.INCLUDED_RECESSIVE_COMPOUND);
 					return resultMap;
 				}
 				else
 				{
 					genesWithCandidates.add(gene);
-					resultMap.put(MONOGENICDISEASECANDIDATE, outcome.EXCLUDED); //exclude the 'first' variant in a potential comp.het.
+					resultMap.put(MONOGENICDISEASECANDIDATE, impact.equals(SnpEffServiceAnnotator.impact.HIGH) ? outcome.EXCLUDED_FIRST_OF_COMPOUND_HIGHIMPACT : outcome.EXCLUDED_FIRST_OF_COMPOUND); //exclude the 'first' variant in a potential comp.het.
 					return resultMap;
 				}
+			}
+			else
+			{
+				throw new IOException("Zygosity HOMREF, something went wrong in prefilter!");
 			}
 		}
 		
 		//other
 		else
 		{
-			LOG.info("INCLUDED variant with weird inheritance mode '"+originalInheritance+"', condition '"+condition+"', keeping variant " + entity.toString());
+			LOG.info("INCLUDED variant with untypical inheritance mode '"+originalInheritance+"', condition '"+condition+"', keeping variant " + entity.toString());
 			resultMap.put(MONOGENICDISEASECANDIDATE, outcome.INCLUDED_OTHER);
 			return resultMap;
 		}

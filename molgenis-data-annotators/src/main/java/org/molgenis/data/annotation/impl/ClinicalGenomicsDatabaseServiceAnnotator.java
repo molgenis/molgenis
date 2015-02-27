@@ -184,11 +184,13 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 				if(split[3].length() != 0)
 				{
 					geneSymbol = split[3];
-	//too much..	LOG.info("Gene symbol '" + geneSymbol + "' found for " + entity.toString());
+					//too much..
+					//LOG.info("Gene symbol '" + geneSymbol + "' found for " + entity.toString());
 				}
 				else
 				{
-					LOG.info("No gene symbol in ANN field for " + entity.toString());
+					//will happen a lot for WGS data
+					//LOG.info("No gene symbol in ANN field for " + entity.toString());
 				}
 				
 			}
