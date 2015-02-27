@@ -58,7 +58,6 @@ public class WikiPathwaysController extends MolgenisPluginController
 
 	private static final String HOMO_SAPIENS = "Homo sapiens";
 	private static Map<Integer, String> variantColor = new HashMap<Integer, String>();
-	private Map<String, String> pathwayNames;
 	private final WikiPathwaysService wikiPathwaysService;
 	@Autowired
 	private DataService dataService;
@@ -91,9 +90,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 	@RequestMapping(method = GET)
 	public String init(Model model)
 	{
-		model.addAttribute("listOfPathwayNames", pathwayNames);
 		model.addAttribute("entitiesMeta", getVCFEntities());
-		model.addAttribute("selectedEntityName", "");
 		return "view-WikiPathways";
 	}
 
