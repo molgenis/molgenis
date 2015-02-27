@@ -245,9 +245,9 @@ public class WikiPathwaysController extends MolgenisPluginController
 		return wikiPathwaysService.getPathwaysForGene(gene, HOMO_SAPIENS);
 	}
 
-	@RequestMapping(value = "/getGPML/{selectedVcf}/{pathwayId}", method = GET)
+	@RequestMapping(value = "/getColoredPathway/{selectedVcf}/{pathwayId}", method = GET)
 	@ResponseBody
-	public String getGPML(@PathVariable String selectedVcf, @PathVariable String pathwayId)
+	public String getColoredPathway(@PathVariable String selectedVcf, @PathVariable String pathwayId)
 			throws ParserConfigurationException, SAXException, IOException, ExecutionException
 	{
 		Multimap<String, String> graphIdsPerGene = analyzeGPML(wikiPathwaysService.getCurrentPathwayGPML(pathwayId));

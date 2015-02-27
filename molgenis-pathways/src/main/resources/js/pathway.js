@@ -79,26 +79,15 @@
 		});
 	}
 
-	function getGPML(selectedVcf, pathwayId) {
+	function getColoredPathwayImage(selectedVcf, pathwayId) {
 		$.ajax({
 			type : 'GET',
-			url : molgenis.getContextUrl() + "/getGPML/" + selectedVcf + "/" + pathwayId,
+			url : molgenis.getContextUrl() + "/getColoredPathway/" + selectedVcf + "/" + pathwayId,
 			contentType : 'application/json',
 			success : function(data) {
 				$("#colored-pathway-svg-image").empty();
 				$('#colored-pathway-svg-image').append(data);
 				SvgZoomColoredPathway();
-			}
-		});
-	}
-
-	function getColoredPathwayImage(pathwayId) {
-		$.ajax({
-			type : 'GET',
-			url : molgenis.getContextUrl() + "/getColoredPathway/" + pathwayId,
-			success : function(data) {
-				$("#colored-pathway-svg-image").empty();
-				$('#colored-pathway-svg-image').append(data);
 			}
 		});
 	}
@@ -156,7 +145,7 @@
 			},
 		}).on("select2-selecting", function(event) {
 			pathwayId = event.val;
-			getGPML(selectedVcf, pathwayId);
+			getColoredPathwayImage(selectedVcf, pathwayId);
 		});
 		
 		getPathways();
