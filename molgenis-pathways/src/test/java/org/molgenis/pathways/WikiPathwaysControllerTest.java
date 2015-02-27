@@ -1,31 +1,85 @@
 package org.molgenis.pathways;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.util.Arrays;
+import java.util.concurrent.ExecutionException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.mockito.Mockito;
-import org.molgenis.wikipathways.client.WikiPathwaysPortType;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Repository;
+import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.MapEntity;
+import org.molgenis.framework.ui.MolgenisPluginRegistry;
+import org.molgenis.pathways.WikiPathwaysController.Impact;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.ui.ExtendedModelMap;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import org.xml.sax.SAXException;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 
-public class WikiPathwaysControllerTest
+@ContextConfiguration(classes =
+{ WikiPathwaysControllerTest.Config.class })
+public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 {
+	@Configuration
+	public static class Config
+	{
+		@Bean
+		public DataService dataService()
+		{
+			return mock(DataService.class);
+		}
+
+		@Bean
+		public WikiPathwaysService serviceMock()
+		{
+			return Mockito.mock(WikiPathwaysService.class);
+		}
+
+		@Bean
+		public WikiPathwaysController controller()
+		{
+			return new WikiPathwaysController(serviceMock());
+		}
+
+		@Bean
+		public MolgenisPluginRegistry molgenisPluginRegistry()
+		{
+			return mock(MolgenisPluginRegistry.class);
+		}
+	}
+
+	@Autowired
 	private WikiPathwaysController controller;
-	private WikiPathwaysPortType serviceMock;
+	@Autowired
+	private WikiPathwaysService serviceMock;
+	@Autowired
+	private DataService dataService;
+	private DefaultEntityMetaData vcf;
 
 	@BeforeTest
 	public void init()
 	{
-		serviceMock = Mockito.mock(WikiPathwaysPortType.class);
-		controller = new WikiPathwaysController(new WikiPathwaysService(serviceMock));
+		vcf = new DefaultEntityMetaData("VCF");
+		vcf.addAttribute("id").setIdAttribute(true);
+		vcf.addAttribute("EFF");
 	}
 
 	@Test
@@ -55,14 +109,106 @@ public class WikiPathwaysControllerTest
 	}
 
 	@Test
-	public void testGetColoredPathway() throws RemoteException
+	public void testInit() throws RemoteException
 	{
-		// mock inprogrammeren
-		byte[] base64Binary = null;
+		when(dataService.getEntityNames()).thenReturn(Arrays.asList("NonVCF", "VCF"));
+		DefaultEntityMetaData nonVcf = new DefaultEntityMetaData("NonVCF");
+		nonVcf.addAttribute("id").setIdAttribute(true);
 
-		when(serviceMock.getColoredPathway("WP2377", "0", new String[]
-		{ "cf3", "cd6" }, new String[]
-		{ "FFA500", "FF0000" }, "svg")).thenReturn(base64Binary);
+		when(dataService.getEntityMetaData("NonVCF")).thenReturn(nonVcf);
+		when(dataService.getEntityMetaData("VCF")).thenReturn(vcf);
 
+		ExtendedModelMap model = new ExtendedModelMap();
+		assertEquals(controller.init(model), "view-pathways");
+		assertEquals(model.get("entitiesMeta"), ImmutableList.<EntityMetaData> of(vcf));
 	}
+
+	@Test
+	public void testGetAllPathways() throws ExecutionException
+	{
+		ImmutableMap<String, String> allPathways = ImmutableMap.<String, String> of("WP1234", "Pathway 1 (WP1234)",
+				"WP12", "Pathway 2 (WP12)");
+		when(serviceMock.getAllPathways("Homo sapiens")).thenReturn(allPathways);
+		assertEquals(controller.getAllPathways(), allPathways);
+	}
+
+	@Test
+	public void testGetColoredPathway() throws ParserConfigurationException, SAXException, IOException,
+			ExecutionException
+	{
+		// {TUSC2=[cf7548], IPO4=[d9af5]}
+		when(serviceMock.getPathwayGPML("WP1234"))
+				.thenReturn(
+						"<gpml>  "
+								+ "<DataNode TextLabel='TUSC2 / Fus1 , Fusion' GraphId = 'cf7548' Type='GeneProduct' GroupRef='bced7'>"
+								+ "<Graphics CenterX='688.6583271016858' CenterY='681.6145075824545' Width='80.0' Height='20.0' ZOrder='32768' FontSize='10' Valign='Middle' />"
+								+ "<Xref Database='Ensembl' ID='ENSG00000197081' />"
+								+ "</DataNode>"
+								+ "<DataNode TextLabel='&amp;quot;IPO4&amp;quot;' GraphId='d9af5' Type='GeneProduct' GroupRef='bced7'>"
+								+ "<Graphics CenterX='688.6583271016858' CenterY='701.6145075824545' Width='80.0' Height='20.0' ZOrder='32768' FontSize='10' Valign='Middle' />"
+								+ "<Xref Database='Ensembl' ID='ENSG00000196497' />" + "</DataNode></gpml>");
+		Repository vcfRepo = mock(Repository.class);
+		Entity row1 = new MapEntity(vcf);
+		row1.set("EFF", "INTRON(LOW||||1417|TUSC2|protein_coding|CODING|NM_000057.3|7|1)	GT	1|0");
+		Entity row2 = new MapEntity(vcf);
+		row2.set("EFF", "INTRON(LOW||||1417|IPO4|protein_coding|CODING|NM_000057.3|8|1)	GT	1|0");
+		Entity row3 = new MapEntity(vcf);
+		row2.set("EFF", "INTRON(MODERATE||||1417|IPO4|protein_coding|CODING|NM_000057.3|8|1)	GT	1|0");
+		when(vcfRepo.iterator()).thenReturn(Arrays.asList(row1, row2, row3).iterator());
+		when(dataService.getRepositoryByEntityName("VCF")).thenReturn(vcfRepo);
+
+		when(
+				serviceMock.getColoredPathwayImage("WP1234", Arrays.asList("cf7548", "d9af5"),
+						Arrays.asList(Impact.LOW.getColor(), Impact.MODERATE.getColor()))).thenReturn(
+				"<svg>WP1234</svg>");
+
+		assertEquals(controller.getColoredPathway("VCF", "WP1234"), "<svg>WP1234</svg>");
+	}
+
+	@Test
+	public void testGetColoredPathwayNoGraphIds() throws ParserConfigurationException, SAXException, IOException,
+			ExecutionException
+	{
+		when(serviceMock.getPathwayGPML("WP1234"))
+				.thenReturn(
+						"<gpml>  "
+								+ "<DataNode TextLabel='TUSC2 / Fus1 , Fusion' Type='GeneProduct' GroupRef='bced7'>"
+								+ "<Graphics CenterX='688.6583271016858' CenterY='681.6145075824545' Width='80.0' Height='20.0' ZOrder='32768' FontSize='10' Valign='Middle' />"
+								+ "<Xref Database='Ensembl' ID='ENSG00000197081' />"
+								+ "</DataNode>"
+								+ "<DataNode TextLabel='IPO4' Type='GeneProduct' GroupRef='bced7'>"
+								+ "<Graphics CenterX='688.6583271016858' CenterY='701.6145075824545' Width='80.0' Height='20.0' ZOrder='32768' FontSize='10' Valign='Middle' />"
+								+ "<Xref Database='Ensembl' ID='ENSG00000196497' />" + "</DataNode></gpml>");
+		Repository vcfRepo = mock(Repository.class);
+		Entity row1 = new MapEntity(vcf);
+		row1.set("EFF", "INTRON(LOW||||1417|TUSC2|protein_coding|CODING|NM_000057.3|7|1)	GT	1|0");
+		Entity row2 = new MapEntity(vcf);
+		row2.set("EFF", "INTRON(MODERATE||||1417|IPO4|protein_coding|CODING|NM_000057.3|8|1)	GT	1|0");
+		when(vcfRepo.iterator()).thenReturn(Arrays.asList(row1, row2).iterator());
+		when(dataService.getRepositoryByEntityName("VCF")).thenReturn(vcfRepo);
+		when(serviceMock.getUncoloredPathwayImage("WP1234")).thenReturn("<svg>WP1234</svg>");
+		assertEquals(controller.getColoredPathway("VCF", "WP1234"), "<svg>WP1234</svg>");
+	}
+
+	@Test
+	public void testGetPathwaysByGenes() throws ExecutionException
+	{
+		Repository vcfRepo = mock(Repository.class);
+		Entity row1 = new MapEntity(vcf);
+		row1.set("EFF", "INTRON(LOW||||1417|TUSC2|protein_coding|CODING|NM_000057.3|7|1)	GT	1|0");
+		Entity row2 = new MapEntity(vcf);
+		row2.set("EFF", "INTRON(MODERATE||||1417|IPO4|protein_coding|CODING|NM_000057.3|8|1)	GT	1|0");
+		when(vcfRepo.iterator()).thenReturn(Arrays.asList(row1, row2).iterator());
+
+		when(dataService.getRepositoryByEntityName("VCF")).thenReturn(vcfRepo);
+
+		when(serviceMock.getPathwaysForGene("TUSC2", "Homo sapiens")).thenReturn(
+				ImmutableMap.<String, String> of("WP1", "Pathway 1 (WP1)", "WP2", "Pathway 2 (WP2)"));
+		when(serviceMock.getPathwaysForGene("IPO4", "Homo sapiens")).thenReturn(
+				ImmutableMap.<String, String> of("WP3", "Pathway 3 (WP3)", "WP4", "Pathway 4 (WP4)"));
+
+		assertEquals(controller.getListOfPathwayNamesByGenes("VCF"), ImmutableMap.<String, String> of("WP1",
+				"Pathway 1 (WP1)", "WP2", "Pathway 2 (WP2)", "WP3", "Pathway 3 (WP3)", "WP4", "Pathway 4 (WP4)"));
+	}
+
 }
