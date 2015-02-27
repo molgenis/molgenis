@@ -11,6 +11,62 @@
 	
 	molgenis.dataexplorer = molgenis.dataexplorer || {};
 	var self = molgenis.dataexplorer.filter = molgenis.dataexplorer.filter || {};
+
+	self.createFilter = function createFilter(attribute, filter, wizard) {
+		switch(attribute.fieldType) {
+			case 'BOOL':
+			case 'CATEGORICAL':
+				return self.createSimpleFilter(attribute, filter, wizard, false);
+			case 'XREF':
+				return self.createSimpleFilter(attribute, filter, wizard, true);
+			case 'DATE':
+			case 'DATE_TIME':
+			case 'DECIMAL':
+			case 'LONG':
+			case 'EMAIL':
+			case 'HTML':
+			case 'HYPERLINK':
+			case 'STRING':
+			case 'ENUM':
+			case 'INT':
+			case 'TEXT':
+			case 'SCRIPT':
+				return self.createComplexFilter(attribute, filter, wizard, 'OR');
+				break;
+			case 'CATEGORICAL_MREF':	
+			case 'MREF':
+				return self.createComplexFilter(attribute, filter, wizard, null);
+				break;
+			case 'COMPOUND' :
+			case 'FILE':
+			case 'IMAGE':
+				throw 'Unsupported data type: ' + attribute.fieldType;
+			default:
+				throw 'Unknown data type: ' + attribute.fieldType;
+		}
+	};
+	
+	/**
+	 * Create filters JavaScript components from a form
+	 */
+	self.createFilters = function createFilters(form) {
+		var filters = {};
+		var filter;
+		
+		$('.complex-filter-container', form).each(function() {
+			filter = new self.ComplexFilter($(this).data('attribute'));
+			filter.update($(this));
+			filters[filter.attribute.href] = filter;
+		});
+
+		$('.simple-filter-container', form).each(function() {
+			filter = new self.SimpleFilter($(this).data('attribute'));
+			filter.update($(this));
+			filters[filter.attribute.href] = filter;
+		});
+
+		return filters;
+	};
 	
 	/**
 	 * Create the filter
@@ -204,6 +260,7 @@
 				break;
 			case 'XREF':
 			case 'MREF':
+			case 'CATEGORICAL_MREF':
 				var operator = simpleFilter ? simpleFilter.operator : 'OR';
 				var container = $('<div class="xrefmrefsearch">');
 				$controls.append(container);
@@ -328,7 +385,7 @@
 						
 						labels = $(this).data('labels');
 					} 
-					else if(attribute.fieldType == 'CATEGORICAL') {
+					else if(attribute.fieldType == 'CATEGORICAL' || attribute.fieldType == 'CATEGORICAL_MREF') {
 						labels.push($(this).parent().text());
 						values[values.length] = value;
 					}
@@ -429,6 +486,7 @@
 					switch(attribute.fieldType) {
 						case 'BOOL':
 						case 'CATEGORICAL':
+						case 'CATEGORICAL_MREF':
 						case 'DATE':
 						case 'DATE_TIME':
 						case 'DECIMAL':

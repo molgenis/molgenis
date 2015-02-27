@@ -73,6 +73,7 @@ public class SortGenerator implements QueryPartGenerator
 						.toString();
 				break;
 			case CATEGORICAL:
+			case CATEGORICAL_MREF:
 			case MREF:
 			case XREF:
 				// use nested field for sorting

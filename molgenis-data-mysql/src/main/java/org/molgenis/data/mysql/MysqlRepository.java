@@ -358,6 +358,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 			case COMPOUND:
 			case MREF:
 			case CATEGORICAL:
+			case CATEGORICAL_MREF:
 			case XREF:
 				if (att.isLabelAttribute())
 				{

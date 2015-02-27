@@ -303,10 +303,6 @@
 								<name>molgenis.home</name>
 								<value>${user.home}${file.separator}.molgenis${file.separator}omx</value>
 							</systemProperty>
-							<systemProperty>
-								<name>log4j.configuration</name>
-								<value>log4j-molgenis.properties</value>
-							</systemProperty>
 						</systemProperties>
                         <webAppConfig>
                             <contextPath>/</contextPath>

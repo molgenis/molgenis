@@ -396,6 +396,7 @@ function createInput(attr, attrs, val, lbl) {
 	case 'ENUM':
 	case 'SCRIPT':
 		return createBasicInput('text', attrs, val).addClass('form-control');
+	case 'CATEGORICAL_MREF':
 	case 'MREF':
 	case 'XREF':
 		return createBasicInput('hidden', attrs, val).addClass('form-control');
