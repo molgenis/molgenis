@@ -250,7 +250,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 	public String getColoredPathway(@PathVariable String selectedVcf, @PathVariable String pathwayId)
 			throws ParserConfigurationException, SAXException, IOException, ExecutionException
 	{
-		Multimap<String, String> graphIdsPerGene = analyzeGPML(wikiPathwaysService.getCurrentPathwayGPML(pathwayId));
+		Multimap<String, String> graphIdsPerGene = analyzeGPML(wikiPathwaysService.getPathwayGPML(pathwayId));
 		return getColoredPathway(selectedVcf, pathwayId, graphIdsPerGene);
 	}
 

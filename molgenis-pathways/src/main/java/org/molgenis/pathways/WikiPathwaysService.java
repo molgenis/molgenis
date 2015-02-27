@@ -149,7 +149,7 @@ public class WikiPathwaysService
 	 * @throws ConverterException
 	 * @throws RemoteException
 	 */
-	public String getCurrentPathwayGPML(String pathwayId) throws RemoteException
+	public String getPathwayGPML(String pathwayId) throws RemoteException
 	{
 		return wikiPathwaysProxy.getPathway(pathwayId, 0).getGpml();
 	}
