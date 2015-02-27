@@ -2,13 +2,11 @@ package org.molgenis.data;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.molgenis.data.support.FileRepositoryCollection;
+import org.molgenis.util.FileExtensionUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 
@@ -58,25 +56,12 @@ public class FileRepositoryCollectionFactory
 	 */
 	public FileRepositoryCollection createFileRepositoryCollection(File file)
 	{
-		String name = file.getName().toLowerCase();
 		Class<? extends FileRepositoryCollection> clazz = null;
 		
-		List<String> possibleExtensions = new ArrayList<String>();
-		for (Entry<String, Class<? extends FileRepositoryCollection>> entry : fileRepositoryCollection.entrySet())
-		{
-			if (name.endsWith('.' + entry.getKey()))
-			{
-				possibleExtensions.add(entry.getKey());
-			}
-		}
-
-		String longestExtention = "";
-		for (String possibleExtension : possibleExtensions)
-		{
-			if (longestExtention.length() < possibleExtension.length()) longestExtention = possibleExtension;
-		}
+		String extension = FileExtensionUtil.findTheClosestFileExtansionFromSet(file.getName(),
+				fileRepositoryCollection.keySet());
 		
-		clazz = fileRepositoryCollection.get(longestExtention);
+		clazz = fileRepositoryCollection.get(extension);
 
 		if (clazz == null)
 		{

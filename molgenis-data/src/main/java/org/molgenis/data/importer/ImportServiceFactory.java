@@ -1,29 +1,35 @@
 package org.molgenis.data.importer;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.util.FileExtensionUtil;
 import org.springframework.core.OrderComparator;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 @Component
 public class ImportServiceFactory
 {
+	private final Map<String, ImportService> importServicesMapedToExtentions = Maps.newHashMap();
 	private final List<ImportService> importServices = Lists.newArrayList();
 
 	public void addImportService(ImportService importService)
 	{
 		importServices.add(importService);
+		for (String extension : importService.getSupportedFileExtensions())
+		{
+			importServicesMapedToExtentions.put(extension.toLowerCase(), importService);
+		}
 		Collections.sort(importServices, OrderComparator.INSTANCE);
 	}
+	
 
 	/**
 	 * Finds a suitable ImportService for a FileRepositoryCollection.
@@ -37,42 +43,25 @@ public class ImportServiceFactory
 	 */
 	public ImportService getImportService(File file, RepositoryCollection source)
 	{
-		List<ImportService> possibleImportServices = new ArrayList<ImportService>();
-		for (ImportService importService : importServices)
+		String extension = FileExtensionUtil.findTheClosestFileExtansionFromSet(file.getName(),
+				importServicesMapedToExtentions.keySet());
+
+		final ImportService importService = importServicesMapedToExtentions.get(extension);
+
+		System.out.println("extension: " + extension);
+
+		if (importService == null)
+			throw new MolgenisDataException("Can not import file. No suitable importer found");
+
+		System.out.println("SupportedFileExtensions" + importService.getSupportedFileExtensions());
+
+		if (importService.canImport(file, source))
 		{
-			if (importService.canImport(file, source))
-			{
-				possibleImportServices.add(importService);
-			}
+			return importService;
 		}
-
-		String name = file.getName().toLowerCase();
-		Map<String, ImportService> possibleExtensions = new HashMap<String, ImportService>();
-		for (ImportService importSerivce : possibleImportServices)
+		else
 		{
-			for (String extension : importSerivce.getSupportedFileExtensions())
-			{
-				if (name.endsWith('.' + extension))
-				{
-					if (possibleExtensions.containsKey(extension)) throw new MolgenisDataException(
-							"Cannot have the same file extension registered in multiple ImportServices : "
-									+ importSerivce.getClass().getSimpleName() + ", "
-									+ possibleExtensions.get(extension).getClass().getSimpleName());
-
-					possibleExtensions.put(extension, importSerivce);
-				}
-			}
+			throw new MolgenisDataException("Can not import file. No suitable importer found");
 		}
-
-		String longestExtention = "";
-		for (String possibleExtension : possibleExtensions.keySet())
-		{
-			if (longestExtention.length() < possibleExtension.length()) longestExtention = possibleExtension;
-		}
-
-		if (!possibleExtensions.containsKey(longestExtention)) throw new MolgenisDataException(
-				"Can not import file. No suitable importer found");
-
-		return possibleExtensions.get(longestExtention);
 	}
 }
