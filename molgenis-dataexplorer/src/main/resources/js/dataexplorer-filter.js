@@ -33,6 +33,7 @@
 			case 'SCRIPT':
 				return self.createComplexFilter(attribute, filter, wizard, 'OR');
 				break;
+			case 'CATEGORICAL_MREF': // FIXME test if this works	
 			case 'MREF':
 				return self.createComplexFilter(attribute, filter, wizard, null);
 				break;
@@ -169,6 +170,7 @@
 			case 'SCRIPT':
 				return htmlEscape(values[0] ? values[0] : '');
 			case 'CATEGORICAL':
+			case 'CATEGORICAL_MREF':
 			case 'MREF':
 			case 'XREF':
 				var operator = (filter.operator ? filter.operator.toLocaleLowerCase() : 'or');
@@ -459,6 +461,7 @@
 				$controls.append($('<div class="filter-radio-inline-container">').append(inputTrue.addClass('radio-inline')).append(inputFalse.addClass('radio-inline')));
 				break;
 			case 'CATEGORICAL':
+			case 'CATEGORICAL_MREF': // FIXME test is works
 				var restApi = new molgenis.RestClient();
 				var entityMeta = restApi.get(attribute.refEntity.href);
 				var entitiesUri = entityMeta.href.replace(new RegExp('/meta[^/]*$'), ''); // TODO do not manipulate uri
@@ -655,7 +658,7 @@
 						
 						labels = $(this).data('labels');
 					} 
-					else if(attribute.fieldType == 'CATEGORICAL') {
+					else if(attribute.fieldType == 'CATEGORICAL' || attribute.fieldType == 'CATEGORICAL_MREF') {
 						labels.push($(this).parent().text());
 						values[values.length] = value;
 					}
@@ -756,6 +759,7 @@
 					switch(attribute.fieldType) {
 						case 'BOOL':
 						case 'CATEGORICAL':
+						case 'CATEGORICAL_MREF':
 						case 'DATE':
 						case 'DATE_TIME':
 						case 'DECIMAL':

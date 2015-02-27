@@ -140,6 +140,7 @@ public abstract class ElasticsearchEntity implements Entity
 				return getInt(attributeName);
 			case LONG:
 				return getLong(attributeName);
+			case CATEGORICAL_MREF:
 			case MREF:
 				return getEntities(attributeName);
 			default:

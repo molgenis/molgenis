@@ -31,7 +31,7 @@
 			if(attribute.aggregateable) {
 				if(attribute.nillable) {
 					// see: https://github.com/molgenis/molgenis/issues/1937
-					return attribute.fieldType !== 'CATEGORICAL' && attribute.fieldType !== 'XREF' && attribute.fieldType !== 'MREF';
+					return attribute.fieldType !== 'CATEGORICAL' && attribute.fieldType !== 'XREF' && attribute.fieldType !== 'MREF' && attribute.fieldType !== 'CATEGORICAL_MREF';
 				}
 				return true;
 			}
