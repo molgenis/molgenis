@@ -273,6 +273,10 @@
                     </tr>
             </#list>
                 </table>
+                <h4>Symptoms</h4>
+                <p>
+                	<#if genes[geneName][0].getString("INFO_HPOTERMS")??>${genes[geneName][0].getString("INFO_HPOTERMS")?replace("/",", ")}</#if>
+                </p>
                 ')"><#if all_candidates[geneName] gt 1><b>${geneName}</b><#else>${geneName}</#if></div>
         </@compress>
 
