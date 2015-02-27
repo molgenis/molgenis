@@ -10,16 +10,17 @@ import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import org.molgenis.pathways.WikiPathwaysController.Impact;
 import org.molgenis.wikipathways.client.WSPathwayInfo;
 import org.molgenis.wikipathways.client.WSSearchResult;
 import org.molgenis.wikipathways.client.WikiPathwaysPortType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.auto.value.AutoValue;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.ImmutableMap;
 
 /**
  * Interacts with WikiPathways. Caches results.
@@ -28,9 +29,6 @@ import com.google.common.collect.ImmutableMap;
 public class WikiPathwaysService
 {
 	private final WikiPathwaysPortType wikiPathwaysProxy;
-	private static final String COLORS = "colors";
-	private static final String GRAPH_IDS = "graphIds";
-	private static final String PATHWAY_ID = "pathwayId";
 
 	private final LoadingCache<String, List<WSPathwayInfo>> allPathwaysCache = CacheBuilder.newBuilder()
 			.maximumSize(Integer.MAX_VALUE).refreshAfterWrite(1, TimeUnit.DAYS)
@@ -103,20 +101,40 @@ public class WikiPathwaysService
 				}
 			});
 
-	private final LoadingCache<Map<String, Object>, String> coloredPathwayImageCache = CacheBuilder.newBuilder()
+	@AutoValue
+	public static abstract class ColoredPathwayParameters
+	{
+		public abstract String getPathwayId();
+
+		public abstract Map<String, Impact> getImpactPerGraphId();
+
+		public String[] getGraphIdArray()
+		{
+			return getImpactPerGraphId().keySet().toArray(new String[0]);
+		}
+
+		public String[] getColorArray()
+		{
+			return getImpactPerGraphId().values().stream().map(Impact::getColor).toArray((i) -> new String[i]);
+		}
+
+		public static ColoredPathwayParameters create(String pathwayId, Map<String, Impact> impactPerGraphId)
+		{
+			return new AutoValue_WikiPathwaysService_ColoredPathwayParameters(pathwayId, impactPerGraphId);
+		}
+	}
+
+	private final LoadingCache<ColoredPathwayParameters, String> coloredPathwayImageCache = CacheBuilder.newBuilder()
 			.maximumSize(Integer.MAX_VALUE).refreshAfterWrite(1, TimeUnit.DAYS)
-			.build(new CacheLoader<Map<String, Object>, String>()
+			.build(new CacheLoader<ColoredPathwayParameters, String>()
 			{
 				@Override
-				@SuppressWarnings(
-				{ "unchecked" })
-				public String load(Map<String, Object> coloredPathwayParameters) throws Exception
+				public String load(ColoredPathwayParameters coloredPathwayParameters) throws Exception
 				{
-					List<String> graphIds = (List<String>) coloredPathwayParameters.get(GRAPH_IDS);
-					List<String> colors = (List<String>) coloredPathwayParameters.get(COLORS);
+					System.out.println(coloredPathwayParameters);
 					return toSingleLineString(wikiPathwaysProxy.getColoredPathway(
-							coloredPathwayParameters.get(PATHWAY_ID).toString(), "0", graphIds.toArray(new String[0]),
-							colors.toArray(new String[0]), "svg"));
+							coloredPathwayParameters.getPathwayId(), "0", coloredPathwayParameters.getGraphIdArray(),
+							coloredPathwayParameters.getColorArray(), "svg"));
 				}
 			});
 
@@ -159,6 +177,7 @@ public class WikiPathwaysService
 	 * 
 	 * @param pathwayId
 	 *            ID of the pathway from WikiPathways
+	 * @param highestImpactPerGraphId
 	 * @param graphIds
 	 *            List containing graphIds to color
 	 * @param colors
@@ -167,11 +186,10 @@ public class WikiPathwaysService
 	 * @throws ExecutionException
 	 *             if loading of the cache fails
 	 */
-	public String getColoredPathwayImage(String pathwayId, List<String> graphIds, List<String> colors)
+	public String getColoredPathwayImage(String pathwayId, Map<String, Impact> impactPerGraphId)
 			throws ExecutionException
 	{
-		return coloredPathwayImageCache.get(ImmutableMap.<String, Object> of(PATHWAY_ID, pathwayId, GRAPH_IDS,
-				graphIds, COLORS, colors));
+		return coloredPathwayImageCache.get(ColoredPathwayParameters.create(pathwayId, impactPerGraphId));
 	}
 
 	/**

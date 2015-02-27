@@ -158,10 +158,8 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 		when(dataService.getRepositoryByEntityName("VCF")).thenReturn(vcfRepo);
 
 		when(
-				serviceMock.getColoredPathwayImage("WP1234", Arrays.asList("cf7548", "d9af5"),
-						Arrays.asList(Impact.LOW.getColor(), Impact.MODERATE.getColor()))).thenReturn(
-				"<svg>WP1234</svg>");
-
+				serviceMock.getColoredPathwayImage("WP1234", ImmutableMap.<String, WikiPathwaysController.Impact> of(
+						"cf7548", Impact.LOW, "d9af5", Impact.MODERATE))).thenReturn("<svg>WP1234</svg>");
 		assertEquals(controller.getColoredPathway("VCF", "WP1234"), "<svg>WP1234</svg>");
 	}
 

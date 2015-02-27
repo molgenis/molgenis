@@ -336,30 +336,13 @@ public class WikiPathwaysController extends MolgenisPluginController
 	private String getColoredPathway(String selectedVcf, String pathwayId, Multimap<String, String> graphIdsPerGene)
 			throws ExecutionException
 	{
-		Map<String, Impact> highestImpactPerGene = getGenesForVcf(selectedVcf);
-		Map<String, Impact> highestImpactPerGraphId = new HashMap<String, Impact>();
+		Map<String, Impact> impactPerGraphId = new HashMap<String, Impact>();
+		getGenesForVcf(selectedVcf).forEach(
+				(gene, impact) -> graphIdsPerGene.get(gene).forEach(graphId -> impactPerGraphId.put(graphId, impact)));
 
-		for (String gene : highestImpactPerGene.keySet())
+		if (!impactPerGraphId.isEmpty())
 		{
-			Impact impact = highestImpactPerGene.get(gene);
-			for (String graphId : graphIdsPerGene.get(gene))
-			{
-				highestImpactPerGraphId.put(graphId, impact);
-			}
-		}
-
-		List<String> colors = new ArrayList<String>();
-		List<String> graphIds = new ArrayList<String>();
-		for (String graphId : highestImpactPerGraphId.keySet())
-		{
-			Impact impact = highestImpactPerGraphId.get(graphId);
-			graphIds.add(graphId);
-			colors.add(impact.getColor());
-		}
-
-		if (!graphIds.isEmpty())
-		{
-			return wikiPathwaysService.getColoredPathwayImage(pathwayId, graphIds, colors);
+			return wikiPathwaysService.getColoredPathwayImage(pathwayId, impactPerGraphId);
 		}
 		else
 		{

@@ -7,9 +7,9 @@ import static org.testng.Assert.assertEquals;
 
 import java.io.UnsupportedEncodingException;
 import java.rmi.RemoteException;
-import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 
+import org.molgenis.pathways.WikiPathwaysController.Impact;
 import org.molgenis.wikipathways.client.WSPathway;
 import org.molgenis.wikipathways.client.WSPathwayInfo;
 import org.molgenis.wikipathways.client.WSSearchResult;
@@ -92,22 +92,23 @@ public class WikiPathwaysServiceTest
 	}
 
 	@Test
-	public void testGet() throws ExecutionException, RemoteException, UnsupportedEncodingException
+	public void testGetColoredPathwayImage() throws ExecutionException, RemoteException, UnsupportedEncodingException
 	{
 		String svg = "<svg>bl\u00ebah</svg>";
 		when(wikiPathwaysPortType.getColoredPathway("WP1234", "0", new String[]
 		{ "graphID1", "graphID2" }, new String[]
-		{ "FFFFFF", "EEEEEE" }, "svg")).thenReturn("<svg>bl\u00ebah</svg>\n".getBytes("UTF-8"));
+		{ Impact.HIGH.getColor(), Impact.MODERATE.getColor() }, "svg")).thenReturn(
+				"<svg>bl\u00ebah</svg>\n".getBytes("UTF-8"));
 		assertEquals(
-				wikiPathwaysService.getColoredPathwayImage("WP1234", Arrays.asList("graphID1", "graphID2"),
-						Arrays.asList("FFFFFF", "EEEEEE")), svg);
+				wikiPathwaysService.getColoredPathwayImage("WP1234",
+						ImmutableMap.<String, Impact> of("graphID1", Impact.HIGH, "graphID2", Impact.MODERATE)), svg);
 		// test that result gets cached
 		assertEquals(
-				wikiPathwaysService.getColoredPathwayImage("WP1234", Arrays.asList("graphID1", "graphID2"),
-						Arrays.asList("FFFFFF", "EEEEEE")), svg);
+				wikiPathwaysService.getColoredPathwayImage("WP1234",
+						ImmutableMap.<String, Impact> of("graphID1", Impact.HIGH, "graphID2", Impact.MODERATE)), svg);
 		verify(wikiPathwaysPortType).getColoredPathway("WP1234", "0", new String[]
 		{ "graphID1", "graphID2" }, new String[]
-		{ "FFFFFF", "EEEEEE" }, "svg");
+		{ Impact.HIGH.getColor(), Impact.MODERATE.getColor() }, "svg");
 	}
 
 	@Test
