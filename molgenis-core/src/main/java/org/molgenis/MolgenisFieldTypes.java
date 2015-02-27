@@ -76,6 +76,7 @@ public class MolgenisFieldTypes
 		{
 			addType(BOOL);
 			addType(CATEGORICAL);
+			addType(CATEGORICAL_MREF);
 			addType(COMPOUND);
 			addType(DATE);
 			addType(DATETIME);

@@ -33,7 +33,7 @@
 			case 'SCRIPT':
 				return self.createComplexFilter(attribute, filter, wizard, 'OR');
 				break;
-			case 'CATEGORICAL_MREF': // FIXME test if this works	
+			case 'CATEGORICAL_MREF':	
 			case 'MREF':
 				return self.createComplexFilter(attribute, filter, wizard, null);
 				break;
@@ -461,7 +461,6 @@
 				$controls.append($('<div class="filter-radio-inline-container">').append(inputTrue.addClass('radio-inline')).append(inputFalse.addClass('radio-inline')));
 				break;
 			case 'CATEGORICAL':
-			case 'CATEGORICAL_MREF': // FIXME test is works
 				var restApi = new molgenis.RestClient();
 				var entityMeta = restApi.get(attribute.refEntity.href);
 				var entitiesUri = entityMeta.href.replace(new RegExp('/meta[^/]*$'), ''); // TODO do not manipulate uri
@@ -534,6 +533,7 @@
 				break;
 			case 'XREF':
 			case 'MREF':
+			case 'CATEGORICAL_MREF':
 				var operator = simpleFilter ? simpleFilter.operator : 'OR';
 				var container = $('<div class="xrefmrefsearch">');
 				$controls.append(container);

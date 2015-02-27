@@ -127,7 +127,7 @@
 		$hiddenInput.select2({
 			width: width,
 			minimumInputLength: 1,
-			multiple: (attributeMetaData.fieldType === 'MREF' || attributeMetaData.fieldType === 'XREF'), // FIXME missing CATEGORICAL and CATEGORICAL_MREF?
+			multiple: (attributeMetaData.fieldType === 'MREF' || attributeMetaData.fieldType === 'CATEGORICAL_MREF' || attributeMetaData.fieldType === 'XREF'),
 			closeOnSelect: false,
 			query: function (options){
 				var query = createQuery(lookupAttrNames, options.term.match(/[^ ]+/g),'LIKE', true);
@@ -212,7 +212,7 @@
 		if (options.isfilter){
 			var $operatorInput = $('<input type="hidden" data-filter="xrefmref-operator" value="' + options.operator + '" />');
 
-			if(attributeMetaData.fieldType === 'MREF') { // FIXME missing CATEGORICAL_MREF?
+			if(attributeMetaData.fieldType === 'MREF' || attributeMetaData.fieldType === 'CATEGORICAL_MREF') {
 				var $dropdown = $('<div class="input-group-addon dropdown dropdown-toggle-container">');
 				var orValue = 'OR&nbsp;&nbsp;';
 				var andValue = 'AND';
