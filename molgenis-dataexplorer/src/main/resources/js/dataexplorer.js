@@ -498,6 +498,13 @@ function($, molgenis, settingsXhr) {
 				// FIXME implement as part of http://www.molgenis.org/ticket/3110
 			}
 			
+			var searchTerm = $("#observationset-search").val();
+			console.log(searchTerm);
+			// restore the search term and trigger change event to filter data table
+			if(searchTerm){
+				$("#observationset-search").val(searchTerm).change();
+			}
+			
 			render();
 		}
 		
