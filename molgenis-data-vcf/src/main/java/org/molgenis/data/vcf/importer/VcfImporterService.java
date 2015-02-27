@@ -3,9 +3,9 @@ package org.molgenis.data.vcf.importer;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
@@ -23,6 +23,7 @@ import org.molgenis.data.elasticsearch.ElasticsearchRepository;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.importer.EntitiesValidationReportImpl;
 import org.molgenis.data.importer.ImportService;
+import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.security.permission.PermissionSystemService;
@@ -35,7 +36,6 @@ import com.google.common.collect.Lists;
 @Service
 public class VcfImporterService implements ImportService
 {
-	private static final List<String> SUPPORTED_FILE_EXTENSIONS = Arrays.asList("vcf", "vcf.gz");
 	private static final int DEFAULT_BATCH_SIZE = 1000;
 	private final FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
 	private final DataService dataService;
@@ -160,7 +160,7 @@ public class VcfImporterService implements ImportService
 	@Override
 	public boolean canImport(File file, RepositoryCollection source)
 	{
-		for (String extension : SUPPORTED_FILE_EXTENSIONS)
+		for (String extension : GenericImporterExtensions.getVCF())
 		{
 			if (file.getName().toLowerCase().endsWith(extension))
 			{
@@ -299,8 +299,8 @@ public class VcfImporterService implements ImportService
 	}
 
 	@Override
-	public List<String> getSupportedFileExtensions()
+	public Set<String> getSupportedFileExtensions()
 	{
-		return SUPPORTED_FILE_EXTENSIONS;
+		return GenericImporterExtensions.getVCF();
 	}
 }

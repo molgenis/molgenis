@@ -1,13 +1,14 @@
 package org.molgenis.data.importer;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
+import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
 import org.slf4j.Logger;
@@ -23,8 +24,6 @@ import com.google.common.collect.Lists;
 public class EmxImportService implements ImportService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(EmxImportService.class);
-
-	private static final List<String> SUPPORTED_FILE_EXTENSIONS = Arrays.asList("xls", "xlsx", "csv", "zip");
 
 	private final MetaDataParser parser;
 	private final ImportWriter writer;
@@ -55,7 +54,7 @@ public class EmxImportService implements ImportService
 	public boolean canImport(File file, RepositoryCollection source)
 	{
 		String fileNameExtension = StringUtils.getFilenameExtension(file.getName());
-		if (SUPPORTED_FILE_EXTENSIONS.contains(fileNameExtension.toLowerCase()))
+		if (GenericImporterExtensions.getEMX().contains(fileNameExtension.toLowerCase()))
 		{
 			for (String entityName : source.getEntityNames())
 			{
@@ -134,8 +133,8 @@ public class EmxImportService implements ImportService
 	}
 
 	@Override
-	public List<String> getSupportedFileExtensions()
+	public Set<String> getSupportedFileExtensions()
 	{
-		return SUPPORTED_FILE_EXTENSIONS;
+		return GenericImporterExtensions.getEMX();
 	}
 }

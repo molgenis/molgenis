@@ -3,6 +3,7 @@ package org.molgenis.data.csv;
 import javax.annotation.PostConstruct;
 
 import org.molgenis.data.FileRepositoryCollectionFactory;
+import org.molgenis.data.support.GenericImporterExtensions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
@@ -20,7 +21,7 @@ public class CsvDataConfig
 	public void registerCsvRepositorySource()
 	{
 		fileRepositorySourceFactory.addFileRepositoryCollectionClass(CsvRepositoryCollection.class,
-				CsvRepositoryCollection.EXTENSIONS);
+				GenericImporterExtensions.getCSV());
 	}
 
 }

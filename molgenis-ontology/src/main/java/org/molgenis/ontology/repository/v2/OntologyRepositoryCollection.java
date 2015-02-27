@@ -5,13 +5,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.FileRepositoryCollection;
+import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.ontology.model.OntologyMetaData;
 import org.molgenis.ontology.model.OntologyTermDynamicAnnotationMetaData;
 import org.molgenis.ontology.model.OntologyTermMetaData;
@@ -21,34 +21,31 @@ import org.molgenis.ontology.utils.ZipFileUtil;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.common.collect.ImmutableSet;
-
 public class OntologyRepositoryCollection extends FileRepositoryCollection
 {
 	@Autowired
 	private DataService dataService;
 
-	private static final String EXTENSION_OBO_ZIP = "obo.zip";
-	private static final String EXTENSION_OWL_ZIP = "owl.zip";
 	private static final String ESCAPE_VALUES = "[^a-zA-Z0-9_]";
-	public static final Set<String> EXTENSIONS = ImmutableSet.of(EXTENSION_OBO_ZIP, EXTENSION_OWL_ZIP);
 
 	private LinkedHashMap<String, Repository> repositories;
 
 	public OntologyRepositoryCollection(File file) throws OWLOntologyCreationException, FileNotFoundException,
 			IOException
 	{
-		super(EXTENSIONS);
+		super(GenericImporterExtensions.getOntology());
 		if (file == null) throw new IllegalArgumentException("file is null");
 
 		String name = file.getName();
-		if (name.endsWith(EXTENSION_OBO_ZIP))
+		if (name.endsWith(GenericImporterExtensions.OBO_ZIP.toString()))
 		{
-			name = name.substring(0, name.lastIndexOf('.' + EXTENSION_OBO_ZIP)).replace('.', '_');
+			name = name.substring(0, name.lastIndexOf('.' + GenericImporterExtensions.OBO_ZIP.toString())).replace('.',
+					'_');
 		}
-		else if (name.endsWith(EXTENSION_OWL_ZIP))
+		else if (name.endsWith(GenericImporterExtensions.OWL_ZIP.toString()))
 		{
-			name = name.substring(0, name.lastIndexOf('.' + EXTENSION_OWL_ZIP)).replace('.', '_');
+			name = name.substring(0, name.lastIndexOf('.' + GenericImporterExtensions.OWL_ZIP.toString())).replace('.',
+					'_');
 		}
 		else
 		{

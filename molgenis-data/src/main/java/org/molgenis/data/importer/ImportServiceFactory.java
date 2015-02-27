@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.util.FileExtensionUtil;
+import org.molgenis.util.FileExtensionUtils;
 import org.springframework.core.OrderComparator;
 import org.springframework.stereotype.Component;
 
@@ -17,16 +17,11 @@ import com.google.common.collect.Maps;
 @Component
 public class ImportServiceFactory
 {
-	private final Map<String, ImportService> importServicesMapedToExtentions = Maps.newHashMap();
 	private final List<ImportService> importServices = Lists.newArrayList();
 
 	public void addImportService(ImportService importService)
 	{
 		importServices.add(importService);
-		for (String extension : importService.getSupportedFileExtensions())
-		{
-			importServicesMapedToExtentions.put(extension.toLowerCase(), importService);
-		}
 		Collections.sort(importServices, OrderComparator.INSTANCE);
 	}
 	
@@ -43,10 +38,22 @@ public class ImportServiceFactory
 	 */
 	public ImportService getImportService(File file, RepositoryCollection source)
 	{
-		String extension = FileExtensionUtil.findTheClosestFileExtansionFromSet(file.getName(),
-				importServicesMapedToExtentions.keySet());
+		final Map<String, ImportService> importServicesImportableMapedToExtentions = Maps.newHashMap();
+		for (ImportService importService : importServices)
+		{
+			if (importService.canImport(file, source))
+			{
+				for (String extension : importService.getSupportedFileExtensions())
+				{
+					importServicesImportableMapedToExtentions.put(extension.toLowerCase(), importService);
+				}
+			}
+		}
 
-		final ImportService importService = importServicesMapedToExtentions.get(extension);
+		String extension = FileExtensionUtils.findExtansionFromSetForGenericImporter(file.getName(),
+				importServicesImportableMapedToExtentions.keySet());
+
+		final ImportService importService = importServicesImportableMapedToExtentions.get(extension);
 
 		System.out.println("extension: " + extension);
 
@@ -55,13 +62,6 @@ public class ImportServiceFactory
 
 		System.out.println("SupportedFileExtensions" + importService.getSupportedFileExtensions());
 
-		if (importService.canImport(file, source))
-		{
-			return importService;
-		}
-		else
-		{
-			throw new MolgenisDataException("Can not import file. No suitable importer found");
-		}
+		return importService;
 	}
 }

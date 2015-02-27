@@ -2,13 +2,14 @@ package org.molgenis.data.jpa.importer;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.importer.ImportService;
+import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntitiesValidator;
 import org.molgenis.framework.db.EntityImportReport;
@@ -26,8 +27,6 @@ import com.google.common.collect.Lists;
 @Component
 public class JpaImportService implements ImportService
 {
-	private static final List<String> SUPPORTED_FILE_EXTENSIONS = Arrays.asList("xls", "xlsx", "csv", "zip");
-
 	private final EntitiesValidator entitiesValidator;
 	private final EntitiesImporter entitiesImporter;
 	private final RepositoryCollection targetCollection;
@@ -71,7 +70,7 @@ public class JpaImportService implements ImportService
 	public boolean canImport(File file, RepositoryCollection source)
 	{
 		String fileNameExtension = StringUtils.getFilenameExtension(file.getName());
-		if (SUPPORTED_FILE_EXTENSIONS.contains(fileNameExtension.toLowerCase()))
+		if (GenericImporterExtensions.getJPA().contains(fileNameExtension.toLowerCase()))
 		{
 			for (String entityName : source.getEntityNames())
 			{
@@ -101,8 +100,8 @@ public class JpaImportService implements ImportService
 	}
 
 	@Override
-	public List<String> getSupportedFileExtensions()
+	public Set<String> getSupportedFileExtensions()
 	{
-		return SUPPORTED_FILE_EXTENSIONS;
+		return GenericImporterExtensions.getJPA();
 	}
 }
