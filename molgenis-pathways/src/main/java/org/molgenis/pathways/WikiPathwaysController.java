@@ -4,9 +4,8 @@ import static org.molgenis.pathways.WikiPathwaysController.URI;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.StringReader;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,6 +39,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -276,8 +276,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 	Multimap<String, String> analyzeGPML(String gpml) throws ParserConfigurationException, IOException, SAXException
 	{
 		DocumentBuilder dBuilder = DB_FACTORY.newDocumentBuilder();
-		InputStream is = new ByteArrayInputStream(gpml.getBytes());
-		Document doc = dBuilder.parse(is);
+		Document doc = dBuilder.parse(new InputSource(new StringReader(gpml)));
 		NodeList dataNodes = doc.getElementsByTagName("DataNode");
 
 		Multimap<String, String> result = ArrayListMultimap.create();
