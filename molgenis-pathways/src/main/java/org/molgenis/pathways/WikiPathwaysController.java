@@ -57,7 +57,6 @@ public class WikiPathwaysController extends MolgenisPluginController
 			.compile("([A-Z]*\\|)(\\|*[0-9]+\\||\\|+)+([0-9A-Z]+)(\\|*)(.*)");
 
 	private static final String HOMO_SAPIENS = "Homo sapiens";
-	private static Map<Integer, String> variantColor = new HashMap<Integer, String>();
 	private final WikiPathwaysService wikiPathwaysService;
 	@Autowired
 	private DataService dataService;
@@ -69,15 +68,23 @@ public class WikiPathwaysController extends MolgenisPluginController
 	{
 		super(URI);
 		this.wikiPathwaysService = wikiPathwaysService;
-		fillVariantColors();
 	}
 
-	private void fillVariantColors()
+	public enum Impact
 	{
-		variantColor.put(3, "FF0000"); // red
-		variantColor.put(2, "FFA500"); // orange
-		variantColor.put(1, "FFFF00"); // yellow
-		variantColor.put(0, "219AD7"); // lighter blue, so the gene symbol is still visible
+		NONE("219AD7"), LOW("FFFF00"), MODERATE("FFA500"), HIGH("FF0000");
+
+		private final String color;
+
+		private Impact(String color)
+		{
+			this.color = color;
+		}
+
+		public String getColor()
+		{
+			return color;
+		}
 	}
 
 	/**
@@ -165,10 +172,10 @@ public class WikiPathwaysController extends MolgenisPluginController
 	 *            name of the VCF to select
 	 * @return Map mapping Gene name to highest impact
 	 */
-	private HashMap<String, Integer> getGenesForVcf(String selectedVcf)
+	private HashMap<String, Impact> getGenesForVcf(String selectedVcf)
 	{
 		// TODO: cache result per VCF!
-		HashMap<String, Integer> result = new HashMap<String, Integer>();
+		HashMap<String, Impact> result = new HashMap<String, Impact>();
 		Repository repository = dataService.getRepositoryByEntityName(selectedVcf);
 		Iterator<Entity> iterator = repository.iterator();
 		while (iterator.hasNext())
@@ -188,7 +195,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 	 *            String with effect attribute of VCF
 	 */
 
-	private void updateEffect(HashMap<String, Integer> maximumImpacts, String eff)
+	private void updateEffect(HashMap<String, Impact> maximumImpacts, String eff)
 	{
 		if (!StringUtils.isEmpty(eff))
 		{
@@ -196,9 +203,11 @@ public class WikiPathwaysController extends MolgenisPluginController
 			if (effectMatcher.find())
 			{
 				String geneSymbol = effectMatcher.group(3);
-				int impact = eff.contains("HIGH") ? 3 : eff.contains("MODERATE") ? 2 : eff.contains("LOW") ? 1 : 0;
+				Impact impact = eff.contains("HIGH") ? Impact.HIGH : eff.contains("MODERATE") ? Impact.MODERATE : eff
+						.contains("LOW") ? Impact.LOW : Impact.NONE;
 
-				if (!maximumImpacts.containsKey(geneSymbol) || impact > maximumImpacts.get(geneSymbol))
+				if (!maximumImpacts.containsKey(geneSymbol)
+						|| impact.ordinal() > maximumImpacts.get(geneSymbol).ordinal())
 				{
 					maximumImpacts.put(geneSymbol, impact);
 				}
@@ -328,12 +337,12 @@ public class WikiPathwaysController extends MolgenisPluginController
 	private String getColoredPathway(String selectedVcf, String pathwayId, Multimap<String, String> graphIdsPerGene)
 			throws ExecutionException
 	{
-		Map<String, Integer> highestImpactPerGene = getGenesForVcf(selectedVcf);
-		Map<String, Integer> highestImpactPerGraphId = new HashMap<String, Integer>();
+		Map<String, Impact> highestImpactPerGene = getGenesForVcf(selectedVcf);
+		Map<String, Impact> highestImpactPerGraphId = new HashMap<String, Impact>();
 
 		for (String gene : highestImpactPerGene.keySet())
 		{
-			int impact = highestImpactPerGene.get(gene);
+			Impact impact = highestImpactPerGene.get(gene);
 			for (String graphId : graphIdsPerGene.get(gene))
 			{
 				highestImpactPerGraphId.put(graphId, impact);
@@ -344,10 +353,9 @@ public class WikiPathwaysController extends MolgenisPluginController
 		List<String> graphIds = new ArrayList<String>();
 		for (String graphId : highestImpactPerGraphId.keySet())
 		{
-			Integer impact = highestImpactPerGraphId.get(graphId);
-			String color = variantColor.get(impact);
+			Impact impact = highestImpactPerGraphId.get(graphId);
 			graphIds.add(graphId);
-			colors.add(color);
+			colors.add(impact.getColor());
 		}
 
 		if (!graphIds.isEmpty())
