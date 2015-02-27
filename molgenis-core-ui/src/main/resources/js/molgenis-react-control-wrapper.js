@@ -9,8 +9,6 @@
 (function($, molgenis) {
 	"use strict";
 	
-	molgenis.controls = molgenis.controls || {};
-	
 	var div = React.DOM.div, input = React.DOM.input, span = React.DOM.span;
 	
 	/**
@@ -18,7 +16,7 @@
 	 * 
 	 * @memberOf controls
 	 */
-	molgenis.controls.Select2 = React.createClass({
+	var Select2 = React.createClass({
 		mixins: [molgenis.DeepPureRenderMixin],
 		displayName: 'Select2',
 		propTypes: {
@@ -81,7 +79,7 @@
 	 * 
 	 * @memberOf controls
 	 */
-	molgenis.controls.JQRangeSlider = React.createClass({
+	var JQRangeSlider = React.createClass({
 		mixins: [molgenis.DeepPureRenderMixin],
 		displayName: 'JQRangeSlider',
 		propTypes: {
@@ -122,7 +120,7 @@
 	 * 
 	 * @memberOf controls
 	 */
-	molgenis.controls.DateTimePicker = React.createClass({
+	var DateTimePicker = React.createClass({
 		mixins: [molgenis.DeepPureRenderMixin],
 		displayName: 'DateTimePicker',
 		propTypes: {
@@ -173,5 +171,15 @@
 				)
 			);
 		},
+	});
+	
+	// export module
+	molgenis.control = molgenis.control || {};
+	molgenis.control.wrapper = molgenis.control.wrapper || {};
+	
+	$.extend(molgenis.control.wrapper, {
+		Select2: React.createFactory(Select2),
+		JQRangeSlider: React.createFactory(JQRangeSlider),
+		DateTimePicker: React.createFactory(DateTimePicker)
 	});
 }($, window.top.molgenis = window.top.molgenis || {}));

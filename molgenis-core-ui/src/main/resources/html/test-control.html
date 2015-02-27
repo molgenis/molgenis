@@ -29,13 +29,125 @@
     </head>
     <body>
         <div class="container-fluid">
-            <div class="row">
-                <div class="col-md-6">
-				    <div id="input-container"></div>
-				    <div id="input-container-enum"></div>
-                </div>
-            </div>
-        </div>
+			<div class="row">
+				<div class="col-md-12">
+					<div role="tabpanel">
+						<ul class="nav nav-tabs" role="tablist">
+							<li role="presentation" class="active"><a href="#radiogroupcontrol" role="tab" data-toggle="tab">Radio group</a></li>
+							<li role="presentation"><a href="#checkboxgroupcontrol" role="tab" data-toggle="tab">Checkbox group</a></li>
+							<li role="presentation"><a href="#boolcontrol" role="tab" data-toggle="tab">Bool</a></li>
+							<li role="presentation"><a href="#enumcontrol" role="tab" data-toggle="tab">Enum</a></li>
+						</ul>
+	
+						<div class="tab-content">
+							<div role="tabpanel" class="tab-pane active" id="radiogroupcontrol">
+								<div class="row">
+					                <div class="col-md-6">
+					                    <h3>Radio group: stacked</h3>
+					                    <form>
+					                        <div id="input-container-radiogroup"></div>
+					                    </form>
+					                    <h3>Radio group: stacked, selected value</h3>
+					                    <form>
+					                        <div id="input-container-radiogroup-value"></div>
+					                    </form>
+					                    <h3>Radio group: stacked, nillable</h3>
+					                    <form>
+					                        <div id="input-container-radiogroup-nillable"></div>
+					                    </form>
+					                    <h3>Radio group: stacked, nillable, selected value</h3>
+					                    <form>
+					                        <div id="input-container-radiogroup-nillable-value"></div>
+					                    </form>
+					                    <h3>Radio group: stacked, nillable, selected null value</h3>
+					                    <form>
+					                        <div id="input-container-radiogroup-nillable-value-null"></div>
+					                    </form>
+					                    <h3>Radio group: inline</h3>
+					                    <form>
+					                        <div id="input-container-radiogroup-inline"></div>
+					                    </form>
+					                    <h3>Radio group: disabled</h3>
+					                    <form>
+					                        <div id="input-container-radiogroup-inline-disabled"></div>
+					                    </form>
+                                    </div>
+                                </div>
+							</div>
+							<div role="tabpanel" class="tab-pane" id="checkboxgroupcontrol">
+								<div class="row">
+                                    <div class="col-md-6">
+	                                    <h3>Checkbox group: stacked</h3>
+					                    <form>
+					                        <div id="input-container-checkboxgroup"></div>
+					                    </form>
+					                    <h3>Checkbox group: stacked, selected value</h3>
+					                    <form>
+					                        <div id="input-container-checkboxgroup-value"></div>
+					                    </form>
+					                    <h3>Checkbox group: stacked, nillable</h3>
+					                    <form>
+					                        <div id="input-container-checkboxgroup-nillable"></div>
+					                    </form>
+					                    <h3>Checkbox group: stacked, nillable, selected value</h3>
+					                    <form>
+					                        <div id="input-container-checkboxgroup-nillable-value"></div>
+					                    </form>
+					                    <h3>Checkbox group: stacked, nillable, selected null value</h3>
+					                    <form>
+					                        <div id="input-container-checkboxgroup-nillable-value-null"></div>
+					                    </form>
+					                    <h3>Checkbox group: inline</h3>
+					                    <form>
+					                        <div id="input-container-checkboxgroup-inline"></div>
+					                    </form>
+					                    <h3>Checkbox group: disabled</h3>
+					                    <form>
+					                        <div id="input-container-checkboxgroup-inline-disabled"></div>
+					                    </form>
+                                    </div>
+                                </div>
+							</div>
+							<div role="tabpanel" class="tab-pane" id="boolcontrol">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h3>Bool: default</h3>
+                                        <form><div id="input-container-bool"></div></form>
+                                        <h3>Bool: value = true</h3>
+                                        <form><div id="input-container-bool-value-true"></div></form>
+                                        <h3>Bool: value = false</h3>
+                                        <form><div id="input-container-bool-value-false"></div></form>
+                                        <h3>Bool: nillable</h3>
+                                        <form><div id="input-container-bool-nillable"></div></form>
+                                        <h3>Bool: nillable, value=null</h3>
+                                        <form><div id="input-container-bool-nillable-value"></div></form>
+                                        <h3>Bool: multiple</h3>
+                                        <form><div id="input-container-bool-multiple"></div></form>
+                                        <h3>Bool: multiple, value=[true,false]</h3>
+                                        <form><div id="input-container-bool-multiple-value"></div></form>
+                                        <h3>Bool: multiple, nillable</h3>
+                                        <form><div id="input-container-bool-multiple-nillable"></div></form>
+                                        <h3>Bool: multiple, nillable, value=[false,null]</h3>
+                                        <form><div id="input-container-bool-multiple-nillable-value"></div></form>
+                                        <h3>Bool: group layout</h3>
+                                        <form><div id="input-container-bool-group"></div></form>
+                                        <h3>Bool: group layout, value=true</h3>
+                                        <form><div id="input-container-bool-group-value"></div></form>
+                                    </div>
+                                </div>
+                            </div>
+							<div role="tabpanel" class="tab-pane" id="enumcontrol">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div id="input-container"></div>
+                                        <div id="input-container-enum"></div>
+                                    </div>
+                                </div>
+                            </div>                                      
+						</div>
+					</div>
+				</div>
+			</div>
         <script id="attr-control-form-template" type="text/x-handlebars-template">
         <form class="form-horizontal">
             <div class="form-group">

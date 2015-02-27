@@ -1,7 +1,7 @@
 (function($, molgenis) {
 	"use strict";
 
-	var form = React.DOM.form, div = React.DOM.div, label = React.DOM.label, button = React.DOM.button, span = React.DOM.span, a = React.DOM.a;
+	var form = React.DOM.form, div = React.DOM.div, label = React.DOM.label, button = React.DOM.button, span = React.DOM.span, h4 = React.DOM.h4;
 	var __spread = React.__spread;
 	
 	var api = new molgenis.RestClient();
@@ -9,8 +9,13 @@
 	var AttributeFormControl = React.createClass({
 		mixins: [molgenis.DeepPureRenderMixin],
 		displayName: 'AttributeFormControl',
+		propTypes: {
+			layout: React.PropTypes.string,
+			onValueChange: React.PropTypes.func.isRequired
+		},
 		getInitialState: function() {
 			return {
+				attr: this.props.attr.name !== undefined ? this.props.attr : null,
 				value: this.props.value,
 				pristine: true,
 				validity: this.props.validate ? this._validate(this.props.value).valid : undefined
@@ -24,39 +29,60 @@
 			}
 		},
 		componentDidMount: function() {console.log('componentDidMount AttributeFormControl');
-			if(this.props.attr.description !== undefined) {
-				$(this.refs.popover.getDOMNode()).popover(); // Bootstrap requires you to initialize popovers yourself
+			if(this.props.attr.name === undefined) {
+				var self = this;
+				api.getAsync(this.props.attr.href).done(function(attr) {
+					if (self.isMounted()) {
+						self.setState({attr: attr});
+						
+						// notify parent of initial value validity
+						self.props.onValueChange({
+							attr: attr.name,
+							value: self.state.value,
+							valid: self._validate(self.state.value).valid
+						});
+					}
+				});
 			}
+//			if(this.props.attr.description !== undefined) {
+//				$(this.refs.popover.getDOMNode()).popover(); // Bootstrap requires you to initialize popovers yourself
+//			}
 			
-			// notify parent of initial value validity
-			this.props.onValueChange({
-				attr: this.props.attr.name,
-				value: this.state.value,
-				valid: this._validate(this.state.value).valid
-			});
+//			// notify parent of initial value validity
+//			this.props.onValueChange({
+//				attr: this.props.attr.name,
+//				value: this.state.value,
+//				valid: this._validate(this.state.value).valid
+//			});
 		},
 		componentWillUnmount: function() {console.log('componentWillUnmount AttributeFormControl');
-			if(this.props.attr.description !== undefined) {
-				$(this.refs.popover.getDOMNode()).popover('destroy'); // cleanup
-			}
+//			if(this.props.attr.description !== undefined) {
+//				$(this.refs.popover.getDOMNode()).popover('destroy'); // cleanup
+//			}
 		},
 		render: function() {console.log('render AttributeFormControl', this.state, this.props);
-			var lbl = this.props.attr.label;
-			
-			// add info control for attribute description
-			var lblInfo;
-			if(this.props.attr.description !== undefined) {
-				lblInfo = (
-					a({href: '#', 'data-toggle': 'popover', 'data-content': this.props.attr.description, 'data-trigger': 'focus', ref: 'popover'},
-						span({className: 'glyphicon glyphicon-info-sign'})
-					)
-				);
-				lbl = ' ' + lbl; // put some space between icon and label text
-			} else {
-				lblInfo = undefined;
+			if(this.state.attr === null) {
+				// attribute not fetched yet
+				return div({});
 			}
 			
-			if(this.props.attr.nillable === false) {
+			var attr = this.state.attr;
+			var lbl = attr.label;
+			
+			// add info control for attribute description
+//			var lblInfo;
+//			if(attr.description !== undefined) {
+//				lblInfo = (
+//					a({href: '#', 'data-toggle': 'popover', 'data-content': attr.description, 'data-trigger': 'focus', ref: 'popover'},
+//						span({className: 'glyphicon glyphicon-info-sign'})
+//					)
+//				);
+//				lbl = ' ' + lbl; // put some space between icon and label text
+//			} else {
+//				lblInfo = undefined;
+//			}
+			
+			if(attr.nillable === false) {
 				lbl += ' *';
 			}
 			
@@ -71,17 +97,39 @@
 					formGroupClasses += ' has-error';
 				}
 			}
-			 
-			var id = this.props.attr.name;
-			return(
-				div({className: formGroupClasses},
-					label({className: 'col-sm-2 control-label', htmlFor: id}, lblInfo, lbl),
-					div({className: 'col-sm-10'},
-						React.createElement(molgenis.controls.AttributeControl, __spread({}, this.props, {id: id, onValueChange: this._handleValueChange, onBlur: this._handleBlur})),
+			
+			var multiple = attr.fieldType === 'MREF';
+			if(attr.fieldType === 'MREF') attr.fieldType = 'CATEGORICAL';
+			
+			var id = attr.name;
+			
+			var description = attr.description !== undefined ? span({className: 'help-block'}, attr.description) : undefined;
+			var labelClasses = this.props.layout === 'horizontal' ? 'col-sm-2 control-label' : 'control-label';
+			//var labelElement = label({className: labelClasses, htmlFor: id}, lblInfo, lbl);
+			var labelElement = label({className: labelClasses, htmlFor: id}, lbl);
+			var control = molgenis.control.AttributeControl(__spread({}, this.props, {attr: attr, id: id, layout: undefined, multiple: multiple, onValueChange: this._handleValueChange, onBlur: this._handleBlur}));
+			
+			if(this.props.layout === 'horizontal') {
+				return(
+					div({className: formGroupClasses},
+						labelElement,
+						div({className: 'col-sm-10'},
+							description,
+							control,
+							errorMessageSpan
+						)
+					)
+				);
+			} else {
+				return(
+					div({className: formGroupClasses},
+						labelElement,
+						description,
+						control,
 						errorMessageSpan
 					)
-				)
-			);	
+				);
+			}
 		},
 		_handleValueChange: function(e) {
 			var value = e.value;
@@ -94,7 +142,7 @@
 			});
 			
 			this.props.onValueChange({
-				attr: this.props.attr.name,
+				attr: this.state.attr.name,
 				value: value,
 				valid: validity.valid // notify parent of value validity immediately
 			});
@@ -109,7 +157,7 @@
 		},
 		_validate: function(value) {
 			// apply validation rules
-			var attr = this.props.attr;
+			var attr = this.state.attr;
 			
 			var report;
 			
@@ -144,11 +192,46 @@
 		}
 	});
 	
+	var AttributeFormControlGroup = React.createClass({
+		mixins: [molgenis.DeepPureRenderMixin],
+		displayName: 'AttributeFormControlGroup',
+		propTypes: {
+			onValueChange: React.PropTypes.func.isRequired // TODO add all props
+		},
+		render: function() {
+			var attributes = this.props.attr.attributes;
+			
+			// add control for each attribute
+			var controls = [];
+			for(var i = 0; i < attributes.length; ++i) {console.log('attribute', attributes[i]);
+				var control;
+				if(attributes[i].fieldType !== 'COMPOUND') { // FIXME attribute might be a href, so fieldtype does not exist
+					control = AttributeFormControl({attr: attributes[i], key: 'attr' + i, onValueChange: this.props.onValueChange, validate: this.props.validate, layout: this.props.layout});
+				} else {
+					control = AttributeFormControlGroup({attr: attributes[i], key: 'attr' + i, onValueChange: this.props.onValueChange, validate: this.props.validate, layout: this.props.layout});
+				}
+				controls.push(control);
+			}
+			
+			return (
+				div({},
+					h4({className: 'page-header'}, this.props.attr.label),
+					div({className: 'row'},
+						div({className: 'col-md-offset-1 col-md-11'},
+							controls
+						)
+					)
+				)
+			);
+		}
+	});
+	
 	var Form = React.createClass({
 		mixins: [molgenis.DeepPureRenderMixin],
 		displayName: 'Form',
 		propTypes: {
-			entity: React.PropTypes.object
+			entity: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]),
+			layout: React.PropTypes.string
 		},
 		getInitialState: function() {
 			return {entity: null, values: {}, validate: false}; // TODO initialize with value
@@ -166,25 +249,35 @@
 			}
 
 			// add control for each attribute
+			var attributes = this.state.entity.attributes;
 			var controls = [];
-			for(var key in this.state.entity.attributes) {
-				var control = React.createElement(AttributeFormControl, {attr: this.state.entity.attributes[key], key: key, onValueChange: this._handleValueChange, validate: this.state.validate, ref: key});
+			for(var key in attributes) {console.log('attribute', attributes[key]);
+				var control;
+				if(attributes[key].fieldType !== 'COMPOUND') { // FIXME remove if, find other solution
+					control = AttributeFormControl({attr: attributes[key], key: key, onValueChange: this._handleValueChange, validate: this.state.validate, layout: this.props.layout, ref: key});
+				} else {
+					control = AttributeFormControlGroup({attr: attributes[key], key: key, onValueChange: this._handleValueChange, layout: this.props.layout});
+				}
 				controls.push(control);
 			}
 			
 			// add form buttons
-			var saveControl = (
-				div({className: 'form-group', key: 'submitBtn'},
-					div({className: 'col-sm-offset-2 col-sm-10'},
-						button({type: 'submit', className: 'btn btn-large btn-primary pull-right'}, 'Save')
+			var saveControl = button({type: 'submit', className: 'btn btn-large btn-primary pull-right'}, 'Save');
+			if(this.props.layout === 'horizontal') {
+				saveControl = (
+					div({className: 'form-group'},
+						div({className: 'col-sm-offset-2 col-sm-10'},
+							saveControl
+						)
 					)
-				)
-			);
-			controls.push(saveControl);
+				);
+			}
 			
+			var formClasses = this.props.layout === 'horizontal' ? 'form-horizontal' : undefined; 
 			return (
-				form({className: 'form-horizontal', noValidate: true, onSubmit: this._handleSubmit},
-					controls
+				form({className: formClasses, noValidate: true, onSubmit: this._handleSubmit},
+					controls,
+					saveControl
 				)
 			);
 		},
@@ -239,6 +332,12 @@
 		}
 	});
 
-	molgenis.Form = Form;
+	// export module
+	molgenis.control = molgenis.control || {};
 	
+	$.extend(molgenis.control, {
+		AttributeFormControl: React.createFactory(AttributeFormControl),
+		AttributeFormControlGroup: React.createFactory(AttributeFormControlGroup),
+		Form: React.createFactory(Form),
+	});
 }($, window.top.molgenis = window.top.molgenis || {}));
