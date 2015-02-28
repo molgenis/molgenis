@@ -157,7 +157,7 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 		row2.set("EFF", "INTRON(LOW||||1417|IPO4|protein_coding|CODING|NM_000057.3|8|1)	GT	1|0");
 		Entity row3 = new MapEntity(vcf);
 		row2.set("EFF", "INTRON(MODERATE||||1417|IPO4|protein_coding|CODING|NM_000057.3|8|1)	GT	1|0");
-		when(vcfRepo.iterator()).thenReturn(Arrays.asList(row1, row2, row3).iterator());
+		when(vcfRepo.spliterator()).thenReturn(Arrays.asList(row1, row2, row3).spliterator());
 		when(dataService.getRepositoryByEntityName("VCF")).thenReturn(vcfRepo);
 
 		when(
@@ -186,7 +186,7 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 		row1.set("EFF", "INTRON(LOW||||1417|TUSC2|protein_coding|CODING|NM_000057.3|7|1)	GT	1|0");
 		Entity row2 = new MapEntity(vcf);
 		row2.set("EFF", "INTRON(MODERATE||||1417|IPO4|protein_coding|CODING|NM_000057.3|8|1)	GT	1|0");
-		when(vcfRepo.iterator()).thenReturn(Arrays.asList(row1, row2).iterator());
+		when(vcfRepo.spliterator()).thenReturn(Arrays.asList(row1, row2).spliterator());
 		when(dataService.getRepositoryByEntityName("VCF")).thenReturn(vcfRepo);
 		when(serviceMock.getUncoloredPathwayImage("WP1234")).thenReturn("<svg>WP1234</svg>");
 		assertEquals(controller.getColoredPathway("VCF", "WP1234"), "<svg>WP1234</svg>");
@@ -200,7 +200,7 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 		row1.set("EFF", "INTRON(LOW||||1417|TUSC2|protein_coding|CODING|NM_000057.3|7|1)	GT	1|0");
 		Entity row2 = new MapEntity(vcf);
 		row2.set("EFF", "INTRON(MODERATE||||1417|IPO4|protein_coding|CODING|NM_000057.3|8|1)	GT	1|0");
-		when(vcfRepo.iterator()).thenReturn(Arrays.asList(row1, row2).iterator());
+		when(vcfRepo.spliterator()).thenReturn(Arrays.asList(row1, row2).spliterator());
 
 		when(dataService.getRepositoryByEntityName("VCF")).thenReturn(vcfRepo);
 

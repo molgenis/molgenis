@@ -24,7 +24,7 @@ abstract class ColoredPathwayParameters
 
 	public String[] getColorArray()
 	{
-		return getImpactPerGraphId().values().stream().map(Impact::getColor).toArray((i) -> new String[i]);
+		return getImpactPerGraphId().values().stream().map(Impact::getColor).toArray(String[]::new);
 	}
 
 	public static ColoredPathwayParameters create(String pathwayId, Map<String, Impact> impactPerGraphId)
