@@ -33,6 +33,12 @@ public class WikiPathwaysService
 	private final LoadingCache<ColoredPathwayParameters, String> coloredPathwayImageCache;
 	private final LoadingCache<String, String> uncoloredPathwayImageCache;
 
+	/**
+	 * Creates a new WikiPathwaysService. creates all the caches with their proper loaders.
+	 * 
+	 * @param wikiPathwaysProxy
+	 *            {@link WikiPathwaysPortType} proxy for the REST api that the caches use to load their data from
+	 */
 	@Autowired
 	public WikiPathwaysService(WikiPathwaysPortType wikiPathwaysProxy)
 	{
@@ -58,22 +64,22 @@ public class WikiPathwaysService
 	 */
 	private static String toSingleLineString(byte[] source)
 	{
+		StringBuilder result = new StringBuilder();
 		ByteArrayInputStream bis = new ByteArrayInputStream(source);
 		Scanner scanner = new Scanner(bis, "UTF-8");
-		scanner.useDelimiter("\\Z");
-		String result = "";
+		scanner.useDelimiter("\\n");
 		try
 		{
-			if (scanner.hasNext())
+			while (scanner.hasNext())
 			{
-				result = scanner.next();
+				result.append(scanner.next());
 			}
 		}
 		finally
 		{
 			scanner.close();
 		}
-		return result;
+		return result.toString();
 	}
 
 	/**
