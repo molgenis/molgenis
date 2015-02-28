@@ -133,7 +133,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 	 */
 	@RequestMapping(value = "/filteredPathways", method = POST)
 	@ResponseBody
-	public List<Pathway> getFilteredPathways(@Valid @RequestBody String searchTerm) throws RemoteException
+	public Collection<Pathway> getFilteredPathways(@Valid @RequestBody String searchTerm) throws RemoteException
 	{
 		return wikiPathwaysService.getFilteredPathways(searchTerm, HOMO_SAPIENS);
 	}

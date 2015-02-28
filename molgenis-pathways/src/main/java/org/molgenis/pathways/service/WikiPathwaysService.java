@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
@@ -85,7 +84,7 @@ public class WikiPathwaysService
 	 * @return Map with all matching pathway ids mapped to pathway name
 	 * @throws RemoteException
 	 */
-	public List<Pathway> getFilteredPathways(String searchTerm, String species) throws RemoteException
+	public Collection<Pathway> getFilteredPathways(String searchTerm, String species) throws RemoteException
 	{
 		return Arrays.stream(wikiPathwaysProxy.findPathwaysByText(searchTerm, species)).map(Pathway::create)
 				.collect(Collectors.toList());
