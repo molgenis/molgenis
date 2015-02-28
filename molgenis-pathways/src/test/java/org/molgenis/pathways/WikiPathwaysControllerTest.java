@@ -7,6 +7,7 @@ import static org.testng.Assert.assertEquals;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -19,7 +20,9 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
-import org.molgenis.pathways.WikiPathwaysController.Impact;
+import org.molgenis.pathways.model.Impact;
+import org.molgenis.pathways.model.Pathway;
+import org.molgenis.pathways.service.WikiPathwaysService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -126,8 +129,8 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testGetAllPathways() throws ExecutionException
 	{
-		ImmutableMap<String, String> allPathways = ImmutableMap.<String, String> of("WP1234", "Pathway 1 (WP1234)",
-				"WP12", "Pathway 2 (WP12)");
+		List<Pathway> allPathways = Arrays.asList(Pathway.create("WP1234", "Pathway 1"),
+				Pathway.create("WP12", "Pathway 2"));
 		when(serviceMock.getAllPathways("Homo sapiens")).thenReturn(allPathways);
 		assertEquals(controller.getAllPathways(), allPathways);
 	}
@@ -158,8 +161,9 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 		when(dataService.getRepositoryByEntityName("VCF")).thenReturn(vcfRepo);
 
 		when(
-				serviceMock.getColoredPathwayImage("WP1234", ImmutableMap.<String, WikiPathwaysController.Impact> of(
-						"cf7548", Impact.LOW, "d9af5", Impact.MODERATE))).thenReturn("<svg>WP1234</svg>");
+				serviceMock.getColoredPathwayImage("WP1234",
+						ImmutableMap.<String, Impact> of("cf7548", Impact.LOW, "d9af5", Impact.MODERATE))).thenReturn(
+				"<svg>WP1234</svg>");
 		assertEquals(controller.getColoredPathway("VCF", "WP1234"), "<svg>WP1234</svg>");
 	}
 
@@ -201,12 +205,14 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 		when(dataService.getRepositoryByEntityName("VCF")).thenReturn(vcfRepo);
 
 		when(serviceMock.getPathwaysForGene("TUSC2", "Homo sapiens")).thenReturn(
-				ImmutableMap.<String, String> of("WP1", "Pathway 1 (WP1)", "WP2", "Pathway 2 (WP2)"));
+				Arrays.asList(Pathway.create("WP1", "Pathway 1"), Pathway.create("WP2", "Pathway 2")));
 		when(serviceMock.getPathwaysForGene("IPO4", "Homo sapiens")).thenReturn(
-				ImmutableMap.<String, String> of("WP3", "Pathway 3 (WP3)", "WP4", "Pathway 4 (WP4)"));
+				Arrays.asList(Pathway.create("WP3", "Pathway 3"), Pathway.create("WP4", "Pathway 4")));
 
-		assertEquals(controller.getListOfPathwayNamesByGenes("VCF"), ImmutableMap.<String, String> of("WP1",
-				"Pathway 1 (WP1)", "WP2", "Pathway 2 (WP2)", "WP3", "Pathway 3 (WP3)", "WP4", "Pathway 4 (WP4)"));
+		assertEquals(
+				controller.getListOfPathwayNamesByGenes("VCF"),
+				Arrays.asList(Pathway.create("WP1", "Pathway 1"), Pathway.create("WP2", "Pathway 2"),
+						Pathway.create("WP3", "Pathway 3"), Pathway.create("WP4", "Pathway 4")));
 	}
 
 }

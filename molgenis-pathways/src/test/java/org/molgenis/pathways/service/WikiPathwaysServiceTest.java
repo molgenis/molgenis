@@ -1,4 +1,4 @@
-package org.molgenis.pathways;
+package org.molgenis.pathways.service;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -7,9 +7,14 @@ import static org.testng.Assert.assertEquals;
 
 import java.io.UnsupportedEncodingException;
 import java.rmi.RemoteException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import org.molgenis.pathways.WikiPathwaysController.Impact;
+import org.molgenis.pathways.WikiPathwaysController;
+import org.molgenis.pathways.model.Impact;
+import org.molgenis.pathways.model.Pathway;
+import org.molgenis.pathways.service.WikiPathwaysService;
 import org.molgenis.wikipathways.client.WSPathway;
 import org.molgenis.wikipathways.client.WSPathwayInfo;
 import org.molgenis.wikipathways.client.WSSearchResult;
@@ -40,8 +45,8 @@ public class WikiPathwaysServiceTest
 				"Homo sapiens", "0");
 		when(wikiPathwaysPortType.listPathways("Homo sapiens")).thenReturn(new WSPathwayInfo[]
 		{ pathway1, pathway2 });
-		ImmutableMap<String, String> expected = ImmutableMap.<String, String> of("WP1234", "Blahdi Pathway (WP1234)",
-				"WP1235", "Yet another Pathway (WP1235)");
+		List<Pathway> expected = Arrays.asList(Pathway.create("WP1234", "Blahdi Pathway"),
+				Pathway.create("WP1235", "Yet another Pathway"));
 		assertEquals(wikiPathwaysService.getAllPathways("Homo sapiens"), expected);
 		// check that results are cached
 		assertEquals(wikiPathwaysService.getAllPathways("Homo sapiens"), expected);
@@ -57,8 +62,8 @@ public class WikiPathwaysServiceTest
 				"Yet another Pathway", "Homo sapiens", "1124");
 		when(wikiPathwaysPortType.findPathwaysByText("cancer", "Homo sapiens")).thenReturn(new WSSearchResult[]
 		{ pathway1, pathway2 });
-		ImmutableMap<String, String> expected = ImmutableMap.<String, String> of("WP1234", "Blahdi Pathway (WP1234)",
-				"WP1235", "Yet another Pathway (WP1235)");
+		List<Pathway> expected = Arrays.asList(Pathway.create("WP1234", "Blahdi Pathway"),
+				Pathway.create("WP1235", "Yet another Pathway"));
 		assertEquals(wikiPathwaysService.getFilteredPathways("cancer", "Homo sapiens"), expected);
 	}
 
@@ -72,8 +77,8 @@ public class WikiPathwaysServiceTest
 				{ new WSSearchResult(100, null, "WP1234", null, "Blahdi Pathway", "Homo sapiens", "8921"),
 						new WSSearchResult(100, null, "WP6543", null, "Ratti Pathway", "Rattus norvegicus", "231"),
 						new WSSearchResult(100, null, "WP1235", null, "Yet another Pathway", "Homo sapiens", "8922") });
-		ImmutableMap<String, String> expected = ImmutableMap.<String, String> of("WP1234", "Blahdi Pathway (WP1234)",
-				"WP1235", "Yet another Pathway (WP1235)");
+		List<Pathway> expected = Arrays.asList(Pathway.create("WP1234", "Blahdi Pathway"),
+				Pathway.create("WP1235", "Yet another Pathway"));
 		assertEquals(wikiPathwaysService.getPathwaysForGene("ABCD1", "Homo sapiens"), expected);
 		// test that results are cached
 		assertEquals(wikiPathwaysService.getPathwaysForGene("ABCD1", "Homo sapiens"), expected);

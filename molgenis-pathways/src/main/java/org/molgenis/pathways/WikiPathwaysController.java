@@ -8,13 +8,16 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 import javax.xml.parsers.DocumentBuilder;
@@ -26,6 +29,9 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.pathways.model.Impact;
+import org.molgenis.pathways.model.Pathway;
+import org.molgenis.pathways.service.WikiPathwaysService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,23 +76,6 @@ public class WikiPathwaysController extends MolgenisPluginController
 		this.wikiPathwaysService = wikiPathwaysService;
 	}
 
-	public enum Impact
-	{
-		NONE("219AD7"), LOW("FFFF00"), MODERATE("FFA500"), HIGH("FF0000");
-
-		private final String color;
-
-		private Impact(String color)
-		{
-			this.color = color;
-		}
-
-		public String getColor()
-		{
-			return color;
-		}
-	}
-
 	/**
 	 * Shows the start screen.
 	 * 
@@ -129,7 +118,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 	 */
 	@RequestMapping(value = "/allPathways", method = POST)
 	@ResponseBody
-	public Map<String, String> getAllPathways() throws ExecutionException
+	public Collection<Pathway> getAllPathways() throws ExecutionException
 	{
 		return wikiPathwaysService.getAllPathways(HOMO_SAPIENS);
 	}
@@ -144,7 +133,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 	 */
 	@RequestMapping(value = "/filteredPathways", method = POST)
 	@ResponseBody
-	public Map<String, String> getFilteredPathways(@Valid @RequestBody String searchTerm) throws RemoteException
+	public List<Pathway> getFilteredPathways(@Valid @RequestBody String searchTerm) throws RemoteException
 	{
 		return wikiPathwaysService.getFilteredPathways(searchTerm, HOMO_SAPIENS);
 	}
@@ -174,7 +163,6 @@ public class WikiPathwaysController extends MolgenisPluginController
 	 */
 	private HashMap<String, Impact> getGenesForVcf(String selectedVcf)
 	{
-		// TODO: cache result per VCF!
 		HashMap<String, Impact> result = new HashMap<String, Impact>();
 		Repository repository = dataService.getRepositoryByEntityName(selectedVcf);
 		Iterator<Entity> iterator = repository.iterator();
@@ -226,15 +214,11 @@ public class WikiPathwaysController extends MolgenisPluginController
 	 */
 	@RequestMapping(value = "/pathwaysByGenes", method = POST)
 	@ResponseBody
-	public Map<String, String> getListOfPathwayNamesByGenes(@Valid @RequestBody String selectedVcf)
+	public Collection<Pathway> getListOfPathwayNamesByGenes(@Valid @RequestBody String selectedVcf)
 			throws ExecutionException
 	{
-		Map<String, String> result = new HashMap<String, String>();
-		for (String gene : getGenesForVcf(selectedVcf).keySet())
-		{
-			result.putAll(getPathwaysForGene(gene));
-		}
-		return result;
+		return getGenesForVcf(selectedVcf).keySet().stream().map(this::getPathwaysForGene).flatMap(Collection::stream)
+				.collect(Collectors.toCollection(LinkedHashSet::new));
 	}
 
 	/**
@@ -242,13 +226,20 @@ public class WikiPathwaysController extends MolgenisPluginController
 	 * 
 	 * @param gene
 	 *            the HGNC name of the gene
-	 * @return Map mapping pathway ID to pathway name plus ID
+	 * @return Collection of {@link Pathway}s
 	 * @throws ExecutionException
 	 *             if the loading from cache fails
 	 */
-	private Map<String, String> getPathwaysForGene(String gene) throws ExecutionException
+	private Collection<Pathway> getPathwaysForGene(String gene)
 	{
-		return wikiPathwaysService.getPathwaysForGene(gene, HOMO_SAPIENS);
+		try
+		{
+			return wikiPathwaysService.getPathwaysForGene(gene, HOMO_SAPIENS);
+		}
+		catch (ExecutionException e)
+		{
+			throw new RuntimeException(e);
+		}
 	}
 
 	@RequestMapping(value = "/getColoredPathway/{selectedVcf}/{pathwayId}", method = GET)
