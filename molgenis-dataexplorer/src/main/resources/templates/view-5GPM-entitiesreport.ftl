@@ -1,20 +1,28 @@
 <div class="modal-header">
     <h1>Monogenic disease candidate report for ${datasetRepository.getName()}</h1>
 </div>
-<div class="modal-body">
+<div class="modal-body" style="background-color: #FFFFFF; ">
 
 
 <script type="text/javascript">
-    $(".togglediv_grey").click(function () {
-        $(this).toggleClass("red");
-    });
-    $(".togglediv_lightgreen").click(function () {
-        $(this).toggleClass("red");
-    });
-    $(".togglediv_green").click(function () {
-        $(this).toggleClass("red");
-    });
-
+	$('.togglediv_grey').click(function () {
+		$(this).each(function(){
+		var classes = ['togglediv_border togglediv_blue','togglediv_border togglediv_red', 'togglediv_border togglediv_grey'];
+		this.className = classes[($.inArray(this.className, classes)+1)%classes.length];
+		});
+	});
+	$('.togglediv_lightgreen').click(function () {
+		$(this).each(function(){
+		var classes = ['togglediv_border togglediv_blue','togglediv_border togglediv_red', 'togglediv_border togglediv_lightgreen'];
+		this.className = classes[($.inArray(this.className, classes)+1)%classes.length];
+		});
+	});
+	$('.togglediv_green').click(function () {
+		$(this).each(function(){
+		var classes = ['togglediv_border togglediv_blue','togglediv_border togglediv_red', 'togglediv_border togglediv_green'];
+		this.className = classes[($.inArray(this.className, classes)+1)%classes.length];
+		});
+	});
     function changeContent(id, msg) {
         var el = document.getElementById(id);
         if (id) {
@@ -178,7 +186,10 @@
 
 <h4>Candidate genes</h4>
 <p>
-<div style="display:inline" class="togglediv_green">Green</div> genes have a strong Phenomizer symptom match (<i>p</i> < 0.05), <div style="display:inline" class="togglediv_lightgreen">light green</div> is a weak symptom match (<i>p</i> > 0.05), and <div style="display:inline" class="togglediv_grey">grey</div> genes do not a match. Hover over a gene to see details and the variants for this candidate below. Click on a gene to 'exclude' this candidate by flagging it with a <div style="display:inline" class="togglediv_red">red</div> color.
+<div style="display:inline" class="togglediv_green">Green</div> genes have a strong Phenomizer symptom match (<i>p</i> < 0.05), <div style="display:inline" class="togglediv_lightgreen">light green</div> is a weak symptom match (<i>p</i> > 0.05), and <div style="display:inline" class="togglediv_grey">grey</div> genes do not a match.
+Hover over a gene to see details and the variants for this candidate below.
+Genes in <b>bold font</b> appear in multiple categories.
+Click on a gene to 'exclude' this candidate by flagging it with a <div style="display:inline" class="togglediv_red">red</div> color.
 </p>
 <table class="table table-bordered table-condensed">
     <tr class="active">
@@ -214,7 +225,7 @@
     <#list genes?keys as geneName>
 
         <@compress single_line=true>
-        <div class="togglediv_border togglediv_<#if genes[geneName][0].getDouble("INFO_PHENOMIZERPVAL")??><#if genes[geneName][0].getDouble("INFO_PHENOMIZERPVAL") lt 0.05>green<#else>lightgreen</#if><#else>grey</#if>" style="display:inline" onmouseover="changeContent('infoDiv', '
+        <div class="togglediv_border togglediv_<#if genes[geneName][0].getDouble("INFO_PHENOMIZERPVAL")??><#if genes[geneName][0].getDouble("INFO_PHENOMIZERPVAL") lt 0.05>green<#else>lightgreen</#if><#else>grey</#if>" style="display:inline" onclick="changeContent('infoDiv', '
                 <h4>Gene details</h4>
                 <table class=&quot;table table-bordered table-condensed&quot;>
                 <tr class=&quot;active&quot;>
@@ -273,9 +284,9 @@
                     </tr>
             </#list>
                 </table>
-                <h4>Symptoms</h4>
+                <h4>Symptoms for ${genes[geneName][0].getString("INFO_CGDCOND")}</h4>
                 <p>
-                	<#if genes[geneName][0].getString("INFO_HPOTERMS")??>${genes[geneName][0].getString("INFO_HPOTERMS")?replace("/",", ")}</#if>
+                	<#if genes[geneName][0].getString("INFO_HPOTERMS")??>${genes[geneName][0].getString("INFO_HPOTERMS")?replace("/",", ")?lower_case}<#else>No symptoms available.</#if>
                 </p>
                 ')"><#if all_candidates[geneName] gt 1><b>${geneName}</b><#else>${geneName}</#if></div>
         </@compress>
