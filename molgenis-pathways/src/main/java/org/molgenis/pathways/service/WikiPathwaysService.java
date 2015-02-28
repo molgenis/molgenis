@@ -41,7 +41,7 @@ public class WikiPathwaysService
 				(organism, pathway) -> true, Pathway::create);
 		this.pathwaysPerGeneCache = CacheFactory.loadingPathwayCache(
 				params -> wikiPathwaysProxy.findPathwaysByXref(params.getGeneArray(), HGNC_CODE),
-				(pathway, params) -> pathway.getSpecies().equals(params.getSpecies()), Pathway::create);
+				(params, pathway) -> pathway.getSpecies().equals(params.getSpecies()), Pathway::create);
 		this.uncoloredPathwayImageCache = CacheFactory.loadingCache(pathwayId -> toSingleLineString(wikiPathwaysProxy
 				.getPathwayAs("svg", pathwayId, 0)));
 		this.coloredPathwayImageCache = CacheFactory
