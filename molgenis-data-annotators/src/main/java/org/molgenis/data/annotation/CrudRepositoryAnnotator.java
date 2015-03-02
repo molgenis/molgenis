@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.UUID;
 
 import org.molgenis.MolgenisFieldTypes;
@@ -24,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CrudRepositoryAnnotator
 {
 	private static final Logger LOG = LoggerFactory.getLogger(CrudRepositoryAnnotator.class);
+	private static final int BATCH_SIZE = 50;
 
 	private final String newRepositoryLabel;
 	private final DataService dataService;
@@ -94,6 +96,8 @@ public class CrudRepositoryAnnotator
 			RepositoryAnnotator annotator)
 	{
 		Iterator<Entity> entityIterator = annotator.annotate(sourceRepo.iterator());
+		List<Entity> annotatedEntities = new ArrayList<>();
+
 		if (targetRepo == null)
 		{
 			// annotate repository to itself
@@ -101,7 +105,17 @@ public class CrudRepositoryAnnotator
 			while (entityIterator.hasNext())
 			{
 				Entity entity = entityIterator.next();
-				annotatedSourceRepository.update(entity);
+				annotatedEntities.add(entity);
+				if (annotatedEntities.size() > BATCH_SIZE)
+				{
+					annotatedSourceRepository.update(annotatedEntities);
+					annotatedEntities.clear();
+				}
+			}
+			if (annotatedEntities.size() > 0)
+			{
+				annotatedSourceRepository.update(annotatedEntities);
+				annotatedEntities.clear();
 			}
 			return annotatedSourceRepository;
 		}
@@ -111,7 +125,17 @@ public class CrudRepositoryAnnotator
 			while (entityIterator.hasNext())
 			{
 				Entity entity = entityIterator.next();
-				targetRepo.add(entity);
+				annotatedEntities.add(entity);
+				if (annotatedEntities.size() > BATCH_SIZE)
+				{
+					targetRepo.add(annotatedEntities);
+					annotatedEntities.clear();
+				}
+			}
+			if (annotatedEntities.size() > 0)
+			{
+				targetRepo.add(annotatedEntities);
+				annotatedEntities.clear();
 			}
 			return targetRepo;
 		}

@@ -102,6 +102,10 @@ public class RepositoryValidationDecorator implements Repository
 			{
 				if (attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
 				{
+					if (attr.getExpression() != null)
+					{
+						continue;
+					}
 					violations = checkRefValues(entities, attr);
 					if (!violations.isEmpty())
 					{
@@ -174,7 +178,7 @@ public class RepositoryValidationDecorator implements Repository
 
 			for (AttributeMetaData attr : getEntityMetaData().getAtomicAttributes())
 			{
-				if (attr.isReadonly())
+				if (attr.isReadonly() && attr.getExpression() == null)
 				{
 					Object newValue = attr.getDataType().convert(entity.get(attr.getName()));
 					Object oldValue = attr.getDataType().convert(oldEntity.get(attr.getName()));

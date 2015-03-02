@@ -187,12 +187,12 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest
 	@Test
 	public void canAnnotateTrueTest()
 	{
-		assertEquals(annotator.canAnnotate(metaDataCanAnnotate), true);
+		assertEquals(annotator.canAnnotate(metaDataCanAnnotate), "true");
 	}
 
 	@Test
 	public void canAnnotateFalseTest()
 	{
-		assertEquals(annotator.canAnnotate(metaDataCantAnnotate), false);
+		assertEquals(annotator.canAnnotate(metaDataCantAnnotate), "a required attribute has the wrong datatype");
 	}
 }

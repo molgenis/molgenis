@@ -1,34 +1,11 @@
 package org.molgenis.gaf;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-
 import java.io.IOException;
+import java.nio.file.FileStore;
 import java.util.Arrays;
 import java.util.List;
 
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Repository;
-import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.MapEntity;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.gaf.GafListValidatorTest.Config;
-import org.molgenis.util.FileStore;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes =
 { Config.class })
@@ -158,9 +135,7 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 		when(entityMetaData.getAttribute(GAFCol.EXTERNAL_SAMPLE_ID.toString())).thenReturn(externalSampleId);
 		when(entityMetaData.getAttribute(GAFCol.PROJECT.toString())).thenReturn(project);
 		when(entityMetaData.getAttribute(GAFCol.BARCODE_1.toString())).thenReturn(barcode1);
-
 		when(repository.getEntityMetaData()).thenReturn(entityMetaData);
-
 		when(molgenisSettings.getProperty(GafListFileRepository.GAFLIST_ENTITYNAME)).thenReturn(
 				"gaflist_gaflist_20141111");
 

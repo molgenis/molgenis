@@ -37,6 +37,7 @@ import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.BatchingQueryResult;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.IntField;
@@ -159,6 +160,11 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 
 			for (AttributeMetaData attr : getEntityMetaData().getAtomicAttributes())
 			{
+				if (attr.getExpression() != null)
+				{
+					// computed attributes are not persisted
+					continue;
+				}
 				// add mref tables
 				if (attr.getDataType() instanceof MrefField)
 				{
@@ -193,6 +199,11 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	{
 		try
 		{
+			if (attributeMetaData.getExpression() != null)
+			{
+				// computed attributes are not persisted
+				return;
+			}
 			if (attributeMetaData.getDataType() instanceof MrefField)
 			{
 				asyncJdbcTemplate.execute(getMrefCreateSql(attributeMetaData));
@@ -300,7 +311,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 		{
 			getAttributeSql(sql, att);
-			if (!(att.getDataType() instanceof MrefField))
+			if (att.getExpression() == null && !(att.getDataType() instanceof MrefField))
 			{
 				sql.append(", ");
 			}
@@ -332,6 +343,10 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 
 	private void getAttributeSql(StringBuilder sql, AttributeMetaData att) throws MolgenisModelException
 	{
+		if (att.getExpression() != null)
+		{
+			return;
+		}
 		switch (att.getDataType().getEnumType())
 		{
 			case BOOL:
@@ -456,11 +471,17 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		sql.append("INSERT INTO ").append('`').append(getTableName()).append('`').append(" (");
 		StringBuilder params = new StringBuilder();
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
+		{
+			if (att.getExpression() != null)
+			{
+				continue;
+			}
 			if (!(att.getDataType() instanceof MrefField))
 			{
 				sql.append('`').append(att.getName()).append('`').append(", ");
 				params.append("?, ");
 			}
+		}
 		if (sql.charAt(sql.length() - 1) == ' ' && sql.charAt(sql.length() - 2) == ',')
 		{
 			sql.setLength(sql.length() - 2);
@@ -843,10 +864,17 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		// create sql
 		StringBuilder sql = new StringBuilder("UPDATE ").append('`').append(getTableName()).append('`').append(" SET ");
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
+		{
+			if (att.getExpression() != null)
+			{
+				// computed attributes are not persisted
+				continue;
+			}
 			if (!(att.getDataType() instanceof MrefField))
 			{
 				sql.append('`').append(att.getName()).append('`').append(" = ?, ");
 			}
+		}
 		if (sql.charAt(sql.length() - 1) == ' ' && sql.charAt(sql.length() - 2) == ',')
 		{
 			sql.setLength(sql.length() - 2);
@@ -962,9 +990,21 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 							}
 							else
 							{
-								// default value, if any
+								if (att.getExpression() != null)
+								{
+									continue;
+								}
+
 								if (batch.get(rowIndex).get(att.getName()) == null)
 								{
+									if (att.isIdAtrribute() && att.isAuto()
+											&& (att.getDataType() instanceof StringField))
+									{
+										throw new MolgenisDataException(
+												"Missing auto id value. Please use the 'AutoIdCrudRepositoryDecorator' to add auto id capabilities.");
+									}
+
+									// default value, if any
 									preparedStatement.setObject(fieldIndex++, att.getDefaultValue());
 								}
 								else if (att.getDataType() instanceof XrefField)
@@ -1077,6 +1117,11 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 					}
 					else
 					{
+						if (att.getExpression() != null)
+						{
+							// computed attributes are not persisted
+							continue;
+						}
 						// default value, if any
 						if (e.get(att.getName()) == null)
 						{
@@ -1150,6 +1195,10 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 
 			for (AttributeMetaData att : entityMetaData.getAtomicAttributes())
 			{
+				if (att.getExpression() != null)
+				{
+					continue;
+				}
 				if (att.getDataType() instanceof MrefField)
 				{
 					// TODO: convert to typed lists (or arrays?)
@@ -1172,6 +1221,14 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				else
 				{
 					e.set(att.getName(), att.getDataType().convert(resultSet.getObject(att.getName())));
+				}
+			}
+			for (AttributeMetaData att : entityMetaData.getAtomicAttributes())
+			{
+				if (att.getExpression() != null)
+				{
+					// at least one attribute is computed
+					return new EntityWithComputedAttributes(e);
 				}
 			}
 			return e;

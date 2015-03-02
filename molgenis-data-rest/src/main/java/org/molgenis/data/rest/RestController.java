@@ -21,8 +21,8 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -1182,11 +1182,12 @@ public class RestController
 		Map<String, Object> entityMap = new LinkedHashMap<String, Object>();
 		try
 		{
-			entityMap
-					.put("href", (String.format(BASE_URI + "/%s/%s", meta.getName(),
-							new URI(null, DataConverter.toString(entity.getIdValue()), null).toASCIIString(), "UTF-8")));
+			entityMap.put(
+					"href",
+					(String.format(BASE_URI + "/%s/%s", meta.getName(),
+							URLEncoder.encode(DataConverter.toString(entity.getIdValue()), "UTF-8"))));
 		}
-		catch (URISyntaxException e)
+		catch (UnsupportedEncodingException e)
 		{
 			throw new RuntimeException(e);
 		}

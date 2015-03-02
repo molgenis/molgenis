@@ -195,6 +195,12 @@
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data-vcf</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+            	<exclusion>
+            		<artifactId>log4j</artifactId>
+            		<groupId>log4j</groupId>
+            	</exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
@@ -237,6 +243,12 @@
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-das</artifactId>
 			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>log4j</artifactId>
+					<groupId>log4j</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>

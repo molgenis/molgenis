@@ -83,7 +83,7 @@ public class MappingsBuilder
 
 		for (AttributeMetaData attr : entityMetaData.getAtomicAttributes())
 		{
-			createAttributeMapping(attr, enableNorms, createAllIndex, true, jsonBuilder);
+			createAttributeMapping(attr, enableNorms, createAllIndex, true, true, jsonBuilder);
 		}
 
 		jsonBuilder.endObject();
@@ -94,16 +94,17 @@ public class MappingsBuilder
 
 	// TODO discuss: use null_value for nillable attributes?
 	private static void createAttributeMapping(AttributeMetaData attr, boolean enableNorms, boolean createAllIndex,
-			boolean nestRefs, XContentBuilder jsonBuilder) throws IOException
+			boolean nestRefs, boolean enableNgramAnalyzer, XContentBuilder jsonBuilder) throws IOException
 	{
 		String attrName = attr.getName();
 		jsonBuilder.startObject(attrName);
-		createAttributeMappingContents(attr, enableNorms, createAllIndex, nestRefs, jsonBuilder);
+		createAttributeMappingContents(attr, enableNorms, createAllIndex, nestRefs, enableNgramAnalyzer, jsonBuilder);
 		jsonBuilder.endObject();
 	}
 
 	private static void createAttributeMappingContents(AttributeMetaData attr, boolean enableNorms,
-			boolean createAllIndex, boolean nestRefs, XContentBuilder jsonBuilder) throws IOException
+			boolean createAllIndex, boolean nestRefs, boolean enableNgramAnalyzer, XContentBuilder jsonBuilder)
+			throws IOException
 	{
 		FieldTypeEnum dataType = attr.getDataType().getEnumType();
 		switch (dataType)
@@ -125,14 +126,14 @@ public class MappingsBuilder
 					jsonBuilder.startObject("properties");
 					for (AttributeMetaData refAttr : refEntity.getAtomicAttributes())
 					{
-						createAttributeMapping(refAttr, enableNorms, createAllIndex, false, jsonBuilder);
+						createAttributeMapping(refAttr, enableNorms, createAllIndex, false, false, jsonBuilder);
 					}
 					jsonBuilder.endObject();
 				}
 				else
 				{
 					createAttributeMappingContents(refEntity.getLabelAttribute(), enableNorms, createAllIndex, false,
-							jsonBuilder);
+							false, jsonBuilder);
 				}
 				break;
 			case COMPOUND:
@@ -185,10 +186,15 @@ public class MappingsBuilder
 				// not-analyzed field for sorting and wildcard queries
 				// note: the include_in_all setting is ignored on any field that is defined in the fields options
 				// note: the norms settings defaults to false for not_analyzed fields
-				jsonBuilder.startObject("fields").startObject(FIELD_NOT_ANALYZED).field("type", "string")
-						.field("index", "not_analyzed").endObject().startObject(FIELD_NGRAM_ANALYZED)
-						.field("type", "string").field("analyzer", ElasticsearchIndexCreator.NGRAM_ANALYZER)
-						.endObject().endObject();
+				XContentBuilder fieldsObject = jsonBuilder.startObject("fields").startObject(FIELD_NOT_ANALYZED)
+						.field("type", "string").field("index", "not_analyzed").endObject();
+				if (enableNgramAnalyzer)
+				{
+					// add ngram analyzer (not applied to nested documents)
+					fieldsObject.startObject(FIELD_NGRAM_ANALYZED).field("type", "string")
+							.field("analyzer", ElasticsearchIndexCreator.NGRAM_ANALYZER).endObject();
+				}
+				fieldsObject.endObject();
 				break;
 			case HTML:
 			case SCRIPT:

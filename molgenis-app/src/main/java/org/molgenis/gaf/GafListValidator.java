@@ -8,22 +8,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
-
-import org.apache.commons.lang3.StringUtils;
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Repository;
-import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.server.MolgenisSettings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.convert.ConversionFailedException;
-import org.springframework.stereotype.Component;
 
 @Component
 public class GafListValidator
@@ -124,6 +110,7 @@ public class GafListValidator
 
 			// validate individual cells
 			String runId = entity.getString(GAFCol.RUN.toString());
+			String sampleType = entity.getString(GAFCol.SAMPLE_TYPE.toString());
 
 			for (AttributeMetaData attributeMetaData : attributes)
 			{
@@ -132,7 +119,8 @@ public class GafListValidator
 				String value = entity.getString(attributeName);
 
 				// validate cell
-				validateCell(runId, row, attributeName, value, patternMap, patternExampleMap, lookupLists, report);
+				validateCell(runId, row, attributeName, value, patternMap, patternExampleMap, lookupLists, report,
+						sampleType);
 			}
 
 			row++;
@@ -387,6 +375,7 @@ public class GafListValidator
 
 	private void validateCell(String runId, int row, String colName, String value, Map<String, Pattern> patterns,
 			Map<String, String> patternExampleMap, Map<String, List<String>> lookupLists, GafListValidationReport report)
+
 	{
 		// validate
 		if (colName.equalsIgnoreCase(GAFCol.INTERNAL_SAMPLE_ID.toString()))
@@ -400,10 +389,6 @@ public class GafListValidator
 		else if (colName.equalsIgnoreCase(GAFCol.SEQUENCER.toString()))
 		{
 			validateCellWithLookupList(runId, row, colName, value, lookupLists, true, report, patternExampleMap);
-		}
-		else if (colName.equalsIgnoreCase(GAFCol.SAMPLE.toString()))
-		{
-			validateCellWithPattern(runId, row, colName, value, patterns, patternExampleMap, false, report);
 		}
 		else if (colName.equalsIgnoreCase(GAFCol.SEQUENCING_START_DATE.toString()))
 		{
@@ -425,10 +410,6 @@ public class GafListValidator
 		{
 			validateCellWithPattern(runId, row, colName, value, patterns, patternExampleMap, false, report);
 		}
-		else if (colName.equalsIgnoreCase(GAFCol.End_Product_Concentration_nmol__l.toString()))
-		{
-			validateCellWithPattern(runId, row, colName, value, patterns, patternExampleMap, false, report);
-		}
 		else if (colName.equalsIgnoreCase(GAFCol.EXTERNAL_SAMPLE_ID.toString()))
 		{
 			validateCellWithPattern(runId, row, colName, value, patterns, patternExampleMap, true, report);
@@ -439,11 +420,11 @@ public class GafListValidator
 		}
 		else if (colName.equalsIgnoreCase(GAFCol.CONTACT.toString()))
 		{
-			validateCellWithPattern(runId, row, colName, value, patterns, patternExampleMap, true, report);
+			validateCellWithPattern(runId, row, colName, value, patterns, patternExampleMap, false, report);
 		}
 		else if (colName.equalsIgnoreCase(GAFCol.SAMPLE_TYPE.toString()))
 		{
-			validateCellWithPattern(runId, row, colName, value, patterns, patternExampleMap, false, report);
+			validateCellWithPattern(runId, row, colName, value, patterns, patternExampleMap, true, report);
 		}
 		else if (colName.equalsIgnoreCase(GAFCol.ARRAY_FILE.toString()))
 		{
@@ -455,7 +436,11 @@ public class GafListValidator
 		}
 		else if (colName.equalsIgnoreCase(GAFCol.CAPTURING_KIT.toString()))
 		{
-			validateCellWithLookupList(runId, row, colName, value, lookupLists, true, report, patternExampleMap);
+			// SAMPLE_TYPE must be available to validate the CAPTURING_KIT
+			if ("DNA".equals(sampleType))
+			{
+				validateCellWithLookupList(runId, row, colName, value, lookupLists, true, report, patternExampleMap);
+			}
 		}
 		else if (colName.equalsIgnoreCase(GAFCol.PREP_KIT.toString()))
 		{
@@ -476,18 +461,6 @@ public class GafListValidator
 		else if (colName.equalsIgnoreCase(GAFCol.GCC_ANALYSIS.toString()))
 		{
 			validateCellWithLookupList(runId, row, colName, value, lookupLists, false, report, patternExampleMap);
-		}
-		else if (colName.equalsIgnoreCase(GAFCol.PLATES_IN_STOCK__DNA_SEQUENCING.toString()))
-		{
-			validateCellWithPattern(runId, row, colName, value, patterns, patternExampleMap, false, report);
-		}
-		else if (colName.equalsIgnoreCase(GAFCol.REJECTED_FOR_PROCESSING.toString()))
-		{
-			validateCellWithPattern(runId, row, colName, value, patterns, patternExampleMap, false, report);
-		}
-		else if (colName.equalsIgnoreCase(GAFCol.PLATES_IN_STOCK__DNA_SEQUENCING__WHOLE_GENOME_CAPTURING.toString()))
-		{
-			validateCellWithPattern(runId, row, colName, value, patterns, patternExampleMap, false, report);
 		}
 		else if (colName.equalsIgnoreCase(GAFCol.BARCODE_2.toString()))
 		{

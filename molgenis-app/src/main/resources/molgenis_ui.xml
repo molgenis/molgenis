@@ -24,6 +24,7 @@
         	<plugin id="form.MolgenisToken" name="Tokens" url="form.MolgenisToken"/>
         	<plugin id="form.Script" name="Script" url="form.Script"/>
         	<plugin id="form.ScriptParameter" name="ScriptParameter" url="form.ScriptParameter"/>
+        	<plugin id="form.FreemarkerTemplate" name="FreemarkerTemplate" url="form.FreemarkerTemplate"/>
 	    </menu>
         <menu label="Admin" name="admin">
 	        <plugin id="usermanager" name="User Manager" url="usermanager"/>
