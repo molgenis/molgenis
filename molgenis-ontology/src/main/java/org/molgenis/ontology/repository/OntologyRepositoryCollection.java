@@ -1,15 +1,16 @@
-package org.molgenis.ontology.repository.v2;
+package org.molgenis.ontology.repository;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Set;
 
+import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.FileRepositoryCollection;
+import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.ontology.model.OntologyMetaData;
 import org.molgenis.ontology.model.OntologyTermDynamicAnnotationMetaData;
@@ -19,33 +20,31 @@ import org.molgenis.ontology.model.OntologyTermSynonymMetaData;
 import org.molgenis.ontology.utils.OntologyLoader;
 import org.molgenis.ontology.utils.ZipFileUtil;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-
-import com.google.common.collect.ImmutableSet;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class OntologyRepositoryCollection extends FileRepositoryCollection
 {
-	private static final String EXTENSION_OBO_ZIP = "obo.zip";
-	private static final String EXTENSION_OWL_ZIP = "owl.zip";
-	private static final String ESCAPE_VALUES = "[^a-zA-Z0-9_]";
-	private static final String REPLACEMENT_VALUE = "_";
-	public static final Set<String> EXTENSIONS = ImmutableSet.of(EXTENSION_OBO_ZIP, EXTENSION_OWL_ZIP);
+	@Autowired
+	private DataService dataService;
 
 	private LinkedHashMap<String, Repository> repositories;
 
 	public OntologyRepositoryCollection(File file) throws OWLOntologyCreationException, FileNotFoundException,
 			IOException
 	{
-		super(EXTENSIONS);
+		super(GenericImporterExtensions.getOntology());
 		if (file == null) throw new IllegalArgumentException("file is null");
 
 		String name = file.getName();
-		if (name.endsWith(EXTENSION_OBO_ZIP))
+		if (name.endsWith(GenericImporterExtensions.OBO_ZIP.toString()))
 		{
-			name = name.substring(0, name.lastIndexOf('.' + EXTENSION_OBO_ZIP)).replace('.', '_');
+			name = name.substring(0, name.lastIndexOf('.' + GenericImporterExtensions.OBO_ZIP.toString())).replace('.',
+					'_');
 		}
-		else if (name.endsWith(EXTENSION_OWL_ZIP))
+		else if (name.endsWith(GenericImporterExtensions.OWL_ZIP.toString()))
 		{
-			name = name.substring(0, name.lastIndexOf('.' + EXTENSION_OWL_ZIP)).replace('.', '_');
+			name = name.substring(0, name.lastIndexOf('.' + GenericImporterExtensions.OWL_ZIP.toString())).replace('.',
+					'_');
 		}
 		else
 		{
@@ -68,7 +67,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 		repositories.put(OntologyTermDynamicAnnotationMetaData.ENTITY_NAME, ontologyTermDynamicAnnotationRepo);
 		repositories.put(OntologyTermSynonymMetaData.ENTITY_NAME, ontologyTermSynonymRepo);
 		repositories.put(OntologyTermNodePathMetaData.ENTITY_NAME, ontologyTermNodePathRepository);
-		repositories.put(OntologyMetaData.ENTITY_NAME, new OntologyRepository(ontologyLoader));
+		repositories.put(OntologyMetaData.ENTITY_NAME, new OntologyRepository(ontologyLoader, uuidGenerator));
 		repositories.put(OntologyTermMetaData.ENTITY_NAME, new OntologyTermRepository(ontologyLoader, uuidGenerator,
 				ontologyTermDynamicAnnotationRepo, ontologyTermSynonymRepo, ontologyTermNodePathRepository));
 	}
@@ -84,17 +83,5 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	{
 		if (!repositories.containsKey(name)) throw new MolgenisDataException("Unknown entity name [" + name + "]");
 		return repositories.get(name);
-	}
-
-	public static String createUniqueId(String ontologyIRI, String ontologyTermIRI, String label)
-	{
-		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append(ontologyIRI).append(ontologyTermIRI).append(label);
-		return escapeValue(stringBuilder.toString());
-	}
-
-	public static String escapeValue(String value)
-	{
-		return value.replaceAll(ESCAPE_VALUES, REPLACEMENT_VALUE);
 	}
 }

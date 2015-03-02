@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.molgenis.data.support.FileRepositoryCollection;
-import org.molgenis.util.FileExtensionUtil;
+import org.molgenis.util.FileExtensionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 
@@ -58,7 +58,7 @@ public class FileRepositoryCollectionFactory
 	{
 		Class<? extends FileRepositoryCollection> clazz = null;
 		
-		String extension = FileExtensionUtil.findTheClosestFileExtansionFromSet(file.getName(),
+		String extension = FileExtensionUtils.findExtansionFromSetForGenericImporter(file.getName(),
 				fileRepositoryCollection.keySet());
 		
 		clazz = fileRepositoryCollection.get(extension);

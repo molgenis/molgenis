@@ -1,7 +1,5 @@
 package org.molgenis.data.csv;
 
-import static org.molgenis.data.csv.CsvRepositoryCollection.EXTENSION_ZIP;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,6 +16,7 @@ import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.data.support.MapEntity;
 import org.springframework.util.StringUtils;
 
@@ -53,7 +52,8 @@ public class CsvRepository extends AbstractRepository
 
 	public CsvRepository(File file, String sheetName, @Nullable List<CellProcessor> cellProcessors)
 	{
-		super(file.getName().toLowerCase().endsWith(EXTENSION_ZIP) ? BASE_URL + file.getName() + '/' + sheetName : file
+		super(file.getName().toLowerCase().endsWith(GenericImporterExtensions.ZIP.toString()) ? BASE_URL
+				+ file.getName() + '/' + sheetName : file
 				.getName());
 
 		this.file = file;

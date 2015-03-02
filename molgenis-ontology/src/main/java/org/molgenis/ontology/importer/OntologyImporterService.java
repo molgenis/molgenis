@@ -3,6 +3,7 @@ package org.molgenis.ontology.importer;
 import java.io.File;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
@@ -18,13 +19,13 @@ import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.importer.EntitiesValidationReportImpl;
 import org.molgenis.data.importer.ImportService;
+import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.ontology.OntologyService;
 import org.molgenis.ontology.index.OntologyIndexer;
 import org.molgenis.ontology.model.OntologyMetaData;
-import org.molgenis.ontology.repository.v2.OntologyRepositoryCollection;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,9 +41,6 @@ public class OntologyImporterService implements ImportService
 	private final DataService dataService;
 	private final SearchService searchService;
 	private final PermissionSystemService permissionSystemService;
-
-	private static final List<String> SUPPORTED_FILE_EXTENSIONS = Lists
-			.newArrayList(OntologyRepositoryCollection.EXTENSIONS);
 
 	@Autowired
 	private FileStore fileStore;
@@ -163,7 +161,7 @@ public class OntologyImporterService implements ImportService
 	@Override
 	public boolean canImport(File file, RepositoryCollection source)
 	{
-		for (String extension : OntologyRepositoryCollection.EXTENSIONS)
+		for (String extension : GenericImporterExtensions.getOntology())
 		{
 			if (file.getName().toLowerCase().endsWith(extension))
 			{
@@ -193,8 +191,8 @@ public class OntologyImporterService implements ImportService
 	}
 
 	@Override
-	public List<String> getSupportedFileExtensions()
+	public Set<String> getSupportedFileExtensions()
 	{
-		return SUPPORTED_FILE_EXTENSIONS;
+		return GenericImporterExtensions.getOntology();
 	}
 }

@@ -1,4 +1,4 @@
-package org.molgenis.ontology.repository.v2;
+package org.molgenis.ontology.repository;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -7,6 +7,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.ontology.model.OntologyMetaData;
 import org.molgenis.ontology.utils.OntologyLoader;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -14,11 +15,15 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 public class OntologyRepository implements Repository
 {
 	private final OntologyLoader ontologyLoader;
+	private final UuidGenerator uuidGenerator;
 
-	public OntologyRepository(OntologyLoader ontologyLoader) throws OWLOntologyCreationException
+	public OntologyRepository(OntologyLoader ontologyLoader, UuidGenerator uuidGenerator)
+			throws OWLOntologyCreationException
 	{
 		if (ontologyLoader == null) throw new IllegalArgumentException("OntologyLoader is null!");
+		if (uuidGenerator == null) throw new IllegalArgumentException("UuidGenerator is null!");
 		this.ontologyLoader = ontologyLoader;
+		this.uuidGenerator = uuidGenerator;
 	}
 
 	@Override
@@ -43,8 +48,7 @@ public class OntologyRepository implements Repository
 			public Entity next()
 			{
 				Entity entity = new MapEntity();
-				entity.set(OntologyMetaData.ID,
-						OntologyRepositoryCollection.escapeValue(ontologyLoader.getOntologyIRI()));
+				entity.set(OntologyMetaData.ID, uuidGenerator.generateId());
 				entity.set(OntologyMetaData.ONTOLOGY_IRI, ontologyLoader.getOntologyIRI());
 				entity.set(OntologyMetaData.ONTOLOGY_NAME, ontologyLoader.getOntologyName());
 				return entity;

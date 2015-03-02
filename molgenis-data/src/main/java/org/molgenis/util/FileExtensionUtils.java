@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class FileExtensionUtil
+public class FileExtensionUtils
 {
 	/**
 	 * Checks if an entity contains data or not
 	 * 
 	 * @param entity
 	 */
-	public static String findTheClosestFileExtansionFromSet(String fileName, Set<String> fileExtensions)
+	public static String findExtansionFromSetForGenericImporter(String fileName, Set<String> fileExtensions)
 	{
 		String name = fileName.toLowerCase();
 		List<String> possibleExtensions = new ArrayList<String>();

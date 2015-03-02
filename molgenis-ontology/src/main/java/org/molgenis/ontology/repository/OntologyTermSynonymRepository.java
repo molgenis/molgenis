@@ -1,4 +1,4 @@
-package org.molgenis.ontology.repository.v2;
+package org.molgenis.ontology.repository;
 
 import java.io.IOException;
 import java.util.HashMap;

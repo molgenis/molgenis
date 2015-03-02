@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -17,8 +16,8 @@ import org.molgenis.data.Writable;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.support.FileRepositoryCollection;
+import org.molgenis.data.support.GenericImporterExtensions;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
 /**
@@ -28,7 +27,6 @@ import com.google.common.collect.Lists;
  */
 public class ExcelRepositoryCollection extends FileRepositoryCollection
 {
-	public static final Set<String> EXTENSIONS = ImmutableSet.of("xls", "xlsx");
 	private final String name;
 	private final Workbook workbook;
 
@@ -46,7 +44,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 	public ExcelRepositoryCollection(String name, InputStream in, CellProcessor... cellProcessors)
 			throws InvalidFormatException, IOException
 	{
-		super(EXTENSIONS, cellProcessors);
+		super(GenericImporterExtensions.getExcel(), cellProcessors);
 		this.name = name;
 		workbook = WorkbookFactory.create(in);
 	}

@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -14,9 +13,9 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.FileRepositoryCollection;
+import org.molgenis.data.support.GenericImporterExtensions;
 import org.springframework.util.StringUtils;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
 /**
@@ -27,12 +26,6 @@ import com.google.common.collect.Lists;
  */
 public class CsvRepositoryCollection extends FileRepositoryCollection
 {
-	public static final String EXTENSION_CSV = "csv";
-	public static final String EXTENSION_TXT = "txt";
-	public static final String EXTENSION_TSV = "tsv";
-	public static final String EXTENSION_ZIP = "zip";
-	public static final Set<String> EXTENSIONS = ImmutableSet.of(EXTENSION_CSV, EXTENSION_TXT, EXTENSION_TSV,
-			EXTENSION_ZIP);
 	private static final String MAC_ZIP = "__MACOSX";
 	private final File file;
 	private List<String> entityNames;
@@ -46,7 +39,7 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 	public CsvRepositoryCollection(File file, CellProcessor... cellProcessors) throws InvalidFormatException,
 			IOException
 	{
-		super(EXTENSIONS, cellProcessors);
+		super(GenericImporterExtensions.getCSV(), cellProcessors);
 		this.file = file;
 
 		loadEntityNames();
@@ -75,7 +68,7 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 		entityNames = Lists.newArrayList();
 		entityNamesLowerCase = Lists.newArrayList();
 
-		if (extension.equalsIgnoreCase(EXTENSION_ZIP))
+		if (extension.equalsIgnoreCase(GenericImporterExtensions.ZIP.toString()))
 		{
 			ZipFile zipFile = null;
 			try
