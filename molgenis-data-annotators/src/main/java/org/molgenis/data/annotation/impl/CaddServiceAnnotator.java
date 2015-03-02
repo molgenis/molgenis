@@ -5,8 +5,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
@@ -52,8 +54,8 @@ public class CaddServiceAnnotator extends VariantAnnotator
 
 	// the cadd service returns these two values
 	// must be compatible with VCF format, ie no funny characters
-	public static final String CADD_SCALED = "CADDSCALED";
-	public static final String CADD_ABS = "CADDABS";
+	public static final String CADD_SCALED = VcfRepository.getInfoPrefix() + "CADDSCALED";
+	public static final String CADD_ABS = VcfRepository.getInfoPrefix() + "CADDABS";
 
 	private static final String NAME = "CADD";
 
@@ -61,10 +63,10 @@ public class CaddServiceAnnotator extends VariantAnnotator
         .asList(new String[]
                 {
                         "##INFO=<ID="
-                                + CADD_SCALED
+                                + CADD_SCALED.substring(VcfRepository.getInfoPrefix().length())
                                 + ",Number=1,Type=Float,Description=\"CADD scaled C score, ie. phred-like. See Kircher et al. 2014 (http://www.ncbi.nlm.nih.gov/pubmed/24487276) or CADD website (http://cadd.gs.washington.edu/) for more information.\">",
                         "##INFO=<ID="
-                                + CADD_ABS
+                                + CADD_ABS.substring(VcfRepository.getInfoPrefix().length())
                                 + ",Number=1,Type=Float,Description=\"CADD absolute C score, ie. unscaled SVM output. Useful as  reference when the scaled score may be unexpected.\">" });
 
     public static final String CADD_FILE_LOCATION_PROPERTY = "cadd_location";
@@ -142,7 +144,7 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	{
 		return NAME;
 	}
-
+	
 	@Override
 	public List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException
 	{
@@ -152,24 +154,55 @@ public class CaddServiceAnnotator extends VariantAnnotator
 		String chromosome = entity.getString(VcfRepository.CHROM) != null ? entity.getString(VcfRepository.CHROM) : entity
 				.getString(CHROMOSOME);
 
-         long position = entity.getLong(POSITION);
-		String reference = entity.getString(REFERENCE);
-        String alternative = entity.getString(ALTERNATIVE);
+		// FIXME use VcfRepository.POS, use VcfRepository.REF, use VcfRepository.ALT ?
+		Map<String, Object> resultMap = annotateEntityWithCADD(chromosome, entity.getLong(POSITION),
+				entity.getString(REFERENCE), entity.getString(ALTERNATIVE));
+		return Collections.<Entity> singletonList(getAnnotatedEntity(entity, resultMap));
+	}
 
-
+	private synchronized Map<String, Object> annotateEntityWithCADD(String chromosome, Long position, String reference, String alternative) throws IOException, InterruptedException
+	{
+		TabixReader.Iterator tabixIterator = null;
+		try
+		{
+			tabixIterator = tabixReader.query(chromosome + ":" + position + "-" + position);
+		}
+		catch(Exception e)
+		{
+			LOG.error("Something went wrong (chromosome not in data?) when querying CADD tabix file for " + chromosome + " POS: " + position + " REF: " + reference
+					+ " ALT: " + alternative + "! skipping...");
+		}
+		
         Double caddAbs = null;
         Double caddScaled = null;
-
-        TabixReader.Iterator tabixIterator = tabixReader.query(chromosome + ":" + position + "-" + position);
 
         // TabixReaderIterator does not have a hasNext();
         boolean done = tabixIterator == null;
         int i = 0;
 
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        
+      //get line(s) from data, we expect 0 (no hit), 1 (specialized files such as 1000G) or 3 (whole genome file), so 0 to 3 hits
         while (!done)
         {
-            String line = tabixIterator.next();
+            String line = null;
 
+            try
+    		{
+    			line = tabixIterator.next();
+    		}
+    		catch(net.sf.samtools.SAMFormatException sfx)
+    		{
+    			LOG.error("Bad GZIP file for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
+    					+ " ALT: " + alternative + " LINE: " + line);
+    			throw sfx;
+    		}
+            catch(NullPointerException npe)
+    		{
+    			//overkill to print all missing? depends on CADD source file..
+    			//LOG.info("No data for CHROM: " + chromosome + " POS: " + position + " REF: " + reference + " ALT: " + alternative + " LINE: " + line);
+    		}
+            
             if (line != null)
             {
                 String[] split = null;
@@ -183,8 +216,7 @@ public class CaddServiceAnnotator extends VariantAnnotator
                 }
                 if (split[2].equals(reference) && split[3].equals(alternative))
                 {
-                    LOG.info("CADD scores found for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
-                            + " ALT: " + alternative + " LINE: " + line);
+  //                  LOG.info("CADD scores found for CHROM: " + chromosome + " POS: " + position + " REF: " + reference + " ALT: " + alternative + " LINE: " + line);
                     caddAbs = Double.parseDouble(split[4]);
                     caddScaled = Double.parseDouble(split[5]);
                     done = true;
@@ -208,17 +240,18 @@ public class CaddServiceAnnotator extends VariantAnnotator
                     }
                 }
             }
-            else
+            else //case: line == null
             {
-                LOG.warn("No hit found in CADD file for CHROM: " + chromosome + " POS: " + position + " REF: "
-                        + reference + " ALT: " + alternative);
+                LOG.warn("No hit found in CADD file for CHROM: " + chromosome + " POS: " + position + " REF: " + reference + " ALT: " + alternative);
+                //not needed? just return..??
                 done = true;
+              //  return resultMap;
             }
         }
 
-        entity.set(CADD_ABS, caddAbs);
-        entity.set(CADD_SCALED, caddScaled);
-        return Collections.<Entity> singletonList(entity);
+        resultMap.put(CADD_ABS, caddAbs);
+        resultMap.put(CADD_SCALED, caddScaled);
+        return resultMap;
 	}
 
 	/**
