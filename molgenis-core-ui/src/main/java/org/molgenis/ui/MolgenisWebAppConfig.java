@@ -11,10 +11,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.molgenis.data.AutoIdCrudRepositoryDecorator;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.CrudRepositorySecurityDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.IdGenerator;
+import org.molgenis.data.IndexedAutoIdRepositoryDecorator;
 import org.molgenis.data.IndexedCrudRepository;
 import org.molgenis.data.IndexedCrudRepositorySecurityDecorator;
 import org.molgenis.data.MolgenisDataException;
@@ -30,6 +33,7 @@ import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.PackageMetaData;
 import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.data.meta.WritableMetaDataServiceDecorator;
+import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.IndexedRepositoryValidationDecorator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
@@ -362,6 +366,12 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	@Bean
+	public IdGenerator molgenisIdGenerator()
+	{
+		return new UuidGenerator();
+	}
+
+	@Bean
 	public RepositoryDecoratorFactory repositoryDecoratorFactory()
 	{
 		return new RepositoryDecoratorFactory()
@@ -376,8 +386,8 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 					// 2. validation decorator
 					// 3. indexed repository
 					return new IndexedCrudRepositorySecurityDecorator(new IndexedRepositoryValidationDecorator(
-							dataService, (IndexedCrudRepository) repository, new EntityAttributesValidator()),
-							molgenisSettings);
+							dataService, new IndexedAutoIdRepositoryDecorator((IndexedCrudRepository) repository,
+									molgenisIdGenerator()), new EntityAttributesValidator()), molgenisSettings);
 				}
 				else
 				{
@@ -389,7 +399,8 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 						// a RuntimeProperty can exceed this (for example the menu structure in JSON and the static
 						// plugin contents are stored in a RuntimeProperty)
 						return new CrudRepositorySecurityDecorator(new RepositoryValidationDecorator(dataService,
-								(CrudRepository) repository, new EntityAttributesValidator()));
+								new AutoIdCrudRepositoryDecorator((CrudRepository) repository, molgenisIdGenerator()),
+								new EntityAttributesValidator()));
 					}
 
 					// create indexing meta data if meta data does not exist
@@ -421,7 +432,8 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 					}
 
 					return new IndexedCrudRepositorySecurityDecorator(new IndexedRepositoryValidationDecorator(
-							dataService, indexedRepo, new EntityAttributesValidator()), molgenisSettings);
+							dataService, new IndexedAutoIdRepositoryDecorator(indexedRepo, molgenisIdGenerator()),
+							new EntityAttributesValidator()), molgenisSettings);
 				}
 			}
 		};
