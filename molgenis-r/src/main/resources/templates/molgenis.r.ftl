@@ -76,12 +76,13 @@ molgenis.get <- local(function(entity, q = NULL, start = 0, num = 1000, sortColu
   if (!is.null(q)) {
     url <- paste0(url, "&q=", curlEscape(q))
   }
-
+	
   if (!is.null(attributes)) {
   	url <- paste0(url, "&attributes=", curlEscape(paste0(attributes, collapse = ",")))
   }
   
-  dataFrame <- read.csv(url)
+  csv <- getURL(url)
+  dataFrame <- read.csv(textConnection(csv))
   
   return (dataFrame)
 }, molgenis.env)
