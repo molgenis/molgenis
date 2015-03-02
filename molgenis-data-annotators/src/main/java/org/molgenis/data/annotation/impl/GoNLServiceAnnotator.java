@@ -56,7 +56,6 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 	private final MolgenisSettings molgenisSettings;
 	private final AnnotationService annotatorService;
 
-	// the cadd service returns these two values
 	// must be compatible with VCF format, ie no funny characters
 	public static final String GONL_MAF = VcfRepository.getInfoPrefix() + "GONLMAF";
 	public static final String GONL_GTC = VcfRepository.getInfoPrefix() + "GONLGTC";
@@ -94,7 +93,6 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 
 		this.annotatorService = new AnnotationServiceImpl();
 
-		//tabixReader = new TabixReader(molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY));
 		checkTabixReader();
 		
 		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
@@ -154,14 +152,9 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 	public List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException
 	{
 		checkTabixReader();
-
-		// FIXME need to solve this! duplicate notation for CHROM in VcfRepository.CHROM and LocusAnnotator.CHROMOSOME
-		String chromosome = entity.getString(VcfRepository.CHROM) != null ? entity.getString(VcfRepository.CHROM) : entity
-				.getString(CHROMOSOME);
-
-		// FIXME use VcfRepository.POS, use VcfRepository.REF, use VcfRepository.ALT ?
-		Map<String, Object> resultMap = annotateEntityWithGoNL(chromosome, entity.getLong(POSITION),
-				entity.getString(REFERENCE), entity.getString(ALTERNATIVE));
+		String chromosome = entity.getString(VcfRepository.CHROM);
+		Map<String, Object> resultMap = annotateEntityWithGoNL(chromosome, entity.getLong(VcfRepository.POS),
+				entity.getString(VcfRepository.REF), entity.getString(VcfRepository.ALT));
 		return Collections.<Entity> singletonList(getAnnotatedEntity(entity, resultMap));
 	}
 
