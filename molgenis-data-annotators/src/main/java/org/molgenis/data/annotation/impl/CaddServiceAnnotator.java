@@ -215,7 +215,7 @@ public class CaddServiceAnnotator extends VariantAnnotator
                 done = true;
             }
         }
-
+        entity = new MapEntity(entity);
         entity.set(CADD_ABS, caddAbs);
         entity.set(CADD_SCALED, caddScaled);
         return Collections.<Entity> singletonList(entity);
