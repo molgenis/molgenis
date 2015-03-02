@@ -22,8 +22,10 @@ import org.molgenis.data.annotation.impl.datastructures.CgdData;
 import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
 import org.molgenis.data.annotation.provider.CgdDataProvider;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
+import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ResourceUtils;
 import org.testng.annotations.BeforeMethod;
@@ -32,13 +34,11 @@ import org.testng.annotations.Test;
 public class ClinicalGenomicsDatabaseServiceAnnotatorTest
 {
 	private DefaultEntityMetaData metaDataCanAnnotate;
-	private EntityMetaData metaDataCantAnnotate;
+	private DefaultEntityMetaData metaDataCantAnnotate;
 	private ClinicalGenomicsDatabaseServiceAnnotator annotator;
-	private AttributeMetaData attributeMetaDataChrom;
-	private AttributeMetaData attributeMetaDataPos;
-	private AttributeMetaData attributeMetaDataCantAnnotateFeature;
-	private AttributeMetaData attributeMetaDataCantAnnotateChrom;
-	private AttributeMetaData attributeMetaDataCantAnnotatePos;
+	private DefaultAttributeMetaData attributeMetaDataChrom;
+	private DefaultAttributeMetaData attributeMetaDataPos;
+	private DefaultAttributeMetaData attributeMetaDataCantAnnotateChrom;
 	private Entity entity;
 	private ArrayList<Entity> input;
 
@@ -48,50 +48,28 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest
 		MolgenisSettings settings = mock(MolgenisSettings.class);
 
 		when(settings.getProperty(CgdDataProvider.CGD_FILE_LOCATION_PROPERTY)).thenReturn(
-				ResourceUtils.getFile(getClass(), "/cgd_example.txt").getPath());
+                ResourceUtils.getFile(getClass(), "/cgd_example.txt").getPath());
 
 		metaDataCanAnnotate = new DefaultEntityMetaData("test");
-		attributeMetaDataChrom = mock(AttributeMetaData.class);
-		attributeMetaDataPos = mock(AttributeMetaData.class);
+        metaDataCantAnnotate = new DefaultEntityMetaData("test");
+		attributeMetaDataChrom = new DefaultAttributeMetaData(VcfRepository.CHROM, FieldTypeEnum.STRING);
+		attributeMetaDataPos = new DefaultAttributeMetaData(VcfRepository.POS, FieldTypeEnum.LONG);
 
-		when(attributeMetaDataChrom.getName()).thenReturn(ClinicalGenomicsDatabaseServiceAnnotator.CHROMOSOME);
-		when(attributeMetaDataPos.getName()).thenReturn(ClinicalGenomicsDatabaseServiceAnnotator.POSITION);
-		when(attributeMetaDataChrom.getDataType()).thenReturn(
-				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
-		when(attributeMetaDataPos.getDataType()).thenReturn(
-				MolgenisFieldTypes.getType(FieldTypeEnum.LONG.toString().toLowerCase()));
+        attributeMetaDataCantAnnotateChrom = new DefaultAttributeMetaData("Chromosome", FieldTypeEnum.STRING);
 
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom);
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
 		metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom.getName());
-		metaDataCantAnnotate = mock(EntityMetaData.class);
 
-		attributeMetaDataCantAnnotateFeature = mock(AttributeMetaData.class);
-		when(attributeMetaDataCantAnnotateFeature.getName()).thenReturn("otherID");
-		when(attributeMetaDataCantAnnotateFeature.getDataType()).thenReturn(
-				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
+		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataChrom);
+		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataCantAnnotateChrom);
 
-		attributeMetaDataCantAnnotateChrom = mock(AttributeMetaData.class);
-		when(attributeMetaDataCantAnnotateChrom.getName()).thenReturn(DbnsfpVariantServiceAnnotator.CHROMOSOME);
-		when(attributeMetaDataCantAnnotateFeature.getDataType()).thenReturn(
-				MolgenisFieldTypes.getType(FieldTypeEnum.INT.toString().toLowerCase()));
-
-		attributeMetaDataCantAnnotatePos = mock(AttributeMetaData.class);
-		when(attributeMetaDataCantAnnotatePos.getName()).thenReturn(ClinicalGenomicsDatabaseServiceAnnotator.POSITION);
-		when(attributeMetaDataCantAnnotatePos.getDataType()).thenReturn(
-				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
-
-		when(metaDataCantAnnotate.getAttribute(ClinicalGenomicsDatabaseServiceAnnotator.CHROMOSOME)).thenReturn(
-				attributeMetaDataChrom);
-		when(metaDataCantAnnotate.getAttribute(ClinicalGenomicsDatabaseServiceAnnotator.POSITION)).thenReturn(
-				attributeMetaDataCantAnnotatePos);
-
-		entity = mock(Entity.class);
+		entity = new MapEntity(metaDataCanAnnotate);
 
 		String chrStr = "1";
 		Long chrPos = new Long(66067385);
-		when(entity.getString(ClinicalGenomicsDatabaseServiceAnnotator.CHROMOSOME)).thenReturn(chrStr);
-		when(entity.getLong(ClinicalGenomicsDatabaseServiceAnnotator.POSITION)).thenReturn(chrPos);
+		entity.set(VcfRepository.CHROM,chrStr);
+		entity.set(VcfRepository.POS, chrPos);
 
 		input = new ArrayList<Entity>();
 		input.add(entity);
@@ -124,7 +102,6 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest
 		annotator = new ClinicalGenomicsDatabaseServiceAnnotator(settings, annotationService, hgncLocationsProvider,
 				cgdDataProvider);
 
-		when(entity.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
 	}
 
 	@Test
@@ -193,6 +170,6 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest
 	@Test
 	public void canAnnotateFalseTest()
 	{
-		assertEquals(annotator.canAnnotate(metaDataCantAnnotate), "a required attribute has the wrong datatype");
+		assertEquals(annotator.canAnnotate(metaDataCantAnnotate), "missing required attribute");
 	}
 }

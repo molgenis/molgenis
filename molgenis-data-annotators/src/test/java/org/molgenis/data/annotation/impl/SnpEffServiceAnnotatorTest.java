@@ -6,6 +6,7 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.vcf.VcfRepository;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -27,32 +28,32 @@ public class SnpEffServiceAnnotatorTest
     @BeforeMethod
     public void beforeMethod() throws IOException
     {
-        QueryRule chromRule = new QueryRule(SnpEffServiceAnnotator.CHROMOSOME,
+        QueryRule chromRule = new QueryRule(VcfRepository.CHROM,
                 QueryRule.Operator.EQUALS, "X");
-        Query query = new QueryImpl(chromRule).and().eq(SnpEffServiceAnnotator.POSITION, "12345");
+        Query query = new QueryImpl(chromRule).and().eq(VcfRepository.POS, "12345");
 
         DefaultEntityMetaData metaData = new DefaultEntityMetaData("TestEntity");
         metaData.addAttributeMetaData(new DefaultAttributeMetaData("ID", MolgenisFieldTypes.FieldTypeEnum.STRING));
         metaData.setIdAttribute("ID");
-        metaData.addAttributeMetaData(new DefaultAttributeMetaData(SnpEffServiceAnnotator.CHROMOSOME, MolgenisFieldTypes.FieldTypeEnum.STRING));
-        metaData.addAttributeMetaData(new DefaultAttributeMetaData(SnpEffServiceAnnotator.POSITION, MolgenisFieldTypes.FieldTypeEnum.LONG));
-        metaData.addAttributeMetaData(new DefaultAttributeMetaData(SnpEffServiceAnnotator.REFERENCE, MolgenisFieldTypes.FieldTypeEnum.STRING));
-        metaData.addAttributeMetaData(new DefaultAttributeMetaData(SnpEffServiceAnnotator.ALTERNATIVE, MolgenisFieldTypes.FieldTypeEnum.STRING));
+        metaData.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.CHROM, MolgenisFieldTypes.FieldTypeEnum.STRING));
+        metaData.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.POS, MolgenisFieldTypes.FieldTypeEnum.LONG));
+        metaData.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.REF, MolgenisFieldTypes.FieldTypeEnum.STRING));
+        metaData.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.ALT, MolgenisFieldTypes.FieldTypeEnum.STRING));
         Entity entity1 = new MapEntity(metaData);
-        entity1.set(SnpEffServiceAnnotator.CHROMOSOME,"1");
-        entity1.set(SnpEffServiceAnnotator.POSITION,1234);
-        entity1.set(SnpEffServiceAnnotator.REFERENCE,"A");
-        entity1.set(SnpEffServiceAnnotator.ALTERNATIVE,"T");
+        entity1.set(VcfRepository.CHROM,"1");
+        entity1.set(VcfRepository.POS,1234);
+        entity1.set(VcfRepository.REF,"A");
+        entity1.set(VcfRepository.ALT,"T");
         Entity entity2 = new MapEntity(metaData);
-        entity2.set(SnpEffServiceAnnotator.CHROMOSOME,"X");
-        entity2.set(SnpEffServiceAnnotator.POSITION,12345);
-        entity2.set(SnpEffServiceAnnotator.REFERENCE,"A");
-        entity2.set(SnpEffServiceAnnotator.ALTERNATIVE,"C");
+        entity2.set(VcfRepository.CHROM,"X");
+        entity2.set(VcfRepository.POS,12345);
+        entity2.set(VcfRepository.REF,"A");
+        entity2.set(VcfRepository.ALT,"C");
         Entity entity3 = new MapEntity(metaData);
-        entity3.set(SnpEffServiceAnnotator.CHROMOSOME,"3");
-        entity3.set(SnpEffServiceAnnotator.POSITION,123);
-        entity3.set(SnpEffServiceAnnotator.REFERENCE,"G");
-        entity3.set(SnpEffServiceAnnotator.ALTERNATIVE,"T");
+        entity3.set(VcfRepository.CHROM,"3");
+        entity3.set(VcfRepository.POS,123);
+        entity3.set(VcfRepository.REF,"G");
+        entity3.set(VcfRepository.ALT,"T");
         entities = new ArrayList<>();
         entities.add(entity1);
         entities.add(entity2);

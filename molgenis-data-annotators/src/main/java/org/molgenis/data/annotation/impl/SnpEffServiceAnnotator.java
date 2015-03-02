@@ -18,6 +18,7 @@ import org.molgenis.data.*;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.support.*;
+import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.server.MolgenisSimpleSettings;
 import org.slf4j.Logger;
@@ -50,10 +51,6 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator, ApplicationL
     public static String snpEffPath = "";
 
 	private static final String NAME = "SnpEff";
-	public static final String REFERENCE = "REF";
-	public static final String ALTERNATIVE = "ALT";
-	public static final String CHROMOSOME = "#CHROM";
-	public static final String POSITION = "POS";
     public static final String ANNOTATION = "Annotation";
     public static final String PUTATIVE_IMPACT = "Putative_impact";
     public static final String GENE_NAME = "Gene_Name";
@@ -197,13 +194,13 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator, ApplicationL
         for (Entity entity : source)
         {
             StringBuilder builder = new StringBuilder();
-            builder.append(entity.getString(CHROMOSOME));
+            builder.append(entity.getString(VcfRepository.CHROM));
             builder.append("\t");
-            builder.append(entity.getString(POSITION));
+            builder.append(entity.getString(VcfRepository.POS));
             builder.append("\t.\t");
-            builder.append(entity.getString(REFERENCE));
+            builder.append(entity.getString(VcfRepository.REF));
             builder.append("\t");
-            builder.append(entity.getString(ALTERNATIVE));
+            builder.append(entity.getString(VcfRepository.ALT));
             builder.append("\n");
             bw.write(builder.toString());
         }
@@ -219,9 +216,9 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator, ApplicationL
         String[] fields = line.split("\t");
         String[] ann_field = fields[7].split(";");
         String[] annotation = ann_field[0].split(Pattern.quote("|"), -1);
-        QueryRule chromRule = new QueryRule(CHROMOSOME,
+        QueryRule chromRule = new QueryRule(VcfRepository.CHROM,
                 QueryRule.Operator.EQUALS, fields[0]);
-        Query query = new QueryImpl(chromRule).and().eq(POSITION, fields[1]);
+        Query query = new QueryImpl(chromRule).and().eq(VcfRepository.POS, fields[1]);
         Entity entity = dataService.findOne(entityName, query);
         if (ann_field.length > 1)
         {
@@ -367,14 +364,14 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator, ApplicationL
 	public EntityMetaData getInputMetaData()
 	{
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		DefaultAttributeMetaData chrom = new DefaultAttributeMetaData(CHROMOSOME,
+		DefaultAttributeMetaData chrom = new DefaultAttributeMetaData(VcfRepository.CHROM,
 				MolgenisFieldTypes.FieldTypeEnum.STRING);
 		chrom.setDescription("The chromosome on which the variant is observed");
-		DefaultAttributeMetaData pos = new DefaultAttributeMetaData(POSITION, MolgenisFieldTypes.FieldTypeEnum.LONG);
+		DefaultAttributeMetaData pos = new DefaultAttributeMetaData(VcfRepository.POS, MolgenisFieldTypes.FieldTypeEnum.LONG);
 		pos.setDescription("The position on the chromosome which the variant is observed");
-		DefaultAttributeMetaData ref = new DefaultAttributeMetaData(REFERENCE, MolgenisFieldTypes.FieldTypeEnum.STRING);
+		DefaultAttributeMetaData ref = new DefaultAttributeMetaData(VcfRepository.REF, MolgenisFieldTypes.FieldTypeEnum.STRING);
 		ref.setDescription("The reference allele");
-		DefaultAttributeMetaData alt = new DefaultAttributeMetaData(ALTERNATIVE,
+		DefaultAttributeMetaData alt = new DefaultAttributeMetaData(VcfRepository.ALT,
 				MolgenisFieldTypes.FieldTypeEnum.STRING);
 		alt.setDescription("The alternative allele observed");
 
