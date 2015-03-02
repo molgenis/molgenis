@@ -31,19 +31,24 @@ public class OntologyTermSynonymRepository implements Repository
 	{
 		return new Iterator<Entity>()
 		{
-			final Iterator<OWLClass> iterator = ontologyLoader.getAllclasses().iterator();
+			final Iterator<OWLClass> ontologyTermIterator = ontologyLoader.getAllclasses().iterator();
 			private OWLClass currentClass = null;
 			private Iterator<String> synonymIterator = null;
 
 			@Override
 			public boolean hasNext()
 			{
-				while ((currentClass == null || !synonymIterator.hasNext()) && iterator.hasNext())
+				// OT_1 -> S1, S2
+				// OT_2 -> S3, S4
+				// OT_3 -> []
+				// OT_4 -> []
+				// OT_5 -> S5, S6
+				while ((currentClass == null || !synonymIterator.hasNext()) && ontologyTermIterator.hasNext())
 				{
-					currentClass = iterator.next();
+					currentClass = ontologyTermIterator.next();
 					synonymIterator = ontologyLoader.getSynonyms(currentClass).iterator();
 				}
-				return synonymIterator.hasNext() || iterator.hasNext();
+				return synonymIterator.hasNext() || ontologyTermIterator.hasNext();
 			}
 
 			@Override
@@ -51,21 +56,21 @@ public class OntologyTermSynonymRepository implements Repository
 			{
 				String ontologyTermIRI = currentClass.getIRI().toString();
 				String synonym = synonymIterator.next();
-				String id = uuidGenerator.generateId();
+
+				MapEntity entity = new MapEntity();
 
 				if (!referenceIds.containsKey(ontologyTermIRI))
 				{
 					referenceIds.put(ontologyTermIRI, new HashMap<String, String>());
 				}
+
 				if (!referenceIds.get(ontologyTermIRI).containsKey(synonym))
 				{
-					referenceIds.get(ontologyTermIRI).put(synonym, id);
+					referenceIds.get(ontologyTermIRI).put(synonym, uuidGenerator.generateId());
 				}
 
-				MapEntity entity = new MapEntity();
 				entity.set(OntologyTermSynonymMetaData.ID, referenceIds.get(ontologyTermIRI).get(synonym));
 				entity.set(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM, synonym);
-
 				return entity;
 			}
 		};

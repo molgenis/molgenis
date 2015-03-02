@@ -52,8 +52,7 @@ public class OntologyTermDynamicAnnotationRepository implements Repository
 				String ontologyTermIRI = currentClass.getIRI().toString();
 				String label = databaseIdIterator.next();
 				String fragments[] = label.split(":");
-				String id = uuidGenerator.generateId();
-
+				MapEntity entity = new MapEntity();
 				if (!referenceIds.containsKey(ontologyTermIRI))
 				{
 					referenceIds.put(ontologyTermIRI, new HashMap<String, String>());
@@ -61,10 +60,9 @@ public class OntologyTermDynamicAnnotationRepository implements Repository
 
 				if (!referenceIds.get(ontologyTermIRI).containsKey(label))
 				{
-					referenceIds.get(ontologyTermIRI).put(label, id);
+					referenceIds.get(ontologyTermIRI).put(label, uuidGenerator.generateId());
 				}
 
-				MapEntity entity = new MapEntity();
 				entity.set(OntologyTermDynamicAnnotationMetaData.ID, referenceIds.get(ontologyTermIRI).get(label));
 				entity.set(OntologyTermDynamicAnnotationMetaData.NAME, fragments[0]);
 				entity.set(OntologyTermDynamicAnnotationMetaData.VALUE, fragments[1]);
