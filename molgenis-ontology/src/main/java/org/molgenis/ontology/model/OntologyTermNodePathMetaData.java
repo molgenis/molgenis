@@ -5,11 +5,12 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 
-public class OntologyTermSynonymMetaData
+public class OntologyTermNodePathMetaData
 {
 	public final static String ID = "id";
-	public final static String ONTOLOGY_TERM_SYNONYM = "ontologyTermSynonym";
-	public final static String SIMPLE_NAME = "OntologyTermSynonym";
+	public final static String ONTOLOGY_TERM_NODE_PATH = "nodePath";
+	public final static String ROOT = "root";
+	public final static String SIMPLE_NAME = "OntologyTermNodePath";
 	public final static String ENTITY_NAME = OntologyPackage.PACKAGE_NAME + "_" + SIMPLE_NAME;
 
 	public static EntityMetaData getEntityMetaData()
@@ -23,11 +24,15 @@ public class OntologyTermSynonymMetaData
 		idAttr.setVisible(false);
 		entityMetaData.addAttributeMetaData(idAttr);
 
-		DefaultAttributeMetaData ontologyTermSynonymAttr = new DefaultAttributeMetaData(ONTOLOGY_TERM_SYNONYM,
+		DefaultAttributeMetaData ontologyTermNodePathAttr = new DefaultAttributeMetaData(ONTOLOGY_TERM_NODE_PATH,
 				FieldTypeEnum.STRING);
-		ontologyTermSynonymAttr.setNillable(false);
-		ontologyTermSynonymAttr.setLabelAttribute(true);
-		entityMetaData.addAttributeMetaData(ontologyTermSynonymAttr);
+		ontologyTermNodePathAttr.setNillable(false);
+		ontologyTermNodePathAttr.setLabelAttribute(true);
+		entityMetaData.addAttributeMetaData(ontologyTermNodePathAttr);
+
+		DefaultAttributeMetaData ontologyTermRootAttr = new DefaultAttributeMetaData(ROOT, FieldTypeEnum.BOOL);
+		ontologyTermRootAttr.setNillable(false);
+		entityMetaData.addAttributeMetaData(ontologyTermRootAttr);
 
 		return entityMetaData;
 	}

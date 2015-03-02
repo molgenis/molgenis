@@ -14,12 +14,14 @@ public class OntologyTermMetaData
 	public final static String ONTOLOGY_TERM_DYNAMIC_ANNOTATION = "ontologyTermDynamicAnnotation";
 	public final static String ONTOLOGY_TERM_NODE_PATH = "nodePath";
 	public final static String ONTOLOGY = "ontology";
-
-	public final static String ENTITY_NAME = "OntologyTerm";
+	public final static String SIMPLE_NAME = "OntologyTerm";
+	public final static String ENTITY_NAME = OntologyPackage.PACKAGE_NAME + "_" + SIMPLE_NAME;
 
 	public static EntityMetaData getEntityMetaData()
 	{
-		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData(ENTITY_NAME);
+		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData(SIMPLE_NAME,
+				OntologyPackage.getPackageInstance());
+
 		DefaultAttributeMetaData idAttr = new DefaultAttributeMetaData(ID);
 		idAttr.setIdAttribute(true);
 		idAttr.setNillable(false);
@@ -48,11 +50,11 @@ public class OntologyTermMetaData
 		ontologyTermDynamicAnnotationAttr.setRefEntity(OntologyTermDynamicAnnotationMetaData.getEntityMetaData());
 		entityMetaData.addAttributeMetaData(ontologyTermDynamicAnnotationAttr);
 
-		// DefaultAttributeMetaData ontologyTermParentAttr = new DefaultAttributeMetaData(ONTOLOGY_TERM_NODE_PATH,
-		// FieldTypeEnum.MREF);
-		// ontologyTermParentAttr.setNillable(true);
-		// ontologyTermParentAttr.setRefEntity(OntologyTermMetaData.getEntityMetaData());
-		// entityMetaData.addAttributeMetaData(ontologyTermParentAttr);
+		DefaultAttributeMetaData ontologyTermNodePathAttr = new DefaultAttributeMetaData(ONTOLOGY_TERM_NODE_PATH,
+				FieldTypeEnum.MREF);
+		ontologyTermNodePathAttr.setNillable(true);
+		ontologyTermNodePathAttr.setRefEntity(OntologyTermNodePathMetaData.getEntityMetaData());
+		entityMetaData.addAttributeMetaData(ontologyTermNodePathAttr);
 
 		DefaultAttributeMetaData ontologyAttr = new DefaultAttributeMetaData(ONTOLOGY, FieldTypeEnum.XREF);
 		ontologyAttr.setNillable(false);
