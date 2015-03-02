@@ -233,9 +233,9 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 		 * Broad spectrum filters, already gets rid of >99% of variants
 		 */
 
-		// not in CGD, skip variant!
 		boolean filter = false;
-		if (cgdGenInh == null) filter = true;
+        // not in CGD, skip variant!
+        if (cgdGenInh == null) filter = true;
 		// common variant in one of the three big databases, skip it
 		if (thousandGenomesMAF > 0.05 || exacMAF > 0.05 || gonlMAF > 0.05) filter = true;
 		// skip any "low impact" variants
@@ -318,7 +318,6 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 			}
 		}
 
-		// other
 		else
 		{
 			LOG.info("INCLUDED variant with untypical inheritance mode '" + originalInheritance + "', condition '"
