@@ -15,11 +15,11 @@ public class UuidGeneratorTest
 	public void generateId()
 	{
 		Set<String> ids = new HashSet<>();
-		for (int i = 0; i < 1000; i++)
+		for (int i = 0; i < 1000000; i++)
 		{
-			ids.add(uuidGenerator.generateId());
-		}
+			ids.add(uuidGenerator.generateId().toLowerCase());
 
-		assertEquals(ids.size(), 1000);
+		}
+		assertEquals(ids.size(), 1000000);
 	}
 }
