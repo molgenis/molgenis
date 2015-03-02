@@ -45,59 +45,46 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 
 	private final MolgenisSettings molgenisSettings;
 	private final AnnotationService annotatorService;
-
-	// the cadd service returns these two values
-	// must be compatible with VCF format, ie no funny characters
 	public static final String MONOGENICDISEASECANDIDATE = VcfRepository.getInfoPrefix() + "MONGENDISCAND";
 	private static final String HOMREF = "HOMREF";
 	private static final String HOMALT = "HOMALT";
 	private static final String HET = "HET";
 
 	private static final String NAME = "MONOGENICDISEASE";
-	
-	//helper hashmap to find compound heterozygous pathogenicity
+
+	// helper hashmap to find compound heterozygous pathogenicity
 	Set<String> genesWithCandidates;
-	
-	public enum outcome {
-		EXCLUDED,
-		EXCLUDED_FIRST_OF_COMPOUND,
-		EXCLUDED_FIRST_OF_COMPOUND_HIGHIMPACT,
-		INCLUDED_DOMINANT,
-		INCLUDED_DOMINANT_HIGHIMPACT,
-		INCLUDED_RECESSIVE,
-		INCLUDED_RECESSIVE_HIGHIMPACT,
-		INCLUDED_RECESSIVE_COMPOUND,
-		INCLUDED_RECESSIVE_COMPOUND_HIGHIMPACT,
-		INCLUDED_OTHER
+
+	public enum outcome
+	{
+		EXCLUDED, EXCLUDED_FIRST_OF_COMPOUND, EXCLUDED_FIRST_OF_COMPOUND_HIGHIMPACT, INCLUDED_DOMINANT, INCLUDED_DOMINANT_HIGHIMPACT, INCLUDED_RECESSIVE, INCLUDED_RECESSIVE_HIGHIMPACT, INCLUDED_RECESSIVE_COMPOUND, INCLUDED_RECESSIVE_COMPOUND_HIGHIMPACT, INCLUDED_OTHER
 	}
-	
-	
 
 	final List<String> infoFields = Arrays
 			.asList(new String[]
-			{
-					"##INFO=<ID="
-							+ MONOGENICDISEASECANDIDATE.substring(VcfRepository.getInfoPrefix().length())
-							+ ",Number=1,Type=String,Description=\"Possible outcomes: EXCLUDED, INCLUDED_DOMINANT, INCLUDED_DOMINANT_HIGHIMPACT, INCLUDED_RECESSIVE, INCLUDED_RECESSIVE_HIGHIMPACT, INCLUDED_RECESSIVE_COMPOUND, INCLUDED_OTHER\">",
-								});
-	
+			{ "##INFO=<ID="
+					+ MONOGENICDISEASECANDIDATE.substring(VcfRepository.getInfoPrefix().length())
+					+ ",Number=1,Type=String,Description=\"Possible outcomes: EXCLUDED, INCLUDED_DOMINANT, INCLUDED_DOMINANT_HIGHIMPACT, INCLUDED_RECESSIVE, INCLUDED_RECESSIVE_HIGHIMPACT, INCLUDED_RECESSIVE_COMPOUND, INCLUDED_OTHER\">", });
+
 	@Autowired
-	public MonogenicDiseaseCandidatesServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService)
-			throws IOException
+	public MonogenicDiseaseCandidatesServiceAnnotator(MolgenisSettings molgenisSettings,
+			AnnotationService annotatorService) throws IOException
 	{
 		this.molgenisSettings = molgenisSettings;
 		this.annotatorService = annotatorService;
 	}
 
-	public MonogenicDiseaseCandidatesServiceAnnotator(File filterSettings, File inputVcfFile, File outputVCFFile) throws Exception
+	public MonogenicDiseaseCandidatesServiceAnnotator(File filterSettings, File inputVcfFile, File outputVCFFile)
+			throws Exception
 	{
 
-		//TODO: filterSettings in input file??
+		// TODO: filterSettings in input file??
 		// or... symptoms
-		// then invoke http://compbio.charite.de/phenomizer/phenomizer/PhenomizerServiceURI?mobilequery=true&terms=HP:0001300,HP:0007325&numres=100
-		
+		// then invoke
+		// http://compbio.charite.de/phenomizer/phenomizer/PhenomizerServiceURI?mobilequery=true&terms=HP:0001300,HP:0007325&numres=100
+
 		genesWithCandidates = new HashSet<String>();
-		
+
 		this.molgenisSettings = new MolgenisSimpleSettings();
 		this.annotatorService = new AnnotationServiceImpl();
 
@@ -106,7 +93,8 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
 		Iterator<Entity> vcfIter = vcfRepo.iterator();
 
-		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields, MONOGENICDISEASECANDIDATE.substring(VcfRepository.getInfoPrefix().length()));
+		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields,
+				MONOGENICDISEASECANDIDATE.substring(VcfRepository.getInfoPrefix().length()));
 
 		System.out.println("Now starting to process the data.");
 
@@ -161,42 +149,51 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 		return Collections.<Entity> singletonList(getAnnotatedEntity(entity, resultMap));
 	}
 
-	private synchronized Map<String, Object> annotateEntityWithMonogenicDiseaseCandidates(Entity entity) throws IOException
+	private synchronized Map<String, Object> annotateEntityWithMonogenicDiseaseCandidates(Entity entity)
+			throws IOException
 	{
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		
-		//TODO:
+
+		// TODO:
 		// check if these annotators have been run:
 		// exac, gonl, 1kg, snpeff, cgd
-		
+
 		/**
 		 * Important variables to use in monogenic disease filter
 		 */
 		String[] annSplit = entity.getString(VcfRepository.getInfoPrefix() + "ANN").split("\\|", -1);
-		double thGenMAF = entity.getDouble(ThousandGenomesServiceAnnotator.THGEN_MAF) != null ? entity.getDouble(ThousandGenomesServiceAnnotator.THGEN_MAF) : 0;
-		double exacMAF = entity.getDouble(ExACServiceAnnotator.EXAC_MAF) != null ? entity.getDouble(ExACServiceAnnotator.EXAC_MAF) : 0;
-		double gonlMAF = entity.getDouble(GoNLServiceAnnotator.GONL_MAF) != null ? entity.getDouble(GoNLServiceAnnotator.GONL_MAF) : 0;
-		CgdDataProvider.generalizedInheritance cgdGenInh = entity.getString(ClinicalGenomicsDatabaseServiceAnnotator.CGD_GENERALIZED_INHERITANCE) != null ? generalizedInheritance.valueOf(entity.getString(ClinicalGenomicsDatabaseServiceAnnotator.CGD_GENERALIZED_INHERITANCE)) : null;
-		String originalInheritance = entity.getString(ClinicalGenomicsDatabaseServiceAnnotator.CGD_INHERITANCE) != null ? entity.getString(ClinicalGenomicsDatabaseServiceAnnotator.CGD_INHERITANCE) : null;
+		double thousandGenomesMAF = entity.getDouble(ThousandGenomesServiceAnnotator.THGEN_MAF) != null ? entity
+				.getDouble(ThousandGenomesServiceAnnotator.THGEN_MAF) : 0;
+		double exacMAF = entity.getDouble(ExACServiceAnnotator.EXAC_MAF) != null ? entity
+				.getDouble(ExACServiceAnnotator.EXAC_MAF) : 0;
+		double gonlMAF = entity.getDouble(GoNLServiceAnnotator.GONL_MAF) != null ? entity
+				.getDouble(GoNLServiceAnnotator.GONL_MAF) : 0;
+		CgdDataProvider.generalizedInheritance cgdGenInh = entity
+				.getString(ClinicalGenomicsDatabaseServiceAnnotator.CGD_GENERALIZED_INHERITANCE) != null ? generalizedInheritance
+				.valueOf(entity.getString(ClinicalGenomicsDatabaseServiceAnnotator.CGD_GENERALIZED_INHERITANCE)) : null;
+		String originalInheritance = entity.getString(ClinicalGenomicsDatabaseServiceAnnotator.CGD_INHERITANCE) != null ? entity
+				.getString(ClinicalGenomicsDatabaseServiceAnnotator.CGD_INHERITANCE) : null;
 		SnpEffServiceAnnotator.impact impact = SnpEffServiceAnnotator.impact.valueOf(annSplit[2]);
 		String gene = annSplit[3];
 		String condition = entity.getString(ClinicalGenomicsDatabaseServiceAnnotator.CGD_CONDITION);
-	//	String hgvsVariant = annSplit[9];
-		
+
 		// TODO: can be multiple!! even with canonical output...
 		// ANN=G|intron_variant|MODIFIER|LOC101926913|LOC101926913|transcript|NR_110185.1|Noncoding|5/5|n.376+9526G>C||||||,G|non_coding_exon_variant|MODIFIER|LINC01124|LINC01124|transcript|NR_027433.1|Noncoding|1/1|n.590G>C||||||;
+		// dealing with multiple ANN values?? not to worry - we don't miss any HIGH or MODERATE effects because they are
+		// placed nr.1 in the list by SnpEff
+		// if(annSplit.length != 16 && !impact.equals(SnpEffServiceAnnotator.impact.HIGH) &&
+		// entity.getString(VcfRepository.getInfoPrefix() + "ANN").contains("HIGH")) {
+		// System.out.println(entity.getString(VcfRepository.getInfoPrefix() + "ANN")); }
 
-		//dealing with multiple ANN values?? not to worry - we don't miss any HIGH or MODERATE effects because they are placed nr.1 in the list by SnpEff
-		//if(annSplit.length != 16 && !impact.equals(SnpEffServiceAnnotator.impact.HIGH) && entity.getString(VcfRepository.getInfoPrefix() + "ANN").contains("HIGH")) { System.out.println(entity.getString(VcfRepository.getInfoPrefix() + "ANN")); }	
-		
 		/**
 		 * Read and check genotype data
 		 */
 		String alleles = null;
 		String zygosity = null;
-		if(entity.getEntities("Samples") != null && !Iterables.isEmpty(entity.getEntities("Samples")) && Iterables.size(entity.getEntities("Samples")) == 1)
+		if (entity.getEntities("Samples") != null && !Iterables.isEmpty(entity.getEntities("Samples"))
+				&& Iterables.size(entity.getEntities("Samples")) == 1)
 		{
-			for(Entity sample: entity.getEntities("SAMPLES"))
+			for (Entity sample : entity.getEntities("SAMPLES"))
 			{
 				alleles = sample.getString("GT");
 				break;
@@ -206,30 +203,24 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 		{
 			throw new IOException("Expecting exactly 1 sample! bad data: " + entity.toString());
 		}
-		
-		if(alleles.length() == 1)
-		{
-			throw new IOException("Hemizygous calls not yet supported (although would be easy)");
-		}
-		
-		if(alleles.length() != 3)
-		{
-			throw new IOException("Genotype length not 3: " + alleles + " for record " + entity.toString());
-		}
-		
+
+		if (alleles.length() == 1) throw new IOException("Hemizygous calls not yet supported");
+		if (alleles.length() != 3) throw new IOException("Genotype length not 3: " + alleles + " for record " + entity.toString());
+
 		char allele1 = alleles.charAt(0);
 		char allele2 = alleles.charAt(2);
-		
-		if(!((allele1 == '0' || allele1 == '1') && (allele2 == '0' || allele2 == '1')))
+
+		if (!((allele1 == '0' || allele1 == '1') && (allele2 == '0' || allele2 == '1')))
 		{
-			throw new IOException("Allelic values other than 0 or 1 not yet supported, for " + alleles + " for record " + entity.toString());
+			throw new IOException("Allelic values other than 0 or 1 not yet supported, for " + alleles + " for record "
+					+ entity.toString());
 		}
-		
-		if(allele1 == '0' && allele2 == '0')
+
+		if (allele1 == '0' && allele2 == '0')
 		{
 			zygosity = HOMREF;
 		}
-		else if(allele1 == '1' && allele2 == '1')
+		else if (allele1 == '1' && allele2 == '1')
 		{
 			zygosity = HOMALT;
 		}
@@ -237,83 +228,87 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 		{
 			zygosity = HET;
 		}
-		
+
 		/**
 		 * Broad spectrum filters, already gets rid of >99% of variants
 		 */
-		
-		//not in CGD, skip variant!
-		if(cgdGenInh == null)
-		{
-			resultMap.put(MONOGENICDISEASECANDIDATE, outcome.EXCLUDED);
-			return resultMap;
-		}
-		
-		//common variant in one of the three big databases, skip it
-		if(thGenMAF > 0.05 || exacMAF > 0.05 || gonlMAF > 0.05)
-		{
-			resultMap.put(MONOGENICDISEASECANDIDATE, outcome.EXCLUDED);
-			return resultMap;
-		}
-		
-		//skip any "low impact" variants
-		if(impact.equals(SnpEffServiceAnnotator.impact.MODIFIER) || impact.equals(SnpEffServiceAnnotator.impact.LOW))
-		{
-			resultMap.put(MONOGENICDISEASECANDIDATE, outcome.EXCLUDED);
-			return resultMap;
-		}
-		
-		//skip any homozygous reference alleles
-		if(zygosity.equals(HOMREF))
-		{
-			resultMap.put(MONOGENICDISEASECANDIDATE, outcome.EXCLUDED);
-			return resultMap;
-		}
-		
+
+		// not in CGD, skip variant!
+		boolean filter = false;
+		if (cgdGenInh == null) filter = true;
+		// common variant in one of the three big databases, skip it
+		if (thousandGenomesMAF > 0.05 || exacMAF > 0.05 || gonlMAF > 0.05) filter = true;
+		// skip any "low impact" variants
+		if (impact.equals(SnpEffServiceAnnotator.impact.MODIFIER) || impact.equals(SnpEffServiceAnnotator.impact.LOW)) filter = true;
+		// skip any homozygous reference alleles
+		if (zygosity.equals(HOMREF)) filter = true;
+
 		/**
-		 * Sensitive filters
-		 * We already know that zygosity is HET or HOMALT and MAF < 0.05
+		 * Sensitive filters We already know that zygosity is HET or HOMALT and MAF < 0.05
 		 */
-	
-		//dominant disorders, including those may may also be recessive, and X-linked, since CGD does not distinguish dominant or recessive for those..
-		if(cgdGenInh.equals(CgdDataProvider.generalizedInheritance.DOMINANT) || cgdGenInh.equals(CgdDataProvider.generalizedInheritance.DOM_OR_REC) || cgdGenInh.equals(CgdDataProvider.generalizedInheritance.XLINKED))
+
+		// dominant disorders, including those may may also be recessive, and X-linked, since CGD does not distinguish
+		// dominant or recessive for those..
+		if (cgdGenInh.equals(CgdDataProvider.generalizedInheritance.DOMINANT)
+				|| cgdGenInh.equals(CgdDataProvider.generalizedInheritance.DOM_OR_REC)
+				|| cgdGenInh.equals(CgdDataProvider.generalizedInheritance.XLINKED))
 		{
 			// must be rare enough in EACH database
-			if(thGenMAF < 0.0025 && exacMAF < 0.0025 && gonlMAF < 0.0025)
+			if (thousandGenomesMAF < 0.0025 && exacMAF < 0.0025 && gonlMAF < 0.0025)
 			{
-				resultMap.put(MONOGENICDISEASECANDIDATE, impact.equals(SnpEffServiceAnnotator.impact.HIGH) ? outcome.INCLUDED_DOMINANT_HIGHIMPACT : outcome.INCLUDED_DOMINANT);
+				resultMap
+						.put(MONOGENICDISEASECANDIDATE,
+								impact.equals(SnpEffServiceAnnotator.impact.HIGH) ? outcome.INCLUDED_DOMINANT_HIGHIMPACT : outcome.INCLUDED_DOMINANT);
 				return resultMap;
 			}
-			else if(cgdGenInh.equals(CgdDataProvider.generalizedInheritance.DOMINANT)) //if purely dominant, exclude at this point!
-			{
-//				LOG.info("EXCLUDED candidate for dominant disease because not rare enough! 1KG: " + thGenMAF + ", ExAC: " + exacMAF + ", GoNL: " + gonlMAF +", for :" + entity.toString());
-				resultMap.put(MONOGENICDISEASECANDIDATE, outcome.EXCLUDED);
-				return resultMap;
-			}
+            // if purely dominant, exclude at this point!
+			else if (cgdGenInh.equals(CgdDataProvider.generalizedInheritance.DOMINANT)) filter = true;
 		}
-		
-		//recessive disorders, including those may may also be dominant, and X-linked, since CGD does not distinguish dominant or recessive for those..
-		if(cgdGenInh.equals(CgdDataProvider.generalizedInheritance.RECESSIVE) || cgdGenInh.equals(CgdDataProvider.generalizedInheritance.DOM_OR_REC) || cgdGenInh.equals(CgdDataProvider.generalizedInheritance.XLINKED))
+
+		if (filter)
 		{
-			//must be HOMALT for this
-			if(zygosity.equals(HOMALT))
+			resultMap.put(MONOGENICDISEASECANDIDATE, outcome.EXCLUDED);
+            return resultMap;
+		}
+		// recessive disorders, including those may may also be dominant, and X-linked, since CGD does not distinguish
+		// dominant or recessive for those..
+		if (cgdGenInh.equals(CgdDataProvider.generalizedInheritance.RECESSIVE)
+				|| cgdGenInh.equals(CgdDataProvider.generalizedInheritance.DOM_OR_REC)
+				|| cgdGenInh.equals(CgdDataProvider.generalizedInheritance.XLINKED))
+		{
+			// must be HOMALT for this
+			if (zygosity.equals(HOMALT))
 			{
-				resultMap.put(MONOGENICDISEASECANDIDATE, impact.equals(SnpEffServiceAnnotator.impact.HIGH) ? outcome.INCLUDED_RECESSIVE_HIGHIMPACT : outcome.INCLUDED_RECESSIVE);
+				resultMap
+						.put(MONOGENICDISEASECANDIDATE,
+								impact.equals(SnpEffServiceAnnotator.impact.HIGH) ? outcome.INCLUDED_RECESSIVE_HIGHIMPACT : outcome.INCLUDED_RECESSIVE);
 				return resultMap;
 			}
-			//only option left: HET, but check just in case
-			else if(zygosity.equals(HET))
+			// only option left: HET, but check just in case
+			else if (zygosity.equals(HET))
 			{
-				if(genesWithCandidates.contains(gene))
+				if (genesWithCandidates.contains(gene))
 				{
-					LOG.info("INCLUDED heterozygous variant for comp. het. recessive disease because we've seen at least 1 candidate before in gene '"+gene+", for " + entity.toString());
-					resultMap.put(MONOGENICDISEASECANDIDATE, impact.equals(SnpEffServiceAnnotator.impact.HIGH) ? outcome.INCLUDED_RECESSIVE_COMPOUND_HIGHIMPACT : outcome.INCLUDED_RECESSIVE_COMPOUND);
+					LOG.info("INCLUDED heterozygous variant for comp. het. recessive disease because we've seen at least 1 candidate before in gene '"
+							+ gene + ", for " + entity.toString());
+					resultMap
+							.put(MONOGENICDISEASECANDIDATE,
+									impact.equals(SnpEffServiceAnnotator.impact.HIGH) ? outcome.INCLUDED_RECESSIVE_COMPOUND_HIGHIMPACT : outcome.INCLUDED_RECESSIVE_COMPOUND);
 					return resultMap;
 				}
 				else
 				{
 					genesWithCandidates.add(gene);
-					resultMap.put(MONOGENICDISEASECANDIDATE, impact.equals(SnpEffServiceAnnotator.impact.HIGH) ? outcome.EXCLUDED_FIRST_OF_COMPOUND_HIGHIMPACT : outcome.EXCLUDED_FIRST_OF_COMPOUND); //exclude the 'first' variant in a potential comp.het.
+					resultMap
+							.put(MONOGENICDISEASECANDIDATE,
+									impact.equals(SnpEffServiceAnnotator.impact.HIGH) ? outcome.EXCLUDED_FIRST_OF_COMPOUND_HIGHIMPACT : outcome.EXCLUDED_FIRST_OF_COMPOUND); // exclude
+																																												// the
+																																												// 'first'
+																																												// variant
+																																												// in
+																																												// a
+																																												// potential
+																																												// comp.het.
 					return resultMap;
 				}
 			}
@@ -322,11 +317,12 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 				throw new IOException("Zygosity HOMREF, something went wrong in prefilter!");
 			}
 		}
-		
-		//other
+
+		// other
 		else
 		{
-			LOG.info("INCLUDED variant with untypical inheritance mode '"+originalInheritance+"', condition '"+condition+"', keeping variant " + entity.toString());
+			LOG.info("INCLUDED variant with untypical inheritance mode '" + originalInheritance + "', condition '"
+					+ condition + "', keeping variant " + entity.toString());
 			resultMap.put(MONOGENICDISEASECANDIDATE, outcome.INCLUDED_OTHER);
 			return resultMap;
 		}
@@ -337,7 +333,9 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 	public EntityMetaData getOutputMetaData()
 	{
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(MONOGENICDISEASECANDIDATE, FieldTypeEnum.STRING)); //FIXME best type?
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(MONOGENICDISEASECANDIDATE, FieldTypeEnum.STRING)); // FIXME
+																														// best
+																														// type?
 		return metadata;
 	}
 
