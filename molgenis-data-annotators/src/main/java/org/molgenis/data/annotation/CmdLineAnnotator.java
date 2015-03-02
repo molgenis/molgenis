@@ -9,6 +9,7 @@ import org.molgenis.data.annotation.impl.ClinVarVCFServiceAnnotator;
 import org.molgenis.data.annotation.impl.ClinicalGenomicsDatabaseServiceAnnotator;
 import org.molgenis.data.annotation.impl.ExACServiceAnnotator;
 import org.molgenis.data.annotation.impl.GoNLServiceAnnotator;
+import org.molgenis.data.annotation.impl.HpoServiceAnnotator;
 import org.molgenis.data.annotation.impl.MonogenicDiseaseCandidatesServiceAnnotator;
 import org.molgenis.data.annotation.impl.PhenomizerServiceAnnotator;
 import org.molgenis.data.annotation.impl.SnpEffServiceAnnotator;
@@ -19,7 +20,7 @@ public class CmdLineAnnotator
 
 	public static void main(String[] args) throws Exception
 	{
-		List<String> annotators = Arrays.asList(new String[]{"cadd", "snpeff", "clinvar", "ase", "monogenic", "phenomizer", "ccgg", "exac", "1kg", "gonl", "gwascatalog", "vkgl", "cgd", "enhancers", "proteinatlas"});
+		List<String> annotators = Arrays.asList(new String[]{"cadd", "snpeff", "clinvar", "hpo", "ase", "monogenic", "phenomizer", "ccgg", "exac", "1kg", "gonl", "gwascatalog", "vkgl", "cgd", "enhancers", "proteinatlas"});
 		
 		if (args.length != 4)
 		{
@@ -76,6 +77,10 @@ public class CmdLineAnnotator
 		else if(annotator.equals("clinvar"))
 		{
 			new ClinVarVCFServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
+		}
+		else if(annotator.equals("hpo"))
+		{
+			new HpoServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
 		else if(annotator.equals("ase"))
 		{
