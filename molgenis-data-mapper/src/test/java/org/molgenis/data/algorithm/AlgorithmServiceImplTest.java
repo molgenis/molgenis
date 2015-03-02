@@ -62,20 +62,19 @@ public class AlgorithmServiceImplTest
 	}
 
 	@Test
-	public void testGetGenderScript() throws ParseException
+	public void testGetXrefScript() throws ParseException
 	{
 		// xref entities
 		DefaultEntityMetaData entityMetaDataXref = new DefaultEntityMetaData("xrefEntity1");
 		entityMetaDataXref.addAttribute("id").setDataType(MolgenisFieldTypes.INT).setIdAttribute(true);
-		entityMetaDataXref.addAttribute("song").setDataType(MolgenisFieldTypes.STRING);
+		entityMetaDataXref.addAttribute("field1").setDataType(MolgenisFieldTypes.STRING);
 		Entity xref1a = new MapEntity(entityMetaDataXref);
 		xref1a.set("id", "1");
 		xref1a.set("field1", "Test");
 
-
 		DefaultEntityMetaData entityMetaDataXref2 = new DefaultEntityMetaData("xrefEntity2");
 		entityMetaDataXref2.addAttribute("id").setDataType(MolgenisFieldTypes.INT).setIdAttribute(true);
-		entityMetaDataXref2.addAttribute("song").setDataType(MolgenisFieldTypes.STRING);
+		entityMetaDataXref2.addAttribute("field1").setDataType(MolgenisFieldTypes.STRING);
 		Entity xref2a = new MapEntity(entityMetaDataXref2);
 		xref2a.set("id", "2");
 		xref2a.set("field2", "Test");
@@ -88,13 +87,13 @@ public class AlgorithmServiceImplTest
 		source.set("id", "1");
 		source.set("xref", xref2a);
 
-		DefaultAttributeMetaData targetAttributeMetaData = new DefaultAttributeMetaData("song");
+		DefaultAttributeMetaData targetAttributeMetaData = new DefaultAttributeMetaData("field1");
 		targetAttributeMetaData.setDataType(org.molgenis.MolgenisFieldTypes.XREF);
 		targetAttributeMetaData.setRefEntity(entityMetaDataXref);
 		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
 		attributeMapping.setAlgorithm("$('xref').map({'1':'2', '2':'1'});");
 		when(dataService.findOne("xrefEntity1", "1")).thenReturn(xref1a);
-        Entity result = (Entity)algorithmService.apply(attributeMapping, source);
+		Entity result = (Entity) algorithmService.apply(attributeMapping, source);
 		assertEquals(result.get("field1"), xref2a.get("field2"));
 	}
 }
