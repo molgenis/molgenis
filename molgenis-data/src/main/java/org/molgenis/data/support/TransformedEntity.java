@@ -5,7 +5,9 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
@@ -30,7 +32,7 @@ public class TransformedEntity implements Entity
 {
 	private static final long serialVersionUID = 1L;
 
-	private final Entity entity;
+	private final Map<String, Object> entity = new HashMap<>();;
 	private final EntityMetaData entityMetaData;
 	private final DataService dataService;
 
@@ -39,9 +41,13 @@ public class TransformedEntity implements Entity
 		if (entity == null) throw new IllegalArgumentException("entity is null");
 		if (entityMetaData == null) throw new IllegalArgumentException("entityMetaData is null");
 		if (dataService == null) throw new IllegalArgumentException("dataService is null");
-		this.entity = entity;
 		this.entityMetaData = entityMetaData;
 		this.dataService = dataService;
+
+		for (AttributeMetaData attr : entityMetaData.getAtomicAttributes())
+		{
+			this.entity.put(attr.getName(), entity.get(attr.getName()));
+		}
 	}
 
 	@Override
@@ -98,7 +104,7 @@ public class TransformedEntity implements Entity
 	@Override
 	public String getLabelValue()
 	{
-		return entity.getString(entityMetaData.getLabelAttribute().getName());
+		return DataConverter.toString(entity.get(entityMetaData.getLabelAttribute().getName()));
 	}
 
 	@Override
@@ -298,18 +304,21 @@ public class TransformedEntity implements Entity
 	@Override
 	public void set(String attributeName, Object value)
 	{
-		throw new UnsupportedOperationException(this.getClass().getSimpleName() + " is not mutable");
+		entity.put(attributeName, value);
 	}
 
 	@Override
 	public void set(Entity entity, boolean strict)
 	{
-		throw new UnsupportedOperationException(this.getClass().getSimpleName() + " is not mutable");
+		for (AttributeMetaData attr : entityMetaData.getAtomicAttributes())
+		{
+			this.entity.put(attr.getName(), entity.get(attr.getName()));
+		}
 	}
 
 	@Override
 	public void set(Entity values)
 	{
-		throw new UnsupportedOperationException(this.getClass().getSimpleName() + " is not mutable");
+		set(values, false);
 	}
 }
