@@ -16,6 +16,7 @@
 
 package org.molgenis.wikipathways.client;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.rmi.RemoteException;
@@ -316,6 +317,7 @@ public class WikiPathwaysRESTBindingStub implements WikiPathwaysPortType
 	@Override
 	public byte[] getPathwayAs(String fileType, String pwId, int revision) throws RemoteException
 	{
+		InputStream instream = null;
 		try
 		{
 			String url = baseUrl;
@@ -336,13 +338,27 @@ public class WikiPathwaysRESTBindingStub implements WikiPathwaysPortType
 			HttpGet httpget = new HttpGet(url);
 			HttpResponse response = client.execute(httpget);
 			HttpEntity entity = response.getEntity();
-			InputStream instream = entity.getContent();
+			instream = entity.getContent();
 
 			return IOUtils.toByteArray(instream);
 		}
 		catch (Exception e)
 		{
 			throw new RemoteException(e.getMessage(), e.getCause());
+		}
+		finally
+		{
+			try
+			{
+				if (instream != null)
+				{
+					instream.close();
+				}
+			}
+			catch (IOException e)
+			{
+				throw new RemoteException(e.getMessage(), e.getCause());
+			}
 		}
 	}
 

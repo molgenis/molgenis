@@ -2,10 +2,30 @@
 
 	"use strict";
 	var select2_items = [];
-	var select2_items2 = [];
+	var select2_items_vcf = [];
 	var pathway_info = [];
 	var pathwayId = "";
 	var selectedVcf;
+	
+	var fillPathwaySelect = function(data){
+		select2_items = [];
+		for (var i = 0; i < data.length; i++) {
+			select2_items.push({
+				text : data[i].name,
+				id : data[i].id
+			});
+		}
+	}
+	
+	var fillPathwaySelectVcf = function(data){
+		select2_items_vcf = [];
+		for (var i = 0; i < data.length; i++) {
+			select2_items_vcf.push({
+				text : data[i].name,
+				id : data[i].id
+			});
+		}
+	}
 
 	function getPathwaysForGene(submittedGene) {
 		$("#pathway-select").select2("val", "");
@@ -15,15 +35,7 @@
 			url : molgenis.getContextUrl() + "/filteredPathways",
 			contentType : 'application/json',
 			data : JSON.stringify(submittedGene),
-			success : function(data) {
-				select2_items = [];
-				for ( var item in data) {
-					select2_items.push({
-						text : data[item],
-						id : item
-					});
-				}
-			}
+			success : fillPathwaySelect
 		});
 	}
 
@@ -33,15 +45,7 @@
 			type : 'POST',
 			url : molgenis.getContextUrl() + "/allPathways",
 			contentType : 'application/json',
-			success : function(data) {
-				select2_items = [];
-				for ( var item in data) {
-					select2_items.push({
-						text : data[item],
-						id : item
-					});
-				}
-			}
+			success : fillPathwaySelect
 		});
 	}
 
@@ -67,38 +71,19 @@
 			url : molgenis.getContextUrl() + "/pathwaysByGenes",
 			contentType : 'application/json',
 			data : selectedVcf,
-			success : function(data) {
-				select2_items2 = [];
-				for ( var item in data) {
-					select2_items2.push({
-						text : data[item],
-						id : item
-					});
-				}
-			}
+			success : fillPathwaySelectVcf
 		});
 	}
 
-	function getGPML(selectedVcf, pathwayId) {
+	function getColoredPathwayImage(selectedVcf, pathwayId) {
 		$.ajax({
 			type : 'GET',
-			url : molgenis.getContextUrl() + "/getGPML/" + selectedVcf + "/" + pathwayId,
+			url : molgenis.getContextUrl() + "/getColoredPathway/" + selectedVcf + "/" + pathwayId,
 			contentType : 'application/json',
 			success : function(data) {
 				$("#colored-pathway-svg-image").empty();
 				$('#colored-pathway-svg-image').append(data);
 				SvgZoomColoredPathway();
-			}
-		});
-	}
-
-	function getColoredPathwayImage(pathwayId) {
-		$.ajax({
-			type : 'GET',
-			url : molgenis.getContextUrl() + "/getColoredPathway/" + pathwayId,
-			success : function(data) {
-				$("#colored-pathway-svg-image").empty();
-				$('#colored-pathway-svg-image').append(data);
 			}
 		});
 	}
@@ -151,12 +136,12 @@
 			width : '400px',
 			data : function() {
 				return {
-					results : select2_items2
+					results : select2_items_vcf
 				};
 			},
 		}).on("select2-selecting", function(event) {
 			pathwayId = event.val;
-			getGPML(selectedVcf, pathwayId);
+			getColoredPathwayImage(selectedVcf, pathwayId);
 		});
 		
 		getPathways();

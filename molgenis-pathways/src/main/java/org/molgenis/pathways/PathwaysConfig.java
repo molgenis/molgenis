@@ -2,7 +2,6 @@ package org.molgenis.pathways;
 
 import java.net.MalformedURLException;
 
-import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.molgenis.wikipathways.client.WikiPathwaysPortType;
 import org.molgenis.wikipathways.client.WikiPathwaysRESTBindingStub;

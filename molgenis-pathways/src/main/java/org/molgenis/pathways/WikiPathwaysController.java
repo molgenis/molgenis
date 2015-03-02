@@ -1,21 +1,29 @@
 package org.molgenis.pathways;
 
+import static java.util.function.BinaryOperator.maxBy;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.reducing;
+import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.IntStream.range;
+import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.pathways.WikiPathwaysController.URI;
+import static org.molgenis.util.stream.MultimapCollectors.toArrayListMultimap;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.StringReader;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import javax.validation.Valid;
 import javax.xml.parsers.DocumentBuilder;
@@ -27,6 +35,9 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.pathways.model.Impact;
+import org.molgenis.pathways.model.Pathway;
+import org.molgenis.pathways.service.WikiPathwaysService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,9 +51,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
 @Controller
@@ -57,8 +68,6 @@ public class WikiPathwaysController extends MolgenisPluginController
 			.compile("([A-Z]*\\|)(\\|*[0-9]+\\||\\|+)+([0-9A-Z]+)(\\|*)(.*)");
 
 	private static final String HOMO_SAPIENS = "Homo sapiens";
-	private static Map<Integer, String> variantColor = new HashMap<Integer, String>();
-	private Map<String, String> pathwayNames;
 	private final WikiPathwaysService wikiPathwaysService;
 	@Autowired
 	private DataService dataService;
@@ -70,15 +79,6 @@ public class WikiPathwaysController extends MolgenisPluginController
 	{
 		super(URI);
 		this.wikiPathwaysService = wikiPathwaysService;
-		fillVariantColors();
-	}
-
-	private void fillVariantColors()
-	{
-		variantColor.put(3, "FF0000"); // red
-		variantColor.put(2, "FFA500"); // orange
-		variantColor.put(1, "FFFF00"); // yellow
-		variantColor.put(0, "219AD7"); // lighter blue, so the gene symbol is still visible
 	}
 
 	/**
@@ -91,41 +91,43 @@ public class WikiPathwaysController extends MolgenisPluginController
 	@RequestMapping(method = GET)
 	public String init(Model model)
 	{
-		model.addAttribute("listOfPathwayNames", pathwayNames);
 		model.addAttribute("entitiesMeta", getVCFEntities());
-		model.addAttribute("selectedEntityName", "");
-		return "view-WikiPathways";
+		return "view-pathways";
 	}
 
 	/**
-	 * Retrieves the list of VCF entities. They are recognized by the fact that they have an "EFF" attribute.
+	 * Retrieves the list of VCF entities. They are recognized by the fact that they have an effect attribute.
 	 * 
 	 * @return {@link List} of {@link EntityMetaData} for the VCF entities
 	 */
 	private List<EntityMetaData> getVCFEntities()
 	{
-		List<EntityMetaData> entitiesMeta = new ArrayList<EntityMetaData>();
-		for (String entityName : dataService.getEntityNames())
-		{
-			EntityMetaData emd = dataService.getEntityMetaData(entityName);
-			if (emd.getAttribute("EFF") != null)
-			{
-				entitiesMeta.add(emd);
-			}
-		}
-		return entitiesMeta;
+		return stream(dataService.getEntityNames().spliterator(), false).map(dataService::getEntityMetaData)
+				.filter(this::hasEffectAttribute).collect(toList());
+	}
+
+	/**
+	 * Determines if an entity has an effect attribute.
+	 * 
+	 * @param emd
+	 *            {@link EntityMetaData} of the entity
+	 * @return boolean indicating if the entity has an effect column
+	 */
+	private boolean hasEffectAttribute(EntityMetaData emd)
+	{
+		return emd.getAttribute("EFF") != null;
 	}
 
 	/**
 	 * Retrieves all pathways.
 	 * 
-	 * @return Map with all pathway ids mapped to pathway name
+	 * @return {@link Collection} of all {@link Pathway}s.
 	 * @throws ExecutionException
 	 *             if load from cache fails
 	 */
 	@RequestMapping(value = "/allPathways", method = POST)
 	@ResponseBody
-	public Map<String, String> getAllPathways() throws ExecutionException
+	public Collection<Pathway> getAllPathways() throws ExecutionException
 	{
 		return wikiPathwaysService.getAllPathways(HOMO_SAPIENS);
 	}
@@ -135,18 +137,18 @@ public class WikiPathwaysController extends MolgenisPluginController
 	 * 
 	 * @param searchTerm
 	 *            string to search for
-	 * @return Map with all matching pathway ids mapped to pathway name
+	 * @return {@link Collection} of all {@link Pathway}s found for searchTerm
 	 * @throws RemoteException
 	 */
 	@RequestMapping(value = "/filteredPathways", method = POST)
 	@ResponseBody
-	public Map<String, String> getFilteredPathways(@Valid @RequestBody String searchTerm) throws RemoteException
+	public Collection<Pathway> getFilteredPathways(@Valid @RequestBody String searchTerm) throws RemoteException
 	{
 		return wikiPathwaysService.getFilteredPathways(searchTerm, HOMO_SAPIENS);
 	}
 
 	/**
-	 * Retrieves pathway image.
+	 * Retrieves uncolored pathway image.
 	 * 
 	 * @param pathwayId
 	 *            the id of the pathway
@@ -162,73 +164,73 @@ public class WikiPathwaysController extends MolgenisPluginController
 	}
 
 	/**
-	 * Retrieves gene symbols plus impact for a VCF.
+	 * Retrieves gene symbols plus impact from the EFF attributes of all {@link Entity}s in a VCF repository that have
+	 * an EFF attribute containing a gene symbol.
 	 * 
 	 * @param selectedVcf
-	 *            name of the VCF to select
-	 * @return Map mapping Gene name to highest impact
+	 *            name of the VCF {@link Repository}
+	 * @return Map mapping Gene name to highest {@link Impact} for that gene
 	 */
-	private HashMap<String, Integer> getGenesForVcf(String selectedVcf)
+	private Map<String, Impact> getGenesForVcf(String selectedVcf)
 	{
-		// TODO: cache result per VCF!
-		HashMap<String, Integer> result = new HashMap<String, Integer>();
-		Repository repository = dataService.getRepositoryByEntityName(selectedVcf);
-		Iterator<Entity> iterator = repository.iterator();
-		while (iterator.hasNext())
-		{
-			Entity entity = iterator.next();
-			updateEffect(result, entity.getString("EFF"));
-		}
-		return result;
+		return stream(dataService.getRepositoryByEntityName(selectedVcf).spliterator(), false)
+				.map(entity -> entity.getString("EFF"))
+				.filter(eff -> !StringUtils.isEmpty(getGeneFromEffect(eff)))
+				.collect(
+						groupingBy(
+								WikiPathwaysController::getGeneFromEffect,
+								reducing(Impact.NONE, WikiPathwaysController::getImpactFromEffect,
+										maxBy((i1, i2) -> i1.compareTo(i2)))));
 	}
 
 	/**
-	 * Interprets effect and updates maximum impact.
+	 * Parses the impact from an effect attribute. Recognizes the strings HIGH, MODERATE, and LOW.
 	 * 
-	 * @param maximumImpacts
-	 *            Map with maximum impact per gene
 	 * @param eff
-	 *            String with effect attribute of VCF
+	 *            String value of the effect attribute
+	 * @return the highest {@link Impact} found in the effect attribute, or {@value Impact#NONE} if none found
 	 */
+	private static Impact getImpactFromEffect(String eff)
+	{
+		return eff.contains("HIGH") ? Impact.HIGH : eff.contains("MODERATE") ? Impact.MODERATE : eff.contains("LOW") ? Impact.LOW : Impact.NONE;
+	}
 
-	private void updateEffect(HashMap<String, Integer> maximumImpacts, String eff)
+	/**
+	 * Parses the Gene symbol from an effect attribute.
+	 * 
+	 * @param eff
+	 *            String value of the effect attribute
+	 * @return the gene symbol or null if none found
+	 */
+	private static String getGeneFromEffect(String eff)
 	{
 		if (!StringUtils.isEmpty(eff))
 		{
 			Matcher effectMatcher = EFFECT_PATTERN.matcher(eff);
 			if (effectMatcher.find())
 			{
-				String geneSymbol = effectMatcher.group(3);
-				int impact = eff.contains("HIGH") ? 3 : eff.contains("MODERATE") ? 2 : eff.contains("LOW") ? 1 : 0;
-
-				if (!maximumImpacts.containsKey(geneSymbol) || impact > maximumImpacts.get(geneSymbol))
-				{
-					maximumImpacts.put(geneSymbol, impact);
-				}
+				return effectMatcher.group(3);
 			}
 		}
+		return null;
 	}
 
 	/**
 	 * Retrieves all pathways for the genes in a vcf.
 	 * 
 	 * @param selectedVcf
-	 *            the name of the vcf entity
-	 * @return Map mapping pathway ID to pathway name plus ID
+	 *            the name of the vcf {@link Repository}
+	 * @return {@link Collection} of {@link Pathway}s found for genes in the VCF
 	 * @throws ExecutionException
 	 *             if the loading from cache fails
 	 */
 	@RequestMapping(value = "/pathwaysByGenes", method = POST)
 	@ResponseBody
-	public Map<String, String> getListOfPathwayNamesByGenes(@Valid @RequestBody String selectedVcf)
+	public Collection<Pathway> getListOfPathwayNamesByGenes(@Valid @RequestBody String selectedVcf)
 			throws ExecutionException
 	{
-		Map<String, String> result = new HashMap<String, String>();
-		for (String gene : getGenesForVcf(selectedVcf).keySet())
-		{
-			result.putAll(getPathwaysForGene(gene));
-		}
-		return result;
+		return getGenesForVcf(selectedVcf).keySet().stream().map(this::getPathwaysForGene).flatMap(Collection::stream)
+				.collect(toCollection(LinkedHashSet::new));
 	}
 
 	/**
@@ -236,22 +238,43 @@ public class WikiPathwaysController extends MolgenisPluginController
 	 * 
 	 * @param gene
 	 *            the HGNC name of the gene
-	 * @return Map mapping pathway ID to pathway name plus ID
-	 * @throws ExecutionException
-	 *             if the loading from cache fails
+	 * @return Collection of {@link Pathway}s
 	 */
-	private Map<String, String> getPathwaysForGene(String gene) throws ExecutionException
+	private Collection<Pathway> getPathwaysForGene(String gene)
 	{
-		return wikiPathwaysService.getPathwaysForGene(gene, HOMO_SAPIENS);
+		try
+		{
+			return wikiPathwaysService.getPathwaysForGene(gene, HOMO_SAPIENS);
+		}
+		catch (ExecutionException e)
+		{
+			throw new RuntimeException(e);
+		}
 	}
 
-	@RequestMapping(value = "/getGPML/{selectedVcf}/{pathwayId}", method = GET)
+	/**
+	 * Retrieves a colored pathway.
+	 * 
+	 * @param selectedVcf
+	 *            name of the VCF {@link Repository}
+	 * @param pathwayId
+	 *            ID of the pathway
+	 * @return svg for the pathway, with the genes in the VCF colored according to their {@link Impact}
+	 * @throws ParserConfigurationException
+	 *             if the creation of the {@link DocumentBuilder} fails
+	 * @throws IOException
+	 *             If any IO errors occur when parsing the GPML
+	 * @throws SAXException
+	 *             If any parse errors occur when parsing the GPML
+	 * @throws ExecutionException
+	 *             if the loading of the colored pathway from cache fails
+	 */
+	@RequestMapping(value = "/getColoredPathway/{selectedVcf}/{pathwayId}", method = GET)
 	@ResponseBody
-	public String getGPML(@PathVariable String selectedVcf, @PathVariable String pathwayId)
+	public String getColoredPathway(@PathVariable String selectedVcf, @PathVariable String pathwayId)
 			throws ParserConfigurationException, SAXException, IOException, ExecutionException
 	{
-		Multimap<String, String> graphIdsPerGene = analyzeGPML(wikiPathwaysService.getCurrentPathwayGPML(pathwayId));
-		return getColoredPathway(selectedVcf, pathwayId, graphIdsPerGene);
+		return getColoredPathway(selectedVcf, pathwayId, analyzeGPML(wikiPathwaysService.getPathwayGPML(pathwayId)));
 	}
 
 	/**
@@ -260,35 +283,39 @@ public class WikiPathwaysController extends MolgenisPluginController
 	 * @param gpml
 	 *            String containing the pathway GPML
 	 * @return {@link Multimap} mapping gene symbol to graphIDs
-	 * @throws ParserConfigurationException
-	 *             if the creation of the {@link DocumentBuilder} fails
-	 * @throws IOException
-	 *             If any IO errors occur when parsing the GPML
-	 * @throws SAXException
-	 *             If any parse errors occur when parsing the GPML
+	 * @throws IllegalArgumentException
+	 *             if the gpml is invalid
 	 */
-	private Multimap<String, String> analyzeGPML(String gpml) throws ParserConfigurationException, IOException,
-			SAXException
+	Multimap<String, String> analyzeGPML(String gpml) throws ParserConfigurationException, IOException, SAXException
 	{
-		DocumentBuilder dBuilder = DB_FACTORY.newDocumentBuilder();
-		InputStream is = new ByteArrayInputStream(gpml.getBytes());
-		Document doc = dBuilder.parse(is);
-		NodeList dataNodes = doc.getElementsByTagName("DataNode");
+		return streamDataNodes(gpml).filter(node -> !node.getAttribute("GraphId").isEmpty()).collect(
+				toArrayListMultimap(node -> getGeneSymbol(node.getAttribute("TextLabel")),
+						node -> node.getAttribute("GraphId")));
+	}
 
-		Multimap<String, String> result = ArrayListMultimap.create();
-		for (int i = 0; i < dataNodes.getLength(); i++)
+	/**
+	 * Finds the DataNode elements in a gpml string.
+	 * 
+	 * @param gpml
+	 *            String containing the gpml document
+	 * @return {@link Stream} of DataNode {@link Element}s
+	 * @throws IllegalArgumentException
+	 *             if the gpml is invalid
+	 */
+	private Stream<Element> streamDataNodes(String gpml)
+	{
+		Document document;
+		try
 		{
-			Element dataNode = (Element) dataNodes.item(i);
-			String graphId = dataNode.getAttribute("GraphId");
-			String textLabel = dataNode.getAttribute("TextLabel");
-
-			String geneSymbol = getGeneSymbol(textLabel);
-			if (!graphId.isEmpty())
-			{
-				result.put(geneSymbol, graphId);
-			}
+			document = DB_FACTORY.newDocumentBuilder().parse(new InputSource(new StringReader(gpml)));
+			NodeList dataNodes = document.getElementsByTagName("DataNode");
+			return range(0, dataNodes.getLength()).mapToObj(dataNodes::item).map(Element.class::cast);
 		}
-		return result;
+		catch (SAXException | IOException | ParserConfigurationException e)
+		{
+			LOG.error("Invalid GPML " + gpml);
+			throw new IllegalArgumentException("Invalid GPML");
+		}
 	}
 
 	/**
@@ -332,31 +359,13 @@ public class WikiPathwaysController extends MolgenisPluginController
 	private String getColoredPathway(String selectedVcf, String pathwayId, Multimap<String, String> graphIdsPerGene)
 			throws ExecutionException
 	{
-		Map<String, Integer> highestImpactPerGene = getGenesForVcf(selectedVcf);
-		Map<String, Integer> highestImpactPerGraphId = new HashMap<String, Integer>();
+		Map<String, Impact> impactPerGraphId = new HashMap<String, Impact>();
+		getGenesForVcf(selectedVcf).forEach(
+				(gene, impact) -> graphIdsPerGene.get(gene).forEach(graphId -> impactPerGraphId.put(graphId, impact)));
 
-		for (String gene : highestImpactPerGene.keySet())
+		if (!impactPerGraphId.isEmpty())
 		{
-			int impact = highestImpactPerGene.get(gene);
-			for (String graphId : graphIdsPerGene.get(gene))
-			{
-				highestImpactPerGraphId.put(graphId, impact);
-			}
-		}
-
-		List<String> colors = new ArrayList<String>();
-		List<String> graphIds = new ArrayList<String>();
-		for (String graphId : highestImpactPerGraphId.keySet())
-		{
-			Integer impact = highestImpactPerGraphId.get(graphId);
-			String color = variantColor.get(impact);
-			graphIds.add(graphId);
-			colors.add(color);
-		}
-
-		if (!graphIds.isEmpty())
-		{
-			return wikiPathwaysService.getColoredPathwayImage(pathwayId, graphIds, colors);
+			return wikiPathwaysService.getColoredPathwayImage(pathwayId, impactPerGraphId);
 		}
 		else
 		{
