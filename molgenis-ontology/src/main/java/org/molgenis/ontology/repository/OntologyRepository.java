@@ -15,7 +15,7 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 public class OntologyRepository implements Repository
 {
 	private final OntologyLoader ontologyLoader;
-	private final UuidGenerator uuidGenerator;
+	private final String ontologyId;
 
 	public OntologyRepository(OntologyLoader ontologyLoader, UuidGenerator uuidGenerator)
 			throws OWLOntologyCreationException
@@ -23,7 +23,7 @@ public class OntologyRepository implements Repository
 		if (ontologyLoader == null) throw new IllegalArgumentException("OntologyLoader is null!");
 		if (uuidGenerator == null) throw new IllegalArgumentException("UuidGenerator is null!");
 		this.ontologyLoader = ontologyLoader;
-		this.uuidGenerator = uuidGenerator;
+		ontologyId = uuidGenerator.generateId();
 	}
 
 	@Override
@@ -48,7 +48,7 @@ public class OntologyRepository implements Repository
 			public Entity next()
 			{
 				Entity entity = new MapEntity();
-				entity.set(OntologyMetaData.ID, uuidGenerator.generateId());
+				entity.set(OntologyMetaData.ID, ontologyId);
 				entity.set(OntologyMetaData.ONTOLOGY_IRI, ontologyLoader.getOntologyIRI());
 				entity.set(OntologyMetaData.ONTOLOGY_NAME, ontologyLoader.getOntologyName());
 				return entity;
