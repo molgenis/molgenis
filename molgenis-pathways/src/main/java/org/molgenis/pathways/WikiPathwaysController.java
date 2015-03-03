@@ -62,7 +62,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 {
 	private static final Logger LOG = LoggerFactory.getLogger(WikiPathwaysController.class);
 
-	private static final String ID = "wikipathways";
+	private static final String ID = "pathways";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	private static final Pattern EFFECT_PATTERN = Pattern
 			.compile("([A-Z]*\\|)(\\|*[0-9]+\\||\\|+)+([0-9A-Z]+)(\\|*)(.*)");
@@ -139,11 +139,17 @@ public class WikiPathwaysController extends MolgenisPluginController
 	 *            string to search for
 	 * @return {@link Collection} of all {@link Pathway}s found for searchTerm
 	 * @throws RemoteException
+	 * @throws ExecutionException
 	 */
 	@RequestMapping(value = "/filteredPathways", method = POST)
 	@ResponseBody
-	public Collection<Pathway> getFilteredPathways(@Valid @RequestBody String searchTerm) throws RemoteException
+	public Collection<Pathway> getFilteredPathways(@RequestBody String searchTerm) throws RemoteException,
+			ExecutionException
 	{
+		if (StringUtils.isEmpty(searchTerm))
+		{
+			return getAllPathways();
+		}
 		return wikiPathwaysService.getFilteredPathways(searchTerm, HOMO_SAPIENS);
 	}
 

@@ -63,7 +63,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 	private final JdbcTemplate jdbcTemplate;
 	private final AsyncJdbcTemplate asyncJdbcTemplate;
 	private MysqlRepositoryCollection repositoryCollection;
-	private DataSource dataSource;
+	private final DataSource dataSource;
 
 	/**
 	 * Creates a new MysqlRepository.
@@ -1125,9 +1125,17 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 								{
 									continue;
 								}
-								// default value, if any
+
 								if (batch.get(rowIndex).get(att.getName()) == null)
 								{
+									if (att.isIdAtrribute() && att.isAuto()
+											&& (att.getDataType() instanceof StringField))
+									{
+										throw new MolgenisDataException(
+												"Missing auto id value. Please use the 'AutoIdCrudRepositoryDecorator' to add auto id capabilities.");
+									}
+
+									// default value, if any
 									preparedStatement.setObject(fieldIndex++, att.getDefaultValue());
 								}
 								else if (att.getDataType() instanceof XrefField)
