@@ -705,5 +705,6 @@
         <module>molgenis-data-import</module>
         <module>molgenis-catalogue</module>
         <module>molgenis-data-mapper</module>
+        <module>molgenis-pathways</module>
     </modules>
 </project>

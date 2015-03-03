@@ -2,6 +2,7 @@
 <molgenis label="OMX" name="omx">
 	<menu label="Home" name="main">
 		<plugin id="home" name="Home" url="home"/>
+		<plugin id="wikipathways" name="WikiPathways" url="wikipathways"/>
         <plugin id="importwizard" name="Upload" url="importwizard"/>
         <plugin id="catalogue" name="Catalogue" url="catalogue"/>
 		<plugin id="dataexplorer" name="Data Explorer" url="dataexplorer"/>
