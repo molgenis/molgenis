@@ -216,8 +216,6 @@ public interface DataService extends Iterable<Repository>
 	 */
 	Repository getRepository(String entityName);
 
-	Repository repo(String entityName);
-
 	Manageable getManageableRepository(String entityName);
 
 	Query query(String entityName);

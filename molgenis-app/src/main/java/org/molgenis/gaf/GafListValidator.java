@@ -8,8 +8,22 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
+
+import org.apache.commons.lang3.StringUtils;
+import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Repository;
+import org.molgenis.data.support.QueryImpl;
+import org.molgenis.framework.server.MolgenisSettings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.convert.ConversionFailedException;
+import org.springframework.stereotype.Component;
 
 @Component
 public class GafListValidator
@@ -374,7 +388,8 @@ public class GafListValidator
 	}
 
 	private void validateCell(String runId, int row, String colName, String value, Map<String, Pattern> patterns,
-			Map<String, String> patternExampleMap, Map<String, List<String>> lookupLists, GafListValidationReport report)
+			Map<String, String> patternExampleMap, Map<String, List<String>> lookupLists,
+			GafListValidationReport report, String sampleType)
 
 	{
 		// validate

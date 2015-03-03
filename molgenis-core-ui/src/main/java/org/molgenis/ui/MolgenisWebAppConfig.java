@@ -13,7 +13,10 @@ import java.util.Properties;
 
 import javax.annotation.PostConstruct;
 
+import org.molgenis.data.AutoIdRepositoryDecorator;
 import org.molgenis.data.DataService;
+import org.molgenis.data.IdGenerator;
+import org.molgenis.data.IndexedAutoIdRepositoryDecorator;
 import org.molgenis.data.IndexedCrudRepositorySecurityDecorator;
 import org.molgenis.data.IndexedRepository;
 import org.molgenis.data.ManageableRepositoryCollection;
@@ -29,6 +32,7 @@ import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.support.DataServiceImpl;
+import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.IndexedRepositoryValidationDecorator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
@@ -406,6 +410,12 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	@Bean
+	public IdGenerator molgenisIdGenerator()
+	{
+		return new UuidGenerator();
+	}
+
+	@Bean
 	public RepositoryDecoratorFactory repositoryDecoratorFactory()
 	{
 		return new RepositoryDecoratorFactory()
@@ -414,17 +424,19 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 			public Repository createDecoratedRepository(Repository repository)
 			{
 				// 1. security decorator
-				// 2. validation decorator
+				// 2. autoid decorator
+				// 3. validation decorator
 				if (repository instanceof IndexedRepository)
 				{
+					IndexedRepository indexedRepos = (IndexedRepository) repository;
 
-					return new IndexedCrudRepositorySecurityDecorator(new IndexedRepositoryValidationDecorator(
-							dataService(), (IndexedRepository) repository, new EntityAttributesValidator()),
-							molgenisSettings);
+					return new IndexedCrudRepositorySecurityDecorator(new IndexedAutoIdRepositoryDecorator(
+							new IndexedRepositoryValidationDecorator(dataService(), indexedRepos,
+									new EntityAttributesValidator()), molgenisIdGenerator()), molgenisSettings);
 				}
 
-				return new RepositorySecurityDecorator(new RepositoryValidationDecorator(dataService(), repository,
-						new EntityAttributesValidator()));
+				return new RepositorySecurityDecorator(new AutoIdRepositoryDecorator(new RepositoryValidationDecorator(
+						dataService(), repository, new EntityAttributesValidator()), molgenisIdGenerator()));
 			}
 		};
 	}

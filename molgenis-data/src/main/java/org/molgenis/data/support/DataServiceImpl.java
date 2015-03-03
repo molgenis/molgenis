@@ -298,10 +298,4 @@ public class DataServiceImpl implements DataService
 		return getRepository(repositoryName).getCapabilities();
 	}
 
-	@Override
-	public Repository repo(String entityName)
-	{
-		return getRepository(entityName);
-	}
-
 }

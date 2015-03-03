@@ -45,7 +45,8 @@ public class DataApiExample extends AbstractTestNGSpringContextTests
 		dataService.findAll(UserMetaData.ENTITY_NAME, EQ(UserMetaData.ACTIVE, true), User.class).forEach(
 				System.out::println);
 		// OR ??
-		dataService.repo(UserMetaData.ENTITY_NAME).query().eq(UserMetaData.ACTIVE, true).forEach(System.out::println);
+		dataService.getRepository(UserMetaData.ENTITY_NAME).query().eq(UserMetaData.ACTIVE, true)
+				.forEach(System.out::println);
 
 		// Delete one
 		dataService.delete(UserMetaData.ENTITY_NAME, "Piet");
