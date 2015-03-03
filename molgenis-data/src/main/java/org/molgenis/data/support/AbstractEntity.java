@@ -44,6 +44,7 @@ public abstract class AbstractEntity implements Entity
 			case XREF:
 				Entity refEntity = getEntity(labelAttributeName);
 				return refEntity != null ? refEntity.getLabelValue() : null;
+			case CATEGORICAL_MREF:
 			case MREF:
 				Iterable<Entity> refEntities = getEntities(labelAttributeName);
 				if (refEntities != null)
