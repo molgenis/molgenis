@@ -69,7 +69,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 		repositories.put(OntologyTermNodePathMetaData.ENTITY_NAME, ontologyTermNodePathRepository);
 		repositories.put(OntologyMetaData.ENTITY_NAME, new OntologyRepository(ontologyLoader, uuidGenerator));
 		repositories.put(OntologyTermMetaData.ENTITY_NAME, new OntologyTermRepository(ontologyLoader, uuidGenerator,
-				ontologyTermDynamicAnnotationRepo, ontologyTermSynonymRepo, ontologyTermNodePathRepository));
+				ontologyTermDynamicAnnotationRepo, ontologyTermSynonymRepo, ontologyTermNodePathRepository, null));
 	}
 
 	@Override
