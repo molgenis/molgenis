@@ -106,10 +106,10 @@ public class ImportWriter
 		for (final EntityMetaData entityMetaData : resolved)
 		{
 			String name = entityMetaData.getName();
-			Repository repository = dataService.getRepository(name);
 
-			if (repository != null)
+			if (dataService.hasRepository(name))
 			{
+				Repository repository = dataService.getRepository(name);
 				Repository fileEntityRepository = source.getRepository(entityMetaData.getSimpleName());
 
 				if (fileEntityRepository == null)
@@ -121,7 +121,6 @@ public class ImportWriter
 				// check to prevent nullpointer when importing metadata only
 				if (fileEntityRepository != null)
 				{
-
 					// transforms entities so that they match the entity meta data of the output repository
 					Iterable<Entity> entities = Iterables.transform(fileEntityRepository,
 							new Function<Entity, Entity>()
