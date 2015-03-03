@@ -73,6 +73,7 @@ public class WikiPathwaysService
 			while (scanner.hasNext())
 			{
 				result.append(scanner.next());
+				result.append(" ");
 			}
 		}
 		finally
