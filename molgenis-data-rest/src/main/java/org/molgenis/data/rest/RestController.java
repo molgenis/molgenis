@@ -628,6 +628,15 @@ public class RestController
 		updateInternal(entityName, id, entityMap);
 	}
 
+	@RequestMapping(value = "/{entityName}/{id}/{attributeName}", method = PUT)
+	@ResponseStatus(OK)
+	public void updateAttributePUT(@PathVariable("entityName") String entityName,
+			@PathVariable("attributeName") String attributeName, @PathVariable("id") Object id,
+			@RequestBody Object paramValue)
+	{
+		updateAttribute(entityName, attributeName, id, paramValue);
+	}
+
 	@RequestMapping(value = "/{entityName}/{id}/{attributeName}", method = POST, params = "_method=PUT")
 	@ResponseStatus(OK)
 	public void updateAttribute(@PathVariable("entityName") String entityName,
