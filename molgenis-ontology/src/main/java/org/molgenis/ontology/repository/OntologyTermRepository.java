@@ -1,8 +1,8 @@
 package org.molgenis.ontology.repository;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -40,11 +40,19 @@ public class OntologyTermRepository implements Repository
 	public OntologyTermRepository(OntologyLoader ontologyLoader, UuidGenerator uuidGenerator,
 			OntologyTermDynamicAnnotationRepository ontologyTermDynamicAnnotationRepo,
 			OntologyTermSynonymRepository ontologyTermSynonymRepo,
-			OntologyTermNodePathRepository ontologyTermNodePathRepository)
+			OntologyTermNodePathRepository ontologyTermNodePathRepository, DataService dataService)
 	{
+		if (null == dataService)
+		{
+			this.dataService = ApplicationContextProvider.getApplicationContext().getBean(DataService.class);
+		}
+		else
+		{
+			this.dataService = dataService;
+		}
+
 		this.ontologyLoader = ontologyLoader;
 		this.uuidGenerator = uuidGenerator;
-		this.dataService = ApplicationContextProvider.getApplicationContext().getBean(DataService.class);
 		this.ontologyTermDynamicAnnotationRepo = ontologyTermDynamicAnnotationRepo;
 		this.ontologyTermSynonymRepo = ontologyTermSynonymRepo;
 		this.ontologyTermNodePathRepository = ontologyTermNodePathRepository;
@@ -75,14 +83,16 @@ public class OntologyTermRepository implements Repository
 
 				Map<String, Map<String, String>> referenceIds4 = ontologyTermNodePathRepository.getReferenceIds();
 
-				Collection<String> synonymIds = ontologyTermSynonymRepo.getReferenceIds().containsKey(ontologyTermIRI) ? referenceIds2
-						.get(ontologyTermIRI).values() : Collections.emptySet();
+				List<String> synonymIds = ontologyTermSynonymRepo.getReferenceIds().containsKey(ontologyTermIRI) ? Lists
+						.newArrayList(referenceIds2.get(ontologyTermIRI).values()) : Arrays.asList();
 
-				Collection<String> annotationIds = ontologyTermDynamicAnnotationRepo.getReferenceIds().containsKey(
-						ontologyTermIRI) ? referenceIds3.get(ontologyTermIRI).values() : Collections.emptySet();
+				List<String> annotationIds = ontologyTermDynamicAnnotationRepo.getReferenceIds().containsKey(
+						ontologyTermIRI) ? Lists.newArrayList(referenceIds3.get(ontologyTermIRI).values()) : Arrays
+						.asList();
 
-				Collection<String> nodePathIds = ontologyTermNodePathRepository.getReferenceIds().containsKey(
-						ontologyTermIRI) ? referenceIds4.get(ontologyTermIRI).values() : Collections.emptySet();
+				List<String> nodePathIds = ontologyTermNodePathRepository.getReferenceIds()
+						.containsKey(ontologyTermIRI) ? Lists.newArrayList(referenceIds4.get(ontologyTermIRI).values()) : Arrays
+						.asList();
 
 				if (!referenceIds.containsKey(ontologyTermIRI))
 				{
@@ -116,7 +126,7 @@ public class OntologyTermRepository implements Repository
 		return Lists.newArrayList(ontologyTermNodePathEntities);
 	}
 
-	private List<Entity> getOntologyTermDynamicAnnotationEntities(Collection<String> annotationIds)
+	private List<Entity> getOntologyTermDynamicAnnotationEntities(List<String> annotationIds)
 	{
 		Iterable<Entity> ontologyTermDynamicAnnotationEntities = dataService.findAll(
 				OntologyTermDynamicAnnotationMetaData.ENTITY_NAME,
@@ -129,7 +139,7 @@ public class OntologyTermRepository implements Repository
 		return Lists.newArrayList(ontologyTermDynamicAnnotationEntities);
 	}
 
-	private List<Entity> getSynonymEntities(Collection<String> synonymIds)
+	private List<Entity> getSynonymEntities(List<String> synonymIds)
 	{
 		Iterable<Entity> ontologyTermSynonymEntities = dataService.findAll(OntologyTermSynonymMetaData.ENTITY_NAME,
 				new QueryImpl().in(OntologyMetaData.ID, synonymIds));
