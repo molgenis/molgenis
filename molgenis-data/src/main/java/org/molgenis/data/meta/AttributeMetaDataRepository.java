@@ -45,6 +45,7 @@ import org.molgenis.fieldtypes.CompoundField;
 import org.molgenis.fieldtypes.EnumField;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.Iterables;
 
 /**
  * Helper class around the {@link AttributeMetaDataMetaData} repository. Internal implementation class, use
@@ -152,8 +153,10 @@ class AttributeMetaDataRepository
 	public void add(Entity entity, AttributeMetaData att)
 	{
 		toAttributeMetaDataEntity(entity, att, null);
+		DefaultEntityMetaData entityMeta = entityMetaDataRepository.get(entity
+				.getString(EntityMetaDataMetaData.FULL_NAME));
 
-		entityMetaDataRepository.get(entity.getString(EntityMetaDataMetaData.FULL_NAME)).addAttributeMetaData(att);
+		if (!Iterables.contains(entityMeta.getAttributes(), att)) entityMeta.addAttributeMetaData(att);
 	}
 
 	private void toAttributeMetaDataEntity(Entity entity, AttributeMetaData att, AttributeMetaData parentCompoundAtt)
