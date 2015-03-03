@@ -58,6 +58,7 @@ import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.IntField;
 import org.molgenis.fieldtypes.LongField;
 import org.molgenis.fieldtypes.MrefField;
+import org.molgenis.fieldtypes.StringField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.util.DependencyResolver;
@@ -90,6 +91,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			LOOKUP_ATTRIBUTE.toLowerCase(), NAME, NILLABLE.toLowerCase(), PART_OF_ATTRIBUTE.toLowerCase(),
 			RANGE_MAX.toLowerCase(), RANGE_MIN.toLowerCase(), READ_ONLY.toLowerCase(), REF_ENTITY.toLowerCase(),
 			VISIBLE.toLowerCase(), UNIQUE.toLowerCase(), TAGS.toLowerCase(), EXPRESSION.toLowerCase());
+	static final String AUTO = "auto";
 
 	private final DataService dataService;
 	private final MetaDataService metaDataService;
@@ -219,7 +221,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			}
 
 			Boolean attributeNillable = attributeEntity.getBoolean(NILLABLE);
-			Boolean attributeIdAttribute = attributeEntity.getBoolean(ID_ATTRIBUTE);
+			String attributeIdAttribute = attributeEntity.getString(ID_ATTRIBUTE);
 			Boolean attributeVisible = attributeEntity.getBoolean(VISIBLE);
 			Boolean attributeAggregateable = attributeEntity.getBoolean(AGGREGATEABLE);
 			Boolean lookupAttribute = attributeEntity.getBoolean(LOOKUP_ATTRIBUTE);
@@ -230,13 +232,41 @@ public class EmxMetaDataParser implements MetaDataParser
 			List<String> tagIds = attributeEntity.getList(TAGS);
 
 			if (attributeNillable != null) attribute.setNillable(attributeNillable);
-			if (attributeIdAttribute != null) attribute.setIdAttribute(attributeIdAttribute);
+
+			boolean isIdAttr = attributeIdAttribute != null
+					&& (attributeIdAttribute.equalsIgnoreCase("true") || attributeIdAttribute.equalsIgnoreCase(AUTO));
+			attribute.setIdAttribute(isIdAttr);
+
+			if (isIdAttr)
+			{
+				if ((attributeNillable != null) && attributeNillable)
+				{
+					throw new IllegalArgumentException("Attributes error on line " + i
+							+ ". Id attributes cannot be nillable");
+				}
+				attribute.setNillable(false);
+			}
+
 			if (attributeVisible != null) attribute.setVisible(attributeVisible);
 			if (attributeAggregateable != null) attribute.setAggregateable(attributeAggregateable);
 			// cannot update ref entities yet, will do so later on
 			if (readOnly != null) attribute.setReadOnly(readOnly);
 			if (unique != null) attribute.setUnique(unique);
 			if (expression != null) attribute.setExpression(expression);
+			attribute.setAuto(attributeIdAttribute != null && attributeIdAttribute.equalsIgnoreCase(AUTO));
+
+			if ((attributeIdAttribute != null) && !attributeIdAttribute.equalsIgnoreCase("true")
+					&& !attributeIdAttribute.equalsIgnoreCase("false") && !attributeIdAttribute.equalsIgnoreCase(AUTO))
+			{
+				throw new IllegalArgumentException("Attributes error on line " + i
+						+ ". Illegal idAttribute value. Allowed values are 'TRUE', 'FALSE' or 'AUTO'");
+			}
+
+			if (attribute.isAuto() && !(attribute.getDataType() instanceof StringField))
+			{
+				throw new IllegalArgumentException("Attributes error on line " + i
+						+ ". Auto attributes can only be of data type 'string'");
+			}
 
 			if (lookupAttribute != null)
 			{
@@ -738,7 +768,7 @@ public class EmxMetaDataParser implements MetaDataParser
 							if (!att.isAuto() && att.getExpression() == null
 									&& !report.getFieldsImportable().get(sheet).contains(att.getName()))
 							{
-								boolean required = !att.isNillable();
+								boolean required = !att.isNillable() && !att.isAuto();
 								report = report.addAttribute(att.getName(),
 										required ? AttributeState.REQUIRED : AttributeState.AVAILABLE);
 							}
