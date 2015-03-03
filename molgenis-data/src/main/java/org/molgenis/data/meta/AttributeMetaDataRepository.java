@@ -78,7 +78,7 @@ class AttributeMetaDataRepository
 	 */
 	public void fillAllEntityAttributes()
 	{
-		Map<String, Map<String, DefaultAttributeMetaData>> attributesMap = new LinkedHashMap<String, Map<String, DefaultAttributeMetaData>>();
+		Map<String, Map<String, DefaultAttributeMetaData>> attributesMap = new LinkedHashMap<>();
 
 		// 1st pass: create attributes
 		for (Entity attributeEntity : repository)
@@ -90,14 +90,14 @@ class AttributeMetaDataRepository
 			Map<String, DefaultAttributeMetaData> attributes = attributesMap.get(entityName);
 			if (attributes == null)
 			{
-				attributes = new LinkedHashMap<String, DefaultAttributeMetaData>();
+				attributes = new LinkedHashMap<>();
 				attributesMap.put(entityName, attributes);
 			}
 			attributes.put(attribute.getName(), attribute);
 		}
 
 		// 2nd pass: add attribute relations to attributes
-		Map<String, Set<String>> rootAttributes = new LinkedHashMap<String, Set<String>>();
+		Map<String, Set<String>> rootAttributes = new LinkedHashMap<>();
 		for (Entity attributeEntity : repository)
 		{
 			Entity entity = attributeEntity.getEntity(ENTITY);
@@ -117,7 +117,7 @@ class AttributeMetaDataRepository
 				Set<String> entityRootAttributes = rootAttributes.get(entityName);
 				if (entityRootAttributes == null)
 				{
-					entityRootAttributes = new LinkedHashSet<String>();
+					entityRootAttributes = new LinkedHashSet<>();
 					rootAttributes.put(entityName, entityRootAttributes);
 				}
 				entityRootAttributes.add(attributeName);

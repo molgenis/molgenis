@@ -1,9 +1,10 @@
 package org.molgenis.data.support;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EditableEntityMetaData;
@@ -11,6 +12,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Package;
 import org.molgenis.util.CaseInsensitiveLinkedHashMap;
+
+import com.google.common.collect.Lists;
 
 public class DefaultEntityMetaData extends AbstractEntityMetaData implements EditableEntityMetaData
 {
@@ -153,8 +156,8 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData implements Edi
 	@Override
 	public List<AttributeMetaData> getAttributes()
 	{
-		List<AttributeMetaData> result = new ArrayList<AttributeMetaData>();
-		if (this.getExtends() != null)
+		Set<AttributeMetaData> result = new LinkedHashSet<>();
+		if (getExtends() != null)
 		{
 			for (AttributeMetaData att : getExtends().getAttributes())
 			{
@@ -162,7 +165,7 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData implements Edi
 			}
 		}
 		result.addAll(attributes.values());
-		return Collections.unmodifiableList(result);
+		return Collections.unmodifiableList(Lists.newArrayList(result));
 	}
 
 	@Override

@@ -39,7 +39,7 @@ class PackageRepository
 	/**
 	 * In-memory cache of all packages, filled with entities and attributes.
 	 */
-	private Map<String, PackageImpl> packageCache = new HashMap<String, PackageImpl>();
+	private Map<String, PackageImpl> packageCache = new HashMap<>();
 
 	/**
 	 * Creates a new PackageRepository.
@@ -50,7 +50,6 @@ class PackageRepository
 	public PackageRepository(Repository repository)
 	{
 		this.repository = repository;
-		// repository = coll.addEntityMeta(META_DATA);
 		updatePackageCache();
 		addDefaultPackage();
 	}
@@ -192,9 +191,9 @@ class PackageRepository
 	 */
 	public static Map<String, PackageImpl> createPackageTree(Iterable<Entity> packageEntities)
 	{
-		Map<String, PackageImpl> result = new HashMap<String, PackageImpl>();
+		Map<String, PackageImpl> result = new HashMap<>();
 
-		List<Entity> entities = new ArrayList<Entity>();
+		List<Entity> entities = new ArrayList<>();
 		for (Entity entity : packageEntities)
 		{
 			entities.add(entity);

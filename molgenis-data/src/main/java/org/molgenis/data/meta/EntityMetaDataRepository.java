@@ -40,7 +40,7 @@ class EntityMetaDataRepository
 	private final Repository repository;
 	private final PackageRepository packageRepository;
 	private final ManageableRepositoryCollection collection;
-	private final Map<String, DefaultEntityMetaData> entityMetaDataCache = new HashMap<String, DefaultEntityMetaData>();
+	private final Map<String, DefaultEntityMetaData> entityMetaDataCache = new HashMap<>();
 
 	public EntityMetaDataRepository(ManageableRepositoryCollection collection, PackageRepository packageRepository)
 	{
@@ -62,7 +62,7 @@ class EntityMetaDataRepository
 	 */
 	void fillEntityMetaDataCache()
 	{
-		List<Entity> entities = new ArrayList<Entity>();
+		List<Entity> entities = new ArrayList<>();
 		for (Entity entity : repository)
 		{
 			entities.add(entity);
