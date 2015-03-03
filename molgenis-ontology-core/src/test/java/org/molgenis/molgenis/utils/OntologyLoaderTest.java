@@ -5,12 +5,14 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import java.io.File;
-import java.net.URL;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.molgenis.ontology.utils.OntologyLoader;
+import org.molgenis.ontology.utils.ZipFileUtil;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -22,12 +24,13 @@ public class OntologyLoaderTest
 	OntologyLoader loader;
 
 	@BeforeMethod
-	public void setUp() throws OWLOntologyCreationException
+	public void setUp() throws OWLOntologyCreationException, FileNotFoundException, IOException
 	{
-		URL url = Thread.currentThread().getContextClassLoader().getResource("test-ontology-loader.owl");
-		File file = new File(url.getPath());
-
-		loader = new OntologyLoader("ontology-test", file);
+		File file = new File(OntologyTermIndexRepositoryTest.class.getResource(
+				System.getProperty("file.separator") + "test-ontology-loader.owl.zip").getFile());
+		List<File> uploadedFiles;
+		uploadedFiles = ZipFileUtil.unzip(file);
+		loader = new OntologyLoader("ontology-test", uploadedFiles.get(0));
 	}
 
 	@Test
@@ -68,7 +71,7 @@ public class OntologyLoaderTest
 	{
 		List<OWLClass> topClasses = new ArrayList<OWLClass>(loader.getRootClasses());
 		Iterator<String> iterator = loader.getSynonyms(topClasses.get(0)).iterator();
-		if (iterator.hasNext()) assertEquals(iterator.next(), "People");
+		if (iterator.hasNext()) assertEquals(iterator.next(), "Person label test");
 
 	}
 
