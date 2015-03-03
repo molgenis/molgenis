@@ -243,6 +243,12 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 		// skip any homozygous reference alleles
         else if (zygosity.equals(HOMREF)) filter = true;
 
+        if (filter)
+        {
+            resultMap.put(MONOGENICDISEASECANDIDATE, outcome.EXCLUDED);
+            return resultMap;
+        }
+
 		/**
 		 * Sensitive filters We already know that zygosity is HET or HOMALT and MAF < 0.05
 		 */
