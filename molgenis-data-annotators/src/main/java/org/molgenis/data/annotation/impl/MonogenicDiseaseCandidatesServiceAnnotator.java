@@ -205,7 +205,7 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 		}
 
 		if (alleles.length() == 1) throw new IOException("Hemizygous calls not yet supported");
-		if (alleles.length() != 3) throw new IOException("Genotype length not 3: " + alleles + " for record " + entity.toString());
+        else if (alleles.length() != 3) throw new IOException("Genotype length not 3: " + alleles + " for record " + entity.toString());
 
 		char allele1 = alleles.charAt(0);
 		char allele2 = alleles.charAt(2);
@@ -237,11 +237,11 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
         // not in CGD, skip variant!
         if (cgdGenInh == null) filter = true;
 		// common variant in one of the three big databases, skip it
-		if (thousandGenomesMAF > 0.05 || exacMAF > 0.05 || gonlMAF > 0.05) filter = true;
+		else if (thousandGenomesMAF > 0.05 || exacMAF > 0.05 || gonlMAF > 0.05) filter = true;
 		// skip any "low impact" variants
-		if (impact.equals(SnpEffServiceAnnotator.impact.MODIFIER) || impact.equals(SnpEffServiceAnnotator.impact.LOW)) filter = true;
+        else if (impact.equals(SnpEffServiceAnnotator.impact.MODIFIER) || impact.equals(SnpEffServiceAnnotator.impact.LOW)) filter = true;
 		// skip any homozygous reference alleles
-		if (zygosity.equals(HOMREF)) filter = true;
+        else if (zygosity.equals(HOMREF)) filter = true;
 
 		/**
 		 * Sensitive filters We already know that zygosity is HET or HOMALT and MAF < 0.05
