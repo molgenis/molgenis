@@ -18,7 +18,9 @@ import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.OntologyService;
 import org.molgenis.ontology.beans.OntologyEntity;
-import org.molgenis.ontology.repository.*;
+import org.molgenis.ontology.repository.OntologyIndexRepository;
+import org.molgenis.ontology.repository.OntologyQueryRepository;
+import org.molgenis.ontology.repository.OntologyTermQueryRepository;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -158,9 +160,4 @@ public class OntologyQueryRepositoryTest
 				"another ontology");
 	}
 
-	@Test
-	public void getUrl()
-	{
-		assertEquals("ontologyindex://ontologyindex", ontologyQueryRepository.getUrl());
-	}
 }

@@ -12,7 +12,7 @@ import java.io.StringReader;
 
 import org.apache.commons.io.IOUtils;
 import org.mockito.Mockito;
-import org.molgenis.data.Queryable;
+import org.molgenis.data.Repository;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.system.core.FreemarkerTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,9 +31,9 @@ public class RepositoryTemplateLoaderTest extends AbstractTestNGSpringContextTes
 	static class Config
 	{
 		@Bean
-		public Queryable repository()
+		public Repository repository()
 		{
-			return mock(Queryable.class);
+			return mock(Repository.class);
 		}
 
 		@Bean
@@ -44,7 +44,7 @@ public class RepositoryTemplateLoaderTest extends AbstractTestNGSpringContextTes
 	}
 
 	@Autowired
-	private Queryable repository;
+	private Repository repository;
 
 	@Autowired
 	private RepositoryTemplateLoader repositoryTemplateLoader;

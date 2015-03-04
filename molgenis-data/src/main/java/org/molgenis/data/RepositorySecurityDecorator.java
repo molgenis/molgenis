@@ -4,17 +4,17 @@ import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.Permission;
 
-public class CrudRepositorySecurityDecorator extends CrudRepositoryDecorator
+public class RepositorySecurityDecorator implements Repository
 {
-	private final CrudRepository decoratedRepository;
+	private final Repository decoratedRepository;
 
-	public CrudRepositorySecurityDecorator(CrudRepository decoratedRepository)
+	public RepositorySecurityDecorator(Repository decoratedRepository)
 	{
-		super(decoratedRepository);
 		this.decoratedRepository = decoratedRepository;
 	}
 
@@ -45,19 +45,6 @@ public class CrudRepositorySecurityDecorator extends CrudRepositoryDecorator
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
-	{
-		validatePermission(decoratedRepository.getName(), Permission.READ);
-		return decoratedRepository.iterator(clazz);
-	}
-
-	@Override
-	public String getUrl()
-	{
-		return decoratedRepository.getUrl();
-	}
-
-	@Override
 	public Query query()
 	{
 		return new QueryImpl(this);
@@ -75,13 +62,6 @@ public class CrudRepositorySecurityDecorator extends CrudRepositoryDecorator
 	{
 		validatePermission(decoratedRepository.getName(), Permission.READ);
 		return decoratedRepository.findAll(q);
-	}
-
-	@Override
-	public <E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz)
-	{
-		validatePermission(decoratedRepository.getName(), Permission.READ);
-		return decoratedRepository.findAll(q, clazz);
 	}
 
 	@Override
@@ -103,27 +83,6 @@ public class CrudRepositorySecurityDecorator extends CrudRepositoryDecorator
 	{
 		validatePermission(decoratedRepository.getName(), Permission.READ);
 		return decoratedRepository.findAll(ids);
-	}
-
-	@Override
-	public <E extends Entity> Iterable<E> findAll(Iterable<Object> ids, Class<E> clazz)
-	{
-		validatePermission(decoratedRepository.getName(), Permission.READ);
-		return decoratedRepository.findAll(ids, clazz);
-	}
-
-	@Override
-	public <E extends Entity> E findOne(Object id, Class<E> clazz)
-	{
-		validatePermission(decoratedRepository.getName(), Permission.READ);
-		return decoratedRepository.findOne(id, clazz);
-	}
-
-	@Override
-	public <E extends Entity> E findOne(Query q, Class<E> clazz)
-	{
-		validatePermission(decoratedRepository.getName(), Permission.READ);
-		return decoratedRepository.findOne(q, clazz);
 	}
 
 	@Override
@@ -208,6 +167,19 @@ public class CrudRepositorySecurityDecorator extends CrudRepositoryDecorator
 	{
 		validatePermission(decoratedRepository.getName(), Permission.WRITE);
 		decoratedRepository.clearCache();
+	}
+
+	@Override
+	public AggregateResult aggregate(AggregateQuery aggregateQuery)
+	{
+		validatePermission(decoratedRepository.getName(), Permission.COUNT);
+		return decoratedRepository.aggregate(aggregateQuery);
+	}
+
+	@Override
+	public Set<RepositoryCapability> getCapabilities()
+	{
+		return decoratedRepository.getCapabilities();
 	}
 
 }

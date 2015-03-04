@@ -1,7 +1,6 @@
 package org.molgenis.data.support;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
@@ -16,7 +15,7 @@ public class EntityWithComputedAttributes extends AbstractEntity
 {
 	private static final long serialVersionUID = 1L;
 
-	private Map<String, ExpressionEvaluator> expressionEvaluators = new HashMap<String, ExpressionEvaluator>();
+	private final Map<String, ExpressionEvaluator> expressionEvaluators = new HashMap<String, ExpressionEvaluator>();
 
 	public EntityWithComputedAttributes(Entity entity)
 	{
@@ -31,7 +30,7 @@ public class EntityWithComputedAttributes extends AbstractEntity
 		}
 	}
 
-	private Entity entity;
+	private final Entity entity;
 
 	@Override
 	public EntityMetaData getEntityMetaData()
@@ -49,12 +48,6 @@ public class EntityWithComputedAttributes extends AbstractEntity
 	public Object getIdValue()
 	{
 		return entity.getIdValue();
-	}
-
-	@Override
-	public List<String> getLabelAttributeNames()
-	{
-		return entity.getLabelAttributeNames();
 	}
 
 	@Override
@@ -79,9 +72,9 @@ public class EntityWithComputedAttributes extends AbstractEntity
 	}
 
 	@Override
-	public void set(Entity entity, boolean strict)
+	public void set(Entity values)
 	{
-		entity.set(entity, strict);
+		entity.set(values);
 	}
 
 }

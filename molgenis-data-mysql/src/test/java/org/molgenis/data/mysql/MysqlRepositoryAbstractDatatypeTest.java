@@ -3,6 +3,7 @@ package org.molgenis.data.mysql;
 import org.molgenis.AppConfig;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.meta.MetaDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,7 @@ public abstract class MysqlRepositoryAbstractDatatypeTest extends AbstractTestNG
 	protected static final Logger LOG = LoggerFactory.getLogger(MysqlRepositoryAbstractDatatypeTest.class);
 
 	@Autowired
-	MysqlRepositoryCollection coll;
+	MetaDataService metaDataService;
 
 	private EntityMetaData metaData;
 
@@ -44,10 +45,11 @@ public abstract class MysqlRepositoryAbstractDatatypeTest extends AbstractTestNG
 	public void test() throws Exception
 	{
 		// drop if needed
-		coll.drop(getMetaData());
+		if (metaDataService.getEntityMetaData(getMetaData().getName()) != null) metaDataService
+				.deleteEntityMeta(getMetaData().getName());
 
 		// test create table
-		MysqlRepository repo = (MysqlRepository) coll.add(getMetaData());
+		MysqlRepository repo = (MysqlRepository) metaDataService.addEntityMeta(getMetaData());
 		Assert.assertEquals(repo.getCreateSql(), createSql());
 
 		// verify default value

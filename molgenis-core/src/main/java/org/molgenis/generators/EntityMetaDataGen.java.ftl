@@ -12,9 +12,13 @@
 package ${package};
 
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.*;
+
+import org.springframework.stereotype.Component;
+
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 
+@Component
 public class ${JavaName(entity)}MetaData extends DefaultEntityMetaData
 {
 	public ${JavaName(entity)}MetaData()
@@ -22,6 +26,7 @@ public class ${JavaName(entity)}MetaData extends DefaultEntityMetaData
 		super("${JavaName(entity)}", ${JavaName(entity)}.class);
 		setLabel("${entity.label}");
 		setDescription("${entity.description?j_string}");
+		setBackend("JPA");
 		
 <#list entity.allFields as f>
 		DefaultAttributeMetaData ${name(f)} = new DefaultAttributeMetaData("${f.name}", ${f.type.enumType});
