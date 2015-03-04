@@ -32,8 +32,7 @@ public class OntologyTermNodePathRepositoryTest
 	{
 		File file = new File(OntologyTermNodePathRepositoryTest.class.getResource(
 				System.getProperty("file.separator") + "small_test_data.owl.zip").getFile());
-		List<File> uploadedFiles;
-		uploadedFiles = ZipFileUtil.unzip(file);
+		List<File> uploadedFiles = ZipFileUtil.unzip(file);
 		ontologyLoader = new OntologyLoader("small_test_data", uploadedFiles.get(0));
 		uuidGenerator = new UuidGenerator();
 		ontologyTermNodePathRepository = new OntologyTermNodePathRepository(ontologyLoader, uuidGenerator);

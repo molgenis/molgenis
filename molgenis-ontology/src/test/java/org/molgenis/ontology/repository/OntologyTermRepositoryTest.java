@@ -50,8 +50,7 @@ public class OntologyTermRepositoryTest
 	{
 		File file = new File(OntologyTermRepositoryTest.class.getResource(
 				System.getProperty("file.separator") + "small_test_data.owl.zip").getFile());
-		List<File> uploadedFiles;
-		uploadedFiles = ZipFileUtil.unzip(file);
+		List<File> uploadedFiles = ZipFileUtil.unzip(file);
 		ontologyLoader = new OntologyLoader("small_test_data", uploadedFiles.get(0));
 		uuidGenerator = new UuidGeneratorTest();
 		ontologyTermDynamicAnnotationRepository = new OntologyTermDynamicAnnotationRepository(ontologyLoader,

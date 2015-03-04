@@ -50,7 +50,7 @@ public class ImportServiceFactory
 			}
 		}
 
-		String extension = FileExtensionUtils.findExtansionFromSetForGenericImporter(file.getName(),
+		String extension = FileExtensionUtils.findExtensionFromSetForGenericImporter(file.getName(),
 				importServicesImportableMapedToExtensions.keySet());
 
 		final ImportService importService = importServicesImportableMapedToExtensions.get(extension);

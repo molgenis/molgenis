@@ -11,11 +11,11 @@ public class FileExtensionUtilsTest
 {
 
 	@Test
-	public void findExtansionFromSetForGenericImporter()
+	public void findExtensionFromSetForGenericImporter()
 	{
 		Set<String> extensions = GenericImporterExtensions.getAll();
 		for(String extention :extensions){
-			assertEquals(FileExtensionUtils.findExtansionFromSetForGenericImporter("molgenis.test." + extention,
+			assertEquals(FileExtensionUtils.findExtensionFromSetForGenericImporter("molgenis.test." + extention,
 					GenericImporterExtensions.getAll()),
 					GenericImporterExtensions.valueOf(extention.toUpperCase().replace('.', '_'))
 					.toString());

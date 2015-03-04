@@ -322,9 +322,10 @@ public class OntologyServiceImpl implements OntologyService
 
 		for (Entity entity : entities)
 		{
-			if (!processedOntologyTerms.contains(entity.getString(OntologyTermQueryRepository.SYNONYMS)))
+			String ontologyTermSynonym = entity.getString(OntologyTermQueryRepository.SYNONYMS);
+			if (!processedOntologyTerms.contains(ontologyTermSynonym))
 			{
-				processedOntologyTerms.add(entity.getString(OntologyTermQueryRepository.SYNONYMS));
+				processedOntologyTerms.add(ontologyTermSynonym);
 
 				BigDecimal maxNgramScore = new BigDecimal(0);
 				for (String inputAttrName : inputEntity.getAttributeNames())

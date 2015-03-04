@@ -40,8 +40,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 
 		try
 		{
-			List<File> uploadedFiles;
-			uploadedFiles = ZipFileUtil.unzip(file);
+			List<File> uploadedFiles = ZipFileUtil.unzip(file);
 			this.ontologyRepository = new OntologyIndexRepository(uploadedFiles.get(0), this.entityName);
 		}
 		catch (OWLOntologyCreationException e)

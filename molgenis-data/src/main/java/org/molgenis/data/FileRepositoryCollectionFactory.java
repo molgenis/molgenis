@@ -58,7 +58,7 @@ public class FileRepositoryCollectionFactory
 	{
 		Class<? extends FileRepositoryCollection> clazz = null;
 		
-		String extension = FileExtensionUtils.findExtansionFromSetForGenericImporter(file.getName(),
+		String extension = FileExtensionUtils.findExtensionFromSetForGenericImporter(file.getName(),
 				fileRepositoryCollection.keySet());
 		
 		clazz = fileRepositoryCollection.get(extension);

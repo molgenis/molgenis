@@ -51,8 +51,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 			throw new IllegalArgumentException("Not a obo.zip or owl.zip file [" + file.getName() + "]");
 		}
 
-		List<File> uploadedFiles;
-		uploadedFiles = ZipFileUtil.unzip(file);
+		List<File> uploadedFiles = ZipFileUtil.unzip(file);
 		OntologyLoader ontologyLoader = new OntologyLoader(name, uploadedFiles.get(0));
 
 		UuidGenerator uuidGenerator = new UuidGenerator();

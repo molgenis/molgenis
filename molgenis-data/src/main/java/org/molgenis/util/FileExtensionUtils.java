@@ -11,7 +11,7 @@ public class FileExtensionUtils
 	 * 
 	 * @param entity
 	 */
-	public static String findExtansionFromSetForGenericImporter(String fileName, Set<String> fileExtensions)
+	public static String findExtensionFromSetForGenericImporter(String fileName, Set<String> fileExtensions)
 	{
 		String name = fileName.toLowerCase();
 		List<String> possibleExtensions = new ArrayList<String>();

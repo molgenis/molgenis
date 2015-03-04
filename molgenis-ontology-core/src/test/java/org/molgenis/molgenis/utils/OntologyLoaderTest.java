@@ -28,8 +28,7 @@ public class OntologyLoaderTest
 	{
 		File file = new File(OntologyTermIndexRepositoryTest.class.getResource(
 				System.getProperty("file.separator") + "test-ontology-loader.owl.zip").getFile());
-		List<File> uploadedFiles;
-		uploadedFiles = ZipFileUtil.unzip(file);
+		List<File> uploadedFiles = ZipFileUtil.unzip(file);
 		loader = new OntologyLoader("ontology-test", uploadedFiles.get(0));
 	}
 
