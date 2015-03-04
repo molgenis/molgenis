@@ -1,35 +1,32 @@
 package org.molgenis.data;
 
-public class IndexedAutoIdRepositoryDecorator extends AutoIdCrudRepositoryDecorator implements IndexedCrudRepository
+public class IndexedAutoIdRepositoryDecorator extends AutoIdRepositoryDecorator implements IndexedRepository
 {
-	public IndexedAutoIdRepositoryDecorator(IndexedCrudRepository decoratedRepository, IdGenerator idGenerator)
-	{
-		super(decoratedRepository, idGenerator);
-	}
+	private final IndexedRepository indexedRepository;
 
-	@Override
-	public AggregateResult aggregate(AggregateQuery aggregateQuery)
+	public IndexedAutoIdRepositoryDecorator(IndexedRepository indexedRepository, IdGenerator idGenerator)
 	{
-		return ((IndexedCrudRepository) getDecoratedRepository()).aggregate(aggregateQuery);
+		super(indexedRepository, idGenerator);
+		this.indexedRepository = indexedRepository;
 	}
 
 	@Override
 	public void create()
 	{
-		((IndexedCrudRepository) getDecoratedRepository()).create();
+		indexedRepository.create();
 	}
 
 	@Override
 	public void drop()
 	{
-		((IndexedCrudRepository) getDecoratedRepository()).drop();
+		indexedRepository.drop();
 
 	}
 
 	@Override
 	public void rebuildIndex()
 	{
-		((IndexedCrudRepository) getDecoratedRepository()).rebuildIndex();
+		indexedRepository.rebuildIndex();
 	}
 
 }

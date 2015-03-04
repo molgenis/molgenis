@@ -82,7 +82,7 @@ public class Omx2EmxConverter
 		if (omxContainsEntity(OMX_TABS.CATEGORY.toString()))
 		{
 			Set<String> observableFeatureIdentifiers = Sets.newHashSet();
-			Repository categoryRepo = omxRepositoryCollection.getRepositoryByEntityName(OMX_TABS.CATEGORY.toString());
+			Repository categoryRepo = omxRepositoryCollection.getRepository(OMX_TABS.CATEGORY.toString());
 			for (Entity category : categoryRepo)
 			{
 				String observableFeatureIdentifier = category.getString(CATEGORY_COLUMNS.OBSERVABLEFEATURE_IDENTIFIER
@@ -126,8 +126,7 @@ public class Omx2EmxConverter
 
 			Writable writable = writableFactory.createWritable(getFullEntityName("Individual"),
 					Arrays.asList("Identifier", "Name", "Description"));
-			Repository individualRepo = omxRepositoryCollection.getRepositoryByEntityName(OMX_TABS.INDIVIDUAL
-					.toString());
+			Repository individualRepo = omxRepositoryCollection.getRepository(OMX_TABS.INDIVIDUAL.toString());
 			writable.add(individualRepo);
 		}
 
@@ -136,7 +135,7 @@ public class Omx2EmxConverter
 		{
 			Writable writable = writableFactory.createWritable(getFullEntityName("Panel"),
 					Arrays.asList("Identifier", "Name", "NumberOfIndividuals"));
-			Repository panelRepo = omxRepositoryCollection.getRepositoryByEntityName(OMX_TABS.PANEL.toString());
+			Repository panelRepo = omxRepositoryCollection.getRepository(OMX_TABS.PANEL.toString());
 			writable.add(panelRepo);
 		}
 
@@ -144,7 +143,7 @@ public class Omx2EmxConverter
 		{
 			if (entityName.toLowerCase().startsWith("dataset_"))
 			{
-				Repository repo = omxRepositoryCollection.getRepositoryByEntityName(entityName);
+				Repository repo = omxRepositoryCollection.getRepository(entityName);
 				List<String> attributeNames = Lists.newArrayList("Identifier");
 				for (AttributeMetaData attr : repo.getEntityMetaData().getAtomicAttributes())
 				{
@@ -244,8 +243,7 @@ public class Omx2EmxConverter
 			if (omxContainsEntity(OMX_TABS.CATEGORY.toString()))
 			{
 				Set<String> observableFeatureIdentifiers = Sets.newHashSet();
-				Repository categoryRepo = omxRepositoryCollection.getRepositoryByEntityName(OMX_TABS.CATEGORY
-						.toString());
+				Repository categoryRepo = omxRepositoryCollection.getRepository(OMX_TABS.CATEGORY.toString());
 
 				for (Entity category : categoryRepo)
 				{
@@ -323,12 +321,11 @@ public class Omx2EmxConverter
 
 							for (String entityName : omxRepositoryCollection.getEntityNames())
 							{
+								// See where the first not null row points to
+								Repository repo = omxRepositoryCollection.getRepository(entityName);
 								if (entityName.toLowerCase().startsWith("dataset_"))
 
 								{
-									// See where the first not null row points to
-									Repository repo = omxRepositoryCollection.getRepositoryByEntityName(entityName);
-
 									List<String> refs = null;
 									Iterator<Entity> it = repo.iterator();
 									while ((refs == null) && it.hasNext())
@@ -478,8 +475,7 @@ public class Omx2EmxConverter
 			if (omxContainsEntity(OMX_TABS.CATEGORY.toString()))
 			{
 				Set<String> observableFeatureIdentifiers = Sets.newHashSet();
-				Repository categoryRepo = omxRepositoryCollection.getRepositoryByEntityName(OMX_TABS.CATEGORY
-						.toString());
+				Repository categoryRepo = omxRepositoryCollection.getRepository(OMX_TABS.CATEGORY.toString());
 
 				for (Entity category : categoryRepo)
 				{
@@ -527,12 +523,12 @@ public class Omx2EmxConverter
 
 	private Iterable<Entity> getDatasets()
 	{
-		return omxRepositoryCollection.getRepositoryByEntityName(OMX_TABS.DATASET.toString());
+		return omxRepositoryCollection.getRepository(OMX_TABS.DATASET.toString());
 	}
 
 	private Iterable<Entity> getObservableFeatures()
 	{
-		return omxRepositoryCollection.getRepositoryByEntityName(OMX_TABS.OBSERVABLEFEATURE.toString());
+		return omxRepositoryCollection.getRepository(OMX_TABS.OBSERVABLEFEATURE.toString());
 	}
 
 	private Map<String, Entity> getProtocols()
@@ -540,7 +536,7 @@ public class Omx2EmxConverter
 		if (protocols == null)
 		{
 			protocols = Maps.newLinkedHashMap();
-			for (Entity protocol : omxRepositoryCollection.getRepositoryByEntityName(OMX_TABS.PROTOCOL.toString()))
+			for (Entity protocol : omxRepositoryCollection.getRepository(OMX_TABS.PROTOCOL.toString()))
 			{
 				if (!EntityUtils.isEmpty(protocol))
 				{
@@ -583,7 +579,7 @@ public class Omx2EmxConverter
 			return false;
 		}
 
-		for (Entity entity : omxRepositoryCollection.getRepositoryByEntityName(entityName))
+		for (Entity entity : omxRepositoryCollection.getRepository(entityName))
 		{
 			String entityIdentifier = entity.getString("identifier");
 			if ((entityIdentifier != null) && entityIdentifier.equalsIgnoreCase(identifier))

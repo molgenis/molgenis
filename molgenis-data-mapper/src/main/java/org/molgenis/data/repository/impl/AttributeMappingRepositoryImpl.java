@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.CrudRepository;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.mapping.model.AttributeMapping;
@@ -26,11 +26,11 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 	@Autowired
 	private IdGenerator idGenerator;
 
-	private CrudRepository repository;
+	private final DataService dataService;
 
-	public AttributeMappingRepositoryImpl(CrudRepository repository)
+	public AttributeMappingRepositoryImpl(DataService dataService)
 	{
-		this.repository = repository;
+		this.dataService = dataService;
 	}
 
 	@Override
@@ -51,12 +51,12 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 		{
 			attributeMapping.setIdentifier(idGenerator.generateId().toString());
 			result = toAttributeMappingEntity(attributeMapping);
-			repository.add(result);
+			dataService.add(AttributeMappingRepositoryImpl.META_DATA.getName(), result);
 		}
 		else
 		{
 			result = toAttributeMappingEntity(attributeMapping);
-			repository.update(result);
+			dataService.update(AttributeMappingRepositoryImpl.META_DATA.getName(), result);
 		}
 		return result;
 	}

@@ -39,7 +39,7 @@ public class AttributeMetaDataMetaData extends DefaultEntityMetaData
 	{
 		super(ENTITY_NAME);
 
-		addAttribute(IDENTIFIER).setIdAttribute(true).setNillable(false).setDataType(STRING);
+		addAttribute(IDENTIFIER).setIdAttribute(true).setNillable(false).setDataType(STRING).setVisible(false);
 		addAttribute(ENTITY).setNillable(false).setDataType(XREF).setRefEntity(EntityMetaDataRepository.META_DATA);
 		addAttribute(NAME).setNillable(false);
 		addAttribute(DATA_TYPE);

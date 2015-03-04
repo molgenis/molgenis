@@ -179,7 +179,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 	 */
 	private Map<String, Impact> getGenesForVcf(String selectedVcf)
 	{
-		return stream(dataService.getRepositoryByEntityName(selectedVcf).spliterator(), false)
+		return stream(dataService.getRepository(selectedVcf).spliterator(), false)
 				.map(entity -> entity.getString("EFF"))
 				.filter(eff -> !StringUtils.isEmpty(getGeneFromEffect(eff)))
 				.collect(

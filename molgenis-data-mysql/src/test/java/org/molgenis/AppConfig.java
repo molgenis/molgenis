@@ -5,14 +5,10 @@ import java.util.UUID;
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
-import org.molgenis.data.CrudRepository;
-import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryDecoratorFactory;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.TagMetaData;
-import org.molgenis.data.meta.WritableMetaDataService;
-import org.molgenis.data.meta.WritableMetaDataServiceDecorator;
 import org.molgenis.data.mysql.AsyncJdbcTemplate;
 import org.molgenis.data.mysql.EmbeddedMysqlDatabaseBuilder;
 import org.molgenis.data.mysql.MysqlRepository;
@@ -40,17 +36,16 @@ import org.springframework.util.IdGenerator;
  */
 @Configuration
 @EnableTransactionManagement(proxyTargetClass = true)
-@ComponentScan(
-{ "org.molgenis.data.mysql", "org.molgenis.data.importer" })
+// @ComponentScan(
+// { "org.molgenis.data.mysql", "org.molgenis.data.importer" })
+@ComponentScan("org.molgenis.data.meta")
 public class AppConfig
 {
-	private MetaDataServiceImpl mysqlWritableMetaDataService;
 
 	@Bean
 	TagRepository tagRepository()
 	{
-		CrudRepository repo = (CrudRepository) mysqlRepositoryCollection().getRepositoryByEntityName(
-				TagMetaData.ENTITY_NAME);
+		Repository repo = mysqlRepositoryCollection().getRepository(TagMetaData.ENTITY_NAME);
 		return new TagRepository(repo, new IdGenerator()
 		{
 
@@ -75,8 +70,11 @@ public class AppConfig
 	}
 
 	@PostConstruct
-	public void login()
+	public void init()
 	{
+		metaDataService().setDefaultBackend(mysqlRepositoryCollection());
+
+		// Login
 		SecurityContextHolder.getContext().setAuthentication(
 				new TestingAuthenticationToken("admin", "admin", "ROLE_SYSTEM"));
 	}
@@ -88,7 +86,7 @@ public class AppConfig
 	}
 
 	@Bean
-	public DataService dataService()
+	public DataServiceImpl dataService()
 	{
 		return new DataServiceImpl();
 	}
@@ -103,7 +101,7 @@ public class AppConfig
 	@Scope("prototype")
 	public MysqlRepository mysqlRepository()
 	{
-		return new MysqlRepository(dataSource(), asyncJdbcTemplate());
+		return new MysqlRepository(dataService(), dataSource(), asyncJdbcTemplate());
 	}
 
 	@Bean
@@ -113,45 +111,22 @@ public class AppConfig
 	}
 
 	@Bean
-	public WritableMetaDataService writableMetaDataService()
+	public MetaDataService metaDataService()
 	{
-		mysqlWritableMetaDataService = new MetaDataServiceImpl();
-		return writableMetaDataServiceDecorator().decorate(mysqlWritableMetaDataService);
-	}
-
-	@Bean
-	/**
-	 * non-decorating decorator, to be overrided if you wish to decorate the MetaDataRepositories
-	 */
-	WritableMetaDataServiceDecorator writableMetaDataServiceDecorator()
-	{
-		return new WritableMetaDataServiceDecorator()
-		{
-			@Override
-			public WritableMetaDataService decorate(WritableMetaDataService writableMetaDataService)
-			{
-				return writableMetaDataService;
-			}
-		};
+		return new MetaDataServiceImpl(dataService());
 	}
 
 	@Bean
 	public MysqlRepositoryCollection mysqlRepositoryCollection()
 	{
-		MysqlRepositoryCollection mysqlRepositoryCollection = new MysqlRepositoryCollection(dataSource(),
-				dataService(), writableMetaDataService(), repositoryDecoratorFactory())
-
+		MysqlRepositoryCollection mysqlRepositoryCollection = new MysqlRepositoryCollection()
 		{
 			@Override
 			protected MysqlRepository createMysqlRepository()
 			{
-				MysqlRepository repo = mysqlRepository();
-				repo.setRepositoryCollection(this);
-				return repo;
+				return mysqlRepository();
 			}
 		};
-
-		mysqlWritableMetaDataService.setManageableCrudRepositoryCollection(mysqlRepositoryCollection);
 
 		return mysqlRepositoryCollection;
 	}
@@ -161,19 +136,4 @@ public class AppConfig
 	{
 		return new MolgenisPluginRegistryImpl();
 	}
-
-	// temporary workaround for module dependencies
-	@Bean
-	public RepositoryDecoratorFactory repositoryDecoratorFactory()
-	{
-		return new RepositoryDecoratorFactory()
-		{
-			@Override
-			public Repository createDecoratedRepository(Repository repository)
-			{
-				return repository;
-			}
-		};
-	}
-
 }

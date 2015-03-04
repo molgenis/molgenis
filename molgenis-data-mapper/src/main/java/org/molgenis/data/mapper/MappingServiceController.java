@@ -360,7 +360,7 @@ public class MappingServiceController extends MolgenisPluginController
 				.getEntityMetaData(mappingServiceRequest.getTargetEntityName());
 		AttributeMetaData targetAttribute = targetEntityMetaData != null ? targetEntityMetaData
 				.getAttribute(mappingServiceRequest.getTargetAttributeName()) : null;
-		Repository sourceRepo = dataService.getRepositoryByEntityName(mappingServiceRequest.getSourceEntityName());
+		Repository sourceRepo = dataService.getRepository(mappingServiceRequest.getSourceEntityName());
 		List<Object> calculatedValues = algorithmService.applyAlgorithm(targetAttribute,
 				mappingServiceRequest.getAlgorithm(), sourceRepo);
 		return ImmutableMap.<String, Object> of("results", calculatedValues, "totalCount", Iterables.size(sourceRepo));

@@ -1,11 +1,16 @@
 package org.molgenis.data.jpa;
 
+import static org.molgenis.data.RepositoryCapability.QUERYABLE;
+import static org.molgenis.data.RepositoryCapability.UPDATEABLE;
+import static org.molgenis.data.RepositoryCapability.WRITABLE;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -29,9 +34,9 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.support.AbstractCrudRepository;
-import org.molgenis.data.support.ConvertingIterable;
+import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.QueryResolver;
 import org.molgenis.generators.GeneratorHelper;
@@ -42,11 +47,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 /**
  * Repository implementation for (generated) jpa entities
  */
-public class JpaRepository extends AbstractCrudRepository
+public class JpaRepository extends AbstractRepository
 {
 	private static final Logger LOG = LoggerFactory.getLogger(JpaRepository.class);
 
@@ -58,7 +64,6 @@ public class JpaRepository extends AbstractCrudRepository
 
 	public JpaRepository(EntityMetaData entityMetaData, QueryResolver queryResolver)
 	{
-		super(BASE_URL + entityMetaData.getEntityClass().getName());
 		this.entityMetaData = entityMetaData;
 		this.queryResolver = queryResolver;
 	}
@@ -567,55 +572,6 @@ public class JpaRepository extends AbstractCrudRepository
 		return jpaEntity;
 	}
 
-	@Override
-	@Transactional(readOnly = true)
-	public <E extends Entity> Iterable<E> findAll(Iterable<Object> ids, Class<E> clazz)
-	{
-		return new ConvertingIterable<E>(clazz, findAll(ids));
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	@Transactional(readOnly = true)
-	public <E extends Entity> E findOne(Object id, Class<E> clazz)
-	{
-		Entity entity = findOne(id);
-		if (entity == null)
-		{
-			return null;
-		}
-
-		if (clazz.isAssignableFrom(entity.getClass()))
-		{
-			return (E) entity;
-		}
-
-		E e = BeanUtils.instantiate(clazz);
-		e.set(entity);
-		return e;
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	@Transactional(readOnly = true)
-	public <E extends Entity> E findOne(Query q, Class<E> clazz)
-	{
-		Entity entity = findOne(q);
-		if (entity == null)
-		{
-			return null;
-		}
-
-		if (clazz.isAssignableFrom(entity.getClass()))
-		{
-			return (E) entity;
-		}
-
-		E e = BeanUtils.instantiate(clazz);
-		e.set(entity);
-		return e;
-	}
-
 	/*
 	 * Convert a search query to a list of QueryRule, creates for every attribute a QueryRule and 'OR's them
 	 * 
@@ -746,5 +702,11 @@ public class JpaRepository extends AbstractCrudRepository
 		}
 
 		return searchRules;
+	}
+
+	@Override
+	public Set<RepositoryCapability> getCapabilities()
+	{
+		return Sets.newHashSet(QUERYABLE, UPDATEABLE, WRITABLE);
 	}
 }
