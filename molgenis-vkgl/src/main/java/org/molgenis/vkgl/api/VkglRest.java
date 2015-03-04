@@ -283,7 +283,7 @@ public class VkglRest
 						// if not the same something went wrong when comparing the ID's
 						if (query.getParameterID().equals(qEl) && query.getParameterID().equals(id))
 						{
-							System.out.println("id's are correct");
+							
 							if (positionsToIds.get(position).size() > 1)
 							{
 								equationFlag = true;
@@ -327,7 +327,7 @@ public class VkglRest
 			{
 				resultxLabel.add("Less then 10 found");
 				resultyLabel.add("Less then 10 found");
-				System.out.println(dataService.count(entityName, new QueryImpl()));
+				
 				List<Long> totalLengthRepo = new ArrayList<Long>();
 				totalLengthRepo.add(dataService.count(entityName, new QueryImpl()));
 				resultMatrix.add(totalLengthRepo);
@@ -394,7 +394,7 @@ public class VkglRest
 			Query q = new QueryImpl();
 			for (String qEl : statement)
 			{
-				System.out.println(qEl);
+			
 
 				if (equationFlag)
 				{
@@ -468,7 +468,7 @@ public class VkglRest
 				}
 
 			}
-			System.out.println(q);
+		
 			AggregateQuery newAggregateQuery = new AggregateQueryImpl().attrX(posXAttributeMeta)
 					.attrY(posYAttributeMeta).query(q);
 
