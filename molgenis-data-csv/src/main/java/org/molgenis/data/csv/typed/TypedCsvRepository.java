@@ -7,17 +7,22 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.util.CloseableIterator;
 
 import au.com.bytecode.opencsv.CSVParser;
 import au.com.bytecode.opencsv.CSVReader;
+
+import com.google.common.collect.Iterables;
 
 /**
  * Repository that contains typed entities. For csv/tsv files with known content.
@@ -35,10 +40,9 @@ public class TypedCsvRepository<T extends Entity> extends AbstractRepository
 	private final int skipLines;
 	private final LineMapper<T> lineMapper;
 
-	public TypedCsvRepository(String url, File file, EntityMetaData entityMetaData, char separatorChar, int skipLines,
+	public TypedCsvRepository(File file, EntityMetaData entityMetaData, char separatorChar, int skipLines,
 			LineMapper<T> lineMapper)
 	{
-		super(url);
 		this.entityMetaData = entityMetaData;
 		this.file = file;
 		this.separatorChar = separatorChar;
@@ -120,12 +124,6 @@ public class TypedCsvRepository<T extends Entity> extends AbstractRepository
 				}
 
 				@Override
-				public void remove()
-				{
-					throw new UnsupportedOperationException();
-				}
-
-				@Override
 				public void close()
 				{
 					IOUtils.closeQuietly(csvReader);
@@ -160,9 +158,15 @@ public class TypedCsvRepository<T extends Entity> extends AbstractRepository
 	}
 
 	@Override
-	public void close() throws IOException
+	public Set<RepositoryCapability> getCapabilities()
 	{
-		// nothing
+		return Collections.emptySet();
+	}
+
+	@Override
+	public long count()
+	{
+		return Iterables.size(this);
 	}
 
 }

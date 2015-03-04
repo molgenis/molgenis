@@ -21,6 +21,7 @@ import org.mockito.Matchers;
 import org.molgenis.auth.MolgenisGroup;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
@@ -155,14 +156,13 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 		when(molgenisUser.getPassword()).thenReturn("password");
 		when(
 				dataService.findOne(eq(MolgenisUser.ENTITY_NAME), any(Query.class),
-						Matchers.notNull(MolgenisUser.class.getClass()))).thenReturn(molgenisUser);
+						(Class<Entity>) Matchers.notNull(MolgenisUser.class.getClass()))).thenReturn(molgenisUser);
 
 		accountService.resetPassword("user@molgenis.org");
 		ArgumentCaptor<MolgenisUser> argument = ArgumentCaptor.forClass(MolgenisUser.class);
 		verify(dataService).update(eq(MolgenisUser.ENTITY_NAME), argument.capture());
 		assertNotNull(argument.getValue().getPassword());
 		verify(javaMailSender).send(any(SimpleMailMessage.class));
-		// TODO improve test
 	}
 
 	@Test(expectedExceptions = MolgenisUserException.class)

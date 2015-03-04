@@ -5,9 +5,8 @@ import java.io.IOException;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.Writable;
+import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.FileStore;
@@ -30,9 +29,6 @@ public class GafListFileImporterService
 
 	@Autowired
 	private DataService dataService;
-
-	@Autowired
-	private WritableMetaDataService writableMetaDataService;
 
 	@Autowired
 	private SearchService searchService;
@@ -66,7 +62,7 @@ public class GafListFileImporterService
 
 			try
 			{
-				Writable writableRepository = dataService.getWritableRepository(gaflistEntityName);
+				Repository writableRepository = dataService.getRepository(gaflistEntityName);
 				for (Entity entity : gafListFileRepositoryToImport)
 				{
 					writableRepository.add(entity);

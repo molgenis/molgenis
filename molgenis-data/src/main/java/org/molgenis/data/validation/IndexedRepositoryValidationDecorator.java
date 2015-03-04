@@ -3,14 +3,13 @@ package org.molgenis.data.validation;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.DataService;
-import org.molgenis.data.IndexedCrudRepository;
+import org.molgenis.data.IndexedRepository;
 
-public class IndexedRepositoryValidationDecorator extends RepositoryValidationDecorator implements
-		IndexedCrudRepository
+public class IndexedRepositoryValidationDecorator extends RepositoryValidationDecorator implements IndexedRepository
 {
-	private final IndexedCrudRepository decoratedRepository;
+	private final IndexedRepository decoratedRepository;
 
-	public IndexedRepositoryValidationDecorator(DataService dataService, IndexedCrudRepository decoratedRepository,
+	public IndexedRepositoryValidationDecorator(DataService dataService, IndexedRepository decoratedRepository,
 			EntityAttributesValidator entityAttributesValidator)
 	{
 		super(dataService, decoratedRepository, entityAttributesValidator);

@@ -158,7 +158,7 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 		Entity row3 = new MapEntity(vcf);
 		row2.set("EFF", "INTRON(MODERATE||||1417|IPO4|protein_coding|CODING|NM_000057.3|8|1)	GT	1|0");
 		when(vcfRepo.spliterator()).thenReturn(Arrays.asList(row1, row2, row3).spliterator());
-		when(dataService.getRepositoryByEntityName("VCF")).thenReturn(vcfRepo);
+		when(dataService.getRepository("VCF")).thenReturn(vcfRepo);
 
 		when(
 				serviceMock.getColoredPathwayImage("WP1234",
@@ -187,7 +187,7 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 		Entity row2 = new MapEntity(vcf);
 		row2.set("EFF", "INTRON(MODERATE||||1417|IPO4|protein_coding|CODING|NM_000057.3|8|1)	GT	1|0");
 		when(vcfRepo.spliterator()).thenReturn(Arrays.asList(row1, row2).spliterator());
-		when(dataService.getRepositoryByEntityName("VCF")).thenReturn(vcfRepo);
+		when(dataService.getRepository("VCF")).thenReturn(vcfRepo);
 		when(serviceMock.getUncoloredPathwayImage("WP1234")).thenReturn("<svg>WP1234</svg>");
 		assertEquals(controller.getColoredPathway("VCF", "WP1234"), "<svg>WP1234</svg>");
 	}
@@ -202,7 +202,7 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 		row2.set("EFF", "INTRON(MODERATE||||1417|IPO4|protein_coding|CODING|NM_000057.3|8|1)	GT	1|0");
 		when(vcfRepo.spliterator()).thenReturn(Arrays.asList(row1, row2).spliterator());
 
-		when(dataService.getRepositoryByEntityName("VCF")).thenReturn(vcfRepo);
+		when(dataService.getRepository("VCF")).thenReturn(vcfRepo);
 
 		when(serviceMock.getPathwaysForGene("TUSC2", "Homo sapiens")).thenReturn(
 				Arrays.asList(Pathway.create("WP1", "Pathway 1"), Pathway.create("WP2", "Pathway 2")));

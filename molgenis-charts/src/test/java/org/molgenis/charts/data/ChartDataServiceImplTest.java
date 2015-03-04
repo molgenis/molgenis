@@ -51,7 +51,7 @@ public class ChartDataServiceImplTest
 		final Repository repo = mock(Repository.class);
 		when(repo.iterator()).thenReturn(entities.iterator());
 
-		when(dataServiceMock.getRepositoryByEntityName(entityName)).thenAnswer(new Answer<Repository>()
+		when(dataServiceMock.getRepository(entityName)).thenAnswer(new Answer<Repository>()
 		{
 			@Override
 			public Repository answer(InvocationOnMock invocation) throws Throwable
