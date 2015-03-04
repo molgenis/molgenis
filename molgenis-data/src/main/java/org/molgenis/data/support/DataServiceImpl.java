@@ -2,54 +2,71 @@ package org.molgenis.data.support;
 
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserHasRole;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
-import org.molgenis.data.Aggregateable;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Manageable;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
-import org.molgenis.data.Queryable;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.Updateable;
-import org.molgenis.data.Writable;
+import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 /**
  * Implementation of the DataService interface
  */
-@Component
+
 public class DataServiceImpl implements DataService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(DataServiceImpl.class);
 
 	private final Map<String, Repository> repositories;
 	private final Set<String> repositoryNames;
+	private MetaDataService metaDataService;
+	private final RepositoryDecoratorFactory repositoryDecoratorFactory;
 
 	public DataServiceImpl()
 	{
-		this.repositories = new LinkedHashMap<String, Repository>();
-		this.repositoryNames = new TreeSet<String>();
+		this(new NonDecoratingRepositoryDecoratorFactory());
 	}
 
-	@Override
+	public DataServiceImpl(RepositoryDecoratorFactory repositoryDecoratorFactory)
+	{
+		this.repositories = Maps.newLinkedHashMap();
+		this.repositoryNames = new TreeSet<String>();
+		this.repositoryDecoratorFactory = repositoryDecoratorFactory;
+	}
+
+	/**
+	 * For testing purposes
+	 */
+	public void resetRepositories()
+	{
+		repositories.clear();
+		repositoryNames.clear();
+	}
+
+	public void setMetaDataService(MetaDataService metaDataService)
+	{
+		this.metaDataService = metaDataService;
+	}
+
 	public void addRepository(Repository newRepository)
 	{
 		String repositoryName = newRepository.getName();
@@ -59,10 +76,11 @@ public class DataServiceImpl implements DataService
 		}
 		if (LOG.isDebugEnabled()) LOG.debug("Adding repository [" + repositoryName + "]");
 		repositoryNames.add(repositoryName);
-		repositories.put(repositoryName.toLowerCase(), newRepository);
+
+		Repository decoratedRepo = repositoryDecoratorFactory.createDecoratedRepository(newRepository);
+		repositories.put(repositoryName.toLowerCase(), decoratedRepo);
 	}
 
-	@Override
 	public void removeRepository(String repositoryName)
 	{
 		if (null == repositoryName)
@@ -105,14 +123,6 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public Repository getRepositoryByEntityName(String entityName)
-	{
-		Repository repository = repositories.get(entityName.toLowerCase());
-		if (repository == null) throw new UnknownEntityException("Unknown entity [" + entityName + "]");
-		else return repository;
-	}
-
-	@Override
 	public boolean hasRepository(String entityName)
 	{
 		return repositories.containsKey(entityName.toLowerCase());
@@ -121,7 +131,7 @@ public class DataServiceImpl implements DataService
 	@Override
 	public long count(String entityName, Query q)
 	{
-		return getQueryable(entityName).count(q);
+		return getRepository(entityName).count(q);
 	}
 
 	@Override
@@ -133,161 +143,88 @@ public class DataServiceImpl implements DataService
 	@Override
 	public Iterable<Entity> findAll(String entityName, Query q)
 	{
-		return getQueryable(entityName).findAll(q);
+		return getRepository(entityName).findAll(q);
 	}
 
 	@Override
 	public Iterable<Entity> findAll(String entityName, Iterable<Object> ids)
 	{
-		return getQueryable(entityName).findAll(ids);
-	}
-
-	@Override
-	public List<Entity> findAllAsList(String entityName, Query q)
-	{
-		Iterable<Entity> iterable = findAll(entityName, q);
-		return Lists.newArrayList(iterable);
+		return getRepository(entityName).findAll(ids);
 	}
 
 	@Override
 	public Entity findOne(String entityName, Object id)
 	{
-		return getQueryable(entityName).findOne(id);
+		return getRepository(entityName).findOne(id);
 	}
 
 	@Override
 	public Entity findOne(String entityName, Query q)
 	{
-		return getQueryable(entityName).findOne(q);
+		return getRepository(entityName).findOne(q);
 	}
 
 	@Override
 	public void add(String entityName, Entity entity)
 	{
-		getWritable(entityName).add(entity);
+		getRepository(entityName).add(entity);
 	}
 
 	@Override
 	public void add(String entityName, Iterable<? extends Entity> entities)
 	{
-		getWritable(entityName).add(entities);
+		getRepository(entityName).add(entities);
 	}
 
 	@Override
 	public void update(String entityName, Entity entity)
 	{
-		getUpdateable(entityName).update(entity);
+		getRepository(entityName).update(entity);
 	}
 
 	@Override
 	public void update(String entityName, Iterable<? extends Entity> entities)
 	{
-		Updateable updateable = getUpdateable(entityName);
-		updateable.update(entities);
+		getRepository(entityName).update(entities);
 	}
 
 	@Override
 	public void delete(String entityName, Entity entity)
 	{
-		getUpdateable(entityName).delete(entity);
+		getRepository(entityName).delete(entity);
 	}
 
 	@Override
 	public void delete(String entityName, Iterable<? extends Entity> entities)
 	{
-		getUpdateable(entityName).delete(entities);
+		getRepository(entityName).delete(entities);
 	}
 
 	@Override
 	public void delete(String entityName, Object id)
 	{
-		getUpdateable(entityName).deleteById(id);
+		getRepository(entityName).deleteById(id);
 	}
 
 	@Override
 	public void deleteAll(String entityName)
 	{
-		getUpdateable(entityName).deleteAll();
+		getRepository(entityName).deleteAll();
 	}
 
 	@Override
-	public void drop(String entityName)
+	public Repository getRepository(String entityName)
 	{
-		getManageableRepository(entityName).drop();
-	}
+		Repository repository = repositories.get(entityName.toLowerCase());
+		if (repository == null) throw new UnknownEntityException("Unknown entity [" + entityName + "]");
 
-	private <E extends Entity> Queryable getQueryable(String entityName)
-	{
-		Repository repo = getRepositoryByEntityName(entityName);
-		if (!(repo instanceof Queryable))
-		{
-			throw new MolgenisDataException("Repository of [" + entityName + "] isn't queryable");
-		}
-
-		return (Queryable) repo;
-	}
-
-	private Writable getWritable(String entityName)
-	{
-		Repository repo = getRepositoryByEntityName(entityName);
-		if (!(repo instanceof Writable))
-		{
-			throw new MolgenisDataException("Repository of [" + entityName + "] isn't writable");
-		}
-
-		return (Writable) repo;
-	}
-
-	private Updateable getUpdateable(String entityName)
-	{
-		Repository repo = getRepositoryByEntityName(entityName);
-		if (!(repo instanceof Updateable))
-		{
-			throw new MolgenisDataException("Repository of [" + entityName + "] isn't updateable");
-		}
-
-		return (Updateable) repo;
-	}
-
-	@Override
-	public CrudRepository getCrudRepository(String entityName)
-	{
-		Repository repository = getRepositoryByEntityName(entityName);
-		if (repository instanceof CrudRepository)
-		{
-			return (CrudRepository) repository;
-		}
-
-		throw new MolgenisDataException("Repository [" + repository.getName() + "] isn't a CrudRepository");
-	}
-
-	@Override
-	public Writable getWritableRepository(String entityName)
-	{
-		Repository repository = getRepositoryByEntityName(entityName);
-		if (repository instanceof Writable)
-		{
-			return (Writable) repository;
-		}
-		throw new MolgenisDataException("Repository [" + repository.getName() + "] is not Writable");
-	}
-
-	@Override
-	public Queryable getQueryableRepository(String entityName)
-	{
-		Repository repository = getRepositoryByEntityName(entityName);
-		if (repository instanceof Queryable)
-		{
-			return (Queryable) repository;
-		}
-		throw new MolgenisDataException("Repository [" + repository.getName() + "] is not Queryable");
-
+		return repository;
 	}
 
 	@Override
 	public Manageable getManageableRepository(String entityName)
 	{
-		Repository repository = getRepositoryByEntityName(entityName);
+		Repository repository = getRepository(entityName);
 		if (repository instanceof Manageable)
 		{
 			return (Manageable) repository;
@@ -298,44 +235,37 @@ public class DataServiceImpl implements DataService
 	@Override
 	public Query query(String entityName)
 	{
-		return new QueryImpl(getQueryableRepository(entityName));
-	}
-
-	@Override
-	public Iterable<Class<? extends Entity>> getEntityClasses()
-	{
-		List<Class<? extends Entity>> entityClasses = new ArrayList<Class<? extends Entity>>();
-		for (String entityName : getEntityNames())
-		{
-			Repository repo = getRepositoryByEntityName(entityName);
-			entityClasses.add(repo.getEntityMetaData().getEntityClass());
-		}
-
-		return entityClasses;
+		return new QueryImpl(getRepository(entityName));
 	}
 
 	@Override
 	public <E extends Entity> Iterable<E> findAll(String entityName, Query q, Class<E> clazz)
 	{
-		return getQueryable(entityName).findAll(q, clazz);
+		Iterable<Entity> entities = getRepository(entityName).findAll(q);
+		return new ConvertingIterable<E>(clazz, entities, this);
 	}
 
 	@Override
 	public <E extends Entity> Iterable<E> findAll(String entityName, Iterable<Object> ids, Class<E> clazz)
 	{
-		return getQueryable(entityName).findAll(ids, clazz);
+		Iterable<Entity> entities = getRepository(entityName).findAll(ids);
+		return new ConvertingIterable<E>(clazz, entities, this);
 	}
 
 	@Override
 	public <E extends Entity> E findOne(String entityName, Object id, Class<E> clazz)
 	{
-		return getQueryable(entityName).findOne(id, clazz);
+		Entity entity = getRepository(entityName).findOne(id);
+		if (entity == null) return null;
+		return EntityUtils.convert(entity, clazz, this);
 	}
 
 	@Override
 	public <E extends Entity> E findOne(String entityName, Query q, Class<E> clazz)
 	{
-		return getQueryable(entityName).findOne(q, clazz);
+		Entity entity = getRepository(entityName).findOne(q);
+		if (entity == null) return null;
+		return EntityUtils.convert(entity, clazz, this);
 	}
 
 	@Override
@@ -347,12 +277,25 @@ public class DataServiceImpl implements DataService
 	@Override
 	public AggregateResult aggregate(String entityName, AggregateQuery aggregateQuery)
 	{
-		Repository repo = getRepositoryByEntityName(entityName);
-		if (!(repo instanceof Aggregateable))
-		{
-			throw new MolgenisDataException("Repository of [" + entityName + "] isn't aggregateable");
-		}
-
-		return ((Aggregateable) repo).aggregate(aggregateQuery);
+		return getRepository(entityName).aggregate(aggregateQuery);
 	}
+
+	@Override
+	public MetaDataService getMeta()
+	{
+		return metaDataService;
+	}
+
+	@Override
+	public Iterator<Repository> iterator()
+	{
+		return repositories.values().iterator();
+	}
+
+	@Override
+	public Set<RepositoryCapability> getCapabilities(String repositoryName)
+	{
+		return getRepository(repositoryName).getCapabilities();
+	}
+
 }

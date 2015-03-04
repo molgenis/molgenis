@@ -10,18 +10,21 @@ import static org.testng.Assert.fail;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.elasticsearch.common.collect.Lists;
 import org.mockito.Mockito;
 import org.molgenis.auth.MolgenisUser;
-import org.molgenis.data.CrudRepository;
-import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.ManageableCrudRepositoryCollection;
+import org.molgenis.data.ManageableRepositoryCollection;
+import org.molgenis.data.Repository;
 import org.molgenis.data.mapping.model.AttributeMapping;
 import org.molgenis.data.mapping.model.EntityMapping;
 import org.molgenis.data.mapping.model.MappingProject;
 import org.molgenis.data.mapping.model.MappingTarget;
 import org.molgenis.data.mem.InMemoryRepositoryCollection;
+import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.PackageImpl;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -30,6 +33,7 @@ import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -45,12 +49,19 @@ import com.google.common.collect.ImmutableList;
 public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 {
 	@Configuration
+	@ComponentScan("org.molgenis.data.meta")
 	static class Config
 	{
 		@Bean
-		DataService dataService()
+		DataServiceImpl dataService()
 		{
 			return new DataServiceImpl();
+		}
+
+		@Bean
+		MetaDataService metaDataService()
+		{
+			return new MetaDataServiceImpl(dataService());
 		}
 
 		@Bean
@@ -60,9 +71,9 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		ManageableCrudRepositoryCollection repositoryCollection()
+		ManageableRepositoryCollection repositoryCollection()
 		{
-			return new InMemoryRepositoryCollection(dataService());
+			return new InMemoryRepositoryCollection();
 		}
 
 		@Bean
@@ -71,13 +82,19 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 			return mock(PermissionSystemService.class);
 		}
 
+		@PostConstruct
+		public void initRepositories()
+		{
+			metaDataService().setDefaultBackend(repositoryCollection());
+		}
+
 	}
 
 	@Autowired
-	private ManageableCrudRepositoryCollection repoCollection;
+	private ManageableRepositoryCollection repoCollection;
 
 	@Autowired
-	private DataService dataService;
+	private DataServiceImpl dataService;
 
 	@Autowired
 	private MappingService mappingService;
@@ -112,8 +129,8 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 
 		if (!dataService.hasRepository("HopEntity"))
 		{
-			repoCollection.add(hopMetaData);
-			CrudRepository gene = repoCollection.add(geneMetaData);
+			dataService.getMeta().addEntityMeta(hopMetaData);
+			Repository gene = dataService.getMeta().addEntityMeta(geneMetaData);
 			MapEntity geneEntity = new MapEntity(hopMetaData);
 			geneEntity.set("identifier", "1");
 			geneEntity.set("lengte", 123.4);
@@ -217,7 +234,7 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 
 		mappingService.applyMappings(target, "Koetjeboe");
 
-		CrudRepository actual = dataService.getCrudRepository("Koetjeboe");
+		Repository actual = dataService.getRepository("Koetjeboe");
 		DefaultEntityMetaData expectedMetadata = new DefaultEntityMetaData("Koetjeboe", hopMetaData);
 		expectedMetadata.addAttribute("source");
 		assertEquals(actual.getEntityMetaData(), expectedMetadata);
