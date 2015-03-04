@@ -8,7 +8,7 @@ The procedure below tells you how to checkout the molgenis project and build one
 
 ## 1. Install software needed
 
-install java8 SDK from http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
+install java8 JDK (not JRE) from http://www.oracle.com/technetwork/java/javase/downloads/index.html
 
 install eclipse (we used Luna) from https://www.eclipse.org/downloads/?osType=macosx
 
