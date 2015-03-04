@@ -126,6 +126,13 @@ public class AppConfig
 			{
 				return mysqlRepository();
 			}
+
+			@Override
+			public boolean hasRepository(String name)
+			{
+				// TODO Auto-generated method stub
+				return false;
+			}
 		};
 
 		return mysqlRepositoryCollection;

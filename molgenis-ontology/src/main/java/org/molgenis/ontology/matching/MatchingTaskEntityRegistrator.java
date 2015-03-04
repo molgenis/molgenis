@@ -1,7 +1,6 @@
 package org.molgenis.ontology.matching;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,15 +15,12 @@ public class MatchingTaskEntityRegistrator implements ApplicationListener<Contex
 	private static final Logger LOG = LoggerFactory.getLogger(MatchingTaskEntityRegistrator.class);
 
 	private final DataService dataService;
-	private final MysqlRepositoryCollection mysqlRepositoryCollection;
 
 	@Autowired
-	public MatchingTaskEntityRegistrator(DataService dataService, MysqlRepositoryCollection mysqlRepositoryCollection)
+	public MatchingTaskEntityRegistrator(DataService dataService)
 	{
 		if (dataService == null) throw new IllegalArgumentException("DataService is null");
-		if (mysqlRepositoryCollection == null) throw new IllegalArgumentException("MysqlRepositoryCollection is null");
 		this.dataService = dataService;
-		this.mysqlRepositoryCollection = mysqlRepositoryCollection;
 	}
 
 	@Override
@@ -39,7 +35,7 @@ public class MatchingTaskEntityRegistrator implements ApplicationListener<Contex
 		if (!dataService.hasRepository(MatchingTaskEntity.ENTITY_NAME))
 		{
 			LOG.info("Created table " + MatchingTaskEntity.ENTITY_NAME);
-			mysqlRepositoryCollection.add(MatchingTaskEntity.getEntityMetaData());
+			dataService.getMeta().addEntityMeta(MatchingTaskEntity.getEntityMetaData());
 		}
 		else
 		{
@@ -49,7 +45,8 @@ public class MatchingTaskEntityRegistrator implements ApplicationListener<Contex
 		if (!dataService.hasRepository(MatchingTaskContentEntity.ENTITY_NAME))
 		{
 			LOG.info("Created table " + MatchingTaskContentEntity.ENTITY_NAME);
-			mysqlRepositoryCollection.add(MatchingTaskContentEntity.getEntityMetaData());
+			// mysqlRepositoryCollection.add(MatchingTaskContentEntity.getEntityMetaData()); //TODO JJ
+			dataService.getMeta().addEntityMeta(MatchingTaskContentEntity.getEntityMetaData()); // TODO JJ
 		}
 		else
 		{

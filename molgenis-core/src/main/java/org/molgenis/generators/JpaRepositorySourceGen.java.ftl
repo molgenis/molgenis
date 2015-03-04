@@ -62,9 +62,9 @@ public class JpaRepositoryCollection extends IndexedRepositoryCollectionDecorato
 			}
 
 			@Override
-			public Repository getRepository(String name)
+			public boolean hasRepository(String name)
 			{
-				return repositories.get(name);
+				return repositories.containsKey(name);
 			}
 		});
 	}

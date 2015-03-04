@@ -22,15 +22,16 @@ import javax.servlet.http.Part;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.csv.CsvWriter;
-import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.LowerCaseProcessor;
 import org.molgenis.data.processor.TrimProcessor;
@@ -88,9 +89,6 @@ public class OntologyServiceController extends MolgenisPluginController
 	private ProcessInputTermService processInputTermService;
 
 	@Autowired
-	private MysqlRepositoryCollection mysqlRepositoryCollection;
-
-	@Autowired
 	private UploadProgress uploadProgress;
 
 	@Autowired
@@ -140,7 +138,7 @@ public class OntologyServiceController extends MolgenisPluginController
 				Double threshold_value = Double.parseDouble(threshold);
 				entity.set(MatchingTaskEntity.THRESHOLD, threshold_value);
 				dataService.update(MatchingTaskEntity.ENTITY_NAME, entity);
-				dataService.getCrudRepository(MatchingTaskEntity.ENTITY_NAME).flush();
+				dataService.getRepository(MatchingTaskEntity.ENTITY_NAME).flush();
 			}
 			catch (Exception e)
 			{
@@ -206,9 +204,9 @@ public class OntologyServiceController extends MolgenisPluginController
 			dataService.delete(MatchingTaskEntity.ENTITY_NAME, matchingSummaryEntity);
 
 			// Drop the table that contains the information for raw data (input terms)
-			mysqlRepositoryCollection.dropEntityMetaData(entityName);
+			dataService.getMeta().deleteEntityMeta(entityName); // TODO JJ
 
-			dataService.getCrudRepository(MatchingTaskEntity.ENTITY_NAME).flush();
+			dataService.getRepository(MatchingTaskEntity.ENTITY_NAME).flush();
 		}
 	}
 
@@ -450,7 +448,7 @@ public class OntologyServiceController extends MolgenisPluginController
 			private String entityName = name;
 
 			@Override
-			public Repository getRepositoryByEntityName(String name)
+			public Repository getRepository(String name)
 			{
 				CsvRepository csvRepository = new CsvRepository(file, Arrays.<CellProcessor> asList(
 						new LowerCaseProcessor(), new TrimProcessor()), OntologyServiceImpl.DEFAULT_SEPARATOR);
@@ -461,6 +459,30 @@ public class OntologyServiceController extends MolgenisPluginController
 			public Iterable<String> getEntityNames()
 			{
 				return Arrays.asList(entityName);
+			}
+
+			@Override
+			public Iterator<Repository> iterator()
+			{
+				throw new NotImplementedException("Not implemented yet");
+			}
+
+			@Override
+			public String getName()
+			{
+				throw new NotImplementedException("Not implemented yet");
+			}
+
+			@Override
+			public Repository addEntityMeta(EntityMetaData entityMeta)
+			{
+				throw new NotImplementedException("Not implemented yet");
+			}
+
+			@Override
+			public boolean hasRepository(String name)
+			{
+				throw new NotImplementedException("Not implemented yet");
 			}
 		};
 	}

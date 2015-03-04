@@ -74,7 +74,7 @@ public class JpaImportService implements ImportService
 		{
 			for (String entityName : source.getEntityNames())
 			{
-				if (targetCollection.getRepository(entityName) != null) return true;
+				targetCollection.hasRepository(entityName);
 			}
 		}
 

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Iterator;
 
+import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
@@ -107,6 +108,12 @@ public class IndexedRepositoryCollectionDecorator implements RepositoryCollectio
 	protected SearchService getSearchService()
 	{
 		return searchService;
+	}
+
+	@Override
+	public boolean hasRepository(String name)
+	{
+		throw new NotImplementedException("Not implemented yet");
 	}
 
 }

@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
@@ -96,5 +97,11 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 			}
 
 		};
+	}
+
+	@Override
+	public boolean hasRepository(String name)
+	{
+		throw new NotImplementedException("Not implemented yet");
 	}
 }

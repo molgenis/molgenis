@@ -145,4 +145,11 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 		};
 	}
 
+	@Override
+	public boolean hasRepository(String name)
+	{
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

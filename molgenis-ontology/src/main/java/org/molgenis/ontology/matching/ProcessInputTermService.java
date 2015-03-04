@@ -13,7 +13,6 @@ import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.importer.EmxImportService;
-import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.OntologyService;
@@ -40,8 +39,6 @@ public class ProcessInputTermService
 
 	private final EmxImportService emxImportService;
 
-	private final MysqlRepositoryCollection mysqlRepositoryCollection;
-
 	private final DataService dataService;
 
 	private final UploadProgress uploadProgress;
@@ -49,12 +46,10 @@ public class ProcessInputTermService
 	private final OntologyService ontologyService;
 
 	@Autowired
-	public ProcessInputTermService(EmxImportService emxImportService,
-			MysqlRepositoryCollection mysqlRepositoryCollection, DataService dataService,
+	public ProcessInputTermService(EmxImportService emxImportService, DataService dataService,
 			UploadProgress uploadProgress, OntologyService ontologyService)
 	{
 		this.emxImportService = emxImportService;
-		this.mysqlRepositoryCollection = mysqlRepositoryCollection;
 		this.dataService = dataService;
 		this.uploadProgress = uploadProgress;
 		this.ontologyService = ontologyService;
@@ -69,9 +64,9 @@ public class ProcessInputTermService
 		String userName = molgenisUser.getUsername();
 		uploadProgress.registerUser(userName, entityName);
 		// Add the original input dataset to database
-		mysqlRepositoryCollection.add(repositoryCollection.getRepositoryByEntityName(entityName).getEntityMetaData());
+		dataService.getMeta().addEntityMeta(repositoryCollection.getRepository(entityName).getEntityMetaData());
 		emxImportService.doImport(repositoryCollection, DatabaseAction.ADD);
-		dataService.getCrudRepository(entityName).flush();
+		dataService.getRepository(entityName).flush();
 
 		// Add a new entry in MatchingTask table for this new matching job
 		int threshold = uploadProgress.getThreshold(userName);
@@ -82,7 +77,7 @@ public class ProcessInputTermService
 		mapEntity.set(MatchingTaskEntity.MOLGENIS_USER, userName);
 		mapEntity.set(MatchingTaskEntity.THRESHOLD, threshold);
 		dataService.add(MatchingTaskEntity.ENTITY_NAME, mapEntity);
-		dataService.getCrudRepository(MatchingTaskEntity.ENTITY_NAME).flush();
+		dataService.getRepository(MatchingTaskEntity.ENTITY_NAME).flush();
 		uploadProgress.registerUser(userName, entityName, (int) dataService.count(entityName, new QueryImpl()));
 		// Match input terms with code
 		Iterable<Entity> findAll = dataService.findAll(entityName);
@@ -121,7 +116,7 @@ public class ProcessInputTermService
 				dataService.add(MatchingTaskContentEntity.ENTITY_NAME, entitiesToAdd);
 				entitiesToAdd.clear();
 			}
-			dataService.getCrudRepository(MatchingTaskContentEntity.ENTITY_NAME).flush();
+			dataService.getRepository(MatchingTaskContentEntity.ENTITY_NAME).flush();
 
 			// FIXME : temporary work around to assign write permissions to the
 			// users who create the entities.
@@ -136,7 +131,7 @@ public class ProcessInputTermService
 				userAuthority.setRole(role);
 				roles.add(new SimpleGrantedAuthority(role));
 				dataService.add(UserAuthority.ENTITY_NAME, userAuthority);
-				dataService.getCrudRepository(UserAuthority.ENTITY_NAME).flush();
+				dataService.getRepository(UserAuthority.ENTITY_NAME).flush();
 			}
 			auth = new UsernamePasswordAuthenticationToken(auth.getPrincipal(), null, roles);
 			securityContext.setAuthentication(auth);

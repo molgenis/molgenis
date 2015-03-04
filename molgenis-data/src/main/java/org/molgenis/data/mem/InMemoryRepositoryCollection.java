@@ -83,4 +83,10 @@ public class InMemoryRepositoryCollection implements ManageableRepositoryCollect
 	{
 		throw new NotImplementedException("Not implemented yet");
 	}
+
+	@Override
+	public boolean hasRepository(String name)
+	{
+		throw new NotImplementedException("Not implemented yet");
+	}
 }

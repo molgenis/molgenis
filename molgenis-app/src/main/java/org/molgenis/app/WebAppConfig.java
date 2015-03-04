@@ -75,6 +75,13 @@ public class WebAppConfig extends MolgenisWebAppConfig
 				return new MysqlRepository(localDataService, dataSource, new AsyncJdbcTemplate(new JdbcTemplate(
 						dataSource)));
 			}
+
+			@Override
+			public boolean hasRepository(String name)
+			{
+				// TODO Auto-generated method stub
+				return false;
+			}
 		};
 		localDataService.getMeta().setDefaultBackend(backend);
 

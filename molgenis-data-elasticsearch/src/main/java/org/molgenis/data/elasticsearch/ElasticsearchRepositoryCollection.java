@@ -5,6 +5,7 @@ import java.io.UncheckedIOException;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
@@ -133,6 +134,12 @@ public class ElasticsearchRepositoryCollection implements ManageableRepositoryCo
 	public void addAttributeSync(String entityName, AttributeMetaData attribute)
 	{
 		addAttribute(entityName, attribute);
+	}
+
+	@Override
+	public boolean hasRepository(String name)
+	{
+		throw new NotImplementedException("Not implemented yet");
 	}
 
 }

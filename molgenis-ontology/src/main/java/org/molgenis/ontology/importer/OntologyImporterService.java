@@ -7,7 +7,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
@@ -29,6 +28,7 @@ import org.molgenis.ontology.model.OntologyMetaData;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -78,14 +78,14 @@ public class OntologyImporterService implements ImportService
 			while (it.hasNext())
 			{
 				String entityNameToImport = it.next();
-				Repository repo = source.getRepositoryByEntityName(entityNameToImport);
+				Repository repo = source.getRepository(entityNameToImport);
 				try
 				{
 					report = new EntityImportReport();
 
-					CrudRepository crudRepository = dataService.getCrudRepository(entityNameToImport);
+					CrudRepository crudRepository = (CrudRepository) dataService.getRepository(entityNameToImport);
 
-					crudRepository.add(repo);
+					((Repository) crudRepository).add(repo);
 
 					List<String> entityNames = addedEntities.stream().map(emd -> emd.getName())
 							.collect(Collectors.toList());
@@ -110,7 +110,7 @@ public class OntologyImporterService implements ImportService
 			{
 				if (dataService.hasRepository(emd.getName()))
 				{
-					dataService.removeRepository(emd.getName());
+					dataService.deleteAll(emd.getName());
 				}
 
 				if (searchService.hasMapping(emd))
@@ -133,11 +133,11 @@ public class OntologyImporterService implements ImportService
 	{
 		EntitiesValidationReport report = new EntitiesValidationReportImpl();
 
-		if (source.getRepositoryByEntityName(OntologyMetaData.ENTITY_NAME) == null) throw new MolgenisDataException(
+		if (source.getRepository(OntologyMetaData.ENTITY_NAME) == null) throw new MolgenisDataException(
 				"Exception Repository [" + OntologyMetaData.ENTITY_NAME + "] is missing");
 
 		boolean ontologyExists = false;
-		for (Entity ontologyEntity : source.getRepositoryByEntityName(OntologyMetaData.ENTITY_NAME))
+		for (Entity ontologyEntity : source.getRepository(OntologyMetaData.ENTITY_NAME))
 		{
 			String ontologyIRI = ontologyEntity.getString(OntologyMetaData.ONTOLOGY_IRI);
 			String ontologyName = ontologyEntity.getString(OntologyMetaData.ONTOLOGY_NAME);

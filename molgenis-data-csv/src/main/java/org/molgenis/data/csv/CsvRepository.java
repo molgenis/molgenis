@@ -18,7 +18,6 @@ import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.data.support.MapEntity;
 import org.springframework.util.StringUtils;
 
@@ -55,13 +54,6 @@ public class CsvRepository extends AbstractRepository
 
 	public CsvRepository(File file, String sheetName, @Nullable List<CellProcessor> cellProcessors)
 	{
-<<<<<<< HEAD
-		super(file.getName().toLowerCase().endsWith(GenericImporterExtensions.ZIP.toString()) ? BASE_URL
-				+ file.getName() + '/' + sheetName : file
-				.getName());
-
-=======
->>>>>>> df4145cfdecfaccc0165541679f9272b683d3dc2
 		this.file = file;
 		this.sheetName = sheetName;
 		this.cellProcessors = cellProcessors;

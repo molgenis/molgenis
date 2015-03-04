@@ -109,8 +109,8 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 			String ontologyName = ontologyLoader.getOntologyName();
 			if (!dataService.hasRepository(ontologyName))
 			{
-				dataService.addRepository(new OntologyTermQueryRepository(ontologyName, searchService, dataService,
-						ontologyService));
+				dataService.add(OntologyTermQueryRepository.DEFAULT_ONTOLOGY_TERM_REPO,
+						new OntologyTermQueryRepository(ontologyName, searchService, dataService, ontologyService));
 			}
 			runningIndexProcesses.decrementAndGet();
 			indexingOntologyIri = null;
@@ -237,8 +237,8 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 						dataService.getEntityMetaData(OntologyQueryRepository.ENTITY_NAME));
 			}
 			String ontologyName = ontologyEntity.getString(OntologyQueryRepository.ONTOLOGY_NAME);
-			searchService.delete(ontologyName);
-			dataService.removeRepository(ontologyName);
+			dataService.deleteAll(ontologyName); // TODO JJ
+			dataService.getMeta().deleteEntityMeta(ontologyName);
 		}
 	}
 

@@ -37,7 +37,7 @@ public class OntologyManagerController extends MolgenisPluginController
 	private OntologyService ontologyService;
 
 	@Autowired
-	private OntologyIndexer ontologyIndexer;
+	private OntologyIndexer harmonizationIndexer;
 
 	public OntologyManagerController()
 	{
@@ -69,7 +69,7 @@ public class OntologyManagerController extends MolgenisPluginController
 	{
 		try
 		{
-			ontologyIndexer.removeOntology(ontologyUri);
+			harmonizationIndexer.removeOntology(ontologyUri);
 			model.addAttribute("removeSuccess", true);
 			model.addAttribute("message", "The ontology has been removed!");
 		}

@@ -10,6 +10,7 @@ import java.util.zip.ZipFile;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
@@ -28,16 +29,7 @@ import com.google.common.collect.Lists;
  */
 public class CsvRepositoryCollection extends FileRepositoryCollection
 {
-<<<<<<< HEAD
-=======
 	public static final String NAME = "CSV";
-	public static final String EXTENSION_CSV = "csv";
-	public static final String EXTENSION_TXT = "txt";
-	public static final String EXTENSION_TSV = "tsv";
-	public static final String EXTENSION_ZIP = "zip";
-	public static final Set<String> EXTENSIONS = ImmutableSet.of(EXTENSION_CSV, EXTENSION_TXT, EXTENSION_TSV,
-			EXTENSION_ZIP);
->>>>>>> df4145cfdecfaccc0165541679f9272b683d3dc2
 	private static final String MAC_ZIP = "__MACOSX";
 	private final File file;
 	private List<String> entityNames;
@@ -151,6 +143,12 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 			}
 
 		};
+	}
+
+	@Override
+	public boolean hasRepository(String name)
+	{
+		throw new NotImplementedException("Not implemented yet");
 	}
 
 }

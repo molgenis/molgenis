@@ -3,10 +3,13 @@ package org.molgenis.ontology.repository;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.molgenis.data.DataService;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.FileRepositoryCollection;
@@ -78,9 +81,33 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	}
 
 	@Override
-	public Repository getRepositoryByEntityName(String name)
+	public String getName()
+	{
+		throw new NotImplementedException("Not implemented yet");
+	}
+
+	@Override
+	public Repository addEntityMeta(EntityMetaData entityMeta)
+	{
+		throw new NotImplementedException("Not implemented yet");
+	}
+
+	@Override
+	public Iterator<Repository> iterator()
+	{
+		throw new NotImplementedException("Not implemented yet");
+	}
+
+	@Override
+	public Repository getRepository(String name)
 	{
 		if (!repositories.containsKey(name)) throw new MolgenisDataException("Unknown entity name [" + name + "]");
 		return repositories.get(name);
+	}
+
+	@Override
+	public boolean hasRepository(String name)
+	{
+		throw new NotImplementedException("Not implemented yet");
 	}
 }
