@@ -82,12 +82,6 @@ public class OntologyIndexRepository extends AbstractOntologyRepository
 		return Collections.emptySet();
 	}
 
-	@Override
-	public String getUrl()
-	{
-		throw new UnsupportedOperationException();
-	}
-
 	/**
 	 * @return the ontologyLoader
 	 */
