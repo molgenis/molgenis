@@ -23,19 +23,20 @@ public class FileExtensionUtils
 			}
 		}
 
-		String longestExtention = null;
+		String longestExtension = null;
 		for (String possibleExtension : possibleExtensions)
 		{
-			if (null == longestExtention){
-				longestExtention = possibleExtension;
+			if (null == longestExtension)
+			{
+				longestExtension = possibleExtension;
 				continue;
 			}
 			else
 			{
-				if (longestExtention.length() < possibleExtension.length()) longestExtention = possibleExtension;
+				if (longestExtension.length() < possibleExtension.length()) longestExtension = possibleExtension;
 			}
 		}
 
-		return longestExtention;
+		return longestExtension;
 	}
 }

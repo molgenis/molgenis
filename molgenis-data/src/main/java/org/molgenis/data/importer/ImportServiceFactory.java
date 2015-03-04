@@ -38,22 +38,22 @@ public class ImportServiceFactory
 	 */
 	public ImportService getImportService(File file, RepositoryCollection source)
 	{
-		final Map<String, ImportService> importServicesImportableMapedToExtentions = Maps.newHashMap();
+		final Map<String, ImportService> importServicesImportableMapedToExtensions = Maps.newHashMap();
 		for (ImportService importService : importServices)
 		{
 			if (importService.canImport(file, source))
 			{
 				for (String extension : importService.getSupportedFileExtensions())
 				{
-					importServicesImportableMapedToExtentions.put(extension.toLowerCase(), importService);
+					importServicesImportableMapedToExtensions.put(extension.toLowerCase(), importService);
 				}
 			}
 		}
 
 		String extension = FileExtensionUtils.findExtansionFromSetForGenericImporter(file.getName(),
-				importServicesImportableMapedToExtentions.keySet());
+				importServicesImportableMapedToExtensions.keySet());
 
-		final ImportService importService = importServicesImportableMapedToExtentions.get(extension);
+		final ImportService importService = importServicesImportableMapedToExtensions.get(extension);
 
 		System.out.println("extension: " + extension);
 
