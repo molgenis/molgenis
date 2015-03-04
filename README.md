@@ -10,15 +10,15 @@ The procedure below tells you how to checkout the molgenis project and build one
 
 install java8 JDK (not JRE) from http://www.oracle.com/technetwork/java/javase/downloads/index.html
 
-install eclipse (we used Luna) from https://www.eclipse.org/downloads/?osType=macosx
+install eclipse (we used Luna) from https://www.eclipse.org/downloads/
 
 install mysql from (we used 5.6.23 DMG) http://dev.mysql.com/downloads/mysql/
 
-install git from http://git-scm.com/download/mac
+install git from http://git-scm.com/download/
 
 ## 2. Configure mysql
 
-open terminal and start mysql client via command: 
+open terminal and start mysql client (command differs in Windows, Linux, Mac): 
 
     /usr/local/mysql/bin/mysql -u root
 
