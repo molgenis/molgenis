@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.mapping.model.AttributeMapping;
@@ -25,10 +26,12 @@ import org.slf4j.LoggerFactory;
 public class AlgorithmServiceImpl implements AlgorithmService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(AlgorithmServiceImpl.class);
+    private static DataService dataService = null;
 
-	public AlgorithmServiceImpl()
+    public AlgorithmServiceImpl(DataService dataService)
 	{
 		new RhinoConfig().init();
+        this.dataService = dataService;
 	}
 
 	@Override
@@ -61,6 +64,12 @@ public class AlgorithmServiceImpl implements AlgorithmService
 								case DECIMAL:
 									derivedValues.add(Context.toNumber(result));
 									break;
+                                case XREF:
+                                case CATEGORICAL:
+                                    derivedValues.add(dataService.findOne(targetAttribute.getRefEntity().getName(),result).getIdValue());
+                                    break;
+                                case MREF:
+                                    throw new UnsupportedOperationException();
 								default:
 									derivedValues.add(Context.toString(result));
 									break;
@@ -83,6 +92,9 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		for (String attributeName : attributeNames)
 		{
 			Object value = entity.get(attributeName);
+            if(value instanceof Entity){
+                value = ((Entity) value).getIdValue();
+            }
 			mapEntity.set(attributeName, value);
 		}
 		return mapEntity;
@@ -100,7 +112,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		{
 			MapEntity entity = createMapEntity(getSourceAttributeNames(attributeMapping.getAlgorithm()), sourceEntity);
 			Object value = ScriptEvaluator.eval(algorithm, entity);
-			return convert(value, attributeMapping.getTargetAttributeMetaData().getDataType().getEnumType());
+			return convert(value, attributeMapping.getTargetAttributeMetaData());
 		}
 		catch (RuntimeException e)
 		{
@@ -108,13 +120,14 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		}
 	}
 
-	private static Object convert(Object value, FieldTypeEnum targetDataType)
+	private static Object convert(Object value, AttributeMetaData attributeMetaData)
 	{
 		if (value == null)
 		{
 			return null;
 		}
 		Object convertedValue;
+        FieldTypeEnum targetDataType = attributeMetaData.getDataType().getEnumType();
 		switch (targetDataType)
 		{
 			case INT:
@@ -123,6 +136,12 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			case DECIMAL:
 				convertedValue = Context.toNumber(value);
 				break;
+            case XREF:
+            case CATEGORICAL:
+                convertedValue = dataService.findOne(attributeMetaData.getRefEntity().getName(), Context.toString(value));
+                break;
+            case MREF:
+                throw new UnsupportedOperationException();
 			default:
 				convertedValue = Context.toString(value);
 				break;

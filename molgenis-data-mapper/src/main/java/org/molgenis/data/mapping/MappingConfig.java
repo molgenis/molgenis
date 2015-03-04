@@ -47,7 +47,7 @@ public class MappingConfig
 	@Bean
 	public AlgorithmService algorithmServiceImpl()
 	{
-		return new AlgorithmServiceImpl();
+		return new AlgorithmServiceImpl(dataService);
 	}
 
 	@Bean
