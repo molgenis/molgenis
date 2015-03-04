@@ -57,7 +57,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		this.name = name;
 		this.fieldType = MolgenisFieldTypes.STRING;
 	}
-	
+
 	public DefaultAttributeMetaData(String newName, AttributeMetaData attributeMetaData)
 	{
 		this(attributeMetaData);

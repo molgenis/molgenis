@@ -33,6 +33,6 @@ public class WebAppDatabasePopulator implements ApplicationListener<ContextRefre
 	@Override
 	public int getOrder()
 	{
-		return Ordered.HIGHEST_PRECEDENCE + 1;
+		return Ordered.HIGHEST_PRECEDENCE + 100;
 	}
 }

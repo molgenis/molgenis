@@ -36,8 +36,7 @@ public class Validator
 		RepositoryCollection excelReaderReferenceFile = new ExcelRepositoryCollection(new File(excelFile1),
 				new TrimProcessor());
 
-		Repository excelSheetReaderReferenceFile = excelReaderReferenceFile
-				.getRepositoryByEntityName("dataset_celiac_sprue");
+		Repository excelSheetReaderReferenceFile = excelReaderReferenceFile.getRepository("dataset_celiac_sprue");
 		try
 		{
 			excelfile.readFile(excelSheetReaderReferenceFile, IDENTIFIER, IDENTIFIER2);

@@ -2,6 +2,7 @@ package org.molgenis.data.mysql;
 
 import org.molgenis.AppConfig;
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -23,7 +24,7 @@ public class MysqlRepositoryCountTest extends AbstractTestNGSpringContextTests
 	private static final Logger LOG = LoggerFactory.getLogger(MysqlRepositoryCountTest.class);
 
 	@Autowired
-	MysqlRepositoryCollection coll;
+	DataService dataService;
 
 	@Test
 	public void test()
@@ -43,10 +44,8 @@ public class MysqlRepositoryCountTest extends AbstractTestNGSpringContextTests
 		personMD.addAttribute("active").setDataType(MolgenisFieldTypes.BOOL);
 		personMD.addAttribute("country").setDataType(MolgenisFieldTypes.XREF).setRefEntity(countryMD);
 
-		coll.dropEntityMetaData(personMD.getName());
-		coll.dropEntityMetaData(countryMD.getName());
-		MysqlRepository countries = (MysqlRepository) coll.add(countryMD);
-		MysqlRepository persons = (MysqlRepository) coll.add(personMD);
+		MysqlRepository countries = (MysqlRepository) dataService.getMeta().addEntityMeta(countryMD);
+		MysqlRepository persons = (MysqlRepository) dataService.getMeta().addEntityMeta(personMD);
 
 		// add country entities to repo
 		Entity c = new MapEntity();

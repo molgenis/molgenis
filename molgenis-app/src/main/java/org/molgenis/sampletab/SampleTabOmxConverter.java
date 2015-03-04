@@ -41,7 +41,7 @@ public class SampleTabOmxConverter
 
 		try
 		{
-			Repository repo = repositorySource.getRepositoryByEntityName(sheetName);
+			Repository repo = repositorySource.getRepository(sheetName);
 			try
 			{
 				// Collect headers as features to be imported in Omx-format

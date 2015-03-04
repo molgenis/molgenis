@@ -2,7 +2,6 @@ package org.molgenis.data.vcf.importer;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -18,46 +17,40 @@ import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.RepositoryDecoratorFactory;
-import org.molgenis.data.elasticsearch.ElasticsearchRepository;
-import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
 import org.molgenis.data.importer.EntitiesValidationReportImpl;
 import org.molgenis.data.importer.ImportService;
+import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.security.permission.PermissionSystemService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 @Service
 public class VcfImporterService implements ImportService
 {
+	private static final Logger LOG = LoggerFactory.getLogger(VcfImporterService.class);
 	private static final List<String> SUPPORTED_FILE_EXTENSIONS = Arrays.asList("vcf", "vcf.gz");
 	private static final int DEFAULT_BATCH_SIZE = 1000;
+	private static final String BACKEND = ElasticsearchRepositoryCollection.NAME;
 	private final FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
 	private final DataService dataService;
-	private final SearchService searchService;
-	private final RepositoryDecoratorFactory repositoryDecoratorFactory;
 	private final PermissionSystemService permissionSystemService;
 
 	@Autowired
 	public VcfImporterService(FileRepositoryCollectionFactory fileRepositoryCollectionFactory, DataService dataService,
-			SearchService searchService, RepositoryDecoratorFactory repositoryDecoratorFactory,
 			PermissionSystemService permissionSystemService)
+
 	{
-		if (fileRepositoryCollectionFactory == null) throw new IllegalArgumentException(
-				"fileRepositoryCollectionFactory is null");
-		if (dataService == null) throw new IllegalArgumentException("dataservice is null");
-		if (searchService == null) throw new IllegalArgumentException("seachservice is null");
-		if (repositoryDecoratorFactory == null) throw new IllegalArgumentException("repositoryDecoratorFactory is null");
-		if (permissionSystemService == null) throw new IllegalArgumentException("permissionSystemService is null");
 		this.fileRepositoryCollectionFactory = fileRepositoryCollectionFactory;
 		this.dataService = dataService;
-		this.searchService = searchService;
-		this.repositoryDecoratorFactory = repositoryDecoratorFactory;
 		this.permissionSystemService = permissionSystemService;
 	}
 
@@ -73,18 +66,13 @@ public class VcfImporterService implements ImportService
 			Iterator<String> it = source.getEntityNames().iterator();
 			if (it.hasNext())
 			{
-				Repository repo = source.getRepositoryByEntityName(it.next());
-				try
+				try (Repository repo = source.getRepository(it.next());)
 				{
 					report = importVcf(repo, DEFAULT_BATCH_SIZE, addedEntities);
 					List<String> entityNames = addedEntities.stream().map(emd -> emd.getName())
 							.collect(Collectors.toList());
 					permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
 							entityNames);
-				}
-				finally
-				{
-					IOUtils.closeQuietly(repo);
 				}
 			}
 			else
@@ -94,18 +82,16 @@ public class VcfImporterService implements ImportService
 		}
 		catch (Exception e)
 		{
-			// Remove created repositories
-			for (EntityMetaData emd : addedEntities)
-			{
-				if (dataService.hasRepository(emd.getName()))
-				{
-					dataService.removeRepository(emd.getName());
-				}
+			LOG.error("Exception importing vcf", e);
 
-				if (searchService.hasMapping(emd))
-				{
-					searchService.delete(emd.getName());
-				}
+			// Remove created repositories
+			try
+			{
+				dataService.getMeta().delete(addedEntities);
+			}
+			catch (Exception e1)
+			{
+				LOG.error("Exception rollback changes", e1);
 			}
 
 			throw new MolgenisDataException(e);
@@ -125,7 +111,7 @@ public class VcfImporterService implements ImportService
 		if (it.hasNext())
 		{
 			String entityName = it.next();
-			EntityMetaData emd = source.getRepositoryByEntityName(entityName).getEntityMetaData();
+			EntityMetaData emd = source.getRepository(entityName).getEntityMetaData();
 
 			// Vcf entity
 			boolean entityExists = dataService.hasRepository(entityName);
@@ -182,7 +168,7 @@ public class VcfImporterService implements ImportService
 		Iterator<String> it = repositoryCollection.getEntityNames().iterator();
 		if (it.hasNext())
 		{
-			Repository repo = repositoryCollection.getRepositoryByEntityName(it.next());
+			Repository repo = repositoryCollection.getRepository(it.next());
 			try
 			{
 				importVcf(repo, DEFAULT_BATCH_SIZE, Lists.<EntityMetaData> newArrayList());
@@ -198,7 +184,7 @@ public class VcfImporterService implements ImportService
 			throws IOException
 	{
 		EntityImportReport report = new EntityImportReport();
-		ElasticsearchRepository sampleRepository = null;
+		Repository sampleRepository = null;
 		String entityName = inRepository.getName();
 
 		if (dataService.hasRepository(entityName))
@@ -206,25 +192,24 @@ public class VcfImporterService implements ImportService
 			throw new MolgenisDataException("Can't overwrite existing " + entityName);
 		}
 
-		EntityMetaData entityMetaData = inRepository.getEntityMetaData();
-		ElasticsearchRepository outRepository = new ElasticsearchRepository(entityMetaData, searchService);
-		searchService.createMappings(entityMetaData, true, true, true, true);
-		addedEntities.add(entityMetaData);
+		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData(inRepository.getEntityMetaData());
+		entityMetaData.setBackend(BACKEND);
 
 		AttributeMetaData sampleAttribute = entityMetaData.getAttribute("SAMPLES");
 		if (sampleAttribute != null)
 		{
-			sampleRepository = new ElasticsearchRepository(sampleAttribute.getRefEntity(), searchService);
-			searchService.createMappings(sampleAttribute.getRefEntity(), true, true, true, true);
+			DefaultEntityMetaData samplesEntityMetaData = new DefaultEntityMetaData(sampleAttribute.getRefEntity());
+			samplesEntityMetaData.setBackend(BACKEND);
+			sampleRepository = dataService.getMeta().addEntityMeta(samplesEntityMetaData);
 			addedEntities.add(sampleAttribute.getRefEntity());
 		}
 
 		Iterator<Entity> inIterator = inRepository.iterator();
 		int vcfEntityCount = 0;
 		int sampleEntityCount = 0;
-		try
+		try (Repository outRepository = dataService.getMeta().addEntityMeta(entityMetaData))
 		{
-			List<Entity> sampleEntities = new ArrayList<Entity>();
+			addedEntities.add(entityMetaData);
 
 			while (inIterator.hasNext())
 			{
@@ -236,41 +221,19 @@ public class VcfImporterService implements ImportService
 					Iterable<Entity> samples = entity.getEntities("SAMPLES");
 					if (samples != null)
 					{
-						Iterator<Entity> sampleIterator = samples.iterator();
-						while (sampleIterator.hasNext())
-						{
-							sampleEntities.add(sampleIterator.next());
-
-							if (sampleEntities.size() == batchSize)
-							{
-								sampleRepository.add(sampleEntities);
-								sampleEntityCount += sampleEntities.size();
-								sampleEntities.clear();
-							}
-						}
+						sampleRepository.add(samples);
+						sampleEntityCount += Iterables.size(samples);
 					}
 				}
-			}
 
-			outRepository.add(inRepository);
-
-			if (sampleRepository != null)
-			{
-				sampleRepository.add(sampleEntities);
-				sampleEntityCount += sampleEntities.size();
+				outRepository.add(entity);
 			}
 		}
-		finally
-		{
-			outRepository.close();
-		}
 
-		dataService.addRepository(repositoryDecoratorFactory.createDecoratedRepository(outRepository));
 		report.addNewEntity(entityName);
 
 		if (sampleRepository != null)
 		{
-			dataService.addRepository(sampleRepository);
 			report.addNewEntity(sampleRepository.getName());
 			if (sampleEntityCount > 0) report.addEntityCount(sampleRepository.getName(), sampleEntityCount);
 		}

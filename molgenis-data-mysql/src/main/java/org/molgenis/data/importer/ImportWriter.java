@@ -1,6 +1,5 @@
 package org.molgenis.data.importer;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -9,25 +8,22 @@ import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IndexedRepository;
-import org.molgenis.data.ManageableCrudRepositoryCollection;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Package;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.TagMetaData;
-import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Tag;
 import org.molgenis.data.semantic.UntypedTagService;
+import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.support.TransformedEntity;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -53,7 +49,6 @@ public class ImportWriter
 	private static final Logger LOG = LoggerFactory.getLogger(ImportWriter.class);
 
 	private final DataService dataService;
-	private final WritableMetaDataService metaDataService;
 	private final PermissionSystemService permissionSystemService;
 	private final UntypedTagService tagService;
 
@@ -62,16 +57,13 @@ public class ImportWriter
 	 * 
 	 * @param dataService
 	 *            {@link DataService} to query existing repositories and transform entities
-	 * @param metaDataService
-	 *            {@link WritableMetaDataService} to add and update {@link EntityMetaData}
 	 * @param permissionSystemService
 	 *            {@link PermissionSystemService} to give permissions on uploaded entities
 	 */
-	public ImportWriter(DataService dataService, WritableMetaDataService metaDataService,
-			PermissionSystemService permissionSystemService, UntypedTagService tagService)
+	public ImportWriter(DataService dataService, PermissionSystemService permissionSystemService,
+			UntypedTagService tagService)
 	{
 		this.dataService = dataService;
-		this.metaDataService = metaDataService;
 		this.permissionSystemService = permissionSystemService;
 		this.tagService = tagService;
 	}
@@ -81,10 +73,10 @@ public class ImportWriter
 	{
 		importTags(job.source);
 		importPackages(job.parsedMetaData);
-		addEntityMetaData(job.parsedMetaData, job.report, job.metaDataChanges, job.target);
+		addEntityMetaData(job.parsedMetaData, job.report, job.metaDataChanges);
 		addEntityPermissions(job.metaDataChanges);
 		importEntityAndAttributeTags(job.parsedMetaData);
-		importData(job.report, job.parsedMetaData.getEntities(), job.source, job.target, job.dbAction);
+		importData(job.report, job.parsedMetaData.getEntities(), job.source, job.dbAction);
 		return job.report;
 	}
 
@@ -106,24 +98,24 @@ public class ImportWriter
 	}
 
 	/**
-	 * Imports entity data for all entities in {@link #resolved} from {@link #source} to {@link #targetCollection}
+	 * Imports entity data for all entities in {@link #resolved} from {@link #source}
 	 */
 	private void importData(EntityImportReport report, Iterable<EntityMetaData> resolved, RepositoryCollection source,
-			RepositoryCollection targetCollection, DatabaseAction dbAction)
+			DatabaseAction dbAction)
 	{
 		for (final EntityMetaData entityMetaData : resolved)
 		{
 			String name = entityMetaData.getName();
-			CrudRepository crudRepository = (CrudRepository) targetCollection.getRepositoryByEntityName(name);
 
-			if (crudRepository != null)
+			if (dataService.hasRepository(name))
 			{
-				Repository fileEntityRepository = source.getRepositoryByEntityName(entityMetaData.getSimpleName());
+				Repository repository = dataService.getRepository(name);
+				Repository fileEntityRepository = source.getRepository(entityMetaData.getSimpleName());
 
 				if (fileEntityRepository == null)
 				{
 					// Try fully qualified name
-					fileEntityRepository = source.getRepositoryByEntityName(entityMetaData.getName());
+					fileEntityRepository = source.getRepository(entityMetaData.getName());
 				}
 
 				// check to prevent nullpointer when importing metadata only
@@ -136,12 +128,13 @@ public class ImportWriter
 								@Override
 								public Entity apply(Entity entity)
 								{
-									return new TransformedEntity(entity, entityMetaData, dataService);
+									return new DefaultEntity(entityMetaData, dataService, entity);
 								}
 							});
+
 					entities = DependencyResolver.resolveSelfReferences(entities, entityMetaData);
 
-					int count = update(crudRepository, entities, dbAction);
+					int count = update(repository, entities, dbAction);
 					report.addEntityCount(name, count);
 				}
 			}
@@ -165,7 +158,7 @@ public class ImportWriter
 	 * Adds the parsed {@link ParsedMetaData}, creating new repositories where necessary.
 	 */
 	private void addEntityMetaData(ParsedMetaData parsedMetaData, EntityImportReport report,
-			MetaDataChanges metaDataChanges, ManageableCrudRepositoryCollection targetCollection)
+			MetaDataChanges metaDataChanges)
 	{
 		for (EntityMetaData entityMetaData : parsedMetaData.getEntities())
 		{
@@ -173,11 +166,11 @@ public class ImportWriter
 			if (!EmxMetaDataParser.ENTITIES.equals(name) && !EmxMetaDataParser.ATTRIBUTES.equals(name)
 					&& !EmxMetaDataParser.PACKAGES.equals(name) && !EmxMetaDataParser.TAGS.equals(name))
 			{
-				if (metaDataService.getEntityMetaData(entityMetaData.getName()) == null)
+				if (dataService.getMeta().getEntityMetaData(entityMetaData.getName()) == null)
 				{
 					LOG.debug("trying to create: " + name);
 					metaDataChanges.addEntity(name);
-					Repository repo = targetCollection.add(entityMetaData);
+					Repository repo = dataService.getMeta().addEntityMeta(entityMetaData);
 					if (repo != null)
 					{
 						report.addNewEntity(name);
@@ -185,7 +178,8 @@ public class ImportWriter
 				}
 				else if (!entityMetaData.isAbstract())
 				{
-					metaDataChanges.addAttributes(name, targetCollection.update(entityMetaData));
+					List<AttributeMetaData> addedAttributes = dataService.getMeta().updateEntityMeta(entityMetaData);
+					metaDataChanges.addAttributes(name, addedAttributes);
 				}
 			}
 		}
@@ -200,7 +194,7 @@ public class ImportWriter
 		{
 			if (p != null)
 			{
-				metaDataService.addPackage(p);
+				dataService.getMeta().addPackage(p);
 			}
 		}
 	}
@@ -210,12 +204,12 @@ public class ImportWriter
 	 */
 	private void importTags(RepositoryCollection source)
 	{
-		Repository tagRepo = source.getRepositoryByEntityName(TagMetaData.ENTITY_NAME);
+		Repository tagRepo = source.getRepository(TagMetaData.ENTITY_NAME);
 		if (tagRepo != null)
 		{
 			for (Entity tag : tagRepo)
 			{
-				Entity transformed = new TransformedEntity(tag, new TagMetaData(), dataService);
+				Entity transformed = new DefaultEntity(new TagMetaData(), dataService, tag);
 				Entity existingTag = dataService
 						.findOne(TagMetaData.ENTITY_NAME, tag.getString(TagMetaData.IDENTIFIER));
 
@@ -237,8 +231,8 @@ public class ImportWriter
 	public void rollbackSchemaChanges(EmxImportJob job)
 	{
 		LOG.info("Rolling back changes.");
-		dropAddedEntities(job.target, job.metaDataChanges.getAddedEntities());
-		List<String> entities = dropAddedAttributes(job.target, job.metaDataChanges.getAddedAttributes());
+		dropAddedEntities(job.metaDataChanges.getAddedEntities());
+		List<String> entities = dropAddedAttributes(job.metaDataChanges.getAddedAttributes());
 
 		// Reindex
 		Set<String> entitiesToIndex = Sets.newLinkedHashSet(job.source.getEntityNames());
@@ -263,7 +257,7 @@ public class ImportWriter
 		{
 			if (dataService.hasRepository(entity))
 			{
-				Repository repo = dataService.getRepositoryByEntityName(entity);
+				Repository repo = dataService.getRepository(entity);
 				if ((repo != null) && (repo instanceof IndexedRepository))
 				{
 					((IndexedRepository) repo).rebuildIndex();
@@ -275,8 +269,7 @@ public class ImportWriter
 	/**
 	 * Drops attributes from entities
 	 */
-	private List<String> dropAddedAttributes(ManageableCrudRepositoryCollection targetCollection,
-			ImmutableMap<String, Collection<AttributeMetaData>> addedAttributes)
+	private List<String> dropAddedAttributes(ImmutableMap<String, Collection<AttributeMetaData>> addedAttributes)
 	{
 		List<String> entities = Lists.newArrayList(addedAttributes.keySet());
 		Collections.reverse(entities);
@@ -285,7 +278,7 @@ public class ImportWriter
 		{
 			for (AttributeMetaData attribute : addedAttributes.get(entityName))
 			{
-				targetCollection.dropAttributeMetaData(entityName, attribute.getName());
+				dataService.getMeta().deleteAttribute(entityName, attribute.getName());
 			}
 		}
 		return entities;
@@ -294,16 +287,10 @@ public class ImportWriter
 	/**
 	 * Drops added entities in the reverse order in which they were created.
 	 */
-	private void dropAddedEntities(ManageableCrudRepositoryCollection targetCollection, List<String> addedEntities)
+	private void dropAddedEntities(List<String> addedEntities)
 	{
 		// Rollback metadata, create table statements cannot be rolled back, we have to do it ourselves
-		ArrayList<String> reversedEntities = new ArrayList<String>(addedEntities);
-		Collections.reverse(reversedEntities);
-
-		for (String entityName : reversedEntities)
-		{
-			targetCollection.dropEntityMetaData(entityName);
-		}
+		Lists.reverse(addedEntities).forEach(dataService.getMeta()::deleteEntityMeta);
 	}
 
 	/**
@@ -317,7 +304,7 @@ public class ImportWriter
 	 *            {@link DatabaseAction} describing how to merge the existing entities
 	 * @return number of updated entities
 	 */
-	public int update(CrudRepository repo, Iterable<? extends Entity> entities, DatabaseAction dbAction)
+	public int update(Repository repo, Iterable<? extends Entity> entities, DatabaseAction dbAction)
 	{
 		if (entities == null) return 0;
 
@@ -395,6 +382,7 @@ public class ImportWriter
 						}
 						throw new MolgenisDataException(msg.toString());
 					}
+
 					count = repo.add(entities);
 					break;
 
