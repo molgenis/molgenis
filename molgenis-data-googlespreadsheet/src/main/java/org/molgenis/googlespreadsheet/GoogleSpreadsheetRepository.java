@@ -3,17 +3,21 @@ package org.molgenis.googlespreadsheet;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 
+import com.google.common.collect.Iterables;
 import com.google.gdata.client.spreadsheet.FeedURLFactory;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.spreadsheet.Cell;
@@ -26,8 +30,6 @@ import com.google.gdata.util.ServiceException;
 
 public class GoogleSpreadsheetRepository extends AbstractRepository
 {
-	public static final String BASE_URL = "googless://";
-
 	public enum Visibility
 	{
 		PUBLIC, PRIVATE;
@@ -55,7 +57,6 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 	public GoogleSpreadsheetRepository(SpreadsheetService spreadsheetService, String spreadsheetKey,
 			String worksheetId, Visibility visibility) throws IOException, ServiceException
 	{
-		super(BASE_URL + spreadsheetKey + "/" + worksheetId);
 		if (spreadsheetService == null) throw new IllegalArgumentException("spreadsheetService is null");
 		if (spreadsheetKey == null) throw new IllegalArgumentException("spreadsheetKey is null");
 		if (worksheetId == null) throw new IllegalArgumentException("worksheetId is null");
@@ -125,12 +126,6 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 	}
 
 	@Override
-	public void close() throws IOException
-	{
-		// noop
-	}
-
-	@Override
 	public EntityMetaData getEntityMetaData()
 	{
 		if (entityMetaData == null)
@@ -171,5 +166,17 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 		}
 
 		return entityMetaData;
+	}
+
+	@Override
+	public Set<RepositoryCapability> getCapabilities()
+	{
+		return Collections.emptySet();
+	}
+
+	@Override
+	public long count()
+	{
+		return Iterables.size(this);
 	}
 }

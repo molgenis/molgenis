@@ -1,7 +1,5 @@
 package org.molgenis.data.support;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
@@ -80,7 +78,7 @@ public class MapEntity extends AbstractEntity
 	}
 
 	@Override
-	public void set(Entity other, boolean strict)
+	public void set(Entity other)
 	{
 		for (String attributeName : other.getAttributeNames())
 		{
@@ -125,12 +123,6 @@ public class MapEntity extends AbstractEntity
 			});
 		}
 		return values.keySet();
-	}
-
-	@Override
-	public List<String> getLabelAttributeNames()
-	{
-		return Collections.singletonList(entityMetaData.getLabelAttribute().getName());
 	}
 
 	@Override

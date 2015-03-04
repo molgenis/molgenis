@@ -68,7 +68,7 @@ public class SampleConverter
 		{
 			for (String name : repositorySource.getEntityNames())
 			{
-				Repository repo = repositorySource.getRepositoryByEntityName(name);
+				Repository repo = repositorySource.getRepository(name);
 				this.featureColNames = new ArrayList<String>();
 
 				for (AttributeMetaData attr : repo.getEntityMetaData().getAttributes())

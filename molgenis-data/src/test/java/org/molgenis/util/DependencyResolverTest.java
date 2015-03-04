@@ -1,18 +1,20 @@
 package org.molgenis.util;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Repository;
 import org.molgenis.data.support.DataServiceImpl;
+import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.support.TransformedEntity;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Lists;
@@ -70,10 +72,20 @@ public class DependencyResolverTest
 		Entity marie = new MapEntity("name");
 		marie.set("name", "Marie");
 
-		DataService ds = new DataServiceImpl();
-		Iterable<Entity> entities = Arrays.<Entity> asList(new TransformedEntity(piet, emd, ds), new TransformedEntity(
-				klaas, emd, ds), new TransformedEntity(jan, emd, ds), new TransformedEntity(katrijn, emd, ds),
-				new TransformedEntity(marie, emd, ds));
+		Repository repo = mock(Repository.class);
+		when(repo.getName()).thenReturn("Person");
+		when(repo.findOne("Piet")).thenReturn(piet);
+		when(repo.findOne("Jan")).thenReturn(jan);
+		when(repo.findOne("Marie")).thenReturn(marie);
+		when(repo.findOne("Katrijn")).thenReturn(katrijn);
+
+		DataServiceImpl ds = new DataServiceImpl();
+		ds.addRepository(repo);
+
+		Iterable<Entity> entities = Arrays.<Entity> asList(new DefaultEntity(emd, ds, piet), new DefaultEntity(emd, ds,
+				klaas), new DefaultEntity(emd, ds, jan), new DefaultEntity(emd, ds, katrijn), new DefaultEntity(emd,
+				ds, marie));
+
 		Iterable<Entity> sorted = DependencyResolver.resolveSelfReferences(entities, emd);
 		List<Entity> sortedList = Lists.newArrayList(sorted);
 		assertEquals(sortedList.size(), 5);

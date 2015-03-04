@@ -1,34 +1,30 @@
 package org.molgenis.data;
 
-import java.util.List;
+import java.util.Set;
+
+import org.molgenis.data.meta.MetaDataService;
 
 /**
  * DataService is a façade that manages data sources Entity names should be unique over all data sources.
  * 
  * Main entry point for the DataApi
  */
-public interface DataService extends RepositoryCollection
+public interface DataService extends Iterable<Repository>
 {
 	/**
-	 * Add a repository to the DataService
+	 * Get the MetaDataService
 	 * 
-	 * @throws MolgenisDataException
-	 *             if entity name is already registered
-	 * @param repository
+	 * @return
 	 */
-	void addRepository(Repository repository);
+	MetaDataService getMeta();
 
 	/**
-	 * Remove a repository from the DataService
+	 * Get the capabilities of a repository
 	 * 
-	 * @throws MolgenisDataException
-	 *             if repository/entity name is null
-	 * 
-	 * @throws MolgenisDataException
-	 *             if repository/entity name doesn't exists
 	 * @param repositoryName
+	 * @return
 	 */
-	void removeRepository(String repositoryName);
+	Set<RepositoryCapability> getCapabilities(String repositoryName);
 
 	/**
 	 * check ia a repository for this entity already exists
@@ -93,17 +89,6 @@ public interface DataService extends RepositoryCollection
 	 * @return
 	 */
 	Iterable<Entity> findAll(String entityName, Iterable<Object> ids);
-
-	@Deprecated
-	/**
-	 * Find entities that match a query. Returns empty List if no matches.
-	 * Use Iterable<E> findAll instead or count(String entityName, Query q);
-	 * 
-	 * @param entityName entity name (case insensitive)
-	 * @param q
-	 * @return
-	 */
-	<E extends Entity> List<E> findAllAsList(String entityName, Query q);
 
 	/**
 	 * Find one entity based on id. Returns null if not exists
@@ -217,14 +202,6 @@ public interface DataService extends RepositoryCollection
 	void deleteAll(String entityName);
 
 	/**
-	 * Drops the repository for the given entity (but does not remove the repository)
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 */
-	void drop(String entityName);
-
-	/**
 	 * Get a CrudRepository by entity name
 	 * 
 	 * @throws UnknownEntityException
@@ -237,25 +214,11 @@ public interface DataService extends RepositoryCollection
 	 * @param entityName
 	 *            entity name (case insensitive)
 	 */
-	CrudRepository getCrudRepository(String entityName);
-
-	Writable getWritableRepository(String entityName);
-
-	Queryable getQueryableRepository(String entityName);
+	Repository getRepository(String entityName);
 
 	Manageable getManageableRepository(String entityName);
 
 	Query query(String entityName);
-
-	// TODO remove
-	/**
-	 * Returns all entity classes. Returns empty Iterable if no entity classes.
-	 * 
-	 * @throws MolgenisDataAccessException
-	 * 
-	 * @return
-	 */
-	Iterable<Class<? extends Entity>> getEntityClasses();
 
 	/**
 	 * type-safe find entities that match a query
@@ -316,4 +279,10 @@ public interface DataService extends RepositoryCollection
 	 * @return
 	 */
 	AggregateResult aggregate(String entityName, AggregateQuery aggregateQuery);
+
+	/**
+	 * Get names of all the entities in this source
+	 */
+	Iterable<String> getEntityNames();
+
 }

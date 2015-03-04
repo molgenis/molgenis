@@ -13,8 +13,10 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.jpa.importer.EntityImportService;
+import org.molgenis.data.support.ConvertingIterable;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.util.EntityUtils;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.testng.annotations.Test;
@@ -42,7 +44,7 @@ public class JpaRepositoryTest extends BaseJpaTest
 		repo.update(p);
 
 		Query q = new QueryImpl().in("children", Lists.newArrayList(child1));
-		Person found = repo.findOne(q, Person.class);
+		Person found = EntityUtils.convert(repo.findOne(q), Person.class, null);
 		assertEquals(p, found);
 	}
 
@@ -149,7 +151,8 @@ public class JpaRepositoryTest extends BaseJpaTest
 		Person p2 = new Person("Paulus", "de Boskabouter");
 		repo.add(p2);
 
-		Iterable<Person> it = repo.findAll(Arrays.asList((Object) p1.getId(), p2.getId()), Person.class);
+		Iterable<Entity> entities = repo.findAll(Arrays.asList((Object) p1.getId(), p2.getId()));
+		Iterable<Person> it = new ConvertingIterable<Person>(Person.class, entities, null);
 		assertEquals(Iterables.size(it), 2);
 		assertTrue(Iterables.contains(it, p1));
 		assertTrue(Iterables.contains(it, p2));
@@ -170,7 +173,7 @@ public class JpaRepositoryTest extends BaseJpaTest
 	{
 		Person p = new Person("Piet", "Paulusma");
 		repo.add(p);
-		Person e = repo.findOne(p.getId(), Person.class);
+		Person e = EntityUtils.convert(repo.findOne(p.getId()), Person.class, null);
 		assertNotNull(e);
 		assertEquals(p, e);
 	}
@@ -194,11 +197,11 @@ public class JpaRepositoryTest extends BaseJpaTest
 		Person p = new Person("Piet", "Paulusma");
 		repo.add(p);
 
-		Person e = repo.findOne(p.getId(), Person.class);
+		Person e = EntityUtils.convert(repo.findOne(p.getId()), Person.class, null);
 		e.setLastName("XXX");
 		repo.update(e);
 
-		Person e1 = repo.findOne(p.getId(), Person.class);
+		Person e1 = EntityUtils.convert(repo.findOne(p.getId()), Person.class, null);
 		assertNotNull(e1);
 		assertEquals(e.getLastName(), "XXX");
 	}
@@ -209,11 +212,11 @@ public class JpaRepositoryTest extends BaseJpaTest
 		Person p = new Person("Piet", "Paulusma");
 		repo.add(Arrays.asList(p));
 
-		Person e = repo.findOne(p.getId(), Person.class);
+		Person e = EntityUtils.convert(repo.findOne(p.getId()), Person.class, null);
 		e.setLastName("XXX");
 		repo.update(e);
 
-		Person e1 = repo.findOne(p.getId(), Person.class);
+		Person e1 = EntityUtils.convert(repo.findOne(p.getId()), Person.class, null);
 		assertNotNull(e1);
 		assertEquals(e.getLastName(), "XXX");
 	}
@@ -254,7 +257,7 @@ public class JpaRepositoryTest extends BaseJpaTest
 		e1.set("lastName", "XXX");
 		eis.update(repo, Arrays.asList(e1), DatabaseAction.ADD_UPDATE_EXISTING, "firstName");
 		assertEquals(repo.count(), 1);
-		assertEquals(repo.iterator(Person.class).iterator().next().getLastName(), "XXX");
+		assertEquals(repo.iterator().next().getString("lastName"), "XXX");
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
@@ -284,7 +287,7 @@ public class JpaRepositoryTest extends BaseJpaTest
 		EntityImportService eis = new EntityImportService();
 		eis.update(repo, Arrays.asList(e1), DatabaseAction.UPDATE, "firstName");
 		assertEquals(repo.count(), 1);
-		assertEquals(repo.iterator(Person.class).iterator().next().getLastName(), "XXX");
+		assertEquals(repo.iterator().next().getString("lastName"), "XXX");
 	}
 
 	@Test

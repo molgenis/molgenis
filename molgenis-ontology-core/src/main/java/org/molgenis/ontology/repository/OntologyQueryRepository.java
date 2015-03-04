@@ -1,10 +1,13 @@
 package org.molgenis.ontology.repository;
 
+import java.util.Set;
+
 import javax.annotation.Nullable;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.OntologyService;
@@ -12,11 +15,11 @@ import org.molgenis.ontology.beans.OntologyEntity;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 
 public class OntologyQueryRepository extends AbstractOntologyQueryRepository
 {
 	public final static String ENTITY_NAME = "ontologyindex";
-	private final static String BASE_URL = "ontologyindex://";
 	private final OntologyService ontologyService;
 	private final SearchService searchService;
 	private final DataService dataService;
@@ -41,8 +44,7 @@ public class OntologyQueryRepository extends AbstractOntologyQueryRepository
 		{
 			@Override
 			@Nullable
-			public Entity apply(@Nullable
-			Entity entity)
+			public Entity apply(@Nullable Entity entity)
 			{
 				return new OntologyEntity(entity, entityMetaData, dataService, searchService, ontologyService);
 			}
@@ -88,8 +90,15 @@ public class OntologyQueryRepository extends AbstractOntologyQueryRepository
 	}
 
 	@Override
-	public String getUrl()
+	public Set<RepositoryCapability> getCapabilities()
 	{
-		return BASE_URL + entityName;
+		return Sets.newHashSet(RepositoryCapability.QUERYABLE);
 	}
+
+	@Override
+	public long count()
+	{
+		return count(new QueryImpl());
+	}
+
 }

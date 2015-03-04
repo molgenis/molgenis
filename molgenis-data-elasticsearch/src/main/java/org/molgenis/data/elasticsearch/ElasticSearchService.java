@@ -64,7 +64,9 @@ import org.molgenis.data.elasticsearch.util.Hit;
 import org.molgenis.data.elasticsearch.util.MultiSearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
+import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.util.DependencyResolver;
 import org.molgenis.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,11 +85,6 @@ public class ElasticSearchService implements SearchService
 	private static final Logger LOG = LoggerFactory.getLogger(ElasticSearchService.class);
 
 	private static BulkProcessorFactory BULK_PROCESSOR_FACTORY = new BulkProcessorFactory();
-
-	public EntityMetaData deserializeEntityMeta(String name) throws IOException
-	{
-		return MappingsBuilder.deserializeEntityMeta(client, name);
-	}
 
 	public static enum IndexingMode
 	{
@@ -553,21 +550,8 @@ public class ElasticSearchService implements SearchService
 	public void createMappings(EntityMetaData entityMetaData, boolean storeSource, boolean enableNorms,
 			boolean createAllIndex) throws IOException
 	{
-		createMappings(entityMetaData, storeSource, enableNorms, createAllIndex, false);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.elasticsearch.SearchService#createMappings(org.molgenis .data.EntityMetaData, boolean,
-	 * boolean, boolean)
-	 */
-	@Override
-	public void createMappings(EntityMetaData entityMetaData, boolean storeSource, boolean enableNorms,
-			boolean createAllIndex, boolean storeFullMetadata) throws IOException
-	{
 		XContentBuilder jsonBuilder = MappingsBuilder.buildMapping(entityMetaData, storeSource, enableNorms,
-				createAllIndex, storeFullMetadata);
+				createAllIndex);
 		if (LOG.isTraceEnabled()) LOG.trace("Creating Elasticsearch mapping [" + jsonBuilder.string() + "] ...");
 		String entityName = entityMetaData.getName();
 
@@ -943,7 +927,7 @@ public class ElasticSearchService implements SearchService
 	 * @see org.molgenis.data.elasticsearch.SearchService#get(java.lang.Object, org.molgenis.data.EntityMetaData)
 	 */
 	@Override
-	public ElasticsearchDocumentEntity get(Object entityId, EntityMetaData entityMetaData)
+	public Entity get(Object entityId, EntityMetaData entityMetaData)
 	{
 		String entityName = entityMetaData.getName();
 		String type = sanitizeMapperType(entityName);
@@ -958,8 +942,7 @@ public class ElasticSearchService implements SearchService
 		{
 			LOG.debug("Retrieved Elasticsearch '" + type + "' doc with id [" + id + "]");
 		}
-		return response.isExists() ? new ElasticsearchDocumentEntity(response.getSource(), entityMetaData, this,
-				entityToSourceConverter) : null;
+		return response.isExists() ? new DefaultEntity(entityMetaData, dataService, response.getSource()) : null;
 	}
 
 	/*
@@ -984,7 +967,6 @@ public class ElasticSearchService implements SearchService
 			LOG.debug("Retrieved Elasticsearch '" + type + "' docs with ids [" + entityIds + "] ...");
 		}
 
-		final SearchService self = this;
 		return Iterables.transform(response, new Function<MultiGetItemResponse, Entity>()
 		{
 			@Override
@@ -995,8 +977,7 @@ public class ElasticSearchService implements SearchService
 					throw new ElasticsearchException("Search failed. Returned headers:" + itemResponse.getFailure());
 				}
 				GetResponse getResponse = itemResponse.getResponse();
-				return getResponse.isExists() ? new ElasticsearchDocumentEntity(getResponse.getSource(),
-						entityMetaData, self, entityToSourceConverter) : null;
+				return getResponse.isExists() ? new DefaultEntity(entityMetaData, dataService, getResponse.getSource()) : null;
 			}
 		});
 	}
@@ -1012,8 +993,7 @@ public class ElasticSearchService implements SearchService
 	@Override
 	public Iterable<Entity> search(Query q, final EntityMetaData entityMetaData)
 	{
-		return new ElasticsearchEntityIterable(q, entityMetaData, client, this, generator, indexName,
-				entityToSourceConverter);
+		return new ElasticsearchEntityIterable(q, entityMetaData, client, dataService, generator, indexName);
 	}
 
 	/*
@@ -1059,12 +1039,39 @@ public class ElasticSearchService implements SearchService
 	{
 		try
 		{
-			if (hasMapping(entityMetaData))
+			if (DependencyResolver.hasSelfReferences(entityMetaData))
 			{
-				delete(entityMetaData.getName());
+				Iterable<Entity> iterable = Iterables.transform(entities, new Function<Entity, Entity>()
+				{
+					@Override
+					public Entity apply(Entity input)
+					{
+						return input;
+					}
+				});
+
+				Iterable<Entity> resolved = DependencyResolver.resolveSelfReferences(iterable, entityMetaData);
+				if (hasMapping(entityMetaData))
+				{
+					delete(entityMetaData.getName());
+				}
+				createMappings(entityMetaData);
+
+				for (Entity e : resolved)
+				{
+					index(e, entityMetaData, IndexingMode.ADD);
+				}
 			}
-			createMappings(entityMetaData);
-			index(entities, entityMetaData, IndexingMode.ADD);
+			else
+			{
+				if (hasMapping(entityMetaData))
+				{
+					delete(entityMetaData.getName());
+				}
+				createMappings(entityMetaData);
+
+				index(entities, entityMetaData, IndexingMode.ADD);
+			}
 		}
 		catch (IOException e)
 		{
@@ -1188,20 +1195,6 @@ public class ElasticSearchService implements SearchService
 		return client.admin().indices().prepareGetMappings(indexName).execute().actionGet();
 	}
 
-	public EntityMetaData getEntityMetaData(String name)
-	{
-		EntityMetaData entityMetaData = null;
-		try
-		{
-			entityMetaData = MappingsBuilder.deserializeEntityMeta(client, name);
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
-		return entityMetaData;
-	}
-
 	// Checks if entities can be deleted, have no ref entities pointing to it
 	private boolean canBeDeleted(Iterable<?> ids, EntityMetaData meta)
 	{
@@ -1237,7 +1230,7 @@ public class ElasticSearchService implements SearchService
 		private final Query q;
 		private final EntityMetaData entityMetaData;
 		private final Client client;
-		private final ElasticSearchService elasticSearchService;
+		private final DataService dataService;;
 		private final SearchRequestGenerator searchRequestGenerator;
 		private final String indexName;
 
@@ -1245,19 +1238,16 @@ public class ElasticSearchService implements SearchService
 		private final List<String> fieldsToReturn;
 		private final int offset;
 		private final int pageSize;
-		private final EntityToSourceConverter entityToSourceConverter;
 
 		public ElasticsearchEntityIterable(Query q, EntityMetaData entityMetaData, Client client,
-				ElasticSearchService elasticSearchService, SearchRequestGenerator searchRequestGenerator,
-				String indexName, EntityToSourceConverter entityToSourceConverter)
+				DataService dataService, SearchRequestGenerator searchRequestGenerator, String indexName)
 		{
 			this.client = client;
 			this.q = q;
 			this.entityMetaData = entityMetaData;
-			this.elasticSearchService = elasticSearchService;
+			this.dataService = dataService;
 			this.searchRequestGenerator = searchRequestGenerator;
 			this.indexName = indexName;
-			this.entityToSourceConverter = entityToSourceConverter;
 
 			this.type = sanitizeMapperType(entityMetaData.getName());
 			this.fieldsToReturn = Collections.<String> emptyList();
@@ -1320,8 +1310,7 @@ public class ElasticSearchService implements SearchService
 					{
 						SearchHit hit = batchHits[batchPos];
 						++batchPos;
-						return new ElasticsearchDocumentEntity(hit.getSource(), entityMetaData, elasticSearchService,
-								entityToSourceConverter);
+						return new DefaultEntity(entityMetaData, dataService, hit.getSource());
 					}
 					else throw new ArrayIndexOutOfBoundsException();
 				}
