@@ -4,7 +4,7 @@ public class VkglQuery
 {
 	private VkglCoordinateQuery[] coordinate;
 	private VkglAlleleQuery[] allele;
-	private String queryStatement; 
+
 	
 	public VkglCoordinateQuery[] getCoordinate()
 	{
@@ -22,13 +22,6 @@ public class VkglQuery
 	{
 		this.allele = allele;
 	}
-	public String getQueryStatement()
-	{
-		return queryStatement;
-	}
-	public void setQueryStatement(String queryStatement)
-	{
-		this.queryStatement = queryStatement;
-	}
+
 
 }

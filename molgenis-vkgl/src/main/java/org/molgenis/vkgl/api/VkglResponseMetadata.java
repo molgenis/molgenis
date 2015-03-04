@@ -2,6 +2,7 @@ package org.molgenis.vkgl.api;
 
 public class VkglResponseMetadata
 {
+	private String queryId;
 	private String href;
 	private int start;
 	private int num;
@@ -56,5 +57,13 @@ public class VkglResponseMetadata
 	public void setNextHref(String nextHref)
 	{
 		this.nextHref = nextHref;
+	}
+	public String getQueryId()
+	{
+		return queryId;
+	}
+	public void setQueryId(String queryId)
+	{
+		this.queryId = queryId;
 	}
 }

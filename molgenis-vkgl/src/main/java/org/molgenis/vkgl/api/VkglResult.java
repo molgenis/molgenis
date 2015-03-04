@@ -5,8 +5,8 @@ import java.util.List;
 public class VkglResult
 {
 	private String resultType;
-	private List<String> referenceAllele;
-	private List<String> alternativeAllele;
+	private List<String> xAxisAlleles;
+	private List<String> yAxisAlleles;
 	private String chromosome;
 	private int position;
 	private String reference;
@@ -14,19 +14,19 @@ public class VkglResult
 		
 	public List<String> getReferenceAllele()
 	{
-		return referenceAllele;
+		return xAxisAlleles;
 	}
-	public void setReferenceAllele(List<String> referenceAllele)
+	public void setXAxisAlleles(List<String> xAxisAlleles)
 	{
-		this.referenceAllele = referenceAllele;
+		this.xAxisAlleles = xAxisAlleles;
 	}
-	public List<String> getAlternativeAllele()
+	public List<String> getYAxisAlleles()
 	{
-		return alternativeAllele;
+		return yAxisAlleles;
 	}
-	public void setAlternativeAllele(List<String> alternativeAllele)
+	public void setYAxisAlleles(List<String> yAxisAlleles)
 	{
-		this.alternativeAllele = alternativeAllele;
+		this.yAxisAlleles = yAxisAlleles;
 	}
 	public String getChromosome()
 	{

@@ -2,7 +2,7 @@ package org.molgenis.vkgl.api;
 
 public class VkglCoordinateQuery
 {
-	private String id;
+	private String parameterID;
 	private String operator;
 	private String source;
 	private String reference;
@@ -49,13 +49,13 @@ public class VkglCoordinateQuery
 	{
 		this.end = end;
 	}
-	public String getId()
+	public String getParameterID()
 	{
-		return id;
+		return parameterID;
 	}
-	public void setId(String id)
+	public void setParameterID(String parameterID)
 	{
-		this.id = id;
+		this.parameterID = parameterID;
 	}
 	
 }

@@ -2,13 +2,13 @@ package org.molgenis.vkgl.api;
 
 public class VkglAlleleQuery
 {
-	private String id;
+	private String parameterID;
 	private String operator;
 	private String source;
 	private String reference;
 	private String start;
 	private String end;
-	private String[] allele_sequence;
+	private String[] alleleSequence;
 	
 	public String getOperator()
 	{
@@ -50,20 +50,20 @@ public class VkglAlleleQuery
 	{
 		this.end = end;
 	}
-	public String[] getAllele_sequence()
+	public String[] getAlleleSequence()
 	{
-		return allele_sequence;
+		return alleleSequence;
 	}
-	public void setAllele_sequence(String[] allele_sequence)
+	public void setAlleleSequence(String[] alleleSequence)
 	{
-		this.allele_sequence = allele_sequence;
+		this.alleleSequence = alleleSequence;
 	}
-	public String getId()
+	public String getParameterID()
 	{
-		return id;
+		return parameterID;
 	}
-	public void setId(String id)
+	public void setParameterID(String parameterID)
 	{
-		this.id = id;
+		this.parameterID = parameterID;
 	}
 }
