@@ -46,7 +46,7 @@ public class VcfImporterServiceTest
 		EntityImportReport report = importer.doImport(source, DatabaseAction.ADD);
 
 		assertNotNull(report);
-		assertEquals(report.getNewEntities(), Arrays.asList("testdata", "testdata_Sample"));
+		assertEquals(report.getNewEntities(), Arrays.asList("testdata_Sample", "testdata"));
 
 		Map<String, Integer> importedEntitiesMap = report.getNrImportedEntitiesMap();
 		assertNotNull(importedEntitiesMap);
