@@ -9,25 +9,26 @@ import java.util.Arrays;
 import java.util.Set;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
+import org.molgenis.data.Repository;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class RepositoryValidationDecoratorTest
 {
 	private RepositoryValidationDecorator repositoryValidationDecorator;
-	private CrudRepository decoratedRepository;
+	private Repository decoratedRepository;
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		decoratedRepository = mock(CrudRepository.class);
-		repositoryValidationDecorator = new RepositoryValidationDecorator(new DataServiceImpl(), decoratedRepository,
-				new EntityAttributesValidator());
+		decoratedRepository = mock(Repository.class);
+		repositoryValidationDecorator = new RepositoryValidationDecorator(new DataServiceImpl(
+				new NonDecoratingRepositoryDecoratorFactory()), decoratedRepository, new EntityAttributesValidator());
 	}
 
 	@Test

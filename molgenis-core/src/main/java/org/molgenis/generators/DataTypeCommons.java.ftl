@@ -1,4 +1,9 @@
 	@Override
+	public void set(Entity entity)
+	{
+		set(entity, true);
+	}
+
 	public void set(org.molgenis.data.Entity entity, boolean strict)
 	{
 <#list allFields(entity) as f>

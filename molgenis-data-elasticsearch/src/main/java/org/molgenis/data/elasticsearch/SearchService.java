@@ -29,6 +29,7 @@ public interface SearchService
 	/**
 	 * @deprecated see search(Query, EntityMetaData) or aggregate(AggregateQuery, EntityMetaData)
 	 */
+	@Deprecated
 	SearchResult search(SearchRequest request);
 
 	// TODO this method is only used by BiobankConnect and should be removed in the future
@@ -37,6 +38,7 @@ public interface SearchService
 	/**
 	 * @deprecated see count(Query, EntityMetaData)
 	 */
+	@Deprecated
 	long count(String documentType, Query q);
 
 	// TODO this method is only used by BiobankConnect and should be removed in
@@ -46,6 +48,7 @@ public interface SearchService
 	/**
 	 * @deprecated see index(Iterable<Entity>, EntityMetaData)
 	 */
+	@Deprecated
 	void indexRepository(Repository repository);
 
 	boolean documentTypeExists(String documentType);
@@ -53,11 +56,13 @@ public interface SearchService
 	/**
 	 * @deprecated see delete(EntityMetaData)
 	 */
+	@Deprecated
 	void deleteDocumentsByType(String documentType);
 
 	/**
 	 * @deprecated see delete(Iterable<Entity>, EntityMetaData)
 	 */
+	@Deprecated
 	void deleteDocumentByIds(String documentType, List<String> documentIds);
 
 	void updateRepositoryIndex(Repository repository);
@@ -71,6 +76,7 @@ public interface SearchService
 	/**
 	 * @deprecated see createMappings(EntityMetaData)
 	 */
+	@Deprecated
 	void createMappings(Repository repository, boolean storeSource, boolean enableNorms, boolean createAllIndex)
 			throws IOException;
 
@@ -78,9 +84,6 @@ public interface SearchService
 
 	void createMappings(EntityMetaData entityMetaData, boolean storeSource, boolean enableNorms, boolean createAllIndex)
 			throws IOException;
-
-	void createMappings(EntityMetaData entityMetaData, boolean storeSource, boolean enableNorms,
-			boolean createAllIndex, boolean storeFullMetadata) throws IOException;
 
 	/**
 	 * Refresh index, making all operations performed since the last refresh available for search
@@ -112,7 +115,7 @@ public interface SearchService
 	 * @param entityMetaData
 	 * @return
 	 */
-	ElasticsearchDocumentEntity get(Object entityId, EntityMetaData entityMetaData);
+	Entity get(Object entityId, EntityMetaData entityMetaData);
 
 	Iterable<Entity> get(Iterable<Object> entityIds, EntityMetaData entityMetaData);
 

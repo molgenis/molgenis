@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -12,6 +13,7 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.Writable;
 import org.molgenis.data.processor.CellProcessor;
@@ -28,6 +30,7 @@ import com.google.common.collect.Lists;
  */
 public class ExcelRepositoryCollection extends FileRepositoryCollection
 {
+	public static final String NAME = "EXCEL";
 	public static final Set<String> EXTENSIONS = ImmutableSet.of("xls", "xlsx");
 	private final String name;
 	private final Workbook workbook;
@@ -66,7 +69,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 	}
 
 	@Override
-	public Repository getRepositoryByEntityName(String name)
+	public Repository getRepository(String name)
 	{
 		Sheet poiSheet = workbook.getSheet(name);
 		if (poiSheet == null)
@@ -107,6 +110,40 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 	public void save(OutputStream out) throws IOException
 	{
 		workbook.write(out);
+	}
+
+	@Override
+	public String getName()
+	{
+		return NAME;
+	}
+
+	@Override
+	public Repository addEntityMeta(EntityMetaData entityMeta)
+	{
+		return getRepository(entityMeta.getName());
+	}
+
+	@Override
+	public Iterator<Repository> iterator()
+	{
+		return new Iterator<Repository>()
+		{
+			Iterator<String> it = getEntityNames().iterator();
+
+			@Override
+			public boolean hasNext()
+			{
+				return it.hasNext();
+			}
+
+			@Override
+			public Repository next()
+			{
+				return getRepository(it.next());
+			}
+
+		};
 	}
 
 }

@@ -1,11 +1,11 @@
 package org.molgenis.data.excel;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -15,12 +15,15 @@ import org.apache.poi.ss.util.CellReference;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.processor.AbstractCellProcessor;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.util.CaseInsensitiveLinkedHashMap;
+
+import com.google.common.collect.Iterables;
 
 /**
  * ExcelSheet {@link org.molgenis.data.Repository} implementation
@@ -33,7 +36,6 @@ import org.molgenis.util.CaseInsensitiveLinkedHashMap;
  */
 public class ExcelRepository extends AbstractRepository
 {
-	public static final String BASE_URL = "excel://";
 	private final Sheet sheet;
 
 	/** process cells after reading */
@@ -49,7 +51,6 @@ public class ExcelRepository extends AbstractRepository
 
 	public ExcelRepository(String fileName, Sheet sheet, List<CellProcessor> cellProcessors)
 	{
-		super(BASE_URL + fileName + "/" + sheet.getSheetName());
 		this.sheet = sheet;
 		this.cellProcessors = cellProcessors;
 	}
@@ -182,8 +183,14 @@ public class ExcelRepository extends AbstractRepository
 	}
 
 	@Override
-	public void close() throws IOException
+	public Set<RepositoryCapability> getCapabilities()
 	{
-		// Nothing
+		return Collections.emptySet();
+	}
+
+	@Override
+	public long count()
+	{
+		return Iterables.size(this);
 	}
 }

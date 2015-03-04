@@ -4,23 +4,32 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 import org.apache.poi.ss.formula.eval.NotImplementedException;
-import org.molgenis.data.CrudRepository;
+import org.molgenis.data.AggregateQuery;
+import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
 
-public class InMemoryRepository implements CrudRepository
+import com.google.common.collect.Sets;
+
+/**
+ * Reposirory that uses a hashmap as store.
+ * 
+ * For testing purposis
+ */
+public class InMemoryRepository implements Repository
 {
-	private DefaultEntityMetaData metadata;
-	private Map<Object, Entity> entities = new LinkedHashMap<Object, Entity>();
+	private final EntityMetaData metadata;
+	private final Map<Object, Entity> entities = new LinkedHashMap<Object, Entity>();
 
 	public InMemoryRepository(EntityMetaData entityMetaData)
 	{
-		this.metadata = new DefaultEntityMetaData(entityMetaData);
+		this.metadata = entityMetaData;
 	}
 
 	@Override
@@ -30,7 +39,7 @@ public class InMemoryRepository implements CrudRepository
 	}
 
 	@Override
-	public DefaultEntityMetaData getEntityMetaData()
+	public EntityMetaData getEntityMetaData()
 	{
 		return metadata;
 	}
@@ -42,22 +51,9 @@ public class InMemoryRepository implements CrudRepository
 	}
 
 	@Override
-	public String getUrl()
-	{
-		return null;
-	}
-
-	@Override
 	public void close() throws IOException
 	{
 
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
-	{
-		return entities.values().stream().map(entity -> (E) entity).collect(Collectors.toList());
 	}
 
 	@Override
@@ -79,12 +75,6 @@ public class InMemoryRepository implements CrudRepository
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz)
-	{
-		throw new NotImplementedException("Not implemented yet");
-	}
-
-	@Override
 	public Entity findOne(Query q)
 	{
 		throw new NotImplementedException("Not implemented yet");
@@ -98,24 +88,6 @@ public class InMemoryRepository implements CrudRepository
 
 	@Override
 	public Iterable<Entity> findAll(Iterable<Object> ids)
-	{
-		throw new NotImplementedException("Not implemented yet");
-	}
-
-	@Override
-	public <E extends Entity> Iterable<E> findAll(Iterable<Object> ids, Class<E> clazz)
-	{
-		throw new NotImplementedException("Not implemented yet");
-	}
-
-	@Override
-	public <E extends Entity> E findOne(Object id, Class<E> clazz)
-	{
-		throw new NotImplementedException("Not implemented yet");
-	}
-
-	@Override
-	public <E extends Entity> E findOne(Query q, Class<E> clazz)
 	{
 		throw new NotImplementedException("Not implemented yet");
 	}
@@ -211,6 +183,19 @@ public class InMemoryRepository implements CrudRepository
 	public void clearCache()
 	{
 
+	}
+
+	@Override
+	public Set<RepositoryCapability> getCapabilities()
+	{
+		return Sets.newHashSet(RepositoryCapability.QUERYABLE, RepositoryCapability.UPDATEABLE,
+				RepositoryCapability.WRITABLE);
+	}
+
+	@Override
+	public AggregateResult aggregate(AggregateQuery aggregateQuery)
+	{
+		throw new NotImplementedException("Not implemented yet");
 	}
 
 }

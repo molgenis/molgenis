@@ -9,7 +9,7 @@ import static org.testng.Assert.assertEquals;
 import java.util.UUID;
 
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.CrudRepository;
+import org.molgenis.data.Repository;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -28,7 +28,7 @@ import org.testng.annotations.Test;
 public class TagRepositoryTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
-	private CrudRepository repository;
+	private Repository repository;
 
 	private TagRepository tagRepository;
 
@@ -38,7 +38,7 @@ public class TagRepositoryTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	private AttributeMetaData attributeMetaData;
 
-	private UUID uuid = UUID.randomUUID();
+	private final UUID uuid = UUID.randomUUID();
 
 	@BeforeMethod
 	public void beforeMethod()
@@ -77,9 +77,9 @@ public class TagRepositoryTest extends AbstractTestNGSpringContextTests
 	public static class Config
 	{
 		@Bean
-		CrudRepository repository()
+		Repository repository()
 		{
-			return mock(CrudRepository.class);
+			return mock(Repository.class);
 		}
 
 		@Bean

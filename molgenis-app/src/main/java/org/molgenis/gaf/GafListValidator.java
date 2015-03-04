@@ -17,7 +17,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
-import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.slf4j.Logger;
@@ -49,17 +48,14 @@ public class GafListValidator
 	private DataService dataService;
 
 	@Autowired
-	private MetaDataService metaDataService;
-
-	@Autowired
 	private MolgenisSettings molgenisSettings;
 
 	public GafListValidationReport validate(GafListValidationReport report, Repository repository, List<String> columns)
 			throws IOException
 	{
 		final String gaflistEntityName = molgenisSettings.getProperty(GafListFileRepository.GAFLIST_ENTITYNAME);
-		EntityMetaData entityMetaData = metaDataService.getEntityMetaData(gaflistEntityName);
-		
+		EntityMetaData entityMetaData = dataService.getEntityMetaData(gaflistEntityName);
+
 		if (null == entityMetaData)
 		{
 			report.addGlobalErrorMessage("Please contact the administrator, the metadata is not loaded correctly");
@@ -112,7 +108,7 @@ public class GafListValidator
 			validateRun(entities, report);
 			report.populateStatusImportedRuns();
 		}
-		
+
 		return report;
 	}
 
@@ -163,14 +159,14 @@ public class GafListValidator
 			if (isEmptyRow(entity)) continue;
 			String runId = entity.getString(GAFCol.RUN.toString());
 			Integer internalSampleId = null;
-			try{
+			try
+			{
 				internalSampleId = entity.getInt(GAFCol.INTERNAL_SAMPLE_ID.toString());
 
 				if (internalSampleId == null)
 				{
 					// internal sample id can not be null
-					report.addEntry(runId, new GafListValidationError(row, GAFCol.INTERNAL_SAMPLE_ID.toString(),
-							null,
+					report.addEntry(runId, new GafListValidationError(row, GAFCol.INTERNAL_SAMPLE_ID.toString(), null,
 							"value undefined"));
 				}
 
@@ -187,8 +183,10 @@ public class GafListValidator
 					if (toImportInternalSampleIds.containsKey(internalSampleId))
 					{
 						// internal sample id already exists
-						report.addEntry(runId, new GafListValidationError(row, GAFCol.INTERNAL_SAMPLE_ID.toString(),
-								internalSampleId.toString(), "Duplicate internal sample id " + internalSampleId
+						report.addEntry(
+								runId,
+								new GafListValidationError(row, GAFCol.INTERNAL_SAMPLE_ID.toString(), internalSampleId
+										.toString(), "Duplicate internal sample id " + internalSampleId
 										+ ". First encountered on row "
 										+ toImportInternalSampleIds.get(internalSampleId) + " in this file"));
 					}
@@ -203,11 +201,11 @@ public class GafListValidator
 				new GafListValidationError(row, GAFCol.INTERNAL_SAMPLE_ID.toString(), null,
 						"value is not formatted correctly it need to be a number");
 			}
-			
+
 			row++;
 		}
 	}
-	
+
 	/**
 	 * Check if internalSampleId already exists in the GAF list entity
 	 * 
@@ -322,8 +320,7 @@ public class GafListValidator
 					{
 						report.addEntry(runId, new GafListValidationError(laneEntityRowPair.getRow(),
 								GAFCol.BARCODE_TYPE.toString(), barcodeType, "run lane has different "
-										+ GAFCol.BARCODE_TYPE + " (expected: "
-										+ laneBarcodeType + ")"));
+										+ GAFCol.BARCODE_TYPE + " (expected: " + laneBarcodeType + ")"));
 					}
 				}
 
@@ -368,8 +365,7 @@ public class GafListValidator
 	}
 
 	/**
-	 * Checks if row is empty.
-	 * skip empty rows. skip rows containing only a (prefilled) internal sample id
+	 * Checks if row is empty. skip empty rows. skip rows containing only a (prefilled) internal sample id
 	 * 
 	 * @param entity
 	 * @return
@@ -392,9 +388,9 @@ public class GafListValidator
 	}
 
 	private void validateCell(String runId, int row, String colName, String value, Map<String, Pattern> patterns,
-			Map<String, String> patternExampleMap,
- Map<String, List<String>> lookupLists,
+			Map<String, String> patternExampleMap, Map<String, List<String>> lookupLists,
 			GafListValidationReport report, String sampleType)
+
 	{
 		// validate
 		if (colName.equalsIgnoreCase(GAFCol.INTERNAL_SAMPLE_ID.toString()))
@@ -552,11 +548,12 @@ public class GafListValidator
 			}
 		}
 	}
-	
+
 	private String getPatternErrorMessage(String colName, Map<String, String> patternExampleMap)
 	{
 		String message = patternExampleMap.get(colName);
-		if(null == message){
+		if (null == message)
+		{
 			message = "Something went wrong!";
 		}
 		return message;

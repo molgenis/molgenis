@@ -14,7 +14,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.FileWriterWithEncoding;
 import org.molgenis.script.Script;
 import org.molgenis.script.ScriptRunner;
-import org.molgenis.script.ScriptRunnerFactory;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,13 +32,11 @@ public class RScriptRunner implements ScriptRunner
 	private final FreeMarkerConfigurer freeMarkerConfig;
 
 	@Autowired
-	public RScriptRunner(RScriptExecutor rScriptExecutor, FileStore fileStore, FreeMarkerConfigurer freeMarkerConfig,
-			ScriptRunnerFactory scriptRunnerFactory)
+	public RScriptRunner(RScriptExecutor rScriptExecutor, FileStore fileStore, FreeMarkerConfigurer freeMarkerConfig)
 	{
 		this.rScriptExecutor = rScriptExecutor;
 		this.fileStore = fileStore;
 		this.freeMarkerConfig = freeMarkerConfig;
-		scriptRunnerFactory.registerScriptExecutor("r", this);
 	}
 
 	/**

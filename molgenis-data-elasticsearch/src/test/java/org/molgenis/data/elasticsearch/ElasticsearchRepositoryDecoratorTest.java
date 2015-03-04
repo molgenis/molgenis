@@ -17,21 +17,22 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.ElasticSearchService.IndexingMode;
 import org.molgenis.data.support.AggregateQueryImpl;
-import org.molgenis.data.support.MapEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.google.common.collect.Iterables;
 
 public class ElasticsearchRepositoryDecoratorTest
 {
 	private ElasticsearchRepositoryDecorator elasticSearchRepository;
 	private ElasticSearchService elasticSearchService;
-	private CrudRepository repository;
+	private Repository repository;
 	private EntityMetaData repositoryEntityMetaData;
 	private String entityName;
 	private String idAttrName;
@@ -40,7 +41,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	public void setUp() throws IOException
 	{
 		elasticSearchService = mock(ElasticSearchService.class);
-		repository = mock(CrudRepository.class);
+		repository = mock(Repository.class);
 		entityName = "";
 		repositoryEntityMetaData = mock(EntityMetaData.class);
 		when(repositoryEntityMetaData.getName()).thenReturn(entityName);
@@ -174,57 +175,30 @@ public class ElasticsearchRepositoryDecoratorTest
 		verify(elasticSearchService).deleteById(Matchers.<Iterable<String>> any(), eq(repositoryEntityMetaData));
 	}
 
-	// FIXME
-	// @Test
-	// public void findAllQuery()
-	// {
-	// Query q = mock(Query.class);
-	// String id0 = "0";
-	// String id1 = "1";
-	// List<String> ids = Arrays.<String> asList(entityName + id0, entityName + id1);
-	// when(elasticSearchService.search(q, repositoryEntityMetaData)).thenReturn(ids);
-	// elasticSearchRepository.findAll(q);
-	// verify(repository).findAll(Matchers.<Iterable<Object>> any());
-	// }
+	@Test
+	public void findAllQuery()
+	{
+		Query q = mock(Query.class);
+		List<Entity> entities = Arrays.<Entity> asList(mock(Entity.class), mock(Entity.class));
+		when(elasticSearchService.search(q, repositoryEntityMetaData)).thenReturn(entities);
+		elasticSearchRepository.findAll(q);
+		verify(elasticSearchService).search(q, repositoryEntityMetaData);
+	}
 
-	// FIXME
-	// @Test
-	// public void findAllQuery_noResults()
-	// {
-	// Query q = mock(Query.class);
-	// List<String> ids = Collections.emptyList();
-	// when(elasticSearchService.search(q, repositoryEntityMetaData)).thenReturn(ids);
-	// assertEquals(Iterables.size(elasticSearchRepository.findAll(q)), 0);
-	// }
-
-	// FIXME
-	// @Test
-	// public void findAllQueryClassE()
-	// {
-	// Query q = mock(Query.class);
-	// Class<? extends Entity> clazz = new MapEntity().getClass();
-	// String id0 = "0";
-	// String id1 = "1";
-	// List<String> ids = Arrays.<String> asList(id0, id1);
-	// when(elasticSearchService.search(q, repositoryEntityMetaData)).thenReturn(ids);
-	// elasticSearchRepository.findAll(q, clazz);
-	// verify(repository).findAll(Matchers.<Iterable<Object>> any(), eq(clazz));
-	// }
+	@Test
+	public void findAllQuery_noResults()
+	{
+		Query q = mock(Query.class);
+		List<Entity> entities = Collections.emptyList();
+		when(elasticSearchService.search(q, repositoryEntityMetaData)).thenReturn(entities);
+		assertEquals(Iterables.size(elasticSearchRepository.findAll(q)), 0);
+	}
 
 	@Test
 	public void findAllIterableObject()
 	{
 		List<Object> ids = Arrays.asList(mock(Object.class), mock(Object.class));
 		elasticSearchRepository.findAll(ids);
-		verify(elasticSearchService).get(ids, repositoryEntityMetaData);
-	}
-
-	@Test
-	public void findAllIterableObjectClassE()
-	{
-		List<Object> ids = Arrays.asList(mock(Object.class), mock(Object.class));
-		Class<? extends Entity> clazz = new MapEntity().getClass();
-		elasticSearchRepository.findAll(ids, clazz);
 		verify(elasticSearchService).get(ids, repositoryEntityMetaData);
 	}
 
@@ -258,40 +232,6 @@ public class ElasticsearchRepositoryDecoratorTest
 	}
 
 	@Test
-	public void findOneObjectClassE()
-	{
-		Object id = mock(Object.class);
-		Class<? extends Entity> clazz = new MapEntity().getClass();
-		elasticSearchRepository.findOne(id, clazz);
-		verify(elasticSearchService).get(id, repositoryEntityMetaData);
-	}
-
-	// FIXME
-	// @Test
-	// public void findOneQueryClassE()
-	// {
-	// Query q = mock(Query.class);
-	// Class<? extends Entity> clazz = new MapEntity().getClass();
-	// String id0 = "0";
-	// String id1 = "1";
-	// List<String> ids = Arrays.<String> asList(entityName + id0, entityName + id1);
-	// when(elasticSearchService.search(q, repositoryEntityMetaData)).thenReturn(ids);
-	// elasticSearchRepository.findOne(q, clazz);
-	// verify(repository).findOne(id0, clazz);
-	// }
-
-	// FIXME
-	// @Test
-	// public void findOneQueryClassE_noResults()
-	// {
-	// Query q = mock(Query.class);
-	// Class<? extends Entity> clazz = new MapEntity().getClass();
-	// List<String> ids = Collections.emptyList();
-	// when(elasticSearchService.search(q, repositoryEntityMetaData)).thenReturn(ids);
-	// assertNull(elasticSearchRepository.findOne(q, clazz));
-	// }
-
-	@Test
 	public void flush()
 	{
 		elasticSearchRepository.flush();
@@ -311,31 +251,6 @@ public class ElasticsearchRepositoryDecoratorTest
 	{
 		assertEquals(elasticSearchRepository.getName(), repositoryEntityMetaData.getName());
 	}
-
-	@Test
-	public void getUrl()
-	{
-		when(repositoryEntityMetaData.getName()).thenReturn("entity");
-		assertEquals(elasticSearchRepository.getUrl(), "elasticsearch://entity/");
-	}
-
-	// FIXME
-	// @Test
-	// public void iteratorClassE()
-	// {
-	// Class<? extends Entity> clazz = new MapEntity().getClass();
-	// elasticSearchRepository.iterator(clazz);
-	// verify(repository).iterator(clazz);
-	// }
-	//
-	// @Test
-	// public void iterator()
-	// {
-	// elasticSearchRepository.iterator();
-	// when(elasticSearchService.search(new QueryImpl(), repositoryEntityMetaData)).thenReturn(
-	// Collections.<Entity> emptyList());
-	// verify(elasticSearchService).search(new QueryImpl(), repositoryEntityMetaData);
-	// }
 
 	@Test
 	public void updateEntity()

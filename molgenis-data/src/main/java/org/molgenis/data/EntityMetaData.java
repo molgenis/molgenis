@@ -28,6 +28,13 @@ public interface EntityMetaData
 	String getSimpleName();
 
 	/**
+	 * The name of the backend where the entities of this type are stored
+	 * 
+	 * @return
+	 */
+	String getBackend();
+
+	/**
 	 * Entities can be abstract (analogous an 'interface' or 'protocol'). Use is to define reusable Entity model
 	 * components that cannot be instantiated themselves (i.e. there cannot be data attached to this entity meta data).
 	 */
