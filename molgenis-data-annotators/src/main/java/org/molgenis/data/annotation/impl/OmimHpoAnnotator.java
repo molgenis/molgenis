@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -177,7 +178,7 @@ public class OmimHpoAnnotator extends LocusAnnotator
             OMIMCausedBy.add(omimTerm.getCausedBy());
             OMIMCytoLocations.add(omimTerm.getCytoLoc());
 
-            OMIMHgncIdentifiers.add(omimTerm.getHgncIds().toString());
+            OMIMHgncIdentifiers.add(StringUtils.join(omimTerm.getHgncIds(), ','));
 
         }
         resultMap.put(OMIM_DISORDERS, OMIMDisorders);
