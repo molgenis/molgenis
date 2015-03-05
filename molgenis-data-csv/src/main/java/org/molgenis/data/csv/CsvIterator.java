@@ -1,10 +1,5 @@
 package org.molgenis.data.csv;
 
-import static org.molgenis.data.csv.CsvRepositoryCollection.EXTENSION_CSV;
-import static org.molgenis.data.csv.CsvRepositoryCollection.EXTENSION_TSV;
-import static org.molgenis.data.csv.CsvRepositoryCollection.EXTENSION_TXT;
-import static org.molgenis.data.csv.CsvRepositoryCollection.EXTENSION_ZIP;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -27,6 +22,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.processor.AbstractCellProcessor;
 import org.molgenis.data.processor.CellProcessor;
+import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.util.CloseableIterator;
 import org.springframework.util.StringUtils;
@@ -53,7 +49,8 @@ public class CsvIterator implements CloseableIterator<Entity>
 
 		try
 		{
-			if (StringUtils.getFilenameExtension(file.getName()).equalsIgnoreCase(EXTENSION_ZIP))
+			if (StringUtils.getFilenameExtension(file.getName()).equalsIgnoreCase(
+					GenericImporterExtensions.ZIP.toString()))
 			{
 				zipFile = new ZipFile(file.getAbsolutePath());
 				for (Enumeration<? extends ZipEntry> e = zipFile.entries(); e.hasMoreElements();)
@@ -177,13 +174,13 @@ public class CsvIterator implements CloseableIterator<Entity>
 
 		if (null == separator)
 		{
-			if (fileName.toLowerCase().endsWith("." + EXTENSION_CSV)
-					|| fileName.toLowerCase().endsWith("." + EXTENSION_TXT))
+			if (fileName.toLowerCase().endsWith("." + GenericImporterExtensions.CSV.toString())
+					|| fileName.toLowerCase().endsWith("." + GenericImporterExtensions.TXT.toString()))
 			{
 				return new CSVReader(reader);
 			}
 
-			if (fileName.toLowerCase().endsWith("." + EXTENSION_TSV))
+			if (fileName.toLowerCase().endsWith("." + GenericImporterExtensions.TSV.toString()))
 			{
 				return new CSVReader(reader, '\t');
 			}

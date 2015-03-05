@@ -11,7 +11,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.ontology.beans.OWLClassContainer;
 import org.molgenis.ontology.utils.OntologyLoader;
@@ -27,11 +26,13 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository
 	private final Set<String> dynamaticFields;
 
 	@Autowired
-	public OntologyTermIndexRepository(OntologyLoader loader, String entityName, SearchService searchService)
+	public OntologyTermIndexRepository(OntologyLoader ontologyLoader, String entityName)
 	{
-		super(entityName, searchService);
-		if (loader == null) throw new IllegalArgumentException("OntologyLoader is null!");
-		ontologyLoader = loader;
+		super(entityName);
+
+		if (ontologyLoader == null) throw new IllegalArgumentException("OntologyLoader is null!");
+		this.ontologyLoader = ontologyLoader;
+
 		dynamaticFields = new HashSet<String>();
 		recursivelyFindDatabaseIds(ontologyLoader.getAllclasses());
 	}
