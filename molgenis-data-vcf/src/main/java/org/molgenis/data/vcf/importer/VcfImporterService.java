@@ -98,8 +98,9 @@ public class VcfImporterService implements ImportService
 		}
         //Should not be necessary, bug in elasticsearch?
         //"All shards failed" for big datasets if this flush is not here...
-        searchService.flush();
-
+        for(EntityMetaData entityMetaData : addedEntities) {
+            dataService.getRepository(entityMetaData.getName()).flush();
+        }
 		return report;
 	}
 

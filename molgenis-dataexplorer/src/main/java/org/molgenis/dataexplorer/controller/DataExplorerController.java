@@ -250,7 +250,7 @@ public class DataExplorerController extends MolgenisPluginController
 		}
 		else if (moduleId.equals("entitiesreport"))
 		{
-            model.addAttribute("datasetRepository", dataService.getCrudRepository(entityName));
+            model.addAttribute("datasetRepository", dataService.getRepository(entityName));
 			model.addAttribute("viewName", parseEntitiesReportRuntimeProperty(entityName));
 		}
 		return "view-dataexplorer-mod-" + moduleId; // TODO bad request in case of invalid module id
@@ -622,7 +622,7 @@ public class DataExplorerController extends MolgenisPluginController
 	{
 		//first we check if there are any RuntimeProperty mappings of entity to report template
 		String rtName = "plugin.dataexplorer.mod.entitiesreport";
-		Entity rt = dataService.getCrudRepository("RuntimeProperty").findOne(new QueryImpl().eq("Name", rtName));
+		Entity rt = dataService.getRepository("RuntimeProperty").findOne(new QueryImpl().eq("Name", rtName));
 		if(rt != null){
 			String entityMapping = rt.get("Value").toString();
 			String[] mappingSplit = entityMapping.split(",", -1);
