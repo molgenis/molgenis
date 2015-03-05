@@ -1,6 +1,5 @@
 package org.molgenis.ontology.repository;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -165,12 +164,6 @@ public class OntologyTermRepository extends AbstractRepository
 				+ " does not exist in the database!");
 
 		return ontologyEntity;
-	}
-
-	@Override
-	public void close() throws IOException
-	{
-		// Do nothing
 	}
 
 	@Override

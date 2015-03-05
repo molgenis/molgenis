@@ -1,6 +1,5 @@
 package org.molgenis.ontology.repository;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -104,12 +103,6 @@ public class OntologyTermNodePathRepository extends AbstractRepository
 		nodePathStringBuilder.append(currentPosition).append('[')
 				.append(nodePathStringBuilder.toString().split("\\.").length - 1).append(']');
 		return nodePathStringBuilder.toString();
-	}
-
-	@Override
-	public void close() throws IOException
-	{
-		// Do nothing
 	}
 
 	@Override
