@@ -71,13 +71,13 @@ public class ProcessInputTermService
 		// Add a new entry in MatchingTask table for this new matching job
 		int threshold = uploadProgress.getThreshold(userName);
 		MapEntity mapEntity = new MapEntity();
-		mapEntity.set(MatchingTaskEntity.IDENTIFIER, entityName);
-		mapEntity.set(MatchingTaskEntity.DATA_CREATED, new Date());
-		mapEntity.set(MatchingTaskEntity.CODE_SYSTEM, ontologyIri);
-		mapEntity.set(MatchingTaskEntity.MOLGENIS_USER, userName);
-		mapEntity.set(MatchingTaskEntity.THRESHOLD, threshold);
-		dataService.add(MatchingTaskEntity.ENTITY_NAME, mapEntity);
-		dataService.getRepository(MatchingTaskEntity.ENTITY_NAME).flush();
+		mapEntity.set(MatchingTaskEntityMetaData.IDENTIFIER, entityName);
+		mapEntity.set(MatchingTaskEntityMetaData.DATA_CREATED, new Date());
+		mapEntity.set(MatchingTaskEntityMetaData.CODE_SYSTEM, ontologyIri);
+		mapEntity.set(MatchingTaskEntityMetaData.MOLGENIS_USER, userName);
+		mapEntity.set(MatchingTaskEntityMetaData.THRESHOLD, threshold);
+		dataService.add(MatchingTaskEntityMetaData.ENTITY_NAME, mapEntity);
+		dataService.getRepository(MatchingTaskEntityMetaData.ENTITY_NAME).flush();
 		uploadProgress.registerUser(userName, entityName, (int) dataService.count(entityName, new QueryImpl()));
 		// Match input terms with code
 		Iterable<Entity> findAll = dataService.findAll(entityName);
@@ -91,21 +91,21 @@ public class ProcessInputTermService
 				{
 					Double score = Double.parseDouble(ontologyTerm.get(ComparableEntity.SCORE).toString());
 					MapEntity matchingTaskContentEntity = new MapEntity();
-					matchingTaskContentEntity.set(MatchingTaskContentEntity.IDENTIFIER,
+					matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.IDENTIFIER,
 							entityName + "_" + entity.getIdValue());
-					matchingTaskContentEntity.set(MatchingTaskContentEntity.INPUT_TERM, entity.getIdValue());
-					matchingTaskContentEntity.set(MatchingTaskContentEntity.REF_ENTITY, entityName);
-					matchingTaskContentEntity.set(MatchingTaskContentEntity.MATCHED_TERM,
+					matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.INPUT_TERM, entity.getIdValue());
+					matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.REF_ENTITY, entityName);
+					matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.MATCHED_TERM,
 							ontologyTerm.get(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI));
-					matchingTaskContentEntity.set(MatchingTaskContentEntity.SCORE, score);
-					matchingTaskContentEntity.set(MatchingTaskContentEntity.VALIDATED, false);
+					matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.SCORE, score);
+					matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.VALIDATED, false);
 					entitiesToAdd.add(matchingTaskContentEntity);
 					break;
 				}
 				// Add entity in batch
 				if (entitiesToAdd.size() >= ADD_BATCH_SIZE)
 				{
-					dataService.add(MatchingTaskContentEntity.ENTITY_NAME, entitiesToAdd);
+					dataService.add(MatchingTaskContentEntityMetaData.ENTITY_NAME, entitiesToAdd);
 					entitiesToAdd.clear();
 				}
 				uploadProgress.incrementProgress(userName);
@@ -113,10 +113,10 @@ public class ProcessInputTermService
 			// Add the rest
 			if (entitiesToAdd.size() != 0)
 			{
-				dataService.add(MatchingTaskContentEntity.ENTITY_NAME, entitiesToAdd);
+				dataService.add(MatchingTaskContentEntityMetaData.ENTITY_NAME, entitiesToAdd);
 				entitiesToAdd.clear();
 			}
-			dataService.getRepository(MatchingTaskContentEntity.ENTITY_NAME).flush();
+			dataService.getRepository(MatchingTaskContentEntityMetaData.ENTITY_NAME).flush();
 
 			// FIXME : temporary work around to assign write permissions to the
 			// users who create the entities.

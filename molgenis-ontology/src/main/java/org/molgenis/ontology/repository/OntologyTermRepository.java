@@ -1,22 +1,19 @@
 package org.molgenis.ontology.repository;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.molgenis.data.AggregateQuery;
-import org.molgenis.data.AggregateResult;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Query;
-import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.UuidGenerator;
@@ -32,7 +29,7 @@ import org.semanticweb.owlapi.model.OWLClass;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
-public class OntologyTermRepository implements Repository
+public class OntologyTermRepository extends AbstractRepository
 {
 	private final OntologyLoader ontologyLoader;
 	private final DataService dataService;
@@ -70,11 +67,13 @@ public class OntologyTermRepository implements Repository
 		{
 			private final Iterator<OWLClass> iterator = ontologyLoader.getAllclasses().iterator();
 
+			@Override
 			public boolean hasNext()
 			{
 				return iterator.hasNext();
 			}
 
+			@Override
 			public Entity next()
 			{
 				OWLClass cls = iterator.next();
@@ -82,22 +81,22 @@ public class OntologyTermRepository implements Repository
 				String ontologyTermIRI = cls.getIRI().toString();
 				String ontologyTermName = ontologyLoader.getLabel(cls);
 
-				Map<String, Map<String, String>> referenceIds2 = ontologyTermSynonymRepo.getReferenceIds();
+				Map<String, Map<String, String>> synonymRefIds = ontologyTermSynonymRepo.getReferenceIds();
 
-				Map<String, Map<String, String>> referenceIds3 = ontologyTermDynamicAnnotationRepo.getReferenceIds();
+				Map<String, Map<String, String>> annotationRefIds = ontologyTermDynamicAnnotationRepo.getReferenceIds();
 
-				Map<String, Map<String, String>> referenceIds4 = ontologyTermNodePathRepository.getReferenceIds();
+				Map<String, Map<String, String>> nodePathRefIds = ontologyTermNodePathRepository.getReferenceIds();
 
 				List<String> synonymIds = ontologyTermSynonymRepo.getReferenceIds().containsKey(ontologyTermIRI) ? Lists
-						.newArrayList(referenceIds2.get(ontologyTermIRI).values()) : Arrays.asList();
+						.newArrayList(synonymRefIds.get(ontologyTermIRI).values()) : Arrays.asList();
 
 				List<String> annotationIds = ontologyTermDynamicAnnotationRepo.getReferenceIds().containsKey(
-						ontologyTermIRI) ? Lists.newArrayList(referenceIds3.get(ontologyTermIRI).values()) : Arrays
+						ontologyTermIRI) ? Lists.newArrayList(annotationRefIds.get(ontologyTermIRI).values()) : Arrays
 						.asList();
 
 				List<String> nodePathIds = ontologyTermNodePathRepository.getReferenceIds()
-						.containsKey(ontologyTermIRI) ? Lists.newArrayList(referenceIds4.get(ontologyTermIRI).values()) : Arrays
-						.asList();
+						.containsKey(ontologyTermIRI) ? Lists
+						.newArrayList(nodePathRefIds.get(ontologyTermIRI).values()) : Arrays.asList();
 
 				if (!referenceIds.containsKey(ontologyTermIRI))
 				{
@@ -168,12 +167,6 @@ public class OntologyTermRepository implements Repository
 	}
 
 	@Override
-	public void close() throws IOException
-	{
-		// Do nothing
-	}
-
-	@Override
 	public String getName()
 	{
 		return OntologyTermMetaData.ENTITY_NAME;
@@ -182,146 +175,12 @@ public class OntologyTermRepository implements Repository
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		return OntologyTermMetaData.getEntityMetaData();
+		return OntologyTermMetaData.INSTANCE;
 	}
 
 	@Override
 	public Set<RepositoryCapability> getCapabilities()
 	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public long count()
-	{
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public Query query()
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public long count(Query q)
-	{
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public Iterable<Entity> findAll(Query q)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Entity findOne(Query q)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Entity findOne(Object id)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public AggregateResult aggregate(AggregateQuery aggregateQuery)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void update(Entity entity)
-	{
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void update(Iterable<? extends Entity> records)
-	{
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void delete(Entity entity)
-	{
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void delete(Iterable<? extends Entity> entities)
-	{
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void deleteById(Object id)
-	{
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void deleteById(Iterable<Object> ids)
-	{
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void deleteAll()
-	{
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void add(Entity entity)
-	{
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public Integer add(Iterable<? extends Entity> entities)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void flush()
-	{
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void clearCache()
-	{
-		// TODO Auto-generated method stub
-
+		return Collections.emptySet();
 	}
 }
