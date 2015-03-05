@@ -99,7 +99,7 @@ public class WikiPathwaysServiceTest
 	@Test
 	public void testGetColoredPathwayImage() throws ExecutionException, RemoteException, UnsupportedEncodingException
 	{
-		String svg = "<svg>bl\u00ebah</svg>";
+		String svg = "<svg>bl\u00ebah</svg> ";
 		when(wikiPathwaysPortType.getColoredPathway("WP1234", "0", new String[]
 		{ "graphID1", "graphID2" }, new String[]
 		{ Impact.HIGH.getColor(), Impact.MODERATE.getColor() }, "svg")).thenReturn(
@@ -121,9 +121,9 @@ public class WikiPathwaysServiceTest
 	{
 		when(wikiPathwaysPortType.getPathwayAs("svg", "WP1234", 0)).thenReturn(
 				"<svg>WP1234\u00eb</svg>".getBytes("UTF-8"));
-		assertEquals(wikiPathwaysService.getUncoloredPathwayImage("WP1234"), "<svg>WP1234\u00eb</svg>");
+		assertEquals(wikiPathwaysService.getUncoloredPathwayImage("WP1234"), "<svg>WP1234\u00eb</svg> ");
 		// test that result gets cached
-		assertEquals(wikiPathwaysService.getUncoloredPathwayImage("WP1234"), "<svg>WP1234\u00eb</svg>");
+		assertEquals(wikiPathwaysService.getUncoloredPathwayImage("WP1234"), "<svg>WP1234\u00eb</svg> ");
 		verify(wikiPathwaysPortType).getPathwayAs("svg", "WP1234", 0);
 	}
 }
