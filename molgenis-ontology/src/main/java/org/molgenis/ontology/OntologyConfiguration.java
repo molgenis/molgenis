@@ -3,6 +3,8 @@ package org.molgenis.ontology;
 import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.importer.EmxImportService;
+import org.molgenis.ontology.matching.MatchingTaskContentEntityMetaData;
+import org.molgenis.ontology.matching.MatchingTaskEntityMetaData;
 import org.molgenis.ontology.matching.ProcessInputTermService;
 import org.molgenis.ontology.matching.UploadProgress;
 import org.molgenis.ontology.model.OntologyMetaData;
@@ -51,6 +53,18 @@ public class OntologyConfiguration
 	public OntologyTermMetaData ontologyTermMetaData()
 	{
 		return OntologyTermMetaData.INSTANCE;
+	}
+
+	@Bean
+	public MatchingTaskEntityMetaData matchingTaskEntityMetaData()
+	{
+		return MatchingTaskEntityMetaData.INSTANCE;
+	}
+
+	@Bean
+	public MatchingTaskContentEntityMetaData matchingTaskContentEntityMetaData()
+	{
+		return MatchingTaskContentEntityMetaData.INSTANCE;
 	}
 
 	@Autowired

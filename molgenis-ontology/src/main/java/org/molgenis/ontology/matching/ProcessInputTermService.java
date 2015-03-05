@@ -91,21 +91,21 @@ public class ProcessInputTermService
 				{
 					Double score = Double.parseDouble(ontologyTerm.get(ComparableEntity.SCORE).toString());
 					MapEntity matchingTaskContentEntity = new MapEntity();
-					matchingTaskContentEntity.set(MatchingTaskContentEntity.IDENTIFIER,
+					matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.IDENTIFIER,
 							entityName + "_" + entity.getIdValue());
-					matchingTaskContentEntity.set(MatchingTaskContentEntity.INPUT_TERM, entity.getIdValue());
-					matchingTaskContentEntity.set(MatchingTaskContentEntity.REF_ENTITY, entityName);
-					matchingTaskContentEntity.set(MatchingTaskContentEntity.MATCHED_TERM,
+					matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.INPUT_TERM, entity.getIdValue());
+					matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.REF_ENTITY, entityName);
+					matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.MATCHED_TERM,
 							ontologyTerm.get(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI));
-					matchingTaskContentEntity.set(MatchingTaskContentEntity.SCORE, score);
-					matchingTaskContentEntity.set(MatchingTaskContentEntity.VALIDATED, false);
+					matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.SCORE, score);
+					matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.VALIDATED, false);
 					entitiesToAdd.add(matchingTaskContentEntity);
 					break;
 				}
 				// Add entity in batch
 				if (entitiesToAdd.size() >= ADD_BATCH_SIZE)
 				{
-					dataService.add(MatchingTaskContentEntity.ENTITY_NAME, entitiesToAdd);
+					dataService.add(MatchingTaskContentEntityMetaData.ENTITY_NAME, entitiesToAdd);
 					entitiesToAdd.clear();
 				}
 				uploadProgress.incrementProgress(userName);
@@ -113,10 +113,10 @@ public class ProcessInputTermService
 			// Add the rest
 			if (entitiesToAdd.size() != 0)
 			{
-				dataService.add(MatchingTaskContentEntity.ENTITY_NAME, entitiesToAdd);
+				dataService.add(MatchingTaskContentEntityMetaData.ENTITY_NAME, entitiesToAdd);
 				entitiesToAdd.clear();
 			}
-			dataService.getRepository(MatchingTaskContentEntity.ENTITY_NAME).flush();
+			dataService.getRepository(MatchingTaskContentEntityMetaData.ENTITY_NAME).flush();
 
 			// FIXME : temporary work around to assign write permissions to the
 			// users who create the entities.
