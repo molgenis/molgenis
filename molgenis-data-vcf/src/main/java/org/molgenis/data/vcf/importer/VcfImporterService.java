@@ -200,7 +200,6 @@ public class VcfImporterService implements ImportService
 			addedEntities.add(sampleAttribute.getRefEntity());
 		}
 
-		long t0 = System.currentTimeMillis();
 		Iterator<Entity> inIterator = inRepository.iterator();
 		int vcfEntityCount = 0;
 		int sampleEntityCount = 0;
@@ -229,9 +228,6 @@ public class VcfImporterService implements ImportService
 								sampleRepository.add(sampleEntities);
 								sampleEntityCount += sampleEntities.size();
 								sampleEntities.clear();
-
-								long t = System.currentTimeMillis() - t0;
-								System.out.println(sampleEntityCount + " samples in " + t + " msec");
 							}
 						}
 					}
@@ -242,8 +238,6 @@ public class VcfImporterService implements ImportService
 				{
 					sampleRepository.add(sampleEntities);
 					sampleEntityCount += sampleEntities.size();
-					long t = System.currentTimeMillis() - t0;
-					System.out.println(sampleEntityCount + " samples in " + t + " msec");
 				}
 
 				sampleRepository.flush();
