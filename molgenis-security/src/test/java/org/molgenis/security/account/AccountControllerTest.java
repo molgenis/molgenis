@@ -21,7 +21,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.security.account.AccountService.ActivationMode;
 import org.molgenis.security.captcha.CaptchaService;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.util.GsonHttpMessageConverter;
@@ -272,7 +271,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 			DataService dataService = mock(DataService.class);
 			MolgenisUser molgenisUser = mock(MolgenisUser.class);
 			when(
-					dataService.findAllAsList(MolgenisUser.ENTITY_NAME,
+					dataService.findAll(MolgenisUser.ENTITY_NAME,
 							new QueryImpl().eq(MolgenisUser.EMAIL, "admin@molgenis.org"))).thenReturn(
 					Collections.<Entity> singletonList(molgenisUser));
 

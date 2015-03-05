@@ -11,20 +11,23 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
-import org.molgenis.data.elasticsearch.ElasticsearchRepository;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.merge.RepositoryMerger;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.util.ErrorMessageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -33,7 +36,6 @@ import com.google.common.collect.Iterables;
 @RequestMapping(URI)
 public class GeneticRepositoryMergerController extends MolgenisPluginController
 {
-	@SuppressWarnings("unused")
 	private static final Logger LOG = LoggerFactory.getLogger(GeneticRepositoryMergerController.class);
 
 	public static final String ID = "geneticrepositorymerger";
@@ -50,9 +52,9 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 			MolgenisFieldTypes.FieldTypeEnum.STRING);
 
 	private final ArrayList<AttributeMetaData> commonAttributes;
-	private RepositoryMerger repositoryMerger;
-	private DataService dataService;
-	private SearchService searchService;
+	private final RepositoryMerger repositoryMerger;
+	private final DataService dataService;
+	private final SearchService searchService;
 
 	@Autowired
 	public GeneticRepositoryMergerController(RepositoryMerger repositoryMerger, DataService dataService,
@@ -114,7 +116,7 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 			{
 				if (dataService.hasRepository(name))
 				{
-					geneticRepositories.add(dataService.getRepositoryByEntityName(name));
+					geneticRepositories.add(dataService.getRepository(name));
 				}
 				else
 				{
@@ -129,24 +131,24 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 		// Delete if exists
 		if (dataService.hasRepository(resultSet))
 		{
-			if (searchService.documentTypeExists(resultSet))
-			{
-				searchService.deleteDocumentsByType(resultSet);
-				dataService.removeRepository(resultSet);
-			}
-			else
-			{
-				throw new RuntimeException("Repository " + resultSet + " is not a ElasticSearchRepository");
-			}
+			dataService.getMeta().deleteEntityMeta(resultSet);
 		}
 
 		EntityMetaData mergedEntityMetaData = repositoryMerger.mergeMetaData(geneticRepositories, commonAttributes,
 				resultSet);
-		searchService.createMappings(mergedEntityMetaData, true, true, true, true);
-
-		ElasticsearchRepository mergedRepository = new ElasticsearchRepository(mergedEntityMetaData, searchService);
+		Repository mergedRepository = dataService.getMeta().addEntityMeta(mergedEntityMetaData);
 		repositoryMerger.merge(geneticRepositories, commonAttributes, mergedRepository, ID_FIELD);
 
 		return resultSet;
+	}
+
+	@ExceptionHandler(RuntimeException.class)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
+	{
+		LOG.error(e.getMessage(), e);
+		return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(
+				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage()));
 	}
 }

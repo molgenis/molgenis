@@ -7,7 +7,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -48,8 +47,8 @@ public class TypedCsvRepositoryTest
 		File csvFile = new File(FileUtils.getTempDirectory(), "testdata.csv");
 		FileCopyUtils.copy(in, new FileOutputStream(csvFile));
 
-		TypedCsvRepository<TestEntity> repo = new TypedCsvRepository<TestEntity>("csv://test", csvFile,
-				ENTITY_META_DATA, ',', 1, new TestEntityLineMapper());
+		TypedCsvRepository<TestEntity> repo = new TypedCsvRepository<TestEntity>(csvFile, ENTITY_META_DATA, ',', 1,
+				new TestEntityLineMapper());
 
 		assertEquals(Iterables.size(repo), 5);
 
@@ -109,12 +108,6 @@ public class TypedCsvRepositoryTest
 		}
 
 		@Override
-		public List<String> getLabelAttributeNames()
-		{
-			return Lists.newArrayList("index");
-		}
-
-		@Override
 		public Object get(String attributeName)
 		{
 			if (attributeName.equalsIgnoreCase("index"))
@@ -141,12 +134,6 @@ public class TypedCsvRepositoryTest
 			throw new UnsupportedOperationException();
 		}
 
-		@Override
-		public void set(Entity entity, boolean strict)
-		{
-			throw new UnsupportedOperationException();
-		}
-
 		public String getCol1()
 		{
 			return col1;
@@ -160,6 +147,12 @@ public class TypedCsvRepositoryTest
 		public Integer getIndex()
 		{
 			return index;
+		}
+
+		@Override
+		public void set(Entity values)
+		{
+			throw new UnsupportedOperationException();
 		}
 
 	}

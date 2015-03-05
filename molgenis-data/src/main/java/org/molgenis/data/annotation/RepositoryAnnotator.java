@@ -11,6 +11,7 @@ import java.util.Iterator;
 
 public interface RepositoryAnnotator
 {
+    final static String ANNOTATOR_PREFIX = "molgenis_annotated_";
 
 	Iterator<Entity> annotate(Iterator<Entity> source);
 
@@ -29,19 +30,23 @@ public interface RepositoryAnnotator
 	EntityMetaData getInputMetaData();
 
 	/**
-	 * Returns if the annotator will work for the given metadata
+	 * Returns null if the annotator will work for the given metadata, a reason if not so
 	 * 
 	 * @param inputMetaData
 	 * @return canAnnotate
 	 */
-	boolean canAnnotate(EntityMetaData inputMetaData);
+	String canAnnotate(EntityMetaData inputMetaData);
 
 	/**
 	 * Return the name of the annotator
 	 * 
 	 * @return name
 	 */
-	String getName();
+	String getSimpleName();
 
-    String getLabel();
+    String getFullName();
+
+    default String getDescription(){
+        return "no description";
+    }
 }

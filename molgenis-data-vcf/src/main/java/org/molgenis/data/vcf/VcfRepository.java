@@ -6,8 +6,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
@@ -16,6 +18,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -33,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 /**
@@ -44,7 +48,6 @@ public class VcfRepository extends AbstractRepository
 {
 	private static final Logger LOG = LoggerFactory.getLogger(VcfRepository.class);
 
-	public static final String BASE_URL = "vcf://";
 	public static final String CHROM = "#CHROM";
 	public static final String ALT = "ALT";
 	public static final String POS = "POS";
@@ -67,7 +70,6 @@ public class VcfRepository extends AbstractRepository
 
 	public VcfRepository(File file, String entityName) throws IOException
 	{
-		super(BASE_URL + file.getName());
 		this.file = file;
 		this.entityName = entityName;
 	}
@@ -151,7 +153,7 @@ public class VcfRepository extends AbstractRepository
 						{
 							Iterator<String> sampleNameIterator = finalVcfReader.getVcfMeta().getSampleNames()
 									.iterator();
-							while (sampleIterator.hasNext())
+							for (int j = 0; sampleIterator.hasNext(); ++j)
 							{
 								String[] format = vcfRecord.getFormat();
 								VcfSample sample = sampleIterator.next();
@@ -160,7 +162,8 @@ public class VcfRepository extends AbstractRepository
 								{
 									sampleEntity.set(format[i], sample.getData(i));
 								}
-								sampleEntity.set(ID, UUID.randomUUID());
+								sampleEntity.set(ID, UUID.randomUUID().toString().replaceAll("-", ""));
+
 								// FIXME remove entity ID from Sample label after #1400 is fixed, see also:
 								// jquery.molgenis.table.js line 152
 								sampleEntity.set(NAME, entity.get(POS) + "_" + entity.get(ALT) + "_"
@@ -173,17 +176,12 @@ public class VcfRepository extends AbstractRepository
 				}
 				catch (IOException e)
 				{
-					LOG.error("Unable to load VCF metadata. " + e.getStackTrace());
+					LOG.error("Unable to load VCF metadata. ", e);
 				}
 
 				return entity;
 			}
 
-			@Override
-			public void remove()
-			{
-				throw new UnsupportedOperationException();
-			}
 		};
 	}
 
@@ -208,19 +206,19 @@ public class VcfRepository extends AbstractRepository
 					if (vcfReader != null) vcfReader.close();
 				}
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(CHROM,
-						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true));
+						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ALT,
-						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true));
+						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(POS,
-						MolgenisFieldTypes.FieldTypeEnum.LONG).setAggregateable(true));
+						MolgenisFieldTypes.FieldTypeEnum.LONG).setAggregateable(true).setNillable(false));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(REF,
-						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true));
+						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(FILTER,
-						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true));
+						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(true));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(QUAL,
-						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true));
+						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(true));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ID,
-						MolgenisFieldTypes.FieldTypeEnum.STRING));
+						MolgenisFieldTypes.FieldTypeEnum.STRING).setNillable(true));
 				DefaultAttributeMetaData idAttributeMetaData = new DefaultAttributeMetaData(INTERNAL_ID,
 						MolgenisFieldTypes.FieldTypeEnum.STRING);
 				idAttributeMetaData.setNillable(false);
@@ -228,7 +226,7 @@ public class VcfRepository extends AbstractRepository
 				idAttributeMetaData.setVisible(false);
 				entityMetaData.addAttributeMetaData(idAttributeMetaData);
 				DefaultAttributeMetaData infoMetaData = new DefaultAttributeMetaData(INFO,
-						MolgenisFieldTypes.FieldTypeEnum.COMPOUND);
+						MolgenisFieldTypes.FieldTypeEnum.COMPOUND).setNillable(true);
 				List<AttributeMetaData> metadataInfoField = new ArrayList<AttributeMetaData>();
 				for (VcfMetaInfo info : vcfMeta.getInfoMeta())
 				{
@@ -267,10 +265,11 @@ public class VcfRepository extends AbstractRepository
 					MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true);
 			idAttributeMetaData.setIdAttribute(true);
 			idAttributeMetaData.setVisible(false);
+
 			sampleEntityMetaData.addAttributeMetaData(idAttributeMetaData);
 			DefaultAttributeMetaData nameAttributeMetaData = new DefaultAttributeMetaData(NAME,
 					MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true);
-			nameAttributeMetaData.setLabelAttribute(true);
+			nameAttributeMetaData.setLabelAttribute(true).setLookupAttribute(true);
 			sampleEntityMetaData.addAttributeMetaData(nameAttributeMetaData);
 			for (VcfMetaFormat meta : formatMetaData)
 			{
@@ -288,7 +287,7 @@ public class VcfRepository extends AbstractRepository
 		try
 		{
 			isListValue = number.equals("A") || number.equals("R") || number.equals("G") || number.equals(".")
-					|| Integer.valueOf(number) > 1;
+					|| Integer.parseInt(number) > 1;
 		}
 		catch (NumberFormatException ex)
 		{
@@ -339,7 +338,7 @@ public class VcfRepository extends AbstractRepository
 		try
 		{
 			isListValue = number.equals("A") || number.equals("R") || number.equals("G") || number.equals(".")
-					|| Integer.valueOf(number) > 1;
+					|| Integer.parseInt(number) > 1;
 		}
 		catch (NumberFormatException ex)
 		{
@@ -408,6 +407,18 @@ public class VcfRepository extends AbstractRepository
 				}
 			}
 		}
+	}
+
+	@Override
+	public Set<RepositoryCapability> getCapabilities()
+	{
+		return Collections.emptySet();
+	}
+
+	@Override
+	public long count()
+	{
+		return Iterables.size(this);
 	}
 
 }

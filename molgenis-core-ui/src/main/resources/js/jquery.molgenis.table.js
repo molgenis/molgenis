@@ -3,6 +3,7 @@
 
 	var restApi = new molgenis.RestClient();
 
+	
 	/**
 	 * @memberOf molgenis.table
 	 */
@@ -40,9 +41,12 @@
 		items.push('</div>');
 		items.push('</div>');
 		items.push('<div class="row">');
-		items.push('<div class="col-md-3"><div class="molgenis-table-controls pull-left">');
-		if(settings.editable)
-			items.push('<a class="btn btn-default edit-table-btn" href="#" data-toggle="button"><span class="glyphicon glyphicon-edit"></span></a>');
+		items.push('<div class="col-md-3"><div class="molgenis-table-controls">');
+		if(settings.editable) {
+			items.push('<a class="btn btn-default btn-primary edit-table-btn" href="#" data-toggle="button" title="Edit"><span class="glyphicon glyphicon-edit"></span></a>');
+			items.push('<a class="btn btn-default btn-success add-row-btn" style="display: none" href="#" data-toggle="button" title="Add row"><span class="glyphicon glyphicon-plus"></span></a>');
+		}
+		
 		items.push('</div></div>');
 		items.push('<div class="col-md-6"><div class="molgenis-table-pager"></div></div>');
 		items.push('<div class="col-md-3"><div class="molgenis-table-info pull-right"></div></div>');
@@ -98,7 +102,9 @@
 				});
 				callback(colAttributes, refEntitiesMeta);
 			});
-		} else callback([], {});
+		} else {
+			callback([], {});
+		}
 	}
 
 	/**
@@ -109,6 +115,9 @@
 			return attribute.name;
 		});
 		var expandAttributeNames = $.map(settings.colAttributes, function(attribute) {
+			if(attribute.expression){
+				return attribute.name;
+			}
 			if(attribute.fieldType === 'XREF' || attribute.fieldType === 'CATEGORICAL' ||attribute.fieldType === 'MREF') {
 				// partially expand reference entities (only request label attribute)
 				var refEntity = settings.refEntitiesMeta[attribute.refEntity.href];
@@ -116,14 +125,20 @@
 			}
 			return null;
 		});
-
+		
 		// TODO do not construct uri from other uri
 		var entityCollectionUri = settings.entityMetaData.href.replace("/meta", "");
-		var q = $.extend({}, settings.query, {'start': settings.start, 'num': settings.maxRows, 'sort': settings.sort});
-		restApi.getAsync(entityCollectionUri, {'attributes' : attributeNames, 'expand' : expandAttributeNames, 'q' : q}, function(data) {
-			settings.data = data;
-			callback(data);
-		});
+		if(settings.query) {
+			var q = $.extend({}, settings.query, {'start': settings.start, 'num': settings.maxRows, 'sort': settings.sort});
+			restApi.getAsync(entityCollectionUri, {'attributes' : attributeNames, 'expand' : expandAttributeNames, 'q' : q}, function(data) {
+				settings.data = data;
+				callback(data);
+			});
+		} else {
+			// don't query but use the predefined value
+			settings.data = settings.value;
+			callback(settings.value);
+		}
 	}
 
 	/**
@@ -133,12 +148,13 @@
 		var container = $('.molgenis-table thead', settings.container);
 
 		var items = [];
-		if (settings.editenabled || settings.deletable)
+		if (settings.editenabled || settings.deletable){
 			items.push($('<th>'));
+		}
 		$.each(settings.colAttributes, function(i, attribute) {
 			var header;
 			if (settings.sort && settings.sort.orders[0].property === attribute.name) {
-				if (settings.sort.orders[0].direction == 'ASC') {
+				if (settings.sort.orders[0].direction === 'ASC') {
 					header = $('<th>' + attribute.label + '<span data-attribute="' + attribute.name
 							+ '" class="ui-icon ui-icon-triangle-1-s down"></span></th>');
 				} else {
@@ -163,17 +179,17 @@
 
 		var items = [];
 		var tabindex = 1;
-		for ( var i = 0; i < data.items.length; ++i) {
+		for (var i = 0; i < data.items.length; ++i) {
 			var entity = data.items[i];
 			var row = $('<tr>').data('entity', entity).data('id', entity.href);
 			if (settings.editenabled || settings.deletable) {
 				var cell = $('<td class="trash" tabindex="' + tabindex++ + '">');
-				$('<span class="glyphicon glyphicon-trash delete-row-btn"></span>').appendTo(cell);
+				$('<a class="btn btn-xs btn-danger delete-row-btn" href="#" data-toggle="button" title="Delete"><span class="glyphicon glyphicon-minus"></span></button>').appendTo(cell);
 				row.append(cell);
 			}
 
 			$.each(settings.colAttributes, function(i, attribute) {
-				var cell = $('<td>').data('id', entity.href + '/' + attribute.name);
+				var cell = $('<td>').data('id', entity.href + '/' + encodeURIComponent(attribute.name));
 				renderCell(cell, entity, attribute, settings);
 				if(settings.editenabled) {
 					cell.attr('tabindex', tabindex++);
@@ -192,10 +208,12 @@
 	 * @memberOf molgenis.table.cell
 	 */
 	function renderCell(cell, entity, attribute, settings) {
-		if(settings.editenabled && !attribute.readOnly)
+		if(settings.editenabled && !attribute.readOnly) {
 			renderEditCell(cell, entity, attribute, settings);
-		else
+		}
+		else {
 			renderViewCell(cell, entity, attribute, settings);
+		}
 	}
 	
 	/**
@@ -210,14 +228,14 @@
 				var items = [];
 				items.push('<div class="bool-btn-group btn-group-xs">');
 				items.push('<button type="button" class="btn btn-default');
-				if(value === true) items.push(' active');
+				if(value === true) {items.push(' active');}
 				items.push('" data-state="true">Yes</button>');
 				items.push('<button type="button" class="btn btn-default');
-				if(value === false) items.push(' active');
+				if(value === false) {items.push(' active');}
 				items.push('" data-state="false">No</button>');
 				if(attribute.nillable) {
 					items.push('<button type="button" class="btn btn-default');
-					if(value === undefined) items.push(' active');
+					if(value === undefined) {items.push(' active');}
 					items.push('" data-state="undefined">N/A</button>');
 				}
 				items.push('</div>');
@@ -229,8 +247,9 @@
 				var refEntityCollectionUri = attribute.refEntity.href.replace("/meta", "");
 				
 				var format = function(item) {
-					if (item)
+					if (item) {
 						return item[refEntityMeta.labelAttribute];
+					}
 				};
 				
 				var opts = {
@@ -327,8 +346,9 @@
 				var refEntityCollectionUri = attribute.refEntity.href.replace("/meta", "");
 				
 				var format = function(item) {
-					if(item)
+					if(item) {
 						return item[refEntityMeta.labelAttribute];
+					}
 				};
 				
 				var opts = {
@@ -378,14 +398,15 @@
 	function renderViewCell(cell, entity, attribute, settings) {
 		cell.empty();
 		
-		var rawValue = entity[attribute.name];				
+		var rawValue = entity[attribute.name];
+
 		switch(attribute.fieldType) {
 			case 'XREF':
 			case 'MREF':
             case 'CATEGORICAL':
                 if (rawValue) {
                 	var refEntity = settings.refEntitiesMeta[attribute.refEntity.href];
-                	var refAttribute = refEntity.labelAttribute;
+                    var refAttribute = refEntity.labelAttribute;
                 	var refValue = refEntity.attributes[refAttribute];
 					
                 	if (refValue) {
@@ -397,22 +418,24 @@
                 		switch(attribute.fieldType) {
 							case 'CATEGORICAL':
 							case 'XREF':
-								var cellValue = $('<a href="#">' + formatTableCellValue(rawValue[refAttribute], refAttributeType) + '</a>'); 
-								cellValue.click(function(event) {
+
+								var $cellValue = $('<a href="#">').append(formatTableCellValue(rawValue[refAttribute], refAttributeType));
+								$cellValue.click(function(event) {
 									if(settings.cellClickHandlers && settings.cellClickHandlers[attribute.name]) {
 										settings.cellClickHandlers[attribute.name](attribute, refEntity, refAttribute, rawValue);
 									} else {
 										// execute default cell click handler
 										openRefAttributeModal(attribute, refEntity, refAttribute, rawValue);
 									}
+
 									event.stopPropagation();
 								});
-								cell.append(cellValue);
+								cell.append($cellValue);
 								break;
 							case 'MREF':
 								$.each(rawValue.items, function(i, rawValue) {
-									var cellValuePart = $('<a href="#">' + formatTableCellValue(rawValue[refAttribute], refAttributeType) + '</a>');
-									cellValuePart.click(function(event) {
+									var $cellValuePart = $('<a href="#">').append(formatTableCellValue(rawValue[refAttribute], refAttributeType));
+									$cellValuePart.click(function(event) {
 										if(settings.cellClickHandlers && settings.cellClickHandlers[attribute.name]) {
 											settings.cellClickHandlers[attribute.name](attribute, refEntity, refAttribute, rawValue);
 										} else {
@@ -421,9 +444,8 @@
 										}
 										event.stopPropagation();
 									});
-									if (i > 0)
-										cell.append(',');
-									cell.append(cellValuePart);
+									if (i > 0) {cell.append(',');}
+									cell.append($cellValuePart);
 								});
 								break;
 							default:
@@ -433,16 +455,10 @@
                 }
 				break;
             case 'BOOL':
-            	// FIXME refactor formatTableCellValue to accept attribute instead of attribute field type and move nillable boolean code to this function
-            	var cellValuePart = $(formatTableCellValue(rawValue, attribute.fieldType));
-            	if(attribute.nillable && rawValue === undefined) {
-            		cellValuePart.prop('indeterminate', true);
-            	}
-				cell.append(cellValuePart);
+				cell.append(formatTableCellValue(rawValue, attribute.fieldType, undefined, attribute.nillable));
             	break;
 			default :
-				var value = formatTableCellValue(rawValue, attribute.fieldType);
-				cell.append(value);
+				cell.append(formatTableCellValue(rawValue, attribute.fieldType));
 				break;
 		}
 	}
@@ -474,29 +490,28 @@
 			items.push('</div>');
 			modal = $(items.join(''));
 		}
-		
+
 		// inject modal data
 		var refAttributes = molgenis.getAtomicAttributes(refEntity.attributes, restApi);
-		
-		// TODO use idAttribute once github #1400 is fixed
-		// TODO remove trim() once github #1401 is fixed
-		var val = refValue[refEntity.labelAttribute];
-		if (typeof val.trim == 'function') {
-			val = val.trim();
-		}
-		
-		var refQuery = {
+		var val = restApi.get(refValue.href)[refEntity.idAttribute];
+        
+        var refQuery = {
 			'q' : [ {
-				// TODO use idAttribute once github #1400 is fixed
-				'field' : refEntity.labelAttribute, 
+				'field' : refEntity.idAttribute,
 				'operator' : 'EQUALS',
 				'value' : val
 			} ]
 		}; 
+	
 		$('.ref-title', modal).html(attribute.label || attribute.name);
 		$('.ref-description-header', modal).html((refEntity.label || refEntity.name) + ' description');
 		$('.ref-description', modal).html(refEntity.description || 'No description available');
-		$('.ref-table', modal).table({'entityMetaData' : refEntity, 'attributes': refAttributes, 'query' : refQuery});
+		if(attribute.expression){
+			// computed attribute, don't query but show the computed value
+			$('.ref-table', modal).table({'entityMetaData' : refEntity, 'attributes': refAttributes, 'value': {items:[refValue], total: 1} });
+		} else {
+			$('.ref-table', modal).table({'entityMetaData' : refEntity, 'attributes': refAttributes, 'query' : refQuery });
+		}
 		
 		// show modal
 		modal.modal({'show': true});
@@ -516,14 +531,15 @@
 				var editValue;
 				
 				var state = cell.find('button.active').data('state');
-				if(state === true) editValue = true;
-				else if(state === false) editValue = false;
-				else if(state === 'undefined' && attribute.nillable) editValue = undefined;
-				else throw 'invalid state: ' + state;
+				if(state === true) {editValue = true;}
+				else if(state === false) {editValue = false;}
+				else if(state === 'undefined' && attribute.nillable) {editValue = undefined;}
+				else {throw 'invalid state: ' + state;}
 				
 				if(value !== editValue) {
 					restApi.update(cell.data('id'), editValue, {
 						success: function() {
+							settings.onDataChange();
 							value = editValue;
 							settings.data.items[row][attribute.name] = value;
 							cell.addClass('edited');
@@ -539,8 +555,10 @@
 				if(value !== editValue) {
 					restApi.update(cell.data('id'), editValue, {
 						success: function() {
-							if (editValue === '')
+							settings.onDataChange();
+							if (editValue === '') {
 								delete entity[attribute.name];
+							}
 							else {
 								entity[attribute.name] = editValue;	
 							}
@@ -558,6 +576,7 @@
 					if(value !== editValue) {
 						restApi.update(cell.data('id'), editValue, {
 							success: function() {
+								settings.onDataChange();
 								settings.data.items[row][attribute.name] = editValue;
 								cell.removeClass('invalid-input').addClass('edited');
 							}
@@ -577,6 +596,7 @@
 						var editValue = $.map(data, function(val){ return restApi.getPrimaryKeyFromHref(val.href);});
 						restApi.update(cell.data('id'), editValue, {
 							success: function() {
+								settings.onDataChange();
 								entity[attribute.name].total = data.length;
 								entity[attribute.name].items = data;
 								cell.addClass('edited');
@@ -601,11 +621,14 @@
 	            		editValue = editValue !== '' ? restApi.getPrimaryKeyFromHref(editValue) : ''; 
 						restApi.update(cell.data('id'), editValue, {
 							success: function() {
-								if (editValue === '')
+								settings.onDataChange();
+								if (editValue === '') {
 									delete entity[attribute.name];
+								}
 								else {
-									if(!entity[attribute.name])
+									if(!entity[attribute.name]) {
 										entity[attribute.name] = {};
+									}
 									entity[attribute.name].href = editValue;
 									entity[attribute.name][refEntityMeta.labelAttribute] = editLabel;	
 								}
@@ -621,6 +644,7 @@
 				if(value !== editValue) {
 					restApi.update(cell.data('id'), editValue, {
 						success: function() {
+							settings.onDataChange();
 							value = editValue;
 							settings.data.items[row][attribute.name] = value;
 							cell.addClass('edited');
@@ -649,9 +673,19 @@
 				}
 			});
 			container.show();
-		} else container.hide();
+		} else {
+			container.hide();
+		}
 	}
 
+	function refresh(settings) {
+		getTableData(settings, function(data) {
+			createTableBody(data, settings);
+			createTablePager(data, settings);
+			createTableFooter(data, settings);
+		});
+	}
+	
 	/**
 	 * @memberOf molgenis.table
 	 */
@@ -699,12 +733,7 @@
 			'setQuery' : function(query) {
 				settings.query = query;
 				settings.start = 0;
-				
-				getTableData(settings, function(data) {
-					createTableBody(data, settings);
-					createTablePager(data, settings);
-					createTableFooter(data, settings);
-				});
+				refresh(settings);
 			},
 			'getQuery' : function() {
 				return settings.query;
@@ -717,7 +746,12 @@
 			}
 		});
 
-		createTable(settings, settings.onInit);
+
+		createTable(settings, function() {
+			if(settings.onInit) {
+				settings.onInit();
+			}
+		});
 
 		// sort column ascending/descending
 		$(container).on('click', 'thead th .ui-icon', function(e) {
@@ -754,7 +788,7 @@
 		$(container).on('click', '.edit-table-btn', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
-			
+			  
 			settings.editenabled = !settings.editenabled;
 			createTableHeader(settings);
 			createTableBody(settings.data, settings);
@@ -762,12 +796,78 @@
 				createTableBody(settings.data, settings);
 				$('.molgenis-table tbody').addClass('editable');
 				$('.molgenis-table tbody td:not(.trash)', settings.container).first().focus();
+				$('.add-row-btn').show();
+				 
+				$('.edit-table-btn').html('Done');
 			} else {
+				$('.add-row-btn').hide();
 				getTableData(settings, function(data) {
 					createTableBody(data, settings);
 				});
 				$('.molgenis-table tbody').removeClass('editable');
+				$('.edit-table-btn').html('<span class="glyphicon glyphicon-edit"></span>');
 			}
+		});
+		
+		//Add row
+		$(container).on('click', '.add-row-btn', function(e) {
+			e.preventDefault();
+			e.stopPropagation();
+			getCreateForm(settings.entityMetaData);
+		});
+		
+		function getCreateForm(entityMetaData) {
+			$.ajax({
+				type : 'GET',
+				url : '/api/v1/' + entityMetaData.name + '/create',
+				success : function(form) {
+					openFormModal(entityMetaData, form);
+				}
+			});
+		}
+		
+		function openFormModal(entityMetaData, form) {
+			// create modal structure
+			var modal = $('#form-modal');
+			if(!modal.length) {
+				var items = [];
+				items.push('<div class="modal" id="form-modal" tabindex="-1" role="dialog" aria-labelledby="form-modal-title" aria-hidden="true">');
+				items.push('<div class="modal-dialog">');
+				items.push('<div class="modal-content">');				
+				items.push('<div class="modal-header">');
+				items.push('<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>');
+				items.push('<h4 class="modal-title"></h4>');
+				items.push('</div>');
+				items.push('<div class="modal-body">');
+				items.push('</div>');
+				items.push('<div class="modal-footer">');
+				items.push('<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>');
+				items.push('<button type="button" id="submit-form-btn" class="btn btn-primary">Save</button>');
+				items.push('</div>');
+				items.push('</div>');
+				items.push('</div>');
+				items.push('</div>');
+				modal = $(items.join(''));
+			}
+			
+			$('.modal-title', modal).html(entityMetaData.label);
+			$('.modal-body', modal).html(form);
+			
+			modal.on('click', '#submit-form-btn', function(e) {
+				e.preventDefault();
+				e.stopPropagation();
+				$('#entity-form').submit();			
+			});
+			
+			// show modal
+			modal.modal({'show': true});
+		}
+		
+		$(document).on('onFormSubmitSuccess', function() {
+			$('#form-modal .modal-body').html('');
+			$('#form-modal').modal('hide');
+			settings.start = 0;
+			refresh(settings);
 		});
 		
 		// toggle edit table mode
@@ -777,24 +877,12 @@
 			
 			if(confirm('Are you sure you want to delete this row?')) {
 				var href = $(this).closest('tr').data('id');
-				
-				if(settings.onDeleteRow) {
-					// use user-defined delete instead of default delete behavior
-					settings.onDeleteRow(href);
-				}
-				else {
-					restApi.remove(href, {
-						success: function() {
-							getTableData(settings, function(data) {
-								createTableBody(data, settings);
-								createTablePager(data, settings);
-								createTableFooter(data, settings);
-							});
-							
-							
-						}
-					});
-				}
+				restApi.remove(href, {
+					success: function() {
+						settings.start = 0;
+						refresh(settings);
+					}
+				});
 			}
 		});
 		
@@ -950,5 +1038,8 @@
 		'onDeleteRow': function(){},
 		'cellClickHandlers' : null,
 		'onInit' : null
+		'rowClickable': false,
+		'onDataChange': function(){}
+
 	};
 }($, window.top.molgenis = window.top.molgenis || {}));

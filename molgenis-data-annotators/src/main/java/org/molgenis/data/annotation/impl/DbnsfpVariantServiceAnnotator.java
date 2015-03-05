@@ -143,7 +143,7 @@ public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 	}
 
 	@Override
-	public String getName()
+	public String getSimpleName()
 	{
 		return NAME;
 	}

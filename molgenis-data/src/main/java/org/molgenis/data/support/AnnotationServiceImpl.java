@@ -25,9 +25,9 @@ public class AnnotationServiceImpl implements AnnotationService
 	{
 		for (RepositoryAnnotator annotator : annotators)
 		{
-			if (annotator.getName().equalsIgnoreCase(newAnnotator.getName()))
+			if (annotator.getSimpleName().equalsIgnoreCase(newAnnotator.getSimpleName()))
 			{
-				throw new MolgenisDataException("Entity [" + annotator.getName() + "] already registered.");
+				throw new MolgenisDataException("Annotator [" + annotator.getSimpleName() + "] already registered.");
 			}
 		}
 
@@ -39,7 +39,7 @@ public class AnnotationServiceImpl implements AnnotationService
 	{
 		for (RepositoryAnnotator annotator : annotators)
 		{
-			if (annotator.getName().equalsIgnoreCase(annotatorName))
+			if (annotator.getSimpleName().equalsIgnoreCase(annotatorName))
 			{
 				return annotator;
 			}
@@ -54,7 +54,7 @@ public class AnnotationServiceImpl implements AnnotationService
 
 		for (RepositoryAnnotator annotator : annotators)
 		{
-			if (annotator.canAnnotate(metaData))
+			if (annotator.canAnnotate(metaData).equals("true"))
 			{
 				result.add(annotator);
 			}

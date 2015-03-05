@@ -9,6 +9,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.stereotype.Component;
 
@@ -58,6 +59,11 @@ public class EntityToSourceConverter
 
 	public Object convertAttribute(Entity entity, AttributeMetaData attributeMetaData, final boolean nestRefs)
 	{
+		if (attributeMetaData.getExpression() != null)
+		{
+			entity = new EntityWithComputedAttributes(entity);
+		}
+
 		Object value;
 
 		String attrName = attributeMetaData.getName();
@@ -159,7 +165,6 @@ public class EntityToSourceConverter
 	{
 		Object value;
 
-		String attrName = attributeMetaData.getName();
 		FieldTypeEnum dataType = attributeMetaData.getDataType().getEnumType();
 		switch (dataType)
 		{

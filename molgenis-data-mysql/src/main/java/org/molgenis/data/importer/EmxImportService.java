@@ -4,10 +4,9 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
+import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.meta.WritableMetaDataService;
-import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
 import org.slf4j.Logger;
@@ -28,27 +27,17 @@ public class EmxImportService implements ImportService
 
 	private final MetaDataParser parser;
 	private final ImportWriter writer;
-	private MysqlRepositoryCollection targetCollection;
-	private WritableMetaDataService metaDataService;
+	private final DataService dataService;
 
 	@Autowired
-	public EmxImportService(MetaDataParser parser, ImportWriter writer)
+	public EmxImportService(MetaDataParser parser, ImportWriter writer, DataService dataService)
 	{
 		if (parser == null) throw new IllegalArgumentException("parser is null");
 		if (writer == null) throw new IllegalArgumentException("writer is null");
 		LOG.debug("EmxImportService created");
 		this.parser = parser;
 		this.writer = writer;
-	}
-
-	@Autowired
-	public void setRepositoryCollection(MysqlRepositoryCollection targetCollection,
-			WritableMetaDataService metaDataService)
-	{
-		this.targetCollection = targetCollection;
-		this.metaDataService = metaDataService;
-		LOG.debug("EmxImportService created with targetCollection=" + targetCollection + " and metaDataService="
-				+ metaDataService);
+		this.dataService = dataService;
 	}
 
 	@Override
@@ -60,7 +49,7 @@ public class EmxImportService implements ImportService
 			for (String entityName : source.getEntityNames())
 			{
 				if (entityName.equalsIgnoreCase(EmxMetaDataParser.ATTRIBUTES)) return true;
-				if (targetCollection.getRepositoryByEntityName(entityName) != null) return true;
+				if (dataService.getMeta().getEntityMetaData(entityName) != null) return true;
 			}
 		}
 
@@ -70,13 +59,10 @@ public class EmxImportService implements ImportService
 	@Override
 	public EntityImportReport doImport(final RepositoryCollection source, DatabaseAction databaseAction)
 	{
-		if (targetCollection == null) throw new RuntimeException("targetCollection was not set");
-		if (metaDataService == null) throw new RuntimeException("metadataService was not set");
-
 		ParsedMetaData parsedMetaData = parser.parse(source);
 
 		// TODO altered entities (merge, see getEntityMetaData)
-		return doImport(new EmxImportJob(databaseAction, source, parsedMetaData, targetCollection));
+		return doImport(new EmxImportJob(databaseAction, source, parsedMetaData));
 
 	}
 
@@ -94,12 +80,19 @@ public class EmxImportService implements ImportService
 		}
 		catch (Exception e)
 		{
-			writer.rollbackSchemaChanges(job);
+			LOG.error("Error handling EmxImportJob", e);
+			try
+			{
+				writer.rollbackSchemaChanges(job);
+			}
+			catch (Exception ignore)
+			{
+			}
 			throw e;
 		}
 		finally
 		{
-			metaDataService.refreshCaches();
+			dataService.getMeta().refreshCaches();
 		}
 	}
 

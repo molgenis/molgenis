@@ -51,7 +51,10 @@
 			entities = restApi.get(uri, options);
 		}
 		
-		var items = [];
+		var $tableBody = $('#entity-table-body-' + formIndex);
+		$tableBody.empty();
+		var $tr;
+		
 		$.each(entities.items, function(index, entity) {
 			var id = restApi.getPrimaryKeyFromHref(entity.href);
 			var labelValue = entity[forms[formIndex].meta.labelFieldName];
@@ -62,16 +65,16 @@
 			if ((forms.length > 1) && (formIndex == 0) && (selectedEntityId == null)) {
 				selectedEntityId = id;
 			}
-				
+			
 			if (id == selectedEntityId) {
-				items.push('<tr data-id="' + id + '" class="info">');
+				$tr = $('<tr data-id="' + id + '" class="info">');
 			} else {
-				items.push('<tr data-id="' + id + '">');
+				$tr = $('<tr data-id="' + id + '">');
 			}
 				
-			items.push('<td class="edit-entity"><a href="' + editPageUrl + '"><img src="/img/editview.gif"></a></td>');
+			$tr.append('<td class="edit-entity"><a href="' + editPageUrl + '"><img src="/img/editview.gif"></a></td>');
 			if (forms[formIndex].hasWritePermission) {
-				items.push('<td class="delete-entity"><a href="#" class="delete-entity-' + formIndex + '" data-href="' + deleteApiUrl + '"><img src="/img/delete.png"></a></td>');
+				$tr.append('<td class="delete-entity"><a href="#" class="delete-entity-' + formIndex + '" data-href="' + deleteApiUrl + '"><img src="/img/delete.png"></a></td>');
 			}
 				
 			$.each(forms[formIndex].meta.fields, function(index, field) {
@@ -96,14 +99,12 @@
 						value =  entity[fieldName];
 					}
 				} 
-				
-				items.push('<td>' + formatTableCellValue(value, field.type) + '</td>');
+				$tr.append($('<td>').append(formatTableCellValue(value, field.type, undefined, field.nillable)));
 			});
 				
-			items.push('</tr>');
+			$tableBody.append($tr);
 		});
 		
-		$('#entity-table-body-' + formIndex).html(items.join(''));
 		$('.show-popover').popover({trigger:'hover', placement: 'bottom'});
 			
 		//Add master row click handler

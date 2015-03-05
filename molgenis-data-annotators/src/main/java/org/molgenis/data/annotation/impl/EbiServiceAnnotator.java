@@ -71,7 +71,7 @@ public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements 
 	}
 
 	@Override
-	public String getName()
+	public String getSimpleName()
 	{
 		return NAME;
 	}

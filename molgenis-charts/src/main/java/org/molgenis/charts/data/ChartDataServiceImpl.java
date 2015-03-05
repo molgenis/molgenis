@@ -21,7 +21,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
-import org.molgenis.data.Queryable;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +43,7 @@ public class ChartDataServiceImpl implements ChartDataService
 	public XYDataChart getXYDataChart(String entityName, String attributeNameXaxis, String attributeNameYaxis,
 			String split, List<QueryRule> queryRules)
 	{
-		Repository repo = dataService.getRepositoryByEntityName(entityName);
+		Repository repo = dataService.getRepository(entityName);
 		EntityMetaData entityMetaData = repo.getEntityMetaData();
 
 		final FieldTypeEnum attributeXFieldTypeEnum = entityMetaData.getAttribute(attributeNameXaxis).getDataType()
@@ -208,7 +207,7 @@ public class ChartDataServiceImpl implements ChartDataService
 	public BoxPlotChart getBoxPlotChart(String entityName, String attributeName, List<QueryRule> queryRules,
 			String split, double scaleToCalcOutliers)
 	{
-		Repository repo = dataService.getRepositoryByEntityName(entityName);
+		Repository repo = dataService.getRepository(entityName);
 		EntityMetaData entityMetaData = repo.getEntityMetaData();
 
 		BoxPlotChart boxPlotChart = new BoxPlotChart();
@@ -327,10 +326,6 @@ public class ChartDataServiceImpl implements ChartDataService
 
 	private Iterable<Entity> getIterable(String entityName, Repository repo, List<QueryRule> queryRules, Sort sort)
 	{
-		if (!(repo instanceof Queryable))
-		{
-			throw new MolgenisChartException("entity: " + entityName + " is not queryable and is not supported");
-		}
 
 		final Query q;
 		if (queryRules == null)
@@ -347,7 +342,7 @@ public class ChartDataServiceImpl implements ChartDataService
 			q.sort(sort);
 		}
 
-		return ((Queryable) repo).findAll(q);
+		return repo.findAll(q);
 	}
 
 	/**
@@ -390,23 +385,17 @@ public class ChartDataServiceImpl implements ChartDataService
 	public DataMatrix getDataMatrix(String entityName, List<String> attributeNamesXaxis, String attributeNameYaxis,
 			List<QueryRule> queryRules)
 	{
-		Iterable<Entity> iterable = dataService.getRepositoryByEntityName(entityName);
+		Iterable<Entity> iterable = dataService.getRepository(entityName);
 
 		if (queryRules != null && !queryRules.isEmpty())
 		{
-			if (!(iterable instanceof Queryable))
-			{
-				throw new MolgenisChartException("There a query rules defined but the " + entityName
-						+ " repository is not queryable");
-			}
-
 			QueryImpl q = new QueryImpl();
 			for (QueryRule queryRule : queryRules)
 			{
 				q.addRule(queryRule);
 			}
 
-			iterable = ((Queryable) iterable).findAll(q);
+			iterable = ((Repository) iterable).findAll(q);
 		}
 
 		List<Target> rowTargets = new ArrayList<Target>();

@@ -239,47 +239,51 @@ function getCurrentTimezoneOffset() {
  * Create a table cell to show data of a certain type Is used by the
  * dataexplorer and the forms plugin
  */
-function formatTableCellValue(value, dataType, editable) {
+function formatTableCellValue(rawValue, dataType, editable, nillable) {
+	var htmlElement;
+	
 	if (dataType.toLowerCase() == 'bool') {
-		var checked = (value === true);
-		value = '<input type="checkbox" ';
-		if (checked) {
-			value = value + 'checked ';
+		htmlElement = '<input type="checkbox" ';
+		if (rawValue === true) {
+			htmlElement += 'checked ';
 		}
 		if (editable !== true) {
-			value = value + 'disabled="disabled"';
+			htmlElement += 'disabled="disabled"';
 		}
-
-		return value + '/>';
+		
+		htmlElement += '/>';
+		
+		if(dataType.toLowerCase() == 'bool' && nillable === true && (rawValue === undefined || rawValue === '')) {
+			htmlElement = $(htmlElement);
+			htmlElement.prop('indeterminate', true);
+		}
+		
+		return htmlElement;
 	}
 
-	if (typeof value === 'undefined' || value === null) {
-		return '';
+	if (typeof rawValue === 'undefined' || rawValue === null) {
+		return '<span></span>';
 	}
 
 	if (dataType.toLowerCase() == "hyperlink") {
-		value = '<a target="_blank" href="' + value + '">' + htmlEscape(value)
-				+ '</a>';
+		return htmlElement = '<a target="_blank" href="' + rawValue + '">' + htmlEscape(rawValue) + '</a>';
 
 	} else if (dataType.toLowerCase() == "email") {
-		value = '<a href="mailto:' + value + '">' + htmlEscape(value) + '</a>';
+		return htmlElement = '<a href="mailto:' + rawValue + '">' + htmlEscape(rawValue) + '</a>';
 
 	} else if (dataType.toLowerCase() != 'html') {
-
-		if (value.length > 50) {
-			var abbr = htmlEscape(abbreviate(value, 50));
-			value = '<span class="show-popover"  data-content="'
-					+ htmlEscape(value) + '" data-toggle="popover">' + abbr
+		if (rawValue.length > 50) {
+			var abbr = htmlEscape(abbreviate(rawValue, 50));
+			return htmlElement = '<span class="show-popover"  data-content="'
+					+ htmlEscape(rawValue) + '" data-toggle="popover">' + abbr
 					+ "</span>";
 		} else {
-			value = htmlEscape(value);
+			return '<span>' + htmlEscape(rawValue) + '</span>';
 		}
 
 	} else {
-		value = htmlEscape(value);
+		return '<span>' + htmlEscape(rawValue) + '</span>';
 	}
-
-	return value;
 }
 
 /**
@@ -392,32 +396,32 @@ function createInput(attr, attrs, val, lbl) {
 	};
 
 	molgenis.RestClient.prototype.get = function(resourceUri, options) {
-		return this._get(resourceUri, options);
+		return this._get(resourceUri, options, false);
 	};
 
-	molgenis.RestClient.prototype.getAsync = function(resourceUri, options,
-			callback) {
-		this._get(resourceUri, options, callback);
+	molgenis.RestClient.prototype.getAsync = function(resourceUri, options, callback) {
+		return this._get(resourceUri, options, true, callback);
 	};
 
-	molgenis.RestClient.prototype._get = function(resourceUri, options,
-			callback) {
+	molgenis.RestClient.prototype._get = function(resourceUri, options, async, callback) {
 		var resource = null;
-
-		var async = callback !== undefined;
 		
 		var config = {
 			'dataType' : 'json',
 			'cache' : true,
-			'async' : async,
-			'success' : function(data) {
-				if (async)
-					callback(data);
-				else
-					resource = data;
-			}
+			'async' : async
 		};
-
+		
+		if(callback) {
+			config['success'] = function(data) {
+				callback(data);
+			}
+		} else if(async === false) {
+			config['success'] = function(data) {
+				resource = data;
+			}
+		}
+		
 		// tunnel get requests with options through a post,
 		// because it might not fit in the URL
 		if(options) {
@@ -451,10 +455,12 @@ function createInput(attr, attrs, val, lbl) {
 			});
 		}
 
-		this._ajax(config);
+		var promise = this._ajax(config);
 
-		if (!async)
+		if (async === false)
 			return resource;
+		else
+			return promise;
 	};
 
 	molgenis.RestClient.prototype._ajax = function(config) {
@@ -466,7 +472,7 @@ function createInput(attr, attrs, val, lbl) {
 			});
 		}
 
-		$.ajax(config);
+		return $.ajax(config);
 	};
 
 	molgenis.RestClient.prototype._toApiUri = function(resourceUri, options) {
@@ -496,7 +502,7 @@ function createInput(attr, attrs, val, lbl) {
 	};
 
 	molgenis.RestClient.prototype.remove = function(href, callback) {
-		this._ajax({
+		return this._ajax({
 			type : 'POST',
 			url : href,
 			data : '_method=DELETE',
@@ -507,7 +513,7 @@ function createInput(attr, attrs, val, lbl) {
 	};
 
 	molgenis.RestClient.prototype.update = function(href, entity, callback) {
-		this._ajax({
+		return this._ajax({
 			type : 'POST',
 			url : href + '?_method=PUT',
 			contentType : 'application/json',
@@ -805,3 +811,125 @@ $(function() {
 		$(this).trigger('changeDate');
 	});
 });
+//jQuery Deparam - v0.1.0 - 6/14/2011
+//http://benalman.com/
+//Copyright (c) 2011 Ben Alman; Licensed MIT, GPL
+
+(function($) {
+	// Creating an internal undef value is safer than using undefined, in case it
+	// was ever overwritten.
+	var undef;
+	// A handy reference.
+	var decode = decodeURIComponent;
+
+	// Document $.deparam.
+	var deparam = $.deparam = function(text, reviver) {
+		// The object to be returned.
+		var result = {};
+		// Iterate over all key=value pairs.
+		$.each(text.replace(/\+/g, ' ').split('&'), function(index, pair) {
+			// The key=value pair.
+			var kv = pair.split('=');
+			// The key, URI-decoded.
+			var key = decode(kv[0]);
+			// Abort if there's no key.
+			if (!key) {
+				return;
+			}
+			// The value, URI-decoded. If value is missing, use empty string.
+			var value = decode(kv[1] || '');
+			// If key is more complex than 'foo', like 'a[]' or 'a[b][c]', split it
+			// into its component parts.
+			var keys = key.split('][');
+			var last = keys.length - 1;
+			// Used when key is complex.
+			var i = 0;
+			var current = result;
+
+			// If the first keys part contains [ and the last ends with ], then []
+			// are correctly balanced.
+			if (keys[0].indexOf('[') >= 0 && /\]$/.test(keys[last])) {
+				// Remove the trailing ] from the last keys part.
+				keys[last] = keys[last].replace(/\]$/, '');
+				// Split first keys part into two parts on the [ and add them back onto
+				// the beginning of the keys array.
+				keys = keys.shift().split('[').concat(keys);
+				// Since a key part was added, increment last.
+				last++;
+			} else {
+				// Basic 'foo' style key.
+				last = 0;
+			}
+
+			if ($.isFunction(reviver)) {
+				// If a reviver function was passed, use that function.
+				value = reviver(key, value);
+			} else if (reviver) {
+				// If true was passed, use the built-in $.deparam.reviver function.
+				value = deparam.reviver(key, value);
+			}
+
+			if (last) {
+				// Complex key, like 'a[]' or 'a[b][c]'. At this point, the keys array
+				// might look like ['a', ''] (array) or ['a', 'b', 'c'] (object).
+				for (; i <= last; i++) {
+					// If the current key part was specified, use that value as the array
+					// index or object key. If omitted, assume an array and use the
+					// array's length (effectively an array push).
+					key = keys[i] !== '' ? keys[i] : current.length;
+					if (i < last) {
+						// If not the last key part, update the reference to the current
+						// object/array, creating it if it doesn't already exist AND there's
+						// a next key. If the next key is non-numeric and not empty string,
+						// create an object, otherwise create an array.
+						current = current[key] = current[key] || (isNaN(keys[i + 1]) ? {} : []);
+					} else {
+						// If the last key part, set the value.
+						current[key] = value;
+					}
+				}
+			} else {
+				// Simple key.
+				if ($.isArray(result[key])) {
+					// If the key already exists, and is an array, push the new value onto
+					// the array.
+					result[key].push(value);
+				} else if (key in result) {
+					// If the key already exists, and is NOT an array, turn it into an
+					// array, pushing the new value onto it.
+					result[key] = [ result[key], value ];
+				} else {
+					// Otherwise, just set the value.
+					result[key] = value;
+				}
+			}
+		});
+
+		return result;
+	};
+
+	// Default reviver function, used when true is passed as the second argument
+	// to $.deparam. Don't like it? Pass your own!
+	deparam.reviver = function(key, value) {
+		var specials = {
+			'true' : true,
+			'false' : false,
+			'null' : null,
+			'undefined' : undef
+		};
+
+		return (+value + '') === value ? +value // Number
+		: value in specials ? specials[value] // true, false, null, undefined
+		: value; // String
+	};
+
+}(jQuery));
+// IE9
+if(window.history === undefined)
+	window.history = {};
+if(window.history.pushState === undefined)
+	window.history.pushState = function(){};
+if(window.history.replaceState === undefined)
+	window.history.replaceState = function(){};
+if(window.onpopstate === undefined)
+	window.onpopstate = function(){}

@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.molgenis.data.support.DataServiceImpl;
+import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -48,7 +49,7 @@ public class DataServiceImplTest
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
-		dataService = new DataServiceImpl();
+		dataService = new DataServiceImpl(new NonDecoratingRepositoryDecoratorFactory());
 
 		repo1 = mock(Repository.class);
 		when(repo1.getName()).thenReturn("Entity1");
@@ -81,29 +82,30 @@ public class DataServiceImplTest
 	@Test
 	public void getRepositoryByEntityName()
 	{
-		assertEquals(dataService.getRepositoryByEntityName("Entity1"), repo1);
-		assertEquals(dataService.getRepositoryByEntityName("Entity2"), repo2);
+		assertEquals(dataService.getRepository("Entity1"), repo1);
+		assertEquals(dataService.getRepository("Entity2"), repo2);
 	}
 
 	@Test
 	public void removeRepositoryByEntityName()
 	{
-		assertEquals(dataService.getRepositoryByEntityName("Entity3"), repoToRemove);
+		assertEquals(dataService.getRepository("Entity3"), repoToRemove);
 		dataService.removeRepository("Entity3");
 	}
 
 	@Test(expectedExceptions = UnknownEntityException.class)
 	public void removeRepositoryByEntityNameUnknownEntityException()
 	{
-		assertEquals(dataService.getRepositoryByEntityName("Entity3"), repoToRemove);
+		assertEquals(dataService.getRepository("Entity3"), repoToRemove);
 		dataService.removeRepository("Entity3");
-		dataService.getRepositoryByEntityName("Entity3");
+		dataService.getRepository("Entity3");
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void removeRepositoryByEntityNameMolgenisDataException()
 	{
-		assertEquals(dataService.getRepositoryByEntityName("Entity3"), repoToRemove);
+		assertEquals(dataService.getRepository("Entity3"), repoToRemove);
 		dataService.removeRepository("Entity4");
 	}
+
 }

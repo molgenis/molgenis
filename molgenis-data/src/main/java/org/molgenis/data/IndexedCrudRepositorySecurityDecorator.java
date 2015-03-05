@@ -6,15 +6,14 @@ import org.molgenis.data.support.AggregateAnonymizerImpl;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.security.core.Permission;
 
-public class IndexedCrudRepositorySecurityDecorator extends CrudRepositorySecurityDecorator implements
-		IndexedRepository
+public class IndexedCrudRepositorySecurityDecorator extends RepositorySecurityDecorator implements IndexedRepository
 {
 	public static final String SETTINGS_KEY_AGGREGATE_ANONYMIZATION_THRESHOLD = "aggregate.anonymization.threshold";
-	private final IndexedCrudRepository decoratedRepository;
+	private final IndexedRepository decoratedRepository;
 	private final MolgenisSettings molgenisSettings;
 	private final AggregateAnonymizer aggregateAnonymizer = new AggregateAnonymizerImpl();
 
-	public IndexedCrudRepositorySecurityDecorator(IndexedCrudRepository decoratedRepository,
+	public IndexedCrudRepositorySecurityDecorator(IndexedRepository decoratedRepository,
 			MolgenisSettings molgenisSettings)
 	{
 		super(decoratedRepository);
@@ -42,6 +41,13 @@ public class IndexedCrudRepositorySecurityDecorator extends CrudRepositorySecuri
 	{
 		validatePermission(decoratedRepository.getName(), Permission.WRITE);
 		decoratedRepository.rebuildIndex();
+	}
+
+	@Override
+	public void create()
+	{
+		validatePermission(decoratedRepository.getName(), Permission.WRITE);
+		decoratedRepository.create();
 	}
 
 	@Override

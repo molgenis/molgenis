@@ -1,21 +1,21 @@
 package org.molgenis.data.elasticsearch;
 
+import java.util.Set;
+
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.IndexedCrudRepository;
+import org.molgenis.data.IndexedRepository;
+import org.molgenis.data.Manageable;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.Repository;
-import org.molgenis.data.Updateable;
-import org.molgenis.data.Writable;
+import org.molgenis.data.RepositoryCapability;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Repository that wraps an existing repository and retrieves count/aggregate information from a Elasticsearch index
  */
-public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepository implements IndexedCrudRepository
+public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepository implements IndexedRepository
 {
-	public static final String BASE_URL = "elasticsearch://";
-
 	private final Repository repository;
 
 	public ElasticsearchRepositoryDecorator(Repository repository, SearchService elasticSearchService)
@@ -35,12 +35,7 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	@Transactional
 	public void add(Entity entity)
 	{
-		if (!(repository instanceof Writable))
-		{
-			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Writable");
-		}
-		((Writable) repository).add(entity);
-
+		repository.add(entity);
 		super.add(entity);
 	}
 
@@ -48,37 +43,23 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	@Transactional
 	public Integer add(Iterable<? extends Entity> entities)
 	{
-		if (!(repository instanceof Writable))
-		{
-			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Writable");
-		}
-		Integer count = ((Writable) repository).add(entities);
-
+		Integer count = repository.add(entities);
 		super.add(entities);
+
 		return count;
 	}
 
 	@Override
 	public void flush()
 	{
-		if (!(repository instanceof Writable))
-		{
-			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Updateable");
-		}
-		((Writable) repository).flush();
-
+		repository.flush();
 		super.flush();
 	}
 
 	@Override
 	public void clearCache()
 	{
-		if (!(repository instanceof Writable))
-		{
-			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Updateable");
-		}
-		((Writable) repository).clearCache();
-
+		repository.clearCache();
 		super.clearCache();
 	}
 
@@ -86,12 +67,7 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	@Transactional
 	public void update(Entity entity)
 	{
-		if (!(repository instanceof Updateable))
-		{
-			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Updateable");
-		}
-		((Updateable) repository).update(entity);
-
+		repository.update(entity);
 		super.update(entity);
 	}
 
@@ -99,12 +75,7 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	@Transactional
 	public void update(Iterable<? extends Entity> entities)
 	{
-		if (!(repository instanceof Updateable))
-		{
-			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Updateable");
-		}
-		((Updateable) repository).update(entities);
-
+		repository.update(entities);
 		super.update(entities);
 	}
 
@@ -112,12 +83,7 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	@Transactional
 	public void delete(Entity entity)
 	{
-		if (!(repository instanceof Updateable))
-		{
-			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Updateable");
-		}
-		((Updateable) repository).delete(entity);
-
+		repository.delete(entity);
 		super.delete(entity);
 	}
 
@@ -125,12 +91,7 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	@Transactional
 	public void delete(Iterable<? extends Entity> entities)
 	{
-		if (!(repository instanceof Updateable))
-		{
-			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Updateable");
-		}
-		((Updateable) repository).delete(entities);
-
+		repository.delete(entities);
 		super.delete(entities);
 	}
 
@@ -138,12 +99,7 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	@Transactional
 	public void deleteById(Object id)
 	{
-		if (!(repository instanceof Updateable))
-		{
-			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Updateable");
-		}
-		((Updateable) repository).deleteById(id);
-
+		repository.deleteById(id);
 		super.deleteById(id);
 	}
 
@@ -151,12 +107,7 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	@Transactional
 	public void deleteById(Iterable<Object> ids)
 	{
-		if (!(repository instanceof Updateable))
-		{
-			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Updateable");
-		}
-		((Updateable) repository).deleteById(ids);
-
+		repository.deleteById(ids);
 		super.deleteById(ids);
 	}
 
@@ -164,12 +115,7 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	@Transactional
 	public void deleteAll()
 	{
-		if (!(repository instanceof Updateable))
-		{
-			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Updateable");
-		}
-		((Updateable) repository).deleteAll();
-
+		repository.deleteAll();
 		super.deleteAll();
 	}
 
@@ -182,6 +128,22 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	@Override
 	public void drop()
 	{
-		elasticSearchService.delete(getEntityMetaData().getName());
+		if (!(repository instanceof Manageable))
+		{
+			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Manageable");
+		}
+		((Manageable) repository).drop();
+
+		super.drop();
+	}
+
+	@Override
+	public Set<RepositoryCapability> getCapabilities()
+	{
+		Set<RepositoryCapability> capabilities = repository.getCapabilities();
+		capabilities.add(RepositoryCapability.QUERYABLE);
+		capabilities.add(RepositoryCapability.AGGREGATEABLE);
+
+		return capabilities;
 	}
 }

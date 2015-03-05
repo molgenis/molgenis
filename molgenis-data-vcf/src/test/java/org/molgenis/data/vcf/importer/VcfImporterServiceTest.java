@@ -1,5 +1,6 @@
 package org.molgenis.data.vcf.importer;
 
+import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -17,13 +18,13 @@ import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
-import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
-import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
+import org.molgenis.data.mem.InMemoryRepositoryCollection;
+import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.vcf.VcfRepositoryCollection;
 import org.molgenis.framework.db.EntityImportReport;
+import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.ResourceUtils;
 import org.testng.annotations.Test;
 
@@ -32,42 +33,28 @@ public class VcfImporterServiceTest
 	@Test
 	public void testImport() throws IOException
 	{
-		DataService dataService = new DataServiceImpl();
+		DataServiceImpl dataService = new DataServiceImpl();
+		MetaDataServiceImpl metaDataService = new MetaDataServiceImpl(dataService);
+		metaDataService.setDefaultBackend(new InMemoryRepositoryCollection("ElasticSearch"));
 
-		EmbeddedElasticSearchServiceFactory factory = new EmbeddedElasticSearchServiceFactory("vcf-import-test");
-		try
-		{
-			SearchService searchService = factory.create(dataService, new EntityToSourceConverter());
+		File f = ResourceUtils.getFile(getClass(), "/testdata.vcf");
+		VcfRepositoryCollection source = new VcfRepositoryCollection(f);
 
-			File f = ResourceUtils.getFile(getClass(), "/testdata.vcf");
-			VcfRepositoryCollection source = new VcfRepositoryCollection(f);
+		VcfImporterService importer = new VcfImporterService(new FileRepositoryCollectionFactory(), dataService,
+				mock(PermissionSystemService.class));
 
-			VcfImporterService importer = new VcfImporterService(new FileRepositoryCollectionFactory(), dataService,
-					searchService);
+		EntityImportReport report = importer.doImport(source, DatabaseAction.ADD);
 
-			EntityImportReport report = importer.doImport(source, DatabaseAction.ADD);
+		assertNotNull(report);
+		assertEquals(report.getNewEntities(), Arrays.asList("testdata", "testdata_Sample"));
 
-			assertNotNull(report);
-			assertEquals(report.getNewEntities(), Arrays.asList("testdata", "testdata_Sample"));
+		Map<String, Integer> importedEntitiesMap = report.getNrImportedEntitiesMap();
+		assertNotNull(importedEntitiesMap);
+		assertTrue(importedEntitiesMap.containsKey("testdata"));
+		assertEquals(importedEntitiesMap.get("testdata"), Integer.valueOf(7));
+		assertTrue(importedEntitiesMap.containsKey("testdata_Sample"));
+		assertEquals(importedEntitiesMap.get("testdata_Sample"), Integer.valueOf(7));
 
-			Map<String, Integer> importedEntitiesMap = report.getNrImportedEntitiesMap();
-			assertNotNull(importedEntitiesMap);
-			assertTrue(importedEntitiesMap.containsKey("testdata"));
-			assertEquals(importedEntitiesMap.get("testdata"), Integer.valueOf(7));
-			assertTrue(importedEntitiesMap.containsKey("testdata_Sample"));
-			assertEquals(importedEntitiesMap.get("testdata_Sample"), Integer.valueOf(7));
-		}
-		finally
-		{
-			factory.close();
-		}
-
-	}
-
-	@Test(expectedExceptions = IllegalArgumentException.class)
-	public void VcfImporterService()
-	{
-		new VcfImporterService(null, null, null);
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
@@ -75,14 +62,13 @@ public class VcfImporterServiceTest
 	{
 		String entityName = "entity";
 		DataService dataService = Mockito.mock(DataService.class);
-
-		SearchService searchService = Mockito.mock(SearchService.class);
 		Mockito.when(dataService.hasRepository(entityName)).thenReturn(true);
 
 		FileRepositoryCollectionFactory fileRepositoryCollectionFactory = Mockito
 				.mock(FileRepositoryCollectionFactory.class);
 		VcfImporterService vcfImporterService = new VcfImporterService(fileRepositoryCollectionFactory, dataService,
-				searchService);
+				mock(PermissionSystemService.class));
+
 		FileRepositoryCollection fileRepositoryCollection = Mockito.mock(FileRepositoryCollection.class);
 
 		File testdata = new File(FileUtils.getTempDirectory(), "testdata.vcf");
@@ -93,9 +79,8 @@ public class VcfImporterServiceTest
 
 		Repository repo = Mockito.mock(Repository.class);
 		Mockito.when(repo.getName()).thenReturn(entityName);
-		Mockito.when(fileRepositoryCollection.getRepositoryByEntityName(entityName)).thenReturn(repo);
+		Mockito.when(fileRepositoryCollection.getRepository(entityName)).thenReturn(repo);
 
 		vcfImporterService.importVcf(testdata);
 	}
-
 }

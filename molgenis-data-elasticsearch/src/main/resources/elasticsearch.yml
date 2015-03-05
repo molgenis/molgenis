@@ -119,21 +119,6 @@ index:
     query:
         bool:
             max_clause_count: 131072
-    analysis:
-        analyzer: 
-            default:
-                type: custom
-                filter: [lowercase, default_stemmer]
-                tokenizer: default_tokenizer
-                char_filter: html_strip
-        filter:
-            default_stemmer:
-                type: stemmer
-                name: english
-        tokenizer:
-            default_tokenizer:
-                type: pattern
-                pattern: ([\W\.]+)
 
 # disable automatic mapping creation
 index.mapper.dynamic: false

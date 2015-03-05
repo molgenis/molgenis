@@ -2,10 +2,8 @@ package org.molgenis.annotators;
 
 import static org.molgenis.annotators.AnnotatorController.URI;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
@@ -16,8 +14,9 @@ import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.CrudRepositoryAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.validation.EntityValidator;
+import org.molgenis.security.permission.PermissionSystemService;
+import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.FileStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +62,7 @@ public class AnnotatorController
 	EntityValidator entityValidator;
 
 	@Autowired
-	MysqlRepositoryCollection mysqlRepositoryCollection;
+	PermissionSystemService permissionSystemService;
 
 	/**
 	 * Gets a map of all available annotators.
@@ -85,7 +84,7 @@ public class AnnotatorController
 	 * option is ticked by the user.
 	 * 
 	 * @param annotatorNames
-	 * @param dataSetIdentifier
+	 * @param entityName
 	 * @param createCopy
 	 * @return repositoryName
 	 * 
@@ -97,11 +96,12 @@ public class AnnotatorController
 			@RequestParam("dataset-identifier") String entityName,
 			@RequestParam(value = "createCopy", required = false) boolean createCopy)
 	{
-		Repository repository = dataService.getRepositoryByEntityName(entityName);
+		Repository repository = dataService.getRepository(entityName);
 		if (annotatorNames != null && repository != null)
 		{
-			CrudRepositoryAnnotator crudRepositoryAnnotator = new CrudRepositoryAnnotator(mysqlRepositoryCollection,
-					getNewRepositoryName(annotatorNames, repository.getEntityMetaData().getSimpleName()));
+			CrudRepositoryAnnotator crudRepositoryAnnotator = new CrudRepositoryAnnotator(dataService,
+					getNewRepositoryName(annotatorNames, repository.getEntityMetaData().getSimpleName()),
+					permissionSystemService);
 
 			for (String annotatorName : annotatorNames)
 			{
@@ -109,10 +109,17 @@ public class AnnotatorController
 				if (annotator != null)
 				{
 					// running annotator
-					Repository repo = dataService.getRepositoryByEntityName(entityName);
-					repository = crudRepositoryAnnotator.annotate(annotator, repo, createCopy);
-					entityName = repository.getName();
-					createCopy = false;
+					try
+					{
+						Repository repo = dataService.getRepository(entityName);
+						repository = crudRepositoryAnnotator.annotate(annotator, repo, createCopy);
+						entityName = repository.getName();
+						createCopy = false;
+					}
+					catch (IOException e)
+					{
+						throw new RuntimeException(e.getMessage());
+					}
 				}
 			}
 		}
@@ -147,10 +154,13 @@ public class AnnotatorController
 			for (RepositoryAnnotator annotator : annotationService.getAllAnnotators())
 			{
 				Map<String, Object> map = new HashMap<String, Object>();
+				map.put("description", annotator.getDescription());
 				map.put("canAnnotate", annotator.canAnnotate(entityMetaData));
-				map.put("inputMetadata", metaDataToStringList(annotator.getInputMetaData()));
-				map.put("outputMetadata", metaDataToStringList(annotator.getOutputMetaData()));
-				mapOfAnnotators.put(annotator.getName(), map);
+				map.put("inputAttributes", annotator.getInputMetaData().getAttributes());
+				map.put("inputAttributeTypes", toMap(annotator.getInputMetaData().getAttributes()));
+				map.put("outputAttributes", annotator.getOutputMetaData().getAttributes());
+				map.put("outputAttributeTypes", toMap(annotator.getOutputMetaData().getAttributes()));
+				mapOfAnnotators.put(annotator.getSimpleName(), map);
 			}
 
 		}
@@ -158,18 +168,12 @@ public class AnnotatorController
 		return mapOfAnnotators;
 	}
 
-	/**
-	 * Transforms metadata to a List of strings
-	 * 
-	 * @param metaData
-	 * @return result
-	 * */
-	private List<String> metaDataToStringList(EntityMetaData metaData)
+	private Map<String, String> toMap(Iterable<AttributeMetaData> attrs)
 	{
-		List<String> result = new ArrayList<String>();
-		for (AttributeMetaData attribute : metaData.getAttributes())
+		Map<String, String> result = new HashMap<>();
+		for (AttributeMetaData attr : attrs)
 		{
-			result.add(attribute.getLabel() + "(" + attribute.getDataType().toString() + ")\n");
+			result.put(attr.getName(), attr.getDataType().toString());
 		}
 		return result;
 	}
@@ -177,10 +181,10 @@ public class AnnotatorController
 	@ExceptionHandler(RuntimeException.class)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-	public Map<String, String> handleRuntimeException(RuntimeException e)
+	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
 	{
 		LOG.error(e.getMessage(), e);
-		return Collections.singletonMap("errorMessage",
-				"An error occured. Please contact the administrator.<br />Message:" + e.getMessage());
+		return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(
+				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage()));
 	}
 }

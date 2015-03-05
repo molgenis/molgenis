@@ -9,8 +9,8 @@
 package org.molgenis.util.cmdline;
 
 // jdk
-import java.util.*;
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
+import java.util.Collection;
 
 /**
  * ...
@@ -18,8 +18,8 @@ import java.lang.reflect.*;
  * @author RA Scheltema
  * @version 1.0.0
  * 
- *          DEPRECATED AS OF April 15th 2011. Not longer needed due to assign()
- *          in org.molgenis.util.cmdline.CmdLineParser.
+ *          DEPRECATED AS OF April 15th 2011. Not longer needed due to assign() in
+ *          org.molgenis.util.cmdline.CmdLineParser.
  */
 @Deprecated
 public class FieldAssign
@@ -46,9 +46,8 @@ public class FieldAssign
 
 	// public methods
 	/**
-	 * This method applies the given value to the field in the given object. It
-	 * checks whether the field is a primitive and converts the value
-	 * accordingly.
+	 * This method applies the given value to the field in the given object. It checks whether the field is a primitive
+	 * and converts the value accordingly.
 	 * 
 	 * @param obj
 	 *            The object to set.
@@ -78,7 +77,7 @@ public class FieldAssign
 			String name = c.getSimpleName();
 			if ("int".equals(name))
 			{
-				field.setInt(obj, Integer.valueOf(value.toString()));
+				field.setInt(obj, Integer.parseInt(value.toString()));
 			}
 			else if ("short".equals(name))
 			{
@@ -86,7 +85,7 @@ public class FieldAssign
 			}
 			else if ("long".equals(name))
 			{
-				field.setLong(obj, Long.valueOf(value.toString()));
+				field.setLong(obj, Long.parseLong(value.toString()));
 			}
 			else if ("boolean".equals(name))
 			{

@@ -47,6 +47,9 @@ public class MolgenisAnonymousAuthenticationFilterTest
 	@Test
 	public void doFilter() throws IOException, ServletException
 	{
+		// anonymous authentication filter sets anonymous user if no user is set
+		SecurityContextHolder.getContext().setAuthentication(null);
+
 		UserDetailsService userDetailsService = mock(UserDetailsService.class);
 		UserDetails userDetails = mock(UserDetails.class);
 		SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_SOMETHING");

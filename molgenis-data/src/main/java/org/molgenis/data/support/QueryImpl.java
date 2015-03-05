@@ -11,7 +11,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.Queryable;
+import org.molgenis.data.Repository;
 import org.springframework.data.domain.Sort;
 
 public class QueryImpl implements Query
@@ -21,14 +21,29 @@ public class QueryImpl implements Query
 	private int pageSize;
 	private int offset;
 	private Sort sort;
-	private Queryable repository;
+	private Repository repository;
+
+	public static Query query()
+	{
+		return new QueryImpl();
+	}
+
+	public static Query EQ(String attributeName, Object value)
+	{
+		return query().eq(attributeName, value);
+	}
+
+	public static Query IN(String attributeName, Iterable<?> values)
+	{
+		return query().in(attributeName, values);
+	}
 
 	public QueryImpl()
 	{
 		this.rules.add(new ArrayList<QueryRule>());
 	}
 
-	public QueryImpl(Queryable repository)
+	public QueryImpl(Repository repository)
 	{
 		this();
 		this.repository = repository;
@@ -69,10 +84,10 @@ public class QueryImpl implements Query
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> findAll(Class<E> klazz)
+	public Iterable<Entity> findAll()
 	{
 		if (repository == null) throw new RuntimeException("Query failed: repository not set");
-		return repository.findAll(this, klazz);
+		return repository.findAll(this);
 	}
 
 	@Override

@@ -21,8 +21,8 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -55,7 +55,6 @@ import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
-import org.molgenis.data.Queryable;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
@@ -79,7 +78,6 @@ import org.molgenis.util.MolgenisDateFormat;
 import org.molgenis.util.ResourceFingerprintRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConversionFailedException;
@@ -93,6 +91,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -167,7 +166,7 @@ public class RestController
 	{
 		try
 		{
-			dataService.getRepositoryByEntityName(entityName);
+			dataService.getRepository(entityName);
 			return true;
 		}
 		catch (UnknownEntityException e)
@@ -672,8 +671,8 @@ public class RestController
 	public void updateFromFormPost(@PathVariable("entityName") String entityName, @PathVariable("id") Object id,
 			HttpServletRequest request)
 	{
-		Object typedId = dataService.getRepositoryByEntityName(entityName).getEntityMetaData().getIdAttribute()
-				.getDataType().convert(id);
+		Object typedId = dataService.getRepository(entityName).getEntityMetaData().getIdAttribute().getDataType()
+				.convert(id);
 
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		for (String param : request.getParameterMap().keySet())
@@ -695,8 +694,8 @@ public class RestController
 	@ResponseStatus(NO_CONTENT)
 	public void delete(@PathVariable("entityName") String entityName, @PathVariable Object id)
 	{
-		Object typedId = dataService.getRepositoryByEntityName(entityName).getEntityMetaData().getIdAttribute()
-				.getDataType().convert(id);
+		Object typedId = dataService.getRepository(entityName).getEntityMetaData().getIdAttribute().getDataType()
+				.convert(id);
 		dataService.delete(entityName, typedId);
 	}
 
@@ -716,19 +715,78 @@ public class RestController
 		delete(entityName, id);
 	}
 
+	/**
+	 * Deletes all entities for the given entity name
+	 * 
+	 * @param entityName
+	 * @param id
+	 * @throws EntityNotFoundException
+	 */
+	@RequestMapping(value = "/{entityName}", method = DELETE)
+	@ResponseStatus(NO_CONTENT)
+	public void deleteAll(@PathVariable("entityName") String entityName)
+	{
+		dataService.deleteAll(entityName);
+	}
+
+	/**
+	 * Deletes all entities for the given entity name but tunnels DELETE through POST
+	 * 
+	 * @param entityName
+	 * @param id
+	 * @throws EntityNotFoundException
+	 */
+	@RequestMapping(value = "/{entityName}", method = POST, params = "_method=DELETE")
+	@ResponseStatus(NO_CONTENT)
+	public void deleteAllPost(@PathVariable("entityName") String entityName)
+	{
+		dataService.deleteAll(entityName);
+	}
+
+	/**
+	 * Deletes all entities and entity meta data for the given entity name
+	 * 
+	 * @param entityName
+	 * @param id
+	 * @throws EntityNotFoundException
+	 */
+	@RequestMapping(value = "/{entityName}/meta", method = DELETE)
+	@ResponseStatus(NO_CONTENT)
+	@Transactional
+	public void deleteMeta(@PathVariable("entityName") String entityName)
+	{
+		deleteMetaInternal(entityName);
+	}
+
+	/**
+	 * Deletes all entities and entity meta data for the given entity name but tunnels DELETE through POST
+	 * 
+	 * @param entityName
+	 * @param id
+	 * @throws EntityNotFoundException
+	 */
+	@RequestMapping(value = "/{entityName}/meta", method = POST, params = "_method=DELETE")
+	@ResponseStatus(NO_CONTENT)
+	@Transactional
+	public void deleteMetaPost(@PathVariable("entityName") String entityName)
+	{
+		deleteMetaInternal(entityName);
+	}
+
+	private void deleteMetaInternal(String entityName)
+	{
+		dataService.getMeta().deleteEntityMeta(entityName);
+	}
+
 	@RequestMapping(value = "/{entityName}/create", method = GET)
 	public String createForm(@PathVariable("entityName") String entityName, Model model)
 	{
 
-		Repository repo = dataService.getRepositoryByEntityName(entityName);
-		Entity entity = null;
-		if (repo.getEntityMetaData().getEntityClass() != Entity.class) entity = BeanUtils.instantiateClass(repo
-				.getEntityMetaData().getEntityClass());
-		else entity = new MapEntity();
+		Repository repo = dataService.getRepository(entityName);
+
 		EntityMetaData entityMeta = repo.getEntityMetaData();
-		model.addAttribute(ENTITY_FORM_MODEL_ATTRIBUTE, new EntityForm(entityMeta, true, entity));
+		model.addAttribute(ENTITY_FORM_MODEL_ATTRIBUTE, new EntityForm(entityMeta, true, null));
 		model.addAttribute(KEY_RESOURCE_FINGERPRINT_REGISTRY, resourceFingerprintRegistry);
-		model.addAttribute("entity", entity);
 
 		return "view-entity-create";
 	}
@@ -737,8 +795,6 @@ public class RestController
 	public String editForm(@PathVariable("entityName") String entityName, @PathVariable Object id, Model model)
 	{
 		Entity entity = dataService.findOne(entityName, id);
-
-		// dataService.getRepositoryByEntityName(entityName);
 		EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
 
 		boolean hasWritePermission = molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITE);
@@ -1096,18 +1152,17 @@ public class RestController
 			EntityCollectionRequest request, Set<String> attributesSet, Map<String, Set<String>> attributeExpandsSet)
 	{
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
-		Repository repository = dataService.getRepositoryByEntityName(entityName);
+		Repository repository = dataService.getRepository(entityName);
 
-		// TODO non queryable
 		List<QueryRule> queryRules = request.getQ() == null ? Collections.<QueryRule> emptyList() : request.getQ();
 		Query q = new QueryImpl(queryRules).pageSize(request.getNum()).offset(request.getStart())
 				.sort(request.getSort());
 
 		Iterable<Entity> it = dataService.findAll(entityName, q);
-		Long count = ((Queryable) repository).count(q);
+		Long count = repository.count(q);
 		EntityPager pager = new EntityPager(request.getStart(), request.getNum(), count, it);
 
-		List<Map<String, Object>> entities = new ArrayList<Map<String, Object>>();
+		List<Map<String, Object>> entities = new ArrayList<>();
 		for (Entity entity : it)
 		{
 			entities.add(getEntityAsMap(entity, meta, attributesSet, attributeExpandsSet));
@@ -1127,11 +1182,12 @@ public class RestController
 		Map<String, Object> entityMap = new LinkedHashMap<String, Object>();
 		try
 		{
-			entityMap
-					.put("href", (String.format(BASE_URI + "/%s/%s", meta.getName(),
-							new URI(null, DataConverter.toString(entity.getIdValue()), null).toASCIIString(), "UTF-8")));
+			entityMap.put(
+					"href",
+					(String.format(BASE_URI + "/%s/%s", meta.getName(),
+							URLEncoder.encode(DataConverter.toString(entity.getIdValue()), "UTF-8"))));
 		}
-		catch (URISyntaxException e)
+		catch (UnsupportedEncodingException e)
 		{
 			throw new RuntimeException(e);
 		}
