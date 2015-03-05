@@ -2,21 +2,22 @@ package org.molgenis.data.jpa.importer;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.importer.ImportService;
+import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntitiesValidator;
 import org.molgenis.framework.db.EntityImportReport;
+import org.molgenis.util.FileExtensionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Lists;
 
@@ -26,8 +27,6 @@ import com.google.common.collect.Lists;
 @Component
 public class JpaImportService implements ImportService
 {
-	private static final List<String> SUPPORTED_FILE_EXTENSIONS = Arrays.asList("xls", "xlsx", "csv", "zip");
-
 	private final EntitiesValidator entitiesValidator;
 	private final EntitiesImporter entitiesImporter;
 	private final RepositoryCollection targetCollection;
@@ -70,12 +69,13 @@ public class JpaImportService implements ImportService
 	@Override
 	public boolean canImport(File file, RepositoryCollection source)
 	{
-		String fileNameExtension = StringUtils.getFilenameExtension(file.getName());
-		if (SUPPORTED_FILE_EXTENSIONS.contains(fileNameExtension.toLowerCase()))
+		String fileNameExtension = FileExtensionUtils.findExtensionFromPossibilities(file.getName(),
+				GenericImporterExtensions.getJPA());
+		if (null != fileNameExtension)
 		{
 			for (String entityName : source.getEntityNames())
 			{
-				if (targetCollection.getRepository(entityName) != null) return true;
+				targetCollection.hasRepository(entityName);
 			}
 		}
 
@@ -98,5 +98,11 @@ public class JpaImportService implements ImportService
 	public int getOrder()
 	{
 		return Ordered.LOWEST_PRECEDENCE;
+	}
+
+	@Override
+	public Set<String> getSupportedFileExtensions()
+	{
+		return GenericImporterExtensions.getJPA();
 	}
 }

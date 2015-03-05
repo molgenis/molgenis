@@ -79,6 +79,8 @@ public class OptionsWizardPage extends AbstractWizardPage
 			{
 				String fileName = tmpFile.getName();
 
+				// TODO FIXME wrong way to decide the extension of the file. It will not detect, for example a file with
+				// the obo.zip extension.
 				int index = fileName.lastIndexOf('.');
 				String extension = (index > -1) ? fileName.substring(index) : "";
 
