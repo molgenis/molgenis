@@ -376,6 +376,7 @@
 				}
 			}
 		});
+		
 		$('form[name=galaxy-export-form]').submit(function(e) {
 			e.preventDefault();
 			if($(this).valid()) {
