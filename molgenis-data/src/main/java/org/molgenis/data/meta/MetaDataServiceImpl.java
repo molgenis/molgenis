@@ -83,6 +83,7 @@ public class MetaDataServiceImpl implements MetaDataService
 
 		entityMetaDataRepository = new EntityMetaDataRepository(defaultBackend, packageRepository);
 		dataService.addRepository(entityMetaDataRepository.getRepository());
+		entityMetaDataRepository.fillEntityMetaDataCache();
 
 		attributeMetaDataRepository = new AttributeMetaDataRepository(defaultBackend, entityMetaDataRepository);
 		dataService.addRepository(attributeMetaDataRepository.getRepository());

@@ -86,7 +86,8 @@ molgenis.get <- local(function(entity, q = NULL, start = 0, num = 1000, sortColu
   # characterClass <- c("character")
   # names(characterClass) <- c("column1")
   # read.csv(url, colClass = c(characterClass))
-  dataFrame <- read.csv(url)
+	csv <- getURL(url)
+	dataFrame <- read.csv(textConnection(csv))
   
   return (dataFrame)
 }, molgenis.env)
