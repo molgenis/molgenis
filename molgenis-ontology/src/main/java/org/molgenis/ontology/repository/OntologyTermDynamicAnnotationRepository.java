@@ -84,7 +84,7 @@ public class OntologyTermDynamicAnnotationRepository extends AbstractRepository
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		return OntologyTermDynamicAnnotationMetaData.getEntityMetaData();
+		return OntologyTermDynamicAnnotationMetaData.INSTANCE;
 	}
 
 	public Map<String, Map<String, String>> getReferenceIds()

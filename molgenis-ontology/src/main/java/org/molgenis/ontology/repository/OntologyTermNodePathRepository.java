@@ -114,7 +114,7 @@ public class OntologyTermNodePathRepository extends AbstractRepository
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		return OntologyTermNodePathMetaData.getEntityMetaData();
+		return OntologyTermNodePathMetaData.INSTANCE;
 	}
 
 	public Map<String, Map<String, String>> getReferenceIds()

@@ -87,7 +87,7 @@ public class OntologyTermSynonymRepository extends AbstractRepository
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		return OntologyTermSynonymMetaData.getEntityMetaData();
+		return OntologyTermSynonymMetaData.INSTANCE;
 	}
 
 	public Map<String, Map<String, String>> getReferenceIds()

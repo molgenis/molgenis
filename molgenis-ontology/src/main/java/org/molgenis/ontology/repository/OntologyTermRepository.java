@@ -175,7 +175,7 @@ public class OntologyTermRepository extends AbstractRepository
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		return OntologyTermMetaData.getEntityMetaData();
+		return OntologyTermMetaData.INSTANCE;
 	}
 
 	@Override
