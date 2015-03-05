@@ -82,22 +82,22 @@ public class OntologyTermRepository extends AbstractRepository
 				String ontologyTermIRI = cls.getIRI().toString();
 				String ontologyTermName = ontologyLoader.getLabel(cls);
 
-				Map<String, Map<String, String>> referenceIds2 = ontologyTermSynonymRepo.getReferenceIds();
+				Map<String, Map<String, String>> synonymRefIds = ontologyTermSynonymRepo.getReferenceIds();
 
-				Map<String, Map<String, String>> referenceIds3 = ontologyTermDynamicAnnotationRepo.getReferenceIds();
+				Map<String, Map<String, String>> annotationRefIds = ontologyTermDynamicAnnotationRepo.getReferenceIds();
 
-				Map<String, Map<String, String>> referenceIds4 = ontologyTermNodePathRepository.getReferenceIds();
+				Map<String, Map<String, String>> nodePathRefIds = ontologyTermNodePathRepository.getReferenceIds();
 
 				List<String> synonymIds = ontologyTermSynonymRepo.getReferenceIds().containsKey(ontologyTermIRI) ? Lists
-						.newArrayList(referenceIds2.get(ontologyTermIRI).values()) : Arrays.asList();
+						.newArrayList(synonymRefIds.get(ontologyTermIRI).values()) : Arrays.asList();
 
 				List<String> annotationIds = ontologyTermDynamicAnnotationRepo.getReferenceIds().containsKey(
-						ontologyTermIRI) ? Lists.newArrayList(referenceIds3.get(ontologyTermIRI).values()) : Arrays
+						ontologyTermIRI) ? Lists.newArrayList(annotationRefIds.get(ontologyTermIRI).values()) : Arrays
 						.asList();
 
 				List<String> nodePathIds = ontologyTermNodePathRepository.getReferenceIds()
-						.containsKey(ontologyTermIRI) ? Lists.newArrayList(referenceIds4.get(ontologyTermIRI).values()) : Arrays
-						.asList();
+						.containsKey(ontologyTermIRI) ? Lists
+						.newArrayList(nodePathRefIds.get(ontologyTermIRI).values()) : Arrays.asList();
 
 				if (!referenceIds.containsKey(ontologyTermIRI))
 				{
