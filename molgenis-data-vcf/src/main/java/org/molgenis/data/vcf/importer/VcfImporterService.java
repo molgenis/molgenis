@@ -2,6 +2,8 @@ package org.molgenis.data.vcf.importer;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -31,14 +33,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 @Service
 public class VcfImporterService implements ImportService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(VcfImporterService.class);
-	private static final int DEFAULT_BATCH_SIZE = 1000;
+	private static final int BATCH_SIZE = 10000;
 	private static final String BACKEND = ElasticsearchRepositoryCollection.NAME;
 	private final FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
 	private final DataService dataService;
@@ -68,7 +69,7 @@ public class VcfImporterService implements ImportService
 			{
 				try (Repository repo = source.getRepository(it.next());)
 				{
-					report = importVcf(repo, DEFAULT_BATCH_SIZE, addedEntities);
+					report = importVcf(repo, addedEntities);
 					List<String> entityNames = addedEntities.stream().map(emd -> emd.getName())
 							.collect(Collectors.toList());
 					permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
@@ -168,7 +169,7 @@ public class VcfImporterService implements ImportService
 			Repository repo = repositoryCollection.getRepository(it.next());
 			try
 			{
-				importVcf(repo, DEFAULT_BATCH_SIZE, Lists.<EntityMetaData> newArrayList());
+				importVcf(repo, Lists.<EntityMetaData> newArrayList());
 			}
 			finally
 			{
@@ -177,8 +178,7 @@ public class VcfImporterService implements ImportService
 		}
 	}
 
-	public EntityImportReport importVcf(Repository inRepository, int batchSize, List<EntityMetaData> addedEntities)
-			throws IOException
+	public EntityImportReport importVcf(Repository inRepository, List<EntityMetaData> addedEntities) throws IOException
 	{
 		EntityImportReport report = new EntityImportReport();
 		Repository sampleRepository = null;
@@ -204,36 +204,53 @@ public class VcfImporterService implements ImportService
 		Iterator<Entity> inIterator = inRepository.iterator();
 		int vcfEntityCount = 0;
 		int sampleEntityCount = 0;
+		List<Entity> sampleEntities = new ArrayList<>();
 		try (Repository outRepository = dataService.getMeta().addEntityMeta(entityMetaData))
 		{
 			addedEntities.add(entityMetaData);
 
-			while (inIterator.hasNext())
+			if (sampleRepository != null)
 			{
-				Entity entity = inIterator.next();
-				vcfEntityCount++;
-
-				if (sampleRepository != null)
+				while (inIterator.hasNext())
 				{
+					Entity entity = inIterator.next();
+					vcfEntityCount++;
+
 					Iterable<Entity> samples = entity.getEntities("SAMPLES");
 					if (samples != null)
 					{
-						sampleRepository.add(samples);
-						sampleEntityCount += Iterables.size(samples);
+						Iterator<Entity> sampleIterator = samples.iterator();
+						while (sampleIterator.hasNext())
+						{
+							sampleEntities.add(sampleIterator.next());
+
+							if (sampleEntities.size() == BATCH_SIZE)
+							{
+								sampleRepository.add(sampleEntities);
+								sampleEntityCount += sampleEntities.size();
+								sampleEntities.clear();
+							}
+						}
 					}
+
 				}
 
-				outRepository.add(entity);
+				if (!sampleEntities.isEmpty())
+				{
+					sampleRepository.add(sampleEntities);
+					sampleEntityCount += sampleEntities.size();
+				}
+
+				sampleRepository.flush();
+
+				report.addNewEntity(sampleRepository.getName());
+				if (sampleEntityCount > 0) report.addEntityCount(sampleRepository.getName(), sampleEntityCount);
 			}
+
+			outRepository.add(inRepository);
 		}
 
 		report.addNewEntity(entityName);
-
-		if (sampleRepository != null)
-		{
-			report.addNewEntity(sampleRepository.getName());
-			if (sampleEntityCount > 0) report.addEntityCount(sampleRepository.getName(), sampleEntityCount);
-		}
 
 		if (vcfEntityCount > 0)
 		{
