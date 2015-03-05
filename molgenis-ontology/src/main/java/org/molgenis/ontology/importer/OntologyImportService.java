@@ -34,7 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.google.common.collect.Lists;
 
 @Service
-public class OntologyImporterService implements ImportService
+public class OntologyImportService implements ImportService
 {
 	private final DataService dataService;
 	private final SearchService searchService;
@@ -47,7 +47,7 @@ public class OntologyImporterService implements ImportService
 	private OntologyService ontologyService;
 
 	@Autowired
-	public OntologyImporterService(FileRepositoryCollectionFactory fileRepositoryCollectionFactory,
+	public OntologyImportService(FileRepositoryCollectionFactory fileRepositoryCollectionFactory,
 			DataService dataService, SearchService searchService, PermissionSystemService permissionSystemService)
 	{
 		if (fileRepositoryCollectionFactory == null) throw new IllegalArgumentException(
