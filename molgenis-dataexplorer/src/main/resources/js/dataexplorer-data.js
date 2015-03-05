@@ -326,30 +326,32 @@
 			/**
 			 * Validation before using the setLocation of the browser
 			 */
-			function setLocation(chr, viewStart, viewEnd){
-				var maxViewWidth = 999999999;
-				if(chr){
-					viewStart = viewStart && viewStart > 0 ? viewStart : 1;
-					viewEnd = viewEnd && viewEnd > 0 ? viewEnd : viewStart + maxViewWidth;
-					genomeBrowser.setLocation(chr, viewStart, viewEnd);
+			if(molgenis.dataexplorer.settings["genomebrowser"] !== 'false'){
+				function setLocation(chr, viewStart, viewEnd){
+					var maxViewWidth = 999999999;
+					if(chr){
+						viewStart = viewStart && viewStart > 0 ? viewStart : 1;
+						viewEnd = viewEnd && viewEnd > 0 ? viewEnd : viewStart + maxViewWidth;
+						genomeBrowser.setLocation(chr, viewStart, viewEnd);
+					}
 				}
+				
+				// TODO implement elegant solution for genome browser specific code
+				$.each(data.filters, function() {
+					if(this.getComplexFilterElements && this.getComplexFilterElements()[0]){
+						if(this.attribute === genomebrowserStartAttribute){
+							setLocation(genomeBrowser.chr,
+									parseInt(this.getComplexFilterElements()[0].simpleFilter.fromValue),
+									parseInt(this.getComplexFilterElements()[0].simpleFilter.toValue));
+						}
+						else if(this.attribute === genomebrowserChromosomeAttribute){
+							setLocation(this.getComplexFilterElements()[0].simpleFilter.getValues()[0],
+									genomeBrowser.viewStart,
+									genomeBrowser.viewEnd);
+						}
+					}
+				});
 			}
-			
-			// TODO implement elegant solution for genome browser specific code
-			$.each(data.filters, function() {
-				if(this.getComplexFilterElements && this.getComplexFilterElements()[0]){
-					if(this.attribute === genomebrowserStartAttribute){
-						setLocation(genomeBrowser.chr,
-								parseInt(this.getComplexFilterElements()[0].simpleFilter.fromValue),
-								parseInt(this.getComplexFilterElements()[0].simpleFilter.toValue));
-					}
-					else if(this.attribute === genomebrowserChromosomeAttribute){
-						setLocation(this.getComplexFilterElements()[0].simpleFilter.getValues()[0],
-								genomeBrowser.viewStart,
-								genomeBrowser.viewEnd);
-					}
-				}
-			});
 		});
 
 		$(document).on('changeQuery.data', function(e, query) {
