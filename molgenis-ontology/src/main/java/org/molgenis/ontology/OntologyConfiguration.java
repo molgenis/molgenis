@@ -3,8 +3,6 @@ package org.molgenis.ontology;
 import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.importer.EmxImportService;
-import org.molgenis.ontology.index.AsyncOntologyIndexer;
-import org.molgenis.ontology.index.OntologyIndexer;
 import org.molgenis.ontology.matching.ProcessInputTermService;
 import org.molgenis.ontology.matching.UploadProgress;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,22 +29,10 @@ public class OntologyConfiguration
 	@Autowired
 	private OntologyService ontologyService;
 
-	/**
-	 * Get a reference to a HarmonizationIndexer.
-	 * 
-	 * @return HarmonizationIndexer
-	 */
-	@Bean
-	public OntologyIndexer harmonizationIndexer()
-	{
-		return new AsyncOntologyIndexer(searchService, dataService, ontologyService);
-	}
-
 	@Bean
 	public ProcessInputTermService processInputTermService()
 	{
-		return new ProcessInputTermService(emxImportService, dataService, uploadProgress(),
-				ontologyService);
+		return new ProcessInputTermService(emxImportService, dataService, uploadProgress(), ontologyService);
 	}
 
 	@Bean
