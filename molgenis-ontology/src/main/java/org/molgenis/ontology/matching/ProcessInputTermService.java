@@ -71,13 +71,13 @@ public class ProcessInputTermService
 		// Add a new entry in MatchingTask table for this new matching job
 		int threshold = uploadProgress.getThreshold(userName);
 		MapEntity mapEntity = new MapEntity();
-		mapEntity.set(MatchingTaskEntity.IDENTIFIER, entityName);
-		mapEntity.set(MatchingTaskEntity.DATA_CREATED, new Date());
-		mapEntity.set(MatchingTaskEntity.CODE_SYSTEM, ontologyIri);
-		mapEntity.set(MatchingTaskEntity.MOLGENIS_USER, userName);
-		mapEntity.set(MatchingTaskEntity.THRESHOLD, threshold);
-		dataService.add(MatchingTaskEntity.ENTITY_NAME, mapEntity);
-		dataService.getRepository(MatchingTaskEntity.ENTITY_NAME).flush();
+		mapEntity.set(MatchingTaskEntityMetaData.IDENTIFIER, entityName);
+		mapEntity.set(MatchingTaskEntityMetaData.DATA_CREATED, new Date());
+		mapEntity.set(MatchingTaskEntityMetaData.CODE_SYSTEM, ontologyIri);
+		mapEntity.set(MatchingTaskEntityMetaData.MOLGENIS_USER, userName);
+		mapEntity.set(MatchingTaskEntityMetaData.THRESHOLD, threshold);
+		dataService.add(MatchingTaskEntityMetaData.ENTITY_NAME, mapEntity);
+		dataService.getRepository(MatchingTaskEntityMetaData.ENTITY_NAME).flush();
 		uploadProgress.registerUser(userName, entityName, (int) dataService.count(entityName, new QueryImpl()));
 		// Match input terms with code
 		Iterable<Entity> findAll = dataService.findAll(entityName);

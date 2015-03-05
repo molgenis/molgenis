@@ -32,14 +32,14 @@ public class MatchingTaskEntityRegistrator implements ApplicationListener<Contex
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
-		if (!dataService.hasRepository(MatchingTaskEntity.ENTITY_NAME))
+		if (!dataService.hasRepository(MatchingTaskEntityMetaData.ENTITY_NAME))
 		{
-			LOG.info("Created table " + MatchingTaskEntity.ENTITY_NAME);
-			dataService.getMeta().addEntityMeta(MatchingTaskEntity.getEntityMetaData());
+			LOG.info("Created table " + MatchingTaskEntityMetaData.ENTITY_NAME);
+			dataService.getMeta().addEntityMeta(MatchingTaskEntityMetaData.getEntityMetaData());
 		}
 		else
 		{
-			LOG.info("Table " + MatchingTaskEntity.ENTITY_NAME + " existed");
+			LOG.info("Table " + MatchingTaskEntityMetaData.ENTITY_NAME + " existed");
 		}
 
 		if (!dataService.hasRepository(MatchingTaskContentEntity.ENTITY_NAME))
