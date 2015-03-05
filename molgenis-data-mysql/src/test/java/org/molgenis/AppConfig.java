@@ -5,6 +5,7 @@ import java.util.UUID;
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
+import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
@@ -130,8 +131,7 @@ public class AppConfig
 			@Override
 			public boolean hasRepository(String name)
 			{
-				// TODO Auto-generated method stub
-				return false;
+				throw new NotImplementedException("Not implemented yet");
 			}
 		};
 

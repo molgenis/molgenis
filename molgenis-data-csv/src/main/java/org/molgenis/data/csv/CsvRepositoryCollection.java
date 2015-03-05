@@ -10,7 +10,6 @@ import java.util.zip.ZipFile;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
@@ -148,7 +147,7 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 	@Override
 	public boolean hasRepository(String name)
 	{
-		throw new NotImplementedException("Not implemented yet");
+		return entityNames.contains(name);
 	}
 
 }

@@ -108,6 +108,12 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	@Override
 	public boolean hasRepository(String name)
 	{
-		throw new NotImplementedException("Not implemented yet");
+		if (null == name) return false;
+		Iterator<String> entityNames = getEntityNames().iterator();
+		while (entityNames.hasNext())
+		{
+			if (entityNames.next().equals(name)) return true;
+		}
+		return false;
 	}
 }

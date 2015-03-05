@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.molgenis.DatabaseConfig;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
@@ -79,8 +80,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 			@Override
 			public boolean hasRepository(String name)
 			{
-				// TODO Auto-generated method stub
-				return false;
+				throw new NotImplementedException("Not implemented yet");
 			}
 		};
 		localDataService.getMeta().setDefaultBackend(backend);

@@ -45,8 +45,7 @@ public class MatchingTaskEntityRegistrator implements ApplicationListener<Contex
 		if (!dataService.hasRepository(MatchingTaskContentEntity.ENTITY_NAME))
 		{
 			LOG.info("Created table " + MatchingTaskContentEntity.ENTITY_NAME);
-			// mysqlRepositoryCollection.add(MatchingTaskContentEntity.getEntityMetaData()); //TODO JJ
-			dataService.getMeta().addEntityMeta(MatchingTaskContentEntity.getEntityMetaData()); // TODO JJ
+			dataService.getMeta().addEntityMeta(MatchingTaskContentEntity.getEntityMetaData());
 		}
 		else
 		{

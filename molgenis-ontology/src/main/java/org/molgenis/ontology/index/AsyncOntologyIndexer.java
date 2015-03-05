@@ -237,7 +237,7 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 						dataService.getEntityMetaData(OntologyQueryRepository.ENTITY_NAME));
 			}
 			String ontologyName = ontologyEntity.getString(OntologyQueryRepository.ONTOLOGY_NAME);
-			dataService.deleteAll(ontologyName); // TODO JJ
+			dataService.deleteAll(ontologyName);
 			dataService.getMeta().deleteEntityMeta(ontologyName);
 		}
 	}

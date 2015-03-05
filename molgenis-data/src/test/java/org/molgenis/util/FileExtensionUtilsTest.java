@@ -15,7 +15,7 @@ public class FileExtensionUtilsTest
 	{
 		Set<String> extensions = GenericImporterExtensions.getAll();
 		for(String extention :extensions){
-			assertEquals(FileExtensionUtils.findExtensionFromSetForGenericImporter("molgenis.test." + extention,
+			assertEquals(FileExtensionUtils.findExtensionFromPossibilities("molgenis.test." + extention,
 					GenericImporterExtensions.getAll()),
 					GenericImporterExtensions.valueOf(extention.toUpperCase().replace('.', '_'))
 					.toString());

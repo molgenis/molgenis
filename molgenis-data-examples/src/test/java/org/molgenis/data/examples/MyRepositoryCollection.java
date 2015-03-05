@@ -4,7 +4,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
@@ -49,7 +48,13 @@ public class MyRepositoryCollection implements RepositoryCollection
 	@Override
 	public boolean hasRepository(String name)
 	{
-		throw new NotImplementedException("Not implemented yet");
+		if (null == name) return false;
+		Iterator<String> entityNames = getEntityNames().iterator();
+		while (entityNames.hasNext())
+		{
+			if (entityNames.next().equals(name)) return true;
+		}
+		return false;
 	}
 
 }

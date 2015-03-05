@@ -50,17 +50,13 @@ public class ImportServiceFactory
 			}
 		}
 
-		String extension = FileExtensionUtils.findExtensionFromSetForGenericImporter(file.getName(),
+		String extension = FileExtensionUtils.findExtensionFromPossibilities(file.getName(),
 				importServicesImportableMapedToExtensions.keySet());
 
 		final ImportService importService = importServicesImportableMapedToExtensions.get(extension);
 
-		System.out.println("extension: " + extension);
-
 		if (importService == null)
 			throw new MolgenisDataException("Can not import file. No suitable importer found");
-
-		System.out.println("SupportedFileExtensions" + importService.getSupportedFileExtensions());
 
 		return importService;
 	}
