@@ -5,21 +5,22 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.annotation.AbstractRepositoryAnnotator;
 import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.LocusAnnotator;
 import org.molgenis.data.annotation.impl.datastructures.JsonReader;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.json.*;
 
-public class GeneNetworkAnnotator extends AbstractRepositoryAnnotator implements RepositoryAnnotator
+public class GeneNetworkAnnotator extends LocusAnnotator
 {
 	private static final String NAME = "GENENETWORK";
 
@@ -88,12 +89,6 @@ public class GeneNetworkAnnotator extends AbstractRepositoryAnnotator implements
 	public String getSimpleName()
 	{
 		return NAME;
-	}
-
-	@Override
-	public boolean canAnnotate(EntityMetaData inputMetaData)
-	{
-		return true;
 	}
 
 	@Override
