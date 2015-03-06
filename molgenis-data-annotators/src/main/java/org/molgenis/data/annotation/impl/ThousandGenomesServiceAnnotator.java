@@ -128,6 +128,7 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 	@Override
 	public boolean annotationDataExists()
 	{
+		if (null == molgenisSettings.getProperty(THGEN_DIRECTORY_LOCATION_PROPERTY)) return false;
         File f = new File(molgenisSettings.getProperty(THGEN_DIRECTORY_LOCATION_PROPERTY));
         return (f.exists() && f.isDirectory());
 	}

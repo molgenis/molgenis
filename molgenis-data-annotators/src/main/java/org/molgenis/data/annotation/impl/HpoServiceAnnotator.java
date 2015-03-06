@@ -15,11 +15,9 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.HgncLocationsUtils;
 import org.molgenis.data.annotation.LocusAnnotator;
 import org.molgenis.data.annotation.VcfUtils;
 import org.molgenis.data.annotation.impl.datastructures.HpoData;
-import org.molgenis.data.annotation.impl.datastructures.Locus;
 import org.molgenis.data.annotation.provider.HpoDataProvider;
 import org.molgenis.data.support.AnnotationServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
@@ -28,8 +26,6 @@ import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.server.MolgenisSimpleSettings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -44,16 +40,14 @@ import org.springframework.stereotype.Component;
 @Component("HpoService")
 public class HpoServiceAnnotator extends LocusAnnotator
 {
-	private static final Logger LOG = LoggerFactory.getLogger(HpoServiceAnnotator.class);
-	
 	private final MolgenisSettings molgenisSettings;
 	private final AnnotationService annotatorService;
 	private final HpoDataProvider hpoDataProvider;
 
 	private static final String NAME = "HPO";
+
 	public static final String HPO_IDS = VcfRepository.getInfoPrefix() + "HPOIDS";
 	public static final String HPO_TERMS = VcfRepository.getInfoPrefix() + "HPOTERMS";
-	
 	public static final String HPO_FILE_LOCATION = "hpo_location";
 	
 	
@@ -117,8 +111,6 @@ public class HpoServiceAnnotator extends LocusAnnotator
 		outputVCFWriter.close();
 		vcfRepo.close();
 		System.out.println("All done!");
-		
-		
 	}
 
 	@Override
@@ -136,6 +128,7 @@ public class HpoServiceAnnotator extends LocusAnnotator
 	@Override
 	public boolean annotationDataExists()
 	{
+		if (null == molgenisSettings.getProperty(HPO_FILE_LOCATION)) return false;
 		return new File(molgenisSettings.getProperty(HPO_FILE_LOCATION)).exists();
 	}
 
@@ -215,11 +208,8 @@ public class HpoServiceAnnotator extends LocusAnnotator
 	public EntityMetaData getOutputMetaData()
 	{
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_IDS, MolgenisFieldTypes.FieldTypeEnum.STRING));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_TERMS, MolgenisFieldTypes.FieldTypeEnum.STRING));
-		
-
 		return metadata;
 	}
 }
