@@ -49,7 +49,7 @@ public class UserManagerServiceImpl implements UserManagerService
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional
-	public void setActivationUser(Integer userId, Boolean active)
+	public void setActivationUser(String userId, Boolean active)
 	{
 		MolgenisUser mu = this.dataService.findOne(MolgenisUser.ENTITY_NAME, userId, MolgenisUser.class);
 		mu.setActive(active);
@@ -59,7 +59,7 @@ public class UserManagerServiceImpl implements UserManagerService
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional
-	public void setActivationGroup(Integer groupId, Boolean active)
+	public void setActivationGroup(String groupId, Boolean active)
 	{
 		MolgenisGroup mg = this.dataService.findOne(MolgenisGroup.ENTITY_NAME, groupId, MolgenisGroup.class);
 		mg.setActive(active);
@@ -84,7 +84,7 @@ public class UserManagerServiceImpl implements UserManagerService
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true)
-	public List<MolgenisGroup> getGroupsWhereUserIsMember(Integer userId)
+	public List<MolgenisGroup> getGroupsWhereUserIsMember(String userId)
 	{
 		return this.getMolgenisGroups(userId);
 	}
@@ -92,12 +92,12 @@ public class UserManagerServiceImpl implements UserManagerService
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true)
-	public List<MolgenisUserViewData> getUsersMemberInGroup(Integer groupId)
+	public List<MolgenisUserViewData> getUsersMemberInGroup(String groupId)
 	{
 		return this.parseToMolgenisUserViewData(this.getMolgenisUsers(groupId));
 	}
 
-	private List<MolgenisGroup> getMolgenisGroups(Integer userId)
+	private List<MolgenisGroup> getMolgenisGroups(String userId)
 	{
 		final MolgenisUser molgenisUser = dataService.findOne(MolgenisUser.ENTITY_NAME, userId, MolgenisUser.class);
 
@@ -113,7 +113,7 @@ public class UserManagerServiceImpl implements UserManagerService
 		return this.getAllMolgenisGroupsFromGroupMembers(groupMembers);
 	}
 
-	private List<MolgenisUser> getMolgenisUsers(final Integer groupId)
+	private List<MolgenisUser> getMolgenisUsers(final String groupId)
 	{
 		final MolgenisGroup molgenisGroup = dataService
 				.findOne(MolgenisGroup.ENTITY_NAME, groupId, MolgenisGroup.class);
@@ -133,7 +133,7 @@ public class UserManagerServiceImpl implements UserManagerService
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true)
-	public List<MolgenisGroup> getGroupsWhereUserIsNotMember(final Integer userId)
+	public List<MolgenisGroup> getGroupsWhereUserIsNotMember(final String userId)
 	{
 		final MolgenisUser molgenisUser = dataService.findOne(MolgenisUser.ENTITY_NAME, userId, MolgenisUser.class);
 
@@ -157,7 +157,7 @@ public class UserManagerServiceImpl implements UserManagerService
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional
-	public void addUserToGroup(Integer molgenisGroupId, Integer molgenisUserId)
+	public void addUserToGroup(String molgenisGroupId, String molgenisUserId)
 	{
 		MolgenisGroup group = dataService.findOne(MolgenisGroup.ENTITY_NAME, molgenisGroupId, MolgenisGroup.class);
 		MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME, molgenisUserId, MolgenisUser.class);
@@ -171,7 +171,7 @@ public class UserManagerServiceImpl implements UserManagerService
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional
-	public void removeUserFromGroup(Integer molgenisGroupId, Integer molgenisUserId)
+	public void removeUserFromGroup(String molgenisGroupId, String molgenisUserId)
 	{
 		final MolgenisUser molgenisUser = dataService.findOne(MolgenisUser.ENTITY_NAME, molgenisUserId,
 				MolgenisUser.class);
