@@ -1,10 +1,13 @@
 package org.molgenis.data.annotation.tabix;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
+
+import net.sf.samtools.SAMFormatException;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
@@ -65,7 +68,7 @@ public class TabixRepository extends AbstractRepository
 			}
 			catch (IOException e)
 			{
-				LOG.error("Failed to initialize tabix reader for file " + fileName);
+				LOG.error("Failed to initialize tabix reader for file " + fileName, e);
 				throw new IllegalStateException("Failed to initialize tabix reader for file " + fileName, e);
 			}
 		}
@@ -117,9 +120,14 @@ public class TabixRepository extends AbstractRepository
 				line = iterator.next();
 			}
 		}
+		catch (SAMFormatException e)
+		{
+			LOG.error("Bad GZIP file: {}", fileName, e);
+			throw e;
+		}
 		catch (IOException e)
 		{
-			LOG.error("Error reading from tabix reader.", e);
+			LOG.error("Error reading from tabix reader {}", fileName, e);
 		}
 		return builder.build();
 	}
@@ -196,4 +204,8 @@ public class TabixRepository extends AbstractRepository
 		return new TabixRepositoryIterator();
 	}
 
+	public boolean fileExists()
+	{
+		return new File(fileName).exists();
+	}
 }
