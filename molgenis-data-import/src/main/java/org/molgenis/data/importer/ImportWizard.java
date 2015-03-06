@@ -21,7 +21,7 @@ public class ImportWizard extends Wizard
 	private Map<String, Collection<String>> fieldsAvailable;
 	private String entityImportOption;
 	private String validationMessage;
-	private Integer importRunId;
+	private String importRunId;
 	private List<DatabaseAction> supportedDatabaseActions;
 	private boolean mustChangeEntityName;
 
@@ -115,12 +115,12 @@ public class ImportWizard extends Wizard
 		this.validationMessage = validationMessage;
 	}
 
-	public Integer getImportRunId()
+	public String getImportRunId()
 	{
 		return importRunId;
 	}
 
-	public void setImportRunId(Integer importRunId)
+	public void setImportRunId(String importRunId)
 	{
 		this.importRunId = importRunId;
 	}

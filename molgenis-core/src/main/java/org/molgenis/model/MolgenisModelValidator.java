@@ -676,7 +676,7 @@ public class MolgenisModelValidator
 			for (Field field : entity.getAllFields())
 			{
 				String fieldname = field.getName();
-				if (field.isAuto() && field.getType() instanceof IntField)
+				if (field.isAuto() && field.getType() instanceof StringField)
 				{
 					autocount++;
 

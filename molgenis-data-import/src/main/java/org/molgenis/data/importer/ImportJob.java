@@ -18,13 +18,13 @@ public class ImportJob implements Runnable
 	private final SecurityContext securityContext;
 	private final RepositoryCollection source;
 	private final DatabaseAction databaseAction;
-	private final int importRunId;
+	private final String importRunId;
 	private final ImportRunService importRunService;
 	private final ImportPostProcessingService importPostProcessingService;
 	private final HttpSession session;
 
 	public ImportJob(ImportService importService, SecurityContext securityContext, RepositoryCollection source,
-			DatabaseAction databaseAction, int importRunId, ImportRunService importRunService,
+			DatabaseAction databaseAction, String importRunId, ImportRunService importRunService,
 			ImportPostProcessingService importPostProcessingService, HttpSession session)
 	{
 		this.importService = importService;
