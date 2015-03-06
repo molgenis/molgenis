@@ -85,7 +85,7 @@ public abstract class AbstractStaticContentController extends MolgenisPluginCont
 	{
 		try
 		{
-			this.staticContentService.submitContent(this.uniqueReference, StringEscapeUtils.escapeXml(content));
+			this.staticContentService.submitContent(this.uniqueReference, StringEscapeUtils.escapeHtml4(content));
 		}
 		catch (RuntimeException re)
 		{
