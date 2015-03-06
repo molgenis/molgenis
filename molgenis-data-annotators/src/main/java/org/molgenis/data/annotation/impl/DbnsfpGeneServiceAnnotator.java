@@ -22,6 +22,7 @@ import org.molgenis.data.annotation.provider.HgncLocationsProvider;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -127,8 +128,8 @@ public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(
 				molgenisSettings.getProperty(GENE_FILE_LOCATION_PROPERTY)), Charset.forName("UTF-8")));
 
-		Long position = entity.getLong(POSITION);
-		String chromosome = entity.getString(CHROMOSOME);
+		Long position = entity.getLong(VcfRepository.POS);
+		String chromosome = entity.getString(VcfRepository.CHROM);
 
 		List<String> geneSymbols = HgncLocationsUtils.locationToHgcn(hgncLocationsProvider.getHgncLocations(),
 				new Locus(chromosome, position));

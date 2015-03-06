@@ -52,12 +52,9 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 
 	private final MolgenisSettings molgenisSettings;
 	private final AnnotationService annotatorService;
-
-	// the cadd service returns these two values
-	// must be compatible with VCF format, ie no funny characters
-	public static final String THGEN_MAF = VcfRepository.getInfoPrefix() + "1KGMAF";
-
-	private static final String NAME = "1000G";
+    private static final String NAME = "1000G";
+    public static final String THGEN_MAF = VcfRepository.getInfoPrefix() + "1KGMAF";
+    public static final String THGEN_DIRECTORY_LOCATION_PROPERTY = "1000G_location";
 
 	final List<String> infoFields = Arrays
 			.asList(new String[]
@@ -65,10 +62,8 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 					"##INFO=<ID="
 							+ THGEN_MAF.substring(VcfRepository.getInfoPrefix().length())
 							+ ",Number=1,Type=Float,Description=\"1000G minor allele frequency.\">"
-							});
+	        });
 
-	public static final String THGEN_DIRECTORY_LOCATION_PROPERTY = "1000G_location";
-	
 	HashMap<String, TabixReader> tabixReaders = null;
 
 	@Autowired
@@ -87,7 +82,7 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 
 		this.annotatorService = new AnnotationServiceImpl();
 
-		checkTabixReader();
+		getTabixReaders();
 		
 		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
 
@@ -146,22 +141,13 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 	@Override
 	public List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException
 	{
-		checkTabixReader();
-
-		// FIXME need to solve this! duplicate notation for CHROM in VcfRepository.CHROM and LocusAnnotator.CHROMOSOME
-		String chromosome = entity.getString(VcfRepository.CHROM) != null ? entity.getString(VcfRepository.CHROM) : entity
-				.getString(CHROMOSOME);
-
-		// FIXME use VcfRepository.POS, use VcfRepository.REF, use VcfRepository.ALT ?
-		Map<String, Object> resultMap = annotateEntityWith1000G(chromosome, entity.getLong(POSITION),
-				entity.getString(REFERENCE), entity.getString(ALTERNATIVE));
+        getTabixReaders();
+        Map<String, Object> resultMap = annotateWith1000G(entity.getString(VcfRepository.CHROM), entity.getLong(VcfRepository.POS),
+                entity.getString(VcfRepository.REF), entity.getString(VcfRepository.ALT));
 		return Collections.<Entity> singletonList(getAnnotatedEntity(entity, resultMap));
 	}
 
-	/**
-	 * Makes sure the tabixReader exists.
-	 */
-	private void checkTabixReader() throws IOException
+	private void getTabixReaders() throws IOException
 	{
 		if (tabixReaders == null)
 		{
@@ -170,10 +156,7 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 				if (tabixReaders == null)
 				{
 					tabixReaders = new HashMap<String, TabixReader>();
-					
 					String chroms = "1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|X|Y"; //yes, 1KG has Y
-					
-				//	tabixReader = new TabixReader(molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY));
 					
 					for(String chr : chroms.split("\\|"))
 					{
@@ -194,7 +177,7 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 		}
 	}
 
-	private synchronized Map<String, Object> annotateEntityWith1000G(String chromosome, Long position, String reference,
+	private synchronized Map<String, Object> annotateWith1000G(String chromosome, Long position, String reference,
 			String alternative) throws IOException
 	{
 		Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -273,11 +256,10 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 			if(altAllele.equals(alternative) && split[3].equals(reference))
 			{
 				maf = Double.parseDouble(mafs[i]);
-//				LOG.info("1000G variant found for CHROM: " + chromosome + " POS: " + position + " REF: " + reference + " ALT: " + alternative + ", MAF = " + maf);
 			}
 		}
 		
-		//if nothing found, try swapping ref-alt, and do 1-MAF
+		//if nothing found, try swapping ref-alt, and do 1-Minor Allele Frequency
 		if(false && maf == null) //FIXME TODO bad idea... ? e.g. C->CT is *not* swappable with CT->CTT,CTTT,C !! one is insertion, other is deletion (both REF is the real reference!), except CTT->CT, but that requires smart parsing!
 		{
 			for(int i = 0; i < altAlleles.length; i++)

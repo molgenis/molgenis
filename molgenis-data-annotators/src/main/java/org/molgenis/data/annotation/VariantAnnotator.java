@@ -10,9 +10,6 @@ import org.molgenis.data.vcf.VcfRepository;
 public abstract class VariantAnnotator extends LocusAnnotator
 {
 
-	public static final String REFERENCE = VcfRepository.REF;
-	public static final String ALTERNATIVE = VcfRepository.ALT;
-	
 	public static final String QUAL = VcfRepository.QUAL;
 	public static final String FILTER = VcfRepository.FILTER;
 	public static final String SAMPLES = VcfRepository.SAMPLES;
@@ -21,21 +18,11 @@ public abstract class VariantAnnotator extends LocusAnnotator
 	public EntityMetaData getInputMetaData()
 	{
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		DefaultAttributeMetaData chrom = new DefaultAttributeMetaData(CHROMOSOME,
-				MolgenisFieldTypes.FieldTypeEnum.STRING);
-		chrom.setDescription("The chromosome on which the variant is observed");
-		DefaultAttributeMetaData pos = new DefaultAttributeMetaData(POSITION, MolgenisFieldTypes.FieldTypeEnum.LONG);
-		pos.setDescription("The position on the chromosome which the variant is observed");
-		DefaultAttributeMetaData ref = new DefaultAttributeMetaData(REFERENCE, MolgenisFieldTypes.FieldTypeEnum.STRING);
-		ref.setDescription("The reference allele");
-		DefaultAttributeMetaData alt = new DefaultAttributeMetaData(ALTERNATIVE,
-				MolgenisFieldTypes.FieldTypeEnum.STRING);
-		alt.setDescription("The alternative allele observed");
 
-		metadata.addAttributeMetaData(chrom);
-		metadata.addAttributeMetaData(pos);
-		metadata.addAttributeMetaData(ref);
-		metadata.addAttributeMetaData(alt);
+		metadata.addAttributeMetaData(VcfRepository.CHROM_META);
+		metadata.addAttributeMetaData(VcfRepository.POS_META);
+		metadata.addAttributeMetaData(VcfRepository.REF_META);
+		metadata.addAttributeMetaData(VcfRepository.POS_META);
 
 		return metadata;
 	}

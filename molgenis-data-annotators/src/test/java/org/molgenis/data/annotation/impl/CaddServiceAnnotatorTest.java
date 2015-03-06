@@ -77,33 +77,33 @@ public class CaddServiceAnnotatorTest
         entity3 = new MapEntity(metaDataCanAnnotate);
         entity4 = new MapEntity(metaDataCanAnnotate);
 
-		entity1.set(CaddServiceAnnotator.CHROMOSOME,"1");
-		entity1.set(CaddServiceAnnotator.POSITION, 100);
-		entity1.set(CaddServiceAnnotator.REFERENCE, "C");
-		entity1.set(CaddServiceAnnotator.ALTERNATIVE, "T");
+		entity1.set(VcfRepository.CHROM,"1");
+		entity1.set(VcfRepository.POS, 100);
+		entity1.set(VcfRepository.REF, "C");
+		entity1.set(VcfRepository.ALT, "T");
 		input1 = new ArrayList<Entity>();
 		input1.add(entity1);
 
-		entity2.set(CaddServiceAnnotator.CHROMOSOME, "2");
-		entity2.set(CaddServiceAnnotator.POSITION, new Long(200));
-		entity2.set(CaddServiceAnnotator.REFERENCE, "A");
-		entity2.set(CaddServiceAnnotator.ALTERNATIVE, "C");
+		entity2.set(VcfRepository.CHROM, "2");
+		entity2.set(VcfRepository.POS, new Long(200));
+		entity2.set(VcfRepository.REF, "A");
+		entity2.set(VcfRepository.ALT, "C");
 		input2 = new ArrayList<Entity>();
 		input2.add(entity2);
 		annotator = new CaddServiceAnnotator(settings, null);
 
-		entity3.set(CaddServiceAnnotator.CHROMOSOME, "3");
-		entity3.set(CaddServiceAnnotator.POSITION, new Long(300));
-		entity3.set(CaddServiceAnnotator.REFERENCE, "G");
-		entity3.set(CaddServiceAnnotator.ALTERNATIVE, "C");
+		entity3.set(VcfRepository.CHROM, "3");
+		entity3.set(VcfRepository.POS, new Long(300));
+		entity3.set(VcfRepository.REF, "G");
+		entity3.set(VcfRepository.ALT, "C");
 		input3 = new ArrayList<Entity>();
 		input3.add(entity3);
 		annotator = new CaddServiceAnnotator(settings, null);
 
-		entity4.set(CaddServiceAnnotator.CHROMOSOME, "1");
-		entity4.set(CaddServiceAnnotator.POSITION, new Long(100));
-		entity4.set(CaddServiceAnnotator.REFERENCE, "T");
-		entity4.set(CaddServiceAnnotator.ALTERNATIVE, "C");
+		entity4.set(VcfRepository.CHROM, "1");
+		entity4.set(VcfRepository.POS, new Long(100));
+		entity4.set(VcfRepository.REF, "T");
+		entity4.set(VcfRepository.ALT, "C");
 		input4 = new ArrayList<Entity>();
 		input4.add(entity4);
 		annotator = new CaddServiceAnnotator(settings, null);

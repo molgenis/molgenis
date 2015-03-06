@@ -24,6 +24,7 @@ import org.molgenis.data.annotation.provider.HgncLocationsProvider;
 import org.molgenis.data.annotation.provider.KeggDataProvider;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.vcf.VcfRepository;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -49,8 +50,8 @@ public class KeggAnnotatorServiceTest
 
 		AnnotationService annotationService = mock(AnnotationService.class);
 
-		when(attributeMetaDataChrom.getName()).thenReturn(KeggServiceAnnotator.CHROMOSOME);
-		when(attributeMetaDataPos.getName()).thenReturn(KeggServiceAnnotator.POSITION);
+		when(attributeMetaDataChrom.getName()).thenReturn(VcfRepository.CHROM);
+		when(attributeMetaDataPos.getName()).thenReturn(VcfRepository.POS);
 		when(attributeMetaDataChrom.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
 		when(attributeMetaDataPos.getDataType()).thenReturn(
@@ -68,23 +69,23 @@ public class KeggAnnotatorServiceTest
 				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
 
 		attributeMetaDataCantAnnotateChrom = mock(AttributeMetaData.class);
-		when(attributeMetaDataCantAnnotateChrom.getName()).thenReturn(DbnsfpVariantServiceAnnotator.CHROMOSOME);
+		when(attributeMetaDataCantAnnotateChrom.getName()).thenReturn(VcfRepository.CHROM);
 		when(attributeMetaDataCantAnnotateFeature.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.INT.toString().toLowerCase()));
 
 		attributeMetaDataCantAnnotatePos = mock(AttributeMetaData.class);
-		when(attributeMetaDataCantAnnotatePos.getName()).thenReturn(KeggServiceAnnotator.POSITION);
+		when(attributeMetaDataCantAnnotatePos.getName()).thenReturn(VcfRepository.POS);
 		when(attributeMetaDataCantAnnotatePos.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
 
-		when(metaDataCantAnnotate.getAttribute(KeggServiceAnnotator.CHROMOSOME)).thenReturn(attributeMetaDataChrom);
-		when(metaDataCantAnnotate.getAttribute(KeggServiceAnnotator.POSITION)).thenReturn(
+		when(metaDataCantAnnotate.getAttribute(VcfRepository.CHROM)).thenReturn(attributeMetaDataChrom);
+		when(metaDataCantAnnotate.getAttribute(VcfRepository.POS)).thenReturn(
 				attributeMetaDataCantAnnotatePos);
 
 		entity = mock(Entity.class);
 
-		when(entity.getString(KeggServiceAnnotator.CHROMOSOME)).thenReturn("2");
-		when(entity.getLong(KeggServiceAnnotator.POSITION)).thenReturn(new Long(58453844l));
+		when(entity.getString(VcfRepository.CHROM)).thenReturn("2");
+		when(entity.getLong(VcfRepository.POS)).thenReturn(new Long(58453844l));
 
 		input = new ArrayList<Entity>();
 		input.add(entity);

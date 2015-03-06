@@ -56,7 +56,6 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 	private final MolgenisSettings molgenisSettings;
 	private final AnnotationService annotatorService;
 
-	// must be compatible with VCF format, ie no funny characters
 	public static final String GONL_MAF = VcfRepository.getInfoPrefix() + "GONLMAF";
 	public static final String GONL_GTC = VcfRepository.getInfoPrefix() + "GONLGTC";
 
@@ -93,7 +92,7 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 
 		this.annotatorService = new AnnotationServiceImpl();
 
-		checkTabixReader();
+		getTabixReaders();
 		
 		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
 
@@ -152,9 +151,8 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 	@Override
 	public List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException
 	{
-		checkTabixReader();
-		String chromosome = entity.getString(VcfRepository.CHROM);
-		Map<String, Object> resultMap = annotateEntityWithGoNL(chromosome, entity.getLong(VcfRepository.POS),
+		getTabixReaders();
+		Map<String, Object> resultMap = annotateWithGoNL(entity.getString(VcfRepository.CHROM), entity.getLong(VcfRepository.POS),
 				entity.getString(VcfRepository.REF), entity.getString(VcfRepository.ALT));
 		return Collections.<Entity> singletonList(getAnnotatedEntity(entity, resultMap));
 	}
@@ -162,7 +160,7 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 	/**
 	 * Makes sure the tabixReader exists.
 	 */
-	private void checkTabixReader() throws IOException
+	private void getTabixReaders() throws IOException
 	{
 		if (tabixReaders == null)
 		{
@@ -193,17 +191,17 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 		}
 	}
 
-	private synchronized Map<String, Object> annotateEntityWithGoNL(String chromosome, Long position, String reference,
-			String alternative) throws IOException
+	private synchronized Map<String, Object> annotateWithGoNL(String inputChromosome, Long inputPosition, String inputReference,
+			String inputAlternative) throws IOException
 	{
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 
-		if(!tabixReaders.containsKey(chromosome)){
-			LOG.info("No chromosome " + chromosome + " in data!");
+		if(!tabixReaders.containsKey(inputChromosome)){
+			LOG.info("No chromosome " + inputChromosome + " in data!");
 			return resultMap;
 		}
 		
-		TabixReader.Iterator tabixIterator = tabixReaders.get(chromosome).query(chromosome + ":" + position + "-" + position);
+		TabixReader.Iterator tabixIterator = tabixReaders.get(inputChromosome).query(inputChromosome + ":" + inputPosition + "-" + inputPosition);
 		String line = null;
 	
 		//get line from data, we expect exactly 1
@@ -213,14 +211,14 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 		}
 		catch(net.sf.samtools.SAMFormatException sfx)
 		{
-			LOG.error("Bad GZIP file for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
-					+ " ALT: " + alternative + " LINE: " + line);
+			LOG.error("Bad GZIP file for CHROM: " + inputChromosome + " POS: " + inputPosition + " REF: " + inputReference
+					+ " ALT: " + inputAlternative + " LINE: " + line);
 			throw sfx;
 		}
 		catch(NullPointerException npe)
 		{
-			LOG.info("No data for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
-					+ " ALT: " + alternative + " LINE: " + line);
+			LOG.info("No data for CHROM: " + inputChromosome + " POS: " + inputPosition + " REF: " + inputReference
+					+ " ALT: " + inputAlternative + " LINE: " + line);
 			//throw sfx;
 		}
 		
@@ -235,8 +233,8 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 		split = line.split("\t", -1);
 		if (split.length != 8)
 		{
-			LOG.error("Bad GoNL data (split was not 8 elements) for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
-					+ " ALT: " + alternative + " LINE: " + line);
+			LOG.error("Bad GoNL data (split was not 8 elements) for CHROM: " + inputChromosome + " POS: " + inputPosition + " REF: " + inputReference
+					+ " ALT: " + inputAlternative + " LINE: " + line);
 			throw new IOException("Bad data! see log");
 		}
 		
@@ -264,14 +262,14 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 		//check if we miss data
 		if(ac == -1 || an == -1)
 		{
-			LOG.error("Bad GoNL data (no AC or AN field) for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
-					+ " ALT: " + alternative + " LINE: " + line);
+			LOG.error("Bad GoNL data (no AC or AN field) for CHROM: " + inputChromosome + " POS: " + inputPosition + " REF: " + inputReference
+					+ " ALT: " + inputAlternative + " LINE: " + line);
 			throw new IOException("Bad data (no AC or AN), see log");
 		}
 		if(gtc == null)
 		{
-			LOG.error("Bad GoNL data (no GTC field) for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
-					+ " ALT: " + alternative + " LINE: " + line);
+			LOG.error("Bad GoNL data (no GTC field) for CHROM: " + inputChromosome + " POS: " + inputPosition + " REF: " + inputReference
+					+ " ALT: " + inputAlternative + " LINE: " + line);
 			throw new IOException("Bad data (no GTC), see log");
 		}
 		
@@ -280,8 +278,8 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 		
 		Double maf = null;
 		
-		//match alleles and get the MAF from list
-		if(ref.equals(reference) && alt.equals(alternative))
+		//match alleles and get the Minor Allele Frequency from list
+		if(ref.equals(inputReference) && alt.equals(inputAlternative))
 		{
 			maf = ac/an;
 //			LOG.info("1000G variant found for CHROM: " + chromosome + " POS: " + position + " REF: " + reference + " ALT: " + alternative + ", MAF = " + maf);
@@ -291,11 +289,11 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 		if(false && maf == null)  //FIXME TODO See 1000G annotator why this is not (always) allowed
 		{
 			
-			if(ref.equals(alternative) && alt.equals(reference))
+			if(ref.equals(inputAlternative) && alt.equals(inputReference))
 			{
 				maf = 1-(ac/an);
-				LOG.info("*ref-alt swapped* 1000G variant found for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
-						+ " ALT: " + alternative + ", MAF (1-originalMAF) = " + maf);
+				LOG.info("*ref-alt swapped* 1000G variant found for CHROM: " + inputChromosome + " POS: " + inputPosition + " REF: " + inputReference
+						+ " ALT: " + inputAlternative + ", MAF (1-originalMAF) = " + maf);
 			}
 			
 		}

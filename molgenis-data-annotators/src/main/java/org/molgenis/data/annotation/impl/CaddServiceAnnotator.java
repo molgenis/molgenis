@@ -149,14 +149,8 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	public List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException
 	{
 		checkTabixReader();
-
-		// FIXME need to solve this! duplicate notation for CHROM in VcfRepository.CHROM and LocusAnnotator.CHROMOSOME
-		String chromosome = entity.getString(VcfRepository.CHROM) != null ? entity.getString(VcfRepository.CHROM) : entity
-				.getString(CHROMOSOME);
-
-		// FIXME use VcfRepository.POS, use VcfRepository.REF, use VcfRepository.ALT ?
-		Map<String, Object> resultMap = annotateEntityWithCADD(chromosome, entity.getLong(POSITION),
-				entity.getString(REFERENCE), entity.getString(ALTERNATIVE));
+        Map<String, Object> resultMap = annotateEntityWithCADD(entity.getString(VcfRepository.CHROM), entity.getLong(VcfRepository.POS),
+				entity.getString(VcfRepository.REF), entity.getString(VcfRepository.ALT));
 		return Collections.<Entity> singletonList(getAnnotatedEntity(entity, resultMap));
 	}
 
