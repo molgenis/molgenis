@@ -70,8 +70,9 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 
 	@Override
 	@Transactional
-	public Iterator<Entity> annotate(final Iterator<Entity> source)
+	public Iterator<Entity> annotate(final Iterable<Entity> sourceIterable)
 	{
+        Iterator<Entity> source = sourceIterable.iterator();
 		return new Iterator<Entity>()
 		{
 			int current = 0;

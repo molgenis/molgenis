@@ -58,8 +58,9 @@ public class VcfRepository extends AbstractRepository
 	public static final String INFO = "INFO";
 	public static final String SAMPLES = "SAMPLES";
 	public static final String NAME = "NAME";
+    public static final String PREFIX = "##";
 
-	private final File file;
+    private final File file;
 	private final String entityName;
 
 	private DefaultEntityMetaData entityMetaData;
@@ -142,7 +143,7 @@ public class VcfRepository extends AbstractRepository
 							// TODO support list of primitives datatype
 							val = StringUtils.join((List<?>) val, ',');
 						}
-						entity.set(vcfInfo.getKey(), val);
+						entity.set(getInfoPrefix() + vcfInfo.getKey(), val);
 					}
 					if (hasFormatMetaData)
 					{
@@ -229,7 +230,7 @@ public class VcfRepository extends AbstractRepository
 				List<AttributeMetaData> metadataInfoField = new ArrayList<AttributeMetaData>();
 				for (VcfMetaInfo info : vcfMeta.getInfoMeta())
 				{
-					DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData(info.getId(),
+					DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData(getInfoPrefix() + info.getId(),
 							vcfReaderFormatToMolgenisType(info)).setAggregateable(true);
 					attributeMetaData.setDescription(info.getDescription());
 					metadataInfoField.add(attributeMetaData);
@@ -252,6 +253,17 @@ public class VcfRepository extends AbstractRepository
 			}
 		}
 		return entityMetaData;
+	}
+	
+	/**
+	 * Prefix to make INFO column names safe-ish. For example, 'Samples' is sometimes used as an INFO field
+	 * and clashes with the 'Samples' key used by Genotype-IO to store sample data in memory.
+	 * By prefixing a tag we hope to create unique INFO field names that do not clash.
+	 * @return
+	 */
+	public static String getInfoPrefix()
+	{
+		return INFO + "_";
 	}
 
 	void createSampleEntityMetaData(Iterable<VcfMetaFormat> formatMetaData)
