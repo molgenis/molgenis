@@ -37,7 +37,7 @@ public class OntologyQueryRepositoryTest
 		OntologyService ontologyService = mock(OntologyService.class);
 
 		DefaultEntityMetaData entityMetaDataOntology = new DefaultEntityMetaData(
-				OntologyQueryRepository.DEFAULT_ONTOLOGY_REPO);
+				OntologyQueryRepository.ENTITY_NAME);
 		entityMetaDataOntology
 				.addAttributeMetaData(new DefaultAttributeMetaData(OntologyQueryRepository.ONTOLOGY_NAME));
 		entityMetaDataOntology.addAttributeMetaData(new DefaultAttributeMetaData(OntologyQueryRepository.ROOT,

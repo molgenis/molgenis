@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import javax.sql.DataSource;
 
+import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.molgenis.data.DataService;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
@@ -67,6 +68,12 @@ public class MySqlConfiguration
 			protected MysqlRepository createMysqlRepository()
 			{
 				return mysqlRepository();
+			}
+
+			@Override
+			public boolean hasRepository(String name)
+			{
+				throw new NotImplementedException("Not implemented yet");
 			}
 		};
 

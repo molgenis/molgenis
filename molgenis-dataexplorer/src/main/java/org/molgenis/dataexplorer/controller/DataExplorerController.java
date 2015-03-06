@@ -160,8 +160,7 @@ public class DataExplorerController extends MolgenisPluginController
 	 * @return the view name
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(value = "entity", required = false) String selectedEntityName,
-			@RequestParam(value = "searchTerm", required = false) String searchTerm, Model model) throws Exception
+	public String init(@RequestParam(value = "entity", required = false) String selectedEntityName, Model model) throws Exception
 	{
 		boolean entityExists = false;
 		boolean hasEntityPermission = false;
@@ -200,7 +199,6 @@ public class DataExplorerController extends MolgenisPluginController
 			}
 		}
 		model.addAttribute("selectedEntityName", selectedEntityName);
-		model.addAttribute("searchTerm", searchTerm);
 		model.addAttribute("hideSearchBox", molgenisSettings.getBooleanProperty(KEY_HIDE_SEARCH_BOX, false));
 		model.addAttribute("hideDataItemSelect", molgenisSettings.getBooleanProperty(KEY_HIDE_ITEM_SELECTION, false));
 		model.addAttribute("isAdmin", SecurityUtils.currentUserIsSu());

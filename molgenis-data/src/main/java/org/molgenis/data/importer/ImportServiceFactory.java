@@ -3,13 +3,16 @@ package org.molgenis.data.importer;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.util.FileExtensionUtils;
 import org.springframework.core.OrderComparator;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 @Component
 public class ImportServiceFactory
@@ -21,6 +24,7 @@ public class ImportServiceFactory
 		importServices.add(importService);
 		Collections.sort(importServices, OrderComparator.INSTANCE);
 	}
+	
 
 	/**
 	 * Finds a suitable ImportService for a FileRepositoryCollection.
@@ -34,11 +38,26 @@ public class ImportServiceFactory
 	 */
 	public ImportService getImportService(File file, RepositoryCollection source)
 	{
+		final Map<String, ImportService> importServicesImportableMapedToExtensions = Maps.newHashMap();
 		for (ImportService importService : importServices)
 		{
-			if (importService.canImport(file, source)) return importService;
+			if (importService.canImport(file, source))
+			{
+				for (String extension : importService.getSupportedFileExtensions())
+				{
+					importServicesImportableMapedToExtensions.put(extension.toLowerCase(), importService);
+				}
+			}
 		}
 
-		throw new MolgenisDataException("Can not import file. No suitable importer found");
+		String extension = FileExtensionUtils.findExtensionFromPossibilities(file.getName(),
+				importServicesImportableMapedToExtensions.keySet());
+
+		final ImportService importService = importServicesImportableMapedToExtensions.get(extension);
+
+		if (importService == null)
+			throw new MolgenisDataException("Can not import file. No suitable importer found");
+
+		return importService;
 	}
 }

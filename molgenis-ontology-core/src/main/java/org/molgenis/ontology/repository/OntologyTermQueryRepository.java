@@ -18,7 +18,6 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.OntologyService;
 import org.molgenis.ontology.beans.OntologyTermEntity;
 import org.molgenis.ontology.beans.OntologyTermTransformer;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
@@ -28,7 +27,6 @@ public class OntologyTermQueryRepository extends AbstractOntologyQueryRepository
 	public final static String DEFAULT_ONTOLOGY_TERM_REPO = "ontologytermindex";
 	private final static List<String> reservedAttributeName = Arrays.asList("score");
 
-	@Autowired
 	public OntologyTermQueryRepository(String entityName, SearchService searchService, DataService dataService,
 			OntologyService ontologyService)
 	{

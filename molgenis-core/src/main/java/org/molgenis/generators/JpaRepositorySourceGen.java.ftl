@@ -66,6 +66,12 @@ public class JpaRepositoryCollection extends IndexedRepositoryCollectionDecorato
 			{
 				return repositories.get(name);
 			}
+
+			@Override
+			public boolean hasRepository(String name)
+			{
+				return repositories.containsKey(name);
+			}
 		});
 	}
 
