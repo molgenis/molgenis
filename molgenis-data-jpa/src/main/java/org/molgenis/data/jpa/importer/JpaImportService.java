@@ -71,15 +71,18 @@ public class JpaImportService implements ImportService
 	{
 		String fileNameExtension = FileExtensionUtils.findExtensionFromPossibilities(file.getName(),
 				GenericImporterExtensions.getJPA());
+
+		if (!source.getEntityNames().iterator().hasNext()) return false;
+
 		if (null != fileNameExtension)
 		{
 			for (String entityName : source.getEntityNames())
 			{
-				if (targetCollection.hasRepository(entityName)) return true;
+				if (!targetCollection.hasRepository(entityName)) return false;
 			}
 		}
 
-		return false;
+		return true;
 	}
 
 	@Override
