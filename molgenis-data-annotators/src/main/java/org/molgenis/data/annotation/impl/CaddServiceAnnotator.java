@@ -54,24 +54,24 @@ public class CaddServiceAnnotator extends VariantAnnotator
 
 	// the cadd service returns these two values
 	// must be compatible with VCF format, ie no funny characters
-	public static final String CADD_SCALED = "CADDSCALED";
-	public static final String CADD_ABS = "CADDABS";
+	public static final String CADD_SCALED = VcfRepository.getInfoPrefix() + "CADDSCALED";
+	public static final String CADD_ABS = VcfRepository.getInfoPrefix() + "CADDABS";
 
 	private static final String NAME = "CADD";
 
 	final List<String> infoFields = Arrays
-			.asList(new String[]
-			{
-					"##INFO=<ID="
-							+ CADD_SCALED
-							+ ",Number=1,Type=Float,Description=\"CADD scaled C score, ie. phred-like. See Kircher et al. 2014 (http://www.ncbi.nlm.nih.gov/pubmed/24487276) or CADD website (http://cadd.gs.washington.edu/) for more information.\">",
-					"##INFO=<ID="
-							+ CADD_ABS
-							+ ",Number=1,Type=Float,Description=\"CADD absolute C score, ie. unscaled SVM output. Useful as  reference when the scaled score may be unexpected.\">" });
+        .asList(new String[]
+                {
+                        "##INFO=<ID="
+                                + CADD_SCALED.substring(VcfRepository.getInfoPrefix().length())
+                                + ",Number=1,Type=Float,Description=\"CADD scaled C score, ie. phred-like. See Kircher et al. 2014 (http://www.ncbi.nlm.nih.gov/pubmed/24487276) or CADD website (http://cadd.gs.washington.edu/) for more information.\">",
+                        "##INFO=<ID="
+                                + CADD_ABS.substring(VcfRepository.getInfoPrefix().length())
+                                + ",Number=1,Type=Float,Description=\"CADD absolute C score, ie. unscaled SVM output. Useful as  reference when the scaled score may be unexpected.\">" });
 
-	public static final String CADD_FILE_LOCATION_PROPERTY = "cadd_location";
+    public static final String CADD_FILE_LOCATION_PROPERTY = "cadd_location";
 
-	private volatile TabixReader tabixReader;
+    private volatile TabixReader tabixReader;
 
 	@Autowired
 	public CaddServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService)
@@ -89,14 +89,15 @@ public class CaddServiceAnnotator extends VariantAnnotator
 
 		this.annotatorService = new AnnotationServiceImpl();
 
-		tabixReader = new TabixReader(molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY));
+		//tabixReader = new TabixReader(molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY));
+		checkTabixReader();
 
 		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
 
 		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
 		Iterator<Entity> vcfIter = vcfRepo.iterator();
 
-		VcfUtils.checkInput(inputVcfFile, outputVCFWriter, infoFields, CADD_SCALED);
+		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields, CADD_SCALED);
 
 		System.out.println("Now starting to process the data.");
 
@@ -143,20 +144,108 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	{
 		return NAME;
 	}
-
+	
 	@Override
 	public List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException
 	{
 		checkTabixReader();
-
-		// FIXME need to solve this! duplicate notation for CHROM in VcfRepository.CHROM and LocusAnnotator.CHROMOSOME
-		String chromosome = entity.getString(VcfRepository.CHROM) != null ? entity.getString(VcfRepository.CHROM) : entity
-				.getString(CHROMOSOME);
-
-		// FIXME use VcfRepository.POS, use VcfRepository.REF, use VcfRepository.ALT ?
-		Map<String, Object> resultMap = annotateEntityWithCadd(chromosome, entity.getLong(POSITION),
-				entity.getString(REFERENCE), entity.getString(ALTERNATIVE));
+        Map<String, Object> resultMap = annotateEntityWithCADD(entity.getString(VcfRepository.CHROM), entity.getLong(VcfRepository.POS),
+				entity.getString(VcfRepository.REF), entity.getString(VcfRepository.ALT));
 		return Collections.<Entity> singletonList(getAnnotatedEntity(entity, resultMap));
+	}
+
+	private synchronized Map<String, Object> annotateEntityWithCADD(String chromosome, Long position, String reference, String alternative) throws IOException, InterruptedException
+	{
+		TabixReader.Iterator tabixIterator = null;
+		try
+		{
+			tabixIterator = tabixReader.query(chromosome + ":" + position + "-" + position);
+		}
+		catch(Exception e)
+		{
+			LOG.error("Something went wrong (chromosome not in data?) when querying CADD tabix file for " + chromosome + " POS: " + position + " REF: " + reference
+					+ " ALT: " + alternative + "! skipping...");
+		}
+		
+        Double caddAbs = null;
+        Double caddScaled = null;
+
+        // TabixReaderIterator does not have a hasNext();
+        boolean done = tabixIterator == null;
+        int i = 0;
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        
+      //get line(s) from data, we expect 0 (no hit), 1 (specialized files such as 1000G) or 3 (whole genome file), so 0 to 3 hits
+        while (!done)
+        {
+            String line = null;
+
+            try
+    		{
+    			line = tabixIterator.next();
+    		}
+    		catch(net.sf.samtools.SAMFormatException sfx)
+    		{
+    			LOG.error("Bad GZIP file for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
+    					+ " ALT: " + alternative + " LINE: " + line);
+    			throw sfx;
+    		}
+            catch(NullPointerException npe)
+    		{
+    			//overkill to print all missing? depends on CADD source file..
+    			//LOG.info("No data for CHROM: " + chromosome + " POS: " + position + " REF: " + reference + " ALT: " + alternative + " LINE: " + line);
+    		}
+            
+            if (line != null)
+            {
+                String[] split = null;
+                i++;
+                split = line.split("\t");
+                if (split.length != 6)
+                {
+                    LOG.error("bad CADD output for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
+                            + " ALT: " + alternative + " LINE: " + line);
+                    continue;
+                }
+                if (split[2].equals(reference) && split[3].equals(alternative))
+                {
+  //                  LOG.info("CADD scores found for CHROM: " + chromosome + " POS: " + position + " REF: " + reference + " ALT: " + alternative + " LINE: " + line);
+                    caddAbs = Double.parseDouble(split[4]);
+                    caddScaled = Double.parseDouble(split[5]);
+                    done = true;
+                }
+                // In some cases, the ref and alt are swapped. If this is the case, the initial if statement above will
+                // fail, we can just check whether such a swapping has occured
+                else if (split[3].equals(reference) && split[2].equals(alternative))
+                {
+                    LOG.info("CADD scores found [swapped REF and ALT!] for CHROM: " + chromosome + " POS: " + position
+                            + " REF: " + reference + " ALT: " + alternative + " LINE: " + line);
+                    caddAbs = Double.parseDouble(split[4]);
+                    caddScaled = Double.parseDouble(split[5]);
+                    done = true;
+                }
+                else
+                {
+                    if (i > 3)
+                    {
+                        LOG.warn("More than 3 hits in the CADD file! for CHROM: " + chromosome + " POS: " + position
+                                + " REF: " + reference + " ALT: " + alternative);
+                    }
+                }
+            }
+            else //case: line == null
+            {
+                LOG.warn("No hit found in CADD file for CHROM: " + chromosome + " POS: " + position + " REF: " + reference + " ALT: " + alternative);
+                //not needed? just return..??
+                done = true;
+              //  return resultMap;
+            }
+        }
+
+        resultMap.put(CADD_ABS, caddAbs);
+        resultMap.put(CADD_SCALED, caddScaled);
+        return resultMap;
 	}
 
 	/**
@@ -174,74 +263,6 @@ public class CaddServiceAnnotator extends VariantAnnotator
 				}
 			}
 		}
-	}
-
-	private synchronized Map<String, Object> annotateEntityWithCadd(String chromosome, Long position, String reference,
-			String alternative) throws IOException
-	{
-		Double caddAbs = null;
-		Double caddScaled = null;
-
-		TabixReader.Iterator tabixIterator = tabixReader.query(chromosome + ":" + position + "-" + position);
-
-		// TabixReaderIterator does not have a hasNext();
-		boolean done = tabixIterator == null;
-		int i = 0;
-
-		while (!done)
-		{
-			String line = tabixIterator.next();
-
-			if (line != null)
-			{
-				String[] split = null;
-				i++;
-				split = line.split("\t");
-				if (split.length != 6)
-				{
-					LOG.error("bad CADD output for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
-							+ " ALT: " + alternative + " LINE: " + line);
-					continue;
-				}
-				if (split[2].equals(reference) && split[3].equals(alternative))
-				{
-					LOG.info("CADD scores found for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
-							+ " ALT: " + alternative + " LINE: " + line);
-					caddAbs = Double.parseDouble(split[4]);
-					caddScaled = Double.parseDouble(split[5]);
-					done = true;
-				}
-				// In some cases, the ref and alt are swapped. If this is the case, the initial if statement above will
-				// fail, we can just check whether such a swapping has occured
-				else if (split[3].equals(reference) && split[2].equals(alternative))
-				{
-					LOG.info("CADD scores found [swapped REF and ALT!] for CHROM: " + chromosome + " POS: " + position
-							+ " REF: " + reference + " ALT: " + alternative + " LINE: " + line);
-					caddAbs = Double.parseDouble(split[4]);
-					caddScaled = Double.parseDouble(split[5]);
-					done = true;
-				}
-				else
-				{
-					if (i > 3)
-					{
-						LOG.warn("More than 3 hits in the CADD file! for CHROM: " + chromosome + " POS: " + position
-								+ " REF: " + reference + " ALT: " + alternative);
-					}
-				}
-			}
-			else
-			{
-				LOG.warn("No hit found in CADD file for CHROM: " + chromosome + " POS: " + position + " REF: "
-						+ reference + " ALT: " + alternative);
-				done = true;
-			}
-		}
-
-		Map<String, Object> resultMap = new HashMap<String, Object>();
-		resultMap.put(CADD_ABS, caddAbs);
-		resultMap.put(CADD_SCALED, caddScaled);
-		return resultMap;
 	}
 
 	@Override

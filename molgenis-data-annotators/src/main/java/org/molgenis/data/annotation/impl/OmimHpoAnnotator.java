@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -28,6 +29,7 @@ import org.molgenis.data.annotation.provider.UrlPinger;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -122,10 +124,13 @@ public class OmimHpoAnnotator extends LocusAnnotator
 	@Override
 	public List<Entity> annotateEntity(Entity entity) throws IOException
 	{
-		List<Entity> results = new ArrayList<Entity>();
+        geneToHpoTerms = getGeneToHpoTerms();
+        geneToOmimTerms = getGeneToOmimTerms();
+        
+		List<Entity> results = new ArrayList<>();
 
-		String chromosome = entity.getString(CHROMOSOME);
-		Long position = entity.getLong(POSITION);
+		String chromosome = entity.getString(VcfRepository.CHROM);
+		Long position = entity.getLong(VcfRepository.POS);
 
 		Locus locus = new Locus(chromosome, position);
 
@@ -138,70 +143,17 @@ public class OmimHpoAnnotator extends LocusAnnotator
 			for (String geneSymbol : geneSymbols)
 			{
 				HashMap<String, Object> resultMap = new HashMap<String, Object>();
-				if (geneSymbol != null && geneToOmimTerms.containsKey(geneSymbol)
-						&& geneToHpoTerms.containsKey(geneSymbol))
-				{
-					Set<String> OMIMDisorders = new HashSet<String>();
-					Set<String> OMIMCytoLocations = new HashSet<String>();
-					Set<String> OMIMHgncIdentifiers = new HashSet<String>();
-					Set<Integer> OMIMEntries = new HashSet<Integer>();
-					Set<Integer> OMIMTypes = new HashSet<Integer>();
-					Set<Integer> OMIMCausedBy = new HashSet<Integer>();
 
-					Set<String> HPOPDescriptions = new HashSet<String>();
-					Set<String> HPOIdentifiers = new HashSet<String>();
-					Set<Integer> HPODiseaseDatabaseEntries = new HashSet<Integer>();
-					Set<String> HPODiseaseDatabases = new HashSet<String>();
-					Set<String> HPOGeneNames = new HashSet<String>();
-					Set<Integer> HPOEntrezIdentifiers = new HashSet<Integer>();
-
-					for (OMIMTerm omimTerm : geneToOmimTerms.get(geneSymbol))
-					{
-						OMIMDisorders.add(omimTerm.getName());
-						OMIMEntries.add(omimTerm.getEntry());
-						OMIMTypes.add(omimTerm.getType());
-						OMIMCausedBy.add(omimTerm.getCausedBy());
-						OMIMCytoLocations.add(omimTerm.getCytoLoc());
-
-						for (String hgncSymbol : omimTerm.getHgncIds())
-						{
-							OMIMHgncIdentifiers.add(hgncSymbol);
-						}
-
-					}
-
-					for (HPOTerm hpoTerm : geneToHpoTerms.get(geneSymbol))
-					{
-						HPOPDescriptions.add(hpoTerm.getDescription());
-						HPOIdentifiers.add(hpoTerm.getId());
-						HPOGeneNames.add(hpoTerm.getGeneName());
-						HPOEntrezIdentifiers.add(hpoTerm.getGeneEntrezID());
-						HPODiseaseDatabaseEntries.add(hpoTerm.getDiseaseDbEntry());
-						HPODiseaseDatabases.add(hpoTerm.getDiseaseDb());
-					}
-
-					resultMap.put(CHROMOSOME, locus.getChrom());
-					resultMap.put(POSITION, locus.getPos());
-					resultMap.put(OMIM_DISORDERS, OMIMDisorders);
-					resultMap.put(HPO_DESCRIPTIONS, HPOPDescriptions);
-					resultMap.put(OMIM_CAUSAL_IDENTIFIER, OMIMCausedBy);
-					resultMap.put(OMIM_TYPE, OMIMTypes);
-					resultMap.put(OMIM_HGNC_IDENTIFIERS, OMIMHgncIdentifiers);
-					resultMap.put(OMIM_CYTOGENIC_LOCATION, OMIMCytoLocations);
-					resultMap.put(OMIM_ENTRY, OMIMEntries);
-					resultMap.put(HPO_IDENTIFIERS, HPOIdentifiers);
-					resultMap.put(HPO_GENE_NAME, HPOGeneNames);
-					resultMap.put(HPO_DISEASE_DATABASE, HPODiseaseDatabases);
-					resultMap.put(HPO_DISEASE_DATABASE_ENTRY, HPODiseaseDatabaseEntries);
-					resultMap.put(HPO_ENTREZ_ID, HPOEntrezIdentifiers);
-
-					results.add(getAnnotatedEntity(entity, resultMap));
+                if (geneSymbol != null && geneToOmimTerms.containsKey(geneSymbol))
+                {
+                    annotateWithOMIM(geneSymbol, resultMap);
+                }
+                if (geneSymbol != null && geneToHpoTerms.containsKey(geneSymbol))
+                {
+                    annotateWithHPO(geneSymbol, resultMap);
 				}
-				else
-				{
-					results.add(getAnnotatedEntity(entity, resultMap));
-				}
-			}
+                results.add(getAnnotatedEntity(entity, resultMap));
+            }
 		}
 		catch (Exception e)
 		{
@@ -211,7 +163,58 @@ public class OmimHpoAnnotator extends LocusAnnotator
 		return results;
 	}
 
-	/**
+    public void annotateWithOMIM(String geneSymbol, HashMap<String, Object> resultMap) {
+        Set<String> OMIMDisorders = new HashSet<>();
+        Set<String> OMIMCytoLocations = new HashSet<>();
+        Set<String> OMIMHgncIdentifiers = new HashSet<>();
+        Set<Integer> OMIMEntries = new HashSet<>();
+        Set<Integer> OMIMTypes = new HashSet<>();
+        Set<Integer> OMIMCausedBy = new HashSet<>();
+
+        for (OMIMTerm omimTerm : geneToOmimTerms.get(geneSymbol))
+        {
+            OMIMDisorders.add(omimTerm.getName());
+            OMIMEntries.add(omimTerm.getEntry());
+            OMIMTypes.add(omimTerm.getType());
+            OMIMCausedBy.add(omimTerm.getCausedBy());
+            OMIMCytoLocations.add(omimTerm.getCytoLoc());
+
+            OMIMHgncIdentifiers.add(StringUtils.join(omimTerm.getHgncIds(), ','));
+
+        }
+        resultMap.put(OMIM_DISORDERS, OMIMDisorders);
+        resultMap.put(OMIM_CAUSAL_IDENTIFIER, OMIMCausedBy);
+        resultMap.put(OMIM_TYPE, OMIMTypes);
+        resultMap.put(OMIM_HGNC_IDENTIFIERS, OMIMHgncIdentifiers);
+        resultMap.put(OMIM_CYTOGENIC_LOCATION, OMIMCytoLocations);
+        resultMap.put(OMIM_ENTRY, OMIMEntries);
+    }
+
+    public void annotateWithHPO(String geneSymbol, HashMap<String, Object> resultMap) {
+        Set<String> HPOPDescriptions = new HashSet<>();
+        Set<String> HPOIdentifiers = new HashSet<>();
+        Set<Integer> HPODiseaseDatabaseEntries = new HashSet<>();
+        Set<String> HPODiseaseDatabases = new HashSet<>();
+        Set<String> HPOGeneNames = new HashSet<>();
+        Set<Integer> HPOEntrezIdentifiers = new HashSet<>();
+        for (HPOTerm hpoTerm : geneToHpoTerms.get(geneSymbol))
+        {
+            HPOPDescriptions.add(hpoTerm.getDescription());
+            HPOIdentifiers.add(hpoTerm.getId());
+            HPOGeneNames.add(hpoTerm.getGeneName());
+            HPOEntrezIdentifiers.add(hpoTerm.getGeneEntrezID());
+            HPODiseaseDatabaseEntries.add(hpoTerm.getDiseaseDbEntry());
+            HPODiseaseDatabases.add(hpoTerm.getDiseaseDb());
+        }
+        resultMap.put(HPO_DESCRIPTIONS, HPOPDescriptions);
+        resultMap.put(HPO_IDENTIFIERS, HPOIdentifiers);
+        resultMap.put(HPO_GENE_NAME, HPOGeneNames);
+        resultMap.put(HPO_DISEASE_DATABASE, HPODiseaseDatabases);
+        resultMap.put(HPO_DISEASE_DATABASE_ENTRY, HPODiseaseDatabaseEntries);
+        resultMap.put(HPO_ENTREZ_ID, HPOEntrezIdentifiers);
+    }
+
+    /**
 	 * e.g. OMIM:614887 PEX14 5195 HP:0002240 Hepatomegaly
 	 * 
 	 * becomes: HPOTerm{id='HP:0002240', description='Hepatomegaly', diseaseDb='OMIM', diseaseDbEntry=614887,
@@ -224,7 +227,7 @@ public class OmimHpoAnnotator extends LocusAnnotator
 	{
 		if (this.hpoTerms == null)
 		{
-			hpoTerms = new ArrayList<HPOTerm>();
+			hpoTerms = new ArrayList<>();
 
 			List<String> hpoLines = IOUtils.readLines(hpoMappingProvider.getHpoMapping());
 

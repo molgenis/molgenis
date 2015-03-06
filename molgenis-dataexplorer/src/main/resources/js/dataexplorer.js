@@ -75,11 +75,15 @@ function($, molgenis, settingsXhr) {
 	 */
 	function createModuleNav(modules, entity, container) {
 		var items = [];
-		items.push('<ul class="nav nav-tabs pull-left" role="tablist">');
+		items.push('<ul class="nav nav-tabs pull-left" style="width: 100%" role="tablist">');
 		$.each(modules, function() {
 			var href = molgenis.getContextUrl() + '/module/' + this.id+'?entity=' + entity;
 			items.push('<li data-id="' + this.id + '"><a href="' + href + '" data-target="#tab-' + this.id + '" data-id="' + this.id + '" role="tab" data-toggle="tab"><img src="/img/' + this.icon + '"> ' + this.label + '</a></li>');
 		});
+        items.push('<li class="pull-right">');
+        items.push('<button type="button" class="btn btn-default" id="toggleSelectors">')+
+        items.push('<span id="toggleSelectorsIcon" class="glyphicon glyphicon-resize-horizontal"></span>')+
+        items.push('</button></li>');
 		items.push('</ul>');
 		items.push('<div class="tab-content">');
 		$.each(modules, function() {
@@ -305,6 +309,27 @@ function($, molgenis, settingsXhr) {
 			$.when(entityMetaDataRequest).done(function(){
 				moduleTab.tab('show');
 			});
+
+            function hideSelectors() {
+                $('#selectors').removeClass("col-md-3").addClass("hidden");
+                $('#modules').removeClass("col-md-9").addClass("col-md-12");
+                $('#toggleSelectorsIcon').removeClass("glyphicon glyphicon-resize-horizontal").addClass("glyphicon glyphicon-resize-small");
+            }
+
+            function showSelectors() {
+                $('#selectors').addClass("col-md-3").removeClass("hidden");
+                $('#modules').removeClass("col-md-12").addClass("col-md-9");
+                $('#toggleSelectorsIcon').removeClass("glyphicon glyphicon-resize-small").addClass("glyphicon glyphicon-resize-horizontal");
+            }
+
+            $('#toggleSelectors').on('click', function(){
+                if($('#selectors').hasClass("hidden")){
+                    showSelectors();
+                }
+                else{
+                    hideSelectors();
+                }
+            });
 		});
 		
 		$('#observationset-search').focus();
@@ -351,8 +376,8 @@ function($, molgenis, settingsXhr) {
 				});
 			}
 		});
-		
-		$(document).on('changeQuery', function(e, query) {
+
+        $(document).on('changeQuery', function(e, query) {
 			state.query = query;
 			pushState();
 		});
@@ -504,7 +529,7 @@ function($, molgenis, settingsXhr) {
 				// set filters in filter list
 				// FIXME implement as part of http://www.molgenis.org/ticket/3110
 			}
-			
+
 			render();
 		}
 		

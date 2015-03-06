@@ -5,18 +5,29 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.molgenis.data.annotation.impl.CaddServiceAnnotator;
+import org.molgenis.data.annotation.impl.ClinVarVCFServiceAnnotator;
+import org.molgenis.data.annotation.impl.ClinicalGenomicsDatabaseServiceAnnotator;
+import org.molgenis.data.annotation.impl.ExACServiceAnnotator;
+import org.molgenis.data.annotation.impl.GoNLServiceAnnotator;
+import org.molgenis.data.annotation.impl.HpoServiceAnnotator;
+import org.molgenis.data.annotation.impl.MonogenicDiseaseCandidatesServiceAnnotator;
+import org.molgenis.data.annotation.impl.PhenomizerServiceAnnotator;
+import org.molgenis.data.annotation.impl.SnpEffServiceAnnotator;
+import org.molgenis.data.annotation.impl.ThousandGenomesServiceAnnotator;
 
 public class CmdLineAnnotator
 {
 
 	public static void main(String[] args) throws Exception
 	{
-		List<String> annotators = Arrays.asList(new String[]{"cadd", "clinvar", "ase", "ccgg", "exac", "1kg", "gonl", "gwascatalog", "vkgl", "cgd", "enhancers", "proteinatlas"});
+		List<String> annotators = Arrays.asList(new String[]{"cadd", "snpeff", "clinvar", "hpo", "ase", "monogenic", "phenomizer", "ccgg", "exac", "1kg", "gonl", "gwascatalog", "vkgl", "cgd", "enhancers", "proteinatlas"});
 		
 		if (args.length != 4)
 		{
 			throw new Exception(
-					"Usage: java -Xmx4g -jar CmdLineAnnotator.jar [Annotator] [Annotation source file] [input VCF] [output VCF].\n");
+					"Usage: java -Xmx4g -jar CmdLineAnnotator.jar [Annotator] [Annotation source file] [input VCF] [output VCF].\n"
+					+ "Possible annotators are: " + annotators.toString() + ".\n"
+							+ "Example: java -Xmx4g -jar CmdLineAnnotator.jar gonl GoNL/release5_noContam_noChildren_with_AN_AC_GTC_stripped/ Cardio.vcf Cardio_gonl.vcf\n");
 		}
 
 		String annotator = args[0];
@@ -27,7 +38,8 @@ public class CmdLineAnnotator
 			{
 				System.out.print(ann + " ");
 			}
-			throw new Exception("Invalid annotator.");
+			throw new Exception("\nInvalid annotator.\n"
+					+ "Possible annotators are: " + annotators.toString() + ".");
 		}
 		
 		File annotationSourceFile = new File(args[1]);
@@ -49,7 +61,8 @@ public class CmdLineAnnotator
 		File outputVCFFile = new File(args[3]);
 		if (outputVCFFile.exists())
 		{
-			//TODO terugzetten!! throw new Exception("Output VCF file already exists at " + outputVCFFile.getAbsolutePath());
+			//TODO: do we make this an input options? or always throw? what is best practice?
+			//throw new Exception("Output VCF file already exists at " + outputVCFFile.getAbsolutePath());
 		}
 
 		// engage!
@@ -57,13 +70,29 @@ public class CmdLineAnnotator
 		{
 			new CaddServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
+		else if(annotator.equals("snpeff"))
+		{
+			new SnpEffServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
+		}
 		else if(annotator.equals("clinvar"))
 		{
-			//TODO
+			new ClinVarVCFServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
+		}
+		else if(annotator.equals("hpo"))
+		{
+			new HpoServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
 		else if(annotator.equals("ase"))
 		{
 			//TODO
+		}
+		else if(annotator.equals("monogenic"))
+		{
+			new MonogenicDiseaseCandidatesServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
+		}
+		else if(annotator.equals("phenomizer"))
+		{
+			new PhenomizerServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
 		else if(annotator.equals("ccgg"))
 		{
@@ -71,15 +100,15 @@ public class CmdLineAnnotator
 		}
 		else if(annotator.equals("exac"))
 		{
-			//TODO
+			new ExACServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
 		else if(annotator.equals("1kg"))
 		{
-			//TODO
+			new ThousandGenomesServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
 		else if(annotator.equals("gonl"))
 		{
-			//TODO
+			new GoNLServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
 		else if(annotator.equals("gwascatalog"))
 		{
@@ -91,7 +120,7 @@ public class CmdLineAnnotator
 		}
 		else if(annotator.equals("cgd"))
 		{
-			//TODO
+			new ClinicalGenomicsDatabaseServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
 		else if(annotator.equals("enhancers"))
 		{
