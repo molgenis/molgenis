@@ -60,6 +60,11 @@ public class VcfRepository extends AbstractRepository
 	public static final String NAME = "NAME";
     public static final String PREFIX = "##";
 
+    public static final AttributeMetaData CHROM_META = new DefaultAttributeMetaData(CHROM,MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false).setDescription("The chromosome on which the variant is observed");
+    public static final AttributeMetaData ALT_META = new DefaultAttributeMetaData(ALT,MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false).setDescription("The alternative allele observed");
+    public static final AttributeMetaData POS_META = new DefaultAttributeMetaData(POS,MolgenisFieldTypes.FieldTypeEnum.LONG).setAggregateable(true).setNillable(false).setDescription("The position on the chromosome which the variant is observed");
+    public static final AttributeMetaData REF_META = new DefaultAttributeMetaData(REF,MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false).setDescription("The reference allele");
+
     private final File file;
 	private final String entityName;
 
@@ -205,14 +210,10 @@ public class VcfRepository extends AbstractRepository
 				{
 					if (vcfReader != null) vcfReader.close();
 				}
-				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(CHROM,
-						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false));
-				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ALT,
-						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false));
-				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(POS,
-						MolgenisFieldTypes.FieldTypeEnum.LONG).setAggregateable(true).setNillable(false));
-				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(REF,
-						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false));
+				entityMetaData.addAttributeMetaData(CHROM_META);
+				entityMetaData.addAttributeMetaData(ALT_META);
+				entityMetaData.addAttributeMetaData(POS_META);
+				entityMetaData.addAttributeMetaData(REF_META);
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(FILTER,
 						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(true));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(QUAL,
