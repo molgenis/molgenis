@@ -27,7 +27,8 @@ public class TabixRepository extends AbstractRepository
 {
 	private static final Logger LOG = LoggerFactory.getLogger(TabixRepository.class);
 
-	private TabixReader reader;
+	private String fileName;
+	private volatile TabixReader reader;
 	private EntityMetaData entityMetaData;
 
 	/**
@@ -42,13 +43,33 @@ public class TabixRepository extends AbstractRepository
 	 */
 	public TabixRepository(String fileName, EntityMetaData entityMetaData) throws IOException
 	{
+		this.fileName = fileName;
 		this.entityMetaData = entityMetaData;
-		this.reader = new TabixReader(fileName);
 	}
 
-	public static CSVParser getCsvParser()
+	private void checkTabixReader()
 	{
-		return new CSVParser('\t');
+		if (reader == null)
+		{
+			initTabixReader();
+		}
+	}
+
+	private synchronized void initTabixReader()
+	{
+		if (reader == null)
+		{
+			try
+			{
+				reader = new TabixReader(fileName);
+			}
+			catch (IOException e)
+			{
+				LOG.error("Failed to initialize tabix reader for file " + fileName);
+				throw new IllegalStateException("Failed to initialize tabix reader for file " + fileName, e);
+			}
+		}
+
 	}
 
 	@Override
@@ -82,6 +103,7 @@ public class TabixRepository extends AbstractRepository
 	 */
 	private synchronized ImmutableList<Entity> query(String chrom, long pos)
 	{
+		checkTabixReader();
 		String queryString = String.format("%s:%s-%2$s", chrom, pos);
 		LOG.info("query({})", queryString);
 		org.molgenis.data.annotation.tabix.TabixReader.Iterator iterator = reader.query(queryString);
@@ -110,7 +132,7 @@ public class TabixRepository extends AbstractRepository
 	private Entity toEntity(String line) throws IOException
 	{
 		Entity result = new MapEntity(entityMetaData);
-		CSVParser csvParser = getCsvParser();
+		CSVParser csvParser = new CSVParser('\t');
 		String[] columns = csvParser.parseLine(line);
 		int i = 0;
 		for (AttributeMetaData amd : entityMetaData.getAtomicAttributes())
@@ -170,6 +192,7 @@ public class TabixRepository extends AbstractRepository
 	@Override
 	public Iterator<Entity> iterator()
 	{
+		checkTabixReader();
 		return new TabixRepositoryIterator();
 	}
 
