@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -28,6 +29,7 @@ import org.molgenis.data.annotation.provider.UrlPinger;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -127,8 +129,8 @@ public class OmimHpoAnnotator extends LocusAnnotator
         
 		List<Entity> results = new ArrayList<>();
 
-		String chromosome = entity.getString(CHROMOSOME);
-		Long position = entity.getLong(POSITION);
+		String chromosome = entity.getString(VcfRepository.CHROM);
+		Long position = entity.getLong(VcfRepository.POS);
 
 		Locus locus = new Locus(chromosome, position);
 
@@ -177,7 +179,7 @@ public class OmimHpoAnnotator extends LocusAnnotator
             OMIMCausedBy.add(omimTerm.getCausedBy());
             OMIMCytoLocations.add(omimTerm.getCytoLoc());
 
-            OMIMHgncIdentifiers.add(omimTerm.getHgncIds().toString());
+            OMIMHgncIdentifiers.add(StringUtils.join(omimTerm.getHgncIds(), ','));
 
         }
         resultMap.put(OMIM_DISORDERS, OMIMDisorders);

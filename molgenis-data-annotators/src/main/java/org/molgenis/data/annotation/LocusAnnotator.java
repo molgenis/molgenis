@@ -16,23 +16,14 @@ import org.springframework.context.event.ContextRefreshedEvent;
 public abstract class LocusAnnotator extends AbstractRepositoryAnnotator implements RepositoryAnnotator,
 		ApplicationListener<ContextRefreshedEvent>
 {
-
-	public static final String CHROMOSOME = VcfRepository.CHROM;
-	public static final String POSITION = VcfRepository.POS;
-
-	// TODO: needs genome build and possible organism !?
+    // TODO: needs genome build and possible organism !?
 
 	@Override
 	public EntityMetaData getInputMetaData()
 	{
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		DefaultAttributeMetaData attr1 = new DefaultAttributeMetaData(CHROMOSOME,
-				MolgenisFieldTypes.FieldTypeEnum.STRING);
-		attr1.setDescription("The chromosome on which the variant is observed");
-		DefaultAttributeMetaData attr2 = new DefaultAttributeMetaData(POSITION, MolgenisFieldTypes.FieldTypeEnum.LONG);
-		attr2.setDescription("The position on the chromosome which the variant is observed");
-		metadata.addAttributeMetaData(attr1);
-		metadata.addAttributeMetaData(attr2);
+		metadata.addAttributeMetaData(VcfRepository.CHROM_META);
+		metadata.addAttributeMetaData(VcfRepository.POS_META);
 
 		return metadata;
 	}

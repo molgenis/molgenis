@@ -29,6 +29,7 @@ import org.molgenis.data.annotation.provider.OmimMorbidMapProvider;
 import org.molgenis.data.annotation.provider.UrlPinger;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -56,8 +57,8 @@ public class OmimHpoAnnotatorTest
 		attributeMetaDataChrom = mock(AttributeMetaData.class);
 		attributeMetaDataPos = mock(AttributeMetaData.class);
 
-		when(attributeMetaDataChrom.getName()).thenReturn(OmimHpoAnnotator.CHROMOSOME);
-		when(attributeMetaDataPos.getName()).thenReturn(OmimHpoAnnotator.POSITION);
+		when(attributeMetaDataChrom.getName()).thenReturn(VcfRepository.CHROM);
+		when(attributeMetaDataPos.getName()).thenReturn(VcfRepository.POS);
 
 		when(attributeMetaDataChrom.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
@@ -76,22 +77,22 @@ public class OmimHpoAnnotatorTest
 				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
 
 		attributeMetaDataCantAnnotateChrom = mock(AttributeMetaData.class);
-		when(attributeMetaDataCantAnnotateChrom.getName()).thenReturn(OmimHpoAnnotator.CHROMOSOME);
+		when(attributeMetaDataCantAnnotateChrom.getName()).thenReturn(VcfRepository.CHROM);
 		when(attributeMetaDataCantAnnotateFeature.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.INT.toString().toLowerCase()));
 
 		attributeMetaDataCantAnnotatePos = mock(AttributeMetaData.class);
-		when(attributeMetaDataCantAnnotatePos.getName()).thenReturn(OmimHpoAnnotator.POSITION);
+		when(attributeMetaDataCantAnnotatePos.getName()).thenReturn(VcfRepository.POS);
 		when(attributeMetaDataCantAnnotatePos.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
 
-		when(metaDataCantAnnotate.getAttribute(OmimHpoAnnotator.CHROMOSOME)).thenReturn(attributeMetaDataChrom);
-		when(metaDataCantAnnotate.getAttribute(OmimHpoAnnotator.POSITION)).thenReturn(attributeMetaDataCantAnnotatePos);
+		when(metaDataCantAnnotate.getAttribute(VcfRepository.CHROM)).thenReturn(attributeMetaDataChrom);
+		when(metaDataCantAnnotate.getAttribute(VcfRepository.POS)).thenReturn(attributeMetaDataCantAnnotatePos);
 
 		entity = mock(Entity.class);
 
-		when(entity.getString(OmimHpoAnnotator.CHROMOSOME)).thenReturn("11");
-		when(entity.getLong(OmimHpoAnnotator.POSITION)).thenReturn(new Long(19207841));
+		when(entity.getString(VcfRepository.CHROM)).thenReturn("11");
+		when(entity.getLong(VcfRepository.POS)).thenReturn(new Long(19207841));
 
 		input = new ArrayList<Entity>();
 		input.add(entity);
@@ -208,8 +209,8 @@ public class OmimHpoAnnotatorTest
 		assertEquals(resultEntity.get(OmimHpoAnnotator.OMIM_IDENTIFIERS),
 				expectedEntity.get(OmimHpoAnnotator.OMIM_IDENTIFIERS));
 		assertEquals(resultEntity.get(OmimHpoAnnotator.OMIM_TYPE), expectedEntity.get(OmimHpoAnnotator.OMIM_TYPE));
-		//assertEquals(resultEntity.get(OmimHpoAnnotator.OMIM_HGNC_IDENTIFIERS),
-		//		expectedEntity.get(OmimHpoAnnotator.OMIM_HGNC_IDENTIFIERS));
+		assertEquals(resultEntity.get(OmimHpoAnnotator.OMIM_HGNC_IDENTIFIERS),
+				expectedEntity.get(OmimHpoAnnotator.OMIM_HGNC_IDENTIFIERS));
 		assertEquals(resultEntity.get(OmimHpoAnnotator.OMIM_CYTOGENIC_LOCATION),
 				expectedEntity.get(OmimHpoAnnotator.OMIM_CYTOGENIC_LOCATION));
 		assertEquals(resultEntity.get(OmimHpoAnnotator.OMIM_ENTRY), expectedEntity.get(OmimHpoAnnotator.OMIM_ENTRY));

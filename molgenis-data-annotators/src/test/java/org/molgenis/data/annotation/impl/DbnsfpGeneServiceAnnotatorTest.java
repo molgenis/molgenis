@@ -21,6 +21,7 @@ import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ResourceUtils;
 import org.testng.annotations.BeforeMethod;
@@ -55,8 +56,8 @@ public class DbnsfpGeneServiceAnnotatorTest
 
 		attributeMetaDataChrom = mock(AttributeMetaData.class);
 		attributeMetaDataPos = mock(AttributeMetaData.class);
-		when(attributeMetaDataChrom.getName()).thenReturn(DbnsfpGeneServiceAnnotator.CHROMOSOME);
-		when(attributeMetaDataPos.getName()).thenReturn(DbnsfpGeneServiceAnnotator.POSITION);
+		when(attributeMetaDataChrom.getName()).thenReturn(VcfRepository.CHROM);
+		when(attributeMetaDataPos.getName()).thenReturn(VcfRepository.POS);
 
 		when(attributeMetaDataChrom.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
@@ -66,7 +67,7 @@ public class DbnsfpGeneServiceAnnotatorTest
 		metaDataCanAnnotate = new DefaultEntityMetaData("test");
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom);
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
-		metaDataCanAnnotate.setIdAttribute(DbnsfpGeneServiceAnnotator.POSITION);
+		metaDataCanAnnotate.setIdAttribute(VcfRepository.POS);
 		metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom.getName());
 
 		metaDataCantAnnotate = mock(EntityMetaData.class);
@@ -77,24 +78,24 @@ public class DbnsfpGeneServiceAnnotatorTest
 				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
 
 		attributeMetaDataCantAnnotateChrom = mock(AttributeMetaData.class);
-		when(attributeMetaDataCantAnnotateChrom.getName()).thenReturn(DbnsfpGeneServiceAnnotator.CHROMOSOME);
+		when(attributeMetaDataCantAnnotateChrom.getName()).thenReturn(VcfRepository.CHROM);
 		when(attributeMetaDataCantAnnotateFeature.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.INT.toString().toLowerCase()));
 
 		attributeMetaDataCantAnnotatePos = mock(AttributeMetaData.class);
-		when(attributeMetaDataCantAnnotatePos.getName()).thenReturn(DbnsfpGeneServiceAnnotator.POSITION);
+		when(attributeMetaDataCantAnnotatePos.getName()).thenReturn(VcfRepository.POS);
 		when(attributeMetaDataCantAnnotatePos.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
 
-		when(metaDataCantAnnotate.getAttribute(DbnsfpGeneServiceAnnotator.CHROMOSOME)).thenReturn(
+		when(metaDataCantAnnotate.getAttribute(VcfRepository.CHROM)).thenReturn(
 				attributeMetaDataChrom);
-		when(metaDataCantAnnotate.getAttribute(DbnsfpGeneServiceAnnotator.POSITION)).thenReturn(
+		when(metaDataCantAnnotate.getAttribute(VcfRepository.POS)).thenReturn(
 				attributeMetaDataCantAnnotatePos);
 
 		entity = mock(Entity.class);
 
-		when(entity.getString(DbnsfpGeneServiceAnnotator.CHROMOSOME)).thenReturn("12");
-		when(entity.getLong(DbnsfpGeneServiceAnnotator.POSITION)).thenReturn(new Long(6968292));
+		when(entity.getString(VcfRepository.CHROM)).thenReturn("12");
+		when(entity.getLong(VcfRepository.POS)).thenReturn(new Long(6968292));
 
 		input = new ArrayList<Entity>();
 		input.add(entity);

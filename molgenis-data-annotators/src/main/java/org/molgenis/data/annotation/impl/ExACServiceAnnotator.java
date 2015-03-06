@@ -143,13 +143,8 @@ public class ExACServiceAnnotator extends VariantAnnotator
 	{
 		checkTabixReader();
 
-		// FIXME need to solve this! duplicate notation for CHROM in VcfRepository.CHROM and LocusAnnotator.CHROMOSOME
-		String chromosome = entity.getString(VcfRepository.CHROM) != null ? entity.getString(VcfRepository.CHROM) : entity
-				.getString(CHROMOSOME);
-
-		// FIXME use VcfRepository.POS, use VcfRepository.REF, use VcfRepository.ALT ?
-		Map<String, Object> resultMap = annotateEntityWithExAC(chromosome, entity.getLong(POSITION),
-				entity.getString(REFERENCE), entity.getString(ALTERNATIVE));
+		Map<String, Object> resultMap = annotateEntityWithExAC(VcfRepository.CHROM, entity.getLong(VcfRepository.POS),
+				entity.getString(VcfRepository.REF), entity.getString(VcfRepository.ALT));
 		return Collections.<Entity> singletonList(getAnnotatedEntity(entity, resultMap));
 	}
 
