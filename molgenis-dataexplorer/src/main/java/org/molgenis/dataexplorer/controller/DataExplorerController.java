@@ -423,6 +423,7 @@ public class DataExplorerController extends MolgenisPluginController implements
 		Map<String, Object> actionResponse = actionHandler.getSource().performAction(actionId,
 				actionRequest.getEntityName(), actionRequest.getQuery().getRules());
 		return actionResponse;
+	}
 
 	/**
 	 * Updates the 'Entities' menu when an entity is deleted.

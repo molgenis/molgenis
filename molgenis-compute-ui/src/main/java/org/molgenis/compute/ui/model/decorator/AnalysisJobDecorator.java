@@ -1,33 +1,40 @@
 package org.molgenis.compute.ui.model.decorator;
 
+import java.io.IOException;
 import java.util.EnumSet;
+import java.util.Iterator;
+import java.util.Set;
 
-import com.google.common.collect.Iterables;
 import org.molgenis.compute.ui.meta.AnalysisJobMetaData;
 import org.molgenis.compute.ui.meta.AnalysisMetaData;
 import org.molgenis.compute.ui.model.Analysis;
 import org.molgenis.compute.ui.model.AnalysisJob;
 import org.molgenis.compute.ui.model.AnalysisStatus;
 import org.molgenis.compute.ui.model.JobStatus;
-import org.molgenis.data.CrudRepository;
-import org.molgenis.data.CrudRepositoryDecorator;
+import org.molgenis.data.AggregateQuery;
+import org.molgenis.data.AggregateResult;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.support.QueryImpl;
+
+import com.google.common.collect.Iterables;
 
 /**
  * AnalysisJob decorator that updates analysis status on job status change
  * 
  * TODO handle analysis job deletes
  */
-public class AnalysisJobDecorator extends CrudRepositoryDecorator
+public class AnalysisJobDecorator implements Repository
 {
-	private final CrudRepository decoratedRepository;
+	private final Repository decoratedRepository;
 	private final DataService dataService;
 
-	public AnalysisJobDecorator(CrudRepository decoratedRepository, DataService dataService)
+	public AnalysisJobDecorator(Repository decoratedRepository, DataService dataService)
 	{
-		super(decoratedRepository);
 		this.decoratedRepository = decoratedRepository;
 		this.dataService = dataService;
 	}
@@ -146,7 +153,7 @@ public class AnalysisJobDecorator extends CrudRepositoryDecorator
 			if (analysisJob.getStatus() == JobStatus.FAILED) return AnalysisStatus.FAILED;
 		}
 
-		if(!Iterables.isEmpty(analysisJobs))
+		if (!Iterables.isEmpty(analysisJobs))
 		{
 			boolean completed = true;
 			for (AnalysisJob analysisJob : analysisJobs)
@@ -157,10 +164,130 @@ public class AnalysisJobDecorator extends CrudRepositoryDecorator
 					break;
 				}
 			}
-			if (completed)
-				return AnalysisStatus.COMPLETED;
+			if (completed) return AnalysisStatus.COMPLETED;
 		}
 
 		return currentAnalysisStatus;
+	}
+
+	@Override
+	public Iterator<Entity> iterator()
+	{
+		return this.decoratedRepository.iterator();
+	}
+
+	@Override
+	public void close() throws IOException
+	{
+		this.decoratedRepository.close();
+
+	}
+
+	@Override
+	public Set<RepositoryCapability> getCapabilities()
+	{
+		return this.decoratedRepository.getCapabilities();
+	}
+
+	@Override
+	public String getName()
+	{
+		return this.decoratedRepository.getName();
+	}
+
+	@Override
+	public EntityMetaData getEntityMetaData()
+	{
+		return this.decoratedRepository.getEntityMetaData();
+	}
+
+	@Override
+	public long count()
+	{
+		return this.decoratedRepository.count();
+	}
+
+	@Override
+	public Query query()
+	{
+		return this.decoratedRepository.query();
+	}
+
+	@Override
+	public long count(Query q)
+	{
+		return this.decoratedRepository.count(q);
+	}
+
+	@Override
+	public Iterable<Entity> findAll(Query q)
+	{
+		return this.decoratedRepository.findAll(q);
+	}
+
+	@Override
+	public Entity findOne(Query q)
+	{
+		return this.decoratedRepository.findOne(q);
+	}
+
+	@Override
+	public Entity findOne(Object id)
+	{
+		return this.decoratedRepository.findOne(id);
+	}
+
+	@Override
+	public Iterable<Entity> findAll(Iterable<Object> ids)
+	{
+		return this.decoratedRepository.findAll(ids);
+	}
+
+	@Override
+	public AggregateResult aggregate(AggregateQuery aggregateQuery)
+	{
+		return this.decoratedRepository.aggregate(aggregateQuery);
+	}
+
+	@Override
+	public void delete(Entity entity)
+	{
+		this.decoratedRepository.delete(entity);
+	}
+
+	@Override
+	public void delete(Iterable<? extends Entity> entities)
+	{
+		this.decoratedRepository.delete(entities);
+	}
+
+	@Override
+	public void deleteById(Object id)
+	{
+		this.decoratedRepository.deleteById(id);
+	}
+
+	@Override
+	public void deleteById(Iterable<Object> ids)
+	{
+		this.decoratedRepository.deleteById(ids);
+	}
+
+	@Override
+	public void deleteAll()
+	{
+		this.decoratedRepository.deleteAll();
+	}
+
+	@Override
+	public void flush()
+	{
+		this.decoratedRepository.flush();
+	}
+
+	@Override
+	public void clearCache()
+	{
+		this.decoratedRepository.clearCache();
 	}
 }

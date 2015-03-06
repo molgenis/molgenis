@@ -62,7 +62,7 @@
 			'query' : getQuery(),
 			'editable' : editable,
 			'rowClickable': rowClickable,
-			'cellClickHandlers' : cellClickHandlers 
+			'cellClickHandlers' : cellClickHandlers, 
 			'onDataChange' : function(){
 				$(document).trigger('dataChange.data');
 			}

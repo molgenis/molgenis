@@ -1,16 +1,16 @@
 package org.molgenis.compute.ui.meta;
 
+import java.util.Arrays;
+
 import org.molgenis.compute.ui.analysis.event.AnalysisHandlerRegistratorService;
 import org.molgenis.compute.ui.model.decorator.AnalysisDecorator;
 import org.molgenis.compute.ui.model.decorator.AnalysisJobDecorator;
 import org.molgenis.compute.ui.model.decorator.UIWorkflowDecorator;
 import org.molgenis.compute.ui.workflow.event.WorkflowHandlerRegistratorService;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.RepositoryDecoratorFactory;
-import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,20 +24,16 @@ public class MetaDataRegistrator implements ApplicationListener<ContextRefreshed
 {
 	private static final Logger LOG = LoggerFactory.getLogger(MetaDataRegistrator.class);
 
-	private final MysqlRepositoryCollection repositoryCollection;
 	private final DataService dataService;
-	private final MetaDataService metaDataService;
 	private final WorkflowHandlerRegistratorService workflowHandlerRegistratorService;
 	private final AnalysisHandlerRegistratorService analysisHandlerRegistratorService;
 
 	@Autowired
-	public MetaDataRegistrator(MysqlRepositoryCollection repositoryCollection, DataService dataService,
-			MetaDataService metaDataService, WorkflowHandlerRegistratorService workflowHandlerRegistratorService,
+	public MetaDataRegistrator(DataService dataService,
+			WorkflowHandlerRegistratorService workflowHandlerRegistratorService,
 			AnalysisHandlerRegistratorService analysisHandlerRegistratorService)
 	{
-		this.repositoryCollection = repositoryCollection;
 		this.dataService = dataService;
-		this.metaDataService = metaDataService;
 		this.workflowHandlerRegistratorService = workflowHandlerRegistratorService;
 		this.analysisHandlerRegistratorService = analysisHandlerRegistratorService;
 	}
@@ -46,55 +42,57 @@ public class MetaDataRegistrator implements ApplicationListener<ContextRefreshed
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
 		LOG.info("Registering ComputeUI MySQL repositories ...");
-		repositoryCollection.add(MolgenisUserKeyMetaData.INSTANCE);
-		repositoryCollection.add(UIParameterMetaData.INSTANCE);
-		repositoryCollection.add(UIWorkflowParameterValueMetaData.INSTANCE);
-		repositoryCollection.add(UIParameterMappingMetaData.INSTANCE);
-		repositoryCollection.add(UIWorkflowParameterMetaData.INSTANCE);
-		repositoryCollection.add(UIWorkflowProtocolMetaData.INSTANCE);
-		repositoryCollection.add(UIWorkflowNodeMetaData.INSTANCE);
-		repositoryCollection.add(UIWorkflowMetaData.INSTANCE, new RepositoryDecoratorFactory()
+		dataService.getMeta().addEntityMeta(MolgenisUserKeyMetaData.INSTANCE);
+		dataService.getMeta().addEntityMeta(UIParameterMetaData.INSTANCE);
+		dataService.getMeta().addEntityMeta(UIWorkflowParameterValueMetaData.INSTANCE);
+		dataService.getMeta().addEntityMeta(UIParameterMappingMetaData.INSTANCE);
+		dataService.getMeta().addEntityMeta(UIWorkflowParameterMetaData.INSTANCE);
+		dataService.getMeta().addEntityMeta(UIWorkflowProtocolMetaData.INSTANCE);
+		dataService.getMeta().addEntityMeta(UIWorkflowNodeMetaData.INSTANCE);
+		dataService.getMeta().add(UIWorkflowMetaData.INSTANCE, new RepositoryDecoratorFactory()
 		{
 			@Override
 			public Repository createDecoratedRepository(Repository repository)
 			{
-				if (!(repository instanceof CrudRepository))
+				if (!(repository.getCapabilities().containsAll(Arrays.asList(RepositoryCapability.QUERYABLE,
+						RepositoryCapability.UPDATEABLE, RepositoryCapability.WRITABLE))))
 				{
-					throw new RuntimeException("Repository [" + repository.getName() + "] must be a CrudRepository");
+					throw new RuntimeException("Repository [" + repository.getName() + "] must be a Crud Repository");
 				}
-				return new UIWorkflowDecorator((CrudRepository) repository, repositoryCollection,
-						workflowHandlerRegistratorService, analysisHandlerRegistratorService);
+				return new UIWorkflowDecorator(repository, dataService, workflowHandlerRegistratorService,
+						analysisHandlerRegistratorService);
 			}
 		});
-		repositoryCollection.add(UIParameterValueMetaData.INSTANCE);
-		repositoryCollection.add(UIBackendMetaData.INSTANCE);
-		repositoryCollection.add(AnalysisMetaData.INSTANCE, new RepositoryDecoratorFactory()
+		dataService.getMeta().addEntityMeta(UIParameterValueMetaData.INSTANCE);
+		dataService.getMeta().addEntityMeta(UIBackendMetaData.INSTANCE);
+		dataService.getMeta().add(AnalysisMetaData.INSTANCE, new RepositoryDecoratorFactory()
 		{
 			@Override
 			public Repository createDecoratedRepository(Repository repository)
 			{
-				if (!(repository instanceof CrudRepository))
+				if (!(repository.getCapabilities().containsAll(Arrays.asList(RepositoryCapability.QUERYABLE,
+						RepositoryCapability.UPDATEABLE, RepositoryCapability.WRITABLE))))
 				{
-					throw new RuntimeException("Repository [" + repository.getName() + "] must be a CrudRepository");
+					throw new RuntimeException("Repository [" + repository.getName() + "] must be a Crud Repository");
 				}
-				return new AnalysisDecorator((CrudRepository) repository, dataService);
+				return new AnalysisDecorator(repository, dataService);
 			}
 		});
-		repositoryCollection.add(AnalysisJobMetaData.INSTANCE, new RepositoryDecoratorFactory()
+		dataService.getMeta().add(AnalysisJobMetaData.INSTANCE, new RepositoryDecoratorFactory()
 		{
 			@Override
 			public Repository createDecoratedRepository(Repository repository)
 			{
-				if (!(repository instanceof CrudRepository))
+				if (!(repository.getCapabilities().containsAll(Arrays.asList(RepositoryCapability.QUERYABLE,
+						RepositoryCapability.UPDATEABLE, RepositoryCapability.WRITABLE))))
 				{
-					throw new RuntimeException("Repository [" + repository.getName() + "] must be a CrudRepository");
+					throw new RuntimeException("Repository [" + repository.getName() + "] must be a Crud Repository");
 				}
-				return new AnalysisJobDecorator((CrudRepository) repository, dataService);
+				return new AnalysisJobDecorator(repository, dataService);
 			}
 		});
-		metaDataService.refreshCaches();
 
-		LOG.info("Registered ComputeUI MySQL repositories");
+		LOG.info("Registered ComputeUI repositories");
 	}
 
 	@Override

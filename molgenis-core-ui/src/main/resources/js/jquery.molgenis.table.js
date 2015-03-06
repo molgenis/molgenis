@@ -1037,9 +1037,8 @@
 		'rowClickable': false,
 		'onDeleteRow': function(){},
 		'cellClickHandlers' : null,
-		'onInit' : null
+		'onInit' : null,
 		'rowClickable': false,
 		'onDataChange': function(){}
-
 	};
 }($, window.top.molgenis = window.top.molgenis || {}));

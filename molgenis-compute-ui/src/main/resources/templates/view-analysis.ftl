@@ -2,7 +2,7 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=["jquery-ui-1.9.2.custom.min.css", "select2.css", "jquery.molgenis.table.css", "analysis.css"]>
-<#assign js=["lodash.js", "backbone-min.js", "geometry.min.js", "vectorizer.min.js", "joint.clean.min.js","joint.layout.DirectedGraph.min.js", "jquery-ui-1.9.2.custom.min.js", "select2.min.js", "jquery.bootstrap.pager.js", "jquery.molgenis.table.js", "analysis.js"]>
+<#assign js=["lodash.js", "backbone-min.js", "geometry.min.js", "vectorizer.min.js", "joint.clean.min.js","joint.layout.DirectedGraph.min.js", "jquery-ui-1.9.2.custom.min.js", "select2-patched.js", "jquery.bootstrap.pager.js", "jquery.molgenis.table.js", "analysis.js"]>
 
 <@header css js/>
 <#-- Analysis overview -->

@@ -2,7 +2,7 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=['joint.min.css', 'molgenis-form.css', 'select2.css', 'workflow.css']>
-<#assign js=['lodash.js', 'backbone-min.js', 'geometry.min.js', 'vectorizer.min.js', 'joint.clean.min.js','joint.layout.DirectedGraph.min.js', 'ace/src-min-noconflict/ace.js', 'select2.min.js', 'workflow.js']>
+<#assign js=['lodash.js', 'backbone-min.js', 'geometry.min.js', 'vectorizer.min.js', 'joint.clean.min.js','joint.layout.DirectedGraph.min.js', 'ace/src-min-noconflict/ace.js', 'select2-patched.js', 'workflow.js']>
 
 <@header css js/>
 

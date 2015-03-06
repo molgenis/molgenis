@@ -1,15 +1,22 @@
 package org.molgenis.compute.ui.model.decorator;
 
+import java.io.IOException;
 import java.util.EnumSet;
+import java.util.Iterator;
+import java.util.Set;
 
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.compute.ui.meta.AnalysisMetaData;
 import org.molgenis.compute.ui.model.Analysis;
 import org.molgenis.compute.ui.model.AnalysisStatus;
-import org.molgenis.data.CrudRepository;
-import org.molgenis.data.CrudRepositoryDecorator;
+import org.molgenis.data.AggregateQuery;
+import org.molgenis.data.AggregateResult;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.slf4j.Logger;
@@ -20,16 +27,15 @@ import org.slf4j.LoggerFactory;
  * 
  * TODO handle analysis job deletes
  */
-public class AnalysisDecorator extends CrudRepositoryDecorator
+public class AnalysisDecorator implements Repository
 {
-	private final CrudRepository decoratedRepository;
+	private final Repository decoratedRepository;
 	private final DataService dataService;
 
 	private static final Logger LOG = LoggerFactory.getLogger(AnalysisDecorator.class);
 
-	public AnalysisDecorator(CrudRepository decoratedRepository, DataService dataService)
+	public AnalysisDecorator(Repository decoratedRepository, DataService dataService)
 	{
-		super(decoratedRepository);
 		this.decoratedRepository = decoratedRepository;
 		this.dataService = dataService;
 	}
@@ -166,5 +172,81 @@ public class AnalysisDecorator extends CrudRepositoryDecorator
 						+ analysisStatus + " is not allowed. Allowed transitions " + allowedStateTransitions);
 			}
 		}
+	}
+
+	@Override
+	public Iterator<Entity> iterator() {
+		return this.decoratedRepository.iterator();
+	}
+
+	@Override
+	public void close() throws IOException {
+		this.decoratedRepository.close();
+		
+	}
+
+	@Override
+	public Set<RepositoryCapability> getCapabilities() {
+		return this.decoratedRepository.getCapabilities();
+	}
+
+	@Override
+	public String getName() {
+		return this.decoratedRepository.getName();
+	}
+
+	@Override
+	public EntityMetaData getEntityMetaData() {
+		return this.decoratedRepository.getEntityMetaData();
+	}
+
+	@Override
+	public long count() {
+		return this.decoratedRepository.count();
+	}
+
+	@Override
+	public Query query() {
+		return this.decoratedRepository.query();
+	}
+
+	@Override
+	public long count(Query q) {
+		return this.decoratedRepository.count(q);
+	}
+
+	@Override
+	public Iterable<Entity> findAll(Query q) {
+		return this.decoratedRepository.findAll(q);
+	}
+
+	@Override
+	public Entity findOne(Query q) {
+		return this.decoratedRepository.findOne(q);
+	}
+
+	@Override
+	public Entity findOne(Object id) {
+		return this.decoratedRepository.findOne(id);
+	}
+
+	@Override
+	public Iterable<Entity> findAll(Iterable<Object> ids) {
+		return this.decoratedRepository.findAll(ids);
+	}
+
+	@Override
+	public AggregateResult aggregate(AggregateQuery aggregateQuery) {
+		return this.decoratedRepository.aggregate(aggregateQuery);
+	}
+
+	@Override
+	public void flush() {
+		this.decoratedRepository.flush();
+	}
+
+	@Override
+	public void clearCache() {
+		this.decoratedRepository.clearCache();
 	}
 }
