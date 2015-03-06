@@ -33,8 +33,10 @@ public class GoNLAnnotatorTest
 	private AttributeMetaData attributeMetaDataCantAnnotateChrom;
 	private ArrayList<Entity> input1;
 	private Entity entity1;
+    private Entity entity2;
+    private ArrayList<Entity> input2;
 
-	@BeforeMethod
+    @BeforeMethod
 	public void beforeMethod() throws IOException
 	{
 		metaDataCanAnnotate = new DefaultEntityMetaData("test");
@@ -73,6 +75,14 @@ public class GoNLAnnotatorTest
 		input1 = new ArrayList<>();
 		input1.add(entity1);
 
+        entity2 = new MapEntity(metaDataCanAnnotate);
+        entity2.set(VcfRepository.CHROM,"1");
+        entity2.set(VcfRepository.POS, 123456);
+        entity2.set(VcfRepository.REF, "G");
+        entity2.set(VcfRepository.ALT, "A");
+        input2 = new ArrayList<>();
+        input2.add(entity2);
+
 		annotator = new GoNLServiceAnnotator(settings, null);
 	}
 
@@ -96,6 +106,27 @@ public class GoNLAnnotatorTest
 
         assertEquals(results.next(),mapEntity);
 	}
+
+    @Test
+    public void testAnnotateNoResult()
+    {
+        DefaultEntityMetaData annotatedMetadata = new DefaultEntityMetaData("test");
+        annotatedMetadata.addAttributeMetaData(attributeMetaDataCantAnnotateChrom);
+        annotatedMetadata.addAttributeMetaData(attributeMetaDataPos);
+        annotatedMetadata.addAttributeMetaData(attributeMetaDataRef);
+        annotatedMetadata.addAttributeMetaData(attributeMetaDataAlt);
+        annotatedMetadata.setIdAttribute(attributeMetaDataCantAnnotateChrom.getName());
+        annotatedMetadata.addAttributeMetaData(new DefaultAttributeMetaData(GoNLServiceAnnotator.GONL_MAF, FieldTypeEnum.DECIMAL));
+        annotatedMetadata.addAttributeMetaData(new DefaultAttributeMetaData(GoNLServiceAnnotator.GONL_GTC, FieldTypeEnum.STRING)); //FIXME: correct type?
+
+        Iterator<Entity> results = annotator.annotate(input2);
+
+        MapEntity mapEntity = new MapEntity(entity2, annotatedMetadata);
+        mapEntity.set(GoNLServiceAnnotator.GONL_MAF,null);
+        mapEntity.set(GoNLServiceAnnotator.GONL_GTC,null);
+
+        assertEquals(results.next(),mapEntity);
+    }
 
 	@Test
 	public void canAnnotateTrueTest()

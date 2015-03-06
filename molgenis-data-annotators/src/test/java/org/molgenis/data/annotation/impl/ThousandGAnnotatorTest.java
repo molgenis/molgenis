@@ -33,6 +33,8 @@ public class ThousandGAnnotatorTest
 	private AttributeMetaData attributeMetaDataCantAnnotateChrom;
 	private ArrayList<Entity> input1;
 	private Entity entity1;
+    private ArrayList<Entity> input2;
+    private Entity entity2;
 
 	@BeforeMethod
 	public void beforeMethod() throws IOException
@@ -73,6 +75,14 @@ public class ThousandGAnnotatorTest
 		input1 = new ArrayList<Entity>();
 		input1.add(entity1);
 
+        entity2 = new MapEntity(metaDataCanAnnotate);
+        entity2.set(VcfRepository.CHROM,"1");
+        entity2.set(VcfRepository.POS, 123456);
+        entity2.set(VcfRepository.REF, "G");
+        entity2.set(VcfRepository.ALT, "A");
+        input2 = new ArrayList<>();
+        input2.add(entity2);
+
 		annotator = new ThousandGenomesServiceAnnotator(settings, null);
 	}
 
@@ -94,6 +104,25 @@ public class ThousandGAnnotatorTest
 
         assertEquals(results.next(),mapEntity);
 	}
+
+    @Test
+    public void testAnnotateNoResult()
+    {
+        DefaultEntityMetaData annotatedMetadata = new DefaultEntityMetaData("test");
+        annotatedMetadata.addAttributeMetaData(attributeMetaDataCantAnnotateChrom);
+        annotatedMetadata.addAttributeMetaData(attributeMetaDataPos);
+        annotatedMetadata.addAttributeMetaData(attributeMetaDataRef);
+        annotatedMetadata.addAttributeMetaData(attributeMetaDataAlt);
+        annotatedMetadata.setIdAttribute(attributeMetaDataCantAnnotateChrom.getName());
+        annotatedMetadata.addAttributeMetaData(new DefaultAttributeMetaData(ThousandGenomesServiceAnnotator.THGEN_MAF, FieldTypeEnum.DECIMAL));
+
+        Iterator<Entity> results = annotator.annotate(input2);
+
+        MapEntity mapEntity = new MapEntity(entity2, annotatedMetadata);
+        mapEntity.set(ThousandGenomesServiceAnnotator.THGEN_MAF,null);
+
+        assertEquals(results.next(),mapEntity);
+    }
 
 	@Test
 	public void canAnnotateTrueTest()
