@@ -145,7 +145,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	public void getGroupsWhereUserIsMemberNonUs()
 	{
 		this.setSecurityContextNonSuperUserWrite();
-		this.userManagerService.getGroupsWhereUserIsMember(Integer.valueOf("1"));
+		this.userManagerService.getGroupsWhereUserIsMember("1");
 	}
 
 	@Test
@@ -153,7 +153,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	{
 		this.setSecurityContextSuperUser();
 
-		MolgenisUser user1 = when(mock(MolgenisUser.class).getId()).thenReturn(Integer.valueOf("1")).getMock();
+		MolgenisUser user1 = when(mock(MolgenisUser.class).getId()).thenReturn("1").getMock();
 		MolgenisGroup group20 = mock(MolgenisGroup.class);
 		MolgenisGroup group21 = mock(MolgenisGroup.class);
 
@@ -165,12 +165,12 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		molgenisGroupMemberTwo.setMolgenisGroup(group21);
 		molgenisGroupMemberTwo.setMolgenisUser(user1);
 
-		when(dataService.findOne(MolgenisUser.ENTITY_NAME, 1, MolgenisUser.class)).thenReturn(user1);
+		when(dataService.findOne(MolgenisUser.ENTITY_NAME, "1", MolgenisUser.class)).thenReturn(user1);
 		when(
 				dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
 						new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, user1), MolgenisGroupMember.class))
 				.thenReturn(Arrays.asList(molgenisGroupMemberOne, molgenisGroupMemberTwo));
-		List<MolgenisGroup> groups = this.userManagerService.getGroupsWhereUserIsMember(1);
+		List<MolgenisGroup> groups = this.userManagerService.getGroupsWhereUserIsMember("1");
 
 		assertEquals(groups.size(), 2);
 	}
@@ -179,7 +179,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	public void getUsersMemberInGroupNonUs()
 	{
 		this.setSecurityContextNonSuperUserWrite();
-		this.userManagerService.getUsersMemberInGroup(Integer.valueOf("22"));
+		this.userManagerService.getUsersMemberInGroup("22");
 	}
 
 	@Test
@@ -188,22 +188,22 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		this.setSecurityContextSuperUser();
 
 		MolgenisUser user1 = mock(MolgenisUser.class);
-		when(user1.getId()).thenReturn(1);
+		when(user1.getId()).thenReturn("1");
 		when(user1.getUsername()).thenReturn("Jonathan");
 
-		MolgenisGroup group22 = when(mock(MolgenisGroup.class).getId()).thenReturn(Integer.valueOf("22")).getMock();
+		MolgenisGroup group22 = when(mock(MolgenisGroup.class).getId()).thenReturn("22").getMock();
 
 		MolgenisGroupMember molgenisGroupMember = mock(MolgenisGroupMember.class);
 		when(molgenisGroupMember.getMolgenisUser()).thenReturn(user1);
 		when(molgenisGroupMember.getMolgenisGroup()).thenReturn(group22);
 
-		when(dataService.findOne(MolgenisGroup.ENTITY_NAME, 22, MolgenisGroup.class)).thenReturn(group22);
+		when(dataService.findOne(MolgenisGroup.ENTITY_NAME, "22", MolgenisGroup.class)).thenReturn(group22);
 		when(
 				dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
 						new QueryImpl().eq(MolgenisGroupMember.MOLGENISGROUP, group22), MolgenisGroupMember.class))
 				.thenReturn(Arrays.asList(molgenisGroupMember));
 
-		List<MolgenisUserViewData> users = this.userManagerService.getUsersMemberInGroup(22);
+		List<MolgenisUserViewData> users = this.userManagerService.getUsersMemberInGroup("22");
 		assertEquals(users.size(), 1);
 	}
 
@@ -211,7 +211,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	public void getGroupsWhereUserIsNotMemberNonUs()
 	{
 		this.setSecurityContextNonSuperUserWrite();
-		this.userManagerService.getGroupsWhereUserIsNotMember(Integer.valueOf("1"));
+		this.userManagerService.getGroupsWhereUserIsNotMember("1");
 	}
 
 	@Test
@@ -219,16 +219,16 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	{
 		setSecurityContextSuperUser();
 
-		MolgenisUser user1 = when(mock(MolgenisUser.class).getId()).thenReturn(1).getMock();
-		MolgenisGroup group22 = when(mock(MolgenisGroup.class).getId()).thenReturn(22).getMock();
-		MolgenisGroup group33 = when(mock(MolgenisGroup.class).getId()).thenReturn(33).getMock();
-		MolgenisGroup group44 = when(mock(MolgenisGroup.class).getId()).thenReturn(44).getMock();
+		MolgenisUser user1 = when(mock(MolgenisUser.class).getId()).thenReturn("1").getMock();
+		MolgenisGroup group22 = when(mock(MolgenisGroup.class).getId()).thenReturn("22").getMock();
+		MolgenisGroup group33 = when(mock(MolgenisGroup.class).getId()).thenReturn("33").getMock();
+		MolgenisGroup group44 = when(mock(MolgenisGroup.class).getId()).thenReturn("44").getMock();
 
 		MolgenisGroupMember molgenisGroupMember = mock(MolgenisGroupMember.class);
 		when(molgenisGroupMember.getMolgenisUser()).thenReturn(user1);
 		when(molgenisGroupMember.getMolgenisGroup()).thenReturn(group22);
 
-		when(dataService.findOne(MolgenisUser.ENTITY_NAME, 1, MolgenisUser.class)).thenReturn(user1);
+		when(dataService.findOne(MolgenisUser.ENTITY_NAME, "1", MolgenisUser.class)).thenReturn(user1);
 
 		when(
 				dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
@@ -237,7 +237,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		when(dataService.findAll(MolgenisGroup.ENTITY_NAME, MolgenisGroup.class)).thenReturn(
 				Arrays.asList(group22, group33, group44));
 
-		List<MolgenisGroup> groups = this.userManagerService.getGroupsWhereUserIsNotMember(1);
+		List<MolgenisGroup> groups = this.userManagerService.getGroupsWhereUserIsNotMember("1");
 		assertEquals(groups.size(), 2);
 	}
 
@@ -245,14 +245,14 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	public void addUserToGroupSu() throws NumberFormatException
 	{
 		setSecurityContextSuperUser();
-		this.userManagerService.addUserToGroup(Integer.valueOf("22"), Integer.valueOf("1"));
+		this.userManagerService.addUserToGroup("22", "1");
 	}
 
 	@Test(expectedExceptions = AccessDeniedException.class)
 	public void addUserToGroupNonSu() throws NumberFormatException
 	{
 		setSecurityContextNonSuperUserWrite();
-		this.userManagerService.addUserToGroup(Integer.valueOf("22"), Integer.valueOf("1"));
+		this.userManagerService.addUserToGroup("22", "1");
 	}
 
 	@Test
@@ -260,14 +260,14 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	{
 		setSecurityContextSuperUser();
 
-		MolgenisUser user1 = when(mock(MolgenisUser.class).getId()).thenReturn(1).getMock();
-		MolgenisGroup group22 = when(mock(MolgenisGroup.class).getId()).thenReturn(22).getMock();
+		MolgenisUser user1 = when(mock(MolgenisUser.class).getId()).thenReturn("1").getMock();
+		MolgenisGroup group22 = when(mock(MolgenisGroup.class).getId()).thenReturn("22").getMock();
 		MolgenisGroupMember molgenisGroupMember = mock(MolgenisGroupMember.class);
 		when(molgenisGroupMember.getMolgenisUser()).thenReturn(user1);
 		when(molgenisGroupMember.getMolgenisGroup()).thenReturn(group22);
 
-		when(dataService.findOne(MolgenisUser.ENTITY_NAME, 1, MolgenisUser.class)).thenReturn(user1);
-		when(dataService.findOne(MolgenisGroup.ENTITY_NAME, 22, MolgenisGroup.class)).thenReturn(group22);
+		when(dataService.findOne(MolgenisUser.ENTITY_NAME, "1", MolgenisUser.class)).thenReturn(user1);
+		when(dataService.findOne(MolgenisGroup.ENTITY_NAME, "22", MolgenisGroup.class)).thenReturn(group22);
 
 		Query q = new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, user1).and()
 				.eq(MolgenisGroupMember.MOLGENISGROUP, group22);
@@ -275,14 +275,14 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		when(dataService.findAll(MolgenisGroupMember.ENTITY_NAME, q, MolgenisGroupMember.class)).thenReturn(
 				Arrays.asList(molgenisGroupMember));
 
-		this.userManagerService.removeUserFromGroup(22, 1);
+		this.userManagerService.removeUserFromGroup("22", "1");
 	}
 
 	@Test(expectedExceptions = AccessDeniedException.class)
 	public void removeUserFromGroupNonSu() throws NumberFormatException
 	{
 		setSecurityContextNonSuperUserWrite();
-		this.userManagerService.removeUserFromGroup(Integer.valueOf("22"), Integer.valueOf("1"));
+		this.userManagerService.removeUserFromGroup("22", "1");
 	}
 
 	private void setSecurityContextSuperUser()

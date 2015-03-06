@@ -84,11 +84,11 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	{
 		reset(dataService);
 
-		int group1Id = 1;
-		int user1Id = 1, user2Id = 2, user3Id = 3;
-		user1 = when(mock(MolgenisUser.class).getId()).thenReturn(1).getMock();
-		user2 = when(mock(MolgenisUser.class).getId()).thenReturn(2).getMock();
-		user3 = when(mock(MolgenisUser.class).getId()).thenReturn(3).getMock();
+		String group1Id = "1";
+		String user1Id = "1", user2Id = "2", user3Id = "3";
+		user1 = when(mock(MolgenisUser.class).getId()).thenReturn("1").getMock();
+		user2 = when(mock(MolgenisUser.class).getId()).thenReturn("2").getMock();
+		user3 = when(mock(MolgenisUser.class).getId()).thenReturn("3").getMock();
 		when(dataService.findAll(MolgenisUser.ENTITY_NAME, MolgenisUser.class)).thenReturn(
 				Arrays.asList(user1, user2, user3));
 
@@ -206,7 +206,7 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	@Test
 	public void getGroupEntityClassPermissions()
 	{
-		Permissions permissions = pluginPermissionManagerService.getGroupEntityClassPermissions(1);
+		Permissions permissions = pluginPermissionManagerService.getGroupEntityClassPermissions("1");
 		Map<String, List<Permission>> groupPermissions = permissions.getGroupPermissions();
 
 		Permission permission = new Permission();
@@ -220,10 +220,10 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	@Test
 	public void getGroupPluginPermissions()
 	{
-		MolgenisGroup group1 = when(mock(MolgenisGroup.class).getId()).thenReturn(1).getMock();
+		MolgenisGroup group1 = when(mock(MolgenisGroup.class).getId()).thenReturn("1").getMock();
 		when(group1.getName()).thenReturn("group1");
 
-		Permissions permissions = pluginPermissionManagerService.getGroupPluginPermissions(1);
+		Permissions permissions = pluginPermissionManagerService.getGroupPluginPermissions("1");
 		Map<String, List<Permission>> groupPermissions = permissions.getGroupPermissions();
 
 		Permission permission = new Permission();
@@ -237,7 +237,7 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	@Test
 	public void getUserEntityClassPermissions_noGroup()
 	{
-		Permissions permissions = pluginPermissionManagerService.getUserEntityClassPermissions(1);
+		Permissions permissions = pluginPermissionManagerService.getUserEntityClassPermissions("1");
 		Map<String, List<Permission>> userPermissions = permissions.getUserPermissions();
 
 		Permission permission = new Permission();
@@ -250,7 +250,7 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	@Test
 	public void getUserEntityClassPermissions_inGroup()
 	{
-		Permissions permissions = pluginPermissionManagerService.getUserEntityClassPermissions(2);
+		Permissions permissions = pluginPermissionManagerService.getUserEntityClassPermissions("2");
 
 		Map<String, List<Permission>> userPermissions = permissions.getUserPermissions();
 		Permission permission = new Permission();
@@ -271,7 +271,7 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	@Test
 	public void getUserPluginPermissions_noGroup()
 	{
-		Permissions permissions = pluginPermissionManagerService.getUserPluginPermissions(1);
+		Permissions permissions = pluginPermissionManagerService.getUserPluginPermissions("1");
 		Map<String, List<Permission>> userPermissions = permissions.getUserPermissions();
 
 		Permission permission = new Permission();
@@ -284,7 +284,7 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	@Test
 	public void getUserPluginPermissions_inGroup()
 	{
-		Permissions permissions = pluginPermissionManagerService.getUserPluginPermissions(2);
+		Permissions permissions = pluginPermissionManagerService.getUserPluginPermissions("2");
 
 		Map<String, List<Permission>> userPermissions = permissions.getUserPermissions();
 		Permission permission = new Permission();
@@ -306,7 +306,7 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	public void replaceGroupEntityClassPermissions()
 	{
 		List<GroupAuthority> authorities = Arrays.asList(mock(GroupAuthority.class), mock(GroupAuthority.class));
-		pluginPermissionManagerService.replaceGroupEntityClassPermissions(authorities, 1);
+		pluginPermissionManagerService.replaceGroupEntityClassPermissions(authorities, "1");
 		verify(dataService).delete(GroupAuthority.ENTITY_NAME,
 				Arrays.asList(groupEntity1Authority, groupEntity2Authority));
 		verify(dataService).add(GroupAuthority.ENTITY_NAME, authorities);
@@ -316,7 +316,7 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	public void replaceGroupPluginPermissions()
 	{
 		List<GroupAuthority> authorities = Arrays.asList(mock(GroupAuthority.class), mock(GroupAuthority.class));
-		pluginPermissionManagerService.replaceGroupPluginPermissions(authorities, 1);
+		pluginPermissionManagerService.replaceGroupPluginPermissions(authorities, "1");
 		verify(dataService).delete(GroupAuthority.ENTITY_NAME,
 				Arrays.asList(groupPlugin1Authority, groupPlugin2Authority));
 		verify(dataService).add(GroupAuthority.ENTITY_NAME, authorities);
@@ -326,7 +326,7 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	public void replaceUserEntityClassPermissions()
 	{
 		List<UserAuthority> authorities = Arrays.asList(mock(UserAuthority.class), mock(UserAuthority.class));
-		pluginPermissionManagerService.replaceUserEntityClassPermissions(authorities, 1);
+		pluginPermissionManagerService.replaceUserEntityClassPermissions(authorities, "1");
 		verify(dataService)
 				.delete(UserAuthority.ENTITY_NAME, Arrays.asList(userEntity2Authority, userEntity3Authority));
 		verify(dataService).add(UserAuthority.ENTITY_NAME, authorities);
@@ -336,7 +336,7 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	public void replaceUserPluginPermissions()
 	{
 		List<UserAuthority> authorities = Arrays.asList(mock(UserAuthority.class), mock(UserAuthority.class));
-		pluginPermissionManagerService.replaceUserPluginPermissions(authorities, 1);
+		pluginPermissionManagerService.replaceUserPluginPermissions(authorities, "1");
 		verify(dataService)
 				.delete(UserAuthority.ENTITY_NAME, Arrays.asList(userPlugin2Authority, userPlugin3Authority));
 		verify(dataService).add(UserAuthority.ENTITY_NAME, authorities);

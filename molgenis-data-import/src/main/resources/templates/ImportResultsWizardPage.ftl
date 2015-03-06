@@ -26,7 +26,7 @@
 		checkImportResult();
 	
 		function checkImportResult() {
-			restApi.getAsync('/api/v1/ImportRun/${wizard.importRunId?c?js_string}', {}, function(importRun) {
+			restApi.getAsync('/api/v1/ImportRun/${wizard.importRunId?js_string}', {}, function(importRun) {
 				if (timer) {
 					clearTimeout(timer);	
 				}
