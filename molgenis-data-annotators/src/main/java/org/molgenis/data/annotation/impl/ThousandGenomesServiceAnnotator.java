@@ -87,7 +87,6 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 
 		this.annotatorService = new AnnotationServiceImpl();
 
-		//tabixReader = new TabixReader(molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY));
 		checkTabixReader();
 		
 		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
@@ -134,7 +133,8 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 	@Override
 	public boolean annotationDataExists()
 	{
-		return false;
+        File f = new File(molgenisSettings.getProperty(THGEN_DIRECTORY_LOCATION_PROPERTY));
+        return (f.exists() && f.isDirectory());
 	}
 
 	@Override
@@ -181,8 +181,13 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 								molgenisSettings.getProperty(THGEN_DIRECTORY_LOCATION_PROPERTY) + File.separator + 
 								(chr.equals("X") ? "ALL.chrX.phase3_shapeit2_mvncall_integrated.20130502.genotypes.vcf.gz" : chr.equals("Y") ? "ALL.chrY.phase3_integrated.20130502.genotypes.vcf.gz" : "ALL.chr"+chr+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz")
 								);
-						TabixReader tr = new TabixReader(thGenChrom);
-						tabixReaders.put(chr, tr);
+                        if(new File(thGenChrom).exists()) {
+                            TabixReader tr = new TabixReader(thGenChrom);
+                            tabixReaders.put(chr, tr);
+                        }
+                        else{
+                            LOG.info("No file found for path: "+thGenChrom);
+                        }
 					}
 				}
 			}
@@ -217,7 +222,6 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 		{
 			LOG.info("No data for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
 					+ " ALT: " + alternative + " LINE: " + line);
-			//throw sfx;
 		}
 		
 		//if nothing found, return empty list for no hit
@@ -233,7 +237,7 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 		{
 			LOG.error("Bad 1000G data (split was < 1000 elements) for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
 					+ " ALT: " + alternative + " LINE: " + line.substring(0, (line.length() > 250 ? 250 : line.length())));
-			throw new IOException("Bad data! see log");
+			throw new IOException("Less than 1000 items found, Bad 1000G data.");
 		}
 		
 		// get MAF from info field

@@ -139,7 +139,8 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 	@Override
 	public boolean annotationDataExists()
 	{
-		return false;
+        File f = new File(molgenisSettings.getProperty(GONL_DIRECTORY_LOCATION_PROPERTY));
+        return (f.exists() && f.isDirectory());
 	}
 
 	@Override
@@ -179,8 +180,13 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 										//small hack to use chrX from release 4.. (5 isn't out yet!)
 										+ (!chr.equals("X") ? "gonl.chr"+chr+".snps_indels.r5.vcf.gz" : "gonl.chrX.release4.gtc.vcf.gz")
 								);
-						TabixReader tr = new TabixReader(gonlchrom);
-						tabixReaders.put(chr, tr);
+                        if(new File(gonlchrom).exists()) {
+                            TabixReader tr = new TabixReader(gonlchrom);
+                            tabixReaders.put(chr, tr);
+                        }
+                        else{
+                            LOG.info("No file found for path: "+gonlchrom);
+                        }
 					}
 				}
 			}
