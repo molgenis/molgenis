@@ -90,4 +90,9 @@ public class OntologyConfiguration
 	{
 		return new UploadProgress();
 	}
+
+	public OntologyConfiguration()
+	{
+		System.setProperty("jdk.xml.entityExpansionLimit", "1280000");
+	}
 }
