@@ -2,7 +2,7 @@
 
 # Welcome to MOLGENIS
 
-MOLGENIS is an collaborative open source project on a mission to generate great software infrastructure for life science research. 
+MOLGENIS is a collaborative open source project on a mission to generate great software infrastructure for life science research. 
 
 The procedure below tells you how to checkout the molgenis project and build one of the example apps.
 
