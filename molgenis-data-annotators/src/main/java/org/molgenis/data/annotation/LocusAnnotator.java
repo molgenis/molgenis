@@ -17,8 +17,8 @@ public abstract class LocusAnnotator extends AbstractRepositoryAnnotator impleme
 		ApplicationListener<ContextRefreshedEvent>
 {
 
-	public static final String CHROMOSOME = "#CHROM";
-	public static final String POSITION = "POS";
+	public static final String CHROMOSOME = VcfRepository.CHROM;
+	public static final String POSITION = VcfRepository.POS;
 
 	// TODO: needs genome build and possible organism !?
 
