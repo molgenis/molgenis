@@ -4,11 +4,10 @@ import java.util.Collections;
 import java.util.List;
 
 import org.molgenis.auth.MolgenisUser;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.ManageableCrudRepositoryCollection;
+import org.molgenis.data.Repository;
 import org.molgenis.data.algorithm.AlgorithmService;
 import org.molgenis.data.mapping.model.AttributeMapping;
 import org.molgenis.data.mapping.model.EntityMapping;
@@ -35,9 +34,6 @@ public class MappingServiceImpl implements MappingService
 
 	@Autowired
 	private AlgorithmService algorithmService;
-
-	@Autowired
-	private ManageableCrudRepositoryCollection manageableCrudRepositoryCollection;
 
 	@Autowired
 	private IdGenerator idGenerator;
@@ -93,7 +89,7 @@ public class MappingServiceImpl implements MappingService
 		targetMetaData.setPackage(PackageImpl.defaultPackage);
 		targetMetaData.setLabel(newEntityName);
 		targetMetaData.addAttribute("source");
-		CrudRepository targetRepo = manageableCrudRepositoryCollection.add(targetMetaData);
+		Repository targetRepo = dataService.getMeta().addEntityMeta(targetMetaData);
 		permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
 				Collections.singletonList(targetRepo.getName()));
 		try
@@ -104,12 +100,12 @@ public class MappingServiceImpl implements MappingService
 		catch (RuntimeException ex)
 		{
 			LOG.error("Error applying mappings, dropping created repository.", ex);
-			manageableCrudRepositoryCollection.dropEntityMetaData(targetMetaData.getName());
+			dataService.getMeta().deleteEntityMeta(targetMetaData.getName());
 			throw ex;
 		}
 	}
 
-	private void applyMappingsToRepositories(MappingTarget mappingTarget, CrudRepository targetRepo)
+	private void applyMappingsToRepositories(MappingTarget mappingTarget, Repository targetRepo)
 	{
 		for (EntityMapping sourceMapping : mappingTarget.getEntityMappings())
 		{
@@ -117,10 +113,10 @@ public class MappingServiceImpl implements MappingService
 		}
 	}
 
-	private void applyMappingToRepo(EntityMapping sourceMapping, CrudRepository targetRepo)
+	private void applyMappingToRepo(EntityMapping sourceMapping, Repository targetRepo)
 	{
 		EntityMetaData targetMetaData = targetRepo.getEntityMetaData();
-		CrudRepository sourceRepo = dataService.getCrudRepository(sourceMapping.getName());
+		Repository sourceRepo = dataService.getRepository(sourceMapping.getName());
 		for (Entity sourceEntity : sourceRepo)
 		{
 			MapEntity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData);

@@ -73,4 +73,9 @@ public class HgncSymbolServiceAnnotator extends LocusAnnotator
 
 		return metadata;
 	}
+    @Override
+    public String getDescription()
+    {
+        return "This is the description for the HGNC Annotator";
+    }
 }

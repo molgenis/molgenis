@@ -8,7 +8,6 @@ import static org.molgenis.ontology.repository.AbstractOntologyRepository.SYNONY
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,33 +17,19 @@ import org.molgenis.ontology.service.OntologyServiceImpl;
 import org.tartarus.snowball.ext.PorterStemmer;
 
 public class AlgorithmHelper
-
 {
 	private static final String NON_WORD_SEPARATOR = "[^a-zA-Z0-9]";
 
-	public static Map<String, Integer> createWordFreq(String queryString, List<ComparableEntity> comparableEntities,
-			int totalDocs, OntologyServiceImpl ontologyService)
+	public static Map<String, Double> createWordIDF(String queryString, String ontologyIri,
+			OntologyServiceImpl ontologyService)
 	{
-		Map<String, Integer> wordFreqMap = new HashMap<String, Integer>();
+		Map<String, Double> wordFreqMap = new HashMap<String, Double>();
 		Set<String> wordsInQueryString = medicalStemProxy(queryString);
 		for (String word : wordsInQueryString)
 		{
-			wordFreqMap.put(word, 0);
+			wordFreqMap.put(word, ontologyService.getWordInverseDocumentFrequency(ontologyIri, word));
 		}
 
-		for (ComparableEntity entity : comparableEntities.subList(0, totalDocs))
-		{
-			Set<String> listOfWordsInSynonymGroup = medicalStemProxy(StringUtils.join(
-					ontologyService.getOntologyTermSynonyms(entity.getString(ONTOLOGY_TERM_IRI),
-							entity.getString(ONTOLOGY_IRI)), SINGLE_WHITESPACE));
-			for (String word : wordFreqMap.keySet())
-			{
-				if (listOfWordsInSynonymGroup.contains(word))
-				{
-					wordFreqMap.put(word, (wordFreqMap.get(word) + 1));
-				}
-			}
-		}
 		for (String word : wordsInQueryString)
 		{
 			if (wordFreqMap.get(word) == 0) wordFreqMap.remove(word);

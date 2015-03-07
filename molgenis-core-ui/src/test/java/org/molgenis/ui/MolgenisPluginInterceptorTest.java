@@ -6,6 +6,8 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -114,6 +116,60 @@ public class MolgenisPluginInterceptorTest
 		assertNotNull(modelAndView.getModel().get(MolgenisPluginAttributes.KEY_MOLGENIS_UI));
 		assertEquals(modelAndView.getModel().get(MolgenisPluginAttributes.KEY_AUTHENTICATED), false);
 		assertEquals(modelAndView.getModel().get("footerText"), "footerTest");
+	}
+
+	@Test
+	public void postHandlePluginidWithQueryString() throws Exception
+	{
+		MolgenisSettings settings = mock(MolgenisSettings.class);
+		when(settings.getProperty(MolgenisPluginInterceptor.KEY_FOOTER)).thenReturn("footerTest");
+		MolgenisPluginInterceptor molgenisPluginInterceptor = new MolgenisPluginInterceptor(molgenisUi, settings);
+		String uri = MolgenisPluginController.PLUGIN_URI_PREFIX + "plugin_id_test";
+
+		HttpServletRequest mockHttpServletRequest = mock(HttpServletRequest.class);
+		when(mockHttpServletRequest.getQueryString()).thenReturn("entity=entityName");
+
+		HandlerMethod handlerMethod = mock(HandlerMethod.class);
+		when(handlerMethod.getBean()).thenReturn(new MolgenisPluginController(uri)
+		{
+		});
+
+		ModelAndView modelAndView = new ModelAndView();
+		molgenisPluginInterceptor.postHandle(mockHttpServletRequest, null, handlerMethod, modelAndView);
+		assertEquals(modelAndView.getModel().get(MolgenisPluginAttributes.KEY_PLUGIN_ID), "plugin_id_test");
+		assertNotNull(modelAndView.getModel().get(MolgenisPluginAttributes.KEY_MOLGENIS_UI));
+		assertEquals(modelAndView.getModel().get(MolgenisPluginAttributes.KEY_AUTHENTICATED), false);
+		assertEquals(modelAndView.getModel().get("footerText"), "footerTest");
+		assertEquals(modelAndView.getModel().get(MolgenisPluginAttributes.KEY_PLUGINID_WITH_QUERY_STRING),
+				"plugin_id_test?entity=entityName");
+	}
+
+	@Test
+	public void postHandleWithAppTrackingCode() throws Exception
+	{
+		MolgenisSettings settings = mock(MolgenisSettings.class);
+		when(settings.getProperty(AppTrackingCode.KEY_APP_TRACKING_CODE_PIWIK)).thenReturn(
+				"alert('key_app_tracking_code_piwik');");
+		when(settings.getProperty(AppTrackingCode.KEY_APP_TRACKING_CODE_GOOGLEANALYTICS)).thenReturn(
+				"alert('key_app_tracking_code_googleanalytics');");
+		MolgenisPluginInterceptor molgenisPluginInterceptor = new MolgenisPluginInterceptor(molgenisUi, settings);
+		String uri = MolgenisPluginController.PLUGIN_URI_PREFIX + "app_tracking_code";
+
+		HttpServletRequest mockHttpServletRequest = mock(HttpServletRequest.class);
+
+		HandlerMethod handlerMethod = mock(HandlerMethod.class);
+		when(handlerMethod.getBean()).thenReturn(new MolgenisPluginController(uri)
+		{
+		});
+
+		ModelAndView modelAndView = new ModelAndView();
+		molgenisPluginInterceptor.postHandle(mockHttpServletRequest, null, handlerMethod, modelAndView);
+		
+		AppTrackingCodeImpl appTrackingCodeResult = new AppTrackingCodeImpl();
+		appTrackingCodeResult.setPiwik("alert('key_app_tracking_code_piwik');");
+		appTrackingCodeResult.setGoogleAnalytics("alert('key_app_tracking_code_googleanalytics');");
+		assertEquals(modelAndView.getModel().get(MolgenisPluginInterceptor.APP_TRACKING_CODE_VARIABLE),
+				appTrackingCodeResult);
 	}
 
 	@Test

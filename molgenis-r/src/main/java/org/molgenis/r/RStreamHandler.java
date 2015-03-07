@@ -37,7 +37,7 @@ public class RStreamHandler implements Runnable
 		}
 		catch (IOException e)
 		{
-			throw new MolgenisRException("Error reading r outputstream", e);
+			throw new MolgenisRException("Error reading R outputstream", e);
 		}
 	}
 

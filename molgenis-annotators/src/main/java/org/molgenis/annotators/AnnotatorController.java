@@ -3,9 +3,7 @@ package org.molgenis.annotators;
 import static org.molgenis.annotators.AnnotatorController.URI;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
@@ -16,7 +14,6 @@ import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.CrudRepositoryAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.ErrorMessageResponse;
@@ -65,9 +62,6 @@ public class AnnotatorController
 	EntityValidator entityValidator;
 
 	@Autowired
-	MysqlRepositoryCollection mysqlRepositoryCollection;
-
-	@Autowired
 	PermissionSystemService permissionSystemService;
 
 	/**
@@ -102,22 +96,22 @@ public class AnnotatorController
 			@RequestParam("dataset-identifier") String entityName,
 			@RequestParam(value = "createCopy", required = false) boolean createCopy)
 	{
-		Repository repository = dataService.getRepositoryByEntityName(entityName);
+		Repository repository = dataService.getRepository(entityName);
 		if (annotatorNames != null && repository != null)
 		{
-			CrudRepositoryAnnotator crudRepositoryAnnotator = new CrudRepositoryAnnotator(mysqlRepositoryCollection,
+			CrudRepositoryAnnotator crudRepositoryAnnotator = new CrudRepositoryAnnotator(dataService,
 					getNewRepositoryName(annotatorNames, repository.getEntityMetaData().getSimpleName()),
-					searchService, dataService, permissionSystemService);
+					permissionSystemService);
 
 			for (String annotatorName : annotatorNames)
 			{
 				RepositoryAnnotator annotator = annotationService.getAnnotatorByName(annotatorName);
 				if (annotator != null)
 				{
+					// running annotator
 					try
 					{
-						// running annotator
-						Repository repo = dataService.getRepositoryByEntityName(entityName);
+						Repository repo = dataService.getRepository(entityName);
 						repository = crudRepositoryAnnotator.annotate(annotator, repo, createCopy);
 						entityName = repository.getName();
 						createCopy = false;
@@ -160,9 +154,12 @@ public class AnnotatorController
 			for (RepositoryAnnotator annotator : annotationService.getAllAnnotators())
 			{
 				Map<String, Object> map = new HashMap<String, Object>();
+				map.put("description", annotator.getDescription());
 				map.put("canAnnotate", annotator.canAnnotate(entityMetaData));
-				map.put("inputMetadata", metaDataToStringList(annotator.getInputMetaData()));
-				map.put("outputMetadata", metaDataToStringList(annotator.getOutputMetaData()));
+				map.put("inputAttributes", annotator.getInputMetaData().getAttributes());
+				map.put("inputAttributeTypes", toMap(annotator.getInputMetaData().getAttributes()));
+				map.put("outputAttributes", annotator.getOutputMetaData().getAttributes());
+				map.put("outputAttributeTypes", toMap(annotator.getOutputMetaData().getAttributes()));
 				mapOfAnnotators.put(annotator.getSimpleName(), map);
 			}
 
@@ -171,18 +168,12 @@ public class AnnotatorController
 		return mapOfAnnotators;
 	}
 
-	/**
-	 * Transforms metadata to a List of strings
-	 * 
-	 * @param metaData
-	 * @return result
-	 * */
-	private List<String> metaDataToStringList(EntityMetaData metaData)
+	private Map<String, String> toMap(Iterable<AttributeMetaData> attrs)
 	{
-		List<String> result = new ArrayList<String>();
-		for (AttributeMetaData attribute : metaData.getAttributes())
+		Map<String, String> result = new HashMap<>();
+		for (AttributeMetaData attr : attrs)
 		{
-			result.add(attribute.getLabel() + "(" + attribute.getDataType().toString() + ")\n");
+			result.put(attr.getName(), attr.getDataType().toString());
 		}
 		return result;
 	}

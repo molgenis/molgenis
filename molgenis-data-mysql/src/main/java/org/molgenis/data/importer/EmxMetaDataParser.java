@@ -5,6 +5,7 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.DATA_TYPE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.DESCRIPTION;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENTITY;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENUM_OPTIONS;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.EXPRESSION;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ID_ATTRIBUTE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL_ATTRIBUTE;
@@ -45,7 +46,6 @@ import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.importer.MyEntitiesValidationReport.AttributeState;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
-import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.PackageImpl;
 import org.molgenis.data.meta.PackageMetaData;
 import org.molgenis.data.meta.TagMetaData;
@@ -57,6 +57,7 @@ import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.IntField;
 import org.molgenis.fieldtypes.LongField;
 import org.molgenis.fieldtypes.MrefField;
+import org.molgenis.fieldtypes.StringField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.util.DependencyResolver;
@@ -88,15 +89,14 @@ public class EmxMetaDataParser implements MetaDataParser
 			ID_ATTRIBUTE.toLowerCase(), LABEL.toLowerCase(), LABEL_ATTRIBUTE.toLowerCase(),
 			LOOKUP_ATTRIBUTE.toLowerCase(), NAME, NILLABLE.toLowerCase(), PART_OF_ATTRIBUTE.toLowerCase(),
 			RANGE_MAX.toLowerCase(), RANGE_MIN.toLowerCase(), READ_ONLY.toLowerCase(), REF_ENTITY.toLowerCase(),
-			VISIBLE.toLowerCase(), UNIQUE.toLowerCase(), org.molgenis.data.meta.AttributeMetaDataMetaData.TAGS);
+			VISIBLE.toLowerCase(), UNIQUE.toLowerCase(), TAGS.toLowerCase(), EXPRESSION.toLowerCase());
+	static final String AUTO = "auto";
 
 	private final DataService dataService;
-	private final MetaDataService metaDataService;
 
-	public EmxMetaDataParser(DataService dataService, MetaDataService metaDataService)
+	public EmxMetaDataParser(DataService dataService)
 	{
 		this.dataService = dataService;
-		this.metaDataService = metaDataService;
 	}
 
 	/**
@@ -111,12 +111,12 @@ public class EmxMetaDataParser implements MetaDataParser
 		// TODO: this task is actually a 'merge' instead of 'import'
 		// so we need to consider both new metadata and existing ...
 
-		IntermediateParseResults intermediateResults = parseTagsSheet(source.getRepositoryByEntityName(TAGS));
+		IntermediateParseResults intermediateResults = parseTagsSheet(source.getRepository(TAGS));
 		// load attributes first, entities and packages are optional
-		parseAttributesSheet(source.getRepositoryByEntityName(ATTRIBUTES), intermediateResults);
-		parseEntitiesSheet(source.getRepositoryByEntityName(ENTITIES), intermediateResults);
-		parsePackagesSheetToEntityMap(source.getRepositoryByEntityName(PACKAGES), intermediateResults);
-		reiterateToMapRefEntity(source.getRepositoryByEntityName(ATTRIBUTES), intermediateResults);
+		parseAttributesSheet(source.getRepository(ATTRIBUTES), intermediateResults);
+		parseEntitiesSheet(source.getRepository(ENTITIES), intermediateResults);
+		parsePackagesSheetToEntityMap(source.getRepository(PACKAGES), intermediateResults);
+		reiterateToMapRefEntity(source.getRepository(ATTRIBUTES), intermediateResults);
 
 		return intermediateResults;
 	}
@@ -218,22 +218,52 @@ public class EmxMetaDataParser implements MetaDataParser
 			}
 
 			Boolean attributeNillable = attributeEntity.getBoolean(NILLABLE);
-			Boolean attributeIdAttribute = attributeEntity.getBoolean(ID_ATTRIBUTE);
+			String attributeIdAttribute = attributeEntity.getString(ID_ATTRIBUTE);
 			Boolean attributeVisible = attributeEntity.getBoolean(VISIBLE);
 			Boolean attributeAggregateable = attributeEntity.getBoolean(AGGREGATEABLE);
 			Boolean lookupAttribute = attributeEntity.getBoolean(LOOKUP_ATTRIBUTE);
 			Boolean labelAttribute = attributeEntity.getBoolean(LABEL_ATTRIBUTE);
 			Boolean readOnly = attributeEntity.getBoolean(READ_ONLY);
 			Boolean unique = attributeEntity.getBoolean(UNIQUE);
+			String expression = attributeEntity.getString(EXPRESSION);
 			List<String> tagIds = attributeEntity.getList(TAGS);
 
 			if (attributeNillable != null) attribute.setNillable(attributeNillable);
-			if (attributeIdAttribute != null) attribute.setIdAttribute(attributeIdAttribute);
+
+			boolean isIdAttr = attributeIdAttribute != null
+					&& (attributeIdAttribute.equalsIgnoreCase("true") || attributeIdAttribute.equalsIgnoreCase(AUTO));
+			attribute.setIdAttribute(isIdAttr);
+
+			if (isIdAttr)
+			{
+				if ((attributeNillable != null) && attributeNillable)
+				{
+					throw new IllegalArgumentException("Attributes error on line " + i
+							+ ". Id attributes cannot be nillable");
+				}
+				attribute.setNillable(false);
+			}
+
 			if (attributeVisible != null) attribute.setVisible(attributeVisible);
 			if (attributeAggregateable != null) attribute.setAggregateable(attributeAggregateable);
 			// cannot update ref entities yet, will do so later on
 			if (readOnly != null) attribute.setReadOnly(readOnly);
 			if (unique != null) attribute.setUnique(unique);
+			if (expression != null) attribute.setExpression(expression);
+			attribute.setAuto(attributeIdAttribute != null && attributeIdAttribute.equalsIgnoreCase(AUTO));
+
+			if ((attributeIdAttribute != null) && !attributeIdAttribute.equalsIgnoreCase("true")
+					&& !attributeIdAttribute.equalsIgnoreCase("false") && !attributeIdAttribute.equalsIgnoreCase(AUTO))
+			{
+				throw new IllegalArgumentException("Attributes error on line " + i
+						+ ". Illegal idAttribute value. Allowed values are 'TRUE', 'FALSE' or 'AUTO'");
+			}
+
+			if (attribute.isAuto() && !(attribute.getDataType() instanceof StringField))
+			{
+				throw new IllegalArgumentException("Attributes error on line " + i
+						+ ". Auto attributes can only be of data type 'string'");
+			}
 
 			if (lookupAttribute != null)
 			{
@@ -592,6 +622,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			final String refEntityName = (String) attribute.get(REF_ENTITY);
 			final String entityName = attribute.getString(ENTITY);
 			final String attributeName = attribute.getString(NAME);
+			final String expression = attribute.getString(EXPRESSION);
 			i++;
 			if (refEntityName != null)
 			{
@@ -599,13 +630,22 @@ public class EmxMetaDataParser implements MetaDataParser
 				DefaultAttributeMetaData defaultAttributeMetaData = (DefaultAttributeMetaData) defaultEntityMetaData
 						.getAttribute(attributeName);
 
-				if (!intermediateResults.knowsEntity(refEntityName))
+				if (intermediateResults.knowsEntity(refEntityName))
 				{
-					throw new IllegalArgumentException("attributes.refEntity error on line " + i + ": " + refEntityName
-							+ " unknown");
+					defaultAttributeMetaData.setRefEntity(intermediateResults.getEntityMetaData(refEntityName));
+				}
+				else
+				{
+					EntityMetaData refEntityMeta = dataService.getEntityMetaData(refEntityName);
+					if (expression == null || refEntityMeta == null)
+					{
+						throw new IllegalArgumentException("attributes.refEntity error on line " + i + ": "
+								+ refEntityName + " unknown");
+					}
+					// allow computed xref attributes to refer to pre-existing entities
+					defaultAttributeMetaData.setRefEntity(refEntityMeta);
 				}
 
-				defaultAttributeMetaData.setRefEntity(intermediateResults.getEntityMetaData(refEntityName));
 			}
 		}
 	}
@@ -613,7 +653,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	@Override
 	public ParsedMetaData parse(final RepositoryCollection source)
 	{
-		if (source.getRepositoryByEntityName(EmxMetaDataParser.ATTRIBUTES) != null)
+		if (source.getRepository(EmxMetaDataParser.ATTRIBUTES) != null)
 		{
 			IntermediateParseResults intermediateResults = getEntityMetaDataFromSource(source);
 			return new ParsedMetaData(resolveEntityDependencies(intermediateResults.getEntities()),
@@ -625,10 +665,10 @@ public class EmxMetaDataParser implements MetaDataParser
 			List<EntityMetaData> metadataList = new ArrayList<EntityMetaData>();
 			for (String name : source.getEntityNames())
 			{
-				metadataList.add(dataService.getRepositoryByEntityName(name).getEntityMetaData());
+				metadataList.add(dataService.getRepository(name).getEntityMetaData());
 			}
-			IntermediateParseResults intermediateResults = parseTagsSheet(source.getRepositoryByEntityName(TAGS));
-			parsePackagesSheet(source.getRepositoryByEntityName(PACKAGES), intermediateResults);
+			IntermediateParseResults intermediateResults = parseTagsSheet(source.getRepository(TAGS));
+			parsePackagesSheet(source.getRepository(PACKAGES), intermediateResults);
 			return new ParsedMetaData(resolveEntityDependencies(metadataList), intermediateResults.getPackages(),
 					intermediateResults.getAttributeTags(), intermediateResults.getEntityTags());
 		}
@@ -645,7 +685,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	private List<EntityMetaData> resolveEntityDependencies(List<? extends EntityMetaData> metaDataList)
 	{
 		Set<EntityMetaData> allMetaData = Sets.newLinkedHashSet(metaDataList);
-		Iterable<EntityMetaData> existingMetaData = metaDataService.getEntityMetaDatas();
+		Iterable<EntityMetaData> existingMetaData = dataService.getMeta().getEntityMetaDatas();
 		Iterables.addAll(allMetaData, existingMetaData);
 
 		// Use all metadata for dependency resolving
@@ -660,7 +700,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	private ImmutableMap<String, EntityMetaData> getEntityMetaDataMap(DataService dataService,
 			RepositoryCollection source)
 	{
-		if (source.getRepositoryByEntityName(EmxMetaDataParser.ATTRIBUTES) != null)
+		if (source.getRepository(EmxMetaDataParser.ATTRIBUTES) != null)
 		{
 			return getEntityMetaDataFromSource(source).getEntityMap();
 		}
@@ -676,7 +716,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		ImmutableMap.Builder<String, EntityMetaData> builder = ImmutableMap.<String, EntityMetaData> builder();
 		for (String name : entityNames)
 		{
-			builder.put(name, dataService.getRepositoryByEntityName(name).getEntityMetaData());
+			builder.put(name, dataService.getRepository(name).getEntityMetaData());
 		}
 		return builder.build();
 	}
@@ -706,14 +746,15 @@ public class EmxMetaDataParser implements MetaDataParser
 				report = report.addEntity(sheet, metaDataMap.containsKey(sheet));
 
 				// check the fields
-				Repository s = source.getRepositoryByEntityName(sheet);
+				Repository s = source.getRepository(sheet);
 				EntityMetaData target = metaDataMap.get(sheet);
 
 				if (target != null)
 				{
 					for (AttributeMetaData att : s.getEntityMetaData().getAttributes())
 					{
-						boolean known = target.getAttribute(att.getName()) != null;
+						AttributeMetaData attribute = target.getAttribute(att.getName());
+						boolean known = attribute != null && attribute.getExpression() == null;
 						report = report.addAttribute(att.getName(),
 								known ? AttributeState.IMPORTABLE : AttributeState.UNKNOWN);
 					}
@@ -721,9 +762,10 @@ public class EmxMetaDataParser implements MetaDataParser
 					{
 						if (!(att.getDataType() instanceof CompoundField))
 						{
-							if (!att.isAuto() && !report.getFieldsImportable().get(sheet).contains(att.getName()))
+							if (!att.isAuto() && att.getExpression() == null
+									&& !report.getFieldsImportable().get(sheet).contains(att.getName()))
 							{
-								boolean required = !att.isNillable();
+								boolean required = !att.isNillable() && !att.isAuto();
 								report = report.addAttribute(att.getName(),
 										required ? AttributeState.REQUIRED : AttributeState.AVAILABLE);
 							}

@@ -30,12 +30,12 @@ public interface RepositoryAnnotator
 	EntityMetaData getInputMetaData();
 
 	/**
-	 * Returns if the annotator will work for the given metadata
+	 * Returns null if the annotator will work for the given metadata, a reason if not so
 	 * 
 	 * @param inputMetaData
 	 * @return canAnnotate
 	 */
-	boolean canAnnotate(EntityMetaData inputMetaData);
+	String canAnnotate(EntityMetaData inputMetaData);
 
 	/**
 	 * Return the name of the annotator
@@ -45,4 +45,8 @@ public interface RepositoryAnnotator
 	String getSimpleName();
 
     String getFullName();
+
+    default String getDescription(){
+        return "no description";
+    }
 }

@@ -3,20 +3,21 @@ package org.molgenis.data.csv;
 import java.io.File;
 import java.io.IOException;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.FileRepositoryCollection;
+import org.molgenis.data.support.GenericImporterExtensions;
 import org.springframework.util.StringUtils;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
 /**
@@ -27,12 +28,7 @@ import com.google.common.collect.Lists;
  */
 public class CsvRepositoryCollection extends FileRepositoryCollection
 {
-	public static final String EXTENSION_CSV = "csv";
-	public static final String EXTENSION_TXT = "txt";
-	public static final String EXTENSION_TSV = "tsv";
-	public static final String EXTENSION_ZIP = "zip";
-	public static final Set<String> EXTENSIONS = ImmutableSet.of(EXTENSION_CSV, EXTENSION_TXT, EXTENSION_TSV,
-			EXTENSION_ZIP);
+	public static final String NAME = "CSV";
 	private static final String MAC_ZIP = "__MACOSX";
 	private final File file;
 	private List<String> entityNames;
@@ -46,7 +42,7 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 	public CsvRepositoryCollection(File file, CellProcessor... cellProcessors) throws InvalidFormatException,
 			IOException
 	{
-		super(EXTENSIONS, cellProcessors);
+		super(GenericImporterExtensions.getCSV(), cellProcessors);
 		this.file = file;
 
 		loadEntityNames();
@@ -59,7 +55,7 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 	}
 
 	@Override
-	public Repository getRepositoryByEntityName(String name)
+	public Repository getRepository(String name)
 	{
 		if (!entityNamesLowerCase.contains(name.toLowerCase()))
 		{
@@ -75,7 +71,7 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 		entityNames = Lists.newArrayList();
 		entityNamesLowerCase = Lists.newArrayList();
 
-		if (extension.equalsIgnoreCase(EXTENSION_ZIP))
+		if (extension.equalsIgnoreCase(GenericImporterExtensions.ZIP.toString()))
 		{
 			ZipFile zipFile = null;
 			try
@@ -112,6 +108,46 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 	private String getRepositoryName(String fileName)
 	{
 		return StringUtils.stripFilenameExtension(StringUtils.getFilename(fileName));
+	}
+
+	@Override
+	public String getName()
+	{
+		return NAME;
+	}
+
+	@Override
+	public Repository addEntityMeta(EntityMetaData entityMeta)
+	{
+		return getRepository(entityMeta.getName());
+	}
+
+	@Override
+	public Iterator<Repository> iterator()
+	{
+		return new Iterator<Repository>()
+		{
+			Iterator<String> it = getEntityNames().iterator();
+
+			@Override
+			public boolean hasNext()
+			{
+				return it.hasNext();
+			}
+
+			@Override
+			public Repository next()
+			{
+				return getRepository(it.next());
+			}
+
+		};
+	}
+
+	@Override
+	public boolean hasRepository(String name)
+	{
+		return entityNames.contains(name);
 	}
 
 }

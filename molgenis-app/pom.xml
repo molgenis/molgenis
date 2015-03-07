@@ -8,6 +8,46 @@
 	</parent>
 	<artifactId>molgenis-app</artifactId>
 	<packaging>war</packaging>
+
+	<repositories>
+		<repository>
+			<id>uoft-releases</id>
+			<name>UofT Releases repository</name>
+			<url>http://nexus.cs.toronto.edu/nexus/content/repositories/releases/</url>
+			<releases>
+				<enabled>true</enabled>
+				<checksumPolicy>fail</checksumPolicy>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+				<checksumPolicy>fail</checksumPolicy>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>uoft-snapshots</id>
+			<name>UofT Releases repository</name>
+			<url>http://nexus.cs.toronto.edu/nexus/content/repositories/snapshots/</url>
+			<releases>
+				<enabled>false</enabled>
+				<checksumPolicy>fail</checksumPolicy>
+			</releases>
+			<snapshots>
+				<checksumPolicy>fail</checksumPolicy>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>uoft-externals</id>
+			<name>UofT external repositories mirror</name>
+			<url>http://nexus.cs.toronto.edu/nexus/content/groups/public/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
 	<build>
 		<resources>
 			<resource>
@@ -89,20 +129,6 @@
 				<plugin>
 					<groupId>org.mortbay.jetty</groupId>
 					<artifactId>jetty-maven-plugin</artifactId>
-					<configuration>
-						<stopPort>8079</stopPort>
-						<stopKey>jetty-stop</stopKey>
-						<systemProperties>
-							<systemProperty>
-								<name>molgenis.home</name>
-								<value>${user.home}${file.separator}.molgenis${file.separator}omx</value>
-							</systemProperty>
-							<systemProperty>
-								<name>log4j.configuration</name>
-								<value>log4j-molgenis.properties</value>
-							</systemProperty>
-						</systemProperties>
-					</configuration>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -142,6 +168,11 @@
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-dataexplorer</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-pathways</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -209,6 +240,12 @@
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data-vcf</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+            	<exclusion>
+            		<artifactId>log4j</artifactId>
+            		<groupId>log4j</groupId>
+            	</exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
@@ -251,10 +288,21 @@
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-das</artifactId>
 			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>log4j</artifactId>
+					<groupId>log4j</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-model-registry</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-ontology</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

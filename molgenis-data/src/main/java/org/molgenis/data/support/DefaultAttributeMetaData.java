@@ -34,6 +34,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	private boolean labelAttribute = false; // remove?
 	private boolean lookupAttribute = false; // remove?
 	private EntityMetaData refEntity;
+	private String expression;
 	private String label;
 	private boolean visible = true; // remove?
 	private boolean unique = false;
@@ -56,7 +57,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		this.name = name;
 		this.fieldType = MolgenisFieldTypes.STRING;
 	}
-	
+
 	public DefaultAttributeMetaData(String newName, AttributeMetaData attributeMetaData)
 	{
 		this(attributeMetaData);
@@ -81,6 +82,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		this.lookupAttribute = attributeMetaData.isLookupAttribute();
 		EntityMetaData refEntity = attributeMetaData.getRefEntity();
 		this.refEntity = refEntity != null ? new DefaultEntityMetaData(refEntity) : null; // deep copy
+		this.expression = attributeMetaData.getExpression();
 		this.label = attributeMetaData.getLabel();
 		this.visible = attributeMetaData.isVisible();
 		this.unique = attributeMetaData.isUnique();
@@ -164,6 +166,10 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		if (getDataType() instanceof XrefField || getDataType() instanceof MrefField
 				|| getDataType() instanceof CategoricalField)
 		{
+			if (getExpression() != null)
+			{
+				return null;
+			}
 			if (getRefEntity() == null) throw new MolgenisDataException("refEntity is missing for " + getName());
 			if (getRefEntity().getIdAttribute() == null) throw new MolgenisDataException(
 					"idAttribute is missing for entity [" + getRefEntity().getName() + "]");
@@ -212,6 +218,18 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setRefEntity(EntityMetaData refEntity)
 	{
 		this.refEntity = refEntity;
+		return this;
+	}
+
+	@Override
+	public String getExpression()
+	{
+		return expression;
+	}
+
+	public DefaultAttributeMetaData setExpression(String expression)
+	{
+		this.expression = expression;
 		return this;
 	}
 

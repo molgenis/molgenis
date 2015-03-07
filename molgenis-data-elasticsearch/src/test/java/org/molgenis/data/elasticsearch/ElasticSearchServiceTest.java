@@ -25,6 +25,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -35,6 +36,7 @@ import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
 import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -55,7 +57,7 @@ public class ElasticSearchServiceTest
 		indexName = "molgenis";
 		client = mock(Client.class);
 		entityToSourceConverter = mock(EntityToSourceConverter.class);
-		dataService = spy(new DataServiceImpl());
+		dataService = spy(new DataServiceImpl(new NonDecoratingRepositoryDecoratorFactory()));
 		searchService = spy(new ElasticSearchService(client, indexName, dataService, entityToSourceConverter, false));
 		BulkProcessorFactory bulkProcessorFactory = mock(BulkProcessorFactory.class);
 		ElasticSearchService.setBulkProcessorFactory(bulkProcessorFactory);
@@ -137,7 +139,7 @@ public class ElasticSearchServiceTest
 		when(client.prepareSearch(indexName)).thenReturn(searchRequestBuilder);
 
 		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("entity");
-		entityMetaData.addAttribute(idAttrName).setIdAttribute(true);
+		entityMetaData.addAttribute(idAttrName).setDataType(MolgenisFieldTypes.INT).setIdAttribute(true);
 		Query q = new QueryImpl();
 		Iterable<Entity> searchResults = searchService.search(q, entityMetaData);
 		Iterator<Entity> it = searchResults.iterator();

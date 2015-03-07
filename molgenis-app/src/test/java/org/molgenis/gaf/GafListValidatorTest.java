@@ -41,17 +41,14 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 	private DataService dataService;
 
 	@Autowired
-	private MetaDataService metaDataService;
-
-	@Autowired
 	private MolgenisSettings molgenisSettings;
 
 	@Autowired
 	private GafListValidationReport report;
-	
-	private List<String> columns = Arrays.<String> asList(GAFCol.INTERNAL_SAMPLE_ID.toString(), GAFCol.LANE.toString(),
-			GAFCol.SEQUENCER.toString(),
-			GAFCol.EXTERNAL_SAMPLE_ID.toString(), GAFCol.PROJECT.toString(), GAFCol.BARCODE_1.toString());
+
+	private final List<String> columns = Arrays.<String> asList(GAFCol.INTERNAL_SAMPLE_ID.toString(),
+			GAFCol.LANE.toString(), GAFCol.SEQUENCER.toString(), GAFCol.EXTERNAL_SAMPLE_ID.toString(),
+			GAFCol.PROJECT.toString(), GAFCol.BARCODE_1.toString());
 
 	@BeforeMethod
 	public void setUp() throws Exception
@@ -129,7 +126,8 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
 
 		// INTERNAL_SAMPLE_ID
-		DefaultAttributeMetaData internalSampleID = new DefaultAttributeMetaData(GAFCol.INTERNAL_SAMPLE_ID.toString(), FieldTypeEnum.INT);
+		DefaultAttributeMetaData internalSampleID = new DefaultAttributeMetaData(GAFCol.INTERNAL_SAMPLE_ID.toString(),
+				FieldTypeEnum.INT);
 
 		// LANE
 		DefaultAttributeMetaData lane = new DefaultAttributeMetaData(GAFCol.LANE.toString(), FieldTypeEnum.STRING);
@@ -138,7 +136,7 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 		DefaultAttributeMetaData sequencer = new DefaultAttributeMetaData(GAFCol.SEQUENCER.toString(),
 				FieldTypeEnum.ENUM);
 		sequencer.setEnumOptions(Arrays.<String> asList("HWUSI_EAS536", "SN163", "M01785"));
-		
+
 		// EXTERNAL_SAMPLE_ID
 		DefaultAttributeMetaData externalSampleId = new DefaultAttributeMetaData(GAFCol.EXTERNAL_SAMPLE_ID.toString(),
 				FieldTypeEnum.STRING);
@@ -160,13 +158,11 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 		when(entityMetaData.getAttribute(GAFCol.EXTERNAL_SAMPLE_ID.toString())).thenReturn(externalSampleId);
 		when(entityMetaData.getAttribute(GAFCol.PROJECT.toString())).thenReturn(project);
 		when(entityMetaData.getAttribute(GAFCol.BARCODE_1.toString())).thenReturn(barcode1);
-
 		when(repository.getEntityMetaData()).thenReturn(entityMetaData);
-
 		when(molgenisSettings.getProperty(GafListFileRepository.GAFLIST_ENTITYNAME)).thenReturn(
 				"gaflist_gaflist_20141111");
 
-		when(metaDataService.getEntityMetaData("gaflist_gaflist_20141111")).thenReturn(entityMetaData);
+		when(dataService.getEntityMetaData("gaflist_gaflist_20141111")).thenReturn(entityMetaData);
 
 		return repository;
 	}

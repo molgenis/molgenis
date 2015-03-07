@@ -6,6 +6,7 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.DATA_TYPE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.DESCRIPTION;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENTITY;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENUM_OPTIONS;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.EXPRESSION;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.IDENTIFIER;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ID_ATTRIBUTE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL;
@@ -20,6 +21,7 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.READ_ONLY;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.REF_ENTITY;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.UNIQUE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.VISIBLE;
+import static org.molgenis.data.support.QueryImpl.EQ;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -29,13 +31,12 @@ import java.util.UUID;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.ManageableCrudRepositoryCollection;
+import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Query;
 import org.molgenis.data.Range;
-import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Repository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -44,6 +45,7 @@ import org.molgenis.fieldtypes.CompoundField;
 import org.molgenis.fieldtypes.EnumField;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.Iterables;
 
 /**
  * Helper class around the {@link AttributeMetaDataMetaData} repository. Internal implementation class, use
@@ -53,16 +55,21 @@ class AttributeMetaDataRepository
 {
 	public static final AttributeMetaDataMetaData META_DATA = new AttributeMetaDataMetaData();
 
-	private final CrudRepository repository;
+	private final Repository repository;
 
 	private final EntityMetaDataRepository entityMetaDataRepository;
 
-	public AttributeMetaDataRepository(ManageableCrudRepositoryCollection collection,
+	public AttributeMetaDataRepository(ManageableRepositoryCollection collection,
 			EntityMetaDataRepository entityMetaDataRepository)
 	{
 		this.entityMetaDataRepository = entityMetaDataRepository;
-		this.repository = collection.add(META_DATA);
+		this.repository = collection.addEntityMeta(META_DATA);
 		fillAllEntityAttributes();
+	}
+
+	Repository getRepository()
+	{
+		return repository;
 	}
 
 	/**
@@ -71,7 +78,7 @@ class AttributeMetaDataRepository
 	 */
 	public void fillAllEntityAttributes()
 	{
-		Map<String, Map<String, DefaultAttributeMetaData>> attributesMap = new LinkedHashMap<String, Map<String, DefaultAttributeMetaData>>();
+		Map<String, Map<String, DefaultAttributeMetaData>> attributesMap = new LinkedHashMap<>();
 
 		// 1st pass: create attributes
 		for (Entity attributeEntity : repository)
@@ -83,14 +90,14 @@ class AttributeMetaDataRepository
 			Map<String, DefaultAttributeMetaData> attributes = attributesMap.get(entityName);
 			if (attributes == null)
 			{
-				attributes = new LinkedHashMap<String, DefaultAttributeMetaData>();
+				attributes = new LinkedHashMap<>();
 				attributesMap.put(entityName, attributes);
 			}
 			attributes.put(attribute.getName(), attribute);
 		}
 
 		// 2nd pass: add attribute relations to attributes
-		Map<String, Set<String>> rootAttributes = new LinkedHashMap<String, Set<String>>();
+		Map<String, Set<String>> rootAttributes = new LinkedHashMap<>();
 		for (Entity attributeEntity : repository)
 		{
 			Entity entity = attributeEntity.getEntity(ENTITY);
@@ -110,7 +117,7 @@ class AttributeMetaDataRepository
 				Set<String> entityRootAttributes = rootAttributes.get(entityName);
 				if (entityRootAttributes == null)
 				{
-					entityRootAttributes = new LinkedHashSet<String>();
+					entityRootAttributes = new LinkedHashSet<>();
 					rootAttributes.put(entityName, entityRootAttributes);
 				}
 				entityRootAttributes.add(attributeName);
@@ -146,8 +153,10 @@ class AttributeMetaDataRepository
 	public void add(Entity entity, AttributeMetaData att)
 	{
 		toAttributeMetaDataEntity(entity, att, null);
+		DefaultEntityMetaData entityMeta = entityMetaDataRepository.get(entity
+				.getString(EntityMetaDataMetaData.FULL_NAME));
 
-		entityMetaDataRepository.get(entity.getString(EntityMetaDataMetaData.FULL_NAME)).addAttributeMetaData(att);
+		if (!Iterables.contains(entityMeta.getAttributes(), att)) entityMeta.addAttributeMetaData(att);
 	}
 
 	private void toAttributeMetaDataEntity(Entity entity, AttributeMetaData att, AttributeMetaData parentCompoundAtt)
@@ -169,11 +178,12 @@ class AttributeMetaDataRepository
 		attributeMetaDataEntity.set(LABEL_ATTRIBUTE, att.isLabelAttribute());
 		attributeMetaDataEntity.set(READ_ONLY, att.isReadonly());
 		attributeMetaDataEntity.set(UNIQUE, att.isUnique());
+		attributeMetaDataEntity.set(EXPRESSION, att.getExpression());
 		if (parentCompoundAtt != null)
 		{
 			attributeMetaDataEntity.set(PART_OF_ATTRIBUTE, parentCompoundAtt.getName());
 		}
-		if (att.getDataType() instanceof EnumField)
+		if ((att.getDataType() instanceof EnumField) && (att.getEnumOptions() != null))
 		{
 			attributeMetaDataEntity.set(ENUM_OPTIONS, Joiner.on(",").join(att.getEnumOptions()));
 		}
@@ -187,11 +197,9 @@ class AttributeMetaDataRepository
 		if (att.getRefEntity() != null)
 		{
 			Entity refEntity = entityMetaDataRepository.getEntity(att.getRefEntity().getName());
-			if (refEntity == null)
-			{
-				throw new MolgenisDataException("RefEntity: " + att.getRefEntity().getName()
-						+ " could not be found in entityMetaDataRepository!");
-			}
+			if (refEntity == null) throw new RuntimeException("Missing refEntity [" + att.getRefEntity().getName()
+					+ "] of attribute [" + att.getName() + "]");
+
 			attributeMetaDataEntity.set(REF_ENTITY, refEntity);
 		}
 		repository.add(attributeMetaDataEntity);
@@ -239,7 +247,7 @@ class AttributeMetaDataRepository
 	 */
 	public void deleteAllAttributes(String entityName)
 	{
-		repository.delete(repository.findAll(new QueryImpl().eq(AttributeMetaDataMetaData.ENTITY, entityName)));
+		repository.delete(repository.findAll(EQ(AttributeMetaDataMetaData.ENTITY, entityName)));
 	}
 
 	/**
@@ -276,6 +284,7 @@ class AttributeMetaDataRepository
 				.getBoolean(LABEL_ATTRIBUTE));
 		attributeMetaData.setReadOnly(entity.getBoolean(READ_ONLY) == null ? false : entity.getBoolean(READ_ONLY));
 		attributeMetaData.setUnique(entity.getBoolean(UNIQUE) == null ? false : entity.getBoolean(UNIQUE));
+		attributeMetaData.setExpression(entity.getString(EXPRESSION));
 
 		Long rangeMin = entity.getLong(RANGE_MIN);
 		Long rangeMax = entity.getLong(RANGE_MAX);

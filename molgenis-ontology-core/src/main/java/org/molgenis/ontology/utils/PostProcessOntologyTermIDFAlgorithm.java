@@ -10,25 +10,27 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.ontology.beans.ComparableEntity;
+import org.molgenis.ontology.repository.OntologyTermQueryRepository;
 import org.molgenis.ontology.service.OntologyServiceImpl;
 
 public class PostProcessOntologyTermIDFAlgorithm
 {
+	private static final int MAX_NUM = 100;
 	private static final String DEFAULT_FIELD = "Name";
 
 	public static void process(List<ComparableEntity> entities, Map<String, Object> inputData,
 			OntologyServiceImpl ontologyService)
 	{
-		if (inputData.size() == 1 && inputData.containsKey(DEFAULT_FIELD))
+		if (inputData.size() == 1 && inputData.containsKey(DEFAULT_FIELD) && entities.size() > 0)
 		{
 			String queryString = inputData.get(DEFAULT_FIELD).toString();
 
-			int totalDocs = entities.size() > 10 ? 10 : entities.size();
+			int totalDocs = entities.size() > MAX_NUM ? MAX_NUM : entities.size();
 
 			Set<String> wordsInQueryString = AlgorithmHelper.medicalStemProxy(queryString);
 			// Collect the frequencies for all of the unique words from query string
-			Map<String, Integer> wordFreqMap = AlgorithmHelper.createWordFreq(queryString, entities, totalDocs,
-					ontologyService);
+			Map<String, Double> wordIDFMap = AlgorithmHelper.createWordIDF(queryString,
+					entities.get(0).getString(OntologyTermQueryRepository.ONTOLOGY_IRI), ontologyService);
 
 			for (ComparableEntity entity : entities.subList(0, totalDocs))
 			{
@@ -41,14 +43,13 @@ public class PostProcessOntologyTermIDFAlgorithm
 
 				BigDecimal unmatchedPart = new BigDecimal(100).subtract(entity.getCombinedScore());
 				// Weight the matched key word based on inverse document frequency (IDF)
-				wordsInOntologyTerm.retainAll(wordFreqMap.keySet());
+				wordsInOntologyTerm.retainAll(wordIDFMap.keySet());
 				for (String word : wordsInOntologyTerm)
 				{
-					if (wordFreqMap.containsKey(word) && wordFreqMap.get(word) != 0)
+					if (wordIDFMap.containsKey(word) && wordIDFMap.get(word) != 0)
 					{
 						BigDecimal score = entity.getCombinedScore();
-						BigDecimal idfValue = new BigDecimal(1 + Math.log((double) totalDocs
-								/ (wordFreqMap.get(word) + 1)));
+						BigDecimal idfValue = new BigDecimal(wordIDFMap.get(word));
 						BigDecimal partialScore = score.multiply(new BigDecimal((double) word.length() / termLength));
 						entity.set(COMBINED_SCORE, score.subtract(partialScore).add(partialScore.multiply(idfValue))
 								.doubleValue());
@@ -57,12 +58,11 @@ public class PostProcessOntologyTermIDFAlgorithm
 
 				// Weight unmatched key word based on inverse doucment frequency
 				wordsInOntologyTerm = AlgorithmHelper.medicalStemProxy(combineSynonyms);
-				for (String word : wordFreqMap.keySet())
+				for (String word : wordIDFMap.keySet())
 				{
-					if (!wordsInOntologyTerm.contains(word) && wordFreqMap.get(word) != 0)
+					if (!wordsInOntologyTerm.contains(word) && wordIDFMap.get(word) != 0)
 					{
-						BigDecimal idfValue = new BigDecimal(1 + Math.log((double) totalDocs
-								/ (wordFreqMap.get(word) + 1)));
+						BigDecimal idfValue = new BigDecimal(wordIDFMap.get(word));
 						BigDecimal partialScore = unmatchedPart.multiply(new BigDecimal((double) word.length()
 								/ termLength));
 

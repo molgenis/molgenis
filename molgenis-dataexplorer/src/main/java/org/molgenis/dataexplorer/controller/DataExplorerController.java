@@ -26,11 +26,11 @@ import javax.validation.Valid;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.AggregateResult;
-import org.molgenis.data.Aggregateable;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.GenomeConfig;
@@ -45,6 +45,8 @@ import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.ui.MolgenisInterceptor;
+import org.molgenis.ui.menu.Menu;
+import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.util.GsonHttpMessageConverter;
@@ -142,6 +144,9 @@ public class DataExplorerController extends MolgenisPluginController
 	@Autowired
 	private FreeMarkerConfigurer freemarkerConfigurer;
 
+	@Autowired
+	MenuManagerService menuManager;
+
 	public DataExplorerController()
 	{
 		super(URI);
@@ -154,8 +159,7 @@ public class DataExplorerController extends MolgenisPluginController
 	 * @return the view name
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(value = "entity", required = false) String selectedEntityName,
-			@RequestParam(value = "searchTerm", required = false) String searchTerm, Model model) throws Exception
+	public String init(@RequestParam(value = "entity", required = false) String selectedEntityName, Model model) throws Exception
 	{
 		boolean entityExists = false;
 		boolean hasEntityPermission = false;
@@ -194,7 +198,6 @@ public class DataExplorerController extends MolgenisPluginController
 			}
 		}
 		model.addAttribute("selectedEntityName", selectedEntityName);
-		model.addAttribute("searchTerm", searchTerm);
 		model.addAttribute("hideSearchBox", molgenisSettings.getBooleanProperty(KEY_HIDE_SEARCH_BOX, false));
 		model.addAttribute("hideDataItemSelect", molgenisSettings.getBooleanProperty(KEY_HIDE_ITEM_SELECTION, false));
 		model.addAttribute("isAdmin", SecurityUtils.currentUserIsSu());
@@ -267,13 +270,12 @@ public class DataExplorerController extends MolgenisPluginController
 		boolean modDiseasematcher = molgenisSettings.getBooleanProperty(KEY_MOD_DISEASEMATCHER,
 				DEFAULT_VAL_MOD_DISEASEMATCHER);
 
-		String modEntitiesReportName = parseEntitiesReportRuntimeProperty(entityName);
-
 		if (modAggregates)
 		{
-			// Check if the repository is aggregateable
-			modAggregates = dataService.getRepositoryByEntityName(entityName) instanceof Aggregateable;
+			modAggregates = dataService.getCapabilities(entityName).contains(RepositoryCapability.AGGREGATEABLE);
 		}
+
+		String modEntitiesReportName = parseEntitiesReportRuntimeProperty(entityName);
 
 		// set data explorer permission
 		Permission pluginPermission = null;
@@ -391,6 +393,19 @@ public class DataExplorerController extends MolgenisPluginController
 		return attributeStartPosition != null && attributeChromosome != null;
 	}
 
+	/**
+	 * Updates the 'Entities' menu when an entity is deleted.
+	 * 
+	 * @param entityName
+	 */
+	@RequestMapping(value = "/removeEntityFromMenu/{entityName}", method = POST)
+	public void updateMenuOnDeleteEntity(@PathVariable("entityName") String entityName, HttpServletResponse response)
+	{
+		Menu menu = menuManager.getMenu();
+		menu.deleteMenuItem("form." + entityName);
+		menuManager.saveMenu(menu);
+	}
+
 	@RequestMapping(value = "/download", method = POST)
 	public void download(@RequestParam("dataRequest") String dataRequestStr, HttpServletResponse response)
 			throws IOException
@@ -402,7 +417,7 @@ public class DataExplorerController extends MolgenisPluginController
 		DataRequest dataRequest = new GsonHttpMessageConverter().getGson().fromJson(dataRequestStr, DataRequest.class);
 
 		String entityName = dataRequest.getEntityName();
-		String fileName = entityName + '_' + new SimpleDateFormat("yyyy-mm-dd hh:mm:ss").format(new Date()) + ".csv";
+		String fileName = entityName + '_' + new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date()) + ".csv";
 
 		response.setContentType("text/csv");
 		response.addHeader("Content-Disposition", "attachment; filename=" + fileName);
@@ -593,7 +608,7 @@ public class DataExplorerController extends MolgenisPluginController
 	public String viewEntityDetails(@RequestParam(value = "entityName") String entityName,
 			@RequestParam(value = "entityId") String entityId, Model model) throws Exception
 	{
-		model.addAttribute("entity", dataService.getQueryableRepository(entityName).findOne(entityId));
+		model.addAttribute("entity", dataService.getRepository(entityName).findOne(entityId));
 		model.addAttribute("entityMetadata", dataService.getEntityMetaData(entityName));
 		model.addAttribute("viewName", getViewName(entityName));
 		return "view-entityreport";

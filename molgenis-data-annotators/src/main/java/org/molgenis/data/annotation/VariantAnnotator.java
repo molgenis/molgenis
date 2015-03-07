@@ -17,11 +17,21 @@ public abstract class VariantAnnotator extends LocusAnnotator
 	public EntityMetaData getInputMetaData()
 	{
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
+		DefaultAttributeMetaData chrom = new DefaultAttributeMetaData(CHROMOSOME,
+				MolgenisFieldTypes.FieldTypeEnum.STRING);
+		chrom.setDescription("The chromosome on which the variant is observed");
+		DefaultAttributeMetaData pos = new DefaultAttributeMetaData(POSITION, MolgenisFieldTypes.FieldTypeEnum.LONG);
+		pos.setDescription("The position on the chromosome which the variant is observed");
+		DefaultAttributeMetaData ref = new DefaultAttributeMetaData(REFERENCE, MolgenisFieldTypes.FieldTypeEnum.STRING);
+		ref.setDescription("The reference allele");
+		DefaultAttributeMetaData alt = new DefaultAttributeMetaData(ALTERNATIVE,
+				MolgenisFieldTypes.FieldTypeEnum.STRING);
+		alt.setDescription("The alternative allele observed");
 
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CHROMOSOME, MolgenisFieldTypes.FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(POSITION, MolgenisFieldTypes.FieldTypeEnum.LONG));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(REFERENCE, MolgenisFieldTypes.FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ALTERNATIVE, MolgenisFieldTypes.FieldTypeEnum.STRING));
+		metadata.addAttributeMetaData(chrom);
+		metadata.addAttributeMetaData(pos);
+		metadata.addAttributeMetaData(ref);
+		metadata.addAttributeMetaData(alt);
 
 		return metadata;
 	}

@@ -14,7 +14,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.util.MapperTypeSanitizer;
-import org.molgenis.util.RepositoryUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,7 +65,7 @@ public class IndexRequestGenerator
 
 		return new Iterator<BulkRequestBuilder>()
 		{
-			private final long rows = RepositoryUtils.count(repository);
+			private final long rows = repository.count();
 			private static final int docsPerBulk = 1000;
 			private final Iterator<? extends Entity> it = repository.iterator();
 			private final EntityMetaData entityMetaData = repository.getEntityMetaData();

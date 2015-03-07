@@ -8,7 +8,7 @@ import org.molgenis.auth.MolgenisUser;
 
 public class MolgenisUserViewData
 {
-	private final Integer id;
+	private final String id;
 	private final String username;
 	private String firstName;
 	private String middleName;
@@ -16,7 +16,7 @@ public class MolgenisUserViewData
 	private String fullName; // first, middle, last name
 	private Boolean active;
 	private Boolean superuser;
-	private final List<Integer> groupList = new ArrayList<Integer>();
+	private final List<String> groupList = new ArrayList<>();
 
 	MolgenisUserViewData(MolgenisUser mu, List<MolgenisGroup> molgenisGroups)
 	{
@@ -36,7 +36,7 @@ public class MolgenisUserViewData
 		}
 	}
 
-	MolgenisUserViewData(final Integer id, final String username)
+	MolgenisUserViewData(String id, final String username)
 	{
 		if (null == id)
 		{
@@ -50,7 +50,7 @@ public class MolgenisUserViewData
 		this.username = username;
 	}
 
-	public Integer getId()
+	public String getId()
 	{
 		return id;
 	}
@@ -75,7 +75,7 @@ public class MolgenisUserViewData
 		return this.superuser;
 	}
 
-	public Boolean isGroupMember(Integer id)
+	public Boolean isGroupMember(String id)
 	{
 		return groupList.contains(id);
 	}

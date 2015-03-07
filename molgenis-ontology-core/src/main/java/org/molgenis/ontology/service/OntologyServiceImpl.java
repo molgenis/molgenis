@@ -10,6 +10,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
@@ -36,10 +38,14 @@ import org.molgenis.ontology.repository.OntologyTermIndexRepository;
 import org.molgenis.ontology.repository.OntologyTermQueryRepository;
 import org.molgenis.ontology.utils.NGramMatchingModel;
 import org.molgenis.ontology.utils.PostProcessOntologyTermCombineSynonymAlgorithm;
-import org.molgenis.ontology.utils.PostProcessOntologyTermIDFAlgorithm;
+import org.molgenis.ontology.utils.PostProcessRedistributionScoreAlgorithm;
+import org.molgenis.ontology.utils.PostProcessRemoveRedundantOntologyTerm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.tartarus.snowball.ext.PorterStemmer;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Iterables;
 
 public class OntologyServiceImpl implements OntologyService
@@ -47,17 +53,32 @@ public class OntologyServiceImpl implements OntologyService
 	private final PorterStemmer stemmer = new PorterStemmer();
 	private static final List<String> ELASTICSEARCH_RESERVED_WORDS = Arrays.asList("or", "and", "if");
 	private static final String FUZZY_MATCH_SIMILARITY = "~0.8";
-	private static final String NON_WORD_SEPARATOR = "[^a-zA-Z0-9]";
 	private static final int MAX_NUMBER_MATCHES = 500;
+	public static final String NON_WORD_SEPARATOR = "[^a-zA-Z0-9]";
 	public static final String SIGNIFICANT_VALUE = "Significant";
 	public static final Character DEFAULT_SEPARATOR = ';';
 	public static final String COMMOM_SEPARATOR = ",";
-	public static final String DEFAULT_MATCHING_NAME_FIELD = "name";
-	public static final String DEFAULT_MATCHING_SYNONYM_FIELD = "synonym";
+	public static final String DEFAULT_MATCHING_NAME_FIELD = "Name";
+	public static final String DEFAULT_MATCHING_SYNONYM_FIELD = "Synonym";
 	public static final String ALLOWED_IDENTIFIER = "Identifier";
 
 	private final SearchService searchService;
 	private final DataService dataService;
+
+	private final LoadingCache<String, Long> CACHED_TOTAL_WORD_COUNT = CacheBuilder.newBuilder()
+			.maximumSize(Integer.MAX_VALUE).expireAfterWrite(1, TimeUnit.DAYS).build(new CacheLoader<String, Long>()
+			{
+				public Long load(String ontologyIri)
+				{
+					Ontology ontology = getOntology(ontologyIri);
+
+					if (ontology != null && !StringUtils.isEmpty(ontology.getLabel()))
+					{
+						return searchService.count(new QueryImpl(), dataService.getEntityMetaData(ontology.getLabel()));
+					}
+					return (long) 0;
+				}
+			});
 
 	@Autowired
 	public OntologyServiceImpl(SearchService searchService, DataService dataService)
@@ -66,6 +87,37 @@ public class OntologyServiceImpl implements OntologyService
 		if (dataService == null) throw new IllegalArgumentException("DataService is null");
 		this.searchService = searchService;
 		this.dataService = dataService;
+	}
+
+	public double getWordInverseDocumentFrequency(String ontologyIri, String word)
+	{
+		Ontology ontology = getOntology(ontologyIri);
+
+		if (ontology != null && !StringUtils.isEmpty(ontology.getLabel()))
+		{
+			QueryRule queryRule = new QueryRule(Arrays.asList(new QueryRule(OntologyTermQueryRepository.SYNONYMS,
+					Operator.EQUALS, word)));
+			queryRule.setOperator(Operator.DIS_MAX);
+			long wordCount = searchService.count(new QueryImpl(queryRule),
+					dataService.getEntityMetaData(ontology.getLabel()));
+			BigDecimal idfValue = new BigDecimal(1 + Math.log((double) getTotalNumDocument(ontologyIri)
+					/ (wordCount + 1)));
+			return idfValue.doubleValue();
+		}
+		return 0;
+	}
+
+	public long getTotalNumDocument(String ontologyIri)
+	{
+		try
+		{
+			return CACHED_TOTAL_WORD_COUNT.get(ontologyIri);
+		}
+		catch (ExecutionException e)
+		{
+			new RuntimeException(e.getMessage());
+		}
+		return 0;
 	}
 
 	@Override
@@ -79,7 +131,7 @@ public class OntologyServiceImpl implements OntologyService
 	{
 		Query query = new QueryImpl().eq(OntologyQueryRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY)
 				.pageSize(Integer.MAX_VALUE);
-		EntityMetaData entityMetaData = dataService.getEntityMetaData(OntologyQueryRepository.DEFAULT_ONTOLOGY_REPO);
+		EntityMetaData entityMetaData = dataService.getEntityMetaData(OntologyQueryRepository.ENTITY_NAME);
 		return searchService.search(query, entityMetaData);
 	}
 
@@ -94,7 +146,7 @@ public class OntologyServiceImpl implements OntologyService
 	{
 		Query query = new QueryImpl().eq(OntologyQueryRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY)
 				.and().eq(OntologyIndexRepository.ONTOLOGY_IRI, ontologyIri).pageSize(Integer.MAX_VALUE);
-		EntityMetaData entityMetaData = dataService.getEntityMetaData(OntologyQueryRepository.DEFAULT_ONTOLOGY_REPO);
+		EntityMetaData entityMetaData = dataService.getEntityMetaData(OntologyQueryRepository.ENTITY_NAME);
 		for (Entity entity : searchService.search(query, entityMetaData))
 		{
 			return new OntologyEntity(entity, entityMetaData, dataService, searchService, this);
@@ -234,8 +286,8 @@ public class OntologyServiceImpl implements OntologyService
 			{
 				// The attribute name is either equal to 'Name' or starts
 				// with string 'Synonym'
-				if (DEFAULT_MATCHING_NAME_FIELD.equals(attributeName.toLowerCase())
-						|| attributeName.toLowerCase().startsWith(DEFAULT_MATCHING_SYNONYM_FIELD))
+				if (DEFAULT_MATCHING_NAME_FIELD.equalsIgnoreCase(attributeName)
+						|| attributeName.toLowerCase().startsWith(DEFAULT_MATCHING_SYNONYM_FIELD.toLowerCase()))
 				{
 					String medicalStemProxy = medicalStemProxy(inputEntity.getString(attributeName));
 					if (!StringUtils.isEmpty(medicalStemProxy))
@@ -265,20 +317,23 @@ public class OntologyServiceImpl implements OntologyService
 		int count = 0;
 		EntityMetaData entityMetaData = dataService.getEntityMetaData(getEntityName(ontologyIri));
 		Set<String> processedOntologyTerms = new HashSet<String>();
-		for (Entity entity : searchService.search(new QueryImpl(finalQueryRule).pageSize(MAX_NUMBER_MATCHES),
-				entityMetaData))
+		Iterable<Entity> entities = searchService.search(new QueryImpl(finalQueryRule).pageSize(MAX_NUMBER_MATCHES),
+				entityMetaData);
+
+		for (Entity entity : entities)
 		{
-			if (!processedOntologyTerms.contains(entity.getString(OntologyTermQueryRepository.SYNONYMS)))
+			String ontologyTermSynonym = entity.getString(OntologyTermQueryRepository.SYNONYMS);
+			if (!processedOntologyTerms.contains(ontologyTermSynonym))
 			{
-				processedOntologyTerms.add(entity.getString(OntologyTermQueryRepository.SYNONYMS));
+				processedOntologyTerms.add(ontologyTermSynonym);
 
 				BigDecimal maxNgramScore = new BigDecimal(0);
 				for (String inputAttrName : inputEntity.getAttributeNames())
 				{
 					if (!StringUtils.isEmpty(inputEntity.getString(inputAttrName)))
 					{
-						if (DEFAULT_MATCHING_NAME_FIELD.equals(inputAttrName.toLowerCase())
-								|| inputAttrName.toLowerCase().startsWith(DEFAULT_MATCHING_SYNONYM_FIELD))
+						if (DEFAULT_MATCHING_NAME_FIELD.equalsIgnoreCase(inputAttrName)
+								|| inputAttrName.toLowerCase().startsWith(DEFAULT_MATCHING_SYNONYM_FIELD.toLowerCase()))
 						{
 							BigDecimal ngramScore = matchOntologyTerm(inputEntity.getString(inputAttrName), entity);
 							if (maxNgramScore.doubleValue() < ngramScore.doubleValue())
@@ -321,7 +376,17 @@ public class OntologyServiceImpl implements OntologyService
 				comparableEntities.add(new ComparableEntity(entity, maxNgramScore, maxScoreField));
 			}
 		}
-		return convertResults(comparableEntities, inputData);
+		return convertResults(comparableEntities, inputData, comparableEntities.size());
+	}
+
+	private OntologyServiceResult convertResults(List<ComparableEntity> comparableEntities,
+			Map<String, Object> inputData, int count)
+	{
+		PostProcessOntologyTermCombineSynonymAlgorithm.process(comparableEntities, inputData);
+		PostProcessRemoveRedundantOntologyTerm.process(comparableEntities);
+		PostProcessRedistributionScoreAlgorithm.process(comparableEntities, inputData, this);
+		Collections.sort(comparableEntities);
+		return new OntologyServiceResultImpl(inputData, comparableEntities, count);
 	}
 
 	public OntologyServiceResult search(String ontologyUrl, String queryString)
@@ -357,16 +422,6 @@ public class OntologyServiceImpl implements OntologyService
 			}
 		}
 		return stringBuilder.toString().trim();
-	}
-
-	private OntologyServiceResult convertResults(List<ComparableEntity> comparableEntities,
-			Map<String, Object> inputData)
-	{
-		comparableEntities = PostProcessOntologyTermCombineSynonymAlgorithm.process(comparableEntities, inputData);
-		PostProcessOntologyTermIDFAlgorithm.process(comparableEntities, inputData, this);
-		// PostProcessRedistributionScoreAlgorithm.process(comparableEntities, inputData, this);
-		Collections.sort(comparableEntities);
-		return new OntologyServiceResultImpl(inputData, comparableEntities, comparableEntities.size());
 	}
 
 	private BigDecimal matchOntologyTerm(String queryString, Entity entity)

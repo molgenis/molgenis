@@ -81,7 +81,13 @@ molgenis.get <- local(function(entity, q = NULL, start = 0, num = 1000, sortColu
   	url <- paste0(url, "&attributes=", curlEscape(paste0(attributes, collapse = ",")))
   }
   
-  dataFrame <- read.csv(url)
+  # FIXME Check metadata for every column and set a colClass vector corresponding to the correct type
+  # EXAMPLE: column1 contains strings, 
+  # characterClass <- c("character")
+  # names(characterClass) <- c("column1")
+  # read.csv(url, colClass = c(characterClass))
+	csv <- getURL(url)
+	dataFrame <- read.csv(textConnection(csv))
   
   return (dataFrame)
 }, molgenis.env)
