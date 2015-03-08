@@ -63,7 +63,7 @@ public class Utils
 		try
 		{
 			String content = "";
-			BufferedReader reader = new BufferedReader(new InputStreamReader(instream));
+			BufferedReader reader = new BufferedReader(new InputStreamReader(instream, "UTF-8"));
 			String line;
 			while ((line = reader.readLine()) != null)
 			{

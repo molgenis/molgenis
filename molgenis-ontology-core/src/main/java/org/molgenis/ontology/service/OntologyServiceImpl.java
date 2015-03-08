@@ -68,6 +68,7 @@ public class OntologyServiceImpl implements OntologyService
 	private final LoadingCache<String, Long> CACHED_TOTAL_WORD_COUNT = CacheBuilder.newBuilder()
 			.maximumSize(Integer.MAX_VALUE).expireAfterWrite(1, TimeUnit.DAYS).build(new CacheLoader<String, Long>()
 			{
+				@Override
 				public Long load(String ontologyIri)
 				{
 					Ontology ontology = getOntology(ontologyIri);
@@ -115,9 +116,8 @@ public class OntologyServiceImpl implements OntologyService
 		}
 		catch (ExecutionException e)
 		{
-			new RuntimeException(e.getMessage());
+			throw new RuntimeException(e.getMessage());
 		}
-		return 0;
 	}
 
 	@Override
@@ -275,6 +275,7 @@ public class OntologyServiceImpl implements OntologyService
 		return searchService.search(query, entityMetaData);
 	}
 
+	@Override
 	public OntologyServiceResult searchEntity(String ontologyIri, Entity inputEntity)
 	{
 		List<QueryRule> allQueryRules = new ArrayList<QueryRule>();
@@ -389,6 +390,7 @@ public class OntologyServiceImpl implements OntologyService
 		return new OntologyServiceResultImpl(inputData, comparableEntities, count);
 	}
 
+	@Override
 	public OntologyServiceResult search(String ontologyUrl, String queryString)
 	{
 		return null;
