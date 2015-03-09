@@ -10,7 +10,7 @@ import org.molgenis.data.Entity;
 
 public class OntologyServiceUtil
 {
-	public static List<Map<String, Object>> getEntityAsMap(Iterable<Entity> entities)
+	public static List<Map<String, Object>> getEntityAsMap(Iterable<? extends Entity> entities)
 	{
 		List<Map<String, Object>> docs = new ArrayList<Map<String, Object>>();
 		for (Entity entity : entities)

@@ -110,6 +110,7 @@ public class QueryGenerator implements QueryPartGenerator
 			}
 			queryBuilder = boolQuery;
 		}
+
 		return queryBuilder;
 	}
 

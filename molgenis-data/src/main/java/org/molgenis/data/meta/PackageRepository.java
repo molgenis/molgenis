@@ -6,11 +6,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.ManageableCrudRepositoryCollection;
+import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Package;
+import org.molgenis.data.Repository;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Tag;
 import org.molgenis.data.semantic.TagImpl;
@@ -34,22 +34,22 @@ class PackageRepository
 	/**
 	 * The repository where the package entities are stored.
 	 */
-	private final CrudRepository repository;
+	private final Repository repository;
 
 	/**
 	 * In-memory cache of all packages, filled with entities and attributes.
 	 */
-	private Map<String, PackageImpl> packageCache = new HashMap<String, PackageImpl>();
+	private Map<String, PackageImpl> packageCache = new HashMap<>();
 
 	/**
 	 * Creates a new PackageRepository.
 	 * 
 	 * @param coll
-	 *            {@link ManageableCrudRepositoryCollection} that will be used to store the package entities.
+	 *            {@link ManageableRepositoryCollection} that will be used to store the package entities.
 	 */
-	public PackageRepository(ManageableCrudRepositoryCollection coll)
+	public PackageRepository(Repository repository)
 	{
-		repository = coll.add(META_DATA);
+		this.repository = repository;
 		updatePackageCache();
 		addDefaultPackage();
 	}
@@ -191,9 +191,9 @@ class PackageRepository
 	 */
 	public static Map<String, PackageImpl> createPackageTree(Iterable<Entity> packageEntities)
 	{
-		Map<String, PackageImpl> result = new HashMap<String, PackageImpl>();
+		Map<String, PackageImpl> result = new HashMap<>();
 
-		List<Entity> entities = new ArrayList<Entity>();
+		List<Entity> entities = new ArrayList<>();
 		for (Entity entity : packageEntities)
 		{
 			entities.add(entity);

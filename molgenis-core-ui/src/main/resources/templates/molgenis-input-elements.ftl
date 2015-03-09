@@ -73,7 +73,7 @@
 						var xrefs = [];
 						<#if entity!='' && entity.get(fieldName)??>
 							<#if entity.getEntities(fieldName)?has_content >
-								<#list entity.getEntities(fieldName).iterator() as xrefEntity>
+								<#list entity.getEntities(fieldName) as xrefEntity>
 									xrefs.push({id:'<@formatValue field.refEntity.idAttribute.dataType.enumType xrefEntity.idValue />', text:'${xrefEntity.get(field.refEntity.labelAttribute.name)!?js_string}'});
 								</#list>
 							</#if>

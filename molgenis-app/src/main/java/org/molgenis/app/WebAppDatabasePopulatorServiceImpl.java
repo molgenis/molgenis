@@ -62,6 +62,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		// Genomebrowser stuff
 		Map<String, String> runtimePropertyMap = new HashMap<String, String>();
 
+		runtimePropertyMap.put("plugin.dataexplorer.genomebrowser", "false");
 		runtimePropertyMap.put(DataExplorerController.INITLOCATION,
 				"chr:'1',viewStart:10000000,viewEnd:10100000,cookieKey:'human',nopersist:true");
 		runtimePropertyMap.put(DataExplorerController.COORDSYSTEM,

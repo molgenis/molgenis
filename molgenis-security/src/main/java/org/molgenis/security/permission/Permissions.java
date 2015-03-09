@@ -9,29 +9,29 @@ import java.util.Map;
 
 public class Permissions
 {
-	private Integer userId;
-	private Integer groupId;
+	private String userId;
+	private String groupId;
 	private Map<String, String> entityIds;
 	private Map<String, List<Permission>> userPermissionMap;
 	private Map<String, List<Permission>> groupPermissionMap;
 	private Map<String, List<Permission>> hierarchyPermissionMap;
 
-	public Integer getUserId()
+	public String getUserId()
 	{
 		return userId;
 	}
 
-	public void setUserId(Integer userId)
+	public void setUserId(String userId)
 	{
 		this.userId = userId;
 	}
 
-	public Integer getGroupId()
+	public String getGroupId()
 	{
 		return groupId;
 	}
 
-	public void setGroupId(Integer groupId)
+	public void setGroupId(String groupId)
 	{
 		this.groupId = groupId;
 	}

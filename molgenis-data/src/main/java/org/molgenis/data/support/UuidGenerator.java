@@ -15,7 +15,7 @@ public class UuidGenerator implements IdGenerator
 
 	public UuidGenerator()
 	{
-		baseEncoding = BaseEncoding.base64Url().omitPadding();
+		baseEncoding = BaseEncoding.base32().omitPadding();
 		uniqueId = new UniqueId();
 	}
 

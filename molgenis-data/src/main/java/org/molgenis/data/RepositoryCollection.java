@@ -3,18 +3,33 @@ package org.molgenis.data;
 /**
  * Repository collection
  */
-public interface RepositoryCollection
+public interface RepositoryCollection extends Iterable<Repository>
 {
+	/**
+	 * @return the name of this backend
+	 */
+	String getName();
+
+	/**
+	 * Create and add a new CrudRepository for an EntityMetaData
+	 */
+	Repository addEntityMeta(EntityMetaData entityMeta);
+
 	/**
 	 * Get names of all the entities in this source
 	 */
 	Iterable<String> getEntityNames();
 
-	// TODO remove
 	/**
 	 * Get a repository by entity name
 	 * 
 	 * @throws UnknownEntityException
 	 */
-	Repository getRepositoryByEntityName(String name);
+	Repository getRepository(String name);
+
+	/**
+	 * Check if a repository exists by entity name
+	 *
+	 */
+	boolean hasRepository(String name);
 }
