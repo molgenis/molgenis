@@ -22,14 +22,11 @@ import javax.servlet.http.Part;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.processor.CellProcessor;
@@ -392,8 +389,8 @@ public class OntologyServiceController extends MolgenisPluginController
 		}
 	}
 
-	@SuppressWarnings("resource")
 	private String startMatchJob(String entityName, String ontologyIri, File uploadFile, Model model)
+			throws IOException
 	{
 		entityName = entityName.replaceAll(ILLEGAL_PATTERN, ILLEGAL_PATTERN_REPLACEMENT).toLowerCase();
 		if (dataService.hasRepository(entityName))
@@ -409,8 +406,9 @@ public class OntologyServiceController extends MolgenisPluginController
 									.get(MatchingTaskEntityMetaData.MOLGENIS_USER) : StringUtils.EMPTY));
 			return init(model);
 		}
-
-		CsvRepository csvRepository = new CsvRepository(uploadFile, null, OntologyMatchingServiceImpl.DEFAULT_SEPARATOR);
+		AdaptedCsvRepository csvRepository = new AdaptedCsvRepository(entityName, new CsvRepository(uploadFile,
+				Arrays.<CellProcessor> asList(new LowerCaseProcessor(), new TrimProcessor()),
+				OntologyMatchingServiceImpl.DEFAULT_SEPARATOR));
 
 		if (!validateFileHeader(csvRepository))
 		{
@@ -430,64 +428,11 @@ public class OntologyServiceController extends MolgenisPluginController
 			return matchTask(model);
 		}
 
-		RepositoryCollection repositoryCollection = getRepositoryCollection(entityName, uploadFile);
 		uploadProgress.registerUser(userAccountService.getCurrentUser().getUsername(), entityName);
 		processInputTermService.process(SecurityContextHolder.getContext(), userAccountService.getCurrentUser(),
-				entityName, ontologyIri, uploadFile, repositoryCollection);
+				ontologyIri, csvRepository);
 
 		return matchResult(entityName, model);
-	}
-
-	private RepositoryCollection getRepositoryCollection(final String name, final File file)
-	{
-		return new RepositoryCollection()
-		{
-			private String entityName = name;
-
-			@Override
-			public Repository getRepository(String name)
-			{
-				CsvRepository csvRepository = new CsvRepository(file, Arrays.<CellProcessor> asList(
-						new LowerCaseProcessor(), new TrimProcessor()), OntologyMatchingServiceImpl.DEFAULT_SEPARATOR);
-				return (entityName.equals(name) ? new AdaptedCsvRepository(entityName, csvRepository) : null);
-			}
-
-			@Override
-			public Iterable<String> getEntityNames()
-			{
-				return Arrays.asList(entityName);
-			}
-
-			@Override
-			public Iterator<Repository> iterator()
-			{
-				throw new NotImplementedException("Not implemented yet");
-			}
-
-			@Override
-			public String getName()
-			{
-				throw new NotImplementedException("Not implemented yet");
-			}
-
-			@Override
-			public Repository addEntityMeta(EntityMetaData entityMeta)
-			{
-				throw new NotImplementedException("Not implemented yet");
-			}
-
-			@Override
-			public boolean hasRepository(String name)
-			{
-				if (null == name) return false;
-				Iterator<String> entityNames = getEntityNames().iterator();
-				while (entityNames.hasNext())
-				{
-					if (entityNames.next().equals(name)) return true;
-				}
-				return false;
-			}
-		};
 	}
 
 	private String getCsvFileName(String dataSetName)
@@ -496,28 +441,28 @@ public class OntologyServiceController extends MolgenisPluginController
 		return dataSetName + "_" + dateFormat.format(new Date()) + ".csv";
 	}
 
-	private boolean validateFileHeader(CsvRepository csvRepository)
+	private boolean validateFileHeader(Repository repository)
 	{
 		boolean containsName = false;
-		for (AttributeMetaData atomicAttributes : csvRepository.getEntityMetaData().getAtomicAttributes())
+		for (AttributeMetaData atomicAttributes : repository.getEntityMetaData().getAtomicAttributes())
 		{
 			if (atomicAttributes.getName().equalsIgnoreCase(OntologyMatchingServiceImpl.DEFAULT_MATCHING_NAME_FIELD)) containsName = true;
 		}
 		return containsName;
 	}
 
-	private boolean validateEmptyFileHeader(CsvRepository csvRepository)
+	private boolean validateEmptyFileHeader(Repository repository)
 	{
-		for (AttributeMetaData atomicAttributes : csvRepository.getEntityMetaData().getAtomicAttributes())
+		for (AttributeMetaData atomicAttributes : repository.getEntityMetaData().getAtomicAttributes())
 		{
 			if (StringUtils.isEmpty(atomicAttributes.getName())) return false;
 		}
 		return true;
 	}
 
-	private boolean validateInputFileContent(CsvRepository csvRepository)
+	private boolean validateInputFileContent(Repository repository)
 	{
-		Iterator<Entity> iterator = csvRepository.iterator();
+		Iterator<Entity> iterator = repository.iterator();
 		return iterator.hasNext();
 	}
 }

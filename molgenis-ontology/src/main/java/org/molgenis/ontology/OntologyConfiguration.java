@@ -2,7 +2,6 @@ package org.molgenis.ontology;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.importer.EmxImportService;
 import org.molgenis.ontology.matching.MatchingTaskContentEntityMetaData;
 import org.molgenis.ontology.matching.MatchingTaskEntityMetaData;
 import org.molgenis.ontology.matching.OntologyMatchingService;
@@ -21,6 +20,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class OntologyConfiguration
 {
+	@Autowired
+	private SearchService searchService;
+
+	@Autowired
+	private DataService dataService;
+
 	// Declaring these EntityMetaData beans makes sure their repositories are created in the default backend.
 	@Bean
 	public OntologyMetaData ontologyMetaData()
@@ -64,15 +69,6 @@ public class OntologyConfiguration
 		return MatchingTaskContentEntityMetaData.INSTANCE;
 	}
 
-	@Autowired
-	private SearchService searchService;
-
-	@Autowired
-	private EmxImportService emxImportService;
-
-	@Autowired
-	private DataService dataService;
-
 	@Bean
 	public OntologyMatchingService ontologyMatchingService()
 	{
@@ -82,20 +78,8 @@ public class OntologyConfiguration
 	@Bean
 	public ProcessInputTermService processInputTermService()
 	{
-		return new ProcessInputTermService(emxImportService, dataService, uploadProgress(), ontologyMatchingService());
+		return new ProcessInputTermService(dataService, uploadProgress(), ontologyMatchingService());
 	}
-
-	//
-	// /**
-	// * Get a reference to a HarmonizationIndexer.
-	// *
-	// * @return HarmonizationIndexer
-	// */
-	// @Bean
-	// public AsyncOntologyIndexer harmonizationIndexer()
-	// {
-	// return new AsyncOntologyIndexer(searchService, dataService, ontologyService());
-	// }
 
 	@Bean
 	public UploadProgress uploadProgress()

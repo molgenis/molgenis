@@ -1,6 +1,5 @@
 package org.molgenis.ontology.matching;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -9,10 +8,8 @@ import java.util.Map;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.UserAuthority;
 import org.molgenis.data.DataService;
-import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
-import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.importer.EmxImportService;
+import org.molgenis.data.Repository;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.OntologyServiceResult;
@@ -34,18 +31,15 @@ public class ProcessInputTermService
 {
 	private static final int ADD_BATCH_SIZE = 1000;
 
-	private final EmxImportService emxImportService;
-
 	private final DataService dataService;
 
 	private final UploadProgress uploadProgress;
 
 	private final OntologyMatchingService ontologyService;
 
-	public ProcessInputTermService(EmxImportService emxImportService, DataService dataService,
-			UploadProgress uploadProgress, OntologyMatchingService ontologyService)
+	public ProcessInputTermService(DataService dataService, UploadProgress uploadProgress,
+			OntologyMatchingService ontologyService)
 	{
-		this.emxImportService = emxImportService;
 		this.dataService = dataService;
 		this.uploadProgress = uploadProgress;
 		this.ontologyService = ontologyService;
@@ -54,14 +48,16 @@ public class ProcessInputTermService
 	@Async
 	@RunAsSystem
 	@Transactional
-	public void process(SecurityContext securityContext, MolgenisUser molgenisUser, String entityName,
-			String ontologyIri, File uploadFile, RepositoryCollection repositoryCollection)
+	public void process(SecurityContext securityContext, MolgenisUser molgenisUser, String ontologyIri,
+			Repository repository)
 	{
+		String entityName = repository.getName();
 		String userName = molgenisUser.getUsername();
 		uploadProgress.registerUser(userName, entityName);
+
 		// Add the original input dataset to database
-		dataService.getMeta().addEntityMeta(repositoryCollection.getRepository(entityName).getEntityMetaData());
-		emxImportService.doImport(repositoryCollection, DatabaseAction.ADD);
+		dataService.getMeta().addEntityMeta(repository.getEntityMetaData());
+		dataService.getRepository(entityName).add(repository);
 		dataService.getRepository(entityName).flush();
 
 		// Add a new entry in MatchingTask table for this new matching job
@@ -87,7 +83,7 @@ public class ProcessInputTermService
 						entityName + "_" + entity.getIdValue());
 				matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.REF_ENTITY, entityName);
 				entitiesToAdd.add(matchingTaskContentEntity);
-				
+
 				OntologyServiceResult searchEntity = ontologyService.searchEntity(ontologyIri, entity);
 				if (searchEntity.getOntologyTerms().size() > 0)
 				{
