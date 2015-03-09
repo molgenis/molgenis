@@ -145,7 +145,7 @@ public class DbnsfpVariantServiceAnnotatorTest
 
 		expectedList.add(expectedEntity);
 
-		Iterator<Entity> results = annotator.annotate(input.iterator());
+		Iterator<Entity> results = annotator.annotate(input);
 
 		Entity resultEntity = results.next();
 
