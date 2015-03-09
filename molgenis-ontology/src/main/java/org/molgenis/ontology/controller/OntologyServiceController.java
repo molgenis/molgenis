@@ -111,10 +111,9 @@ public class OntologyServiceController extends MolgenisPluginController
 		String username = userAccountService.getCurrentUser().getUsername();
 
 		if (uploadProgress.isUserExists(username)) return matchResult(uploadProgress.getCurrentJob(username), model);
-		model.addAttribute(
-				"existingTasks",
-				OntologyServiceUtil.getEntityAsMap(dataService.findAll(MatchingTaskEntityMetaData.ENTITY_NAME,
-						new QueryImpl().eq(MatchingTaskEntityMetaData.MOLGENIS_USER, username))));
+		model.addAttribute("existingTasks", OntologyServiceUtil.getEntityAsMap(dataService.findAll(
+				MatchingTaskEntityMetaData.ENTITY_NAME,
+				new QueryImpl().eq(MatchingTaskEntityMetaData.MOLGENIS_USER, username))));
 		return "ontology-match-view";
 	}
 
@@ -168,18 +167,26 @@ public class OntologyServiceController extends MolgenisPluginController
 					"numberOfMatched",
 					dataService.count(
 							MatchingTaskContentEntityMetaData.ENTITY_NAME,
-							new QueryImpl().eq(MatchingTaskContentEntityMetaData.REF_ENTITY, entityName).and().nest()
-									.eq(MatchingTaskContentEntityMetaData.VALIDATED, true).or()
-									.ge(MatchingTaskContentEntityMetaData.SCORE, entity.get(MatchingTaskEntityMetaData.THRESHOLD))
-									.unnest()));
+							new QueryImpl()
+									.eq(MatchingTaskContentEntityMetaData.REF_ENTITY, entityName)
+									.and()
+									.nest()
+									.eq(MatchingTaskContentEntityMetaData.VALIDATED, true)
+									.or()
+									.ge(MatchingTaskContentEntityMetaData.SCORE,
+											entity.get(MatchingTaskEntityMetaData.THRESHOLD)).unnest()));
 			model.addAttribute(
 					"numberOfUnmatched",
 					dataService.count(
 							MatchingTaskContentEntityMetaData.ENTITY_NAME,
-							new QueryImpl().eq(MatchingTaskContentEntityMetaData.REF_ENTITY, entityName).and().nest()
-									.eq(MatchingTaskContentEntityMetaData.VALIDATED, false).and()
-									.lt(MatchingTaskContentEntityMetaData.SCORE, entity.get(MatchingTaskEntityMetaData.THRESHOLD))
-									.unnest()));
+							new QueryImpl()
+									.eq(MatchingTaskContentEntityMetaData.REF_ENTITY, entityName)
+									.and()
+									.nest()
+									.eq(MatchingTaskContentEntityMetaData.VALIDATED, false)
+									.and()
+									.lt(MatchingTaskContentEntityMetaData.SCORE,
+											entity.get(MatchingTaskEntityMetaData.THRESHOLD)).unnest()));
 		}
 
 		return "ontology-match-view";
@@ -194,7 +201,8 @@ public class OntologyServiceController extends MolgenisPluginController
 		if (dataService.hasRepository(entityName) && !uploadProgress.isUserExists(userName))
 		{
 			// Remove all the matching terms from MatchingTaskContentEntity table
-			Iterable<Entity> iterableMatchingEntities = dataService.findAll(MatchingTaskContentEntityMetaData.ENTITY_NAME,
+			Iterable<Entity> iterableMatchingEntities = dataService.findAll(
+					MatchingTaskContentEntityMetaData.ENTITY_NAME,
 					new QueryImpl().eq(MatchingTaskContentEntityMetaData.REF_ENTITY, entityName));
 			dataService.delete(MatchingTaskContentEntityMetaData.ENTITY_NAME, iterableMatchingEntities);
 
@@ -236,8 +244,10 @@ public class OntologyServiceController extends MolgenisPluginController
 
 		for (Entity mappingEntity : dataService.findAll(
 				MatchingTaskContentEntityMetaData.ENTITY_NAME,
-				query.offset(start).pageSize(num)
-						.sort(Direction.DESC, MatchingTaskContentEntityMetaData.VALIDATED, MatchingTaskContentEntityMetaData.SCORE)))
+				query.offset(start)
+						.pageSize(num)
+						.sort(Direction.DESC, MatchingTaskContentEntityMetaData.VALIDATED,
+								MatchingTaskContentEntityMetaData.SCORE)))
 		{
 			Entity RefEntity = dataService.findOne(
 					entityName,
@@ -257,7 +267,8 @@ public class OntologyServiceController extends MolgenisPluginController
 
 		uploadProgress.setUserClickMode(userAccountService.getCurrentUser().getUsername(), isMatched);
 		EntityPager pager = new EntityPager(start, num, (long) count, null);
-		return new EntityCollectionResponse(pager, entityMaps, "/match/retrieve");
+		return new EntityCollectionResponse(pager, entityMaps, "/match/retrieve", null); // FIXME do not return null for
+																							// EntityMetaData
 	}
 
 	@RequestMapping(method = POST, value = "/match")
@@ -321,7 +332,8 @@ public class OntologyServiceController extends MolgenisPluginController
 			if (matchingTaskEntity == null || entity == null) return new OntologyServiceResultImpl(
 					"entityName or inputTermIdentifier is invalid!");
 
-			return ontologyService.searchEntity(matchingTaskEntity.getString(MatchingTaskEntityMetaData.CODE_SYSTEM), entity);
+			return ontologyService.searchEntity(matchingTaskEntity.getString(MatchingTaskEntityMetaData.CODE_SYSTEM),
+					entity);
 		}
 		return new OntologyServiceResultImpl("Please check entityName, inputTermIdentifier exist in input!");
 	}
@@ -386,8 +398,10 @@ public class OntologyServiceController extends MolgenisPluginController
 						ontologyTermEntity.get(OntologyTermQueryRepository.ONTOLOGY_TERM));
 				row.set(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI,
 						ontologyTermEntity.get(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI));
-				row.set(MatchingTaskContentEntityMetaData.VALIDATED, mappingEntity.get(MatchingTaskContentEntityMetaData.VALIDATED));
-				row.set(MatchingTaskContentEntityMetaData.SCORE, mappingEntity.get(MatchingTaskContentEntityMetaData.SCORE));
+				row.set(MatchingTaskContentEntityMetaData.VALIDATED,
+						mappingEntity.get(MatchingTaskContentEntityMetaData.VALIDATED));
+				row.set(MatchingTaskContentEntityMetaData.SCORE,
+						mappingEntity.get(MatchingTaskContentEntityMetaData.SCORE));
 				csvWriter.add(row);
 			}
 		}
@@ -410,7 +424,8 @@ public class OntologyServiceController extends MolgenisPluginController
 					"The task name should be case insensitive, the task name <strong>"
 							+ entityName
 							+ "</strong> has existed and created by user : "
-							+ (matchingTaskEntity != null ? matchingTaskEntity.get(MatchingTaskEntityMetaData.MOLGENIS_USER) : StringUtils.EMPTY));
+							+ (matchingTaskEntity != null ? matchingTaskEntity
+									.get(MatchingTaskEntityMetaData.MOLGENIS_USER) : StringUtils.EMPTY));
 			return init(model);
 		}
 
