@@ -15,7 +15,7 @@
     <!-- More Project Information -->
     <name>Molgenis</name>
     <description>
-        MOLGENIS is an collaborative open source project on a mission to generate great software infrastructure for life
+        MOLGENIS is a collaborative open source project on a mission to generate great software infrastructure for life
         science research
     </description>
     <url>http://www.molgenis.org</url>
@@ -151,6 +151,32 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-resources-plugin</artifactId>
                     <version>2.6</version>
+                    <executions>
+					<!-- 
+						Copying the das server config to the war ROOT
+						the uk.ac.ebi.mydas.controller.MydasServlet cannot find the file if
+						its placed in the normal WEB-INF/classes folder
+					-->
+						<execution>
+							<id>copy-resources</id>
+							<phase>validate</phase>
+							<goals>
+								<goal>copy-resources</goal>
+							</goals>
+							<configuration>
+								<outputDirectory>target/${project.name}-${project.version}</outputDirectory>
+								<resources>
+									<resource>
+										<directory>src/main/resources/</directory>
+										<includes>
+											<include>MydasServerConfig.xml</include>
+										</includes>
+										<filtering>true</filtering>
+									</resource>
+								</resources>
+							</configuration>
+						</execution>
+					</executions>
                 </plugin>
                 <!-- specify java 8 compatible plugin version -->
                 <plugin>
@@ -645,6 +671,7 @@
         <module>molgenis-core</module>
         <module>molgenis-core-ui</module>
         <module>molgenis-ontology-core</module>
+        <module>molgenis-ontology</module>
         <module>molgenis-das</module>
         <module>molgenis-dataexplorer</module>
         <module>molgenis-app</module>
@@ -675,5 +702,7 @@
         <module>molgenis-data-import</module>
         <module>molgenis-catalogue</module>
         <module>molgenis-data-mapper</module>
+        <module>molgenis-pathways</module>
+        <module>molgenis-data-rest-client</module>
     </modules>
 </project>

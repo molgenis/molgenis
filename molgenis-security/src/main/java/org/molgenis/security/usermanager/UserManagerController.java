@@ -55,8 +55,7 @@ public class UserManagerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/activation", method = RequestMethod.PUT)
 	@ResponseStatus(HttpStatus.OK)
-	public @ResponseBody
-	ActivationResponse activation(@RequestBody Activation activation)
+	public @ResponseBody ActivationResponse activation(@RequestBody Activation activation)
 	{
 		ActivationResponse activationResponse = new ActivationResponse();
 		activationResponse.setId(activation.getId());
@@ -74,15 +73,15 @@ public class UserManagerController extends MolgenisPluginController
 		else throw new RuntimeException(
 				"Trying to deactivate entity. Type may only be 'user' or 'group', however, value is: "
 						+ activation.getType());
-		
+
 		return activationResponse;
 	}
-	
+
 	public class ActivationResponse
 	{
 		private boolean success = false;
 		private String type;
-		private Integer id;
+		private String id;
 
 		public boolean isSuccess()
 		{
@@ -104,24 +103,24 @@ public class UserManagerController extends MolgenisPluginController
 			this.type = type;
 		}
 
-		public Integer getId()
+		public String getId()
 		{
 			return id;
 		}
 
-		public void setId(Integer id)
+		public void setId(String id)
 		{
 			this.id = id;
 		}
 	}
-	
+
 	public class Activation
 	{
 		private String type;
-		private Integer id;
+		private String id;
 		private Boolean active;
 
-		Activation(String type, Integer id, Boolean active)
+		Activation(String type, String id, Boolean active)
 		{
 			this.id = id;
 			this.type = type;
@@ -148,7 +147,7 @@ public class UserManagerController extends MolgenisPluginController
 		/**
 		 * @return the id
 		 */
-		public Integer getId()
+		public String getId()
 		{
 			return id;
 		}
@@ -157,7 +156,7 @@ public class UserManagerController extends MolgenisPluginController
 		 * @param id
 		 *            the id to set
 		 */
-		public void setId(Integer id)
+		public void setId(String id)
 		{
 			this.id = id;
 		}
@@ -182,8 +181,7 @@ public class UserManagerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/changeGroupMembership", method = RequestMethod.PUT)
 	@ResponseStatus(HttpStatus.OK)
-	public @ResponseBody
-	GroupMembershipResponse changeGroupMembership(@RequestBody GroupMembership groupMembership)
+	public @ResponseBody GroupMembershipResponse changeGroupMembership(@RequestBody GroupMembership groupMembership)
 	{
 		GroupMembershipResponse groupMembershipResponse = new GroupMembershipResponse();
 		groupMembershipResponse.setUserId(groupMembership.getUserId());
@@ -196,24 +194,22 @@ public class UserManagerController extends MolgenisPluginController
 			}
 			else if (!groupMembership.getMember())
 			{
-				this.pluginUserManagerService
-						.removeUserFromGroup(
-						groupMembership.getGroupId(), groupMembership.getUserId());
+				this.pluginUserManagerService.removeUserFromGroup(groupMembership.getGroupId(),
+						groupMembership.getUserId());
 			}
-			
+
 			groupMembershipResponse.setSuccess(true);
 		}
 
 		return groupMembershipResponse;
 	}
-	
 
 	public class GroupMembership
 	{
 		/**
 		 * @return the userId
 		 */
-		public Integer getUserId()
+		public String getUserId()
 		{
 			return userId;
 		}
@@ -222,7 +218,7 @@ public class UserManagerController extends MolgenisPluginController
 		 * @param userId
 		 *            the userId to set
 		 */
-		public void setUserId(Integer userId)
+		public void setUserId(String userId)
 		{
 			this.userId = userId;
 		}
@@ -230,7 +226,7 @@ public class UserManagerController extends MolgenisPluginController
 		/**
 		 * @return the groupId
 		 */
-		public Integer getGroupId()
+		public String getGroupId()
 		{
 			return groupId;
 		}
@@ -239,7 +235,7 @@ public class UserManagerController extends MolgenisPluginController
 		 * @param groupId
 		 *            the groupId to set
 		 */
-		public void setGroupId(Integer groupId)
+		public void setGroupId(String groupId)
 		{
 			this.groupId = groupId;
 		}
@@ -260,14 +256,15 @@ public class UserManagerController extends MolgenisPluginController
 		{
 			this.member = member;
 		}
-		Integer userId;
-		Integer groupId;
+
+		String userId;
+		String groupId;
 		Boolean member;
 	}
 
 	public class GroupMembershipResponse
 	{
-		Integer userId;
+		String userId;
 		boolean success;
 
 		public boolean isSuccess()
@@ -283,7 +280,7 @@ public class UserManagerController extends MolgenisPluginController
 		/**
 		 * @return the userId
 		 */
-		public Integer getUserId()
+		public String getUserId()
 		{
 			return userId;
 		}
@@ -292,7 +289,7 @@ public class UserManagerController extends MolgenisPluginController
 		 * @param userId
 		 *            the userId to set
 		 */
-		public void setUserId(Integer userId)
+		public void setUserId(String userId)
 		{
 			this.userId = userId;
 		}

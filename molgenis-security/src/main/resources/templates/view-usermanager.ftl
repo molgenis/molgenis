@@ -40,12 +40,12 @@
 						<tbody>
 							<#if users?has_content>
 								<#list users as user>
-									<tr id="userRow${user.id?c?html}">
-										<td><a href="#" class="edit-user-btn" data-toggle="modal" data-target="#managerModal" data-id="${user.id?c?html}"><img src="/img/editview.gif"></a></td>
-										<td><input type="checkbox" class="activate-user-checkbox" data-id="${user.id?c?html}" <#if user.isActive()>checked</#if> <#if user.isSuperuser()>disabled</#if>></td>
+									<tr id="userRow${user.id?html}">
+										<td><a href="#" class="edit-user-btn" data-toggle="modal" data-target="#managerModal" data-id="${user.id?html}"><img src="/img/editview.gif"></a></td>
+										<td><input type="checkbox" class="activate-user-checkbox" data-id="${user.id?html}" <#if user.isActive()>checked</#if> <#if user.isSuperuser()>disabled</#if>></td>
 										<td>${user.getUsername()!?html}</td>
 										<td>${user.getFullName()!?html}</td>
-										<#list groups as g><#if g.active><td><input type="checkbox" class="change-group-membership-checkbox" data-uid="${user.id?c?html}" data-gid="${g.id?c?html}"  <#if user.isGroupMember(g.id)>checked</#if>></td></#if></#list>
+										<#list groups as g><#if g.active><td><input type="checkbox" class="change-group-membership-checkbox" data-uid="${user.id?html}" data-gid="${g.id?html}"  <#if user.isGroupMember(g.id)>checked</#if>></td></#if></#list>
 									</tr>
 								</#list>
 							</#if>
@@ -74,12 +74,12 @@
 						<tbody>
 							<#if groups?has_content>
 								<#list groups as g>
-									<tr id="groupRow${g.id?c?html}">
+									<tr id="groupRow${g.id?html}">
 										<td>
-											<a href="#" class="edit-group-btn" data-toggle="modal" data-target="#managerModal" data-id="${g.id?c?html}"><img src="/img/editview.gif"></a>
+											<a href="#" class="edit-group-btn" data-toggle="modal" data-target="#managerModal" data-id="${g.id?html}"><img src="/img/editview.gif"></a>
 										</td>
 										<td>
-											<input type="checkbox" class="activate-group-checkbox" data-id="${g.id?c?html}" <#if g.active>checked</#if>>
+											<input type="checkbox" class="activate-group-checkbox" data-id="${g.id?html}" <#if g.active>checked</#if>>
 										</td>
 										<td>${g.getName()!?html}</td>
 										<td>

@@ -5,7 +5,9 @@ import static org.molgenis.MolgenisFieldTypes.STRING;
 
 import org.molgenis.data.repository.impl.EntityMappingRepositoryImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.springframework.stereotype.Component;
 
+@Component
 public class MappingTargetMetaData extends DefaultEntityMetaData
 {
 	public static final String ENTITY_NAME = "MappingTarget";

@@ -1,18 +1,19 @@
 package org.molgenis.molgenis.utils;
 
-import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
-import java.net.URL;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 
 import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.data.Entity;
-import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.ontology.repository.OntologyIndexRepository;
 import org.molgenis.ontology.utils.OntologyLoader;
+import org.molgenis.ontology.utils.ZipFileUtil;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -23,13 +24,13 @@ public class OntologyRepositoryTest
 	OntologyLoader loader;
 
 	@BeforeMethod
-	public void setUp() throws OWLOntologyCreationException
+	public void setUp() throws OWLOntologyCreationException, FileNotFoundException, IOException
 	{
-		URL url = Thread.currentThread().getContextClassLoader().getResource("test-ontology-loader.owl");
-		File file = new File(url.getPath());
-
-		loader = new OntologyLoader("ontology-test", file);
-		repository = new OntologyIndexRepository(loader, "test", mock(SearchService.class));
+		File file = new File(OntologyTermIndexRepositoryTest.class.getResource(
+				System.getProperty("file.separator") + "test-ontology-loader.owl.zip").getFile());
+		List<File> uploadedFiles = ZipFileUtil.unzip(file);
+		loader = new OntologyLoader("ontology-test", uploadedFiles.get(0));
+		repository = new OntologyIndexRepository(loader, "test");
 	}
 
 	@Test

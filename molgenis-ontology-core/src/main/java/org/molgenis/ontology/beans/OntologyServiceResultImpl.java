@@ -19,7 +19,8 @@ public class OntologyServiceResultImpl extends OntologyServiceResult
 		super(message);
 	}
 
-	public OntologyServiceResultImpl(Map<String, Object> inputData, Iterable<Entity> ontologyTerms, long totalHitCount)
+	public OntologyServiceResultImpl(Map<String, Object> inputData, Iterable<? extends Entity> ontologyTerms,
+			long totalHitCount)
 	{
 		super(inputData, OntologyServiceUtil.getEntityAsMap(ontologyTerms), totalHitCount);
 	}

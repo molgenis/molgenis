@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import javax.servlet.http.Part;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ui.XmlMolgenisUi;
@@ -84,7 +85,7 @@ public abstract class AbstractStaticContentController extends MolgenisPluginCont
 	{
 		try
 		{
-			this.staticContentService.submitContent(this.uniqueReference, content);
+			this.staticContentService.submitContent(this.uniqueReference, StringEscapeUtils.escapeXml(content));
 		}
 		catch (RuntimeException re)
 		{

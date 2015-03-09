@@ -1,6 +1,7 @@
 package org.molgenis.data.meta;
 
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.BACKEND;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.EXTENDS;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.FULL_NAME;
@@ -18,10 +19,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.ManageableCrudRepositoryCollection;
+import org.molgenis.data.ManageableRepositoryCollection;
+import org.molgenis.data.Repository;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.util.DependencyResolver;
@@ -36,15 +37,21 @@ import com.google.common.collect.Lists;
 class EntityMetaDataRepository
 {
 	public static final EntityMetaDataMetaData META_DATA = new EntityMetaDataMetaData();
-	private CrudRepository repository;
-	private PackageRepository packageRepository;
-	private Map<String, DefaultEntityMetaData> entityMetaDataCache = new HashMap<String, DefaultEntityMetaData>();
+	private final Repository repository;
+	private final PackageRepository packageRepository;
+	private final ManageableRepositoryCollection collection;
+	private final Map<String, DefaultEntityMetaData> entityMetaDataCache = new HashMap<>();
 
-	public EntityMetaDataRepository(ManageableCrudRepositoryCollection collection, PackageRepository packageRepository)
+	public EntityMetaDataRepository(ManageableRepositoryCollection collection, PackageRepository packageRepository)
 	{
 		this.packageRepository = packageRepository;
-		this.repository = collection.add(META_DATA);
-		fillEntityMetaDataCache();
+		this.repository = collection.addEntityMeta(META_DATA);
+		this.collection = collection;
+	}
+
+	Repository getRepository()
+	{
+		return repository;
 	}
 
 	/**
@@ -54,7 +61,7 @@ class EntityMetaDataRepository
 	 */
 	void fillEntityMetaDataCache()
 	{
-		List<Entity> entities = new ArrayList<Entity>();
+		List<Entity> entities = new ArrayList<>();
 		for (Entity entity : repository)
 		{
 			entities.add(entity);
@@ -65,6 +72,7 @@ class EntityMetaDataRepository
 			entityMetaData.setLabelAttribute(entity.getString(LABEL_ATTRIBUTE));
 			entityMetaData.setLabel(entity.getString(LABEL));
 			entityMetaData.setDescription(entity.getString(DESCRIPTION));
+			entityMetaData.setBackend(entity.getString(BACKEND));
 			entityMetaDataCache.put(entity.getString(FULL_NAME), entityMetaData);
 		}
 		for (Entity entity : entities)
@@ -78,7 +86,7 @@ class EntityMetaDataRepository
 				entityMetaData.setExtends(extendsEntityMetaData);
 			}
 			final Entity packageEntity = entity.getEntity(PACKAGE);
-			
+
 			PackageImpl p = (PackageImpl) packageRepository.getPackage(packageEntity
 					.getString(PackageMetaData.FULL_NAME));
 			if (null != p)
@@ -115,6 +123,8 @@ class EntityMetaDataRepository
 		emd.setLabel(entityMetaData.getLabel());
 		emd.setAbstract(entityMetaData.isAbstract());
 		emd.setDescription(entityMetaData.getDescription());
+		emd.setBackend(entityMetaData.getBackend() == null ? collection.getName() : entityMetaData.getBackend());
+
 		if (entityMetaData.getExtends() != null)
 		{
 			emd.setExtends(entityMetaDataCache.get(entityMetaData.getExtends().getName()));
@@ -147,7 +157,7 @@ class EntityMetaDataRepository
 		}
 		repository.add(entity);
 		entityMetaDataCache.put(emd.getName(), emd);
-		return toEntity(emd);
+		return entity;
 	}
 
 	private Entity toEntity(EntityMetaData emd)
@@ -155,10 +165,14 @@ class EntityMetaDataRepository
 		Entity entityMetaDataEntity = new MapEntity();
 		entityMetaDataEntity.set(FULL_NAME, emd.getName());
 		entityMetaDataEntity.set(SIMPLE_NAME, emd.getSimpleName());
-		entityMetaDataEntity.set(PACKAGE, packageRepository.getEntity(emd.getPackage().getName()));
+		if (emd.getPackage() != null)
+		{
+			entityMetaDataEntity.set(PACKAGE, packageRepository.getEntity(emd.getPackage().getName()));
+		}
 		entityMetaDataEntity.set(DESCRIPTION, emd.getDescription());
 		entityMetaDataEntity.set(ABSTRACT, emd.isAbstract());
 		entityMetaDataEntity.set(LABEL, emd.getLabel());
+		entityMetaDataEntity.set(BACKEND, emd.getBackend());
 		if (emd.getExtends() != null)
 		{
 			entityMetaDataEntity.set(EXTENDS, getEntity(emd.getExtends().getName()));

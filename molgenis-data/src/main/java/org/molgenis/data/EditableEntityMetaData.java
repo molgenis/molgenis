@@ -42,6 +42,8 @@ public interface EditableEntityMetaData extends EntityMetaData
 	 */
 	EditableEntityMetaData setAbstract(boolean boolean1);
 
+	EditableEntityMetaData setBackend(String backend);
+
 	/**
 	 * 
 	 * @param defaultAttributeMetaData

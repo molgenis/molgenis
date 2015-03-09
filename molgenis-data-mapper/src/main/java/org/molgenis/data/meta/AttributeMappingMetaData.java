@@ -1,7 +1,9 @@
 package org.molgenis.data.meta;
 
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.springframework.stereotype.Component;
 
+@Component
 public class AttributeMappingMetaData extends DefaultEntityMetaData
 {
 	public static final String ENTITY_NAME = "AttributeMapping";

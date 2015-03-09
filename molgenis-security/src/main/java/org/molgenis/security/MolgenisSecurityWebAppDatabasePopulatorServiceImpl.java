@@ -68,6 +68,7 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl implements
 		allUsersGroup = new MolgenisGroup();
 		allUsersGroup.setName(AccountService.ALL_USER_GROUP);
 		dataService.add(MolgenisGroup.ENTITY_NAME, allUsersGroup);
+		dataService.getRepository(MolgenisGroup.ENTITY_NAME).flush();
 
 		// allow all users to see the home plugin
 		GroupAuthority usersGroupHomeAuthority = new GroupAuthority();

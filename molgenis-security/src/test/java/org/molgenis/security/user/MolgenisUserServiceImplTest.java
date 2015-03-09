@@ -76,7 +76,7 @@ public class MolgenisUserServiceImplTest extends AbstractTestNGSpringContextTest
 		String username = "username";
 
 		MolgenisUser existingMolgenisUser = mock(MolgenisUser.class);
-		when(existingMolgenisUser.getId()).thenReturn(1);
+		when(existingMolgenisUser.getId()).thenReturn("1");
 		when(existingMolgenisUser.getUsername()).thenReturn(username);
 		when(existingMolgenisUser.getPassword()).thenReturn("encrypted-password");
 

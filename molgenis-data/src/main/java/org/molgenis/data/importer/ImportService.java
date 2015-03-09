@@ -2,6 +2,7 @@ package org.molgenis.data.importer;
 
 import java.io.File;
 import java.util.List;
+import java.util.Set;
 
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.RepositoryCollection;
@@ -20,4 +21,6 @@ public interface ImportService extends Ordered
 	List<DatabaseAction> getSupportedDatabaseActions();
 
 	boolean getMustChangeEntityName();
+
+	Set<String> getSupportedFileExtensions();
 }

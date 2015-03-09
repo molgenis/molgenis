@@ -3,10 +3,10 @@ package org.molgenis.data;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.molgenis.data.support.FileRepositoryCollection;
+import org.molgenis.util.FileExtensionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 
@@ -56,16 +56,12 @@ public class FileRepositoryCollectionFactory
 	 */
 	public FileRepositoryCollection createFileRepositoryCollection(File file)
 	{
-		String name = file.getName().toLowerCase();
 		Class<? extends FileRepositoryCollection> clazz = null;
-		for (Entry<String, Class<? extends FileRepositoryCollection>> entry : fileRepositoryCollection.entrySet())
-		{
-			if (name.endsWith('.' + entry.getKey()))
-			{
-				clazz = entry.getValue();
-				break;
-			}
-		}
+		
+		String extension = FileExtensionUtils.findExtensionFromPossibilities(file.getName(),
+				fileRepositoryCollection.keySet());
+		
+		clazz = fileRepositoryCollection.get(extension);
 
 		if (clazz == null)
 		{
