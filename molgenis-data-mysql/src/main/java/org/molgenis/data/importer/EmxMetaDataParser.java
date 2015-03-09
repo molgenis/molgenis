@@ -622,7 +622,6 @@ public class EmxMetaDataParser implements MetaDataParser
 			final String refEntityName = (String) attribute.get(REF_ENTITY);
 			final String entityName = attribute.getString(ENTITY);
 			final String attributeName = attribute.getString(NAME);
-			final String expression = attribute.getString(EXPRESSION);
 			i++;
 			if (refEntityName != null)
 			{
@@ -637,7 +636,7 @@ public class EmxMetaDataParser implements MetaDataParser
 				else
 				{
 					EntityMetaData refEntityMeta = dataService.getEntityMetaData(refEntityName);
-					if (expression == null || refEntityMeta == null)
+					if (refEntityMeta == null)
 					{
 						throw new IllegalArgumentException("attributes.refEntity error on line " + i + ": "
 								+ refEntityName + " unknown");
