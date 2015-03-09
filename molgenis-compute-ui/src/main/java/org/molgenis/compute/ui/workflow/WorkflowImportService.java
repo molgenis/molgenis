@@ -3,14 +3,30 @@ package org.molgenis.compute.ui.workflow;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.molgenis.compute.ui.ComputeUiException;
 import org.molgenis.compute.ui.IdGenerator;
-import org.molgenis.compute.ui.meta.*;
-import org.molgenis.compute.ui.model.*;
+import org.molgenis.compute.ui.meta.UIParameterMappingMetaData;
+import org.molgenis.compute.ui.meta.UIParameterMetaData;
+import org.molgenis.compute.ui.meta.UIWorkflowMetaData;
+import org.molgenis.compute.ui.meta.UIWorkflowNodeMetaData;
+import org.molgenis.compute.ui.meta.UIWorkflowParameterMetaData;
+import org.molgenis.compute.ui.meta.UIWorkflowParameterValueMetaData;
+import org.molgenis.compute.ui.meta.UIWorkflowProtocolMetaData;
+import org.molgenis.compute.ui.model.ParameterType;
+import org.molgenis.compute.ui.model.UIParameter;
+import org.molgenis.compute.ui.model.UIParameterMapping;
+import org.molgenis.compute.ui.model.UIWorkflow;
+import org.molgenis.compute.ui.model.UIWorkflowNode;
+import org.molgenis.compute.ui.model.UIWorkflowParameter;
+import org.molgenis.compute.ui.model.UIWorkflowParameterValue;
+import org.molgenis.compute.ui.model.UIWorkflowProtocol;
 import org.molgenis.compute5.ComputeProperties;
 import org.molgenis.compute5.model.Input;
 import org.molgenis.compute5.model.Output;
@@ -196,14 +212,14 @@ public class WorkflowImportService
 
 		HashMap<String, List<String>> tmp = new HashMap<String, List<String>>();
 
-		for(Entity e : csv)
+		for (Entity e : csv)
 		{
 			for (AttributeMetaData attr : csv.getEntityMetaData().getAttributes())
 			{
 				String name = attr.getName();
 				String value = e.getString(attr.getName());
 
-				if(!tmp.containsKey(name))
+				if (!tmp.containsKey(name))
 				{
 					List<String> values = new ArrayList<String>();
 					values.add(value);
@@ -217,6 +233,15 @@ public class WorkflowImportService
 			}
 		}
 
+		try
+		{
+			csv.close();
+		}
+		catch (IOException e1)
+		{
+			throw new ComputeUiException("Parameters file cannot be closed.");
+		}
+
 		Iterator iter = tmp.entrySet().iterator();
 		while (iter.hasNext())
 		{
@@ -225,7 +250,7 @@ public class WorkflowImportService
 			List<String> values = (List<String>) entry.getValue();
 
 			List<UIWorkflowParameterValue> uiValues = new ArrayList<UIWorkflowParameterValue>();
-			for(String value: values)
+			for (String value : values)
 			{
 				UIWorkflowParameterValue uiParameterValue = new UIWorkflowParameterValue(IdGenerator.generateId(),
 						value);

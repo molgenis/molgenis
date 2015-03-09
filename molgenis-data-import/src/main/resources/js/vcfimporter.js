@@ -1,7 +1,6 @@
 (function($, molgenis) {
 	"use strict";
 
-	$(function() {
 		$('form[name=vcf-importer-form]').validate({
 			rules : {
 				file : {
@@ -10,6 +9,7 @@
 				}
 			}
 		});
+		
 		$('form[name=vcf-importer-form]').submit(function(e) {
 			e.preventDefault();
 			e.stopPropagation();

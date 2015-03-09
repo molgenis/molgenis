@@ -3,7 +3,6 @@ package org.molgenis.compute.ui.meta;
 import static org.molgenis.MolgenisFieldTypes.BOOL;
 import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.SCRIPT;
-import static org.molgenis.MolgenisFieldTypes.TEXT;
 
 import org.molgenis.data.support.DefaultEntityMetaData;
 

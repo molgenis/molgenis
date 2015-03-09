@@ -8,7 +8,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import javax.servlet.http.Part;
 
 import org.molgenis.compute.ui.model.JobStatus;
-import org.molgenis.security.runas.SystemSecurityToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,7 +72,6 @@ public class JobStatusController
 			}
 		}
 
-
 		try
 		{
 			queue.put(statusUpdate);
@@ -90,19 +88,19 @@ public class JobStatusController
 		public void run()
 		{
 
-				while (true)
+			while (true)
+			{
+				JobStatusUpdate statusUpdate = null;
+				try
 				{
-					JobStatusUpdate statusUpdate = null;
-					try
-					{
-						statusUpdate = queue.take();
-						jobService.updateJobStatus(statusUpdate);
-					} catch (Throwable t)
-					{
-						logger.error("Error updating jobStatus [" + statusUpdate + "]", t);
-					}
+					statusUpdate = queue.take();
+					jobService.updateJobStatus(statusUpdate);
 				}
-
+				catch (Throwable t)
+				{
+					logger.error("Error updating jobStatus [" + statusUpdate + "]", t);
+				}
+			}
 
 		}
 

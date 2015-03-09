@@ -2,13 +2,11 @@ package org.molgenis.compute.ui.clusterexecutor;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import org.molgenis.auth.MolgenisUser;
@@ -31,7 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
@@ -154,12 +151,10 @@ public class ClusterExecutorImpl implements ClusterExecutor
 		LOG.info("Prepare Analysis: " + analysis.getName());
 
 		MolgenisUser molgenisUser = dataService.findOne(MolgenisUser.ENTITY_NAME,
-				new QueryImpl().eq(MolgenisUser.USERNAME,
-						analysis.getUser()), MolgenisUser.class);
+				new QueryImpl().eq(MolgenisUser.USERNAME, analysis.getUser()), MolgenisUser.class);
 
 		MolgenisToken token = dataService.findOne(MolgenisToken.ENTITY_NAME,
-				new QueryImpl().eq(MolgenisToken.MOLGENISUSER,
-						molgenisUser), MolgenisToken.class);
+				new QueryImpl().eq(MolgenisToken.MOLGENISUSER, molgenisUser), MolgenisToken.class);
 
 		Channel channel = session.openChannel("sftp");
 		channel.setInputStream(System.in);
@@ -356,24 +351,24 @@ public class ClusterExecutorImpl implements ClusterExecutor
 			return true;
 		}
 		catch (IOException | JSchException | InterruptedException e)
+		{
+			LOG.error("Failed to submit analysis", e);
+			throw new RuntimeException(e);
+		}
+		finally
+		{
+			if (userSecureChannel != null)
 			{
-				LOG.error("Failed to submit analysis", e);
-				throw new RuntimeException(e);
-			}
-			finally
-			{
-				if (userSecureChannel != null)
+				try
 				{
-					try
-					{
-						userSecureChannel.close();
-					}
-					catch (IOException e)
-					{
-						throw new RuntimeException(e);
-					}
+					userSecureChannel.close();
+				}
+				catch (IOException e)
+				{
+					throw new RuntimeException(e);
 				}
 			}
+		}
 	}
 
 	public boolean reRun(Analysis analysis, String callbackUri)
@@ -416,7 +411,7 @@ public class ClusterExecutorImpl implements ClusterExecutor
 			}
 
 		}
-		catch (IOException | JSchException  e)
+		catch (IOException | JSchException e)
 		{
 			LOG.error("Failed to submit analysis", e);
 			throw new RuntimeException(e);

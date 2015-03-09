@@ -1,22 +1,31 @@
 package org.molgenis.compute.ui.analysis;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.molgenis.compute.ui.model.*;
-import org.molgenis.compute.ui.model.decorator.UIWorkflowDecorator;
-import org.molgenis.data.*;
-import org.molgenis.data.csv.CsvWriter;
-import org.molgenis.data.support.QueryImpl;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.commons.io.FileUtils;
+import org.molgenis.compute.ui.model.Analysis;
+import org.molgenis.compute.ui.model.UIParameterMapping;
+import org.molgenis.compute.ui.model.UIWorkflow;
+import org.molgenis.compute.ui.model.UIWorkflowNode;
+import org.molgenis.compute.ui.model.UIWorkflowParameter;
+import org.molgenis.compute.ui.model.UIWorkflowProtocol;
+import org.molgenis.compute.ui.model.decorator.UIWorkflowDecorator;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.csv.CsvWriter;
+import org.molgenis.data.support.QueryImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 
 /**
  * Created by hvbyelas on 1/7/15.
@@ -35,12 +44,12 @@ public class AnalysisToFilesWriter
 
 		try
 		{
-			//write parameters
+			// write parameters
 			StringBuilder keysBuilder = new StringBuilder();
 
 			int max = workflow.getParameters().get(0).getValues().size();
 
-			StringBuilder[] valueBuilders =new StringBuilder[max];
+			StringBuilder[] valueBuilders = new StringBuilder[max];
 			for (int i = 0; i < valueBuilders.length; i++)
 			{
 				valueBuilders[i] = new StringBuilder("");
@@ -50,7 +59,7 @@ public class AnalysisToFilesWriter
 			for (UIWorkflowParameter p : parameters)
 			{
 				keysBuilder.append(p.getKey()).append(SEP);
-				for(int i = 0; i < valueBuilders.length; i++)
+				for (int i = 0; i < valueBuilders.length; i++)
 					valueBuilders[i].append(p.getValues().get(i).getValue()).append(SEP);
 			}
 
@@ -59,21 +68,21 @@ public class AnalysisToFilesWriter
 			List<String> values = new ArrayList<>();
 			for (int i = 0; i < valueBuilders.length; i++)
 			{
-				String value = valueBuilders[i].toString()
-						.substring(0, valueBuilders[i].toString().toString().length() - 1);
+				String value = valueBuilders[i].toString().substring(0,
+						valueBuilders[i].toString().toString().length() - 1);
 				values.add(value);
 			}
 
 			keys += System.getProperty("line.separator");
 
-			for(String value : values)
+			for (String value : values)
 			{
 				keys += value + System.getProperty("line.separator");
 			}
 
 			FileUtils.writeStringToFile(new File(path + AnalysisPluginController.PARAMETERS_DEFAULT), keys);
 
-			//write workflow
+			// write workflow
 			String nodes = "step" + SEP + "protocol" + SEP + "dependencies\n";
 			for (UIWorkflowNode node : workflow.getNodes())
 			{

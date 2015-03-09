@@ -11,7 +11,6 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
-import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.merge.RepositoryMerger;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.framework.ui.MolgenisPluginController;
@@ -54,17 +53,14 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 	private final ArrayList<AttributeMetaData> commonAttributes;
 	private final RepositoryMerger repositoryMerger;
 	private final DataService dataService;
-	private final SearchService searchService;
 
 	@Autowired
-	public GeneticRepositoryMergerController(RepositoryMerger repositoryMerger, DataService dataService,
-			SearchService searchService)
+	public GeneticRepositoryMergerController(RepositoryMerger repositoryMerger, DataService dataService)
 	{
 		super(URI);
 
 		this.repositoryMerger = repositoryMerger;
 		this.dataService = dataService;
-		this.searchService = searchService;
 
 		commonAttributes = new ArrayList<AttributeMetaData>();
 		commonAttributes.add(CHROM);
