@@ -218,7 +218,7 @@
 					'html' : true
 				});
 			}
-			ontologyTermTd.append('<div>Name : <a href="' + ontologyTerm.ontologyTermIRI + '" target="_blank">' + ontologyTerm.ontologyTerm + '</a></div>').append(synonymDiv);
+			ontologyTermTd.append('<div>Name : <a href="' + ontologyTerm.ontologyTermIRI + '" target="_blank">' + ontologyTerm.ontologyTermName + '</a></div>').append(synonymDiv);
 			$.each(Object.keys(inputEntity), function(index, key){
 				if(key.toLowerCase() !== 'name' && key.toLowerCase().search('synonym') === -1 && key.toLowerCase() !== reserved_identifier_field.toLowerCase()){
 					ontologyTermTd.append('<div>' + key + ' : ' + (ontologyTerm[key] ? ontologyTerm[key] : 'N/A')  + '</div>');
@@ -232,24 +232,10 @@
 	
 	function getOntologyTermSynonyms(ontologyTerm){
 		var synonyms = [];
-		var ontologyCollection = restApi.get('/api/v1/ontologyindex/', {
-			'q' : [{
-				'field' : 'ontologyIRI',
-				'operator' : 'EQUALS',
-				'value' : ontologyTerm.ontologyIRI
-			}]
-		});
-		if(ontologyCollection.items.length > 0){
-			var ontologyTermCollection = restApi.get('/api/v1/' + ontologyCollection.items[0].ontologyName, {
-				'q' : [{
-					'field' : 'ontologyTermIRI',
-					'operator' : 'EQUALS',
-					'value' : ontologyTerm.ontologyTermIRI
-				}]
-			});
-			$.each(ontologyTermCollection.items, function(index, ontologyTerm){
-				if(ontologyTerm.ontologyTerm !== ontologyTerm.ontologyTermSynonym && $.inArray(ontologyTerm.ontologyTermSynonym, synonyms) === -1){
-					synonyms.push(ontologyTerm.ontologyTermSynonym);
+		if(ontologyTerm.ontologyTermSynonym.length > 0){
+			$.each(ontologyTerm.ontologyTermSynonym, function(index, ontologyTermSynonymEntity){
+				if(ontologyTerm.ontologyTermName !== ontologyTermSynonymEntity.ontologyTermSynonym && $.inArray(ontologyTermSynonymEntity.ontologyTermSynonym, synonyms) === -1){
+					synonyms.push(ontologyTermSynonymEntity.ontologyTermSynonym);
 				}
 			});
 		}

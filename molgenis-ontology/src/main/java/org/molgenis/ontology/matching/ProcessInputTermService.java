@@ -16,9 +16,7 @@ import org.molgenis.data.importer.EmxImportService;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.ontology.OntologyService;
 import org.molgenis.ontology.OntologyServiceResult;
-import org.molgenis.ontology.beans.ComparableEntity;
 import org.molgenis.ontology.repository.OntologyTermQueryRepository;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -46,12 +44,12 @@ public class ProcessInputTermService
 
 	private final UploadProgress uploadProgress;
 
-	private final OntologyService ontologyService;
+	private final OntologyMatchingService ontologyService;
 
 	@Autowired
 	public ProcessInputTermService(EmxImportService emxImportService,
 			MysqlRepositoryCollection mysqlRepositoryCollection, DataService dataService,
-			UploadProgress uploadProgress, OntologyService ontologyService)
+			UploadProgress uploadProgress, OntologyMatchingService ontologyService)
 	{
 		this.emxImportService = emxImportService;
 		this.mysqlRepositoryCollection = mysqlRepositoryCollection;
@@ -66,6 +64,7 @@ public class ProcessInputTermService
 	public void process(SecurityContext securityContext, MolgenisUser molgenisUser, String entityName,
 			String ontologyIri, File uploadFile, RepositoryCollection repositoryCollection)
 	{
+		// TODO : FIXIME, use standard dataservice to add metadata and data
 		String userName = molgenisUser.getUsername();
 		uploadProgress.registerUser(userName, entityName);
 		// Add the original input dataset to database
@@ -94,7 +93,6 @@ public class ProcessInputTermService
 				OntologyServiceResult searchEntity = ontologyService.searchEntity(ontologyIri, entity);
 				for (Map<String, Object> ontologyTerm : searchEntity.getOntologyTerms())
 				{
-					Double score = Double.parseDouble(ontologyTerm.get(ComparableEntity.SCORE).toString());
 					MapEntity matchingTaskContentEntity = new MapEntity();
 					matchingTaskContentEntity.set(MatchingTaskContentEntity.IDENTIFIER,
 							entityName + "_" + entity.getIdValue());
@@ -102,7 +100,8 @@ public class ProcessInputTermService
 					matchingTaskContentEntity.set(MatchingTaskContentEntity.REF_ENTITY, entityName);
 					matchingTaskContentEntity.set(MatchingTaskContentEntity.MATCHED_TERM,
 							ontologyTerm.get(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI));
-					matchingTaskContentEntity.set(MatchingTaskContentEntity.SCORE, score);
+					matchingTaskContentEntity.set(MatchingTaskContentEntity.SCORE,
+							ontologyTerm.get(OntologyMatchingServiceImpl.SCORE));
 					matchingTaskContentEntity.set(MatchingTaskContentEntity.VALIDATED, false);
 					entitiesToAdd.add(matchingTaskContentEntity);
 					break;

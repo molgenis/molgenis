@@ -39,22 +39,20 @@ import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.ontology.OntologyService;
 import org.molgenis.ontology.OntologyServiceResult;
 import org.molgenis.ontology.beans.OntologyServiceResultImpl;
 import org.molgenis.ontology.matching.AdaptedCsvRepository;
 import org.molgenis.ontology.matching.MatchingTaskContentEntity;
 import org.molgenis.ontology.matching.MatchingTaskEntity;
+import org.molgenis.ontology.matching.OntologyMatchingService;
+import org.molgenis.ontology.matching.OntologyMatchingServiceImpl;
 import org.molgenis.ontology.matching.ProcessInputTermService;
 import org.molgenis.ontology.matching.UploadProgress;
 import org.molgenis.ontology.repository.OntologyTermQueryRepository;
 import org.molgenis.ontology.request.OntologyServiceRequest;
-import org.molgenis.ontology.service.OntologyServiceImpl;
 import org.molgenis.ontology.utils.OntologyServiceUtil;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.FileStore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpStatus;
@@ -72,9 +70,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @RequestMapping(URI)
 public class OntologyServiceController extends MolgenisPluginController
 {
-	@SuppressWarnings("unused")
-	private static final Logger LOG = LoggerFactory.getLogger(OntologyServiceController.class);
-
 	@Autowired
 	private UserAccountService userAccountService;
 
@@ -82,7 +77,7 @@ public class OntologyServiceController extends MolgenisPluginController
 	private DataService dataService;
 
 	@Autowired
-	private OntologyService ontologyService;
+	private OntologyMatchingService ontologyMatchingService;
 
 	@Autowired
 	private ProcessInputTermService processInputTermService;
@@ -123,7 +118,8 @@ public class OntologyServiceController extends MolgenisPluginController
 	@RequestMapping(method = GET, value = "/newtask")
 	public String matchTask(Model model)
 	{
-		model.addAttribute("ontologies", OntologyServiceUtil.getEntityAsMap(ontologyService.getAllOntologyEntities()));
+		model.addAttribute("ontologies",
+				OntologyServiceUtil.getEntityAsMap(ontologyMatchingService.getAllOntologyEntities()));
 		return "ontology-match-view";
 	}
 
@@ -250,8 +246,10 @@ public class OntologyServiceController extends MolgenisPluginController
 			Object matchedTerm = mappingEntity.get(MatchingTaskContentEntity.MATCHED_TERM);
 			if (matchedTerm != null)
 			{
-				outputEntity.put("ontologyTerm", OntologyServiceUtil.getEntityAsMap(ontologyService
-						.getOntologyTermEntity(matchedTerm.toString(), ontologyIri)));
+				outputEntity.put(
+						"ontologyTerm",
+						OntologyServiceUtil.getEntityAsMap(ontologyMatchingService.getOntologyTermEntity(
+								matchedTerm.toString(), ontologyIri)));
 			}
 			entityMaps.add(outputEntity);
 		}
@@ -298,7 +296,7 @@ public class OntologyServiceController extends MolgenisPluginController
 		{
 			String ontologyTermIri = request.get(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI).toString();
 			String ontologyIri = request.get(OntologyTermQueryRepository.ONTOLOGY_IRI).toString();
-			results.put("synonyms", ontologyService.getOntologyTermSynonyms(ontologyTermIri, ontologyIri));
+			results.put("synonyms", ontologyMatchingService.getOntologyTermSynonyms(ontologyTermIri, ontologyIri));
 		}
 		return results;
 	}
@@ -322,7 +320,8 @@ public class OntologyServiceController extends MolgenisPluginController
 			if (matchingTaskEntity == null || entity == null) return new OntologyServiceResultImpl(
 					"entityName or inputTermIdentifier is invalid!");
 
-			return ontologyService.searchEntity(matchingTaskEntity.getString(MatchingTaskEntity.CODE_SYSTEM), entity);
+			return ontologyMatchingService.searchEntity(matchingTaskEntity.getString(MatchingTaskEntity.CODE_SYSTEM),
+					entity);
 		}
 		return new OntologyServiceResultImpl("Please check entityName, inputTermIdentifier exist in input!");
 	}
@@ -338,8 +337,8 @@ public class OntologyServiceController extends MolgenisPluginController
 			String queryString = request.get("queryString").toString();
 			String ontologyIri = request.get(OntologyTermQueryRepository.ONTOLOGY_IRI).toString();
 			Entity entity = new MapEntity();
-			entity.set(OntologyServiceImpl.DEFAULT_MATCHING_NAME_FIELD, queryString);
-			return ontologyService.searchEntity(ontologyIri, entity);
+			entity.set(OntologyMatchingServiceImpl.DEFAULT_MATCHING_NAME_FIELD, queryString);
+			return ontologyMatchingService.searchEntity(ontologyIri, entity);
 		}
 		return new OntologyServiceResultImpl("Please check entityName, inputTermIdentifier exist in input!");
 	}
@@ -352,7 +351,7 @@ public class OntologyServiceController extends MolgenisPluginController
 		{
 			response.setContentType("text/csv");
 			response.addHeader("Content-Disposition", "attachment; filename=" + getCsvFileName("match-result"));
-			csvWriter = new CsvWriter(response.getOutputStream(), OntologyServiceImpl.DEFAULT_SEPARATOR);
+			csvWriter = new CsvWriter(response.getOutputStream(), OntologyMatchingServiceImpl.DEFAULT_SEPARATOR);
 			List<String> columnHeaders = new ArrayList<String>();
 			for (AttributeMetaData attributeMetaData : dataService.getEntityMetaData(entityName).getAttributes())
 			{
@@ -374,7 +373,7 @@ public class OntologyServiceController extends MolgenisPluginController
 						entityName,
 						new QueryImpl().eq(MatchingTaskEntity.IDENTIFIER,
 								mappingEntity.getString(MatchingTaskContentEntity.INPUT_TERM)));
-				Entity ontologyTermEntity = ontologyService.getOntologyTermEntity(
+				Entity ontologyTermEntity = ontologyMatchingService.getOntologyTermEntity(
 						mappingEntity.getString(MatchingTaskContentEntity.MATCHED_TERM),
 						matchingTaskEntity.getString(MatchingTaskEntity.CODE_SYSTEM));
 				Entity row = new MapEntity();
@@ -415,7 +414,7 @@ public class OntologyServiceController extends MolgenisPluginController
 			return init(model);
 		}
 
-		CsvRepository csvRepository = new CsvRepository(uploadFile, null, OntologyServiceImpl.DEFAULT_SEPARATOR);
+		CsvRepository csvRepository = new CsvRepository(uploadFile, null, OntologyMatchingServiceImpl.DEFAULT_SEPARATOR);
 
 		if (!validateFileHeader(csvRepository))
 		{
@@ -453,7 +452,7 @@ public class OntologyServiceController extends MolgenisPluginController
 			public Repository getRepositoryByEntityName(String name)
 			{
 				CsvRepository csvRepository = new CsvRepository(file, Arrays.<CellProcessor> asList(
-						new LowerCaseProcessor(), new TrimProcessor()), OntologyServiceImpl.DEFAULT_SEPARATOR);
+						new LowerCaseProcessor(), new TrimProcessor()), OntologyMatchingServiceImpl.DEFAULT_SEPARATOR);
 				return (entityName.equals(name) ? new AdaptedCsvRepository(entityName, csvRepository) : null);
 			}
 
@@ -476,7 +475,7 @@ public class OntologyServiceController extends MolgenisPluginController
 		boolean containsName = false;
 		for (AttributeMetaData atomicAttributes : csvRepository.getEntityMetaData().getAtomicAttributes())
 		{
-			if (atomicAttributes.getName().equalsIgnoreCase(OntologyServiceImpl.DEFAULT_MATCHING_NAME_FIELD)) containsName = true;
+			if (atomicAttributes.getName().equalsIgnoreCase(OntologyMatchingServiceImpl.DEFAULT_MATCHING_NAME_FIELD)) containsName = true;
 		}
 		return containsName;
 	}

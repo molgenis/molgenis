@@ -4,19 +4,15 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.importer.EmxImportService;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
-import org.molgenis.ontology.index.AsyncOntologyIndexer;
+import org.molgenis.ontology.matching.OntologyMatchingService;
+import org.molgenis.ontology.matching.OntologyMatchingServiceImpl;
 import org.molgenis.ontology.matching.ProcessInputTermService;
 import org.molgenis.ontology.matching.UploadProgress;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.scheduling.annotation.EnableAsync;
 
 @Configuration
-@EnableAsync
-@Import(
-{ OntologyCoreConfiguration.class })
 public class OntologyConfiguration
 {
 	@Autowired
@@ -31,26 +27,30 @@ public class OntologyConfiguration
 	@Autowired
 	private DataService dataService;
 
-	@Autowired
-	private OntologyService ontologyService;
-
-	/**
-	 * Get a reference to a HarmonizationIndexer.
-	 * 
-	 * @return HarmonizationIndexer
-	 */
 	@Bean
-	public AsyncOntologyIndexer harmonizationIndexer()
+	public OntologyMatchingService ontologyMatchingService()
 	{
-		return new AsyncOntologyIndexer(searchService, dataService, ontologyService);
+		return new OntologyMatchingServiceImpl(dataService, searchService);
 	}
 
 	@Bean
 	public ProcessInputTermService processInputTermService()
 	{
 		return new ProcessInputTermService(emxImportService, mysqlRepositoryCollection, dataService, uploadProgress(),
-				ontologyService);
+				ontologyMatchingService());
 	}
+
+	//
+	// /**
+	// * Get a reference to a HarmonizationIndexer.
+	// *
+	// * @return HarmonizationIndexer
+	// */
+	// @Bean
+	// public AsyncOntologyIndexer harmonizationIndexer()
+	// {
+	// return new AsyncOntologyIndexer(searchService, dataService, ontologyService());
+	// }
 
 	@Bean
 	public UploadProgress uploadProgress()
