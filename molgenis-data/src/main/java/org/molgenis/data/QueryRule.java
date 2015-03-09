@@ -152,7 +152,12 @@ public class QueryRule
 		/**
 		 * Disjunction max query
 		 */
-		DIS_MAX("DIS_MAX");
+		DIS_MAX("DIS_MAX"),
+
+		/**
+		 * Fuzzy match operator
+		 */
+		FUZZY_MATCH("FUZZY_MATCH");
 
 		private String label;
 
