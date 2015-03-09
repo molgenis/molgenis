@@ -250,7 +250,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 			{
 				jdbcTemplate.execute(getMrefCreateSql(attributeMetaData));
 			}
-			else
+			else if(!attributeMetaData.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
 			{
 				jdbcTemplate.execute(getAlterSql(attributeMetaData));
 			}
@@ -379,8 +379,8 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				break;
 			case TEXT:
 				break;
-
 			case COMPOUND:
+                break;
 			case MREF:
 			case CATEGORICAL:
 			case CATEGORICAL_MREF:
