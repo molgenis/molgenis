@@ -655,6 +655,7 @@
         <module>molgenis-data-elasticsearch</module>
         <module>molgenis-data-semanticsearch</module>
         <module>molgenis-python</module>
+        <module>molgenis-questionnaire</module>
         <module>molgenis-r</module>
         <module>molgenis-charts</module>
         <module>molgenis-annotators</module>

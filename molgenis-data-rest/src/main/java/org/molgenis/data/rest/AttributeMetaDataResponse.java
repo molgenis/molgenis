@@ -91,7 +91,6 @@ public class AttributeMetaDataResponse
 		}
 		else this.expression = null;
 
-
 		if (attributesSet == null || attributesSet.contains("refEntity".toLowerCase()))
 		{
 			EntityMetaData refEntity = attr.getRefEntity();
@@ -149,7 +148,11 @@ public class AttributeMetaDataResponse
 
 		if (attributesSet == null || attributesSet.contains("defaultValue".toLowerCase()))
 		{
-			this.defaultValue = attr.getDefaultValue();
+			// this.defaultValue = attr.getDefaultValue();
+
+			// TEMP HACK
+			this.defaultValue = attr.getDefaultValue() != null ? attr.getDefaultValue() : (attr.getDataType()
+					.getEnumType() == FieldTypeEnum.BOOL ? false : null);
 		}
 		else this.defaultValue = null;
 

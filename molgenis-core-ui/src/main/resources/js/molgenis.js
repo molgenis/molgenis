@@ -968,3 +968,12 @@ if(window.history.replaceState === undefined)
 	window.history.replaceState = function(){};
 if(window.onpopstate === undefined)
 	window.onpopstate = function(){}
+
+// polyfills
+Number.isInteger = Number.isInteger || function(value) {
+    return typeof value === "number" && 
+           isFinite(value) && 
+           Math.floor(value) === value;
+};
+Number.MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER || 9007199254740991;
+Number.MIN_SAFE_INTEGER = Number.MIN_SAFE_INTEGER || -9007199254740991;

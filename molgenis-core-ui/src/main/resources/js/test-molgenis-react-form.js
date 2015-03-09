@@ -1,13 +1,13 @@
 $(function($, molgenis) {
 	"use strict";
 	
-	var div = React.DOM.div, label = React.DOM.label, input = React.DOM.input, hr = React.DOM.hr;
+	var div = React.DOM.div, label = React.DOM.label, input = React.DOM.input;
 	
 	var FormSelect = React.createClass({
 		mixins: [molgenis.DeepPureRenderMixin],
 		displayName: 'FormSelect',
 		getInitialState: function() {
-			return {selectedEntity: null, layout: 'vertical'};
+			return {selectedEntity: null, formLayout: 'vertical'};
 		},
 		render: function() {console.log('render FormSelect', this.state, this.props);
 			var elements = [];
@@ -32,7 +32,7 @@ $(function($, molgenis) {
 				elements.push(
 					div({className: 'row', key: 'form'},
 						div({className: 'col-md-12'},
-								molgenis.control.Form({entity: this.state.selectedEntity, layout: this.state.layout})
+								molgenis.control.Form({entity: this.state.selectedEntity, formLayout: this.state.formLayout})
 						)
 					)	
 				);
@@ -44,7 +44,7 @@ $(function($, molgenis) {
 			this.setState({selectedEntity: entity});
 		},
 		_handleCheckboxChange: function(event) {
-			this.setState({layout: event.target.checked ? 'horizontal' : 'vertical'});
+			this.setState({formLayout: event.target.checked ? 'horizontal' : 'vertical'});
 		}
 	});
 	

@@ -9,13 +9,14 @@
 (function($, molgenis) {
 	"use strict";
 
-	molgenis.filters = molgenis.filters || {};
-
-	var controls = molgenis.controls;
+	var control = molgenis.control;
 
 	var div = React.DOM.div, label = React.DOM.label, span = React.DOM.span, button=React.DOM.button;
 	var __spread = React.__spread;
 	
+	/**
+	 * @memberOf filter.mixin
+	 */
 	var ValueQueryMixin = {
 		_toQuery: function(event) {
 			return event.value !== undefined && event.value !== '' ? {
@@ -31,6 +32,7 @@
 	
 	/**
 	 * Attribute value filter shared functions
+	 * @memberOf filter.mixin
 	 */
 	var ValueFilterMixin = {
 		_createValueFilter: function(additionalProps) {
@@ -40,21 +42,23 @@
 				case 'DECIMAL':
 				case 'INT':
 				case 'LONG':
-					return RangeValueFilter(__spread({},  this.props, this.additionalProps, {onQueryChange: this.props.onQueryChange}));
-//					return (<RangeValueFilter {...this.props} {...additionalProps} onQueryChange={this.props.onQueryChange} />);
+					return molgenis.filter.RangeValueFilter(__spread({},  this.props, this.additionalProps, {onQueryChange: this.props.onQueryChange}));
 				default:
-//					return (<AttributeFilter {...this.props} {...additionalProps} onQueryChange={this.props.onQueryChange} />);
-					return AttributeFilter(__spread({},  this.props, this.additionalProps, {onQueryChange: this.props.onQueryChange}));
+					return molgenis.filter.AttributeFilter(__spread({},  this.props, this.additionalProps, {onQueryChange: this.props.onQueryChange}));
 			}
 		}
 	};
 	
 	/**
 	 *  Attribute filter with one required value input and a null select
+	 *  @memberOf filter
 	 */
 	var NillableValueFilter = React.createClass({
-		mixins: [ValueQueryMixin, ValueFilterMixin],
+		mixins: [molgenis.DeepPureRenderMixin, ValueQueryMixin, ValueFilterMixin],
 		displayName: 'NillableValueFilter',
+		propTypes: {
+			name: React.PropTypes.func.isRequired // FIXME add additional props
+		},
 		getDefaultProps: function() {
 			return {
 				cols: 12
@@ -84,26 +88,19 @@
 					filter,
 					div({className: 'form-group'},
 						div({className: colClassName},
-							controls.BoolControl({value: checked, label: 'N/A', onValueChange: this._handleNillableValueChange})
+							control.BoolControl({value: checked, onValueChange: this._handleNillableValueChange}),
+							' N/A' 
 						)
 					)
 				)
-//				<div>
-//					{filter}
-//					<div className="form-group">
-//						<div className={colClassName}>
-//							<controls.BoolControl value={checked} label="N/A" onValueChange={this._handleNillableValueChange} />
-//						</div>
-//					</div>
-//				</div>
 		    );
 		},
 		_handleNillableValueChange: function(event) {console.log('_handleNillableValueChange NillableValueFilter', event);
 			this.setState({
-				disabled: event.value
+				disabled: event.checked
 			});
-			event.value = event.value === true ? null : undefined;
-			this.props.onQueryChange({attr: this.props.attr.name, query: this._toQuery({attr: this.props.attr.name, value: event.value})});
+			event.value = event.checked === true ? null : undefined; // FIXME ??
+			this.props.onQueryChange({attr: this.props.attr.name, query: this._toQuery({attr: this.props.attr.name, value: event.checked})});
 		},
 		_disableFilter: function(query) {
 			return this._toValue(query) === null;
@@ -112,9 +109,10 @@
 	
 	/**
 	 * Attribute filter with one required value input
+	 * @memberOf filter
 	 */
 	var NonNillableValueFilter = React.createClass({
-		mixins: [ValueFilterMixin],
+		mixins: [molgenis.DeepPureRenderMixin, ValueFilterMixin],
 		displayName: 'NonNillableValueFilter',
 		render: function() {console.log('render NonNillableValueFilter', this.state, this.props);
 			var filter = this._createValueFilter(this.state);
@@ -124,21 +122,25 @@
 	
 	/**
 	 * Attribute filter
+	 * @memberOf filter
 	 */
 	var ValueFilter = React.createClass({
+		mixins: [molgenis.DeepPureRenderMixin],
 		displayName: 'ValueFilter',
 		render: function() {console.log('render ValueFilter', this.state, this.props);
-			if(this.props.attr.nillable) {
-//				return (<NillableValueFilter cols={this.props.cols} {...this.props} onQueryChange={this.props.onQueryChange} />);
-				return NillableValueFilter(__spread({},  this.props, {cols: this.props.cols, onQueryChange: this.props.onQueryChange}));
+			if(this.props.attr.nillable && (this.props.attr.fieldType === 'BOOL' || this.props.attr.fieldType === 'ENUM' || this.props.attr.fieldType === 'CATEGORICAL' || this.props.attr.fieldType === 'CATEGORICAL_MREF' || this.props.attr.fieldType === 'XREF' || this.props.attr.fieldType === 'MREF')) {
+				return molgenis.filter.NonNillableValueFilter(__spread({},  this.props, {cols: this.props.cols, onQueryChange: this.props.onQueryChange}));
 			} else {
-//				return (<NonNillableValueFilter cols={this.props.cols} {...this.props} onQueryChange={this.props.onQueryChange} />);
-				return NonNillableValueFilter(__spread({},  this.props, {cols: this.props.cols, onQueryChange: this.props.onQueryChange}));
+				return molgenis.filter.NillableValueFilter(__spread({},  this.props, {cols: this.props.cols, onQueryChange: this.props.onQueryChange}));
 			}
 		}
 	});
-				
+
+	/**
+	 * @memberOf filter
+	 */
 	var ComposedFilterPart = React.createClass({
+		mixins: [molgenis.DeepPureRenderMixin],
 		displayName: 'ComposedFilterPart',
 		render: function() {console.log('render ComposedFilterPart', this.state, this.props);
 			if(this.props.query && this.props.query.operator === 'OR') { // FIXME not elegant
@@ -148,46 +150,27 @@
 							div({className: 'text-center'}, 'OR')
 						)
 					)
-//						<div className="form-group">
-//							<div className="col-md-offset-3 col-md-3">
-//								<div className="text-center">OR</div>
-//							</div>
-//						</div>
 			    );
 			}
 
 			var addBtnClasses = 'btn btn-default' + (this.props.hideAddBtn ? ' hidden' : '');
 			var removeBtnClasses = 'btn btn-default' + (this.props.hideRemoveBtn ? ' hidden' : '');			
-//			var filter = <ValueFilter {...this.props} query={this.props.query} onQueryChange={this._handleOnQueryChange} />;
-			var filter = ValueFilter(__spread({},  this.props, {query: this.props.query, onQueryChange: this._handleQueryChange}));
+			var filter = molgenis.filter.ValueFilter(__spread({},  this.props, {query: this.props.query, onQueryChange: this._handleQueryChange}));
 					
 			return (
-					div({className: 'row'},
-						div({className: 'col-md-9'},
-							filter
+				div({className: 'row'},
+					div({className: 'col-md-9'},
+						filter
+					),
+					div({className: 'col-md-3'},
+						button({className: addBtnClasses, type: 'button', title: 'Add a filter clause', onClick: this._handleAddFilterPartClick},
+							span({className: 'glyphicon glyphicon-plus'})
 						),
-						div({className: 'col-md-3'},
-							button({className: addBtnClasses, type: 'button', title: 'Add a filter clause', onClick: this._handleAddFilterPartClick},
-								span({className: 'glyphicon glyphicon-plus'})
-							),
-							button({className: removeBtnClasses, type: 'button', title: 'Remove this filter clause', onClick: this._handleRemoveFilterPartClick},
-								span({className: 'glyphicon glyphicon-minus'})
-							)
+						button({className: removeBtnClasses, type: 'button', title: 'Remove this filter clause', onClick: this._handleRemoveFilterPartClick},
+							span({className: 'glyphicon glyphicon-minus'})
 						)
 					)
-//				<div className="row">
-//					<div className="col-md-9">
-//						{filter}
-//					</div>
-//					<div className="col-md-3">
-//						<button className={addBtnClasses} type="button" title="Add a filter clause" onClick={this._handleAddFilterPartClick}>
-//							<span className="glyphicon glyphicon-plus"></span>
-//						</button>
-//						<button className={removeBtnClasses} type="button" title="Remove this filter clause" onClick={this._handleRemoveFilterPartClick}>
-//							<span className="glyphicon glyphicon-minus"></span>
-//						</button>
-//					</div>
-//				</div>
+				)
 		    );
 		},
 		_handleOnQueryChange: function(event) {console.log('_handleOnQueryChange ComposedFilterPart', event);
@@ -203,8 +186,10 @@
 	
 	/**
 	 * Attribute filter composed of attribute filters that can be added/removed and operators that define the relations between them
+	 * @memberOf filter
 	 */
 	var ComposedFilter = React.createClass({
+		mixins: [molgenis.DeepPureRenderMixin],
 		displayName: 'ComposedFilter',
 		getInitialState: function() {
 			return {filters: this._toFilters(this.props.query)};
@@ -215,7 +200,7 @@
 		render: function() {console.log('render ComposedFilter', this.state, this.props);
 			var self = this;
 			var filterParts = $.map(this.state.filters, function(query, index) {
-				return ComposedFilterPart(__spread({},  self.props, {
+				return molgenis.filter.ComposedFilterPart(__spread({},  self.props, {
 					query: query,
 					index: index,
 					key: 'part-' + index,
@@ -225,14 +210,7 @@
 					onRemoveFilterPart: self._handleRemoveFilterPart,
 					onFilterPartQueryChange: self._handleOnFilterPartQueryChange
 				}));
-//				return <ComposedFilterPart {...self.props} query={query} index={index} key={'part-' + index}
-//							hideAddBtn={self.props.query === null}
-//							hideRemoveBtn={self.props.query === null || self.state.filters.length === 1}
-//							onAddFilterPart={self._handleAddFilterPart}
-//							onRemoveFilterPart={self._handleRemoveFilterPart}
-//							onFilterPartQueryChange={self._handleOnFilterPartQueryChange} />;
 			});
-//			return (<div>{filterParts}</div>);
 			return div({}, filterParts);
 		},
 		_handleOnFilterPartQueryChange: function(event) {console.log('_handleOnFilterPartQueryChange ComposedFilter', event);
@@ -307,10 +285,9 @@
 		}
 	});
 	
-	
-	
 	/**
 	 * Attribute range filter shared functions
+	 * @memberOf filter.mixin
 	 */
 	var RangeValueFilterMixin = {
 		displayName: 'RangeValueFilterMixin',
@@ -421,88 +398,66 @@
 	};
 	
 	/**
-	 * Attribute range filter with a 'from' and a 'to' input next to each other 
+	 * Attribute range filter with a 'from' and a 'to' input next to each other
+	 * @memberOf filter
 	 */
 	var HorizontalRangeValueFilter = React.createClass({
-		mixins: [RangeValueFilterMixin],
+		mixins: [molgenis.DeepPureRenderMixin, RangeValueFilterMixin],
 		displayName: 'HorizontalRangeValueFilter',
 		render: function() {console.log('render HorizontalRangeValueFilter', this.state, this.props);
 			return (
-					div({className: 'form-group'},
-						div({className: 'col-md-6'},
-							AttributeFilter(__spread({},  this.props, {placeholder: 'From', query: this._extractFromQuery(), onQueryChange: this._handleFromQueryChange}))
-						),
-						div({className: 'col-md-6'},
-							AttributeFilter(__spread({},  this.props, {placeholder: 'To', query: this._extractToQuery(), onQueryChange: this._handleToQueryChange}))
-						)
+				div({className: 'form-group'},
+					div({className: 'col-md-6'},
+						molgenis.filter.AttributeFilter(__spread({},  this.props, {placeholder: 'From', query: this._extractFromQuery(), onQueryChange: this._handleFromQueryChange}))
+					),
+					div({className: 'col-md-6'},
+						molgenis.filter.AttributeFilter(__spread({},  this.props, {placeholder: 'To', query: this._extractToQuery(), onQueryChange: this._handleToQueryChange}))
 					)
-//				<div className="form-group">
-//					<div className="col-md-6">
-//						<AttributeFilter {...this.props} placeholder="From" query={this._extractFromQuery()} onQueryChange={this._handleFromQueryChange} />
-//					</div>
-//					<div className="col-md-6">
-//						<AttributeFilter {...this.props} placeholder="To" query={this._extractToQuery()} onQueryChange={this._handleToQueryChange} />
-//					</div>
-//				</div>	
+				)
 		    );
 		}
 	});
 	
 	/**
-	 * Attribute range filter with a 'to' input below a 'from' input 
+	 * Attribute range filter with a 'to' input below a 'from' input\
+	 * @memberOf filter
 	 */
 	var VerticalRangeValueFilter = React.createClass({
-		mixins: [RangeValueFilterMixin],
+		mixins: [molgenis.DeepPureRenderMixin, RangeValueFilterMixin],
 		displayName: 'VerticalRangeValueFilter',
 		render: function() {console.log('render VerticalRangeValueFilter', this.state, this.props);
 			return(
 				div({},
 					div({className: 'form-group'},
 						div({className: 'col-md-12'},
-							AttributeFilter(__spread({},  this.props, {placeholder: 'From', query: this._extractFromQuery(), onQueryChange: this._handleFromQueryChange}))
+							molgenis.filter.AttributeFilter(__spread({},  this.props, {placeholder: 'From', query: this._extractFromQuery(), onQueryChange: this._handleFromQueryChange}))
 						)
 					),
 					div({className: 'form-group'},
 						div({className: 'col-md-12'},
-							AttributeFilter(__spread({},  this.props, {placeholder: 'To', query: this._extractToQuery(), onQueryChange: this._handleToQueryChange}))
+							molgenis.filter.AttributeFilter(__spread({},  this.props, {placeholder: 'To', query: this._extractToQuery(), onQueryChange: this._handleToQueryChange}))
 						)
 					)
 				)
-//				<div>
-//					<div className="form-group">
-//						<div className="col-md-12">
-//							<AttributeFilter {...this.props} placeholder="From" query={this._extractFromQuery()} onQueryChange={this._handleFromQueryChange} />
-//						</div>
-//					</div>
-//					<div className="form-group">
-//						<div className="col-md-12">
-//							<AttributeFilter {...this.props} placeholder="To" query={this._extractToQuery()} onQueryChange={this._handleToQueryChange} />
-//						</div>
-//					</div>
-//				</div>
 			);
 		}
 	});
 	
 	/**
-	 * Attribute range filter with a slider 
+	 * Attribute range filter with a slider
+	 * @memberOf filter
 	 */
 	var RangeSliderFilter = React.createClass({// FIXME init with value
-		mixins: [RangeValueFilterMixin],
+		mixins: [molgenis.DeepPureRenderMixin, RangeValueFilterMixin],
 		displayName: 'RangeSliderFilter',
 		render: function() {console.log('render RangeSliderFilter', this.state, this.props);
 			var value = this._toValue(this.props.query);
 			return(
 				div({className: 'form-group'},
 					div({className: 'col-md-offset-1 col-md-10'},
-						controls.RangeSlider({range: this.props.attr.range, step: this.props.step, disabled: this.props.disabled, value: value, onValueChange: this._handleValueChange})
+						control.RangeSlider({range: this.props.attr.range, step: this.props.step, disabled: this.props.disabled, value: value, onValueChange: this._handleValueChange})
 					)
 				)
-//				<div className="form-group">
-//					<div className="col-md-offset-1 col-md-10">
-//						<controls.RangeSliderControl range={this.props.attr.range} step={this.props.step} disabled={this.props.disabled} value={value} onValueChange={this._handleValueChange} />
-//					</div>
-//				</div>
 			); //FIXME handle change event
 		},
 		_handleValueChange: function(event) {console.log('_handleValueChange RangeSliderFilter', event);
@@ -557,8 +512,10 @@
 	
 	/**
 	 * Attribute range filter with a 'from' and 'to' input
+	 * @memberOf filter
 	 */
 	var RangeValueFilter = React.createClass({
+		mixins: [molgenis.DeepPureRenderMixin],
 		displayName: 'RangeValueFilter',
 		render: function() {console.log('render RangeValueFilter', this.state, this.props);
 			var attrType = this.props.attr.fieldType;
@@ -568,26 +525,22 @@
 				case 'LONG':
 					if(this.props.attr.range) {
 						var step = attrType === 'DECIMAL' ? false : '1';
-//						return (<RangeSliderFilter {...this.props} step={step} onQueryChange={this.props.onQueryChange} />);
-						return RangeSliderFilter(__spread({},  this.props, {step: step, onQueryChange: this.props.onQueryChange}));
+						return molgenis.filter.RangeSliderFilter(__spread({},  this.props, {step: step, onQueryChange: this.props.onQueryChange}));
 					}
 					else {
-//						return (<HorizontalRangeValueFilter {...this.props} onQueryChange={this.props.onQueryChange} />);
-						return HorizontalRangeValueFilter(__spread({},  this.props, {onQueryChange: this.props.onQueryChange}));
+						return molgenis.filter.HorizontalRangeValueFilter(__spread({},  this.props, {onQueryChange: this.props.onQueryChange}));
 					}
 				default:
-//					return (<VerticalRangeValueFilter {...this.props} onQueryChange={this.props.onQueryChange} />);
-					return VerticalRangeValueFilter(__spread({},  this.props, {onQueryChange: this.props.onQueryChange}));
+					return molgenis.filter.VerticalRangeValueFilter(__spread({},  this.props, {onQueryChange: this.props.onQueryChange}));
 			}
 		}
 	});
-	
-	
-	
-	
-	
+
+	/**
+	 * @memberOf filter
+	 */
 	var AttributeFilter = React.createClass({
-		mixins: [ValueQueryMixin],
+		mixins: [molgenis.DeepPureRenderMixin, ValueQueryMixin],
 		displayName: 'AttributeFilter',
 		getDefaultProps: function() {
 			return {
@@ -601,15 +554,9 @@
 			return (
 				div({className: 'row'},
 					div({className: colClassName},
-						controls.AttributeControl(__spread({},  this.props, {value: value, layout: 'radio', onValueChange: this._handleValueChange}))
+						control.AttributeControl(__spread({},  this.props, {value: value, layout: 'radio', onValueChange: this._handleValueChange}))
 					)
 				)
-				
-//				<div className="row">
-//					<div className={colClassName}>
-//						<controls.AttributeControl value={value} {...this.props} layout="radio" onValueChange={this._handleValueChange} />
-//					</div>
-//				</div>
 			);
 		},
 		_handleValueChange: function(event) {console.log('_handleValueChange AttributeFilter', event);
@@ -621,8 +568,10 @@
 
 	/**
 	 * Attribute filter with clear control
+	 * @memberOf filter
 	 */
 	var Filter = React.createClass({
+		mixins: [molgenis.DeepPureRenderMixin],
 		displayName: 'Filter',
 		getInitialState: function() {
 			return {query: this.props.query};
@@ -634,21 +583,20 @@
 			var query = this.state.query;
 			
 			var filter;
-			var attr = this.props.attr;
+			var attr = _.extend({}, this.props.attr, {readOnly: false});
 			switch(this.props.attr.fieldType) {
 				case 'BOOL':
 					var cols = 9; // align value filters with composed filters
-//					filter = <ValueFilter cols={cols} {...this.props} query={query} onQueryChange={this._handleOnQueryChange} />;
-					filter = ValueFilter(__spread({},  this.props, {cols: cols, query: query, onQueryChange: this._handleOnQueryChange}));
+					filter = molgenis.filter.ValueFilter(__spread({},  this.props, {attr: attr, cols: cols, query: query, onQueryChange: this._handleOnQueryChange}));
 					break;
 				case 'CATEGORICAL':
 				case 'XREF':
 				case 'ENUM':
 					var multiple = true;
 					var cols = 9; // align value filters with composed filters
-//					filter = <ValueFilter cols={cols} {...this.props} multiple={multiple} query={query} onQueryChange={this._handleOnQueryChange} />;
-					filter = ValueFilter(__spread({},  this.props, {cols: cols, multiple: multiple, query: query, onQueryChange: this._handleOnQueryChange}));
+					filter = molgenis.filter.ValueFilter(__spread({},  this.props, {attr: attr, cols: cols, multiple: multiple, query: query, onQueryChange: this._handleOnQueryChange}));
 					break;
+				case 'CATEGORICAL_MREF':
 				case 'EMAIL':
 				case 'HTML':
 				case 'HYPERLINK':
@@ -661,8 +609,7 @@
 				case 'DECIMAL':
 				case 'INT':
 				case 'LONG':
-//					filter = <ComposedFilter {...this.props} query={query} onQueryChange={this._handleOnQueryChange} />;
-					filter = ComposedFilter(__spread({},  this.props, {query: query, onQueryChange: this._handleOnQueryChange}));
+					filter = molgenis.filter.ComposedFilter(__spread({},  this.props, {attr: attr, query: query, onQueryChange: this._handleOnQueryChange}));
 					break;
 				case 'COMPOUND' :
 				case 'FILE':
@@ -684,17 +631,6 @@
 						)
 					)
 				)
-				
-//				<div className="row">
-//					<div className="col-md-10">
-//						{filter}
-//					</div>
-//					<div className="col-md-2">
-//						<button className={clearBtnClasses} type="button" title="Reset this filter" onClick={this._handleOnClearFilterClick}>
-//							<span className="glyphicon glyphicon-remove"></span>
-//						</button>
-//					</div>
-//				</div>
 		    );
 		},
 		_handleOnQueryChange: function(event) {console.log('_handleOnQueryChange Filter', event);
@@ -707,7 +643,11 @@
 		}
 	});
 
+	/**
+	 * @memberOf filter
+	 */
 	var FilterGroup = React.createClass({
+		mixins: [molgenis.DeepPureRenderMixin],
 		displayName: 'FilterGroup',
 		getInitialState: function() {
 			return {query: this.props.query, queries: {}}; // FIXME split query in queries
@@ -720,21 +660,14 @@
 			var filters = $.map(self.props.attrs, function(attr, index) {console.log(attr, index);
 				var query = self.state.queries[attr.name] || null;
 				return (
-						div({className: 'form-group'},
-							label({className: 'col-md-4 control-label'}, attr.label),
-							div({className: 'col-md-8'},
-								Filter({attr: attr, query: query, onQueryChange: self._handleOnQueryChange})
-							)
+					div({className: 'form-group'},
+						label({className: 'col-md-4 control-label'}, attr.label),
+						div({className: 'col-md-8'},
+							molgenis.filter.Filter({attr: attr, query: query, onQueryChange: self._handleOnQueryChange})
 						)
-//					<div className="form-group">
-//						<label for="something" className="col-md-4 control-label">{attr.label}</label>
-//						<div className="col-md-8">
-//							<Filter attr={attr} query={query} onQueryChange={self._handleOnQueryChange} />
-//						</div>
-//					</div>
+					)
 				); // FIXME label-for
 			});
-//			return (<div className="form-horizontal">{filters}</div>);
 			return div({className: 'form-horizontal'}, filters);
 		},
 		_handleOnQueryChange: function(event) {console.log('_handleOnQueryChange FilterGroup', event);
@@ -750,20 +683,36 @@
 		}
 	});
 	
-										
+	molgenis.filters = molgenis.filters || {};									
 	molgenis.filters.create = function(attr, props, $container) {
 		props.attr = attr; // FIXME
 		props.query = props.query || null;
 		
-//		React.render(<Filter {...props} />, $container[0]);
-		React.render(Filter(props), $container[0]);
+		React.render(molgenis.filter.Filter(props), $container[0]);
 	};
 
 	molgenis.filters.createGroup = function(attrs, props, $container) {
 		props.attrs = attrs; // FIXME
 		props.query = props.query || null;
 		
-//		React.render(<FilterGroup {...props} />, $container[0]);
-		React.render(FilterGroup(props), $container[0]);
+		React.render(molgenis.filter.FilterGroup(props), $container[0]);
 	};
+	
+	// export module
+	molgenis.filter = molgenis.filter || {};
+	
+	$.extend(molgenis.filter, {
+		NillableValueFilter: React.createFactory(NillableValueFilter),
+		NonNillableValueFilter: React.createFactory(NonNillableValueFilter),
+		ValueFilter: React.createFactory(ValueFilter),
+		ComposedFilterPart: React.createFactory(ComposedFilterPart),
+		ComposedFilter: React.createFactory(ComposedFilter),
+		HorizontalRangeValueFilter: React.createFactory(HorizontalRangeValueFilter),
+		VerticalRangeValueFilter: React.createFactory(VerticalRangeValueFilter),
+		RangeSliderFilter: React.createFactory(RangeSliderFilter),
+		RangeValueFilter: React.createFactory(RangeValueFilter),
+		AttributeFilter: React.createFactory(AttributeFilter),
+		Filter: React.createFactory(Filter),
+		FilterGroup: React.createFactory(FilterGroup)
+	});
 }($, window.top.molgenis = window.top.molgenis || {}));

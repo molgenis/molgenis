@@ -20,7 +20,8 @@
         <script src="../js/bootstrap-datetimepicker.min.js"></script>
         <script src="../js/handlebars.min.js"></script>
         <script src="../js/select2-patched.js"></script>
-        <script src="../js/jQEditRangeSlider-min.js"></script>        
+        <script src="../js/jQEditRangeSlider-min.js"></script>
+        <script src="../js/ace/src-min-noconflict/ace.js"></script>
         <script src="../js/molgenis.js"></script>
         <script src="../js/molgenis-react-common.js"></script>
         <script src="../js/molgenis-react-control-wrapper.js"></script>
@@ -29,132 +30,280 @@
     </head>
     <body>
         <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                    <span>Event: </span><span id="value"></span>
+                </div>
+            </div>
 			<div class="row">
 				<div class="col-md-12">
 					<div role="tabpanel">
 						<ul class="nav nav-tabs" role="tablist">
-							<li role="presentation" class="active"><a href="#radiogroupcontrol" role="tab" data-toggle="tab">Radio group</a></li>
-							<li role="presentation"><a href="#checkboxgroupcontrol" role="tab" data-toggle="tab">Checkbox group</a></li>
+						    <li role="presentation" class="active"><a href="#inputcontrol" role="tab" data-toggle="tab">Input</a></li>
+							<li role="presentation"><a href="#groupcontrol" role="tab" data-toggle="tab">Radio/Checkbox group</a></li>
+							<li role="presentation"><a href="#datecontrol" role="tab" data-toggle="tab">Date</a></li>
+							<li role="presentation"><a href="#textcontrol" role="tab" data-toggle="tab">Text</a></li>
+							<li role="presentation"><a href="#codeeditorcontrol" role="tab" data-toggle="tab">Code editor</a></li>
 							<li role="presentation"><a href="#boolcontrol" role="tab" data-toggle="tab">Bool</a></li>
-							<li role="presentation"><a href="#enumcontrol" role="tab" data-toggle="tab">Enum</a></li>
 						</ul>
 	
 						<div class="tab-content">
-							<div role="tabpanel" class="tab-pane active" id="radiogroupcontrol">
+                            <div role="tabpanel" class="tab-pane active" id="inputcontrol">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h4>Input: text</h4>
+                                        <form>
+                                            <div id="input-container-input-text"></div>
+                                        </form>
+                                        <h4>Input: text, value</h4>
+                                        <form>
+                                            <div id="input-container-input-text-value"></div>
+                                        </form>
+                                        <h4>Input: text, placeholder</h4>
+                                        <form>
+                                            <div id="input-container-input-text-placeholder"></div>
+                                        </form>
+                                        <h4>Input: text, required</h4>
+                                        <form>
+                                            <div id="input-container-input-text-required"></div>
+                                        </form>
+                                        <h4>Input: text, readonly</h4>
+                                        <form>
+                                            <div id="input-container-input-text-readonly"></div>
+                                        </form>
+                                        <h4>Input: text, disabled</h4>
+                                        <form>
+                                            <div id="input-container-input-text-disabled"></div>
+                                        </form>
+                                        <h4>Input: number</h4>
+                                        <form>
+                                            <div id="input-container-input-number"></div>
+                                        </form>
+                                        <h4>Input: number, value</h4>
+                                        <form>
+                                            <div id="input-container-input-number-value"></div>
+                                        </form>
+                                        <h4>Input: checkbox</h4>
+                                        <form>
+                                            <div id="input-container-input-checkbox"></div>
+                                        </form>
+                                        <h4>Input: checkbox, value</h4>
+                                        <form>
+                                            <div id="input-container-input-checkbox-value"></div>
+                                        </form>
+                                        <h4>Input: checkbox, checked</h4>
+                                        <form>
+                                            <div id="input-container-input-checkbox-checked"></div>
+                                        </form>
+                                        <h4>Input: radio</h4>
+                                        <form>
+                                            <div id="input-container-input-radio"></div>
+                                        </form>
+                                        <h4>Input: radio, value</h4>
+                                        <form>
+                                            <div id="input-container-input-radio-value"></div>
+                                        </form>
+                                        <h4>Input: radio, checked</h4>
+                                        <form>
+                                            <div id="input-container-input-radio-checked"></div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>    
+							<div role="tabpanel" class="tab-pane" id="groupcontrol">
 								<div class="row">
 					                <div class="col-md-6">
-					                    <h3>Radio group: stacked</h3>
+					                    <h4>Radio group: stacked</h4>
 					                    <form>
 					                        <div id="input-container-radiogroup"></div>
 					                    </form>
-					                    <h3>Radio group: stacked, selected value</h3>
+					                    <h4>Radio group: stacked, selected value</h4>
 					                    <form>
 					                        <div id="input-container-radiogroup-value"></div>
 					                    </form>
-					                    <h3>Radio group: stacked, nillable</h3>
+					                    <h4>Radio group: stacked, required</h4>
 					                    <form>
-					                        <div id="input-container-radiogroup-nillable"></div>
+					                        <div id="input-container-radiogroup-required"></div>
 					                    </form>
-					                    <h3>Radio group: stacked, nillable, selected value</h3>
+					                    <h4>Radio group: stacked, required, selected value</h4>
 					                    <form>
-					                        <div id="input-container-radiogroup-nillable-value"></div>
+					                        <div id="input-container-radiogroup-required-value"></div>
 					                    </form>
-					                    <h3>Radio group: stacked, nillable, selected null value</h3>
+					                    <h4>Radio group: stacked, required, selected null value</h4>
 					                    <form>
-					                        <div id="input-container-radiogroup-nillable-value-null"></div>
+					                        <div id="input-container-radiogroup-required-value-null"></div>
 					                    </form>
-					                    <h3>Radio group: inline</h3>
+					                    <h4>Radio group: inline</h4>
 					                    <form>
 					                        <div id="input-container-radiogroup-inline"></div>
 					                    </form>
-					                    <h3>Radio group: disabled</h3>
+					                    <h4>Radio group: readonly</h4>
+                                        <form>
+                                            <div id="input-container-radiogroup-inline-readonly"></div>
+                                        </form>
+					                    <h4>Radio group: disabled</h4>
 					                    <form>
 					                        <div id="input-container-radiogroup-inline-disabled"></div>
 					                    </form>
                                     </div>
-                                </div>
-							</div>
-							<div role="tabpanel" class="tab-pane" id="checkboxgroupcontrol">
-								<div class="row">
                                     <div class="col-md-6">
-	                                    <h3>Checkbox group: stacked</h3>
-					                    <form>
-					                        <div id="input-container-checkboxgroup"></div>
-					                    </form>
-					                    <h3>Checkbox group: stacked, selected value</h3>
-					                    <form>
-					                        <div id="input-container-checkboxgroup-value"></div>
-					                    </form>
-					                    <h3>Checkbox group: stacked, nillable</h3>
-					                    <form>
-					                        <div id="input-container-checkboxgroup-nillable"></div>
-					                    </form>
-					                    <h3>Checkbox group: stacked, nillable, selected value</h3>
-					                    <form>
-					                        <div id="input-container-checkboxgroup-nillable-value"></div>
-					                    </form>
-					                    <h3>Checkbox group: stacked, nillable, selected null value</h3>
-					                    <form>
-					                        <div id="input-container-checkboxgroup-nillable-value-null"></div>
-					                    </form>
-					                    <h3>Checkbox group: inline</h3>
-					                    <form>
-					                        <div id="input-container-checkboxgroup-inline"></div>
-					                    </form>
-					                    <h3>Checkbox group: disabled</h3>
-					                    <form>
-					                        <div id="input-container-checkboxgroup-inline-disabled"></div>
-					                    </form>
+                                        <h4>Checkbox group: stacked</h4>
+                                        <form>
+                                            <div id="input-container-checkboxgroup"></div>
+                                        </form>
+                                        <h4>Checkbox group: stacked, selected value</h4>
+                                        <form>
+                                            <div id="input-container-checkboxgroup-value"></div>
+                                        </form>
+                                        <h4>Checkbox group: stacked, required</h4>
+                                        <form>
+                                            <div id="input-container-checkboxgroup-required"></div>
+                                        </form>
+                                        <h4>Checkbox group: stacked, required, selected value</h4>
+                                        <form>
+                                            <div id="input-container-checkboxgroup-required-value"></div>
+                                        </form>
+                                        <h4>Checkbox group: stacked, required, selected null value</h4>
+                                        <form>
+                                            <div id="input-container-checkboxgroup-required-value-null"></div>
+                                        </form>
+                                        <h4>Checkbox group: inline</h4>
+                                        <form>
+                                            <div id="input-container-checkboxgroup-inline"></div>
+                                        </form>
+                                        <h4>Checkbox group: readonly</h4>
+                                        <form>
+                                            <div id="input-container-checkboxgroup-inline-readonly"></div>
+                                        </form>
+                                        <h4>Checkbox group: disabled</h4>
+                                        <form>
+                                            <div id="input-container-checkboxgroup-inline-disabled"></div>
+                                        </form>
                                     </div>
                                 </div>
 							</div>
-							<div role="tabpanel" class="tab-pane" id="boolcontrol">
+							<div role="tabpanel" class="tab-pane" id="datecontrol">
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <h3>Bool: default</h3>
-                                        <form><div id="input-container-bool"></div></form>
-                                        <h3>Bool: value = true</h3>
-                                        <form><div id="input-container-bool-value-true"></div></form>
-                                        <h3>Bool: value = false</h3>
-                                        <form><div id="input-container-bool-value-false"></div></form>
-                                        <h3>Bool: nillable</h3>
-                                        <form><div id="input-container-bool-nillable"></div></form>
-                                        <h3>Bool: nillable, value=null</h3>
-                                        <form><div id="input-container-bool-nillable-value"></div></form>
-                                        <h3>Bool: multiple</h3>
-                                        <form><div id="input-container-bool-multiple"></div></form>
-                                        <h3>Bool: multiple, value=[true,false]</h3>
-                                        <form><div id="input-container-bool-multiple-value"></div></form>
-                                        <h3>Bool: multiple, nillable</h3>
-                                        <form><div id="input-container-bool-multiple-nillable"></div></form>
-                                        <h3>Bool: multiple, nillable, value=[false,null]</h3>
-                                        <form><div id="input-container-bool-multiple-nillable-value"></div></form>
-                                        <h3>Bool: group layout</h3>
-                                        <form><div id="input-container-bool-group"></div></form>
-                                        <h3>Bool: group layout, value=true</h3>
-                                        <form><div id="input-container-bool-group-value"></div></form>
+                                        <h4>Date: date</h4>
+                                        <form>
+                                            <div id="input-container-date"></div>
+                                        </form>
+                                        <h4>Date: date, value</h4>
+                                        <form>
+                                            <div id="input-container-date-value"></div>
+                                        </form>
+                                        <h4>Date: placeholder</h4>
+                                        <form>
+                                            <div id="input-container-date-placeholder"></div>
+                                        </form>
+                                         <h4>Date: readonly</h4>
+                                        <form>
+                                            <div id="input-container-date-readonly"></div>
+                                        </form>
+                                        <h4>Date: disabled</h4>
+                                        <form>
+                                            <div id="input-container-date-disabled"></div>
+                                        </form>
+                                        <h4>Date: required</h4>
+                                        <form>
+                                            <div id="input-container-date-required"></div>
+                                        </form>
+                                        <h4>Date: datetime</h4>
+                                        <form>
+                                            <div id="input-container-datetime"></div>
+                                        </form>
+                                        <h4>Date: datetime, value</h4>
+                                        <form>
+                                            <div id="input-container-datetime-value"></div>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
-							<div role="tabpanel" class="tab-pane" id="enumcontrol">
+                            <div role="tabpanel" class="tab-pane" id="codeeditorcontrol">
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <div id="input-container"></div>
-                                        <div id="input-container-enum"></div>
+                                        <h4>Code editor: default</h4>
+                                        <form>
+                                            <div id="input-container-codeeditor"></div>
+                                        </form>
+                                        <h4>Code editor: value</h4>
+                                        <form>
+                                            <div id="input-container-codeeditor-value"></div>
+                                        </form>
+                                        <h4>Code editor: placeholder</h4>
+                                        <form>
+                                            <div id="input-container-codeeditor-placeholder"></div>
+                                        </form>
+                                        <h4>Code editor: readonly</h4>
+                                        <form>
+                                            <div id="input-container-codeeditor-readonly"></div>
+                                        </form>
+                                        <h4>Code editor: disabled</h4>
+                                        <form>
+                                            <div id="input-container-codeeditor-disabled"></div>
+                                        </form>
                                     </div>
                                 </div>
-                            </div>                                      
+                            </div>
+                            <div role="tabpanel" class="tab-pane" id="textcontrol">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h4>Text: default</h4>
+                                        <form>
+                                            <div id="input-container-text"></div>
+                                        </form>
+                                        <h4>Text: value</h4>
+                                        <form>
+                                            <div id="input-container-text-value"></div>
+                                        </form>
+                                        <h4>Text: placeholder</h4>
+                                        <form>
+                                            <div id="input-container-text-placeholder"></div>
+                                        </form>
+                                        <h4>Text: readonly</h4>
+                                        <form>
+                                            <div id="input-container-text-readonly"></div>
+                                        </form>
+                                        <h4>Text: disabled</h4>
+                                        <form>
+                                            <div id="input-container-text-disabled"></div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+							<div role="tabpanel" class="tab-pane" id="boolcontrol">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h4>Bool: required, default</h4>
+                                        <form><div id="input-container-bool"></div></form>
+                                        <h4>Bool: required, value = true</h4>
+                                        <form><div id="input-container-bool-value-true"></div></form>
+                                        <h4>Bool: required, value = false</h4>
+                                        <form><div id="input-container-bool-value-false"></div></form>
+                                        <h4>Bool: nillable</h4>
+                                        <form><div id="input-container-bool-nillable"></div></form>
+                                        <h4>Bool: nillable, value=null</h4>
+                                        <form><div id="input-container-bool-nillable-value"></div></form>
+                                        <h4>Bool: required, multiple</h4>
+                                        <form><div id="input-container-bool-multiple"></div></form>
+                                        <h4>Bool: required, multiple, value=[true,false]</h4>
+                                        <form><div id="input-container-bool-multiple-value"></div></form>
+                                        <h4>Bool: required, multiple, nillable</h4>
+                                        <form><div id="input-container-bool-multiple-nillable"></div></form>
+                                        <h4>Bool: required, multiple, nillable, value=[false,null]</h4>
+                                        <form><div id="input-container-bool-multiple-nillable-value"></div></form>
+                                        <h4>Bool: required, group layout</h4>
+                                        <form><div id="input-container-bool-group"></div></form>
+                                        <h4>Bool: required, group layout, value=true</h4>
+                                        <form><div id="input-container-bool-group-value"></div></form>
+                                    </div>
+                                </div>
+                            </div>                                  
 						</div>
 					</div>
 				</div>
 			</div>
-        <script id="attr-control-form-template" type="text/x-handlebars-template">
-        <form class="form-horizontal">
-            <div class="form-group">
-                <label for="something" class="col-md-4 control-label">{{name}}</label>
-                <div class="col-md-8" id="{{name}}-filter-container"></div>
-            </div>
-        </form>
-        </script>
+		</div>
 	</body>
 </html>
