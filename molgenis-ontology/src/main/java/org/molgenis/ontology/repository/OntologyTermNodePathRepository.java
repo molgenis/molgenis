@@ -1,16 +1,18 @@
 package org.molgenis.ontology.repository;
 
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.ontology.model.OntologyTermNodePathMetaData;
@@ -20,7 +22,7 @@ import org.semanticweb.owlapi.model.OWLClass;
 
 import com.google.common.collect.TreeTraverser;
 
-public class OntologyTermNodePathRepository implements Repository
+public class OntologyTermNodePathRepository extends AbstractRepository
 {
 	private final static String PSEUDO_ROOT_CLASS_LABEL = "top";
 	private final OntologyLoader ontologyLoader;
@@ -38,6 +40,7 @@ public class OntologyTermNodePathRepository implements Repository
 	{
 		final TreeTraverser<OWLClassContainer> traverser = new TreeTraverser<OWLClassContainer>()
 		{
+			@Override
 			public Iterable<OWLClassContainer> children(OWLClassContainer container)
 			{
 				int count = 0;
@@ -103,12 +106,6 @@ public class OntologyTermNodePathRepository implements Repository
 	}
 
 	@Override
-	public void close() throws IOException
-	{
-		// Do nothing
-	}
-
-	@Override
 	public String getName()
 	{
 		return OntologyTermNodePathMetaData.ENTITY_NAME;
@@ -117,23 +114,17 @@ public class OntologyTermNodePathRepository implements Repository
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		return OntologyTermNodePathMetaData.getEntityMetaData();
-	}
-
-	@Override
-	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public String getUrl()
-	{
-		throw new UnsupportedOperationException();
+		return OntologyTermNodePathMetaData.INSTANCE;
 	}
 
 	public Map<String, Map<String, String>> getReferenceIds()
 	{
 		return referenceIds;
+	}
+
+	@Override
+	public Set<RepositoryCapability> getCapabilities()
+	{
+		return Collections.emptySet();
 	}
 }

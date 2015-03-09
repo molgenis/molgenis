@@ -12,7 +12,7 @@ import java.io.StringReader;
 
 import org.apache.commons.io.IOUtils;
 import org.mockito.Mockito;
-import org.molgenis.data.Queryable;
+import org.molgenis.data.Repository;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.system.core.FreemarkerTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,9 +31,9 @@ public class RepositoryTemplateLoaderTest extends AbstractTestNGSpringContextTes
 	static class Config
 	{
 		@Bean
-		public Queryable repository()
+		public Repository repository()
 		{
-			return mock(Queryable.class);
+			return mock(Repository.class);
 		}
 
 		@Bean
@@ -44,7 +44,7 @@ public class RepositoryTemplateLoaderTest extends AbstractTestNGSpringContextTes
 	}
 
 	@Autowired
-	private Queryable repository;
+	private Repository repository;
 
 	@Autowired
 	private RepositoryTemplateLoader repositoryTemplateLoader;
@@ -57,17 +57,17 @@ public class RepositoryTemplateLoaderTest extends AbstractTestNGSpringContextTes
 	public void init()
 	{
 		template1 = new FreemarkerTemplate();
-		template1.setId(1234);
+		template1.setId("1234");
 		template1.setName("template1");
 		template1.setValue("template1\ncontents");
 
 		template1Modified = new FreemarkerTemplate();
-		template1Modified.setId(1234);
+		template1Modified.setId("1234");
 		template1Modified.setName("template1");
 		template1Modified.setValue("template1\nmodified contents");
 
 		template2 = new FreemarkerTemplate();
-		template2.setId(2345);
+		template2.setId("2345");
 		template2.setName("template2");
 		template2.setValue("template2\ncontents");
 	}

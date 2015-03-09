@@ -15,7 +15,7 @@
     <!-- More Project Information -->
     <name>Molgenis</name>
     <description>
-        MOLGENIS is an collaborative open source project on a mission to generate great software infrastructure for life
+        MOLGENIS is a collaborative open source project on a mission to generate great software infrastructure for life
         science research
     </description>
     <url>http://www.molgenis.org</url>
@@ -337,10 +337,6 @@
 							<systemProperty>
 								<name>molgenis.home</name>
 								<value>${user.home}${file.separator}.molgenis${file.separator}omx</value>
-							</systemProperty>
-							<systemProperty>
-								<name>log4j.configuration</name>
-								<value>log4j-molgenis.properties</value>
 							</systemProperty>
 						</systemProperties>
                         <webAppConfig>
@@ -706,5 +702,7 @@
         <module>molgenis-data-import</module>
         <module>molgenis-catalogue</module>
         <module>molgenis-data-mapper</module>
+        <module>molgenis-pathways</module>
+        <module>molgenis-data-rest-client</module>
     </modules>
 </project>

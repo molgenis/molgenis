@@ -13,11 +13,11 @@ import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntitiesValidator;
 import org.molgenis.framework.db.EntityImportReport;
+import org.molgenis.util.FileExtensionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Lists;
 
@@ -69,16 +69,20 @@ public class JpaImportService implements ImportService
 	@Override
 	public boolean canImport(File file, RepositoryCollection source)
 	{
-		String fileNameExtension = StringUtils.getFilenameExtension(file.getName());
-		if (GenericImporterExtensions.getJPA().contains(fileNameExtension.toLowerCase()))
+		String fileNameExtension = FileExtensionUtils.findExtensionFromPossibilities(file.getName(),
+				GenericImporterExtensions.getJPA());
+
+		if (!source.getEntityNames().iterator().hasNext()) return false;
+
+		if (null != fileNameExtension)
 		{
 			for (String entityName : source.getEntityNames())
 			{
-				if (targetCollection.getRepositoryByEntityName(entityName) != null) return true;
+				if (!targetCollection.hasRepository(entityName)) return false;
 			}
 		}
 
-		return false;
+		return true;
 	}
 
 	@Override

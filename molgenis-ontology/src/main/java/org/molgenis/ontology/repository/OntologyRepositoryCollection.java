@@ -3,10 +3,13 @@ package org.molgenis.ontology.repository;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.molgenis.data.DataService;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.FileRepositoryCollection;
@@ -51,8 +54,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 			throw new IllegalArgumentException("Not a obo.zip or owl.zip file [" + file.getName() + "]");
 		}
 
-		List<File> uploadedFiles;
-		uploadedFiles = ZipFileUtil.unzip(file);
+		List<File> uploadedFiles = ZipFileUtil.unzip(file);
 		OntologyLoader ontologyLoader = new OntologyLoader(name, uploadedFiles.get(0));
 
 		UuidGenerator uuidGenerator = new UuidGenerator();
@@ -69,7 +71,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 		repositories.put(OntologyTermNodePathMetaData.ENTITY_NAME, ontologyTermNodePathRepository);
 		repositories.put(OntologyMetaData.ENTITY_NAME, new OntologyRepository(ontologyLoader, uuidGenerator));
 		repositories.put(OntologyTermMetaData.ENTITY_NAME, new OntologyTermRepository(ontologyLoader, uuidGenerator,
-				ontologyTermDynamicAnnotationRepo, ontologyTermSynonymRepo, ontologyTermNodePathRepository));
+				ontologyTermDynamicAnnotationRepo, ontologyTermSynonymRepo, ontologyTermNodePathRepository, null));
 	}
 
 	@Override
@@ -79,9 +81,39 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	}
 
 	@Override
-	public Repository getRepositoryByEntityName(String name)
+	public String getName()
+	{
+		throw new NotImplementedException("Not implemented yet");
+	}
+
+	@Override
+	public Repository addEntityMeta(EntityMetaData entityMeta)
+	{
+		throw new NotImplementedException("Not implemented yet");
+	}
+
+	@Override
+	public Iterator<Repository> iterator()
+	{
+		throw new NotImplementedException("Not implemented yet");
+	}
+
+	@Override
+	public Repository getRepository(String name)
 	{
 		if (!repositories.containsKey(name)) throw new MolgenisDataException("Unknown entity name [" + name + "]");
 		return repositories.get(name);
+	}
+
+	@Override
+	public boolean hasRepository(String name)
+	{
+		if (null == name) return false;
+		Iterator<String> entityNames = getEntityNames().iterator();
+		while (entityNames.hasNext())
+		{
+			if (entityNames.next().equals(name)) return true;
+		}
+		return false;
 	}
 }

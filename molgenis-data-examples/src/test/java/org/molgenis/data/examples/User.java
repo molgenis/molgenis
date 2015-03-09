@@ -1,164 +1,74 @@
 package org.molgenis.data.examples;
 
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.util.List;
-
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.support.AbstractEntity;
+import org.molgenis.data.support.MapEntity;
 
 /**
  * Created by mswertz on 09/05/14.
  */
-public class User extends AbstractEntity implements Entity
+public class User extends MapEntity
 {
-	private String username;
-	private boolean active;
+	private static final long serialVersionUID = 1L;
 
-	public boolean isActive()
+	public User(String username, boolean active)
 	{
-		return active;
+		this();
+		setUsername(username);
+		setActive(active);
 	}
 
-	public void setActive(boolean active)
+	public User()
 	{
-		this.active = active;
+		super(UserMetaData.USERNAME);
 	}
 
 	public String getUsername()
 	{
-		return username;
+		return getString(UserMetaData.USERNAME);
 	}
 
 	public void setUsername(String username)
 	{
-		this.username = username;
+		set(UserMetaData.USERNAME, username);
+	}
+
+	public Boolean isActive()
+	{
+		return getBoolean(UserMetaData.ACTIVE);
+	}
+
+	public void setActive(Boolean active)
+	{
+		set(UserMetaData.ACTIVE, active);
 	}
 
 	@Override
-	public EntityMetaData getEntityMetaData()
+	public String toString()
 	{
-		return null;
+		return "User [username=" + getUsername() + ", active=" + isActive() + "]";
 	}
 
 	@Override
-	public Iterable<String> getAttributeNames()
+	public int hashCode()
 	{
-		return null;
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((getUsername() == null) ? 0 : getUsername().hashCode());
+		return result;
 	}
 
 	@Override
-	public Object getIdValue()
+	public boolean equals(Object obj)
 	{
-		return null;
+		if (this == obj) return true;
+		if (!super.equals(obj)) return false;
+		if (getClass() != obj.getClass()) return false;
+		User other = (User) obj;
+		if (getUsername() == null)
+		{
+			if (other.getUsername() != null) return false;
+		}
+		else if (!getUsername().equals(other.getUsername())) return false;
+		return true;
 	}
 
-	@Override
-	public String getLabelValue()
-	{
-		return null;
-	}
-
-	@Override
-	public List<String> getLabelAttributeNames()
-	{
-		return null;
-	}
-
-	@Override
-	public Object get(String attributeName)
-	{
-		return null;
-	}
-
-	@Override
-	public String getString(String attributeName)
-	{
-		return null;
-	}
-
-	@Override
-	public Integer getInt(String attributeName)
-	{
-		return null;
-	}
-
-	@Override
-	public Long getLong(String attributeName)
-	{
-		return null;
-	}
-
-	@Override
-	public Boolean getBoolean(String attributeName)
-	{
-		return null;
-	}
-
-	@Override
-	public Double getDouble(String attributeName)
-	{
-		return null;
-	}
-
-	@Override
-	public Date getDate(String attributeName)
-	{
-		return null;
-	}
-
-	@Override
-	public java.util.Date getUtilDate(String attributeName)
-	{
-		return null;
-	}
-
-	@Override
-	public Timestamp getTimestamp(String attributeName)
-	{
-		return null;
-	}
-
-	@Override
-	public Entity getEntity(String attributeName)
-	{
-		return null;
-	}
-
-	@Override
-	public Iterable<Entity> getEntities(String attributeName)
-	{
-		return null;
-	}
-
-	@Override
-	public List<String> getList(String attributeName)
-	{
-		return null;
-	}
-
-	@Override
-	public List<Integer> getIntList(String attributeName)
-	{
-		return null;
-	}
-
-	@Override
-	public void set(String attributeName, Object value)
-	{
-
-	}
-
-	@Override
-	public void set(Entity values)
-	{
-
-	}
-
-	@Override
-	public void set(Entity entity, boolean strict)
-	{
-
-	}
 }

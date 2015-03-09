@@ -14,7 +14,6 @@ import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.CrudRepositoryAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.ErrorMessageResponse;
@@ -63,9 +62,6 @@ public class AnnotatorController
 	EntityValidator entityValidator;
 
 	@Autowired
-	MysqlRepositoryCollection mysqlRepositoryCollection;
-
-	@Autowired
 	PermissionSystemService permissionSystemService;
 
 	/**
@@ -100,22 +96,22 @@ public class AnnotatorController
 			@RequestParam("dataset-identifier") String entityName,
 			@RequestParam(value = "createCopy", required = false) boolean createCopy)
 	{
-		Repository repository = dataService.getRepositoryByEntityName(entityName);
+		Repository repository = dataService.getRepository(entityName);
 		if (annotatorNames != null && repository != null)
 		{
-			CrudRepositoryAnnotator crudRepositoryAnnotator = new CrudRepositoryAnnotator(mysqlRepositoryCollection,
+			CrudRepositoryAnnotator crudRepositoryAnnotator = new CrudRepositoryAnnotator(dataService,
 					getNewRepositoryName(annotatorNames, repository.getEntityMetaData().getSimpleName()),
-					searchService, dataService, permissionSystemService);
+					permissionSystemService);
 
 			for (String annotatorName : annotatorNames)
 			{
 				RepositoryAnnotator annotator = annotationService.getAnnotatorByName(annotatorName);
 				if (annotator != null)
 				{
+					// running annotator
 					try
 					{
-						// running annotator
-						Repository repo = dataService.getRepositoryByEntityName(entityName);
+						Repository repo = dataService.getRepository(entityName);
 						repository = crudRepositoryAnnotator.annotate(annotator, repo, createCopy);
 						entityName = repository.getName();
 						createCopy = false;

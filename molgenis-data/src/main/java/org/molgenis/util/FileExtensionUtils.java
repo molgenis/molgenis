@@ -11,7 +11,7 @@ public class FileExtensionUtils
 	 * 
 	 * @param entity
 	 */
-	public static String findExtansionFromSetForGenericImporter(String fileName, Set<String> fileExtensions)
+	public static String findExtensionFromPossibilities(String fileName, Set<String> fileExtensions)
 	{
 		String name = fileName.toLowerCase();
 		List<String> possibleExtensions = new ArrayList<String>();
@@ -23,19 +23,20 @@ public class FileExtensionUtils
 			}
 		}
 
-		String longestExtention = null;
+		String longestExtension = null;
 		for (String possibleExtension : possibleExtensions)
 		{
-			if (null == longestExtention){
-				longestExtention = possibleExtension;
+			if (null == longestExtension)
+			{
+				longestExtension = possibleExtension;
 				continue;
 			}
 			else
 			{
-				if (longestExtention.length() < possibleExtension.length()) longestExtention = possibleExtension;
+				if (longestExtension.length() < possibleExtension.length()) longestExtension = possibleExtension;
 			}
 		}
 
-		return longestExtention;
+		return longestExtension;
 	}
 }

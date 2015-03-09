@@ -1,17 +1,19 @@
 package org.molgenis.ontology.repository;
 
-import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.UuidGenerator;
@@ -27,7 +29,7 @@ import org.semanticweb.owlapi.model.OWLClass;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
-public class OntologyTermRepository implements Repository
+public class OntologyTermRepository extends AbstractRepository
 {
 	private final OntologyLoader ontologyLoader;
 	private final DataService dataService;
@@ -40,11 +42,19 @@ public class OntologyTermRepository implements Repository
 	public OntologyTermRepository(OntologyLoader ontologyLoader, UuidGenerator uuidGenerator,
 			OntologyTermDynamicAnnotationRepository ontologyTermDynamicAnnotationRepo,
 			OntologyTermSynonymRepository ontologyTermSynonymRepo,
-			OntologyTermNodePathRepository ontologyTermNodePathRepository)
+			OntologyTermNodePathRepository ontologyTermNodePathRepository, DataService dataService)
 	{
+		if (null == dataService)
+		{
+			this.dataService = ApplicationContextProvider.getApplicationContext().getBean(DataService.class);
+		}
+		else
+		{
+			this.dataService = dataService;
+		}
+
 		this.ontologyLoader = ontologyLoader;
 		this.uuidGenerator = uuidGenerator;
-		this.dataService = ApplicationContextProvider.getApplicationContext().getBean(DataService.class);
 		this.ontologyTermDynamicAnnotationRepo = ontologyTermDynamicAnnotationRepo;
 		this.ontologyTermSynonymRepo = ontologyTermSynonymRepo;
 		this.ontologyTermNodePathRepository = ontologyTermNodePathRepository;
@@ -57,11 +67,13 @@ public class OntologyTermRepository implements Repository
 		{
 			private final Iterator<OWLClass> iterator = ontologyLoader.getAllclasses().iterator();
 
+			@Override
 			public boolean hasNext()
 			{
 				return iterator.hasNext();
 			}
 
+			@Override
 			public Entity next()
 			{
 				OWLClass cls = iterator.next();
@@ -69,20 +81,22 @@ public class OntologyTermRepository implements Repository
 				String ontologyTermIRI = cls.getIRI().toString();
 				String ontologyTermName = ontologyLoader.getLabel(cls);
 
-				Map<String, Map<String, String>> referenceIds2 = ontologyTermSynonymRepo.getReferenceIds();
+				Map<String, Map<String, String>> synonymRefIds = ontologyTermSynonymRepo.getReferenceIds();
 
-				Map<String, Map<String, String>> referenceIds3 = ontologyTermDynamicAnnotationRepo.getReferenceIds();
+				Map<String, Map<String, String>> annotationRefIds = ontologyTermDynamicAnnotationRepo.getReferenceIds();
 
-				Map<String, Map<String, String>> referenceIds4 = ontologyTermNodePathRepository.getReferenceIds();
+				Map<String, Map<String, String>> nodePathRefIds = ontologyTermNodePathRepository.getReferenceIds();
 
-				Collection<String> synonymIds = ontologyTermSynonymRepo.getReferenceIds().containsKey(ontologyTermIRI) ? referenceIds2
-						.get(ontologyTermIRI).values() : Collections.emptySet();
+				List<String> synonymIds = ontologyTermSynonymRepo.getReferenceIds().containsKey(ontologyTermIRI) ? Lists
+						.newArrayList(synonymRefIds.get(ontologyTermIRI).values()) : Arrays.asList();
 
-				Collection<String> annotationIds = ontologyTermDynamicAnnotationRepo.getReferenceIds().containsKey(
-						ontologyTermIRI) ? referenceIds3.get(ontologyTermIRI).values() : Collections.emptySet();
+				List<String> annotationIds = ontologyTermDynamicAnnotationRepo.getReferenceIds().containsKey(
+						ontologyTermIRI) ? Lists.newArrayList(annotationRefIds.get(ontologyTermIRI).values()) : Arrays
+						.asList();
 
-				Collection<String> nodePathIds = ontologyTermNodePathRepository.getReferenceIds().containsKey(
-						ontologyTermIRI) ? referenceIds4.get(ontologyTermIRI).values() : Collections.emptySet();
+				List<String> nodePathIds = ontologyTermNodePathRepository.getReferenceIds()
+						.containsKey(ontologyTermIRI) ? Lists
+						.newArrayList(nodePathRefIds.get(ontologyTermIRI).values()) : Arrays.asList();
 
 				if (!referenceIds.containsKey(ontologyTermIRI))
 				{
@@ -116,7 +130,7 @@ public class OntologyTermRepository implements Repository
 		return Lists.newArrayList(ontologyTermNodePathEntities);
 	}
 
-	private List<Entity> getOntologyTermDynamicAnnotationEntities(Collection<String> annotationIds)
+	private List<Entity> getOntologyTermDynamicAnnotationEntities(List<String> annotationIds)
 	{
 		Iterable<Entity> ontologyTermDynamicAnnotationEntities = dataService.findAll(
 				OntologyTermDynamicAnnotationMetaData.ENTITY_NAME,
@@ -129,7 +143,7 @@ public class OntologyTermRepository implements Repository
 		return Lists.newArrayList(ontologyTermDynamicAnnotationEntities);
 	}
 
-	private List<Entity> getSynonymEntities(Collection<String> synonymIds)
+	private List<Entity> getSynonymEntities(List<String> synonymIds)
 	{
 		Iterable<Entity> ontologyTermSynonymEntities = dataService.findAll(OntologyTermSynonymMetaData.ENTITY_NAME,
 				new QueryImpl().in(OntologyMetaData.ID, synonymIds));
@@ -153,12 +167,6 @@ public class OntologyTermRepository implements Repository
 	}
 
 	@Override
-	public void close() throws IOException
-	{
-		// Do nothing
-	}
-
-	@Override
 	public String getName()
 	{
 		return OntologyTermMetaData.ENTITY_NAME;
@@ -167,18 +175,12 @@ public class OntologyTermRepository implements Repository
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		return OntologyTermMetaData.getEntityMetaData();
+		return OntologyTermMetaData.INSTANCE;
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
+	public Set<RepositoryCapability> getCapabilities()
 	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public String getUrl()
-	{
-		throw new UnsupportedOperationException();
+		return Collections.emptySet();
 	}
 }

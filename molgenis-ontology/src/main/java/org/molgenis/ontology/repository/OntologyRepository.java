@@ -1,18 +1,20 @@
 package org.molgenis.ontology.repository;
 
-import java.io.IOException;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.ontology.model.OntologyMetaData;
 import org.molgenis.ontology.utils.OntologyLoader;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
-public class OntologyRepository implements Repository
+public class OntologyRepository extends AbstractRepository
 {
 	private final OntologyLoader ontologyLoader;
 	private final String ontologyId;
@@ -57,18 +59,6 @@ public class OntologyRepository implements Repository
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public String getUrl()
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public String getName()
 	{
 		return OntologyMetaData.ENTITY_NAME;
@@ -77,12 +67,13 @@ public class OntologyRepository implements Repository
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		return OntologyMetaData.getEntityMetaData();
+		return OntologyMetaData.INSTANCE;
 	}
 
 	@Override
-	public void close() throws IOException
+	public Set<RepositoryCapability> getCapabilities()
 	{
-		// TODO Auto-generated method stub
+		return Collections.emptySet();
 	}
+
 }

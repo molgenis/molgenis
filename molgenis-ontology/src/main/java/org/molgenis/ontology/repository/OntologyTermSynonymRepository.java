@@ -1,20 +1,22 @@
 package org.molgenis.ontology.repository;
 
-import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.ontology.model.OntologyTermSynonymMetaData;
 import org.molgenis.ontology.utils.OntologyLoader;
 import org.semanticweb.owlapi.model.OWLClass;
 
-public class OntologyTermSynonymRepository implements Repository
+public class OntologyTermSynonymRepository extends AbstractRepository
 {
 	private final OntologyLoader ontologyLoader;
 	private final UuidGenerator uuidGenerator;
@@ -77,12 +79,6 @@ public class OntologyTermSynonymRepository implements Repository
 	}
 
 	@Override
-	public void close() throws IOException
-	{
-		// Nothing
-	}
-
-	@Override
 	public String getName()
 	{
 		return OntologyTermSynonymMetaData.ENTITY_NAME;
@@ -91,23 +87,18 @@ public class OntologyTermSynonymRepository implements Repository
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		return OntologyTermSynonymMetaData.getEntityMetaData();
-	}
-
-	@Override
-	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public String getUrl()
-	{
-		throw new UnsupportedOperationException();
+		return OntologyTermSynonymMetaData.INSTANCE;
 	}
 
 	public Map<String, Map<String, String>> getReferenceIds()
 	{
 		return referenceIds;
 	}
+
+	@Override
+	public Set<RepositoryCapability> getCapabilities()
+	{
+		return Collections.emptySet();
+	}
+
 }

@@ -13,7 +13,6 @@ import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.FileField;
 import org.molgenis.fieldtypes.ImageField;
-import org.molgenis.fieldtypes.IntField;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.model.MolgenisModelException;
@@ -312,7 +311,7 @@ public class GeneratorHelper
 
 	private boolean isAutoId(Field f, Entity e)
 	{
-		return f.getType() instanceof IntField && f.isAuto();
+		return f.isAuto();
 		// SOLVED BY TRIGGERS && f.getEntity() == e;
 	}
 

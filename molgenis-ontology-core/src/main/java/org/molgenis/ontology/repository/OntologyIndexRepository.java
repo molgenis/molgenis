@@ -1,16 +1,19 @@
 package org.molgenis.ontology.repository;
 
-import java.io.File;
-import java.util.Iterator;
 
-import org.molgenis.data.Countable;
+import java.io.File;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Set;
+
 import org.molgenis.data.Entity;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.elasticsearch.util.MapperTypeSanitizer;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.ontology.utils.OntologyLoader;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
-public class OntologyIndexRepository extends AbstractOntologyRepository implements Countable
+public class OntologyIndexRepository extends AbstractOntologyRepository
 {
 	public final static String TYPE_ONTOLOGY = "indexedOntology";
 	private OntologyLoader ontologyLoader;
@@ -67,21 +70,16 @@ public class OntologyIndexRepository extends AbstractOntologyRepository implemen
 		};
 	}
 
+	@Override
 	public long count()
 	{
 		return 1;
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
+	public Set<RepositoryCapability> getCapabilities()
 	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public String getUrl()
-	{
-		throw new UnsupportedOperationException();
+		return Collections.emptySet();
 	}
 
 	/**

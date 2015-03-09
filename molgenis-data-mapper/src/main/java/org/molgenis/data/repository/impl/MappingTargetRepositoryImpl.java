@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -25,18 +24,16 @@ public class MappingTargetRepositoryImpl implements MappingTargetRepository
 {
 	public static final EntityMetaData META_DATA = new MappingTargetMetaData();
 
-	private final CrudRepository repository;
 	@Autowired
 	private IdGenerator idGenerator;
 
-	private EntityMappingRepository entityMappingRepository;
+	private final EntityMappingRepository entityMappingRepository;
 
 	@Autowired
 	private DataService dataService;
 
-	public MappingTargetRepositoryImpl(CrudRepository repository, EntityMappingRepository entityMappingRepository)
+	public MappingTargetRepositoryImpl(EntityMappingRepository entityMappingRepository)
 	{
-		this.repository = repository;
 		this.entityMappingRepository = entityMappingRepository;
 	}
 
@@ -54,12 +51,12 @@ public class MappingTargetRepositoryImpl implements MappingTargetRepository
 		{
 			mappingTarget.setIdentifier(idGenerator.generateId().toString());
 			mappingTargetEntity = toMappingTargetEntity(mappingTarget, entityMappingEntities);
-			repository.add(mappingTargetEntity);
+			dataService.add(MappingTargetRepositoryImpl.META_DATA.getName(), mappingTargetEntity);
 		}
 		else
 		{
 			mappingTargetEntity = toMappingTargetEntity(mappingTarget, entityMappingEntities);
-			repository.update(mappingTargetEntity);
+			dataService.update(MappingTargetRepositoryImpl.META_DATA.getName(), mappingTargetEntity);
 		}
 		return mappingTargetEntity;
 	}

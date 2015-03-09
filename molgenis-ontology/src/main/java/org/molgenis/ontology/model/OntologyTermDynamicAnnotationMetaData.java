@@ -1,11 +1,10 @@
 package org.molgenis.ontology.model;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 
-public class OntologyTermDynamicAnnotationMetaData
+public class OntologyTermDynamicAnnotationMetaData extends DefaultEntityMetaData
 {
 	public final static String ID = "id";
 	public final static String NAME = "name";
@@ -14,30 +13,16 @@ public class OntologyTermDynamicAnnotationMetaData
 	public final static String SIMPLE_NAME = "OntologyTermDynamicAnnotation";
 	public final static String ENTITY_NAME = OntologyPackage.PACKAGE_NAME + "_" + SIMPLE_NAME;
 
-	public static EntityMetaData getEntityMetaData()
+	public final static OntologyTermDynamicAnnotationMetaData INSTANCE = new OntologyTermDynamicAnnotationMetaData();
+
+	private OntologyTermDynamicAnnotationMetaData()
 	{
-		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData(SIMPLE_NAME,
-				OntologyPackage.getPackageInstance());
+		super(SIMPLE_NAME, OntologyPackage.getPackageInstance());
 
-		DefaultAttributeMetaData idAttr = new DefaultAttributeMetaData(ID);
-		idAttr.setIdAttribute(true);
-		idAttr.setNillable(false);
-		idAttr.setVisible(false);
-		entityMetaData.addAttributeMetaData(idAttr);
-
-		DefaultAttributeMetaData nameAttr = new DefaultAttributeMetaData(NAME, FieldTypeEnum.STRING);
-		nameAttr.setNillable(false);
-		entityMetaData.addAttributeMetaData(nameAttr);
-
-		DefaultAttributeMetaData valueAttr = new DefaultAttributeMetaData(VALUE, FieldTypeEnum.STRING);
-		valueAttr.setNillable(false);
-		entityMetaData.addAttributeMetaData(valueAttr);
-
-		DefaultAttributeMetaData labelAttr = new DefaultAttributeMetaData(LABEL, FieldTypeEnum.STRING);
-		labelAttr.setNillable(false);
-		labelAttr.setLabelAttribute(true);
-		entityMetaData.addAttributeMetaData(labelAttr);
-
-		return entityMetaData;
+		addAttributeMetaData(new DefaultAttributeMetaData(ID).setIdAttribute(true).setNillable(false).setVisible(false));
+		addAttributeMetaData(new DefaultAttributeMetaData(NAME, FieldTypeEnum.STRING).setNillable(false));
+		addAttributeMetaData(new DefaultAttributeMetaData(VALUE, FieldTypeEnum.STRING).setNillable(false));
+		addAttributeMetaData(new DefaultAttributeMetaData(LABEL, FieldTypeEnum.STRING).setNillable(false)
+				.setLabelAttribute(true));
 	}
 }

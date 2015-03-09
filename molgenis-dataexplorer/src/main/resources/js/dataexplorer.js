@@ -63,7 +63,11 @@ function($, molgenis, settingsXhr) {
 	 * @memberOf molgenis.dataexplorer
 	 */
 	function getEntityQuery() {
-		return state.query || { q: [] };
+		// N.B. There's a translation step between the query in the state, which is also shown on screen
+		// ("SEARCH 1:10050001") and the actual entity query which is used when retrieving data
+		// (CHROM = 1 AND POS = 1005001)
+		// So here we should return the *translated* query.
+		return createEntityQuery();
 	}
 	
 	/**
@@ -492,7 +496,7 @@ function($, molgenis, settingsXhr) {
 				for (var i = 0; i < state.query.q.length; ++i) {
 					var rule = state.query.q[i];
 					if(rule.field === undefined && rule.operator === 'SEARCH') {
-						$('#observationset-search').val(rule.value);
+						$('#observationset-search').val(rule.value).change();
 						break;
 					}
 				}

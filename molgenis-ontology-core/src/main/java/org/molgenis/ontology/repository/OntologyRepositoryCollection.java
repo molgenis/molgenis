@@ -3,8 +3,11 @@ package org.molgenis.ontology.repository;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
+import org.apache.poi.ss.formula.eval.NotImplementedException;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.FileRepositoryCollection;
@@ -40,8 +43,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 
 		try
 		{
-			List<File> uploadedFiles;
-			uploadedFiles = ZipFileUtil.unzip(file);
+			List<File> uploadedFiles = ZipFileUtil.unzip(file);
 			this.ontologyRepository = new OntologyIndexRepository(uploadedFiles.get(0), this.entityName);
 		}
 		catch (OWLOntologyCreationException e)
@@ -60,18 +62,48 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 		return Collections.singleton(entityName);
 	}
 
-	@Override
-	public Repository getRepositoryByEntityName(String name)
-	{
-		if (!entityName.equals(name)) throw new MolgenisDataException("Unknown entity name [" + name + "]");
-		return this.ontologyRepository;
-	}
-
 	/**
 	 * @return the ontologyRepository
 	 */
 	public OntologyIndexRepository getOntologyRepository()
 	{
 		return ontologyRepository;
+	}
+
+	@Override
+	public String getName()
+	{
+		throw new NotImplementedException("Not implemented yet");
+	}
+
+	@Override
+	public Repository addEntityMeta(EntityMetaData entityMeta)
+	{
+		throw new NotImplementedException("Not implemented yet");
+	}
+
+	@Override
+	public Iterator<Repository> iterator()
+	{
+		throw new NotImplementedException("Not implemented yet");
+	}
+
+	@Override
+	public Repository getRepository(String name)
+	{
+		if (!entityName.equals(name)) throw new MolgenisDataException("Unknown entity name [" + name + "]");
+		return this.ontologyRepository;
+	}
+
+	@Override
+	public boolean hasRepository(String name)
+	{
+		if (null == name) return false;
+		Iterator<String> entityNames = getEntityNames().iterator();
+		while (entityNames.hasNext())
+		{
+			if (entityNames.next().equals(name)) return true;
+		}
+		return false;
 	}
 }

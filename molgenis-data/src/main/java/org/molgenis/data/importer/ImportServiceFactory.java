@@ -38,29 +38,25 @@ public class ImportServiceFactory
 	 */
 	public ImportService getImportService(File file, RepositoryCollection source)
 	{
-		final Map<String, ImportService> importServicesImportableMapedToExtentions = Maps.newHashMap();
+		final Map<String, ImportService> importServicesImportableMapedToExtensions = Maps.newHashMap();
 		for (ImportService importService : importServices)
 		{
 			if (importService.canImport(file, source))
 			{
 				for (String extension : importService.getSupportedFileExtensions())
 				{
-					importServicesImportableMapedToExtentions.put(extension.toLowerCase(), importService);
+					importServicesImportableMapedToExtensions.put(extension.toLowerCase(), importService);
 				}
 			}
 		}
 
-		String extension = FileExtensionUtils.findExtansionFromSetForGenericImporter(file.getName(),
-				importServicesImportableMapedToExtentions.keySet());
+		String extension = FileExtensionUtils.findExtensionFromPossibilities(file.getName(),
+				importServicesImportableMapedToExtensions.keySet());
 
-		final ImportService importService = importServicesImportableMapedToExtentions.get(extension);
-
-		System.out.println("extension: " + extension);
+		final ImportService importService = importServicesImportableMapedToExtensions.get(extension);
 
 		if (importService == null)
 			throw new MolgenisDataException("Can not import file. No suitable importer found");
-
-		System.out.println("SupportedFileExtensions" + importService.getSupportedFileExtensions());
 
 		return importService;
 	}

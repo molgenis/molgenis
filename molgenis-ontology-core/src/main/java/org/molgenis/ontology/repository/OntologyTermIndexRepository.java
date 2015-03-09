@@ -8,7 +8,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.data.Entity;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.ontology.beans.OWLClassContainer;
 import org.molgenis.ontology.utils.OntologyLoader;
@@ -230,14 +232,15 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
+	public Set<RepositoryCapability> getCapabilities()
 	{
-		throw new UnsupportedOperationException();
+		return Collections.emptySet();
 	}
 
 	@Override
-	public String getUrl()
+	public long count()
 	{
-		throw new UnsupportedOperationException();
+		return Iterables.size(this);
 	}
+
 }
