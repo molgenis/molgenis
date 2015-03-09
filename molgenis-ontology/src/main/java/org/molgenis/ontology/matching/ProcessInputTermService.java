@@ -57,7 +57,6 @@ public class ProcessInputTermService
 	public void process(SecurityContext securityContext, MolgenisUser molgenisUser, String entityName,
 			String ontologyIri, File uploadFile, RepositoryCollection repositoryCollection)
 	{
-		// TODO : FIXIME, use standard dataservice to add metadata and data
 		String userName = molgenisUser.getUsername();
 		uploadProgress.registerUser(userName, entityName);
 		// Add the original input dataset to database
@@ -76,29 +75,30 @@ public class ProcessInputTermService
 		dataService.add(MatchingTaskEntityMetaData.ENTITY_NAME, mapEntity);
 		dataService.getRepository(MatchingTaskEntityMetaData.ENTITY_NAME).flush();
 		uploadProgress.registerUser(userName, entityName, (int) dataService.count(entityName, new QueryImpl()));
-		// Match input terms with code
-		Iterable<Entity> findAll = dataService.findAll(entityName);
 		try
 		{
+			// Match input terms with code
 			List<Entity> entitiesToAdd = new ArrayList<Entity>();
-			for (Entity entity : findAll)
+			for (Entity entity : dataService.findAll(entityName))
 			{
+				MapEntity matchingTaskContentEntity = new MapEntity();
+				matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.INPUT_TERM, entity.getIdValue());
+				matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.IDENTIFIER,
+						entityName + "_" + entity.getIdValue());
+				matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.REF_ENTITY, entityName);
+				entitiesToAdd.add(matchingTaskContentEntity);
+				
 				OntologyServiceResult searchEntity = ontologyService.searchEntity(ontologyIri, entity);
-				for (Map<String, Object> ontologyTerm : searchEntity.getOntologyTerms())
+				if (searchEntity.getOntologyTerms().size() > 0)
 				{
-					MapEntity matchingTaskContentEntity = new MapEntity();
-					matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.IDENTIFIER, entityName + "_"
-							+ entity.getIdValue());
-					matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.INPUT_TERM, entity.getIdValue());
-					matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.REF_ENTITY, entityName);
+					Map<String, Object> firstMatchedOntologyTerm = searchEntity.getOntologyTerms().get(0);
 					matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.MATCHED_TERM,
-							ontologyTerm.get(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI));
+							firstMatchedOntologyTerm.get(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI));
 					matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.SCORE,
-							ontologyTerm.get(OntologyMatchingServiceImpl.SCORE));
+							firstMatchedOntologyTerm.get(OntologyMatchingServiceImpl.SCORE));
 					matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.VALIDATED, false);
-					entitiesToAdd.add(matchingTaskContentEntity);
-					break;
 				}
+
 				// Add entity in batch
 				if (entitiesToAdd.size() >= ADD_BATCH_SIZE)
 				{
@@ -133,10 +133,6 @@ public class ProcessInputTermService
 			auth = new UsernamePasswordAuthenticationToken(auth.getPrincipal(), null, roles);
 			securityContext.setAuthentication(auth);
 
-		}
-		catch (Exception e)
-		{
-			throw new RuntimeException(e.getMessage());
 		}
 		finally
 		{
