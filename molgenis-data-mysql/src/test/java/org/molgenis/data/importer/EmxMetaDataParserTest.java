@@ -47,6 +47,7 @@ public class EmxMetaDataParserTest extends AbstractTestNGSpringContextTests
 		metaDataService = mock(MetaDataService.class);
 		parser = new EmxMetaDataParser(dataService);
 		when(metaDataService.getEntityMetaDatas()).thenReturn(ImmutableList.<EntityMetaData> of());
+		when(dataService.getMeta()).thenReturn(metaDataService);
 	}
 
 	@Test

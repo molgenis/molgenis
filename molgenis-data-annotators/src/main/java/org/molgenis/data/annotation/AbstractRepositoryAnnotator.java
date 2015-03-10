@@ -63,16 +63,16 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 	/**
 	 * Checks if folder and files that were set with a runtime property actually exist, or if a webservice can be
 	 * reached
-	 * 
+	 *
 	 * @return boolean
-	 * */
+	 */
 	protected abstract boolean annotationDataExists();
 
 	@Override
 	@Transactional
 	public Iterator<Entity> annotate(final Iterable<Entity> sourceIterable)
 	{
-        Iterator<Entity> source = sourceIterable.iterator();
+		Iterator<Entity> source = sourceIterable.iterator();
 		return new Iterator<Entity>()
 		{
 			int current = 0;
@@ -146,9 +146,9 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 		return resultEntity;
 	}
 
-    @Override
+	@Override
 	public String getFullName()
-    {
-        return RepositoryAnnotator.ANNOTATOR_PREFIX + getSimpleName();
-    }
+	{
+		return RepositoryAnnotator.ANNOTATOR_PREFIX + getSimpleName();
+	}
 }
