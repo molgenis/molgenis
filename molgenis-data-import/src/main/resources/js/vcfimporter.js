@@ -28,5 +28,4 @@
 				});
 			}
 		});
-	});
 }($, window.top.molgenis = window.top.molgenis || {}));
