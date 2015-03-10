@@ -89,6 +89,7 @@ Add user and database properties to this file, such as this example:
     db_uri=jdbc:mysql://localhost/omx
     admin.password=admin
     user.password=admin
+    vkgl.basedir=<PATH_TO_FOLDER_TO_SHARE>
 
 If these properties are not present, the MolgenisDatabasePopulator will fail (RuntimeException). This properties-file should be in your home folder, if the file is not there yet, just create it.
 
@@ -111,7 +112,11 @@ Open your browser at http://localhost:8080/
 
 You should see the application. Login as 'admin', 'admin' to be able to upload and view data, create users, etc etc.
 
-## 9. Keep your code up to date
+## 9.
+Use the MOLGENIS upload feature to upload the look up tables for the build specific genesymbol to genomic positions support.
+These tables can be found at: https://www.dropbox.com/sh/9vluea785vk1e1x/AAAmbjVJTE0ljyslJUzpk2qka?dl=0
+
+## 10. Keep your code up to date
 
 Add the original molgenis repository as a remote location.
 
