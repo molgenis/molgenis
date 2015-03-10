@@ -62,7 +62,7 @@ public class EmxImportService implements ImportService
 	{
 		// entity is importable if entity name is the simple name of an existing entity,
 		// and only one entity with this simple name exists
-		List<EntityMetaData> entityMetaDatas = new ArrayList<EntityMetaData>();
+		List<EntityMetaData> entityMetaDatas = new ArrayList<>();
 		for (EntityMetaData entityMetaData : dataService.getMeta().getEntityMetaDatas())
 		{
 			if (entityName.equals(entityMetaData.getSimpleName()))
