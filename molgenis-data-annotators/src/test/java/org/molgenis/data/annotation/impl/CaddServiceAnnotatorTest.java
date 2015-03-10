@@ -167,7 +167,7 @@ public class CaddServiceAnnotatorTest
 		Entity expectedEntity = new MapEntity(resultMap);
 		expectedList.add(expectedEntity);
 
-		Iterator<Entity> results = annotator.annotate(input1.iterator());
+		Iterator<Entity> results = annotator.annotate(input1);
 		Entity resultEntity = results.next();
 
 		assertEquals(resultEntity.get(CaddServiceAnnotator.CADD_ABS), expectedEntity.get(CaddServiceAnnotator.CADD_ABS));
@@ -184,7 +184,7 @@ public class CaddServiceAnnotatorTest
 		Entity expectedEntity = new MapEntity(resultMap);
 		expectedList.add(expectedEntity);
 
-		Iterator<Entity> results = annotator.annotate(input2.iterator());
+		Iterator<Entity> results = annotator.annotate(input2);
 		Entity resultEntity = results.next();
 
 		assertEquals(resultEntity.get(CaddServiceAnnotator.CADD_ABS), expectedEntity.get(CaddServiceAnnotator.CADD_ABS));
@@ -204,7 +204,7 @@ public class CaddServiceAnnotatorTest
 		Entity expectedEntity = new MapEntity(resultMap);
 		expectedList.add(expectedEntity);
 
-		Iterator<Entity> results = annotator.annotate(input3.iterator());
+		Iterator<Entity> results = annotator.annotate(input3);
 		Entity resultEntity = results.next();
 
 		assertEquals(resultEntity.get(CaddServiceAnnotator.CADD_ABS), expectedEntity.get(CaddServiceAnnotator.CADD_ABS));
@@ -224,7 +224,7 @@ public class CaddServiceAnnotatorTest
 		Entity expectedEntity = new MapEntity(resultMap);
 		expectedList.add(expectedEntity);
 
-		Iterator<Entity> results = annotator.annotate(input4.iterator());
+		Iterator<Entity> results = annotator.annotate(input4);
 		Entity resultEntity = results.next();
 
 		assertEquals(resultEntity.get(CaddServiceAnnotator.CADD_ABS), expectedEntity.get(CaddServiceAnnotator.CADD_ABS));

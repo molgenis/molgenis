@@ -17,6 +17,7 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.security.permission.PermissionSystemService;
+import org.molgenis.security.user.UserAccountService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,18 +26,20 @@ import org.springframework.transaction.annotation.Transactional;
 public class CrudRepositoryAnnotator
 {
 	private static final Logger LOG = LoggerFactory.getLogger(CrudRepositoryAnnotator.class);
-	private static final int BATCH_SIZE = 50;
+	private static final int BATCH_SIZE = 100;
 
 	private final String newRepositoryLabel;
 	private final DataService dataService;
 	private final PermissionSystemService permissionSystemService;
+	private final UserAccountService userAccountService;
 
 	public CrudRepositoryAnnotator(DataService dataService, String newRepositoryName,
-			PermissionSystemService permissionSystemService)
+			PermissionSystemService permissionSystemService, UserAccountService userAccountService)
 	{
 		this.dataService = dataService;
 		this.newRepositoryLabel = newRepositoryName;
 		this.permissionSystemService = permissionSystemService;
+		this.userAccountService = userAccountService;
 	}
 
 	/**
@@ -57,9 +60,7 @@ public class CrudRepositoryAnnotator
 	 * @param annotator
 	 * @param sourceRepo
 	 * @param createCopy
-	 * 
-	 * 
-	 * */
+	 */
 	@Transactional
 	public Repository annotate(RepositoryAnnotator annotator, Repository sourceRepo, boolean createCopy)
 			throws IOException
@@ -72,8 +73,8 @@ public class CrudRepositoryAnnotator
 		if (createCopy) LOG.info("Creating a copy of " + sourceRepo.getName() + " repository, which will be labelled "
 				+ newRepositoryLabel + ". A UUID will be generated for the name/identifier");
 
-		if (!createCopy) LOG.info("Annotating " + sourceRepo.getName() + " repository with the "
-				+ annotator.getSimpleName() + " annotator");
+		LOG.info("Started annotating \"" + sourceRepo.getName() + "\" with the " + annotator.getSimpleName()
+				+ " annotator (started by \"" + userAccountService.getCurrentUser().getUsername() + "\")");
 
 		EntityMetaData entityMetaData = sourceRepo.getEntityMetaData();
 		DefaultAttributeMetaData compoundAttributeMetaData = getCompoundResultAttribute(annotator, entityMetaData);
@@ -83,8 +84,8 @@ public class CrudRepositoryAnnotator
 
 		Repository crudRepository = iterateOverEntitiesAndAnnotate(sourceRepo, targetRepo, annotator);
 
-		LOG.info("Finished annotating " + sourceRepo.getName() + " with the " + annotator.getSimpleName()
-				+ " annotator");
+		LOG.info("Finished annotating \"" + sourceRepo.getName() + "\" with the " + annotator.getSimpleName()
+				+ " annotator (started by \"" + userAccountService.getCurrentUser().getUsername() + "\")");
 
 		return crudRepository;
 	}
@@ -95,29 +96,37 @@ public class CrudRepositoryAnnotator
 	private Repository iterateOverEntitiesAndAnnotate(Repository sourceRepo, Repository targetRepo,
 			RepositoryAnnotator annotator)
 	{
-		Iterator<Entity> entityIterator = annotator.annotate(sourceRepo.iterator());
+		Iterator<Entity> entityIterator = annotator.annotate(sourceRepo);
 		List<Entity> annotatedEntities = new ArrayList<>();
+		int i = 0;
 
 		if (targetRepo == null)
 		{
 			// annotate repository to itself
-			Repository annotatedSourceRepository = sourceRepo;
 			while (entityIterator.hasNext())
 			{
 				Entity entity = entityIterator.next();
 				annotatedEntities.add(entity);
-				if (annotatedEntities.size() > BATCH_SIZE)
+				if (annotatedEntities.size() == BATCH_SIZE)
 				{
-					annotatedSourceRepository.update(annotatedEntities);
+					dataService.update(sourceRepo.getName(), annotatedEntities);
+					i = i + annotatedEntities.size();
+					LOG.info("annotated " + i + " \"" + sourceRepo.getName() + "\" entities with the "
+							+ annotator.getSimpleName() + " annotator (started by \""
+							+ userAccountService.getCurrentUser().getUsername() + "\")");
 					annotatedEntities.clear();
 				}
 			}
 			if (annotatedEntities.size() > 0)
 			{
-				annotatedSourceRepository.update(annotatedEntities);
+				dataService.update(sourceRepo.getName(), annotatedEntities);
+				i = i + annotatedEntities.size();
+				LOG.info("annotated " + i + " \"" + sourceRepo.getName() + "\" entities with the "
+						+ annotator.getSimpleName() + " annotator (started by \""
+						+ userAccountService.getCurrentUser().getUsername() + "\")");
 				annotatedEntities.clear();
 			}
-			return annotatedSourceRepository;
+			return dataService.getRepository(sourceRepo.getName());
 		}
 		else
 		{
@@ -126,15 +135,23 @@ public class CrudRepositoryAnnotator
 			{
 				Entity entity = entityIterator.next();
 				annotatedEntities.add(entity);
-				if (annotatedEntities.size() > BATCH_SIZE)
+				if (annotatedEntities.size() == BATCH_SIZE)
 				{
 					targetRepo.add(annotatedEntities);
+					i = i + annotatedEntities.size();
+					LOG.info("annotated " + i + " \"" + sourceRepo.getName() + "\" entities with the "
+							+ annotator.getSimpleName() + " annotator (started by \""
+							+ userAccountService.getCurrentUser().getUsername() + "\")");
 					annotatedEntities.clear();
 				}
 			}
 			if (annotatedEntities.size() > 0)
 			{
-				targetRepo.add(annotatedEntities);
+				dataService.add(targetRepo.getName(), annotatedEntities);
+				i = i + annotatedEntities.size();
+				LOG.info("annotated " + i + " \"" + sourceRepo.getName() + "\" entities with the "
+						+ annotator.getSimpleName() + " annotator (started by \""
+						+ userAccountService.getCurrentUser().getUsername() + "\")");
 				annotatedEntities.clear();
 			}
 			return targetRepo;
@@ -145,7 +162,7 @@ public class CrudRepositoryAnnotator
 	 * Adds a new compound attribute to an existing mysql CrudRepository which is part of the
 	 * {@link #mysqlRepositoryCollection} or an existing CrudRepository which is not part of
 	 * {@link #mysqlRepositoryCollection}.
-	 * 
+	 *
 	 * @param entityMetaData
 	 *            {@link EntityMetaData} for the existing repository
 	 * @param createCopy
