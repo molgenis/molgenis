@@ -100,7 +100,7 @@ public class VcfRepository extends AbstractRepository
 			private int numberOfSamples;
 			Iterator<VcfSample> sampleIterator = null;
 			String reference;
-			int row;
+		
 
 			@Override
 			public boolean hasNext()
@@ -118,11 +118,7 @@ public class VcfRepository extends AbstractRepository
 				{
 					// Set the next vcfRecord
 					vcfRecord = vcfRecordIterator.next();
-					row++;
-					if (row % 500 == 0)
-					{
-						System.out.println("processing row: " + row);
-					}
+					
 					// If there are no samples it will not pass this filter
 					numberOfSamples = vcfRecord.getNrSamples();
 					if (numberOfSamples == 0)
@@ -148,7 +144,7 @@ public class VcfRepository extends AbstractRepository
 
 					while (!vkglReferenceGenomeFilter(reference))
 					{
-						//System.out.println(reference);
+						
 						if (vcfRecordIterator.hasNext())
 						{
 							vcfRecord = vcfRecordIterator.next();
@@ -243,12 +239,12 @@ public class VcfRepository extends AbstractRepository
 								if (sampleEntity.getString("GT").contains("/"))
 								{
 									genoTypes = sampleEntity.getString("GT").split("/");
-						//			System.out.println("/: " + sampleEntity.getString("GT"));
+						
 								}
 								else if (sampleEntity.getString("GT").contains("|"))
 								{
 									genoTypes = sampleEntity.getString("GT").split("\\|");
-							//		System.out.println("|: " + sampleEntity.getString("GT"));
+						
 									
 							
 								}
@@ -259,14 +255,14 @@ public class VcfRepository extends AbstractRepository
 									{
 
 										alleles.add(entity.get(REF).toString());
-							//			System.out.println("ref 1: " + entity.get(REF).toString());
+							
 									}
 									else
 									{
-							//			System.out.println("GT: " + genoType);
+							
 										String allele2 = vcfRecord.getAlternateAlleles()
 												.get(Integer.parseInt(genoType) - 1).toString();
-								//		System.out.println("alt: " + allele2);
+								
 										alleles.add(allele2);
 									}
 

@@ -53,6 +53,8 @@ public class VkglRest
 {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RestController.class);
+	private static final String ALLELE1 = "ALLELE1";
+	private static final String ALLELE2 = "ALLELE2";
 	public static final String BASE_URI = "/vkgl/api/v1";
 	private final DataService dataService;
 	private final AuthenticationManager authenticationManager;
@@ -247,8 +249,8 @@ public class VkglRest
 		String entityName = "vkgl_vkgl";
 		EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
 		String reference = "";
-		AttributeMetaData posXAttributeMeta = entityMeta.getAttribute("ALLELE1");
-		AttributeMetaData posYAttributeMeta = entityMeta.getAttribute("ALLELE2");
+		AttributeMetaData posXAttributeMeta = entityMeta.getAttribute(ALLELE1);
+		AttributeMetaData posYAttributeMeta = entityMeta.getAttribute(ALLELE2);
 		int positionStart = 0;
 		int positionEnd = 0;
 		String chr = "";
@@ -347,13 +349,6 @@ public class VkglRest
 
 			AggregateResult aggregateQueryResults = dataService.aggregate(entityName, newAggregateQuery);
 
-			List<String> resultxLabel = new ArrayList<>();
-			List<String> resultyLabel = new ArrayList<>();
-			List<List<Long>> resultMatrix = new ArrayList<>();
-
-			// System.out.println(" NEw result: " + result);
-
-
 			for (List<Long> aggregateRowResult : aggregateQueryResults.getMatrix())
 			{
 				for (Long aggregateResult : aggregateRowResult)
@@ -362,17 +357,14 @@ public class VkglRest
 				}
 			}
 
-			resultxLabel = aggregateQueryResults.getxLabels();
-			resultyLabel = aggregateQueryResults.getyLabels();
-			resultMatrix = aggregateQueryResults.getMatrix();
-
 			VkglResult vkglResult = new VkglResult();
 			vkglResult.setChromosome(chr);
+			// start position and stop position indicate a window capturing everything in between these number but excluding themselves.
 			vkglResult.setPosition(positionStart + 1);
-			vkglResult.setResultType("coordinate");
-			vkglResult.setResult(resultMatrix);
-			vkglResult.setXAxisAlleles(resultxLabel);
-			vkglResult.setYAxisAlleles(resultyLabel);
+			vkglResult.setResultType("allele");
+			vkglResult.setResult(aggregateQueryResults.getMatrix());
+			vkglResult.setXAxisAlleles(aggregateQueryResults.getxLabels());
+			vkglResult.setYAxisAlleles(aggregateQueryResults.getyLabels());
 
 			vkglResult.setReference(reference);
 
@@ -389,8 +381,8 @@ public class VkglRest
 		String entityName = "vkgl_vkgl";
 		EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
 		String reference = "";
-		AttributeMetaData posXAttributeMeta = entityMeta.getAttribute("ALLELE1");
-		AttributeMetaData posYAttributeMeta = entityMeta.getAttribute("ALLELE2");
+		AttributeMetaData posXAttributeMeta = entityMeta.getAttribute(ALLELE1);
+		AttributeMetaData posYAttributeMeta = entityMeta.getAttribute(ALLELE2);
 		int positionStart = 0;
 		int positionEnd = 0;
 		Long totalNumberOfHits = (long) 0;
@@ -420,7 +412,7 @@ public class VkglRest
 		for (String position : positionsToIds.keySet())
 		{
 			boolean equationFlag = true;
-			
+
 			Query q = new QueryImpl();
 			for (String qEl : statement)
 			{
@@ -497,29 +489,12 @@ public class VkglRest
 
 			}
 
-		
-
 			q = q.unnestAll();
-			
 
 			AggregateQuery newAggregateQuery = new AggregateQueryImpl().attrX(posXAttributeMeta)
 					.attrY(posYAttributeMeta).query(q);
 
 			AggregateResult aggregateQueryResults = dataService.aggregate(entityName, newAggregateQuery);
-
-			List<String> resultxLabel = new ArrayList<>();
-			List<String> resultyLabel = new ArrayList<>();
-			List<List<Long>> resultMatrix = new ArrayList<>();
-
-			// System.out.println(" NEw result: " + result);
-			// if (aggregateQueryResults.getxLabels().get(0) == null && aggregateQueryResults.getyLabels().get(0) ==
-			// null)
-			// {
-			// throw new NoHitsFoundException("No hits found");
-
-			// }
-			// else
-			// {
 
 			for (List<Long> aggregateRowResult : aggregateQueryResults.getMatrix())
 			{
@@ -529,21 +504,16 @@ public class VkglRest
 				}
 			}
 
-			resultxLabel = aggregateQueryResults.getxLabels();
-			resultyLabel = aggregateQueryResults.getyLabels();
-			resultMatrix = aggregateQueryResults.getMatrix();
-			// }
-
 			VkglResult vkglResult = new VkglResult();
 			vkglResult.setChromosome(chr);
 			vkglResult.setPosition(positionStart + 1);
 			vkglResult.setResultType("allele");
-			vkglResult.setResult(resultMatrix);
-			vkglResult.setXAxisAlleles(resultxLabel);
-			vkglResult.setYAxisAlleles(resultyLabel);
+			vkglResult.setResult(aggregateQueryResults.getMatrix());
+			vkglResult.setXAxisAlleles(aggregateQueryResults.getxLabels());
+			vkglResult.setYAxisAlleles(aggregateQueryResults.getyLabels());
 
 			vkglResult.setReference(reference);
-			
+
 			results.add(vkglResult);
 
 		}
@@ -576,7 +546,7 @@ public class VkglRest
 					"No more then 5 queries can be chained at one give time");
 			results = getAlleleResults(request.getQuery().getAllele(), request.getQueryStatement());
 		}
- 
+
 		VkglResponse vkglResponse = new VkglResponse();
 		VkglResponseMetadata vkglMetadata = new VkglResponseMetadata();
 		vkglMetadata.setTotal(results.size());
