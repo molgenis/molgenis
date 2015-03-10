@@ -131,7 +131,7 @@ And push back any merges or commits of your own to your online fork.
 
     git push origin master
     
-## 10. Troubleshooting
+## 11. Troubleshooting
 
 ### When I try to start an application, the console tells me 'Address already in use'!
 
