@@ -220,7 +220,6 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 		{
 			LOG.info("No data for CHROM: " + inputChromosome + " POS: " + inputPosition + " REF: " + inputReference
 					+ " ALT: " + inputAlternative + " LINE: " + line);
-			//throw sfx;
 		}
 		
 		//if nothing found, return empty list for no hit
@@ -283,7 +282,6 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 		if(ref.equals(inputReference) && alt.equals(inputAlternative))
 		{
 			maf = ac/an;
-//			LOG.info("1000G variant found for CHROM: " + chromosome + " POS: " + position + " REF: " + reference + " ALT: " + alternative + ", MAF = " + maf);
 		}
 
 		//if nothing found, try swapping ref-alt, and do 1-MAF
