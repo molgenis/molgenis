@@ -42,9 +42,9 @@
 				case 'DECIMAL':
 				case 'INT':
 				case 'LONG':
-					return molgenis.filter.RangeValueFilter(__spread({},  this.props, this.additionalProps, {onQueryChange: this.props.onQueryChange}));
+					return molgenis.filter.RangeValueFilter(__spread({},  this.props, additionalProps, {onQueryChange: this.props.onQueryChange}));
 				default:
-					return molgenis.filter.AttributeFilter(__spread({},  this.props, this.additionalProps, {onQueryChange: this.props.onQueryChange}));
+					return molgenis.filter.AttributeFilter(__spread({},  this.props, additionalProps, {onQueryChange: this.props.onQueryChange}));
 			}
 		}
 	};
@@ -57,7 +57,11 @@
 		mixins: [molgenis.DeepPureRenderMixin, ValueQueryMixin, ValueFilterMixin],
 		displayName: 'NillableValueFilter',
 		propTypes: {
-			name: React.PropTypes.func.isRequired // FIXME add additional props
+			attr: React.PropTypes.object.isRequired,
+			query: React.PropTypes.object,
+			cols: React.PropTypes.number,
+			disabled: React.PropTypes.bool,
+			onQueryChange: React.PropTypes.func.isRequired
 		},
 		getDefaultProps: function() {
 			return {
@@ -99,8 +103,8 @@
 			this.setState({
 				disabled: event.checked
 			});
-			event.value = event.checked === true ? null : undefined; // FIXME ??
-			this.props.onQueryChange({attr: this.props.attr.name, query: this._toQuery({attr: this.props.attr.name, value: event.checked})});
+			var value = event.checked === true ? null : undefined;
+			this.props.onQueryChange({attr: this.props.attr.name, query: this._toQuery({attr: this.props.attr.name, value: value})});
 		},
 		_disableFilter: function(query) {
 			return this._toValue(query) === null;
@@ -127,6 +131,11 @@
 	var ValueFilter = React.createClass({
 		mixins: [molgenis.DeepPureRenderMixin],
 		displayName: 'ValueFilter',
+		propTypes: {
+			attr: React.PropTypes.object.isRequired,
+			cols: React.PropTypes.number,
+			onQueryChange: React.PropTypes.func.isRequired
+		},
 		render: function() {console.log('render ValueFilter', this.state, this.props);
 			if(this.props.attr.nillable && (this.props.attr.fieldType === 'BOOL' || this.props.attr.fieldType === 'ENUM' || this.props.attr.fieldType === 'CATEGORICAL' || this.props.attr.fieldType === 'CATEGORICAL_MREF' || this.props.attr.fieldType === 'XREF' || this.props.attr.fieldType === 'MREF')) {
 				return molgenis.filter.NonNillableValueFilter(__spread({},  this.props, {cols: this.props.cols, onQueryChange: this.props.onQueryChange}));
@@ -142,6 +151,14 @@
 	var ComposedFilterPart = React.createClass({
 		mixins: [molgenis.DeepPureRenderMixin],
 		displayName: 'ComposedFilterPart',
+		propTypes: {
+			attr: React.PropTypes.object.isRequired,
+			query: React.PropTypes.object,
+			index: React.PropTypes.number.isRequired,
+			hideAddBtn: React.PropTypes.bool,
+			hideRemoveBtn: React.PropTypes.bool,
+			onFilterPartQueryChange: React.PropTypes.func.isRequired
+		},
 		render: function() {console.log('render ComposedFilterPart', this.state, this.props);
 			if(this.props.query && this.props.query.operator === 'OR') { // FIXME not elegant
 				return (
@@ -173,7 +190,7 @@
 				)
 		    );
 		},
-		_handleOnQueryChange: function(event) {console.log('_handleOnQueryChange ComposedFilterPart', event);
+		_handleQueryChange: function(event) {console.log('_handleOnQueryChange ComposedFilterPart', event);
 			this.props.onFilterPartQueryChange({index: this.props.index, event: event});
 		},
 		_handleAddFilterPartClick: function() {console.log('_handleAddFilterPartClick ComposedFilterPart');
@@ -674,10 +691,19 @@
 			this.state.queries[event.attr] = event.query;
 			this.setState({queries: this.state.queries});
 // FIXME boxes not ticked
-			var rules = $.map(this.state.queries, function(query) {
-				return [query, {operator: 'AND'}];
-			});
-			// FIXME remove trailing operator
+			
+			var size = _.size(this.state.queries);
+			var rules = [];
+			var i = 0;
+			for(var key in this.state.queries) {
+				if(this.state.queries.hasOwnProperty(key)) {
+					rules.push(this.state.queries[key]);
+					if(++i < size) {
+						rules.push({operator: 'AND'});
+					}
+				}
+			}
+			
 			// FIXME return query instead of array of query rules
 			this.props.onQueryChange({query: rules});
 		}
