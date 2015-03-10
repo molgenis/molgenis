@@ -1,11 +1,13 @@
 package org.molgenis.data.importer;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.framework.db.EntitiesValidationReport;
@@ -49,10 +51,26 @@ public class EmxImportService implements ImportService
 			{
 				if (entityName.equalsIgnoreCase(EmxMetaDataParser.ATTRIBUTES)) return true;
 				if (dataService.getMeta().getEntityMetaData(entityName) != null) return true;
+				if (canImportByHeuristic(entityName)) return true;
 			}
 		}
 
 		return false;
+	}
+
+	private boolean canImportByHeuristic(String entityName)
+	{
+		// entity is importable if entity name is the simple name of an existing entity,
+		// and only one entity with this simple name exists
+		List<EntityMetaData> entityMetaDatas = new ArrayList<EntityMetaData>();
+		for (EntityMetaData entityMetaData : dataService.getMeta().getEntityMetaDatas())
+		{
+			if (entityName.equals(entityMetaData.getSimpleName()))
+			{
+				entityMetaDatas.add(entityMetaData);
+			}
+		}
+		return entityMetaDatas.size() == 1;
 	}
 
 	@Override
@@ -62,7 +80,6 @@ public class EmxImportService implements ImportService
 
 		// TODO altered entities (merge, see getEntityMetaData)
 		return doImport(new EmxImportJob(databaseAction, source, parsedMetaData));
-
 	}
 
 	/**
