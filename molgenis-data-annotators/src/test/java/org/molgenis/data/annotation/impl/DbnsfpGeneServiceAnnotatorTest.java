@@ -123,7 +123,7 @@ public class DbnsfpGeneServiceAnnotatorTest
 
 		Entity expectedEntity = new MapEntity(resultMap);
 
-		Iterator<Entity> results = annotator.annotate(input.iterator());
+		Iterator<Entity> results = annotator.annotate(input);
 
 		Entity resultEntity = results.next();
 
