@@ -6,7 +6,7 @@ import org.molgenis.ontology.matching.MatchingTaskContentEntityMetaData;
 import org.molgenis.ontology.matching.MatchingTaskEntityMetaData;
 import org.molgenis.ontology.matching.OntologyMatchingService;
 import org.molgenis.ontology.matching.OntologyMatchingServiceImpl;
-import org.molgenis.ontology.matching.ProcessInputTermService;
+import org.molgenis.ontology.matching.MatchInputTermBatchService;
 import org.molgenis.ontology.matching.UploadProgress;
 import org.molgenis.ontology.model.OntologyMetaData;
 import org.molgenis.ontology.model.OntologyTermDynamicAnnotationMetaData;
@@ -76,9 +76,9 @@ public class OntologyConfiguration
 	}
 
 	@Bean
-	public ProcessInputTermService processInputTermService()
+	public MatchInputTermBatchService processInputTermService()
 	{
-		return new ProcessInputTermService(dataService, uploadProgress(), ontologyMatchingService());
+		return new MatchInputTermBatchService(dataService, uploadProgress(), ontologyMatchingService());
 	}
 
 	@Bean

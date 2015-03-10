@@ -27,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
 
-public class ProcessInputTermService
+public class MatchInputTermBatchService
 {
 	private static final int ADD_BATCH_SIZE = 1000;
 
@@ -37,7 +37,7 @@ public class ProcessInputTermService
 
 	private final OntologyMatchingService ontologyService;
 
-	public ProcessInputTermService(DataService dataService, UploadProgress uploadProgress,
+	public MatchInputTermBatchService(DataService dataService, UploadProgress uploadProgress,
 			OntologyMatchingService ontologyService)
 	{
 		this.dataService = dataService;

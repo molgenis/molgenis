@@ -44,7 +44,7 @@ import org.molgenis.ontology.matching.MatchingTaskContentEntityMetaData;
 import org.molgenis.ontology.matching.MatchingTaskEntityMetaData;
 import org.molgenis.ontology.matching.OntologyMatchingService;
 import org.molgenis.ontology.matching.OntologyMatchingServiceImpl;
-import org.molgenis.ontology.matching.ProcessInputTermService;
+import org.molgenis.ontology.matching.MatchInputTermBatchService;
 import org.molgenis.ontology.matching.UploadProgress;
 import org.molgenis.ontology.model.OntologyMetaData;
 import org.molgenis.ontology.model.OntologyTermMetaData;
@@ -79,7 +79,7 @@ public class OntologyServiceController extends MolgenisPluginController
 	private OntologyMatchingService ontologyMatchingService;
 
 	@Autowired
-	private ProcessInputTermService processInputTermService;
+	private MatchInputTermBatchService processInputTermService;
 
 	@Autowired
 	private UploadProgress uploadProgress;
