@@ -182,7 +182,7 @@ public class RepositoryMergerTest
 		commonAttributes.add(metaDatab);
 
 		RepositoryMerger repositoryMerger = new RepositoryMerger(dataService);
-		repositoryMerger.merge(repositoryList, commonAttributes, elasticSearchRepository, null, 2);
+		repositoryMerger.merge(repositoryList, commonAttributes, elasticSearchRepository, 2);
 		ArgumentCaptor<List> argument = ArgumentCaptor.forClass(List.class);
 		verify(elasticSearchRepository, times(2)).add(argument.capture());
 		assertTrue(argument.getAllValues().get(0).size() == 2);
