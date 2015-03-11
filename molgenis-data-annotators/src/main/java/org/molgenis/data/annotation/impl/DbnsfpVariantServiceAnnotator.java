@@ -18,6 +18,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.AnnotatorUtils;
 import org.molgenis.data.annotation.VariantAnnotator;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -236,7 +237,7 @@ public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 								resultMap.put(REFERENCE, reference);
 								resultMap.put(ALTERNATIVE, alternative);
 
-								results.add(getAnnotatedEntity(entity, resultMap));
+								results.add(AnnotatorUtils.getAnnotatedEntity(this, entity, resultMap));
 							}
 							else
 							{
