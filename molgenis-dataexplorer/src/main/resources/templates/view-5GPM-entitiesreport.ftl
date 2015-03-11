@@ -31,6 +31,8 @@
     }
 </script>
 
+<#assign severelateonset = ["AIP", "ALK", "APC", "AXIN2", "BAP1", "BMPR1A", "BRCA1", "CDH1", "CDK4", "CDKN2A", "CEBPA", "CHEK2", "CTHRC1", "CTNNA1", "DICER1", "EGFR", "FH", "FLCN", "GATA2", "KIT", "MAX", "MLH1", "MLH3", "MSH2", "MSH3", "MSH6", "MUTYH", "NF2", "PAX5", "PDGFRA", "PMS2", "PRKAR1A", "RAD51D", "STK11", "TMEM127", "TP53"]>
+
 <#assign dom_high_candidate_genes = {}>
 <#assign dom_mod_candidate_genes = {}>
 <#assign rec_high_candidate_genes = {}>
@@ -224,72 +226,78 @@ Click on a gene to 'exclude' this candidate by flagging it with a <div style="di
 <#macro printGenes genes>
     <#list genes?keys as geneName>
 
-        <@compress single_line=true>
-        <div class="togglediv_border togglediv_<#if genes[geneName][0].getDouble("INFO_PHENOMIZERPVAL")??><#if genes[geneName][0].getDouble("INFO_PHENOMIZERPVAL") lt 0.05>green<#else>lightgreen</#if><#else>grey</#if>" style="display:inline" onclick="changeContent('infoDiv', '
-                <h4>Gene details</h4>
-                <table class=&quot;table table-bordered table-condensed&quot;>
-                <tr class=&quot;active&quot;>
-                <th>Name</th>
-                <th>Disorder</th>
-                <th>Inheritance</th>
-                <th>Generalized inh.</th>
-                <th>Onset</th>
-                <th>Phenomizer</th>
-                </tr>
-                <tr>
-                <td>${geneName}</td>
-                <td>${genes[geneName][0].getString("INFO_CGDCOND")}</td>
-                <td>${genes[geneName][0].getString("INFO_CGDINH")}</td>
-                <td>${genes[geneName][0].getString("INFO_CGDGIN")}</td>
-                <td>${genes[geneName][0].getString("INFO_CGDAGE")}</td>
-                <td><#if genes[geneName][0].getDouble("INFO_PHENOMIZERPVAL")??>${genes[geneName][0].getDouble("INFO_PHENOMIZERPVAL")}</#if></td>
-                </tr>
-                </table>
-                <h4>Variant details</h4>
-                <table class=&quot;table table-bordered table-condensed&quot;>
-                <tr class=&quot;active&quot;>
-                <th>Chr</th>
-                <th>Pos</th>
-                <th>Id</th>
-                <th>Ref</th>
-                <th>Alt</th>
-                <th>Effect</th>
-                <th>Impact</th>
-                <th>Transcript</th>
-                <th>AAchange</th>
-                <th>Genotype</th>
-                <th>Al.depth</th>
-                <th>GoNL</th>
-                <th>ExAC</th>
-                <th>1000G</th>
-                <th>ClinVar</th>
-                </tr>
-            <#list genes[geneName] as row>
-                    <tr>
-                    <td>${row.getString("#CHROM")}</td>
-                    <td>${row.getString("POS")}</td>
-                    <td>${row.getString("ID")}</td>
-                    <td>${row.getString("REF")}</td>
-                    <td>${row.getString("ALT")}</td>
-                    <td>${row.getString("INFO_ANN")?split("|")[1]}</td>
-                    <td>${row.getString("INFO_ANN")?split("|")[2]}</td>
-                    <td>${row.getString("INFO_ANN")?split("|")[6]}</td>
-                    <td>${row.getString("INFO_ANN")?split("|")[10]}</td>
-                    <td><#list row.getEntities("SAMPLES").iterator() as sample>${sample.getString("GT")} </#list></td>
-                    <td><#list row.getEntities("SAMPLES").iterator() as sample>${sample.getString("AD")} </#list></td>
-                    <td><#if row.getString("INFO_GONLMAF")??>${row.getString("INFO_GONLMAF")}</#if></td>
-                    <td><#if row.getString("INFO_EXACMAF")??>${row.getString("INFO_EXACMAF")}</#if></td>
-                    <td><#if row.getString("INFO_1KGMAF")??>${row.getString("INFO_1KGMAF")}</#if></td>
-                    <td><#if row.getString("INFO_CLINVAR_CLNSIG")??>${row.getString("INFO_CLINVAR_CLNSIG")}</#if></td>
-                    </tr>
-            </#list>
-                </table>
-                <h4>Symptoms for ${genes[geneName][0].getString("INFO_CGDCOND")}</h4>
-                <p>
-                	<#if genes[geneName][0].getString("INFO_HPOTERMS")??>${genes[geneName][0].getString("INFO_HPOTERMS")?replace("/",", ")?lower_case}<#else>No symptoms available.</#if>
-                </p>
-                ')"><#if all_candidates[geneName] gt 1><b>${geneName}</b><#else>${geneName}</#if></div>
-        </@compress>
+		<#if severelateonset?seq_contains(geneName)>
+			<#-- skipping this gene -->
+		<#else>
+		
+	        <@compress single_line=true>
+	        <div class="togglediv_border togglediv_<#if genes[geneName][0].getDouble("INFO_PHENOMIZERPVAL")??><#if genes[geneName][0].getDouble("INFO_PHENOMIZERPVAL") lt 0.05>green<#else>lightgreen</#if><#else>grey</#if>" style="display:inline" onclick="changeContent('infoDiv', '
+	                <h4>Gene details</h4>
+	                <table class=&quot;table table-bordered table-condensed&quot;>
+	                <tr class=&quot;active&quot;>
+	                <th>Name</th>
+	                <th>Disorder</th>
+	                <th>Inheritance</th>
+	                <th>Generalized inh.</th>
+	                <th>Onset</th>
+	                <th>Phenomizer</th>
+	                </tr>
+	                <tr>
+	                <td>${geneName}</td>
+	                <td>${genes[geneName][0].getString("INFO_CGDCOND")}</td>
+	                <td>${genes[geneName][0].getString("INFO_CGDINH")}</td>
+	                <td>${genes[geneName][0].getString("INFO_CGDGIN")}</td>
+	                <td>${genes[geneName][0].getString("INFO_CGDAGE")}</td>
+	                <td><#if genes[geneName][0].getDouble("INFO_PHENOMIZERPVAL")??>${genes[geneName][0].getDouble("INFO_PHENOMIZERPVAL")}</#if></td>
+	                </tr>
+	                </table>
+	                <h4>Variant details</h4>
+	                <table class=&quot;table table-bordered table-condensed&quot;>
+	                <tr class=&quot;active&quot;>
+	                <th>Chr</th>
+	                <th>Pos</th>
+	                <th>Id</th>
+	                <th>Ref</th>
+	                <th>Alt</th>
+	                <th>Effect</th>
+	                <th>Impact</th>
+	                <th>Transcript</th>
+	                <th>AAchange</th>
+	                <th>Genotype</th>
+	                <th>Al.depth</th>
+	                <th>GoNL</th>
+	                <th>ExAC</th>
+	                <th>1000G</th>
+	                <th>ClinVar</th>
+	                </tr>
+	            <#list genes[geneName] as row>
+	                    <tr>
+	                    <td>${row.getString("#CHROM")}</td>
+	                    <td>${row.getString("POS")}</td>
+	                    <td>${row.getString("ID")}</td>
+	                    <td>${row.getString("REF")}</td>
+	                    <td>${row.getString("ALT")}</td>
+	                    <td>${row.getString("INFO_ANN")?split("|")[1]}</td>
+	                    <td>${row.getString("INFO_ANN")?split("|")[2]}</td>
+	                    <td>${row.getString("INFO_ANN")?split("|")[6]}</td>
+	                    <td>${row.getString("INFO_ANN")?split("|")[10]}</td>
+	                    <td><#list row.getEntities("SAMPLES") as sample>${sample.getString("GT")} </#list></td>
+	                    <td><#list row.getEntities("SAMPLES") as sample>${sample.getString("AD")} </#list></td>
+	                    <td><#if row.getString("INFO_GONLMAF")??>${row.getString("INFO_GONLMAF")}</#if></td>
+	                    <td><#if row.getString("INFO_EXACMAF")??>${row.getString("INFO_EXACMAF")}</#if></td>
+	                    <td><#if row.getString("INFO_1KGMAF")??>${row.getString("INFO_1KGMAF")}</#if></td>
+	                    <td><#if row.getString("INFO_CLINVAR_CLNSIG")??>${row.getString("INFO_CLINVAR_CLNSIG")}</#if></td>
+	                    </tr>
+	            </#list>
+	                </table>
+	                <h4>Symptoms for ${genes[geneName][0].getString("INFO_CGDCOND")}</h4>
+	                <p>
+	                	<#if genes[geneName][0].getString("INFO_HPOTERMS")??>${genes[geneName][0].getString("INFO_HPOTERMS")?replace("/",", ")?lower_case}<#else>No symptoms available.</#if>
+	                </p>
+	                ')"><#if all_candidates[geneName] gt 1><b>${geneName}</b><#else>${geneName}</#if></div>
+	        </@compress>
+
+		</#if>
 
     </#list>
 </#macro>
