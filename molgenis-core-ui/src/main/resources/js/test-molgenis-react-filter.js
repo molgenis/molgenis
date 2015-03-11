@@ -29,7 +29,7 @@ $(function() {
 			'xbool': {field: 'xbool', operator: 'EQUALS', value: true},
 			'xboolnillable': {field: 'xboolnillable', operator: 'EQUALS', value: null},
 			'xcategorical_value': {field: 'xcategorical_value', operator: 'EQUALS', value: {value: 'ref1', label: 'label1'}},
-			'xcategoricalnillable_value': {field: 'xcategorical_value', operator: 'EQUALS', value: null},
+			'xcategoricalnillable_value': {field: 'xcategorical_value', operator: 'EQUALS', value: [null]},
 			'xdate': {operator: 'NESTED', nestedRules: [
 				{field: 'xdate', operator: 'GREATER_EQUAL', value: '2012-01-02'},
 				{operator: 'OR'},
@@ -64,7 +64,7 @@ $(function() {
 				{operator: 'OR'},
 				{field: 'xenumnillable', operator: 'EQUALS', value: ['enum2']},
 				{operator: 'OR'},
-				{field: 'xenumnillable', operator: 'EQUALS', value: null}]},
+				{field: 'xenumnillable', operator: 'EQUALS', value: [null]}]},
 			'xhtml': {field: 'xhtml', operator: 'EQUALS', value: '<h1>cool html</h1>'},
 			'xhtmlnillable': {operator: 'NESTED', nestedRules: [
 				{field: 'xhtmlnillable', operator: 'EQUALS', value: '<h1>cool html</h1>'},
@@ -143,7 +143,6 @@ $(function() {
 			}
 		}
 
-		console.log('meta.attributes', meta.attributes);
 		molgenis.filters.createGroup(meta.attributes, {
 				'onQueryChange' : function(q) {
 					$('#query-result-header').html('Filter query: ');

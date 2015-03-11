@@ -31,7 +31,7 @@
 		componentWillReceiveProps : function(nextProps) {
 			this.setState({value: nextProps.value});
 		},
-		componentDidMount: function() {console.log('componentDidMount Select2');
+		componentDidMount: function() {//console.log('componentDidMount Select2');
 			var $container = $(this.refs.select2.getDOMNode());
 			
 			// create select2
@@ -51,24 +51,24 @@
 			// initialize select2
 			this._updateSelect2();
 		},
-		componentWillUnmount: function() {console.log('componentWillUnmount Select2');
+		componentWillUnmount: function() {//console.log('componentWillUnmount Select2');
 			var $container = $(this.refs.select2.getDOMNode());
 			$container.off();
 			$container.select2('destroy');
 		},
-		render: function() {console.log('render Select2', this.state, this.props);
+		render: function() {//console.log('render Select2', this.state, this.props);
 			if (this.isMounted()) {
 				this._updateSelect2();
 			}
 			return input({type: 'hidden', ref: 'select2', onChange: function(){}}); // empty onChange callback to suppress React warning FIXME use InputControl 
 		},
-		_handleChange: function(value) {console.log('_handleChange Select2', value);
+		_handleChange: function(value) {//console.log('_handleChange Select2', value);
 			this.setState({value: value});
 			this.props.onChange(value);
 		},
 		_updateSelect2: function() {
 			var $container = $(this.refs.select2.getDOMNode());
-			console.log('_updateSelect2', this.state);
+			//console.log('_updateSelect2', this.state);
 			$container.select2('data', this.state.value);
 			$container.select2('enable', !this.props.disabled);
 			$container.select2('readonly', this.props.readOnly);
@@ -89,7 +89,7 @@
 			disabled: React.PropTypes.array,
 			onChange: React.PropTypes.func
 		},
-		componentDidMount: function() {console.log('componentDidMount JQRangeSlider');
+		componentDidMount: function() {//console.log('componentDidMount JQRangeSlider');
 			var $container = $(this.refs.rangeslider.getDOMNode());
 			$container.editRangeSlider(this.props.options);
 
@@ -102,12 +102,12 @@
 				props.onChange({value: [data.values.min, data.values.max]});
 			});
 		},
-		componentWillUnmount: function() {console.log('componentWillUnmount JQRangeSlider');
+		componentWillUnmount: function() {//console.log('componentWillUnmount JQRangeSlider');
 			var $container = $(this.refs.rangeslider.getDOMNode());
 			$container.off();
 			$container.editRangeSlider('destroy');
 		},
-		render: function() {console.log('render JQRangeSlider', this.state, this.props);
+		render: function() {//console.log('render JQRangeSlider', this.state, this.props);
 			if(this.isMounted()) {
 				var $container = $(this.refs.rangeslider.getDOMNode());
 				$container.editRangeSlider(this.props.disabled ? 'disable' : 'enable');
@@ -136,7 +136,7 @@
 			value: React.PropTypes.string,
 			onChange: React.PropTypes.func
 		},
-		componentDidMount: function() {console.log('componentDidMount DateTimePicker');
+		componentDidMount: function() {//console.log('componentDidMount DateTimePicker');
 			var props = this.props;
 
 			var format = props.time === true ? 'YYYY-MM-DDTHH:mm:ssZZ' : 'YYYY-MM-DD';
@@ -146,7 +146,7 @@
 				format: format
 			});
 
-			$container.on('dp.change', function(event) {console.log('event.date', event.date.format(format));
+			$container.on('dp.change', function(event) {//console.log('event.date', event.date.format(format));
 				props.onChange({value: event.date.format(format)});
 			});
 
@@ -157,11 +157,11 @@
 				});
 			}
 		},
-		componentWillUnmount: function() {console.log('componentWillUnmount DateTimePicker');
+		componentWillUnmount: function() {//console.log('componentWillUnmount DateTimePicker');
 			var $container = $(this.refs.datepicker.getDOMNode());
 			$container.datetimepicker('destroy');
 		},
-		render: function() {console.log('render DateTimePicker', this.state, this.props);
+		render: function() {//console.log('render DateTimePicker', this.state, this.props);
 			var placeholder = this.props.placeholder;
 			var required = this.props.required;
 			var disabled = this.props.disabled;
@@ -223,7 +223,7 @@
 		componentWillReceiveProps : function(nextProps) {
 			this.setState({value: nextProps.value});
 		},
-		componentDidMount: function() {console.log('componentDidMount Ace');
+		componentDidMount: function() {//console.log('componentDidMount Ace');
 			var container = this.refs.editor.getDOMNode();
 			var editor = ace.edit(container);
 			editor.setTheme('ace/theme/' + this.props.theme);
@@ -240,12 +240,12 @@
 				self.props.onChange(value);
 			});
 		},
-		componentWillUnmount: function() {console.log('componentWillUnmount Ace');
+		componentWillUnmount: function() {//console.log('componentWillUnmount Ace');
 			var container = this.refs.editor.getDOMNode();
 			var editor = ace.edit(container);
 			editor.destroy();
 		},
-		render: function() {console.log('render Ace', this.state, this.props);
+		render: function() {//console.log('render Ace', this.state, this.props);
 			// editor won't show up unless height is defined
 			return div({},
 				div({ref: 'editor', style: {height: this.props.height}}),
@@ -260,7 +260,7 @@
 				})
 			);
 		},
-		_handleChange: function(value) {console.log('_handleChange Ace', value);
+		_handleChange: function(value) {//console.log('_handleChange Ace', value);
 			this.setState({value: value});
 			this.props.onChange(value);
 		},

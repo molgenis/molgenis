@@ -39,7 +39,7 @@
 				entity: this._isRetrieved(entity) ? entity : null
 			};
 		},
-		componentDidMount: function() {console.log('componentDidMount EntityControl');
+		componentDidMount: function() {//console.log('componentDidMount EntityControl');
 			// fetch entity meta if not exists
 			var entity = this.props.entity;
 			if(typeof entity === 'object') {
@@ -50,7 +50,7 @@
 				this._retrieveEntity(entity);
 			}
 		},
-		render: function() {console.log('render EntityControl', this.state, this.props);
+		render: function() {//console.log('render EntityControl', this.state, this.props);
 			if(this.state.entity === null) {
 				// entity meta data not fetched yet
 				return div({});
@@ -95,7 +95,7 @@
 			};
 			return molgenis.control.wrapper.Select2({options: options, disabled: this.props.disabled, readOnly: this.props.readOnly, value: this.props.value, onChange: this._handleChange});
 		},
-		_handleChange: function(value) {console.log('_handleChange EntityControl', value);
+		_handleChange: function(value) {//console.log('_handleChange EntityControl', value);
 			var val = this.props.multiple && value.length === 0 ? undefined : value;
 			this.props.onValueChange({value: val});
 		},
@@ -130,7 +130,7 @@
 				attr: this._isRetrieved(attr) ? attr : null
 			};
 		},
-		componentDidMount: function() {console.log('componentDidMount AttributeFormControl');
+		componentDidMount: function() {//console.log('componentDidMount AttributeFormControl');
 			// fetch attribute meta if not exists
 			var attr = this.props.attr;
 			if(typeof attr === 'object') {
@@ -143,7 +143,7 @@
 				this._retrieveAttr(attr, this._onAttrRetrieved);
 			}
 		},
-		render: function() {console.log('render AttributeControl', this.state, this.props);	
+		render: function() {//console.log('render AttributeControl', this.state, this.props);	
 			if(this.state.attr === null) {
 				// attribute meta data not fetched yet
 				return div({});
@@ -172,6 +172,7 @@
 						return div();
 					}
 					
+					var layout = props.layout || 'stacked';
 					var Control = props.multiple === true ? molgenis.control.CheckboxGroupControl : molgenis.control.RadioGroupControl;
 					return Control({
 						id: props.id,
@@ -180,7 +181,7 @@
 						required : !attr.nillable,
 						disabled : props.disabled,
 						readOnly : attr.readOnly,
-						layout : props.layout,
+						layout : layout,
 						value : props.value,
 						onValueChange : this._handleValueChange
 					});
@@ -280,7 +281,7 @@
 					throw 'Unknown data type: ' + attr.fieldType;
 			}
 		},
-		_handleValueChange: function(event) {console.log('_handleChange AttributeControl', event);
+		_handleValueChange: function(event) {//console.log('_handleChange AttributeControl', event);
 			this.props.onValueChange(__spread({}, event, {attr: this.state.attr.name}));
 		},
 		_createNumberControl: function(step) {

@@ -78,7 +78,7 @@
 				disabled: this._disableFilter(nextProps.query)
 			});
 		},
-		render: function() {console.log('render NillableValueFilter', this.state, this.props);
+		render: function() {//console.log('render NillableValueFilter', this.state, this.props);
 			var filter = this._createValueFilter({
 				attr: $.extend({}, this.props.attr, {nillable: false}), // non-nillable attr
 				disabled: this.state.disabled,
@@ -99,7 +99,7 @@
 				)
 		    );
 		},
-		_handleNillableValueChange: function(event) {console.log('_handleNillableValueChange NillableValueFilter', event);
+		_handleNillableValueChange: function(event) {//console.log('_handleNillableValueChange NillableValueFilter', event);
 			this.setState({
 				disabled: event.checked
 			});
@@ -118,7 +118,7 @@
 	var NonNillableValueFilter = React.createClass({
 		mixins: [molgenis.DeepPureRenderMixin, ValueFilterMixin],
 		displayName: 'NonNillableValueFilter',
-		render: function() {console.log('render NonNillableValueFilter', this.state, this.props);
+		render: function() {//console.log('render NonNillableValueFilter', this.state, this.props);
 			var filter = this._createValueFilter(this.state);
 			return filter;
 		}
@@ -136,11 +136,11 @@
 			cols: React.PropTypes.number,
 			onQueryChange: React.PropTypes.func.isRequired
 		},
-		render: function() {console.log('render ValueFilter', this.state, this.props);
-			if(this.props.attr.nillable && (this.props.attr.fieldType === 'BOOL' || this.props.attr.fieldType === 'ENUM' || this.props.attr.fieldType === 'CATEGORICAL' || this.props.attr.fieldType === 'CATEGORICAL_MREF' || this.props.attr.fieldType === 'XREF' || this.props.attr.fieldType === 'MREF')) {
-				return molgenis.filter.NonNillableValueFilter(__spread({},  this.props, {cols: this.props.cols, onQueryChange: this.props.onQueryChange}));
-			} else {
+		render: function() {//console.log('render ValueFilter', this.state, this.props);
+			if(this.props.attr.nillable && (this.props.attr.fieldType !== 'BOOL' && this.props.attr.fieldType !== 'ENUM' && this.props.attr.fieldType !== 'CATEGORICAL' && this.props.attr.fieldType !== 'CATEGORICAL_MREF' && this.props.attr.fieldType !== 'XREF' && this.props.attr.fieldType !== 'MREF')) {
 				return molgenis.filter.NillableValueFilter(__spread({},  this.props, {cols: this.props.cols, onQueryChange: this.props.onQueryChange}));
+			} else {
+				return molgenis.filter.NonNillableValueFilter(__spread({},  this.props, {cols: this.props.cols, onQueryChange: this.props.onQueryChange}));
 			}
 		}
 	});
@@ -159,7 +159,7 @@
 			hideRemoveBtn: React.PropTypes.bool,
 			onFilterPartQueryChange: React.PropTypes.func.isRequired
 		},
-		render: function() {console.log('render ComposedFilterPart', this.state, this.props);
+		render: function() {//console.log('render ComposedFilterPart', this.state, this.props);
 			if(this.props.query && this.props.query.operator === 'OR') { // FIXME not elegant
 				return (
 					div({className: 'form-group'},
@@ -190,13 +190,13 @@
 				)
 		    );
 		},
-		_handleQueryChange: function(event) {console.log('_handleOnQueryChange ComposedFilterPart', event);
+		_handleQueryChange: function(event) {//console.log('_handleOnQueryChange ComposedFilterPart', event);
 			this.props.onFilterPartQueryChange({index: this.props.index, event: event});
 		},
-		_handleAddFilterPartClick: function() {console.log('_handleAddFilterPartClick ComposedFilterPart');
+		_handleAddFilterPartClick: function() {//console.log('_handleAddFilterPartClick ComposedFilterPart');
 			this.props.onAddFilterPart();
 		},
-		_handleRemoveFilterPartClick: function() {console.log('_handleRemoveFilterPartClick ComposedFilterPart');
+		_handleRemoveFilterPartClick: function() {//console.log('_handleRemoveFilterPartClick ComposedFilterPart');
 			this.props.onRemoveFilterPart({index: this.props.index, attr: this.props.attr.name});
 		},
 	});
@@ -214,7 +214,7 @@
 		componentWillReceiveProps : function(nextProps) {
 			this.setState({filters: this._toFilters(nextProps.query)});
 		},
-		render: function() {console.log('render ComposedFilter', this.state, this.props);
+		render: function() {//console.log('render ComposedFilter', this.state, this.props);
 			var self = this;
 			var filterParts = $.map(this.state.filters, function(query, index) {
 				return molgenis.filter.ComposedFilterPart(__spread({},  self.props, {
@@ -230,23 +230,23 @@
 			});
 			return div({}, filterParts);
 		},
-		_handleOnFilterPartQueryChange: function(event) {console.log('_handleOnFilterPartQueryChange ComposedFilter', event);
+		_handleOnFilterPartQueryChange: function(event) {//console.log('_handleOnFilterPartQueryChange ComposedFilter', event);
 			var filters = this.state.filters;
 			filters[event.index] = event.event.query;
 			this.setState({filters: filters});
 			
 			this.props.onQueryChange($.extend({}, event.event, {query: this._toQuery(filters)}));
 		},
-		_handleAddFilterPart: function() {console.log('_handleAddFilterPart ComposedFilter');
+		_handleAddFilterPart: function() {//console.log('_handleAddFilterPart ComposedFilter');
 			var filters = this.state.filters;
 			filters.push({operator: 'OR'}); // FIXME can be and for mref
 			filters.push(null);
 			this.setState({filters: filters});
 		},
-		_handleRemoveFilterPart: function(event) {console.log('_handleRemoveFilterPart ComposedFilter', event);
+		_handleRemoveFilterPart: function(event) {//console.log('_handleRemoveFilterPart ComposedFilter', event);
 			var filters = this.state.filters;
 			var removed = filters.splice(event.index > 0 ? event.index - 1 : 0, filters.length > 1 ? 2 : 1); // remove filter and operator
-			console.log('removed', event.index, removed, filters);
+			//console.log('removed', event.index, removed, filters);
 			this.setState({filters: filters});
 			
 			this.props.onQueryChange({
@@ -308,7 +308,7 @@
 	 */
 	var RangeValueFilterMixin = {
 		displayName: 'RangeValueFilterMixin',
-		_handleFromQueryChange: function(event) {console.log('_handleFromQueryChange RangeValueFilterMixin', event);
+		_handleFromQueryChange: function(event) {//console.log('_handleFromQueryChange RangeValueFilterMixin', event);
 			// merge query with query change
 			if(this.props.query) {
 				switch(this.props.query.operator) {
@@ -333,7 +333,7 @@
 			}
 			this.props.onQueryChange(event);
 		},
-		_handleToQueryChange: function(event) {console.log('_handleToQueryChange RangeValueFilterMixin', event);
+		_handleToQueryChange: function(event) {//console.log('_handleToQueryChange RangeValueFilterMixin', event);
 			// merge query with query change
 			if(this.props.query) {
 				switch(this.props.query.operator) {
@@ -421,7 +421,7 @@
 	var HorizontalRangeValueFilter = React.createClass({
 		mixins: [molgenis.DeepPureRenderMixin, RangeValueFilterMixin],
 		displayName: 'HorizontalRangeValueFilter',
-		render: function() {console.log('render HorizontalRangeValueFilter', this.state, this.props);
+		render: function() {//console.log('render HorizontalRangeValueFilter', this.state, this.props);
 			return (
 				div({className: 'form-group'},
 					div({className: 'col-md-6'},
@@ -442,7 +442,7 @@
 	var VerticalRangeValueFilter = React.createClass({
 		mixins: [molgenis.DeepPureRenderMixin, RangeValueFilterMixin],
 		displayName: 'VerticalRangeValueFilter',
-		render: function() {console.log('render VerticalRangeValueFilter', this.state, this.props);
+		render: function() {//console.log('render VerticalRangeValueFilter', this.state, this.props);
 			return(
 				div({},
 					div({className: 'form-group'},
@@ -467,7 +467,7 @@
 	var RangeSliderFilter = React.createClass({// FIXME init with value
 		mixins: [molgenis.DeepPureRenderMixin, RangeValueFilterMixin],
 		displayName: 'RangeSliderFilter',
-		render: function() {console.log('render RangeSliderFilter', this.state, this.props);
+		render: function() {//console.log('render RangeSliderFilter', this.state, this.props);
 			var value = this._toValue(this.props.query);
 			return(
 				div({className: 'form-group'},
@@ -477,7 +477,7 @@
 				)
 			); //FIXME handle change event
 		},
-		_handleValueChange: function(event) {console.log('_handleValueChange RangeSliderFilter', event);
+		_handleValueChange: function(event) {//console.log('_handleValueChange RangeSliderFilter', event);
 			var attr = this.props.attr;
 
 			var fromValue = event.value[0] !== attr.range.min ? event.value[0] : undefined;
@@ -534,7 +534,7 @@
 	var RangeValueFilter = React.createClass({
 		mixins: [molgenis.DeepPureRenderMixin],
 		displayName: 'RangeValueFilter',
-		render: function() {console.log('render RangeValueFilter', this.state, this.props);
+		render: function() {//console.log('render RangeValueFilter', this.state, this.props);
 			var attrType = this.props.attr.fieldType;
 			switch(attrType) {
 				case 'DECIMAL':
@@ -564,19 +564,19 @@
 				cols: 12
 			};
 		},
-		render: function() {console.log('render AttributeFilter', this.state, this.props);
+		render: function() {//console.log('render AttributeFilter', this.state, this.props);
 			var value = this._toValue(this.props.query);
 
 			var colClassName = "col-md-" + this.props.cols;
 			return (
 				div({className: 'row'},
 					div({className: colClassName},
-						control.AttributeControl(__spread({},  this.props, {value: value, layout: 'radio', onValueChange: this._handleValueChange}))
+						control.AttributeControl(__spread({},  this.props, {value: value, multiple: true, onValueChange: this._handleValueChange}))
 					)
 				)
 			);
 		},
-		_handleValueChange: function(event) {console.log('_handleValueChange AttributeFilter', event);
+		_handleValueChange: function(event) {//console.log('_handleValueChange AttributeFilter', event);
 			var query = this._toQuery({attr: this.props.attr.name, value: event.value});
 			this.props.onQueryChange({attr: this.props.attr.name, query: query});
 		}
@@ -596,7 +596,7 @@
 		componentWillReceiveProps : function(nextProps) {
 			this.setState({query: this.props.query});
 		},
-		render: function() {console.log('render Filter', this.state, this.props);
+		render: function() {//console.log('render Filter', this.state, this.props);
 			var query = this.state.query;
 			
 			var filter;
@@ -650,11 +650,11 @@
 				)
 		    );
 		},
-		_handleOnQueryChange: function(event) {console.log('_handleOnQueryChange Filter', event);
+		_handleOnQueryChange: function(event) {//console.log('_handleOnQueryChange Filter', event);
 			this.setState({query: event.query});
 			this.props.onQueryChange(event);
 		},
-		_handleOnClearFilterClick: function(event) {console.log('_handleOnClearFilterClick Filter', event);
+		_handleOnClearFilterClick: function(event) {//console.log('_handleOnClearFilterClick Filter', event);
 			this.setState({query: null});
 			this._handleOnQueryChange({attr: this.props.attr.name, query: null});
 		}
@@ -672,12 +672,12 @@
 		componentWillReceiveProps : function(nextProps) {
 			this.setState({query: this.props.query}); // FIXME split query in queries
 		},
-		render: function() {console.log('render FilterGroup', this.state, this.props);
+		render: function() {//console.log('render FilterGroup', this.state, this.props);
 			var self = this;
-			var filters = $.map(self.props.attrs, function(attr, index) {console.log(attr, index);
+			var filters = $.map(self.props.attrs, function(attr, i) {//console.log(attr, index);
 				var query = self.state.queries[attr.name] || null;
 				return (
-					div({className: 'form-group'},
+					div({className: 'form-group', key : '' + i},
 						label({className: 'col-md-4 control-label'}, attr.label),
 						div({className: 'col-md-8'},
 							molgenis.filter.Filter({attr: attr, query: query, onQueryChange: self._handleOnQueryChange})
@@ -687,19 +687,31 @@
 			});
 			return div({className: 'form-horizontal'}, filters);
 		},
-		_handleOnQueryChange: function(event) {console.log('_handleOnQueryChange FilterGroup', event);
+		_handleOnQueryChange: function(event) {//console.log('_handleOnQueryChange FilterGroup', event);
 			this.state.queries[event.attr] = event.query;
 			this.setState({queries: this.state.queries});
 // FIXME boxes not ticked
 			
-			var size = _.size(this.state.queries);
+			var size = 0;
+			for(var key in this.state.queries) {
+				if(this.state.queries.hasOwnProperty(key)) {
+					var query = this.state.queries[key];
+					if(query !== null) {
+						++size;
+					}
+				}
+			}
+			
 			var rules = [];
 			var i = 0;
 			for(var key in this.state.queries) {
 				if(this.state.queries.hasOwnProperty(key)) {
-					rules.push(this.state.queries[key]);
-					if(++i < size) {
-						rules.push({operator: 'AND'});
+					var query = this.state.queries[key];
+					if(query !== null) {
+						rules.push(this.state.queries[key]);
+						if(++i < size) {
+							rules.push({operator: 'AND'});
+						}
 					}
 				}
 			}

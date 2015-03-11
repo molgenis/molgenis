@@ -40,7 +40,7 @@
 		componentWillReceiveProps : function(nextProps) {
 			this.setState(this._isRadioOrCheckbox() ? {checked: nextProps.checked} : {value: nextProps.value});
 		},
-		render: function() {console.log('render InputControl', this.state, this.props);
+		render: function() {//console.log('render InputControl', this.state, this.props);
 			var props = this.props;
 			
 			var inputProps = {
@@ -87,7 +87,7 @@
 				return input(inputProps);
 			}
 		},
-		_handleChange: function(event) {console.log('_handleChange InputControl', event);
+		_handleChange: function(event) {//console.log('_handleChange InputControl', event);
 			this.setState(this._isRadioOrCheckbox() ? {checked: event.target.checked} : {value: event.target.value});
 			
 			var valueEvent;
@@ -115,7 +115,7 @@
 	 * @memberOf control.mixin
 	 */
 	var GroupControlMixin = { // FIXME not working for readonly
-		render: function() {console.log('render GroupControlMixin', this.state, this.props);
+		render: function() {//console.log('render GroupControlMixin', this.state, this.props);
 			var options = this.props.options;
 			if(!this.props.required) {
 				options = options.concat({value: '', label: 'N/A'});
@@ -187,7 +187,7 @@
 				value: this.props.value
 			};
 		},
-		_handleChange: function(event) {console.log('_handleChange RadioGroupControl', event);
+		_handleChange: function(event) {//console.log('_handleChange RadioGroupControl', event);
 			var value = this._inputToValue(event.value);
 			this.setState({value: value});
 			this.props.onValueChange({value: value});
@@ -226,7 +226,12 @@
 				value: this.props.value || []
 			};
 		},
-		_handleChange: function(event) {console.log('_handleChange CheckboxGroupControl', event);
+		componentWillReceiveProps : function(nextProps) {
+			this.setState({
+				value: nextProps.value || []
+			});
+		},
+		_handleChange: function(event) {//console.log('_handleChange CheckboxGroupControl', event);
 			var value = this._inputToValue(event.value);
 			
 			var values = this.state.value;
@@ -268,7 +273,7 @@
 				value: nextProps.value
 			});
 		},
-		render: function() {console.log('render DateControl', this.state, this.props);
+		render: function() {//console.log('render DateControl', this.state, this.props);
 			return molgenis.control.wrapper.DateTimePicker({
 				name: this.props.name,
 				time : this.props.time,
@@ -280,7 +285,7 @@
 				onChange : this._handleChange
 			});
 		},
-		_handleChange: function(value) {console.log('_handleChange DateControl', value);
+		_handleChange: function(value) {//console.log('_handleChange DateControl', value);
 			this.setState(value);
 			this.props.onValueChange(value);
 		}
@@ -310,7 +315,7 @@
 				value: nextProps.value
 			});
 		},
-		render: function() {console.log('render TextAreaControl', this.state, this.props);
+		render: function() {//console.log('render TextAreaControl', this.state, this.props);
 			return textarea({
 				className: 'form-control',
 				id: this.props.id,
@@ -322,7 +327,7 @@
 				value: this.state.value,
 				onChange: this._handleChange});
 		},
-		_handleChange: function(event) {console.log('_handleChange TextAreaControl', event);
+		_handleChange: function(event) {//console.log('_handleChange TextAreaControl', event);
 			this.setState({value: event.target.value});
 			
 			var value = event.target.value !== '' ? event.target.value : null;
@@ -336,7 +341,7 @@
 	var CodeEditorControl = React.createClass({ // TODO: add prop types
 		mixins: [molgenis.DeepPureRenderMixin],
 		displayName: 'CodeEditorControl',
-		render: function() {console.log('render CodeEditorControl', this.state, this.props);
+		render: function() {//console.log('render CodeEditorControl', this.state, this.props);
 			return molgenis.control.wrapper.Ace({
 				id : this.props.id,
 				name: this.props.name,
@@ -346,11 +351,8 @@
 				readOnly : this.props.readOnly,
 				mode: this.props.language,
 				value : this.props.value,
-				onChange : this._handleChange
+				onChange : this.props.onValueChange
 			});
-		},
-		_handleChange: function(value) {console.log('_handleChange CodeEditorControl', value);
-			this.props.onValueChange({value: value});
 		}
 	});
 	
@@ -369,7 +371,7 @@
 			disabled: React.PropTypes.bool,
 			onChange: React.PropTypes.func
 		},
-		render: function() {console.log('render RangeSlider', this.state, this.props);
+		render: function() {//console.log('render RangeSlider', this.state, this.props);
 			var range = this.props.range;
 			var value = this.props.value;
 			
@@ -391,7 +393,7 @@
 				onChange : this._handleChange
 			});
 		},
-		_handleChange: function(event) {console.log('_handleChange RangeSlider', event);
+		_handleChange: function(event) {//console.log('_handleChange RangeSlider', event);
 			this.props.onValueChange({value: event.value});
 		}
 	});
@@ -422,7 +424,7 @@
 				required: true
 			};
 		},
-		render: function() {console.log('render BoolControl', this.state, this.props);
+		render: function() {//console.log('render BoolControl', this.state, this.props);
 			if(this.props.multiple || !this.props.required || this.props.type === 'group') {
 				var options = [{value: 'true', label: 'True'}, {value: 'false', label: 'False'}];
 				var Element = this.props.multiple ? molgenis.control.CheckboxGroupControl : molgenis.control.RadioGroupControl;
