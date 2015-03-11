@@ -81,7 +81,6 @@
             input.desc = inputAttributes[attr].description;
             inputParams.push(input);
         }
-        console.log(inputParams);
         return attributesTemplate({
             'inputParams': inputParams});
     }

@@ -1,8 +1,10 @@
 package org.molgenis.data.annotation;
 
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -134,21 +136,10 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 
 	public abstract List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException;
 
-	public Entity getAnnotatedEntity(Entity entity, Map<String, Object> resultMap)
-	{
-		DefaultEntityMetaData resultEntityMetadata = new DefaultEntityMetaData(entity.getEntityMetaData());
-		MapEntity resultEntity = new MapEntity(entity, resultEntityMetadata);
-		for (AttributeMetaData attributeMetaData : getOutputMetaData().getAtomicAttributes())
-		{
-			resultEntityMetadata.addAttributeMetaData(attributeMetaData);
-			resultEntity.set(attributeMetaData.getName(), resultMap.get(attributeMetaData.getName()));
-		}
-		return resultEntity;
-	}
-
 	@Override
 	public String getFullName()
 	{
 		return RepositoryAnnotator.ANNOTATOR_PREFIX + getSimpleName();
 	}
+
 }
