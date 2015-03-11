@@ -1,11 +1,6 @@
 package org.molgenis.data.annotation.impl;
 
-import java.io.IOException;
-import java.io.File;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.*;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -151,7 +146,9 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator, ApplicationL
 
             runSnpEff(inputTempFile, outputTempFile);
 
-			BufferedReader br = new BufferedReader(new FileReader(outputTempFile.getAbsolutePath()));
+            Reader reader = new InputStreamReader(new FileInputStream(outputTempFile.getAbsolutePath()), "utf-8");
+            BufferedReader br = new BufferedReader(reader);
+
 			String line;
 			Iterator<Entity> entityIterator = source.iterator();
             while ((line = br.readLine()) != null)
@@ -190,7 +187,7 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator, ApplicationL
         File tempInput;
         tempInput = File.createTempFile(tempInputFileName, ".vcf");
 
-        BufferedWriter bw = new BufferedWriter(new FileWriter(tempInput));
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tempInput),"UTF-8"));
         for (Entity entity : source)
         {
             StringBuilder builder = new StringBuilder();
