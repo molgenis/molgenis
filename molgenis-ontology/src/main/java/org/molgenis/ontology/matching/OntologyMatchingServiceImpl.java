@@ -338,7 +338,9 @@ public class OntologyMatchingServiceImpl implements OntologyMatchingService
 	@Override
 	public OntologyServiceResult search(String ontologyUrl, String queryString)
 	{
-		return null;
+		Entity entity = new MapEntity();
+		entity.set(OntologyMatchingServiceImpl.DEFAULT_MATCHING_NAME_FIELD, queryString);
+		return searchEntity(ontologyUrl, entity);
 	}
 
 	private OntologyServiceResult convertResults(List<Entity> relevantEntities, Map<String, Object> inputData)
