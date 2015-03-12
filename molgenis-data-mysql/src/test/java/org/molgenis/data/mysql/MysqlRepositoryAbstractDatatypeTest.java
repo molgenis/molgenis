@@ -3,13 +3,14 @@ package org.molgenis.data.mysql;
 import org.molgenis.AppConfig;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
 /** Superclass for all datatype specific tests, e.g. MysqlRepositoryStringTest */
@@ -19,7 +20,7 @@ public abstract class MysqlRepositoryAbstractDatatypeTest extends AbstractTestNG
 	protected static final Logger LOG = LoggerFactory.getLogger(MysqlRepositoryAbstractDatatypeTest.class);
 
 	@Autowired
-	MetaDataService metaDataService;
+	MetaDataServiceImpl metaDataService;
 
 	private EntityMetaData metaData;
 
@@ -76,5 +77,11 @@ public abstract class MysqlRepositoryAbstractDatatypeTest extends AbstractTestNG
 
 		// allow time for logger to finish... (premature end of program results in loss of output)
 		Thread.sleep(100);
+	}
+
+	@AfterClass
+	public void afterClass()
+	{
+		metaDataService.recreateMetaDataRepositories();
 	}
 }
