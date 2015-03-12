@@ -14,6 +14,7 @@
 	};
 	
 	function createFilterWizardModal(attributeFilters) {
+		$('#filter-wizard-modal').remove();
 		var modal = $('#filter-wizard-modal');
         var wizardTemplate = Handlebars.compile($("#filter-wizard-modal-template").html());
         modal = $(wizardTemplate({}));
