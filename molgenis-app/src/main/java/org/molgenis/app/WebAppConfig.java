@@ -1,6 +1,7 @@
 package org.molgenis.app;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -20,6 +21,7 @@ import org.molgenis.data.system.RepositoryTemplateLoader;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
 import org.molgenis.system.core.FreemarkerTemplateRepository;
 import org.molgenis.ui.MolgenisWebAppConfig;
+import org.molgenis.util.DependencyResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.ComponentScan;
@@ -30,6 +32,8 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
+
+import com.google.common.collect.Sets;
 
 import freemarker.template.TemplateException;
 
@@ -85,15 +89,21 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		};
 		localDataService.getMeta().setDefaultBackend(backend);
 
-		for (EntityMetaData emd : localDataService.getMeta().getEntityMetaDatas())
+		List<EntityMetaData> metas = DependencyResolver.resolve(Sets.newHashSet(localDataService.getMeta()
+				.getEntityMetaDatas()));
+
+		for (EntityMetaData emd : metas)
 		{
-			if (emd.getBackend().equals(MysqlRepositoryCollection.NAME))
+			if (!emd.isAbstract())
 			{
-				localDataService.addRepository(backend.addEntityMeta(emd));
-			}
-			else if (emd.getBackend().equals(JpaRepositoryCollection.NAME))
-			{
-				localDataService.addRepository(jpaRepositoryCollection.getUnderlying(emd.getName()));
+				if (emd.getBackend().equals(MysqlRepositoryCollection.NAME))
+				{
+					localDataService.addRepository(backend.addEntityMeta(emd));
+				}
+				else if (emd.getBackend().equals(JpaRepositoryCollection.NAME))
+				{
+					localDataService.addRepository(jpaRepositoryCollection.getUnderlying(emd.getName()));
+				}
 			}
 		}
 	}

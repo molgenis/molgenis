@@ -481,16 +481,25 @@ public class EmxMetaDataParser implements MetaDataParser
 				String extendsEntityName = entity.getString(EXTENDS);
 				if (extendsEntityName != null)
 				{
+					EntityMetaData extendsEntityMeta = null;
 					if (intermediateResults.knowsEntity(extendsEntityName))
 					{
-						EntityMetaData extendsEntityMeta = intermediateResults.getEntityMetaData(extendsEntityName);
-						md.setExtends(extendsEntityMeta);
+						extendsEntityMeta = intermediateResults.getEntityMetaData(extendsEntityName);
+
 					}
 					else
+					{
+						extendsEntityMeta = dataService.getMeta().getEntityMetaData(extendsEntityName);
+
+					}
+
+					if (extendsEntityMeta == null)
 					{
 						throw new MolgenisDataException("Missing super entity " + extendsEntityName + " for entity "
 								+ entityName + " on line " + i);
 					}
+
+					md.setExtends(extendsEntityMeta);
 				}
 
 				String packageName = entity.getString(PACKAGE);

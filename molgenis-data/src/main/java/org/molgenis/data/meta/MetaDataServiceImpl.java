@@ -159,6 +159,8 @@ public class MetaDataServiceImpl implements MetaDataService
 
 		if (getEntityMetaData(emd.getName()) != null)
 		{
+			if (emd.isAbstract()) return null;
+
 			if (!dataService.hasRepository(emd.getName()))
 			{
 				Repository repo = backend.getRepository(emd.getName());
