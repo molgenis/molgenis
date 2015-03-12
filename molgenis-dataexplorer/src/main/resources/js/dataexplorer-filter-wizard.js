@@ -63,13 +63,7 @@
 			listItems.push('<li><a href="#' + tabId + '" data-toggle="tab">' + label + '</a></li>');
 			
 			var pane = $('<div class="tab-pane' + (i === 0 ? ' active"' : '"') + ' id="' + tabId + '">');
-			var paneContainer = $('<div class="well"></div>');
-			
-			if (compoundAttributes.length > 1){
-				paneContainer.addClass('filter-wizard-fixed-height');
-			} else {
-				paneContainer.removeClass('filter-wizard-fixed-height');
-			}
+			var paneContainer = $('<div class="well filter-wizard-fixed-height"></div>');
 			
 			$.each(compoundAttribute.attributes, function(i, attribute) {
 				if(attribute.fieldType !== 'COMPOUND') {
