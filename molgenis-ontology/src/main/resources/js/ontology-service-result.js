@@ -5,7 +5,7 @@
 	var ontologyServiceRequest = null;
 	var result_container = null;
 	var reserved_identifier_field = 'Identifier';
-	var no_match_info = 'N/A';
+	var NO_MATCH_INFO = 'N/A';
 	
 	molgenis.OntologyService = function OntologySerivce(container, request){
 		result_container = container;
@@ -67,7 +67,7 @@
 		var row = $('<tr />');
 		row.append(gatherInputInfoHelper(responseData.inputTerm));
 		row.append(gatherOntologyInfoHelper(responseData.inputTerm, responseData.ontologyTerm));
-		$('<td />').append(responseData.matchedTerm.Score ? responseData.matchedTerm.Score.toFixed(2) + '%' : no_match_info).appendTo(row);
+		$('<td />').append(responseData.matchedTerm.Score ? responseData.matchedTerm.Score.toFixed(2) + '%' : NO_MATCH_INFO).appendTo(row);
 		if(matched){
 			$('<td />').append('<span class="glyphicon ' + (responseData.matchedTerm.Validated ? 'glyphicon-ok' : 'glyphicon-remove') + '"></span>').appendTo(row);
 			$('<td />').append(responseData.matchedTerm.Validated ? '<button type="button" class="btn btn-default"><span class="glyphicon glyphicon-trash"</span></button>':'').appendTo(row);
@@ -149,7 +149,8 @@
 						$.map(mappedEntity, function(val, key){
 							if(key !== 'Identifier') updatedMappedEntity[key] = val;
 							if(key === 'Validated') updatedMappedEntity[key] = true;
-							if(key === 'Score' || key === 'Match_term') updatedMappedEntity[key] = null;
+							if(key === 'Score') updatedMappedEntity[key] = 0;
+							if(key === 'Match_term') updatedMappedEntity[key] = null;
 						});
 						restApi.update(href, updatedMappedEntity);
 						location.reload();
@@ -207,7 +208,7 @@
 			var synonymDiv = $('<div>Synonym : </div>');
 			var synonyms = getOntologyTermSynonyms(ontologyTerm);
 			if(synonyms.length == 0){
-				synonymDiv.append(no_match_info);
+				synonymDiv.append(NO_MATCH_INFO);
 			}else if(synonyms.length == 1){
 				synonymDiv.append(synonyms.join());		
 			}else{
@@ -225,7 +226,7 @@
 				}
 			});
 		}else{
-			ontologyTermTd.append(no_match_info);
+			ontologyTermTd.append(NO_MATCH_INFO);
 		}
 		return ontologyTermTd;
 	}

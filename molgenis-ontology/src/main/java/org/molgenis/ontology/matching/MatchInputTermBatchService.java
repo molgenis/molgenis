@@ -82,6 +82,7 @@ public class MatchInputTermBatchService
 				matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.IDENTIFIER,
 						entityName + "_" + entity.getIdValue());
 				matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.REF_ENTITY, entityName);
+				matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.VALIDATED, false);
 				entitiesToAdd.add(matchingTaskContentEntity);
 
 				OntologyServiceResult searchEntity = ontologyService.searchEntity(ontologyIri, entity);
@@ -92,7 +93,10 @@ public class MatchInputTermBatchService
 							firstMatchedOntologyTerm.get(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI));
 					matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.SCORE,
 							firstMatchedOntologyTerm.get(OntologyMatchingServiceImpl.SCORE));
-					matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.VALIDATED, false);
+				}
+				else
+				{
+					matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.SCORE, 0);
 				}
 
 				// Add entity in batch
