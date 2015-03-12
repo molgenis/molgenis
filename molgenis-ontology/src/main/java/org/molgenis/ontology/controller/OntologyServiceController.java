@@ -22,6 +22,7 @@ import javax.servlet.http.Part;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -40,15 +41,16 @@ import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ontology.OntologyServiceResult;
 import org.molgenis.ontology.beans.OntologyServiceResultImpl;
 import org.molgenis.ontology.matching.AdaptedCsvRepository;
+import org.molgenis.ontology.matching.MatchInputTermBatchService;
 import org.molgenis.ontology.matching.MatchingTaskContentEntityMetaData;
 import org.molgenis.ontology.matching.MatchingTaskEntityMetaData;
 import org.molgenis.ontology.matching.OntologyMatchingService;
 import org.molgenis.ontology.matching.OntologyMatchingServiceImpl;
-import org.molgenis.ontology.matching.MatchInputTermBatchService;
 import org.molgenis.ontology.matching.UploadProgress;
 import org.molgenis.ontology.model.OntologyMetaData;
 import org.molgenis.ontology.model.OntologyTermMetaData;
 import org.molgenis.ontology.request.OntologyServiceRequest;
+import org.molgenis.ontology.roc.MatchQualityRocService;
 import org.molgenis.ontology.utils.OntologyServiceUtil;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.FileStore;
@@ -61,6 +63,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -83,6 +86,9 @@ public class OntologyServiceController extends MolgenisPluginController
 
 	@Autowired
 	private UploadProgress uploadProgress;
+
+	@Autowired
+	private MatchQualityRocService matchQualityRocService;
 
 	@Autowired
 	private FileStore fileStore;
@@ -116,6 +122,13 @@ public class OntologyServiceController extends MolgenisPluginController
 		model.addAttribute("ontologies",
 				OntologyServiceUtil.getEntityAsMap(ontologyMatchingService.getAllOntologyEntities()));
 		return "ontology-match-view";
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/calculate/{entityName}")
+	public String calculateRoc(@PathVariable String entityName, Model model) throws IOException, InvalidFormatException
+	{
+		model.addAllAttributes(matchQualityRocService.calculateROC(entityName));
+		return init(model);
 	}
 
 	@RequestMapping(method = POST, value = "/threshold/{entityName}")
