@@ -8,9 +8,14 @@ $(function() {
 	});
 	
 	function submitForm() {
-		$('#workflowForm').validate();
 		$('#workflowForm').submit();
 	}
+	
+	$('#workflowForm').validate({
+		submitHandler : function(form) {
+			form.submit();
+		}
+	});
 	
 	$('#workflowForm input, #workflowForm textarea, #workflowForm select').on('change', submitForm);
 });
