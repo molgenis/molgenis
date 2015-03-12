@@ -60,6 +60,7 @@
 		$.each(compoundAttributes, function(i, compoundAttribute) {
 			var tabId = compoundAttribute.name + '-tab';
 			var label = compoundAttribute.label || compoundAttribute.name;
+			
 			listItems.push('<li><a href="#' + tabId + '" data-toggle="tab">' + label + '</a></li>');
 			
 			var pane = $('<div class="tab-pane' + (i === 0 ? ' active"' : '"') + ' id="' + tabId + '">');
@@ -70,10 +71,10 @@
 					paneContainer.append(molgenis.dataexplorer.filter.createFilter(attribute, attributeFilters[attribute.href], true));
 				}
 			});
+			
 			pane.append(paneContainer);
 			paneItems.push(pane);
 		});
-		
 		
 		if(compoundAttributes.length > 1){
             $('.wizard-steps', wizard).show();
