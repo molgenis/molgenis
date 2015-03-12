@@ -99,19 +99,46 @@
 	}
 	
 	function createTableForCandidateMappings(inputEntity, data, row){
+		
 		var container = $('<div class="row"></div>').css({'margin-bottom':'20px'});
+		//Hide existing table
 		row.parents('table:eq(0)').hide();
+		//Add table containing candidate matches to the view
 		row.parents('div:eq(0)').append(container);
+		
+		//Add a backButton for users to go back to previous summary table
+		var backButton = $('<button type="button" class="btn btn-warning">Cancel</button>').css({'margin-bottom':'10px','float':'right'}).click(function(){
+			container.remove();
+			row.parents('table:eq(0)').show();
+		});
+		//Add a unknownButton for users to choose 'Unknown' for the input term
+		var unknownButton = $('<button type="button" class="btn btn-danger">No match</button>').
+			css({'margin-bottom':'10px','margin-right':'10px','float':'right'}).click(function(){
+			getMappingEntity(inputEntity.Identifier, ontologyServiceRequest.entityName, function(data){
+				if(data.items.length > 0){
+					var mappedEntity = data.items[0];
+					var href = '/api/v1/MatchingTaskContent/' + mappedEntity.Identifier;
+					var updatedMappedEntity = {};
+					$.map(mappedEntity, function(val, key){
+						if(key !== 'Identifier') updatedMappedEntity[key] = val;
+						if(key === 'Validated') updatedMappedEntity[key] = true;
+						if(key === 'Score') updatedMappedEntity[key] = 0;
+						if(key === 'Match_term') updatedMappedEntity[key] = null;
+					});
+					restApi.update(href, updatedMappedEntity);
+					location.reload();
+				}
+			});
+		});
+		
+		var hintInformation;
+		var table = $('<table class="table"></table>').append('<tr><th style="width:30%;">Input Term</th><th style="width:40%;">Candidate mapping</th><th style="width:8%;">Score</th><th style="width:12%;">Adjusted Score</th><th>Select</th></tr>');
 		if(data.ontologyTerms && data.ontologyTerms.length > 0){
-			var backButton = $('<button type="button" class="btn btn-warning">Cancel</button>').css({'margin-bottom':'10px','float':'right'});
-			var unknownButton = $('<button type="button" class="btn btn-danger">No match</button>').css({'margin-bottom':'10px','margin-right':'10px','float':'right'});
-			var hintInformation = $('<center><p style="font-size:15px;">The candidate ontology terms are sorted based on similarity score, please select one of them by clicking <span class="glyphicon glyphicon-ok"></span> button</p></center>');
-			var table = $('<table class="table"></table>').append('<tr><th style="width:30%;">Input Term</th><th style="width:40%;">Candidate mapping</th><th style="width:8%;">Score</th><th style="width:12%;">Adjusted Score</th><th>Select</th></tr>');
-			var count = 0;
+			hintInformation = $('<center><p style="font-size:15px;">The candidate ontology terms are sorted based on similarity score, please select one of them by clicking <span class="glyphicon glyphicon-ok"></span> button</p></center>');
 			$.each(data.ontologyTerms, function(index, ontologyTerm){
-				if(count >= 20) return;
+				if(index >= 20) return;
 				var row = $('<tr />').appendTo(table);
-				row.append(count == 0 ? gatherInputInfoHelper(inputEntity) : '<td></td>');
+				row.append(index == 0 ? gatherInputInfoHelper(inputEntity) : '<td></td>');
 				row.append(gatherOntologyInfoHelper(inputEntity, ontologyTerm));
 				row.append('<td>' + ontologyTerm.Score.toFixed(2) + '%</td>');
 				row.append('<td>' + ontologyTerm.Combined_Score.toFixed(2) + '%</td>');
@@ -134,33 +161,13 @@
 						}
 					});
 				});
-				count++;
 			});
-			backButton.click(function(){
-				container.remove();
-				row.parents('table:eq(0)').show();
-			});
-			unknownButton.click(function(){
-				getMappingEntity(inputEntity.Identifier, ontologyServiceRequest.entityName, function(data){
-					if(data.items.length > 0){
-						var mappedEntity = data.items[0];
-						var href = '/api/v1/MatchingTaskContent/' + mappedEntity.Identifier;
-						var updatedMappedEntity = {};
-						$.map(mappedEntity, function(val, key){
-							if(key !== 'Identifier') updatedMappedEntity[key] = val;
-							if(key === 'Validated') updatedMappedEntity[key] = true;
-							if(key === 'Score') updatedMappedEntity[key] = 0;
-							if(key === 'Match_term') updatedMappedEntity[key] = null;
-						});
-						restApi.update(href, updatedMappedEntity);
-						location.reload();
-					}
-				});
-			})
-			$('<div class="col-md-12"></div>').append(hintInformation).append(backButton).append(unknownButton).append(table).appendTo(container);
 		}else{
-			container.append('<center>There are no candidate mappings for this input term!</center>');
+			hintInformation = $('<center><p style="font-size:15px;">There are no candidate mappings for this input term!</p></center>');
+			$('<tr />').append(gatherInputInfoHelper(inputEntity)).append('<td>' + NO_MATCH_INFO + '</td><td>' + NO_MATCH_INFO + '</td><td>' + NO_MATCH_INFO + '</td><td>' + NO_MATCH_INFO + '</td>').appendTo(table);
 		}
+		
+		$('<div class="col-md-12"></div>').append(hintInformation).append(backButton).append(unknownButton).append(table).appendTo(container);
 	}
 	
 	function getMappingEntity(inputTermIdentifier, entityName, callback){
