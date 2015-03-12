@@ -284,7 +284,6 @@ public class DefaultEntity implements Entity
 		}
 		List<Entity> result = ids.stream().map(id -> entities.get(id)).filter(x -> x != null)
 				.collect(Collectors.toList());
-		System.out.println(result);
 		return result;
 	}
 
