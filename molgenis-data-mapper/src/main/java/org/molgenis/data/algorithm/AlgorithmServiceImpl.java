@@ -66,8 +66,8 @@ public class AlgorithmServiceImpl implements AlgorithmService
 									break;
 								case XREF:
 								case CATEGORICAL:
-									derivedValues.add(dataService.findOne(targetAttribute.getRefEntity().getName(),
-											result).getIdValue());
+                                    derivedValues.add(dataService.findOne(targetAttribute.getRefEntity().getName(),
+                                            Context.toString(result)).getIdValue());
 									break;
 								case MREF:
 									throw new UnsupportedOperationException();
