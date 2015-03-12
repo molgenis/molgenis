@@ -20,7 +20,11 @@ import org.molgenis.compute.ui.meta.AnalysisJobMetaData;
 import org.molgenis.compute.ui.meta.AnalysisMetaData;
 import org.molgenis.compute.ui.meta.UIBackendMetaData;
 import org.molgenis.compute.ui.meta.UIWorkflowMetaData;
-import org.molgenis.compute.ui.model.*;
+import org.molgenis.compute.ui.model.Analysis;
+import org.molgenis.compute.ui.model.AnalysisJob;
+import org.molgenis.compute.ui.model.UIBackend;
+import org.molgenis.compute.ui.model.UIWorkflow;
+import org.molgenis.compute.ui.model.UIWorkflowNode;
 import org.molgenis.compute.ui.model.decorator.UIWorkflowDecorator;
 import org.molgenis.compute5.CommandLineRunContainer;
 import org.molgenis.compute5.ComputeCommandLine;
@@ -110,6 +114,13 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 		return "view-analysis";
 	}
 
+	/**
+	 * Called when a worksheet is sent to a workflow
+	 * 
+	 * @param model
+	 * @param createAnalysisRequest
+	 * @return
+	 */
 	@Transactional
 	@RequestMapping(value = CREATE_MAPPING, method = POST)
 	@ResponseBody
@@ -162,6 +173,9 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 		dataService.add(AnalysisMetaData.INSTANCE.getName(), analysis);
 
 		String targetEntityName = createAnalysisRequest.getTargetEntityName();
+
+		// System.out.println("targetEntityName: " + targetEntityName);
+
 		if (targetEntityName != null && !targetEntityName.isEmpty())
 		{
 			// get requested targets
@@ -176,8 +190,27 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 				targets = dataService.findAll(targetEntityName);
 			}
 
+			/** REMOVE **/
+			for (Entity e : targets)
+			{
+				System.out.println("target: " + e.getLabelValue());
+				System.out.println("target attributes: ");
+				for (String s : e.getAttributeNames())
+				{
+					System.out.println("   " + s);
+				}
+			}
+
 			// set analysis on requested targets
 			final String analysisAttrName = UIWorkflowDecorator.ANALYSIS_ATTRIBUTE.getName();
+
+			/** REMOVE **/
+			System.out.println("analysisAttrName: " + analysisAttrName);
+			// add analysis column
+			// AttributeMetaData attr = new DefaultAttributeMetaData(analysisAttrName)
+			// .setDataType(MolgenisFieldTypes.MREF).setRefEntity(AnalysisMetaData.INSTANCE);
+			// dataService.getMeta().addAttribute(targetEntityName, attr);
+
 			dataService.update(targetEntityName, Iterables.transform(targets, new Function<Entity, Entity>()
 			{
 				@Override

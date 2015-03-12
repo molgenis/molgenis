@@ -110,6 +110,16 @@ public class WorkflowPluginController extends MolgenisPluginController
 		return "view-workflow";
 	}
 
+	/**
+	 * Called when the workflow form is updated
+	 * 
+	 * @param workflowName
+	 * @param form
+	 * @param model
+	 * @param response
+	 * @return
+	 * @throws IOException
+	 */
 	@RequestMapping(value = "{workflowName}", method = POST)
 	public String updateWorkflow(@PathVariable("workflowName") String workflowName, @Valid UpdateWorkflowForm form,
 			Model model, HttpServletResponse response) throws IOException
