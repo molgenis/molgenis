@@ -12,7 +12,7 @@ import org.apache.xmlbeans.impl.piccolo.io.FileFormatException;
 import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.vcf.VcfRepository;
 
 public class VcfUtils
@@ -27,7 +27,7 @@ public class VcfUtils
 	 * @return
 	 * @throws Exception 
 	 */
-	public static String convertToVCF(Entity vcfEntity) throws Exception
+	public static String convertToVCF(Entity vcfEntity) throws MolgenisDataException
 	{
 		StringBuilder vcfRecord = new StringBuilder();
 
@@ -119,7 +119,7 @@ public class VcfUtils
 				}
 				else if(firstSample)
 				{
-					throw new Exception("Weird situation: we are at sample 1 and want to print FORMAT info but there seems to be none?");
+					throw new MolgenisDataException("Weird situation: we are at sample 1 and want to print FORMAT info but there seems to be none?");
 				}
 
 				// now add SAMPLE data
