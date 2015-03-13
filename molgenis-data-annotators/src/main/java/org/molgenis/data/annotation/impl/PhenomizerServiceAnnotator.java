@@ -134,6 +134,10 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 		
 		for(String line : response)
 		{
+			if(line == null || line.equals("") || line.startsWith("#"))
+			{
+				continue;
+			}
 			String[] split = line.split("\t", -1);
 			pval = split[0];
 			simScore = split[1];
