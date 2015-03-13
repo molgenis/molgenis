@@ -14,9 +14,14 @@
 						'</div>'
 						));
 		
+			$('body').css({'margin-top': $('#accept-cookies-container').height()});
+			
 			$('#accept-cookies').on('click', function(){
 				$.cookie("toestemmingvoorcookies", "true", {expires:365, path:'/', secure:false});
 				$('#accept-cookies-container').fadeOut(1000);
+				
+				// Reset body margin-top default value
+				setTimeout(function(){$('body').css({'margin-top': 0});}, 1000);
 			});
 		}
 	});
