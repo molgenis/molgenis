@@ -1014,8 +1014,7 @@ public class RestController
 	// Creates a new MapEntity based from a HttpServletRequest
 	private Entity toEntity(EntityMetaData meta, Map<String, Object> request)
 	{
-		Entity entity = new MapEntity();
-		if (meta.getIdAttribute() != null) entity = new MapEntity(meta.getIdAttribute().getName());
+		Entity entity = new MapEntity(meta);
 
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{

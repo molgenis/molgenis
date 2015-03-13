@@ -92,9 +92,9 @@
 			
 			var valueEvent;
 			if(this._isRadioOrCheckbox()) {
-				valueEvent = {value: event.target.value, checked: event.target.checked};
+				valueEvent = {value: this._emptyValueToNull(event.target.value), checked: event.target.checked};
 			} else {
-				var value = event.target.value !== '' ? event.target.value : null;
+				var value = this._emptyValueToNull(event.target.value);
 				
 				if(this.props.type === 'number' && value !== null) {
 					value = parseFloat(value); // convert js string to js number
@@ -106,6 +106,9 @@
 		},
 		_isRadioOrCheckbox: function() {
 			return this.props.type === 'radio' || this.props.type === 'checkbox';
+		},
+		_emptyValueToNull: function(value) {
+			return value !== '' ? value : null;
 		}
 	});
 	
@@ -114,7 +117,7 @@
 	 *  
 	 * @memberOf control.mixin
 	 */
-	var GroupControlMixin = { // FIXME not working for readonly
+	var GroupControlMixin = {
 		render: function() {//console.log('render GroupControlMixin', this.state, this.props);
 			var options = this.props.options;
 			if(!this.props.required) {
@@ -122,19 +125,18 @@
 			}
 			
 			var type = this.props.type;
-			var self = this;
 			var inputs = $.map(options, function(option, i) {
 				var control = molgenis.control.InputControl({
 					type : type,
-					name : self.props.name,
-					checked : self._isChecked(option.value),
-					disabled : self.props.disabled,
-					readOnly: self.props.readOnly,
+					name : this.props.name,
+					checked : this._isChecked(option),
+					disabled : this.props.disabled,
+					readOnly: this.props.readOnly,
 					value : option.value,
-					onValueChange : self._handleChange
+					onValueChange : this._handleChange
 				});
-				if(self.props.layout === 'stacked') {
-					var divClasses = self.props.disabled ? type + ' disabled' : type;
+				if(this.props.layout === 'vertical') {
+					var divClasses = this.props.disabled ? type + ' disabled' : type;
 					return (
 						div({className: divClasses, key: '' + i},
 							label({},
@@ -143,14 +145,14 @@
 						)
 					);
 				} else {
-					var labelClasses = self.props.disabled ? type + '-inline disabled' : type + '-inline';
+					var labelClasses = this.props.disabled ? type + '-inline disabled' : type + '-inline';
 					return (
 						label({className: labelClasses, key: '' + i},
 							control, option.label
 						)
 					);
 				}
-			});
+			}.bind(this));
 			return div({}, inputs);
 		},
 		_inputToValue: function(value) {
@@ -168,18 +170,18 @@
 		displayName: 'RadioGroupControl',
 		propTypes: {
 			name: React.PropTypes.string.isRequired,
-			layout: React.PropTypes.string,
+			layout: React.PropTypes.oneOf(['horizontal', 'vertical']),
 			required: React.PropTypes.bool,
 			disabled: React.PropTypes.bool,
 			readOnly: React.PropTypes.bool,
-			options: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
+			options: React.PropTypes.arrayOf(React.PropTypes.shape({value: React.PropTypes.string, label: React.PropTypes.string})).isRequired,
 			value: React.PropTypes.string,
 			onValueChange: React.PropTypes.func.isRequired
 		},
 		getDefaultProps: function() {
 			return {
 				type: 'radio',
-				layout: 'stacked'
+				layout: 'vertical'
 			};
 		},
 		getInitialState: function() {
@@ -187,13 +189,12 @@
 				value: this.props.value
 			};
 		},
-		_handleChange: function(event) {//console.log('_handleChange RadioGroupControl', event);
-			var value = this._inputToValue(event.value);
-			this.setState({value: value});
-			this.props.onValueChange({value: value});
+		_handleChange: function(event) {//console.log('_handleChange RadioGroupControl', event);			
+			this.setState({value: event.value});
+			this.props.onValueChange({value: event.value});
 		},
 		_isChecked: function(value) {
-			return this.state.value === this._inputToValue(value);
+			return this.state.value === this._inputToValue(value.value);
 		}
 	});
 
@@ -207,18 +208,18 @@
 		displayName: 'CheckboxGroupControl',
 		propTypes: {
 			name: React.PropTypes.string,
-			layout: React.PropTypes.string,
+			layout: React.PropTypes.oneOf(['horizontal', 'vertical']),
 			required: React.PropTypes.bool,
 			disabled: React.PropTypes.bool,
 			readOnly: React.PropTypes.bool,
-			options: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
+			options: React.PropTypes.arrayOf(React.PropTypes.shape({value: React.PropTypes.string, label: React.PropTypes.string})).isRequired,
 			value: React.PropTypes.arrayOf(React.PropTypes.string),
 			onValueChange: React.PropTypes.func.isRequired
 		},
 		getDefaultProps: function() {
 			return {
 				type: 'checkbox',
-				layout: 'stacked'
+				layout: 'vertical'
 			};
 		},
 		getInitialState: function() {
@@ -253,7 +254,7 @@
 	/**
 	 * @memberOf control
 	 */
-	var DateControl = React.createClass({ // FIXME why store state here? already stored by DateTimePicker
+	var DateControl = React.createClass({
 		mixins: [molgenis.DeepPureRenderMixin],
 		displayName: 'DateControl',
 		propTypes: {
@@ -265,14 +266,6 @@
 			value: React.PropTypes.string,
 			onValueChange: React.PropTypes.func.isRequired
 		},
-		getInitialState: function() {
-			return {value: this.props.value};
-		},
-		componentWillReceiveProps : function(nextProps) {
-			this.setState({
-				value: nextProps.value
-			});
-		},
 		render: function() {//console.log('render DateControl', this.state, this.props);
 			return molgenis.control.wrapper.DateTimePicker({
 				name: this.props.name,
@@ -281,13 +274,12 @@
 				required : this.props.required,
 				disabled : this.props.disabled,
 				readOnly : this.props.readOnly,
-				value : this.state.value,
+				value : this.props.value,
 				onChange : this._handleChange
 			});
 		},
-		_handleChange: function(value) {//console.log('_handleChange DateControl', value);
-			this.setState(value);
-			this.props.onValueChange(value);
+		_handleChange: function(value) {
+			this.props.onValueChange({value: value});
 		}
 	});
 	
@@ -338,9 +330,20 @@
 	/**
 	 * @memberOf control
 	 */
-	var CodeEditorControl = React.createClass({ // TODO: add prop types
+	var CodeEditorControl = React.createClass({
 		mixins: [molgenis.DeepPureRenderMixin],
 		displayName: 'CodeEditorControl',
+		propTypes: {
+			id : React.PropTypes.string,
+			name: React.PropTypes.string,
+			placeholder : React.PropTypes.string,
+			required : React.PropTypes.bool,
+			disabled : React.PropTypes.bool,
+			readOnly : React.PropTypes.bool,
+			mode: React.PropTypes.string,
+			value : React.PropTypes.string,
+			onValueChange : React.PropTypes.func.isRequired
+		},
 		render: function() {//console.log('render CodeEditorControl', this.state, this.props);
 			return molgenis.control.wrapper.Ace({
 				id : this.props.id,
@@ -351,8 +354,11 @@
 				readOnly : this.props.readOnly,
 				mode: this.props.language,
 				value : this.props.value,
-				onChange : this.props.onValueChange
+				onChange : this._handleChange
 			});
+		},
+		_handleChange: function(value) {//console.log('_handleChange RangeSlider', event);
+			this.props.onValueChange({value: value !== '' ? value : null});
 		}
 	});
 	
@@ -369,7 +375,7 @@
 			value: React.PropTypes.arrayOf(React.PropTypes.number),
 			step: React.PropTypes.string,
 			disabled: React.PropTypes.bool,
-			onChange: React.PropTypes.func
+			onValueChange : React.PropTypes.func.isRequired
 		},
 		render: function() {//console.log('render RangeSlider', this.state, this.props);
 			var range = this.props.range;
@@ -393,8 +399,8 @@
 				onChange : this._handleChange
 			});
 		},
-		_handleChange: function(event) {//console.log('_handleChange RangeSlider', event);
-			this.props.onValueChange({value: event.value});
+		_handleChange: function(value) {//console.log('_handleChange RangeSlider', event);
+			this.props.onValueChange({value: value});
 		}
 	});
 	
@@ -409,7 +415,8 @@
 			id: React.PropTypes.string,
 			name: React.PropTypes.string,
 			label: React.PropTypes.string,
-			layout: React.PropTypes.string,
+			layout: React.PropTypes.oneOf(['horizontal', 'vertical']),
+			type: React.PropTypes.oneOf(['single', 'group']),
 			multiple: React.PropTypes.bool,
 			required: React.PropTypes.bool,
 			disabled: React.PropTypes.bool,
@@ -420,7 +427,7 @@
 		getDefaultProps: function() {
 			return {
 				type: 'single',
-				layout: 'inline',
+				layout: 'horizontal',
 				required: true
 			};
 		},

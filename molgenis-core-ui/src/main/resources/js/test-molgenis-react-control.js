@@ -23,24 +23,24 @@ $(function() {
 	var options = [{value: 'd', label: 'Dog'}, {value: 'c', label: 'Cat'}, {value: 'm', label: 'Mouse'}];
 	
 	var RadioGroupControl = molgenis.control.RadioGroupControl;
-	React.render(RadioGroupControl({options: options, onValueChange: onValueChange, layout: 'stacked'}), $('#input-container-radiogroup')[0]);
-	React.render(RadioGroupControl({options: options, onValueChange: onValueChange, layout: 'stacked', value: 'c'}), $('#input-container-radiogroup-value')[0]);
-	React.render(RadioGroupControl({options: options, onValueChange: onValueChange, layout: 'stacked', required: true}), $('#input-container-radiogroup-required')[0]);
-	React.render(RadioGroupControl({options: options, onValueChange: onValueChange, layout: 'stacked', required: true, value: 'c'}), $('#input-container-radiogroup-required-value')[0]);
-	React.render(RadioGroupControl({options: options, onValueChange: onValueChange, layout: 'stacked', required: true, value: null}), $('#input-container-radiogroup-required-value-null')[0]);
-	React.render(RadioGroupControl({options: options, onValueChange: onValueChange, layout: 'inline'}), $('#input-container-radiogroup-inline')[0]);
-	React.render(RadioGroupControl({options: options, onValueChange: onValueChange, layout: 'inline', readOnly: true}), $('#input-container-radiogroup-inline-readonly')[0]);
-	React.render(RadioGroupControl({options: options, onValueChange: onValueChange, layout: 'inline', disabled: true}), $('#input-container-radiogroup-inline-disabled')[0]);
+	React.render(RadioGroupControl({name: 'radio0', options: options, onValueChange: onValueChange, layout: 'vertical'}), $('#input-container-radiogroup')[0]);
+	React.render(RadioGroupControl({name: 'radio1', options: options, onValueChange: onValueChange, layout: 'vertical', value: 'c'}), $('#input-container-radiogroup-value')[0]);
+	React.render(RadioGroupControl({name: 'radio2', options: options, onValueChange: onValueChange, layout: 'vertical', required: true}), $('#input-container-radiogroup-required')[0]);
+	React.render(RadioGroupControl({name: 'radio3', options: options, onValueChange: onValueChange, layout: 'vertical', required: true, value: 'c'}), $('#input-container-radiogroup-required-value')[0]);
+	React.render(RadioGroupControl({name: 'radio4', options: options, onValueChange: onValueChange, layout: 'vertical', required: true, value: null}), $('#input-container-radiogroup-required-value-null')[0]);
+	React.render(RadioGroupControl({name: 'radio5', options: options, onValueChange: onValueChange, layout: 'horizontal'}), $('#input-container-radiogroup-inline')[0]);
+	React.render(RadioGroupControl({name: 'radio6', options: options, onValueChange: onValueChange, layout: 'horizontal', readOnly: true}), $('#input-container-radiogroup-inline-readonly')[0]);
+	React.render(RadioGroupControl({name: 'radio7', options: options, onValueChange: onValueChange, layout: 'horizontal', disabled: true}), $('#input-container-radiogroup-inline-disabled')[0]);
 	
 	var CheckboxGroupControl = molgenis.control.CheckboxGroupControl;
-	React.render(CheckboxGroupControl({options: options, onValueChange: onValueChange, layout: 'stacked'}), $('#input-container-checkboxgroup')[0]);
-	React.render(CheckboxGroupControl({options: options, onValueChange: onValueChange, layout: 'stacked', value: ['c']}), $('#input-container-checkboxgroup-value')[0]);
-	React.render(CheckboxGroupControl({options: options, onValueChange: onValueChange, layout: 'stacked', required: true}), $('#input-container-checkboxgroup-required')[0]);
-	React.render(CheckboxGroupControl({options: options, onValueChange: onValueChange, layout: 'stacked', required: true, value: ['c']}), $('#input-container-checkboxgroup-required-value')[0]);
-	React.render(CheckboxGroupControl({options: options, onValueChange: onValueChange, layout: 'stacked', required: true, value: [null]}), $('#input-container-checkboxgroup-required-value-null')[0]);
-	React.render(CheckboxGroupControl({options: options, onValueChange: onValueChange, layout: 'inline'}), $('#input-container-checkboxgroup-inline')[0]);
-	React.render(CheckboxGroupControl({options: options, onValueChange: onValueChange, layout: 'inline', readOnly: true}), $('#input-container-checkboxgroup-inline-readonly')[0]);
-	React.render(CheckboxGroupControl({options: options, onValueChange: onValueChange, layout: 'inline', disabled: true}), $('#input-container-checkboxgroup-inline-disabled')[0]);
+	React.render(CheckboxGroupControl({options: options, onValueChange: onValueChange, layout: 'vertical'}), $('#input-container-checkboxgroup')[0]);
+	React.render(CheckboxGroupControl({options: options, onValueChange: onValueChange, layout: 'vertical', value: ['c']}), $('#input-container-checkboxgroup-value')[0]);
+	React.render(CheckboxGroupControl({options: options, onValueChange: onValueChange, layout: 'vertical', required: true}), $('#input-container-checkboxgroup-required')[0]);
+	React.render(CheckboxGroupControl({options: options, onValueChange: onValueChange, layout: 'vertical', required: true, value: ['c']}), $('#input-container-checkboxgroup-required-value')[0]);
+	React.render(CheckboxGroupControl({options: options, onValueChange: onValueChange, layout: 'vertical', required: true, value: [null]}), $('#input-container-checkboxgroup-required-value-null')[0]);
+	React.render(CheckboxGroupControl({options: options, onValueChange: onValueChange, layout: 'horizontal'}), $('#input-container-checkboxgroup-inline')[0]);
+	React.render(CheckboxGroupControl({options: options, onValueChange: onValueChange, layout: 'horizontal', readOnly: true}), $('#input-container-checkboxgroup-inline-readonly')[0]);
+	React.render(CheckboxGroupControl({options: options, onValueChange: onValueChange, layout: 'horizontal', disabled: true}), $('#input-container-checkboxgroup-inline-disabled')[0]);
 
 	var DateControl = molgenis.control.DateControl;
 	React.render(DateControl({onValueChange: onValueChange}), $('#input-container-date')[0]);

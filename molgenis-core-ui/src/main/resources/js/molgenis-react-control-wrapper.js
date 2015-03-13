@@ -23,7 +23,7 @@
 			options: React.PropTypes.object,
 			disabled: React.PropTypes.bool,
 			value: React.PropTypes.oneOfType([React.PropTypes.object, React.PropTypes.array]),
-			onChange: React.PropTypes.func
+			onChange: React.PropTypes.func.isRequired
 		},
 		getInitialState: function() {
 			return {value: this.props.value};
@@ -43,10 +43,9 @@
 				}, this.props.options));
 
 			// create event select2 handlers
-			var self = this;
 			$container.on('change', function() {
-				self._handleChange($container.select2('data'));
-			});
+				this._handleChange($container.select2('data'));
+			}.bind(this));
 
 			// initialize select2
 			this._updateSelect2();
@@ -60,7 +59,7 @@
 			if (this.isMounted()) {
 				this._updateSelect2();
 			}
-			return input({type: 'hidden', ref: 'select2', onChange: function(){}}); // empty onChange callback to suppress React warning FIXME use InputControl 
+			return input({type: 'hidden', name: this.props.name, ref: 'select2', onChange: function(){}}); // empty onChange callback to suppress React warning FIXME use InputControl 
 		},
 		_handleChange: function(value) {//console.log('_handleChange Select2', value);
 			this.setState({value: value});
@@ -87,7 +86,7 @@
 			id: React.PropTypes.string,
 			options: React.PropTypes.object,
 			disabled: React.PropTypes.array,
-			onChange: React.PropTypes.func
+			onChange: React.PropTypes.func.isRequired
 		},
 		componentDidMount: function() {//console.log('componentDidMount JQRangeSlider');
 			var $container = $(this.refs.rangeslider.getDOMNode());
@@ -99,7 +98,7 @@
 
 			var props = this.props;
 			$container.on('userValuesChanged', function(e, data) {
-				props.onChange({value: [data.values.min, data.values.max]});
+				props.onChange([data.values.min, data.values.max]);
 			});
 		},
 		componentWillUnmount: function() {//console.log('componentWillUnmount JQRangeSlider');
@@ -134,7 +133,7 @@
 			disabled: React.PropTypes.bool,
 			readonly: React.PropTypes.bool,
 			value: React.PropTypes.string,
-			onChange: React.PropTypes.func
+			onChange: React.PropTypes.func.isRequired
 		},
 		componentDidMount: function() {//console.log('componentDidMount DateTimePicker');
 			var props = this.props;
@@ -147,19 +146,27 @@
 			});
 
 			$container.on('dp.change', function(event) {//console.log('event.date', event.date.format(format));
-				props.onChange({value: event.date.format(format)});
-			});
+				this._handleChange(event.date.format(format));
+			}.bind(this));
 
 			if(!this.props.required) {
 				var $clearBtn = $(this.refs.clearbtn.getDOMNode());
 				$clearBtn.on('click', function() {
-					props.onChange({value: undefined});
-				});
+					this._handleChange(undefined);
+				}.bind(this));
 			}
 		},
 		componentWillUnmount: function() {//console.log('componentWillUnmount DateTimePicker');
 			var $container = $(this.refs.datepicker.getDOMNode());
 			$container.datetimepicker('destroy');
+		},
+		getInitialState: function() {
+			return {value: this.props.value};
+		},
+		componentWillReceiveProps : function(nextProps) {
+			this.setState({
+				value: nextProps.value
+			});
 		},
 		render: function() {//console.log('render DateTimePicker', this.state, this.props);
 			var placeholder = this.props.placeholder;
@@ -174,12 +181,12 @@
 						className : 'form-control',
 						id: this.props.id,
 						name: this.props.name,
-						value : this.props.value,
+						value : this.state.value,
 						placeholder : placeholder,
 						required : required,
 						disabled : disabled,
 						readOnly : readOnly,
-						onChange : this.props.onChange
+						onChange : this._handleChange
 					}), // FIXME use InputControl
 					!required ? span({className: 'input-group-addon'},
 						span({className: 'glyphicon glyphicon-remove empty-date-input', ref: 'clearbtn'})
@@ -190,6 +197,10 @@
 				)
 			);
 		},
+		_handleChange: function(event) {//console.log('_handleChange DateControl', value);
+			this.setState({value: event.target.value});
+			this.props.onChange(event.target.value);
+		}
 	});
 	
 	/**
@@ -204,6 +215,7 @@
 			name: React.PropTypes.string,
 			required: React.PropTypes.bool,
 			readOnly: React.PropTypes.bool,
+			disabled: React.PropTypes.bool,
 			height: React.PropTypes.number,
 			theme: React.PropTypes.string,
 			mode: React.PropTypes.string,
@@ -227,18 +239,16 @@
 			var container = this.refs.editor.getDOMNode();
 			var editor = ace.edit(container);
 			editor.setTheme('ace/theme/' + this.props.theme);
-			editor.setReadOnly(this.props.readOnly === true || this.props.disabled === true);
 			
 			var session = editor.getSession();
 			session.setMode('ace/mode/' + this.props.mode);
-			session.setValue(this.props.value);
+			session.setValue(this.state.value);
 			
-			var self = this;
 			session.on('change', function() {
 				var value = session.getValue();
-				self.setState({value: value});
-				self.props.onChange(value);
-			});
+				this.setState({value: value});
+				this.props.onChange(value);
+			}.bind(this));
 		},
 		componentWillUnmount: function() {//console.log('componentWillUnmount Ace');
 			var container = this.refs.editor.getDOMNode();
@@ -246,6 +256,12 @@
 			editor.destroy();
 		},
 		render: function() {//console.log('render Ace', this.state, this.props);
+			if (this.isMounted()) {
+				var container = this.refs.editor.getDOMNode();
+				var editor = ace.edit(container);	
+				editor.setReadOnly(this.props.readOnly === true || this.props.disabled === true);
+			}
+			
 			// editor won't show up unless height is defined
 			return div({},
 				div({ref: 'editor', style: {height: this.props.height}}),

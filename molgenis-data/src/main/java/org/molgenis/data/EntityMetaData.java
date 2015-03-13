@@ -79,6 +79,11 @@ public interface EntityMetaData
 	AttributeMetaData getLabelAttribute();
 
 	/**
+	 * Returns attributes that must be searched in case of xref/mref search
+	 */
+	Iterable<AttributeMetaData> getLookupAttributes();
+
+	/**
 	 * Get attribute by name (case insensitive), returns null if not found
 	 */
 	AttributeMetaData getAttribute(String attributeName);

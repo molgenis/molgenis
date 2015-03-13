@@ -7,29 +7,43 @@
 	var api = new molgenis.RestClient();
 	
 	/**
+	 * @memberOf control.mixin
+	 */
+	var FormMixin = {
+		componentDidMount: function() {//console.log('componentDidMount FormMixin');
+			this._retrieveEntity(this.props.entity);
+		},
+		componentWillReceiveProps : function(nextProps) {
+			this._retrieveEntity(nextProps.entity);
+		},
+		_retrieveEntity: function(entity) {
+			// fetch entity meta if not exists
+			if(typeof entity === 'string') {
+				api.getAsync(entity).done(function(entity) {
+					if (this.isMounted()) { // check that the component is still mounted
+						this.setState({entity: entity});
+					}
+				}.bind(this));
+			} else if(typeof entity === 'object') {
+				this.setState({entity: entity});
+			}
+		}		
+	};
+	
+	/**
 	 * @memberOf control
 	 */
-	var AttributeFormControl = React.createClass({
-		mixins: [molgenis.DeepPureRenderMixin],
-		displayName: 'AttributeFormControl',
-		propTypes: { // FIXME add all props
-			entity: React.PropTypes.object.isRequired, // TODO support entity with only href
+	var ValidatedFormControl = React.createClass({
+		mixins: [molgenis.DeepPureRenderMixin, FormMixin],
+		displayName: 'ValidatedFormControl',
+		propTypes: {
+			entity: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]),
 			attr: React.PropTypes.object.isRequired,
 			formLayout: React.PropTypes.string,
-			mode: React.PropTypes.oneOf(['create', 'edit']),
+			mode: React.PropTypes.oneOf(['create', 'edit', 'view']),
+			validate: React.PropTypes.bool,
+			value: React.PropTypes.any,
 			onValueChange: React.PropTypes.func.isRequired
-		},
-		getDefaultProps: function() {
-			return {
-				// https://gist.github.com/dperini/729294
-				regexUrl: /^(?:(?:https?|ftp):\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/i,
-				// http://www.w3.org/TR/html5/forms.html#valid-e-mail-address
-				regexEmail: /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
-				intMin: -2147483648, 
-				intMax: 2147483647,
-				longMin: Number.MIN_SAFE_INTEGER,
-				longMax: Number.MAX_SAFE_INTEGER
-			};
 		},
 		getInitialState: function() {
 			return {
@@ -41,31 +55,31 @@
 		componentWillReceiveProps: function(nextProps) {
 			if(nextProps.validate === true) {
 				// validate control
-				var self = this;
 				this._validate(nextProps.value, function(validity) {
-					self.setState({
-						validity: validity 
+					this.setState({
+						value: nextProps.value,
+						pristine: true,
+						validity: validity
 					});		
-				});
+				}.bind(this));
 			}
 		},
-		componentDidMount: function() {console.log('componentDidMount AttributeFormControl');
+		componentDidMount: function() {console.log('componentDidMount ValidatedFormControl');
 			if(this.props.attr.name === undefined) {
-				var self = this;
 				api.getAsync(this.props.attr.href).done(function(attr) {
-					if (self.isMounted()) {
-						self.setState({attr: attr});
+					if (this.isMounted()) {
+						this.setState({attr: attr});
 						
 						// notify parent of initial value validity
-						self._handleValueChange({value: self.state.value});
+						this._handleValueChange({value: this.state.value});
 					}
-				});
+				}.bind(this));
 			} else {
 				// notify parent of initial value validity
 				this._handleValueChange({value: this.state.value});
 			}
 		},
-		render: function() {console.log('render AttributeFormControl', this.state, this.props);
+		render: function() {console.log('render ValidatedFormControl', this.state, this.props);
 			if(this.state.attr === null) {
 				// attribute not fetched yet
 				return div({});
@@ -73,9 +87,14 @@
 			
 			var attr = this.state.attr;
 			
+			
 			// allow editing readonly controls in create mode
 			if(this.props.mode === 'create' && attr.readOnly === true) {
-				attr = _.extend({}, attr, {readOnly: false});
+				attr = _.extend({}, attr, {readOnly: false, required: true});
+			}
+			// show hidden controls and create and edit form
+			if((this.props.mode === 'create' || this.props.mode === 'edit') && attr.visible !== true) {
+				attr = _.extend({}, attr, {visible: true});				
 			}
 			
 			var lbl = attr.label;
@@ -97,15 +116,24 @@
 			var id = attr.name;
 			
 			var description = attr.description !== undefined ? span({className: 'help-block'}, attr.description) : undefined;
-			var labelClasses = this.props.formLayout === 'horizontal' ? 'col-sm-2 control-label' : 'control-label';
+			var labelClasses = this.props.formLayout === 'horizontal' ? 'col-md-2 control-label' : 'control-label';
 			var labelElement = label({className: labelClasses, htmlFor: id}, lbl);
-			var control = molgenis.control.AttributeControl(__spread({}, this.props, {attr: attr, id: id, name: id, formLayout: undefined, onValueChange: this._handleValueChange, onBlur: this._handleBlur}));
+			var control = molgenis.control.AttributeControl(__spread({}, this.props, {
+				attr : attr,
+				id : id,
+				name : id,
+				disabled: this.props.mode === 'view',
+				formLayout : undefined,
+				value: this.state.value,
+				onValueChange : this._handleValueChange,
+				onBlur : this._handleBlur
+			}));
 			
 			if(this.props.formLayout === 'horizontal') {
 				return(
 					div({className: formGroupClasses},
 						labelElement,
-						div({className: 'col-sm-10'},
+						div({className: 'col-md-10'},
 							description,
 							control,
 							errorMessageSpan
@@ -124,22 +152,21 @@
 			}
 		},
 		_handleValueChange: function(e) {
-			var self = this; // FIXME use bind(this)
 			this._validate(e.value, function(validity) {
-				self.setState({
+				this.setState({
 					value: e.value,
 					valid: validity.valid,
 					errorMessage: validity.errorMessage,
-					pristine: self.state.value === e.value // mark input as dirty
+					pristine: this.state.value === e.value // mark input as dirty
 				});
 				
-				self.props.onValueChange({
-					attr: self.state.attr.name,
+				this.props.onValueChange({
+					attr: this.state.attr.name,
 					value: e.value,
 					valid: validity.valid,
 					errorMessage: validity.errorMessage
 				});
-			});
+			}.bind(this));
 		},
 		_handleBlur: function(e) {
 			// only validate if control was touched
@@ -147,13 +174,12 @@
 				return;
 			}
 			
-			var self = this;
 			this._validate(this.state.value, function(validity) {
-				self.setState({
+				this.setState({
 					valid: validity.valid,
 					errorMessage: validity.errorMessage
 				});
-			});
+			}.bind(this));
 		},
 		_validate: function(value, callback) {
 			// apply validation rules, not that IE9 does not support constraint validation API 
@@ -166,17 +192,17 @@
 			if(attr.nillable === false && nullOrUndefinedValue) { // required value constraint
 				errorMessage = 'Please enter a value.';
 			}
-			else if(type === 'EMAIL' && !nullOrUndefinedValue && !this.props.regexEmail.test(value)) {
+			else if(type === 'EMAIL' && !nullOrUndefinedValue && !this._statics.REGEX_EMAIL.test(value)) {
 				errorMessage = 'Please enter a valid email address.';
 			}
-			else if(type === 'HYPERLINK' && !nullOrUndefinedValue && !this.props.regexUrl.test(value)) {
+			else if(type === 'HYPERLINK' && !nullOrUndefinedValue && !this._statics.REGEX_URL.test(value)) {
 				errorMessage = 'Please enter a valid URL.';
 			}
 			else if(type === 'INT' && !nullOrUndefinedValue && !this._isInt(value)) {
-				errorMessage = 'Please enter a value between ' + this.props.intMin + ' and ' + this.props.intMax + '.';
+				errorMessage = 'Please enter a value between ' + this._statics.INT_MIN + ' and ' + this._statics.INT_MAX + '.';
 			}
 			else if(type === 'LONG' && !nullOrUndefinedValue && !this._isLong(value)) {
-				errorMessage = 'Please enter a value between ' + this.props.longMin + ' and ' + this.props.longMax + '.';
+				errorMessage = 'Please enter a value between ' + this._statics.LONG_MIN + ' and ' + this._statics.LONG_MAX + '.';
 			}
 			else if((type === 'INT' || type === 'LONG') && attr.range && !nullOrUndefinedValue && !this._inRange(value, attr.range)) {
 				if(attr.range.min !== undefined && attr.range.max !== undefined) {
@@ -189,24 +215,46 @@
 					errorMessage = 'Please enter a value lower than or equal to ' + attr.range.max + '.';
 				}
 			}
-			else if(attr.unique === true) { // value uniqueness constraint
+			else if(attr.unique === true && (this.props.mode !== 'edit' || value !== this.props.value)) { // value uniqueness constraint
 				// FIXME temp hack because validation of ref types does not work yet
 				if(type !== 'XREF' && type !== 'CATEGORICAL' && type !== 'MREF' && type !== 'CATEGORICAL_MREF')
 				{
-					api.getAsync(this.props.entity.hrefCollection, {q: {q: [{field: attr.name, operator: 'EQUALS', value: value}]}}, function(data) {
+					var rules = [{field: attr.name, operator: 'EQUALS', value: value}];
+//					if(this.props.mode === 'edit') {
+//						rules.push({operator: 'AND'});
+//						rules.push({operator: 'NOT'});
+//						rules.push({field: attr.name, operator: 'EQUALS', value: value});
+//					}
+					
+					console.log(this.props.value);
+					
+					api.getAsync(this.props.entity.hrefCollection, {q: {q: rules}}, function(data) {
 						if(data.total > 0) {
 							callback({valid: false, errorMessage: 'This ' + attr.label + ' already exists. It must be unique.'});
-						}	
+						} else {
+							callback({valid: true, errorMessage: undefined});
+						}
 					});
+					return;
 				}
 			}
 			callback({valid: errorMessage === undefined, errorMessage: errorMessage});
 		},
+		_statics: {
+			// https://gist.github.com/dperini/729294
+			REGEX_URL: /^(?:(?:https?|ftp):\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/i,
+			// http://www.w3.org/TR/html5/forms.html#valid-e-mail-address
+			REGEX_EMAIL: /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
+			INT_MIN: -2147483648, 
+			INT_MAX: 2147483647,
+			LONG_MIN: Number.MIN_SAFE_INTEGER,
+			LONG_MAX: Number.MAX_SAFE_INTEGER
+		},
 		_isInt: function(value) {
-			return Number.isInteger(value) && value >= -2147483648 && value <= 2147483647;
+			return Number.isInteger(value) && value >= this._statics.INT_MIN && value <= this._statics.INT_MAX;
 		},
 		_isLong: function(value) {
-			return Number.isInteger(value) && value >= Number.MAX_SAFE_INTEGER && value <= Number.MIN_SAFE_INTEGER; 
+			return Number.isInteger(value) && value >= this._statics.LONG_MIN && value <= this._statics.LONG_MAX; 
 		},
 		_inRange: function(value, range) {
 			var inRange = true;
@@ -223,12 +271,17 @@
 	/**
 	 * @memberOf control
 	 */
-	var AttributeFormControlGroup = React.createClass({
+	var FormControlGroup = React.createClass({
 		mixins: [molgenis.DeepPureRenderMixin],
-		displayName: 'AttributeFormControlGroup',
+		displayName: 'FormControlGroup',
 		propTypes: {
-			attributes: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
-			onValueChange: React.PropTypes.func.isRequired // TODO add all props
+			entity: React.PropTypes.object,
+			attr: React.PropTypes.object.isRequired,
+			value: React.PropTypes.object,
+			mode: React.PropTypes.oneOf(['create', 'edit', 'view']),
+			formLayout: React.PropTypes.oneOf(['horizontal', 'vertical']),
+			validate: React.PropTypes.bool,
+			onValueChange: React.PropTypes.func.isRequired
 		},
 		render: function() {
 			var attributes = this.props.attr.attributes;
@@ -236,12 +289,17 @@
 			// add control for each attribute
 			var controls = [];
 			for(var i = 0; i < attributes.length; ++i) {console.log('attribute', attributes[i]);
-				var control;
-				if(attributes[i].fieldType !== 'COMPOUND') { // FIXME attribute might be a href, so fieldtype does not exist
-					control = molgenis.control.AttributeFormControl({attr: attributes[i], key: 'attr' + i, onValueChange: this.props.onValueChange, validate: this.props.validate, formLayout: this.props.formLayout});
-				} else {
-					control = molgenis.control.AttributeFormControlGroup({attr: attributes[i], key: 'attr' + i, onValueChange: this.props.onValueChange, validate: this.props.validate, formLayout: this.props.formLayout});
-				}
+				var Control = attributes[i].fieldType === 'COMPOUND' ? molgenis.control.FormControlGroup : molgenis.control.ValidatedFormControl;
+				controls.push(Control({
+					entity : this.props.entity,
+					attr : attributes[i],
+					value: this.props.value ? this.props.value[attributes[i].name] : undefined,
+					mode : this.props.mode,
+					formLayout : this.props.formLayout,
+					validate: this.props.validate,
+					onValueChange : this.props.onValueChange,
+					key : '' + i
+				}));
 				controls.push(control);
 			}
 			
@@ -262,73 +320,137 @@
 	/**
 	 * @memberOf control
 	 */
-	var Form = React.createClass({
+	var FormControls = React.createClass({
 		mixins: [molgenis.DeepPureRenderMixin],
+		displayName: 'FormControls',
+		propTypes: {
+			entity: React.PropTypes.object.isRequired,
+			value: React.PropTypes.object,
+			mode: React.PropTypes.oneOf(['create', 'edit', 'view']),
+			formLayout: React.PropTypes.oneOf(['horizontal', 'vertical']),
+			colOffset: React.PropTypes.number,
+			validate: React.PropTypes.bool,
+			onValueChange: React.PropTypes.func.isRequired
+		},
+		render: function() {
+			// add control for each attribute
+			var attributes = this.props.entity.attributes;
+			var controls = [];
+			for(var key in attributes) {
+				if(attributes.hasOwnProperty(key)) {
+					var Control = attributes[key].fieldType === 'COMPOUND' ? molgenis.control.FormControlGroup : molgenis.control.ValidatedFormControl;
+					controls.push(Control({
+						entity : this.props.entity,
+						attr : attributes[key],
+						value: this.props.value ? this.props.value[key] : undefined,
+						mode : this.props.mode,
+						formLayout : this.props.formLayout,
+						validate: this.props.validate,
+						onValueChange : this.props.onValueChange,
+						key : key
+					}));
+				}
+			}
+			return div({}, controls);
+		}
+	});
+	
+	/**
+	 * @memberOf control
+	 */
+	var FormSubmitButton = React.createClass({
+		mixins: [molgenis.DeepPureRenderMixin],
+		displayName: 'FormSubmitButton',
+		propTypes: {
+			formLayout: React.PropTypes.oneOf(['horizontal', 'vertical']),
+			colOffset: React.PropTypes.number
+		},
+		render: function() {
+			var saveControl = button({type: 'submit', className: 'btn btn-large btn-primary pull-right'}, 'Save');
+			if(this.props.formLayout === 'horizontal') {
+				var divClasses = 'col-md-offset-' + this.props.colOffset + ' col-md-' + (12 - this.props.colOffset);  
+				saveControl = (
+					div({className: 'form-group'},
+						div({className: divClasses},
+							saveControl
+						)
+					)
+				);
+			}
+			return saveControl;
+		}
+	});
+	
+	/**
+	 * @memberOf control
+	 */
+	var Form = React.createClass({
+		mixins: [molgenis.DeepPureRenderMixin, FormMixin],
 		displayName: 'Form',
 		propTypes: {
 			entity: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]),
-			formLayout: React.PropTypes.string,
-			groupLayout: React.PropTypes.string,
-			mode: React.PropTypes.oneOf(['create', 'edit'])
+			value: React.PropTypes.object,
+			mode: React.PropTypes.oneOf(['create', 'edit', 'view']),
+			formLayout: React.PropTypes.oneOf(['horizontal', 'vertical']),
+			colOffset: React.PropTypes.number
 		},
 		getDefaultProps: function() {
 			return {
-				mode: 'create'
+				mode: 'create',
+				formLayout: 'vertical',
+				colOffset: 2
 			};
 		},
 		getInitialState: function() {
 			return {entity: null, values: {}, validate: false}; // TODO initialize with value
-		},
-		componentDidMount: function() {console.log('componentDidMount Form');
-			this._retrieveEntity(this.props.entity);
-		},
-		componentWillReceiveProps : function(nextProps) {
-			this._retrieveEntity(nextProps.entity);
 		},
 		render: function() {console.log('render Form', this.state, this.props);
 			// return empty div if entity data is not yet available
 			if(this.state.entity === null) {
 				return div();
 			}
-
-			// add control for each attribute
-			var attributes = this.state.entity.attributes;
-			var controls = [];
-			for(var key in attributes) {
-				var control;
-				if(attributes[key].fieldType === 'COMPOUND') { // FIXME remove if, find other solution
-					control = molgenis.control.AttributeFormControlGroup({entity: this.state.entity, attr: attributes[key], key: key, onValueChange: this._handleValueChange, mode: this.props.mode, formLayout: this.props.formLayout});
-				} else {
-					control = molgenis.control.AttributeFormControl({entity: this.state.entity, attr: attributes[key], key: key, onValueChange: this._handleValueChange, validate: this.state.validate, mode: this.props.mode, formLayout: this.props.formLayout, ref: key});
-				}
-				controls.push(control);
+			
+			var action, method;
+			switch(this.props.mode) {
+				case 'create':
+					action = this.state.entity.hrefCollection;
+					method = 'post';
+					break;
+				case 'edit':
+					action = this.props.value.href + '?_method=PUT';
+					method = 'post';
+					break;
+				case 'view':
+					action = undefined;
+					method = undefined;
+					break;
+				default:
+					throw 'unknown mode [' + this.props.mode + ']';
 			}
 			
-			// add form buttons
-			var saveControl = button({type: 'submit', className: 'btn btn-large btn-primary pull-right'}, 'Save');
-			if(this.props.formLayout === 'horizontal') {
-				saveControl = (
-					div({className: 'form-group'},
-						div({className: 'col-sm-offset-2 col-sm-10'},
-							saveControl
-						)
-					)
-				);
-			}
-
 			var formProps = {
 				className : this.props.formLayout === 'horizontal' ? 'form-horizontal' : undefined,
-				action : this.state.entity.hrefCollection,
-				method : 'post',
+				action : action,
+				method : method,
 				encType : 'application/x-www-form-urlencoded', // use multipart/form-data if form contains one or more file inputs
 				noValidate : true,
 				onSubmit : this._handleSubmit
 			};
 			
+			var formControlsProps = {
+				entity : this.state.entity,
+				value: this.props.mode !== 'create' ? this.props.value : undefined,
+				mode : this.props.mode,
+				formLayout : this.props.formLayout,
+				colOffset : this.props.colOffset,
+				validate: this.state.validate,
+				onValueChange : this._handleValueChange
+			};
+			
 			return (
 				form(formProps,
-					controls,
-					saveControl
+					molgenis.control.FormControls(formControlsProps),
+					this.props.mode !== 'view' ? molgenis.control.FormSubmitButton({layout: this.props.formLayout, colOffset: this.props.colOffset}) : null
 				)
 			);
 		},
@@ -365,19 +487,6 @@
 				e.preventDefault(); // do not submit form
 				this.setState({validate: true}); // render validated controls
 			}
-		},
-		_retrieveEntity: function(entity) {
-			// fetch entity meta if not exists
-			if(typeof entity === 'string') {
-				var self = this;
-				api.getAsync(entity).done(function(entity) {
-					if (self.isMounted()) { // check that the component is still mounted
-						self.setState({entity: entity});
-					}
-				});
-			} else if(typeof entity === 'object') {
-				this.setState({entity: entity});
-			}
 		}
 	});
 
@@ -385,8 +494,10 @@
 	molgenis.control = molgenis.control || {};
 	
 	$.extend(molgenis.control, {
-		AttributeFormControl: React.createFactory(AttributeFormControl),
-		AttributeFormControlGroup: React.createFactory(AttributeFormControlGroup),
 		Form: React.createFactory(Form),
+		FormControls: React.createFactory(FormControls),
+		ValidatedFormControl: React.createFactory(ValidatedFormControl),
+		FormControlGroup: React.createFactory(FormControlGroup),
+		FormSubmitButton: React.createFactory(FormSubmitButton),
 	});
 }($, window.top.molgenis = window.top.molgenis || {}));

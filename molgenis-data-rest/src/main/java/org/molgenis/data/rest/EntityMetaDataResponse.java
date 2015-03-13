@@ -2,13 +2,17 @@ package org.molgenis.data.rest;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 
 public class EntityMetaDataResponse
 {
@@ -20,6 +24,7 @@ public class EntityMetaDataResponse
 	private final Map<String, Object> attributes;
 	private final String labelAttribute;
 	private final String idAttribute;
+	private final List<String> lookupAttributes;
 	private final Boolean isAbstract;
 
 	/**
@@ -69,7 +74,7 @@ public class EntityMetaDataResponse
 
 			for (AttributeMetaData attr : meta.getAttributes())
 			{
-				if (attr.isVisible() && !attr.getName().equals("__Type"))
+				if (!attr.getName().equals("__Type"))
 				{
 					if (attributeExpandsSet != null && attributeExpandsSet.containsKey("attributes".toLowerCase()))
 					{
@@ -100,6 +105,21 @@ public class EntityMetaDataResponse
 			this.idAttribute = idAttribute != null ? idAttribute.getName() : null;
 		}
 		else this.idAttribute = null;
+
+		if (attributesSet == null || attributesSet.contains("lookupAttributes".toLowerCase()))
+		{
+			Iterable<AttributeMetaData> lookupAttributes = meta.getLookupAttributes();
+			this.lookupAttributes = lookupAttributes != null ? Lists.newArrayList(Iterables.transform(lookupAttributes,
+					new Function<AttributeMetaData, String>()
+					{
+						@Override
+						public String apply(AttributeMetaData attribute)
+						{
+							return attribute.getName();
+						}
+					})) : null;
+		}
+		else this.lookupAttributes = null;
 
 		if (attributesSet == null || attributesSet.contains("abstract".toLowerCase()))
 		{
@@ -146,6 +166,11 @@ public class EntityMetaDataResponse
 	public String getLabelAttribute()
 	{
 		return labelAttribute;
+	}
+
+	public List<String> getLookupAttributes()
+	{
+		return lookupAttributes;
 	}
 
 	public boolean isAbstract()
