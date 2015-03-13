@@ -7,6 +7,7 @@ import java.util.List;
 import org.molgenis.data.annotation.impl.CaddServiceAnnotator;
 import org.molgenis.data.annotation.impl.ClinVarVCFServiceAnnotator;
 import org.molgenis.data.annotation.impl.ClinicalGenomicsDatabaseServiceAnnotator;
+import org.molgenis.data.annotation.impl.DeNovoAnnotator;
 import org.molgenis.data.annotation.impl.ExACServiceAnnotator;
 import org.molgenis.data.annotation.impl.GoNLServiceAnnotator;
 import org.molgenis.data.annotation.impl.HpoServiceAnnotator;
@@ -20,7 +21,7 @@ public class CmdLineAnnotator
 
 	public static void main(String[] args) throws Exception
 	{
-		List<String> annotators = Arrays.asList(new String[]{"cadd", "snpeff", "clinvar", "hpo", "ase", "monogenic", "phenomizer", "ccgg", "exac", "1kg", "gonl", "gwascatalog", "vkgl", "cgd", "enhancers", "proteinatlas"});
+		List<String> annotators = Arrays.asList(new String[]{"cadd", "snpeff", "clinvar", "hpo", "ase", "monogenic", "phenomizer", "ccgg", "denovo", "exac", "1kg", "gonl", "gwascatalog", "vkgl", "cgd", "enhancers", "proteinatlas"});
 		
 		if (args.length != 4)
 		{
@@ -97,6 +98,10 @@ public class CmdLineAnnotator
 		else if(annotator.equals("ccgg"))
 		{
 			//TODO
+		}
+		else if(annotator.equals("denovo"))
+		{
+			new DeNovoAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
 		else if(annotator.equals("exac"))
 		{

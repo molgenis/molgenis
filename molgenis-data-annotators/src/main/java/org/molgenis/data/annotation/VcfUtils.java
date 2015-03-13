@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
@@ -208,6 +209,84 @@ public class VcfUtils
 
 		inputVcfFileScanner.close();
 		return annotatedBefore;
+	}
+	
+	/**
+	 * 
+	 * Get pedigree data from VCF
+	 * Now only support child, father, mother
+	 * No fancy data structure either
+	 * 
+	 * @param vcfFile
+	 * @return
+	 * @throws FileNotFoundException 
+	 */
+	public static HashMap<String, List<String>> getPedigree(File inputVcfFile) throws FileNotFoundException
+	{
+		HashMap<String, List<String>> result = new HashMap<String, List<String>>();
+		
+		Scanner inputVcfFileScanner = new Scanner(inputVcfFile, "UTF-8");
+		String line = inputVcfFileScanner.nextLine();
+
+		// if first line does not start with ##, we don't trust this file as VCF
+		if (line.startsWith(VcfRepository.PREFIX))
+		{
+			while (inputVcfFileScanner.hasNextLine())
+			{
+				// detect pedigree line
+				// expecting: ##PEDIGREE=<Child=100400,Mother=100402,Father=100401>
+				if (line.startsWith("##PEDIGREE"))
+				{
+					System.out.println("Pedigree data line: " + line);
+					String childID = null;
+					String motherID = null;
+					String fatherID = null;
+					
+					String lineStripped = line.replace("##PEDIGREE=<", "").replace(">", "");
+					String[] lineSplit = lineStripped.split(",", -1);
+					for(String element : lineSplit)
+					{
+						if(element.startsWith("Child"))
+						{
+							childID = element.replace("Child=", "");
+						}
+						else if(element.startsWith("Mother"))
+						{
+							motherID = element.replace("Mother=", "");
+						}
+						else if(element.startsWith("Father"))
+						{
+							fatherID = element.replace("Father=", "");
+						}
+						else
+						{
+							inputVcfFileScanner.close();
+							throw new MolgenisDataException("Expected Child, Mother or Father, but found: " + element + " in line " + line);
+						}
+					}
+					
+					if(childID != null && motherID != null && fatherID != null)
+					{
+						// good
+						result.put(childID, Arrays.asList(new String[]{motherID, fatherID}));
+					}
+					else
+					{
+						inputVcfFileScanner.close();
+						throw new MolgenisDataException("Missing Child, Mother or Father ID in line " + line);
+					}
+				}
+				
+				line = inputVcfFileScanner.nextLine();
+				if (!line.startsWith(VcfRepository.PREFIX))
+				{
+					break;
+				}
+			}
+		}
+		
+		inputVcfFileScanner.close();
+		return result;
 	}
 
 }
