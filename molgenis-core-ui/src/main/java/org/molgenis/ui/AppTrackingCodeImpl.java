@@ -6,6 +6,8 @@ public class AppTrackingCodeImpl implements AppTrackingCode
 {
 	private String googleAnalytics = null;
 	private String piwik = null;
+	private final static String START_TRACKINGCODE = "(function(){if('true' === $.cookie('toestemmingvoorcookies')){";
+	private final static String END_TRACKINGCODE = "}})();";
 
 	public AppTrackingCodeImpl()
 	{
@@ -16,12 +18,12 @@ public class AppTrackingCodeImpl implements AppTrackingCode
 		String piwik = molgenisSettings.getProperty(AppTrackingCode.KEY_APP_TRACKING_CODE_PIWIK);
 		if (piwik != null)
 		{
-			this.setPiwik(piwik);
+			this.setPiwik(START_TRACKINGCODE + piwik + END_TRACKINGCODE);
 		}
 		String googleAnalytics = molgenisSettings.getProperty(AppTrackingCode.KEY_APP_TRACKING_CODE_GOOGLEANALYTICS);
 		if (googleAnalytics != null)
 		{
-			this.setGoogleAnalytics(googleAnalytics);
+			this.setGoogleAnalytics(START_TRACKINGCODE + googleAnalytics + END_TRACKINGCODE);
 		}
 	}
 
