@@ -94,6 +94,10 @@
 			if((this.props.mode === 'create' || this.props.mode === 'edit') && attr.visible !== true) {
 				attr = _.extend({}, attr, {visible: true});				
 			}
+			// show auto controls as readonly in edit mode
+			if(this.props.mode === 'edit' && attr.auto === true) {
+				attr = _.extend({}, attr, {readOnly: true});
+			}
 			
 			var lbl = attr.label;
 			
@@ -339,17 +343,20 @@
 			var controls = [];
 			for(var key in attributes) {
 				if(attributes.hasOwnProperty(key)) {
-					var Control = attributes[key].fieldType === 'COMPOUND' ? molgenis.control.FormControlGroup : molgenis.control.ValidatedFormControl;
-					controls.push(Control({
-						entity : this.props.entity,
-						attr : attributes[key],
-						value: this.props.value ? this.props.value[key] : undefined,
-						mode : this.props.mode,
-						formLayout : this.props.formLayout,
-						validate: this.props.validate,
-						onValueChange : this.props.onValueChange,
-						key : key
-					}));
+					var attr = attributes[key];
+					if(this.props.mode === 'create' && attr.auto !== true) {
+						var Control = attr.fieldType === 'COMPOUND' ? molgenis.control.FormControlGroup : molgenis.control.ValidatedFormControl;
+						controls.push(Control({
+							entity : this.props.entity,
+							attr : attr,
+							value: this.props.value ? this.props.value[key] : undefined,
+							mode : this.props.mode,
+							formLayout : this.props.formLayout,
+							validate: this.props.validate,
+							onValueChange : this.props.onValueChange,
+							key : key
+						}));
+					}
 				}
 			}
 			return div({}, controls);
