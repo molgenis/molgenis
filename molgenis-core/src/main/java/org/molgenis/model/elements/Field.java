@@ -380,6 +380,16 @@ public class Field implements Serializable
 	}
 
 	/**
+	 * Returns whether this field has enum options.
+	 * 
+	 * @return Whether this field has enum options.
+	 */
+	public boolean isEnum()
+	{
+		return type instanceof EnumField;
+	}
+
+	/**
 	 * Returns whether this field is a xref.
 	 * 
 	 * @return Whether this field is a xref.
