@@ -39,7 +39,7 @@
 		propTypes: {
 			entity: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]),
 			attr: React.PropTypes.object.isRequired,
-			formLayout: React.PropTypes.string,
+			formLayout: React.PropTypes.oneOf(['horizontal', 'vertical']),
 			mode: React.PropTypes.oneOf(['create', 'edit', 'view']),
 			validate: React.PropTypes.bool,
 			value: React.PropTypes.any,
@@ -48,7 +48,6 @@
 		getInitialState: function() {
 			return {
 				attr: this.props.attr.name !== undefined ? this.props.attr : null,
-				value: this.props.value || this.props.attr.defaultValue,
 				pristine: true
 			};
 		},
@@ -57,7 +56,6 @@
 				// validate control
 				this._validate(nextProps.value, function(validity) {
 					this.setState({
-						value: nextProps.value,
 						pristine: true,
 						validity: validity
 					});		
@@ -71,12 +69,12 @@
 						this.setState({attr: attr});
 						
 						// notify parent of initial value validity
-						this._handleValueChange({value: this.state.value});
+						this._handleValueChange({value: this.props.value});
 					}
 				}.bind(this));
 			} else {
 				// notify parent of initial value validity
-				this._handleValueChange({value: this.state.value});
+				this._handleValueChange({value: this.props.value});
 			}
 		},
 		render: function() {console.log('render ValidatedFormControl', this.state, this.props);
@@ -118,13 +116,23 @@
 			var description = attr.description !== undefined ? span({className: 'help-block'}, attr.description) : undefined;
 			var labelClasses = this.props.formLayout === 'horizontal' ? 'col-md-2 control-label' : 'control-label';
 			var labelElement = label({className: labelClasses, htmlFor: id}, lbl);
+			console.log(__spread({}, this.props, {
+				attr : attr,
+				id : id,
+				name : id,
+				disabled: this.props.mode === 'view',
+				formLayout : undefined,
+				value: this.props.value,
+				onValueChange : this._handleValueChange,
+				onBlur : this._handleBlur
+			}));
 			var control = molgenis.control.AttributeControl(__spread({}, this.props, {
 				attr : attr,
 				id : id,
 				name : id,
 				disabled: this.props.mode === 'view',
 				formLayout : undefined,
-				value: this.state.value,
+				value: this.props.value,
 				onValueChange : this._handleValueChange,
 				onBlur : this._handleBlur
 			}));
@@ -157,7 +165,7 @@
 					value: e.value,
 					valid: validity.valid,
 					errorMessage: validity.errorMessage,
-					pristine: this.state.value === e.value // mark input as dirty
+					pristine: this.props.value === e.value // mark input as dirty
 				});
 				
 				this.props.onValueChange({
@@ -174,7 +182,7 @@
 				return;
 			}
 			
-			this._validate(this.state.value, function(validity) {
+			this._validate(this.props.value, function(validity) {
 				this.setState({
 					valid: validity.valid,
 					errorMessage: validity.errorMessage
@@ -220,13 +228,6 @@
 				if(type !== 'XREF' && type !== 'CATEGORICAL' && type !== 'MREF' && type !== 'CATEGORICAL_MREF')
 				{
 					var rules = [{field: attr.name, operator: 'EQUALS', value: value}];
-//					if(this.props.mode === 'edit') {
-//						rules.push({operator: 'AND'});
-//						rules.push({operator: 'NOT'});
-//						rules.push({field: attr.name, operator: 'EQUALS', value: value});
-//					}
-					
-					console.log(this.props.value);
 					
 					api.getAsync(this.props.entity.hrefCollection, {q: {q: rules}}, function(data) {
 						if(data.total > 0) {
@@ -402,7 +403,7 @@
 			};
 		},
 		getInitialState: function() {
-			return {entity: null, values: {}, validate: false}; // TODO initialize with value
+			return {entity: null, values: {}, validate: false};
 		},
 		render: function() {console.log('render Form', this.state, this.props);
 			// return empty div if entity data is not yet available

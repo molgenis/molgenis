@@ -21,6 +21,7 @@
 		displayName: 'Select2',
 		propTypes: {
 			options: React.PropTypes.object,
+			readOnly: React.PropTypes.bool,
 			disabled: React.PropTypes.bool,
 			value: React.PropTypes.oneOfType([React.PropTypes.object, React.PropTypes.array]),
 			onChange: React.PropTypes.func.isRequired
@@ -29,48 +30,54 @@
 			return {value: this.props.value};
 		},
 		componentWillReceiveProps : function(nextProps) {
+			if(!_.isEqual(this.props.options, nextProps.options)) {
+				this._destroySelect2();
+				this._createSelect2(nextProps.options);
+			}
 			this.setState({value: nextProps.value});
 		},
 		componentDidMount: function() {//console.log('componentDidMount Select2');
-			var $container = $(this.refs.select2.getDOMNode());
-			
-			// create select2
-			$container.select2($.extend({
-					containerCssClass: 'form-control',
-					placeholder : ' ', // cannot be an empty string
-					minimumResultsForSearch: -1, // permanently hide the search field
-					width: '100%'
-				}, this.props.options));
-
-			// create event select2 handlers
-			$container.on('change', function() {
-				this._handleChange($container.select2('data'));
-			}.bind(this));
-
-			// initialize select2
+			this._createSelect2(this.props.options);
 			this._updateSelect2();
 		},
 		componentWillUnmount: function() {//console.log('componentWillUnmount Select2');
-			var $container = $(this.refs.select2.getDOMNode());
-			$container.off();
-			$container.select2('destroy');
+			this._destroySelect2();
 		},
 		render: function() {//console.log('render Select2', this.state, this.props);
 			if (this.isMounted()) {
 				this._updateSelect2();
 			}
-			return input({type: 'hidden', name: this.props.name, ref: 'select2', onChange: function(){}}); // empty onChange callback to suppress React warning FIXME use InputControl 
+			return input({type: 'hidden', name: this.props.name, ref: 'select2', onChange: function(){}}); // empty onChange callback to suppress React warning 
 		},
 		_handleChange: function(value) {//console.log('_handleChange Select2', value);
 			this.setState({value: value});
 			this.props.onChange(value);
 		},
+		_createSelect2: function(options) {
+			var $container = $(this.refs.select2.getDOMNode());
+			
+			// create select2
+			$container.select2($.extend({
+				containerCssClass: 'form-control',
+				placeholder : ' ', // cannot be an empty string
+				minimumResultsForSearch: -1, // permanently hide the search field
+				width: '100%'
+			}, options));
+			
+			$container.on('change', function() {
+				this._handleChange($container.select2('data'));
+			}.bind(this));
+		},
 		_updateSelect2: function() {
 			var $container = $(this.refs.select2.getDOMNode());
-			//console.log('_updateSelect2', this.state);
 			$container.select2('data', this.state.value);
 			$container.select2('enable', !this.props.disabled);
 			$container.select2('readonly', this.props.readOnly);
+		},
+		_destroySelect2: function() {
+			var $container = $(this.refs.select2.getDOMNode());
+			$container.off();
+			$container.select2('destroy');
 		}
 	});
 	

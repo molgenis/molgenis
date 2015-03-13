@@ -34,22 +34,17 @@
 			onValueChange: React.PropTypes.func.isRequired
 		},
 		getInitialState: function() {
-			// initialize with entity meta if exists
-			var entity = this.props.entity;
 			return {
-				entity: this._isRetrieved(entity) ? entity : null
+				entity: null
 			};
 		},
-		componentDidMount: function() {//console.log('componentDidMount EntityControl');
-			// fetch entity meta if not exists
-			var entity = this.props.entity;
-			if(typeof entity === 'object') {
-				if(!this._isRetrieved(entity)) {
-					this._retrieveEntity(entity.href);
-				}
-			} else if (typeof entity === 'string') {
-				this._retrieveEntity(entity);
+		componentWillReceiveProps: function(nextProps) {
+			if(!_.isEqual(this.props.entity, nextProps.entity)) {
+				this._initEntity(nextProps.entity);
 			}
+		},
+		componentDidMount: function() {//console.log('componentDidMount AttributeFormControl');
+			this._initEntity(this.props.entity);
 		},
 		render: function() {//console.log('render EntityControl', this.state, this.props);
 			if(this.state.entity === null) {
@@ -127,10 +122,22 @@
 			var val = this.props.multiple && value.length === 0 ? undefined : value;
 			this.props.onValueChange({value: val});
 		},
-		_isRetrieved: function(entity) {
+		_isLoaded: function(entity) {
 			return entity.idAttribute !== undefined;
 		},
-		_retrieveEntity: function(href) {
+		_initEntity: function(entity) {
+			// fetch entity meta if not exists
+			if(typeof entity === 'object') {
+				if(!this._isLoaded(entity)) {
+					this._loadEntity(entity.href);
+				} else {
+					this.setState({entity: entity});
+				}
+			} else if (typeof entity === 'string') {
+				this._loadEntity(entity);
+			}
+		},
+		_loadEntity: function(href) {
 			api.getAsync(href, {'expand': ['attributes']}).done(function(entity) {
 				if (this.isMounted()) {
 					this.setState({entity: entity});
@@ -152,27 +159,21 @@
 			onValueChange: React.PropTypes.func.isRequired
 		},
 		getInitialState: function() {
-			var attr = this.props.attr;
 			return {
-				attr: this._isRetrieved(attr) ? attr : null
+				attr: null
 			};
 		},
-		componentDidMount: function() {//console.log('componentDidMount AttributeFormControl');
-			// fetch attribute meta if not exists
-			var attr = this.props.attr;
-			if(typeof attr === 'object') {
-				if(!this._isRetrieved(attr)) {
-					this._retrieveAttr(attr.href, this._onAttrRetrieved);
-				} else {
-					this._onAttrRetrieved(attr);
-				}
-			} else if (typeof attr === 'string') {
-				this._retrieveAttr(attr, this._onAttrRetrieved);
+		componentWillReceiveProps: function(nextProps) {
+			if(!_.isEqual(this.props.attr, nextProps.attr)) {
+				this._initAttr(nextProps.attr);
 			}
+		},
+		componentDidMount: function() {//console.log('componentDidMount AttributeFormControl');
+			this._initAttr(this.props.attr);
 		},
 		render: function() {//console.log('render AttributeControl', this.state, this.props);	
 			if(this.state.attr === null) {
-				// attribute meta data not fetched yet
+				// attribute not available yet
 				return div({});
 			}
 			
@@ -406,10 +407,23 @@
 				onValueChange : this._handleValueChange
 			});
 		},
-		_isRetrieved: function(attr) {
+		_isLoaded: function(attr) {
 			return attr.name !== undefined;
 		},
-		_retrieveAttr: function(href, callback) {
+		_initAttr: function(attr) {
+			// fetch attribute meta if not exists
+			if(typeof attr === 'object') {
+				if(!this._isLoaded(attr)) {
+					this._loadAttr(attr.href, this._onAttrInit);
+				} else {
+					this.setState({attr: attr});
+					this._onAttrInit(attr);
+				}
+			} else if (typeof attr === 'string') {
+				this._loadAttr(attr, this._onAttrInit);
+			}
+		},
+		_loadAttr: function(href, callback) {
 			api.getAsync(href).done(function(attr) {
 				if (this.isMounted()) {
 					this.setState({attr: attr});
@@ -417,7 +431,7 @@
 				}
 			}.bind(this));
 		},
-		_onAttrRetrieved: function(attr) {
+		_onAttrInit: function(attr) {
 			if(attr.fieldType === 'CATEGORICAL' || attr.fieldType === 'CATEGORICAL_MREF') {
 				// retrieve all categories
 				api.getAsync(attr.refEntity.href).done(function(meta) {
