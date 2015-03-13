@@ -42,7 +42,7 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 	private Entity findAttributeEntity(String entityName, String attributeName)
 	{
 		Entity entityMetaDataEntity = dataService.findOne(ENTITY_NAME, entityName);
-		return stream(entityMetaDataEntity.getEntities(ATTRIBUTES).spliterator(), true)
+		return stream(entityMetaDataEntity.getEntities(ATTRIBUTES).spliterator(), false)
 				.filter(att -> attributeName.equals(att.getString(AttributeMetaDataMetaData.NAME))).findFirst().get();
 	}
 
