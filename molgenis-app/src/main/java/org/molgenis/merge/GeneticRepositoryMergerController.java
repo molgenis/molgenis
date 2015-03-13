@@ -11,7 +11,6 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
-import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.merge.RepositoryMerger;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.framework.ui.MolgenisPluginController;
@@ -41,7 +40,6 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 	public static final String ID = "geneticrepositorymerger";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
-	public static final String ID_FIELD = "ID";
 	public static final DefaultAttributeMetaData CHROM = new DefaultAttributeMetaData("#CHROM",
 			MolgenisFieldTypes.FieldTypeEnum.STRING);
 	public static final DefaultAttributeMetaData POS = new DefaultAttributeMetaData("POS",
@@ -54,17 +52,14 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 	private final ArrayList<AttributeMetaData> commonAttributes;
 	private final RepositoryMerger repositoryMerger;
 	private final DataService dataService;
-	private final SearchService searchService;
 
 	@Autowired
-	public GeneticRepositoryMergerController(RepositoryMerger repositoryMerger, DataService dataService,
-			SearchService searchService)
+	public GeneticRepositoryMergerController(RepositoryMerger repositoryMerger, DataService dataService)
 	{
 		super(URI);
 
 		this.repositoryMerger = repositoryMerger;
 		this.dataService = dataService;
-		this.searchService = searchService;
 
 		commonAttributes = new ArrayList<AttributeMetaData>();
 		commonAttributes.add(CHROM);
@@ -137,7 +132,7 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 		EntityMetaData mergedEntityMetaData = repositoryMerger.mergeMetaData(geneticRepositories, commonAttributes,
 				resultSet);
 		Repository mergedRepository = dataService.getMeta().addEntityMeta(mergedEntityMetaData);
-		repositoryMerger.merge(geneticRepositories, commonAttributes, mergedRepository, ID_FIELD);
+		repositoryMerger.merge(geneticRepositories, commonAttributes, mergedRepository);
 
 		return resultSet;
 	}

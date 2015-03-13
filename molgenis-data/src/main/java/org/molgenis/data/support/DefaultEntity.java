@@ -238,8 +238,8 @@ public class DefaultEntity implements Entity
 
 		value = attribute.getDataType().convert(value);
 		Entity refEntity = dataService.findOne(attribute.getRefEntity().getName(), value);
-		if (refEntity == null) throw new UnknownEntityException(entityMetaData.getName() + " with id [" + value
-				+ "] does not exist");
+		if (refEntity == null) throw new UnknownEntityException(attribute.getRefEntity().getName() + " with "
+				+ attribute.getRefEntity().getIdAttribute().getName() + " [" + value + "] does not exist");
 
 		return refEntity;
 	}

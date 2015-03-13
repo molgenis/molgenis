@@ -195,7 +195,11 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		}
 	}
 
-	public void addAttribute(AttributeMetaData attributeMetaData)
+    public void addAttribute(AttributeMetaData attributeMetaData) {
+        addAttribute(attributeMetaData, true);
+    }
+
+	public void addAttribute(AttributeMetaData attributeMetaData, boolean addToEntityMetaData)
 	{
 		try
 		{
@@ -227,12 +231,13 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 			{
 				for (AttributeMetaData attrPart : attributeMetaData.getAttributeParts())
 				{
-					addAttribute(attrPart);
+					addAttribute(attrPart, false);
 				}
 			}
-
-			DefaultEntityMetaData demd = new DefaultEntityMetaData(metaData);
-			demd.addAttributeMetaData(attributeMetaData);
+            DefaultEntityMetaData demd = new DefaultEntityMetaData(metaData);
+            if(addToEntityMetaData) {
+                demd.addAttributeMetaData(attributeMetaData);
+            }
 			setMetaData(demd);
 		}
 		catch (Exception e)
@@ -242,7 +247,11 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		}
 	}
 
-	public void addAttributeSync(AttributeMetaData attributeMetaData)
+    public void addAttributeSync(AttributeMetaData attributeMetaData) {
+        addAttributeSync(attributeMetaData, true);
+    }
+
+	public void addAttributeSync(AttributeMetaData attributeMetaData, boolean addToEntityMetaData)
 	{
 		try
 		{
@@ -250,7 +259,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 			{
 				jdbcTemplate.execute(getMrefCreateSql(attributeMetaData));
 			}
-			else if(!attributeMetaData.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
+			else if (!attributeMetaData.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
 			{
 				jdbcTemplate.execute(getAlterSql(attributeMetaData));
 			}
@@ -269,12 +278,13 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 			{
 				for (AttributeMetaData attrPart : attributeMetaData.getAttributeParts())
 				{
-					addAttributeSync(attrPart);
+					addAttributeSync(attrPart, false);
 				}
 			}
-
-			DefaultEntityMetaData demd = new DefaultEntityMetaData(metaData);
-			demd.addAttributeMetaData(attributeMetaData);
+            DefaultEntityMetaData demd = new DefaultEntityMetaData(metaData);
+            if(addToEntityMetaData) {
+                demd.addAttributeMetaData(attributeMetaData);
+            }
 			setMetaData(demd);
 		}
 		catch (Exception e)
@@ -380,7 +390,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 			case TEXT:
 				break;
 			case COMPOUND:
-                break;
+				break;
 			case MREF:
 			case CATEGORICAL:
 			case CATEGORICAL_MREF:
@@ -590,22 +600,25 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		int count = 0;
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 		{
-			if (count > 0) select.append(", ");
+			if (att.getExpression() == null)
+			{
+				if (count > 0) select.append(", ");
 
-			// TODO needed when autoids are used to join
-			if (att.getDataType() instanceof MrefField)
-			{
-				select.append("GROUP_CONCAT(DISTINCT(").append('`').append(att.getName()).append('`').append('.')
-						.append('`').append(att.getName()).append('`').append(")) AS ").append('`')
-						.append(att.getName()).append('`');
+				// TODO needed when autoids are used to join
+				if (att.getDataType() instanceof MrefField)
+				{
+					select.append("GROUP_CONCAT(DISTINCT(").append('`').append(att.getName()).append('`').append('.')
+							.append('`').append(att.getName()).append('`').append(")) AS ").append('`')
+							.append(att.getName()).append('`');
+				}
+				else
+				{
+					select.append("this.").append('`').append(att.getName()).append('`');
+					if (group.length() > 0) group.append(", this.").append('`').append(att.getName()).append('`');
+					else group.append("this.").append('`').append(att.getName()).append('`');
+				}
+				count++;
 			}
-			else
-			{
-				select.append("this.").append('`').append(att.getName()).append('`');
-				if (group.length() > 0) group.append(", this.").append('`').append(att.getName()).append('`');
-				else group.append("this.").append('`').append(att.getName()).append('`');
-			}
-			count++;
 		}
 
 		// from

@@ -622,7 +622,6 @@ public class EmxMetaDataParser implements MetaDataParser
 			final String refEntityName = (String) attribute.get(REF_ENTITY);
 			final String entityName = attribute.getString(ENTITY);
 			final String attributeName = attribute.getString(NAME);
-			final String expression = attribute.getString(EXPRESSION);
 			i++;
 			if (refEntityName != null)
 			{
@@ -637,7 +636,7 @@ public class EmxMetaDataParser implements MetaDataParser
 				else
 				{
 					EntityMetaData refEntityMeta = dataService.getEntityMetaData(refEntityName);
-					if (expression == null || refEntityMeta == null)
+					if (refEntityMeta == null)
 					{
 						throw new IllegalArgumentException("attributes.refEntity error on line " + i + ": "
 								+ refEntityName + " unknown");
@@ -665,7 +664,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			List<EntityMetaData> metadataList = new ArrayList<EntityMetaData>();
 			for (String name : source.getEntityNames())
 			{
-				metadataList.add(dataService.getRepository(name).getEntityMetaData());
+				metadataList.add(dataService.getRepository(getFullyQualifiedEntityName(name)).getEntityMetaData());
 			}
 			IntermediateParseResults intermediateResults = parseTagsSheet(source.getRepository(TAGS));
 			parsePackagesSheet(source.getRepository(PACKAGES), intermediateResults);
@@ -710,13 +709,33 @@ public class EmxMetaDataParser implements MetaDataParser
 		}
 	}
 
+	private String getFullyQualifiedEntityName(String entityName)
+	{
+		if (dataService.getMeta().getEntityMetaData(entityName) == null)
+		{
+			for (EntityMetaData entityMetaData : dataService.getMeta().getEntityMetaDatas())
+			{
+				if (entityName.equals(entityMetaData.getSimpleName()))
+				{
+					// map simple entity name to fully qualified entity name
+					return entityMetaData.getName();
+				}
+			}
+			return entityName;
+		}
+		else
+		{
+			return entityName;
+		}
+	}
+
 	private ImmutableMap<String, EntityMetaData> getEntityMetaDataFromDataService(DataService dataService,
 			Iterable<String> entityNames)
 	{
 		ImmutableMap.Builder<String, EntityMetaData> builder = ImmutableMap.<String, EntityMetaData> builder();
 		for (String name : entityNames)
 		{
-			builder.put(name, dataService.getRepository(name).getEntityMetaData());
+			builder.put(name, dataService.getRepository(getFullyQualifiedEntityName(name)).getEntityMetaData());
 		}
 		return builder.build();
 	}
