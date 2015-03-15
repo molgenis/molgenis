@@ -4,12 +4,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -18,17 +22,16 @@ import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.ontology.OntologyServiceResult;
 import org.molgenis.ontology.beans.Ontology;
 import org.molgenis.ontology.beans.OntologyImpl;
-import org.molgenis.ontology.beans.OntologyServiceResultImpl;
+import org.molgenis.ontology.beans.OntologyServiceResult;
 import org.molgenis.ontology.beans.OntologyTerm;
 import org.molgenis.ontology.beans.OntologyTermImpl;
 import org.molgenis.ontology.model.OntologyMetaData;
 import org.molgenis.ontology.model.OntologyTermMetaData;
 import org.molgenis.ontology.model.OntologyTermNodePathMetaData;
 import org.molgenis.ontology.model.OntologyTermSynonymMetaData;
-import org.molgenis.ontology.repository.OntologyTermQueryRepository;
+import org.molgenis.ontology.roc.InformationContentService;
 import org.molgenis.ontology.utils.NGramMatchingModel;
 import org.molgenis.ontology.utils.OntologyServiceUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,10 +43,11 @@ import com.google.common.collect.Sets;
 
 public class OntologyMatchingServiceImpl implements OntologyMatchingService
 {
-	private final PorterStemmer stemmer = new PorterStemmer();
 	private static final List<String> ELASTICSEARCH_RESERVED_WORDS = Arrays.asList("or", "and", "if");
 	private static final String NON_WORD_SEPARATOR = "[^a-zA-Z0-9]";
+	private static final String ILLEGAL_CHARACTERS_PATTERN = "[^a-zA-Z0-9 ]";
 	private static final String FUZZY_MATCH_SIMILARITY = "~0.8";
+	private static final String SINGLE_WHITESPACE = " ";
 	private static final int MAX_NUMBER_MATCHES = 500;
 
 	// Global fields that are used by other classes
@@ -53,19 +57,23 @@ public class OntologyMatchingServiceImpl implements OntologyMatchingService
 	public static final String DEFAULT_MATCHING_SYNONYM_FIELD = "Synonym";
 	public static final String DEFAULT_MATCHING_IDENTIFIER = "Identifier";
 	public static final String SCORE = "Score";
-	public static final String MAX_SCORE_FIELD = "maxScoreField";
 	public static final String COMBINED_SCORE = "Combined_Score";
 
+	private final PorterStemmer stemmer = new PorterStemmer();
 	private final DataService dataService;
 	private final SearchService searchService;
+	private final InformationContentService informationContentService;
 
 	@Autowired
-	public OntologyMatchingServiceImpl(DataService dataService, SearchService searchService)
+	public OntologyMatchingServiceImpl(DataService dataService, SearchService searchService,
+			InformationContentService informationContentService)
 	{
 		if (dataService == null) throw new IllegalArgumentException("DataService is null");
 		if (searchService == null) throw new IllegalArgumentException("SearchService is null");
+		if (informationContentService == null) throw new IllegalArgumentException("InformationContentService is null");
 		this.dataService = dataService;
 		this.searchService = searchService;
+		this.informationContentService = informationContentService;
 	}
 
 	@Override
@@ -299,20 +307,24 @@ public class OntologyMatchingServiceImpl implements OntologyMatchingService
 			for (Entity entity : searchService.search(new QueryImpl(queryRule).pageSize(MAX_NUMBER_MATCHES),
 					entityMetaData))
 			{
-				String maxScoreField = null;
 				double maxNgramScore = 0;
+				double maxNgramIDFScore = 0;
 				for (String inputAttrName : inputEntity.getAttributeNames())
 				{
-					if (StringUtils.isNotEmpty(inputEntity.getString(inputAttrName)))
+					String queryString = inputEntity.getString(inputAttrName);
+					if (StringUtils.isNotEmpty(queryString))
 					{
 						if (DEFAULT_MATCHING_NAME_FIELD.equalsIgnoreCase(inputAttrName)
 								|| inputAttrName.toLowerCase().startsWith(DEFAULT_MATCHING_SYNONYM_FIELD.toLowerCase()))
 						{
-							double ngramScore = calculateNGramOTSynonyms(inputEntity.getString(inputAttrName), entity);
-							if (maxNgramScore < ngramScore)
+							Entity topMatchedSynonymEntity = calculateNGramOTSynonyms(ontologyIri, queryString, entity);
+							if (maxNgramScore < topMatchedSynonymEntity.getDouble(SCORE))
 							{
-								maxNgramScore = ngramScore;
-								maxScoreField = inputAttrName;
+								maxNgramScore = topMatchedSynonymEntity.getDouble(SCORE);
+							}
+							if (maxNgramIDFScore < topMatchedSynonymEntity.getDouble(COMBINED_SCORE))
+							{
+								maxNgramIDFScore = topMatchedSynonymEntity.getDouble(COMBINED_SCORE);
 							}
 						}
 						else
@@ -327,12 +339,21 @@ public class OntologyMatchingServiceImpl implements OntologyMatchingService
 					mapEntity.set(attributeName, entity.get(attributeName));
 				}
 				mapEntity.set(SCORE, maxNgramScore);
-				mapEntity.set(COMBINED_SCORE, maxNgramScore);
-				mapEntity.set(MAX_SCORE_FIELD, maxScoreField);
+				mapEntity.set(COMBINED_SCORE, maxNgramIDFScore);
 				relevantEntities.add(mapEntity);
 			}
 		}
-		return convertResults(relevantEntities, OntologyServiceUtil.getEntityAsMap(inputEntity));
+
+		Collections.sort(relevantEntities, new Comparator<Entity>()
+		{
+			public int compare(Entity entity1, Entity entity2)
+			{
+				return entity2.getDouble(COMBINED_SCORE).compareTo(entity1.getDouble(COMBINED_SCORE));
+			}
+		});
+
+		return new OntologyServiceResult(OntologyServiceUtil.getEntityAsMap(inputEntity), relevantEntities,
+				relevantEntities.size());
 	}
 
 	@Override
@@ -343,40 +364,135 @@ public class OntologyMatchingServiceImpl implements OntologyMatchingService
 		return searchEntity(ontologyUrl, entity);
 	}
 
-	private OntologyServiceResult convertResults(List<Entity> relevantEntities, Map<String, Object> inputData)
-	{
-		Collections.sort(relevantEntities, new Comparator<Entity>()
-		{
-			public int compare(Entity entity1, Entity entity2)
-			{
-				return entity2.getDouble(COMBINED_SCORE).compareTo(entity1.getDouble(COMBINED_SCORE));
-			}
-		});
-		// PostProcessOntologyTermCombineSynonymAlgorithm.process(relevantEntities, inputData);
-		// PostProcessRemoveRedundantOntologyTerm.process(relevantEntities);
-		// PostProcessRedistributionScoreAlgorithm.process(relevantEntities, inputData, this);
-		return new OntologyServiceResultImpl(inputData, relevantEntities, relevantEntities.size());
-	}
-
 	/**
 	 * A helper function to calculate the best NGram score from a list ontologyTerm synonyms
 	 * 
 	 * @param queryString
 	 * @param entity
 	 * @return
+	 * @throws ExecutionException
 	 */
-	private double calculateNGramOTSynonyms(String queryString, Entity entity)
+	private Entity calculateNGramOTSynonyms(String ontologyIri, String queryString, Entity entity)
 	{
-		double ngramScore = 0;
-		queryString = removeIllegalCharWithSingleWhiteSpace(queryString);
-		for (Entity synonymEntity : entity.getEntities(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM))
+		Iterable<Entity> entities = entity.getEntities(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM);
+		if (Iterables.size(entities) > 0)
 		{
-			String ontologyTermSynonym = removeIllegalCharWithSingleWhiteSpace(synonymEntity
-					.getString(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM));
-			double score_1 = NGramMatchingModel.stringMatching(queryString, ontologyTermSynonym);
-			if (score_1 > ngramScore) ngramScore = score_1;
+			List<MapEntity> synonymEntities = FluentIterable.from(entities).transform(new Function<Entity, MapEntity>()
+			{
+				public MapEntity apply(Entity input)
+				{
+					MapEntity mapEntity = new MapEntity();
+					for (String attrName : input.getAttributeNames())
+						mapEntity.set(attrName, input.get(attrName));
+
+					String ontologyTermSynonym = removeIllegalCharWithSingleWhiteSpace(input
+							.getString(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM));
+					double score_1 = NGramMatchingModel.stringMatching(queryString, ontologyTermSynonym);
+					mapEntity.set(SCORE, score_1);
+
+					return mapEntity;
+				}
+
+			}).toSortedList(new Comparator<MapEntity>()
+			{
+				public int compare(MapEntity o1, MapEntity o2)
+				{
+					return o2.getDouble(SCORE).compareTo(o1.getDouble(SCORE));
+				}
+			});
+
+			Entity topMatchedSynonymEntity = synonymEntities.get(0);
+			double ngramScore = topMatchedSynonymEntity.getDouble(SCORE);
+			String topMatchedSynonym = topMatchedSynonymEntity
+					.getString(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM);
+
+			for (int j = 1; j < synonymEntities.size(); j++)
+			{
+				Entity nextMatchedSynonymEntity = synonymEntities.get(j);
+				String nextMatchedSynonym = nextMatchedSynonymEntity
+						.getString(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM);
+
+				StringBuilder tempCombinedSynonym = new StringBuilder().append(topMatchedSynonym)
+						.append(SINGLE_WHITESPACE).append(nextMatchedSynonym);
+
+				double newScore = NGramMatchingModel.stringMatching(queryString.replaceAll(ILLEGAL_CHARACTERS_PATTERN,
+						SINGLE_WHITESPACE),
+						tempCombinedSynonym.toString().replaceAll(ILLEGAL_CHARACTERS_PATTERN, SINGLE_WHITESPACE));
+
+				if (newScore > ngramScore)
+				{
+					ngramScore = newScore;
+					topMatchedSynonym = tempCombinedSynonym.toString();
+				}
+			}
+
+			topMatchedSynonymEntity.set(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM, topMatchedSynonym);
+			topMatchedSynonymEntity.set(SCORE, ngramScore);
+			topMatchedSynonymEntity.set(COMBINED_SCORE, ngramScore);
+
+			Map<String, Double> weightedWordSimilarity = redistributedNGramScore(queryString, ontologyIri);
+
+			Set<String> synonymStemmedWordSet = informationContentService.createStemmedWordSet(topMatchedSynonym);
+
+			for (String originalWord : informationContentService.createStemmedWordSet(queryString))
+			{
+				if (synonymStemmedWordSet.contains(originalWord) && weightedWordSimilarity.containsKey(originalWord))
+				{
+					topMatchedSynonymEntity.set(COMBINED_SCORE,
+							(topMatchedSynonymEntity.getDouble(COMBINED_SCORE) + weightedWordSimilarity
+									.get(originalWord)));
+				}
+			}
+			return topMatchedSynonymEntity;
 		}
-		return ngramScore;
+		return null;
+	}
+
+	private Map<String, Double> redistributedNGramScore(String queryString, String ontologyIri)
+	{
+		// Collect the frequencies for all of the unique words from query string
+		Set<String> queryStringStemmedWordSet = informationContentService.createStemmedWordSet(queryString);
+
+		double queryStringLength = StringUtils.join(queryStringStemmedWordSet, SINGLE_WHITESPACE).trim().length();
+
+		Map<String, Double> wordIDFMap = informationContentService.createWordIDF(queryString, ontologyIri);
+
+		Map<String, Double> wordWeightedSimilarity = new HashMap<String, Double>();
+		double averageIDFValue = 0;
+		for (Entry<String, Double> entry : wordIDFMap.entrySet())
+		{
+			averageIDFValue += entry.getValue();
+			wordWeightedSimilarity.put(entry.getKey(), entry.getKey().length() / queryStringLength * 100);
+		}
+		averageIDFValue = averageIDFValue / wordIDFMap.size();
+
+		double totalContribution = 0;
+		double totalDenominator = 0;
+		for (Entry<String, Double> entry : wordIDFMap.entrySet())
+		{
+			double diff = entry.getValue() - averageIDFValue;
+			if (diff < 0)
+			{
+				Double contributedSimilarity = wordWeightedSimilarity.get(entry.getKey()) * (diff / averageIDFValue);
+				totalContribution += Math.abs(contributedSimilarity);
+				wordWeightedSimilarity.put(entry.getKey(), contributedSimilarity);
+			}
+			else
+			{
+				totalDenominator += diff;
+			}
+		}
+
+		for (Entry<String, Double> entry : wordIDFMap.entrySet())
+		{
+			double diff = entry.getValue() - averageIDFValue;
+			if (diff > 0)
+			{
+				wordWeightedSimilarity.put(entry.getKey(), ((diff / totalDenominator) * totalContribution));
+			}
+		}
+
+		return wordWeightedSimilarity;
 	}
 
 	/**
@@ -399,8 +515,7 @@ public class OntologyMatchingServiceImpl implements OntologyMatchingService
 				String afterStem = stemmer.getCurrent();
 				if (StringUtils.isNotEmpty(afterStem))
 				{
-					stringBuilder.append(afterStem).append(FUZZY_MATCH_SIMILARITY)
-							.append(OntologyTermQueryRepository.SINGLE_WHITESPACE);
+					stringBuilder.append(afterStem).append(FUZZY_MATCH_SIMILARITY).append(SINGLE_WHITESPACE);
 				}
 			}
 		}
@@ -409,12 +524,11 @@ public class OntologyMatchingServiceImpl implements OntologyMatchingService
 
 	public String removeIllegalCharWithSingleWhiteSpace(String string)
 	{
-		return string.replaceAll(OntologyTermQueryRepository.ILLEGAL_CHARACTERS_PATTERN,
-				OntologyTermQueryRepository.SINGLE_WHITESPACE);
+		return string.replaceAll(ILLEGAL_CHARACTERS_PATTERN, SINGLE_WHITESPACE);
 	}
 
 	public String removeIllegalCharWithEmptyString(String string)
 	{
-		return string.replaceAll(OntologyTermQueryRepository.ILLEGAL_CHARACTERS_PATTERN, StringUtils.EMPTY);
+		return string.replaceAll(ILLEGAL_CHARACTERS_PATTERN, StringUtils.EMPTY);
 	}
 }

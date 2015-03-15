@@ -13,6 +13,7 @@ import org.molgenis.ontology.model.OntologyTermDynamicAnnotationMetaData;
 import org.molgenis.ontology.model.OntologyTermMetaData;
 import org.molgenis.ontology.model.OntologyTermNodePathMetaData;
 import org.molgenis.ontology.model.OntologyTermSynonymMetaData;
+import org.molgenis.ontology.roc.InformationContentService;
 import org.molgenis.ontology.roc.MatchQualityRocService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -73,7 +74,7 @@ public class OntologyConfiguration
 	@Bean
 	public OntologyMatchingService ontologyMatchingService()
 	{
-		return new OntologyMatchingServiceImpl(dataService, searchService);
+		return new OntologyMatchingServiceImpl(dataService, searchService, informationContentService());
 	}
 
 	@Bean
@@ -92,6 +93,12 @@ public class OntologyConfiguration
 	public MatchQualityRocService matchQualityRocService()
 	{
 		return new MatchQualityRocService(dataService, ontologyMatchingService());
+	}
+
+	@Bean
+	public InformationContentService informationContentService()
+	{
+		return new InformationContentService(dataService);
 	}
 
 	public OntologyConfiguration()
