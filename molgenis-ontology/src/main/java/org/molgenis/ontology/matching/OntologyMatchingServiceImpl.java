@@ -4,13 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.collect.Iterables;
@@ -370,7 +367,6 @@ public class OntologyMatchingServiceImpl implements OntologyMatchingService
 	 * @param queryString
 	 * @param entity
 	 * @return
-	 * @throws ExecutionException
 	 */
 	private Entity calculateNGramOTSynonyms(String ontologyIri, String queryString, Entity entity)
 	{
@@ -430,7 +426,8 @@ public class OntologyMatchingServiceImpl implements OntologyMatchingService
 			topMatchedSynonymEntity.set(SCORE, ngramScore);
 			topMatchedSynonymEntity.set(COMBINED_SCORE, ngramScore);
 
-			Map<String, Double> weightedWordSimilarity = redistributedNGramScore(queryString, ontologyIri);
+			Map<String, Double> weightedWordSimilarity = informationContentService.redistributedNGramScore(queryString,
+					ontologyIri);
 
 			Set<String> synonymStemmedWordSet = informationContentService.createStemmedWordSet(topMatchedSynonym);
 
@@ -446,53 +443,6 @@ public class OntologyMatchingServiceImpl implements OntologyMatchingService
 			return topMatchedSynonymEntity;
 		}
 		return null;
-	}
-
-	private Map<String, Double> redistributedNGramScore(String queryString, String ontologyIri)
-	{
-		// Collect the frequencies for all of the unique words from query string
-		Set<String> queryStringStemmedWordSet = informationContentService.createStemmedWordSet(queryString);
-
-		double queryStringLength = StringUtils.join(queryStringStemmedWordSet, SINGLE_WHITESPACE).trim().length();
-
-		Map<String, Double> wordIDFMap = informationContentService.createWordIDF(queryString, ontologyIri);
-
-		Map<String, Double> wordWeightedSimilarity = new HashMap<String, Double>();
-		double averageIDFValue = 0;
-		for (Entry<String, Double> entry : wordIDFMap.entrySet())
-		{
-			averageIDFValue += entry.getValue();
-			wordWeightedSimilarity.put(entry.getKey(), entry.getKey().length() / queryStringLength * 100);
-		}
-		averageIDFValue = averageIDFValue / wordIDFMap.size();
-
-		double totalContribution = 0;
-		double totalDenominator = 0;
-		for (Entry<String, Double> entry : wordIDFMap.entrySet())
-		{
-			double diff = entry.getValue() - averageIDFValue;
-			if (diff < 0)
-			{
-				Double contributedSimilarity = wordWeightedSimilarity.get(entry.getKey()) * (diff / averageIDFValue);
-				totalContribution += Math.abs(contributedSimilarity);
-				wordWeightedSimilarity.put(entry.getKey(), contributedSimilarity);
-			}
-			else
-			{
-				totalDenominator += diff;
-			}
-		}
-
-		for (Entry<String, Double> entry : wordIDFMap.entrySet())
-		{
-			double diff = entry.getValue() - averageIDFValue;
-			if (diff > 0)
-			{
-				wordWeightedSimilarity.put(entry.getKey(), ((diff / totalDenominator) * totalContribution));
-			}
-		}
-
-		return wordWeightedSimilarity;
 	}
 
 	/**
