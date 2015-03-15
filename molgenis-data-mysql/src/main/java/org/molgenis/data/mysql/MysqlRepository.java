@@ -1197,6 +1197,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 
 	private class EntityMapper implements RowMapper<Entity>
 	{
+		private static final int GROUP_CONCAT_MAX_LEN = 1024;
 		private final EntityMetaData entityMetaData;
 
 		private EntityMapper(EntityMetaData entityMetaData)
@@ -1218,15 +1219,36 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				if (att.getDataType() instanceof MrefField)
 				{
 					// TODO: convert to typed lists (or arrays?)
-					if (att.getRefEntity().getIdAttribute().getDataType() instanceof IntField)
+					String mrefIds = resultSet.getString(att.getName());
+					if (mrefIds != null)
 					{
-						e.set(att.getName(), DataConverter.toIntList(resultSet.getString(att.getName())));
+						if (att.getRefEntity().getIdAttribute().getDataType() instanceof IntField)
+						{
+							if (mrefIds.length() >= GROUP_CONCAT_MAX_LEN)
+							{
+								// this list is just as long as it's allowed to be so it probably got truncated.
+								// Retrieve the IDs explicitly in a separate query.
+								e.set(att.getName(), jdbcTemplate.queryForList(getMrefSelectSql(e, att), Integer.class));
+							}
+							else
+							{
+								e.set(att.getName(), DataConverter.toIntList(mrefIds));
+							}
+						}
+						else
+						{
+							if (mrefIds.length() >= GROUP_CONCAT_MAX_LEN)
+							{
+								// this list is just as long as it's allowed to be so it probably got truncated.
+								// Retrieve the IDs explicitly in a separate query.
+								e.set(att.getName(), jdbcTemplate.queryForList(getMrefSelectSql(e, att), Object.class));
+							}
+							else
+							{
+								e.set(att.getName(), DataConverter.toObjectList(mrefIds));
+							}
+						}
 					}
-					else
-					{
-						e.set(att.getName(), DataConverter.toObjectList(resultSet.getString(att.getName())));
-					}
-
 				}
 				else if (att.getDataType() instanceof XrefField)
 				{
@@ -1249,6 +1271,13 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 			}
 			return e;
 
+		}
+
+		private String getMrefSelectSql(Entity e, AttributeMetaData att)
+		{
+			return String.format("SELECT `%s` FROM `%s_%1$s` WHERE `%s` = '%s' ORDER BY `order`",
+					getTableName(att.getRefEntity()), getTableName(), entityMetaData.getIdAttribute().getName()
+							.toLowerCase(), e.get(entityMetaData.getIdAttribute().getName()));
 		}
 	}
 
