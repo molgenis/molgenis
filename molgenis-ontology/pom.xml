@@ -46,12 +46,17 @@
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-scripts</artifactId>
+			<artifactId>molgenis-data-rest</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-ontology-core</artifactId>
+			<artifactId>molgenis-data-elasticsearch</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-scripts</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>

@@ -12,8 +12,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.ontology.OntologyServiceResult;
-import org.molgenis.ontology.repository.OntologyTermQueryRepository;
+import org.molgenis.ontology.beans.OntologyServiceResult;
+import org.molgenis.ontology.model.OntologyTermMetaData;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.runas.RunAsSystem;
@@ -90,7 +90,7 @@ public class MatchInputTermBatchService
 				{
 					Map<String, Object> firstMatchedOntologyTerm = searchEntity.getOntologyTerms().get(0);
 					matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.MATCHED_TERM,
-							firstMatchedOntologyTerm.get(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI));
+							firstMatchedOntologyTerm.get(OntologyTermMetaData.ONTOLOGY_TERM_IRI));
 					matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.SCORE,
 							firstMatchedOntologyTerm.get(OntologyMatchingServiceImpl.SCORE));
 				}

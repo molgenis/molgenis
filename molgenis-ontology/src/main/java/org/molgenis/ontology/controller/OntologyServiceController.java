@@ -38,8 +38,7 @@ import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.ontology.OntologyServiceResult;
-import org.molgenis.ontology.beans.OntologyServiceResultImpl;
+import org.molgenis.ontology.beans.OntologyServiceResult;
 import org.molgenis.ontology.matching.AdaptedCsvRepository;
 import org.molgenis.ontology.matching.MatchInputTermBatchService;
 import org.molgenis.ontology.matching.MatchingTaskContentEntityMetaData;
@@ -320,13 +319,13 @@ public class OntologyServiceController extends MolgenisPluginController
 			Entity entity = dataService.findOne(entityName,
 					new QueryImpl().eq(MatchingTaskContentEntityMetaData.IDENTIFIER, inputTermIdentifier));
 
-			if (matchingTaskEntity == null || entity == null) return new OntologyServiceResultImpl(
+			if (matchingTaskEntity == null || entity == null) return new OntologyServiceResult(
 					"entityName or inputTermIdentifier is invalid!");
 
 			return ontologyMatchingService.searchEntity(
 					matchingTaskEntity.getString(MatchingTaskEntityMetaData.CODE_SYSTEM), entity);
 		}
-		return new OntologyServiceResultImpl("Please check entityName, inputTermIdentifier exist in input!");
+		return new OntologyServiceResult("Please check entityName, inputTermIdentifier exist in input!");
 	}
 
 	@RequestMapping(method = POST, value = "/search")
@@ -343,7 +342,7 @@ public class OntologyServiceController extends MolgenisPluginController
 			entity.set(OntologyMatchingServiceImpl.DEFAULT_MATCHING_NAME_FIELD, queryString);
 			return ontologyMatchingService.searchEntity(ontologyIri, entity);
 		}
-		return new OntologyServiceResultImpl("Please check entityName, inputTermIdentifier exist in input!");
+		return new OntologyServiceResult("Please check entityName, inputTermIdentifier exist in input!");
 	}
 
 	@RequestMapping(method = GET, value = "/match/download/{entityName}")

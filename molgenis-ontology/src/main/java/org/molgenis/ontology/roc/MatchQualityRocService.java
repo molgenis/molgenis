@@ -23,12 +23,12 @@ import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.excel.ExcelWriter.FileFormat;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.ontology.OntologyServiceResult;
+import org.molgenis.ontology.beans.OntologyServiceResult;
 import org.molgenis.ontology.matching.MatchingTaskContentEntityMetaData;
 import org.molgenis.ontology.matching.MatchingTaskEntityMetaData;
 import org.molgenis.ontology.matching.OntologyMatchingService;
-import org.molgenis.ontology.repository.OntologyTermQueryRepository;
-import org.molgenis.ontology.service.OntologyServiceImpl;
+import org.molgenis.ontology.matching.OntologyMatchingServiceImpl;
+import org.molgenis.ontology.model.OntologyTermMetaData;
 import org.molgenis.ontology.utils.OntologyServiceUtil;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.FileStore;
@@ -96,8 +96,8 @@ public class MatchQualityRocService
 						for (Map<String, Object> candidateMatch : searchResult.getOntologyTerms())
 						{
 							rank++;
-							String candidateMatchIdentifier = candidateMatch.get(
-									OntologyTermQueryRepository.ONTOLOGY_TERM_IRI).toString();
+							String candidateMatchIdentifier = candidateMatch
+									.get(OntologyTermMetaData.ONTOLOGY_TERM_IRI).toString();
 
 							if (candidateMatchIdentifier.equals(matchedCodeIdentifier))
 							{
@@ -200,8 +200,8 @@ public class MatchQualityRocService
 	{
 		String termIdentifier = validatedMatchEntity.getString(MatchingTaskContentEntityMetaData.INPUT_TERM);
 		Entity termEntity = dataService.findOne(entityName,
-				new QueryImpl().eq(OntologyServiceImpl.ALLOWED_IDENTIFIER, termIdentifier));
-		return termEntity.getString(OntologyServiceImpl.DEFAULT_MATCHING_NAME_FIELD);
+				new QueryImpl().eq(OntologyMatchingServiceImpl.DEFAULT_MATCHING_IDENTIFIER, termIdentifier));
+		return termEntity.getString(OntologyMatchingServiceImpl.DEFAULT_MATCHING_NAME_FIELD);
 	}
 
 	private String createFileName()
