@@ -134,6 +134,10 @@ public class MatchInputTermBatchService
 			securityContext.setAuthentication(auth);
 
 		}
+		catch (Exception e)
+		{
+			throw new RuntimeException(e.getMessage());
+		}
 		finally
 		{
 			uploadProgress.removeUser(userName);
