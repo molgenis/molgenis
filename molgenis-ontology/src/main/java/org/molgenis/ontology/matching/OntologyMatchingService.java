@@ -3,8 +3,8 @@ package org.molgenis.ontology.matching;
 import java.util.List;
 
 import org.molgenis.data.Entity;
-import org.molgenis.ontology.OntologyServiceResult;
 import org.molgenis.ontology.beans.Ontology;
+import org.molgenis.ontology.beans.OntologyServiceResult;
 import org.molgenis.ontology.beans.OntologyTerm;
 
 /**
