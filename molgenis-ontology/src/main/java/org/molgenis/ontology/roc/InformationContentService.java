@@ -83,30 +83,22 @@ public class InformationContentService
 
 	public Map<String, Double> redistributedNGramScore(String queryString, String ontologyIri)
 	{
-		// Collect the frequencies for all of the unique words from query string
-		Set<String> queryStringStemmedWordSet = createStemmedWordSet(queryString);
-
-		double queryStringLength = StringUtils.join(queryStringStemmedWordSet, SINGLE_WHITESPACE).trim().length();
-
 		Map<String, Double> wordIDFMap = createWordIDF(queryString, ontologyIri);
-
 		Map<String, Double> wordWeightedSimilarity = new HashMap<String, Double>();
-		double averageIDFValue = 0;
-		for (Entry<String, Double> entry : wordIDFMap.entrySet())
-		{
-			averageIDFValue += entry.getValue();
-			wordWeightedSimilarity.put(entry.getKey(), entry.getKey().length() / queryStringLength * 100);
-		}
-		averageIDFValue = averageIDFValue / wordIDFMap.size();
 
+		double averageIDFValue = wordIDFMap.values().stream().mapToDouble(Double::doubleValue).average().getAsDouble();
+		double queryStringLength = StringUtils.join(createStemmedWordSet(queryString), SINGLE_WHITESPACE).trim()
+				.length();
 		double totalContribution = 0;
 		double totalDenominator = 0;
+
 		for (Entry<String, Double> entry : wordIDFMap.entrySet())
 		{
 			double diff = entry.getValue() - averageIDFValue;
 			if (diff < 0)
 			{
-				Double contributedSimilarity = wordWeightedSimilarity.get(entry.getKey()) * (diff / averageIDFValue);
+				Double contributedSimilarity = (entry.getKey().length() / queryStringLength * 100)
+						* (diff / averageIDFValue);
 				totalContribution += Math.abs(contributedSimilarity);
 				wordWeightedSimilarity.put(entry.getKey(), contributedSimilarity);
 			}
