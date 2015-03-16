@@ -125,7 +125,8 @@ attr2	"HMDB"	"entity11"	string		TRUE	""
 attr3	"Gene ontology"	"entity11"	string		TRUE	"Gene ontology Id, eg: 
 GI:468181829"
 attr4	"UniprotID"	"entity11"	string		TRUE	""
-attr5	"Protein Full-Name(s)"	"entity11"	text		TRUE	""
+attr5	"Protein Full-Name(s)"	"entity11"	text		TRUE	"Full protein name(s) and shortcode(s), for lookup purposes. Eg. from ncbi DEFINITION:  xylanase [Prevotella ruminicola]
+"
 attr6	"Description"	"entity11"	text		TRUE	"Notes/References to feature method or version
 "
 attr7	"Low Plasma Range"	"entity11"	string		TRUE	""
@@ -139,7 +140,9 @@ attr2	"Compound name dbNP"	"entity12"	text		TRUE	"Feature name without version n
 "
 attr3	"Compound Id in Metabolic platform"	"entity12"	string		TRUE	"Compound Id from the actual metabolomics platform. Preferably shortest unique name or code. 
 "
-attr4	"Compound ontology"	"entity12"	text		TRUE	""
+attr4	"Compound ontology"	"entity12"	text		TRUE	"Compound/Metabolomics ontology Id. Multiple Id's allowed (Id,Id,...).
+If needed combine ontology-db-code:compoundcode (eg. CHEBI:5931,SNOMED:85600001,NDF:N0000168565,HMDB00651).
+"
 attr5	"Compound Full-Name(s)"	"entity12"	text		TRUE	"Full compoud name(s) and shortcode(s), for lookup purposes.
 "
 attr6	"Description"	"entity12"	text		TRUE	"Notes/References to feature method or version
@@ -175,8 +178,11 @@ attr1	"Unit (unique)"	"entity15"	text		TRUE	"Validated unit symbol
 "
 attr2	"Protein name dbNP"	"entity15"	text		TRUE	"Feature name without version number (for grouping feature-versions).
 "
-attr3	"Protein ontology"	"entity15"	string		TRUE	""
-attr4	"Protein Full-Name(s)"	"entity15"	text		TRUE	""
+attr3	"Protein ontology"	"entity15"	string		TRUE	"Protein ontology Id. Multiple allowed (Id,Id,…), eg: 
+CAA31109.1
+"
+attr4	"Protein Full-Name(s)"	"entity15"	text		TRUE	"Full protein name(s) and shortcode(s), for lookup purposes. Eg. from ncbi DEFINITION:  xylanase [Prevotella ruminicola]
+"
 attr5	"Description"	"entity15"	text		TRUE	"Notes/References to feature method or version
 "
 attr6	"HMDB"	"entity15"	string		TRUE	""
@@ -248,7 +254,7 @@ attr1	"Quality"	"entity22"	text		TRUE	"Indicate if sample is good, suspect or ba
 attr2	"Size"	"entity22"	decimal		TRUE	"Decimal, sample size (give unit in next field)"
 attr3	"Size unit"	"entity22"	text		TRUE	"Unit for sample size, (edit template to add choices)."
 id	"id"	entity23	int	TRUE	FALSE	"generated ID attribute"
-attr0	"Subject description"	"entity23"	text		TRUE	""
+attr0	"Subject description"	"entity23"	text		TRUE	"Subject details, e.g: description, objective or time unrelated treatments. (note: describe time-related treatments and sampling via event )."
 attr1	"GPS coordinate"	"entity23"	string		TRUE	"GPS location of sample obtained, e.g: N 52 7 36.3, E 4 39 29.5"
 attr2	"Name/Address"	"entity23"	text		TRUE	"Name of location/factory/institution and  address, sample obtained: name/street/nr/city/zipcode/country, e.g. Factory/iI."
 attr3	"City/Area"	"entity23"	text		TRUE	"City/Area, sample obtained: e.g. London, Amsterdam, North Sea  (edit template to add choices)."
@@ -287,7 +293,7 @@ attr17	"Insulin unit"	"entity25"	text		TRUE	"Unit, Insulin (edit template to add
 attr18	"Medication/Supplement/Diet use"	"entity25"	text		TRUE	"Summarize per subject adverse events before/during study (not study objectives).
 "
 attr19	"Adverse events"	"entity25"	text		TRUE	"Summarize per subject adverse events at/before study start."
-attr20	"Subject description"	"entity25"	text		TRUE	""
+attr20	"Subject description"	"entity25"	text		TRUE	"Subject details, e.g: description, objective or time unrelated treatments. (note: describe time-related treatments and sampling via event )."
 attr21	"FVC%"	"entity25"	string		TRUE	"Forced vital capacity (expressed as a percentage of the normal expected value)"
 attr22	"DLCO%"	"entity25"	string		TRUE	"Diffse capacity for carbon monoxide (expressed as a percentage of the normal expected value)"
 attr23	"Occupancy"	"entity25"	string		TRUE	"main occupacy subject"
@@ -316,7 +322,7 @@ attr11	"Animals/cage"	"entity26"	long		TRUE	"Natural number, Animals per cage."
 attr12	"Cage id before study"	"entity26"	string		TRUE	"Cage identifier, unique in this study."
 attr13	"Run-in diet"	"entity26"	string		TRUE	"Short diet code, unique in this study (full diet description under events; file).
 "
-attr14	"Subject description"	"entity26"	text		TRUE	""
+attr14	"Subject description"	"entity26"	text		TRUE	"Subject details, e.g: description, objective or time unrelated treatments. (note: describe time-related treatments and sampling via event )."
 attr15	"Study/Treatment Group"	"entity26"	string		TRUE	"Group of Subjects belonging to the same experimental (treatment) group."
 id	"id"	entity27	int	TRUE	FALSE	"generated ID attribute"
 attr0	"Sampling name short"	"entity27"	string			"Sampling name, short,unique in this study, e.g: physiology, feces, blood, heart, BAT, WAT."
@@ -522,7 +528,9 @@ attr1	"Unit (unique)"	"entity57"	text		TRUE	"Validated unit symbol
 "
 attr2	"Compound name dbNP"	"entity57"	text		TRUE	"Feature name without version number (for grouping feature-versions).
 "
-attr3	"Compound ontology"	"entity57"	text		TRUE	""
+attr3	"Compound ontology"	"entity57"	text		TRUE	"Compound/Metabolomics ontology Id. Multiple Id's allowed (Id,Id,...).
+If needed combine ontology-db-code:compoundcode (eg. CHEBI:5931,SNOMED:85600001,NDF:N0000168565,HMDB00651).
+"
 attr4	"Compound Full-Name(s)"	"entity57"	text		TRUE	"Full compoud name(s) and shortcode(s), for lookup purposes.
 "
 attr5	"Description"	"entity57"	text		TRUE	"Notes/References to feature method or version
