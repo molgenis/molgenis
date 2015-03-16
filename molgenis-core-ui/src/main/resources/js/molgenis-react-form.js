@@ -186,7 +186,7 @@
 				return;
 			}
 			
-			this._validate(this.props.value, function(validity) {
+			this._validate(e.value, function(validity) {
 				this.setState({
 					valid: validity.valid,
 					errorMessage: validity.errorMessage
@@ -344,7 +344,7 @@
 			for(var key in attributes) {
 				if(attributes.hasOwnProperty(key)) {
 					var attr = attributes[key];
-					if(this.props.mode === 'create' && attr.auto !== true) {
+					if(this.props.mode !== 'create' && attr.auto !== true) {
 						var Control = attr.fieldType === 'COMPOUND' ? molgenis.control.FormControlGroup : molgenis.control.ValidatedFormControl;
 						controls.push(Control({
 							entity : this.props.entity,

@@ -60,7 +60,6 @@
 			$container.select2($.extend({
 				containerCssClass: 'form-control',
 				placeholder : ' ', // cannot be an empty string
-				minimumResultsForSearch: -1, // permanently hide the search field
 				width: '100%'
 			}, options));
 			

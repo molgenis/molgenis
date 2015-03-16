@@ -59,7 +59,7 @@
 				value: this._isRadioOrCheckbox() ? this.props.value : this.state.value,
 				checked: this._isRadioOrCheckbox() ? this.state.checked : undefined,
 				onChange: this._handleChange,
-				onBlur: props.onBlur
+				onBlur: this._handleBlur
 			};
 			
 			if(props.readOnly && this._isRadioOrCheckbox()) {
@@ -89,20 +89,26 @@
 		},
 		_handleChange: function(event) {//console.log('_handleChange InputControl', event);
 			this.setState(this._isRadioOrCheckbox() ? {checked: event.target.checked} : {value: event.target.value});
-			
+			this._handleChangeOrBlur(event.target.value, event.target.checked, this.props.onValueChange);
+		},
+		_handleBlur: function(event) {
+			if(this.props.onBlur) {
+				this._handleChangeOrBlur(event.target.value, event.target.checked, this.props.onBlur);
+			}
+		},
+		_handleChangeOrBlur: function(value, checked, callback) {
 			var valueEvent;
 			if(this._isRadioOrCheckbox()) {
-				valueEvent = {value: this._emptyValueToNull(event.target.value), checked: event.target.checked};
+				valueEvent = {value: this._emptyValueToNull(value), checked: checked};
 			} else {
-				var value = this._emptyValueToNull(event.target.value);
+				var val = this._emptyValueToNull(value);
 				
-				if(this.props.type === 'number' && value !== null) {
-					value = parseFloat(value); // convert js string to js number
+				if(this.props.type === 'number' && val !== null) {
+					val = parseFloat(val); // convert js string to js number
 				}
-				valueEvent = {value: value};
+				valueEvent = {value: val};
 			}
-			
-			this.props.onValueChange(valueEvent);
+			callback(valueEvent);
 		},
 		_isRadioOrCheckbox: function() {
 			return this.props.type === 'radio' || this.props.type === 'checkbox';

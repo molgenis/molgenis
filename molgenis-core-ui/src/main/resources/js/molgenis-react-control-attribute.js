@@ -56,12 +56,13 @@
 			var entity = this.state.entity;
 			
 			var formatResult = function(item) {
-				if (entity.lookupAttributes.length > 0) {
+				var attrs = this._getAttrs();
+				if (attrs.length > 1) {
 					var items = [];
 					items.push('<div class="row">');
 
-					var width = Math.round(12 / entity.lookupAttributes.length); // FIXME fix in case of 5, 7 etc. lookup attributes
-					$.each(entity.lookupAttributes, function(i, attrName) {
+					var width = Math.round(12 / attrs.length); // FIXME fix in case of 5, 7 etc. lookup attributes
+					$.each(attrs, function(i, attrName) {
 						var attrLabel = entity.attributes[attrName].label;
 						var attrValue = item[attrName] !== undefined ? item[attrName] : '';
 						items.push('<div class="col-md-' + width + '">');
@@ -73,11 +74,11 @@
 
 					return items.join('');
 				} else {
-					return item[entity.labelAttribute];
+					return item[attrs[0]];
 				}
-			};
+			}.bind(this);
 			
-			var format = function(item) {
+			var formatSelection = function(item) {
 				return item[entity.labelAttribute];
 			};
 			
@@ -98,16 +99,17 @@
 				    var q = {
 						q : {
 							start : (query.page - 1) * num, 
-							num : num
+							num : num,
+							q: query.term.length > 0 ? this._createQuery(query.term) : undefined
 						}
 					};
 			    	
 			    	api.getAsync(entity.hrefCollection, q).done(function(data) {
 			    		query.callback({results: data.items, more: data.nextHref ? true : false});
 			    	});
-			    },
+			    }.bind(this),
 			    formatResult: formatResult,
-			    formatSelection: format
+			    formatSelection: formatSelection
 			};
 			return molgenis.control.wrapper.Select2({
 				options : options,
@@ -143,6 +145,26 @@
 					this.setState({entity: entity});
 				}
 			}.bind(this));
+		},
+		_createQuery: function(term) {
+			var rules = [];
+			var attrs = this._getAttrs();
+			for(var i = 0; i < attrs.length; ++i) {
+				if(i > 0) {
+					rules.push({operator: 'OR'});	
+				}
+				rules.push({field: attrs[i], operator: 'LIKE', value: term});
+			}
+			return rules;
+		},
+		_getAttrs: function() {
+			// display lookup attributes in dropdown or label attribute if no lookup attributes are defined
+			var entity = this.state.entity; 
+			if(entity.lookupAttributes && entity.lookupAttributes.length > 0) {
+				return entity.lookupAttributes;
+			} else {
+				return [entity.labelAttribute];
+			}
 		}
 	});
 	
