@@ -1,5 +1,6 @@
 name	label	entity	datatype	idattribute	nillable	description
-attr0	"Version"	"entity0"	string	TRUE	TRUE	""
+id	"id"	entity0	int	TRUE	FALSE	"generated ID attribute"
+attr0	"Version"	"entity0"	string		TRUE	""
 attr1	"Gene Full-Name(s)"	"entity0"	string		TRUE	"Full name(s) of the target gene, e.g. NCBI definition."
 attr2	"Target Gene Symbol (HGNC)"	"entity0"	string		TRUE	"Name of the target gene using HGNC term (for human subjects)"
 attr3	"Gene Ontology"	"entity0"	string		TRUE	"NCBI code
@@ -25,12 +26,13 @@ attr13	"Description"	"entity0"	text		TRUE	"Description on how the qRT-PCR was pe
 attr14	"Machine used for qRT-PCR (manufacturer)"	"entity0"	string		TRUE	"Description on what type of machine the experiment was performed."
 attr15	"Reporter dye (manufacturer)"	"entity0"	string		TRUE	""
 attr16	"Software used for analysis of qRT-PCR results"	"entity0"	string		TRUE	"Name of software (+version) used for analysis of qRT-PCR."
-attr17	"Experimental protocol"	"entity0"	file		TRUE	"Experimental protocol describing how detection for methylation of the gene of interest was performed."
+attr17	"Experimental protocol"	"entity0"	text		TRUE	"Experimental protocol describing how detection for methylation of the gene of interest was performed."
 attr18	"Analysis/calculation unit value of the measured feature"	"entity0"	text		TRUE	"Calculation/formula for obtaining processed data measurements (e.g. for a target gene compared to reference gene)"
 attr19	"Target gene primer manufacturer"	"entity0"	string		TRUE	""
 attr20	"Reference gene primer manufacturer"	"entity0"	string		TRUE	""
 attr21	"Additional information"	"entity0"	text		TRUE	"E.g. information on DNA isolation and bisulphite modification could be referred to here.
 In case primers and probes are from a published article, could refer to article here as well."
+id	"id"	entity1	int	TRUE	FALSE	"generated ID attribute"
 attr0	"Chromosomal position"	"entity1"	string		TRUE	"Chromosomal position of the probes in the kit."
 attr1	"Gene (kit name)"	"entity1"	string		TRUE	"Gene name as supplied by the MLPA kit."
 attr2	"Length"	"entity1"	long		TRUE	""
@@ -45,8 +47,9 @@ attr10	"Description"	"entity1"	text		TRUE	"Description on how the qRT-PCR was pe
 (can be reference to a published article or an online site with the protocol)"
 attr11	"Additional information"	"entity1"	text		TRUE	"E.g. information on DNA isolation and bisulphite modification could be referred to here.
 In case primers and probes are from a published article, could refer to article here as well."
-attr12	"Experimental protocol"	"entity1"	file		TRUE	"Experimental protocol describing how detection for methylation of the gene of interest was performed."
+attr12	"Experimental protocol"	"entity1"	text		TRUE	"Experimental protocol describing how detection for methylation of the gene of interest was performed."
 attr13	"Note on experimental protocol"	"entity1"	text		TRUE	""
+id	"id"	entity2	int	TRUE	FALSE	"generated ID attribute"
 attr0	"Chromosomal position"	"entity2"	string		TRUE	"Chromosomal position of the probes in the kit."
 attr1	"Gene (kit name)"	"entity2"	string		TRUE	"Gene name as supplied by the MLPA kit."
 attr2	"Length"	"entity2"	long		TRUE	""
@@ -61,8 +64,9 @@ attr10	"Description"	"entity2"	text		TRUE	"Description on how the qRT-PCR was pe
 (can be reference to a published article or an online site with the protocol)"
 attr11	"Additional information"	"entity2"	text		TRUE	"E.g. information on DNA isolation and bisulphite modification could be referred to here.
 In case primers and probes are from a published article, could refer to article here as well."
-attr12	"Experimental protocol"	"entity2"	file		TRUE	"Experimental protocol describing how detection for methylation of the gene of interest was performed."
+attr12	"Experimental protocol"	"entity2"	text		TRUE	"Experimental protocol describing how detection for methylation of the gene of interest was performed."
 attr13	"Note on experimental protocol"	"entity2"	text		TRUE	""
+id	"id"	entity3	int	TRUE	FALSE	"generated ID attribute"
 attr0	"Gene Full-Name(s)"	"entity3"	string		TRUE	"Full name(s) of the target gene, e.g. NCBI definition."
 attr1	"Gene Ontology"	"entity3"	string		TRUE	"NCBI code
 GI code
@@ -104,12 +108,13 @@ attr20	"Reference Gene: Molecular beacon sequence"	"entity3"	string		TRUE	"Refer
 Orientation given as standard: 5'-3'"
 attr21	"Reference Gene: Molecular beacon: Location relative to TSS"	"entity3"	string		TRUE	"Location relative to transcription start site (TSS) in basepairs (bp).
 For the reference gene."
-attr22	"Experimental protocol"	"entity3"	file		TRUE	"Experimental protocol describing how detection for methylation of the gene of interest was performed."
+attr22	"Experimental protocol"	"entity3"	text		TRUE	"Experimental protocol describing how detection for methylation of the gene of interest was performed."
 attr23	"Description"	"entity3"	text		TRUE	"Description on how the qRT-PCR was performed. 
 (can be reference to a published article or an online site with the protocol)"
 attr24	"Note on experimental protocol"	"entity3"	text		TRUE	""
 attr25	"Product company"	"entity3"	string		TRUE	""
 attr26	"Machine used for detection"	"entity3"	string		TRUE	"e.g. for detection of a qRT-PCR or qMSP, Taqman 7500 from Applied Biosystems was used."
+id	"id"	entity4	int	TRUE	FALSE	"generated ID attribute"
 attr0	"Target Gene Symbol (HGNC)"	"entity4"	string		TRUE	"Name of the target gene using HGNC term (for human subjects)"
 attr1	"Target gene primer manufacturer"	"entity4"	string		TRUE	""
 attr2	"Target Gene Full Name(s)"	"entity4"	string		TRUE	"Target gene full name(s)"
@@ -130,6 +135,7 @@ attr10	"Description"	"entity4"	text		TRUE	"Description on how the qRT-PCR was pe
 attr11	"Note on experimental protocol"	"entity4"	text		TRUE	""
 attr12	"Product company"	"entity4"	string		TRUE	""
 attr13	"Product information_Lot# kit"	"entity4"	string		TRUE	"Lot# of the product used for the experiments"
+id	"id"	entity5	int	TRUE	FALSE	"generated ID attribute"
 attr0	"Comment"	"entity5"	text		TRUE	""
 attr1	"Marker name"	"entity5"	string		TRUE	"MSI Analysis System, version1.2 marker name.
 From the kit."
@@ -151,6 +157,7 @@ attr10	"Description"	"entity5"	text		TRUE	"Description on how the qRT-PCR was pe
 (can be reference to a published article or an online site with the protocol)"
 attr11	"Negative control sample(s) used"	"entity5"	text		TRUE	"Negative control used in the MSI Analysis System verion 1.2."
 attr12	"Positive control sample(s) used"	"entity5"	text		TRUE	"Positive control used in the MSI Analysis System version 1.2."
+id	"id"	entity6	int	TRUE	FALSE	"generated ID attribute"
 attr0	"Target Gene Symbol (HGNC)"	"entity6"	string		TRUE	"Name of the target gene using HGNC term (for human subjects)"
 attr1	"Target gene primer manufacturer"	"entity6"	string		TRUE	""
 attr2	"Target Gene Full Name(s)"	"entity6"	string		TRUE	"Target gene full name(s)"
@@ -173,6 +180,7 @@ attr11	"Description"	"entity6"	text		TRUE	"Description on how the qRT-PCR was pe
 attr12	"Note on experimental protocol"	"entity6"	text		TRUE	""
 attr13	"Product company"	"entity6"	string		TRUE	""
 attr14	"Product information_Lot# kit"	"entity6"	string		TRUE	"Lot# of the product used for the experiments"
+id	"id"	entity7	int	TRUE	FALSE	"generated ID attribute"
 attr0	"Version"	"entity7"	string		TRUE	""
 attr1	"Target Gene Symbol (HGNC)"	"entity7"	string		TRUE	"Name of the target gene using HGNC term (for human subjects)"
 attr2	"Gene Full-Name(s)"	"entity7"	string		TRUE	"Full name(s) of the target gene, e.g. NCBI definition."
@@ -199,13 +207,14 @@ attr14	"Annealing temperature (Tm)_Reference Gene primers"	"entity7"	decimal		TR
 attr15	"Description"	"entity7"	text		TRUE	"Description on how the qRT-PCR was performed. 
 (can be reference to a published article or an online site with the protocol)"
 attr16	"Reporter dye (manufacturer)"	"entity7"	string		TRUE	""
-attr17	"Experimental protocol"	"entity7"	file		TRUE	"Experimental protocol describing how detection for methylation of the gene of interest was performed."
+attr17	"Experimental protocol"	"entity7"	text		TRUE	"Experimental protocol describing how detection for methylation of the gene of interest was performed."
 attr18	"Analysis/calculation unit value of the measured feature"	"entity7"	text		TRUE	"Calculation/formula for obtaining processed data measurements (e.g. for a target gene compared to reference gene)"
 attr19	"Target gene primer manufacturer"	"entity7"	string		TRUE	""
 attr20	"Reference gene primer manufacturer"	"entity7"	string		TRUE	""
 attr21	"Additional information"	"entity7"	text		TRUE	"E.g. information on DNA isolation and bisulphite modification could be referred to here.
 In case primers and probes are from a published article, could refer to article here as well."
 attr22	"Machine used for detection"	"entity7"	string		TRUE	"e.g. for detection of a qRT-PCR or qMSP, Taqman 7500 from Applied Biosystems was used."
+id	"id"	entity8	int	TRUE	FALSE	"generated ID attribute"
 attr0	"Note on unit"	"entity8"	text		TRUE	"Explanation of the unit.
 Primarily used in this version of Phenotype Db to explain numerically categorised feature measurements."
 attr1	"Version"	"entity8"	string		TRUE	""

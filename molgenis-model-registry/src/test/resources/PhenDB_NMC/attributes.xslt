@@ -14,6 +14,8 @@
 </xsl:template>
 
 <xsl:template match="gscf:template">
+<xsl:text>id	"id"	entity</xsl:text><xsl:value-of select="count(preceding-sibling::gscf:template)"/><xsl:text>	int	TRUE	FALSE	"generated ID attribute"
+</xsl:text>
 <xsl:apply-templates select="gscf:templateFields">
 	<xsl:with-param name="entity"><xsl:text>entity</xsl:text><xsl:value-of select="count(preceding-sibling::gscf:template)"/></xsl:with-param>
 </xsl:apply-templates>
@@ -28,7 +30,7 @@
 <xsl:if test="gscf:type='DOUBLE'">decimal</xsl:if>
 <xsl:if test="gscf:type='LONG'">long</xsl:if>
 <xsl:if test="gscf:type='EXTENDABLESTRINGLIST'">text</xsl:if>
-<xsl:if test="gscf:type='FILE'">file</xsl:if>
+<xsl:if test="gscf:type='FILE'">text</xsl:if>
 <xsl:if test="gscf:type='STRINGLIST'">text</xsl:if>
 <xsl:if test="gscf:type='TEXT'">text</xsl:if><xsl:text>	</xsl:text>
 <xsl:if test="gscf:preferredIdentifier='true'">TRUE</xsl:if><xsl:text>	</xsl:text>
