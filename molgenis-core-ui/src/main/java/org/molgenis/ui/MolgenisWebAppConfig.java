@@ -11,8 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.annotation.PostConstruct;
-
 import org.molgenis.data.AutoIdRepositoryDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.IdGenerator;
@@ -36,6 +34,7 @@ import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.IndexedRepositoryValidationDecorator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
+import org.molgenis.data.version.MetaDataUpgradeService;
 import org.molgenis.framework.db.WebAppDatabasePopulator;
 import org.molgenis.framework.db.WebAppDatabasePopulatorService;
 import org.molgenis.framework.server.MolgenisSettings;
@@ -107,6 +106,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 	@Autowired
 	public EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory;
+
+	@Autowired
+	public MetaDataUpgradeService metaDataUpgradeService;
 
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry)
@@ -360,7 +362,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	{
 		// Create local dataservice and metadataservice
 		DataServiceImpl localDataService = new DataServiceImpl();
-		new MetaDataServiceImpl(localDataService);
+		new MetaDataServiceImpl(localDataService, null);
 
 		addReposToReindex(localDataService);
 
@@ -372,9 +374,10 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		});
 	}
 
-	@PostConstruct
+	// @PostConstruct
 	public void initRepositories()
 	{
+
 		if (!indexExists())
 		{
 			LOG.info("Reindexing repositories....");
@@ -386,7 +389,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 			LOG.info("Index found no need to reindex.");
 		}
 
-		metaDataService().setDefaultBackend(getBackend());
+		ManageableRepositoryCollection defaultBackend = getBackend();
+		metaDataService().setDefaultBackend(defaultBackend);
+		metaDataUpgradeService.upgrade(defaultBackend);
 	}
 
 	private boolean indexExists()
@@ -404,7 +409,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	public MetaDataService metaDataService()
 	{
 		DataService dataService = dataService();
-		MetaDataService metaDataService = new MetaDataServiceImpl((DataServiceImpl) dataService);
+		MetaDataService metaDataService = new MetaDataServiceImpl((DataServiceImpl) dataService, metaDataUpgradeService);
 
 		return metaDataService;
 	}

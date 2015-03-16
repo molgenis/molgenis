@@ -21,6 +21,7 @@ import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
+import org.molgenis.data.version.MetaDataUpgradeService;
 import org.molgenis.util.DependencyResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,10 +49,12 @@ public class MetaDataServiceImpl implements MetaDataService
 	private ManageableRepositoryCollection defaultBackend;
 	private final Map<String, RepositoryCollection> backends = Maps.newHashMap();
 	private final DataServiceImpl dataService;
+	private final MetaDataUpgradeService metaDataUpgradeService;
 
-	public MetaDataServiceImpl(DataServiceImpl dataService)
+	public MetaDataServiceImpl(DataServiceImpl dataService, MetaDataUpgradeService metaDataUpgradeService)
 	{
 		this.dataService = dataService;
+		this.metaDataUpgradeService = metaDataUpgradeService;
 		dataService.setMetaDataService(this);
 	}
 
@@ -342,6 +345,8 @@ public class MetaDataServiceImpl implements MetaDataService
 		// Discover EntityMetaData
 		Map<String, EntityMetaData> emds = event.getApplicationContext().getBeansOfType(EntityMetaData.class);
 		DependencyResolver.resolve(Sets.newHashSet(emds.values())).forEach(this::addEntityMeta);
+
+		// metaDataUpgradeService.upgrade();
 	}
 
 	@Override

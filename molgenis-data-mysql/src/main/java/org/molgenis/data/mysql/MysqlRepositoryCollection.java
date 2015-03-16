@@ -76,8 +76,6 @@ public abstract class MysqlRepositoryCollection implements ManageableRepositoryC
 		MysqlRepository repo = repositories.get(entityName);
 		if (repo == null) throw new UnknownEntityException(String.format("Unknown entity '%s'", entityName));
 		repo.addAttribute(attribute);
-		DefaultEntityMetaData meta = new DefaultEntityMetaData(repo.getEntityMetaData());
-		meta.addAttributeMetaData(attribute);
 	}
 
 	@Override

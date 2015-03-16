@@ -91,6 +91,13 @@ public class QueryImpl implements Query
 	}
 
 	@Override
+	public Entity findOne()
+	{
+		if (repository == null) throw new RuntimeException("Query failed: repository not set");
+		return repository.findOne(this);
+	}
+
+	@Override
 	public List<QueryRule> getRules()
 	{
 		if (this.rules.size() > 1) throw new MolgenisDataException(
