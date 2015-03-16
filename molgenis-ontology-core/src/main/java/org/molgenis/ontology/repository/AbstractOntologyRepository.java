@@ -2,7 +2,7 @@ package org.molgenis.ontology.repository;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -41,7 +41,7 @@ public abstract class AbstractOntologyRepository extends AbstractRepository
 	}
 
 	@Override
-	public EntityMetaData getEntityMetaData()
+	public EditableEntityMetaData getEntityMetaData()
 	{
 		if (entityMetaData == null)
 		{
