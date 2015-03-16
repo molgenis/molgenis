@@ -14,7 +14,7 @@
 </xsl:template>
 
 <xsl:template match="gscf:template">
-<xsl:text>entity</xsl:text><xsl:value-of select="count(preceding-sibling::gscf:template)"/><xsl:text>	DBMP	"</xsl:text>
+<xsl:text>entity</xsl:text><xsl:value-of select="count(preceding-sibling::gscf:template)"/><xsl:text>	NMC	"</xsl:text>
 <xsl:value-of select="gscf:name"/><xsl:text>"	"</xsl:text>
 <xsl:value-of select="gscf:description"/><xsl:text>"
 </xsl:text>
