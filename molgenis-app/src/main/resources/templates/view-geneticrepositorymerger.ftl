@@ -54,8 +54,11 @@
                 molgenis.createAlert([
                     {'message': 'Select at least 2 datasets to merge.'}
                 ], 'warning');
-            }
-            else if(restApi.entityExists("/api/v1/"+$('[name=resultDataset]').val())){
+            } else if($('[name=resultDataset]').val() === "") {
+            	molgenis.createAlert([
+            		{'message': 'Please fill in a name for the result dataset.'}
+        		], 'warning');
+            } else if(restApi.entityExists("/api/v1/"+$('[name=resultDataset]').val())){
                 molgenis.createAlert([
                     {'message': 'An entity with this name already exists.'}
                 ], 'warning');
