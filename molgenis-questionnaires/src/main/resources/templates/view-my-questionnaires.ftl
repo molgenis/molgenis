@@ -12,6 +12,10 @@
 		<p>Submitted and open questionnares</p>
 	</div>  	
 </div>
+
+<#if questionnaires?size == 0>
+<h3>No questionnaires found</h3>
+<#else>
 <div class="row">
 	<div class="col-md-6">
 		<table class="table table-bordered">
@@ -48,3 +52,4 @@
 		 </table>	
 	</div>
 </div>
+</#if>
