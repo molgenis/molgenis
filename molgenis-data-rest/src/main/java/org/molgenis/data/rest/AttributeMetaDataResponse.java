@@ -23,6 +23,7 @@ public class AttributeMetaDataResponse
 	private final String description;
 	private final List<?> attributes;
 	private final Object refEntity;
+	private final Boolean auto;
 	private final Boolean nillable;
 	private final Boolean readOnly;
 	private final Object defaultValue;
@@ -126,6 +127,12 @@ public class AttributeMetaDataResponse
 					})) : null;
 		}
 		else this.attributes = null;
+
+		if (attributesSet == null || attributesSet.contains("auto".toLowerCase()))
+		{
+			this.auto = attr.isAuto();
+		}
+		else this.auto = null;
 
 		if (attributesSet == null || attributesSet.contains("nillable".toLowerCase()))
 		{
