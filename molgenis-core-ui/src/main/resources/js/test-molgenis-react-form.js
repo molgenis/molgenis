@@ -16,7 +16,7 @@ $(function($, molgenis) {
 					div({className: 'row'},
 						div({className: 'col-md-12'},
 							div({className: 'form-group'},
- 								molgenis.control.EntityControl({
+ 								molgenis.control.EntitySelectBox({
 									entity : this.props.entity,
 									value: this.state.selectedEntityType,
 									onValueChange : function(e) {
@@ -39,7 +39,7 @@ $(function($, molgenis) {
 									}
 								}.bind(this)
 							}) : null,
-							this.state.selectedEntityType && (this.state.mode === 'edit' || this.state.mode === 'view') ? molgenis.control.EntityControl({
+							this.state.selectedEntityType && (this.state.mode === 'edit' || this.state.mode === 'view') ? molgenis.control.EntitySelectBox({
 								entity : this.state.selectedEntityTypeHref,
 								value: this.state.selectedEntity,
 								onValueChange : function(e) {

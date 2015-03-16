@@ -19,9 +19,9 @@
 	 * 
 	 * @memberOf control
 	 */
-	var EntityControl = React.createClass({
+	var EntitySelectBox = React.createClass({
 		mixins: [molgenis.DeepPureRenderMixin],
-		displayName: 'EntityControl',
+		displayName: 'EntitySelectBox',
 		propTypes: {
 			entity: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]),
 			name: React.PropTypes.string,
@@ -46,7 +46,7 @@
 		componentDidMount: function() {//console.log('componentDidMount AttributeFormControl');
 			this._initEntity(this.props.entity);
 		},
-		render: function() {//console.log('render EntityControl', this.state, this.props);
+		render: function() {//console.log('render EntitySelectBox', this.state, this.props);
 			if(this.state.entity === null) {
 				// entity meta data not fetched yet
 				return div({});
@@ -100,6 +100,10 @@
 						q : {
 							start : (query.page - 1) * num, 
 							num : num,
+							orders : [ {
+								direction : 'ASC',
+								property : this._getAttrs()[0]
+							} ],
 							q: query.term.length > 0 ? this._createQuery(query.term) : undefined
 						}
 					};
@@ -120,7 +124,7 @@
 				onChange : this._handleChange
 			});
 		},
-		_handleChange: function(value) {//console.log('_handleChange EntityControl', value);
+		_handleChange: function(value) {//console.log('_handleChange EntitySelectBox', value);
 			var val = this.props.multiple && value.length === 0 ? undefined : value;
 			this.props.onValueChange({value: val});
 		},
@@ -314,11 +318,11 @@
 					case 'XREF':
 						var placeholder = props.placeholder || 'Search for a Value';
 						var multiple = props.multiple || false;
-						return this._createEntityControl(multiple, placeholder);
+						return this._createEntitySelectBox(multiple, placeholder);
 					case 'MREF':
 						var placeholder = props.placeholder || 'Search for Values';
 						var multiple = props.multiple || true;
-						return this._createEntityControl(multiple, placeholder);
+						return this._createEntitySelectBox(multiple, placeholder);
 					case 'SCRIPT':
 						return molgenis.control.CodeEditorControl({
 							id : this.props.id,
@@ -414,9 +418,9 @@
 				onValueChange : this._handleValueChange
 			});
 		},
-		_createEntityControl: function(multiple, placeholder) {
+		_createEntitySelectBox: function(multiple, placeholder) {
 			var props = this.props;
-			return molgenis.control.EntityControl({
+			return molgenis.control.EntitySelectBox({
 				id : props.id,
 				name : this.state.attr.name,
 				placeholder : placeholder,
@@ -485,7 +489,7 @@
 	molgenis.control = molgenis.control || {};
 	
 	$.extend(molgenis.control, {
-		EntityControl: React.createFactory(EntityControl),
+		EntitySelectBox: React.createFactory(EntitySelectBox),
 		AttributeControl: React.createFactory(AttributeControl)
 	});
 }($, window.top.molgenis = window.top.molgenis || {}));
