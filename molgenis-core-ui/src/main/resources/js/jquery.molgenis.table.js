@@ -36,7 +36,14 @@
 		
 		// add data to elements
 		getTableMetaData(settings, function(attributes, refEntitiesMeta) {
-			settings.colAttributes = attributes;
+			var visibleAttributes = [];
+			for (var i = 0; i < attributes.length; ++i) {
+				if(attributes[i].visible) {
+					visibleAttributes.push(attributes[i]);
+				}
+			}
+			
+			settings.colAttributes = visibleAttributes;
 			settings.refEntitiesMeta = refEntitiesMeta;
 
 			getTableData(settings, function(data) {
@@ -92,16 +99,22 @@
 	 */
 	function getTableData(settings, callback) {
 		var attributeNames = $.map(settings.colAttributes, function(attribute) {
-			return attribute.name;
+			if(attribute.visible){
+				return attribute.name;
+			}
 		});
 		var expandAttributeNames = $.map(settings.colAttributes, function(attribute) {
 			if(attribute.expression){
-				return attribute.name;
+				if(attribute.visible){
+					return attribute.name;
+				}
 			}
 			if(attribute.fieldType === 'XREF' || attribute.fieldType === 'CATEGORICAL' ||attribute.fieldType === 'MREF') {
 				// partially expand reference entities (only request label attribute)
 				var refEntity = settings.refEntitiesMeta[attribute.refEntity.href];
-				return attribute.name + '[' + refEntity.labelAttribute + ']';
+				if(attribute.visible){
+					return attribute.name + '[' + refEntity.labelAttribute + ']';
+				}
 			}
 			return null;
 		});
@@ -131,22 +144,25 @@
 		if (settings.editenabled) {
 			items.push($('<th>'));
 		}
+		
 		$.each(settings.colAttributes, function(i, attribute) {
 			var header;
-			if (settings.sort && settings.sort.orders[0].property === attribute.name) {
-				if (settings.sort.orders[0].direction === 'ASC') {
-					header = $('<th>' + attribute.label + '<span data-attribute="' + attribute.name
-							+ '" class="ui-icon ui-icon-triangle-1-s down"></span></th>');
+			if(attribute.visible) {
+				if (settings.sort && settings.sort.orders[0].property === attribute.name) {
+					if (settings.sort.orders[0].direction === 'ASC') {
+						header = $('<th>' + attribute.label + '<span data-attribute="' + attribute.name
+								+ '" class="ui-icon ui-icon-triangle-1-s down"></span></th>');
+					} else {
+						header = $('<th>' + attribute.label + '<span data-attribute="' + attribute.name
+								+ '" class="ui-icon ui-icon-triangle-1-n up"></span></th>');
+					}
 				} else {
 					header = $('<th>' + attribute.label + '<span data-attribute="' + attribute.name
-							+ '" class="ui-icon ui-icon-triangle-1-n up"></span></th>');
+							+ '" class="ui-icon ui-icon-triangle-2-n-s updown"></span></th>');
 				}
-			} else {
-				header = $('<th>' + attribute.label + '<span data-attribute="' + attribute.name
-						+ '" class="ui-icon ui-icon-triangle-2-n-s updown"></span></th>');
+				header.data('attr', attribute);
+				items.push(header);
 			}
-			header.data('attr', attribute);
-			items.push(header);
 		});
 		container.html(items);
 	}
@@ -156,7 +172,6 @@
 	 */
 	function createTableBody(data, settings) {
 		var container = $('.molgenis-table tbody', settings.container);
-
 		var items = [];
 		var tabindex = 1;
 		for (var i = 0; i < data.items.length; ++i) {

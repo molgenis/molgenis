@@ -29,6 +29,7 @@ public class AttributeMetaDataResponse
 	private final Object defaultValue;
 	private final Boolean labelAttribute;
 	private final Boolean unique;
+	private final Boolean visible;
 	private Boolean lookupAttribute;
 	private Boolean aggregateable;
 	private Range range;
@@ -181,6 +182,12 @@ public class AttributeMetaDataResponse
 			this.range = attr.getRange();
 		}
 		else this.range = null;
+		
+		if (attributesSet == null || attributesSet.contains("isVisible".toLowerCase()))
+		{
+			this.visible = attr.isVisible();
+		}
+		else this.visible = null;
 	}
 
 	public String getHref()
@@ -218,6 +225,11 @@ public class AttributeMetaDataResponse
 		return refEntity;
 	}
 
+	public boolean isAuto()
+	{
+		return auto;
+	}
+	
 	public boolean isNillable()
 	{
 		return nillable;
@@ -241,6 +253,11 @@ public class AttributeMetaDataResponse
 	public boolean isUnique()
 	{
 		return unique;
+	}
+
+	public boolean isVisible()
+	{
+		return visible;
 	}
 
 	public Boolean getLookupAttribute()
@@ -287,5 +304,4 @@ public class AttributeMetaDataResponse
 	{
 		return expression;
 	}
-
 }
