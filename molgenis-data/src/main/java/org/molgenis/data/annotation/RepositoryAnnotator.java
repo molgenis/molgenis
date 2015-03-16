@@ -13,7 +13,7 @@ public interface RepositoryAnnotator
 {
     final static String ANNOTATOR_PREFIX = "molgenis_annotated_";
 
-	Iterator<Entity> annotate(Iterator<Entity> source);
+	Iterator<Entity> annotate(Iterable<Entity> source);
 
 	/**
 	 * returns an entityMetaData containing the attributes the annotator will add

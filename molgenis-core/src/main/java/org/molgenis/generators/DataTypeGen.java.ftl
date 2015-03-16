@@ -102,16 +102,7 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 	//${field.description}[type=${field.type}]
 	<#if !isPrimaryKey(field,entity) || !entity.hasAncestor()>
  			<#if isPrimaryKey(field,entity) && !entity.hasAncestor()>
-    			<#if field.auto = true>
-	    			<#if jpa_use_sequence >
-	@javax.persistence.SequenceGenerator(name="${JavaName(entity)}_Gen", sequenceName="${JavaName(entity)}_Seq"<#if entity.allocationSize??>, allocationSize=${entity.allocationSize?c}</#if>)
-    @javax.persistence.Id @javax.persistence.GeneratedValue(generator="${JavaName(entity)}_Gen", strategy=javax.persistence.GenerationType.SEQUENCE)		
-    				<#else>
-    @javax.persistence.Id @javax.persistence.GeneratedValue(strategy = javax.persistence.GenerationType.AUTO)
-    				</#if>   			
-    			<#else>
-    			@Id
-    			</#if>
+  				@javax.persistence.Id  
     		</#if>
 		</#if>	
 
@@ -349,7 +340,7 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 
 <#if !entity.abstract>	
 	@Override
-	public Integer getIdValue()
+	public String getIdValue()
 	{
 		return get${JavaName(pkey(entity))}();
 	}		

@@ -26,4 +26,10 @@ public interface RepositoryCollection extends Iterable<Repository>
 	 * @throws UnknownEntityException
 	 */
 	Repository getRepository(String name);
+
+	/**
+	 * Check if a repository exists by entity name
+	 *
+	 */
+	boolean hasRepository(String name);
 }

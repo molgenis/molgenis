@@ -7,18 +7,16 @@ import java.util.Set;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.OntologyService;
 import org.molgenis.ontology.beans.OntologyTermEntity;
 import org.molgenis.ontology.beans.OntologyTermTransformer;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
@@ -28,7 +26,6 @@ public class OntologyTermQueryRepository extends AbstractOntologyQueryRepository
 	public final static String DEFAULT_ONTOLOGY_TERM_REPO = "ontologytermindex";
 	private final static List<String> reservedAttributeName = Arrays.asList("score");
 
-	@Autowired
 	public OntologyTermQueryRepository(String entityName, SearchService searchService, DataService dataService,
 			OntologyService ontologyService)
 	{
@@ -39,25 +36,21 @@ public class OntologyTermQueryRepository extends AbstractOntologyQueryRepository
 	// FIXME: please document this piece of sorcery
 	private void dynamicEntityMetaData()
 	{
-		EntityMetaData entityMetaData = getEntityMetaData();
-		if (entityMetaData instanceof DefaultEntityMetaData)
+		EditableEntityMetaData editableEntityMetaData = getEntityMetaData();
+		Set<String> availableAttributes = new HashSet<String>();
+		for (AttributeMetaData attributeMetaData : editableEntityMetaData.getAttributes())
 		{
-			DefaultEntityMetaData defaultEntityMetaData = (DefaultEntityMetaData) entityMetaData;
-			Set<String> availableAttributes = new HashSet<String>();
-			for (AttributeMetaData attributeMetaData : entityMetaData.getAttributes())
+			availableAttributes.add(attributeMetaData.getName().toLowerCase());
+		}
+		for (Entity entity : searchService.search(new QueryImpl().pageSize(1), editableEntityMetaData))
+		{
+			for (String attributeName : entity.getAttributeNames())
 			{
-				availableAttributes.add(attributeMetaData.getName().toLowerCase());
-			}
-			for (Entity entity : searchService.search(new QueryImpl().pageSize(1), entityMetaData))
-			{
-				for (String attributeName : entity.getAttributeNames())
+				if (!availableAttributes.contains(attributeName.toLowerCase())
+						&& !reservedAttributeName.contains(attributeName))
 				{
-					if (!availableAttributes.contains(attributeName.toLowerCase())
-							&& !reservedAttributeName.contains(attributeName))
-					{
-						availableAttributes.add(attributeName.toLowerCase());
-						defaultEntityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(attributeName));
-					}
+					availableAttributes.add(attributeName.toLowerCase());
+					editableEntityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(attributeName));
 				}
 			}
 		}

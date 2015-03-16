@@ -40,7 +40,6 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 	public static final String ID = "geneticrepositorymerger";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
-	public static final String ID_FIELD = "ID";
 	public static final DefaultAttributeMetaData CHROM = new DefaultAttributeMetaData("#CHROM",
 			MolgenisFieldTypes.FieldTypeEnum.STRING);
 	public static final DefaultAttributeMetaData POS = new DefaultAttributeMetaData("POS",
@@ -133,7 +132,7 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 		EntityMetaData mergedEntityMetaData = repositoryMerger.mergeMetaData(geneticRepositories, commonAttributes,
 				resultSet);
 		Repository mergedRepository = dataService.getMeta().addEntityMeta(mergedEntityMetaData);
-		repositoryMerger.merge(geneticRepositories, commonAttributes, mergedRepository, ID_FIELD);
+		repositoryMerger.merge(geneticRepositories, commonAttributes, mergedRepository);
 
 		return resultSet;
 	}

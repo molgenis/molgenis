@@ -33,7 +33,7 @@
 
 <@header css js/>
 <div class="row">
-    <div class="col-md-12">
+	<div class="col-md-12">
         <div id="entity-class" class="well well-sm">
             <div class="row">
                 <div class="col-md-8">
@@ -64,7 +64,7 @@
     </div>
 </div>
 <div class="row">
-	<div class="col-md-3">
+	<div class="col-md-3" id="selectors">
 		<div class="well well-sm">
 			<div class="row">
                 <div class="col-md-12">
@@ -72,7 +72,7 @@
                     	<div class="form-group">
                         	<div class="col-md-12">
                             	<div class="input-group" <#if hideSearchBox == true> style="display:none"</#if>>
-                                	<input type="text" class="form-control" id="observationset-search" placeholder="Search data values" autofocus="autofocus"<#if searchTerm??> value="${searchTerm?html}"</#if> />
+                                	<input type="text" class="form-control" id="observationset-search" placeholder="Search data values" autofocus="autofocus"/>
                                 	<span class="input-group-btn">
                                     	<button id="search-clear-button" class="btn btn-default" type="button"><span class="glyphicon glyphicon-remove"></span></button>
                                     	<button id="search-button" class="btn btn-default" type="button"><span class="glyphicon glyphicon-search"></span></button>
@@ -118,7 +118,7 @@
             </div>
 		</div>		
 	</div>
-	<div class="col-md-9">
+	<div class="col-md-9" id="modules">
 		<div id="module-nav"></div>
 	</div>
 </div>

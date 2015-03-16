@@ -21,19 +21,19 @@ public interface PermissionManagerService
 
 	List<String> getEntityClassIds();
 
-	Permissions getGroupPluginPermissions(Integer groupId);
+	Permissions getGroupPluginPermissions(String groupId);
 
-	Permissions getGroupEntityClassPermissions(Integer groupId);
+	Permissions getGroupEntityClassPermissions(String groupId);
 
-	Permissions getUserPluginPermissions(Integer userId);
+	Permissions getUserPluginPermissions(String userId);
 
-	Permissions getUserEntityClassPermissions(Integer userId);
+	Permissions getUserEntityClassPermissions(String userId);
 
-	void replaceGroupPluginPermissions(List<GroupAuthority> pluginAuthorities, Integer groupId);
+	void replaceGroupPluginPermissions(List<GroupAuthority> pluginAuthorities, String groupId);
 
-	void replaceGroupEntityClassPermissions(List<GroupAuthority> entityAuthorities, Integer groupId);
+	void replaceGroupEntityClassPermissions(List<GroupAuthority> entityAuthorities, String groupId);
 
-	void replaceUserPluginPermissions(List<UserAuthority> pluginAuthorities, Integer userId);
+	void replaceUserPluginPermissions(List<UserAuthority> pluginAuthorities, String userId);
 
-	void replaceUserEntityClassPermissions(List<UserAuthority> entityAuthorities, Integer userId);
+	void replaceUserEntityClassPermissions(List<UserAuthority> entityAuthorities, String userId);
 }
