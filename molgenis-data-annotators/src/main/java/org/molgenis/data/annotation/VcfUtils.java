@@ -14,6 +14,8 @@ import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.annotation.impl.datastructures.Sample;
+import org.molgenis.data.annotation.impl.datastructures.Trio;
 import org.molgenis.data.vcf.VcfRepository;
 
 public class VcfUtils
@@ -216,14 +218,15 @@ public class VcfUtils
 	 * Get pedigree data from VCF
 	 * Now only support child, father, mother
 	 * No fancy data structure either
+	 * Output: result.put(childID, Arrays.asList(new String[]{motherID, fatherID}));
 	 * 
 	 * @param vcfFile
 	 * @return
 	 * @throws FileNotFoundException 
 	 */
-	public static HashMap<String, List<String>> getPedigree(File inputVcfFile) throws FileNotFoundException
+	public static HashMap<String, Trio> getPedigree(File inputVcfFile) throws FileNotFoundException
 	{
-		HashMap<String, List<String>> result = new HashMap<String, List<String>>();
+		HashMap<String, Trio> result = new HashMap<String, Trio>();
 		
 		Scanner inputVcfFileScanner = new Scanner(inputVcfFile, "UTF-8");
 		String line = inputVcfFileScanner.nextLine();
@@ -268,7 +271,7 @@ public class VcfUtils
 					if(childID != null && motherID != null && fatherID != null)
 					{
 						// good
-						result.put(childID, Arrays.asList(new String[]{motherID, fatherID}));
+						result.put(childID, new Trio(new Sample(childID), new Sample(motherID), new Sample(fatherID)));
 					}
 					else
 					{

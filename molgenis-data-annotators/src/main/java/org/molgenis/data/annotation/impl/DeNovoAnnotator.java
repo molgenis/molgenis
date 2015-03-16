@@ -14,9 +14,10 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.TabixReader;
 import org.molgenis.data.annotation.VariantAnnotator;
 import org.molgenis.data.annotation.VcfUtils;
+import org.molgenis.data.annotation.impl.datastructures.Sample;
+import org.molgenis.data.annotation.impl.datastructures.Trio;
 import org.molgenis.data.support.AnnotationServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -45,8 +46,11 @@ public class DeNovoAnnotator extends VariantAnnotator
 
 	private final MolgenisSettings molgenisSettings;
 	private final AnnotationService annotatorService;
-	private HashMap<String, List<String>> pedigree;
-
+	private HashMap<String, Trio> pedigree;
+	
+	//helper lists for ease of use, derived from HashMap<String, Parents> pedigree
+	private HashMap<String, Sample> motherToChild;
+	private HashMap<String, Sample> fatherToChild;
 
 	public static final String DENOVO = VcfRepository.getInfoPrefix() + "DENOVO";
 
@@ -82,9 +86,19 @@ public class DeNovoAnnotator extends VariantAnnotator
 		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields, DENOVO.substring(VcfRepository.getInfoPrefix().length()));
 
 		pedigree = VcfUtils.getPedigree(inputVcfFile);
+		motherToChild = new HashMap<String, Sample>();
+		fatherToChild =  new HashMap<String, Sample>();
+		for(String key: pedigree.keySet())
+		{
+			Sample mom = pedigree.get(key).getMother();
+			Sample dad = pedigree.get(key).getFather();
+			motherToChild.put(mom.getId(), pedigree.get(key).getChild());
+			fatherToChild.put(dad.getId(), pedigree.get(key).getChild());
+		}
+		
 		for(String key : pedigree.keySet())
 		{
-			System.out.println("CHILD: " + key + ", M/F: " + pedigree.get(key));
+			System.out.println(key+ ", " + pedigree.get(key));
 		}
 		
 		System.out.println("Now starting to process the data.");
@@ -148,13 +162,104 @@ public class DeNovoAnnotator extends VariantAnnotator
 		
 		Iterable<Entity> samples = entity.getEntities("Samples");
 		
+		HashMap<String, Trio> childToParentGenotypes = new HashMap<String, Trio>();
+		
 		System.out.println("Variant: " + entity.get(VcfRepository.CHROM) + " " + entity.get(VcfRepository.POS) + " " + entity.get(VcfRepository.REF) + " " + entity.get(VcfRepository.ALT));
 		for(Entity sample : samples)
 		{
 			String sampleID = sample.get("NAME").toString().substring(sample.get("NAME").toString().lastIndexOf("_")+1);
-			System.out.println("sampleID " + sampleID);
-			System.out.println("\t" + sample.get("GT") + " is a " + (pedigree.containsKey(sampleID) ? "child" : "parent"));
+			String gt = sample.get("GT") == null ? null : sample.get("GT").toString();
+			
+	//		System.out.println("SAMPLEID: " + sampleID);
+	//		System.out.println("GT: " + gt);
+			
+			//found a child
+			if(pedigree.keySet().contains(sampleID))
+			{
+				//child not previously added by finding a parent first, add here plus empty trio object
+				if(!childToParentGenotypes.containsKey(sampleID))
+				{
+//					System.out.println("CHILD - NEW TRIO");
+						Trio t = new Trio();
+						t.setChild(new Sample(sampleID, gt));
+						childToParentGenotypes.put(sampleID, t);
+				}
+				//child may have been added because the parent was found first, in that case there is only a key, so make child object + genotype!
+				else if(childToParentGenotypes.containsKey(sampleID) && gt != null)
+				{
+//					System.out.println("CHILD - UPDATING GENOTYPE");
+					if(childToParentGenotypes.get(sampleID)
+							.getChild()
+							!= null)
+					{
+						throw new IOException("Child genotype for '"+sampleID+"' already known !");
+					}
+					Sample child = new Sample(sampleID, gt);
+					childToParentGenotypes.get(sampleID).setChild(child);
+				}
+			}
+			
+			//found a mother
+			else if(motherToChild.containsKey(sampleID))
+			{
+				//child not seen yet, look it up and add it here, but without genotype (!)
+				if(!childToParentGenotypes.containsKey(motherToChild.get(sampleID).getId()))
+				{
+//					System.out.println("MOTHER - NEW TRIO");
+					Trio t = new Trio();
+					t.setMother(new Sample(sampleID, gt));
+					childToParentGenotypes.put(motherToChild.get(sampleID).getId(), t);
+				}
+				//child seen, check if mother was already known, we do not expect/want this to happen
+				else
+				{
+					if(childToParentGenotypes.get(motherToChild.get(sampleID).getId()).getMother() != null)
+					{
+						throw new IOException("Mother '"+sampleID+"' already known for child '" + motherToChild.get(sampleID) + "' !");
+					}
+//					System.out.println("MOTHER - UPDATING GENOTYPE");
+					childToParentGenotypes.get(motherToChild.get(sampleID).getId()).setMother(new Sample(sampleID, gt));
+				}
+			}
+			else if(fatherToChild.containsKey(sampleID))
+			{
+				//child not seen yet, look it up and add it here, but without genotype (!)
+				if(!childToParentGenotypes.containsKey(fatherToChild.get(sampleID).getId()))
+				{
+//					System.out.println("FATHER - NEW TRIO");
+					Trio t = new Trio();
+					t.setFather(new Sample(sampleID, gt));
+					childToParentGenotypes.put(fatherToChild.get(sampleID).getId(), t);
+				}
+				//child seen, check if father was already known, we do not expect/want this to happen
+				else
+				{
+					if(childToParentGenotypes.get(fatherToChild.get(sampleID).getId()).getFather() != null)
+					{
+						throw new IOException("Father '"+sampleID+"' already known for child '" + fatherToChild.get(sampleID) + "' !");
+					}	
+//					System.out.println("FATHER - UPDATING GENOTYPE");
+					childToParentGenotypes.get(fatherToChild.get(sampleID).getId()).setFather(new Sample(sampleID, gt));
+				}
+			}
+			else
+			{
+				LOG.warn("Sample ID '" + sampleID + "' not in list of children, mothers or fathers !! ignoring for further analysis !!");
+			}
+			
+	//		System.out.println("sampleID " + sampleID);
+	//		System.out.println("\t" + sample.get("GT") + " is a " + (pedigree.containsKey(sampleID) ? "child" : "parent"));
 		}
+
+		/**
+		System.out.println("Found " + childToParentGenotypes.size() + " trios..");
+		for(String child : childToParentGenotypes.keySet())
+		{
+			System.out.println(child + ", " + childToParentGenotypes.get(child));
+		}
+		*/
+		
+		
 		
 		resultMap.put(DENOVO, "yes");
 		return resultMap;
