@@ -16,6 +16,7 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.AnnotatorUtils;
 import org.molgenis.data.annotation.HgncLocationsUtils;
 import org.molgenis.data.annotation.LocusAnnotator;
 import org.molgenis.data.annotation.impl.datastructures.HPOTerm;
@@ -195,11 +196,11 @@ public class OmimHpoAnnotator extends LocusAnnotator
 					resultMap.put(HPO_DISEASE_DATABASE_ENTRY, HPODiseaseDatabaseEntries);
 					resultMap.put(HPO_ENTREZ_ID, HPOEntrezIdentifiers);
 
-					results.add(getAnnotatedEntity(entity, resultMap));
+					results.add(AnnotatorUtils.getAnnotatedEntity(this, entity, resultMap));
 				}
 				else
 				{
-					results.add(getAnnotatedEntity(entity, resultMap));
+					results.add(AnnotatorUtils.getAnnotatedEntity(this, entity, resultMap));
 				}
 			}
 		}

@@ -7,6 +7,7 @@
 		<plugin id="dataexplorer" name="Data Explorer" url="dataexplorer"/>
 		<plugin id="mappingservice" name="Mapping Service" url="mappingservice"/>
         <menu label="Plugins" name="plugins">
+        	<plugin id="pathways" name="Pathways" url="pathways"/>
             <plugin id="standardsregistry" name="Model registry" url="standardsregistry" />
             <plugin id="geneticrepositorymerger" name="Merge Genetic Data" url="geneticrepositorymerger"/>
             <plugin id="background" name="Background" url="background"/>
@@ -17,12 +18,14 @@
             <plugin id="scripts" name="Scripts" url="scripts" />
 	    </menu>
 		<menu label="Entities" name ="entities">
+			<plugin id="form.entities" name="EntityMeta" url="form.entities?subForms=attributes.entity"/>
         	<plugin id="form.RuntimeProperty" name="RuntimeProperty" url="form.RuntimeProperty"/>
         	<plugin id="form.MolgenisUser" name="MolgenisUser" url="form.MolgenisUser"/>
         	<plugin id="form.MolgenisGroup" name="MolgenisGroup" url="form.MolgenisGroup"/>
         	<plugin id="form.MolgenisToken" name="Tokens" url="form.MolgenisToken"/>
         	<plugin id="form.Script" name="Script" url="form.Script"/>
         	<plugin id="form.ScriptParameter" name="ScriptParameter" url="form.ScriptParameter"/>
+        	<plugin id="form.FreemarkerTemplate" name="FreemarkerTemplate" url="form.FreemarkerTemplate"/>
 	    </menu>
         <menu label="Admin" name="admin">
 	        <plugin id="usermanager" name="User Manager" url="usermanager"/>

@@ -7,7 +7,7 @@
 	</parent>
 	<artifactId>molgenis-data-annotators</artifactId>
 	<packaging>jar</packaging>
-	
+
 	<dependencies>
 		<dependency>
             <groupId>org.molgenis</groupId>
@@ -22,11 +22,6 @@
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data-vcf</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-mysql</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -74,6 +69,7 @@
 					</descriptorRefs>
 					<finalName>CmdLineAnnotator</finalName>
 					<appendAssemblyId>false</appendAssemblyId>
+                    <skipAssembly>${skip.delivery}</skipAssembly>
 				</configuration>
 				<executions>
 					<execution>

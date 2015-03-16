@@ -24,6 +24,7 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 	public static final String DEFAULT_VAL_FOOTER = "null";
 	public static final String MOLGENIS_CSS_THEME = "molgenis.css.theme";
 	public static final String CSS_VARIABLE = "molgeniscsstheme";
+	public static final String APP_TRACKING_CODE_VARIABLE = "app_tracking_code";
 
 	private MolgenisSettings molgenisSettings;
 
@@ -65,10 +66,12 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 				modelAndView.addObject(KEY_PLUGIN_ID, pluginId);
 			}
 
-			if(molgenisSettings.getProperty(MOLGENIS_CSS_THEME) != null)
-				modelAndView.addObject(CSS_VARIABLE, molgenisSettings
-						.getProperty(MOLGENIS_CSS_THEME));
+			if (molgenisSettings.getProperty(MOLGENIS_CSS_THEME) != null)
+			{
+				modelAndView.addObject(CSS_VARIABLE, molgenisSettings.getProperty(MOLGENIS_CSS_THEME));
+			}
 
+			modelAndView.addObject(APP_TRACKING_CODE_VARIABLE, new AppTrackingCodeImpl(molgenisSettings));
 			modelAndView.addObject("footerText", molgenisSettings.getProperty(KEY_FOOTER));
 			modelAndView.addObject(KEY_MOLGENIS_UI, molgenisUi);
 			modelAndView.addObject(KEY_AUTHENTICATED, SecurityUtils.currentUserIsAuthenticated());
@@ -91,7 +94,7 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 		return (MolgenisPluginController) bean;
 	}
 	
-	public String getPluginIdWithQueryString(HttpServletRequest request, String pluginId)
+	private String getPluginIdWithQueryString(HttpServletRequest request, String pluginId)
 	{
 		if (null != request)
 		{

@@ -63,7 +63,11 @@ function($, molgenis, settingsXhr) {
 	 * @memberOf molgenis.dataexplorer
 	 */
 	function getEntityQuery() {
-		return state.query || { q: [] };
+		// N.B. There's a translation step between the query in the state, which is also shown on screen
+		// ("SEARCH 1:10050001") and the actual entity query which is used when retrieving data
+		// (CHROM = 1 AND POS = 1005001)
+		// So here we should return the *translated* query.
+		return createEntityQuery();
 	}
 	
 	/**
@@ -163,7 +167,7 @@ function($, molgenis, settingsXhr) {
 			if (/\S/.test(searchQuery)) {
 				var searchQueryRegex = /^\s*(?:chr)?([\d]{1,2}|X|Y|MT|XY):([\d]+)(?:-([\d]+)+)?\s*$/g;
 				
-				if(searchQueryRegex && searchQuery.match(searchQueryRegex)) {
+				if(searchQueryRegex && searchQuery.match(searchQueryRegex) && chromosomeAttribute !== undefined && posAttribute !== undefined) {
 					var match = searchQueryRegex.exec(searchQuery);
 					
 					// only chromosome and position
@@ -175,7 +179,7 @@ function($, molgenis, settingsXhr) {
 				        	    [{
 				        	        operator: "NESTED",
 				        	        nestedRules: [{
-				        	            field: chromosomeAttribute,
+				        	            field: chromosomeAttribute.name,
 				        	            operator: "EQUALS",
 				        	            value: chromosome
 				        	        }]
@@ -184,7 +188,7 @@ function($, molgenis, settingsXhr) {
 				        	    }, {
 				        	        operator: "NESTED",
 				        	        nestedRules: [{
-				        	            field: posAttribute,
+				        	            field: posAttribute.name,
 				        	            operator: "EQUALS",
 				        	            value: position
 				        	        }]
@@ -208,7 +212,7 @@ function($, molgenis, settingsXhr) {
 						        nestedRules: [{
 							            operator: "NESTED",
 							            nestedRules: [{
-							                field: chromosomeAttribute,
+							                field: chromosomeAttribute.name,
 							                operator: "EQUALS",
 							                value: chromosome
 						            }]
@@ -218,13 +222,13 @@ function($, molgenis, settingsXhr) {
 						    }, {
 						    	operator: "NESTED",
 						        nestedRules: [{
-				                    field: posAttribute,
+				                    field: posAttribute.name,
 				                    operator: "GREATER_EQUAL",
 				                    value: startPosition
 				                }, {
 				                	operator: "AND"
 				                }, {
-				                    field: posAttribute,
+				                    field: posAttribute.name,
 				                    operator: "LESS_EQUAL",
 				                    value: stopPosition
 				                }]
@@ -301,6 +305,27 @@ function($, molgenis, settingsXhr) {
 			$.when(entityMetaDataRequest).done(function(){
 				moduleTab.tab('show');
 			});
+
+            function hideSelectors() {
+                $('#selectors').removeClass("col-md-3").addClass("hidden");
+                $('#modules').removeClass("col-md-9").addClass("col-md-12");
+                $('#toggleSelectorsIcon').removeClass("glyphicon glyphicon-resize-horizontal").addClass("glyphicon glyphicon-resize-small");
+            }
+
+            function showSelectors() {
+                $('#selectors').addClass("col-md-3").removeClass("hidden");
+                $('#modules').removeClass("col-md-12").addClass("col-md-9");
+                $('#toggleSelectorsIcon').removeClass("glyphicon glyphicon-resize-small").addClass("glyphicon glyphicon-resize-horizontal");
+            }
+
+            $('#toggleSelectors').on('click', function(){
+                if($('#selectors').hasClass("hidden")){
+                    showSelectors();
+                }
+                else{
+                    hideSelectors();
+                }
+            });
 		});
 		
 		$('#observationset-search').focus();
@@ -465,10 +490,12 @@ function($, molgenis, settingsXhr) {
 			bootbox.confirm("Are you sure you want to delete all data and metadata for this entity?", function(confirmed){
 				if(confirmed){
 					$.ajax('/api/v1/'+selectedEntityMetaData.name+'/meta', {'type': 'DELETE'}).done(function(){
-						document.location.href = "/menu/main/dataexplorer";
+						$.post(molgenis.getContextUrl() + '/removeEntityFromMenu/' + selectedEntityMetaData.name).done(function(){
+							document.location.href = "/menu/main/dataexplorer";
+						});
 					});
 				}
-			})
+			});
 		});
 
 		function init() {
@@ -490,7 +517,7 @@ function($, molgenis, settingsXhr) {
 				for (var i = 0; i < state.query.q.length; ++i) {
 					var rule = state.query.q[i];
 					if(rule.field === undefined && rule.operator === 'SEARCH') {
-						$('#observationset-search').val(rule.value);
+						$('#observationset-search').val(rule.value).change();
 						break;
 					}
 				}

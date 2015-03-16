@@ -4,8 +4,8 @@ import java.util.Locale;
 
 import org.molgenis.AppConfig;
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
+import org.molgenis.data.Repository;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ public class MysqlRepositoryCollectionTest extends AbstractTestNGSpringContextTe
 	public void test()
 	{
 		// delete old stuff
-		coll.dropEntityMetaData("coll_person");
+		if (coll.getRepository("coll_person") != null) coll.deleteEntityMeta("coll_person");
 
 		// create collection, add repo, destroy and reload
 		DefaultEntityMetaData personMD = new DefaultEntityMetaData("coll_person");
@@ -37,12 +37,12 @@ public class MysqlRepositoryCollectionTest extends AbstractTestNGSpringContextTe
 		personMD.addAttribute("active").setDataType(MolgenisFieldTypes.BOOL);
 
 		// autowired ds
-		coll.add(personMD);
+		coll.addEntityMeta(personMD);
 
 		// destroy and rebuild
-		Assert.assertNotNull(coll.getRepositoryByEntityName("coll_person"));
+		Assert.assertNotNull(coll.getRepository("coll_person"));
 
-		CrudRepository repo = (CrudRepository) coll.getRepositoryByEntityName("coll_person");
+		Repository repo = coll.getRepository("coll_person");
 		String[] locale = Locale.getISOCountries();
 		for (int i = 0; i < 10; i++)
 		{
@@ -56,7 +56,7 @@ public class MysqlRepositoryCollectionTest extends AbstractTestNGSpringContextTe
 		}
 
 		// and again
-		repo = (CrudRepository) coll.getRepositoryByEntityName("coll_person");
+		repo = coll.getRepository("coll_person");
 		Assert.assertEquals(repo.count(), 10);
 	}
 }

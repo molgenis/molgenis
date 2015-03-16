@@ -1,29 +1,40 @@
 package org.molgenis.ontology.repository;
 
-import java.util.Iterator;
 
-import org.molgenis.data.Countable;
+import java.io.File;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Set;
+
 import org.molgenis.data.Entity;
-import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.elasticsearch.util.MapperTypeSanitizer;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.ontology.utils.OntologyLoader;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
-public class OntologyIndexRepository extends AbstractOntologyRepository implements Countable
+public class OntologyIndexRepository extends AbstractOntologyRepository
 {
-	private final OntologyLoader ontologyLoader;
 	public final static String TYPE_ONTOLOGY = "indexedOntology";
+	private OntologyLoader ontologyLoader;
 
-	public OntologyIndexRepository(OntologyLoader loader, String name, SearchService searchService)
+	public OntologyIndexRepository(File file, String name) throws OWLOntologyCreationException
 	{
-		super(name, searchService);
-		if (loader == null) throw new IllegalArgumentException("OntologyLoader is null!");
-		ontologyLoader = loader;
+		super(name);
+		this.ontologyLoader = new OntologyLoader(name, file);
+	}
+
+	public OntologyIndexRepository(OntologyLoader ontologyLoader, String name) throws OWLOntologyCreationException
+	{
+		super(name);
+		this.ontologyLoader = ontologyLoader;
 	}
 
 	@Override
 	public Iterator<Entity> iterator()
 	{
+		if (ontologyLoader == null) throw new IllegalArgumentException("OntologyLoader is null!");
+
 		return new Iterator<Entity>()
 		{
 			private int count = 0;
@@ -59,20 +70,32 @@ public class OntologyIndexRepository extends AbstractOntologyRepository implemen
 		};
 	}
 
+	@Override
 	public long count()
 	{
 		return 1;
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
+	public Set<RepositoryCapability> getCapabilities()
 	{
-		throw new UnsupportedOperationException();
+		return Collections.emptySet();
 	}
 
-	@Override
-	public String getUrl()
+	/**
+	 * @return the ontologyLoader
+	 */
+	public OntologyLoader getOntologyLoader()
 	{
-		throw new UnsupportedOperationException();
+		return ontologyLoader;
+	}
+
+	/**
+	 * @param ontologyLoader
+	 *            the ontologyLoader to set
+	 */
+	public void setOntologyLoader(OntologyLoader ontologyLoader)
+	{
+		this.ontologyLoader = ontologyLoader;
 	}
 }

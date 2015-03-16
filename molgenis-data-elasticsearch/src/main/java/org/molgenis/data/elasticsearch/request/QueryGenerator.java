@@ -1,5 +1,7 @@
 package org.molgenis.data.elasticsearch.request;
 
+import static org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator.DEFAULT_ANALYZER;
+
 import java.util.Iterator;
 import java.util.List;
 
@@ -108,6 +110,7 @@ public class QueryGenerator implements QueryPartGenerator
 			}
 			queryBuilder = boolQuery;
 		}
+
 		return queryBuilder;
 	}
 
@@ -356,7 +359,8 @@ public class QueryGenerator implements QueryPartGenerator
 					case HYPERLINK:
 					case STRING:
 						queryBuilder = QueryBuilders.matchQuery(
-								queryField + '.' + MappingsBuilder.FIELD_NGRAM_ANALYZED, queryValue);
+								queryField + '.' + MappingsBuilder.FIELD_NGRAM_ANALYZED, queryValue).analyzer(
+								DEFAULT_ANALYZER);
 						break;
 					case FILE:
 					case IMAGE:

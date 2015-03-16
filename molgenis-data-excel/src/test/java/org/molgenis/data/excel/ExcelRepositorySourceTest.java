@@ -51,11 +51,11 @@ public class ExcelRepositorySourceTest
 	@Test
 	public void getRepository()
 	{
-		Repository test = excelRepositoryCollection.getRepositoryByEntityName("test");
+		Repository test = excelRepositoryCollection.getRepository("test");
 		assertNotNull(test);
 		assertEquals(test.getName(), "test");
 
-		Repository blad2 = excelRepositoryCollection.getRepositoryByEntityName("Blad2");
+		Repository blad2 = excelRepositoryCollection.getRepository("Blad2");
 		assertNotNull(blad2);
 		assertEquals(blad2.getName(), "Blad2");
 	}

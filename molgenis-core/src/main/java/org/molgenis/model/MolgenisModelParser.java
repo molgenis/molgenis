@@ -28,8 +28,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.model.elements.Entity;
@@ -42,6 +40,8 @@ import org.molgenis.model.elements.Model;
 import org.molgenis.model.elements.Module;
 import org.molgenis.model.elements.Parameter;
 import org.molgenis.model.elements.View;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -455,7 +455,7 @@ public class MolgenisModelParser
 		}
 		if (type.equals("autoid"))
 		{
-			type = "int";
+			type = "string";
 			nillable = "false";
 			auto = "true";
 			readonly = "true";
@@ -539,8 +539,7 @@ public class MolgenisModelParser
 			}
 			if (filtervalue != null && filtervalue.isEmpty())
 			{
-				LOG.warn("no value specified for filter in field '" + name + "' of entity '" + entity.getName()
-						+ "'");
+				LOG.warn("no value specified for filter in field '" + name + "' of entity '" + entity.getName() + "'");
 			}
 			field.setFilter(Boolean.parseBoolean(filter));
 			field.setFiltertype(filtertype);

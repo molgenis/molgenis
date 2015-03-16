@@ -36,7 +36,7 @@ public class ImportRunService
 	}
 
 	@RunAsSystem
-	public void finishImportRun(int importRunId, String message)
+	public void finishImportRun(String importRunId, String message)
 	{
 		try
 		{
@@ -56,7 +56,7 @@ public class ImportRunService
 	}
 
 	@RunAsSystem
-	public void failImportRun(int importRunId, String message)
+	public void failImportRun(String importRunId, String message)
 	{
 		try
 		{

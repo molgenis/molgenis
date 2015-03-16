@@ -190,11 +190,4 @@ public class OntologyTermIndexRepositoryTest
 		assertEquals(entity.get(OntologyTermIndexRepository.SYNONYMS).toString(), "OT-3");
 	}
 
-	@Test
-	public void getUrl()
-	{
-		assertEquals(ontologyTermIndexRepository.getUrl(),
-				"ontologytermindex://" + ontologyTermIndexRepository.getName());
-	}
-
 }

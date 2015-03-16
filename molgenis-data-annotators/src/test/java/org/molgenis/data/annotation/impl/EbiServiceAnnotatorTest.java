@@ -125,7 +125,7 @@ public class EbiServiceAnnotatorTest
 			}
 		}))).thenReturn(catalogReleaseResponse);
 
-		Iterator<Entity> results = annotator.annotate(input.iterator());
+		Iterator<Entity> results = annotator.annotate(input);
 
 		assertEquals(results.next().getString("chemblId"), expectedEntity.getString("chemblId"));
 	}
