@@ -59,7 +59,7 @@ public class EntityMetaDataResponse
 
 			for (AttributeMetaData attr : meta.getAttributes())
 			{
-				if (attr.isVisible() && !attr.getName().equals("__Type"))
+				if (!attr.getName().equals("__Type"))
 				{
 					if (attributeExpandsSet != null && attributeExpandsSet.containsKey("attributes".toLowerCase()))
 					{
