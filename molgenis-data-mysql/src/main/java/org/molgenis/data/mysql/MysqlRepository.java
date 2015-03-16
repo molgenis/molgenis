@@ -195,11 +195,46 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		}
 	}
 
-    public void addAttribute(AttributeMetaData attributeMetaData) {
-        addAttribute(attributeMetaData, true);
-    }
+	/**
+	 * Adds an attribute to the repository. Will execute the alter table statement in a different thread so that the
+	 * current transaction does not get committed.
+	 * 
+	 * This is needed for adding columns during an import.
+	 * 
+	 * @param attributeMetaData
+	 *            the {@link AttributeMetaData} to add
+	 */
+	protected void addAttribute(AttributeMetaData attributeMetaData)
+	{
+		addAttributeInternal(attributeMetaData, true, true);
+	}
 
-	public void addAttribute(AttributeMetaData attributeMetaData, boolean addToEntityMetaData)
+	/**
+	 * Adds an attribute to the repository. Will excecute the alter table statement in the current thread. Please note
+	 * that this *will* commit any existing transactions.
+	 * 
+	 * This is needed for adding columns in the annotator.
+	 * 
+	 * @param attributeMetaData
+	 *            the {@link AttributeMetaData} to add
+	 */
+	protected void addAttributeSync(AttributeMetaData attributeMetaData)
+	{
+		addAttributeInternal(attributeMetaData, true, false);
+	}
+
+	/**
+	 * Adds an attribute to the repository.
+	 * 
+	 * @param attributeMetaData
+	 *            the {@link AttributeMetaData} to add
+	 * @param addToEntityMetaData
+	 *            boolean indicating if the repository's {@link EntityMetaData} should be updated as well. This should
+	 *            not happen for parts of a compound attribute.
+	 * @param async
+	 *            boolean indicating if the alter table statement should be executed in a different thread or not.
+	 */
+	private void addAttributeInternal(AttributeMetaData attributeMetaData, boolean addToEntityMetaData, boolean async)
 	{
 		try
 		{
@@ -210,34 +245,35 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 			}
 			if (attributeMetaData.getDataType() instanceof MrefField)
 			{
-				asyncJdbcTemplate.execute(getMrefCreateSql(attributeMetaData));
+				execute(getMrefCreateSql(attributeMetaData), async);
 			}
 			else
 			{
-				asyncJdbcTemplate.execute(getAlterSql(attributeMetaData));
+				execute(getAlterSql(attributeMetaData), async);
 			}
 
 			if (attributeMetaData.getDataType() instanceof XrefField)
 			{
-				asyncJdbcTemplate.execute(getCreateFKeySql(attributeMetaData));
+				execute(getCreateFKeySql(attributeMetaData), async);
 			}
 
 			if (attributeMetaData.isUnique())
 			{
-				asyncJdbcTemplate.execute(getUniqueSql(attributeMetaData));
+				execute(getUniqueSql(attributeMetaData), async);
 			}
 
 			if (attributeMetaData.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
 			{
 				for (AttributeMetaData attrPart : attributeMetaData.getAttributeParts())
 				{
-					addAttribute(attrPart, false);
+					addAttributeInternal(attrPart, false, async);
 				}
 			}
-            DefaultEntityMetaData demd = new DefaultEntityMetaData(metaData);
-            if(addToEntityMetaData) {
-                demd.addAttributeMetaData(attributeMetaData);
-            }
+			DefaultEntityMetaData demd = new DefaultEntityMetaData(metaData);
+			if (addToEntityMetaData)
+			{
+				demd.addAttributeMetaData(attributeMetaData);
+			}
 			setMetaData(demd);
 		}
 		catch (Exception e)
@@ -247,50 +283,23 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		}
 	}
 
-    public void addAttributeSync(AttributeMetaData attributeMetaData) {
-        addAttributeSync(attributeMetaData, true);
-    }
-
-	public void addAttributeSync(AttributeMetaData attributeMetaData, boolean addToEntityMetaData)
+	/**
+	 * Executes a SQL string.
+	 * 
+	 * @param sql
+	 *            the String to execute
+	 * @param async
+	 *            indication if the string should be executed on a different thread or not
+	 */
+	private void execute(String sql, boolean async)
 	{
-		try
+		if (async)
 		{
-			if (attributeMetaData.getDataType() instanceof MrefField)
-			{
-				jdbcTemplate.execute(getMrefCreateSql(attributeMetaData));
-			}
-			else if (!attributeMetaData.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
-			{
-				jdbcTemplate.execute(getAlterSql(attributeMetaData));
-			}
-
-			if (attributeMetaData.getDataType() instanceof XrefField)
-			{
-				jdbcTemplate.execute(getCreateFKeySql(attributeMetaData));
-			}
-
-			if (attributeMetaData.isUnique())
-			{
-				jdbcTemplate.execute(getUniqueSql(attributeMetaData));
-			}
-
-			if (attributeMetaData.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
-			{
-				for (AttributeMetaData attrPart : attributeMetaData.getAttributeParts())
-				{
-					addAttributeSync(attrPart, false);
-				}
-			}
-            DefaultEntityMetaData demd = new DefaultEntityMetaData(metaData);
-            if(addToEntityMetaData) {
-                demd.addAttributeMetaData(attributeMetaData);
-            }
-			setMetaData(demd);
+			asyncJdbcTemplate.execute(sql);
 		}
-		catch (Exception e)
+		else
 		{
-			LOG.error("Exception updating MysqlRepository.", e);
-			throw new MolgenisDataException(e);
+			jdbcTemplate.execute(sql);
 		}
 	}
 

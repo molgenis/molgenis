@@ -39,8 +39,10 @@ go to 'Help' -> 'Eclipse market place'
 find and install plugins:
 * 'JBoss Tools', during install only select Freemarker IDE
 * 'TestNG for Eclipse'
+* 'm2e-apt'
 
 go to 'Eclipse' -> 'Preferences' -> 'installed JREs' and select 'java 8'
+go to 'Eclipse' -> 'Preferences' -> 'Maven' -> 'Annotation Processing' and select 'Automatically Configure JDT APT'
 
 ## 4. Get the code
 
