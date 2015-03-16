@@ -35,7 +35,7 @@
 <xsl:if test="gscf:type='TEXT'">text</xsl:if><xsl:text>	</xsl:text>
 <xsl:if test="gscf:preferredIdentifier='true'">TRUE</xsl:if><xsl:text>	</xsl:text>
 <xsl:if test="gscf:required='false'">TRUE</xsl:if><xsl:text>	"</xsl:text>
-<xsl:value-of select="gscf:comment"/><xsl:text>"
+<xsl:if test="not(contains(gscf:comment, '&quot;'))"><xsl:value-of select="gscf:comment"/></xsl:if><xsl:text>"
 </xsl:text>
 </xsl:template>
 
