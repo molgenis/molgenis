@@ -1,13 +1,12 @@
 package org.molgenis.data.support;
 
+import static com.google.common.collect.Iterables.transform;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.support.QueryImpl.IN;
 
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -272,19 +271,8 @@ public class DefaultEntity implements Entity
 					id -> new DefaultEntity(attribute.getRefEntity(), dataService, (Map<String, Object>) id)).collect(
 					Collectors.toList());
 		}
-
-		EntityMetaData ref = attribute.getRefEntity();
-		ids = ids.stream().map(attribute.getDataType()::convert).collect(Collectors.toList());
-
-		String entityIdName = ref.getIdAttribute().getName();
-		Map<Object, Entity> entities = new HashMap<Object, Entity>();
-		for (Entity entity : dataService.findAll(ref.getName(), IN(entityIdName, ids)))
-		{
-			entities.put(entity.get(entityIdName), entity);
-		}
-		List<Entity> result = ids.stream().map(id -> entities.get(id)).filter(x -> x != null)
-				.collect(Collectors.toList());
-		return result;
+		return transform(ids,
+				(id) -> (dataService.findOne(attribute.getRefEntity().getName(), attribute.getDataType().convert(id))));
 	}
 
 	@Override
