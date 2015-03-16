@@ -1,4 +1,11 @@
 name	label	entity	datatype	idattribute	nillable	description
+id		"dbnp.studycapturing.Study"	int	TRUE	FALSE	"generated ID attribute"
+id		"dbnp.studycapturing.Event"	int	TRUE	FALSE	"generated ID attribute"
+id		"dbnp.studycapturing.Sample"	int	TRUE	FALSE	"generated ID attribute"
+id		"dbnp.studycapturing.Subject"	int	TRUE	FALSE	"generated ID attribute"
+id		"org.dbxp.sam.Feature"	int	TRUE	FALSE	"generated ID attribute"
+id		"dbnp.studycapturing.Assay"	int	TRUE	FALSE	"generated ID attribute"
+id		"dbnp.studycapturing.SamplingEvent"	int	TRUE	FALSE	"generated ID attribute"
 id	"id"	entity0	int	TRUE	FALSE	"generated ID attribute"
 attr0	"Objectives"	"entity0"	text			"Aim and scientific questions of the study
 "

@@ -1,4 +1,5 @@
 name	label	entity	datatype	idattribute	nillable	description
+id		"org.dbxp.sam.Feature"	int	TRUE	FALSE	"generated ID attribute"
 id	"id"	entity0	int	TRUE	FALSE	"generated ID attribute"
 attr0	"Version"	"entity0"	string		TRUE	""
 attr1	"Gene Full-Name(s)"	"entity0"	string		TRUE	"Full name(s) of the target gene, e.g. NCBI definition."

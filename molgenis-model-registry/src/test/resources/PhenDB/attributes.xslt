@@ -10,6 +10,9 @@
 <xsl:template match="/">
 <xsl:text>name	label	entity	datatype	idattribute	nillable	description
 </xsl:text>
+	<xsl:for-each select="distinct-values(//gscf:entity)"><xsl:text>id		"</xsl:text><xsl:value-of select="."/><xsl:text>"	int	TRUE	FALSE	"generated ID attribute"
+</xsl:text>
+	</xsl:for-each>
 	<xsl:apply-templates/>
 </xsl:template>
 

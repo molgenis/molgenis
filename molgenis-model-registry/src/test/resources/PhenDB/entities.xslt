@@ -8,14 +8,19 @@
 
 <xsl:strip-space elements="*"/>
 <xsl:template match="/">
-<xsl:text>name	package	label	description
+<xsl:text>name	package	label	extends	abstract	description
 </xsl:text>
+	<xsl:for-each select="distinct-values(//gscf:entity)">
+		<xsl:text>"</xsl:text><xsl:value-of select="."/><xsl:text>"	NMC			TRUE	""
+</xsl:text>
+	</xsl:for-each>
 	<xsl:apply-templates/>
 </xsl:template>
 
 <xsl:template match="gscf:template">
 <xsl:text>entity</xsl:text><xsl:value-of select="count(preceding-sibling::gscf:template)"/><xsl:text>	NMC	"</xsl:text>
 <xsl:value-of select="gscf:name"/><xsl:text>"	"</xsl:text>
+<xsl:value-of select="gscf:entity"/><xsl:text>"	FALSE	"</xsl:text>
 <xsl:value-of select="gscf:description"/><xsl:text>"
 </xsl:text>
 </xsl:template>
