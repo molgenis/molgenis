@@ -12,6 +12,7 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.AnnotatorUtils;
 import org.molgenis.data.annotation.VariantAnnotator;
 import org.molgenis.data.annotation.impl.datastructures.ClinvarData;
 import org.molgenis.data.annotation.provider.ClinvarDataProvider;
@@ -131,11 +132,11 @@ public class ClinVarServiceAnnotator extends VariantAnnotator
 			resultMap.put(OTHERIDS, data.getOtherids());
 			resultMap.put(VARIANTIDS, data.getVariantids());
 
-			results.add(getAnnotatedEntity(entity, resultMap));
+			results.add(AnnotatorUtils.getAnnotatedEntity(this, entity, resultMap));
 		}
 		else
 		{
-			results.add(getAnnotatedEntity(entity, resultMap));
+			results.add(AnnotatorUtils.getAnnotatedEntity(this, entity, resultMap));
 		}
 
 		return results;

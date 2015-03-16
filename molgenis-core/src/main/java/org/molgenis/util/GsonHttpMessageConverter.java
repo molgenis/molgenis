@@ -24,6 +24,7 @@ import java.lang.reflect.Type;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.IOUtils;
+import org.molgenis.gson.AutoValueTypeAdapterFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpInputMessage;
@@ -78,6 +79,7 @@ public class GsonHttpMessageConverter extends BaseHttpMessageConverter<Object>
 			builder = builder.setPrettyPrinting();
 		}
 
+		builder.registerTypeAdapterFactory(new AutoValueTypeAdapterFactory());
 		gson = builder.create();
 	}
 
@@ -265,9 +267,16 @@ public class GsonHttpMessageConverter extends BaseHttpMessageConverter<Object>
 
 	private String getCallbackParam()
 	{
-		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
-				.getRequest();
-		return request.getParameter("callback");
+		try
+		{
+			HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+					.getRequest();
+			return request.getParameter("callback");
+		}
+		catch (IllegalStateException ex)
+		{
+			return null;
+		}
 	}
 
 }

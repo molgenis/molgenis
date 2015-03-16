@@ -109,4 +109,16 @@ public class IndexedRepositoryCollectionDecorator implements RepositoryCollectio
 		return searchService;
 	}
 
+	@Override
+	public boolean hasRepository(String name)
+	{
+		if (null == name) return false;
+		Iterator<String> entityNames = getEntityNames().iterator();
+		while (entityNames.hasNext())
+		{
+			if (entityNames.next().equals(name)) return true;
+		}
+		return false;
+	}
+
 }

@@ -63,7 +63,11 @@ function($, molgenis, settingsXhr) {
 	 * @memberOf molgenis.dataexplorer
 	 */
 	function getEntityQuery() {
-		return state.query || { q: [] };
+		// N.B. There's a translation step between the query in the state, which is also shown on screen
+		// ("SEARCH 1:10050001") and the actual entity query which is used when retrieving data
+		// (CHROM = 1 AND POS = 1005001)
+		// So here we should return the *translated* query.
+		return createEntityQuery();
 	}
 	
 	/**
@@ -301,6 +305,27 @@ function($, molgenis, settingsXhr) {
 			$.when(entityMetaDataRequest).done(function(){
 				moduleTab.tab('show');
 			});
+
+            function hideSelectors() {
+                $('#selectors').removeClass("col-md-3").addClass("hidden");
+                $('#modules').removeClass("col-md-9").addClass("col-md-12");
+                $('#toggleSelectorsIcon').removeClass("glyphicon glyphicon-resize-horizontal").addClass("glyphicon glyphicon-resize-small");
+            }
+
+            function showSelectors() {
+                $('#selectors').addClass("col-md-3").removeClass("hidden");
+                $('#modules').removeClass("col-md-12").addClass("col-md-9");
+                $('#toggleSelectorsIcon').removeClass("glyphicon glyphicon-resize-small").addClass("glyphicon glyphicon-resize-horizontal");
+            }
+
+            $('#toggleSelectors').on('click', function(){
+                if($('#selectors').hasClass("hidden")){
+                    showSelectors();
+                }
+                else{
+                    hideSelectors();
+                }
+            });
 		});
 		
 		$('#observationset-search').focus();
@@ -492,7 +517,7 @@ function($, molgenis, settingsXhr) {
 				for (var i = 0; i < state.query.q.length; ++i) {
 					var rule = state.query.q[i];
 					if(rule.field === undefined && rule.operator === 'SEARCH') {
-						$('#observationset-search').val(rule.value);
+						$('#observationset-search').val(rule.value).change();
 						break;
 					}
 				}

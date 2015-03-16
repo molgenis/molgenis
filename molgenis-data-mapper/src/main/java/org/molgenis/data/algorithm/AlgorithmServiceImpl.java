@@ -26,12 +26,12 @@ import org.slf4j.LoggerFactory;
 public class AlgorithmServiceImpl implements AlgorithmService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(AlgorithmServiceImpl.class);
-    private static DataService dataService = null;
+	private DataService dataService = null;
 
-    public AlgorithmServiceImpl(DataService dataService)
+	public AlgorithmServiceImpl(DataService dataService)
 	{
 		new RhinoConfig().init();
-        this.dataService = dataService;
+		this.dataService = dataService;
 	}
 
 	@Override
@@ -64,12 +64,13 @@ public class AlgorithmServiceImpl implements AlgorithmService
 								case DECIMAL:
 									derivedValues.add(Context.toNumber(result));
 									break;
-                                case XREF:
-                                case CATEGORICAL:
-                                    derivedValues.add(dataService.findOne(targetAttribute.getRefEntity().getName(),result).getIdValue());
-                                    break;
-                                case MREF:
-                                    throw new UnsupportedOperationException();
+								case XREF:
+								case CATEGORICAL:
+									derivedValues.add(dataService.findOne(targetAttribute.getRefEntity().getName(),
+											Context.toString(result)).getIdValue());
+									break;
+								case MREF:
+									throw new UnsupportedOperationException();
 								default:
 									derivedValues.add(Context.toString(result));
 									break;
@@ -92,9 +93,10 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		for (String attributeName : attributeNames)
 		{
 			Object value = entity.get(attributeName);
-            if(value instanceof Entity){
-                value = ((Entity) value).getIdValue();
-            }
+			if (value instanceof Entity)
+			{
+				value = ((Entity) value).getIdValue();
+			}
 			mapEntity.set(attributeName, value);
 		}
 		return mapEntity;
@@ -120,14 +122,14 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		}
 	}
 
-	private static Object convert(Object value, AttributeMetaData attributeMetaData)
+	private Object convert(Object value, AttributeMetaData attributeMetaData)
 	{
 		if (value == null)
 		{
 			return null;
 		}
 		Object convertedValue;
-        FieldTypeEnum targetDataType = attributeMetaData.getDataType().getEnumType();
+		FieldTypeEnum targetDataType = attributeMetaData.getDataType().getEnumType();
 		switch (targetDataType)
 		{
 			case INT:
@@ -136,12 +138,13 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			case DECIMAL:
 				convertedValue = Context.toNumber(value);
 				break;
-            case XREF:
-            case CATEGORICAL:
-                convertedValue = dataService.findOne(attributeMetaData.getRefEntity().getName(), Context.toString(value));
-                break;
-            case MREF:
-                throw new UnsupportedOperationException();
+			case XREF:
+			case CATEGORICAL:
+				convertedValue = dataService.findOne(attributeMetaData.getRefEntity().getName(),
+						Context.toString(value));
+				break;
+			case MREF:
+				throw new UnsupportedOperationException();
 			default:
 				convertedValue = Context.toString(value);
 				break;

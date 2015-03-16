@@ -47,7 +47,6 @@ class EntityMetaDataRepository
 		this.packageRepository = packageRepository;
 		this.repository = collection.addEntityMeta(META_DATA);
 		this.collection = collection;
-		fillEntityMetaDataCache();
 	}
 
 	Repository getRepository()

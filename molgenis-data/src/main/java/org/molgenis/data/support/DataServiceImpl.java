@@ -98,7 +98,6 @@ public class DataServiceImpl implements DataService
 			repositoryNames.remove(repositoryName);
 			repositories.remove(repositoryName.toLowerCase());
 		}
-
 	}
 
 	@Override

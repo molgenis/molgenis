@@ -85,7 +85,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true)
-	public Permissions getGroupPluginPermissions(Integer groupId)
+	public Permissions getGroupPluginPermissions(String groupId)
 	{
 		MolgenisGroup molgenisGroup = dataService.findOne(MolgenisGroup.ENTITY_NAME, groupId, MolgenisGroup.class);
 		if (molgenisGroup == null) throw new RuntimeException("unknown group id [" + groupId + "]");
@@ -99,7 +99,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true)
-	public Permissions getGroupEntityClassPermissions(Integer groupId)
+	public Permissions getGroupEntityClassPermissions(String groupId)
 	{
 		MolgenisGroup molgenisGroup = dataService.findOne(MolgenisGroup.ENTITY_NAME, groupId, MolgenisGroup.class);
 		if (molgenisGroup == null) throw new RuntimeException("unknown group id [" + groupId + "]");
@@ -112,7 +112,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true)
-	public Permissions getUserPluginPermissions(Integer userId)
+	public Permissions getUserPluginPermissions(String userId)
 	{
 		List<? extends Authority> userPermissions = getUserPermissions(userId);
 		Permissions permissions = createPermissions(userPermissions, SecurityUtils.AUTHORITY_PLUGIN_PREFIX);
@@ -123,7 +123,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true)
-	public Permissions getUserEntityClassPermissions(Integer userId)
+	public Permissions getUserEntityClassPermissions(String userId)
 	{
 		List<? extends Authority> userPermissions = getUserPermissions(userId);
 
@@ -132,12 +132,12 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 		return permissions;
 	}
 
-	private List<? extends Authority> getUserPermissions(Integer userId)
+	private List<? extends Authority> getUserPermissions(String userId)
 	{
 		return getUserPermissions(userId, null);
 	}
 
-	private List<? extends Authority> getUserPermissions(Integer userId, String authorityPrefix)
+	private List<? extends Authority> getUserPermissions(String userId, String authorityPrefix)
 	{
 		MolgenisUser molgenisUser = dataService.findOne(MolgenisUser.ENTITY_NAME, userId, MolgenisUser.class);
 		if (molgenisUser == null) throw new RuntimeException("unknown user id [" + userId + "]");
@@ -174,7 +174,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional
-	public void replaceGroupPluginPermissions(List<GroupAuthority> pluginAuthorities, Integer groupId)
+	public void replaceGroupPluginPermissions(List<GroupAuthority> pluginAuthorities, String groupId)
 	{
 		replaceGroupPermissions(pluginAuthorities, groupId, SecurityUtils.AUTHORITY_PLUGIN_PREFIX);
 	}
@@ -182,12 +182,12 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional
-	public void replaceGroupEntityClassPermissions(List<GroupAuthority> entityAuthorities, Integer groupId)
+	public void replaceGroupEntityClassPermissions(List<GroupAuthority> entityAuthorities, String groupId)
 	{
 		replaceGroupPermissions(entityAuthorities, groupId, SecurityUtils.AUTHORITY_ENTITY_PREFIX);
 	}
 
-	private void replaceGroupPermissions(List<GroupAuthority> entityAuthorities, Integer groupId, String authorityPrefix)
+	private void replaceGroupPermissions(List<GroupAuthority> entityAuthorities, String groupId, String authorityPrefix)
 	{
 		MolgenisGroup molgenisGroup = dataService.findOne(MolgenisGroup.ENTITY_NAME, groupId, MolgenisGroup.class);
 		if (molgenisGroup == null) throw new RuntimeException("unknown group id [" + groupId + "]");
@@ -208,7 +208,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional
-	public void replaceUserPluginPermissions(List<UserAuthority> pluginAuthorities, Integer userId)
+	public void replaceUserPluginPermissions(List<UserAuthority> pluginAuthorities, String userId)
 	{
 		replaceUserPermissions(pluginAuthorities, userId, SecurityUtils.AUTHORITY_PLUGIN_PREFIX);
 	}
@@ -216,12 +216,12 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional
-	public void replaceUserEntityClassPermissions(List<UserAuthority> pluginAuthorities, Integer userId)
+	public void replaceUserEntityClassPermissions(List<UserAuthority> pluginAuthorities, String userId)
 	{
 		replaceUserPermissions(pluginAuthorities, userId, SecurityUtils.AUTHORITY_ENTITY_PREFIX);
 	}
 
-	private void replaceUserPermissions(List<UserAuthority> entityAuthorities, Integer userId, String authorityType)
+	private void replaceUserPermissions(List<UserAuthority> entityAuthorities, String userId, String authorityType)
 	{
 		MolgenisUser molgenisUser = dataService.findOne(MolgenisUser.ENTITY_NAME, userId, MolgenisUser.class);
 		if (molgenisUser == null) throw new RuntimeException("unknown user id [" + userId + "]");

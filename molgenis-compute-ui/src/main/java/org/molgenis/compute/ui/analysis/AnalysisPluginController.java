@@ -174,8 +174,6 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 
 		String targetEntityName = createAnalysisRequest.getTargetEntityName();
 
-		// System.out.println("targetEntityName: " + targetEntityName);
-
 		if (targetEntityName != null && !targetEntityName.isEmpty())
 		{
 			// get requested targets
@@ -190,26 +188,8 @@ public class AnalysisPluginController extends MolgenisPluginController implement
 				targets = dataService.findAll(targetEntityName);
 			}
 
-			/** REMOVE **/
-			for (Entity e : targets)
-			{
-				System.out.println("target: " + e.getLabelValue());
-				System.out.println("target attributes: ");
-				for (String s : e.getAttributeNames())
-				{
-					System.out.println("   " + s);
-				}
-			}
-
 			// set analysis on requested targets
 			final String analysisAttrName = UIWorkflowDecorator.ANALYSIS_ATTRIBUTE.getName();
-
-			/** REMOVE **/
-			System.out.println("analysisAttrName: " + analysisAttrName);
-			// add analysis column
-			// AttributeMetaData attr = new DefaultAttributeMetaData(analysisAttrName)
-			// .setDataType(MolgenisFieldTypes.MREF).setRefEntity(AnalysisMetaData.INSTANCE);
-			// dataService.getMeta().addAttribute(targetEntityName, attr);
 
 			dataService.update(targetEntityName, Iterables.transform(targets, new Function<Entity, Entity>()
 			{

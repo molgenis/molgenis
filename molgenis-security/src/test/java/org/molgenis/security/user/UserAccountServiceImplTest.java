@@ -90,14 +90,14 @@ public class UserAccountServiceImplTest extends AbstractTestNGSpringContextTests
 	public void updateCurrentUser()
 	{
 		MolgenisUser existingMolgenisUser = mock(MolgenisUser.class);
-		when(existingMolgenisUser.getId()).thenReturn(1);
+		when(existingMolgenisUser.getId()).thenReturn("1");
 		when(existingMolgenisUser.getUsername()).thenReturn(USERNAME_USER);
 		when(existingMolgenisUser.getPassword()).thenReturn("encrypted-password");
 
 		when(molgenisUserService.getUser(USERNAME_USER)).thenReturn(existingMolgenisUser);
 
 		MolgenisUser updatedMolgenisUser = mock(MolgenisUser.class);
-		when(updatedMolgenisUser.getId()).thenReturn(1);
+		when(updatedMolgenisUser.getId()).thenReturn("1");
 		when(updatedMolgenisUser.getUsername()).thenReturn("username");
 		when(updatedMolgenisUser.getPassword()).thenReturn("encrypted-password");
 
@@ -109,13 +109,13 @@ public class UserAccountServiceImplTest extends AbstractTestNGSpringContextTests
 	public void updateCurrentUser_wrongUser()
 	{
 		MolgenisUser existingMolgenisUser = mock(MolgenisUser.class);
-		when(existingMolgenisUser.getId()).thenReturn(1);
+		when(existingMolgenisUser.getId()).thenReturn("1");
 		when(existingMolgenisUser.getPassword()).thenReturn("encrypted-password");
 
 		when(molgenisUserService.getUser(USERNAME_USER)).thenReturn(existingMolgenisUser);
 
 		MolgenisUser updatedMolgenisUser = mock(MolgenisUser.class);
-		when(updatedMolgenisUser.getId()).thenReturn(1);
+		when(updatedMolgenisUser.getId()).thenReturn("1");
 		when(updatedMolgenisUser.getUsername()).thenReturn("wrong-username");
 		when(updatedMolgenisUser.getPassword()).thenReturn("encrypted-password");
 
@@ -127,14 +127,14 @@ public class UserAccountServiceImplTest extends AbstractTestNGSpringContextTests
 	{
 		when(passwordEncoder.matches("new-password", "encrypted-password")).thenReturn(true);
 		MolgenisUser existingMolgenisUser = mock(MolgenisUser.class);
-		when(existingMolgenisUser.getId()).thenReturn(1);
+		when(existingMolgenisUser.getId()).thenReturn("1");
 		when(existingMolgenisUser.getPassword()).thenReturn("encrypted-password");
 		when(existingMolgenisUser.getUsername()).thenReturn("username");
 
 		when(molgenisUserService.getUser(USERNAME_USER)).thenReturn(existingMolgenisUser);
 
 		MolgenisUser updatedMolgenisUser = mock(MolgenisUser.class);
-		when(updatedMolgenisUser.getId()).thenReturn(1);
+		when(updatedMolgenisUser.getId()).thenReturn("1");
 		when(updatedMolgenisUser.getPassword()).thenReturn("new-password");
 		when(updatedMolgenisUser.getUsername()).thenReturn("username");
 
@@ -145,7 +145,7 @@ public class UserAccountServiceImplTest extends AbstractTestNGSpringContextTests
 	public void validateCurrentUserPassword()
 	{
 		MolgenisUser existingMolgenisUser = mock(MolgenisUser.class);
-		when(existingMolgenisUser.getId()).thenReturn(1);
+		when(existingMolgenisUser.getId()).thenReturn("1");
 		when(existingMolgenisUser.getPassword()).thenReturn("encrypted-password");
 		when(existingMolgenisUser.getUsername()).thenReturn("username");
 		when(passwordEncoder.matches("password", "encrypted-password")).thenReturn(true);
