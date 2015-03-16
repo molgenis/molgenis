@@ -53,13 +53,16 @@ public class VcfUtils
 			if (vcfEntity.getString(attributeMetaData.getName()) != null) // FIXME: This removes 'FLAG' fields? see
 																			// http://samtools.github.io/hts-specs/VCFv4.2.pdf
 			{
-                if(attributeMetaData.getName().startsWith(VcfRepository.getInfoPrefix())) {
-                    vcfRecord.append(attributeMetaData.getName().substring(VcfRepository.getInfoPrefix().length()) + "="
-                            + vcfEntity.getString(attributeMetaData.getName()) + ";");
-                }else{
-                    vcfRecord.append(attributeMetaData.getName() + "="
-                            + vcfEntity.getString(attributeMetaData.getName()) + ";");
-                }
+				if (attributeMetaData.getName().startsWith(VcfRepository.getInfoPrefix()))
+				{
+					vcfRecord.append(attributeMetaData.getName().substring(VcfRepository.getInfoPrefix().length())
+							+ "=" + vcfEntity.getString(attributeMetaData.getName()) + ";");
+				}
+				else
+				{
+					vcfRecord.append(attributeMetaData.getName() + "="
+							+ vcfEntity.getString(attributeMetaData.getName()) + ";");
+				}
 			}
 		}
 
@@ -143,7 +146,8 @@ public class VcfUtils
 	 * @throws Exception
 	 */
 	public static boolean checkPreviouslyAnnotatedAndAddMetadata(File inputVcfFile, PrintWriter outputVCFWriter,
-			List<String> infoFields, String checkAnnotatedBeforeValue) throws FileFormatException, FileNotFoundException
+			List<String> infoFields, String checkAnnotatedBeforeValue) throws FileFormatException,
+			FileNotFoundException
 	{
 		boolean annotatedBefore = false;
 

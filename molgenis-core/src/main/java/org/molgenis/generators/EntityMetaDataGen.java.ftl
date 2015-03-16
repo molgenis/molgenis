@@ -50,7 +50,10 @@ public class ${JavaName(entity)}MetaData extends DefaultEntityMetaData
 		${name(f)}.setReadOnly(${f.readOnly?string('true', 'false')});
 		${name(f)}.setUnique(${f.unique?string('true', 'false')});
 		${name(f)}.setAuto(${f.auto?string('true', 'false')});
-		<#if f.isXRef()>
+		<#if f.isEnum()>
+        ${name(f)}.setEnumOptions(java.util.Arrays.asList(<#list f.enumOptions as option>"${option}"<#if option_has_next>, </#if></#list>));
+        </#if>
+        <#if f.isXRef()>
 			<#if f.xrefEntity.name == entity.name>
 		${name(f)}.setRefEntity(this);	
 			<#else>

@@ -195,7 +195,11 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		}
 	}
 
-	public void addAttribute(AttributeMetaData attributeMetaData)
+    public void addAttribute(AttributeMetaData attributeMetaData) {
+        addAttribute(attributeMetaData, true);
+    }
+
+	public void addAttribute(AttributeMetaData attributeMetaData, boolean addToEntityMetaData)
 	{
 		try
 		{
@@ -227,12 +231,13 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 			{
 				for (AttributeMetaData attrPart : attributeMetaData.getAttributeParts())
 				{
-					addAttribute(attrPart);
+					addAttribute(attrPart, false);
 				}
 			}
-
-			DefaultEntityMetaData demd = new DefaultEntityMetaData(metaData);
-			demd.addAttributeMetaData(attributeMetaData);
+            DefaultEntityMetaData demd = new DefaultEntityMetaData(metaData);
+            if(addToEntityMetaData) {
+                demd.addAttributeMetaData(attributeMetaData);
+            }
 			setMetaData(demd);
 		}
 		catch (Exception e)
@@ -242,7 +247,11 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		}
 	}
 
-	public void addAttributeSync(AttributeMetaData attributeMetaData)
+    public void addAttributeSync(AttributeMetaData attributeMetaData) {
+        addAttributeSync(attributeMetaData, true);
+    }
+
+	public void addAttributeSync(AttributeMetaData attributeMetaData, boolean addToEntityMetaData)
 	{
 		try
 		{
@@ -269,12 +278,13 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 			{
 				for (AttributeMetaData attrPart : attributeMetaData.getAttributeParts())
 				{
-					addAttributeSync(attrPart);
+					addAttributeSync(attrPart, false);
 				}
 			}
-
-			DefaultEntityMetaData demd = new DefaultEntityMetaData(metaData);
-			demd.addAttributeMetaData(attributeMetaData);
+            DefaultEntityMetaData demd = new DefaultEntityMetaData(metaData);
+            if(addToEntityMetaData) {
+                demd.addAttributeMetaData(attributeMetaData);
+            }
 			setMetaData(demd);
 		}
 		catch (Exception e)
