@@ -114,14 +114,14 @@
 		<#if emd.abstract == true >
 			'<@entityName emd />': new uml.Abstract({
 	      	 	size: { width: RECT_WIDTH, height: ${(50 + 12 * emd.attributes?size)?c} },
-	        	name: '${emd.simpleName?js_string}',
-	       		attributes: [<#list emd.attributes as amd>'${amd.name?js_string}: ${amd.dataType}'<#if amd_has_next>,</#if></#list>]
+	        	name: '${emd.label?js_string}',
+	       		attributes: [<#list emd.attributes as amd>'${amd.label?js_string}: ${amd.dataType}'<#if amd_has_next>,</#if></#list>]
 	    	}),
 	    <#else>
 			'<@entityName emd />': new uml.Class({
 	      	 	size: { width: RECT_WIDTH, height: ${(50 + 12 * emd.attributes?size)?c} },
-	        	name: '${emd.simpleName?js_string}',
-	       	 	attributes: [<#list emd.attributes as amd>'${amd.name?js_string}: ${amd.dataType?js_string}'<#if amd_has_next>,</#if></#list>]
+	        	name: '${emd.label?js_string}',
+	       	 	attributes: [<#list emd.attributes as amd>'${amd.label?js_string}: ${amd.dataType?js_string}'<#if amd_has_next>,</#if></#list>]
 	    	}),
 	    </#if>
 	</#list>
