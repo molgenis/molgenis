@@ -1,6 +1,7 @@
 package org.molgenis.data.support;
 
-import static com.google.common.collect.Iterables.transform;
+import static com.google.common.base.Predicates.notNull;
+import static com.google.common.collect.FluentIterable.from;
 import static java.util.stream.StreamSupport.stream;
 
 import java.sql.Timestamp;
@@ -271,8 +272,9 @@ public class DefaultEntity implements Entity
 					id -> new DefaultEntity(attribute.getRefEntity(), dataService, (Map<String, Object>) id)).collect(
 					Collectors.toList());
 		}
-		return transform(ids,
-				(id) -> (dataService.findOne(attribute.getRefEntity().getName(), attribute.getDataType().convert(id))));
+		return from(ids).transform(attribute.getDataType()::convert)
+				.transform(convertedId -> (dataService.findOne(attribute.getRefEntity().getName(), convertedId)))
+				.filter(notNull());
 	}
 
 	@Override
