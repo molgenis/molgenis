@@ -55,6 +55,7 @@
 								<#if !attribute.nillable> <span class="label label-default">required</span></#if>
 								<#if attribute.unique> <span class="label label-default">unique</span></#if>
 								<#if attribute.description??><br />${attribute.description?html}</#if>
+								<#if attribute.tags??><br />${attribute.tags?html}</#if>
 							</td>
 							<#list mappingProject.getMappingTarget(selectedTarget).entityMappings as source>
 								<td>

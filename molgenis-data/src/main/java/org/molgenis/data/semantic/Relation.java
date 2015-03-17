@@ -12,7 +12,8 @@ public enum Relation {
 			"http://molgenis.org/uml/isRealizationOf"), isGeneralizationOf(
 			"http://molgenis.org/uml/isGeneralizationOf"), hasSourceId(
 			"http://molgenis.org/uml/hasSourceId"), hasSourceName(
-			"http://molgenis.org/uml/hasSourceName");
+			"http://molgenis.org/uml/hasSourceName"), isAssociatedWith(
+			"http://iri.org/#isAssociatedWith");
 	
 	private String iri;
 
@@ -37,5 +38,4 @@ public enum Relation {
 		}
 		return null;
 	}
-
 }
