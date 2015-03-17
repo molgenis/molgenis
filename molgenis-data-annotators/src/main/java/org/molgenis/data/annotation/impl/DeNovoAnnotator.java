@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Level;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -74,7 +75,10 @@ public class DeNovoAnnotator extends VariantAnnotator
 
 	public DeNovoAnnotator(File exacFileLocation, File inputVcfFile, File outputVCFFile) throws Exception
 	{
-
+		//cast to a real logger to adjust to the log level
+		ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger)LOG;
+		root.setLevel(ch.qos.logback.classic.Level.ERROR);
+		
 		this.molgenisSettings = new MolgenisSimpleSettings();
 		this.annotatorService = new AnnotationServiceImpl();
 		
@@ -164,7 +168,7 @@ public class DeNovoAnnotator extends VariantAnnotator
 		
 		HashMap<String, Trio> childToParentGenotypes = new HashMap<String, Trio>();
 		
-		System.out.println("Variant: " + entity.get(VcfRepository.CHROM) + " " + entity.get(VcfRepository.POS) + " " + entity.get(VcfRepository.REF) + " " + entity.get(VcfRepository.ALT));
+//		System.out.println("Variant: " + entity.get(VcfRepository.CHROM) + " " + entity.get(VcfRepository.POS) + " " + entity.get(VcfRepository.REF) + " " + entity.get(VcfRepository.ALT));
 		for(Entity sample : samples)
 		{
 			String sampleID = sample.get("NAME").toString().substring(sample.get("NAME").toString().lastIndexOf("_")+1);
@@ -251,18 +255,123 @@ public class DeNovoAnnotator extends VariantAnnotator
 	//		System.out.println("\t" + sample.get("GT") + " is a " + (pedigree.containsKey(sampleID) ? "child" : "parent"));
 		}
 
-		/**
-		System.out.println("Found " + childToParentGenotypes.size() + " trios..");
-		for(String child : childToParentGenotypes.keySet())
+		
+		LOG.info("Found " + childToParentGenotypes.size() + " trios..");
+		
+		HashMap<String, Trio> completeTrios = getCompleteTrios(childToParentGenotypes);
+		
+		LOG.info("Of which " + completeTrios.size() + " complete, having child+mother+father..");
+		
+		int totalDenovoForVariant = 0;
+		
+		for(String child : completeTrios.keySet())
 		{
-			System.out.println(child + ", " + childToParentGenotypes.get(child));
+		
+			totalDenovoForVariant += findDeNovoVariants(completeTrios.get(child));
+			
+	//		System.out.println(child + ", " + childToParentGenotypes.get(child));
 		}
-		*/
 		
 		
 		
-		resultMap.put(DENOVO, "yes");
+		
+		
+		
+		resultMap.put(DENOVO, totalDenovoForVariant);
 		return resultMap;
+	}
+	
+	/**
+	 * Filter trios for those that are complete (c+f+m)
+	 * @param trios
+	 * @return
+	 */
+	public HashMap<String, Trio> getCompleteTrios(HashMap<String, Trio> trios)
+	{
+		HashMap<String, Trio> result = new HashMap<String, Trio>();
+		
+		for(String key : trios.keySet())
+		{
+			if(trios.get(key).getChild() != null && trios.get(key).getMother() != null && trios.get(key).getFather() != null)
+			{
+				result.put(key, trios.get(key));
+//				System.out.println("TRIO OK: " + trios.get(key));
+			}
+			else
+			{
+//				System.out.println("TRIO BAD: " + trios.get(key));
+			}
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Find de novo variants in complete trios
+	 * Genotype may be missing
+	 * @param t
+	 * @return
+	 */
+	public int findDeNovoVariants(Trio t)
+	{
+		
+		if(t == null)
+		{
+			System.out.println("T NULL !!!!");
+		}
+		
+		if(t.getMother().getGenotype() == null)
+		{
+			LOG.warn("Maternal genotype null, skipping trio for child " + t.getChild().getId());
+			return 0;
+		}
+		if(t.getFather().getGenotype() == null)
+		{
+			LOG.warn("Paternal genotype null, skipping trio for child " + t.getChild().getId());
+			return 0;
+		}
+		if(t.getChild().getGenotype() == null)
+		{
+			LOG.warn("Child genotype null, skipping trio for child " + t.getChild().getId());
+			return 0;
+		}
+
+		String[] mat_all = t.getMother().getGenotype().split("/", -1);
+		if(mat_all.length != 2)
+		{
+			LOG.warn("Maternal genotype split by '/' does not have 2 elements, skipping trio for child " + t.getChild().getId());
+			return 0;
+		}
+		
+		String[] pat_all = t.getFather().getGenotype().split("/", -1);
+		if(pat_all.length != 2)
+		{
+			LOG.warn("Paternal genotype split by '/' does not have 2 elements, skipping trio for child " + t.getChild().getId());
+			return 0;
+		}
+		
+		String[] chi_all = t.getChild().getGenotype().split("/", -1);
+		if(chi_all.length != 2)
+		{
+			LOG.warn("Child genotype split by '/' does not have 2 elements, skipping trio for child " + t.getChild().getId());
+			return 0;
+		}
+		
+		//test if any combination of parent alleles can form the child alleles
+		for(String ma : mat_all)
+		{
+			for(String pa : pat_all)
+			{
+				//if child alleles in any combinations match, return 0
+				if((chi_all[0].equals(ma) && chi_all[1].equals(pa)) || (chi_all[0].equals(pa) && chi_all[1].equals(ma)))
+				{
+					return 0;
+				}
+			}
+		}
+		
+		LOG.info("DE NOVO FOUND!! " + t);
+		return 1;
 	}
 
 	@Override
