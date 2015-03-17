@@ -38,7 +38,7 @@ public class AttributeMetaDataMetaData extends DefaultEntityMetaData
 		super(ENTITY_NAME);
 
 		addAttribute(IDENTIFIER).setIdAttribute(true).setNillable(false).setDataType(STRING).setVisible(false);
-		addAttribute(NAME).setNillable(false);
+		addAttribute(NAME).setNillable(false).setLabelAttribute(true).setLookupAttribute(true);
 		addAttribute(DATA_TYPE);
 		addAttribute(PARTS).setDataType(MREF).setRefEntity(this);
 		addAttribute(REF_ENTITY);
@@ -48,7 +48,7 @@ public class AttributeMetaDataMetaData extends DefaultEntityMetaData
 		addAttribute(ID_ATTRIBUTE).setDataType(BOOL).setNillable(false);
 		addAttribute(LOOKUP_ATTRIBUTE).setDataType(BOOL).setNillable(false);
 		addAttribute(VISIBLE).setDataType(BOOL).setNillable(false);
-		addAttribute(LABEL);
+		addAttribute(LABEL).setLookupAttribute(true);
 		addAttribute(DESCRIPTION).setDataType(TEXT);
 		addAttribute(AGGREGATEABLE).setDataType(BOOL).setNillable(false);
 		addAttribute(ENUM_OPTIONS).setDataType(TEXT);
