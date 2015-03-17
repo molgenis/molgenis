@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.annotation.PostConstruct;
+
 import org.molgenis.data.AutoIdRepositoryDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.IdGenerator;
@@ -362,7 +364,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	{
 		// Create local dataservice and metadataservice
 		DataServiceImpl localDataService = new DataServiceImpl();
-		new MetaDataServiceImpl(localDataService, null);
+		new MetaDataServiceImpl(localDataService);
 
 		addReposToReindex(localDataService);
 
@@ -374,7 +376,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		});
 	}
 
-	// @PostConstruct
+	@PostConstruct
 	public void initRepositories()
 	{
 
@@ -389,9 +391,8 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 			LOG.info("Index found no need to reindex.");
 		}
 
-		ManageableRepositoryCollection defaultBackend = getBackend();
-		metaDataService().setDefaultBackend(defaultBackend);
-		metaDataUpgradeService.upgrade(defaultBackend);
+		metaDataService().setDefaultBackend(getBackend());
+		metaDataUpgradeService.upgrade();
 	}
 
 	private boolean indexExists()
@@ -409,7 +410,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	public MetaDataService metaDataService()
 	{
 		DataService dataService = dataService();
-		MetaDataService metaDataService = new MetaDataServiceImpl((DataServiceImpl) dataService, metaDataUpgradeService);
+		MetaDataService metaDataService = new MetaDataServiceImpl((DataServiceImpl) dataService);
 
 		return metaDataService;
 	}

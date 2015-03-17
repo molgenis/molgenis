@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.sql.DataSource;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.ManageableRepositoryCollection;
+import org.molgenis.data.RepositoryCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -20,21 +22,26 @@ public class MetaDataUpgradeService
 	private final MetaDataVersionService metaDataVersionService;
 	private final DataService dataService;
 	private final List<MetaDataUpgrade> upgrades = new ArrayList<>();
+	private final RepositoryCollection jpaRepositoryCollection;
+	private final DataSource dataSource;
 
 	@Autowired
-	public MetaDataUpgradeService(MetaDataVersionService metaDataVersionService, DataService dataService)
+	public MetaDataUpgradeService(MetaDataVersionService metaDataVersionService, DataService dataService,
+			@Qualifier("JpaRepositoryCollection") RepositoryCollection jpaRepositoryCollection, DataSource dataSource)
 	{
 		this.metaDataVersionService = metaDataVersionService;
 		this.dataService = dataService;
+		this.jpaRepositoryCollection = jpaRepositoryCollection;
+		this.dataSource = dataSource;
 	}
 
 	@PostConstruct
 	public void addUpgrades()
 	{
-		upgrades.add(new UpgradeFrom0To1(dataService));
+		upgrades.add(new UpgradeFrom0To1(dataService, jpaRepositoryCollection, dataSource));
 	}
 
-	public void upgrade(ManageableRepositoryCollection defaultBackend)
+	public void upgrade()
 	{
 		if (metaDataVersionService.getDatabaseMetaDataVersion() < MetaDataVersionService.CURRENT_META_DATA_VERSION)
 		{
@@ -44,7 +51,7 @@ public class MetaDataUpgradeService
 
 			upgrades.stream()
 					.filter(upgrade -> upgrade.getFromVersion() >= metaDataVersionService.getDatabaseMetaDataVersion())
-					.forEach(upgrade -> upgrade.upgrade(defaultBackend));
+					.forEach(upgrade -> upgrade.upgrade());
 
 			metaDataVersionService.updateToCurrentVersion();
 

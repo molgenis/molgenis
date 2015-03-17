@@ -14,7 +14,8 @@ import org.springframework.stereotype.Service;
 /**
  * Get the MetaData version the database is built with and the current MetaData version
  * 
- * The version is stored in the molgenis-server.properties.
+ * The version is stored in the molgenis-server.properties with key 'meta.data.version'. If this key is not present a
+ * new install is assumed, so it will be set to the current version and no upgrade will take place.
  * 
  * This is done so we can upgrade the database. If we store it in the database we must access the database to get it but
  * we must upgrade before we can access the database...
@@ -25,12 +26,20 @@ public class MetaDataVersionService
 	public static final int CURRENT_META_DATA_VERSION = 1;
 	private static final String META_DATE_VERSION_KEY = "meta.data.version";
 
+	public MetaDataVersionService()
+	{
+		if (getMolgenisServerProperties().getProperty(META_DATE_VERSION_KEY) == null)
+		{
+			updateToCurrentVersion();
+		}
+	}
+
 	/**
 	 * Get the molgenis meta data version where the database is generated with.
 	 */
 	public int getDatabaseMetaDataVersion()
 	{
-		return Integer.parseInt(getMolgenisServerProperties().getProperty(META_DATE_VERSION_KEY, "0"));
+		return Integer.parseInt(getMolgenisServerProperties().getProperty(META_DATE_VERSION_KEY));
 	}
 
 	public void updateToCurrentVersion()

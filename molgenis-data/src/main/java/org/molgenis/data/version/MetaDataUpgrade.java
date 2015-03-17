@@ -1,7 +1,6 @@
 package org.molgenis.data.version;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.ManageableRepositoryCollection;
 
 public abstract class MetaDataUpgrade
 {
@@ -26,6 +25,6 @@ public abstract class MetaDataUpgrade
 		return toVersion;
 	}
 
-	public abstract void upgrade(ManageableRepositoryCollection defaultBackend);
+	public abstract void upgrade();
 
 }
