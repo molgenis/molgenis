@@ -104,14 +104,25 @@
 	</#if>
 </div>
 
-<#if mappingProject.getMappingTarget(selectedTarget).entityMappings?has_content>
-	<div class="row">
-		<div class="col-md-12">
-			<a id="add-new-attr-mapping-btn" href="#" class="btn btn-success" 
-				data-toggle="modal" data-target="#create-integrated-entity-modal"><span class="glyphicon glyphicon-play"></span> Create integrated dataset</a>
-		</div>
+<div class="row">
+	<div class="col-md-1">
+		<form method="get" action="${context_url}/tagWizard" class="pull-right">
+			<input type="hidden" name="target" value="${selectedTarget}"/>
+			<div class="btn-group" role="group">
+				<button type="submit" class="btn btn-primary">
+					<span class="glyphicon glyphicon-tag"></span> Run tag wizard
+				</button>
+			</div>
+		</form>
 	</div>
-</#if>
+	<#if mappingProject.getMappingTarget(selectedTarget).entityMappings?has_content>		
+		<div class="col-md-11">
+			<a id="add-new-attr-mapping-btn" href="#" class="btn btn-success pull-left" data-toggle="modal" data-target="#create-integrated-entity-modal">
+				<span class="glyphicon glyphicon-play"></span> Create integrated dataset
+			</a>
+		</div>
+	</#if>
+</div>
 
 <!--Create new source dialog-->
 <div class="modal" id="create-new-source-column-modal" tabindex="-1" role="dialog">
@@ -169,3 +180,4 @@
 		</div>
 	</div>
 </div>
+<@footer/>
