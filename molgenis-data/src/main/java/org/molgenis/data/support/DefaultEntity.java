@@ -1,7 +1,7 @@
 package org.molgenis.data.support;
 
+import static com.google.common.collect.Iterables.transform;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.support.QueryImpl.IN;
 
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -271,11 +271,8 @@ public class DefaultEntity implements Entity
 					id -> new DefaultEntity(attribute.getRefEntity(), dataService, (Map<String, Object>) id)).collect(
 					Collectors.toList());
 		}
-
-		EntityMetaData ref = attribute.getRefEntity();
-		ids = ids.stream().map(attribute.getDataType()::convert).collect(Collectors.toList());
-
-		return dataService.findAll(ref.getName(), IN(ref.getIdAttribute().getName(), ids));
+		return transform(ids,
+				(id) -> (dataService.findOne(attribute.getRefEntity().getName(), attribute.getDataType().convert(id))));
 	}
 
 	@Override

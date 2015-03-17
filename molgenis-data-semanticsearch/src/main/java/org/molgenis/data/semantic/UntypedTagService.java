@@ -1,5 +1,9 @@
 package org.molgenis.data.semantic;
 
+import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.ATTRIBUTES;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_NAME;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -9,7 +13,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Package;
-import org.molgenis.data.Query;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
@@ -39,10 +42,9 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 
 	private Entity findAttributeEntity(EntityMetaData entityMetaData, String attributeName)
 	{
-		Query q = new QueryImpl().eq(AttributeMetaDataMetaData.ENTITY, entityMetaData.getName()).and()
-				.eq(AttributeMetaDataMetaData.NAME, attributeName);
-		Entity entity = dataService.findOne(AttributeMetaDataMetaData.ENTITY_NAME, q);
-		return entity;
+		Entity entityMetaDataEntity = dataService.findOne(ENTITY_NAME, entityMetaData.getName());
+		return stream(entityMetaDataEntity.getEntities(ATTRIBUTES).spliterator(), false)
+				.filter(att -> attributeName.equals(att.getString(AttributeMetaDataMetaData.NAME))).findFirst().get();
 	}
 
 	private Entity findEntity(EntityMetaData emd)
