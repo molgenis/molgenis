@@ -1,18 +1,15 @@
 package org.molgenis.data.version;
 
-import org.molgenis.data.DataService;
 
 public abstract class MetaDataUpgrade
 {
 	private final int fromVersion;
 	private final int toVersion;
-	protected DataService dataService;
 
-	public MetaDataUpgrade(int fromVersion, int toVersion, DataService dataService)
+	public MetaDataUpgrade(int fromVersion, int toVersion)
 	{
 		this.fromVersion = fromVersion;
 		this.toVersion = toVersion;
-		this.dataService = dataService;
 	}
 
 	public int getFromVersion()

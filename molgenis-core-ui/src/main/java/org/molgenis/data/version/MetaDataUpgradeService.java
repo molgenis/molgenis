@@ -8,6 +8,7 @@ import javax.sql.DataSource;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.elasticsearch.SearchService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,21 +25,24 @@ public class MetaDataUpgradeService
 	private final List<MetaDataUpgrade> upgrades = new ArrayList<>();
 	private final RepositoryCollection jpaRepositoryCollection;
 	private final DataSource dataSource;
+	private final SearchService searchService;
 
 	@Autowired
 	public MetaDataUpgradeService(MetaDataVersionService metaDataVersionService, DataService dataService,
-			@Qualifier("JpaRepositoryCollection") RepositoryCollection jpaRepositoryCollection, DataSource dataSource)
+			@Qualifier("JpaRepositoryCollection") RepositoryCollection jpaRepositoryCollection, DataSource dataSource,
+			SearchService searchService)
 	{
 		this.metaDataVersionService = metaDataVersionService;
 		this.dataService = dataService;
 		this.jpaRepositoryCollection = jpaRepositoryCollection;
 		this.dataSource = dataSource;
+		this.searchService = searchService;
 	}
 
 	@PostConstruct
 	public void addUpgrades()
 	{
-		upgrades.add(new UpgradeFrom0To1(dataService, jpaRepositoryCollection, dataSource));
+		upgrades.add(new UpgradeFrom0To1(dataService, jpaRepositoryCollection, dataSource, searchService));
 	}
 
 	public void upgrade()
