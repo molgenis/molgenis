@@ -11,12 +11,13 @@
 	 */
 	var GroupMixin = {
 		render: function() {
+			var type = this.props.type;
+			
 			var options = this.props.options;
-			if(!this.props.required) {
+			if(!this.props.required && type === 'radio') {
 				options = options.concat({value: '', label: 'N/A'});
 			}
 			
-			var type = this.props.type;
 			var inputs = _.map(options, function(option, i) {
 				var control = molgenis.ui.Input({
 					type : type,

@@ -85,11 +85,14 @@
 						q : {
 							start : (query.page - 1) * num, 
 							num : num,
-							orders : [ {
-								direction : 'ASC',
-								property : this._getAttrs()[0]
-							} ],
-							q: query.term.length > 0 ? this._createQuery(query.term) : undefined
+							sort : {
+								orders : [ {
+									direction : 'ASC',
+									property : this._getAttrs()[0]
+								} ]
+							},
+							q: query.term.length > 0 ? this._createQuery(query.term) : undefined,
+							expand: this._getAttrsWithRefEntity()
 						}
 					};
 			    	
@@ -132,6 +135,22 @@
 			} else {
 				return [entity.labelAttribute];
 			}
+		},
+		_getAttrsWithRefEntity: function() {
+			var attrsWithRefEntity = _.filter(this.state.entity.attributes, function(attr) {
+				switch(attr.fieldType) {
+					case 'CATEGORICAL':
+					case 'CATEGORICAL_MREF':
+					case 'MREF':
+					case 'XREF':
+						return true;
+					default:
+						return false;
+				}
+			});
+			return _.map(attrsWithRefEntity, function(attr) {
+				return attr.name;
+			});
 		}
 	});
 	

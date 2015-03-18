@@ -29,12 +29,18 @@
 				value: this.props.value
 			};
 		},
-		_handleChange: function(event) {			
+		componentWillReceiveProps : function(nextProps) {
+			if(this.state.value !== nextProps.value) {
+				this.setState({value: nextProps.value});
+			}
+		},
+		_handleChange: function(event) {
 			this.setState({value: event.value});
 			this.props.onValueChange({value: event.value});
 		},
-		_isChecked: function(value) {
-			return this.state.value === this._inputToValue(value.value);
+		_isChecked: function(option) {
+			var value = this.state.value === undefined && !this.props.required ? null : this.state.value;
+			return value === this._inputToValue(option.value);
 		}
 	});
 	

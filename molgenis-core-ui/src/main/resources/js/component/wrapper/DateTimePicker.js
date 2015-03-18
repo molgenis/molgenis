@@ -34,13 +34,13 @@
 			});
 
 			$container.on('dp.change', function(event) {
-				this._handleChange(event.date.format(format));
+				this._handleValueChange(event.date.format(format));
 			}.bind(this));
 
 			if(!this.props.required) {
 				var $clearBtn = $(this.refs.clearbtn.getDOMNode());
 				$clearBtn.on('click', function() {
-					this._handleChange(undefined);
+					this._handleValueChange(undefined);
 				}.bind(this));
 			}
 		},
@@ -87,7 +87,10 @@
 		},
 		_handleChange: function(event) {
 			this.setState({value: event.target.value});
-			this.props.onChange(event.target.value);
+		},
+		_handleValueChange: function(value) {
+			this.setState({value: value});
+			this.props.onChange(value);
 		}
 	});
 	

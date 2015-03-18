@@ -3,8 +3,6 @@
 	"use strict";
 	
 	/**
-	 * layout: stacked or inline
-	 * 
 	 * @memberOf component
 	 */
 	var CheckboxGroup = React.createClass({
@@ -50,8 +48,8 @@
 			this.setState({value: values});
 			this.props.onValueChange({value: values});
 		},
-		_isChecked: function(value) {
-			return this.state.value && this.state.value.indexOf(this._inputToValue(value)) > -1;
+		_isChecked: function(option) {
+			return this.state.value && this.state.value.indexOf(this._inputToValue(option.value)) > -1;
 		}
 	});
 	

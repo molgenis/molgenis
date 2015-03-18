@@ -23,11 +23,6 @@
 				attr: null
 			};
 		},
-		getDefaultProps: function() {
-			return {
-				onAttrInit: this._onAttrInit
-			};
-		},
 		render: function() {	
 			if(this.state.attr === null) {
 				// attribute not available yet
@@ -47,7 +42,7 @@
 							required : !attr.nillable,
 							disabled : props.disabled,
 							readOnly : attr.readOnly,
-							layout : props.layout || 'checkbox',
+							layout : props.layout || 'horizontal',
 							value : props.value,
 							onValueChange : this._handleValueChange
 						});
@@ -56,17 +51,6 @@
 							// options not yet available
 							return div();
 						}
-						
-//						xcategoricalreadonly_value: {
-//							href: "/api/v1/org_molgenis_test_TypeTestRef/ref1" // FIXME cleanup
-//							value: "ref1"
-//							label: "label1"
-//						}
-						
-						var value = props.value !== undefined ? {
-							value: props.value.value, // FIXME get idAttr
-							label: props.value.label // FIXME get labelAttr
-						} : undefined;
 						
 						var CategoricalControl = props.multiple === true ? molgenis.ui.CheckboxGroup : molgenis.ui.RadioGroup;
 						return CategoricalControl({
@@ -77,7 +61,7 @@
 							disabled : props.disabled,
 							readOnly : attr.readOnly,
 							layout : props.layout || 'vertical',
-							value : value !== undefined ? value.value : undefined, // FIXME get idAttr
+							value : props.value !== undefined ? props.value[attr.refEntity.idAttribute] : undefined,
 							onValueChange : this._handleValueChange // FIXME go from id to entity
 						});
 					case 'CATEGORICAL_MREF':
@@ -86,6 +70,9 @@
 							return div();
 						}
 	
+						var values = props.value ? _.map(props.value.items, function(item) {
+							return item[attr.refEntity.idAttribute];
+						}) : [];
 						return molgenis.ui.CheckboxGroup({
 							id: props.id,
 							name: attr.name,
@@ -94,7 +81,7 @@
 							disabled : props.disabled,
 							readOnly : attr.readOnly,
 							layout : 'vertical', // FIXME make configurable
-							value : props.value,
+							value : values,
 							onValueChange : this._handleValueChange
 						});
 					case 'DATE':
@@ -141,9 +128,9 @@
 					case 'LONG':
 						return this._createNumberControl('1');
 					case 'XREF':
-						return this._createEntitySelectBox(props.multiple || false, props.placeholder || 'Search for a Value');
+						return this._createEntitySelectBox(props.multiple || false, props.placeholder || 'Search for a Value', props.value);
 					case 'MREF':
-						return this._createEntitySelectBox(props.multiple || true, props.placeholder || 'Search for Values');
+						return this._createEntitySelectBox(props.multiple || true, props.placeholder || 'Search for Values', props.value ? props.value.items : undefined);
 					case 'SCRIPT':
 						return molgenis.ui.CodeEditor({
 							id : this.props.id,
@@ -238,7 +225,7 @@
 				onValueChange : this._handleValueChange
 			});
 		},
-		_createEntitySelectBox: function(multiple, placeholder) {
+		_createEntitySelectBox: function(multiple, placeholder, value) {
 			var props = this.props;
 			return molgenis.ui.EntitySelectBox({
 				id : props.id,
@@ -249,11 +236,12 @@
 				disabled : props.disabled,
 				readOnly : this.state.attr.readOnly,
 				entity : this.state.attr.refEntity,
-				value : props.value,
+				value : value,
 				onValueChange : this._handleValueChange
 			});
 		},
-		_onAttrInit: function(attr) {
+		_onAttrInit: function() {
+			var attr = this.state.attr;
 			if(attr.fieldType === 'CATEGORICAL' || attr.fieldType === 'CATEGORICAL_MREF') {
 				// retrieve all categories
 				api.getAsync(attr.refEntity.href).done(function(meta) {

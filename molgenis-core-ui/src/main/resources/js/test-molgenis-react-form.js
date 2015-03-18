@@ -20,7 +20,7 @@ $(function($, molgenis) {
 									entity : this.props.entity,
 									value: this.state.selectedEntityType,
 									onValueChange : function(e) {
-										this.setState({selectedEntityType: e.value, selectedEntityTypeHref: '/api/v1/' + e.value.fullName + '/meta?expand=attributes'});
+										this.setState({selectedEntityType: e.value, selectedEntityTypeHref: '/api/v1/' + e.value.fullName + '/meta', selectedEntity: undefined});
 									}.bind(this)
 								})
 							),

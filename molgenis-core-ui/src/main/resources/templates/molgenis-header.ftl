@@ -32,7 +32,10 @@
         <script src="<@resource_href "/js/molgenis-ie8.js"/>"></script>
     <![endif]-->
         <#-- Bundle of third party JavaScript resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
-        <script src="<@resource_href "/js/molgenis-bundle.min.js"/>"></script>
+        <script src="<@resource_href "/js/molgenis-bundle.min.js"/>"></script>></script>
+        <script src="<@resource_href "/js/jquery.validate.min.js"/>"></script>
+        <script src="<@resource_href "/js/handlebars.min.js"/>"></script>
+        <script src="<@resource_href "/js/molgenis.js"/>"></script>
     <#if environment == "dev">
         <#-- Important: Update minify-maven-plugin configuration in molgenis-core-ui/pom.xml when modifying the list below -->    
         <script src="<@resource_href "/js/component/mixin/DeepPureRenderMixin.js"/>"></script>
@@ -57,9 +60,7 @@
     <#else>
         <script src="<@resource_href "/js/molgenis-component.min.js"/>"></script>
     </#if>
-        <script src="<@resource_href "/js/jquery.validate.min.js"/>"></script>
-        <script src="<@resource_href "/js/handlebars.min.js"/>"></script>
-        <script src="<@resource_href "/js/molgenis.js"/>"></script>
+        
     <!--[if IE 9]>
         <#-- used to disable the genomebrowser in IE9 -->
         <script>top.molgenis.ie9 = true;</script>

@@ -17,7 +17,7 @@
 			}
 		},
 		_isLoaded: function(attr) {
-			return attr.name !== undefined;
+			return attr.name !== undefined && (attr.refEntity === undefined || attr.refEntity.name !== undefined);
 		},
 		_initAttr: function(attr) {
 			// fetch attribute if not exists
@@ -32,16 +32,17 @@
 			}
 		},
 		_loadAttr: function(href) {
-			api.getAsync(href).done(function(attr) {
+			api.getAsync(href, {'expand': ['refEntity']}).done(function(attr) {
 				if (this.isMounted()) {
 					this._setAttr(attr);
 				}
 			}.bind(this));
 		},
 		_setAttr: function(attr) {
-			this.setState({attr: attr});
-			if(this.props.onAttrInit) {
-				this.props.onAttrInit(attr);
+			if(this._onAttrInit) {
+				this.setState({attr: attr}, this._onAttrInit);
+			} else {
+				this.setState({attr: attr});
 			}
 		}
 	};

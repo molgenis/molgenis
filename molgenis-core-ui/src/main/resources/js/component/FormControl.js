@@ -169,10 +169,13 @@
             else if(type === 'HYPERLINK' && !nullOrUndefinedValue && !this._statics.REGEX_URL.test(value)) {
                 errorMessage = 'Please enter a valid URL.';
             }
-            else if(type === 'INT' && !nullOrUndefinedValue && !this._isInt(value)) {
+            else if((type === 'INT' || type === 'LONG') && !nullOrUndefinedValue && !this._isInteger(value)) {
+                errorMessage = 'Please enter an integer value.';
+            }
+            else if(type === 'INT' && !nullOrUndefinedValue && !this._inRange(value, {min: this._statics.INT_MIN, max: this._statics.INT_MAX})) {
                 errorMessage = 'Please enter a value between ' + this._statics.INT_MIN + ' and ' + this._statics.INT_MAX + '.';
             }
-            else if(type === 'LONG' && !nullOrUndefinedValue && !this._isLong(value)) {
+            else if(type === 'LONG' && !nullOrUndefinedValue && !this._inRange(value, {min: this._statics.LONG_MIN, max: this._statics.LONG_MAX})) {
                 errorMessage = 'Please enter a value between ' + this._statics.LONG_MIN + ' and ' + this._statics.LONG_MAX + '.';
             }
             else if((type === 'INT' || type === 'LONG') && attr.range && !nullOrUndefinedValue && !this._inRange(value, attr.range)) {
@@ -186,7 +189,7 @@
                     errorMessage = 'Please enter a value lower than or equal to ' + attr.range.max + '.';
                 }
             }
-            else if(attr.unique === true && (this.props.mode !== 'edit' || value !== this.props.value)) { // value uniqueness constraint
+            else if(attr.unique === true && (this.props.mode === 'create' || value !== this.props.value)) { // value uniqueness constraint
                 // FIXME temp hack because validation of ref types does not work yet
                 if(type !== 'XREF' && type !== 'CATEGORICAL' && type !== 'MREF' && type !== 'CATEGORICAL_MREF')
                 {
@@ -215,11 +218,8 @@
             LONG_MIN: Number.MIN_SAFE_INTEGER,
             LONG_MAX: Number.MAX_SAFE_INTEGER
         },
-        _isInt: function(value) {
-            return Number.isInteger(value) && value >= this._statics.INT_MIN && value <= this._statics.INT_MAX;
-        },
-        _isLong: function(value) {
-            return Number.isInteger(value) && value >= this._statics.LONG_MIN && value <= this._statics.LONG_MAX; 
+        _isInteger: function(value) {
+            return Number.isInteger(value);
         },
         _inRange: function(value, range) {
             var inRange = true;
