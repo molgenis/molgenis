@@ -3,6 +3,7 @@ package org.molgenis.data.vcf.importer;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -163,6 +164,7 @@ public class VcfImporterService implements ImportService
 		return false;
 	}
 
+
 	public void importVcf(File vcfFile) throws IOException
 	{
 		RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory
@@ -183,7 +185,7 @@ public class VcfImporterService implements ImportService
 		}
 	}
 
-	public EntityImportReport importVcf(Repository inRepository, List<EntityMetaData> addedEntities) throws IOException
+    private EntityImportReport importVcf(Repository inRepository, List<EntityMetaData> addedEntities) throws IOException
 	{
 		EntityImportReport report = new EntityImportReport();
 		Repository sampleRepository = null;
@@ -203,6 +205,8 @@ public class VcfImporterService implements ImportService
 			DefaultEntityMetaData samplesEntityMetaData = new DefaultEntityMetaData(sampleAttribute.getRefEntity());
 			samplesEntityMetaData.setBackend(BACKEND);
 			sampleRepository = dataService.getMeta().addEntityMeta(samplesEntityMetaData);
+            permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
+                    Collections.singletonList(samplesEntityMetaData.getName()));
 			addedEntities.add(sampleAttribute.getRefEntity());
 		}
 
@@ -212,7 +216,10 @@ public class VcfImporterService implements ImportService
 		List<Entity> sampleEntities = new ArrayList<>();
 		try (Repository outRepository = dataService.getMeta().addEntityMeta(entityMetaData))
 		{
-			addedEntities.add(entityMetaData);
+            permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
+                    Collections.singletonList(entityMetaData.getName()));
+
+            addedEntities.add(entityMetaData);
 
 			if (sampleRepository != null)
 			{
