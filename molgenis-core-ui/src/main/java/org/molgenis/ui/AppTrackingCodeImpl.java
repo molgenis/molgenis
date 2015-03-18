@@ -15,12 +15,16 @@ public class AppTrackingCodeImpl implements AppTrackingCode
 
 	public AppTrackingCodeImpl(MolgenisSettings molgenisSettings)
 	{
-		String piwik = molgenisSettings.getProperty(AppTrackingCode.KEY_APP_TRACKING_CODE_PIWIK);
+		this(molgenisSettings.getProperty(AppTrackingCode.KEY_APP_TRACKING_CODE_PIWIK), molgenisSettings
+				.getProperty(AppTrackingCode.KEY_APP_TRACKING_CODE_GOOGLEANALYTICS));
+	}
+
+	public AppTrackingCodeImpl(String piwik, String googleAnalytics)
+	{
 		if (piwik != null)
 		{
 			this.setPiwik(START_TRACKINGCODE + piwik + END_TRACKINGCODE);
 		}
-		String googleAnalytics = molgenisSettings.getProperty(AppTrackingCode.KEY_APP_TRACKING_CODE_GOOGLEANALYTICS);
 		if (googleAnalytics != null)
 		{
 			this.setGoogleAnalytics(START_TRACKINGCODE + googleAnalytics + END_TRACKINGCODE);
@@ -44,12 +48,12 @@ public class AppTrackingCodeImpl implements AppTrackingCode
 		return this.piwik;
 	}
 	
-	public void setGoogleAnalytics(String googleAnalytics)
+	private void setGoogleAnalytics(String googleAnalytics)
 	{
 		this.googleAnalytics = googleAnalytics;
 	}
 
-	public void setPiwik(String piwik)
+	private void setPiwik(String piwik)
 	{
 		this.piwik = piwik;
 	}
