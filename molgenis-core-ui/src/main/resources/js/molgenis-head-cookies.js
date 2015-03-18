@@ -2,7 +2,7 @@
 	"use strict";
 	
 	$(function() {
-		var cookieValue = $.cookie("toestemmingvoorcookies");
+		var cookieValue = $.cookie("permissionforcookies");
 		
 		if(undefined === cookieValue){
 			$('.navbar.navbar-default.navbar-fixed-top').prepend(
@@ -17,7 +17,7 @@
 			$('body').css({'margin-top': $('#accept-cookies-container').height()});
 			
 			$('#accept-cookies').on('click', function(){
-				$.cookie("toestemmingvoorcookies", "true", {expires:365, path:'/', secure:false});
+				$.cookie("permissionforcookies", "true", {expires:365, path:'/', secure:false});
 				$('#accept-cookies-container').fadeOut(1000);
 				
 				// Reset body margin-top default value

@@ -6,7 +6,7 @@ public class AppTrackingCodeImpl implements AppTrackingCode
 {
 	private String googleAnalytics = null;
 	private String piwik = null;
-	private final static String START_TRACKINGCODE = "(function(){if('true' === $.cookie('toestemmingvoorcookies')){";
+	private final static String START_TRACKINGCODE = "(function(){if('true' === $.cookie('permissionforcookies')){";
 	private final static String END_TRACKINGCODE = "}})();";
 
 	public AppTrackingCodeImpl()
