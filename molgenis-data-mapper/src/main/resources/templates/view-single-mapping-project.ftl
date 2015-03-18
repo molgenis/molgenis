@@ -19,7 +19,6 @@
 	<div class="col-md-6">
 		<h3>Mappings for the ${mappingProject.name?html} project</h3>
 		<p>Create and view mappings.</p>
-		
 	</div>
 </div>
 
@@ -107,13 +106,14 @@
 
 <div class="row">
 	<div class="col-md-1">
-		<form method="get" action="${context_url}/tagWizard" class="pull-right">
+		<form method="get" action="${context_url}/tagWizard">
 			<input type="hidden" name="target" value="${selectedTarget}"/>
 			<div class="btn-group" role="group">
 				<button type="submit" class="btn btn-primary">
 					<span class="glyphicon glyphicon-tag"></span> Run tag wizard
 				</button>
 			</div>
+			
 		</form>
 	</div>
 	<#if mappingProject.getMappingTarget(selectedTarget).entityMappings?has_content>		
