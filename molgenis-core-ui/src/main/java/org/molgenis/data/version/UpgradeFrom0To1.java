@@ -5,8 +5,10 @@ import static org.molgenis.data.elasticsearch.util.MapperTypeSanitizer.sanitizeM
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -24,14 +26,14 @@ import org.molgenis.data.Range;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.elasticsearch.ElasticSearchService;
+import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.meta.AttributeMetaDataMetaData;
-import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
+import org.molgenis.util.DependencyResolver;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class UpgradeFrom0To1 extends MetaDataUpgrade
@@ -42,7 +44,6 @@ public class UpgradeFrom0To1 extends MetaDataUpgrade
 	private static final String ENTITY_EXTENDS = "extends";
 	private static final String ENTITY_ATTRIBUTES = "attributes";
 	private static final String ENTITY_ABSTRACT = "abstract";
-	private static final String ENTITY_ENTITY_CLASS = "entityClass";
 
 	private static final String ATTRIBUTE_NAME = "name";
 	private static final String ATTRIBUTE_LABEL = "label";
@@ -86,12 +87,12 @@ public class UpgradeFrom0To1 extends MetaDataUpgrade
 		MetaDataServiceImpl metaDataService = (MetaDataServiceImpl) dataService.getMeta();
 
 		// Add expression attribute to AttributeMetaData
-		defaultBackend.addAttribute(AttributeMetaDataMetaData.ENTITY_NAME,
-				new AttributeMetaDataMetaData().getAttribute(AttributeMetaDataMetaData.EXPRESSION));
+		// defaultBackend.addAttribute(AttributeMetaDataMetaData.ENTITY_NAME,
+		// new AttributeMetaDataMetaData().getAttribute(AttributeMetaDataMetaData.EXPRESSION));
 
 		// Add backend attribute to EntityMetaData
-		defaultBackend.addAttribute(EntityMetaDataMetaData.ENTITY_NAME,
-				new EntityMetaDataMetaData().getAttribute(EntityMetaDataMetaData.BACKEND));
+		// defaultBackend.addAttribute(EntityMetaDataMetaData.ENTITY_NAME,
+		// new EntityMetaDataMetaData().getAttribute(EntityMetaDataMetaData.BACKEND));
 
 		// All entities in the entities repo are MySQL backend
 		for (EntityMetaData emd : dataService.getMeta().getEntityMetaDatas())
@@ -100,22 +101,26 @@ public class UpgradeFrom0To1 extends MetaDataUpgrade
 		}
 
 		// Register ES repos
+		Set<EntityMetaData> esRepos = new HashSet<>();
 		for (String entityName : searchService.getTypes())
 		{
-			if (isElasticSearchRepo(entityName))
+			try
 			{
-				try
-				{
-					metaDataService.addEntityMeta(deserializeEntityMeta(entityName));
-				}
-				catch (IOException e)
-				{
-					throw new UncheckedIOException(e);
-				}
+				EntityMetaData emd = deserializeEntityMeta(entityName);
+				if (emd != null) esRepos.add(emd);
+			}
+			catch (IOException e)
+			{
+				throw new UncheckedIOException(e);
 			}
 		}
 
-		// We got no mrefs in JPA in the standard molgenis -> not supported in upgrate
+		for (EntityMetaData emd : DependencyResolver.resolve(esRepos))
+		{
+			metaDataService.addToEntityMetaDataRepository(emd);
+		}
+
+		// We got no mrefs in JPA in the standard molgenis -> not supported in upgrade
 		// JPA ids from int to string
 		List<String> statements = new ArrayList<>();
 
@@ -174,21 +179,6 @@ public class UpgradeFrom0To1 extends MetaDataUpgrade
 		}
 	}
 
-	// If it is not a MySQL and not a JPA repo it must be a ES repo
-	private boolean isElasticSearchRepo(String name)
-	{
-		// Check if MySQL, at this moment only the MySQL metadatas are in the entities repo
-		if (dataService.getMeta().getEntityMetaData(name) != null) return false;
-
-		// Check if JPA
-		for (Repository repo : jpaBackend)
-		{
-			if (repo.getName().equalsIgnoreCase(name)) return false;
-		}
-
-		return true;
-	}
-
 	@SuppressWarnings("unchecked")
 	public EntityMetaData deserializeEntityMeta(String entityName) throws IOException
 	{
@@ -198,16 +188,14 @@ public class UpgradeFrom0To1 extends MetaDataUpgrade
 
 		ImmutableOpenMap<String, MappingMetaData> indexMappings = getMappingsResponse.getMappings().get("molgenis");
 		MappingMetaData mappingMetaData = indexMappings.get(docType);
-		Map<String, Object> metaMap = null;
-		// get full entitymetadata stored in elastic search
-		metaMap = (Map<String, Object>) mappingMetaData.sourceAsMap().get("_meta");
-		// get properties if full entitymetadata is not stored in elastic search
-		if (metaMap == null || metaMap.isEmpty()) metaMap = (Map<String, Object>) mappingMetaData.sourceAsMap().get(
-				"properties");
+		Map<String, Object> metaMap = (Map<String, Object>) mappingMetaData.sourceAsMap().get("_meta");
+		if (metaMap == null) return null;
+
 		// create entity meta
 		String name = (String) metaMap.get(ENTITY_NAME);
 
 		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData(name);
+		entityMetaData.setBackend(ElasticsearchRepositoryCollection.NAME);
 
 		// deserialize entity meta
 		deserializeEntityMeta(metaMap, entityMetaData);

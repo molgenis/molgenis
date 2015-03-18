@@ -350,12 +350,16 @@ public class MetaDataServiceImpl implements MetaDataService
 		return backends.values().iterator();
 	}
 
-	// Only for the metadata upgrade !!
 	public void updateEntityMetaBackend(String entityName, String backend)
 	{
 		DefaultEntityMetaData entityMeta = entityMetaDataRepository.get(entityName);
 		if (entityMeta == null) throw new UnknownEntityException("Unknown entity '" + entityName + "'");
 		entityMeta.setBackend(backend);
 		entityMetaDataRepository.update(entityMeta);
+	}
+
+	public void addToEntityMetaDataRepository(EntityMetaData entityMetaData)
+	{
+		entityMetaDataRepository.add(entityMetaData);
 	}
 }
