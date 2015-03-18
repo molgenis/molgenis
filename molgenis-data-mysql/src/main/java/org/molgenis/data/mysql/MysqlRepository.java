@@ -247,7 +247,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 			{
 				execute(getMrefCreateSql(attributeMetaData), async);
 			}
-			else
+			else if (!attributeMetaData.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
 			{
 				execute(getAlterSql(attributeMetaData), async);
 			}
