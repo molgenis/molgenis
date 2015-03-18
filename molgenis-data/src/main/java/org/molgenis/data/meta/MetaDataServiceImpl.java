@@ -182,22 +182,7 @@ public class MetaDataServiceImpl implements MetaDataService
 			packageRepository.add(emd.getPackage());
 		}
 
-		Entity mdEntity = entityMetaDataRepository.add(emd);
-
-		// add attribute metadata
-		for (AttributeMetaData att : emd.getAttributes())
-		{
-			if (LOG.isTraceEnabled())
-			{
-				LOG.trace("Adding attribute metadata for entity " + emd.getName() + ", attribute " + att.getName());
-			}
-
-			if ((emd.getExtends() == null) || !Iterables.contains(emd.getExtends().getAtomicAttributes(), att))
-			{
-				attributeMetaDataRepository.add(mdEntity, att);
-			}
-		}
-
+		addToEntityMetaDataRepository(emd);
 		if (emd.isAbstract()) return null;
 
 		Repository repo = backend.addEntityMeta(getEntityMetaData(emd.getName()));
@@ -360,6 +345,22 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	public void addToEntityMetaDataRepository(EntityMetaData entityMetaData)
 	{
-		entityMetaDataRepository.add(entityMetaData);
+		Entity mdEntity = entityMetaDataRepository.add(entityMetaData);
+
+		// add attribute metadata
+		for (AttributeMetaData att : entityMetaData.getAttributes())
+		{
+			if (LOG.isTraceEnabled())
+			{
+				LOG.trace("Adding attribute metadata for entity " + entityMetaData.getName() + ", attribute "
+						+ att.getName());
+			}
+
+			if ((entityMetaData.getExtends() == null)
+					|| !Iterables.contains(entityMetaData.getExtends().getAtomicAttributes(), att))
+			{
+				attributeMetaDataRepository.add(mdEntity, att);
+			}
+		}
 	}
 }
