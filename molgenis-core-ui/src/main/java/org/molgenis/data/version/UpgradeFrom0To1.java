@@ -38,6 +38,9 @@ import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.util.DependencyResolver;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+/**
+ * Upgrade class for upgrading from metadata version 0 (molgenis 1.4.4) to 1 (molgenis 1.5.0)
+ */
 public class UpgradeFrom0To1 extends MetaDataUpgrade
 {
 	private static final String ENTITY_NAME = "name";

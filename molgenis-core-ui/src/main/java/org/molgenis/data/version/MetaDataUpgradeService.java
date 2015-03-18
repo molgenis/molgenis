@@ -15,6 +15,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+/**
+ * Upgrades the data backends to the current meta data version.
+ * 
+ * The version the database is generated with should be defined in the molgenis-server.properties with the key
+ * 'meta.data.version'
+ */
 @Component
 public class MetaDataUpgradeService
 {
@@ -42,7 +48,12 @@ public class MetaDataUpgradeService
 	@PostConstruct
 	public void addUpgrades()
 	{
-		upgrades.add(new UpgradeFrom0To1(dataService, jpaRepositoryCollection, dataSource, searchService));
+		addUpgrade(new UpgradeFrom0To1(dataService, jpaRepositoryCollection, dataSource, searchService));
+	}
+
+	protected void addUpgrade(MetaDataUpgrade upgrade)
+	{
+		upgrades.add(upgrade);
 	}
 
 	public void upgrade()

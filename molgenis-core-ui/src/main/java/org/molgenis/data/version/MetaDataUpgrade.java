@@ -1,6 +1,8 @@
 package org.molgenis.data.version;
 
-
+/**
+ * Base class for meta data upgrade classes
+ */
 public abstract class MetaDataUpgrade
 {
 	private final int fromVersion;
