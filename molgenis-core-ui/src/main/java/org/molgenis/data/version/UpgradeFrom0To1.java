@@ -28,6 +28,8 @@ import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.elasticsearch.ElasticSearchService;
 import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
 import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.meta.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -87,12 +89,12 @@ public class UpgradeFrom0To1 extends MetaDataUpgrade
 		MetaDataServiceImpl metaDataService = (MetaDataServiceImpl) dataService.getMeta();
 
 		// Add expression attribute to AttributeMetaData
-		// defaultBackend.addAttribute(AttributeMetaDataMetaData.ENTITY_NAME,
-		// new AttributeMetaDataMetaData().getAttribute(AttributeMetaDataMetaData.EXPRESSION));
+		defaultBackend.addAttribute(AttributeMetaDataMetaData.ENTITY_NAME,
+				new AttributeMetaDataMetaData().getAttribute(AttributeMetaDataMetaData.EXPRESSION));
 
 		// Add backend attribute to EntityMetaData
-		// defaultBackend.addAttribute(EntityMetaDataMetaData.ENTITY_NAME,
-		// new EntityMetaDataMetaData().getAttribute(EntityMetaDataMetaData.BACKEND));
+		defaultBackend.addAttribute(EntityMetaDataMetaData.ENTITY_NAME,
+				new EntityMetaDataMetaData().getAttribute(EntityMetaDataMetaData.BACKEND));
 
 		// All entities in the entities repo are MySQL backend
 		for (EntityMetaData emd : dataService.getMeta().getEntityMetaDatas())
