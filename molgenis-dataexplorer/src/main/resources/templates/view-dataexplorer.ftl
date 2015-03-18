@@ -22,7 +22,7 @@
 	"dataexplorer-filter-dialog.js",
 	"dataexplorer-filter-wizard.js",
 	"jquery.fancytree.min.js",
-	"jquery.molgenis.tree.js",
+	"treetest.js",
 	"select2-patched.js",
 	"jQEditRangeSlider-min.js",
 	"bootstrap-switch.min.js",
