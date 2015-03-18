@@ -9,14 +9,14 @@ $(function($, molgenis) {
 		getInitialState: function() {
 			return {selectedEntityType: null, formLayout: 'vertical', mode: 'create'};
 		},
-		render: function() {console.log('render FormSelect', this.state, this.props);
+		render: function() {
 			var elements = [];
 			elements.push(
 				div({className: 'well', key: 'select'},
 					div({className: 'row'},
 						div({className: 'col-md-12'},
 							div({className: 'form-group'},
- 								molgenis.control.EntitySelectBox({
+ 								molgenis.ui.EntitySelectBox({
 									entity : this.props.entity,
 									value: this.state.selectedEntityType,
 									onValueChange : function(e) {
@@ -24,7 +24,7 @@ $(function($, molgenis) {
 									}.bind(this)
 								})
 							),
-							this.state.selectedEntityType ? molgenis.control.RadioGroupControl({
+							this.state.selectedEntityType ? molgenis.ui.RadioGroup({
 								options : [ {value : 'create', label : 'Create'}, {value : 'edit', label : 'Edit'}, {value : 'view', label : 'View'} ],
 								required: true,
 								layout: 'horizontal',
@@ -39,14 +39,14 @@ $(function($, molgenis) {
 									}
 								}.bind(this)
 							}) : null,
-							this.state.selectedEntityType && (this.state.mode === 'edit' || this.state.mode === 'view') ? molgenis.control.EntitySelectBox({
+							this.state.selectedEntityType && (this.state.mode === 'edit' || this.state.mode === 'view') ? molgenis.ui.EntitySelectBox({
 								entity : this.state.selectedEntityTypeHref,
 								value: this.state.selectedEntity,
 								onValueChange : function(e) {
 									this.setState({selectedEntity: e.value});
 								}.bind(this)
 							}) : null,
-							this.state.selectedEntityType ? molgenis.control.RadioGroupControl({
+							this.state.selectedEntityType ? molgenis.ui.RadioGroup({
 								options : [ {value : 'horizontal',label : 'Horizontal'}, {value : 'vertical', label : 'Vertical'} ],
 								required: true,
 								layout: 'horizontal',
@@ -67,7 +67,7 @@ $(function($, molgenis) {
 				elements.push(
 					div({className: 'row', key: 'form'},
 						div({className: 'col-md-12'},
-								molgenis.control.Form({entity: this.state.selectedEntityTypeHref, value: this.state.selectedEntity, formLayout: this.state.formLayout, mode: this.state.mode})
+								molgenis.ui.Form({entity: this.state.selectedEntityTypeHref, value: this.state.selectedEntity, formLayout: this.state.formLayout, mode: this.state.mode})
 						)
 					)	
 				);

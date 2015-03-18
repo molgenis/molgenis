@@ -1,109 +1,14 @@
-(function($, molgenis) {
-	"use strict";
+/* global _: false, React: false, molgenis: true */
+(function(_, React, molgenis) {
+    "use strict";
 
-	var form = React.DOM.form, div = React.DOM.div, label = React.DOM.label, button = React.DOM.button, span = React.DOM.span, h4 = React.DOM.h4, p = React.DOM.p;
-	var __spread = React.__spread;
-	
-	var api = new molgenis.RestClient();
-	
-	
-	
-	
-	/**
-	 * @memberOf control
-	 */
-	var FormControlGroup = React.createClass({
-		mixins: [molgenis.DeepPureRenderMixin],
-		displayName: 'FormControlGroup',
-		propTypes: {
-			entity: React.PropTypes.object,
-			attr: React.PropTypes.object.isRequired,
-			value: React.PropTypes.object,
-			mode: React.PropTypes.oneOf(['create', 'edit', 'view']),
-			formLayout: React.PropTypes.oneOf(['horizontal', 'vertical']),
-			validate: React.PropTypes.bool,
-			onValueChange: React.PropTypes.func.isRequired
-		},
-		render: function() {
-			var attributes = this.props.attr.attributes;
-			
-			// add control for each attribute
-			var controls = [];
-			for(var i = 0; i < attributes.length; ++i) {console.log('attribute', attributes[i]);
-				var Control = attributes[i].fieldType === 'COMPOUND' ? molgenis.control.FormControlGroup : molgenis.control.FormControl;
-				controls.push(Control({
-					entity : this.props.entity,
-					attr : attributes[i],
-					value: this.props.value ? this.props.value[attributes[i].name] : undefined,
-					mode : this.props.mode,
-					formLayout : this.props.formLayout,
-					validate: this.props.validate,
-					onValueChange : this.props.onValueChange,
-					key : '' + i
-				}));
-				controls.push(control);
-			}
-			
-			return (
-				div({},
-					h4({className: 'page-header'}, this.props.attr.label),
-					p({}, this.props.attr.description),
-					div({className: 'row'},
-						div({className: 'col-md-offset-1 col-md-11'},
-							controls
-						)
-					)
-				)
-			);
-		}
-	});
-	
-	/**
-	 * @memberOf control
-	 */
-	var FormControls = React.createClass({
-		mixins: [molgenis.DeepPureRenderMixin],
-		displayName: 'FormControls',
-		propTypes: {
-			entity: React.PropTypes.object.isRequired,
-			value: React.PropTypes.object,
-			mode: React.PropTypes.oneOf(['create', 'edit', 'view']),
-			formLayout: React.PropTypes.oneOf(['horizontal', 'vertical']),
-			colOffset: React.PropTypes.number,
-			validate: React.PropTypes.bool,
-			onValueChange: React.PropTypes.func.isRequired
-		},
-		render: function() {
-			// add control for each attribute
-			var attributes = this.props.entity.attributes;
-			var controls = [];
-			for(var key in attributes) {
-				if(attributes.hasOwnProperty(key)) {
-					var attr = attributes[key];
-					if(this.props.mode !== 'create' && attr.auto !== true) {
-						var Control = attr.fieldType === 'COMPOUND' ? molgenis.control.FormControlGroup : molgenis.control.FormControl;
-						controls.push(Control({
-							entity : this.props.entity,
-							attr : attr,
-							value: this.props.value ? this.props.value[key] : undefined,
-							mode : this.props.mode,
-							formLayout : this.props.formLayout,
-							validate: this.props.validate,
-							onValueChange : this.props.onValueChange,
-							key : key
-						}));
-					}
-				}
-			}
-			return div({}, controls);
-		}
-	});
-	
-	/**
-	 * @memberOf control
+    var div = React.DOM.div, button = React.DOM.button, form = React.DOM.form;
+    
+    /**
+	 * @memberOf component
 	 */
 	var FormSubmitButton = React.createClass({
-		mixins: [molgenis.DeepPureRenderMixin],
+		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
 		displayName: 'FormSubmitButton',
 		propTypes: {
 			formLayout: React.PropTypes.oneOf(['horizontal', 'vertical']),
@@ -124,12 +29,55 @@
 			return saveControl;
 		}
 	});
+	var FormSubmitButtonFactory = React.createFactory(FormSubmitButton);
 	
 	/**
-	 * @memberOf control
+	 * @memberOf component
+	 */
+	var FormControls = React.createClass({
+		mixins: [molgenis.DeepPureRenderMixin],
+		displayName: 'FormControls',
+		propTypes: {
+			entity: React.PropTypes.object.isRequired,
+			value: React.PropTypes.object,
+			mode: React.PropTypes.oneOf(['create', 'edit', 'view']),
+			formLayout: React.PropTypes.oneOf(['horizontal', 'vertical']),
+			colOffset: React.PropTypes.number,
+			validate: React.PropTypes.bool,
+			onValueChange: React.PropTypes.func.isRequired
+		},
+		render: function() {
+			// add control for each attribute
+			var attributes = this.props.entity.attributes;
+			var controls = [];
+			for(var key in attributes) {
+				if(attributes.hasOwnProperty(key)) {
+					var attr = attributes[key];
+					if(this.props.mode !== 'create' || (this.props.mode === 'create' && attr.auto !== true)) {
+						var Control = attr.fieldType === 'COMPOUND' ? molgenis.ui.FormControlGroup : molgenis.ui.FormControl;
+						controls.push(Control({
+							entity : this.props.entity,
+							attr : attr,
+							value: this.props.value ? this.props.value[key] : undefined,
+							mode : this.props.mode,
+							formLayout : this.props.formLayout,
+							validate: this.props.validate,
+							onValueChange : this.props.onValueChange,
+							key : key
+						}));
+					}
+				}
+			}
+			return div({}, controls);
+		}
+	});
+	var FormControlsFactory = React.createFactory(FormControls);
+	
+	/**
+	 * @memberOf component
 	 */
 	var Form = React.createClass({
-		mixins: [molgenis.DeepPureRenderMixin, EntityLoaderMixin],
+		mixins: [molgenis.ui.mixin.DeepPureRenderMixin, molgenis.ui.mixin.EntityLoaderMixin],
 		displayName: 'Form',
 		propTypes: {
 			entity: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]),
@@ -148,7 +96,7 @@
 		getInitialState: function() {
 			return {entity: null, values: {}, validate: false};
 		},
-		render: function() {console.log('render Form', this.state, this.props);
+		render: function() {
 			// return empty div if entity data is not yet available
 			if(this.state.entity === null) {
 				return div();
@@ -193,18 +141,18 @@
 			
 			return (
 				form(formProps,
-					molgenis.control.FormControls(formControlsProps),
-					this.props.mode !== 'view' ? molgenis.control.FormSubmitButton({layout: this.props.formLayout, colOffset: this.props.colOffset}) : null
+					FormControlsFactory(formControlsProps),
+					this.props.mode !== 'view' ? FormSubmitButtonFactory({layout: this.props.formLayout, colOffset: this.props.colOffset}) : null
 				)
 			);
 		},
-		_handleValueChange: function(e) {console.log('Form._handleValueChange', e);
+		_handleValueChange: function(e) {
 			this.state.values[e.attr] = {value: e.value, valid: e.valid};
-			this.setState({values: this.state.values, valid: this.state.valid & e.valid});
+			this.setState({values: this.state.values, valid: this.state.valid && e.valid});
 		},
 		_handleSubmit: function(e) {			
 			var values = this.state.values;
-			
+						
 			// determine if form is valid
 			var formValid = true;
 			for(var key in values) {
@@ -220,9 +168,9 @@
 			if(formValid) {
 				// create updated entity
 				var updatedEntity = {};
-				for(var key in values) {
-					if(values.hasOwnProperty(key)) {
-						updatedEntity[key] = values[key].value;
+				for(var valueKey in values) {
+					if(values.hasOwnProperty(valueKey)) {
+						updatedEntity[valueKey] = values[valueKey].value;
 					}
 				}
 				
@@ -233,15 +181,10 @@
 			}
 		}
 	});
-
-	// export module
-	molgenis.control = molgenis.control || {};
 	
-	$.extend(molgenis.control, {
-		Form: React.createFactory(Form),
-		FormControls: React.createFactory(FormControls),
-		FormControl: React.createFactory(FormControl),
-		FormControlGroup: React.createFactory(FormControlGroup),
-		FormSubmitButton: React.createFactory(FormSubmitButton),
-	});
-}($, window.top.molgenis = window.top.molgenis || {}));
+    // export component
+    molgenis.ui = molgenis.ui || {};
+    _.extend(molgenis.ui, {
+        Form: React.createFactory(Form)
+    });
+}(_, React, molgenis));	

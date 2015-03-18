@@ -3,7 +3,7 @@ $(function() {
 		$('#value').html(JSON.stringify(event));
 	}
 	
-	var AttributeControl = molgenis.control.AttributeControl;
+	var AttributeControl = molgenis.ui.AttributeControl;
 	
 	var baseHref = '/api/v1/org_molgenis_test_TypeTest/meta/';
 	React.render(AttributeControl({attr: baseHref + 'xbool', onValueChange: onValueChange}), $('#bool-container-required')[0]);

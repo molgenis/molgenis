@@ -9,7 +9,7 @@
     </parent>
     <groupId>org.molgenis</groupId>
     <artifactId>molgenis</artifactId>
-    <version>1.4.0</version>
+    <version>1.5.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <!-- More Project Information -->
@@ -38,6 +38,8 @@
                 <molgenis.build.profile>dev</molgenis.build.profile>
                 <logger.level.root>INFO</logger.level.root>
                 <logger.level.org.molgenis>DEBUG</logger.level.org.molgenis>
+                <js.postfix>js</js.postfix>
+                <css.postfix>css</css.postfix>
                 <minify.skipMinify>true</minify.skipMinify>
                 <skip.delivery>true</skip.delivery>
             </properties>
@@ -49,6 +51,8 @@
                 <molgenis.build.profile>release</molgenis.build.profile>
                 <logger.level.root>WARN</logger.level.root>
                 <logger.level.org.molgenis>INFO</logger.level.org.molgenis>
+                <js.postfix>min.js</js.postfix>
+                <css.postfix>min.css</css.postfix>
                 <minify.skipMinify>false</minify.skipMinify>
                 <skip.delivery>true</skip.delivery>
             </properties>
@@ -63,6 +67,8 @@
                 <molgenis.build.profile>dev</molgenis.build.profile>
                 <logger.level.root>INFO</logger.level.root>
                 <logger.level.org.molgenis>DEBUG</logger.level.org.molgenis>
+                <js.postfix>js</js.postfix>
+                <css.postfix>css</css.postfix>
                 <minify.skipMinify>true</minify.skipMinify>
                 <skip.delivery>false</skip.delivery>
             </properties>
@@ -481,7 +487,7 @@
                 <plugin>
                     <groupId>com.samaxes.maven</groupId>
                     <artifactId>minify-maven-plugin</artifactId>
-                    <version>1.7.2</version>
+                    <version>1.7.4</version>
                     <executions>
                         <execution>
                             <id>default-minify</id>
@@ -489,6 +495,7 @@
                                 <goal>minify</goal>
                             </goals>
                             <configuration>
+                                <charset>UTF-8</charset>
                                 <webappSourceDir>${project.basedir}/src/main/resources</webappSourceDir>
                                 <webappTargetDir>${project.build.outputDirectory}</webappTargetDir>
                                 <cssSourceIncludes>
@@ -682,7 +689,6 @@
         <module>molgenis-data-elasticsearch</module>
         <module>molgenis-data-semanticsearch</module>
         <module>molgenis-python</module>
-        <module>molgenis-questionnaire</module>
         <module>molgenis-r</module>
         <module>molgenis-charts</module>
         <module>molgenis-annotators</module>
