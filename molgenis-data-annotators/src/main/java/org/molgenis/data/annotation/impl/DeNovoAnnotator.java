@@ -10,7 +10,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Level;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -105,7 +104,7 @@ public class DeNovoAnnotator extends VariantAnnotator
 			System.out.println(key+ ", " + pedigree.get(key));
 		}
 		
-		System.out.println("Now starting to process the data.");
+		LOG.info("Now starting to process the data.");
 
 		while (vcfIter.hasNext())
 		{
@@ -164,6 +163,15 @@ public class DeNovoAnnotator extends VariantAnnotator
 	{
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		
+		// only look at variants that PASS the filter
+		String filter = entity.get("FILTER").toString();
+		if(!filter.equals("PASS"))
+		{
+			LOG.info("Skipping low quality variant: " + entity);
+			resultMap.put(DENOVO, 0);
+			return resultMap;
+		}
+		
 		Iterable<Entity> samples = entity.getEntities("Samples");
 		
 		HashMap<String, Trio> childToParentGenotypes = new HashMap<String, Trio>();
@@ -172,7 +180,7 @@ public class DeNovoAnnotator extends VariantAnnotator
 		for(Entity sample : samples)
 		{
 			String sampleID = sample.get("NAME").toString().substring(sample.get("NAME").toString().lastIndexOf("_")+1);
-			String gt = sample.get("GT") == null ? null : sample.get("GT").toString();
+	//		String gt = sample.get("GT") == null ? null : sample.get("GT").toString();
 			
 	//		System.out.println("SAMPLEID: " + sampleID);
 	//		System.out.println("GT: " + gt);
@@ -185,11 +193,11 @@ public class DeNovoAnnotator extends VariantAnnotator
 				{
 //					System.out.println("CHILD - NEW TRIO");
 						Trio t = new Trio();
-						t.setChild(new Sample(sampleID, gt));
+						t.setChild(new Sample(sampleID, sample));
 						childToParentGenotypes.put(sampleID, t);
 				}
 				//child may have been added because the parent was found first, in that case there is only a key, so make child object + genotype!
-				else if(childToParentGenotypes.containsKey(sampleID) && gt != null)
+				else if(childToParentGenotypes.containsKey(sampleID) && sample != null)
 				{
 //					System.out.println("CHILD - UPDATING GENOTYPE");
 					if(childToParentGenotypes.get(sampleID)
@@ -198,7 +206,7 @@ public class DeNovoAnnotator extends VariantAnnotator
 					{
 						throw new IOException("Child genotype for '"+sampleID+"' already known !");
 					}
-					Sample child = new Sample(sampleID, gt);
+					Sample child = new Sample(sampleID, sample);
 					childToParentGenotypes.get(sampleID).setChild(child);
 				}
 			}
@@ -211,7 +219,7 @@ public class DeNovoAnnotator extends VariantAnnotator
 				{
 //					System.out.println("MOTHER - NEW TRIO");
 					Trio t = new Trio();
-					t.setMother(new Sample(sampleID, gt));
+					t.setMother(new Sample(sampleID, sample));
 					childToParentGenotypes.put(motherToChild.get(sampleID).getId(), t);
 				}
 				//child seen, check if mother was already known, we do not expect/want this to happen
@@ -222,7 +230,7 @@ public class DeNovoAnnotator extends VariantAnnotator
 						throw new IOException("Mother '"+sampleID+"' already known for child '" + motherToChild.get(sampleID) + "' !");
 					}
 //					System.out.println("MOTHER - UPDATING GENOTYPE");
-					childToParentGenotypes.get(motherToChild.get(sampleID).getId()).setMother(new Sample(sampleID, gt));
+					childToParentGenotypes.get(motherToChild.get(sampleID).getId()).setMother(new Sample(sampleID, sample));
 				}
 			}
 			else if(fatherToChild.containsKey(sampleID))
@@ -232,7 +240,7 @@ public class DeNovoAnnotator extends VariantAnnotator
 				{
 //					System.out.println("FATHER - NEW TRIO");
 					Trio t = new Trio();
-					t.setFather(new Sample(sampleID, gt));
+					t.setFather(new Sample(sampleID, sample));
 					childToParentGenotypes.put(fatherToChild.get(sampleID).getId(), t);
 				}
 				//child seen, check if father was already known, we do not expect/want this to happen
@@ -243,7 +251,7 @@ public class DeNovoAnnotator extends VariantAnnotator
 						throw new IOException("Father '"+sampleID+"' already known for child '" + fatherToChild.get(sampleID) + "' !");
 					}	
 //					System.out.println("FATHER - UPDATING GENOTYPE");
-					childToParentGenotypes.get(fatherToChild.get(sampleID).getId()).setFather(new Sample(sampleID, gt));
+					childToParentGenotypes.get(fatherToChild.get(sampleID).getId()).setFather(new Sample(sampleID, sample));
 				}
 			}
 			else
@@ -315,49 +323,83 @@ public class DeNovoAnnotator extends VariantAnnotator
 	public int findDeNovoVariants(Trio t)
 	{
 		
-		if(t == null)
-		{
-			System.out.println("T NULL !!!!");
-		}
+		/**
+		 * Null checks
+		 */
 		
-		if(t.getMother().getGenotype() == null)
+		if(t.getMother().getGenotype().get("GT") == null)
 		{
 			LOG.warn("Maternal genotype null, skipping trio for child " + t.getChild().getId());
 			return 0;
 		}
-		if(t.getFather().getGenotype() == null)
+		if(t.getFather().getGenotype().get("GT") == null)
 		{
 			LOG.warn("Paternal genotype null, skipping trio for child " + t.getChild().getId());
 			return 0;
 		}
-		if(t.getChild().getGenotype() == null)
+		if(t.getChild().getGenotype().get("GT") == null)
 		{
 			LOG.warn("Child genotype null, skipping trio for child " + t.getChild().getId());
 			return 0;
 		}
+		
+		
+		/**
+		 * Quality checks: genotype completeness
+		 */
 
-		String[] mat_all = t.getMother().getGenotype().split("/", -1);
+		String[] mat_all = t.getMother().getGenotype().get("GT").toString().split("/", -1);
 		if(mat_all.length != 2)
 		{
 			LOG.warn("Maternal genotype split by '/' does not have 2 elements, skipping trio for child " + t.getChild().getId());
 			return 0;
 		}
 		
-		String[] pat_all = t.getFather().getGenotype().split("/", -1);
+		String[] pat_all = t.getFather().getGenotype().get("GT").toString().split("/", -1);
 		if(pat_all.length != 2)
 		{
 			LOG.warn("Paternal genotype split by '/' does not have 2 elements, skipping trio for child " + t.getChild().getId());
 			return 0;
 		}
 		
-		String[] chi_all = t.getChild().getGenotype().split("/", -1);
+		String[] chi_all = t.getChild().getGenotype().get("GT").toString().split("/", -1);
 		if(chi_all.length != 2)
 		{
 			LOG.warn("Child genotype split by '/' does not have 2 elements, skipping trio for child " + t.getChild().getId());
 			return 0;
 		}
 		
-		//test if any combination of parent alleles can form the child alleles
+		
+		/**
+		 * Quality checks: read depth
+		 */
+		
+		int mat_dp = Integer.parseInt(t.getMother().getGenotype().get("DP").toString());
+		if(mat_dp < 20)
+		{
+			LOG.warn("Maternal genotype has less than 20 reads ("+mat_dp+"), skipping trio for child " + t.getChild().getId());
+			return 0;
+		}
+		
+		int pat_dp = Integer.parseInt(t.getFather().getGenotype().get("DP").toString());
+		if(pat_dp < 20)
+		{
+			LOG.warn("Paternal genotype has less than 20 reads ("+pat_dp+"), skipping trio for child " + t.getChild().getId());
+			return 0;
+		}
+		
+		int child_dp = Integer.parseInt(t.getChild().getGenotype().get("DP").toString());
+		if(child_dp < 20)
+		{
+			LOG.warn("Child genotype has less than 20 reads ("+child_dp+"), skipping trio for child " + t.getChild().getId());
+			return 0;
+		}
+		
+		
+		/**
+		 * Test if any combination of parent alleles can form the child alleles and return if possible
+		 */
+		
 		for(String ma : mat_all)
 		{
 			for(String pa : pat_all)
@@ -370,7 +412,12 @@ public class DeNovoAnnotator extends VariantAnnotator
 			}
 		}
 		
-		LOG.info("DE NOVO FOUND!! " + t);
+		
+		/**
+		 * If none pass, we found a de novo variant
+		 */
+		
+		LOG.info("De novo variant found for trio " + t);
 		return 1;
 	}
 

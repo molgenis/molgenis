@@ -2,11 +2,12 @@ package org.molgenis.data.annotation.impl.datastructures;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.molgenis.data.Entity;
 
 public class Sample
 {
 	String id;
-	String genotype;
+	Entity genotype;
 	
 	public Sample()
 	{
@@ -19,7 +20,7 @@ public class Sample
 		this.id = id;
 	}
 	
-	public Sample(String id, String genotype)
+	public Sample(String id, Entity genotype)
 	{
 		super();
 		this.id = id;
@@ -36,12 +37,12 @@ public class Sample
 		this.id = id;
 	}
 
-	public String getGenotype()
+	public Entity getGenotype()
 	{
 		return genotype;
 	}
 
-	public void setGenotype(String genotype)
+	public void setGenotype(Entity genotype)
 	{
 		this.genotype = genotype;
 	}
