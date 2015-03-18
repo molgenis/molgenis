@@ -6,19 +6,21 @@
 	function createChildren(attributes, doSelect) {
 		var children = [];
 		$.each(attributes, function() {
-			var isFolder = this.fieldType === 'COMPOUND';
-			children.push({
-				'key' : this.href,
-				'title' : this.label,
-				'tooltip' : this.description,
-				'folder' : isFolder,
-				'lazy' : isFolder,
-				'expanded' : !isFolder,
-				'selected' : doSelect(this),
-				'data' : {
-					'attribute' : this
-				}
-			});
+			if(this.visible){
+				var isFolder = this.fieldType === 'COMPOUND';
+				children.push({
+					'key' : this.href,
+					'title' : this.label,
+					'tooltip' : this.description,
+					'folder' : isFolder,
+					'lazy' : isFolder,
+					'expanded' : !isFolder,
+					'selected' : doSelect(this),
+					'data' : {
+						'attribute' : this
+					}
+				});
+			}
 		});
 		return children;
 	}

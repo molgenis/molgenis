@@ -120,7 +120,7 @@
         $("#disabled-tooltip").tooltip();
 
         $('#annotate-dataset-form').click(function() {
-            if( $('#annotate-dataset-form input:checked').size() > 0) {
+            if( $('#annotate-dataset-form input:checkbox[name=annotatorNames]:checked').size() > 0) {
                 submitBtn.removeAttr("disabled", "disabled");
             }else{
                 submitBtn.attr("disabled", "disabled");
