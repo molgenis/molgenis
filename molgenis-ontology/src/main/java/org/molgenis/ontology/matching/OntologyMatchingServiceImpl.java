@@ -250,6 +250,10 @@ public class OntologyMatchingServiceImpl implements OntologyMatchingService
 	@Override
 	public OntologyServiceResult searchEntity(String ontologyIri, Entity inputEntity)
 	{
+		Entity ontologyEntity = getOntologyEntity(ontologyIri);
+		if (ontologyEntity == null) throw new IllegalArgumentException("Ontology IRI " + ontologyIri
+				+ " does not exist in the database!");
+
 		List<Entity> relevantEntities = new ArrayList<Entity>();
 
 		List<QueryRule> rulesForOntologyTermFields = new ArrayList<QueryRule>();
@@ -300,8 +304,11 @@ public class OntologyMatchingServiceImpl implements OntologyMatchingService
 			QueryRule queryRule = new QueryRule(combinedRules);
 			queryRule.setOperator(Operator.DIS_MAX);
 
+			List<QueryRule> finalQueryRules = Arrays.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY,
+					Operator.EQUALS, ontologyEntity), new QueryRule(Operator.AND), queryRule);
+
 			EntityMetaData entityMetaData = dataService.getEntityMetaData(OntologyTermMetaData.ENTITY_NAME);
-			for (Entity entity : searchService.search(new QueryImpl(queryRule).pageSize(MAX_NUMBER_MATCHES),
+			for (Entity entity : searchService.search(new QueryImpl(finalQueryRules).pageSize(MAX_NUMBER_MATCHES),
 					entityMetaData))
 			{
 				double maxNgramScore = 0;
