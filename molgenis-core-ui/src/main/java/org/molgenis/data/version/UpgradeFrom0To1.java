@@ -91,6 +91,8 @@ public class UpgradeFrom0To1 extends MetaDataUpgrade
 		ManageableRepositoryCollection defaultBackend = dataService.getMeta().getDefaultBackend();
 		MetaDataServiceImpl metaDataService = (MetaDataServiceImpl) dataService.getMeta();
 
+		new MysqlMigrate(jdbcTemplate, "MySQL").migrate(metaDataService);
+
 		// Add expression attribute to AttributeMetaData
 		defaultBackend.addAttribute(AttributeMetaDataMetaData.ENTITY_NAME,
 				new AttributeMetaDataMetaData().getAttribute(AttributeMetaDataMetaData.EXPRESSION));
