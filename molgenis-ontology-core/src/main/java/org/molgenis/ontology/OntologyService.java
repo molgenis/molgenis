@@ -11,7 +11,7 @@ public interface OntologyService
 
 	Ontology getOntology(String name);
 
-	OntologyTerm findOntologyTerm(List<Ontology> ontologies, String search);
+	List<OntologyTerm> findOntologyTerms(List<Ontology> ontologies, String search);
 
 	// voor de tag service
 	OntologyTerm getOntologyTerm(String ontology, String iri);

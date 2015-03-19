@@ -7,11 +7,14 @@ import org.molgenis.ontology.repository.OntologyRepository;
 import org.molgenis.ontology.repository.OntologyTermRepository;
 import org.molgenis.ontology.repository.model.Ontology;
 import org.molgenis.ontology.repository.model.OntologyTerm;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class OntologyServiceImpl implements OntologyService
 {
+	@Autowired
 	private OntologyRepository ontologyRepository;
 
+	@Autowired
 	private OntologyTermRepository ontologyTermRepository;
 
 	@Override
@@ -27,10 +30,9 @@ public class OntologyServiceImpl implements OntologyService
 	}
 
 	@Override
-	public OntologyTerm findOntologyTerm(List<Ontology> ontologies, String search)
+	public List<OntologyTerm> findOntologyTerms(List<Ontology> ontologies, String search)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return ontologyTermRepository.findOntologyTerm(ontologies, search);
 	}
 
 	@Override
