@@ -128,9 +128,13 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 
 		Assert.assertEquals(mrefRepo.count(), 2);
 
-		Assert.assertEquals(
-				mrefRepo.getSelectSql(new QueryImpl(), Lists.newArrayList()),
-				"SELECT this.`identifier`, GROUP_CONCAT(DISTINCT(`stringRef`.`stringRef`)) AS `stringRef`, GROUP_CONCAT(DISTINCT(`intRef`.`intRef`)) AS `intRef` FROM `MrefTest` AS this LEFT JOIN `MrefTest_stringRef` AS `stringRef` ON (this.`identifier` = `stringRef`.`identifier`) LEFT JOIN `MrefTest_intRef` AS `intRef` ON (this.`identifier` = `intRef`.`identifier`) GROUP BY this.`identifier`");
+		Assert.assertEquals(mrefRepo.getSelectSql(new QueryImpl(), Lists.newArrayList()), "SELECT this.`identifier`, "
+				+ "GROUP_CONCAT(DISTINCT(`stringRef`.`stringRef`) ORDER BY `stringRef`.`order`) AS `stringRef`, "
+				+ "GROUP_CONCAT(DISTINCT(`intRef`.`intRef`) ORDER BY `intRef`.`order`) AS `intRef` "
+				+ "FROM `MrefTest` AS this "
+				+ "LEFT JOIN `MrefTest_stringRef` AS `stringRef` ON (this.`identifier` = `stringRef`.`identifier`) "
+				+ "LEFT JOIN `MrefTest_intRef` AS `intRef` ON (this.`identifier` = `intRef`.`identifier`) "
+				+ "GROUP BY this.`identifier`");
 
 		assertEquals(mrefRepo.query().eq("identifier", "one").count(), Long.valueOf(1));
 		for (Entity e : mrefRepo.findAll(new QueryImpl().eq("identifier", "one")))

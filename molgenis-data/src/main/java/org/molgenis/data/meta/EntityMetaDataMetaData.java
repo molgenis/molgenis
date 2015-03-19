@@ -21,6 +21,7 @@ public class EntityMetaDataMetaData extends DefaultEntityMetaData
 	public static final String DESCRIPTION = "description";
 	public static final String PACKAGE = "package";
 	public static final String TAGS = "tags";
+	public static final String ATTRIBUTES = "attributes";
 
 	public EntityMetaDataMetaData()
 	{
@@ -36,6 +37,7 @@ public class EntityMetaDataMetaData extends DefaultEntityMetaData
 		addAttribute(EXTENDS).setDataType(XREF).setRefEntity(this);
 		addAttribute(DESCRIPTION).setDataType(TEXT);
 		addAttribute(TAGS).setDataType(MREF).setRefEntity(new TagMetaData());
+		addAttribute(ATTRIBUTES).setDataType(MREF).setRefEntity(new AttributeMetaDataMetaData());
 	}
 
 }

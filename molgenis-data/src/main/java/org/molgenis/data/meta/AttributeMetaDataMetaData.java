@@ -4,7 +4,6 @@ import static org.molgenis.MolgenisFieldTypes.BOOL;
 import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
-import static org.molgenis.MolgenisFieldTypes.XREF;
 
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.fieldtypes.LongField;
@@ -13,10 +12,8 @@ public class AttributeMetaDataMetaData extends DefaultEntityMetaData
 {
 	public static final String ENTITY_NAME = "attributes";
 	public static final String IDENTIFIER = "identifier";
-	public static final String ENTITY = "entity";
 	public static final String NAME = "name";
 	public static final String DATA_TYPE = "dataType";
-	public static final String PART_OF_ATTRIBUTE = "partOfAttribute";
 	public static final String REF_ENTITY = "refEntity";
 	public static final String EXPRESSION = "expression";
 	public static final String NILLABLE = "nillable";
@@ -33,6 +30,7 @@ public class AttributeMetaDataMetaData extends DefaultEntityMetaData
 	public static final String LABEL_ATTRIBUTE = "labelAttribute";
 	public static final String READ_ONLY = "readOnly";
 	public static final String UNIQUE = "unique";
+	public static final String PARTS = "parts";
 	public static final String TAGS = "tags";
 
 	public AttributeMetaDataMetaData()
@@ -40,18 +38,17 @@ public class AttributeMetaDataMetaData extends DefaultEntityMetaData
 		super(ENTITY_NAME);
 
 		addAttribute(IDENTIFIER).setIdAttribute(true).setNillable(false).setDataType(STRING).setVisible(false);
-		addAttribute(ENTITY).setNillable(false).setDataType(XREF).setRefEntity(EntityMetaDataRepository.META_DATA);
-		addAttribute(NAME).setNillable(false);
+		addAttribute(NAME).setNillable(false).setLabelAttribute(true).setLookupAttribute(true);
 		addAttribute(DATA_TYPE);
-		addAttribute(PART_OF_ATTRIBUTE).setDataType(STRING);
-		addAttribute(REF_ENTITY).setDataType(XREF).setRefEntity(EntityMetaDataRepository.META_DATA);
+		addAttribute(PARTS).setDataType(MREF).setRefEntity(this);
+		addAttribute(REF_ENTITY);
 		addAttribute(EXPRESSION).setNillable(true);
 		addAttribute(NILLABLE).setDataType(BOOL).setNillable(false);
 		addAttribute(AUTO).setDataType(BOOL).setNillable(false);
 		addAttribute(ID_ATTRIBUTE).setDataType(BOOL).setNillable(false);
 		addAttribute(LOOKUP_ATTRIBUTE).setDataType(BOOL).setNillable(false);
 		addAttribute(VISIBLE).setDataType(BOOL).setNillable(false);
-		addAttribute(LABEL);
+		addAttribute(LABEL).setLookupAttribute(true);
 		addAttribute(DESCRIPTION).setDataType(TEXT);
 		addAttribute(AGGREGATEABLE).setDataType(BOOL).setNillable(false);
 		addAttribute(ENUM_OPTIONS).setDataType(TEXT);

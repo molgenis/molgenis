@@ -1,6 +1,11 @@
 package org.molgenis.data.meta;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.NAME;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.ATTRIBUTES;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.BACKEND;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.EXTENDS;
@@ -26,6 +31,8 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.util.DependencyResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
@@ -41,10 +48,15 @@ class EntityMetaDataRepository
 	private final PackageRepository packageRepository;
 	private final ManageableRepositoryCollection collection;
 	private final Map<String, DefaultEntityMetaData> entityMetaDataCache = new HashMap<>();
+	private final AttributeMetaDataRepository attributeRepository;
 
-	public EntityMetaDataRepository(ManageableRepositoryCollection collection, PackageRepository packageRepository)
+	private static final Logger LOG = LoggerFactory.getLogger(EntityMetaDataRepository.class);
+
+	public EntityMetaDataRepository(ManageableRepositoryCollection collection, PackageRepository packageRepository,
+			AttributeMetaDataRepository attributeRepository)
 	{
 		this.packageRepository = packageRepository;
+		this.attributeRepository = attributeRepository;
 		this.repository = collection.addEntityMeta(META_DATA);
 		this.collection = collection;
 	}
@@ -62,6 +74,7 @@ class EntityMetaDataRepository
 	void fillEntityMetaDataCache()
 	{
 		List<Entity> entities = new ArrayList<>();
+		// Fill the cache with EntityMetaData objects
 		for (Entity entity : repository)
 		{
 			entities.add(entity);
@@ -74,6 +87,17 @@ class EntityMetaDataRepository
 			entityMetaData.setDescription(entity.getString(DESCRIPTION));
 			entityMetaData.setBackend(entity.getString(BACKEND));
 			entityMetaDataCache.put(entity.getString(FULL_NAME), entityMetaData);
+		}
+		// Only then create the AttributeMetaData objects, so that lookups of refEntity values work.
+		for (Entity entity : entities)
+		{
+			DefaultEntityMetaData entityMetaData = entityMetaDataCache.get(entity.getString(FULL_NAME));
+			Iterable<Entity> attributeEntities = entity.getEntities(EntityMetaDataMetaData.ATTRIBUTES);
+			if (attributeEntities != null)
+			{
+				stream(attributeEntities.spliterator(), false).map(attributeRepository::toAttributeMetaData).forEach(
+						entityMetaData::addAttributeMetaData);
+			}
 		}
 		for (Entity entity : entities)
 		{
@@ -110,16 +134,16 @@ class EntityMetaDataRepository
 	}
 
 	/**
-	 * Adds an {@link EntityMetaData} to the repository. Attributes are ignored.
+	 * Adds an {@link EntityMetaData} to the {@link #repository}. Will also add its attributes to the
+	 * {@link #attributeRepository}.
 	 * 
 	 * @param entityMetaData
 	 *            the {@link EntityMetaData} to add.
-	 * @return Entity representing the {@link EntityMetaData}.
 	 */
-	public Entity add(EntityMetaData entityMetaData)
+	public void add(EntityMetaData entityMetaData)
 	{
+		LOG.debug("Adding" + entityMetaData);
 		DefaultEntityMetaData emd = new DefaultEntityMetaData(entityMetaData.getSimpleName());
-
 		emd.setLabel(entityMetaData.getLabel());
 		emd.setAbstract(entityMetaData.isAbstract());
 		emd.setDescription(entityMetaData.getDescription());
@@ -137,6 +161,7 @@ class EntityMetaDataRepository
 		{
 			emd.setPackage(entityMetaData.getPackage());
 		}
+		entityMetaDataCache.put(emd.getName(), emd);
 		if (packageRepository.getPackage(emd.getPackage().getName()) == null)
 		{
 			packageRepository.add(emd.getPackage());
@@ -155,9 +180,18 @@ class EntityMetaDataRepository
 			emd.setIdAttribute(idAttribute.getName());
 			entity.set(ID_ATTRIBUTE, idAttribute.getName());
 		}
+		Iterable<AttributeMetaData> attributes = entityMetaData.getAttributes();
+		if (attributes != null)
+		{
+			entity.set(ATTRIBUTES,
+					stream(attributes.spliterator(), false).map(attributeRepository::add).collect(toList()));
+			emd.addAllAttributeMetaData(newArrayList(attributes));
+		}
+		else
+		{
+			entity.set(ATTRIBUTES, Collections.emptyList());
+		}
 		repository.add(entity);
-		entityMetaDataCache.put(emd.getName(), emd);
-		return entity;
 	}
 
 	private Entity toEntity(EntityMetaData emd)
@@ -186,6 +220,7 @@ class EntityMetaDataRepository
 		if (entity != null)
 		{
 			repository.deleteById(entityName);
+			attributeRepository.deleteAttributes(entity.getEntities(ATTRIBUTES));
 			entityMetaDataCache.remove(entityName);
 		}
 	}
@@ -215,5 +250,32 @@ class EntityMetaDataRepository
 	public Collection<EntityMetaData> getMetaDatas()
 	{
 		return Collections.<EntityMetaData> unmodifiableCollection(entityMetaDataCache.values());
+	}
+
+	public void removeAttribute(String entityName, String attributeName)
+	{
+		Entity entity = getEntity(entityName);
+		List<Entity> attributes = Lists.newArrayList(entity.getEntities(ATTRIBUTES));
+		Entity attributeEntity = attributes.stream().filter(att -> attributeName.equals(att.getString(NAME)))
+				.findFirst().get();
+		attributes.remove(attributeEntity);
+		repository.update(entity);
+		attributeRepository.deleteAttributes(Collections.singletonList(attributeEntity));
+	}
+
+	public EntityMetaData addAttribute(String fullyQualifiedEntityName, AttributeMetaData attr)
+	{
+		Entity entity = getEntity(fullyQualifiedEntityName);
+		List<Entity> attributes = newArrayList();
+		if (entity.get(ATTRIBUTES) != null)
+		{
+			attributes = newArrayList(entity.getEntities(ATTRIBUTES));
+		}
+		attributes.add(attributeRepository.add(attr));
+		entity.set(ATTRIBUTES, attributes);
+		repository.update(entity);
+		DefaultEntityMetaData result = entityMetaDataCache.get(fullyQualifiedEntityName);
+		result.addAttributeMetaData(attr);
+		return result;
 	}
 }
