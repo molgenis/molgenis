@@ -15,12 +15,14 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.model.OntologyTermMetaData;
 import org.molgenis.ontology.repository.model.OntologyTerm;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Maps {@link OntologyTermMetaData} {@link Entity} <-> {@link OntologyTerm}
  */
 public class OntologyTermRepository
 {
+	@Autowired
 	private DataService dataService;
 
 	/**
@@ -33,8 +35,8 @@ public class OntologyTermRepository
 	 */
 	public List<OntologyTerm> findOntologyTerms(List<String> ontologyIds, String search, int pageSize)
 	{
-		Iterable<Entity> termEntities = dataService.findAll(ENTITY_NAME,
-				new QueryImpl(IN(ONTOLOGY, ontologyIds)).setPageSize(pageSize));
+		Iterable<Entity> termEntities = dataService.findAll(ENTITY_NAME, new QueryImpl(IN(ONTOLOGY, ontologyIds).and()
+				.search(search)).setPageSize(pageSize));
 		return Lists.newArrayList(Iterables.transform(termEntities, OntologyTermRepository::toOntologyTerm));
 	}
 
