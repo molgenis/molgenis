@@ -36,6 +36,12 @@ public class RunAsSystemProxy implements Advice, MethodInterceptor
 			return invocation.proceed();
 		}
 
+		return runAsSystem(invocation::proceed);
+
+	}
+
+	public static <T, X extends Throwable> T runAsSystem(RunnableAsSystem<T, X> runnable) throws X
+	{
 		// Remember the original context
 		SecurityContext origCtx = SecurityContextHolder.getContext();
 		try
@@ -43,14 +49,12 @@ public class RunAsSystemProxy implements Advice, MethodInterceptor
 			// Set a SystemSecurityToken
 			SecurityContextHolder.setContext(SecurityContextHolder.createEmptyContext());
 			SecurityContextHolder.getContext().setAuthentication(new SystemSecurityToken());
-
-			return invocation.proceed();
+			return runnable.run();
 		}
 		finally
 		{
 			// Set the original context back when method is finished
 			SecurityContextHolder.setContext(origCtx);
 		}
-
 	}
 }
