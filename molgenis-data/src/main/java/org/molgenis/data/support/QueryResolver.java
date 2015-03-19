@@ -1,6 +1,7 @@
 package org.molgenis.data.support;
 
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL_MREF;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
 
@@ -62,7 +63,7 @@ public class QueryResolver
 					else
 					{
 						FieldTypeEnum dataType = attr.getDataType().getEnumType();
-						if ((dataType == XREF || dataType == MREF || dataType == CATEGORICAL))
+						if ((dataType == XREF || dataType == MREF || dataType == CATEGORICAL || dataType == CATEGORICAL_MREF))
 						{
 							// Find referencing entity if a ref attribute is given and not the ref entity itself
 							if (r.getOperator() == Operator.IN)

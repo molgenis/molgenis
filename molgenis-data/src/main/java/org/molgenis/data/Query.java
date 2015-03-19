@@ -122,7 +122,7 @@ public interface Query extends Iterable<Entity>
 	Query unnestAll();
 
 	/**
-	 * Range (excluding smaller and bigger)
+	 * Range (including smaller and bigger)
 	 */
 	Query rng(String field, Object smaller, Object bigger);
 

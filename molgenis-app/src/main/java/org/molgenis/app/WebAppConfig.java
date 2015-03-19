@@ -19,6 +19,7 @@ import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.system.RepositoryTemplateLoader;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
+import org.molgenis.migrate.MysqlMigrate;
 import org.molgenis.system.core.FreemarkerTemplateRepository;
 import org.molgenis.ui.MolgenisWebAppConfig;
 import org.molgenis.util.DependencyResolver;
@@ -88,6 +89,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 			}
 		};
 		localDataService.getMeta().setDefaultBackend(backend);
+		new MysqlMigrate(new JdbcTemplate(dataSource), "MySQL").migrate(localDataService.getMeta());
 
 		List<EntityMetaData> metas = DependencyResolver.resolve(Sets.newHashSet(localDataService.getMeta()
 				.getEntityMetaDatas()));
