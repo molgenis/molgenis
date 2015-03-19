@@ -22,12 +22,21 @@
 <div class="row">
 	<div class="col-md-12">
 		Select an ontology: 
+		<select>
+			<#list ontologies as ontology>
+				<option value="${ontology}">${ontology}</option>
+			</#list>
+		</select>
 		<hr></hr>
 	</div>
 </div>
 
 <div class="row">
 	<div class="col-md-6" style="overflow-y:auto;max-height:500px;min-height:500px;">
+		<#list taggedAttributeMetaDatas?keys as attributeMetaData>
+			${attributeMetaData.name}
+		</#list>
+		
 		<h4>Hypertension</h4>
 		<p>This is a really awsome description of this attribute</p>
 		
