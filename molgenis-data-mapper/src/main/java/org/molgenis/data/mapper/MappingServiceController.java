@@ -1,10 +1,16 @@
 package org.molgenis.data.mapper;
 
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.StreamSupport.stream;
+import static org.elasticsearch.common.collect.Lists.newArrayList;
 import static org.molgenis.data.mapper.MappingServiceController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -20,7 +26,13 @@ import org.molgenis.data.mapping.model.AttributeMapping;
 import org.molgenis.data.mapping.model.EntityMapping;
 import org.molgenis.data.mapping.model.MappingProject;
 import org.molgenis.data.mapping.model.MappingTarget;
+import org.molgenis.data.semantic.OntologyTagService;
+import org.molgenis.data.semantic.Relation;
+import org.molgenis.data.semantic.Tag;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.ontology.OntologyService;
+import org.molgenis.ontology.repository.model.Ontology;
+import org.molgenis.ontology.repository.model.OntologyTerm;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.util.ErrorMessageResponse;
@@ -39,6 +51,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 
@@ -67,6 +80,12 @@ public class MappingServiceController extends MolgenisPluginController
 
 	@Autowired
 	private DataService dataService;
+
+	@Autowired
+	private OntologyService ontologyService;
+
+	@Autowired
+	private OntologyTagService ontologyTagService;
 
 	public MappingServiceController()
 	{
@@ -346,12 +365,30 @@ public class MappingServiceController extends MolgenisPluginController
 		model.addAttribute("hasWritePermission", hasWritePermission(project, false));
 		return VIEW_ATTRIBUTE_MAPPING;
 	}
-	
+
 	@RequestMapping("/tagWizard")
 	public String viewTagWizard(@RequestParam String target, Model model)
 	{
-		model.addAttribute("target", dataService.getEntityMetaData(target));
+		List<Ontology> ontologies = ontologyService.getOntologies();
+		EntityMetaData emd = dataService.getEntityMetaData(target);
+		Iterable<AttributeMetaData> attributes = emd.getAttributes();
+		
+		// Remember, we are iterating over attribute metadata. x == attribute metadata
+		Map<AttributeMetaData, List<Tag<AttributeMetaData, OntologyTerm, Ontology>>> attributesAndTags = stream(
+				attributes.spliterator(), false).collect(
+				toMap((x -> x), (x -> newArrayList(ontologyTagService.getTagsForAttribute(emd, x)))));
+
+		model.addAttribute("ontologies", ontologies);
+		model.addAttribute("amdAndTags", attributesAndTags);
+		model.addAttribute("relations", Relation.values());
+		
 		return VIEW_TAG_WIZARD;
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/tagattribute")
+	public @ResponseBody void tagAttribute()
+	{
+
 	}
 
 	/**
