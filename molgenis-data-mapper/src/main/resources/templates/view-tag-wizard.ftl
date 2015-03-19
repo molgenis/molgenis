@@ -21,12 +21,24 @@
 
 <div class="row">
 	<div class="col-md-12">
-		Select an ontology: 
-		<select>
-			<#list ontologies as ontology>
-				<option value="${ontology}">${ontology}</option>
-			</#list>
-		</select>
+		<div class="control-group">
+			<label class="control-label" for="ontology-select">Select an ontology: </label>
+			<div class="controls">
+				<div class="form-group">
+					<div class="col-md-4">
+						<select class="form-control " name="ontology-select" id="ontology-select" data-placeholder="Select an ontology to use">
+							<option value=""></option>
+							<#list ontologies as ontology>
+								<option value="${ontology.id}">${ontology.name?html}</option>
+							</#list>
+						</select>
+					</div>
+				</div>
+				<button type="button" class="btn btn-primary">Tag-o-matic!</button>
+				<button type="button" class="btn btn-info">Reannotate</button>
+				<button type="button" class="btn btn-danger">Clear tags</button>
+			</div>
+		</div>
 		<hr></hr>
 	</div>
 </div>
@@ -34,62 +46,35 @@
 <div class="row">
 	<div class="col-md-6" style="overflow-y:auto;max-height:500px;min-height:500px;">
 		<#list taggedAttributeMetaDatas?keys as attributeMetaData>
-			${attributeMetaData.name}
-		</#list>
-		
-		<h4>Hypertension</h4>
-		<p>This is a really awsome description of this attribute</p>
-		
-		<h5>Add a relation <button type="button" id="add-expression-btn" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-plus"></span></button></h5>
-		<h5>Add a tag <button type="button" id="add-tag-btn" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-plus"></span></button></h5> 
-		
-		<table class="table">
-			<thead>
-				<th>Relation</th>
-				<th>Tags</th>
-			</thead>
-			<tbody>
-				<tr>
-					<td>
-						<#assign relation = "is_associated_with" />
-						<button type="btn" class="btn btn-default btn-xs relation" value="${relation}">${expression}</button>						
-					</td>
-					<td>
-						<button type="btn" class="btn btn-primary btn-xs tag-remove-btn">TAG 1 <span class="glyphicon glyphicon-remove"></span></button></button>
-						<button type="btn" class="btn btn-primary btn-xs tag-remove-btn">TAG 2 <span class="glyphicon glyphicon-remove"></span></button></button>
-					</td>				
-				</tr>
-				<tr>
-					<td>
-						<#assign relation = "is_caused_by" />
-						<button type="btn" class="btn btn-default btn-xs relation" value="${relation}">${relation}</button>
-					</td>
-					<td>
-						<button type="btn" class="btn btn-primary btn-xs tag-remove-btn">TAG 5 <span class="glyphicon glyphicon-remove"></span></button></button>
-					</td>
-				</tr>
+			<h4>${attributeMetaData.name}</h4>
+			<p>${attributeMetaData.description}</p>
 			
-				<tr>
-					<td>
-						<#assign relation = "is_related_to" />
-						<button type="btn" class="btn btn-default btn-xs relation" value="${relation}">${relation}</button>
-					</td>
-					<td>
-						<button type="btn" class="btn btn-primary btn-xs tag-remove-btn">TAG 4 <span class="glyphicon glyphicon-remove"></span></button>
-					</td>
-				</tr>
-			</tbody>
-		</table>
+			<table class="table">
+				<thead>
+					<th>Relation <button type="button" class="btn btn-default btn-xs add-expression-btn"><span class="glyphicon glyphicon-plus"></span></button></th>
+					<th>Tags <button type="button" class="btn btn-default btn-xs add-tag-btn"><span class="glyphicon glyphicon-plus"></span></button></th>
+				</thead>
+				<#if taggedAttributeMetaDatas[attributeMetaData]??>
+					<tbody>
+					<#list taggedAttributeMetaDatas[attributeMetaData] as tag>
+						<tr>
+							<td>
+								2 be implemented						
+							</td>
+							<td>
+								<button type="btn" class="btn btn-primary btn-xs tag-remove-btn">
+									${tag.object.label}<span class="glyphicon glyphicon-remove"></span>
+								</button>
+							</td>				
+						</tr>
+					</#list>
+					</tbody>
+				</#if>
+				</table>
+			<#if attributeMetaData_has_next><hr></hr></#if>
+		</#list>
 	</div>
 	<div id="relation-tag-info-container" class="col-md-6"></div>
-</div>
-
-<div class="row">
-	<div class="col-md-12">
-		<hr></hr>
-		<button type="btn" class="btn btn-primary">Reannotate</button>
-		<button type="btn" class="btn btn-danger">Clear tags</button>
-	</div>
 </div>
 
 <script id="relation-and-tag-template" type="text/x-handlebars-template">
