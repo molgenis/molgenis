@@ -342,7 +342,7 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	public void addToEntityMetaDataRepository(EntityMetaData entityMetaData)
 	{
-		Entity mdEntity = entityMetaDataRepository.add(entityMetaData);
+		entityMetaDataRepository.add(entityMetaData);
 
 		// add attribute metadata
 		for (AttributeMetaData att : entityMetaData.getAttributes())
@@ -356,7 +356,7 @@ public class MetaDataServiceImpl implements MetaDataService
 			if ((entityMetaData.getExtends() == null)
 					|| !Iterables.contains(entityMetaData.getExtends().getAtomicAttributes(), att))
 			{
-				attributeMetaDataRepository.add(mdEntity, att);
+				attributeMetaDataRepository.add(att);
 			}
 		}
 	}
