@@ -89,6 +89,8 @@ $(function($, molgenis) {
 	
 	$.get('/api/v1/entities/meta').done(function(meta) {
 		var $container = $('#form-container');
-		React.render(molgenis.test.control.FormSelect({entity: meta}), $container[0]);
+		React.render(molgenis.test.control.FormSelect({
+			entity : meta
+		}), $container[0]);
 	});
 }($, window.top.molgenis = window.top.molgenis || {}));

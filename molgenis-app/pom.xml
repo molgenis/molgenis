@@ -328,10 +328,5 @@
 			<artifactId>molgenis-data-semanticsearch</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-      <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-questionnaire</artifactId>
-            <version>${project.version}</version>
-        </dependency>
 	</dependencies>
 </project>

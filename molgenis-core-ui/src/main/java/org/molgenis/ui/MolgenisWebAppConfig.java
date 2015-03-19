@@ -374,7 +374,33 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	@PostConstruct
-	public void initRepositories()
+	public void postConstruct()
+	{
+		// validate required molgenis-server.properties exist
+		validateSystemProperties();
+		// initialize repositories
+		initRepositories();
+	}
+
+	@Value("${environment:production}")
+	private String environment;
+
+	private void validateSystemProperties()
+	{
+		String path = System.getProperty("molgenis.home") + File.separator + "molgenis-server.properties";
+		if (environment == null)
+		{
+			throw new RuntimeException("Missing required property 'environment' in " + path
+					+ ", allowed values are [development, production].");
+		}
+		else if (!environment.equals("development") && !environment.equals("production"))
+		{
+			throw new RuntimeException("Invalid value '" + environment + "'for property 'environment' in " + path
+					+ ", allowed values are [development, production].");
+		}
+	}
+
+	private void initRepositories()
 	{
 		if (!indexExists())
 		{
