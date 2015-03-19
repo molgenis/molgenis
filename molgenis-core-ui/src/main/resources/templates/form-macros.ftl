@@ -97,7 +97,7 @@
 					{
 						name:'${field.name?js_string}', 
 						xref:${(field.dataType.enumType == 'XREF' || field.dataType.enumType == 'CATEGORICAL')?string('true', 'false')},
-						mref:${(field.dataType.enumType == 'MREF')?string('true', 'false')},
+						mref:${(field.dataType.enumType == 'MREF' || field.dataType.enumType == 'CATEGORICAL_MREF')?string('true', 'false')},
 						type:'${field.dataType.enumType?js_string}',
 						readOnly:${field.isReadonly()?string('true', 'false')},
 						nillable:${field.isNillable()?string('true', 'false')},

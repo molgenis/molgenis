@@ -402,6 +402,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				break;
 			case MREF:
 			case CATEGORICAL:
+			case CATEGORICAL_MREF:
 			case XREF:
 				if (att.isLabelAttribute())
 				{
