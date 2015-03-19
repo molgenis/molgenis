@@ -36,7 +36,14 @@
 		
 		// add data to elements
 		getTableMetaData(settings, function(attributes, refEntitiesMeta) {
-			settings.colAttributes = attributes;
+			var visibleAttributes = [];
+			for (var i = 0; i < attributes.length; ++i) {
+				if(attributes[i].visible) {
+					visibleAttributes.push(attributes[i]);
+				}
+			}
+			
+			settings.colAttributes = visibleAttributes;
 			settings.refEntitiesMeta = refEntitiesMeta;
 
 			getTableData(settings, function(data) {
@@ -57,7 +64,7 @@
 			// get meta data for referenced entities
 			var refEntitiesMeta = {};
 			$.each(colAttributes, function(i, attribute) {
-				if(attribute.fieldType === 'XREF' || attribute.fieldType === 'MREF' || attribute.fieldType === 'CATEGORICAL') {
+				if(attribute.fieldType === 'XREF' || attribute.fieldType === 'MREF' || attribute.fieldType === 'CATEGORICAL' || attribute.fieldType === 'CATEGORICAL_MREF') {
 					refEntitiesMeta[attribute.refEntity.href] = null;
 				}
 			});
@@ -76,7 +83,7 @@
 			$.when.apply($, dfds).done(function() {
 				// inject referenced entities meta data in attributes
 				$.each(colAttributes, function(i, attribute) {
-					if(attribute.fieldType === 'XREF' || attribute.fieldType === 'MREF' || attribute.fieldType === 'CATEGORICAL') {
+					if(attribute.fieldType === 'XREF' || attribute.fieldType === 'MREF' || attribute.fieldType === 'CATEGORICAL' || attribute.fieldType === 'CATEGORICAL_MREF') {
 						attribute.refEntity = refEntitiesMeta[attribute.refEntity.href];
 					}
 				});
@@ -92,16 +99,22 @@
 	 */
 	function getTableData(settings, callback) {
 		var attributeNames = $.map(settings.colAttributes, function(attribute) {
-			return attribute.name;
+			if(attribute.visible){
+				return attribute.name;
+			}
 		});
 		var expandAttributeNames = $.map(settings.colAttributes, function(attribute) {
 			if(attribute.expression){
-				return attribute.name;
+				if(attribute.visible){
+					return attribute.name;
+				}
 			}
-			if(attribute.fieldType === 'XREF' || attribute.fieldType === 'CATEGORICAL' ||attribute.fieldType === 'MREF') {
+			if(attribute.fieldType === 'XREF' || attribute.fieldType === 'CATEGORICAL' ||attribute.fieldType === 'MREF' || attribute.fieldType === 'CATEGORICAL_MREF') {
 				// partially expand reference entities (only request label attribute)
 				var refEntity = settings.refEntitiesMeta[attribute.refEntity.href];
-				return attribute.name + '[' + refEntity.labelAttribute + ']';
+				if(attribute.visible){
+					return attribute.name + '[' + refEntity.labelAttribute + ']';
+				}
 			}
 			return null;
 		});
@@ -131,22 +144,25 @@
 		if (settings.editenabled) {
 			items.push($('<th>'));
 		}
+		
 		$.each(settings.colAttributes, function(i, attribute) {
 			var header;
-			if (settings.sort && settings.sort.orders[0].property === attribute.name) {
-				if (settings.sort.orders[0].direction === 'ASC') {
-					header = $('<th>' + attribute.label + '<span data-attribute="' + attribute.name
-							+ '" class="ui-icon ui-icon-triangle-1-s down"></span></th>');
+			if(attribute.visible) {
+				if (settings.sort && settings.sort.orders[0].property === attribute.name) {
+					if (settings.sort.orders[0].direction === 'ASC') {
+						header = $('<th>' + attribute.label + '<span data-attribute="' + attribute.name
+								+ '" class="ui-icon ui-icon-triangle-1-s down"></span></th>');
+					} else {
+						header = $('<th>' + attribute.label + '<span data-attribute="' + attribute.name
+								+ '" class="ui-icon ui-icon-triangle-1-n up"></span></th>');
+					}
 				} else {
 					header = $('<th>' + attribute.label + '<span data-attribute="' + attribute.name
-							+ '" class="ui-icon ui-icon-triangle-1-n up"></span></th>');
+							+ '" class="ui-icon ui-icon-triangle-2-n-s updown"></span></th>');
 				}
-			} else {
-				header = $('<th>' + attribute.label + '<span data-attribute="' + attribute.name
-						+ '" class="ui-icon ui-icon-triangle-2-n-s updown"></span></th>');
+				header.data('attr', attribute);
+				items.push(header);
 			}
-			header.data('attr', attribute);
-			items.push(header);
 		});
 		container.html(items);
 	}
@@ -156,7 +172,6 @@
 	 */
 	function createTableBody(data, settings) {
 		var container = $('.molgenis-table tbody', settings.container);
-
 		var items = [];
 		var tabindex = 1;
 		for (var i = 0; i < data.items.length; ++i) {
@@ -277,6 +292,7 @@
 				input.addClass('number-input');
 				cell.html(input);
 				break;
+			case 'CATEGORICAL_MREF': // TODO render like CATEGORICAL is rendered for XREF
 			case 'MREF':
 				var refEntityMeta = settings.refEntitiesMeta[attribute.refEntity.href];
 				// TODO do not construct uri from other uri
@@ -384,6 +400,7 @@
 			case 'XREF':
 			case 'MREF':
             case 'CATEGORICAL':
+            case 'CATEGORICAL_MREF':
                 if (rawValue) {
                 	var refEntity = settings.refEntitiesMeta[attribute.refEntity.href];
                     var refAttribute = refEntity.labelAttribute;
@@ -391,7 +408,7 @@
 					
                 	if (refValue) {
                 		var refAttributeType = refValue.fieldType;
-                		if (refAttributeType === 'XREF' || refAttributeType === 'MREF' || refAttributeType === 'COMPOUND') {
+                		if (refAttributeType === 'XREF' || refAttributeType === 'MREF' || refAttributeType === 'CATEGORICAL' || refAttributeType === 'CATEGORICAL_MREF' || refAttributeType === 'COMPOUND') {
                 			throw 'unsupported field type ' + refAttributeType;
                 		}
 						
@@ -405,6 +422,7 @@
 								});
 								cell.append($cellValue);
 								break;
+							case 'CATEGORICAL_MREF':
 							case 'MREF':
 								$.each(rawValue.items, function(i, rawValue) {
 									var $cellValuePart = $('<a href="#">').append(formatTableCellValue(rawValue[refAttribute], refAttributeType));
@@ -554,6 +572,7 @@
 					cell.removeClass('edited').addClass('invalid-input');
 				}
 				break;
+			case 'CATEGORICAL_MREF' :
 			case 'MREF':
 				var select = cell.find('input[type=hidden]');
 				var data = select.select2('data');

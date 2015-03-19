@@ -198,6 +198,7 @@ public class QueryGenerator implements QueryPartGenerator
 							break;
 						}
 						case CATEGORICAL:
+						case CATEGORICAL_MREF:
 						case XREF:
 						case MREF:
 						{
@@ -282,6 +283,7 @@ public class QueryGenerator implements QueryPartGenerator
 								Iterables.toArray(iterable, Object.class));
 						break;
 					case CATEGORICAL:
+					case CATEGORICAL_MREF:
 					case MREF:
 					case XREF:
 						// support both entity iterable as entity id iterable as value
@@ -364,6 +366,7 @@ public class QueryGenerator implements QueryPartGenerator
 						throw new MolgenisQueryException("Illegal data type [" + dataType + "] for operator ["
 								+ queryOperator + "]");
 					case CATEGORICAL:
+					case CATEGORICAL_MREF:
 					case MREF:
 					case XREF:
 					case SCRIPT: // due to size would result in large amount of ngrams
@@ -424,6 +427,7 @@ public class QueryGenerator implements QueryPartGenerator
 							queryBuilder = QueryBuilders.matchQuery(queryField, queryValue);
 							break;
 						case CATEGORICAL:
+						case CATEGORICAL_MREF:
 						case MREF:
 						case XREF:
 							queryBuilder = QueryBuilders.nestedQuery(queryField,
@@ -498,6 +502,7 @@ public class QueryGenerator implements QueryPartGenerator
 		{
 			case XREF:
 			case CATEGORICAL:
+			case CATEGORICAL_MREF:
 			case MREF:
 				return queryField;
 			case BOOL:
@@ -547,6 +552,7 @@ public class QueryGenerator implements QueryPartGenerator
 				break;
 			case BOOL:
 			case CATEGORICAL:
+			case CATEGORICAL_MREF:
 			case COMPOUND:
 			case EMAIL:
 			case ENUM:

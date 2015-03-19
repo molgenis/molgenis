@@ -2,6 +2,7 @@ package org.molgenis.data.elasticsearch.request;
 
 import static java.lang.Integer.MAX_VALUE;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL_MREF;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
 
@@ -51,7 +52,8 @@ public class AggregateQueryGenerator
 			throw new IllegalArgumentException("Distinct aggregateable attribute cannot be nillable");
 		}
 		FieldTypeEnum dataType1 = aggAttr1.getDataType().getEnumType();
-		if (aggAttr1.isNillable() && (dataType1 == CATEGORICAL || dataType1 == XREF || dataType1 == MREF))
+		if (aggAttr1.isNillable()
+				&& (dataType1 == CATEGORICAL || dataType1 == CATEGORICAL_MREF || dataType1 == XREF || dataType1 == MREF))
 		{
 			// see: https://github.com/molgenis/molgenis/issues/1937
 			throw new IllegalArgumentException("Aggregateable attribute of type [" + dataType1 + "] cannot be nillable");
@@ -60,7 +62,8 @@ public class AggregateQueryGenerator
 		{
 			// see: https://github.com/molgenis/molgenis/issues/1937
 			FieldTypeEnum dataType2 = aggAttr2.getDataType().getEnumType();
-			if (aggAttr2.isNillable() && (dataType2 == CATEGORICAL || dataType2 == XREF || dataType2 == MREF))
+			if (aggAttr2.isNillable()
+					&& (dataType2 == CATEGORICAL || dataType1 == CATEGORICAL_MREF || dataType2 == XREF || dataType2 == MREF))
 			{
 				throw new IllegalArgumentException("Aggregateable attribute of type [" + dataType2
 						+ "] cannot be nillable");
@@ -209,8 +212,8 @@ public class AggregateQueryGenerator
 	public static boolean isNestedType(AttributeMetaData attr)
 	{
 		FieldTypeEnum dataType = attr.getDataType().getEnumType();
-		return dataType == FieldTypeEnum.CATEGORICAL || dataType == FieldTypeEnum.XREF
-				|| dataType == FieldTypeEnum.MREF;
+		return dataType == FieldTypeEnum.CATEGORICAL || dataType == FieldTypeEnum.CATEGORICAL_MREF
+				|| dataType == FieldTypeEnum.XREF || dataType == FieldTypeEnum.MREF;
 	}
 
 	private String getAggregateFieldName(AttributeMetaData attr)
@@ -236,6 +239,7 @@ public class AggregateQueryGenerator
 				// use non-analyzed field
 				return attrName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED;
 			case CATEGORICAL:
+			case CATEGORICAL_MREF:
 			case XREF:
 			case MREF:
 				// use id attribute of nested field

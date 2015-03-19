@@ -165,9 +165,8 @@ public class MolgenisPluginInterceptorTest
 		ModelAndView modelAndView = new ModelAndView();
 		molgenisPluginInterceptor.postHandle(mockHttpServletRequest, null, handlerMethod, modelAndView);
 		
-		AppTrackingCodeImpl appTrackingCodeResult = new AppTrackingCodeImpl();
-		appTrackingCodeResult.setPiwik("alert('key_app_tracking_code_piwik');");
-		appTrackingCodeResult.setGoogleAnalytics("alert('key_app_tracking_code_googleanalytics');");
+		AppTrackingCodeImpl appTrackingCodeResult = new AppTrackingCodeImpl("alert('key_app_tracking_code_piwik');",
+				"alert('key_app_tracking_code_googleanalytics');");
 		assertEquals(modelAndView.getModel().get(MolgenisPluginInterceptor.APP_TRACKING_CODE_VARIABLE),
 				appTrackingCodeResult);
 	}

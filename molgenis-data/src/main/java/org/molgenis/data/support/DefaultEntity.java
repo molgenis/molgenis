@@ -1,7 +1,8 @@
 package org.molgenis.data.support;
 
+import static com.google.common.base.Predicates.notNull;
+import static com.google.common.collect.FluentIterable.from;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.support.QueryImpl.IN;
 
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -126,6 +127,7 @@ public class DefaultEntity implements Entity
 				return getInt(attributeName);
 			case LONG:
 				return getLong(attributeName);
+			case CATEGORICAL_MREF:
 			case MREF:
 				return getEntities(attributeName);
 			default:
@@ -271,11 +273,9 @@ public class DefaultEntity implements Entity
 					id -> new DefaultEntity(attribute.getRefEntity(), dataService, (Map<String, Object>) id)).collect(
 					Collectors.toList());
 		}
-
-		EntityMetaData ref = attribute.getRefEntity();
-		ids = ids.stream().map(attribute.getDataType()::convert).collect(Collectors.toList());
-
-		return dataService.findAll(ref.getName(), IN(ref.getIdAttribute().getName(), ids));
+		return from(ids).transform(attribute.getDataType()::convert)
+				.transform(convertedId -> (dataService.findOne(attribute.getRefEntity().getName(), convertedId)))
+				.filter(notNull());
 	}
 
 	@Override
