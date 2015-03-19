@@ -17,8 +17,8 @@ import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.system.RepositoryTemplateLoader;
-import org.molgenis.data.version.MysqlMigrate;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
+import org.molgenis.migrate.MysqlMigrate;
 import org.molgenis.system.core.FreemarkerTemplateRepository;
 import org.molgenis.ui.MolgenisWebAppConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,6 +85,8 @@ public class WebAppConfig extends MolgenisWebAppConfig
 			}
 		};
 		localDataService.getMeta().setDefaultBackend(backend);
+
+		new MysqlMigrate(new JdbcTemplate(dataSource), "MySQL").migrate(localDataService.getMeta());
 
 		for (EntityMetaData emd : localDataService.getMeta().getEntityMetaDatas())
 		{
