@@ -30,11 +30,9 @@
 		<h4>Hypertension</h4>
 		<p>This is a really awsome description of this attribute</p>
 		
-		<h5>
-			Tags
-			<button type="button" class="btn btn-default btn-xs"><span class="add-tag glyphicon glyphicon-plus"></span></button>
-			 
-		</h5>	
+		<h5>Expression <button type="button" id="add-expression-btn" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-plus"></span></button></h5>
+		<h5>Tags <button type="button" id="add-tag-btn" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-plus"></span></button></h5> 
+		
 		<table class="table">
 			<thead>
 				<th>Expression</th>
