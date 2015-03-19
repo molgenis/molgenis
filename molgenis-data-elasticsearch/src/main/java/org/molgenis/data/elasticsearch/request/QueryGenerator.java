@@ -339,6 +339,24 @@ public class QueryGenerator implements QueryPartGenerator
 				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
 				break;
 			}
+			case RANGE:
+			{
+				if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
+				if (!(queryValue instanceof Iterable<?>))
+				{
+					throw new MolgenisQueryException("Query value must be a Iterable instead of ["
+							+ queryValue.getClass().getSimpleName() + "]");
+				}
+				Iterable<?> iterable = (Iterable<?>) queryValue;
+
+				validateNumericalQueryField(queryField, entityMetaData);
+
+				Iterator<?> iterator = iterable.iterator();
+				FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).gte(iterator.next())
+						.lte(iterator.next());
+				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
+				break;
+			}
 			case NESTED:
 				List<QueryRule> nestedQueryRules = queryRule.getNestedRules();
 				if (nestedQueryRules == null || nestedQueryRules.isEmpty())
