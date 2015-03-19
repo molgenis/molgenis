@@ -382,9 +382,16 @@ public class MappingServiceController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/tagattribute")
-	public @ResponseBody void tagAttribute()
+	public @ResponseBody void addTagAttribute()
 	{
 
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/getontologyterms")
+	public @ResponseBody List<OntologyTerm> getAllOntologyTerms(@RequestParam String search,
+			@RequestParam List<String> ontologyIds)
+	{
+		return ontologyService.findOntologyTerms(ontologyIds, search, 100);
 	}
 
 	/**
