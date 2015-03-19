@@ -4,6 +4,7 @@
 <#assign css=[
 	"jquery.bootstrap.wizard.css",
 	"bootstrap-datetimepicker.min.css",
+	"jquery.molgenis.tree.css",
 	"ui.fancytree.min.css",
 	"jquery-ui-1.9.2.custom.min.css",
 	"select2.css",
@@ -22,7 +23,7 @@
 	"dataexplorer-filter-dialog.js",
 	"dataexplorer-filter-wizard.js",
 	"jquery.fancytree.min.js",
-	"treetest.js",
+	"jquery.molgenis.tree.js",
 	"select2-patched.js",
 	"jQEditRangeSlider-min.js",
 	"bootstrap-switch.min.js",
