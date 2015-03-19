@@ -3,7 +3,7 @@ package org.molgenis.questionnaires;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.support.QueryImpl.EQ;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX;
-import static org.molgenis.security.runas.RunAsSystemTemplate.runAsSystem;
+import static org.molgenis.security.runas.RunAsSystemProxy.runAsSystem;
 
 import java.io.IOException;
 import java.util.List;
