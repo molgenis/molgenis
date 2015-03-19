@@ -66,20 +66,26 @@
         <script>top.molgenis.ie9 = true;</script>
         <#-- required by dalliance-compiled.js to load the genomebrowsers in IE9 -->
         <script src="<@resource_href "/js/typedarray.min.js"/>"></script>
-    <![endif]-->        
-    <#if context_url??>
-        <script>top.molgenis.setContextUrl('${context_url?js_string}');</script>
-    </#if>
-    <#list js as js_file_name>
-        <script src="<@resource_href "/js/${js_file_name?html}"/>"></script>
-    </#list>        
-    <#if molgenis_ui.hrefJs?has_content>
-        <script src="<@resource_href "/js/${molgenis_ui.hrefJs?html}"/>"></script>
-    </#if>
-    </head>
-    <#if app_tracking_code.googleAnalytics?has_content><script type="text/javascript">${app_tracking_code.googleAnalytics?string}</script></#if>
-    <body>
-        <#-- Navbar menu -->
+    <![endif]-->		
+	<#if context_url??>
+		<script>top.molgenis.setContextUrl('${context_url?js_string}');</script>
+	</#if>
+	<#list js as js_file_name>
+		<script src="<@resource_href "/js/${js_file_name?html}"/>"></script>
+	</#list>		
+	<#if molgenis_ui.hrefJs?has_content>
+		<script src="<@resource_href "/js/${molgenis_ui.hrefJs?html}"/>"></script>
+	</#if>
+	<#if app_tracking_code.piwik?has_content || app_tracking_code.googleAnalytics?has_content>
+		<script src="<@resource_href "/js/jquery.cookie.js"/>"></script>
+		<script src="<@resource_href "/js/molgenis-head-cookies.js"/>"></script>
+	</#if>
+	<#if app_tracking_code.googleAnalytics?has_content>
+		<script id="app-tracking-code-googleAnalytics" type="text/javascript">${app_tracking_code.googleAnalytics?string}</script>
+	</#if>
+	</head>
+	<body>
+		<#-- Navbar menu -->
         <#if menu_id??>
             <#if !(plugin_id??)>
                 <#assign plugin_id="NULL">

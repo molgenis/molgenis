@@ -36,7 +36,7 @@ public class ImportRunService
 	}
 
 	@RunAsSystem
-	public void finishImportRun(String importRunId, String message)
+	public void finishImportRun(String importRunId, String message, String importedEntities)
 	{
 		try
 		{
@@ -46,6 +46,7 @@ public class ImportRunService
 				importRun.setStatus(ImportStatus.FINISHED.toString());
 				importRun.setEndDate(new Date());
 				importRun.setMessage(message);
+				importRun.setImportedEntities(importedEntities);
 				dataService.update(ImportRun.ENTITY_NAME, importRun);
 			}
 		}

@@ -377,7 +377,7 @@
 				
 				if(value) {
 					// Add values
-					if(attribute.fieldType === 'MREF' || attribute.fieldType === 'XREF'){
+					if(attribute.fieldType === 'MREF' || attribute.fieldType == 'CATEGORICAL_MREF' || attribute.fieldType === 'XREF'){
 						var mrefValues = value.split(',');
 						$(mrefValues).each(function(i){
 							values.push(mrefValues[i]);
@@ -385,7 +385,7 @@
 						
 						labels = $(this).data('labels');
 					} 
-					else if(attribute.fieldType == 'CATEGORICAL' || attribute.fieldType == 'CATEGORICAL_MREF') {
+					else if(attribute.fieldType == 'CATEGORICAL') {
 						labels.push($(this).parent().text());
 						values[values.length] = value;
 					}

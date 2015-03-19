@@ -102,7 +102,7 @@
 		$.each(colAttributes, function() {
 			var feature = this;
 			dataRequest.attributeNames.push(feature.name);
-			if (feature.fieldType === 'XREF' || feature.fieldType === 'MREF') // FIXME missing CATEGORICAL and CATEGORICAL_MREF?
+			if (feature.fieldType === 'XREF' || feature.fieldType === 'MREF' || feature.fieldType === 'CATEGORICAL' || feature.fieldType === 'CATEGORICAL_MREF')
 				dataRequest.attributeNames.push("key-" + feature.name);
 		});
 
