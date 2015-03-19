@@ -66,23 +66,12 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 				}
 			}
 
-			// Search in attributes
-			for (Entity attributeMetaData : dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME, q))
-			{
-				Entity entityMetaData = attributeMetaData.getEntity(AttributeMetaDataMetaData.ENTITY);
-				if (entityMetaData != null)
-				{
-					Package p = getRootPackage(entityMetaData);
-					if (p != null)
-					{
-						String matchDesc = "Matched: attribute '"
-								+ attributeMetaData.getString(AttributeMetaDataMetaData.NAME) + "' of entity '"
-								+ entityMetaData.getString(EntityMetaDataMetaData.SIMPLE_NAME) + "'";
-						PackageSearchResultItem item = new PackageSearchResultItem(p.getRootPackage(), matchDesc);
-						if ((p != null) && !results.contains(item)) results.add(item);
-					}
-				}
-			}
+			// TODO: Search in attributes?
+			// This used to be necessary when entities didn't yet have an mref to attributes.
+			// Now that they do, the attribute and all of its properties are listed in the entity document in
+			// elasticsearch and will be found in the above query.
+			// But the match does not know any longer which attribute it has matched, though, and won't be able to
+			// find tags of attributes of the entity when we implement them.
 		}
 
 		// Remove default package

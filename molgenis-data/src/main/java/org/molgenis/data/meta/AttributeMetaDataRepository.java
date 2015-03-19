@@ -1,10 +1,11 @@
 package org.molgenis.data.meta;
 
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.AGGREGATEABLE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.AUTO;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.DATA_TYPE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.DESCRIPTION;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENTITY;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENUM_OPTIONS;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.EXPRESSION;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.IDENTIFIER;
@@ -14,38 +15,28 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL_ATTRIBUTE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.LOOKUP_ATTRIBUTE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.NAME;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.NILLABLE;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.PART_OF_ATTRIBUTE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.PARTS;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MAX;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MIN;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.READ_ONLY;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.REF_ENTITY;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.UNIQUE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.VISIBLE;
-import static org.molgenis.data.support.QueryImpl.EQ;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
-import org.molgenis.data.Query;
 import org.molgenis.data.Range;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.CompoundField;
 import org.molgenis.fieldtypes.EnumField;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.Iterables;
 
 /**
  * Helper class around the {@link AttributeMetaDataMetaData} repository. Internal implementation class, use
@@ -57,14 +48,16 @@ class AttributeMetaDataRepository
 
 	private final Repository repository;
 
-	private final EntityMetaDataRepository entityMetaDataRepository;
+	private EntityMetaDataRepository entityMetaDataRepository;
 
-	public AttributeMetaDataRepository(ManageableRepositoryCollection collection,
-			EntityMetaDataRepository entityMetaDataRepository)
+	public AttributeMetaDataRepository(ManageableRepositoryCollection collection)
+	{
+		this.repository = collection.addEntityMeta(META_DATA);
+	}
+
+	public void setEntityMetaDataRepository(EntityMetaDataRepository entityMetaDataRepository)
 	{
 		this.entityMetaDataRepository = entityMetaDataRepository;
-		this.repository = collection.addEntityMeta(META_DATA);
-		fillAllEntityAttributes();
 	}
 
 	Repository getRepository()
@@ -73,98 +66,18 @@ class AttributeMetaDataRepository
 	}
 
 	/**
-	 * Creates {@link AttributeMetaData} for all {@link AttributeMetaDataMetaData} entities in the repository and adds
-	 * them to the {@link EntityMetaData} in the {@link EntityMetaDataRepository}.
-	 */
-	public void fillAllEntityAttributes()
-	{
-		Map<String, Map<String, DefaultAttributeMetaData>> attributesMap = new LinkedHashMap<>();
-
-		// 1st pass: create attributes
-		for (Entity attributeEntity : repository)
-		{
-			DefaultAttributeMetaData attribute = toAttributeMetaData(attributeEntity);
-			Entity entity = attributeEntity.getEntity(ENTITY);
-			String entityName = entity.getString(EntityMetaDataMetaData.FULL_NAME);
-
-			Map<String, DefaultAttributeMetaData> attributes = attributesMap.get(entityName);
-			if (attributes == null)
-			{
-				attributes = new LinkedHashMap<>();
-				attributesMap.put(entityName, attributes);
-			}
-			attributes.put(attribute.getName(), attribute);
-		}
-
-		// 2nd pass: add attribute relations to attributes
-		Map<String, Set<String>> rootAttributes = new LinkedHashMap<>();
-		for (Entity attributeEntity : repository)
-		{
-			Entity entity = attributeEntity.getEntity(ENTITY);
-			String entityName = entity.getString(EntityMetaDataMetaData.FULL_NAME);
-			String attributeName = attributeEntity.getString(NAME);
-			Map<String, DefaultAttributeMetaData> attributes = attributesMap.get(entityName);
-
-			String compoundAttributeName = attributeEntity.getString(PART_OF_ATTRIBUTE);
-			if (compoundAttributeName != null && !compoundAttributeName.isEmpty())
-			{
-				DefaultAttributeMetaData attributePart = attributes.get(attributeName);
-				DefaultAttributeMetaData compoundAttribute = attributes.get(compoundAttributeName);
-				compoundAttribute.addAttributePart(attributePart);
-			}
-			else
-			{
-				Set<String> entityRootAttributes = rootAttributes.get(entityName);
-				if (entityRootAttributes == null)
-				{
-					entityRootAttributes = new LinkedHashSet<>();
-					rootAttributes.put(entityName, entityRootAttributes);
-				}
-				entityRootAttributes.add(attributeName);
-			}
-		}
-
-		// 3rd pass: add attributes to entities
-		for (Map.Entry<String, Map<String, DefaultAttributeMetaData>> entry : attributesMap.entrySet())
-		{
-			String entityName = entry.getKey();
-			DefaultEntityMetaData entityMetaData = entityMetaDataRepository.get(entityName);
-
-			Set<String> entityRootAttributes = rootAttributes.get(entityName);
-			for (DefaultAttributeMetaData attribute : entry.getValue().values())
-			{
-				if (entityRootAttributes.contains(attribute.getName()))
-				{
-					entityMetaData.addAttributeMetaData(attribute);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Adds an attribute to an entity, both in the repository and in its {@link EntityMetaData}.
+	 * Adds an attribute to the repository and returns the Entity it's created for it. If the attribute is a compound
+	 * attribute with attribute parts, will also add all the parts.
 	 * 
-	 * @param entity
-	 *            {@link EntityMetaData} {@link Entity} that represents the Entity that the attribute should be added
-	 *            to.
 	 * @param att
-	 *            {@link AttributeMetaData} to be added to the entity
+	 *            AttributeMetaData to add
+	 * @return the AttributeMetaDataMetaData entity that got created
 	 */
-	public void add(Entity entity, AttributeMetaData att)
+	public Entity add(AttributeMetaData att)
 	{
-		toAttributeMetaDataEntity(entity, att, null);
-		DefaultEntityMetaData entityMeta = entityMetaDataRepository.get(entity
-				.getString(EntityMetaDataMetaData.FULL_NAME));
-
-		if (!Iterables.contains(entityMeta.getAttributes(), att)) entityMeta.addAttributeMetaData(att);
-	}
-
-	private void toAttributeMetaDataEntity(Entity entity, AttributeMetaData att, AttributeMetaData parentCompoundAtt)
-	{
-		Entity attributeMetaDataEntity = new MapEntity();
+		Entity attributeMetaDataEntity = new MapEntity(META_DATA);
 		// autoid
 		attributeMetaDataEntity.set(IDENTIFIER, UUID.randomUUID().toString().replaceAll("-", ""));
-		attributeMetaDataEntity.set(ENTITY, entity);
 		attributeMetaDataEntity.set(NAME, att.getName());
 		attributeMetaDataEntity.set(DATA_TYPE, att.getDataType());
 		attributeMetaDataEntity.set(ID_ATTRIBUTE, att.isIdAtrribute());
@@ -179,10 +92,6 @@ class AttributeMetaDataRepository
 		attributeMetaDataEntity.set(READ_ONLY, att.isReadonly());
 		attributeMetaDataEntity.set(UNIQUE, att.isUnique());
 		attributeMetaDataEntity.set(EXPRESSION, att.getExpression());
-		if (parentCompoundAtt != null)
-		{
-			attributeMetaDataEntity.set(PART_OF_ATTRIBUTE, parentCompoundAtt.getName());
-		}
 		if ((att.getDataType() instanceof EnumField) && (att.getEnumOptions() != null))
 		{
 			attributeMetaDataEntity.set(ENUM_OPTIONS, Joiner.on(",").join(att.getEnumOptions()));
@@ -196,13 +105,12 @@ class AttributeMetaDataRepository
 
 		if (att.getRefEntity() != null)
 		{
-			Entity refEntity = entityMetaDataRepository.getEntity(att.getRefEntity().getName());
-			if (refEntity == null) throw new RuntimeException("Missing refEntity [" + att.getRefEntity().getName()
-					+ "] of attribute [" + att.getName() + "]");
-
-			attributeMetaDataEntity.set(REF_ENTITY, refEntity);
+			String entityName = att.getRefEntity().getName();
+			Entity refEntity = entityMetaDataRepository.getEntity(entityName);
+			if (refEntity == null) throw new RuntimeException("Missing refEntity [" + entityName + "] of attribute ["
+					+ att.getName() + "]");
+			attributeMetaDataEntity.set(REF_ENTITY, entityName);
 		}
-		repository.add(attributeMetaDataEntity);
 
 		// recursive for compound attribute parts
 		if (att.getDataType() instanceof CompoundField)
@@ -210,44 +118,32 @@ class AttributeMetaDataRepository
 			Iterable<AttributeMetaData> attributeParts = att.getAttributeParts();
 			if (attributeParts != null)
 			{
-				for (AttributeMetaData attributePart : attributeParts)
-				{
-					toAttributeMetaDataEntity(entity, attributePart, att);
-				}
+				attributeMetaDataEntity.set(PARTS,
+						stream(attributeParts.spliterator(), false).map(this::add).collect(toList()));
 			}
 		}
+
+		repository.add(attributeMetaDataEntity);
+		return attributeMetaDataEntity;
 	}
 
 	/**
-	 * Removes an attribute from an entity.
+	 * Deletes attributes from the repository. If the attribute is a compound attribute with attribute parts, also
+	 * deletes its parts.
 	 * 
-	 * @param entityName
-	 *            fully qualified name of the entity
-	 * @param attributeName
-	 *            name of the attribute to remove.
+	 * @param attributes
+	 *            Iterable<Entity> for the attribute that should be deleted
 	 */
-	public void remove(String entityName, String attributeName)
+	public void deleteAttributes(Iterable<Entity> attributes)
 	{
-		Query q = new QueryImpl().eq(AttributeMetaDataMetaData.ENTITY, entityName).and()
-				.eq(AttributeMetaDataMetaData.NAME, attributeName);
-		Entity entity = repository.findOne(q);
-		if (entity != null)
+		if (attributes != null)
 		{
-			repository.delete(entity);
-			DefaultEntityMetaData emd = entityMetaDataRepository.get(entityName);
-			emd.removeAttributeMetaData(emd.getAttribute(attributeName));
+			for (Entity attribute : attributes)
+			{
+				deleteAttributes(attribute.getEntities(PARTS));
+				repository.delete(attribute);
+			}
 		}
-	}
-
-	/**
-	 * Deletes all attributes for a particular entity from the repository.
-	 * 
-	 * @param entityName
-	 *            fully qualified name of the entity whose attributes are deleted.
-	 */
-	public void deleteAllAttributes(String entityName)
-	{
-		repository.delete(repository.findAll(EQ(AttributeMetaDataMetaData.ENTITY, entityName)));
 	}
 
 	/**
@@ -266,7 +162,7 @@ class AttributeMetaDataRepository
 	 * @return {@link DefaultAttributeMetaData}, with {@link DefaultAttributeMetaData#getRefEntity()} properly filled if
 	 *         needed.
 	 */
-	private DefaultAttributeMetaData toAttributeMetaData(Entity entity)
+	public DefaultAttributeMetaData toAttributeMetaData(Entity entity)
 	{
 		DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData(entity.getString(NAME));
 		attributeMetaData.setDataType(MolgenisFieldTypes.getType(entity.getString(DATA_TYPE)));
@@ -292,11 +188,18 @@ class AttributeMetaDataRepository
 		{
 			attributeMetaData.setRange(new Range(rangeMin, rangeMax));
 		}
-		if (entity.getEntity(REF_ENTITY) != null)
+		if (entity.get(REF_ENTITY) != null)
 		{
-			final String refEntityName = entity.getEntity(REF_ENTITY).getString(EntityMetaDataMetaData.FULL_NAME);
+			final String refEntityName = entity.getString(REF_ENTITY);
 			attributeMetaData.setRefEntity(entityMetaDataRepository.get(refEntityName));
+		}
+		Iterable<Entity> parts = entity.getEntities(PARTS);
+		if (parts != null)
+		{
+			stream(parts.spliterator(), false).map(this::toAttributeMetaData).forEach(
+					attributeMetaData::addAttributePart);
 		}
 		return attributeMetaData;
 	}
+
 }

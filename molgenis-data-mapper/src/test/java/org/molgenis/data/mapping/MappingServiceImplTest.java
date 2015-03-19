@@ -71,9 +71,9 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		ManageableRepositoryCollection repositoryCollection()
+		ManageableRepositoryCollection manageableCrudRepositoryCollection()
 		{
-			return new InMemoryRepositoryCollection();
+			return new InMemoryRepositoryCollection("mem");
 		}
 
 		@Bean
@@ -85,7 +85,7 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		@PostConstruct
 		public void initRepositories()
 		{
-			metaDataService().setDefaultBackend(repositoryCollection());
+			metaDataService().setDefaultBackend(manageableCrudRepositoryCollection());
 		}
 
 	}
@@ -131,8 +131,8 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		{
 			dataService.getMeta().addEntityMeta(hopMetaData);
 			Repository gene = dataService.getMeta().addEntityMeta(geneMetaData);
-			MapEntity geneEntity = new MapEntity(hopMetaData);
-			geneEntity.set("identifier", "1");
+			MapEntity geneEntity = new MapEntity(geneMetaData);
+			geneEntity.set("id", "1");
 			geneEntity.set("lengte", 123.4);
 			gene.add(geneEntity);
 		}

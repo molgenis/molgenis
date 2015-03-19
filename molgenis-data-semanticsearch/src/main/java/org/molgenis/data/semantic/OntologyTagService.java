@@ -1,5 +1,9 @@
 package org.molgenis.data.semantic;
 
+import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.ATTRIBUTES;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_NAME;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,7 +12,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Package;
-import org.molgenis.data.Query;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.PackageMetaData;
@@ -38,10 +41,9 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 
 	private Entity findAttributeEntity(String entityName, String attributeName)
 	{
-		Query q = new QueryImpl().eq(AttributeMetaDataMetaData.ENTITY, entityName).and()
-				.eq(AttributeMetaDataMetaData.NAME, attributeName);
-		Entity entity = dataService.findOne(AttributeMetaDataMetaData.ENTITY_NAME, q);
-		return entity;
+		Entity entityMetaDataEntity = dataService.findOne(ENTITY_NAME, entityName);
+		return stream(entityMetaDataEntity.getEntities(ATTRIBUTES).spliterator(), false)
+				.filter(att -> attributeName.equals(att.getString(AttributeMetaDataMetaData.NAME))).findFirst().get();
 	}
 
 	@Override

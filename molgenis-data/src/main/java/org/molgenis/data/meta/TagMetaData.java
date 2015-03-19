@@ -17,7 +17,7 @@ public class TagMetaData extends DefaultEntityMetaData
 	{
 		super(ENTITY_NAME);
 		addAttribute(IDENTIFIER).setIdAttribute(true).setNillable(false);
-		addAttribute(OBJECT_IRI);
+		addAttribute(OBJECT_IRI).setLookupAttribute(true);
 		addAttribute(LABEL).setNillable(false).setLookupAttribute(true).setLabelAttribute(true);
 		addAttribute(RELATION_IRI).setNillable(false);
 		addAttribute(RELATION_LABEL).setNillable(false);
