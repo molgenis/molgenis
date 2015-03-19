@@ -1,9 +1,12 @@
 package org.molgenis.ontology.repository;
 
+import static java.util.Arrays.stream;
 import static org.elasticsearch.common.collect.Iterables.transform;
 import static org.molgenis.data.support.QueryImpl.IN;
 import static org.molgenis.ontology.model.OntologyTermMetaData.ENTITY_NAME;
 import static org.molgenis.ontology.model.OntologyTermMetaData.ONTOLOGY;
+import static org.molgenis.ontology.model.OntologyTermMetaData.ONTOLOGY_TERM_IRI;
+import static org.molgenis.ontology.model.OntologyTermMetaData.ONTOLOGY_TERM_NAME;
 
 import java.util.List;
 
@@ -12,7 +15,6 @@ import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.ontology.model.OntologyTermMetaData;
 import org.molgenis.ontology.repository.model.Ontology;
 import org.molgenis.ontology.repository.model.OntologyTerm;
 
@@ -20,16 +22,29 @@ public class OntologyTermRepository
 {
 	private DataService dataService;
 
-	public List<OntologyTerm> findOntologyTerms(List<Ontology> ontologies, String search)
+	public List<OntologyTerm> findOntologyTerms(List<Ontology> ontologies, String search, int pageSize)
 	{
 		Iterable<Entity> termEntities = dataService.findAll(ENTITY_NAME,
-				new QueryImpl(IN(ONTOLOGY, transform(ontologies, Ontology::getId))).setPageSize(100));
+				new QueryImpl(IN(ONTOLOGY, transform(ontologies, Ontology::getId))).setPageSize(pageSize));
 		return Lists.newArrayList(Iterables.transform(termEntities, OntologyTermRepository::toOntologyTerm));
 	}
 
 	private static OntologyTerm toOntologyTerm(Entity entity)
 	{
-		return OntologyTerm.create(entity.getString(OntologyTermMetaData.ONTOLOGY_TERM_IRI),
-				entity.getString(OntologyTermMetaData.ONTOLOGY_TERM_NAME));
+		return OntologyTerm.create(entity.getString(ONTOLOGY_TERM_IRI), entity.getString(ONTOLOGY_TERM_NAME));
+	}
+
+	/**
+	 * Retrieves an {@link OntologyTerm} for one or more IRIs
+	 * 
+	 * @param iris
+	 *            Array of {@link OntologyTerm} IRIs
+	 * @return combined {@link OntologyTerm} for the iris.
+	 */
+	public OntologyTerm getOntologyTerm(String[] iris)
+	{
+		return OntologyTerm.and(stream(iris)
+				.map(iri -> dataService.findOne(ENTITY_NAME, QueryImpl.EQ(ONTOLOGY_TERM_IRI, iri)))
+				.filter(x -> x != null).map(OntologyTermRepository::toOntologyTerm).toArray(OntologyTerm[]::new));
 	}
 }

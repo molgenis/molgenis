@@ -52,8 +52,16 @@ public abstract class OntologyTerm
 	 *            the {@link OntologyTerm}s to combine
 	 * @return the combined OntologyTerm
 	 */
-	public static OntologyTerm add(OntologyTerm... terms)
+	public static OntologyTerm and(OntologyTerm... terms)
 	{
+		if (terms == null || terms.length == 0)
+		{
+			return null;
+		}
+		if (terms.length == 1)
+		{
+			return terms[0];
+		}
 		return create(join(stream(terms).map(OntologyTerm::getIRI).toArray(), ','),
 				"(" + join(stream(terms).map(OntologyTerm::getLabel).toArray(), " and ") + ")");
 	}
