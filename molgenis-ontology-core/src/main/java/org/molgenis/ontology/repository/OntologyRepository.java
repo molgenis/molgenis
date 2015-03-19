@@ -12,6 +12,10 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.repository.model.Ontology;
 import org.springframework.beans.factory.annotation.Autowired;
 
+/**
+ * Maps OntologyMetaData {@link Entity} <-> {@link Ontology}
+ * 
+ */
 public class OntologyRepository
 {
 	@Autowired

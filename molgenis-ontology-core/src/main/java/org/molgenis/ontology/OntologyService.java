@@ -32,7 +32,7 @@ public interface OntologyService
 	 *            number of results to return.
 	 * @return List of {@link OntologyTerm}s that match the search term.
 	 */
-	List<OntologyTerm> findOntologyTerms(List<Ontology> ontologies, String search, int pageSize);
+	List<OntologyTerm> findOntologyTerms(List<String> ontologyIds, String search, int pageSize);
 
 	// voor de tag service
 	/**

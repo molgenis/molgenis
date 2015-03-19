@@ -1,6 +1,5 @@
 package org.molgenis.ontology.repository;
 
-import static org.elasticsearch.common.collect.Iterables.transform;
 import static org.molgenis.data.support.QueryImpl.IN;
 import static org.molgenis.ontology.model.OntologyTermMetaData.ENTITY_NAME;
 import static org.molgenis.ontology.model.OntologyTermMetaData.ONTOLOGY;
@@ -14,17 +13,28 @@ import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.ontology.repository.model.Ontology;
+import org.molgenis.ontology.model.OntologyTermMetaData;
 import org.molgenis.ontology.repository.model.OntologyTerm;
 
+/**
+ * Maps {@link OntologyTermMetaData} {@link Entity} <-> {@link OntologyTerm}
+ */
 public class OntologyTermRepository
 {
 	private DataService dataService;
 
-	public List<OntologyTerm> findOntologyTerms(List<Ontology> ontologies, String search, int pageSize)
+	/**
+	 * Finds
+	 * 
+	 * @param ontologyIds
+	 * @param search
+	 * @param pageSize
+	 * @return
+	 */
+	public List<OntologyTerm> findOntologyTerms(List<String> ontologyIds, String search, int pageSize)
 	{
 		Iterable<Entity> termEntities = dataService.findAll(ENTITY_NAME,
-				new QueryImpl(IN(ONTOLOGY, transform(ontologies, Ontology::getId))).setPageSize(pageSize));
+				new QueryImpl(IN(ONTOLOGY, ontologyIds)).setPageSize(pageSize));
 		return Lists.newArrayList(Iterables.transform(termEntities, OntologyTermRepository::toOntologyTerm));
 	}
 

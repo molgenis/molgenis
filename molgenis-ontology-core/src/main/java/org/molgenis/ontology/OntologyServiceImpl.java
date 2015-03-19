@@ -37,9 +37,9 @@ public class OntologyServiceImpl implements OntologyService
 	}
 
 	@Override
-	public List<OntologyTerm> findOntologyTerms(List<Ontology> ontologies, String search, int pageSize)
+	public List<OntologyTerm> findOntologyTerms(List<String> ontologyIds, String search, int pageSize)
 	{
-		return ontologyTermRepository.findOntologyTerms(ontologies, search, pageSize);
+		return ontologyTermRepository.findOntologyTerms(ontologyIds, search, pageSize);
 	}
 
 }
