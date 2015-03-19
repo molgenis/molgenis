@@ -1410,6 +1410,21 @@ public class QueryGeneratorTest
 	}
 
 	@Test(expectedExceptions = MolgenisQueryException.class)
+	public void generateOneQueryRuleRangeInt()
+	{
+		Integer low = Integer.valueOf(3);
+		Integer high = Integer.valueOf(9);
+		Query q = new QueryImpl().rng(intAttributeName, low, high);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
+				.rangeFilter(stringAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED).gte(3).lte(9));
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
+	@Test(expectedExceptions = MolgenisQueryException.class)
 	public void generateOneQueryRuleSearchOneFieldBool()
 	{
 		String value = "value";
