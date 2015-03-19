@@ -5,8 +5,20 @@
 	
 	function createChildren(attributes, doSelect) {
 		var children = [];
-		$.each(attributes, function() {
-			var isFolder = this.fieldType === 'COMPOUND';
+		$.each(attributes, function() {		
+			
+			var isFolder = false;
+			
+			if (this.fieldType === 'MREF' || this.fieldType === 'XREF'){
+				isFolder = true;
+				if(this.hasOwnProperty('isRefEntity')){
+					isFolder = false;
+				}
+			}
+			
+			var isFolder = isFolder || this.fieldType === 'COMPOUND';
+			
+			
 			children.push({
 				'key' : this.href,
 				'title' : this.label,
@@ -93,18 +105,29 @@
 			},
 			'lazyLoad' : function (e, data) {
 				var node = data.node;
-				data.result = $.Deferred(function (dfd) {
-					restApi.getAsync(node.key, {'expand': ['attributes']}, function(attributeMetaData) {
-						console.log(attributeMetaData);
-						var children = createChildren(attributeMetaData.attributes, function() {
-							return node.selected;
+				if (node.data.attribute.fieldType === "MREF" || node.data.attribute.fieldType === "XREF"){
+					
+					data.result = $.Deferred(function (dfd) {
+						restApi.getAsync(node.data.attribute.refEntity.href, {'expand': ['attributes']}, function(attributeMetaData) {
+							var children = createChildren(attributeMetaData.attributes, function() {
+								return node.selected;
+							});
+							dfd.resolve(children);
 						});
-						dfd.resolve(children);
-					});
-				});	
+					});						
+				}else{
+					data.result = $.Deferred(function (dfd) {
+						restApi.getAsync(node.key, {'expand': ['attributes']}, function(attributeMetaData) {
+							var children = createChildren(attributeMetaData.attributes, function() {
+								return node.selected;
+							});
+							dfd.resolve(children);
+						});
+					});	
+				}
 			},
 			'source' : createChildren(settings.entityMetaData.attributes, function(attribute) {
-					return settings.selectedAttributes ? $.inArray(attribute, settings.selectedAttributes) !== -1  : false;
+				return settings.selectedAttributes ? $.inArray(attribute, settings.selectedAttributes) !== -1  : false;
 			}),
 			'click' : function(e, data) {
 				if (data.targetType === 'title' || data.targetType === 'icon') {
@@ -171,6 +194,9 @@
 		'focusedAttribute' : null,
 		'icon' : null,
 		'onAttributeClick' : null,
-		'onAttributesSelect' : null
+		'onAttributesSelect' : null,
+		'refEntityDepth': -1 // -1 = infinite depth
+							 //  0 = default behaviour (no expanding refEntities)
+							 // >0 = nr. of nested refEntities that can be expanded
 	};
 }($, window.top.molgenis = window.top.molgenis || {}));
