@@ -22,7 +22,6 @@ import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
-import org.molgenis.ontology.OntologyService;
 import org.molgenis.ontology.model.OntologyMetaData;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.FileStore;
@@ -42,9 +41,6 @@ public class OntologyImportService implements ImportService
 
 	@Autowired
 	private FileStore fileStore;
-
-	@Autowired
-	private OntologyService ontologyService;
 
 	@Autowired
 	public OntologyImportService(FileRepositoryCollectionFactory fileRepositoryCollectionFactory,

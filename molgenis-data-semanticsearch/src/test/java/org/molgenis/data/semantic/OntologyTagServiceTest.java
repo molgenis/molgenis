@@ -19,11 +19,9 @@ import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.ontology.Ontology;
 import org.molgenis.ontology.OntologyService;
-import org.molgenis.ontology.OntologyTerm;
-import org.molgenis.ontology.beans.OntologyImpl;
-import org.molgenis.ontology.beans.OntologyTermImpl;
+import org.molgenis.ontology.repository.model.Ontology;
+import org.molgenis.ontology.repository.model.OntologyTerm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -55,15 +53,15 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 
 	private final Relation instanceOf = Relation.valueOf("instanceOf");
 
-	public static final Ontology EDAM_ONTOLOGY = new OntologyImpl("EDAM", "http://edamontology.org",
+	public static final Ontology EDAM_ONTOLOGY = Ontology.create("EDAM", "http://edamontology.org",
 			"The EDAM ontology.");
 
-	public static final OntologyTerm CHROMOSOME_NAME_ONTOLOGY_TERM = new OntologyTermImpl(
-			"http://edamontology.org/data_0987", "Chromosome name", "Name of a chromosome.", "data_0987", EDAM_ONTOLOGY);
+	public static final OntologyTerm CHROMOSOME_NAME_ONTOLOGY_TERM = OntologyTerm.create(
+			"http://edamontology.org/data_0987", "Chromosome name", "Name of a chromosome.");
 
-	public static final OntologyTerm GENE_ANNOTATION_ONTOLOGY_TERM = new OntologyTermImpl(
+	public static final OntologyTerm GENE_ANNOTATION_ONTOLOGY_TERM = OntologyTerm.create(
 			"http://edamontology.org/data_0919", "Gene annotation (chromosome)",
-			"This includes basic information. e.g. chromosome number...", "data_0919", EDAM_ONTOLOGY);
+			"This includes basic information. e.g. chromosome number...");
 
 	@BeforeTest
 	public void beforeTest()
@@ -108,12 +106,11 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 		when(dataService.findOne(EntityMetaDataMetaData.ENTITY_NAME, "org.molgenis.SNP")).thenReturn(
 				entityMetaDataEntity);
 
-		Ontology edamOntology = new OntologyImpl("EDAM", "http://edamontology.org", "The EDAM ontology.");
-		OntologyTerm chromosomeName = new OntologyTermImpl("http://edamontology.org/data_0987", "Chromosome name",
-				"Name of a chromosome.", "data_0987", edamOntology);
-		OntologyTerm geneAnnotation = new OntologyTermImpl("http://edamontology.org/data_0919",
-				"Gene annotation (chromosome)", "This includes basic information. e.g. chromosome number...",
-				"data_0919", edamOntology);
+		Ontology edamOntology = Ontology.create("EDAM", "http://edamontology.org", "The EDAM ontology.");
+		OntologyTerm chromosomeName = OntologyTerm.create("http://edamontology.org/data_0987", "Chromosome name",
+				"Name of a chromosome.");
+		OntologyTerm geneAnnotation = OntologyTerm.create("http://edamontology.org/data_0919",
+				"Gene annotation (chromosome)", "This includes basic information. e.g. chromosome number...");
 
 		when(ontologyService.getOntology("http://edamontology.org")).thenReturn(edamOntology);
 		when(ontologyService.getOntologyTerm("http://edamontology.org/data_0987", "http://edamontology.org"))

@@ -120,6 +120,12 @@ public class QueryRule
 		GREATER_EQUAL(">="),
 
 		/**
+		 * 'field' equal-or-greater-than 'from value' and equal-or-less-than 'to value' (value being a list with 'from
+		 * value' as first element and 'to value' as second element
+		 */
+		RANGE("RANGE"),
+
+		/**
 		 * 'field' like 'value' (works like equals with wildcard before and after value)
 		 */
 		LIKE("LIKE"),
@@ -152,7 +158,12 @@ public class QueryRule
 		/**
 		 * Disjunction max query
 		 */
-		DIS_MAX("DIS_MAX");
+		DIS_MAX("DIS_MAX"),
+
+		/**
+		 * Fuzzy match operator
+		 */
+		FUZZY_MATCH("FUZZY_MATCH");
 
 		private String label;
 
