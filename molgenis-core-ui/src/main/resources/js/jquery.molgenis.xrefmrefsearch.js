@@ -212,7 +212,7 @@
 		if (options.isfilter){
 			var $operatorInput = $('<input type="hidden" data-filter="xrefmref-operator" value="' + options.operator + '" />');
 
-			if(attributeMetaData.fieldType === 'MREF' || attributeMetaData.fieldType === 'CATEGORICAL_MREF') {
+			if(attributeMetaData.fieldType === 'MREF' || attributeMetaData.fieldType === 'CATEGORICAL_MREF') { // TODO remove CATEGORICAL_MREF when it is rendered like CATEGORICAL is rendered for XREF
 				var $dropdown = $('<div class="input-group-addon dropdown dropdown-toggle-container">');
 				var orValue = 'OR&nbsp;&nbsp;';
 				var andValue = 'AND';
@@ -237,7 +237,7 @@
 				$container.addClass("select2-bootstrap-prepend");
 				$container.prepend($dropdown);
 			}
-			else if (attributeMetaData.fieldType === 'XREF') { // FIXME missing CATEGORICAL
+			else if (attributeMetaData.fieldType === 'XREF') {
 				$operatorInput.val('OR');
 				$container.append($('<div class="input-group-addon dropdown-toggle-container"><button class="btn btn-default" type="button" disabled>OR</button></div>'));
 				$container.append($operatorInput);

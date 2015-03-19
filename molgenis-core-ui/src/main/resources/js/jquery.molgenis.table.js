@@ -292,7 +292,7 @@
 				input.addClass('number-input');
 				cell.html(input);
 				break;
-			case 'CATEGORICAL_MREF': // FIXME render like CATEGORICAL is rendered for XREF
+			case 'CATEGORICAL_MREF': // TODO render like CATEGORICAL is rendered for XREF
 			case 'MREF':
 				var refEntityMeta = settings.refEntitiesMeta[attribute.refEntity.href];
 				// TODO do not construct uri from other uri
@@ -408,8 +408,7 @@
 					
                 	if (refValue) {
                 		var refAttributeType = refValue.fieldType;
-                		// FIXME missing CATEGORICAL?
-                		if (refAttributeType === 'XREF' || refAttributeType === 'MREF' || refAttributeType === 'CATEGORICAL_MREF' || refAttributeType === 'COMPOUND') {
+                		if (refAttributeType === 'XREF' || refAttributeType === 'MREF' || refAttributeType === 'CATEGORICAL' || refAttributeType === 'CATEGORICAL_MREF' || refAttributeType === 'COMPOUND') {
                 			throw 'unsupported field type ' + refAttributeType;
                 		}
 						

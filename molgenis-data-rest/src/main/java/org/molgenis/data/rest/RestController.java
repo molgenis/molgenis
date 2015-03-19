@@ -1145,7 +1145,7 @@ public class RestController
 
 				EntityPager pager = new EntityPager(request.getStart(), request.getNum(), (long) count, mrefEntities);
 				return new EntityCollectionResponse(pager, refEntityMaps, attrHref);
-				// FIXME check why CATEGORICAL is not a case here
+			case CATEGORICAL:
 			case XREF:
 				Map<String, Object> entityXrefAttributeMap = getEntityAsMap((Entity) entity.get(refAttributeName),
 						attr.getRefEntity(), attributesSet, attributeExpandSet);
