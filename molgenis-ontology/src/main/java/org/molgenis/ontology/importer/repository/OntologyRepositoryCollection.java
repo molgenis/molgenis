@@ -1,4 +1,4 @@
-package org.molgenis.ontology.repository;
+package org.molgenis.ontology.importer.repository;
 
 import java.io.File;
 import java.io.FileNotFoundException;

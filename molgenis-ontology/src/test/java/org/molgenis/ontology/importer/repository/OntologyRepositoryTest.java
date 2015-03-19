@@ -1,4 +1,4 @@
-package org.molgenis.ontology.repository;
+package org.molgenis.ontology.importer.repository;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -12,6 +12,7 @@ import java.util.List;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.UuidGenerator;
+import org.molgenis.ontology.importer.repository.OntologyRepository;
 import org.molgenis.ontology.model.OntologyMetaData;
 import org.molgenis.ontology.utils.OntologyLoader;
 import org.molgenis.ontology.utils.ZipFileUtil;
