@@ -105,7 +105,7 @@
 </div>
 
 <div class="row">
-	<div class="col-md-1">
+	<div class="col-md-2">
 		<form method="get" action="${context_url}/tagWizard">
 			<input type="hidden" name="target" value="${selectedTarget}"/>
 			<div class="btn-group" role="group">
@@ -113,16 +113,17 @@
 					<span class="glyphicon glyphicon-tag"></span> Run tag wizard
 				</button>
 			</div>
-			
 		</form>
-	</div>
-	<#if mappingProject.getMappingTarget(selectedTarget).entityMappings?has_content>		
-		<div class="col-md-11">
-			<a id="add-new-attr-mapping-btn" href="#" class="btn btn-success pull-left" data-toggle="modal" data-target="#create-integrated-entity-modal">
+	</div>	
+		
+	<#if mappingProject.getMappingTarget(selectedTarget).entityMappings?has_content>
+		<div class="col-md-8">		
+			<a id="add-new-attr-mapping-btn" href="#" class="btn btn-success pull-right" data-toggle="modal" data-target="#create-integrated-entity-modal">
 				<span class="glyphicon glyphicon-play"></span> Create integrated dataset
 			</a>
 		</div>
 	</#if>
+	
 </div>
 
 <!--Create new source dialog-->
