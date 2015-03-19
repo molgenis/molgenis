@@ -5,8 +5,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.molgenis.auth.GroupAuthority;
+import org.molgenis.auth.MolgenisGroup;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.framework.db.EntityImportReport;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.ui.wizard.Wizard;
 
 public class ImportWizard extends Wizard
@@ -21,9 +24,12 @@ public class ImportWizard extends Wizard
 	private Map<String, Collection<String>> fieldsAvailable;
 	private String entityImportOption;
 	private String validationMessage;
-	private Integer importRunId;
+	private String importRunId;
 	private List<DatabaseAction> supportedDatabaseActions;
 	private boolean mustChangeEntityName;
+	private Iterable<MolgenisGroup> groups;
+	private List<String> entityNames;
+	private boolean allowPermissions;
 
 	public File getFile()
 	{
@@ -115,12 +121,12 @@ public class ImportWizard extends Wizard
 		this.validationMessage = validationMessage;
 	}
 
-	public Integer getImportRunId()
+	public String getImportRunId()
 	{
 		return importRunId;
 	}
 
-	public void setImportRunId(Integer importRunId)
+	public void setImportRunId(String importRunId)
 	{
 		this.importRunId = importRunId;
 	}
@@ -145,4 +151,32 @@ public class ImportWizard extends Wizard
 		this.mustChangeEntityName = mustChangeEntityName;
 	}
 
+	public void setGroups(Iterable<MolgenisGroup> groups)
+	{
+		this.groups = groups;
+	}
+
+	public Iterable<MolgenisGroup> getGroups()
+	{
+		return groups;
+	}
+
+	public void setImportedEntities(List entityNames)
+	{
+		this.entityNames = entityNames;
+	}
+
+	public List<String> getImportedEntities()
+	{
+		return this.entityNames;
+	}
+
+	public boolean getAllowPermissions()
+	{
+		allowPermissions = SecurityUtils.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX
+                + MolgenisGroup.ENTITY_NAME.toUpperCase())
+				&& SecurityUtils.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX
+						+ GroupAuthority.ENTITY_NAME.toUpperCase());
+		return allowPermissions || SecurityUtils.currentUserIsSu();
+	}
 }

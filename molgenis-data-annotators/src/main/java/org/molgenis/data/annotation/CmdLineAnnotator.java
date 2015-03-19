@@ -11,8 +11,10 @@ public class CmdLineAnnotator
 
 	public static void main(String[] args) throws Exception
 	{
-		List<String> annotators = Arrays.asList(new String[]{"cadd", "clinvar", "ase", "ccgg", "exac", "1kg", "gonl", "gwascatalog", "vkgl", "cgd", "enhancers", "proteinatlas"});
-		
+		List<String> annotators = Arrays.asList(new String[]
+		{ "cadd", "clinvar", "ase", "ccgg", "exac", "1kg", "gonl", "gwascatalog", "vkgl", "cgd", "enhancers",
+				"proteinatlas" });
+
 		if (args.length != 4)
 		{
 			throw new Exception(
@@ -20,16 +22,16 @@ public class CmdLineAnnotator
 		}
 
 		String annotator = args[0];
-		if(!annotators.contains(annotator))
+		if (!annotators.contains(annotator))
 		{
 			System.out.println("Annotator must be one of the following: ");
-			for(String ann : annotators)
+			for (String ann : annotators)
 			{
 				System.out.print(ann + " ");
 			}
 			throw new Exception("Invalid annotator.");
 		}
-		
+
 		File annotationSourceFile = new File(args[1]);
 		if (!annotationSourceFile.exists())
 		{
@@ -49,63 +51,63 @@ public class CmdLineAnnotator
 		File outputVCFFile = new File(args[3]);
 		if (outputVCFFile.exists())
 		{
-			//TODO terugzetten!! throw new Exception("Output VCF file already exists at " + outputVCFFile.getAbsolutePath());
+			// TODO terugzetten!! throw new Exception("Output VCF file already exists at " +
+			// outputVCFFile.getAbsolutePath());
 		}
 
 		// engage!
-		if(annotator.equals("cadd"))
+		if (annotator.equals("cadd"))
 		{
 			new CaddServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
-		else if(annotator.equals("clinvar"))
+		else if (annotator.equals("clinvar"))
 		{
-			//TODO
+			// TODO
 		}
-		else if(annotator.equals("ase"))
+		else if (annotator.equals("ase"))
 		{
-			//TODO
+			// TODO
 		}
-		else if(annotator.equals("ccgg"))
+		else if (annotator.equals("ccgg"))
 		{
-			//TODO
+			// TODO
 		}
-		else if(annotator.equals("exac"))
+		else if (annotator.equals("exac"))
 		{
-			//TODO
+			// TODO
 		}
-		else if(annotator.equals("1kg"))
+		else if (annotator.equals("1kg"))
 		{
-			//TODO
+			// TODO
 		}
-		else if(annotator.equals("gonl"))
+		else if (annotator.equals("gonl"))
 		{
-			//TODO
+			// TODO
 		}
-		else if(annotator.equals("gwascatalog"))
+		else if (annotator.equals("gwascatalog"))
 		{
-			//TODO
+			// TODO
 		}
-		else if(annotator.equals("vkgl"))
+		else if (annotator.equals("vkgl"))
 		{
-			//TODO
+			// TODO
 		}
-		else if(annotator.equals("cgd"))
+		else if (annotator.equals("cgd"))
 		{
-			//TODO
+			// TODO
 		}
-		else if(annotator.equals("enhancers"))
+		else if (annotator.equals("enhancers"))
 		{
-			//TODO
+			// TODO
 		}
-		else if(annotator.equals("proteinatlas"))
+		else if (annotator.equals("proteinatlas"))
 		{
-			//TODO
+			// TODO
 		}
 		else
 		{
 			throw new Exception("Annotor unknown: " + annotator);
 		}
-		
 
 	}
 

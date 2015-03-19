@@ -1,12 +1,11 @@
 package org.molgenis.data.csv;
 
-import static org.molgenis.data.csv.CsvRepositoryCollection.EXTENSION_ZIP;
-
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -14,12 +13,15 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.springframework.util.StringUtils;
+
+import com.google.common.collect.Iterables;
 
 /**
  * Repository implementation for csv files.
@@ -28,7 +30,6 @@ import org.springframework.util.StringUtils;
  */
 public class CsvRepository extends AbstractRepository
 {
-	public static final String BASE_URL = "csv://";
 	private final String sheetName;
 	private final File file;
 	private List<CellProcessor> cellProcessors;
@@ -53,9 +54,6 @@ public class CsvRepository extends AbstractRepository
 
 	public CsvRepository(File file, String sheetName, @Nullable List<CellProcessor> cellProcessors)
 	{
-		super(file.getName().toLowerCase().endsWith(EXTENSION_ZIP) ? BASE_URL + file.getName() + '/' + sheetName : file
-				.getName());
-
 		this.file = file;
 		this.sheetName = sheetName;
 		this.cellProcessors = cellProcessors;
@@ -91,7 +89,15 @@ public class CsvRepository extends AbstractRepository
 	}
 
 	@Override
-	public void close() throws IOException
+	public Set<RepositoryCapability> getCapabilities()
 	{
+		return Collections.emptySet();
 	}
+
+	@Override
+	public long count()
+	{
+		return Iterables.size(this);
+	}
+
 }

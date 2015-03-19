@@ -1,13 +1,17 @@
 package org.molgenis.data.examples;
 
+import static org.molgenis.data.support.QueryImpl.EQ;
+
+import java.io.File;
+
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
-import org.molgenis.data.Updateable;
-import org.molgenis.data.Writable;
 import org.molgenis.data.csv.CsvRepository;
+import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -19,74 +23,115 @@ public class DataApiExample extends AbstractTestNGSpringContextTests
 	@Autowired
 	DataService dataService;
 
-	@Test
-	public void test()
+	// @Test
+	public void testStatic()
 	{
-		Repository r = dataService.getRepositoryByEntityName("Users");
+		// Add some users
+		dataService.add(UserMetaData.ENTITY_NAME, new User("Piet", true));
+		dataService.add(UserMetaData.ENTITY_NAME, new User("Klaas", false));
 
-		for (Entity e : r)
-		{
-			System.out.println(e);
-            //outputs
-		}
+		// Retrieve them and print
+		printUsers();
 
-		Writable repo = dataService.getWritableRepository("Users");
+		// Find Klaas
+		User klaas = dataService.findOne(UserMetaData.ENTITY_NAME, "Klaas", User.class);
+		System.out.println(klaas);
 
-		// untyped
-		MapEntity user = new MapEntity();
-		user.set("username", "john");
-		user.set("active", true);
+		// Make klaas active
+		klaas.setActive(true);
+		dataService.update(UserMetaData.ENTITY_NAME, klaas);
 
-		repo.add(user);
+		// Find all active
+		dataService.findAll(UserMetaData.ENTITY_NAME, EQ(UserMetaData.ACTIVE, true), User.class).forEach(
+				System.out::println);
+		// OR ??
+		dataService.getRepository(UserMetaData.ENTITY_NAME).query().eq(UserMetaData.ACTIVE, true)
+				.forEach(System.out::println);
 
-		// typed, if we used good ol' XML -> JPA code generator
-		User u = new User();
-		u.setUsername("jane");
-		u.setActive(true);
+		// Delete one
+		dataService.delete(UserMetaData.ENTITY_NAME, "Piet");
+		printUsers();
 
-		repo.add(u);
+		// Discover capabilities of repo
+		dataService.getCapabilities(UserMetaData.ENTITY_NAME).forEach(System.out::println);
 
-		// streaming
-		repo.add(new CsvRepository("users.csv"));
-
-		// User{name:username, active:true}
-
-		Query q = dataService.query("Users");
-
-		// iterator
-		for (Entity e : q.eq("username", "john"))
-		{
-			System.out.println(e);
-		}
-
-		// count
-		System.out.println(q.gt("age", 65).count());
-
-		// type safe
-		for (User p : q.findAll(User.class))
-		{
-			System.out.println(p.getUsername());
-		}
-
-		Updateable dao = dataService.getCrudRepository("Users");
-
-		u.setUsername("jane2");
-
-		// update
-		dao.update(u);
-
-		// update streaming
-		dao.update(new CsvRepository("updatedUsers.csv"));
-
-		// delete
-		dao.delete(u);
-
-		// delete streaming
-		dao.delete(q.lt("age", 21));
-
-		// adding a repo
-		dataService.addRepository(new CsvRepository("browseThis.csv"));
-
+		// Add streaming
+		File usersCsv = ResourceUtils.getFile("users.csv");
+		dataService.add(UserMetaData.ENTITY_NAME, new CsvRepository(usersCsv, null));
+		printUsers();
 	}
 
+	private void printUsers()
+	{
+		dataService.findAll(UserMetaData.ENTITY_NAME, User.class).forEach(System.out::println);
+	}
+
+	// @Test
+	public void testDynamic()
+	{
+		// Create new dynamic repo
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("City");
+		emd.addAttribute("name").setIdAttribute(true).setNillable(false);
+		emd.addAttribute("population").setDataType(MolgenisFieldTypes.INT);
+
+		Repository repo = dataService.getMeta().addEntityMeta(emd);
+
+		// Add entities to it
+		Entity amsterdam = new MapEntity();
+		amsterdam.set("name", "Amsterdam");
+		amsterdam.set("population", 813562);
+		repo.add(amsterdam);
+
+		Entity london = new MapEntity();
+		london.set("name", "London");
+		london.set("population", 8416535);
+		repo.add(london);
+
+		// Retrieve all entities of repo
+		dataService.findAll("City").forEach((entity) -> System.out.println(entity.get("name")));
+
+		// Add attribute
+		emd.addAttribute("country");
+		dataService.getMeta().updateEntityMeta(emd);
+
+		// Print attributes
+		dataService.getEntityMetaData("City").getAtomicAttributes()
+				.forEach((attr) -> System.out.println(attr.getName()));
+
+		// Update entity
+		amsterdam.set("country", "Netherlands");
+		dataService.update("City", amsterdam);
+		Entity entity = dataService.findOne("City", "Amsterdam");
+		System.out.println(entity.get("name") + ": " + entity.get("country"));
+	}
+
+	@Test
+	public void testRepositoryCollections()
+	{
+		// Print all available backends
+		dataService.getMeta().forEach((backend) -> System.out.println(backend.getName()));
+
+		// Add cities to MyRepo
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("City1");
+		emd.setBackend("MyRepos");
+		emd.addAttribute("name").setIdAttribute(true).setNillable(false);
+		emd.addAttribute("population").setDataType(MolgenisFieldTypes.INT);
+
+		Repository repo = dataService.getMeta().addEntityMeta(emd);
+		System.out.println(repo);
+
+		// Add entities to it
+		Entity amsterdam = new MapEntity();
+		amsterdam.set("name", "Amsterdam");
+		amsterdam.set("population", 813562);
+		repo.add(amsterdam);
+
+		Entity london = new MapEntity();
+		london.set("name", "London");
+		london.set("population", 8416535);
+		repo.add(london);
+
+		// Retrieve all entities of repo
+		repo.forEach((entity) -> System.out.println(entity.get("name")));
+	}
 }

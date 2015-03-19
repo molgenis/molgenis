@@ -10,6 +10,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -17,17 +18,15 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.OntologyService;
 import org.molgenis.ontology.beans.OntologyTermEntity;
 import org.molgenis.ontology.beans.OntologyTermTransformer;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 
 public class OntologyTermQueryRepository extends AbstractOntologyQueryRepository
 {
 	public final static String DEFAULT_ONTOLOGY_TERM_REPO = "ontologytermindex";
-	private final static String BASE_URL = "ontologytermindex://";
 	private final static List<String> reservedAttributeName = Arrays.asList("score");
 
-	@Autowired
 	public OntologyTermQueryRepository(String entityName, SearchService searchService, DataService dataService,
 			OntologyService ontologyService)
 	{
@@ -92,20 +91,21 @@ public class OntologyTermQueryRepository extends AbstractOntologyQueryRepository
 	}
 
 	@Override
-	public Query query()
-	{
-		return new QueryImpl(this);
-	}
-
-	@Override
 	public long count(Query q)
 	{
 		return searchService.count(q.pageSize(Integer.MAX_VALUE).offset(Integer.MIN_VALUE), entityMetaData);
 	}
 
 	@Override
-	public String getUrl()
+	public Set<RepositoryCapability> getCapabilities()
 	{
-		return BASE_URL + getName();
+		return Sets.newHashSet(RepositoryCapability.QUERYABLE);
 	}
+
+	@Override
+	public long count()
+	{
+		return count(new QueryImpl());
+	}
+
 }

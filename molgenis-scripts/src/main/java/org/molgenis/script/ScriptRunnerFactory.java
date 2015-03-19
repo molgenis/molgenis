@@ -3,7 +3,6 @@ package org.molgenis.script;
 import java.util.Map;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.ManageableCrudRepositoryCollection;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,12 +22,9 @@ public class ScriptRunnerFactory
 	private final DataService dataService;
 
 	@Autowired
-	public ScriptRunnerFactory(ManageableCrudRepositoryCollection collection, DataService dataService)
+	public ScriptRunnerFactory(DataService dataService)
 	{
 		this.dataService = dataService;
-		collection.add(ScriptParameter.META_DATA);
-		collection.add(ScriptType.META_DATA);
-		collection.add(Script.META_DATA);
 	}
 
 	@RunAsSystem
@@ -38,7 +34,7 @@ public class ScriptRunnerFactory
 
 		if (dataService.count(ScriptType.ENTITY_NAME, new QueryImpl().eq(ScriptType.NAME, type)) == 0)
 		{
-			dataService.add(ScriptType.ENTITY_NAME, new ScriptType(type));
+			dataService.add(ScriptType.ENTITY_NAME, new ScriptType(type, dataService));
 		}
 	}
 

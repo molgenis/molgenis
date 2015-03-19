@@ -155,7 +155,7 @@ public class MolgenisEntityFormPluginController extends MolgenisPluginController
 			model.addAttribute("back", back);
 		}
 
-		Repository repo = dataService.getRepositoryByEntityName(entityName);
+		Repository repo = dataService.getRepository(entityName);
 		Entity entity = null;
 		if (repo.getEntityMetaData().getEntityClass() != Entity.class) entity = BeanUtils.instantiateClass(repo
 				.getEntityMetaData().getEntityClass());

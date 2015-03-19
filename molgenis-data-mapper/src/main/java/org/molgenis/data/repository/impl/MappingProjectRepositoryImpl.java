@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.molgenis.auth.MolgenisUser;
-import org.molgenis.data.CrudRepository;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
@@ -14,7 +14,6 @@ import org.molgenis.data.meta.MappingProjectMetaData;
 import org.molgenis.data.repository.MappingProjectRepository;
 import org.molgenis.data.repository.MappingTargetRepository;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,16 +24,16 @@ import com.google.common.collect.Lists;
 public class MappingProjectRepositoryImpl implements MappingProjectRepository
 {
 	public static final MappingProjectMetaData META_DATA = new MappingProjectMetaData();
-	private final CrudRepository repository;
+	private final DataService dataService;
 	@Autowired
 	private MolgenisUserService molgenisUserService;
 	@Autowired
 	private IdGenerator idGenerator;
-	private MappingTargetRepository mappingTargetRepository;
+	private final MappingTargetRepository mappingTargetRepository;
 
-	public MappingProjectRepositoryImpl(CrudRepository repository, MappingTargetRepository mappingTargetRepository)
+	public MappingProjectRepositoryImpl(DataService dataService, MappingTargetRepository mappingTargetRepository)
 	{
-		this.repository = repository;
+		this.dataService = dataService;
 		this.mappingTargetRepository = mappingTargetRepository;
 	}
 
@@ -46,7 +45,7 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 		{
 			throw new MolgenisDataException("MappingProject already exists");
 		}
-		repository.add(toEntity(mappingProject));
+		dataService.add(MappingProjectRepositoryImpl.META_DATA.getName(), toEntity(mappingProject));
 	}
 
 	@Override
@@ -59,13 +58,13 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 			throw new MolgenisDataException("MappingProject does not exists");
 		}
 		Entity mappingProjectEntity = toEntity(mappingProject);
-		repository.update(mappingProjectEntity);
+		dataService.update(MappingProjectRepositoryImpl.META_DATA.getName(), mappingProjectEntity);
 	}
 
 	@Override
 	public MappingProject getMappingProject(String identifier)
 	{
-		Entity mappingProjectEntity = repository.findOne(identifier);
+		Entity mappingProjectEntity = dataService.findOne(MappingProjectRepositoryImpl.META_DATA.getName(), identifier);
 		if (mappingProjectEntity == null)
 		{
 			return null;
@@ -76,8 +75,8 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 	@Override
 	public List<MappingProject> getAllMappingProjects()
 	{
-		List<MappingProject> results = new ArrayList<MappingProject>();
-		for (Entity entity : repository.findAll(new QueryImpl()))
+		List<MappingProject> results = new ArrayList<>();
+		for (Entity entity : dataService.findAll(MappingProjectRepositoryImpl.META_DATA.getName()))
 		{
 			results.add(toMappingProject(entity));
 		}
@@ -88,7 +87,7 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 	public List<MappingProject> getMappingProjects(Query q)
 	{
 		List<MappingProject> results = new ArrayList<>();
-		for (Entity entity : repository.findAll(q))
+		for (Entity entity : dataService.findAll(MappingProjectRepositoryImpl.META_DATA.getName(), q))
 		{
 			results.add(toMappingProject(entity));
 		}
@@ -140,6 +139,6 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 	@Override
 	public void delete(String mappingProjectId)
 	{
-		repository.deleteById(mappingProjectId);
+		dataService.delete(MappingProjectRepositoryImpl.META_DATA.getName(), mappingProjectId);
 	}
 }

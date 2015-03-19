@@ -16,6 +16,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Package;
 import org.molgenis.data.Range;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.PackageImpl;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
@@ -43,51 +44,64 @@ public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTe
 	@AfterClass
 	public void beforeMethod()
 	{
-		metaDataRepositories.recreateMetaDataRepositories();
+		try
+		{
+			metaDataRepositories.recreateMetaDataRepositories();
+		}
+		catch (UnknownEntityException e)
+		{
+
+		}
 	}
 
 	@Test
 	public void addAndGetAttributeMetaData()
 	{
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("test");
-		metaDataRepositories.addEntityMetaData(emd);
+		emd.addAttribute("id").setIdAttribute(true).setNillable(false);
+		metaDataRepositories.addEntityMeta(emd);
 
 		List<String> enumOptions = Arrays.asList("enum1", "enum2");
 		AttributeMetaData enumAttr = emd.addAttribute("enum").setDataType(new EnumField()).setEnumOptions(enumOptions);
-		metaDataRepositories.addAttributeMetaData(emd.getName(), enumAttr);
+		metaDataRepositories.addAttribute(emd.getName(), enumAttr);
 
 		AttributeMetaData intRangeAttr = emd.addAttribute("intrange").setDataType(MolgenisFieldTypes.INT)
 				.setRange(new Range(1l, 5l));
-		metaDataRepositories.addAttributeMetaData(emd.getName(), intRangeAttr);
+		metaDataRepositories.addAttribute(emd.getName(), intRangeAttr);
 
 		List<AttributeMetaData> retrieved = Lists.newArrayList(metaDataRepositories.getEntityMetaData(emd.getName())
 				.getAttributes());
 
 		assertNotNull(retrieved);
-		assertEquals(retrieved.size(), 2);
+		assertEquals(retrieved.size(), 3);
 
-		assertEquals(retrieved.get(0).getName(), "enum");
+		assertEquals(retrieved.get(0).getName(), "id");
 		assertNotNull(retrieved.get(0).getDataType());
-		assertEquals(retrieved.get(0).getDataType().getEnumType(), FieldTypeEnum.ENUM);
-		assertEquals(retrieved.get(0).getEnumOptions(), enumOptions);
+		assertEquals(retrieved.get(0).getDataType().getEnumType(), FieldTypeEnum.STRING);
 
-		assertEquals(retrieved.get(1).getName(), "intrange");
+		assertEquals(retrieved.get(1).getName(), "enum");
 		assertNotNull(retrieved.get(1).getDataType());
-		assertEquals(retrieved.get(1).getDataType().getEnumType(), FieldTypeEnum.INT);
-		assertNotNull(retrieved.get(1).getRange());
-		assertEquals(retrieved.get(1).getRange().getMin(), Long.valueOf(1l));
-		assertEquals(retrieved.get(1).getRange().getMax(), Long.valueOf(5l));
+		assertEquals(retrieved.get(1).getDataType().getEnumType(), FieldTypeEnum.ENUM);
+		assertEquals(retrieved.get(1).getEnumOptions(), enumOptions);
+
+		assertEquals(retrieved.get(2).getName(), "intrange");
+		assertNotNull(retrieved.get(2).getDataType());
+		assertEquals(retrieved.get(2).getDataType().getEnumType(), FieldTypeEnum.INT);
+		assertNotNull(retrieved.get(2).getRange());
+		assertEquals(retrieved.get(2).getRange().getMin(), Long.valueOf(1l));
+		assertEquals(retrieved.get(2).getRange().getMax(), Long.valueOf(5l));
 	}
 
 	@Test
 	public void addAndGetEntityMetaData()
 	{
-		DefaultEntityMetaData test = new DefaultEntityMetaData("test");
-		metaDataRepositories.addEntityMetaData(test);
+		DefaultEntityMetaData test = new DefaultEntityMetaData("testje");
+		test.addAttribute("id").setIdAttribute(true).setNillable(false);
+		metaDataRepositories.addEntityMeta(test);
 
 		DefaultEntityMetaData extendsTest = new DefaultEntityMetaData("extendstest");
 		extendsTest.setExtends(test);
-		metaDataRepositories.addEntityMetaData(extendsTest);
+		metaDataRepositories.addEntityMeta(extendsTest);
 
 		EntityMetaData retrieved = metaDataRepositories.getEntityMetaData("extendstest");
 		assertNotNull(retrieved);
@@ -105,13 +119,16 @@ public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTe
 	public void getEntityMetaDatas()
 	{
 		DefaultEntityMetaData test = new DefaultEntityMetaData("test");
-		metaDataRepositories.addEntityMetaData(test);
+		test.addAttribute("id").setIdAttribute(true).setNillable(false);
+		metaDataRepositories.addEntityMeta(test);
 
 		DefaultEntityMetaData test1 = new DefaultEntityMetaData("test1");
-		metaDataRepositories.addEntityMetaData(test1);
+		test1.addAttribute("id").setIdAttribute(true).setNillable(false);
+		metaDataRepositories.addEntityMeta(test1);
 
 		DefaultEntityMetaData test2 = new DefaultEntityMetaData("test2");
-		metaDataRepositories.addEntityMetaData(test2);
+		test2.addAttribute("id").setIdAttribute(true).setNillable(false);
+		metaDataRepositories.addEntityMeta(test2);
 
 		List<EntityMetaData> meta = Lists.newArrayList(metaDataRepositories.getEntityMetaDatas());
 		assertNotNull(meta);
@@ -132,16 +149,20 @@ public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTe
 		metaDataRepositories.addPackage(p2);
 
 		DefaultEntityMetaData test = new DefaultEntityMetaData("test");
-		metaDataRepositories.addEntityMetaData(test);
+		test.addAttribute("id").setIdAttribute(true).setNillable(false);
+		metaDataRepositories.addEntityMeta(test);
 
 		DefaultEntityMetaData test1 = new DefaultEntityMetaData("test1", p1);
-		metaDataRepositories.addEntityMetaData(test1);
+		test1.addAttribute("id").setIdAttribute(true).setNillable(false);
+		metaDataRepositories.addEntityMeta(test1);
 
 		DefaultEntityMetaData test2 = new DefaultEntityMetaData("test2", p2);
-		metaDataRepositories.addEntityMetaData(test2);
+		test2.addAttribute("id").setIdAttribute(true).setNillable(false);
+		metaDataRepositories.addEntityMeta(test2);
 
 		DefaultEntityMetaData test3 = new DefaultEntityMetaData("test3", p2);
-		metaDataRepositories.addEntityMetaData(test3);
+		test3.addAttribute("id").setIdAttribute(true).setNillable(false);
+		metaDataRepositories.addEntityMeta(test3);
 
 		assertEquals(metaDataRepositories.getPackage("p1_p2").getEntityMetaDatas(),
 				Collections.unmodifiableList(Arrays.asList(test2, test3)));

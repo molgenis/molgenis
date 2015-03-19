@@ -115,7 +115,7 @@
 	 */
 	function doShowGenomeBrowser() {
 		// dalliance is not compatible with IE9
-		return molgenis.ie9 !== true && genomebrowserStartAttribute !== undefined && genomebrowserChromosomeAttribute !== undefined;
+		return molgenis.ie9 !== true && genomebrowserStartAttribute !== undefined && genomebrowserChromosomeAttribute !== undefined && molgenis.dataexplorer.settings["genomebrowser"] !== 'false';
 	}
 
     function getAttributeFromList(attributesString){
@@ -334,22 +334,24 @@
 					genomeBrowser.setLocation(chr, viewStart, viewEnd);
 				}
 			}
-			
-			// TODO implement elegant solution for genome browser specific code
-			$.each(data.filters, function() {
-				if(this.getComplexFilterElements && this.getComplexFilterElements()[0]){
-					if(this.attribute === genomebrowserStartAttribute){
-						setLocation(genomeBrowser.chr,
-								parseInt(this.getComplexFilterElements()[0].simpleFilter.fromValue),
-								parseInt(this.getComplexFilterElements()[0].simpleFilter.toValue));
+				
+			if(molgenis.dataexplorer.settings["genomebrowser"] !== 'false'){
+				// TODO implement elegant solution for genome browser specific code
+				$.each(data.filters, function() {
+					if(this.getComplexFilterElements && this.getComplexFilterElements()[0]){
+						if(this.attribute === genomebrowserStartAttribute){
+							setLocation(genomeBrowser.chr,
+									parseInt(this.getComplexFilterElements()[0].simpleFilter.fromValue),
+									parseInt(this.getComplexFilterElements()[0].simpleFilter.toValue));
+						}
+						else if(this.attribute === genomebrowserChromosomeAttribute){
+							setLocation(this.getComplexFilterElements()[0].simpleFilter.getValues()[0],
+									genomeBrowser.viewStart,
+									genomeBrowser.viewEnd);
+						}
 					}
-					else if(this.attribute === genomebrowserChromosomeAttribute){
-						setLocation(this.getComplexFilterElements()[0].simpleFilter.getValues()[0],
-								genomeBrowser.viewStart,
-								genomeBrowser.viewEnd);
-					}
-				}
-			});
+				});
+			}
 		});
 
 		$(document).on('changeQuery.data', function(e, query) {
@@ -374,6 +376,7 @@
 				}
 			}
 		});
+		
 		$('form[name=galaxy-export-form]').submit(function(e) {
 			e.preventDefault();
 			if($(this).valid()) {

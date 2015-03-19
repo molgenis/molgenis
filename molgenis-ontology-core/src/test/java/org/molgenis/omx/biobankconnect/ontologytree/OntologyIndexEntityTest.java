@@ -38,7 +38,7 @@ public class OntologyIndexEntityTest
 		DataService dataService = mock(DataService.class);
 		OntologyService ontologyService = mock(OntologyService.class);
 
-		entityMetaData = new DefaultEntityMetaData(OntologyQueryRepository.DEFAULT_ONTOLOGY_REPO);
+		entityMetaData = new DefaultEntityMetaData(OntologyQueryRepository.ENTITY_NAME);
 		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermIndexRepository.ONTOLOGY_NAME));
 		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermIndexRepository.ROOT,
 				FieldTypeEnum.BOOL));

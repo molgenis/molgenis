@@ -151,7 +151,8 @@ public class OntologyLoader
 			OWLClassExpression expression = axiom.getSubClass();
 			if (!expression.isAnonymous())
 			{
-				listOfClasses.add(expression.asOWLClass());
+				OWLClass asOWLClass = expression.asOWLClass();
+				listOfClasses.add(asOWLClass);
 			}
 		}
 		return listOfClasses;
@@ -196,6 +197,7 @@ public class OntologyLoader
 		{
 			listOfSynonyms.addAll(getAnnotation(cls, eachSynonymProperty));
 		}
+		listOfSynonyms.add(getLabel(cls));
 		return listOfSynonyms;
 	}
 
@@ -217,7 +219,7 @@ public class OntologyLoader
 		{
 			return annotation;
 		}
-		return StringUtils.EMPTY;
+		return extractOWLClassId(entity);
 	}
 
 	private Set<String> getAnnotation(OWLEntity entity, String property)
@@ -266,6 +268,25 @@ public class OntologyLoader
 		return dbAnnotations;
 	}
 
+	// TODO : FIXME replace the getAllDatabaseIds later on
+	public Set<String> getDatabaseIds(OWLClass entity)
+	{
+		Set<String> dbAnnotations = new HashSet<String>();
+		for (OWLAnnotation annotation : entity.getAnnotations(ontology))
+		{
+			if (annotation.getValue() instanceof OWLLiteral)
+			{
+				OWLLiteral val = (OWLLiteral) annotation.getValue();
+				String value = val.getLiteral().toString();
+				if (value.matches(DB_ID_PATTERN))
+				{
+					dbAnnotations.add(value);
+				}
+			}
+		}
+		return dbAnnotations;
+	}
+
 	public String getOntologyLabel()
 	{
 		OWLAnnotationProperty labelProperty = factory.getOWLAnnotationProperty(OWLRDFVocabulary.RDFS_LABEL.getIRI());
@@ -279,6 +300,24 @@ public class OntologyLoader
 			}
 		}
 		return ontologyLabel;
+	}
+
+	public String extractOWLClassId(OWLEntity cls)
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		String clsIri = cls.getIRI().toString();
+		// Case where id is separated by #
+		String[] split = null;
+		if (clsIri.contains("#"))
+		{
+			split = clsIri.split("#");
+		}
+		else
+		{
+			split = clsIri.split("/");
+		}
+		stringBuilder.append(split[split.length - 1]);
+		return stringBuilder.toString();
 	}
 
 	public String getOntologyIRI()
@@ -321,7 +360,7 @@ public class OntologyLoader
 		OWLClass owlClass = factory.getOWLClass(IRI.create(iri));
 		for (OWLClass rootClass : rootClasses)
 		{
-			addClass(rootClass, owlClass);
+			if (rootClass != owlClass) addClass(rootClass, owlClass);
 		}
 		return owlClass;
 	}

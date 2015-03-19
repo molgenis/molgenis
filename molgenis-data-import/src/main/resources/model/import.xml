@@ -10,6 +10,7 @@
 			<field name="status" type="enum" enum_options="RUNNING,FINISHED,FAILED" nillable="false" />
 			<field name="message" type="text" nillable="true" />
 			<field name="progress" type="int" nillable="false"  />
+            <field name="importedEntities" type="string" nillable="true"  />
 		</entity>
 	</module>
 </molgenis>

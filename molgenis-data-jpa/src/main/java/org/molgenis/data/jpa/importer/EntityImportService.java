@@ -18,7 +18,6 @@ import java.util.concurrent.ExecutionException;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
@@ -75,13 +74,7 @@ public class EntityImportService
 	@Transactional
 	public int importEntity(String entityName, Repository source, DatabaseAction dbAction)
 	{
-		final Repository repo = dataService.getRepositoryByEntityName(entityName);
-		if (!(repo instanceof CrudRepository))
-		{
-			throw new MolgenisDataException(repo.getName() + " is not a CrudRepository");
-		}
-
-		CrudRepository jpaRepository = (CrudRepository) repo;
+		final Repository jpaRepository = dataService.getRepository(entityName);
 
 		// Convert to MapEntity so we can be sure we can set xref/mref fields on it
 		List<Entity> entitiesToImport = Lists.newArrayList();
@@ -90,7 +83,7 @@ public class EntityImportService
 			entitiesToImport.add(new MapEntity(entity));
 		}
 
-		EntityMetaData entityMetaData = repo.getEntityMetaData();
+		EntityMetaData entityMetaData = jpaRepository.getEntityMetaData();
 
 		String updateKey = entityMetaData.getLabelAttribute().getName();
 		List<Entity> batch = Lists.newArrayListWithCapacity(BATCH_SIZE);
@@ -235,8 +228,7 @@ public class EntityImportService
 		return entitiesToImport.size();
 	}
 
-	public void update(CrudRepository repo, List<? extends Entity> entities, DatabaseAction dbAction,
-			String... keyNames)
+	public void update(Repository repo, List<? extends Entity> entities, DatabaseAction dbAction, String... keyNames)
 	{
 		if (keyNames.length == 0) throw new MolgenisDataException("At least one key must be provided, e.g. 'name'");
 
@@ -444,7 +436,7 @@ public class EntityImportService
 							{
 								mapEntity.set(field, newEntity.get(field));
 							}
-							entityInDb.set(mapEntity, false);
+							entityInDb.set(mapEntity);
 						}
 						catch (Exception ex)
 						{
