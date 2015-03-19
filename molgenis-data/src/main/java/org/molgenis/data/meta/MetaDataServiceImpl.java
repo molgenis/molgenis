@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.MolgenisDataException;
@@ -36,7 +35,7 @@ import com.google.common.collect.Sets;
  * MetaData service. Administration of the {@link Package}, {@link EntityMetaData} and {@link AttributeMetaData} of the
  * metadata of the repositories.
  * 
- * <img src="http://yuml.me/8870d0e4.png" alt="Metadata entities" width="640"/>
+ * <img src="http://yuml.me/041e5382.png" alt="Metadata entities" width="640"/>
  */
 public class MetaDataServiceImpl implements MetaDataService
 {
@@ -64,12 +63,13 @@ public class MetaDataServiceImpl implements MetaDataService
 	 * @param ManageableRepositoryCollection
 	 */
 	@Override
-	public void setDefaultBackend(ManageableRepositoryCollection backend)
+	public MetaDataService setDefaultBackend(ManageableRepositoryCollection backend)
 	{
 		this.defaultBackend = backend;
 		backends.put(backend.getName(), backend);
 
 		bootstrapMetaRepos();
+		return this;
 	}
 
 	private void bootstrapMetaRepos()
@@ -81,12 +81,14 @@ public class MetaDataServiceImpl implements MetaDataService
 		dataService.addRepository(packages);
 		packageRepository = new PackageRepository(packages);
 
-		entityMetaDataRepository = new EntityMetaDataRepository(defaultBackend, packageRepository);
+		attributeMetaDataRepository = new AttributeMetaDataRepository(defaultBackend);
+		entityMetaDataRepository = new EntityMetaDataRepository(defaultBackend, packageRepository,
+				attributeMetaDataRepository);
+		attributeMetaDataRepository.setEntityMetaDataRepository(entityMetaDataRepository);
+
+		dataService.addRepository(attributeMetaDataRepository.getRepository());
 		dataService.addRepository(entityMetaDataRepository.getRepository());
 		entityMetaDataRepository.fillEntityMetaDataCache();
-
-		attributeMetaDataRepository = new AttributeMetaDataRepository(defaultBackend, entityMetaDataRepository);
-		dataService.addRepository(attributeMetaDataRepository.getRepository());
 	}
 
 	@Override
@@ -103,12 +105,14 @@ public class MetaDataServiceImpl implements MetaDataService
 	public void deleteEntityMeta(String entityName)
 	{
 		if (dataService.hasRepository(entityName)) dataService.removeRepository(entityName);
-		attributeMetaDataRepository.deleteAllAttributes(entityName);
 		EntityMetaData emd = getEntityMetaData(entityName);
 		if (emd != null)
 		{
 			entityMetaDataRepository.delete(entityName);
-			getManageableRepositoryCollection(emd).deleteEntityMeta(entityName);
+			if (!emd.isAbstract())
+			{
+				getManageableRepositoryCollection(emd).deleteEntityMeta(entityName);
+			}
 		}
 	}
 
@@ -128,7 +132,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	public void deleteAttribute(String entityName, String attributeName)
 	{
 		// Update AttributeMetaDataRepository
-		attributeMetaDataRepository.remove(entityName, attributeName);
+		entityMetaDataRepository.removeAttribute(entityName, attributeName);
 		EntityMetaData emd = getEntityMetaData(entityName);
 		if (emd != null) getManageableRepositoryCollection(emd).deleteAttribute(entityName, attributeName);
 	}
@@ -204,11 +208,15 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public void addAttribute(String fullyQualifiedEntityName, AttributeMetaData attr)
 	{
-		Entity entity = entityMetaDataRepository.getEntity(fullyQualifiedEntityName);
-		attributeMetaDataRepository.add(entity, attr);
-
-		DefaultEntityMetaData emd = getEntityMetaData(fullyQualifiedEntityName);
+		EntityMetaData emd = entityMetaDataRepository.addAttribute(fullyQualifiedEntityName, attr);
 		getManageableRepositoryCollection(emd).addAttribute(fullyQualifiedEntityName, attr);
+	}
+
+	@Override
+	public void addAttributeSync(String fullyQualifiedEntityName, AttributeMetaData attr)
+	{
+		EntityMetaData emd = entityMetaDataRepository.addAttribute(fullyQualifiedEntityName, attr);
+		getManageableRepositoryCollection(emd).addAttributeSync(fullyQualifiedEntityName, attr);
 	}
 
 	@Override
@@ -266,7 +274,6 @@ public class MetaDataServiceImpl implements MetaDataService
 	{
 		packageRepository.updatePackageCache();
 		entityMetaDataRepository.fillEntityMetaDataCache();
-		attributeMetaDataRepository.fillAllEntityAttributes();
 	}
 
 	@Transactional
@@ -274,16 +281,6 @@ public class MetaDataServiceImpl implements MetaDataService
 	public List<AttributeMetaData> updateEntityMeta(EntityMetaData entityMeta)
 	{
 		return MetaUtils.updateEntityMeta(this, entityMeta, false);
-	}
-
-	@Override
-	public void addAttributeSync(String entityName, AttributeMetaData attribute)
-	{
-		Entity entity = entityMetaDataRepository.getEntity(entityName);
-		DefaultEntityMetaData emd = getEntityMetaData(entityName);
-		emd.addAttributeMetaData(attribute);
-		attributeMetaDataRepository.add(entity, attribute);
-		getManageableRepositoryCollection(emd).addAttributeSync(entityName, attribute);
 	}
 
 	@Override

@@ -308,7 +308,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
 		StringBuilder sql = new StringBuilder();
 		sql.append(" CREATE TABLE ").append('`').append(getTableName()).append('_').append(att.getName()).append('`')
-				.append('(').append('`').append(idAttribute.getName()).append('`').append(' ')
+				.append("(`order` INT,`").append(idAttribute.getName()).append('`').append(' ')
 				.append(idAttribute.getDataType().getMysqlType()).append(" NOT NULL, ").append('`')
 				.append(att.getName()).append('`').append(' ')
 				.append(att.getRefEntity().getIdAttribute().getDataType().getMysqlType())
@@ -402,6 +402,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				break;
 			case MREF:
 			case CATEGORICAL:
+			case CATEGORICAL_MREF:
 			case XREF:
 				if (att.isLabelAttribute())
 				{
@@ -540,8 +541,8 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 
 		StringBuilder mrefSql = new StringBuilder();
 		mrefSql.append("INSERT INTO ").append('`').append(getTableName()).append('_').append(att.getName()).append('`')
-				.append(" (").append('`').append(idAttribute.getName()).append('`').append(',').append('`')
-				.append(att.getName()).append('`').append(") VALUES (?,?)");
+				.append(" (`order`,").append('`').append(idAttribute.getName()).append('`').append(',').append('`')
+				.append(att.getName()).append('`').append(") VALUES (?,?,?)");
 
 		jdbcTemplate.batchUpdate(mrefSql.toString(), new BatchPreparedStatementSetter()
 		{
@@ -554,20 +555,21 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 					LOG.debug("mref: " + mrefs.get(i).get(idAttribute.getName()) + ", "
 							+ mrefs.get(i).get(att.getName()));
 				}
+				preparedStatement.setInt(1, i);
 
-				preparedStatement.setObject(1, mrefs.get(i).get(idAttribute.getName()));
+				preparedStatement.setObject(2, mrefs.get(i).get(idAttribute.getName()));
 
 				Object value = mrefs.get(i).get(att.getName());
 				if (value instanceof Entity)
 				{
 					preparedStatement.setObject(
-							2,
+							3,
 							refEntityIdAttribute.getDataType().convert(
 									((Entity) value).get(refEntityIdAttribute.getName())));
 				}
 				else
 				{
-					preparedStatement.setObject(2, refEntityIdAttribute.getDataType().convert(value));
+					preparedStatement.setObject(3, refEntityIdAttribute.getDataType().convert(value));
 				}
 			}
 
@@ -616,8 +618,8 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				if (att.getDataType() instanceof MrefField)
 				{
 					select.append("GROUP_CONCAT(DISTINCT(").append('`').append(att.getName()).append('`').append('.')
-							.append('`').append(att.getName()).append('`').append(")) AS ").append('`')
-							.append(att.getName()).append('`');
+							.append('`').append(att.getName()).append('`').append(") ORDER BY `").append(att.getName())
+							.append("`.`order`) AS ").append('`').append(att.getName()).append('`');
 				}
 				else
 				{
@@ -1127,9 +1129,11 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 							List<Entity> vals = Lists.newArrayList(e.getEntities(att.getName()));
 							if (vals != null)
 							{
+								int i = 0;
 								for (Entity val : vals)
 								{
 									Map<String, Object> mref = new HashMap<>();
+									mref.put("order", i++);
 									mref.put(idAttribute.getName(), idValue);
 									mref.put(att.getName(), val.get(att.getRefEntity().getIdAttribute().getName()));
 									mrefs.get(att.getName()).add(mref);
@@ -1203,6 +1207,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 
 	private class EntityMapper implements RowMapper<Entity>
 	{
+		private static final int GROUP_CONCAT_MAX_LEN = 1024;
 		private final EntityMetaData entityMetaData;
 
 		private EntityMapper(EntityMetaData entityMetaData)
@@ -1224,15 +1229,36 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				if (att.getDataType() instanceof MrefField)
 				{
 					// TODO: convert to typed lists (or arrays?)
-					if (att.getRefEntity().getIdAttribute().getDataType() instanceof IntField)
+					String mrefIds = resultSet.getString(att.getName());
+					if (mrefIds != null)
 					{
-						e.set(att.getName(), DataConverter.toIntList(resultSet.getString(att.getName())));
+						if (att.getRefEntity().getIdAttribute().getDataType() instanceof IntField)
+						{
+							if (mrefIds.length() >= GROUP_CONCAT_MAX_LEN)
+							{
+								// this list is just as long as it's allowed to be so it probably got truncated.
+								// Retrieve the IDs explicitly in a separate query.
+								e.set(att.getName(), jdbcTemplate.queryForList(getMrefSelectSql(e, att), Integer.class));
+							}
+							else
+							{
+								e.set(att.getName(), DataConverter.toIntList(mrefIds));
+							}
+						}
+						else
+						{
+							if (mrefIds.length() >= GROUP_CONCAT_MAX_LEN)
+							{
+								// this list is just as long as it's allowed to be so it probably got truncated.
+								// Retrieve the IDs explicitly in a separate query.
+								e.set(att.getName(), jdbcTemplate.queryForList(getMrefSelectSql(e, att), Object.class));
+							}
+							else
+							{
+								e.set(att.getName(), DataConverter.toObjectList(mrefIds));
+							}
+						}
 					}
-					else
-					{
-						e.set(att.getName(), DataConverter.toObjectList(resultSet.getString(att.getName())));
-					}
-
 				}
 				else if (att.getDataType() instanceof XrefField)
 				{
@@ -1255,6 +1281,13 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 			}
 			return e;
 
+		}
+
+		private String getMrefSelectSql(Entity e, AttributeMetaData att)
+		{
+			return String.format("SELECT `%s` FROM `%s_%1$s` WHERE `%s` = '%s' ORDER BY `order`",
+					getTableName(att.getRefEntity()), getTableName(), entityMetaData.getIdAttribute().getName()
+							.toLowerCase(), e.get(entityMetaData.getIdAttribute().getName()));
 		}
 	}
 

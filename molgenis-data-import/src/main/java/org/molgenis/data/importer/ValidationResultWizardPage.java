@@ -2,16 +2,20 @@ package org.molgenis.data.importer;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.google.common.collect.Lists;
+import org.molgenis.auth.MolgenisGroup;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.wizard.AbstractWizardPage;
 import org.molgenis.ui.wizard.Wizard;
 import org.slf4j.Logger;
@@ -44,6 +48,10 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 
 	@Autowired
 	private ImportPostProcessingService importPostProcessingService;
+
+	@Autowired
+	UserAccountService userAccountService;
+	private List<MolgenisGroup> groups;
 
 	@Override
 	public String getTitle()
@@ -102,6 +110,17 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 
 		}
 
+		// Convert to list because it's less impossible use in FreeMarker
+		if (!userAccountService.getCurrentUser().getSuperuser())
+		{
+			groups = Lists.newArrayList(userAccountService.getCurrentUserGroups());
+		}
+		else
+		{
+			groups = Lists.newArrayList(dataService.findAll(MolgenisGroup.ENTITY_NAME, MolgenisGroup.class));
+		}
+
+		((ImportWizard) wizard).setGroups(groups);
 		return null;
 	}
 

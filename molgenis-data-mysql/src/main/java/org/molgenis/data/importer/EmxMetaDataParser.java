@@ -3,7 +3,6 @@ package org.molgenis.data.importer;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.AGGREGATEABLE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.DATA_TYPE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.DESCRIPTION;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENTITY;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENUM_OPTIONS;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.EXPRESSION;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ID_ATTRIBUTE;
@@ -12,7 +11,6 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL_ATTRIBUTE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.LOOKUP_ATTRIBUTE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.NAME;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.NILLABLE;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.PART_OF_ATTRIBUTE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MAX;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MIN;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.READ_ONLY;
@@ -78,6 +76,10 @@ public class EmxMetaDataParser implements MetaDataParser
 	static final String PACKAGES = PackageMetaData.ENTITY_NAME;
 	static final String TAGS = TagMetaData.ENTITY_NAME;
 	static final String ATTRIBUTES = AttributeMetaDataMetaData.ENTITY_NAME;
+
+	public static final String ENTITY = "entity";
+	public static final String PART_OF_ATTRIBUTE = "partOfAttribute";
+
 	// Sheet names
 	static final String ENTITIES = EntityMetaDataMetaData.ENTITY_NAME;
 	static final List<String> SUPPORTED_ENTITY_ATTRIBUTES = Arrays.asList(
