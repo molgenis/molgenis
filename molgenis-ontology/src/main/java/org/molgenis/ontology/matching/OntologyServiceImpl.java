@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -26,7 +25,6 @@ import org.molgenis.ontology.beans.OntologyTerm;
 import org.molgenis.ontology.beans.OntologyTermImpl;
 import org.molgenis.ontology.model.OntologyMetaData;
 import org.molgenis.ontology.model.OntologyTermMetaData;
-import org.molgenis.ontology.model.OntologyTermNodePathMetaData;
 import org.molgenis.ontology.model.OntologyTermSynonymMetaData;
 import org.molgenis.ontology.roc.InformationContentService;
 import org.molgenis.ontology.utils.NGramMatchingModel;
@@ -76,17 +74,8 @@ public class OntologyServiceImpl implements OntologyService
 	@Override
 	public Iterable<Ontology> getAllOntologies()
 	{
-		Iterable<Ontology> ontologies = FluentIterable.from(getAllOntologyEntities()).transform(
-				new Function<Entity, Ontology>()
-				{
-					@Override
-					public Ontology apply(Entity entity)
-					{
-						return new OntologyImpl(entity);
-					}
-				});
-
-		return ontologies;
+		// TODO
+		return null;
 	}
 
 	@Override
@@ -139,86 +128,35 @@ public class OntologyServiceImpl implements OntologyService
 	@Override
 	public List<String> getOntologyTermSynonyms(String ontologyTermIri, String ontologyIri)
 	{
-		List<String> synonyms = new ArrayList<String>();
-		Entity ontologyTermEntity = getOntologyTermEntity(ontologyTermIri, ontologyIri);
-		if (ontologyTermEntity != null)
-		{
-			Iterable<Entity> synonymEntities = ontologyTermEntity
-					.getEntities(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM);
-			synonyms = FluentIterable.from(synonymEntities).transform(new Function<Entity, String>()
-			{
-				@Override
-				public String apply(Entity entity)
-				{
-					return entity.getString(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM);
-				}
-			}).toList();
-		}
-		return synonyms;
+		// TODO
+		return null;
 	}
 
 	@Override
 	public Iterable<OntologyTerm> getAllOntologyTerms(String ontologyIri)
 	{
-		Iterable<Entity> allOntologyEntities = getAllOntologyEntities();
-		if (allOntologyEntities != null)
-		{
-			return FluentIterable.from(allOntologyEntities).transform(new Function<Entity, OntologyTerm>()
-			{
-				@Override
-				public OntologyTerm apply(Entity entity)
-				{
-					return new OntologyTermImpl(entity);
-				}
-			});
-		}
+		// TODO
 		return null;
 	}
 
 	@Override
 	public Iterable<Entity> getAllOntologyTermEntities(String ontologyIri)
 	{
-		Entity ontologyEntity = getOntologyEntity(ontologyIri);
-		if (ontologyEntity != null)
-		{
-			return dataService.findAll(OntologyTermMetaData.ENTITY_NAME,
-					new QueryImpl().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity));
-		}
+		// TODO
 		return null;
 	}
 
 	@Override
 	public Iterable<OntologyTerm> getRootOntologyTerms(String ontologyIri)
 	{
-		Iterable<Entity> rootOntologyTermEntities = getRootOntologyTermEntities(ontologyIri);
-
-		if (rootOntologyTermEntities != null)
-		{
-			return FluentIterable.from(rootOntologyTermEntities).transform(new Function<Entity, OntologyTerm>()
-			{
-				@Override
-				public OntologyTerm apply(Entity entity)
-				{
-					return new OntologyTermImpl(entity);
-				}
-			});
-		}
+		// TODO
 		return null;
 	}
 
 	@Override
 	public Iterable<Entity> getRootOntologyTermEntities(String ontologyIri)
 	{
-		// TODO : FIXME, we need a better way to retrieve the root ontology terms
-		Iterable<Entity> nodePathEntities = dataService.findAll(OntologyTermNodePathMetaData.ENTITY_NAME,
-				new QueryImpl().eq(OntologyTermNodePathMetaData.ROOT, true));
-		if (nodePathEntities != null)
-		{
-			return dataService.findAll(
-					OntologyTermMetaData.ENTITY_NAME,
-					new QueryImpl().eq(OntologyTermMetaData.ONTOLOGY_TERM_IRI, ontologyIri).and()
-							.in(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH, nodePathEntities));
-		}
+		// TODO
 		return null;
 	}
 
@@ -231,19 +169,7 @@ public class OntologyServiceImpl implements OntologyService
 	@Override
 	public Iterable<Entity> getChildOntologyTermEntities(String ontologyIri, String ontologyTermIri)
 	{
-		Entity ontologyTerm = getOntologyTermEntity(ontologyTermIri, ontologyIri);
-		Iterable<Entity> nodePathEntities = ontologyTerm.getEntities(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH);
-		Iterator<Entity> iterator = nodePathEntities.iterator();
-		if (iterator.hasNext())
-		{
-			Entity firstNodePathEntity = iterator.next();
-
-			String parentNodePath = firstNodePathEntity.getString(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH);
-			Iterable<Entity> childNodePathEntities = dataService.findAll(OntologyTermNodePathMetaData.ENTITY_NAME,
-					new QueryImpl().like(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH, parentNodePath + "%"));
-			return dataService.findAll(OntologyTermMetaData.ENTITY_NAME,
-					new QueryImpl().in(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH, childNodePathEntities));
-		}
+		// TODO
 		return null;
 	}
 
