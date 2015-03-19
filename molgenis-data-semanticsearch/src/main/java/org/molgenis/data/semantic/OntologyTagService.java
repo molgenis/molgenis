@@ -17,9 +17,9 @@ import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.PackageMetaData;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.ontology.Ontology;
-import org.molgenis.ontology.OntologyService;
-import org.molgenis.ontology.OntologyTerm;
+import org.molgenis.ontology.beans.Ontology;
+import org.molgenis.ontology.beans.OntologyTerm;
+import org.molgenis.ontology.matching.OntologyService;
 
 import com.google.common.collect.Lists;
 

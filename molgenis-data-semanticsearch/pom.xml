@@ -15,7 +15,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-ontology-core</artifactId>
+			<artifactId>molgenis-ontology</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
