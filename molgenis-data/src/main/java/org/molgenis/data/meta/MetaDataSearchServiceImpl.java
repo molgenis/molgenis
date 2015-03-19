@@ -66,12 +66,9 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 				}
 			}
 
-			// TODO: Search in attributes?
-			// This used to be necessary when entities didn't yet have an mref to attributes.
-			// Now that they do, the attribute and all of its properties are listed in the entity document in
-			// elasticsearch and will be found in the above query.
-			// But the match does not know any longer which attribute it has matched, though, and won't be able to
-			// find tags of attributes of the entity when we implement them.
+			// Search in attributes no longer needed since the entities contain the attribute documents.
+			// Change this if the searching for tags becomes needed and/or the results need to reflect which attribute
+			// got matched.
 		}
 
 		// Remove default package
