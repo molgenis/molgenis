@@ -30,16 +30,16 @@ public class OntologyServiceImpl implements OntologyService
 	}
 
 	@Override
-	public List<OntologyTerm> findOntologyTerms(List<Ontology> ontologies, String search)
+	public OntologyTerm getOntologyTerm(String iri)
 	{
-		return ontologyTermRepository.findOntologyTerms(ontologies, search);
+		return ontologyTermRepository.getOntologyTerm(iri.split(","));
+
 	}
 
 	@Override
-	public OntologyTerm getOntologyTerm(String ontology, String iri)
+	public List<OntologyTerm> findOntologyTerms(List<String> ontologyIds, String search, int pageSize)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return ontologyTermRepository.findOntologyTerms(ontologyIds, search, pageSize);
 	}
 
 }
