@@ -390,10 +390,17 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		else
 		{
 			LOG.info("Index found no need to reindex.");
+			upgradeMetaData();
+			reindex();
 		}
 
 		runAsSystem(() -> metaDataService().setDefaultBackend(getBackend()));
 		metaDataUpgradeService.upgrade();
+	}
+
+	protected void upgradeMetaData()
+	{
+		LOG.info("override this!");
 	}
 
 	private boolean indexExists()

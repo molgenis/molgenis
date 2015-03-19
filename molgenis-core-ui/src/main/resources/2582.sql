@@ -14,28 +14,6 @@ CREATE TABLE attributes_parts
 	parts		varchar(255)
 );
 
-SELECT @rownum:=0;
-INSERT INTO attributes_parts 
-(`order`, identifier, parts)
-SELECT 
-	@rownum:=@rownum+1, 
-	(SELECT c.identifier
-	FROM attributes c
-	WHERE c.name = attributes.partOfAttribute
-	AND	c.entity = attributes.entity),
-	identifier 
-FROM attributes 
-WHERE partOfAttribute IS NOT NULL;
-
-#Renum to 0 index
-UPDATE attributes_parts 
-SET `order` = `order` - 
-	(SELECT minOrder FROM 
-		(SELECT identifier, MIN(`order`) AS minOrder 
-		FROM attributes_parts other 
-		GROUP BY identifier) X 
-	WHERE x.identifier = attributes_parts.identifier);
-
 CREATE TABLE entities_attributes
 (
 	`order`		int(11),
@@ -43,20 +21,18 @@ CREATE TABLE entities_attributes
 	attributes	varchar(255)
 );
 
-SELECT @rownum:=0;
-INSERT INTO entities_attributes 
-(`order`, fullName, attributes)
-SELECT 
-	@rownum:=@rownum+1, 
-	entity,
-	identifier 
-FROM attributes ORDER BY entity;
+ALTER TABLE entities
+ADD COLUMN backend varchar(255);
 
-#Renum to 0 index
-UPDATE entities_attributes
-SET `order` = `order` - 
-	(SELECT newOrder FROM 
-		(SELECT fullName, MIN(`order`) AS newOrder 
-		FROM entities_attributes other 
-		GROUP BY fullName) X 
-	WHERE x.fullName = entities_attributes.fullName);
+ALTER TABLE attributes
+ADD COLUMN expression varchar(255);
+
+ALTER TABLE attributes DROP FOREIGN KEY attributes_ibfk_1;
+
+ALTER TABLE attributes DROP FOREIGN KEY attributes_ibfk_2;
+
+ALTER TABLE attributes
+DROP COLUMN partOfAttribute;
+
+ALTER TABLE attributes
+DROP COLUMN entity;
