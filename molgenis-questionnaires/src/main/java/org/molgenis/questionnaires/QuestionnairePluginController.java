@@ -2,6 +2,7 @@ package org.molgenis.questionnaires;
 
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.support.QueryImpl.EQ;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX;
 import static org.molgenis.security.runas.RunAsSystemTemplate.runAsSystem;
 
 import java.io.IOException;
@@ -10,7 +11,6 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
-import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -34,20 +34,21 @@ public class QuestionnairePluginController extends MolgenisPluginController
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
 	private final DataService dataService;
+	private final ThankYouTextService thankYouTextService;
 
 	@Autowired
-	public QuestionnairePluginController(DataService dataService)
+	public QuestionnairePluginController(DataService dataService, ThankYouTextService thankYouTextService)
 	{
 		super(URI);
 		this.dataService = dataService;
+		this.thankYouTextService = thankYouTextService;
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
 	public String showView(Model model)
 	{
 		Iterable<Entity> questionnaireMeta = runAsSystem(() -> {
-			return dataService.query(EntityMetaDataMetaData.ENTITY_NAME)
-					.eq(EntityMetaDataMetaData.EXTENDS, QuestionnaireMetaData.ENTITY_NAME).findAll();
+			return QuestionnaireUtils.findQuestionnairesMetaData(dataService);
 		});
 
 		List<Questionnaire> questionnaires = stream(questionnaireMeta.spliterator(), false)
@@ -57,7 +58,7 @@ public class QuestionnairePluginController extends MolgenisPluginController
 				.map(name -> {
 					// Create entity if not yet exists for current user
 					EntityMetaData emd = dataService.getMeta().getEntityMetaData(name);
-					Entity entity = findQuestonnaireEntity(name);
+					Entity entity = findQuestionnaireEntity(name);
 					if (entity == null) entity = createQuestionnaireEntity(emd, QuestionnaireStatus.NOT_STARTED);
 
 					return toQuestionnaireModel(entity, emd);
@@ -80,7 +81,7 @@ public class QuestionnairePluginController extends MolgenisPluginController
 		}
 
 		// Once we showed the questionnaire it's status is 'OPEN'
-		Entity entity = findQuestonnaireEntity(name);
+		Entity entity = findQuestionnaireEntity(name);
 		if (entity == null)
 		{
 			entity = createQuestionnaireEntity(emd, QuestionnaireStatus.OPEN);
@@ -96,9 +97,18 @@ public class QuestionnairePluginController extends MolgenisPluginController
 		return "view-questionnair";
 	}
 
-	@RequestMapping("/thanks")
-	public String showThanks()
+	@RequestMapping("/{name}/thanks")
+	public String showThanks(@PathVariable("name") String name, Model model, HttpServletResponse response)
+			throws IOException
 	{
+		EntityMetaData emd = dataService.getMeta().getEntityMetaData(name);
+		if (emd == null)
+		{
+			response.sendError(404);
+			return null;
+		}
+
+		model.addAttribute("thankYouText", getThankYouText(name));
 		return "view-thanks";
 	}
 
@@ -118,10 +128,15 @@ public class QuestionnairePluginController extends MolgenisPluginController
 		return new Questionnaire(emd.getName(), emd.getLabel(), status, emd.getDescription(), entity.getIdValue());
 	}
 
-	private Entity findQuestonnaireEntity(String name)
+	private Entity findQuestionnaireEntity(String name)
 	{
 		return dataService.findOne(name,
 				EQ(OwnedEntityMetaData.ATTR_OWNER_USERNAME, SecurityUtils.getCurrentUsername()));
+	}
+
+	public String getThankYouText(String questionnaireName)
+	{
+		return runAsSystem(() -> thankYouTextService.getThankYouText(questionnaireName));
 	}
 
 	public static class Questionnaire

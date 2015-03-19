@@ -8,6 +8,11 @@
 
 <a href="/menu/main/questionnaires" class="btn btn-default btn-md"><span class="glyphicon glyphicon-chevron-left"></span> Back to My questionnaires</a>
 
-<h3>Thank you for submitting the questionnaire.</h3>
+<div class="row">
+	<div class="col-md-12">
+		  <#-- Do *not* HTML escape content -->
+		${thankYouText!}
+	</div>
+</div>
 
 <@footer />

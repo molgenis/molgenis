@@ -8,7 +8,7 @@
 		$('#submit-button').click(function(e) {
 			$('#entity-form input[name=status]').val('SUBMITTED');
 			$('#entity-form').submit();
-			document.location = "thanks";
+			document.location = data.name + "/thanks";
 		});
 	});
 	
