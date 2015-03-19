@@ -1,5 +1,7 @@
 package org.molgenis.app;
 
+import static org.molgenis.data.support.QueryImpl.EQ;
+
 import java.io.IOException;
 import java.util.Map;
 
@@ -8,10 +10,14 @@ import javax.sql.DataSource;
 import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.molgenis.DatabaseConfig;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
+import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.data.jpa.JpaRepositoryCollection;
+import org.molgenis.data.meta.EntityMetaDataMetaData;
+import org.molgenis.data.meta.migrate.v1_4.AttributeMetaDataMetaData1_4;
 import org.molgenis.data.mysql.AsyncJdbcTemplate;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
@@ -83,6 +89,12 @@ public class WebAppConfig extends MolgenisWebAppConfig
 				throw new NotImplementedException("Not implemented yet");
 			}
 		};
+
+		// Update database tables before here!
+
+		updateAttributeOrder(localDataService);
+
+		// metadata repositories get created here.
 		localDataService.getMeta().setDefaultBackend(backend);
 
 		for (EntityMetaData emd : localDataService.getMeta().getEntityMetaDatas())
@@ -95,6 +107,25 @@ public class WebAppConfig extends MolgenisWebAppConfig
 			{
 				localDataService.addRepository(jpaRepositoryCollection.getUnderlying(emd.getName()));
 			}
+		}
+	}
+
+	/**
+	 * Retrieves the proper attribute order from the dataservice and stores it in the updated mysql metadata repository
+	 * 
+	 * @param localDataService
+	 */
+	private void updateAttributeOrder(DataServiceImpl localDataService)
+	{
+		Repository entityRepo = mysqlRepositoryCollection.getRepository("entities");
+		// save all entity metadata with attributes in proper order
+		for (EntityMetaData emd : localDataService.getMeta().getEntityMetaDatas())
+		{
+			Entity entityMetaDataEntity = entityRepo.findOne(emd.getName());
+			Iterable<Entity> attributes = searchService.search(
+					EQ(AttributeMetaDataMetaData1_4.ENTITY_NAME, emd.getName()), new AttributeMetaDataMetaData1_4());
+			entityMetaDataEntity.set(EntityMetaDataMetaData.ATTRIBUTES, attributes);
+			entityRepo.update(entityMetaDataEntity);
 		}
 	}
 
