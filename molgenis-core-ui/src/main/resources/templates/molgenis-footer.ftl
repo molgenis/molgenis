@@ -13,7 +13,11 @@
 	            </p>
             </div>
         </div>
-    </body>
-    <#if app_tracking_code.piwik?has_content><script type="text/javascript">${app_tracking_code.piwik?string}</script></#if>
+	</body>
+	<#if app_tracking_code.piwik?has_content>
+		<script id="app-tracking-code-piwik" type="text/javascript">
+			${app_tracking_code.piwik?string}
+		</script>
+	</#if>
 </html>
 </#macro>

@@ -2,6 +2,7 @@ package org.molgenis.data.importer;
 
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.framework.db.EntityImportReport;
@@ -56,7 +57,7 @@ public class ImportJob implements Runnable
 			}
 
 			session.setAttribute("SPRING_SECURITY_CONTEXT", securityContext);
-			importRunService.finishImportRun(importRunId, importReport.toString());
+			importRunService.finishImportRun(importRunId, importReport.toString(), StringUtils.join(importReport.getNewEntities(), ','));
 
 			long t = System.currentTimeMillis();
 			LOG.info("Import finished in " + (t - t0) + " msec.");
