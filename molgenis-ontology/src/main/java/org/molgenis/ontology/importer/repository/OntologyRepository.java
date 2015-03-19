@@ -1,4 +1,4 @@
-package org.molgenis.ontology.repository;
+package org.molgenis.ontology.importer.repository;
 
 import java.util.Collections;
 import java.util.Iterator;

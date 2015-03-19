@@ -1,4 +1,4 @@
-package org.molgenis.ontology.repository;
+package org.molgenis.ontology.importer.repository;
 
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -20,6 +20,10 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.UuidGenerator;
+import org.molgenis.ontology.importer.repository.OntologyTermDynamicAnnotationRepository;
+import org.molgenis.ontology.importer.repository.OntologyTermNodePathRepository;
+import org.molgenis.ontology.importer.repository.OntologyTermRepository;
+import org.molgenis.ontology.importer.repository.OntologyTermSynonymRepository;
 import org.molgenis.ontology.model.OntologyMetaData;
 import org.molgenis.ontology.model.OntologyTermDynamicAnnotationMetaData;
 import org.molgenis.ontology.model.OntologyTermMetaData;
