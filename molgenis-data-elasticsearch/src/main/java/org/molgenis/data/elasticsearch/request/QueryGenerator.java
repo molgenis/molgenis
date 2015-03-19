@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.DisMaxQueryBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -138,10 +139,26 @@ public class QueryGenerator implements QueryPartGenerator
 			case NOT:
 				throw new MolgenisQueryException("Unexpected query operator [" + queryOperator + ']');
 			case SHOULD:
+				BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+				for (QueryRule subQuery : queryRule.getNestedRules())
+				{
+					boolQueryBuilder.should(createQueryClause(subQuery, entityMetaData));
+				}
+				queryBuilder = boolQueryBuilder;
+				break;
 			case DIS_MAX:
-				// SHOULD and DIS_MAX are handled in DisMaxQueryGenerator
-				// TODO merge DisMaxQueryGenerator with this class
-				return null;
+				DisMaxQueryBuilder disMaxQueryBuilder = QueryBuilders.disMaxQuery();
+				for (QueryRule subQuery : queryRule.getNestedRules())
+				{
+					disMaxQueryBuilder.add(createQueryClause(subQuery, entityMetaData));
+				}
+				disMaxQueryBuilder.tieBreaker((float) 0.0);
+				if (queryRule.getValue() != null)
+				{
+					disMaxQueryBuilder.boost(Float.parseFloat(queryRule.getValue().toString()));
+				}
+				queryBuilder = disMaxQueryBuilder;
+				break;
 			case EQUALS:
 			{
 				// As a general rule, filters should be used instead of queries:
@@ -322,6 +339,24 @@ public class QueryGenerator implements QueryPartGenerator
 				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
 				break;
 			}
+			case RANGE:
+			{
+				if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
+				if (!(queryValue instanceof Iterable<?>))
+				{
+					throw new MolgenisQueryException("Query value must be a Iterable instead of ["
+							+ queryValue.getClass().getSimpleName() + "]");
+				}
+				Iterable<?> iterable = (Iterable<?>) queryValue;
+
+				validateNumericalQueryField(queryField, entityMetaData);
+
+				Iterator<?> iterator = iterable.iterator();
+				FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).gte(iterator.next())
+						.lte(iterator.next());
+				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
+				break;
+			}
 			case NESTED:
 				List<QueryRule> nestedQueryRules = queryRule.getNestedRules();
 				if (nestedQueryRules == null || nestedQueryRules.isEmpty())
@@ -423,6 +458,48 @@ public class QueryGenerator implements QueryPartGenerator
 						case IMAGE:
 							throw new UnsupportedOperationException("Query with data type [" + dataType
 									+ "] not supported");
+						default:
+							throw new RuntimeException("Unknown data type [" + dataType + "]");
+					}
+				}
+				break;
+			}
+			case FUZZY_MATCH:
+			{
+				if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
+
+				if (queryField == null)
+				{
+					queryBuilder = QueryBuilders.matchQuery("_all", queryValue);
+				}
+				else
+				{
+					AttributeMetaData attr = entityMetaData.getAttribute(queryField);
+					if (attr == null) throw new UnknownAttributeException(queryField);
+					// construct query part
+					FieldTypeEnum dataType = attr.getDataType().getEnumType();
+					switch (dataType)
+					{
+						case DATE:
+						case DATE_TIME:
+						case DECIMAL:
+						case EMAIL:
+						case ENUM:
+						case HTML:
+						case HYPERLINK:
+						case INT:
+						case LONG:
+						case SCRIPT:
+						case STRING:
+						case TEXT:
+							queryBuilder = QueryBuilders.queryString(queryField + ":(" + queryValue + ")");
+							break;
+						case MREF:
+						case XREF:
+							queryField = attr.getName() + "." + attr.getRefEntity().getLabelAttribute().getName();
+							queryBuilder = QueryBuilders.nestedQuery(attr.getName(),
+									QueryBuilders.queryString(queryField + ":(" + queryValue + ")")).scoreMode("max");
+							break;
 						default:
 							throw new RuntimeException("Unknown data type [" + dataType + "]");
 					}
