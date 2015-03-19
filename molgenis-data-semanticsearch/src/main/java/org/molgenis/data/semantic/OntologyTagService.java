@@ -17,9 +17,9 @@ import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.PackageMetaData;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.ontology.Ontology;
 import org.molgenis.ontology.OntologyService;
-import org.molgenis.ontology.OntologyTerm;
+import org.molgenis.ontology.repository.model.Ontology;
+import org.molgenis.ontology.repository.model.OntologyTerm;
 
 import com.google.common.collect.Lists;
 
@@ -104,7 +104,7 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 		Relation relation = Relation.forIRI(tagEntity.getString(TagMetaData.RELATION_IRI));
 		Ontology ontology = ontologyService.getOntology(tagEntity.getString(TagMetaData.CODE_SYSTEM));
 		OntologyTerm ontologyTerm = ontologyService.getOntologyTerm(tagEntity.getString(TagMetaData.OBJECT_IRI),
-				ontology.getIri());
+				ontology.getIRI());
 
 		return new TagImpl<SubjectType, OntologyTerm, Ontology>(identifier, subjectType, relation, ontologyTerm,
 				ontology);
@@ -124,10 +124,10 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 		dataService.update(AttributeMetaDataMetaData.ENTITY_NAME, entity);
 	}
 
-	public Entity getTagEntity(Tag<?, OntologyTerm, Ontology> tag)
+	Entity getTagEntity(Tag<?, OntologyTerm, Ontology> tag)
 	{
-		return tagRepository.getTagEntity(tag.getObject().getIRI(), tag.getObject().getLabel(), tag.getRelation(), tag
-				.getCodeSystem().getIri());
+		return tagRepository.getTagEntity(tag.getObject().getIRI(), tag.getObject().getName(), tag.getRelation(), tag
+				.getCodeSystem().getIRI());
 	}
 
 	@Override
