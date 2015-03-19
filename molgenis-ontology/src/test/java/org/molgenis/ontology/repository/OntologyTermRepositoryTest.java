@@ -27,11 +27,11 @@ import org.molgenis.ontology.model.OntologyTermNodePathMetaData;
 import org.molgenis.ontology.model.OntologyTermSynonymMetaData;
 import org.molgenis.ontology.utils.OntologyLoader;
 import org.molgenis.ontology.utils.ZipFileUtil;
+import org.molgenis.util.ResourceUtils;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
 
 public class OntologyTermRepositoryTest
 {
@@ -48,8 +48,7 @@ public class OntologyTermRepositoryTest
 	@BeforeClass
 	public static void beforeClass() throws FileNotFoundException, IOException, OWLOntologyCreationException
 	{
-		File file = new File(OntologyTermRepositoryTest.class.getResource(
-				System.getProperty("file.separator") + "small_test_data.owl.zip").getFile());
+		File file = ResourceUtils.getFile("small_test_data.owl.zip");
 		List<File> uploadedFiles = ZipFileUtil.unzip(file);
 		ontologyLoader = new OntologyLoader("small_test_data", uploadedFiles.get(0));
 		uuidGenerator = new UuidGeneratorTest();
@@ -57,7 +56,7 @@ public class OntologyTermRepositoryTest
 				uuidGenerator);
 		ontologyTermNodePathRepository = new OntologyTermNodePathRepository(ontologyLoader, uuidGenerator);
 		ontologyTermSynonymRepository = new OntologyTermSynonymRepository(ontologyLoader, uuidGenerator);
-		
+
 		populateRepositoy(ontologyTermDynamicAnnotationRepository.iterator());
 		populateRepositoy(ontologyTermSynonymRepository.iterator());
 		populateRepositoy(ontologyTermNodePathRepository.iterator());
@@ -65,15 +64,15 @@ public class OntologyTermRepositoryTest
 
 	@Test
 	public void ontologyTermRepositoryIterator() throws OWLOntologyCreationException
-	{		
+	{
 		DataService dataService = mock(DataService.class);
-		
+
 		Entity entityOntology = new MapEntity();
 		entityOntology.set(OntologyMetaData.ID, "13");
 		entityOntology.set(OntologyMetaData.ONTOLOGY_IRI, "http://www.molgenis.org");
 		entityOntology.set(OntologyMetaData.ONTOLOGY_NAME, "small_test_data");
-		when(dataService.findOne(OntologyMetaData.ENTITY_NAME,
-				new QueryImpl().eq(anyString(), anyString()))).thenReturn(entityOntology);
+		when(dataService.findOne(OntologyMetaData.ENTITY_NAME, new QueryImpl().eq(anyString(), anyString())))
+				.thenReturn(entityOntology);
 
 		// Entities
 		MapEntity entity1 = new MapEntity();
@@ -94,7 +93,7 @@ public class OntologyTermRepositoryTest
 				dataService.findAll(OntologyTermSynonymMetaData.ENTITY_NAME,
 						new QueryImpl().in(OntologyMetaData.ID, Arrays.<String> asList("5")))).thenReturn(
 				Arrays.asList(entity1));
-		
+
 		when(
 				dataService.findAll(OntologyTermSynonymMetaData.ENTITY_NAME,
 						new QueryImpl().in(OntologyMetaData.ID, Arrays.<String> asList()))).thenReturn(Arrays.asList());
@@ -204,7 +203,7 @@ public class OntologyTermRepositoryTest
 
 		assertFalse(i.hasNext());
 	}
-	
+
 	private static void populateRepositoy(Iterator<Entity> iterator)
 	{
 		while (iterator.hasNext())
@@ -214,7 +213,7 @@ public class OntologyTermRepositoryTest
 	static class UuidGeneratorTest extends UuidGenerator
 	{
 		private int autoId = -1;
-		
+
 		@Override
 		public String generateId()
 		{
