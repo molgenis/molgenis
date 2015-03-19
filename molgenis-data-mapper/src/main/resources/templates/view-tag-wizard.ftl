@@ -15,36 +15,44 @@
 <div class="row">
 	<div class="col-md-6">
 		<h3>Tag Wizard</h3>
-		<p>View and curate auto generated ontology tags</p>
+		<p>Tag attributes manually with ontology term or view and curate auto generated tags</p>
 	</div>
 </div>
 
 <div class="row">
 	<div class="col-md-12">
+		Select an ontology: 
+		<select>
+			<#list ontologies as ontology>
+				<option value="${ontology}">${ontology}</option>
+			</#list>
+		</select>
 		<hr></hr>
 	</div>
 </div>
 
 <div class="row">
 	<div class="col-md-6" style="overflow-y:auto;max-height:500px;min-height:500px;">
+		<#list taggedAttributeMetaDatas?keys as attributeMetaData>
+			${attributeMetaData.name}
+		</#list>
+		
 		<h4>Hypertension</h4>
 		<p>This is a really awsome description of this attribute</p>
 		
-		<h5>
-			Tags
-			<button type="button" class="btn btn-default btn-xs"><span class="add-tag glyphicon glyphicon-plus"></span></button>
-			 
-		</h5>	
+		<h5>Add a relation <button type="button" id="add-expression-btn" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-plus"></span></button></h5>
+		<h5>Add a tag <button type="button" id="add-tag-btn" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-plus"></span></button></h5> 
+		
 		<table class="table">
 			<thead>
-				<th>Expression</th>
+				<th>Relation</th>
 				<th>Tags</th>
 			</thead>
 			<tbody>
 				<tr>
 					<td>
-						<#assign expression = "is_associated_with" />
-						<button type="btn" class="btn btn-default btn-xs expression" value="${expression}">${expression}</button>						
+						<#assign relation = "is_associated_with" />
+						<button type="btn" class="btn btn-default btn-xs relation" value="${relation}">${expression}</button>						
 					</td>
 					<td>
 						<button type="btn" class="btn btn-primary btn-xs tag-remove-btn">TAG 1 <span class="glyphicon glyphicon-remove"></span></button></button>
@@ -53,8 +61,8 @@
 				</tr>
 				<tr>
 					<td>
-						<#assign expression = "is_caused_by" />
-						<button type="btn" class="btn btn-default btn-xs expression" value="${expression}">${expression}</button>
+						<#assign relation = "is_caused_by" />
+						<button type="btn" class="btn btn-default btn-xs relation" value="${relation}">${relation}</button>
 					</td>
 					<td>
 						<button type="btn" class="btn btn-primary btn-xs tag-remove-btn">TAG 5 <span class="glyphicon glyphicon-remove"></span></button></button>
@@ -63,8 +71,8 @@
 			
 				<tr>
 					<td>
-						<#assign expression = "is_related_to" />
-						<button type="btn" class="btn btn-default btn-xs expression" value="${expression}">${expression}</button>
+						<#assign relation = "is_related_to" />
+						<button type="btn" class="btn btn-default btn-xs relation" value="${relation}">${relation}</button>
 					</td>
 					<td>
 						<button type="btn" class="btn btn-primary btn-xs tag-remove-btn">TAG 4 <span class="glyphicon glyphicon-remove"></span></button>
@@ -73,7 +81,7 @@
 			</tbody>
 		</table>
 	</div>
-	<div id="expression-tag-info-container" class="col-md-6"></div>
+	<div id="relation-tag-info-container" class="col-md-6"></div>
 </div>
 
 <div class="row">
@@ -84,10 +92,10 @@
 	</div>
 </div>
 
-<script id="expression-and-tag-template" type="text/x-handlebars-template">
+<script id="relation-and-tag-template" type="text/x-handlebars-template">
 	<div class="row">
 		<div class="col-md-12">
-			<legend>{{this.expression}}</legend>
+			<legend>{{this.relation}}</legend>
 		</div>
 	</div>
 	

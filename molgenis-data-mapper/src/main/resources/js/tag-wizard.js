@@ -7,19 +7,19 @@
 (function($, molgenis) {
 	"use strict";
 
-	var expressionAndTagTemplate;
+	var relationAndTagTemplate;
 
 	/**
 	 * Function that loads the expression and tag information.
 	 */
-	function loadExpressionAndTagContainer(expression, tags) {
-		var expressionAndTagInfoContainer = $('#expression-tag-info-container');
+	function loadRelationAndTagContainer(relation, tags) {
+		var relationAndTagInfoContainer = $('#relation-tag-info-container');
 
-		expressionAndTagInfoContainer.empty();
-		expressionAndTagTemplate = Handlebars.compile($("#expression-and-tag-template").html());
+		relationAndTagInfoContainer.empty();
+		relationAndTagTemplate = Handlebars.compile($("#relation-and-tag-template").html());
 
-		expressionAndTagInfoContainer.append(expressionAndTagTemplate({
-			'expression' : expression,
+		relationAndTagInfoContainer.append(relationAndTagTemplate({
+			'relation' : relation,
 			'taglist' : tags
 		}));
 
@@ -29,7 +29,7 @@
 	$(function() {
 		// Tag on click listener
 		$('.tag-remove-btn').on('click', function() {
-			var expression = $(this).parent().prev().children().val();
+			var relation = $(this).parent().prev().children().val();
 			var tags = [];
 
 			$.each($(this).parent().children(), function() {
@@ -39,19 +39,19 @@
 			tags.splice(tags.indexOf($(this).text()), 1);
 			$(this).remove();
 
-			loadExpressionAndTagContainer(expression, tags);
+			loadRelationAndTagContainer(relation, tags);
 		});
 
 		// Expression on click listener
-		$('.expression').on('click', function() {
-			var expression = $(this).val();
+		$('.relation').on('click', function() {
+			var relation = $(this).val();
 			var tags = [];
 
 			$.each($(this).parent().next().children(), function() {
 				tags.push($(this).text());
 			});
 
-			loadExpressionAndTagContainer(expression, tags);
+			loadRelationAndTagContainer(relation, tags);
 		});
 	});
 }($, window.top.molgenis = window.top.molgenis || {}));
