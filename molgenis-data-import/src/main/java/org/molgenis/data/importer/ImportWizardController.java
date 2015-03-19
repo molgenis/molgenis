@@ -145,7 +145,7 @@ public class ImportWizardController extends AbstractWizardController
 					}
 					else dataService.update(GroupAuthority.ENTITY_NAME, authority);
 				}
-				else if (value.equals("none"))
+				else if (value.toUpperCase().equals(org.molgenis.security.core.Permission.NONE))
 				{
 					if (authority.getId() != null) dataService.delete(GroupAuthority.ENTITY_NAME, authority.getId());
 				}
