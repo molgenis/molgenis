@@ -126,7 +126,7 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 
 	Entity getTagEntity(Tag<?, OntologyTerm, Ontology> tag)
 	{
-		return tagRepository.getTagEntity(tag.getObject().getIRI(), tag.getObject().getName(), tag.getRelation(), tag
+		return tagRepository.getTagEntity(tag.getObject().getIRI(), tag.getObject().getLabel(), tag.getRelation(), tag
 				.getCodeSystem().getIRI());
 	}
 

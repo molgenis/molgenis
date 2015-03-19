@@ -145,7 +145,7 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 
 		Ontology edamOntology = mock(Ontology.class);
 
-		when(edamOntology.getIri()).thenReturn("http://edamontology.org");
+		when(edamOntology.getIRI()).thenReturn("http://edamontology.org");
 
 		Tag<Object, OntologyTerm, Ontology> tag = new TagImpl<Object, OntologyTerm, Ontology>("1233", null,
 				Relation.instanceOf, coreData, edamOntology);

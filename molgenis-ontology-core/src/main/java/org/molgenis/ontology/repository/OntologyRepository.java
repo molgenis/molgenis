@@ -9,7 +9,7 @@ public class OntologyRepository
 
 	public Iterable<Ontology> getOntologies()
 	{
-		return dataService.findAll();
+		return dataService.findAll(OntologyMe);
 	}
 
 	public Ontology getOntology(String name)
