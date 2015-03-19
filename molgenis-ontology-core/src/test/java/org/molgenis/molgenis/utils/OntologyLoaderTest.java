@@ -13,6 +13,7 @@ import java.util.List;
 
 import org.molgenis.ontology.utils.OntologyLoader;
 import org.molgenis.ontology.utils.ZipFileUtil;
+import org.molgenis.util.ResourceUtils;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -26,8 +27,7 @@ public class OntologyLoaderTest
 	@BeforeMethod
 	public void setUp() throws OWLOntologyCreationException, FileNotFoundException, IOException
 	{
-		File file = new File(OntologyTermIndexRepositoryTest.class.getResource(
-				System.getProperty("file.separator") + "test-ontology-loader.owl.zip").getFile());
+		File file = ResourceUtils.getFile("test-ontology-loader.owl.zip");
 		List<File> uploadedFiles = ZipFileUtil.unzip(file);
 		loader = new OntologyLoader("ontology-test", uploadedFiles.get(0));
 	}
