@@ -6,11 +6,8 @@ import static org.elasticsearch.common.collect.Lists.newArrayList;
 import static org.molgenis.data.mapper.MappingServiceController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -51,7 +48,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 
@@ -374,12 +370,12 @@ public class MappingServiceController extends MolgenisPluginController
 		Iterable<AttributeMetaData> attributes = emd.getAttributes();
 		
 		// Remember, we are iterating over attribute metadata. x == attribute metadata
-		Map<AttributeMetaData, List<Tag<AttributeMetaData, OntologyTerm, Ontology>>> attributesAndTags = stream(
+		Map<AttributeMetaData, List<Tag<AttributeMetaData, OntologyTerm, Ontology>>> taggedAttributeMetaDatas = stream(
 				attributes.spliterator(), false).collect(
 				toMap((x -> x), (x -> newArrayList(ontologyTagService.getTagsForAttribute(emd, x)))));
 
 		model.addAttribute("ontologies", ontologies);
-		model.addAttribute("amdAndTags", attributesAndTags);
+		model.addAttribute("taggedAttributeMetaDatas", taggedAttributeMetaDatas);
 		model.addAttribute("relations", Relation.values());
 		
 		return VIEW_TAG_WIZARD;
