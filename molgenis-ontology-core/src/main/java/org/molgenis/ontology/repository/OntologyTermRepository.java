@@ -1,6 +1,5 @@
 package org.molgenis.ontology.repository;
 
-import static java.util.Arrays.stream;
 import static org.elasticsearch.common.collect.Iterables.transform;
 import static org.molgenis.data.support.QueryImpl.IN;
 import static org.molgenis.ontology.model.OntologyTermMetaData.ENTITY_NAME;
@@ -31,6 +30,10 @@ public class OntologyTermRepository
 
 	private static OntologyTerm toOntologyTerm(Entity entity)
 	{
+		if (entity == null)
+		{
+			return null;
+		}
 		return OntologyTerm.create(entity.getString(ONTOLOGY_TERM_IRI), entity.getString(ONTOLOGY_TERM_NAME));
 	}
 
@@ -43,8 +46,17 @@ public class OntologyTermRepository
 	 */
 	public OntologyTerm getOntologyTerm(String[] iris)
 	{
-		return OntologyTerm.and(stream(iris)
-				.map(iri -> dataService.findOne(ENTITY_NAME, QueryImpl.EQ(ONTOLOGY_TERM_IRI, iri)))
-				.filter(x -> x != null).map(OntologyTermRepository::toOntologyTerm).toArray(OntologyTerm[]::new));
+		List<OntologyTerm> ontologyTerms = Lists.newArrayList();
+		for (String iri : iris)
+		{
+			OntologyTerm ontologyTerm = toOntologyTerm(dataService.findOne(ENTITY_NAME,
+					QueryImpl.EQ(ONTOLOGY_TERM_IRI, iri)));
+			if (ontologyTerm == null)
+			{
+				return null;
+			}
+
+		}
+		return OntologyTerm.and(ontologyTerms.toArray(new OntologyTerm[0]));
 	}
 }
