@@ -171,45 +171,4 @@ label.horizontal-inline.inbetween {
 	height: 0
 }
 
-.toggle {
-	overflow: hidden;
-	display: inline-block;
-	width: 8em;
-	background: #e6e6e6;
-	border: 1px solid #c3c6c6;
-	border-color: #adadad;
-	cursor: pointer;
-}
-
-.toggle input {
-	position: absolute;
-	visibility: hidden;
-}
-
-.toggle span {
-	position: relative;
-	left: 0%;
-	display: block;
-	text-align: center;
-}
-
-.toggle :checked+span {
-	left: 50%;
-}
-
-/* Default unchecked state */
-.toggle span:before {
-	content: attr(data-unchecked);
-	display: block;
-	width: 50%;
-	background-color: #5cb85c;
-	color: black;
-}
-
-/* Checked state */
-.toggle :checked+span:before {
-	content: attr(data-checked);
-	background-color: #d9534f;
-}
-
 /* end of Bootstrap tooltip style*/
