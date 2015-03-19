@@ -64,7 +64,7 @@
 			// get meta data for referenced entities
 			var refEntitiesMeta = {};
 			$.each(colAttributes, function(i, attribute) {
-				if(attribute.fieldType === 'XREF' || attribute.fieldType === 'MREF' || attribute.fieldType === 'CATEGORICAL') {
+				if(attribute.fieldType === 'XREF' || attribute.fieldType === 'MREF' || attribute.fieldType === 'CATEGORICAL' || attribute.fieldType === 'CATEGORICAL_MREF') {
 					refEntitiesMeta[attribute.refEntity.href] = null;
 				}
 			});
@@ -83,7 +83,7 @@
 			$.when.apply($, dfds).done(function() {
 				// inject referenced entities meta data in attributes
 				$.each(colAttributes, function(i, attribute) {
-					if(attribute.fieldType === 'XREF' || attribute.fieldType === 'MREF' || attribute.fieldType === 'CATEGORICAL') {
+					if(attribute.fieldType === 'XREF' || attribute.fieldType === 'MREF' || attribute.fieldType === 'CATEGORICAL' || attribute.fieldType === 'CATEGORICAL_MREF') {
 						attribute.refEntity = refEntitiesMeta[attribute.refEntity.href];
 					}
 				});
@@ -109,7 +109,7 @@
 					return attribute.name;
 				}
 			}
-			if(attribute.fieldType === 'XREF' || attribute.fieldType === 'CATEGORICAL' ||attribute.fieldType === 'MREF') {
+			if(attribute.fieldType === 'XREF' || attribute.fieldType === 'CATEGORICAL' ||attribute.fieldType === 'MREF' || attribute.fieldType === 'CATEGORICAL_MREF') {
 				// partially expand reference entities (only request label attribute)
 				var refEntity = settings.refEntitiesMeta[attribute.refEntity.href];
 				if(attribute.visible){
@@ -292,6 +292,7 @@
 				input.addClass('number-input');
 				cell.html(input);
 				break;
+			case 'CATEGORICAL_MREF': // TODO render like CATEGORICAL is rendered for XREF
 			case 'MREF':
 				var refEntityMeta = settings.refEntitiesMeta[attribute.refEntity.href];
 				// TODO do not construct uri from other uri
@@ -399,6 +400,7 @@
 			case 'XREF':
 			case 'MREF':
             case 'CATEGORICAL':
+            case 'CATEGORICAL_MREF':
                 if (rawValue) {
                 	var refEntity = settings.refEntitiesMeta[attribute.refEntity.href];
                     var refAttribute = refEntity.labelAttribute;
@@ -406,7 +408,7 @@
 					
                 	if (refValue) {
                 		var refAttributeType = refValue.fieldType;
-                		if (refAttributeType === 'XREF' || refAttributeType === 'MREF' || refAttributeType === 'COMPOUND') {
+                		if (refAttributeType === 'XREF' || refAttributeType === 'MREF' || refAttributeType === 'CATEGORICAL' || refAttributeType === 'CATEGORICAL_MREF' || refAttributeType === 'COMPOUND') {
                 			throw 'unsupported field type ' + refAttributeType;
                 		}
 						
@@ -420,6 +422,7 @@
 								});
 								cell.append($cellValue);
 								break;
+							case 'CATEGORICAL_MREF':
 							case 'MREF':
 								$.each(rawValue.items, function(i, rawValue) {
 									var $cellValuePart = $('<a href="#">').append(formatTableCellValue(rawValue[refAttribute], refAttributeType));
@@ -569,6 +572,7 @@
 					cell.removeClass('edited').addClass('invalid-input');
 				}
 				break;
+			case 'CATEGORICAL_MREF' :
 			case 'MREF':
 				var select = cell.find('input[type=hidden]');
 				var data = select.select2('data');
