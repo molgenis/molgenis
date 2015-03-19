@@ -54,6 +54,7 @@ public class MappingServiceController extends MolgenisPluginController
 	private static final String VIEW_MAPPING_PROJECTS = "view-mapping-projects";
 	private static final String VIEW_ATTRIBUTE_MAPPING = "view-attribute-mapping";
 	private static final String VIEW_SINGLE_MAPPING_PROJECT = "view-single-mapping-project";
+	private static final String VIEW_TAG_WIZARD = "view-tag-wizard";
 
 	@Autowired
 	private MolgenisUserService molgenisUserService;
@@ -344,6 +345,13 @@ public class MappingServiceController extends MolgenisPluginController
 		model.addAttribute("attributeMapping", attributeMapping);
 		model.addAttribute("hasWritePermission", hasWritePermission(project, false));
 		return VIEW_ATTRIBUTE_MAPPING;
+	}
+	
+	@RequestMapping("/tagWizard")
+	public String viewTagWizard(@RequestParam String target, Model model)
+	{
+		model.addAttribute("target", dataService.getEntityMetaData(target));
+		return VIEW_TAG_WIZARD;
 	}
 
 	/**
