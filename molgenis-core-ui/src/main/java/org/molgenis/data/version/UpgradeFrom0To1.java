@@ -92,9 +92,6 @@ public class UpgradeFrom0To1 extends MetaDataUpgrade
 	@Override
 	public void upgrade()
 	{
-		ManageableRepositoryCollection defaultBackend = dataService.getMeta().getDefaultBackend();
-		MetaDataServiceImpl metaDataService = (MetaDataServiceImpl) dataService.getMeta();
-
 		InputStream in = getClass().getResourceAsStream("2582.sql");
 		try
 		{
@@ -104,6 +101,9 @@ public class UpgradeFrom0To1 extends MetaDataUpgrade
 		{
 			throw new RuntimeException(e);
 		}
+
+		ManageableRepositoryCollection defaultBackend = dataService.getMeta().getDefaultBackend();
+		MetaDataServiceImpl metaDataService = (MetaDataServiceImpl) dataService.getMeta();
 
 		((IndexedRepository) dataService.getRepository(EntityMetaDataMetaData.ENTITY_NAME)).rebuildIndex();
 		((IndexedRepository) dataService.getRepository(AttributeMetaDataMetaData.ENTITY_NAME)).rebuildIndex();
