@@ -9,9 +9,11 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.ontology.model.OntologyMetaData;
 import org.molgenis.ontology.repository.model.Ontology;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class OntologyRepository
 {
+	@Autowired
 	private DataService dataService;
 
 	public Iterable<Ontology> getOntologies()
