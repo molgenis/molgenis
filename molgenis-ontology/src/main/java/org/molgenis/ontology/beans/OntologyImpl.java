@@ -6,25 +6,42 @@ import org.molgenis.ontology.model.OntologyMetaData;
 
 public class OntologyImpl implements Ontology
 {
-	private final String name;
+	private final String label;
 	private final String iri;
+	private final String description;
+
+	public OntologyImpl(String label, String iri, String description)
+	{
+		super();
+		this.label = label;
+		this.iri = iri;
+		this.description = description;
+	}
 
 	public OntologyImpl(Entity entity)
 	{
-		this.name = entity.getString(OntologyMetaData.ONTOLOGY_NAME);
+		this.label = entity.getString(OntologyMetaData.ONTOLOGY_NAME);
 		this.iri = entity.getString(OntologyMetaData.ONTOLOGY_IRI);
+		// TODO : FIXME
+		this.description = StringUtils.EMPTY;
 	}
 
 	@Override
 	public String getLabel()
 	{
-		return name;
+		return label;
 	}
 
 	@Override
 	public String getIri()
 	{
 		return iri;
+	}
+
+	@Override
+	public String getDescription()
+	{
+		return description;
 	}
 
 	@Override
@@ -36,7 +53,7 @@ public class OntologyImpl implements Ontology
 	@Override
 	public String toString()
 	{
-		return name;
+		return label;
 	}
 
 	@Override
@@ -45,7 +62,7 @@ public class OntologyImpl implements Ontology
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((iri == null) ? 0 : iri.hashCode());
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((label == null) ? 0 : label.hashCode());
 		return result;
 	}
 
@@ -61,11 +78,11 @@ public class OntologyImpl implements Ontology
 			if (other.iri != null) return false;
 		}
 		else if (!iri.equals(other.iri)) return false;
-		if (name == null)
+		if (label == null)
 		{
-			if (other.name != null) return false;
+			if (other.label != null) return false;
 		}
-		else if (!name.equals(other.name)) return false;
+		else if (!label.equals(other.label)) return false;
 		return true;
 	}
 }

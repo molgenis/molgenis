@@ -6,5 +6,7 @@ public interface Ontology
 
 	String getLabel();
 
+	String getDescription();
+
 	String getVersion();
 }

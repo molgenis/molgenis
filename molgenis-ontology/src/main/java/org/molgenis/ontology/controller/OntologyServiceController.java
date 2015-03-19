@@ -43,8 +43,8 @@ import org.molgenis.ontology.matching.AdaptedCsvRepository;
 import org.molgenis.ontology.matching.MatchInputTermBatchService;
 import org.molgenis.ontology.matching.MatchingTaskContentEntityMetaData;
 import org.molgenis.ontology.matching.MatchingTaskEntityMetaData;
-import org.molgenis.ontology.matching.OntologyMatchingService;
-import org.molgenis.ontology.matching.OntologyMatchingServiceImpl;
+import org.molgenis.ontology.matching.OntologyService;
+import org.molgenis.ontology.matching.OntologyServiceImpl;
 import org.molgenis.ontology.matching.UploadProgress;
 import org.molgenis.ontology.model.OntologyMetaData;
 import org.molgenis.ontology.model.OntologyTermMetaData;
@@ -78,7 +78,7 @@ public class OntologyServiceController extends MolgenisPluginController
 	private DataService dataService;
 
 	@Autowired
-	private OntologyMatchingService ontologyMatchingService;
+	private OntologyService ontologyMatchingService;
 
 	@Autowired
 	private MatchInputTermBatchService processInputTermService;
@@ -339,7 +339,7 @@ public class OntologyServiceController extends MolgenisPluginController
 			String queryString = request.get("queryString").toString();
 			String ontologyIri = request.get(OntologyMetaData.ONTOLOGY_IRI).toString();
 			Entity entity = new MapEntity();
-			entity.set(OntologyMatchingServiceImpl.DEFAULT_MATCHING_NAME_FIELD, queryString);
+			entity.set(OntologyServiceImpl.DEFAULT_MATCHING_NAME_FIELD, queryString);
 			return ontologyMatchingService.searchEntity(ontologyIri, entity);
 		}
 		return new OntologyServiceResult("Please check entityName, inputTermIdentifier exist in input!");
@@ -353,7 +353,7 @@ public class OntologyServiceController extends MolgenisPluginController
 		{
 			response.setContentType("text/csv");
 			response.addHeader("Content-Disposition", "attachment; filename=" + getCsvFileName("match-result"));
-			csvWriter = new CsvWriter(response.getOutputStream(), OntologyMatchingServiceImpl.DEFAULT_SEPARATOR);
+			csvWriter = new CsvWriter(response.getOutputStream(), OntologyServiceImpl.DEFAULT_SEPARATOR);
 			List<String> columnHeaders = new ArrayList<String>();
 			for (AttributeMetaData attributeMetaData : dataService.getEntityMetaData(entityName).getAttributes())
 			{
@@ -420,7 +420,7 @@ public class OntologyServiceController extends MolgenisPluginController
 		}
 		AdaptedCsvRepository csvRepository = new AdaptedCsvRepository(entityName, new CsvRepository(uploadFile,
 				Arrays.<CellProcessor> asList(new LowerCaseProcessor(), new TrimProcessor()),
-				OntologyMatchingServiceImpl.DEFAULT_SEPARATOR));
+				OntologyServiceImpl.DEFAULT_SEPARATOR));
 
 		if (!validateFileHeader(csvRepository))
 		{
@@ -458,7 +458,7 @@ public class OntologyServiceController extends MolgenisPluginController
 		boolean containsName = false;
 		for (AttributeMetaData atomicAttributes : repository.getEntityMetaData().getAtomicAttributes())
 		{
-			if (atomicAttributes.getName().equalsIgnoreCase(OntologyMatchingServiceImpl.DEFAULT_MATCHING_NAME_FIELD)) containsName = true;
+			if (atomicAttributes.getName().equalsIgnoreCase(OntologyServiceImpl.DEFAULT_MATCHING_NAME_FIELD)) containsName = true;
 		}
 		return containsName;
 	}

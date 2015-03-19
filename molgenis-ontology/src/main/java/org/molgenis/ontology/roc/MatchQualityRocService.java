@@ -26,8 +26,8 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.beans.OntologyServiceResult;
 import org.molgenis.ontology.matching.MatchingTaskContentEntityMetaData;
 import org.molgenis.ontology.matching.MatchingTaskEntityMetaData;
-import org.molgenis.ontology.matching.OntologyMatchingService;
-import org.molgenis.ontology.matching.OntologyMatchingServiceImpl;
+import org.molgenis.ontology.matching.OntologyService;
+import org.molgenis.ontology.matching.OntologyServiceImpl;
 import org.molgenis.ontology.model.OntologyTermMetaData;
 import org.molgenis.ontology.utils.OntologyServiceUtil;
 import org.molgenis.security.user.UserAccountService;
@@ -42,10 +42,10 @@ public class MatchQualityRocService
 	private UserAccountService userAccountService;
 
 	private final DataService dataService;
-	private final OntologyMatchingService ontologyService;
+	private final OntologyService ontologyService;
 
 	@Autowired
-	public MatchQualityRocService(DataService dataService, OntologyMatchingService ontologyService)
+	public MatchQualityRocService(DataService dataService, OntologyService ontologyService)
 	{
 		if (dataService == null) throw new IllegalArgumentException("DataService cannot be null!");
 		if (ontologyService == null) throw new IllegalArgumentException("OntologyMatchingService cannot be null!");
@@ -200,8 +200,8 @@ public class MatchQualityRocService
 	{
 		String termIdentifier = validatedMatchEntity.getString(MatchingTaskContentEntityMetaData.INPUT_TERM);
 		Entity termEntity = dataService.findOne(entityName,
-				new QueryImpl().eq(OntologyMatchingServiceImpl.DEFAULT_MATCHING_IDENTIFIER, termIdentifier));
-		return termEntity.getString(OntologyMatchingServiceImpl.DEFAULT_MATCHING_NAME_FIELD);
+				new QueryImpl().eq(OntologyServiceImpl.DEFAULT_MATCHING_IDENTIFIER, termIdentifier));
+		return termEntity.getString(OntologyServiceImpl.DEFAULT_MATCHING_NAME_FIELD);
 	}
 
 	private String createFileName()

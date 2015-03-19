@@ -13,7 +13,7 @@ import org.molgenis.ontology.beans.OntologyTerm;
  * @author chaopang
  * 
  */
-public interface OntologyMatchingService
+public interface OntologyService
 {
 	// TODO : to be added in the future for importing ontology
 	// void importOntology();

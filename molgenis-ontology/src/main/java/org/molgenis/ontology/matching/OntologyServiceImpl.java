@@ -38,7 +38,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
 
-public class OntologyMatchingServiceImpl implements OntologyMatchingService
+public class OntologyServiceImpl implements OntologyService
 {
 	private static final List<String> ELASTICSEARCH_RESERVED_WORDS = Arrays.asList("or", "and", "if");
 	private static final String NON_WORD_SEPARATOR = "[^a-zA-Z0-9]";
@@ -62,7 +62,7 @@ public class OntologyMatchingServiceImpl implements OntologyMatchingService
 	private final InformationContentService informationContentService;
 
 	@Autowired
-	public OntologyMatchingServiceImpl(DataService dataService, SearchService searchService,
+	public OntologyServiceImpl(DataService dataService, SearchService searchService,
 			InformationContentService informationContentService)
 	{
 		if (dataService == null) throw new IllegalArgumentException("DataService is null");
@@ -364,7 +364,7 @@ public class OntologyMatchingServiceImpl implements OntologyMatchingService
 	public OntologyServiceResult search(String ontologyUrl, String queryString)
 	{
 		Entity entity = new MapEntity();
-		entity.set(OntologyMatchingServiceImpl.DEFAULT_MATCHING_NAME_FIELD, queryString);
+		entity.set(OntologyServiceImpl.DEFAULT_MATCHING_NAME_FIELD, queryString);
 		return searchEntity(ontologyUrl, entity);
 	}
 

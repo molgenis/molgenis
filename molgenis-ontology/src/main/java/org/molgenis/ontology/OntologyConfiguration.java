@@ -5,8 +5,8 @@ import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.ontology.matching.MatchInputTermBatchService;
 import org.molgenis.ontology.matching.MatchingTaskContentEntityMetaData;
 import org.molgenis.ontology.matching.MatchingTaskEntityMetaData;
-import org.molgenis.ontology.matching.OntologyMatchingService;
-import org.molgenis.ontology.matching.OntologyMatchingServiceImpl;
+import org.molgenis.ontology.matching.OntologyService;
+import org.molgenis.ontology.matching.OntologyServiceImpl;
 import org.molgenis.ontology.matching.UploadProgress;
 import org.molgenis.ontology.model.OntologyMetaData;
 import org.molgenis.ontology.model.OntologyTermDynamicAnnotationMetaData;
@@ -72,9 +72,9 @@ public class OntologyConfiguration
 	}
 
 	@Bean
-	public OntologyMatchingService ontologyMatchingService()
+	public OntologyService ontologyMatchingService()
 	{
-		return new OntologyMatchingServiceImpl(dataService, searchService, informationContentService());
+		return new OntologyServiceImpl(dataService, searchService, informationContentService());
 	}
 
 	@Bean

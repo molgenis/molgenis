@@ -1,7 +1,9 @@
 package org.molgenis.ontology.beans;
 
+import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.ontology.model.OntologyTermMetaData;
 import org.molgenis.ontology.model.OntologyTermSynonymMetaData;
@@ -12,14 +14,26 @@ import com.google.common.collect.FluentIterable;
 public class OntologyTermImpl implements OntologyTerm
 {
 	private final String iri;
-	private final String name;
+	private final String label;
+	private final String description;
+	private final String termAccession;
 	private final Ontology ontology;
 	private final Set<String> synonyms;
+
+	public OntologyTermImpl(String iri, String label, String description, String termAccession, Ontology ontology)
+	{
+		this.iri = iri;
+		this.label = label;
+		this.description = description;
+		this.termAccession = termAccession;
+		this.ontology = ontology;
+		this.synonyms = new HashSet<String>();
+	}
 
 	public OntologyTermImpl(Entity ontologyTermEntity)
 	{
 		this.iri = ontologyTermEntity.getString(OntologyTermMetaData.ONTOLOGY_TERM_IRI);
-		this.name = ontologyTermEntity.getString(OntologyTermMetaData.ONTOLOGY_TERM_NAME);
+		this.label = ontologyTermEntity.getString(OntologyTermMetaData.ONTOLOGY_TERM_NAME);
 		this.ontology = new OntologyImpl(ontologyTermEntity.getEntity(OntologyTermMetaData.ONTOLOGY));
 		this.synonyms = FluentIterable.from(ontologyTermEntity.getEntities(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM))
 				.transform(new Function<Entity, String>()
@@ -30,6 +44,9 @@ public class OntologyTermImpl implements OntologyTerm
 						return entity.getString(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM);
 					}
 				}).toSet();
+		// TODO : FIXME
+		this.termAccession = StringUtils.EMPTY;
+		this.description = StringUtils.EMPTY;
 	}
 
 	@Override
@@ -39,9 +56,9 @@ public class OntologyTermImpl implements OntologyTerm
 	}
 
 	@Override
-	public String getName()
+	public String getLabel()
 	{
-		return name;
+		return label;
 	}
 
 	@Override
@@ -57,9 +74,21 @@ public class OntologyTermImpl implements OntologyTerm
 	}
 
 	@Override
+	public String getDescription()
+	{
+		return description;
+	}
+
+	@Override
+	public String getTermAccession()
+	{
+		return termAccession;
+	}
+
+	@Override
 	public String toString()
 	{
-		return name;
+		return label;
 	}
 
 	@Override
@@ -68,7 +97,7 @@ public class OntologyTermImpl implements OntologyTerm
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((iri == null) ? 0 : iri.hashCode());
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((label == null) ? 0 : label.hashCode());
 		return result;
 	}
 
@@ -84,11 +113,12 @@ public class OntologyTermImpl implements OntologyTerm
 			if (other.iri != null) return false;
 		}
 		else if (!iri.equals(other.iri)) return false;
-		if (name == null)
+		if (label == null)
 		{
-			if (other.name != null) return false;
+			if (other.label != null) return false;
 		}
-		else if (!name.equals(other.name)) return false;
+		else if (!label.equals(other.label)) return false;
 		return true;
 	}
+
 }

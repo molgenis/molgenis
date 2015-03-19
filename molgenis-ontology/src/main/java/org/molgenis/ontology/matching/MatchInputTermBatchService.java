@@ -35,10 +35,10 @@ public class MatchInputTermBatchService
 
 	private final UploadProgress uploadProgress;
 
-	private final OntologyMatchingService ontologyService;
+	private final OntologyService ontologyService;
 
 	public MatchInputTermBatchService(DataService dataService, UploadProgress uploadProgress,
-			OntologyMatchingService ontologyService)
+			OntologyService ontologyService)
 	{
 		this.dataService = dataService;
 		this.uploadProgress = uploadProgress;
@@ -92,7 +92,7 @@ public class MatchInputTermBatchService
 					matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.MATCHED_TERM,
 							firstMatchedOntologyTerm.get(OntologyTermMetaData.ONTOLOGY_TERM_IRI));
 					matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.SCORE,
-							firstMatchedOntologyTerm.get(OntologyMatchingServiceImpl.SCORE));
+							firstMatchedOntologyTerm.get(OntologyServiceImpl.SCORE));
 				}
 				else
 				{
