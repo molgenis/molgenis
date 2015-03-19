@@ -4,6 +4,7 @@ import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_CSS;
 import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_FONTS;
 import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_IMG;
 import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_JS;
+import static org.molgenis.security.runas.RunAsSystemProxy.runAsSystem;
 
 import java.io.File;
 import java.io.IOException;
@@ -386,7 +387,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 			LOG.info("Index found no need to reindex.");
 		}
 
-		metaDataService().setDefaultBackend(getBackend());
+		runAsSystem(() -> metaDataService().setDefaultBackend(getBackend()));
 	}
 
 	private boolean indexExists()
