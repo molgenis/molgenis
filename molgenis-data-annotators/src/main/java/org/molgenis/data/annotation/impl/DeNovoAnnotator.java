@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -51,6 +52,11 @@ public class DeNovoAnnotator extends VariantAnnotator
 	//helper lists for ease of use, derived from HashMap<String, Parents> pedigree
 	private HashMap<String, Sample> motherToChild;
 	private HashMap<String, Sample> fatherToChild;
+	
+	
+	//need: matrix of gene x trio, with nr of denovo calls in each cell
+	//<geneSymbol - <trioChildID - count>>
+	LinkedHashMap<String, LinkedHashMap<String, Integer>> geneTrioCounts = new LinkedHashMap<String, LinkedHashMap<String, Integer>>();
 
 	public static final String DENOVO = VcfRepository.getInfoPrefix() + "DENOVO";
 
@@ -127,9 +133,32 @@ public class DeNovoAnnotator extends VariantAnnotator
 				outputVCFWriter.println(VcfUtils.convertToVCF(annotatedRecord.get(0)));
 			}
 		}
+		
+		
+		for(String child : geneTrioCounts.entrySet().iterator().next().getValue().keySet())
+		{
+			System.out.print("\t" + child);
+		}
+		System.out.print("\n");
+		for(String gene : geneTrioCounts.keySet())
+		{
+		//	System.out.println("GENE " + gene);
+			StringBuilder line = new StringBuilder();
+			line.append(gene);
+			line.append("\t");
+			for(String child : geneTrioCounts.get(gene).keySet())
+			{
+		//		System.out.println("CHILD " + child);
+				line.append(geneTrioCounts.get(gene).get(child));
+				line.append("\t");
+			}
+			line.deleteCharAt(line.length()-1);
+			System.out.println(line.toString());
+		}
+		
 		outputVCFWriter.close();
 		vcfRepo.close();
-		System.out.println("All done!");
+		LOG.info("All done!");
 	}
 
 	@Override
@@ -163,6 +192,14 @@ public class DeNovoAnnotator extends VariantAnnotator
 	{
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		
+		String chrom = entity.get("#CHROM").toString();
+		if(chrom.equals("X") || chrom.equals("Y"))
+		{
+			LOG.info("Skipping allosomal variant: " + entity);
+			resultMap.put(DENOVO, 0);
+			return resultMap;
+		}
+		
 		// only look at variants that PASS the filter
 		String filter = entity.get("FILTER").toString();
 		if(!filter.equals("PASS"))
@@ -171,6 +208,9 @@ public class DeNovoAnnotator extends VariantAnnotator
 			resultMap.put(DENOVO, 0);
 			return resultMap;
 		}
+		
+		String geneSymbol = SnpEffServiceAnnotator.getGeneNameFromEntity(entity);
+		
 		
 		Iterable<Entity> samples = entity.getEntities("Samples");
 		
@@ -275,13 +315,51 @@ public class DeNovoAnnotator extends VariantAnnotator
 		for(String child : completeTrios.keySet())
 		{
 		
-			totalDenovoForVariant += findDeNovoVariants(completeTrios.get(child));
+			int denovoForTrio = findDeNovoVariants(completeTrios.get(child));
+			totalDenovoForVariant += denovoForTrio;
 			
-	//		System.out.println(child + ", " + childToParentGenotypes.get(child));
+			if(geneSymbol != null){
+				//matrix of gene x trio x denovo counts
+				if(geneTrioCounts.containsKey(geneSymbol))
+				{
+					if(geneTrioCounts.get(geneSymbol).containsKey(child))
+					{
+						geneTrioCounts.get(geneSymbol).put(child, geneTrioCounts.get(geneSymbol).get(child) + denovoForTrio);
+				//		System.out.println("GENE see, CHILD seen, for gene " + geneSymbol + " child " + child);
+					}
+					else
+					{
+				//		System.out.println("new child for: " + geneSymbol + " child " + child);
+						geneTrioCounts.get(geneSymbol).put(child, denovoForTrio);
+					}
+						
+						
+//						System.out.println("gene seen but NEW trio, adding: " + geneSymbol + " - " + denovoForTrio + " for trio " + child) ;
+			
+				}
+				else
+				{
+			//		System.out.println("all new! adding: " + geneSymbol + " - " + denovoForTrio + " for trio " + child) ;
+					LinkedHashMap<String, Integer> counts = new LinkedHashMap<String, Integer>();
+					counts.put(child, denovoForTrio);
+					geneTrioCounts.put(geneSymbol, counts);
+				}
+				
+		//		System.out.println(child + ", " + childToParentGenotypes.get(child));
+			}
+			
 		}
 		
-		
-		
+		//also add total
+		if(geneTrioCounts.get(geneSymbol).containsKey("TOTAL"))
+		{
+			geneTrioCounts.get(geneSymbol).put("TOTAL", geneTrioCounts.get(geneSymbol).get("TOTAL") + totalDenovoForVariant);
+		}
+		else
+		{
+			geneTrioCounts.get(geneSymbol).put("TOTAL", totalDenovoForVariant);
+		}
+	
 		
 		
 		
@@ -373,25 +451,26 @@ public class DeNovoAnnotator extends VariantAnnotator
 		/**
 		 * Quality checks: read depth
 		 */
+		int minDepth = 20;
 		
 		int mat_dp = Integer.parseInt(t.getMother().getGenotype().get("DP").toString());
-		if(mat_dp < 20)
+		if(mat_dp < minDepth)
 		{
-			LOG.warn("Maternal genotype has less than 20 reads ("+mat_dp+"), skipping trio for child " + t.getChild().getId());
+			LOG.warn("Maternal genotype has less than "+minDepth+" reads ("+mat_dp+"), skipping trio for child " + t.getChild().getId());
 			return 0;
 		}
 		
 		int pat_dp = Integer.parseInt(t.getFather().getGenotype().get("DP").toString());
-		if(pat_dp < 20)
+		if(pat_dp < minDepth)
 		{
-			LOG.warn("Paternal genotype has less than 20 reads ("+pat_dp+"), skipping trio for child " + t.getChild().getId());
+			LOG.warn("Paternal genotype has less than "+minDepth+" reads ("+pat_dp+"), skipping trio for child " + t.getChild().getId());
 			return 0;
 		}
 		
 		int child_dp = Integer.parseInt(t.getChild().getGenotype().get("DP").toString());
-		if(child_dp < 20)
+		if(child_dp < minDepth)
 		{
-			LOG.warn("Child genotype has less than 20 reads ("+child_dp+"), skipping trio for child " + t.getChild().getId());
+			LOG.warn("Child genotype has less than "+minDepth+" reads ("+child_dp+"), skipping trio for child " + t.getChild().getId());
 			return 0;
 		}
 		
@@ -416,7 +495,7 @@ public class DeNovoAnnotator extends VariantAnnotator
 		/**
 		 * If none pass, we found a de novo variant
 		 */
-		
+		//System.out.println("De novo variant found for trio " + t);
 		LOG.info("De novo variant found for trio " + t);
 		return 1;
 	}

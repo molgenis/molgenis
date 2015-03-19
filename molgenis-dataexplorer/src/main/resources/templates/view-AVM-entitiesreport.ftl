@@ -10,6 +10,8 @@
 
 <#assign all_candidates = {}><#-- all genes + counts per category -->
 
+
+
 <#list datasetRepository.iterator() as row>
 
     <#assign geneName = row.getString("INFO_ANN")?split("|")[3]>
@@ -26,18 +28,21 @@
  	<#assign impact = row.getString("INFO_ANN")?split("|")[2]>
 
 
+	<#if severelateonset?seq_contains(geneName)>
+			<#-- skipping this gene -->
+	<#else>
+
+		<#if impact == "MODERATE" || impact == "HIGH">
+			
+			<#if tg_maf lt 0.01 && gonl_maf lt 0.011 && exac_maf lt 0.01>
 	
-
-	<#if impact == "MODERATE" || impact == "HIGH">
+				<#if all_candidates[geneName]??><#assign all_candidates = all_candidates + {geneName : all_candidates[geneName] + denovo }><#else><#assign all_candidates = all_candidates + {geneName : denovo }></#if>
+	
 		
-		<#if tg_maf lt 0.05 && gonl_maf lt 0.05 && exac_maf lt 0.05>
-
-			<#if all_candidates[geneName]??><#assign all_candidates = all_candidates + {geneName : all_candidates[geneName] + denovo }><#else><#assign all_candidates = all_candidates + {geneName : denovo }></#if>
-
- 		</#if>
-
+	 		</#if>
+	
+		</#if>
 	</#if>
-
 
 </#list>
 
@@ -46,18 +51,16 @@
 
 <#-- HTML -->
 <#list all_candidates?keys as geneName>
-	<#if severelateonset?seq_contains(geneName)>
-			<#-- skipping this gene -->
-	<#else>
+
 		<#if all_candidates[geneName] gt 1>
 			<#if abnArValHpoAllFreq?seq_contains(geneName)>
-				<b>[${geneName} - ${all_candidates[geneName]}]</b> 
+				<b> ${geneName}<#--: ${all_candidates[geneName]}--> </b> <br>
 			<#else>
-				[${geneName} - ${all_candidates[geneName]}] 
+				${geneName}<#--: ${all_candidates[geneName]}--> <br>
 			</#if>
 				
 		</#if>
-	</#if>
+
 </#list>
 
 

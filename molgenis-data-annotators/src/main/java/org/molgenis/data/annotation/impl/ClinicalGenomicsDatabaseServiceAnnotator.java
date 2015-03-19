@@ -170,45 +170,7 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 		Long position = entity.getLong(VcfRepository.POS);
 		String chromosome = entity.getString(VcfRepository.CHROM);
 
-		String geneSymbol = null;
-
-		if (entity.getString(SnpEffServiceAnnotator.GENE_NAME) != null)
-		{
-			geneSymbol = entity.getString(SnpEffServiceAnnotator.GENE_NAME);
-		}
-		if (geneSymbol == null)
-		{
-			String annField = entity.getString(VcfRepository.getInfoPrefix() + "ANN");
-			if (annField != null)
-			{
-				// if the entity is annotated with the snpEff annotator the split is already done
-				String[] split = annField.split("\\|", -1);
-				// TODO: ask Joeri to explain this line
-				if (split.length > 10)
-				{
-					// 3 is 'gene name'
-					// TODO check if it should not be index 4 -> 'gene id'
-					if (split[3].length() != 0)
-					{
-						geneSymbol = split[3];
-						// LOG.info("Gene symbol '" + geneSymbol + "' found for " + entity.toString());
-					}
-					else
-					{
-						// will happen a lot for whole genome sequencing data
-						LOG.info("No gene symbol in ANN field for " + entity.toString());
-					}
-
-				}
-			}
-            else
-            {
-                LOG.debug("ANN field and GENE_NAME both null for " + entity.toString() + ", trying to get via location file.");
-                geneSymbol = HgncLocationsUtils.locationToHgcn(hgncLocationsProvider.getHgncLocations(),
-                        new Locus(chromosome, position)).get(0);
-            }
-		}
-
+		String geneSymbol = SnpEffServiceAnnotator.getGeneNameFromEntity(entity);
 
 		Map<String, CgdData> cgdData = cgdDataProvider.getCgdData();
 

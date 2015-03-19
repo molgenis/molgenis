@@ -6,7 +6,6 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -16,7 +15,9 @@ import java.util.regex.Pattern;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.*;
 import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.HgncLocationsUtils;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.impl.datastructures.Locus;
 import org.molgenis.data.support.*;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.framework.server.MolgenisSettings;
@@ -133,6 +134,47 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator, ApplicationL
 			LOG.error("SnpEff not found at: " + snpEffpath.getAbsolutePath());
 			return false;
 		}
+	}
+	
+	/**
+	 * Helper function to get gene name from entity
+	 * @param entity
+	 * @return
+	 */
+	public static String getGeneNameFromEntity(Entity entity)
+	{
+		String geneSymbol = null;
+		if (entity.getString(SnpEffServiceAnnotator.GENE_NAME) != null)
+		{
+			geneSymbol = entity.getString(SnpEffServiceAnnotator.GENE_NAME);
+		}
+		if (geneSymbol == null)
+		{
+			String annField = entity.getString(VcfRepository.getInfoPrefix() + "ANN");
+			if (annField != null)
+			{
+				// if the entity is annotated with the snpEff annotator the split is already done
+				String[] split = annField.split("\\|", -1);
+				// TODO: ask Joeri to explain this line
+				if (split.length > 10)
+				{
+					// 3 is 'gene name'
+					// TODO check if it should not be index 4 -> 'gene id'
+					if (split[3].length() != 0)
+					{
+						geneSymbol = split[3];
+						// LOG.info("Gene symbol '" + geneSymbol + "' found for " + entity.toString());
+					}
+					else
+					{
+						// will happen a lot for whole genome sequencing data
+						LOG.info("No gene symbol in ANN field for " + entity.toString());
+					}
+
+				}
+			}
+		}
+		return geneSymbol;
 	}
 
 	@Override
