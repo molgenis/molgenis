@@ -1,5 +1,10 @@
 package org.molgenis.data.elasticsearch.index;
 
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL_MREF;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
+
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -59,7 +64,8 @@ public class IndexRequestGenerator
 		for (AttributeMetaData attr : repository.getEntityMetaData().getAtomicAttributes())
 		{
 			FieldTypeEnum fieldType = attr.getDataType().getEnumType();
-			boolean isXrefOrMref = fieldType.equals(FieldTypeEnum.XREF) || fieldType.equals(FieldTypeEnum.MREF);
+			boolean isXrefOrMref = fieldType == XREF || fieldType == MREF || fieldType == CATEGORICAL
+					|| fieldType == CATEGORICAL_MREF;
 			if (isXrefOrMref) xrefAndMrefColumns.add(attr.getName());
 		}
 

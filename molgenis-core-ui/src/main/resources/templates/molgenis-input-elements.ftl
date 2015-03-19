@@ -66,7 +66,7 @@
 					});
 					
 				</script>
-			<#elseif field.dataType.enumType == 'MREF'>
+			<#elseif field.dataType.enumType == 'MREF' || field.dataType.enumType == 'CATEGORICAL_MREF'>
 				<input type="hidden" name="${fieldName?html}" id="${fieldName?html}" <#if !nillable>required="required"</#if>>
 				<script>
 					$(document).ready(function() {

@@ -120,6 +120,7 @@ public class EntityToSourceConverter
 				}
 				break;
 			}
+			case CATEGORICAL_MREF:
 			case MREF:
 			{
 				final Iterable<Entity> refEntities = entity.getEntities(attrName);
@@ -208,6 +209,7 @@ public class EntityToSourceConverter
 				}
 				break;
 			}
+			case CATEGORICAL_MREF:
 			case MREF:
 			{
 				final Iterable<Entity> refEntities = (Iterable<Entity>) inputValue;

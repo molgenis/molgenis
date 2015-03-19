@@ -1,6 +1,7 @@
 package org.molgenis.data.rest;
 
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL_MREF;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DATE;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DATE_TIME;
@@ -1054,7 +1055,7 @@ public class RestController
 							+ " found");
 				}
 			}
-			else if (attr.getDataType().getEnumType() == MREF)
+			else if (attr.getDataType().getEnumType() == MREF || attr.getDataType().getEnumType() == CATEGORICAL_MREF)
 			{
 				List<Object> ids = DataConverter.toObjectList(paramValue);
 				if ((ids != null) && !ids.isEmpty())
@@ -1125,6 +1126,7 @@ public class RestController
 					entityHasAttributeMap.put(attrName, entity.get(attrName));
 				}
 				return entityHasAttributeMap;
+			case CATEGORICAL_MREF:
 			case MREF:
 				List<Entity> mrefEntities = new ArrayList<Entity>();
 				for (Entity e : entity.getEntities((attr.getName())))
@@ -1143,6 +1145,7 @@ public class RestController
 
 				EntityPager pager = new EntityPager(request.getStart(), request.getNum(), (long) count, mrefEntities);
 				return new EntityCollectionResponse(pager, refEntityMaps, attrHref);
+			case CATEGORICAL:
 			case XREF:
 				Map<String, Object> entityXrefAttributeMap = getEntityAsMap((Entity) entity.get(refAttributeName),
 						attr.getRefEntity(), attributesSet, attributeExpandSet);
@@ -1244,7 +1247,8 @@ public class RestController
 									date != null ? new SimpleDateFormat(MolgenisDateFormat.DATEFORMAT_DATETIME)
 											.format(date) : null);
 				}
-				else if (attrType != XREF && attrType != CATEGORICAL && attrType != MREF)
+				else if (attrType != XREF && attrType != CATEGORICAL && attrType != MREF
+						&& attrType != CATEGORICAL_MREF)
 				{
 					entityMap.put(attrName, entity.get(attr.getName()));
 				}
@@ -1261,7 +1265,7 @@ public class RestController
 						entityMap.put(attrName, refEntityMap);
 					}
 				}
-				else if (attrType == MREF && attributeExpandsSet != null
+				else if ((attrType == MREF || attrType == CATEGORICAL_MREF) && attributeExpandsSet != null
 						&& attributeExpandsSet.containsKey(attrName.toLowerCase()))
 				{
 					EntityMetaData refEntityMetaData = dataService.getEntityMetaData(attr.getRefEntity().getName());
@@ -1284,7 +1288,8 @@ public class RestController
 					entityMap.put(attrName, ecr);
 				}
 				else if ((attrType == XREF && entity.get(attr.getName()) != null)
-						|| (attrType == CATEGORICAL && entity.get(attr.getName()) != null) || attrType == MREF)
+						|| (attrType == CATEGORICAL && entity.get(attr.getName()) != null) || attrType == MREF
+						|| attrType == CATEGORICAL_MREF)
 				{
 					// Add href to ref field
 					Map<String, String> ref = new LinkedHashMap<String, String>();
