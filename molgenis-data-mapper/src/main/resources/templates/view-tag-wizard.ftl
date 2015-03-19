@@ -26,7 +26,7 @@
 </div>
 
 <div class="row">
-	<div class="col-md-4" style="overflow-y:auto;max-height:500px;min-height:500px;">
+	<div class="col-md-6" style="overflow-y:auto;max-height:500px;min-height:500px;">
 		<h4>Hypertension</h4>
 		<p>This is a really awsome description of this attribute</p>
 		
@@ -34,48 +34,46 @@
 			Tags
 			<button type="button" class="btn btn-default btn-xs"><span class="add-tag glyphicon glyphicon-plus"></span></button>
 			 
-		</h5>
-		
+		</h5>	
+		<table class="table">
+			<thead>
+				<th>Expression</th>
+				<th>Tags</th>
+			</thead>
+			<tbody>
+				<tr>
+					<td>
+						<#assign expression = "is_associated_with" />
+						<button type="btn" class="btn btn-default btn-xs expression" value="${expression}">${expression}</button>						
+					</td>
+					<td>
+						<button type="btn" class="btn btn-primary btn-xs tag-remove-btn">TAG 1 <span class="glyphicon glyphicon-remove"></span></button></button>
+						<button type="btn" class="btn btn-primary btn-xs tag-remove-btn">TAG 2 <span class="glyphicon glyphicon-remove"></span></button></button>
+					</td>				
+				</tr>
+				<tr>
+					<td>
+						<#assign expression = "is_caused_by" />
+						<button type="btn" class="btn btn-default btn-xs expression" value="${expression}">${expression}</button>
+					</td>
+					<td>
+						<button type="btn" class="btn btn-primary btn-xs tag-remove-btn">TAG 5 <span class="glyphicon glyphicon-remove"></span></button></button>
+					</td>
+				</tr>
 			
-			<table class="table">
-				<thead>
-					<th>Expression</th>
-					<th>Tags</th>
-				</thead>
-				<tbody>
-					<tr>
-						<td>
-							<#assign expression = "is_associated_with" />
-							<button type="btn" class="btn btn-default btn-xs expression" value="${expression}">${expression}</button>						
-						</td>
-						<td>
-							<button type="btn" class="btn btn-primary btn-xs tag-remove-btn">TAG 1 <span class="glyphicon glyphicon-remove"></span></button></button>
-							<button type="btn" class="btn btn-primary btn-xs tag-remove-btn">TAG 2 <span class="glyphicon glyphicon-remove"></span></button></button>
-						</td>				
-					</tr>
-					<tr>
-						<td>
-							<#assign expression = "is_caused_by" />
-							<button type="btn" class="btn btn-default btn-xs expression" value="${expression}">${expression}</button>
-						</td>
-						<td>
-							<button type="btn" class="btn btn-primary btn-xs tag-remove-btn">TAG 5 <span class="glyphicon glyphicon-remove"></span></button></button>
-						</td>
-					</tr>
-				
-					<tr>
-						<td>
-							<#assign expression = "is_related_to" />
-							<button type="btn" class="btn btn-default btn-xs expression" value="${expression}">${expression}</button>
-						</td>
-						<td>
-							<button type="btn" class="btn btn-primary btn-xs tag-remove-btn">TAG 4 <span class="glyphicon glyphicon-remove"></span></button>
-						</td>
-					</tr>
-				</tbody>
+				<tr>
+					<td>
+						<#assign expression = "is_related_to" />
+						<button type="btn" class="btn btn-default btn-xs expression" value="${expression}">${expression}</button>
+					</td>
+					<td>
+						<button type="btn" class="btn btn-primary btn-xs tag-remove-btn">TAG 4 <span class="glyphicon glyphicon-remove"></span></button>
+					</td>
+				</tr>
+			</tbody>
 		</table>
 	</div>
-	<div id="expression-tag-info-container" class="col-md-8"></div>
+	<div id="expression-tag-info-container" class="col-md-6"></div>
 </div>
 
 <div class="row">
