@@ -1,4 +1,4 @@
-package org.molgenis.migrate;
+package org.molgenis.data.version;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;

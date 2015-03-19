@@ -3,6 +3,8 @@ package org.molgenis.data.version;
 import static org.molgenis.data.elasticsearch.util.MapperTypeSanitizer.sanitizeMapperType;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -36,7 +38,9 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.util.DependencyResolver;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.util.FileCopyUtils;
 
 /**
  * Upgrade class for upgrading from metadata version 0 (molgenis 1.4.4) to 1 (molgenis 1.5.0)
@@ -90,6 +94,19 @@ public class UpgradeFrom0To1 extends MetaDataUpgrade
 	{
 		ManageableRepositoryCollection defaultBackend = dataService.getMeta().getDefaultBackend();
 		MetaDataServiceImpl metaDataService = (MetaDataServiceImpl) dataService.getMeta();
+
+		InputStream in = getClass().getResourceAsStream("2582.sql");
+		try
+		{
+			jdbcTemplate.execute(FileCopyUtils.copyToString(new InputStreamReader(in)));
+		}
+		catch (DataAccessException | IOException e)
+		{
+			throw new RuntimeException(e);
+		}
+
+		((IndexedRepository) dataService.getRepository(EntityMetaDataMetaData.ENTITY_NAME)).rebuildIndex();
+		((IndexedRepository) dataService.getRepository(AttributeMetaDataMetaData.ENTITY_NAME)).rebuildIndex();
 
 		// Add expression attribute to AttributeMetaData
 		defaultBackend.addAttribute(AttributeMetaDataMetaData.ENTITY_NAME,
@@ -182,6 +199,8 @@ public class UpgradeFrom0To1 extends MetaDataUpgrade
 		{
 			((IndexedRepository) repo).rebuildIndex();
 		}
+
+		new MysqlMigrate(jdbcTemplate, "MySQL").migrate(metaDataService);
 	}
 
 	@SuppressWarnings("unchecked")
