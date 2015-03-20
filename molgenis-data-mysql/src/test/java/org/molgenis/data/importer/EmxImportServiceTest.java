@@ -26,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
-import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -80,35 +79,35 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		EntitiesValidationReport report = importer.validateImport(f, source);
 
 		// SheetsImportable
-		AssertJUnit.assertEquals(report.getSheetsImportable().size(), 4);
+		Assert.assertEquals(report.getSheetsImportable().size(), 4);
 		Assert.assertTrue(report.getSheetsImportable().get("import_person"));
 		Assert.assertTrue(report.getSheetsImportable().get("import_city"));
 		Assert.assertFalse(report.getSheetsImportable().get("unknown_entity"));
 		Assert.assertFalse(report.getSheetsImportable().get("unknown_fields"));
 
 		// FieldsAvailable
-		AssertJUnit.assertEquals(report.getFieldsAvailable().size(), 2);
-		AssertJUnit.assertEquals(report.getFieldsAvailable().get("import_person").size(), 1);
-		AssertJUnit.assertEquals(report.getFieldsAvailable().get("import_city").size(), 0);
-		AssertJUnit.assertTrue(report.getFieldsAvailable().get("import_person").contains("otherAttribute"));
+		Assert.assertEquals(report.getFieldsAvailable().size(), 2);
+		Assert.assertEquals(report.getFieldsAvailable().get("import_person").size(), 1);
+		Assert.assertEquals(report.getFieldsAvailable().get("import_city").size(), 0);
+		Assert.assertTrue(report.getFieldsAvailable().get("import_person").contains("otherAttribute"));
 
 		// FieldsImportable
-		AssertJUnit.assertEquals(report.getFieldsImportable().size(), 2);
-		AssertJUnit.assertEquals(report.getFieldsImportable().get("import_person").size(), 6);
-		AssertJUnit.assertTrue(report.getFieldsImportable().get("import_person").contains("firstName"));
-		AssertJUnit.assertFalse(report.getFieldsImportable().get("import_person").contains("unknownField"));
+		Assert.assertEquals(report.getFieldsImportable().size(), 2);
+		Assert.assertEquals(report.getFieldsImportable().get("import_person").size(), 6);
+		Assert.assertTrue(report.getFieldsImportable().get("import_person").contains("firstName"));
+		Assert.assertFalse(report.getFieldsImportable().get("import_person").contains("unknownField"));
 
 		// FieldsUnknown
-		AssertJUnit.assertEquals(report.getFieldsUnknown().size(), 2);
-		AssertJUnit.assertEquals(report.getFieldsUnknown().get("import_person").size(), 1);
-		AssertJUnit.assertTrue(report.getFieldsUnknown().get("import_person").contains("unknownField"));
-		AssertJUnit.assertEquals(report.getFieldsUnknown().get("import_city").size(), 0);
+		Assert.assertEquals(report.getFieldsUnknown().size(), 2);
+		Assert.assertEquals(report.getFieldsUnknown().get("import_person").size(), 1);
+		Assert.assertTrue(report.getFieldsUnknown().get("import_person").contains("unknownField"));
+		Assert.assertEquals(report.getFieldsUnknown().get("import_city").size(), 0);
 
 		// FieldsRequired missing
-		AssertJUnit.assertEquals(report.getFieldsRequired().size(), 2);
-		AssertJUnit.assertEquals(report.getFieldsRequired().get("import_person").size(), 1);
-		AssertJUnit.assertTrue(report.getFieldsRequired().get("import_person").contains("birthday"));
-		AssertJUnit.assertEquals(report.getFieldsRequired().get("import_city").size(), 0);
+		Assert.assertEquals(report.getFieldsRequired().size(), 2);
+		Assert.assertEquals(report.getFieldsRequired().get("import_person").size(), 1);
+		Assert.assertTrue(report.getFieldsRequired().get("import_person").contains("birthday"));
+		Assert.assertEquals(report.getFieldsRequired().get("import_city").size(), 0);
 	}
 
 	@Test
@@ -164,8 +163,8 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		// test import
 		EntityImportReport report = importer.doImport(source_no_meta, DatabaseAction.ADD);
 
-		AssertJUnit.assertEquals(report.getNrImportedEntitiesMap().get("import_city"), new Integer(4));
-		AssertJUnit.assertEquals(report.getNrImportedEntitiesMap().get("import_person"), new Integer(4));
+		Assert.assertEquals(report.getNrImportedEntitiesMap().get("import_city"), new Integer(4));
+		Assert.assertEquals(report.getNrImportedEntitiesMap().get("import_person"), new Integer(4));
 
 	}
 }
