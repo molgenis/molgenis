@@ -24,6 +24,7 @@ import org.molgenis.ontology.beans.OntologyServiceResult;
 import org.molgenis.ontology.beans.OntologyTerm;
 import org.molgenis.ontology.beans.OntologyTermImpl;
 import org.molgenis.ontology.model.OntologyMetaData;
+import org.molgenis.ontology.model.OntologyTermDynamicAnnotationMetaData;
 import org.molgenis.ontology.model.OntologyTermMetaData;
 import org.molgenis.ontology.model.OntologyTermSynonymMetaData;
 import org.molgenis.ontology.roc.InformationContentService;
@@ -182,8 +183,10 @@ public class OntologyServiceImpl implements OntologyService
 
 		List<Entity> relevantEntities = new ArrayList<Entity>();
 
-		List<QueryRule> rulesForOntologyTermFields = new ArrayList<QueryRule>();
+		List<QueryRule> combinedQueryRules = new ArrayList<QueryRule>();
 		List<QueryRule> rulesForOtherFields = new ArrayList<QueryRule>();
+		List<QueryRule> rulesForOntologyTermFields = new ArrayList<QueryRule>();
+
 		for (String attributeName : inputEntity.getAttributeNames())
 		{
 			if (StringUtils.isNotEmpty(inputEntity.getString(attributeName))
@@ -203,35 +206,59 @@ public class OntologyServiceImpl implements OntologyService
 				}
 				else if (StringUtils.isNotEmpty(inputEntity.getString(attributeName)))
 				{
-					rulesForOtherFields.add(new QueryRule(attributeName, Operator.EQUALS, inputEntity
-							.getString(attributeName)));
+					QueryRule queryAnnotationName = new QueryRule(OntologyTermDynamicAnnotationMetaData.NAME,
+							Operator.EQUALS, attributeName);
+					QueryRule queryAnnotationValue = new QueryRule(OntologyTermDynamicAnnotationMetaData.VALUE,
+							Operator.EQUALS, inputEntity.getString(attributeName));
+
+					// (A AND B) or (A' AND B') or (A'' AND B'')
+					if (rulesForOtherFields.size() > 0) rulesForOtherFields.add(new QueryRule(Operator.OR));
+					rulesForOtherFields.add(new QueryRule(Arrays.asList(queryAnnotationName,
+							new QueryRule(Operator.AND), queryAnnotationValue)));
 				}
 			}
 		}
-
-		List<QueryRule> combinedRules = new ArrayList<QueryRule>();
 
 		if (rulesForOntologyTermFields.size() > 0)
 		{
 			QueryRule disMaxQuery_1 = new QueryRule(rulesForOntologyTermFields);
 			disMaxQuery_1.setOperator(Operator.DIS_MAX);
-			combinedRules.add(disMaxQuery_1);
+			combinedQueryRules.add(disMaxQuery_1);
 		}
 
 		if (rulesForOtherFields.size() > 0)
 		{
-			QueryRule disMaxQuery_2 = new QueryRule(rulesForOtherFields);
-			disMaxQuery_2.setOperator(Operator.DIS_MAX);
-			combinedRules.add(disMaxQuery_2);
+			Iterable<Entity> ontologyTermAnnotationEntities = dataService.findAll(
+					OntologyTermDynamicAnnotationMetaData.ENTITY_NAME,
+					new QueryImpl(rulesForOtherFields).pageSize(Integer.MAX_VALUE));
+
+			if (Iterables.size(ontologyTermAnnotationEntities) > 0)
+			{
+				QueryRule ontologyTermAnnotationQueryRule = new QueryRule(
+						OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION, Operator.IN,
+						ontologyTermAnnotationEntities);
+
+				if (combinedQueryRules.size() > 0)
+				{
+					QueryRule previousQueryRule = combinedQueryRules.size() == 1 ? combinedQueryRules.get(0) : new QueryRule(
+							combinedQueryRules);
+					combinedQueryRules = Arrays.asList(previousQueryRule, new QueryRule(Operator.OR),
+							ontologyTermAnnotationQueryRule);
+				}
+				else
+				{
+					combinedQueryRules.add(ontologyTermAnnotationQueryRule);
+				}
+			}
 		}
 
-		if (combinedRules.size() > 0)
+		if (combinedQueryRules.size() > 0)
 		{
-			QueryRule queryRule = new QueryRule(combinedRules);
-			queryRule.setOperator(Operator.DIS_MAX);
+			QueryRule ontologyInfoQueryRule = combinedQueryRules.size() == 1 ? combinedQueryRules.get(0) : new QueryRule(
+					combinedQueryRules);
 
 			List<QueryRule> finalQueryRules = Arrays.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY,
-					Operator.EQUALS, ontologyEntity), new QueryRule(Operator.AND), queryRule);
+					Operator.EQUALS, ontologyEntity), new QueryRule(Operator.AND), ontologyInfoQueryRule);
 
 			EntityMetaData entityMetaData = dataService.getEntityMetaData(OntologyTermMetaData.ENTITY_NAME);
 			for (Entity entity : searchService.search(new QueryImpl(finalQueryRules).pageSize(MAX_NUMBER_MATCHES),
@@ -259,7 +286,21 @@ public class OntologyServiceImpl implements OntologyService
 						}
 						else
 						{
-							// TODO : implement the scenario where database annotations are used in matching
+							for (Entity annotationEntity : entity
+									.getEntities(OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION))
+							{
+								String annotationName = annotationEntity
+										.getString(OntologyTermDynamicAnnotationMetaData.NAME);
+								String annotationValue = annotationEntity
+										.getString(OntologyTermDynamicAnnotationMetaData.VALUE);
+								if (annotationName.equalsIgnoreCase(inputAttrName)
+										&& annotationValue.equalsIgnoreCase(queryString))
+								{
+									maxNgramScore = 100;
+									maxNgramIDFScore = 100;
+									break;
+								}
+							}
 						}
 					}
 				}
