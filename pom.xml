@@ -250,6 +250,20 @@
                             </configuration>
                         </execution>
                         <execution>
+                            <id>minify-build-helper</id>
+                            <phase>generate-resources</phase>
+                            <goals>
+                                <goal>add-resource</goal>
+                            </goals>
+                            <configuration>
+                                <resources>
+                                    <resource>
+                                        <directory>target/generated-resources</directory>
+                                    </resource>
+                                </resources>
+                            </configuration>
+                        </execution>
+                        <execution>
                             <id>execution-molgenis-generator</id>
                             <phase>generate-sources</phase>
                             <goals>
@@ -475,12 +489,13 @@
                     <executions>
                         <execution>
                             <id>default-minify</id>
+                            <phase>generate-resources</phase>
                             <goals>
                                 <goal>minify</goal>
                             </goals>
                             <configuration>
                                 <webappSourceDir>${project.basedir}/src/main/resources</webappSourceDir>
-                                <webappTargetDir>${project.build.outputDirectory}</webappTargetDir>
+                                <webappTargetDir>${project.build.directory}/generated-resources</webappTargetDir>
                                 <cssSourceIncludes>
                                     <cssSourceInclude>**/*.css</cssSourceInclude>
                                 </cssSourceIncludes>
@@ -496,6 +511,7 @@
                                     <jsSourceExclude>**/*.min.js</jsSourceExclude>
                                     <jsSourceExclude>**/src-min-noconflict/**</jsSourceExclude>
                                 </jsSourceExcludes>
+                                <nosuffix>false</nosuffix>
                                 <skipMerge>true</skipMerge>
                                 <skipMinify>false</skipMinify>
                                 <verbose>true</verbose>
