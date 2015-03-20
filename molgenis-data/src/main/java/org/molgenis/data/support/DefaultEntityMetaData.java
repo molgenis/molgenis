@@ -80,6 +80,7 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData implements Edi
 		Iterable<AttributeMetaData> attributes = entityMetaData.getAttributes();
 		if (attributes != null)
 		{
+			//shallow copy, fixed issue #2602
 			addAllAttributeMetaData(attributes);
 		}
 		AttributeMetaData idAttribute = entityMetaData.getIdAttribute();
