@@ -136,7 +136,7 @@ public class ImportWriter
 					entities = DependencyResolver.resolveSelfReferences(entities, entityMetaData);
 					int count = update(repository, entities, dbAction);
 					
-					// Fix self referenced entities where not imported
+					// Fix self referenced entities were not imported
 					keepSelfReferencedEntities(entities);
 					update(repository, entities, DatabaseAction.UPDATE);
 
