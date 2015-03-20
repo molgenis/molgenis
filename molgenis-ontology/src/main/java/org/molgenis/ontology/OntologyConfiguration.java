@@ -1,7 +1,6 @@
 package org.molgenis.ontology;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.ontology.matching.MatchInputTermBatchService;
 import org.molgenis.ontology.matching.MatchingTaskContentEntityMetaData;
 import org.molgenis.ontology.matching.MatchingTaskEntityMetaData;
@@ -22,9 +21,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class OntologyConfiguration
 {
-	@Autowired
-	private SearchService searchService;
-
 	@Autowired
 	private DataService dataService;
 
@@ -74,7 +70,7 @@ public class OntologyConfiguration
 	@Bean
 	public OntologyService ontologyMatchingService()
 	{
-		return new OntologyServiceImpl(dataService, searchService, informationContentService());
+		return new OntologyServiceImpl(dataService, informationContentService());
 	}
 
 	@Bean

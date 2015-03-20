@@ -12,10 +12,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.beans.Ontology;
@@ -44,7 +42,7 @@ public class OntologyServiceImpl implements OntologyService
 	private static final String ILLEGAL_CHARACTERS_PATTERN = "[^a-zA-Z0-9 ]";
 	private static final String FUZZY_MATCH_SIMILARITY = "~0.8";
 	private static final String SINGLE_WHITESPACE = " ";
-	private static final int MAX_NUMBER_MATCHES = 500;
+	private static final int MAX_NUMBER_MATCHES = 100;
 
 	// Global fields that are used by other classes
 	public static final String SIGNIFICANT_VALUE = "Significant";
@@ -57,18 +55,14 @@ public class OntologyServiceImpl implements OntologyService
 
 	private final PorterStemmer stemmer = new PorterStemmer();
 	private final DataService dataService;
-	private final SearchService searchService;
 	private final InformationContentService informationContentService;
 
 	@Autowired
-	public OntologyServiceImpl(DataService dataService, SearchService searchService,
-			InformationContentService informationContentService)
+	public OntologyServiceImpl(DataService dataService, InformationContentService informationContentService)
 	{
 		if (dataService == null) throw new IllegalArgumentException("DataService is null");
-		if (searchService == null) throw new IllegalArgumentException("SearchService is null");
 		if (informationContentService == null) throw new IllegalArgumentException("InformationContentService is null");
 		this.dataService = dataService;
-		this.searchService = searchService;
 		this.informationContentService = informationContentService;
 	}
 
@@ -183,7 +177,7 @@ public class OntologyServiceImpl implements OntologyService
 
 		List<Entity> relevantEntities = new ArrayList<Entity>();
 
-		List<QueryRule> combinedQueryRules = new ArrayList<QueryRule>();
+		// List<QueryRule> combinedQueryRules = new ArrayList<QueryRule>();
 		List<QueryRule> rulesForOtherFields = new ArrayList<QueryRule>();
 		List<QueryRule> rulesForOntologyTermFields = new ArrayList<QueryRule>();
 
@@ -219,13 +213,7 @@ public class OntologyServiceImpl implements OntologyService
 			}
 		}
 
-		if (rulesForOntologyTermFields.size() > 0)
-		{
-			QueryRule disMaxQuery_1 = new QueryRule(rulesForOntologyTermFields);
-			disMaxQuery_1.setOperator(Operator.DIS_MAX);
-			combinedQueryRules.add(disMaxQuery_1);
-		}
-
+		// Find the ontology terms that have the same annotations as the input
 		if (rulesForOtherFields.size() > 0)
 		{
 			Iterable<Entity> ontologyTermAnnotationEntities = dataService.findAll(
@@ -234,35 +222,32 @@ public class OntologyServiceImpl implements OntologyService
 
 			if (Iterables.size(ontologyTermAnnotationEntities) > 0)
 			{
-				QueryRule ontologyTermAnnotationQueryRule = new QueryRule(
+				List<QueryRule> rules = Arrays.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS,
+						ontologyEntity), new QueryRule(Operator.AND), new QueryRule(
 						OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION, Operator.IN,
-						ontologyTermAnnotationEntities);
+						ontologyTermAnnotationEntities));
 
-				if (combinedQueryRules.size() > 0)
-				{
-					QueryRule previousQueryRule = combinedQueryRules.size() == 1 ? combinedQueryRules.get(0) : new QueryRule(
-							combinedQueryRules);
-					combinedQueryRules = Arrays.asList(previousQueryRule, new QueryRule(Operator.OR),
-							ontologyTermAnnotationQueryRule);
-				}
-				else
-				{
-					combinedQueryRules.add(ontologyTermAnnotationQueryRule);
-				}
+				Iterable<Entity> ontologyTermIterable = dataService.findAll(OntologyTermMetaData.ENTITY_NAME,
+						new QueryImpl(rules).pageSize(Integer.MAX_VALUE));
+
+				ontologyTermIterable.forEach(ontologyTermEntity -> relevantEntities.add(calculateNGromOTAnnotations(
+						inputEntity, ontologyTermEntity)));
 			}
 		}
 
-		if (combinedQueryRules.size() > 0)
+		// Find the ontology terms based on the lexical similarities
+		if (rulesForOntologyTermFields.size() > 0)
 		{
-			QueryRule ontologyInfoQueryRule = combinedQueryRules.size() == 1 ? combinedQueryRules.get(0) : new QueryRule(
-					combinedQueryRules);
+			QueryRule disMaxQuery_1 = new QueryRule(rulesForOntologyTermFields);
+			disMaxQuery_1.setOperator(Operator.DIS_MAX);
 
 			List<QueryRule> finalQueryRules = Arrays.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY,
-					Operator.EQUALS, ontologyEntity), new QueryRule(Operator.AND), ontologyInfoQueryRule);
+					Operator.EQUALS, ontologyEntity), new QueryRule(Operator.AND), disMaxQuery_1);
 
-			EntityMetaData entityMetaData = dataService.getEntityMetaData(OntologyTermMetaData.ENTITY_NAME);
-			for (Entity entity : searchService.search(new QueryImpl(finalQueryRules).pageSize(MAX_NUMBER_MATCHES),
-					entityMetaData))
+			int pageSize = MAX_NUMBER_MATCHES - relevantEntities.size();
+
+			for (Entity entity : dataService.findAll(OntologyTermMetaData.ENTITY_NAME,
+					new QueryImpl(finalQueryRules).pageSize(pageSize)))
 			{
 				double maxNgramScore = 0;
 				double maxNgramIDFScore = 0;
@@ -282,24 +267,6 @@ public class OntologyServiceImpl implements OntologyService
 							if (maxNgramIDFScore < topMatchedSynonymEntity.getDouble(COMBINED_SCORE))
 							{
 								maxNgramIDFScore = topMatchedSynonymEntity.getDouble(COMBINED_SCORE);
-							}
-						}
-						else
-						{
-							for (Entity annotationEntity : entity
-									.getEntities(OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION))
-							{
-								String annotationName = annotationEntity
-										.getString(OntologyTermDynamicAnnotationMetaData.NAME);
-								String annotationValue = annotationEntity
-										.getString(OntologyTermDynamicAnnotationMetaData.VALUE);
-								if (annotationName.equalsIgnoreCase(inputAttrName)
-										&& annotationValue.equalsIgnoreCase(queryString))
-								{
-									maxNgramScore = 100;
-									maxNgramIDFScore = 100;
-									break;
-								}
 							}
 						}
 					}
@@ -335,6 +302,32 @@ public class OntologyServiceImpl implements OntologyService
 		return searchEntity(ontologyUrl, entity);
 	}
 
+	private Entity calculateNGromOTAnnotations(Entity inputEntity, Entity ontologyTermEntity)
+	{
+		MapEntity mapEntity = new MapEntity();
+		ontologyTermEntity.getAttributeNames().forEach(
+				attributeName -> mapEntity.set(attributeName, ontologyTermEntity.get(attributeName)));
+		for (Entity annotationEntity : ontologyTermEntity
+				.getEntities(OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION))
+		{
+			String annotationName = annotationEntity.getString(OntologyTermDynamicAnnotationMetaData.NAME);
+			String annotationValue = annotationEntity.getString(OntologyTermDynamicAnnotationMetaData.VALUE);
+			for (String attributeName : inputEntity.getAttributeNames())
+			{
+				if (annotationName.equalsIgnoreCase(attributeName)
+						&& StringUtils.isNotEmpty(inputEntity.getString(attributeName))
+						&& annotationValue.equalsIgnoreCase(inputEntity.getString(attributeName)))
+				{
+					mapEntity.set(SCORE, 100);
+					mapEntity.set(COMBINED_SCORE, 100);
+
+					return mapEntity;
+				}
+			}
+		}
+		return mapEntity;
+	}
+
 	/**
 	 * A helper function to calculate the best NGram score from a list ontologyTerm synonyms
 	 * 
@@ -347,6 +340,7 @@ public class OntologyServiceImpl implements OntologyService
 		Iterable<Entity> entities = entity.getEntities(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM);
 		if (Iterables.size(entities) > 0)
 		{
+			String cleanedQueryString = removeIllegalCharWithSingleWhiteSpace(queryString);
 			List<MapEntity> synonymEntities = FluentIterable.from(entities).transform(new Function<Entity, MapEntity>()
 			{
 				public MapEntity apply(Entity input)
@@ -357,7 +351,7 @@ public class OntologyServiceImpl implements OntologyService
 
 					String ontologyTermSynonym = removeIllegalCharWithSingleWhiteSpace(input
 							.getString(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM));
-					double score_1 = NGramMatchingModel.stringMatching(queryString, ontologyTermSynonym);
+					double score_1 = NGramMatchingModel.stringMatching(cleanedQueryString, ontologyTermSynonym);
 					mapEntity.set(SCORE, score_1);
 
 					return mapEntity;
@@ -385,9 +379,8 @@ public class OntologyServiceImpl implements OntologyService
 				StringBuilder tempCombinedSynonym = new StringBuilder().append(topMatchedSynonym)
 						.append(SINGLE_WHITESPACE).append(nextMatchedSynonym);
 
-				double newScore = NGramMatchingModel.stringMatching(queryString.replaceAll(ILLEGAL_CHARACTERS_PATTERN,
-						SINGLE_WHITESPACE),
-						tempCombinedSynonym.toString().replaceAll(ILLEGAL_CHARACTERS_PATTERN, SINGLE_WHITESPACE));
+				double newScore = NGramMatchingModel.stringMatching(cleanedQueryString,
+						removeIllegalCharWithSingleWhiteSpace(tempCombinedSynonym.toString()));
 
 				if (newScore > ngramScore)
 				{
@@ -400,12 +393,12 @@ public class OntologyServiceImpl implements OntologyService
 			topMatchedSynonymEntity.set(SCORE, ngramScore);
 			topMatchedSynonymEntity.set(COMBINED_SCORE, ngramScore);
 
-			Map<String, Double> weightedWordSimilarity = informationContentService.redistributedNGramScore(queryString,
-					ontologyIri);
+			Map<String, Double> weightedWordSimilarity = informationContentService.redistributedNGramScore(
+					cleanedQueryString, ontologyIri);
 
 			Set<String> synonymStemmedWordSet = informationContentService.createStemmedWordSet(topMatchedSynonym);
 
-			for (String originalWord : informationContentService.createStemmedWordSet(queryString))
+			for (String originalWord : informationContentService.createStemmedWordSet(cleanedQueryString))
 			{
 				if (synonymStemmedWordSet.contains(originalWord) && weightedWordSimilarity.containsKey(originalWord))
 				{
