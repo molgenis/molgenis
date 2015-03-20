@@ -38,7 +38,7 @@
 					</div>
 				</div>
 				<button type="button" class="btn btn-primary">Tag-o-matic!</button>
-				<button type="button" class="btn btn-info">Reannotate</button>
+				<button type="button" class="btn btn-info">Re-annotate</button>
 				<button type="button" class="btn btn-danger">Clear tags</button>
 			</div>
 		</div>
@@ -59,65 +59,77 @@
 					<th></th>
 				</thead>
 					<tbody>
-						<tr>
-							<td data-relation="Is associated with">Is associated with</td> <#--${tag.relation.iri} ${tag.relation.label}-->
-							<td>
-								<button type="btn" class="btn btn-primary btn-xs remove-tag-btn" data-tag="Tag1">
-									Tag1 <span class="glyphicon glyphicon-remove"></span>
-								</button>
-								<button type="btn" class="btn btn-primary btn-xs remove-tag-btn" data-tag="Tag2"> <#--${tag.iri}-->
-									Tag2 <span class="glyphicon glyphicon-remove"></span>
-								</button>
-								<button type="btn" class="btn btn-primary btn-xs remove-tag-btn" data-tag="Tag3">
-									Tag3 <span class="glyphicon glyphicon-remove"></span>
-								</button>
-							</td>
-							<td>
-								<button type="btn" class="btn btn-default btn-xs show-tags-screen-btn">
-									Add new tag <span class="glyphicon glyphicon-plus"></span>
-								</button>
-							</td>				
-						</tr>
 					<#if taggedAttributeMetaDatas[attributeMetaData]??>
-						<#list taggedAttributeMetaDatas[attributeMetaData] as tag>
+						<#assign relationsAndTagsMap = taggedAttributeMetaDatas[attributeMetaData]>
+						<#list relationsAndTagsMap?keys as relation>
 							<tr>
+								<td data-relation="${relation.IRI}">${relation.label}</td>
 								<td>
-									<button type="btn" class="btn btn-default btn-xs show-relation-and-tags-btn">
-										Expression here...
-									</button>						
+									<#if relationsAndTagsMap[relation]??>
+										<#list relationsAndTagsMap[relation] as tag>
+											<button type="btn" class="btn btn-primary btn-xs remove-tag-btn" data-tag="${tag.iri}">
+												${tag.label} <span class="glyphicon glyphicon-remove"></span>
+											</button>
+										</#list>
+									</#if>
 								</td>
 								<td>
-									<button type="btn" class="btn btn-primary btn-xs remove-tag-btn">
-										${tag.object.label}<span class="glyphicon glyphicon-remove"></span>
-									</button>
-								</td>				
+								<button type="btn" class="btn btn-default btn-xs edit-ontology-term-btn" data-relation="${relation.IRI}" 
+									data-attribute="${attributeMetaData.name}" data-toggle="modal" data-target="#edit-ontology-modal">
+										Edit <span class="glyphicon glyphicon-pencil"></span>
+								</button>
+							</td>
 							</tr>
 						</#list>
+					<#else>
+						<tr>
+						<td data-relation="http://iri.org/#isAssociatedWith">Is associated with</td>
+							<td></td>
+							<td>
+								<button type="btn" class="btn btn-default btn-xs edit-ontology-term-btn" data-relation="http://iri.org/#isAssociatedWith" 
+									data-attribute="${attributeMetaData.name}" data-toggle="modal" data-target="#edit-ontology-modal">
+										Edit <span class="glyphicon glyphicon-pencil"></span>
+								</button>
+							</td>
+						</tr>
 					</#if>
 				</tbody>
 			</table>
 			<#if attributeMetaData_has_next><hr></hr></#if>
 		</#list>
 	</div>
-	<div id="relation-and-tag-info-container" class="col-md-6"></div>
+	<div id="edit-ontology-container" class="col-md-6"></div>
 </div>
 
-<script id="relation-and-tag-template" type="text/x-handlebars-template">
-	<div class="row">
-		<div class="col-md-12">
-			<legend>{{this.relation}}</legend>
+<div class="modal fade" id="edit-ontology-modal">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+				<h4 class="modal-title">Modal title</h4>
+			</div>
+			
+			<div class="modal-body">
+				<div class="row">
+					<div class="col-md-12">
+						<input id="tag-dropdown" type="hidden"></input>
+					</div>
+					<hr></hr>
+				</div>
+				<div class="row">
+					<div class="col-md-6">
+						<button id="save-tag-selection-btn" type="btn" class="btn btn-success pull-right" data-entity="${entity.name}">Save</button>
+					</div>
+				</div>
+			</div>
+			
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-primary">Save changes</button>
+			</div>
 		</div>
 	</div>
-	
-	<div class="row">
-		<div class="col-md-6">
-			<select multiple class="form-control" id="tag-dropdown">
-				{{#each taglist}}
-					<option selected="selected">{{this}}</option>
-				{{/each}}
-			</select>
-		</div>
-	</div>
-</script>
+</div>
 
 <@footer/>

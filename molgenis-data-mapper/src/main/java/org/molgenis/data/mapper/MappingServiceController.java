@@ -24,6 +24,7 @@ import org.molgenis.data.mapping.model.MappingProject;
 import org.molgenis.data.mapping.model.MappingTarget;
 import org.molgenis.data.semantic.OntologyTagService;
 import org.molgenis.data.semantic.Relation;
+import org.molgenis.data.semantic.TagImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ontology.OntologyService;
 import org.molgenis.ontology.repository.model.Ontology;
@@ -368,11 +369,11 @@ public class MappingServiceController extends MolgenisPluginController
 		EntityMetaData emd = dataService.getEntityMetaData(target);
 		Iterable<AttributeMetaData> attributes = emd.getAttributes();
 
-		// Remember, we are iterating over attribute metadata. x == attribute metadata
 		Map<AttributeMetaData, Multimap<Relation, OntologyTerm>> taggedAttributeMetaDatas = stream(
 				attributes.spliterator(), false).collect(
 				toMap((x -> x), (x -> ontologyTagService.getTagsForAttribute(emd, x))));
 
+		model.addAttribute("entity", emd);
 		model.addAttribute("ontologies", ontologies);
 		model.addAttribute("taggedAttributeMetaDatas", taggedAttributeMetaDatas);
 		model.addAttribute("relations", Relation.values());
@@ -381,15 +382,17 @@ public class MappingServiceController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/tagattribute")
-	public @ResponseBody void addTagAttribute()
+	public @ResponseBody void addTagAttribute(@RequestBody AddTagRequest request)
 	{
-		// TODO determine which params are needed and implement
+		ontologyTagService.addAttributeTag(request.getEntityName(), request.getAttributeName(),
+				request.getRelationIRI(), request.getOntologyTermIRIs());
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/deletesingletag")
-	public @ResponseBody void deleteSingleTag(@RequestParam String tagIRI)
+	public @ResponseBody void deleteSingleTag(@RequestParam String entityName, @RequestParam String attributeName,
+			@RequestParam String relationIRI, @RequestParam String ontologyTermIRI)
 	{
-		// TODO determine which params are needed and implement
+		ontologyTagService.removeAttributeTag(entityName, attributeName, relationIRI, ontologyTermIRI);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/clearalltags")
@@ -397,13 +400,13 @@ public class MappingServiceController extends MolgenisPluginController
 	{
 		// TODO determine which params are needed and implement
 	}
-	
+
 	@RequestMapping(method = RequestMethod.POST, value = "/autotagattributes")
 	public @ResponseBody void autoTagAttributes()
 	{
 		// TODO determine which params are needed and implement
 	}
-	
+
 	@RequestMapping(method = RequestMethod.GET, value = "/getontologyterms")
 	public @ResponseBody List<OntologyTerm> getAllOntologyTerms(@RequestParam String search,
 			@RequestParam List<String> ontologyIds)
