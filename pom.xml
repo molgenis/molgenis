@@ -304,6 +304,19 @@
                                 </resources>
                             </configuration>
                         </execution>
+                        <!-- add sources created by jaxb -->
+                        <execution>
+                            <id>execution-annotations</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>add-source</goal>
+                            </goals>
+                            <configuration>
+                                <sources>
+                                    <source>target/generated-sources/annotations</source>
+                                </sources>
+                            </configuration>
+                        </execution>
                     </executions>
                 </plugin>
                 <!-- specify plugin version -->
