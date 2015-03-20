@@ -26,6 +26,7 @@ import org.molgenis.data.mapping.model.MappingTarget;
 import org.molgenis.data.semantic.OntologyTagService;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semantic.Tag;
+import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ontology.OntologyService;
 import org.molgenis.ontology.repository.model.Ontology;
@@ -387,14 +388,20 @@ public class MappingServiceController extends MolgenisPluginController
 		// TODO determine which params are needed and implement
 	}
 
-	@RequestMapping(method = RequestMethod.POST, value = "/deletetag")
-	public @ResponseBody void deleteTag()
+	@RequestMapping(method = RequestMethod.POST, value = "/deletesingletag")
+	public @ResponseBody void deleteSingleTag(@RequestParam String tagIRI)
 	{
 		// TODO determine which params are needed and implement
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/clearalltags")
 	public @ResponseBody void clearAllTags()
+	{
+		// TODO determine which params are needed and implement
+	}
+	
+	@RequestMapping(method = RequestMethod.POST, value = "/autotagattributes")
+	public @ResponseBody void autoTagAttributes()
 	{
 		// TODO determine which params are needed and implement
 	}
