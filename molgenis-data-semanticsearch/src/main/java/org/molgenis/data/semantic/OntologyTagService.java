@@ -194,6 +194,7 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 		tagEntity.set(TagMetaData.RELATION_LABEL, relation.getLabel());
 		tagEntity.set(TagMetaData.LABEL, combinedOntologyTerm.getLabel());
 		tagEntity.set(TagMetaData.OBJECT_IRI, combinedOntologyTerm.getIRI());
+		dataService.add(TagMetaData.ENTITY_NAME, tagEntity);
 		tags.add(tagEntity);
 		attributeEntity.set(AttributeMetaDataMetaData.TAGS, tags);
 		dataService.update(AttributeMetaDataMetaData.ENTITY_NAME, attributeEntity);

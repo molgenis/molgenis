@@ -48,9 +48,9 @@
 
 <div class="row">
 	<div class="col-md-6" style="overflow-y:auto;max-height:500px;min-height:300px;">
-		<#list taggedAttributeMetaDatas?keys as attributeMetaData>
+		<#list attributes as attributeMetaData>
 			<h4>${attributeMetaData.name}</h4>
-			<p>${attributeMetaData.description}</p>
+			<p>${attributeMetaData.description!""}
 			
 			<table class="table" id="${attributeMetaData.name}">
 				<thead>
@@ -59,19 +59,17 @@
 					<th></th>
 				</thead>
 					<tbody>
-					<#if taggedAttributeMetaDatas[attributeMetaData]??>
-						<#assign relationsAndTagsMap = taggedAttributeMetaDatas[attributeMetaData]>
-						<#list relationsAndTagsMap?keys as relation>
+					<#assign relationsAndTagsMap = taggedAttributeMetaDatas[attributeMetaData.name]>
+					<#if relationsAndTagsMap.keySet()?has_content>
+						<#list relationsAndTagsMap.keySet() as relation>
 							<tr>
 								<td data-relation="${relation.IRI}">${relation.label}</td>
 								<td>
-									<#if relationsAndTagsMap[relation]??>
-										<#list relationsAndTagsMap[relation] as tag>
-											<button type="btn" class="btn btn-primary btn-xs remove-tag-btn" data-tag="${tag.iri}">
-												${tag.label} <span class="glyphicon glyphicon-remove"></span>
-											</button>
-										</#list>
-									</#if>
+									<#list relationsAndTagsMap.get(relation) as tag>
+										<button type="btn" class="btn btn-primary btn-xs remove-tag-btn" data-tag="${tag.IRI}">
+											${tag.label} <span class="glyphicon glyphicon-remove"></span>
+										</button>
+									</#list>
 								</td>
 								<td>
 								<button type="btn" class="btn btn-default btn-xs edit-ontology-term-btn" data-relation="${relation.IRI}" 

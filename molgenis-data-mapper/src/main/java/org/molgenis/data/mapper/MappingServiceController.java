@@ -1,7 +1,7 @@
 package org.molgenis.data.mapper;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toMap;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.mapper.MappingServiceController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import org.elasticsearch.common.collect.Lists;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -24,7 +23,6 @@ import org.molgenis.data.mapping.model.MappingProject;
 import org.molgenis.data.mapping.model.MappingTarget;
 import org.molgenis.data.semantic.OntologyTagService;
 import org.molgenis.data.semantic.Relation;
-import org.molgenis.data.semantic.TagImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ontology.OntologyService;
 import org.molgenis.ontology.repository.model.Ontology;
@@ -49,6 +47,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
 @Controller
@@ -367,13 +366,12 @@ public class MappingServiceController extends MolgenisPluginController
 	{
 		List<Ontology> ontologies = ontologyService.getOntologies();
 		EntityMetaData emd = dataService.getEntityMetaData(target);
-		Iterable<AttributeMetaData> attributes = emd.getAttributes();
-
-		Map<AttributeMetaData, Multimap<Relation, OntologyTerm>> taggedAttributeMetaDatas = stream(
-				attributes.spliterator(), false).collect(
-				toMap((x -> x), (x -> ontologyTagService.getTagsForAttribute(emd, x))));
+		List<AttributeMetaData> attributes = newArrayList(emd.getAttributes());
+		Map<String, Multimap<Relation, OntologyTerm>> taggedAttributeMetaDatas = attributes.stream().collect(
+				toMap((x -> x.getName()), (x -> ontologyTagService.getTagsForAttribute(emd, x))));
 
 		model.addAttribute("entity", emd);
+		model.addAttribute("attributes", attributes);
 		model.addAttribute("ontologies", ontologies);
 		model.addAttribute("taggedAttributeMetaDatas", taggedAttributeMetaDatas);
 		model.addAttribute("relations", Relation.values());

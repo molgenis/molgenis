@@ -67,7 +67,7 @@ public class OntologyTermRepository
 			{
 				return null;
 			}
-
+			ontologyTerms.add(ontologyTerm);
 		}
 		return OntologyTerm.and(ontologyTerms.toArray(new OntologyTerm[0]));
 	}
