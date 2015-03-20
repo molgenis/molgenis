@@ -36,6 +36,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class MatchQualityRocService
 {
+	private static final int MAX_NUM = 100;
+
 	@Autowired
 	private FileStore fileStore;
 	@Autowired
@@ -85,7 +87,7 @@ public class MatchQualityRocService
 							.getString(MatchingTaskContentEntityMetaData.MATCHED_TERM);
 					boolean manualMatchExists = matchedCodeIdentifier != null && !matchedCodeIdentifier.equals("NULL");
 
-					OntologyServiceResult searchResult = ontologyService.search(codeSystem,
+					OntologyServiceResult searchResult = ontologyService.searchEntity(codeSystem,
 							getInputTerm(validatedMatchEntity, entityName));
 
 					long totalNumber = searchResult.getTotalHitCount();
@@ -135,7 +137,7 @@ public class MatchQualityRocService
 		ExcelSheetWriter createWritable = excelWriter.createWritable(entityName, Arrays.asList("Cutoff", "TPR", "FPR"));
 
 		DecimalFormat df = new DecimalFormat("##.###", new DecimalFormatSymbols(Locale.ENGLISH));
-		for (int cutOff = 1; cutOff <= 500; cutOff++)
+		for (int cutOff = 1; cutOff <= MAX_NUM; cutOff++)
 		{
 			int totalPositives = 0;
 			int totalNegatives = 0;
@@ -196,12 +198,12 @@ public class MatchQualityRocService
 		createWritable.close();
 	}
 
-	private String getInputTerm(Entity validatedMatchEntity, String entityName)
+	private Entity getInputTerm(Entity validatedMatchEntity, String entityName)
 	{
 		String termIdentifier = validatedMatchEntity.getString(MatchingTaskContentEntityMetaData.INPUT_TERM);
 		Entity termEntity = dataService.findOne(entityName,
 				new QueryImpl().eq(OntologyServiceImpl.DEFAULT_MATCHING_IDENTIFIER, termIdentifier));
-		return termEntity.getString(OntologyServiceImpl.DEFAULT_MATCHING_NAME_FIELD);
+		return termEntity;
 	}
 
 	private String createFileName()
