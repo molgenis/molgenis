@@ -528,6 +528,16 @@
                 <artifactId>maven-resources-plugin</artifactId>
             </plugin>
             <plugin>
+            <!-- add minified resources to build path -->
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>minify-build-helper</id>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
                 <executions>
