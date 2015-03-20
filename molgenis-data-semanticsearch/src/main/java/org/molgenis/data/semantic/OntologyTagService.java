@@ -6,16 +6,19 @@ import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_NAME;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.IdGenerator;
 import org.molgenis.data.Package;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.PackageMetaData;
 import org.molgenis.data.meta.TagMetaData;
+import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.OntologyService;
 import org.molgenis.ontology.repository.model.Ontology;
@@ -34,12 +37,15 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 	private final DataService dataService;
 	private final TagRepository tagRepository;
 	private final OntologyService ontologyService;
+	private final IdGenerator idGenerator;
 
-	public OntologyTagService(DataService dataService, OntologyService ontologyService, TagRepository tagRepository)
+	public OntologyTagService(DataService dataService, OntologyService ontologyService, TagRepository tagRepository,
+			IdGenerator idGenerator)
 	{
 		this.dataService = dataService;
 		this.tagRepository = tagRepository;
 		this.ontologyService = ontologyService;
+		this.idGenerator = idGenerator;
 	}
 
 	private Entity findAttributeEntity(String entityName, String attributeName)
@@ -172,6 +178,25 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 		tags.add(getTagEntity(tag));
 		entity.set(AttributeMetaDataMetaData.TAGS, tags);
 		dataService.update(AttributeMetaDataMetaData.ENTITY_NAME, entity);
+	}
+
+	public void addAttributeTag(String entity, String attribute, String relationIRI, List<String> ontologyTermIRIs)
+	{
+		Entity attributeEntity = findAttributeEntity(entity, attribute);
+		List<Entity> tags = Lists.<Entity> newArrayList(attributeEntity.getEntities(AttributeMetaDataMetaData.TAGS));
+		Entity tagEntity = new DefaultEntity(TagRepository.META_DATA, dataService);
+		Stream<OntologyTerm> terms = ontologyTermIRIs.stream().map(ontologyService::getOntologyTerm);
+		OntologyTerm combinedOntologyTerm = OntologyTerm.and(terms.toArray(OntologyTerm[]::new));
+		Relation relation = Relation.forIRI(relationIRI);
+		tagEntity.set(TagMetaData.IDENTIFIER, idGenerator.generateId());
+		tagEntity.set(TagMetaData.CODE_SYSTEM, null);
+		tagEntity.set(TagMetaData.RELATION_IRI, relation.getIRI());
+		tagEntity.set(TagMetaData.RELATION_LABEL, relation.getLabel());
+		tagEntity.set(TagMetaData.LABEL, combinedOntologyTerm.getLabel());
+		tagEntity.set(TagMetaData.OBJECT_IRI, combinedOntologyTerm.getIRI());
+		tags.add(tagEntity);
+		attributeEntity.set(AttributeMetaDataMetaData.TAGS, tags);
+		dataService.update(AttributeMetaDataMetaData.ENTITY_NAME, attributeEntity);
 	}
 
 	Entity getTagEntity(Tag<?, OntologyTerm, Ontology> tag)
