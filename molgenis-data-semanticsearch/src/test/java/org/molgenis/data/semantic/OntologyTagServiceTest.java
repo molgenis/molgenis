@@ -13,6 +13,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.IdGenerator;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.TagMetaData;
@@ -89,7 +90,7 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		ontologyTagService = new OntologyTagService(dataService, ontologyService, tagRepository);
+		ontologyTagService = new OntologyTagService(dataService, ontologyService, tagRepository, null);
 	}
 
 	@Test
