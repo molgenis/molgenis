@@ -27,7 +27,7 @@ public class MolgenisInterceptorTest
 	public void MolgenisInterceptor()
 	{
 		MolgenisSettings molgenisSettings = mock(MolgenisSettings.class);
-		new MolgenisInterceptor(null, molgenisSettings);
+		new MolgenisInterceptor(null, molgenisSettings, "development");
 	}
 
 	@Test
@@ -35,7 +35,8 @@ public class MolgenisInterceptorTest
 	{
 		MolgenisSettings molgenisSettings = mock(MolgenisSettings.class);
 		when(molgenisSettings.getProperty("i18nLocale", "en")).thenReturn("en");
-		MolgenisInterceptor molgenisInterceptor = new MolgenisInterceptor(resourceFingerprintRegistry, molgenisSettings);
+		MolgenisInterceptor molgenisInterceptor = new MolgenisInterceptor(resourceFingerprintRegistry,
+				molgenisSettings, "development");
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		HttpServletResponse response = mock(HttpServletResponse.class);
 		Object handler = mock(Object.class);
