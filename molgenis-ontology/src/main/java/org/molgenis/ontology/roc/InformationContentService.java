@@ -86,37 +86,40 @@ public class InformationContentService
 		Map<String, Double> wordIDFMap = createWordIDF(queryString, ontologyIri);
 		Map<String, Double> wordWeightedSimilarity = new HashMap<String, Double>();
 
-		double averageIDFValue = wordIDFMap.values().stream().mapToDouble(Double::doubleValue).average().getAsDouble();
-		double queryStringLength = StringUtils.join(createStemmedWordSet(queryString), SINGLE_WHITESPACE).trim()
-				.length();
-		double totalContribution = 0;
-		double totalDenominator = 0;
-
-		for (Entry<String, Double> entry : wordIDFMap.entrySet())
+		if (wordIDFMap.size() > 0)
 		{
-			double diff = entry.getValue() - averageIDFValue;
-			if (diff < 0)
+			double averageIDFValue = wordIDFMap.values().stream().mapToDouble(Double::doubleValue).average()
+					.getAsDouble();
+			double queryStringLength = StringUtils.join(createStemmedWordSet(queryString), SINGLE_WHITESPACE).trim()
+					.length();
+			double totalContribution = 0;
+			double totalDenominator = 0;
+
+			for (Entry<String, Double> entry : wordIDFMap.entrySet())
 			{
-				Double contributedSimilarity = (entry.getKey().length() / queryStringLength * 100)
-						* (diff / averageIDFValue);
-				totalContribution += Math.abs(contributedSimilarity);
-				wordWeightedSimilarity.put(entry.getKey(), contributedSimilarity);
+				double diff = entry.getValue() - averageIDFValue;
+				if (diff < 0)
+				{
+					Double contributedSimilarity = (entry.getKey().length() / queryStringLength * 100)
+							* (diff / averageIDFValue);
+					totalContribution += Math.abs(contributedSimilarity);
+					wordWeightedSimilarity.put(entry.getKey(), contributedSimilarity);
+				}
+				else
+				{
+					totalDenominator += diff;
+				}
 			}
-			else
+
+			for (Entry<String, Double> entry : wordIDFMap.entrySet())
 			{
-				totalDenominator += diff;
+				double diff = entry.getValue() - averageIDFValue;
+				if (diff > 0)
+				{
+					wordWeightedSimilarity.put(entry.getKey(), ((diff / totalDenominator) * totalContribution));
+				}
 			}
 		}
-
-		for (Entry<String, Double> entry : wordIDFMap.entrySet())
-		{
-			double diff = entry.getValue() - averageIDFValue;
-			if (diff > 0)
-			{
-				wordWeightedSimilarity.put(entry.getKey(), ((diff / totalDenominator) * totalContribution));
-			}
-		}
-
 		return wordWeightedSimilarity;
 	}
 
