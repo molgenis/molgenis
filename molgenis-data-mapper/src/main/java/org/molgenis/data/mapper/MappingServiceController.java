@@ -368,7 +368,7 @@ public class MappingServiceController extends MolgenisPluginController
 		List<Ontology> ontologies = ontologyService.getOntologies();
 		EntityMetaData emd = dataService.getEntityMetaData(target);
 		Iterable<AttributeMetaData> attributes = emd.getAttributes();
-		
+
 		// Remember, we are iterating over attribute metadata. x == attribute metadata
 		Map<AttributeMetaData, List<Tag<AttributeMetaData, OntologyTerm, Ontology>>> taggedAttributeMetaDatas = stream(
 				attributes.spliterator(), false).collect(
@@ -377,16 +377,28 @@ public class MappingServiceController extends MolgenisPluginController
 		model.addAttribute("ontologies", ontologies);
 		model.addAttribute("taggedAttributeMetaDatas", taggedAttributeMetaDatas);
 		model.addAttribute("relations", Relation.values());
-		
+
 		return VIEW_TAG_WIZARD;
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/tagattribute")
 	public @ResponseBody void addTagAttribute()
 	{
-
+		// TODO determine which params are needed and implement
 	}
 
+	@RequestMapping(method = RequestMethod.POST, value = "/deletetag")
+	public @ResponseBody void deleteTag()
+	{
+		// TODO determine which params are needed and implement
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/clearalltags")
+	public @ResponseBody void clearAllTags()
+	{
+		// TODO determine which params are needed and implement
+	}
+	
 	@RequestMapping(method = RequestMethod.GET, value = "/getontologyterms")
 	public @ResponseBody List<OntologyTerm> getAllOntologyTerms(@RequestParam String search,
 			@RequestParam List<String> ontologyIds)
