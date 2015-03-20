@@ -9,9 +9,8 @@
 
 	var relationAndTagTemplate;
 
-	function createSelect2() {
-		
-		$('#test').select2({
+	function createSelect2(inputIdentifier) {
+		$('#'+inputIdentifier).select2({
 			width: 500,
 			minimumInputLength: 1,
 			multiple: true,
@@ -36,10 +35,7 @@
 		});
 	}
 	
-	/**
-	 * Function that loads the expression and tag information.
-	 */
-	function loadRelationAndTagContainer(relation, tags) {
+	function addNewTags(relation) {
 		var relationAndTagInfoContainer = $('#relation-and-tag-info-container');
 
 		relationAndTagInfoContainer.empty();
@@ -47,56 +43,27 @@
 
 		relationAndTagInfoContainer.append(relationAndTagTemplate({
 			'relation' : relation,
-			'taglist' : tags
 		}));
 
-		$('#tag-dropdown').select2();
+		createSelect2('tag-dropdown');
 	}
 
 	$(function() {
 		$('#ontology-select').select2();
 		
-		$('.add-tag-btn').on('click', function() {
-			var attributeName = $(this).val();
-			$(this).closest('table');
-			
-//			var $tbody = $('#'+attributeName) 
-//			//var table = document.getElementById(attributeName).getElementsByTagName('tbody')[0];
-//			var selectId = $(this).val() + "-row-" + table.rows.length;
-//			
-//			var newRow = table.insertRow(table.rows.length);
-//			var newRelation = newRow.insertCell(0);
-//			var newTags = newRow.insertCell(1);
-//			
-//			var newRelationContent = document.createTextNode('not speficied..');
-//			var input = document.createElement('input');
-//			input.type = 'hidden';
-//			input.id = selectId;
-//			
-//			newRelation.appendChild(newRelationContent);
-//			newTags.appendChild(input);
-//			
-//			createSelect2(selectId);
-//			
+		$('.show-tags-screen-btn').on('click', function() {
+			var relation = $(this).closest('tr').find("td:first").data('relation');
+			addNewTags(relation);
 		});
 		
 		$('.remove-tag-btn').on('click', function() {
-			var relation = $(this).parent().prev().children().val();
-			var tags = [];
-
-			$.each($(this).parent().children(), function() {
-				tags.push($(this).text());
+			var tagIRI =  $(this).data('tag');
+			$.ajax({
+				url: '/deletesingletag'
+				data: tagIRI
 			});
-
-			tags.splice(tags.indexOf($(this).text()), 1);
 			$(this).remove();
-
-			loadRelationAndTagContainer(relation, tags);
 		});
 
-		$('.add-new-tags-btn').on('click', function() {
-			var relation = $(this).closest('tr').find("td:first").data('relation');
-			loadRelationAndTagContainer(relation, null);
-		});
 	});
 }($, window.top.molgenis = window.top.molgenis || {}));

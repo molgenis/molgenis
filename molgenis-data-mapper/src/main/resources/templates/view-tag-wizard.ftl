@@ -62,18 +62,18 @@
 						<tr>
 							<td data-relation="Is associated with">Is associated with</td> <#--${tag.relation.iri} ${tag.relation.label}-->
 							<td>
-								<button type="btn" class="btn btn-primary btn-xs remove-tag-btn">
+								<button type="btn" class="btn btn-primary btn-xs remove-tag-btn" data-tag="Tag1">
 									Tag1 <span class="glyphicon glyphicon-remove"></span>
 								</button>
-								<button type="btn" class="btn btn-primary btn-xs remove-tag-btn">
+								<button type="btn" class="btn btn-primary btn-xs remove-tag-btn" data-tag="Tag2"> <#--${tag.iri}-->
 									Tag2 <span class="glyphicon glyphicon-remove"></span>
 								</button>
-								<button type="btn" class="btn btn-primary btn-xs remove-tag-btn">
+								<button type="btn" class="btn btn-primary btn-xs remove-tag-btn" data-tag="Tag3">
 									Tag3 <span class="glyphicon glyphicon-remove"></span>
 								</button>
 							</td>
 							<td>
-								<button type="btn" class="btn btn-default btn-xs add-new-tags-btn">
+								<button type="btn" class="btn btn-default btn-xs show-tags-screen-btn">
 									Add new tag <span class="glyphicon glyphicon-plus"></span>
 								</button>
 							</td>				
