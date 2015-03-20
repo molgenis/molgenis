@@ -2,7 +2,6 @@ package org.molgenis.data.mapper;
 
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
-import static org.elasticsearch.common.collect.Lists.newArrayList;
 import static org.molgenis.data.mapper.MappingServiceController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -25,8 +24,6 @@ import org.molgenis.data.mapping.model.MappingProject;
 import org.molgenis.data.mapping.model.MappingTarget;
 import org.molgenis.data.semantic.OntologyTagService;
 import org.molgenis.data.semantic.Relation;
-import org.molgenis.data.semantic.Tag;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ontology.OntologyService;
 import org.molgenis.ontology.repository.model.Ontology;
@@ -51,6 +48,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Multimap;
 
 @Controller
 @RequestMapping(URI)
@@ -371,9 +369,9 @@ public class MappingServiceController extends MolgenisPluginController
 		Iterable<AttributeMetaData> attributes = emd.getAttributes();
 
 		// Remember, we are iterating over attribute metadata. x == attribute metadata
-		Map<AttributeMetaData, List<Tag<AttributeMetaData, OntologyTerm, Ontology>>> taggedAttributeMetaDatas = stream(
+		Map<AttributeMetaData, Multimap<Relation, OntologyTerm>> taggedAttributeMetaDatas = stream(
 				attributes.spliterator(), false).collect(
-				toMap((x -> x), (x -> newArrayList(ontologyTagService.getTagsForAttribute(emd, x)))));
+				toMap((x -> x), (x -> ontologyTagService.getTagsForAttribute(emd, x))));
 
 		model.addAttribute("ontologies", ontologies);
 		model.addAttribute("taggedAttributeMetaDatas", taggedAttributeMetaDatas);
