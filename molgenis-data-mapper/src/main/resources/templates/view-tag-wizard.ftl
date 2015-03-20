@@ -14,8 +14,6 @@
 
 <div class="row">
 	<div class="col-md-6">
-		<input type="hidden" id="test"></input>
-	
 		<h3>Tag Wizard</h3>
 		<p>
 			Tag attributes manually with ontology terms, or automagically 
@@ -68,10 +66,12 @@
 						<#list taggedAttributeMetaDatas[attributeMetaData] as tag>
 							<tr>
 								<td>
-									2 be implemented						
+									<button type="btn" class="btn btn-default btn-xs show-relation-and-tags-btn">
+										Expression here...
+									</button>						
 								</td>
 								<td>
-									<button type="btn" class="btn btn-primary btn-xs tag-remove-btn">
+									<button type="btn" class="btn btn-primary btn-xs remove-tag-btn">
 										${tag.object.label}<span class="glyphicon glyphicon-remove"></span>
 									</button>
 								</td>				
@@ -83,7 +83,7 @@
 			<#if attributeMetaData_has_next><hr></hr></#if>
 		</#list>
 	</div>
-	<div id="relation-tag-info-container" class="col-md-6"></div>
+	<div id="relation-and-tag-info-container" class="col-md-6"></div>
 </div>
 
 <script id="relation-and-tag-template" type="text/x-handlebars-template">

@@ -12,7 +12,7 @@
 	function createSelect2() {
 		
 		$('#test').select2({
-			width: 200,
+			width: 500,
 			minimumInputLength: 1,
 			multiple: true,
 			closeOnSelect: true,
@@ -40,7 +40,7 @@
 	 * Function that loads the expression and tag information.
 	 */
 	function loadRelationAndTagContainer(relation, tags) {
-		var relationAndTagInfoContainer = $('#relation-tag-info-container');
+		var relationAndTagInfoContainer = $('#relation-and-tag-info-container');
 
 		relationAndTagInfoContainer.empty();
 		relationAndTagTemplate = Handlebars.compile($("#relation-and-tag-template").html());
@@ -58,21 +58,25 @@
 		
 		$('.add-tag-btn').on('click', function() {
 			var attributeName = $(this).val();
-			createSelect2();
+			 
 			var table = document.getElementById(attributeName).getElementsByTagName('tbody')[0];
+			var selectId = $(this).val() + "-row-" + table.rows.length;
+			
 			var newRow = table.insertRow(table.rows.length);
-
 			var newRelation = newRow.insertCell(0);
-			var newRelationContent = document.createTextNode('not speficied..');
-			newRelation.appendChild(newRelationContent);
-
 			var newTags = newRow.insertCell(1);
-			var newTagsContent = document.createTextNode('New tags');
+			
+			var newRelationContent = document.createTextNode('not speficied..');
+			var newTagsContent = document.createTextNode('<input id="" type="hidden></input>"');
+			
+			newRelation.appendChild(newRelationContent);
 			newTags.appendChild(newTagsContent);
+			
+			createSelect2(selectId);
 			
 		});
 		
-		$('.tag-remove-btn').on('click', function() {
+		$('.remove-tag-btn').on('click', function() {
 			var relation = $(this).parent().prev().children().val();
 			var tags = [];
 
@@ -86,7 +90,7 @@
 			loadRelationAndTagContainer(relation, tags);
 		});
 
-		$('.relation').on('click', function() {
+		$('.show-relation-and-tags-btn').on('click', function() {
 			var relation = $(this).val();
 			var tags = [];
 
