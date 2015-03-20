@@ -54,14 +54,30 @@
 			
 			<table class="table" id="${attributeMetaData.name}">
 				<thead>
-					<th>
-						Relation <button type="button" class="btn btn-default btn-xs add-expression-btn" value="${attributeMetaData.name}">
-							<span class="glyphicon glyphicon-plus"></span>
-						</button>
-					</th>
-					<th>Tags <button type="button" class="btn btn-default btn-xs add-tag-btn" value="${attributeMetaData.name}"><span class="glyphicon glyphicon-plus"></span></button></th>
+					<th>Relation</th>
+					<th>Tags</th>
+					<th></th>
 				</thead>
 					<tbody>
+						<tr>
+							<td data-relation="Is associated with">Is associated with</td> <#--${tag.relation.iri} ${tag.relation.label}-->
+							<td>
+								<button type="btn" class="btn btn-primary btn-xs remove-tag-btn">
+									Tag1 <span class="glyphicon glyphicon-remove"></span>
+								</button>
+								<button type="btn" class="btn btn-primary btn-xs remove-tag-btn">
+									Tag2 <span class="glyphicon glyphicon-remove"></span>
+								</button>
+								<button type="btn" class="btn btn-primary btn-xs remove-tag-btn">
+									Tag3 <span class="glyphicon glyphicon-remove"></span>
+								</button>
+							</td>
+							<td>
+								<button type="btn" class="btn btn-default btn-xs add-new-tags-btn">
+									Add new tag <span class="glyphicon glyphicon-plus"></span>
+								</button>
+							</td>				
+						</tr>
 					<#if taggedAttributeMetaDatas[attributeMetaData]??>
 						<#list taggedAttributeMetaDatas[attributeMetaData] as tag>
 							<tr>

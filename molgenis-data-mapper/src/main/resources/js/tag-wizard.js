@@ -58,22 +58,26 @@
 		
 		$('.add-tag-btn').on('click', function() {
 			var attributeName = $(this).val();
-			 
-			var table = document.getElementById(attributeName).getElementsByTagName('tbody')[0];
-			var selectId = $(this).val() + "-row-" + table.rows.length;
+			$(this).closest('table');
 			
-			var newRow = table.insertRow(table.rows.length);
-			var newRelation = newRow.insertCell(0);
-			var newTags = newRow.insertCell(1);
-			
-			var newRelationContent = document.createTextNode('not speficied..');
-			var newTagsContent = document.createTextNode('<input id="" type="hidden></input>"');
-			
-			newRelation.appendChild(newRelationContent);
-			newTags.appendChild(newTagsContent);
-			
-			createSelect2(selectId);
-			
+//			var $tbody = $('#'+attributeName) 
+//			//var table = document.getElementById(attributeName).getElementsByTagName('tbody')[0];
+//			var selectId = $(this).val() + "-row-" + table.rows.length;
+//			
+//			var newRow = table.insertRow(table.rows.length);
+//			var newRelation = newRow.insertCell(0);
+//			var newTags = newRow.insertCell(1);
+//			
+//			var newRelationContent = document.createTextNode('not speficied..');
+//			var input = document.createElement('input');
+//			input.type = 'hidden';
+//			input.id = selectId;
+//			
+//			newRelation.appendChild(newRelationContent);
+//			newTags.appendChild(input);
+//			
+//			createSelect2(selectId);
+//			
 		});
 		
 		$('.remove-tag-btn').on('click', function() {
@@ -90,15 +94,9 @@
 			loadRelationAndTagContainer(relation, tags);
 		});
 
-		$('.show-relation-and-tags-btn').on('click', function() {
-			var relation = $(this).val();
-			var tags = [];
-
-			$.each($(this).parent().next().children(), function() {
-				tags.push($(this).text());
-			});
-
-			loadRelationAndTagContainer(relation, tags);
+		$('.add-new-tags-btn').on('click', function() {
+			var relation = $(this).closest('tr').find("td:first").data('relation');
+			loadRelationAndTagContainer(relation, null);
 		});
 	});
 }($, window.top.molgenis = window.top.molgenis || {}));
