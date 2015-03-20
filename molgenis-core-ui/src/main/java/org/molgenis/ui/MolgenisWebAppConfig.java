@@ -122,13 +122,13 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		registry.addResourceHandler("/html/**").addResourceLocations("/html/", "classpath:/html/").setCachePeriod(3600);
 	}
 
-	@Value("${molgenis.build.profile}")
-	private String molgenisBuildProfile;
+	@Value("${environment:production}")
+	private String environment;
 
 	@Override
 	public void configureMessageConverters(List<HttpMessageConverter<?>> converters)
 	{
-		boolean prettyPrinting = molgenisBuildProfile != null && molgenisBuildProfile.equals("dev");
+		boolean prettyPrinting = environment != null && environment.equals("development");
 		converters.add(new GsonHttpMessageConverter(prettyPrinting));
 		converters.add(new BufferedImageHttpMessageConverter());
 		converters.add(new CsvHttpMessageConverter());
@@ -171,7 +171,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Bean
 	public MolgenisInterceptor molgenisInterceptor()
 	{
-		return new MolgenisInterceptor(resourceFingerprintRegistry(), molgenisSettings, molgenisBuildProfile);
+		return new MolgenisInterceptor(resourceFingerprintRegistry(), molgenisSettings, environment);
 	}
 
 	@Bean
@@ -374,19 +374,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	@PostConstruct
-	public void postConstruct()
+	public void validateMolgenisServerProperties()
 	{
-		// validate required molgenis-server.properties exist
-		validateSystemProperties();
-		// initialize repositories
-		initRepositories();
-	}
-
-	@Value("${environment:production}")
-	private String environment;
-
-	private void validateSystemProperties()
-	{
+		// validate properties defined in molgenis-server.properties
 		String path = System.getProperty("molgenis.home") + File.separator + "molgenis-server.properties";
 		if (environment == null)
 		{
@@ -395,12 +385,13 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		}
 		else if (!environment.equals("development") && !environment.equals("production"))
 		{
-			throw new RuntimeException("Invalid value '" + environment + "'for property 'environment' in " + path
+			throw new RuntimeException("Invalid value '" + environment + "' for property 'environment' in " + path
 					+ ", allowed values are [development, production].");
 		}
 	}
 
-	private void initRepositories()
+	@PostConstruct
+	public void initRepositories()
 	{
 		if (!indexExists())
 		{

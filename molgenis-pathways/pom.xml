@@ -8,6 +8,17 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>molgenis-pathways</artifactId>
+	
+	<build>
+       <plugins>
+            <!-- minify resources -->
+            <plugin>
+                <groupId>com.samaxes.maven</groupId>
+                <artifactId>minify-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+    
 	<dependencies>
 		<dependency>
 			<groupId>org.molgenis</groupId>

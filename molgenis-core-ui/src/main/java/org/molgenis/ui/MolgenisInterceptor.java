@@ -18,19 +18,28 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 public class MolgenisInterceptor extends HandlerInterceptorAdapter
 {
-	public static final String I18N_LOCALE = "i18nLocale";
-
 	private final ResourceFingerprintRegistry resourceFingerprintRegistry;
 	private final MolgenisSettings molgenisSettings;
+
+	public static final String I18N_LOCALE = "i18nLocale";
+
 	private final String environment;
 
 	@Autowired
 	public MolgenisInterceptor(ResourceFingerprintRegistry resourceFingerprintRegistry,
-			MolgenisSettings molgenisSettings, @Value("${molgenis.build.profile}") String environment)
+			MolgenisSettings molgenisSettings, @Value("${environment}") String environment)
 	{
 		if (resourceFingerprintRegistry == null)
 		{
 			throw new IllegalArgumentException("resourceFingerprintRegistry ui is null");
+		}
+		if (molgenisSettings == null)
+		{
+			throw new IllegalArgumentException("molgenisSettings is null");
+		}
+		if (environment == null)
+		{
+			throw new IllegalArgumentException("environment is null");
 		}
 		this.resourceFingerprintRegistry = resourceFingerprintRegistry;
 		this.molgenisSettings = molgenisSettings;

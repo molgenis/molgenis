@@ -4,6 +4,7 @@
 <#assign css=[
 	"jquery.bootstrap.wizard.css",
 	"bootstrap-datetimepicker.min.css",
+	"jquery.molgenis.tree.css",
 	"ui.fancytree.min.css",
 	"jquery-ui-1.9.2.custom.min.css",
 	"select2.css",
