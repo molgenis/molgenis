@@ -127,28 +127,38 @@ public class ImportWizardController extends AbstractWizardController
 			String param = "radio-" + entityClassId;
 			String value = webRequest.getParameter(param);
 			if (value != null
-					&& (value.equalsIgnoreCase(org.molgenis.security.core.Permission.READ.toString())
-							|| value.equalsIgnoreCase(org.molgenis.security.core.Permission.COUNT.toString()) || value
-								.equalsIgnoreCase(org.molgenis.security.core.Permission.WRITE.toString()))
 					&& (SecurityUtils.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX
 							+ entityClassId.toUpperCase()) || userAccountService.getCurrentUser().getSuperuser()))
 			{
-
-				authority
-						.setMolgenisGroup(dataService.findOne(MolgenisGroup.ENTITY_NAME, groupId, MolgenisGroup.class));
-				authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_"
-						+ entityClassId.toUpperCase());
-				if (authority.getId() == null)
+				if ((value.equalsIgnoreCase(org.molgenis.security.core.Permission.READ.toString())
+						|| value.equalsIgnoreCase(org.molgenis.security.core.Permission.COUNT.toString()) || value
+							.equalsIgnoreCase(org.molgenis.security.core.Permission.WRITE.toString())))
 				{
-					authority.setId(UUID.randomUUID().toString());
-					dataService.add(GroupAuthority.ENTITY_NAME, authority);
+					authority.setMolgenisGroup(dataService.findOne(MolgenisGroup.ENTITY_NAME, groupId,
+							MolgenisGroup.class));
+					authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_"
+							+ entityClassId.toUpperCase());
+					if (authority.getId() == null)
+					{
+						authority.setId(UUID.randomUUID().toString());
+						dataService.add(GroupAuthority.ENTITY_NAME, authority);
+					}
+					else dataService.update(GroupAuthority.ENTITY_NAME, authority);
 				}
-				else dataService.update(GroupAuthority.ENTITY_NAME, authority);
+				else if (value.equalsIgnoreCase(org.molgenis.security.core.Permission.NONE.toString()))
+				{
+					if (authority.getId() != null) dataService.delete(GroupAuthority.ENTITY_NAME, authority.getId());
+				}
+				else
+				{
+					throw new RuntimeException("Unknown value: " + value + " for permission on entity: "
+							+ entityClassId);
+				}
 			}
 			else
 			{
 				if (value != null) throw new MolgenisDataAccessException(
-						"Current user is not allowed to change the permissions for this entity");
+						"Current user is not allowed to change the permissions for this entity: " + entityClassId);
 			}
 		}
 	}
