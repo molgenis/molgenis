@@ -36,8 +36,9 @@
         <script src="<@resource_href "/js/jquery.validate.min.js"/>"></script>
         <script src="<@resource_href "/js/handlebars.min.js"/>"></script>
         <script src="<@resource_href "/js/molgenis.js"/>"></script>
-    <#if environment == "dev">
-        <#-- Important: Update minify-maven-plugin configuration in molgenis-core-ui/pom.xml when modifying the list below -->    
+    <#if environment == "development">
+        <#-- Important: Update minify-maven-plugin configuration in molgenis-core-ui/pom.xml when modifying the list below -->
+        <script src="<@resource_href "/js/react-with-addons.js"/>"></script>
         <script src="<@resource_href "/js/component/mixin/DeepPureRenderMixin.js"/>"></script>
         <script src="<@resource_href "/js/component/mixin/GroupMixin.js"/>"></script>
         <script src="<@resource_href "/js/component/wrapper/Ace.js"/>"></script>
@@ -58,6 +59,7 @@
         <script src="<@resource_href "/js/component/RangeSlider.js"/>"></script>
         <script src="<@resource_href "/js/component/TextArea.js"/>"></script>
     <#else>
+        <script src="<@resource_href "/js/react-with-addons.min.js"/>"></script>
         <script src="<@resource_href "/js/molgenis-component.min.js"/>"></script>
     </#if>
         

@@ -63,7 +63,7 @@
 	                    <configuration>
 	                        <charset>UTF-8</charset>
 	                        <webappSourceDir>${project.basedir}/src/main/resources</webappSourceDir>
-	                        <webappTargetDir>${project.build.outputDirectory}</webappTargetDir>
+	                        <webappTargetDir>${project.build.directory}/generated-resources</webappTargetDir>
 	                        <cssEngine>YUI</cssEngine>
 	                        <cssSourceDir>css</cssSourceDir>
 	                        <cssSourceFiles>
@@ -81,7 +81,6 @@
 	                            <jsSourceFile>jquery-2.1.1.min.js</jsSourceFile>
 	                            <jsSourceFile>bootstrap.min.js</jsSourceFile>
 	                            <jsSourceFile>underscore-min.js</jsSourceFile>
-	                            <jsSourceFile>react-with-addons.${js.postfix}</jsSourceFile>
 	                            <jsSourceFile>jquery-ui-1.9.2.custom.min.js</jsSourceFile> <!-- JQRangeSlider dependency -->
 	                            <jsSourceFile>ace/src-min-noconflict/ace.js</jsSourceFile> <!-- Ace dependency -->
 	                            <jsSourceFile>moment-with-locales.min.js</jsSourceFile> <!-- DateTimePicker dependency -->
@@ -133,8 +132,8 @@
 	                            <jsSourceFile>/component/TextArea.js</jsSourceFile>
 	                        </jsSourceFiles>
 	                        <jsFinalFile>molgenis-component.min.js</jsFinalFile>
-	                        <skipMerge>${minify.skipMinify}</skipMerge>
-	                        <skipMinify>${minify.skipMinify}</skipMinify>
+	                        <skipMerge>false</skipMerge>
+	                        <skipMinify>false</skipMinify>
 	                        <nosuffix>true</nosuffix>
 	                        <verbose>true</verbose>
 	                    </configuration>

@@ -13,7 +13,6 @@ public class MolgenisPluginAttributes
 	/** environment: development, production */
 	public static final String KEY_ENVIRONMENT = "environment";
 	public static final String KEY_RESOURCE_FINGERPRINT_REGISTRY = "resource_fingerprint_registry";
-	public static final String KEY_ENVIRONMENT = "environment";
 
 	private MolgenisPluginAttributes()
 	{
