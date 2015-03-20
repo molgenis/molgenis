@@ -227,10 +227,8 @@
 				});
 			}
 			ontologyTermTd.append('<div>Name : <a href="' + ontologyTerm.ontologyTermIRI + '" target="_blank">' + ontologyTerm.ontologyTermName + '</a></div>').append(synonymDiv);
-			$.each(Object.keys(inputEntity), function(index, key){
-				if(key.toLowerCase() !== 'name' && key.toLowerCase().search('synonym') === -1 && key.toLowerCase() !== reserved_identifier_field.toLowerCase()){
-					ontologyTermTd.append('<div>' + key + ' : ' + (ontologyTerm[key] ? ontologyTerm[key] : 'N/A')  + '</div>');
-				}
+			$.each(ontologyTerm.ontologyTermDynamicAnnotation, function(i, annotation){
+				ontologyTermTd.append('<div>' + annotation.name + ' : ' + annotation.value  + '</div>');
 			});
 		}else{
 			ontologyTermTd.append(NO_MATCH_INFO);
