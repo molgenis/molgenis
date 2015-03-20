@@ -36,6 +36,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -126,19 +127,43 @@ public class ImportWriter
 							new Function<Entity, Entity>()
 							{
 								@Override
-								public Entity apply(Entity entity)
+								public DefaultEntity apply(Entity entity)
 								{
 									return new DefaultEntity(entityMetaData, dataService, entity);
 								}
 							});
 
 					entities = DependencyResolver.resolveSelfReferences(entities, entityMetaData);
-
 					int count = update(repository, entities, dbAction);
+					
+					// Fix self referenced entities were not imported
+					keepSelfReferencedEntities(entities);
+					update(repository, entities, DatabaseAction.UPDATE);
+
 					report.addEntityCount(name, count);
 				}
 			}
 		}
+	}
+
+	private void keepSelfReferencedEntities(Iterable<Entity> entities)
+	{
+		entities = Iterables.filter(entities, new Predicate<Entity>()
+		{
+			@Override
+			public boolean apply(Entity entity)
+			{
+				Iterator<AttributeMetaData> attributes = entity.getEntityMetaData().getAttributes().iterator();
+				while (attributes.hasNext())
+				{
+					AttributeMetaData attribute = attributes.next();
+					if (attribute.getRefEntity() != null
+							&& attribute.getRefEntity().getName().equals(entity.getEntityMetaData().getName())
+							&& entity.getEntities(attribute.getName()).iterator().hasNext()) return true;
+				}
+				return false;
+			}
+		});
 	}
 
 	/**
