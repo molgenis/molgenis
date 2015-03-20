@@ -22,6 +22,7 @@ import org.molgenis.ontology.repository.model.Ontology;
 import org.molgenis.ontology.repository.model.OntologyTerm;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
@@ -46,6 +47,20 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 		Entity entityMetaDataEntity = dataService.findOne(ENTITY_NAME, entityName);
 		return stream(entityMetaDataEntity.getEntities(ATTRIBUTES).spliterator(), false)
 				.filter(att -> attributeName.equals(att.getString(AttributeMetaDataMetaData.NAME))).findFirst().get();
+	}
+
+	public void removeAttributeTag(String entity, String attribute, String relationIRI, String ontologyTermIRI)
+	{
+		Entity attributeEntity = findAttributeEntity(entity, attribute);
+		Iterable<Entity> tags = attributeEntity.getEntities(AttributeMetaDataMetaData.TAGS);
+		Iterable<Entity> newTags = Iterables.filter(tags, e -> !isSameTag(relationIRI, ontologyTermIRI, e));
+		attributeEntity.set(AttributeMetaDataMetaData.TAGS, newTags);
+	}
+
+	private boolean isSameTag(String relationIRI, String ontologyTermIRI, Entity e)
+	{
+		return ontologyTermIRI.equals(e.getString(TagMetaData.OBJECT_IRI))
+				&& relationIRI.equals(e.getString(TagMetaData.RELATION_IRI));
 	}
 
 	@Override
@@ -104,11 +119,45 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 	private <SubjectType> TagImpl<SubjectType, OntologyTerm, Ontology> asTag(SubjectType subjectType, Entity tagEntity)
 	{
 		String identifier = tagEntity.getString(TagMetaData.IDENTIFIER);
-		Relation relation = Relation.forIRI(tagEntity.getString(TagMetaData.RELATION_IRI));
-		Ontology ontology = ontologyService.getOntology(tagEntity.getString(TagMetaData.CODE_SYSTEM));
-		OntologyTerm ontologyTerm = ontologyService.getOntologyTerm(tagEntity.getString(TagMetaData.OBJECT_IRI));
+		Relation relation = asRelation(tagEntity);
+		Ontology ontology = asOntology(tagEntity);
+		OntologyTerm ontologyTerm = asOntologyTerm(tagEntity);
+		if (relation == null || ontologyTerm == null)
+		{
+			return null;
+		}
 		return new TagImpl<SubjectType, OntologyTerm, Ontology>(identifier, subjectType, relation, ontologyTerm,
 				ontology);
+	}
+
+	private static Relation asRelation(Entity tagEntity)
+	{
+		String relationIRI = tagEntity.getString(TagMetaData.RELATION_IRI);
+		if (relationIRI == null)
+		{
+			return null;
+		}
+		return Relation.forIRI(relationIRI);
+	}
+
+	private OntologyTerm asOntologyTerm(Entity tagEntity)
+	{
+		String objectIRI = tagEntity.getString(TagMetaData.OBJECT_IRI);
+		if (objectIRI == null)
+		{
+			return null;
+		}
+		return ontologyService.getOntologyTerm(objectIRI);
+	}
+
+	private Ontology asOntology(Entity tagEntity)
+	{
+		String codeSystemIRI = tagEntity.getString(TagMetaData.CODE_SYSTEM);
+		if (codeSystemIRI == null)
+		{
+			return null;
+		}
+		return ontologyService.getOntology(codeSystemIRI);
 	}
 
 	@Override
