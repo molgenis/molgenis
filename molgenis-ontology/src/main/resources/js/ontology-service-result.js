@@ -227,8 +227,17 @@
 				});
 			}
 			ontologyTermTd.append('<div>Name : <a href="' + ontologyTerm.ontologyTermIRI + '" target="_blank">' + ontologyTerm.ontologyTermName + '</a></div>').append(synonymDiv);
+			var annotationMap = {};
 			$.each(ontologyTerm.ontologyTermDynamicAnnotation, function(i, annotation){
-				ontologyTermTd.append('<div>' + annotation.name + ' : ' + annotation.value  + '</div>');
+				if(!annotationMap[annotation.name]){
+					annotationMap[annotation.name] = [];
+				}
+				annotationMap[annotation.name].push(annotation.value);
+			});
+			$.each(Object.keys(inputEntity), function(index, key){
+				if(key.toLowerCase() !== 'name' && key.toLowerCase().search('synonym') === -1 && key.toLowerCase() !== reserved_identifier_field.toLowerCase()){
+					ontologyTermTd.append('<div>' + key + ' : ' + (annotationMap[key] ? annotationMap[key].join() : 'N/A')  + '</div>');
+				}
 			});
 		}else{
 			ontologyTermTd.append(NO_MATCH_INFO);
