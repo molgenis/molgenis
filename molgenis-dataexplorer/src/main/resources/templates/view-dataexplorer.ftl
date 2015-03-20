@@ -18,7 +18,6 @@
 	"jquery-ui-1.9.2.custom.min.js",
 	"jquery.bootstrap.wizard.min.js",
 	"react-with-addons.js",
-    "JSXTransformer.js",
 	"moment-with-locales.min.js",
 	"bootstrap-datetimepicker.min.js",
 	"dataexplorer-filter.js",
