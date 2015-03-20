@@ -1,6 +1,7 @@
 package org.molgenis.data.semantic;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.IdGenerator;
 import org.molgenis.ontology.OntologyService;
 import org.molgenis.ontology.repository.OntologyRepository;
 import org.molgenis.ontology.repository.OntologyTermRepository;
@@ -19,10 +20,14 @@ public class SemanticSearchConfig
 
 	@Autowired
 	TagRepository tagRepository;
+	
+	@Autowired
+	IdGenerator idGenerator;
+	
 
 	@Bean
 	public OntologyTagService ontologyTagService()
 	{
-		return new OntologyTagService(dataService, ontologyService, tagRepository);
+		return new OntologyTagService(dataService, ontologyService, tagRepository, idGenerator);
 	}
 }
