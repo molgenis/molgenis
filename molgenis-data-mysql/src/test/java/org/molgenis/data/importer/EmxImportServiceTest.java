@@ -3,10 +3,16 @@ package org.molgenis.data.importer;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.AppConfig;
 import org.molgenis.data.DatabaseAction;
+import org.molgenis.data.Entity;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
@@ -26,6 +32,7 @@ import org.testng.annotations.Test;
 /**
  * Integration tests for the entire EMX importer.
  */
+@Test
 @ContextConfiguration(classes = AppConfig.class)
 public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 {
@@ -118,9 +125,19 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 
 		// test import
 		EntityImportReport report = importer.doImport(source, DatabaseAction.ADD);
+		
+		List<Entity> entities = (List<Entity>) StreamSupport
+				.stream(dataService.getRepository("import_person").spliterator(), false)
+				.filter(e -> e.getEntities("children").iterator().hasNext())
+				.collect(Collectors.toCollection(ArrayList::new));
+		Assert.assertEquals(new Integer(entities.size()), new Integer(1));
+		Iterator<Entity> children = entities.get(0).getEntities("children").iterator();
+		Assert.assertEquals(children.next().getIdValue(), "john");
+		Assert.assertEquals(children.next().getIdValue(), "jane");
 
 		// test report
 		Assert.assertEquals(report.getNrImportedEntitiesMap().get("import_city"), new Integer(2));
+		Assert.assertEquals(report.getNrImportedEntitiesMap().get("import_person"), new Integer(3));
 		Assert.assertEquals(report.getNrImportedEntitiesMap().get("import_person"), new Integer(3));
 
 	}
