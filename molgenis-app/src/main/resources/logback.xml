@@ -6,8 +6,8 @@
 	</appender>
 	<appender name="MOLGENIS" class="org.molgenis.data.elasticsearch.logback.MolgenisAppender">
 	</appender>
-	<logger name="org.molgenis" level="${logger.level.org.molgenis}"/>
-	<root level="${logger.level.root}">
+	<logger name="org.molgenis" level="INFO"/>
+	<root level="WARN">
 		<appender-ref ref="STDOUT" />
 		<appender-ref ref="MOLGENIS" />
 	</root>
