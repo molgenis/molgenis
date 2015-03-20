@@ -5,7 +5,6 @@ import static org.molgenis.data.meta.EntityMetaDataMetaData.ATTRIBUTES;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_NAME;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.molgenis.data.AttributeMetaData;
@@ -21,8 +20,10 @@ import org.molgenis.data.support.QueryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 
 /**
  * Service to tag metadata with simple String terms.
@@ -72,16 +73,18 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 	}
 
 	@Override
-	public Iterable<Tag<AttributeMetaData, LabeledResource, LabeledResource>> getTagsForAttribute(
-			EntityMetaData entityMetaData, AttributeMetaData attributeMetaData)
+	public Multimap<Relation, LabeledResource> getTagsForAttribute(EntityMetaData entityMetaData,
+			AttributeMetaData attributeMetaData)
 	{
 		Entity entity = findAttributeEntity(entityMetaData, attributeMetaData.getName());
-		if (entity == null) return Collections.<Tag<AttributeMetaData, LabeledResource, LabeledResource>> emptyList();
+		if (entity == null) return ArrayListMultimap.<Relation, LabeledResource> create();
 
-		List<Tag<AttributeMetaData, LabeledResource, LabeledResource>> tags = new ArrayList<Tag<AttributeMetaData, LabeledResource, LabeledResource>>();
+		Multimap<Relation, LabeledResource> tags = ArrayListMultimap.<Relation, LabeledResource> create();
 		for (Entity tagEntity : entity.getEntities(AttributeMetaDataMetaData.TAGS))
 		{
-			tags.add(TagImpl.asTag(attributeMetaData, tagEntity));
+			TagImpl<AttributeMetaData, LabeledResource, LabeledResource> tag = TagImpl.asTag(attributeMetaData,
+					tagEntity);
+			tags.put(tag.getRelation(), tag.getObject());
 		}
 		return tags;
 	}

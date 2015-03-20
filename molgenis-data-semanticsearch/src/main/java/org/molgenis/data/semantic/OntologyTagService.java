@@ -21,7 +21,9 @@ import org.molgenis.ontology.OntologyService;
 import org.molgenis.ontology.repository.model.Ontology;
 import org.molgenis.ontology.repository.model.OntologyTerm;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 
 /**
  * Service to tag metadata with ontology terms.
@@ -66,14 +68,15 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 	}
 
 	@Override
-	public Iterable<Tag<AttributeMetaData, OntologyTerm, Ontology>> getTagsForAttribute(EntityMetaData entityMetaData,
+	public Multimap<Relation, OntologyTerm> getTagsForAttribute(EntityMetaData entityMetaData,
 			AttributeMetaData attributeMetaData)
 	{
 		Entity entity = findAttributeEntity(entityMetaData.getName(), attributeMetaData.getName());
-		List<Tag<AttributeMetaData, OntologyTerm, Ontology>> tags = new ArrayList<Tag<AttributeMetaData, OntologyTerm, Ontology>>();
+		Multimap<Relation, OntologyTerm> tags = ArrayListMultimap.<Relation, OntologyTerm> create();
 		for (Entity tagEntity : entity.getEntities(AttributeMetaDataMetaData.TAGS))
 		{
-			tags.add(asTag(attributeMetaData, tagEntity));
+			Tag<AttributeMetaData, OntologyTerm, Ontology> tag = asTag(attributeMetaData, tagEntity);
+			tags.put(tag.getRelation(), tag.getObject());
 		}
 		return tags;
 	}
