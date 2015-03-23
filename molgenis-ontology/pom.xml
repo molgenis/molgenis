@@ -56,7 +56,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-scripts</artifactId>
+			<artifactId>molgenis-r</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>

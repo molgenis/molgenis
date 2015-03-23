@@ -7,10 +7,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OntologyImporterServiceRegistrator implements ApplicationListener<ContextRefreshedEvent>
+public class OntologyImporterServiceRegistrator implements ApplicationListener<ContextRefreshedEvent>, Ordered
 {
 
 	private static final Logger LOG = LoggerFactory.getLogger(OntologyImporterServiceRegistrator.class);
@@ -34,5 +35,11 @@ public class OntologyImporterServiceRegistrator implements ApplicationListener<C
 		importServiceFactory.addImportService(ontologyImportService);
 		LOG.info("Registered ontology import service");
 		ontologyScriptInitializer.initialize();
+	}
+
+	@Override
+	public int getOrder()
+	{
+		return Ordered.LOWEST_PRECEDENCE;
 	}
 }
