@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.RepositoryCapability;
@@ -152,17 +153,19 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 				throw new RuntimeException(e);
 			}
 
-			entityMetaData = new DefaultEntityMetaData(feed.getTitle().getPlainText(), MapEntity.class);
+			EditableEntityMetaData editableEntityMetaData = new DefaultEntityMetaData(feed.getTitle().getPlainText(),
+					MapEntity.class);
 
 			for (CellEntry cellEntry : feed.getEntries())
 			{
 				Cell cell = cellEntry.getCell();
 				if (cell.getRow() == 1)
 				{
-					((DefaultEntityMetaData) entityMetaData).addAttributeMetaData(new DefaultAttributeMetaData(cell
-							.getValue(), FieldTypeEnum.STRING));
+					editableEntityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(cell.getValue(),
+							FieldTypeEnum.STRING));
 				}
 			}
+			entityMetaData = editableEntityMetaData;
 		}
 
 		return entityMetaData;
