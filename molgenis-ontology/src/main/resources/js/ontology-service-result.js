@@ -131,8 +131,23 @@
 			});
 		});
 		
+		var hoverover = $('<div>Adjusted score ?</div>').css({'cursor':'pointer'}).popover({
+			'title' : 'Explanation',
+			'content' : '<p style="color:black;font-weight:normal;">Adjusted scores are derived from the original scores (<strong>lexical similarity</strong>) combined with the weight of the words (<strong>inverse document frequency</strong>)</p>',
+			'placement' : 'top',
+			'trigger' : 'hover',
+			'html' : true
+		});
+		
+		var table = $('<table class="table"></table>');
+		var header = $('<tr />').appendTo(table);
+		$('<th />').append('Input term').css({'width':'30%'}).appendTo(header);
+		$('<th />').append('Candidate mapping').css({'width':'40%'}).appendTo(header);
+		$('<th />').append('Score').css({'width':'12%'}).appendTo(header);
+		$('<th />').append(hoverover).css({'width':'12%'}).appendTo(header);
+		$('<th />').append('Select').appendTo(header);
+		
 		var hintInformation;
-		var table = $('<table class="table"></table>').append('<tr><th style="width:30%;">Input Term</th><th style="width:40%;">Candidate mapping</th><th style="width:8%;">Score</th><th style="width:12%;">Adjusted Score</th><th>Select</th></tr>');
 		if(data.ontologyTerms && data.ontologyTerms.length > 0){
 			hintInformation = $('<center><p style="font-size:15px;">The candidate ontology terms are sorted based on similarity score, please select one of them by clicking <span class="glyphicon glyphicon-ok"></span> button</p></center>');
 			$.each(data.ontologyTerms, function(index, ontologyTerm){
@@ -166,7 +181,6 @@
 			hintInformation = $('<center><p style="font-size:15px;">There are no candidate mappings for this input term!</p></center>');
 			$('<tr />').append(gatherInputInfoHelper(inputEntity)).append('<td>' + NO_MATCH_INFO + '</td><td>' + NO_MATCH_INFO + '</td><td>' + NO_MATCH_INFO + '</td><td>' + NO_MATCH_INFO + '</td>').appendTo(table);
 		}
-		
 		$('<div class="col-md-12"></div>').append(hintInformation).append(backButton).append(unknownButton).append(table).appendTo(container);
 	}
 	
