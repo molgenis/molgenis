@@ -137,8 +137,7 @@ public class ImportWriter
 					int count = update(repository, entities, dbAction);
 					
 					// Fix self referenced entities were not imported
-					keepSelfReferencedEntities(entities);
-					update(repository, entities, DatabaseAction.UPDATE);
+					update(repository, this.keepSelfReferencedEntities(entities), DatabaseAction.UPDATE);
 
 					report.addEntityCount(name, count);
 				}
@@ -146,9 +145,15 @@ public class ImportWriter
 		}
 	}
 
-	private void keepSelfReferencedEntities(Iterable<Entity> entities)
+	/**
+	 * Keeps the entities that have: 1. A reference to themselves. 2. Minimal one value.
+	 * 
+	 * @param entities
+	 * @return Iterable<Entity> - filtered entities;
+	 */
+	private Iterable<Entity> keepSelfReferencedEntities(Iterable<Entity> entities)
 	{
-		entities = Iterables.filter(entities, new Predicate<Entity>()
+		return Iterables.filter(entities, new Predicate<Entity>()
 		{
 			@Override
 			public boolean apply(Entity entity)

@@ -576,6 +576,10 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 			@Override
 			public int getBatchSize()
 			{
+				if (null == mrefs)
+				{
+					return 0;
+				}
 				return mrefs.size();
 			}
 		});
