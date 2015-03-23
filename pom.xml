@@ -31,39 +31,20 @@
     <developers/>
 
     <profiles>
-        <!-- development profile -->
-        <profile>
-            <id>dev</id>
-            <properties>
-                <molgenis.build.profile>dev</molgenis.build.profile>
-                <logger.level.root>INFO</logger.level.root>
-                <logger.level.org.molgenis>DEBUG</logger.level.org.molgenis>
-                <minify.skipMinify>true</minify.skipMinify>
-                <skip.delivery>true</skip.delivery>
-            </properties>
-        </profile>
         <!-- release profile (default) -->
         <profile>
             <id>release</id>
             <properties>
-                <molgenis.build.profile>release</molgenis.build.profile>
-                <logger.level.root>WARN</logger.level.root>
-                <logger.level.org.molgenis>INFO</logger.level.org.molgenis>
-                <minify.skipMinify>false</minify.skipMinify>
                 <skip.delivery>true</skip.delivery>
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
         </profile>
-
+        <!-- create runnable jar -->
         <profile>
             <id>create-delivery</id>
             <properties>
-                <molgenis.build.profile>dev</molgenis.build.profile>
-                <logger.level.root>INFO</logger.level.root>
-                <logger.level.org.molgenis>DEBUG</logger.level.org.molgenis>
-                <minify.skipMinify>true</minify.skipMinify>
                 <skip.delivery>false</skip.delivery>
             </properties>
         </profile>
@@ -152,6 +133,23 @@
                     <artifactId>maven-resources-plugin</artifactId>
                     <version>2.6</version>
                     <executions>
+                        <!-- copy generated resources to target folder -->
+                        <execution>
+                            <id>copy-generated-resources</id>
+                            <phase>process-classes</phase>
+                            <goals>
+                                <goal>copy-resources</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${project.build.outputDirectory}</outputDirectory>
+                                <resources>
+                                    <resource>
+                                        <directory>target/generated-resources</directory>
+                                        <filtering>false</filtering>
+                                    </resource>
+                                </resources>
+                            </configuration>
+                        </execution>                    
 					<!-- 
 						Copying the das server config to the war ROOT
 						the uk.ac.ebi.mydas.controller.MydasServlet cannot find the file if
@@ -269,6 +267,20 @@
                             </configuration>
                         </execution>
                         <execution>
+                            <id>minify-build-helper</id>
+                            <phase>generate-resources</phase>
+                            <goals>
+                                <goal>add-resource</goal>
+                            </goals>
+                            <configuration>
+                                <resources>
+                                    <resource>
+                                        <directory>target/generated-resources</directory>
+                                    </resource>
+                                </resources>
+                            </configuration>
+                        </execution>
+                        <execution>
                             <id>execution-molgenis-generator</id>
                             <phase>generate-sources</phase>
                             <goals>
@@ -302,6 +314,19 @@
                                         <directory>target/generated-test-sources/molgenis/java</directory>
                                     </resource>
                                 </resources>
+                            </configuration>
+                        </execution>
+                        <!-- add sources created by jaxb -->
+                        <execution>
+                            <id>execution-annotations</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>add-source</goal>
+                            </goals>
+                            <configuration>
+                                <sources>
+                                    <source>target/generated-sources/annotations</source>
+                                </sources>
                             </configuration>
                         </execution>
                     </executions>
@@ -490,33 +515,35 @@
                 <plugin>
                     <groupId>com.samaxes.maven</groupId>
                     <artifactId>minify-maven-plugin</artifactId>
-                    <version>1.7.2</version>
+                    <version>1.7.4</version>
                     <executions>
                         <execution>
                             <id>default-minify</id>
+                            <phase>generate-resources</phase>
                             <goals>
                                 <goal>minify</goal>
                             </goals>
                             <configuration>
                                 <webappSourceDir>${project.basedir}/src/main/resources</webappSourceDir>
-                                <webappTargetDir>${project.build.outputDirectory}</webappTargetDir>
+                                <webappTargetDir>${project.build.directory}/generated-resources</webappTargetDir>
                                 <cssSourceIncludes>
                                     <cssSourceInclude>**/*.css</cssSourceInclude>
                                 </cssSourceIncludes>
                                 <cssSourceExcludes>
+                                    <!-- changes to excludes must be applied to molgenis-core-ui/src/main/resources/templates/resource-macros.ftl -->
                                     <cssSourceExclude>**/*.min.css</cssSourceExclude>
                                 </cssSourceExcludes>
                                 <jsSourceIncludes>
                                     <jsSourceInclude>**/*.js</jsSourceInclude>
                                 </jsSourceIncludes>
                                 <jsSourceExcludes>
+                                    <!-- changes to excludes must be applied to molgenis-core-ui/src/main/resources/templates/resource-macros.ftl -->
                                     <jsSourceExclude>**/*.min.js</jsSourceExclude>
                                     <jsSourceExclude>**/src-min-noconflict/**</jsSourceExclude>
-                                    <jsSourceExclude>**/ace-min/**</jsSourceExclude>
                                 </jsSourceExcludes>
+                                <nosuffix>false</nosuffix>
                                 <skipMerge>true</skipMerge>
-                                <skipMinify>${minify.skipMinify}</skipMinify>
-                                <nosuffix>true</nosuffix>
+                                <skipMinify>false</skipMinify>
                                 <verbose>true</verbose>
                             </configuration>
                         </execution>
@@ -529,6 +556,16 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
+            </plugin>
+            <plugin>
+            <!-- add minified resources to build path -->
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>minify-build-helper</id>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
