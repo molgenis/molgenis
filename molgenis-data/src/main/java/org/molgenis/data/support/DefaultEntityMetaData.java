@@ -77,15 +77,11 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData implements Edi
 		this.extends_ = extends_ != null ? new DefaultEntityMetaData(extends_) : null;
 		this.backend = entityMetaData.getBackend();
 
-		// deep copy attributes
-		// TODO: Fails dramatically for self-referencing entities.
 		Iterable<AttributeMetaData> attributes = entityMetaData.getAttributes();
 		if (attributes != null)
 		{
-			for (AttributeMetaData attributeMetaData : attributes)
-			{
-				addAttributeMetaData(new DefaultAttributeMetaData(attributeMetaData));
-			}
+			//shallow copy, fixed issue #2602
+			addAllAttributeMetaData(attributes);
 		}
 		AttributeMetaData idAttribute = entityMetaData.getIdAttribute();
 		if (idAttribute != null)
@@ -148,7 +144,7 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData implements Edi
 		this.attributes.remove(attributeMetaData.getName());
 	}
 
-	public void addAllAttributeMetaData(List<AttributeMetaData> attributeMetaDataList)
+	public void addAllAttributeMetaData(Iterable<AttributeMetaData> attributeMetaDataList)
 	{
 		attributeMetaDataList.forEach(this::addAttributeMetaData);
 	}
