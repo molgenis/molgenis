@@ -133,6 +133,23 @@
                     <artifactId>maven-resources-plugin</artifactId>
                     <version>2.6</version>
                     <executions>
+                        <!-- copy generated resources to target folder -->
+                        <execution>
+                            <id>copy-generated-resources</id>
+                            <phase>process-classes</phase>
+                            <goals>
+                                <goal>copy-resources</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${project.build.outputDirectory}</outputDirectory>
+                                <resources>
+                                    <resource>
+                                        <directory>target/generated-resources</directory>
+                                        <filtering>false</filtering>
+                                    </resource>
+                                </resources>
+                            </configuration>
+                        </execution>                    
 					<!-- 
 						Copying the das server config to the war ROOT
 						the uk.ac.ebi.mydas.controller.MydasServlet cannot find the file if
