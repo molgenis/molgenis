@@ -9,7 +9,7 @@
 					<tr><th>Name</th><th>Date created</th><th>Code system</th><th>Roc</th><th>Retrieve</th><th>Delete</th></tr>
 					<#list existingTasks as task>
 					<tr><td>${task.Identifier?html}</td><td>${task.Date_created?html}</td><td>${task.Code_system?html}</td>
-						<td><a type="button" class="btn btn-warning retrieve-button-class" href="${context_url}/calculate/${task.Identifier?html}">Plot</a></td>
+						<td><a type="button" class="btn btn-warning" href="${context_url}/calculate/${task.Identifier?html}">Plot</a></td>
 						<td><button type="button" class="btn btn-default retrieve-button-class">Retrieve</button></td>
 						<td><button type="button" class="btn btn-danger remove-button-class">Delete</button></td>
 					</tr>
