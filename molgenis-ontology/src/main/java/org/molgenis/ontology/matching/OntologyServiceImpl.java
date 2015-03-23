@@ -177,7 +177,6 @@ public class OntologyServiceImpl implements OntologyService
 
 		List<Entity> relevantEntities = new ArrayList<Entity>();
 
-		// List<QueryRule> combinedQueryRules = new ArrayList<QueryRule>();
 		List<QueryRule> rulesForOtherFields = new ArrayList<QueryRule>();
 		List<QueryRule> rulesForOntologyTermFields = new ArrayList<QueryRule>();
 
