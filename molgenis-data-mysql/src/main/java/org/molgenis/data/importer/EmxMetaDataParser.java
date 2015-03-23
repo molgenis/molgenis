@@ -221,7 +221,6 @@ public class EmxMetaDataParser implements MetaDataParser
 
 			Boolean attributeNillable = attributeEntity.getBoolean(NILLABLE);
 			String attributeIdAttribute = attributeEntity.getString(ID_ATTRIBUTE);
-			Boolean attributeVisible = attributeEntity.getBoolean(VISIBLE);
 			Boolean attributeAggregateable = attributeEntity.getBoolean(AGGREGATEABLE);
 			Boolean lookupAttribute = attributeEntity.getBoolean(LOOKUP_ATTRIBUTE);
 			Boolean labelAttribute = attributeEntity.getBoolean(LABEL_ATTRIBUTE);
@@ -246,7 +245,19 @@ public class EmxMetaDataParser implements MetaDataParser
 				attribute.setNillable(false);
 			}
 
-			if (attributeVisible != null) attribute.setVisible(attributeVisible);
+			String attributeVisible = attributeEntity.getString(VISIBLE);
+			if (attributeVisible != null)
+			{
+				if (attributeVisible.equalsIgnoreCase("true") || attributeVisible.equalsIgnoreCase("false"))
+				{
+					attribute.setVisible(Boolean.parseBoolean(attributeVisible));
+				}
+				else
+				{
+					attribute.setVisibleExpression(attributeVisible);
+				}
+			}
+
 			if (attributeAggregateable != null) attribute.setAggregateable(attributeAggregateable);
 			// cannot update ref entities yet, will do so later on
 			if (readOnly != null) attribute.setReadOnly(readOnly);

@@ -15,11 +15,10 @@ import com.google.common.collect.ImmutableSet;
 /**
  * Creates ScriptableValue javascript prototype.
  * 
- * The javascript methods are provided by static methods of the given java
- * classes. These methods should have this signature:
+ * The javascript methods are provided by static methods of the given java classes. These methods should have this
+ * signature:
  * 
- * public static Object functionName (Context ctx, Scriptable thisObj, Object[]
- * args, Function funObj)
+ * public static Object functionName (Context ctx, Scriptable thisObj, Object[] args, Function funObj)
  * 
  */
 public class ScriptableValuePrototypeFactory

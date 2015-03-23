@@ -168,6 +168,12 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 			{
 				throw new UnsupportedOperationException();
 			}
+
+			@Override
+			public String getVisibleExpression()
+			{
+				throw new UnsupportedOperationException();
+			}
 		}).skip(1);
 	}
 

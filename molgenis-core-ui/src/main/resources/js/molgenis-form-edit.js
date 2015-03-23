@@ -62,7 +62,36 @@
 		$('#error-message').hide();
 	};
 	
+	ns.updateInputsVisibility = function() {		
+		$('.datetime input').each(function() {
+			var d = $(this).val();
+			$(this).val(d.replace(/'/g,''));//Remove quotes from isodateformat
+		});
+		
+		
+		$.ajax({
+			type: 'POST',
+			url:  $('#entity-form').attr('action').split("?")[0]  + '/attributes/visibility' ,
+			data: $('#entity-form').serialize(),
+			contentType: 'application/x-www-form-urlencoded',
+			async: false,
+			success: function(data, textStatus, response) {
+				ns.quoteIsoDateT();
+				
+				$('#entity-form input').each(function(index, el) {
+					if (data[el.name] === true) {
+						$(el).closest('.form-group').show();
+					} else if (data[el.name] === false) {
+						$(el).closest('.form-group').hide();
+					}
+				});
+			}
+		});
+	};
+	
 	$(function() {
+		setTimeout(function(){ ns.updateInputsVisibility(); }, 10);//TODO get rid of setTimeout
+
 		//Enable datepickers
 		$('.date.datetime').datetimepicker({pickTime: true, useSeconds : true});
 		$('.date.dateonly').datetimepicker({pickTime: false, useSeconds : false});
@@ -80,8 +109,7 @@
 				ns.onFormSubmit();
 			}
 		});
-		
-		
+
 		//Validate occurs on form submit
 		$("#entity-form").validate({
 			ignore: null, //Needed for validation of xref,mref.  To validate hidden fields
@@ -100,6 +128,10 @@
 		
 		$('.empty-date-input').on('click', function() {
 			$(this).parent().parent().children('input').val('');
+		});
+		
+		$('input').on('change', function() {
+			ns.updateInputsVisibility();
 		});
 		
 	});

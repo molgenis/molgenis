@@ -2,6 +2,8 @@ package org.molgenis.js;
 
 import static org.testng.Assert.assertEquals;
 
+import java.util.Date;
+
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.MapEntity;
 import org.mozilla.javascript.Context;
@@ -17,5 +19,12 @@ public class GlobalMethodsTest extends MolgenisJsTest
 
 		Object weight = ScriptEvaluator.eval("$('weight')", person);
 		assertEquals((int) Context.toNumber(weight), 82);
+	}
+
+	@Test
+	public void age()
+	{
+		Object result = ScriptEvaluator.eval("age($('birthdate'))", new MapEntity("birthdate", new Date()));
+		assertEquals((int) Context.toNumber(result), 0);
 	}
 }
