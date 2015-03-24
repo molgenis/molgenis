@@ -369,7 +369,7 @@ function createInput(attr, attrs, val, lbl) {
 		$('<span>').addClass('input-group-addon datepickerbutton')
 		    .append($('<span>').addClass('glyphicon glyp2icon-calendar'))
 		    .appendTo($div);
-		$div.datetimepicker(dataType === 'DATE' ? { pickTime : false } : { pickTime : true, useSeconds : true });
+		$div.datetimepicker(dataType === 'DATE' ? { format : 'YYYY-MM-DD' } : { format : 'YYYY-MM-DDTHH:mm:ssZZ' });
 		return $div;
 	case 'DECIMAL':
 		var input = createBasicInput('number', $.extend({}, attrs, {'step': 'any'}), val).addClass('form-control');
