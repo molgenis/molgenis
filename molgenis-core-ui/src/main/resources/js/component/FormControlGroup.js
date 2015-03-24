@@ -16,26 +16,38 @@
 			value: React.PropTypes.object,
 			mode: React.PropTypes.oneOf(['create', 'edit', 'view']),
 			formLayout: React.PropTypes.oneOf(['horizontal', 'vertical']),
+			colOffset: React.PropTypes.number,
 			validate: React.PropTypes.bool,
+			focus: React.PropTypes.bool,
 			onValueChange: React.PropTypes.func.isRequired
 		},
 		render: function() {
 			var attributes = this.props.attr.attributes;
 			
 			// add control for each attribute
+			var foundFocusControl = false;
 			var controls = [];
 			for(var i = 0; i < attributes.length; ++i) {
-				var Control = attributes[i].fieldType === 'COMPOUND' ? molgenis.ui.FormControlGroup : molgenis.ui.FormControl;
-				controls.push(Control({
+				var attr = attributes[i];
+				var Control = attr.fieldType === 'COMPOUND' ? molgenis.ui.FormControlGroup : molgenis.ui.FormControl;
+				var controlProps = {
 					entity : this.props.entity,
-					attr : attributes[i],
-					value: this.props.value ? this.props.value[attributes[i].name] : undefined,
+					attr : attr,
+					value: this.props.value ? this.props.value[attr.name] : undefined,
 					mode : this.props.mode,
 					formLayout : this.props.formLayout,
+					colOffset: this.props.colOffset,
 					validate: this.props.validate,
 					onValueChange : this.props.onValueChange,
 					key : '' + i
-				}));
+				};
+				
+				// IE9 does not support the autofocus attribute, focus the first visible input manually
+				if(!foundFocusControl && attr.visible === true) {
+					_.extend(controlProps, {focus: true});
+					foundFocusControl = true;
+				}
+				controls.push(Control(controlProps));
 			}
 			
 			return (

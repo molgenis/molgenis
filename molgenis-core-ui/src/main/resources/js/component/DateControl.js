@@ -14,6 +14,7 @@
 			placeholder: React.PropTypes.string,
 			required: React.PropTypes.bool,
 			disabled: React.PropTypes.bool,
+			focus: React.PropTypes.bool,
 			value: React.PropTypes.string,
 			onValueChange: React.PropTypes.func.isRequired
 		},
@@ -25,6 +26,7 @@
 				required : this.props.required,
 				disabled : this.props.disabled,
 				readOnly : this.props.readOnly,
+				focus : this.props.focus,
 				value : this.props.value,
 				onChange : this._handleChange
 			});

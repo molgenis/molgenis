@@ -22,6 +22,7 @@
 			min: React.PropTypes.string,
 			max: React.PropTypes.string,
 			maxLength: React.PropTypes.number,
+			focus: React.PropTypes.bool,
 			value: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.number]),
 			checked: React.PropTypes.bool,
 			onValueChange: React.PropTypes.func.isRequired,
@@ -29,6 +30,12 @@
 		},
 		getInitialState: function() {
 			return this._isRadioOrCheckbox() ? {checked: this.props.checked} : {value: this.props.value};
+		},
+		componentDidMount: function() {
+			// IE9 does not support the autofocus attribute, focus the first visible input manually
+			if(this.props.focus) {
+				this.refs.input.getDOMNode().focus();
+			}
 		},
 		componentWillReceiveProps : function(nextProps) {
 			this.setState(this._isRadioOrCheckbox() ? {checked: nextProps.checked} : {value: nextProps.value});
@@ -52,7 +59,8 @@
 				value: this._isRadioOrCheckbox() ? this.props.value : this.state.value,
 				checked: this._isRadioOrCheckbox() ? this.state.checked : undefined,
 				onChange: this._handleChange,
-				onBlur: this._handleBlur
+				onBlur: this._handleBlur,
+				ref: this.props.focus ? 'input' : undefined
 			};
 			
 			if(props.readOnly && this._isRadioOrCheckbox()) {

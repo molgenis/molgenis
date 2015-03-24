@@ -52,6 +52,8 @@
 				this.setState({value: value});
 				this.props.onChange(value);
 			}.bind(this));
+			
+			this._updateAce();
 		},
 		componentWillUnmount: function() {
 			var container = this.refs.editor.getDOMNode();
@@ -59,12 +61,6 @@
 			editor.destroy();
 		},
 		render: function() {
-			if (this.isMounted()) {
-				var container = this.refs.editor.getDOMNode();
-				var editor = ace.edit(container);	
-				editor.setReadOnly(this.props.readOnly === true || this.props.disabled === true);
-			}
-			
 			// editor won't show up unless height is defined
 			return div({},
 				div({ref: 'editor', style: {height: this.props.height}}),
@@ -78,6 +74,16 @@
 					onChange: this._handleChange,
 				})
 			);
+		},
+		componentDidUpdate: function() {
+			if (this.isMounted()) {
+				this._updateAce();	
+			}
+		},
+		_updateAce: function() {
+			var container = this.refs.editor.getDOMNode();
+			var editor = ace.edit(container);	
+			editor.setReadOnly(this.props.readOnly === true || this.props.disabled === true);
 		},
 		_handleChange: function(value) {
 			this.setState({value: value});

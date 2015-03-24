@@ -2,7 +2,7 @@
 (function($, _, React, molgenis) {
 	"use strict";
 	
-	var input = React.DOM.input;
+	var input = React.DOM.input, span = React.DOM.span, div = React.DOM.div;
 	
 	/**
 	 * React component for select box replacement Select2 (http://select2.github.io/)
@@ -16,8 +16,18 @@
 			options: React.PropTypes.object,
 			readOnly: React.PropTypes.bool,
 			disabled: React.PropTypes.bool,
+			focus: React.PropTypes.bool,
+			addonBtn: React.PropTypes.bool,
+			addonBtnIcon: React.PropTypes.string,
+			onAddonBtnClick: React.PropTypes.func,
 			value: React.PropTypes.oneOfType([React.PropTypes.object, React.PropTypes.array]),
 			onChange: React.PropTypes.func.isRequired
+		},
+		getDefaultProps: function() {
+			return {
+				addonBtn: false,
+				addonBtnIcon: 'plus'
+			};
 		},
 		getInitialState: function() {
 			return {value: this.props.value};
@@ -37,10 +47,24 @@
 			this._destroySelect2();
 		},
 		render: function() {
-			if (this.isMounted()) {
-				this._updateSelect2();
+			var inputControl = input({type: 'hidden', name: this.props.name, ref: 'select2', onChange: function(){}}); // empty onChange callback to suppress React warning 
+			if(this.props.addonBtn) {
+				return (
+					div({className: 'input-group select2-bootstrap-append'},
+						inputControl,
+						span({className: 'input-group-btn'},
+							molgenis.ui.Button({icon: this.props.addonBtnIcon, onClick: this.props.onAddonBtnClick})
+						)
+					)
+				);
+			} else {
+				return inputControl;	
 			}
-			return input({type: 'hidden', name: this.props.name, ref: 'select2', onChange: function(){}}); // empty onChange callback to suppress React warning 
+		},
+		componentDidUpdate: function() {
+			if (this.isMounted()) {
+				this._updateSelect2();	
+			}
 		},
 		_handleChange: function(value) {
 			this.setState({value: value});
@@ -65,6 +89,9 @@
 			$container.select2('data', this.state.value);
 			$container.select2('enable', !this.props.disabled);
 			$container.select2('readonly', this.props.readOnly);
+			if(this.props.focus) {
+				$container.select2('focus');
+			}
 		},
 		_destroySelect2: function() {
 			var $container = $(this.refs.select2.getDOMNode());

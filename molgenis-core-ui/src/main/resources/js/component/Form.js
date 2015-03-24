@@ -2,76 +2,7 @@
 (function(_, React, molgenis) {
     "use strict";
 
-    var div = React.DOM.div, button = React.DOM.button, form = React.DOM.form;
-    
-    /**
-	 * @memberOf component
-	 */
-	var FormSubmitButton = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
-		displayName: 'FormSubmitButton',
-		propTypes: {
-			formLayout: React.PropTypes.oneOf(['horizontal', 'vertical']),
-			colOffset: React.PropTypes.number
-		},
-		render: function() {
-			var saveControl = button({type: 'submit', className: 'btn btn-large btn-primary pull-right'}, 'Save');
-			if(this.props.formLayout === 'horizontal') {
-				var divClasses = 'col-md-offset-' + this.props.colOffset + ' col-md-' + (12 - this.props.colOffset);  
-				saveControl = (
-					div({className: 'form-group'},
-						div({className: divClasses},
-							saveControl
-						)
-					)
-				);
-			}
-			return saveControl;
-		}
-	});
-	var FormSubmitButtonFactory = React.createFactory(FormSubmitButton);
-	
-	/**
-	 * @memberOf component
-	 */
-	var FormControls = React.createClass({
-		mixins: [molgenis.DeepPureRenderMixin],
-		displayName: 'FormControls',
-		propTypes: {
-			entity: React.PropTypes.object.isRequired,
-			value: React.PropTypes.object,
-			mode: React.PropTypes.oneOf(['create', 'edit', 'view']),
-			formLayout: React.PropTypes.oneOf(['horizontal', 'vertical']),
-			colOffset: React.PropTypes.number,
-			validate: React.PropTypes.bool,
-			onValueChange: React.PropTypes.func.isRequired
-		},
-		render: function() {
-			// add control for each attribute
-			var attributes = this.props.entity.attributes;
-			var controls = [];
-			for(var key in attributes) {
-				if(attributes.hasOwnProperty(key)) {
-					var attr = attributes[key];
-					if(this.props.mode !== 'create' || (this.props.mode === 'create' && attr.auto !== true)) {
-						var Control = attr.fieldType === 'COMPOUND' ? molgenis.ui.FormControlGroup : molgenis.ui.FormControl;
-						controls.push(Control({
-							entity : this.props.entity,
-							attr : attr,
-							value: this.props.value ? this.props.value[key] : undefined,
-							mode : this.props.mode,
-							formLayout : this.props.formLayout,
-							validate: this.props.validate,
-							onValueChange : this.props.onValueChange,
-							key : key
-						}));
-					}
-				}
-			}
-			return div({}, controls);
-		}
-	});
-	var FormControlsFactory = React.createFactory(FormControls);
+    var div = React.DOM.div, button = React.DOM.button;
 	
 	/**
 	 * @memberOf component
@@ -84,13 +15,18 @@
 			value: React.PropTypes.object,
 			mode: React.PropTypes.oneOf(['create', 'edit', 'view']),
 			formLayout: React.PropTypes.oneOf(['horizontal', 'vertical']),
-			colOffset: React.PropTypes.number
+			colOffset: React.PropTypes.number,
+			cancelBtn: React.PropTypes.bool, 
+			onCancel: React.PropTypes.func,
+			onSubmitSuccess: React.PropTypes.func,
+			onSubmitError: React.PropTypes.func
 		},
 		getDefaultProps: function() {
 			return {
 				mode: 'create',
-				formLayout: 'vertical',
-				colOffset: 2
+				formLayout: 'horizontal',
+				colOffset: 3,
+				cancelBtn: false
 			};
 		},
 		getInitialState: function() {
@@ -126,7 +62,9 @@
 				method : method,
 				encType : 'application/x-www-form-urlencoded', // use multipart/form-data if form contains one or more file inputs
 				noValidate : true,
-				onSubmit : this._handleSubmit
+				onSubmit : this._handleSubmit,
+				success: this.props.onSubmitSuccess,
+				error: this.props.onSubmitError
 			};
 			
 			var formControlsProps = {
@@ -140,9 +78,15 @@
 			};
 			
 			return (
-				form(formProps,
+				molgenis.ui.wrapper.JQueryForm(formProps,
 					FormControlsFactory(formControlsProps),
-					this.props.mode !== 'view' ? FormSubmitButtonFactory({layout: this.props.formLayout, colOffset: this.props.colOffset}) : null
+ 					this.props.mode !== 'view' ? FormButtonsFactory({
+ 						mode : this.props.mode,
+ 						formLayout : this.props.formLayout,
+						colOffset : this.props.colOffset,
+						cancelBtn: this.props.cancelBtn, 
+						onCancelClick : this.props.onCancel
+					}) : null
 				)
 			);
 		},
@@ -181,6 +125,96 @@
 			}
 		}
 	});
+	
+	/**
+	 * @memberOf component
+	 */
+	var FormControls = React.createClass({
+		mixins: [molgenis.DeepPureRenderMixin],
+		displayName: 'FormControls',
+		propTypes: {
+			entity: React.PropTypes.object.isRequired,
+			value: React.PropTypes.object,
+			mode: React.PropTypes.oneOf(['create', 'edit', 'view']),
+			formLayout: React.PropTypes.oneOf(['horizontal', 'vertical']),
+			colOffset: React.PropTypes.number,
+			validate: React.PropTypes.bool,
+			onValueChange: React.PropTypes.func.isRequired
+		},
+		render: function() {
+			// add control for each attribute
+			var foundFocusControl = false;
+			var attributes = this.props.entity.attributes;
+			var controls = [];
+			for(var key in attributes) {
+				if(attributes.hasOwnProperty(key)) {
+					var attr = attributes[key];
+					if(this.props.mode !== 'create' || (this.props.mode === 'create' && attr.auto !== true)) {
+						var Control = attr.fieldType === 'COMPOUND' ? molgenis.ui.FormControlGroup : molgenis.ui.FormControl;
+						var controlProps = {
+							entity : this.props.entity,
+							attr : attr,
+							value: this.props.value ? this.props.value[key] : undefined,
+							mode : this.props.mode,
+							formLayout : this.props.formLayout,
+							colOffset: this.props.colOffset,
+							validate: this.props.validate,
+							onValueChange : this.props.onValueChange,
+							key : key
+						};
+						
+						// IE9 does not support the autofocus attribute, focus the first visible input manually
+						if(!foundFocusControl && attr.visible === true) {
+							_.extend(controlProps, {focus: true});
+							foundFocusControl = true;
+						}
+						controls.push(Control(controlProps));
+					}
+				}
+			}
+			return div({}, controls);
+		}
+	});
+	var FormControlsFactory = React.createFactory(FormControls);
+	
+	/**
+	 * @memberOf component
+	 */
+	var FormButtons = React.createClass({
+		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
+		displayName: 'FormSubmitButton',
+		propTypes: {
+			mode: React.PropTypes.oneOf(['create', 'edit']).isRequired,
+			formLayout: React.PropTypes.oneOf(['horizontal', 'vertical']).isRequired,
+			colOffset: React.PropTypes.number,
+			cancelBtn: React.PropTypes.bool,
+			onCancelClick: React.PropTypes.func,
+		},
+		getDefaultProps: function() {
+			return {
+				onCancelClick : function() {}
+			};
+		},
+		render: function() {
+			var divClasses;
+			if(this.props.formLayout === 'horizontal') {
+				divClasses = 'col-md-offset-' + this.props.colOffset + ' col-md-' + (12 - this.props.colOffset);
+			} else {
+				divClasses = 'col-md-12';
+			}
+			
+			var submitBtnText = this.props.mode === 'create' ? 'Create' : 'Save changes';
+			return (
+				div({className: 'row', style: {textAlign: 'right'}},
+					div({className: divClasses},
+						this.props.cancelBtn ? button({type: 'button', className: 'btn btn-default', onClick: this.props.onCancelClick}, 'Cancel') : null,
+						button({type: 'submit', className: 'btn btn-primary', style: {marginLeft: 5}}, submitBtnText)
+					)
+				)
+			);
+		}
+	});
+	var FormButtonsFactory = React.createFactory(FormButtons);
 	
     // export component
     molgenis.ui = molgenis.ui || {};

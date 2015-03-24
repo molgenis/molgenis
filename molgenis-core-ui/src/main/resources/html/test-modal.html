@@ -1,0 +1,60 @@
+<!doctype html>
+<html>
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="../css/molgenis-bundle.min.css" rel="stylesheet">
+        <link href="../css/molgenis-controls.css" rel="stylesheet">
+        <link href="../css/molgenis.css" rel="stylesheet">
+        <script src="../js/molgenis-bundle.min.js"></script>
+        <script src="../js/handlebars.min.js"></script>
+        <script src="../js/molgenis.js"></script>
+        <!-- RELEASE -->
+        <!-- <script src="../js/react-with-addons.min.js"></script> -->
+        <!-- <script src="../js/molgenis-component.min.js"></script> -->
+        <!-- RELEASE END -->
+        <!-- DEVELOPMENT -->
+        <script src="../js/react-with-addons.js"></script>
+        <script src="../js/component/mixin/AttributeLoaderMixin.js"></script>
+        <script src="../js/component/mixin/DeepPureRenderMixin.js"></script>
+        <script src="../js/component/mixin/EntityLoaderMixin.js"></script>
+		<script src="../js/component/mixin/GroupMixin.js"></script>
+		<script src="../js/component/wrapper/Ace.js"></script>
+		<script src="../js/component/wrapper/DateTimePicker.js"></script>
+		<script src="../js/component/wrapper/JQueryForm.js"></script>
+		<script src="../js/component/wrapper/JQRangeSlider.js"></script>
+		<script src="../js/component/wrapper/Select2.js"></script>
+		<script src="../js/component/AttributeControl.js"></script>
+		<script src="../js/component/BoolControl.js"></script>
+		<script src="../js/component/CheckboxGroup.js"></script>
+		<script src="../js/component/CodeEditor.js"></script>
+		<script src="../js/component/DateControl.js"></script>
+		<script src="../js/component/EntitySelectBox.js"></script>
+		<script src="../js/component/Form.js"></script>
+		<script src="../js/component/FormControl.js"></script>
+		<script src="../js/component/FormControlGroup.js"></script>
+		<script src="../js/component/Input.js"></script>
+		<script src="../js/component/Modal.js"></script>
+		<script src="../js/component/RadioGroup.js"></script>
+		<script src="../js/component/RangeSlider.js"></script>
+		<script src="../js/component/TextArea.js"></script>
+        <!-- DEVELOPMENT END -->
+    </head>
+    <body>
+		<div class="container-fluid">
+            <div class="row">
+                <div class="col-md-offset-3 col-md-6">
+                    <div id="modal-container-small"></div>
+                    <div id="modal-container-medium"></div>
+                    <div id="modal-container-large"></div>
+                </div>
+            </div>
+		</div>
+	</body>
+	<script>
+	React.render(molgenis.ui.Modal({title: 'Modal small', size: 'small'}), $('#modal-container-small')[0]);
+	React.render(molgenis.ui.Modal({title: 'Modal medium', size: 'medium'}), $('#modal-container-medium')[0]);
+	React.render(molgenis.ui.Modal({title: 'Modal large', size: 'large'}), $('#modal-container-large')[0]);
+	</script>
+</html>

@@ -20,6 +20,7 @@
 			required: React.PropTypes.bool,
 			disabled: React.PropTypes.bool,
 			readonly: React.PropTypes.bool,
+			focus: React.PropTypes.bool,
 			value: React.PropTypes.string,
 			onChange: React.PropTypes.func.isRequired
 		},
@@ -42,6 +43,10 @@
 				$clearBtn.on('click', function() {
 					this._handleValueChange(undefined);
 				}.bind(this));
+			}
+			
+			if(this.props.focus) {
+				this.refs.input.getDOMNode().focus();
 			}
 		},
 		componentWillUnmount: function() {
@@ -74,7 +79,8 @@
 						required : required,
 						disabled : disabled,
 						readOnly : readOnly,
-						onChange : this._handleChange
+						onChange : this._handleChange,
+						ref: this.props.focus ? 'input' : undefined
 					}), // FIXME use Input
 					!required ? span({className: 'input-group-addon'},
 						span({className: 'glyphicon glyphicon-remove empty-date-input', ref: 'clearbtn'})

@@ -28,7 +28,8 @@
 					this.setState({entity: entity});
 				}
 			} else if (typeof entity === 'string') {
-				this._loadEntity(entity);
+				var href = entity.startsWith('/api/') ? entity : '/api/v1/' + entity + '/meta';					
+				this._loadEntity(href);
 			}
 		},
 		_loadEntity: function(href) {

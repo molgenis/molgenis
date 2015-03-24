@@ -16,6 +16,7 @@
 		displayName: 'AttributeControl',
 		propTypes: {
 			attr: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]),
+			focus: React.PropTypes.bool,
 			onValueChange: React.PropTypes.func.isRequired
 		},
 		getInitialState: function() {
@@ -23,7 +24,7 @@
 				attr: null
 			};
 		},
-		render: function() {	
+		render: function() {	// FIXME apply focus to all controls
 			if(this.state.attr === null) {
 				// attribute not available yet
 				return div({});
@@ -195,6 +196,7 @@
 				disabled : this.props.disabled,
 				readOnly : this.state.attr.readOnly,
 				maxlength : '255',
+				focus: this.props.focus,
 				value : this.props.value,
 				onValueChange : this._handleValueChange,
 				onBlur : this.props.onBlur
@@ -209,6 +211,7 @@
 				disabled : this.props.disabled,
 				readOnly : this.state.attr.readOnly,
 				time : time,
+				focus: this.props.focus,
 				value : this.props.value,
 				onValueChange : this._handleValueChange
 			});
@@ -230,11 +233,13 @@
 			return molgenis.ui.EntitySelectBox({
 				id : props.id,
 				name : this.state.attr.name,
+				mode: 'create',
 				placeholder : placeholder,
 				required : !this.state.attr.nillable,
 				multiple : multiple,
 				disabled : props.disabled,
 				readOnly : this.state.attr.readOnly,
+				focus: this.props.focus,
 				entity : this.state.attr.refEntity,
 				value : value,
 				onValueChange : this._handleValueChange

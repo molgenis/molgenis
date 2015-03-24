@@ -17,7 +17,9 @@
             attr: React.PropTypes.object.isRequired,
             formLayout: React.PropTypes.oneOf(['horizontal', 'vertical']),
             mode: React.PropTypes.oneOf(['create', 'edit', 'view']),
+            colOffset: React.PropTypes.number,
             validate: React.PropTypes.bool,
+            focus: React.PropTypes.bool,
             value: React.PropTypes.any,
             onValueChange: React.PropTypes.func.isRequired
         },
@@ -29,6 +31,7 @@
         },
         getDefaultProps: function() {
 			return {
+				colOffset: 2,
 				onAttrInit: this._onAttrInit
 			};
 		},
@@ -84,13 +87,14 @@
             var id = attr.name;
             
             var description = attr.description !== undefined ? span({className: 'help-block'}, attr.description) : undefined;
-            var labelClasses = this.props.formLayout === 'horizontal' ? 'col-md-2 control-label' : 'control-label';
+            var labelClasses = this.props.formLayout === 'horizontal' ? 'col-md-' + this.props.colOffset + ' control-label' : 'control-label';
             var labelElement = label({className: labelClasses, htmlFor: id}, lbl);
             var control = molgenis.ui.AttributeControl(_.extend({}, this.props, {
                 attr : attr,
                 id : id,
                 name : id,
                 disabled: this.props.mode === 'view',
+                focus: this.props.focus,
                 formLayout : undefined,
                 value: this.props.value,
                 onValueChange : this._handleValueChange,
@@ -101,7 +105,7 @@
                 return(
                     div({className: formGroupClasses},
                         labelElement,
-                        div({className: 'col-md-10'},
+                        div({className: 'col-md-' + (12 - this.props.colOffset)},
                             description,
                             control,
                             errorMessageSpan
