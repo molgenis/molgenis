@@ -39,14 +39,18 @@
     <#if environment == "development">
         <#-- Important: Update minify-maven-plugin configuration in molgenis-core-ui/pom.xml when modifying the list below -->
         <script src="<@resource_href "/js/react-with-addons.js"/>"></script>
+        <script src="<@resource_href "/js/component/mixin/AttributeLoaderMixin.js"/>"></script>
         <script src="<@resource_href "/js/component/mixin/DeepPureRenderMixin.js"/>"></script>
+        <script src="<@resource_href "/js/component/mixin/EntityLoaderMixin.js"/>"></script>
         <script src="<@resource_href "/js/component/mixin/GroupMixin.js"/>"></script>
         <script src="<@resource_href "/js/component/wrapper/Ace.js"/>"></script>
         <script src="<@resource_href "/js/component/wrapper/DateTimePicker.js"/>"></script>
         <script src="<@resource_href "/js/component/wrapper/JQRangeSlider.js"/>"></script>
+        <script src="<@resource_href "/js/component/wrapper/JQueryForm.js"/>"></script>
         <script src="<@resource_href "/js/component/wrapper/Select2.js"/>"></script>
         <script src="<@resource_href "/js/component/AttributeControl.js"/>"></script>
         <script src="<@resource_href "/js/component/BoolControl.js"/>"></script>
+        <script src="<@resource_href "/js/component/Button.js"/>"></script>
         <script src="<@resource_href "/js/component/CheckboxGroup.js"/>"></script>
         <script src="<@resource_href "/js/component/CodeEditor.js"/>"></script>
         <script src="<@resource_href "/js/component/DateControl.js"/>"></script>
@@ -54,7 +58,9 @@
         <script src="<@resource_href "/js/component/Form.js"/>"></script>
         <script src="<@resource_href "/js/component/FormControl.js"/>"></script>
         <script src="<@resource_href "/js/component/FormControlGroup.js"/>"></script>
+        <script src="<@resource_href "/js/component/Icon.js"/>"></script>
         <script src="<@resource_href "/js/component/Input.js"/>"></script>
+        <script src="<@resource_href "/js/component/Modal.js"/>"></script>
         <script src="<@resource_href "/js/component/RadioGroup.js"/>"></script>
         <script src="<@resource_href "/js/component/RangeSlider.js"/>"></script>
         <script src="<@resource_href "/js/component/TextArea.js"/>"></script>
