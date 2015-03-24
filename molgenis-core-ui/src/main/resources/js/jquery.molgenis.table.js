@@ -180,6 +180,7 @@
 			if (settings.editenabled) {
 				var cell = $('<td class="trash" tabindex="' + tabindex++ + '">');
 				$('<a class="btn btn-xs btn-danger delete-row-btn" href="#" data-toggle="button" title="Delete"><span class="glyphicon glyphicon-minus"></span></button>').appendTo(cell);
+				$('<a class="btn btn-xs btn-danger delete-row-btn" href="#" data-toggle="button" title="Delete"><span class="glyphicon glyphicon-minus"></span></button>').appendTo(cell);
 				row.append(cell);
 			}
 
@@ -800,16 +801,10 @@
 		});
 		
 		function getCreateForm(entityMetaData) {
-			$.ajax({
-				type : 'GET',
-				url : '/api/v1/' + entityMetaData.name + '/create',
-				success : function(form) {
-					openFormModal(entityMetaData, form);
-				}
-			});
+			openFormModal(entityMetaData);
 		}
 		
-		function openFormModal(entityMetaData, form) {
+		function openFormModal(entityMetaData) {
 			// create modal structure
 			var modal = $('#form-modal');
 			if(!modal.length) {
@@ -823,24 +818,23 @@
 				items.push('</div>');
 				items.push('<div class="modal-body">');
 				items.push('</div>');
-				items.push('<div class="modal-footer">');
-				items.push('<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>');
-				items.push('<button type="button" id="submit-form-btn" class="btn btn-primary">Save</button>');
-				items.push('</div>');
 				items.push('</div>');
 				items.push('</div>');
 				items.push('</div>');
 				modal = $(items.join(''));
 			}
-			
 			$('.modal-title', modal).html(entityMetaData.label);
-			$('.modal-body', modal).html(form);
-			
-			modal.on('click', '#submit-form-btn', function(e) {
-				e.preventDefault();
-				e.stopPropagation();
-				$('#entity-form').submit();			
-			});
+
+			React.render(molgenis.ui.Form({
+				entity : entityMetaData.name,
+				onSubmitSuccess : function() {
+					modal.modal('hide');
+				},
+				cancelBtn: true,
+				onCancel: function() {
+					modal.modal('hide');
+				}
+			}), $('.modal-body', modal)[0]);
 			
 			// show modal
 			modal.modal({'show': true});
