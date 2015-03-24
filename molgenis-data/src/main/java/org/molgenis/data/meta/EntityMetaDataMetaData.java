@@ -26,7 +26,7 @@ public class EntityMetaDataMetaData extends DefaultEntityMetaData
 	public EntityMetaDataMetaData()
 	{
 		super(ENTITY_NAME);
-		addAttribute(FULL_NAME).setIdAttribute(true).setUnique(true).setNillable(false).setLookupAttribute(true);
+		addAttribute(FULL_NAME).setIdAttribute(true).setUnique(true).setNillable(false);
 		addAttribute(SIMPLE_NAME).setNillable(false);
 		addAttribute(BACKEND);
 		addAttribute(PACKAGE).setDataType(XREF).setRefEntity(PackageRepository.META_DATA);
