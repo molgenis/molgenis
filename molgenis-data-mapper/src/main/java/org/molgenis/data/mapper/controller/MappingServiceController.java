@@ -34,6 +34,7 @@ import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.semantic.OntologyTagService;
 import org.molgenis.data.semantic.Relation;
+import org.molgenis.data.semantic.Tag;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ontology.OntologyService;
 import org.molgenis.ontology.repository.model.Ontology;
@@ -74,8 +75,6 @@ public class MappingServiceController extends MolgenisPluginController
 	private static final String VIEW_ATTRIBUTE_MAPPING = "view-attribute-mapping";
 	private static final String VIEW_SINGLE_MAPPING_PROJECT = "view-single-mapping-project";
 	private static final String VIEW_TAG_WIZARD = "view-tag-wizard";
-
-	private Set<Ontology> selectedOntologies = new HashSet<Ontology>();
 
 	@Autowired
 	private MolgenisUserService molgenisUserService;
@@ -388,7 +387,6 @@ public class MappingServiceController extends MolgenisPluginController
 		model.addAttribute("ontologies", ontologies);
 		model.addAttribute("taggedAttributeMetaDatas", taggedAttributeMetaDatas);
 		model.addAttribute("relations", Relation.values());
-		model.addAttribute("selectedOntologies", selectedOntologies);
 
 		return VIEW_TAG_WIZARD;
 	}
@@ -408,17 +406,19 @@ public class MappingServiceController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/clearalltags")
-	public @ResponseBody void clearAllTags()
+	public @ResponseBody void clearAllTags(@RequestParam String entityName)
 	{
-		// TODO determine which params are needed and implement
+		// TODO remove all tags from this entity
+		System.out.println(entityName);
+		EntityMetaData emd = dataService.getEntityMetaData(entityName);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/autotagattributes")
-	public @ResponseBody Map<AttributeMetaData, List<OntologyTerm>> autoTagAttributes(@Valid @RequestBody AutoTagRequest request)
+	public @ResponseBody Map<AttributeMetaData, List<OntologyTerm>> autoTagAttributes(
+			@Valid @RequestBody AutoTagRequest request)
 	{
 		System.out.println(request);
-		//CALL FLEUR FUNCTION
-		// TODO determine which params are needed and implement
+		// TODO Call fleur function
 		return null;
 	}
 
@@ -426,13 +426,6 @@ public class MappingServiceController extends MolgenisPluginController
 	public @ResponseBody List<OntologyTerm> getAllOntologyTerms(@Valid @RequestBody GetOntologyTermRequest request)
 	{
 		return ontologyService.findOntologyTerms(request.getOntologyIds(), request.getSearchTerm(), 100);
-	}
-
-	@RequestMapping(method = RequestMethod.POST, value = "/setontologies")
-	public @ResponseBody void setSelectedOntology(@RequestParam String selectedOntologyIRI)
-	{
-		selectedOntologies.clear();
-		selectedOntologies.add(ontologyService.getOntology(selectedOntologyIRI));
 	}
 
 	/**
