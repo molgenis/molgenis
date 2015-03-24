@@ -207,7 +207,7 @@
 			return (
 				div({className: 'row', style: {textAlign: 'right'}},
 					div({className: divClasses},
-						this.props.cancelBtn ? button({type: 'button', className: 'btn btn-default', onClick: this.props.onCancelClick}, 'Cancel') : null,
+						this.props.cancelBtn ? molgenis.ui.Button({text: 'Cancel', onClick: this.props.onCancelClick}, 'Cancel') : null,
 						button({type: 'submit', className: 'btn btn-primary', style: {marginLeft: 5}}, submitBtnText)
 					)
 				)
