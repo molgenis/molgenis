@@ -453,7 +453,9 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 			else
 			{
 				// id attributes can not be of type TEXT so we'll change it to VARCHAR
-				if (att == getEntityMetaData().getIdAttribute())
+				if (att == getEntityMetaData().getIdAttribute()
+						&& getEntityMetaData().getIdAttribute().getDataType().getEnumType()
+								.equals(FieldTypeEnum.STRING))
 				{
 					sql.append(VARCHAR);
 				}
