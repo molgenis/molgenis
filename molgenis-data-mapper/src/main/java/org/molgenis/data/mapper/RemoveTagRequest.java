@@ -1,18 +1,15 @@
 package org.molgenis.data.mapper;
 
-import java.util.List;
-
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.molgenis.gson.AutoGson;
 
 import com.google.auto.value.AutoValue;
 
 @AutoValue
-@AutoGson(autoValueClass = AutoValue_AddTagRequest.class)
-public abstract class AddTagRequest
+@AutoGson(autoValueClass = AutoValue_RemoveTagRequest.class)
+public abstract class RemoveTagRequest
 {
 	@NotNull
 	public abstract String getEntityName();
@@ -24,6 +21,5 @@ public abstract class AddTagRequest
 	public abstract String getRelationIRI();
 
 	@NotEmpty
-	public abstract List<String> getOntologyTermIRIs();
-
+	public abstract String getOntologyTermIRI();
 }

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+import org.elasticsearch.search.SearchService;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -16,6 +17,7 @@ import org.molgenis.data.IdGenerator;
 import org.molgenis.data.Package;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.PackageMetaData;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.support.DefaultEntity;
@@ -61,6 +63,8 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 		Iterable<Entity> tags = attributeEntity.getEntities(AttributeMetaDataMetaData.TAGS);
 		Iterable<Entity> newTags = Iterables.filter(tags, e -> !isSameTag(relationIRI, ontologyTermIRI, e));
 		attributeEntity.set(AttributeMetaDataMetaData.TAGS, newTags);
+		dataService.update(AttributeMetaDataMetaData.ENTITY_NAME, attributeEntity);
+		updateEntityMetaDataEntityWithNewAttributeEntity(entity, attribute, attributeEntity);
 	}
 
 	private boolean isSameTag(String relationIRI, String ontologyTermIRI, Entity e)
@@ -198,6 +202,28 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 		tags.add(tagEntity);
 		attributeEntity.set(AttributeMetaDataMetaData.TAGS, tags);
 		dataService.update(AttributeMetaDataMetaData.ENTITY_NAME, attributeEntity);
+		updateEntityMetaDataEntityWithNewAttributeEntity(entity, attribute, attributeEntity);
+	}
+
+	/**
+	 * The attribute just got updated, but the entity does not know this yet. To reindex this document in elasticsearch,
+	 * update it.
+	 * 
+	 * @param entity
+	 *            name of the entity
+	 * @param attribute
+	 *            the name of the attribute that got changed
+	 * @param attributeEntity
+	 *            the entity of the attribute that got changed
+	 */
+	private void updateEntityMetaDataEntityWithNewAttributeEntity(String entity, String attribute,
+			Entity attributeEntity)
+	{
+		Entity entityEntity = dataService.findOne(EntityMetaDataMetaData.ENTITY_NAME, entity);
+		Iterable<Entity> attributes = entityEntity.getEntities(ATTRIBUTES);
+		entityEntity.set(ATTRIBUTES, Iterables.transform(attributes,
+				att -> att.getString(AttributeMetaDataMetaData.NAME).equals(attribute) ? attributeEntity : att));
+		dataService.update(EntityMetaDataMetaData.ENTITY_NAME, entityEntity);
 	}
 
 	Entity getTagEntity(Tag<?, OntologyTerm, Ontology> tag)

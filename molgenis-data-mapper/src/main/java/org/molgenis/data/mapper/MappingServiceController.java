@@ -5,10 +5,16 @@ import static java.util.stream.Collectors.toMap;
 import static org.molgenis.data.mapper.MappingServiceController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+
+import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
 
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.AttributeMetaData;
@@ -44,6 +50,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.SessionAttributes;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
@@ -54,7 +61,6 @@ import com.google.common.collect.Multimap;
 @RequestMapping(URI)
 public class MappingServiceController extends MolgenisPluginController
 {
-
 	private static final Logger LOG = LoggerFactory.getLogger(MappingServiceController.class);
 
 	public static final String ID = "mappingservice";
@@ -63,6 +69,8 @@ public class MappingServiceController extends MolgenisPluginController
 	private static final String VIEW_ATTRIBUTE_MAPPING = "view-attribute-mapping";
 	private static final String VIEW_SINGLE_MAPPING_PROJECT = "view-single-mapping-project";
 	private static final String VIEW_TAG_WIZARD = "view-tag-wizard";
+
+	private Set<Ontology> selectedOntologies = new HashSet<Ontology>();
 
 	@Autowired
 	private MolgenisUserService molgenisUserService;
@@ -362,7 +370,7 @@ public class MappingServiceController extends MolgenisPluginController
 	}
 
 	@RequestMapping("/tagWizard")
-	public String viewTagWizard(@RequestParam String target, Model model)
+	public String viewTagWizard(@RequestParam String target, Model model, HttpSession session)
 	{
 		List<Ontology> ontologies = ontologyService.getOntologies();
 		EntityMetaData emd = dataService.getEntityMetaData(target);
@@ -375,22 +383,23 @@ public class MappingServiceController extends MolgenisPluginController
 		model.addAttribute("ontologies", ontologies);
 		model.addAttribute("taggedAttributeMetaDatas", taggedAttributeMetaDatas);
 		model.addAttribute("relations", Relation.values());
+		model.addAttribute("selectedOntologies", selectedOntologies);
 
 		return VIEW_TAG_WIZARD;
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/tagattribute")
-	public @ResponseBody void addTagAttribute(@RequestBody AddTagRequest request)
+	public @ResponseBody void addTagAttribute(@Valid @RequestBody AddTagRequest request)
 	{
 		ontologyTagService.addAttributeTag(request.getEntityName(), request.getAttributeName(),
 				request.getRelationIRI(), request.getOntologyTermIRIs());
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/deletesingletag")
-	public @ResponseBody void deleteSingleTag(@RequestParam String entityName, @RequestParam String attributeName,
-			@RequestParam String relationIRI, @RequestParam String ontologyTermIRI)
+	public @ResponseBody void deleteSingleTag(@Valid @RequestBody RemoveTagRequest request)
 	{
-		ontologyTagService.removeAttributeTag(entityName, attributeName, relationIRI, ontologyTermIRI);
+		ontologyTagService.removeAttributeTag(request.getEntityName(), request.getAttributeName(),
+				request.getRelationIRI(), request.getOntologyTermIRI());
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/clearalltags")
@@ -405,11 +414,17 @@ public class MappingServiceController extends MolgenisPluginController
 		// TODO determine which params are needed and implement
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/getontologyterms")
-	public @ResponseBody List<OntologyTerm> getAllOntologyTerms(@RequestParam String search,
-			@RequestParam List<String> ontologyIds)
+	@RequestMapping(method = RequestMethod.POST, value = "/getontologyterms")
+	public @ResponseBody List<OntologyTerm> getAllOntologyTerms(@Valid @RequestBody GetOntologyTermRequest request)
 	{
-		return ontologyService.findOntologyTerms(ontologyIds, search, 100);
+		return ontologyService.findOntologyTerms(request.getOntologyIds(), request.getSearchTerm(), 100);
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/setontologies")
+	public @ResponseBody void setSelectedOntology(@RequestParam String selectedOntologyIRI)
+	{
+		selectedOntologies.clear();
+		selectedOntologies.add(ontologyService.getOntology(selectedOntologyIRI));
 	}
 
 	/**

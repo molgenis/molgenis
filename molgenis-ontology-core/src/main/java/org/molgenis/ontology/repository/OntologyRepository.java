@@ -30,15 +30,15 @@ public class OntologyRepository
 	}
 
 	/**
-	 * Retrieves an ontology with a specific name.
+	 * Retrieves an ontology with a specific IRI.
 	 * 
-	 * @param name
-	 *            the name of the repository
+	 * @param IRI
+	 *            the IRI of the ontology
 	 * @return
 	 */
-	public Ontology getOntology(String name)
+	public Ontology getOntology(String IRI)
 	{
-		return toOntology(dataService.findOne(ENTITY_NAME, QueryImpl.EQ(ONTOLOGY_NAME, name)));
+		return toOntology(dataService.findOne(ENTITY_NAME, QueryImpl.EQ(ONTOLOGY_IRI, IRI)));
 	}
 
 	private static Ontology toOntology(Entity entity)

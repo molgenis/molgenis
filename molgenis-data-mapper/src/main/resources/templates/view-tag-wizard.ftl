@@ -31,8 +31,15 @@
 					<div class="col-md-4">
 						<select multiple class="form-control " name="ontology-select" id="ontology-select" data-placeholder="Select an ontology to use">
 							<option value=""></option>
+							<#if selectedOntologies??>
+								<#list selectedOntologies as selectedOntology>
+									<#if selectedOntology??>
+										<option selected='selected' data-iri="${selectedOntology.IRI} "value="${selectedOntology.id}">${selectedOntology.name?html}</option>
+									</#if>
+								</#list>
+							</#if>
 							<#list ontologies as ontology>
-								<option value="${ontology.id}">${ontology.name?html}</option>
+								<option data-iri="${ontology.IRI}" value="${ontology.id}">${ontology.name?html}</option>
 							</#list>
 						</select>
 					</div>
@@ -66,13 +73,14 @@
 								<td data-relation="${relation.IRI}">${relation.label}</td>
 								<td>
 									<#list relationsAndTagsMap.get(relation) as tag>
-										<button type="btn" class="btn btn-primary btn-xs remove-tag-btn" data-tag="${tag.IRI}">
-											${tag.label} <span class="glyphicon glyphicon-remove"></span>
+										<button type="btn" class="btn btn-primary btn-xs remove-tag-btn" data-relation="${relation.IRI}" 
+											data-entity="${entity.name}" data-attribute="${attributeMetaData.name}" data-tag="${tag.IRI}">
+												${tag.label} <span class="glyphicon glyphicon-remove"></span>
 										</button>
 									</#list>
 								</td>
 								<td>
-								<button type="btn" class="btn btn-default btn-xs edit-ontology-term-btn" data-relation="${relation.IRI}" 
+								<button type="btn" class="btn btn-default btn-xs edit-attribute-tags-btn" data-relation="${relation.IRI}" 
 									data-attribute="${attributeMetaData.name}" data-toggle="modal" data-target="#edit-ontology-modal">
 										Edit <span class="glyphicon glyphicon-pencil"></span>
 								</button>
@@ -84,7 +92,7 @@
 						<td data-relation="http://iri.org/#isAssociatedWith">Is associated with</td>
 							<td></td>
 							<td>
-								<button type="btn" class="btn btn-default btn-xs edit-ontology-term-btn" data-relation="http://iri.org/#isAssociatedWith" 
+								<button type="btn" class="btn btn-default btn-xs edit-attribute-tags-btn" data-relation="http://iri.org/#isAssociatedWith" 
 									data-attribute="${attributeMetaData.name}" data-toggle="modal" data-target="#edit-ontology-modal">
 										Edit <span class="glyphicon glyphicon-pencil"></span>
 								</button>
@@ -105,7 +113,7 @@
 			
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-				<h4 class="modal-title">Modal title</h4>
+				<h4 class="modal-title">Select ontologies to add as tags</h4>
 			</div>
 			
 			<div class="modal-body">
@@ -113,18 +121,12 @@
 					<div class="col-md-12">
 						<input id="tag-dropdown" type="hidden"></input>
 					</div>
-					<hr></hr>
-				</div>
-				<div class="row">
-					<div class="col-md-6">
-						<button id="save-tag-selection-btn" type="btn" class="btn btn-success pull-right" data-entity="${entity.name}">Save</button>
-					</div>
 				</div>
 			</div>
 			
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-				<button type="button" class="btn btn-primary">Save changes</button>
+				<button id="save-tag-selection-btn" data-entity="${entity.name}" type="button" class="btn btn-primary">Save changes</button>
 			</div>
 		</div>
 	</div>
