@@ -31,8 +31,10 @@ public class StringField extends FieldType
 	@Override
 	public String getMysqlType() throws MolgenisModelException
 	{
-        if(f == null) return "VARCHAR(255)";
-		return "VARCHAR(" + f.getVarCharLength() + ")";
+		// if(f == null) return "VARCHAR(255)";
+		// return "VARCHAR(" + f.getVarCharLength() + ")";
+		// Changed to text to allow for 1000 columns
+		return "TEXT";
 	}
 
 	@Override

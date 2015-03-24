@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.sql.DataSource;
 
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
@@ -67,6 +68,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	private final AsyncJdbcTemplate asyncJdbcTemplate;
 	private final DataService dataService;
 	private final DataSource dataSource;
+	private static final String VARCHAR = "VARCHAR(255)";
 
 	/**
 	 * Creates a new MysqlRepository.
@@ -307,15 +309,22 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	{
 		AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
 		StringBuilder sql = new StringBuilder();
+
+		// mysql keys cannot have TEXT value, so change it to VARCHAR when needed
+		String idAttrMysqlType = (idAttribute.getDataType().getEnumType().equals(FieldTypeEnum.STRING) ? VARCHAR : idAttribute
+				.getDataType().getMysqlType());
+
+		String refAttrMysqlType = (att.getRefEntity().getIdAttribute().getDataType().getEnumType()
+				.equals(FieldTypeEnum.STRING) ? VARCHAR : att.getRefEntity().getIdAttribute().getDataType()
+				.getMysqlType());
+
 		sql.append(" CREATE TABLE ").append('`').append(getTableName()).append('_').append(att.getName()).append('`')
-				.append("(`order` INT,`").append(idAttribute.getName()).append('`').append(' ')
-				.append(idAttribute.getDataType().getMysqlType()).append(" NOT NULL, ").append('`')
-				.append(att.getName()).append('`').append(' ')
-				.append(att.getRefEntity().getIdAttribute().getDataType().getMysqlType())
-				.append(" NOT NULL, FOREIGN KEY (").append('`').append(idAttribute.getName()).append('`')
-				.append(") REFERENCES ").append('`').append(getTableName()).append('`').append('(').append('`')
-				.append(idAttribute.getName()).append('`').append(") ON DELETE CASCADE, FOREIGN KEY (").append('`')
-				.append(att.getName()).append('`').append(") REFERENCES ").append('`')
+				.append("(`order` INT,`").append(idAttribute.getName()).append('`').append(' ').append(idAttrMysqlType)
+				.append(" NOT NULL, ").append('`').append(att.getName()).append('`').append(' ')
+				.append(refAttrMysqlType).append(" NOT NULL, FOREIGN KEY (").append('`').append(idAttribute.getName())
+				.append('`').append(") REFERENCES ").append('`').append(getTableName()).append('`').append('(')
+				.append('`').append(idAttribute.getName()).append('`').append(") ON DELETE CASCADE, FOREIGN KEY (")
+				.append('`').append(att.getName()).append('`').append(") REFERENCES ").append('`')
 				.append(getTableName(att.getRefEntity())).append('`').append('(').append('`')
 				.append(att.getRefEntity().getIdAttribute().getName()).append('`').append(") ON DELETE CASCADE);");
 
@@ -335,7 +344,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				sql.append(", ");
 			}
 		}
-		// primary key is first attribute unless otherwise indicate
+		// primary key is first attribute unless otherwise indicated
 		AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
 
 		if (idAttribute == null) throw new MolgenisDataException("Missing idAttribute for entity [" + getName() + "]");
@@ -430,11 +439,28 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 			// xref adopt type of the identifier of referenced entity
 			if (att.getDataType() instanceof XrefField)
 			{
-				sql.append(att.getRefEntity().getIdAttribute().getDataType().getMysqlType());
+				// mysql keys can not be of type TEXT, so don't adopt the field type of a referenced entity when it is
+				// of fieldtype STRING
+				if (att.getRefEntity().getIdAttribute().getDataType().getEnumType().equals(FieldTypeEnum.STRING))
+				{
+					sql.append(VARCHAR);
+				}
+				else
+				{
+					sql.append(att.getRefEntity().getIdAttribute().getDataType().getMysqlType());
+				}
 			}
 			else
 			{
-				sql.append(att.getDataType().getMysqlType());
+				// id attributes can not be of type TEXT so we'll change it to VARCHAR
+				if (att == getEntityMetaData().getIdAttribute())
+				{
+					sql.append(VARCHAR);
+				}
+				else
+				{
+					sql.append(att.getDataType().getMysqlType());
+				}
 			}
 			// not null
 			if (!att.isNillable())
