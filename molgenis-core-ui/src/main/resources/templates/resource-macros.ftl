@@ -14,4 +14,4 @@
         </#if>
 <#else>
         <#assign filtered_resource_name = resource_name>
-</#if>${filtered_resource_name?html}?${resource_fingerprint_registry.getFingerprint(filtered_resource_name)?html}</#macro>
+</#if>${filtered_resource_name?html}<#if environment == "production">?${resource_fingerprint_registry.getFingerprint(filtered_resource_name)?html}</#if></#macro>
