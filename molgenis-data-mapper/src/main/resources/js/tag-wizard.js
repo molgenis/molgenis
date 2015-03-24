@@ -10,6 +10,13 @@
 	var selectedAttributeName;
 	var relationIRI;
 	var selectedOntologyIds = [];
+	var entityName;
+
+	function noOntologySelectedHandler() {
+		molgenis.createAlert([ {
+			'message' : 'You need atleast one ontology selected before being able to tag.'
+		} ], 'warning');
+	}
 
 	function createDynamicSelectDropdown() {
 		$('#tag-dropdown').select2({
@@ -47,19 +54,41 @@
 	}
 
 	$(function() {
+		entityName = $('#global-information').data('entity');
+		noOntologySelectedHandler();
+
 		$('#ontology-select').select2();
 		$('#automatic-tag-btn').on('click', function() {
-			$.ajax({
-				url : 'autotagattributes',
-				type : 'POST',
-				contentType : 'application/json',
-				data : JSON.stringify({
-					'entityName' : $(this).data('entity'),
-					'ontologyIds' : selectedOntologyIds
-				}),
-				success : function(data) {
-					// TODO data is a Map<AttributeMetaData, List<OntologyTerm>>
-					// Do something nice with it
+			if (selectedOntologyIds.length > 0) {
+				$.ajax({
+					url : 'autotagattributes',
+					type : 'POST',
+					contentType : 'application/json',
+					data : JSON.stringify({
+						'entityName' : entityName,
+						'ontologyIds' : selectedOntologyIds
+					}),
+					success : function(data) {
+						// TODO data is a Map<AttributeMetaData,
+						// List<OntologyTerm>>
+						// Do something nice with it
+					}
+				});
+			} else {
+				noOntologySelectedHandler();
+			}
+		});
+
+		$('#clear-all-tags-btn').on('click', function() {
+			bootbox.confirm("Are you sure you want to remove all tags?", function(result) {
+				if (result === true) {
+					$.ajax({
+						url : 'clearalltags',
+						type : 'POST',
+						data : {
+							'entityName' : entityName
+						}
+					});
 				}
 			});
 		});
@@ -77,7 +106,7 @@
 		createDynamicSelectDropdown();
 
 		$('#save-tag-selection-btn').on('click', function() {
-			var entityName = $(this).data('entity');
+
 			var attributeName = selectedAttributeName;
 			var ontologyTermIRIs = $('#tag-dropdown').select2('val');
 
@@ -100,7 +129,6 @@
 		});
 
 		$('.remove-tag-btn').on('click', function() {
-			var entityName = $(this).data('entity');
 			var attributeName = $(this).data('attribute');
 			relationIRI = $(this).data('relation');
 			var ontologyTermIRI = $(this).data('tag');

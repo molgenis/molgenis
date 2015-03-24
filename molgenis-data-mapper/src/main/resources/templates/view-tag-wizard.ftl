@@ -8,6 +8,7 @@
 
 <div class="row">
 	<div class="col-md-12">
+		<input type="hidden" id="global-information" data-entity="${entity.name}"></input>
 		<a onclick="window.history.back()" class="btn btn-default"><span class="glyphicon glyphicon-chevron-left"></span> Back to mapping project</a>	
 	</div>
 </div>
@@ -24,30 +25,34 @@
 
 <div class="row">
 	<div class="col-md-12">
-		<div class="control-group">
-			<label class="control-label" for="ontology-select">Select an ontology: </label>
-			<div class="controls">
-				<div class="form-group">
-					<div class="col-md-4">
-						<select multiple class="form-control " name="ontology-select" id="ontology-select" data-placeholder="Select an ontology to use">
-							<option value=""></option>
-							<#if selectedOntologies??>
-								<#list selectedOntologies as selectedOntology>
-									<#if selectedOntology??>
-										<option selected='selected' data-iri="${selectedOntology.IRI} "value="${selectedOntology.id}">${selectedOntology.name?html}</option>
-									</#if>
-								</#list>
-							</#if>
-							<#list ontologies as ontology>
-								<option data-iri="${ontology.IRI}" value="${ontology.id}">${ontology.name?html}</option>
-							</#list>
-						</select>
-					</div>
-				</div>
-				<button type="button" class="btn btn-primary" id="automatic-tag-btn" data-entity="${entity.name}">Tag-o-matic!</button>
-				<button type="button" class="btn btn-danger">Clear tags</button>
-			</div>
-		</div>
+		<label>Select an ontology:</label>
+	</div>
+</div>			
+
+<div class="row">
+	<div class="col-md-4">
+		<select multiple class="form-control " name="ontology-select" id="ontology-select" data-placeholder="Select an ontology to use">
+			<option value=""></option>
+			<#if selectedOntologies??>
+				<#list selectedOntologies as selectedOntology>
+					<#if selectedOntology??>
+						<option selected='selected' data-iri="${selectedOntology.IRI} "value="${selectedOntology.id}">${selectedOntology.name?html}</option>
+					</#if>
+				</#list>
+			</#if>
+			<#list ontologies as ontology>
+				<option data-iri="${ontology.IRI}" value="${ontology.id}">${ontology.name?html}</option>
+			</#list>
+		</select>
+	</div>
+	<div class="col-md-8">	
+		<button type="button" class="btn btn-primary" id="automatic-tag-btn">Tag-o-matic!</button>
+		<button type="button" class="btn btn-danger"id="clear-all-tags-btn">Clear tags</button>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-12">
 		<hr></hr>
 	</div>
 </div>
@@ -70,29 +75,29 @@
 						<#list relationsAndTagsMap.keySet() as relation>
 							<tr>
 								<td data-relation="${relation.IRI}">${relation.label}</td>
-								<td>
+								<td id="${attributeMetaData.name}-tag-column">
 									<#list relationsAndTagsMap.get(relation) as tag>
-										<button type="btn" class="btn btn-primary btn-xs remove-tag-btn" data-relation="${relation.IRI}" 
-											data-entity="${entity.name}" data-attribute="${attributeMetaData.name}" data-tag="${tag.IRI}">
-												${tag.label} <span class="glyphicon glyphicon-remove"></span>
+										<button type="btn" class="btn btn-primary btn-xs remove-tag-btn" 
+											data-relation="${relation.IRI}" data-attribute="${attributeMetaData.name}" data-tag="${tag.IRI}">
+											${tag.label} <span class="glyphicon glyphicon-remove"></span>
 										</button>
 									</#list>
 								</td>
 								<td>
-								<button type="btn" class="btn btn-default btn-xs edit-attribute-tags-btn pull-right" data-relation="${relation.IRI}" 
-									data-attribute="${attributeMetaData.name}" data-toggle="modal" data-target="#edit-ontology-modal">
-										Edit <span class="glyphicon glyphicon-pencil"></span>
-								</button>
-							</td>
+									<button type="btn" class="btn btn-default btn-xs edit-attribute-tags-btn pull-right" 
+										data-relation="${relation.IRI}" data-attribute="${attributeMetaData.name}" data-toggle="modal" data-target="#edit-ontology-modal">
+											Edit <span class="glyphicon glyphicon-pencil"></span>
+									</button>
+								</td>
 							</tr>
 						</#list>
 					<#else>
 						<tr>
-						<td data-relation="http://iri.org/#isAssociatedWith">Is associated with</td>
+							<td data-relation="http://iri.org/#isAssociatedWith">Is associated with</td>
 							<td></td>
 							<td>
-								<button type="btn" class="btn btn-default btn-xs edit-attribute-tags-btn pull-right" data-relation="http://iri.org/#isAssociatedWith" 
-									data-attribute="${attributeMetaData.name}" data-toggle="modal" data-target="#edit-ontology-modal">
+								<button type="btn" class="btn btn-default btn-xs edit-attribute-tags-btn pull-right" 
+									data-relation="http://iri.org/#isAssociatedWith" data-attribute="${attributeMetaData.name}" data-toggle="modal" data-target="#edit-ontology-modal">
 										Edit <span class="glyphicon glyphicon-pencil"></span>
 								</button>
 							</td>
@@ -125,7 +130,7 @@
 			
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-				<button id="save-tag-selection-btn" data-dismiss="modal" data-entity="${entity.name}" type="button" class="btn btn-primary">Save changes</button>
+				<button id="save-tag-selection-btn" data-dismiss="modal" type="button" class="btn btn-primary">Save changes</button>
 			</div>
 		</div>
 	</div>
