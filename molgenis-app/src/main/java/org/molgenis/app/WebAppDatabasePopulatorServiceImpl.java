@@ -62,7 +62,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		// Genomebrowser stuff
 		Map<String, String> runtimePropertyMap = new HashMap<String, String>();
 
-		runtimePropertyMap.put("plugin.dataexplorer.genomebrowser", "false");
+		runtimePropertyMap.put("plugin.dataexplorer.genomebrowser", "true");
 		runtimePropertyMap.put(DataExplorerController.INITLOCATION,
 				"chr:'1',viewStart:10000000,viewEnd:10100000,cookieKey:'human',nopersist:true");
 		runtimePropertyMap.put(DataExplorerController.COORDSYSTEM,
@@ -135,6 +135,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 				String.valueOf(DataExplorerController.DEFAULT_VAL_AGGREGATES_DISTINCT_HIDE));
 
 		runtimePropertyMap.put(MolgenisInterceptor.I18N_LOCALE, "en");
+		runtimePropertyMap.put(MolgenisInterceptor.APP_HREF_LOGO, "/img/logo_molgenis_small.png");
 
 		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_CHROM, "CHROM,#CHROM,chromosome");
 		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_POS, "POS,start_nucleotide");

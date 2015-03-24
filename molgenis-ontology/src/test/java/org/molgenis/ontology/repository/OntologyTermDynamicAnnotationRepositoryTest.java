@@ -16,10 +16,10 @@ import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.ontology.model.OntologyTermDynamicAnnotationMetaData;
 import org.molgenis.ontology.utils.OntologyLoader;
 import org.molgenis.ontology.utils.ZipFileUtil;
+import org.molgenis.util.ResourceUtils;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
 
 public class OntologyTermDynamicAnnotationRepositoryTest
 {
@@ -30,8 +30,7 @@ public class OntologyTermDynamicAnnotationRepositoryTest
 	@BeforeClass
 	public static void beforeClass() throws FileNotFoundException, IOException, OWLOntologyCreationException
 	{
-		File file = new File(OntologyTermDynamicAnnotationRepositoryTest.class.getResource(
-				System.getProperty("file.separator") + "small_test_data.owl.zip").getFile());
+		File file = ResourceUtils.getFile("small_test_data.owl.zip");
 		List<File> uploadedFiles = ZipFileUtil.unzip(file);
 		ontologyLoader = new OntologyLoader("small_test_data", uploadedFiles.get(0));
 		uuidGenerator = new UuidGenerator();

@@ -3,7 +3,6 @@ package org.molgenis.data.importer;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.AGGREGATEABLE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.DATA_TYPE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.DESCRIPTION;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENTITY;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENUM_OPTIONS;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.EXPRESSION;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ID_ATTRIBUTE;
@@ -12,7 +11,6 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL_ATTRIBUTE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.LOOKUP_ATTRIBUTE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.NAME;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.NILLABLE;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.PART_OF_ATTRIBUTE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MAX;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MIN;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.READ_ONLY;
@@ -78,6 +76,10 @@ public class EmxMetaDataParser implements MetaDataParser
 	static final String PACKAGES = PackageMetaData.ENTITY_NAME;
 	static final String TAGS = TagMetaData.ENTITY_NAME;
 	static final String ATTRIBUTES = AttributeMetaDataMetaData.ENTITY_NAME;
+
+	public static final String ENTITY = "entity";
+	public static final String PART_OF_ATTRIBUTE = "partOfAttribute";
+
 	// Sheet names
 	static final String ENTITIES = EntityMetaDataMetaData.ENTITY_NAME;
 	static final List<String> SUPPORTED_ENTITY_ATTRIBUTES = Arrays.asList(
@@ -622,7 +624,6 @@ public class EmxMetaDataParser implements MetaDataParser
 			final String refEntityName = (String) attribute.get(REF_ENTITY);
 			final String entityName = attribute.getString(ENTITY);
 			final String attributeName = attribute.getString(NAME);
-			final String expression = attribute.getString(EXPRESSION);
 			i++;
 			if (refEntityName != null)
 			{
@@ -637,7 +638,7 @@ public class EmxMetaDataParser implements MetaDataParser
 				else
 				{
 					EntityMetaData refEntityMeta = dataService.getEntityMetaData(refEntityName);
-					if (expression == null || refEntityMeta == null)
+					if (refEntityMeta == null)
 					{
 						throw new IllegalArgumentException("attributes.refEntity error on line " + i + ": "
 								+ refEntityName + " unknown");
@@ -665,7 +666,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			List<EntityMetaData> metadataList = new ArrayList<EntityMetaData>();
 			for (String name : source.getEntityNames())
 			{
-				metadataList.add(dataService.getRepository(name).getEntityMetaData());
+				metadataList.add(dataService.getRepository(getFullyQualifiedEntityName(name)).getEntityMetaData());
 			}
 			IntermediateParseResults intermediateResults = parseTagsSheet(source.getRepository(TAGS));
 			parsePackagesSheet(source.getRepository(PACKAGES), intermediateResults);
@@ -710,13 +711,33 @@ public class EmxMetaDataParser implements MetaDataParser
 		}
 	}
 
+	private String getFullyQualifiedEntityName(String entityName)
+	{
+		if (dataService.getMeta().getEntityMetaData(entityName) == null)
+		{
+			for (EntityMetaData entityMetaData : dataService.getMeta().getEntityMetaDatas())
+			{
+				if (entityName.equals(entityMetaData.getSimpleName()))
+				{
+					// map simple entity name to fully qualified entity name
+					return entityMetaData.getName();
+				}
+			}
+			return entityName;
+		}
+		else
+		{
+			return entityName;
+		}
+	}
+
 	private ImmutableMap<String, EntityMetaData> getEntityMetaDataFromDataService(DataService dataService,
 			Iterable<String> entityNames)
 	{
 		ImmutableMap.Builder<String, EntityMetaData> builder = ImmutableMap.<String, EntityMetaData> builder();
 		for (String name : entityNames)
 		{
-			builder.put(name, dataService.getRepository(name).getEntityMetaData());
+			builder.put(name, dataService.getRepository(getFullyQualifiedEntityName(name)).getEntityMetaData());
 		}
 		return builder.build();
 	}

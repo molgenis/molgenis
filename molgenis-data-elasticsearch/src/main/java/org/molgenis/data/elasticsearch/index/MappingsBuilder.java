@@ -116,6 +116,7 @@ public class MappingsBuilder
 				jsonBuilder.field("norms").startObject().field("enabled", false).endObject();
 				break;
 			case CATEGORICAL:
+			case CATEGORICAL_MREF:
 			case MREF:
 			case XREF:
 				EntityMetaData refEntity = attr.getRefEntity();

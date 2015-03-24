@@ -1,6 +1,7 @@
 package org.molgenis.data.jpa.importer;
 
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL_MREF;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
 
@@ -15,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
@@ -115,8 +117,8 @@ public class EntityImportService
 			boolean resolved = true;
 			for (AttributeMetaData attr : entityMetaData.getAttributes())
 			{
-				if ((attr.getDataType().getEnumType() == MREF) || (attr.getDataType().getEnumType() == XREF)
-						|| (attr.getDataType().getEnumType() == CATEGORICAL))
+				FieldTypeEnum enumType = attr.getDataType().getEnumType();
+				if (enumType == MREF || enumType == CATEGORICAL_MREF || enumType == XREF || enumType == CATEGORICAL)
 				{
 					boolean attrResolved = resolveEntityRef(entityName, entityToImport, attr);
 					resolved = resolved && attrResolved;
@@ -169,8 +171,8 @@ public class EntityImportService
 					boolean resolved = true;
 					for (AttributeMetaData attr : entityMetaData.getAttributes())
 					{
-						if (((attr.getDataType().getEnumType() == MREF) || (attr.getDataType().getEnumType() == XREF) || (attr
-								.getDataType().getEnumType() == CATEGORICAL))
+						FieldTypeEnum enumType = attr.getDataType().getEnumType();
+						if ((enumType == MREF || enumType == CATEGORICAL_MREF || enumType == XREF || enumType == CATEGORICAL)
 								&& attr.getRefEntity().getName().equalsIgnoreCase(entityName))
 						{
 							resolved = resolved && resolveEntityRef(entityName, entityToImport, attr);
@@ -202,8 +204,8 @@ public class EntityImportService
 				// this entity)
 				for (AttributeMetaData attr : entityMetaData.getAttributes())
 				{
-					if (((attr.getDataType().getEnumType() == MREF) || (attr.getDataType().getEnumType() == XREF) || (attr
-							.getDataType().getEnumType() == CATEGORICAL))
+					FieldTypeEnum enumType = attr.getDataType().getEnumType();
+					if ((enumType == MREF || enumType == CATEGORICAL_MREF || enumType == XREF || enumType == CATEGORICAL)
 							&& attr.getRefEntity().getName().equalsIgnoreCase(entityName)
 							&& !resolveEntityRef(entityName, entity, attr))
 					{
@@ -473,7 +475,7 @@ public class EntityImportService
 		final String foreignAttr = attr.getRefEntity().getLabelAttribute().getName();
 		String key = attr.getName() + "_" + foreignAttr;
 
-		if (attr.getDataType().getEnumType() == MREF)
+		if (attr.getDataType().getEnumType() == MREF || attr.getDataType().getEnumType() == CATEGORICAL_MREF)
 		{
 			List<String> keys = entityToBeImported.getList(key);
 			if (keys != null)
@@ -530,7 +532,7 @@ public class EntityImportService
 		if (!foundRefEntityList.isEmpty())
 		{
 			// Add the found ref entities
-			if (attr.getDataType().getEnumType() == MREF)
+			if (attr.getDataType().getEnumType() == MREF || attr.getDataType().getEnumType() == CATEGORICAL_MREF)
 			{
 				@SuppressWarnings("unchecked")
 				List<Entity> entityRefs = (List<Entity>) entityToBeImported.get(attr.getName());

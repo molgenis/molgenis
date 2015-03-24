@@ -62,6 +62,7 @@ public class DataConverter
 				return toBoolean(source);
 			case XREF:
 			case CATEGORICAL:
+			case CATEGORICAL_MREF:
 			case MREF:
 				return source;
 			case COMPOUND:

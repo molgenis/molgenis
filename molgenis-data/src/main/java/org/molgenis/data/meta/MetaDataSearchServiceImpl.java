@@ -66,23 +66,9 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 				}
 			}
 
-			// Search in attributes
-			for (Entity attributeMetaData : dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME, q))
-			{
-				Entity entityMetaData = attributeMetaData.getEntity(AttributeMetaDataMetaData.ENTITY);
-				if (entityMetaData != null)
-				{
-					Package p = getRootPackage(entityMetaData);
-					if (p != null)
-					{
-						String matchDesc = "Matched: attribute '"
-								+ attributeMetaData.getString(AttributeMetaDataMetaData.NAME) + "' of entity '"
-								+ entityMetaData.getString(EntityMetaDataMetaData.SIMPLE_NAME) + "'";
-						PackageSearchResultItem item = new PackageSearchResultItem(p.getRootPackage(), matchDesc);
-						if ((p != null) && !results.contains(item)) results.add(item);
-					}
-				}
-			}
+			// Search in attributes no longer needed since the entities contain the attribute documents.
+			// Change this if the searching for tags becomes needed and/or the results need to reflect which attribute
+			// got matched.
 		}
 
 		// Remove default package

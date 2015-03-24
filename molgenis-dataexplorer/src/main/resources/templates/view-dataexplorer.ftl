@@ -4,6 +4,7 @@
 <#assign css=[
 	"jquery.bootstrap.wizard.css",
 	"bootstrap-datetimepicker.min.css",
+	"jquery.molgenis.tree.css",
 	"ui.fancytree.min.css",
 	"jquery-ui-1.9.2.custom.min.css",
 	"select2.css",
@@ -33,7 +34,7 @@
 
 <@header css js/>
 <div class="row">
-    <div class="col-md-12">
+	<div class="col-md-12">
         <div id="entity-class" class="well well-sm">
             <div class="row">
                 <div class="col-md-8">
@@ -64,7 +65,7 @@
     </div>
 </div>
 <div class="row">
-	<div class="col-md-3">
+	<div class="col-md-3" id="selectors">
 		<div class="well well-sm">
 			<div class="row">
                 <div class="col-md-12">
@@ -118,7 +119,7 @@
             </div>
 		</div>		
 	</div>
-	<div class="col-md-9">
+	<div class="col-md-9" id="modules">
 		<div id="module-nav"></div>
 	</div>
 </div>

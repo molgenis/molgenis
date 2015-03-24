@@ -102,7 +102,7 @@
 		$.each(colAttributes, function() {
 			var feature = this;
 			dataRequest.attributeNames.push(feature.name);
-			if (feature.fieldType === 'XREF' || feature.fieldType === 'MREF')
+			if (feature.fieldType === 'XREF' || feature.fieldType === 'MREF' || feature.fieldType === 'CATEGORICAL' || feature.fieldType === 'CATEGORICAL_MREF')
 				dataRequest.attributeNames.push("key-" + feature.name);
 		});
 
@@ -326,16 +326,16 @@
 			/**
 			 * Validation before using the setLocation of the browser
 			 */
-			if(molgenis.dataexplorer.settings["genomebrowser"] !== 'false'){
-				function setLocation(chr, viewStart, viewEnd){
-					var maxViewWidth = 999999999;
-					if(chr){
-						viewStart = viewStart && viewStart > 0 ? viewStart : 1;
-						viewEnd = viewEnd && viewEnd > 0 ? viewEnd : viewStart + maxViewWidth;
-						genomeBrowser.setLocation(chr, viewStart, viewEnd);
-					}
+			function setLocation(chr, viewStart, viewEnd){
+				var maxViewWidth = 999999999;
+				if(chr){
+					viewStart = viewStart && viewStart > 0 ? viewStart : 1;
+					viewEnd = viewEnd && viewEnd > 0 ? viewEnd : viewStart + maxViewWidth;
+					genomeBrowser.setLocation(chr, viewStart, viewEnd);
 				}
+			}
 				
+			if(molgenis.dataexplorer.settings["genomebrowser"] !== 'false'){
 				// TODO implement elegant solution for genome browser specific code
 				$.each(data.filters, function() {
 					if(this.getComplexFilterElements && this.getComplexFilterElements()[0]){

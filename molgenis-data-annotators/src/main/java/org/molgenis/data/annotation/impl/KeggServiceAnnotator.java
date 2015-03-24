@@ -12,6 +12,7 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.AnnotatorUtils;
 import org.molgenis.data.annotation.HgncLocationsUtils;
 import org.molgenis.data.annotation.LocusAnnotator;
 import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
@@ -131,7 +132,7 @@ public class KeggServiceAnnotator extends LocusAnnotator
 						// no genes for this pathway, do nothing
 					}
 
-					results.add(getAnnotatedEntity(entity, resultMap));
+					results.add(AnnotatorUtils.getAnnotatedEntity(this, entity, resultMap));
 				}
 			}
 		}

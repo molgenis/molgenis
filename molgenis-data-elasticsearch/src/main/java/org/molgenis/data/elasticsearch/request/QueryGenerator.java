@@ -181,6 +181,7 @@ public class QueryGenerator implements QueryPartGenerator
 							break;
 						}
 						case CATEGORICAL:
+						case CATEGORICAL_MREF:
 						case XREF:
 						case MREF:
 						{
@@ -265,6 +266,7 @@ public class QueryGenerator implements QueryPartGenerator
 								Iterables.toArray(iterable, Object.class));
 						break;
 					case CATEGORICAL:
+					case CATEGORICAL_MREF:
 					case MREF:
 					case XREF:
 						// support both entity iterable as entity id iterable as value
@@ -320,6 +322,24 @@ public class QueryGenerator implements QueryPartGenerator
 				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
 				break;
 			}
+			case RANGE:
+			{
+				if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
+				if (!(queryValue instanceof Iterable<?>))
+				{
+					throw new MolgenisQueryException("Query value must be a Iterable instead of ["
+							+ queryValue.getClass().getSimpleName() + "]");
+				}
+				Iterable<?> iterable = (Iterable<?>) queryValue;
+
+				validateNumericalQueryField(queryField, entityMetaData);
+
+				Iterator<?> iterator = iterable.iterator();
+				FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).gte(iterator.next())
+						.lte(iterator.next());
+				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
+				break;
+			}
 			case NESTED:
 				List<QueryRule> nestedQueryRules = queryRule.getNestedRules();
 				if (nestedQueryRules == null || nestedQueryRules.isEmpty())
@@ -347,6 +367,7 @@ public class QueryGenerator implements QueryPartGenerator
 						throw new MolgenisQueryException("Illegal data type [" + dataType + "] for operator ["
 								+ queryOperator + "]");
 					case CATEGORICAL:
+					case CATEGORICAL_MREF:
 					case MREF:
 					case XREF:
 					case SCRIPT: // due to size would result in large amount of ngrams
@@ -407,6 +428,7 @@ public class QueryGenerator implements QueryPartGenerator
 							queryBuilder = QueryBuilders.matchQuery(queryField, queryValue);
 							break;
 						case CATEGORICAL:
+						case CATEGORICAL_MREF:
 						case MREF:
 						case XREF:
 							queryBuilder = QueryBuilders.nestedQuery(queryField,
@@ -439,6 +461,7 @@ public class QueryGenerator implements QueryPartGenerator
 		{
 			case XREF:
 			case CATEGORICAL:
+			case CATEGORICAL_MREF:
 			case MREF:
 				return queryField;
 			case BOOL:
@@ -488,6 +511,7 @@ public class QueryGenerator implements QueryPartGenerator
 				break;
 			case BOOL:
 			case CATEGORICAL:
+			case CATEGORICAL_MREF:
 			case COMPOUND:
 			case EMAIL:
 			case ENUM:

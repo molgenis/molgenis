@@ -3,10 +3,26 @@
 	
 	var restApi = new molgenis.RestClient();
 	
-	function createChildren(attributes, doSelect) {
+	function createChildren(attributes, refEntityDepth, doSelect) {
 		var children = [];
-		$.each(attributes, function() {
-			var isFolder = this.fieldType === 'COMPOUND';
+		
+		$.each(attributes, function() {		
+			
+			var isFolder = false;		
+			var classes = null;
+			
+			if (this.fieldType === 'MREF' || this.fieldType === 'XREF'){
+				var maxDepth = $.fn.tree.defaults.maxRefEntityDepth;
+				if (maxDepth >= 0){
+					isFolder = refEntityDepth < maxDepth ? true : false;
+				}else{
+					isFolder = true;
+				}
+				if (isFolder) classes = 'refentitynode';
+			}
+			
+			var isFolder = isFolder || this.fieldType === 'COMPOUND';
+			
 			children.push({
 				'key' : this.href,
 				'title' : this.label,
@@ -17,7 +33,9 @@
 				'selected' : doSelect(this),
 				'data' : {
 					'attribute' : this
-				}
+				},
+				'refEntityDepth': refEntityDepth,
+				'extraClasses': classes
 			});
 		});
 		return children;
@@ -60,7 +78,7 @@
 		// create tree container
 		var tree = $('.molgenis-tree', container);
 		var settings = $.extend({}, $.fn.tree.defaults, options);
-		
+
 		// store tree settings
 		container.data('settings', settings);
 		
@@ -91,19 +109,29 @@
 					data.tree.getFirstChild().setActive(true);
 				}
 			},
-			'lazyload' : function (e, data) {
+			'lazyLoad' : function (e, data) {
 				var node = data.node;
+				
+				var target;
+				var increaseDepth = 0;
+				if (node.data.attribute.fieldType === "MREF" || node.data.attribute.fieldType === "XREF"){
+					target = node.data.attribute.refEntity.href;
+					increaseDepth = 1;
+				}else{
+					target = node.key;
+				}
+	
 				data.result = $.Deferred(function (dfd) {
-					restApi.getAsync(node.key, {'expand': ['attributes']}, function(attributeMetaData) {
-						var children = createChildren(attributeMetaData.attributes, function() {
+					restApi.getAsync(target, {'expand': ['attributes']}, function(attributeMetaData) {
+						var children = createChildren(attributeMetaData.attributes, node.data.refEntityDepth + increaseDepth, function() {
 							return node.selected;
 						});
 						dfd.resolve(children);
 					});
 				});	
 			},
-			'source' : createChildren(settings.entityMetaData.attributes, function(attribute) {
-					return settings.selectedAttributes ? $.inArray(attribute, settings.selectedAttributes) !== -1  : false;
+			'source' : createChildren(settings.entityMetaData.attributes, 0, function(attribute) {
+				return settings.selectedAttributes ? $.inArray(attribute, settings.selectedAttributes) !== -1  : false;
 			}),
 			'click' : function(e, data) {
 				if (data.targetType === 'title' || data.targetType === 'icon') {
@@ -170,6 +198,9 @@
 		'focusedAttribute' : null,
 		'icon' : null,
 		'onAttributeClick' : null,
-		'onAttributesSelect' : null
+		'onAttributesSelect' : null,
+		'maxRefEntityDepth': 0	// -1 = infinite depth
+							   	//  0 = default behavior (no expanding refEntities)
+							   	// >0 = nr. of nested refEntities that can be expanded
 	};
 }($, window.top.molgenis = window.top.molgenis || {}));
