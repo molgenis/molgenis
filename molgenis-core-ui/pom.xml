@@ -82,6 +82,7 @@
 	                            <jsSourceFile>bootstrap.min.js</jsSourceFile>
 	                            <jsSourceFile>underscore-min.js</jsSourceFile>
 	                            <jsSourceFile>jquery-ui-1.9.2.custom.min.js</jsSourceFile> <!-- JQRangeSlider dependency -->
+	                            <jsSourceFile>jquery.form.min.js</jsSourceFile> <!-- Form dependency -->
 	                            <jsSourceFile>ace/src-min-noconflict/ace.js</jsSourceFile> <!-- Ace dependency -->
 	                            <jsSourceFile>moment-with-locales.min.js</jsSourceFile> <!-- DateTimePicker dependency -->
 	                            <jsSourceFile>bootstrap-datetimepicker.min.js</jsSourceFile> <!-- DateTimePicker dependency -->
@@ -116,9 +117,11 @@
 	                            <jsSourceFile>/component/wrapper/Ace.js</jsSourceFile>
 	                            <jsSourceFile>/component/wrapper/DateTimePicker.js</jsSourceFile>
 	                            <jsSourceFile>/component/wrapper/JQRangeSlider.js</jsSourceFile>
+	                            <jsSourceFile>/component/wrapper/JQueryForm.js</jsSourceFile>
 	                            <jsSourceFile>/component/wrapper/Select2.js</jsSourceFile>
 	                            <jsSourceFile>/component/AttributeControl.js</jsSourceFile>
 	                            <jsSourceFile>/component/BoolControl.js</jsSourceFile>
+	                            <jsSourceFile>/component/Button.js</jsSourceFile>
 	                            <jsSourceFile>/component/CheckboxGroup.js</jsSourceFile>
 	                            <jsSourceFile>/component/CodeEditor.js</jsSourceFile>
 	                            <jsSourceFile>/component/DateControl.js</jsSourceFile>
@@ -126,7 +129,9 @@
 	                            <jsSourceFile>/component/Form.js</jsSourceFile>
 	                            <jsSourceFile>/component/FormControl.js</jsSourceFile>
 	                            <jsSourceFile>/component/FormControlGroup.js</jsSourceFile>
+	                            <jsSourceFile>/component/Icon.js</jsSourceFile>
 	                            <jsSourceFile>/component/Input.js</jsSourceFile>
+	                            <jsSourceFile>/component/Modal.js</jsSourceFile>
 	                            <jsSourceFile>/component/RadioGroup.js</jsSourceFile>
 	                            <jsSourceFile>/component/RangeSlider.js</jsSourceFile>
 	                            <jsSourceFile>/component/TextArea.js</jsSourceFile>
