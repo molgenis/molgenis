@@ -126,14 +126,27 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		// test import
 		EntityImportReport report = importer.doImport(source, DatabaseAction.ADD);
 		
-		List<Entity> entities = (List<Entity>) StreamSupport
+		// Check children
+		List<Entity> entitiesWithChildern = (List<Entity>) StreamSupport
 				.stream(dataService.getRepository("import_person").spliterator(), false)
 				.filter(e -> e.getEntities("children").iterator().hasNext())
 				.collect(Collectors.toCollection(ArrayList::new));
-		Assert.assertEquals(new Integer(entities.size()), new Integer(1));
-		Iterator<Entity> children = entities.get(0).getEntities("children").iterator();
+		Assert.assertEquals(new Integer(entitiesWithChildern.size()), new Integer(1));
+		Iterator<Entity> children = entitiesWithChildern.get(0).getEntities("children").iterator();
 		Assert.assertEquals(children.next().getIdValue(), "john");
 		Assert.assertEquals(children.next().getIdValue(), "jane");
+
+		// Check parents
+		List<Entity> entitiesWithParents = (List<Entity>) StreamSupport
+				.stream(dataService.getRepository("import_person").spliterator(), false)
+				.filter(e -> e.getEntities("parent").iterator().hasNext())
+				.collect(Collectors.toCollection(ArrayList::new));
+		Entity parent1 = entitiesWithParents.get(0).getEntity("parent");
+		Assert.assertEquals(parent1.getIdValue().toString(), "john");
+		Entity parent2 = entitiesWithParents.get(1).getEntity("parent");
+		Assert.assertEquals(parent2.getIdValue().toString(), "jane");
+		Entity parent3 = entitiesWithParents.get(2).getEntity("parent");
+		Assert.assertEquals(parent3.getIdValue().toString(), "geofrey");
 
 		// test report
 		Assert.assertEquals(report.getNrImportedEntitiesMap().get("import_city"), new Integer(2));
@@ -165,6 +178,5 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 
 		Assert.assertEquals(report.getNrImportedEntitiesMap().get("import_city"), new Integer(4));
 		Assert.assertEquals(report.getNrImportedEntitiesMap().get("import_person"), new Integer(4));
-
 	}
 }
