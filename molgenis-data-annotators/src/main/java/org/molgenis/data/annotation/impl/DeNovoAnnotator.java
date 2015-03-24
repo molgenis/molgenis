@@ -211,6 +211,29 @@ public class DeNovoAnnotator extends VariantAnnotator
 		
 		String geneSymbol = SnpEffServiceAnnotator.getGeneNameFromEntity(entity);
 		
+		// allele frequency filter
+		double thousandGenomesMAF = entity.getDouble(ThousandGenomesServiceAnnotator.THGEN_MAF) != null ? entity
+				.getDouble(ThousandGenomesServiceAnnotator.THGEN_MAF) : 0;
+		double exacMAF = entity.getDouble(ExACServiceAnnotator.EXAC_MAF) != null ? entity
+				.getDouble(ExACServiceAnnotator.EXAC_MAF) : 0;
+		double gonlMAF = entity.getDouble(GoNLServiceAnnotator.GONL_MAF) != null ? entity
+				.getDouble(GoNLServiceAnnotator.GONL_MAF) : 0;
+		if(thousandGenomesMAF > 0.01 || exacMAF > 0.01 || gonlMAF > 0.01)
+		{
+			LOG.info("Skipping 'common' variant (>1% AF in GoNL/ExAC/1000G): " + entity);
+			resultMap.put(DENOVO, 0);
+			return resultMap;
+		}
+		
+		// impact
+		String[] annSplit = entity.getString(VcfRepository.getInfoPrefix() + "ANN").split("\\|", -1);
+		SnpEffServiceAnnotator.impact impact = SnpEffServiceAnnotator.impact.valueOf(annSplit[2]);
+		if (impact.equals(SnpEffServiceAnnotator.impact.MODIFIER) || impact.equals(SnpEffServiceAnnotator.impact.LOW))
+		{
+			LOG.info("Skipping MODIFIER/LOW impact variant: " + entity);
+			resultMap.put(DENOVO, 0);
+			return resultMap;
+		}
 		
 		Iterable<Entity> samples = entity.getEntities("Samples");
 		
@@ -471,6 +494,32 @@ public class DeNovoAnnotator extends VariantAnnotator
 		if(child_dp < minDepth)
 		{
 			LOG.warn("Child genotype has less than "+minDepth+" reads ("+child_dp+"), skipping trio for child " + t.getChild().getId());
+			return 0;
+		}
+		
+		/**
+		 * Quality checks: genotype quality
+		 */
+		double minQual = 30.00;
+		
+		double mat_gq = Double.parseDouble(t.getMother().getGenotype().get("GQ").toString());
+		if(mat_gq < minQual)
+		{
+			LOG.warn("Maternal genotype has less than "+minQual+" quality ("+mat_gq+"), skipping trio for child " + t.getChild().getId());
+			return 0;
+		}
+		
+		double pat_gq = Double.parseDouble(t.getFather().getGenotype().get("GQ").toString());
+		if(pat_gq < minQual)
+		{
+			LOG.warn("Paternal genotype has less than "+minQual+" quality ("+pat_gq+"), skipping trio for child " + t.getChild().getId());
+			return 0;
+		}
+		
+		double child_gq = Double.parseDouble(t.getChild().getGenotype().get("GQ").toString());
+		if(child_gq < minQual)
+		{
+			LOG.warn("Child genotype has less than "+minQual+" quality ("+child_gq+"), skipping trio for child " + t.getChild().getId());
 			return 0;
 		}
 		
