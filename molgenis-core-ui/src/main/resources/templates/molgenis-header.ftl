@@ -43,6 +43,7 @@
         <script src="<@resource_href "/js/component/mixin/DeepPureRenderMixin.js"/>"></script>
         <script src="<@resource_href "/js/component/mixin/EntityLoaderMixin.js"/>"></script>
         <script src="<@resource_href "/js/component/mixin/GroupMixin.js"/>"></script>
+        <script src="<@resource_href "/js/component/mixin/ReactLayeredComponentMixin.js"/>"></script>
         <script src="<@resource_href "/js/component/wrapper/Ace.js"/>"></script>
         <script src="<@resource_href "/js/component/wrapper/DateTimePicker.js"/>"></script>
         <script src="<@resource_href "/js/component/wrapper/JQRangeSlider.js"/>"></script>

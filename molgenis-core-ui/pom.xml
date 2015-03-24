@@ -114,6 +114,7 @@
 	                            <jsSourceFile>/component/mixin/DeepPureRenderMixin.js</jsSourceFile>
 	                            <jsSourceFile>/component/mixin/EntityLoaderMixin.js</jsSourceFile>
 	                            <jsSourceFile>/component/mixin/GroupMixin.js</jsSourceFile>
+	                            <jsSourceFile>/component/mixin/ReactLayeredComponentMixin.js</jsSourceFile>
 	                            <jsSourceFile>/component/wrapper/Ace.js</jsSourceFile>
 	                            <jsSourceFile>/component/wrapper/DateTimePicker.js</jsSourceFile>
 	                            <jsSourceFile>/component/wrapper/JQRangeSlider.js</jsSourceFile>
