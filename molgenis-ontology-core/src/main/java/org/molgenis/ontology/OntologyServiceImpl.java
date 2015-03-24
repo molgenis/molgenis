@@ -1,6 +1,7 @@
 package org.molgenis.ontology;
 
 import java.util.List;
+import java.util.Set;
 
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.ontology.repository.OntologyRepository;
@@ -37,9 +38,9 @@ public class OntologyServiceImpl implements OntologyService
 	}
 
 	@Override
-	public List<OntologyTerm> findOntologyTerms(List<String> ontologyIds, String search, int pageSize)
+	public List<OntologyTerm> findOntologyTerms(List<String> ontologyIds, Set<String> terms, int pageSize)
 	{
-		return ontologyTermRepository.findOntologyTerms(ontologyIds, search, pageSize);
+		return ontologyTermRepository.findOntologyTerms(ontologyIds, terms, pageSize);
 	}
 
 }

@@ -7,13 +7,16 @@ import static org.molgenis.ontology.model.OntologyTermMetaData.ONTOLOGY_TERM_IRI
 import static org.molgenis.ontology.model.OntologyTermMetaData.ONTOLOGY_TERM_NAME;
 
 import java.util.List;
+import java.util.Set;
 
 import org.elasticsearch.common.collect.Iterables;
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.model.OntologyTermMetaData;
+import org.molgenis.ontology.repository.model.Ontology;
 import org.molgenis.ontology.repository.model.OntologyTerm;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -26,17 +29,30 @@ public class OntologyTermRepository
 	private DataService dataService;
 
 	/**
-	 * Finds
+	 * Finds {@link OntologyTerm}s within {@link Ontology}s.
 	 * 
 	 * @param ontologyIds
-	 * @param search
+	 *            IDs of the {@link Ontology}s to search in
+	 * @param terms
+	 *            {@link List} of search terms. the {@link OntologyTerm} must match at least one of these terms
 	 * @param pageSize
-	 * @return
+	 *            max number of results
+	 * @return {@link List} of {@link OntologyTerm}s
 	 */
-	public List<OntologyTerm> findOntologyTerms(List<String> ontologyIds, String search, int pageSize)
+	public List<OntologyTerm> findOntologyTerms(List<String> ontologyIds, Set<String> terms, int pageSize)
 	{
-		Iterable<Entity> termEntities = dataService.findAll(ENTITY_NAME, new QueryImpl(IN(ONTOLOGY, ontologyIds).and()
-				.search(search)).setPageSize(pageSize));
+		Query termsQuery = IN(ONTOLOGY, ontologyIds).pageSize(pageSize).and().nest();
+		boolean firstTerm = true;
+		for (String term : terms)
+		{
+			if (!firstTerm)
+			{
+				termsQuery = termsQuery.or();
+				firstTerm = false;
+			}
+			termsQuery = termsQuery.search(term);
+		}
+		Iterable<Entity> termEntities = dataService.findAll(ENTITY_NAME, termsQuery.unnest());
 		return Lists.newArrayList(Iterables.transform(termEntities, OntologyTermRepository::toOntologyTerm));
 	}
 

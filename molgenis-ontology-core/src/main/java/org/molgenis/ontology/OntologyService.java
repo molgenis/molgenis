@@ -1,6 +1,7 @@
 package org.molgenis.ontology;
 
 import java.util.List;
+import java.util.Set;
 
 import org.molgenis.ontology.repository.model.Ontology;
 import org.molgenis.ontology.repository.model.OntologyTerm;
@@ -32,7 +33,7 @@ public interface OntologyService
 	 *            number of results to return.
 	 * @return List of {@link OntologyTerm}s that match the search term.
 	 */
-	List<OntologyTerm> findOntologyTerms(List<String> ontologyIds, String search, int pageSize);
+	List<OntologyTerm> findOntologyTerms(List<String> ontologyIds, Set<String> terms, int pageSize);
 
 	// voor de tag service
 	/**
