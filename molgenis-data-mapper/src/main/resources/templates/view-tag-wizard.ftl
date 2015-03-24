@@ -44,8 +44,7 @@
 						</select>
 					</div>
 				</div>
-				<button type="button" class="btn btn-primary">Tag-o-matic!</button>
-				<button type="button" class="btn btn-info">Re-annotate</button>
+				<button type="button" class="btn btn-primary" id="automatic-tag-btn" data-entity="${entity.name}">Tag-o-matic!</button>
 				<button type="button" class="btn btn-danger">Clear tags</button>
 			</div>
 		</div>
@@ -54,7 +53,7 @@
 </div>
 
 <div class="row">
-	<div class="col-md-6" style="overflow-y:auto;max-height:500px;min-height:300px;">
+	<div class="col-md-8" style="overflow-y:auto;max-height:500px;min-height:300px;">
 		<#list attributes as attributeMetaData>
 			<h4>${attributeMetaData.name}</h4>
 			<p>${attributeMetaData.description!""}
@@ -80,7 +79,7 @@
 									</#list>
 								</td>
 								<td>
-								<button type="btn" class="btn btn-default btn-xs edit-attribute-tags-btn" data-relation="${relation.IRI}" 
+								<button type="btn" class="btn btn-default btn-xs edit-attribute-tags-btn pull-right" data-relation="${relation.IRI}" 
 									data-attribute="${attributeMetaData.name}" data-toggle="modal" data-target="#edit-ontology-modal">
 										Edit <span class="glyphicon glyphicon-pencil"></span>
 								</button>
@@ -92,7 +91,7 @@
 						<td data-relation="http://iri.org/#isAssociatedWith">Is associated with</td>
 							<td></td>
 							<td>
-								<button type="btn" class="btn btn-default btn-xs edit-attribute-tags-btn" data-relation="http://iri.org/#isAssociatedWith" 
+								<button type="btn" class="btn btn-default btn-xs edit-attribute-tags-btn pull-right" data-relation="http://iri.org/#isAssociatedWith" 
 									data-attribute="${attributeMetaData.name}" data-toggle="modal" data-target="#edit-ontology-modal">
 										Edit <span class="glyphicon glyphicon-pencil"></span>
 								</button>
@@ -126,7 +125,7 @@
 			
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-				<button id="save-tag-selection-btn" data-entity="${entity.name}" type="button" class="btn btn-primary">Save changes</button>
+				<button id="save-tag-selection-btn" data-dismiss="modal" data-entity="${entity.name}" type="button" class="btn btn-primary">Save changes</button>
 			</div>
 		</div>
 	</div>

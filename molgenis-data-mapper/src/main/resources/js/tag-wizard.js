@@ -48,37 +48,33 @@
 
 	$(function() {
 		$('#ontology-select').select2();
-
-		selectedOntologyIds = $('#ontology-select').select2('data');
-
-		$('#ontology-select').on('change', function() {
-			var x = $('#ontology-select').select2('data')
-			for ( var item in x) {
-				console.log($(item));
-			}
-
-			selectedOntologyIds = $(this).val();
-			var selectedOntologyIRI = $(this).find(':selected').data('iri');
+		$('#automatic-tag-btn').on('click', function() {
 			$.ajax({
-				url : 'setontologies',
+				url : 'autotagattributes',
 				type : 'POST',
-				data : {
-					'selectedOntologyIRI' : selectedOntologyIRI
-				},
-				success : function() {
-					molgenis.createAlert([ {
-						'message' : 'Ontology succesfully set'
-					} ], 'success');
+				contentType : 'application/json',
+				data : JSON.stringify({
+					'entityName' : $(this).data('entity'),
+					'ontologyIds' : selectedOntologyIds
+				}),
+				success : function(data) {
+					// TODO data is a Map<AttributeMetaData, List<OntologyTerm>>
+					// Do something nice with it
 				}
 			});
 		});
-
-		createDynamicSelectDropdown();
 
 		$('.edit-attribute-tags-btn').on('click', function() {
 			selectedAttributeName = $(this).data('attribute');
 			relationIRI = $(this).data('relation');
 		});
+
+		$('#ontology-select').on('change', function() {
+			selectedOntologyIds = $(this).val();
+		});
+
+		// Dynamic dropdown for selecting ontologyterms as tags
+		createDynamicSelectDropdown();
 
 		$('#save-tag-selection-btn').on('click', function() {
 			var entityName = $(this).data('entity');
@@ -94,7 +90,12 @@
 					'attributeName' : attributeName,
 					'relationIRI' : relationIRI,
 					'ontologyTermIRIs' : ontologyTermIRIs
-				})
+				}),
+				success : function() {
+					// TODO close modal
+					// TODO reload page to actually show the added tag OR add it
+					// via javascript
+				}
 			});
 		});
 
@@ -112,9 +113,11 @@
 					'attributeName' : attributeName,
 					'relationIRI' : relationIRI,
 					'ontologyTermIRI' : ontologyTermIRI
-				})
+				}),
+				success : function() {
+					$(this).remove();
+				}
 			});
-			$(this).remove();
 		});
 	});
 }($, window.top.molgenis = window.top.molgenis || {}));
