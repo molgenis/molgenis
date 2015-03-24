@@ -28,6 +28,7 @@
         	$modal.on('hide.bs.modal', function (e) {
         		this.props.onHide();
         	}.bind(this));
+        	this._initModal();
         },
         componentWillUnmount: function() {
         	var $modal = $(this.refs.modal.getDOMNode());
@@ -61,6 +62,11 @@
     		);
     	},
     	componentDidUpdate: function() {
+    		if(this.isMounted()) {
+    			this._initModal();
+    		}
+    	},
+    	_initModal: function() {
     		var $modal = $(this.refs.modal.getDOMNode());
     		if(this.props.show) {
     			$modal.modal('show');

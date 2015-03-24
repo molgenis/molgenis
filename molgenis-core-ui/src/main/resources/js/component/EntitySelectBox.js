@@ -10,7 +10,7 @@
 	 * @memberOf component
 	 */
 	var EntitySelectBox = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin, molgenis.ui.mixin.EntityLoaderMixin],
+		mixins: [molgenis.ui.mixin.DeepPureRenderMixin, molgenis.ui.mixin.EntityLoaderMixin, molgenis.ui.mixin.ReactLayeredComponentMixin],
 		displayName: 'EntitySelectBox',
 		propTypes: {
 			entity: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]),
@@ -112,7 +112,7 @@
 			    formatSelection: formatSelection
 			};
 			
-			var Select2 = molgenis.ui.wrapper.Select2({
+			return molgenis.ui.wrapper.Select2({
 				options : options,
 				name : this.props.name,
 				disabled : this.props.disabled,
@@ -123,24 +123,20 @@
 				onAddonBtnClick: this._handleAddonBtnClick,
 				onChange : this._handleChange
 			});
-			
+		},
+		renderLayer: function() {
 			if(this.props.mode === 'create') {
-				return (
-					div({},
-						Select2,
-						molgenis.ui.Modal({title: this.state.entity.label, show: this.state.modal, onHide: this._onModalHide},
- 							molgenis.ui.Form({
-								entity : this.state.entity.name,
-								cancelBtn : true,
-								onCancel : this._onModalHide
-							})
-						)
-					)
+				return molgenis.ui.Modal({title: this.state.entity.label, show: this.state.modal, onHide: this._onModalHide},
+					molgenis.ui.Form({
+						entity : this.state.entity.name,
+						cancelBtn : true,
+						onCancel : this._onModalHide,
+						onSubmitSuccess: this._onModalHide
+					})
 				);
 			} else {
-				return Select2;	
+				return div({});
 			}
-			 
 		},
 		_handleChange: function(value) {
 			var val = this.props.multiple && value.length === 0 ? undefined : value;

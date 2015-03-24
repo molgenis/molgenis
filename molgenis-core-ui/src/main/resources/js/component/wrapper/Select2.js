@@ -53,7 +53,11 @@
 					div({className: 'input-group select2-bootstrap-append'},
 						inputControl,
 						span({className: 'input-group-btn'},
-							molgenis.ui.Button({icon: this.props.addonBtnIcon, onClick: this.props.onAddonBtnClick})
+ 							molgenis.ui.Button({
+								icon : this.props.addonBtnIcon,
+								disabled : this.props.readOnly || this.props.disabled,
+								onClick : this.props.onAddonBtnClick
+							})
 						)
 					)
 				);
