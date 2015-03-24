@@ -2,36 +2,21 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=[
-	"jquery.bootstrap.wizard.css",
-	"bootstrap-datetimepicker.min.css",
 	"jquery.molgenis.tree.css",
 	"ui.fancytree.min.css",
-	"jquery-ui-1.9.2.custom.min.css",
-	"select2.css",
-	"iThing-min.css",
 	"bootstrap-switch.min.css",
 	"dataexplorer.css",
 	"dataexplorer-filter.css",
 	"diseasematcher.css",
 	"molgenis-controls.css"]>
 <#assign js=[
-	"ace/src-min-noconflict/ace.js",
-	"jquery-ui-1.9.2.custom.min.js",
-	"jquery.bootstrap.wizard.min.js",
-	"react-with-addons.js",
-	"moment-with-locales.min.js",
-	"bootstrap-datetimepicker.min.js",
 	"dataexplorer-filter.js",
 	"dataexplorer-filter-dialog.js",
 	"dataexplorer-filter-wizard.js",
 	"jquery.fancytree.min.js",
 	"jquery.molgenis.tree.js",
-	"select2-patched.js",
-	"jQEditRangeSlider-min.js",
 	"bootstrap-switch.min.js",
-	"jquery.molgenis.xrefmrefsearch.js",
 	"dataexplorer.js",
-	"jquery.molgenis.table.js",
 	"bootbox.min.js"]>
 
 <@header css js/>
