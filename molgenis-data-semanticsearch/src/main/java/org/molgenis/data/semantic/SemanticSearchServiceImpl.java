@@ -86,7 +86,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 
 	private List<OntologyTerm> findTagsSync(String description, List<String> ontologyIds)
 	{
-		Set<String> searchTerms = stream(description.split(" +")).map(String::toLowerCase)
+		Set<String> searchTerms = stream(description.split("\\W+")).map(String::toLowerCase)
 				.filter(w -> !STOP_WORDS.contains(w)).collect(Collectors.toSet());
 
 		List<OntologyTerm> matchingOntologyTerms = ontologyService.findOntologyTerms(ontologyIds, searchTerms, 100);

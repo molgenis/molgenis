@@ -1,10 +1,16 @@
 package org.molgenis.data.semantic;
 
+import static com.google.common.collect.ImmutableSet.of;
 import static java.util.Arrays.asList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
@@ -15,6 +21,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableSet;
@@ -42,6 +49,12 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 		{
 			return new SemanticSearchServiceImpl();
 		}
+
+		@Bean
+		ExecutorService executorService()
+		{
+			return Executors.newFixedThreadPool(1);
+		}
 	}
 
 	@Autowired
@@ -53,16 +66,63 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 	@Autowired
 	private SemanticSearchService semanticSearchService;
 
-	@Test
-	public void testSearchDescription()
-	{
-		DefaultAttributeMetaData attribute = new DefaultAttributeMetaData("attr1");
-		attribute.setDescription("Standing height in meters.");
+	private List<String> ontologies;
 
-		List<String> ontologies = asList("1", "2");
+	private OntologyTerm standingHeight;
+
+	private List<OntologyTerm> ontologyTerms;
+
+	private DefaultAttributeMetaData attribute;
+
+	@BeforeTest
+	public void beforeTest()
+	{
+		ontologies = asList("1", "2");
+		standingHeight = OntologyTerm.create("http://onto/height", "Standing height");
+		ontologyTerms = asList(standingHeight);
+		attribute = new DefaultAttributeMetaData("attr1");
+	}
+
+	@Test
+	public void testSearchDescription() throws InterruptedException, ExecutionException
+	{
+		attribute.setDescription("Standing height in meters.");
 		when(
 				ontologyService.findOntologyTerms(ontologies, ImmutableSet.<String> of("standing", "height", "meters"),
-						100)).thenReturn(asList(OntologyTerm.create("http://onto/height", "Standing height")));
-		semanticSearchService.findTags(attribute, ontologies);
+						100)).thenReturn(ontologyTerms);
+		Future<List<OntologyTerm>> terms = semanticSearchService.findTags(attribute, ontologies);
+		assertEquals(terms.get(), ontologyTerms);
+	}
+
+	@Test
+	public void testSearchLabel() throws InterruptedException, ExecutionException
+	{
+		attribute.setLabel("Standing height (m.)");
+
+		when(ontologyService.findOntologyTerms(ontologies, ImmutableSet.<String> of("standing", "height", "m"), 100))
+				.thenReturn(ontologyTerms);
+		Future<List<OntologyTerm>> terms = semanticSearchService.findTags(attribute, ontologies);
+		assertEquals(terms.get(), ontologyTerms);
+	}
+
+	@Test
+	public void testSearchIsoLatin() throws InterruptedException, ExecutionException
+	{
+		attribute.setLabel("Standing height (Ångstrøm)");
+
+		when(ontologyService.findOntologyTerms(ontologies, of("standing", "height", "ångstrøm"), 100)).thenReturn(
+				ontologyTerms);
+		Future<List<OntologyTerm>> terms = semanticSearchService.findTags(attribute, ontologies);
+		assertEquals(terms.get(), ontologyTerms);
+	}
+
+	@Test
+	public void testSearchUnicode() throws InterruptedException, ExecutionException
+	{
+		attribute.setLabel("/əˈnædrəməs/");
+
+		when(ontologyService.findOntologyTerms(ontologies, of("ə", "nædrəməs"), 100)).thenReturn(ontologyTerms);
+		Future<List<OntologyTerm>> terms = semanticSearchService.findTags(attribute, ontologies);
+		assertEquals(terms.get(), ontologyTerms);
 	}
 }
