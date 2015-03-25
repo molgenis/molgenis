@@ -44,12 +44,11 @@
 					tableItems.push('<div class="col-md-12"><table class="table">');
 					tableItems.push('<tr><th style="width:38%;">Input term</th><th style="width:38%;">Best candidate</th><th style="width:10%;">Score</th><th style="width:10%;">Manual Match</th>' + (ontologyServiceRequest.matched ? '<th>Remove</th>' : '') + '</tr>');
 					tableItems.push('</table></div>');
-					
-					var matchResultTableDiv = $('<div />').addClass('row').appendTo(result_container);
-					matchResultTableDiv.append(tableItems.join(''));
+					$('<div />').addClass('row').append(tableItems.join('')).appendTo(result_container);
+					var table = $(result_container).find('table:eq(0)')
 					
 					$.each(data.items, function(index, entity){
-						$(matchResultTableDiv).find('table:eq(0)').append(createRowForMatchedTerm(entity, ontologyServiceRequest.matched, page));
+						table.append(createRowForMatchedTerm(entity, ontologyServiceRequest.matched, page));
 					});
 					
 					var searchButton = matchResultHeaderDiv.find('button:eq(0)');
@@ -76,14 +75,18 @@
 						'onPageChange' : molgenis.OntologyService.prototype.updatePageFunction
 					});
 				}else{
-					var messageDiv = $('<div class="col-md-offset-3 col-md-6" style="font-size:16px;"><center><p>There are no results!</p></center><br></div>').appendTo(result_container);
+					var messageItems = [];
+					messageItems.push('<div class="col-md-offset-3 col-md-6"><p>There are no results!</p>');
 					if(ontologyServiceRequest.filterQuery){
-						var cleanButton = $('<span class="glyphicon glyphicon-remove"></span>').click(function(){
-							ontologyServiceRequest.filterQuery = '';
-							molgenis.OntologyService.prototype.updatePageFunction(page);
-						});
-						messageDiv.append('<strong>Clear the query </strong>: ' + ontologyServiceRequest.filterQuery + '&nbsp;&nbsp;').append(cleanButton);
+						messageItems.push('<strong>Clear the query </strong>: ' + ontologyServiceRequest.filterQuery + '&nbsp;&nbsp;');
+						messageItems.push('<span class="glyphicon glyphicon-remove"></span>');
 					}
+					messageItems.push('<br><br></div>');
+					result_container.append(messageItems.join(''));
+					$(result_container).find('span.glyphicon-remove:eq(0)').click(function(){
+						ontologyServiceRequest.filterQuery = '';
+						molgenis.OntologyService.prototype.updatePageFunction(page);
+					});
 				}
 			}
 		});
