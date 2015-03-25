@@ -8,7 +8,6 @@ import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DATE_TIME;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
 import static org.molgenis.data.rest.RestController.BASE_URI;
-import static org.molgenis.ui.MolgenisPluginAttributes.KEY_RESOURCE_FINGERPRINT_REGISTRY;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
@@ -68,11 +67,9 @@ import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.fieldtypes.BoolField;
 import org.molgenis.framework.db.EntityNotFoundException;
 import org.molgenis.security.core.MolgenisPermissionService;
-import org.molgenis.security.core.Permission;
 import org.molgenis.security.token.TokenExtractor;
 import org.molgenis.security.token.TokenService;
 import org.molgenis.security.token.UnknownTokenException;
-import org.molgenis.ui.form.EntityForm;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.util.MolgenisDateFormat;
@@ -93,7 +90,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -786,33 +782,6 @@ public class RestController
 	private void deleteMetaInternal(String entityName)
 	{
 		dataService.getMeta().deleteEntityMeta(entityName);
-	}
-
-	@RequestMapping(value = "/{entityName}/create", method = GET)
-	public String createForm(@PathVariable("entityName") String entityName, Model model)
-	{
-
-		Repository repo = dataService.getRepository(entityName);
-
-		EntityMetaData entityMeta = repo.getEntityMetaData();
-		model.addAttribute(ENTITY_FORM_MODEL_ATTRIBUTE, new EntityForm(entityMeta, true, null));
-		model.addAttribute(KEY_RESOURCE_FINGERPRINT_REGISTRY, resourceFingerprintRegistry);
-
-		return "view-entity-create";
-	}
-
-	@RequestMapping(value = "/{entityName}/{id}/edit", method = GET)
-	public String editForm(@PathVariable("entityName") String entityName, @PathVariable Object id, Model model)
-	{
-		Entity entity = dataService.findOne(entityName, id);
-		EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
-
-		boolean hasWritePermission = molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITE);
-		model.addAttribute(ENTITY_FORM_MODEL_ATTRIBUTE, new EntityForm(entityMetaData, entity, id, hasWritePermission));
-		model.addAttribute(KEY_RESOURCE_FINGERPRINT_REGISTRY, resourceFingerprintRegistry);
-		model.addAttribute("entity", entity);
-
-		return "view-entity-edit";
 	}
 
 	/**
