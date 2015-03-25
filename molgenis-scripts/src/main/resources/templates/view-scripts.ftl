@@ -1,8 +1,8 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 
-<#assign css=['select2.css', 'bootstrap-datetimepicker.min.css', 'molgenis-form.css']>
-<#assign js=['ace/src-min-noconflict/ace.js', 'jquery.validate.min.js', 'moment-with-locales.min.js', 'bootstrap-datetimepicker.min.js', 'select2-patched.js', 'scripts.js']>
+<#assign css=['molgenis-form.css']>
+<#assign js=['jquery.validate.min.js', 'scripts.js']>
 
 <@header css js/>
 <div class="container-fluid">

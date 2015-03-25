@@ -31,10 +31,11 @@
         entity: '${form.metaData.name?lower_case?html}',
 <#if form.primaryKey??>
         entityInstance: '<#if form.primaryKey?is_number>${form.primaryKey?c?html}<#else>${form.primaryKey?html}</#if>',
-        mode: 'edit'
+        mode: 'edit',
 <#else>
-        mode: 'create'
-</#if>        
+        mode: 'create',
+</#if>
+        filterControls: true
     }), $('#form-container')[0]);
 </script>
 
