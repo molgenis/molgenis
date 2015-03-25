@@ -2,6 +2,7 @@ package org.molgenis.data.mapper.controller;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toMap;
+import static org.elasticsearch.common.collect.ImmutableSet.of;
 import static org.molgenis.data.mapper.controller.MappingServiceController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -10,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -34,6 +36,7 @@ import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.semantic.OntologyTagService;
 import org.molgenis.data.semantic.Relation;
+import org.molgenis.data.semantic.SemanticSearchService;
 import org.molgenis.data.semantic.Tag;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ontology.OntologyService;
@@ -59,6 +62,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -93,6 +97,9 @@ public class MappingServiceController extends MolgenisPluginController
 
 	@Autowired
 	private OntologyTagService ontologyTagService;
+
+	@Autowired
+	private SemanticSearchService semanticSearchService;
 
 	public MappingServiceController()
 	{
@@ -414,18 +421,16 @@ public class MappingServiceController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/autotagattributes")
-	public @ResponseBody Map<AttributeMetaData, List<OntologyTerm>> autoTagAttributes(
+	public @ResponseBody Map<AttributeMetaData, Future<List<OntologyTerm>>> autoTagAttributes(
 			@Valid @RequestBody AutoTagRequest request)
 	{
-		System.out.println(request);
-		// TODO Call fleur function
-		return null;
+		return semanticSearchService.findTags(request.getEntityName(), request.getOntologyIds());
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/getontologyterms")
 	public @ResponseBody List<OntologyTerm> getAllOntologyTerms(@Valid @RequestBody GetOntologyTermRequest request)
 	{
-		return ontologyService.findOntologyTerms(request.getOntologyIds(), request.getSearchTerm(), 100);
+		return ontologyService.findOntologyTerms(request.getOntologyIds(), of(request.getSearchTerm()), 100);
 	}
 
 	/**
