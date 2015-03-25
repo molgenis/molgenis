@@ -64,8 +64,7 @@
 							})		
 						)
 					)
-				); 
-				return ;
+				);
 			}
 		},
 		_handleValueChange: function(e) {
