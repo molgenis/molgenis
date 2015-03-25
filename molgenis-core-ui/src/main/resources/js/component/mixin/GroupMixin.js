@@ -46,7 +46,20 @@
 					);
 				}
 			}.bind(this));
-			return div({}, inputs);
+			
+			return (
+				div({},
+					inputs,
+					type === 'checkbox' ? div({className: 'row'},
+						div({className: 'col-md-12'},
+							this.props.selectAll ? molgenis.ui.Button({style: 'link', size: 'small', text: 'Select all', disabled: this.props.disabled, onClick: this._selectAll}) : null,
+							this.props.selectAll ? molgenis.ui.Button({style: 'link', size: 'small', text: 'Deselect all', disabled: this.props.disabled, onClick: this._deselectAll}) : null			
+						)
+					) : null
+					
+				)
+			);
+			
 		},
 		_inputToValue: function(value) {
 			return value === '' ? null : value;

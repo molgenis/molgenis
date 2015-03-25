@@ -2,7 +2,7 @@
 (function(_, React, molgenis) {
 	"use strict";
 	
-	var button = React.DOM.button;
+	var button = React.DOM.button, a = React.DOM.a;
 	
 	/**
 	 * @memberOf component
@@ -12,9 +12,12 @@
 		displayName: 'Button',
 		propTypes: {
 			id : React.PropTypes.string,
-			type: React.PropTypes.string,
+			type: React.PropTypes.oneOf(['button', 'submit', 'reset']),
+			style: React.PropTypes.oneOf(['default', 'primary', 'success', 'info', 'warning', 'danger', 'link']),
+			size: React.PropTypes.oneOf(['xsmall', 'small', 'medium', 'large']),
 			text: React.PropTypes.string,
 			icon: React.PropTypes.string,
+			css: React.PropTypes.object,
 			name: React.PropTypes.string,
 			value: React.PropTypes.string,
 			disabled : React.PropTypes.bool,
@@ -22,30 +25,69 @@
 		},
 		getDefaultProps: function() {
 			return {
-				type: 'button'
+				type: 'button',
+				style: 'default',
+				size: 'medium'
 			};
 		},
 		render: function() {
-			var buttonProps = {
-				className: 'btn btn-default',
-				id : this.props.id,
-				type : this.props.type,
-				name: this.props.name,
-				placeholder : this.props.placeholder,
-				required : this.props.required,
-				disabled : this.props.disabled,
-				readOnly : this.props.readOnly,
-				mode: this.props.language,
-				value : this.props.value,
-				onClick : this.props.onClick
-			};
+			var buttonClasses = 'btn btn-' + this.props.style;
+			switch(this.props.size) {
+				case 'xsmall':
+					buttonClasses += ' btn-xs';
+					break;
+				case 'small':
+					buttonClasses += ' btn-sm';
+					break;
+				case 'medium':
+					break;
+				case 'large':
+					buttonClasses += ' btn-lg';
+					break;
+				default:
+					throw 'Unknown Button style [' + this.props.style + ']';
+			}
 			
-			return (
-				button(buttonProps,
-					this.props.icon ? molgenis.ui.Icon({name: this.props.icon}) : null,
-					this.props.text ? (this.props.icon ? ' ' + this.props.text : this.props.text) : null
-				)
-			);
+			if(this.props.style !== 'link') {
+				var buttonProps = {
+						className: buttonClasses,
+						id : this.props.id,
+						type : this.props.type,
+						name: this.props.name,
+						style: this.props.css,
+						disabled : this.props.disabled,
+						value : this.props.value,
+						onClick : this.props.onClick
+					};
+				
+				return (
+					button(buttonProps,
+						this.props.icon ? molgenis.ui.Icon({name: this.props.icon}) : null,
+						this.props.text ? (this.props.icon ? ' ' + this.props.text : this.props.text) : null
+					)
+				);
+			} else {
+				if(this.props.disabled) {
+					buttonClasses += ' disabled';
+				}
+				var anchorProps = {
+						className: buttonClasses,
+						href: '#',
+						role: 'button',
+						id : this.props.id,
+						name: this.props.name,
+						style: this.props.css,
+						value : this.props.value,
+						onClick : this.props.onClick
+					};
+				
+				return (
+					a(anchorProps,
+						this.props.icon ? molgenis.ui.Icon({name: this.props.icon}) : null,
+						this.props.text ? (this.props.icon ? ' ' + this.props.text : this.props.text) : null
+					)
+				); 
+			}
 		}
 	});
 	
