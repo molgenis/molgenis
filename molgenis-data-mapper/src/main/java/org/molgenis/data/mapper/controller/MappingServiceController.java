@@ -6,14 +6,16 @@ import static org.elasticsearch.common.collect.ImmutableSet.of;
 import static org.molgenis.data.mapper.controller.MappingServiceController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import javax.validation.Valid;
 
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -409,10 +411,31 @@ public class MappingServiceController extends MolgenisPluginController
 	 *            the {@link AddTagRequest} containing the entityName, attributeName, relationIRI and ontologyTermIRIs
 	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/tagattribute")
-	public @ResponseBody void addTagAttribute(@Valid @RequestBody AddTagRequest request)
+	public @ResponseBody Map<String, String> addTagAttribute(@Valid @RequestBody AddTagRequest request)
 	{
 		ontologyTagService.addAttributeTag(request.getEntityName(), request.getAttributeName(),
 				request.getRelationIRI(), request.getOntologyTermIRIs());
+
+		List<String> IRIs = request.getOntologyTermIRIs();
+		Map<String, String> labelIriMap = new HashMap<String, String>();
+
+		if (IRIs.size() < 2)
+		{
+			labelIriMap.put(IRIs.get(0), ontologyService.getOntologyTerm(IRIs.get(0)).getLabel());
+			return labelIriMap;
+		}
+		else
+		{
+			String label = "(";
+			for (int i = 0; i < IRIs.size(); i++)
+			{
+				label = label + ontologyService.getOntologyTerm(IRIs.get(i)).getLabel();
+				if (i < (IRIs.size() - 1)) label = label + " and ";
+				else label = label + ")";
+			}
+			labelIriMap.put(StringUtils.join(IRIs, ','), label);
+			return labelIriMap;
+		}
 	}
 
 	/**
@@ -437,8 +460,7 @@ public class MappingServiceController extends MolgenisPluginController
 	@RequestMapping(method = RequestMethod.POST, value = "/clearalltags")
 	public @ResponseBody void clearAllTags(@RequestParam String entityName)
 	{
-		// TODO remove all tags from this entity
-		EntityMetaData emd = dataService.getEntityMetaData(entityName);
+		ontologyTagService.removeAllTagsFromEntity(entityName);
 	}
 
 	/**
