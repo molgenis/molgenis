@@ -8,10 +8,6 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.ontology.OntologyService;
@@ -49,12 +45,6 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 		{
 			return new SemanticSearchServiceImpl();
 		}
-
-		@Bean
-		ExecutorService executorService()
-		{
-			return Executors.newFixedThreadPool(1);
-		}
 	}
 
 	@Autowired
@@ -90,8 +80,8 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 		when(
 				ontologyService.findOntologyTerms(ontologies, ImmutableSet.<String> of("standing", "height", "meters"),
 						100)).thenReturn(ontologyTerms);
-		Future<List<OntologyTerm>> terms = semanticSearchService.findTags(attribute, ontologies);
-		assertEquals(terms.get(), ontologyTerms);
+		List<OntologyTerm> terms = semanticSearchService.findTags(attribute, ontologies);
+		assertEquals(terms, ontologyTerms);
 	}
 
 	@Test
@@ -101,8 +91,8 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 
 		when(ontologyService.findOntologyTerms(ontologies, ImmutableSet.<String> of("standing", "height", "m"), 100))
 				.thenReturn(ontologyTerms);
-		Future<List<OntologyTerm>> terms = semanticSearchService.findTags(attribute, ontologies);
-		assertEquals(terms.get(), ontologyTerms);
+		List<OntologyTerm> terms = semanticSearchService.findTags(attribute, ontologies);
+		assertEquals(terms, ontologyTerms);
 	}
 
 	@Test
@@ -112,8 +102,8 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 
 		when(ontologyService.findOntologyTerms(ontologies, of("standing", "height", "ångstrøm"), 100)).thenReturn(
 				ontologyTerms);
-		Future<List<OntologyTerm>> terms = semanticSearchService.findTags(attribute, ontologies);
-		assertEquals(terms.get(), ontologyTerms);
+		List<OntologyTerm> terms = semanticSearchService.findTags(attribute, ontologies);
+		assertEquals(terms, ontologyTerms);
 	}
 
 	@Test
@@ -122,7 +112,7 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 		attribute.setLabel("/əˈnædrəməs/");
 
 		when(ontologyService.findOntologyTerms(ontologies, of("ə", "nædrəməs"), 100)).thenReturn(ontologyTerms);
-		Future<List<OntologyTerm>> terms = semanticSearchService.findTags(attribute, ontologies);
-		assertEquals(terms.get(), ontologyTerms);
+		List<OntologyTerm> terms = semanticSearchService.findTags(attribute, ontologies);
+		assertEquals(terms, ontologyTerms);
 	}
 }

@@ -24,12 +24,9 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 {
 	@Autowired
 	private OntologyService ontologyService;
-	
+
 	@Autowired
 	private MetaDataService metaDataService;
-	
-	@Autowired
-	private ExecutorService executors;
 
 	public static final Set<String> STOP_WORDS;
 
@@ -68,9 +65,9 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	}
 
 	@Override
-	public Map<AttributeMetaData, Future<List<OntologyTerm>>> findTags(String entity, List<String> ontologyIds)
+	public Map<AttributeMetaData, List<OntologyTerm>> findTags(String entity, List<String> ontologyIds)
 	{
-		Map<AttributeMetaData, Future<List<OntologyTerm>>> result = new LinkedHashMap<AttributeMetaData, Future<List<OntologyTerm>>>();
+		Map<AttributeMetaData, List<OntologyTerm>> result = new LinkedHashMap<AttributeMetaData, List<OntologyTerm>>();
 		EntityMetaData emd = metaDataService.getEntityMetaData(entity);
 		for (AttributeMetaData amd : emd.getAtomicAttributes())
 		{
@@ -80,10 +77,10 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	}
 
 	@Override
-	public Future<List<OntologyTerm>> findTags(AttributeMetaData attribute, List<String> ontologyIds)
+	public List<OntologyTerm> findTags(AttributeMetaData attribute, List<String> ontologyIds)
 	{
 		String description = attribute.getDescription() == null ? attribute.getLabel() : attribute.getDescription();
-		return executors.submit(() -> findTagsSync(description, ontologyIds));
+		return findTagsSync(description, ontologyIds);
 	}
 
 	private List<OntologyTerm> findTagsSync(String description, List<String> ontologyIds)

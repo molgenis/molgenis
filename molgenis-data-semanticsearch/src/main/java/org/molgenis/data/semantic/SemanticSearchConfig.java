@@ -1,8 +1,5 @@
 package org.molgenis.data.semantic;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.ontology.OntologyService;
@@ -24,12 +21,6 @@ public class SemanticSearchConfig
 
 	@Autowired
 	IdGenerator idGenerator;
-
-	@Bean
-	ExecutorService executorService()
-	{
-		return Executors.newFixedThreadPool(1);
-	}
 
 	@Bean
 	public OntologyTagService ontologyTagService()

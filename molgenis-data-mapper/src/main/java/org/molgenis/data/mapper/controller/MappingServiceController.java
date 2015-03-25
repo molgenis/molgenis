@@ -55,6 +55,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -445,11 +446,10 @@ public class MappingServiceController extends MolgenisPluginController
 	 * 
 	 * @param request
 	 *            containing the entityName and selected ontology identifiers
-	 * @return A {@link Map} containing key {@link AttributeMetaData} and value {@link Future} {@link List} of
-	 *         {@link OntologyTerm} pairs
+	 * @return A {@link Map} containing key {@link AttributeMetaData} and value {@link List} {@link OntologyTerm} pairs
 	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/autotagattributes")
-	public @ResponseBody Map<AttributeMetaData, Future<List<OntologyTerm>>> autoTagAttributes(
+	public @ResponseBody Map<AttributeMetaData, List<OntologyTerm>> autoTagAttributes(
 			@Valid @RequestBody AutoTagRequest request)
 	{
 		return semanticSearchService.findTags(request.getEntityName(), request.getOntologyIds());
