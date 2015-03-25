@@ -27,29 +27,40 @@
 			}
 		});
 		
-		$('#create-script-btn').click(function() {
-			$.ajax({
-				type : 'GET',
-				url : '/api/v1/script/create',
-				success : function(text) {
-					$('#formModalTitle').html('Add Script');
-					$('#controlGroups').html(text);
-					$('#formModal').modal('show');
+		$('#create-script-btn').click(function(e) {
+			$('#formModalTitle').html('Add Script');
+			React.render(molgenis.ui.Form({
+				entity : 'script',
+				mode: 'create',
+				onSubmitSuccess : function() {
+					$('#formModal').modal('hide');
+					location.reload();
+				},
+				cancelBtn: true,
+				onCancel: function() {
+					$('#formModal').modal('hide');
 				}
-			});
+			}), $('#controlGroups')[0]);
+			$('#formModal').modal('show');
 		});
 		
 		$('.edit-script-btn').click(function() {
 			var scriptToEdit = $(this).parent().siblings(".name").text();
-			$.ajax({
-				type : 'GET',
-				url : '/api/v1/script/' + encodeURIComponent(scriptToEdit) +  '/edit',
-				success : function(text) {
-					$('#formModalTitle').html('Edit ' + scriptToEdit);
-					$('#controlGroups').html(text);
-					$('#formModal').modal('show');
+			
+			$('#formModalTitle').html('Edit ' + scriptToEdit);
+			React.render(molgenis.ui.Form({
+				entity : 'script',
+				entityInstance: encodeURIComponent(scriptToEdit),
+				mode: 'edit',
+				onSubmitSuccess : function() {
+					$('#formModal').modal('hide');
+				},
+				cancelBtn: true,
+				onCancel: function() {
+					$('#formModal').modal('hide');
 				}
-			});
+			}), $('#controlGroups')[0]);
+			$('#formModal').modal('show');
 		});
 		
 		$('.delete-script-btn').click(function() {
@@ -64,26 +75,22 @@
 			};
 		});
 		
-		$('#submitFormButton').click(function() {
-			$('#entity-form').submit();
-		});
-		
 		$('#create-scriptparameter-btn').click(function() {
-			$.ajax({
-				type : 'GET',
-				url : '/api/v1/scriptparameter/create',
-				success : function(text) {
-					$('#formModalTitle').html('Add Scriptparameter');
-					$('#controlGroups').html(text);
-					$('#formModal').modal('show');
+			$('#formModalTitle').html('Add Scriptparameter');
+			React.render(molgenis.ui.Form({
+				entity : 'scriptparameter',
+				mode: 'create',
+				onSubmitSuccess : function() {
+					$('#formModal').modal('hide');
+					location.reload();
+				},
+				cancelBtn: true,
+				onCancel: function() {
+					$('#formModal').modal('hide');
 				}
-			});
+			}), $('#controlGroups')[0]);
+			$('#formModal').modal('show');
 		});
-		
-		$(document).on('onFormSubmitSuccess', function() {
-			location.reload();
-		});
-
 	})
 	
 })($, window.top.molgenis = window.top.molgenis || {});
