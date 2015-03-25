@@ -163,6 +163,7 @@
 	                            <jsSourceFile>/component/Modal.js</jsSourceFile>
 	                            <jsSourceFile>/component/RadioGroup.js</jsSourceFile>
 	                            <jsSourceFile>/component/RangeSlider.js</jsSourceFile>
+	                            <jsSourceFile>/component/Spinner.js</jsSourceFile>
 	                            <jsSourceFile>/component/TextArea.js</jsSourceFile>
 	                        </jsSourceFiles>
 	                        <jsFinalFile>molgenis-component.min.js</jsFinalFile>

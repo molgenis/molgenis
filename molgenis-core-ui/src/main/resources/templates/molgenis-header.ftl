@@ -73,6 +73,7 @@
         <script src="<@resource_href "/js/component/Modal.js"/>"></script>
         <script src="<@resource_href "/js/component/RadioGroup.js"/>"></script>
         <script src="<@resource_href "/js/component/RangeSlider.js"/>"></script>
+        <script src="<@resource_href "/js/component/Spinner.js"/>"></script>
         <script src="<@resource_href "/js/component/TextArea.js"/>"></script>
     <#else>
         <script src="<@resource_href "/js/react-with-addons.min.js"/>"></script>
