@@ -18,6 +18,29 @@
 		} ], messageType);
 	}
 
+	function createNewButtonHtml(entityName, attributeName, relationIRI, ontologyTermIRIs, labelIriMap) {
+		var btnHtml = '';
+		var tagIRI = '';
+		var tagLabel = '';
+		
+		$.each(labelIriMap, function(key, value) {
+			tagIRI = key;
+			tagLabel = value;
+		});
+
+		btnHtml += '<button '
+		btnHtml += 'type="btn" ';
+		btnHtml += 'class="btn btn-primary btn-xs remove-tag-btn" ';
+		btnHtml += 'data-relation="' + relationIRI + '" ';
+		btnHtml += 'data-attribute="' + attributeName + '" ';
+		btnHtml += 'data-tag="' + tagIRI + '">';
+		btnHtml += tagLabel + ' ';
+		btnHtml += '<span class="glyphicon glyphicon-remove"></span>';
+		btnHtml += '</button>';
+
+		return btnHtml;
+	}
+
 	function createDynamicSelectDropdown() {
 		$('#tag-dropdown').select2({
 			width : '100%',
@@ -55,9 +78,17 @@
 
 	$(function() {
 		entityName = $('#global-information').data('entity');
-		noOntologySelectedHandler('warning');
 
 		$('#ontology-select').select2();
+
+		$('#ontology-select').on('change', function() {
+			if ($(this).val() === null) {
+				selectedOntologyIds = []
+			} else {
+				selectedOntologyIds = $(this).val();
+			}
+		});
+
 		$('#automatic-tag-btn').on('click', function() {
 			if (selectedOntologyIds.length > 0) {
 				$.ajax({
@@ -76,7 +107,7 @@
 					}
 				});
 			} else {
-				noOntologySelectedHandler('error');
+				noOntologySelectedHandler('warning');
 			}
 		});
 
@@ -94,20 +125,21 @@
 			});
 		});
 
-		$('.edit-attribute-tags-btn').on('click', function() {
-			selectedAttributeName = $(this).data('attribute');
-			relationIRI = $(this).data('relation');
-		});
-
-		$('#ontology-select').on('change', function() {
-			selectedOntologyIds = $(this).val();
+		$('.edit-attribute-tags-btn').on('click', function(event) {
+			if (selectedOntologyIds.length > 0) {
+				selectedAttributeName = $(this).data('attribute');
+				relationIRI = $(this).data('relation');
+			} else {
+				noOntologySelectedHandler('warning');
+				event.stopPropagation();
+				event.preventDefault()
+			}
 		});
 
 		// Dynamic dropdown for selecting ontologyterms as tags
 		createDynamicSelectDropdown();
 
 		$('#save-tag-selection-btn').on('click', function() {
-
 			var attributeName = selectedAttributeName;
 			var ontologyTermIRIs = $('#tag-dropdown').select2('val');
 
@@ -121,10 +153,10 @@
 					'relationIRI' : relationIRI,
 					'ontologyTermIRIs' : ontologyTermIRIs
 				}),
-				success : function() {
-					// TODO close modal
-					// TODO reload page to actually show the added tag OR add it
-					// via javascript
+				success : function(tagLabel) {
+					$('#tag-dropdown').select2('val', '');
+					var btn = createNewButtonHtml(entityName, attributeName, relationIRI, ontologyTermIRIs, tagLabel);
+					$('#' + attributeName + '-tag-column').append(btn);
 				}
 			});
 		});
@@ -142,11 +174,9 @@
 					'attributeName' : attributeName,
 					'relationIRI' : relationIRI,
 					'ontologyTermIRI' : ontologyTermIRI
-				}),
-				success : function() {
-					$(this).remove();
-				}
+				})
 			});
+			$(this).remove();
 		});
 	});
 }($, window.top.molgenis = window.top.molgenis || {}));
