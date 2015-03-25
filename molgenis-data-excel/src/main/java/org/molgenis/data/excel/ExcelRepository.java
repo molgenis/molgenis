@@ -13,6 +13,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellReference;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.RepositoryCapability;
@@ -133,7 +134,8 @@ public class ExcelRepository extends AbstractRepository
 	{
 		if (entityMetaData == null)
 		{
-			entityMetaData = new DefaultEntityMetaData(sheet.getSheetName(), ExcelEntity.class);
+			EditableEntityMetaData editableEntityMetaData = new DefaultEntityMetaData(sheet.getSheetName(),
+					ExcelEntity.class);
 
 			if (colNamesMap == null)
 			{
@@ -149,10 +151,11 @@ public class ExcelRepository extends AbstractRepository
 			{
 				for (String colName : colNamesMap.keySet())
 				{
-					((DefaultEntityMetaData) entityMetaData).addAttributeMetaData(new DefaultAttributeMetaData(colName,
+					editableEntityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(colName,
 							FieldTypeEnum.STRING));
 				}
 			}
+			entityMetaData = editableEntityMetaData;
 		}
 
 		return entityMetaData;
