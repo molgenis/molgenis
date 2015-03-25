@@ -2,8 +2,6 @@
 (function(_, React, molgenis) {
 	"use strict";
 	
-	var div = React.DOM.div;
-	
 	var api = new molgenis.RestClient();
 	
 	/**

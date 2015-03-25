@@ -2,7 +2,7 @@
 (function(_, React, molgenis) {
     "use strict";
 
-    var div = React.DOM.div, h4 = React.DOM.h4, p = React.DOM.p;
+    var div = React.DOM.div, p = React.DOM.p;
     
     /**
 	 * @memberOf component
