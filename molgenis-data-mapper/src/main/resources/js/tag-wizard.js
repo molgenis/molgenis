@@ -12,10 +12,10 @@
 	var selectedOntologyIds = [];
 	var entityName;
 
-	function noOntologySelectedHandler() {
+	function noOntologySelectedHandler(messageType) {
 		molgenis.createAlert([ {
 			'message' : 'You need atleast one ontology selected before being able to tag.'
-		} ], 'warning');
+		} ], messageType);
 	}
 
 	function createDynamicSelectDropdown() {
@@ -55,7 +55,7 @@
 
 	$(function() {
 		entityName = $('#global-information').data('entity');
-		noOntologySelectedHandler();
+		noOntologySelectedHandler('warning');
 
 		$('#ontology-select').select2();
 		$('#automatic-tag-btn').on('click', function() {
@@ -69,13 +69,14 @@
 						'ontologyIds' : selectedOntologyIds
 					}),
 					success : function(data) {
+						console.log(data);
 						// TODO data is a Map<AttributeMetaData,
 						// List<OntologyTerm>>
 						// Do something nice with it
 					}
 				});
 			} else {
-				noOntologySelectedHandler();
+				noOntologySelectedHandler('error');
 			}
 		});
 
