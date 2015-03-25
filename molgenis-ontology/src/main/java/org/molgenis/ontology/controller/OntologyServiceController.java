@@ -27,6 +27,8 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.csv.CsvWriter;
@@ -66,6 +68,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
+import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
 
 @Controller
 @RequestMapping(URI)
@@ -231,18 +236,47 @@ public class OntologyServiceController extends MolgenisPluginController
 	{
 		List<Map<String, Object>> entityMaps = new ArrayList<Map<String, Object>>();
 		String entityName = ontologyServiceRequest.getEntityName();
+		String filterQuery = ontologyServiceRequest.getFilterQuery();
 		String ontologyIri = ontologyServiceRequest.getOntologyIri();
 		EntityPager entityPager = ontologyServiceRequest.getEntityPager();
 		boolean isMatched = ontologyServiceRequest.isMatched();
 		Entity entity = dataService.findOne(MatchingTaskEntityMetaData.ENTITY_NAME,
 				new QueryImpl().eq(MatchingTaskEntityMetaData.IDENTIFIER, entityName));
-
-		Query query = new QueryImpl().eq(MatchingTaskContentEntityMetaData.REF_ENTITY, entityName).and().nest()
-				.eq(MatchingTaskContentEntityMetaData.VALIDATED, isMatched);
 		Double threshold = Double.parseDouble(entity.get(MatchingTaskEntityMetaData.THRESHOLD).toString());
-		if (isMatched) query.or().ge(MatchingTaskContentEntityMetaData.SCORE, threshold).unnest();
-		else query.and().lt(MatchingTaskContentEntityMetaData.SCORE, threshold).unnest();
 
+		QueryRule queryRuleInputEntities = new QueryRule(Arrays.asList(new QueryRule(
+				MatchingTaskContentEntityMetaData.VALIDATED, Operator.EQUALS, isMatched), new QueryRule(
+				isMatched ? Operator.OR : Operator.AND), new QueryRule(MatchingTaskContentEntityMetaData.SCORE,
+				isMatched ? Operator.GREATER_EQUAL : Operator.LESS, threshold)));
+
+		QueryRule queryRuleMatchingTask = new QueryRule(MatchingTaskContentEntityMetaData.REF_ENTITY, Operator.EQUALS,
+				entityName);
+
+		List<QueryRule> queryRuleInputEntitiesInOneMatchingTask = Arrays.asList(queryRuleMatchingTask, new QueryRule(
+				Operator.AND), queryRuleInputEntities);
+
+		// Add filter to the query if query string is not empty
+		if (StringUtils.isNotEmpty(filterQuery))
+		{
+			Iterable<String> filteredInputTermIds = FluentIterable.from(
+					dataService.findAll(entityName, new QueryImpl().search(filterQuery))).transform(
+					new Function<Entity, String>()
+					{
+						@Override
+						public String apply(Entity input)
+						{
+							return input.getString(OntologyServiceImpl.DEFAULT_MATCHING_IDENTIFIER);
+						}
+					});
+
+			QueryRule previousQueryRule = new QueryRule(queryRuleInputEntitiesInOneMatchingTask);
+			QueryRule queryRuleFilterInput = new QueryRule(MatchingTaskContentEntityMetaData.INPUT_TERM, Operator.IN,
+					filteredInputTermIds);
+			queryRuleInputEntitiesInOneMatchingTask = Arrays.asList(previousQueryRule, new QueryRule(Operator.AND),
+					queryRuleFilterInput);
+		}
+
+		Query query = new QueryImpl(queryRuleInputEntitiesInOneMatchingTask);
 		long count = dataService.count(MatchingTaskContentEntityMetaData.ENTITY_NAME, query);
 		int start = entityPager.getStart();
 		int num = entityPager.getNum();

@@ -74,7 +74,6 @@
 					</div>
 				</div>
 			</div>
-			<div id="pager" class="row"></div>
 			<div class="row">
 				<div id="match-result-container" class="col-md-12"></div>
 			</div>
@@ -117,16 +116,9 @@
 				});
 				function initEventHelper(request, totalNumber){
 					var ontologyService = new molgenis.OntologyService($('#match-result-container'), request);
-					var itermsPerPage = 5;
-					$('#pager').pager({
-						'nrItems' : totalNumber,
-						'nrItemsPerPage' : itermsPerPage,
-						'onPageChange' : ontologyService.updatePageFunction
-					});
 					ontologyService.updatePageFunction({
-						'page' : 0,
 						'start' : 0,
-						'end' : totalNumber < itermsPerPage ? totalNumber : itermsPerPage
+						'end' : totalNumber
 					});
 				}
 			</script>
