@@ -8,11 +8,11 @@
 	 * @memberOf component
 	 */
 	var Form = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin, molgenis.ui.mixin.EntityLoaderMixin],
+		mixins: [molgenis.ui.mixin.DeepPureRenderMixin, molgenis.ui.mixin.EntityLoaderMixin, molgenis.ui.mixin.EntityInstanceLoaderMixin],
 		displayName: 'Form',
 		propTypes: {
 			entity: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]),
-			value: React.PropTypes.object,
+			entityInstance: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]),
 			mode: React.PropTypes.oneOf(['create', 'edit', 'view']),
 			formLayout: React.PropTypes.oneOf(['horizontal', 'vertical']),
 			colOffset: React.PropTypes.number,
@@ -30,11 +30,20 @@
 			};
 		},
 		getInitialState: function() {
-			return {entity: null, values: {}, validate: false};
+			return {
+				entity : null,
+				entityInstance : null,
+				values : {},
+				validate : false
+			};
 		},
 		render: function() {
 			// return empty div if entity data is not yet available
 			if(this.state.entity === null) {
+				return div();
+			}
+			// return empty div if entity value is not yet available
+			if((this.props.mode === 'edit' || this.props.mode === 'view') && this.state.entityInstance === null) {
 				return div();
 			}
 			
@@ -45,7 +54,7 @@
 					method = 'post';
 					break;
 				case 'edit':
-					action = this.props.value.href + '?_method=PUT';
+					action = this.state.entityInstance.href + '?_method=PUT';
 					method = 'post';
 					break;
 				case 'view':
@@ -69,7 +78,7 @@
 			
 			var formControlsProps = {
 				entity : this.state.entity,
-				value: this.props.mode !== 'create' ? this.props.value : undefined,
+				value: this.props.mode !== 'create' ? this.state.entityInstance : undefined, // FIXME replace value with entity instance
 				mode : this.props.mode,
 				formLayout : this.props.formLayout,
 				colOffset : this.props.colOffset,
@@ -117,8 +126,6 @@
 						updatedEntity[valueKey] = values[valueKey].value;
 					}
 				}
-				
-				
 			} else {
 				e.preventDefault(); // do not submit form
 				this.setState({validate: true}); // render validated controls
