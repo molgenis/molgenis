@@ -524,6 +524,7 @@
                                 <cssSourceExcludes>
                                     <!-- changes to excludes must be applied to molgenis-core-ui/src/main/resources/templates/resource-macros.ftl -->
                                     <cssSourceExclude>**/*.min.css</cssSourceExclude>
+                                    <cssSourceExclude>**/*-min.css</cssSourceExclude>
                                 </cssSourceExcludes>
                                 <jsSourceIncludes>
                                     <jsSourceInclude>**/*.js</jsSourceInclude>
@@ -531,6 +532,7 @@
                                 <jsSourceExcludes>
                                     <!-- changes to excludes must be applied to molgenis-core-ui/src/main/resources/templates/resource-macros.ftl -->
                                     <jsSourceExclude>**/*.min.js</jsSourceExclude>
+                                    <cssSourceExclude>**/*-min.js</cssSourceExclude>
                                     <jsSourceExclude>**/src-min-noconflict/**</jsSourceExclude>
                                 </jsSourceExcludes>
                                 <nosuffix>false</nosuffix>

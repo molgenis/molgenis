@@ -97,17 +97,44 @@
 	                    </configuration>
 	                </execution>
 	                <execution>
-	                    <id>component-merge-minify</id>
+                        <id>component-css-merge-minify</id>
+                        <goals>
+                            <goal>minify</goal>
+                        </goals>
+                        <configuration>
+                            <charset>UTF-8</charset>
+                            <webappSourceDir>${project.basedir}/src/main/resources</webappSourceDir>
+                            <webappTargetDir>${project.build.directory}/generated-resources</webappTargetDir>
+                            <cssEngine>YUI</cssEngine>
+                            <cssSourceDir>css</cssSourceDir>
+                            <!-- Specify files one-by-one to preserve order -->
+                            <cssSourceFiles>
+                                <!-- Important: Update molgenis-header.ftl when modifying the list below -->
+                                <cssSourceFile>/component/wrapper/DateTimePicker.css</cssSourceFile>
+                                <cssSourceFile>/component/wrapper/JQRangeSlider.css</cssSourceFile>
+                                <cssSourceFile>/component/Checkbox.css</cssSourceFile>
+                                <cssSourceFile>/component/Radio.css</cssSourceFile>
+                            </cssSourceFiles>
+                            <cssFinalFile>molgenis-component.min.css</cssFinalFile>
+                            <skipMerge>false</skipMerge>
+                            <skipMinify>false</skipMinify>
+                            <nosuffix>true</nosuffix>
+                            <verbose>true</verbose>
+                        </configuration>
+                    </execution>
+	                <execution>
+	                    <id>component-js-merge-minify</id>
 	                    <goals>
 	                        <goal>minify</goal>
 	                    </goals>
 	                    <configuration>
 	                        <charset>UTF-8</charset>
 	                        <webappSourceDir>${project.basedir}/src/main/resources</webappSourceDir>
-	                        <webappTargetDir>${project.build.outputDirectory}</webappTargetDir>
+	                        <webappTargetDir>${project.build.directory}/generated-resources</webappTargetDir>
 	                        <jsEngine>CLOSURE</jsEngine>
 	                        <closureLanguage>ECMASCRIPT5_STRICT</closureLanguage>
 	                        <jsSourceDir>js</jsSourceDir>
+	                        <!-- Specify files one-by-one to preserve order -->
 	                        <jsSourceFiles>
 	                            <!-- Important: Update molgenis-header.ftl when modifying the list below -->
 	                            <jsSourceFile>/component/mixin/AttributeLoaderMixin.js</jsSourceFile>

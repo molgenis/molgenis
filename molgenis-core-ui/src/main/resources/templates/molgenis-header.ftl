@@ -15,6 +15,14 @@
         <link rel="icon" href="<@resource_href "/img/molgenis.ico"/>" type="image/x-icon">
         <#-- Bundle of third party CSS resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
         <link rel="stylesheet" href="<@resource_href "/css/molgenis-bundle.min.css"/>" type="text/css">
+    <#if environment == "development">
+        <link rel="stylesheet" href="<@resource_href "/css/component/wrapper/DateTimePicker.css"/>" type="text/css">
+        <link rel="stylesheet" href="<@resource_href "/css/component/wrapper/JQRangeSlider.css"/>" type="text/css">
+        <link rel="stylesheet" href="<@resource_href "/css/component/Checkbox.css"/>" type="text/css">
+        <link rel="stylesheet" href="<@resource_href "/css/component/Radio.css"/>" type="text/css">
+    <#else>
+        <link rel="stylesheet" href="<@resource_href "/css/molgenis-component.min.css"/>" type="text/css">
+    </#if>
         <link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
     <#if molgeniscsstheme??>
         <link rel="stylesheet" href="<@resource_href "/css/${molgeniscsstheme}"/>" type="text/css">
