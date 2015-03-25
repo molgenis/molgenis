@@ -51,15 +51,19 @@
 			}
 			
 			return (
-				div({},
-					h4({className: 'page-header'}, this.props.attr.label),
-					p({}, this.props.attr.description),
-					div({className: 'row'},
-						div({className: 'col-md-offset-1 col-md-11'},
-							controls
-						)
-					)
-				)
+//					div({className: 'panel panel-default'},
+//						div({className: 'panel-body'},
+							React.DOM.fieldset({},
+									React.DOM.legend({}, this.props.attr.label),
+									p({}, this.props.attr.description),
+									div({className: 'row'},
+										div({className: 'col-md-offset-1 col-md-11'},
+											controls
+										)
+									)
+							)
+//						)
+//					)
 			);
 		}
 	});

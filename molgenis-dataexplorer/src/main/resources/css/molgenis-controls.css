@@ -4,5 +4,15 @@
 }
 .ui-editRangeSlider-inputValue {
     width: 4em;
-    color: black; // JQEditRangeSlider-Bootstrap conflict
+    color: black; /* JQEditRangeSlider-Bootstrap conflict /*
+}
+
+/* Fix for https://github.com/twbs/bootstrap/issues/13997 */
+.checkbox label {
+    min-height: 20px;	
+}
+
+/* Fix for https://github.com/twbs/bootstrap/issues/13997 */
+.radio label {
+    min-height: 20px;   
 }

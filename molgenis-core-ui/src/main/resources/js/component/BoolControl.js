@@ -2,6 +2,8 @@
 (function(_, React, molgenis) {
 	"use strict";
 	
+	var div = React.DOM.div, label = React.DOM.label;
+	
 	/**
 	 * Input control for BOOL type with checkbox or radio buttons
 	 * 
@@ -46,17 +48,24 @@
 					onValueChange : this._handleValueChange
 				});
 			} else {
-				return molgenis.ui.Input({
-					type : 'checkbox',
-					id : this.props.id,
-					name: this.props.name,
-					value: this.props.label,
-					required : this.props.required,
-					disabled : this.props.disabled,
-					readOnly: this.props.readOnly,
-					checked : this.props.value,
-					onValueChange : this.props.onValueChange
-				});
+				return (
+					div({className: 'checkbox'},
+						label({},
+							molgenis.ui.Input({
+								type : 'checkbox',
+								id : this.props.id,
+								name: this.props.name,
+								value: this.props.label,
+								required : this.props.required,
+								disabled : this.props.disabled,
+								readOnly: this.props.readOnly,
+								checked : this.props.value,
+								onValueChange : this.props.onValueChange
+							})		
+						)
+					)
+				); 
+				return ;
 			}
 		},
 		_handleValueChange: function(e) {
