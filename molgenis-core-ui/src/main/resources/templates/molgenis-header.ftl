@@ -166,72 +166,72 @@
         <div class="container-fluid">
             <#-- Logo start -->
             <#list menu.items as item> 
-                <#if item.type != "MENU" && item.name == "Home"> 
-                    <div class="navbar-header">
-                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-molgenis-navbar">
-                            <span class="sr-only">Toggle navigation</span>
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                        </button>
-                        <a class="navbar-brand" href="/menu/${menu.id?html}/${item.url?html}">
-                            <img class="img-responsive" 
-                                src="<#if molgenis_ui.hrefLogo?has_content>${molgenis_ui.hrefLogo?html}<#else><@resource_href "/img/logo_molgenis_small.png"/></#if>" 
-                                alt="<#if molgenis_ui.title?has_content>${molgenis_ui.title?html}</#if>">
-                        </a>
-                    </div>
-                </#if>
-            </#list>
-            <#-- Logo end -->
-            
-            <#-- Navbar items start -->
-            <div class="navbar-collapse collapse" id="bs-molgenis-navbar">
-                <ul class="nav navbar-nav">
-                    <#list menu.items as item>
-                        
-                        <#-- Single menu items -->
-                        <#if item.type != "MENU">    
-                            <#if item.name != "Home">
-                                <#if item.url == pluginid_with_query_string>
-                                    <li class="active">
-                                        <a href="#">${item.name?html}</a>
-                                    </li>
-                                <#else>
-                                    <li>
-                                        <a href="/menu/${menu.id?url('UTF-8')}/${item.url?html}">${item.name?html}</a>
-                                    </li>
-                                </#if>
-                            </#if>
-                            
-                        <#-- Dropdown menu items -->
-                        <#elseif item.type == "MENU">
-                            <#assign sub_menu = item>
-                            <#assign menu_counter = 0>
-                            <li class="dropdown">
-                                <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                                    ${item.name?html}<b class="caret"></b>
-                                </a>
-                                
-                                <ul class="dropdown-menu" role="menu">
-                                    <@dropdown sub_menu menu_counter />    
-                                </ul>
-                            </li>
-                        </#if>
-                    </#list>
-                </ul>
-                
-                <#if authenticated?? && authenticated>
-                    <form class="navbar-form navbar-right" method="post" action="/logout">
-                        <button type="submit" class="btn btn-inverse btn-link">Sign out</button>
-                    </form>
-                <#else>
-                    <a class="modal-href btn btn-default navbar-btn navbar-right" href="/account/login" data-target="login-modal-container-header">Sign in</a>
-                </#if>
-            </div>
-            <#-- Navbar items end -->
-            
-        </div> <#-- close container -->
-    </div> <#-- close navbar div -->
+                <#if item.type != "MENU" && item.name == "Home" && app_home_logo?has_content>
+					<div class="navbar-header">
+						<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-molgenis-navbar">
+		                    <span class="sr-only">Toggle navigation</span>
+		                    <span class="icon-bar"></span>
+        					<span class="icon-bar"></span>
+        					<span class="icon-bar"></span>
+		                </button>
+		                <a class="navbar-brand" href="/menu/${menu.id?html}/${item.url?html}">
+		                	<img class="img-responsive" 
+	                			src="<#if molgenis_ui.hrefLogo?has_content>${molgenis_ui.hrefLogo?html}<#else><@resource_href "/img/logo_molgenis_small.png"/></#if>" 
+	                			alt="<#if molgenis_ui.title?has_content>${molgenis_ui.title?html}</#if>">
+                		</a>
+					</div>
+        		</#if>
+    		</#list>
+    		<#-- Logo end -->
+    		
+    		<#-- Navbar items start -->
+        	<div class="navbar-collapse collapse" id="bs-molgenis-navbar">
+				<ul class="nav navbar-nav">
+					<#list menu.items as item>
+						
+						<#-- Single menu items -->
+						<#if item.type != "MENU">	
+							<#if item.name != "Home" || !app_home_logo?has_content>
+								<#if item.url == pluginid_with_query_string>
+									<li class="active">
+										<a href="#">${item.name?html}</a>
+									</li>
+								<#else>
+									<li>
+										<a href="/menu/${menu.id?url('UTF-8')}/${item.url?html}">${item.name?html}</a>
+									</li>
+								</#if>
+							</#if>
+							
+						<#-- Dropdown menu items -->
+						<#elseif item.type == "MENU">
+							<#assign sub_menu = item>
+							<#assign menu_counter = 0>
+							<li class="dropdown">
+								<a class="dropdown-toggle" data-toggle="dropdown" href="#">
+									${item.name?html}<b class="caret"></b>
+								</a>
+								
+								<ul class="dropdown-menu" role="menu">
+									<@dropdown sub_menu menu_counter />	
+								</ul>
+							</li>
+						</#if>
+					</#list>
+				</ul>
+				
+				<#if authenticated?? && authenticated>
+					<form class="navbar-form navbar-right" method="post" action="/logout">
+						<button type="submit" class="btn btn-inverse btn-link">Sign out</button>
+					</form>
+				<#else>
+					<a class="modal-href btn btn-default navbar-btn navbar-right" href="/account/login" data-target="login-modal-container-header">Sign in</a>
+				</#if>
+			</div>
+			<#-- Navbar items end -->
+			
+		</div> <#-- close container -->
+	</div> <#-- close navbar div -->
 </#macro>
 
 <#-- dropdown for entity -->
