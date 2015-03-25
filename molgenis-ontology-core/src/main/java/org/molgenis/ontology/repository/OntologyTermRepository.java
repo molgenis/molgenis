@@ -42,16 +42,20 @@ public class OntologyTermRepository
 	public List<OntologyTerm> findOntologyTerms(List<String> ontologyIds, Set<String> terms, int pageSize)
 	{
 		Query termsQuery = IN(ONTOLOGY, ontologyIds).pageSize(pageSize).and().nest();
-		boolean firstTerm = true;
+		int counter = 0;
 		for (String term : terms)
 		{
-			if (!firstTerm)
+			counter = counter + 1;
+			if (counter < terms.size())
 			{
-				termsQuery = termsQuery.or();
-				firstTerm = false;
+				termsQuery = termsQuery.search(term).or();
 			}
-			termsQuery = termsQuery.search(term);
+			else
+			{
+				termsQuery = termsQuery.search(term);
+			}
 		}
+
 		Iterable<Entity> termEntities = dataService.findAll(ENTITY_NAME, termsQuery.unnest());
 		return Lists.newArrayList(Iterables.transform(termEntities, OntologyTermRepository::toOntologyTerm));
 	}
