@@ -18,29 +18,38 @@
 	 * @memberOf molgenis.usermanager
 	 */
 	function getCreateForm(type) {
-		$.ajax({
-			type : 'GET',
-			url : '/api/v1/molgenis' + type + '/create',
-			success : function(text) {
-				$('#managerModalTitle').html('Add ' + type);
-				$('#controlGroups').html(text);
-				
+		$('#managerModalTitle').html('Create ' + type);
+		React.render(molgenis.ui.Form({
+			entity : 'molgenis' + type,
+			mode: 'create',
+			onSubmitSuccess : function() {
+				$('#managerModal').modal('hide');
+				location.reload();
+			},
+			cancelBtn: true,
+			onCancel: function() {
+				$('#managerModal').modal('hide');
 			}
-		});
+		}), $('#controlGroups')[0]);
 	}
 
 	/**
 	 * @memberOf molgenis.usermanager
 	 */
 	function getEditForm(id, type) {
-		$.ajax({
-			type : 'GET',
-			url : '/api/v1/molgenis' + type + '/' + id + '/edit',
-			success : function(text) {
-				$('#managerModalTitle').html('Edit ' + type);
-				$('#controlGroups').html(text);
+		$('#managerModalTitle').html('Edit ' + type);
+		React.render(molgenis.ui.Form({
+			entity : 'molgenis' + type,
+			entityInstance: id,
+			mode: 'edit',
+			onSubmitSuccess : function() {
+				$('#managerModal').modal('hide');
+			},
+			cancelBtn: true,
+			onCancel: function() {
+				$('#managerModal').modal('hide');
 			}
-		});
+		}), $('#controlGroups')[0]);
 	}
 
 	/**
@@ -145,22 +154,6 @@
 
 		$('.activate-group-checkbox').click(function(e) {
 			setActivation('group', $(this).data('id'), this);
-		});
-
-		var submitBtn = $('#submitFormButton');
-		submitBtn.click(function(e) {
-			$('#entity-form').submit();
-			return false;
-		});
-		
-		$( "#target" ).submit(function( event ) {
-			alert( "Handler for .submit() called." );
-			event.preventDefault();
-		});
-
-		$(document).on('onFormSubmitSuccess', function() {
-			$('#usermanagerModal').modal('toggle');
-			location.reload();
 		});
 		
 		$('#managerModal').keydown(function(e) {
