@@ -175,4 +175,11 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 	{
 		throw new UnsupportedOperationException("not yet implemented");
 	}
+
+	@Override
+	public void removeAllTagsFromEntity(String entityName)
+	{
+		// TODO Auto-generated method stub
+		
+	}
 }

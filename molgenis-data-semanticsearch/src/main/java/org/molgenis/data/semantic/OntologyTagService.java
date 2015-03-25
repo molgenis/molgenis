@@ -253,4 +253,11 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 		return null;
 	}
 
+	@Override
+	public void removeAllTagsFromEntity(String entityName)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
 }
