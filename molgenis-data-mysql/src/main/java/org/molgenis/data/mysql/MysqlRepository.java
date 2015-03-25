@@ -936,7 +936,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	}
 
 	/**
-	 * Use before a delete action of a entity with XREF data type were the entity and refEntity are the same entities.
+	 * Use before a delete action of a entity with XREF data type where the entity and refEntity are the same entities.
 	 * 
 	 * @param entities
 	 */
@@ -991,7 +991,6 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		for (Object id : ids)
 		{
 			idList.add(id);
-			System.out.println("MysqlRepositoy 956 id: " + id.toString());
 		}
 
 		jdbcTemplate.batchUpdate(getDeleteSql(), new BatchPreparedStatementSetter()

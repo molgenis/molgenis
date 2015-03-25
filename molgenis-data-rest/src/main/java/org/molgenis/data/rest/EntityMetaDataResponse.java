@@ -33,7 +33,7 @@ public class EntityMetaDataResponse
 			Map<String, Set<String>> attributeExpandsSet)
 	{
 		String name = meta.getName();
-		this.href = Href.concatMetaEntityHref(name);
+		this.href = Href.concatMetaEntityHref(RestController.BASE_URI, name);
 
 		if (attributesSet == null || attributesSet.contains("name".toLowerCase()))
 		{
@@ -69,7 +69,7 @@ public class EntityMetaDataResponse
 					}
 					else
 					{
-						String attrHref = Href.concatMetaAttributeHref(name, attr.getName());
+						String attrHref = Href.concatMetaAttributeHref(RestController.BASE_URI, name, attr.getName());
 						this.attributes.put(attr.getName(), Collections.singletonMap("href", attrHref));
 					}
 				}

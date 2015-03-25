@@ -31,12 +31,12 @@ public class Href
 	 * @return
 	 * @throws UnsupportedEncodingException
 	 */
-	public static String concatAttributeHref(String qualifiedEntityName, Object entityIdValue, String attributeName)
+	public static String concatAttributeHref(String baseUri, String qualifiedEntityName, Object entityIdValue,
+			String attributeName)
 	{
 		try
 		{
-			return String.format(RestController.BASE_URI + "/%s/%s/%s",
-					UriUtils.encodePathSegment(qualifiedEntityName, "UTF-8"),
+			return String.format(baseUri + "/%s/%s/%s", UriUtils.encodePathSegment(qualifiedEntityName, "UTF-8"),
 					UriUtils.encodePathSegment(DataConverter.toString(entityIdValue), "UTF-8"),
 					UriUtils.encodePathSegment(attributeName, "UTF-8"));
 		}
@@ -55,12 +55,11 @@ public class Href
 	 * @return
 	 * @throws UnsupportedEncodingException
 	 */
-	public static String concatMetaAttributeHref(String entityParentName, String attributeName)
+	public static String concatMetaAttributeHref(String baseUri, String entityParentName, String attributeName)
 	{
 		try
 		{
-			return String.format(RestController.BASE_URI + "/%s/meta/%s",
-					UriUtils.encodePathSegment(entityParentName, "UTF-8"),
+			return String.format(baseUri + "/%s/meta/%s", UriUtils.encodePathSegment(entityParentName, "UTF-8"),
 					UriUtils.encodePathSegment(attributeName, "UTF-8"));
 		}
 		catch (UnsupportedEncodingException e)
@@ -77,7 +76,7 @@ public class Href
 	 * @return
 	 * @throws UnsupportedEncodingException
 	 */
-	public static String concatEntityHref(String qualifiedEntityName, Object entityIdValue)
+	public static String concatEntityHref(String baseUri, String qualifiedEntityName, Object entityIdValue)
 	{
 		if (null == qualifiedEntityName)
 		{
@@ -86,8 +85,7 @@ public class Href
 
 		try
 		{
-			return String.format(RestController.BASE_URI + "/%s/%s",
-					UriUtils.encodePathSegment(qualifiedEntityName, "UTF-8"),
+			return String.format(baseUri + "/%s/%s", UriUtils.encodePathSegment(qualifiedEntityName, "UTF-8"),
 					UriUtils.encodePathSegment(DataConverter.toString(entityIdValue), "UTF-8"));
 		}
 		catch (UnsupportedEncodingException e)
@@ -104,12 +102,11 @@ public class Href
 	 * @return
 	 * @throws UnsupportedEncodingException
 	 */
-	public static String concatMetaEntityHref(String qualifiedEntityName)
+	public static String concatMetaEntityHref(String baseUri, String qualifiedEntityName)
 	{
 		try
 		{
-			return String.format(RestController.BASE_URI + "/%s/meta",
-					UriUtils.encodePathSegment(qualifiedEntityName, "UTF-8"));
+			return String.format(baseUri + "/%s/meta", UriUtils.encodePathSegment(qualifiedEntityName, "UTF-8"));
 		}
 		catch (UnsupportedEncodingException e)
 		{

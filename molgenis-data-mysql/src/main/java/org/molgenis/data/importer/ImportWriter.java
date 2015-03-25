@@ -534,7 +534,8 @@ public class ImportWriter
 		@Override
 		public Entity getEntity(String attributeName)
 		{
-			try {
+			try
+			{
 				return super.getEntity(attributeName);
 			}
 			catch (UnknownEntityException uee)
