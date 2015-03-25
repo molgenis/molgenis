@@ -11,14 +11,72 @@
 	molgenis.OntologyService = function OntologySerivce(container, request){
 		result_container = container;
 		ontologyServiceRequest = request;
+		ontologyServiceRequest.entityPager = {'start' : 0, 'num' : itermsPerPage, 'total' : 5};
 	};
 	
-	molgenis.OntologyService.prototype.updatePageFunction = function(page){
-		ontologyServiceRequest['entityPager'] = {
-			'start' : page.start,
-			'num' : itermsPerPage,
-			'total' : page.end,
-		};
+	molgenis.OntologyService.prototype.renderPage = function(){
+
+		var items = [];
+		items.push('<div class="row"><div class="col-md-offset-3 col-md-6 well">');
+		items.push('<div class="row">');
+		items.push('<div class="col-md-8">The total number of matched items is <strong><span id="matched-item-count"></span></strong></div>');
+		items.push('<div class="col-md-4"><button id="matched-result-button" type="button" class="btn btn-primary pull-right">Show</button></div>');
+		items.push('</div><br>');
+		items.push('<div class="row">');
+		items.push('<div class="col-md-8">The total number of unmatched items is <strong><span id="unmatched-item-count"></span></strong></div>');
+		items.push('<div class="col-md-4"><button id="unmatched-result-button" type="button" class="btn btn-info pull-right">Show</button></div>');
+		items.push('</div><br>');
+		items.push('<div class="row">');
+		items.push('<div class="col-md-12"><button id="sorta-download-button" class="btn btn-primary" type="button">Download</button></div>');
+		items.push('</div>');
+		items.push('</div></div>');
+		result_container.empty().append(items.join(''));
+		
+		getMatchResultCount(function(data){
+			var page = {};
+			var totalMatched = data.numberOfMatched;
+			var totalUnMatched = data.numberOfUnmatched;
+			page.total = ontologyServiceRequest.matched ? totalMatched : totalUnMatched;
+			updatePageFunction(page);
+			$('#matched-item-count').html(totalMatched);
+			$('#unmatched-item-count').html(totalUnMatched);
+		});
+		
+		$('#sorta-download-button').click(function(){
+			$(this).parents('form:eq(0)').attr({
+				'action' : molgenis.getContextUrl() + '/match/download/' + ontologyServiceRequest.entityName,
+				'method' : 'GET'
+			}).submit();
+		});
+		
+		$('#matched-result-button').click(function(){
+			ontologyServiceRequest.matched = true;
+			molgenis.OntologyService.prototype.renderPage();
+		});
+		
+		$('#unmatched-result-button').click(function(){
+			ontologyServiceRequest.matched = false;
+			molgenis.OntologyService.prototype.renderPage();
+		});
+		
+		function getMatchResultCount(callback){
+			$.ajax({
+				type : 'GET',
+				url : molgenis.getContextUrl() + '/count/' + ontologyServiceRequest.entityName,
+				contentType : 'application/json',
+				success : function(data) {
+					if(callback !== null && typeof callback === 'function'){
+						callback(data)
+					}
+				}
+			});
+		}
+	};
+	
+	function updatePageFunction(page){
+		
+		$.extend(ontologyServiceRequest.entityPager, page);
+		
 		$.ajax({
 			type : 'POST',
 			url : molgenis.getContextUrl() + '/match/retrieve',
@@ -26,9 +84,9 @@
 			data : JSON.stringify(ontologyServiceRequest),
 			contentType : 'application/json',
 			success : function(data) {
-				result_container.empty();
+				var table_container = $('<div />').addClass('col-md-12');
 				if(data.items.length > 0){
-					var pagerDiv = $('<div />').addClass('row').appendTo(result_container);
+					var pagerDiv = $('<div />').addClass('row').appendTo(table_container);
 					var searchItems = [];
 					searchItems.push('<div class="col-md-3">');
 					searchItems.push('<div class="input-group"><span class="input-group-addon">Filter</span>');
@@ -36,7 +94,7 @@
 					searchItems.push('<span class="input-group-btn"><button class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button></span>')
 					searchItems.push('</div></div>')
 					
-					var matchResultHeaderDiv = $('<div />').addClass('row').css({'margin-bottom':'10px'}).appendTo(result_container);
+					var matchResultHeaderDiv = $('<div />').addClass('row').css({'margin-bottom':'10px'}).appendTo(table_container);
 					matchResultHeaderDiv.append(searchItems.join(''));
 					matchResultHeaderDiv.append('<div class="col-md-6"><center><strong><p style="font-size:20px;">' + (ontologyServiceRequest.matched ? 'Matched result' : 'Unmatched result') + '</p></strong></center></div>');
 					
@@ -44,8 +102,8 @@
 					tableItems.push('<div class="col-md-12"><table class="table">');
 					tableItems.push('<tr><th style="width:38%;">Input term</th><th style="width:38%;">Best candidate</th><th style="width:10%;">Score</th><th style="width:10%;">Manual Match</th>' + (ontologyServiceRequest.matched ? '<th>Remove</th>' : '') + '</tr>');
 					tableItems.push('</table></div>');
-					$('<div />').addClass('row').append(tableItems.join('')).appendTo(result_container);
-					var table = $(result_container).find('table:eq(0)')
+					$('<div />').addClass('row').append(tableItems.join('')).appendTo(table_container);
+					var table = $(table_container).find('table:eq(0)')
 					
 					$.each(data.items, function(index, entity){
 						table.append(createRowForMatchedTerm(entity, ontologyServiceRequest.matched, page));
@@ -56,7 +114,7 @@
 					$(searchButton).click(function(){
 						if(ontologyServiceRequest.filterQuery !== $(searchBox).val()){
 							ontologyServiceRequest.filterQuery = $(searchBox).val();
-							molgenis.OntologyService.prototype.updatePageFunction(page);
+							updatePageFunction(page);
 						}
 						return false;
 					});
@@ -72,7 +130,7 @@
 						'page' : Math.floor(data.start / data.num) + (data.start % data.num == 0 ? 0 : 1) + 1,
 						'nrItems' : data.total,
 						'nrItemsPerPage' : data.num,
-						'onPageChange' : molgenis.OntologyService.prototype.updatePageFunction
+						'onPageChange' : updatePageFunction
 					});
 				}else{
 					var messageItems = [];
@@ -82,12 +140,16 @@
 						messageItems.push('<span class="glyphicon glyphicon-remove"></span>');
 					}
 					messageItems.push('<br><br></div>');
-					result_container.append(messageItems.join(''));
-					$(result_container).find('span.glyphicon-remove:eq(0)').click(function(){
+					table_container.append(messageItems.join(''));
+					$(table_container).find('span.glyphicon-remove:eq(0)').click(function(){
 						ontologyServiceRequest.filterQuery = '';
-						molgenis.OntologyService.prototype.updatePageFunction(page);
+						updatePageFunction(page);
 					});
 				}
+				//Remove the existing results
+				result_container.children('div.row:gt(0)').empty();
+				//Add the new results to the page
+				$('<div />').addClass('row').append(table_container).appendTo(result_container);
 			}
 		});
 	};
@@ -129,7 +191,7 @@
 						updatedMappedEntity['Match_term'] = null;
 					}
 					restApi.update('/api/v1/MatchingTaskContent/' + responseData.matchedTerm.Identifier, updatedMappedEntity);
-					molgenis.OntologyService.prototype.updatePageFunction(page);
+					molgenis.OntologyService.prototype.renderPage();
 				});
 			});
 		}else{
@@ -171,7 +233,7 @@
 						if(key === 'Match_term') updatedMappedEntity[key] = null;
 					});
 					restApi.update(href, updatedMappedEntity);
-					molgenis.OntologyService.prototype.updatePageFunction(page);
+					molgenis.OntologyService.prototype.renderPage();
 				}
 			});
 		});
@@ -217,7 +279,7 @@
 								else if(key !== 'Identifier') updatedMappedEntity[key] = val;
 							});
 							restApi.update(href, updatedMappedEntity);
-							molgenis.OntologyService.prototype.updatePageFunction(page);
+							molgenis.OntologyService.prototype.renderPage();
 						}
 					});
 				});

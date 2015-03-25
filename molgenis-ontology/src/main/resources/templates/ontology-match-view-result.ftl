@@ -46,59 +46,19 @@
 				</div>
 			</div>
 			<div class="row">
-				<div class="col-md-12">
-					<div class="row">
-						<div class="col-md-offset-3 col-md-6 well">
-							<div id="matched-container" class="row">
-								<div class="col-md-8">
-									The total number of matched items is <strong><span>${numberOfMatched?html}</span></strong>
-								</div>
-								<div class="col-md-2 float-right">
-									<button id="matched-result-button" type="button" class="btn btn-primary">Show</button>
-								</div>
-							</div><br>
-							<div id="unmatched-container" class="row">
-								<div class="col-md-8">
-									The total number of unmatched items is <strong><span>${numberOfUnmatched?html}</span></strong>
-								</div>
-								<div class="col-md-2 float-right">
-									<button id="unmatched-result-button" type="button" class="btn btn-info">Show</button>
-								</div>
-							</div><br>
-							<div class="row">
-								<div class="col-md-12">
-									<button id="download-button" class="btn btn-primary" type="button">Download</button>
-								</div>	
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="row">
 				<div id="match-result-container" class="col-md-12"></div>
 			</div>
 			<script>
 				$(document).ready(function(){
+								
 					var request = {
 						'entityName' : '${entityName?js_string}',
 						'ontologyIri' : '${ontologyIri?js_string}',
+						'matched' : <#if isMatched?? && isMatched>true<#else>false</#if>					
 					};
 					
-					$('#unmatched-result-button').click(function(){
-						request['matched'] = false;
-						initEventHelper(request, ${numberOfUnmatched?c});
-					});
-					
-					$('#matched-result-button').click(function(){
-						request['matched'] = true;
-						initEventHelper(request, ${numberOfMatched?c});
-					});
-					
-					<#if isMatched?? && isMatched>
-					$('#matched-result-button').click();
-					<#else>
-					$('#unmatched-result-button').click();
-					</#if>
+					var ontologyService = new molgenis.OntologyService($('#match-result-container'), request);
+					ontologyService.renderPage();
 					
 					$('#update-threshold-button').click(function(){
 						$(this).parents('form:eq(0)').attr({
@@ -106,21 +66,7 @@
 							'method' : 'POST'
 						}).submit();
 					});
-					
-					$('#download-button').click(function(){
-						$(this).parents('form:eq(0)').attr({
-							'action' : molgenis.getContextUrl() + '/match/download/${entityName?html}',
-							'method' : 'GET'
-						}).submit();
-					});
 				});
-				function initEventHelper(request, totalNumber){
-					var ontologyService = new molgenis.OntologyService($('#match-result-container'), request);
-					ontologyService.updatePageFunction({
-						'start' : 0,
-						'end' : totalNumber
-					});
-				}
 			</script>
 			<#else>
 				<div class="row">
