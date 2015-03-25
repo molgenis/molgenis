@@ -2,7 +2,7 @@
 (function(_, React, molgenis) {
     "use strict";
 
-    var div = React.DOM.div, span = React.DOM.span, label = React.DOM.label;
+    var div = React.DOM.div, span = React.DOM.span, label = React.DOM.label, strong = React.DOM.strong;
     
     var api = new molgenis.RestClient();
     
@@ -76,7 +76,7 @@
             
             // add validation error message
             var validate = this.state.pristine === false || this.props.validate === true;
-            var errorMessageSpan = validate && this.state.valid === false ? span({className: 'help-block'}, this.state.errorMessage) : null;
+            var errorMessageSpan = validate && this.state.valid === false ? span({className: 'help-block'}, strong({}, this.state.errorMessage)) : null;
             
             // determine success and error classes for control 
             var formGroupClasses = 'form-group';
@@ -106,8 +106,8 @@
                     div({className: formGroupClasses},
                         labelElement,
                         div({className: 'col-md-' + (12 - this.props.colOffset)},
+                        	control,
                             description,
-                            control,
                             errorMessageSpan
                         )
                     )
