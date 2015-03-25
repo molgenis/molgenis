@@ -13,17 +13,16 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.IdGenerator;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.ontology.beans.Ontology;
-import org.molgenis.ontology.beans.OntologyImpl;
-import org.molgenis.ontology.beans.OntologyTerm;
-import org.molgenis.ontology.beans.OntologyTermImpl;
-import org.molgenis.ontology.matching.OntologyService;
+import org.molgenis.ontology.OntologyService;
+import org.molgenis.ontology.repository.model.Ontology;
+import org.molgenis.ontology.repository.model.OntologyTerm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,6 +32,9 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = OntologyTagServiceTest.Config.class)
@@ -55,15 +57,15 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 
 	private final Relation instanceOf = Relation.valueOf("instanceOf");
 
-	public static final Ontology EDAM_ONTOLOGY = new OntologyImpl("EDAM", "http://edamontology.org",
+	public static final Ontology EDAM_ONTOLOGY = Ontology.create("EDAM", "http://edamontology.org",
 			"The EDAM ontology.");
 
-	public static final OntologyTerm CHROMOSOME_NAME_ONTOLOGY_TERM = new OntologyTermImpl(
-			"http://edamontology.org/data_0987", "Chromosome name", "Name of a chromosome.", "data_0987", EDAM_ONTOLOGY);
+	public static final OntologyTerm CHROMOSOME_NAME_ONTOLOGY_TERM = OntologyTerm.create(
+			"http://edamontology.org/data_0987", "Chromosome name", "Name of a chromosome.");
 
-	public static final OntologyTerm GENE_ANNOTATION_ONTOLOGY_TERM = new OntologyTermImpl(
+	public static final OntologyTerm GENE_ANNOTATION_ONTOLOGY_TERM = OntologyTerm.create(
 			"http://edamontology.org/data_0919", "Gene annotation (chromosome)",
-			"This includes basic information. e.g. chromosome number...", "data_0919", EDAM_ONTOLOGY);
+			"This includes basic information. e.g. chromosome number...");
 
 	@BeforeTest
 	public void beforeTest()
@@ -88,7 +90,7 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		ontologyTagService = new OntologyTagService(dataService, ontologyService, tagRepository);
+		ontologyTagService = new OntologyTagService(dataService, ontologyService, tagRepository, null);
 	}
 
 	@Test
@@ -108,26 +110,21 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 		when(dataService.findOne(EntityMetaDataMetaData.ENTITY_NAME, "org.molgenis.SNP")).thenReturn(
 				entityMetaDataEntity);
 
-		Ontology edamOntology = new OntologyImpl("EDAM", "http://edamontology.org", "The EDAM ontology.");
-		OntologyTerm chromosomeName = new OntologyTermImpl("http://edamontology.org/data_0987", "Chromosome name",
-				"Name of a chromosome.", "data_0987", edamOntology);
-		OntologyTerm geneAnnotation = new OntologyTermImpl("http://edamontology.org/data_0919",
-				"Gene annotation (chromosome)", "This includes basic information. e.g. chromosome number...",
-				"data_0919", edamOntology);
+		Ontology edamOntology = Ontology.create("EDAM", "http://edamontology.org", "The EDAM ontology.");
+		OntologyTerm chromosomeName = OntologyTerm.create("http://edamontology.org/data_0987", "Chromosome name",
+				"Name of a chromosome.");
+		OntologyTerm geneAnnotation = OntologyTerm.create("http://edamontology.org/data_0919",
+				"Gene annotation (chromosome)", "This includes basic information. e.g. chromosome number...");
 
 		when(ontologyService.getOntology("http://edamontology.org")).thenReturn(edamOntology);
-		when(ontologyService.getOntologyTerm("http://edamontology.org/data_0987", "http://edamontology.org"))
-				.thenReturn(chromosomeName);
-		when(ontologyService.getOntologyTerm("http://edamontology.org/data_0919", "http://edamontology.org"))
-				.thenReturn(geneAnnotation);
+		when(ontologyService.getOntologyTerm("http://edamontology.org/data_0987")).thenReturn(chromosomeName);
+		when(ontologyService.getOntologyTerm("http://edamontology.org/data_0919")).thenReturn(geneAnnotation);
 
-		Tag<AttributeMetaData, OntologyTerm, Ontology> chromosomeTag = new TagImpl<AttributeMetaData, OntologyTerm, Ontology>(
-				"1234", attributeMetaData, instanceOf, chromosomeName, edamOntology);
-		Tag<AttributeMetaData, OntologyTerm, Ontology> geneAnnotationTag = new TagImpl<AttributeMetaData, OntologyTerm, Ontology>(
-				"4321", attributeMetaData, instanceOf, geneAnnotation, edamOntology);
+		Multimap<Relation, OntologyTerm> expected = ArrayListMultimap.<Relation, OntologyTerm> create();
+		expected.put(instanceOf, chromosomeName);
+		expected.put(instanceOf, geneAnnotation);
 
-		assertEquals(ontologyTagService.getTagsForAttribute(emd, attributeMetaData),
-				Arrays.asList(chromosomeTag, geneAnnotationTag));
+		assertEquals(ontologyTagService.getTagsForAttribute(emd, attributeMetaData), expected);
 	}
 
 	@Test
@@ -148,7 +145,7 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 
 		Ontology edamOntology = mock(Ontology.class);
 
-		when(edamOntology.getIri()).thenReturn("http://edamontology.org");
+		when(edamOntology.getIRI()).thenReturn("http://edamontology.org");
 
 		Tag<Object, OntologyTerm, Ontology> tag = new TagImpl<Object, OntologyTerm, Ontology>("1233", null,
 				Relation.instanceOf, coreData, edamOntology);
@@ -167,8 +164,8 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 		AttributeMetaData attributeMetaData = new DefaultAttributeMetaData("Chr");
 
 		when(ontologyService.getOntology("http://edamontology.org")).thenReturn(EDAM_ONTOLOGY);
-		when(ontologyService.getOntologyTerm("http://edamontology.org/data_0987", "http://edamontology.org"))
-				.thenReturn(CHROMOSOME_NAME_ONTOLOGY_TERM);
+		when(ontologyService.getOntologyTerm("http://edamontology.org/data_0987")).thenReturn(
+				CHROMOSOME_NAME_ONTOLOGY_TERM);
 
 		MapEntity attributeEntity = new MapEntity();
 		attributeEntity.set(AttributeMetaDataMetaData.TAGS, Arrays.asList(geneAnnotationTagEntity));

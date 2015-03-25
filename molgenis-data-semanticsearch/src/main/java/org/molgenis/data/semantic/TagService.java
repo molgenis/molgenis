@@ -3,8 +3,10 @@ package org.molgenis.data.semantic;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Package;
-import org.molgenis.ontology.beans.Ontology;
-import org.molgenis.ontology.beans.OntologyTerm;
+import org.molgenis.ontology.repository.model.Ontology;
+import org.molgenis.ontology.repository.model.OntologyTerm;
+
+import com.google.common.collect.Multimap;
 
 /**
  * Service that administrates tags on attributes, entities and packages of a particular code system.
@@ -17,9 +19,9 @@ import org.molgenis.ontology.beans.OntologyTerm;
 public interface TagService<ObjectType, CodeSystemType>
 {
 	/**
-	 * Retrieves all tags for an attribute
+	 * Retrieves all tags for an attribute, and groups them by relation
 	 */
-	Iterable<Tag<AttributeMetaData, ObjectType, CodeSystemType>> getTagsForAttribute(EntityMetaData entityMetaData,
+	Multimap<Relation, ObjectType> getTagsForAttribute(EntityMetaData entityMetaData,
 			AttributeMetaData attributeMetaData);
 
 	/**
