@@ -24,8 +24,10 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 {
 	@Autowired
 	private OntologyService ontologyService;
+	
 	@Autowired
 	private MetaDataService metaDataService;
+	
 	@Autowired
 	private ExecutorService executors;
 
