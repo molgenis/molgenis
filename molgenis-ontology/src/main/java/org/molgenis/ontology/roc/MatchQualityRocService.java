@@ -23,13 +23,12 @@ import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.excel.ExcelWriter.FileFormat;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.ontology.beans.OntologyServiceResult;
-import org.molgenis.ontology.matching.MatchingTaskContentEntityMetaData;
-import org.molgenis.ontology.matching.MatchingTaskEntityMetaData;
-import org.molgenis.ontology.matching.OntologyService;
-import org.molgenis.ontology.matching.OntologyServiceImpl;
 import org.molgenis.ontology.model.OntologyTermMetaData;
-import org.molgenis.ontology.utils.OntologyServiceUtil;
+import org.molgenis.ontology.sorta.MatchingTaskContentEntityMetaData;
+import org.molgenis.ontology.sorta.MatchingTaskEntityMetaData;
+import org.molgenis.ontology.sorta.SortaService;
+import org.molgenis.ontology.sorta.SortaServiceImpl;
+import org.molgenis.ontology.utils.SortaServiceUtil;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,10 +43,10 @@ public class MatchQualityRocService
 	private UserAccountService userAccountService;
 
 	private final DataService dataService;
-	private final OntologyService ontologyService;
+	private final SortaService ontologyService;
 
 	@Autowired
-	public MatchQualityRocService(DataService dataService, OntologyService ontologyService)
+	public MatchQualityRocService(DataService dataService, SortaService ontologyService)
 	{
 		if (dataService == null) throw new IllegalArgumentException("DataService cannot be null!");
 		if (ontologyService == null) throw new IllegalArgumentException("OntologyMatchingService cannot be null!");
@@ -87,24 +86,20 @@ public class MatchQualityRocService
 							.getString(MatchingTaskContentEntityMetaData.MATCHED_TERM);
 					boolean manualMatchExists = matchedCodeIdentifier != null && !matchedCodeIdentifier.equals("NULL");
 
-					OntologyServiceResult searchResult = ontologyService.searchEntity(codeSystem,
+					Iterable<Entity> ontologyTermEntities = ontologyService.findOntologyTermEntities(codeSystem,
 							getInputTerm(validatedMatchEntity, entityName));
 
-					long totalNumber = searchResult.getTotalHitCount();
+					long totalNumber = Iterables.size(ontologyTermEntities);
 					int rank = 0;
 
 					if (manualMatchExists)
 					{
-						for (Map<String, Object> candidateMatch : searchResult.getOntologyTerms())
+						for (Entity candidateMatch : ontologyTermEntities)
 						{
 							rank++;
 							String candidateMatchIdentifier = candidateMatch
-									.get(OntologyTermMetaData.ONTOLOGY_TERM_IRI).toString();
-
-							if (candidateMatchIdentifier.equals(matchedCodeIdentifier))
-							{
-								break;
-							}
+									.getString(OntologyTermMetaData.ONTOLOGY_TERM_IRI);
+							if (candidateMatchIdentifier.equals(matchedCodeIdentifier)) break;
 						}
 					}
 
@@ -125,7 +120,7 @@ public class MatchQualityRocService
 				data.put("rocfilePath", file.getAbsolutePath());
 				data.put("totalNumber", totalNumberOfTerms);
 				data.put("validatedNumber", Iterables.size(validatedMatchEntities));
-				data.put("rocEntities", OntologyServiceUtil.getEntityAsMap(excelRepositoryCollection.getSheet(0)));
+				data.put("rocEntities", SortaServiceUtil.getEntityAsMap(excelRepositoryCollection.getSheet(0)));
 			}
 		}
 		return data;
@@ -202,7 +197,7 @@ public class MatchQualityRocService
 	{
 		String termIdentifier = validatedMatchEntity.getString(MatchingTaskContentEntityMetaData.INPUT_TERM);
 		Entity termEntity = dataService.findOne(entityName,
-				new QueryImpl().eq(OntologyServiceImpl.DEFAULT_MATCHING_IDENTIFIER, termIdentifier));
+				new QueryImpl().eq(SortaServiceImpl.DEFAULT_MATCHING_IDENTIFIER, termIdentifier));
 		return termEntity;
 	}
 

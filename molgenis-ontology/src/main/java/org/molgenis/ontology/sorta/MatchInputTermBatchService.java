@@ -1,10 +1,10 @@
-package org.molgenis.ontology.matching;
+package org.molgenis.ontology.sorta;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
+import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.UserAuthority;
 import org.molgenis.data.DataService;
@@ -12,7 +12,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.ontology.beans.OntologyServiceResult;
 import org.molgenis.ontology.model.OntologyTermMetaData;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -35,14 +34,13 @@ public class MatchInputTermBatchService
 
 	private final UploadProgress uploadProgress;
 
-	private final OntologyService ontologyService;
+	private final SortaService sortaService;
 
-	public MatchInputTermBatchService(DataService dataService, UploadProgress uploadProgress,
-			OntologyService ontologyService)
+	public MatchInputTermBatchService(DataService dataService, UploadProgress uploadProgress, SortaService sortaService)
 	{
 		this.dataService = dataService;
 		this.uploadProgress = uploadProgress;
-		this.ontologyService = ontologyService;
+		this.sortaService = sortaService;
 	}
 
 	@Async
@@ -85,14 +83,14 @@ public class MatchInputTermBatchService
 				matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.VALIDATED, false);
 				entitiesToAdd.add(matchingTaskContentEntity);
 
-				OntologyServiceResult searchEntity = ontologyService.searchEntity(ontologyIri, entity);
-				if (searchEntity.getOntologyTerms().size() > 0)
+				Iterable<Entity> ontologyTermEntities = sortaService.findOntologyTermEntities(ontologyIri, entity);
+				if (Iterables.size(ontologyTermEntities) > 0)
 				{
-					Map<String, Object> firstMatchedOntologyTerm = searchEntity.getOntologyTerms().get(0);
+					Entity firstMatchedOntologyTerm = Iterables.getFirst(ontologyTermEntities, new MapEntity());
 					matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.MATCHED_TERM,
 							firstMatchedOntologyTerm.get(OntologyTermMetaData.ONTOLOGY_TERM_IRI));
 					matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.SCORE,
-							firstMatchedOntologyTerm.get(OntologyServiceImpl.SCORE));
+							firstMatchedOntologyTerm.get(SortaServiceImpl.SCORE));
 				}
 				else
 				{

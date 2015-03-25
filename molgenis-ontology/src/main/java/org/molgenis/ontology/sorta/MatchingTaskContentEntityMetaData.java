@@ -1,4 +1,4 @@
-package org.molgenis.ontology.matching;
+package org.molgenis.ontology.sorta;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.support.DefaultAttributeMetaData;

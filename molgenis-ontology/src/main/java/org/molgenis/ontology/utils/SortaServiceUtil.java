@@ -8,7 +8,7 @@ import java.util.Map;
 
 import org.molgenis.data.Entity;
 
-public class OntologyServiceUtil
+public class SortaServiceUtil
 {
 	public static List<Map<String, Object>> getEntityAsMap(Iterable<? extends Entity> entities)
 	{

@@ -1,12 +1,6 @@
 package org.molgenis.ontology;
 
 import org.molgenis.data.DataService;
-import org.molgenis.ontology.matching.MatchInputTermBatchService;
-import org.molgenis.ontology.matching.MatchingTaskContentEntityMetaData;
-import org.molgenis.ontology.matching.MatchingTaskEntityMetaData;
-import org.molgenis.ontology.matching.OntologyService;
-import org.molgenis.ontology.matching.OntologyServiceImpl;
-import org.molgenis.ontology.matching.UploadProgress;
 import org.molgenis.ontology.model.OntologyMetaData;
 import org.molgenis.ontology.model.OntologyTermDynamicAnnotationMetaData;
 import org.molgenis.ontology.model.OntologyTermMetaData;
@@ -14,6 +8,12 @@ import org.molgenis.ontology.model.OntologyTermNodePathMetaData;
 import org.molgenis.ontology.model.OntologyTermSynonymMetaData;
 import org.molgenis.ontology.roc.InformationContentService;
 import org.molgenis.ontology.roc.MatchQualityRocService;
+import org.molgenis.ontology.sorta.MatchInputTermBatchService;
+import org.molgenis.ontology.sorta.MatchingTaskContentEntityMetaData;
+import org.molgenis.ontology.sorta.MatchingTaskEntityMetaData;
+import org.molgenis.ontology.sorta.SortaService;
+import org.molgenis.ontology.sorta.SortaServiceImpl;
+import org.molgenis.ontology.sorta.UploadProgress;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -68,15 +68,15 @@ public class OntologyConfiguration
 	}
 
 	@Bean
-	public OntologyService ontologyMatchingService()
+	public SortaService sortaService()
 	{
-		return new OntologyServiceImpl(dataService, informationContentService());
+		return new SortaServiceImpl(dataService, informationContentService());
 	}
 
 	@Bean
 	public MatchInputTermBatchService processInputTermService()
 	{
-		return new MatchInputTermBatchService(dataService, uploadProgress(), ontologyMatchingService());
+		return new MatchInputTermBatchService(dataService, uploadProgress(), sortaService());
 	}
 
 	@Bean
@@ -88,7 +88,7 @@ public class OntologyConfiguration
 	@Bean
 	public MatchQualityRocService matchQualityRocService()
 	{
-		return new MatchQualityRocService(dataService, ontologyMatchingService());
+		return new MatchQualityRocService(dataService, sortaService());
 	}
 
 	@Bean

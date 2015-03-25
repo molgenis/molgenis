@@ -1,4 +1,4 @@
-package org.molgenis.ontology.matching;
+package org.molgenis.ontology.sorta;
 
 import java.util.HashMap;
 import java.util.HashSet;

@@ -3,7 +3,6 @@ package org.molgenis.ontology.roc;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -22,9 +21,14 @@ import org.molgenis.ontology.utils.NGramMatchingModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.tartarus.snowball.ext.PorterStemmer;
 
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 
 public class InformationContentService
@@ -127,8 +131,7 @@ public class InformationContentService
 	{
 		Map<String, Double> wordFreqMap = new HashMap<String, Double>();
 		Set<String> wordsInQueryString = createStemmedWordSet(queryString);
-		for (String word : wordsInQueryString)
-		{
+		wordsInQueryString.stream().forEach(word -> {
 			Double wordIDF = null;
 			try
 			{
@@ -138,33 +141,42 @@ public class InformationContentService
 			{
 				throw new UncheckedExecutionException(e);
 			}
-			wordFreqMap.put(word, wordIDF == null ? 0 : wordIDF);
-		}
 
-		for (String word : wordsInQueryString)
-		{
-			if (wordFreqMap.get(word) == 0) wordFreqMap.remove(word);
-		}
+			if (wordIDF != null && wordIDF != 0)
+			{
+				wordFreqMap.put(word, wordIDF);
+			}
+		});
 		return wordFreqMap;
 	}
 
 	public Set<String> createStemmedWordSet(String queryString)
 	{
-		Set<String> uniqueTerms = new HashSet<String>();
 		PorterStemmer stemmer = new PorterStemmer();
-		for (String term : queryString.toLowerCase().trim().split(NON_WORD_SEPARATOR))
-		{
-			if (!NGramMatchingModel.STOPWORDSLIST.contains(term))
-			{
-				stemmer.setCurrent(term);
-				stemmer.stem();
-				String afterStem = stemmer.getCurrent();
-				if (StringUtils.isNotEmpty(afterStem))
+		Set<String> uniqueTerms = FluentIterable
+				.from(Sets.newHashSet(queryString.toLowerCase().trim().split(NON_WORD_SEPARATOR)))
+				.filter(new Predicate<String>()
 				{
-					uniqueTerms.add(afterStem);
-				}
-			}
-		}
+					public boolean apply(String termBeforeStem)
+					{
+						return !Iterables.contains(NGramMatchingModel.STOPWORDSLIST, termBeforeStem);
+					}
+				}).transform(new Function<String, String>()
+				{
+					public String apply(String term)
+					{
+						stemmer.setCurrent(term);
+						stemmer.stem();
+						return stemmer.getCurrent();
+					}
+				}).filter(new Predicate<String>()
+				{
+					public boolean apply(String termAfterStem)
+					{
+						return StringUtils.isNotEmpty(termAfterStem);
+					}
+				}).toSet();
+
 		return uniqueTerms;
 	}
 }
