@@ -2,7 +2,7 @@
 (function(_, React, molgenis) {
     "use strict";
 
-    var div = React.DOM.div, button = React.DOM.button;
+    var div = React.DOM.div;
 	
 	/**
 	 * @memberOf component
@@ -40,11 +40,11 @@
 		render: function() {
 			// return empty div if entity data is not yet available
 			if(this.state.entity === null) {
-				return div();
+				return molgenis.ui.Spinner();
 			}
 			// return empty div if entity value is not yet available
 			if((this.props.mode === 'edit' || this.props.mode === 'view') && this.state.entityInstance === null) {
-				return div();
+				return molgenis.ui.Spinner();
 			}
 			
 			var action, method;
@@ -215,7 +215,7 @@
 				div({className: 'row', style: {textAlign: 'right'}},
 					div({className: divClasses},
 						this.props.cancelBtn ? molgenis.ui.Button({text: 'Cancel', onClick: this.props.onCancelClick}, 'Cancel') : null,
-						button({type: 'submit', className: 'btn btn-primary', style: {marginLeft: 5}}, submitBtnText)
+						molgenis.ui.Button({type: 'submit', style: 'primary', css: {marginLeft: 5}, text: submitBtnText})
 					)
 				)
 			);

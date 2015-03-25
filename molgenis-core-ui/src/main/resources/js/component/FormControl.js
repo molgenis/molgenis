@@ -49,7 +49,7 @@
         render: function() {
             if(this.state.attr === null) {
                 // attribute not fetched yet
-                return div({});
+            	return molgenis.ui.Spinner();
             }
             
             var attr = this.state.attr;

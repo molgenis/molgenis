@@ -27,7 +27,7 @@
 		render: function() {	// FIXME apply focus to all controls
 			if(this.state.attr === null) {
 				// attribute not available yet
-				return div({});
+				return molgenis.ui.Spinner();
 			}
 			
 			var props = this.props;
@@ -50,7 +50,7 @@
 					case 'CATEGORICAL':
 						if(this.state.options === undefined) {
 							// options not yet available
-							return div();
+							return molgenis.ui.Spinner();
 						}
 						
 						var CategoricalControl = props.multiple === true ? molgenis.ui.CheckboxGroup : molgenis.ui.RadioGroup;
@@ -68,7 +68,7 @@
 					case 'CATEGORICAL_MREF':
 						if(this.state.options === undefined) {
 							// options not yet available
-							return div();
+							return molgenis.ui.Spinner();
 						}
 	
 						var values = props.value ? _.map(props.value.items, function(item) {
@@ -96,7 +96,7 @@
 					case 'ENUM':
 						if(this.state.options === undefined) {
 							// options not yet available
-							return div();
+							return molgenis.ui.Spinner();
 						}
 						
 						var EnumControl = props.multiple === true ? molgenis.ui.CheckboxGroup : molgenis.ui.RadioGroup;

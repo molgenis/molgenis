@@ -39,7 +39,7 @@
 		render: function() {
 			if(this.state.entity === null) {
 				// entity meta data not fetched yet
-				return div({});
+				return molgenis.ui.Spinner();
 			}
 			
 			var props = this.props;
@@ -125,7 +125,9 @@
 			});
 		},
 		renderLayer: function() {
-			if(this.state.entity !== null && this.props.mode === 'create') {
+			if(this.state.entity === null) {
+				return molgenis.ui.Spinner();
+			} else if(this.props.mode === 'create') {
 				return molgenis.ui.Modal({title: this.state.entity.label, show: this.state.modal, onHide: this._onModalHide},
 					molgenis.ui.Form({
 						entity : this.state.entity.name,
@@ -135,7 +137,7 @@
 					})
 				);
 			} else {
-				return div({});
+				return div();
 			}
 		},
 		_handleChange: function(value) {
