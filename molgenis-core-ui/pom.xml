@@ -139,6 +139,7 @@
 	                            <!-- Important: Update molgenis-header.ftl when modifying the list below -->
 	                            <jsSourceFile>/component/mixin/AttributeLoaderMixin.js</jsSourceFile>
 	                            <jsSourceFile>/component/mixin/DeepPureRenderMixin.js</jsSourceFile>
+	                            <jsSourceFile>/component/mixin/EntityInstanceLoaderMixin.js</jsSourceFile>
 	                            <jsSourceFile>/component/mixin/EntityLoaderMixin.js</jsSourceFile>
 	                            <jsSourceFile>/component/mixin/GroupMixin.js</jsSourceFile>
 	                            <jsSourceFile>/component/mixin/ReactLayeredComponentMixin.js</jsSourceFile>

@@ -49,6 +49,7 @@
         <script src="<@resource_href "/js/react-with-addons.js"/>"></script>
         <script src="<@resource_href "/js/component/mixin/AttributeLoaderMixin.js"/>"></script>
         <script src="<@resource_href "/js/component/mixin/DeepPureRenderMixin.js"/>"></script>
+        <script src="<@resource_href "/js/component/mixin/EntityInstanceLoaderMixin.js"/>"></script>
         <script src="<@resource_href "/js/component/mixin/EntityLoaderMixin.js"/>"></script>
         <script src="<@resource_href "/js/component/mixin/GroupMixin.js"/>"></script>
         <script src="<@resource_href "/js/component/mixin/ReactLayeredComponentMixin.js"/>"></script>
