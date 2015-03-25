@@ -6,21 +6,18 @@ import static org.elasticsearch.common.collect.ImmutableSet.of;
 import static org.molgenis.data.mapper.controller.MappingServiceController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.mapper.algorithm.AlgorithmService;
@@ -37,7 +34,6 @@ import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.semantic.OntologyTagService;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semantic.SemanticSearchService;
-import org.molgenis.data.semantic.Tag;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ontology.OntologyService;
 import org.molgenis.ontology.repository.model.Ontology;
@@ -59,10 +55,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.SessionAttributes;
-
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -380,8 +373,18 @@ public class MappingServiceController extends MolgenisPluginController
 		return VIEW_ATTRIBUTE_MAPPING;
 	}
 
+	/**
+	 * Displays on tag wizard button press
+	 * 
+	 * @param target
+	 *            The target entity name
+	 * @param model
+	 *            the model
+	 * 
+	 * @return name of the tag wizard view
+	 */
 	@RequestMapping("/tagWizard")
-	public String viewTagWizard(@RequestParam String target, Model model, HttpSession session)
+	public String viewTagWizard(@RequestParam String target, Model model)
 	{
 		List<Ontology> ontologies = ontologyService.getOntologies();
 		EntityMetaData emd = dataService.getEntityMetaData(target);
@@ -398,6 +401,12 @@ public class MappingServiceController extends MolgenisPluginController
 		return VIEW_TAG_WIZARD;
 	}
 
+	/**
+	 * Add a tag for a single attribute
+	 * 
+	 * @param request
+	 *            the {@link AddTagRequest} containing the entityName, attributeName, relationIRI and ontologyTermIRIs
+	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/tagattribute")
 	public @ResponseBody void addTagAttribute(@Valid @RequestBody AddTagRequest request)
 	{
@@ -405,6 +414,12 @@ public class MappingServiceController extends MolgenisPluginController
 				request.getRelationIRI(), request.getOntologyTermIRIs());
 	}
 
+	/**
+	 * Delete a single tag
+	 * 
+	 * @param request
+	 *            the {@link RemoveTagRequest} containing entityName, attributeName, relationIRI and ontologyTermIRI
+	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/deletesingletag")
 	public @ResponseBody void deleteSingleTag(@Valid @RequestBody RemoveTagRequest request)
 	{
@@ -412,14 +427,27 @@ public class MappingServiceController extends MolgenisPluginController
 				request.getRelationIRI(), request.getOntologyTermIRI());
 	}
 
+	/**
+	 * Clears all tags from every attribute in the current target entity
+	 * 
+	 * @param entityName
+	 *            The name of the {@link Entity}
+	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/clearalltags")
 	public @ResponseBody void clearAllTags(@RequestParam String entityName)
 	{
 		// TODO remove all tags from this entity
-		System.out.println(entityName);
 		EntityMetaData emd = dataService.getEntityMetaData(entityName);
 	}
 
+	/**
+	 * Automatically tags all attributes in the current entity using Lucene lexical matching
+	 * 
+	 * @param request
+	 *            containing the entityName and selected ontology identifiers
+	 * @return A {@link Map} containing key {@link AttributeMetaData} and value {@link Future} {@link List} of
+	 *         {@link OntologyTerm} pairs
+	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/autotagattributes")
 	public @ResponseBody Map<AttributeMetaData, Future<List<OntologyTerm>>> autoTagAttributes(
 			@Valid @RequestBody AutoTagRequest request)
@@ -427,6 +455,13 @@ public class MappingServiceController extends MolgenisPluginController
 		return semanticSearchService.findTags(request.getEntityName(), request.getOntologyIds());
 	}
 
+	/**
+	 * Returns ontology terms based on a search term and a selected ontology
+	 * 
+	 * @param request
+	 *            Containing ontology identifiers and a search term
+	 * @return A {@link List} of {@link OntologyTerm}s
+	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/getontologyterms")
 	public @ResponseBody List<OntologyTerm> getAllOntologyTerms(@Valid @RequestBody GetOntologyTermRequest request)
 	{
