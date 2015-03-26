@@ -18,25 +18,18 @@
 		} ], messageType);
 	}
 
-	function createNewButtonHtml(attributeName, relationIRI, labelIriMap) {
+	function createNewButtonHtml(attributeName, tag) {
 		var btnHtml = '';
-		var tagIRI = '';
-		var tagLabel = '';
-
-		$.each(labelIriMap, function(key, value) {
-			tagIRI = key;
-			tagLabel = value;
-		});
 
 		btnHtml += '<button '
 		btnHtml += 'type="btn" ';
 		btnHtml += 'class="btn btn-primary btn-xs remove-tag-btn" ';
-		btnHtml += 'data-relation="' + relationIRI + '" ';
+		btnHtml += 'data-relation="' + tag.relationIRI + '" ';
 		btnHtml += 'data-attribute="' + attributeName + '" ';
-		btnHtml += 'data-tag="' + tagIRI + '">';
-		btnHtml += tagLabel + ' ';
+		btnHtml += 'data-tag="' + tag.ontologyTerm.IRI + '">';
+		btnHtml += tag.ontologyTerm.label + ' ';
 		btnHtml += '<span class="glyphicon glyphicon-remove"></span>';
-		btnHtml += '</button>';
+		btnHtml += '</button> ';
 
 		return btnHtml;
 	}
@@ -99,14 +92,15 @@
 						'entityName' : entityName,
 						'ontologyIds' : selectedOntologyIds
 					}),
-					success : function(dataMap) {
-						relationIRI = 'http://molgenis.org#isAssociatedWith';
+					success : function(data) {
 						molgenis.createAlert([ {
 							'message' : 'Automatic tagging is a success!'
 						} ], 'success');
 
-						$.each(dataMap, function(attributeName, labelIriMap) {
-							$('#' + attributeName + '-tag-column').append(createNewButtonHtml(attributeName, relationIRI, labelIriMap));								
+						$.each(data, function(attributeName, tags) {
+							$.each(tags, function(index) {
+								$('#' + attributeName + '-tag-column').append(createNewButtonHtml(attributeName, tags[index]));
+							});
 						});
 					}
 				});
@@ -126,8 +120,8 @@
 						},
 						success : function() {
 							// empty columns with class tag-column
-							$('td').empty('.tag-column');
-							
+							$('td.tag-column').empty();
+
 							molgenis.createAlert([ {
 								'message' : 'All tags have been succesfully removed!'
 							} ], 'success');
@@ -165,14 +159,14 @@
 					'relationIRI' : relationIRI,
 					'ontologyTermIRIs' : ontologyTermIRIs
 				}),
-				success : function(labelIriMap) {
+				success : function(ontologyTag) {
 					$('#tag-dropdown').select2('val', '');
-					$('#' + attributeName + '-tag-column').append(createNewButtonHtml(attributeName, relationIRI, labelIriMap));
+					$('#' + attributeName + '-tag-column').append(createNewButtonHtml(attributeName, ontologyTag));
 				}
 			});
 		});
 
-		$('.remove-tag-btn').on('click', function() {
+		$('.tag-column').on('click', '.remove-tag-btn', function() {
 			var attributeName = $(this).data('attribute');
 			relationIRI = $(this).data('relation');
 			var ontologyTermIRI = $(this).data('tag');
