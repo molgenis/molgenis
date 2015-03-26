@@ -14,7 +14,7 @@
 
 	function noOntologySelectedHandler(messageType) {
 		molgenis.createAlert([ {
-			'message' : 'You need atleast one ontology selected before being able to tag.'
+			'message' : 'You need at least one ontology selected before being able to tag.'
 		} ], messageType);
 	}
 
@@ -22,7 +22,7 @@
 		var btnHtml = '';
 		var tagIRI = '';
 		var tagLabel = '';
-		
+
 		$.each(labelIriMap, function(key, value) {
 			tagIRI = key;
 			tagLabel = value;
@@ -100,7 +100,12 @@
 						'ontologyIds' : selectedOntologyIds
 					}),
 					success : function(data) {
+						molgenis.createAlert([ {
+							'message' : 'Automatic tagging is a success!'
+						} ], 'success');
+
 						console.log(data);
+
 						// TODO data is a Map<AttributeMetaData,
 						// List<OntologyTerm>>
 						// Do something nice with it
@@ -119,6 +124,14 @@
 						type : 'POST',
 						data : {
 							'entityName' : entityName
+						},
+						success : function() {
+							molgenis.createAlert([ {
+								'message' : 'All tags have been succesfully removed!'
+							} ], 'success');
+							
+							
+							// TODO remove tags from UI
 						}
 					});
 				}
@@ -155,8 +168,7 @@
 				}),
 				success : function(tagLabel) {
 					$('#tag-dropdown').select2('val', '');
-					var btn = createNewButtonHtml(entityName, attributeName, relationIRI, ontologyTermIRIs, tagLabel);
-					$('#' + attributeName + '-tag-column').append(btn);
+					$('#' + attributeName + '-tag-column').append(createNewButtonHtml(entityName, attributeName, relationIRI, ontologyTermIRIs, tagLabel));
 				}
 			});
 		});
