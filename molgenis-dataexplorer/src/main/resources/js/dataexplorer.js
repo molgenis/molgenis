@@ -1,6 +1,5 @@
 $.when( $, 
-		window.top.molgenis = window.top.molgenis || {}, 
-		$.get('dataexplorer/settings') 
+		window.top.molgenis = window.top.molgenis || {}, $.get('/menu/main/dataexplorer/settings')
 ).then(
 function($, molgenis, settingsXhr) {	
 	"use strict";
