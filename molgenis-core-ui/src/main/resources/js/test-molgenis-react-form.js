@@ -67,7 +67,7 @@ $(function($, molgenis) {
 				elements.push(
 					div({className: 'row', key: 'form'},
 						div({className: 'col-md-12'},
-								molgenis.ui.Form({entity: this.state.selectedEntityTypeHref, value: this.state.selectedEntity, formLayout: this.state.formLayout, mode: this.state.mode})
+								molgenis.ui.Form({entity: this.state.selectedEntityTypeHref, entityInstance: this.state.selectedEntity, formLayout: this.state.formLayout, mode: this.state.mode})
 						)
 					)	
 				);
