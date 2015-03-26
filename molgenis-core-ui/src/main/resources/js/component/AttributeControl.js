@@ -14,6 +14,10 @@
 		displayName: 'AttributeControl',
 		propTypes: {
 			attr: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]),
+			required: React.PropTypes.bool, // optional overwrite for attr.required
+			readOnly: React.PropTypes.bool, // optional overwrite for attr.readOnly
+			visible: React.PropTypes.bool,  // optional overwrite for attr.visible
+			disabled: React.PropTypes.bool, // optional overwrite for attr.disabled
 			focus: React.PropTypes.bool,
 			onValueChange: React.PropTypes.func.isRequired
 		},
@@ -38,9 +42,9 @@
 							id: props.id,
 							name: attr.name,
 							label : props.label,
-							required : !attr.nillable,
-							disabled : props.disabled,
-							readOnly : attr.readOnly,
+							required : this._isRequired(),
+							disabled : this._isDisabled(),
+							readOnly : this._isReadOnly(),
 							layout : props.layout || 'horizontal',
 							value : props.value,
 							onValueChange : this._handleValueChange
@@ -56,9 +60,9 @@
 							id: props.id,
 							name: attr.name,
 							options : this.state.options,
-							required : !attr.nillable,
-							disabled : props.disabled,
-							readOnly : attr.readOnly,
+							required : this._isRequired(),
+							disabled : this._isDisabled(),
+							readOnly : this._isReadOnly(),
 							layout : props.layout || 'vertical',
 							value : props.value !== undefined ? props.value[attr.refEntity.idAttribute] : undefined,
 							onValueChange : this._handleValueChange // FIXME go from id to entity
@@ -76,9 +80,9 @@
 							id: props.id,
 							name: attr.name,
 							options : this.state.options,
-							required : !attr.nillable,
-							disabled : props.disabled,
-							readOnly : attr.readOnly,
+							required : this._isRequired(),
+							disabled : this._isDisabled(),
+							readOnly : this._isReadOnly(),
 							layout : 'vertical', // FIXME make configurable
 							value : values,
 							onValueChange : this._handleValueChange
@@ -102,9 +106,9 @@
 							id: props.id,
 							name: attr.name,
 							options : this.state.options,
-							required: !attr.nillable,
-							disabled : props.disabled,
-							readOnly : attr.readOnly,
+							required : this._isRequired(),
+							disabled : this._isDisabled(),
+							readOnly : this._isReadOnly(),
 							layout : props.layout,
 							value : props.value,
 							onValueChange : this._handleValueChange
@@ -114,9 +118,9 @@
 							id : this.props.id,
 							name: attr.name,
 							placeholder : this.props.placeholder,
-							required : !this.state.attr.nillable,
-							disabled : this.props.disabled,
-							readOnly : this.state.attr.readOnly,
+							required : this._isRequired(),
+							disabled : this._isDisabled(),
+							readOnly : this._isReadOnly(),
 							language: 'html',
 							value : this.props.value,
 							onValueChange : this._handleValueChange
@@ -135,9 +139,9 @@
 							id : this.props.id,
 							name : attr.name,
 							placeholder : this.props.placeholder,
-							required : !this.state.attr.nillable,
-							disabled : this.props.disabled,
-							readOnly : this.state.attr.readOnly,
+							required : this._isRequired(),
+							disabled : this._isDisabled(),
+							readOnly : this._isReadOnly(),
 							value : this.props.value,
 							onValueChange : this._handleValueChange
 						});
@@ -164,6 +168,18 @@
 		_handleValueChange: function(event) {
 			this.props.onValueChange(_.extend({}, event, {attr: this.state.attr.name}));
 		},
+		_isRequired: function() {
+			return this.props.required !== undefined ? this.props.required : !this.state.attr.nillable; 
+		},
+		_isVisible: function() {
+			return this.props.visible !== undefined ? this.props.visible : this.state.attr.visible;
+		},
+		_isDisabled: function() {
+			return this.props.disabled !== undefined ? this.props.disabled : this.state.attr.disabled;
+		},
+		_isReadOnly: function() {
+			return this.props.readOnly !== undefined ? this.props.readOnly : this.state.attr.readOnly;
+		},
 		_createNumberControl: function(step) {
 			var min = this.props.range ? this.props.range.min : undefined;
 			var max = this.props.range ? this.props.range.max : undefined;
@@ -173,9 +189,9 @@
 				id : this.props.id,
 				name : this.state.attr.name,
 				placeholder : placeholder,
-				required : !this.state.attr.nillable,
-				disabled : this.props.disabled,
-				readOnly : this.state.attr.readOnly,
+				required : this._isRequired(),
+				disabled : this._isDisabled(),
+				readOnly : this._isReadOnly(),
 				step : step,
 				min : min,
 				max : max,
@@ -190,9 +206,9 @@
 				id : this.props.id,
 				name : this.state.attr.name,
 				placeholder : placeholder,
-				required : !this.state.attr.nillable,
-				disabled : this.props.disabled,
-				readOnly : this.state.attr.readOnly,
+				required : this._isRequired(),
+				disabled : this._isDisabled(),
+				readOnly : this._isReadOnly(),
 				maxlength : '255',
 				focus: this.props.focus,
 				value : this.props.value,
@@ -205,9 +221,9 @@
 				id : this.props.id,
 				name : this.state.attr.name,
 				placeholder : placeholder,
-				required : !this.state.attr.nillable,
-				disabled : this.props.disabled,
-				readOnly : this.state.attr.readOnly,
+				required : this._isRequired(),
+				disabled : this._isDisabled(),
+				readOnly : this._isReadOnly(),
 				time : time,
 				focus: this.props.focus,
 				value : this.props.value,
@@ -219,9 +235,9 @@
 				id : this.props.id,
 				name : this.state.attr.name,
 				placeholder : this.props.placeholder,
-				required : !this.state.attr.nillable,
-				disabled : this.props.disabled,
-				readOnly : this.state.attr.readOnly,
+				required : this._isRequired(),
+				disabled : this._isDisabled(),
+				readOnly : this._isReadOnly(),
 				value : this.props.value,
 				onValueChange : this._handleValueChange
 			});
@@ -233,10 +249,10 @@
 				name : this.state.attr.name,
 				mode: 'create',
 				placeholder : placeholder,
-				required : !this.state.attr.nillable,
 				multiple : multiple,
-				disabled : props.disabled,
-				readOnly : this.state.attr.readOnly,
+				required : this._isRequired(),
+				disabled : this._isDisabled(),
+				readOnly : this._isReadOnly(),
 				focus: this.props.focus,
 				entity : this.state.attr.refEntity,
 				value : value,

@@ -54,20 +54,6 @@
             
             var attr = this.state.attr;
             
-            
-            // allow editing readonly controls in create mode
-            if(this.props.mode === 'create' && attr.readOnly === true) {
-                attr = _.extend({}, attr, {readOnly: false, required: true});
-            }
-            // show hidden controls and create and edit form
-            if((this.props.mode === 'create' || this.props.mode === 'edit') && attr.visible !== true) {
-                attr = _.extend({}, attr, {visible: true});             
-            }
-            // show auto controls as readonly in edit mode
-            if(this.props.mode === 'edit' && attr.auto === true) {
-                attr = _.extend({}, attr, {readOnly: true});
-            }
-            
             var lbl = attr.label;
             
             if(attr.nillable === false) {
@@ -89,7 +75,8 @@
             var description = attr.description !== undefined ? span({className: 'help-block'}, attr.description) : undefined;
             var labelClasses = this.props.formLayout === 'horizontal' ? 'col-md-' + this.props.colOffset + ' control-label' : 'control-label';
             var labelElement = label({className: labelClasses, htmlFor: id}, lbl);
-            var control = molgenis.ui.AttributeControl(_.extend({}, this.props, {
+            
+            var attributeControlProps = _.extend({}, this.props, {
                 attr : attr,
                 id : id,
                 name : id,
@@ -99,7 +86,22 @@
                 value: this.props.value,
                 onValueChange : this._handleValueChange,
                 onBlur : this._handleBlur
-            }));
+            });
+            
+            // allow editing readonly controls in create mode
+            if(this.props.mode === 'create' && attr.readOnly === true) {
+                _.extend(attributeControlProps, {readOnly: false, required: true});
+            }
+            // show hidden controls and create and edit form
+            if((this.props.mode === 'create' || this.props.mode === 'edit') && attr.visible !== true) {
+            	attributeControlProps.visible = true;
+            }
+            // show auto controls as readonly in edit mode
+            if(this.props.mode === 'edit' && attr.auto === true) {
+            	attributeControlProps.readOnly = true;
+            }
+            
+            var control = molgenis.ui.AttributeControl(attributeControlProps);
             
             if(this.props.formLayout === 'horizontal') {
                 return(
