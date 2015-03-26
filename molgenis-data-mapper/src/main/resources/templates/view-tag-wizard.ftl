@@ -75,7 +75,7 @@
 						<#list relationsAndTagsMap.keySet() as relation>
 							<tr>
 								<td data-relation="${relation.IRI}">${relation.label}</td>
-								<td id="${attributeMetaData.name}-tag-column">
+								<td class="tag-column" id="${attributeMetaData.name}-tag-column">
 									<#list relationsAndTagsMap.get(relation) as tag>
 										<button type="btn" class="btn btn-primary btn-xs remove-tag-btn" 
 											data-relation="${relation.IRI}" data-attribute="${attributeMetaData.name}" data-tag="${tag.IRI}">

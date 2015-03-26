@@ -18,7 +18,7 @@
 		} ], messageType);
 	}
 
-	function createNewButtonHtml(entityName, attributeName, relationIRI, ontologyTermIRIs, labelIriMap) {
+	function createNewButtonHtml(attributeName, relationIRI, labelIriMap) {
 		var btnHtml = '';
 		var tagIRI = '';
 		var tagLabel = '';
@@ -99,16 +99,15 @@
 						'entityName' : entityName,
 						'ontologyIds' : selectedOntologyIds
 					}),
-					success : function(data) {
+					success : function(dataMap) {
+						relationIRI = 'http://molgenis.org#isAssociatedWith';
 						molgenis.createAlert([ {
 							'message' : 'Automatic tagging is a success!'
 						} ], 'success');
 
-						console.log(data);
-
-						// TODO data is a Map<AttributeMetaData,
-						// List<OntologyTerm>>
-						// Do something nice with it
+						$.each(dataMap, function(attributeName, labelIriMap) {
+							$('#' + attributeName + '-tag-column').append(createNewButtonHtml(attributeName, relationIRI, labelIriMap));								
+						});
 					}
 				});
 			} else {
@@ -126,12 +125,12 @@
 							'entityName' : entityName
 						},
 						success : function() {
+							// empty columns with class tag-column
+							$('td').empty('.tag-column');
+							
 							molgenis.createAlert([ {
 								'message' : 'All tags have been succesfully removed!'
 							} ], 'success');
-							
-							
-							// TODO remove tags from UI
 						}
 					});
 				}
@@ -166,9 +165,9 @@
 					'relationIRI' : relationIRI,
 					'ontologyTermIRIs' : ontologyTermIRIs
 				}),
-				success : function(tagLabel) {
+				success : function(labelIriMap) {
 					$('#tag-dropdown').select2('val', '');
-					$('#' + attributeName + '-tag-column').append(createNewButtonHtml(entityName, attributeName, relationIRI, ontologyTermIRIs, tagLabel));
+					$('#' + attributeName + '-tag-column').append(createNewButtonHtml(attributeName, relationIRI, labelIriMap));
 				}
 			});
 		});
