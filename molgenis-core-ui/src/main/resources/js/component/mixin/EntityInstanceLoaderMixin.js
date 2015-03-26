@@ -25,23 +25,32 @@
 			// fetch entity instance if not exists
 			if(typeof entityInstance === 'object') {
 				if(!this._isEntityInstanceLoaded(entityInstance)) {
-					this._loadEntityInstance(entityInstance.href);
+					this._loadEntityInstance(entity, entityInstance.href);
 				} else {
 					this.setState({entityInstance: entityInstance});
 				}
 			} else if (typeof entityInstance === 'string') {
 				if(entity && entity.name) {
 					var href = entityInstance.startsWith('/api/') ? entityInstance : '/api/v1/' + this.state.entity.name + '/' + entityInstance;					
-					this._loadEntityInstance(href);
+					this._loadEntityInstance(entity, href);
 				}
 			}
 		},
-		_loadEntityInstance: function(href) {
-			api.getAsync(href).done(function(entityInstance) {
-				if (this.isMounted()) {
-					this.setState({entityInstance: entityInstance});
-				}
-			}.bind(this));
+		_loadEntityInstance: function(entity, href) {
+			if(entity && entity.name) {
+				// expand attributes with ref entity
+				var expands = _.chain(entity.attributes).filter(function(attr) {
+					return attr.refEntity !== undefined;
+				}).map(function(attr) {
+					return attr.name;
+				}).value();
+				
+				api.getAsync(href, expands.length > 0 ? {'expand': expands} : undefined).done(function(entityInstance) {
+					if (this.isMounted()) {
+						this.setState({entityInstance: entityInstance});
+					}
+				}.bind(this));
+			}
 		},
 		_setEntityInstance: function(entityInstance) {
 			this.setState({entityInstance: entityInstance});
