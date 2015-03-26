@@ -93,8 +93,8 @@
 						</#list>
 					<#else>
 						<tr>
-							<td data-relation="http://molgenis.org#isAssociatedWith">Is associated with</td>
-							<td></td>
+							<td data-relation="http://molgenis.org#isAssociatedWith">isAssociatedWith</td>
+							<td class="tag-column" id="${attributeMetaData.name}-tag-column"></td>
 							<td>
 								<button type="btn" class="btn btn-default btn-xs edit-attribute-tags-btn pull-right" 
 									data-relation="http://molgenis.org#isAssociatedWith" data-attribute="${attributeMetaData.name}" data-toggle="modal" data-target="#edit-ontology-modal">
