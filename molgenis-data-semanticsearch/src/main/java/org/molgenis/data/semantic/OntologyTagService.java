@@ -1,10 +1,12 @@
 package org.molgenis.data.semantic;
 
+import static java.util.Collections.emptyList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ATTRIBUTES;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_NAME;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -256,8 +258,15 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 	@Override
 	public void removeAllTagsFromEntity(String entityName)
 	{
-		// TODO Auto-generated method stub
-		
-	}
+		EntityMetaData entityMetadata = dataService.getEntityMetaData(entityName);
+		Iterable<AttributeMetaData> attributeMetaDatas = entityMetadata.getAtomicAttributes();
 
+		for (AttributeMetaData attributeMetaData : attributeMetaDatas)
+		{
+			Entity attributeEntity = findAttributeEntity(entityName, attributeMetaData.getName());
+			attributeEntity.set(AttributeMetaDataMetaData.TAGS, emptyList());
+			dataService.update(AttributeMetaDataMetaData.ENTITY_NAME, attributeEntity);
+			updateEntityMetaDataEntityWithNewAttributeEntity(entityName, attributeMetaData.getName(), attributeEntity);
+		}
+	}
 }
