@@ -5,8 +5,7 @@ public class Trio
 	Sample child;
 	Sample mother;
 	Sample father;
-	
-	
+
 	public Trio()
 	{
 		super();
@@ -19,27 +18,32 @@ public class Trio
 		this.mother = mother;
 		this.father = father;
 	}
-	
+
 	public Sample getChild()
 	{
 		return child;
 	}
+
 	public void setChild(Sample child)
 	{
 		this.child = child;
 	}
+
 	public Sample getMother()
 	{
 		return mother;
 	}
+
 	public void setMother(Sample mother)
 	{
 		this.mother = mother;
 	}
+
 	public Sample getFather()
 	{
 		return father;
 	}
+
 	public void setFather(Sample father)
 	{
 		this.father = father;
@@ -50,7 +54,5 @@ public class Trio
 	{
 		return "Trio [child=" + child + ", mother=" + mother + ", father=" + father + "]";
 	}
-	
-	
-	
+
 }

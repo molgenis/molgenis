@@ -42,7 +42,7 @@ public class HgncSymbolServiceAnnotator extends LocusAnnotator
 		return NAME;
 	}
 
-    @Override
+	@Override
 	protected boolean annotationDataExists()
 	{
 		// FIXME Check if web service is available
@@ -74,9 +74,10 @@ public class HgncSymbolServiceAnnotator extends LocusAnnotator
 
 		return metadata;
 	}
-    @Override
-    public String getDescription()
-    {
-        return "This is the description for the HGNC Annotator";
-    }
+
+	@Override
+	public String getDescription()
+	{
+		return "This is the description for the HGNC Annotator";
+	}
 }

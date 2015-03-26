@@ -8,7 +8,7 @@ public class Sample
 {
 	String id;
 	Entity genotype;
-	
+
 	public Sample()
 	{
 		super();
@@ -19,14 +19,14 @@ public class Sample
 		super();
 		this.id = id;
 	}
-	
+
 	public Sample(String id, Entity genotype)
 	{
 		super();
 		this.id = id;
 		this.genotype = genotype;
 	}
-	
+
 	public String getId()
 	{
 		return id;
@@ -60,27 +60,26 @@ public class Sample
 	public boolean equals(Object obj)
 	{
 		System.out.println("EQUALS!!");
-		if(obj instanceof String){
-			System.out.println("COMPARING TO STIRNG!!!");return new EqualsBuilder().append(id, obj.toString()).isEquals();
+		if (obj instanceof String)
+		{
+			System.out.println("COMPARING TO STIRNG!!!");
+			return new EqualsBuilder().append(id, obj.toString()).isEquals();
 		}
 		if (!(obj instanceof Sample)) return false;
 		if (obj == this) return true;
 		Sample rhs = (Sample) obj;
 		return new EqualsBuilder().append(id, rhs.id).isEquals();
 	}
-	
 
-//	public boolean equals(String obj)
-//	{
-//		return equals((Object)obj);
-//	}
+	// public boolean equals(String obj)
+	// {
+	// return equals((Object)obj);
+	// }
 
 	@Override
 	public String toString()
 	{
 		return "Sample [id=" + id + ", genotype=" + genotype + "]";
 	}
-	
-	
 
 }

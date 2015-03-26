@@ -37,7 +37,7 @@ import org.springframework.stereotype.Component;
  * 
  * TODO: feature enhancement: match multiple alternatives from SOURCE file to multiple alternatives in ExAC
  * 
- * e.g. 1       237965145       rs115779425     T       TT,TTT,TTTT     .       PASS    AC=31,3,1;AN=70;GTC=0,31,0,3,0,0,1,0,0,0;
+ * e.g. 1 237965145 rs115779425 T TT,TTT,TTTT . PASS AC=31,3,1;AN=70;GTC=0,31,0,3,0,0,1,0,0,0;
  * 
  * 
  * */
@@ -49,21 +49,18 @@ public class ExACServiceAnnotator extends VariantAnnotator
 	private final MolgenisSettings molgenisSettings;
 	private final AnnotationService annotatorService;
 
-
 	public static final String EXAC_MAF = VcfRepository.getInfoPrefix() + "EXACMAF";
 
 	private static final String NAME = "EXAC";
 
 	final List<String> infoFields = Arrays
 			.asList(new String[]
-			{
-					"##INFO=<ID="
-							+ EXAC_MAF.substring(VcfRepository.getInfoPrefix().length())
-							+ ",Number=1,Type=Float,Description=\"ExAC minor allele frequency. Taken straight for AF field, inverted when alleles are swapped\">"
-							});
+			{ "##INFO=<ID="
+					+ EXAC_MAF.substring(VcfRepository.getInfoPrefix().length())
+					+ ",Number=1,Type=Float,Description=\"ExAC minor allele frequency. Taken straight for AF field, inverted when alleles are swapped\">" });
 
 	public static final String EXAC_VCFGZ_LOCATION = "exac_location";
-	
+
 	private volatile TabixReader tabixReader;
 
 	@Autowired
@@ -82,15 +79,16 @@ public class ExACServiceAnnotator extends VariantAnnotator
 
 		this.annotatorService = new AnnotationServiceImpl();
 
-		//tabixReader = new TabixReader(molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY));
+		// tabixReader = new TabixReader(molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY));
 		checkTabixReader();
-		
+
 		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
 
 		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
 		Iterator<Entity> vcfIter = vcfRepo.iterator();
 
-		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields, EXAC_MAF.substring(VcfRepository.getInfoPrefix().length()));
+		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields,
+				EXAC_MAF.substring(VcfRepository.getInfoPrefix().length()));
 
 		System.out.println("Now starting to process the data.");
 
@@ -129,7 +127,7 @@ public class ExACServiceAnnotator extends VariantAnnotator
 	@Override
 	public boolean annotationDataExists()
 	{
-		return false;//Returns null -> new File(molgenisSettings.getProperty(EXAC_VCFGZ_LOCATION)).exists();
+		return false;// Returns null -> new File(molgenisSettings.getProperty(EXAC_VCFGZ_LOCATION)).exists();
 	}
 
 	@Override
@@ -173,99 +171,102 @@ public class ExACServiceAnnotator extends VariantAnnotator
 		{
 			tabixIterator = tabixReader.query(chromosome + ":" + position + "-" + position);
 		}
-		catch(Exception e)
+		catch (Exception e)
 		{
-			LOG.error("Something went wrong (chromosome not in data?) when querying ExAC tabix file for " + chromosome + " POS: " + position + " REF: " + reference
-					+ " ALT: " + alternative + "! skipping...");
+			LOG.error("Something went wrong (chromosome not in data?) when querying ExAC tabix file for " + chromosome
+					+ " POS: " + position + " REF: " + reference + " ALT: " + alternative + "! skipping...");
 		}
 		String line = null;
-	
-		//get line from data, we expect exactly 1
+
+		// get line from data, we expect exactly 1
 		try
 		{
 			line = tabixIterator.next();
 		}
-		catch(net.sf.samtools.SAMFormatException sfx)
+		catch (net.sf.samtools.SAMFormatException sfx)
 		{
-			LOG.error("Bad GZIP file for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
-					+ " ALT: " + alternative + " LINE: " + line);
+			LOG.error("Bad GZIP file for CHROM: " + chromosome + " POS: " + position + " REF: " + reference + " ALT: "
+					+ alternative + " LINE: " + line);
 			throw sfx;
 		}
-		catch(NullPointerException npe)
+		catch (NullPointerException npe)
 		{
-			//overkill to print all missing, since ExAC is exome data 'only'
-			//LOG.info("No data for CHROM: " + chromosome + " POS: " + position + " REF: " + reference + " ALT: " + alternative + " LINE: " + line);
+			// overkill to print all missing, since ExAC is exome data 'only'
+			// LOG.info("No data for CHROM: " + chromosome + " POS: " + position + " REF: " + reference + " ALT: " +
+			// alternative + " LINE: " + line);
 		}
-		
-		//if nothing found, return empty list for no hit
+
+		// if nothing found, return empty list for no hit
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		if(line == null)
+		if (line == null)
 		{
 			return resultMap;
 		}
-		
-		//sanity check on content of line
+
+		// sanity check on content of line
 		String[] split = null;
 		split = line.split("\t", -1);
 		if (split.length != 8)
 		{
-			LOG.error("Bad ExAC data (split was not 8 elements) for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
-					+ " ALT: " + alternative + " LINE: " + line);
+			LOG.error("Bad ExAC data (split was not 8 elements) for CHROM: " + chromosome + " POS: " + position
+					+ " REF: " + reference + " ALT: " + alternative + " LINE: " + line);
 			throw new IOException("Bad data! see log");
 		}
-		
+
 		// get MAF from info field
 		String[] infoFields = split[7].split(";", -1);
 		String[] mafs = null;
-		for(String info : infoFields)
+		for (String info : infoFields)
 		{
-			if(info.startsWith("AF="))
+			if (info.startsWith("AF="))
 			{
 				try
 				{
-					mafs = info.replace("AF=", "").split(",",-1);
+					mafs = info.replace("AF=", "").split(",", -1);
 					break;
-				}catch( java.lang.NumberFormatException e)
+				}
+				catch (java.lang.NumberFormatException e)
 				{
 					LOG.error("Could not get MAF for line \n" + line);
 				}
 			}
 		}
-		
-		//get alt alleles and check if the amount is equal to MAF list
+
+		// get alt alleles and check if the amount is equal to MAF list
 		String[] altAlleles = split[4].split(",", -1);
-		if(mafs.length != altAlleles.length)
+		if (mafs.length != altAlleles.length)
 		{
 			throw new IOException("Number of alt alleles unequal to number of MAF values for line " + line);
 		}
-		
-		//match alleles and get the MAF from list
+
+		// match alleles and get the MAF from list
 		Double maf = null;
-		for(int i = 0; i < altAlleles.length; i++)
+		for (int i = 0; i < altAlleles.length; i++)
 		{
 			String altAllele = altAlleles[i];
-			if(altAllele.equals(alternative) && split[3].equals(reference))
+			if (altAllele.equals(alternative) && split[3].equals(reference))
 			{
 				maf = Double.parseDouble(mafs[i]);
-//				LOG.info("ExAC variant found for CHROM: " + chromosome + " POS: " + position + " REF: " + reference + " ALT: " + alternative + ", MAF = " + maf);
+				// LOG.info("ExAC variant found for CHROM: " + chromosome + " POS: " + position + " REF: " + reference +
+				// " ALT: " + alternative + ", MAF = " + maf);
 			}
 		}
-		
-		//if nothing found, try swapping ref-alt, and do 1-MAF
-		if(false && maf == null) //FIXME TODO See 1000G annotator why this is not (always) allowed
+
+		// if nothing found, try swapping ref-alt, and do 1-MAF
+		if (false && maf == null) // FIXME TODO See 1000G annotator why this is not (always) allowed
 		{
-			for(int i = 0; i < altAlleles.length; i++)
+			for (int i = 0; i < altAlleles.length; i++)
 			{
 				String altAllele = altAlleles[i];
-				if(altAllele.equals(reference) && split[3].equals(alternative))
+				if (altAllele.equals(reference) && split[3].equals(alternative))
 				{
-					maf = 1-Double.parseDouble(mafs[i]);
-					LOG.info("*ref-alt swapped* ExAC variant found for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
-							+ " ALT: " + alternative + ", MAF (1-originalMAF) = " + maf);
+					maf = 1 - Double.parseDouble(mafs[i]);
+					LOG.info("*ref-alt swapped* ExAC variant found for CHROM: " + chromosome + " POS: " + position
+							+ " REF: " + reference + " ALT: " + alternative + ", MAF (1-originalMAF) = " + maf);
 				}
 			}
 		}
-		
+
 		resultMap.put(EXAC_MAF, maf);
 		return resultMap;
 	}

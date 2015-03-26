@@ -31,17 +31,16 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 /**
- * GoNl annotator
- * data:
+ * GoNl annotator data:
  * 
- * https://molgenis26.target.rug.nl/downloads/gonl_public/variants/release5_with_GTC/release5_noContam_noChildren_with_AN_AC_GTC_stripped.tgz
+ * https://molgenis26.target.rug.nl/downloads/gonl_public/variants/release5_with_GTC/
+ * release5_noContam_noChildren_with_AN_AC_GTC_stripped.tgz
  * 
  * PLUS chrX from http://molgenis15.target.rug.nl/release4_noContam_noChildren_with_AN_AC_GTC_stripped.tgz
  * 
  * 
  * 
- * GoNL example line:
- * 1	126108	rs146756510	G	A	.	PASS	AC=37;AN=996;DB;GTC=461,37,0;set=SNP
+ * GoNL example line: 1 126108 rs146756510 G A . PASS AC=37;AN=996;DB;GTC=461,37,0;set=SNP
  * 
  * 
  * TODO: right now there are no multiple alternative alleles in GoNL, but will there be in the future??
@@ -69,11 +68,10 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 							+ ",Number=1,Type=Float,Description=\"GoNL minor allele frequency. Calculated by dividing AC by AN. For example: AC=23;AN=996 = 0.02309237\">",
 					"##INFO=<ID="
 							+ GONL_GTC.substring(VcfRepository.getInfoPrefix().length())
-							+ ",Number=G,Type=Integer,Description=\"GoNL genotype counts. For example: GONLGTC=69,235,194. Listed in the same order as the ALT alleles in case multiple ALT alleles are present = 0/0,0/1,1/1,0/2,1/2,2/2,0/3,1/3,2/3,3/3,etc. Phasing is ignored; hence 0/1, 1/0, 0|1 and 1|0 are all counted as 0/1. Incomplete gentotypes (./., ./0, ./1, ./2, etc.) are completely discarded for calculating GTC.\">"
-							});
+							+ ",Number=G,Type=Integer,Description=\"GoNL genotype counts. For example: GONLGTC=69,235,194. Listed in the same order as the ALT alleles in case multiple ALT alleles are present = 0/0,0/1,1/1,0/2,1/2,2/2,0/3,1/3,2/3,3/3,etc. Phasing is ignored; hence 0/1, 1/0, 0|1 and 1|0 are all counted as 0/1. Incomplete gentotypes (./., ./0, ./1, ./2, etc.) are completely discarded for calculating GTC.\">" });
 
 	public static final String GONL_DIRECTORY_LOCATION_PROPERTY = "gonl_location";
-	
+
 	HashMap<String, TabixReader> tabixReaders = null;
 
 	@Autowired
@@ -93,13 +91,14 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 		this.annotatorService = new AnnotationServiceImpl();
 
 		getTabixReaders();
-		
+
 		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
 
 		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
 		Iterator<Entity> vcfIter = vcfRepo.iterator();
 
-		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields, GONL_MAF.substring(VcfRepository.getInfoPrefix().length()));
+		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields,
+				GONL_MAF.substring(VcfRepository.getInfoPrefix().length()));
 
 		System.out.println("Now starting to process the data.");
 
@@ -139,8 +138,8 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 	public boolean annotationDataExists()
 	{
 		if (null == molgenisSettings.getProperty(GONL_DIRECTORY_LOCATION_PROPERTY)) return false;
-        File f = new File(molgenisSettings.getProperty(GONL_DIRECTORY_LOCATION_PROPERTY));
-        return (f.exists() && f.isDirectory());
+		File f = new File(molgenisSettings.getProperty(GONL_DIRECTORY_LOCATION_PROPERTY));
+		return (f.exists() && f.isDirectory());
 	}
 
 	@Override
@@ -153,8 +152,9 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 	public List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException
 	{
 		getTabixReaders();
-		Map<String, Object> resultMap = annotateWithGoNL(entity.getString(VcfRepository.CHROM), entity.getLong(VcfRepository.POS),
-				entity.getString(VcfRepository.REF), entity.getString(VcfRepository.ALT));
+		Map<String, Object> resultMap = annotateWithGoNL(entity.getString(VcfRepository.CHROM),
+				entity.getLong(VcfRepository.POS), entity.getString(VcfRepository.REF),
+				entity.getString(VcfRepository.ALT));
 		return Collections.<Entity> singletonList(getAnnotatedEntity(entity, resultMap));
 	}
 
@@ -171,135 +171,141 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 				{
 					tabixReaders = new HashMap<String, TabixReader>();
 					String chroms = "1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|X";
-					
-					for(String chr : chroms.split("\\|"))
+
+					for (String chr : chroms.split("\\|"))
 					{
 						String gonlchrom = new String(
-								molgenisSettings.getProperty(GONL_DIRECTORY_LOCATION_PROPERTY) + File.separator
-										//small hack to use chrX from release 4.. (5 isn't out yet!)
-										+ (!chr.equals("X") ? "gonl.chr"+chr+".snps_indels.r5.vcf.gz" : "gonl.chrX.release4.gtc.vcf.gz")
-								);
-                        if(new File(gonlchrom).exists()) {
-                            TabixReader tr = new TabixReader(gonlchrom);
-                            tabixReaders.put(chr, tr);
-                        }
-                        else{
-                            LOG.info("No file found for path: "+gonlchrom);
-                        }
+								molgenisSettings.getProperty(GONL_DIRECTORY_LOCATION_PROPERTY)
+										+ File.separator
+										// small hack to use chrX from release 4.. (5 isn't out yet!)
+										+ (!chr.equals("X") ? "gonl.chr" + chr + ".snps_indels.r5.vcf.gz" : "gonl.chrX.release4.gtc.vcf.gz"));
+						if (new File(gonlchrom).exists())
+						{
+							TabixReader tr = new TabixReader(gonlchrom);
+							tabixReaders.put(chr, tr);
+						}
+						else
+						{
+							LOG.info("No file found for path: " + gonlchrom);
+						}
 					}
 				}
 			}
 		}
 	}
 
-	private synchronized Map<String, Object> annotateWithGoNL(String inputChromosome, Long inputPosition, String inputReference,
-			String inputAlternative) throws IOException
+	private synchronized Map<String, Object> annotateWithGoNL(String inputChromosome, Long inputPosition,
+			String inputReference, String inputAlternative) throws IOException
 	{
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 
-		if(!tabixReaders.containsKey(inputChromosome)){
+		if (!tabixReaders.containsKey(inputChromosome))
+		{
 			LOG.info("No chromosome " + inputChromosome + " in data!");
 			return resultMap;
 		}
-		
-		TabixReader.Iterator tabixIterator = tabixReaders.get(inputChromosome).query(inputChromosome + ":" + inputPosition + "-" + inputPosition);
+
+		TabixReader.Iterator tabixIterator = tabixReaders.get(inputChromosome).query(
+				inputChromosome + ":" + inputPosition + "-" + inputPosition);
 		String line = null;
-	
-		//get line from data, we expect exactly 1
+
+		// get line from data, we expect exactly 1
 		try
 		{
 			line = tabixIterator.next();
 		}
-		catch(net.sf.samtools.SAMFormatException sfx)
+		catch (net.sf.samtools.SAMFormatException sfx)
 		{
-			LOG.error("Bad GZIP file for CHROM: " + inputChromosome + " POS: " + inputPosition + " REF: " + inputReference
-					+ " ALT: " + inputAlternative + " LINE: " + line);
+			LOG.error("Bad GZIP file for CHROM: " + inputChromosome + " POS: " + inputPosition + " REF: "
+					+ inputReference + " ALT: " + inputAlternative + " LINE: " + line);
 			throw sfx;
 		}
-		catch(NullPointerException npe)
+		catch (NullPointerException npe)
 		{
 			LOG.info("No data for CHROM: " + inputChromosome + " POS: " + inputPosition + " REF: " + inputReference
 					+ " ALT: " + inputAlternative + " LINE: " + line);
-			//throw sfx;
+			// throw sfx;
 		}
-		
-		//if nothing found, return empty list for no hit
-		if(line == null)
+
+		// if nothing found, return empty list for no hit
+		if (line == null)
 		{
 			return resultMap;
 		}
-		
-		//sanity check on content of line
+
+		// sanity check on content of line
 		String[] split = null;
 		split = line.split("\t", -1);
 		if (split.length != 8)
 		{
-			LOG.error("Bad GoNL data (split was not 8 elements) for CHROM: " + inputChromosome + " POS: " + inputPosition + " REF: " + inputReference
-					+ " ALT: " + inputAlternative + " LINE: " + line);
+			LOG.error("Bad GoNL data (split was not 8 elements) for CHROM: " + inputChromosome + " POS: "
+					+ inputPosition + " REF: " + inputReference + " ALT: " + inputAlternative + " LINE: " + line);
 			throw new IOException("Bad data! see log");
 		}
-		
+
 		// get MAF from info field
 		String[] infoFields = split[7].split(";", -1);
 		double ac = -1;
 		double an = -1;
 		String gtc = null;
-		for(String info : infoFields)
+		for (String info : infoFields)
 		{
-			if(info.startsWith("AC="))
+			if (info.startsWith("AC="))
 			{
 				ac = Double.parseDouble(info.replace("AC=", ""));
 			}
-			if(info.startsWith("AN="))
+			if (info.startsWith("AN="))
 			{
 				an = Double.parseDouble(info.replace("AN=", ""));
 			}
-			if(info.startsWith("GTC="))
+			if (info.startsWith("GTC="))
 			{
 				gtc = info.replace("GTC=", "");
 			}
 		}
-		
-		//check if we miss data
-		if(ac == -1 || an == -1)
+
+		// check if we miss data
+		if (ac == -1 || an == -1)
 		{
-			LOG.error("Bad GoNL data (no AC or AN field) for CHROM: " + inputChromosome + " POS: " + inputPosition + " REF: " + inputReference
-					+ " ALT: " + inputAlternative + " LINE: " + line);
+			LOG.error("Bad GoNL data (no AC or AN field) for CHROM: " + inputChromosome + " POS: " + inputPosition
+					+ " REF: " + inputReference + " ALT: " + inputAlternative + " LINE: " + line);
 			throw new IOException("Bad data (no AC or AN), see log");
 		}
-		if(gtc == null)
+		if (gtc == null)
 		{
-			LOG.error("Bad GoNL data (no GTC field) for CHROM: " + inputChromosome + " POS: " + inputPosition + " REF: " + inputReference
-					+ " ALT: " + inputAlternative + " LINE: " + line);
+			LOG.error("Bad GoNL data (no GTC field) for CHROM: " + inputChromosome + " POS: " + inputPosition
+					+ " REF: " + inputReference + " ALT: " + inputAlternative + " LINE: " + line);
 			throw new IOException("Bad data (no GTC), see log");
 		}
-		
+
 		String ref = split[3];
 		String alt = split[4];
-		
+
 		Double maf = null;
-		
-		//match alleles and get the Minor Allele Frequency from list
-		if(ref.equals(inputReference) && alt.equals(inputAlternative))
+
+		// match alleles and get the Minor Allele Frequency from list
+		if (ref.equals(inputReference) && alt.equals(inputAlternative))
 		{
-			maf = ac/an;
-//			LOG.info("1000G variant found for CHROM: " + chromosome + " POS: " + position + " REF: " + reference + " ALT: " + alternative + ", MAF = " + maf);
+			maf = ac / an;
+			// LOG.info("1000G variant found for CHROM: " + chromosome + " POS: " + position + " REF: " + reference +
+			// " ALT: " + alternative + ", MAF = " + maf);
 		}
 
-		//if nothing found, try swapping ref-alt, and do 1-MAF
-		if(false && maf == null)  //FIXME TODO See 1000G annotator why this is not (always) allowed
+		// if nothing found, try swapping ref-alt, and do 1-MAF
+		if (false && maf == null) // FIXME TODO See 1000G annotator why this is not (always) allowed
 		{
-			
-			if(ref.equals(inputAlternative) && alt.equals(inputReference))
+
+			if (ref.equals(inputAlternative) && alt.equals(inputReference))
 			{
-				maf = 1-(ac/an);
-				LOG.info("*ref-alt swapped* 1000G variant found for CHROM: " + inputChromosome + " POS: " + inputPosition + " REF: " + inputReference
-						+ " ALT: " + inputAlternative + ", MAF (1-originalMAF) = " + maf);
+				maf = 1 - (ac / an);
+				LOG.info("*ref-alt swapped* 1000G variant found for CHROM: " + inputChromosome + " POS: "
+						+ inputPosition + " REF: " + inputReference + " ALT: " + inputAlternative
+						+ ", MAF (1-originalMAF) = " + maf);
 			}
-			
+
 		}
-		
-		//FIXME: actually, they should also be inside INFO compound attribute!!
+
+		// FIXME: actually, they should also be inside INFO compound attribute!!
 		resultMap.put(GONL_GTC, gtc);
 		resultMap.put(GONL_MAF, maf);
 		return resultMap;
@@ -312,7 +318,8 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
 
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GONL_MAF, FieldTypeEnum.DECIMAL));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GONL_GTC, FieldTypeEnum.STRING)); //FIXME: correct type?
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GONL_GTC, FieldTypeEnum.STRING)); // FIXME: correct
+																										// type?
 
 		return metadata;
 	}

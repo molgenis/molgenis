@@ -45,26 +45,22 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 
 	private final MolgenisSettings molgenisSettings;
 	private final AnnotationService annotatorService;
-	
+
 	public static final String PHENOMIZERPVAL = VcfRepository.getInfoPrefix() + "PHENOMIZERPVAL";
 	public static final String PHENOMIZEROMIM = VcfRepository.getInfoPrefix() + "PHENOMIZEROMIM";
-	
+
 	private static final String NAME = "PHENOMIZER";
 
 	HashMap<String, String> geneToPval;
 	HashMap<String, String> geneToOmimID;
 
-	final List<String> infoFields = Arrays
-			.asList(new String[]
-			{
-					"##INFO=<ID="
-							+ PHENOMIZERPVAL.substring(VcfRepository.getInfoPrefix().length())
-							+ ",Number=1,Type=Float,Description=\"Phenomizer P-value\">",
-					"##INFO=<ID="
-							+ PHENOMIZEROMIM.substring(VcfRepository.getInfoPrefix().length())
-							+ ",Number=1,Type=String,Description=\"Phenomizer OMIM ID\">",
-			});
-	
+	final List<String> infoFields = Arrays.asList(new String[]
+	{
+			"##INFO=<ID=" + PHENOMIZERPVAL.substring(VcfRepository.getInfoPrefix().length())
+					+ ",Number=1,Type=Float,Description=\"Phenomizer P-value\">",
+			"##INFO=<ID=" + PHENOMIZEROMIM.substring(VcfRepository.getInfoPrefix().length())
+					+ ",Number=1,Type=String,Description=\"Phenomizer OMIM ID\">", });
+
 	@Autowired
 	public PhenomizerServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService)
 			throws IOException
@@ -72,14 +68,15 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 		this.molgenisSettings = molgenisSettings;
 		this.annotatorService = annotatorService;
 	}
-	
-	public static List<String> getHtml(String url) throws IOException {
+
+	public static List<String> getHtml(String url) throws IOException
+	{
 		List<String> lines = new ArrayList<String>();
 		URL loc = new URL(url);
-		BufferedReader in = new BufferedReader(new InputStreamReader(
-				loc.openStream()));
+		BufferedReader in = new BufferedReader(new InputStreamReader(loc.openStream()));
 		String inputLine;
-		while ((inputLine = in.readLine()) != null) {
+		while ((inputLine = in.readLine()) != null)
+		{
 			lines.add(inputLine);
 		}
 		in.close();
@@ -88,53 +85,56 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 
 	public PhenomizerServiceAnnotator(File hpoTermFile, File inputVcfFile, File outputVCFFile) throws Exception
 	{
-		
+
 		int limit = 10000;
-		
+
 		/**
 		 * Check input HPO terms
 		 */
 		Scanner s = new Scanner(hpoTermFile);
 		String hpoTerms = s.nextLine();
-		if(s.hasNextLine())
+		if (s.hasNextLine())
 		{
-			throw new IOException("HPO terms file is not supposed to have more than 1 line. Example line: HP:0001300,HP:0007325,HP:0002015");
+			throw new IOException(
+					"HPO terms file is not supposed to have more than 1 line. Example line: HP:0001300,HP:0007325,HP:0002015");
 		}
-		
+
 		hpoTerms = hpoTerms.trim();
-		
+
 		LOG.info("Line in HPO terms file (trimmed): " + hpoTerms);
 		String[] splitTerms = hpoTerms.split(",", -1);
-		for(String term : splitTerms)
+		for (String term : splitTerms)
 		{
-			if(!term.startsWith("HP:"))
+			if (!term.startsWith("HP:"))
 			{
-				throw new IOException("HPO term did not start with 'HP:'. Example line: HP:0001300,HP:0007325,HP:0002015");
+				throw new IOException(
+						"HPO term did not start with 'HP:'. Example line: HP:0001300,HP:0007325,HP:0002015");
 			}
 			else
 			{
 				LOG.info("Term OK: " + term);
 			}
 		}
-		
+
 		/**
 		 * Invoke web service
 		 */
-		List<String> response = getHtml("http://compbio.charite.de/phenomizer/phenomizer/PhenomizerServiceURI?mobilequery=true&numres="+limit+"&terms="+hpoTerms);
-		
+		List<String> response = getHtml("http://compbio.charite.de/phenomizer/phenomizer/PhenomizerServiceURI?mobilequery=true&numres="
+				+ limit + "&terms=" + hpoTerms);
+
 		String pval = null;
 		String simScore = null;
 		String omimId = null;
 		String disorder = null;
 		String gene = null;
 		String thatLastNumber = null;
-		
+
 		geneToPval = new HashMap<String, String>();
 		geneToOmimID = new HashMap<String, String>();
-		
-		for(String line : response)
+
+		for (String line : response)
 		{
-			if(line == null || line.equals("") || line.startsWith("#"))
+			if (line == null || line.equals("") || line.startsWith("#"))
 			{
 				continue;
 			}
@@ -145,21 +145,21 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 			disorder = split[3];
 			gene = split[4];
 			thatLastNumber = split[5];
-			
-			for(String multiGene : gene.split(", ", -1))
+
+			for (String multiGene : gene.split(", ", -1))
 			{
 				geneToPval.put(multiGene, pval);
 				geneToOmimID.put(multiGene, omimId);
 			}
 
 		}
-		
-		for(String key : geneToPval.keySet())
+
+		for (String key : geneToPval.keySet())
 		{
 			LOG.info("gene: " + key + ", pval: " + geneToPval.get(key));
 			LOG.info("gene: " + key + ", " + geneToOmimID.get(key));
 		}
-	
+
 		this.molgenisSettings = new MolgenisSimpleSettings();
 		this.annotatorService = new AnnotationServiceImpl();
 
@@ -168,7 +168,8 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
 		Iterator<Entity> vcfIter = vcfRepo.iterator();
 
-		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields, PHENOMIZERPVAL.substring(VcfRepository.getInfoPrefix().length()));
+		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields,
+				PHENOMIZERPVAL.substring(VcfRepository.getInfoPrefix().length()));
 
 		System.out.println("Now starting to process the data.");
 
@@ -226,11 +227,11 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 	private synchronized Map<String, Object> annotateEntityWithPhenomizerPvalue(Entity entity) throws IOException
 	{
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		
+
 		String[] annSplit = entity.getString(VcfRepository.getInfoPrefix() + "ANN").split("\\|", -1);
 		String gene = null;
-		
-		if(annSplit[3].length() != 0)
+
+		if (annSplit[3].length() != 0)
 		{
 			gene = annSplit[3];
 			resultMap.put(PHENOMIZERPVAL, geneToPval.get(gene));
@@ -238,12 +239,11 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 		}
 		else
 		{
-			//will happen a lot for WGS data
-			//LOG.info("No gene symbol in ANN field for " + entity.toString());
+			// will happen a lot for WGS data
+			// LOG.info("No gene symbol in ANN field for " + entity.toString());
 		}
 
 		return resultMap;
-		
 
 	}
 

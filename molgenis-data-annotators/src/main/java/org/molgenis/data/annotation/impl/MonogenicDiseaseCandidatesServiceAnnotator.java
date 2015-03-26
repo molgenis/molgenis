@@ -205,7 +205,8 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 		}
 
 		if (alleles.length() == 1) throw new IOException("Hemizygous calls not yet supported");
-        else if (alleles.length() != 3) throw new IOException("Genotype length not 3: " + alleles + " for record " + entity.toString());
+		else if (alleles.length() != 3) throw new IOException("Genotype length not 3: " + alleles + " for record "
+				+ entity.toString());
 
 		char allele1 = alleles.charAt(0);
 		char allele2 = alleles.charAt(2);
@@ -234,20 +235,21 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 		 */
 
 		boolean filter = false;
-        // not in CGD, skip variant!
-        if (cgdGenInh == null) filter = true;
+		// not in CGD, skip variant!
+		if (cgdGenInh == null) filter = true;
 		// common variant in one of the three big databases, skip it
 		else if (thousandGenomesMAF > 0.05 || exacMAF > 0.05 || gonlMAF > 0.05) filter = true;
 		// skip any "low impact" variants
-        else if (impact.equals(SnpEffServiceAnnotator.impact.MODIFIER) || impact.equals(SnpEffServiceAnnotator.impact.LOW)) filter = true;
+		else if (impact.equals(SnpEffServiceAnnotator.impact.MODIFIER)
+				|| impact.equals(SnpEffServiceAnnotator.impact.LOW)) filter = true;
 		// skip any homozygous reference alleles
-        else if (zygosity.equals(HOMREF)) filter = true;
+		else if (zygosity.equals(HOMREF)) filter = true;
 
-        if (filter)
-        {
-            resultMap.put(MONOGENICDISEASECANDIDATE, outcome.EXCLUDED);
-            return resultMap;
-        }
+		if (filter)
+		{
+			resultMap.put(MONOGENICDISEASECANDIDATE, outcome.EXCLUDED);
+			return resultMap;
+		}
 
 		/**
 		 * Sensitive filters We already know that zygosity is HET or HOMALT and MAF < 0.05
@@ -267,14 +269,14 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 								impact.equals(SnpEffServiceAnnotator.impact.HIGH) ? outcome.INCLUDED_DOMINANT_HIGHIMPACT : outcome.INCLUDED_DOMINANT);
 				return resultMap;
 			}
-            // if purely dominant, exclude at this point!
+			// if purely dominant, exclude at this point!
 			else if (cgdGenInh.equals(CgdDataProvider.generalizedInheritance.DOMINANT)) filter = true;
 		}
 
 		if (filter)
 		{
 			resultMap.put(MONOGENICDISEASECANDIDATE, outcome.EXCLUDED);
-            return resultMap;
+			return resultMap;
 		}
 		// recessive disorders, including those may may also be dominant, and X-linked, since CGD does not distinguish
 		// dominant or recessive for those..

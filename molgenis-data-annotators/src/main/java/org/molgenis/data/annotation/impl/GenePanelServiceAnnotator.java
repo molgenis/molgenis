@@ -35,34 +35,46 @@ import org.springframework.stereotype.Component;
 public class GenePanelServiceAnnotator extends VariantAnnotator
 {
 	private static final Logger LOG = LoggerFactory.getLogger(GenePanelServiceAnnotator.class);
-	
+
 	private final MolgenisSettings molgenisSettings;
 	private final AnnotationService annotatorService;
-	
+
 	// 5GPM list
-	List<String> severeLateOnsetGenes5GPM = Arrays.asList(new String[]{ "AIP", "ALK", "APC", "AXIN2", "BAP1", "BMPR1A", "BRCA1", "CDH1", "CDK4", "CDKN2A", "CEBPA", "CHEK2", "CTHRC1", "CTNNA1", "DICER1", "EGFR", "FH", "FLCN", "GATA2", "KIT", "MAX", "MLH1", "MLH3", "MSH2", "MSH3", "MSH6", "MUTYH", "NF2", "PAX5", "PDGFRA", "PMS2", "PRKAR1A", "RAD51D", "STK11", "TMEM127", "TP53" });
-	
+	List<String> severeLateOnsetGenes5GPM = Arrays.asList(new String[]
+	{ "AIP", "ALK", "APC", "AXIN2", "BAP1", "BMPR1A", "BRCA1", "CDH1", "CDK4", "CDKN2A", "CEBPA", "CHEK2", "CTHRC1",
+			"CTNNA1", "DICER1", "EGFR", "FH", "FLCN", "GATA2", "KIT", "MAX", "MLH1", "MLH3", "MSH2", "MSH3", "MSH6",
+			"MUTYH", "NF2", "PAX5", "PDGFRA", "PMS2", "PRKAR1A", "RAD51D", "STK11", "TMEM127", "TP53" });
+
 	// http://www.ncbi.nlm.nih.gov/clinvar/docs/acmg/
-	List<String> acmgRecomIncendentals = Arrays.asList(new String[]{ "APC", "MYH11", "ACTA2", "MYLK", "TMEM43", "DSP", "PKP2", "DSG2", "DSC2", "BRCA1", "BRCA2", "SCN5A", "RYR2", "LMNA", "MYBPC3", "COL3A1", "GLA", "APOB", "LDLR", "MYH7", "TPM1", "MYBPC3", "PRKAG2", "TNNI3", "MYL3", "MYL2", "ACTC1", "RET", "PCSK9", "TNNT2", "TP53", "TGFBR1", "TGFBR2", "TGFBR1", "TGFBR2", "SMAD3", "KCNQ1", "KCNH2", "SCN5A", "MLH1", "MSH2", "MSH6", "PMS2", "RYR1", "CACNA1S", "FBN1", "TGFBR1", "MEN1", "RET", "MUTYH", "NF2", "SDHD", "SDHAF2", "SDHC", "SDHB", "STK11", "MUTYH", "PTEN", "RB1", "TSC1", "TSC2", "VHL", "WT1" });
-	
+	List<String> acmgRecomIncendentals = Arrays.asList(new String[]
+	{ "APC", "MYH11", "ACTA2", "MYLK", "TMEM43", "DSP", "PKP2", "DSG2", "DSC2", "BRCA1", "BRCA2", "SCN5A", "RYR2",
+			"LMNA", "MYBPC3", "COL3A1", "GLA", "APOB", "LDLR", "MYH7", "TPM1", "MYBPC3", "PRKAG2", "TNNI3", "MYL3",
+			"MYL2", "ACTC1", "RET", "PCSK9", "TNNT2", "TP53", "TGFBR1", "TGFBR2", "TGFBR1", "TGFBR2", "SMAD3", "KCNQ1",
+			"KCNH2", "SCN5A", "MLH1", "MSH2", "MSH6", "PMS2", "RYR1", "CACNA1S", "FBN1", "TGFBR1", "MEN1", "RET",
+			"MUTYH", "NF2", "SDHD", "SDHAF2", "SDHC", "SDHB", "STK11", "MUTYH", "PTEN", "RB1", "TSC1", "TSC2", "VHL",
+			"WT1" });
+
 	// http://www.genedx.com/test-catalog/disorders/charge-syndrome/
-	List<String> chargeSyndrome = Arrays.asList(new String[]{ "CHD7", "FGF8", "FGFR1", "GNRH1", "GNRHR", "KAL1", "KISS1", "KISS1R", "NR0B1", "NSMF", "NELF", "PROK2", "PROKR2", "TAC3", "TACR3" });
-	
+	List<String> chargeSyndrome = Arrays.asList(new String[]
+	{ "CHD7", "FGF8", "FGFR1", "GNRH1", "GNRHR", "KAL1", "KISS1", "KISS1R", "NR0B1", "NSMF", "NELF", "PROK2", "PROKR2",
+			"TAC3", "TACR3" });
+
 	private static final String NAME = "GenePanels";
 
 	public final static String PANEL_SEVERELATEONSET = "GenePanel_5GPM";
 	public final static String PANEL_ACMG = "GenePanel_ACMG";
 	public final static String PANEL_CHARGE = "GenePanel_CHARGE";
-	
+
 	public static final String CUSTOMPANEL_FILE_LOCATION = "custompanel_location";
 
 	@Autowired
-	public GenePanelServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService) throws IOException
+	public GenePanelServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService)
+			throws IOException
 	{
 		this.molgenisSettings = molgenisSettings;
 		this.annotatorService = annotatorService;
 	}
-	
+
 	public GenePanelServiceAnnotator(File cgdFileLocation, File inputVcfFile, File outputVCFFile) throws IOException
 	{
 		this.molgenisSettings = new MolgenisSimpleSettings();
@@ -128,27 +140,26 @@ public class GenePanelServiceAnnotator extends VariantAnnotator
 				}
 			}
 		}
-		
-		
+
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
-	
-		if(severeLateOnsetGenes5GPM.contains(geneSymbol))
+
+		if (severeLateOnsetGenes5GPM.contains(geneSymbol))
 		{
 			resultMap.put(PANEL_SEVERELATEONSET, "TRUE");
 		}
-		
-		if(acmgRecomIncendentals.contains(geneSymbol))
+
+		if (acmgRecomIncendentals.contains(geneSymbol))
 		{
 			resultMap.put(PANEL_ACMG, "TRUE");
 		}
-		
-		if(chargeSyndrome.contains(geneSymbol))
+
+		if (chargeSyndrome.contains(geneSymbol))
 		{
 			resultMap.put(PANEL_CHARGE, "TRUE");
 		}
 
 		return results;
-		
+
 	}
 
 	@Override

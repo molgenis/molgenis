@@ -16,7 +16,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 public abstract class LocusAnnotator extends AbstractRepositoryAnnotator implements RepositoryAnnotator,
 		ApplicationListener<ContextRefreshedEvent>
 {
-    // TODO: needs genome build and possible organism !?
+	// TODO: needs genome build and possible organism !?
 
 	@Override
 	public EntityMetaData getInputMetaData()

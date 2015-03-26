@@ -21,28 +21,31 @@ public class CmdLineAnnotator
 
 	public static void main(String[] args) throws Exception
 	{
-		List<String> annotators = Arrays.asList(new String[]{"cadd", "snpeff", "clinvar", "hpo", "ase", "monogenic", "phenomizer", "ccgg", "denovo", "exac", "1kg", "gonl", "gwascatalog", "vkgl", "cgd", "enhancers", "proteinatlas"});
-		
+		List<String> annotators = Arrays.asList(new String[]
+		{ "cadd", "snpeff", "clinvar", "hpo", "ase", "monogenic", "phenomizer", "ccgg", "denovo", "exac", "1kg",
+				"gonl", "gwascatalog", "vkgl", "cgd", "enhancers", "proteinatlas" });
+
 		if (args.length != 4)
 		{
 			throw new Exception(
 					"Usage: java -Xmx4g -jar CmdLineAnnotator.jar [Annotator] [Annotation source file] [input VCF] [output VCF].\n"
-					+ "Possible annotators are: " + annotators.toString() + ".\n"
+							+ "Possible annotators are: "
+							+ annotators.toString()
+							+ ".\n"
 							+ "Example: java -Xmx4g -jar CmdLineAnnotator.jar gonl GoNL/release5_noContam_noChildren_with_AN_AC_GTC_stripped/ Cardio.vcf Cardio_gonl.vcf\n");
 		}
 
 		String annotator = args[0];
-		if(!annotators.contains(annotator))
+		if (!annotators.contains(annotator))
 		{
 			System.out.println("Annotator must be one of the following: ");
-			for(String ann : annotators)
+			for (String ann : annotators)
 			{
 				System.out.print(ann + " ");
 			}
-			throw new Exception("\nInvalid annotator.\n"
-					+ "Possible annotators are: " + annotators.toString() + ".");
+			throw new Exception("\nInvalid annotator.\n" + "Possible annotators are: " + annotators.toString() + ".");
 		}
-		
+
 		File annotationSourceFile = new File(args[1]);
 		if (!annotationSourceFile.exists())
 		{
@@ -62,84 +65,83 @@ public class CmdLineAnnotator
 		File outputVCFFile = new File(args[3]);
 		if (outputVCFFile.exists())
 		{
-			//TODO: do we make this an input options? or always throw? what is best practice?
-			//throw new Exception("Output VCF file already exists at " + outputVCFFile.getAbsolutePath());
+			// TODO: do we make this an input options? or always throw? what is best practice?
+			// throw new Exception("Output VCF file already exists at " + outputVCFFile.getAbsolutePath());
 		}
 
 		// engage!
-		if(annotator.equals("cadd"))
+		if (annotator.equals("cadd"))
 		{
 			new CaddServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
-		else if(annotator.equals("snpeff"))
+		else if (annotator.equals("snpeff"))
 		{
 			new SnpEffServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
-		else if(annotator.equals("clinvar"))
+		else if (annotator.equals("clinvar"))
 		{
 			new ClinVarVCFServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
-		else if(annotator.equals("hpo"))
+		else if (annotator.equals("hpo"))
 		{
 			new HpoServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
-		else if(annotator.equals("ase"))
+		else if (annotator.equals("ase"))
 		{
-			//TODO
+			// TODO
 		}
-		else if(annotator.equals("monogenic"))
+		else if (annotator.equals("monogenic"))
 		{
 			new MonogenicDiseaseCandidatesServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
-		else if(annotator.equals("phenomizer"))
+		else if (annotator.equals("phenomizer"))
 		{
 			new PhenomizerServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
-		else if(annotator.equals("ccgg"))
+		else if (annotator.equals("ccgg"))
 		{
-			//TODO
+			// TODO
 		}
-		else if(annotator.equals("denovo"))
+		else if (annotator.equals("denovo"))
 		{
 			new DeNovoAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
-		else if(annotator.equals("exac"))
+		else if (annotator.equals("exac"))
 		{
 			new ExACServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
-		else if(annotator.equals("1kg"))
+		else if (annotator.equals("1kg"))
 		{
 			new ThousandGenomesServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
-		else if(annotator.equals("gonl"))
+		else if (annotator.equals("gonl"))
 		{
 			new GoNLServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
-		else if(annotator.equals("gwascatalog"))
+		else if (annotator.equals("gwascatalog"))
 		{
-			//TODO
+			// TODO
 		}
-		else if(annotator.equals("vkgl"))
+		else if (annotator.equals("vkgl"))
 		{
-			//TODO
+			// TODO
 		}
-		else if(annotator.equals("cgd"))
+		else if (annotator.equals("cgd"))
 		{
 			new ClinicalGenomicsDatabaseServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
-		else if(annotator.equals("enhancers"))
+		else if (annotator.equals("enhancers"))
 		{
-			//TODO
+			// TODO
 		}
-		else if(annotator.equals("proteinatlas"))
+		else if (annotator.equals("proteinatlas"))
 		{
-			//TODO
+			// TODO
 		}
 		else
 		{
 			throw new Exception("Annotor unknown: " + annotator);
 		}
-		
 
 	}
 

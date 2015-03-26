@@ -31,8 +31,10 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 /**
- * Typical HPO terms for a gene identifier (already present via SnpEff)
- * Source: http://compbio.charite.de/hudson/job/hpo.annotations.monthly/lastStableBuild/artifact/annotation/ALL_SOURCES_TYPICAL_FEATURES_diseases_to_genes_to_phenotypes.txt
+ * Typical HPO terms for a gene identifier (already present via SnpEff) Source:
+ * http://compbio.charite.de/hudson/job/hpo.
+ * annotations.monthly/lastStableBuild/artifact/annotation/ALL_SOURCES_TYPICAL_FEATURES_diseases_to_genes_to_phenotypes
+ * .txt
  * 
  *
  */
@@ -49,18 +51,17 @@ public class HpoServiceAnnotator extends LocusAnnotator
 	public static final String HPO_IDS = VcfRepository.getInfoPrefix() + "HPOIDS";
 	public static final String HPO_TERMS = VcfRepository.getInfoPrefix() + "HPOTERMS";
 	public static final String HPO_FILE_LOCATION = "hpo_location";
-	
-	
-	final List<String> infoFields = Arrays
-			.asList(new String[]
-			{
-				"##INFO=<ID=" + HPO_IDS.substring(VcfRepository.getInfoPrefix().length()) + ",Number=1,Type=String,Description=\"HPO identifiers\">",
-				"##INFO=<ID=" + HPO_TERMS.substring(VcfRepository.getInfoPrefix().length()) + ",Number=1,Type=String,Description=\"HPO terms\">",
-			});
 
+	final List<String> infoFields = Arrays.asList(new String[]
+	{
+			"##INFO=<ID=" + HPO_IDS.substring(VcfRepository.getInfoPrefix().length())
+					+ ",Number=1,Type=String,Description=\"HPO identifiers\">",
+			"##INFO=<ID=" + HPO_TERMS.substring(VcfRepository.getInfoPrefix().length())
+					+ ",Number=1,Type=String,Description=\"HPO terms\">", });
 
 	@Autowired
-	public HpoServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotationService, HpoDataProvider hpoDataProvider) throws IOException
+	public HpoServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotationService,
+			HpoDataProvider hpoDataProvider) throws IOException
 	{
 		if (molgenisSettings == null) throw new IllegalArgumentException("molgenisSettings is null");
 		if (annotationService == null) throw new IllegalArgumentException("annotationService is null");
@@ -69,21 +70,22 @@ public class HpoServiceAnnotator extends LocusAnnotator
 		this.annotatorService = annotationService;
 		this.hpoDataProvider = hpoDataProvider;
 	}
-	
+
 	public HpoServiceAnnotator(File hpoFileLocation, File inputVcfFile, File outputVCFFile) throws Exception
-	{	
+	{
 		this.molgenisSettings = new MolgenisSimpleSettings();
 		molgenisSettings.setProperty(HPO_FILE_LOCATION, hpoFileLocation.getAbsolutePath());
 		hpoDataProvider = new HpoDataProvider(molgenisSettings);
 
 		this.annotatorService = new AnnotationServiceImpl();
-		
+
 		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
 
 		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
 		Iterator<Entity> vcfIter = vcfRepo.iterator();
 
-		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields, HPO_IDS.substring(VcfRepository.getInfoPrefix().length()));
+		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields,
+				HPO_IDS.substring(VcfRepository.getInfoPrefix().length()));
 
 		System.out.println("Now starting to process the data.");
 
@@ -135,33 +137,33 @@ public class HpoServiceAnnotator extends LocusAnnotator
 	@Override
 	public List<Entity> annotateEntity(Entity entity) throws IOException
 	{
-		
+
 		List<Entity> results = new ArrayList<Entity>();
 		String geneSymbol = null;
 
-		String annField = entity.getString(VcfRepository.getInfoPrefix()+"ANN");
-		if(annField != null)
+		String annField = entity.getString(VcfRepository.getInfoPrefix() + "ANN");
+		if (annField != null)
 		{
 			String[] split = annField.split("\\|", -1);
-			if(split.length > 10)
+			if (split.length > 10)
 			{
-				//3 is 'gene name', 4 is 'gene id' .. which ??
-				if(split[3].length() != 0)
+				// 3 is 'gene name', 4 is 'gene id' .. which ??
+				if (split[3].length() != 0)
 				{
 					geneSymbol = split[3];
-					//too much..
-					//LOG.info("Gene symbol '" + geneSymbol + "' found for " + entity.toString());
+					// too much..
+					// LOG.info("Gene symbol '" + geneSymbol + "' found for " + entity.toString());
 				}
 				else
 				{
-					//will happen a lot for WGS data
-					//LOG.info("No gene symbol in ANN field for " + entity.toString());
+					// will happen a lot for WGS data
+					// LOG.info("No gene symbol in ANN field for " + entity.toString());
 					return Collections.singletonList(entity);
 				}
-				
+
 			}
 		}
-		
+
 		Map<String, List<HpoData>> hpoData = hpoDataProvider.getHpoData();
 
 		try
@@ -171,22 +173,24 @@ public class HpoServiceAnnotator extends LocusAnnotator
 			if (hpoData.containsKey(geneSymbol))
 			{
 				List<HpoData> data = hpoData.get(geneSymbol);
-				
+
 				StringBuilder ids = new StringBuilder();
 				StringBuilder terms = new StringBuilder();
-				for(HpoData h : data)
+				for (HpoData h : data)
 				{
 					ids.append(h.getHpoId());
 					ids.append("/");
 					terms.append(h.getHpoTerm());
 					terms.append("/");
 				}
-				if(ids.length() > 0){
-					ids.deleteCharAt(ids.length()-1);
+				if (ids.length() > 0)
+				{
+					ids.deleteCharAt(ids.length() - 1);
 					resultMap.put(HPO_IDS, ids);
 				}
-				if(terms.length() > 0){
-					terms.deleteCharAt(terms.length()-1);
+				if (terms.length() > 0)
+				{
+					terms.deleteCharAt(terms.length() - 1);
 					resultMap.put(HPO_TERMS, terms);
 				}
 				results.add(getAnnotatedEntity(entity, resultMap));

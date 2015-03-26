@@ -15,8 +15,8 @@ public class CgdData
 	String condition;
 	String entrez_gene_id;
 	String hgnc_id;
-	private generalizedInheritance generalizedInheritance; //used for gene inheritance matching!
-	
+	private generalizedInheritance generalizedInheritance; // used for gene inheritance matching!
+
 	public CgdData(String hgnc_id, String entrez_gene_id, String condition, String inheritance, String age_group,
 			String allelic_conditions, String manifestation_categories, String intervention_categories,
 			String comments, String intervention_rationale, String references)
@@ -33,7 +33,7 @@ public class CgdData
 		this.entrez_gene_id = entrez_gene_id;
 		this.hgnc_id = hgnc_id;
 	}
-	
+
 	public generalizedInheritance getGeneralizedInheritance()
 	{
 		return generalizedInheritance;

@@ -36,8 +36,8 @@ import org.springframework.stereotype.Component;
 @Component("clinvarVcfService")
 public class ClinVarVCFServiceAnnotator extends VariantAnnotator
 {
-private static final Logger LOG = LoggerFactory.getLogger(ClinVarVCFServiceAnnotator.class);
-	
+	private static final Logger LOG = LoggerFactory.getLogger(ClinVarVCFServiceAnnotator.class);
+
 	private final MolgenisSettings molgenisSettings;
 	private final AnnotationService annotatorService;
 
@@ -46,15 +46,10 @@ private static final Logger LOG = LoggerFactory.getLogger(ClinVarVCFServiceAnnot
 	public static final String CLINVAR_VCF_LOCATION_PROPERTY = "clinvar_location";
 	public final static String CLINVAR_CLINSIG = VcfRepository.getInfoPrefix() + "CLINVAR_CLNSIG";
 	private volatile TabixReader tabixReader;
-	
-	final List<String> infoFields = Arrays
-			.asList(new String[]
-			{
-					"##INFO=<ID="
-							+ CLINVAR_CLINSIG.substring(VcfRepository.getInfoPrefix().length())
-							+ ",Number=1,Type=String,Description=\"ClinVar clinical significance\">"
-							});
 
+	final List<String> infoFields = Arrays.asList(new String[]
+	{ "##INFO=<ID=" + CLINVAR_CLINSIG.substring(VcfRepository.getInfoPrefix().length())
+			+ ",Number=1,Type=String,Description=\"ClinVar clinical significance\">" });
 
 	@Autowired
 	public ClinVarVCFServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService,
@@ -63,8 +58,9 @@ private static final Logger LOG = LoggerFactory.getLogger(ClinVarVCFServiceAnnot
 		this.molgenisSettings = molgenisSettings;
 		this.annotatorService = annotatorService;
 	}
-	
-	public ClinVarVCFServiceAnnotator(File clinvarVcfFileLocation, File inputVcfFile, File outputVCFFile) throws Exception
+
+	public ClinVarVCFServiceAnnotator(File clinvarVcfFileLocation, File inputVcfFile, File outputVCFFile)
+			throws Exception
 	{
 
 		this.molgenisSettings = new MolgenisSimpleSettings();
@@ -73,13 +69,14 @@ private static final Logger LOG = LoggerFactory.getLogger(ClinVarVCFServiceAnnot
 		this.annotatorService = new AnnotationServiceImpl();
 
 		checkTabixReader();
-		
+
 		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
 
 		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
 		Iterator<Entity> vcfIter = vcfRepo.iterator();
 
-		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields, CLINVAR_CLINSIG.substring(VcfRepository.getInfoPrefix().length()));
+		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields,
+				CLINVAR_CLINSIG.substring(VcfRepository.getInfoPrefix().length()));
 
 		System.out.println("Now starting to process the data.");
 
@@ -120,7 +117,7 @@ private static final Logger LOG = LoggerFactory.getLogger(ClinVarVCFServiceAnnot
 	{
 		return NAME;
 	}
-	
+
 	/**
 	 * Makes sure the tabixReader exists.
 	 */
@@ -149,77 +146,81 @@ private static final Logger LOG = LoggerFactory.getLogger(ClinVarVCFServiceAnnot
 	{
 		checkTabixReader();
 
-		Map<String, Object> resultMap = annotateEntityWithClinVar(entity.getString(VcfRepository.CHROM), entity.getLong(VcfRepository.POS),
-				entity.getString(VcfRepository.REF), entity.getString(VcfRepository.ALT));
+		Map<String, Object> resultMap = annotateEntityWithClinVar(entity.getString(VcfRepository.CHROM),
+				entity.getLong(VcfRepository.POS), entity.getString(VcfRepository.REF),
+				entity.getString(VcfRepository.ALT));
 		return Collections.<Entity> singletonList(getAnnotatedEntity(entity, resultMap));
 	}
-	
-	private synchronized Map<String, Object> annotateEntityWithClinVar(String chromosome, Long position, String reference,
-			String alternative) throws IOException
+
+	private synchronized Map<String, Object> annotateEntityWithClinVar(String chromosome, Long position,
+			String reference, String alternative) throws IOException
 	{
 		TabixReader.Iterator tabixIterator = null;
 		try
 		{
 			tabixIterator = tabixReader.query(chromosome + ":" + position + "-" + position);
 		}
-		catch(Exception e)
+		catch (Exception e)
 		{
-			LOG.error("Something went wrong (chromosome not in data?) when querying ClinVar tabix file for " + chromosome + " POS: " + position + " REF: " + reference
-					+ " ALT: " + alternative + "! skipping...");
+			LOG.error("Something went wrong (chromosome not in data?) when querying ClinVar tabix file for "
+					+ chromosome + " POS: " + position + " REF: " + reference + " ALT: " + alternative
+					+ "! skipping...");
 		}
 		String line = null;
-		
-		//get line from data, we expect exactly 1
+
+		// get line from data, we expect exactly 1
 		try
 		{
 			line = tabixIterator.next();
 		}
-		catch(net.sf.samtools.SAMFormatException sfx)
+		catch (net.sf.samtools.SAMFormatException sfx)
 		{
-			LOG.error("Bad GZIP file for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
-					+ " ALT: " + alternative + " LINE: " + line);
+			LOG.error("Bad GZIP file for CHROM: " + chromosome + " POS: " + position + " REF: " + reference + " ALT: "
+					+ alternative + " LINE: " + line);
 			throw sfx;
 		}
-		catch(NullPointerException npe)
+		catch (NullPointerException npe)
 		{
-			//overkill to print all missing, since ExAC is exome data 'only'
-			//LOG.info("No data for CHROM: " + chromosome + " POS: " + position + " REF: " + reference + " ALT: " + alternative + " LINE: " + line);
+			// overkill to print all missing, since ExAC is exome data 'only'
+			// LOG.info("No data for CHROM: " + chromosome + " POS: " + position + " REF: " + reference + " ALT: " +
+			// alternative + " LINE: " + line);
 		}
-		
-		//if nothing found, return empty list for no hit
+
+		// if nothing found, return empty list for no hit
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		if(line == null)
+		if (line == null)
 		{
 			return resultMap;
 		}
-		
-		//sanity check on content of line
+
+		// sanity check on content of line
 		String[] split = null;
 		split = line.split("\t", -1);
 		if (split.length != 8)
 		{
-			LOG.error("Bad ClinVar data (split was not 8 elements) for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
-					+ " ALT: " + alternative + " LINE: " + line);
+			LOG.error("Bad ClinVar data (split was not 8 elements) for CHROM: " + chromosome + " POS: " + position
+					+ " REF: " + reference + " ALT: " + alternative + " LINE: " + line);
 			throw new IOException("Bad data! see log");
 		}
-		
-		//match ref & alt
-		if(split[3].equals(reference) && split[4].equals(alternative))
+
+		// match ref & alt
+		if (split[3].equals(reference) && split[4].equals(alternative))
 		{
-			LOG.info("ClinVar variant found for CHROM: " + chromosome + " POS: " + position + " REF: " + reference + " ALT: " + alternative);
+			LOG.info("ClinVar variant found for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
+					+ " ALT: " + alternative);
 			// ...CLNORIGIN=1;CLNSRCID=.;CLNSIG=2;CLNDSDB=MedGen;CLNDSDBID=CN169374;CLNDBN=not_specified;... etc
 			String clinSig = null;
 			String[] infoSplit = split[7].split(";", -1);
-			for(String infoField : infoSplit)
+			for (String infoField : infoSplit)
 			{
-				if(infoField.startsWith("CLNSIG="))
+				if (infoField.startsWith("CLNSIG="))
 				{
 					clinSig = infoField.replace("CLNSIG=", "");
 					resultMap.put(CLINVAR_CLINSIG, clinSig);
 				}
 			}
 		}
-		
+
 		return resultMap;
 	}
 
