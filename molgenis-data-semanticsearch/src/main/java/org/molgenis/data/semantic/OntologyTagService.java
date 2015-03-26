@@ -6,8 +6,9 @@ import static org.molgenis.data.meta.EntityMetaDataMetaData.ATTRIBUTES;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_NAME;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import org.molgenis.data.AttributeMetaData;
@@ -185,7 +186,8 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 		dataService.update(AttributeMetaDataMetaData.ENTITY_NAME, entity);
 	}
 
-	public void addAttributeTag(String entity, String attribute, String relationIRI, List<String> ontologyTermIRIs)
+	public OntologyTag addAttributeTag(String entity, String attribute, String relationIRI,
+			List<String> ontologyTermIRIs)
 	{
 		Entity attributeEntity = findAttributeEntity(entity, attribute);
 		List<Entity> tags = Lists.<Entity> newArrayList(attributeEntity.getEntities(AttributeMetaDataMetaData.TAGS));
@@ -204,6 +206,7 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 		attributeEntity.set(AttributeMetaDataMetaData.TAGS, tags);
 		dataService.update(AttributeMetaDataMetaData.ENTITY_NAME, attributeEntity);
 		updateEntityMetaDataEntityWithNewAttributeEntity(entity, attribute, attributeEntity);
+		return OntologyTag.create(combinedOntologyTerm, relation);
 	}
 
 	/**
@@ -268,5 +271,28 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 			dataService.update(AttributeMetaDataMetaData.ENTITY_NAME, attributeEntity);
 			updateEntityMetaDataEntityWithNewAttributeEntity(entityName, attributeMetaData.getName(), attributeEntity);
 		}
+	}
+
+	public Map<String, List<OntologyTag>> tagAttributesInEntity(String entity,
+			Map<AttributeMetaData, List<OntologyTerm>> tags)
+	{
+		Map<String, List<OntologyTag>> result = new LinkedHashMap<>();
+		for (AttributeMetaData amd : tags.keySet())
+		{
+			List<OntologyTag> attributeTags = Lists.newArrayList();
+			result.put(amd.getName(), attributeTags);
+			if (!tags.get(amd).isEmpty())
+			{
+				List<String> ontologyTermIRIs = new ArrayList<String>();
+				for (OntologyTerm ontologyTerm : tags.get(amd))
+				{
+					ontologyTermIRIs.add(ontologyTerm.getIRI());
+				}
+				OntologyTag tag = addAttributeTag(entity, amd.getName(), Relation.isAssociatedWith.getIRI(),
+						ontologyTermIRIs);
+				attributeTags.add(tag);
+			}
+		}
+		return result;
 	}
 }
