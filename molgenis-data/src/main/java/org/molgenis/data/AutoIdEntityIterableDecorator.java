@@ -5,6 +5,7 @@ import java.util.Map;
 
 /**
  * Adds auto generated id to an entity if it does not have an id.
+ * Adds auto generated date to entity auto date and datetime attributes.
  * 
  * Keeps an index of id by rownr so multiple calls to iterator() returns the same id.
  */
