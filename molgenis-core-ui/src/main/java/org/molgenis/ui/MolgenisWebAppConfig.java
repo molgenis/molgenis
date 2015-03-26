@@ -14,10 +14,10 @@ import java.util.Properties;
 
 import javax.annotation.PostConstruct;
 
-import org.molgenis.data.AutoIdRepositoryDecorator;
+import org.molgenis.data.AutoValueRepositoryDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.IdGenerator;
-import org.molgenis.data.IndexedAutoIdRepositoryDecorator;
+import org.molgenis.data.IndexedAutoValueRepositoryDecorator;
 import org.molgenis.data.IndexedCrudRepositorySecurityDecorator;
 import org.molgenis.data.IndexedRepository;
 import org.molgenis.data.ManageableRepositoryCollection;
@@ -448,12 +448,12 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 				{
 					IndexedRepository indexedRepos = (IndexedRepository) repository;
 
-					return new IndexedCrudRepositorySecurityDecorator(new IndexedAutoIdRepositoryDecorator(
+					return new IndexedCrudRepositorySecurityDecorator(new IndexedAutoValueRepositoryDecorator(
 							new IndexedRepositoryValidationDecorator(dataService(), indexedRepos,
 									new EntityAttributesValidator()), molgenisIdGenerator()), molgenisSettings);
 				}
 
-				return new RepositorySecurityDecorator(new AutoIdRepositoryDecorator(new RepositoryValidationDecorator(
+				return new RepositorySecurityDecorator(new AutoValueRepositoryDecorator(new RepositoryValidationDecorator(
 						dataService(), repository, new EntityAttributesValidator()), molgenisIdGenerator()));
 			}
 		};
