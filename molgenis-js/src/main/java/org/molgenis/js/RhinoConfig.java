@@ -2,6 +2,7 @@ package org.molgenis.js;
 
 import javax.annotation.PostConstruct;
 
+import org.molgenis.js.sandbox.SandboxedContextFactory;
 import org.mozilla.javascript.ContextFactory;
 import org.springframework.context.annotation.Configuration;
 
@@ -18,9 +19,7 @@ public class RhinoConfig
 	{
 		if (!ContextFactory.hasExplicitGlobal())
 		{
-			MolgenisContextFactory factory = new MolgenisContextFactory();
-			ContextFactory.initGlobal(factory);
-			factory.initSharedScope();
+			ContextFactory.initGlobal(new SandboxedContextFactory());
 		}
 	}
 

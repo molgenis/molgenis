@@ -4,6 +4,7 @@
 	var ns = molgenis.form = molgenis.form || {};
 	var restApi = new molgenis.RestClient();
 	var successHandler;
+	var meta;
 	
 	ns.quoteIsoDateT = function() {
 		$('.datetime input').each(function() {
@@ -62,34 +63,27 @@
 		$('#error-message').hide();
 	};
 	
-	ns.updateInputsVisibility = function() {		
-		$('.datetime input').each(function() {
-			var d = $(this).val();
-			$(this).val(d.replace(/'/g,''));//Remove quotes from isodateformat
+	ns.updateInputsVisibility = function() {	
+		var e = {};
+		$.each($('#entity-form').serializeArray(), function(index, input) {
+			e[input.name] = input.value;
 		});
 		
-		
-		$.ajax({
-			type: 'POST',
-			url:  $('#entity-form').attr('action').split("?")[0]  + '/attributes/visibility' ,
-			data: $('#entity-form').serialize(),
-			contentType: 'application/x-www-form-urlencoded',
-			async: false,
-			success: function(data, textStatus, response) {
-				ns.quoteIsoDateT();
-				
-				$('#entity-form input').each(function(index, el) {
-					if (data[el.name] === true) {
-						$(el).closest('.form-group').show();
-					} else if (data[el.name] === false) {
-						$(el).closest('.form-group').hide();
-					}
-				});
+		$.each(meta.attributes, function(name, attr) {
+			if (attr.visibleExpression) {
+				var visible = evalScript(attr.visibleExpression, e);
+				if (visible === true) {
+					$('#entity-form input[name=' + attr.name + "]").closest('.form-group').show();
+				} else if (visible === false) {
+					$('#entity-form input[name=' + attr.name + "]").closest('.form-group').hide();
+				}
 			}
 		});
 	};
 	
 	$(function() {
+		meta = restApi.get('/api/v1/' + $('#entity-form').data('id') + '/meta?expand=attributes');
+		
 		setTimeout(function(){ ns.updateInputsVisibility(); }, 10);//TODO get rid of setTimeout
 
 		//Enable datepickers
@@ -133,7 +127,6 @@
 		$('input').on('change', function() {
 			ns.updateInputsVisibility();
 		});
-		
 	});
 	
 }($, window.top.molgenis = window.top.molgenis || {}));

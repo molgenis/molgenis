@@ -34,6 +34,7 @@ public class AttributeMetaDataResponse
 	private Boolean aggregateable;
 	private Range range;
 	private String expression;
+	private String visibleExpression;
 
 	public AttributeMetaDataResponse(String entityParentName, AttributeMetaData attr)
 	{
@@ -182,12 +183,18 @@ public class AttributeMetaDataResponse
 			this.range = attr.getRange();
 		}
 		else this.range = null;
-		
+
 		if (attributesSet == null || attributesSet.contains("isVisible".toLowerCase()))
 		{
 			this.visible = attr.isVisible();
 		}
 		else this.visible = null;
+
+		if (attributesSet == null || attributesSet.contains("visibleExpression".toLowerCase()))
+		{
+			this.visibleExpression = attr.getVisibleExpression();
+		}
+		else this.visibleExpression = null;
 	}
 
 	public String getHref()
@@ -229,7 +236,7 @@ public class AttributeMetaDataResponse
 	{
 		return auto;
 	}
-	
+
 	public boolean isNillable()
 	{
 		return nillable;
@@ -304,4 +311,10 @@ public class AttributeMetaDataResponse
 	{
 		return expression;
 	}
+
+	public String getVisibleExpression()
+	{
+		return visibleExpression;
+	}
+
 }

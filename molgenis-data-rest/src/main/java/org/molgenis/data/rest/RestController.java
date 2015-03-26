@@ -67,7 +67,6 @@ import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.fieldtypes.BoolField;
 import org.molgenis.framework.db.EntityNotFoundException;
-import org.molgenis.js.ScriptEvaluator;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.token.TokenExtractor;
@@ -78,7 +77,6 @@ import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.util.MolgenisDateFormat;
 import org.molgenis.util.ResourceFingerprintRegistry;
-import org.mozilla.javascript.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -878,46 +876,6 @@ public class RestController
 		tokenService.removeToken(token);
 		SecurityContextHolder.getContext().setAuthentication(null);
 		request.getSession().invalidate();
-	}
-
-	/**
-	 * Return a map of the booleans indicating that an attribute must be visible or invisible on a form based on the
-	 * visible expressions
-	 */
-	@RequestMapping(value =
-	{ "/{entityName}/attributes/visibility", "/{entityName}/**/attributes/visibility" }, method = POST, headers = "Content-Type=application/x-www-form-urlencoded")
-	@ResponseBody
-	public Map<String, Boolean> checkVisbleExpressions(@PathVariable("entityName") String entityName,
-			HttpServletRequest request)
-	{
-		EntityMetaData entityMeta = dataService.getRepository(entityName).getEntityMetaData();
-		if (entityMeta == null) throw new UnknownEntityException("Unknown entity '" + entityName + "'");
-
-		Entity entity = new MapEntity();
-		for (AttributeMetaData attr : entityMeta.getAtomicAttributes())
-		{
-			String val = request.getParameter(attr.getName());
-			if (StringUtils.isNotBlank(val)) entity.set(attr.getName(), attr.getDataType().convert(val));
-		}
-
-		Map<String, Boolean> visibilityMap = new HashMap<>();
-		for (AttributeMetaData attr : entityMeta.getAtomicAttributes())
-		{
-			try
-			{
-				boolean visible = attr.getVisibleExpression() == null ? true : Context.toBoolean(ScriptEvaluator.eval(
-						attr.getVisibleExpression(), entity));
-				visibilityMap.put(attr.getName(), visible);
-			}
-			catch (Exception e)
-			{
-				LOG.warn("Exception evaluating expression [" + attr.getVisibleExpression() + "]", e);
-				throw new MolgenisDataException("Invalid expression '" + attr.getVisibleExpression() + "':"
-						+ e.getMessage());
-			}
-		}
-
-		return visibilityMap;
 	}
 
 	@ExceptionHandler(HttpMessageNotReadableException.class)
