@@ -93,11 +93,11 @@
 						</#list>
 					<#else>
 						<tr>
-							<td data-relation="http://iri.org/#isAssociatedWith">Is associated with</td>
+							<td data-relation="http://molgenis.org#isAssociatedWith">Is associated with</td>
 							<td></td>
 							<td>
 								<button type="btn" class="btn btn-default btn-xs edit-attribute-tags-btn pull-right" 
-									data-relation="http://iri.org/#isAssociatedWith" data-attribute="${attributeMetaData.name}" data-toggle="modal" data-target="#edit-ontology-modal">
+									data-relation="http://molgenis.org#isAssociatedWith" data-attribute="${attributeMetaData.name}" data-toggle="modal" data-target="#edit-ontology-modal">
 										Edit <span class="glyphicon glyphicon-pencil"></span>
 								</button>
 							</td>

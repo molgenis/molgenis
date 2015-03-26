@@ -13,7 +13,7 @@ public enum Relation {
 			"http://molgenis.org/uml/isGeneralizationOf"), hasSourceId(
 			"http://molgenis.org/uml/hasSourceId"), hasSourceName(
 			"http://molgenis.org/uml/hasSourceName"), isAssociatedWith(
-			"http://iri.org/#isAssociatedWith");
+			"http://molgenis.org#isAssociatedWith");
 	
 	private String iri;
 
