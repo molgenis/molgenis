@@ -1,22 +1,28 @@
 package org.molgenis.data;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.fieldtypes.StringField;
 import org.molgenis.util.HugeMap;
+
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 
 /**
  * Adds auto id capabilities to a Repository
  */
-public class AutoIdRepositoryDecorator implements Repository
+public class AutoValueRepositoryDecorator implements Repository
 {
 	private final Repository decoratedRepository;
 	private final IdGenerator idGenerator;
 
-	public AutoIdRepositoryDecorator(Repository decoratedRepository, IdGenerator idGenerator)
+	public AutoValueRepositoryDecorator(Repository decoratedRepository, IdGenerator idGenerator)
 	{
 		this.decoratedRepository = decoratedRepository;
 		this.idGenerator = idGenerator;
@@ -25,10 +31,14 @@ public class AutoIdRepositoryDecorator implements Repository
 	@Override
 	public void add(Entity entity)
 	{
-		AttributeMetaData attr = getEntityMetaData().getIdAttribute();
-		if ((attr != null) && attr.isAuto() && (attr.getDataType() instanceof StringField))
+		// auto date
+		generateAutoDateOrDateTime(Arrays.asList(entity), getEntityMetaData().getAttributes());
+
+		// auto id
+		AttributeMetaData idAttr = getEntityMetaData().getIdAttribute();
+		if ((idAttr != null) && idAttr.isAuto() && (idAttr.getDataType() instanceof StringField))
 		{
-			entity.set(attr.getName(), idGenerator.generateId());
+			entity.set(idAttr.getName(), idGenerator.generateId());
 		}
 
 		decoratedRepository.add(entity);
@@ -37,6 +47,10 @@ public class AutoIdRepositoryDecorator implements Repository
 	@Override
 	public Integer add(Iterable<? extends Entity> entities)
 	{
+		// auto date
+		generateAutoDateOrDateTime(entities, getEntityMetaData().getAttributes());
+
+		// auto id
 		AttributeMetaData attr = getEntityMetaData().getIdAttribute();
 		if ((attr != null) && attr.isAuto() && (attr.getDataType() instanceof StringField))
 		{
@@ -188,4 +202,47 @@ public class AutoIdRepositoryDecorator implements Repository
 		decoratedRepository.clearCache();
 	}
 
+	private void generateAutoDateOrDateTime(Iterable<? extends Entity> entities, Iterable<AttributeMetaData> attrs)
+	{
+		// get auto date and datetime attributes
+		Iterable<AttributeMetaData> autoAttrs = Iterables.filter(attrs, new Predicate<AttributeMetaData>()
+		{
+			@Override
+			public boolean apply(AttributeMetaData attr)
+			{
+				if (attr.isAuto())
+				{
+					FieldTypeEnum type = attr.getDataType().getEnumType();
+					return type == FieldTypeEnum.DATE || type == FieldTypeEnum.DATE_TIME;
+				}
+				else
+				{
+					return false;
+				}
+			}
+		});
+
+		// set current date for auto date and datetime attributes
+		Date dateNow = new Date();
+		for (Entity entity : entities)
+		{
+			for (AttributeMetaData attr : autoAttrs)
+			{
+				FieldTypeEnum type = attr.getDataType().getEnumType();
+				if (type == FieldTypeEnum.DATE)
+				{
+					entity.set(attr.getName(), dateNow);
+				}
+				else if (type == FieldTypeEnum.DATE_TIME)
+				{
+					entity.set(attr.getName(), dateNow);
+				}
+				else
+				{
+					throw new RuntimeException("Unexpected data type [" + type + "]");
+				}
+
+			}
+		}
+	}
 }
