@@ -186,7 +186,7 @@ public class RepositoryValidationDecorator implements Repository
 					if (attr.getDataType() instanceof XrefField)
 					{
 						if (newValue != null) newValue = ((Entity) newValue).getIdValue();
-						if (oldValue != null) ((Entity) oldValue).getIdValue();
+						if (oldValue != null) oldValue = ((Entity) oldValue).getIdValue();
 					}
 
 					if (((null == newValue) && (null != oldValue))

@@ -256,9 +256,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void retrieve() throws Exception
 	{
-		restController.retrieveEntity(ENTITY_NAME, ENTITY_ID, new String[]
-		{}, new String[]
-		{});
+		restController.retrieveEntity(ENTITY_NAME, ENTITY_ID, new String[] {}, new String[] {});
 
 		mockMvc.perform(get(HREF_ENTITY_ID)).andExpect(status().isOk())
 				.andExpect(content().contentType(APPLICATION_JSON))

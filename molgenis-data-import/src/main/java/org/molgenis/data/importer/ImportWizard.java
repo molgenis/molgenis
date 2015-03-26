@@ -161,7 +161,7 @@ public class ImportWizard extends Wizard
 		return groups;
 	}
 
-	public void setImportedEntities(List entityNames)
+	public void setImportedEntities(List<String> entityNames)
 	{
 		this.entityNames = entityNames;
 	}

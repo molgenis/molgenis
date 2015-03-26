@@ -21,8 +21,6 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -974,7 +972,7 @@ public class RestController
 		Object id = entity.getIdValue();
 		if (id != null)
 		{
-			response.addHeader("Location", String.format(BASE_URI + "/%s/%s", entityName, id));
+			response.addHeader("Location", Href.concatEntityHref(RestController.BASE_URI, entityName, id));
 		}
 
 		response.setStatus(HttpServletResponse.SC_CREATED);
@@ -1080,7 +1078,8 @@ public class RestController
 			throw new UnknownEntityException(entityName + " " + id + " not found");
 		}
 
-		String attrHref = String.format(BASE_URI + "/%s/%s/%s", meta.getName(), entity.getIdValue(), refAttributeName);
+		String attrHref = Href.concatAttributeHref(RestController.BASE_URI, meta.getName(), entity.getIdValue(),
+				refAttributeName);
 		switch (attr.getDataType().getEnumType())
 		{
 			case COMPOUND:
@@ -1160,17 +1159,7 @@ public class RestController
 		if (null == meta) throw new IllegalArgumentException("meta is null");
 
 		Map<String, Object> entityMap = new LinkedHashMap<String, Object>();
-		try
-		{
-			entityMap.put(
-					"href",
-					(String.format(BASE_URI + "/%s/%s", meta.getName(),
-							URLEncoder.encode(DataConverter.toString(entity.getIdValue()), "UTF-8"))));
-		}
-		catch (UnsupportedEncodingException e)
-		{
-			throw new RuntimeException(e);
-		}
+		entityMap.put("href", Href.concatEntityHref(RestController.BASE_URI, meta.getName(), entity.getIdValue()));
 
 		// TODO system fields
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
@@ -1194,9 +1183,12 @@ public class RestController
 					}
 					else
 					{
-						String attrHref = String.format(BASE_URI + "/%s/%s/%s", meta.getName(), entity.getIdValue(),
-								attrName);
-						entityMap.put(attrName, Collections.singletonMap("href", attrHref));
+						entityMap.put(
+								attrName,
+								Collections.singletonMap(
+										"href",
+										Href.concatAttributeHref(RestController.BASE_URI, meta.getName(),
+												entity.getIdValue(), attrName)));
 					}
 				}
 				else if (attrType == DATE)
@@ -1251,8 +1243,9 @@ public class RestController
 					EntityPager pager = new EntityPager(0, new EntityCollectionRequest().getNum(),
 							(long) refEntityMaps.size(), mrefEntities);
 
-					String uri = String.format(BASE_URI + "/%s/%s/%s", meta.getName(), entity.getIdValue(), attrName);
-					EntityCollectionResponse ecr = new EntityCollectionResponse(pager, refEntityMaps, uri, null);
+					EntityCollectionResponse ecr = new EntityCollectionResponse(pager, refEntityMaps,
+							Href.concatAttributeHref(RestController.BASE_URI, meta.getName(), entity.getIdValue(),
+									attrName), null);
 					entityMap.put(attrName, ecr);
 				}
 				else if ((attrType == XREF && entity.get(attr.getName()) != null)
@@ -1261,8 +1254,8 @@ public class RestController
 				{
 					// Add href to ref field
 					Map<String, String> ref = new LinkedHashMap<String, String>();
-					ref.put("href",
-							String.format(BASE_URI + "/%s/%s/%s", meta.getName(), entity.getIdValue(), attrName));
+					ref.put("href", Href.concatAttributeHref(RestController.BASE_URI, meta.getName(),
+							entity.getIdValue(), attrName));
 					entityMap.put(attrName, ref);
 				}
 

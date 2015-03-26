@@ -47,8 +47,8 @@ public class EntityMetaDataResponse
 			Map<String, Set<String>> attributeExpandsSet)
 	{
 		String name = meta.getName();
-		this.href = String.format("%s/%s/meta", RestController.BASE_URI, name);
-		this.hrefCollection = String.format("%s/%s", RestController.BASE_URI, name);
+		this.href = Href.concatMetaEntityHref(RestController.BASE_URI, name);
+		this.hrefCollection = String.format("%s/%s", RestController.BASE_URI, name); // FIXME apply Href escaping fix
 
 		if (attributesSet == null || attributesSet.contains("name".toLowerCase()))
 		{
@@ -84,7 +84,7 @@ public class EntityMetaDataResponse
 					}
 					else
 					{
-						String attrHref = String.format("%s/%s/meta/%s", RestController.BASE_URI, name, attr.getName());
+						String attrHref = Href.concatMetaAttributeHref(RestController.BASE_URI, name, attr.getName());
 						this.attributes.put(attr.getName(), Collections.singletonMap("href", attrHref));
 					}
 				}

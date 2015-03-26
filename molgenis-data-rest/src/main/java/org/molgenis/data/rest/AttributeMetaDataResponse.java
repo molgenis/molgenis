@@ -54,8 +54,7 @@ public class AttributeMetaDataResponse
 			final Map<String, Set<String>> attributeExpandsSet)
 	{
 		String attrName = attr.getName();
-
-		this.href = String.format("%s/%s/meta/%s", RestController.BASE_URI, entityParentName, attrName);
+		this.href = Href.concatMetaAttributeHref(RestController.BASE_URI, entityParentName, attrName);
 
 		if (attributesSet == null || attributesSet.contains("fieldType".toLowerCase()))
 		{
@@ -103,8 +102,12 @@ public class AttributeMetaDataResponse
 			}
 			else
 			{
-				this.refEntity = refEntity != null ? new Href(String.format("%s/%s/meta", RestController.BASE_URI,
-						refEntity.getName()), String.format("%s/%s", RestController.BASE_URI, refEntity.getName())) : null;
+				this.refEntity = refEntity != null ? new Href(Href.concatMetaEntityHref(RestController.BASE_URI,
+						refEntity.getName()), String.format("%s/%s", RestController.BASE_URI, refEntity.getName())) : null; // FIXME
+																															// apply
+																															// Href
+																															// escaping
+																															// fix
 			}
 		}
 		else this.refEntity = null;
@@ -128,7 +131,7 @@ public class AttributeMetaDataResponse
 							}
 							else
 							{
-								return Collections.<String, Object> singletonMap("href", String.format("%s/%s/meta/%s",
+								return Collections.<String, Object> singletonMap("href", Href.concatMetaAttributeHref(
 										RestController.BASE_URI, entityParentName, attributeMetaData.getName()));
 							}
 						}
@@ -193,7 +196,7 @@ public class AttributeMetaDataResponse
 			this.range = attr.getRange();
 		}
 		else this.range = null;
-		
+
 		if (attributesSet == null || attributesSet.contains("isVisible".toLowerCase()))
 		{
 			this.visible = attr.isVisible();
@@ -240,7 +243,7 @@ public class AttributeMetaDataResponse
 	{
 		return auto;
 	}
-	
+
 	public boolean isNillable()
 	{
 		return nillable;
