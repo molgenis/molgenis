@@ -69,9 +69,9 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	@Override
 	public void addUpgrades()
 	{
-		metaDataUpgradeService.addUpgrade(new Step1(searchService, dataSource));
+		metaDataUpgradeService.addUpgrade(new Step1(dataSource));
 		metaDataUpgradeService.addUpgrade(new Step2(dataService, jpaRepositoryCollection, dataSource, searchService));
-		metaDataUpgradeService.addUpgrade(new Step3(dataSource, mysqlRepositoryCollection));
+		metaDataUpgradeService.addUpgrade(new Step3(dataSource, searchService));
 	}
 
 	@Override
