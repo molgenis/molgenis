@@ -35,7 +35,8 @@ public class MolgenisInterceptorTest
 	{
 		MolgenisSettings molgenisSettings = mock(MolgenisSettings.class);
 		when(molgenisSettings.getProperty("i18nLocale", "en")).thenReturn("en");
-        when(molgenisSettings.getProperty("app.href.logo", "/img/logo_molgenis_small.png")).thenReturn("/img/logo_molgenis_small.png");
+		when(molgenisSettings.getProperty("app.href.logo", "/img/logo_molgenis_small.png")).thenReturn(
+				"/img/logo_molgenis_small.png");
 		MolgenisInterceptor molgenisInterceptor = new MolgenisInterceptor(resourceFingerprintRegistry,
 				molgenisSettings, "development");
 		HttpServletRequest request = mock(HttpServletRequest.class);
