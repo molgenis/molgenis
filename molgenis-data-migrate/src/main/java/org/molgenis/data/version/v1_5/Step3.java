@@ -2,6 +2,7 @@ package org.molgenis.data.version.v1_5;
 
 import static org.molgenis.data.support.QueryImpl.EQ;
 
+import java.io.IOException;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -11,9 +12,12 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
+import org.molgenis.data.meta.PackageMetaData;
+import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.meta.migrate.v1_4.AttributeMetaDataMetaData1_4;
 import org.molgenis.data.meta.migrate.v1_4.EntityMetaDataMetaData1_4;
 import org.molgenis.data.mysql.AsyncJdbcTemplate;
@@ -61,8 +65,8 @@ public class Step3 extends MetaDataUpgrade
 		LOG.info("Migrating MySQL MREF columns...");
 
 		dataService = new DataServiceImpl();
-		// Get the undecorated repos to index
-		MysqlRepositoryCollection backend = new MysqlRepositoryCollection()
+		// Get the undecorated repos
+		MysqlRepositoryCollection undecoratedMySQL = new MysqlRepositoryCollection()
 		{
 			@Override
 			protected MysqlRepository createMysqlRepository()
@@ -78,20 +82,20 @@ public class Step3 extends MetaDataUpgrade
 		};
 
 		metaData = new MetaDataServiceImpl(dataService);
-		RunAsSystemProxy.runAsSystem(() -> metaData.setDefaultBackend(backend));
+		RunAsSystemProxy.runAsSystem(() -> metaData.setDefaultBackend(undecoratedMySQL));
 
 		addOrderColumnToMREFTables();
 		updateAttributeOrderInMysql(dataService, searchService);
-		recreateElasticSearchMetaDataIndices(searchService);
+		recreateElasticSearchMetaDataIndices();
 		LOG.info("Migrating MySQL MREF columns DONE.");
 	}
 
-	private void recreateElasticSearchMetaDataIndices(SearchService v14ElasticSearchService)
+	private void recreateElasticSearchMetaDataIndices()
 	{
-		v14ElasticSearchService.delete("entities");
-		v14ElasticSearchService.delete("attributes");
-		v14ElasticSearchService.delete("tags");
-		v14ElasticSearchService.delete("packages");
+		searchService.delete("entities");
+		searchService.delete("attributes");
+		searchService.delete("tags");
+		searchService.delete("packages");
 
 		searchService.refresh();
 
@@ -105,19 +109,24 @@ public class Step3 extends MetaDataUpgrade
 			e1.printStackTrace();
 		}
 
-		// try
-		// {
-		// searchService.createMappings(new TagMetaData());
-		// searchService.createMappings(new PackageMetaData());
-		// searchService.createMappings(new AttributeMetaDataMetaData());
-		// searchService.createMappings(new EntityMetaDataMetaData());
-		// }
-		// catch (IOException e)
-		// {
-		// LOG.error("error creating metadata mappings", e);
-		// }
+		try
+		{
+			searchService.createMappings(new TagMetaData());
+			searchService.createMappings(new PackageMetaData());
+			searchService.createMappings(new AttributeMetaDataMetaData());
+			searchService.createMappings(new EntityMetaDataMetaData());
+		}
+		catch (IOException e)
+		{
+			LOG.error("error creating metadata mappings", e);
+		}
 
-		// TODO: refill from mysql!
+		searchService.rebuildIndex(dataService.getRepository(TagMetaData.ENTITY_NAME), new TagMetaData());
+		searchService.rebuildIndex(dataService.getRepository(PackageMetaData.ENTITY_NAME), new PackageMetaData());
+		searchService.rebuildIndex(dataService.getRepository(AttributeMetaDataMetaData.ENTITY_NAME),
+				new AttributeMetaDataMetaData());
+		searchService.rebuildIndex(dataService.getRepository(EntityMetaDataMetaData.ENTITY_NAME),
+				new EntityMetaDataMetaData());
 	}
 
 	private void addOrderColumnToMREFTables()
@@ -125,15 +134,13 @@ public class Step3 extends MetaDataUpgrade
 		LOG.info("Add order column to MREF tables...");
 		for (EntityMetaData emd : metaData.getEntityMetaDatas())
 		{
-			LOG.info("Entity: {}", emd.getName());
+			LOG.info("Entity {}", emd.getName());
 			for (AttributeMetaData amd : emd.getAtomicAttributes())
 			{
-				LOG.info("attribute: {}", amd.getName());
 				if (amd.getDataType() instanceof MrefField)
 				{
 					LOG.info("Add order column to MREF attribute table {}.{} .", emd.getName(), amd.getName());
 					String mrefUpdateSql = getMrefUpdateSql(emd, amd);
-					LOG.info(mrefUpdateSql);
 					try
 					{
 						template.execute(mrefUpdateSql);
