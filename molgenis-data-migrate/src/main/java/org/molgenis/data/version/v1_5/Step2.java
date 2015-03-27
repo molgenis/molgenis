@@ -76,7 +76,7 @@ public class Step2 extends MetaDataUpgrade
 	public Step2(DataService dataService, RepositoryCollection jpaBackend, DataSource dataSource,
 			SearchService searchService)
 	{
-		super(0, 1);
+		super(1, 2);
 		this.dataService = dataService;
 		this.jpaBackend = jpaBackend;
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
