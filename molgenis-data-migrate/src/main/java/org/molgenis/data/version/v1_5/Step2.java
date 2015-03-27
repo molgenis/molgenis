@@ -1,10 +1,8 @@
-package org.molgenis.data.version;
+package org.molgenis.data.version.v1_5;
 
 import static org.molgenis.data.elasticsearch.util.MapperTypeSanitizer.sanitizeMapperType;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -22,7 +20,6 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IndexedRepository;
-import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Range;
 import org.molgenis.data.Repository;
@@ -30,22 +27,19 @@ import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.elasticsearch.ElasticSearchService;
 import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.meta.AttributeMetaDataMetaData;
-import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.version.MetaDataUpgrade;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.util.DependencyResolver;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.util.FileCopyUtils;
 
 /**
  * Upgrade class for upgrading from metadata version 0 (molgenis 1.4.4) to 1 (molgenis 1.5.0)
  */
-public class UpgradeFrom0To1 extends MetaDataUpgrade
+public class Step2 extends MetaDataUpgrade
 {
 	private static final String ENTITY_NAME = "name";
 	private static final String ENTITY_LABEL = "label";
@@ -79,7 +73,7 @@ public class UpgradeFrom0To1 extends MetaDataUpgrade
 	private final JdbcTemplate jdbcTemplate;
 	private final ElasticSearchService searchService;
 
-	public UpgradeFrom0To1(DataService dataService, RepositoryCollection jpaBackend, DataSource dataSource,
+	public Step2(DataService dataService, RepositoryCollection jpaBackend, DataSource dataSource,
 			SearchService searchService)
 	{
 		super(0, 1);
@@ -92,35 +86,7 @@ public class UpgradeFrom0To1 extends MetaDataUpgrade
 	@Override
 	public void upgrade()
 	{
-		InputStream in = getClass().getResourceAsStream("2582.sql");
-		try
-		{
-			jdbcTemplate.execute(FileCopyUtils.copyToString(new InputStreamReader(in)));
-		}
-		catch (DataAccessException | IOException e)
-		{
-			throw new RuntimeException(e);
-		}
-
-		ManageableRepositoryCollection defaultBackend = dataService.getMeta().getDefaultBackend();
 		MetaDataServiceImpl metaDataService = (MetaDataServiceImpl) dataService.getMeta();
-
-		((IndexedRepository) dataService.getRepository(EntityMetaDataMetaData.ENTITY_NAME)).rebuildIndex();
-		((IndexedRepository) dataService.getRepository(AttributeMetaDataMetaData.ENTITY_NAME)).rebuildIndex();
-
-		// Add expression attribute to AttributeMetaData
-		defaultBackend.addAttribute(AttributeMetaDataMetaData.ENTITY_NAME,
-				new AttributeMetaDataMetaData().getAttribute(AttributeMetaDataMetaData.EXPRESSION));
-
-		// Add backend attribute to EntityMetaData
-		defaultBackend.addAttribute(EntityMetaDataMetaData.ENTITY_NAME,
-				new EntityMetaDataMetaData().getAttribute(EntityMetaDataMetaData.BACKEND));
-
-		// All entities in the entities repo are MySQL backend
-		for (EntityMetaData emd : dataService.getMeta().getEntityMetaDatas())
-		{
-			metaDataService.updateEntityMetaBackend(emd.getName(), "MySQL");
-		}
 
 		// Register ES repos
 		Set<EntityMetaData> esRepos = new HashSet<>();
@@ -199,8 +165,6 @@ public class UpgradeFrom0To1 extends MetaDataUpgrade
 		{
 			((IndexedRepository) repo).rebuildIndex();
 		}
-
-		new MysqlMigrate(jdbcTemplate, "MySQL").migrate(metaDataService);
 	}
 
 	@SuppressWarnings("unchecked")

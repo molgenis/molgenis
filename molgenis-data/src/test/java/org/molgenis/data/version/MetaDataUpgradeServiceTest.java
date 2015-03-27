@@ -19,7 +19,7 @@ public class MetaDataUpgradeServiceTest
 	public void beforeMethod()
 	{
 		metaDataVersionService = mock(MetaDataVersionService.class);
-		metaDataUpgradeService = new MetaDataUpgradeService(metaDataVersionService, null, null, null, null);
+		metaDataUpgradeService = new MetaDataUpgradeService(metaDataVersionService);
 		upgradeFrom0 = mock(MetaDataUpgrade.class);
 		when(upgradeFrom0.getFromVersion()).thenReturn(0);
 		metaDataUpgradeService.addUpgrade(upgradeFrom0);
@@ -28,7 +28,8 @@ public class MetaDataUpgradeServiceTest
 	@Test
 	public void upgradeNotNeeded()
 	{
-		when(metaDataVersionService.getDatabaseMetaDataVersion()).thenReturn(1);
+		when(metaDataVersionService.getDatabaseMetaDataVersion()).thenReturn(
+				MetaDataVersionService.CURRENT_META_DATA_VERSION);
 		metaDataUpgradeService.upgrade();
 		verify(metaDataVersionService, never()).updateToCurrentVersion();
 		verify(upgradeFrom0, never()).upgrade();

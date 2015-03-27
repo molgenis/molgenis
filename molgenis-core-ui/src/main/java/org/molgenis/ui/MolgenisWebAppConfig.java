@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.annotation.PostConstruct;
+import javax.sql.DataSource;
 
 import org.molgenis.data.AutoIdRepositoryDecorator;
 import org.molgenis.data.DataService;
@@ -112,6 +113,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 	@Autowired
 	public MetaDataUpgradeService metaDataUpgradeService;
+
+	@Autowired
+	public DataSource dataSource;
 
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry)
@@ -397,7 +401,8 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@PostConstruct
 	public void initRepositories()
 	{
-
+		addUpgrades();
+		metaDataUpgradeService.upgrade();
 		if (!indexExists())
 		{
 			LOG.info("Reindexing repositories....");
@@ -406,18 +411,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		}
 		else
 		{
-			LOG.info("Index found no need to reindex.");
-			upgradeMetaData();
-			reindex();
+			LOG.info("Index found. No need to reindex.");
 		}
-
 		runAsSystem(() -> metaDataService().setDefaultBackend(getBackend()));
-		metaDataUpgradeService.upgrade();
-	}
-
-	protected void upgradeMetaData()
-	{
-		LOG.info("override this!");
 	}
 
 	private boolean indexExists()
@@ -471,4 +467,6 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 			}
 		};
 	}
+
+	public abstract void addUpgrades();
 }

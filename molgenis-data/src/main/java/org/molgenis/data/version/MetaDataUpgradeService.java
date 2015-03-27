@@ -3,17 +3,10 @@ package org.molgenis.data.version;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-import javax.sql.DataSource;
-
-import org.molgenis.data.DataService;
-import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.elasticsearch.SearchService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 /**
  * Upgrades the data backends to the current meta data version.
@@ -21,37 +14,21 @@ import org.springframework.stereotype.Component;
  * The version the database is generated with should be defined in the molgenis-server.properties with the key
  * 'meta.data.version'
  */
-@Component
+@Service
 public class MetaDataUpgradeService
 {
 	private final Logger LOG = LoggerFactory.getLogger(getClass());
 
 	private final MetaDataVersionService metaDataVersionService;
-	private final DataService dataService;
 	private final List<MetaDataUpgrade> upgrades = new ArrayList<>();
-	private final RepositoryCollection jpaRepositoryCollection;
-	private final DataSource dataSource;
-	private final SearchService searchService;
 
 	@Autowired
-	public MetaDataUpgradeService(MetaDataVersionService metaDataVersionService, DataService dataService,
-			@Qualifier("JpaRepositoryCollection") RepositoryCollection jpaRepositoryCollection, DataSource dataSource,
-			SearchService searchService)
+	public MetaDataUpgradeService(MetaDataVersionService metaDataVersionService)
 	{
 		this.metaDataVersionService = metaDataVersionService;
-		this.dataService = dataService;
-		this.jpaRepositoryCollection = jpaRepositoryCollection;
-		this.dataSource = dataSource;
-		this.searchService = searchService;
 	}
 
-	@PostConstruct
-	public void addUpgrades()
-	{
-		addUpgrade(new UpgradeFrom0To1(dataService, jpaRepositoryCollection, dataSource, searchService));
-	}
-
-	protected void addUpgrade(MetaDataUpgrade upgrade)
+	public void addUpgrade(MetaDataUpgrade upgrade)
 	{
 		upgrades.add(upgrade);
 	}
@@ -66,7 +43,7 @@ public class MetaDataUpgradeService
 
 			upgrades.stream()
 					.filter(upgrade -> upgrade.getFromVersion() >= metaDataVersionService.getDatabaseMetaDataVersion())
-					.forEach(upgrade -> upgrade.upgrade());
+					.forEach(this::runUpgrade);
 
 			metaDataVersionService.updateToCurrentVersion();
 
@@ -78,5 +55,12 @@ public class MetaDataUpgradeService
 					metaDataVersionService.getDatabaseMetaDataVersion(),
 					MetaDataVersionService.CURRENT_META_DATA_VERSION);
 		}
+	}
+
+	private void runUpgrade(MetaDataUpgrade upgrade)
+	{
+		LOG.info("Upgrading from {} to {}...", upgrade.getFromVersion(), upgrade.getToVersion());
+		upgrade.upgrade();
+		LOG.debug("Upgraded from {} to {}.", upgrade.getFromVersion(), upgrade.getToVersion());
 	}
 }
