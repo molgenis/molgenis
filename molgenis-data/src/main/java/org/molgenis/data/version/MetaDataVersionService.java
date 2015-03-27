@@ -44,8 +44,13 @@ public class MetaDataVersionService
 
 	public void updateToCurrentVersion()
 	{
+		updateToVersion(CURRENT_META_DATA_VERSION);
+	}
+
+	public void updateToVersion(int version)
+	{
 		Properties properties = getMolgenisServerProperties();
-		properties.setProperty(META_DATE_VERSION_KEY, Integer.toString(CURRENT_META_DATA_VERSION));
+		properties.setProperty(META_DATE_VERSION_KEY, Integer.toString(version));
 
 		try (OutputStream out = new FileOutputStream(getMolgenisServerPropertiesFile()))
 		{
@@ -55,7 +60,6 @@ public class MetaDataVersionService
 		{
 			throw new UncheckedIOException(e);
 		}
-
 	}
 
 	public Properties getMolgenisServerProperties()

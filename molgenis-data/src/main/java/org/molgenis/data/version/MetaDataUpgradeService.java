@@ -62,5 +62,6 @@ public class MetaDataUpgradeService
 		LOG.info("Upgrading from {} to {}...", upgrade.getFromVersion(), upgrade.getToVersion());
 		upgrade.upgrade();
 		LOG.debug("Upgraded from {} to {}.", upgrade.getFromVersion(), upgrade.getToVersion());
+		metaDataVersionService.updateToVersion(upgrade.getToVersion());
 	}
 }
