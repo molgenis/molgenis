@@ -140,7 +140,7 @@
  						mode : this.props.mode,
  						formLayout : this.props.formLayout,
 						colOffset : this.props.colOffset,
-						cancelBtn: this.props.modal === true, 
+						cancelBtn: this.props.modal === true,
 						onCancelClick : this.props.modal === true ? this._handleCancel : undefined
 					}) : null
 				)
@@ -183,7 +183,7 @@
 		},
 		_handleSubmitSuccess: function() {
 			if(this.props.modal) {
-				this.setState({showModal: false});	
+				this.setState({showModal: false});
 			}
 			if(this.props.onSubmitSuccess) {
 				this.props.onSubmitSuccess();
