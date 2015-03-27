@@ -106,7 +106,7 @@
 
 <div class="row">
 	<div class="col-md-2">
-		<form method="get" action="${context_url}/tagWizard">
+		<form method="get" action="${context_url}/tagwizard">
 			<input type="hidden" name="target" value="${selectedTarget}"/>
 			<div class="btn-group" role="group">
 				<button type="submit" class="btn btn-primary">
