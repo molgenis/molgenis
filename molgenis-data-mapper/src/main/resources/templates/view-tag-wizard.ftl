@@ -58,12 +58,12 @@
 </div>
 
 <div class="row">
-	<div class="col-md-8" style="overflow-y:auto;max-height:500px;min-height:300px;">
+	<div class="col-md-12" style="overflow-y:auto;max-height:500px;min-height:300px;">
 		<#list attributes as attributeMetaData>
 			<h4>${attributeMetaData.name}</h4>
 			<p>${attributeMetaData.description!""}
 			
-			<table class="table" id="${attributeMetaData.name}">
+			<table class="table" style="table-layout:fixed;width:100%;" id="${attributeMetaData.name}">
 				<thead>
 					<th>Relation</th>
 					<th>Tags</th>
