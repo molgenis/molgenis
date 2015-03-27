@@ -3,8 +3,9 @@ package org.molgenis.data.version.v1_5;
 import javax.sql.DataSource;
 
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.version.MetaDataUpgrade;
 import org.molgenis.fieldtypes.MrefField;
 import org.slf4j.Logger;
@@ -19,64 +20,44 @@ public class Step3 extends MetaDataUpgrade
 {
 	private JdbcTemplate template;
 
-	private String backend;
-
-	private DataService dataService;
+	private RepositoryCollection mysql;
 
 	private static final Logger LOG = LoggerFactory.getLogger(Step3.class);
 
-	public Step3(DataSource dataSource, String backend, DataService dataService)
+	public Step3(DataSource dataSource, RepositoryCollection mysql)
 	{
 		super(2, 3);
 		this.template = new JdbcTemplate(dataSource);
-		this.backend = backend;
-		this.dataService = dataService;
+		this.mysql = mysql;
 	}
 
 	@Override
 	public void upgrade()
 	{
-		LOG.info("Migrating backend {} ...", backend);
-		for (EntityMetaData emd : dataService.getMeta().getEntityMetaDatas())
+		LOG.info("Migrating {} MREF columns...", mysql.getName());
+		for (Repository repo : mysql)
 		{
-			if (backend.equalsIgnoreCase(emd.getBackend()))
+			EntityMetaData emd = repo.getEntityMetaData();
+			for (AttributeMetaData amd : emd.getAtomicAttributes())
 			{
-				for (AttributeMetaData amd : emd.getAtomicAttributes())
+				if (amd.getDataType() instanceof MrefField)
 				{
-					if (amd.getDataType() instanceof MrefField) try
+					LOG.info("Add order column to MREF attribute table {}.{}.{} .", mysql.getName(), emd.getName(),
+							amd.getName());
+					String mrefUpdateSql = getMrefUpdateSql(emd, amd);
+					LOG.debug(mrefUpdateSql);
+					try
 					{
-						String mrefExistenceSql = getMrefExistenceSql(emd, amd);
-						LOG.debug(mrefExistenceSql);
-						Integer exists = template.queryForObject(mrefExistenceSql, Integer.class);
-						if (exists > 0)
-						{
-							LOG.debug("MREF attribute table {}.{}.{} already has an order column.", backend,
-									emd.getName(), amd.getName());
-						}
-						else
-						{
-							LOG.info("Add order column to MREF attribute table {}.{}.{} .", backend, emd.getName(),
-									amd.getName());
-							String mrefUpdateSql = getMrefUpdateSql(emd, amd);
-							LOG.debug(mrefUpdateSql);
-							template.execute(mrefUpdateSql);
-						}
+						template.execute(mrefUpdateSql);
 					}
-					catch (DataAccessException daoe)
+					catch (DataAccessException dae)
 					{
-						LOG.error("Error migrating {}.{}.{} .", backend, emd.getName(), amd.getName(), daoe);
+						LOG.error("Error migrating {}.{}.{} .", mysql.getName(), emd.getName(), amd.getName(), dae);
 					}
 				}
 			}
 		}
-		LOG.info("Migrating backend {} done.", backend);
-	}
-
-	private static String getMrefExistenceSql(EntityMetaData emd, AttributeMetaData att)
-	{
-		return String.format(
-				"SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = '%s_%s' AND column_name = 'order'",
-				emd.getName().toLowerCase(), att.getName().toLowerCase());
+		LOG.info("Migrating {} MREF columns DONE.", mysql.getName());
 	}
 
 	private static String getMrefUpdateSql(EntityMetaData emd, AttributeMetaData att)

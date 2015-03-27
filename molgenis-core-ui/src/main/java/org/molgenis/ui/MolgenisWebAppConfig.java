@@ -468,5 +468,8 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		};
 	}
 
+	/**
+	 * Adds the upgrade steps to the {@link MetaDataUpgradeService}.
+	 */
 	public abstract void addUpgrades();
 }
