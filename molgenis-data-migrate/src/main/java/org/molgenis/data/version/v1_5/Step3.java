@@ -84,8 +84,9 @@ public class Step3 extends MetaDataUpgrade
 		metaData = new MetaDataServiceImpl(dataService);
 		RunAsSystemProxy.runAsSystem(() -> metaData.setDefaultBackend(undecoratedMySQL));
 
+		updateAttributeOrderInMysql();
 		addOrderColumnToMREFTables();
-		updateAttributeOrderInMysql(dataService, searchService);
+		updateAttributeOrderInMysql();
 		recreateElasticSearchMetaDataIndices();
 		LOG.info("Migrating MySQL MREF columns DONE.");
 	}
@@ -155,22 +156,22 @@ public class Step3 extends MetaDataUpgrade
 		LOG.info("Add order column to MREF tables DONE.");
 	}
 
-	private void updateAttributeOrderInMysql(DataServiceImpl v15MySQLDataService, SearchService v14ElasticSearchService)
+	private void updateAttributeOrderInMysql()
 	{
 		LOG.info("Update attribute order in MySQL...");
 
 		// save all entity metadata with attributes in proper order
-		for (Entity v15EntityMetaDataEntity : v15MySQLDataService.getRepository(EntityMetaDataMetaData.ENTITY_NAME))
+		for (Entity v15EntityMetaDataEntity : dataService.getRepository(EntityMetaDataMetaData.ENTITY_NAME))
 		{
 			LOG.info("Setting attribute order for entity: "
 					+ v15EntityMetaDataEntity.get(EntityMetaDataMetaData1_4.SIMPLE_NAME));
-			List<Entity> attributes = Lists.newArrayList(v14ElasticSearchService.search(
+			List<Entity> attributes = Lists.newArrayList(searchService.search(
 					EQ(AttributeMetaDataMetaData1_4.ENTITY,
 							v15EntityMetaDataEntity.getString(EntityMetaDataMetaData1_4.SIMPLE_NAME)),
 					new AttributeMetaDataMetaData1_4()));
 			v15EntityMetaDataEntity.set(EntityMetaDataMetaData.ATTRIBUTES, attributes);
 			v15EntityMetaDataEntity.set(EntityMetaDataMetaData.BACKEND, "MySQL");
-			v15MySQLDataService.update(EntityMetaDataMetaData.ENTITY_NAME, v15EntityMetaDataEntity);
+			dataService.update(EntityMetaDataMetaData.ENTITY_NAME, v15EntityMetaDataEntity);
 		}
 		LOG.info("Update attribute order done.");
 	}
