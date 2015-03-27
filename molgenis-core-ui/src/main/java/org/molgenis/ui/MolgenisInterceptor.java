@@ -19,7 +19,8 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 public class MolgenisInterceptor extends HandlerInterceptorAdapter
 {
 	public static final String APP_HREF_LOGO = "app.href.logo";
-	private final ResourceFingerprintRegistry resourceFingerprintRegistry;
+    private static final String VALUE_HOME = "home";
+    private final ResourceFingerprintRegistry resourceFingerprintRegistry;
 	private final MolgenisSettings molgenisSettings;
 	public static final String I18N_LOCALE = "i18nLocale";
 	private final String environment;
@@ -55,14 +56,14 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter
 			modelAndView.addObject(KEY_RESOURCE_FINGERPRINT_REGISTRY, resourceFingerprintRegistry);
 			String i18nLocale = molgenisSettings.getProperty(I18N_LOCALE, "en");
 			String topLogo = molgenisSettings.getProperty("app.top.logo", "");
-			String homeLogo = molgenisSettings.getProperty(APP_HREF_LOGO, "");
+			String homeLogo = molgenisSettings.getProperty(APP_HREF_LOGO, "/img/logo_molgenis_small.png");
 
 			Locale locale = new Locale(i18nLocale, i18nLocale);
 			ResourceBundle i18n = ResourceBundle.getBundle("i18n", locale);
 
 			modelAndView.addObject("i18n", i18n);
 			modelAndView.addObject("app_top_logo", topLogo);
-			modelAndView.addObject("app_home_logo", homeLogo);
+			modelAndView.addObject("app_home_logo", !homeLogo.equals(VALUE_HOME)?homeLogo:"");
 		}
 	}
 }
