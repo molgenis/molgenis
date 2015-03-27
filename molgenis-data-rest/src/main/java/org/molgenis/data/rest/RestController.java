@@ -192,7 +192,7 @@ public class RestController
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
 
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
-		return new EntityMetaDataResponse(meta, attributeSet, attributeExpandSet);
+		return new EntityMetaDataResponse(meta, attributeSet, attributeExpandSet, molgenisPermissionService);
 	}
 
 	/**
@@ -212,7 +212,7 @@ public class RestController
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(request != null ? request.getExpand() : null);
 
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
-		return new EntityMetaDataResponse(meta, attributesSet, attributeExpandSet);
+		return new EntityMetaDataResponse(meta, attributesSet, attributeExpandSet, molgenisPermissionService);
 	}
 
 	/**
@@ -1083,7 +1083,8 @@ public class RestController
 		AttributeMetaData attributeMetaData = meta.getAttribute(attributeName);
 		if (attributeMetaData != null)
 		{
-			return new AttributeMetaDataResponse(entityName, attributeMetaData, attributeSet, attributeExpandSet);
+			return new AttributeMetaDataResponse(entityName, attributeMetaData, attributeSet, attributeExpandSet,
+					molgenisPermissionService);
 		}
 		else
 		{
@@ -1211,7 +1212,7 @@ public class RestController
 					{
 						Set<String> subAttributesSet = attributeExpandsSet.get(attrName.toLowerCase());
 						entityMap.put(attrName, new AttributeMetaDataResponse(meta.getName(), attr, subAttributesSet,
-								null));
+								null, molgenisPermissionService));
 					}
 					else
 					{
