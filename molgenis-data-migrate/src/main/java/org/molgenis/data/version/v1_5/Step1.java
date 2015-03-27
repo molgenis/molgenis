@@ -5,7 +5,6 @@ import static org.molgenis.data.support.QueryImpl.EQ;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -41,13 +40,12 @@ public class Step1 extends MetaDataUpgrade
 	private JdbcTemplate jdbcTemplate;
 	private DataSource dataSource;
 
-	// private ElasticSearchServiceF
-
 	public Step1(SearchService searchService, DataSource dataSource)
 	{
 		super(0, 1);
 		this.searchService = searchService;
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
+		this.dataSource = dataSource;
 	}
 
 	@Override
@@ -59,18 +57,30 @@ public class Step1 extends MetaDataUpgrade
 
 	private void updateMetaDataDatabaseTables()
 	{
-		// TODO: Update metadata database tables here! (or run SQL script manually)
-
 		InputStream in = getClass().getResourceAsStream("/2582.sql");
+		String script;
 		try
 		{
-			String script = FileCopyUtils.copyToString(new InputStreamReader(in));
-			String[] statements = script.split(";");
-			Arrays.stream(statements).forEach(jdbcTemplate::execute);
+			script = FileCopyUtils.copyToString(new InputStreamReader(in));
 		}
-		catch (DataAccessException | IOException e)
+		catch (IOException e)
 		{
+			LOG.error("Failed to read upgrade script", e);
 			throw new RuntimeException(e);
+		}
+		for (String statement : script.split(";"))
+		{
+			String trimmed = statement.trim();
+			try
+			{
+				LOG.info(trimmed);
+				jdbcTemplate.execute(trimmed);
+			}
+			catch (DataAccessException e)
+			{
+				LOG.error(e.getMessage());
+			}
+
 		}
 	}
 
