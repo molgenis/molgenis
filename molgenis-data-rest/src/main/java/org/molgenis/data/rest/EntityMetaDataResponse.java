@@ -23,7 +23,7 @@ public class EntityMetaDataResponse
 	private final String idAttribute;
 	private final Boolean isAbstract;
 	/**
-	 * Is this user allowed to add/update entities of this type?
+	 * Is this user allowed to add/update/delete entities of this type?
 	 */
 	private final Boolean writable;
 
