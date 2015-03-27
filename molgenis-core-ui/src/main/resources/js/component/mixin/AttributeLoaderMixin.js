@@ -32,7 +32,7 @@
 			}
 		},
 		_loadAttr: function(href) {
-			api.getAsync(href).done(function(attr) {
+			api.getAsync(href, {expand: ['refEntity']}).done(function(attr) {
 				if (this.isMounted()) {
 					this._setAttr(attr);
 				}

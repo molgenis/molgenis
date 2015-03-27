@@ -7,8 +7,7 @@
 	"bootstrap-switch.min.css",
 	"dataexplorer.css",
 	"dataexplorer-filter.css",
-	"diseasematcher.css",
-	"molgenis-controls.css"]>
+	"diseasematcher.css"]>
 <#assign js=[
 	"dataexplorer-filter.js",
 	"dataexplorer-filter-dialog.js",

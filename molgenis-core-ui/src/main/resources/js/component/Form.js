@@ -2,22 +2,21 @@
 (function(_, React, molgenis) {
     "use strict";
 
-    var div = React.DOM.div;
+    var div = React.DOM.div, span = React.DOM.span;
 	
 	/**
 	 * @memberOf component
 	 */
 	var Form = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin, molgenis.ui.mixin.EntityLoaderMixin, molgenis.ui.mixin.EntityInstanceLoaderMixin],
+		mixins: [molgenis.ui.mixin.DeepPureRenderMixin, molgenis.ui.mixin.EntityLoaderMixin, molgenis.ui.mixin.EntityInstanceLoaderMixin, molgenis.ui.mixin.ReactLayeredComponentMixin],
 		displayName: 'Form',
 		propTypes: {
 			entity: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]),
 			entityInstance: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]),
 			mode: React.PropTypes.oneOf(['create', 'edit', 'view']),
 			formLayout: React.PropTypes.oneOf(['horizontal', 'vertical']),
+			modal: React.PropTypes.bool, // whether or not to show form in modal
 			colOffset: React.PropTypes.number,
-			cancelBtn: React.PropTypes.bool, 
-			onCancel: React.PropTypes.func,
 			onSubmitSuccess: React.PropTypes.func,
 			onSubmitError: React.PropTypes.func
 		},
@@ -25,19 +24,67 @@
 			return {
 				mode: 'create',
 				formLayout: 'horizontal',
-				colOffset: 3,
-				cancelBtn: false
+				modal: false,
+				colOffset: 3
 			};
+		},
+		componentWillReceiveProps : function(nextProps) {
+			this.setState({
+				validate: false,
+				showModal: true
+			});
 		},
 		getInitialState: function() {
 			return {
 				entity : null,
 				entityInstance : null,
 				values : {},
-				validate : false
+				validate : false,
+				showModal: true
 			};
 		},
 		render: function() {
+			// render form in component container
+			return this.props.modal ? span() : this._render();
+		},
+		renderLayer: function() {
+			// render form in modal dialog
+			return this.props.modal ? this._render() : span();
+		},
+		_render: function() {
+			var Form = this._renderForm();
+			
+			if(this.props.modal === true) {
+				// determine modal title based on form mode
+				var title;
+				if(this.state.entity !== null) {
+					switch(this.props.mode) {
+						case 'create':
+							title = 'Create ' + this.state.entity.label;
+							break;
+						case 'edit':
+							title = 'Edit ' + this.state.entity.label;
+							break;
+						case 'view':
+							title = 'View' + this.state.entity.label;
+							break;
+						default:
+							throw 'unknown mode [' + this.props.mode + ']';
+					}
+				} else {
+					title = '';
+				}
+				
+				return (
+					molgenis.ui.Modal({title: title, show: this.state.showModal, onHide: this._handleCancel},
+						Form
+					)
+				);
+			} else {
+				return Form;
+			}
+		},
+		_renderForm: function() {
 			// return empty div if entity data is not yet available
 			if(this.state.entity === null) {
 				return molgenis.ui.Spinner();
@@ -72,7 +119,7 @@
 				encType : 'application/x-www-form-urlencoded', // use multipart/form-data if form contains one or more file inputs
 				noValidate : true,
 				onSubmit : this._handleSubmit,
-				success: this.props.onSubmitSuccess,
+				success: this._handleSubmitSuccess,
 				error: this.props.onSubmitError
 			};
 			
@@ -93,8 +140,8 @@
  						mode : this.props.mode,
  						formLayout : this.props.formLayout,
 						colOffset : this.props.colOffset,
-						cancelBtn: this.props.cancelBtn, 
-						onCancelClick : this.props.onCancel
+						cancelBtn: this.props.modal === true, 
+						onCancelClick : this.props.modal === true ? this._handleCancel : undefined
 					}) : null
 				)
 			);
@@ -130,9 +177,20 @@
 				e.preventDefault(); // do not submit form
 				this.setState({validate: true}); // render validated controls
 			}
+		},
+		_handleCancel: function() {
+			this.setState({showModal: false});
+		},
+		_handleSubmitSuccess: function() {
+			if(this.props.modal) {
+				this.setState({showModal: false});	
+			}
+			if(this.props.onSubmitSuccess) {
+				this.props.onSubmitSuccess();
+			}
 		}
 	});
-	
+		
 	/**
 	 * @memberOf component
 	 */

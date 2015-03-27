@@ -35,7 +35,6 @@
 <#else>
         mode: 'create',
 </#if>
-        filterControls: true
     }), $('#form-container')[0]);
 </script>
 

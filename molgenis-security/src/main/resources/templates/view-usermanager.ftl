@@ -56,7 +56,7 @@
 				<div class="tab-pane <#if "groups"==viewState>active</#if>" id="group-manager">
 					<legend>
 						Group management 
-						<a id="create-group-btn" href="#" style="margin:30px 10px" data-toggle="modal" data-target="#managerModal">
+						<a id="create-group-btn" href="#" style="margin:30px 10px">
 							<img src="/img/new.png">
 						</a>
 					</legend>

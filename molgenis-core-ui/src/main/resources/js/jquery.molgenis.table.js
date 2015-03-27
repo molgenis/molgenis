@@ -801,48 +801,14 @@
 		});
 		
 		function getCreateForm(entityMetaData) {
-			openFormModal(entityMetaData);
-		}
-		
-		function openFormModal(entityMetaData) {
-			// create modal structure
-			var modal = $('#form-modal');
-			if(!modal.length) {
-				var items = [];
-				items.push('<div class="modal" id="form-modal" tabindex="-1" role="dialog" aria-labelledby="form-modal-title" aria-hidden="true">');
-				items.push('<div class="modal-dialog">');
-				items.push('<div class="modal-content">');				
-				items.push('<div class="modal-header">');
-				items.push('<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>');
-				items.push('<h4 class="modal-title"></h4>');
-				items.push('</div>');
-				items.push('<div class="modal-body">');
-				items.push('</div>');
-				items.push('</div>');
-				items.push('</div>');
-				items.push('</div>');
-				modal = $(items.join(''));
-			}
-			$('.modal-title', modal).html(entityMetaData.label);
-
 			React.render(molgenis.ui.Form({
+				mode: 'create',
 				entity : entityMetaData.name,
-				onSubmitSuccess : function() {
-					modal.modal('hide');
-				},
-				cancelBtn: true,
-				onCancel: function() {
-					modal.modal('hide');
-				}
-			}), $('.modal-body', modal)[0]);
-			
-			// show modal
-			modal.modal({'show': true});
+				modal: true
+			}), $('div')[0]);
 		}
 		
 		$(document).on('onFormSubmitSuccess', function() {
-			$('#form-modal .modal-body').html('');
-			$('#form-modal').modal('hide');
 			settings.start = 0;
 			refresh(settings);
 		});

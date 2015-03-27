@@ -18,19 +18,14 @@
 	 * @memberOf molgenis.usermanager
 	 */
 	function getCreateForm(type) {
-		$('#managerModalTitle').html('Create ' + type);
 		React.render(molgenis.ui.Form({
-			entity : 'molgenis' + type,
 			mode: 'create',
+			entity : 'molgenis' + type,
+			modal: true,
 			onSubmitSuccess : function() {
-				$('#managerModal').modal('hide');
 				location.reload();
-			},
-			cancelBtn: true,
-			onCancel: function() {
-				$('#managerModal').modal('hide');
 			}
-		}), $('#controlGroups')[0]);
+		}), $('div')[0]);
 	}
 
 	/**
