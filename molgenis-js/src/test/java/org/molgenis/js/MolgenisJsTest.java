@@ -82,4 +82,16 @@ public class MolgenisJsTest
 		Object result = ScriptEvaluator.eval("$('birthdate').age().value()", new MapEntity("birthdate", new Date()));
 		assertEquals(result, 0d);
 	}
+
+	@Test
+	public void testNull()
+	{
+		String script = "$('birthdate').age().value() < 18  || $('birthdate').value() != null";
+
+		Object result = ScriptEvaluator.eval(script, new MapEntity("birthdate", new Date()));
+		assertEquals(result, true);
+
+		result = ScriptEvaluator.eval(script, new MapEntity("birthdate", null));
+		assertEquals(result, false);
+	}
 }
