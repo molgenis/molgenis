@@ -42,7 +42,7 @@
 			closeOnSelect : true,
 			query : function(options) {
 				$.ajax({
-					url : 'getontologyterms',
+					url : 'tagwizard/getontologyterms',
 					type : 'POST',
 					contentType : 'application/json',
 					data : JSON.stringify({
@@ -85,7 +85,7 @@
 		$('#automatic-tag-btn').on('click', function() {
 			if (selectedOntologyIds.length > 0) {
 				$.ajax({
-					url : 'autotagattributes',
+					url : 'tagwizard/autotagattributes',
 					type : 'POST',
 					contentType : 'application/json',
 					data : JSON.stringify({
@@ -113,7 +113,7 @@
 			bootbox.confirm("Are you sure you want to remove all tags?", function(result) {
 				if (result === true) {
 					$.ajax({
-						url : 'clearalltags',
+						url : 'tagwizard/clearalltags',
 						type : 'POST',
 						data : {
 							'entityName' : entityName
@@ -150,7 +150,7 @@
 			var ontologyTermIRIs = $('#tag-dropdown').select2('val');
 
 			$.ajax({
-				url : 'tagattribute',
+				url : 'tagwizard/tagattribute',
 				type : 'POST',
 				contentType : 'application/json',
 				data : JSON.stringify({
@@ -171,7 +171,7 @@
 			relationIRI = $(this).data('relation');
 			var ontologyTermIRI = $(this).data('tag');
 			$.ajax({
-				url : 'deletesingletag',
+				url : 'tagwizard/deletesingletag',
 				type : 'POST',
 				contentType : 'application/json',
 				data : JSON.stringify({
