@@ -119,28 +119,31 @@ public class MappingServiceImpl implements MappingService
 		Repository sourceRepo = dataService.getRepository(sourceMapping.getName());
 		for (Entity sourceEntity : sourceRepo)
 		{
-			MapEntity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData);
+			MapEntity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
+					sourceMapping.getSourceEntityMetaData());
 			targetRepo.add(mappedEntity);
 		}
 	}
 
 	private MapEntity applyMappingToEntity(EntityMapping sourceMapping, Entity sourceEntity,
-			EntityMetaData targetMetaData)
+			EntityMetaData targetMetaData, EntityMetaData sourceEntityMetaData)
 	{
 		MapEntity target = new MapEntity(targetMetaData);
 		target.set(targetMetaData.getIdAttribute().getName(), idGenerator.generateId().toString());
 		target.set("source", sourceMapping.getName());
 		sourceMapping.getAttributeMappings().forEach(
-				attributeMapping -> applyMappingToAttribute(attributeMapping, sourceEntity, target));
+				attributeMapping -> applyMappingToAttribute(attributeMapping, sourceEntity, target,
+						sourceEntityMetaData));
 		return target;
 	}
 
-	private void applyMappingToAttribute(AttributeMapping attributeMapping, Entity sourceEntity, MapEntity target)
+	private void applyMappingToAttribute(AttributeMapping attributeMapping, Entity sourceEntity, MapEntity target,
+			EntityMetaData entityMetaData)
 	{
 		if (!attributeMapping.getTargetAttributeMetaData().isIdAtrribute())
 		{
 			target.set(attributeMapping.getTargetAttributeMetaData().getName(),
-					algorithmService.apply(attributeMapping, sourceEntity));
+					algorithmService.apply(attributeMapping, sourceEntity, entityMetaData));
 		}
 	}
 }

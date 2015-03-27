@@ -34,6 +34,7 @@ public class AttributeMetaDataMetaData extends DefaultEntityMetaData
 	public static final String PARTS = "parts";
 	public static final String TAGS = "tags";
 	public static final String VISIBLE_EXPRESSION = "visibleExpression";
+	public static final String VALIDATION_EXPRESSION = "validationExpression";
 
 	public AttributeMetaDataMetaData()
 	{
@@ -61,5 +62,6 @@ public class AttributeMetaDataMetaData extends DefaultEntityMetaData
 		addAttribute(UNIQUE).setDataType(BOOL).setNillable(false);
 		addAttribute(TAGS).setDataType(MREF).setRefEntity(new TagMetaData());
 		addAttribute(VISIBLE_EXPRESSION).setDataType(SCRIPT).setNillable(true);
+		addAttribute(VALIDATION_EXPRESSION).setDataType(SCRIPT).setNillable(true);
 	}
 }

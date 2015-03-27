@@ -3,9 +3,12 @@ package org.molgenis.js;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextAction;
 import org.mozilla.javascript.ContextFactory;
@@ -21,7 +24,7 @@ public class ScriptEvaluator
 {
 	private static String JS_SCRIPT = null;
 
-	public static Object eval(final String source, final Entity entity)
+	public static Object eval(final String source, final Entity entity, final EntityMetaData entityMetaData)
 	{
 		if (JS_SCRIPT == null)
 		{
@@ -46,9 +49,12 @@ public class ScriptEvaluator
 
 				Scriptable scriptableEntity = cx.newObject(scriptableObject);
 				scriptableEntity.setPrototype(scriptableObject);
-				entity.getAttributeNames().forEach(
-						attr -> scriptableEntity.put(attr, scriptableEntity,
-								javaToJS(entity.get(attr), cx, scriptableObject)));
+
+				entityMetaData.getAtomicAttributes().forEach(
+						attr -> {
+							scriptableEntity.put(attr.getName(), scriptableEntity,
+									javaToJS(entity.get(attr.getName()), cx, scriptableObject));
+						});
 
 				Function evalScript = (Function) scriptableObject.get("evalScript", scriptableObject);
 				Object result = evalScript.call(cx, scriptableObject, scriptableObject, new Object[]
@@ -71,7 +77,22 @@ public class ScriptEvaluator
 			return convertedValue;
 		}
 
+		if (value instanceof Entity)
+		{
+			return javaToJS(((Entity) value).getIdValue(), cx, scope);
+		}
+
+		if (value instanceof Iterable)
+		{
+			List<Object> values = new ArrayList<>();
+			for (Object val : (Iterable<?>) value)
+			{
+				values.add(javaToJS(val, cx, scope));
+			}
+
+			value = cx.newArray(scope, values.toArray(new Object[values.size()]));
+		}
+
 		return Context.javaToJS(value, scope);
 	}
-
 }

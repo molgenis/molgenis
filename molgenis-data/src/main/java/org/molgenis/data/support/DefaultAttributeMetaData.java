@@ -46,6 +46,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	private boolean aggregateable = false;
 	private Range range;
 	private String visibleExpression;
+	private String validationExpression;
 
 	public DefaultAttributeMetaData(String name, FieldTypeEnum fieldType)
 	{
@@ -93,6 +94,8 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		this.auto = attributeMetaData.isAuto();
 		this.aggregateable = attributeMetaData.isAggregateable();
 		this.range = attributeMetaData.getRange();
+		this.visibleExpression = attributeMetaData.getVisibleExpression();
+		this.validationExpression = attributeMetaData.getValidationExpression();
 
 		// deep copy
 		Iterable<AttributeMetaData> attributeParts = attributeMetaData.getAttributeParts();
@@ -392,6 +395,18 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	}
 
 	@Override
+	public String getValidationExpression()
+	{
+		return validationExpression;
+	}
+
+	public DefaultAttributeMetaData setValidationExpression(String validationExpression)
+	{
+		this.validationExpression = validationExpression;
+		return this;
+	}
+
+	@Override
 	public boolean equals(Object o)
 	{
 		if (this == o) return true;
@@ -500,7 +515,12 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		{
 			if (other.getVisibleExpression() != null) return false;
 		}
-		else if (!getVisibleExpression().equals(other.getVisibleExpression())) return false;
+		else if (!getValidationExpression().equals(other.getValidationExpression())) return false;
+		if (getValidationExpression() == null)
+		{
+			if (other.getValidationExpression() != null) return false;
+		}
+		else if (!getValidationExpression().equals(other.getValidationExpression())) return false;
 
 		return true;
 	}

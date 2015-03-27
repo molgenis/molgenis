@@ -114,5 +114,10 @@ public interface AttributeMetaData
 	 */
 	String getVisibleExpression();
 
+	/**
+	 * Javascript expression to validate the value of the attribute
+	 */
+	String getValidationExpression();
+
 	boolean isSameAs(AttributeMetaData attributeMetaData);
 }
