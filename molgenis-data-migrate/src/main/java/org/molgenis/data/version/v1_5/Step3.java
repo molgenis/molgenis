@@ -2,7 +2,6 @@ package org.molgenis.data.version.v1_5;
 
 import static org.molgenis.data.support.QueryImpl.EQ;
 
-import java.io.IOException;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -12,12 +11,9 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
-import org.molgenis.data.meta.PackageMetaData;
-import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.meta.migrate.v1_4.AttributeMetaDataMetaData1_4;
 import org.molgenis.data.meta.migrate.v1_4.EntityMetaDataMetaData1_4;
 import org.molgenis.data.mysql.AsyncJdbcTemplate;
@@ -84,7 +80,7 @@ public class Step3 extends MetaDataUpgrade
 		metaData = new MetaDataServiceImpl(dataService);
 		RunAsSystemProxy.runAsSystem(() -> metaData.setDefaultBackend(backend));
 
-		addOrderColumnToMREFTables(backend);
+		addOrderColumnToMREFTables();
 		updateAttributeOrderInMysql(dataService, searchService);
 		recreateElasticSearchMetaDataIndices(searchService);
 		LOG.info("Migrating MySQL MREF columns DONE.");
@@ -109,27 +105,30 @@ public class Step3 extends MetaDataUpgrade
 			e1.printStackTrace();
 		}
 
-		try
-		{
-			searchService.createMappings(new TagMetaData());
-			searchService.createMappings(new PackageMetaData());
-			searchService.createMappings(new AttributeMetaDataMetaData());
-			searchService.createMappings(new EntityMetaDataMetaData());
-		}
-		catch (IOException e)
-		{
-			LOG.error("error creating metadata mappings", e);
-		}
+		// try
+		// {
+		// searchService.createMappings(new TagMetaData());
+		// searchService.createMappings(new PackageMetaData());
+		// searchService.createMappings(new AttributeMetaDataMetaData());
+		// searchService.createMappings(new EntityMetaDataMetaData());
+		// }
+		// catch (IOException e)
+		// {
+		// LOG.error("error creating metadata mappings", e);
+		// }
 
 		// TODO: refill from mysql!
 	}
 
-	private void addOrderColumnToMREFTables(MysqlRepositoryCollection backend)
+	private void addOrderColumnToMREFTables()
 	{
+		LOG.info("Add order column to MREF tables...");
 		for (EntityMetaData emd : metaData.getEntityMetaDatas())
 		{
+			LOG.info("Entity: {}", emd.getName());
 			for (AttributeMetaData amd : emd.getAtomicAttributes())
 			{
+				LOG.info("attribute: {}", amd.getName());
 				if (amd.getDataType() instanceof MrefField)
 				{
 					LOG.info("Add order column to MREF attribute table {}.{} .", emd.getName(), amd.getName());
@@ -146,6 +145,7 @@ public class Step3 extends MetaDataUpgrade
 				}
 			}
 		}
+		LOG.info("Add order column to MREF tables DONE.");
 	}
 
 	private void updateAttributeOrderInMysql(DataServiceImpl v15MySQLDataService, SearchService v14ElasticSearchService)
@@ -155,7 +155,8 @@ public class Step3 extends MetaDataUpgrade
 		// save all entity metadata with attributes in proper order
 		for (Entity v15EntityMetaDataEntity : v15MySQLDataService.getRepository(EntityMetaDataMetaData.ENTITY_NAME))
 		{
-			LOG.info("V1.5 Entity: " + v15EntityMetaDataEntity.get(EntityMetaDataMetaData1_4.SIMPLE_NAME));
+			LOG.info("Setting attribute order for entity: "
+					+ v15EntityMetaDataEntity.get(EntityMetaDataMetaData1_4.SIMPLE_NAME));
 			List<Entity> attributes = Lists.newArrayList(v14ElasticSearchService.search(
 					EQ(AttributeMetaDataMetaData1_4.ENTITY,
 							v15EntityMetaDataEntity.getString(EntityMetaDataMetaData1_4.SIMPLE_NAME)),
