@@ -1,4 +1,6 @@
 package org.molgenis.data.importer;
+import static com.google.common.base.Predicates.notNull;
+import static com.google.common.collect.FluentIterable.from;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -18,6 +20,7 @@ import org.molgenis.data.Package;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Tag;
@@ -129,7 +132,7 @@ public class ImportWriter
 								@Override
 								public DefaultEntity apply(Entity entity)
 								{
-									return new DefaultEntity(entityMetaData, dataService, entity);
+									return new DefaultEntityImporter(entityMetaData, dataService, entity);
 								}
 							});
 
@@ -137,8 +140,7 @@ public class ImportWriter
 					int count = update(repository, entities, dbAction);
 					
 					// Fix self referenced entities were not imported
-					keepSelfReferencedEntities(entities);
-					update(repository, entities, DatabaseAction.UPDATE);
+					update(repository, this.keepSelfReferencedEntities(entities), DatabaseAction.UPDATE);
 
 					report.addEntityCount(name, count);
 				}
@@ -146,9 +148,15 @@ public class ImportWriter
 		}
 	}
 
-	private void keepSelfReferencedEntities(Iterable<Entity> entities)
+	/**
+	 * Keeps the entities that have: 1. A reference to themselves. 2. Minimal one value.
+	 * 
+	 * @param entities
+	 * @return Iterable<Entity> - filtered entities;
+	 */
+	private Iterable<Entity> keepSelfReferencedEntities(Iterable<Entity> entities)
 	{
-		entities = Iterables.filter(entities, new Predicate<Entity>()
+		return Iterables.filter(entities, new Predicate<Entity>()
 		{
 			@Override
 			public boolean apply(Entity entity)
@@ -502,4 +510,46 @@ public class ImportWriter
 		}
 	}
 
+	/**
+	 * A wrapper for a to import entity
+	 * 
+	 * When importing, some references (Entity) are still not imported. This wrapper accepts this inconsistency in the
+	 * dataService. For example xref and mref.
+	 */
+	private class DefaultEntityImporter extends DefaultEntity
+	{
+		/**
+		 * Auto generated
+		 */
+		private static final long serialVersionUID = -5994977400560081655L;
+
+		public DefaultEntityImporter(EntityMetaData entityMetaData, DataService dataService, Entity entity)
+		{
+			super(entityMetaData, dataService, entity);
+		}
+
+		/**
+		 * getEntity returns null when attributeName is not resulting in an entity
+		 */
+		@Override
+		public Entity getEntity(String attributeName)
+		{
+			try
+			{
+				return super.getEntity(attributeName);
+			}
+			catch (UnknownEntityException uee)
+			{
+				return null;
+			}
+		}
+		
+		/**
+		 * getEntities filters the entities that are still not imported
+		 */
+		@Override
+		public Iterable<Entity> getEntities(String attributeName) {
+			return from((Iterable<Entity>) super.getEntities(attributeName)).filter(notNull());
+		}
+	}
 }

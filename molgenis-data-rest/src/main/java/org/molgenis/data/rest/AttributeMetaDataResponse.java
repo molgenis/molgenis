@@ -54,8 +54,7 @@ public class AttributeMetaDataResponse
 			final Map<String, Set<String>> attributeExpandsSet)
 	{
 		String attrName = attr.getName();
-
-		this.href = String.format("%s/%s/meta/%s", RestController.BASE_URI, entityParentName, attrName);
+		this.href = Href.concatMetaAttributeHref(RestController.BASE_URI, entityParentName, attrName);
 
 		if (attributesSet == null || attributesSet.contains("fieldType".toLowerCase()))
 		{
@@ -97,7 +96,7 @@ public class AttributeMetaDataResponse
 			}
 			else
 			{
-				this.refEntity = refEntity != null ? new Href(String.format("%s/%s/meta", RestController.BASE_URI,
+				this.refEntity = refEntity != null ? new Href(Href.concatMetaEntityHref(RestController.BASE_URI,
 						refEntity.getName())) : null;
 			}
 		}
@@ -122,7 +121,7 @@ public class AttributeMetaDataResponse
 							}
 							else
 							{
-								return Collections.<String, Object> singletonMap("href", String.format("%s/%s/meta/%s",
+								return Collections.<String, Object> singletonMap("href", Href.concatMetaAttributeHref(
 										RestController.BASE_URI, entityParentName, attributeMetaData.getName()));
 							}
 						}
