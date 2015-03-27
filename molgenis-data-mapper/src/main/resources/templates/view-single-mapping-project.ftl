@@ -19,7 +19,6 @@
 	<div class="col-md-6">
 		<h3>Mappings for the ${mappingProject.name?html} project</h3>
 		<p>Create and view mappings.</p>
-		
 	</div>
 </div>
 
@@ -55,6 +54,7 @@
 								<#if !attribute.nillable> <span class="label label-default">required</span></#if>
 								<#if attribute.unique> <span class="label label-default">unique</span></#if>
 								<#if attribute.description??><br />${attribute.description?html}</#if>
+								<#if attribute.tags??><br />${attribute.tags?html}</#if>
 							</td>
 							<#list mappingProject.getMappingTarget(selectedTarget).entityMappings as source>
 								<td>
@@ -104,14 +104,27 @@
 	</#if>
 </div>
 
-<#if mappingProject.getMappingTarget(selectedTarget).entityMappings?has_content>
-	<div class="row">
-		<div class="col-md-12">
-			<a id="add-new-attr-mapping-btn" href="#" class="btn btn-success" 
-				data-toggle="modal" data-target="#create-integrated-entity-modal"><span class="glyphicon glyphicon-play"></span> Create integrated dataset</a>
+<div class="row">
+	<div class="col-md-2">
+		<form method="get" action="${context_url}/tagWizard">
+			<input type="hidden" name="target" value="${selectedTarget}"/>
+			<div class="btn-group" role="group">
+				<button type="submit" class="btn btn-primary">
+					<span class="glyphicon glyphicon-tag"></span> Run tag wizard
+				</button>
+			</div>
+		</form>
+	</div>	
+		
+	<#if mappingProject.getMappingTarget(selectedTarget).entityMappings?has_content>
+		<div class="col-md-8">		
+			<a id="add-new-attr-mapping-btn" href="#" class="btn btn-success pull-right" data-toggle="modal" data-target="#create-integrated-entity-modal">
+				<span class="glyphicon glyphicon-play"></span> Create integrated dataset
+			</a>
 		</div>
-	</div>
-</#if>
+	</#if>
+	
+</div>
 
 <!--Create new source dialog-->
 <div class="modal" id="create-new-source-column-modal" tabindex="-1" role="dialog">
@@ -169,3 +182,4 @@
 		</div>
 	</div>
 </div>
+<@footer/>

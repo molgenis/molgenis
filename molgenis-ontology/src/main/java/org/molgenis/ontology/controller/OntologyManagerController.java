@@ -10,7 +10,7 @@ import java.util.Map;
 
 import org.molgenis.data.Entity;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.ontology.OntologyService;
+import org.molgenis.ontology.matching.OntologyService;
 import org.molgenis.ontology.utils.OntologyServiceUtil;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
