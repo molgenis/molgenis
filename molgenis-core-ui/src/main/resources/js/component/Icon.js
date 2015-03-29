@@ -14,7 +14,12 @@
 			name: React.PropTypes.string.isRequired
 		},
 		render: function() {
-			return span({className: 'glyphicon glyphicon-' + this.props.name});
+			return (
+				span(null,
+					span({className: 'glyphicon glyphicon-' + this.props.name, 'aria-hidden': true}),
+					span({className: 'sr-only'}, this.props.name)
+				)
+			);
 		}
 	});
 	
