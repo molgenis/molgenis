@@ -23,7 +23,9 @@
 		},
 		_initEntity: function(entity) {
 			// fetch entity meta if not exists
-			if(typeof entity === 'object') {
+			if(entity === undefined) {
+				this._setEntity(entity);
+			} else if(typeof entity === 'object') {
 				if(!this._isLoaded(entity)) {
 					this._loadEntity(entity.href);
 				} else {

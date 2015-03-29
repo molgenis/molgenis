@@ -23,11 +23,13 @@
 		},
 		_initEntityInstance: function(entity, entityInstance) {
 			// fetch entity instance if not exists
-			if(typeof entityInstance === 'object') {
+			if(entityInstance === undefined) {
+				this._setEntityInstance(entityInstance);
+			} else if (typeof entityInstance === 'object') {
 				if(!this._isEntityInstanceLoaded(entityInstance)) {
 					this._loadEntityInstance(entity, entityInstance.href);
 				} else {
-					this.setState({entityInstance: entityInstance});
+					this._setEntityInstance(entityInstance);
 				}
 			} else if (typeof entityInstance === 'string') {
 				if(entity && entity.name) {
@@ -47,7 +49,7 @@
 				
 				api.getAsync(href, expands.length > 0 ? {'expand': expands} : undefined).done(function(entityInstance) {
 					if (this.isMounted()) {
-						this.setState({entityInstance: entityInstance});
+						this._setEntityInstance(entityInstance);
 					}
 				}.bind(this));
 			}
