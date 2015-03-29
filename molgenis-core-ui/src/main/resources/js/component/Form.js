@@ -15,33 +15,48 @@
 			entityInstance: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]),
 			mode: React.PropTypes.oneOf(['create', 'edit', 'view']),
 			formLayout: React.PropTypes.oneOf(['horizontal', 'vertical']),
-			modal: React.PropTypes.bool, // whether or not to show form in modal
+			modal: React.PropTypes.bool, // whether or not to render form in a modal dialog
 			colOffset: React.PropTypes.number,
 			onSubmitSuccess: React.PropTypes.func,
-			onSubmitError: React.PropTypes.func
+			onSubmitError: React.PropTypes.func,
+			onValueChange: React.PropTypes.func
 		},
 		getDefaultProps: function() {
 			return {
 				mode: 'create',
 				formLayout: 'horizontal',
 				modal: false,
-				colOffset: 3
+				colOffset: 3,
+				onSubmitSuccess: function() {},
+				onSubmitError: function() {},
+				onValueChange: function() {}
 			};
 		},
-		componentWillReceiveProps : function(nextProps) {
-			this.setState({
+		componentWillReceiveProps : function(nextProps) { // FIXME reload entity and entityinstance when changed
+			var newState = {
+				invalids : {},
 				validate: false,
-				showModal: true
-			});
+				showModal: true,
+				submitMsg: null
+			};
+			if(this.props.mode === 'create') {
+				_.extend(newState, {entityInstance: {}});
+			}
+			this.setState(newState);
 		},
 		getInitialState: function() {
 			return {
-				entity : null,
-				entityInstance : null,
-				values : {},
+				entity : null,			// transfered from props to state, loaded from server if required
+				entityInstance : null,	// transfered from props to state, loaded from server if required
+				invalids : {},
 				validate : false,
 				showModal: true
 			};
+		},
+		componentWillMount: function() {
+			if(this.props.mode === 'create') {
+				this.setState({entityInstance: {}});
+			}
 		},
 		render: function() {
 			// render form in component container
@@ -116,16 +131,16 @@
 				className : this.props.formLayout === 'horizontal' ? 'form-horizontal' : undefined,
 				action : action,
 				method : method,
-				encType : 'application/x-www-form-urlencoded', // use multipart/form-data if form contains one or more file inputs
+				encType : 'application/x-www-form-urlencoded', // TODO use multipart/form-data if form contains one or more file inputs
 				noValidate : true,
 				onSubmit : this._handleSubmit,
 				success: this._handleSubmitSuccess,
-				error: this.props.onSubmitError
+				error: this._handleSubmitError
 			};
 			
 			var formControlsProps = {
 				entity : this.state.entity,
-				value: this.props.mode !== 'create' ? this.state.entityInstance : undefined, // FIXME replace value with entity instance
+				value: this.state.entityInstance, // FIXME replace value with entity instance
 				mode : this.props.mode,
 				formLayout : this.props.formLayout,
 				colOffset : this.props.colOffset,
@@ -133,7 +148,7 @@
 				onValueChange : this._handleValueChange
 			};
 			
-			return (
+			var Form = (
 				molgenis.ui.wrapper.JQueryForm(formProps,
 					FormControlsFactory(formControlsProps),
  					this.props.mode !== 'view' ? FormButtonsFactory({
@@ -145,49 +160,79 @@
 					}) : null
 				)
 			);
+			
+			if(this.state.submitMsg) {
+				return (
+					div(null,
+						molgenis.ui.Alert({type: this.state.submitMsg.type, message: this.state.submitMsg.message}),
+						Form
+					)
+				);
+			} else {
+				return Form;
+			}
 		},
 		_handleValueChange: function(e) {
-			this.state.values[e.attr] = {value: e.value, valid: e.valid};
-			this.setState({values: this.state.values, valid: this.state.valid && e.valid});
-		},
-		_handleSubmit: function(e) {			
-			var values = this.state.values;
-						
-			// determine if form is valid
-			var formValid = true;
-			for(var key in values) {
-				if(values.hasOwnProperty(key)) {
-					var value = values[key];
-					if(value.valid === false) {
-						formValid = false;
-						break;
-					}
+			// update value in entity instance
+			var entityInstance = this.state.entityInstance;
+			if(entityInstance === null || entityInstance === undefined) {
+				entityInstance = {};
+			}
+			entityInstance[e.attr] = e.value;
+			this.setState({entityInstance: entityInstance});
+			
+			var invalids = this.state.invalids;
+			if(e.valid === true) {
+				// remove item from invalids
+				if(_.has(invalids, e.attr)) {
+					invalids = _.omit(this.state.invalids, e.attr);
+					this.setState({invalids: invalids});
+				}
+			} else {
+				// add item to invalids
+				if(!_.has(invalids, e.attr)) {
+					invalids[e.attr] = null;
+					this.setState({invalids: invalids});
 				}
 			}
 			
-			if(formValid) {
-				// create updated entity
-				var updatedEntity = {};
-				for(var valueKey in values) {
-					if(values.hasOwnProperty(valueKey)) {
-						updatedEntity[valueKey] = values[valueKey].value;
-					}
-				}
-			} else {
+			this.props.onValueChange(e);
+		},
+		_handleSubmit: function(e) {
+			// determine if form is valid
+			if(_.size(this.state.invalids) > 0) {
 				e.preventDefault(); // do not submit form
 				this.setState({validate: true}); // render validated controls
 			}
 		},
 		_handleCancel: function() {
-			this.setState({showModal: false});
-		},
-		_handleSubmitSuccess: function() {
 			if(this.props.modal) {
 				this.setState({showModal: false});
 			}
-			if(this.props.onSubmitSuccess) {
-				this.props.onSubmitSuccess();
+		},
+		_handleSubmitSuccess: function() {
+			var message = this.props.mode === 'create' ? 'has been created.' : 'changes have been saved.';
+			var stateProps = {
+				submitMsg: {type: 'success', message: this.state.entity.label + ' ' + message},
+				entityInstance: null, // reset form
+				invalids : {},
+				validate : false,
+			};
+			if(this.props.modal) {
+				_.extend(stateProps, {
+					showModal : false
+				});
 			}
+			this.setState(stateProps);
+			
+			this.props.onSubmitSuccess();
+		},
+		_handleSubmitError: function() {
+			var message = this.props.mode === 'create' ? 'could not be created.' : 'changes could not be saved.';
+			this.setState({
+				submitMsg: {type: 'danger', message: this.state.entity.label + ' ' + message}
+			});
+			this.props.onSubmitError();
 		}
 	});
 		
