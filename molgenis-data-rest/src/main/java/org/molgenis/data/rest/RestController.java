@@ -1112,7 +1112,7 @@ public class RestController
 				}
 
 				EntityPager pager = new EntityPager(request.getStart(), request.getNum(), (long) count, mrefEntities);
-				return new EntityCollectionResponse(pager, refEntityMaps, attrHref, null);
+				return new EntityCollectionResponse(pager, refEntityMaps, attrHref, null, molgenisPermissionService);
 			case CATEGORICAL:
 			case XREF:
 				Map<String, Object> entityXrefAttributeMap = getEntityAsMap((Entity) entity.get(refAttributeName),
@@ -1148,7 +1148,8 @@ public class RestController
 			entities.add(getEntityAsMap(entity, meta, attributesSet, attributeExpandsSet));
 		}
 
-		return new EntityCollectionResponse(pager, entities, BASE_URI + "/" + entityName, meta);
+		return new EntityCollectionResponse(pager, entities, BASE_URI + "/" + entityName, meta,
+				molgenisPermissionService);
 	}
 
 	// Transforms an entity to a Map so it can be transformed to json
@@ -1246,7 +1247,7 @@ public class RestController
 
 					EntityCollectionResponse ecr = new EntityCollectionResponse(pager, refEntityMaps,
 							Href.concatAttributeHref(RestController.BASE_URI, meta.getName(), entity.getIdValue(),
-									attrName), null);
+									attrName), null, molgenisPermissionService);
 					entityMap.put(attrName, ecr);
 				}
 				else if ((attrType == XREF && entity.get(attr.getName()) != null)

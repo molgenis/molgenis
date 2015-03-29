@@ -36,9 +36,9 @@ public class EntityMetaDataResponse
 	/**
 	 * @param meta
 	 */
-	public EntityMetaDataResponse(EntityMetaData meta)
+	public EntityMetaDataResponse(EntityMetaData meta, MolgenisPermissionService permissionService)
 	{
-		this(meta, null, null);
+		this(meta, null, null, permissionService);
 	}
 
 	/**

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.security.core.MolgenisPermissionService;
 
 public class EntityCollectionResponse
 {
@@ -17,10 +18,10 @@ public class EntityCollectionResponse
 	private final List<Map<String, Object>> items;
 
 	public EntityCollectionResponse(EntityPager entityPager, List<Map<String, Object>> items, String href,
-			EntityMetaData meta)
+			EntityMetaData meta, MolgenisPermissionService permissionService)
 	{
 		this.href = href;
-		this.meta = meta != null ? new EntityMetaDataResponse(meta) : null;
+		this.meta = meta != null ? new EntityMetaDataResponse(meta, permissionService) : null;
 		this.start = entityPager.getStart();
 		this.num = entityPager.getNum();
 		this.total = entityPager.getTotal();

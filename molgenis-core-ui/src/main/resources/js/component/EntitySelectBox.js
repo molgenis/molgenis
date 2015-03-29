@@ -119,7 +119,7 @@
 				readOnly : this.props.readOnly,
 				focus: this.props.focus,
 				value : this.props.value,
-				addonBtn: this.props.mode === 'create',
+				addonBtn: this.props.mode === 'create' && entity.writable === true,
 				onAddonBtnClick: this._handleAddonBtnClick,
 				onChange : this._handleChange
 			});
