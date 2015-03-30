@@ -164,7 +164,7 @@
 			if(this.state.submitMsg) {
 				return (
 					div(null,
-						molgenis.ui.Alert({type: this.state.submitMsg.type, message: this.state.submitMsg.message}),
+						molgenis.ui.AlertMessage({type: this.state.submitMsg.type, message: this.state.submitMsg.message}),
 						Form
 					)
 				);

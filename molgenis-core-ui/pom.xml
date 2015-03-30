@@ -148,7 +148,7 @@
 	                            <jsSourceFile>/component/wrapper/JQRangeSlider.js</jsSourceFile>
 	                            <jsSourceFile>/component/wrapper/JQueryForm.js</jsSourceFile>
 	                            <jsSourceFile>/component/wrapper/Select2.js</jsSourceFile>
-	                            <jsSourceFile>/component/Alert.js</jsSourceFile>
+	                            <jsSourceFile>/component/AlertMessage.js</jsSourceFile>
 	                            <jsSourceFile>/component/AttributeControl.js</jsSourceFile>
 	                            <jsSourceFile>/component/BoolControl.js</jsSourceFile>
 	                            <jsSourceFile>/component/Button.js</jsSourceFile>
