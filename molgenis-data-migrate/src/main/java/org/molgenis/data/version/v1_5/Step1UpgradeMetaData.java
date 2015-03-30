@@ -37,16 +37,21 @@ import com.google.common.collect.Lists;
 
 /**
  * Upgrades the metadata repositories in MySQL.
+ * 
+ * Fills the attribute order based on the current values in ElasticSearch. It looks like ElasticSearch *does* return the
+ * attribute documents in the order in which they were inserted.
+ * 
+ * Subsequently drops the index and recreates it.
  */
-public class Step1 extends MetaDataUpgrade
+public class Step1UpgradeMetaData extends MetaDataUpgrade
 {
-	private static final Logger LOG = LoggerFactory.getLogger(Step1.class);
+	private static final Logger LOG = LoggerFactory.getLogger(Step1UpgradeMetaData.class);
 	private JdbcTemplate jdbcTemplate;
 	private DataSource dataSource;
 	private MysqlRepositoryCollection undecoratedMySQL;
 	private SearchService searchService;
 
-	public Step1(DataSource dataSource, SearchService searchService)
+	public Step1UpgradeMetaData(DataSource dataSource, SearchService searchService)
 	{
 		super(0, 1);
 		this.jdbcTemplate = new JdbcTemplate(dataSource);

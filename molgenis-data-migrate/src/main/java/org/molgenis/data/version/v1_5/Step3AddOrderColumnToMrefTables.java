@@ -22,7 +22,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 /**
  * Migrates MySQL MREF tables for ordinary entities from molgenis 1.4 to 1.5
  */
-public class Step3 extends MetaDataUpgrade
+public class Step3AddOrderColumnToMrefTables extends MetaDataUpgrade
 {
 	private JdbcTemplate template;
 
@@ -30,11 +30,11 @@ public class Step3 extends MetaDataUpgrade
 
 	private DataSource dataSource;
 
-	private static final Logger LOG = LoggerFactory.getLogger(Step3.class);
+	private static final Logger LOG = LoggerFactory.getLogger(Step3AddOrderColumnToMrefTables.class);
 
 	private MetaDataService metaData;
 
-	public Step3(DataSource dataSource)
+	public Step3AddOrderColumnToMrefTables(DataSource dataSource)
 	{
 		super(2, 3);
 		this.template = new JdbcTemplate(dataSource);
