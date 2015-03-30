@@ -32,10 +32,7 @@
 			return this._isRadioOrCheckbox() ? {checked: this.props.checked} : {value: this.props.value};
 		},
 		componentDidMount: function() {
-			// IE9 does not support the autofocus attribute, focus the first visible input manually
-			if(this.props.focus) {
-				this.refs.input.getDOMNode().focus();
-			}
+			this._focus();
 		},
 		componentWillReceiveProps : function(nextProps) {
 			this.setState(this._isRadioOrCheckbox() ? {checked: nextProps.checked} : {value: nextProps.value});
@@ -88,6 +85,9 @@
 				return input(inputProps);
 			}
 		},
+		componentDidUpdate: function() {
+			this._focus();
+		},
 		_handleChange: function(event) {
 			this.setState(this._isRadioOrCheckbox() ? {checked: event.target.checked} : {value: event.target.value});
 			this._handleChangeOrBlur(event.target.value, event.target.checked, this.props.onValueChange);
@@ -116,6 +116,11 @@
 		},
 		_emptyValueToNull: function(value) {
 			return value !== '' ? value : null;
+		},
+		_focus: function() {
+			if(this.props.focus) {
+				this.refs.input.getDOMNode().focus();
+			}
 		}
 	});
 	

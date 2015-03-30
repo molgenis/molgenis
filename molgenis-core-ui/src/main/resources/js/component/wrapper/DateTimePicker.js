@@ -45,9 +45,7 @@
 				}.bind(this));
 			}
 			
-			if(this.props.focus) {
-				this.refs.input.getDOMNode().focus();
-			}
+			this._focus();
 		},
 		componentWillUnmount: function() {
 			var $container = $(this.refs.datepicker.getDOMNode());
@@ -91,12 +89,20 @@
 				)
 			);
 		},
+		componentDidUpdate: function() {
+			this._focus();
+		},
 		_handleChange: function(event) {
 			this.setState({value: event.target.value});
 		},
 		_handleValueChange: function(value) {
 			this.setState({value: value});
 			this.props.onChange(value);
+		},
+		_focus: function() {
+			if(this.props.focus) {
+				this.refs.input.getDOMNode().focus();
+			}
 		}
 	});
 	

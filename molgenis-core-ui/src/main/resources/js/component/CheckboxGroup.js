@@ -16,6 +16,7 @@
 			readOnly: React.PropTypes.bool,
 			selectAll: React.PropTypes.bool, // add select all and deselect all options for checkbox group
 			options: React.PropTypes.arrayOf(React.PropTypes.shape({value: React.PropTypes.string, label: React.PropTypes.string})).isRequired,
+			focus: React.PropTypes.bool,
 			value: React.PropTypes.arrayOf(React.PropTypes.string),
 			onValueChange: React.PropTypes.func.isRequired
 		},

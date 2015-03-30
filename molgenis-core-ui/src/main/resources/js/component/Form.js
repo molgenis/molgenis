@@ -274,7 +274,7 @@
 						};
 						
 						// IE9 does not support the autofocus attribute, focus the first visible input manually
-						if(!foundFocusControl && attr.visible === true) {
+						if(this.props.mode !== 'view' && !foundFocusControl && attr.visible === true && (this.props.mode === 'create' || attr.readOnly !== true)) {
 							_.extend(controlProps, {focus: true});
 							foundFocusControl = true;
 						}

@@ -26,6 +26,7 @@
 					disabled : this.props.disabled,
 					readOnly: this.props.readOnly,
 					value : option.value,
+					focus: i === 0 ? this.props.focus : undefined,
 					onValueChange : this._handleChange
 				});
 				if(this.props.layout === 'vertical') {

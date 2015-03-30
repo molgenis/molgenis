@@ -19,7 +19,14 @@
 			}
 		},
 		_isLoaded: function(entity) {
-			return entity.idAttribute !== undefined;
+			if(entity.idAttribute !== undefined) {
+				return false;
+			}
+			else if(entity.attributes && entity.attributes.length > 0) {
+				return _.size(entity.attributes[0] > 1);
+			} else {
+				return true;
+			}
 		},
 		_initEntity: function(entity) {
 			// fetch entity meta if not exists
