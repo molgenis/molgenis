@@ -163,7 +163,6 @@ public class Step1UpgradeMetaData extends MetaDataUpgrade
 		}
 		catch (InterruptedException e1)
 		{
-			e1.printStackTrace();
 		}
 
 		LOG.info("Adding metadata indices...");
