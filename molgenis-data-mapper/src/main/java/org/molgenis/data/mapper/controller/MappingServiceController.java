@@ -3,6 +3,8 @@ package org.molgenis.data.mapper.controller;
 import static org.molgenis.data.mapper.controller.MappingServiceController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -20,7 +22,9 @@ import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
+import org.molgenis.data.semantic.OntologyTagService;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.ontology.repository.model.OntologyTerm;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.util.ErrorMessageResponse;
@@ -66,6 +70,9 @@ public class MappingServiceController extends MolgenisPluginController
 
 	@Autowired
 	private DataService dataService;
+
+	@Autowired
+	private OntologyTagService ontologyTagService;
 
 	public MappingServiceController()
 	{
@@ -256,11 +263,12 @@ public class MappingServiceController extends MolgenisPluginController
 		{
 			target = project.getMappingTargets().get(0).getName();
 		}
-		// Fill the model
+
 		model.addAttribute("selectedTarget", target);
 		model.addAttribute("mappingProject", project);
 		model.addAttribute("entityMetaDatas", getNewSources(project.getMappingTarget(target)));
 		model.addAttribute("hasWritePermission", hasWritePermission(project, false));
+		model.addAttribute("attributeTagMap", getTagsForAttribute(target, project));
 
 		return VIEW_SINGLE_MAPPING_PROJECT;
 	}
@@ -404,5 +412,19 @@ public class MappingServiceController extends MolgenisPluginController
 	private MolgenisUser getCurrentUser()
 	{
 		return molgenisUserService.getUser(SecurityUtils.getCurrentUsername());
+	}
+
+	private Map<String, List<OntologyTerm>> getTagsForAttribute(String target, MappingProject project)
+	{
+		Map<String, List<OntologyTerm>> attributeTagMap = new HashMap<String, List<OntologyTerm>>();
+		for (AttributeMetaData amd : project.getMappingTarget(target).getTarget().getAtomicAttributes())
+		{
+			List<OntologyTerm> ontologyTermsForAttribute = new ArrayList<OntologyTerm>(ontologyTagService
+					.getTagsForAttribute(dataService.getEntityMetaData(target), amd).values());
+
+			attributeTagMap.put(amd.getName(), ontologyTermsForAttribute);
+		}
+
+		return attributeTagMap;
 	}
 }
