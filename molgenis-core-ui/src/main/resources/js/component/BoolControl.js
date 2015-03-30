@@ -22,6 +22,7 @@
 			required: React.PropTypes.bool,
 			disabled: React.PropTypes.bool,
 			readOnly: React.PropTypes.bool,
+			focus: React.PropTypes.bool,
 			value: React.PropTypes.oneOfType([React.PropTypes.bool, React.PropTypes.array]),
 			onValueChange: React.PropTypes.func.isRequired
 		},
@@ -44,6 +45,7 @@
 					disabled : this.props.disabled,
 					readOnly: this.props.readOnly,
 					layout : this.props.layout,
+					focus: this.props.focus,
 					value : this._boolToString(this.props.value),
 					onValueChange : this._handleValueChange
 				});
@@ -60,6 +62,7 @@
 								disabled : this.props.disabled,
 								readOnly: this.props.readOnly,
 								checked : this.props.value,
+								focus: this.props.focus,
 								onValueChange : this.props.onValueChange
 							})		
 						)
