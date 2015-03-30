@@ -32,7 +32,7 @@ public class AppTrackingCodeImpl implements AppTrackingCode
 	}
 
 	/**
-	 * Return the header Analytics Tracking Code from data base
+	 * Return the header Tracking Code from data base
 	 * 
 	 * @return
 	 */
