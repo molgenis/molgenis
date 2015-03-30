@@ -95,6 +95,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		Entity entity = new MapEntity("id");
 		entity.set("id", ENTITY_ID);
 		entity.set("name", "Piet");
+		entity.set("enum", "enum1");
 		entity.set("xrefAttribute", entityXref);
 
 		Entity entity2 = new MapEntity("id");
@@ -117,6 +118,9 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		Query q2 = new QueryImpl().sort(Sort.Direction.DESC, "name").pageSize(100).offset(0);
 		when(dataService.findAll(ENTITY_NAME, q2)).thenReturn(entities);
 
+		DefaultAttributeMetaData attrEnum = new DefaultAttributeMetaData("enum", FieldTypeEnum.ENUM)
+				.setEnumOptions(Arrays.asList("enum0, enum1"));
+
 		DefaultAttributeMetaData attrName = new DefaultAttributeMetaData("name", FieldTypeEnum.STRING);
 		attrName.setLookupAttribute(true);
 
@@ -127,8 +131,9 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
 		when(entityMetaData.getAttribute("name")).thenReturn(attrName);
 		when(entityMetaData.getIdAttribute()).thenReturn(attrId);
-		when(entityMetaData.getAttributes()).thenReturn(Arrays.<AttributeMetaData> asList(attrName, attrId));
-		when(entityMetaData.getAtomicAttributes()).thenReturn(Arrays.<AttributeMetaData> asList(attrName, attrId));
+		when(entityMetaData.getAttributes()).thenReturn(Arrays.<AttributeMetaData> asList(attrName, attrId, attrEnum));
+		when(entityMetaData.getAtomicAttributes()).thenReturn(
+				Arrays.<AttributeMetaData> asList(attrName, attrId, attrEnum));
 		when(entityMetaData.getName()).thenReturn(ENTITY_NAME);
 		when(repo.getEntityMetaData()).thenReturn(entityMetaData);
 		when(dataService.getEntityMetaData(ENTITY_NAME)).thenReturn(entityMetaData);
@@ -213,7 +218,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 										+ ENTITY_NAME
 										+ "\",\"attributes\":{\"name\":{\"href\":\""
 										+ HREF_ENTITY_META
-										+ "/name\"},\"id\":{\"href\":\"/api/v1/Person/meta/id\"}},\"idAttribute\":\"id\",\"isAbstract\":false}"));
+										+ "/name\"},\"id\":{\"href\":\"/api/v1/Person/meta/id\"},\"enum\":{\"href\":\"/api/v1/Person/meta/enum\"}},\"idAttribute\":\"id\",\"isAbstract\":false}"));
 	}
 
 	@Test
@@ -249,18 +254,24 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 										+ ENTITY_NAME
 										+ "\",\"attributes\":{\"name\":{\"href\":\""
 										+ HREF_ENTITY_META
-										+ "/name\",\"fieldType\":\"STRING\",\"name\":\"name\",\"label\":\"name\",\"attributes\":[],\"auto\":false,\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"visible\":true,\"lookupAttribute\":true,\"aggregateable\":false},\"id\":{\"href\":\"/api/v1/Person/meta/id\",\"fieldType\":\"STRING\",\"name\":\"id\",\"label\":\"id\",\"attributes\":[],\"auto\":false,\"nillable\":true,\"readOnly\":true,\"labelAttribute\":false,\"unique\":true,\"visible\":false,\"lookupAttribute\":false,\"aggregateable\":false}},\"idAttribute\":\"id\",\"isAbstract\":false}"));
+										+ "/name\",\"fieldType\":\"STRING\",\"name\":\"name\",\"label\":\"name\",\"attributes\":[],\"auto\":false,\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"visible\":true,\"lookupAttribute\":true,\"aggregateable\":false},\"id\":{\"href\":\"/api/v1/Person/meta/id\",\"fieldType\":\"STRING\",\"name\":\"id\",\"label\":\"id\",\"attributes\":[],\"auto\":false,\"nillable\":true,\"readOnly\":true,\"labelAttribute\":false,\"unique\":true,\"visible\":false,\"lookupAttribute\":false,\"aggregateable\":false},\"enum\":{\"href\":\"/api/v1/Person/meta/enum\",\"fieldType\":\"ENUM\",\"name\":\"enum\",\"label\":\"enum\",\"attributes\":[],\"enumOptions\":[\"enum0, enum1\"],\"auto\":false,\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"visible\":true,\"lookupAttribute\":false,\"aggregateable\":false}},\"idAttribute\":\"id\",\"isAbstract\":false}"));
 
 	}
 
 	@Test
 	public void retrieve() throws Exception
 	{
-		restController.retrieveEntity(ENTITY_NAME, ENTITY_ID, new String[] {}, new String[] {});
+		restController.retrieveEntity(ENTITY_NAME, ENTITY_ID, new String[]
+		{}, new String[]
+		{});
 
-		mockMvc.perform(get(HREF_ENTITY_ID)).andExpect(status().isOk())
+		mockMvc.perform(get(HREF_ENTITY_ID))
+				.andExpect(status().isOk())
 				.andExpect(content().contentType(APPLICATION_JSON))
-				.andExpect(content().string("{\"href\":\"" + HREF_ENTITY_ID + "\",\"name\":\"Piet\",\"id\":\"p1\"}"));
+				.andExpect(
+						content().string(
+								"{\"href\":\"" + HREF_ENTITY_ID
+										+ "\",\"name\":\"Piet\",\"id\":\"p1\",\"enum\":\"enum1\"}"));
 
 	}
 
@@ -285,7 +296,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 						content().string(
 								"{\"href\":\"" + HREF_ENTITY + "\",\"start\":5,\"num\":10,\"total\":0,\"prevHref\":\""
 										+ HREF_ENTITY + "?start=0&num=10\",\"items\":[{\"href\":\"" + HREF_ENTITY_ID
-										+ "\",\"name\":\"Piet\",\"id\":\"p1\"}]}"));
+										+ "\",\"name\":\"Piet\",\"id\":\"p1\",\"enum\":\"enum1\"}]}"));
 
 	}
 
@@ -301,7 +312,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 						content().string(
 								"{\"href\":\"" + HREF_ENTITY + "\",\"start\":5,\"num\":10,\"total\":0,\"prevHref\":\""
 										+ HREF_ENTITY + "?start=0&num=10\",\"items\":[{\"href\":\"" + HREF_ENTITY_ID
-										+ "\",\"name\":\"Piet\",\"id\":\"p1\"}]}"));
+										+ "\",\"name\":\"Piet\",\"id\":\"p1\",\"enum\":\"enum1\"}]}"));
 
 	}
 
@@ -502,15 +513,16 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	{
 		mockMvc.perform(get(BASE_URI + "/csv/Person").param("start", "5").param("num", "10").param("q", "name==Piet"))
 				.andExpect(status().isOk()).andExpect(content().contentType("text/csv"))
-				.andExpect(content().string("\"name\",\"id\"\n\"Piet\",\"p1\"\n"));
+				.andExpect(content().string("\"name\",\"id\",\"enum\"\n\"Piet\",\"p1\",\"enum1\"\n"));
 	}
 
 	@Test
 	public void retrieveSortedEntityCollectionCsv() throws Exception
 	{
 		mockMvc.perform(get(BASE_URI + "/csv/Person").param("sortColumn", "name").param("sortOrder", "DESC"))
-				.andExpect(status().isOk()).andExpect(content().contentType("text/csv"))
-				.andExpect(content().string("\"name\",\"id\"\n\"Klaas\",\"p2\"\n\"Piet\",\"p1\"\n"));
+				.andExpect(status().isOk())
+				.andExpect(content().contentType("text/csv"))
+				.andExpect(content().string("\"name\",\"id\",\"enum\"\n\"Klaas\",\"p2\",\n\"Piet\",\"p1\",\"enum1\"\n"));
 	}
 
 	@Configuration
