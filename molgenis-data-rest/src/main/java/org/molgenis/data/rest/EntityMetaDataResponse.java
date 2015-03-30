@@ -7,6 +7,8 @@ import java.util.Set;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.Permission;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -20,6 +22,10 @@ public class EntityMetaDataResponse
 	private final String labelAttribute;
 	private final String idAttribute;
 	private final Boolean isAbstract;
+	/**
+	 * Is this user allowed to add/update/delete entities of this type?
+	 */
+	private final Boolean writable;
 
 	/**
 	 * 
@@ -30,7 +36,7 @@ public class EntityMetaDataResponse
 	 *            set of lowercase attribute names to expand in response
 	 */
 	public EntityMetaDataResponse(EntityMetaData meta, Set<String> attributesSet,
-			Map<String, Set<String>> attributeExpandsSet)
+			Map<String, Set<String>> attributeExpandsSet, MolgenisPermissionService permissionService)
 	{
 		String name = meta.getName();
 		this.href = Href.concatMetaEntityHref(RestController.BASE_URI, name);
@@ -65,7 +71,7 @@ public class EntityMetaDataResponse
 					{
 						Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
 						this.attributes.put(attr.getName(), new AttributeMetaDataResponse(name, attr, subAttributesSet,
-								null));
+								null, permissionService));
 					}
 					else
 					{
@@ -96,6 +102,8 @@ public class EntityMetaDataResponse
 			isAbstract = meta.isAbstract();
 		}
 		else this.isAbstract = null;
+
+		this.writable = permissionService.hasPermissionOnEntity(name, Permission.WRITE);
 	}
 
 	public String getHref()
@@ -136,5 +144,10 @@ public class EntityMetaDataResponse
 	public boolean isAbstract()
 	{
 		return isAbstract;
+	}
+
+	public Boolean getWritable()
+	{
+		return writable;
 	}
 }
