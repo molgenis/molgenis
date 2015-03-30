@@ -100,9 +100,9 @@ public class SortaServiceController extends MolgenisPluginController
 	@Autowired
 	private FileStore fileStore;
 
+	public static final String VIEW_NAME = "ontology-match-view";
 	public static final String ID = "ontologyservice";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
-	public static final int INVALID_TOTAL_NUMBER = -1;
 	private static final String ILLEGAL_PATTERN = "[^0-9a-zA-Z_]";
 	private static final String ILLEGAL_PATTERN_REPLACEMENT = "_";
 
@@ -115,19 +115,22 @@ public class SortaServiceController extends MolgenisPluginController
 	public String init(Model model)
 	{
 		String username = userAccountService.getCurrentUser().getUsername();
-
-		if (uploadProgress.isUserExists(username)) return matchResult(uploadProgress.getCurrentJob(username), model);
+		if (uploadProgress.isUserExists(username))
+		{
+			return matchResult(uploadProgress.getCurrentJob(username), model);
+		}
 		model.addAttribute("existingTasks", SortaServiceUtil.getEntityAsMap(dataService.findAll(
 				MatchingTaskEntityMetaData.ENTITY_NAME,
 				new QueryImpl().eq(MatchingTaskEntityMetaData.MOLGENIS_USER, username))));
-		return "ontology-match-view";
+
+		return VIEW_NAME;
 	}
 
 	@RequestMapping(method = GET, value = "/newtask")
 	public String matchTask(Model model)
 	{
 		model.addAttribute("ontologies", SortaServiceUtil.getEntityAsMap(sortaService.getAllOntologyEntities()));
-		return "ontology-match-view";
+		return VIEW_NAME;
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/calculate/{entityName}")
@@ -179,7 +182,7 @@ public class SortaServiceController extends MolgenisPluginController
 			model.addAttribute("numberOfMatched", countMatchedEntities(entityName, true));
 			model.addAttribute("numberOfUnmatched", countMatchedEntities(entityName, false));
 		}
-		return "ontology-match-view";
+		return VIEW_NAME;
 	}
 
 	@RequestMapping(method = GET, value = "/count/{entityName}")
