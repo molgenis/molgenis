@@ -23,6 +23,7 @@ public class AttributeMetaDataResponse
 	private final String label;
 	private final String description;
 	private final List<?> attributes;
+	private final List<String> enumOptions;
 	private final Object refEntity;
 	private final Boolean auto;
 	private final Boolean nillable;
@@ -80,6 +81,12 @@ public class AttributeMetaDataResponse
 			this.description = attr.getDescription();
 		}
 		else this.description = null;
+
+		if (attributesSet == null || attributesSet.contains("enumOptions".toLowerCase()))
+		{
+			this.enumOptions = attr.getEnumOptions();
+		}
+		else this.enumOptions = null;
 
 		if (attributesSet == null || attributesSet.contains("expression".toLowerCase()))
 		{
@@ -220,6 +227,11 @@ public class AttributeMetaDataResponse
 	public List<?> getAttributes()
 	{
 		return attributes;
+	}
+
+	public List<String> getEnumOptions()
+	{
+		return enumOptions;
 	}
 
 	public Object getRefEntity()
