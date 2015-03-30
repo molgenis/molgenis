@@ -2,6 +2,7 @@ package org.molgenis.data.rest;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -10,7 +11,10 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 public class EntityMetaDataResponse
 {
@@ -21,6 +25,7 @@ public class EntityMetaDataResponse
 	private final Map<String, Object> attributes;
 	private final String labelAttribute;
 	private final String idAttribute;
+	private final List<String> lookupAttributes;
 	private final Boolean isAbstract;
 	/**
 	 * Is this user allowed to add/update/delete entities of this type?
@@ -97,6 +102,21 @@ public class EntityMetaDataResponse
 		}
 		else this.idAttribute = null;
 
+		if (attributesSet == null || attributesSet.contains("lookupAttributes".toLowerCase()))
+		{
+			Iterable<AttributeMetaData> lookupAttributes = meta.getLookupAttributes();
+			this.lookupAttributes = lookupAttributes != null ? Lists.newArrayList(Iterables.transform(lookupAttributes,
+					new Function<AttributeMetaData, String>()
+					{
+						@Override
+						public String apply(AttributeMetaData attribute)
+						{
+							return attribute.getName();
+						}
+					})) : null;
+		}
+		else this.lookupAttributes = null;
+
 		if (attributesSet == null || attributesSet.contains("abstract".toLowerCase()))
 		{
 			isAbstract = meta.isAbstract();
@@ -129,6 +149,11 @@ public class EntityMetaDataResponse
 	public String getIdAttribute()
 	{
 		return idAttribute;
+	}
+
+	public List<String> getLookupAttributes()
+	{
+		return lookupAttributes;
 	}
 
 	public Map<String, Object> getAttributes()
