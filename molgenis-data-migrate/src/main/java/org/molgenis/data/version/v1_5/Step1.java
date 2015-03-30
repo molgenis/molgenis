@@ -141,22 +141,27 @@ public class Step1 extends MetaDataUpgrade
 
 	private void recreateElasticSearchMetaDataIndices()
 	{
-		searchService.delete("entities");
-		searchService.delete("attributes");
-		searchService.delete("tags");
-		searchService.delete("packages");
+		LOG.info("Deleting metadata indices...");
+		searchService.delete(EntityMetaDataMetaData.ENTITY_NAME);
+		searchService.delete(AttributeMetaDataMetaData.ENTITY_NAME);
+		searchService.delete(TagMetaData.ENTITY_NAME);
+		searchService.delete(PackageMetaData.ENTITY_NAME);
 
 		searchService.refresh();
 
+		LOG.info("Deleting metadata indices DONE.");
+
 		try
 		{
-			Thread.sleep(1000);
+			// sleep just a bit to be sure changes have been persisted
+			Thread.sleep(1500);
 		}
 		catch (InterruptedException e1)
 		{
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+
+		LOG.info("Adding metadata indices...");
 
 		try
 		{
@@ -170,12 +175,17 @@ public class Step1 extends MetaDataUpgrade
 			LOG.error("error creating metadata mappings", e);
 		}
 
+		LOG.info("Reindexing MySQL repositories...");
+
 		searchService.rebuildIndex(undecoratedMySQL.getRepository(TagMetaData.ENTITY_NAME), new TagMetaData());
 		searchService.rebuildIndex(undecoratedMySQL.getRepository(PackageMetaData.ENTITY_NAME), new PackageMetaData());
 		searchService.rebuildIndex(undecoratedMySQL.getRepository(AttributeMetaDataMetaData.ENTITY_NAME),
 				new AttributeMetaDataMetaData());
 		searchService.rebuildIndex(undecoratedMySQL.getRepository(EntityMetaDataMetaData.ENTITY_NAME),
 				new EntityMetaDataMetaData());
+
+		LOG.info("Reindexing MySQL repositories DONE.");
+
 	}
 
 }
