@@ -18,6 +18,7 @@ import org.molgenis.data.system.RepositoryTemplateLoader;
 import org.molgenis.data.version.v1_5.Step1UpgradeMetaData;
 import org.molgenis.data.version.v1_5.Step2;
 import org.molgenis.data.version.v1_5.Step3AddOrderColumnToMrefTables;
+import org.molgenis.data.version.v1_5.Step4;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
 import org.molgenis.system.core.FreemarkerTemplateRepository;
 import org.molgenis.ui.MolgenisWebAppConfig;
@@ -72,6 +73,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		metaDataUpgradeService.addUpgrade(new Step1UpgradeMetaData(dataSource, searchService));
 		metaDataUpgradeService.addUpgrade(new Step2(dataService, jpaRepositoryCollection, dataSource, searchService));
 		metaDataUpgradeService.addUpgrade(new Step3AddOrderColumnToMrefTables(dataSource));
+		metaDataUpgradeService.addUpgrade(new Step4(dataSource, mysqlRepositoryCollection));
 	}
 
 	@Override
