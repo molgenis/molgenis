@@ -166,6 +166,11 @@ public class EntityMetaDataResponse
 		return idAttribute;
 	}
 
+	public List<String> getLookupAttributes()
+	{
+		return lookupAttributes;
+	}
+
 	public Map<String, Object> getAttributes()
 	{
 		return ImmutableMap.copyOf(attributes);
@@ -174,11 +179,6 @@ public class EntityMetaDataResponse
 	public String getLabelAttribute()
 	{
 		return labelAttribute;
-	}
-
-	public List<String> getLookupAttributes()
-	{
-		return lookupAttributes;
 	}
 
 	public boolean isAbstract()
