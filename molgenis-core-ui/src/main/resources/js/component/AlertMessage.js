@@ -7,9 +7,9 @@
 	/**
 	 * @memberOf component
 	 */
-	var Alert = React.createClass({
+	var AlertMessage = React.createClass({
 		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
-		displayName: 'Alert',
+		displayName: 'AlertMessage',
 		propTypes: {
 			type: React.PropTypes.oneOf(['success', 'info', 'warning', 'danger']),
 			message: React.PropTypes.string.isRequired
@@ -30,6 +30,6 @@
 	// export component
 	molgenis.ui = molgenis.ui || {};
 	_.extend(molgenis.ui, {
-		Alert: React.createFactory(Alert)
+		AlertMessage: React.createFactory(AlertMessage)
 	});
 }(_, React, molgenis));
