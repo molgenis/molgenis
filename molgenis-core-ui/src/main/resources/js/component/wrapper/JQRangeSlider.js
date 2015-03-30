@@ -15,7 +15,7 @@
 		propTypes: {
 			id: React.PropTypes.string,
 			options: React.PropTypes.object,
-			disabled: React.PropTypes.array,
+			disabled: React.PropTypes.bool,
 			onChange: React.PropTypes.func.isRequired
 		},
 		componentDidMount: function() {
@@ -39,13 +39,22 @@
 			$container.editRangeSlider('destroy');
 		},
 		render: function() {
+			// workaround for JQRangeSlider edit boxes going out of bounds
+			return (
+				div({className: 'row'},
+					div({className: 'col-md-offset-1 col-md-10'},
+						div({id: this.props.id, ref: 'rangeslider'})
+					)
+				)
+			);
+		},
+		componentDidUpdate: function() {
 			if(this.isMounted()) {
 				var $container = $(this.refs.rangeslider.getDOMNode());
 				$container.editRangeSlider(this.props.disabled ? 'disable' : 'enable');
 				$container.editRangeSlider('values', this.props.value[0], this.props.value[1]);
 			}
-			return div({id: this.props.id, ref: 'rangeslider'});
-		}
+		},
 	});
 	
 	// export component
