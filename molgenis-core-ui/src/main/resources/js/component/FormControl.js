@@ -175,16 +175,16 @@
             else if(type === 'HYPERLINK' && !nullOrUndefinedValue && !this._statics.REGEX_URL.test(value)) {
                 errorMessage = 'Please enter a valid URL.';
             }
-            else if((type === 'INT' || type === 'LONG') && !nullOrUndefinedValue && !this._isInteger(value)) {
+            else if(!attr.range && (type === 'INT' || type === 'LONG') && !nullOrUndefinedValue && !this._isInteger(value)) {
                 errorMessage = 'Please enter an integer value.';
             }
-            else if(type === 'INT' && !nullOrUndefinedValue && !this._inRange(value, {min: this._statics.INT_MIN, max: this._statics.INT_MAX})) {
+            else if(!attr.range && type === 'INT' && !nullOrUndefinedValue && !this._inRange(value, {min: this._statics.INT_MIN, max: this._statics.INT_MAX})) {
                 errorMessage = 'Please enter a value between ' + this._statics.INT_MIN + ' and ' + this._statics.INT_MAX + '.';
             }
-            else if(type === 'LONG' && !nullOrUndefinedValue && !this._inRange(value, {min: this._statics.LONG_MIN, max: this._statics.LONG_MAX})) {
+            else if(!attr.range && type === 'LONG' && !nullOrUndefinedValue && !this._inRange(value, {min: this._statics.LONG_MIN, max: this._statics.LONG_MAX})) {
                 errorMessage = 'Please enter a value between ' + this._statics.LONG_MIN + ' and ' + this._statics.LONG_MAX + '.';
             }
-            else if((type === 'INT' || type === 'LONG') && attr.range && !nullOrUndefinedValue && !this._inRange(value, attr.range)) {
+            else if(attr.range && (type === 'INT' || type === 'LONG') && !nullOrUndefinedValue && (!this._inRange(value[0], attr.range) || !this._inRange(value[1], attr.range))) {
                 if(attr.range.min !== undefined && attr.range.max !== undefined) {
                     errorMessage = 'Please enter a value between ' + attr.range.min + ' and ' + attr.range.max + '.';
                 }
