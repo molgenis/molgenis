@@ -23,6 +23,7 @@
         <script src="../js/molgenis-component.min.js"></script>
         --><!-- RELEASE END -->
         <!-- DEVELOPMENT -->
+        <script src="../js/tinymce/tinymce.min.js"></script>
         <script src="../js/react-with-addons.js"></script>
         <script src="../js/component/mixin/AttributeLoaderMixin.js"></script>
         <script src="../js/component/mixin/DeepPureRenderMixin.js"></script>
@@ -35,6 +36,8 @@
 		<script src="../js/component/wrapper/JQueryForm.js"></script>
 		<script src="../js/component/wrapper/JQRangeSlider.js"></script>
 		<script src="../js/component/wrapper/Select2.js"></script>
+        <script src="../js/component/wrapper/TinyMce.js"></script>
+		<script src="../js/component/AlertMessage.js"></script>
 		<script src="../js/component/AttributeControl.js"></script>
 		<script src="../js/component/BoolControl.js"></script>
 		<script src="../js/component/Button.js"></script>
@@ -56,6 +59,12 @@
         <script src="../js/test-molgenis-react-form.js"></script>
     </head>
     <body>
+        <div id="tinymce-container"></div>
+        <script>
+        React.render(molgenis.ui.wrapper.TinyMce({
+            
+        }), $('#tinymce-container')[0]);
+        </script>
 		<div class="container-fluid">
             <div class="row">
                 <div class="col-md-offset-3 col-md-6">

@@ -162,11 +162,7 @@ public class AttributeMetaDataResponse
 
 		if (attributesSet == null || attributesSet.contains("defaultValue".toLowerCase()))
 		{
-			// this.defaultValue = attr.getDefaultValue();
-
-			// TEMP HACK
-			this.defaultValue = attr.getDefaultValue() != null ? attr.getDefaultValue() : (attr.getDataType()
-					.getEnumType() == FieldTypeEnum.BOOL ? false : null);
+			this.defaultValue = attr.getDefaultValue();
 		}
 		else this.defaultValue = null;
 
@@ -235,6 +231,11 @@ public class AttributeMetaDataResponse
 	public List<?> getAttributes()
 	{
 		return attributes;
+	}
+
+	public List<String> getEnumOptions()
+	{
+		return enumOptions;
 	}
 
 	public Object getRefEntity()
