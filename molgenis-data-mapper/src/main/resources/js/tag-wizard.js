@@ -72,6 +72,7 @@
 	$(function() {
 		entityName = $('#global-information').data('entity');
 
+		$('#tag-mapping-table').scrollTableBody();
 		$('#ontology-select').select2();
 
 		$('#ontology-select').on('change', function() {
