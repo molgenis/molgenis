@@ -41,15 +41,16 @@
     			'modal-sm': this.props.size == 'small',
     			'modal-lg': this.props.size == 'large'
     		});
+    		var id = 'modal-title-' + (new Date).getTime(); 
     		return (
-				div({className: 'modal', tabIndex: -1, ref: 'modal'},
+				div({className: 'modal', tabIndex: -1, role: 'dialog', 'aria-labelledby': id, ref: 'modal'},
 					div({className: modalDialogClasses},
 						div({className: 'modal-content'},
 							div({className: 'modal-header'},
-								button({type: 'button', className: 'close', 'data-dismiss': 'modal'},
-									span({}, '\u00D7') // &times;
+								button({type: 'button', className: 'close', 'data-dismiss': 'modal', 'aria-label': 'Close'},
+									span({'aria-hidden': true}, '\u00D7') // &times;
 								),
-								h4({className: 'modal-title'},
+								h4({className: 'modal-title', id: id},
 									this.props.title
 								)
 							),
