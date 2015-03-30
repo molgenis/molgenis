@@ -333,5 +333,10 @@
 			<artifactId>molgenis-data-semanticsearch</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-data-migrate</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 	</dependencies>
 </project>

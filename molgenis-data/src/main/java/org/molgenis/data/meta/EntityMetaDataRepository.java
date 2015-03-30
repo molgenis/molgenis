@@ -194,6 +194,12 @@ class EntityMetaDataRepository
 		repository.add(entity);
 	}
 
+	public void update(DefaultEntityMetaData entityMeta)
+	{
+		repository.update(toEntity(entityMeta));
+		entityMetaDataCache.put(entityMeta.getName(), entityMeta);
+	}
+
 	private Entity toEntity(EntityMetaData emd)
 	{
 		Entity entityMetaDataEntity = new MapEntity(META_DATA);
