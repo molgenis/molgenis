@@ -157,16 +157,24 @@
 			return this.props.readOnly !== undefined ? this.props.readOnly : this.state.attr.readOnly;
 		},
 		_createNumberControl: function(controlProps, step) {
-			var min = this.props.range ? this.props.range.min : undefined;
-			var max = this.props.range ? this.props.range.max : undefined;
+			var range = this.props.attr.range;
+			var min = range ? range.min : undefined;
+			var max = range ? range.max : undefined;
 			var placeholder = this.props.placeholder || 'Number';
-			return molgenis.ui.Input(_.extend({}, controlProps, {
-				type : 'number',
-				placeholder : placeholder,
-				step : step,
-				min : min,
-				max : max,
-			}));
+			if(range === undefined || ((range.min === undefined || range.max === undefined) && step !== 'any')) {
+				return molgenis.ui.Input(_.extend({}, controlProps, {
+					type : 'number',
+					placeholder : placeholder,
+					step : step,
+					min : min,
+					max : max,
+				}));
+			} else {
+				return molgenis.ui.RangeSlider(_.extend({}, controlProps, {
+					range: range,
+					step: step
+				}));
+			}
 		},
 		_createStringControl: function(controlProps, type, placeholder) {
 			return molgenis.ui.Input(_.extend({}, controlProps, {
