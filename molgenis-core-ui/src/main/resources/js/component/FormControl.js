@@ -38,7 +38,7 @@
         componentWillReceiveProps: function(nextProps) {
             if(nextProps.validate === true) {
                 // validate control
-                this._validate(nextProps.value, function(validity) {
+                this._validate(this._getValue(nextProps.value), function(validity) {
                     this.setState({
                         pristine: true,
                         validity: validity
@@ -83,7 +83,7 @@
                 disabled: this.props.mode === 'view',
                 focus: this.props.focus,
                 formLayout : undefined,
-                value: this.props.value,
+                value: this._getValue(this.props.value),
                 onValueChange : this._handleValueChange,
                 onBlur : this._handleBlur
             });
@@ -126,12 +126,12 @@
             }
         },
         _onAttrInit: function() {
-        	this._handleValueChange({value: this.props.value});
+        	this._handleValueChange({value: this._getValue(this.props.value)});
         },
         _handleValueChange: function(e) {
-            this._validate(e.value, function(validity) {
+            this._validate(this._getValue(e.value), function(validity) {
                 this.setState({
-                    value: e.value,
+                    value: this._getValue(e.value),
                     valid: validity.valid,
                     errorMessage: validity.errorMessage,
                     pristine: this.props.value === e.value // mark input as dirty
@@ -139,7 +139,7 @@
                 
                 this.props.onValueChange({
                     attr: this.state.attr.name,
-                    value: e.value,
+                    value: this._getValue(e.value),
                     valid: validity.valid,
                     errorMessage: validity.errorMessage
                 });
@@ -151,7 +151,7 @@
                 return;
             }
             
-            this._validate(e.value, function(validity) {
+            this._validate(this._getValue(e.value), function(validity) {
                 this.setState({
                     valid: validity.valid,
                     errorMessage: validity.errorMessage
@@ -236,6 +236,15 @@
                 inRange = inRange && value <= range.max;
             }
             return inRange;
+        },
+        _getValue: function(value) {
+        	// workaround for required bool attribute with no value implying false value
+        	// TODO replace with elegant solution
+            if(value === undefined && this.state.attr.fieldType === 'BOOL' && !this.state.attr.nillable) {
+            	return false;
+            } else {
+            	return value;
+            }
         }
     });
     
