@@ -14,12 +14,32 @@ CREATE TABLE attributes_parts
 	parts		varchar(255)
 );
 
+INSERT INTO attributes_parts
+(`order`, identifier, parts)
+SELECT
+	null,
+	(SELECT c.identifier
+		FROM attributes c
+		WHERE c.name = attributes.partOfAttribute
+		AND c.entity = attributes.entity),
+	identifier
+FROM attributes
+WHERE partOfAttribute IS NOT NULL;
+
 CREATE TABLE entities_attributes
 (
 	`order`		int(11),
 	fullName	varchar(255),
 	attributes	varchar(255)
 );
+
+INSERT INTO entities_attributes
+(`order`, fullName, attributes)
+SELECT
+	null,
+	entity,
+	identifier
+FROM attributes;
 
 ALTER TABLE entities
 ADD COLUMN backend varchar(255);
