@@ -1,11 +1,3 @@
-function isFloat(n) {
-    return n === +n && n !== (n|0);
-}
-
-function isInteger(n) {
-    return n === +n && n === (n|0);
-}
-
 (function($, molgenis) {
 	"use strict";
 
