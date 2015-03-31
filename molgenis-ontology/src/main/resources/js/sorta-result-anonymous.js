@@ -159,13 +159,31 @@
 			if(ontologyTerm){
 				var divContainerOTName = getOntologyTermName(ontologyTerm);
 				var divContainerOTSynonym = getOntologyTermSynonyms(ontologyTerm);
-				inputTermDiv.append(divContainerOTName).append(divContainerOTSynonym);
+				var divContainerOTAnnotation = getOntologyTermAnnotations(ontologyTerm);
+				inputTermDiv.append(divContainerOTName).append(divContainerOTSynonym).append(divContainerOTAnnotation);
 			}
 			return inputTermDiv;
 		}
 		
 		function getOntologyTermName(ontologyTerm){
 			return $('<div />').append('Name : ').append('<a href="' + ontologyTerm.ontologyTermIri + '">' + ontologyTerm.ontologyTermName + '</a>');
+		}
+		
+		function getOntologyTermAnnotations(ontologyTerm){
+			var divContainerOTAnnotations = [];
+			if(ontologyTerm.ontologyTermDynamicAnnotation.length > 0){
+				var annotationMap = {};
+				$.each(ontologyTerm.ontologyTermDynamicAnnotation, function(index, annotation){
+					if(!annotationMap[annotation.name]){
+						annotationMap[annotation.name] = [];
+					}
+					annotationMap[annotation.name].push(annotation.value);
+				});
+				$.map(annotationMap, function(val, key){					
+					divContainerOTAnnotations.push($('<div />').append(key + ' : ' + val.join(', ')));
+				});
+			}
+			return divContainerOTAnnotations;
 		}
 		
 		function getOntologyTermSynonyms(ontologyTerm){
