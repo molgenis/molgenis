@@ -313,6 +313,8 @@ function abbreviate(s, maxLength) {
  *            input value
  * @param lbl
  *            input label (for checkbox and radio inputs)
+ *            
+ * @deprecated use AttributeControl.js            
  */
 function createInput(attr, attrs, val, lbl) {
 	function createBasicInput(type, attrs, val) {
@@ -349,7 +351,7 @@ function createInput(attr, attrs, val, lbl) {
 		        .appendTo($div);
 		}
 		$('<span>').addClass('input-group-addon datepickerbutton')
-		    .append($('<span>').addClass('glyphicon glyp2icon-calendar'))
+		    .append($('<span>').addClass('glyphicon glyphicon-calendar'))
 		    .appendTo($div);
 		$div.datetimepicker(dataType === 'DATE' ? { format : 'YYYY-MM-DD' } : { format : 'YYYY-MM-DDTHH:mm:ssZZ' });
 		return $div;
