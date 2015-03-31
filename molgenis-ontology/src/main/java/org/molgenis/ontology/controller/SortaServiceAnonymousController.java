@@ -18,6 +18,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -90,6 +91,20 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 		String sessionId = httpServletRequest.getSession().getId();
 		File uploadFile = fileStore.store(new ByteArrayInputStream(inputTerms.getBytes("UTF8")), sessionId
 				+ "_input.txt");
+		httpServletRequest.getSession().setAttribute("filePath", uploadFile.getAbsoluteFile());
+		httpServletRequest.getSession().setAttribute("ontologyIri", ontologyIri);
+		model.addAttribute("showResult", true);
+		return VIEW_NAME;
+	}
+
+	@RequestMapping(method = POST, value = "/match/upload")
+	public String upload(@RequestParam(value = "selectOntologies", required = true) String ontologyIri,
+			@RequestParam(value = "file", required = true) Part file, HttpServletRequest httpServletRequest, Model model)
+			throws UnsupportedEncodingException, IOException
+	{
+
+		String sessionId = httpServletRequest.getSession().getId();
+		File uploadFile = fileStore.store(file.getInputStream(), sessionId + "_input.csv");
 		httpServletRequest.getSession().setAttribute("filePath", uploadFile.getAbsoluteFile());
 		httpServletRequest.getSession().setAttribute("ontologyIri", ontologyIri);
 		model.addAttribute("showResult", true);
