@@ -166,7 +166,10 @@
             
             var errorMessage = undefined;
             
-            if(attr.nillable === false && nullOrUndefinedValue) { // required value constraint
+            if(attr.nillable === false && type !== 'CATEGORICAL_MREF' && type !== 'MREF' && nullOrUndefinedValue) { // required value constraint
+                errorMessage = 'Please enter a value.';
+            }
+            else if(attr.nillable === false && (type === 'CATEGORICAL_MREF' || type === 'MREF') && (nullOrUndefinedValue || value.length === 0)) { // required value constraint
                 errorMessage = 'Please enter a value.';
             }
             else if(type === 'EMAIL' && !nullOrUndefinedValue && !this._statics.REGEX_EMAIL.test(value)) {
