@@ -1,10 +1,10 @@
 package org.molgenis.data;
 
-public class IndexedAutoIdRepositoryDecorator extends AutoIdRepositoryDecorator implements IndexedRepository
+public class IndexedAutoValueRepositoryDecorator extends AutoValueRepositoryDecorator implements IndexedRepository
 {
 	private final IndexedRepository indexedRepository;
 
-	public IndexedAutoIdRepositoryDecorator(IndexedRepository indexedRepository, IdGenerator idGenerator)
+	public IndexedAutoValueRepositoryDecorator(IndexedRepository indexedRepository, IdGenerator idGenerator)
 	{
 		super(indexedRepository, idGenerator);
 		this.indexedRepository = indexedRepository;

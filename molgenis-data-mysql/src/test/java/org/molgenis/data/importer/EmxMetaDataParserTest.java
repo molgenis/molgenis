@@ -64,8 +64,8 @@ public class EmxMetaDataParserTest extends AbstractTestNGSpringContextTests
 		assertTrue(report.valid());
 		EntitiesValidationReport expected = new MyEntitiesValidationReport().addEntity("import_person", true)
 				.addAttribute("firstName").addAttribute("lastName").addAttribute("height").addAttribute("active")
-				.addAttribute("children").addAttribute("birthplace").addEntity("import_city", true)
-				.addAttribute("name");
+				.addAttribute("children").addAttribute("birthplace").addAttribute("parent")
+				.addEntity("import_city", true).addAttribute("name");
 		assertEquals(report, expected);
 	}
 

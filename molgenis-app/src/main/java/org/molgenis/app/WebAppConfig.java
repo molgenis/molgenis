@@ -3,8 +3,6 @@ package org.molgenis.app;
 import java.io.IOException;
 import java.util.Map;
 
-import javax.sql.DataSource;
-
 import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.molgenis.DatabaseConfig;
 import org.molgenis.data.DataService;
@@ -17,10 +15,15 @@ import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.system.RepositoryTemplateLoader;
+import org.molgenis.data.version.v1_5.Step1UpgradeMetaData;
+import org.molgenis.data.version.v1_5.Step2;
+import org.molgenis.data.version.v1_5.Step3AddOrderColumnToMrefTables;
+import org.molgenis.data.version.v1_5.Step4;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
-import org.molgenis.migrate.MysqlMigrate;
 import org.molgenis.system.core.FreemarkerTemplateRepository;
 import org.molgenis.ui.MolgenisWebAppConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.ComponentScan;
@@ -43,6 +46,8 @@ import freemarker.template.TemplateException;
 { WebAppSecurityConfig.class, DatabaseConfig.class, EmbeddedElasticSearchConfig.class })
 public class WebAppConfig extends MolgenisWebAppConfig
 {
+	private static final Logger LOG = LoggerFactory.getLogger(WebAppConfig.class);
+
 	@Autowired
 	private DataService dataService;
 
@@ -56,13 +61,19 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	@Autowired
 	private JpaRepositoryCollection jpaRepositoryCollection;
 
-	@Autowired
-	private DataSource dataSource;
-
 	@Override
 	public ManageableRepositoryCollection getBackend()
 	{
 		return mysqlRepositoryCollection;
+	}
+
+	@Override
+	public void addUpgrades()
+	{
+		metaDataUpgradeService.addUpgrade(new Step1UpgradeMetaData(dataSource, searchService));
+		metaDataUpgradeService.addUpgrade(new Step2(dataService, jpaRepositoryCollection, dataSource, searchService));
+		metaDataUpgradeService.addUpgrade(new Step3AddOrderColumnToMrefTables(dataSource));
+		metaDataUpgradeService.addUpgrade(new Step4(dataSource, mysqlRepositoryCollection));
 	}
 
 	@Override
@@ -84,19 +95,23 @@ public class WebAppConfig extends MolgenisWebAppConfig
 				throw new NotImplementedException("Not implemented yet");
 			}
 		};
-		localDataService.getMeta().setDefaultBackend(backend);
 
-		new MysqlMigrate(new JdbcTemplate(dataSource), "MySQL").migrate(localDataService.getMeta());
+		// metadata repositories get created here.
+		localDataService.getMeta().setDefaultBackend(backend);
 
 		for (EntityMetaData emd : localDataService.getMeta().getEntityMetaDatas())
 		{
-			if (emd.getBackend().equals(MysqlRepositoryCollection.NAME))
+			if (MysqlRepositoryCollection.NAME.equals(emd.getBackend()))
 			{
 				localDataService.addRepository(backend.addEntityMeta(emd));
 			}
-			else if (emd.getBackend().equals(JpaRepositoryCollection.NAME))
+			else if (JpaRepositoryCollection.NAME.equals(emd.getBackend()))
 			{
 				localDataService.addRepository(jpaRepositoryCollection.getUnderlying(emd.getName()));
+			}
+			else
+			{
+				LOG.warn("backend unkown for metadata " + emd.getName());
 			}
 		}
 	}
