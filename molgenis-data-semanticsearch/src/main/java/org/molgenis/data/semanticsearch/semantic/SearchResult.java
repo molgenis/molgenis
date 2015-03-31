@@ -1,4 +1,4 @@
-package org.molgenis.data.semantic;
+package org.molgenis.data.semanticsearch.semantic;
 
 public interface SearchResult<ItemType>
 {

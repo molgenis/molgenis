@@ -1,4 +1,4 @@
-package org.molgenis.data.mapping;
+package org.molgenis.data.mapper.mapping;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;

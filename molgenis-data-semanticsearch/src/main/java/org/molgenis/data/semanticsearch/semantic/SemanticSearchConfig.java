@@ -1,4 +1,4 @@
-package org.molgenis.data.semantic;
+package org.molgenis.data.semanticsearch.semantic;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.IdGenerator;

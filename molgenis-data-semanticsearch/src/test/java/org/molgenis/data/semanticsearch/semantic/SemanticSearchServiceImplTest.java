@@ -1,4 +1,4 @@
-package org.molgenis.data.semantic;
+package org.molgenis.data.semanticsearch.semantic;
 
 import static com.google.common.collect.ImmutableSet.of;
 import static java.util.Arrays.asList;
@@ -8,7 +8,10 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.semanticsearch.semantic.SemanticSearchService;
+import org.molgenis.data.semanticsearch.semantic.SemanticSearchServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.ontology.OntologyService;
 import org.molgenis.ontology.repository.model.OntologyTerm;

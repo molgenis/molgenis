@@ -1,4 +1,4 @@
-package org.molgenis.data.semantic;
+package org.molgenis.data.semanticsearch.semantic;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -17,6 +17,11 @@ import org.molgenis.data.IdGenerator;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.TagMetaData;
+import org.molgenis.data.semantic.Relation;
+import org.molgenis.data.semantic.Tag;
+import org.molgenis.data.semantic.TagImpl;
+import org.molgenis.data.semanticsearch.semantic.OntologyTagService;
+import org.molgenis.data.semanticsearch.semantic.TagRepository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
