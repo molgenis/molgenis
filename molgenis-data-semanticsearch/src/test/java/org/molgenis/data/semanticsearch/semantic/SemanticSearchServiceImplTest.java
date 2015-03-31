@@ -13,8 +13,8 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.semanticsearch.service.impl.SemanticSearchServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.ontology.OntologyService;
-import org.molgenis.ontology.repository.model.OntologyTerm;
+import org.molgenis.ontology.core.model.OntologyTerm;
+import org.molgenis.ontology.core.service.OntologyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,28 +28,6 @@ import com.google.common.collect.ImmutableSet;
 @ContextConfiguration(classes = SemanticSearchServiceImplTest.Config.class)
 public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTests
 {
-	@Configuration
-	public static class Config
-	{
-		@Bean
-		MetaDataService metaDataService()
-		{
-			return mock(MetaDataService.class);
-		}
-
-		@Bean
-		OntologyService ontologyService()
-		{
-			return mock(OntologyService.class);
-		}
-
-		@Bean
-		SemanticSearchService semanticSearchService()
-		{
-			return new SemanticSearchServiceImpl();
-		}
-	}
-
 	@Autowired
 	private MetaDataService metaDataService;
 
@@ -118,4 +96,27 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 		List<OntologyTerm> terms = semanticSearchService.findTags(attribute, ontologies);
 		assertEquals(terms, ontologyTerms);
 	}
+
+	@Configuration
+	public static class Config
+	{
+		@Bean
+		MetaDataService metaDataService()
+		{
+			return mock(MetaDataService.class);
+		}
+
+		@Bean
+		OntologyService ontologyService()
+		{
+			return mock(OntologyService.class);
+		}
+
+		@Bean
+		SemanticSearchService semanticSearchService()
+		{
+			return new SemanticSearchServiceImpl();
+		}
+	}
+
 }
