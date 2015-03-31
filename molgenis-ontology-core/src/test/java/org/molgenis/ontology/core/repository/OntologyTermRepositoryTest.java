@@ -52,7 +52,7 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 	public void testFindOntologyTerms()
 	{
 		ArgumentCaptor<Query> queryCaptor = forClass(Query.class);
-		when(dataService.findAll(eq("Ontology_OntologyTerm"), queryCaptor.capture())).thenReturn(
+		when(dataService.findAll(eq(OntologyTermMetaData.ENTITY_NAME), queryCaptor.capture())).thenReturn(
 				asList(ontologyTermEntity));
 
 		List<OntologyTerm> terms = ontologyTermRepository.findOntologyTerms(asList("1", "2"),
@@ -68,8 +68,10 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testGetOntologyTerm()
 	{
-		when(dataService.findOne("Ontology_OntologyTerm", QueryImpl.EQ("ontologyTermIRI", "http://www.test.nl/iri")))
-				.thenReturn(ontologyTermEntity);
+		when(
+				dataService.findOne(OntologyTermMetaData.ENTITY_NAME,
+						QueryImpl.EQ(OntologyTermMetaData.ONTOLOGY_TERM_IRI, "http://www.test.nl/iri"))).thenReturn(
+				ontologyTermEntity);
 
 		String[] iris =
 		{ "http://www.test.nl/iri" };
