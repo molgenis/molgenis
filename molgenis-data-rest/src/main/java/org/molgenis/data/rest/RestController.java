@@ -566,7 +566,8 @@ public class RestController
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		for (String param : request.getParameterMap().keySet())
 		{
-			String value = request.getParameter(param);
+			String[] values = request.getParameterValues(param);
+			String value = values != null ? StringUtils.join(values, ',') : null;
 			if (StringUtils.isNotBlank(value))
 			{
 				paramMap.put(param, value);
@@ -685,7 +686,9 @@ public class RestController
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		for (String param : request.getParameterMap().keySet())
 		{
-			paramMap.put(param, request.getParameter(param));
+			String[] values = request.getParameterValues(param);
+			String value = values != null ? StringUtils.join(values, ',') : null;
+			paramMap.put(param, value);
 		}
 
 		updateInternal(entityName, typedId, paramMap);
