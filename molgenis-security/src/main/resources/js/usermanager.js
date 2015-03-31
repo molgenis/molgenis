@@ -32,19 +32,15 @@
 	 * @memberOf molgenis.usermanager
 	 */
 	function getEditForm(id, type) {
-		$('#managerModalTitle').html('Edit ' + type);
 		React.render(molgenis.ui.Form({
 			entity : 'molgenis' + type,
 			entityInstance: id,
 			mode: 'edit',
+			modal: true,
 			onSubmitSuccess : function() {
-				$('#managerModal').modal('hide');
-			},
-			cancelBtn: true,
-			onCancel: function() {
-				$('#managerModal').modal('hide');
+				location.reload();
 			}
-		}), $('#controlGroups')[0]);
+		}), $('div')[0]);
 	}
 
 	/**
@@ -149,13 +145,6 @@
 
 		$('.activate-group-checkbox').click(function(e) {
 			setActivation('group', $(this).data('id'), this);
-		});
-		
-		$('#managerModal').keydown(function(e) {
-			// prevent modal being submitted if one presses enter
-			if (event.keyCode === 13) {
-				return false;
-			}
 		});
 	});
 }($, window.top.molgenis = window.top.molgenis || {}));

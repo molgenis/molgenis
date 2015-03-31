@@ -21,7 +21,7 @@
 				<div class="tab-pane <#if "users"==viewState>active</#if>" id="user-manager">
 					<legend>
 						User management 
-						<a id="create-user-btn" href="#" style="margin:30px 10px" data-toggle="modal" data-target="#managerModal">
+						<a id="create-user-btn" href="#" style="margin:30px 10px">
 							<img src="/img/new.png">
 						</a>
 					</legend>
@@ -41,7 +41,7 @@
 							<#if users?has_content>
 								<#list users as user>
 									<tr id="userRow${user.id?html}">
-										<td><a href="#" class="edit-user-btn" data-toggle="modal" data-target="#managerModal" data-id="${user.id?html}"><img src="/img/editview.gif"></a></td>
+										<td><a href="#" class="edit-user-btn" data-id="${user.id?html}"><img src="/img/editview.gif"></a></td>
 										<td><input type="checkbox" class="activate-user-checkbox" data-id="${user.id?html}" <#if user.isActive()>checked</#if> <#if user.isSuperuser()>disabled</#if>></td>
 										<td>${user.getUsername()!?html}</td>
 										<td>${user.getFullName()!?html}</td>
@@ -76,7 +76,7 @@
 								<#list groups as g>
 									<tr id="groupRow${g.id?html}">
 										<td>
-											<a href="#" class="edit-group-btn" data-toggle="modal" data-target="#managerModal" data-id="${g.id?html}"><img src="/img/editview.gif"></a>
+											<a href="#" class="edit-group-btn" data-id="${g.id?html}"><img src="/img/editview.gif"></a>
 										</td>
 										<td>
 											<input type="checkbox" class="activate-group-checkbox" data-id="${g.id?html}" <#if g.active>checked</#if>>
@@ -104,19 +104,4 @@
 		</div>
 	</div>
 </div>
-
-<#-- Modal -->
-<div class="modal" id="managerModal" tabindex="-1" role="dialog" aria-labelledby="managerModalTitle" aria-hidden="true">
-	<div class="modal-dialog">
-		<div class="modal-content">				
-	      	<div class="modal-header">
-	        	<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-	        	<h4 class="modal-title" id="managerModalTitle"></h4>
-	     	</div>
-	      	<div class="modal-body" id="controlGroups">
-	      	</div>
-	    </div>
-	</div>
-</div>
-
 <@footer/>
