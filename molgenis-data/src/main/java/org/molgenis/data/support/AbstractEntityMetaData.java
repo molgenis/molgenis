@@ -269,6 +269,19 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 		return getIdAttribute();
 	}
 
+	@Override
+	public Iterable<AttributeMetaData> getLookupAttributes()
+	{
+		return Iterables.filter(getAttributesTraverser(), new Predicate<AttributeMetaData>()
+		{
+			@Override
+			public boolean apply(AttributeMetaData attribute)
+			{
+				return attribute.isLookupAttribute();
+			}
+		});
+	}
+
 	public void setLabelAttribute(String name)
 	{
 		this.labelAttribute = name;
