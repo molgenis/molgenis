@@ -67,7 +67,9 @@
 					}
 				}
 			});
+			
 			matchSpanContainer.html('<strong>' + perfectMatches.length + '</strong>');
+			
 			unmatchSpanContainer.html('<strong>' + partialMatches.length + '</strong>');
 
 			matchButon.click(function(){
@@ -98,6 +100,13 @@
 			if($('#sorta-result-table')){			
 				$('#sorta-result-table').remove();
 			}
+			var adjustedScoreHoverover = $('<div>Adjusted score ?</div>').css({'cursor':'pointer'}).popover({
+				'title' : 'Explanation',
+				'content' : '<p style="color:black;font-weight:normal;">Adjusted scores are derived from the original scores (<strong>lexical similarity</strong>) combined with the weight of the words (<strong>inverse document frequency</strong>)</p>',
+				'placement' : 'top',
+				'trigger' : 'hover',
+				'html' : true
+			});
 			var divContainerMatchResult =  $('<div />').attr('id', 'sorta-result-table').addClass('row').appendTo(container);
 			var tableTitle = $('<p />').css('font-size','20px').append('<strong>' + (isMatched ? 'Matched results' : 'Unmatched results') + '</strong>');
 			var table = $('<table />').addClass('table');
@@ -105,7 +114,7 @@
 			$('<th />').append('Input term').appendTo(tableHeader);
 			$('<th />').append('Ontologgy terms').appendTo(tableHeader);
 			$('<th />').append('Score').appendTo(tableHeader);
-			$('<th />').append('Adjusted score').appendTo(tableHeader);
+			$('<th />').append(adjustedScoreHoverover).appendTo(tableHeader);
 			$('<th />').append('Match').appendTo(tableHeader);
 			$.each(matches, function(index, match){
 				var row = $('<tr />').appendTo(table);
