@@ -97,10 +97,10 @@
 						}
 						
 						var EnumControl = props.multiple === true ? molgenis.ui.CheckboxGroup : molgenis.ui.RadioGroup;
-						return EnumControl({
+						return EnumControl(_.extend({}, controlProps, {
 							options : this.state.options,
 							layout : props.layout,
-						});
+						}));
 					case 'HTML':
 						return molgenis.ui.CodeEditor({
 							placeholder : this.props.placeholder,
@@ -161,20 +161,14 @@
 			var min = range ? range.min : undefined;
 			var max = range ? range.max : undefined;
 			var placeholder = this.props.placeholder || 'Number';
-			if(range === undefined || ((range.min === undefined || range.max === undefined) && step !== 'any')) {
-				return molgenis.ui.Input(_.extend({}, controlProps, {
-					type : 'number',
-					placeholder : placeholder,
-					step : step,
-					min : min,
-					max : max,
-				}));
-			} else {
-				return molgenis.ui.RangeSlider(_.extend({}, controlProps, {
-					range: range,
-					step: step
-				}));
-			}
+
+			return molgenis.ui.Input(_.extend({}, controlProps, {
+				type : 'number',
+				placeholder : placeholder,
+				step : step,
+				min : min,
+				max : max,
+			}));
 		},
 		_createStringControl: function(controlProps, type, placeholder) {
 			return molgenis.ui.Input(_.extend({}, controlProps, {
