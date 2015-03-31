@@ -1,4 +1,4 @@
-package org.molgenis.data.semanticsearch.semantic;
+package org.molgenis.data.semanticsearch.service.impl;
 
 import static com.google.common.collect.ImmutableSet.of;
 import static java.util.Arrays.asList;

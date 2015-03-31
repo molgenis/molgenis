@@ -1,4 +1,4 @@
-package org.molgenis.data.semanticsearch.semantic;
+package org.molgenis.data.semanticsearch.repository;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
