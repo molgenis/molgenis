@@ -243,14 +243,15 @@ function($, molgenis, settingsXhr) {
 		}
 
 		// add rules for attribute filters to the query
-		$.each(attributeFilters, function(attrName, query) {
-			if(query){
+		$.each(attributeFilters, function(attributeUri, filter) {
+			var rule = filter.createQueryRule();
+			if(rule){
 				if (entityCollectionRequest.q.length > 0) {
 					entityCollectionRequest.q.push({
 						operator : 'AND'
 					});
 				}
-				entityCollectionRequest.q.push(query);
+				entityCollectionRequest.q.push(rule);
 			}
 		});
 		
@@ -279,33 +280,6 @@ function($, molgenis, settingsXhr) {
 			});
 			
 			createEntityMetaTree(entityMetaData, selectedAttributes);
-			
-			if(state.query) {
-					// set query in searchbox
-					for (var i = 0; i < state.query.q.length; ++i) {
-						var rule = state.query.q[i];
-						if(rule.field === undefined && rule.operator === 'SEARCH') {
-							$('#observationset-search').val(rule.value);
-							break;
-						}
-					}
-					
-					// set filters in filter list
-					for (var i = 0; i < state.query.q.length; ++i) {
-						var rule = state.query.q[i];
-						if(rule.operator !== 'AND') {
-							if(rule.field !== undefined || rule.operator !== 'SEARCH') {
-								var attrName = rule.field;
-								if(attrName === undefined) {
-									// FIXME fails for nested --> nested rules
-									attrName = rule.nestedRules[0].field;
-								}
-								attributeFilters[attrName] = rule;
-							}
-						}
-					}
-					self.filter.createFilterQueryUserReadableList(attributeFilters);
-			}
 			
 			//Show wizard on show of dataexplorer if url param 'wizard=true' is added
 			if (settings['wizard.oninit'] && settings['wizard.oninit'] === 'true') {
@@ -368,6 +342,18 @@ function($, molgenis, settingsXhr) {
 		    }
 		}
 		
+		// FIXME remove if clause as part of http://www.molgenis.org/ticket/3110
+		if(state.query) {
+			delete cleanState.query;
+	    	for (var i = 0; i < state.query.q.length; ++i) {
+				var rule = state.query.q[i];
+				if(rule.field === undefined && rule.operator === 'SEARCH') {
+					cleanState.query = { q: [rule] };
+					break;
+				}
+			}
+		}
+		
 		// update browser state
 		history.pushState(state, '', molgenis.getContextUrl() + '?' + $.param(cleanState));
 	}
@@ -393,7 +379,11 @@ function($, molgenis, settingsXhr) {
 			
 		$(document).on('changeEntity', function(e, entity) {
 			// reset state
-			state = $.extend({}, stateDefault, {entity: entity});
+			state = {
+				entity: entity,
+				attributes: [],
+				mod : null
+			};
 			pushState();
 			
 			// reset			
@@ -436,10 +426,10 @@ function($, molgenis, settingsXhr) {
 		
 		$(document).on('updateAttributeFilters', function(e, data) {
 			$.each(data.filters, function() {
-				if(this.query === null){
-					delete attributeFilters[this.attr];
+				if(this.isEmpty()){
+					delete attributeFilters[this.attribute.href];
 				}else{
-					attributeFilters[this.attr] = this.query;
+					attributeFilters[this.attribute.href] = this;
 				}
 			});
 			self.filter.createFilterQueryUserReadableList(attributeFilters);
@@ -447,7 +437,7 @@ function($, molgenis, settingsXhr) {
 		});
 		
 		$(document).on('removeAttributeFilter', function(e, data) {
-			delete attributeFilters[data.attr];
+			delete attributeFilters[data.attributeUri];
 			self.filter.createFilterQueryUserReadableList(attributeFilters);
 			$(document).trigger('changeQuery', createEntityQuery());
 		});
@@ -486,15 +476,13 @@ function($, molgenis, settingsXhr) {
 	
 		$(container).on('click', '.feature-filter-edit', function(e) {
 			e.preventDefault();
-			var attrId = $(this).data('id');
-			var attr = getSelectedEntityMeta().attributes[attrId];
-			var filter = attributeFilters[attrId];
-			self.filter.dialog.openFilterModal(attr, filter);
+			var filter = attributeFilters[$(this).data('href')];
+			self.filter.dialog.openFilterModal(filter.attribute, filter);
 		});
 		
 		$(container).on('click', '.feature-filter-remove', function(e) {
 			e.preventDefault();
-			$(document).trigger('removeAttributeFilter', {'attr': $(this).data('id')});
+			$(document).trigger('removeAttributeFilter', {'attributeUri': $(this).data('href')});
 		});
 		
 		$('#delete').on('click', function(){
@@ -515,7 +503,7 @@ function($, molgenis, settingsXhr) {
 				state.entity = $('#dataset-select option:not(:empty)').first().val();
 			}
 			$('#dataset-select').select2('val', state.entity);
-		
+			
 			// hide entity dropdown
 			if(state.hideselect === 'true') {
 				$('#dataset-select-container').addClass('hidden');

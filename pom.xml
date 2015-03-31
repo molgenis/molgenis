@@ -176,6 +176,15 @@
 						</execution>
 					</executions>
                 </plugin>
+				<!-- specify java 8 compatible plugin version -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>2.10.1</version>
+					<configuration>
+						<additionalparam>-Xdoclint:none</additionalparam>
+					</configuration>
+				</plugin>
                 <!-- specify plugin version -->
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
