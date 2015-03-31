@@ -6,17 +6,11 @@ import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ENTITY_NAME;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_IRI;
 import static org.testng.Assert.assertEquals;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import org.elasticsearch.common.collect.Lists;
 import org.mockito.ArgumentCaptor;
-import org.molgenis.auth.MolgenisGroup;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -42,18 +36,11 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	OntologyTermRepository ontologyTermRepository;
 
-	private MapEntity ontologyTermMapEntity;
 	private Entity ontologyTermEntity;
 
 	@BeforeTest
 	public void beforeTest()
 	{
-		ontologyTermMapEntity = new MapEntity(OntologyTermMetaData.INSTANCE);
-		ontologyTermMapEntity.set(OntologyTermMetaData.ID, "12");
-		ontologyTermMapEntity.set(OntologyTermMetaData.ONTOLOGY, "34");
-		ontologyTermMapEntity.set(OntologyTermMetaData.ONTOLOGY_TERM_IRI, "http://www.test.nl/iri");
-		ontologyTermMapEntity.set(OntologyTermMetaData.ONTOLOGY_TERM_NAME, "Ontology term");
-
 		ontologyTermEntity = new MapEntity(OntologyTermMetaData.INSTANCE);
 		ontologyTermEntity.set(OntologyTermMetaData.ID, "12");
 		ontologyTermEntity.set(OntologyTermMetaData.ONTOLOGY, "34");
