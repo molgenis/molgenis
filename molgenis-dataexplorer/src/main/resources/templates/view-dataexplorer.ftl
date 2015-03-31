@@ -9,12 +9,14 @@
 	"dataexplorer-filter.css",
 	"diseasematcher.css"]>
 <#assign js=[
+    "jquery.bootstrap.wizard.min.js",
 	"dataexplorer-filter.js",
 	"dataexplorer-filter-dialog.js",
 	"dataexplorer-filter-wizard.js",
 	"jquery.fancytree.min.js",
 	"jquery.molgenis.tree.js",
 	"bootstrap-switch.min.js",
+	"jquery.molgenis.xrefmrefsearch.js",
 	"dataexplorer.js",
 	"bootbox.min.js"]>
 
