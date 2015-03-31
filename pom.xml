@@ -743,5 +743,6 @@
         <module>molgenis-pathways</module>
         <module>molgenis-data-rest-client</module>
         <module>molgenis-questionnaires</module>
-    </modules>
+		<module>molgenis-data-migrate</module>
+	 </modules>
 </project>
