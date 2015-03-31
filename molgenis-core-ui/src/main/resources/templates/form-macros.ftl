@@ -24,9 +24,8 @@
 					</#list>
 				</select>
 				<select id="operators">
-					<option id="EQUALS">EQUALS</option>
-					<option id="NOT">NOT EQUALS</option>
 					<option id="LIKE">LIKE</option>
+					<option id="EQUALS">EQUALS</option>
 				</select>
 				<div class="input-append">
     				<input type="search" class="span8 search-query" name="q" placeholder="SEARCH">
