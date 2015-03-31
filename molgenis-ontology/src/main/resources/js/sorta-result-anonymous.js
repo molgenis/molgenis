@@ -13,12 +13,14 @@
 		container.children('div.row:gt(0)').remove();
 		
 		var divContainerThreshold = $('<div />').addClass('row').css('margin-bottom','15px').appendTo(container);
-		$('<div />').addClass('col-md-offset-3 col-md-4').append('Current threshold : ' + THRESHOLD + '%').css('padding-left','0px').appendTo(divContainerThreshold);
+		$('<div />').addClass('col-md-offset-1 col-md-4').append('Current threshold : ' + THRESHOLD + '%').css('padding-left','0px').appendTo(divContainerThreshold);
 		var thresholdUpdateButton = $('<button />').attr('type','button').addClass('btn btn-default').text('Update');
 		var inputGroupButton = $('<span />').addClass('input-group-btn').append(thresholdUpdateButton);		
 		var thresholdValue = $('<input type="text" class="form-control"/>');
 		var divContainerButtonFormGroup = $('<div />').addClass('input-group pull-right').append(inputGroupButton).append(thresholdValue);
 		$('<div />').addClass('col-md-2').css('padding-right','0px').append(divContainerButtonFormGroup).appendTo(divContainerThreshold);
+		var backToFrontPageButton = $('<button />').addClass('btn btn-default').text('Back').append(' <span class="glyphicon glyphicon-backward"></span>');
+		$('<div />').addClass('col-md-offset-1 col-md-1').append(backToFrontPageButton).prependTo(divContainerThreshold);
 		
 		var divContainerSummary = $('<div />').addClass('row').appendTo(container);
 		var divContainerSummaryCenterStyleWell = $('<div />').addClass('col-md-offset-3 col-md-6 well').appendTo(divContainerSummary);
