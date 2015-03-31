@@ -198,7 +198,7 @@
 		
 		ns.refresh();
 		
-		$('form.form-search').on('submit', function() {
+		$('#search-form').on('submit', function() {
 			search = {
 				field: $('#query-fields option:selected').attr('id'),
 				operator: $('#operators option:selected').attr('id'),
