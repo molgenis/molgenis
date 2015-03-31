@@ -180,7 +180,6 @@
 			if (settings.editenabled) {
 				var cell = $('<td class="trash" tabindex="' + tabindex++ + '">');
 				$('<a class="btn btn-xs btn-danger delete-row-btn" href="#" data-toggle="button" title="Delete"><span class="glyphicon glyphicon-minus"></span></button>').appendTo(cell);
-				$('<a class="btn btn-xs btn-danger delete-row-btn" href="#" data-toggle="button" title="Delete"><span class="glyphicon glyphicon-minus"></span></button>').appendTo(cell);
 				row.append(cell);
 			}
 
