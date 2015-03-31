@@ -61,12 +61,19 @@
 							return molgenis.ui.Spinner();
 						}
 						
+						// convert entity to component value
+						var value = props.value !== undefined ? props.value[attr.refEntity.idAttribute] : undefined;
+						
 						var CategoricalControl = props.multiple === true ? molgenis.ui.CheckboxGroup : molgenis.ui.RadioGroup;
 						return CategoricalControl(_.extend({}, controlProps, {
 							options : this.state.options,
 							layout : props.layout || 'vertical',
-							value : props.value !== undefined ? props.value[attr.refEntity.idAttribute] : undefined,
-							onValueChange : this._handleValueChange // FIXME go from id to entity
+							value : value,
+							onValueChange : function(event) {
+								// convert component value back to entity
+								event.value = this._idValueToEntity(event.value);
+								this._handleValueChange(event);
+							}.bind(this)
 						}));
 					case 'CATEGORICAL_MREF':
 						if(this.state.options === undefined) {
@@ -74,13 +81,22 @@
 							return molgenis.ui.Spinner();
 						}
 	
-						var values = props.value ? _.map(props.value.items, function(item) {
+						// convert entities to component values
+						var values = props.value ? _.map(this._pagedValueToValue(props.value), function(item) {
 							return item[attr.refEntity.idAttribute];
 						}) : [];
 						return molgenis.ui.CheckboxGroup(_.extend({}, controlProps, {
 							options : this.state.options,
 							layout : 'vertical', // FIXME make configurable
-							value : values
+							value : values,
+							onValueChange: function(event) {
+								// convert component values back to entities
+								event.value = this._valueToPagedValue(event.value);
+								event.value.items = _.map(event.value.items, function(id) {
+									return this._idValueToEntity(id);
+								}.bind(this));
+								this._handleValueChange(event);
+							}.bind(this)
 						}));
 					case 'DATE':
 						return this._createDateControl(controlProps, false, props.placeholder || 'Date');
@@ -99,7 +115,7 @@
 						var EnumControl = props.multiple === true ? molgenis.ui.CheckboxGroup : molgenis.ui.RadioGroup;
 						return EnumControl(_.extend({}, controlProps, {
 							options : this.state.options,
-							layout : props.layout,
+							layout : props.layout
 						}));
 					case 'HTML':
 						return molgenis.ui.CodeEditor({
@@ -114,16 +130,16 @@
 					case 'XREF':
 						return this._createEntitySelectBox(controlProps, props.multiple || false, props.placeholder || 'Search for a Value', props.value);
 					case 'MREF':
-						return this._createEntitySelectBox(controlProps, props.multiple || true, props.placeholder || 'Search for Values', props.value ? props.value.items : undefined);
+						return this._createEntitySelectBox(controlProps, props.multiple || true, props.placeholder || 'Search for Values', props.value);
 					case 'SCRIPT':
 						return molgenis.ui.CodeEditor({
-							placeholder : this.props.placeholder,
+							placeholder : this.props.placeholder
 						});
 					case 'STRING':
 						return this._createStringControl(controlProps, 'text', props.placeholder || '');
 					case 'TEXT':
 						return molgenis.ui.TextArea({
-							placeholder : this.props.placeholder,
+							placeholder : this.props.placeholder
 						});
 					case 'COMPOUND' :
 					case 'FILE':
@@ -189,7 +205,40 @@
 				placeholder : placeholder,
 				multiple : multiple,
 				entity : this.state.attr.refEntity,
+				value: multiple ? this._pagedValueToValue(value) : value, // TODO same for CATEGORICAL_MREF
+				onValueChange: multiple ? function(event) {
+					event.value = this._valueToPagedValue(event.value);
+					this._handleValueChange(event);
+				}.bind(this) : this._handleValueChange
 			}));
+		},
+		_pagedValueToValue: function(value) {
+			return value ? value.items : value;
+		},
+		_valueToPagedValue: function(value) {
+			if(value) {
+				return {
+					start: 0,
+					num: value.length,
+					total: value.length,
+					items: value
+				};
+			} else {
+				return {
+					start: 0,
+					num: 0,
+					total: 0,
+					items: []
+				};
+			}
+		},
+		_idValueToEntity: function(id) {
+			var entity = {};
+			entity[this.state.attr.refEntity.idAttribute] = id;
+			entity[this.state.attr.refEntity.labelAttribute] = _.find(this.state.options, function(option) {
+				return option.value === id;
+			}).label;
+			return entity;
 		},
 		_onAttrInit: function() {
 			var attr = this.state.attr;

@@ -111,7 +111,7 @@
 				disabled : this.props.disabled,
 				readOnly : this.props.readOnly,
 				focus: this.props.focus,
-				value : this.props.multiple ? (this.props.value ? this.props.value.items : this.props.value) : this.props.value,
+				value : this.props.value,
 				addonBtn: this.props.mode === 'create' && entity.writable === true,
 				onAddonBtnClick: this._handleAddonBtnClick,
 				onChange : this._handleChange
