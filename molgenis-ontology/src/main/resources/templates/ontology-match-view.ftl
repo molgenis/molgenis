@@ -13,7 +13,7 @@
 			<br>
 			<div class="row">
 				<div class="col-md-offset-3 col-md-6">
-					<legend><center><h3>Ontology Annotator</h3></center></legend>
+					<legend><center><strong>SORTA</strong>: <strong>S</strong>ystem for <strong>O</strong>ntology-based <strong>R</strong>e-coding and <strong>T</strong>echnical <strong>A</strong>nnotation</center></legend>
 				</div>
 			</div>
 			<#if existingTasks??>
