@@ -127,10 +127,8 @@ public class RestController
 	private final DataService dataService;
 	private final TokenService tokenService;
 	private final AuthenticationManager authenticationManager;
-	private final String ENTITY_FORM_MODEL_ATTRIBUTE = "form";
 	private final MolgenisPermissionService molgenisPermissionService;
 	private final MolgenisRSQL molgenisRSQL;
-	private final ResourceFingerprintRegistry resourceFingerprintRegistry;
 
 	@Autowired
 	public RestController(DataService dataService, TokenService tokenService,
@@ -141,15 +139,12 @@ public class RestController
 		if (tokenService == null) throw new IllegalArgumentException("tokenService is null");
 		if (authenticationManager == null) throw new IllegalArgumentException("authenticationManager is null");
 		if (molgenisPermissionService == null) throw new IllegalArgumentException("molgenisPermissionService is null");
-		if (resourceFingerprintRegistry == null) throw new IllegalArgumentException(
-				"resourceFingerprintRegistry is null");
 
 		this.dataService = dataService;
 		this.tokenService = tokenService;
 		this.authenticationManager = authenticationManager;
 		this.molgenisPermissionService = molgenisPermissionService;
 		this.molgenisRSQL = molgenisRSQL;
-		this.resourceFingerprintRegistry = resourceFingerprintRegistry;
 	}
 
 	/**
@@ -562,7 +557,8 @@ public class RestController
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		for (String param : request.getParameterMap().keySet())
 		{
-			String value = request.getParameter(param);
+			String[] values = request.getParameterValues(param);
+			String value = values != null ? StringUtils.join(values, ',') : null;
 			if (StringUtils.isNotBlank(value))
 			{
 				paramMap.put(param, value);
@@ -681,7 +677,9 @@ public class RestController
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		for (String param : request.getParameterMap().keySet())
 		{
-			paramMap.put(param, request.getParameter(param));
+			String[] values = request.getParameterValues(param);
+			String value = values != null ? StringUtils.join(values, ',') : null;
+			paramMap.put(param, value);
 		}
 
 		updateInternal(entityName, typedId, paramMap);
