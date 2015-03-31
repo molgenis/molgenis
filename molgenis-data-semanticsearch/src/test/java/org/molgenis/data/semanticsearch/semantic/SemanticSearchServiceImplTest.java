@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.semanticsearch.semantic.SemanticSearchService;
-import org.molgenis.data.semanticsearch.semantic.SemanticSearchServiceImpl;
+import org.molgenis.data.semanticsearch.service.SemanticSearchService;
+import org.molgenis.data.semanticsearch.service.impl.SemanticSearchServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.ontology.OntologyService;
 import org.molgenis.ontology.repository.model.OntologyTerm;

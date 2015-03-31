@@ -24,7 +24,7 @@ import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Tag;
-import org.molgenis.data.semanticsearch.semantic.UntypedTagService;
+import org.molgenis.data.semanticsearch.service.UntypedTagService;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.FieldType;

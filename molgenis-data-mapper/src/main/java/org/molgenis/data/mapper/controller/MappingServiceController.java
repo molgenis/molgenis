@@ -22,7 +22,7 @@ import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
-import org.molgenis.data.semanticsearch.semantic.OntologyTagService;
+import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ontology.repository.model.OntologyTerm;
 import org.molgenis.security.core.utils.SecurityUtils;
