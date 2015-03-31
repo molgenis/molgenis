@@ -1,4 +1,4 @@
-package org.molgenis.data.semanticsearch.semantic;
+package org.molgenis.data.semanticsearch.service;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.StreamSupport.stream;
@@ -26,6 +26,8 @@ import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semantic.Tag;
 import org.molgenis.data.semantic.TagImpl;
+import org.molgenis.data.semanticsearch.repository.TagRepository;
+import org.molgenis.data.semanticsearch.semantic.OntologyTag;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.OntologyService;
@@ -234,7 +236,7 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 		dataService.update(EntityMetaDataMetaData.ENTITY_NAME, entityEntity);
 	}
 
-	Entity getTagEntity(Tag<?, OntologyTerm, Ontology> tag)
+	public Entity getTagEntity(Tag<?, OntologyTerm, Ontology> tag)
 	{
 		return tagRepository.getTagEntity(tag.getObject().getIRI(), tag.getObject().getLabel(), tag.getRelation(), tag
 				.getCodeSystem().getIRI());

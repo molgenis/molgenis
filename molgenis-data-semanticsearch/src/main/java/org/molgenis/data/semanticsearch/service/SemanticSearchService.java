@@ -1,10 +1,11 @@
-package org.molgenis.data.semanticsearch.semantic;
+package org.molgenis.data.semanticsearch.service;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.semanticsearch.semantic.ItemizedSearchResult;
 import org.molgenis.ontology.repository.model.OntologyTerm;
 
 public interface SemanticSearchService

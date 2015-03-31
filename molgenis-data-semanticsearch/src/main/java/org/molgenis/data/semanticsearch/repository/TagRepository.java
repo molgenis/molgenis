@@ -1,4 +1,4 @@
-package org.molgenis.data.semanticsearch.semantic;
+package org.molgenis.data.semanticsearch.repository;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;

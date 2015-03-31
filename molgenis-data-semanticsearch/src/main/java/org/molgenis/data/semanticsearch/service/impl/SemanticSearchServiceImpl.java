@@ -1,4 +1,4 @@
-package org.molgenis.data.semanticsearch.semantic;
+package org.molgenis.data.semanticsearch.service.impl;
 
 import static java.util.Arrays.stream;
 
@@ -16,6 +16,8 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Package;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.semanticsearch.semantic.ItemizedSearchResult;
+import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.ontology.OntologyService;
 import org.molgenis.ontology.repository.model.OntologyTerm;
 import org.springframework.beans.factory.annotation.Autowired;
