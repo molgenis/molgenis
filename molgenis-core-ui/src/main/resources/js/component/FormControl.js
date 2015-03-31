@@ -187,7 +187,7 @@
             else if(!attr.range && type === 'LONG' && !nullOrUndefinedValue && !this._inRange(value, {min: this._statics.LONG_MIN, max: this._statics.LONG_MAX})) {
                 errorMessage = 'Please enter a value between ' + this._statics.LONG_MIN + ' and ' + this._statics.LONG_MAX + '.';
             }
-            else if(attr.range && (type === 'INT' || type === 'LONG') && !nullOrUndefinedValue && (!this._inRange(value[0], attr.range) || !this._inRange(value[1], attr.range))) {
+            else if(attr.range && (type === 'INT' || type === 'LONG') && !nullOrUndefinedValue && !this._inRange(value, attr.range)) {
                 if(attr.range.min !== undefined && attr.range.max !== undefined) {
                     errorMessage = 'Please enter a value between ' + attr.range.min + ' and ' + attr.range.max + '.';
                 }
