@@ -14,12 +14,12 @@
 </div>
 
 <div class="row">
-	<div class="col-md-6">
+	<div class="col-md-12">
 		<h3>Tag Wizard</h3>
 		<p>
-			Tag attributes manually with ontology terms, or automagically 
-			tag attributes with the selected ontology.
+			Tag attributes with ontology terms from the selected ontologies either manually or automatically.
 		</p>
+		<hr></hr>
 	</div>
 </div>
 
@@ -30,7 +30,7 @@
 </div>			
 
 <div class="row">
-	<div class="col-md-4">
+	<div class="col-md-3">
 		<select multiple class="form-control " name="ontology-select" id="ontology-select" data-placeholder="Select an ontology to use">
 			<option value=""></option>
 			<#if selectedOntologies??>
@@ -45,68 +45,64 @@
 			</#list>
 		</select>
 	</div>
-	<div class="col-md-8">	
-		<button type="button" class="btn btn-primary" id="automatic-tag-btn">Tag-o-matic!</button>
-		<button type="button" class="btn btn-danger"id="clear-all-tags-btn">Clear tags</button>
+	<div class="col-md-9">	
+		<button type="button" class="btn btn-primary" id="automatic-tag-btn"><span class="glyphicon glyphicon-flash"></span> Run Automatic Tagging</button>
+		<button type="button" class="btn btn-danger"id="clear-all-tags-btn"><span class="glyphicon glyphicon-trash"></span> Clear tags</button>
 	</div>
 </div>
 
 <div class="row">
 	<div class="col-md-12">
-		<hr></hr>
+		<br></br>
 	</div>
 </div>
 
 <div class="row">
-	<div class="col-md-8" style="overflow-y:auto;max-height:500px;min-height:300px;">
-		<#list attributes as attributeMetaData>
-			<h4>${attributeMetaData.name}</h4>
-			<p>${attributeMetaData.description!""}
-			
-			<table class="table" id="${attributeMetaData.name}">
-				<thead>
-					<th>Relation</th>
-					<th>Tags</th>
-					<th></th>
-				</thead>
-					<tbody>
+	<div class="col-md-6">
+		<table class="table table-bordered" id="tag-mapping-table">
+			<thead>
+				<th>Target Attribute</th>
+				<th style="width:500px;">Tags</th>
+				<th></th>
+			</thead>
+			<tbody>
+			<#list attributes as attributeMetaData>		
+				<tr>
+					<td>
+						<b>${attributeMetaData.name}</b>
+						<p><i>${attributeMetaData.description!""}</i></p>
+					</td>
 					<#assign relationsAndTagsMap = taggedAttributeMetaDatas[attributeMetaData.name]>
 					<#if relationsAndTagsMap.keySet()?has_content>
 						<#list relationsAndTagsMap.keySet() as relation>
-							<tr>
-								<td data-relation="${relation.IRI}">${relation.label}</td>
-								<td id="${attributeMetaData.name}-tag-column">
-									<#list relationsAndTagsMap.get(relation) as tag>
-										<button type="btn" class="btn btn-primary btn-xs remove-tag-btn" 
-											data-relation="${relation.IRI}" data-attribute="${attributeMetaData.name}" data-tag="${tag.IRI}">
-											${tag.label} <span class="glyphicon glyphicon-remove"></span>
-										</button>
-									</#list>
-								</td>
-								<td>
-									<button type="btn" class="btn btn-default btn-xs edit-attribute-tags-btn pull-right" 
-										data-relation="${relation.IRI}" data-attribute="${attributeMetaData.name}" data-toggle="modal" data-target="#edit-ontology-modal">
-											Edit <span class="glyphicon glyphicon-pencil"></span>
+							<td class="tag-column" id="${attributeMetaData.name}-tag-column">
+								<#list relationsAndTagsMap.get(relation) as tag>
+									<button type="btn" class="btn btn-primary btn-xs remove-tag-btn" 
+										data-relation="${relation.IRI}" data-attribute="${attributeMetaData.name}" data-tag="${tag.IRI}">
+										${tag.label} <span class="glyphicon glyphicon-remove"></span>
 									</button>
-								</td>
-							</tr>
-						</#list>
-					<#else>
-						<tr>
-							<td data-relation="http://iri.org/#isAssociatedWith">Is associated with</td>
-							<td></td>
-							<td>
-								<button type="btn" class="btn btn-default btn-xs edit-attribute-tags-btn pull-right" 
-									data-relation="http://iri.org/#isAssociatedWith" data-attribute="${attributeMetaData.name}" data-toggle="modal" data-target="#edit-ontology-modal">
-										Edit <span class="glyphicon glyphicon-pencil"></span>
-								</button>
+								</#list>
 							</td>
-						</tr>
+						</#list>
+						<td>
+							<button type="btn" class="btn btn-default btn-xs edit-attribute-tags-btn pull-right" 
+								data-relation="http://molgenis.org#isAssociatedWith" data-attribute="${attributeMetaData.name}" data-toggle="modal" data-target="#edit-ontology-modal">
+									Edit <span class="glyphicon glyphicon-pencil"></span>
+							</button>
+						</td>
+					<#else>
+						<td class="tag-column" id="${attributeMetaData.name}-tag-column"></td>
+						<td style="width:10px">
+							<button type="btn" class="btn btn-default btn-xs edit-attribute-tags-btn pull-right" 
+								data-relation="http://molgenis.org#isAssociatedWith" data-attribute="${attributeMetaData.name}" data-toggle="modal" data-target="#edit-ontology-modal">
+									Edit <span class="glyphicon glyphicon-pencil"></span>
+							</button>
+						</td>	
 					</#if>
-				</tbody>
-			</table>
-			<#if attributeMetaData_has_next><hr></hr></#if>
-		</#list>
+				</tr>
+			</#list>
+			</tbody>
+		</table>
 	</div>
 	<div id="edit-ontology-container" class="col-md-6"></div>
 </div>

@@ -12,8 +12,8 @@ import java.util.List;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.UuidGenerator;
+import org.molgenis.ontology.core.meta.OntologyMetaData;
 import org.molgenis.ontology.importer.repository.OntologyRepository;
-import org.molgenis.ontology.model.OntologyMetaData;
 import org.molgenis.ontology.utils.OntologyLoader;
 import org.molgenis.ontology.utils.ZipFileUtil;
 import org.molgenis.util.ResourceUtils;

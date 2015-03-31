@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.ontology.OntologyService;
+import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

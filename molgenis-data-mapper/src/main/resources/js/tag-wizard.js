@@ -12,10 +12,26 @@
 	var selectedOntologyIds = [];
 	var entityName;
 
-	function noOntologySelectedHandler() {
+	function noOntologySelectedHandler(messageType) {
 		molgenis.createAlert([ {
-			'message' : 'You need atleast one ontology selected before being able to tag.'
-		} ], 'warning');
+			'message' : 'You need at least one ontology selected before being able to tag.'
+		} ], messageType);
+	}
+
+	function createNewButtonHtml(attributeName, tag) {
+		var btnHtml = '';
+
+		btnHtml += '<button '
+		btnHtml += 'type="btn" ';
+		btnHtml += 'class="btn btn-primary btn-xs remove-tag-btn" ';
+		btnHtml += 'data-relation="' + tag.relationIRI + '" ';
+		btnHtml += 'data-attribute="' + attributeName + '" ';
+		btnHtml += 'data-tag="' + tag.ontologyTerm.IRI + '">';
+		btnHtml += tag.ontologyTerm.label + ' ';
+		btnHtml += '<span class="glyphicon glyphicon-remove"></span>';
+		btnHtml += '</button> ';
+
+		return btnHtml;
 	}
 
 	function createDynamicSelectDropdown() {
@@ -26,7 +42,7 @@
 			closeOnSelect : true,
 			query : function(options) {
 				$.ajax({
-					url : 'getontologyterms',
+					url : 'tagwizard/getontologyterms',
 					type : 'POST',
 					contentType : 'application/json',
 					data : JSON.stringify({
@@ -55,13 +71,22 @@
 
 	$(function() {
 		entityName = $('#global-information').data('entity');
-		noOntologySelectedHandler();
 
+		$('#tag-mapping-table').scrollTableBody();
 		$('#ontology-select').select2();
+
+		$('#ontology-select').on('change', function() {
+			if ($(this).val() === null) {
+				selectedOntologyIds = []
+			} else {
+				selectedOntologyIds = $(this).val();
+			}
+		});
+
 		$('#automatic-tag-btn').on('click', function() {
 			if (selectedOntologyIds.length > 0) {
 				$.ajax({
-					url : 'autotagattributes',
+					url : 'tagwizard/autotagattributes',
 					type : 'POST',
 					contentType : 'application/json',
 					data : JSON.stringify({
@@ -69,13 +94,19 @@
 						'ontologyIds' : selectedOntologyIds
 					}),
 					success : function(data) {
-						// TODO data is a Map<AttributeMetaData,
-						// List<OntologyTerm>>
-						// Do something nice with it
+						molgenis.createAlert([ {
+							'message' : 'Automatic tagging is a success!'
+						} ], 'success');
+
+						$.each(data, function(attributeName, tags) {
+							$.each(tags, function(index) {
+								$('#' + attributeName + '-tag-column').append(createNewButtonHtml(attributeName, tags[index]));
+							});
+						});
 					}
 				});
 			} else {
-				noOntologySelectedHandler();
+				noOntologySelectedHandler('warning');
 			}
 		});
 
@@ -83,35 +114,44 @@
 			bootbox.confirm("Are you sure you want to remove all tags?", function(result) {
 				if (result === true) {
 					$.ajax({
-						url : 'clearalltags',
+						url : 'tagwizard/clearalltags',
 						type : 'POST',
 						data : {
 							'entityName' : entityName
+						},
+						success : function() {
+							// empty columns with class tag-column
+							$('td.tag-column').empty();
+
+							molgenis.createAlert([ {
+								'message' : 'All tags have been succesfully removed!'
+							} ], 'success');
 						}
 					});
 				}
 			});
 		});
 
-		$('.edit-attribute-tags-btn').on('click', function() {
-			selectedAttributeName = $(this).data('attribute');
-			relationIRI = $(this).data('relation');
-		});
-
-		$('#ontology-select').on('change', function() {
-			selectedOntologyIds = $(this).val();
+		$('.edit-attribute-tags-btn').on('click', function(event) {
+			if (selectedOntologyIds.length > 0) {
+				selectedAttributeName = $(this).data('attribute');
+				relationIRI = $(this).data('relation');
+			} else {
+				noOntologySelectedHandler('warning');
+				event.stopPropagation();
+				event.preventDefault()
+			}
 		});
 
 		// Dynamic dropdown for selecting ontologyterms as tags
 		createDynamicSelectDropdown();
 
 		$('#save-tag-selection-btn').on('click', function() {
-
 			var attributeName = selectedAttributeName;
 			var ontologyTermIRIs = $('#tag-dropdown').select2('val');
 
 			$.ajax({
-				url : 'tagattribute',
+				url : 'tagwizard/tagattribute',
 				type : 'POST',
 				contentType : 'application/json',
 				data : JSON.stringify({
@@ -120,20 +160,19 @@
 					'relationIRI' : relationIRI,
 					'ontologyTermIRIs' : ontologyTermIRIs
 				}),
-				success : function() {
-					// TODO close modal
-					// TODO reload page to actually show the added tag OR add it
-					// via javascript
+				success : function(ontologyTag) {
+					$('#tag-dropdown').select2('val', '');
+					$('#' + attributeName + '-tag-column').append(createNewButtonHtml(attributeName, ontologyTag));
 				}
 			});
 		});
 
-		$('.remove-tag-btn').on('click', function() {
+		$('.tag-column').on('click', '.remove-tag-btn', function() {
 			var attributeName = $(this).data('attribute');
 			relationIRI = $(this).data('relation');
 			var ontologyTermIRI = $(this).data('tag');
 			$.ajax({
-				url : 'deletesingletag',
+				url : 'tagwizard/deletesingletag',
 				type : 'POST',
 				contentType : 'application/json',
 				data : JSON.stringify({
@@ -141,11 +180,9 @@
 					'attributeName' : attributeName,
 					'relationIRI' : relationIRI,
 					'ontologyTermIRI' : ontologyTermIRI
-				}),
-				success : function() {
-					$(this).remove();
-				}
+				})
 			});
+			$(this).remove();
 		});
 	});
 }($, window.top.molgenis = window.top.molgenis || {}));

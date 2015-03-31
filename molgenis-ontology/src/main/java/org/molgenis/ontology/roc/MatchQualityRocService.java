@@ -23,7 +23,7 @@ import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.excel.ExcelWriter.FileFormat;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.ontology.model.OntologyTermMetaData;
+import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.molgenis.ontology.sorta.MatchingTaskContentEntityMetaData;
 import org.molgenis.ontology.sorta.MatchingTaskEntityMetaData;
 import org.molgenis.ontology.sorta.SortaService;

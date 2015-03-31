@@ -24,3 +24,10 @@ derby.log
 .RHistory
 molgenis-data-mysql/.factorypath
 molgenis-pathways/.factorypath
+molgenis-app/.factorypath
+molgenis-data-mapper/.factorypath
+molgenis-data-migrate/.factorypath
+molgenis-data-semanticsearch/.factorypath
+molgenis-model-registry/.factorypath
+molgenis-ontology-core/.factorypath
+molgenis-ontology/.factorypath

@@ -1,20 +1,14 @@
 package org.molgenis.data.mapper.controller;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static java.util.stream.Collectors.toMap;
 import static org.molgenis.data.mapper.controller.MappingServiceController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-
-import javax.servlet.http.HttpSession;
-import javax.validation.Valid;
 
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.AttributeMetaData;
@@ -22,23 +16,15 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.mapper.algorithm.AlgorithmService;
-import org.molgenis.data.mapper.data.request.AddTagRequest;
-import org.molgenis.data.mapper.data.request.AutoTagRequest;
-import org.molgenis.data.mapper.data.request.GetOntologyTermRequest;
 import org.molgenis.data.mapper.data.request.MappingServiceRequest;
-import org.molgenis.data.mapper.data.request.RemoveTagRequest;
 import org.molgenis.data.mapper.mapping.MappingService;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
-import org.molgenis.data.semantic.OntologyTagService;
-import org.molgenis.data.semantic.Relation;
-import org.molgenis.data.semantic.Tag;
+import org.molgenis.data.semanticsearch.service.impl.OntologyTagService;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.ontology.OntologyService;
-import org.molgenis.ontology.repository.model.Ontology;
-import org.molgenis.ontology.repository.model.OntologyTerm;
+import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.util.ErrorMessageResponse;
@@ -56,12 +42,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.SessionAttributes;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
 
 @Controller
 @RequestMapping(URI)
@@ -74,7 +58,6 @@ public class MappingServiceController extends MolgenisPluginController
 	private static final String VIEW_MAPPING_PROJECTS = "view-mapping-projects";
 	private static final String VIEW_ATTRIBUTE_MAPPING = "view-attribute-mapping";
 	private static final String VIEW_SINGLE_MAPPING_PROJECT = "view-single-mapping-project";
-	private static final String VIEW_TAG_WIZARD = "view-tag-wizard";
 
 	@Autowired
 	private MolgenisUserService molgenisUserService;
@@ -87,9 +70,6 @@ public class MappingServiceController extends MolgenisPluginController
 
 	@Autowired
 	private DataService dataService;
-
-	@Autowired
-	private OntologyService ontologyService;
 
 	@Autowired
 	private OntologyTagService ontologyTagService;
@@ -135,6 +115,13 @@ public class MappingServiceController extends MolgenisPluginController
 		return "redirect:/menu/main/mappingservice/mappingproject/" + newMappingProject.getIdentifier();
 	}
 
+	/**
+	 * Removes a mapping project
+	 * 
+	 * @param mappingProjectId
+	 *            the ID of the mapping project
+	 * @return redirect url to the same page to force a refresh
+	 */
 	@RequestMapping(value = "/removeMappingProject", method = RequestMethod.POST)
 	public String deleteMappingProject(@RequestParam(required = true) String mappingProjectId)
 	{
@@ -147,6 +134,19 @@ public class MappingServiceController extends MolgenisPluginController
 		return "redirect:/menu/main/mappingservice/";
 	}
 
+	/**
+	 * Removes a attribute mapping
+	 * 
+	 * @param mappingProjectId
+	 *            the ID of the mapping project
+	 * @param target
+	 *            the target entity
+	 * @param source
+	 *            the source entity
+	 * @param attribute
+	 *            the attribute that is mapped
+	 * @return
+	 */
 	@RequestMapping(value = "/removeAttributeMapping", method = RequestMethod.POST)
 	public String removeAttributeMapping(@RequestParam(required = true) String mappingProjectId,
 			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
@@ -159,24 +159,6 @@ public class MappingServiceController extends MolgenisPluginController
 			mappingService.updateMappingProject(project);
 		}
 		return "redirect:/menu/main/mappingservice/mappingproject/" + project.getIdentifier();
-	}
-
-	private boolean hasWritePermission(MappingProject project)
-	{
-		return hasWritePermission(project, true);
-	}
-
-	private boolean hasWritePermission(MappingProject project, boolean logInfractions)
-	{
-		boolean result = SecurityUtils.currentUserIsSu()
-				|| project.getOwner().getUsername().equals(SecurityUtils.getCurrentUsername());
-		if (logInfractions && !result)
-		{
-			LOG.warn("User " + SecurityUtils.getCurrentUsername()
-					+ " illegally tried to modify mapping project with id " + project.getIdentifier() + " owned by "
-					+ project.getOwner().getUsername());
-		}
-		return result;
 	}
 
 	/**
@@ -281,11 +263,12 @@ public class MappingServiceController extends MolgenisPluginController
 		{
 			target = project.getMappingTargets().get(0).getName();
 		}
-		// Fill the model
+
 		model.addAttribute("selectedTarget", target);
 		model.addAttribute("mappingProject", project);
 		model.addAttribute("entityMetaDatas", getNewSources(project.getMappingTarget(target)));
 		model.addAttribute("hasWritePermission", hasWritePermission(project, false));
+		model.addAttribute("attributeTagMap", getTagsForAttribute(target, project));
 
 		return VIEW_SINGLE_MAPPING_PROJECT;
 	}
@@ -318,25 +301,6 @@ public class MappingServiceController extends MolgenisPluginController
 			model.addAttribute("href", "/menu/main/mappingservice/mappingproject/" + mappingProjectId);
 			return "error-msg";
 		}
-	}
-
-	/**
-	 * Lists the entities that may be added as new sources to this mapping project's selected target
-	 * 
-	 * @param target
-	 *            the selected target
-	 * @return
-	 */
-	private List<EntityMetaData> getNewSources(MappingTarget target)
-	{
-		return StreamSupport.stream(dataService.getEntityNames().spliterator(), false)
-				.filter((name) -> isValidSource(target, name)).map(dataService::getEntityMetaData)
-				.collect(Collectors.toList());
-	}
-
-	private static boolean isValidSource(MappingTarget target, String name)
-	{
-		return !target.hasMappingFor(name);
 	}
 
 	/**
@@ -373,61 +337,6 @@ public class MappingServiceController extends MolgenisPluginController
 		return VIEW_ATTRIBUTE_MAPPING;
 	}
 
-	@RequestMapping("/tagWizard")
-	public String viewTagWizard(@RequestParam String target, Model model, HttpSession session)
-	{
-		List<Ontology> ontologies = ontologyService.getOntologies();
-		EntityMetaData emd = dataService.getEntityMetaData(target);
-		List<AttributeMetaData> attributes = newArrayList(emd.getAttributes());
-		Map<String, Multimap<Relation, OntologyTerm>> taggedAttributeMetaDatas = attributes.stream().collect(
-				toMap((x -> x.getName()), (x -> ontologyTagService.getTagsForAttribute(emd, x))));
-
-		model.addAttribute("entity", emd);
-		model.addAttribute("attributes", attributes);
-		model.addAttribute("ontologies", ontologies);
-		model.addAttribute("taggedAttributeMetaDatas", taggedAttributeMetaDatas);
-		model.addAttribute("relations", Relation.values());
-
-		return VIEW_TAG_WIZARD;
-	}
-
-	@RequestMapping(method = RequestMethod.POST, value = "/tagattribute")
-	public @ResponseBody void addTagAttribute(@Valid @RequestBody AddTagRequest request)
-	{
-		ontologyTagService.addAttributeTag(request.getEntityName(), request.getAttributeName(),
-				request.getRelationIRI(), request.getOntologyTermIRIs());
-	}
-
-	@RequestMapping(method = RequestMethod.POST, value = "/deletesingletag")
-	public @ResponseBody void deleteSingleTag(@Valid @RequestBody RemoveTagRequest request)
-	{
-		ontologyTagService.removeAttributeTag(request.getEntityName(), request.getAttributeName(),
-				request.getRelationIRI(), request.getOntologyTermIRI());
-	}
-
-	@RequestMapping(method = RequestMethod.POST, value = "/clearalltags")
-	public @ResponseBody void clearAllTags(@RequestParam String entityName)
-	{
-		// TODO remove all tags from this entity
-		System.out.println(entityName);
-		EntityMetaData emd = dataService.getEntityMetaData(entityName);
-	}
-
-	@RequestMapping(method = RequestMethod.POST, value = "/autotagattributes")
-	public @ResponseBody Map<AttributeMetaData, List<OntologyTerm>> autoTagAttributes(
-			@Valid @RequestBody AutoTagRequest request)
-	{
-		System.out.println(request);
-		// TODO Call fleur function
-		return null;
-	}
-
-	@RequestMapping(method = RequestMethod.POST, value = "/getontologyterms")
-	public @ResponseBody List<OntologyTerm> getAllOntologyTerms(@Valid @RequestBody GetOntologyTermRequest request)
-	{
-		return ontologyService.findOntologyTerms(request.getOntologyIds(), request.getSearchTerm(), 100);
-	}
-
 	/**
 	 * Tests an algoritm by computing it for all entities in the source repository.
 	 * 
@@ -448,11 +357,6 @@ public class MappingServiceController extends MolgenisPluginController
 		return ImmutableMap.<String, Object> of("results", calculatedValues, "totalCount", Iterables.size(sourceRepo));
 	}
 
-	private List<EntityMetaData> getEntityMetaDatas()
-	{
-		return Lists.newArrayList(Iterables.transform(dataService.getEntityNames(), dataService::getEntityMetaData));
-	}
-
 	@ExceptionHandler(RuntimeException.class)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -463,8 +367,64 @@ public class MappingServiceController extends MolgenisPluginController
 				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage()));
 	}
 
+	/**
+	 * Lists the entities that may be added as new sources to this mapping project's selected target
+	 * 
+	 * @param target
+	 *            the selected target
+	 * @return
+	 */
+	private List<EntityMetaData> getNewSources(MappingTarget target)
+	{
+		return StreamSupport.stream(dataService.getEntityNames().spliterator(), false)
+				.filter((name) -> isValidSource(target, name)).map(dataService::getEntityMetaData)
+				.collect(Collectors.toList());
+	}
+
+	private static boolean isValidSource(MappingTarget target, String name)
+	{
+		return !target.hasMappingFor(name);
+	}
+
+	private List<EntityMetaData> getEntityMetaDatas()
+	{
+		return Lists.newArrayList(Iterables.transform(dataService.getEntityNames(), dataService::getEntityMetaData));
+	}
+
+	private boolean hasWritePermission(MappingProject project)
+	{
+		return hasWritePermission(project, true);
+	}
+
+	private boolean hasWritePermission(MappingProject project, boolean logInfractions)
+	{
+		boolean result = SecurityUtils.currentUserIsSu()
+				|| project.getOwner().getUsername().equals(SecurityUtils.getCurrentUsername());
+		if (logInfractions && !result)
+		{
+			LOG.warn("User " + SecurityUtils.getCurrentUsername()
+					+ " illegally tried to modify mapping project with id " + project.getIdentifier() + " owned by "
+					+ project.getOwner().getUsername());
+		}
+		return result;
+	}
+
 	private MolgenisUser getCurrentUser()
 	{
 		return molgenisUserService.getUser(SecurityUtils.getCurrentUsername());
+	}
+
+	private Map<String, List<OntologyTerm>> getTagsForAttribute(String target, MappingProject project)
+	{
+		Map<String, List<OntologyTerm>> attributeTagMap = new HashMap<String, List<OntologyTerm>>();
+		for (AttributeMetaData amd : project.getMappingTarget(target).getTarget().getAtomicAttributes())
+		{
+			List<OntologyTerm> ontologyTermsForAttribute = new ArrayList<OntologyTerm>(ontologyTagService
+					.getTagsForAttribute(dataService.getEntityMetaData(target), amd).values());
+
+			attributeTagMap.put(amd.getName(), ontologyTermsForAttribute);
+		}
+
+		return attributeTagMap;
 	}
 }

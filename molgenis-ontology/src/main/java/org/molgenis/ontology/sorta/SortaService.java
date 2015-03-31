@@ -1,7 +1,6 @@
 package org.molgenis.ontology.sorta;
 
 import org.molgenis.data.Entity;
-import org.molgenis.ontology.repository.model.OntologyTerm;
 
 public interface SortaService
 {
@@ -48,25 +47,5 @@ public interface SortaService
 	 * @return a list of ontologyterm entities in generic type
 	 */
 	Iterable<Entity> findOntologyTermEntities(String ontologyIri, Entity inputEntity);
-
-	/**
-	 * Find a list of relevant ontologyterm typed entities using lexical matching (elasticsearch + ngram) based on given
-	 * ontologyIri and a set of query inputs (name, synonym, ontology database id, e.g. hpo, omim)
-	 * 
-	 * @param ontologyIri
-	 * @param queryString
-	 * @return a list of typed ontologyterm entities
-	 */
-	Iterable<OntologyTerm> findOntologyTerms(String ontologyIri, String queryString);
-
-	/**
-	 * Find a list of relevant ontologyterm typed classes using lexical matching (elasticsearch + ngram) based on given
-	 * ontologyIri and queryString
-	 * 
-	 * @param ontologyIri
-	 * @param inputEntity
-	 * @return a list of typed ontologyterm entities
-	 */
-	Iterable<OntologyTerm> findOntologyTerms(String ontologyIri, Entity inputEntity);
 
 }

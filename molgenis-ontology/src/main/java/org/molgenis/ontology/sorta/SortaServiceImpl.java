@@ -17,18 +17,16 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.ontology.model.OntologyMetaData;
-import org.molgenis.ontology.model.OntologyTermDynamicAnnotationMetaData;
-import org.molgenis.ontology.model.OntologyTermMetaData;
-import org.molgenis.ontology.model.OntologyTermSynonymMetaData;
-import org.molgenis.ontology.repository.model.OntologyTerm;
+import org.molgenis.ontology.core.meta.OntologyMetaData;
+import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData;
+import org.molgenis.ontology.core.meta.OntologyTermMetaData;
+import org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData;
 import org.molgenis.ontology.roc.InformationContentService;
 import org.molgenis.ontology.utils.NGramMatchingModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.tartarus.snowball.ext.PorterStemmer;
 
 import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
 
@@ -88,49 +86,6 @@ public class SortaServiceImpl implements SortaService
 							.eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity));
 		}
 		return null;
-	}
-
-	@Override
-	public Iterable<OntologyTerm> findOntologyTerms(String ontologyIri, Entity inputEntity)
-	{
-		Iterable<Entity> ontologyTermEntities = findOntologyTermEntities(ontologyIri, inputEntity);
-		return Iterables.transform(ontologyTermEntities, SortaServiceImpl::transformOntologyTermEntity);
-	}
-
-	@Override
-	public Iterable<OntologyTerm> findOntologyTerms(String ontologyIri, String queryString)
-	{
-		Iterable<Entity> ontologyTermEntities = findOntologyTermEntities(ontologyIri, queryString);
-		return Iterables.transform(ontologyTermEntities, SortaServiceImpl::transformOntologyTermEntity);
-	}
-
-	/**
-	 * A helper function to convert generic Entity to typed ontologyterm class
-	 *
-	 * @param ontologyTermEntity
-	 * @return
-	 */
-	private static OntologyTerm transformOntologyTermEntity(Entity ontologyTermEntity)
-	{
-		String ontologyTermIri = ontologyTermEntity.getString(OntologyTermMetaData.ONTOLOGY_TERM_IRI);
-		String ontologyTermName = ontologyTermEntity.getString(OntologyTermMetaData.ONTOLOGY_TERM_NAME);
-		List<String> synonyms = FluentIterable
-				.from(ontologyTermEntity.getEntities(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM))
-				.transform(new Function<Entity, String>()
-				{
-					public String apply(Entity ontologyTermSynonymEntity)
-					{
-						return ontologyTermSynonymEntity.getString(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM);
-					}
-				}).filter(new Predicate<String>()
-				{
-					public boolean apply(String synonym)
-					{
-						return !synonym.equalsIgnoreCase(ontologyTermName);
-					}
-				}).toList();
-
-		return OntologyTerm.create(ontologyTermIri, ontologyTermName, StringUtils.EMPTY, synonyms);
 	}
 
 	@Override

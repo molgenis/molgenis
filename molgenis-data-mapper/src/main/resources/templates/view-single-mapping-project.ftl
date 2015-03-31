@@ -55,6 +55,12 @@
 								<#if attribute.unique> <span class="label label-default">unique</span></#if>
 								<#if attribute.description??><br />${attribute.description?html}</#if>
 								<#if attribute.tags??><br />${attribute.tags?html}</#if>
+								<#if attributeTagMap[attribute.name]??>
+									<br />
+									<#list attributeTagMap[attribute.name] as tag>
+										<span class="label label-danger"> ${tag.label}</span>
+									</#list>
+								</#if>
 							</td>
 							<#list mappingProject.getMappingTarget(selectedTarget).entityMappings as source>
 								<td>
@@ -106,7 +112,7 @@
 
 <div class="row">
 	<div class="col-md-2">
-		<form method="get" action="${context_url}/tagWizard">
+		<form method="get" action="${context_url}/tagwizard">
 			<input type="hidden" name="target" value="${selectedTarget}"/>
 			<div class="btn-group" role="group">
 				<button type="submit" class="btn btn-primary">
@@ -123,7 +129,6 @@
 			</a>
 		</div>
 	</#if>
-	
 </div>
 
 <!--Create new source dialog-->
