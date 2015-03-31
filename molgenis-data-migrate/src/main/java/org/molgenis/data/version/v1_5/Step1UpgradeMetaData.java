@@ -46,10 +46,10 @@ import com.google.common.collect.Lists;
 public class Step1UpgradeMetaData extends MetaDataUpgrade
 {
 	private static final Logger LOG = LoggerFactory.getLogger(Step1UpgradeMetaData.class);
-	private JdbcTemplate jdbcTemplate;
-	private DataSource dataSource;
+	private final JdbcTemplate jdbcTemplate;
+	private final DataSource dataSource;
 	private MysqlRepositoryCollection undecoratedMySQL;
-	private SearchService searchService;
+	private final SearchService searchService;
 
 	public Step1UpgradeMetaData(DataSource dataSource, SearchService searchService)
 	{
@@ -101,7 +101,7 @@ public class Step1UpgradeMetaData extends MetaDataUpgrade
 		String script;
 		try
 		{
-			script = FileCopyUtils.copyToString(new InputStreamReader(in));
+			script = FileCopyUtils.copyToString(new InputStreamReader(in, "UTF-8"));
 		}
 		catch (IOException e)
 		{
