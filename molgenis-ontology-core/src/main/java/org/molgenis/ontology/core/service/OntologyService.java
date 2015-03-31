@@ -1,10 +1,10 @@
-package org.molgenis.ontology;
+package org.molgenis.ontology.core.service;
 
 import java.util.List;
 import java.util.Set;
 
-import org.molgenis.ontology.repository.model.Ontology;
-import org.molgenis.ontology.repository.model.OntologyTerm;
+import org.molgenis.ontology.core.model.Ontology;
+import org.molgenis.ontology.core.model.OntologyTerm;
 
 public interface OntologyService
 {

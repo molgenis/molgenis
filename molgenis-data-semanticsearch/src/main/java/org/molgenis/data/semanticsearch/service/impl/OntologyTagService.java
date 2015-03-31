@@ -31,9 +31,9 @@ import org.molgenis.data.semanticsearch.semantic.OntologyTag;
 import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.ontology.OntologyService;
-import org.molgenis.ontology.repository.model.Ontology;
-import org.molgenis.ontology.repository.model.OntologyTerm;
+import org.molgenis.ontology.core.model.Ontology;
+import org.molgenis.ontology.core.model.OntologyTerm;
+import org.molgenis.ontology.core.service.OntologyService;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Iterables;

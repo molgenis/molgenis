@@ -1,8 +1,9 @@
-package org.molgenis.ontology.model;
+package org.molgenis.ontology.core.meta;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.ontology.core.model.OntologyPackage;
 
 public class OntologyMetaData extends DefaultEntityMetaData
 {

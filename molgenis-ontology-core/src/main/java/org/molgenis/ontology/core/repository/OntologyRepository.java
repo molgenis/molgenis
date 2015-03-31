@@ -1,15 +1,15 @@
-package org.molgenis.ontology.repository;
+package org.molgenis.ontology.core.repository;
 
-import static org.molgenis.ontology.model.OntologyMetaData.ENTITY_NAME;
-import static org.molgenis.ontology.model.OntologyMetaData.ID;
-import static org.molgenis.ontology.model.OntologyMetaData.ONTOLOGY_IRI;
-import static org.molgenis.ontology.model.OntologyMetaData.ONTOLOGY_NAME;
+import static org.molgenis.ontology.core.meta.OntologyMetaData.ENTITY_NAME;
+import static org.molgenis.ontology.core.meta.OntologyMetaData.ID;
+import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY_IRI;
+import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY_NAME;
 
 import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.ontology.repository.model.Ontology;
+import org.molgenis.ontology.core.model.Ontology;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**

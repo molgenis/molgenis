@@ -24,7 +24,7 @@ import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.semanticsearch.service.impl.OntologyTagService;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.ontology.repository.model.OntologyTerm;
+import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.util.ErrorMessageResponse;

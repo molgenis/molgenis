@@ -6,8 +6,8 @@ import org.molgenis.data.Package;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semantic.Tag;
-import org.molgenis.ontology.repository.model.Ontology;
-import org.molgenis.ontology.repository.model.OntologyTerm;
+import org.molgenis.ontology.core.model.Ontology;
+import org.molgenis.ontology.core.model.OntologyTerm;
 
 import com.google.common.collect.Multimap;
 

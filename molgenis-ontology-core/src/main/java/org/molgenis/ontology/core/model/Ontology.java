@@ -1,6 +1,7 @@
-package org.molgenis.ontology.repository.model;
+package org.molgenis.ontology.core.model;
 
 import org.molgenis.gson.AutoGson;
+import org.molgenis.ontology.core.model.AutoValue_Ontology;
 
 import com.google.auto.value.AutoValue;
 

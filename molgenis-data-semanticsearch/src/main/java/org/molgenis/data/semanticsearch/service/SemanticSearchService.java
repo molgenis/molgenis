@@ -6,7 +6,7 @@ import java.util.concurrent.Future;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.semanticsearch.semantic.ItemizedSearchResult;
-import org.molgenis.ontology.repository.model.OntologyTerm;
+import org.molgenis.ontology.core.model.OntologyTerm;
 
 public interface SemanticSearchService
 {

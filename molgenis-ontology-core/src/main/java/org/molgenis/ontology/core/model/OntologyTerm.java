@@ -1,4 +1,4 @@
-package org.molgenis.ontology.repository.model;
+package org.molgenis.ontology.core.model;
 
 import static com.google.common.collect.ImmutableList.copyOf;
 import static java.util.Arrays.stream;
@@ -10,6 +10,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import org.molgenis.gson.AutoGson;
+import org.molgenis.ontology.core.model.AutoValue_OntologyTerm;
 
 import com.google.auto.value.AutoValue;
 

@@ -6,7 +6,7 @@ import org.molgenis.data.semanticsearch.repository.TagRepository;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.semanticsearch.service.impl.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.impl.SemanticSearchServiceImpl;
-import org.molgenis.ontology.OntologyService;
+import org.molgenis.ontology.core.service.OntologyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

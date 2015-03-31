@@ -1,5 +1,6 @@
 package org.molgenis.ontology.repository.model;
 
+import org.molgenis.ontology.core.model.OntologyTerm;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

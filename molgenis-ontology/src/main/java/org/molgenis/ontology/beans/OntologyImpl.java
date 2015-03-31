@@ -2,7 +2,7 @@ package org.molgenis.ontology.beans;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
-import org.molgenis.ontology.model.OntologyMetaData;
+import org.molgenis.ontology.core.meta.OntologyMetaData;
 
 public class OntologyImpl implements Ontology
 {

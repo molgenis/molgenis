@@ -12,7 +12,7 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.UuidGenerator;
-import org.molgenis.ontology.model.OntologyTermDynamicAnnotationMetaData;
+import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData;
 import org.molgenis.ontology.utils.OntologyLoader;
 import org.semanticweb.owlapi.model.OWLClass;
 

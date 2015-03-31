@@ -18,8 +18,8 @@ import org.molgenis.data.Package;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.semanticsearch.semantic.ItemizedSearchResult;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
-import org.molgenis.ontology.OntologyService;
-import org.molgenis.ontology.repository.model.OntologyTerm;
+import org.molgenis.ontology.core.model.OntologyTerm;
+import org.molgenis.ontology.core.service.OntologyService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class SemanticSearchServiceImpl implements SemanticSearchService

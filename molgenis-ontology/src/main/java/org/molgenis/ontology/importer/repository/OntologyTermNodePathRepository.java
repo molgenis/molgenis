@@ -15,7 +15,7 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.UuidGenerator;
-import org.molgenis.ontology.model.OntologyTermNodePathMetaData;
+import org.molgenis.ontology.core.meta.OntologyTermNodePathMetaData;
 import org.molgenis.ontology.utils.OWLClassContainer;
 import org.molgenis.ontology.utils.OntologyLoader;
 import org.semanticweb.owlapi.model.OWLClass;

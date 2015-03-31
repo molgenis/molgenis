@@ -1,10 +1,10 @@
-package org.molgenis.ontology.repository;
+package org.molgenis.ontology.core.repository;
 
 import static org.molgenis.data.support.QueryImpl.IN;
-import static org.molgenis.ontology.model.OntologyTermMetaData.ENTITY_NAME;
-import static org.molgenis.ontology.model.OntologyTermMetaData.ONTOLOGY;
-import static org.molgenis.ontology.model.OntologyTermMetaData.ONTOLOGY_TERM_IRI;
-import static org.molgenis.ontology.model.OntologyTermMetaData.ONTOLOGY_TERM_NAME;
+import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ENTITY_NAME;
+import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY;
+import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_IRI;
+import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_NAME;
 
 import java.util.List;
 import java.util.Set;
@@ -15,9 +15,9 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.ontology.model.OntologyTermMetaData;
-import org.molgenis.ontology.repository.model.Ontology;
-import org.molgenis.ontology.repository.model.OntologyTerm;
+import org.molgenis.ontology.core.meta.OntologyTermMetaData;
+import org.molgenis.ontology.core.model.Ontology;
+import org.molgenis.ontology.core.model.OntologyTerm;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**

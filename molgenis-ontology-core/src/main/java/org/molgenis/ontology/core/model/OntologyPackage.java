@@ -1,4 +1,4 @@
-package org.molgenis.ontology.model;
+package org.molgenis.ontology.core.model;
 
 import org.molgenis.data.Package;
 import org.molgenis.data.meta.PackageImpl;

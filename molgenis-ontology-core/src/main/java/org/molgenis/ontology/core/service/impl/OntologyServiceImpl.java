@@ -1,13 +1,14 @@
-package org.molgenis.ontology;
+package org.molgenis.ontology.core.service.impl;
 
 import java.util.List;
 import java.util.Set;
 
 import org.elasticsearch.common.collect.Lists;
-import org.molgenis.ontology.repository.OntologyRepository;
-import org.molgenis.ontology.repository.OntologyTermRepository;
-import org.molgenis.ontology.repository.model.Ontology;
-import org.molgenis.ontology.repository.model.OntologyTerm;
+import org.molgenis.ontology.core.model.Ontology;
+import org.molgenis.ontology.core.model.OntologyTerm;
+import org.molgenis.ontology.core.repository.OntologyRepository;
+import org.molgenis.ontology.core.repository.OntologyTermRepository;
+import org.molgenis.ontology.core.service.OntologyService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class OntologyServiceImpl implements OntologyService
