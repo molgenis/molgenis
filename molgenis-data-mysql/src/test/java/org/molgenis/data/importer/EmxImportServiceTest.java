@@ -16,7 +16,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
-import org.molgenis.data.semanticsearch.service.UntypedTagService;
+import org.molgenis.data.semanticsearch.service.impl.UntypedTagService;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;

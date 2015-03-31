@@ -1,4 +1,4 @@
-package org.molgenis.data.semanticsearch.service;
+package org.molgenis.data.semanticsearch.service.impl;
 
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ATTRIBUTES;
@@ -21,6 +21,7 @@ import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semantic.Tag;
 import org.molgenis.data.semantic.TagImpl;
 import org.molgenis.data.semanticsearch.repository.TagRepository;
+import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.data.support.QueryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

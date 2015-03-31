@@ -18,7 +18,7 @@ import org.molgenis.data.importer.ImportWriter;
 import org.molgenis.data.importer.MetaDataParser;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.semanticsearch.repository.TagRepository;
-import org.molgenis.data.semanticsearch.service.UntypedTagService;
+import org.molgenis.data.semanticsearch.service.impl.UntypedTagService;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
