@@ -4,7 +4,7 @@
 <#assign css=["jquery-ui-1.9.2.custom.min.css", "bootstrap-fileupload.min.css", "ontology-service.css", "biobank-connect.css"]>
 <#assign js=["jquery-ui-1.9.2.custom.min.js", "bootstrap-fileupload.min.js", "sorta-result-anonymous.js"]>
 <@header css js/>
-<form id="ontology-match" class="form-horizontal" action="${context_url}" method="get" enctype="multipart/form-data" >
+<form id="ontology-match" class="form-horizontal" enctype="multipart/form-data" >
 	<br>
 	<div class="row">
 		<div class="col-md-offset-3 col-md-6">

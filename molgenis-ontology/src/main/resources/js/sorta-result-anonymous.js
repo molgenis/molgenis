@@ -19,7 +19,7 @@
 		var thresholdValue = $('<input type="text" class="form-control"/>');
 		var divContainerButtonFormGroup = $('<div />').addClass('input-group pull-right').append(inputGroupButton).append(thresholdValue);
 		$('<div />').addClass('col-md-2').css('padding-right','0px').append(divContainerButtonFormGroup).appendTo(divContainerThreshold);
-		var backToFrontPageButton = $('<button />').addClass('btn btn-default').text('Back').append(' <span class="glyphicon glyphicon-backward"></span>');
+		var backToFrontPageButton = $('<button />').attr('type', 'button').addClass('btn btn-default').text('Back').append(' <span class="glyphicon glyphicon-backward"></span>');
 		$('<div />').addClass('col-md-offset-1 col-md-1').append(backToFrontPageButton).prependTo(divContainerThreshold);
 		
 		var divContainerSummary = $('<div />').addClass('row').appendTo(container);
@@ -39,6 +39,13 @@
 		var divContainerDownloadButton = $('<div />').addClass('row').prepend('<br>').appendTo(divContainerSummaryCenterStyleWell);
 		var downloadButton = $('<button />').attr('type', 'button').addClass('btn btn-primary').text('Download');
 		$('<div />').addClass('col-md-12').append(downloadButton).appendTo(divContainerDownloadButton);
+		
+		$(backToFrontPageButton).click(function(){
+			container.attr({
+				'action' : molgenis.getContextUrl(),
+				'method' : 'GET'
+			}).submit();
+		});
 		
 		$(downloadButton).click(function(){
 			container.attr({
