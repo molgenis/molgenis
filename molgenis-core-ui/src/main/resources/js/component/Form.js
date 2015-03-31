@@ -214,7 +214,6 @@
 			var message = this.props.mode === 'create' ? 'has been created.' : 'changes have been saved.';
 			var stateProps = {
 				submitMsg: {type: 'success', message: this.state.entity.label + ' ' + message},
-				entityInstance: null, // reset form
 				invalids : {},
 				validate : false,
 			};
