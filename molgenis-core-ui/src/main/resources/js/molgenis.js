@@ -514,17 +514,6 @@ function createInput(attr, attrs, val, lbl) {
 			error : callback && callback.error ? callback.error : function() {}
 		});
 	};
-
-	molgenis.RestClient.prototype.create = function(href, entity, callback) {
-		return this._ajax({
-			type : 'POST',
-			url : href,
-			contentType : 'application/json',
-			data : JSON.stringify(entity),
-			success : callback && callback.success ? callback.success : function() {},
-			error : callback && callback.error ? callback.error : function() {}
-		});
-	};
 	
 	molgenis.RestClient.prototype.update = function(href, entity, callback) {
 		return this._ajax({
@@ -584,10 +573,6 @@ function createInput(attr, attrs, val, lbl) {
 				callback();
 			}
 		});
-	};
-
-	molgenis.RestClient.prototype.getNumMax = function() {
-		return 10000;
 	};
 }($, window.top.molgenis = window.top.molgenis || {}));
 
