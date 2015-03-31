@@ -164,7 +164,7 @@
 			if(this.state.submitMsg) {
 				return (
 					div(null,
-						molgenis.ui.AlertMessage({type: this.state.submitMsg.type, message: this.state.submitMsg.message}),
+						molgenis.ui.AlertMessage({type: this.state.submitMsg.type, message: this.state.submitMsg.message, onDismiss: this._handleAlertMessageDismiss}),
 						Form
 					)
 				);
@@ -232,6 +232,11 @@
 				submitMsg: {type: 'danger', message: this.state.entity.label + ' ' + message}
 			});
 			this.props.onSubmitError();
+		},
+		_handleAlertMessageDismiss: function() {
+			this.setState({
+				submitMsg: undefined
+			});
 		}
 	});
 		

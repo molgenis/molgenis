@@ -12,14 +12,15 @@
 		displayName: 'AlertMessage',
 		propTypes: {
 			type: React.PropTypes.oneOf(['success', 'info', 'warning', 'danger']),
-			message: React.PropTypes.string.isRequired
+			message: React.PropTypes.string.isRequired,
+			onDismiss: React.PropTypes.func,
 		},
 		render: function() {
 			return (
 				div({className: 'alert alert-' + this.props.type + ' alert-dismissible', role: 'alert'},
-					button({type: 'button', className: 'close', 'data-dismiss': 'alert', 'aria-label': 'Close'},
+					this.props.onDismiss ? button({type: 'button', className: 'close', 'aria-label': 'Close', onClick: this.props.onDismiss},
 						span({'aria-hidden': true,}, '\u00D7')
-					),
+					) : null,
 					this.props.type === 'danger' ? molgenis.ui.Icon({name: 'exclamation-sign'}) : null,
 					this.props.type === 'danger' ? ' ' + this.props.message : this.props.message  
 				)

@@ -23,7 +23,7 @@
 		componentDidMount: function() {
 			var $form = $(this.refs.form.getDOMNode());
 			$form.ajaxForm({
-				resetForm: true,
+				resetForm: false,
 				success : this.props.success,
 				error : this.props.error
 			});
