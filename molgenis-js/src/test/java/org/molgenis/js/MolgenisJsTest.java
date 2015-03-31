@@ -122,4 +122,146 @@ public class MolgenisJsTest
 		result = ScriptEvaluator.eval(script, new MapEntity("birthdate", null), emd);
 		assertEquals(result, false);
 	}
+
+	@Test
+	public void testEq()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
+		emd.addAttribute("weight").setDataType(MolgenisFieldTypes.INT);
+		String script = "$('weight').eq(100).value()";
+
+		Object result = ScriptEvaluator.eval(script, new MapEntity("weight", 100), emd);
+		assertEquals(result, true);
+
+		result = ScriptEvaluator.eval(script, new MapEntity("weight", 99), emd);
+		assertEquals(result, false);
+	}
+
+	@Test
+	public void testIsNull()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
+		emd.addAttribute("weight").setDataType(MolgenisFieldTypes.INT);
+		String script = "$('weight').isNull().value()";
+
+		Object result = ScriptEvaluator.eval(script, new MapEntity("weight", null), emd);
+		assertEquals(result, true);
+
+		result = ScriptEvaluator.eval(script, new MapEntity("weight", 99), emd);
+		assertEquals(result, false);
+	}
+
+	@Test
+	public void testNot()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
+		emd.addAttribute("weight").setDataType(MolgenisFieldTypes.INT);
+		String script = "$('weight').isNull().not().value()";
+
+		Object result = ScriptEvaluator.eval(script, new MapEntity("weight", null), emd);
+		assertEquals(result, false);
+
+		result = ScriptEvaluator.eval(script, new MapEntity("weight", 99), emd);
+		assertEquals(result, true);
+	}
+
+	@Test
+	public void testOr()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
+		emd.addAttribute("weight").setDataType(MolgenisFieldTypes.INT);
+		String script = "$('weight').eq(99).or($('weight').eq(100)).value()";
+
+		Object result = ScriptEvaluator.eval(script, new MapEntity("weight", null), emd);
+		assertEquals(result, false);
+
+		result = ScriptEvaluator.eval(script, new MapEntity("weight", 99), emd);
+		assertEquals(result, true);
+
+		result = ScriptEvaluator.eval(script, new MapEntity("weight", 100), emd);
+		assertEquals(result, true);
+
+		result = ScriptEvaluator.eval(script, new MapEntity("weight", 99), emd);
+		assertEquals(result, true);
+	}
+
+	@Test
+	public void testGt()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
+		emd.addAttribute("weight").setDataType(MolgenisFieldTypes.INT);
+		String script = "$('weight').gt(100).value()";
+
+		Object result = ScriptEvaluator.eval(script, new MapEntity("weight", null), emd);
+		assertEquals(result, false);
+
+		result = ScriptEvaluator.eval(script, new MapEntity("weight", 99), emd);
+		assertEquals(result, false);
+
+		result = ScriptEvaluator.eval(script, new MapEntity("weight", 100), emd);
+		assertEquals(result, false);
+
+		result = ScriptEvaluator.eval(script, new MapEntity("weight", 101), emd);
+		assertEquals(result, true);
+	}
+
+	@Test
+	public void testLt()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
+		emd.addAttribute("weight").setDataType(MolgenisFieldTypes.INT);
+		String script = "$('weight').lt(100).value()";
+
+		Object result = ScriptEvaluator.eval(script, new MapEntity("weight", null), emd);
+		assertEquals(result, false);
+
+		result = ScriptEvaluator.eval(script, new MapEntity("weight", 99), emd);
+		assertEquals(result, true);
+
+		result = ScriptEvaluator.eval(script, new MapEntity("weight", 100), emd);
+		assertEquals(result, false);
+
+		result = ScriptEvaluator.eval(script, new MapEntity("weight", 101), emd);
+		assertEquals(result, false);
+	}
+
+	@Test
+	public void testGe()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
+		emd.addAttribute("weight").setDataType(MolgenisFieldTypes.INT);
+		String script = "$('weight').ge(100).value()";
+
+		Object result = ScriptEvaluator.eval(script, new MapEntity("weight", null), emd);
+		assertEquals(result, false);
+
+		result = ScriptEvaluator.eval(script, new MapEntity("weight", 99), emd);
+		assertEquals(result, false);
+
+		result = ScriptEvaluator.eval(script, new MapEntity("weight", 100), emd);
+		assertEquals(result, true);
+
+		result = ScriptEvaluator.eval(script, new MapEntity("weight", 101), emd);
+		assertEquals(result, true);
+	}
+
+	@Test
+	public void testLe()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
+		emd.addAttribute("weight").setDataType(MolgenisFieldTypes.INT);
+		String script = "$('weight').le(100).value()";
+
+		Object result = ScriptEvaluator.eval(script, new MapEntity("weight", null), emd);
+		assertEquals(result, false);
+
+		result = ScriptEvaluator.eval(script, new MapEntity("weight", 99), emd);
+		assertEquals(result, true);
+
+		result = ScriptEvaluator.eval(script, new MapEntity("weight", 100), emd);
+		assertEquals(result, true);
+
+		result = ScriptEvaluator.eval(script, new MapEntity("weight", 101), emd);
+		assertEquals(result, false);
+	}
 }

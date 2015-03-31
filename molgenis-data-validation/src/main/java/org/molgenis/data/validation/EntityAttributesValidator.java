@@ -275,23 +275,9 @@ public class EntityAttributesValidator
 	private ConstraintViolation createConstraintViolation(Entity entity, AttributeMetaData attribute,
 			EntityMetaData meta)
 	{
-		String key = meta.getLabelAttribute() != null ? entity.getString(meta.getLabelAttribute().getName()) : null;
-		String message;
-
-		System.out.println(attribute.getName());
-
-		if (key == null)
-		{
-			message = String.format("Invalid %s value '%s' for attribute '%s' of entity '%s'.", attribute.getDataType()
-					.getEnumType().toString().toLowerCase(), entity.getString(attribute.getName()),
-					attribute.getLabel(), meta.getName());
-		}
-		else
-		{
-			message = String.format("Invalid %s value '%s' for attribute '%s' of entity '%s' with key '%s'.", attribute
-					.getDataType().getEnumType().toString().toLowerCase(), entity.getString(attribute.getName()),
-					attribute.getLabel(), meta.getName(), key);
-		}
+		String message = String.format("Invalid %s value '%s' for attribute '%s' of entity '%s'.", attribute
+				.getDataType().getEnumType().toString().toLowerCase(), entity.getString(attribute.getName()),
+				attribute.getLabel(), meta.getName());
 
 		Range range = attribute.getRange();
 		if (range != null)

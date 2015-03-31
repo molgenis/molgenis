@@ -19,10 +19,14 @@ function evalScript(script, entity) {
 				return this;
 			},
 			age: function() {
-				if (typeof this.val === 'string') {
-					this.val = new Date(this.val);
+				if (_isNull(this.val)) {
+					this.val = undefined;
+				} else {
+					if (typeof this.val === 'string') {
+						this.val = new Date(this.val);
+					}
+					this.val = Math.floor((new Date() - this.val)/(365.2425 * 24 * 60 * 60 * 1000));
 				}
-				this.val = Math.floor((new Date() - this.val)/(365.2425 * 24 * 60 * 60 * 1000));
 				return this;
 			},
 			map: function(categoryMapping) {
@@ -38,27 +42,50 @@ function evalScript(script, entity) {
 				}
 				return this;
 			},
-			contains: function(value) {
-				if ((this.val === undefined) || (this.val === null)) {
-					return false;
+			eq: function(other) {
+				if (_isNull(this.val) && _isNull(other)) {
+					this.val = false;
+				} else if (_isNull(this.val) && !_isNull(other)) {
+					this.val = false;
+				} else {
+					this.val = (this.val === other);
 				}
-				
-				if (typeof this.val === 'string') {
-					this.val = this.val.split(',');
-				}
-				
-				if (this.val.constructor !== Array) {
-					return false
-				}
-				
-				for (var i = 0; i < this.val.length; i++) {
-					if (this.val[i] === value) {
-						return true;
-					}
-				}
-				
-				return false;
+				return this;
+			},
+			isNull: function() {
+				this.val = _isNull(this.val);
+				return this;
+			},
+			not: function() {
+				this.val = !this.val;
+				return this;
+			},
+			or: function(other) {
+				this.val = (this.val || other.value());
+				return this;
+			},
+			gt: function(value) {
+				this.val = _isNull(this.val) ? false : (this.val > value);
+				return this;
+			},
+			lt: function(value) {
+				this.val = _isNull(this.val) ? false : (this.val < value);
+				return this;
+			},
+			ge: function(value) {
+				this.val = _isNull(this.val) ? false : (this.val >= value);
+				return this;
+			},
+			le: function(value) {
+				this.val = _isNull(this.val) ? false : (this.val <= value);
+				return this;
 			}
+		}
+		
+		function _isNull(value) {
+			if (value === null || value === undefined) return true;
+			if ((typeof value === 'string') && (value.length == 0)) return true;
+			return false;
 		}
 		
 		attribute.val = this[attr];

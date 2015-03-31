@@ -79,13 +79,6 @@
 				}
 			}
 		});
-		
-		$.each(meta.attributes, function(name, attr) {
-			if (attr.validationExpression) {
-				var valid = evalScript(attr.validationExpression, e);
-				alert(attr.name + " = " + valid);
-			}
-		});
 	};
 	
 	$(function() {
