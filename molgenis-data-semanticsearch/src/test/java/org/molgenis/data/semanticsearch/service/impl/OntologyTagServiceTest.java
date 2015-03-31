@@ -1,4 +1,4 @@
-package org.molgenis.data.semanticsearch.semantic;
+package org.molgenis.data.semanticsearch.service.impl;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -8,7 +8,6 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
-
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -24,9 +23,9 @@ import org.molgenis.data.semanticsearch.service.impl.OntologyTagService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.ontology.OntologyService;
-import org.molgenis.ontology.repository.model.Ontology;
-import org.molgenis.ontology.repository.model.OntologyTerm;
+import org.molgenis.ontology.core.model.Ontology;
+import org.molgenis.ontology.core.model.OntologyTerm;
+import org.molgenis.ontology.core.service.OntologyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -98,7 +97,7 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void testGetTags()
+	public void testgetTagsForAttribute()
 	{
 		EntityMetaData emd = new DefaultEntityMetaData("org.molgenis.SNP");
 		AttributeMetaData attributeMetaData = new DefaultAttributeMetaData("Chr");
@@ -132,7 +131,7 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void testGetTagTyped()
+	public void testGetTagEntity()
 	{
 		MapEntity expected = new MapEntity(TagMetaData.ENTITY_NAME);
 		expected.set(TagMetaData.IDENTIFIER, "1233");
@@ -162,7 +161,7 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void testAddTag()
+	public void testAddAttributeTag()
 	{
 		EntityMetaData emd = new DefaultEntityMetaData("org.molgenis.SNP");
 		AttributeMetaData attributeMetaData = new DefaultAttributeMetaData("Chr");
@@ -196,7 +195,7 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void testRemoveTag()
+	public void testRemoveAttributeTag()
 	{
 		EntityMetaData emd = new DefaultEntityMetaData("org.molgenis.SNP");
 		AttributeMetaData attributeMetaData = new DefaultAttributeMetaData("Chr");
@@ -216,9 +215,27 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 		ontologyTagService.removeAttributeTag(emd, geneAnnotationTag);
 
 		MapEntity updatedEntity = new MapEntity(attributeEntity);
-		updatedEntity.set(AttributeMetaDataMetaData.TAGS, Arrays.asList(chromosomeNameTagEntity));
+		updatedEntity.set(AttributeMetaDataMetaData.TAGS,
+				Arrays.asList(chromosomeNameTagEntity, geneAnnotationTagEntity));
+		verify(dataService).update(AttributeMetaDataMetaData.ENTITY_NAME, updatedEntity);
+	}
 
-		verify(dataService, times(1)).update(AttributeMetaDataMetaData.ENTITY_NAME, updatedEntity);
+	@Test
+	public void testgetTagsForPackage()
+	{
+		// TODO How do you test this?
+	}
+
+	@Test
+	public void testRemoveAllTagsFromEntity()
+	{
+		// TODO How do you test this?
+	}
+
+	@Test
+	public void testTagAttributesInEntity()
+	{
+		// TODO How do you test this?
 	}
 
 	@Configuration
@@ -241,6 +258,5 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 		{
 			return mock(TagRepository.class);
 		}
-
 	}
 }
