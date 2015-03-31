@@ -2,7 +2,7 @@
 	"use strict";
 	
 	var container = null;
-	var threshold = 100;
+	var THRESHOLD = 100;
 	
 	molgenis.SortaAnonymous = function SortaAnonymous(form_container){
 		container = form_container;
@@ -10,9 +10,10 @@
 	
 	molgenis.SortaAnonymous.prototype.renderPage = function(){
 		
+		container.children('div.row:gt(0)').remove();
 		
 		var divContainerThreshold = $('<div />').addClass('row').css('margin-bottom','15px').appendTo(container);
-		$('<div />').addClass('col-md-offset-3 col-md-4').append('Current threshold : ' + threshold + '%').css('padding-left','0px').appendTo(divContainerThreshold);
+		$('<div />').addClass('col-md-offset-3 col-md-4').append('Current threshold : ' + THRESHOLD + '%').css('padding-left','0px').appendTo(divContainerThreshold);
 		var thresholdUpdateButton = $('<button />').attr('type','button').addClass('btn btn-default').text('Update');
 		var inputGroupButton = $('<span />').addClass('input-group-btn').append(thresholdUpdateButton);		
 		var thresholdValue = $('<input type="text" class="form-control"/>');
@@ -33,13 +34,31 @@
 		var unmatchSpanContainer = $('<span />');
 		$('<div />').addClass('col-md-12').append('Total number of unmatch results is ').append(unmatchSpanContainer).append(unmatchButon).appendTo(divContainerUnMatchButton);
 		
+		var divContainerDownloadButton = $('<div />').addClass('row').prepend('<br>').appendTo(divContainerSummaryCenterStyleWell);
+		var downloadButton = $('<button />').attr('type', 'button').addClass('btn btn-primary').text('Download');
+		$('<div />').addClass('col-md-12').append(downloadButton).appendTo(divContainerDownloadButton);
+		
+		$(downloadButton).click(function(){
+			container.attr({
+				'action' : molgenis.getContextUrl() + '/download/',
+				'method' : 'GET'
+			}).submit();
+		});
+		
+		$(inputGroupButton).click(function(){
+			var customThreshold = Number($(thresholdValue).val());
+			if(customThreshold && customThreshold !== THRESHOLD){
+				THRESHOLD = customThreshold;
+				molgenis.SortaAnonymous.prototype.renderPage();
+			}
+		});
 		
 		getMatchResults(function(matchedResults){
 			var perfectMatches = [];
 			var partialMatches = [];
 			$.each(matchedResults, function(index, matchedResult){
 				if(matchedResult.ontologyTerm.length > 0){
-					if(matchedResult.ontologyTerm[0].Combined_Score === 100){
+					if(matchedResult.ontologyTerm[0].Combined_Score >= THRESHOLD){
 						perfectMatches.push(matchedResult);
 					}else{
 						partialMatches.push(matchedResult);
@@ -48,14 +67,14 @@
 			});
 			matchSpanContainer.html('<strong>' + perfectMatches.length + '</strong>');
 			unmatchSpanContainer.html('<strong>' + partialMatches.length + '</strong>');
-			
+
 			matchButon.click(function(){
 				renderMatchedResultTable(perfectMatches, true);
-			}).click();
+			});
 			
 			unmatchButon.click(function(){
 				renderMatchedResultTable(partialMatches, false);
-			});
+			}).click();
 		});
 
 		
