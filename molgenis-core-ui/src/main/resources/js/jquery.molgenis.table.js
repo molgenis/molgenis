@@ -142,7 +142,8 @@
 
 		var items = [];
 		if (settings.editenabled) {
-			items.push($('<th>'));
+			items.push($('<th>')); // edit row
+			items.push($('<th>')); // delete row
 		}
 		
 		$.each(settings.colAttributes, function(i, attribute) {
@@ -178,6 +179,12 @@
 			var entity = data.items[i];
 			var row = $('<tr>').data('entity', entity).data('id', entity.href);
 			if (settings.editenabled) {
+				// edit row button
+				var cell = $('<td class="edit" tabindex="' + tabindex++ + '">');
+				$('<a class="btn btn-xs btn-primary edit-row-btn" href="#" data-toggle="button" title="Edit"><span class="glyphicon glyphicon-edit"></span></button>').appendTo(cell);
+				row.append(cell);
+				
+				// delete row button
 				var cell = $('<td class="trash" tabindex="' + tabindex++ + '">');
 				$('<a class="btn btn-xs btn-danger delete-row-btn" href="#" data-toggle="button" title="Delete"><span class="glyphicon glyphicon-minus"></span></button>').appendTo(cell);
 				row.append(cell);
@@ -812,7 +819,23 @@
 			refresh(settings);
 		});
 		
-		// toggle edit table mode
+		// edit row
+		$(container).on('click', '.edit-row-btn', function(e) {
+			e.preventDefault();
+			e.stopPropagation();
+			
+			React.render(molgenis.ui.Form({
+				entity : settings.entityMetaData.name,
+				entityInstance: $(this).closest('tr').data('id'),
+				mode: 'edit',
+				modal: true,
+				onSubmitSuccess : function() {
+					location.reload();
+				}
+			}), $('div')[0]);
+		});
+		
+		// delete row
 		$(container).on('click', '.delete-row-btn', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
