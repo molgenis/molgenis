@@ -21,9 +21,7 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter
 	public static final String APP_HREF_LOGO = "app.href.logo";
 	private final ResourceFingerprintRegistry resourceFingerprintRegistry;
 	private final MolgenisSettings molgenisSettings;
-
 	public static final String I18N_LOCALE = "i18nLocale";
-
 	private final String environment;
 
 	@Autowired
