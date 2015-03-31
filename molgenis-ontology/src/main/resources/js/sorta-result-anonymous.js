@@ -92,6 +92,7 @@
 		}
 		
 		function renderMatchedResultTable(matches, isMatched){
+			
 			if($('#sorta-result-table')){			
 				$('#sorta-result-table').remove();
 			}
@@ -125,7 +126,7 @@
 					});
 				});
 			});
-			$('<div />').addClass('col-md-offset-2 col-md-8').append(tableTitle).append(table).appendTo(divContainerMatchResult);
+			$('<div />').addClass('col-md-offset-1 col-md-10').append(tableTitle).append(table).appendTo(divContainerMatchResult);
 			return divContainerMatchResult;
 		}
 		
@@ -145,7 +146,7 @@
 		
 		function getInputTermInfo(inputTerm){
 			var inputTermDiv = $('<div />');
-			$.map(inputTerm, function(val, key){
+			$.map(inputTerm, function(val, key){					
 				inputTermDiv.append(key + ' : ' + val).append('<br>');
 			});
 			return inputTermDiv;
