@@ -50,9 +50,8 @@ public class TagRepositoryTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void testGetTag()
+	public void testGetTagEntity()
 	{
-
 		MapEntity expected = new MapEntity(TagMetaData.ENTITY_NAME);
 		expected.set(TagMetaData.IDENTIFIER, uuid.toString());
 		expected.set(TagMetaData.OBJECT_IRI, "http://edamontology.org/data_3031");
@@ -95,6 +94,5 @@ public class TagRepositoryTest extends AbstractTestNGSpringContextTests
 		{
 			return mock(AttributeMetaData.class);
 		}
-
 	}
 }
