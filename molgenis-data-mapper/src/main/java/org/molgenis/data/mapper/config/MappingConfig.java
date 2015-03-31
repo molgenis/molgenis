@@ -1,4 +1,4 @@
-package org.molgenis.data.mapper.mapping;
+package org.molgenis.data.mapper.config;
 
 import java.util.UUID;
 
@@ -9,6 +9,8 @@ import org.molgenis.data.mapper.repository.impl.AttributeMappingRepositoryImpl;
 import org.molgenis.data.mapper.repository.impl.EntityMappingRepositoryImpl;
 import org.molgenis.data.mapper.repository.impl.MappingProjectRepositoryImpl;
 import org.molgenis.data.mapper.repository.impl.MappingTargetRepositoryImpl;
+import org.molgenis.data.mapper.service.MappingService;
+import org.molgenis.data.mapper.service.impl.MappingServiceImpl;
 import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

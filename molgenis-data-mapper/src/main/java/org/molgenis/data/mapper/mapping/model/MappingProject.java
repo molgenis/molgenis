@@ -7,8 +7,8 @@ import java.util.Map;
 import org.elasticsearch.repositories.Repository;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.mapper.mapping.MappingService;
 import org.molgenis.data.mapper.repository.MappingProjectRepository;
+import org.molgenis.data.mapper.service.MappingService;
 
 import com.google.common.collect.Lists;
 

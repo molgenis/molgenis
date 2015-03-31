@@ -1,4 +1,4 @@
-package org.molgenis.data.mapper.mapping;
+package org.molgenis.data.mapper.service.impl;
 
 import java.util.Collections;
 import java.util.List;
@@ -14,6 +14,7 @@ import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.repository.MappingProjectRepository;
+import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.meta.PackageImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;

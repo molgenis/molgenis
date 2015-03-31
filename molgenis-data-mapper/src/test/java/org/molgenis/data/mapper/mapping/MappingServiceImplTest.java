@@ -18,12 +18,12 @@ import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.Entity;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
-import org.molgenis.data.mapper.mapping.MappingConfig;
-import org.molgenis.data.mapper.mapping.MappingService;
+import org.molgenis.data.mapper.config.MappingConfig;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
+import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.mem.InMemoryRepositoryCollection;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
@@ -50,48 +50,6 @@ import com.google.common.collect.ImmutableList;
 { MappingServiceImplTest.Config.class, MappingConfig.class })
 public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 {
-	@Configuration
-	@ComponentScan("org.molgenis.data.meta")
-	static class Config
-	{
-		@Bean
-		DataServiceImpl dataService()
-		{
-			return new DataServiceImpl();
-		}
-
-		@Bean
-		MetaDataService metaDataService()
-		{
-			return new MetaDataServiceImpl(dataService());
-		}
-
-		@Bean
-		MolgenisUserService userService()
-		{
-			return mock(MolgenisUserService.class);
-		}
-
-		@Bean
-		ManageableRepositoryCollection manageableCrudRepositoryCollection()
-		{
-			return new InMemoryRepositoryCollection("mem");
-		}
-
-		@Bean
-		PermissionSystemService permissionSystemService()
-		{
-			return mock(PermissionSystemService.class);
-		}
-
-		@PostConstruct
-		public void initRepositories()
-		{
-			metaDataService().setDefaultBackend(manageableCrudRepositoryCollection());
-		}
-
-	}
-
 	@Autowired
 	private ManageableRepositoryCollection repoCollection;
 
@@ -253,5 +211,46 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 
 		Mockito.verify(permissionSystemService).giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
 				Arrays.asList("Koetjeboe"));
+	}
+
+	@Configuration
+	@ComponentScan("org.molgenis.data.meta")
+	static class Config
+	{
+		@Bean
+		DataServiceImpl dataService()
+		{
+			return new DataServiceImpl();
+		}
+
+		@Bean
+		MetaDataService metaDataService()
+		{
+			return new MetaDataServiceImpl(dataService());
+		}
+
+		@Bean
+		MolgenisUserService userService()
+		{
+			return mock(MolgenisUserService.class);
+		}
+
+		@Bean
+		ManageableRepositoryCollection manageableCrudRepositoryCollection()
+		{
+			return new InMemoryRepositoryCollection("mem");
+		}
+
+		@Bean
+		PermissionSystemService permissionSystemService()
+		{
+			return mock(PermissionSystemService.class);
+		}
+
+		@PostConstruct
+		public void initRepositories()
+		{
+			metaDataService().setDefaultBackend(manageableCrudRepositoryCollection());
+		}
 	}
 }
