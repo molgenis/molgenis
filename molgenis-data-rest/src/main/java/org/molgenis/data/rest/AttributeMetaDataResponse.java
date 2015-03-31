@@ -36,6 +36,7 @@ public class AttributeMetaDataResponse
 	private Range range;
 	private String expression;
 	private String visibleExpression;
+	private String validationExpression;
 
 	public AttributeMetaDataResponse(String entityParentName, AttributeMetaData attr,
 			MolgenisPermissionService permissionService)
@@ -197,6 +198,12 @@ public class AttributeMetaDataResponse
 			this.visibleExpression = attr.getVisibleExpression();
 		}
 		else this.visibleExpression = null;
+
+		if (attributesSet == null || attributesSet.contains("validationExpression".toLowerCase()))
+		{
+			this.validationExpression = attr.getValidationExpression();
+		}
+		else this.validationExpression = null;
 	}
 
 	public String getHref()
@@ -317,6 +324,11 @@ public class AttributeMetaDataResponse
 	public String getVisibleExpression()
 	{
 		return visibleExpression;
+	}
+
+	public String getValidationExpression()
+	{
+		return validationExpression;
 	}
 
 }

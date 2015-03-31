@@ -515,7 +515,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		{
 			if (other.getVisibleExpression() != null) return false;
 		}
-		else if (!getValidationExpression().equals(other.getValidationExpression())) return false;
+		else if (!getVisibleExpression().equals(other.getVisibleExpression())) return false;
 		if (getValidationExpression() == null)
 		{
 			if (other.getValidationExpression() != null) return false;

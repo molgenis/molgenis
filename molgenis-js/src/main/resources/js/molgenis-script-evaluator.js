@@ -33,17 +33,38 @@ function evalScript(script, entity) {
 					categoryMappingReversed[categoryMapping[key]] = key;
 				}
 				this.val = categoryMappingReversed[this.val];
-				if (this.val === undefined) {
+				if ((this.val === undefined) || (this.val === null)) {
 					this.val = MISSING_VALUE;
 				}
 				return this;
+			},
+			contains: function(value) {
+				if ((this.val === undefined) || (this.val === null)) {
+					return false;
+				}
+				
+				if (typeof this.val === 'string') {
+					this.val = this.val.split(',');
+				}
+				
+				if (this.val.constructor !== Array) {
+					return false
+				}
+				
+				for (var i = 0; i < this.val.length; i++) {
+					if (this.val[i] === value) {
+						return true;
+					}
+				}
+				
+				return false;
 			}
 		}
-											
+		
 		attribute.val = this[attr];
 		return attribute
 	}
-			
+	
 	$ = $.bind(entity);
 	return eval(script);
 }

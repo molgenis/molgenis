@@ -65,7 +65,7 @@
 	
 	ns.updateInputsVisibility = function() {	
 		var e = {};
-		$.each($('#entity-form').serializeArray(), function(index, input) {
+		$.each($('#entity-form').serializeArray(), function(index, input) {	
 			e[input.name] = input.value;
 		});
 		
@@ -77,6 +77,13 @@
 				} else if (visible === false) {
 					$('#entity-form input[name=' + attr.name + "]").closest('.form-group').hide();
 				}
+			}
+		});
+		
+		$.each(meta.attributes, function(name, attr) {
+			if (attr.validationExpression) {
+				var valid = evalScript(attr.validationExpression, e);
+				alert(attr.name + " = " + valid);
 			}
 		});
 	};
