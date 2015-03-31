@@ -25,7 +25,7 @@
         },
         componentDidMount: function() {
         	var $modal = $(this.refs.modal.getDOMNode());
-        	$modal.on('hide.bs.modal', function (e) {
+        	$modal.on('hide.bs.modal', function () {
         		this.props.onHide();
         	}.bind(this));
         	this._initModal();
@@ -41,7 +41,7 @@
     			'modal-sm': this.props.size == 'small',
     			'modal-lg': this.props.size == 'large'
     		});
-    		var id = 'modal-title-' + (new Date).getTime(); 
+    		var id = 'modal-title-' + new Date().getTime(); 
     		return (
 				div({className: 'modal', tabIndex: -1, role: 'dialog', 'aria-labelledby': id, ref: 'modal'},
 					div({className: modalDialogClasses},

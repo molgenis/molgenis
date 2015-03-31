@@ -1,5 +1,5 @@
-/* global _: false, React: false, ace: false, molgenis: true */
-(function(_, React, ace, molgenis) {
+/* global _: false, React: false, molgenis: true */
+(function(_, React, molgenis) {
     "use strict";
     
     var form = React.DOM.form;
@@ -47,4 +47,4 @@
     _.extend(molgenis.ui.wrapper, {
         JQueryForm: React.createFactory(JQueryForm)
     });
-}(_, React, ace, molgenis));
+}(_, React, molgenis));

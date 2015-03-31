@@ -1,5 +1,5 @@
-/* global _: false, React: false, molgenis: true */
-(function(_, React, molgenis) {
+/* global _: false, molgenis: true */
+(function(_, molgenis) {
 	"use strict";
 
 	/**
@@ -19,4 +19,4 @@
 	_.extend(molgenis.ui.mixin, {
 		DeepPureRenderMixin: DeepPureRenderMixin
 	});
-}(_, React, molgenis));
+}(_, molgenis));

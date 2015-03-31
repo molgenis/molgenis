@@ -1,5 +1,5 @@
-/* global _: false, $: false, React: false, molgenis: true */
-(function(_, $, React, molgenis) {
+/* global _: false, React: false, molgenis: true */
+(function(_, React, molgenis) {
 	"use strict";
 	
 	var div = React.DOM.div;
@@ -186,4 +186,4 @@
 	_.extend(molgenis.ui, {
 		EntitySelectBox: React.createFactory(EntitySelectBox)
 	});
-}(_, $, React, molgenis));
+}(_, React, molgenis));
