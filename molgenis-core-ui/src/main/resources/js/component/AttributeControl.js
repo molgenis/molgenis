@@ -118,10 +118,10 @@
 							layout : props.layout
 						}));
 					case 'HTML':
-						return molgenis.ui.CodeEditor({
+						return molgenis.ui.CodeEditor(_.extend({}, controlProps, {
 							placeholder : this.props.placeholder,
 							language: 'html'
-						});
+						}));
 					case 'HYPERLINK':
 						return this._createStringControl(controlProps, 'url', props.placeholder || 'URL');
 					case 'INT':
@@ -132,15 +132,15 @@
 					case 'MREF':
 						return this._createEntitySelectBox(controlProps, props.multiple || true, props.placeholder || 'Search for Values', props.value);
 					case 'SCRIPT':
-						return molgenis.ui.CodeEditor({
+						return molgenis.ui.CodeEditor(_.extend({}, controlProps, {
 							placeholder : this.props.placeholder
-						});
+						}));
 					case 'STRING':
 						return this._createStringControl(controlProps, 'text', props.placeholder || '');
 					case 'TEXT':
-						return molgenis.ui.TextArea({
+						return molgenis.ui.TextArea(_.extend({}, controlProps, {
 							placeholder : this.props.placeholder
-						});
+						}));
 					case 'COMPOUND' :
 					case 'FILE':
 					case 'IMAGE':
