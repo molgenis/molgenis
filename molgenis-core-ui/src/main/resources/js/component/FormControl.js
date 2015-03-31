@@ -195,21 +195,36 @@
                     errorMessage = 'Please enter a value lower than or equal to ' + attr.range.max + '.';
                 }
             }
-            else if(attr.unique === true && (this.props.mode === 'create' || value !== this.props.value)) { // value uniqueness constraint
-                // FIXME temp hack because validation of ref types does not work yet
-                if(type !== 'XREF' && type !== 'CATEGORICAL' && type !== 'MREF' && type !== 'CATEGORICAL_MREF')
-                {
-                    var rules = [{field: attr.name, operator: 'EQUALS', value: value}];
-                    
-                    api.getAsync(this.props.entity.hrefCollection, {q: {q: rules}}, function(data) {
-                        if(data.total > 0) {
-                            callback({valid: false, errorMessage: 'This ' + attr.label + ' already exists. It must be unique.'});
-                        } else {
-                            callback({valid: true, errorMessage: undefined});
-                        }
-                    });
-                    return;
+            else if(attr.unique === true && !nullOrUndefinedValue && (this.props.mode === 'create' || value !== this.props.value)) { // value uniqueness constraint
+                // determine query value
+                var queryValue;
+                switch(type) {
+                    case 'CATEGORICAL':
+                    case 'XREF':
+                        queryValue = value[attr.refEntity.idAttribute];
+                        break;
+                    case 'CATEGORICAL_MREF':
+                    case 'MREF':
+                        queryValue = _.map(value, function(item) {
+							return item[attr.refEntity.idAttribute];
+						});
+                        break;
+                    default:
+                        queryValue = value;
+                        break;
                 }
+
+                // check if value already exists for this attribute
+                var rules = [{field: attr.name, operator: 'EQUALS', value: queryValue}];
+
+                api.getAsync(this.props.entity.hrefCollection, {q: {q: rules}}, function(data) {
+                    if(data.total > 0) {
+                        callback({valid: false, errorMessage: 'This ' + attr.label + ' already exists. It must be unique.'});
+                    } else {
+                        callback({valid: true, errorMessage: undefined});
+                    }
+                });
+                return;
             }
             
             callback({valid: errorMessage === undefined, errorMessage: errorMessage});
