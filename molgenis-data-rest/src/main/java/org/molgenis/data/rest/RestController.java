@@ -375,12 +375,10 @@ public class RestController
 	@RequestMapping(value = "/{entityName}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public EntityCollectionResponse retrieveEntityCollection(@PathVariable("entityName") String entityName,
-			@Valid EntityCollectionRequest request,
-			@RequestParam(value = "attributes", required = false) String[] attributes,
-			@RequestParam(value = "expand", required = false) String[] attributeExpands)
+			@Valid EntityCollectionRequest request)
 	{
-		Set<String> attributesSet = toAttributeSet(attributes);
-		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
+		Set<String> attributesSet = toAttributeSet(request.getAttributes());
+		Map<String, Set<String>> attributeExpandSet = toExpandMap(request.getExpand());
 
 		return retrieveEntityCollectionInternal(entityName, request, attributesSet, attributeExpandSet);
 	}
@@ -388,7 +386,8 @@ public class RestController
 	/**
 	 * Same as retrieveEntityCollection (GET) only tunneled through POST.
 	 * 
-	 * Example url: /api/v1/person?_method=GET
+	 * Example url: /api/v1/molgenisuser?num=10&start=0&q[0].field=username&q[0].operator=EQUALS&q[0].value=as&_method=GET
+	 * Example Request Payload (Body): {expand: null}
 	 * 
 	 * Returns json
 	 * 
@@ -400,13 +399,15 @@ public class RestController
 	@RequestMapping(value = "/{entityName}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public EntityCollectionResponse retrieveEntityCollectionPost(@PathVariable("entityName") String entityName,
-			@Valid @RequestBody EntityCollectionRequest request)
+			@Valid EntityCollectionRequest request,
+			@Valid @RequestBody EntityCollectionRequest requestBody)
 	{
+		//Merge the url request with the payload
+		request.setExpand(requestBody.getExpand());
+		
 		Set<String> attributesSet = toAttributeSet(request != null ? request.getAttributes() : null);
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(request != null ? request.getExpand() : null);
-
 		request = request != null ? request : new EntityCollectionRequest();
-
 		return retrieveEntityCollectionInternal(entityName, request, attributesSet, attributeExpandSet);
 	}
 

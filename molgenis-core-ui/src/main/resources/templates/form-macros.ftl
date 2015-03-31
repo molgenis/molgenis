@@ -15,7 +15,7 @@
 		</div>
 		
 		<#if index==0>
-			<form class="form-search text-center pull-right" method="get" action="#">
+			<form id="search-form" class="form-search text-center pull-right" method="GET" action="#">
 				<select id="query-fields">
 					<#list form.metaData.fields as field>
 						<#if field.dataType.enumType == 'STRING'>
@@ -24,9 +24,8 @@
 					</#list>
 				</select>
 				<select id="operators">
-					<option id="EQUALS">EQUALS</option>
-					<option id="NOT">NOT EQUALS</option>
 					<option id="LIKE">LIKE</option>
+					<option id="EQUALS">EQUALS</option>
 				</select>
 				<div class="input-append">
     				<input type="search" class="span8 search-query" name="q" placeholder="SEARCH">
