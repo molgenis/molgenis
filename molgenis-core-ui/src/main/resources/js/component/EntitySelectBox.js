@@ -80,13 +80,6 @@
 				allowClear : props.required ? false : true,
 				placeholder : props.placeholder || ' ', // cannot be an empty string
 				closeOnSelect: props.multiple !== true,
-				/* jshint unused: false */
-				initSelection: function(element, callback) {
-					if(this.props.value) {
-						callback([this.props.value]);
-					}
-				}.bind(this),
-				/* jshint unused: true */
 			    query: function (query) {
 			    	var num = 25;
 				    var q = {
@@ -118,7 +111,7 @@
 				disabled : this.props.disabled,
 				readOnly : this.props.readOnly,
 				focus: this.props.focus,
-				value : this.props.value,
+				value : this.props.multiple ? (this.props.value ? this.props.value.items : this.props.value) : this.props.value,
 				addonBtn: this.props.mode === 'create' && entity.writable === true,
 				onAddonBtnClick: this._handleAddonBtnClick,
 				onChange : this._handleChange
