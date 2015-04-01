@@ -11,7 +11,7 @@
 			<legend><center><strong>SORTA</strong> - <strong>S</strong>ystem for <strong>O</strong>ntology-based <strong>R</strong>e-coding and <strong>T</strong>echnical <strong>A</strong>nnotation</center></legend>
 		</div>
 	</div>
-	<#if showResult??>
+	<#if showResult?? && showResult>
 	<script type="text/javascript">
 		$(document).ready(function(){
 			var sorta = new window.top.molgenis.SortaAnonymous($('#ontology-match'));
@@ -22,6 +22,9 @@
 	<@ontologyMatchNewTask />
 	<script type="text/javascript">
 		$(document).ready(function(){
+			<#if message??>
+			window.top.molgenis.createAlert([{'message' : '${message?js_string}'}], 'error');
+			</#if>
 			$('#ontology-match').children('div.row:eq(1)').remove();
 		});
 	</script>

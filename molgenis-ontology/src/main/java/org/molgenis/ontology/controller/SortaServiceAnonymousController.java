@@ -13,11 +13,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.servlet.http.Part;
 
 import org.apache.commons.io.IOUtils;
@@ -88,13 +90,12 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 			HttpServletRequest httpServletRequest, Model model) throws UnsupportedEncodingException, IOException
 	{
 
-		String sessionId = httpServletRequest.getSession().getId();
-		File uploadFile = fileStore.store(new ByteArrayInputStream(inputTerms.getBytes("UTF8")), sessionId
-				+ "_input.txt");
-		httpServletRequest.getSession().setAttribute("filePath", uploadFile.getAbsoluteFile());
-		httpServletRequest.getSession().setAttribute("ontologyIri", ontologyIri);
-		model.addAttribute("showResult", true);
-		return VIEW_NAME;
+		String fileName = httpServletRequest.getSession().getId() + "_input.txt";
+		File uploadFile = fileStore.store(new ByteArrayInputStream(inputTerms.getBytes("UTF8")), fileName);
+
+		validateSortaInput(ontologyIri, uploadFile, httpServletRequest, model);
+
+		return init(model);
 	}
 
 	@RequestMapping(method = POST, value = "/match/upload")
@@ -103,12 +104,12 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 			throws UnsupportedEncodingException, IOException
 	{
 
-		String sessionId = httpServletRequest.getSession().getId();
-		File uploadFile = fileStore.store(file.getInputStream(), sessionId + "_input.csv");
-		httpServletRequest.getSession().setAttribute("filePath", uploadFile.getAbsoluteFile());
-		httpServletRequest.getSession().setAttribute("ontologyIri", ontologyIri);
-		model.addAttribute("showResult", true);
-		return VIEW_NAME;
+		String fileName = httpServletRequest.getSession().getId() + "_input.csv";
+		File uploadFile = fileStore.store(file.getInputStream(), fileName);
+
+		validateSortaInput(ontologyIri, uploadFile, httpServletRequest, model);
+
+		return init(model);
 	}
 
 	@RequestMapping(method = GET, value = "/retrieve")
@@ -126,11 +127,12 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 					new CsvRepository(uploadFile, Arrays.<CellProcessor> asList(new LowerCaseProcessor(),
 							new TrimProcessor()), SortaServiceImpl.DEFAULT_SEPARATOR));
 
-			if (validateUserInputHeader(csvRepository))
+			if (validateUserInputHeader(csvRepository) && validateUserInputContent(csvRepository))
 			{
 				responseResults.addAll(matchInputWithOntologyTerm(csvRepository, ontologyIriObject.toString()));
 			}
 		}
+
 		return responseResults;
 	}
 
@@ -235,6 +237,34 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 		}).toList();
 	}
 
+	private void validateSortaInput(String ontologyIri, File uploadFile, HttpServletRequest httpServletRequest,
+			Model model)
+	{
+		SortaModifiableCsvRepository csvRepository = new SortaModifiableCsvRepository(uploadFile.getName(),
+				new CsvRepository(uploadFile, Arrays.<CellProcessor> asList(new LowerCaseProcessor(),
+						new TrimProcessor()), SortaServiceImpl.DEFAULT_SEPARATOR));
+
+		HttpSession session = httpServletRequest.getSession();
+		session.setAttribute("filePath", uploadFile.getAbsoluteFile());
+		session.setAttribute("ontologyIri", ontologyIri);
+		model.addAttribute("showResult", true);
+
+		if (!validateUserInputHeader(csvRepository))
+		{
+			model.addAttribute("message", "The input header is wrong!");
+			model.addAttribute("showResult", false);
+			session.removeAttribute("filePath");
+			session.removeAttribute("ontologyIri");
+		}
+		else if (!validateUserInputContent(csvRepository))
+		{
+			model.addAttribute("message", "There are no terms in the input!");
+			model.addAttribute("showResult", false);
+			session.removeAttribute("filePath");
+			session.removeAttribute("ontologyIri");
+		}
+	}
+
 	private boolean validateUserInputHeader(Repository repository)
 	{
 		return Iterables.any(repository.getEntityMetaData().getAtomicAttributes(), new Predicate<AttributeMetaData>()
@@ -245,6 +275,12 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 						&& StringUtils.equalsIgnoreCase(attr.getName(), SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD);
 			}
 		});
+	}
+
+	private boolean validateUserInputContent(SortaModifiableCsvRepository csvRepository)
+	{
+		Iterator<Entity> iterator = csvRepository.iterator();
+		return iterator.hasNext();
 	}
 
 	private String generateCsvFileName(String dataSetName)
