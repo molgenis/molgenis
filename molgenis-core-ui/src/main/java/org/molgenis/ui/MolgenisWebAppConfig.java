@@ -40,6 +40,7 @@ import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
 import org.molgenis.messageconverter.CsvHttpMessageConverter;
+import org.molgenis.rdf.spring.RdfHttpMessageConverter;
 import org.molgenis.security.CorsInterceptor;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.freemarker.HasPermissionDirective;
@@ -122,10 +123,11 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	public void configureMessageConverters(List<HttpMessageConverter<?>> converters)
 	{
 		boolean prettyPrinting = molgenisBuildProfile != null && molgenisBuildProfile.equals("dev");
+		converters.add(new RdfHttpMessageConverter());
 		converters.add(new GsonHttpMessageConverter(prettyPrinting));
 		converters.add(new BufferedImageHttpMessageConverter());
 		converters.add(new CsvHttpMessageConverter());
-        converters.add(new ResourceHttpMessageConverter());
+		converters.add(new ResourceHttpMessageConverter());
 	}
 
 	@Bean

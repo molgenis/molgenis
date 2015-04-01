@@ -15,7 +15,10 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
+import org.molgenis.data.rest.RestController;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.rdf.RdfService;
+import org.molgenis.rdf.fair.FairService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.MediaType;
@@ -49,6 +52,26 @@ public class RDFController extends MolgenisPluginController
 	@Autowired
 	DataService dataService;
 
+	@Autowired
+	RdfService rdfService;
+
+	@Autowired
+	FairService fairService;
+
+	@RequestMapping(value = "schema", method = RequestMethod.GET)
+	@ResponseBody
+	public Model getRDFSchema()
+	{
+		return rdfService.getSchema("http://localhost:8080" + RestController.BASE_URI);
+	}
+
+	@RequestMapping(value = "fair", method = RequestMethod.GET)
+	@ResponseBody
+	public Model getFairProfile()
+	{
+		return fairService.getProfile("http://localhost:8080" + RestController.BASE_URI);
+	}
+
 	@RequestMapping(value = "jsonld/{entityName}", method = RequestMethod.GET, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
 	@ResponseBody
 	public FileSystemResource getFile(@PathVariable("entityName") String entityName, HttpServletResponse response)
@@ -74,8 +97,7 @@ public class RDFController extends MolgenisPluginController
 						Resource subject = model.createResource(restPrefix
 								.concat("/" + entity.getEntityMetaData().getName()).concat("/")
 								.concat(entity.getIdValue().toString()));
-						Property predicate = model.createProperty(ns
-								.concat("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"));
+						Property predicate = model.createProperty("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
 						Resource object = model.createResource(ns.concat(entity.getEntityMetaData().getName()));
 
 						connect(subject, predicate, object, model);
