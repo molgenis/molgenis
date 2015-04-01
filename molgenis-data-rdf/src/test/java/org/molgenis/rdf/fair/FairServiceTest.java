@@ -1,4 +1,4 @@
-package org.molgenis.rdf;
+package org.molgenis.rdf.fair;
 
 import java.io.StringWriter;
 import java.util.Arrays;
@@ -8,6 +8,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.fieldtypes.DateField;
 import org.molgenis.fieldtypes.XrefField;
+import org.molgenis.rdf.fair.FairService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,14 +19,14 @@ import org.testng.annotations.Test;
 
 import com.hp.hpl.jena.rdf.model.Model;
 
-@ContextConfiguration(classes = RDFServiceTest.Config.class)
-public class RDFServiceTest extends AbstractTestNGSpringContextTests
+@ContextConfiguration(classes = FairServiceTest.Config.class)
+public class FairServiceTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
 	private MetaDataService metaDataService;
 
 	@Autowired
-	private RDFService rdfService;
+	private FairService fairService;
 
 	private DefaultEntityMetaData cities;
 
@@ -60,7 +61,7 @@ public class RDFServiceTest extends AbstractTestNGSpringContextTests
 	{
 		Mockito.when(metaDataService.getEntityMetaDatas()).thenReturn(Arrays.asList(cities, persons, patients));
 
-		Model model = rdfService.getSchema("http://localhost:8080/api/v1/");
+		Model model = fairService.getProfile("http://localhost:8080/api/v1");
 		StringWriter writer = new StringWriter();
 		model.write(writer, "Turtle");
 
@@ -77,9 +78,9 @@ public class RDFServiceTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		public RDFService rdfService()
+		public FairService fairportService()
 		{
-			return new RDFService();
+			return new FairService();
 		}
 	}
 }

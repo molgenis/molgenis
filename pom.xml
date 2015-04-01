@@ -647,6 +647,6 @@
         <module>molgenis-scripts</module>
         <module>molgenis-data-import</module>
         <module>molgenis-catalogue</module>
-	<module>molgenis-data-fair</module>
+	<module>molgenis-data-rdf</module>
     </modules>
 </project>

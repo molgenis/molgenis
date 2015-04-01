@@ -1,4 +1,4 @@
-package org.molgenis.fairpoint;
+package org.molgenis.rdf;
 
 import java.io.StringWriter;
 import java.util.Arrays;
@@ -6,7 +6,6 @@ import java.util.Arrays;
 import org.mockito.Mockito;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.fair.FairService;
 import org.molgenis.fieldtypes.DateField;
 import org.molgenis.fieldtypes.XrefField;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,14 +18,14 @@ import org.testng.annotations.Test;
 
 import com.hp.hpl.jena.rdf.model.Model;
 
-@ContextConfiguration(classes = FairServiceTest.Config.class)
-public class FairServiceTest extends AbstractTestNGSpringContextTests
+@ContextConfiguration(classes = RDFServiceTest.Config.class)
+public class RDFServiceTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
 	private MetaDataService metaDataService;
 
 	@Autowired
-	private FairService fairService;
+	private RdfService rdfService;
 
 	private DefaultEntityMetaData cities;
 
@@ -61,11 +60,18 @@ public class FairServiceTest extends AbstractTestNGSpringContextTests
 	{
 		Mockito.when(metaDataService.getEntityMetaDatas()).thenReturn(Arrays.asList(cities, persons, patients));
 
-		Model model = fairService.getProfile("http://localhost:8080/api/v1");
+		Model model = rdfService.getSchema("http://localhost:8080/api/v1/");
 		StringWriter writer = new StringWriter();
 		model.write(writer, "Turtle");
 
 		System.out.println(writer);
+	}
+
+	@Test
+	public void test()
+	{
+		System.out.println(com.hp.hpl.jena.ontology.impl.OntModelImpl.class.isAssignableFrom(Model.class));
+		System.out.println(Model.class.isAssignableFrom(com.hp.hpl.jena.ontology.impl.OntModelImpl.class));
 	}
 
 	@Configuration
@@ -78,9 +84,9 @@ public class FairServiceTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		public FairService fairportService()
+		public RdfService rdfService()
 		{
-			return new FairService();
+			return new RdfService();
 		}
 	}
 }

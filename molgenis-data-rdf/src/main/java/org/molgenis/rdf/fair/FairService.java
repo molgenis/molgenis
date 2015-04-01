@@ -1,4 +1,4 @@
-package org.molgenis.fair;
+package org.molgenis.rdf.fair;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
@@ -51,13 +51,13 @@ public class FairService
 		OntClass fairClass = result.createClass(FAIR_CLASS);
 		OntClass fairProperty = result.createClass(FAIR_PROPERTY);
 
-		Property fairOnClassType = result.createObjectProperty(FAIR_ON_CLASS_TYPE);
-		Property fairOnPropertyType = result.createObjectProperty(FAIR_ON_PROPERTY_TYPE);
-		Property fairHasClass = result.createObjectProperty(FAIR_HAS_CLASS);
-		Property fairHasProperty = result.createObjectProperty(FAIR_HAS_PROPERTY);
-		Property fairAllowedValues = result.createDatatypeProperty(FAIR_ALLOWED_VALUES);
-		Property fairMinCount = result.createDatatypeProperty(FAIR_MIN_COUNT);
-		Property fairMaxCount = result.createDatatypeProperty(FAIR_MAX_COUNT);
+		Property fairOnClassType = result.createProperty(FAIR_ON_CLASS_TYPE);
+		Property fairOnPropertyType = result.createProperty(FAIR_ON_PROPERTY_TYPE);
+		Property fairHasClass = result.createProperty(FAIR_HAS_CLASS);
+		Property fairHasProperty = result.createProperty(FAIR_HAS_PROPERTY);
+		Property fairAllowedValues = result.createProperty(FAIR_ALLOWED_VALUES);
+		Property fairMinCount = result.createProperty(FAIR_MIN_COUNT);
+		Property fairMaxCount = result.createProperty(FAIR_MAX_COUNT);
 
 		Individual molgenisProfile = fairProfile.createIndividual(restApi + "/fair");
 

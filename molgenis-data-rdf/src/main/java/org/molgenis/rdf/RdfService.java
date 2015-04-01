@@ -17,7 +17,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.ResourceFactory;
 
-public class RDFService
+public class RdfService
 {
 	// NS
 	public static final String RDF_NS = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
