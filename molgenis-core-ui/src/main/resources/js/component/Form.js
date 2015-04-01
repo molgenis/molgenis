@@ -16,6 +16,7 @@
 			mode: React.PropTypes.oneOf(['create', 'edit', 'view']),
 			formLayout: React.PropTypes.oneOf(['horizontal', 'vertical']),
 			modal: React.PropTypes.bool, // whether or not to render form in a modal dialog
+			enableOptionalFilter: React.PropTypes.bool, // whether or not to show a control to filter optional form fields 
 			colOffset: React.PropTypes.number,
 			onSubmitSuccess: React.PropTypes.func,
 			onSubmitError: React.PropTypes.func,
@@ -26,6 +27,7 @@
 				mode: 'create',
 				formLayout: 'horizontal',
 				modal: false,
+				enableOptionalFilter: true,
 				colOffset: 3,
 				onSubmitSuccess: function() {},
 				onSubmitError: function() {},
@@ -50,7 +52,8 @@
 				entityInstance : null,	// transfered from props to state, loaded from server if required
 				invalids : {},
 				validate : false,
-				showModal: true
+				showModal: true,
+				hideOptional: false
 			};
 		},
 		componentWillMount: function() {
@@ -144,10 +147,31 @@
 				mode : this.props.mode,
 				formLayout : this.props.formLayout,
 				colOffset : this.props.colOffset,
+				hideOptional: this.state.hideOptional,
 				validate: this.state.validate,
 				onValueChange : this._handleValueChange
 			};
 			
+			var AlertMessage = this.state.submitMsg ? (
+				molgenis.ui.AlertMessage({type: this.state.submitMsg.type, message: this.state.submitMsg.message, onDismiss: this._handleAlertMessageDismiss})	
+			) : null;
+			
+			var Filter = this.props.enableOptionalFilter ? (
+				div({className: 'row', style: {textAlign: 'right'}},
+					div({className: 'col-md-12'},
+ 						molgenis.ui.Button({
+							icon : this.state.hideOptional ? 'eye-open' : 'eye-close',
+							title: this.state.hideOptional ? 'Show all fields' : 'Hide optional fields',
+							css : {
+								marginBottom : 15,
+								textAlign : 'right'
+							},
+							onClick : this._handleOptionalFilterClick
+						})
+					)
+				)
+			) : null;
+					
 			var Form = (
 				molgenis.ui.wrapper.JQueryForm(formProps,
 					FormControlsFactory(formControlsProps),
@@ -160,11 +184,12 @@
 					}) : null
 				)
 			);
-			
-			if(this.state.submitMsg) {
+				
+			if(AlertMessage !== null || Filter !== null) {
 				return (
 					div(null,
-						molgenis.ui.AlertMessage({type: this.state.submitMsg.type, message: this.state.submitMsg.message, onDismiss: this._handleAlertMessageDismiss}),
+						AlertMessage,
+						Filter,
 						Form
 					)
 				);
@@ -237,6 +262,11 @@
 			this.setState({
 				submitMsg: undefined
 			});
+		},
+		_handleOptionalFilterClick: function() {
+			this.setState({
+				hideOptional: !this.state.hideOptional
+			});
 		}
 	});
 		
@@ -252,6 +282,7 @@
 			mode: React.PropTypes.oneOf(['create', 'edit', 'view']),
 			formLayout: React.PropTypes.oneOf(['horizontal', 'vertical']),
 			colOffset: React.PropTypes.number,
+			hideOptional: React.PropTypes.bool,
 			validate: React.PropTypes.bool,
 			onValueChange: React.PropTypes.func.isRequired
 		},
@@ -264,7 +295,7 @@
 				if(attributes.hasOwnProperty(key)) {
 					var attr = attributes[key];
 					if(this.props.mode !== 'create' || (this.props.mode === 'create' && attr.auto !== true)) {
-						var Control = attr.fieldType === 'COMPOUND' ? molgenis.ui.FormControlGroup : molgenis.ui.FormControl;
+						var ControlFactory = attr.fieldType === 'COMPOUND' ? molgenis.ui.FormControlGroup : molgenis.ui.FormControl;
 						var controlProps = {
 							entity : this.props.entity,
 							attr : attr,
@@ -282,7 +313,12 @@
 							_.extend(controlProps, {focus: true});
 							foundFocusControl = true;
 						}
-						controls.push(Control(controlProps));
+						
+						var Control = ControlFactory(controlProps);
+						if(attr.nillable === true && this.props.hideOptional === true) {
+							Control = div({className: 'hide'}, Control);
+						}
+						controls.push(Control);
 					}
 				}
 			}

@@ -19,6 +19,7 @@
 			icon: React.PropTypes.string,
 			css: React.PropTypes.object,
 			name: React.PropTypes.string,
+			title: React.PropTypes.string,
 			value: React.PropTypes.string,
 			disabled : React.PropTypes.bool,
 			onClick: React.PropTypes.func,
@@ -56,6 +57,7 @@
 						name: this.props.name,
 						style: this.props.css,
 						disabled : this.props.disabled,
+						title: this.props.title,
 						value : this.props.value,
 						onClick : this.props.onClick
 					};
