@@ -22,14 +22,6 @@ public class FairService
 	// Namespaces
 	public static final String MOLGENIS_FAIR_NS = "http://molgenis.org/2015/04/fair#";
 	public static final String FAIR_NS = "http://fairdata.org/ontology/FAIR-Data#";
-	public static final String RDF_NS = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-	public static final String RDFS_NS = "http://www.w3.org/2000/01/rdf-schema#";
-
-	// RDF
-	public static final String RDF_TYPE = RDF_NS + "type";
-
-	// RDFS
-	public static final String RDFS_SUBCLASS_OF = RDFS_NS + "subClassOf";
 
 	// FAIR Class IRIs
 	public static final String FAIR_PROFILE = FAIR_NS + "FAIRProfile";
