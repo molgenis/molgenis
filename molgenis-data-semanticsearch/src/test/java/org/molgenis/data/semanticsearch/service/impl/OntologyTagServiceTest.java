@@ -8,10 +8,12 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
+
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.mem.InMemoryRepositoryCollection;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.TagMetaData;
@@ -222,7 +224,7 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 
 	@Test
 	public void testgetTagsForPackage()
-	{
+	{ 
 		// TODO How do you test this?
 	}
 
