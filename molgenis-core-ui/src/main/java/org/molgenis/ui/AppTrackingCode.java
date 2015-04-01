@@ -2,20 +2,24 @@ package org.molgenis.ui;
 
 public interface AppTrackingCode
 {
-	public static final String KEY_APP_TRACKING_CODE_PIWIK = "app.trackingcode.piwik";
-	public static final String KEY_APP_TRACKING_CODE_GOOGLEANALYTICS = "app.trackingcode.googleanalytics";
+	public static final String KEY_APP_TRACKING_CODE_FOOTER = "app.trackingcode.footer";
+	public static final String KEY_APP_TRACKING_CODE_HEADER = "app.trackingcode.header";
 
 	/**
-	 * Return the Google Analytics Tracking Code from data base
+	 * Return the header Tracking Code from data base
+	 * 
+	 * (Google Analytics)
 	 * 
 	 * @return
 	 */
-	String getGoogleAnalytics();
+	String getHeader();
 
 	/**
-	 * Return the Piwik Tracking Code from data base
+	 * Return the footer Tracking Code from data base
+	 * 
+	 * (Piwik)
 	 * 
 	 * @return
 	 */
-	String getPiwik();
+	String getFooter();
 }
