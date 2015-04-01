@@ -61,7 +61,7 @@ public class FairServiceTest extends AbstractTestNGSpringContextTests
 	{
 		Mockito.when(metaDataService.getEntityMetaDatas()).thenReturn(Arrays.asList(cities, persons, patients));
 
-		Model model = fairService.getProfile("http://molgenis01.target.rug.nl");
+		Model model = fairService.getProfile("http://localhost:8080/api/v1");
 		StringWriter writer = new StringWriter();
 		model.write(writer, "Turtle");
 

@@ -9,7 +9,9 @@ import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.model.MolgenisModelException;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.hp.hpl.jena.ontology.DatatypeProperty;
 import com.hp.hpl.jena.ontology.Individual;
+import com.hp.hpl.jena.ontology.ObjectProperty;
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.rdf.model.Model;
@@ -20,8 +22,7 @@ import com.hp.hpl.jena.rdf.model.ResourceFactory;
 public class FairService
 {
 	// Namespaces
-	public static final String MOLGENIS_FAIR_NS = "http://molgenis.org/2015/04/fair#";
-	public static final String FAIR_NS = "http://fairdata.org/ontology/FAIR-Data#";
+	public static final String FAIR_NS = "http://datafairport.org/ontology/FAIR-schema.owl#";
 
 	// FAIR Class IRIs
 	public static final String FAIR_PROFILE = FAIR_NS + "FAIRProfile";
@@ -37,44 +38,28 @@ public class FairService
 	public static final String FAIR_MIN_COUNT = FAIR_NS + "minCount";
 	public static final String FAIR_MAX_COUNT = FAIR_NS + "maxCount";
 
-	// MOLGENIS Class IRIs
-	public static final String MOLGENIS_PACKAGE = MOLGENIS_FAIR_NS + "Package";
-	public static final String MOLGENIS_ENTITY = MOLGENIS_FAIR_NS + "Entity";
-	public static final String MOLGENIS_ATTRIBUTE = MOLGENIS_FAIR_NS + "Attribute";
-	public static final String MOLGENIS_DATATYPE = MOLGENIS_FAIR_NS + "DataType";
-
 	@Autowired
 	private MetaDataService meta;
 
-	public Model getProfile(String id)
+	public Model getProfile(String restApi)
 	{
 		OntModel result = ModelFactory.createOntologyModel();
 
-		result.read(getClass().getResourceAsStream("FAIR-schema.owl"), "RDF/XML");
-		result.setNsPrefix("mlg", MOLGENIS_FAIR_NS);
+		result.setNsPrefix("fair", FAIR_NS);
 
-		OntClass fairProfile = result.getOntClass(FAIR_PROFILE);
-		OntClass fairClass = result.getOntClass(FAIR_CLASS);
-		OntClass fairProperty = result.getOntClass(FAIR_PROPERTY);
+		OntClass fairProfile = result.createClass(FAIR_PROFILE);
+		OntClass fairClass = result.createClass(FAIR_CLASS);
+		OntClass fairProperty = result.createClass(FAIR_PROPERTY);
 
-		Property fairOnClassType = result.getObjectProperty(FAIR_ON_CLASS_TYPE);
-		Property fairOnPropertyType = result.getObjectProperty(FAIR_ON_PROPERTY_TYPE);
-		Property fairHasClass = result.getObjectProperty(FAIR_HAS_CLASS);
-		Property fairHasProperty = result.getObjectProperty(FAIR_HAS_PROPERTY);
-		Property fairAllowedValues = result.getProperty(FAIR_ALLOWED_VALUES);
-		Property fairMinCount = result.getProperty(FAIR_MIN_COUNT);
-		Property fairMaxCount = result.getProperty(FAIR_MAX_COUNT);
+		Property fairOnClassType = result.createObjectProperty(FAIR_ON_CLASS_TYPE);
+		Property fairOnPropertyType = result.createObjectProperty(FAIR_ON_PROPERTY_TYPE);
+		Property fairHasClass = result.createObjectProperty(FAIR_HAS_CLASS);
+		Property fairHasProperty = result.createObjectProperty(FAIR_HAS_PROPERTY);
+		Property fairAllowedValues = result.createDatatypeProperty(FAIR_ALLOWED_VALUES);
+		Property fairMinCount = result.createDatatypeProperty(FAIR_MIN_COUNT);
+		Property fairMaxCount = result.createDatatypeProperty(FAIR_MAX_COUNT);
 
-		// Property rdfType = result.getProperty(RDF_TYPE);
-
-		OntClass molgenisEntity = result.createClass(MOLGENIS_ENTITY);
-		OntClass molgenisAttribute = result.createClass(MOLGENIS_ATTRIBUTE);
-		OntClass molgenisDataType = result.createClass(MOLGENIS_DATATYPE);
-
-		Property rdfsSubclassOf = result.getProperty(RDFS_SUBCLASS_OF);
-
-		String profileIRI = MOLGENIS_FAIR_NS + id;
-		Individual molgenisProfile = result.createIndividual(profileIRI, fairProfile);
+		Individual molgenisProfile = fairProfile.createIndividual(restApi + "/fair");
 
 		for (EntityMetaData emd : meta.getEntityMetaDatas())
 		{
@@ -82,20 +67,14 @@ public class FairService
 			{
 				continue;
 			}
-			Individual emdFairClass = result.createIndividual(profileIRI + "/fair/" + emd.getName(), fairClass);
+			Individual emdFairClass = result.createIndividual(restApi + '/' + emd.getName() + "/meta/fair", fairClass);
 			result.add(molgenisProfile, fairHasClass, emdFairClass);
-			OntClass emdEntity = result.createClass(profileIRI + "/" + emd.getName());
-			result.add(emdEntity, rdfsSubclassOf, molgenisEntity);
-			// result.add(emdEntity, rdfType, rdfClass);
-			if (emd.getDescription() != null)
-			{
-				emdEntity.addComment(emd.getDescription(), null);
-			}
-			result.add(emdFairClass, fairOnClassType, molgenisEntity);
+			OntClass emdEntity = result.createClass(restApi + "/" + emd.getName() + "/meta");
+			result.add(emdFairClass, fairOnClassType, emdEntity);
 			for (AttributeMetaData amd : emd.getAtomicAttributes())
 			{
-				Individual amdFairProperty = result.createIndividual(
-						profileIRI + "/fair/" + emd.getName() + "/" + amd.getName(), fairProperty);
+				Individual amdFairProperty = fairProperty.createIndividual(restApi + '/' + emd.getName()
+						+ "/meta/fair/" + amd.getName());
 				FieldType dataType = amd.getDataType();
 				result.add(emdFairClass, fairHasProperty, amdFairProperty);
 
@@ -113,19 +92,19 @@ public class FairService
 					result.add(amdFairProperty, fairMaxCount, result.createTypedLiteral(1));
 				}
 
-				OntClass amdAttribute = result.createClass(profileIRI + "/" + emd.getName() + "/" + amd.getName());
-				result.add(amdAttribute, rdfsSubclassOf, molgenisAttribute);
-				result.add(amdFairProperty, fairOnPropertyType, amdAttribute);
 				if (dataType instanceof XrefField || dataType instanceof MrefField)
 				{
-					OntClass refEntity = result.createClass(profileIRI + "/" + amd.getRefEntity().getName());
-					result.add(amdAttribute, fairAllowedValues, refEntity);
+					ObjectProperty amdAttribute = result.createObjectProperty(restApi + "/" + emd.getName() + "/meta/"
+							+ amd.getName());
+					result.add(amdFairProperty, fairOnPropertyType, amdAttribute);
+					OntClass refEntity = result.createClass(restApi + "/" + amd.getRefEntity().getName() + "/meta");
+					result.add(amdFairProperty, fairAllowedValues, refEntity);
 				}
 				else
 				{
-					Individual dataTypeIndividual = result.createIndividual(
-							MOLGENIS_FAIR_NS + "dataType/" + dataType.toString(), molgenisDataType);
-					result.add(amdAttribute, fairAllowedValues, dataTypeIndividual);
+					DatatypeProperty amdAttribute = result.createDatatypeProperty(restApi + "/" + emd.getName()
+							+ "/meta/" + amd.getName());
+					result.add(amdFairProperty, fairOnPropertyType, amdAttribute);
 					result.add(amdAttribute, fairAllowedValues,
 							result.createResource(ResourceFactory.createResource(getXSDDataType(dataType))));
 				}
