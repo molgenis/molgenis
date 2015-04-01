@@ -271,10 +271,17 @@ class EntityMetaDataRepository
 
 	public EntityMetaData addAttribute(String fullyQualifiedEntityName, AttributeMetaData attr)
 	{
-        DefaultEntityMetaData entityMetaData = get(fullyQualifiedEntityName);
-        delete(fullyQualifiedEntityName);
-        entityMetaData.addAttributeMetaData(attr);
-        add(entityMetaData);
-		return entityMetaData;
+		Entity entity = getEntity(fullyQualifiedEntityName);
+		List<Entity> attributes = newArrayList();
+		if (entity.get(ATTRIBUTES) != null)
+		{
+			attributes = newArrayList(entity.getEntities(ATTRIBUTES));
+		}
+		attributes.add(attributeRepository.add(attr));
+		entity.set(ATTRIBUTES, attributes);
+		repository.update(entity);
+		DefaultEntityMetaData result = entityMetaDataCache.get(fullyQualifiedEntityName);
+		result.addAttributeMetaData(attr);
+		return result;
 	}
 }
