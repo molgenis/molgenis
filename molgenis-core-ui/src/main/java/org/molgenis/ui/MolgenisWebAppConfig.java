@@ -40,7 +40,9 @@ import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
 import org.molgenis.messageconverter.CsvHttpMessageConverter;
-import org.molgenis.rdf.spring.RdfHttpMessageConverter;
+import org.molgenis.rdf.spring.RdfHttpMessageJSONConverter;
+import org.molgenis.rdf.spring.RdfHttpMessageTurtleConverter;
+import org.molgenis.rdf.spring.RdfHttpMessageXMLConverter;
 import org.molgenis.security.CorsInterceptor;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.freemarker.HasPermissionDirective;
@@ -67,6 +69,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.format.FormatterRegistry;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.BufferedImageHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
@@ -75,6 +78,7 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
@@ -120,10 +124,18 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	private String molgenisBuildProfile;
 
 	@Override
+	public void configureContentNegotiation(ContentNegotiationConfigurer configurer)
+	{
+		configurer.mediaType("ttl", MediaType.parseMediaType("text/turtle"));
+	}
+
+	@Override
 	public void configureMessageConverters(List<HttpMessageConverter<?>> converters)
 	{
 		boolean prettyPrinting = molgenisBuildProfile != null && molgenisBuildProfile.equals("dev");
-		converters.add(new RdfHttpMessageConverter());
+		converters.add(new RdfHttpMessageTurtleConverter());
+		converters.add(new RdfHttpMessageXMLConverter());
+		converters.add(new RdfHttpMessageJSONConverter());
 		converters.add(new GsonHttpMessageConverter(prettyPrinting));
 		converters.add(new BufferedImageHttpMessageConverter());
 		converters.add(new CsvHttpMessageConverter());

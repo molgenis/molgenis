@@ -11,11 +11,11 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 
 import com.hp.hpl.jena.rdf.model.Model;
 
-public class RdfHttpMessageConverter extends BaseHttpMessageConverter<Model>
+public class RdfHttpMessageTurtleConverter extends BaseHttpMessageConverter<Model>
 {
-	public RdfHttpMessageConverter()
+	public RdfHttpMessageTurtleConverter()
 	{
-		super(MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON);
+		super(MediaType.parseMediaType("text/turtle"));
 	}
 
 	@Override
@@ -35,7 +35,7 @@ public class RdfHttpMessageConverter extends BaseHttpMessageConverter<Model>
 	protected void writeInternal(Model t, HttpOutputMessage outputMessage) throws IOException,
 			HttpMessageNotWritableException
 	{
-		t.write(outputMessage.getBody());
+		t.write(outputMessage.getBody(), "TURTLE");
 	}
 
 }
