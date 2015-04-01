@@ -55,7 +55,7 @@ public class RdfService
 			{
 				continue;
 			}
-			OntClass emdEntity = result.createClass(apiHref + emd.getName() + "/meta");
+			OntClass emdEntity = result.createClass(apiHref + '/' + emd.getName() + "/meta");
 			if (emd.getDescription() != null)
 			{
 				emdEntity.setComment(emd.getDescription(), null);
@@ -67,7 +67,7 @@ public class RdfService
 			for (AttributeMetaData amd : emd.getAtomicAttributes())
 			{
 				FieldType dataType = amd.getDataType();
-				DatatypeProperty amdAttribute = result.createDatatypeProperty(apiHref + emd.getName() + "/meta/"
+				DatatypeProperty amdAttribute = result.createDatatypeProperty(apiHref + '/' + emd.getName() + "/meta/"
 						+ amd.getName());
 				if (amd.isNillable())
 				{
@@ -85,7 +85,7 @@ public class RdfService
 
 				if (dataType instanceof XrefField || dataType instanceof MrefField)
 				{
-					OntClass refEntity = result.createClass(apiHref + amd.getRefEntity().getName() + "/meta");
+					OntClass refEntity = result.createClass(apiHref + '/' + amd.getRefEntity().getName() + "/meta");
 					result.add(amdAttribute, owlAllValuesFrom, refEntity);
 				}
 				else
