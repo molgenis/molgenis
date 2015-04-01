@@ -121,7 +121,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setDescription(String description)
 	{
 		this.description = description;
-        return this;
+		return this;
 	}
 
 	@Override
@@ -184,9 +184,10 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		return getDataType().convert(defaultValue);
 	}
 
-	public void setDefaultValue(Object defaultValue)
+	public DefaultAttributeMetaData setDefaultValue(Object defaultValue)
 	{
 		this.defaultValue = defaultValue;
+		return this;
 	}
 
 	@Override
