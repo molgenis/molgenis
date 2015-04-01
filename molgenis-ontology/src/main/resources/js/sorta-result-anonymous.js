@@ -13,14 +13,12 @@
 		container.children('div.row:gt(0)').remove();
 		
 		var divContainerThreshold = $('<div />').addClass('row').css('margin-bottom','15px').appendTo(container);
-		$('<div />').addClass('col-md-offset-1 col-md-4').append('Current threshold : ' + THRESHOLD + '%').css('padding-left','0px').appendTo(divContainerThreshold);
+		$('<div />').addClass('col-md-offset-3 col-md-4').append('Current threshold : ' + THRESHOLD + '%').css('padding-left','0px').appendTo(divContainerThreshold);
 		var thresholdUpdateButton = $('<button />').attr('type','button').addClass('btn btn-default').text('Update');
 		var inputGroupButton = $('<span />').addClass('input-group-btn').append(thresholdUpdateButton);		
 		var thresholdValue = $('<input type="text" class="form-control"/>');
 		var divContainerButtonFormGroup = $('<div />').addClass('input-group pull-right').append(inputGroupButton).append(thresholdValue);
 		$('<div />').addClass('col-md-2').css('padding-right','0px').append(divContainerButtonFormGroup).appendTo(divContainerThreshold);
-		var backToFrontPageButton = $('<button />').attr('type', 'button').addClass('btn btn-default').text('Back').append(' <span class="glyphicon glyphicon-backward"></span>');
-		$('<div />').addClass('col-md-offset-1 col-md-1').append(backToFrontPageButton).prependTo(divContainerThreshold);
 		
 		var divContainerSummary = $('<div />').addClass('row').appendTo(container);
 		var divContainerSummaryCenterStyleWell = $('<div />').addClass('col-md-offset-3 col-md-6 well').appendTo(divContainerSummary);
@@ -38,7 +36,9 @@
 		
 		var divContainerDownloadButton = $('<div />').addClass('row').prepend('<br>').appendTo(divContainerSummaryCenterStyleWell);
 		var downloadButton = $('<button />').attr('type', 'button').addClass('btn btn-primary').text('Download');
-		$('<div />').addClass('col-md-12').append(downloadButton).appendTo(divContainerDownloadButton);
+		var backToFrontPageButton = $('<button />').attr('type', 'button').addClass('btn btn-default').html('<strong>New task</strong>&nbsp;').append(' <span class="glyphicon glyphicon-new-window"></span>');
+		$('<div />').addClass('col-md-2').append(downloadButton).appendTo(divContainerDownloadButton);
+		$('<div />').addClass('col-md-2').append(backToFrontPageButton).appendTo(divContainerDownloadButton);
 		
 		$(backToFrontPageButton).click(function(){
 			container.attr({
@@ -67,7 +67,8 @@
 			var partialMatches = [];
 			$.each(matchedResults, function(index, matchedResult){
 				if(matchedResult.ontologyTerm.length > 0){
-					if(matchedResult.ontologyTerm[0].Combined_Score >= THRESHOLD){
+					var matchedScore = matchedResult.ontologyTerm[0].Combined_Score;
+					if(matchedScore && matchedScore.toFixed(2) >= THRESHOLD){
 						perfectMatches.push(matchedResult);
 					}else{
 						partialMatches.push(matchedResult);
@@ -107,44 +108,51 @@
 			if($('#sorta-result-table')){			
 				$('#sorta-result-table').remove();
 			}
-			var adjustedScoreHoverover = $('<div>Adjusted score ?</div>').css({'cursor':'pointer'}).popover({
-				'title' : 'Explanation',
-				'content' : '<p style="color:black;font-weight:normal;">Adjusted scores are derived from the original scores (<strong>lexical similarity</strong>) combined with the weight of the words (<strong>inverse document frequency</strong>)</p>',
-				'placement' : 'top',
-				'trigger' : 'hover',
-				'html' : true
-			});
+			
 			var divContainerMatchResult =  $('<div />').attr('id', 'sorta-result-table').addClass('row').appendTo(container);
-			var tableTitle = $('<p />').css('font-size','20px').append('<strong>' + (isMatched ? 'Matched results' : 'Unmatched results') + '</strong>');
-			var table = $('<table />').addClass('table');
-			var tableHeader = $('<tr />').appendTo(table);
-			$('<th />').append('Input term').appendTo(tableHeader);
-			$('<th />').append('Ontologgy terms').appendTo(tableHeader);
-			$('<th />').append('Score').appendTo(tableHeader);
-			$('<th />').append(adjustedScoreHoverover).appendTo(tableHeader);
-			$('<th />').append('Match').appendTo(tableHeader);
-			$.each(matches, function(index, match){
-				var row = $('<tr />').appendTo(table);
-				var firstOntologyTerm = match.ontologyTerm[0];
-				$('<td />').append(getInputTermInfo(match.inputTerm)).appendTo(row);
-				$('<td />').append(getOntologyTermInfo(firstOntologyTerm)).appendTo(row);
-				$('<td />').append(getMatchScore(firstOntologyTerm)).appendTo(row);
-				$('<td />').append(getMatchAdjustedScore(firstOntologyTerm)).appendTo(row);
-				$('<td />').append('<button type="button" class="btn btn-default">Match</button>').appendTo(row);
-				row.find('button:eq(0)').click(function(){
-					var clearButton = $('<button />').attr('type','button').addClass('btn btn-danger pull-right').css({'margin-top':'-10px','margin-bottom':'10px'}).text('Clear').insertBefore(table);
-					table.find('tr:not(:first-child)').hide();
-					table.find('tr >th:last-child').hide();
-					table.append(renderCandidateMatchTable(match));
-					clearButton.click(function(){
-						table.find('tr:visible:not(:first-child)').remove();
-						table.find('tr').show();
-						table.find('th').show();
-						$(this).remove();
+			
+			if(matches.length > 0){
+				var adjustedScoreHoverover = $('<div>Adjusted score ?</div>').css({'cursor':'pointer'}).popover({
+					'title' : 'Explanation',
+					'content' : '<p style="color:black;font-weight:normal;">Adjusted scores are derived from the original scores (<strong>lexical similarity</strong>) combined with the weight of the words (<strong>inverse document frequency</strong>)</p>',
+					'placement' : 'top',
+					'trigger' : 'hover',
+					'html' : true
+				});
+				var tableTitle = $('<p />').css('font-size','20px').append('<strong>' + (isMatched ? 'Matched results' : 'Unmatched results') + '</strong>');
+				var table = $('<table />').addClass('table');
+				var tableHeader = $('<tr />').appendTo(table);
+				$('<th />').append('Input term').appendTo(tableHeader);
+				$('<th />').append('Ontologgy terms').appendTo(tableHeader);
+				$('<th />').append('Score').appendTo(tableHeader);
+				$('<th />').append(adjustedScoreHoverover).appendTo(tableHeader);
+				$('<th />').append('Match').appendTo(tableHeader);
+				$.each(matches, function(index, match){
+					var row = $('<tr />').appendTo(table);
+					var firstOntologyTerm = match.ontologyTerm[0];
+					$('<td />').append(getInputTermInfo(match.inputTerm)).appendTo(row);
+					$('<td />').append(getOntologyTermInfo(firstOntologyTerm)).appendTo(row);
+					$('<td />').append(getMatchScore(firstOntologyTerm)).appendTo(row);
+					$('<td />').append(getMatchAdjustedScore(firstOntologyTerm)).appendTo(row);
+					$('<td />').append('<button type="button" class="btn btn-default">Match</button>').appendTo(row);
+					row.find('button:eq(0)').click(function(){
+						var clearButton = $('<button />').attr('type','button').addClass('btn btn-danger pull-right').css({'margin-top':'-10px','margin-bottom':'10px'}).text('Clear').insertBefore(table);
+						table.find('tr:not(:first-child)').hide();
+						table.find('tr >th:last-child').hide();
+						table.append(renderCandidateMatchTable(match));
+						clearButton.click(function(){
+							table.find('tr:visible:not(:first-child)').remove();
+							table.find('tr').show();
+							table.find('th').show();
+							$(this).remove();
+						});
 					});
 				});
-			});
-			$('<div />').addClass('col-md-offset-1 col-md-10').append(tableTitle).append(table).appendTo(divContainerMatchResult);
+				$('<div />').addClass('col-md-offset-1 col-md-10').append(tableTitle).append(table).appendTo(divContainerMatchResult);
+				
+			}else{
+				$('<div />').addClass('col-md-offset-1 col-md-10').text("There ");
+			}
 			return divContainerMatchResult;
 		}
 		
