@@ -14,7 +14,7 @@
 			this._initEntityInstance(this.state.entity, this.props.entityInstance);
 		},
 		componentWillReceiveProps : function(nextProps) {
-			if(!_.isEqual(this.props.entityInstance, nextProps.entityInstance)) {
+			if(_.isEqual(this.props.entity, nextProps.entity) && !_.isEqual(this.props.entityInstance, nextProps.entityInstance)) {
 				this._initEntityInstance(this.state.entity, nextProps.entityInstance);
 			}
 		},
