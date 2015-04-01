@@ -4,7 +4,7 @@
 <#import "form-macros.ftl" as f>
 
 <#assign css=['select2.css', 'bootstrap-datetimepicker.min.css', 'molgenis-form.css']>
-<#assign js=['jquery.validate.min.js', 'select2-patched.js', 'moment-with-locales.min.js', 'bootstrap-datetimepicker.min.js', 'molgenis-form-edit.js', 'ace/src-min-noconflict/ace.js']>
+<#assign js=['jquery.validate.min.js', 'select2-patched.js', 'moment-with-locales.min.js', 'bootstrap-datetimepicker.min.js', 'molgenis-form-edit.js', 'molgenis-script-evaluator.js', 'ace/src-min-noconflict/ace.js']>
 
 <@header css js/>
 
@@ -25,7 +25,7 @@
 	<a href="${back?html}" class="btn btn-default btn-md"><span class="glyphicon glyphicon-chevron-left"></span> Back to list</a>
 </#if>
 
-<form role="form" class="form-horizontal" id="entity-form" method="POST" action="/api/v1/${form.metaData.name?lower_case?html}<#if form.primaryKey??><#if form.primaryKey?is_number>/${form.primaryKey?c?html}<#else>/${form.primaryKey?html}</#if></#if>">
+<form role="form" class="form-horizontal" data-id="${form.metaData.name?html}" id="entity-form" method="POST" action="/api/v1/${form.metaData.name?lower_case?html}<#if form.primaryKey??><#if form.primaryKey?is_number>/${form.primaryKey?c?html}<#else>/${form.primaryKey?html}</#if></#if>">
 	<div class="form-group">
 		<div class="col-md-3">
 			<#if form.primaryKey??>

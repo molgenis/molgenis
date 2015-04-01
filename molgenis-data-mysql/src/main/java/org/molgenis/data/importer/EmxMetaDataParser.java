@@ -16,6 +16,7 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MIN;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.READ_ONLY;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.REF_ENTITY;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.UNIQUE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.VALIDATION_EXPRESSION;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.VISIBLE;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.EXTENDS;
@@ -91,7 +92,8 @@ public class EmxMetaDataParser implements MetaDataParser
 			ID_ATTRIBUTE.toLowerCase(), LABEL.toLowerCase(), LABEL_ATTRIBUTE.toLowerCase(),
 			LOOKUP_ATTRIBUTE.toLowerCase(), NAME, NILLABLE.toLowerCase(), PART_OF_ATTRIBUTE.toLowerCase(),
 			RANGE_MAX.toLowerCase(), RANGE_MIN.toLowerCase(), READ_ONLY.toLowerCase(), REF_ENTITY.toLowerCase(),
-			VISIBLE.toLowerCase(), UNIQUE.toLowerCase(), TAGS.toLowerCase(), EXPRESSION.toLowerCase());
+			VISIBLE.toLowerCase(), UNIQUE.toLowerCase(), TAGS.toLowerCase(), EXPRESSION.toLowerCase(),
+			VALIDATION_EXPRESSION.toLowerCase());
 	static final String AUTO = "auto";
 
 	private final DataService dataService;
@@ -221,7 +223,6 @@ public class EmxMetaDataParser implements MetaDataParser
 
 			Boolean attributeNillable = attributeEntity.getBoolean(NILLABLE);
 			String attributeIdAttribute = attributeEntity.getString(ID_ATTRIBUTE);
-			Boolean attributeVisible = attributeEntity.getBoolean(VISIBLE);
 			Boolean attributeAggregateable = attributeEntity.getBoolean(AGGREGATEABLE);
 			Boolean lookupAttribute = attributeEntity.getBoolean(LOOKUP_ATTRIBUTE);
 			Boolean labelAttribute = attributeEntity.getBoolean(LABEL_ATTRIBUTE);
@@ -229,6 +230,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			Boolean unique = attributeEntity.getBoolean(UNIQUE);
 			String expression = attributeEntity.getString(EXPRESSION);
 			List<String> tagIds = attributeEntity.getList(TAGS);
+			String validationExpression = attributeEntity.getString(VALIDATION_EXPRESSION);
 
 			if (attributeNillable != null) attribute.setNillable(attributeNillable);
 
@@ -246,12 +248,25 @@ public class EmxMetaDataParser implements MetaDataParser
 				attribute.setNillable(false);
 			}
 
-			if (attributeVisible != null) attribute.setVisible(attributeVisible);
+			String attributeVisible = attributeEntity.getString(VISIBLE);
+			if (attributeVisible != null)
+			{
+				if (attributeVisible.equalsIgnoreCase("true") || attributeVisible.equalsIgnoreCase("false"))
+				{
+					attribute.setVisible(Boolean.parseBoolean(attributeVisible));
+				}
+				else
+				{
+					attribute.setVisibleExpression(attributeVisible);
+				}
+			}
+
 			if (attributeAggregateable != null) attribute.setAggregateable(attributeAggregateable);
 			// cannot update ref entities yet, will do so later on
 			if (readOnly != null) attribute.setReadOnly(readOnly);
 			if (unique != null) attribute.setUnique(unique);
 			if (expression != null) attribute.setExpression(expression);
+			if (validationExpression != null) attribute.setValidationExpression(validationExpression);
 			attribute.setAuto(attributeIdAttribute != null && attributeIdAttribute.equalsIgnoreCase(AUTO));
 
 			if ((attributeIdAttribute != null) && !attributeIdAttribute.equalsIgnoreCase("true")
@@ -483,16 +498,25 @@ public class EmxMetaDataParser implements MetaDataParser
 				String extendsEntityName = entity.getString(EXTENDS);
 				if (extendsEntityName != null)
 				{
+					EntityMetaData extendsEntityMeta = null;
 					if (intermediateResults.knowsEntity(extendsEntityName))
 					{
-						EntityMetaData extendsEntityMeta = intermediateResults.getEntityMetaData(extendsEntityName);
-						md.setExtends(extendsEntityMeta);
+						extendsEntityMeta = intermediateResults.getEntityMetaData(extendsEntityName);
+
 					}
 					else
+					{
+						extendsEntityMeta = dataService.getMeta().getEntityMetaData(extendsEntityName);
+
+					}
+
+					if (extendsEntityMeta == null)
 					{
 						throw new MolgenisDataException("Missing super entity " + extendsEntityName + " for entity "
 								+ entityName + " on line " + i);
 					}
+
+					md.setExtends(extendsEntityMeta);
 				}
 
 				String packageName = entity.getString(PACKAGE);

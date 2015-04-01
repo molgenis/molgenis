@@ -4,6 +4,7 @@
 	var ns = molgenis.form = molgenis.form || {};
 	var restApi = new molgenis.RestClient();
 	var successHandler;
+	var meta;
 	
 	ns.quoteIsoDateT = function() {
 		$('.datetime input').each(function() {
@@ -62,7 +63,29 @@
 		$('#error-message').hide();
 	};
 	
+	ns.updateInputsVisibility = function() {	
+		var e = {};
+		$.each($('#entity-form').serializeArray(), function(index, input) {	
+			e[input.name] = input.value;
+		});
+		
+		$.each(meta.attributes, function(name, attr) {
+			if (attr.visibleExpression) {
+				var visible = evalScript(attr.visibleExpression, e);
+				if (visible === true) {
+					$('#entity-form input[name=' + attr.name + "]").closest('.form-group').show();
+				} else if (visible === false) {
+					$('#entity-form input[name=' + attr.name + "]").closest('.form-group').hide();
+				}
+			}
+		});
+	};
+	
 	$(function() {
+		meta = restApi.get('/api/v1/' + $('#entity-form').data('id') + '/meta?expand=attributes');
+		
+		setTimeout(function(){ ns.updateInputsVisibility(); }, 10);//TODO get rid of setTimeout
+
 		//Enable datepickers
 		$('.date.datetime').datetimepicker({pickTime: true, useSeconds : true});
 		$('.date.dateonly').datetimepicker({pickTime: false, useSeconds : false});
@@ -80,8 +103,7 @@
 				ns.onFormSubmit();
 			}
 		});
-		
-		
+
 		//Validate occurs on form submit
 		$("#entity-form").validate({
 			ignore: null, //Needed for validation of xref,mref.  To validate hidden fields
@@ -102,6 +124,9 @@
 			$(this).parent().parent().children('input').val('');
 		});
 		
+		$('input').on('change', function() {
+			ns.updateInputsVisibility();
+		});
 	});
 	
 }($, window.top.molgenis = window.top.molgenis || {}));
