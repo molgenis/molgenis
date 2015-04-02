@@ -20,23 +20,24 @@
 				}
 				if (isFolder) classes = 'refentitynode';
 			}
-			
-			var isFolder = isFolder || this.fieldType === 'COMPOUND';
-			
-			children.push({
-				'key' : this.href,
-				'title' : this.label,
-				'tooltip' : this.description,
-				'folder' : isFolder,
-				'lazy' : isFolder,
-				'expanded' : !isFolder,
-				'selected' : doSelect(this),
-				'data' : {
-					'attribute' : this
-				},
-				'refEntityDepth': refEntityDepth,
-				'extraClasses': classes
-			});
+            if(this.visible) {
+                var isFolder = isFolder || this.fieldType === 'COMPOUND';
+
+                children.push({
+                    'key': this.href,
+                    'title': this.label,
+                    'tooltip': this.description,
+                    'folder': isFolder,
+                    'lazy': isFolder,
+                    'expanded': !isFolder,
+                    'selected': doSelect(this),
+                    'data': {
+                        'attribute': this
+                    },
+                    'refEntityDepth': refEntityDepth,
+                    'extraClasses': classes
+                });
+            }
 		});
 		return children;
 	}
