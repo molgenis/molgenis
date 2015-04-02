@@ -42,7 +42,7 @@
 				<span style="font-size:14pt;margin-left:-15px;">matching with Human Phenotype Ontology</span>
 			</p>
 			<div class="highlight">
-				<p style="font-size: 10pt; font-family: arial, helvetica, sans-serif;">The input example is shown below; 1. copy the example 2. click the demo link above 3. paste the example into the text area 4. select the human phenotype ontology</p>
+				<p style="font-size: 10pt; font-family: arial, helvetica, sans-serif;">To reproduce the matching results, 1. copy the example below 2. click the demo link above 3. paste the example into the text area 4. select the human phenotype ontology</p>
 				<pre>Name<br>Hearing impairment<br>protruding eyeball<br>hyperextensibility at elbow joint</pre>
 			</div>
 		</form>
@@ -58,12 +58,13 @@
 				<span style="font-size:14pt;margin-left:-15px;">matching with Orphanet</span>
 			</p>
 			<div class="highlight">
-				<p style="font-size: 10pt; font-family: arial, helvetica, sans-serif;">The input example is shown below; 1. copy the example 2. click the demo link above 3. paste the example into the text area 4. select the orphanet ontology</p>
+				<p style="font-size: 10pt; font-family: arial, helvetica, sans-serif;">To reproduce the matching results, 1. copy the example below 2. click the demo link above 3. paste the example into the text area 4. select the orphanet ontology</p>
 				<pre>Name;Synonym;OMIM<br>3-oxoacyl-CoA thiolase deficiency;peroxisomal thiolase deficiency;604054<br>2-ketoglutarate dehydrogenase deficiency;2-ketoglutaric aciduria;203740<br>acid sphingomyelinase deficiency;sfingomyelinase deficiency;607608</pre>
 			</div>
 		</form>
 	</div>
 </div>
+<br>
 <div class="row"> 
 	<div class="col-md-offset-2 col-md-8">
 		<hr></hr>
