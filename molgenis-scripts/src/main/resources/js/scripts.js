@@ -35,7 +35,7 @@
 				onSubmitSuccess : function() {
 					location.reload();
 				}
-			}), $('div')[0]);
+			}), $('<div>')[0]);
 		});
 		
 		$('.edit-script-btn').click(function() {
@@ -49,7 +49,7 @@
 				onSubmitSuccess : function() {
 					location.reload();
 				}
-			}), $('div')[0]);
+			}), $('<div>')[0]);
 		});
 		
 		$('.delete-script-btn').click(function() {
@@ -72,7 +72,7 @@
 				onSubmitSuccess : function() {
 					location.reload();
 				}
-			}), $('div')[0]);
+			}), $('<div>')[0]);
 		});
 	})
 	

@@ -815,7 +815,7 @@
 					settings.start = 0;
 					refresh(settings);
 				}
-			}), $('div')[0]);
+			}), $('<div>')[0]);
 		}
 		
 		// edit row
@@ -832,7 +832,7 @@
 					settings.start = 0;
 					refresh(settings);
 				}
-			}), $('div')[0]);
+			}), $('<div>')[0]);
 		});
 		
 		// delete row

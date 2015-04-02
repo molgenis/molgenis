@@ -25,7 +25,7 @@
 			onSubmitSuccess : function() {
 				location.reload();
 			}
-		}), $('div')[0]);
+		}), $('<div>')[0]);
 	}
 
 	/**
@@ -40,7 +40,7 @@
 			onSubmitSuccess : function() {
 				location.reload();
 			}
-		}), $('div')[0]);
+		}), $('<div>')[0]);
 	}
 
 	/**
