@@ -163,6 +163,7 @@
  						molgenis.ui.Button({
 							icon : this.state.hideOptional ? 'eye-open' : 'eye-close',
 							title: this.state.hideOptional ? 'Show all fields' : 'Hide optional fields',
+							size: 'xsmall',
 							css : {
 								marginBottom : 15,
 								textAlign : 'right'
