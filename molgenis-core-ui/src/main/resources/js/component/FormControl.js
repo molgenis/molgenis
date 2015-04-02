@@ -169,7 +169,7 @@
             if(attr.nillable === false && type !== 'CATEGORICAL_MREF' && type !== 'MREF' && nullOrUndefinedValue) { // required value constraint
                 errorMessage = 'Please enter a value.';
             }
-            else if(attr.nillable === false && (type === 'CATEGORICAL_MREF' || type === 'MREF') && (nullOrUndefinedValue || value.length === 0)) { // required value constraint
+            else if(attr.nillable === false && (type === 'CATEGORICAL_MREF' || type === 'MREF') && (nullOrUndefinedValue || value.items.length === 0)) { // required value constraint
                 errorMessage = 'Please enter a value.';
             }
             else if(type === 'EMAIL' && !nullOrUndefinedValue && !this._statics.REGEX_EMAIL.test(value)) {
