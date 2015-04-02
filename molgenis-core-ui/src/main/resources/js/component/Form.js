@@ -185,18 +185,14 @@
 					}) : null
 				)
 			);
-				
-			if(AlertMessage !== null || Filter !== null) {
-				return (
-					div(null,
-						AlertMessage,
-						Filter,
-						Form
-					)
-				);
-			} else {
-				return Form;
-			}
+
+			return (
+				div(null,
+					AlertMessage,
+					Filter,
+					Form
+				)
+			);
 		},
 		_handleValueChange: function(e) {
 			// update value in entity instance
@@ -253,6 +249,10 @@
 			}
 			this.setState(stateProps);
 			
+			if(!this.props.modal) {
+				window.scrollTo(0, 0);
+			}
+			
 			this.props.onSubmitSuccess();
 		},
 		_handleSubmitError: function() {
@@ -260,6 +260,11 @@
 			this.setState({
 				submitMsg: {type: 'danger', message: this.state.entity.label + ' ' + message}
 			});
+			
+			if(!this.props.modal) {
+				window.scrollTo(0, 0);
+			}
+			
 			this.props.onSubmitError();
 		},
 		_handleAlertMessageDismiss: function() {
