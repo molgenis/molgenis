@@ -82,19 +82,19 @@ public class MappingTargetRepositoryImpl implements MappingTargetRepository
 	/**
 	 * Creates a fully reconstructed MappingProject from an Entity retrieved from the repository.
 	 * 
-	 * @param mappingProjectEntity
+	 * @param mappingTargetEntity
 	 *            Entity with {@link MappingProjectMetaData} metadata
 	 * @return fully reconstructed MappingProject
 	 */
-	private MappingTarget toMappingTarget(Entity mappingProjectEntity)
+	private MappingTarget toMappingTarget(Entity mappingTargetEntity)
 	{
 		List<EntityMapping> entityMappings = Collections.emptyList();
-		String identifier = mappingProjectEntity.getString(MappingTargetMetaData.IDENTIFIER);
-		EntityMetaData target = dataService.getEntityMetaData(mappingProjectEntity
+		String identifier = mappingTargetEntity.getString(MappingTargetMetaData.IDENTIFIER);
+		EntityMetaData target = dataService.getEntityMetaData(mappingTargetEntity
 				.getString(MappingTargetMetaData.TARGET));
-		if (mappingProjectEntity.getEntities(MappingTargetMetaData.ENTITYMAPPINGS) != null)
+		if (mappingTargetEntity.getEntities(MappingTargetMetaData.ENTITYMAPPINGS) != null)
 		{
-			List<Entity> entityMappingEntities = Lists.newArrayList(mappingProjectEntity
+			List<Entity> entityMappingEntities = Lists.newArrayList(mappingTargetEntity
 					.getEntities(MappingTargetMetaData.ENTITYMAPPINGS));
 			entityMappings = entityMappingRepository.toEntityMappings(entityMappingEntities);
 		}
