@@ -2,7 +2,7 @@
 (function(_, React, molgenis) {
 	"use strict";
 	
-	var div = React.DOM.div, span = React.DOM.span, button = React.DOM.div;
+	var div = React.DOM.div, span = React.DOM.span, button = React.DOM.button;
 	
 	/**
 	 * @memberOf component
@@ -18,7 +18,7 @@
 		render: function() {
 			return (
 				div({className: 'alert alert-' + this.props.type + ' alert-dismissible', role: 'alert'},
-					this.props.onDismiss ? button({type: 'button', className: 'close', 'aria-label': 'Close', onClick: this.props.onDismiss},
+					this.props.onDismiss ? button({type: 'button', className: 'close', 'aria-label': 'Close', onClick: this.props.onDismiss}, // TODO use molgenis.ui.Button
 						span({'aria-hidden': true,}, '\u00D7')
 					) : null,
 					this.props.type === 'danger' ? molgenis.ui.Icon({name: 'exclamation-sign'}) : null,
