@@ -26,12 +26,12 @@
 		<hr></hr>
 		<p style="font-size: 14pt; font-family: arial, helvetica, sans-serif;"><strong>Demo</strong></p>
 		<p style="font-size: 14pt; font-family: arial, helvetica, sans-serif; text-align: justify;">
-			Click <a href="http://molgenis19.target.rug.nl/menu/main/sorta_anonymous/">here for a demo.</a> <br>The demo version <strong>does not</strong> have full functionality, data <strong>will not be saved</strong> in the database 
+			Click <a href="https://molgenis19.target.rug.nl/menu/main/sorta_anonymous/">here for a demo.</a> <br>The demo version <strong>does not</strong> have full functionality, data <strong>will not be saved</strong> in the database 
 			and <strong>will be lost</strong> after the session expires.
 			To get access to SORTA, please contact the <a href="mailto:ChaoPang229@gmail.com">administrator</a> for login credentials. Try out the examples below, you can directly get match results by clicking one of the two example links.
 		</p>
 		<br>
-		<form action="http://molgenis19.target.rug.nl/menu/main/sorta_anonymous/match" method="POST">
+		<form action="https://molgenis19.target.rug.nl/menu/main/sorta_anonymous/match" method="POST">
 			<input name="selectOntologies" type="hidden" value="http://purl.obolibrary.org/obo/hp.owl" />
 			<input name="inputTerms" type="hidden" value="Name
 			hearing impairment
@@ -47,7 +47,7 @@
 			</div>
 		</form>
 		<br>
-		<form action="http://molgenis19.target.rug.nl/menu/main/sorta_anonymous/match" method="POST">
+		<form action="https://molgenis19.target.rug.nl/menu/main/sorta_anonymous/match" method="POST">
 			<input name="selectOntologies" type="hidden" value="http://www.orpha.net/ontology/orphanet.owl" />
 			<input name="inputTerms" type="hidden" value="Name;Synonym;OMIM
 			3-oxoacyl-CoA thiolase deficiency;peroxisomal thiolase deficiency;604054
@@ -92,7 +92,7 @@
 <div class="row">
 	<div class="col-md-offset-2 col-md-8">
 		<p style="font-size: 14pt; font-family: arial, helvetica, sans-serif;"><strong>Ontology model</strong></p>
-		<p style="font-size: 14pt; font-family: arial, helvetica, sans-serif; text-align: justify;">Standard codes (ontologies) can be imported using the <a href="https://github.com/molgenis/molgenis/wiki/EMX-upload-format" target="_blank">EMX format</a>, the <a href="http://molgenis19.target.rug.nl/menu/plugins/standardsregistry?package=Ontology#" target="_blank">model</a>&nbsp;can be browsed and viewed as a UML diagram as well as a flat list in the webbrowser.&nbsp;</p>
+		<p style="font-size: 14pt; font-family: arial, helvetica, sans-serif; text-align: justify;">Standard codes (ontologies) can be imported using the <a href="https://github.com/molgenis/molgenis/wiki/EMX-upload-format" target="_blank">EMX format</a>, the <a href="https://molgenis19.target.rug.nl/menu/plugins/standardsregistry?package=Ontology#" target="_blank">model</a>&nbsp;can be browsed and viewed as a UML diagram as well as a flat list in the webbrowser.&nbsp;</p>
 	</div>
 </div>
 <br>
