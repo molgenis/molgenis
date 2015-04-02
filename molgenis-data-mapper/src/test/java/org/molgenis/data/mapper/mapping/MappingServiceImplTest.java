@@ -9,7 +9,6 @@ import static org.testng.Assert.fail;
 
 import java.util.Arrays;
 import java.util.List;
-
 import javax.annotation.PostConstruct;
 
 import org.elasticsearch.common.collect.Lists;
@@ -23,6 +22,8 @@ import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
+import org.molgenis.data.mapper.repository.impl.MappingProjectRepositoryImpl;
+import org.molgenis.data.mapper.repository.impl.MappingTargetRepositoryImpl;
 import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.mem.InMemoryRepositoryCollection;
 import org.molgenis.data.meta.MetaDataService;
@@ -74,7 +75,6 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 	@BeforeMethod
 	public void beforeMethod()
 	{
-
 		user = new MolgenisUser();
 		user.setUsername("Piet");
 		when(userService.getUser("Piet")).thenReturn(user);
@@ -116,6 +116,7 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		final String mappingProjectId = added.getIdentifier();
 		assertNotNull(mappingProjectId);
 		expected.setIdentifier(mappingProjectId);
+
 		final String mappingTargetId = added.getMappingTarget("HopEntity").getIdentifier();
 		assertNotNull(mappingTargetId);
 		expected.getMappingTarget("HopEntity").setIdentifier(mappingTargetId);
@@ -171,6 +172,7 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 	{
 		MappingProject mappingProject = mappingService.addMappingProject("Test123", user, "HopEntity");
 		mappingProject.getMappingTarget("HopEntity").addSource(geneMetaData);
+
 		mappingService.updateMappingProject(mappingProject);
 		MappingProject retrieved = mappingService.getMappingProject(mappingProject.getIdentifier());
 		try
@@ -220,7 +222,15 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		@Bean
 		DataServiceImpl dataService()
 		{
-			return new DataServiceImpl();
+			DataServiceImpl dataServiceImpl = new DataServiceImpl();
+			Repository newMappingTargetRepository = mock(Repository.class);
+			Repository newMappingProjectRepository = mock(Repository.class);
+			when(newMappingTargetRepository.getName()).thenReturn(MappingTargetRepositoryImpl.META_DATA.getName());
+			when(newMappingProjectRepository.getName()).thenReturn(MappingProjectRepositoryImpl.META_DATA.getName());
+			dataServiceImpl.addRepository(newMappingTargetRepository);
+			dataServiceImpl.addRepository(newMappingProjectRepository);
+
+			return dataServiceImpl;
 		}
 
 		@Bean
@@ -236,7 +246,7 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		ManageableRepositoryCollection manageableCrudRepositoryCollection()
+		ManageableRepositoryCollection manageableRepositoryCollection()
 		{
 			return new InMemoryRepositoryCollection("mem");
 		}
@@ -250,7 +260,7 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		@PostConstruct
 		public void initRepositories()
 		{
-			metaDataService().setDefaultBackend(manageableCrudRepositoryCollection());
+			metaDataService().setDefaultBackend(manageableRepositoryCollection());
 		}
 	}
 }
