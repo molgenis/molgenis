@@ -138,7 +138,8 @@
 				noValidate : true,
 				onSubmit : this._handleSubmit,
 				success: this._handleSubmitSuccess,
-				error: this._handleSubmitError
+				error: this._handleSubmitError,
+				key: 'form'
 			};
 			
 			var formControlsProps = {
@@ -153,11 +154,11 @@
 			};
 			
 			var AlertMessage = this.state.submitMsg ? (
-				molgenis.ui.AlertMessage({type: this.state.submitMsg.type, message: this.state.submitMsg.message, onDismiss: this._handleAlertMessageDismiss})	
+				molgenis.ui.AlertMessage({type: this.state.submitMsg.type, message: this.state.submitMsg.message, onDismiss: this._handleAlertMessageDismiss, key: 'alert'})	
 			) : null;
 			
 			var Filter = this.props.enableOptionalFilter ? (
-				div({className: 'row', style: {textAlign: 'right'}},
+				div({className: 'row', style: {textAlign: 'right'}, key: 'filter'},
 					div({className: 'col-md-12'},
  						molgenis.ui.Button({
 							icon : this.state.hideOptional ? 'eye-open' : 'eye-close',
@@ -199,10 +200,7 @@
 		},
 		_handleValueChange: function(e) {
 			// update value in entity instance
-			var entityInstance = this.state.entityInstance;
-			if(entityInstance === null || entityInstance === undefined) {
-				entityInstance = {};
-			}
+			var entityInstance = _.extend({}, this.state.entityInstance);
 			entityInstance[e.attr] = e.value;
 			this.setState({entityInstance: entityInstance});
 			
@@ -245,6 +243,12 @@
 			if(this.props.modal) {
 				_.extend(stateProps, {
 					showModal : false
+				});
+			}
+			if(this.props.mode === 'create') {
+				// clear form to create new entity
+				_.extend(stateProps, {
+					entityInstance : {}
 				});
 			}
 			this.setState(stateProps);
@@ -299,7 +303,7 @@
 						var controlProps = {
 							entity : this.props.entity,
 							attr : attr,
-							value: this.props.value ? this.props.value[key] : undefined,
+							value: attr.fieldType === 'COMPOUND' ? this.props.value : (this.props.value ? this.props.value[key] : undefined),
 							mode : this.props.mode,
 							formLayout : this.props.formLayout,
 							colOffset: this.props.colOffset,
