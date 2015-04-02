@@ -810,14 +810,13 @@
 			React.render(molgenis.ui.Form({
 				mode: 'create',
 				entity : entityMetaData.name,
-				modal: true
+				modal: true,
+				onSubmitSuccess: function() {
+					settings.start = 0;
+					refresh(settings);
+				}
 			}), $('div')[0]);
 		}
-		
-		$(document).on('onFormSubmitSuccess', function() {
-			settings.start = 0;
-			refresh(settings);
-		});
 		
 		// edit row
 		$(container).on('click', '.edit-row-btn', function(e) {
@@ -830,7 +829,8 @@
 				mode: 'edit',
 				modal: true,
 				onSubmitSuccess : function() {
-					location.reload();
+					settings.start = 0;
+					refresh(settings);
 				}
 			}), $('div')[0]);
 		});
