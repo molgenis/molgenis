@@ -132,10 +132,10 @@ public class Step1UpgradeMetaData extends MetaDataUpgrade
 		for (Entity v15EntityMetaDataEntity : entityRepository)
 		{
 			LOG.info("Setting attribute order for entity: "
-					+ v15EntityMetaDataEntity.get(EntityMetaDataMetaData1_4.SIMPLE_NAME));
+					+ v15EntityMetaDataEntity.get(EntityMetaDataMetaData1_4.FULL_NAME));
 			List<Entity> attributes = Lists.newArrayList(searchService.search(
 					EQ(AttributeMetaDataMetaData1_4.ENTITY,
-							v15EntityMetaDataEntity.getString(EntityMetaDataMetaData.SIMPLE_NAME)),
+							v15EntityMetaDataEntity.getString(EntityMetaDataMetaData.FULL_NAME)),
 					new AttributeMetaDataMetaData1_4()));
             for(Entity attribute : attributes)
                 LOG.info("Setting attribute : "
