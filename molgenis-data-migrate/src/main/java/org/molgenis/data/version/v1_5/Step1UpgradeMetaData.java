@@ -128,18 +128,21 @@ public class Step1UpgradeMetaData extends MetaDataUpgrade
 	{
 		LOG.info("Update attribute order in MySQL...");
 		Repository entityRepository = undecoratedMySQL.getRepository(EntityMetaDataMetaData.ENTITY_NAME);
-		// save all entity metadata with attributes in proper order
+        Repository attributeRepository = undecoratedMySQL.getRepository(AttributeMetaDataMetaData.ENTITY_NAME);
+
+        // save all entity metadata with attributes in proper order
 		for (Entity v15EntityMetaDataEntity : entityRepository)
 		{
 			LOG.info("Setting attribute order for entity: "
 					+ v15EntityMetaDataEntity.get(EntityMetaDataMetaData1_4.FULL_NAME));
 			List<Entity> attributes = Lists.newArrayList(searchService.search(
-					EQ(AttributeMetaDataMetaData1_4.ENTITY,
-							v15EntityMetaDataEntity.getString(EntityMetaDataMetaData.FULL_NAME)),
-					new AttributeMetaDataMetaData1_4()));
-            for(Entity attribute : attributes)
-                LOG.info("Setting attribute : "
-                        + attribute.get(AttributeMetaDataMetaData1_4.NAME));
+                    EQ(AttributeMetaDataMetaData1_4.ENTITY,
+                            v15EntityMetaDataEntity.getString(EntityMetaDataMetaData.FULL_NAME)).and()
+                            .eq(AttributeMetaDataMetaData1_4.PART_OF_ATTRIBUTE, null),
+                    new AttributeMetaDataMetaData1_4()));
+            for(Entity attribute : attributes){
+                updateAttribute(attributeRepository, attribute);
+            }
 
             v15EntityMetaDataEntity.set(EntityMetaDataMetaData.ATTRIBUTES, attributes);
 			v15EntityMetaDataEntity.set(EntityMetaDataMetaData.BACKEND, "MySQL");
@@ -148,7 +151,22 @@ public class Step1UpgradeMetaData extends MetaDataUpgrade
 		LOG.info("Update attribute order done.");
 	}
 
-	private void recreateElasticSearchMetaDataIndices()
+    private void updateAttribute(Repository attributeRepository, Entity attribute) {
+        LOG.info("Setting attribute : "
+                + attribute.get(AttributeMetaDataMetaData1_4.NAME));
+        List<Entity> parts = Lists.newArrayList(searchService.search(
+                EQ(AttributeMetaDataMetaData1_4.PART_OF_ATTRIBUTE,
+                        attribute),
+                new AttributeMetaDataMetaData1_4()));
+        Entity attributeFromRepo = attributeRepository.findOne(attribute);
+        attributeFromRepo.set(AttributeMetaDataMetaData.PARTS, parts);
+        for(Entity part: parts){
+            updateAttribute(attributeRepository, part);
+        }
+        attributeRepository.update(attributeFromRepo);
+    }
+
+    private void recreateElasticSearchMetaDataIndices()
 	{
 		LOG.info("Deleting metadata indices...");
 		searchService.delete(EntityMetaDataMetaData.ENTITY_NAME);
