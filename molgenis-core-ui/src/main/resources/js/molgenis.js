@@ -936,7 +936,7 @@ if(window.history.pushState === undefined)
 if(window.history.replaceState === undefined)
 	window.history.replaceState = function(){};
 if(window.onpopstate === undefined)
-	window.onpopstate = function(){}
+	window.onpopstate = function(){};
 
 // polyfills
 Number.isInteger = Number.isInteger || function(value) {
@@ -944,5 +944,13 @@ Number.isInteger = Number.isInteger || function(value) {
            isFinite(value) && 
            Math.floor(value) === value;
 };
+
+// ECMAScript 6
+if (!String.prototype.startsWith) {
+	String.prototype.startsWith = function(searchString, position) {
+		position = position || 0;
+		return this.lastIndexOf(searchString, position) === position;
+	};
+}
 Number.MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER || 9007199254740991;
 Number.MIN_SAFE_INTEGER = Number.MIN_SAFE_INTEGER || -9007199254740991;
