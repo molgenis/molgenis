@@ -32,6 +32,7 @@
         },
         componentWillUnmount: function() {
         	var $modal = $(this.refs.modal.getDOMNode());
+        	$modal.modal('hide'); // remove modal backdrop
         	$modal.off();
         	$modal.data('bs.modal', null); // see http://stackoverflow.com/a/18169689
 		},
