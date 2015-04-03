@@ -9,6 +9,7 @@ import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.model.MolgenisModelException;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.hp.hpl.jena.ontology.AnnotationProperty;
 import com.hp.hpl.jena.ontology.DatatypeProperty;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.ObjectProperty;
@@ -16,13 +17,16 @@ import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.ResourceFactory;
 
 public class FairService
 {
 	// Namespaces
 	public static final String FAIR_NS = "http://datafairport.org/ontology/FAIR-schema.owl#";
+	public static final String SKOS_NS = "http://www.w3.org/2004/02/skos/core#";
+
+	// SKOS Property IRIs
+	public static final String SKOS_PREFERRED_LABEL = SKOS_NS + "preferredLabel";
 
 	// FAIR Class IRIs
 	public static final String FAIR_PROFILE = FAIR_NS + "FAIRProfile";
@@ -30,10 +34,9 @@ public class FairService
 	public static final String FAIR_PROPERTY = FAIR_NS + "FAIRProperty";
 
 	// FAIR Property IRIs
+	public static final String FAIR_DESCRIBES_USE_OF = FAIR_NS + "describesUseOf";
 	public static final String FAIR_HAS_CLASS = FAIR_NS + "hasClass";
 	public static final String FAIR_HAS_PROPERTY = FAIR_NS + "hasProperty";
-	public static final String FAIR_ON_CLASS_TYPE = FAIR_NS + "onClassType";
-	public static final String FAIR_ON_PROPERTY_TYPE = FAIR_NS + "onPropertyType";
 	public static final String FAIR_ALLOWED_VALUES = FAIR_NS + "allowedValues";
 	public static final String FAIR_MIN_COUNT = FAIR_NS + "minCount";
 	public static final String FAIR_MAX_COUNT = FAIR_NS + "maxCount";
@@ -51,13 +54,13 @@ public class FairService
 		OntClass fairClass = result.createClass(FAIR_CLASS);
 		OntClass fairProperty = result.createClass(FAIR_PROPERTY);
 
-		Property fairOnClassType = result.createProperty(FAIR_ON_CLASS_TYPE);
-		Property fairOnPropertyType = result.createProperty(FAIR_ON_PROPERTY_TYPE);
-		Property fairHasClass = result.createProperty(FAIR_HAS_CLASS);
-		Property fairHasProperty = result.createProperty(FAIR_HAS_PROPERTY);
-		Property fairAllowedValues = result.createProperty(FAIR_ALLOWED_VALUES);
-		Property fairMinCount = result.createProperty(FAIR_MIN_COUNT);
-		Property fairMaxCount = result.createProperty(FAIR_MAX_COUNT);
+		AnnotationProperty skosPreferredLabel = result.createAnnotationProperty(SKOS_PREFERRED_LABEL);
+		ObjectProperty fairDescribesUseOf = result.createObjectProperty(FAIR_DESCRIBES_USE_OF);
+		ObjectProperty fairHasClass = result.createObjectProperty(FAIR_HAS_CLASS);
+		ObjectProperty fairHasProperty = result.createObjectProperty(FAIR_HAS_PROPERTY);
+		DatatypeProperty fairAllowedValues = result.createDatatypeProperty(FAIR_ALLOWED_VALUES);
+		DatatypeProperty fairMinCount = result.createDatatypeProperty(FAIR_MIN_COUNT);
+		DatatypeProperty fairMaxCount = result.createDatatypeProperty(FAIR_MAX_COUNT);
 
 		Individual molgenisProfile = fairProfile.createIndividual(restApi + "/fair");
 
@@ -68,15 +71,17 @@ public class FairService
 				continue;
 			}
 			Individual emdFairClass = result.createIndividual(restApi + '/' + emd.getName() + "/meta/fair", fairClass);
+			result.add(emdFairClass, skosPreferredLabel, result.createLiteral(emd.getLabel(), null));
 			result.add(molgenisProfile, fairHasClass, emdFairClass);
 			OntClass emdEntity = result.createClass(restApi + "/" + emd.getName() + "/meta");
-			result.add(emdFairClass, fairOnClassType, emdEntity);
+			result.add(emdFairClass, fairDescribesUseOf, emdEntity);
 			for (AttributeMetaData amd : emd.getAtomicAttributes())
 			{
 				Individual amdFairProperty = fairProperty.createIndividual(restApi + '/' + emd.getName()
 						+ "/meta/fair/" + amd.getName());
 				FieldType dataType = amd.getDataType();
 				result.add(emdFairClass, fairHasProperty, amdFairProperty);
+				result.add(amdFairProperty, skosPreferredLabel, result.createLiteral(amd.getLabel(), null));
 
 				if (amd.isNillable())
 				{
@@ -96,7 +101,7 @@ public class FairService
 				{
 					ObjectProperty amdAttribute = result.createObjectProperty(restApi + "/" + emd.getName() + "/meta/"
 							+ amd.getName());
-					result.add(amdFairProperty, fairOnPropertyType, amdAttribute);
+					result.add(amdFairProperty, fairDescribesUseOf, amdAttribute);
 					OntClass refEntity = result.createClass(restApi + "/" + amd.getRefEntity().getName() + "/meta");
 					result.add(amdFairProperty, fairAllowedValues, refEntity);
 				}
@@ -104,7 +109,7 @@ public class FairService
 				{
 					DatatypeProperty amdAttribute = result.createDatatypeProperty(restApi + "/" + emd.getName()
 							+ "/meta/" + amd.getName());
-					result.add(amdFairProperty, fairOnPropertyType, amdAttribute);
+					result.add(amdFairProperty, fairDescribesUseOf, amdAttribute);
 					result.add(amdAttribute, fairAllowedValues,
 							result.createResource(ResourceFactory.createResource(getXSDDataType(dataType))));
 				}

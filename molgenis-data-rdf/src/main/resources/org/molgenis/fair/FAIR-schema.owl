@@ -3,39 +3,40 @@
 
 <!DOCTYPE rdf:RDF [
     <!ENTITY dc "http://purl.org/dc/terms/" >
+    <!ENTITY vann "http://purl.org/vocab/vann/" >
     <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
     <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
     <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
-    <!ENTITY fair "http://fairdata.org/ontology/FAIR-Data#" >
-	<!ENTITY vann "http://purl.org/vocab/vann/" >
     <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
-	<!ENTITY protege "http://protege.stanford.edu/plugins/owl/protege#" >
+    <!ENTITY protege "http://protege.stanford.edu/plugins/owl/protege#" >
+    <!ENTITY fair "http://datafairport.org/ontology/FAIR-schema.owl#" >
+	<!ENTITY skos "http://www.w3.org/2004/02/skos/core#" >
 ]>
 
 
-<rdf:RDF xmlns="http://fairdata.org/ontology/FAIR-Data#"
-     xml:base="http://fairdata.org/ontology/FAIR-Data"
-     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-     xmlns:dc="http://purl.org/dc/terms/"
-     xmlns:owl="http://www.w3.org/2002/07/owl#"
-     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-	 xmlns:vann="http://purl.org/vocab/vann/"
-	 xmlns:protege="http://protege.stanford.edu/plugins/owl/protege#"
+<rdf:RDF xmlns="https://github.com/FAIRDataInitiative/DataFairPort/blob/master/Schema/FAIR-schema.owl#"
+     xml:base="https://github.com/FAIRDataInitiative/DataFairPort/blob/master/Schema/FAIR-schema.owl"
      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-     xmlns:fair="http://fairdata.org/ontology/FAIR-Data#">
-	 
-    <owl:Ontology rdf:about="http://datafairport.org/ontology/FAIR-schema.owl#">
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:protege="http://protege.stanford.edu/plugins/owl/protege#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:fair="http://datafairport.org/ontology/FAIR-schema.owl#"
+     xmlns:vann="http://purl.org/vocab/vann/"
+	 xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+     xmlns:dc="http://purl.org/dc/terms/">
+    <owl:Ontology rdf:about="https://github.com/FAIRDataInitiative/DataFairPort/blob/master/Schema/FAIR-schema.owl#">
         <rdfs:label>FAIR Ontology</rdfs:label>
         <rdfs:comment rdf:datatype="&xsd;string">FAIR Schema Ontology</rdfs:comment>
         <owl:versionInfo rdf:datatype="&xsd;string">alpha</owl:versionInfo>
         <dc:license rdf:datatype="&xsd;anyURI">http://creativecommons.org/licenses/by/4.0/</dc:license>
-        <dc:creator rdf:datatype="&xsd;anyURI">http://orcid.org/0000-0003-4727-9435</dc:creator>
-        <dc:creator rdf:datatype="&xsd;anyURI">http://orcid.org/0000-0001-6960-357X</dc:creator>
         <vann:preferredNamespaceUri rdf:datatype="&xsd;string">http://datafairport.org/ontology/FAIR-schema.owl</vann:preferredNamespaceUri>
-		<vann:preferredNamespacePrefix xml:lang="en">fair</vann:preferredNamespacePrefix>
-		<protege:defaultLanguage>en</protege:defaultLanguage>
-		<dc:title xml:lang="en">FAIR Ontology</dc:title>
-	</owl:Ontology>
+        <dc:creator rdf:datatype="&xsd;anyURI">http://orcid.org/0000-0001-6960-357X</dc:creator>
+        <dc:creator rdf:datatype="&xsd;anyURI">http://orcid.org/0000-0003-4727-9435</dc:creator>
+        <dc:title xml:lang="en">FAIR Ontology</dc:title>
+        <protege:defaultLanguage>en</protege:defaultLanguage>
+        <vann:preferredNamespacePrefix xml:lang="en">fair</vann:preferredNamespacePrefix>
+    </owl:Ontology>
     
 
 
@@ -53,7 +54,7 @@
     <!-- http://purl.org/dc/terms/creator -->
 
     <owl:AnnotationProperty rdf:about="&dc;creator"/>
-    
+    <owl:AnnotationProperty rdf:about="&skos;preferredLabel"/>
 
 
     <!-- 
@@ -67,44 +68,41 @@
     
 
 
-    <!-- http://fairdata.org/ontology/FAIR-Data#hasClass -->
+    <!-- http://datafairport.org/ontology/FAIR-schema.owl#describesUseOf -->
 
-    <owl:ObjectProperty rdf:about="&fair;hasClass">
+    <owl:ObjectProperty rdf:about="http://datafairport.org/ontology/FAIR-schema.owl#describesUseOf">
+        <rdfs:label xml:lang="en">describes use of</rdfs:label>
+        <rdfs:comment>The FAIR (or other ontology) Class URI</rdfs:comment>
+        <rdfs:domain>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://datafairport.org/ontology/FAIR-schema.owl#FAIRClass"/>
+                    <rdf:Description rdf:about="http://datafairport.org/ontology/FAIR-schema.owl#FAIRProperty"/>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:domain>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://datafairport.org/ontology/FAIR-schema.owl#hasClass -->
+
+    <owl:ObjectProperty rdf:about="http://datafairport.org/ontology/FAIR-schema.owl#hasClass">
         <rdfs:label xml:lang="en">has class</rdfs:label>
         <rdfs:comment>has class is a one-to-many relationship between a FAIR Profile and FAIR classes </rdfs:comment>
-        <rdfs:range rdf:resource="&fair;FAIRClass"/>
-        <rdfs:domain rdf:resource="&fair;FAIRProfile"/>
+        <rdfs:range rdf:resource="http://datafairport.org/ontology/FAIR-schema.owl#FAIRClass"/>
+        <rdfs:domain rdf:resource="http://datafairport.org/ontology/FAIR-schema.owl#FAIRProfile"/>
     </owl:ObjectProperty>
     
 
 
-    <!-- http://fairdata.org/ontology/FAIR-Data#hasProperty -->
+    <!-- http://datafairport.org/ontology/FAIR-schema.owl#hasProperty -->
 
-    <owl:ObjectProperty rdf:about="&fair;hasProperty">
+    <owl:ObjectProperty rdf:about="http://datafairport.org/ontology/FAIR-schema.owl#hasProperty">
         <rdfs:label xml:lang="en">has property</rdfs:label>
         <rdfs:comment>has property is a one-to-many relationship between a FAIR Class and FAIR properties</rdfs:comment>
-        <rdfs:domain rdf:resource="&fair;FAIRClass"/>
-        <rdfs:range rdf:resource="&fair;FAIRProperty"/>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://fairdata.org/ontology/FAIR-Data#onClassType -->
-
-    <owl:ObjectProperty rdf:about="&fair;onClassType">
-        <rdfs:label xml:lang="en">on class type</rdfs:label>
-        <rdfs:comment>The FAIR (or other ontology) Class URI</rdfs:comment>
-        <rdfs:domain rdf:resource="&fair;FAIRClass"/>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://fairdata.org/ontology/FAIR-Data#onPropertyType -->
-
-    <owl:ObjectProperty rdf:about="&fair;onPropertyType">
-        <rdfs:label xml:lang="en">on property type</rdfs:label>
-        <rdfs:comment>The FAIR (or other ontology) Property URI</rdfs:comment>
-        <rdfs:domain rdf:resource="&fair;FAIRProperty"/>
+        <rdfs:domain rdf:resource="http://datafairport.org/ontology/FAIR-schema.owl#FAIRClass"/>
+        <rdfs:range rdf:resource="http://datafairport.org/ontology/FAIR-schema.owl#FAIRProperty"/>
     </owl:ObjectProperty>
     
 
@@ -120,35 +118,35 @@
     
 
 
-    <!-- http://fairdata.org/ontology/FAIR-Data#allowedValues -->
+    <!-- http://datafairport.org/ontology/FAIR-schema.owl#allowedValues -->
 
-    <owl:DatatypeProperty rdf:about="&fair;allowedValues">
+    <owl:DatatypeProperty rdf:about="http://datafairport.org/ontology/FAIR-schema.owl#allowedValues">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:label xml:lang="en">allowed values</rdfs:label>
         <rdfs:comment>The set of valid values for the specified property</rdfs:comment>
-        <rdfs:domain rdf:resource="&fair;FAIRProperty"/>
+        <rdfs:domain rdf:resource="http://datafairport.org/ontology/FAIR-schema.owl#FAIRProperty"/>
         <rdfs:range rdf:resource="&xsd;anyURI"/>
     </owl:DatatypeProperty>
     
 
 
-    <!-- http://fairdata.org/ontology/FAIR-Data#maxCount -->
+    <!-- http://datafairport.org/ontology/FAIR-schema.owl#maxCount -->
 
-    <owl:DatatypeProperty rdf:about="&fair;maxCount">
+    <owl:DatatypeProperty rdf:about="http://datafairport.org/ontology/FAIR-schema.owl#maxCount">
         <rdfs:label xml:lang="en">maximum count</rdfs:label>
         <rdfs:comment>The maximum number of required occurrences of this property</rdfs:comment>
-        <rdfs:domain rdf:resource="&fair;FAIRProperty"/>
+        <rdfs:domain rdf:resource="http://datafairport.org/ontology/FAIR-schema.owl#FAIRProperty"/>
         <rdfs:range rdf:resource="&xsd;integer"/>
     </owl:DatatypeProperty>
     
 
 
-    <!-- http://fairdata.org/ontology/FAIR-Data#minCount -->
+    <!-- http://datafairport.org/ontology/FAIR-schema.owl#minCount -->
 
-    <owl:DatatypeProperty rdf:about="&fair;minCount">
+    <owl:DatatypeProperty rdf:about="http://datafairport.org/ontology/FAIR-schema.owl#minCount">
         <rdfs:label xml:lang="en">minimum count</rdfs:label>
         <rdfs:comment>The minimum number of required occurrences of this property</rdfs:comment>
-        <rdfs:domain rdf:resource="&fair;FAIRProperty"/>
+        <rdfs:domain rdf:resource="http://datafairport.org/ontology/FAIR-schema.owl#FAIRProperty"/>
         <rdfs:range rdf:resource="&xsd;integer"/>
     </owl:DatatypeProperty>
     
@@ -165,20 +163,32 @@
     
 
 
-    <!-- http://fairdata.org/ontology/FAIR-Data#FAIRClass -->
+    <!-- http://datafairport.org/ontology/FAIR-schema.owl#FAIRClass -->
 
-    <owl:Class rdf:about="&fair;FAIRClass">
+    <owl:Class rdf:about="http://datafairport.org/ontology/FAIR-schema.owl#FAIRClass">
         <rdfs:label xml:lang="en">FAIR Class</rdfs:label>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&fair;hasProperty"/>
-                <owl:allValuesFrom rdf:resource="&fair;FAIRProperty"/>
+                <owl:onProperty rdf:resource="http://datafairport.org/ontology/FAIR-schema.owl#describesUseOf"/>
+                <owl:maxCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:maxCardinality>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&fair;hasProperty"/>
-                <owl:someValuesFrom rdf:resource="&fair;FAIRProperty"/>
+                <owl:onProperty rdf:resource="http://datafairport.org/ontology/FAIR-schema.owl#hasProperty"/>
+                <owl:someValuesFrom rdf:resource="http://datafairport.org/ontology/FAIR-schema.owl#FAIRProperty"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://datafairport.org/ontology/FAIR-schema.owl#describesUseOf"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">0</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://datafairport.org/ontology/FAIR-schema.owl#hasProperty"/>
+                <owl:allValuesFrom rdf:resource="http://datafairport.org/ontology/FAIR-schema.owl#FAIRProperty"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:comment>A FAIR Class is a machine-readable description of a class in a data schema</rdfs:comment>
@@ -186,20 +196,20 @@
     
 
 
-    <!-- http://fairdata.org/ontology/FAIR-Data#FAIRProfile -->
+    <!-- http://datafairport.org/ontology/FAIR-schema.owl#FAIRProfile -->
 
-    <owl:Class rdf:about="&fair;FAIRProfile">
+    <owl:Class rdf:about="http://datafairport.org/ontology/FAIR-schema.owl#FAIRProfile">
         <rdfs:label xml:lang="en">FAIR Profile</rdfs:label>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&fair;hasClass"/>
-                <owl:someValuesFrom rdf:resource="&fair;FAIRClass"/>
+                <owl:onProperty rdf:resource="http://datafairport.org/ontology/FAIR-schema.owl#hasClass"/>
+                <owl:allValuesFrom rdf:resource="http://datafairport.org/ontology/FAIR-schema.owl#FAIRClass"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&fair;hasClass"/>
-                <owl:allValuesFrom rdf:resource="&fair;FAIRClass"/>
+                <owl:onProperty rdf:resource="http://datafairport.org/ontology/FAIR-schema.owl#hasClass"/>
+                <owl:someValuesFrom rdf:resource="http://datafairport.org/ontology/FAIR-schema.owl#FAIRClass"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:comment>A FAIR Profile is a machine-readable description of a data schema.</rdfs:comment>
@@ -207,15 +217,54 @@
     
 
 
-    <!-- http://fairdata.org/ontology/FAIR-Data#FAIRProperty -->
+    <!-- http://datafairport.org/ontology/FAIR-schema.owl#FAIRProperty -->
 
-    <owl:Class rdf:about="&fair;FAIRProperty">
+    <owl:Class rdf:about="http://datafairport.org/ontology/FAIR-schema.owl#FAIRProperty">
         <rdfs:label xml:lang="en">FAIR Property</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://datafairport.org/ontology/FAIR-schema.owl#minCount"/>
+                <owl:maxQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:maxQualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;integer"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://datafairport.org/ontology/FAIR-schema.owl#minCount"/>
+                <owl:allValuesFrom rdf:resource="&xsd;integer"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://datafairport.org/ontology/FAIR-schema.owl#allowedValues"/>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;anyURI"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://datafairport.org/ontology/FAIR-schema.owl#maxCount"/>
+                <owl:allValuesFrom rdf:resource="&xsd;integer"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://datafairport.org/ontology/FAIR-schema.owl#describesUseOf"/>
+                <owl:maxCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:maxCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://datafairport.org/ontology/FAIR-schema.owl#maxCount"/>
+                <owl:maxQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:maxQualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;integer"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
         <rdfs:comment>A FAIR Property is a machine-readable description of a property in a data schema</rdfs:comment>
     </owl:Class>
 </rdf:RDF>
 
 
 
-<!-- Generated by the OWL API (version 3.4.2) http://owlapi.sourceforge.net -->
+<!-- Generated by the OWL API (version 3.5.1) http://owlapi.sourceforge.net -->
 
