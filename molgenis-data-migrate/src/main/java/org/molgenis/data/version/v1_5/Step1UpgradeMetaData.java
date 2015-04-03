@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
@@ -138,8 +139,10 @@ public class Step1UpgradeMetaData extends MetaDataUpgrade
 					+ v15EntityMetaDataEntity.get(EntityMetaDataMetaData1_4.FULL_NAME));
 			List<Entity> attributes = Lists.newArrayList(searchService.search(
 					EQ(AttributeMetaDataMetaData1_4.ENTITY,
-							v15EntityMetaDataEntity.getString(EntityMetaDataMetaData.FULL_NAME)).and().eq(
-                            AttributeMetaDataMetaData1_4.PART_OF_ATTRIBUTE, null), new AttributeMetaDataMetaData1_4()));
+							v15EntityMetaDataEntity.getString(EntityMetaDataMetaData.FULL_NAME)),
+					new AttributeMetaDataMetaData1_4()));
+			attributes = attributes.stream().filter(a -> a.get(AttributeMetaDataMetaData1_4.PART_OF_ATTRIBUTE) == null)
+					.collect(Collectors.toList());
 			for (Entity attribute : attributes)
 			{
 				updateAttribute(attributeRepository, attribute);
@@ -155,8 +158,10 @@ public class Step1UpgradeMetaData extends MetaDataUpgrade
 	/**
 	 * Update an 1.4 attribute's parts attribute in the 1.5 attribute repository
 	 * 
-	 * @param attributeRepository undecorated 1.5 MySQL attribute repository
-	 * @param attribute_v1_4 elasticsearch 1.4 attribute document entity
+	 * @param attributeRepository
+	 *            undecorated 1.5 MySQL attribute repository
+	 * @param attribute_v1_4
+	 *            elasticsearch 1.4 attribute document entity
 	 */
 	private void updateAttribute(Repository attributeRepository, Entity attribute_v1_4)
 	{
