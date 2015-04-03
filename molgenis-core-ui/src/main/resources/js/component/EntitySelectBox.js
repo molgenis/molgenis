@@ -113,6 +113,7 @@
 				focus: this.props.focus,
 				value : this.props.value,
 				addonBtn: this.props.mode === 'create' && entity.writable === true,
+				addonBtnTitle: this.props.mode === 'create' && entity.writable === true ? 'Create ' + this.state.entity.label : undefined,
 				onAddonBtnClick: this._handleAddonBtnClick,
 				onChange : this._handleChange
 			});
@@ -121,14 +122,13 @@
 			if(this.state.entity === null) {
 				return molgenis.ui.Spinner();
 			} else if(this.props.mode === 'create') {
-				return molgenis.ui.Modal({title: this.state.entity.label, show: this.state.modal, onHide: this._onModalHide},
-					molgenis.ui.Form({
-						entity : this.state.entity.name,
-						cancelBtn : true,
-						onCancel : this._onModalHide,
-						onSubmitSuccess: this._onModalHide
-					})
-				);
+				return this.state.modal ? molgenis.ui.Form({
+					entity : this.state.entity.name,
+					cancelBtn : true,
+					modal: true,
+					onSubmitCancel : this._onModalHide,
+					onSubmitSuccess: this._onModalHide
+				}) : div();
 			} else {
 				return div();
 			}

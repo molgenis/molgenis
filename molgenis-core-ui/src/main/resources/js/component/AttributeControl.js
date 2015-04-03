@@ -13,20 +13,31 @@
 		mixins: [molgenis.ui.mixin.DeepPureRenderMixin, molgenis.ui.mixin.AttributeLoaderMixin],
 		displayName: 'AttributeControl',
 		propTypes: {
-			attr: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]),
+			attr: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]), // FIXME add multiple to propTypes
 			required: React.PropTypes.bool, // optional overwrite for attr.required
 			readOnly: React.PropTypes.bool, // optional overwrite for attr.readOnly
 			visible: React.PropTypes.bool,  // optional overwrite for attr.visible
 			disabled: React.PropTypes.bool, // optional overwrite for attr.disabled
 			focus: React.PropTypes.bool,
-			onValueChange: React.PropTypes.func.isRequired
+			onValueChange: React.PropTypes.func.isRequired,
+			onBlur: React.PropTypes.func
+		},
+		getDefaultProps: function() {
+			return {
+				required: false,
+				readOnly: false,
+				visible: false,
+				disabled: false,
+				focus: false,
+				onBlur: function() {}
+			};
 		},
 		getInitialState: function() {
 			return {
 				attr: null
 			};
 		},
-		render: function() {	// FIXME apply focus to all controls
+		render: function() {
 			if(this.state.attr === null) {
 				// attribute not available yet
 				return molgenis.ui.Spinner();
