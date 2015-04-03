@@ -24,10 +24,6 @@
 		},
 		getDefaultProps: function() {
 			return {
-				required: false,
-				readOnly: false,
-				visible: false,
-				disabled: false,
 				focus: false,
 				onBlur: function() {}
 			};
