@@ -19,6 +19,7 @@
 			focus: React.PropTypes.bool,
 			addonBtn: React.PropTypes.bool,
 			addonBtnIcon: React.PropTypes.string,
+			addonBtnTitle: React.PropTypes.string,
 			onAddonBtnClick: React.PropTypes.func,
 			value: React.PropTypes.oneOfType([React.PropTypes.object, React.PropTypes.array]),
 			onChange: React.PropTypes.func.isRequired
@@ -55,6 +56,7 @@
 						span({className: 'input-group-btn'},
  							molgenis.ui.Button({
 								icon : this.props.addonBtnIcon,
+								title: this.props.addonBtnTitle,
 								disabled : this.props.readOnly || this.props.disabled,
 								onClick : this.props.onAddonBtnClick
 							})

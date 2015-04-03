@@ -11,13 +11,14 @@
 		mixins: [molgenis.ui.mixin.DeepPureRenderMixin, molgenis.ui.mixin.EntityLoaderMixin, molgenis.ui.mixin.EntityInstanceLoaderMixin, molgenis.ui.mixin.ReactLayeredComponentMixin],
 		displayName: 'Form',
 		propTypes: {
-			entity: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]),
+			entity: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]).isRequired,
 			entityInstance: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]),
 			mode: React.PropTypes.oneOf(['create', 'edit', 'view']),
 			formLayout: React.PropTypes.oneOf(['horizontal', 'vertical']),
 			modal: React.PropTypes.bool, // whether or not to render form in a modal dialog
-			enableOptionalFilter: React.PropTypes.bool, // whether or not to show a control to filter optional form fields 
-			colOffset: React.PropTypes.number,
+			enableOptionalFilter: React.PropTypes.bool, // whether or not to show a control to filter optional form fields
+			saveOnBlur:React.PropTypes.bool, // save form control values on blur
+			onSubmitCancel: React.PropTypes.func,
 			onSubmitSuccess: React.PropTypes.func,
 			onSubmitError: React.PropTypes.func,
 			onValueChange: React.PropTypes.func
@@ -29,6 +30,8 @@
 				modal: false,
 				enableOptionalFilter: true,
 				colOffset: 3,
+				saveOnBlur: false,
+				onSubmitCancel: function() {},
 				onSubmitSuccess: function() {},
 				onSubmitError: function() {},
 				onValueChange: function() {}
@@ -94,7 +97,7 @@
 				}
 				
 				return (
-					molgenis.ui.Modal({title: title, show: this.state.showModal, onHide: this._handleCancel},
+					molgenis.ui.Modal({title: title, size: 'large', show: this.state.showModal, onHide: this._handleCancel},
 						Form
 					)
 				);
@@ -149,6 +152,7 @@
 				formLayout : this.props.formLayout,
 				colOffset : this.props.colOffset,
 				hideOptional: this.state.hideOptional,
+				saveOnBlur: this.props.saveOnBlur,
 				validate: this.state.validate,
 				onValueChange : this._handleValueChange
 			};
@@ -229,6 +233,7 @@
 			if(this.props.modal) {
 				this.setState({showModal: false});
 			}
+			this.props.onSubmitCancel();
 		},
 		_handleSubmitSuccess: function() {
 			var message = this.props.mode === 'create' ? 'has been created.' : 'changes have been saved.';
@@ -293,6 +298,7 @@
 			formLayout: React.PropTypes.oneOf(['horizontal', 'vertical']),
 			colOffset: React.PropTypes.number,
 			hideOptional: React.PropTypes.bool,
+			saveOnBlur: React.PropTypes.bool,
 			validate: React.PropTypes.bool,
 			onValueChange: React.PropTypes.func.isRequired
 		},
@@ -308,11 +314,13 @@
 						var ControlFactory = attr.fieldType === 'COMPOUND' ? molgenis.ui.FormControlGroup : molgenis.ui.FormControl;
 						var controlProps = {
 							entity : this.props.entity,
+							entityInstance : this.props.value,
 							attr : attr,
 							value: attr.fieldType === 'COMPOUND' ? this.props.value : (this.props.value ? this.props.value[key] : undefined),
 							mode : this.props.mode,
 							formLayout : this.props.formLayout,
 							colOffset: this.props.colOffset,
+							saveOnBlur: this.props.saveOnBlur,
 							validate: this.props.validate,
 							onValueChange : this.props.onValueChange,
 							key : key

@@ -13,10 +13,12 @@
         mixins: [molgenis.ui.mixin.DeepPureRenderMixin, molgenis.ui.mixin.AttributeLoaderMixin],
         displayName: 'FormControl',
         propTypes: {
-            entity: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]),
+            entity: React.PropTypes.object.isRequired,
+            entityInstance: React.PropTypes.object,
             attr: React.PropTypes.object.isRequired,
             formLayout: React.PropTypes.oneOf(['horizontal', 'vertical']),
             mode: React.PropTypes.oneOf(['create', 'edit', 'view']),
+            saveOnBlur: React.PropTypes.bool,
             colOffset: React.PropTypes.number,
             validate: React.PropTypes.bool,
             focus: React.PropTypes.bool,
@@ -151,8 +153,14 @@
                 return;
             }
             
-            this._validate(this._getValue(e.value), function(validity) {
-                this.setState({
+            this._validate(this._getValue(e.value), function(validity) { 
+            	if(this.props.mode === 'edit' && this.props.saveOnBlur && validity.valid === true) {
+                	var entityInstance = _.extend({}, this.props.entityInstance);
+                	entityInstance[this.state.attr.name] = e.value;
+            		api.update(this.props.entityInstance.href + '/' + this.state.attr.name, e.value);
+                }
+            	
+            	this.setState({
                     valid: validity.valid,
                     errorMessage: validity.errorMessage
                 });

@@ -12,11 +12,13 @@
 		displayName: 'FormControlGroup',
 		propTypes: {
 			entity: React.PropTypes.object,
+			entityInstance : React.PropTypes.object,
 			attr: React.PropTypes.object.isRequired,
 			value: React.PropTypes.object,
 			mode: React.PropTypes.oneOf(['create', 'edit', 'view']),
 			formLayout: React.PropTypes.oneOf(['horizontal', 'vertical']),
 			colOffset: React.PropTypes.number,
+			saveOnBlur: React.PropTypes.bool,
 			validate: React.PropTypes.bool,
 			focus: React.PropTypes.bool,
 			onValueChange: React.PropTypes.func.isRequired
@@ -37,6 +39,7 @@
 					mode : this.props.mode,
 					formLayout : this.props.formLayout,
 					colOffset: this.props.colOffset,
+					saveOnBlur: this.props.saveOnBlur,
 					validate: this.props.validate,
 					onValueChange : this.props.onValueChange,
 					key : '' + i
