@@ -145,6 +145,22 @@
                     valid: validity.valid,
                     errorMessage: validity.errorMessage
                 });
+                
+                if(validity.valid === true && this._doPersistAttributeValue()) {
+	                // persist changes for controls that do not have a blur event
+	                switch(this.state.attr.fieldType) {
+		                case 'BOOL':
+		                case 'CATEGORICAL':
+		                case 'CATEGORICAL_MREF':
+		                case 'ENUM':
+		                case 'MREF':
+		                case 'XREF':
+		                	this._persistAttributeValue(e.value);
+		                	break;
+		                default:
+		                	break;
+	                }
+                }
             }.bind(this));
         },
         _handleBlur: function(e) {
@@ -153,11 +169,9 @@
                 return;
             }
             
-            this._validate(this._getValue(e.value), function(validity) { 
-            	if(this.props.mode === 'edit' && this.props.saveOnBlur && validity.valid === true) {
-                	var entityInstance = _.extend({}, this.props.entityInstance);
-                	entityInstance[this.state.attr.name] = e.value;
-            		api.update(this.props.entityInstance.href + '/' + this.state.attr.name, e.value);
+            this._validate(this._getValue(e.value), function(validity) {
+            	if(validity.valid === true && this._doPersistAttributeValue()) {
+            		this._persistAttributeValue(e.value);
                 }
             	
             	this.setState({
@@ -239,6 +253,30 @@
             }
             
             callback({valid: errorMessage === undefined, errorMessage: errorMessage});
+        },
+        _doPersistAttributeValue: function() {
+        	return this.props.mode === 'edit' && this.props.saveOnBlur && !this.state.attr.readOnly;
+        },
+        _persistAttributeValue: function(value) {
+        	// persist attribute
+    		var val;
+        	switch(this.state.attr.fieldType) {
+        		case 'CATEGORICAL':
+        		case 'XREF':
+        			val = value[this.state.attr.refEntity.idAttribute];
+        			break;
+        		case 'CATEGORICAL_MREF':
+        		case 'MREF':
+        			val = _.map(value.items, function(item) {
+        				return item[this.state.attr.refEntity.idAttribute];
+        			});
+        			break;
+        		default:
+        			val = value;
+        			break;
+        	}
+        	
+    		api.update(this.props.entityInstance.href + '/' + this.state.attr.name, val);
         },
         _statics: {
             // https://gist.github.com/dperini/729294
