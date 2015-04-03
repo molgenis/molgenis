@@ -10,12 +10,12 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.molgenis.AppConfig;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
+import org.molgenis.data.semantic.SemanticSearchConfig;
 import org.molgenis.data.semantic.UntypedTagService;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.framework.db.EntitiesValidationReport;
@@ -33,7 +33,8 @@ import org.testng.annotations.Test;
  * Integration tests for the entire EMX importer.
  */
 @Test
-@ContextConfiguration(classes = AppConfig.class)
+@ContextConfiguration(classes =
+{ ImportTestConfig.class, SemanticSearchConfig.class })
 public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
@@ -125,9 +126,9 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 
 		// test import
 		EntityImportReport report = importer.doImport(source, DatabaseAction.ADD);
-		
+
 		// Check children
-		List<Entity> entitiesWithChildern = (List<Entity>) StreamSupport
+		List<Entity> entitiesWithChildern = StreamSupport
 				.stream(dataService.getRepository("import_person").spliterator(), false)
 				.filter(e -> e.getEntities("children").iterator().hasNext())
 				.collect(Collectors.toCollection(ArrayList::new));
@@ -137,7 +138,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		Assert.assertEquals(children.next().getIdValue(), "jane");
 
 		// Check parents
-		List<Entity> entitiesWithParents = (List<Entity>) StreamSupport
+		List<Entity> entitiesWithParents = StreamSupport
 				.stream(dataService.getRepository("import_person").spliterator(), false)
 				.filter(e -> e.getEntities("parent").iterator().hasNext())
 				.collect(Collectors.toCollection(ArrayList::new));

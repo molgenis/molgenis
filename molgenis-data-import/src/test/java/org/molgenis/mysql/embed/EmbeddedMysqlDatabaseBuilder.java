@@ -1,4 +1,4 @@
-package org.molgenis.data.mysql;
+package org.molgenis.mysql.embed;
 
 import java.io.File;
 import java.util.HashMap;
