@@ -36,7 +36,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -101,7 +100,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -508,14 +506,7 @@ public class RestController
 
 		// Check attribute names
 		Iterable<String> attributesIterable = Iterables.transform(meta.getAtomicAttributes(),
-				new Function<AttributeMetaData, String>()
-				{
-					@Override
-					public String apply(AttributeMetaData attributeMetaData)
-					{
-						return attributeMetaData.getName().toLowerCase();
-					}
-				});
+				attributeMetaData -> attributeMetaData.getName().toLowerCase());
 
 		if (attributesSet != null)
 		{
@@ -527,25 +518,12 @@ public class RestController
 			}
 		}
 
-		attributesIterable = Iterables.transform(meta.getAtomicAttributes(), new Function<AttributeMetaData, String>()
-		{
-			@Override
-			public String apply(AttributeMetaData attributeMetaData)
-			{
-				return attributeMetaData.getName();
-			}
-		});
+		attributesIterable = Iterables.transform(meta.getAtomicAttributes(), AttributeMetaData::getName);
 
 		if (attributesSet != null)
 		{
-			attributesIterable = Iterables.filter(attributesIterable, new Predicate<String>()
-			{
-				@Override
-				public boolean apply(@Nullable String attribute)
-				{
-					return attributesSet.contains(attribute.toLowerCase());
-				}
-			});
+			attributesIterable = Iterables.filter(attributesIterable,
+					attribute -> attributesSet.contains(attribute.toLowerCase()));
 		}
 
 		return new DefaultEntityCollection(entities, attributesIterable);
