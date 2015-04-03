@@ -137,7 +137,11 @@ public class Step1UpgradeMetaData extends MetaDataUpgrade
 					EQ(AttributeMetaDataMetaData1_4.ENTITY,
 							v15EntityMetaDataEntity.getString(EntityMetaDataMetaData.SIMPLE_NAME)),
 					new AttributeMetaDataMetaData1_4()));
-			v15EntityMetaDataEntity.set(EntityMetaDataMetaData.ATTRIBUTES, attributes);
+            for(Entity attribute : attributes)
+                LOG.info("Setting attribute : "
+                        + attribute.get(AttributeMetaDataMetaData1_4.NAME));
+
+            v15EntityMetaDataEntity.set(EntityMetaDataMetaData.ATTRIBUTES, attributes);
 			v15EntityMetaDataEntity.set(EntityMetaDataMetaData.BACKEND, "MySQL");
 			entityRepository.update(v15EntityMetaDataEntity);
 		}
