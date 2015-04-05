@@ -196,7 +196,7 @@
 		}
 		
 		function getOntologyTermName(ontologyTerm){
-			return $('<div />').append('Name : ').append('<a href="' + ontologyTerm.ontologyTermIri + '">' + ontologyTerm.ontologyTermName + '</a>');
+			return $('<div />').append('Name : ').append('<a href="' + ontologyTerm.ontologyTermIRI + '" target="_blank">' + ontologyTerm.ontologyTermName + '</a>');
 		}
 		
 		function getOntologyTermAnnotations(ontologyTerm){
