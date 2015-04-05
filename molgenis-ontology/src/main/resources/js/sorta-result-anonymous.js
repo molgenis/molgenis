@@ -63,6 +63,12 @@
 			}
 		});
 		
+		$(thresholdValue).keydown(function(e){
+			if(e.keyCode === 13){
+				$(inputGroupButton).click();
+			}
+		});
+		
 		getMatchResults(function(matchedResults){
 			var perfectMatches = [];
 			var partialMatches = [];
