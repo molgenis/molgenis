@@ -9,19 +9,6 @@ import org.springframework.web.util.UriUtils;
 
 public class Href
 {
-	private final String href;
-
-	public Href(String href)
-	{
-		super();
-		this.href = href;
-	}
-
-	public String getHref()
-	{
-		return href;
-	}
-
 	/**
 	 * Create an encoded href for an attribute
 	 * 
