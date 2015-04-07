@@ -12,6 +12,7 @@ import java.util.List;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.IdGenerator;
 import org.molgenis.data.mapper.config.MappingConfig;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
@@ -21,6 +22,7 @@ import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -150,6 +152,12 @@ public class EntityMappingRepositoryImplTest extends AbstractTestNGSpringContext
 		PermissionSystemService permissionSystemService()
 		{
 			return mock(PermissionSystemService.class);
+		}
+
+		@Bean
+		IdGenerator idGenerator()
+		{
+			return new UuidGenerator();
 		}
 	}
 }
