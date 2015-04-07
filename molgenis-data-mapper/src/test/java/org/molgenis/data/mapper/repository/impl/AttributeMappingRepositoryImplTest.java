@@ -16,7 +16,6 @@ import org.molgenis.data.mapper.config.MappingConfig;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.meta.AttributeMappingMetaData;
 import org.molgenis.data.mapper.meta.EntityMappingMetaData;
-import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -42,7 +41,7 @@ public class AttributeMappingRepositoryImplTest extends AbstractTestNGSpringCont
 	private static final String AUTO_ID = "1";
 
 	@Test
-	private void testGetAttributeMappings()
+	public void testGetAttributeMappings()
 	{
 		DefaultAttributeMetaData targetAttributeMetaData = new DefaultAttributeMetaData("targetAttribute");
 
@@ -66,7 +65,7 @@ public class AttributeMappingRepositoryImplTest extends AbstractTestNGSpringCont
 	}
 
 	@Test
-	private void testUpsert()
+	public void testUpsert()
 	{
 		DefaultAttributeMetaData targetAttributeMetaData = new DefaultAttributeMetaData("targetAttribute");
 		targetAttributeMetaData.setDataType(MolgenisFieldTypes.STRING);
@@ -91,9 +90,9 @@ public class AttributeMappingRepositoryImplTest extends AbstractTestNGSpringCont
 	public static class Config
 	{
 		@Bean
-		DataServiceImpl dataService()
+		DataService dataService()
 		{
-			return mock(DataServiceImpl.class);
+			return mock(DataService.class);
 		}
 
 		@Bean
