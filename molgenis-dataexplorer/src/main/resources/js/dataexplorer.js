@@ -525,7 +525,9 @@ function($, molgenis, settingsXhr) {
 				// FIXME implement as part of http://www.molgenis.org/ticket/3110
 			}
 			
-			render();
+			if (state.entity) {
+				render();
+			}
 		}
 		
 		// set state from url
