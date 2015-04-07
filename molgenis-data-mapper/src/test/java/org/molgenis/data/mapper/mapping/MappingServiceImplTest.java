@@ -9,6 +9,7 @@ import static org.testng.Assert.fail;
 
 import java.util.Arrays;
 import java.util.List;
+
 import javax.annotation.PostConstruct;
 
 import org.elasticsearch.common.collect.Lists;
@@ -22,8 +23,10 @@ import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
-import org.molgenis.data.mapper.repository.impl.MappingProjectRepositoryImpl;
-import org.molgenis.data.mapper.repository.impl.MappingTargetRepositoryImpl;
+import org.molgenis.data.mapper.meta.AttributeMappingMetaData;
+import org.molgenis.data.mapper.meta.EntityMappingMetaData;
+import org.molgenis.data.mapper.meta.MappingProjectMetaData;
+import org.molgenis.data.mapper.meta.MappingTargetMetaData;
 import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.mem.InMemoryRepositoryCollection;
 import org.molgenis.data.meta.MetaDataService;
@@ -222,15 +225,7 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		@Bean
 		DataServiceImpl dataService()
 		{
-			DataServiceImpl dataServiceImpl = new DataServiceImpl();
-			Repository newMappingTargetRepository = mock(Repository.class);
-			Repository newMappingProjectRepository = mock(Repository.class);
-			when(newMappingTargetRepository.getName()).thenReturn(MappingTargetRepositoryImpl.META_DATA.getName());
-			when(newMappingProjectRepository.getName()).thenReturn(MappingProjectRepositoryImpl.META_DATA.getName());
-			dataServiceImpl.addRepository(newMappingTargetRepository);
-			dataServiceImpl.addRepository(newMappingProjectRepository);
-
-			return dataServiceImpl;
+			return new DataServiceImpl();
 		}
 
 		@Bean
@@ -260,7 +255,12 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		@PostConstruct
 		public void initRepositories()
 		{
-			metaDataService().setDefaultBackend(manageableRepositoryCollection());
+			MetaDataService metaDataService = metaDataService();
+			metaDataService.setDefaultBackend(manageableRepositoryCollection());
+			metaDataService.addEntityMeta(new AttributeMappingMetaData());
+			metaDataService.addEntityMeta(new EntityMappingMetaData());
+			metaDataService.addEntityMeta(new MappingTargetMetaData());
+			metaDataService.addEntityMeta(new MappingProjectMetaData());
 		}
 	}
 }
