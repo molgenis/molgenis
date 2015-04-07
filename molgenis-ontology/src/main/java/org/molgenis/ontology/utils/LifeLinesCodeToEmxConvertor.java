@@ -114,7 +114,7 @@ public class LifeLinesCodeToEmxConvertor
 				String code = entity.getString(CODE);
 				String codeName = entity.getString(NAME);
 				String identifier = codeSystem + code + codeName;
-				String nodePath = TOP_NODE_PATH + "." + count + "[1]";
+				String nodePath = codeName.equals(TOP_NODE_NAME) ? TOP_NODE_PATH : TOP_NODE_PATH + "." + count + "[1]";
 				String generatedId = uuidGenerator.generateId();
 				ontologyTermNodePathExcelSheet.add(createOntologyNodePathEntity(nodePath,
 						StringUtils.equalsIgnoreCase(TOP_NODE_NAME, codeName), generatedId));
