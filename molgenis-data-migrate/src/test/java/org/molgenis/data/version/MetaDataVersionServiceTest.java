@@ -7,7 +7,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import javax.sql.DataSource;
+
 import org.apache.commons.io.FileUtils;
+import org.mockito.Mockito;
 import org.springframework.util.FileCopyUtils;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -20,6 +23,7 @@ public class MetaDataVersionServiceTest
 	private MetaDataVersionService metaDataVersionService;
 	private File molgenisHomeFolder;
 	private File propertiesFile;
+	private DataSource dataSource;
 
 	@BeforeMethod
 	public void beforeMethod() throws IOException
@@ -28,7 +32,8 @@ public class MetaDataVersionServiceTest
 		System.setProperty("molgenis.home", molgenisHomeFolder.getAbsolutePath());
 		propertiesFile = new File(molgenisHomeFolder, "molgenis-server.properties");
 		propertiesFile.createNewFile();
-		metaDataVersionService = new MetaDataVersionService();
+		dataSource = Mockito.mock(DataSource.class);
+		metaDataVersionService = new MetaDataVersionService(dataSource);
 	}
 
 	@AfterMethod
