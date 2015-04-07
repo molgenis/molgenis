@@ -55,7 +55,7 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 		MappingProject existing = getMappingProject(mappingProject.getIdentifier());
 		if (existing == null)
 		{
-			throw new MolgenisDataException("MappingProject does not exists");
+			throw new MolgenisDataException("MappingProject does not exist");
 		}
 		Entity mappingProjectEntity = toEntity(mappingProject);
 		dataService.update(MappingProjectRepositoryImpl.META_DATA.getName(), mappingProjectEntity);
