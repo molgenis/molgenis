@@ -252,15 +252,35 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 			return mock(PermissionSystemService.class);
 		}
 
+		@Bean
+		AttributeMappingMetaData attributeMappingMetaData()
+		{
+			return new AttributeMappingMetaData();
+		}
+
+		@Bean
+		EntityMappingMetaData entityMappingMetaData()
+		{
+			return new EntityMappingMetaData();
+		}
+
+		@Bean
+		MappingTargetMetaData mappingTargetMetaData()
+		{
+			return new MappingTargetMetaData();
+		}
+
+		@Bean
+		MappingProjectMetaData mappingProjectMetaData()
+		{
+			return new MappingProjectMetaData();
+		}
+
 		@PostConstruct
 		public void initRepositories()
 		{
 			MetaDataService metaDataService = metaDataService();
 			metaDataService.setDefaultBackend(manageableRepositoryCollection());
-			metaDataService.addEntityMeta(new AttributeMappingMetaData());
-			metaDataService.addEntityMeta(new EntityMappingMetaData());
-			metaDataService.addEntityMeta(new MappingTargetMetaData());
-			metaDataService.addEntityMeta(new MappingProjectMetaData());
 		}
 	}
 }
