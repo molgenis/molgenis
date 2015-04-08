@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.molgenis.AppConfig;
+import org.molgenis.MysqlTestConfig;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -27,7 +27,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 /** Simple test of all apsects of the repository */
-@ContextConfiguration(classes = AppConfig.class)
+@ContextConfiguration(classes = MysqlTestConfig.class)
 public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired

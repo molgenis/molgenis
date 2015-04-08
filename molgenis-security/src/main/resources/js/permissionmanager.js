@@ -40,7 +40,6 @@
 		}
 		
 		function createUserPermissionTable(data) {
-			console.log(data);
 			var items = [];
 			$.each(data.entityIds, function(entityId, entityName) {
 				if(data.userPermissionMap && data.userPermissionMap[entityId.toLowerCase()]) {

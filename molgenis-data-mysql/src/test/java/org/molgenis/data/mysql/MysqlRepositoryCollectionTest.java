@@ -2,7 +2,7 @@ package org.molgenis.data.mysql;
 
 import java.util.Locale;
 
-import org.molgenis.AppConfig;
+import org.molgenis.MysqlTestConfig;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
@@ -14,7 +14,7 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-@ContextConfiguration(classes = AppConfig.class)
+@ContextConfiguration(classes = MysqlTestConfig.class)
 public class MysqlRepositoryCollectionTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired

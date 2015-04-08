@@ -10,12 +10,12 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.molgenis.AppConfig;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
+import org.molgenis.data.semantic.SemanticSearchConfig;
 import org.molgenis.data.semantic.UntypedTagService;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.framework.db.EntitiesValidationReport;
@@ -33,7 +33,8 @@ import org.testng.annotations.Test;
  * Integration tests for the entire EMX importer.
  */
 @Test
-@ContextConfiguration(classes = AppConfig.class)
+@ContextConfiguration(classes =
+{ ImportTestConfig.class, SemanticSearchConfig.class })
 public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
@@ -125,15 +126,28 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 
 		// test import
 		EntityImportReport report = importer.doImport(source, DatabaseAction.ADD);
-		
-		List<Entity> entities = (List<Entity>) StreamSupport
+
+		// Check children
+		List<Entity> entitiesWithChildern = StreamSupport
 				.stream(dataService.getRepository("import_person").spliterator(), false)
 				.filter(e -> e.getEntities("children").iterator().hasNext())
 				.collect(Collectors.toCollection(ArrayList::new));
-		Assert.assertEquals(new Integer(entities.size()), new Integer(1));
-		Iterator<Entity> children = entities.get(0).getEntities("children").iterator();
+		Assert.assertEquals(new Integer(entitiesWithChildern.size()), new Integer(1));
+		Iterator<Entity> children = entitiesWithChildern.get(0).getEntities("children").iterator();
 		Assert.assertEquals(children.next().getIdValue(), "john");
 		Assert.assertEquals(children.next().getIdValue(), "jane");
+
+		// Check parents
+		List<Entity> entitiesWithParents = StreamSupport
+				.stream(dataService.getRepository("import_person").spliterator(), false)
+				.filter(e -> e.getEntities("parent").iterator().hasNext())
+				.collect(Collectors.toCollection(ArrayList::new));
+		Entity parent1 = entitiesWithParents.get(0).getEntity("parent");
+		Assert.assertEquals(parent1.getIdValue().toString(), "john");
+		Entity parent2 = entitiesWithParents.get(1).getEntity("parent");
+		Assert.assertEquals(parent2.getIdValue().toString(), "jane");
+		Entity parent3 = entitiesWithParents.get(2).getEntity("parent");
+		Assert.assertEquals(parent3.getIdValue().toString(), "geofrey");
 
 		// test report
 		Assert.assertEquals(report.getNrImportedEntitiesMap().get("import_city"), new Integer(2));
@@ -165,6 +179,5 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 
 		Assert.assertEquals(report.getNrImportedEntitiesMap().get("import_city"), new Integer(4));
 		Assert.assertEquals(report.getNrImportedEntitiesMap().get("import_person"), new Integer(4));
-
 	}
 }

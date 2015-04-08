@@ -13,11 +13,12 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.annotation.PostConstruct;
+import javax.sql.DataSource;
 
-import org.molgenis.data.AutoIdRepositoryDecorator;
+import org.molgenis.data.AutoValueRepositoryDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.IdGenerator;
-import org.molgenis.data.IndexedAutoIdRepositoryDecorator;
+import org.molgenis.data.IndexedAutoValueRepositoryDecorator;
 import org.molgenis.data.IndexedCrudRepositorySecurityDecorator;
 import org.molgenis.data.IndexedRepository;
 import org.molgenis.data.ManageableRepositoryCollection;
@@ -37,6 +38,7 @@ import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.IndexedRepositoryValidationDecorator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
+import org.molgenis.data.version.MetaDataUpgradeService;
 import org.molgenis.framework.db.WebAppDatabasePopulator;
 import org.molgenis.framework.db.WebAppDatabasePopulatorService;
 import org.molgenis.framework.server.MolgenisSettings;
@@ -108,6 +110,12 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 	@Autowired
 	public EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory;
+
+	@Autowired
+	public MetaDataUpgradeService metaDataUpgradeService;
+
+	@Autowired
+	public DataSource dataSource;
 
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry)
@@ -393,6 +401,8 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@PostConstruct
 	public void initRepositories()
 	{
+		addUpgrades();
+		metaDataUpgradeService.upgrade();
 		if (!indexExists())
 		{
 			LOG.info("Reindexing repositories....");
@@ -401,9 +411,8 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		}
 		else
 		{
-			LOG.info("Index found no need to reindex.");
+			LOG.info("Index found. No need to reindex.");
 		}
-
 		runAsSystem(() -> metaDataService().setDefaultBackend(getBackend()));
 	}
 
@@ -448,14 +457,19 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 				{
 					IndexedRepository indexedRepos = (IndexedRepository) repository;
 
-					return new IndexedCrudRepositorySecurityDecorator(new IndexedAutoIdRepositoryDecorator(
+					return new IndexedCrudRepositorySecurityDecorator(new IndexedAutoValueRepositoryDecorator(
 							new IndexedRepositoryValidationDecorator(dataService(), indexedRepos,
 									new EntityAttributesValidator()), molgenisIdGenerator()), molgenisSettings);
 				}
 
-				return new RepositorySecurityDecorator(new AutoIdRepositoryDecorator(new RepositoryValidationDecorator(
+				return new RepositorySecurityDecorator(new AutoValueRepositoryDecorator(new RepositoryValidationDecorator(
 						dataService(), repository, new EntityAttributesValidator()), molgenisIdGenerator()));
 			}
 		};
 	}
+
+	/**
+	 * Adds the upgrade steps to the {@link MetaDataUpgradeService}.
+	 */
+	public abstract void addUpgrades();
 }

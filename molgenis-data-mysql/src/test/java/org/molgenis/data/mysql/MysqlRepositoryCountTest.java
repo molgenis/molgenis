@@ -1,6 +1,6 @@
 package org.molgenis.data.mysql;
 
-import org.molgenis.AppConfig;
+import org.molgenis.MysqlTestConfig;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -18,7 +18,7 @@ import org.testng.annotations.Test;
 import com.google.common.collect.Lists;
 
 /** Test for Query */
-@ContextConfiguration(classes = AppConfig.class)
+@ContextConfiguration(classes = MysqlTestConfig.class)
 public class MysqlRepositoryCountTest extends AbstractTestNGSpringContextTests
 {
 	private static final Logger LOG = LoggerFactory.getLogger(MysqlRepositoryCountTest.class);

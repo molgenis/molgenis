@@ -231,7 +231,7 @@ public class VcfRepository extends AbstractRepository
 				List<AttributeMetaData> metadataInfoField = new ArrayList<AttributeMetaData>();
 				for (VcfMetaInfo info : vcfMeta.getInfoMeta())
 				{
-					DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData(info.getId(),
+					DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData(getInfoPrefix()+info.getId(),
 							vcfReaderFormatToMolgenisType(info)).setAggregateable(true);
 					attributeMetaData.setDescription(info.getDescription());
 					metadataInfoField.add(attributeMetaData);
