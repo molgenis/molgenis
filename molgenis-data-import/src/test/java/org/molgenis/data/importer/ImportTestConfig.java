@@ -9,7 +9,7 @@ import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.mysql.AsyncJdbcTemplate;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
-import org.molgenis.data.semantic.SemanticSearchConfig;
+import org.molgenis.data.semanticsearch.config.SemanticSearchConfig;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;

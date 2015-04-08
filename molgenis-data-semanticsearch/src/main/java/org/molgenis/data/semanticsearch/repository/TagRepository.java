@@ -1,6 +1,7 @@
 package org.molgenis.data.semanticsearch.repository;
 
 import org.molgenis.data.Entity;
+import org.molgenis.data.IdGenerator;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.MetaDataServiceImpl;
@@ -8,7 +9,6 @@ import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.springframework.util.IdGenerator;
 
 /**
  * Helper class around the {@link TagMetaData} repository. Internal implementation class, use
@@ -47,7 +47,7 @@ public class TagRepository
 		if (result == null)
 		{
 			MapEntity mapEntity = new MapEntity(TagMetaData.ENTITY_NAME);
-			mapEntity.set(TagMetaData.IDENTIFIER, idGenerator.generateId().toString());
+			mapEntity.set(TagMetaData.IDENTIFIER, idGenerator.generateId());
 			mapEntity.set(TagMetaData.OBJECT_IRI, objectIRI);
 			mapEntity.set(TagMetaData.LABEL, label);
 			mapEntity.set(TagMetaData.RELATION_IRI, relation.getIRI());
