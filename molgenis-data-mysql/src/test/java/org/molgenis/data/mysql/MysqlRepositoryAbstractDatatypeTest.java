@@ -1,6 +1,6 @@
 package org.molgenis.data.mysql;
 
-import org.molgenis.AppConfig;
+import org.molgenis.MysqlTestConfig;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.meta.MetaDataServiceImpl;
@@ -14,7 +14,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
 /** Superclass for all datatype specific tests, e.g. MysqlRepositoryStringTest */
-@ContextConfiguration(classes = AppConfig.class)
+@ContextConfiguration(classes = MysqlTestConfig.class)
 public abstract class MysqlRepositoryAbstractDatatypeTest extends AbstractTestNGSpringContextTests
 {
 	protected static final Logger LOG = LoggerFactory.getLogger(MysqlRepositoryAbstractDatatypeTest.class);

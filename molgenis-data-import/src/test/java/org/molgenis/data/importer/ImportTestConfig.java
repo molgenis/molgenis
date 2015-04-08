@@ -1,24 +1,19 @@
-package org.molgenis;
-
-import java.util.UUID;
+package org.molgenis.data.importer;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 import org.apache.poi.ss.formula.eval.NotImplementedException;
-import org.molgenis.data.Repository;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
-import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.mysql.AsyncJdbcTemplate;
-import org.molgenis.data.mysql.EmbeddedMysqlDatabaseBuilder;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
-import org.molgenis.data.semanticsearch.repository.TagRepository;
-import org.molgenis.data.semanticsearch.service.impl.UntypedTagService;
+import org.molgenis.data.semantic.SemanticSearchConfig;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
+import org.molgenis.mysql.embed.EmbeddedMysqlDatabaseBuilder;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -28,9 +23,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.util.IdGenerator;
 
 /**
  * Database configuration
@@ -40,29 +35,9 @@ import org.springframework.util.IdGenerator;
 // @ComponentScan(
 // { "org.molgenis.data.mysql", "org.molgenis.data.importer" })
 @ComponentScan("org.molgenis.data.meta")
-public class AppConfig
+@ContextConfiguration(classes = SemanticSearchConfig.class)
+public class ImportTestConfig
 {
-
-	@Bean
-	TagRepository tagRepository()
-	{
-		Repository repo = mysqlRepositoryCollection().getRepository(TagMetaData.ENTITY_NAME);
-		return new TagRepository(repo, new IdGenerator()
-		{
-
-			@Override
-			public UUID generateId()
-			{
-				return UUID.randomUUID();
-			}
-		});
-	}
-
-	@Bean
-	public UntypedTagService tagService()
-	{
-		return new UntypedTagService(dataService(), tagRepository());
-	}
 
 	@Bean(destroyMethod = "shutdown")
 	public DataSource dataSource()
