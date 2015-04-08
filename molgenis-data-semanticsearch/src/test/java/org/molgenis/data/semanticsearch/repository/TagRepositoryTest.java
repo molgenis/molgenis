@@ -9,6 +9,7 @@ import static org.testng.Assert.assertEquals;
 import java.util.UUID;
 
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.IdGenerator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.semantic.Relation;
@@ -21,7 +22,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.util.IdGenerator;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -46,7 +46,7 @@ public class TagRepositoryTest extends AbstractTestNGSpringContextTests
 	public void beforeMethod()
 	{
 		tagRepository = new TagRepository(repository, idGenerator);
-		when(idGenerator.generateId()).thenReturn(uuid);
+		when(idGenerator.generateId()).thenReturn(uuid.toString());
 	}
 
 	@Test
