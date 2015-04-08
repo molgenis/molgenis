@@ -1,4 +1,5 @@
 package org.molgenis.data.importer;
+
 import static com.google.common.base.Predicates.notNull;
 import static com.google.common.collect.FluentIterable.from;
 
@@ -114,13 +115,7 @@ public class ImportWriter
 			if (dataService.hasRepository(name))
 			{
 				Repository repository = dataService.getRepository(name);
-				Repository fileEntityRepository = source.getRepository(entityMetaData.getSimpleName());
-
-				if (fileEntityRepository == null)
-				{
-					// Try fully qualified name
-					fileEntityRepository = source.getRepository(entityMetaData.getName());
-				}
+				Repository fileEntityRepository = source.getRepository(entityMetaData.getName());
 
 				// check to prevent nullpointer when importing metadata only
 				if (fileEntityRepository != null)
@@ -138,7 +133,7 @@ public class ImportWriter
 
 					entities = DependencyResolver.resolveSelfReferences(entities, entityMetaData);
 					int count = update(repository, entities, dbAction);
-					
+
 					// Fix self referenced entities were not imported
 					update(repository, this.keepSelfReferencedEntities(entities), DatabaseAction.UPDATE);
 
@@ -543,13 +538,14 @@ public class ImportWriter
 				return null;
 			}
 		}
-		
+
 		/**
 		 * getEntities filters the entities that are still not imported
 		 */
 		@Override
-		public Iterable<Entity> getEntities(String attributeName) {
-			return from((Iterable<Entity>) super.getEntities(attributeName)).filter(notNull());
+		public Iterable<Entity> getEntities(String attributeName)
+		{
+			return from(super.getEntities(attributeName)).filter(notNull());
 		}
 	}
 }

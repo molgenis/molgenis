@@ -23,6 +23,7 @@ import static org.molgenis.data.meta.EntityMetaDataMetaData.PACKAGE;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -114,10 +115,10 @@ public class EmxMetaDataParser implements MetaDataParser
 		// so we need to consider both new metadata and existing ...
 
 		IntermediateParseResults intermediateResults = parseTagsSheet(source.getRepository(TAGS));
-		// load attributes first, entities and packages are optional
+
+		parsePackagesSheet(source.getRepository(PACKAGES), intermediateResults);
 		parseAttributesSheet(source.getRepository(ATTRIBUTES), intermediateResults);
 		parseEntitiesSheet(source.getRepository(ENTITIES), intermediateResults);
-		parsePackagesSheetToEntityMap(source.getRepository(PACKAGES), intermediateResults);
 		reiterateToMapRefEntity(source.getRepository(ATTRIBUTES), intermediateResults);
 
 		return intermediateResults;
@@ -441,6 +442,7 @@ public class EmxMetaDataParser implements MetaDataParser
 					}
 				}
 			}
+
 			intermediateResults.addAttributes(entityName, editableEntityMetaData);
 		}
 	}
@@ -474,7 +476,25 @@ public class EmxMetaDataParser implements MetaDataParser
 				// required
 				if (entityName == null) throw new IllegalArgumentException("entity.name is missing on line " + i);
 
+				String packageName = entity.getString(PACKAGE);
+				if (packageName != null && !Package.DEFAULT_PACKAGE_NAME.equals(packageName))
+				{
+					entityName = packageName + Package.PACKAGE_SEPARATOR + entityName;
+				}
+
 				EditableEntityMetaData md = intermediateResults.getEntityMetaData(entityName);
+				if (packageName != null)
+				{
+					PackageImpl p = intermediateResults.getPackage(packageName);
+					if (p == null)
+					{
+						throw new MolgenisDataException("Unknown package: '" + packageName + "' for entity '"
+								+ entity.getString("name") + "'. Please specify the package on the " + PACKAGES
+								+ " sheet and use the fully qualified package and entity names.");
+					}
+					md.setPackage(p);
+				}
+
 				md.setLabel(entity.getString(org.molgenis.data.meta.EntityMetaDataMetaData.LABEL));
 				md.setDescription(entity.getString(org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION));
 				if (entity.getBoolean(ABSTRACT) != null) md.setAbstract(entity.getBoolean(ABSTRACT));
@@ -493,12 +513,6 @@ public class EmxMetaDataParser implements MetaDataParser
 						throw new MolgenisDataException("Missing super entity " + extendsEntityName + " for entity "
 								+ entityName + " on line " + i);
 					}
-				}
-
-				String packageName = entity.getString(PACKAGE);
-				if (packageName != null)
-				{
-					md.setPackage(new PackageImpl(packageName, null));
 				}
 
 				if (tagIds != null)
@@ -532,23 +546,28 @@ public class EmxMetaDataParser implements MetaDataParser
 
 		// Collect packages
 		int i = 1;
-		for (Entity pack : repo)
+		for (Entity pack : resolvePackages(repo))
 		{
 			i++;
-			String simpleName = pack.getString(NAME);
+			String name = pack.getString(NAME);
 
 			// required
-			if (simpleName == null) throw new IllegalArgumentException("package.name is missing on line " + i);
+			if (name == null) throw new IllegalArgumentException("package.name is missing on line " + i);
 
-			PackageImpl parentPackage = null;
+			String simpleName = name;
 			String description = pack.getString(org.molgenis.data.meta.PackageMetaData.DESCRIPTION);
-			String parent = pack.getString(org.molgenis.data.meta.PackageMetaData.PARENT);
-			if (parent != null)
+			String parentName = pack.getString(org.molgenis.data.meta.PackageMetaData.PARENT);
+			PackageImpl parent = null;
+			if (parentName != null)
 			{
-				parentPackage = new PackageImpl(parent, null);
+				if (!name.toLowerCase().startsWith(parentName.toLowerCase())) throw new MolgenisDataException(
+						"Inconsistent package structure. Package: '" + name + "', parent: '" + parentName + "'");
+				simpleName = name.substring(parentName.length() + 1);// subpackage_package
+				parent = intermediateResults.getPackage(parentName);
 			}
 			Iterable<String> tagIdentifiers = pack.getList(org.molgenis.data.meta.PackageMetaData.TAGS);
-			PackageImpl p = new PackageImpl(simpleName, description, parentPackage);
+
+			PackageImpl p = new PackageImpl(simpleName, description, parent);
 
 			if (tagIdentifiers != null && !Iterables.isEmpty(tagIdentifiers))
 			{
@@ -564,48 +583,57 @@ public class EmxMetaDataParser implements MetaDataParser
 
 			}
 
-			intermediateResults.addPackage(simpleName, p);
-		}
-
-		// Resolve parent packages
-		for (PackageImpl p : intermediateResults.getPackages().values())
-		{
-			if (p.getParent() != null)
-			{
-				PackageImpl parent = intermediateResults.getPackage(p.getParent().getSimpleName());
-				if (parent == null) throw new IllegalArgumentException("Unknown parent package '"
-						+ p.getParent().getSimpleName() + "' of package '" + p.getSimpleName() + "'");
-
-				p.setParent(parent);
-			}
+			intermediateResults.addPackage(name, p);
 		}
 	}
 
-	/**
-	 * Load packages (optional)
-	 * 
-	 * @param packageRepo
-	 *            {@link Repository} containing the packages
-	 * @param intermediateResults
-	 *            {@link IntermediateParseResults} containing the already parsed entities
-	 */
-	private void parsePackagesSheetToEntityMap(Repository packageRepo, IntermediateParseResults intermediateResults)
+	private List<Entity> resolvePackages(Repository packageRepo)
 	{
-		parsePackagesSheet(packageRepo, intermediateResults);
+		List<Entity> resolved = new ArrayList<>();
+		List<Entity> unresolved = new ArrayList<>();
+		Map<String, Entity> resolvedByName = new HashMap<>();
 
-		// Resolve entity packages
-		for (EditableEntityMetaData emd : intermediateResults.getEntities())
+		for (Entity pack : packageRepo)
 		{
-			if (emd.getPackage() != null)
-			{
-				Package p = intermediateResults.getPackage(emd.getPackage().getSimpleName());
-				if (p == null) throw new IllegalArgumentException("Unknown package '"
-						+ emd.getPackage().getSimpleName() + "' of entity '" + emd.getSimpleName() + "'");
+			String name = pack.getString(NAME);
+			String parentName = pack.getString(org.molgenis.data.meta.PackageMetaData.PARENT);
 
-				emd.setPackage(p);
+			if (parentName == null)
+			{
+				resolved.add(pack);
+				resolvedByName.put(name, pack);
+			}
+			else
+			{
+				unresolved.add(pack);
 			}
 		}
 
+		if (resolved.isEmpty()) throw new IllegalArgumentException(
+				"Missing root package. There must be at least one package without a parent.");
+
+		List<Entity> ready = new ArrayList<>();
+		while (!unresolved.isEmpty())
+		{
+			for (Entity pack : unresolved)
+			{
+				Entity parent = resolvedByName.get(pack.getString(org.molgenis.data.meta.PackageMetaData.PARENT));
+				if (parent != null)
+				{
+					String name = pack.getString(NAME);
+					ready.add(pack);
+					resolvedByName.put(name, pack);
+				}
+			}
+
+			if (ready.isEmpty()) throw new IllegalArgumentException(
+					"Could not resolve packages. Is there a circular reference?");
+			resolved.addAll(ready);
+			unresolved.removeAll(ready);
+			ready.clear();
+		}
+
+		return resolved;
 	}
 
 	/**
@@ -666,7 +694,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			List<EntityMetaData> metadataList = new ArrayList<EntityMetaData>();
 			for (String name : source.getEntityNames())
 			{
-				metadataList.add(dataService.getRepository(getFullyQualifiedEntityName(name)).getEntityMetaData());
+				metadataList.add(dataService.getRepository(name).getEntityMetaData());
 			}
 			IntermediateParseResults intermediateResults = parseTagsSheet(source.getRepository(TAGS));
 			parsePackagesSheet(source.getRepository(PACKAGES), intermediateResults);
@@ -711,33 +739,13 @@ public class EmxMetaDataParser implements MetaDataParser
 		}
 	}
 
-	private String getFullyQualifiedEntityName(String entityName)
-	{
-		if (dataService.getMeta().getEntityMetaData(entityName) == null)
-		{
-			for (EntityMetaData entityMetaData : dataService.getMeta().getEntityMetaDatas())
-			{
-				if (entityName.equals(entityMetaData.getSimpleName()))
-				{
-					// map simple entity name to fully qualified entity name
-					return entityMetaData.getName();
-				}
-			}
-			return entityName;
-		}
-		else
-		{
-			return entityName;
-		}
-	}
-
 	private ImmutableMap<String, EntityMetaData> getEntityMetaDataFromDataService(DataService dataService,
 			Iterable<String> entityNames)
 	{
 		ImmutableMap.Builder<String, EntityMetaData> builder = ImmutableMap.<String, EntityMetaData> builder();
 		for (String name : entityNames)
 		{
-			builder.put(name, dataService.getRepository(getFullyQualifiedEntityName(name)).getEntityMetaData());
+			builder.put(name, dataService.getRepository(name).getEntityMetaData());
 		}
 		return builder.build();
 	}
