@@ -5,6 +5,8 @@ import java.util.UUID;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.TagMetaData;
+import org.molgenis.data.semanticsearch.repository.TagRepository;
+import org.molgenis.data.semanticsearch.service.impl.UntypedTagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

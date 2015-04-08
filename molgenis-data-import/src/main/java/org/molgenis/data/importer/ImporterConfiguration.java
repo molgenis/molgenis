@@ -2,7 +2,7 @@ package org.molgenis.data.importer;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.mysql.EmxImportServiceRegistrator;
-import org.molgenis.data.semantic.UntypedTagService;
+import org.molgenis.data.semanticsearch.service.impl.UntypedTagService;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

@@ -1337,6 +1337,10 @@ public class ElasticSearchService implements SearchService
 					SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName);
 					searchRequestGenerator.buildSearchRequest(searchRequestBuilder, type, SearchType.QUERY_AND_FETCH,
 							q, fieldsToReturn, null, null, null, entityMetaData);
+					if (LOG.isTraceEnabled())
+					{
+						LOG.trace("SearchRequest: " + searchRequestBuilder);
+					}
 					SearchResponse searchResponse = searchRequestBuilder.execute().actionGet();
 					if (searchResponse.getFailedShards() > 0)
 					{

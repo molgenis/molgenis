@@ -87,5 +87,10 @@
 		    <artifactId>jscience</artifactId>
 		    <version>4.3.1</version>
 		</dependency>
+		<dependency>
+			<groupId>com.google.auto.value</groupId>
+			<artifactId>auto-value</artifactId>
+			<version>1.0</version>
+		</dependency>
 	</dependencies>
 </project>
