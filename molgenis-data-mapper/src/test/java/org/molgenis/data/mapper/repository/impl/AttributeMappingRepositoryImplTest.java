@@ -2,6 +2,10 @@ package org.molgenis.data.mapper.repository.impl;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.molgenis.data.mapper.meta.AttributeMappingMetaData.ALGORITHM;
+import static org.molgenis.data.mapper.meta.AttributeMappingMetaData.IDENTIFIER;
+import static org.molgenis.data.mapper.meta.AttributeMappingMetaData.TARGETATTRIBUTEMETADATA;
+import static org.molgenis.data.mapper.repository.impl.AttributeMappingRepositoryImpl.META_DATA;
 import static org.testng.Assert.assertEquals;
 
 import java.util.ArrayList;
@@ -9,13 +13,14 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.mockito.Mockito;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.IdGenerator;
 import org.molgenis.data.mapper.config.MappingConfig;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.meta.AttributeMappingMetaData;
-import org.molgenis.data.mapper.meta.EntityMappingMetaData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -38,7 +43,8 @@ public class AttributeMappingRepositoryImplTest extends AbstractTestNGSpringCont
 	@Autowired
 	private AttributeMappingRepositoryImpl attributeMappingRepository;
 
-	private static final String AUTO_ID = "1";
+	@Autowired
+	private IdGenerator idGenerator;
 
 	@Test
 	public void testGetAttributeMappings()
@@ -46,12 +52,12 @@ public class AttributeMappingRepositoryImplTest extends AbstractTestNGSpringCont
 		DefaultAttributeMetaData targetAttributeMetaData = new DefaultAttributeMetaData("targetAttribute");
 
 		List<AttributeMapping> attributeMappings = new ArrayList<AttributeMapping>();
-		attributeMappings.add(new AttributeMapping("1", targetAttributeMetaData, "algorithm"));
+		attributeMappings.add(new AttributeMapping("attributeMappingID", targetAttributeMetaData, "algorithm"));
 
-		Entity attributeMappingEntity = new MapEntity();
-		attributeMappingEntity.set(EntityMappingMetaData.IDENTIFIER, AUTO_ID);
-		attributeMappingEntity.set(AttributeMappingMetaData.TARGETATTRIBUTEMETADATA, "targetAttribute");
-		attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHM, "algorithm");
+		Entity attributeMappingEntity = new MapEntity(new AttributeMappingMetaData());
+		attributeMappingEntity.set(IDENTIFIER, "attributeMappingID");
+		attributeMappingEntity.set(TARGETATTRIBUTEMETADATA, "targetAttribute");
+		attributeMappingEntity.set(ALGORITHM, "algorithm");
 
 		List<Entity> attributeMappingEntities = new ArrayList<Entity>();
 		attributeMappingEntities.add(attributeMappingEntity);
@@ -65,25 +71,49 @@ public class AttributeMappingRepositoryImplTest extends AbstractTestNGSpringCont
 	}
 
 	@Test
-	public void testUpsert()
+	public void testUpdate()
 	{
 		DefaultAttributeMetaData targetAttributeMetaData = new DefaultAttributeMetaData("targetAttribute");
 		targetAttributeMetaData.setDataType(MolgenisFieldTypes.STRING);
 
-		Collection<AttributeMapping> attributeMappings = Arrays.asList(new AttributeMapping(AUTO_ID,
+		Collection<AttributeMapping> attributeMappings = Arrays.asList(new AttributeMapping("attributeMappingID",
 				targetAttributeMetaData, "algorithm"));
 
 		List<Entity> result = new ArrayList<Entity>();
 		Entity attributeMappingEntity = new MapEntity(new AttributeMappingMetaData());
-		attributeMappingEntity.set(AttributeMappingMetaData.IDENTIFIER, AUTO_ID);
-		attributeMappingEntity.set(AttributeMappingMetaData.TARGETATTRIBUTEMETADATA, targetAttributeMetaData.getName());
-		attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHM, "algorithm");
+		attributeMappingEntity.set(IDENTIFIER, "attributeMappingID");
+		attributeMappingEntity.set(TARGETATTRIBUTEMETADATA, targetAttributeMetaData.getName());
+		attributeMappingEntity.set(ALGORITHM, "algorithm");
 
 		result.add(attributeMappingEntity);
 
 		assertEquals(attributeMappingRepository.upsert(attributeMappings), result);
 
 		verify(dataService).update(AttributeMappingRepositoryImpl.META_DATA.getName(), attributeMappingEntity);
+	}
+
+	@Test
+	public void testInsert()
+	{
+		DefaultAttributeMetaData targetAttributeMetaData = new DefaultAttributeMetaData("targetAttribute");
+		targetAttributeMetaData.setDataType(MolgenisFieldTypes.STRING);
+
+		Collection<AttributeMapping> attributeMappings = Arrays.asList(new AttributeMapping(null,
+				targetAttributeMetaData, "algorithm"));
+
+		Mockito.when(idGenerator.generateId()).thenReturn("attributeMappingID");
+
+		List<Entity> result = new ArrayList<Entity>();
+		Entity attributeMappingEntity = new MapEntity(new AttributeMappingMetaData());
+		attributeMappingEntity.set(IDENTIFIER, "attributeMappingID");
+		attributeMappingEntity.set(TARGETATTRIBUTEMETADATA, targetAttributeMetaData.getName());
+		attributeMappingEntity.set(ALGORITHM, "algorithm");
+
+		result.add(attributeMappingEntity);
+
+		assertEquals(attributeMappingRepository.upsert(attributeMappings), result);
+
+		verify(dataService).add(META_DATA.getName(), attributeMappingEntity);
 	}
 
 	@Configuration
@@ -111,6 +141,12 @@ public class AttributeMappingRepositoryImplTest extends AbstractTestNGSpringCont
 		PermissionSystemService permissionSystemService()
 		{
 			return mock(PermissionSystemService.class);
+		}
+
+		@Bean
+		IdGenerator idGenerator()
+		{
+			return mock(IdGenerator.class);
 		}
 	}
 }

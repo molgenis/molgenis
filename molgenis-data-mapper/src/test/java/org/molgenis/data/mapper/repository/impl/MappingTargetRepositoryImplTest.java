@@ -1,24 +1,28 @@
 package org.molgenis.data.mapper.repository.impl;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.mapper.meta.MappingTargetMetaData.ENTITYMAPPINGS;
+import static org.molgenis.data.mapper.meta.MappingTargetMetaData.IDENTIFIER;
+import static org.molgenis.data.mapper.meta.MappingTargetMetaData.TARGET;
 import static org.testng.Assert.assertEquals;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.MockitoAnnotations;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.mapper.config.MappingConfig;
-import org.molgenis.data.mapper.mapping.model.AttributeMapping;
+import org.molgenis.data.IdGenerator;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
-import org.molgenis.data.mapper.meta.MappingTargetMetaData;
+import org.molgenis.data.mapper.meta.EntityMappingMetaData;
+import org.molgenis.data.mapper.repository.EntityMappingRepository;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -30,77 +34,95 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.Lists;
-
+/**
+ * Unit test for the MappingTargetRepository. Tests the MappingTargetRepository in isolation.
+ */
 @ContextConfiguration(classes =
-{ MappingTargetRepositoryImplTest.Config.class, MappingConfig.class })
+{ MappingTargetRepositoryImplTest.Config.class })
 public class MappingTargetRepositoryImplTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
 	private DataService dataService;
 
 	@Autowired
-	private AttributeMappingRepositoryImpl attributeMappingRepository;
-
-	@Autowired
-	private EntityMappingRepositoryImpl entityMappingRepository;
+	private EntityMappingRepository entityMappingRepository;
 
 	@Autowired
 	private MappingTargetRepositoryImpl mappingTargetRepository;
 
-	private static final String AUTO_ID = "1";
+	@Autowired
+	private IdGenerator idGenerator;
+
+	private List<MappingTarget> mappingTargets;
+
+	private List<Entity> mappingTargetEntities;
+
+	private DefaultEntityMetaData targetEntityMetaData;
+
+	private List<Entity> entityMappingEntities;
+
+	private List<EntityMapping> entityMappings;
+
+	@Captor
+	ArgumentCaptor<Collection<EntityMapping>> entityMappingCaptor;
+
+	@BeforeMethod
+	public void beforeMethod()
+	{
+		MockitoAnnotations.initMocks(this);
+
+		// POJOs
+		DefaultEntityMetaData sourceEntityMetaData = new DefaultEntityMetaData("source");
+		targetEntityMetaData = new DefaultEntityMetaData("target");
+		DefaultAttributeMetaData targetAttributeMetaData = new DefaultAttributeMetaData("targetAttribute");
+		targetEntityMetaData.addAttributeMetaData(targetAttributeMetaData);
+		entityMappings = Arrays.asList(new EntityMapping("entityMappingID", sourceEntityMetaData, targetEntityMetaData,
+				emptyList()));
+		mappingTargets = Arrays.asList(new MappingTarget("mappingTargetID", targetEntityMetaData, entityMappings));
+
+		// Entities
+		Entity entityMappingEntity = new MapEntity(EntityMappingRepositoryImpl.META_DATA);
+		entityMappingEntity.set(EntityMappingMetaData.IDENTIFIER, "entityMappingID");
+		entityMappingEntity.set(EntityMappingMetaData.SOURCEENTITYMETADATA, "source");
+		entityMappingEntity.set(EntityMappingMetaData.TARGETENTITYMETADATA, "target");
+		entityMappingEntity.set(EntityMappingMetaData.ATTRIBUTEMAPPINGS, emptyList());
+		Entity mappingTargetEntity = new MapEntity(MappingTargetRepositoryImpl.META_DATA);
+		mappingTargetEntity.set(IDENTIFIER, "mappingTargetID");
+		mappingTargetEntity.set(TARGET, "target");
+		entityMappingEntities = asList(entityMappingEntity);
+		mappingTargetEntity.set(ENTITYMAPPINGS, entityMappingEntities);
+		mappingTargetEntities = asList(mappingTargetEntity);
+	}
 
 	@Test
 	public void testToMappingTargets()
 	{
-		DefaultAttributeMetaData targetAttributeMetaData = new DefaultAttributeMetaData("targetAttribute");
-		DefaultEntityMetaData sourceEntityMetaData = new DefaultEntityMetaData("source");
-		DefaultEntityMetaData targetEntityMetaData = new DefaultEntityMetaData("target");
-		targetEntityMetaData.addAttributeMetaData(targetAttributeMetaData);
-
-		List<AttributeMapping> attributeMappings = new ArrayList<AttributeMapping>();
-		attributeMappings.add(new AttributeMapping(AUTO_ID, targetAttributeMetaData, "algorithm"));
-
-		List<EntityMapping> entityMappings = Arrays.asList(new EntityMapping(AUTO_ID, sourceEntityMetaData,
-				targetEntityMetaData, attributeMappings));
-
-		List<MappingTarget> mappingTargets = Arrays.asList(new MappingTarget(AUTO_ID, targetEntityMetaData,
-				entityMappings));
-
-		List<Entity> mappingTargetEntities = new ArrayList<Entity>();
-		Entity mappingTargetEntity = new MapEntity(new MappingTargetMetaData());
-		mappingTargetEntity.set(MappingTargetMetaData.IDENTIFIER, AUTO_ID);
-		mappingTargetEntity.set(MappingTargetMetaData.TARGET, targetEntityMetaData);
-		mappingTargetEntity.set(MappingTargetMetaData.ENTITYMAPPINGS, entityMappings);
-
-		mappingTargetEntities.add(mappingTargetEntity);
-
-		when(dataService.getEntityMetaData(mappingTargetEntity.getString(MappingTargetMetaData.TARGET))).thenReturn(
-				targetEntityMetaData);
+		when(dataService.getEntityMetaData("target")).thenReturn(targetEntityMetaData);
+		when(entityMappingRepository.toEntityMappings(entityMappingEntities)).thenReturn(entityMappings);
 
 		assertEquals(mappingTargetRepository.toMappingTargets(mappingTargetEntities), mappingTargets);
 	}
 
-	private MappingTarget toMappingTarget(Entity mappingTargetEntity)
+	@Test
+	public void testUpdate()
 	{
-		List<EntityMapping> entityMappings = Collections.emptyList();
-		String identifier = mappingTargetEntity.getString(MappingTargetMetaData.IDENTIFIER);
-		EntityMetaData target = dataService.getEntityMetaData(mappingTargetEntity
-				.getString(MappingTargetMetaData.TARGET));
-		if (mappingTargetEntity.getEntities(MappingTargetMetaData.ENTITYMAPPINGS) != null)
-		{
-			List<Entity> entityMappingEntities = Lists.newArrayList(mappingTargetEntity
-					.getEntities(MappingTargetMetaData.ENTITYMAPPINGS));
-			entityMappings = entityMappingRepository.toEntityMappings(entityMappingEntities);
-		}
-		return new MappingTarget(identifier, target, entityMappings);
+		when(entityMappingRepository.upsert(entityMappings)).thenReturn(entityMappingEntities);
+		List<Entity> result = mappingTargetRepository.upsert(mappingTargets);
+		assertEquals(result, mappingTargetEntities);
 	}
 
 	@Test
-	public void testUpsert()
+	public void testInsert()
 	{
+		mappingTargets.get(0).setIdentifier(null);
+
+		when(idGenerator.generateId()).thenReturn("mappingTargetID");
+		when(entityMappingRepository.upsert(entityMappings)).thenReturn(entityMappingEntities);
+		List<Entity> result = mappingTargetRepository.upsert(mappingTargets);
+		assertEquals(result, mappingTargetEntities);
 	}
 
 	@Configuration
@@ -113,15 +135,9 @@ public class MappingTargetRepositoryImplTest extends AbstractTestNGSpringContext
 		}
 
 		@Bean
-		AttributeMappingRepositoryImpl attributeMappingRepository()
+		EntityMappingRepository entityMappingRepository()
 		{
-			return new AttributeMappingRepositoryImpl(dataService());
-		}
-
-		@Bean
-		EntityMappingRepositoryImpl entityMappingRepository()
-		{
-			return new EntityMappingRepositoryImpl(attributeMappingRepository());
+			return mock(EntityMappingRepository.class);
 		}
 
 		@Bean
@@ -140,6 +156,12 @@ public class MappingTargetRepositoryImplTest extends AbstractTestNGSpringContext
 		PermissionSystemService permissionSystemService()
 		{
 			return mock(PermissionSystemService.class);
+		}
+
+		@Bean
+		IdGenerator idGenerator()
+		{
+			return mock(IdGenerator.class);
 		}
 	}
 }

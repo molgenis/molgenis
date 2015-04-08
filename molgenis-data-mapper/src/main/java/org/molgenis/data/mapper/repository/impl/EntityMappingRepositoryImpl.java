@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.IdGenerator;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.meta.EntityMappingMetaData;
@@ -14,7 +15,6 @@ import org.molgenis.data.mapper.repository.AttributeMappingRepository;
 import org.molgenis.data.mapper.repository.EntityMappingRepository;
 import org.molgenis.data.support.MapEntity;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.IdGenerator;
 
 import com.google.common.collect.Lists;
 
@@ -71,7 +71,7 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 		Entity entityMappingEntity;
 		if (entityMapping.getIdentifier() == null)
 		{
-			entityMapping.setIdentifier(idGenerator.generateId().toString());
+			entityMapping.setIdentifier(idGenerator.generateId());
 			entityMappingEntity = toEntityMappingEntity(entityMapping, attributeMappingEntities);
 			dataService.add(EntityMappingRepositoryImpl.META_DATA.getName(), entityMappingEntity);
 		}
