@@ -13,8 +13,8 @@ import java.util.List;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.UuidGenerator;
+import org.molgenis.ontology.core.meta.OntologyTermNodePathMetaData;
 import org.molgenis.ontology.importer.repository.OntologyTermNodePathRepository;
-import org.molgenis.ontology.model.OntologyTermNodePathMetaData;
 import org.molgenis.ontology.utils.OntologyLoader;
 import org.molgenis.ontology.utils.ZipFileUtil;
 import org.molgenis.util.ResourceUtils;

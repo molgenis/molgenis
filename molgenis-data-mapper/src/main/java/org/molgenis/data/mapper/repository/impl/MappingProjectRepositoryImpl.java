@@ -6,6 +6,7 @@ import java.util.List;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.IdGenerator;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
@@ -17,7 +18,6 @@ import org.molgenis.data.support.MapEntity;
 import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.IdGenerator;
 
 import com.google.common.collect.Lists;
 
@@ -55,7 +55,7 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 		MappingProject existing = getMappingProject(mappingProject.getIdentifier());
 		if (existing == null)
 		{
-			throw new MolgenisDataException("MappingProject does not exists");
+			throw new MolgenisDataException("MappingProject does not exist");
 		}
 		Entity mappingProjectEntity = toEntity(mappingProject);
 		dataService.update(MappingProjectRepositoryImpl.META_DATA.getName(), mappingProjectEntity);
@@ -125,7 +125,7 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 		Entity result = new MapEntity(META_DATA);
 		if (mappingProject.getIdentifier() == null)
 		{
-			mappingProject.setIdentifier(idGenerator.generateId().toString());
+			mappingProject.setIdentifier(idGenerator.generateId());
 		}
 		result.set(MappingProjectMetaData.IDENTIFIER, mappingProject.getIdentifier());
 		// FIXME: Once cross-repo references allow it, change this to mappingProject.getOwner()

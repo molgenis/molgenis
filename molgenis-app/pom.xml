@@ -267,7 +267,12 @@
             <artifactId>molgenis-data-import</artifactId>
             <version>${project.version}</version>
         </dependency>
-         <dependency>
+        <dependency>
+        	<groupId>org.molgenis</groupId>
+        	<artifactId>molgenis-data-mysql</artifactId>
+        	<version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-catalogue</artifactId>
             <version>${project.version}</version>
@@ -331,6 +336,11 @@
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-data-semanticsearch</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-data-migrate</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>

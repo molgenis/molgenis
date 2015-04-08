@@ -13,8 +13,8 @@ import java.util.List;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.UuidGenerator;
+import org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData;
 import org.molgenis.ontology.importer.repository.OntologyTermSynonymRepository;
-import org.molgenis.ontology.model.OntologyTermSynonymMetaData;
 import org.molgenis.ontology.utils.OntologyLoader;
 import org.molgenis.ontology.utils.ZipFileUtil;
 import org.molgenis.util.ResourceUtils;

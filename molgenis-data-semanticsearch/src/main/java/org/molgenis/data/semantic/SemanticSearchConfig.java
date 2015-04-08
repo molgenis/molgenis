@@ -1,37 +1,41 @@
 package org.molgenis.data.semantic;
 
+import java.util.UUID;
+
 import org.molgenis.data.DataService;
-import org.molgenis.data.IdGenerator;
-import org.molgenis.ontology.OntologyService;
+import org.molgenis.data.Repository;
+import org.molgenis.data.meta.TagMetaData;
+import org.molgenis.data.semanticsearch.repository.TagRepository;
+import org.molgenis.data.semanticsearch.service.impl.UntypedTagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.IdGenerator;
 
 @Configuration
 public class SemanticSearchConfig
 {
 	@Autowired
-	DataService dataService;
-
-	@Autowired
-	OntologyService ontologyService;
-
-	@Autowired
-	TagRepository tagRepository;
-
-	@Autowired
-	IdGenerator idGenerator;
+	private DataService dataService;
 
 	@Bean
-	public OntologyTagService ontologyTagService()
+	TagRepository tagRepository()
 	{
-		return new OntologyTagService(dataService, ontologyService, tagRepository, idGenerator);
+		Repository repo = dataService.getRepository(TagMetaData.ENTITY_NAME);
+		return new TagRepository(repo, new IdGenerator()
+		{
+
+			@Override
+			public UUID generateId()
+			{
+				return UUID.randomUUID();
+			}
+		});
 	}
 
 	@Bean
-	public SemanticSearchService semanticSearchService()
+	public UntypedTagService tagService()
 	{
-		return new SemanticSearchServiceImpl();
+		return new UntypedTagService(dataService, tagRepository());
 	}
-	
 }

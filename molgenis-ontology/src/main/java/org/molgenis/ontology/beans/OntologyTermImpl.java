@@ -5,8 +5,8 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
-import org.molgenis.ontology.model.OntologyTermMetaData;
-import org.molgenis.ontology.model.OntologyTermSynonymMetaData;
+import org.molgenis.ontology.core.meta.OntologyTermMetaData;
+import org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData;
 
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;

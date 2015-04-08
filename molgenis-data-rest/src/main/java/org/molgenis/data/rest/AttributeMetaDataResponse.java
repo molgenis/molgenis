@@ -9,8 +9,10 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Range;
+import org.molgenis.security.core.MolgenisPermissionService;
 
 import com.google.common.base.Function;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
@@ -22,6 +24,7 @@ public class AttributeMetaDataResponse
 	private final String label;
 	private final String description;
 	private final List<?> attributes;
+	private final List<String> enumOptions;
 	private final Object refEntity;
 	private final Boolean auto;
 	private final Boolean nillable;
@@ -35,9 +38,10 @@ public class AttributeMetaDataResponse
 	private Range range;
 	private String expression;
 
-	public AttributeMetaDataResponse(String entityParentName, AttributeMetaData attr)
+	public AttributeMetaDataResponse(String entityParentName, AttributeMetaData attr,
+			MolgenisPermissionService permissionService)
 	{
-		this(entityParentName, attr, null, null);
+		this(entityParentName, attr, null, null, permissionService);
 	}
 
 	/**
@@ -50,7 +54,7 @@ public class AttributeMetaDataResponse
 	 *            set of lowercase attribute names to expand in response
 	 */
 	public AttributeMetaDataResponse(final String entityParentName, AttributeMetaData attr, Set<String> attributesSet,
-			final Map<String, Set<String>> attributeExpandsSet)
+			final Map<String, Set<String>> attributeExpandsSet, MolgenisPermissionService permissionService)
 	{
 		String attrName = attr.getName();
 		this.href = Href.concatMetaAttributeHref(RestController.BASE_URI, entityParentName, attrName);
@@ -79,6 +83,12 @@ public class AttributeMetaDataResponse
 		}
 		else this.description = null;
 
+		if (attributesSet == null || attributesSet.contains("enumOptions".toLowerCase()))
+		{
+			this.enumOptions = attr.getEnumOptions();
+		}
+		else this.enumOptions = null;
+
 		if (attributesSet == null || attributesSet.contains("expression".toLowerCase()))
 		{
 			this.expression = attr.getExpression();
@@ -91,12 +101,13 @@ public class AttributeMetaDataResponse
 			if (attributeExpandsSet != null && attributeExpandsSet.containsKey("refEntity".toLowerCase()))
 			{
 				Set<String> subAttributesSet = attributeExpandsSet.get("refEntity".toLowerCase());
-				this.refEntity = refEntity != null ? new EntityMetaDataResponse(refEntity, subAttributesSet, null) : null;
+				this.refEntity = refEntity != null ? new EntityMetaDataResponse(refEntity, subAttributesSet, null,
+						permissionService) : null;
 			}
 			else
 			{
-				this.refEntity = refEntity != null ? new Href(Href.concatMetaEntityHref(RestController.BASE_URI,
-						refEntity.getName())) : null;
+				this.refEntity = refEntity != null ? ImmutableMap.<String, String> of("href",
+						Href.concatMetaEntityHref(RestController.BASE_URI, refEntity.getName())) : null;
 			}
 		}
 		else this.refEntity = null;
@@ -116,7 +127,7 @@ public class AttributeMetaDataResponse
 							{
 								Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
 								return new AttributeMetaDataResponse(entityParentName, attributeMetaData,
-										subAttributesSet, null);
+										subAttributesSet, null, permissionService);
 							}
 							else
 							{
@@ -217,6 +228,11 @@ public class AttributeMetaDataResponse
 	public List<?> getAttributes()
 	{
 		return attributes;
+	}
+
+	public List<String> getEnumOptions()
+	{
+		return enumOptions;
 	}
 
 	public Object getRefEntity()

@@ -7,10 +7,10 @@
 (function($, molgenis) {
 	"use strict";
 
-	var selectedAttributeName;
-	var relationIRI;
-	var selectedOntologyIds = [];
-	var entityName;
+	var selectedAttributeName, 
+		relationIRI, 
+		selectedOntologyIds = [], 
+		entityName;
 
 	function noOntologySelectedHandler(messageType) {
 		molgenis.createAlert([ {
@@ -72,6 +72,7 @@
 	$(function() {
 		entityName = $('#global-information').data('entity');
 
+		$('#tag-mapping-table').scrollTableBody();
 		$('#ontology-select').select2();
 
 		$('#ontology-select').on('change', function() {
@@ -146,8 +147,8 @@
 		createDynamicSelectDropdown();
 
 		$('#save-tag-selection-btn').on('click', function() {
-			var attributeName = selectedAttributeName;
-			var ontologyTermIRIs = $('#tag-dropdown').select2('val');
+			var attributeName = selectedAttributeName,
+				ontologyTermIRIs = $('#tag-dropdown').select2('val');
 
 			$.ajax({
 				url : 'tagwizard/tagattribute',
@@ -167,9 +168,9 @@
 		});
 
 		$('.tag-column').on('click', '.remove-tag-btn', function() {
-			var attributeName = $(this).data('attribute');
+			var attributeName = $(this).data('attribute'),
+				ontologyTermIRI = $(this).data('tag');
 			relationIRI = $(this).data('relation');
-			var ontologyTermIRI = $(this).data('tag');
 			$.ajax({
 				url : 'tagwizard/deletesingletag',
 				type : 'POST',

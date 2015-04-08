@@ -8,13 +8,13 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.IdGenerator;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.meta.AttributeMappingMetaData;
 import org.molgenis.data.mapper.meta.EntityMappingMetaData;
 import org.molgenis.data.mapper.repository.AttributeMappingRepository;
 import org.molgenis.data.support.MapEntity;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.IdGenerator;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
@@ -49,7 +49,7 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 		Entity result;
 		if (attributeMapping.getIdentifier() == null)
 		{
-			attributeMapping.setIdentifier(idGenerator.generateId().toString());
+			attributeMapping.setIdentifier(idGenerator.generateId());
 			result = toAttributeMappingEntity(attributeMapping);
 			dataService.add(AttributeMappingRepositoryImpl.META_DATA.getName(), result);
 		}

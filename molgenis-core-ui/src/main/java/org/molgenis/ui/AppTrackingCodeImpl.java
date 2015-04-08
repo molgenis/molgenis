@@ -4,8 +4,8 @@ import org.molgenis.framework.server.MolgenisSettings;
 
 public class AppTrackingCodeImpl implements AppTrackingCode
 {
-	private String googleAnalytics = null;
-	private String piwik = null;
+	private String header = null;
+	private String footer = null;
 	private final static String START_TRACKINGCODE = "(function(){if('true' === $.cookie('permissionforcookies')){";
 	private final static String END_TRACKINGCODE = "}})();";
 
@@ -15,47 +15,47 @@ public class AppTrackingCodeImpl implements AppTrackingCode
 
 	public AppTrackingCodeImpl(MolgenisSettings molgenisSettings)
 	{
-		this(molgenisSettings.getProperty(AppTrackingCode.KEY_APP_TRACKING_CODE_PIWIK), molgenisSettings
-				.getProperty(AppTrackingCode.KEY_APP_TRACKING_CODE_GOOGLEANALYTICS));
+		this(molgenisSettings.getProperty(AppTrackingCode.KEY_APP_TRACKING_CODE_FOOTER), molgenisSettings
+				.getProperty(AppTrackingCode.KEY_APP_TRACKING_CODE_HEADER));
 	}
 
-	public AppTrackingCodeImpl(String piwik, String googleAnalytics)
+	public AppTrackingCodeImpl(String footer, String header)
 	{
-		if (piwik != null)
+		if (footer != null)
 		{
-			this.setPiwik(START_TRACKINGCODE + piwik + END_TRACKINGCODE);
+			this.setFooter(START_TRACKINGCODE + footer + END_TRACKINGCODE);
 		}
-		if (googleAnalytics != null)
+		if (header != null)
 		{
-			this.setGoogleAnalytics(START_TRACKINGCODE + googleAnalytics + END_TRACKINGCODE);
+			this.setHeader(START_TRACKINGCODE + header + END_TRACKINGCODE);
 		}
 	}
 
 	/**
-	 * Return the Google Analytics Tracking Code from data base
+	 * Return the header Tracking Code from data base
 	 * 
 	 * @return
 	 */
 	@Override
-	public String getGoogleAnalytics()
+	public String getHeader()
 	{
-		return this.googleAnalytics;
+		return this.header;
 	}
 
 	@Override
-	public String getPiwik()
+	public String getFooter()
 	{
-		return this.piwik;
+		return this.footer;
 	}
 	
-	private void setGoogleAnalytics(String googleAnalytics)
+	private void setHeader(String header)
 	{
-		this.googleAnalytics = googleAnalytics;
+		this.header = header;
 	}
 
-	private void setPiwik(String piwik)
+	private void setFooter(String footer)
 	{
-		this.piwik = piwik;
+		this.footer = footer;
 	}
 
 	@Override
@@ -63,8 +63,8 @@ public class AppTrackingCodeImpl implements AppTrackingCode
 	{
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((this.piwik == null) ? 0 : this.piwik.hashCode());
-		result = prime * result + ((this.googleAnalytics == null) ? 0 : this.googleAnalytics.hashCode());
+		result = prime * result + ((this.footer == null) ? 0 : this.footer.hashCode());
+		result = prime * result + ((this.header == null) ? 0 : this.header.hashCode());
 		return result;
 	}
 
@@ -75,16 +75,16 @@ public class AppTrackingCodeImpl implements AppTrackingCode
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
 		AppTrackingCode other = (AppTrackingCode) obj;
-		if (this.piwik == null)
+		if (this.footer == null)
 		{
-			if (other.getPiwik() != null) return false;
+			if (other.getFooter() != null) return false;
 		}
-		else if (!this.piwik.equals(other.getPiwik())) return false;
-		if (this.googleAnalytics == null)
+		else if (!this.footer.equals(other.getFooter())) return false;
+		if (this.header == null)
 		{
-			if (other.getGoogleAnalytics() != null) return false;
+			if (other.getHeader() != null) return false;
 		}
-		else if (!this.googleAnalytics.equals(other.getGoogleAnalytics())) return false;
+		else if (!this.header.equals(other.getHeader())) return false;
 		return true;
 	}
 }

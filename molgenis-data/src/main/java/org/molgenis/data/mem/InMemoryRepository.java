@@ -154,6 +154,10 @@ public class InMemoryRepository implements Repository
 	public void add(Entity entity)
 	{
 		Object id = getId(entity);
+		if (id == null)
+		{
+			throw new NullPointerException("Entity ID is null.");
+		}
 		if (entities.containsKey(id))
 		{
 			throw new IllegalStateException("Entity with id " + id + " already exists");
