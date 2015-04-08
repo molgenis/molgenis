@@ -16,14 +16,19 @@ import org.elasticsearch.common.collect.Lists;
 import org.mockito.Mockito;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.Entity;
+import org.molgenis.data.IdGenerator;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
-import org.molgenis.data.mapper.mapping.MappingConfig;
-import org.molgenis.data.mapper.mapping.MappingService;
+import org.molgenis.data.mapper.config.MappingConfig;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
+import org.molgenis.data.mapper.repository.impl.AttributeMappingRepositoryImpl;
+import org.molgenis.data.mapper.repository.impl.EntityMappingRepositoryImpl;
+import org.molgenis.data.mapper.repository.impl.MappingProjectRepositoryImpl;
+import org.molgenis.data.mapper.repository.impl.MappingTargetRepositoryImpl;
+import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.mem.InMemoryRepositoryCollection;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
@@ -31,11 +36,11 @@ import org.molgenis.data.meta.PackageImpl;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -50,48 +55,6 @@ import com.google.common.collect.ImmutableList;
 { MappingServiceImplTest.Config.class, MappingConfig.class })
 public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 {
-	@Configuration
-	@ComponentScan("org.molgenis.data.meta")
-	static class Config
-	{
-		@Bean
-		DataServiceImpl dataService()
-		{
-			return new DataServiceImpl();
-		}
-
-		@Bean
-		MetaDataService metaDataService()
-		{
-			return new MetaDataServiceImpl(dataService());
-		}
-
-		@Bean
-		MolgenisUserService userService()
-		{
-			return mock(MolgenisUserService.class);
-		}
-
-		@Bean
-		ManageableRepositoryCollection manageableCrudRepositoryCollection()
-		{
-			return new InMemoryRepositoryCollection("mem");
-		}
-
-		@Bean
-		PermissionSystemService permissionSystemService()
-		{
-			return mock(PermissionSystemService.class);
-		}
-
-		@PostConstruct
-		public void initRepositories()
-		{
-			metaDataService().setDefaultBackend(manageableCrudRepositoryCollection());
-		}
-
-	}
-
 	@Autowired
 	private ManageableRepositoryCollection repoCollection;
 
@@ -107,6 +70,9 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	private PermissionSystemService permissionSystemService;
 
+	@Autowired
+	private IdGenerator idGenerator;
+
 	private MolgenisUser user;
 
 	private DefaultEntityMetaData hopMetaData;
@@ -116,7 +82,6 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 	@BeforeMethod
 	public void beforeMethod()
 	{
-
 		user = new MolgenisUser();
 		user.setUsername("Piet");
 		when(userService.getUser("Piet")).thenReturn(user);
@@ -158,6 +123,7 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		final String mappingProjectId = added.getIdentifier();
 		assertNotNull(mappingProjectId);
 		expected.setIdentifier(mappingProjectId);
+
 		final String mappingTargetId = added.getMappingTarget("HopEntity").getIdentifier();
 		assertNotNull(mappingTargetId);
 		expected.getMappingTarget("HopEntity").setIdentifier(mappingTargetId);
@@ -213,6 +179,7 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 	{
 		MappingProject mappingProject = mappingService.addMappingProject("Test123", user, "HopEntity");
 		mappingProject.getMappingTarget("HopEntity").addSource(geneMetaData);
+
 		mappingService.updateMappingProject(mappingProject);
 		MappingProject retrieved = mappingService.getMappingProject(mappingProject.getIdentifier());
 		try
@@ -253,5 +220,57 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 
 		Mockito.verify(permissionSystemService).giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
 				Arrays.asList("Koetjeboe"));
+	}
+
+	@Configuration
+	static class Config
+	{
+		@Bean
+		DataServiceImpl dataService()
+		{
+			return new DataServiceImpl();
+		}
+
+		@Bean
+		MetaDataService metaDataService()
+		{
+			return new MetaDataServiceImpl(dataService());
+		}
+
+		@Bean
+		MolgenisUserService userService()
+		{
+			return mock(MolgenisUserService.class);
+		}
+
+		@Bean
+		ManageableRepositoryCollection manageableRepositoryCollection()
+		{
+			return new InMemoryRepositoryCollection("mem");
+		}
+
+		@Bean
+		PermissionSystemService permissionSystemService()
+		{
+			return mock(PermissionSystemService.class);
+		}
+
+		@Bean
+		IdGenerator idGenerator()
+		{
+			return new UuidGenerator();
+		}
+
+		@PostConstruct
+		public void initRepositories()
+		{
+			MetaDataService metaDataService = metaDataService();
+			ManageableRepositoryCollection manageableRepositoryCollection = manageableRepositoryCollection();
+			metaDataService.setDefaultBackend(manageableRepositoryCollection);
+			metaDataService.addEntityMeta(AttributeMappingRepositoryImpl.META_DATA);
+			metaDataService.addEntityMeta(EntityMappingRepositoryImpl.META_DATA);
+			metaDataService.addEntityMeta(MappingTargetRepositoryImpl.META_DATA);
+			metaDataService.addEntityMeta(MappingProjectRepositoryImpl.META_DATA);
+		}
 	}
 }

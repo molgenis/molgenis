@@ -60,15 +60,6 @@ public class OntologyTermRepository
 		return Lists.newArrayList(Iterables.transform(termEntities, OntologyTermRepository::toOntologyTerm));
 	}
 
-	private static OntologyTerm toOntologyTerm(Entity entity)
-	{
-		if (entity == null)
-		{
-			return null;
-		}
-		return OntologyTerm.create(entity.getString(ONTOLOGY_TERM_IRI), entity.getString(ONTOLOGY_TERM_NAME));
-	}
-
 	/**
 	 * Retrieves an {@link OntologyTerm} for one or more IRIs
 	 * 
@@ -90,5 +81,14 @@ public class OntologyTermRepository
 			ontologyTerms.add(ontologyTerm);
 		}
 		return OntologyTerm.and(ontologyTerms.toArray(new OntologyTerm[0]));
+	}
+
+	private static OntologyTerm toOntologyTerm(Entity entity)
+	{
+		if (entity == null)
+		{
+			return null;
+		}
+		return OntologyTerm.create(entity.getString(ONTOLOGY_TERM_IRI), entity.getString(ONTOLOGY_TERM_NAME));
 	}
 }

@@ -1,0 +1,46 @@
+package org.molgenis.data.importer;
+
+import org.molgenis.data.DataService;
+import org.molgenis.data.mysql.EmxImportServiceRegistrator;
+import org.molgenis.data.semanticsearch.service.impl.UntypedTagService;
+import org.molgenis.security.permission.PermissionSystemService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class ImporterConfiguration
+{
+	@Autowired
+	private DataService dataService;
+	@Autowired
+	private PermissionSystemService permissionSystemService;
+	@Autowired
+	private UntypedTagService tagService;
+	@Autowired
+	private ImportServiceFactory importServiceFactory;
+
+	@Bean
+	public ImportService emxImportService()
+	{
+		return new EmxImportService(emxMetaDataParser(), importWriter(), dataService);
+	}
+
+	@Bean
+	public ImportWriter importWriter()
+	{
+		return new ImportWriter(dataService, permissionSystemService, tagService);
+	}
+
+	@Bean
+	public MetaDataParser emxMetaDataParser()
+	{
+		return new EmxMetaDataParser(dataService);
+	}
+
+	@Bean
+	public EmxImportServiceRegistrator mysqlRepositoryRegistrator()
+	{
+		return new EmxImportServiceRegistrator(importServiceFactory, emxImportService());
+	}
+}

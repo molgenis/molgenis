@@ -1,4 +1,4 @@
-package org.molgenis.data.mapper.mapping;
+package org.molgenis.data.mapper.service.impl;
 
 import java.util.Collections;
 import java.util.List;
@@ -7,6 +7,7 @@ import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.IdGenerator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.mapper.algorithm.AlgorithmService;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
@@ -14,6 +15,7 @@ import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.repository.MappingProjectRepository;
+import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.meta.PackageImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -23,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.util.IdGenerator;
 
 public class MappingServiceImpl implements MappingService
 {
@@ -128,7 +129,7 @@ public class MappingServiceImpl implements MappingService
 			EntityMetaData targetMetaData)
 	{
 		MapEntity target = new MapEntity(targetMetaData);
-		target.set(targetMetaData.getIdAttribute().getName(), idGenerator.generateId().toString());
+		target.set(targetMetaData.getIdAttribute().getName(), idGenerator.generateId());
 		target.set("source", sourceMapping.getName());
 		sourceMapping.getAttributeMappings().forEach(
 				attributeMapping -> applyMappingToAttribute(attributeMapping, sourceEntity, target));

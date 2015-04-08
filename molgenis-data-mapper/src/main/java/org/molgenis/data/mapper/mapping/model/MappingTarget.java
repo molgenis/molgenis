@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.EntityMetaData;
 
 public class MappingTarget
@@ -127,7 +128,7 @@ public class MappingTarget
 
 	public Collection<EntityMapping> getEntityMappings()
 	{
-		return entityMappings.values();
+		return Lists.newArrayList(entityMappings.values());
 	}
 
 	public void removeSource(String source)

@@ -1,4 +1,4 @@
-package org.molgenis.data.mapper.mapping;
+package org.molgenis.data.mapper.service;
 
 import java.util.List;
 

@@ -1,32 +1,43 @@
-package org.molgenis.data.semanticsearch.semantic;
+package org.molgenis.data.semanticsearch.service.impl;
 
+import static java.util.Arrays.asList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.ATTRIBUTES;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_NAME;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Package;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
+import org.molgenis.data.meta.PackageImpl;
+import org.molgenis.data.meta.PackageMetaData;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semantic.Tag;
 import org.molgenis.data.semantic.TagImpl;
 import org.molgenis.data.semanticsearch.repository.TagRepository;
+import org.molgenis.data.semanticsearch.semantic.OntologyTag;
 import org.molgenis.data.semanticsearch.service.impl.OntologyTagService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.ontology.OntologyService;
-import org.molgenis.ontology.repository.model.Ontology;
-import org.molgenis.ontology.repository.model.OntologyTerm;
+import org.molgenis.data.support.QueryImpl;
+import org.molgenis.ontology.core.model.Ontology;
+import org.molgenis.ontology.core.model.OntologyTerm;
+import org.molgenis.ontology.core.service.OntologyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -98,7 +109,7 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void testGetTags()
+	public void testgetTagsForAttribute()
 	{
 		EntityMetaData emd = new DefaultEntityMetaData("org.molgenis.SNP");
 		AttributeMetaData attributeMetaData = new DefaultAttributeMetaData("Chr");
@@ -132,7 +143,7 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void testGetTagTyped()
+	public void testGetTagEntity()
 	{
 		MapEntity expected = new MapEntity(TagMetaData.ENTITY_NAME);
 		expected.set(TagMetaData.IDENTIFIER, "1233");
@@ -162,7 +173,7 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void testAddTag()
+	public void testAddAttributeTag()
 	{
 		EntityMetaData emd = new DefaultEntityMetaData("org.molgenis.SNP");
 		AttributeMetaData attributeMetaData = new DefaultAttributeMetaData("Chr");
@@ -196,7 +207,7 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void testRemoveTag()
+	public void testRemoveAttributeTag()
 	{
 		EntityMetaData emd = new DefaultEntityMetaData("org.molgenis.SNP");
 		AttributeMetaData attributeMetaData = new DefaultAttributeMetaData("Chr");
@@ -216,9 +227,90 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 		ontologyTagService.removeAttributeTag(emd, geneAnnotationTag);
 
 		MapEntity updatedEntity = new MapEntity(attributeEntity);
-		updatedEntity.set(AttributeMetaDataMetaData.TAGS, Arrays.asList(chromosomeNameTagEntity));
+		updatedEntity.set(AttributeMetaDataMetaData.TAGS,
+				Arrays.asList(chromosomeNameTagEntity, geneAnnotationTagEntity));
+		verify(dataService).update(AttributeMetaDataMetaData.ENTITY_NAME, updatedEntity);
+	}
 
-		verify(dataService, times(1)).update(AttributeMetaDataMetaData.ENTITY_NAME, updatedEntity);
+	@Test
+	public void testgetTagsForPackage()
+	{
+		Package p = new PackageImpl("test", "desc", null);
+
+		Entity pack = new MapEntity(new PackageMetaData());
+		pack.set(PackageMetaData.FULL_NAME, "test");
+		pack.set(PackageMetaData.SIMPLE_NAME, "test");
+		pack.set(PackageMetaData.TAGS, asList(chromosomeNameTagEntity));
+
+		when(
+				dataService.findOne(PackageMetaData.ENTITY_NAME,
+						new QueryImpl().eq(PackageMetaData.FULL_NAME, p.getName()))).thenReturn(pack);
+
+		assertEquals(ontologyTagService.getTagsForPackage(p),
+				Arrays.asList(new TagImpl<Package, OntologyTerm, Ontology>("1234", p, Relation
+						.forIRI("http://molgenis.org/biobankconnect/instanceOf"), OntologyTerm.create(
+						"http://edamontology.org/data_0987", "Chromosome name", "Name of a chromosome.",
+						Collections.emptyList()), Ontology.create("EDAM", "http://edamontology.org",
+						"The EDAM ontology."))));
+	}
+
+	@Test
+	public void testRemoveAllTagsFromEntity()
+	{
+		// FIXME This does not make sense...
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("test");
+		DefaultAttributeMetaData amd = new DefaultAttributeMetaData("Chr");
+
+		emd.addAttributeMetaData(amd);
+		when(dataService.getEntityMetaData("test")).thenReturn(emd);
+
+		Entity entityMetaDataEntity = mock(Entity.class);
+		Entity att = mock(Entity.class);
+
+		when(entityMetaDataEntity.getEntities(ATTRIBUTES)).thenReturn(Arrays.asList(att));
+		when(att.getString(AttributeMetaDataMetaData.NAME)).thenReturn("Chr");
+
+		when(dataService.findOne(ENTITY_NAME, "test")).thenReturn(entityMetaDataEntity);
+		ontologyTagService.removeAllTagsFromEntity("test");
+
+		verify(dataService).update(EntityMetaDataMetaData.ENTITY_NAME, entityMetaDataEntity);
+	}
+
+	@Test
+	public void testTagAttributesInEntity()
+	{
+		Map<String, List<OntologyTag>> attributeTagMap = new HashMap<String, List<OntologyTag>>();
+		Map<AttributeMetaData, List<OntologyTerm>> tags = new HashMap<AttributeMetaData, List<OntologyTerm>>();
+
+		EntityMetaData emd = new DefaultEntityMetaData("org.molgenis.SNP");
+		AttributeMetaData attributeMetaData = new DefaultAttributeMetaData("Chr");
+
+		when(ontologyService.getOntology("http://edamontology.org")).thenReturn(EDAM_ONTOLOGY);
+		when(ontologyService.getOntologyTerm("http://edamontology.org/data_0987")).thenReturn(
+				CHROMOSOME_NAME_ONTOLOGY_TERM);
+
+		MapEntity attributeEntity = new MapEntity();
+		attributeEntity.set(AttributeMetaDataMetaData.TAGS, Arrays.asList(geneAnnotationTagEntity));
+		attributeEntity.set(AttributeMetaDataMetaData.NAME, "Chr");
+		Tag<AttributeMetaData, OntologyTerm, Ontology> chromosomeTag = new TagImpl<AttributeMetaData, OntologyTerm, Ontology>(
+				"1233", attributeMetaData, instanceOf, CHROMOSOME_NAME_ONTOLOGY_TERM, EDAM_ONTOLOGY);
+
+		Entity entityMetaDataEntity = new MapEntity(new EntityMetaDataMetaData());
+		entityMetaDataEntity.set(EntityMetaDataMetaData.ATTRIBUTES, Collections.singleton(attributeEntity));
+		when(dataService.findOne(EntityMetaDataMetaData.ENTITY_NAME, "org.molgenis.SNP")).thenReturn(
+				entityMetaDataEntity);
+		when(
+				tagRepository.getTagEntity("http://edamontology.org/data_0987", "Chromosome name", instanceOf,
+						"http://edamontology.org")).thenReturn(chromosomeNameTagEntity);
+
+		ontologyTagService.addAttributeTag(emd, chromosomeTag);
+
+		MapEntity updatedEntity = new MapEntity();
+		updatedEntity.set(AttributeMetaDataMetaData.TAGS,
+				Arrays.asList(geneAnnotationTagEntity, chromosomeNameTagEntity));
+		updatedEntity.set(AttributeMetaDataMetaData.NAME, "Chr");
+
+		assertEquals(ontologyTagService.tagAttributesInEntity("test", tags), attributeTagMap);
 	}
 
 	@Configuration
@@ -241,6 +333,5 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 		{
 			return mock(TagRepository.class);
 		}
-
 	}
 }

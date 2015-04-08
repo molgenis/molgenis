@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.molgenis.AppConfig;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
@@ -33,7 +32,7 @@ import com.google.common.collect.ImmutableList;
 /**
  * Parser specific tests.
  */
-@ContextConfiguration(classes = AppConfig.class)
+@ContextConfiguration(classes = ImportTestConfig.class)
 public class EmxMetaDataParserTest extends AbstractTestNGSpringContextTests
 {
 	private MetaDataParser parser;

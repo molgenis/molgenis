@@ -1,6 +1,4 @@
-package org.molgenis.data.mapper.mapping;
-
-import java.util.UUID;
+package org.molgenis.data.mapper.config;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.mapper.algorithm.AlgorithmService;
@@ -9,11 +7,12 @@ import org.molgenis.data.mapper.repository.impl.AttributeMappingRepositoryImpl;
 import org.molgenis.data.mapper.repository.impl.EntityMappingRepositoryImpl;
 import org.molgenis.data.mapper.repository.impl.MappingProjectRepositoryImpl;
 import org.molgenis.data.mapper.repository.impl.MappingTargetRepositoryImpl;
+import org.molgenis.data.mapper.service.MappingService;
+import org.molgenis.data.mapper.service.impl.MappingServiceImpl;
 import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.util.IdGenerator;
 
 @Configuration
 public class MappingConfig
@@ -23,20 +22,6 @@ public class MappingConfig
 
 	@Autowired
 	MolgenisUserService userService;
-
-	@Bean
-	public IdGenerator idGenerator()
-	{
-		return new IdGenerator()
-		{
-			@Override
-			public UUID generateId()
-			{
-				com.eaio.uuid.UUID uuid = new com.eaio.uuid.UUID();
-				return UUID.fromString(uuid.toString());
-			}
-		};
-	}
 
 	@Bean
 	public MappingService mappingService()
