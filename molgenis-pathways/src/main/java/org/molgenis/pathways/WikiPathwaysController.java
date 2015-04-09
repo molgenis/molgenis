@@ -69,6 +69,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 			.compile("([A-Z]*\\|)(\\|*[0-9]+\\||\\|+)+([0-9A-Z]+)(\\|*)(.*)");
 
 	private static final String HOMO_SAPIENS = "Homo sapiens";
+	public static final String EFFECT_ATTRIBUTE_NAME = VcfRepository.getInfoPrefix() + "EFF";
 	private final WikiPathwaysService wikiPathwaysService;
 	@Autowired
 	private DataService dataService;
@@ -116,7 +117,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 	 */
 	private boolean hasEffectAttribute(EntityMetaData emd)
 	{
-		return emd.getAttribute(VcfRepository.getInfoPrefix() + "EFF") != null;
+		return emd.getAttribute(EFFECT_ATTRIBUTE_NAME) != null;
 	}
 
 	/**
@@ -181,7 +182,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 	private Map<String, Impact> getGenesForVcf(String selectedVcf)
 	{
 		return stream(dataService.getRepository(selectedVcf).spliterator(), false)
-				.map(entity -> entity.getString("EFF"))
+				.map(entity -> entity.getString(EFFECT_ATTRIBUTE_NAME))
 				.filter(eff -> !StringUtils.isEmpty(getGeneFromEffect(eff)))
 				.collect(
 						groupingBy(
