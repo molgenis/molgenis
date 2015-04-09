@@ -34,6 +34,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
+import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.pathways.model.Impact;
 import org.molgenis.pathways.model.Pathway;
@@ -115,7 +116,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 	 */
 	private boolean hasEffectAttribute(EntityMetaData emd)
 	{
-		return emd.getAttribute("EFF") != null;
+		return emd.getAttribute(VcfRepository.getInfoPrefix() + "EFF") != null;
 	}
 
 	/**
