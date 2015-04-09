@@ -287,6 +287,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Transactional
 	public List<AttributeMetaData> updateSync(EntityMetaData sourceEntityMetaData)
 	{
+
 		return MetaUtils.updateEntityMeta(this, sourceEntityMetaData, true);
 	}
 
