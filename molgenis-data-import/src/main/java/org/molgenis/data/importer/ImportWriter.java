@@ -81,7 +81,7 @@ public class ImportWriter
 		addEntityMetaData(job.parsedMetaData, job.report, job.metaDataChanges);
 		addEntityPermissions(job.metaDataChanges);
 		importEntityAndAttributeTags(job.parsedMetaData);
-		importData(job.report, job.parsedMetaData.getEntities(), job.source, job.dbAction);
+		importData(job.report, job.parsedMetaData.getEntities(), job.source, job.dbAction, job.defaultPackage);
 		return job.report;
 	}
 
@@ -106,7 +106,7 @@ public class ImportWriter
 	 * Imports entity data for all entities in {@link #resolved} from {@link #source}
 	 */
 	private void importData(EntityImportReport report, Iterable<EntityMetaData> resolved, RepositoryCollection source,
-			DatabaseAction dbAction)
+			DatabaseAction dbAction, String defaultPackage)
 	{
 		for (final EntityMetaData entityMetaData : resolved)
 		{
@@ -116,6 +116,14 @@ public class ImportWriter
 			{
 				Repository repository = dataService.getRepository(name);
 				Repository fileEntityRepository = source.getRepository(entityMetaData.getName());
+
+				// Try without default package
+				if ((fileEntityRepository == null) && (defaultPackage != null)
+						&& entityMetaData.getName().toLowerCase().startsWith(defaultPackage.toLowerCase() + "_"))
+				{
+					fileEntityRepository = source.getRepository(entityMetaData.getName().substring(
+							defaultPackage.length() + 1));
+				}
 
 				// check to prevent nullpointer when importing metadata only
 				if (fileEntityRepository != null)

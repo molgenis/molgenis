@@ -243,6 +243,12 @@ public class MetaDataServiceImpl implements MetaDataService
 	}
 
 	@Override
+	public List<Package> getPackages()
+	{
+		return packageRepository.getPackages();
+	}
+
+	@Override
 	public List<Package> getRootPackages()
 	{
 		return packageRepository.getRootPackages();
