@@ -40,6 +40,7 @@
 		<div class="row">
 			<div class="col-md-6 col-md-offset-2">	
 				<br/>
+                Select a vcf file (Only VCF files with a effect (EFF) Field in the INFO attribute are shown)
 				<form>
 	   				<select class="form-control" id="dataset-select" data-placeholder="Select a vcf file">
 	   				<option val=""></option>
