@@ -7,22 +7,16 @@ import com.google.common.collect.ImmutableSet;
 public enum GenericImporterExtensions
 {
 	// CSV
-	CSV("csv"),
-	TXT("txt"),
-	TSV("tsv"),
-	ZIP("zip"),
+	CSV("csv"), TXT("txt"), TSV("tsv"), ZIP("zip"),
 
 	// Excel
-	XLS("xls"),
-	XLSX("xlsx"),
+	XLS("xls"), XLSX("xlsx"),
 
 	// Ontology
-	OBO_ZIP("obo.zip"),
-	OWL_ZIP("owl.zip"),
+	OBO_ZIP("obo.zip"), OWL_ZIP("owl.zip"),
 
 	// VCF
-	VCF("vcf"),
-	VCF_GZ("vcf.gz");
+	VCF("vcf"), VCF_GZ("vcf.gz");
 
 	private String name;
 
@@ -61,14 +55,15 @@ public enum GenericImporterExtensions
 	{
 		return ImmutableSet.of(XLS.toString(), XLSX.toString(), CSV.toString(), ZIP.toString());
 	}
-	
+
 	public static Set<String> getEMX()
 	{
-		return ImmutableSet.of(XLS.toString(), XLSX.toString(), CSV.toString(), ZIP.toString());
+		return ImmutableSet.of(XLS.toString(), XLSX.toString(), CSV.toString(), TSV.toString(), ZIP.toString());
 	}
 
 	public static Set<String> getAll()
 	{
-		return ImmutableSet.of(CSV.toString(), TXT.toString(), TSV.toString(), ZIP.toString(), XLS.toString(), XLSX.toString(), OBO_ZIP.toString(), OWL_ZIP.toString(), VCF.toString(), VCF_GZ.toString());
+		return ImmutableSet.of(CSV.toString(), TXT.toString(), TSV.toString(), ZIP.toString(), XLS.toString(),
+				XLSX.toString(), OBO_ZIP.toString(), OWL_ZIP.toString(), VCF.toString(), VCF_GZ.toString());
 	}
 }

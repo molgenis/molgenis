@@ -76,7 +76,7 @@ public class CrudRepositoryAnnotator
 		LOG.info("Started annotating \"" + sourceRepo.getName() + "\" with the " + annotator.getSimpleName()
 				+ " annotator (started by \"" + userAccountService.getCurrentUser().getUsername() + "\")");
 
-		EntityMetaData entityMetaData = sourceRepo.getEntityMetaData();
+		EntityMetaData entityMetaData = dataService.getMeta().getEntityMetaData(sourceRepo.getName());
 		DefaultAttributeMetaData compoundAttributeMetaData = AnnotatorUtils.getCompoundResultAttribute(annotator,
 				entityMetaData);
 
