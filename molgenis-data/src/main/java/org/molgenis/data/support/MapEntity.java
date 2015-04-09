@@ -60,9 +60,9 @@ public class MapEntity extends AbstractEntity
 		this.entityMetaData = metaData;
 		this.idAttributeName = entityMetaData.getIdAttribute().getName();
 		for (AttributeMetaData attribute : metaData.getAtomicAttributes())
-        {
-            if(Iterables.contains(other.getAttributeNames(), attribute.getName()))
-                set(attribute.getName(), other.get(attribute.getName()));
+		{
+			if (Iterables.contains(other.getAttributeNames(), attribute.getName())) set(attribute.getName(),
+					other.get(attribute.getName()));
 		}
 	}
 
