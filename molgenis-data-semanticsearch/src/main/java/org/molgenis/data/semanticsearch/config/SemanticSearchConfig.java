@@ -1,7 +1,5 @@
 package org.molgenis.data.semanticsearch.config;
 
-import static org.mockito.Mockito.mock;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.Repository;
@@ -11,8 +9,6 @@ import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.semanticsearch.service.impl.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.impl.SemanticSearchServiceImpl;
 import org.molgenis.data.semanticsearch.service.impl.UntypedTagService;
-import org.molgenis.ontology.core.repository.OntologyRepository;
-import org.molgenis.ontology.core.repository.OntologyTermRepository;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -53,28 +49,5 @@ public class SemanticSearchConfig
 	{
 		Repository repo = dataService.getRepository(TagMetaData.ENTITY_NAME);
 		return new TagRepository(repo, idGenerator);
-	}
-
-	@Bean
-	OntologyService ontologyService()
-	{
-		return mock(OntologyService.class);
-	}
-
-	@Bean
-	OntologyRepository ontologyRepository()
-	{
-		return mock(OntologyRepository.class);
-	}
-
-	@Bean
-	OntologyTermRepository ontologyTermRepository()
-	{
-		return mock(OntologyTermRepository.class);
-	}
-	
-	@Bean
-	IdGenerator idGenerator(){
-		return mock(IdGenerator.class);
 	}
 }
