@@ -92,12 +92,20 @@ public class ElasticsearchRepositoryCollection implements ManageableRepositoryCo
 	@Override
 	public void addAttribute(String entityName, AttributeMetaData attribute)
 	{
-		EntityMetaData entityMetaData = dataService.getMeta().getEntityMetaData(entityName);
+		DefaultEntityMetaData entityMetaData;
+		try
+		{
+			entityMetaData = (DefaultEntityMetaData) dataService.getEntityMetaData(entityName);
+		}
+		catch (ClassCastException ex)
+		{
+			throw new RuntimeException("Cannot cast EntityMetaData to DefaultEntityMetadata " + ex);
+		}
 		if (entityMetaData == null) throw new UnknownEntityException(String.format("Unknown entity '%s'", entityName));
 
 		try
 		{
-			((DefaultEntityMetaData) repositories.get(entityName).getEntityMetaData()).addAttributeMetaData(attribute);
+			entityMetaData.addAttributeMetaData(attribute);
 			searchService.createMappings(entityMetaData);
 		}
 		catch (IOException e)
