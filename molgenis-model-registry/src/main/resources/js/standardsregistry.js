@@ -155,10 +155,9 @@
 		});
 		
 		$(document).on('click', '#print-btn', function() {
-			var width = $('#package-doc-container').outerWidth();
 			$('#package-doc-container').css('height', '100%').css('width', '21cm').css("overflow", "hidden");
 			window.print();
-			$('#package-doc-container').css('height', '600px').css("overflow-x", "hidden").css("overflow-y", "auto").css('width', width);
+			$('#package-doc-container').css('height', '600px').css("overflow-x", "hidden").css("overflow-y", "auto").css('width', '923px');
 		});
 		
 		$(document).on('click', '#uml-tab', function() {
