@@ -81,6 +81,8 @@
 			}
 		});
 		
+		// Limits the input of text fields so you can not crash the server
+		$("#xtext").attr('maxlength','65000');
 		
 		//Validate occurs on form submit
 		$("#entity-form").validate({

@@ -90,17 +90,20 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 	public Iterable<Tag<EntityMetaData, LabeledResource, LabeledResource>> getTagsForEntity(
 			EntityMetaData entityMetaData)
 	{
+		List<Tag<EntityMetaData, LabeledResource, LabeledResource>> result = new ArrayList<Tag<EntityMetaData, LabeledResource, LabeledResource>>();
 		Entity entity = findEntity(entityMetaData);
 		if (entity == null)
 		{
-			throw new UnknownEntityException("No known entity with name " + entityMetaData.getName() + ".");
+			LOG.warn("No known entity with name " + entityMetaData.getName() + ".");
 		}
-		List<Tag<EntityMetaData, LabeledResource, LabeledResource>> tags = new ArrayList<Tag<EntityMetaData, LabeledResource, LabeledResource>>();
-		for (Entity tagEntity : entity.getEntities(EntityMetaDataMetaData.TAGS))
+		else
 		{
-			tags.add(TagImpl.asTag(entityMetaData, tagEntity));
+			for (Entity tagEntity : entity.getEntities(EntityMetaDataMetaData.TAGS))
+			{
+				result.add(TagImpl.asTag(entityMetaData, tagEntity));
+			}
 		}
-		return tags;
+		return result;
 	}
 
 	@Override
