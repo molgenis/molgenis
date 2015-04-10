@@ -2,11 +2,11 @@
 	margin-bottom: 10px;
 	overflow: auto;
 	white-space: nowrap;
-    min-height: 0%; /* workaround for IE9 bug https://github.com/molgenis/molgenis/issues/2755 */
 }
 
 .molgenis-table {
-	width: 100%;	
+	width: 100%;
+    min-height: 0%; /* workaround for IE9 bug https://github.com/molgenis/molgenis/issues/2755 */
 }
 
 .molgenis-table thead th {
