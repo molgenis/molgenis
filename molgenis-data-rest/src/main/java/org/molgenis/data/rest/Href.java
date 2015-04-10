@@ -23,6 +23,11 @@ public class Href
 		return href;
 	}
 
+	public String getHrefCollection()
+	{
+		return hrefCollection;
+	}
+
 	/**
 	 * Create an encoded href for an attribute
 	 * 

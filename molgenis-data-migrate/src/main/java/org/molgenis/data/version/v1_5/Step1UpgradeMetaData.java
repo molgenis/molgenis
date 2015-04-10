@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
@@ -25,6 +26,7 @@ import org.molgenis.data.mysql.AsyncJdbcTemplate;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.version.MetaDataUpgrade;
 import org.molgenis.security.runas.RunAsSystemProxy;
 import org.slf4j.Logger;
@@ -128,20 +130,54 @@ public class Step1UpgradeMetaData extends MetaDataUpgrade
 	{
 		LOG.info("Update attribute order in MySQL...");
 		Repository entityRepository = undecoratedMySQL.getRepository(EntityMetaDataMetaData.ENTITY_NAME);
+		Repository attributeRepository = undecoratedMySQL.getRepository(AttributeMetaDataMetaData.ENTITY_NAME);
+
 		// save all entity metadata with attributes in proper order
 		for (Entity v15EntityMetaDataEntity : entityRepository)
 		{
 			LOG.info("Setting attribute order for entity: "
-					+ v15EntityMetaDataEntity.get(EntityMetaDataMetaData1_4.SIMPLE_NAME));
+					+ v15EntityMetaDataEntity.get(EntityMetaDataMetaData1_4.FULL_NAME));
 			List<Entity> attributes = Lists.newArrayList(searchService.search(
 					EQ(AttributeMetaDataMetaData1_4.ENTITY,
-							v15EntityMetaDataEntity.getString(EntityMetaDataMetaData.SIMPLE_NAME)),
+							v15EntityMetaDataEntity.getString(EntityMetaDataMetaData.FULL_NAME)),
 					new AttributeMetaDataMetaData1_4()));
+			attributes = attributes.stream().filter(a -> a.get(AttributeMetaDataMetaData1_4.PART_OF_ATTRIBUTE) == null)
+					.collect(Collectors.toList());
+			for (Entity attribute : attributes)
+			{
+				updateAttribute(attributeRepository, attribute);
+			}
+
 			v15EntityMetaDataEntity.set(EntityMetaDataMetaData.ATTRIBUTES, attributes);
 			v15EntityMetaDataEntity.set(EntityMetaDataMetaData.BACKEND, "MySQL");
 			entityRepository.update(v15EntityMetaDataEntity);
 		}
 		LOG.info("Update attribute order done.");
+	}
+
+	/**
+	 * Update an 1.4 attribute's parts attribute in the 1.5 attribute repository
+	 * 
+	 * @param attributeRepository
+	 *            undecorated 1.5 MySQL attribute repository
+	 * @param attribute_v1_4
+	 *            elasticsearch 1.4 attribute document entity
+	 */
+	private void updateAttribute(Repository attributeRepository, Entity attribute_v1_4)
+	{
+		LOG.info("Setting attribute : " + attribute_v1_4.get(AttributeMetaDataMetaData1_4.NAME));
+		List<Entity> attributeParts_v1_4 = Lists.newArrayList(searchService.search(
+				EQ(AttributeMetaDataMetaData1_4.PART_OF_ATTRIBUTE,
+						attribute_v1_4.get(AttributeMetaDataMetaData1_4.NAME)).and().eq(
+						AttributeMetaDataMetaData1_4.ENTITY, attribute_v1_4.get(AttributeMetaDataMetaData1_4.ENTITY)),
+				new AttributeMetaDataMetaData1_4()));
+		Entity attribute_v1_5FromRepo = attributeRepository.findOne(attribute_v1_4.getIdValue());
+		attribute_v1_5FromRepo.set(AttributeMetaDataMetaData.PARTS, attributeParts_v1_4);
+		attributeRepository.update(attribute_v1_5FromRepo);
+		for (Entity part : attributeParts_v1_4)
+		{
+			updateAttribute(attributeRepository, part);
+		}
 	}
 
 	private void recreateElasticSearchMetaDataIndices()

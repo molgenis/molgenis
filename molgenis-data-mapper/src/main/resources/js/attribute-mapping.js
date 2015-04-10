@@ -8,9 +8,9 @@
 	 *            the scrollable table whose header and body cells should be
 	 *            realigned
 	 */
-	var updateColumnWidths = function($table) {
-		var $bodyCells = $table.find('tbody tr:first').children();
-		var colWidth;
+	function updateColumnWidths($table) {
+		var $bodyCells = $table.find('tbody tr:first').children(),
+			colWidth;
 
 		// Get the tbody columns width array
 		colWidth = $bodyCells.map(function() {
@@ -31,7 +31,7 @@
 	 * @param editor
 	 *            the ace algorithm editor to insert the attribute into
 	 */
-	var insertAttribute = function(attribute, editor) {
+	function insertAttribute(attribute, editor) {
 		editor.insert("$('" + attribute + "')", -1);
 	};
 
@@ -41,10 +41,10 @@
 	 * @param algorithm
 	 *            the algorithm string to search
 	 */
-	var getSourceAttrs = function(algorithm) {
-		var regex = /\$\(['"]([^\$\(\)]+)['"]\)/g;
-		var match;
-		var result = [];
+	function getSourceAttrs(algorithm) {
+		var regex = /\$\(['"]([^\$\(\)]+)['"]\)/g,
+			match,
+			result = [];
 
 		while ((match = regex.exec(algorithm))) {
 			if (match) {
@@ -60,11 +60,11 @@
 	 * @param algorithm
 	 *            the algorithm string
 	 */
-	var updateCheckboxes = function(algorithm) {
+	function updateCheckboxes(algorithm) {
 		var sourceAttrs = getSourceAttrs(algorithm);
 		$('input:checkbox').each(function(index, value) {
-			var name = $(this).attr('name');
-			var inArray = $.inArray(name, sourceAttrs);
+			var name = $(this).attr('name'),
+				inArray = $.inArray(name, sourceAttrs);
 			$(this).prop('checked', inArray >= 0);
 		});
 	};
@@ -75,7 +75,7 @@
 	 * @param algorithm
 	 *            the algorithm string to send to the server
 	 */
-	var testAlgorithm = function(algorithm) {
+	function testAlgorithm(algorithm) {
 		$.ajax({
 			type : 'POST',
 			url : molgenis.getContextUrl() + '/mappingattribute/testscript',
@@ -96,7 +96,7 @@
 	 * @param data
 	 *            the results from the server
 	 */
-	var showStatistics = function(data) {
+	function showStatistics(data) {
 		if (data.results.length > 0) {
 			$('#stats-total').text(data.totalCount);
 			$('#stats-valid').text(data.results.length);
@@ -117,10 +117,10 @@
 	};
 
 	$(function() {
-		var $textarea = $("#edit-algorithm-textarea");
-		var initialValue = $textarea.val();
-		var editor;
-		var $scrollTable = $('table.scroll');
+		var $textarea = $("#edit-algorithm-textarea"),
+			initialValue = $textarea.val(),
+			editor,
+			$scrollTable = $('table.scroll');
 
 		// N.B. Always do this first cause it fiddles with the DOM and disrupts
 		// listeners you may have placed on the table elements!
