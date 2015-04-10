@@ -402,15 +402,23 @@ public class RestController
 			@Valid EntityCollectionRequest request,
 			@Valid @RequestBody EntityCollectionRequest requestBody)
 	{
-		//Merge the url request with the payload
-		request.setExpand(requestBody.getExpand());
+		Set<String> attributesSet = null;
+		Map<String, Set<String>> attributeExpandSet = null;
 		
-		Set<String> attributesSet = toAttributeSet(request != null ? request.getAttributes() : null);
-		Map<String, Set<String>> attributeExpandSet = toExpandMap(request != null ? request.getExpand() : null);
-		request = request != null ? request : new EntityCollectionRequest();
+		if(requestBody != null){
+			request.setExpand(requestBody.getExpand());
+			request.setAttributes(request.getAttributes() == null ? requestBody.getAttributes() : null);
+			request.setQ(request.getQ() == null ? requestBody.getQ(): null);
+			request.setNum(request.getNum() == EntityCollectionRequest.DEFAULT_ROW_COUNT ? requestBody.getNum(): EntityCollectionRequest.DEFAULT_ROW_COUNT);
+			request.setStart(request.getStart() == EntityCollectionRequest.DEFAULT_START? requestBody.getStart(): EntityCollectionRequest.DEFAULT_START);
+			request.setSort(request.getSort() == null? requestBody.getSort(): null);
+			attributesSet = toAttributeSet(requestBody.getAttributes());
+			attributeExpandSet = toExpandMap(requestBody.getExpand());
+		}
+		
 		return retrieveEntityCollectionInternal(entityName, request, attributesSet, attributeExpandSet);
 	}
-
+	
 	/**
 	 * Does a rsql/fiql query, returns the result as csv
 	 * 
