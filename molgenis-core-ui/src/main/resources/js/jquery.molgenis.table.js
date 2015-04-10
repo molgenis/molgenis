@@ -12,7 +12,7 @@
 		var items = [];
 		items.push('<div class="row">');
 		items.push('<div class="col-md-12">');
-		items.push('<div class="molgenis-table-container">');
+		items.push('<div class="molgenis-table-container" style="min-height: 0%">');  /* workaround for IE9 bug https://github.com/molgenis/molgenis/issues/2755 */
 		if(settings.rowClickable){
 			items.push('<table class="table table-striped table-condensed molgenis-table table-hover"><thead></thead><tbody></tbody></table>');
 		}else{
