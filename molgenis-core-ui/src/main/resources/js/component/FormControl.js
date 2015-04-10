@@ -263,13 +263,13 @@
         	switch(this.state.attr.fieldType) {
         		case 'CATEGORICAL':
         		case 'XREF':
-        			val = value[this.state.attr.refEntity.idAttribute];
+        			val = value !== null && value !== undefined ? value[this.state.attr.refEntity.idAttribute] : null;
         			break;
         		case 'CATEGORICAL_MREF':
         		case 'MREF':
         			val = _.map(value.items, function(item) {
         				return item[this.state.attr.refEntity.idAttribute];
-        			});
+        			}.bind(this));
         			break;
         		default:
         			val = value;
