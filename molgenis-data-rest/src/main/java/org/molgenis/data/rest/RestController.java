@@ -92,6 +92,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -406,15 +407,16 @@ public class RestController
 		Map<String, Set<String>> attributeExpandSet = null;
 		
 		if(requestBody != null){
-			request.setExpand(requestBody.getExpand());
-			request.setAttributes(request.getAttributes() == null ? requestBody.getAttributes() : null);
-			request.setQ(request.getQ() == null ? requestBody.getQ(): null);
-			request.setNum(request.getNum() == EntityCollectionRequest.DEFAULT_ROW_COUNT ? requestBody.getNum(): EntityCollectionRequest.DEFAULT_ROW_COUNT);
-			request.setStart(request.getStart() == EntityCollectionRequest.DEFAULT_START? requestBody.getStart(): EntityCollectionRequest.DEFAULT_START);
-			request.setSort(request.getSort() == null? requestBody.getSort(): null);
-			attributesSet = toAttributeSet(requestBody.getAttributes());
-			attributeExpandSet = toExpandMap(requestBody.getExpand());
+			request.setExpand(request.getExpand() == null ? requestBody.getExpand(): request.getExpand());
+			request.setAttributes(request.getAttributes() == null ? requestBody.getAttributes() : request.getAttributes());
+			request.setQ(request.getQ() == null ? requestBody.getQ(): request.getQ());
+			request.setNum(request.getNum() == EntityCollectionRequest.DEFAULT_ROW_COUNT ? requestBody.getNum(): request.getNum());
+			request.setStart(request.getStart() == EntityCollectionRequest.DEFAULT_START? requestBody.getStart(): request.getStart());
+			request.setSort(request.getSort() == null? requestBody.getSort(): request.getSort());
 		}
+		
+		attributeExpandSet = toExpandMap(request.getExpand());
+		attributesSet = toAttributeSet(request.getAttributes());
 		
 		return retrieveEntityCollectionInternal(entityName, request, attributesSet, attributeExpandSet);
 	}

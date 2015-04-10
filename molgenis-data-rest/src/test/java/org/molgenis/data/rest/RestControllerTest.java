@@ -241,6 +241,24 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
+	public void retrieveEntityCollectionPostSearch() throws Exception
+	{
+		String json = "{expand: null}";
+
+		mockMvc.perform(
+				post(HREF_ENTITY).param("start", "5").param("num", "10").param("q[0].operator", "EQUALS")
+				.param("q[0].field", "name").param("q[0].value", "Piet").param("_method", "GET").content(json).contentType(APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(APPLICATION_JSON))
+				.andExpect(
+						content().string(
+								"{\"href\":\"" + HREF_ENTITY + "\",\"start\":5,\"num\":10,\"total\":0,\"prevHref\":\""
+										+ HREF_ENTITY + "?start=0&num=10\",\"items\":[{\"href\":\"" + HREF_ENTITY_ID
+										+ "\",\"name\":\"Piet\"}]}"));
+
+	}
+	
+	@Test
 	public void retrieveEntityCollectionPost() throws Exception
 	{
 		String json = "{start:5, num:10, q:[{operator:EQUALS,field:name,value:Piet}]}";
