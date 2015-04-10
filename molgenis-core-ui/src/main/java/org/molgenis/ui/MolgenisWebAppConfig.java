@@ -112,7 +112,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	public EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory;
 
 	@Autowired
-	public MolgenisUpgradeService metaDataUpgradeService;
+	public MolgenisUpgradeService upgradeService;
 
 	@Autowired
 	public DataSource dataSource;
@@ -402,7 +402,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	public void initRepositories()
 	{
 		addUpgrades();
-		metaDataUpgradeService.upgrade();
+		upgradeService.upgrade();
 		if (!indexExists())
 		{
 			LOG.info("Reindexing repositories....");
