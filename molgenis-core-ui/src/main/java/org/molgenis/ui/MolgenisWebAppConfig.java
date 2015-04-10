@@ -38,7 +38,7 @@ import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.IndexedRepositoryValidationDecorator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
-import org.molgenis.data.version.MetaDataUpgradeService;
+import org.molgenis.data.version.MolgenisUpgradeService;
 import org.molgenis.framework.db.WebAppDatabasePopulator;
 import org.molgenis.framework.db.WebAppDatabasePopulatorService;
 import org.molgenis.framework.server.MolgenisSettings;
@@ -112,7 +112,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	public EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory;
 
 	@Autowired
-	public MetaDataUpgradeService metaDataUpgradeService;
+	public MolgenisUpgradeService metaDataUpgradeService;
 
 	@Autowired
 	public DataSource dataSource;
@@ -469,7 +469,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	/**
-	 * Adds the upgrade steps to the {@link MetaDataUpgradeService}.
+	 * Adds the upgrade steps to the {@link MolgenisUpgradeService}.
 	 */
 	public abstract void addUpgrades();
 }
