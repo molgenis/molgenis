@@ -2,7 +2,7 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=["select2.css"]>
-<#assign js=["pathway.js", "select2-patched.js", "svg-pan-zoom.min.js"]>	
+<#assign js=["pathway.js", "svg-pan-zoom.min.js"]>	
 
 <@header css js/>
 

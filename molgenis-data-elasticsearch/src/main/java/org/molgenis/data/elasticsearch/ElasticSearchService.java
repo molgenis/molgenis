@@ -661,6 +661,7 @@ public class ElasticSearchService implements SearchService
 		String id = toElasticsearchId(entity, entityMetaData);
 		Map<String, Object> source = entityToSourceConverter.convert(entity, entityMetaData);
 		client.prepareIndex(indexName, type, id).setSource(source).execute().actionGet();
+		refresh();
 
 		if (updateIndex && indexingMode == IndexingMode.UPDATE) updateReferences(entity, entityMetaData);
 	}
@@ -1079,26 +1080,35 @@ public class ElasticSearchService implements SearchService
 		}
 	}
 
-	private void updateReferences(Entity entity, EntityMetaData entityMetaData)
+	private void updateReferences(Entity refEntity, EntityMetaData refEntityMetaData)
 	{
-		List<Pair<EntityMetaData, List<AttributeMetaData>>> referencingEntityMetaData = getReferencingEntityMetaData(entityMetaData);
-
-		for (Pair<EntityMetaData, List<AttributeMetaData>> pair : referencingEntityMetaData)
+		for (Pair<EntityMetaData, List<AttributeMetaData>> pair : getReferencingEntityMetaData(refEntityMetaData))
 		{
-			EntityMetaData refEntityMetaData = pair.getA();
+			EntityMetaData entityMetaData = pair.getA();
+
 			QueryImpl q = null;
 			for (AttributeMetaData attributeMetaData : pair.getB())
 			{
 				if (q == null) q = new QueryImpl();
 				else q.or();
-				q.eq(attributeMetaData.getName(), entity);
+				q.eq(attributeMetaData.getName(), refEntity);
 			}
 
-			Iterable<Entity> refEntities = dataService.findAll(refEntityMetaData.getName(), q);
-			if (!Iterables.isEmpty(refEntities))
+			Iterable<Entity> entities = dataService.findAll(entityMetaData.getName(), q);
+
+			// Don't you cached ref entities but make new ones
+			entities = Iterables.transform(entities, new Function<Entity, Entity>()
 			{
-				index(refEntities, refEntityMetaData, IndexingMode.UPDATE, false);
-			}
+				@Override
+				public Entity apply(Entity entity)
+				{
+					return new DefaultEntity(entityMetaData, dataService, entity);
+				}
+			});
+
+			index(entities, entityMetaData, IndexingMode.UPDATE, false);
+			refresh();
+
 		}
 	}
 
@@ -1327,6 +1337,10 @@ public class ElasticSearchService implements SearchService
 					SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName);
 					searchRequestGenerator.buildSearchRequest(searchRequestBuilder, type, SearchType.QUERY_AND_FETCH,
 							q, fieldsToReturn, null, null, null, entityMetaData);
+					if (LOG.isTraceEnabled())
+					{
+						LOG.trace("SearchRequest: " + searchRequestBuilder);
+					}
 					SearchResponse searchResponse = searchRequestBuilder.execute().actionGet();
 					if (searchResponse.getFailedShards() > 0)
 					{

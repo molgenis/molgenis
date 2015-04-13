@@ -8,7 +8,6 @@ import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DATE_TIME;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
 import static org.molgenis.data.rest.RestController.BASE_URI;
-import static org.molgenis.ui.MolgenisPluginAttributes.KEY_RESOURCE_FINGERPRINT_REGISTRY;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
@@ -36,7 +35,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -66,11 +64,9 @@ import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.fieldtypes.BoolField;
 import org.molgenis.framework.db.EntityNotFoundException;
 import org.molgenis.security.core.MolgenisPermissionService;
-import org.molgenis.security.core.Permission;
 import org.molgenis.security.token.TokenExtractor;
 import org.molgenis.security.token.TokenService;
 import org.molgenis.security.token.UnknownTokenException;
-import org.molgenis.ui.form.EntityForm;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.util.MolgenisDateFormat;
@@ -91,7 +87,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -101,7 +96,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -131,10 +125,8 @@ public class RestController
 	private final DataService dataService;
 	private final TokenService tokenService;
 	private final AuthenticationManager authenticationManager;
-	private final String ENTITY_FORM_MODEL_ATTRIBUTE = "form";
 	private final MolgenisPermissionService molgenisPermissionService;
 	private final MolgenisRSQL molgenisRSQL;
-	private final ResourceFingerprintRegistry resourceFingerprintRegistry;
 
 	@Autowired
 	public RestController(DataService dataService, TokenService tokenService,
@@ -145,15 +137,12 @@ public class RestController
 		if (tokenService == null) throw new IllegalArgumentException("tokenService is null");
 		if (authenticationManager == null) throw new IllegalArgumentException("authenticationManager is null");
 		if (molgenisPermissionService == null) throw new IllegalArgumentException("molgenisPermissionService is null");
-		if (resourceFingerprintRegistry == null) throw new IllegalArgumentException(
-				"resourceFingerprintRegistry is null");
 
 		this.dataService = dataService;
 		this.tokenService = tokenService;
 		this.authenticationManager = authenticationManager;
 		this.molgenisPermissionService = molgenisPermissionService;
 		this.molgenisRSQL = molgenisRSQL;
-		this.resourceFingerprintRegistry = resourceFingerprintRegistry;
 	}
 
 	/**
@@ -508,14 +497,7 @@ public class RestController
 
 		// Check attribute names
 		Iterable<String> attributesIterable = Iterables.transform(meta.getAtomicAttributes(),
-				new Function<AttributeMetaData, String>()
-				{
-					@Override
-					public String apply(AttributeMetaData attributeMetaData)
-					{
-						return attributeMetaData.getName().toLowerCase();
-					}
-				});
+				attributeMetaData -> attributeMetaData.getName().toLowerCase());
 
 		if (attributesSet != null)
 		{
@@ -527,25 +509,12 @@ public class RestController
 			}
 		}
 
-		attributesIterable = Iterables.transform(meta.getAtomicAttributes(), new Function<AttributeMetaData, String>()
-		{
-			@Override
-			public String apply(AttributeMetaData attributeMetaData)
-			{
-				return attributeMetaData.getName();
-			}
-		});
+		attributesIterable = Iterables.transform(meta.getAtomicAttributes(), AttributeMetaData::getName);
 
 		if (attributesSet != null)
 		{
-			attributesIterable = Iterables.filter(attributesIterable, new Predicate<String>()
-			{
-				@Override
-				public boolean apply(@Nullable String attribute)
-				{
-					return attributesSet.contains(attribute.toLowerCase());
-				}
-			});
+			attributesIterable = Iterables.filter(attributesIterable,
+					attribute -> attributesSet.contains(attribute.toLowerCase()));
 		}
 
 		return new DefaultEntityCollection(entities, attributesIterable);
@@ -789,33 +758,6 @@ public class RestController
 		dataService.getMeta().deleteEntityMeta(entityName);
 	}
 
-	@RequestMapping(value = "/{entityName}/create", method = GET)
-	public String createForm(@PathVariable("entityName") String entityName, Model model)
-	{
-
-		Repository repo = dataService.getRepository(entityName);
-
-		EntityMetaData entityMeta = repo.getEntityMetaData();
-		model.addAttribute(ENTITY_FORM_MODEL_ATTRIBUTE, new EntityForm(entityMeta, true, null));
-		model.addAttribute(KEY_RESOURCE_FINGERPRINT_REGISTRY, resourceFingerprintRegistry);
-
-		return "view-entity-create";
-	}
-
-	@RequestMapping(value = "/{entityName}/{id}/edit", method = GET)
-	public String editForm(@PathVariable("entityName") String entityName, @PathVariable Object id, Model model)
-	{
-		Entity entity = dataService.findOne(entityName, id);
-		EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
-
-		boolean hasWritePermission = molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITE);
-		model.addAttribute(ENTITY_FORM_MODEL_ATTRIBUTE, new EntityForm(entityMetaData, entity, id, hasWritePermission));
-		model.addAttribute(KEY_RESOURCE_FINGERPRINT_REGISTRY, resourceFingerprintRegistry);
-		model.addAttribute("entity", entity);
-
-		return "view-entity-edit";
-	}
-
 	/**
 	 * Login to the api.
 	 * 
@@ -1015,8 +957,7 @@ public class RestController
 	// Creates a new MapEntity based from a HttpServletRequest
 	private Entity toEntity(EntityMetaData meta, Map<String, Object> request)
 	{
-		Entity entity = new MapEntity();
-		if (meta.getIdAttribute() != null) entity = new MapEntity(meta.getIdAttribute().getName());
+		Entity entity = new MapEntity(meta);
 
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{
@@ -1147,7 +1088,7 @@ public class RestController
 				}
 
 				EntityPager pager = new EntityPager(request.getStart(), request.getNum(), (long) count, mrefEntities);
-				return new EntityCollectionResponse(pager, refEntityMaps, attrHref);
+				return new EntityCollectionResponse(pager, refEntityMaps, attrHref, null, molgenisPermissionService);
 			case CATEGORICAL:
 			case XREF:
 				Map<String, Object> entityXrefAttributeMap = getEntityAsMap((Entity) entity.get(refAttributeName),
@@ -1183,7 +1124,8 @@ public class RestController
 			entities.add(getEntityAsMap(entity, meta, attributesSet, attributeExpandsSet));
 		}
 
-		return new EntityCollectionResponse(pager, entities, BASE_URI + "/" + entityName);
+		return new EntityCollectionResponse(pager, entities, BASE_URI + "/" + entityName, meta,
+				molgenisPermissionService);
 	}
 
 	// Transforms an entity to a Map so it can be transformed to json
@@ -1281,7 +1223,7 @@ public class RestController
 
 					EntityCollectionResponse ecr = new EntityCollectionResponse(pager, refEntityMaps,
 							Href.concatAttributeHref(RestController.BASE_URI, meta.getName(), entity.getIdValue(),
-									attrName));
+									attrName), null, molgenisPermissionService);
 					entityMap.put(attrName, ecr);
 				}
 				else if ((attrType == XREF && entity.get(attr.getName()) != null)

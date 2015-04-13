@@ -120,12 +120,23 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry)
 	{
-		final int aYear = 31536000;
-		registry.addResourceHandler(PATTERN_CSS).addResourceLocations("/css/", "classpath:/css/").setCachePeriod(aYear);
-		registry.addResourceHandler(PATTERN_IMG).addResourceLocations("/img/", "classpath:/img/").setCachePeriod(aYear);
-		registry.addResourceHandler(PATTERN_JS).addResourceLocations("/js/", "classpath:/js/").setCachePeriod(aYear);
+		int cachePeriod;
+		if (environment.equals("development"))
+		{
+			cachePeriod = 0;
+		}
+		else
+		{
+			cachePeriod = 31536000; // a year
+		}
+		registry.addResourceHandler(PATTERN_CSS).addResourceLocations("/css/", "classpath:/css/")
+				.setCachePeriod(cachePeriod);
+		registry.addResourceHandler(PATTERN_IMG).addResourceLocations("/img/", "classpath:/img/")
+				.setCachePeriod(cachePeriod);
+		registry.addResourceHandler(PATTERN_JS).addResourceLocations("/js/", "classpath:/js/")
+				.setCachePeriod(cachePeriod);
 		registry.addResourceHandler(PATTERN_FONTS).addResourceLocations("/fonts/", "classpath:/fonts/")
-				.setCachePeriod(aYear);
+				.setCachePeriod(cachePeriod);
 		registry.addResourceHandler("/generated-doc/**").addResourceLocations("/generated-doc/").setCachePeriod(3600);
 		registry.addResourceHandler("/html/**").addResourceLocations("/html/", "classpath:/html/").setCachePeriod(3600);
 	}

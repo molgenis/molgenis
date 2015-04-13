@@ -10,6 +10,8 @@
  * $('#id_of_hidden_input)').xrefmrefsearch({attribute: attribute});
  * 
  * Depends on select2.js and molgenis.js
+ * 
+ * @deprecated use EntitySelectBox.js
  */
 (function($, molgenis) {
 	"use strict";

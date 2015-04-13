@@ -219,7 +219,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 						content()
 								.string("{\"href\":\""
 										+ HREF_ENTITY_META
-										+ "\",\"name\":\""
+										+ "\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\""
 										+ ENTITY_NAME
 										+ "\",\"attributes\":{\"name\":{\"href\":\""
 										+ HREF_ENTITY_META
@@ -237,7 +237,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 						content()
 								.string("{\"href\":\""
 										+ HREF_ENTITY_META
-										+ "\",\"name\":\""
+										+ "\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\""
 										+ ENTITY_NAME
 										+ "\",\"attributes\":{\"name\":{\"href\":\""
 										+ HREF_ENTITY_META
@@ -253,7 +253,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 				.andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(
 						content().string(
-								"{\"href\":\"" + HREF_ENTITY_META + "\",\"name\":\"" + ENTITY_NAME
+								"{\"href\":\"" + HREF_ENTITY_META
+										+ "\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\"" + ENTITY_NAME
 										+ "\",\"writable\":false}"));
 	}
 
@@ -265,7 +266,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 				.andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(
 						content().string(
-								"{\"href\":\"" + HREF_ENTITY_META + "\",\"name\":\"" + ENTITY_NAME
+								"{\"href\":\"" + HREF_ENTITY_META
+										+ "\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\"" + ENTITY_NAME
 										+ "\",\"writable\":false}"));
 	}
 
@@ -279,7 +281,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 						content()
 								.string("{\"href\":\""
 										+ HREF_ENTITY_META
-										+ "\",\"name\":\""
+										+ "\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\""
 										+ ENTITY_NAME
 										+ "\",\"attributes\":{\"name\":{\"href\":\""
 										+ HREF_ENTITY_META
@@ -321,8 +323,10 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 				.andExpect(status().isOk())
 				.andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(
-						content().string(
-								"{\"href\":\"" + HREF_ENTITY + "\",\"start\":5,\"num\":10,\"total\":0,\"prevHref\":\""
+						content()
+								.string("{\"href\":\""
+										+ HREF_ENTITY
+										+ "\",\"meta\":{\"href\":\"/api/v1/Person/meta\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\"Person\",\"attributes\":{\"name\":{\"href\":\"/api/v1/Person/meta/name\"},\"id\":{\"href\":\"/api/v1/Person/meta/id\"},\"enum\":{\"href\":\"/api/v1/Person/meta/enum\"}},\"idAttribute\":\"id\",\"isAbstract\":false,\"writable\":false},\"start\":5,\"num\":10,\"total\":0,\"prevHref\":\""
 										+ HREF_ENTITY + "?start=0&num=10\",\"items\":[{\"href\":\"" + HREF_ENTITY_ID
 										+ "\",\"name\":\"Piet\",\"id\":\"p1\",\"enum\":\"enum1\"}]}"));
 
@@ -337,8 +341,10 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 				.andExpect(status().isOk())
 				.andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(
-						content().string(
-								"{\"href\":\"" + HREF_ENTITY + "\",\"start\":5,\"num\":10,\"total\":0,\"prevHref\":\""
+						content()
+								.string("{\"href\":\""
+										+ HREF_ENTITY
+										+ "\",\"meta\":{\"href\":\"/api/v1/Person/meta\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\"Person\",\"attributes\":{\"name\":{\"href\":\"/api/v1/Person/meta/name\"},\"id\":{\"href\":\"/api/v1/Person/meta/id\"},\"enum\":{\"href\":\"/api/v1/Person/meta/enum\"}},\"idAttribute\":\"id\",\"isAbstract\":false,\"writable\":false},\"start\":5,\"num\":10,\"total\":0,\"prevHref\":\""
 										+ HREF_ENTITY + "?start=0&num=10\",\"items\":[{\"href\":\"" + HREF_ENTITY_ID
 										+ "\",\"name\":\"Piet\",\"id\":\"p1\",\"enum\":\"enum1\"}]}"));
 
