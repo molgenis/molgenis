@@ -23,6 +23,7 @@ import org.molgenis.data.annotation.impl.datastructures.ClinvarData;
 import org.molgenis.data.annotation.provider.ClinvarDataProvider;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ResourceUtils;
 import org.testng.annotations.BeforeMethod;
@@ -58,10 +59,10 @@ public class ClinVarServiceAnnotatorTest
 		attributeMetaDataRef = mock(AttributeMetaData.class);
 		attributeMetaDataAlt = mock(AttributeMetaData.class);
 
-		when(attributeMetaDataChrom.getName()).thenReturn(ClinVarServiceAnnotator.CHROMOSOME);
-		when(attributeMetaDataPos.getName()).thenReturn(ClinVarServiceAnnotator.POSITION);
-		when(attributeMetaDataRef.getName()).thenReturn(ClinVarServiceAnnotator.REFERENCE);
-		when(attributeMetaDataAlt.getName()).thenReturn(ClinVarServiceAnnotator.ALTERNATIVE);
+		when(attributeMetaDataChrom.getName()).thenReturn(VcfRepository.CHROM);
+		when(attributeMetaDataPos.getName()).thenReturn(VcfRepository.POS);
+		when(attributeMetaDataRef.getName()).thenReturn(VcfRepository.REF);
+		when(attributeMetaDataAlt.getName()).thenReturn(VcfRepository.ALT);
 		when(attributeMetaDataChrom.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
 		when(attributeMetaDataPos.getDataType()).thenReturn(
@@ -84,41 +85,41 @@ public class ClinVarServiceAnnotatorTest
 				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
 
 		attributeMetaDataCantAnnotateChrom = mock(AttributeMetaData.class);
-		when(attributeMetaDataCantAnnotateChrom.getName()).thenReturn(DbnsfpVariantServiceAnnotator.CHROMOSOME);
+		when(attributeMetaDataCantAnnotateChrom.getName()).thenReturn(VcfRepository.CHROM);
 		when(attributeMetaDataCantAnnotateFeature.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.INT.toString().toLowerCase()));
 
 		attributeMetaDataCantAnnotatePos = mock(AttributeMetaData.class);
-		when(attributeMetaDataCantAnnotatePos.getName()).thenReturn(ClinVarServiceAnnotator.POSITION);
+		when(attributeMetaDataCantAnnotatePos.getName()).thenReturn(VcfRepository.POS);
 		when(attributeMetaDataCantAnnotatePos.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
 
 		attributeMetaDataCantAnnotateRef = mock(AttributeMetaData.class);
-		when(attributeMetaDataCantAnnotateRef.getName()).thenReturn(ClinVarServiceAnnotator.REFERENCE);
+		when(attributeMetaDataCantAnnotateRef.getName()).thenReturn(VcfRepository.REF);
 		when(attributeMetaDataCantAnnotateRef.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.INT.toString().toLowerCase()));
 
 		attributeMetaDataCantAnnotateAlt = mock(AttributeMetaData.class);
-		when(attributeMetaDataCantAnnotateAlt.getName()).thenReturn(ClinVarServiceAnnotator.ALTERNATIVE);
+		when(attributeMetaDataCantAnnotateAlt.getName()).thenReturn(VcfRepository.ALT);
 		when(attributeMetaDataCantAnnotateAlt.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.INT.toString().toLowerCase()));
 
-		when(metaDataCantAnnotate.getAttribute(ClinVarServiceAnnotator.CHROMOSOME)).thenReturn(attributeMetaDataChrom);
-		when(metaDataCantAnnotate.getAttribute(ClinVarServiceAnnotator.POSITION)).thenReturn(
+		when(metaDataCantAnnotate.getAttribute(VcfRepository.CHROM)).thenReturn(attributeMetaDataChrom);
+		when(metaDataCantAnnotate.getAttribute(VcfRepository.POS)).thenReturn(
 				attributeMetaDataCantAnnotatePos);
-		when(metaDataCantAnnotate.getAttribute(ClinVarServiceAnnotator.REFERENCE)).thenReturn(attributeMetaDataRef);
-		when(metaDataCantAnnotate.getAttribute(ClinVarServiceAnnotator.ALTERNATIVE)).thenReturn(attributeMetaDataAlt);
+		when(metaDataCantAnnotate.getAttribute(VcfRepository.REF)).thenReturn(attributeMetaDataRef);
+		when(metaDataCantAnnotate.getAttribute(VcfRepository.ALT)).thenReturn(attributeMetaDataAlt);
 
-		entity = mock(Entity.class);
+		entity = new MapEntity(metaDataCanAnnotate);
 
 		String chrStr = "12";
 		Long chrPos = new Long(57966471);
 		String chrRef = "G";
 		String chrAlt = "A";
-		when(entity.getString(ClinVarServiceAnnotator.CHROMOSOME)).thenReturn(chrStr);
-		when(entity.getLong(ClinVarServiceAnnotator.POSITION)).thenReturn(chrPos);
-		when(entity.getString(ClinVarServiceAnnotator.REFERENCE)).thenReturn(chrRef);
-		when(entity.getString(ClinVarServiceAnnotator.ALTERNATIVE)).thenReturn(chrAlt);
+		entity.set(VcfRepository.CHROM, chrStr);
+		entity.set(VcfRepository.POS, chrPos);
+		entity.set(VcfRepository.REF, chrRef);
+		entity.set(VcfRepository.ALT, chrAlt);
 
 		input = new ArrayList<Entity>();
 		input.add(entity);
@@ -136,7 +137,6 @@ public class ClinVarServiceAnnotatorTest
 		when(clinvarDataProvider.getClinvarData()).thenReturn(clinvarDataMap);
 		
 		annotator = new ClinVarServiceAnnotator(settings, annotationService, clinvarDataProvider);
-		when(entity.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
 	}
 
 	@Test

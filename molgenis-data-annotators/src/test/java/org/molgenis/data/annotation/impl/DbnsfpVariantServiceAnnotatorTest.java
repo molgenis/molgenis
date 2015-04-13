@@ -18,6 +18,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ResourceUtils;
 import org.testng.annotations.BeforeMethod;
@@ -54,10 +55,10 @@ public class DbnsfpVariantServiceAnnotatorTest
 		attributeMetaDataRef = mock(AttributeMetaData.class);
 		attributeMetaDataAlt = mock(AttributeMetaData.class);
 
-		when(attributeMetaDataChrom.getName()).thenReturn(DbnsfpVariantServiceAnnotator.CHROMOSOME);
-		when(attributeMetaDataPos.getName()).thenReturn(DbnsfpVariantServiceAnnotator.POSITION);
-		when(attributeMetaDataRef.getName()).thenReturn(DbnsfpVariantServiceAnnotator.REFERENCE);
-		when(attributeMetaDataAlt.getName()).thenReturn(DbnsfpVariantServiceAnnotator.ALTERNATIVE);
+		when(attributeMetaDataChrom.getName()).thenReturn(VcfRepository.CHROM);
+		when(attributeMetaDataPos.getName()).thenReturn(VcfRepository.POS);
+		when(attributeMetaDataRef.getName()).thenReturn(VcfRepository.REF);
+		when(attributeMetaDataAlt.getName()).thenReturn(VcfRepository.ALT);
 
 		when(attributeMetaDataChrom.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
@@ -81,45 +82,43 @@ public class DbnsfpVariantServiceAnnotatorTest
 				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
 
 		attributeMetaDataCantAnnotateChrom = mock(AttributeMetaData.class);
-		when(attributeMetaDataCantAnnotateChrom.getName()).thenReturn(DbnsfpVariantServiceAnnotator.CHROMOSOME);
+		when(attributeMetaDataCantAnnotateChrom.getName()).thenReturn(VcfRepository.CHROM);
 		when(attributeMetaDataCantAnnotateFeature.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.INT.toString().toLowerCase()));
 
 		attributeMetaDataCantAnnotatePos = mock(AttributeMetaData.class);
-		when(attributeMetaDataCantAnnotatePos.getName()).thenReturn(DbnsfpVariantServiceAnnotator.POSITION);
+		when(attributeMetaDataCantAnnotatePos.getName()).thenReturn(VcfRepository.POS);
 		when(attributeMetaDataCantAnnotatePos.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
 
 		attributeMetaDataCantAnnotateRef = mock(AttributeMetaData.class);
-		when(attributeMetaDataCantAnnotateRef.getName()).thenReturn(DbnsfpVariantServiceAnnotator.REFERENCE);
+		when(attributeMetaDataCantAnnotateRef.getName()).thenReturn(VcfRepository.ALT);
 		when(attributeMetaDataCantAnnotateRef.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.INT.toString().toLowerCase()));
 
 		attributeMetaDataCantAnnotateAlt = mock(AttributeMetaData.class);
-		when(attributeMetaDataCantAnnotateAlt.getName()).thenReturn(DbnsfpVariantServiceAnnotator.ALTERNATIVE);
+		when(attributeMetaDataCantAnnotateAlt.getName()).thenReturn(VcfRepository.ALT);
 		when(attributeMetaDataCantAnnotateAlt.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.INT.toString().toLowerCase()));
 
-		when(metaDataCantAnnotate.getAttribute(DbnsfpVariantServiceAnnotator.CHROMOSOME)).thenReturn(
+		when(metaDataCantAnnotate.getAttribute(VcfRepository.CHROM)).thenReturn(
 				attributeMetaDataChrom);
-		when(metaDataCantAnnotate.getAttribute(DbnsfpVariantServiceAnnotator.POSITION)).thenReturn(
+		when(metaDataCantAnnotate.getAttribute(VcfRepository.POS)).thenReturn(
 				attributeMetaDataCantAnnotatePos);
-		when(metaDataCantAnnotate.getAttribute(DbnsfpVariantServiceAnnotator.REFERENCE)).thenReturn(
+		when(metaDataCantAnnotate.getAttribute(VcfRepository.REF)).thenReturn(
 				attributeMetaDataCantAnnotateRef);
-		when(metaDataCantAnnotate.getAttribute(DbnsfpVariantServiceAnnotator.ALTERNATIVE)).thenReturn(
+		when(metaDataCantAnnotate.getAttribute(VcfRepository.ALT)).thenReturn(
 				attributeMetaDataCantAnnotateAlt);
 
-		entity = mock(Entity.class);
+		entity = new MapEntity(metaDataCanAnnotate);
 
-		when(entity.getString(DbnsfpVariantServiceAnnotator.CHROMOSOME)).thenReturn("Y");
-		when(entity.getLong(DbnsfpVariantServiceAnnotator.POSITION)).thenReturn(new Long(2655049));
-		when(entity.getString(DbnsfpVariantServiceAnnotator.REFERENCE)).thenReturn("C");
-		when(entity.getString(DbnsfpVariantServiceAnnotator.ALTERNATIVE)).thenReturn("A");
+		entity.set(VcfRepository.CHROM,"Y");
+		entity.set(VcfRepository.POS,new Long(2655049));
+		entity.set(VcfRepository.REF,"C");
+		entity.set(VcfRepository.ALT,"A");
 
 		input = new ArrayList<Entity>();
 		input.add(entity);
-
-		when(entity.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
 
 		annotator = new DbnsfpVariantServiceAnnotator(settings, null);
 	}
