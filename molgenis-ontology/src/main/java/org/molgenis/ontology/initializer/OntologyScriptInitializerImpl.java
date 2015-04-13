@@ -13,7 +13,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.script.Script;
 import org.molgenis.script.ScriptParameter;
 import org.molgenis.script.ScriptType;
-import org.molgenis.security.runas.RunAsSystem;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

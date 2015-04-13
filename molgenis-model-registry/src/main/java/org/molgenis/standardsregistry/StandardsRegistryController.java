@@ -153,7 +153,8 @@ public class StandardsRegistryController extends MolgenisPluginController
 							if (!molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.READ)) return false;
 
 							// Check has data
-							if (dataService.count(entityName, new QueryImpl()) == 0) return false;
+							if (!dataService.hasRepository(entityName)
+									|| dataService.count(entityName, new QueryImpl()) == 0) return false;
 
 							return true;
 						}

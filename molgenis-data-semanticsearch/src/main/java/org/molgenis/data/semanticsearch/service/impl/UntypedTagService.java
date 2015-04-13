@@ -23,6 +23,7 @@ import org.molgenis.data.semantic.TagImpl;
 import org.molgenis.data.semanticsearch.repository.TagRepository;
 import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,6 +80,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 	}
 
 	@Override
+	@RunAsSystem
 	public Multimap<Relation, LabeledResource> getTagsForAttribute(EntityMetaData entityMetaData,
 			AttributeMetaData attributeMetaData)
 	{
@@ -96,18 +98,22 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 	}
 
 	@Override
+	@RunAsSystem
 	public Iterable<Tag<EntityMetaData, LabeledResource, LabeledResource>> getTagsForEntity(
 			EntityMetaData entityMetaData)
 	{
+		List<Tag<EntityMetaData, LabeledResource, LabeledResource>> tags = new ArrayList<Tag<EntityMetaData, LabeledResource, LabeledResource>>();
 		Entity entity = findEntity(entityMetaData);
 		if (entity == null)
 		{
-			throw new UnknownEntityException("No known entity with name " + entityMetaData.getName() + ".");
+			LOG.warn("No known entity with name " + entityMetaData.getName() + ".");
 		}
-		List<Tag<EntityMetaData, LabeledResource, LabeledResource>> tags = new ArrayList<Tag<EntityMetaData, LabeledResource, LabeledResource>>();
-		for (Entity tagEntity : entity.getEntities(EntityMetaDataMetaData.TAGS))
+		else
 		{
-			tags.add(TagImpl.asTag(entityMetaData, tagEntity));
+			for (Entity tagEntity : entity.getEntities(EntityMetaDataMetaData.TAGS))
+			{
+				tags.add(TagImpl.asTag(entityMetaData, tagEntity));
+			}
 		}
 		return tags;
 	}
@@ -157,6 +163,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 	}
 
 	@Override
+	@RunAsSystem
 	public Iterable<Tag<Package, LabeledResource, LabeledResource>> getTagsForPackage(Package p)
 	{
 		Entity packageEntity = dataService.findOne(PackageMetaData.ENTITY_NAME,
@@ -186,6 +193,6 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 	public void removeAllTagsFromEntity(String entityName)
 	{
 		// TODO Auto-generated method stub
-		
+
 	}
 }

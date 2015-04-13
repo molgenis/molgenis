@@ -22,6 +22,7 @@ import org.molgenis.data.version.v1_5.Step4;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
 import org.molgenis.system.core.FreemarkerTemplateRepository;
 import org.molgenis.ui.MolgenisWebAppConfig;
+import org.molgenis.ui.migrate.v1_5.Step5AlterDataexplorerMenuURLs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,10 +71,12 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	@Override
 	public void addUpgrades()
 	{
-		metaDataUpgradeService.addUpgrade(new Step1UpgradeMetaData(dataSource, searchService));
-		metaDataUpgradeService.addUpgrade(new Step2(dataService, jpaRepositoryCollection, dataSource, searchService));
-		metaDataUpgradeService.addUpgrade(new Step3AddOrderColumnToMrefTables(dataSource));
-		metaDataUpgradeService.addUpgrade(new Step4(dataSource, mysqlRepositoryCollection));
+		upgradeService.addUpgrade(new Step1UpgradeMetaData(dataSource, searchService));
+		upgradeService.addUpgrade(new Step2(dataService, jpaRepositoryCollection, dataSource, searchService));
+		upgradeService.addUpgrade(new Step3AddOrderColumnToMrefTables(dataSource));
+		upgradeService.addUpgrade(new Step4(dataSource, mysqlRepositoryCollection));
+		upgradeService.addUpgrade(new Step5AlterDataexplorerMenuURLs(jpaRepositoryCollection
+				.getRepository("RuntimeProperty")));
 	}
 
 	@Override

@@ -26,9 +26,8 @@ import org.molgenis.data.mysql.AsyncJdbcTemplate;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.version.MetaDataUpgrade;
-import org.molgenis.security.runas.RunAsSystemProxy;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.molgenis.data.version.MolgenisUpgrade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -45,7 +44,7 @@ import com.google.common.collect.Lists;
  * 
  * Subsequently drops the index and recreates it.
  */
-public class Step1UpgradeMetaData extends MetaDataUpgrade
+public class Step1UpgradeMetaData extends MolgenisUpgrade
 {
 	private static final Logger LOG = LoggerFactory.getLogger(Step1UpgradeMetaData.class);
 	private final JdbcTemplate jdbcTemplate;
