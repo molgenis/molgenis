@@ -103,37 +103,39 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 	public String merge(@RequestParam("resultDataset") String resultSet, @RequestParam("datasets") String[] inputSets)
 			throws IOException
 	{
-		// create list of entities to merge
-		List<Repository> geneticRepositories = new ArrayList<Repository>();
-		for (String name : inputSets)
+		if (dataService.hasRepository(resultSet))
 		{
-			if (!name.equals(resultSet))
+			throw new RuntimeException(
+					"An entity with this name already exists. Please try again with a different name");
+		}
+		else
+		{
+			// create list of entities to merge
+			List<Repository> geneticRepositories = new ArrayList<Repository>();
+			for (String name : inputSets)
 			{
-				if (dataService.hasRepository(name))
+				if (!name.equals(resultSet))
 				{
-					geneticRepositories.add(dataService.getRepository(name));
+					if (dataService.hasRepository(name))
+					{
+						geneticRepositories.add(dataService.getRepository(name));
+					}
+					else
+					{
+						throw new RuntimeException("Cannot merge Repository: " + name + " it does not exist");
+					}
 				}
 				else
 				{
-					throw new RuntimeException("Cannot merge Repository: " + name + " it does not exist");
+					throw new RuntimeException("Cannot merge Repository with itself");
 				}
 			}
-			else
-			{
-				throw new RuntimeException("Cannot merge Repository with itself");
-			}
-		}
-		// Delete if exists
-		if (dataService.hasRepository(resultSet))
-		{
-			dataService.getMeta().deleteEntityMeta(resultSet);
-		}
 
-		EntityMetaData mergedEntityMetaData = repositoryMerger.mergeMetaData(geneticRepositories, commonAttributes,
-				resultSet);
-		Repository mergedRepository = dataService.getMeta().addEntityMeta(mergedEntityMetaData);
-		repositoryMerger.merge(geneticRepositories, commonAttributes, mergedRepository);
-
+			EntityMetaData mergedEntityMetaData = repositoryMerger.mergeMetaData(geneticRepositories, commonAttributes,
+					resultSet);
+			Repository mergedRepository = dataService.getMeta().addEntityMeta(mergedEntityMetaData);
+			repositoryMerger.merge(geneticRepositories, commonAttributes, mergedRepository);
+		}
 		return resultSet;
 	}
 
