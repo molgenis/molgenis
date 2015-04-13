@@ -58,7 +58,7 @@ public class MetaDataVersionServiceTest
 	@Test
 	public void updateToCurrentVersion() throws IOException
 	{
-		FileCopyUtils.copy("meta.data.version=0", new FileWriter(propertiesFile));
+		FileCopyUtils.copy("molgenis.version=0", new FileWriter(propertiesFile));
 		assertEquals(metaDataVersionService.getMolgenisVersionFromServerProperties(), 0);
 
 		metaDataVersionService.updateToCurrentVersion();

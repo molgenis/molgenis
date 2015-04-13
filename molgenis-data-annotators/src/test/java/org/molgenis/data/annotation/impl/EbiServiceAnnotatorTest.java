@@ -71,14 +71,12 @@ public class EbiServiceAnnotatorTest
 
 		when(metaDataCantAnnotate.getAttribute("uniprot_id")).thenReturn(attributeMetaDataCantAnnotate2);
 
-		entity = mock(Entity.class);
-		when(entity.get("uniprot_id")).thenReturn("Q13936");
+		entity = new MapEntity(metaDataCanAnnotate);
+		entity.set("uniprot_id","Q13936");
 		input = new ArrayList<Entity>();
 		input.add(entity);
 
-		when(entity.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
-
-		SERVICE_RESPONSE = "{\"target\": {\"targetType\": \"SINGLE PROTEIN\", \"chemblId\": \"CHEMBL1940\", \"geneNames\": \"Unspecified\", \"description\": \"Voltage-gated L-type calcium channel alpha-1C subunit\", \"compoundCount\": 171, \"bioactivityCount\": 239, \"proteinAccession\": \"Q13936\", \"synonyms\": \"CCHL1A1,CACNL1A1,Calcium channel, L type, alpha-1 polypeptide, isoform 1, cardiac muscle,Voltage-gated calcium channel subunit alpha Cav1.2,CACNA1C,CACN2,CACH2 ,Voltage-dependent L-type calcium channel subunit alpha-1C\", \"organism\": \"Homo sapiens\", \"preferredName\": \"Voltage-gated L-type calcium channel alpha-1C subunit\"}}";
+        SERVICE_RESPONSE = "{\"target\": {\"targetType\": \"SINGLE PROTEIN\", \"chemblId\": \"CHEMBL1940\", \"geneNames\": \"Unspecified\", \"description\": \"Voltage-gated L-type calcium channel alpha-1C subunit\", \"compoundCount\": 171, \"bioactivityCount\": 239, \"proteinAccession\": \"Q13936\", \"synonyms\": \"CCHL1A1,CACNL1A1,Calcium channel, L type, alpha-1 polypeptide, isoform 1, cardiac muscle,Voltage-gated calcium channel subunit alpha Cav1.2,CACNA1C,CACN2,CACH2 ,Voltage-dependent L-type calcium channel subunit alpha-1C\", \"organism\": \"Homo sapiens\", \"preferredName\": \"Voltage-gated L-type calcium channel alpha-1C subunit\"}}";
 	}
 
 	@Test
