@@ -51,6 +51,7 @@ import org.molgenis.ontology.matching.UploadProgress;
 import org.molgenis.ontology.request.OntologyServiceRequest;
 import org.molgenis.ontology.roc.MatchQualityRocService;
 import org.molgenis.ontology.utils.OntologyServiceUtil;
+import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,6 +92,9 @@ public class OntologyServiceController extends MolgenisPluginController
 
 	@Autowired
 	private FileStore fileStore;
+
+	@Autowired
+	private MolgenisPermissionService molgenisPermissionService;
 
 	public static final String ID = "ontologyservice";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
@@ -272,9 +276,8 @@ public class OntologyServiceController extends MolgenisPluginController
 
 		uploadProgress.setUserClickMode(userAccountService.getCurrentUser().getUsername(), isMatched);
 		EntityPager pager = new EntityPager(start, num, (long) count, null);
-		return new EntityCollectionResponse(pager, entityMaps, "/match/retrieve", null, null); // FIXME do not return
-																								// null for
-																								// EntityMetaData
+		return new EntityCollectionResponse(pager, entityMaps, "/match/retrieve", OntologyTermMetaData.INSTANCE,
+				molgenisPermissionService);
 	}
 
 	@RequestMapping(method = POST, value = "/match")
