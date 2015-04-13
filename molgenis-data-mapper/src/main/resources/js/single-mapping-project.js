@@ -1,6 +1,6 @@
 (function($, molgenis) {	
 	$(function() {
-		$('#attribute-mapping-table').scrollTableBody();
+		$('#attribute-mapping-table').scrollTableBody({rowsToDisplay:10});
 		
 		$('.ace.readonly').each(function(){
 			var id = $(this).attr('id');
