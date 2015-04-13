@@ -15,6 +15,7 @@
 			required : React.PropTypes.bool,
 			disabled : React.PropTypes.bool,
 			readOnly : React.PropTypes.bool,
+			maxLength: React.PropTypes.number,
 			mode: React.PropTypes.string,
 			value : React.PropTypes.string,
 			onValueChange : React.PropTypes.func.isRequired
@@ -27,6 +28,7 @@
 				required : this.props.required,
 				disabled : this.props.disabled,
 				readOnly : this.props.readOnly,
+				maxLength: this.props.maxLength,
 				mode: this.props.language,
 				value : this.props.value,
 				onChange : this._handleChange

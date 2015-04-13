@@ -128,7 +128,8 @@
 					case 'HTML':
 						return molgenis.ui.CodeEditor(_.extend({}, controlProps, {
 							placeholder : this.props.placeholder,
-							language: 'html'
+							language: 'html',
+							maxLength: attr.maxLength
 						}));
 					case 'HYPERLINK':
 						return this._createStringControl(controlProps, 'url', props.placeholder || 'URL');
@@ -147,7 +148,8 @@
 						return this._createStringControl(controlProps, 'text', props.placeholder || '');
 					case 'TEXT':
 						return molgenis.ui.TextArea(_.extend({}, controlProps, {
-							placeholder : this.props.placeholder
+							placeholder : this.props.placeholder,
+							maxLength: attr.maxLength
 						}));
 					case 'COMPOUND' :
 					case 'FILE':
@@ -181,7 +183,7 @@
 			return this.props.readOnly !== undefined ? this.props.readOnly : this.state.attr.readOnly;
 		},
 		_createNumberControl: function(controlProps, step) {
-			var range = this.props.attr.range;
+			var range = this.state.attr.range;
 			var min = range ? range.min : undefined;
 			var max = range ? range.max : undefined;
 			var placeholder = this.props.placeholder || 'Number';
@@ -198,7 +200,7 @@
 			return molgenis.ui.Input(_.extend({}, controlProps, {
 				type : type,
 				placeholder : placeholder,
-				maxlength : '255',
+				maxLength : this.state.attr.maxLength,
 			}));
 		},
 		_createDateControl: function(controlProps, time, placeholder) {

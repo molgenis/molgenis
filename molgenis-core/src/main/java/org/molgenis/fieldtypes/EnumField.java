@@ -11,6 +11,7 @@ import org.molgenis.model.elements.Field;
 public class EnumField extends FieldType
 {
 	private static final long serialVersionUID = 1L;
+	private static final long MAX_ENUM_LENGTH = 255L;
 
 	@Override
 	public String getJavaPropertyType()
@@ -89,6 +90,12 @@ public class EnumField extends FieldType
 	public FieldTypeEnum getEnumType()
 	{
 		return FieldTypeEnum.ENUM;
+	}
+
+	@Override
+	public Long getMaxLength()
+	{
+		return MAX_ENUM_LENGTH;
 	}
 
 	@Override
