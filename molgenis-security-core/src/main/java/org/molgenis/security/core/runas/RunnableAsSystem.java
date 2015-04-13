@@ -1,4 +1,4 @@
-package org.molgenis.security.runas;
+package org.molgenis.security.core.runas;
 
 @FunctionalInterface
 public interface RunnableAsSystem<T, X extends Throwable>

@@ -771,7 +771,10 @@
 		$(container).on('click', '.edit-table-btn', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
-			  
+			if( molgenis.ie9 ){
+				bootbox.alert("Sorry. In-place editing is not supported in Internet Explorer 9.<br/>Please use a modern browser instead.");
+				return;
+			}
 			settings.editenabled = !settings.editenabled;
 			createTableHeader(settings);
 			createTableBody(settings.data, settings);

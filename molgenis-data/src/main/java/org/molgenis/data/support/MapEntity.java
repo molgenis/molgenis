@@ -1,5 +1,7 @@
 package org.molgenis.data.support;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
@@ -59,9 +61,14 @@ public class MapEntity extends AbstractEntity
 	{
 		this.entityMetaData = metaData;
 		this.idAttributeName = entityMetaData.getIdAttribute().getName();
+		List<String> otherAttributes = new ArrayList<>();
+		for (AttributeMetaData attributeMetaData : other.getEntityMetaData().getAtomicAttributes())
+		{
+			otherAttributes.add(attributeMetaData.getName());
+		}
 		for (AttributeMetaData attribute : metaData.getAtomicAttributes())
 		{
-			if (Iterables.contains(other.getAttributeNames(), attribute.getName())) set(attribute.getName(),
+			if (Iterables.contains(otherAttributes, attribute.getName())) set(attribute.getName(),
 					other.get(attribute.getName()));
 		}
 	}

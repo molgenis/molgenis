@@ -9,7 +9,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.security.runas.RunAsSystem;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.system.core.RuntimeProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

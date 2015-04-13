@@ -21,6 +21,11 @@ public class CgdDataProvider
 	private final MolgenisSettings molgenisSettings;
 	public static final String CGD_FILE_LOCATION_PROPERTY = "cgd_location";
 
+	public enum generalizedInheritance
+	{
+		DOM_OR_REC, DOMINANT, RECESSIVE, XLINKED, OTHER
+	}
+
 	HashMap<String, CgdData> result = new HashMap<String, CgdData>();
 
 	@Autowired
@@ -44,6 +49,32 @@ public class CgdDataProvider
 					String[] split = line.split("\t");
 					CgdData cgdData = new CgdData(split[1], split[2], split[3], split[4], split[5], split[6], split[7],
 							split[8], split[9], split[10], split[11]);
+
+					// How to match these correctly? dozens of different terms, though most are "AR", "AD", etc.
+					// However there are many combinations and exceptions.
+					// Does AR take prevalence of AD or the other way around? be restrictive or loose here?
+
+					// TODO: correct?! AR > AD > XL when matching?!
+
+					generalizedInheritance inherMode = generalizedInheritance.OTHER;
+					if (split[4].contains("AD") && split[4].contains("AR"))
+					{
+						inherMode = generalizedInheritance.DOM_OR_REC;
+					}
+					else if (split[4].contains("AR"))
+					{
+						inherMode = generalizedInheritance.RECESSIVE;
+					}
+					else if (split[4].contains("AD"))
+					{
+						inherMode = generalizedInheritance.DOMINANT;
+					}
+					else if (split[4].contains("XL"))
+					{
+						inherMode = generalizedInheritance.XLINKED;
+					}
+
+					cgdData.setGeneralizedInheritance(inherMode);
 
 					result.put(split[0], cgdData);
 				}

@@ -2,7 +2,7 @@ package org.molgenis.data.importer;
 
 import java.util.List;
 
-import org.molgenis.security.runas.RunAsSystem;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.ui.menu.Menu;
 import org.molgenis.ui.menu.MenuItem;
 import org.molgenis.ui.menu.MenuItemType;
