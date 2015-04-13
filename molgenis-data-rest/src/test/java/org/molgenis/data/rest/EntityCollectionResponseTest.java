@@ -1,8 +1,11 @@
 package org.molgenis.data.rest;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
+
+import java.util.Collections;
 
 import org.mockito.Mockito;
 import org.molgenis.data.EntityMetaData;
@@ -19,6 +22,7 @@ public class EntityCollectionResponseTest
 	public void setUp()
 	{
 		entityMetaData = Mockito.mock(EntityMetaData.class);
+		when(entityMetaData.getAttributes()).thenReturn(Collections.emptyList());
 		permissionService = mock(MolgenisPermissionService.class);
 	}
 
