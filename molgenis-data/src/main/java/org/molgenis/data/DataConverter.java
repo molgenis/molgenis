@@ -87,7 +87,7 @@ public class DataConverter
 	{
 		if (source == null) return null;
 		if (source instanceof String) return (String) source;
-		if (conversionService == null) return source.toString();
+		if (getConversionService() == null) return source.toString();
 		if (source instanceof FieldType) return source.toString();
 		if (source instanceof Entity) return ((Entity) source).getLabelValue();
 
