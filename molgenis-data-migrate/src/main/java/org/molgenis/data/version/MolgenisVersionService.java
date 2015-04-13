@@ -23,9 +23,9 @@ import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.stereotype.Service;
 
 /**
- * Get the MetaData version the database is built with and the current MetaData version.
+ * Get the Molgenis version from molgenis-server.properties or, in absence there, from a {@link DataSource}.
  * 
- * The current version is stored in the molgenis-server.properties with key 'meta.data.version'.
+ * The current Molgenis version is found in the server properties under key <code>molgenis.version</code>.
  * 
  * <p>
  * If this key is not present, we're either looking at a molgenis 1.4.3 or a new install should be run. We'll check the
@@ -40,19 +40,19 @@ import org.springframework.stereotype.Service;
  * </p>
  */
 @Service
-public class MetaDataVersionService
+public class MolgenisVersionService
 {
-	public static final int CURRENT_META_DATA_VERSION = 4;
-	private static final String META_DATA_VERSION_KEY = "meta.data.version";
+	public static final int CURRENT_VERSION = 5;
+	private static final String VERSION_KEY = "molgenis.version";
 
-	private static final Logger LOG = LoggerFactory.getLogger(MetaDataVersionService.class);
+	private static final Logger LOG = LoggerFactory.getLogger(MolgenisVersionService.class);
 
 	@Autowired
-	public MetaDataVersionService(DataSource dataSource)
+	public MolgenisVersionService(DataSource dataSource)
 	{
-		if (getMolgenisServerProperties().getProperty(META_DATA_VERSION_KEY) == null)
+		if (getMolgenisServerProperties().getProperty(VERSION_KEY) == null)
 		{
-			LOG.warn("No {} property found in molgenis-server.properties.", META_DATA_VERSION_KEY);
+			LOG.warn("No {} property found in molgenis-server.properties.", VERSION_KEY);
 			if (isPopulatedDatabase(dataSource))
 			{
 				updateToVersion(0);
@@ -67,7 +67,7 @@ public class MetaDataVersionService
 	/**
 	 * Checks if this is a populated database.
 	 */
-	public boolean isPopulatedDatabase(DataSource dataSource)
+	private boolean isPopulatedDatabase(DataSource dataSource)
 	{
 		if (dataSource == null)
 		{
@@ -97,22 +97,22 @@ public class MetaDataVersionService
 	}
 
 	/**
-	 * Get the molgenis meta data version where the database is generated with.
+	 * Get the molgenis version from the molgenis server properties.
 	 */
-	public int getDatabaseMetaDataVersion()
+	public int getMolgenisVersionFromServerProperties()
 	{
-		return Integer.parseInt(getMolgenisServerProperties().getProperty(META_DATA_VERSION_KEY));
+		return Integer.parseInt(getMolgenisServerProperties().getProperty(VERSION_KEY));
 	}
 
 	public void updateToCurrentVersion()
 	{
-		updateToVersion(CURRENT_META_DATA_VERSION);
+		updateToVersion(CURRENT_VERSION);
 	}
 
 	public void updateToVersion(int version)
 	{
 		Properties properties = getMolgenisServerProperties();
-		properties.setProperty(META_DATA_VERSION_KEY, Integer.toString(version));
+		properties.setProperty(VERSION_KEY, Integer.toString(version));
 
 		try (OutputStream out = new FileOutputStream(getMolgenisServerPropertiesFile()))
 		{

@@ -20,7 +20,7 @@ import com.google.common.io.Files;
 
 public class MetaDataVersionServiceTest
 {
-	private MetaDataVersionService metaDataVersionService;
+	private MolgenisVersionService metaDataVersionService;
 	private File molgenisHomeFolder;
 	private File propertiesFile;
 	private DataSource dataSource;
@@ -33,7 +33,7 @@ public class MetaDataVersionServiceTest
 		propertiesFile = new File(molgenisHomeFolder, "molgenis-server.properties");
 		propertiesFile.createNewFile();
 		dataSource = Mockito.mock(DataSource.class);
-		metaDataVersionService = new MetaDataVersionService(dataSource);
+		metaDataVersionService = new MolgenisVersionService(dataSource);
 	}
 
 	@AfterMethod
@@ -45,8 +45,8 @@ public class MetaDataVersionServiceTest
 	@Test
 	public void getDatabaseMetaDataVersion()
 	{
-		assertEquals(metaDataVersionService.getDatabaseMetaDataVersion(),
-				MetaDataVersionService.CURRENT_META_DATA_VERSION);
+		assertEquals(metaDataVersionService.getMolgenisVersionFromServerProperties(),
+				MolgenisVersionService.CURRENT_VERSION);
 	}
 
 	@Test
@@ -59,10 +59,10 @@ public class MetaDataVersionServiceTest
 	public void updateToCurrentVersion() throws IOException
 	{
 		FileCopyUtils.copy("meta.data.version=0", new FileWriter(propertiesFile));
-		assertEquals(metaDataVersionService.getDatabaseMetaDataVersion(), 0);
+		assertEquals(metaDataVersionService.getMolgenisVersionFromServerProperties(), 0);
 
 		metaDataVersionService.updateToCurrentVersion();
-		assertEquals(metaDataVersionService.getDatabaseMetaDataVersion(),
-				MetaDataVersionService.CURRENT_META_DATA_VERSION);
+		assertEquals(metaDataVersionService.getMolgenisVersionFromServerProperties(),
+				MolgenisVersionService.CURRENT_VERSION);
 	}
 }
