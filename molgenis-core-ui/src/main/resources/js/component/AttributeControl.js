@@ -13,11 +13,12 @@
 		mixins: [molgenis.ui.mixin.DeepPureRenderMixin, molgenis.ui.mixin.AttributeLoaderMixin],
 		displayName: 'AttributeControl',
 		propTypes: {
-			attr: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]), // FIXME add multiple to propTypes
+			attr: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]),
 			required: React.PropTypes.bool, // optional overwrite for attr.required
 			readOnly: React.PropTypes.bool, // optional overwrite for attr.readOnly
 			visible: React.PropTypes.bool,  // optional overwrite for attr.visible
 			disabled: React.PropTypes.bool, // optional overwrite for attr.disabled
+			multiple: React.PropTypes.bool,
 			focus: React.PropTypes.bool,
 			onValueChange: React.PropTypes.func.isRequired,
 			onBlur: React.PropTypes.func

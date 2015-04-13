@@ -70,7 +70,7 @@
 					required : this.props.required,
 					disabled: this.props.disabled,
 					readOnly: this.props.readOnly,
-					value : this.state.value, // FIXME see test-form html-required validation error
+					value : this.state.value,
 					onChange: this._handleChange,
 				})
 			);
