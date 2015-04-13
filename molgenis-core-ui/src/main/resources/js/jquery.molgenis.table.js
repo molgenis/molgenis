@@ -148,21 +148,28 @@
 		$.each(settings.colAttributes, function(i, attribute) {
 			var header;
 			if(attribute.visible) {
-				if (settings.sort && settings.sort.orders[0].property === attribute.name) {
-					if (settings.sort.orders[0].direction === 'ASC') {
-						header = $('<th>' + attribute.label + '<span data-attribute="' + attribute.name
-								+ '" class="ui-icon ui-icon-triangle-1-s down"></span></th>');
-					} else {
-						header = $('<th>' + attribute.label + '<span data-attribute="' + attribute.name
-								+ '" class="ui-icon ui-icon-triangle-1-n up"></span></th>');
-					}
-				} else {
-					header = $('<th>' + attribute.label + '<span data-attribute="' + attribute.name
-							+ '" class="ui-icon ui-icon-triangle-2-n-s updown"></span></th>');
-				}
-				header.data('attr', attribute);
-				items.push(header);
-			}
+                if (!endsWith(attribute.name," 2")) {
+                    if (endsWith(attribute.name," 1")) {
+                        header = $('<th>'+attribute.name.replace(" 1","")+'</th>');
+                    }
+                    else {
+                        if (settings.sort && settings.sort.orders[0].property === attribute.name) {
+                            if (settings.sort.orders[0].direction === 'ASC') {
+                                header = $('<th>' + attribute.label + '<span data-attribute="' + attribute.name
+                                + '" class="ui-icon ui-icon-triangle-1-s down"></span></th>');
+                            } else {
+                                header = $('<th>' + attribute.label + '<span data-attribute="' + attribute.name
+                                + '" class="ui-icon ui-icon-triangle-1-n up"></span></th>');
+                            }
+                        } else {
+                            header = $('<th>' + attribute.label + '<span data-attribute="' + attribute.name
+                            + '" class="ui-icon ui-icon-triangle-2-n-s updown"></span></th>');
+                        }
+                    }
+                    header.data('attr', attribute);
+                    items.push(header);
+                }
+            }
 		});
 		container.html(items);
 	}
@@ -177,20 +184,15 @@
 		for (var i = 0; i < data.items.length; ++i) {
 			var entity = data.items[i];
 			var row = $('<tr>').data('entity', entity).data('id', entity.href);
-			if (settings.editenabled) {
-				var cell = $('<td class="trash" tabindex="' + tabindex++ + '">');
-				$('<a class="btn btn-xs btn-danger delete-row-btn" href="#" data-toggle="button" title="Delete"><span class="glyphicon glyphicon-minus"></span></button>').appendTo(cell);
-				row.append(cell);
-			}
-
 			$.each(settings.colAttributes, function(i, attribute) {
-				var cell = $('<td>').data('id', entity.href + '/' + encodeURIComponent(attribute.name));
-				renderCell(cell, entity, attribute, settings);
-				if(settings.editenabled) {
-					cell.attr('tabindex', tabindex++);
-				}
-				row.append(cell);
-			
+                if (!endsWith(attribute.name," 2")) {
+                    var cell = $('<td style="vertical-align: middle;">').data('id', entity.href + '/' + encodeURIComponent(attribute.name));
+                    renderCell(cell, entity, attribute, settings);
+                    if (settings.editenabled) {
+                        cell.attr('tabindex', tabindex++);
+                    }
+                    row.append(cell);
+                }
 			});
 			items.push(row);
 		}
@@ -203,189 +205,7 @@
 	 * @memberOf molgenis.table.cell
 	 */
 	function renderCell(cell, entity, attribute, settings) {
-		if(settings.editenabled && !attribute.readOnly) {
-			renderEditCell(cell, entity, attribute, settings);
-		}
-		else {
-			renderViewCell(cell, entity, attribute, settings);
-		}
-	}
-	
-	/**
-	 * @memberOf molgenis.table.cell
-	 */
-	function renderEditCell(cell, entity, attribute, settings) {
-		cell.empty();
-		
-		var value = entity[attribute.name];
-		switch(attribute.fieldType) {
-			case 'BOOL':
-				var items = [];
-				items.push('<div class="bool-btn-group btn-group-xs">');
-				items.push('<button type="button" class="btn btn-default');
-				if(value === true) {items.push(' active');}
-				items.push('" data-state="true">Yes</button>');
-				items.push('<button type="button" class="btn btn-default');
-				if(value === false) {items.push(' active');}
-				items.push('" data-state="false">No</button>');
-				if(attribute.nillable) {
-					items.push('<button type="button" class="btn btn-default');
-					if(value === undefined) {items.push(' active');}
-					items.push('" data-state="undefined">N/A</button>');
-				}
-				items.push('</div>');
-				cell.html(items.join(''));
-				break;
-			case 'CATEGORICAL':
-				var refEntityMeta = settings.refEntitiesMeta[attribute.refEntity.href];
-				// TODO do not construct uri from other uri
-				var refEntityCollectionUri = attribute.refEntity.href.replace("/meta", "");
-				
-				var format = function(item) {
-					if (item) {
-						return item[refEntityMeta.labelAttribute];
-					}
-				};
-				
-				var opts = {
-					id: 'href',
-					allowClear : attribute.nillable ? true : false,
-					placeholder : ' ', // cannot be an empty string
-					initSelection: function(element, callback) {
-						callback(value);
-					},
-				    query: function (query) {
-				    	var num = 25;
-					    var q = {
-							q : {
-								start : (query.page - 1) * num, 
-								num : num
-							}
-						};
-				    	
-				    	restApi.getAsync(refEntityCollectionUri, q, function(data) {
-				    		query.callback({results: data.items, more: data.nextHref ? true : false});
-				    	});
-				    },
-				    formatResult: format,
-				    formatSelection: format,
-				    minimumResultsForSearch: -1, // permanently hide the search field
-				    width: '100%'
-				};
-				
-				var container = $('<input type="hidden" class="ref-select">');
-				cell.html(container); // first append container, then create select2
-				container.select2(opts).select2('val', []); // create select2 and trigger initSelection
-				break;
-			case 'DATE':
-				var datepicker = createInput(attribute, {'style': 'min-width: 100px'}, entity[attribute.name]);
-				cell.html(datepicker);
-				break;
-			case 'DATE_TIME':
-				var datepicker = createInput(attribute, {'style': 'min-width: 210px'}, entity[attribute.name]);
-				cell.html(datepicker);
-				break;
-			case 'DECIMAL':
-			case 'INT':
-			case 'LONG':
-				var input = createInput(attribute, null, entity[attribute.name]);
-				input.addClass('number-input');
-				cell.html(input);
-				break;
-			case 'CATEGORICAL_MREF': // TODO render like CATEGORICAL is rendered for XREF
-			case 'MREF':
-				var refEntityMeta = settings.refEntitiesMeta[attribute.refEntity.href];
-				// TODO do not construct uri from other uri
-				var refEntityCollectionUri = attribute.refEntity.href.replace("/meta", "");
-				
-				var format = function(item) {
-					return item[refEntityMeta.labelAttribute];
-				};
-				
-				// note: allowClear not possible in combination with multiple select
-				var opts = {
-					id: 'href', 
-					multiple: true,
-					initSelection: function(element, callback) {
-						callback(value.items);
-					},
-				    query: function (query) {
-				    	var num = 100;
-					    var q = {
-							q : {
-								start : (query.page - 1) * num, 
-								num : num,
-								q : [ {
-									field : refEntityMeta.labelAttribute,
-									operator : 'SEARCH',
-									value : query.term
-								} ]
-							}
-						};
-				    	
-				    	restApi.getAsync(refEntityCollectionUri, q, function(data) {
-				    		query.callback({results: data.items, more: data.nextHref ? true : false});
-				    	});
-				    },
-				    formatResult: format,
-				    formatSelection: format,
-				    width: '400px' // preserve row height changes by limiting y overflow
-				};
-				
-				var container = $('<input type="hidden" class="ref-select">');
-				cell.html(container); // first append container, then create select2
-				container.select2(opts).select2('val', []); // create select2 and trigger initSelection
-				break;
-			case 'XREF':
-				var refEntityMeta = settings.refEntitiesMeta[attribute.refEntity.href];
-				// TODO do not construct uri from other uri
-				var refEntityCollectionUri = attribute.refEntity.href.replace("/meta", "");
-				
-				var format = function(item) {
-					if(item) {
-						return item[refEntityMeta.labelAttribute];
-					}
-				};
-				
-				var opts = {
-					id: 'href',
-					allowClear : attribute.nillable ? true : false,
-					placeholder : ' ', // cannot be an empty string
-					initSelection: function(element, callback) {
-						callback(value);
-					},
-				    query: function (query) {
-				    	var num = 100;
-					    var q = {
-							q : {
-								start : (query.page - 1) * num, 
-								num : num,
-								q : [ {
-									field : refEntityMeta.labelAttribute,
-									operator : 'SEARCH',
-									value : query.term
-								} ]
-							}
-						};
-				    	
-				    	restApi.getAsync(refEntityCollectionUri, q, function(data) {
-				    		query.callback({results: data.items, more: data.nextHref ? true : false});
-				    	});
-				    },
-				    formatResult: format,
-				    formatSelection: format,
-				    width: '100%'
-				};
-				
-				var container = $('<input type="hidden" class="ref-select">');
-				cell.html(container); // first append container, then create select2
-				container.select2(opts).select2('val', []); // create select2 and trigger initSelection
-				break;
-			default:
-				var value = entity[attribute.name];
-				cell.text(value).attr('contenteditable', 'true');
-				break;
-		}
+		renderViewCell(cell, entity, attribute, settings);
 	}
 	
 	/**
@@ -393,62 +213,74 @@
 	 */
 	function renderViewCell(cell, entity, attribute, settings) {
 		cell.empty();
-		
-		var rawValue = entity[attribute.name];
 
-		switch(attribute.fieldType) {
-			case 'XREF':
-			case 'MREF':
+        if (!endsWith(attribute.name," 2")) {
+            var rawValue = entity[attribute.name];
+            renderSingleViewCell(cell, rawValue, attribute, settings);
+            if(endsWith(attribute.name," 1")){
+                cell.append("<br>");
+                var rawValue2 = entity[attribute.name.replace(" 1"," 2")];
+                renderSingleViewCell(cell, rawValue2, attribute, settings);
+            }
+        }
+	}
+
+    function renderSingleViewCell(cell, rawValue, attribute, settings) {
+        switch (attribute.fieldType) {
+            case 'XREF':
+            case 'MREF':
             case 'CATEGORICAL':
             case 'CATEGORICAL_MREF':
                 if (rawValue) {
-                	var refEntity = settings.refEntitiesMeta[attribute.refEntity.href];
+                    var refEntity = settings.refEntitiesMeta[attribute.refEntity.href];
                     var refAttribute = refEntity.labelAttribute;
-                	var refValue = refEntity.attributes[refAttribute];
-					
-                	if (refValue) {
-                		var refAttributeType = refValue.fieldType;
-                		if (refAttributeType === 'XREF' || refAttributeType === 'MREF' || refAttributeType === 'CATEGORICAL' || refAttributeType === 'CATEGORICAL_MREF' || refAttributeType === 'COMPOUND') {
-                			throw 'unsupported field type ' + refAttributeType;
-                		}
-						
-                		switch(attribute.fieldType) {
-							case 'CATEGORICAL':
-							case 'XREF':
-								var $cellValue = $('<a href="#">').append(formatTableCellValue(rawValue[refAttribute], refAttributeType));
-								$cellValue.click(function(event) {
-									openRefAttributeModal(attribute, refEntity, refAttribute, rawValue);
-									event.stopPropagation();
-								});
-								cell.append($cellValue);
-								break;
-							case 'CATEGORICAL_MREF':
-							case 'MREF':
-								$.each(rawValue.items, function(i, rawValue) {
-									var $cellValuePart = $('<a href="#">').append(formatTableCellValue(rawValue[refAttribute], refAttributeType));
-									$cellValuePart.click(function(event) {
-										openRefAttributeModal(attribute, refEntity, refAttribute, rawValue);
-										event.stopPropagation();
-									});
-									if (i > 0) {cell.append(',');}
-									cell.append($cellValuePart);
-								});
-								break;
-							default:
-								throw 'unexpected field type ' + attribute.fieldType;
-                		}
-                	}
+                    var refValue = refEntity.attributes[refAttribute];
+
+                    if (refValue) {
+                        var refAttributeType = refValue.fieldType;
+                        if (refAttributeType === 'XREF' || refAttributeType === 'MREF' || refAttributeType === 'CATEGORICAL' || refAttributeType === 'CATEGORICAL_MREF' || refAttributeType === 'COMPOUND') {
+                            throw 'unsupported field type ' + refAttributeType;
+                        }
+
+                        switch (attribute.fieldType) {
+                            case 'CATEGORICAL':
+                            case 'XREF':
+                                var $cellValue = $('<a href="#">').append(formatTableCellValue(rawValue[refAttribute], refAttributeType));
+                                $cellValue.click(function (event) {
+                                    openRefAttributeModal(attribute, refEntity, refAttribute, rawValue);
+                                    event.stopPropagation();
+                                });
+                                cell.append($cellValue);
+                                break;
+                            case 'CATEGORICAL_MREF':
+                            case 'MREF':
+                                $.each(rawValue.items, function (i, rawValue) {
+                                    var $cellValuePart = $('<a href="#">').append(formatTableCellValue(rawValue[refAttribute], refAttributeType));
+                                    $cellValuePart.click(function (event) {
+                                        openRefAttributeModal(attribute, refEntity, refAttribute, rawValue);
+                                        event.stopPropagation();
+                                    });
+                                    if (i > 0) {
+                                        cell.append(',');
+                                    }
+                                    cell.append($cellValuePart);
+                                });
+                                break;
+                            default:
+                                throw 'unexpected field type ' + attribute.fieldType;
+                        }
+                    }
                 }
-				break;
+                break;
             case 'BOOL':
-				cell.append(formatTableCellValue(rawValue, attribute.fieldType, undefined, attribute.nillable));
-            	break;
-			default :
-				cell.append(formatTableCellValue(rawValue, attribute.fieldType));
-				break;
-		}
-	}
-	
+                cell.append(formatTableCellValue(rawValue, attribute.fieldType, undefined, attribute.nillable));
+                break;
+            default :
+                cell.append(formatTableCellValue(rawValue, attribute.fieldType));
+                break;
+        }
+    }
+
 	/**
 	 * @memberOf molgenis.table
 	 */
@@ -502,146 +334,7 @@
 		// show modal
 		modal.modal({'show': true});
 	}
-	
-	/**
-	 * @memberOf molgenis.table.cell
-	 */
-	function persistCell(cell, settings) {
-		var row = cell.closest('tr').index();
-		var col = cell.index();
-		var attribute = cell.closest('table').find('th').eq(col).data('attr');
-		var value = settings.data.items[row][attribute.name];
-		
-		switch(attribute.fieldType) {
-			case 'BOOL':
-				var editValue;
-				
-				var state = cell.find('button.active').data('state');
-				if(state === true) {editValue = true;}
-				else if(state === false) {editValue = false;}
-				else if(state === 'undefined' && attribute.nillable) {editValue = undefined;}
-				else {throw 'invalid state: ' + state;}
-				
-				if(value !== editValue) {
-					restApi.update(cell.data('id'), editValue, {
-						success: function() {
-							settings.onDataChange();
-							value = editValue;
-							settings.data.items[row][attribute.name] = value;
-							cell.addClass('edited');
-						}
-					});
-				}
-				break;
-			case 'DATE':
-			case 'DATE_TIME':
-				var editValue = cell.find('input').val();
-				var entity = settings.data.items[row];
-				var value = entity[attribute.name];
-				if(value !== editValue) {
-					restApi.update(cell.data('id'), editValue, {
-						success: function() {
-							settings.onDataChange();
-							if (editValue === '') {
-								delete entity[attribute.name];
-							}
-							else {
-								entity[attribute.name] = editValue;	
-							}
-							cell.addClass('edited');
-						}
-					});
-				}
-				break;
-			case 'DECIMAL':
-			case 'INT':
-			case 'LONG':
-				var input = cell.find('input');
-				if(input[0].validity.valid) {
-					var editValue = input.val();
-					if(value !== editValue) {
-						restApi.update(cell.data('id'), editValue, {
-							success: function() {
-								settings.onDataChange();
-								settings.data.items[row][attribute.name] = editValue;
-								cell.removeClass('invalid-input').addClass('edited');
-							}
-						});
-					}
-				} else {
-					cell.removeClass('edited').addClass('invalid-input');
-				}
-				break;
-			case 'CATEGORICAL_MREF' :
-			case 'MREF':
-				var select = cell.find('input[type=hidden]');
-				var data = select.select2('data');
-				if(attribute.nillable || data.length > 0) {
-					var entity = settings.data.items[row];
-					var value = entity[attribute.name];
-					if(JSON.stringify(data) !== JSON.stringify(value.items) ) {
-						var editValue = $.map(data, function(val){ return restApi.getPrimaryKeyFromHref(val.href);});
-						restApi.update(cell.data('id'), editValue, {
-							success: function() {
-								settings.onDataChange();
-								entity[attribute.name].total = data.length;
-								entity[attribute.name].items = data;
-								cell.addClass('edited');
-							}
-						});
-					}
-				}
-				break;
-			case 'CATEGORICAL' :
-			case 'XREF':
-				var select = cell.find('input[type=hidden]');
-				var data = select.select2('data');
-				if(attribute.nillable || data) {
-	            	var entity = settings.data.items[row];
-					var value = entity[attribute.name] ? entity[attribute.name].href : '';
-					var editValue = data ? data.href : '';
-					
-	            	if(value !== editValue) {
-	            		var refEntityMeta = settings.refEntitiesMeta[attribute.refEntity.href];
-	            		var editLabel = data ? data[refEntityMeta.labelAttribute] : '';
-	            		
-	            		editValue = editValue !== '' ? restApi.getPrimaryKeyFromHref(editValue) : ''; 
-						restApi.update(cell.data('id'), editValue, {
-							success: function() {
-								settings.onDataChange();
-								if (editValue === '') {
-									delete entity[attribute.name];
-								}
-								else {
-									if(!entity[attribute.name]) {
-										entity[attribute.name] = {};
-									}
-									entity[attribute.name].href = editValue;
-									entity[attribute.name][refEntityMeta.labelAttribute] = editLabel;	
-								}
-								
-								cell.addClass('edited');
-							}
-						});
-					}
-				}
-				break;
-			default:
-				var editValue = cell.text();
-				if(value !== editValue) {
-					restApi.update(cell.data('id'), editValue, {
-						success: function() {
-							settings.onDataChange();
-							value = editValue;
-							settings.data.items[row][attribute.name] = value;
-							cell.addClass('edited');
-						}
-					});
-				}
-				break;
-		}
-	}
-	
+
 	/**
 	 * @memberOf molgenis.table
 	 */
@@ -766,200 +459,8 @@
 				createTableBody(data, settings);
 			});
 		});
-		
-		// toggle edit table mode
-		$(container).on('click', '.edit-table-btn', function(e) {
-			e.preventDefault();
-			e.stopPropagation();
-			  
-			settings.editenabled = !settings.editenabled;
-			createTableHeader(settings);
-			createTableBody(settings.data, settings);
-			if (settings.editenabled) {
-				createTableBody(settings.data, settings);
-				$('.molgenis-table tbody').addClass('editable');
-				$('.molgenis-table tbody td:not(.trash)', settings.container).first().focus();
-				$('.add-row-btn').show();
-				 
-				$('.edit-table-btn').html('Done');
-			} else {
-				$('.add-row-btn').hide();
-				getTableData(settings, function(data) {
-					createTableBody(data, settings);
-				});
-				$('.molgenis-table tbody').removeClass('editable');
-				$('.edit-table-btn').html('<span class="glyphicon glyphicon-edit"></span>');
-			}
-		});
-		
-		//Add row
-		$(container).on('click', '.add-row-btn', function(e) {
-			e.preventDefault();
-			e.stopPropagation();
-			getCreateForm(settings.entityMetaData);
-		});
-		
-		function getCreateForm(entityMetaData) {
-			$.ajax({
-				type : 'GET',
-				url : '/api/v1/' + entityMetaData.name + '/create',
-				success : function(form) {
-					openFormModal(entityMetaData, form);
-				}
-			});
-		}
-		
-		function openFormModal(entityMetaData, form) {
-			// create modal structure
-			var modal = $('#form-modal');
-			if(!modal.length) {
-				var items = [];
-				items.push('<div class="modal" id="form-modal" tabindex="-1" role="dialog" aria-labelledby="form-modal-title" aria-hidden="true">');
-				items.push('<div class="modal-dialog">');
-				items.push('<div class="modal-content">');				
-				items.push('<div class="modal-header">');
-				items.push('<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>');
-				items.push('<h4 class="modal-title"></h4>');
-				items.push('</div>');
-				items.push('<div class="modal-body">');
-				items.push('</div>');
-				items.push('<div class="modal-footer">');
-				items.push('<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>');
-				items.push('<button type="button" id="submit-form-btn" class="btn btn-primary">Save</button>');
-				items.push('</div>');
-				items.push('</div>');
-				items.push('</div>');
-				items.push('</div>');
-				modal = $(items.join(''));
-			}
-			
-			$('.modal-title', modal).html(entityMetaData.label);
-			$('.modal-body', modal).html(form);
-			
-			modal.on('click', '#submit-form-btn', function(e) {
-				e.preventDefault();
-				e.stopPropagation();
-				$('#entity-form').submit();			
-			});
-			
-			// show modal
-			modal.modal({'show': true});
-		}
-		
-		$(document).on('onFormSubmitSuccess', function() {
-			$('#form-modal .modal-body').html('');
-			$('#form-modal').modal('hide');
-			settings.start = 0;
-			refresh(settings);
-		});
-		
-		// toggle edit table mode
-		$(container).on('click', '.delete-row-btn', function(e) {
-			e.preventDefault();
-			e.stopPropagation();
-			
-			if(confirm('Are you sure you want to delete this row?')) {
-				var href = $(this).closest('tr').data('id');
-				restApi.remove(href, {
-					success: function() {
-						settings.start = 0;
-						refresh(settings);
-					}
-				});
-			}
-		});
-		
-		// update values on losing focus on cell
-		$(container).on('keydown', '.molgenis-table tbody.editable td', function(e) {
-			var cell = $(this);
-			switch(e.keyCode) {
-				case 37: // left arrow
-					cell.prev('td').focus();
-					break;
-				case 38: // up arrow
-					cell.closest('tr').prev().children().eq(cell.index()).focus();
-					break;
-				case 39: // right arrow
-					cell.next('td').focus();
-					break;
-				case 40: // down arrow
-					cell.closest('tr').next().children().eq(cell.index()).focus();
-					break;
-				default:
-					break;
-			}
-		});
-		
-		// handle table cell focus out event (do not use focusout, since it triggers on children taking focus)
-		$(container).on('blur', '.molgenis-table tbody.editable td[contenteditable="true"]', function(e) {
-			// determine if focus was lost to child:
-			// http://marc.codewisp.com/2013/01/18/detecting-blur-child-elements-jquery/
-			setTimeout($.proxy(function()
-		    {
-		        var target = document.activeElement;
-		        if (target !== null) {
-		        	if($(target).is('td')) {
-		    			e.preventDefault();
-		    			e.stopPropagation();
-		    			var cell = $(this);
-		    			persistCell(cell, settings);	
-		        	}
-		        }
-		    }, this), 1);
-		});
-		
-		// edit event handlers
-				
-		// BOOL
-		$(container).on('click', '.molgenis-table tbody.editable .bool-btn-group button', function(e) {
-			// do not use bootstrap data-toggle to prevent race condition:
-			// http://stackoverflow.com/questions/9262827/twitter-bootstrap-onclick-event-on-buttons-radio
-			$(this).addClass('active').siblings().removeClass('active');
-			
-			var cell = $(this).closest('td');
-			persistCell(cell, settings);
-		});
 
-		// CATEGORICAL
-		$(container).on('change', '.molgenis-table tbody.editable .categorical-select', function(e) {
-			var cell = $(this).closest('td');
-			persistCell(cell, settings);
-		});
 
-		// DATE, DATE_TIME
-		$(container).on('dp.change', function(e) {
-			var cell = $(e.target).closest('td');
-			persistCell(cell, settings);
-		});
-
-		// DECIMAL, INT, LONG
-		$(container).on('change', '.molgenis-table tbody.editable .number-input', function(e) {			
-			var cell = $(this).closest('td');
-			persistCell(cell, settings);
-		});
-		
-		// XREF, MREF
-		$(container).on('change', '.molgenis-table tbody.editable .ref-select', function(e) {
-			var cell = $(this).closest('td');
-			persistCell(cell, settings);
-		});
-		
-		$(container).on('click', '.molgenis-table.table-hover tbody:not(.editable) tr', function(e){
-			// Issue #1400 ask for IdAttribute directly
-			var entityData = $(this).data('entity').href.split('/');
-			var entityId = decodeURIComponent(entityData.pop());
-			var entityName = decodeURIComponent(entityData.pop());
-			
-			$('#entityReport').load("dataexplorer/details",{entityName: entityName, entityId: entityId}, function() {
-				  $('#entityReportModal').modal("show");
-				  
-				  // Button event handler when a button is placed inside an entity report ftl
-				  $(".modal-body button", "#entityReport").on('click', function() {
-						$.download($(this).data('href'), {entityName: entityName, entityId: entityId}, "GET");
-				  });
-			});
-		});
-		
 		return this;
 	};
 
@@ -973,4 +474,21 @@
 		'rowClickable': false,
 		'onDataChange': function(){}
 	};
+
+    function endsWith(str, suffix) {
+        return str.indexOf(suffix, str.length - suffix.length) !== -1;
+    }
+
+    var container = $('#feature-selection');
+    var fancy = $('.molgenis-tree', container).fancytree("getTree");
+    $(fancy.getNodeByKey("/api/v1/Patients/meta/cDNA%20change%202").li).hide();
+    $(fancy.getNodeByKey("/api/v1/Patients/meta/Protein%20change%202").li).hide();
+    $(fancy.getNodeByKey("/api/v1/Patients/meta/Exon%2FIntron%202").li).hide();
+    $(fancy.getNodeByKey("/api/v1/Patients/meta/Consequence%202").li).hide();
+
+    fancy.getNodeByKey("/api/v1/Patients/meta/cDNA%20change%201").setTitle("cDNA change");
+    fancy.getNodeByKey("/api/v1/Patients/meta/Protein%20change%201").setTitle("Protein change");
+    fancy.getNodeByKey("/api/v1/Patients/meta/Exon%2FIntron%201").setTitle("Exon Intron");
+    fancy.getNodeByKey("/api/v1/Patients/meta/Consequence%201").setTitle("Consequence");
+
 }($, window.top.molgenis = window.top.molgenis || {}));
