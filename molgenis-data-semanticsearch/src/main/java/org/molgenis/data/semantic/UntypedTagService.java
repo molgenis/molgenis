@@ -18,6 +18,7 @@ import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.PackageMetaData;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +48,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 				.filter(att -> attributeName.equals(att.getString(AttributeMetaDataMetaData.NAME))).findFirst().get();
 	}
 
+	
 	private Entity findEntity(EntityMetaData emd)
 	{
 		return dataService.findOne(EntityMetaDataMetaData.ENTITY_NAME, emd.getName());
@@ -72,6 +74,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 	}
 
 	@Override
+	@RunAsSystem
 	public Iterable<Tag<AttributeMetaData, LabeledResource, LabeledResource>> getTagsForAttribute(
 			EntityMetaData entityMetaData, AttributeMetaData attributeMetaData)
 	{
@@ -87,6 +90,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 	}
 
 	@Override
+	@RunAsSystem
 	public Iterable<Tag<EntityMetaData, LabeledResource, LabeledResource>> getTagsForEntity(
 			EntityMetaData entityMetaData)
 	{
@@ -151,6 +155,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 	}
 
 	@Override
+	@RunAsSystem
 	public Iterable<Tag<Package, LabeledResource, LabeledResource>> getTagsForPackage(Package p)
 	{
 		Entity packageEntity = dataService.findOne(PackageMetaData.ENTITY_NAME,
