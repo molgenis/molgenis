@@ -32,7 +32,7 @@ public class SemanticSearchConfig
 	}
 
 	@Bean
-	public UntypedTagService tagService()
+	public TagService<LabeledResource, LabeledResource> tagService()
 	{
 		return new UntypedTagService(dataService, tagRepository());
 	}
