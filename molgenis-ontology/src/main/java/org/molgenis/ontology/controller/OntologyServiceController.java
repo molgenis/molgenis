@@ -272,7 +272,9 @@ public class OntologyServiceController extends MolgenisPluginController
 
 		uploadProgress.setUserClickMode(userAccountService.getCurrentUser().getUsername(), isMatched);
 		EntityPager pager = new EntityPager(start, num, (long) count, null);
-		return new EntityCollectionResponse(pager, entityMaps, "/match/retrieve");
+		return new EntityCollectionResponse(pager, entityMaps, "/match/retrieve", null, null); // FIXME do not return
+																								// null for
+																								// EntityMetaData
 	}
 
 	@RequestMapping(method = POST, value = "/match")
@@ -381,6 +383,7 @@ public class OntologyServiceController extends MolgenisPluginController
 					if (!attributeName.equals(MatchingTaskEntityMetaData.IDENTIFIER)) row.set(attributeName,
 							inputEntity.get(attributeName));
 				}
+
 				row.set(OntologyTermMetaData.ONTOLOGY_TERM_NAME,
 						ontologyTermEntity.get(OntologyTermMetaData.ONTOLOGY_TERM_NAME));
 				row.set(OntologyTermMetaData.ONTOLOGY_TERM_IRI,
