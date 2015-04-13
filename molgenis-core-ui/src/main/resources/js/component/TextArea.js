@@ -19,7 +19,8 @@
 			readOnly: React.PropTypes.bool,
 			maxLength: React.PropTypes.number,
 			value: React.PropTypes.string,
-			onValueChange: React.PropTypes.func.isRequired
+			onValueChange: React.PropTypes.func.isRequired,
+			onBlur: React.PropTypes.func
 		},
 		getInitialState: function() {
 			return {value: this.props.value};
@@ -40,18 +41,29 @@
 				readOnly: this.props.readOnly,
 				maxLength: this.props.maxLength,
 				value: this.state.value,
-				onChange: this._handleChange});
+				onChange: this._handleChange,
+				onBlur: this._handleBlur
+			});
 		},
 		_handleChange: function(event) {
+			this._handleChangeOrBlur(event, true, this.props.onValueChange);
+		},
+		_handleBlur: function(event) {
+			if(this.props.onBlur) {
+				this._handleChangeOrBlur(event, false, this.props.onBlur);
+			}
+		},
+		_handleChangeOrBlur: function(event, updateState, callback) {
 			var value = event.target.value;
 			// apply constraint: maximum number of characters allowed in input
 			if(this.props.maxLength) {
 				value = value.substr(0, this.props.maxLength);
 			}
-			this.setState({value: value});
-			
+			if(updateState) {
+				this.setState({value: value});
+			}
 			value = value !== '' ? value : null;
-			this.props.onValueChange({value: value});
+			callback({value: value});
 		}
 	});
 	
