@@ -6,10 +6,12 @@ import java.util.List;
 import java.util.Set;
 
 import org.hibernate.validator.constraints.impl.EmailValidator;
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Range;
+import org.molgenis.fieldtypes.FieldType;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
@@ -31,7 +33,8 @@ public class EntityAttributesValidator
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{
 			ConstraintViolation violation = null;
-			switch (attr.getDataType().getEnumType())
+			FieldType dataType = attr.getDataType();
+			switch (dataType.getEnumType())
 			{
 				case EMAIL:
 					violation = checkEmail(entity, attr, meta);
@@ -68,10 +71,20 @@ public class EntityAttributesValidator
 				case ENUM:
 					violation = checkEnum(entity, attr, meta);
 					break;
-
+				case HTML:
+					violation = checkText(entity, attr, meta, MolgenisFieldTypes.HTML);
+					break;
+				case SCRIPT:
+					violation = checkText(entity, attr, meta, MolgenisFieldTypes.SCRIPT);
+					break;
+				case TEXT:
+					violation = checkText(entity, attr, meta, MolgenisFieldTypes.TEXT);
+					break;
+				case STRING:
+					violation = checkText(entity, attr, meta, MolgenisFieldTypes.STRING);
+					break;
 				default:
 					break;
-
 			}
 
 			if (violation != null)
@@ -85,18 +98,28 @@ public class EntityAttributesValidator
 
 	private ConstraintViolation checkEmail(Entity entity, AttributeMetaData attribute, EntityMetaData meta)
 	{
+		String email = entity.getString(attribute.getName());
+		if (email == null)
+		{
+			return null;
+		}
+
 		if (emailValidator == null)
 		{
 			emailValidator = new EmailValidator();
 		}
 
-		String email = entity.getString(attribute.getName());
-		if (emailValidator.isValid(email, null))
+		if (!emailValidator.isValid(email, null))
 		{
-			return null;
+			return createConstraintViolation(entity, attribute, meta);
 		}
 
-		return createConstraintViolation(entity, attribute, meta);
+		if (email.length() > MolgenisFieldTypes.EMAIL.getMaxLength())
+		{
+			return createConstraintViolation(entity, attribute, meta);
+		}
+
+		return null;
 	}
 
 	private ConstraintViolation checkBoolean(Entity entity, AttributeMetaData attribute, EntityMetaData meta)
@@ -162,13 +185,18 @@ public class EntityAttributesValidator
 		try
 		{
 			new URL(link);
-			return null;
 		}
 		catch (MalformedURLException e)
 		{
 			return createConstraintViolation(entity, attribute, meta);
 		}
 
+		if (link.length() > MolgenisFieldTypes.HYPERLINK.getMaxLength())
+		{
+			return createConstraintViolation(entity, attribute, meta);
+		}
+
+		return null;
 	}
 
 	private ConstraintViolation checkInt(Entity entity, AttributeMetaData attribute, EntityMetaData meta)
@@ -202,6 +230,23 @@ public class EntityAttributesValidator
 		Range range = attribute.getRange();
 		Long value = entity.getLong(attribute.getName());
 		if ((value != null) && ((value < range.getMin()) || (value > range.getMax())))
+		{
+			return createConstraintViolation(entity, attribute, meta);
+		}
+
+		return null;
+	}
+
+	private ConstraintViolation checkText(Entity entity, AttributeMetaData attribute, EntityMetaData meta,
+			FieldType fieldType)
+	{
+		String text = entity.getString(attribute.getName());
+		if (text == null)
+		{
+			return null;
+		}
+
+		if (text.length() > fieldType.getMaxLength())
 		{
 			return createConstraintViolation(entity, attribute, meta);
 		}
@@ -254,6 +299,12 @@ public class EntityAttributesValidator
 		if (range != null)
 		{
 			message += String.format("Value must be between %d and %d", range.getMin(), range.getMax());
+		}
+
+		Long maxLength = attribute.getDataType().getMaxLength();
+		if (maxLength != null)
+		{
+			message += String.format("Value must be less than or equal to %d characters", maxLength);
 		}
 
 		return new ConstraintViolation(message, entity.getString(attribute.getName()), entity, attribute, meta, 0);

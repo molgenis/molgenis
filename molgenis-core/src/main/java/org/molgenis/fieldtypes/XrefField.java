@@ -102,6 +102,12 @@ public class XrefField extends FieldType
 	}
 
 	@Override
+	public Long getMaxLength()
+	{
+		return null;
+	}
+
+	@Override
 	public Object convert(Object value)
 	{
 		return value;

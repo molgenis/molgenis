@@ -24,6 +24,7 @@ public class AttributeMetaDataResponse
 	private final String description;
 	private final List<?> attributes;
 	private final List<String> enumOptions;
+	private final Long maxLength;
 	private final Object refEntity;
 	private final Boolean auto;
 	private final Boolean nillable;
@@ -87,6 +88,12 @@ public class AttributeMetaDataResponse
 			this.enumOptions = attr.getEnumOptions();
 		}
 		else this.enumOptions = null;
+
+		if (attributesSet == null || attributesSet.contains("maxLength".toLowerCase()))
+		{
+			this.maxLength = attr.getDataType().getMaxLength();
+		}
+		else this.maxLength = null;
 
 		if (attributesSet == null || attributesSet.contains("expression".toLowerCase()))
 		{

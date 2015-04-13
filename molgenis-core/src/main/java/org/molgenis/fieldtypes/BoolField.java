@@ -86,12 +86,20 @@ public class BoolField extends FieldType
 		return FieldTypeEnum.BOOL;
 	}
 
-    @Override
-    public Object convert(Object value) {
-        if(value == null) return null;
-        if(value instanceof Boolean) return (Boolean)value;
-        if(value instanceof String) return Boolean.parseBoolean(value.toString());
-        if(value instanceof Integer) return (Integer)value > 0;
-        throw new RuntimeException("BoolField.convert("+value+") failed");
-    }
+	@Override
+	public Long getMaxLength()
+	{
+		return null;
+	}
+
+	@Override
+	public Object convert(Object value)
+	{
+		if (value == null) return null;
+		if (value instanceof Boolean) return (Boolean) value;
+		if (value instanceof String) return Boolean.parseBoolean(value.toString());
+		if (value instanceof Integer) return (Integer) value > 0;
+		throw new RuntimeException("BoolField.convert(" + value + ") failed");
+	}
+
 }

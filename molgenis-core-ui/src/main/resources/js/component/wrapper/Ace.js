@@ -19,6 +19,7 @@
 			required: React.PropTypes.bool,
 			readOnly: React.PropTypes.bool,
 			disabled: React.PropTypes.bool,
+			maxLength: React.PropTypes.number,
 			height: React.PropTypes.number,
 			theme: React.PropTypes.string,
 			mode: React.PropTypes.string,
@@ -70,6 +71,7 @@
 					required : this.props.required,
 					disabled: this.props.disabled,
 					readOnly: this.props.readOnly,
+					maxLength: this.props.maxLength,
 					value : this.state.value,
 					onChange: this._handleChange,
 				})
@@ -86,6 +88,10 @@
 			editor.setReadOnly(this.props.readOnly === true || this.props.disabled === true);
 		},
 		_handleChange: function(value) {
+			// apply constraint: maximum number of characters allowed in input
+			if(this.props.maxLength) {
+				value = value.substr(0, this.props.maxLength);
+			}
 			this.setState({value: value});
 			this.props.onChange(value);
 		},

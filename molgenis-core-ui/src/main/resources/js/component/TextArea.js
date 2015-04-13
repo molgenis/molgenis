@@ -17,6 +17,7 @@
 			required: React.PropTypes.bool,
 			disabled: React.PropTypes.bool,
 			readOnly: React.PropTypes.bool,
+			maxLength: React.PropTypes.number,
 			value: React.PropTypes.string,
 			onValueChange: React.PropTypes.func.isRequired
 		},
@@ -37,13 +38,19 @@
 				required: this.props.required,
 				disabled: this.props.disabled,
 				readOnly: this.props.readOnly,
+				maxLength: this.props.maxLength,
 				value: this.state.value,
 				onChange: this._handleChange});
 		},
 		_handleChange: function(event) {
-			this.setState({value: event.target.value});
+			var value = event.target.value;
+			// apply constraint: maximum number of characters allowed in input
+			if(this.props.maxLength) {
+				value = value.substr(0, this.props.maxLength);
+			}
+			this.setState({value: value});
 			
-			var value = event.target.value !== '' ? event.target.value : null;
+			value = value !== '' ? value : null;
 			this.props.onValueChange({value: value});
 		}
 	});
