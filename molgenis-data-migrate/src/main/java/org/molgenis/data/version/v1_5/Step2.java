@@ -30,7 +30,7 @@ import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.version.MetaDataUpgrade;
+import org.molgenis.data.version.MolgenisUpgrade;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.util.DependencyResolver;
@@ -39,7 +39,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 /**
  * Upgrade class for upgrading from metadata version 0 (molgenis 1.4.4) to 1 (molgenis 1.5.0)
  */
-public class Step2 extends MetaDataUpgrade
+public class Step2 extends MolgenisUpgrade
 {
 	private static final String ENTITY_NAME = "name";
 	private static final String ENTITY_LABEL = "label";
