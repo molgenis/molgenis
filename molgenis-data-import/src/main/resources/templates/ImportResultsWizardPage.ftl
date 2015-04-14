@@ -88,16 +88,18 @@
 					$('.next').removeClass('disabled');
                     var groupcount = "${wizard.groups?size}";
                     var allow = "${wizard.allowPermissions?c}";
-                    if(importRun.importedEntities.length > 0 && groupcount > 0 && allow === "true") {
-                        $('#permission-panel').removeClass("hidden");
-                        $.ajax({
-                            url: "${context_url?html}/entityclass/group/" + $('#entity-class-group-select').val(),
-                            type: 'GET',
-                            data: {entitieIds: importRun.importedEntities},
-                            success: function (data) {
-                                $('.permission-table-container tbody').empty().html(createGroupPermissionTable(data));
-                            }
-                        });
+                    if(importRun.importedEntities !== undefined) {
+	                    if(importRun.importedEntities.length > 0 && groupcount > 0 && allow === "true") {
+	                        $('#permission-panel').removeClass("hidden");
+	                        $.ajax({
+	                            url: "${context_url?html}/entityclass/group/" + $('#entity-class-group-select').val(),
+	                            type: 'GET',
+	                            data: {entitieIds: importRun.importedEntities},
+	                            success: function (data) {
+	                                $('.permission-table-container tbody').empty().html(createGroupPermissionTable(data));
+	                            }
+	                        });
+	                    }
                     }
 				} else {
 					timer = setTimeout(checkImportResult, 3000);
