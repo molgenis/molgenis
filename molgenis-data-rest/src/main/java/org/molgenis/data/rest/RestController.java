@@ -92,6 +92,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -402,15 +403,24 @@ public class RestController
 			@Valid EntityCollectionRequest request,
 			@Valid @RequestBody EntityCollectionRequest requestBody)
 	{
-		//Merge the url request with the payload
-		request.setExpand(requestBody.getExpand());
+		Set<String> attributesSet = null;
+		Map<String, Set<String>> attributeExpandSet = null;
 		
-		Set<String> attributesSet = toAttributeSet(request != null ? request.getAttributes() : null);
-		Map<String, Set<String>> attributeExpandSet = toExpandMap(request != null ? request.getExpand() : null);
-		request = request != null ? request : new EntityCollectionRequest();
+		if(requestBody != null){
+			request.setExpand(request.getExpand() == null ? requestBody.getExpand(): request.getExpand());
+			request.setAttributes(request.getAttributes() == null ? requestBody.getAttributes() : request.getAttributes());
+			request.setQ(request.getQ() == null ? requestBody.getQ(): request.getQ());
+			request.setNum(request.getNum() == EntityCollectionRequest.DEFAULT_ROW_COUNT ? requestBody.getNum(): request.getNum());
+			request.setStart(request.getStart() == EntityCollectionRequest.DEFAULT_START? requestBody.getStart(): request.getStart());
+			request.setSort(request.getSort() == null? requestBody.getSort(): request.getSort());
+		}
+		
+		attributeExpandSet = toExpandMap(request.getExpand());
+		attributesSet = toAttributeSet(request.getAttributes());
+		
 		return retrieveEntityCollectionInternal(entityName, request, attributesSet, attributeExpandSet);
 	}
-
+	
 	/**
 	 * Does a rsql/fiql query, returns the result as csv
 	 * 

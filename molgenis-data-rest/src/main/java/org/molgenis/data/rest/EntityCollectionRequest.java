@@ -12,13 +12,14 @@ public class EntityCollectionRequest
 {
 	public static final int MAX_ROWS = 10000;
 	public static final int DEFAULT_ROW_COUNT = 100;
+	public static final int DEFAULT_START = 0;
 	private List<QueryRule> q;
 	private Sort sort;
 	private String[] attributes;
 	private String[] expand;
 	
 	@Min(0)
-	private int start = 0;
+	private int start = DEFAULT_START;
 	@Min(0)
 	@Max(MAX_ROWS)
 	private int num = DEFAULT_ROW_COUNT;
