@@ -1,4 +1,5 @@
 package org.molgenis.data.importer;
+
 import static com.google.common.base.Predicates.notNull;
 import static com.google.common.collect.FluentIterable.from;
 
@@ -29,6 +30,7 @@ import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.framework.db.EntityImportReport;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.DependencyResolver;
@@ -75,7 +77,10 @@ public class ImportWriter
 	@Transactional
 	public EntityImportReport doImport(EmxImportJob job)
 	{
-		importTags(job.source);
+		RunAsSystemProxy.runAsSystem(() -> {
+			importTags(job.source);
+			return null;
+		});
 		importPackages(job.parsedMetaData);
 		addEntityMetaData(job.parsedMetaData, job.report, job.metaDataChanges);
 		addEntityPermissions(job.metaDataChanges);
@@ -138,7 +143,7 @@ public class ImportWriter
 
 					entities = DependencyResolver.resolveSelfReferences(entities, entityMetaData);
 					int count = update(repository, entities, dbAction);
-					
+
 					// Fix self referenced entities were not imported
 					update(repository, this.keepSelfReferencedEntities(entities), DatabaseAction.UPDATE);
 
@@ -235,6 +240,7 @@ public class ImportWriter
 	/**
 	 * Imports the tags from the tag sheet.
 	 */
+	// FIXME: can everybody always update a tag?
 	private void importTags(RepositoryCollection source)
 	{
 		Repository tagRepo = source.getRepository(TagMetaData.ENTITY_NAME);
@@ -543,12 +549,13 @@ public class ImportWriter
 				return null;
 			}
 		}
-		
+
 		/**
 		 * getEntities filters the entities that are still not imported
 		 */
 		@Override
-		public Iterable<Entity> getEntities(String attributeName) {
+		public Iterable<Entity> getEntities(String attributeName)
+		{
 			return from((Iterable<Entity>) super.getEntities(attributeName)).filter(notNull());
 		}
 	}
