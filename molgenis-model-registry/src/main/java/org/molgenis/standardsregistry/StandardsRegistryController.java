@@ -25,7 +25,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.PackageSearchResultItem;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Tag;
-import org.molgenis.data.semanticsearch.service.impl.UntypedTagService;
+import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -59,12 +59,12 @@ public class StandardsRegistryController extends MolgenisPluginController
 	private final DataService dataService;
 	private final MetaDataSearchService metaDataSearchService;
 	private final MolgenisPermissionService molgenisPermissionService;
-	private final UntypedTagService tagService;
+	private final TagService<LabeledResource, LabeledResource> tagService;
 
 	@Autowired
 	public StandardsRegistryController(DataService dataService, MetaDataService metaDataService,
-			MolgenisPermissionService molgenisPermissionService, UntypedTagService tagService,
-			MetaDataSearchService metaDataSearchService)
+			MolgenisPermissionService molgenisPermissionService,
+			TagService<LabeledResource, LabeledResource> tagService, MetaDataSearchService metaDataSearchService)
 	{
 		super(URI);
 		if (dataService == null) throw new IllegalArgumentException("dataService is null");
