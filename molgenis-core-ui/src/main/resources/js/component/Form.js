@@ -17,7 +17,8 @@
 			formLayout: React.PropTypes.oneOf(['horizontal', 'vertical']),
 			modal: React.PropTypes.bool, // whether or not to render form in a modal dialog
 			enableOptionalFilter: React.PropTypes.bool, // whether or not to show a control to filter optional form fields
-			saveOnBlur:React.PropTypes.bool, // save form control values on blur
+			saveOnBlur: React.PropTypes.bool, // save form control values on blur
+			beforeSubmit: React.PropTypes.func,
 			onSubmitCancel: React.PropTypes.func,
 			onSubmitSuccess: React.PropTypes.func,
 			onSubmitError: React.PropTypes.func,
@@ -31,6 +32,7 @@
 				enableOptionalFilter: true,
 				colOffset: 3,
 				saveOnBlur: false,
+				beforeSubmit: function() {},
 				onSubmitCancel: function() {},
 				onSubmitSuccess: function() {},
 				onSubmitError: function() {},
@@ -139,6 +141,7 @@
 				method : method,
 				encType : 'application/x-www-form-urlencoded', // TODO use multipart/form-data if form contains one or more file inputs
 				noValidate : true,
+				beforeSubmit: this.props.beforeSubmit,
 				onSubmit : this._handleSubmit,
 				success: this._handleSubmitSuccess,
 				error: this._handleSubmitError,
@@ -181,13 +184,14 @@
 			var Form = (
 				molgenis.ui.wrapper.JQueryForm(formProps,
 					FormControlsFactory(formControlsProps),
- 					this.props.mode !== 'view' ? FormButtonsFactory({
+ 					this.props.mode !== 'view' && !(this.props.mode === 'edit' && this.props.saveOnBlur) ? FormButtonsFactory({
  						mode : this.props.mode,
  						formLayout : this.props.formLayout,
 						colOffset : this.props.colOffset,
 						cancelBtn: this.props.modal === true,
 						onCancelClick : this.props.modal === true ? this._handleCancel : undefined
-					}) : null
+					}) : null,
+					this.props.children
 				)
 			);
 

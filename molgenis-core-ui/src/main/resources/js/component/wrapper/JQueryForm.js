@@ -17,6 +17,7 @@
 			action: React.PropTypes.string.isRequired,
 			method: React.PropTypes.string,
 			noValidate: React.PropTypes.bool,
+			beforeSubmit: React.PropTypes.func,
 			success: React.PropTypes.func,
 			error: React.PropTypes.func,
 		},
@@ -24,6 +25,7 @@
 			var $form = $(this.refs.form.getDOMNode());
 			$form.ajaxForm({
 				resetForm: false,
+				beforeSubmit : this.props.beforeSubmit,
 				success : this.props.success,
 				error : this.props.error
 			});

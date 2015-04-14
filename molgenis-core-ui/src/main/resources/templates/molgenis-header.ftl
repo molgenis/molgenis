@@ -72,6 +72,7 @@
         <script src="<@resource_href "/js/component/Icon.js"/>"></script>
         <script src="<@resource_href "/js/component/Input.js"/>"></script>
         <script src="<@resource_href "/js/component/Modal.js"/>"></script>
+        <script src="<@resource_href "/js/component/Questionnaire.js"/>"></script>
         <script src="<@resource_href "/js/component/RadioGroup.js"/>"></script>
         <script src="<@resource_href "/js/component/RangeSlider.js"/>"></script>
         <script src="<@resource_href "/js/component/Spinner.js"/>"></script>
