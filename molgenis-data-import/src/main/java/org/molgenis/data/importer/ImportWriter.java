@@ -29,7 +29,6 @@ import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.framework.db.EntityImportReport;
-import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.DependencyResolver;
@@ -74,7 +73,6 @@ public class ImportWriter
 	}
 
 	@Transactional
-	@RunAsSystem
 	public EntityImportReport doImport(EmxImportJob job)
 	{
 		importTags(job.source);
