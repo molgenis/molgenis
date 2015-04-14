@@ -1,6 +1,7 @@
 package org.molgenis.data.importer;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -15,8 +16,13 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 @Component
-public class ImportServiceFactory
+public class ImportServiceFactory implements Serializable
 {
+	/**
+	 * For serialization purposes
+	 */
+	private static final long serialVersionUID = 1L;
+
 	private final List<ImportService> importServices = Lists.newArrayList();
 
 	public void addImportService(ImportService importService)
