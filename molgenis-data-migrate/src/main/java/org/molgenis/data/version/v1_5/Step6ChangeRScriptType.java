@@ -1,12 +1,7 @@
 package org.molgenis.data.version.v1_5;
 
-import javax.sql.DataSource;
-
 import org.molgenis.data.Entity;
-import org.molgenis.data.Repository;
-import org.molgenis.data.elasticsearch.ElasticSearchService;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.version.MolgenisUpgrade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,10 +22,7 @@ public class Step6ChangeRScriptType extends MolgenisUpgrade
 	@Autowired
 	private DataServiceImpl dataService;
 
-	@Autowired
-	private ElasticSearchService elasticSearchService;
-
-	public Step6ChangeRScriptType(DataSource dataSource)
+	public Step6ChangeRScriptType()
 	{
 		super(2, 3);
 	}
