@@ -162,6 +162,7 @@
 	                            <jsSourceFile>/component/Icon.js</jsSourceFile>
 	                            <jsSourceFile>/component/Input.js</jsSourceFile>
 	                            <jsSourceFile>/component/Modal.js</jsSourceFile>
+	                            <jsSourceFile>/component/Questionnaire.js</jsSourceFile>
 	                            <jsSourceFile>/component/RadioGroup.js</jsSourceFile>
 	                            <jsSourceFile>/component/RangeSlider.js</jsSourceFile>
 	                            <jsSourceFile>/component/Spinner.js</jsSourceFile>
