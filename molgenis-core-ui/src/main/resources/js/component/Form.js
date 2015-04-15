@@ -31,7 +31,7 @@
 				formLayout: 'horizontal',
 				modal: false,
 				enableOptionalFilter: true,
-				enableFormIndex: true, // FIXME put to false
+				enableFormIndex: false,
 				colOffset: 3,
 				saveOnBlur: false,
 				beforeSubmit: function() {},
