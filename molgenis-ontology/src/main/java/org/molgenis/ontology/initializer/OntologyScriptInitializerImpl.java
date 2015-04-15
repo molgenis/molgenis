@@ -39,6 +39,7 @@ public class OntologyScriptInitializerImpl implements OntologyScriptInitializer
 		this.dataService = dataService;
 	}
 
+	@Override
 	@RunAsSystem
 	public void initialize()
 	{
@@ -56,7 +57,8 @@ public class OntologyScriptInitializerImpl implements OntologyScriptInitializer
 				String scriptContent;
 				try
 				{
-					scriptContent = FileCopyUtils.copyToString(new InputStreamReader(resource.getInputStream()));
+					scriptContent = FileCopyUtils
+							.copyToString(new InputStreamReader(resource.getInputStream(), "UTF-8"));
 
 				}
 				catch (IOException e)

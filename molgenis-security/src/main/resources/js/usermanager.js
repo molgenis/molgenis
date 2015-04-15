@@ -18,29 +18,29 @@
 	 * @memberOf molgenis.usermanager
 	 */
 	function getCreateForm(type) {
-		$.ajax({
-			type : 'GET',
-			url : '/api/v1/molgenis' + type + '/create',
-			success : function(text) {
-				$('#managerModalTitle').html('Add ' + type);
-				$('#controlGroups').html(text);
-				
+		React.render(molgenis.ui.Form({
+			mode: 'create',
+			entity : 'molgenis' + type,
+			modal: true,
+			onSubmitSuccess : function() {
+				location.reload();
 			}
-		});
+		}), $('<div>')[0]);
 	}
 
 	/**
 	 * @memberOf molgenis.usermanager
 	 */
 	function getEditForm(id, type) {
-		$.ajax({
-			type : 'GET',
-			url : '/api/v1/molgenis' + type + '/' + id + '/edit',
-			success : function(text) {
-				$('#managerModalTitle').html('Edit ' + type);
-				$('#controlGroups').html(text);
+		React.render(molgenis.ui.Form({
+			entity : 'molgenis' + type,
+			entityInstance: id,
+			mode: 'edit',
+			modal: true,
+			onSubmitSuccess : function() {
+				location.reload();
 			}
-		});
+		}), $('<div>')[0]);
 	}
 
 	/**
@@ -145,29 +145,6 @@
 
 		$('.activate-group-checkbox').click(function(e) {
 			setActivation('group', $(this).data('id'), this);
-		});
-
-		var submitBtn = $('#submitFormButton');
-		submitBtn.click(function(e) {
-			$('#entity-form').submit();
-			return false;
-		});
-		
-		$( "#target" ).submit(function( event ) {
-			alert( "Handler for .submit() called." );
-			event.preventDefault();
-		});
-
-		$(document).on('onFormSubmitSuccess', function() {
-			$('#usermanagerModal').modal('toggle');
-			location.reload();
-		});
-		
-		$('#managerModal').keydown(function(e) {
-			// prevent modal being submitted if one presses enter
-			if (event.keyCode === 13) {
-				return false;
-			}
 		});
 	});
 }($, window.top.molgenis = window.top.molgenis || {}));

@@ -12,7 +12,6 @@ import org.molgenis.data.Range;
 import org.molgenis.security.core.MolgenisPermissionService;
 
 import com.google.common.base.Function;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
@@ -25,6 +24,7 @@ public class AttributeMetaDataResponse
 	private final String description;
 	private final List<?> attributes;
 	private final List<String> enumOptions;
+	private final Long maxLength;
 	private final Object refEntity;
 	private final Boolean auto;
 	private final Boolean nillable;
@@ -89,6 +89,12 @@ public class AttributeMetaDataResponse
 		}
 		else this.enumOptions = null;
 
+		if (attributesSet == null || attributesSet.contains("maxLength".toLowerCase()))
+		{
+			this.maxLength = attr.getDataType().getMaxLength();
+		}
+		else this.maxLength = null;
+
 		if (attributesSet == null || attributesSet.contains("expression".toLowerCase()))
 		{
 			this.expression = attr.getExpression();
@@ -106,8 +112,12 @@ public class AttributeMetaDataResponse
 			}
 			else
 			{
-				this.refEntity = refEntity != null ? ImmutableMap.<String, String> of("href",
-						Href.concatMetaEntityHref(RestController.BASE_URI, refEntity.getName())) : null;
+				this.refEntity = refEntity != null ? new Href(Href.concatMetaEntityHref(RestController.BASE_URI,
+						refEntity.getName()), String.format("%s/%s", RestController.BASE_URI, refEntity.getName())) : null; // FIXME
+																															// apply
+																															// Href
+																															// escaping
+																															// fix
 			}
 		}
 		else this.refEntity = null;

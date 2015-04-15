@@ -8,6 +8,7 @@ import org.molgenis.model.MolgenisModelException;
 public class TextField extends FieldType
 {
 	private static final long serialVersionUID = 1L;
+	private static final long MAX_TEXT_LENGTH = 65535L;
 
 	@Override
 	public String getJavaAssignment(String value)
@@ -89,10 +90,16 @@ public class TextField extends FieldType
 		return FieldTypeEnum.TEXT;
 	}
 
-    @Override
-    public Object convert(Object value)
-    {
-        if (value == null) return null;
-        return value.toString();
-    }
+	@Override
+	public Long getMaxLength()
+	{
+		return MAX_TEXT_LENGTH;
+	}
+
+	@Override
+	public Object convert(Object value)
+	{
+		if (value == null) return null;
+		return value.toString();
+	}
 }

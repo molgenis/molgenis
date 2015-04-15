@@ -54,6 +54,7 @@ import org.molgenis.ontology.sorta.SortaServiceImpl;
 import org.molgenis.ontology.sorta.SortaServiceResponse;
 import org.molgenis.ontology.sorta.UploadProgress;
 import org.molgenis.ontology.utils.SortaServiceUtil;
+import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,6 +100,9 @@ public class SortaServiceController extends MolgenisPluginController
 
 	@Autowired
 	private FileStore fileStore;
+
+	@Autowired
+	private MolgenisPermissionService molgenisPermissionService;
 
 	public static final String VIEW_NAME = "ontology-match-view";
 	public static final String ID = "ontologyservice";
@@ -299,7 +303,8 @@ public class SortaServiceController extends MolgenisPluginController
 
 		uploadProgress.setUserClickMode(userAccountService.getCurrentUser().getUsername(), isMatched);
 		EntityPager pager = new EntityPager(start, num, (long) count, null);
-		return new EntityCollectionResponse(pager, entityMaps, "/match/retrieve");
+		return new EntityCollectionResponse(pager, entityMaps, "/match/retrieve", OntologyTermMetaData.INSTANCE,
+				molgenisPermissionService);
 	}
 
 	@RequestMapping(method = POST, value = "/match")
@@ -413,7 +418,6 @@ public class SortaServiceController extends MolgenisPluginController
 				Entity ontologyTermEntity = sortaService.getOntologyTermEntity(
 						mappingEntity.getString(MatchingTaskContentEntityMetaData.MATCHED_TERM),
 						matchingTaskEntity.getString(MatchingTaskEntityMetaData.CODE_SYSTEM));
-
 				MapEntity row = new MapEntity(inputEntity);
 				row.set(OntologyTermMetaData.ONTOLOGY_TERM_NAME,
 						ontologyTermEntity.get(OntologyTermMetaData.ONTOLOGY_TERM_NAME));

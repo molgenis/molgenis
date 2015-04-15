@@ -1,9 +1,12 @@
 package org.molgenis.data.importer;
 
+import static org.mockito.Mockito.mock;
+
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 import org.apache.poi.ss.formula.eval.NotImplementedException;
+import org.molgenis.data.IdGenerator;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.mysql.AsyncJdbcTemplate;
@@ -14,6 +17,9 @@ import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
 import org.molgenis.mysql.embed.EmbeddedMysqlDatabaseBuilder;
+import org.molgenis.ontology.core.repository.OntologyRepository;
+import org.molgenis.ontology.core.repository.OntologyTermRepository;
+import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -117,5 +123,28 @@ public class ImportTestConfig
 	public MolgenisPluginRegistry molgenisPluginRegistry()
 	{
 		return new MolgenisPluginRegistryImpl();
+	}
+	
+	@Bean
+	OntologyService ontologyService()
+	{
+		return mock(OntologyService.class);
+	}
+
+	@Bean
+	OntologyRepository ontologyRepository()
+	{
+		return mock(OntologyRepository.class);
+	}
+
+	@Bean
+	OntologyTermRepository ontologyTermRepository()
+	{
+		return mock(OntologyTermRepository.class);
+	}
+	
+	@Bean
+	IdGenerator idGenerator(){
+		return mock(IdGenerator.class);
 	}
 }
