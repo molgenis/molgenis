@@ -1,11 +1,10 @@
 package org.molgenis.data.version.v1_5;
 
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.version.MolgenisUpgrade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -19,10 +18,9 @@ public class Step6ChangeRScriptType extends MolgenisUpgrade
 {
 	private static final Logger LOG = LoggerFactory.getLogger(Step6ChangeRScriptType.class);
 
-	@Autowired
-	private DataServiceImpl dataService;
+	private DataService dataService;
 
-	public Step6ChangeRScriptType()
+	public Step6ChangeRScriptType(DataService dataService)
 	{
 		super(2, 3);
 	}
