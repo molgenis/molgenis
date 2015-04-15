@@ -5,7 +5,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.version.MolgenisUpgrade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 /**
  * Migrates the R script type from 'r' to 'R' version 1.4.3 to 1.5
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Component;
  * @author mdehaan
  *
  */
-@Component
 public class Step6ChangeRScriptType extends MolgenisUpgrade
 {
 	private static final Logger LOG = LoggerFactory.getLogger(Step6ChangeRScriptType.class);
