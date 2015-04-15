@@ -38,27 +38,14 @@ public class Step6ChangeRScriptType extends MolgenisUpgrade
 	@Override
 	public void upgrade()
 	{
-		Repository scriptTypeRepository = dataService.getRepository("ScriptType");
-
-		LOG.info("Removing old r script type");
-		Entity oldScriptType = scriptTypeRepository.findOne("r");
-		scriptTypeRepository.delete(oldScriptType);
-
-		LOG.info("Inserting new R script type");
-		Entity newScriptType = new MapEntity();
-		newScriptType.set("name", "R");
-		scriptTypeRepository.add(newScriptType);
-
-		LOG.info("Updating ScriptType in database and index");
-		dataService.update("ScriptType", scriptTypeRepository);
-		elasticSearchService.indexRepository(scriptTypeRepository);
+		LOG.info("Changing old r script type to R");
+		Entity scriptType = dataService.findOne("ScriptType", "r");
+		scriptType.set("name", "R");
+		dataService.update("ScriptType", scriptType);
 
 		LOG.info("Set script type for existing scripts");
-		Repository scriptRepository = dataService.getRepository("Script");
-		scriptRepository.forEach(entity -> entity.set("type", newScriptType));
-
-		LOG.info("Updating Script entity in database and index");
-		dataService.update("Script", scriptRepository);
-		elasticSearchService.indexRepository(scriptRepository);
+		Iterable<Entity> scriptEntities = dataService.findAll("Script");
+		scriptEntities.forEach(entity -> entity.set("type", dataService.findOne("ScriptType", "R")));
+		dataService.update("Script", scriptEntities);
 	}
 }
