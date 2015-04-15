@@ -1,7 +1,6 @@
 package org.molgenis.data;
 
 import java.io.File;
-import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.util.Map;
 import java.util.Set;
@@ -24,12 +23,8 @@ import com.google.common.collect.Maps;
  * you.
  */
 @Component
-public class FileRepositoryCollectionFactory implements Serializable
+public class FileRepositoryCollectionFactory
 {
-	/**
-	 * For serialization purposes
-	 */
-	private static final long serialVersionUID = 1L;
 	private final Map<String, Class<? extends FileRepositoryCollection>> fileRepositoryCollection;
 
 	public FileRepositoryCollectionFactory()
