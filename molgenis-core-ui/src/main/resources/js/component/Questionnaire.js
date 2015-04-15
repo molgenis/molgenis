@@ -39,6 +39,7 @@
     			modal: false,
     	        enableOptionalFilter: false,
     	        saveOnBlur: true,
+    	        enableFormIndex: true,
     	        beforeSubmit: this._handleBeforeSubmit,
     	        onValueChange: this._handleValueChange
     	    }, SubmitButton); 
