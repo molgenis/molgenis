@@ -42,7 +42,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class MetaDataVersionService
 {
-	public static final int CURRENT_META_DATA_VERSION = 4;
+	public static final int CURRENT_META_DATA_VERSION = 5;
 	private static final String META_DATA_VERSION_KEY = "meta.data.version";
 
 	private static final Logger LOG = LoggerFactory.getLogger(MetaDataVersionService.class);

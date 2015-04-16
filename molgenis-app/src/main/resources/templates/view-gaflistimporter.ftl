@@ -3,10 +3,8 @@
 <#assign css=[
 	"gaflistimporter.css",
 	"jquery.bootstrap.wizard.css",
-	"jquery-ui-1.9.2.custom.min.css",
 	"jquery.molgenis.table.css"]>
 <#assign js=[
-	"jquery-ui-1.9.2.custom.min.js",
 	"jquery.bootstrap.wizard.min.js",
 	"jquery.molgenis.table.js"]>
 <@header css js/>

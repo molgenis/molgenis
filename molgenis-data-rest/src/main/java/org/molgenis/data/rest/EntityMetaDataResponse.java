@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -14,11 +15,11 @@ import org.molgenis.security.core.Permission;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 
 public class EntityMetaDataResponse
 {
 	private final String href;
+	private final String hrefCollection;
 	private final String name;
 	private final String label;
 	private final String description;
@@ -33,6 +34,14 @@ public class EntityMetaDataResponse
 	private final Boolean writable;
 
 	/**
+	 * @param meta
+	 */
+	public EntityMetaDataResponse(EntityMetaData meta, MolgenisPermissionService permissionService)
+	{
+		this(meta, null, null, permissionService);
+	}
+
+	/**
 	 * 
 	 * @param meta
 	 * @param attributesSet
@@ -45,6 +54,7 @@ public class EntityMetaDataResponse
 	{
 		String name = meta.getName();
 		this.href = Href.concatMetaEntityHref(RestController.BASE_URI, name);
+		this.hrefCollection = String.format("%s/%s", RestController.BASE_URI, name); // FIXME apply Href escaping fix
 
 		if (attributesSet == null || attributesSet.contains("name".toLowerCase()))
 		{
@@ -76,7 +86,7 @@ public class EntityMetaDataResponse
 					{
 						Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
 						this.attributes.put(attr.getName(), new AttributeMetaDataResponse(name, attr, subAttributesSet,
-								null, permissionService));
+								Collections.singletonMap("refEntity".toLowerCase(), null), permissionService));
 					}
 					else
 					{
@@ -129,6 +139,11 @@ public class EntityMetaDataResponse
 	public String getHref()
 	{
 		return href;
+	}
+
+	public String getHrefCollection()
+	{
+		return hrefCollection;
 	}
 
 	public String getName()
