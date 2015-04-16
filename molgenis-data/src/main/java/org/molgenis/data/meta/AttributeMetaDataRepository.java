@@ -21,7 +21,9 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MIN;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.READ_ONLY;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.REF_ENTITY;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.UNIQUE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.VALIDATION_EXPRESSION;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.VISIBLE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.VISIBLE_EXPRESSION;
 
 import java.util.UUID;
 
@@ -92,6 +94,9 @@ class AttributeMetaDataRepository
 		attributeMetaDataEntity.set(READ_ONLY, att.isReadonly());
 		attributeMetaDataEntity.set(UNIQUE, att.isUnique());
 		attributeMetaDataEntity.set(EXPRESSION, att.getExpression());
+		attributeMetaDataEntity.set(VISIBLE_EXPRESSION, att.getVisibleExpression());
+		attributeMetaDataEntity.set(VALIDATION_EXPRESSION, att.getValidationExpression());
+
 		if ((att.getDataType() instanceof EnumField) && (att.getEnumOptions() != null))
 		{
 			attributeMetaDataEntity.set(ENUM_OPTIONS, Joiner.on(",").join(att.getEnumOptions()));
@@ -199,6 +204,9 @@ class AttributeMetaDataRepository
 			stream(parts.spliterator(), false).map(this::toAttributeMetaData).forEach(
 					attributeMetaData::addAttributePart);
 		}
+		attributeMetaData.setVisibleExpression(entity.getString(VISIBLE_EXPRESSION));
+		attributeMetaData.setValidationExpression(entity.getString(VALIDATION_EXPRESSION));
+
 		return attributeMetaData;
 	}
 

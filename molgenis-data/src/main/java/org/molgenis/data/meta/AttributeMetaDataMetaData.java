@@ -2,6 +2,7 @@ package org.molgenis.data.meta;
 
 import static org.molgenis.MolgenisFieldTypes.BOOL;
 import static org.molgenis.MolgenisFieldTypes.MREF;
+import static org.molgenis.MolgenisFieldTypes.SCRIPT;
 import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
 
@@ -32,6 +33,8 @@ public class AttributeMetaDataMetaData extends DefaultEntityMetaData
 	public static final String UNIQUE = "unique";
 	public static final String PARTS = "parts";
 	public static final String TAGS = "tags";
+	public static final String VISIBLE_EXPRESSION = "visibleExpression";
+	public static final String VALIDATION_EXPRESSION = "validationExpression";
 
 	public AttributeMetaDataMetaData()
 	{
@@ -58,5 +61,7 @@ public class AttributeMetaDataMetaData extends DefaultEntityMetaData
 		addAttribute(READ_ONLY).setDataType(BOOL).setNillable(false);
 		addAttribute(UNIQUE).setDataType(BOOL).setNillable(false);
 		addAttribute(TAGS).setDataType(MREF).setRefEntity(new TagMetaData());
+		addAttribute(VISIBLE_EXPRESSION).setDataType(SCRIPT).setNillable(true);
+		addAttribute(VALIDATION_EXPRESSION).setDataType(SCRIPT).setNillable(true);
 	}
 }

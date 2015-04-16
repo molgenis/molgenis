@@ -14,6 +14,11 @@
 			<artifactId>molgenis-data</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-data-validation</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 		 <!-- database hibernate, connectionpool, driver -->
 		<dependency>
 			<groupId>org.eclipse.persistence</groupId>

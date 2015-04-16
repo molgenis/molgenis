@@ -14,6 +14,7 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.support.MapEntity;
@@ -48,7 +49,8 @@ public class AlgorithmServiceImpl implements AlgorithmService
 				{
 					try
 					{
-						Object result = ScriptEvaluator.eval(algorithm, mapEntity);
+						Object result = ScriptEvaluator
+								.eval(algorithm, mapEntity, sourceRepository.getEntityMetaData());
 
 						if (result != null)
 						{
@@ -103,7 +105,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	}
 
 	@Override
-	public Object apply(AttributeMapping attributeMapping, Entity sourceEntity)
+	public Object apply(AttributeMapping attributeMapping, Entity sourceEntity, EntityMetaData sourceEntityMetaData)
 	{
 		String algorithm = attributeMapping.getAlgorithm();
 		if (StringUtils.isEmpty(algorithm))
@@ -113,7 +115,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		try
 		{
 			MapEntity entity = createMapEntity(getSourceAttributeNames(attributeMapping.getAlgorithm()), sourceEntity);
-			Object value = ScriptEvaluator.eval(algorithm, entity);
+			Object value = ScriptEvaluator.eval(algorithm, entity, sourceEntityMetaData);
 			return convert(value, attributeMapping.getTargetAttributeMetaData());
 		}
 		catch (RuntimeException e)
