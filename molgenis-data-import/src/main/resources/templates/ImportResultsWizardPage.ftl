@@ -83,7 +83,7 @@
 					$('.next').removeClass('disabled');
                     var groupcount = "${wizard.groups?size}";
                     var allow = "${wizard.allowPermissions?c}";
-                    if(importRun.importedEntities.length > 0 && groupcount > 0 && allow === "true") {
+                    if(importRun.importedEntities && importRun.importedEntities.length > 0 && groupcount > 0 && allow === "true") {
                         $('#permission-panel').removeClass("hidden");
                         $.ajax({
                             url: "${context_url?html}/entityclass/group/" + $('#entity-class-group-select').val(),

@@ -142,7 +142,8 @@
 
 		var items = [];
 		if (settings.editenabled) {
-			items.push($('<th>'));
+			items.push($('<th>')); // edit row
+			items.push($('<th>')); // delete row
 		}
 		
 		$.each(settings.colAttributes, function(i, attribute) {
@@ -178,6 +179,12 @@
 			var entity = data.items[i];
 			var row = $('<tr>').data('entity', entity).data('id', entity.href);
 			if (settings.editenabled) {
+				// edit row button
+				var cell = $('<td class="edit" tabindex="' + tabindex++ + '">');
+				$('<a class="btn btn-xs btn-primary edit-row-btn" href="#" data-toggle="button" title="Edit"><span class="glyphicon glyphicon-edit"></span></button>').appendTo(cell);
+				row.append(cell);
+				
+				// delete row button
 				var cell = $('<td class="trash" tabindex="' + tabindex++ + '">');
 				$('<a class="btn btn-xs btn-danger delete-row-btn" href="#" data-toggle="button" title="Delete"><span class="glyphicon glyphicon-minus"></span></button>').appendTo(cell);
 				row.append(cell);
@@ -800,60 +807,35 @@
 		});
 		
 		function getCreateForm(entityMetaData) {
-			$.ajax({
-				type : 'GET',
-				url : '/api/v1/' + entityMetaData.name + '/create',
-				success : function(form) {
-					openFormModal(entityMetaData, form);
+			React.render(molgenis.ui.Form({
+				mode: 'create',
+				entity : entityMetaData.name,
+				modal: true,
+				onSubmitSuccess: function() {
+					settings.start = 0;
+					refresh(settings);
 				}
-			});
+			}), $('<div>')[0]);
 		}
 		
-		function openFormModal(entityMetaData, form) {
-			// create modal structure
-			var modal = $('#form-modal');
-			if(!modal.length) {
-				var items = [];
-				items.push('<div class="modal" id="form-modal" tabindex="-1" role="dialog" aria-labelledby="form-modal-title" aria-hidden="true">');
-				items.push('<div class="modal-dialog">');
-				items.push('<div class="modal-content">');				
-				items.push('<div class="modal-header">');
-				items.push('<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>');
-				items.push('<h4 class="modal-title"></h4>');
-				items.push('</div>');
-				items.push('<div class="modal-body">');
-				items.push('</div>');
-				items.push('<div class="modal-footer">');
-				items.push('<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>');
-				items.push('<button type="button" id="submit-form-btn" class="btn btn-primary">Save</button>');
-				items.push('</div>');
-				items.push('</div>');
-				items.push('</div>');
-				items.push('</div>');
-				modal = $(items.join(''));
-			}
+		// edit row
+		$(container).on('click', '.edit-row-btn', function(e) {
+			e.preventDefault();
+			e.stopPropagation();
 			
-			$('.modal-title', modal).html(entityMetaData.label);
-			$('.modal-body', modal).html(form);
-			
-			modal.on('click', '#submit-form-btn', function(e) {
-				e.preventDefault();
-				e.stopPropagation();
-				$('#entity-form').submit();			
-			});
-			
-			// show modal
-			modal.modal({'show': true});
-		}
-		
-		$(document).on('onFormSubmitSuccess', function() {
-			$('#form-modal .modal-body').html('');
-			$('#form-modal').modal('hide');
-			settings.start = 0;
-			refresh(settings);
+			React.render(molgenis.ui.Form({
+				entity : settings.entityMetaData.name,
+				entityInstance: $(this).closest('tr').data('id'),
+				mode: 'edit',
+				modal: true,
+				onSubmitSuccess : function() {
+					settings.start = 0;
+					refresh(settings);
+				}
+			}), $('<div>')[0]);
 		});
 		
-		// toggle edit table mode
+		// delete row
 		$(container).on('click', '.delete-row-btn', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
