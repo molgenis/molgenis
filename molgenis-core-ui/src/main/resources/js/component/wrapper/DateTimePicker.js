@@ -35,7 +35,7 @@
 			});
 
 			$container.on('dp.change', function(event) {
-				this._handleValueChange(event.date.format(format));
+				this._handleValueChange(event.date ? event.date.format(format) : null);
 			}.bind(this));
 
 			if(!this.props.required) {

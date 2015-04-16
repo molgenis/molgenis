@@ -86,7 +86,7 @@ public class EntityMetaDataResponse
 					{
 						Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
 						this.attributes.put(attr.getName(), new AttributeMetaDataResponse(name, attr, subAttributesSet,
-								null, permissionService));
+								Collections.singletonMap("refEntity".toLowerCase(), null), permissionService));
 					}
 					else
 					{

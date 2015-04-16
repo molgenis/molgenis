@@ -56,6 +56,13 @@ public abstract class FieldType implements Serializable
 	}
 
 	/**
+	 * Returns the maximum number of characters for this field type or null if not applicable
+	 * 
+	 * @return
+	 */
+	public abstract Long getMaxLength();
+
+	/**
 	 * Product the Java type of this field type. Default: "String".
 	 * 
 	 * @return type in java code
@@ -188,5 +195,5 @@ public abstract class FieldType implements Serializable
 		return f != null ? f.hashCode() : 0;
 	}
 
-    public abstract Object convert(Object value);
+	public abstract Object convert(Object value);
 }

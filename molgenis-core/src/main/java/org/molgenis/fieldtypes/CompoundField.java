@@ -102,9 +102,16 @@ public class CompoundField extends FieldType
 		return FieldTypeEnum.COMPOUND;
 	}
 
-    @Override
-    public Object convert(Object defaultValue) {
-        return null;
-    }
+	@Override
+	public Long getMaxLength()
+	{
+		return null;
+	}
+
+	@Override
+	public Object convert(Object defaultValue)
+	{
+		return null;
+	}
 
 }

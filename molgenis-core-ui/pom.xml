@@ -88,6 +88,7 @@
 	                            <jsSourceFile>bootstrap-datetimepicker.min.js</jsSourceFile> <!-- DateTimePicker dependency -->
 	                            <jsSourceFile>jQEditRangeSlider-min.js</jsSourceFile> <!-- JQRangeSlider dependency -->
 	                            <jsSourceFile>../../../../target/classes/js/select2-patched.js</jsSourceFile> <!-- Select2 dependency, use minified file from default-minify execution -->
+	                            <jsSourceFile>URI.js</jsSourceFile>
 	                        </jsSourceFiles>
 	                        <jsFinalFile>molgenis-bundle.min.js</jsFinalFile>
 	                        <skipMerge>false</skipMerge>
@@ -162,6 +163,7 @@
 	                            <jsSourceFile>/component/Icon.js</jsSourceFile>
 	                            <jsSourceFile>/component/Input.js</jsSourceFile>
 	                            <jsSourceFile>/component/Modal.js</jsSourceFile>
+	                            <jsSourceFile>/component/Questionnaire.js</jsSourceFile>
 	                            <jsSourceFile>/component/RadioGroup.js</jsSourceFile>
 	                            <jsSourceFile>/component/RangeSlider.js</jsSourceFile>
 	                            <jsSourceFile>/component/Spinner.js</jsSourceFile>
