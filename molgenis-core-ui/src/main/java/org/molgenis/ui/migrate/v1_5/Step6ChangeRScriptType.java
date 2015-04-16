@@ -1,11 +1,12 @@
 package org.molgenis.ui.migrate.v1_5;
 
+import static com.google.common.collect.Iterables.transform;
+
 import javax.sql.DataSource;
 
 import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
@@ -17,6 +18,7 @@ import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.version.MolgenisUpgrade;
 import org.molgenis.script.Script;
+import org.molgenis.script.ScriptParameter;
 import org.molgenis.script.ScriptType;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.slf4j.Logger;
@@ -42,6 +44,7 @@ public class Step6ChangeRScriptType extends MolgenisUpgrade
 	private Repository scriptRepo;
 	private DataSource dataSource;
 	private MysqlRepositoryCollection mysql;
+	private MetaDataService metaData;
 
 	public Step6ChangeRScriptType(DataSource dataSource, SearchService searchService)
 	{
@@ -56,20 +59,33 @@ public class Step6ChangeRScriptType extends MolgenisUpgrade
 		LOG.info("Changing old r script type to R...");
 
 		initializeUndecoratedMysqlRepository();
-		initializeScriptRepositories();
 
 		Entity swapScriptType = addScriptType(SWAP_SCRIPT_TYPE_NAME);
-		Iterable<Entity> rScriptEntities = setSwapScriptTypeInRScripts(swapScriptType);
-		
+		updateScriptTypeInScriptEntities(swapScriptType, OLD_SCRIPT_TYPE_NAME);
 		scriptTypeRepo.deleteById(OLD_SCRIPT_TYPE_NAME);
+
 		Entity newScriptType = addScriptType(NEW_SCRIPT_TYPE_NAME);
-		
-		updateScriptType(newScriptType, rScriptEntities);
+		updateScriptTypeInScriptEntities(newScriptType, SWAP_SCRIPT_TYPE_NAME);
 		scriptTypeRepo.deleteById(SWAP_SCRIPT_TYPE_NAME);
-		
+
 		rebuildElasticSearchIndices();
 
 		LOG.info("Updating R script type DONE");
+	}
+
+	private Iterable<Entity> updateScriptTypeInScriptEntities(Entity newScriptType, String currentScriptType)
+	{
+		Iterable<Entity> rScriptEntities = scriptRepo.findAll(QueryImpl.EQ(Script.TYPE, currentScriptType));
+		updateScriptType(newScriptType, rScriptEntities);
+		return rScriptEntities;
+	}
+
+	private void updateScriptType(Entity newScriptType, Iterable<Entity> rScriptEntities)
+	{
+		scriptRepo.update(transform(rScriptEntities, entity -> {
+			entity.set(Script.TYPE, newScriptType);
+			return entity;
+		}));
 	}
 
 	private void initializeUndecoratedMysqlRepository()
@@ -90,33 +106,26 @@ public class Step6ChangeRScriptType extends MolgenisUpgrade
 				throw new NotImplementedException("Not implemented yet");
 			}
 		};
-		MetaDataService metaData = new MetaDataServiceImpl(dataService);
-		RunAsSystemProxy.runAsSystem(() -> metaData.setDefaultBackend(mysql));
+		metaData = new MetaDataServiceImpl(dataService);
+		RunAsSystemProxy.runAsSystem(this::initRepositories);
 	}
 
-	private void initializeScriptRepositories()
+	private Void initRepositories()
 	{
-		scriptTypeRepo = mysql.addEntityMeta(ScriptType.META_DATA);
-		scriptRepo = mysql.addEntityMeta(Script.META_DATA);
+		metaData.setDefaultBackend(mysql);
+		mysql.addEntityMeta(ScriptType.META_DATA);
+		mysql.addEntityMeta(Script.META_DATA);
+		mysql.addEntityMeta(ScriptParameter.META_DATA);
+		scriptTypeRepo = metaData.addEntityMeta(ScriptType.META_DATA);
+		scriptRepo = metaData.addEntityMeta(Script.META_DATA);
+		metaData.addEntityMeta(ScriptParameter.META_DATA);
+		return null;
 	}
 
 	private void rebuildElasticSearchIndices()
 	{
 		searchService.rebuildIndex(scriptTypeRepo, ScriptType.META_DATA);
 		searchService.rebuildIndex(scriptRepo, Script.META_DATA);
-	}
-
-	private Iterable<Entity> setSwapScriptTypeInRScripts(Entity swapScriptType)
-	{
-		Iterable<Entity> rScriptEntities = scriptRepo.findAll(QueryImpl.EQ(ScriptType.NAME, OLD_SCRIPT_TYPE_NAME));
-		updateScriptType(swapScriptType, rScriptEntities);
-		return rScriptEntities;
-	}
-
-	private void updateScriptType(Entity swap, Iterable<Entity> rScriptEntities)
-	{
-		rScriptEntities.forEach(entity -> entity.set("type", swap));
-		scriptRepo.update(rScriptEntities);
 	}
 
 	private Entity addScriptType(String name)
