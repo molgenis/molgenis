@@ -5,13 +5,19 @@ import java.net.URL;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.constraints.impl.EmailValidator;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Range;
 import org.molgenis.fieldtypes.FieldType;
+import org.molgenis.js.ScriptEvaluator;
+import org.mozilla.javascript.EcmaError;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
@@ -24,6 +30,7 @@ import com.google.common.collect.Sets;
 @Component
 public class EntityAttributesValidator
 {
+	private static final Logger LOG = LoggerFactory.getLogger(EntityAttributesValidator.class);
 	private EmailValidator emailValidator;
 
 	public Set<ConstraintViolation> validate(Entity entity, EntityMetaData meta)
@@ -32,9 +39,10 @@ public class EntityAttributesValidator
 
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{
-			ConstraintViolation violation = null;
-			FieldType dataType = attr.getDataType();
-			switch (dataType.getEnumType())
+			ConstraintViolation violation = checkValidationExpression(entity, attr, meta);
+			if (violation != null) violations.add(violation);
+
+			switch (attr.getDataType().getEnumType())
 			{
 				case EMAIL:
 					violation = checkEmail(entity, attr, meta);
@@ -94,6 +102,38 @@ public class EntityAttributesValidator
 		}
 
 		return violations;
+	}
+
+	private ConstraintViolation checkValidationExpression(Entity entity, AttributeMetaData attribute,
+			EntityMetaData meta)
+	{
+		if (StringUtils.isNotBlank(attribute.getValidationExpression()))
+		{
+
+			Object result = null;
+			try
+			{
+				result = ScriptEvaluator.eval(attribute.getValidationExpression(), entity, meta);
+			}
+			catch (EcmaError e)
+			{
+				LOG.warn("Error evaluation validationExpression", e);
+			}
+
+			if ((result == null) || !(result instanceof Boolean))
+			{
+				throw new MolgenisDataException(String.format(
+						"Invalid validation expression '%s' for attribute '%s' of entity '%s'",
+						attribute.getValidationExpression(), attribute.getName(), meta.getName()));
+			}
+
+			if (!(Boolean) result)
+			{
+				return createConstraintViolation(entity, attribute, meta);
+			}
+		}
+
+		return null;
 	}
 
 	private ConstraintViolation checkEmail(Entity entity, AttributeMetaData attribute, EntityMetaData meta)
@@ -279,21 +319,9 @@ public class EntityAttributesValidator
 	private ConstraintViolation createConstraintViolation(Entity entity, AttributeMetaData attribute,
 			EntityMetaData meta)
 	{
-		String key = meta.getLabelAttribute() != null ? entity.getString(meta.getLabelAttribute().getName()) : null;
-		String message;
-
-		if (key == null)
-		{
-			message = String.format("Invalid %s value '%s' for attribute '%s' of entity '%s'.", attribute.getDataType()
-					.getEnumType().toString().toLowerCase(), entity.getString(attribute.getName()),
-					attribute.getName(), meta.getName());
-		}
-		else
-		{
-			message = String.format("Invalid %s value '%s' for attribute '%s' of entity '%s' with key '%s'.", attribute
-					.getDataType().getEnumType().toString().toLowerCase(), entity.getString(attribute.getName()),
-					attribute.getName(), meta.getName(), key);
-		}
+		String message = String.format("Invalid %s value '%s' for attribute '%s' of entity '%s'.", attribute
+				.getDataType().getEnumType().toString().toLowerCase(), entity.getString(attribute.getName()),
+				attribute.getLabel(), meta.getName());
 
 		Range range = attribute.getRange();
 		if (range != null)

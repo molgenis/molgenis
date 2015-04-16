@@ -2,6 +2,7 @@ package org.molgenis.js;
 
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
+import org.mozilla.javascript.Undefined;
 
 /**
  * {@link ScriptableObject} that holds the value of an interpreted js function.
@@ -21,12 +22,6 @@ public class ScriptableValue extends ScriptableObject
 	public ScriptableValue(Scriptable scope, Object value)
 	{
 		super(scope, ScriptableObject.getClassPrototype(scope, CLASS_NAME));
-
-		if (value == null)
-		{
-			throw new IllegalArgumentException("Value is null");// TODO How to deal with null values?
-		}
-
 		this.value = value;
 	}
 
@@ -44,12 +39,18 @@ public class ScriptableValue extends ScriptableObject
 	@Override
 	public Object getDefaultValue(Class<?> typeHint)
 	{
+		if (value == null)
+		{
+			value = Undefined.instance;
+
+		}
 		return value;
 	}
 
 	@Override
 	public String toString()
 	{
+		if (value == null) return "null";
 		return value.toString();
 	}
 
