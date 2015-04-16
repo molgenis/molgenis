@@ -97,7 +97,6 @@ public class Step3AddOrderColumnToMrefTables extends MolgenisUpgrade
 
 	private static String getMrefUpdateSql(EntityMetaData emd, AttributeMetaData att)
 	{
-		return String.format("ALTER TABLE `%s_%s` ADD COLUMN `order` INT;", emd.getName().toLowerCase(), att.getName()
-				.toLowerCase());
+		return String.format("ALTER TABLE `%s_%s` ADD COLUMN `order` INT;", emd.getName(), att.getName());
 	}
 }
