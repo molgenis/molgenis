@@ -13,6 +13,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Range;
+import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.js.ScriptEvaluator;
 import org.mozilla.javascript.EcmaError;
 import org.slf4j.Logger;
