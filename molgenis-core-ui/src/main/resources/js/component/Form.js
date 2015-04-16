@@ -3,12 +3,13 @@
     "use strict";
 
     var div = React.DOM.div, span = React.DOM.span;
-	
+    var api = new molgenis.RestClient();
+    
 	/**
 	 * @memberOf component
 	 */
 	var Form = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin, molgenis.ui.mixin.EntityLoaderMixin, molgenis.ui.mixin.EntityInstanceLoaderMixin, molgenis.ui.mixin.ReactLayeredComponentMixin],
+		mixins: [molgenis.ui.mixin.EntityLoaderMixin, molgenis.ui.mixin.EntityInstanceLoaderMixin, molgenis.ui.mixin.ReactLayeredComponentMixin],
 		displayName: 'Form',
 		propTypes: {
 			entity: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]).isRequired,
@@ -39,8 +40,9 @@
 		},
 		componentWillReceiveProps : function(nextProps) { // FIXME reload entity and entityinstance when changed
 			var newState = {
-				invalids : {},
-				validate: false,
+				//invalids : {},
+				//validate: false,
+				errorMessages: {},	
 				showModal: true,
 				submitMsg: null
 			};
@@ -53,7 +55,7 @@
 			return {
 				entity : null,			// transfered from props to state, loaded from server if required
 				entityInstance : null,	// transfered from props to state, loaded from server if required
-				invalids : {},
+				errorMessages : {},
 				validate : false,
 				showModal: true,
 				hideOptional: false
@@ -154,7 +156,8 @@
 				hideOptional: this.state.hideOptional,
 				saveOnBlur: this.props.saveOnBlur,
 				validate: this.state.validate,
-				onValueChange : this._handleValueChange
+				onValueChange : this._handleValueChange,
+				errorMessages: this.state.errorMessages
 			};
 			
 			var AlertMessage = this.state.submitMsg ? (
@@ -199,35 +202,185 @@
 				)
 			);
 		},
+		_validate: function(attr, entityInstance, callback) {
+			 // apply validation rules, not that IE9 does not support constraint validation API 
+            var errorMessage = undefined;
+          
+            if (entityInstance !== null) {
+            	if (entityInstance === undefined) entityInstance = {};//TODO fix this, why undefined if user clicks 'create' button without entering a value
+            	var value = this._getValue(attr, entityInstance[attr.name]);
+            	var type = attr.fieldType;
+                var nullOrUndefinedValue = value === null || value === undefined;
+                
+                if(attr.nillable === false && type !== 'CATEGORICAL_MREF' && type !== 'MREF' && nullOrUndefinedValue && attr.auto !== true) { // required value constraint
+	                errorMessage = 'Please enter a value.';
+	            }
+	            else if(attr.nillable === false && (type === 'CATEGORICAL_MREF' || type === 'MREF') && (nullOrUndefinedValue || value.items.length === 0)) { // required value constraint
+	                errorMessage = 'Please enter a value.';
+	            }
+	            else if(type === 'EMAIL' && !nullOrUndefinedValue && !this._statics.REGEX_EMAIL.test(value)) {
+	                errorMessage = 'Please enter a valid email address.';
+	            }
+	            else if(type === 'HYPERLINK' && !nullOrUndefinedValue && !this._statics.REGEX_URL.test(value)) {
+	                errorMessage = 'Please enter a valid URL.';
+	            }
+	            else if(!attr.range && (type === 'INT' || type === 'LONG') && !nullOrUndefinedValue && !this._isInteger(value)) {
+	                errorMessage = 'Please enter an integer value.';
+	            }
+	            else if(!attr.range && type === 'INT' && !nullOrUndefinedValue && !this._inRange(value, {min: this._statics.INT_MIN, max: this._statics.INT_MAX})) {
+	                errorMessage = 'Please enter a value between ' + this._statics.INT_MIN + ' and ' + this._statics.INT_MAX + '.';
+	            }
+	            else if(!attr.range && type === 'LONG' && !nullOrUndefinedValue && !this._inRange(value, {min: this._statics.LONG_MIN, max: this._statics.LONG_MAX})) {
+	                errorMessage = 'Please enter a value between ' + this._statics.LONG_MIN + ' and ' + this._statics.LONG_MAX + '.';
+	            }
+	            else if(attr.range && (type === 'INT' || type === 'LONG') && !nullOrUndefinedValue && !this._inRange(value, attr.range)) {
+	                if(attr.range.min !== undefined && attr.range.max !== undefined) {
+	                    errorMessage = 'Please enter a value between ' + attr.range.min + ' and ' + attr.range.max + '.';
+	                }
+	                else if(attr.range.min !== undefined) {
+	                    errorMessage = 'Please enter a value greater than or equal to ' + attr.range.min + '.';
+	                }
+	                else if(attr.range.max !== undefined) {
+	                    errorMessage = 'Please enter a value lower than or equal to ' + attr.range.max + '.';
+	                }
+	            }
+	            else if(attr.unique === true && !nullOrUndefinedValue && (this.props.mode === 'create' || value !== this.props.value)) { // value uniqueness constraint
+	                // determine query value
+	                var queryValue;
+	                switch(type) {
+	                    case 'CATEGORICAL':
+	                    case 'XREF':
+	                        queryValue = value[attr.refEntity.idAttribute];
+	                        break;
+	                    case 'CATEGORICAL_MREF':
+	                    case 'MREF':
+	                        queryValue = _.map(value, function(item) {
+								return item[attr.refEntity.idAttribute];
+							});
+	                        break;
+	                    default:
+	                        queryValue = value;
+	                        break;
+	                }
+	
+	                // check if value already exists for this attribute
+	                var rules = [{field: attr.name, operator: 'EQUALS', value: queryValue}];
+	
+	                api.getAsync(this.state.entity.hrefCollection, {q: {q: rules}}, function(data) {
+	                    if(data.total > 0) {
+	                        callback({valid: false, errorMessage: 'This ' + attr.label + ' already exists. It must be unique.'});
+	                    } else {
+	                        callback({valid: true, errorMessage: undefined});
+	                    }
+	                });
+	                return;
+	            }
+	            
+	            if (attr.validationExpression) {
+	            	var form = {};
+	            	_.each(this.state.atomicAttributes, function(entityAttr) {
+	            		var enityAttrValue = this._getValue(entityAttr, entityInstance[entityAttr.name]);
+	            		
+	            		if (enityAttrValue !== null && enityAttrValue !== undefined) {
+	            			if (entityAttr.fieldType === 'XREF' || entityAttr.fieldType === 'CATEGORICAL') {
+	            				form[entityAttr.name] = enityAttrValue[entityAttr.refEntity.idAttribute];
+	            			} else {
+	            				form[entityAttr.name] = enityAttrValue;
+	            			}
+	            		}
+	            	}, this);
+	            	
+	            	if (evalScript(attr.validationExpression, form) === false) {
+	            		errorMessage = 'Please enter a valid value.';
+	            	}
+	            }
+            }
+            
+            callback({valid: errorMessage === undefined, errorMessage: errorMessage});
+		},
+		_getValue: function(attr, value) {
+        	// workaround for required bool attribute with no value implying false value
+        	// TODO replace with elegant solution, deduplicate code in FormControls
+            if(value === undefined && attr.fieldType === 'BOOL' && !attr.nillable) {
+            	return false;
+            } else {
+            	return value;
+            }
+        },
+		_statics: {
+            // https://gist.github.com/dperini/729294
+            REGEX_URL: /^(?:(?:https?|ftp):\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/i,
+            // http://www.w3.org/TR/html5/forms.html#valid-e-mail-address
+            REGEX_EMAIL: /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
+            INT_MIN: -2147483648, 
+            INT_MAX: 2147483647,
+            LONG_MIN: Number.MIN_SAFE_INTEGER,
+            LONG_MAX: Number.MAX_SAFE_INTEGER
+        },
+        _isInteger: function(value) {
+            return Number.isInteger(value);
+        },
+        _inRange: function(value, range) {
+            var inRange = true;
+            if(range.min !== undefined) {
+                inRange = inRange && value >= range.min;
+            }
+            if(range.max !== undefined) {
+                inRange = inRange && value <= range.max;
+            }
+            return inRange;
+        },
 		_handleValueChange: function(e) {
+			var attribute = this.state.entity.attributes[e.attr];
+			if (attribute === undefined) return;//compound
+			
 			// update value in entity instance
 			var entityInstance = _.extend({}, this.state.entityInstance);
 			entityInstance[e.attr] = e.value;
 			this.setState({entityInstance: entityInstance});
 			
-			var invalids = this.state.invalids;
-			if(e.valid === true) {
-				// remove item from invalids
-				if(_.has(invalids, e.attr)) {
-					invalids = _.omit(this.state.invalids, e.attr);
-					this.setState({invalids: invalids});
+			this._validate(attribute, entityInstance, function(validationResult) {
+				var errorMessages = _.extend({}, this.state.errorMessages);
+				
+				if (validationResult.valid === true) {
+					if (_.has(errorMessages, e.attr)) {
+						this.setState({errorMessages: _.omit(errorMessages, e.attr)});
+					}
+					this.props.onValueChange(e);
+					//TODO persist if needed
+				} else {
+					//Render controls with error messages
+					errorMessages[e.attr] = validationResult.errorMessage;
+					this.setState({errorMessages: errorMessages});
 				}
-			} else {
-				// add item to invalids
-				if(!_.has(invalids, e.attr)) {
-					invalids[e.attr] = null;
-					this.setState({invalids: invalids});
-				}
-			}
-			
-			this.props.onValueChange(e);
+			}.bind(this));
 		},
 		_handleSubmit: function(e) {
 			// determine if form is valid
-			if(_.size(this.state.invalids) > 0) {
+			var errorMessages = {};
+			var valid = true;
+			var entityInstance = this.state.entityInstance;
+			
+			_.each(this.state.atomicAttributes, function(attr) {
+				this._validate(attr, entityInstance, function(validationResult) {
+					valid = valid && validationResult.valid;
+					if (validationResult.valid === false) {
+						errorMessages[attr.name] = validationResult.errorMessage;
+					}
+				}.bind(this));
+			}, this);
+			
+			
+			if (!valid) {
 				e.preventDefault(); // do not submit form
-				this.setState({validate: true}); // render validated controls
 			}
+			
+			this.setState({errorMessages: errorMessages});
+			
+			//if(_.size(this.state.invalids) > 0) {
+			//	e.preventDefault(); // do not submit form
+			//	this.setState({validate: true}); // render validated controls
+			//}
 		},
 		_handleCancel: function() {
 			if(this.props.modal) {
@@ -300,7 +453,8 @@
 			hideOptional: React.PropTypes.bool,
 			saveOnBlur: React.PropTypes.bool,
 			validate: React.PropTypes.bool,
-			onValueChange: React.PropTypes.func.isRequired
+			onValueChange: React.PropTypes.func.isRequired,
+			errorMessages: React.PropTypes.object.isRequired
 		},
 		render: function() {
 			// add control for each attribute
@@ -325,6 +479,12 @@
 							onValueChange : this.props.onValueChange,
 							key : key
 						};
+						
+						if (attr.fieldType === 'COMPOUND') {
+							controlProps['errorMessages'] = this.props.errorMessages;
+						} else {
+							controlProps['errorMessage'] = this.props.errorMessages[attr.name];
+						}
 						
 						// IE9 does not support the autofocus attribute, focus the first visible input manually
 						if(this.props.mode !== 'view' && !foundFocusControl && attr.visible === true && (this.props.mode === 'create' || attr.readOnly !== true)) {

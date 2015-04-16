@@ -21,7 +21,8 @@
 			saveOnBlur: React.PropTypes.bool,
 			validate: React.PropTypes.bool,
 			focus: React.PropTypes.bool,
-			onValueChange: React.PropTypes.func.isRequired
+			onValueChange: React.PropTypes.func.isRequired,
+			errorMessages: React.PropTypes.object.isRequired
 		},
 		render: function() {
 			var attributes = this.props.attr.attributes;
@@ -42,7 +43,8 @@
 					saveOnBlur: this.props.saveOnBlur,
 					validate: this.props.validate,
 					onValueChange : this.props.onValueChange,
-					key : '' + i
+					key : '' + i,
+					errorMessage: this.props.errorMessages[attr.name]
 				};
 				
 				// IE9 does not support the autofocus attribute, focus the first visible input manually

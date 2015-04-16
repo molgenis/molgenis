@@ -1,6 +1,7 @@
 package org.molgenis.data.rest;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,8 +86,10 @@ public class EntityMetaDataResponse
 					if (attributeExpandsSet != null && attributeExpandsSet.containsKey("attributes".toLowerCase()))
 					{
 						Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
+						Map<String, Set<String>> expands = new HashMap<>();
+						expands.put("refentity", null);// Expand refEntity
 						this.attributes.put(attr.getName(), new AttributeMetaDataResponse(name, attr, subAttributesSet,
-								null, permissionService));
+								expands, permissionService));
 					}
 					else
 					{
