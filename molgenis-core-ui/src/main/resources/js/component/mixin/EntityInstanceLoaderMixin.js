@@ -41,7 +41,8 @@
 		_loadEntityInstance: function(entity, href) {
 			if(entity && entity.name) {
 				// expand attributes with ref entity
-				var expands = _.chain(entity.attributes).filter(function(attr) {
+				var atomicAttributes = molgenis.getAtomicAttributes(entity.attributes, api);
+				var expands = _.chain(atomicAttributes).filter(function(attr) {
 					return attr.refEntity !== undefined;
 				}).map(function(attr) {
 					return attr.name;
