@@ -20,7 +20,7 @@ public class Step6ChangeRScriptType extends MolgenisUpgrade
 
 	public Step6ChangeRScriptType(DataService dataService)
 	{
-		super(2, 3);
+		super(5, 6);
 		this.dataService = dataService;
 	}
 
