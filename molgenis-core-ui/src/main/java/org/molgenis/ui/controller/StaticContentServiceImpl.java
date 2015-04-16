@@ -31,7 +31,7 @@ public class StaticContentServiceImpl implements StaticContentService
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_SYSTEM')")
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true)
 	public boolean submitContent(final String uniqueReference, String content)
 	{
