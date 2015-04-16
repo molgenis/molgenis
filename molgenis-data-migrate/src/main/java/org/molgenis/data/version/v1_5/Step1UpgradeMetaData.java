@@ -26,7 +26,6 @@ import org.molgenis.data.mysql.AsyncJdbcTemplate;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.version.MetaDataUpgrade;
 import org.molgenis.security.runas.RunAsSystemProxy;
 import org.slf4j.Logger;
