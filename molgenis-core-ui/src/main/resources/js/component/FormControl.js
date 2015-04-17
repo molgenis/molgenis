@@ -1,8 +1,8 @@
-/* global _: false, React: false, molgenis: true */
-(function(_, React, molgenis) {
+/* global _: false, React: false, URI: false, molgenis: true */
+(function(_, React, URI, molgenis) {
     "use strict";
 
-    var div = React.DOM.div, span = React.DOM.span, label = React.DOM.label, strong = React.DOM.strong;
+    var div = React.DOM.div, span = React.DOM.span, label = React.DOM.label, strong = React.DOM.strong, a = React.DOM.a;
     
     var api = new molgenis.RestClient();
     
@@ -74,7 +74,7 @@
                         
             var id = attr.name;
             
-            var description = attr.description !== undefined ? span({className: 'help-block'}, attr.description) : undefined;
+            var description = attr.description !== undefined ? FormControlDescriptionFactory({description: attr.description}) : undefined;
             var labelClasses = this.props.formLayout === 'horizontal' ? 'col-md-' + this.props.colOffset + ' control-label' : 'control-label';
             var labelElement = label({className: labelClasses, htmlFor: id}, lbl);
             
@@ -312,9 +312,41 @@
         }
     });
     
+    /**
+     * @memberOf component
+     */
+    var FormControlDescription = React.createClass({
+    	mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
+        displayName: 'FormControlDescription',
+        propTypes: {
+        	description: React.PropTypes.string.isRequired
+        },
+        render: function () {
+        	var text = this.props.description;
+        	
+        	var keyIdx = 0;
+        	var idx = 0;
+        	var DescriptionParts = [];
+        	URI.withinString(text, function(url, start, end) {
+        		if(start > idx) {
+        			DescriptionParts.push(span({key: '' + keyIdx++}, text.substr(idx, start)));
+        		}
+        		DescriptionParts.push(a({href: url, key: '' + keyIdx++}, url));
+        		
+        		idx = end;
+        		return url;
+    		});
+        	if(idx < text.length) {
+        		DescriptionParts.push(span({key: '' + keyIdx++}, text.substr(idx)));
+        	}
+        	return span({className: 'help-block'}, DescriptionParts);
+        }
+    });
+    var FormControlDescriptionFactory = React.createFactory(FormControlDescription);
+    
     // export component
     molgenis.ui = molgenis.ui || {};
     _.extend(molgenis.ui, {
         FormControl: React.createFactory(FormControl)
     });
-}(_, React, molgenis));
+}(_, React, URI, molgenis));

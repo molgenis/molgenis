@@ -17,7 +17,16 @@
 			}
 		},
 		_isLoaded: function(attr) {
-			return attr.name !== undefined && (attr.refEntity === undefined || attr.refEntity.name !== undefined);
+			if (attr.name !== undefined && (attr.refEntity === undefined || attr.refEntity.name !== undefined)){
+				if (attr.attributes.length > 0){
+					for (var i = 0; i < attr.attributes.length; i++){
+						if (attr.attributes[i].name == undefined){
+							return false;
+						}
+					}
+				}
+				return true;
+			}
 		},
 		_initAttr: function(attr) {
 			// fetch attribute if not exists
@@ -32,7 +41,7 @@
 			}
 		},
 		_loadAttr: function(href) {
-			api.getAsync(href, {expand: ['refEntity']}).done(function(attr) {
+			api.getAsync(href, {expand: ['refEntity', 'attributes']}).done(function(attr) {
 				if (this.isMounted()) {
 					this._setAttr(attr);
 				}

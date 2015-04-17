@@ -24,5 +24,8 @@ public interface EntitiesValidationReport
 	/** provides import order based on dependency */
 	public List<String> getImportOrder();
 
-    boolean valid();
+	/** Returns list of packages **/
+	public List<String> getPackages();
+
+	boolean valid();
 }

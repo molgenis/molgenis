@@ -2,7 +2,7 @@
 (function(_, React, molgenis) {
     "use strict";
 
-    var div = React.DOM.div, span = React.DOM.span;
+    var div = React.DOM.div, span = React.DOM.span, ol = React.DOM.ol, li = React.DOM.li, a = React.DOM.a;
 	
 	/**
 	 * @memberOf component
@@ -17,7 +17,9 @@
 			formLayout: React.PropTypes.oneOf(['horizontal', 'vertical']),
 			modal: React.PropTypes.bool, // whether or not to render form in a modal dialog
 			enableOptionalFilter: React.PropTypes.bool, // whether or not to show a control to filter optional form fields
-			saveOnBlur:React.PropTypes.bool, // save form control values on blur
+			saveOnBlur: React.PropTypes.bool, // save form control values on blur
+			enableFormIndex: React.PropTypes.bool, // whether or not to show a form index to navigate to form controls
+			beforeSubmit: React.PropTypes.func,
 			onSubmitCancel: React.PropTypes.func,
 			onSubmitSuccess: React.PropTypes.func,
 			onSubmitError: React.PropTypes.func,
@@ -29,15 +31,17 @@
 				formLayout: 'horizontal',
 				modal: false,
 				enableOptionalFilter: true,
+				enableFormIndex: false,
 				colOffset: 3,
 				saveOnBlur: false,
+				beforeSubmit: function() {},
 				onSubmitCancel: function() {},
 				onSubmitSuccess: function() {},
 				onSubmitError: function() {},
 				onValueChange: function() {}
 			};
 		},
-		componentWillReceiveProps : function(nextProps) { // FIXME reload entity and entityinstance when changed
+		componentWillReceiveProps : function(nextProps) {
 			var newState = {
 				invalids : {},
 				validate: false,
@@ -139,6 +143,7 @@
 				method : method,
 				encType : 'application/x-www-form-urlencoded', // TODO use multipart/form-data if form contains one or more file inputs
 				noValidate : true,
+				beforeSubmit: this.props.beforeSubmit,
 				onSubmit : this._handleSubmit,
 				success: this._handleSubmitSuccess,
 				error: this._handleSubmitError,
@@ -153,6 +158,7 @@
 				colOffset : this.props.colOffset,
 				hideOptional: this.state.hideOptional,
 				saveOnBlur: this.props.saveOnBlur,
+				enableFormIndex: this.props.enableFormIndex,
 				validate: this.state.validate,
 				onValueChange : this._handleValueChange
 			};
@@ -181,23 +187,39 @@
 			var Form = (
 				molgenis.ui.wrapper.JQueryForm(formProps,
 					FormControlsFactory(formControlsProps),
- 					this.props.mode !== 'view' ? FormButtonsFactory({
+ 					this.props.mode !== 'view' && !(this.props.mode === 'edit' && this.props.saveOnBlur) ? FormButtonsFactory({
  						mode : this.props.mode,
  						formLayout : this.props.formLayout,
 						colOffset : this.props.colOffset,
 						cancelBtn: this.props.modal === true,
 						onCancelClick : this.props.modal === true ? this._handleCancel : undefined
-					}) : null
+					}) : null,
+					this.props.children
 				)
 			);
 
-			return (
+			var FormWithMessageAndFilter = (
 				div(null,
 					AlertMessage,
 					Filter,
 					Form
 				)
 			);
+			
+			if(this.props.enableFormIndex) {
+				return (
+					div({className: 'row'},
+						div({className: 'col-md-2'},
+							FormIndexFactory({entity: this.state.entity})
+						),
+						div({className: 'col-md-10'},
+							FormWithMessageAndFilter
+						)
+					)
+				);
+			} else {
+				return FormWithMessageAndFilter;
+			}
 		},
 		_handleValueChange: function(e) {
 			// update value in entity instance
@@ -299,6 +321,7 @@
 			colOffset: React.PropTypes.number,
 			hideOptional: React.PropTypes.bool,
 			saveOnBlur: React.PropTypes.bool,
+			enableFormIndex: React.PropTypes.bool,
 			validate: React.PropTypes.bool,
 			onValueChange: React.PropTypes.func.isRequired
 		},
@@ -335,12 +358,17 @@
 						var Control = ControlFactory(controlProps);
 						if(attr.nillable === true && this.props.hideOptional === true) {
 							Control = div({className: 'hide'}, Control);
+						} else if(this.props.enableFormIndex === true && attr.fieldType === 'COMPOUND') {
+							Control = div({id: this._getLinkId(attr)}, Control);
 						}
 						controls.push(Control);
 					}
 				}
 			}
 			return div({}, controls);
+		},
+		_getLinkId: function(attr) {
+			return attr.name + '-link';
 		}
 	});
 	var FormControlsFactory = React.createFactory(FormControls);
@@ -350,7 +378,7 @@
 	 */
 	var FormButtons = React.createClass({
 		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
-		displayName: 'FormSubmitButton',
+		displayName: 'FormButtons',
 		propTypes: {
 			mode: React.PropTypes.oneOf(['create', 'edit']).isRequired,
 			formLayout: React.PropTypes.oneOf(['horizontal', 'vertical']).isRequired,
@@ -383,6 +411,44 @@
 		}
 	});
 	var FormButtonsFactory = React.createFactory(FormButtons);
+	
+	/**
+	 * @memberOf component
+	 */
+	var FormIndex = React.createClass({
+		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
+		displayName: 'FormIndex',
+		propTypes: {
+			entity: React.PropTypes.object.isRequired
+		},
+		render: function() {
+			var IndexItems = [];
+			var attrs = this.props.entity.attributes;
+			for (var key in attrs) {
+				if (attrs.hasOwnProperty(key)) {
+					var attr = attrs[key];
+					if(attr.fieldType === 'COMPOUND') {
+						var IndexItem = (
+							li({key: attr.name},
+								a({href: this._getLinkName(attr)}, attr.label)
+							)
+						);
+						IndexItems.push(IndexItem);
+					}
+				}
+			}
+			
+			return (
+				ol({style: {'list-style-type': 'none'}},
+					IndexItems
+				)
+			);
+		},
+		_getLinkName: function(attr) {
+			return '#' + attr.name + '-link';
+		}
+	});
+	var FormIndexFactory = React.createFactory(FormIndex);
 	
     // export component
     molgenis.ui = molgenis.ui || {};

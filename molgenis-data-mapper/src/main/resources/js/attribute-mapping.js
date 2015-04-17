@@ -32,7 +32,7 @@
 	 *            the ace algorithm editor to insert the attribute into
 	 */
 	function insertAttribute(attribute, editor) {
-		editor.insert("$('" + attribute + "')", -1);
+		editor.insert("$('" + attribute + "').value()", -1);
 	};
 
 	/**

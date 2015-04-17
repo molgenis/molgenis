@@ -109,5 +109,15 @@ public interface AttributeMetaData
 	 */
 	List<String> getEnumOptions();
 
+	/**
+	 * Javascript expression to determine at runtime if the attribute must be visible or not in the form
+	 */
+	String getVisibleExpression();
+
+	/**
+	 * Javascript expression to validate the value of the attribute
+	 */
+	String getValidationExpression();
+
 	boolean isSameAs(AttributeMetaData attributeMetaData);
 }

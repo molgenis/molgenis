@@ -92,6 +92,22 @@ class PackageRepository
 	}
 
 	/**
+	 * Get all packages
+	 * 
+	 * @return List of Package
+	 */
+	public List<Package> getPackages()
+	{
+		List<Package> result = new ArrayList<>();
+		for (Package p : packageCache.values())
+		{
+			result.add(p);
+		}
+
+		return result;
+	}
+
+	/**
 	 * Gets a package.
 	 * 
 	 * @param name
