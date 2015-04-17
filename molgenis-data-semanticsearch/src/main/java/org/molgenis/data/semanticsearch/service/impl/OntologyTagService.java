@@ -35,6 +35,8 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Iterables;
@@ -50,6 +52,8 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 	private final TagRepository tagRepository;
 	private final OntologyService ontologyService;
 	private final IdGenerator idGenerator;
+
+	private static final Logger LOG = LoggerFactory.getLogger(OntologyTagService.class);
 
 	public OntologyTagService(DataService dataService, OntologyService ontologyService, TagRepository tagRepository,
 			IdGenerator idGenerator)
@@ -93,8 +97,13 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 	public Multimap<Relation, OntologyTerm> getTagsForAttribute(EntityMetaData entityMetaData,
 			AttributeMetaData attributeMetaData)
 	{
-		Entity entity = findAttributeEntity(entityMetaData.getName(), attributeMetaData.getName());
 		Multimap<Relation, OntologyTerm> tags = ArrayListMultimap.<Relation, OntologyTerm> create();
+		Entity entity = findAttributeEntity(entityMetaData.getName(), attributeMetaData.getName());
+		if (entity == null)
+		{
+			LOG.warn("Cannot find attribute {}.{}", entityMetaData.getName(), attributeMetaData.getName());
+			return tags;
+		}
 		for (Entity tagEntity : entity.getEntities(AttributeMetaDataMetaData.TAGS))
 		{
 			Tag<AttributeMetaData, OntologyTerm, Ontology> tag = asTag(attributeMetaData, tagEntity);
