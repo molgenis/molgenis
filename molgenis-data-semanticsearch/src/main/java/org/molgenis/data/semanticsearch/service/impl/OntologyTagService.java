@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.molgenis.data.AttributeMetaData;
@@ -34,6 +35,8 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Iterables;
@@ -49,6 +52,8 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 	private final TagRepository tagRepository;
 	private final OntologyService ontologyService;
 	private final IdGenerator idGenerator;
+
+	private static final Logger LOG = LoggerFactory.getLogger(OntologyTagService.class);
 
 	public OntologyTagService(DataService dataService, OntologyService ontologyService, TagRepository tagRepository,
 			IdGenerator idGenerator)
@@ -92,8 +97,13 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 	public Multimap<Relation, OntologyTerm> getTagsForAttribute(EntityMetaData entityMetaData,
 			AttributeMetaData attributeMetaData)
 	{
-		Entity entity = findAttributeEntity(entityMetaData.getName(), attributeMetaData.getName());
 		Multimap<Relation, OntologyTerm> tags = ArrayListMultimap.<Relation, OntologyTerm> create();
+		Entity entity = findAttributeEntity(entityMetaData.getName(), attributeMetaData.getName());
+		if (entity == null)
+		{
+			LOG.warn("Cannot find attribute {}.{}", entityMetaData.getName(), attributeMetaData.getName());
+			return tags;
+		}
 		for (Entity tagEntity : entity.getEntities(AttributeMetaDataMetaData.TAGS))
 		{
 			Tag<AttributeMetaData, OntologyTerm, Ontology> tag = asTag(attributeMetaData, tagEntity);
@@ -202,7 +212,7 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 		}
 		return result;
 	}
-	
+
 	@Override
 	public void addEntityTag(Tag<EntityMetaData, OntologyTerm, Ontology> tag)
 	{
@@ -245,7 +255,7 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 				att -> att.getString(AttributeMetaDataMetaData.NAME).equals(attribute) ? attributeEntity : att));
 		dataService.update(EntityMetaDataMetaData.ENTITY_NAME, entityEntity);
 	}
-	
+
 	private boolean isSameTag(String relationIRI, String ontologyTermIRI, Entity e)
 	{
 		return ontologyTermIRI.equals(e.getString(TagMetaData.OBJECT_IRI))
@@ -255,8 +265,9 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 	private Entity findAttributeEntity(String entityName, String attributeName)
 	{
 		Entity entityMetaDataEntity = dataService.findOne(ENTITY_NAME, entityName);
-		return stream(entityMetaDataEntity.getEntities(ATTRIBUTES).spliterator(), false)
-				.filter(att -> attributeName.equals(att.getString(AttributeMetaDataMetaData.NAME))).findFirst().get();
+		Optional<Entity> result = stream(entityMetaDataEntity.getEntities(ATTRIBUTES).spliterator(), false).filter(
+				att -> attributeName.equals(att.getString(AttributeMetaDataMetaData.NAME))).findFirst();
+		return result.isPresent() ? result.get() : null;
 	}
 
 	private <SubjectType> TagImpl<SubjectType, OntologyTerm, Ontology> asTag(SubjectType subjectType, Entity tagEntity)
