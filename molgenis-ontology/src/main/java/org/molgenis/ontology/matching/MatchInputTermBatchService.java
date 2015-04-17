@@ -17,6 +17,10 @@ import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.core.runas.RunAsSystem;
+<<<<<<< HEAD:molgenis-ontology/src/main/java/org/molgenis/ontology/matching/MatchInputTermBatchService.java
+=======
+import org.springframework.beans.factory.annotation.Autowired;
+>>>>>>> blessed/r1.5.0:molgenis-ontology/src/main/java/org/molgenis/ontology/matching/ProcessInputTermService.java
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;

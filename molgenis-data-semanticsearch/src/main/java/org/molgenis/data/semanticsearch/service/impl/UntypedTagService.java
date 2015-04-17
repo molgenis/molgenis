@@ -55,6 +55,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 				.filter(att -> attributeName.equals(att.getString(AttributeMetaDataMetaData.NAME))).findFirst().get();
 	}
 
+	
 	private Entity findEntity(EntityMetaData emd)
 	{
 		return dataService.findOne(EntityMetaDataMetaData.ENTITY_NAME, emd.getName());
@@ -102,7 +103,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 	public Iterable<Tag<EntityMetaData, LabeledResource, LabeledResource>> getTagsForEntity(
 			EntityMetaData entityMetaData)
 	{
-		List<Tag<EntityMetaData, LabeledResource, LabeledResource>> tags = new ArrayList<Tag<EntityMetaData, LabeledResource, LabeledResource>>();
+		List<Tag<EntityMetaData, LabeledResource, LabeledResource>> result = new ArrayList<Tag<EntityMetaData, LabeledResource, LabeledResource>>();
 		Entity entity = findEntity(entityMetaData);
 		if (entity == null)
 		{
@@ -112,10 +113,10 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 		{
 			for (Entity tagEntity : entity.getEntities(EntityMetaDataMetaData.TAGS))
 			{
-				tags.add(TagImpl.asTag(entityMetaData, tagEntity));
+				result.add(TagImpl.asTag(entityMetaData, tagEntity));
 			}
 		}
-		return tags;
+		return result;
 	}
 
 	@Override
