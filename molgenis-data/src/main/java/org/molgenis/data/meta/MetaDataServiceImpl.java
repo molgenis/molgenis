@@ -20,6 +20,7 @@ import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.util.DependencyResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -163,6 +164,8 @@ public class MetaDataServiceImpl implements MetaDataService
 
 		if (getEntityMetaData(emd.getName()) != null)
 		{
+			if (emd.isAbstract()) return null;
+
 			if (!dataService.hasRepository(emd.getName()))
 			{
 				Repository repo = backend.getRepository(emd.getName());
@@ -243,6 +246,12 @@ public class MetaDataServiceImpl implements MetaDataService
 	}
 
 	@Override
+	public List<Package> getPackages()
+	{
+		return packageRepository.getPackages();
+	}
+
+	@Override
 	public List<Package> getRootPackages()
 	{
 		return packageRepository.getRootPackages();
@@ -273,7 +282,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	public void refreshCaches()
 	{
 		packageRepository.updatePackageCache();
-		entityMetaDataRepository.fillEntityMetaDataCache();
+		RunAsSystemProxy.runAsSystem(()->{entityMetaDataRepository.fillEntityMetaDataCache();return null;});
 	}
 
 	@Transactional
@@ -287,6 +296,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Transactional
 	public List<AttributeMetaData> updateSync(EntityMetaData sourceEntityMetaData)
 	{
+
 		return MetaUtils.updateEntityMeta(this, sourceEntityMetaData, true);
 	}
 

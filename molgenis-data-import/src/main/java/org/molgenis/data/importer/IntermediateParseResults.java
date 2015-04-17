@@ -28,11 +28,11 @@ import com.google.common.collect.SetMultimap;
 public final class IntermediateParseResults
 {
 	/**
-	 * Maps simple name to EntityMetaData
+	 * Maps full name to EntityMetaData
 	 */
 	private final Map<String, DefaultEntityMetaData> entities;
 	/**
-	 * Maps simple name to PackageImpl (with tags)
+	 * Maps full name to PackageImpl (with tags)
 	 */
 	private final Map<String, PackageImpl> packages;
 	/**
@@ -63,23 +63,37 @@ public final class IntermediateParseResults
 		tags.put(identifier, tagEntity);
 	}
 
-	public void addAttributes(String simpleEntityName, List<AttributeMetaData> editableEntityMetaData)
+	public void addAttributes(String entityName, List<AttributeMetaData> editableEntityMetaData)
 	{
-		// create entity if not yet defined
-		EditableEntityMetaData emd = getEntityMetaData(simpleEntityName);
+		EditableEntityMetaData emd = getEntityMetaData(entityName);
+		if (emd == null) emd = addEntityMetaData(entityName);
+
 		for (AttributeMetaData amd : editableEntityMetaData)
 		{
 			emd.addAttributeMetaData(amd);
 		}
 	}
 
-	public EditableEntityMetaData getEntityMetaData(String simpleEntityName)
+	public EditableEntityMetaData addEntityMetaData(String name)
 	{
-		if (!entities.containsKey(simpleEntityName))
+		String simpleName = name;
+		for (String packageName : packages.keySet())
 		{
-			entities.put(simpleEntityName, new DefaultEntityMetaData(simpleEntityName));
+			if (name.toLowerCase().startsWith(packageName.toLowerCase()))
+			{
+				simpleName = name.substring(packageName.length() + 1);// package_entity
+			}
 		}
-		return entities.get(simpleEntityName);
+
+		DefaultEntityMetaData emd = new DefaultEntityMetaData(simpleName);
+		entities.put(name, emd);
+
+		return emd;
+	}
+
+	public EditableEntityMetaData getEntityMetaData(String name)
+	{
+		return entities.get(name);
 	}
 
 	/**

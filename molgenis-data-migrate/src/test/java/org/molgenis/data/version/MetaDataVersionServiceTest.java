@@ -26,7 +26,7 @@ import com.mysql.jdbc.DatabaseMetaData;
 
 public class MetaDataVersionServiceTest
 {
-	private MetaDataVersionService metaDataVersionService;
+	private MolgenisVersionService metaDataVersionService;
 	private File molgenisHomeFolder;
 	private File propertiesFile;
 	private ResultSet molgenisUserTableResultSet;
@@ -40,7 +40,7 @@ public class MetaDataVersionServiceTest
 		propertiesFile.createNewFile();
 	}
 
-	private void createMetaDataVersion(boolean withMolgenisUserTable)
+	private void createMetaDataVersionNoServerProperties(boolean withMolgenisUserTable)
 	{
 		try
 		{
@@ -53,7 +53,7 @@ public class MetaDataVersionServiceTest
 			when(dbMeta.getTables(null, null, "MolgenisUser", new String[]
 			{ "TABLE" })).thenReturn(molgenisUserTableResultSet);
 			when(molgenisUserTableResultSet.first()).thenReturn(withMolgenisUserTable);
-			metaDataVersionService = new MetaDataVersionService(dataSource);
+			metaDataVersionService = new MolgenisVersionService(dataSource);
 		}
 		catch (SQLException e)
 		{
@@ -70,34 +70,33 @@ public class MetaDataVersionServiceTest
 	@Test
 	public void getDatabaseMetaDataVersionNoMolgenisUserTable() throws SQLException
 	{
-		createMetaDataVersion(false);
-		assertEquals(metaDataVersionService.getDatabaseMetaDataVersion(),
-				MetaDataVersionService.CURRENT_META_DATA_VERSION);
+		createMetaDataVersionNoServerProperties(false);
+		assertEquals(metaDataVersionService.getMolgenisVersionFromServerProperties(),
+				MolgenisVersionService.CURRENT_VERSION);
 	}
 
 	@Test
 	public void getDatabaseMetaDataVersionMolgenisUserTablePresent() throws SQLException
 	{
-		createMetaDataVersion(true);
-		assertEquals(metaDataVersionService.getDatabaseMetaDataVersion(), 0);
+		createMetaDataVersionNoServerProperties(true);
+		assertEquals(metaDataVersionService.getMolgenisVersionFromServerProperties(), 0);
 	}
 
 	@Test
 	public void getMolgenisServerProperties()
 	{
-		createMetaDataVersion(false);
+		createMetaDataVersionNoServerProperties(false);
 		assertNotNull(metaDataVersionService.getMolgenisServerProperties());
 	}
 
 	@Test
 	public void updateToCurrentVersion() throws IOException
 	{
-		createMetaDataVersion(false);
-		FileCopyUtils.copy("meta.data.version=0", new FileWriter(propertiesFile));
-		assertEquals(metaDataVersionService.getDatabaseMetaDataVersion(), 0);
+		FileCopyUtils.copy("molgenis.version=0", new FileWriter(propertiesFile));
+		assertEquals(metaDataVersionService.getMolgenisVersionFromServerProperties(), 0);
 
 		metaDataVersionService.updateToCurrentVersion();
-		assertEquals(metaDataVersionService.getDatabaseMetaDataVersion(),
-				MetaDataVersionService.CURRENT_META_DATA_VERSION);
+		assertEquals(metaDataVersionService.getMolgenisVersionFromServerProperties(),
+				MolgenisVersionService.CURRENT_VERSION);
 	}
 }

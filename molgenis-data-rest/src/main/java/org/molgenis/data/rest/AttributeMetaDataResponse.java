@@ -37,6 +37,8 @@ public class AttributeMetaDataResponse
 	private Boolean aggregateable;
 	private Range range;
 	private String expression;
+	private String visibleExpression;
+	private String validationExpression;
 
 	public AttributeMetaDataResponse(String entityParentName, AttributeMetaData attr,
 			MolgenisPermissionService permissionService)
@@ -107,8 +109,8 @@ public class AttributeMetaDataResponse
 			if (attributeExpandsSet != null && attributeExpandsSet.containsKey("refEntity".toLowerCase()))
 			{
 				Set<String> subAttributesSet = attributeExpandsSet.get("refEntity".toLowerCase());
-				this.refEntity = refEntity != null ? new EntityMetaDataResponse(refEntity, subAttributesSet, null,
-						permissionService) : null;
+				this.refEntity = refEntity != null ? new EntityMetaDataResponse(refEntity, subAttributesSet,
+						Collections.singletonMap("attributes".toLowerCase(), null), permissionService) : null;
 			}
 			else
 			{
@@ -208,6 +210,18 @@ public class AttributeMetaDataResponse
 			this.visible = attr.isVisible();
 		}
 		else this.visible = null;
+
+		if (attributesSet == null || attributesSet.contains("visibleExpression".toLowerCase()))
+		{
+			this.visibleExpression = attr.getVisibleExpression();
+		}
+		else this.visibleExpression = null;
+
+		if (attributesSet == null || attributesSet.contains("validationExpression".toLowerCase()))
+		{
+			this.validationExpression = attr.getValidationExpression();
+		}
+		else this.validationExpression = null;
 	}
 
 	public String getHref()
@@ -329,4 +343,15 @@ public class AttributeMetaDataResponse
 	{
 		return expression;
 	}
+
+	public String getVisibleExpression()
+	{
+		return visibleExpression;
+	}
+
+	public String getValidationExpression()
+	{
+		return validationExpression;
+	}
+
 }

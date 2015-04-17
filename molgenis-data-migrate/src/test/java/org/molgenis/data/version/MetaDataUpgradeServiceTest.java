@@ -11,16 +11,16 @@ import org.testng.annotations.Test;
 
 public class MetaDataUpgradeServiceTest
 {
-	private MetaDataUpgradeService metaDataUpgradeService;
-	private MetaDataVersionService metaDataVersionService;
-	private MetaDataUpgrade upgradeFrom0;
+	private MolgenisUpgradeService metaDataUpgradeService;
+	private MolgenisVersionService metaDataVersionService;
+	private MolgenisUpgrade upgradeFrom0;
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		metaDataVersionService = mock(MetaDataVersionService.class);
-		metaDataUpgradeService = new MetaDataUpgradeService(metaDataVersionService);
-		upgradeFrom0 = mock(MetaDataUpgrade.class);
+		metaDataVersionService = mock(MolgenisVersionService.class);
+		metaDataUpgradeService = new MolgenisUpgradeService(metaDataVersionService);
+		upgradeFrom0 = mock(MolgenisUpgrade.class);
 		when(upgradeFrom0.getFromVersion()).thenReturn(0);
 		metaDataUpgradeService.addUpgrade(upgradeFrom0);
 	}
@@ -28,8 +28,8 @@ public class MetaDataUpgradeServiceTest
 	@Test
 	public void upgradeNotNeeded()
 	{
-		when(metaDataVersionService.getDatabaseMetaDataVersion()).thenReturn(
-				MetaDataVersionService.CURRENT_META_DATA_VERSION);
+		when(metaDataVersionService.getMolgenisVersionFromServerProperties()).thenReturn(
+				MolgenisVersionService.CURRENT_VERSION);
 		metaDataUpgradeService.upgrade();
 		verify(metaDataVersionService, never()).updateToCurrentVersion();
 		verify(upgradeFrom0, never()).upgrade();
@@ -38,7 +38,7 @@ public class MetaDataUpgradeServiceTest
 	@Test
 	public void upgradeNeeded()
 	{
-		when(metaDataVersionService.getDatabaseMetaDataVersion()).thenReturn(0);
+		when(metaDataVersionService.getMolgenisVersionFromServerProperties()).thenReturn(0);
 		metaDataUpgradeService.upgrade();
 		verify(metaDataVersionService, times(1)).updateToCurrentVersion();
 		verify(upgradeFrom0, times(1)).upgrade();

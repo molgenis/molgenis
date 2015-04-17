@@ -12,7 +12,7 @@
 		var items = [];
 		items.push('<div class="row">');
 		items.push('<div class="col-md-12">');
-		items.push('<div class="molgenis-table-container">');
+		items.push('<div class="molgenis-table-container" style="min-height: 0%">');  /* workaround for IE9 bug https://github.com/molgenis/molgenis/issues/2755 */
 		if(settings.rowClickable){
 			items.push('<table class="table table-striped table-condensed molgenis-table table-hover"><thead></thead><tbody></tbody></table>');
 		}else{
@@ -778,7 +778,10 @@
 		$(container).on('click', '.edit-table-btn', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
-			  
+			if( molgenis.ie9 ){
+				bootbox.alert("Sorry. In-place editing is not supported in Internet Explorer 9.<br/>Please use a modern browser instead.");
+				return;
+			}
 			settings.editenabled = !settings.editenabled;
 			createTableHeader(settings);
 			createTableBody(settings.data, settings);

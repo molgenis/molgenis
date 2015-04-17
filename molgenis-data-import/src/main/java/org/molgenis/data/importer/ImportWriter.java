@@ -1,4 +1,5 @@
 package org.molgenis.data.importer;
+
 import static com.google.common.base.Predicates.notNull;
 import static com.google.common.collect.FluentIterable.from;
 
@@ -24,7 +25,7 @@ import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Tag;
-import org.molgenis.data.semanticsearch.service.impl.UntypedTagService;
+import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.FieldType;
@@ -54,7 +55,7 @@ public class ImportWriter
 
 	private final DataService dataService;
 	private final PermissionSystemService permissionSystemService;
-	private final UntypedTagService tagService;
+	private final TagService<LabeledResource, LabeledResource> tagService;
 
 	/**
 	 * Creates the ImportWriter
@@ -65,7 +66,7 @@ public class ImportWriter
 	 *            {@link PermissionSystemService} to give permissions on uploaded entities
 	 */
 	public ImportWriter(DataService dataService, PermissionSystemService permissionSystemService,
-			UntypedTagService tagService)
+			TagService<LabeledResource, LabeledResource> tagService)
 	{
 		this.dataService = dataService;
 		this.permissionSystemService = permissionSystemService;
@@ -80,7 +81,7 @@ public class ImportWriter
 		addEntityMetaData(job.parsedMetaData, job.report, job.metaDataChanges);
 		addEntityPermissions(job.metaDataChanges);
 		importEntityAndAttributeTags(job.parsedMetaData);
-		importData(job.report, job.parsedMetaData.getEntities(), job.source, job.dbAction);
+		importData(job.report, job.parsedMetaData.getEntities(), job.source, job.dbAction, job.defaultPackage);
 		return job.report;
 	}
 
@@ -105,7 +106,7 @@ public class ImportWriter
 	 * Imports entity data for all entities in {@link #resolved} from {@link #source}
 	 */
 	private void importData(EntityImportReport report, Iterable<EntityMetaData> resolved, RepositoryCollection source,
-			DatabaseAction dbAction)
+			DatabaseAction dbAction, String defaultPackage)
 	{
 		for (final EntityMetaData entityMetaData : resolved)
 		{
@@ -114,12 +115,14 @@ public class ImportWriter
 			if (dataService.hasRepository(name))
 			{
 				Repository repository = dataService.getRepository(name);
-				Repository fileEntityRepository = source.getRepository(entityMetaData.getSimpleName());
+				Repository fileEntityRepository = source.getRepository(entityMetaData.getName());
 
-				if (fileEntityRepository == null)
+				// Try without default package
+				if ((fileEntityRepository == null) && (defaultPackage != null)
+						&& entityMetaData.getName().toLowerCase().startsWith(defaultPackage.toLowerCase() + "_"))
 				{
-					// Try fully qualified name
-					fileEntityRepository = source.getRepository(entityMetaData.getName());
+					fileEntityRepository = source.getRepository(entityMetaData.getName().substring(
+							defaultPackage.length() + 1));
 				}
 
 				// check to prevent nullpointer when importing metadata only
@@ -138,7 +141,7 @@ public class ImportWriter
 
 					entities = DependencyResolver.resolveSelfReferences(entities, entityMetaData);
 					int count = update(repository, entities, dbAction);
-					
+
 					// Fix self referenced entities were not imported
 					update(repository, this.keepSelfReferencedEntities(entities), DatabaseAction.UPDATE);
 
@@ -543,13 +546,14 @@ public class ImportWriter
 				return null;
 			}
 		}
-		
+
 		/**
 		 * getEntities filters the entities that are still not imported
 		 */
 		@Override
-		public Iterable<Entity> getEntities(String attributeName) {
-			return from((Iterable<Entity>) super.getEntities(attributeName)).filter(notNull());
+		public Iterable<Entity> getEntities(String attributeName)
+		{
+			return from(super.getEntities(attributeName)).filter(notNull());
 		}
 	}
 }

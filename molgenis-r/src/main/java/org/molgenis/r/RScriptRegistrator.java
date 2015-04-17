@@ -29,7 +29,7 @@ public class RScriptRegistrator implements ApplicationListener<ContextRefreshedE
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
-		scriptRunnerFactory.registerScriptExecutor("r", rScriptRunner);
+		scriptRunnerFactory.registerScriptExecutor("R", rScriptRunner);
 	}
 
 }

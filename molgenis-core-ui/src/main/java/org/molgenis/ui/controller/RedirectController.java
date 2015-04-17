@@ -31,6 +31,6 @@ public class RedirectController extends MolgenisPluginController
 	@RequestMapping(method = RequestMethod.GET)
 	public View redirect(@RequestParam("url") String url)
 	{
-		return new RedirectView(url);
+		return new RedirectView(url, false, false, false);
 	}
 }

@@ -22,6 +22,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.util.CaseInsensitiveLinkedHashMap;
@@ -137,6 +138,15 @@ public class DefaultEntity implements Entity
 	@Override
 	public String getString(String attributeName)
 	{
+		AttributeMetaData attribute = entityMetaData.getAttribute(attributeName);
+		if (attribute != null)
+		{
+			FieldType dataType = attribute.getDataType();
+			if (dataType instanceof XrefField)
+			{
+				return DataConverter.toString(getEntity(attributeName));
+			}
+		}
 		return DataConverter.toString(values.get(attributeName));
 	}
 
@@ -311,6 +321,12 @@ public class DefaultEntity implements Entity
 	public void set(Entity entity)
 	{
 		entityMetaData.getAtomicAttributes().forEach(attr -> set(attr.getName(), entity.get(attr.getName())));
+	}
+
+	@Override
+	public String toString()
+	{
+		return getLabelValue();
 	}
 
 	@Override

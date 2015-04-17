@@ -58,8 +58,8 @@ public class AlgorithmServiceImplTest
 		targetAttributeMetaData.setDataType(org.molgenis.MolgenisFieldTypes.INT);
 		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
 		attributeMapping
-				.setAlgorithm("Math.floor((new Date('02/12/2015') - $('dob'))/(365.2425 * 24 * 60 * 60 * 1000))");
-		Object result = algorithmService.apply(attributeMapping, source);
+				.setAlgorithm("Math.floor((new Date('02/12/2015') - $('dob').value())/(365.2425 * 24 * 60 * 60 * 1000))");
+		Object result = algorithmService.apply(attributeMapping, source, entityMetaData);
 		assertEquals(result, 41);
 	}
 
@@ -93,9 +93,9 @@ public class AlgorithmServiceImplTest
 		targetAttributeMetaData.setDataType(org.molgenis.MolgenisFieldTypes.XREF);
 		targetAttributeMetaData.setRefEntity(entityMetaDataXref);
 		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
-		attributeMapping.setAlgorithm("$('xref').map({'1':'2', '2':'1'});");
+		attributeMapping.setAlgorithm("$('xref').map({'1':'2', '2':'1'}).value();");
 		when(dataService.findOne("xrefEntity1", "1")).thenReturn(xref1a);
-		Entity result = (Entity) algorithmService.apply(attributeMapping, source);
+		Entity result = (Entity) algorithmService.apply(attributeMapping, source, entityMetaDataSource);
 		assertEquals(result.get("field1"), xref2a.get("field2"));
 	}
 }

@@ -54,7 +54,7 @@ public class JpaImportService implements ImportService
 	}
 
 	@Override
-	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction)
+	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction, String defaultPackage)
 	{
 		try
 		{
