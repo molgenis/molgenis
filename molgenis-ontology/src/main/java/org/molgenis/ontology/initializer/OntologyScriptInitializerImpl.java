@@ -10,6 +10,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.r.RScriptRegistrator;
 import org.molgenis.script.Script;
 import org.molgenis.script.ScriptParameter;
 import org.molgenis.script.ScriptType;
@@ -31,6 +32,10 @@ public class OntologyScriptInitializerImpl implements OntologyScriptInitializer
 	private static final String ROC_CURVE_SCRIPT_NAME = "roc";
 	private static final String ROC_CURVE_SCRIPT_PARAMETER = "filePath";
 	private static final Logger LOG = LoggerFactory.getLogger(OntologyScriptInitializerImpl.class);
+
+	@Autowired
+	// try if this gets the dependencies straight
+	private RScriptRegistrator registrator;
 
 	@Autowired
 	public OntologyScriptInitializerImpl(DataService dataService)

@@ -69,5 +69,10 @@
 			<artifactId>molgenis-ontology-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-r</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 	</dependencies>
 </project>
