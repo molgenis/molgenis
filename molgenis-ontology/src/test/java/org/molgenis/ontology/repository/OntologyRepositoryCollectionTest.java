@@ -16,11 +16,12 @@ import java.util.stream.StreamSupport;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.ontology.model.OntologyMetaData;
-import org.molgenis.ontology.model.OntologyTermDynamicAnnotationMetaData;
-import org.molgenis.ontology.model.OntologyTermMetaData;
-import org.molgenis.ontology.model.OntologyTermNodePathMetaData;
-import org.molgenis.ontology.model.OntologyTermSynonymMetaData;
+import org.molgenis.ontology.core.meta.OntologyMetaData;
+import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData;
+import org.molgenis.ontology.core.meta.OntologyTermMetaData;
+import org.molgenis.ontology.core.meta.OntologyTermNodePathMetaData;
+import org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData;
+import org.molgenis.ontology.importer.repository.OntologyRepositoryCollection;
 import org.molgenis.util.ResourceUtils;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.testng.annotations.BeforeClass;
