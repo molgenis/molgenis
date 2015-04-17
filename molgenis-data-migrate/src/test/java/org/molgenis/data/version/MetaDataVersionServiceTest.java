@@ -15,7 +15,6 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 
 import org.apache.commons.io.FileUtils;
-import org.mockito.Mockito;
 import org.springframework.util.FileCopyUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
