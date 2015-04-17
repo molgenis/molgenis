@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.molgenis.data.AttributeMetaData;
@@ -202,7 +203,7 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 		}
 		return result;
 	}
-	
+
 	@Override
 	public void addEntityTag(Tag<EntityMetaData, OntologyTerm, Ontology> tag)
 	{
@@ -245,7 +246,7 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 				att -> att.getString(AttributeMetaDataMetaData.NAME).equals(attribute) ? attributeEntity : att));
 		dataService.update(EntityMetaDataMetaData.ENTITY_NAME, entityEntity);
 	}
-	
+
 	private boolean isSameTag(String relationIRI, String ontologyTermIRI, Entity e)
 	{
 		return ontologyTermIRI.equals(e.getString(TagMetaData.OBJECT_IRI))
@@ -255,8 +256,9 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 	private Entity findAttributeEntity(String entityName, String attributeName)
 	{
 		Entity entityMetaDataEntity = dataService.findOne(ENTITY_NAME, entityName);
-		return stream(entityMetaDataEntity.getEntities(ATTRIBUTES).spliterator(), false)
-				.filter(att -> attributeName.equals(att.getString(AttributeMetaDataMetaData.NAME))).findFirst().get();
+		Optional<Entity> result = stream(entityMetaDataEntity.getEntities(ATTRIBUTES).spliterator(), false).filter(
+				att -> attributeName.equals(att.getString(AttributeMetaDataMetaData.NAME))).findFirst();
+		return result.isPresent() ? result.get() : null;
 	}
 
 	private <SubjectType> TagImpl<SubjectType, OntologyTerm, Ontology> asTag(SubjectType subjectType, Entity tagEntity)
