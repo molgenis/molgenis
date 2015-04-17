@@ -34,7 +34,7 @@ public class OntologyScriptInitializerImpl implements OntologyScriptInitializer
 	private static final Logger LOG = LoggerFactory.getLogger(OntologyScriptInitializerImpl.class);
 
 	@Autowired
-	// try if this gets the dependencies straight
+	// This makes sure that the R ScriptType has already been registered when we add the roc-curve.R script.
 	private RScriptRegistrator registrator;
 
 	@Autowired
