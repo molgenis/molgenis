@@ -64,6 +64,8 @@ import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.fieldtypes.BoolField;
 import org.molgenis.framework.db.EntityNotFoundException;
 import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.token.TokenExtractor;
 import org.molgenis.security.token.TokenService;
 import org.molgenis.security.token.UnknownTokenException;
@@ -776,6 +778,7 @@ public class RestController
 	 */
 	@RequestMapping(value = "/login", method = POST, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
+	@RunAsSystem
 	public LoginResponse login(@Valid @RequestBody LoginRequest login, HttpServletRequest request)
 	{
 		if (login == null)

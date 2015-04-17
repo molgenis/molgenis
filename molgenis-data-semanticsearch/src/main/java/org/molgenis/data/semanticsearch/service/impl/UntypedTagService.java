@@ -6,6 +6,7 @@ import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_NAME;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -51,8 +52,9 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 	private Entity findAttributeEntity(EntityMetaData entityMetaData, String attributeName)
 	{
 		Entity entityMetaDataEntity = dataService.findOne(ENTITY_NAME, entityMetaData.getName());
-		return stream(entityMetaDataEntity.getEntities(ATTRIBUTES).spliterator(), false)
-				.filter(att -> attributeName.equals(att.getString(AttributeMetaDataMetaData.NAME))).findFirst().get();
+		Optional<Entity> result = stream(entityMetaDataEntity.getEntities(ATTRIBUTES).spliterator(), false).filter(
+				att -> attributeName.equals(att.getString(AttributeMetaDataMetaData.NAME))).findFirst();
+		return result.isPresent() ? result.get() : null;
 	}
 
 	private Entity findEntity(EntityMetaData emd)
@@ -102,7 +104,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 	public Iterable<Tag<EntityMetaData, LabeledResource, LabeledResource>> getTagsForEntity(
 			EntityMetaData entityMetaData)
 	{
-		List<Tag<EntityMetaData, LabeledResource, LabeledResource>> tags = new ArrayList<Tag<EntityMetaData, LabeledResource, LabeledResource>>();
+		List<Tag<EntityMetaData, LabeledResource, LabeledResource>> result = new ArrayList<Tag<EntityMetaData, LabeledResource, LabeledResource>>();
 		Entity entity = findEntity(entityMetaData);
 		if (entity == null)
 		{
@@ -112,10 +114,10 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 		{
 			for (Entity tagEntity : entity.getEntities(EntityMetaDataMetaData.TAGS))
 			{
-				tags.add(TagImpl.asTag(entityMetaData, tagEntity));
+				result.add(TagImpl.asTag(entityMetaData, tagEntity));
 			}
 		}
-		return tags;
+		return result;
 	}
 
 	@Override
