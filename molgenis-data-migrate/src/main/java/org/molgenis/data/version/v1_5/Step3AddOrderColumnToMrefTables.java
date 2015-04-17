@@ -11,9 +11,9 @@ import org.molgenis.data.mysql.AsyncJdbcTemplate;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.version.MetaDataUpgrade;
+import org.molgenis.data.version.MolgenisUpgrade;
 import org.molgenis.fieldtypes.MrefField;
-import org.molgenis.security.runas.RunAsSystemProxy;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -22,7 +22,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 /**
  * Migrates MySQL MREF tables for ordinary entities from molgenis 1.4 to 1.5
  */
-public class Step3AddOrderColumnToMrefTables extends MetaDataUpgrade
+public class Step3AddOrderColumnToMrefTables extends MolgenisUpgrade
 {
 	private JdbcTemplate template;
 

@@ -115,8 +115,7 @@ public class AnnotatorController
 					// running annotator
 					try
 					{
-						Repository repo = dataService.getRepository(entityName);
-						repository = crudRepositoryAnnotator.annotate(annotator, repo, createCopy);
+						repository = crudRepositoryAnnotator.annotate(annotator, repository, createCopy);
 						entityName = repository.getName();
 						createCopy = false;
 					}

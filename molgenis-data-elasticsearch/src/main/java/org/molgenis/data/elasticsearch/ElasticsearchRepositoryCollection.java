@@ -92,11 +92,20 @@ public class ElasticsearchRepositoryCollection implements ManageableRepositoryCo
 	@Override
 	public void addAttribute(String entityName, AttributeMetaData attribute)
 	{
-		EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
+		DefaultEntityMetaData entityMetaData;
+		try
+		{
+			entityMetaData = (DefaultEntityMetaData) dataService.getEntityMetaData(entityName);
+		}
+		catch (ClassCastException ex)
+		{
+			throw new RuntimeException("Cannot cast EntityMetaData to DefaultEntityMetadata " + ex);
+		}
 		if (entityMetaData == null) throw new UnknownEntityException(String.format("Unknown entity '%s'", entityName));
 
 		try
 		{
+			entityMetaData.addAttributeMetaData(attribute);
 			searchService.createMappings(entityMetaData);
 		}
 		catch (IOException e)
@@ -108,11 +117,11 @@ public class ElasticsearchRepositoryCollection implements ManageableRepositoryCo
 	@Override
 	public void deleteAttribute(String entityName, String attributeName)
 	{
-		EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
+		EntityMetaData entityMetaData = dataService.getMeta().getEntityMetaData(entityName);
 		if (entityMetaData == null) throw new UnknownEntityException(String.format("Unknown entity '%s'", entityName));
 
-		DefaultEntityMetaData defaultEntityMetaData = new DefaultEntityMetaData(
-				dataService.getEntityMetaData(entityName));
+		DefaultEntityMetaData defaultEntityMetaData = new DefaultEntityMetaData(dataService.getMeta()
+				.getEntityMetaData(entityName));
 		AttributeMetaData attr = entityMetaData.getAttribute(attributeName);
 		if (attr == null) throw new UnknownAttributeException(String.format("Unknown attribute '%s' of entity '%s'",
 				attributeName, entityName));

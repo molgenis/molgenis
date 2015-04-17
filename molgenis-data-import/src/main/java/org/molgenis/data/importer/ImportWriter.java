@@ -25,7 +25,7 @@ import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Tag;
-import org.molgenis.data.semanticsearch.service.impl.UntypedTagService;
+import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.FieldType;
@@ -55,7 +55,7 @@ public class ImportWriter
 
 	private final DataService dataService;
 	private final PermissionSystemService permissionSystemService;
-	private final UntypedTagService tagService;
+	private final TagService<LabeledResource, LabeledResource> tagService;
 
 	/**
 	 * Creates the ImportWriter
@@ -66,7 +66,7 @@ public class ImportWriter
 	 *            {@link PermissionSystemService} to give permissions on uploaded entities
 	 */
 	public ImportWriter(DataService dataService, PermissionSystemService permissionSystemService,
-			UntypedTagService tagService)
+			TagService<LabeledResource, LabeledResource> tagService)
 	{
 		this.dataService = dataService;
 		this.permissionSystemService = permissionSystemService;

@@ -136,7 +136,7 @@ public class MolgenisUiMenuPermissionDecorator implements MolgenisUiMenu
 				break;
 			case PLUGIN:
 				String menuItemId = molgenisUiMenuItem.getId();
-				hasPermission = molgenisPermissionService.hasPermissionOnPlugin(menuItemId, Permission.COUNT);
+				hasPermission = molgenisPermissionService.hasPermissionOnPlugin(menuItemId, Permission.READ);
 				break;
 			default:
 				throw new RuntimeException("Unknown MolgenisUiMenuItem [" + molgenisUiMenuItem.getType() + "]");

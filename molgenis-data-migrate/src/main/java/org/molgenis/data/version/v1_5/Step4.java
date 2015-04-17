@@ -6,7 +6,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.version.MetaDataUpgrade;
+import org.molgenis.data.version.MolgenisUpgrade;
 import org.molgenis.fieldtypes.StringField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +17,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
  * Part of migration of MOLGENIS 1.4 to 1.5. Changes all entities having MySQL as a back-end. Attributes of FieldType
  * String are changed to TEXT.
  */
-public class Step4 extends MetaDataUpgrade
+public class Step4 extends MolgenisUpgrade
 {
 	private JdbcTemplate template;
 

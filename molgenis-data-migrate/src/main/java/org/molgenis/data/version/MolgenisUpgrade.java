@@ -1,14 +1,14 @@
 package org.molgenis.data.version;
 
 /**
- * Base class for meta data upgrade classes
+ * Base class for Molgenis upgrade steps.
  */
-public abstract class MetaDataUpgrade
+public abstract class MolgenisUpgrade
 {
 	private final int fromVersion;
 	private final int toVersion;
 
-	public MetaDataUpgrade(int fromVersion, int toVersion)
+	public MolgenisUpgrade(int fromVersion, int toVersion)
 	{
 		this.fromVersion = fromVersion;
 		this.toVersion = toVersion;

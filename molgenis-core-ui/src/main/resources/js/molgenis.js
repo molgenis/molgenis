@@ -264,7 +264,7 @@ function formatTableCellValue(rawValue, dataType, editable, nillable) {
 	}
 
 	if (typeof rawValue === 'undefined' || rawValue === null) {
-		return '<span></span>';
+		return '<span>&nbsp;</span>';
 	}
 
 	if (dataType.toLowerCase() == "hyperlink") {
