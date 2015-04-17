@@ -30,6 +30,9 @@ public class ImportWizard extends Wizard
 	private Iterable<MolgenisGroup> groups;
 	private List<String> entityNames;
 	private boolean allowPermissions;
+	private List<String> packages;
+	private List<String> entitiesInDefaultPackage;
+	private String defaultEntity;
 
 	public File getFile()
 	{
@@ -171,10 +174,40 @@ public class ImportWizard extends Wizard
 		return this.entityNames;
 	}
 
+	public List<String> getPackages()
+	{
+		return packages;
+	}
+
+	public void setPackages(List<String> packages)
+	{
+		this.packages = packages;
+	}
+
+	public List<String> getEntitiesInDefaultPackage()
+	{
+		return entitiesInDefaultPackage;
+	}
+
+	public void setEntitiesInDefaultPackage(List<String> entitiesInDefaultPackage)
+	{
+		this.entitiesInDefaultPackage = entitiesInDefaultPackage;
+	}
+
+	public String getDefaultEntity()
+	{
+		return defaultEntity;
+	}
+
+	public void setDefaultEntity(String defaultEntity)
+	{
+		this.defaultEntity = defaultEntity;
+	}
+
 	public boolean getAllowPermissions()
 	{
 		allowPermissions = SecurityUtils.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX
-                + MolgenisGroup.ENTITY_NAME.toUpperCase())
+				+ MolgenisGroup.ENTITY_NAME.toUpperCase())
 				&& SecurityUtils.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX
 						+ GroupAuthority.ENTITY_NAME.toUpperCase());
 		return allowPermissions || SecurityUtils.currentUserIsSu();

@@ -8,7 +8,6 @@ import java.util.concurrent.Executors;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.google.common.collect.Lists;
 import org.molgenis.auth.MolgenisGroup;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
@@ -25,6 +24,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
+
+import com.google.common.collect.Lists;
 
 @Component
 public class ValidationResultWizardPage extends AbstractWizardPage
@@ -91,7 +92,7 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 
 					asyncImportJobs.execute(new ImportJob(importService, SecurityContextHolder.getContext(),
 							repositoryCollection, entityDbAction, importRun.getId(), importRunService,
-							importPostProcessingService, request.getSession()));
+							importPostProcessingService, request.getSession(), importWizard.getDefaultEntity()));
 				}
 
 			}

@@ -1,5 +1,19 @@
 package org.molgenis.security.permission;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 import org.molgenis.auth.GroupAuthority;
 import org.molgenis.auth.MolgenisGroup;
 import org.molgenis.auth.MolgenisUser;
@@ -8,12 +22,14 @@ import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.importer.ImportResultsWizardPage;
 import org.molgenis.data.importer.ImportWizardController;
 import org.molgenis.data.importer.OptionsWizardPage;
+import org.molgenis.data.importer.PackageWizardPage;
 import org.molgenis.data.importer.UploadWizardPage;
 import org.molgenis.data.importer.ValidationResultWizardPage;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.security.permission.ImportWizardControllerTest.Config;
 import org.molgenis.security.user.UserAccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -29,21 +45,6 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.web.context.request.WebRequest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.molgenis.security.permission.ImportWizardControllerTest.Config;
-import static org.testng.Assert.assertEquals;
 
 /**
  * Created by charbonb on 17/03/15.
@@ -118,10 +119,13 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 		OptionsWizardPage optionsWizardPage = mock(OptionsWizardPage.class);
 		ValidationResultWizardPage validationResultWizardPage = mock(ValidationResultWizardPage.class);
 		ImportResultsWizardPage importResultsWizardPage = mock(ImportResultsWizardPage.class);
-		controller = new ImportWizardController(uploadWizardPage, optionsWizardPage, validationResultWizardPage,
-				importResultsWizardPage, dataService, grantedAuthoritiesMapper, userAccountService);
+		PackageWizardPage packageWizardPage = mock(PackageWizardPage.class);
 
-		List authorities = new ArrayList<>();
+		controller = new ImportWizardController(uploadWizardPage, optionsWizardPage, packageWizardPage,
+				validationResultWizardPage, importResultsWizardPage, dataService, grantedAuthoritiesMapper,
+				userAccountService);
+
+		List<GroupAuthority> authorities = new ArrayList<>();
 
 		MolgenisGroup group1 = new MolgenisGroup();
 		group1.setId("ID");

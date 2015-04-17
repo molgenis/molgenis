@@ -2,7 +2,14 @@ package org.molgenis.data.importer;
 
 import static org.molgenis.data.importer.ImportWizardController.URI;
 
-import com.google.common.collect.Lists;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.UUID;
+
 import org.molgenis.auth.Authority;
 import org.molgenis.auth.GroupAuthority;
 import org.molgenis.auth.MolgenisGroup;
@@ -24,20 +31,13 @@ import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMap
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.UUID;
+import com.google.common.collect.Lists;
 
 @Controller
 @RequestMapping(URI)
@@ -50,15 +50,16 @@ public class ImportWizardController extends AbstractWizardController
 	private final OptionsWizardPage optionsWizardPage;
 	private final ValidationResultWizardPage validationResultWizardPage;
 	private final ImportResultsWizardPage importResultsWizardPage;
-	private DataService dataService;
-	private GrantedAuthoritiesMapper grantedAuthoritiesMapper;
-	private UserAccountService userAccountService;
+	private final PackageWizardPage packageWizardPage;
+	private final DataService dataService;
+	private final GrantedAuthoritiesMapper grantedAuthoritiesMapper;
+	private final UserAccountService userAccountService;
 
 	@Autowired
 	public ImportWizardController(UploadWizardPage uploadWizardPage, OptionsWizardPage optionsWizardPage,
-			ValidationResultWizardPage validationResultWizardPage, ImportResultsWizardPage importResultsWizardPage,
-			DataService dataService, GrantedAuthoritiesMapper grantedAuthoritiesMapper,
-			UserAccountService userAccountService)
+			PackageWizardPage packageWizardPage, ValidationResultWizardPage validationResultWizardPage,
+			ImportResultsWizardPage importResultsWizardPage, DataService dataService,
+			GrantedAuthoritiesMapper grantedAuthoritiesMapper, UserAccountService userAccountService)
 	{
 		super(URI, "importWizard");
 		if (uploadWizardPage == null) throw new IllegalArgumentException("UploadWizardPage is null");
@@ -69,6 +70,7 @@ public class ImportWizardController extends AbstractWizardController
 		this.optionsWizardPage = optionsWizardPage;
 		this.validationResultWizardPage = validationResultWizardPage;
 		this.importResultsWizardPage = importResultsWizardPage;
+		this.packageWizardPage = packageWizardPage;
 		this.userAccountService = userAccountService;
 		this.dataService = dataService;
 		this.grantedAuthoritiesMapper = grantedAuthoritiesMapper;
@@ -80,6 +82,7 @@ public class ImportWizardController extends AbstractWizardController
 		Wizard wizard = new ImportWizard();
 		wizard.addPage(uploadWizardPage);
 		wizard.addPage(optionsWizardPage);
+		wizard.addPage(packageWizardPage);
 		wizard.addPage(validationResultWizardPage);
 		wizard.addPage(importResultsWizardPage);
 
