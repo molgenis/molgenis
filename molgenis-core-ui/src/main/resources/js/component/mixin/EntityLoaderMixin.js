@@ -46,6 +46,12 @@
 		_loadEntity: function(href) {
 			api.getAsync(href, {'expand': ['attributes']}).done(function(entity) {
 				if (this.isMounted()) {
+					var atomicAttributes = molgenis.getAtomicAttributes(entity.attributes, api);
+					
+					entity.atomicAttributes = {};
+					for (var i = 0; i < atomicAttributes.length; i++) {
+						entity.atomicAttributes[atomicAttributes[i].name] = atomicAttributes[i];
+					}
 					this._setEntity(entity);
 				}
 			}.bind(this));

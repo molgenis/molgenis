@@ -18,10 +18,10 @@
 			mode: React.PropTypes.oneOf(['create', 'edit', 'view']),
 			formLayout: React.PropTypes.oneOf(['horizontal', 'vertical']),
 			colOffset: React.PropTypes.number,
-			saveOnBlur: React.PropTypes.bool,
-			validate: React.PropTypes.bool,
+			errorMessages: React.PropTypes.object.isRequired,
 			focus: React.PropTypes.bool,
-			onValueChange: React.PropTypes.func.isRequired
+			onValueChange: React.PropTypes.func.isRequired,
+			onBlur: React.PropTypes.func.isRequired
 		},
 		getInitialState: function() {
 			return {
@@ -52,9 +52,15 @@
 					saveOnBlur: this.props.saveOnBlur,
 					validate: this.props.validate,
 					onValueChange : this.props.onValueChange,
+					onBlur: this.props.onBlur,
 					key : '' + i
 				};
 				
+				if (attr.fieldType === 'COMPOUND') {
+					controlProps['errorMessages'] = this.props.errorMessages;
+				} else {
+					controlProps['errorMessage'] = this.props.errorMessages[attr.name];
+				}
 				// IE9 does not support the autofocus attribute, focus the first visible input manually
 				if(!foundFocusControl && attr.visible === true) {
 					_.extend(controlProps, {focus: true});

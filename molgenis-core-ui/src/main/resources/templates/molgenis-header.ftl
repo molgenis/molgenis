@@ -44,6 +44,7 @@
         <script src="<@resource_href "/js/jquery.validate.min.js"/>"></script>
         <script src="<@resource_href "/js/handlebars.min.js"/>"></script>
         <script src="<@resource_href "/js/molgenis.js"/>"></script>
+        <script src="<@resource_href "/js/molgenis-script-evaluator.js"/>"></script>
     <#if environment == "development">
         <#-- Important: Update minify-maven-plugin configuration in molgenis-core-ui/pom.xml when modifying the list below -->
         <script src="<@resource_href "/js/react-with-addons.js"/>"></script>
