@@ -105,7 +105,7 @@ public class ImportWizardController extends AbstractWizardController
 		{
 			throw new RuntimeException("Current user does not belong to the requested group.");
 		}
-		String entitiesString = webRequest.getParameter("entitieIds");
+		String entitiesString = webRequest.getParameter("entityIds");
 		List<String> entities = Arrays.asList(entitiesString.split(","));
 
 		MolgenisGroup molgenisGroup = dataService.findOne(MolgenisGroup.ENTITY_NAME, groupId, MolgenisGroup.class);
@@ -174,14 +174,14 @@ public class ImportWizardController extends AbstractWizardController
 		return Lists.newArrayList(authorities);
 	}
 
-	private Permissions createPermissions(List<? extends Authority> entityAuthorities, List<String> entitieIds)
+	private Permissions createPermissions(List<? extends Authority> entityAuthorities, List<String> entityIds)
 	{
 		Permissions permissions = new Permissions();
 
-		if (entitieIds != null)
+		if (entityIds != null)
 		{
 			Map<String, String> entityClassMap = new TreeMap<String, String>();
-			for (String entityClassId : entitieIds)
+			for (String entityClassId : entityIds)
 			{
 				entityClassMap.put(entityClassId, entityClassId);
 			}
