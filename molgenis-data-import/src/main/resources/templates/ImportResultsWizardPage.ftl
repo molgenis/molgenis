@@ -96,7 +96,7 @@
 	                        $.ajax({
 	                            url: "${context_url?html}/entityclass/group/" + $('#entity-class-group-select').val(),
 	                            type: 'GET',
-	                            data: {entitieIds: importRun.importedEntities},
+	                            data: {entityIds: importRun.importedEntities},
 	                            success: function (data) {
 	                                $('.permission-table-container tbody').empty().html(createGroupPermissionTable(data));
 	                            }
