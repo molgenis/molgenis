@@ -23,16 +23,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-public class Step6UpgradeMetaDataTo1_6 extends MolgenisUpgrade
+public class Step7UpgradeMetaDataTo1_6 extends MolgenisUpgrade
 {
-	private static final Logger LOG = LoggerFactory.getLogger(Step6UpgradeMetaDataTo1_6.class);
+	private static final Logger LOG = LoggerFactory.getLogger(Step7UpgradeMetaDataTo1_6.class);
 	private final JdbcTemplate jdbcTemplate;
 	private final DataSource dataSource;
 	private final SearchService searchService;
 
-	public Step6UpgradeMetaDataTo1_6(DataSource dataSource, SearchService searchService)
+	public Step7UpgradeMetaDataTo1_6(DataSource dataSource, SearchService searchService)
 	{
-		super(5, 6);
+		super(6, 7);
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 		this.dataSource = dataSource;
 		this.searchService = searchService;

@@ -63,8 +63,8 @@ public class StandardsRegistryController extends MolgenisPluginController
 
 	@Autowired
 	public StandardsRegistryController(DataService dataService, MetaDataService metaDataService,
-			MolgenisPermissionService molgenisPermissionService,
-			TagService<LabeledResource, LabeledResource> tagService, MetaDataSearchService metaDataSearchService)
+			MolgenisPermissionService molgenisPermissionService, TagService<LabeledResource, LabeledResource> tagService,
+			MetaDataSearchService metaDataSearchService)
 	{
 		super(URI);
 		if (dataService == null) throw new IllegalArgumentException("dataService is null");

@@ -65,8 +65,8 @@ public class AnnotatorController
 	@Autowired
 	PermissionSystemService permissionSystemService;
 
-    @Autowired
-    UserAccountService userAccountService;
+	@Autowired
+	UserAccountService userAccountService;
 
 	/**
 	 * Gets a map of all available annotators.

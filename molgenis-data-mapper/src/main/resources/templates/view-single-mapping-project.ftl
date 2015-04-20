@@ -46,7 +46,7 @@
  				</tr>
  			</thead>
  			<tbody>
-				<#list mappingProject.getMappingTarget(selectedTarget).target.attributes as attribute>
+				<#list mappingProject.getMappingTarget(selectedTarget).target.getAtomicAttributes().iterator() as attribute>
 					<#if !attribute.isIdAtrribute()>
 						<tr>
 							<td>
