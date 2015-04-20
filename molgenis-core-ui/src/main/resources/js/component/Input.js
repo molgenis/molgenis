@@ -98,13 +98,6 @@
 				if(this.props.maxLength) {
 					value = value.substr(0, this.props.maxLength);
 				}
-				
-				// number change event with invalid number value (e.g. '1abc') will trigger a change event with value '',
-				// use input validation status to determine is the value was cleared or if we are dealing with an invalid value.
-				// Note: this does not apply to IE9 which does not support the input number type and the validation API.
-				if(this.props.type === 'number' && event.target.validity && event.target.validity.badInput === true) {
-					value = this.state.value;
-				}
 				newState = {value: value};
 			}
 			this.setState(newState);
