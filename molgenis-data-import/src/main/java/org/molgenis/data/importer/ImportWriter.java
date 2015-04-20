@@ -25,11 +25,12 @@ import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Tag;
-import org.molgenis.data.semanticsearch.service.impl.UntypedTagService;
+import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.framework.db.EntityImportReport;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.DependencyResolver;
@@ -55,7 +56,7 @@ public class ImportWriter
 
 	private final DataService dataService;
 	private final PermissionSystemService permissionSystemService;
-	private final UntypedTagService tagService;
+	private final TagService<LabeledResource, LabeledResource> tagService;
 
 	/**
 	 * Creates the ImportWriter
@@ -66,7 +67,7 @@ public class ImportWriter
 	 *            {@link PermissionSystemService} to give permissions on uploaded entities
 	 */
 	public ImportWriter(DataService dataService, PermissionSystemService permissionSystemService,
-			UntypedTagService tagService)
+			TagService<LabeledResource, LabeledResource> tagService)
 	{
 		this.dataService = dataService;
 		this.permissionSystemService = permissionSystemService;
@@ -76,7 +77,10 @@ public class ImportWriter
 	@Transactional
 	public EntityImportReport doImport(EmxImportJob job)
 	{
-		importTags(job.source);
+		RunAsSystemProxy.runAsSystem(() -> {
+			importTags(job.source);
+			return null;
+		});
 		importPackages(job.parsedMetaData);
 		addEntityMetaData(job.parsedMetaData, job.report, job.metaDataChanges);
 		addEntityPermissions(job.metaDataChanges);
@@ -238,6 +242,7 @@ public class ImportWriter
 	/**
 	 * Imports the tags from the tag sheet.
 	 */
+	// FIXME: can everybody always update a tag?
 	private void importTags(RepositoryCollection source)
 	{
 		Repository tagRepo = source.getRepository(TagMetaData.ENTITY_NAME);
@@ -553,7 +558,7 @@ public class ImportWriter
 		@Override
 		public Iterable<Entity> getEntities(String attributeName)
 		{
-			return from(super.getEntities(attributeName)).filter(notNull());
+			return from((Iterable<Entity>) super.getEntities(attributeName)).filter(notNull());
 		}
 	}
 }

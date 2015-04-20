@@ -2,7 +2,8 @@ package org.molgenis.data.importer;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.mysql.EmxImportServiceRegistrator;
-import org.molgenis.data.semanticsearch.service.impl.UntypedTagService;
+import org.molgenis.data.semantic.LabeledResource;
+import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -16,7 +17,7 @@ public class ImporterConfiguration
 	@Autowired
 	private PermissionSystemService permissionSystemService;
 	@Autowired
-	private UntypedTagService tagService;
+	private TagService<LabeledResource, LabeledResource> tagService;
 	@Autowired
 	private ImportServiceFactory importServiceFactory;
 

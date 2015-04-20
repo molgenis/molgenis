@@ -229,7 +229,12 @@
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-data-migrate</artifactId>
-			<version>1.6.0-SNAPSHOT</version>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-scripts</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 </project>

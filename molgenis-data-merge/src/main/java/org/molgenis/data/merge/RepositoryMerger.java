@@ -300,7 +300,7 @@ public class RepositoryMerger
 				.getEnumType());
 		result.setDescription(attributeMetaData.getDescription());
 		result.setNillable(true);// We got a problem if a attr is required in one entitymeta and missing in another
-		result.setReadOnly(attributeMetaData.isReadonly());
+		result.setReadOnly(false);
 		result.setDefaultValue(attributeMetaData.getDefaultValue());
 		result.setLookupAttribute(attributeMetaData.isLookupAttribute());
 		result.setRefEntity(attributeMetaData.getRefEntity());

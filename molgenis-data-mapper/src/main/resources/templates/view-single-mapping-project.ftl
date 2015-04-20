@@ -2,7 +2,7 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=['mapping-service.css']>
-<#assign js=['single-mapping-project.js', 'bootbox.min.js', 'jquery.scroll.table.body.js']>
+<#assign js=['single-mapping-project.js', 'bootbox.min.js', 'jquery/scrollTableBody/jquery.scrollTableBody-1.0.0.js']>
 
 <@header css js/>
 
@@ -46,7 +46,7 @@
  				</tr>
  			</thead>
  			<tbody>
-				<#list mappingProject.getMappingTarget(selectedTarget).target.attributes as attribute>
+				<#list mappingProject.getMappingTarget(selectedTarget).target.getAtomicAttributes().iterator() as attribute>
 					<#if !attribute.isIdAtrribute()>
 						<tr>
 							<td>

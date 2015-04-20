@@ -16,23 +16,23 @@ import org.molgenis.data.mysql.AsyncJdbcTemplate;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.version.MetaDataUpgrade;
-import org.molgenis.security.runas.RunAsSystemProxy;
+import org.molgenis.data.version.MolgenisUpgrade;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-public class Step5UpgradeMetaDataTo1_6 extends MetaDataUpgrade
+public class Step7UpgradeMetaDataTo1_6 extends MolgenisUpgrade
 {
-	private static final Logger LOG = LoggerFactory.getLogger(Step5UpgradeMetaDataTo1_6.class);
+	private static final Logger LOG = LoggerFactory.getLogger(Step7UpgradeMetaDataTo1_6.class);
 	private final JdbcTemplate jdbcTemplate;
 	private final DataSource dataSource;
 	private final SearchService searchService;
 
-	public Step5UpgradeMetaDataTo1_6(DataSource dataSource, SearchService searchService)
+	public Step7UpgradeMetaDataTo1_6(DataSource dataSource, SearchService searchService)
 	{
-		super(4, 5);
+		super(6, 7);
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 		this.dataSource = dataSource;
 		this.searchService = searchService;
@@ -41,7 +41,7 @@ public class Step5UpgradeMetaDataTo1_6 extends MetaDataUpgrade
 	@Override
 	public void upgrade()
 	{
-		LOG.info("Updating metadata from version 4 to 5");
+		LOG.info("Updating metadata from version 6 to 7");
 		List<String> sqls = Arrays.asList("ALTER TABLE attributes ADD COLUMN visibleExpression TEXT",
 				"ALTER TABLE attributes ADD COLUMN validationExpression TEXT");
 

@@ -24,7 +24,6 @@ public class ImportServiceFactory
 		importServices.add(importService);
 		Collections.sort(importServices, OrderComparator.INSTANCE);
 	}
-	
 
 	/**
 	 * Finds a suitable ImportService for a FileRepositoryCollection.
@@ -38,25 +37,24 @@ public class ImportServiceFactory
 	 */
 	public ImportService getImportService(File file, RepositoryCollection source)
 	{
-		final Map<String, ImportService> importServicesImportableMapedToExtensions = Maps.newHashMap();
+		final Map<String, ImportService> importServicesMappedToExtensions = Maps.newHashMap();
 		for (ImportService importService : importServices)
 		{
 			if (importService.canImport(file, source))
 			{
 				for (String extension : importService.getSupportedFileExtensions())
 				{
-					importServicesImportableMapedToExtensions.put(extension.toLowerCase(), importService);
+					importServicesMappedToExtensions.put(extension.toLowerCase(), importService);
 				}
 			}
 		}
 
 		String extension = FileExtensionUtils.findExtensionFromPossibilities(file.getName(),
-				importServicesImportableMapedToExtensions.keySet());
+				importServicesMappedToExtensions.keySet());
 
-		final ImportService importService = importServicesImportableMapedToExtensions.get(extension);
+		final ImportService importService = importServicesMappedToExtensions.get(extension);
 
-		if (importService == null)
-			throw new MolgenisDataException("Can not import file. No suitable importer found");
+		if (importService == null) throw new MolgenisDataException("Can not import file. No suitable importer found");
 
 		return importService;
 	}

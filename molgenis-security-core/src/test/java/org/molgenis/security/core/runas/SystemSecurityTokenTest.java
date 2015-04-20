@@ -1,8 +1,9 @@
-package org.molgenis.security.runas;
+package org.molgenis.security.core.runas;
 
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.testng.annotations.Test;
 
