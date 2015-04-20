@@ -331,7 +331,7 @@
         		if(start > idx) {
         			DescriptionParts.push(span({key: '' + keyIdx++}, text.substr(idx, start)));
         		}
-        		DescriptionParts.push(a({href: url, key: '' + keyIdx++}, url));
+        		DescriptionParts.push(a({href: url, target: '_blank', key: '' + keyIdx++}, url));
         		
         		idx = end;
         		return url;
