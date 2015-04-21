@@ -951,10 +951,49 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	public void delete(Iterable<? extends Entity> entities)
 	{
 		// todo, split in subbatchs
-		final List<Object> batch = new ArrayList<Object>();
+		final List<Object> deleteByIdBatch = new ArrayList<Object>();
+		
+		this.resetXrefValuesBySelfReference(entities);
+
 		for (Entity e : entities)
-			batch.add(e.getIdValue());
-		this.deleteById(batch);
+		{
+			deleteByIdBatch.add(e.getIdValue());
+		}
+		this.deleteById(deleteByIdBatch);
+	}
+
+	/**
+	 * Use before a delete action of a entity with XREF data type where the entity and refEntity are the same entities.
+	 * 
+	 * @param entities
+	 */
+	private void resetXrefValuesBySelfReference(Iterable<? extends Entity> entities)
+	{
+		List<String> xrefAttributesWithSelfReference = new ArrayList<String>();
+		for (AttributeMetaData attributeMetaData : getEntityMetaData().getAttributes())
+		{
+			if (attributeMetaData.getDataType().getEnumType().equals(FieldTypeEnum.XREF) &&
+				getEntityMetaData().getName().equals(attributeMetaData.getRefEntity().getName()))
+			{
+				xrefAttributesWithSelfReference.add(attributeMetaData.getName());
+			}
+		}
+
+		final List<Entity> updateBatch = new ArrayList<Entity>();
+		for (Entity e : entities)
+		{
+			for (String attributeName : xrefAttributesWithSelfReference)
+			{
+				Entity en = e.getEntity(attributeName);
+				if (null != en)
+				{
+					en.set(attributeName, null);
+					updateBatch.add(en);
+					break;
+				}
+			}
+		}
+		this.update(updateBatch);
 	}
 
 	public String getDeleteSql()
@@ -977,7 +1016,9 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	{
 		final List<Object> idList = new ArrayList<Object>();
 		for (Object id : ids)
+		{
 			idList.add(id);
+		}
 
 		jdbcTemplate.batchUpdate(getDeleteSql(), new BatchPreparedStatementSetter()
 		{

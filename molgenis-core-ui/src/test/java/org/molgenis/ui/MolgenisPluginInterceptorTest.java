@@ -148,10 +148,10 @@ public class MolgenisPluginInterceptorTest
 	public void postHandleWithAppTrackingCode() throws Exception
 	{
 		MolgenisSettings settings = mock(MolgenisSettings.class);
-		when(settings.getProperty(AppTrackingCode.KEY_APP_TRACKING_CODE_PIWIK)).thenReturn(
-				"alert('key_app_tracking_code_piwik');");
-		when(settings.getProperty(AppTrackingCode.KEY_APP_TRACKING_CODE_GOOGLEANALYTICS)).thenReturn(
-				"alert('key_app_tracking_code_googleanalytics');");
+		when(settings.getProperty(AppTrackingCode.KEY_APP_TRACKING_CODE_FOOTER)).thenReturn(
+				"alert('key_app_tracking_code_footer');");
+		when(settings.getProperty(AppTrackingCode.KEY_APP_TRACKING_CODE_HEADER)).thenReturn(
+				"alert('key_app_tracking_code_header');");
 		MolgenisPluginInterceptor molgenisPluginInterceptor = new MolgenisPluginInterceptor(molgenisUi, settings);
 		String uri = MolgenisPluginController.PLUGIN_URI_PREFIX + "app_tracking_code";
 
@@ -165,8 +165,8 @@ public class MolgenisPluginInterceptorTest
 		ModelAndView modelAndView = new ModelAndView();
 		molgenisPluginInterceptor.postHandle(mockHttpServletRequest, null, handlerMethod, modelAndView);
 		
-		AppTrackingCodeImpl appTrackingCodeResult = new AppTrackingCodeImpl("alert('key_app_tracking_code_piwik');",
-				"alert('key_app_tracking_code_googleanalytics');");
+		AppTrackingCodeImpl appTrackingCodeResult = new AppTrackingCodeImpl("alert('key_app_tracking_code_footer');",
+				"alert('key_app_tracking_code_header');");
 		assertEquals(modelAndView.getModel().get(MolgenisPluginInterceptor.APP_TRACKING_CODE_VARIABLE),
 				appTrackingCodeResult);
 	}

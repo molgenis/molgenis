@@ -18,6 +18,8 @@ public interface Query extends Iterable<Entity>
 
 	Iterable<Entity> findAll();
 
+	Entity findOne();
+
 	/**
 	 * Filtering rules, seperated by QueryRule.AND and QueryRule.OR clauses
 	 */

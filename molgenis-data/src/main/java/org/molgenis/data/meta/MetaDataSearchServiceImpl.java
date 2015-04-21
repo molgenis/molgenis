@@ -9,6 +9,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Package;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,6 +29,7 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 	}
 
 	@Override
+	@RunAsSystem
 	public List<PackageSearchResultItem> findRootPackages(String searchTerm)
 	{
 		List<PackageSearchResultItem> results = Lists.newArrayList();

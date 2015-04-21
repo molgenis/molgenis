@@ -26,7 +26,7 @@ import org.molgenis.framework.db.WebAppDatabasePopulatorService;
 import org.molgenis.security.MolgenisSecurityWebAppDatabasePopulatorService;
 import org.molgenis.security.account.AccountService;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.security.runas.RunAsSystem;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.system.core.RuntimeProperty;
 import org.molgenis.ui.MolgenisInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -135,6 +135,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 				String.valueOf(DataExplorerController.DEFAULT_VAL_AGGREGATES_DISTINCT_HIDE));
 
 		runtimePropertyMap.put(MolgenisInterceptor.I18N_LOCALE, "en");
+		runtimePropertyMap.put(MolgenisInterceptor.APP_HREF_LOGO, "/img/logo_molgenis_small.png");
 
 		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_CHROM, "CHROM,#CHROM,chromosome");
 		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_POS, "POS,start_nucleotide");

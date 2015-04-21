@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.molgenis.AppConfig;
+import org.molgenis.MysqlTestConfig;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
@@ -31,7 +31,7 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.Lists;
 
-@ContextConfiguration(classes = AppConfig.class)
+@ContextConfiguration(classes = MysqlTestConfig.class)
 public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired

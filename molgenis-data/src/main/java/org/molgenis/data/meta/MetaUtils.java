@@ -36,7 +36,7 @@ public class MetaUtils
 					throw new MolgenisDataException(
 							"Changing existing attributes is not currently supported. You tried to alter attribute ["
 									+ attr.getName() + "] of entity [" + entityMeta.getName()
-									+ "]. Only adding of new atrtibutes to existing entities is supported.");
+									+ "]. Only adding of new attributes to existing entities is supported.");
 				}
 			}
 			else if (!attr.isNillable())

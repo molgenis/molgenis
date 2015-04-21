@@ -104,7 +104,7 @@ public class RScriptRunner implements ScriptRunner
 	@Override
 	public String runScript(Script script, Map<String, Object> parameters)
 	{
-		File rScriptFile = script.generateScript(fileStore, "r", parameters);
+		File rScriptFile = script.generateScript(fileStore, "R", parameters);
 
 		StringROutputHandler handler = new StringROutputHandler();
 		runRScript(rScriptFile, handler);
@@ -125,7 +125,7 @@ public class RScriptRunner implements ScriptRunner
 
 	private String generateRandomRScriptName()
 	{
-		return UUID.randomUUID().toString().replaceAll("-", "") + ".r";
+		return UUID.randomUUID().toString().replaceAll("-", "") + ".R";
 	}
 
 }

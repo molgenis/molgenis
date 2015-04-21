@@ -9,7 +9,7 @@
     </parent>
     <groupId>org.molgenis</groupId>
     <artifactId>molgenis</artifactId>
-    <version>1.5.0-SNAPSHOT</version>
+    <version>1.6.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <!-- More Project Information -->
@@ -524,6 +524,7 @@
                                 <goal>minify</goal>
                             </goals>
                             <configuration>
+                                <charset>UTF-8</charset>
                                 <webappSourceDir>${project.basedir}/src/main/resources</webappSourceDir>
                                 <webappTargetDir>${project.build.directory}/generated-resources</webappTargetDir>
                                 <cssSourceIncludes>
@@ -532,6 +533,7 @@
                                 <cssSourceExcludes>
                                     <!-- changes to excludes must be applied to molgenis-core-ui/src/main/resources/templates/resource-macros.ftl -->
                                     <cssSourceExclude>**/*.min.css</cssSourceExclude>
+                                    <cssSourceExclude>**/*-min.css</cssSourceExclude>
                                 </cssSourceExcludes>
                                 <jsSourceIncludes>
                                     <jsSourceInclude>**/*.js</jsSourceInclude>
@@ -539,6 +541,7 @@
                                 <jsSourceExcludes>
                                     <!-- changes to excludes must be applied to molgenis-core-ui/src/main/resources/templates/resource-macros.ftl -->
                                     <jsSourceExclude>**/*.min.js</jsSourceExclude>
+                                    <cssSourceExclude>**/*-min.js</cssSourceExclude>
                                     <jsSourceExclude>**/src-min-noconflict/**</jsSourceExclude>
                                 </jsSourceExcludes>
                                 <nosuffix>false</nosuffix>
@@ -727,6 +730,7 @@
         <module>molgenis-data-rest</module>
         <module>molgenis-data-elasticsearch</module>
         <module>molgenis-data-semanticsearch</module>
+        <module>molgenis-data-validation</module>
         <module>molgenis-python</module>
         <module>molgenis-r</module>
         <module>molgenis-charts</module>
@@ -741,5 +745,6 @@
         <module>molgenis-data-mapper</module>
         <module>molgenis-pathways</module>
         <module>molgenis-data-rest-client</module>
+	<module>molgenis-data-migrate</module>
     </modules>
 </project>

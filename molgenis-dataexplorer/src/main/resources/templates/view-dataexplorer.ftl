@@ -2,34 +2,22 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=[
-	"jquery.bootstrap.wizard.css",
-	"bootstrap-datetimepicker.min.css",
 	"jquery.molgenis.tree.css",
 	"ui.fancytree.min.css",
-	"jquery-ui-1.9.2.custom.min.css",
-	"select2.css",
-	"iThing-min.css",
 	"bootstrap-switch.min.css",
 	"dataexplorer.css",
 	"dataexplorer-filter.css",
 	"diseasematcher.css"]>
 <#assign js=[
-	"ace/src-min-noconflict/ace.js",
-	"jquery-ui-1.9.2.custom.min.js",
-	"jquery.bootstrap.wizard.min.js",
-	"moment-with-locales.min.js",
-	"bootstrap-datetimepicker.min.js",
+    "jquery.bootstrap.wizard.min.js",
 	"dataexplorer-filter.js",
 	"dataexplorer-filter-dialog.js",
 	"dataexplorer-filter-wizard.js",
 	"jquery.fancytree.min.js",
 	"jquery.molgenis.tree.js",
-	"select2-patched.js",
-	"jQEditRangeSlider-min.js",
 	"bootstrap-switch.min.js",
 	"jquery.molgenis.xrefmrefsearch.js",
 	"dataexplorer.js",
-	"jquery.molgenis.table.js",
 	"bootbox.min.js"]>
 
 <@header css js/>
@@ -56,7 +44,15 @@
                 <#if isAdmin?has_content && isAdmin>
 		            <div class="row">
 		            	<div class="col-md-1">
-		            		<a id="delete" class="btn btn-danger">Delete</a>
+		            		<div class="dropdown">
+                                <button class="btn btn-danger dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+                                    Delete <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                                    <li role="presentation"><a role="menuitem" tabindex="-1" href="#" id="delete-data-btn">Data</a></li>
+                                    <li role="presentation"><a role="menuitem" tabindex="-1" href="#" id="delete-data-metadata-btn">Data and meta data</a></li>
+                                </ul>
+                            </div>
 		            	</div>
 		            </div>
             	</#if>

@@ -1,6 +1,10 @@
 package org.molgenis.data.importer;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.molgenis.framework.db.EntitiesValidationReport;
 
@@ -23,15 +27,17 @@ public class EntitiesValidationReportImpl implements EntitiesValidationReport
 	private final Map<String, Collection<String>> fieldsAvailable;
 	/** import order of the sheets */
 	private final List<String> importOrder;
+	private final List<String> packages;
 
 	public EntitiesValidationReportImpl()
 	{
-		this.sheetsImportable = new LinkedHashMap<String, Boolean>();
-		this.fieldsImportable = new LinkedHashMap<String, Collection<String>>();
-		this.fieldsUnknown = new LinkedHashMap<String, Collection<String>>();
-		this.fieldsRequired = new LinkedHashMap<String, Collection<String>>();
-		this.fieldsAvailable = new LinkedHashMap<String, Collection<String>>();
-		importOrder = new ArrayList<String>();
+		this.sheetsImportable = new LinkedHashMap<>();
+		this.fieldsImportable = new LinkedHashMap<>();
+		this.fieldsUnknown = new LinkedHashMap<>();
+		this.fieldsRequired = new LinkedHashMap<>();
+		this.fieldsAvailable = new LinkedHashMap<>();
+		importOrder = new ArrayList<>();
+		packages = new ArrayList<>();
 	}
 
 	@Override
@@ -87,5 +93,11 @@ public class EntitiesValidationReportImpl implements EntitiesValidationReport
 			}
 		}
 		return ok;
+	}
+
+	@Override
+	public List<String> getPackages()
+	{
+		return packages;
 	}
 }

@@ -168,6 +168,18 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 			{
 				throw new UnsupportedOperationException();
 			}
+
+			@Override
+			public String getVisibleExpression()
+			{
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public String getValidationExpression()
+			{
+				throw new UnsupportedOperationException();
+			}
 		}).skip(1);
 	}
 
@@ -267,6 +279,19 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 		}
 
 		return getIdAttribute();
+	}
+
+	@Override
+	public Iterable<AttributeMetaData> getLookupAttributes()
+	{
+		return Iterables.filter(getAttributesTraverser(), new Predicate<AttributeMetaData>()
+		{
+			@Override
+			public boolean apply(AttributeMetaData attribute)
+			{
+				return attribute.isLookupAttribute();
+			}
+		});
 	}
 
 	public void setLabelAttribute(String name)

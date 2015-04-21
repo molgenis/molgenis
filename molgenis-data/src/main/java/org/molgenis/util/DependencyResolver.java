@@ -154,7 +154,6 @@ public class DependencyResolver
 		}
 
 		// You can't have a self reference if you provide id'ds. So we have id's
-
 		Map<Object, Entity> entitiesById = Maps.newHashMap();
 
 		// All self-references of an entity
