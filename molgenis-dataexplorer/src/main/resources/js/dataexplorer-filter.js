@@ -684,7 +684,7 @@
 						
 						// Validate that to > from
 						if(attribute.fieldType === 'DECIMAL' || attribute.fieldType === 'INT' || attribute.fieldType === 'LONG') {
-							if(parseFloat(toValue) <= parseFloat(fromValue)) {
+							if(parseFloat(toValue) < parseFloat(fromValue)) {
 								toValue = undefined;
 							} 
 						}
