@@ -20,13 +20,4 @@
 	<div id="form-holder" data-name="${questionnair.name!?url('UTF-8')}" data-id="${questionnair.id!}" class="col-md-6"></div>
 </div>
 
-<#if questionnair.status != 'SUBMITTED'>
-	<div class="row buttons">
-		<div class="col-md-6">
-			<a type="button" id="submit-button" class="btn btn-success pull-right"><span class="glyphicon glyphicon-play"></span> Submit questionnaire</a>
-			<a type="button" href="/menu/main/questionnaires" class="btn btn-primary pull-right">Continue later</a>
-		</div>
-	</div>
-</#if>
-
 <@footer />

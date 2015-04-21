@@ -9,7 +9,13 @@
     	displayName: 'Questionnaire',
     	propTypes: {
     		entity: React.PropTypes.string.isRequired,
-    		entityInstance: React.PropTypes.string.isRequired
+    		entityInstance: React.PropTypes.string.isRequired,
+    		onContinueLaterClick: React.PropTypes.func
+    	},
+    	getDefaultProps: function() {
+    		return {
+    			onContinueLaterClick: function() {}
+    		};
     	},
     	getInitialState: function() {
 			return {
@@ -23,13 +29,14 @@
 			}
 			
     		// a edit form with save-on-blur doesn't have a submit button 
-    		var SubmitButton = (
+    		var QuestionnaireButtons = this.state.entityInstance.status !== 'SUBMITTED' ? (
     			div({className: 'row', style: {textAlign: 'right'}},
 					div({className: 'col-md-12'},
-						molgenis.ui.Button({type: 'submit', style: 'primary', text: 'Submit'})
+						molgenis.ui.Button({text: 'Save and Continue Later', onClick: this.props.onContinueLaterClick}),
+						molgenis.ui.Button({type: 'submit', style: 'primary', css: {marginLeft: 5}, text: 'Submit'})
 					)
 				)
-			);
+			) : null;
 			
     		var Form = molgenis.ui.Form({
     			entity: this.state.entity,
@@ -42,7 +49,7 @@
     	        enableFormIndex: true,
     	        beforeSubmit: this._handleBeforeSubmit,
     	        onValueChange: this._handleValueChange
-    	    }, SubmitButton); 
+    	    }, QuestionnaireButtons); 
     		
     		return div(null,
     			Form
