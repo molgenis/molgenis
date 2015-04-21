@@ -344,9 +344,6 @@ public class MappingServiceController extends MolgenisPluginController
 		model.addAttribute("suggestedAttributes", suggestedAttributes);
 		model.addAttribute("hasWritePermission", hasWritePermission(project, false));
 
-		// intersect suggestedAttributes entityMapping.sourceEntityMetaData.attributes
-
-		// suggestedAttributes.forEach(entity -> System.out.println(entity.getString(AttributeMetaDataMetaData.LABEL)));
 		return VIEW_ATTRIBUTE_MAPPING;
 	}
 
