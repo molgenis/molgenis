@@ -92,7 +92,8 @@
 			query : {
 				rules : [entityQuery.q]
 			},
-			colNames : $('input[name=colNames]:checked').val()
+			colNames : $('input[name=colNames]:checked').val(),
+			downloadType : $('input[name=downloadTypes]:checked').val()
 		};
 
 		dataRequest.query.sort = $('#data-table-container').table('getSort');
