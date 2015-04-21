@@ -92,9 +92,9 @@ public class QuestionnairePluginController extends MolgenisPluginController
 			dataService.update(name, entity);
 		}
 
-		model.addAttribute("questionnair", toQuestionnaireModel(entity, emd));
+		model.addAttribute("questionnaire", toQuestionnaireModel(entity, emd));
 
-		return "view-questionnair";
+		return "view-questionnaire";
 	}
 
 	@RequestMapping("/{name}/thanks")
