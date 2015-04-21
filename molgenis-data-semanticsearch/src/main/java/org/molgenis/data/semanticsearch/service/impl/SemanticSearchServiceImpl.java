@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.collect.Iterables;
+import org.elasticsearch.common.collect.Lists;
 import org.elasticsearch.common.collect.Sets;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -82,7 +83,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 
 		QueryRule createDisMaxQueryRule = createDisMaxQueryRule(targetEntityMetaData, targetAttribute);
 
-		List<QueryRule> disMaxQueryRules = Arrays.asList(new QueryRule(AttributeMetaDataMetaData.IDENTIFIER,
+		List<QueryRule> disMaxQueryRules = Lists.newArrayList(new QueryRule(AttributeMetaDataMetaData.IDENTIFIER,
 				Operator.IN, attributeIdentifiers));
 
 		if (createDisMaxQueryRule.getNestedRules().size() > 0)
