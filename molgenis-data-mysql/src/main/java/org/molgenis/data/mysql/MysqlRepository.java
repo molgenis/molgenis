@@ -318,6 +318,9 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				.equals(FieldTypeEnum.STRING) ? VARCHAR : att.getRefEntity().getIdAttribute().getDataType()
 				.getMysqlType());
 
+		// mysql TEXT fields cannot be UNIQUE, so check for that too
+		// TODO
+
 		sql.append(" CREATE TABLE ").append('`').append(getTableName()).append('_').append(att.getName()).append('`')
 				.append("(`order` INT,`").append(idAttribute.getName()).append('`').append(' ').append(idAttrMysqlType)
 				.append(" NOT NULL, ").append('`').append(att.getName()).append('`').append(' ')
@@ -452,11 +455,15 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 			}
 			else
 			{
-				// id attributes can not be of type TEXT so we'll change it to VARCHAR
 				if (att == getEntityMetaData().getIdAttribute()
-						&& getEntityMetaData().getIdAttribute().getDataType().getEnumType()
-								.equals(FieldTypeEnum.STRING))
+						&& att.getDataType().getEnumType().equals(FieldTypeEnum.STRING))
 				{
+					// id attributes can not be of type TEXT so we'll change it to VARCHAR
+					sql.append(VARCHAR);
+				}
+				else if (att.isUnique() && att.getDataType().getEnumType().equals(FieldTypeEnum.STRING))
+				{
+					// mysql TEXT fields cannot be UNIQUE, so use VARCHAR instead
 					sql.append(VARCHAR);
 				}
 				else
@@ -952,7 +959,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	{
 		// todo, split in subbatchs
 		final List<Object> deleteByIdBatch = new ArrayList<Object>();
-		
+
 		this.resetXrefValuesBySelfReference(entities);
 
 		for (Entity e : entities)
@@ -972,8 +979,8 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		List<String> xrefAttributesWithSelfReference = new ArrayList<String>();
 		for (AttributeMetaData attributeMetaData : getEntityMetaData().getAttributes())
 		{
-			if (attributeMetaData.getDataType().getEnumType().equals(FieldTypeEnum.XREF) &&
-				getEntityMetaData().getName().equals(attributeMetaData.getRefEntity().getName()))
+			if (attributeMetaData.getDataType().getEnumType().equals(FieldTypeEnum.XREF)
+					&& getEntityMetaData().getName().equals(attributeMetaData.getRefEntity().getName()))
 			{
 				xrefAttributesWithSelfReference.add(attributeMetaData.getName());
 			}
