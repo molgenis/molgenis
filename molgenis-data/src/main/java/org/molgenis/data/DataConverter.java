@@ -101,7 +101,7 @@ public class DataConverter
 			return sb.toString();
 		}
 
-		if (conversionService == null) return source.toString();
+		if (getConversionService() == null) return source.toString();
 		return convert(source, String.class);
 	}
 

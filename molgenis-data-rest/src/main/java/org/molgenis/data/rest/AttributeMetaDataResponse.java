@@ -24,6 +24,7 @@ public class AttributeMetaDataResponse
 	private final String description;
 	private final List<?> attributes;
 	private final List<String> enumOptions;
+	private final Long maxLength;
 	private final Object refEntity;
 	private final Boolean auto;
 	private final Boolean nillable;
@@ -90,6 +91,12 @@ public class AttributeMetaDataResponse
 		}
 		else this.enumOptions = null;
 
+		if (attributesSet == null || attributesSet.contains("maxLength".toLowerCase()))
+		{
+			this.maxLength = attr.getDataType().getMaxLength();
+		}
+		else this.maxLength = null;
+
 		if (attributesSet == null || attributesSet.contains("expression".toLowerCase()))
 		{
 			this.expression = attr.getExpression();
@@ -102,8 +109,8 @@ public class AttributeMetaDataResponse
 			if (attributeExpandsSet != null && attributeExpandsSet.containsKey("refEntity".toLowerCase()))
 			{
 				Set<String> subAttributesSet = attributeExpandsSet.get("refEntity".toLowerCase());
-				this.refEntity = refEntity != null ? new EntityMetaDataResponse(refEntity, subAttributesSet, null,
-						permissionService) : null;
+				this.refEntity = refEntity != null ? new EntityMetaDataResponse(refEntity, subAttributesSet,
+						Collections.singletonMap("attributes".toLowerCase(), null), permissionService) : null;
 			}
 			else
 			{

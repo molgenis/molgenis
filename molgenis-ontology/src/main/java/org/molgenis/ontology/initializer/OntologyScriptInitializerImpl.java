@@ -10,10 +10,11 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.r.RScriptRegistrator;
 import org.molgenis.script.Script;
 import org.molgenis.script.ScriptParameter;
 import org.molgenis.script.ScriptType;
-import org.molgenis.security.runas.RunAsSystem;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,10 @@ public class OntologyScriptInitializerImpl implements OntologyScriptInitializer
 	private static final Logger LOG = LoggerFactory.getLogger(OntologyScriptInitializerImpl.class);
 
 	@Autowired
+	// This makes sure that the R ScriptType has already been registered when we add the roc-curve.R script.
+	private RScriptRegistrator registrator;
+
+	@Autowired
 	public OntologyScriptInitializerImpl(DataService dataService)
 	{
 		if (dataService == null) throw new IllegalArgumentException("DataService cannot be null");
@@ -50,9 +55,9 @@ public class OntologyScriptInitializerImpl implements OntologyScriptInitializer
 			if (count == 0)
 			{
 				Entity scriptType = dataService.findOne(ScriptType.ENTITY_NAME,
-						new QueryImpl().eq(ScriptType.NAME, "r"));
+						new QueryImpl().eq(ScriptType.NAME, "R"));
 
-				if (scriptType == null) throw new UnknownEntityException("ScriptType r does not exist!");
+				if (scriptType == null) throw new UnknownEntityException("ScriptType R does not exist!");
 
 				String scriptContent;
 				try

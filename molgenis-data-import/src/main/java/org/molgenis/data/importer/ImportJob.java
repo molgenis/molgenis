@@ -23,10 +23,11 @@ public class ImportJob implements Runnable
 	private final ImportRunService importRunService;
 	private final ImportPostProcessingService importPostProcessingService;
 	private final HttpSession session;
+	private final String defaultPackage;
 
 	public ImportJob(ImportService importService, SecurityContext securityContext, RepositoryCollection source,
 			DatabaseAction databaseAction, String importRunId, ImportRunService importRunService,
-			ImportPostProcessingService importPostProcessingService, HttpSession session)
+			ImportPostProcessingService importPostProcessingService, HttpSession session, String defaultPackage)
 	{
 		this.importService = importService;
 		this.securityContext = securityContext;
@@ -36,6 +37,7 @@ public class ImportJob implements Runnable
 		this.importRunService = importRunService;
 		this.importPostProcessingService = importPostProcessingService;
 		this.session = session;
+		this.defaultPackage = defaultPackage;
 	}
 
 	@Override
@@ -48,7 +50,7 @@ public class ImportJob implements Runnable
 
 			SecurityContextHolder.setContext(securityContext);
 
-			EntityImportReport importReport = importService.doImport(source, databaseAction);
+			EntityImportReport importReport = importService.doImport(source, databaseAction, defaultPackage);
 
 			if (!importReport.getNewEntities().isEmpty())
 			{
@@ -57,7 +59,8 @@ public class ImportJob implements Runnable
 			}
 
 			session.setAttribute("SPRING_SECURITY_CONTEXT", securityContext);
-			importRunService.finishImportRun(importRunId, importReport.toString(), StringUtils.join(importReport.getNewEntities(), ','));
+			importRunService.finishImportRun(importRunId, importReport.toString(),
+					StringUtils.join(importReport.getNewEntities(), ','));
 
 			long t = System.currentTimeMillis();
 			LOG.info("Import finished in " + (t - t0) + " msec.");

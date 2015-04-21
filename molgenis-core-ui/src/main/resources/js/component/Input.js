@@ -89,8 +89,19 @@
 			this._focus();
 		},
 		_handleChange: function(event) {
-			this.setState(this._isRadioOrCheckbox() ? {checked: event.target.checked} : {value: event.target.value});
-			this._handleChangeOrBlur(event.target.value, event.target.checked, this.props.onValueChange);
+			var value = event.target.value;
+			var newState;
+			if(this._isRadioOrCheckbox()) {
+				newState = {checked: event.target.checked};
+			} else {
+				// apply constraint: maximum number of characters allowed in input
+				if(this.props.maxLength) {
+					value = value.substr(0, this.props.maxLength);
+				}
+				newState = {value: value};
+			}
+			this.setState(newState);
+			this._handleChangeOrBlur(value, event.target.checked, this.props.onValueChange);
 		},
 		_handleBlur: function(event) {
 			if(this.props.onBlur) {

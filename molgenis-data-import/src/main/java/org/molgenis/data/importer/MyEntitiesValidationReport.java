@@ -37,7 +37,7 @@ public class MyEntitiesValidationReport implements EntitiesValidationReport
 		 */
 		AVAILABLE(true);
 
-		private boolean valid;
+		private final boolean valid;
 
 		private AttributeState(boolean valid)
 		{
@@ -50,12 +50,13 @@ public class MyEntitiesValidationReport implements EntitiesValidationReport
 		}
 	}
 
-	private final Map<String, Boolean> sheetsImportable = new LinkedHashMap<String, Boolean>();
-	private final Map<String, Collection<String>> fieldsImportable = new LinkedHashMap<String, Collection<String>>();
-	private final Map<String, Collection<String>> fieldsUnknown = new LinkedHashMap<String, Collection<String>>();
-	private final Map<String, Collection<String>> fieldsRequired = new LinkedHashMap<String, Collection<String>>();
-	private final Map<String, Collection<String>> fieldsAvailable = new LinkedHashMap<String, Collection<String>>();
-	private final List<String> importOrder = new ArrayList<String>();
+	private final Map<String, Boolean> sheetsImportable = new LinkedHashMap<>();
+	private final Map<String, Collection<String>> fieldsImportable = new LinkedHashMap<>();
+	private final Map<String, Collection<String>> fieldsUnknown = new LinkedHashMap<>();
+	private final Map<String, Collection<String>> fieldsRequired = new LinkedHashMap<>();
+	private final Map<String, Collection<String>> fieldsAvailable = new LinkedHashMap<>();
+	private final List<String> importOrder = new ArrayList<>();
+	private final List<String> packages = new ArrayList<>();
 	private boolean valid = true;
 
 	/**
@@ -92,6 +93,18 @@ public class MyEntitiesValidationReport implements EntitiesValidationReport
 	public MyEntitiesValidationReport addAttribute(String attributeName)
 	{
 		return addAttribute(attributeName, AttributeState.IMPORTABLE);
+	}
+
+	/**
+	 * Add a package to the report
+	 * 
+	 * @param pack
+	 * @return
+	 */
+	public MyEntitiesValidationReport addPackage(String pack)
+	{
+		packages.add(pack);
+		return this;
 	}
 
 	/**
@@ -193,6 +206,12 @@ public class MyEntitiesValidationReport implements EntitiesValidationReport
 	}
 
 	@Override
+	public List<String> getPackages()
+	{
+		return ImmutableList.<String> copyOf(packages);
+	}
+
+	@Override
 	public boolean valid()
 	{
 		return valid;
@@ -209,6 +228,7 @@ public class MyEntitiesValidationReport implements EntitiesValidationReport
 		result = prime * result + ((fieldsUnknown == null) ? 0 : fieldsUnknown.hashCode());
 		result = prime * result + ((importOrder == null) ? 0 : importOrder.hashCode());
 		result = prime * result + ((sheetsImportable == null) ? 0 : sheetsImportable.hashCode());
+		result = prime * result + ((packages == null) ? 0 : packages.hashCode());
 		result = prime * result + (valid ? 1231 : 1237);
 		return result;
 	}
@@ -250,6 +270,11 @@ public class MyEntitiesValidationReport implements EntitiesValidationReport
 			if (other.sheetsImportable != null) return false;
 		}
 		else if (!sheetsImportable.equals(other.sheetsImportable)) return false;
+		if (packages == null)
+		{
+			if (other.packages != null) return false;
+		}
+		else if (!packages.equals(other.packages)) return false;
 		if (valid != other.valid) return false;
 		return true;
 	}

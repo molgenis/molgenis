@@ -16,8 +16,10 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ResourceUtils;
 import org.testng.annotations.BeforeMethod;
@@ -26,17 +28,13 @@ import org.testng.annotations.Test;
 public class CaddServiceAnnotatorTest
 {
 	private DefaultEntityMetaData metaDataCanAnnotate;
-	private EntityMetaData metaDataCantAnnotate;
+	private DefaultEntityMetaData metaDataCantAnnotate;
 	private CaddServiceAnnotator annotator;
 	private AttributeMetaData attributeMetaDataChrom;
 	private AttributeMetaData attributeMetaDataPos;
 	private AttributeMetaData attributeMetaDataRef;
 	private AttributeMetaData attributeMetaDataAlt;
-	private AttributeMetaData attributeMetaDataCantAnnotateFeature;
 	private AttributeMetaData attributeMetaDataCantAnnotateChrom;
-	private AttributeMetaData attributeMetaDataCantAnnotatePos;
-	private AttributeMetaData attributeMetaDataCantAnnotateRef;
-	private AttributeMetaData attributeMetaDataCantAnnotateAlt;
 	private ArrayList<Entity> input1;
 	private ArrayList<Entity> input2;
 	private ArrayList<Entity> input3;
@@ -50,109 +48,65 @@ public class CaddServiceAnnotatorTest
 	public void beforeMethod() throws IOException
 	{
 		metaDataCanAnnotate = new DefaultEntityMetaData("test");
+        metaDataCantAnnotate = new DefaultEntityMetaData("test");
 
 		MolgenisSettings settings = mock(MolgenisSettings.class);
 
 		when(settings.getProperty(CaddServiceAnnotator.CADD_FILE_LOCATION_PROPERTY)).thenReturn(
 				ResourceUtils.getFile(getClass(), "/cadd_test.vcf.gz").getPath());
 
-		attributeMetaDataChrom = mock(AttributeMetaData.class);
-		attributeMetaDataPos = mock(AttributeMetaData.class);
-		attributeMetaDataRef = mock(AttributeMetaData.class);
-		attributeMetaDataAlt = mock(AttributeMetaData.class);
-
-		when(attributeMetaDataChrom.getName()).thenReturn(CaddServiceAnnotator.CHROMOSOME);
-		when(attributeMetaDataPos.getName()).thenReturn(CaddServiceAnnotator.POSITION);
-		when(attributeMetaDataRef.getName()).thenReturn(CaddServiceAnnotator.REFERENCE);
-		when(attributeMetaDataAlt.getName()).thenReturn(CaddServiceAnnotator.ALTERNATIVE);
-
-		when(attributeMetaDataChrom.getDataType()).thenReturn(
-				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
-		when(attributeMetaDataPos.getDataType()).thenReturn(
-				MolgenisFieldTypes.getType(FieldTypeEnum.LONG.toString().toLowerCase()));
-		when(attributeMetaDataRef.getDataType()).thenReturn(
-				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
-		when(attributeMetaDataAlt.getDataType()).thenReturn(
-				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
+        attributeMetaDataChrom = new DefaultAttributeMetaData(VcfRepository.CHROM, FieldTypeEnum.STRING);
+        attributeMetaDataPos = new DefaultAttributeMetaData(VcfRepository.POS, FieldTypeEnum.LONG);
+        attributeMetaDataRef = new DefaultAttributeMetaData(VcfRepository.REF, FieldTypeEnum.STRING);
+        attributeMetaDataAlt = new DefaultAttributeMetaData(VcfRepository.ALT, FieldTypeEnum.STRING);
+        attributeMetaDataCantAnnotateChrom = new DefaultAttributeMetaData(VcfRepository.CHROM, FieldTypeEnum.LONG);
 
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom);
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataRef);
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataAlt);
 		metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom.getName());
-		metaDataCantAnnotate = mock(EntityMetaData.class);
 
-		attributeMetaDataCantAnnotateFeature = mock(AttributeMetaData.class);
-		when(attributeMetaDataCantAnnotateFeature.getName()).thenReturn("otherID");
-		when(attributeMetaDataCantAnnotateFeature.getDataType()).thenReturn(
-				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
+		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataCantAnnotateChrom);
+		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataPos);
+		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataRef);
+		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataAlt);
 
-		attributeMetaDataCantAnnotateChrom = mock(AttributeMetaData.class);
-		when(attributeMetaDataCantAnnotateChrom.getName()).thenReturn(DbnsfpVariantServiceAnnotator.CHROMOSOME);
-		when(attributeMetaDataCantAnnotateFeature.getDataType()).thenReturn(
-				MolgenisFieldTypes.getType(FieldTypeEnum.INT.toString().toLowerCase()));
+        entity1 = new MapEntity(metaDataCanAnnotate);
+        entity2 = new MapEntity(metaDataCanAnnotate);
+        entity3 = new MapEntity(metaDataCanAnnotate);
+        entity4 = new MapEntity(metaDataCanAnnotate);
 
-		attributeMetaDataCantAnnotatePos = mock(AttributeMetaData.class);
-		when(attributeMetaDataCantAnnotatePos.getName()).thenReturn(CaddServiceAnnotator.POSITION);
-		when(attributeMetaDataCantAnnotatePos.getDataType()).thenReturn(
-				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
-
-		attributeMetaDataCantAnnotateRef = mock(AttributeMetaData.class);
-		when(attributeMetaDataCantAnnotateRef.getName()).thenReturn(CaddServiceAnnotator.REFERENCE);
-		when(attributeMetaDataCantAnnotateRef.getDataType()).thenReturn(
-				MolgenisFieldTypes.getType(FieldTypeEnum.INT.toString().toLowerCase()));
-
-		attributeMetaDataCantAnnotateAlt = mock(AttributeMetaData.class);
-		when(attributeMetaDataCantAnnotateAlt.getName()).thenReturn(CaddServiceAnnotator.ALTERNATIVE);
-		when(attributeMetaDataCantAnnotateAlt.getDataType()).thenReturn(
-				MolgenisFieldTypes.getType(FieldTypeEnum.INT.toString().toLowerCase()));
-
-		when(metaDataCantAnnotate.getAttribute(CaddServiceAnnotator.CHROMOSOME)).thenReturn(attributeMetaDataChrom);
-		when(metaDataCantAnnotate.getAttribute(CaddServiceAnnotator.POSITION)).thenReturn(
-				attributeMetaDataCantAnnotatePos);
-		when(metaDataCantAnnotate.getAttribute(CaddServiceAnnotator.REFERENCE)).thenReturn(
-				attributeMetaDataCantAnnotateRef);
-		when(metaDataCantAnnotate.getAttribute(CaddServiceAnnotator.ALTERNATIVE)).thenReturn(
-				attributeMetaDataCantAnnotateAlt);
-
-		entity1 = mock(Entity.class);
-		when(entity1.getString(CaddServiceAnnotator.CHROMOSOME)).thenReturn("1");
-		when(entity1.getLong(CaddServiceAnnotator.POSITION)).thenReturn(new Long(100));
-		when(entity1.getString(CaddServiceAnnotator.REFERENCE)).thenReturn("C");
-		when(entity1.getString(CaddServiceAnnotator.ALTERNATIVE)).thenReturn("T");
+		entity1.set(VcfRepository.CHROM,"1");
+		entity1.set(VcfRepository.POS, 100);
+		entity1.set(VcfRepository.REF, "C");
+		entity1.set(VcfRepository.ALT, "T");
 		input1 = new ArrayList<Entity>();
 		input1.add(entity1);
-		when(entity1.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
 
-		entity2 = mock(Entity.class);
-		when(entity2.getString(CaddServiceAnnotator.CHROMOSOME)).thenReturn("2");
-		when(entity2.getLong(CaddServiceAnnotator.POSITION)).thenReturn(new Long(200));
-		when(entity2.getString(CaddServiceAnnotator.REFERENCE)).thenReturn("A");
-		when(entity2.getString(CaddServiceAnnotator.ALTERNATIVE)).thenReturn("C");
+		entity2.set(VcfRepository.CHROM, "2");
+		entity2.set(VcfRepository.POS, new Long(200));
+		entity2.set(VcfRepository.REF, "A");
+		entity2.set(VcfRepository.ALT, "C");
 		input2 = new ArrayList<Entity>();
 		input2.add(entity2);
 		annotator = new CaddServiceAnnotator(settings, null);
-		when(entity2.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
 
-		entity3 = mock(Entity.class);
-		when(entity3.getString(CaddServiceAnnotator.CHROMOSOME)).thenReturn("3");
-		when(entity3.getLong(CaddServiceAnnotator.POSITION)).thenReturn(new Long(300));
-		when(entity3.getString(CaddServiceAnnotator.REFERENCE)).thenReturn("G");
-		when(entity3.getString(CaddServiceAnnotator.ALTERNATIVE)).thenReturn("C");
+		entity3.set(VcfRepository.CHROM, "3");
+		entity3.set(VcfRepository.POS, new Long(300));
+		entity3.set(VcfRepository.REF, "G");
+		entity3.set(VcfRepository.ALT, "C");
 		input3 = new ArrayList<Entity>();
 		input3.add(entity3);
 		annotator = new CaddServiceAnnotator(settings, null);
-		when(entity3.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
 
-		entity4 = mock(Entity.class);
-		when(entity4.getString(CaddServiceAnnotator.CHROMOSOME)).thenReturn("1");
-		when(entity4.getLong(CaddServiceAnnotator.POSITION)).thenReturn(new Long(100));
-		when(entity4.getString(CaddServiceAnnotator.REFERENCE)).thenReturn("T");
-		when(entity4.getString(CaddServiceAnnotator.ALTERNATIVE)).thenReturn("C");
+		entity4.set(VcfRepository.CHROM, "1");
+		entity4.set(VcfRepository.POS, new Long(100));
+		entity4.set(VcfRepository.REF, "T");
+		entity4.set(VcfRepository.ALT, "C");
 		input4 = new ArrayList<Entity>();
 		input4.add(entity4);
 		annotator = new CaddServiceAnnotator(settings, null);
-		when(entity4.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
 	}
 
 	@Test

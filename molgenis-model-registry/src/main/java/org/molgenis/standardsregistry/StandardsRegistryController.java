@@ -25,7 +25,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.PackageSearchResultItem;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Tag;
-import org.molgenis.data.semanticsearch.service.impl.UntypedTagService;
+import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -59,11 +59,11 @@ public class StandardsRegistryController extends MolgenisPluginController
 	private final DataService dataService;
 	private final MetaDataSearchService metaDataSearchService;
 	private final MolgenisPermissionService molgenisPermissionService;
-	private final UntypedTagService tagService;
+	private final TagService<LabeledResource, LabeledResource> tagService;
 
 	@Autowired
 	public StandardsRegistryController(DataService dataService, MetaDataService metaDataService,
-			MolgenisPermissionService molgenisPermissionService, UntypedTagService tagService,
+			MolgenisPermissionService molgenisPermissionService, TagService<LabeledResource, LabeledResource> tagService,
 			MetaDataSearchService metaDataSearchService)
 	{
 		super(URI);
@@ -153,7 +153,8 @@ public class StandardsRegistryController extends MolgenisPluginController
 							if (!molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.READ)) return false;
 
 							// Check has data
-							if (dataService.count(entityName, new QueryImpl()) == 0) return false;
+							if (!dataService.hasRepository(entityName)
+									|| dataService.count(entityName, new QueryImpl()) == 0) return false;
 
 							return true;
 						}

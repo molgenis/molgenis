@@ -4,7 +4,7 @@ import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_CSS;
 import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_FONTS;
 import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_IMG;
 import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_JS;
-import static org.molgenis.security.runas.RunAsSystemProxy.runAsSystem;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,7 +38,7 @@ import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.IndexedRepositoryValidationDecorator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
-import org.molgenis.data.version.MetaDataUpgradeService;
+import org.molgenis.data.version.MolgenisUpgradeService;
 import org.molgenis.framework.db.WebAppDatabasePopulator;
 import org.molgenis.framework.db.WebAppDatabasePopulatorService;
 import org.molgenis.framework.server.MolgenisSettings;
@@ -50,7 +50,6 @@ import org.molgenis.security.CorsInterceptor;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.freemarker.HasPermissionDirective;
 import org.molgenis.security.freemarker.NotHasPermissionDirective;
-import org.molgenis.security.owned.OwnedEntityRepositoryDecorator;
 import org.molgenis.ui.freemarker.FormLinkDirective;
 import org.molgenis.ui.freemarker.LimitMethod;
 import org.molgenis.ui.menu.MenuMolgenisUi;
@@ -60,6 +59,7 @@ import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.ui.menumanager.MenuManagerServiceImpl;
 import org.molgenis.ui.security.MolgenisUiPermissionDecorator;
 import org.molgenis.util.ApplicationContextProvider;
+import org.molgenis.util.DependencyResolver;
 import org.molgenis.util.FileStore;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.ResourceFingerprintRegistry;
@@ -112,7 +112,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	public EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory;
 
 	@Autowired
-	public MetaDataUpgradeService metaDataUpgradeService;
+	public MolgenisUpgradeService upgradeService;
 
 	@Autowired
 	public DataSource dataSource;
@@ -387,7 +387,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		SearchService localSearchService = embeddedElasticSearchServiceFactory.create(localDataService,
 				new EntityToSourceConverter());
 
-		localDataService.forEach(repo -> {
+		DependencyResolver.resolve(localDataService).forEach(repo -> {
 			localSearchService.rebuildIndex(repo, repo.getEntityMetaData());
 		});
 	}
@@ -413,7 +413,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	public void initRepositories()
 	{
 		addUpgrades();
-		metaDataUpgradeService.upgrade();
+		upgradeService.upgrade();
 		if (!indexExists())
 		{
 			LOG.info("Reindexing repositories....");
@@ -462,17 +462,15 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 			public Repository createDecoratedRepository(Repository repository)
 			{
 				// 1. security decorator
-				// 2. autoid decoratord
-				// 3. Owned decorator
+				// 2. autoid decorator
 				// 3. validation decorator
 				if (repository instanceof IndexedRepository)
 				{
 					IndexedRepository indexedRepos = (IndexedRepository) repository;
 
 					return new IndexedCrudRepositorySecurityDecorator(new IndexedAutoValueRepositoryDecorator(
-							new OwnedEntityRepositoryDecorator(new IndexedRepositoryValidationDecorator(dataService(),
-									indexedRepos, new EntityAttributesValidator())), molgenisIdGenerator()),
-							molgenisSettings);
+							new IndexedRepositoryValidationDecorator(dataService(), indexedRepos,
+									new EntityAttributesValidator()), molgenisIdGenerator()), molgenisSettings);
 				}
 
 				return new RepositorySecurityDecorator(new AutoValueRepositoryDecorator(
@@ -483,7 +481,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	/**
-	 * Adds the upgrade steps to the {@link MetaDataUpgradeService}.
+	 * Adds the upgrade steps to the {@link MolgenisUpgradeService}.
 	 */
 	public abstract void addUpgrades();
 }

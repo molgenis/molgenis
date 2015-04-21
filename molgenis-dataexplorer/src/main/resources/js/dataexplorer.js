@@ -364,9 +364,10 @@ function($, molgenis, settingsXhr) {
 	$(function() {
 		// lazy load tab contents
 		$(document).on('show.bs.tab', 'a[data-toggle="tab"]', function(e) {
-			var target = $($(e.target).attr('data-target'));
+			var target = $($(e.target).attr('data-target')), entityHref = encodeURI($(e.target).attr('href'));
+			
 			if(target.data('status') !== 'loaded') {
-				target.load($(e.target).attr('href'), function() {
+				target.load(entityHref, function() {
 					target.data('status', 'loaded');
 				});
 			}
@@ -485,7 +486,17 @@ function($, molgenis, settingsXhr) {
 			$(document).trigger('removeAttributeFilter', {'attributeUri': $(this).data('href')});
 		});
 		
-		$('#delete').on('click', function(){
+		$('#delete-data-btn').on('click', function(){
+			bootbox.confirm("Are you sure you want to delete all data for this entity?", function(confirmed){
+				if(confirmed){
+					$.ajax('/api/v1/' + selectedEntityMetaData.name, {'type': 'DELETE'}).done(function(){
+						document.location.href = '/menu/main/dataexplorer?entity=' + selectedEntityMetaData.name;
+					});
+				}
+			});
+		});
+		
+		$('#delete-data-metadata-btn').on('click', function(){
 			bootbox.confirm("Are you sure you want to delete all data and metadata for this entity?", function(confirmed){
 				if(confirmed){
 					$.ajax('/api/v1/'+selectedEntityMetaData.name+'/meta', {'type': 'DELETE'}).done(function(){

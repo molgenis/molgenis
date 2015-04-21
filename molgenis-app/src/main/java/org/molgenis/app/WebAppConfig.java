@@ -20,10 +20,12 @@ import org.molgenis.data.version.v1_5.Step1UpgradeMetaData;
 import org.molgenis.data.version.v1_5.Step2;
 import org.molgenis.data.version.v1_5.Step3AddOrderColumnToMrefTables;
 import org.molgenis.data.version.v1_5.Step4;
-import org.molgenis.data.version.v1_6.Step1UpgrateMetaDataTo1_6;
+import org.molgenis.data.version.v1_6.Step7UpgradeMetaDataTo1_6;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
 import org.molgenis.system.core.FreemarkerTemplateRepository;
 import org.molgenis.ui.MolgenisWebAppConfig;
+import org.molgenis.ui.migrate.v1_5.Step5AlterDataexplorerMenuURLs;
+import org.molgenis.ui.migrate.v1_5.Step6ChangeRScriptType;
 import org.molgenis.util.DependencyResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,11 +77,14 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	@Override
 	public void addUpgrades()
 	{
-		metaDataUpgradeService.addUpgrade(new Step1UpgradeMetaData(dataSource, searchService));
-		metaDataUpgradeService.addUpgrade(new Step2(dataService, jpaRepositoryCollection, dataSource, searchService));
-		metaDataUpgradeService.addUpgrade(new Step3AddOrderColumnToMrefTables(dataSource));
-		metaDataUpgradeService.addUpgrade(new Step4(dataSource, mysqlRepositoryCollection));
-		metaDataUpgradeService.addUpgrade(new Step1UpgrateMetaDataTo1_6(dataSource, searchService));
+		upgradeService.addUpgrade(new Step1UpgradeMetaData(dataSource, searchService));
+		upgradeService.addUpgrade(new Step2(dataService, jpaRepositoryCollection, dataSource, searchService));
+		upgradeService.addUpgrade(new Step3AddOrderColumnToMrefTables(dataSource));
+		upgradeService.addUpgrade(new Step4(dataSource, mysqlRepositoryCollection));
+		upgradeService.addUpgrade(new Step5AlterDataexplorerMenuURLs(jpaRepositoryCollection
+				.getRepository("RuntimeProperty")));
+		upgradeService.addUpgrade(new Step6ChangeRScriptType(dataSource, searchService));
+		upgradeService.addUpgrade(new Step7UpgradeMetaDataTo1_6(dataSource, searchService));
 	}
 
 	@Override

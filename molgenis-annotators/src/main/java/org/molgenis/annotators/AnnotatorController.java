@@ -65,8 +65,8 @@ public class AnnotatorController
 	@Autowired
 	PermissionSystemService permissionSystemService;
 
-    @Autowired
-    UserAccountService userAccountService;
+	@Autowired
+	UserAccountService userAccountService;
 
 	/**
 	 * Gets a map of all available annotators.
@@ -115,8 +115,7 @@ public class AnnotatorController
 					// running annotator
 					try
 					{
-						Repository repo = dataService.getRepository(entityName);
-						repository = crudRepositoryAnnotator.annotate(annotator, repo, createCopy);
+						repository = crudRepositoryAnnotator.annotate(annotator, repository, createCopy);
 						entityName = repository.getName();
 						createCopy = false;
 					}

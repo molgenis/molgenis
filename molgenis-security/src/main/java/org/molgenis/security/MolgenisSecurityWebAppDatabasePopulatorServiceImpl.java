@@ -7,7 +7,7 @@ import org.molgenis.auth.UserAuthority;
 import org.molgenis.data.DataService;
 import org.molgenis.security.account.AccountService;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.security.runas.RunAsSystem;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.user.UserAccountController;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
