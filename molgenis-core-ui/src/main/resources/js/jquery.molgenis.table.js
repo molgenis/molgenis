@@ -12,7 +12,7 @@
 		var items = [];
 		items.push('<div class="row">');
 		items.push('<div class="col-md-12">');
-		items.push('<div class="molgenis-table-container">');
+		items.push('<div class="molgenis-table-container" style="min-height: 0%">');  /* workaround for IE9 bug https://github.com/molgenis/molgenis/issues/2755 */
 		if(settings.rowClickable){
 			items.push('<table class="table table-striped table-condensed molgenis-table table-hover"><thead></thead><tbody></tbody></table>');
 		}else{
@@ -197,7 +197,6 @@
 					cell.attr('tabindex', tabindex++);
 				}
 				row.append(cell);
-			
 			});
 			items.push(row);
 		}
@@ -400,26 +399,27 @@
 	 */
 	function renderViewCell(cell, entity, attribute, settings) {
 		cell.empty();
-		
 		var rawValue = entity[attribute.name];
-
+		
 		switch(attribute.fieldType) {
 			case 'XREF':
 			case 'MREF':
-            case 'CATEGORICAL':
-            case 'CATEGORICAL_MREF':
-                if (rawValue) {
-                	var refEntity = settings.refEntitiesMeta[attribute.refEntity.href];
-                    var refAttribute = refEntity.labelAttribute;
-                	var refValue = refEntity.attributes[refAttribute];
+			case 'CATEGORICAL':
+			case 'CATEGORICAL_MREF':
+				if (undefined === rawValue) {
+					cell.append(formatTableCellValue(undefined, undefined));
+				} else {
+					var refEntity = settings.refEntitiesMeta[attribute.refEntity.href];
+					var refAttribute = refEntity.labelAttribute;
+					var refValue = refEntity.attributes[refAttribute];
 					
-                	if (refValue) {
-                		var refAttributeType = refValue.fieldType;
-                		if (refAttributeType === 'XREF' || refAttributeType === 'MREF' || refAttributeType === 'CATEGORICAL' || refAttributeType === 'CATEGORICAL_MREF' || refAttributeType === 'COMPOUND') {
-                			throw 'unsupported field type ' + refAttributeType;
-                		}
+					if (refValue) {
+						var refAttributeType = refValue.fieldType;
+						if (refAttributeType === 'XREF' || refAttributeType === 'MREF' || refAttributeType === 'CATEGORICAL' || refAttributeType === 'CATEGORICAL_MREF' || refAttributeType === 'COMPOUND') {
+							throw 'unsupported field type ' + refAttributeType;
+						}
 						
-                		switch(attribute.fieldType) {
+						switch(attribute.fieldType) {
 							case 'CATEGORICAL':
 							case 'XREF':
 								var $cellValue = $('<a href="#">').append(formatTableCellValue(rawValue[refAttribute], refAttributeType));
@@ -431,25 +431,29 @@
 								break;
 							case 'CATEGORICAL_MREF':
 							case 'MREF':
-								$.each(rawValue.items, function(i, rawValue) {
-									var $cellValuePart = $('<a href="#">').append(formatTableCellValue(rawValue[refAttribute], refAttributeType));
-									$cellValuePart.click(function(event) {
-										openRefAttributeModal(attribute, refEntity, refAttribute, rawValue);
-										event.stopPropagation();
+								if(!rawValue.items.length){
+									cell.append(formatTableCellValue(undefined, refAttributeType));
+								}else{
+									$.each(rawValue.items, function(i, rawValue) {
+										var $cellValuePart = $('<a href="#">').append(formatTableCellValue(rawValue[refAttribute], refAttributeType));
+										$cellValuePart.click(function(event) {
+											openRefAttributeModal(attribute, refEntity, refAttribute, rawValue);
+											event.stopPropagation();
+										});
+										if (i > 0) {cell.append(',');}
+										cell.append($cellValuePart);
 									});
-									if (i > 0) {cell.append(',');}
-									cell.append($cellValuePart);
-								});
+								}
 								break;
 							default:
 								throw 'unexpected field type ' + attribute.fieldType;
-                		}
-                	}
-                }
+						}
+					}
+				}
 				break;
-            case 'BOOL':
+			case 'BOOL':
 				cell.append(formatTableCellValue(rawValue, attribute.fieldType, undefined, attribute.nillable));
-            	break;
+				break;
 			default :
 				cell.append(formatTableCellValue(rawValue, attribute.fieldType));
 				break;
@@ -778,7 +782,10 @@
 		$(container).on('click', '.edit-table-btn', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
-			  
+			if( molgenis.ie9 ){
+				bootbox.alert("Sorry. In-place editing is not supported in Internet Explorer 9.<br/>Please use a modern browser instead.");
+				return;
+			}
 			settings.editenabled = !settings.editenabled;
 			createTableHeader(settings);
 			createTableBody(settings.data, settings);

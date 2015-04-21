@@ -8,7 +8,7 @@
 	 * @memberOf component
 	 */
 	var FormControlGroup = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
+		mixins: [molgenis.ui.mixin.DeepPureRenderMixin, molgenis.ui.mixin.AttributeLoaderMixin],
 		displayName: 'FormControlGroup',
 		propTypes: {
 			entity: React.PropTypes.object,
@@ -23,8 +23,17 @@
 			focus: React.PropTypes.bool,
 			onValueChange: React.PropTypes.func.isRequired
 		},
+		getInitialState: function() {
+			return {
+				attr: null
+			};
+		},
 		render: function() {
-			var attributes = this.props.attr.attributes;
+			if (this.state.attr === null) {
+				// attribute not available yet
+				return molgenis.ui.Spinner();
+			}
+			var attributes = this.state.attr.attributes;
 			
 			// add control for each attribute
 			var foundFocusControl = false;
@@ -35,7 +44,8 @@
 				var controlProps = {
 					entity : this.props.entity,
 					attr : attr,
-					value: this.props.value ? this.props.value[attr.name] : undefined,
+					value: this.props.entityInstance ? this.props.entityInstance[attr.name] : undefined,
+					entityInstance: this.props.entityInstance,
 					mode : this.props.mode,
 					formLayout : this.props.formLayout,
 					colOffset: this.props.colOffset,

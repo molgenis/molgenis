@@ -2,11 +2,10 @@
 	margin-bottom: 10px;
 	overflow: auto;
 	white-space: nowrap;
-	font-style: italice;	
 }
 
 .molgenis-table {
-	width: 100%;	
+	width: 100%;
 }
 
 .molgenis-table thead th {

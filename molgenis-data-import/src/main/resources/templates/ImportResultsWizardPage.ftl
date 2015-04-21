@@ -1,5 +1,5 @@
 <div class="row">
-	<div class="col-md-6">
+	<div class="col-md-8">
 		<form method="post" id="wizardForm" name="wizardForm" action="">
 			<div id="message-panel" class="panel">
     			<div class="panel-heading">
@@ -11,13 +11,17 @@
 	    		</div>
 			</div>
         </form>
+    </div>
+</div>
+<div class="row">
+	<div class="col-md-8">        
         <div id="permission-panel" class="hidden panel">
-            <div class="panel-heading"><h4 class="panel-title">Permissions</h4></div>
+        	<div class="panel-heading"><h4 class="panel-title">Permissions</h4></div>
             <div class="panel-body">
                 <div class="tab-content">
                     <div class="tab-pane active" id="entity-class-group-permission-manager">
                         <form class="form-horizontal" id="entity-class-group-permission-form" method="post" action="${context_url?html}/add/entityclass/group" role="form">
-                            <div class="form-group">
+                            <div class="form-group col-md-12 ">
                                 <label class="col-md-3 control-label" for="entity-class-group-select">Select Group:</label>
                                 <div class="col-md-4">
                                     <select class="form-control" name="groupId" id="entity-class-group-select">
@@ -27,7 +31,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group col-md-12">
                                 <div class="permission-table-container">
                                     <table class="table table-condensed table-borderless" id="entity-class-group-permission-table">
                                         <thead>
@@ -44,8 +48,9 @@
                                     </table>
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <button type="submit" class="btn pull-right">Save</button>
+                            <div class="form-group col-md-12">
+								<hr></hr>
+                                <button type="submit" class="btn btn-primary pull-right">Save</button>
                             </div>
                         </form>
                     </div>
@@ -58,6 +63,7 @@
 	$(function() {
 		var restApi = new molgenis.RestClient();
 		var timer;
+        var importedEntities;
 	
 		$('.next').addClass('disabled');
         $('.cancel').addClass('hidden');
@@ -66,13 +72,14 @@
 		checkImportResult();
 	
 		function checkImportResult() {
-			restApi.getAsync('/api/v1/ImportRun/${wizard.importRunId?js_string}', {}, function(importRun) {
+            restApi.getAsync('/api/v1/ImportRun/${wizard.importRunId?js_string}', {}, function(importRun) {
 				if (timer) {
 					clearTimeout(timer);	
 				}
 			
 				if (importRun.status !== 'RUNNING') {
-					$('#message-panel').removeClass('panel-info');
+                    importedEntities = importRun.importedEntities;
+                    $('#message-panel').removeClass('panel-info');
 					$('#message-panel').addClass(importRun.status == 'FINISHED' ? 'panel-success' : 'panel-danger');
 					$('#message-panel .panel-heading').text(importRun.status == 'FINISHED' ? 'Import success' : 'Import failed');
 					
@@ -83,16 +90,18 @@
 					$('.next').removeClass('disabled');
                     var groupcount = "${wizard.groups?size}";
                     var allow = "${wizard.allowPermissions?c}";
-                    if(importRun.importedEntities && importRun.importedEntities.length > 0 && groupcount > 0 && allow === "true") {
-                        $('#permission-panel').removeClass("hidden");
-                        $.ajax({
-                            url: "${context_url?html}/entityclass/group/" + $('#entity-class-group-select').val(),
-                            type: 'GET',
-                            data: {entitieIds: importRun.importedEntities},
-                            success: function (data) {
-                                $('.permission-table-container tbody').empty().html(createGroupPermissionTable(data));
-                            }
-                        });
+                    if(importRun.importedEntities !== undefined) {
+	                    if(importRun.importedEntities && importRun.importedEntities.length > 0 && groupcount > 0 && allow === "true") {
+	                        $('#permission-panel').removeClass("hidden");
+	                        $.ajax({
+	                            url: "${context_url?html}/entityclass/group/" + $('#entity-class-group-select').val(),
+	                            type: 'GET',
+	                            data: {entityIds: importRun.importedEntities},
+	                            success: function (data) {
+	                                $('.permission-table-container tbody').empty().html(createGroupPermissionTable(data));
+	                            }
+	                        });
+	                    }
                     }
 				} else {
 					timer = setTimeout(checkImportResult, 3000);
@@ -155,8 +164,19 @@
         });
 
         $('#entity-class-group-select').change(function() {
-            $.get(molgenis.getContextUrl() + '/entityclass/group/' + $(this).val(), function(data) {
-                $('.permission-table-container tbody').empty().html(createGroupPermissionTable(data));
+
+            $.ajax({
+                type : 'GET',
+                url : molgenis.getContextUrl() + '/entityclass/group/' + $(this).val(),
+                data: {entityIds: importedEntities},
+                success : function(data) {
+                    $('.permission-table-container tbody').empty().html(createGroupPermissionTable(data));
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    var errorMessage = JSON.parse(xhr.responseText).errorMessage;
+                    $('#plugin-container .alert').remove();
+                    $('#plugin-container').prepend('<div class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> ' + errorMessage + '</div>');
+                }
             });
         });
 

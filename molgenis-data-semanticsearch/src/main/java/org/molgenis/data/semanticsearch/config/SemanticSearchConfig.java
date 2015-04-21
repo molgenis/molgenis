@@ -4,8 +4,10 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.TagMetaData;
+import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semanticsearch.repository.TagRepository;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
+import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.data.semanticsearch.service.impl.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.impl.SemanticSearchServiceImpl;
 import org.molgenis.data.semanticsearch.service.impl.UntypedTagService;
@@ -39,7 +41,7 @@ public class SemanticSearchConfig
 	}
 
 	@Bean
-	public UntypedTagService tagService()
+	public TagService<LabeledResource, LabeledResource> tagService()
 	{
 		return new UntypedTagService(dataService, tagRepository());
 	}

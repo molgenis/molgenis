@@ -244,7 +244,10 @@ function getCurrentTimezoneOffset() {
 function formatTableCellValue(rawValue, dataType, editable, nillable) {
 	var htmlElement;
 	
-	if (dataType.toLowerCase() == 'bool') {
+	if (dataType === undefined) {
+		return '<span>&nbsp;</span>';
+	}
+	else if (dataType.toLowerCase() == 'bool') {
 		htmlElement = '<input type="checkbox" ';
 		if (rawValue === true) {
 			htmlElement += 'checked ';
@@ -262,9 +265,8 @@ function formatTableCellValue(rawValue, dataType, editable, nillable) {
 		
 		return htmlElement;
 	}
-
 	if (typeof rawValue === 'undefined' || rawValue === null) {
-		return '<span></span>';
+		return '<span>&nbsp;</span>';
 	}
 
 	if (dataType.toLowerCase() == "hyperlink") {

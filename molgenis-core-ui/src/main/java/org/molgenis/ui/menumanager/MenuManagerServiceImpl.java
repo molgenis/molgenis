@@ -7,7 +7,7 @@ import java.util.List;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
-import org.molgenis.security.runas.RunAsSystem;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.ui.MenuType;
 import org.molgenis.ui.Molgenis;
 import org.molgenis.ui.PluginType;

@@ -269,7 +269,9 @@ public class EntityAttributesValidator
 	{
 		Range range = attribute.getRange();
 		Long value = entity.getLong(attribute.getName());
-		if ((value != null) && ((value < range.getMin()) || (value > range.getMax())))
+		if ((value != null)
+				&& ((range.getMin() != null && value < range.getMin()) || (range.getMax() != null && value > range
+						.getMax())))
 		{
 			return createConstraintViolation(entity, attribute, meta);
 		}

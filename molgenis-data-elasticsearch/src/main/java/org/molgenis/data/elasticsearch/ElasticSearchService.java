@@ -903,22 +903,18 @@ public class ElasticSearchService implements SearchService
 		{
 			LOG.debug("Deleted all Elasticsearch '" + type + "' docs");
 		}
-		// FIXME only deletes mappings?
-		// deleteMapping(request)
-		// DeleteByQueryResponse deleteByQueryResponse =
-		// client.prepareDeleteByQuery(indexName)
-		// .setQuery(new TermQueryBuilder("_type", type)).execute().actionGet();
-		//
-		// if (deleteByQueryResponse != null)
-		// {
-		// IndexDeleteByQueryResponse idbqr =
-		// deleteByQueryResponse.getIndex(indexName);
-		// if (idbqr != null && idbqr.getFailedShards() > 0)
-		// {
-		// throw new ElasticsearchException("Delete failed. Returned headers:" +
-		// idbqr.getHeaders());
-		// }
-		// }
+		
+		DeleteByQueryResponse deleteByQueryResponse = client.prepareDeleteByQuery(indexName)
+				.setQuery(new TermQueryBuilder("_type", type)).execute().actionGet();
+
+		if (deleteByQueryResponse != null)
+		{
+			IndexDeleteByQueryResponse idbqr = deleteByQueryResponse.getIndex(indexName);
+			if (idbqr != null && idbqr.getFailedShards() > 0)
+			{
+				throw new ElasticsearchException("Delete failed. Returned headers:" + idbqr.getHeaders());
+			}
+		}
 		refresh();
 	}
 

@@ -31,7 +31,7 @@ public class ScriptEvaluator
 			try
 			{
 				JS_SCRIPT = FileCopyUtils.copyToString(new InputStreamReader(ScriptEvaluator.class
-						.getResourceAsStream("/js/molgenis-script-evaluator.js")));
+						.getResourceAsStream("/js/molgenis-script-evaluator.js"), "UTF-8"));
 			}
 			catch (IOException e)
 			{
