@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.common.collect.Iterables;
 import org.elasticsearch.common.collect.Sets;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -79,27 +80,21 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	{
 		Iterable<String> attributeIdentifiers = getAttributeIdentifiers(sourceEntityMetaData);
 
-		System.out.println("test 1");
-
 		QueryRule createDisMaxQueryRule = createDisMaxQueryRule(targetEntityMetaData, targetAttribute);
-		List<QueryRule> disMaxQueryRules;
+
+		List<QueryRule> disMaxQueryRules = Arrays.asList(new QueryRule(AttributeMetaDataMetaData.IDENTIFIER,
+				Operator.IN, attributeIdentifiers));
+
 		if (createDisMaxQueryRule.getNestedRules().size() > 0)
 		{
-			disMaxQueryRules = Arrays.asList(new QueryRule(AttributeMetaDataMetaData.IDENTIFIER, Operator.IN,
-					attributeIdentifiers), new QueryRule(Operator.AND), createDisMaxQueryRule);
+			disMaxQueryRules.addAll(Arrays.asList(new QueryRule(Operator.AND), createDisMaxQueryRule));
 		}
-		else
-		{
-			disMaxQueryRules = Arrays.asList(new QueryRule(AttributeMetaDataMetaData.IDENTIFIER, Operator.IN,
-					attributeIdentifiers));
-		}
-
-		System.out.println("test 2");
 
 		Iterable<Entity> attributeMetaDataEntities = dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME,
 				new QueryImpl(disMaxQueryRules));
 
-		return MetaUtils.toAttributeMetaData(sourceEntityMetaData, attributeMetaDataEntities);
+		return Iterables.size(attributeMetaDataEntities) > 0 ? MetaUtils.toAttributeMetaData(sourceEntityMetaData,
+				attributeMetaDataEntities) : sourceEntityMetaData.getAttributes();
 	}
 
 	private QueryRule createDisMaxQueryRule(EntityMetaData targetEntityMetaData, AttributeMetaData targetAttribute)
