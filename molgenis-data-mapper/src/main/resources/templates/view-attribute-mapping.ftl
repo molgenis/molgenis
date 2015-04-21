@@ -34,7 +34,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						<#list suggestedAttributes.iterator() as source>
+						<#list suggestedAttributes as source>
 							<tr>
 								<td>
 									<b>${source.label?html}</b> (${source.dataType})

@@ -79,6 +79,6 @@ public class MetaUtils
 						+ " does not exsit in EntityMetaData : " + entityMetaData.getName());
 				return attribute;
 			}
-		});
+		}).toList();
 	}
 }
