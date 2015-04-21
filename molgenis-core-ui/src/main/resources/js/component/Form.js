@@ -20,6 +20,7 @@
 			enableOptionalFilter: React.PropTypes.bool, // whether or not to show a control to filter optional form fields
 			saveOnBlur: React.PropTypes.bool, // save form control values on blur
 			enableFormIndex: React.PropTypes.bool, // whether or not to show a form index to navigate to form controls
+			showHidden: React.PropTypes.bool, // whether or not to show not-visible attributes
 			beforeSubmit: React.PropTypes.func,
 			onSubmitCancel: React.PropTypes.func,
 			onSubmitSuccess: React.PropTypes.func,
@@ -35,6 +36,7 @@
 				enableFormIndex: false,
 				colOffset: 3,
 				saveOnBlur: false,
+				showHidden: false,
 				beforeSubmit: function() {},
 				onSubmitCancel: function() {},
 				onSubmitSuccess: function() {},
@@ -161,6 +163,7 @@
 				hideOptional: this.state.hideOptional,
 				saveOnBlur: this.props.saveOnBlur,
 				enableFormIndex: this.props.enableFormIndex,
+				showHidden: this.props.showHidden,
 				validate: this.state.validate,
 				onValueChange : this._handleValueChange,
 				errorMessages: this.state.errorMessages
@@ -475,6 +478,7 @@
 			hideOptional: React.PropTypes.bool,
 			saveOnBlur: React.PropTypes.bool,
 			enableFormIndex: React.PropTypes.bool,
+			showHidden: React.PropTypes.bool,
 			validate: React.PropTypes.bool,
 			onValueChange: React.PropTypes.func.isRequired,
 			errorMessages: React.PropTypes.object.isRequired
@@ -498,6 +502,7 @@
 							formLayout : this.props.formLayout,
 							colOffset: this.props.colOffset,
 							saveOnBlur: this.props.saveOnBlur,
+							showHidden: this.props.showHidden,
 							validate: this.props.validate,
 							onValueChange : this.props.onValueChange,
 							key : key
@@ -516,7 +521,7 @@
 						}
 						
 						var Control = ControlFactory(controlProps);
-						if(attr.nillable === true && this.props.hideOptional === true) {
+						if(attr.nillable === true && this.props.hideOptional === true || (this.props.showHidden === false && attr.visible === false)) {
 							Control = div({className: 'hide'}, Control);
 						} else if(this.props.enableFormIndex === true && attr.fieldType === 'COMPOUND') {
 							Control = div({id: this._getLinkId(attr)}, Control);

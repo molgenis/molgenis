@@ -7,6 +7,7 @@
 		<plugin id="dataexplorer" name="Data Explorer" url="dataexplorer"/>
 		<plugin id="mappingservice" name="Mapping Service" url="mappingservice"/>
         <menu label="Plugins" name="plugins">
+            <plugin id="questionnaires" name="Questionnaires" url="questionnaires"/>
         	<plugin id="pathways" name="Pathways" url="pathways"/>
             <plugin id="standardsregistry" name="Model registry" url="standardsregistry" />
             <plugin id="geneticrepositorymerger" name="Merge Genetic Data" url="geneticrepositorymerger"/>
