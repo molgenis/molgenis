@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.concurrent.Future;
 
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.semanticsearch.semantic.ItemizedSearchResult;
 import org.molgenis.ontology.core.model.OntologyTerm;
 
@@ -20,6 +21,17 @@ public interface SemanticSearchService
 	 * @return AttributeMetaData of resembling attributes, sorted by relevance, not including @attributeMetaData
 	 */
 	Iterable<AttributeMetaData> findAttributes(org.molgenis.data.Package p, AttributeMetaData attributeMetaData);
+
+	/**
+	 * Find all relevant attributes from specified Entity source
+	 * 
+	 * @param source
+	 * @param target
+	 * @param attributeMetaData
+	 * @return AttributeMetaData of resembling attributes, sorted by relevance
+	 */
+	Iterable<AttributeMetaData> findAttributes(org.molgenis.data.EntityMetaData source, EntityMetaData target,
+			AttributeMetaData attributeMetaData);
 
 	/**
 	 * Searches the packages and their entities and attributes, and tags thereon for a search term.

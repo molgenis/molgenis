@@ -2,25 +2,40 @@ package org.molgenis.data.semanticsearch.service.impl;
 
 import static java.util.Arrays.stream;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.common.collect.Sets;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.Package;
+import org.molgenis.data.QueryRule;
+import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.meta.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.MetaUtils;
+import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.semantic.ItemizedSearchResult;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Multimap;
 
 public class SemanticSearchServiceImpl implements SemanticSearchService
 {
@@ -29,6 +44,12 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 
 	@Autowired
 	private MetaDataService metaDataService;
+
+	@Autowired
+	private DataService dataService;
+
+	@Autowired
+	private OntologyTagService ontologyTagService;
 
 	public static final Set<String> STOP_WORDS;
 
@@ -50,6 +71,91 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 				"what", "what's", "when", "when's", "where", "where's", "which", "while", "who", "who's", "whom",
 				"why", "why's", "with", "won't", "would", "wouldn't", "you", "you'd", "you'll", "you're", "you've",
 				"your", "yours", "yourself", "yourselves", "many", ")", "("));
+	}
+
+	@Override
+	public Iterable<AttributeMetaData> findAttributes(EntityMetaData sourceEntityMetaData,
+			EntityMetaData targetEntityMetaData, AttributeMetaData targetAttribute)
+	{
+		Iterable<String> attributeIdentifiers = getAttributeIdentifiers(sourceEntityMetaData);
+
+		System.out.println("test 1");
+
+		QueryRule createDisMaxQueryRule = createDisMaxQueryRule(targetEntityMetaData, targetAttribute);
+		List<QueryRule> disMaxQueryRules;
+		if (createDisMaxQueryRule.getNestedRules().size() > 0)
+		{
+			disMaxQueryRules = Arrays.asList(new QueryRule(AttributeMetaDataMetaData.IDENTIFIER, Operator.IN,
+					attributeIdentifiers), new QueryRule(Operator.AND), createDisMaxQueryRule);
+		}
+		else
+		{
+			disMaxQueryRules = Arrays.asList(new QueryRule(AttributeMetaDataMetaData.IDENTIFIER, Operator.IN,
+					attributeIdentifiers));
+		}
+
+		System.out.println("test 2");
+
+		Iterable<Entity> attributeMetaDataEntities = dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME,
+				new QueryImpl(disMaxQueryRules));
+
+		return MetaUtils.toAttributeMetaData(sourceEntityMetaData, attributeMetaDataEntities);
+	}
+
+	private QueryRule createDisMaxQueryRule(EntityMetaData targetEntityMetaData, AttributeMetaData targetAttribute)
+	{
+		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(
+				targetEntityMetaData, targetAttribute);
+
+		List<QueryRule> rules = new ArrayList<QueryRule>();
+
+		// add query rule for searching the label of target attribute in the attribute table.
+		if (StringUtils.isNotEmpty(targetAttribute.getDescription()))
+		{
+			rules.add(new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, targetAttribute
+					.getDescription()));
+		}
+
+		for (OntologyTerm ontologyTerm : tagsForAttribute.values())
+		{
+			QueryRule disMaxQuery = new QueryRule(new ArrayList<QueryRule>());
+			disMaxQuery.setOperator(Operator.DIS_MAX);
+
+			Set<String> synonyms = Sets.newHashSet(ontologyTerm.getSynonyms());
+			synonyms.add(ontologyTerm.getLabel());
+			for (String synonym : synonyms)
+			{
+				disMaxQuery.getNestedRules().add(
+						new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, synonym));
+			}
+
+			rules.add(disMaxQuery);
+		}
+
+		QueryRule finalDisMaxQuery = new QueryRule(rules);
+		finalDisMaxQuery.setOperator(Operator.DIS_MAX);
+
+		return finalDisMaxQuery;
+	}
+
+	private Iterable<String> getAttributeIdentifiers(EntityMetaData sourceEntityMetaData)
+	{
+		Entity entityMetaDataEntity = dataService.findOne(EntityMetaDataMetaData.ENTITY_NAME,
+				new QueryImpl().eq(EntityMetaDataMetaData.FULL_NAME, sourceEntityMetaData.getName()));
+
+		if (entityMetaDataEntity == null) throw new MolgenisDataAccessException(
+				"Could not find EntityMetaDataEntity by the name of " + sourceEntityMetaData.getName());
+
+		Iterable<String> attributeIdentifiers = FluentIterable.from(
+				entityMetaDataEntity.getEntities(EntityMetaDataMetaData.ATTRIBUTES)).transform(
+				new Function<Entity, String>()
+				{
+					public String apply(Entity attributeEntity)
+					{
+						return attributeEntity.getString(AttributeMetaDataMetaData.IDENTIFIER);
+					}
+				});
+		return attributeIdentifiers;
 	}
 
 	@Override
