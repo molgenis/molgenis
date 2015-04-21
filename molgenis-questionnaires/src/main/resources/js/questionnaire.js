@@ -13,13 +13,13 @@
 	});
 	
 	function getForm(name, id) {
-		$.ajax({
-			type : 'GET',
-			url : '/api/v1/' + name + '/' + id + '/edit',
-			success : function(text) {
-				$('#form-holder').html(text);	
+		React.render(molgenis.ui.Questionnaire({
+			entity: name,
+			entityInstance: id,
+			onContinueLaterClick: function() {
+				history.back();
 			}
-		});
+		}), $('#form-holder')[0]);
 	}
 	
 }($, window.top.molgenis = window.top.molgenis || {}));
