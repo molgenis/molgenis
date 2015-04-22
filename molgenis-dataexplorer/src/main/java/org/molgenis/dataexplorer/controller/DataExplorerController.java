@@ -418,25 +418,29 @@ public class DataExplorerController extends MolgenisPluginController
 		LOG.info("Download request: [" + dataRequestStr + "]");
 		DataRequest dataRequest = new GsonHttpMessageConverter().getGson().fromJson(dataRequestStr, DataRequest.class);
 
-		if (dataRequest.getDownloadType() == DownloadType.DOWNLOAD_TYPE_CSV)
-		{
-			response.setContentType("text/csv");
-			String fileName = dataRequest.getEntityName() + '_'
-					+ new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date()) + ".csv";
-			response.addHeader("Content-Disposition", "attachment; filename=" + fileName);
+		String fileName = "";
+		ServletOutputStream outputStream = null;
 
-			ServletOutputStream outputStream = response.getOutputStream();
-			download.writeToCsv(dataRequest, outputStream, ',');
-		}
-		else if (dataRequest.getDownloadType() == DownloadType.DOWNLOAD_TYPE_XLSX)
+		switch (dataRequest.getDownloadType())
 		{
-			response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-			String fileName = dataRequest.getEntityName() + '_'
-					+ new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date()) + ".xlsx";
-			response.addHeader("Content-Disposition", "attachment; filename=" + fileName);
+			case DOWNLOAD_TYPE_CSV:
+				response.setContentType("text/csv");
+				fileName = dataRequest.getEntityName() + '_'
+						+ new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date()) + ".csv";
+				response.addHeader("Content-Disposition", "attachment; filename=" + fileName);
 
-			ServletOutputStream outputStream = response.getOutputStream();
-			download.writeToExcel(dataRequest, outputStream);
+				outputStream = response.getOutputStream();
+				download.writeToCsv(dataRequest, outputStream, ',');
+				break;
+			case DOWNLOAD_TYPE_XLSX:
+				response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+				fileName = dataRequest.getEntityName() + '_'
+						+ new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date()) + ".xlsx";
+				response.addHeader("Content-Disposition", "attachment; filename=" + fileName);
+
+				outputStream = response.getOutputStream();
+				download.writeToExcel(dataRequest, outputStream);
+				break;
 		}
 	}
 
