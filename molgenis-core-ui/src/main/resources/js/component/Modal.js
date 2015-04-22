@@ -49,7 +49,7 @@
 						div({className: 'modal-content'},
 							div({className: 'modal-header'},
 								button({type: 'button', className: 'close', 'data-dismiss': 'modal', 'aria-label': 'Close'},
-									span({'aria-hidden': true}, '\u00D7') // &times;
+									span({'aria-hidden': true}, String.fromCharCode(215)) // &times;
 								),
 								h4({className: 'modal-title', id: id},
 									this.props.title

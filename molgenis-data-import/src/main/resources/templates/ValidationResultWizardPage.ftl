@@ -51,7 +51,11 @@
 	</thead>
 	
 	<#list wizard.entitiesImportable?keys as entity>
-		<#if wizard.entitiesImportable[entity] == true && (wizard.fieldsDetected[entity]?size gt 0 || wizard.fieldsRequired[entity]?size gt 0 || wizard.fieldsAvailable[entity]?size gt 0 || wizard.fieldsUnknown[entity]?size gt 0) >
+		<#if wizard.entitiesImportable[entity] == true 
+			&& ((wizard.fieldsDetected[entity]?? && wizard.fieldsDetected[entity]?size gt 0)
+			 || (wizard.fieldsRequired[entity]?? && wizard.fieldsRequired[entity]?size gt 0)
+			 || (wizard.fieldsAvailable[entity]?? && wizard.fieldsAvailable[entity]?size gt 0)
+			 || (wizard.fieldsUnknown[entity]?? && wizard.fieldsUnknown[entity]?size gt 0))>
 			<tr>
 				<td>${entity?html}</td>
 				<#if wizard.fieldsDetected[entity]?? && wizard.fieldsDetected[entity]?size gt 0>
