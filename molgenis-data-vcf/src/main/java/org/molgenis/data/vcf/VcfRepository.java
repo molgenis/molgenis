@@ -338,9 +338,9 @@ public class VcfRepository extends AbstractRepository
 				if (isListValue)
 				{
 					// TODO support list of primitives datatype
-					return MolgenisFieldTypes.FieldTypeEnum.STRING;
+					return MolgenisFieldTypes.FieldTypeEnum.TEXT;
 				}
-				return MolgenisFieldTypes.FieldTypeEnum.STRING;
+				return MolgenisFieldTypes.FieldTypeEnum.TEXT;
 			default:
 				throw new MolgenisDataException("unknown vcf info type [" + vcfMetaInfo.getType() + "]");
 		}
