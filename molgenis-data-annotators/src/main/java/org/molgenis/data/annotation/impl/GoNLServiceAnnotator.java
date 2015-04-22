@@ -56,8 +56,11 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 	private final MolgenisSettings molgenisSettings;
 	private final AnnotationService annotatorService;
 
-	public static final String GONL_MAF = VcfRepository.getInfoPrefix() + "GONLMAF";
-	public static final String GONL_GTC = VcfRepository.getInfoPrefix() + "GONLGTC";
+	public static final String GONL_MAF_LABEL = "GONLMAF";
+	public static final String GONL_GTC_LABEL = "GONLGTC";
+
+	public static final String GONL_MAF = VcfRepository.getInfoPrefix() + GONL_MAF_LABEL;
+	public static final String GONL_GTC = VcfRepository.getInfoPrefix() + GONL_GTC_LABEL;
 
 	private static final String NAME = "GONL";
 
@@ -318,9 +321,10 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 	{
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
 
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GONL_MAF, FieldTypeEnum.DECIMAL));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GONL_GTC, FieldTypeEnum.STRING)); // FIXME: correct
-																										// type?
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GONL_MAF, FieldTypeEnum.DECIMAL)
+				.setLabel(GONL_MAF_LABEL));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GONL_GTC, FieldTypeEnum.STRING)
+				.setLabel(GONL_GTC_LABEL));
 
 		return metadata;
 	}

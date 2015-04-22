@@ -57,7 +57,8 @@ public class DeNovoAnnotator extends VariantAnnotator
 	// <geneSymbol - <trioChildID - count>>
 	LinkedHashMap<String, LinkedHashMap<String, Integer>> geneTrioCounts = new LinkedHashMap<String, LinkedHashMap<String, Integer>>();
 
-	public static final String DENOVO = VcfRepository.getInfoPrefix() + "DENOVO";
+	public static final String DENOVO_LABEL = "DENOVO";
+	public static final String DENOVO = VcfRepository.getInfoPrefix() + DENOVO_LABEL;
 
 	private static final String NAME = "DENOVO";
 
@@ -574,7 +575,7 @@ public class DeNovoAnnotator extends VariantAnnotator
 	public EntityMetaData getOutputMetaData()
 	{
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(DENOVO, FieldTypeEnum.STRING));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(DENOVO, FieldTypeEnum.STRING).setLabel(DENOVO_LABEL));
 		return metadata;
 	}
 

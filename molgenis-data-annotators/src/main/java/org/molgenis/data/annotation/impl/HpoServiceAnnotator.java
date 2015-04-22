@@ -33,9 +33,8 @@ import org.springframework.stereotype.Component;
 
 /**
  * Typical HPO terms for a gene identifier (already present via SnpEff) Source:
- * http://compbio.charite.de/hudson/job/hpo.
- * annotations.monthly/lastStableBuild/artifact/annotation/ALL_SOURCES_TYPICAL_FEATURES_diseases_to_genes_to_phenotypes
- * .txt
+ * http://compbio.charite.de/hudson/job/hpo. annotations.monthly/lastStableBuild/artifact/annotation/
+ * ALL_SOURCES_TYPICAL_FEATURES_diseases_to_genes_to_phenotypes .txt
  * 
  *
  */
@@ -49,8 +48,10 @@ public class HpoServiceAnnotator extends LocusAnnotator
 
 	private static final String NAME = "HPO";
 
-	public static final String HPO_IDS = VcfRepository.getInfoPrefix() + "HPOIDS";
-	public static final String HPO_TERMS = VcfRepository.getInfoPrefix() + "HPOTERMS";
+	public static final String HPO_IDS_LABEL = "HPOIDS";
+	public static final String HPO_TERMS_LABEL = "HPOTERMS";
+	public static final String HPO_IDS = VcfRepository.getInfoPrefix() + HPO_IDS_LABEL;
+	public static final String HPO_TERMS = VcfRepository.getInfoPrefix() + HPO_TERMS_LABEL;
 	public static final String HPO_FILE_LOCATION = "hpo_location";
 
 	final List<String> infoFields = Arrays.asList(new String[]
@@ -213,8 +214,10 @@ public class HpoServiceAnnotator extends LocusAnnotator
 	public EntityMetaData getOutputMetaData()
 	{
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_IDS, MolgenisFieldTypes.FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_TERMS, MolgenisFieldTypes.FieldTypeEnum.STRING));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_IDS, MolgenisFieldTypes.FieldTypeEnum.STRING)
+				.setLabel(HPO_IDS_LABEL));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_TERMS, MolgenisFieldTypes.FieldTypeEnum.STRING)
+				.setLabel(HPO_TERMS_LABEL));
 		return metadata;
 	}
 }

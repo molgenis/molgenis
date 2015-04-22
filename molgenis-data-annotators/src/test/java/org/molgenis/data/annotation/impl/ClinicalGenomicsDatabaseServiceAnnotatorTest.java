@@ -110,9 +110,9 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest
 		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.GENE, "LEPR");
 		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.HGNC_ID, "6554");
 		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.ENTREZ_GENE_ID, "3953");
-		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.CGD_CONDITION, "Leptin receptor deficiency");
-		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.CGD_INHERITANCE, "AR");
-		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.CGD_AGE_GROUP, "Pediatric");
+		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.CONDITION, "Leptin receptor deficiency");
+		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.INHERITANCE, "AR");
+		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.AGE_GROUP, "Pediatric");
 		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.ALLELIC_CONDITIONS, "");
 		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.MANIFESTATION_CATEGORIES,
 				"Allergy/Immunology/Infectious; Endocrine");
@@ -138,12 +138,12 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest
 				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.GENE));
 		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.ENTREZ_GENE_ID),
 				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.ENTREZ_GENE_ID));
-		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.CGD_CONDITION),
-				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.CGD_CONDITION));
-		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.CGD_INHERITANCE),
-				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.CGD_INHERITANCE));
-		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.CGD_AGE_GROUP),
-				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.CGD_AGE_GROUP));
+		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.CONDITION),
+				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.CONDITION));
+		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.INHERITANCE),
+				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.INHERITANCE));
+		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.AGE_GROUP),
+				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.AGE_GROUP));
 		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.ALLELIC_CONDITIONS),
 				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.ALLELIC_CONDITIONS));
 		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.MANIFESTATION_CATEGORIES),

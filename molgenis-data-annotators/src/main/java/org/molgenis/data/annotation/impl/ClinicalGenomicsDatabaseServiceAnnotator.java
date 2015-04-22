@@ -58,23 +58,27 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 	public static final String GENE = "GENE";
 	public static final String HGNC_ID = "HGNC ID";
 
-	public static final String CGD_FILE_LOCATION = "cgd_location";
+	public static final String CONDITION_LABEL = "CGDCOND";
+	public static final String AGE_GROUP_LABEL = "CGDAGE";
+	public static final String INHERITANCE_LABEL = "CGDINH";
+	public static final String GENERALIZED_INHERITANCE_LABEL = "CGDGIN";
 
-	// FIXME for the commandline VCF output we have to use different names for conciseness/uniqueness..
-	public static final String CGD_CONDITION = VcfRepository.getInfoPrefix() + "CGDCOND";
-	public static final String CGD_AGE_GROUP = VcfRepository.getInfoPrefix() + "CGDAGE";
-	public static final String CGD_INHERITANCE = VcfRepository.getInfoPrefix() + "CGDINH";
-	public static final String CGD_GENERALIZED_INHERITANCE = VcfRepository.getInfoPrefix() + "CGDGIN";
+	public static final String CONDITION = VcfRepository.getInfoPrefix() + CONDITION_LABEL;
+	public static final String AGE_GROUP = VcfRepository.getInfoPrefix() + AGE_GROUP_LABEL;
+	public static final String INHERITANCE = VcfRepository.getInfoPrefix() + INHERITANCE_LABEL;
+	public static final String GENERALIZED_INHERITANCE = VcfRepository.getInfoPrefix() + GENERALIZED_INHERITANCE_LABEL;
+
+	public static final String CGD_FILE_LOCATION = "cgd_location";
 
 	final List<String> infoFields = Arrays.asList(new String[]
 	{
-			"##INFO=<ID=" + CGD_CONDITION.substring(VcfRepository.getInfoPrefix().length())
+			"##INFO=<ID=" + CONDITION.substring(VcfRepository.getInfoPrefix().length())
 					+ ",Number=1,Type=String,Description=\"CGD_CONDITION\">",
-			"##INFO=<ID=" + CGD_AGE_GROUP.substring(VcfRepository.getInfoPrefix().length())
+			"##INFO=<ID=" + AGE_GROUP.substring(VcfRepository.getInfoPrefix().length())
 					+ ",Number=1,Type=String,Description=\"CGD_AGE_GROUP\">",
-			"##INFO=<ID=" + CGD_INHERITANCE.substring(VcfRepository.getInfoPrefix().length())
+			"##INFO=<ID=" + INHERITANCE.substring(VcfRepository.getInfoPrefix().length())
 					+ ",Number=1,Type=String,Description=\"CGD_INHERITANCE\">",
-			"##INFO=<ID=" + CGD_GENERALIZED_INHERITANCE.substring(VcfRepository.getInfoPrefix().length())
+			"##INFO=<ID=" + GENERALIZED_INHERITANCE.substring(VcfRepository.getInfoPrefix().length())
 					+ ",Number=1,Type=String,Description=\"CGD_GENERALIZED_INHERITANCE\">", });
 
 	@Autowired
@@ -113,7 +117,7 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 		Iterator<Entity> vcfIter = vcfRepo.iterator();
 
 		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields,
-				CGD_CONDITION.substring(VcfRepository.getInfoPrefix().length()));
+				CONDITION.substring(VcfRepository.getInfoPrefix().length()));
 
 		System.out.println("Now starting to process the data.");
 
@@ -171,10 +175,10 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 		Long position = entity.getLong(VcfRepository.POS);
 		String chromosome = entity.getString(VcfRepository.CHROM);
 
-        String geneSymbol = HgncLocationsUtils.locationToHgcn(hgncLocationsProvider.getHgncLocations(),
-                new Locus(chromosome, position)).get(0);
+		String geneSymbol = HgncLocationsUtils.locationToHgcn(hgncLocationsProvider.getHgncLocations(),
+				new Locus(chromosome, position)).get(0);
 
-        Map<String, CgdData> cgdData = cgdDataProvider.getCgdData();
+		Map<String, CgdData> cgdData = cgdDataProvider.getCgdData();
 
 		try
 		{
@@ -184,10 +188,10 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 			{
 				CgdData data = cgdData.get(geneSymbol);
 
-				resultMap.put(CGD_CONDITION, data.getCondition().replace(";", " /").replace(",", ""));
-				resultMap.put(CGD_INHERITANCE, data.getInheritance().replace(";", " /").replace(",", ""));
-				resultMap.put(CGD_GENERALIZED_INHERITANCE, data.getGeneralizedInheritance());
-				resultMap.put(CGD_AGE_GROUP, data.getAge_group().replace(";", " /").replace(",", ""));
+				resultMap.put(CONDITION, data.getCondition().replace(";", " /").replace(",", ""));
+				resultMap.put(INHERITANCE, data.getInheritance().replace(";", " /").replace(",", ""));
+				resultMap.put(GENERALIZED_INHERITANCE, data.getGeneralizedInheritance());
+				resultMap.put(AGE_GROUP, data.getAge_group().replace(";", " /").replace(",", ""));
 
 				if (!runningFromCommandLine)
 				{
@@ -228,12 +232,14 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HGNC_ID, MolgenisFieldTypes.FieldTypeEnum.LONG));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ENTREZ_GENE_ID,
 				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CGD_CONDITION, MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CGD_INHERITANCE,
-				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CGD_GENERALIZED_INHERITANCE,
-				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CGD_AGE_GROUP, MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CONDITION, MolgenisFieldTypes.FieldTypeEnum.TEXT)
+				.setLabel(CONDITION_LABEL));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(INHERITANCE, MolgenisFieldTypes.FieldTypeEnum.TEXT)
+				.setLabel(INHERITANCE_LABEL));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GENERALIZED_INHERITANCE,
+				MolgenisFieldTypes.FieldTypeEnum.TEXT).setLabel(GENERALIZED_INHERITANCE_LABEL));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(AGE_GROUP, MolgenisFieldTypes.FieldTypeEnum.TEXT)
+				.setLabel(AGE_GROUP_LABEL));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ALLELIC_CONDITIONS,
 				MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(MANIFESTATION_CATEGORIES,
