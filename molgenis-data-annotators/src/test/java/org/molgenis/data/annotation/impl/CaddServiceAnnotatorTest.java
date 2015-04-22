@@ -1,6 +1,5 @@
 package org.molgenis.data.annotation.impl;
 
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
@@ -12,9 +11,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.Entity;
+import org.molgenis.data.annotators.annotator.test.data.AnnotatorTestData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ResourceUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -26,8 +25,6 @@ public class CaddServiceAnnotatorTest extends AnnotatorTestData
 	@BeforeMethod
 	public void beforeMethod() throws IOException
 	{
-		MolgenisSettings settings = mock(MolgenisSettings.class);
-
 		when(settings.getProperty(CaddServiceAnnotator.CADD_FILE_LOCATION_PROPERTY)).thenReturn(
 				ResourceUtils.getFile(getClass(), "/cadd_test.vcf.gz").getPath());
 	

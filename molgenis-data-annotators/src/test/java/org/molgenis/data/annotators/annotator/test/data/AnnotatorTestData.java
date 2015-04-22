@@ -1,4 +1,6 @@
-package org.molgenis.data.annotation.impl;
+package org.molgenis.data.annotators.annotator.test.data;
+
+import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
 
@@ -9,11 +11,13 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.framework.server.MolgenisSettings;
 
 public abstract class AnnotatorTestData
 {
 	public DefaultEntityMetaData metaDataCanAnnotate = new DefaultEntityMetaData("test");
 	public DefaultEntityMetaData metaDataCantAnnotate = new DefaultEntityMetaData("test");
+
 	public AttributeMetaData attributeMetaDataChrom = new DefaultAttributeMetaData(VcfRepository.CHROM,
 			FieldTypeEnum.STRING);
 	public AttributeMetaData attributeMetaDataPos = new DefaultAttributeMetaData(VcfRepository.POS, FieldTypeEnum.LONG);
@@ -33,10 +37,13 @@ public abstract class AnnotatorTestData
 	public Entity entity2;
 	public Entity entity3;
 	public Entity entity4;
+
 	public AttributeMetaData attributeMetaDataCantAnnotateFeature;
 	public AttributeMetaData attributeMetaDataCantAnnotatePos;
 	public AttributeMetaData attributeMetaDataCantAnnotateRef;
 	public AttributeMetaData attributeMetaDataCantAnnotateAlt;
+
+	public MolgenisSettings settings = mock(MolgenisSettings.class);
 
 	public AnnotatorTestData()
 	{
@@ -50,12 +57,12 @@ public abstract class AnnotatorTestData
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataRef);
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataAlt);
 		metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom.getName());
-		
+
 		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataCantAnnotateChrom);
 		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataPos);
 		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataRef);
 		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataAlt);
-		
+
 		entity = new MapEntity(metaDataCanAnnotate);
 		entity1 = new MapEntity(metaDataCanAnnotate);
 		entity2 = new MapEntity(metaDataCanAnnotate);

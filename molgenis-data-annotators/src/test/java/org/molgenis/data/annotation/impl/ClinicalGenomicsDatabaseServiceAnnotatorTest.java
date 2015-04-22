@@ -18,9 +18,9 @@ import org.molgenis.data.annotation.impl.datastructures.CgdData;
 import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
 import org.molgenis.data.annotation.provider.CgdDataProvider;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
+import org.molgenis.data.annotators.annotator.test.data.AnnotatorTestData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ResourceUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -32,8 +32,6 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest extends AnnotatorTestD
 	@BeforeMethod
 	public void beforeMethod() throws IOException
 	{
-		MolgenisSettings settings = mock(MolgenisSettings.class);
-
 		when(settings.getProperty(CgdDataProvider.CGD_FILE_LOCATION_PROPERTY)).thenReturn(
 				ResourceUtils.getFile(getClass(), "/cgd_example.txt").getPath());
 
@@ -71,7 +69,6 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest extends AnnotatorTestD
 
 		annotator = new ClinicalGenomicsDatabaseServiceAnnotator(settings, annotationService, hgncLocationsProvider,
 				cgdDataProvider);
-
 	}
 
 	@Test
