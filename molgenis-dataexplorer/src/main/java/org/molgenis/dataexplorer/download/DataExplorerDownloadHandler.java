@@ -1,14 +1,17 @@
 package org.molgenis.dataexplorer.download;
 
+import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.transform;
+import static com.google.common.collect.Lists.newArrayList;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
@@ -19,12 +22,7 @@ import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.excel.ExcelWriter.FileFormat;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataRequest;
-import org.molgenis.dataexplorer.controller.DataRequest.ColNames;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 
 public class DataExplorerDownloadHandler
 {
@@ -46,18 +44,17 @@ public class DataExplorerDownloadHandler
 		try
 		{
 			EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
-			final List<String> attributeNames = new ArrayList<String>(dataRequest.getAttributeNames());
-			Iterable<AttributeMetaData> attributes = Iterables.filter(entityMetaData.getAtomicAttributes(),
+			final Set<String> attributeNames = new LinkedHashSet<String>(dataRequest.getAttributeNames());
+			Iterable<AttributeMetaData> attributes = filter(entityMetaData.getAtomicAttributes(),
 					attributeMetaData -> attributeNames.contains(attributeMetaData.getName()));
 
 			switch (dataRequest.getColNames())
 			{
 				case ATTRIBUTE_LABELS:
-					writable = writableFactory.createWritable(entityName, attributeNames);
+					writable = writableFactory.createWritable(entityName, Lists.newArrayList(attributeNames));
 					break;
 				case ATTRIBUTE_NAMES:
-					List<String> attributeNamesList = Lists.newArrayList(transform(attributes,
-							AttributeMetaData::getName));
+					List<String> attributeNamesList = newArrayList(transform(attributes, AttributeMetaData::getName));
 					writable = writableFactory.createWritable(entityName, attributeNamesList);
 					break;
 			}
@@ -85,7 +82,7 @@ public class DataExplorerDownloadHandler
 		{
 			EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
 			final Set<String> attributeNames = new HashSet<String>(dataRequest.getAttributeNames());
-			Iterable<AttributeMetaData> attributes = Iterables.filter(entityMetaData.getAtomicAttributes(),
+			Iterable<AttributeMetaData> attributes = filter(entityMetaData.getAtomicAttributes(),
 					attributeMetaData -> attributeNames.contains(attributeMetaData.getName()));
 
 			switch (dataRequest.getColNames())
@@ -94,7 +91,7 @@ public class DataExplorerDownloadHandler
 					csvWriter.writeAttributes(attributes);
 					break;
 				case ATTRIBUTE_NAMES:
-					csvWriter.writeAttributeNames(Iterables.transform(attributes, AttributeMetaData::getName));
+					csvWriter.writeAttributeNames(transform(attributes, AttributeMetaData::getName));
 					break;
 			}
 
