@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 public class DataExplorerDownloadHandler
 {
@@ -41,43 +42,32 @@ public class DataExplorerDownloadHandler
 		String entityName = dataRequest.getEntityName();
 
 		QueryImpl query = dataRequest.getQuery();
-		Writable writable;
+		Writable writable = null;
 		try
 		{
 			EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
 			final List<String> attributeNames = new ArrayList<String>(dataRequest.getAttributeNames());
 			Iterable<AttributeMetaData> attributes = Iterables.filter(entityMetaData.getAtomicAttributes(),
-					new Predicate<AttributeMetaData>()
-					{
-						@Override
-						public boolean apply(AttributeMetaData attributeMetaData)
-						{
-							return attributeNames.contains(attributeMetaData.getName());
-						}
-					});
+					attributeMetaData -> attributeNames.contains(attributeMetaData.getName()));
 
-			if (dataRequest.getColNames() == ColNames.ATTRIBUTE_LABELS)
+			switch (dataRequest.getColNames())
 			{
-				writable = writableFactory.createWritable(entityName, attributeNames);
-				writable.add(dataService.findAll(entityName, query));
-				writable.close();
+				case ATTRIBUTE_LABELS:
+					writable = writableFactory.createWritable(entityName, attributeNames);
+					break;
+				case ATTRIBUTE_NAMES:
+					List<String> attributeNamesList = Lists.newArrayList(transform(attributes,
+							AttributeMetaData::getName));
+					writable = writableFactory.createWritable(entityName, attributeNamesList);
+					break;
 			}
-			else if (dataRequest.getColNames() == ColNames.ATTRIBUTE_NAMES)
-			{
-				List<String> attributeNamesList = new ArrayList<String>();
-				transform(attributes, AttributeMetaData::getName).forEach(attr -> attributeNamesList.add(attr));
-
-				writable = writableFactory.createWritable(entityName, attributeNamesList);
-				writable.add(dataService.findAll(entityName, query));
-				writable.close();
-			}
-
+			writable.add(dataService.findAll(entityName, query));
+			writable.close();
 		}
 		finally
 		{
 			writableFactory.close();
 		}
-
 	}
 
 	public void writeToCsv(DataRequest request, OutputStream outputStream, char separator) throws IOException
@@ -96,22 +86,16 @@ public class DataExplorerDownloadHandler
 			EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
 			final Set<String> attributeNames = new HashSet<String>(dataRequest.getAttributeNames());
 			Iterable<AttributeMetaData> attributes = Iterables.filter(entityMetaData.getAtomicAttributes(),
-					new Predicate<AttributeMetaData>()
-					{
-						@Override
-						public boolean apply(AttributeMetaData attributeMetaData)
-						{
-							return attributeNames.contains(attributeMetaData.getName());
-						}
-					});
+					attributeMetaData -> attributeNames.contains(attributeMetaData.getName()));
 
-			if (dataRequest.getColNames() == ColNames.ATTRIBUTE_LABELS)
+			switch (dataRequest.getColNames())
 			{
-				csvWriter.writeAttributes(attributes);
-			}
-			else if (dataRequest.getColNames() == ColNames.ATTRIBUTE_NAMES)
-			{
-				csvWriter.writeAttributeNames(Iterables.transform(attributes, AttributeMetaData::getName));
+				case ATTRIBUTE_LABELS:
+					csvWriter.writeAttributes(attributes);
+					break;
+				case ATTRIBUTE_NAMES:
+					csvWriter.writeAttributeNames(Iterables.transform(attributes, AttributeMetaData::getName));
+					break;
 			}
 
 			QueryImpl query = dataRequest.getQuery();
