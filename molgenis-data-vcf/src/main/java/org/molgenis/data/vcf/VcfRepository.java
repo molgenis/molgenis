@@ -10,8 +10,11 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
@@ -31,11 +34,8 @@ import org.molgenis.vcf.VcfSample;
 import org.molgenis.vcf.meta.VcfMeta;
 import org.molgenis.vcf.meta.VcfMetaFormat;
 import org.molgenis.vcf.meta.VcfMetaInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 /**
@@ -45,7 +45,7 @@ import com.google.common.collect.Lists;
  */
 public class VcfRepository extends AbstractRepository
 {
-	private static final Logger LOG = LoggerFactory.getLogger(VcfRepository.class);
+	private static final Logger logger = Logger.getLogger(VcfRepository.class);
 
 	public static final String CHROM = "#CHROM";
 	public static final String ALT = "ALT";
@@ -181,12 +181,16 @@ public class VcfRepository extends AbstractRepository
 				}
 				catch (IOException e)
 				{
-					LOG.error("Unable to load VCF metadata. ", e);
+					logger.error("Unable to load VCF metadata. " + e.getStackTrace());
 				}
-
 				return entity;
 			}
 
+			@Override
+			public void remove()
+			{
+				throw new UnsupportedOperationException();
+			}
 		};
 	}
 
@@ -253,6 +257,17 @@ public class VcfRepository extends AbstractRepository
 			}
 		}
 		return entityMetaData;
+	}
+
+	/**
+	 * Prefix to make INFO column names safe-ish. For example, 'Samples' is sometimes used as an INFO field
+	 * and clashes with the 'Samples' key used by Genotype-IO to store sample data in memory.
+	 * By prefixing a tag we hope to create unique INFO field names that do not clash.
+	 * @return
+	 */
+	public static String getInfoPrefix()
+	{
+		return INFO + "_";
 	}
 
 	void createSampleEntityMetaData(Iterable<VcfMetaFormat> formatMetaData)
@@ -403,7 +418,7 @@ public class VcfRepository extends AbstractRepository
 				}
 				catch (IOException e)
 				{
-					LOG.warn("", e);
+					logger.warn("", e);
 				}
 			}
 		}

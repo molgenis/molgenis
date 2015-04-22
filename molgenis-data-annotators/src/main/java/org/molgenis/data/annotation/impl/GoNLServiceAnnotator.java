@@ -156,7 +156,6 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 		Map<String, Object> resultMap = annotateWithGoNL(entity.getString(VcfRepository.CHROM),
 				entity.getLong(VcfRepository.POS), entity.getString(VcfRepository.REF),
 				entity.getString(VcfRepository.ALT));
-		return Collections.<Entity> singletonList(getAnnotatedEntity(entity, resultMap));
 		return Collections.<Entity> singletonList(AnnotatorUtils.getAnnotatedEntity(this, entity, resultMap));
 	}
 

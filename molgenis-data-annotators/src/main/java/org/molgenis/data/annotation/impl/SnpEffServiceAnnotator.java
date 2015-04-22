@@ -62,24 +62,44 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator, ApplicationL
 	public static String snpEffPath = "";
 
 	private static final String NAME = "SnpEff";
-	public static final String ANNOTATION = "Annotation";
-	public static final String PUTATIVE_IMPACT = "Putative_impact";
-	public static final String GENE_NAME = "Gene_Name";
-	public static final String GENE_ID = "Gene_ID";
-	public static final String FEATURE_TYPE = "Feature_type";
-	public static final String FEATURE_ID = "Feature_ID";
-	public static final String TRANSCRIPT_BIOTYPE = "Transcript_biotype";
-	public static final String RANK_TOTAL = "Rank_total";
-	public static final String HGVS_C = "HGVS_c";
-	public static final String HGVS_P = "HGVS_p";
-	public static final String C_DNA_POSITION = "cDNA_position";
-	public static final String CDS_POSITION = "CDS_position";
-	public static final String PROTEIN_POSITION = "Protein_position";
-	public static final String DISTANCE_TO_FEATURE = "Distance_to_feature";
-	public static final String ERRORS = "Errors";
-	public static final String LOF = "LOF";
-	public static final String NMD = "NMD";
-	private DataService dataService = null;
+
+    public static final String ANNOTATION_LABEL = "Annotation";
+	public static final String PUTATIVE_IMPACT_LABEL = "Putative_impact";
+	public static final String GENE_NAME_LABEL = "Gene_Name";
+	public static final String GENE_ID_LABEL = "Gene_ID";
+	public static final String FEATURE_TYPE_LABEL = "Feature_type";
+	public static final String FEATURE_ID_LABEL = "Feature_ID";
+	public static final String TRANSCRIPT_BIOTYPE_LABEL = "Transcript_biotype";
+	public static final String RANK_TOTAL_LABEL = "Rank_total";
+	public static final String HGVS_C_LABEL = "HGVS_c";
+	public static final String HGVS_P_LABEL = "HGVS_p";
+	public static final String C_DNA_POSITION_LABEL = "cDNA_position";
+	public static final String CDS_POSITION_LABEL = "CDS_position";
+	public static final String PROTEIN_POSITION_LABEL = "Protein_position";
+	public static final String DISTANCE_TO_FEATURE_LABEL = "Distance_to_feature";
+	public static final String ERRORS_LABEL = "Errors";
+	public static final String LOF_LABEL = "LOF";
+	public static final String NMD_LABEL = "NMD";
+
+    public static final String ANNOTATION = VcfRepository.getInfoPrefix() + ANNOTATION_LABEL;
+    public static final String PUTATIVE_IMPACT = VcfRepository.getInfoPrefix() + PUTATIVE_IMPACT_LABEL;
+    public static final String GENE_NAME = VcfRepository.getInfoPrefix() + GENE_NAME_LABEL;
+    public static final String GENE_ID = VcfRepository.getInfoPrefix() + GENE_ID_LABEL;
+    public static final String FEATURE_TYPE = VcfRepository.getInfoPrefix() + FEATURE_TYPE_LABEL;
+    public static final String FEATURE_ID = VcfRepository.getInfoPrefix() + FEATURE_ID_LABEL;
+    public static final String TRANSCRIPT_BIOTYPE = VcfRepository.getInfoPrefix() + TRANSCRIPT_BIOTYPE_LABEL;
+    public static final String RANK_TOTAL = VcfRepository.getInfoPrefix() + RANK_TOTAL_LABEL;
+    public static final String HGVS_C = VcfRepository.getInfoPrefix() + HGVS_C_LABEL;
+    public static final String HGVS_P = VcfRepository.getInfoPrefix() + HGVS_P_LABEL;
+    public static final String C_DNA_POSITION = VcfRepository.getInfoPrefix() + C_DNA_POSITION_LABEL;
+    public static final String CDS_POSITION = VcfRepository.getInfoPrefix() + CDS_POSITION_LABEL;
+    public static final String PROTEIN_POSITION = VcfRepository.getInfoPrefix() + PROTEIN_POSITION_LABEL;
+    public static final String DISTANCE_TO_FEATURE = VcfRepository.getInfoPrefix() + DISTANCE_TO_FEATURE_LABEL;
+    public static final String ERRORS = VcfRepository.getInfoPrefix() + ERRORS_LABEL;
+    public static final String LOF = VcfRepository.getInfoPrefix() + LOF_LABEL;
+    public static final String NMD = VcfRepository.getInfoPrefix() + NMD_LABEL;
+
+    private DataService dataService = null;
 
 	public enum impact
 	{
@@ -333,93 +353,93 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator, ApplicationL
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
 
 		DefaultAttributeMetaData annotation = new DefaultAttributeMetaData(ANNOTATION,
-				MolgenisFieldTypes.FieldTypeEnum.STRING);
+				MolgenisFieldTypes.FieldTypeEnum.STRING).setLabel(FEATURE_ID_LABEL);
 		annotation
 				.setDescription("Annotated using Sequence Ontology terms. Multiple effects can be concatenated using ‘&’ (source:http://snpeff.sourceforge.net)");
 		metadata.addAttributeMetaData(annotation);
 
 		DefaultAttributeMetaData putative_impact = new DefaultAttributeMetaData(PUTATIVE_IMPACT,
-				MolgenisFieldTypes.FieldTypeEnum.STRING);
+				MolgenisFieldTypes.FieldTypeEnum.STRING).setLabel(FEATURE_ID_LABEL);
 		putative_impact
 				.setDescription(" A simple estimation of putative impact / deleteriousness : {HIGH, MODERATE, LOW, MODIFIER}(source:http://snpeff.sourceforge.net)");
 		metadata.addAttributeMetaData(putative_impact);
 
 		DefaultAttributeMetaData gene_name = new DefaultAttributeMetaData(GENE_NAME,
-				MolgenisFieldTypes.FieldTypeEnum.STRING);
+				MolgenisFieldTypes.FieldTypeEnum.STRING).setLabel(FEATURE_ID_LABEL);
 		gene_name
 				.setDescription("Common gene name (HGNC). Optional: use closest gene when the variant is “intergenic”(source:http://snpeff.sourceforge.net)");
 		metadata.addAttributeMetaData(gene_name);
 
 		DefaultAttributeMetaData gene_id = new DefaultAttributeMetaData(GENE_ID,
-				MolgenisFieldTypes.FieldTypeEnum.STRING);
+				MolgenisFieldTypes.FieldTypeEnum.STRING).setLabel(FEATURE_ID_LABEL);
 		gene_id.setDescription("Gene ID");
 		metadata.addAttributeMetaData(gene_id);
 
 		DefaultAttributeMetaData feature_type = new DefaultAttributeMetaData(FEATURE_TYPE,
-				MolgenisFieldTypes.FieldTypeEnum.STRING);
+				MolgenisFieldTypes.FieldTypeEnum.STRING).setLabel(FEATURE_ID_LABEL);
 		feature_type
 				.setDescription("Which type of feature is in the next field (e.g. transcript, motif, miRNA, etc.). It is preferred to use Sequence Ontology (SO) terms, but ‘custom’ (user defined) are allowed. ANN=A|stop_gained|HIGH|||transcript|... Tissue specific features may include cell type / tissue information separated by semicolon e.g.: ANN=A|histone_binding_site|LOW|||H3K4me3:HeLa-S3|...\n"
 						+ "Feature ID: Depending on the annotation, this may be: Transcript ID (preferably using version number), Motif ID, miRNA, ChipSeq peak, Histone mark, etc. Note: Some features may not have ID (e.g. histone marks from custom Chip-Seq experiments may not have a unique ID). (source:http://snpeff.sourceforge.net)");
 		metadata.addAttributeMetaData(feature_type);
 
 		DefaultAttributeMetaData feature_id = new DefaultAttributeMetaData(FEATURE_ID,
-				MolgenisFieldTypes.FieldTypeEnum.STRING);
+				MolgenisFieldTypes.FieldTypeEnum.STRING).setLabel(FEATURE_ID_LABEL);
 		feature_id
 				.setDescription("Depending on the annotation, this may be: Transcript ID (preferably using version number), Motif ID, miRNA, ChipSeq peak, Histone mark, etc. Note: Some features may not have ID (e.g. histone marks from custom Chip-Seq experiments may not have a unique ID).(source:http://snpeff.sourceforge.net)");
 		metadata.addAttributeMetaData(feature_id);
 
 		DefaultAttributeMetaData transcript_biotype = new DefaultAttributeMetaData(TRANSCRIPT_BIOTYPE,
-				MolgenisFieldTypes.FieldTypeEnum.STRING);
+				MolgenisFieldTypes.FieldTypeEnum.STRING).setLabel(FEATURE_ID_LABEL);
 		transcript_biotype
 				.setDescription("The bare minimum is at least a description on whether the transcript is {“Coding”, “Noncoding”}. Whenever possible, use ENSEMBL biotypes.(source:http://snpeff.sourceforge.net)");
 		metadata.addAttributeMetaData(transcript_biotype);
 
 		DefaultAttributeMetaData rank_total = new DefaultAttributeMetaData(RANK_TOTAL,
-				MolgenisFieldTypes.FieldTypeEnum.STRING);
+				MolgenisFieldTypes.FieldTypeEnum.STRING).setLabel(FEATURE_ID_LABEL);
 		rank_total
 				.setDescription("Exon or Intron rank / total number of exons or introns(source:http://snpeff.sourceforge.net)");
 		metadata.addAttributeMetaData(rank_total);
 
-		DefaultAttributeMetaData HGVS_c = new DefaultAttributeMetaData(HGVS_C, MolgenisFieldTypes.FieldTypeEnum.STRING);
+		DefaultAttributeMetaData HGVS_c = new DefaultAttributeMetaData(HGVS_C, MolgenisFieldTypes.FieldTypeEnum.STRING).setLabel(FEATURE_ID_LABEL);
 		HGVS_c.setDescription("Variant using HGVS notation (DNA level)(source:http://snpeff.sourceforge.net)");
 		metadata.addAttributeMetaData(HGVS_c);
 
-		DefaultAttributeMetaData HGVS_p = new DefaultAttributeMetaData(HGVS_P, MolgenisFieldTypes.FieldTypeEnum.STRING);
+		DefaultAttributeMetaData HGVS_p = new DefaultAttributeMetaData(HGVS_P, MolgenisFieldTypes.FieldTypeEnum.STRING).setLabel(FEATURE_ID_LABEL);
 		HGVS_p.setDescription("If variant is coding, this field describes the variant using HGVS notation (Protein level). Since transcript ID is already mentioned in ‘feature ID’, it may be omitted here.(source:http://snpeff.sourceforge.net)");
 		metadata.addAttributeMetaData(HGVS_p);
 
 		DefaultAttributeMetaData cDNA_position = new DefaultAttributeMetaData(C_DNA_POSITION,
-				MolgenisFieldTypes.FieldTypeEnum.STRING);
+				MolgenisFieldTypes.FieldTypeEnum.STRING).setLabel(FEATURE_ID_LABEL);
 		cDNA_position
 				.setDescription("Position in cDNA and trancript’s cDNA length (one based)(source:http://snpeff.sourceforge.net)");
 		metadata.addAttributeMetaData(cDNA_position);
 
 		DefaultAttributeMetaData CDS_position = new DefaultAttributeMetaData(CDS_POSITION,
-				MolgenisFieldTypes.FieldTypeEnum.STRING);
+				MolgenisFieldTypes.FieldTypeEnum.STRING).setLabel(FEATURE_ID_LABEL);
 		CDS_position
 				.setDescription("Position and number of coding bases (one based includes START and STOP codons)(source:http://snpeff.sourceforge.net)");
 		metadata.addAttributeMetaData(CDS_position);
 
 		DefaultAttributeMetaData Protein_position = new DefaultAttributeMetaData(PROTEIN_POSITION,
-				MolgenisFieldTypes.FieldTypeEnum.STRING);
+				MolgenisFieldTypes.FieldTypeEnum.STRING).setLabel(FEATURE_ID_LABEL);
 		Protein_position.setDescription("Position and number of AA (one based, including START, but not STOP)");
 		metadata.addAttributeMetaData(Protein_position);
 
 		DefaultAttributeMetaData Distance_to_feature = new DefaultAttributeMetaData(DISTANCE_TO_FEATURE,
-				MolgenisFieldTypes.FieldTypeEnum.STRING);
+				MolgenisFieldTypes.FieldTypeEnum.STRING).setLabel(FEATURE_ID_LABEL);
 		Distance_to_feature
 				.setDescription("All items in this field are options, so the field could be empty. Up/Downstream: Distance to first / last codon Intergenic: Distance to closest gene Distance to closest Intron boundary in exon (+/- up/downstream). If same, use positive number. Distance to closest exon boundary in Intron (+/- up/downstream) Distance to first base in MOTIF Distance to first base in miRNA Distance to exon-intron boundary in splice_site or splice _region ChipSeq peak: Distance to summit (or peak center) Histone mark / Histone state: Distance to summit (or peak center)(source:http://snpeff.sourceforge.net)");
 		metadata.addAttributeMetaData(Distance_to_feature);
 
-		DefaultAttributeMetaData Errors = new DefaultAttributeMetaData(ERRORS, MolgenisFieldTypes.FieldTypeEnum.STRING);
+		DefaultAttributeMetaData Errors = new DefaultAttributeMetaData(ERRORS, MolgenisFieldTypes.FieldTypeEnum.STRING).setLabel(FEATURE_ID_LABEL);
 		Errors.setDescription("Add errors, warnings oErrors, Warnings or Information messages: Add errors, warnings or r informative message that can affect annotation accuracy. It can be added using either ‘codes’ (as shown in column 1, e.g. W1) or ‘message types’ (as shown in column 2, e.g. WARNING_REF_DOES_NOT_MATCH_GENOME). All these errors, warnings or information messages messages are optional.(source:http://snpeff.sourceforge.net)");
 		metadata.addAttributeMetaData(Errors);
 
-		DefaultAttributeMetaData lof = new DefaultAttributeMetaData(LOF, MolgenisFieldTypes.FieldTypeEnum.STRING);
+		DefaultAttributeMetaData lof = new DefaultAttributeMetaData(LOF, MolgenisFieldTypes.FieldTypeEnum.STRING).setLabel(FEATURE_ID_LABEL);
 		lof.setDescription("snpEff can estimate if a variant is deemed to have a loss of function on the protein.(source:http://snpeff.sourceforge.net)");
 		metadata.addAttributeMetaData(lof);
 
-		DefaultAttributeMetaData nmd = new DefaultAttributeMetaData(NMD, MolgenisFieldTypes.FieldTypeEnum.STRING);
+		DefaultAttributeMetaData nmd = new DefaultAttributeMetaData(NMD, MolgenisFieldTypes.FieldTypeEnum.STRING).setLabel(FEATURE_ID_LABEL);
 		nmd.setDescription("Nonsense mediate decay assessment. Some mutations may cause mRNA to be degraded thus not translated into a protein. NMD analysis marks mutations that are estimated to trigger nonsense mediated decay.(source:http://snpeff.sourceforge.net)");
 		metadata.addAttributeMetaData(nmd);
 

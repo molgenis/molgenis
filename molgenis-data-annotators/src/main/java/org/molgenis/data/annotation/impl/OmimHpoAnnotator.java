@@ -153,7 +153,7 @@ public class OmimHpoAnnotator extends LocusAnnotator
 				{
 					annotateWithHPO(geneSymbol, resultMap);
 				}
-				results.add(getAnnotatedEntity(entity, resultMap));
+				results.add(AnnotatorUtils.getAnnotatedEntity(this, entity, resultMap));
 			}
 		}
 		catch (Exception e)

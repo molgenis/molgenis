@@ -15,6 +15,7 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.AnnotatorUtils;
 import org.molgenis.data.annotation.TabixReader;
 import org.molgenis.data.annotation.VariantAnnotator;
 import org.molgenis.data.annotation.VcfUtils;
@@ -149,7 +150,7 @@ public class ClinVarVCFServiceAnnotator extends VariantAnnotator
 		Map<String, Object> resultMap = annotateEntityWithClinVar(entity.getString(VcfRepository.CHROM),
 				entity.getLong(VcfRepository.POS), entity.getString(VcfRepository.REF),
 				entity.getString(VcfRepository.ALT));
-		return Collections.<Entity> singletonList(getAnnotatedEntity(entity, resultMap));
+		return Collections.<Entity> singletonList(AnnotatorUtils.getAnnotatedEntity(this, entity, resultMap));
 	}
 
 	private synchronized Map<String, Object> annotateEntityWithClinVar(String chromosome, Long position,

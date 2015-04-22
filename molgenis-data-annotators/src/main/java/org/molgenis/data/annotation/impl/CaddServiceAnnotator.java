@@ -55,8 +55,10 @@ public class CaddServiceAnnotator extends VariantAnnotator
 
 	// the cadd service returns these two values
 	// must be compatible with VCF format, ie no funny characters
-	public static final String CADD_SCALED = VcfRepository.getInfoPrefix() + "CADDSCALED";
-	public static final String CADD_ABS = VcfRepository.getInfoPrefix() + "CADDABS";
+	public static final String CADD_SCALED_LABEL = "CADDSCALED";
+	public static final String CADD_ABS_LABEL = "CADDABS";
+    public static final String CADD_SCALED = VcfRepository.getInfoPrefix()+"CADDSCALED";
+    public static final String CADD_ABS = VcfRepository.getInfoPrefix()+"CADDABS";
 
 	private static final String NAME = "CADD";
 
@@ -271,11 +273,8 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	public EntityMetaData getOutputMetaData()
 	{
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		DefaultAttributeMetaData cadd_abs = new DefaultAttributeMetaData(CADD_ABS, FieldTypeEnum.DECIMAL);
-		cadd_abs.setDescription("\"Raw\" CADD scores come straight from the model, and are interpretable as the extent to which the annotation profile for a given variant suggests that that variant is likely to be \"observed\" (negative values) vs \"simulated\" (positive values). These values have no absolute unit of meaning and are incomparable across distinct annotation combinations, training sets, or model parameters. However, raw values do have relative meaning, with higher values indicating that a variant is more likely to be simulated (or \"not observed\") and therefore more likely to have deleterious effects.(source: http://cadd.gs.washington.edu/info)");
-		DefaultAttributeMetaData cadd_scaled = new DefaultAttributeMetaData(CADD_SCALED, FieldTypeEnum.DECIMAL);
-		cadd_scaled
-				.setDescription("Since the raw scores do have relative meaning, one can take a specific group of variants, define the rank for each variant within that group, and then use that value as a \"normalized\" and now externally comparable unit of analysis. In our case, we scored and ranked all ~8.6 billion SNVs of the GRCh37/hg19 reference and then \"PHRED-scaled\" those values by expressing the rank in order of magnitude terms rather than the precise rank itself. For example, reference genome single nucleotide variants at the 10th-% of CADD scores are assigned to CADD-10, top 1% to CADD-20, top 0.1% to CADD-30, etc. The results of this transformation are the \"scaled\" CADD scores.(source: http://cadd.gs.washington.edu/info)");
+		DefaultAttributeMetaData cadd_abs = new DefaultAttributeMetaData(CADD_ABS, FieldTypeEnum.DECIMAL).setLabel(CADD_ABS_LABEL).setDescription("\"Raw\" CADD scores come straight from the model, and are interpretable as the extent to which the annotation profile for a given variant suggests that that variant is likely to be \"observed\" (negative values) vs \"simulated\" (positive values). These values have no absolute unit of meaning and are incomparable across distinct annotation combinations, training sets, or model parameters. However, raw values do have relative meaning, with higher values indicating that a variant is more likely to be simulated (or \"not observed\") and therefore more likely to have deleterious effects.(source: http://cadd.gs.washington.edu/info)");
+		DefaultAttributeMetaData cadd_scaled = new DefaultAttributeMetaData(CADD_SCALED, FieldTypeEnum.DECIMAL).setLabel(CADD_SCALED_LABEL).setDescription("Since the raw scores do have relative meaning, one can take a specific group of variants, define the rank for each variant within that group, and then use that value as a \"normalized\" and now externally comparable unit of analysis. In our case, we scored and ranked all ~8.6 billion SNVs of the GRCh37/hg19 reference and then \"PHRED-scaled\" those values by expressing the rank in order of magnitude terms rather than the precise rank itself. For example, reference genome single nucleotide variants at the 10th-% of CADD scores are assigned to CADD-10, top 1% to CADD-20, top 0.1% to CADD-30, etc. The results of this transformation are the \"scaled\" CADD scores.(source: http://cadd.gs.washington.edu/info)");
 
 		metadata.addAttributeMetaData(cadd_abs);
 		metadata.addAttributeMetaData(cadd_scaled);
