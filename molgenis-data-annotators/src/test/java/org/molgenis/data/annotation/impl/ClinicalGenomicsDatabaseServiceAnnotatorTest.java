@@ -12,70 +12,41 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.impl.datastructures.CgdData;
 import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
 import org.molgenis.data.annotation.provider.CgdDataProvider;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.annotators.annotator.test.data.AnnotatorTestData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ResourceUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class ClinicalGenomicsDatabaseServiceAnnotatorTest
+public class ClinicalGenomicsDatabaseServiceAnnotatorTest extends AnnotatorTestData
 {
-	private DefaultEntityMetaData metaDataCanAnnotate;
-	private DefaultEntityMetaData metaDataCantAnnotate;
-	private ClinicalGenomicsDatabaseServiceAnnotator annotator;
-	private DefaultAttributeMetaData attributeMetaDataChrom;
-	private DefaultAttributeMetaData attributeMetaDataPos;
-	private DefaultAttributeMetaData attributeMetaDataCantAnnotateChrom;
-	private Entity entity;
-	private ArrayList<Entity> input;
+	public ClinicalGenomicsDatabaseServiceAnnotator annotator;
 
 	@BeforeMethod
 	public void beforeMethod() throws IOException
 	{
-		MolgenisSettings settings = mock(MolgenisSettings.class);
-
 		when(settings.getProperty(CgdDataProvider.CGD_FILE_LOCATION_PROPERTY)).thenReturn(
-                ResourceUtils.getFile(getClass(), "/cgd_example.txt").getPath());
-
-		metaDataCanAnnotate = new DefaultEntityMetaData("test");
-        metaDataCantAnnotate = new DefaultEntityMetaData("test");
-		attributeMetaDataChrom = new DefaultAttributeMetaData(VcfRepository.CHROM, FieldTypeEnum.STRING);
-		attributeMetaDataPos = new DefaultAttributeMetaData(VcfRepository.POS, FieldTypeEnum.LONG);
-
-        attributeMetaDataCantAnnotateChrom = new DefaultAttributeMetaData("Chromosome", FieldTypeEnum.STRING);
-
-		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom);
-		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
-		metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom.getName());
-
-		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataChrom);
-		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataCantAnnotateChrom);
-
-		entity = new MapEntity(metaDataCanAnnotate);
+				ResourceUtils.getFile(getClass(), "/cgd_example.txt").getPath());
 
 		String chrStr = "1";
 		Long chrPos = new Long(66067385);
 		entity.set(VcfRepository.CHROM, chrStr);
 		entity.set(VcfRepository.POS, chrPos);
-
-		input = new ArrayList<Entity>();
+		
 		input.add(entity);
 
 		CgdDataProvider cgdDataProvider = mock(CgdDataProvider.class);
 		AnnotationService annotationService = mock(AnnotationService.class);
 		HgncLocationsProvider hgncLocationsProvider = mock(HgncLocationsProvider.class);
 		Map<String, HGNCLocations> locationsMap = Collections.singletonMap("LEPR", new HGNCLocations("LEPR", 65886248l,
-                66107242l, "1"));
+				66107242l, "1"));
 
 		Map<String, CgdData> cgdDataMap = Collections
 				.singletonMap(
@@ -98,7 +69,6 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest
 
 		annotator = new ClinicalGenomicsDatabaseServiceAnnotator(settings, annotationService, hgncLocationsProvider,
 				cgdDataProvider);
-
 	}
 
 	@Test
@@ -167,6 +137,6 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest
 	@Test
 	public void canAnnotateFalseTest()
 	{
-		assertEquals(annotator.canAnnotate(metaDataCantAnnotate), "missing required attribute");
+		assertEquals(annotator.canAnnotate(metaDataCantAnnotate), "a required attribute has the wrong datatype");
 	}
 }

@@ -22,28 +22,28 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
-import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.annotators.annotator.test.data.AnnotatorTestData;
+import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class EbiServiceAnnotatorTest
+public class EbiServiceAnnotatorTest extends AnnotatorTestData
 {
-	private DefaultEntityMetaData metaDataCanAnnotate;
-	private EntityMetaData metaDataCantAnnotate;
 	private EbiServiceAnnotator annotator;
+
+	private DefaultEntityMetaData ebiMetaDataCanAnnotate = new DefaultEntityMetaData("test");;
+	private DefaultEntityMetaData ebiMetaDataCantAnnotate = new DefaultEntityMetaData("test");;
+
 	private AttributeMetaData attributeMetaDataCanAnnotate;
 	private AttributeMetaData attributeMetaDataCantAnnotate;
-	private AttributeMetaData attributeMetaDataCantAnnotate2;
-	private Entity entity;
+
 	private HttpClient httpClient;
 	private static String SERVICE_RESPONSE;
-	private ArrayList<Entity> input;
 
 	@BeforeMethod
 	public void beforeMethod()
@@ -51,32 +51,19 @@ public class EbiServiceAnnotatorTest
 		this.httpClient = mock(HttpClient.class);
 		annotator = new EbiServiceAnnotator(httpClient);
 
-		metaDataCanAnnotate = new DefaultEntityMetaData("test");
-		attributeMetaDataCanAnnotate = mock(AttributeMetaData.class);
-		when(attributeMetaDataCanAnnotate.getName()).thenReturn("uniprot_id");
-		when(attributeMetaDataCanAnnotate.getDataType()).thenReturn(
-				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
+		attributeMetaDataCanAnnotate = new DefaultAttributeMetaData(EbiServiceAnnotator.UNIPROT_ID,
+				FieldTypeEnum.STRING);
+		ebiMetaDataCanAnnotate.addAttributeMetaData(attributeMetaDataCanAnnotate);
+		ebiMetaDataCanAnnotate.setIdAttribute(EbiServiceAnnotator.UNIPROT_ID);
 
-		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataCanAnnotate);
-		metaDataCanAnnotate.setIdAttribute(attributeMetaDataCanAnnotate.getName());
-		metaDataCantAnnotate = mock(EntityMetaData.class);
-		attributeMetaDataCantAnnotate = mock(AttributeMetaData.class);
-		when(attributeMetaDataCantAnnotate.getName()).thenReturn("otherID");
-		when(attributeMetaDataCantAnnotate.getDataType()).thenReturn(
-				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
-		attributeMetaDataCantAnnotate2 = mock(AttributeMetaData.class);
-		when(attributeMetaDataCantAnnotate2.getName()).thenReturn("uniprot_id");
-		when(attributeMetaDataCantAnnotate2.getDataType()).thenReturn(
-				MolgenisFieldTypes.getType(FieldTypeEnum.DATE.toString().toLowerCase()));
+		attributeMetaDataCantAnnotate = new DefaultAttributeMetaData(EbiServiceAnnotator.UNIPROT_ID, FieldTypeEnum.DATE);
+		ebiMetaDataCantAnnotate.addAttributeMetaData(attributeMetaDataCantAnnotate);
+		ebiMetaDataCantAnnotate.setIdAttribute(EbiServiceAnnotator.UNIPROT_ID);
 
-		when(metaDataCantAnnotate.getAttribute("uniprot_id")).thenReturn(attributeMetaDataCantAnnotate2);
-
-		entity = new MapEntity(metaDataCanAnnotate);
-		entity.set("uniprot_id","Q13936");
-		input = new ArrayList<Entity>();
+		entity.set("uniprot_id", "Q13936");
 		input.add(entity);
 
-        SERVICE_RESPONSE = "{\"target\": {\"targetType\": \"SINGLE PROTEIN\", \"chemblId\": \"CHEMBL1940\", \"geneNames\": \"Unspecified\", \"description\": \"Voltage-gated L-type calcium channel alpha-1C subunit\", \"compoundCount\": 171, \"bioactivityCount\": 239, \"proteinAccession\": \"Q13936\", \"synonyms\": \"CCHL1A1,CACNL1A1,Calcium channel, L type, alpha-1 polypeptide, isoform 1, cardiac muscle,Voltage-gated calcium channel subunit alpha Cav1.2,CACNA1C,CACN2,CACH2 ,Voltage-dependent L-type calcium channel subunit alpha-1C\", \"organism\": \"Homo sapiens\", \"preferredName\": \"Voltage-gated L-type calcium channel alpha-1C subunit\"}}";
+		SERVICE_RESPONSE = "{\"target\": {\"targetType\": \"SINGLE PROTEIN\", \"chemblId\": \"CHEMBL1940\", \"geneNames\": \"Unspecified\", \"description\": \"Voltage-gated L-type calcium channel alpha-1C subunit\", \"compoundCount\": 171, \"bioactivityCount\": 239, \"proteinAccession\": \"Q13936\", \"synonyms\": \"CCHL1A1,CACNL1A1,Calcium channel, L type, alpha-1 polypeptide, isoform 1, cardiac muscle,Voltage-gated calcium channel subunit alpha Cav1.2,CACNA1C,CACN2,CACH2 ,Voltage-dependent L-type calcium channel subunit alpha-1C\", \"organism\": \"Homo sapiens\", \"preferredName\": \"Voltage-gated L-type calcium channel alpha-1C subunit\"}}";
 	}
 
 	@Test
@@ -131,12 +118,12 @@ public class EbiServiceAnnotatorTest
 	@Test
 	public void canAnnotateTrueTest()
 	{
-		assertEquals(annotator.canAnnotate(metaDataCanAnnotate), "true");
+		assertEquals(annotator.canAnnotate(ebiMetaDataCanAnnotate), "true");
 	}
 
 	@Test
 	public void canAnnotateFalseTest()
 	{
-		assertEquals(annotator.canAnnotate(metaDataCantAnnotate), "a required attribute has the wrong datatype");
+		assertEquals(annotator.canAnnotate(ebiMetaDataCantAnnotate), "a required attribute has the wrong datatype");
 	}
 }
