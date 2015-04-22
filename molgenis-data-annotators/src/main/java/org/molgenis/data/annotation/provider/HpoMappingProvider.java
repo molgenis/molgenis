@@ -27,7 +27,7 @@ public class HpoMappingProvider
 		this.molgenisSettings = molgenisSettings;
 	}
 
-	public Reader getHpoMapping() throws MalformedURLException, IOException
+	public Reader getHpoMapping() throws IOException
 	{
 		String url = molgenisSettings.getProperty(KEY_HPO_MAPPING);
 		return new InputStreamReader(new URL(url).openStream(), Charset.forName("UTF-8"));

@@ -23,6 +23,7 @@ import org.molgenis.data.annotation.provider.KeggDataProvider;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.vcf.VcfRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -77,8 +78,8 @@ public class KeggServiceAnnotator extends LocusAnnotator
 	{
 		List<Entity> results = new ArrayList<Entity>();
 
-		String chromosome = entity.getString(CHROMOSOME);
-		Long position = entity.getLong(POSITION);
+		String chromosome = entity.getString(VcfRepository.CHROM);
+		Long position = entity.getLong(VcfRepository.POS);
 
 		Locus locus = new Locus(chromosome, position);
 
@@ -99,8 +100,8 @@ public class KeggServiceAnnotator extends LocusAnnotator
 				{
 					HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
-					resultMap.put(CHROMOSOME, locus.getChrom());
-					resultMap.put(POSITION, locus.getPos());
+					resultMap.put(VcfRepository.CHROM, locus.getChrom());
+					resultMap.put(VcfRepository.POS, locus.getPos());
 
 					String keggGeneId = hgncToKeggGeneId.get(geneSymbol);
 

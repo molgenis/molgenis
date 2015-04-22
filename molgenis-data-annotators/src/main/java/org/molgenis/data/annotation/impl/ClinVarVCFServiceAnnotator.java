@@ -3,6 +3,7 @@ package org.molgenis.data.annotation.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -18,6 +19,8 @@ import org.molgenis.data.annotation.AnnotatorUtils;
 import org.molgenis.data.annotation.TabixReader;
 import org.molgenis.data.annotation.VariantAnnotator;
 import org.molgenis.data.annotation.VcfUtils;
+import org.molgenis.data.annotation.impl.datastructures.ClinvarData;
+import org.molgenis.data.annotation.provider.ClinvarDataProvider;
 import org.molgenis.data.support.AnnotationServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -31,52 +34,38 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
-/**
- * ExAC annotator
- * 
- * Data @ ftp://ftp.broadinstitute.org/pub/ExAC_release/release0.3/
- * 
- * TODO: feature enhancement: match multiple alternatives from SOURCE file to multiple alternatives in ExAC
- * 
- * e.g. 1 237965145 rs115779425 T TT,TTT,TTTT . PASS AC=31,3,1;AN=70;GTC=0,31,0,3,0,0,1,0,0,0;
- * 
- * 
- * */
-@Component("exacService")
-public class ExACServiceAnnotator extends VariantAnnotator
+@Component("clinvarVcfService")
+public class ClinVarVCFServiceAnnotator extends VariantAnnotator
 {
-	private static final Logger LOG = LoggerFactory.getLogger(ExACServiceAnnotator.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ClinVarVCFServiceAnnotator.class);
 
 	private final MolgenisSettings molgenisSettings;
 	private final AnnotationService annotatorService;
 
-	public static final String EXAC_MAF = VcfRepository.getInfoPrefix() + "EXACMAF";
+	private static final String NAME = "ClinvarVCF";
 
-	private static final String NAME = "EXAC";
-
-	final List<String> infoFields = Arrays
-			.asList(new String[]
-			{ "##INFO=<ID="
-					+ EXAC_MAF.substring(VcfRepository.getInfoPrefix().length())
-					+ ",Number=1,Type=Float,Description=\"ExAC minor allele frequency. Taken straight for AF field, inverted when alleles are swapped\">" });
-
-	public static final String EXAC_VCFGZ_LOCATION = "exac_location";
-
+	public static final String CLINVAR_VCF_LOCATION_PROPERTY = "clinvar_location";
+	public final static String CLINVAR_CLINSIG = VcfRepository.getInfoPrefix() + "CLINVAR_CLNSIG";
 	private volatile TabixReader tabixReader;
 
+	final List<String> infoFields = Arrays.asList(new String[]
+	{ "##INFO=<ID=" + CLINVAR_CLINSIG.substring(VcfRepository.getInfoPrefix().length())
+			+ ",Number=1,Type=String,Description=\"ClinVar clinical significance\">" });
+
 	@Autowired
-	public ExACServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService)
-			throws IOException
+	public ClinVarVCFServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService,
+			ClinvarDataProvider clinvarDataProvider) throws IOException
 	{
 		this.molgenisSettings = molgenisSettings;
 		this.annotatorService = annotatorService;
 	}
 
-	public ExACServiceAnnotator(File exacFileLocation, File inputVcfFile, File outputVCFFile) throws Exception
+	public ClinVarVCFServiceAnnotator(File clinvarVcfFileLocation, File inputVcfFile, File outputVCFFile)
+			throws Exception
 	{
 
 		this.molgenisSettings = new MolgenisSimpleSettings();
-		molgenisSettings.setProperty(EXAC_VCFGZ_LOCATION, exacFileLocation.getAbsolutePath());
+		molgenisSettings.setProperty(CLINVAR_VCF_LOCATION_PROPERTY, clinvarVcfFileLocation.getAbsolutePath());
 
 		this.annotatorService = new AnnotationServiceImpl();
 
@@ -88,7 +77,7 @@ public class ExACServiceAnnotator extends VariantAnnotator
 		Iterator<Entity> vcfIter = vcfRepo.iterator();
 
 		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields,
-				EXAC_MAF.substring(VcfRepository.getInfoPrefix().length()));
+				CLINVAR_CLINSIG.substring(VcfRepository.getInfoPrefix().length()));
 
 		System.out.println("Now starting to process the data.");
 
@@ -125,31 +114,9 @@ public class ExACServiceAnnotator extends VariantAnnotator
 	}
 
 	@Override
-	public boolean annotationDataExists()
-	{
-		boolean canAnnotate = false;
-		if (molgenisSettings.getProperty(EXAC_VCFGZ_LOCATION) != null)
-		{
-			canAnnotate = new File(molgenisSettings.getProperty(EXAC_VCFGZ_LOCATION)).exists();
-		}
-		return canAnnotate;
-	}
-
-	@Override
 	public String getSimpleName()
 	{
 		return NAME;
-	}
-
-	@Override
-	public List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException
-	{
-		checkTabixReader();
-
-		Map<String, Object> resultMap = annotateEntityWithExAC(entity.getString(VcfRepository.CHROM),
-				entity.getLong(VcfRepository.POS), entity.getString(VcfRepository.REF),
-				entity.getString(VcfRepository.ALT));
-		return Collections.<Entity> singletonList(AnnotatorUtils.getAnnotatedEntity(this, entity, resultMap));
 	}
 
 	/**
@@ -163,14 +130,31 @@ public class ExACServiceAnnotator extends VariantAnnotator
 			{
 				if (tabixReader == null)
 				{
-					tabixReader = new TabixReader(molgenisSettings.getProperty(EXAC_VCFGZ_LOCATION));
+					tabixReader = new TabixReader(molgenisSettings.getProperty(CLINVAR_VCF_LOCATION_PROPERTY));
 				}
 			}
 		}
 	}
 
-	private synchronized Map<String, Object> annotateEntityWithExAC(String chromosome, Long position, String reference,
-			String alternative) throws IOException
+	@Override
+	protected boolean annotationDataExists()
+	{
+		return new File(molgenisSettings.getProperty(CLINVAR_VCF_LOCATION_PROPERTY)).exists();
+	}
+
+	@Override
+	public List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException
+	{
+		checkTabixReader();
+
+		Map<String, Object> resultMap = annotateEntityWithClinVar(entity.getString(VcfRepository.CHROM),
+				entity.getLong(VcfRepository.POS), entity.getString(VcfRepository.REF),
+				entity.getString(VcfRepository.ALT));
+		return Collections.<Entity> singletonList(AnnotatorUtils.getAnnotatedEntity(this, entity, resultMap));
+	}
+
+	private synchronized Map<String, Object> annotateEntityWithClinVar(String chromosome, Long position,
+			String reference, String alternative) throws IOException
 	{
 		TabixReader.Iterator tabixIterator = null;
 		try
@@ -179,8 +163,9 @@ public class ExACServiceAnnotator extends VariantAnnotator
 		}
 		catch (Exception e)
 		{
-			LOG.error("Something went wrong (chromosome not in data?) when querying ExAC tabix file for " + chromosome
-					+ " POS: " + position + " REF: " + reference + " ALT: " + alternative + "! skipping...");
+			LOG.error("Something went wrong (chromosome not in data?) when querying ClinVar tabix file for "
+					+ chromosome + " POS: " + position + " REF: " + reference + " ALT: " + alternative
+					+ "! skipping...");
 		}
 		String line = null;
 
@@ -198,6 +183,8 @@ public class ExACServiceAnnotator extends VariantAnnotator
 		catch (NullPointerException npe)
 		{
 			// overkill to print all missing, since ExAC is exome data 'only'
+			// LOG.info("No data for CHROM: " + chromosome + " POS: " + position + " REF: " + reference + " ALT: " +
+			// alternative + " LINE: " + line);
 		}
 
 		// if nothing found, return empty list for no hit
@@ -212,64 +199,29 @@ public class ExACServiceAnnotator extends VariantAnnotator
 		split = line.split("\t", -1);
 		if (split.length != 8)
 		{
-			LOG.error("Bad ExAC data (split was not 8 elements) for CHROM: " + chromosome + " POS: " + position
+			LOG.error("Bad ClinVar data (split was not 8 elements) for CHROM: " + chromosome + " POS: " + position
 					+ " REF: " + reference + " ALT: " + alternative + " LINE: " + line);
 			throw new IOException("Bad data! see log");
 		}
 
-		// get MAF from info field
-		String[] infoFields = split[7].split(";", -1);
-		String[] mafs = null;
-		for (String info : infoFields)
+		// match ref & alt
+		if (split[3].equals(reference) && split[4].equals(alternative))
 		{
-			if (info.startsWith("AF="))
+			LOG.info("ClinVar variant found for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
+					+ " ALT: " + alternative);
+			// ...CLNORIGIN=1;CLNSRCID=.;CLNSIG=2;CLNDSDB=MedGen;CLNDSDBID=CN169374;CLNDBN=not_specified;... etc
+			String clinSig = null;
+			String[] infoSplit = split[7].split(";", -1);
+			for (String infoField : infoSplit)
 			{
-				try
+				if (infoField.startsWith("CLNSIG="))
 				{
-					mafs = info.replace("AF=", "").split(",", -1);
-					break;
-				}
-				catch (java.lang.NumberFormatException e)
-				{
-					LOG.error("Could not get MAF for line \n" + line);
-				}
-			}
-		}
-
-		// get alt alleles and check if the amount is equal to MAF list
-		String[] altAlleles = split[4].split(",", -1);
-		if (mafs.length != altAlleles.length)
-		{
-			throw new IOException("Number of alt alleles unequal to number of MAF values for line " + line);
-		}
-
-		// match alleles and get the MAF from list
-		Double maf = null;
-		for (int i = 0; i < altAlleles.length; i++)
-		{
-			String altAllele = altAlleles[i];
-			if (altAllele.equals(alternative) && split[3].equals(reference))
-			{
-				maf = Double.parseDouble(mafs[i]);
-			}
-		}
-
-		// if nothing found, try swapping ref-alt, and do 1-MAF
-		if (false && maf == null) // FIXME TODO See 1000G annotator why this is not (always) allowed
-		{
-			for (int i = 0; i < altAlleles.length; i++)
-			{
-				String altAllele = altAlleles[i];
-				if (altAllele.equals(reference) && split[3].equals(alternative))
-				{
-					maf = 1 - Double.parseDouble(mafs[i]);
-					LOG.info("*ref-alt swapped* ExAC variant found for CHROM: " + chromosome + " POS: " + position
-							+ " REF: " + reference + " ALT: " + alternative + ", MAF (1-originalMAF) = " + maf);
+					clinSig = infoField.replace("CLNSIG=", "");
+					resultMap.put(CLINVAR_CLINSIG, clinSig);
 				}
 			}
 		}
 
-		resultMap.put(EXAC_MAF, maf);
 		return resultMap;
 	}
 
@@ -277,9 +229,7 @@ public class ExACServiceAnnotator extends VariantAnnotator
 	public EntityMetaData getOutputMetaData()
 	{
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(EXAC_MAF, FieldTypeEnum.DECIMAL));
-
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CLINVAR_CLINSIG, FieldTypeEnum.STRING));
 		return metadata;
 	}
 
