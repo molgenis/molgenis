@@ -33,7 +33,6 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.GenomeConfig;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.dataexplorer.controller.DataRequest.DownloadType;
 import org.molgenis.dataexplorer.download.DataExplorerDownloadHandler;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExportException;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExportRequest;
