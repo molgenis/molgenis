@@ -13,81 +13,29 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
 import org.molgenis.data.annotation.provider.KeggDataProvider;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.annotators.annotator.test.data.AnnotatorTestData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class KeggAnnotatorServiceTest
+public class KeggAnnotatorServiceTest extends AnnotatorTestData
 {
-	private DefaultEntityMetaData metaDataCanAnnotate;
-	private EntityMetaData metaDataCantAnnotate;
 	private KeggServiceAnnotator annotator;
-	private AttributeMetaData attributeMetaDataChrom;
-	private AttributeMetaData attributeMetaDataPos;
-	private AttributeMetaData attributeMetaDataCantAnnotateFeature;
-	private AttributeMetaData attributeMetaDataCantAnnotateChrom;
-	private AttributeMetaData attributeMetaDataCantAnnotatePos;
-	private Entity entity;
-	private ArrayList<Entity> input;
 
 	@BeforeMethod
 	public void beforeMethod() throws IOException
 	{
-		metaDataCanAnnotate = new org.molgenis.data.support.DefaultEntityMetaData("test");
-		attributeMetaDataChrom = mock(AttributeMetaData.class);
-		attributeMetaDataPos = mock(AttributeMetaData.class);
-
 		AnnotationService annotationService = mock(AnnotationService.class);
-
-		when(attributeMetaDataChrom.getName()).thenReturn(VcfRepository.CHROM);
-		when(attributeMetaDataPos.getName()).thenReturn(VcfRepository.POS);
-		when(attributeMetaDataChrom.getDataType()).thenReturn(
-				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
-		when(attributeMetaDataPos.getDataType()).thenReturn(
-				MolgenisFieldTypes.getType(FieldTypeEnum.LONG.toString().toLowerCase()));
-
-		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom);
-		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
-		metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom.getName());
-
-		metaDataCantAnnotate = mock(EntityMetaData.class);
-
-		attributeMetaDataCantAnnotateFeature = mock(AttributeMetaData.class);
-		when(attributeMetaDataCantAnnotateFeature.getName()).thenReturn("otherID");
-		when(attributeMetaDataCantAnnotateFeature.getDataType()).thenReturn(
-				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
-
-		attributeMetaDataCantAnnotateChrom = mock(AttributeMetaData.class);
-		when(attributeMetaDataCantAnnotateChrom.getName()).thenReturn(VcfRepository.CHROM);
-		when(attributeMetaDataCantAnnotateFeature.getDataType()).thenReturn(
-				MolgenisFieldTypes.getType(FieldTypeEnum.INT.toString().toLowerCase()));
-
-		attributeMetaDataCantAnnotatePos = mock(AttributeMetaData.class);
-		when(attributeMetaDataCantAnnotatePos.getName()).thenReturn(VcfRepository.POS);
-		when(attributeMetaDataCantAnnotatePos.getDataType()).thenReturn(
-				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
-
-		when(metaDataCantAnnotate.getAttribute(VcfRepository.CHROM)).thenReturn(attributeMetaDataChrom);
-		when(metaDataCantAnnotate.getAttribute(VcfRepository.POS)).thenReturn(
-				attributeMetaDataCantAnnotatePos);
-
-		entity = new MapEntity(metaDataCanAnnotate);
 
 		entity.set(VcfRepository.CHROM, "2");
 		entity.set(VcfRepository.POS, new Long(58453844l));
-
-		input = new ArrayList<Entity>();
+		
 		input.add(entity);
 
 		String keggHsaData = "hsa:55120	FANCL, FAAP43, PHF9, POG; Fanconi anemia, complementation group L; K10606 E3 ubiquitin-protein ligase FANCL [EC:6.3.2.19]";
