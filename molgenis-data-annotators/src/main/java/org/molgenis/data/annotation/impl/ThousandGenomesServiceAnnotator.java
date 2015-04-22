@@ -57,8 +57,8 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 	private final AnnotationService annotatorService;
 	private static final String NAME = "1000G";
 	public static final String THGEN_MAF_LABEL = "1KGMAF";
-    public static final String THGEN_MAF = VcfRepository.getInfoPrefix() + THGEN_MAF_LABEL;
-    public static final String THGEN_DIRECTORY_LOCATION_PROPERTY = "1000G_location";
+	public static final String THGEN_MAF = VcfRepository.getInfoPrefix() + THGEN_MAF_LABEL;
+	public static final String THGEN_DIRECTORY_LOCATION_PROPERTY = "1000G_location";
 
 	final List<String> infoFields = Arrays.asList(new String[]
 	{ "##INFO=<ID=" + THGEN_MAF.substring(VcfRepository.getInfoPrefix().length())
@@ -158,7 +158,7 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 			{
 				if (tabixReaders == null)
 				{
-					tabixReaders = new HashMap<String, TabixReader>();
+					tabixReaders = new HashMap<>();
 					String chroms = "1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|X|Y"; // yes, 1KG has Y
 
 					for (String chr : chroms.split("\\|"))
@@ -188,7 +188,7 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 	private synchronized Map<String, Object> annotateWith1000G(String chromosome, Long position, String reference,
 			String alternative) throws IOException
 	{
-		Map<String, Object> resultMap = new HashMap<String, Object>();
+		Map<String, Object> resultMap = new HashMap<>();
 
 		if (!tabixReaders.containsKey(chromosome))
 		{
@@ -298,7 +298,8 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 	{
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
 
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(THGEN_MAF, FieldTypeEnum.DECIMAL));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(THGEN_MAF, FieldTypeEnum.DECIMAL)
+				.setLabel(THGEN_MAF_LABEL));
 
 		return metadata;
 	}

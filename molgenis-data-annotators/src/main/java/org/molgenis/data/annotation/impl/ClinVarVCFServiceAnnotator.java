@@ -3,7 +3,6 @@ package org.molgenis.data.annotation.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,7 +18,6 @@ import org.molgenis.data.annotation.AnnotatorUtils;
 import org.molgenis.data.annotation.TabixReader;
 import org.molgenis.data.annotation.VariantAnnotator;
 import org.molgenis.data.annotation.VcfUtils;
-import org.molgenis.data.annotation.impl.datastructures.ClinvarData;
 import org.molgenis.data.annotation.provider.ClinvarDataProvider;
 import org.molgenis.data.support.AnnotationServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
@@ -45,7 +43,8 @@ public class ClinVarVCFServiceAnnotator extends VariantAnnotator
 	private static final String NAME = "ClinvarVCF";
 
 	public static final String CLINVAR_VCF_LOCATION_PROPERTY = "clinvar_location";
-	public final static String CLINVAR_CLINSIG = VcfRepository.getInfoPrefix() + "CLINVAR_CLNSIG";
+	public final static String CLINVAR_CLINSIG_LABEL = "CLINVAR_CLNSIG";
+	public final static String CLINVAR_CLINSIG = VcfRepository.getInfoPrefix() + CLINVAR_CLINSIG_LABEL;
 	private volatile TabixReader tabixReader;
 
 	final List<String> infoFields = Arrays.asList(new String[]
@@ -229,7 +228,8 @@ public class ClinVarVCFServiceAnnotator extends VariantAnnotator
 	public EntityMetaData getOutputMetaData()
 	{
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CLINVAR_CLINSIG, FieldTypeEnum.STRING));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CLINVAR_CLINSIG, FieldTypeEnum.STRING)
+				.setLabel(CLINVAR_CLINSIG_LABEL));
 		return metadata;
 	}
 

@@ -28,7 +28,6 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.framework.server.MolgenisSimpleSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,13 +43,15 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 {
 	private static final Logger LOG = LoggerFactory.getLogger(PhenomizerServiceAnnotator.class);
 
-	private final MolgenisSettings molgenisSettings;
 	private final AnnotationService annotatorService;
 
-	public static final String PHENOMIZERPVAL = VcfRepository.getInfoPrefix() + "PHENOMIZERPVAL";
-	public static final String PHENOMIZEROMIM = VcfRepository.getInfoPrefix() + "PHENOMIZEROMIM";
+    public static final String PHENOMIZERPVAL_LABEL = "PHENOMIZERPVAL";
+    public static final String PHENOMIZEROMIM_LABEL = "PHENOMIZEROMIM";
+    public static final String PHENOMIZERPVAL = VcfRepository.getInfoPrefix() + PHENOMIZERPVAL_LABEL;
+    public static final String PHENOMIZEROMIM = VcfRepository.getInfoPrefix() + PHENOMIZEROMIM_LABEL;
 
-	private static final String NAME = "PHENOMIZER";
+
+    private static final String NAME = "PHENOMIZER";
 
 	HashMap<String, String> geneToPval;
 	HashMap<String, String> geneToOmimID;
@@ -66,13 +67,12 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 	public PhenomizerServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService)
 			throws IOException
 	{
-		this.molgenisSettings = molgenisSettings;
 		this.annotatorService = annotatorService;
 	}
 
 	public static List<String> getHtml(String url) throws IOException
 	{
-		List<String> lines = new ArrayList<String>();
+		List<String> lines = new ArrayList<>();
 		URL loc = new URL(url);
 		BufferedReader in = new BufferedReader(new InputStreamReader(loc.openStream()));
 		String inputLine;
@@ -124,14 +124,11 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 				+ limit + "&terms=" + hpoTerms);
 
 		String pval = null;
-		String simScore = null;
 		String omimId = null;
-		String disorder = null;
 		String gene = null;
-		String thatLastNumber = null;
 
-		geneToPval = new HashMap<String, String>();
-		geneToOmimID = new HashMap<String, String>();
+		geneToPval = new HashMap<>();
+		geneToOmimID = new HashMap<>();
 
 		for (String line : response)
 		{
@@ -141,11 +138,8 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 			}
 			String[] split = line.split("\t", -1);
 			pval = split[0];
-			simScore = split[1];
 			omimId = split[2];
-			disorder = split[3];
 			gene = split[4];
-			thatLastNumber = split[5];
 
 			for (String multiGene : gene.split(", ", -1))
 			{
@@ -161,7 +155,6 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 			LOG.info("gene: " + key + ", " + geneToOmimID.get(key));
 		}
 
-		this.molgenisSettings = new MolgenisSimpleSettings();
 		this.annotatorService = new AnnotationServiceImpl();
 
 		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
@@ -222,7 +215,7 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 	public List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException
 	{
 		Map<String, Object> resultMap = annotateEntityWithPhenomizerPvalue(entity);
-		return Collections.<Entity> singletonList(AnnotatorUtils.getAnnotatedEntity(this, entity, resultMap));
+		return Collections.singletonList(AnnotatorUtils.getAnnotatedEntity(this, entity, resultMap));
 	}
 
 	private synchronized Map<String, Object> annotateEntityWithPhenomizerPvalue(Entity entity) throws IOException
@@ -240,8 +233,7 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 		}
 		else
 		{
-			// will happen a lot for WGS data
-			// LOG.info("No gene symbol in ANN field for " + entity.toString());
+			// do nothing, will happen a lot for WGS data
 		}
 
 		return resultMap;
@@ -252,8 +244,8 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 	public EntityMetaData getOutputMetaData()
 	{
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(PHENOMIZERPVAL, FieldTypeEnum.DECIMAL));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(PHENOMIZEROMIM, FieldTypeEnum.STRING));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(PHENOMIZERPVAL, FieldTypeEnum.DECIMAL).setLabel(PHENOMIZERPVAL_LABEL));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(PHENOMIZEROMIM, FieldTypeEnum.STRING).setLabel(PHENOMIZEROMIM_LABEL));
 		return metadata;
 	}
 

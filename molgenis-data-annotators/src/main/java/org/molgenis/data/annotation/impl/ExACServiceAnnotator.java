@@ -50,7 +50,8 @@ public class ExACServiceAnnotator extends VariantAnnotator
 	private final MolgenisSettings molgenisSettings;
 	private final AnnotationService annotatorService;
 
-	public static final String EXAC_MAF = VcfRepository.getInfoPrefix() + "EXACMAF";
+	public static final String EXAC_MAF_LABEL = "EXACMAF";
+	public static final String EXAC_MAF = VcfRepository.getInfoPrefix() + EXAC_MAF_LABEL;
 
 	private static final String NAME = "EXAC";
 
@@ -278,7 +279,8 @@ public class ExACServiceAnnotator extends VariantAnnotator
 	{
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
 
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(EXAC_MAF, FieldTypeEnum.DECIMAL));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(EXAC_MAF, FieldTypeEnum.DECIMAL)
+				.setLabel(EXAC_MAF_LABEL));
 
 		return metadata;
 	}
