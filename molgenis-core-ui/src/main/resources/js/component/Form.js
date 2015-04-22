@@ -145,7 +145,6 @@
 				encType : 'application/x-www-form-urlencoded', // TODO use multipart/form-data if form contains one or more file inputs
 				noValidate : true,
 				beforeSubmit: this.props.beforeSubmit,
-				onSubmit : this._handleSubmit,
 				success: this._handleSubmitSuccess,
 				error: this._handleSubmitError,
 				key: 'form'
@@ -193,7 +192,8 @@
  						formLayout : this.props.formLayout,
 						colOffset : this.props.colOffset,
 						cancelBtn: this.props.modal === true,
-						onCancelClick : this.props.modal === true ? this._handleCancel : undefined
+						onCancelClick : this.props.modal === true ? this._handleCancel : undefined,
+						onSubmitClick: this._submit
 					}) : null,
 					this.props.children
 				)
@@ -223,57 +223,111 @@
 			}
 		},
 		_handleBlur: function(e) {
+			var attr = e.attr;
+			var value = e.value;
 			
+			this._validate(attr, this._getValue(attr), function(validationResult) {
+            	if(validationResult.valid === true && this._doPersistAttributeValue(attr)) {
+            		this._persistAttributeValue(attr, value);
+                }
+            	
+            	this.setState({
+					errorMessages: this._updateErrorMessages(attr, validationResult)
+				});
+            	
+            }.bind(this));
 		},
+		_doPersistAttributeValue: function(attr) {
+			return this.props.mode === 'edit' && this.props.saveOnBlur && !attr.readOnly;
+	    },
+		_persistAttributeValue: function(attr, value) {
+			// persist attribute
+    		var val;
+        	switch(attr.fieldType) {
+        		case 'CATEGORICAL':
+        		case 'XREF':
+        			val = value !== null && value !== undefined ? value[attr.refEntity.idAttribute] : null;
+        			break;
+        		case 'CATEGORICAL_MREF':
+        		case 'MREF':
+        			val = _.map(value.items, function(item) {
+        				return item[attr.refEntity.idAttribute];
+        			});
+        			break;
+        		default:
+        			val = value;
+        			break;
+        	}
+        	
+        	api.update(this.state.entityInstance.href + '/' + attr.name, val);
+	    },
 		_handleValueChange: function(e) {
 			// update value in entity instance
+			var value = e.value;
 			var entityInstance = _.extend({}, this.state.entityInstance);
-			entityInstance[e.attr] = e.value;
+			entityInstance[e.attr] = value;
+			var attr = this.state.entity.atomicAttributes[e.attr];
 			
-			this._validate(this.state.entity.atomicAttributes[e.attr], e.value, function(validationResult) {
+			this._validate(attr, value, function(validationResult) {
 				this.setState({
 					entityInstance: entityInstance,
-					errorMessages: this._updateErrorMessages(e.attr, validationResult)
+					errorMessages: this._updateErrorMessages(attr, validationResult)
 				});
 				
 				if (validationResult.valid) {
 					this.props.onValueChange(e);
 				}
+				
+				if(validationResult.valid === true && this._doPersistAttributeValue(attr)) {
+                    // persist changes for controls that do not have a blur event
+	                switch(attr.fieldType) {
+		                case 'BOOL':
+		                case 'CATEGORICAL':
+		                case 'CATEGORICAL_MREF':
+		                case 'ENUM':
+		                case 'MREF':
+		                case 'XREF':
+		                case 'DATE':
+		                case 'DATE_TIME':
+		                	this._persistAttributeValue(attr, value);
+		                	break;
+		                default:
+		                	break;
+	                }
+                }
 			}.bind(this));
 		},
-		_handleSubmit: function(e) {
-			// determine if form is valid
-			//this._validateForm(function(valid) {
-			//	alert(valid);
-			//	if (!valid) {
-					//e.preventDefault(); // do not submit form
-			//	}
-			//});
-			
-			//e.preventDefault();
-			
+		_submit: function(e) {
 			// determine if form is valid
 			var errorMessages = {};
-			var valid = true;
-			var entityInstance = this.state.entityInstance;
+			var promises = [];
+			var target = e.target;
 			
 			_.each(this.state.entity.atomicAttributes, function(attr) {
-				this._validate(attr, entityInstance[attr.name], function(validationResult) {
-					valid = valid && validationResult.valid;
-					if (validationResult.valid === false) {
-						errorMessages[attr.name] = validationResult.errorMessage;
-						this.setState({errorMessages: errorMessages});
-					}
+				var p = new Promise(function(resolve, reject) {
+					this._validate(attr, this._getValue(attr), function(validationResult) {
+						if (validationResult.valid === false) {
+							errorMessages[attr.name] = validationResult.errorMessage;
+						}
+						resolve(validationResult.valid);
+					}.bind(this));
 				}.bind(this));
+				
+				promises.push(p);
 			}, this);
 			
-			
-			if (!valid) {
-				e.preventDefault(); // do not submit form
-			}
-			
-			
-			
+			Promise.all(promises).done(function(results) {
+				var valid = true;
+				for (var i = 0; i < results.length && valid; i++) {
+					valid = valid && results[i];
+				}
+				
+				if (valid) {
+					$(target).closest('form').submit();//TODO remove jquery form submit workaround, see also componentDidMount in JQueryForm.js
+				} else {
+					this.setState({errorMessages: errorMessages});
+				}
+			}.bind(this));
 		},
 		_handleCancel: function() {
 			if(this.props.modal) {
@@ -329,27 +383,15 @@
 				hideOptional: !this.state.hideOptional
 			});
 		},
-//		_validateForm: function(entityInstance, callback) {
-//			var entityInstance = this.state.entityInstance;
-//			
-//			_.each(this.state.entity.atomicAttributes, function(attr) {
-//				this._validate(attr, entityInstance[attr.name], function(validationResult) {
-//					var errorMessages = this._updateErrorMessages(attr.name, validationResult);
-//					this.setState({errorMessages: errorMessages});
-//				}.bind(this));
-//			}, this);
-//			
-//			//callback(false);
-//		},
-		_updateErrorMessages: function(attrName, validationResult) {
+		_updateErrorMessages: function(attr, validationResult) {
 			var errorMessages = this.state.errorMessages;
 			
 			if (validationResult.valid) {
-				if (_.has(errorMessages, attrName)) {
-					delete errorMessages[attrName];
+				if (_.has(errorMessages, attr.name)) {
+					delete errorMessages[attr.name];
 				}
 			} else {
-				errorMessages[attrName] = validationResult.errorMessage;
+				errorMessages[attr.name] = validationResult.errorMessage;
 			}
 			
 			return errorMessages;
@@ -361,7 +403,7 @@
             
             var errorMessage = undefined;
             
-            if(attr.nillable === false && type !== 'CATEGORICAL_MREF' && type !== 'MREF' && nullOrUndefinedValue) { // required value constraint
+            if(attr.nillable === false && type !== 'CATEGORICAL_MREF' && type !== 'MREF' && nullOrUndefinedValue && !attr.auto) { // required value constraint
                 errorMessage = 'Please enter a value.';
             }
             else if(attr.nillable === false && (type === 'CATEGORICAL_MREF' || type === 'MREF') && (nullOrUndefinedValue || value.items.length === 0)) { // required value constraint
@@ -393,7 +435,8 @@
                     errorMessage = 'Please enter a value lower than or equal to ' + attr.range.max + '.';
                 }
             }
-            else if(attr.unique === true && !nullOrUndefinedValue && (this.props.mode === 'create' || value !== this.props.value)) { // value uniqueness constraint
+            else if(attr.unique === true && !nullOrUndefinedValue) { // value uniqueness constraint
+            	
                 // determine query value
                 var queryValue;
                 switch(type) {
@@ -416,17 +459,50 @@
                 var rules = [{field: attr.name, operator: 'EQUALS', value: queryValue}];
                
                 api.getAsync(this.state.entity.hrefCollection, {q: {q: rules}}, function(data) {
-                    if(data.total > 0) {
+                	var idAttribute = data.meta.idAttribute;
+                    if(data.total > 0 && ((this.props.mode === 'create') || (data.items[0][idAttribute] !== this.state.entityInstance[idAttribute]))) {
                         callback({valid: false, errorMessage: 'This ' + attr.label + ' already exists. It must be unique.'});
                     } else {
                         callback({valid: true, errorMessage: undefined});
                     }
-                });
+                }.bind(this));
                 return;
+            }
+            
+            if (attr.validationExpression) {
+            	
+            	//TODO make evalScript work with entities
+            	var form = {};
+            	_.each(this.state.entity.atomicAttributes, function(entityAttr) {
+            		var entityAttrValue = entityAttr.name == attr.name ? value : this._getValue(entityAttr);
+            		
+            		if (entityAttrValue !== null && entityAttrValue !== undefined) {
+            			 switch(entityAttr.fieldType) {
+                         case 'CATEGORICAL':
+                         case 'XREF':
+                        	 form[entityAttr.name] = entityAttrValue[entityAttr.refEntity.idAttribute];
+                             break;
+                         case 'CATEGORICAL_MREF':
+                         case 'MREF':
+                             form[entityAttr.name] = _.map(entityAttrValue.items, function(item) {
+                            	 return item[entityAttr.refEntity.idAttribute]; 
+                             }).join();
+                             break;
+                         default:
+                        	 form[entityAttr.name] = entityAttrValue;
+                             break;
+            			 }
+            		}
+            	}, this);
+            	
+            	if (evalScript(attr.validationExpression, form) === false) {
+            		errorMessage = 'Please enter a valid value.';
+            	}
             }
             
             callback({valid: errorMessage === undefined, errorMessage: errorMessage});
         },
+        
         _statics: {
             // https://gist.github.com/dperini/729294
             REGEX_URL: /^(?:(?:https?|ftp):\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/i,
@@ -449,6 +525,17 @@
                 inRange = inRange && value <= range.max;
             }
             return inRange;
+        },
+        _getValue: function(attr) {
+        	var value = this.state.entityInstance[attr.name];
+        	
+        	// workaround for required bool attribute with no value implying false value
+        	// TODO replace with elegant solution
+            if(value === undefined && attr.fieldType === 'BOOL' && !attr.nillable) {
+            	return false;
+            } else {
+            	return value;
+            }
         }
 	});
 		
@@ -535,6 +622,7 @@
 			colOffset: React.PropTypes.number,
 			cancelBtn: React.PropTypes.bool,
 			onCancelClick: React.PropTypes.func,
+			onSubmitClick: React.PropTypes.func.isRequired
 		},
 		getDefaultProps: function() {
 			return {
@@ -554,7 +642,7 @@
 				div({className: 'row', style: {textAlign: 'right'}},
 					div({className: divClasses},
 						this.props.cancelBtn ? molgenis.ui.Button({text: 'Cancel', onClick: this.props.onCancelClick}, 'Cancel') : null,
-						molgenis.ui.Button({type: 'submit', style: 'primary', css: {marginLeft: 5}, text: submitBtnText})
+						molgenis.ui.Button({type: 'button', style: 'primary', css: {marginLeft: 5}, text: submitBtnText, onClick: this.props.onSubmitClick})
 					)
 				)
 			);

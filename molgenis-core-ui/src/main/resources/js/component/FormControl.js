@@ -27,6 +27,7 @@
         getInitialState: function() {
             return {
                 attr: null,
+                pristine : true
             };
         },
         getDefaultProps: function() {
@@ -74,7 +75,7 @@
                 formLayout : undefined,
                 value: this._getValue(this.props.value),
                 onValueChange : this._handleValueChange,
-                onBlur : this.props.onBlur
+                onBlur : this._handleBlur
             });
             
             // allow editing readonly controls in create mode
@@ -115,57 +116,23 @@
             }
         },
         _handleValueChange: function(e) {
+        	this.setState({pristine: false});
+        	
         	this.props.onValueChange({
         		attr: this.state.attr.name,
                 value: this._getValue(e.value),
             });
         },
         
-        /*
         _handleBlur: function(e) {
-            // only validate if control was touched
-            if(this.state.pristine === true) {
+        	// only validate if control was touched
+            if(this.state.pristine === true || this.props.onBlur === undefined) {
                 return;
             }
             
-            this._validate(this._getValue(e.value), function(validity) {
-            	if(validity.valid === true && this._doPersistAttributeValue()) {s
-            		this._persistAttributeValue(e.value);
-                }
-            	
-            	this.setState({
-                    valid: validity.valid,
-                    errorMessage: validity.errorMessage
-                });
-            }.bind(this));
+            e.attr = this.state.attr;
+            this.props.onBlur(e);
         },
-       
-        _doPersistAttributeValue: function() {
-        	return this.props.mode === 'edit' && this.props.saveOnBlur && !this.state.attr.readOnly;
-        },
-        _persistAttributeValue: function(value) {
-        	// persist attribute
-    		var val;
-        	switch(this.state.attr.fieldType) {
-        		case 'CATEGORICAL':
-        		case 'XREF':
-        			val = value !== null && value !== undefined ? value[this.state.attr.refEntity.idAttribute] : null;
-        			break;
-        		case 'CATEGORICAL_MREF':
-        		case 'MREF':
-        			val = _.map(value.items, function(item) {
-        				return item[this.state.attr.refEntity.idAttribute];
-        			}.bind(this));
-        			break;
-        		default:
-        			val = value;
-        			break;
-        	}
-        	
-    		api.update(this.props.entityInstance.href + '/' + this.state.attr.name, val);
-        },
-       
-        */
         _getValue: function(value) {
         	// workaround for required bool attribute with no value implying false value
         	// TODO replace with elegant solution
