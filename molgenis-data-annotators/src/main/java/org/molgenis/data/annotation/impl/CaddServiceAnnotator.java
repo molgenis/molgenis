@@ -55,20 +55,20 @@ public class CaddServiceAnnotator extends VariantAnnotator
 
 	// the cadd service returns these two values
 	// must be compatible with VCF format, ie no funny characters
-	public static final String CADD_SCALED = "CADDSCALED";
-	public static final String CADD_ABS = "CADDABS";
+	public static final String CADD_SCALED = VcfRepository.getInfoPrefix() + "CADDSCALED";
+	public static final String CADD_ABS = VcfRepository.getInfoPrefix() + "CADDABS";
 
 	private static final String NAME = "CADD";
 
 	final List<String> infoFields = Arrays
-        .asList(new String[]
-                {
-                        "##INFO=<ID="
-                                + CADD_SCALED.substring(VcfRepository.getInfoPrefix().length())
-                                + ",Number=1,Type=Float,Description=\"CADD scaled C score, ie. phred-like. See Kircher et al. 2014 (http://www.ncbi.nlm.nih.gov/pubmed/24487276) or CADD website (http://cadd.gs.washington.edu/) for more information.\">",
-                        "##INFO=<ID="
-                                + CADD_ABS.substring(VcfRepository.getInfoPrefix().length())
-                                + ",Number=1,Type=Float,Description=\"CADD absolute C score, ie. unscaled SVM output. Useful as  reference when the scaled score may be unexpected.\">" });
+			.asList(new String[]
+			{
+					"##INFO=<ID="
+							+ CADD_SCALED.substring(VcfRepository.getInfoPrefix().length())
+							+ ",Number=1,Type=Float,Description=\"CADD scaled C score, ie. phred-like. See Kircher et al. 2014 (http://www.ncbi.nlm.nih.gov/pubmed/24487276) or CADD website (http://cadd.gs.washington.edu/) for more information.\">",
+					"##INFO=<ID="
+							+ CADD_ABS.substring(VcfRepository.getInfoPrefix().length())
+							+ ",Number=1,Type=Float,Description=\"CADD absolute C score, ie. unscaled SVM output. Useful as  reference when the scaled score may be unexpected.\">" });
 
     public static final String CADD_FILE_LOCATION_PROPERTY = "cadd_location";
 

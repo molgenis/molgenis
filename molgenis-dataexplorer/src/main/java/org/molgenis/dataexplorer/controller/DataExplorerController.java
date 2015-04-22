@@ -615,7 +615,7 @@ public class DataExplorerController extends MolgenisPluginController
 		model.addAttribute("viewName", getViewName(entityName));
 		return "view-entityreport";
 	}
-
+	
 	private String getViewName(String entityName)
 	{
 		//first we check if there are any RuntimeProperty mappings of entity to report template

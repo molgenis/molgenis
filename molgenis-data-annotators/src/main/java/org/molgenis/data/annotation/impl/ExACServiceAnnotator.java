@@ -50,7 +50,7 @@ public class ExACServiceAnnotator extends VariantAnnotator
 	private final MolgenisSettings molgenisSettings;
 	private final AnnotationService annotatorService;
 
-	public static final String EXAC_MAF = "EXAC_MAF";
+	public static final String EXAC_MAF = VcfRepository.getInfoPrefix() + "EXACMAF";
 
 	private static final String NAME = "EXAC";
 
@@ -157,11 +157,14 @@ public class ExACServiceAnnotator extends VariantAnnotator
 	 */
 	private void checkTabixReader() throws IOException
 	{
-		synchronized (this)
+		if (tabixReader == null)
 		{
-			if (tabixReader == null)
+			synchronized (this)
 			{
-				tabixReader = new TabixReader(molgenisSettings.getProperty(EXAC_VCFGZ_LOCATION));
+				if (tabixReader == null)
+				{
+					tabixReader = new TabixReader(molgenisSettings.getProperty(EXAC_VCFGZ_LOCATION));
+				}
 			}
 		}
 	}

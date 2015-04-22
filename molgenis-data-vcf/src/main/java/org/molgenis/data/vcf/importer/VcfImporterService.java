@@ -98,12 +98,11 @@ public class VcfImporterService implements ImportService
 
 			throw new MolgenisDataException(e);
 		}
-		// Should not be necessary, bug in elasticsearch?
-		// "All shards failed" for big datasets if this flush is not here...
-		for (EntityMetaData entityMetaData : addedEntities)
-		{
-			dataService.getRepository(entityMetaData.getName()).flush();
-		}
+        //Should not be necessary, bug in elasticsearch?
+        //"All shards failed" for big datasets if this flush is not here...
+        for(EntityMetaData entityMetaData : addedEntities) {
+            dataService.getRepository(entityMetaData.getName()).flush();
+        }
 		return report;
 	}
 

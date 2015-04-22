@@ -231,7 +231,7 @@ public class VcfRepository extends AbstractRepository
 				List<AttributeMetaData> metadataInfoField = new ArrayList<AttributeMetaData>();
 				for (VcfMetaInfo info : vcfMeta.getInfoMeta())
 				{
-					DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData(getInfoPrefix()+info.getId(),
+					DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData(getInfoPrefix() + info.getId(),
 							vcfReaderFormatToMolgenisType(info)).setAggregateable(true);
 					attributeMetaData.setDescription(info.getDescription());
 					metadataInfoField.add(attributeMetaData);
@@ -253,17 +253,6 @@ public class VcfRepository extends AbstractRepository
 			}
 		}
 		return entityMetaData;
-	}
-
-	/**
-	 * Prefix to make INFO column names safe-ish. For example, 'Samples' is sometimes used as an INFO field
-	 * and clashes with the 'Samples' key used by Genotype-IO to store sample data in memory.
-	 * By prefixing a tag we hope to create unique INFO field names that do not clash.
-	 * @return
-	 */
-	public static String getInfoPrefix()
-	{
-		return INFO + "_";
 	}
 
 	void createSampleEntityMetaData(Iterable<VcfMetaFormat> formatMetaData)

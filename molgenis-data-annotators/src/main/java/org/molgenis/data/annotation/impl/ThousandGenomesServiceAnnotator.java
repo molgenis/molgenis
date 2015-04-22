@@ -56,7 +56,7 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 	private final MolgenisSettings molgenisSettings;
 	private final AnnotationService annotatorService;
 	private static final String NAME = "1000G";
-	public static final String THGEN_MAF = "1000G_MAF";
+	public static final String THGEN_MAF = VcfRepository.getInfoPrefix() + "1KGMAF";
 	public static final String THGEN_DIRECTORY_LOCATION_PROPERTY = "1000G_location";
 
 	final List<String> infoFields = Arrays.asList(new String[]

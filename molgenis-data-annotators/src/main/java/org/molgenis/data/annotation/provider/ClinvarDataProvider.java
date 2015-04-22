@@ -85,12 +85,14 @@ public class ClinvarDataProvider
 			}
 			else if (type.equals("single nucleotide variant"))
 			{
-				// NM_003159.2(CDKL5):c.1721C>T				
+				// NM_003159.2(CDKL5):c.1721C>T
 				int gtIndex = hgvs.lastIndexOf('>');
 				reference = hgvs.substring(gtIndex - 1, gtIndex);
-				alternative = hgvs.substring(gtIndex + 1, gtIndex + 2);	
+				alternative = hgvs.substring(gtIndex + 1, gtIndex + 2);
 			}
-		} else {
+		}
+		else
+		{
 			// Some lines do not have a standard notation of variants, we cant handle these at the moment
 		}
 

@@ -56,8 +56,8 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 	private final MolgenisSettings molgenisSettings;
 	private final AnnotationService annotatorService;
 
-	public static final String GONL_MAF = "GONL_MAF";
-	public static final String GONL_GTC = "GONL_GTC";
+	public static final String GONL_MAF = VcfRepository.getInfoPrefix() + "GONLMAF";
+	public static final String GONL_GTC = VcfRepository.getInfoPrefix() + "GONLGTC";
 
 	private static final String NAME = "GONL";
 
@@ -156,6 +156,7 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 		Map<String, Object> resultMap = annotateWithGoNL(entity.getString(VcfRepository.CHROM),
 				entity.getLong(VcfRepository.POS), entity.getString(VcfRepository.REF),
 				entity.getString(VcfRepository.ALT));
+		return Collections.<Entity> singletonList(getAnnotatedEntity(entity, resultMap));
 		return Collections.<Entity> singletonList(AnnotatorUtils.getAnnotatedEntity(this, entity, resultMap));
 	}
 
@@ -225,6 +226,7 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 		{
 			LOG.info("No data for CHROM: " + inputChromosome + " POS: " + inputPosition + " REF: " + inputReference
 					+ " ALT: " + inputAlternative + " LINE: " + line);
+			// throw sfx;
 		}
 
 		// if nothing found, return empty list for no hit
@@ -287,6 +289,8 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 		if (ref.equals(inputReference) && alt.equals(inputAlternative))
 		{
 			maf = ac / an;
+			// LOG.info("1000G variant found for CHROM: " + chromosome + " POS: " + position + " REF: " + reference +
+			// " ALT: " + alternative + ", MAF = " + maf);
 		}
 
 		// if nothing found, try swapping ref-alt, and do 1-MAF

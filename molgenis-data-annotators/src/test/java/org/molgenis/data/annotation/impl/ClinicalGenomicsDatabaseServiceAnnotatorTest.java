@@ -140,13 +140,11 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest
 				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.ENTREZ_GENE_ID));
 		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.CGD_CONDITION),
 				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.CGD_CONDITION));
-		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.CGD_AGE_GROUP),
-				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.CGD_AGE_GROUP));
 		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.CGD_INHERITANCE),
 				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.CGD_INHERITANCE));
-        assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.CGD_GENERALIZED_INHERITANCE),
-                expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.CGD_GENERALIZED_INHERITANCE));
-        assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.ALLELIC_CONDITIONS),
+		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.CGD_AGE_GROUP),
+				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.CGD_AGE_GROUP));
+		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.ALLELIC_CONDITIONS),
 				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.ALLELIC_CONDITIONS));
 		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.MANIFESTATION_CATEGORIES),
 				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.MANIFESTATION_CATEGORIES));

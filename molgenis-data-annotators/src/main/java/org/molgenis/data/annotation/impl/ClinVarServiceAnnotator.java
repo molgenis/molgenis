@@ -19,6 +19,7 @@ import org.molgenis.data.annotation.provider.ClinvarDataProvider;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -93,10 +94,10 @@ public class ClinVarServiceAnnotator extends VariantAnnotator
 	{
 		List<Entity> results = new ArrayList<Entity>();
 
-		String chromosome = entity.getString(CHROMOSOME);
-		Long position = entity.getLong(POSITION);
-		String referenceAllele = entity.getString(REFERENCE);
-		String alternativeAllele = entity.getString(ALTERNATIVE);
+		String chromosome = entity.getString(VcfRepository.CHROM);
+		Long position = entity.getLong(VcfRepository.POS);
+		String referenceAllele = entity.getString(VcfRepository.REF);
+		String alternativeAllele = entity.getString(VcfRepository.ALT);
 
 		List<String> clinvarKeys = Arrays.asList(chromosome, Long.toString(position), referenceAllele,
 				alternativeAllele);

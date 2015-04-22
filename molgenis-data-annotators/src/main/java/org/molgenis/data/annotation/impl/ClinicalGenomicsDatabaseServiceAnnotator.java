@@ -59,11 +59,12 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 	public static final String HGNC_ID = "HGNC ID";
 
 	public static final String CGD_FILE_LOCATION = "cgd_location";
-    // FIXME for the commandline VCF output we have to use different names for conciseness/uniqueness..
-	public static final String CGD_CONDITION = "CGDCOND";
-	public static final String CGD_AGE_GROUP = "CGDAGE";
-	public static final String CGD_INHERITANCE = "CGDINH";
-	public static final String CGD_GENERALIZED_INHERITANCE = "CGDGIN";
+
+	// FIXME for the commandline VCF output we have to use different names for conciseness/uniqueness..
+	public static final String CGD_CONDITION = VcfRepository.getInfoPrefix() + "CGDCOND";
+	public static final String CGD_AGE_GROUP = VcfRepository.getInfoPrefix() + "CGDAGE";
+	public static final String CGD_INHERITANCE = VcfRepository.getInfoPrefix() + "CGDINH";
+	public static final String CGD_GENERALIZED_INHERITANCE = VcfRepository.getInfoPrefix() + "CGDGIN";
 
 	final List<String> infoFields = Arrays.asList(new String[]
 	{
