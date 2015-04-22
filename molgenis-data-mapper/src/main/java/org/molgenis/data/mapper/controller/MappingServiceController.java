@@ -22,6 +22,7 @@ import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.service.MappingService;
+import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.semanticsearch.service.impl.OntologyTagService;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ontology.core.model.OntologyTerm;
@@ -73,6 +74,9 @@ public class MappingServiceController extends MolgenisPluginController
 
 	@Autowired
 	private OntologyTagService ontologyTagService;
+
+	@Autowired
+	private SemanticSearchService semanticSearchService;
 
 	public MappingServiceController()
 	{
@@ -330,10 +334,16 @@ public class MappingServiceController extends MolgenisPluginController
 		{
 			attributeMapping = entityMapping.addAttributeMapping(attribute);
 		}
+		Iterable<AttributeMetaData> suggestedAttributes = semanticSearchService.findAttributes(
+				dataService.getEntityMetaData(source), dataService.getEntityMetaData(target),
+				attributeMapping.getTargetAttributeMetaData());
+
 		model.addAttribute("mappingProject", project);
 		model.addAttribute("entityMapping", entityMapping);
 		model.addAttribute("attributeMapping", attributeMapping);
+		model.addAttribute("suggestedAttributes", suggestedAttributes);
 		model.addAttribute("hasWritePermission", hasWritePermission(project, false));
+
 		return VIEW_ATTRIBUTE_MAPPING;
 	}
 

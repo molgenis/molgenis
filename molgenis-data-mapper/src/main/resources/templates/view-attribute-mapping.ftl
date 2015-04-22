@@ -34,7 +34,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						<#list entityMapping.sourceEntityMetaData.attributes as source>
+						<#list suggestedAttributes as source>
 							<tr>
 								<td>
 									<b>${source.label?html}</b> (${source.dataType})
