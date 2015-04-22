@@ -133,8 +133,9 @@ public class SemanticSearchServiceHelper
 
 	public List<OntologyTerm> findTagsSync(String description, List<String> ontologyIds)
 	{
-		Set<String> searchTerms = stream(description.split("[^a-zA-Z_0-9']+")).map(String::toLowerCase)
-				.filter(w -> !STOP_WORDS.contains(w)).collect(Collectors.toSet());
+		String regex = "[^\\p{L}']+";
+		Set<String> searchTerms = stream(description.split(regex)).map(String::toLowerCase)
+				.filter(w -> !STOP_WORDS.contains(w) && StringUtils.isNotEmpty(w)).collect(Collectors.toSet());
 
 		List<OntologyTerm> matchingOntologyTerms = ontologyService.findOntologyTerms(ontologyIds, searchTerms, 100);
 
