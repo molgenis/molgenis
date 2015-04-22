@@ -100,8 +100,9 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String KEY_MOD_AGGREGATES_DISTINCT_HIDE = KEY_MOD_AGGREGATES + ".distinct.hide";
 	public static final String KEY_MOD_AGGREGATES_DISTINCT_OVERRIDE = KEY_MOD_AGGREGATES + ".distinct.override";
 	public static final String KEY_MOD_ENTITIESREPORT = "plugin.dataexplorer.mod.entitiesreport";
-
-	private static final boolean DEFAULT_VAL_MOD_AGGREGATES = true;
+    public static final String KEY_DATATABLE = "plugin.dataexplorer.mod.entitiesreport";
+    private static final String DEFAULT_VAL_DATATABLE = "jquery.molgenis.table.js";
+    private static final boolean DEFAULT_VAL_MOD_AGGREGATES = true;
 	private static final boolean DEFAULT_VAL_MOD_ANNOTATORS = false;
 	private static final boolean DEFAULT_VAL_MOD_CHARTS = true;
 	private static final boolean DEFAULT_VAL_MOD_DATA = true;
@@ -203,6 +204,9 @@ public class DataExplorerController extends MolgenisPluginController
 		model.addAttribute("hideDataItemSelect", molgenisSettings.getBooleanProperty(KEY_HIDE_ITEM_SELECTION, false));
 		model.addAttribute("isAdmin", SecurityUtils.currentUserIsSu());
 
+        //specific table for entity
+        model.addAttribute("dataTable","jquery.molgenis.table2.js");
+
 		return "view-dataexplorer";
 	}
 
@@ -214,7 +218,6 @@ public class DataExplorerController extends MolgenisPluginController
 		{
 			// Init genome browser
 			model.addAttribute("genomeEntities", getGenomeBrowserEntities());
-
 			model.addAttribute("initLocation", molgenisSettings.getProperty(INITLOCATION));
 			model.addAttribute("coordSystem", molgenisSettings.getProperty(COORDSYSTEM));
 			model.addAttribute("chains", molgenisSettings.getProperty(CHAINS));
@@ -222,7 +225,6 @@ public class DataExplorerController extends MolgenisPluginController
 			model.addAttribute("browserLinks", molgenisSettings.getProperty(BROWSERLINKS));
 			model.addAttribute("showHighlight", String.valueOf(molgenisSettings.getBooleanProperty(HIGHLIGHTREGION,
 					DEFAULT_VAL_KEY_HIGLIGHTREGION)));
-
 			model.addAttribute("genomebrowser_start_list",
 					molgenisSettings.getProperty(GenomeConfig.GENOMEBROWSER_POS, "POS"));
 			model.addAttribute("genomebrowser_chrom_list",
@@ -234,12 +236,15 @@ public class DataExplorerController extends MolgenisPluginController
 			model.addAttribute("genomebrowser_patient_list",
 					molgenisSettings.getProperty(GenomeConfig.GENOMEBROWSER_PATIENT_ID, "patient_id"));
 
-			model.addAttribute("tableEditable", isTableEditable());
-			model.addAttribute("galaxyEnabled",
+            //Galaxy properties
+            model.addAttribute("galaxyEnabled",
 					molgenisSettings.getBooleanProperty(KEY_GALAXY_ENABLED, DEFAULT_VAL_GALAXY_ENABLED));
 			String galaxyUrl = molgenisSettings.getProperty(KEY_GALAXY_URL);
-			model.addAttribute("rowClickable", isRowClickable());
 			if (galaxyUrl != null) model.addAttribute(ATTR_GALAXY_URL, galaxyUrl);
+
+            //Custom report options
+            model.addAttribute("rowClickable", isRowClickable());
+            model.addAttribute("tableEditable", isTableEditable());
 		}
 		else if (moduleId.equals("diseasematcher"))
 		{
