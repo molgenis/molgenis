@@ -3,7 +3,7 @@
 	
 	var restApi = new molgenis.RestClient();
 	
-	function createChildren(attributes, refEntityDepth, doSelect) {
+	function createChildren(attributes, refEntityDepth, maxDepth, doSelect) {
 		var children = [];
 		
 		$.each(attributes, function() {		
@@ -12,7 +12,6 @@
 			var classes = null;
 			
 			if (this.fieldType === 'MREF' || this.fieldType === 'XREF'){
-				var maxDepth = $.fn.tree.defaults.maxRefEntityDepth;
 				if (maxDepth >= 0){
 					isFolder = refEntityDepth < maxDepth ? true : false;
 				}else{
@@ -124,14 +123,14 @@
 	
 				data.result = $.Deferred(function (dfd) {
 					restApi.getAsync(target, {'expand': ['attributes']}, function(attributeMetaData) {
-						var children = createChildren(attributeMetaData.attributes, node.data.refEntityDepth + increaseDepth, function() {
+						var children = createChildren(attributeMetaData.attributes, node.data.refEntityDepth + increaseDepth, settings.maxRefEntityDepth, function() {
 							return node.selected;
 						});
 						dfd.resolve(children);
 					});
 				});	
 			},
-			'source' : createChildren(settings.entityMetaData.attributes, 0, function(attribute) {
+			'source' : createChildren(settings.entityMetaData.attributes, 0, settings.maxRefEntityDepth, function(attribute) {
 				return settings.selectedAttributes ? $.inArray(attribute, settings.selectedAttributes) !== -1  : false;
 			}),
 			'click' : function(e, data) {
