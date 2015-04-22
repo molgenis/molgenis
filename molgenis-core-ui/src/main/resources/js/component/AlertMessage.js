@@ -19,7 +19,7 @@
 			return (
 				div({className: 'alert alert-' + this.props.type + ' alert-dismissible', role: 'alert'},
 					this.props.onDismiss ? button({type: 'button', className: 'close', 'aria-label': 'Close', onClick: this.props.onDismiss}, // TODO use molgenis.ui.Button
-						span({'aria-hidden': true,}, '\u00D7')
+						span({'aria-hidden': true,}, String.fromCharCode(215)) // &times;
 					) : null,
 					this.props.type === 'danger' ? molgenis.ui.Icon({name: 'exclamation-sign'}) : null,
 					this.props.type === 'danger' ? ' ' + this.props.message : this.props.message  
