@@ -177,7 +177,8 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 					asyncJdbcTemplate.execute(getCreateFKeySql(attr));
 				}
 
-				if (attr.isUnique())
+				// text can't be unique, so don't add unique constraint when type is string
+				if (attr.isUnique() && !attr.getDataType().getEnumType().equals(FieldTypeEnum.STRING))
 				{
 					asyncJdbcTemplate.execute(getUniqueSql(attr));
 				}
@@ -259,7 +260,9 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				execute(getCreateFKeySql(attributeMetaData), async);
 			}
 
-			if (attributeMetaData.isUnique())
+			// TEXT cannot be UNIQUE, don't add constraint when field type is string
+			if (attributeMetaData.isUnique()
+					&& attributeMetaData.getDataType().getEnumType().equals(FieldTypeEnum.STRING))
 			{
 				execute(getUniqueSql(attributeMetaData), async);
 			}
@@ -317,9 +320,6 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		String refAttrMysqlType = (att.getRefEntity().getIdAttribute().getDataType().getEnumType()
 				.equals(FieldTypeEnum.STRING) ? VARCHAR : att.getRefEntity().getIdAttribute().getDataType()
 				.getMysqlType());
-
-		// mysql TEXT fields cannot be UNIQUE, so check for that too
-		// TODO
 
 		sql.append(" CREATE TABLE ").append('`').append(getTableName()).append('_').append(att.getName()).append('`')
 				.append("(`order` INT,`").append(idAttribute.getName()).append('`').append(' ').append(idAttrMysqlType)
