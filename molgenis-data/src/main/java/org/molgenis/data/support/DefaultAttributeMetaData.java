@@ -2,7 +2,10 @@ package org.molgenis.data.support;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -42,6 +45,8 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	private List<AttributeMetaData> attributesMetaData;
 	private boolean aggregateable = false;
 	private Range range;
+	private String visibleExpression;
+	private String validationExpression;
 
 	public DefaultAttributeMetaData(String name, FieldTypeEnum fieldType)
 	{
@@ -89,6 +94,8 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		this.auto = attributeMetaData.isAuto();
 		this.aggregateable = attributeMetaData.isAggregateable();
 		this.range = attributeMetaData.getRange();
+		this.visibleExpression = attributeMetaData.getVisibleExpression();
+		this.validationExpression = attributeMetaData.getValidationExpression();
 
 		// deep copy
 		Iterable<AttributeMetaData> attributeParts = attributeMetaData.getAttributeParts();
@@ -118,7 +125,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setDescription(String description)
 	{
 		this.description = description;
-        return this;
+		return this;
 	}
 
 	@Override
@@ -181,9 +188,10 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		return getDataType().convert(defaultValue);
 	}
 
-	public void setDefaultValue(Object defaultValue)
+	public DefaultAttributeMetaData setDefaultValue(Object defaultValue)
 	{
 		this.defaultValue = defaultValue;
+		return this;
 	}
 
 	@Override
@@ -376,6 +384,30 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	}
 
 	@Override
+	public String getVisibleExpression()
+	{
+		return this.visibleExpression;
+	}
+
+	public DefaultAttributeMetaData setVisibleExpression(String visibleExpression)
+	{
+		this.visibleExpression = visibleExpression;
+		return this;
+	}
+
+	@Override
+	public String getValidationExpression()
+	{
+		return validationExpression;
+	}
+
+	public DefaultAttributeMetaData setValidationExpression(String validationExpression)
+	{
+		this.validationExpression = validationExpression;
+		return this;
+	}
+
+	@Override
 	public boolean equals(Object o)
 	{
 		if (this == o) return true;
@@ -459,15 +491,37 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		if (isVisible() != other.isVisible()) return false;
 
 		// attributeparts
-		if (getAttributeParts() == null)
+		Iterator<AttributeMetaData> attributeParts = getAttributeParts().iterator();
+		Iterator<AttributeMetaData> otherAttributeParts = other.getAttributeParts().iterator();
+		Map<String, AttributeMetaData> otherAttributePartsMap = new HashMap<String, AttributeMetaData>();
+		while (otherAttributeParts.hasNext())
 		{
-			if (other.getAttributeParts() != null) return false;
+			AttributeMetaData otherAttributePart = otherAttributeParts.next();
+			otherAttributePartsMap.put(otherAttributePart.getName(), otherAttributePart);
 		}
-		else
+		while (attributeParts.hasNext())
 		{
-			if (other.getAttributeParts() == null) return false;
-			if (!Lists.newArrayList(getAttributeParts()).equals(Lists.newArrayList(other.getAttributeParts()))) return false;
+			AttributeMetaData attributePart = attributeParts.next();
+			if (!attributePart.isSameAs(otherAttributePartsMap.get(attributePart.getName())))
+			{
+				return false;
+			}
+			else
+			{
+				otherAttributePartsMap.remove(attributePart.getName());
+			}
 		}
+		if (otherAttributePartsMap.size() > 0) return false;
+		if (getVisibleExpression() == null)
+		{
+			if (other.getVisibleExpression() != null) return false;
+		}
+		else if (!getVisibleExpression().equals(other.getVisibleExpression())) return false;
+		if (getValidationExpression() == null)
+		{
+			if (other.getValidationExpression() != null) return false;
+		}
+		else if (!getValidationExpression().equals(other.getValidationExpression())) return false;
 
 		return true;
 	}

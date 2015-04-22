@@ -9,7 +9,7 @@
     </parent>
     <groupId>org.molgenis</groupId>
     <artifactId>molgenis</artifactId>
-    <version>1.5.0-SNAPSHOT</version>
+    <version>1.6.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <!-- More Project Information -->
@@ -31,39 +31,20 @@
     <developers/>
 
     <profiles>
-        <!-- development profile -->
-        <profile>
-            <id>dev</id>
-            <properties>
-                <molgenis.build.profile>dev</molgenis.build.profile>
-                <logger.level.root>INFO</logger.level.root>
-                <logger.level.org.molgenis>DEBUG</logger.level.org.molgenis>
-                <minify.skipMinify>true</minify.skipMinify>
-                <skip.delivery>true</skip.delivery>
-            </properties>
-        </profile>
         <!-- release profile (default) -->
         <profile>
             <id>release</id>
             <properties>
-                <molgenis.build.profile>release</molgenis.build.profile>
-                <logger.level.root>WARN</logger.level.root>
-                <logger.level.org.molgenis>INFO</logger.level.org.molgenis>
-                <minify.skipMinify>false</minify.skipMinify>
                 <skip.delivery>true</skip.delivery>
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
         </profile>
-
+        <!-- create runnable jar -->
         <profile>
             <id>create-delivery</id>
             <properties>
-                <molgenis.build.profile>dev</molgenis.build.profile>
-                <logger.level.root>INFO</logger.level.root>
-                <logger.level.org.molgenis>DEBUG</logger.level.org.molgenis>
-                <minify.skipMinify>true</minify.skipMinify>
                 <skip.delivery>false</skip.delivery>
             </properties>
         </profile>
@@ -152,6 +133,23 @@
                     <artifactId>maven-resources-plugin</artifactId>
                     <version>2.6</version>
                     <executions>
+                        <!-- copy generated resources to target folder -->
+                        <execution>
+                            <id>copy-generated-resources</id>
+                            <phase>process-classes</phase>
+                            <goals>
+                                <goal>copy-resources</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${project.build.outputDirectory}</outputDirectory>
+                                <resources>
+                                    <resource>
+                                        <directory>target/generated-resources</directory>
+                                        <filtering>false</filtering>
+                                    </resource>
+                                </resources>
+                            </configuration>
+                        </execution>                    
 					<!-- 
 						Copying the das server config to the war ROOT
 						the uk.ac.ebi.mydas.controller.MydasServlet cannot find the file if
@@ -269,6 +267,20 @@
                             </configuration>
                         </execution>
                         <execution>
+                            <id>minify-build-helper</id>
+                            <phase>generate-resources</phase>
+                            <goals>
+                                <goal>add-resource</goal>
+                            </goals>
+                            <configuration>
+                                <resources>
+                                    <resource>
+                                        <directory>target/generated-resources</directory>
+                                    </resource>
+                                </resources>
+                            </configuration>
+                        </execution>
+                        <execution>
                             <id>execution-molgenis-generator</id>
                             <phase>generate-sources</phase>
                             <goals>
@@ -302,6 +314,19 @@
                                         <directory>target/generated-test-sources/molgenis/java</directory>
                                     </resource>
                                 </resources>
+                            </configuration>
+                        </execution>
+                        <!-- add sources created by jaxb -->
+                        <execution>
+                            <id>execution-annotations</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>add-source</goal>
+                            </goals>
+                            <configuration>
+                                <sources>
+                                    <source>target/generated-sources/annotations</source>
+                                </sources>
                             </configuration>
                         </execution>
                     </executions>
@@ -456,6 +481,19 @@
                                         <ignore/>
                                     </action>
                                 </pluginExecution>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>org.jacoco</groupId>
+                                        <artifactId>jacoco-maven-plugin</artifactId>
+                                        <versionRange>[0.7,)</versionRange>
+                                        <goals>
+                                            <goal>prepare-agent</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore/>
+                                    </action>
+                                </pluginExecution>
                             </pluginExecutions>
                         </lifecycleMappingMetadata>
                     </configuration>
@@ -477,41 +515,60 @@
                 <plugin>
                     <groupId>com.samaxes.maven</groupId>
                     <artifactId>minify-maven-plugin</artifactId>
-                    <version>1.7.2</version>
+                    <version>1.7.4</version>
                     <executions>
                         <execution>
                             <id>default-minify</id>
+                            <phase>generate-resources</phase>
                             <goals>
                                 <goal>minify</goal>
                             </goals>
                             <configuration>
+                                <charset>UTF-8</charset>
                                 <webappSourceDir>${project.basedir}/src/main/resources</webappSourceDir>
-                                <webappTargetDir>${project.build.outputDirectory}</webappTargetDir>
+                                <webappTargetDir>${project.build.directory}/generated-resources</webappTargetDir>
                                 <cssSourceIncludes>
                                     <cssSourceInclude>**/*.css</cssSourceInclude>
                                 </cssSourceIncludes>
                                 <cssSourceExcludes>
+                                    <!-- changes to excludes must be applied to molgenis-core-ui/src/main/resources/templates/resource-macros.ftl -->
                                     <cssSourceExclude>**/*.min.css</cssSourceExclude>
+                                    <cssSourceExclude>**/*-min.css</cssSourceExclude>
                                 </cssSourceExcludes>
                                 <jsSourceIncludes>
                                     <jsSourceInclude>**/*.js</jsSourceInclude>
                                 </jsSourceIncludes>
                                 <jsSourceExcludes>
+                                    <!-- changes to excludes must be applied to molgenis-core-ui/src/main/resources/templates/resource-macros.ftl -->
                                     <jsSourceExclude>**/*.min.js</jsSourceExclude>
+                                    <cssSourceExclude>**/*-min.js</cssSourceExclude>
                                     <jsSourceExclude>**/src-min-noconflict/**</jsSourceExclude>
-                                    <jsSourceExclude>**/ace-min/**</jsSourceExclude>
                                 </jsSourceExcludes>
+                                <nosuffix>false</nosuffix>
                                 <skipMerge>true</skipMerge>
-                                <skipMinify>${minify.skipMinify}</skipMinify>
-                                <nosuffix>true</nosuffix>
+                                <skipMinify>false</skipMinify>
                                 <verbose>true</verbose>
                             </configuration>
                         </execution>
                     </executions>
                 </plugin>
-                <plugin>
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
+            </plugin>
+            <plugin>
+            <!-- add minified resources to build path -->
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>minify-build-helper</id>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -539,13 +596,26 @@
 					</execution>
 				</executions>
 			</plugin>
-            </plugins>
-        </pluginManagement>
+            <plugin>
+            	<groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.18.1</version>
+                <configuration>
+                    <argLine>${argLine}</argLine>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
 
     <reporting>
         <plugins>
             <!-- code coverage -->
+            <plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.7.2.201409121644</version>
+			</plugin>
+            <!-- code analysis -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>findbugs-maven-plugin</artifactId>
@@ -660,6 +730,7 @@
         <module>molgenis-data-rest</module>
         <module>molgenis-data-elasticsearch</module>
         <module>molgenis-data-semanticsearch</module>
+        <module>molgenis-data-validation</module>
         <module>molgenis-python</module>
         <module>molgenis-r</module>
         <module>molgenis-charts</module>
@@ -674,5 +745,6 @@
         <module>molgenis-data-mapper</module>
         <module>molgenis-pathways</module>
         <module>molgenis-data-rest-client</module>
+	<module>molgenis-data-migrate</module>
     </modules>
 </project>

@@ -10,6 +10,8 @@
  * $('#id_of_hidden_input)').xrefmrefsearch({attribute: attribute});
  * 
  * Depends on select2.js and molgenis.js
+ * 
+ * @deprecated use EntitySelectBox.js
  */
 (function($, molgenis) {
 	"use strict";
@@ -127,7 +129,7 @@
 		$hiddenInput.select2({
 			width: width,
 			minimumInputLength: 1,
-			multiple: (attributeMetaData.fieldType === 'MREF' || attributeMetaData.fieldType === 'XREF'),
+			multiple: (attributeMetaData.fieldType === 'MREF' || attributeMetaData.fieldType === 'CATEGORICAL_MREF' || attributeMetaData.fieldType === 'XREF'),
 			closeOnSelect: false,
 			query: function (options){
 				var query = createQuery(lookupAttrNames, options.term.match(/[^ ]+/g),'LIKE', true);
@@ -212,7 +214,7 @@
 		if (options.isfilter){
 			var $operatorInput = $('<input type="hidden" data-filter="xrefmref-operator" value="' + options.operator + '" />');
 
-			if(attributeMetaData.fieldType === 'MREF') {
+			if(attributeMetaData.fieldType === 'MREF' || attributeMetaData.fieldType === 'CATEGORICAL_MREF') { // TODO remove CATEGORICAL_MREF when it is rendered like CATEGORICAL is rendered for XREF
 				var $dropdown = $('<div class="input-group-addon dropdown dropdown-toggle-container">');
 				var orValue = 'OR&nbsp;&nbsp;';
 				var andValue = 'AND';

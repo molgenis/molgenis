@@ -3,7 +3,7 @@ package org.molgenis.data.importer;
 import java.util.Date;
 
 import org.molgenis.data.DataService;
-import org.molgenis.security.runas.RunAsSystem;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +36,7 @@ public class ImportRunService
 	}
 
 	@RunAsSystem
-	public void finishImportRun(String importRunId, String message)
+	public void finishImportRun(String importRunId, String message, String importedEntities)
 	{
 		try
 		{
@@ -46,6 +46,7 @@ public class ImportRunService
 				importRun.setStatus(ImportStatus.FINISHED.toString());
 				importRun.setEndDate(new Date());
 				importRun.setMessage(message);
+				importRun.setImportedEntities(importedEntities);
 				dataService.update(ImportRun.ENTITY_NAME, importRun);
 			}
 		}

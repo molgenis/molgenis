@@ -2,11 +2,17 @@ package org.molgenis.data.importer;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.molgenis.data.DataService;
 import org.molgenis.data.FileRepositoryCollectionFactory;
+import org.molgenis.data.Package;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.validation.EntityNameValidator;
 import org.molgenis.framework.db.EntitiesValidationReport;
@@ -28,14 +34,15 @@ public class OptionsWizardPage extends AbstractWizardPage
 
 	private final transient FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
 	private final transient ImportServiceFactory importServiceFactory;
+	private transient DataService dataService;
 
 	@Autowired
 	public OptionsWizardPage(FileRepositoryCollectionFactory fileRepositoryCollectionFactory,
-			ImportServiceFactory importServiceFactory)
+			ImportServiceFactory importServiceFactory, DataService dataService)
 	{
-		super();
 		this.fileRepositoryCollectionFactory = fileRepositoryCollectionFactory;
 		this.importServiceFactory = importServiceFactory;
+		this.dataService = dataService;
 	}
 
 	@Override
@@ -127,6 +134,26 @@ public class OptionsWizardPage extends AbstractWizardPage
 		wizard.setFieldsAvailable(validationReport.getFieldsAvailable());
 		wizard.setFieldsUnknown(validationReport.getFieldsUnknown());
 
+		Set<String> allPackages = new HashSet<>(validationReport.getPackages());
+		for (Package p : dataService.getMeta().getPackages())
+		{
+			allPackages.add(p.getName());
+		}
+
+		List<String> entitiesInDefaultPackage = new ArrayList<>();
+		for (String entityName : validationReport.getSheetsImportable().keySet())
+		{
+			if (validationReport.getSheetsImportable().get(entityName))
+			{
+				if (isInDefaultPackage(entityName, allPackages)) entitiesInDefaultPackage.add(entityName);
+			}
+		}
+		wizard.setEntitiesInDefaultPackage(entitiesInDefaultPackage);
+
+		List<String> packages = new ArrayList<>(validationReport.getPackages());
+		packages.add(0, Package.DEFAULT_PACKAGE_NAME);
+		wizard.setPackages(packages);
+
 		String msg = null;
 		if (validationReport.valid())
 		{
@@ -139,6 +166,15 @@ public class OptionsWizardPage extends AbstractWizardPage
 		}
 
 		return msg;
+	}
 
+	private boolean isInDefaultPackage(String entityName, Set<String> packages)
+	{
+		for (String packageName : packages)
+		{
+			if (entityName.toLowerCase().startsWith(packageName.toLowerCase())) return false;
+		}
+
+		return true;
 	}
 }

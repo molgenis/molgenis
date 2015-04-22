@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.molgenis</groupId>
 		<artifactId>molgenis</artifactId>
-		<version>1.5.0-SNAPSHOT</version>
+		<version>1.6.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>molgenis-data-jpa</artifactId>
 
@@ -14,6 +14,11 @@
 			<artifactId>molgenis-data</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-data-validation</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 		 <!-- database hibernate, connectionpool, driver -->
 		<dependency>
 			<groupId>org.eclipse.persistence</groupId>

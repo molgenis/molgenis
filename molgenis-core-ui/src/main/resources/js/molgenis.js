@@ -222,7 +222,9 @@ function getCurrentTimezoneOffset() {
 	var entityMap = {
 		"&" : "&amp;",
 		"<" : "&lt;",
+		"\u2264": "&lte;",
 		">" : "&gt;",
+		"\u2265": "&gte;",
 		'"' : '&quot;',
 		"'" : '&#39;',
 		"/" : '&#x2F;'
@@ -242,7 +244,10 @@ function getCurrentTimezoneOffset() {
 function formatTableCellValue(rawValue, dataType, editable, nillable) {
 	var htmlElement;
 	
-	if (dataType.toLowerCase() == 'bool') {
+	if (dataType === undefined) {
+		return '<span>&nbsp;</span>';
+	}
+	else if (dataType.toLowerCase() == 'bool') {
 		htmlElement = '<input type="checkbox" ';
 		if (rawValue === true) {
 			htmlElement += 'checked ';
@@ -260,9 +265,8 @@ function formatTableCellValue(rawValue, dataType, editable, nillable) {
 		
 		return htmlElement;
 	}
-
 	if (typeof rawValue === 'undefined' || rawValue === null) {
-		return '<span></span>';
+		return '<span>&nbsp;</span>';
 	}
 
 	if (dataType.toLowerCase() == "hyperlink") {
@@ -311,6 +315,8 @@ function abbreviate(s, maxLength) {
  *            input value
  * @param lbl
  *            input label (for checkbox and radio inputs)
+ *            
+ * @deprecated use AttributeControl.js            
  */
 function createInput(attr, attrs, val, lbl) {
 	function createBasicInput(type, attrs, val) {
@@ -347,9 +353,9 @@ function createInput(attr, attrs, val, lbl) {
 		        .appendTo($div);
 		}
 		$('<span>').addClass('input-group-addon datepickerbutton')
-		    .append($('<span>').addClass('glyphicon glyp2icon-calendar'))
+		    .append($('<span>').addClass('glyphicon glyphicon-calendar'))
 		    .appendTo($div);
-		$div.datetimepicker(dataType === 'DATE' ? { pickTime : false } : { pickTime : true, useSeconds : true });
+		$div.datetimepicker(dataType === 'DATE' ? { format : 'YYYY-MM-DD' } : { format : 'YYYY-MM-DDTHH:mm:ssZZ' });
 		return $div;
 	case 'DECIMAL':
 		var input = createBasicInput('number', $.extend({}, attrs, {'step': 'any'}), val).addClass('form-control');
@@ -376,6 +382,7 @@ function createInput(attr, attrs, val, lbl) {
 	case 'ENUM':
 	case 'SCRIPT':
 		return createBasicInput('text', attrs, val).addClass('form-control');
+	case 'CATEGORICAL_MREF':
 	case 'MREF':
 	case 'XREF':
 		return createBasicInput('hidden', attrs, val).addClass('form-control');
@@ -511,7 +518,7 @@ function createInput(attr, attrs, val, lbl) {
 			error : callback && callback.error ? callback.error : function() {}
 		});
 	};
-
+	
 	molgenis.RestClient.prototype.update = function(href, entity, callback) {
 		return this._ajax({
 			type : 'POST',
@@ -571,7 +578,6 @@ function createInput(attr, attrs, val, lbl) {
 			}
 		});
 	};
-
 }($, window.top.molgenis = window.top.molgenis || {}));
 
 function showSpinner(callback) {
@@ -932,4 +938,21 @@ if(window.history.pushState === undefined)
 if(window.history.replaceState === undefined)
 	window.history.replaceState = function(){};
 if(window.onpopstate === undefined)
-	window.onpopstate = function(){}
+	window.onpopstate = function(){};
+
+// polyfills
+Number.isInteger = Number.isInteger || function(value) {
+    return typeof value === "number" && 
+           isFinite(value) && 
+           Math.floor(value) === value;
+};
+
+// ECMAScript 6
+if (!String.prototype.startsWith) {
+	String.prototype.startsWith = function(searchString, position) {
+		position = position || 0;
+		return this.lastIndexOf(searchString, position) === position;
+	};
+}
+Number.MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER || 9007199254740991;
+Number.MIN_SAFE_INTEGER = Number.MIN_SAFE_INTEGER || -9007199254740991;

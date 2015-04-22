@@ -14,6 +14,7 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.AnnotatorUtils;
 import org.molgenis.data.annotation.HgncLocationsUtils;
 import org.molgenis.data.annotation.LocusAnnotator;
 import org.molgenis.data.annotation.VcfUtils;
@@ -170,9 +171,10 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 		Long position = entity.getLong(VcfRepository.POS);
 		String chromosome = entity.getString(VcfRepository.CHROM);
 
-		String geneSymbol = SnpEffServiceAnnotator.getGeneNameFromEntity(entity);
+        String geneSymbol = HgncLocationsUtils.locationToHgcn(hgncLocationsProvider.getHgncLocations(),
+                new Locus(chromosome, position)).get(0);
 
-		Map<String, CgdData> cgdData = cgdDataProvider.getCgdData();
+        Map<String, CgdData> cgdData = cgdDataProvider.getCgdData();
 
 		try
 		{
@@ -202,11 +204,11 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 					resultMap.put(VcfRepository.POS, position);
 				}
 
-				results.add(getAnnotatedEntity(entity, resultMap));
+				results.add(AnnotatorUtils.getAnnotatedEntity(this, entity, resultMap));
 			}
 			else
 			{
-				results.add(getAnnotatedEntity(entity, resultMap));
+				results.add(AnnotatorUtils.getAnnotatedEntity(this, entity, resultMap));
 			}
 		}
 		catch (Exception e)

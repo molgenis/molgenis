@@ -12,7 +12,7 @@ import org.springframework.core.Ordered;
 
 public interface ImportService extends Ordered
 {
-	EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction);
+	EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction, String defaultPackage);
 
 	EntitiesValidationReport validateImport(File file, RepositoryCollection source);
 

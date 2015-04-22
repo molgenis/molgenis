@@ -110,17 +110,15 @@ public class DbnsfpVariantServiceAnnotatorTest
 		when(metaDataCantAnnotate.getAttribute(VcfRepository.ALT)).thenReturn(
 				attributeMetaDataCantAnnotateAlt);
 
-		entity = mock(Entity.class);
+		entity = new MapEntity(metaDataCanAnnotate);
 
-		when(entity.getString(VcfRepository.CHROM)).thenReturn("Y");
-		when(entity.getLong(VcfRepository.POS)).thenReturn(new Long(2655049));
-		when(entity.getString(VcfRepository.REF)).thenReturn("C");
-		when(entity.getString(VcfRepository.ALT)).thenReturn("A");
+		entity.set(VcfRepository.CHROM,"Y");
+		entity.set(VcfRepository.POS,new Long(2655049));
+		entity.set(VcfRepository.REF,"C");
+		entity.set(VcfRepository.ALT,"A");
 
 		input = new ArrayList<Entity>();
 		input.add(entity);
-
-		when(entity.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
 
 		annotator = new DbnsfpVariantServiceAnnotator(settings, null);
 	}

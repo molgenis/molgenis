@@ -15,6 +15,7 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.AnnotatorUtils;
 import org.molgenis.data.annotation.LocusAnnotator;
 import org.molgenis.data.annotation.VcfUtils;
 import org.molgenis.data.annotation.impl.datastructures.HpoData;
@@ -193,7 +194,7 @@ public class HpoServiceAnnotator extends LocusAnnotator
 					terms.deleteCharAt(terms.length() - 1);
 					resultMap.put(HPO_TERMS, terms);
 				}
-				results.add(getAnnotatedEntity(entity, resultMap));
+				results.add(AnnotatorUtils.getAnnotatedEntity(this, entity, resultMap));
 			}
 			else
 			{

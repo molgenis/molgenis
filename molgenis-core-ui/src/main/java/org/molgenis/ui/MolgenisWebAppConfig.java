@@ -4,6 +4,7 @@ import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_CSS;
 import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_FONTS;
 import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_IMG;
 import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_JS;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,11 +13,12 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.annotation.PostConstruct;
+import javax.sql.DataSource;
 
-import org.molgenis.data.AutoIdRepositoryDecorator;
+import org.molgenis.data.AutoValueRepositoryDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.IdGenerator;
-import org.molgenis.data.IndexedAutoIdRepositoryDecorator;
+import org.molgenis.data.IndexedAutoValueRepositoryDecorator;
 import org.molgenis.data.IndexedCrudRepositorySecurityDecorator;
 import org.molgenis.data.IndexedRepository;
 import org.molgenis.data.ManageableRepositoryCollection;
@@ -36,6 +38,7 @@ import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.IndexedRepositoryValidationDecorator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
+import org.molgenis.data.version.MolgenisUpgradeService;
 import org.molgenis.framework.db.WebAppDatabasePopulator;
 import org.molgenis.framework.db.WebAppDatabasePopulatorService;
 import org.molgenis.framework.server.MolgenisSettings;
@@ -108,26 +111,43 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Autowired
 	public EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory;
 
+	@Autowired
+	public MolgenisUpgradeService upgradeService;
+
+	@Autowired
+	public DataSource dataSource;
+
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry)
 	{
-		final int aYear = 31536000;
-		registry.addResourceHandler(PATTERN_CSS).addResourceLocations("/css/", "classpath:/css/").setCachePeriod(aYear);
-		registry.addResourceHandler(PATTERN_IMG).addResourceLocations("/img/", "classpath:/img/").setCachePeriod(aYear);
-		registry.addResourceHandler(PATTERN_JS).addResourceLocations("/js/", "classpath:/js/").setCachePeriod(aYear);
+		int cachePeriod;
+		if (environment.equals("development"))
+		{
+			cachePeriod = 0;
+		}
+		else
+		{
+			cachePeriod = 31536000; // a year
+		}
+		registry.addResourceHandler(PATTERN_CSS).addResourceLocations("/css/", "classpath:/css/")
+				.setCachePeriod(cachePeriod);
+		registry.addResourceHandler(PATTERN_IMG).addResourceLocations("/img/", "classpath:/img/")
+				.setCachePeriod(cachePeriod);
+		registry.addResourceHandler(PATTERN_JS).addResourceLocations("/js/", "classpath:/js/")
+				.setCachePeriod(cachePeriod);
 		registry.addResourceHandler(PATTERN_FONTS).addResourceLocations("/fonts/", "classpath:/fonts/")
-				.setCachePeriod(aYear);
+				.setCachePeriod(cachePeriod);
 		registry.addResourceHandler("/generated-doc/**").addResourceLocations("/generated-doc/").setCachePeriod(3600);
 		registry.addResourceHandler("/html/**").addResourceLocations("/html/", "classpath:/html/").setCachePeriod(3600);
 	}
 
-	@Value("${molgenis.build.profile}")
-	private String molgenisBuildProfile;
+	@Value("${environment:production}")
+	private String environment;
 
 	@Override
 	public void configureMessageConverters(List<HttpMessageConverter<?>> converters)
 	{
-		boolean prettyPrinting = molgenisBuildProfile != null && molgenisBuildProfile.equals("dev");
+		boolean prettyPrinting = environment != null && environment.equals("development");
 		converters.add(new GsonHttpMessageConverter(prettyPrinting));
 		converters.add(new BufferedImageHttpMessageConverter());
 		converters.add(new CsvHttpMessageConverter());
@@ -170,7 +190,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Bean
 	public MolgenisInterceptor molgenisInterceptor()
 	{
-		return new MolgenisInterceptor(resourceFingerprintRegistry(), molgenisSettings);
+		return new MolgenisInterceptor(resourceFingerprintRegistry(), molgenisSettings, environment);
 	}
 
 	@Bean
@@ -373,8 +393,27 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	@PostConstruct
+	public void validateMolgenisServerProperties()
+	{
+		// validate properties defined in molgenis-server.properties
+		String path = System.getProperty("molgenis.home") + File.separator + "molgenis-server.properties";
+		if (environment == null)
+		{
+			throw new RuntimeException("Missing required property 'environment' in " + path
+					+ ", allowed values are [development, production].");
+		}
+		else if (!environment.equals("development") && !environment.equals("production"))
+		{
+			throw new RuntimeException("Invalid value '" + environment + "' for property 'environment' in " + path
+					+ ", allowed values are [development, production].");
+		}
+	}
+
+	@PostConstruct
 	public void initRepositories()
 	{
+		addUpgrades();
+		upgradeService.upgrade();
 		if (!indexExists())
 		{
 			LOG.info("Reindexing repositories....");
@@ -383,10 +422,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		}
 		else
 		{
-			LOG.info("Index found no need to reindex.");
+			LOG.info("Index found. No need to reindex.");
 		}
-
-		metaDataService().setDefaultBackend(getBackend());
+		runAsSystem(() -> metaDataService().setDefaultBackend(getBackend()));
 	}
 
 	private boolean indexExists()
@@ -430,14 +468,20 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 				{
 					IndexedRepository indexedRepos = (IndexedRepository) repository;
 
-					return new IndexedCrudRepositorySecurityDecorator(new IndexedAutoIdRepositoryDecorator(
+					return new IndexedCrudRepositorySecurityDecorator(new IndexedAutoValueRepositoryDecorator(
 							new IndexedRepositoryValidationDecorator(dataService(), indexedRepos,
 									new EntityAttributesValidator()), molgenisIdGenerator()), molgenisSettings);
 				}
 
-				return new RepositorySecurityDecorator(new AutoIdRepositoryDecorator(new RepositoryValidationDecorator(
-						dataService(), repository, new EntityAttributesValidator()), molgenisIdGenerator()));
+				return new RepositorySecurityDecorator(new AutoValueRepositoryDecorator(
+						new RepositoryValidationDecorator(dataService(), repository, new EntityAttributesValidator()),
+						molgenisIdGenerator()));
 			}
 		};
 	}
+
+	/**
+	 * Adds the upgrade steps to the {@link MolgenisUpgradeService}.
+	 */
+	public abstract void addUpgrades();
 }

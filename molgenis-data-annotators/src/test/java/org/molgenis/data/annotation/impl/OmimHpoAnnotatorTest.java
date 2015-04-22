@@ -89,10 +89,10 @@ public class OmimHpoAnnotatorTest
 		when(metaDataCantAnnotate.getAttribute(VcfRepository.CHROM)).thenReturn(attributeMetaDataChrom);
 		when(metaDataCantAnnotate.getAttribute(VcfRepository.POS)).thenReturn(attributeMetaDataCantAnnotatePos);
 
-		entity = mock(Entity.class);
+		entity = new MapEntity(metaDataCanAnnotate);
 
-		when(entity.getString(VcfRepository.CHROM)).thenReturn("11");
-		when(entity.getLong(VcfRepository.POS)).thenReturn(new Long(19207841));
+		entity.set(VcfRepository.CHROM, "11");
+		entity.set(VcfRepository.POS, new Long(19207841));
 
 		input = new ArrayList<Entity>();
 		input.add(entity);
@@ -144,7 +144,6 @@ public class OmimHpoAnnotatorTest
 		Map<String, HGNCLocations> hgncLocations = Collections.singletonMap("CUL7", new HGNCLocations("CUL7",
 				19207841l - 10, 19207841l + 10, "11"));
 		when(hgncLocationsProvider.getHgncLocations()).thenReturn(hgncLocations);
-		when(entity.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
 
 		UrlPinger urlPinger = mock(UrlPinger.class);
 		MolgenisSettings molgenisSettings = mock(MolgenisSettings.class);

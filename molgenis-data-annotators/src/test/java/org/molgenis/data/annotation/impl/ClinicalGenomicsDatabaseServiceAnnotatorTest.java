@@ -12,11 +12,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.impl.datastructures.CgdData;
 import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
@@ -68,7 +65,7 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest
 
 		String chrStr = "1";
 		Long chrPos = new Long(66067385);
-		entity.set(VcfRepository.CHROM,chrStr);
+		entity.set(VcfRepository.CHROM, chrStr);
 		entity.set(VcfRepository.POS, chrPos);
 
 		input = new ArrayList<Entity>();
@@ -78,7 +75,7 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest
 		AnnotationService annotationService = mock(AnnotationService.class);
 		HgncLocationsProvider hgncLocationsProvider = mock(HgncLocationsProvider.class);
 		Map<String, HGNCLocations> locationsMap = Collections.singletonMap("LEPR", new HGNCLocations("LEPR", 65886248l,
-				66107242l, "1"));
+                66107242l, "1"));
 
 		Map<String, CgdData> cgdDataMap = Collections
 				.singletonMap(

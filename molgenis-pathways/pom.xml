@@ -4,10 +4,21 @@
 	<parent>
 		<artifactId>molgenis</artifactId>
 		<groupId>org.molgenis</groupId>
-		<version>1.5.0-SNAPSHOT</version>
+		<version>1.6.0-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>molgenis-pathways</artifactId>
+	
+	<build>
+       <plugins>
+            <!-- minify resources -->
+            <plugin>
+                <groupId>com.samaxes.maven</groupId>
+                <artifactId>minify-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+    
 	<dependencies>
 		<dependency>
 			<groupId>org.molgenis</groupId>
@@ -24,6 +35,11 @@
 			<artifactId>molgenis-data</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-data-vcf</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
 		<dependency>
 			<groupId>com.sun.xml.ws</groupId>
 			<artifactId>jaxws-rt</artifactId>

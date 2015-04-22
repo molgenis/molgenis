@@ -92,15 +92,15 @@ public class DbnsfpGeneServiceAnnotatorTest
 		when(metaDataCantAnnotate.getAttribute(VcfRepository.POS)).thenReturn(
 				attributeMetaDataCantAnnotatePos);
 
-		entity = mock(Entity.class);
+		entity = new MapEntity(metaDataCanAnnotate);
 
-		when(entity.getString(VcfRepository.CHROM)).thenReturn("12");
-		when(entity.getLong(VcfRepository.POS)).thenReturn(new Long(6968292));
+		entity.set(VcfRepository.CHROM,"12");
+		entity.set(VcfRepository.POS,new Long(6968292));
 
 		input = new ArrayList<Entity>();
 		input.add(entity);
 
-		when(entity.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
+
 	}
 
 	@Test

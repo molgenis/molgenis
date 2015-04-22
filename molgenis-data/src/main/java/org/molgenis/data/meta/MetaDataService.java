@@ -21,7 +21,7 @@ public interface MetaDataService extends Iterable<RepositoryCollection>, Applica
 	 *
 	 * @param ManageableRepositoryCollection
 	 */
-	void setDefaultBackend(ManageableRepositoryCollection backend);
+	MetaDataService setDefaultBackend(ManageableRepositoryCollection backend);
 
 	/**
 	 * Get the default backend
@@ -31,9 +31,16 @@ public interface MetaDataService extends Iterable<RepositoryCollection>, Applica
 	ManageableRepositoryCollection getDefaultBackend();
 
 	/**
-	 * Lists all packages.
+	 * Get all packages
 	 * 
-	 * @return Iterable of all Packages
+	 * @return List of Package
+	 */
+	public List<Package> getPackages();
+
+	/**
+	 * Lists all root packages.
+	 * 
+	 * @return Iterable of all root Packages
 	 */
 	Iterable<Package> getRootPackages();
 

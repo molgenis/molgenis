@@ -1,7 +1,7 @@
 package org.molgenis.data.support;
 
+import static com.google.common.collect.FluentIterable.from;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.support.QueryImpl.IN;
 
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -22,6 +22,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.util.CaseInsensitiveLinkedHashMap;
@@ -126,6 +127,7 @@ public class DefaultEntity implements Entity
 				return getInt(attributeName);
 			case LONG:
 				return getLong(attributeName);
+			case CATEGORICAL_MREF:
 			case MREF:
 				return getEntities(attributeName);
 			default:
@@ -136,6 +138,15 @@ public class DefaultEntity implements Entity
 	@Override
 	public String getString(String attributeName)
 	{
+		AttributeMetaData attribute = entityMetaData.getAttribute(attributeName);
+		if (attribute != null)
+		{
+			FieldType dataType = attribute.getDataType();
+			if (dataType instanceof XrefField)
+			{
+				return DataConverter.toString(getEntity(attributeName));
+			}
+		}
 		return DataConverter.toString(values.get(attributeName));
 	}
 
@@ -271,11 +282,8 @@ public class DefaultEntity implements Entity
 					id -> new DefaultEntity(attribute.getRefEntity(), dataService, (Map<String, Object>) id)).collect(
 					Collectors.toList());
 		}
-
-		EntityMetaData ref = attribute.getRefEntity();
-		ids = ids.stream().map(attribute.getDataType()::convert).collect(Collectors.toList());
-
-		return dataService.findAll(ref.getName(), IN(ref.getIdAttribute().getName(), ids));
+		return from(ids).transform(attribute.getDataType()::convert).transform(
+				convertedId -> (dataService.findOne(attribute.getRefEntity().getName(), convertedId)));
 	}
 
 	@Override
@@ -313,6 +321,12 @@ public class DefaultEntity implements Entity
 	public void set(Entity entity)
 	{
 		entityMetaData.getAtomicAttributes().forEach(attr -> set(attr.getName(), entity.get(attr.getName())));
+	}
+
+	@Override
+	public String toString()
+	{
+		return getLabelValue();
 	}
 
 	@Override

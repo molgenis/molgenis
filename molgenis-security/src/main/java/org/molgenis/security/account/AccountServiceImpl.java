@@ -13,12 +13,13 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.security.runas.RunAsSystem;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.security.user.MolgenisUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -84,9 +85,10 @@ public class AccountServiceImpl implements AccountService
 		// add user to group
 		MolgenisGroup group = dataService.findOne(MolgenisGroup.ENTITY_NAME,
 				new QueryImpl().eq(MolgenisGroup.NAME, ALL_USER_GROUP), MolgenisGroup.class);
+		MolgenisGroupMember molgenisGroupMember = null;
 		if (group != null)
 		{
-			MolgenisGroupMember molgenisGroupMember = new MolgenisGroupMember();
+			molgenisGroupMember = new MolgenisGroupMember();
 			molgenisGroupMember.setMolgenisGroup(group);
 			molgenisGroupMember.setMolgenisUser(molgenisUser);
 			dataService.add(MolgenisGroupMember.ENTITY_NAME, molgenisGroupMember);
@@ -95,14 +97,32 @@ public class AccountServiceImpl implements AccountService
 		// send activation email
 		URI activationUri = URI.create(baseActivationUri + '/' + activationCode);
 
-		SimpleMailMessage mailMessage = new SimpleMailMessage();
-		mailMessage.setTo(activationEmailAddresses.toArray(new String[]
-		{}));
-		mailMessage.setSubject("User registration for " + getAppName());
-		mailMessage.setText(createActivationEmailText(molgenisUser, activationUri));
-		mailSender.send(mailMessage);
+		try
+		{
+			SimpleMailMessage mailMessage = new SimpleMailMessage();
+			mailMessage.setTo(activationEmailAddresses.toArray(new String[] {}));
+			mailMessage.setSubject("User registration for " + getAppName());
+			mailMessage.setText(createActivationEmailText(molgenisUser, activationUri));
+			mailSender.send(mailMessage);
+		}
+		catch (MailException mce)
+		{
+			if (molgenisGroupMember != null)
+			{
+				dataService.delete(MolgenisGroupMember.ENTITY_NAME, molgenisGroupMember);
+			}
+
+			if (molgenisUser != null)
+			{
+				dataService.delete(MolgenisUser.ENTITY_NAME, molgenisUser);
+			}
+
+			throw new MolgenisUserException(
+					"An error occurred. Please contact the administrator. You are not signed up!");
+		}
 		LOG.debug("send activation email for user " + molgenisUser.getUsername() + " to "
 				+ StringUtils.join(activationEmailAddresses, ','));
+
 	}
 
 	/*

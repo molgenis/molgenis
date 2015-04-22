@@ -14,6 +14,7 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.AnnotatorUtils;
 import org.molgenis.data.annotation.TabixReader;
 import org.molgenis.data.annotation.VariantAnnotator;
 import org.molgenis.data.annotation.VcfUtils;
@@ -79,7 +80,6 @@ public class ExACServiceAnnotator extends VariantAnnotator
 
 		this.annotatorService = new AnnotationServiceImpl();
 
-		// tabixReader = new TabixReader(molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY));
 		checkTabixReader();
 
 		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
@@ -127,7 +127,12 @@ public class ExACServiceAnnotator extends VariantAnnotator
 	@Override
 	public boolean annotationDataExists()
 	{
-		return false;// Returns null -> new File(molgenisSettings.getProperty(EXAC_VCFGZ_LOCATION)).exists();
+		boolean canAnnotate = false;
+		if (molgenisSettings.getProperty(EXAC_VCFGZ_LOCATION) != null)
+		{
+			canAnnotate = new File(molgenisSettings.getProperty(EXAC_VCFGZ_LOCATION)).exists();
+		}
+		return canAnnotate;
 	}
 
 	@Override
@@ -141,9 +146,10 @@ public class ExACServiceAnnotator extends VariantAnnotator
 	{
 		checkTabixReader();
 
-		Map<String, Object> resultMap = annotateEntityWithExAC(VcfRepository.CHROM, entity.getLong(VcfRepository.POS),
-				entity.getString(VcfRepository.REF), entity.getString(VcfRepository.ALT));
-		return Collections.<Entity> singletonList(getAnnotatedEntity(entity, resultMap));
+		Map<String, Object> resultMap = annotateEntityWithExAC(entity.getString(VcfRepository.CHROM),
+				entity.getLong(VcfRepository.POS), entity.getString(VcfRepository.REF),
+				entity.getString(VcfRepository.ALT));
+		return Collections.<Entity> singletonList(AnnotatorUtils.getAnnotatedEntity(this, entity, resultMap));
 	}
 
 	/**
@@ -192,8 +198,6 @@ public class ExACServiceAnnotator extends VariantAnnotator
 		catch (NullPointerException npe)
 		{
 			// overkill to print all missing, since ExAC is exome data 'only'
-			// LOG.info("No data for CHROM: " + chromosome + " POS: " + position + " REF: " + reference + " ALT: " +
-			// alternative + " LINE: " + line);
 		}
 
 		// if nothing found, return empty list for no hit
@@ -247,8 +251,6 @@ public class ExACServiceAnnotator extends VariantAnnotator
 			if (altAllele.equals(alternative) && split[3].equals(reference))
 			{
 				maf = Double.parseDouble(mafs[i]);
-				// LOG.info("ExAC variant found for CHROM: " + chromosome + " POS: " + position + " REF: " + reference +
-				// " ALT: " + alternative + ", MAF = " + maf);
 			}
 		}
 

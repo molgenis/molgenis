@@ -10,7 +10,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.security.runas.SystemSecurityToken;
+import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationDetailsSource;

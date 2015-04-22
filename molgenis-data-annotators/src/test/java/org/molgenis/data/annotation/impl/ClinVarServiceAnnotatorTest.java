@@ -110,16 +110,16 @@ public class ClinVarServiceAnnotatorTest
 		when(metaDataCantAnnotate.getAttribute(VcfRepository.REF)).thenReturn(attributeMetaDataRef);
 		when(metaDataCantAnnotate.getAttribute(VcfRepository.ALT)).thenReturn(attributeMetaDataAlt);
 
-		entity = mock(Entity.class);
+		entity = new MapEntity(metaDataCanAnnotate);
 
 		String chrStr = "12";
 		Long chrPos = new Long(57966471);
 		String chrRef = "G";
 		String chrAlt = "A";
-		when(entity.getString(VcfRepository.CHROM)).thenReturn(chrStr);
-		when(entity.getLong(VcfRepository.POS)).thenReturn(chrPos);
-		when(entity.getString(VcfRepository.REF)).thenReturn(chrRef);
-		when(entity.getString(VcfRepository.ALT)).thenReturn(chrAlt);
+		entity.set(VcfRepository.CHROM, chrStr);
+		entity.set(VcfRepository.POS, chrPos);
+		entity.set(VcfRepository.REF, chrRef);
+		entity.set(VcfRepository.ALT, chrAlt);
 
 		input = new ArrayList<Entity>();
 		input.add(entity);
@@ -137,7 +137,6 @@ public class ClinVarServiceAnnotatorTest
 		when(clinvarDataProvider.getClinvarData()).thenReturn(clinvarDataMap);
 		
 		annotator = new ClinVarServiceAnnotator(settings, annotationService, clinvarDataProvider);
-		when(entity.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
 	}
 
 	@Test

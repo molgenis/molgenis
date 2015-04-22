@@ -15,6 +15,7 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.AnnotatorUtils;
 import org.molgenis.data.annotation.VariantAnnotator;
 import org.molgenis.data.annotation.VcfUtils;
 import org.molgenis.data.annotation.impl.datastructures.Sample;
@@ -176,7 +177,7 @@ public class DeNovoAnnotator extends VariantAnnotator
 	public List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException
 	{
 		Map<String, Object> resultMap = annotateEntityWithDeNovo(entity);
-		return Collections.<Entity> singletonList(getAnnotatedEntity(entity, resultMap));
+		return Collections.<Entity> singletonList(AnnotatorUtils.getAnnotatedEntity(this, entity, resultMap));
 	}
 
 	private synchronized Map<String, Object> annotateEntityWithDeNovo(Entity entity) throws IOException

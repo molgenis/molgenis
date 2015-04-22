@@ -102,6 +102,12 @@ public class DatetimeField extends FieldType
 	}
 
 	@Override
+	public Long getMaxLength()
+	{
+		return null;
+	}
+
+	@Override
 	public List<String> getAllowedOperators()
 	{
 		return Arrays.asList("EQUALS", "NOT EQUALS", "LESS", "GREATER", "LIKE");

@@ -3,7 +3,7 @@ package org.molgenis.data.vcf.importer;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -24,6 +24,7 @@ import org.molgenis.data.importer.EntitiesValidationReportImpl;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.GenericImporterExtensions;
+import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.security.permission.PermissionSystemService;
@@ -56,7 +57,7 @@ public class VcfImporterService implements ImportService
 	}
 
 	@Override
-	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction)
+	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction, String defaultPackage)
 	{
 		if (databaseAction != DatabaseAction.ADD) throw new IllegalArgumentException("Only ADD is supported");
 
@@ -128,11 +129,11 @@ public class VcfImporterService implements ImportService
 			report.getFieldsImportable().put(entityName, availableAttributeNames);
 
 			// Sample entity
-			AttributeMetaData sampleAttribute = emd.getAttribute("SAMPLES");
+			AttributeMetaData sampleAttribute = emd.getAttribute(VcfRepository.SAMPLES);
 			if (sampleAttribute != null)
 			{
-				boolean sampleEntityExists = dataService.hasRepository(entityName);
 				String sampleEntityName = sampleAttribute.getRefEntity().getName();
+				boolean sampleEntityExists = dataService.hasRepository(sampleEntityName);
 				report.getSheetsImportable().put(sampleEntityName, !sampleEntityExists);
 
 				List<String> availableSampleAttributeNames = Lists.newArrayList();
@@ -182,7 +183,8 @@ public class VcfImporterService implements ImportService
 		}
 	}
 
-	public EntityImportReport importVcf(Repository inRepository, List<EntityMetaData> addedEntities) throws IOException
+	private EntityImportReport importVcf(Repository inRepository, List<EntityMetaData> addedEntities)
+			throws IOException
 	{
 		EntityImportReport report = new EntityImportReport();
 		Repository sampleRepository = null;
@@ -196,12 +198,14 @@ public class VcfImporterService implements ImportService
 		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData(inRepository.getEntityMetaData());
 		entityMetaData.setBackend(BACKEND);
 
-		AttributeMetaData sampleAttribute = entityMetaData.getAttribute("SAMPLES");
+		AttributeMetaData sampleAttribute = entityMetaData.getAttribute(VcfRepository.SAMPLES);
 		if (sampleAttribute != null)
 		{
 			DefaultEntityMetaData samplesEntityMetaData = new DefaultEntityMetaData(sampleAttribute.getRefEntity());
 			samplesEntityMetaData.setBackend(BACKEND);
 			sampleRepository = dataService.getMeta().addEntityMeta(samplesEntityMetaData);
+			permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
+					Collections.singletonList(samplesEntityMetaData.getName()));
 			addedEntities.add(sampleAttribute.getRefEntity());
 		}
 
@@ -211,6 +215,9 @@ public class VcfImporterService implements ImportService
 		List<Entity> sampleEntities = new ArrayList<>();
 		try (Repository outRepository = dataService.getMeta().addEntityMeta(entityMetaData))
 		{
+			permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
+					Collections.singletonList(entityMetaData.getName()));
+
 			addedEntities.add(entityMetaData);
 
 			if (sampleRepository != null)
@@ -220,7 +227,7 @@ public class VcfImporterService implements ImportService
 					Entity entity = inIterator.next();
 					vcfEntityCount++;
 
-					Iterable<Entity> samples = entity.getEntities("SAMPLES");
+					Iterable<Entity> samples = entity.getEntities(VcfRepository.SAMPLES);
 					if (samples != null)
 					{
 						Iterator<Entity> sampleIterator = samples.iterator();

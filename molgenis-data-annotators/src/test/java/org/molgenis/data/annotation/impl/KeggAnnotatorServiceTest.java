@@ -82,10 +82,10 @@ public class KeggAnnotatorServiceTest
 		when(metaDataCantAnnotate.getAttribute(VcfRepository.POS)).thenReturn(
 				attributeMetaDataCantAnnotatePos);
 
-		entity = mock(Entity.class);
+		entity = new MapEntity(metaDataCanAnnotate);
 
-		when(entity.getString(VcfRepository.CHROM)).thenReturn("2");
-		when(entity.getLong(VcfRepository.POS)).thenReturn(new Long(58453844l));
+		entity.set(VcfRepository.CHROM, "2");
+		entity.set(VcfRepository.POS, new Long(58453844l));
 
 		input = new ArrayList<Entity>();
 		input.add(entity);
@@ -103,7 +103,6 @@ public class KeggAnnotatorServiceTest
 				58453844l - 10, 58453844l + 10, "2"));
 		when(hgncLocationsProvider.getHgncLocations()).thenReturn(locationsMap);
 		annotator = new KeggServiceAnnotator(annotationService, hgncLocationsProvider, keggDataProvider);
-		when(entity.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
 	}
 
 	@Test

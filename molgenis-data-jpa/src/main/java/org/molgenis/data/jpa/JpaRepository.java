@@ -410,8 +410,9 @@ public class JpaRepository extends AbstractRepository
 					AttributeMetaData meta = getEntityMetaData().getAttribute(r.getField());
 
 					In<Object> in;
-					if (meta.getDataType().getEnumType() == FieldTypeEnum.MREF
-							|| meta.getDataType().getEnumType() == FieldTypeEnum.CATEGORICAL)
+					FieldTypeEnum enumType = meta.getDataType().getEnumType();
+					if (enumType == FieldTypeEnum.MREF || enumType == FieldTypeEnum.CATEGORICAL_MREF
+							|| enumType == FieldTypeEnum.CATEGORICAL)
 					{
 						in = cb.in(from.join(r.getJpaAttribute(), JoinType.LEFT));
 					}
@@ -634,6 +635,7 @@ public class JpaRepository extends AbstractRepository
 					break;
 
 				case CATEGORICAL:
+				case CATEGORICAL_MREF:
 				case MREF:
 				case XREF:
 					// Find the ref entities and create an 'in' queryrule

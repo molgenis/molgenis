@@ -88,11 +88,10 @@ public class HgncSymbolServiceAnnotatorTest
 		when(metaDataCantAnnotate.getAttribute(VcfRepository.POS)).thenReturn(
 				attributeMetaDataCantAnnotatePos);
 
-		entity = mock(Entity.class);
+		entity = new MapEntity(metaDataCanAnnotate);
 
-		when(entity.getString(VcfRepository.CHROM)).thenReturn("17");
-		when(entity.getLong(VcfRepository.POS)).thenReturn(new Long(41196312));
-		when(entity.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
+		entity.set(VcfRepository.CHROM,"17");
+		entity.set(VcfRepository.POS,new Long(41196312));
 
 		input = new ArrayList<Entity>();
 		input.add(entity);

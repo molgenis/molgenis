@@ -111,7 +111,7 @@ public class VcfUtilsTest
         PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
 
 
-         File inputVcfFile = new File(ResourceUtils.getFile(getClass(), "/testWriter.vcf").getPath());
+        File inputVcfFile = new File(ResourceUtils.getFile(getClass(), "/testWriter.vcf").getPath());
 
         VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, Collections.emptyList(), "");
 
@@ -133,10 +133,10 @@ public class VcfUtilsTest
 
         final List<String> infoFields = Arrays
                 .asList(new String[]
-                        {
-                                "##INFO=<ID=INFO_ANNO,Number=1,Type=Float,Description=\"\">"
-                        }
-                               );
+                                {
+                                        "##INFO=<ID=INFO_ANNO,Number=1,Type=Float,Description=\"\">"
+                                }
+                );
 
         File inputVcfFile = new File(ResourceUtils.getFile(getClass(), "/testWriter.vcf").getPath());
         File outputVcfFile = new File(ResourceUtils.getFile(getClass(), "/result_vcfWriter.vcf").getPath());

@@ -615,7 +615,7 @@ public class DataExplorerController extends MolgenisPluginController
 		model.addAttribute("viewName", getViewName(entityName));
 		return "view-entityreport";
 	}
-	
+
 	private String getViewName(String entityName)
 	{
 		//first we check if there are any RuntimeProperty mappings of entity to report template
@@ -638,7 +638,7 @@ public class DataExplorerController extends MolgenisPluginController
 						if (viewExists(specificViewname))
 						{
 							return specificViewname;
-						}	
+						}
 					}
 				}
 				else{
@@ -646,7 +646,7 @@ public class DataExplorerController extends MolgenisPluginController
 				}
 			}
 		}
-		
+
 		//if there are no RuntimeProperty mappings, execute existing behaviour
 		final String specificViewname = "view-entityreport-specific-" + entityName;
 		if (viewExists(specificViewname))

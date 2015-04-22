@@ -14,6 +14,7 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.AnnotatorUtils;
 import org.molgenis.data.annotation.TabixReader;
 import org.molgenis.data.annotation.VariantAnnotator;
 import org.molgenis.data.annotation.VcfUtils;
@@ -55,8 +56,9 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 	private final MolgenisSettings molgenisSettings;
 	private final AnnotationService annotatorService;
 	private static final String NAME = "1000G";
-	public static final String THGEN_MAF = VcfRepository.getInfoPrefix() + "1KGMAF";
-	public static final String THGEN_DIRECTORY_LOCATION_PROPERTY = "1000G_location";
+	public static final String THGEN_MAF_LABEL = "1KGMAF";
+    public static final String THGEN_MAF = VcfRepository.getInfoPrefix() + THGEN_MAF_LABEL;
+    public static final String THGEN_DIRECTORY_LOCATION_PROPERTY = "1000G_location";
 
 	final List<String> infoFields = Arrays.asList(new String[]
 	{ "##INFO=<ID=" + THGEN_MAF.substring(VcfRepository.getInfoPrefix().length())
@@ -145,7 +147,7 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 		Map<String, Object> resultMap = annotateWith1000G(entity.getString(VcfRepository.CHROM),
 				entity.getLong(VcfRepository.POS), entity.getString(VcfRepository.REF),
 				entity.getString(VcfRepository.ALT));
-		return Collections.<Entity> singletonList(getAnnotatedEntity(entity, resultMap));
+		return Collections.<Entity> singletonList(AnnotatorUtils.getAnnotatedEntity(this, entity, resultMap));
 	}
 
 	private void getTabixReaders() throws IOException
