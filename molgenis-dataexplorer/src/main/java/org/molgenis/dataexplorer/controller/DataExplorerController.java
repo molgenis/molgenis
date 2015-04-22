@@ -436,7 +436,7 @@ public class DataExplorerController extends MolgenisPluginController
 			response.addHeader("Content-Disposition", "attachment; filename=" + fileName);
 
 			ServletOutputStream outputStream = response.getOutputStream();
-			download.writeToExcel(dataRequest, outputStream, '\t');
+			download.writeToExcel(dataRequest, outputStream);
 		}
 	}
 
