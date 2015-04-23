@@ -70,7 +70,7 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 	}
 
 	@Test
-	public void testCreateTargetAttributeQueries()
+	public void testCreateTargetAttributeQueryTerms()
 	{
 		EntityMetaData targetEntityMetaData = new DefaultEntityMetaData("targetEntityMetaData");
 		DefaultAttributeMetaData targetAttribute_1 = new DefaultAttributeMetaData("targetAttribute_1");
@@ -100,22 +100,22 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 		when(ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute_3)).thenReturn(tags);
 
 		// Case 1
-		List<String> actualTargetAttributeQueries_1 = semanticSearchServiceHelper.createTargetAttributeQueries(
+		List<String> actualTargetAttributeQueryTerms_1 = semanticSearchServiceHelper.createTargetAttributeQueryTerms(
 				targetEntityMetaData, targetAttribute_1);
-		String expectedTargetAttributeQueriesToString_1 = "[targetAttribute_1, Height, body_length, Standing height, sitting_length, Sitting height, sature, Height]";
-		assertEquals(actualTargetAttributeQueries_1.toString(), expectedTargetAttributeQueriesToString_1);
+		String expectedTargetAttributeQueryTermsToString_1 = "[targetAttribute_1, Height, body_length, Standing height, sitting_length, Sitting height, sature, Height]";
+		assertEquals(actualTargetAttributeQueryTerms_1.toString(), expectedTargetAttributeQueryTermsToString_1);
 
 		// Case 2
-		List<String> actualTargetAttributeQueries_2 = semanticSearchServiceHelper.createTargetAttributeQueries(
+		List<String> actualTargetAttributeQueryTerms_2 = semanticSearchServiceHelper.createTargetAttributeQueryTerms(
 				targetEntityMetaData, targetAttribute_2);
-		String expectedTargetAttributeQueriesToString_2 = "[Height, body_length, Standing height, sitting_length, Sitting height, sature, Height]";
-		assertEquals(actualTargetAttributeQueries_2.toString(), expectedTargetAttributeQueriesToString_2);
+		String expectedTargetAttributeQueryTermsToString_2 = "[Height, body_length, Standing height, sitting_length, Sitting height, sature, Height]";
+		assertEquals(actualTargetAttributeQueryTerms_2.toString(), expectedTargetAttributeQueryTermsToString_2);
 
 		// Case 3
-		List<String> actualTargetAttributeQueries_3 = semanticSearchServiceHelper.createTargetAttributeQueries(
+		List<String> actualTargetAttributeQueryTerms_3 = semanticSearchServiceHelper.createTargetAttributeQueryTerms(
 				targetEntityMetaData, targetAttribute_3);
-		String expectedTargetAttributeQueriesToString_3 = "[targetAttribute_3, body_length, Standing height, sitting_length, Sitting height, sature, Height]";
-		assertEquals(actualTargetAttributeQueries_3.toString(), expectedTargetAttributeQueriesToString_3);
+		String expectedTargetAttributeQueryTermsToString_3 = "[targetAttribute_3, body_length, Standing height, sitting_length, Sitting height, sature, Height]";
+		assertEquals(actualTargetAttributeQueryTerms_3.toString(), expectedTargetAttributeQueryTermsToString_3);
 	}
 
 	@Test

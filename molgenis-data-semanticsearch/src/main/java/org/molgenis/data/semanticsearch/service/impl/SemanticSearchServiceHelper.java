@@ -86,30 +86,30 @@ public class SemanticSearchServiceHelper
 		return finalDisMaxQuery;
 	}
 
-	public List<String> createTargetAttributeQueries(EntityMetaData targetEntityMetaData,
+	public List<String> createTargetAttributeQueryTerms(EntityMetaData targetEntityMetaData,
 			AttributeMetaData targetAttribute)
 	{
-		List<String> queries = new ArrayList<String>();
+		List<String> queryTerms = new ArrayList<String>();
 
 		if (StringUtils.isNotEmpty(targetAttribute.getLabel()))
 		{
-			queries.add(targetAttribute.getLabel());
+			queryTerms.add(targetAttribute.getLabel());
 		}
 
 		if (StringUtils.isNotEmpty(targetAttribute.getDescription()))
 		{
-			queries.add(targetAttribute.getDescription());
+			queryTerms.add(targetAttribute.getDescription());
 		}
 
 		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(
 				targetEntityMetaData, targetAttribute);
 		for (OntologyTerm ontologyTerm : tagsForAttribute.values())
 		{
-			queries.addAll(ontologyTerm.getSynonyms());
-			queries.add(ontologyTerm.getLabel());
+			queryTerms.addAll(ontologyTerm.getSynonyms());
+			queryTerms.add(ontologyTerm.getLabel());
 		}
 
-		return queries;
+		return queryTerms;
 	}
 
 	public List<String> getAttributeIdentifiers(EntityMetaData sourceEntityMetaData)

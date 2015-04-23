@@ -46,11 +46,11 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		Iterable<String> attributeIdentifiers = semanticSearchServiceHelper
 				.getAttributeIdentifiers(sourceEntityMetaData);
 
-		List<String> createTargetAttributeQueries = semanticSearchServiceHelper.createTargetAttributeQueries(
+		List<String> targetAttributeQueryTerms = semanticSearchServiceHelper.createTargetAttributeQueryTerms(
 				targetEntityMetaData, targetAttribute);
 
 		QueryRule createDisMaxQueryRule = semanticSearchServiceHelper
-				.createDisMaxQueryRule(createTargetAttributeQueries);
+				.createDisMaxQueryRule(targetAttributeQueryTerms);
 
 		List<QueryRule> disMaxQueryRules = Lists.newArrayList(new QueryRule(AttributeMetaDataMetaData.IDENTIFIER,
 				Operator.IN, attributeIdentifiers));

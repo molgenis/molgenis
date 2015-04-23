@@ -117,7 +117,7 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 		QueryRule disMaxQueryRule = new QueryRule(rules);
 		disMaxQueryRule.setOperator(Operator.DIS_MAX);
 
-		when(semanticSearchServiceHelper.createTargetAttributeQueries(targetEntityMetaData, targetAttribute))
+		when(semanticSearchServiceHelper.createTargetAttributeQueryTerms(targetEntityMetaData, targetAttribute))
 				.thenReturn(Arrays.asList("targetAttribute", "height", "standing height", "length"));
 
 		when(
