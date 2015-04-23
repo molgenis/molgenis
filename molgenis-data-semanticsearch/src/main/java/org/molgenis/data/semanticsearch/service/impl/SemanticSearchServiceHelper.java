@@ -74,10 +74,10 @@ public class SemanticSearchServiceHelper
 		this.ontologyService = ontologyService;
 	}
 
-	public QueryRule createDisMaxQueryRule(List<String> queries)
+	public QueryRule createDisMaxQueryRule(List<String> queryTerms)
 	{
 		List<QueryRule> rules = new ArrayList<QueryRule>();
-		queries.stream().filter(query -> StringUtils.isNotEmpty(query)).forEach(query -> {
+		queryTerms.stream().filter(query -> StringUtils.isNotEmpty(query)).forEach(query -> {
 			rules.add(new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, query));
 			rules.add(new QueryRule(AttributeMetaDataMetaData.DESCRIPTION, Operator.FUZZY_MATCH, query));
 		});
