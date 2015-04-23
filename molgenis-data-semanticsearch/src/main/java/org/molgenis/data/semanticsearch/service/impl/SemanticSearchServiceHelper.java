@@ -29,7 +29,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
 @Component
@@ -75,40 +74,42 @@ public class SemanticSearchServiceHelper
 		this.ontologyService = ontologyService;
 	}
 
-	public QueryRule createDisMaxQueryRule(EntityMetaData targetEntityMetaData, AttributeMetaData targetAttribute)
+	public QueryRule createDisMaxQueryRule(List<String> queries)
 	{
-		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(
-				targetEntityMetaData, targetAttribute);
-
 		List<QueryRule> rules = new ArrayList<QueryRule>();
-
-		// add query rule for searching the label of target attribute in the attribute table.
-		if (StringUtils.isNotEmpty(targetAttribute.getDescription()))
-		{
-			rules.add(new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, targetAttribute
-					.getDescription()));
-		}
-
-		for (OntologyTerm ontologyTerm : tagsForAttribute.values())
-		{
-			QueryRule disMaxQuery = new QueryRule(new ArrayList<QueryRule>());
-			disMaxQuery.setOperator(Operator.DIS_MAX);
-
-			List<String> synonyms = Lists.newArrayList(ontologyTerm.getSynonyms());
-			synonyms.add(ontologyTerm.getLabel());
-			for (String synonym : synonyms)
-			{
-				disMaxQuery.getNestedRules().add(
-						new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, synonym));
-			}
-
-			rules.add(disMaxQuery);
-		}
-
+		queries.stream().filter(query -> StringUtils.isNotEmpty(query)).forEach(query -> {
+			rules.add(new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, query));
+			rules.add(new QueryRule(AttributeMetaDataMetaData.DESCRIPTION, Operator.FUZZY_MATCH, query));
+		});
 		QueryRule finalDisMaxQuery = new QueryRule(rules);
 		finalDisMaxQuery.setOperator(Operator.DIS_MAX);
-
 		return finalDisMaxQuery;
+	}
+
+	public List<String> createTargetAttributeQueries(EntityMetaData targetEntityMetaData,
+			AttributeMetaData targetAttribute)
+	{
+		List<String> queries = new ArrayList<String>();
+
+		if (StringUtils.isNotEmpty(targetAttribute.getLabel()))
+		{
+			queries.add(targetAttribute.getLabel());
+		}
+
+		if (StringUtils.isNotEmpty(targetAttribute.getDescription()))
+		{
+			queries.add(targetAttribute.getDescription());
+		}
+
+		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(
+				targetEntityMetaData, targetAttribute);
+		for (OntologyTerm ontologyTerm : tagsForAttribute.values())
+		{
+			queries.addAll(ontologyTerm.getSynonyms());
+			queries.add(ontologyTerm.getLabel());
+		}
+
+		return queries;
 	}
 
 	public List<String> getAttributeIdentifiers(EntityMetaData sourceEntityMetaData)
@@ -119,10 +120,8 @@ public class SemanticSearchServiceHelper
 		if (entityMetaDataEntity == null) throw new MolgenisDataAccessException(
 				"Could not find EntityMetaDataEntity by the name of " + sourceEntityMetaData.getName());
 
-		return FluentIterable
-				.from(
-				entityMetaDataEntity.getEntities(EntityMetaDataMetaData.ATTRIBUTES)).transform(
-				new Function<Entity, String>()
+		return FluentIterable.from(entityMetaDataEntity.getEntities(EntityMetaDataMetaData.ATTRIBUTES))
+				.transform(new Function<Entity, String>()
 				{
 					public String apply(Entity attributeEntity)
 					{
