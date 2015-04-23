@@ -30,7 +30,6 @@ import org.molgenis.data.semantic.Tag;
 import org.molgenis.data.semantic.TagImpl;
 import org.molgenis.data.semanticsearch.repository.TagRepository;
 import org.molgenis.data.semanticsearch.semantic.OntologyTag;
-import org.molgenis.data.semanticsearch.service.impl.OntologyTagService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -48,8 +47,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.LinkedHashMultimap;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = OntologyTagServiceTest.Config.class)
@@ -135,7 +133,7 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 		when(ontologyService.getOntologyTerm("http://edamontology.org/data_0987")).thenReturn(chromosomeName);
 		when(ontologyService.getOntologyTerm("http://edamontology.org/data_0919")).thenReturn(geneAnnotation);
 
-		Multimap<Relation, OntologyTerm> expected = ArrayListMultimap.<Relation, OntologyTerm> create();
+		LinkedHashMultimap<Relation, OntologyTerm> expected = LinkedHashMultimap.<Relation, OntologyTerm> create();
 		expected.put(instanceOf, chromosomeName);
 		expected.put(instanceOf, geneAnnotation);
 
