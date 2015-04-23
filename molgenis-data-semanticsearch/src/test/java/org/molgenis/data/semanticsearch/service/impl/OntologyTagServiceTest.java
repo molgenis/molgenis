@@ -48,6 +48,7 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = OntologyTagServiceTest.Config.class)
@@ -133,7 +134,7 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 		when(ontologyService.getOntologyTerm("http://edamontology.org/data_0987")).thenReturn(chromosomeName);
 		when(ontologyService.getOntologyTerm("http://edamontology.org/data_0919")).thenReturn(geneAnnotation);
 
-		LinkedHashMultimap<Relation, OntologyTerm> expected = LinkedHashMultimap.<Relation, OntologyTerm> create();
+		Multimap<Relation, OntologyTerm> expected = LinkedHashMultimap.<Relation, OntologyTerm> create();
 		expected.put(instanceOf, chromosomeName);
 		expected.put(instanceOf, geneAnnotation);
 

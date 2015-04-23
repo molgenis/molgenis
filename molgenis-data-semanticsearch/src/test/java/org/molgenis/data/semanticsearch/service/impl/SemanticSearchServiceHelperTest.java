@@ -33,6 +33,7 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
 @ContextConfiguration(classes = SemanticSearchServiceHelperTest.Config.class)
@@ -63,7 +64,7 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 		DefaultAttributeMetaData targetAttribute = new DefaultAttributeMetaData("targetAttribute");
 		targetAttribute.setDescription("Height");
 
-		LinkedHashMultimap<Relation, OntologyTerm> tags = LinkedHashMultimap.<Relation, OntologyTerm> create();
+		Multimap<Relation, OntologyTerm> tags = LinkedHashMultimap.<Relation, OntologyTerm> create();
 		OntologyTerm ontologyTerm1 = OntologyTerm.create("http://onto/standingheight", "Standing height",
 				"Description is not used", Arrays.<String> asList("body_length"));
 		OntologyTerm ontologyTerm2 = OntologyTerm.create("http://onto/sittingheight", "Sitting height",
