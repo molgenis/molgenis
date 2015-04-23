@@ -15,12 +15,12 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
-import org.molgenis.data.mapper.algorithm.AlgorithmService;
 import org.molgenis.data.mapper.data.request.MappingServiceRequest;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
+import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.semanticsearch.service.impl.OntologyTagService;
@@ -179,12 +179,21 @@ public class MappingServiceController extends MolgenisPluginController
 	@RequestMapping(value = "/addEntityMapping", method = RequestMethod.POST)
 	public String addEntityMapping(@RequestParam String mappingProjectId, String target, String source)
 	{
+		EntityMetaData sourceEntityMetaData = dataService.getEntityMetaData(source);
+		EntityMetaData targetEntityMetaData = dataService.getEntityMetaData(target);
+
+		Iterable<AttributeMetaData> attributes = targetEntityMetaData.getAtomicAttributes();
+
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
+
 		if (hasWritePermission(project))
 		{
-			project.getMappingTarget(target).addSource(dataService.getEntityMetaData(source));
+			EntityMapping mapping = project.getMappingTarget(target).addSource(sourceEntityMetaData);
+			attributes.forEach(attribute -> algorithmService.createAttributeMappingIfOnlyOneMatch(sourceEntityMetaData,
+					targetEntityMetaData, mapping, attribute));
 			mappingService.updateMappingProject(project);
 		}
+
 		return "redirect:/menu/main/mappingservice/mappingproject/" + mappingProjectId;
 	}
 
