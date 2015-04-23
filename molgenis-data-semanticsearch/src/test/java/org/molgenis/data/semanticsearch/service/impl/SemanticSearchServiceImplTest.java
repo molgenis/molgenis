@@ -5,13 +5,24 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.QueryRule;
+import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +32,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 
 @ContextConfiguration(classes = SemanticSearchServiceImplTest.Config.class)
 public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTests
@@ -82,37 +96,66 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 	@Test
 	public void testFindAttributes()
 	{
-		// EntityMetaData sourceEntityMetaData = new DefaultEntityMetaData("sourceEntityMetaData");
-		// EntityMetaData targetEntityMetaData = new DefaultEntityMetaData("targetEntityMetaData");
-		// DefaultAttributeMetaData targetAttribute = new DefaultAttributeMetaData("targetAttribute");
-		//
-		// SemanticSearchServiceHelper semanticSearchServiceHelper_1 = mock(SemanticSearchServiceHelper.class);
-		//
-		// List<String> attributeIdentifiers = Arrays.asList("1", "2");
-		// when(semanticSearchServiceHelper_1.getAttributeIdentifiers(sourceEntityMetaData))
-		// .thenReturn(attributeIdentifiers);
-		//
-		// List<QueryRule> disMaxQueryRules = Lists.newArrayList(new QueryRule(AttributeMetaDataMetaData.IDENTIFIER,
-		// Operator.IN, attributeIdentifiers));
-		//
-		// QueryRule createDisMaxQueryRule = new QueryRule(Arrays.asList(a)); // TODO JJ
-		// createDisMaxQueryRule.setOperator(Operator.DIS_MAX);
-		// when(semanticSearchServiceHelper_1.createDisMaxQueryRule(targetEntityMetaData, targetAttribute)).thenReturn(
-		// createDisMaxQueryRule);
-		//
-		// List<QueryRule> disMaxQueryRules = new ArrayList<QueryRule>(); // TODO JJ
-		// Iterable<Entity> attributeMetaDataEntities = new ArrayList<Entity>(); // TODO JJ
-		// when(dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME, new QueryImpl(disMaxQueryRules))).thenReturn(
-		// attributeMetaDataEntities);
+		DefaultEntityMetaData sourceEntityMetaData = new DefaultEntityMetaData("sourceEntityMetaData");
+		EntityMetaData targetEntityMetaData = new DefaultEntityMetaData("targetEntityMetaData");
+		DefaultAttributeMetaData targetAttribute = new DefaultAttributeMetaData("targetAttribute");
 
-		// TODO jj test this
-		// return Iterables.size(attributeMetaDataEntities) > 0 ? MetaUtils.toExistingAttributeMetaData(
-		// sourceEntityMetaData, attributeMetaDataEntities) : sourceEntityMetaData.getAttributes();
+		// Mock the id's of the attribute entities that should be searched
+		List<String> attributeIdentifiers = Arrays.asList("1", "2");
+		when(semanticSearchServiceHelper.getAttributeIdentifiers(sourceEntityMetaData))
+				.thenReturn(attributeIdentifiers);
 
-		// Iterable<AttributeMetaData> terms = semanticSearchService.findAttributes(sourceEntityMetaData,
-		// targetEntityMetaData, targetAttribute);
+		// Mock the createDisMaxQueryRule method
+		QueryRule finalDisMaxQueryRule = new QueryRule(new ArrayList<QueryRule>());
+		finalDisMaxQueryRule.setOperator(Operator.DIS_MAX);
+		QueryRule targetQueryRuleLabel = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, "height");
+		finalDisMaxQueryRule.getNestedRules().add(targetQueryRuleLabel);
+		QueryRule targetQueryRuleOntologyTermTag = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH,
+				"standing height");
+		QueryRule targetQueryRuleOntologyTermTagSyn = new QueryRule(AttributeMetaDataMetaData.LABEL,
+				Operator.FUZZY_MATCH, "length");
+		QueryRule disMaxTagQueryRule = new QueryRule(Arrays.asList(targetQueryRuleOntologyTermTag,
+				targetQueryRuleOntologyTermTagSyn));
+		disMaxTagQueryRule.setOperator(Operator.DIS_MAX);
+		finalDisMaxQueryRule.getNestedRules().add(disMaxTagQueryRule);
+		when(semanticSearchServiceHelper.createDisMaxQueryRule(targetEntityMetaData, targetAttribute)).thenReturn(
+				finalDisMaxQueryRule);
 
-		// TODO JJ test terms
+		MapEntity entity1 = new MapEntity(ImmutableMap.of(AttributeMetaDataMetaData.NAME, "height_0",
+				AttributeMetaDataMetaData.LABEL, "height",
+				AttributeMetaDataMetaData.DESCRIPTION, "this is a height measurement in m!"));
+		List<Entity> attributeMetaDataEntities = Arrays.<Entity> asList(entity1);
+
+		List<QueryRule> disMaxQueryRules = Lists.newArrayList(new QueryRule(AttributeMetaDataMetaData.IDENTIFIER,
+				Operator.IN, attributeIdentifiers), new QueryRule(Operator.AND), finalDisMaxQueryRule);
+
+		AttributeMetaData attributeHeight = new DefaultAttributeMetaData("height_0");
+		AttributeMetaData attributeWeight = new DefaultAttributeMetaData("weight_0");
+		sourceEntityMetaData.addAttributeMetaData(attributeHeight);
+		sourceEntityMetaData.addAttributeMetaData(attributeWeight);
+
+		// Case 1
+		when(dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME, new QueryImpl(disMaxQueryRules))).thenReturn(
+				attributeMetaDataEntities);
+
+		Iterable<AttributeMetaData> termsActual1 = semanticSearchService.findAttributes(sourceEntityMetaData,
+				targetEntityMetaData, targetAttribute);
+
+		Iterable<AttributeMetaData> termsExpected1 = Arrays.<AttributeMetaData> asList(attributeHeight);
+
+		assertEquals(termsActual1, termsExpected1);
+
+		// Case 2
+		when(dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME, new QueryImpl(disMaxQueryRules))).thenReturn(
+				Arrays.<Entity> asList());
+
+		Iterable<AttributeMetaData> termsActual2 = semanticSearchService.findAttributes(sourceEntityMetaData,
+				targetEntityMetaData, targetAttribute);
+
+		Iterable<AttributeMetaData> termsExpected2 = Arrays
+				.<AttributeMetaData> asList(attributeHeight, attributeWeight);
+
+		assertEquals(termsActual2, termsExpected2);
 	}
 
 	@Configuration
