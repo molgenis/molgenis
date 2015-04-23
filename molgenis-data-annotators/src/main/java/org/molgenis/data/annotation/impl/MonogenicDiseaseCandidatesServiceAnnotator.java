@@ -317,6 +317,7 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 			return resultMap;
 		}
 
+
 	}
 
 	@Override

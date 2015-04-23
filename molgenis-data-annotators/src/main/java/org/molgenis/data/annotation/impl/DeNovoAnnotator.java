@@ -165,7 +165,7 @@ public class DeNovoAnnotator extends VariantAnnotator
 	@Override
 	public boolean annotationDataExists()
 	{
-		return true; // no annotation data required ?
+		return true; // no annotation data required
 	}
 
 	@Override
