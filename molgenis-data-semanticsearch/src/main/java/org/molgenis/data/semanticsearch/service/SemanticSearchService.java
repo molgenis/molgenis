@@ -11,7 +11,18 @@ import org.molgenis.ontology.core.model.OntologyTerm;
 public interface SemanticSearchService
 {
 	/**
-	 * Find all relevant attributes from specified Entity source
+	 * Find all relevant source attributes for every target attribute and put them in a map
+	 * 
+	 * @param sourceEntityMetaData
+	 * @param targetEntityMetaData
+	 * @return A map with target {@link AttributeMetaData} as key and a list of suggested {@link AttributeMetaData} from
+	 *         the source
+	 */
+	Map<AttributeMetaData, Iterable<AttributeMetaData>> findAttributes(EntityMetaData sourceEntityMetaData,
+			EntityMetaData targetEntityMetaData);
+
+	/**
+	 * Find all relevant source attributes for the specified target attribute
 	 * 
 	 * @param source
 	 * @param target

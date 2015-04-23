@@ -1,6 +1,7 @@
 package org.molgenis.data.semanticsearch.service.impl;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,19 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	private SemanticSearchServiceHelper semanticSearchServiceHelper;
 
 	@Override
+	public Map<AttributeMetaData, Iterable<AttributeMetaData>> findAttributes(EntityMetaData sourceEntityMetaData,
+			EntityMetaData targetEntityMetaData)
+	{
+		Iterable<AttributeMetaData> attributes = targetEntityMetaData.getAtomicAttributes();
+		Map<AttributeMetaData, Iterable<AttributeMetaData>> suggestedEntityMappings = new HashMap<AttributeMetaData, Iterable<AttributeMetaData>>();
+
+		attributes.forEach(attribute -> suggestedEntityMappings.put(attribute,
+				findAttributes(sourceEntityMetaData, targetEntityMetaData, attribute)));
+
+		return suggestedEntityMappings;
+	}
+
+	@Override
 	public Iterable<AttributeMetaData> findAttributes(EntityMetaData sourceEntityMetaData,
 			EntityMetaData targetEntityMetaData, AttributeMetaData targetAttribute)
 	{
@@ -60,8 +74,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		Iterable<Entity> attributeMetaDataEntities = dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME,
 				new QueryImpl(disMaxQueryRules));
 
-		return Iterables.size(attributeMetaDataEntities) > 0 ? MetaUtils.toExistingAttributeMetaData(sourceEntityMetaData,
-				attributeMetaDataEntities) : sourceEntityMetaData.getAttributes();
+		return Iterables.size(attributeMetaDataEntities) > 0 ? MetaUtils.toExistingAttributeMetaData(
+				sourceEntityMetaData, attributeMetaDataEntities) : sourceEntityMetaData.getAttributes();
 	}
 
 	@Override
