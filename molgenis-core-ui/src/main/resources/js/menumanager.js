@@ -1,6 +1,8 @@
 (function($, molgenis) {
 	"use strict";
 
+	var cssUrl;
+	
 	function serializeMenu(container) {
 		function serializeMenuRec(list, menu) {
 			list.children('li').each(function() {
@@ -55,6 +57,7 @@
 		$('#bootstrap-theme-select').on('change', function() {
 			var theme = themes[$(this).val()];
 			$('#bootstrap-theme').remove();
+			cssUrl = theme.css;
 			var link = $('<link />').attr('id', 'bootstrap-theme').attr('rel', 'stylesheet').attr('href', theme.css).attr('type', 'text/css');
 			$('head').append(link);
 		});
@@ -64,10 +67,10 @@
 			var selectedBootstrapTheme = $('#bootstrap-theme-select').find(":selected").text();
 			alert(selectedBootstrapTheme);
 			$.ajax({
-				contentType : 'text/html',
+				contentType : 'application/json',
 				type : 'POST',
 				url : molgenis.getContextUrl() + '/set-bootstrap-theme',
-				data : 	selectedBootstrapTheme,
+				data : 	'"'+cssUrl+'"',
 				success : function(succes) {
 					alert('succes!');
 				}

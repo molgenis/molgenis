@@ -25,7 +25,11 @@
     </#if>
         <link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
     <#if molgeniscsstheme??>
-        <link rel="stylesheet" href="<@resource_href "/css/${molgeniscsstheme}"/>" type="text/css">
+		<#if molgeniscsstheme?starts_with("http")>
+			<link rel="stylesheet" href="${molgeniscsstheme}" type="text/css">
+        <#else>
+        	<link rel="stylesheet" href="<@resource_href "/css/${molgeniscsstheme}"/>" type="text/css">
+		</#if>
     </#if>
     <#if app_top_logo?has_content>
         <link rel="stylesheet" href="<@resource_href "/css/molgenis-top-logo.css"/>" type="text/css">
