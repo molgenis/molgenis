@@ -10,7 +10,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.common.collect.Sets;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -30,6 +29,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
 @Component
@@ -94,7 +94,7 @@ public class SemanticSearchServiceHelper
 			QueryRule disMaxQuery = new QueryRule(new ArrayList<QueryRule>());
 			disMaxQuery.setOperator(Operator.DIS_MAX);
 
-			Set<String> synonyms = Sets.newHashSet(ontologyTerm.getSynonyms());
+			List<String> synonyms = Lists.newArrayList(ontologyTerm.getSynonyms());
 			synonyms.add(ontologyTerm.getLabel());
 			for (String synonym : synonyms)
 			{
@@ -131,7 +131,7 @@ public class SemanticSearchServiceHelper
 				}).toList();
 	}
 
-	public List<OntologyTerm> findTagsSync(String description, List<String> ontologyIds)
+	public List<OntologyTerm> findTags(String description, List<String> ontologyIds)
 	{
 		String regex = "[^\\p{L}']+";
 		Set<String> searchTerms = stream(description.split(regex)).map(String::toLowerCase)
