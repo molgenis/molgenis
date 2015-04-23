@@ -109,7 +109,7 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 		String description = "Fall " + SemanticSearchServiceHelper.STOP_WORDS + " sleep";
 		List<String> ontologyIds = Arrays.<String>asList("1");
 		Set<String> searchTerms = Sets.newHashSet("fall", "sleep");
-		semanticSearchServiceHelper.findTagsSync(description, ontologyIds);
+		semanticSearchServiceHelper.findTags(description, ontologyIds);
 		verify(ontologyService).findOntologyTerms(ontologyIds, searchTerms, 100);
 	}
 
@@ -119,7 +119,7 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 		String description = "Standing height (Ångstrøm)";
 		List<String> ontologyIds = Arrays.<String> asList("1");
 		Set<String> searchTerms = Sets.newHashSet("standing", "height", "ångstrøm");
-		semanticSearchServiceHelper.findTagsSync(description, ontologyIds);
+		semanticSearchServiceHelper.findTags(description, ontologyIds);
 		verify(ontologyService).findOntologyTerms(ontologyIds, searchTerms, 100);
 	}
 
@@ -129,7 +129,7 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 		String description = "/əˈnædrəməs/";
 		List<String> ontologyIds = Arrays.<String> asList("1");
 		Set<String> searchTerms = Sets.newHashSet("əˈnædrəməs");
-		semanticSearchServiceHelper.findTagsSync(description, ontologyIds);
+		semanticSearchServiceHelper.findTags(description, ontologyIds);
 		verify(ontologyService).findOntologyTerms(ontologyIds, searchTerms, 100);
 	}
 

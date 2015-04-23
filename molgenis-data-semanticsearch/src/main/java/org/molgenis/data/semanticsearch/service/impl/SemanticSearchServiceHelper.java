@@ -131,7 +131,7 @@ public class SemanticSearchServiceHelper
 				}).toList();
 	}
 
-	public List<OntologyTerm> findTagsSync(String description, List<String> ontologyIds)
+	public List<OntologyTerm> findTags(String description, List<String> ontologyIds)
 	{
 		String regex = "[^\\p{L}']+";
 		Set<String> searchTerms = stream(description.split(regex)).map(String::toLowerCase)
