@@ -15,10 +15,10 @@ public interface SemanticSearchService
 	 * 
 	 * @param sourceEntityMetaData
 	 * @param targetEntityMetaData
-	 * @return A map with target {@link AttributeMetaData} as key and a list of suggested {@link AttributeMetaData} from
+	 * @return A map with target attribute name as key and a list of suggested {@link AttributeMetaData} from
 	 *         the source
 	 */
-	Map<AttributeMetaData, Iterable<AttributeMetaData>> findAttributes(EntityMetaData sourceEntityMetaData,
+	Map<String, List<AttributeMetaData>> findAttributes(EntityMetaData sourceEntityMetaData,
 			EntityMetaData targetEntityMetaData);
 
 	/**
