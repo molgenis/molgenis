@@ -159,6 +159,7 @@
 				formLayout : this.props.formLayout,
 				colOffset : this.props.colOffset,
 				hideOptional: this.state.hideOptional,
+				showHidden: this.props.showHidden,
 				enableFormIndex: this.props.enableFormIndex,
 				onValueChange : this._handleValueChange,
 				onBlur: this._handleBlur,
@@ -195,7 +196,7 @@
 						colOffset : this.props.colOffset,
 						cancelBtn: this.props.modal === true,
 						onCancelClick : this.props.modal === true ? this._handleCancel : undefined,
-						onSubmitClick: this._submit
+						onSubmitClick: this.submit
 					}) : null,
 					this.props.children
 				)
@@ -314,7 +315,7 @@
                 }
 			}.bind(this));
 		},
-		_submit: function(e) {
+		submit: function(e) {
 			// determine if form is valid
 			var errorMessages = {};
 			var promises = [];
@@ -572,6 +573,7 @@
 			formLayout: React.PropTypes.oneOf(['horizontal', 'vertical']),
 			colOffset: React.PropTypes.number,
 			hideOptional: React.PropTypes.bool,
+			showHidden: React.PropTypes.bool,
 			enableFormIndex: React.PropTypes.bool,
 			errorMessages: React.PropTypes.object.isRequired,
 			onValueChange: React.PropTypes.func.isRequired,
