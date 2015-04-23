@@ -64,13 +64,7 @@
 			}.bind(this));
 		},
 		_setEntity: function(entity) {
-			var atomicAttributes = molgenis.getAtomicAttributes(entity.attributes, api);
-			
-			this.setState({
-				entity: entity,
-				atomicAttributes: atomicAttributes
-			});
-			
+			this.setState({entity: entity});
 			if(this._onEntityInit) {
 				this._onEntityInit(entity);
 			}

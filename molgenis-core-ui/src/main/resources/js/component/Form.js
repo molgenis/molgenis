@@ -4,8 +4,8 @@
 
     var div = React.DOM.div, span = React.DOM.span, ol = React.DOM.ol, li = React.DOM.li, a = React.DOM.a;
     var api = new molgenis.RestClient();
-
-    /**
+    
+	/**
 	 * @memberOf component
 	 */
 	var Form = React.createClass({
@@ -64,9 +64,7 @@
 				hideOptional: false
 			};
 		},
-		_willSetEntityInstance: function(entityInstance) {
-			// Resolve visible expressions
-			var entity = this.state.entity;
+		_willSetEntityInstance: function(entity, entityInstance) {
 			_.each(entity.allAttributes, function(attr) {
 				if (attr.visibleExpression) {
 					attr.visible = this._resolveBoolExpression(attr.visibleExpression, entityInstance);
@@ -266,8 +264,9 @@
         	api.update(this.state.entityInstance.href + '/' + attr.name, val);
 	    },
 		_handleValueChange: function(e) {
-			var attribute = this.state.entity.attributes[e.attr];
+			var attribute = this.state.entity.allAttributes[e.attr];
 			if (attribute === undefined) return;//compound
+			
 			
 			// update value in entity instance
 			var value = e.value;
@@ -599,7 +598,7 @@
 							colOffset: this.props.colOffset,
 							onBlur: this.props.onBlur,
 							onValueChange : this.props.onValueChange,
-							key : key
+							key : key 
 						};
 						
 						if (attr.fieldType === 'COMPOUND') {
