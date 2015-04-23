@@ -6,6 +6,7 @@
                         window.ace = a;
                     for (var key in a) if (a.hasOwnProperty(key))
                         window.ace[key] = a[key];
+                    window.ace.config.set("basePath", "/js/ace/src-min-noconflict/");
                 });
             })();
         
