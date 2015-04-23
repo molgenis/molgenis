@@ -8,6 +8,7 @@ import static org.testng.Assert.assertEquals;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -114,6 +115,26 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 		String description = "Fall " + SemanticSearchServiceHelper.STOP_WORDS + " sleep";
 		List<String> ontologyIds = Arrays.<String>asList("1");
 		Set<String> searchTerms = Sets.newHashSet("fall", "sleep");
+		semanticSearchServiceHelper.findTagsSync(description, ontologyIds);
+		verify(ontologyService).findOntologyTerms(ontologyIds, searchTerms, 100);
+	}
+
+	@Test
+	public void testSearchIsoLatin() throws InterruptedException, ExecutionException
+	{
+		String description = "Standing height (Ångstrøm)";
+		List<String> ontologyIds = Arrays.<String> asList("1");
+		Set<String> searchTerms = Sets.newHashSet("standing", "height", "ångstrøm");
+		semanticSearchServiceHelper.findTagsSync(description, ontologyIds);
+		verify(ontologyService).findOntologyTerms(ontologyIds, searchTerms, 100);
+	}
+
+	@Test
+	public void testSearchUnicode() throws InterruptedException, ExecutionException
+	{
+		String description = "/əˈnædrəməs/";
+		List<String> ontologyIds = Arrays.<String> asList("1");
+		Set<String> searchTerms = Sets.newHashSet("əˈnædrəməs");
 		semanticSearchServiceHelper.findTagsSync(description, ontologyIds);
 		verify(ontologyService).findOntologyTerms(ontologyIds, searchTerms, 100);
 	}
