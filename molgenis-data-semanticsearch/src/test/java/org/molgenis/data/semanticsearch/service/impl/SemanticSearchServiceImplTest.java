@@ -78,7 +78,7 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 	public void testSearchDescription() throws InterruptedException, ExecutionException
 	{
 		attribute.setDescription("Standing height (m.)");
-		when(semanticSearchServiceHelper.findTagsSync("Standing height (m.)", ontologies)).thenReturn(ontologyTerms);
+		when(semanticSearchServiceHelper.findTags("Standing height (m.)", ontologies)).thenReturn(ontologyTerms);
 		List<OntologyTerm> terms = semanticSearchService.findTags(attribute, ontologies);
 		assertEquals(terms, ontologyTerms);
 	}
@@ -87,7 +87,7 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 	public void testSearchLabel() throws InterruptedException, ExecutionException
 	{
 		attribute.setLabel("Standing height (m.)");
-		when(semanticSearchServiceHelper.findTagsSync("Standing height (m.)", ontologies)).thenReturn(
+		when(semanticSearchServiceHelper.findTags("Standing height (m.)", ontologies)).thenReturn(
 				ontologyTerms);
 		List<OntologyTerm> terms = semanticSearchService.findTags(attribute, ontologies);
 		assertEquals(terms, ontologyTerms);

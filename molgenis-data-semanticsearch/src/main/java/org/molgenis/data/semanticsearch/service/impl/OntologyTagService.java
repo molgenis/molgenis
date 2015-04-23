@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 
 /**
  * Service to tag metadata with ontology terms.
@@ -93,10 +94,10 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 	}
 
 	@Override
-	public LinkedHashMultimap<Relation, OntologyTerm> getTagsForAttribute(EntityMetaData entityMetaData,
+	public Multimap<Relation, OntologyTerm> getTagsForAttribute(EntityMetaData entityMetaData,
 			AttributeMetaData attributeMetaData)
 	{
-		LinkedHashMultimap<Relation, OntologyTerm> tags = LinkedHashMultimap.<Relation, OntologyTerm> create();
+		Multimap<Relation, OntologyTerm> tags = LinkedHashMultimap.<Relation, OntologyTerm> create();
 		Entity entity = findAttributeEntity(entityMetaData.getName(), attributeMetaData.getName());
 		if (entity == null)
 		{

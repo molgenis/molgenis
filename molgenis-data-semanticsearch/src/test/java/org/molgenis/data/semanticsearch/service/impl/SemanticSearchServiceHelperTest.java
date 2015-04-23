@@ -33,6 +33,7 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
 @ContextConfiguration(classes = SemanticSearchServiceHelperTest.Config.class)
@@ -63,7 +64,7 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 		DefaultAttributeMetaData targetAttribute = new DefaultAttributeMetaData("targetAttribute");
 		targetAttribute.setDescription("Height");
 
-		LinkedHashMultimap<Relation, OntologyTerm> tags = LinkedHashMultimap.<Relation, OntologyTerm> create();
+		Multimap<Relation, OntologyTerm> tags = LinkedHashMultimap.<Relation, OntologyTerm> create();
 		OntologyTerm ontologyTerm1 = OntologyTerm.create("http://onto/standingheight", "Standing height",
 				"Description is not used", Arrays.<String> asList("body_length"));
 		OntologyTerm ontologyTerm2 = OntologyTerm.create("http://onto/sittingheight", "Sitting height",
@@ -109,7 +110,7 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 		String description = "Fall " + SemanticSearchServiceHelper.STOP_WORDS + " sleep";
 		List<String> ontologyIds = Arrays.<String>asList("1");
 		Set<String> searchTerms = Sets.newHashSet("fall", "sleep");
-		semanticSearchServiceHelper.findTagsSync(description, ontologyIds);
+		semanticSearchServiceHelper.findTags(description, ontologyIds);
 		verify(ontologyService).findOntologyTerms(ontologyIds, searchTerms, 100);
 	}
 
@@ -119,7 +120,7 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 		String description = "Standing height (Ångstrøm)";
 		List<String> ontologyIds = Arrays.<String> asList("1");
 		Set<String> searchTerms = Sets.newHashSet("standing", "height", "ångstrøm");
-		semanticSearchServiceHelper.findTagsSync(description, ontologyIds);
+		semanticSearchServiceHelper.findTags(description, ontologyIds);
 		verify(ontologyService).findOntologyTerms(ontologyIds, searchTerms, 100);
 	}
 
@@ -129,7 +130,7 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 		String description = "/əˈnædrəməs/";
 		List<String> ontologyIds = Arrays.<String> asList("1");
 		Set<String> searchTerms = Sets.newHashSet("əˈnædrəməs");
-		semanticSearchServiceHelper.findTagsSync(description, ontologyIds);
+		semanticSearchServiceHelper.findTags(description, ontologyIds);
 		verify(ontologyService).findOntologyTerms(ontologyIds, searchTerms, 100);
 	}
 

@@ -80,6 +80,6 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	public List<OntologyTerm> findTags(AttributeMetaData attribute, List<String> ontologyIds)
 	{
 		String description = attribute.getDescription() == null ? attribute.getLabel() : attribute.getDescription();
-		return semanticSearchServiceHelper.findTagsSync(description, ontologyIds);
+		return semanticSearchServiceHelper.findTags(description, ontologyIds);
 	}
 }
