@@ -33,15 +33,16 @@ import com.google.common.collect.Iterables;
 public class AlgorithmServiceImpl implements AlgorithmService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(AlgorithmServiceImpl.class);
-	private DataService dataService = null;
+
+	@Autowired
+	private DataService dataService;
 
 	@Autowired
 	private SemanticSearchService semanticSearchService;
 
-	public AlgorithmServiceImpl(DataService dataService)
+	public AlgorithmServiceImpl()
 	{
 		new RhinoConfig().init();
-		this.dataService = dataService;
 	}
 
 	@Override
