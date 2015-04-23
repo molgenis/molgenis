@@ -903,22 +903,18 @@ public class ElasticSearchService implements SearchService
 		{
 			LOG.debug("Deleted all Elasticsearch '" + type + "' docs");
 		}
-		// FIXME only deletes mappings?
-		// deleteMapping(request)
-		// DeleteByQueryResponse deleteByQueryResponse =
-		// client.prepareDeleteByQuery(indexName)
-		// .setQuery(new TermQueryBuilder("_type", type)).execute().actionGet();
-		//
-		// if (deleteByQueryResponse != null)
-		// {
-		// IndexDeleteByQueryResponse idbqr =
-		// deleteByQueryResponse.getIndex(indexName);
-		// if (idbqr != null && idbqr.getFailedShards() > 0)
-		// {
-		// throw new ElasticsearchException("Delete failed. Returned headers:" +
-		// idbqr.getHeaders());
-		// }
-		// }
+		
+		DeleteByQueryResponse deleteByQueryResponse = client.prepareDeleteByQuery(indexName)
+				.setQuery(new TermQueryBuilder("_type", type)).execute().actionGet();
+
+		if (deleteByQueryResponse != null)
+		{
+			IndexDeleteByQueryResponse idbqr = deleteByQueryResponse.getIndex(indexName);
+			if (idbqr != null && idbqr.getFailedShards() > 0)
+			{
+				throw new ElasticsearchException("Delete failed. Returned headers:" + idbqr.getHeaders());
+			}
+		}
 		refresh();
 	}
 
@@ -1337,6 +1333,10 @@ public class ElasticSearchService implements SearchService
 					SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName);
 					searchRequestGenerator.buildSearchRequest(searchRequestBuilder, type, SearchType.QUERY_AND_FETCH,
 							q, fieldsToReturn, null, null, null, entityMetaData);
+					if (LOG.isTraceEnabled())
+					{
+						LOG.trace("SearchRequest: " + searchRequestBuilder);
+					}
 					SearchResponse searchResponse = searchRequestBuilder.execute().actionGet();
 					if (searchResponse.getFailedShards() > 0)
 					{

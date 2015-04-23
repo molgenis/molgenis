@@ -42,7 +42,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class MolgenisVersionService
 {
-	public static final int CURRENT_VERSION = 5;
+	public static final int CURRENT_VERSION = 8;
 	private static final String VERSION_KEY = "molgenis.version";
 
 	private static final Logger LOG = LoggerFactory.getLogger(MolgenisVersionService.class);
@@ -55,10 +55,12 @@ public class MolgenisVersionService
 			LOG.warn("No {} property found in molgenis-server.properties.", VERSION_KEY);
 			if (isPopulatedDatabase(dataSource))
 			{
+				LOG.info("Database is populated. Setting molgenis-server.properties to 0. (Molgenis 1.4.3)");
 				updateToVersion(0);
 			}
 			else
 			{
+				LOG.info("Database is empty. Setting molgenis-server.properties to current version. (Clean install)");
 				updateToCurrentVersion();
 			}
 		}

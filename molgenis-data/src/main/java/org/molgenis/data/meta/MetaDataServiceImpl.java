@@ -164,6 +164,8 @@ public class MetaDataServiceImpl implements MetaDataService
 
 		if (getEntityMetaData(emd.getName()) != null)
 		{
+			if (emd.isAbstract()) return null;
+
 			if (!dataService.hasRepository(emd.getName()))
 			{
 				Repository repo = backend.getRepository(emd.getName());
@@ -241,6 +243,12 @@ public class MetaDataServiceImpl implements MetaDataService
 	public Package getPackage(String string)
 	{
 		return packageRepository.getPackage(string);
+	}
+
+	@Override
+	public List<Package> getPackages()
+	{
+		return packageRepository.getPackages();
 	}
 
 	@Override

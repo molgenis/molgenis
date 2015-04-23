@@ -293,5 +293,11 @@ public class EntitiesValidatorImpl implements EntitiesValidator
             }
             return ok;
         }
+        
+        @Override
+		public List<String> getPackages()
+		{
+			return Collections.emptyList();
+		}
 	}
 }

@@ -12,11 +12,12 @@ import java.util.stream.StreamSupport;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
+import org.molgenis.data.Package;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
-import org.molgenis.data.semantic.SemanticSearchConfig;
-import org.molgenis.data.semantic.UntypedTagService;
+import org.molgenis.data.semanticsearch.config.SemanticSearchConfig;
+import org.molgenis.data.semanticsearch.service.impl.UntypedTagService;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
@@ -125,7 +126,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 				dataService, permissionSystemService, tagService), dataService);
 
 		// test import
-		EntityImportReport report = importer.doImport(source, DatabaseAction.ADD);
+		EntityImportReport report = importer.doImport(source, DatabaseAction.ADD, Package.DEFAULT_PACKAGE_NAME);
 
 		// Check children
 		List<Entity> entitiesWithChildern = StreamSupport
@@ -168,14 +169,14 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 				dataService, permissionSystemService, tagService), dataService);
 
 		// test import
-		importer.doImport(source, DatabaseAction.ADD);
+		importer.doImport(source, DatabaseAction.ADD, Package.DEFAULT_PACKAGE_NAME);
 
 		// create test excel
 		File file_no_meta = ResourceUtils.getFile(getClass(), "/example_no_meta.xlsx");
 		ExcelRepositoryCollection source_no_meta = new ExcelRepositoryCollection(file_no_meta);
 
 		// test import
-		EntityImportReport report = importer.doImport(source_no_meta, DatabaseAction.ADD);
+		EntityImportReport report = importer.doImport(source_no_meta, DatabaseAction.ADD, Package.DEFAULT_PACKAGE_NAME);
 
 		Assert.assertEquals(report.getNrImportedEntitiesMap().get("import_city"), new Integer(4));
 		Assert.assertEquals(report.getNrImportedEntitiesMap().get("import_person"), new Integer(4));

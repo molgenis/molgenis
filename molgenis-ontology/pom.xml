@@ -3,7 +3,7 @@
 	<parent>
 	    <groupId>org.molgenis</groupId>
 	    <artifactId>molgenis</artifactId>
-	    <version>1.5.0-SNAPSHOT</version>
+	    <version>1.6.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>molgenis-ontology</artifactId>
 	<packaging>jar</packaging>
@@ -19,11 +19,6 @@
 	</build>
 	
   	<dependencies>
-  		<dependency>
-			<groupId>net.sf.jwordnet</groupId>
-			<artifactId>jwnl</artifactId>
-			<version>1.4_rc3</version>
-		</dependency>
   		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
 		    <artifactId>owlapi-api</artifactId>
@@ -41,31 +36,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-core-ui</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-security</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-elasticsearch</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-data</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		 <dependency>
-			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-data-rest</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-data-csv</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -76,7 +46,22 @@
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-data-rest</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-data-import</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-data-elasticsearch</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-scripts</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -86,31 +71,8 @@
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-dataexplorer</artifactId>
+			<artifactId>molgenis-r</artifactId>
 			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-js</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-		    <groupId>org.springframework</groupId>
-		    <artifactId>spring-context-support</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-webmvc</artifactId>
-		</dependency>
-		<dependency>
-		    <groupId>org.jscience</groupId>
-		    <artifactId>jscience</artifactId>
-		    <version>4.3.1</version>
-		</dependency>
-		<dependency>
-		    <groupId>org.apache.httpcomponents</groupId>
-		    <artifactId>httpclient</artifactId>
-		    <version>4.3.6</version>
 		</dependency>
 	</dependencies>
 </project>

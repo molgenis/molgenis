@@ -8,6 +8,7 @@ import org.molgenis.model.MolgenisModelException;
 public class StringField extends FieldType
 {
 	private static final long serialVersionUID = 1L;
+	private static final long MAX_STRING_LENGTH = 255L;
 
 	@Override
 	public String getJavaAssignment(String value) throws MolgenisModelException
@@ -31,8 +32,8 @@ public class StringField extends FieldType
 	@Override
 	public String getMysqlType() throws MolgenisModelException
 	{
-        if(f == null) return "VARCHAR(255)";
-		return "VARCHAR(" + f.getVarCharLength() + ")";
+		// Changed from varchar to text to allow for more columns
+		return "TEXT";
 	}
 
 	@Override
@@ -87,6 +88,12 @@ public class StringField extends FieldType
 	public FieldTypeEnum getEnumType()
 	{
 		return FieldTypeEnum.STRING;
+	}
+
+	@Override
+	public Long getMaxLength()
+	{
+		return MAX_STRING_LENGTH;
 	}
 
 	@Override

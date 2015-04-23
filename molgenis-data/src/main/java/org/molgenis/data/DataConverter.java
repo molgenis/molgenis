@@ -87,10 +87,21 @@ public class DataConverter
 	{
 		if (source == null) return null;
 		if (source instanceof String) return (String) source;
-		if (conversionService == null) return source.toString();
 		if (source instanceof FieldType) return source.toString();
 		if (source instanceof Entity) return ((Entity) source).getLabelValue();
+		if (source instanceof List)
+		{
+			StringBuilder sb = new StringBuilder();
+			for (Object obj : (List<?>) source)
+			{
+				if (sb.length() > 0) sb.append(",");
+				sb.append(toString(obj));
+			}
 
+			return sb.toString();
+		}
+
+		if (getConversionService() == null) return source.toString();
 		return convert(source, String.class);
 	}
 

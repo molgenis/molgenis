@@ -77,6 +77,12 @@ public class TagImpl<SubjectType, ObjectType, CodeSystemType> implements Tag<Sub
 	}
 
 	@Override
+	public String toString()
+	{
+		return relation.getLabel() + " " + getObject();
+	}
+
+	@Override
 	public int hashCode()
 	{
 		final int prime = 31;

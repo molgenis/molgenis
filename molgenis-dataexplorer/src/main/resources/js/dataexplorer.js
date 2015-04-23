@@ -494,7 +494,17 @@ function($, molgenis, settingsXhr) {
 			$(document).trigger('removeAttributeFilter', {'attributeUri': $(this).data('href')});
 		});
 		
-		$('#delete').on('click', function(){
+		$('#delete-data-btn').on('click', function(){
+			bootbox.confirm("Are you sure you want to delete all data for this entity?", function(confirmed){
+				if(confirmed){
+					$.ajax('/api/v1/' + selectedEntityMetaData.name, {'type': 'DELETE'}).done(function(){
+						document.location.href = '/menu/main/dataexplorer?entity=' + selectedEntityMetaData.name;
+					});
+				}
+			});
+		});
+		
+		$('#delete-data-metadata-btn').on('click', function(){
 			bootbox.confirm("Are you sure you want to delete all data and metadata for this entity?", function(confirmed){
 				if(confirmed){
 					$.ajax('/api/v1/'+selectedEntityMetaData.name+'/meta', {'type': 'DELETE'}).done(function(){

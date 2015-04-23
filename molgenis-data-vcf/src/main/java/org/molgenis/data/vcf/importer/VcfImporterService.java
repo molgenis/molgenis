@@ -57,7 +57,7 @@ public class VcfImporterService implements ImportService
 	}
 
 	@Override
-	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction)
+	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction, String defaultPackage)
 	{
 		if (databaseAction != DatabaseAction.ADD) throw new IllegalArgumentException("Only ADD is supported");
 
@@ -133,8 +133,8 @@ public class VcfImporterService implements ImportService
 			AttributeMetaData sampleAttribute = emd.getAttribute(VcfRepository.SAMPLES);
 			if (sampleAttribute != null)
 			{
-                String sampleEntityName = sampleAttribute.getRefEntity().getName();
-                boolean sampleEntityExists = dataService.hasRepository(sampleEntityName);
+				String sampleEntityName = sampleAttribute.getRefEntity().getName();
+				boolean sampleEntityExists = dataService.hasRepository(sampleEntityName);
 				report.getSheetsImportable().put(sampleEntityName, !sampleEntityExists);
 
 				List<String> availableSampleAttributeNames = Lists.newArrayList();
@@ -164,7 +164,6 @@ public class VcfImporterService implements ImportService
 		return false;
 	}
 
-
 	public void importVcf(File vcfFile) throws IOException
 	{
 		RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory
@@ -185,7 +184,8 @@ public class VcfImporterService implements ImportService
 		}
 	}
 
-    private EntityImportReport importVcf(Repository inRepository, List<EntityMetaData> addedEntities) throws IOException
+	private EntityImportReport importVcf(Repository inRepository, List<EntityMetaData> addedEntities)
+			throws IOException
 	{
 		EntityImportReport report = new EntityImportReport();
 		Repository sampleRepository = null;
@@ -205,8 +205,8 @@ public class VcfImporterService implements ImportService
 			DefaultEntityMetaData samplesEntityMetaData = new DefaultEntityMetaData(sampleAttribute.getRefEntity());
 			samplesEntityMetaData.setBackend(BACKEND);
 			sampleRepository = dataService.getMeta().addEntityMeta(samplesEntityMetaData);
-            permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
-                    Collections.singletonList(samplesEntityMetaData.getName()));
+			permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
+					Collections.singletonList(samplesEntityMetaData.getName()));
 			addedEntities.add(sampleAttribute.getRefEntity());
 		}
 
@@ -216,10 +216,10 @@ public class VcfImporterService implements ImportService
 		List<Entity> sampleEntities = new ArrayList<>();
 		try (Repository outRepository = dataService.getMeta().addEntityMeta(entityMetaData))
 		{
-            permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
-                    Collections.singletonList(entityMetaData.getName()));
+			permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
+					Collections.singletonList(entityMetaData.getName()));
 
-            addedEntities.add(entityMetaData);
+			addedEntities.add(entityMetaData);
 
 			if (sampleRepository != null)
 			{
