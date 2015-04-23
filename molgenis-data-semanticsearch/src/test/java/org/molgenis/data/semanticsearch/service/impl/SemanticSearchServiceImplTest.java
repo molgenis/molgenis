@@ -18,6 +18,7 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -87,8 +88,7 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 	public void testSearchLabel() throws InterruptedException, ExecutionException
 	{
 		attribute.setLabel("Standing height (m.)");
-		when(semanticSearchServiceHelper.findTags("Standing height (m.)", ontologies)).thenReturn(
-				ontologyTerms);
+		when(semanticSearchServiceHelper.findTags("Standing height (m.)", ontologies)).thenReturn(ontologyTerms);
 		List<OntologyTerm> terms = semanticSearchService.findTags(attribute, ontologies);
 		assertEquals(terms, ontologyTerms);
 	}
@@ -122,8 +122,8 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 				finalDisMaxQueryRule);
 
 		MapEntity entity1 = new MapEntity(ImmutableMap.of(AttributeMetaDataMetaData.NAME, "height_0",
-				AttributeMetaDataMetaData.LABEL, "height",
-				AttributeMetaDataMetaData.DESCRIPTION, "this is a height measurement in m!"));
+				AttributeMetaDataMetaData.LABEL, "height", AttributeMetaDataMetaData.DESCRIPTION,
+				"this is a height measurement in m!"));
 		List<Entity> attributeMetaDataEntities = Arrays.<Entity> asList(entity1);
 
 		List<QueryRule> disMaxQueryRules = Lists.newArrayList(new QueryRule(AttributeMetaDataMetaData.IDENTIFIER,

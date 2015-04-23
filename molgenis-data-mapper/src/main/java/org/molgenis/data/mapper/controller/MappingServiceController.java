@@ -24,8 +24,8 @@ import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
+import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
-import org.molgenis.data.semanticsearch.service.impl.OntologyTagService;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -82,7 +82,7 @@ public class MappingServiceController extends MolgenisPluginController
 
 	@Autowired
 	private SemanticSearchService semanticSearchService;
-	
+
 	private ExecutorService executors;
 
 	public MappingServiceController()
@@ -198,11 +198,12 @@ public class MappingServiceController extends MolgenisPluginController
 		{
 			EntityMapping mapping = project.getMappingTarget(target).addSource(sourceEntityMetaData);
 			mappingService.updateMappingProject(project);
-			executors.execute(() -> RunAsSystemProxy.runAsSystem(()->{
-				autoGenerateAlgorithms(mapping, target, sourceEntityMetaData, targetEntityMetaData, attributes, project);
-				return null;
-			}
-			));
+			executors.execute(() -> RunAsSystemProxy
+					.runAsSystem(() -> {
+						autoGenerateAlgorithms(mapping, target, sourceEntityMetaData, targetEntityMetaData, attributes,
+								project);
+						return null;
+					}));
 		}
 
 		return "redirect:/menu/main/mappingservice/mappingproject/" + mappingProjectId;
