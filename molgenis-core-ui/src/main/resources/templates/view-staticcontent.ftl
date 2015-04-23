@@ -1,23 +1,10 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 <@header/>
-
-<#if content?has_content>
-	<div class="row">
-		<div class="col-md-12">
-            <#-- Do *not* HTML escape content -->		
-			${content}
-		</div>
-	</div>
-</#if>
-
-<#if isCurrentUserCanEdit?has_content && isCurrentUserCanEdit>
-	<div class="row">
-		<div class="col-md-12">
-			<hr></hr>
-			<a href="${context_url?html}/edit" class="btn btn-default pull-left">Edit page</a>
-		</div>
-	</div>
-</#if>
-
+<div id="table-container" />
+<script>
+    React.render(molgenis.ui.Table({
+        entity: '/api/v1/org_molgenis_test_TypeTest/meta',
+    }), $('#table-container')[0]);
+</script>
 <@footer/>

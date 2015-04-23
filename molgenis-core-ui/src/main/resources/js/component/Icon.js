@@ -11,11 +11,12 @@
 		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
 		displayName: 'Icon',
 		propTypes: {
-			name: React.PropTypes.string.isRequired
+			name: React.PropTypes.string.isRequired,
+			onClick: React.PropTypes.func
 		},
 		render: function() {
 			return (
-				span(null,
+				span({onClick: this.props.onClick, style: this.props.onClick ? {cursor: 'pointer'} : undefined},
 					span({className: 'glyphicon glyphicon-' + this.props.name, 'aria-hidden': true}),
 					span({className: 'sr-only'}, this.props.name)
 				)

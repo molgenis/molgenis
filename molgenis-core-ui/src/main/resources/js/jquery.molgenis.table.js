@@ -113,7 +113,7 @@
 				// partially expand reference entities (only request label attribute)
 				var refEntity = settings.refEntitiesMeta[attribute.refEntity.href];
 				if(attribute.visible){
-					return attribute.name + '[' + refEntity.labelAttribute + ']';
+					return attribute.name;// + '[' + refEntity.labelAttribute + ']';
 				}
 			}
 			return null;
@@ -137,6 +137,25 @@
 	/**
 	 * @memberOf molgenis.table
 	 */
+	function calculateNrHeaderRows(attributes) {
+	    var level = 1;
+	    if(attributes) {
+		    var key;
+		    for(key in attributes) {
+		        if (!attributes.hasOwnProperty(key)) continue;
+	
+		        if(typeof attributes[key] === 'object'){
+		            var depth = calculateNrHeaderRows(attributes[key]) + 1;
+		            level = Math.max(depth, level);
+		        }
+		    }
+	    }
+	    return level;
+	}
+	
+	/**
+	 * @memberOf molgenis.table
+	 */
 	function createTableHeader(settings) {
 		var container = $('.molgenis-table thead', settings.container);
 
@@ -146,23 +165,47 @@
 			items.push($('<th>')); // delete row
 		}
 		
+		// calculate number of header rows 
+		var nrHeaderRows = calculateNrHeaderRows(settings.expandAttributes);
+		console.log(settings.colAttributes, settings.expandAttributes);
 		$.each(settings.colAttributes, function(i, attribute) {
-			var header;
 			if(attribute.visible) {
-				if (settings.sort && settings.sort.orders[0].property === attribute.name) {
-					if (settings.sort.orders[0].direction === 'ASC') {
-						header = $('<th>' + attribute.label + '<span data-attribute="' + attribute.name
-								+ '" class="ui-icon ui-icon-triangle-1-s down"></span></th>');
+				var expandCollapseControl;
+				if(attribute.refEntity) {
+					if(settings.expandAttributes && settings.expandAttributes[attribute.name] !== undefined) {
+						expandCollapseControl = '<span data-attribute="' + attribute.name + '"class="collapse-btn glyphicon glyphicon-minus"></span>';	
 					} else {
-						header = $('<th>' + attribute.label + '<span data-attribute="' + attribute.name
-								+ '" class="ui-icon ui-icon-triangle-1-n up"></span></th>');
+						expandCollapseControl = '<span data-attribute="' + attribute.name + '"class="expand-btn glyphicon glyphicon-plus"></span>';
 					}
 				} else {
-					header = $('<th>' + attribute.label + '<span data-attribute="' + attribute.name
-							+ '" class="ui-icon ui-icon-triangle-2-n-s updown"></span></th>');
+					expandCollapseControl = '';
 				}
-				header.data('attr', attribute);
-				items.push(header);
+
+				function createAttributeHeader(attribute, headerClass) {
+					var header;
+					if (settings.sort && settings.sort.orders[0].property === attribute.name) {
+						if (settings.sort.orders[0].direction === 'ASC') {
+							header = $('<th' + (headerClass ? ' class="' + headerClass + '"' : '') + '>' + attribute.label + '<span data-attribute="' + attribute.name
+									+ '" class="ui-icon ui-icon-triangle-1-s down"></span>' + expandCollapseControl + '</th>');
+						} else {
+							header = $('<th' + (headerClass ? ' class="' + headerClass + '"' : '') + '>' + attribute.label + '<span data-attribute="' + attribute.name
+									+ '" class="ui-icon ui-icon-triangle-1-n up"></span>' + expandCollapseControl + '</th>');
+						}
+					} else {
+						header = $('<th' + (headerClass ? ' class="' + headerClass + '"' : '') + '>' + attribute.label + '<span data-attribute="' + attribute.name
+								+ '" class="ui-icon ui-icon-triangle-2-n-s updown"></span>' + expandCollapseControl + '</th>');
+					}
+					header.data('attr', attribute);
+					items.push(header);
+				}
+				
+				if(settings.expandAttributes && settings.expandAttributes[attribute.name] !== undefined) {
+					$.each(attribute.refEntity.attributes, function(i, refAttribute) {
+						createAttributeHeader(refAttribute, 'ref-attr');	
+					});
+				} else {
+					createAttributeHeader(attribute);
+				}
 			}
 		});
 		container.html(items);
@@ -191,12 +234,27 @@
 			}
 
 			$.each(settings.colAttributes, function(i, attribute) {
-				var cell = $('<td>').data('id', entity.href + '/' + encodeURIComponent(attribute.name));
-				renderCell(cell, entity, attribute, settings);
-				if(settings.editenabled) {
-					cell.attr('tabindex', tabindex++);
+				function renderAttribute(entity, attribute) {
+					var cell = $('<td>').data('id', entity.href + '/' + encodeURIComponent(attribute.name));
+					renderCell(cell, entity, attribute, settings);
+					if(settings.editenabled) {
+						cell.attr('tabindex', tabindex++);
+					}
+					row.append(cell);
 				}
-				row.append(cell);
+				
+				if(settings.expandAttributes && settings.expandAttributes[attribute.name] !== undefined) {
+					$.each(attribute.refEntity.attributes, function(i, refAttribute) {
+						var refEntity = entity[attribute.name];
+						if(refEntity) {
+							renderAttribute(entity[attribute.name], refAttribute);
+						} else {
+							row.append($('<td>'));
+						}
+					});
+				} else {
+					renderAttribute(entity, attribute);
+				}
 			});
 			items.push(row);
 		}
@@ -778,6 +836,21 @@
 			});
 		});
 		
+		$(container).on('click', 'thead th .expand-btn', function(e) {
+			var attributeName = $(this).data('attribute');
+			settings.expandAttributes = settings.expandAttributes || {};
+			settings.expandAttributes[attributeName] = null;
+			
+			createTable(settings);
+		});
+		
+		$(container).on('click', 'thead th .collapse-btn', function(e) {
+			var attributeName = $(this).data('attribute');
+			delete settings.expandAttributes[attributeName];
+			
+			createTable(settings);
+		});
+
 		// toggle edit table mode
 		$(container).on('click', '.edit-table-btn', function(e) {
 			e.preventDefault();
