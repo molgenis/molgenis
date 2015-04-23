@@ -38,10 +38,9 @@
 		var itemTemplate = Handlebars.compile($("#item-template").html());
 
 		var select = $("#bootstrap-theme-select");
-		
 		var themes;
 
-		$.get("http://api.bootswatch.com/3/", function(data) {
+		$.get('http://api.bootswatch.com/3/', function(data) {
 			themes = data.themes;
 			select.append($('<option />').val('molgenis').text('molgenis'));
 			themes.forEach(function(value, index) {
@@ -53,11 +52,26 @@
 			} ], 'error');
 		});
 
-		$("#bootstrap-theme-select").on('change', function() {
+		$('#bootstrap-theme-select').on('change', function() {
 			var theme = themes[$(this).val()];
 			$('#bootstrap-theme').remove();
 			var link = $('<link />').attr('id', 'bootstrap-theme').attr('rel', 'stylesheet').attr('href', theme.css).attr('type', 'text/css');
 			$('head').append(link);
+		});
+
+		$('#save-selected-bootstrap-theme').on('click', function(event) {
+			event.preventDefault();
+			var selectedBootstrapTheme = $('#bootstrap-theme-select').find(":selected").text();
+			alert(selectedBootstrapTheme);
+			$.ajax({
+				contentType : 'text/html',
+				type : 'POST',
+				url : molgenis.getContextUrl() + '/set-bootstrap-theme',
+				data : 	selectedBootstrapTheme,
+				success : function(succes) {
+					alert('succes!');
+				}
+			});
 		});
 
 		$('#menu-item-select').select2({

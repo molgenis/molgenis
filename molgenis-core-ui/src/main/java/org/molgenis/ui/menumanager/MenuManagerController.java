@@ -14,8 +14,11 @@ import java.util.List;
 import javax.servlet.http.Part;
 import javax.validation.Valid;
 
+import org.apache.commons.lang3.StringUtils;
+import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.ui.MolgenisPluginInterceptor;
 import org.molgenis.ui.MolgenisUi;
 import org.molgenis.ui.MolgenisUiMenu;
 import org.molgenis.ui.MolgenisUiMenuItem;
@@ -31,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.google.common.base.Predicate;
@@ -51,20 +55,24 @@ public class MenuManagerController extends MolgenisPluginController
 	private final MenuManagerService menuManagerService;
 	private final FileStore fileStore;
 	private final MolgenisUi molgenisUi;
+	private final MolgenisSettings molgenisSettings;
 
 	private static final String ERRORMESSAGE_LOGO = "The logo needs to be an image file like png or jpg.";
 
 	@Autowired
-	public MenuManagerController(MenuManagerService menuManagerService, FileStore fileStore, MolgenisUi molgenisUi)
+	public MenuManagerController(MenuManagerService menuManagerService, FileStore fileStore, MolgenisUi molgenisUi,
+			MolgenisSettings molgenisSettings)
 	{
 		super(URI);
 		if (menuManagerService == null) throw new IllegalArgumentException("menuManagerService is null");
 		if (molgenisUi == null) throw new IllegalArgumentException("molgenisUi is null");
 		if (fileStore == null) throw new IllegalArgumentException("fileStore is null");
+		if (molgenisSettings == null) throw new IllegalArgumentException("molgenisSettings is null");
 
 		this.menuManagerService = menuManagerService;
 		this.molgenisUi = molgenisUi;
 		this.fileStore = fileStore;
+		this.molgenisSettings = molgenisSettings;
 
 	}
 
@@ -101,6 +109,12 @@ public class MenuManagerController extends MolgenisPluginController
 				return molgenisPlugin1.getId().compareTo(molgenisPlugin2.getId());
 			}
 		});
+
+		String theme = molgenisSettings.getProperty(MolgenisPluginInterceptor.MOLGENIS_CSS_THEME);
+		if (StringUtils.isNotEmpty(theme))
+		{
+			model.addAttribute("selectedBootstrapTheme", "United");
+		}
 
 		model.addAttribute("menus", menus);
 		model.addAttribute("plugins", plugins);
@@ -159,5 +173,17 @@ public class MenuManagerController extends MolgenisPluginController
 		}
 
 		return init(model);
+	}
+	
+	/**
+	 * Set a new bootstrap theme
+	 * 
+	 * @param selectedBootstrapTheme
+	 */
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
+	@RequestMapping(value = "/set-bootstrap-theme", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
+	public @ResponseBody void setBootstrapTheme(@Valid @RequestBody String selectedBootstrapTheme) {
+		System.out.println("We are arriving!");
+		molgenisSettings.setProperty(MolgenisPluginInterceptor.MOLGENIS_CSS_THEME, selectedBootstrapTheme);
 	}
 }

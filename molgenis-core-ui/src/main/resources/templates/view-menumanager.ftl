@@ -50,11 +50,17 @@
 				</form>
 				
 				<legend>Select a bootstrap theme</legend>
-				<form name="select-new-bootstrap-theme" class="form-horizontal" role="form">
+				<form class="form-horizontal" role="form">
 					<div class="form-group">
 						<div class="col-md-9 col-md-offset-3">
   							<select class="form-control" id="bootstrap-theme-select"></select>
 						</div>
+  					</div>
+  					
+  					<div class="form-group">
+  						<div class="col-md-9 col-md-offset-3">
+  							<button id="save-selected-bootstrap-theme" type="btn" class="btn btn-warning pull-right">Save current theme</button>
+  						</div>	
   					</div>
 				</form>
 			</div>
