@@ -87,8 +87,7 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 	public void testSearchLabel() throws InterruptedException, ExecutionException
 	{
 		attribute.setLabel("Standing height (m.)");
-		when(semanticSearchServiceHelper.findTags("Standing height (m.)", ontologies)).thenReturn(
-				ontologyTerms);
+		when(semanticSearchServiceHelper.findTags("Standing height (m.)", ontologies)).thenReturn(ontologyTerms);
 		List<OntologyTerm> terms = semanticSearchService.findTags(attribute, ontologies);
 		assertEquals(terms, ontologyTerms);
 	}
@@ -106,28 +105,28 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 				.thenReturn(attributeIdentifiers);
 
 		// Mock the createDisMaxQueryRule method
-		QueryRule finalDisMaxQueryRule = new QueryRule(new ArrayList<QueryRule>());
-		finalDisMaxQueryRule.setOperator(Operator.DIS_MAX);
+		List<QueryRule> rules = new ArrayList<QueryRule>();
 		QueryRule targetQueryRuleLabel = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, "height");
-		finalDisMaxQueryRule.getNestedRules().add(targetQueryRuleLabel);
+		rules.add(targetQueryRuleLabel);
 		QueryRule targetQueryRuleOntologyTermTag = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH,
 				"standing height");
+		rules.add(targetQueryRuleOntologyTermTag);
 		QueryRule targetQueryRuleOntologyTermTagSyn = new QueryRule(AttributeMetaDataMetaData.LABEL,
 				Operator.FUZZY_MATCH, "length");
-		QueryRule disMaxTagQueryRule = new QueryRule(Arrays.asList(targetQueryRuleOntologyTermTag,
-				targetQueryRuleOntologyTermTagSyn));
-		disMaxTagQueryRule.setOperator(Operator.DIS_MAX);
-		finalDisMaxQueryRule.getNestedRules().add(disMaxTagQueryRule);
+		rules.add(targetQueryRuleOntologyTermTagSyn);
+		QueryRule disMaxQueryRule = new QueryRule(rules);
+		disMaxQueryRule.setOperator(Operator.DIS_MAX);
+
 		when(semanticSearchServiceHelper.createDisMaxQueryRule(targetEntityMetaData, targetAttribute)).thenReturn(
-				finalDisMaxQueryRule);
+				disMaxQueryRule);
 
 		MapEntity entity1 = new MapEntity(ImmutableMap.of(AttributeMetaDataMetaData.NAME, "height_0",
-				AttributeMetaDataMetaData.LABEL, "height",
-				AttributeMetaDataMetaData.DESCRIPTION, "this is a height measurement in m!"));
+				AttributeMetaDataMetaData.LABEL, "height", AttributeMetaDataMetaData.DESCRIPTION,
+				"this is a height measurement in m!"));
 		List<Entity> attributeMetaDataEntities = Arrays.<Entity> asList(entity1);
 
 		List<QueryRule> disMaxQueryRules = Lists.newArrayList(new QueryRule(AttributeMetaDataMetaData.IDENTIFIER,
-				Operator.IN, attributeIdentifiers), new QueryRule(Operator.AND), finalDisMaxQueryRule);
+				Operator.IN, attributeIdentifiers), new QueryRule(Operator.AND), disMaxQueryRule);
 
 		AttributeMetaData attributeHeight = new DefaultAttributeMetaData("height_0");
 		AttributeMetaData attributeWeight = new DefaultAttributeMetaData("weight_0");

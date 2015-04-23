@@ -46,8 +46,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		Iterable<String> attributeIdentifiers = semanticSearchServiceHelper
 				.getAttributeIdentifiers(sourceEntityMetaData);
 
-		QueryRule createDisMaxQueryRule = semanticSearchServiceHelper.createDisMaxQueryRule(targetEntityMetaData,
-				targetAttribute);
+		QueryRule createDisMaxQueryRule = semanticSearchServiceHelper.createDisMaxQueryRule(
+				targetEntityMetaData, targetAttribute);
 
 		List<QueryRule> disMaxQueryRules = Lists.newArrayList(new QueryRule(AttributeMetaDataMetaData.IDENTIFIER,
 				Operator.IN, attributeIdentifiers));
@@ -60,8 +60,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		Iterable<Entity> attributeMetaDataEntities = dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME,
 				new QueryImpl(disMaxQueryRules));
 
-		return Iterables.size(attributeMetaDataEntities) > 0 ? MetaUtils.toExistingAttributeMetaData(sourceEntityMetaData,
-				attributeMetaDataEntities) : sourceEntityMetaData.getAttributes();
+		return Iterables.size(attributeMetaDataEntities) > 0 ? MetaUtils.toExistingAttributeMetaData(
+				sourceEntityMetaData, attributeMetaDataEntities) : sourceEntityMetaData.getAttributes();
 	}
 
 	@Override

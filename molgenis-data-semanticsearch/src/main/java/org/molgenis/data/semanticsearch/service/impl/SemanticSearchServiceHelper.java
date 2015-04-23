@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -29,7 +30,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
 @Component
@@ -75,40 +75,82 @@ public class SemanticSearchServiceHelper
 		this.ontologyService = ontologyService;
 	}
 
+	/**
+	 * Create a disMaxJunc query rule based on the label and description from target attribute as well as the
+	 * information from ontology term tags
+	 * 
+	 * @param targetEntityMetaData
+	 * @param targetAttribute
+	 * @return disMaxJunc queryRule
+	 */
 	public QueryRule createDisMaxQueryRule(EntityMetaData targetEntityMetaData, AttributeMetaData targetAttribute)
 	{
+		List<String> queryTerms = new ArrayList<String>();
+
+		if (StringUtils.isNotEmpty(targetAttribute.getLabel()))
+		{
+			queryTerms.add(targetAttribute.getLabel());
+		}
+
+		if (StringUtils.isNotEmpty(targetAttribute.getDescription()))
+		{
+			queryTerms.add(targetAttribute.getDescription());
+		}
+
 		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(
 				targetEntityMetaData, targetAttribute);
 
+		tagsForAttribute.values().stream().filter(ot -> !ot.getIRI().contains(",")).forEach(ot -> {
+			queryTerms.addAll(ot.getSynonyms());
+			queryTerms.add(ot.getLabel());
+		});
+
+		QueryRule disMaxQueryRule = createDisMaxQueryRule(queryTerms);
+
+		tagsForAttribute.values().stream().filter(ot -> ot.getIRI().contains(",")).forEach(ot -> {
+			disMaxQueryRule.getNestedRules().add(createShouldQueryRule(ot.getIRI()));
+		});
+
+		return disMaxQueryRule;
+	}
+
+	/**
+	 * Create disMaxJunc query rule based a list of queryTerm. All queryTerms are lower cased and stop words are removed
+	 * 
+	 * @param queryTerms
+	 * @return disMaxJunc queryRule
+	 */
+	public QueryRule createDisMaxQueryRule(List<String> queryTerms)
+	{
 		List<QueryRule> rules = new ArrayList<QueryRule>();
-
-		// add query rule for searching the label of target attribute in the attribute table.
-		if (StringUtils.isNotEmpty(targetAttribute.getDescription()))
-		{
-			rules.add(new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, targetAttribute
-					.getDescription()));
-		}
-
-		for (OntologyTerm ontologyTerm : tagsForAttribute.values())
-		{
-			QueryRule disMaxQuery = new QueryRule(new ArrayList<QueryRule>());
-			disMaxQuery.setOperator(Operator.DIS_MAX);
-
-			List<String> synonyms = Lists.newArrayList(ontologyTerm.getSynonyms());
-			synonyms.add(ontologyTerm.getLabel());
-			for (String synonym : synonyms)
-			{
-				disMaxQuery.getNestedRules().add(
-						new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, synonym));
-			}
-
-			rules.add(disMaxQuery);
-		}
-
+		queryTerms.stream().filter(query -> StringUtils.isNotEmpty(query)).forEach(query -> {
+			query = StringUtils.join(removeStopWords(query), ' ');
+			rules.add(new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, query));
+			rules.add(new QueryRule(AttributeMetaDataMetaData.DESCRIPTION, Operator.FUZZY_MATCH, query));
+		});
 		QueryRule finalDisMaxQuery = new QueryRule(rules);
 		finalDisMaxQuery.setOperator(Operator.DIS_MAX);
-
 		return finalDisMaxQuery;
+	}
+
+	/**
+	 * Create a boolean should query for composite tags containing multiple ontology terms
+	 * 
+	 * @param multiOntologyTermIri
+	 * @return return a boolean should queryRule
+	 */
+	public QueryRule createShouldQueryRule(String multiOntologyTermIri)
+	{
+		QueryRule shouldQueryRule = new QueryRule(new ArrayList<QueryRule>());
+		shouldQueryRule.setOperator(Operator.SHOULD);
+		for (String ontologyTermIri : multiOntologyTermIri.split(","))
+		{
+			OntologyTerm ontologyTerm = ontologyService.getOntologyTerm(ontologyTermIri);
+			List<String> queryTerms = Lists.newArrayList(ontologyTerm.getSynonyms());
+			queryTerms.add(ontologyTerm.getLabel());
+			shouldQueryRule.getNestedRules().add(createDisMaxQueryRule(queryTerms));
+		}
+		return shouldQueryRule;
 	}
 
 	public List<String> getAttributeIdentifiers(EntityMetaData sourceEntityMetaData)
@@ -119,10 +161,8 @@ public class SemanticSearchServiceHelper
 		if (entityMetaDataEntity == null) throw new MolgenisDataAccessException(
 				"Could not find EntityMetaDataEntity by the name of " + sourceEntityMetaData.getName());
 
-		return FluentIterable
-				.from(
-				entityMetaDataEntity.getEntities(EntityMetaDataMetaData.ATTRIBUTES)).transform(
-				new Function<Entity, String>()
+		return FluentIterable.from(entityMetaDataEntity.getEntities(EntityMetaDataMetaData.ATTRIBUTES))
+				.transform(new Function<Entity, String>()
 				{
 					public String apply(Entity attributeEntity)
 					{
@@ -133,12 +173,18 @@ public class SemanticSearchServiceHelper
 
 	public List<OntologyTerm> findTags(String description, List<String> ontologyIds)
 	{
-		String regex = "[^\\p{L}']+";
-		Set<String> searchTerms = stream(description.split(regex)).map(String::toLowerCase)
-				.filter(w -> !STOP_WORDS.contains(w) && StringUtils.isNotEmpty(w)).collect(Collectors.toSet());
+		Set<String> searchTerms = removeStopWords(description);
 
 		List<OntologyTerm> matchingOntologyTerms = ontologyService.findOntologyTerms(ontologyIds, searchTerms, 100);
 
 		return matchingOntologyTerms;
+	}
+
+	public Set<String> removeStopWords(String description)
+	{
+		String regex = "[^\\p{L}'a-zA-Z0-9]+";
+		Set<String> searchTerms = stream(description.split(regex)).map(String::toLowerCase)
+				.filter(w -> !STOP_WORDS.contains(w) && StringUtils.isNotEmpty(w)).collect(Collectors.toSet());
+		return searchTerms;
 	}
 }
