@@ -65,9 +65,11 @@ public abstract class MysqlRepositoryCollection implements ManageableRepositoryC
 	public void deleteEntityMeta(String entityName)
 	{
 		MysqlRepository repo = repositories.get(entityName);
-		if (repo == null) throw new UnknownEntityException(String.format("Unknown entity '%s'", entityName));
-		repo.drop();
-		repositories.remove(entityName);
+		if (repo != null)
+		{
+			repo.drop();
+			repositories.remove(entityName);
+		}
 	}
 
 	@Override
