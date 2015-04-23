@@ -17,7 +17,7 @@
 </div>
 
 <div class="row">
-	<div id="form-holder" data-name="${questionnaire.name!?url('UTF-8')}" data-id="${questionnaire.id!}" class="col-md-6"></div>
+	<div id="form-holder" data-name="${questionnaire.name!?url('UTF-8')}" data-id="${questionnaire.id!}" class="col-md-10"></div>
 </div>
 
 <@footer />
