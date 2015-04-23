@@ -28,8 +28,6 @@ import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ontology.core.model.OntologyTerm;
-import org.molgenis.security.core.runas.RunAsSystem;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.util.ErrorMessageResponse;
@@ -198,18 +196,13 @@ public class MappingServiceController extends MolgenisPluginController
 		{
 			EntityMapping mapping = project.getMappingTarget(target).addSource(sourceEntityMetaData);
 			mappingService.updateMappingProject(project);
-			executors.execute(() -> RunAsSystemProxy
-					.runAsSystem(() -> {
-						autoGenerateAlgorithms(mapping, target, sourceEntityMetaData, targetEntityMetaData, attributes,
-								project);
-						return null;
-					}));
+			executors.execute(() -> autoGenerateAlgorithms(mapping, target, sourceEntityMetaData, targetEntityMetaData,
+					attributes, project));
 		}
 
 		return "redirect:/menu/main/mappingservice/mappingproject/" + mappingProjectId;
 	}
 
-	@RunAsSystem
 	private void autoGenerateAlgorithms(EntityMapping mapping, String target, EntityMetaData sourceEntityMetaData,
 			EntityMetaData targetEntityMetaData, Iterable<AttributeMetaData> attributes, MappingProject project)
 	{

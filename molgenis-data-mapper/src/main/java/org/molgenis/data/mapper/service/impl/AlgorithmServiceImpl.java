@@ -23,6 +23,7 @@ import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.js.RhinoConfig;
 import org.molgenis.js.ScriptEvaluator;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.mozilla.javascript.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,8 +47,9 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	}
 
 	@Override
-	public void autoGenerateAlgorithm(EntityMetaData sourceEntityMetaData,
-			EntityMetaData targetEntityMetaData, EntityMapping mapping, AttributeMetaData targetAttribute)
+	@RunAsSystem
+	public void autoGenerateAlgorithm(EntityMetaData sourceEntityMetaData, EntityMetaData targetEntityMetaData,
+			EntityMapping mapping, AttributeMetaData targetAttribute)
 	{
 		LOG.debug("createAttributeMappingIfOnlyOneMatch: target= " + targetAttribute.getName());
 		Iterable<AttributeMetaData> matches = semanticSearchService.findAttributes(sourceEntityMetaData,
