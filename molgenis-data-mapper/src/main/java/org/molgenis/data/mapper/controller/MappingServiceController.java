@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -26,6 +28,8 @@ import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.semanticsearch.service.impl.OntologyTagService;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ontology.core.model.OntologyTerm;
+import org.molgenis.security.core.runas.RunAsSystem;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.util.ErrorMessageResponse;
@@ -44,6 +48,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -77,10 +82,13 @@ public class MappingServiceController extends MolgenisPluginController
 
 	@Autowired
 	private SemanticSearchService semanticSearchService;
+	
+	private ExecutorService executors;
 
 	public MappingServiceController()
 	{
 		super(URI);
+		executors = Executors.newSingleThreadExecutor();
 	}
 
 	/**
@@ -189,12 +197,27 @@ public class MappingServiceController extends MolgenisPluginController
 		if (hasWritePermission(project))
 		{
 			EntityMapping mapping = project.getMappingTarget(target).addSource(sourceEntityMetaData);
-			attributes.forEach(attribute -> algorithmService.createAttributeMappingIfOnlyOneMatch(sourceEntityMetaData,
-					targetEntityMetaData, mapping, attribute));
 			mappingService.updateMappingProject(project);
+			executors.execute(() -> RunAsSystemProxy.runAsSystem(()->{
+				autoGenerateAlgorithms(mapping, target, sourceEntityMetaData, targetEntityMetaData, attributes, project);
+				return null;
+			}
+			));
 		}
 
 		return "redirect:/menu/main/mappingservice/mappingproject/" + mappingProjectId;
+	}
+
+	@RunAsSystem
+	private void autoGenerateAlgorithms(EntityMapping mapping, String target, EntityMetaData sourceEntityMetaData,
+			EntityMetaData targetEntityMetaData, Iterable<AttributeMetaData> attributes, MappingProject project)
+	{
+		Stopwatch stopwatch = Stopwatch.createStarted();
+		attributes.forEach(attribute -> algorithmService.autoGenerateAlgorithm(sourceEntityMetaData,
+				targetEntityMetaData, mapping, attribute));
+		mappingService.updateMappingProject(project);
+		stopwatch.stop();
+		System.out.println(stopwatch);
 	}
 
 	/**

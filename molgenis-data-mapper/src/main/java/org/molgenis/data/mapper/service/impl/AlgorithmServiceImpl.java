@@ -46,7 +46,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	}
 
 	@Override
-	public void createAttributeMappingIfOnlyOneMatch(EntityMetaData sourceEntityMetaData,
+	public void autoGenerateAlgorithm(EntityMetaData sourceEntityMetaData,
 			EntityMetaData targetEntityMetaData, EntityMapping mapping, AttributeMetaData targetAttribute)
 	{
 		LOG.debug("createAttributeMappingIfOnlyOneMatch: target= " + targetAttribute.getName());

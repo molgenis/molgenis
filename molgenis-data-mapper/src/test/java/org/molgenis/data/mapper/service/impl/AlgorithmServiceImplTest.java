@@ -143,7 +143,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		when(semanticSearchService.findAttributes(sourceEntityMetaData, targetEntityMetaData, targetAttribute))
 				.thenReturn(mappings);
 
-		algorithmService.createAttributeMappingIfOnlyOneMatch(sourceEntityMetaData, targetEntityMetaData, mapping,
+		algorithmService.autoGenerateAlgorithm(sourceEntityMetaData, targetEntityMetaData, mapping,
 				targetAttribute);
 
 		assertEquals(mapping.getAttributeMapping("targetHeight").getAlgorithm(), "$('sourceHeight');");
@@ -179,7 +179,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		when(semanticSearchService.findAttributes(sourceEntityMetaData, targetEntityMetaData, targetAttribute))
 				.thenReturn(emptyList());
 
-		algorithmService.createAttributeMappingIfOnlyOneMatch(sourceEntityMetaData, targetEntityMetaData, mapping,
+		algorithmService.autoGenerateAlgorithm(sourceEntityMetaData, targetEntityMetaData, mapping,
 				targetAttribute);
 
 		Assert.assertNull(mapping.getAttributeMapping("targetHeight"));
@@ -219,7 +219,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		when(semanticSearchService.findAttributes(sourceEntityMetaData, targetEntityMetaData, targetAttribute))
 				.thenReturn(mappings);
 
-		algorithmService.createAttributeMappingIfOnlyOneMatch(sourceEntityMetaData, targetEntityMetaData, mapping,
+		algorithmService.autoGenerateAlgorithm(sourceEntityMetaData, targetEntityMetaData, mapping,
 				targetAttribute);
 
 		Assert.assertNull(mapping.getAttributeMapping("targetHeight"));

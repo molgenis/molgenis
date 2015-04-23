@@ -41,6 +41,6 @@ public interface AlgorithmService
 	 * @param mapping
 	 * @param targetAttribute
 	 */
-	void createAttributeMappingIfOnlyOneMatch(EntityMetaData sourceEntityMetaData,
+	void autoGenerateAlgorithm(EntityMetaData sourceEntityMetaData,
 			EntityMetaData targetEntityMetaData, EntityMapping mapping, AttributeMetaData targetAttribute);
 }
