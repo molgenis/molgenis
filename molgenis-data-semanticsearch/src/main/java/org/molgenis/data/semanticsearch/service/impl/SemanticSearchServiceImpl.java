@@ -1,9 +1,6 @@
 package org.molgenis.data.semanticsearch.service.impl;
 
-import static org.elasticsearch.common.collect.Lists.newArrayList;
-
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,19 +38,6 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 
 	@Autowired
 	private SemanticSearchServiceHelper semanticSearchServiceHelper;
-
-	@Override
-	public Map<String, List<AttributeMetaData>> findAttributes(EntityMetaData sourceEntityMetaData,
-			EntityMetaData targetEntityMetaData)
-	{
-		Iterable<AttributeMetaData> attributes = targetEntityMetaData.getAtomicAttributes();
-		Map<String, List<AttributeMetaData>> suggestedEntityMappings = new HashMap<String, List<AttributeMetaData>>();
-
-		attributes.forEach(attribute -> suggestedEntityMappings.put(attribute.getName(),
-				newArrayList(findAttributes(sourceEntityMetaData, targetEntityMetaData, attribute))));
-
-		return suggestedEntityMappings;
-	}
 
 	@Override
 	public Iterable<AttributeMetaData> findAttributes(EntityMetaData sourceEntityMetaData,
