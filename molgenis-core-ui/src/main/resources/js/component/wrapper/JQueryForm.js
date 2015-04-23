@@ -21,14 +21,17 @@
 			success: React.PropTypes.func,
 			error: React.PropTypes.func,
 		},
-		componentDidMount: function() {
+		submit: function() {
 			var $form = $(this.refs.form.getDOMNode());
-			$form.ajaxForm({
+			$form.ajaxSubmit({
 				resetForm: false,
 				beforeSubmit : this.props.beforeSubmit,
 				success : this.props.success,
 				error : this.props.error
 			});
+		},
+		componentDidMount: function() {
+			this.refs.form.getDOMNode().submit = this.submit;
 		},
 		componentWillUnmount: function() {
 			var $form = $(this.refs.form.getDOMNode());

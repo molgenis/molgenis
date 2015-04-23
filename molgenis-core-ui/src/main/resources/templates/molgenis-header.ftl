@@ -40,6 +40,9 @@
         <script src="<@resource_href "/js/molgenis-ie8.js"/>"></script>
     <![endif]-->
         <#-- Bundle of third party JavaScript resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
+		<script src="<@resource_href "/js/es6-promise.min.js"/>"></script>
+		<script src="<@resource_href "/js/promise-done-6.1.0.min.js"/>"></script>
+		<script src="<@resource_href "/js/promise-done-6.1.0.min.js"/>"></script>
         <script src="<@resource_href "/js/molgenis-bundle.min.js"/>"></script>
         <script src="<@resource_href "/js/jquery.validate.min.js"/>"></script>
         <script src="<@resource_href "/js/handlebars.min.js"/>"></script>

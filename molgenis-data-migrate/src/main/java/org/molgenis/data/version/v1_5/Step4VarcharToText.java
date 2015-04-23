@@ -17,15 +17,15 @@ import org.springframework.jdbc.core.JdbcTemplate;
  * Part of migration of MOLGENIS 1.4 to 1.5. Changes all entities having MySQL as a back-end. Attributes of FieldType
  * String are changed to TEXT.
  */
-public class Step4 extends MolgenisUpgrade
+public class Step4VarcharToText extends MolgenisUpgrade
 {
 	private JdbcTemplate template;
 
 	private RepositoryCollection mysql;
 
-	private static final Logger LOG = LoggerFactory.getLogger(Step4.class);
+	private static final Logger LOG = LoggerFactory.getLogger(Step4VarcharToText.class);
 
-	public Step4(DataSource dataSource, RepositoryCollection mysql)
+	public Step4VarcharToText(DataSource dataSource, RepositoryCollection mysql)
 	{
 		super(3, 4);
 		this.template = new JdbcTemplate(dataSource);
