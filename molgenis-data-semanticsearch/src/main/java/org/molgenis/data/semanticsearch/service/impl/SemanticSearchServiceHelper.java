@@ -182,7 +182,7 @@ public class SemanticSearchServiceHelper
 
 	public Set<String> removeStopWords(String description)
 	{
-		String regex = "[^\\p{L}']+";
+		String regex = "[^\\p{L}'a-zA-Z0-9]+";
 		Set<String> searchTerms = stream(description.split(regex)).map(String::toLowerCase)
 				.filter(w -> !STOP_WORDS.contains(w) && StringUtils.isNotEmpty(w)).collect(Collectors.toSet());
 		return searchTerms;
