@@ -8,6 +8,16 @@
 	</parent>
 	<artifactId>molgenis-js</artifactId>
 
+	<build>
+		<plugins>
+			<!-- minify css/js -->
+			<plugin>
+				<groupId>com.samaxes.maven</groupId>
+				<artifactId>minify-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+	
 	<dependencies>
 		<dependency>
 			<groupId>org.molgenis</groupId>
@@ -15,9 +25,9 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-    <groupId>org.mozilla</groupId>
-    <artifactId>rhino</artifactId>
-    <version>1.7R5</version>
-</dependency>
+			<groupId>org.mozilla</groupId>
+			<artifactId>rhino</artifactId>
+			<version>1.7R5</version>
+		</dependency>
 	</dependencies>
 </project>
