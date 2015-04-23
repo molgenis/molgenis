@@ -14,6 +14,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.QueryRule;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
@@ -60,9 +61,25 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 	@Test
 	public void testCreateDisMaxQueryRule()
 	{
+		List<String> createdTargetAttributeQueries = Arrays.asList("Height", "Standing height", "body_length",
+				"Sitting height", "sitting_length", "Height", "sature");
+		QueryRule actualRule = semanticSearchServiceHelper.createDisMaxQueryRule(createdTargetAttributeQueries);
+		String expectedQueryRuleToString = "(label FUZZY_MATCH 'Height'description FUZZY_MATCH 'Height'label FUZZY_MATCH 'Standing height'description FUZZY_MATCH 'Standing height'label FUZZY_MATCH 'body_length'description FUZZY_MATCH 'body_length'label FUZZY_MATCH 'Sitting height'description FUZZY_MATCH 'Sitting height'label FUZZY_MATCH 'sitting_length'description FUZZY_MATCH 'sitting_length'label FUZZY_MATCH 'Height'description FUZZY_MATCH 'Height'label FUZZY_MATCH 'sature'description FUZZY_MATCH 'sature')";
+		assertEquals(actualRule.getOperator(), Operator.DIS_MAX);
+		assertEquals(actualRule.toString(), expectedQueryRuleToString);
+	}
+
+	@Test
+	public void testCreateTargetAttributeQueries()
+	{
 		EntityMetaData targetEntityMetaData = new DefaultEntityMetaData("targetEntityMetaData");
-		DefaultAttributeMetaData targetAttribute = new DefaultAttributeMetaData("targetAttribute");
-		targetAttribute.setDescription("Height");
+		DefaultAttributeMetaData targetAttribute_1 = new DefaultAttributeMetaData("targetAttribute_1");
+		targetAttribute_1.setDescription("Height");
+
+		DefaultAttributeMetaData targetAttribute_2 = new DefaultAttributeMetaData("targetAttribute_2");
+		targetAttribute_2.setLabel("Height");
+
+		DefaultAttributeMetaData targetAttribute_3 = new DefaultAttributeMetaData("targetAttribute_3");
 
 		Multimap<Relation, OntologyTerm> tags = LinkedHashMultimap.<Relation, OntologyTerm> create();
 		OntologyTerm ontologyTerm1 = OntologyTerm.create("http://onto/standingheight", "Standing height",
@@ -71,24 +88,44 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 				"Description is not used", Arrays.<String> asList("sitting_length"));
 		OntologyTerm ontologyTerm3 = OntologyTerm.create("http://onto/height", "Height", "Description is not used",
 				Arrays.<String> asList("sature"));
+
 		tags.put(Relation.isAssociatedWith, ontologyTerm1);
-		tags.put(Relation.isAssociatedWith, ontologyTerm2);
 		tags.put(Relation.isRealizationOf, ontologyTerm2);
 		tags.put(Relation.isDefinedBy, ontologyTerm3);
 
-		when(ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute)).thenReturn(tags);
+		when(ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute_1)).thenReturn(tags);
 
-		QueryRule actualRule = semanticSearchServiceHelper.createDisMaxQueryRule(targetEntityMetaData, targetAttribute);
-		String expectedRule = "(label FUZZY_MATCH 'Height'(label FUZZY_MATCH 'body_length'label FUZZY_MATCH 'Standing height')(label FUZZY_MATCH 'sitting_length'label FUZZY_MATCH 'Sitting height')(label FUZZY_MATCH 'sitting_length'label FUZZY_MATCH 'Sitting height')(label FUZZY_MATCH 'sature'label FUZZY_MATCH 'Height'))";
-		assertEquals(actualRule.toString(), expectedRule);
+		when(ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute_2)).thenReturn(tags);
+
+		when(ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute_3)).thenReturn(tags);
+
+		// Case 1
+		List<String> actualTargetAttributeQueries_1 = semanticSearchServiceHelper.createTargetAttributeQueries(
+				targetEntityMetaData, targetAttribute_1);
+		String expectedTargetAttributeQueriesToString_1 = "[targetAttribute_1, Height, body_length, Standing height, sitting_length, Sitting height, sature, Height]";
+		assertEquals(actualTargetAttributeQueries_1.toString(), expectedTargetAttributeQueriesToString_1);
+
+		// Case 2
+		List<String> actualTargetAttributeQueries_2 = semanticSearchServiceHelper.createTargetAttributeQueries(
+				targetEntityMetaData, targetAttribute_2);
+		String expectedTargetAttributeQueriesToString_2 = "[Height, body_length, Standing height, sitting_length, Sitting height, sature, Height]";
+		assertEquals(actualTargetAttributeQueries_2.toString(), expectedTargetAttributeQueriesToString_2);
+
+		// Case 3
+		List<String> actualTargetAttributeQueries_3 = semanticSearchServiceHelper.createTargetAttributeQueries(
+				targetEntityMetaData, targetAttribute_3);
+		String expectedTargetAttributeQueriesToString_3 = "[targetAttribute_3, body_length, Standing height, sitting_length, Sitting height, sature, Height]";
+		assertEquals(actualTargetAttributeQueries_3.toString(), expectedTargetAttributeQueriesToString_3);
 	}
-	
+
 	@Test
-	public void testGetAttributeIdentifiers(){
+	public void testGetAttributeIdentifiers()
+	{
 		EntityMetaData sourceEntityMetaData = new DefaultEntityMetaData("sourceEntityMetaData");
 		Entity entityMetaDataEntity = mock(DefaultEntity.class);
-		
-		when(dataService.findOne(EntityMetaDataMetaData.ENTITY_NAME,
+
+		when(
+				dataService.findOne(EntityMetaDataMetaData.ENTITY_NAME,
 						new QueryImpl().eq(EntityMetaDataMetaData.FULL_NAME, sourceEntityMetaData.getName())))
 				.thenReturn(entityMetaDataEntity);
 
@@ -103,12 +140,12 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 		assertEquals(semanticSearchServiceHelper.getAttributeIdentifiers(sourceEntityMetaData),
 				expactedAttributeIdentifiers);
 	}
-	
+
 	@Test
 	public void testFindTagsSync()
 	{
 		String description = "Fall " + SemanticSearchServiceHelper.STOP_WORDS + " sleep";
-		List<String> ontologyIds = Arrays.<String>asList("1");
+		List<String> ontologyIds = Arrays.<String> asList("1");
 		Set<String> searchTerms = Sets.newHashSet("fall", "sleep");
 		semanticSearchServiceHelper.findTags(description, ontologyIds);
 		verify(ontologyService).findOntologyTerms(ontologyIds, searchTerms, 100);
