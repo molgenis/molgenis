@@ -14,7 +14,6 @@ import com.google.gson.internal.LinkedTreeMap;
 
 public class StyleServiceImpl implements StyleService
 {
-
 	@Autowired
 	private MolgenisSettings molgenisSettings;
 
@@ -42,13 +41,21 @@ public class StyleServiceImpl implements StyleService
 	@Override
 	public void setSelectedStyle(Style style)
 	{
-		// TODO Set the RTP?
+		molgenisSettings.setProperty(MolgenisPluginInterceptor.MOLGENIS_CSS_THEME, style.getLocation());
 	}
 
 	@Override
 	public Style getSelectedStyle()
 	{
-		molgenisSettings.getProperty(MolgenisPluginInterceptor.MOLGENIS_CSS_THEME);
-		return null;
+		Style selectedStyle = null;
+		for (Style style : getAvailableStyles())
+		{
+			if (style.getLocation().equals(molgenisSettings.getProperty(MolgenisPluginInterceptor.MOLGENIS_CSS_THEME)))
+			{
+				selectedStyle = style;
+				return selectedStyle;
+			}
+		}
+		return selectedStyle;
 	}
 }
