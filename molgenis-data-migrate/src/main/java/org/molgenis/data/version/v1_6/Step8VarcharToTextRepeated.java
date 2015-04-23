@@ -34,7 +34,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
  * String are changed to TEXT, and UNIQUE constraints are dropped when present for these columns.
  * 
  * This is a partial copy of Step4 and is needed again because in the previous version the actual back-end changes
- * weren't implemented, possibly resulting in inconsistent tables.
+ * weren't implemented, possibly resulting in inconsistent tables. Also, Step4 didn't work.
  */
 public class Step8VarcharToTextRepeated extends MolgenisUpgrade
 {
@@ -95,49 +95,45 @@ public class Step8VarcharToTextRepeated extends MolgenisUpgrade
 						if (!(amd.isIdAtrribute() || fieldType instanceof CategoricalMrefField
 								|| fieldType instanceof CategoricalField || fieldType instanceof MrefField || fieldType instanceof XrefField))
 						{
-
 							if (amd.isUnique())
 							{
 								// TEXT columns don't like UNIQUE, remove the constraint
-								LOG.info("Removing UNIQUE constraint for {}.{}.{}", mysql.getName(), emd.getName(),
-										amd.getName());
+								LOG.info("Removing UNIQUE constraint for {}.{}", emd.getName(), amd.getName());
 
 								try
 								{
 									// get the unique key name for this column
 									List<Map<String, Object>> rows = template.queryForList(getShowIndexSql(emd, amd));
 									// should be first and only row
-									String keyName = rows.iterator().next().get("Key_name").toString();
-
-									template.execute(getRemoveUniqueConstraintSql(emd, keyName));
+									if (rows.iterator().hasNext())
+									{
+										String keyName = rows.iterator().next().get("Key_name").toString();
+										template.execute(getRemoveUniqueConstraintSql(emd, keyName));
+									}
 								}
 								catch (Throwable t)
 								{
-									LOG.error("Error removing UNIQUE constraint for {}.{}.{} ", mysql.getName(),
-											emd.getName(), amd.getName(), t);
+									LOG.error("Error removing UNIQUE constraint for {}.{} ", emd.getName(),
+											amd.getName(), t);
 								}
 							}
 
-							LOG.info("Changing column {}.{}.{} to TEXT", mysql.getName(), emd.getName(), amd.getName());
 							String columnModifySql = getModifyColumnSql(emd, amd);
-							LOG.debug(columnModifySql);
 							try
 							{
-								// change column to text
+								LOG.info("Changing column {}.{} to TEXT", emd.getName(), amd.getName());
 								template.execute(columnModifySql);
 							}
 							catch (DataAccessException dae)
 							{
-								LOG.error("Error migrating {}.{}.{} ", mysql.getName(), emd.getName(), amd.getName(),
-										dae);
+								LOG.error("Error changing column {}.{} ", emd.getName(), amd.getName(), dae);
 							}
 						}
 					}
 				}
 			}
-			LOG.info("Migrating {} String columns DONE.", mysql.getName());
-
 		});
+		LOG.info("Migrating String columns DONE.");
 	}
 
 	private static String getModifyColumnSql(EntityMetaData emd, AttributeMetaData att)
