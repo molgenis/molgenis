@@ -75,6 +75,14 @@ public class SemanticSearchServiceHelper
 		this.ontologyService = ontologyService;
 	}
 
+	/**
+	 * Create a disMaxJunc query rule based on the label and description from target attribute as well as the
+	 * information from ontology term tags
+	 * 
+	 * @param targetEntityMetaData
+	 * @param targetAttribute
+	 * @return disMaxJunc queryRule
+	 */
 	public QueryRule createDisMaxQueryRule(EntityMetaData targetEntityMetaData, AttributeMetaData targetAttribute)
 	{
 		List<String> queryTerms = new ArrayList<String>();
@@ -106,6 +114,12 @@ public class SemanticSearchServiceHelper
 		return disMaxQueryRule;
 	}
 
+	/**
+	 * Create disMaxJunc query rule based a list of queryTerm. All queryTerms are lower cased and stop words are removed
+	 * 
+	 * @param queryTerms
+	 * @return disMaxJunc queryRule
+	 */
 	public QueryRule createDisMaxQueryRule(List<String> queryTerms)
 	{
 		List<QueryRule> rules = new ArrayList<QueryRule>();
@@ -119,6 +133,12 @@ public class SemanticSearchServiceHelper
 		return finalDisMaxQuery;
 	}
 
+	/**
+	 * Create a boolean should query for composite tags containing multiple ontology terms
+	 * 
+	 * @param multiOntologyTermIri
+	 * @return return a boolean should queryRule
+	 */
 	public QueryRule createShouldQueryRule(String multiOntologyTermIri)
 	{
 		QueryRule shouldQueryRule = new QueryRule(new ArrayList<QueryRule>());
