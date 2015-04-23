@@ -40,33 +40,36 @@
 			var controls = [];
 			for(var i = 0; i < attributes.length; ++i) {
 				var attr = attributes[i];
-				var Control = attr.fieldType === 'COMPOUND' ? molgenis.ui.FormControlGroup : molgenis.ui.FormControl;
-				var controlProps = {
-					entity : this.props.entity,
-					attr : attr,
-					value: this.props.entityInstance ? this.props.entityInstance[attr.name] : undefined,
-					entityInstance: this.props.entityInstance,
-					mode : this.props.mode,
-					formLayout : this.props.formLayout,
-					colOffset: this.props.colOffset,
-					saveOnBlur: this.props.saveOnBlur,
-					validate: this.props.validate,
-					onValueChange : this.props.onValueChange,
-					onBlur: this.props.onBlur,
-					key : '' + i
-				};
-				
-				if (attr.fieldType === 'COMPOUND') {
-					controlProps['errorMessages'] = this.props.errorMessages;
-				} else {
-					controlProps['errorMessage'] = this.props.errorMessages[attr.name];
+				if ((attr.visibleExpression === undefined) || (this.props.entity.allAttributes[attr.name].visible === true)) {
+					var Control = attr.fieldType === 'COMPOUND' ? molgenis.ui.FormControlGroup : molgenis.ui.FormControl;
+					var controlProps = {
+						entity : this.props.entity,
+						attr : attr,
+						value: this.props.entityInstance ? this.props.entityInstance[attr.name] : undefined,
+						entityInstance: this.props.entityInstance,
+						mode : this.props.mode,
+						formLayout : this.props.formLayout,
+						colOffset: this.props.colOffset,
+						saveOnBlur: this.props.saveOnBlur,
+						validate: this.props.validate,
+						onValueChange : this.props.onValueChange,
+						onBlur: this.props.onBlur,
+						key : '' + i
+					};
+					
+					if (attr.fieldType === 'COMPOUND') {
+						controlProps['errorMessages'] = this.props.errorMessages;
+					} else {
+						controlProps['errorMessage'] = this.props.errorMessages[attr.name];
+					}
+					// IE9 does not support the autofocus attribute, focus the first visible input manually
+					if(!foundFocusControl && attr.visible === true) {
+						_.extend(controlProps, {focus: true});
+						foundFocusControl = true;
+					}
+					
+					controls.push(Control(controlProps));
 				}
-				// IE9 does not support the autofocus attribute, focus the first visible input manually
-				if(!foundFocusControl && attr.visible === true) {
-					_.extend(controlProps, {focus: true});
-					foundFocusControl = true;
-				}
-				controls.push(Control(controlProps));
 			}
 			
 			return (

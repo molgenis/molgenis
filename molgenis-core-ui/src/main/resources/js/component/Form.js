@@ -49,25 +49,27 @@
 				showModal: true,
 				submitMsg: null
 			};
-			if(this.props.mode === 'create') {
-				_.extend(newState, {entityInstance: {}});
-			}
+			
 			this.setState(newState);
 		},
 		getInitialState: function() {
 			return {
 				entity : null,			// transfered from props to state, loaded from server if required
-				entityInstance : {},	// transfered from props to state, loaded from server if required
+				entityInstance : null,	// transfered from props to state, loaded from server if required
 				errorMessages : {},
 				validate : false,
 				showModal: true,
 				hideOptional: false
 			};
 		},
-		componentWillMount: function() {
-			if(this.props.mode === 'create') {
-				this.setState({entityInstance: {}});
-			}
+		_willSetEntityInstance: function(entityInstance) {
+			// Resolve visible expressions
+			var entity = this.state.entity;
+			_.each(entity.allAttributes, function(attr) {
+				if (attr.visibleExpression) {
+					attr.visible = this._resolveBoolExpression(attr.visibleExpression, entityInstance);
+				}
+			}, this);
 		},
 		render: function() {
 			// render form in component container
@@ -226,7 +228,7 @@
 			var attr = e.attr;
 			var value = e.value;
 			
-			this._validate(attr, this._getValue(attr), function(validationResult) {
+			this._validate(attr, this._getValue(this.state.entityInstance, attr), function(validationResult) {
             	if(validationResult.valid === true && this._doPersistAttributeValue(attr)) {
             		this._persistAttributeValue(attr, value);
                 }
@@ -268,7 +270,18 @@
 			entityInstance[e.attr] = value;
 			var attr = this.state.entity.atomicAttributes[e.attr];
 			
+			//Validate new value
 			this._validate(attr, value, function(validationResult) {
+				
+				if(validationResult.valid === true) {
+					// Resolve visible expressions
+					_.each(this.state.entity.allAttributes, function(entityAttr) {
+						if (entityAttr.visibleExpression) {
+							entityAttr.visible = this._resolveBoolExpression(entityAttr.visibleExpression, entityInstance);
+						}
+					}, this);
+				}
+				
 				this.setState({
 					entityInstance: entityInstance,
 					errorMessages: this._updateErrorMessages(attr, validationResult)
@@ -305,7 +318,7 @@
 			
 			_.each(this.state.entity.atomicAttributes, function(attr) {
 				var p = new Promise(function(resolve, reject) {
-					this._validate(attr, this._getValue(attr), function(validationResult) {
+					this._validate(attr, this._getValue(this.state.entityInstance, attr), function(validationResult) {
 						if (validationResult.valid === false) {
 							errorMessages[attr.name] = validationResult.errorMessage;
 						}
@@ -470,39 +483,42 @@
             }
             
             if (attr.validationExpression) {
-            	
-            	//TODO make evalScript work with entities
-            	var form = {};
-            	_.each(this.state.entity.atomicAttributes, function(entityAttr) {
-            		var entityAttrValue = entityAttr.name == attr.name ? value : this._getValue(entityAttr);
-            		
-            		if (entityAttrValue !== null && entityAttrValue !== undefined) {
-            			 switch(entityAttr.fieldType) {
-                         case 'CATEGORICAL':
-                         case 'XREF':
-                        	 form[entityAttr.name] = entityAttrValue[entityAttr.refEntity.idAttribute];
-                             break;
-                         case 'CATEGORICAL_MREF':
-                         case 'MREF':
-                             form[entityAttr.name] = _.map(entityAttrValue.items, function(item) {
-                            	 return item[entityAttr.refEntity.idAttribute]; 
-                             }).join();
-                             break;
-                         default:
-                        	 form[entityAttr.name] = entityAttrValue;
-                             break;
-            			 }
-            		}
-            	}, this);
-            	
-            	if (evalScript(attr.validationExpression, form) === false) {
+            	var entityInstance = _.extend({}, this.state.entityInstance);
+				entityInstance[attr.name] = value;
+            	if (this._resolveBoolExpression(attr.validationExpression, entityInstance) === false) {
             		errorMessage = 'Please enter a valid value.';
             	}
             }
             
             callback({valid: errorMessage === undefined, errorMessage: errorMessage});
         },
-        
+        _resolveBoolExpression: function(expression, entityInstance) {
+        	//TODO make evalScript work with entities
+        	var form = {};
+        	_.each(this.state.entity.atomicAttributes, function(attr) {
+        		var value = entityInstance[attr.name];
+        		
+        		if (value !== null && value !== undefined) {
+        			 switch(attr.fieldType) {
+                     case 'CATEGORICAL':
+                     case 'XREF':
+                    	 form[attr.name] = value[attr.refEntity.idAttribute];
+                         break;
+                     case 'CATEGORICAL_MREF':
+                     case 'MREF':
+                         form[attr.name] = _.map(value.items, function(item) {
+                        	 return item[attr.refEntity.idAttribute]; 
+                         }).join();
+                         break;
+                     default:
+                    	 form[attr.name] = value;
+                         break;
+        			 }
+        		}
+        	}, this);
+        	
+        	return evalScript(expression, form);
+        },
         _statics: {
             // https://gist.github.com/dperini/729294
             REGEX_URL: /^(?:(?:https?|ftp):\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/i,
@@ -526,8 +542,8 @@
             }
             return inRange;
         },
-        _getValue: function(attr) {
-        	var value = this.state.entityInstance[attr.name];
+        _getValue: function(entityInstance, attr) {
+        	var value = entityInstance[attr.name];
         	
         	// workaround for required bool attribute with no value implying false value
         	// TODO replace with elegant solution
@@ -565,7 +581,8 @@
 			for(var key in attributes) {
 				if(attributes.hasOwnProperty(key)) {
 					var attr = attributes[key];
-					if(this.props.mode !== 'create' || (this.props.mode === 'create' && attr.auto !== true)) {
+					if((this.props.mode !== 'create' || (this.props.mode === 'create' && attr.auto !== true)) && 
+						((attr.visibleExpression === undefined) || (this.props.entity.allAttributes[attr.name].visible === true))) {
 						var ControlFactory = attr.fieldType === 'COMPOUND' ? molgenis.ui.FormControlGroup : molgenis.ui.FormControl;
 						var controlProps = {
 							entity : this.props.entity,

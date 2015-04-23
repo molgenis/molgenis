@@ -34,7 +34,7 @@
 					var href = entityInstance.startsWith('/api/') ? entityInstance : '/api/v1/' + this.state.entity.name + '/' + entityInstance;					
 					this._loadEntityInstance(entity, href);
 				}
-			}
+			} 
 		},
 		_loadEntityInstance: function(entity, href) {
 			if(entity && entity.name) {
@@ -53,13 +53,22 @@
 			}
 		},
 		_setEntityInstance: function(entityInstance) {
+			if(this._willSetEntityInstance) {
+				this._willSetEntityInstance(entityInstance);
+			}
+			
 			this.setState({entityInstance: entityInstance});
+			
 			if(this._onEntityInstanceInit) {
 				this._onEntityInstanceInit(entityInstance);
 			}
 		},
 		_onEntityInit: function(entity) {
-			this._initEntityInstance(entity, this.props.entityInstance);
+			if (this.props.mode === 'create') {
+				this._setEntityInstance({});
+			} else {
+				this._initEntityInstance(entity, this.props.entityInstance);
+			}
 		}
 	};
 	
