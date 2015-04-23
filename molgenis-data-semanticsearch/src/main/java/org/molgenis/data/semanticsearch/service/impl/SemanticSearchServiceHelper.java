@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -74,20 +75,7 @@ public class SemanticSearchServiceHelper
 		this.ontologyService = ontologyService;
 	}
 
-	public QueryRule createDisMaxQueryRule(List<String> queryTerms)
-	{
-		List<QueryRule> rules = new ArrayList<QueryRule>();
-		queryTerms.stream().filter(query -> StringUtils.isNotEmpty(query)).forEach(query -> {
-			rules.add(new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, query));
-			rules.add(new QueryRule(AttributeMetaDataMetaData.DESCRIPTION, Operator.FUZZY_MATCH, query));
-		});
-		QueryRule finalDisMaxQuery = new QueryRule(rules);
-		finalDisMaxQuery.setOperator(Operator.DIS_MAX);
-		return finalDisMaxQuery;
-	}
-
-	public List<String> createTargetAttributeQueryTerms(EntityMetaData targetEntityMetaData,
-			AttributeMetaData targetAttribute)
+	public QueryRule createDisMaxQueryRule(EntityMetaData targetEntityMetaData, AttributeMetaData targetAttribute)
 	{
 		List<String> queryTerms = new ArrayList<String>();
 
@@ -103,13 +91,46 @@ public class SemanticSearchServiceHelper
 
 		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(
 				targetEntityMetaData, targetAttribute);
-		for (OntologyTerm ontologyTerm : tagsForAttribute.values())
-		{
-			queryTerms.addAll(ontologyTerm.getSynonyms());
-			queryTerms.add(ontologyTerm.getLabel());
-		}
 
-		return queryTerms;
+		tagsForAttribute.values().stream().filter(ot -> !ot.getIRI().contains(",")).forEach(ot -> {
+			queryTerms.addAll(ot.getSynonyms());
+			queryTerms.add(ot.getLabel());
+		});
+
+		QueryRule disMaxQueryRule = createDisMaxQueryRule(queryTerms);
+
+		tagsForAttribute.values().stream().filter(ot -> ot.getIRI().contains(",")).forEach(ot -> {
+			disMaxQueryRule.getNestedRules().add(createShouldQueryRule(ot.getIRI()));
+		});
+
+		return disMaxQueryRule;
+	}
+
+	public QueryRule createDisMaxQueryRule(List<String> queryTerms)
+	{
+		List<QueryRule> rules = new ArrayList<QueryRule>();
+		queryTerms.stream().filter(query -> StringUtils.isNotEmpty(query)).forEach(query -> {
+			query = StringUtils.join(removeStopWords(query), ' ');
+			rules.add(new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, query));
+			rules.add(new QueryRule(AttributeMetaDataMetaData.DESCRIPTION, Operator.FUZZY_MATCH, query));
+		});
+		QueryRule finalDisMaxQuery = new QueryRule(rules);
+		finalDisMaxQuery.setOperator(Operator.DIS_MAX);
+		return finalDisMaxQuery;
+	}
+
+	public QueryRule createShouldQueryRule(String multiOntologyTermIri)
+	{
+		QueryRule shouldQueryRule = new QueryRule(new ArrayList<QueryRule>());
+		shouldQueryRule.setOperator(Operator.SHOULD);
+		for (String ontologyTermIri : multiOntologyTermIri.split(","))
+		{
+			OntologyTerm ontologyTerm = ontologyService.getOntologyTerm(ontologyTermIri);
+			List<String> queryTerms = Lists.newArrayList(ontologyTerm.getSynonyms());
+			queryTerms.add(ontologyTerm.getLabel());
+			shouldQueryRule.getNestedRules().add(createDisMaxQueryRule(queryTerms));
+		}
+		return shouldQueryRule;
 	}
 
 	public List<String> getAttributeIdentifiers(EntityMetaData sourceEntityMetaData)
@@ -132,12 +153,18 @@ public class SemanticSearchServiceHelper
 
 	public List<OntologyTerm> findTags(String description, List<String> ontologyIds)
 	{
-		String regex = "[^\\p{L}']+";
-		Set<String> searchTerms = stream(description.split(regex)).map(String::toLowerCase)
-				.filter(w -> !STOP_WORDS.contains(w) && StringUtils.isNotEmpty(w)).collect(Collectors.toSet());
+		Set<String> searchTerms = removeStopWords(description);
 
 		List<OntologyTerm> matchingOntologyTerms = ontologyService.findOntologyTerms(ontologyIds, searchTerms, 100);
 
 		return matchingOntologyTerms;
+	}
+
+	public Set<String> removeStopWords(String description)
+	{
+		String regex = "[^\\p{L}']+";
+		Set<String> searchTerms = stream(description.split(regex)).map(String::toLowerCase)
+				.filter(w -> !STOP_WORDS.contains(w) && StringUtils.isNotEmpty(w)).collect(Collectors.toSet());
+		return searchTerms;
 	}
 }
