@@ -84,7 +84,7 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 		when(ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute)).thenReturn(tags);
 
 		QueryRule actualRule = semanticSearchServiceHelper.createDisMaxQueryRule(targetEntityMetaData, targetAttribute);
-		String expectedRule = "(label FUZZY_MATCH 'Height'(label FUZZY_MATCH 'sature'label FUZZY_MATCH 'Height')(label FUZZY_MATCH 'Standing height'label FUZZY_MATCH 'body_length')(label FUZZY_MATCH 'sitting_length'label FUZZY_MATCH 'Sitting height'))";
+		String expectedRule = "(label FUZZY_MATCH 'Height'(label FUZZY_MATCH 'sature'label FUZZY_MATCH 'Height')(label FUZZY_MATCH 'body_length'label FUZZY_MATCH 'Standing height')(label FUZZY_MATCH 'sitting_length'label FUZZY_MATCH 'Sitting height'))";
 		assertEquals(actualRule.toString(), expectedRule);
 	}
 	
