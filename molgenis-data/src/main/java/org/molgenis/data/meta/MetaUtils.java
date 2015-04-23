@@ -66,7 +66,7 @@ public class MetaUtils
 	 * @param attributeMetaDataEntities
 	 * @return
 	 */
-	public static Iterable<AttributeMetaData> toAttributeMetaData(EntityMetaData entityMetaData,
+	public static Iterable<AttributeMetaData> toExistingAttributeMetaData(EntityMetaData entityMetaData,
 			Iterable<Entity> attributeMetaDataEntities)
 	{
 		return FluentIterable.from(attributeMetaDataEntities).transform(new Function<Entity, AttributeMetaData>()
