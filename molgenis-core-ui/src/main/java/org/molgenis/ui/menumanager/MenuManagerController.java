@@ -14,11 +14,9 @@ import java.util.List;
 import javax.servlet.http.Part;
 import javax.validation.Valid;
 
-import org.apache.commons.lang3.StringUtils;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.ui.MolgenisPluginInterceptor;
 import org.molgenis.ui.MolgenisUi;
 import org.molgenis.ui.MolgenisUiMenu;
 import org.molgenis.ui.MolgenisUiMenuItem;
@@ -68,15 +66,12 @@ public class MenuManagerController extends MolgenisPluginController
 		if (menuManagerService == null) throw new IllegalArgumentException("menuManagerService is null");
 		if (molgenisUi == null) throw new IllegalArgumentException("molgenisUi is null");
 		if (fileStore == null) throw new IllegalArgumentException("fileStore is null");
-		if (molgenisSettings == null) throw new IllegalArgumentException("molgenisSettings is null");
 		if (styleService == null) throw new IllegalArgumentException("styleService is null");
 
 		this.menuManagerService = menuManagerService;
 		this.molgenisUi = molgenisUi;
 		this.fileStore = fileStore;
-		this.molgenisSettings = molgenisSettings;
 		this.styleService = styleService;
-
 	}
 
 	@RequestMapping(method = GET)
