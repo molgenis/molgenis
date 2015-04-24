@@ -18,6 +18,7 @@ import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.semantic.Relation;
+import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntity;
@@ -82,13 +83,15 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 		String expectedRule = "(label FUZZY_MATCH 'Height'(label FUZZY_MATCH 'body_length'label FUZZY_MATCH 'Standing height')(label FUZZY_MATCH 'sitting_length'label FUZZY_MATCH 'Sitting height')(label FUZZY_MATCH 'sitting_length'label FUZZY_MATCH 'Sitting height')(label FUZZY_MATCH 'sature'label FUZZY_MATCH 'Height'))";
 		assertEquals(actualRule.toString(), expectedRule);
 	}
-	
+
 	@Test
-	public void testGetAttributeIdentifiers(){
+	public void testGetAttributeIdentifiers()
+	{
 		EntityMetaData sourceEntityMetaData = new DefaultEntityMetaData("sourceEntityMetaData");
 		Entity entityMetaDataEntity = mock(DefaultEntity.class);
-		
-		when(dataService.findOne(EntityMetaDataMetaData.ENTITY_NAME,
+
+		when(
+				dataService.findOne(EntityMetaDataMetaData.ENTITY_NAME,
 						new QueryImpl().eq(EntityMetaDataMetaData.FULL_NAME, sourceEntityMetaData.getName())))
 				.thenReturn(entityMetaDataEntity);
 
@@ -103,12 +106,12 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 		assertEquals(semanticSearchServiceHelper.getAttributeIdentifiers(sourceEntityMetaData),
 				expactedAttributeIdentifiers);
 	}
-	
+
 	@Test
 	public void testFindTagsSync()
 	{
 		String description = "Fall " + SemanticSearchServiceHelper.STOP_WORDS + " sleep";
-		List<String> ontologyIds = Arrays.<String>asList("1");
+		List<String> ontologyIds = Arrays.<String> asList("1");
 		Set<String> searchTerms = Sets.newHashSet("fall", "sleep");
 		semanticSearchServiceHelper.findTags(description, ontologyIds);
 		verify(ontologyService).findOntologyTerms(ontologyIds, searchTerms, 100);
