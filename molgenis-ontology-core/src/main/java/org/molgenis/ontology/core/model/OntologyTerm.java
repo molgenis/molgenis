@@ -10,7 +10,6 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import org.molgenis.gson.AutoGson;
-import org.molgenis.ontology.core.model.AutoValue_OntologyTerm;
 
 import com.google.auto.value.AutoValue;
 
@@ -27,19 +26,28 @@ public abstract class OntologyTerm
 
 	public abstract List<String> getSynonyms();
 
+	@Nullable
+	public abstract String getNodePath();
+
 	public static OntologyTerm create(String iri, String label)
 	{
-		return new AutoValue_OntologyTerm(iri, label, null, emptyList());
+		return new AutoValue_OntologyTerm(iri, label, null, emptyList(), null);
 	}
 
 	public static OntologyTerm create(String iri, String label, String description)
 	{
-		return new AutoValue_OntologyTerm(iri, label, description, emptyList());
+		return new AutoValue_OntologyTerm(iri, label, description, emptyList(), null);
 	}
 
 	public static OntologyTerm create(String iri, String label, String description, List<String> synonyms)
 	{
-		return new AutoValue_OntologyTerm(iri, label, description, copyOf(synonyms));
+		return new AutoValue_OntologyTerm(iri, label, description, copyOf(synonyms), null);
+	}
+
+	public static OntologyTerm create(String iri, String label, String description, List<String> synonyms,
+			String nodePath)
+	{
+		return new AutoValue_OntologyTerm(iri, label, description, copyOf(synonyms), nodePath);
 	}
 
 	/**
