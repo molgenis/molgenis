@@ -1,8 +1,6 @@
 (function($, molgenis) {
 	"use strict";
 
-	var cssUrl;
-
 	function serializeMenu(container) {
 		function serializeMenuRec(list, menu) {
 			list.children('li').each(function() {
@@ -39,26 +37,22 @@
 		var menuTemplate = Handlebars.compile($("#menu-template").html());
 		var itemTemplate = Handlebars.compile($("#item-template").html());
 
-		var select = $("#bootstrap-theme-select");
-		var themes;
-
-		$.get('http://api.bootswatch.com/3/', function(data) {
-			themes = data.themes;
-			select.append($('<option />').val('molgenis').text('molgenis'));
-			themes.forEach(function(value, index) {
-				select.append($("<option />").val(index).text(value.name));
-			});
-		}, "json").fail(function() {
-			molgenis.createAlert([ {
-				'message' : 'Failed to retrieve selected bootstrap theme'
-			} ], 'error');
-		});
+		var styleName;
 
 		$('#bootstrap-theme-select').on('change', function() {
-			var theme = themes[$(this).val()];
+			// Set selected style name to use in ajax post
+			styleName = $(this).find(":selected").text();
+
+			var cssLocation = $(this).val();
+			var link = $('<link />').attr('id', 'bootstrap-theme').attr('rel', 'stylesheet').attr('type', 'text/css');
+
+			if (cssLocation.indexOf("http") === 0) {
+				$(link).attr('href', cssLocation);
+			} else {
+				$(link).attr('href', '/css/themes/' + cssLocation);
+			}
+
 			$('#bootstrap-theme').remove();
-			cssUrl = theme.css;
-			var link = $('<link />').attr('id', 'bootstrap-theme').attr('rel', 'stylesheet').attr('href', theme.css).attr('type', 'text/css');
 			$('head').append(link);
 		});
 
@@ -69,7 +63,7 @@
 				contentType : 'application/json',
 				type : 'POST',
 				url : molgenis.getContextUrl() + '/set-bootstrap-theme',
-				data : '"' + cssUrl + '"',
+				data : '"' + styleName + '"',
 				success : function(succes) {
 					molgenis.createAlert([ {
 						'message' : 'Succesfully updated the molgenis bootstrap theme'
