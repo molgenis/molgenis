@@ -54,7 +54,7 @@ import com.google.common.collect.Multimap;
 @ContextConfiguration(classes = OntologyTagServiceTest.Config.class)
 public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 {
-	private OntologyTagService ontologyTagService;
+	private OntologyTagServiceImpl ontologyTagService;
 
 	@Autowired
 	private TagRepository tagRepository;
@@ -104,7 +104,7 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		ontologyTagService = new OntologyTagService(dataService, ontologyService, tagRepository, null);
+		ontologyTagService = new OntologyTagServiceImpl(dataService, ontologyService, tagRepository, null);
 	}
 
 	@Test

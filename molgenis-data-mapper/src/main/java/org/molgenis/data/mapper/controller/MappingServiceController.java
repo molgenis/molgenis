@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -15,15 +17,15 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
-import org.molgenis.data.mapper.algorithm.AlgorithmService;
 import org.molgenis.data.mapper.data.request.MappingServiceRequest;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
+import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
+import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
-import org.molgenis.data.semanticsearch.service.impl.OntologyTagService;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -44,6 +46,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -78,9 +81,12 @@ public class MappingServiceController extends MolgenisPluginController
 	@Autowired
 	private SemanticSearchService semanticSearchService;
 
+	private ExecutorService executors;
+
 	public MappingServiceController()
 	{
 		super(URI);
+		executors = Executors.newSingleThreadExecutor();
 	}
 
 	/**
@@ -179,13 +185,33 @@ public class MappingServiceController extends MolgenisPluginController
 	@RequestMapping(value = "/addEntityMapping", method = RequestMethod.POST)
 	public String addEntityMapping(@RequestParam String mappingProjectId, String target, String source)
 	{
+		EntityMetaData sourceEntityMetaData = dataService.getEntityMetaData(source);
+		EntityMetaData targetEntityMetaData = dataService.getEntityMetaData(target);
+
+		Iterable<AttributeMetaData> attributes = targetEntityMetaData.getAtomicAttributes();
+
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
+
 		if (hasWritePermission(project))
 		{
-			project.getMappingTarget(target).addSource(dataService.getEntityMetaData(source));
+			EntityMapping mapping = project.getMappingTarget(target).addSource(sourceEntityMetaData);
 			mappingService.updateMappingProject(project);
+			executors.execute(() -> autoGenerateAlgorithms(mapping, target, sourceEntityMetaData, targetEntityMetaData,
+					attributes, project));
 		}
+
 		return "redirect:/menu/main/mappingservice/mappingproject/" + mappingProjectId;
+	}
+
+	private void autoGenerateAlgorithms(EntityMapping mapping, String target, EntityMetaData sourceEntityMetaData,
+			EntityMetaData targetEntityMetaData, Iterable<AttributeMetaData> attributes, MappingProject project)
+	{
+		Stopwatch stopwatch = Stopwatch.createStarted();
+		attributes.forEach(attribute -> algorithmService.autoGenerateAlgorithm(sourceEntityMetaData,
+				targetEntityMetaData, mapping, attribute));
+		mappingService.updateMappingProject(project);
+		stopwatch.stop();
+		System.out.println(stopwatch);
 	}
 
 	/**

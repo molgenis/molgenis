@@ -1,4 +1,4 @@
-package org.molgenis.data.mapper.algorithm;
+package org.molgenis.data.mapper.service.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,22 +17,51 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
+import org.molgenis.data.mapper.mapping.model.EntityMapping;
+import org.molgenis.data.mapper.service.AlgorithmService;
+import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.js.RhinoConfig;
 import org.molgenis.js.ScriptEvaluator;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.mozilla.javascript.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.google.common.collect.Iterables;
 
 public class AlgorithmServiceImpl implements AlgorithmService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(AlgorithmServiceImpl.class);
-	private DataService dataService = null;
 
-	public AlgorithmServiceImpl(DataService dataService)
+	@Autowired
+	private DataService dataService;
+
+	@Autowired
+	private SemanticSearchService semanticSearchService;
+
+	public AlgorithmServiceImpl()
 	{
 		new RhinoConfig().init();
-		this.dataService = dataService;
+	}
+
+	@Override
+	@RunAsSystem
+	public void autoGenerateAlgorithm(EntityMetaData sourceEntityMetaData, EntityMetaData targetEntityMetaData,
+			EntityMapping mapping, AttributeMetaData targetAttribute)
+	{
+		LOG.debug("createAttributeMappingIfOnlyOneMatch: target= " + targetAttribute.getName());
+		Iterable<AttributeMetaData> matches = semanticSearchService.findAttributes(sourceEntityMetaData,
+				targetEntityMetaData, targetAttribute);
+		if (Iterables.size(matches) == 1)
+		{
+			AttributeMetaData source = matches.iterator().next();
+			AttributeMapping attributeMapping = mapping.addAttributeMapping(targetAttribute.getName());
+			String algorithm = "$('" + source.getName() + "');";
+			attributeMapping.setAlgorithm(algorithm);
+			LOG.info("Creating attribute mapping: " + targetAttribute.getName() + " = " + algorithm);
+		}
 	}
 
 	@Override
