@@ -2,7 +2,7 @@
 	"use strict";
 
 	var cssUrl;
-	
+
 	function serializeMenu(container) {
 		function serializeMenuRec(list, menu) {
 			list.children('li').each(function() {
@@ -65,14 +65,15 @@
 		$('#save-selected-bootstrap-theme').on('click', function(event) {
 			event.preventDefault();
 			var selectedBootstrapTheme = $('#bootstrap-theme-select').find(":selected").text();
-			alert(selectedBootstrapTheme);
 			$.ajax({
 				contentType : 'application/json',
 				type : 'POST',
 				url : molgenis.getContextUrl() + '/set-bootstrap-theme',
-				data : 	'"'+cssUrl+'"',
+				data : '"' + cssUrl + '"',
 				success : function(succes) {
-					alert('succes!');
+					molgenis.createAlert([ {
+						'message' : 'Succesfully updated the molgenis bootstrap theme'
+					} ], 'success');
 				}
 			});
 		});

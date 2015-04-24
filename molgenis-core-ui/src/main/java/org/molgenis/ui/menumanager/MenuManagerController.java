@@ -183,7 +183,6 @@ public class MenuManagerController extends MolgenisPluginController
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@RequestMapping(value = "/set-bootstrap-theme", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
 	public @ResponseBody void setBootstrapTheme(@Valid @RequestBody String selectedBootstrapTheme) {
-		System.out.println("We are arriving!");
 		molgenisSettings.setProperty(MolgenisPluginInterceptor.MOLGENIS_CSS_THEME, selectedBootstrapTheme);
 	}
 }
