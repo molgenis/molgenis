@@ -24,6 +24,7 @@ import org.molgenis.ui.MolgenisUiMenu;
 import org.molgenis.ui.MolgenisUiMenuItem;
 import org.molgenis.ui.MolgenisUiMenuItemType;
 import org.molgenis.ui.menu.Menu;
+import org.molgenis.ui.style.StyleService;
 import org.molgenis.util.FileStore;
 import org.molgenis.util.FileUploadUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,24 +56,26 @@ public class MenuManagerController extends MolgenisPluginController
 	private final MenuManagerService menuManagerService;
 	private final FileStore fileStore;
 	private final MolgenisUi molgenisUi;
-	private final MolgenisSettings molgenisSettings;
+	private final StyleService styleService;
 
 	private static final String ERRORMESSAGE_LOGO = "The logo needs to be an image file like png or jpg.";
 
 	@Autowired
 	public MenuManagerController(MenuManagerService menuManagerService, FileStore fileStore, MolgenisUi molgenisUi,
-			MolgenisSettings molgenisSettings)
+			MolgenisSettings molgenisSettings, StyleService styleService)
 	{
 		super(URI);
 		if (menuManagerService == null) throw new IllegalArgumentException("menuManagerService is null");
 		if (molgenisUi == null) throw new IllegalArgumentException("molgenisUi is null");
 		if (fileStore == null) throw new IllegalArgumentException("fileStore is null");
 		if (molgenisSettings == null) throw new IllegalArgumentException("molgenisSettings is null");
+		if (styleService == null) throw new IllegalArgumentException("styleService is null");
 
 		this.menuManagerService = menuManagerService;
 		this.molgenisUi = molgenisUi;
 		this.fileStore = fileStore;
 		this.molgenisSettings = molgenisSettings;
+		this.styleService = styleService;
 
 	}
 
@@ -109,13 +112,10 @@ public class MenuManagerController extends MolgenisPluginController
 				return molgenisPlugin1.getId().compareTo(molgenisPlugin2.getId());
 			}
 		});
-
-		String theme = molgenisSettings.getProperty(MolgenisPluginInterceptor.MOLGENIS_CSS_THEME);
-		if (StringUtils.isNotEmpty(theme))
-		{
-			model.addAttribute("selectedBootstrapTheme", "United");
-		}
-
+		
+		if (styleService.getSelectedStyle() != null) model.addAttribute("selectedStyle",
+				styleService.getSelectedStyle().getName());
+		model.addAttribute("availableStyles", styleService.getAvailableStyles());
 		model.addAttribute("menus", menus);
 		model.addAttribute("plugins", plugins);
 		model.addAttribute("molgenis_ui", molgenisUi);
@@ -174,7 +174,7 @@ public class MenuManagerController extends MolgenisPluginController
 
 		return init(model);
 	}
-	
+
 	/**
 	 * Set a new bootstrap theme
 	 * 
@@ -182,7 +182,8 @@ public class MenuManagerController extends MolgenisPluginController
 	 */
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@RequestMapping(value = "/set-bootstrap-theme", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
-	public @ResponseBody void setBootstrapTheme(@Valid @RequestBody String selectedBootstrapTheme) {
-		molgenisSettings.setProperty(MolgenisPluginInterceptor.MOLGENIS_CSS_THEME, selectedBootstrapTheme);
+	public @ResponseBody void setBootstrapTheme(@Valid @RequestBody String styleName)
+	{
+		styleService.setSelectedStyle(styleName);
 	}
 }
