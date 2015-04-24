@@ -13,6 +13,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.util.EntityUtils;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -277,15 +278,7 @@ public class OwnedEntityRepositoryDecorator implements IndexedRepository
 	private boolean mustAddRowLevelSecurity()
 	{
 		if (SecurityUtils.currentUserIsSu()) return false;
-
-		EntityMetaData extend = getEntityMetaData().getExtends();
-		while (extend != null)
-		{
-			if (extend.getName().equalsIgnoreCase(OwnedEntityMetaData.ENTITY_NAME)) return true;
-			extend = extend.getExtends();
-		}
-
-		return false;
+		return EntityUtils.doesExtend(getEntityMetaData(), OwnedEntityMetaData.ENTITY_NAME);
 	}
 
 	private void addRowLevelSecurity(Query q)

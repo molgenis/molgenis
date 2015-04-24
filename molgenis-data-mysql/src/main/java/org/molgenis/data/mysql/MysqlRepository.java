@@ -47,6 +47,7 @@ import org.molgenis.fieldtypes.StringField;
 import org.molgenis.fieldtypes.TextField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.model.MolgenisModelException;
+import org.molgenis.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -472,7 +473,8 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				}
 			}
 			// not null
-			if (!att.isNillable())
+			if (!att.isNillable() && !EntityUtils.doesExtend(metaData, "Questionnaire")
+					&& (att.getVisibleExpression() == null))
 			{
 				sql.append(" NOT NULL");
 			}

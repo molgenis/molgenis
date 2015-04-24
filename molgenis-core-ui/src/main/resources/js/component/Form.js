@@ -268,7 +268,6 @@
 			var attribute = this.state.entity.allAttributes[e.attr];
 			if (attribute === undefined) return;//compound
 			
-			
 			// update value in entity instance
 			var value = e.value;
 			var entityInstance = _.extend({}, this.state.entityInstance);
@@ -418,11 +417,13 @@
             // apply validation rules, not that IE9 does not support constraint validation API 
             var type = attr.fieldType;
             var nullOrUndefinedValue = value === null || value === undefined;
-            
+        	var entityInstance = _.extend({}, this.state.entityInstance);
             var errorMessage = undefined;
             
             if(attr.nillable === false && type !== 'CATEGORICAL_MREF' && type !== 'MREF' && nullOrUndefinedValue && !attr.auto) { // required value constraint
-                errorMessage = 'Please enter a value.';
+            	if (attr.visibleExpression === undefined || this._resolveBoolExpression(attr.visibleExpression, entityInstance) === true) {
+            		errorMessage = 'Please enter a value.';
+            	}
             }
             else if(attr.nillable === false && (type === 'CATEGORICAL_MREF' || type === 'MREF') && (nullOrUndefinedValue || value.items.length === 0)) { // required value constraint
                 errorMessage = 'Please enter a value.';
@@ -488,8 +489,7 @@
             }
             
             if (attr.validationExpression) {
-            	var entityInstance = _.extend({}, this.state.entityInstance);
-				entityInstance[attr.name] = value;
+            	entityInstance[attr.name] = value;
             	if (this._resolveBoolExpression(attr.validationExpression, entityInstance) === false) {
             		errorMessage = 'Please enter a valid value.';
             	}

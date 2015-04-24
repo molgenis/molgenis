@@ -115,4 +115,23 @@ public class EntityUtils
 
 		return convertedEntity;
 	}
+
+	/**
+	 * Checks if an entity has another entity as one of its parents
+	 * 
+	 * @param entityMetaData
+	 * @param entityName
+	 * @return
+	 */
+	public static boolean doesExtend(EntityMetaData entityMetaData, String entityName)
+	{
+		EntityMetaData parent = entityMetaData.getExtends();
+		while (parent != null)
+		{
+			if (parent.getName().equalsIgnoreCase(entityName)) return true;
+			parent = parent.getExtends();
+		}
+
+		return false;
+	}
 }
