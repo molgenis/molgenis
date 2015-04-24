@@ -16,7 +16,7 @@ public abstract class Style
 
 	public static Style createLocal(String location)
 	{
-		String name = location.split("-")[1].split(".")[0];
+		String name = location.split("-")[1].split("\\.")[0];
 		return new AutoValue_Style(name, false, location);
 	}
 
