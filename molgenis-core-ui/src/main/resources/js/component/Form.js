@@ -213,11 +213,11 @@
 			if(this.props.enableFormIndex) {
 				return (
 					div({className: 'row'},
-						div({className: 'col-md-2'},
-							FormIndexFactory({entity: this.state.entity})
-						),
 						div({className: 'col-md-10'},
 							FormWithMessageAndFilter
+						),
+						div({className: 'col-md-2'},
+							FormIndexFactory({entity: this.state.entity})
 						)
 					)
 				);
@@ -690,7 +690,7 @@
 					var attr = attrs[key];
 					if(attr.fieldType === 'COMPOUND') {
 						var IndexItem = (
-							li({key: attr.name},
+							li({key: attr.name, className: 'list-group-item'},
 								a({href: this._getLinkName(attr)}, attr.label)
 							)
 						);
@@ -700,8 +700,10 @@
 			}
 			
 			return (
-				ol({style: {'list-style-type': 'none'}},
-					IndexItems
+				div({id: 'sidebar', className: 'affix'},
+						ol({style: {listStyleType: 'none'}, className: 'list-group'},
+								IndexItems
+						)
 				)
 			);
 		},

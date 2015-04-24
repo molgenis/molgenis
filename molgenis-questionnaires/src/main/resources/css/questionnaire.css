@@ -5,3 +5,12 @@
 li {
 	margin-bottom: 10px;
 }
+
+@media (min-width: 979px) {
+  .affix {
+    position: fixed;
+    top:125px;
+    max-width:300px;
+  }
+}
+

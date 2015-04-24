@@ -9,9 +9,9 @@
 <a href="/menu/main/questionnaires" class="btn btn-default btn-md"><span class="glyphicon glyphicon-chevron-left"></span> Back to My questionnaires</a>
 
 <div class="row">		
-	<div class="col-md-6">
-		<h1>${questionnaire.label!?html}</h1>
-		<p>${questionnaire.description!?html}</p>
+	<div class="col-md-8">
+		<h1>${questionnaire.label!}</h1>
+		<p>${questionnaire.description!}</p>
 		<legend></legend>
 	</div>  	
 </div>
