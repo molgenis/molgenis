@@ -10,7 +10,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -89,20 +88,19 @@ public class SemanticSearchServiceHelper
 
 		if (StringUtils.isNotEmpty(targetAttribute.getLabel()))
 		{
-			queryTerms.add(targetAttribute.getLabel());
+			queryTerms.add(parseQueryString(targetAttribute.getLabel()));
 		}
 
 		if (StringUtils.isNotEmpty(targetAttribute.getDescription()))
 		{
-			queryTerms.add(targetAttribute.getDescription());
+			queryTerms.add(parseQueryString(targetAttribute.getDescription()));
 		}
 
 		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(
 				targetEntityMetaData, targetAttribute);
 
 		tagsForAttribute.values().stream().filter(ot -> !ot.getIRI().contains(",")).forEach(ot -> {
-			queryTerms.addAll(ot.getSynonyms());
-			queryTerms.add(ot.getLabel());
+			queryTerms.addAll(collectQueryTermsFromOntologyTerm(ot));
 		});
 
 		QueryRule disMaxQueryRule = createDisMaxQueryRule(queryTerms);
@@ -124,7 +122,6 @@ public class SemanticSearchServiceHelper
 	{
 		List<QueryRule> rules = new ArrayList<QueryRule>();
 		queryTerms.stream().filter(query -> StringUtils.isNotEmpty(query)).forEach(query -> {
-			query = StringUtils.join(removeStopWords(query), ' ');
 			rules.add(new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, query));
 			rules.add(new QueryRule(AttributeMetaDataMetaData.DESCRIPTION, Operator.FUZZY_MATCH, query));
 		});
@@ -146,11 +143,30 @@ public class SemanticSearchServiceHelper
 		for (String ontologyTermIri : multiOntologyTermIri.split(","))
 		{
 			OntologyTerm ontologyTerm = ontologyService.getOntologyTerm(ontologyTermIri);
-			List<String> queryTerms = Lists.newArrayList(ontologyTerm.getSynonyms());
-			queryTerms.add(ontologyTerm.getLabel());
+			List<String> queryTerms = collectQueryTermsFromOntologyTerm(ontologyTerm);
 			shouldQueryRule.getNestedRules().add(createDisMaxQueryRule(queryTerms));
 		}
 		return shouldQueryRule;
+	}
+
+	public List<String> collectQueryTermsFromOntologyTerm(OntologyTerm ontologyTerm)
+	{
+		List<String> queryTerms = new ArrayList<String>();
+
+		ontologyTerm.getSynonyms().forEach(synonym -> queryTerms.add(parseQueryString(synonym)));
+		queryTerms.add(parseQueryString(ontologyTerm.getLabel()));
+
+		for (OntologyTerm descendantOntologyTerm : ontologyService.getChildren(ontologyTerm))
+		{
+			double boostedNumber = Math.pow(0.5,
+					ontologyService.getOntologyTermDistance(ontologyTerm, descendantOntologyTerm));
+
+			descendantOntologyTerm.getSynonyms().forEach(
+					synonym -> queryTerms.add(parseBoostQueryString(synonym, boostedNumber)));
+			queryTerms.add(parseBoostQueryString(descendantOntologyTerm.getLabel(), boostedNumber));
+		}
+
+		return queryTerms;
 	}
 
 	public List<String> getAttributeIdentifiers(EntityMetaData sourceEntityMetaData)
@@ -180,9 +196,20 @@ public class SemanticSearchServiceHelper
 		return matchingOntologyTerms;
 	}
 
+	public String parseQueryString(String queryString)
+	{
+		return StringUtils.join(removeStopWords(queryString), ' ');
+	}
+
+	public String parseBoostQueryString(String queryString, double boost)
+	{
+		return StringUtils.join(
+				removeStopWords(queryString).stream().map(word -> word + "^" + boost).collect(Collectors.toSet()), ' ');
+	}
+
 	public Set<String> removeStopWords(String description)
 	{
-		String regex = "[^\\p{L}'a-zA-Z0-9]+";
+		String regex = "[^\\p{L}'a-zA-Z0-9\\.~^]+";
 		Set<String> searchTerms = stream(description.split(regex)).map(String::toLowerCase)
 				.filter(w -> !STOP_WORDS.contains(w) && StringUtils.isNotEmpty(w)).collect(Collectors.toSet());
 		return searchTerms;

@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -63,7 +64,7 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 		List<String> createdTargetAttributeQueries = Arrays.asList("Height", "Standing height in cm", "body_length",
 				"Sitting height", "sitting_length", "Height", "sature");
 		QueryRule actualRule = semanticSearchServiceHelper.createDisMaxQueryRule(createdTargetAttributeQueries);
-		String expectedQueryRuleToString = "(label FUZZY_MATCH 'height'description FUZZY_MATCH 'height'label FUZZY_MATCH 'standing cm height'description FUZZY_MATCH 'standing cm height'label FUZZY_MATCH 'length body'description FUZZY_MATCH 'length body'label FUZZY_MATCH 'sitting height'description FUZZY_MATCH 'sitting height'label FUZZY_MATCH 'length sitting'description FUZZY_MATCH 'length sitting'label FUZZY_MATCH 'height'description FUZZY_MATCH 'height'label FUZZY_MATCH 'sature'description FUZZY_MATCH 'sature')";
+		String expectedQueryRuleToString = "(label FUZZY_MATCH 'Height'description FUZZY_MATCH 'Height'label FUZZY_MATCH 'Standing height in cm'description FUZZY_MATCH 'Standing height in cm'label FUZZY_MATCH 'body_length'description FUZZY_MATCH 'body_length'label FUZZY_MATCH 'Sitting height'description FUZZY_MATCH 'Sitting height'label FUZZY_MATCH 'sitting_length'description FUZZY_MATCH 'sitting_length'label FUZZY_MATCH 'Height'description FUZZY_MATCH 'Height'label FUZZY_MATCH 'sature'description FUZZY_MATCH 'sature')";
 		assertEquals(actualRule.getOperator(), Operator.DIS_MAX);
 		assertEquals(actualRule.toString(), expectedQueryRuleToString);
 	}
@@ -135,6 +136,31 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 	}
 
 	@Test
+	public void testCollectQueryTermsFromOntologyTerm()
+	{
+		// Case 1
+		OntologyTerm ontologyTerm1 = OntologyTerm.create("http://onto/standingheight", "Standing height",
+				"Description is not used", Arrays.<String> asList("body_length"));
+		List<String> actual_1 = semanticSearchServiceHelper.collectQueryTermsFromOntologyTerm(ontologyTerm1);
+		assertEquals(actual_1, Arrays.asList("length body", "standing height"));
+
+		// Case 2
+		OntologyTerm ontologyTerm2 = OntologyTerm.create("http://onto/standingheight", "height",
+				"Description is not used", Collections.emptyList());
+
+		OntologyTerm ontologyTerm3 = OntologyTerm.create("http://onto/standingheight-children", "length", "",
+				Arrays.<String> asList("body_length"));
+
+		when(ontologyService.getChildren(ontologyTerm2)).thenReturn(Arrays.asList(ontologyTerm3));
+
+		when(ontologyService.getOntologyTermDistance(ontologyTerm2, ontologyTerm3)).thenReturn(1);
+
+		List<String> actual_2 = semanticSearchServiceHelper.collectQueryTermsFromOntologyTerm(ontologyTerm2);
+
+		assertEquals(actual_2, Arrays.asList("height", "length^0.5 body^0.5", "length^0.5"));
+	}
+
+	@Test
 	public void testGetAttributeIdentifiers()
 	{
 		EntityMetaData sourceEntityMetaData = new DefaultEntityMetaData("sourceEntityMetaData");
@@ -158,6 +184,14 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 	}
 
 	@Test
+	public void testParseBoostQueryString()
+	{
+		String description = "falling in the ocean!";
+		String actual = semanticSearchServiceHelper.parseBoostQueryString(description, 0.5);
+		assertEquals(actual, "ocean^0.5 falling^0.5");
+	}
+
+	@Test
 	public void testRemoveStopWords()
 	{
 		String description = "falling in the ocean!";
@@ -171,6 +205,24 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 	{
 		String description = "Fall " + SemanticSearchServiceHelper.STOP_WORDS + " sleep";
 		Set<String> expected = Sets.newHashSet("fall", "sleep");
+		Set<String> actual = semanticSearchServiceHelper.removeStopWords(description);
+		assertEquals(actual, expected);
+	}
+
+	@Test
+	public void testSearchCircumflex() throws InterruptedException, ExecutionException
+	{
+		String description = "body^0.5 length^0.5";
+		Set<String> expected = Sets.newHashSet("length^0.5", "body^0.5");
+		Set<String> actual = semanticSearchServiceHelper.removeStopWords(description);
+		assertEquals(actual, expected);
+	}
+
+	@Test
+	public void testSearchTilde() throws InterruptedException, ExecutionException
+	{
+		String description = "body~0.5 length~0.5";
+		Set<String> expected = Sets.newHashSet("length~0.5", "body~0.5");
 		Set<String> actual = semanticSearchServiceHelper.removeStopWords(description);
 		assertEquals(actual, expected);
 	}
