@@ -27,14 +27,6 @@ body>.container-fluid {
 /* Sticky footer - end */
 
 /* Support collapsable panels */
-.panel-title {
-    color: white;
-}
-
-.panel-heading {
-    background-color: #5B82A4;  
-}
-
 .panel-heading a:after {
     font-family: 'Glyphicons Halflings';
     content: "\e114";    
@@ -45,9 +37,7 @@ body>.container-fluid {
 }
 
 #plugin-container {
-	background: #F8FAFB;
 	height: 100%;
-	padding: 5px;
 }
 
 #spinner img {
@@ -61,14 +51,6 @@ body>.container-fluid {
 
 .modal-backdrop.fade.in {
 	opacity: .3;
-}
-
-label.horizontal-inline {
-	margin-right: 5px;
-}
-
-label.horizontal-inline.inbetween {
-	margin-left: 5px;
 }
 
 .dropdown-menu{
@@ -172,3 +154,4 @@ label.horizontal-inline.inbetween {
 }
 
 /* end of Bootstrap tooltip style*/
+

@@ -4,65 +4,112 @@
 <#assign js=["jquery-sortable-min.js", "menumanager.js"]>
 <@header css js/>
 
-<div class="row">
-	<div class="col-md-offset-2 col-md-8">
+<div class="row" id="menu-editor-container">
+	<div class="col-md-5">
 		<p>
-			Drag and drop menu items to update menu, press Save to store the menu. Each menu should contain at least one item.
+			Drag and drop menu items to update menu, press Save to store the menu. 
+			Each menu should contain at least one item.
 		</p>
 		
-		<div class="row" id="menu-editor-container">
-			<div class="col-md-7">
-				<div id="menu-editor-tree">
-					<@create_menu_list molgenis_ui.menu true/>
-				</div>
-			</div>
-				
-			<div class="col-md-5">
+		<div id="menu-editor-tree">
+			<@create_menu_list molgenis_ui.menu true/>
+		</div>
+	</div>
+					
+	<div class="col-md-6">
+		<div class="row">
+			<div class="col-md-6">
 				<legend>Create Menu</legend>
 				<form name="add-menu-group-form" class="form-horizontal" role="form">
 					<@create_edit_menu_inputs/>
 					<div class="form-group">
 						<div class="col-md-9 col-md-offset-3">
-							<button type="submit" class="btn btn-default">Create</button>
+							<button type="submit" class="btn btn-default pull-right">Create</button>
 						</div>
 					</div>
 				</form>
-					
+			</div>
+			<div class="col-md-6">
 				<legend>Create Menu Item</legend>
 				<form name="add-menu-item-form" class="form-horizontal" role="form">
 					<@create_edit_item_inputs false/>
 					<div class="form-group">
 						<div class="col-md-9 col-md-offset-3">
-							<button type="submit" class="btn btn-default">Create</button>
+							<button type="submit" class="btn btn-default pull-right">Create</button>
 						</div>
 					</div>
 				</form>
-					
-				<legend>Upload logo</legend>
-				<form name="upload-new-logo" class="form-horizontal" role="form" action="${context_url?html}/upload-logo" method="POST" enctype="multipart/form-data">
-					<@upload_new_logo />
-					<div class="form-group">
-						<div class="col-md-9 col-md-offset-3">
-							<input type="submit" value="Upload logo" class="btn btn-default" />	
-						</div>
-					</div>
-				
+			</div>
+		</div>
+		
+		<div class="row">
+			<div class="col-md-12">
+				<form name="save-menu-form" action="${context_url?html}/save" method="POST">
+					<button type="submit" class="btn btn-info pull-right">Save the new menu layout</button>
 				</form>
 			</div>
 		</div>
 		
 		<hr></hr>
-
+		
 		<div class="row">
-			<div class="col-md-2 col-md-offset-10">
-				<form name="save-menu-form" action="${context_url?html}/save" method="POST">
-					<button type="submit" class="btn btn-primary pull-right">Save</button>
+			<div class="col-md-12">
+				<br></br>
+			</div>
+		</div>		
+		
+		<div class="row">
+			<div class="col-md-6">
+			
+				<legend>Upload logo</legend>
+				<form name="upload-new-logo" class="form-horizontal" role="form" action="${context_url?html}/upload-logo" method="POST" enctype="multipart/form-data">
+					<@upload_new_logo />
+					<div class="form-group">
+						<div class="col-md-9 col-md-offset-3">
+							<input type="submit" value="Upload logo" class="btn btn-primary pull-right" />	
+						</div>
+					</div>
 				</form>
+				
+			</div>
+			<div class="col-md-6">
+				
+				<legend>Select a bootstrap theme</legend>
+				<form class="form-horizontal" role="form">
+					<div class="form-group">
+						<div class="col-md-9 col-md-offset-3">
+  							<select class="form-control" id="bootstrap-theme-select">
+  							<#if selectedStyle??>
+									skjhfksdjfslkdjf ${selectedStyle}
+							</#if>
+  							<#list availableStyles as style>
+  								<option value="${style.location}" <#if selectedStyle?? && style.name == selectedStyle>selected</#if>>${style.name}</option>
+  							</#list>
+  							</select>
+						</div>
+  					</div>
+  					
+  					<div class="form-group">
+  						<div class="col-md-9 col-md-offset-3">
+  							<button id="save-selected-bootstrap-theme" type="btn" class="btn btn-primary pull-right">Save current theme</button>
+  						</div>	
+  					</div>
+				</form>
+				
 			</div>
 		</div>
-			
+		
+	</div>
+	
+
+</div>
+
+<div class="row">
+	<div class="col-md-12">
+		<hr></hr>
 	</div>
 </div>
+
 
 <@footer/>
 
