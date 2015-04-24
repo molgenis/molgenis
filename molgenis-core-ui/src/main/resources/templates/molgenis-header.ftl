@@ -13,9 +13,11 @@
         <meta http-equiv="X-UA-Compatible" content="chrome=1">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="icon" href="<@resource_href "/img/molgenis.ico"/>" type="image/x-icon">
-        <#-- Bundle of third party CSS resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
+        
+	<#-- Bundle of third party CSS resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
         <link rel="stylesheet" href="<@resource_href "/css/molgenis-bundle.min.css"/>" type="text/css">
-    <#if environment == "development">
+    
+	<#if environment == "development">
         <link rel="stylesheet" href="<@resource_href "/css/component/wrapper/DateTimePicker.css"/>" type="text/css">
         <link rel="stylesheet" href="<@resource_href "/css/component/wrapper/JQRangeSlider.css"/>" type="text/css">
         <link rel="stylesheet" href="<@resource_href "/css/component/Checkbox.css"/>" type="text/css">
@@ -23,26 +25,36 @@
     <#else>
         <link rel="stylesheet" href="<@resource_href "/css/molgenis-component.min.css"/>" type="text/css">
     </#if>
+        
         <link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
-    <#if molgeniscsstheme??>
+    
+    <#-- CSS selection, configurable based on RTP setting -->
+	<#if molgeniscsstheme??>
 		<#if molgeniscsstheme?starts_with("http")>
-			<link rel="stylesheet" href="${molgeniscsstheme}" type="text/css">
+			<link id="bootstrap-theme" rel="stylesheet" href="${molgeniscsstheme}" type="text/css">
         <#else>
-        	<link rel="stylesheet" href="<@resource_href "/css/${molgeniscsstheme}"/>" type="text/css">
+        	<link id="bootstrap-theme" rel="stylesheet" href="<@resource_href "/css/themes/${molgeniscsstheme}"/>" type="text/css">
 		</#if>
-    </#if>
+    <#else>
+		<link rel="stylesheet" href="<@resource_href "/css/themes/bootstrap-molgenis.css"/>" type="text/css">
+	</#if>
+
     <#if app_top_logo?has_content>
         <link rel="stylesheet" href="<@resource_href "/css/molgenis-top-logo.css"/>" type="text/css">
     </#if>
+
     <#list css as css_file_name>
         <link rel="stylesheet" href="<@resource_href "/css/${css_file_name?html}"/>" type="text/css">
     </#list>
+
     <#if molgenis_ui.hrefCss?has_content>
         <link rel="stylesheet" href="<@resource_href "/css/${molgenis_ui.hrefCss?html}"/>" type="text/css">
     </#if>
+
     <!--[if lt IE 9]>
         <script src="<@resource_href "/js/molgenis-ie8.js"/>"></script>
     <![endif]-->
+    
         <#-- Bundle of third party JavaScript resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
 		<script src="<@resource_href "/js/es6-promise.min.js"/>"></script>
 		<script src="<@resource_href "/js/promise-done-6.1.0.min.js"/>"></script>
