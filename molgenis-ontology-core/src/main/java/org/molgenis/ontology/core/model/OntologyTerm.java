@@ -26,28 +26,19 @@ public abstract class OntologyTerm
 
 	public abstract List<String> getSynonyms();
 
-	@Nullable
-	public abstract String getNodePath();
-
 	public static OntologyTerm create(String iri, String label)
 	{
-		return new AutoValue_OntologyTerm(iri, label, null, emptyList(), null);
+		return new AutoValue_OntologyTerm(iri, label, null, emptyList());
 	}
 
 	public static OntologyTerm create(String iri, String label, String description)
 	{
-		return new AutoValue_OntologyTerm(iri, label, description, emptyList(), null);
+		return new AutoValue_OntologyTerm(iri, label, description, emptyList());
 	}
 
 	public static OntologyTerm create(String iri, String label, String description, List<String> synonyms)
 	{
-		return new AutoValue_OntologyTerm(iri, label, description, copyOf(synonyms), null);
-	}
-
-	public static OntologyTerm create(String iri, String label, String description, List<String> synonyms,
-			String nodePath)
-	{
-		return new AutoValue_OntologyTerm(iri, label, description, copyOf(synonyms), nodePath);
+		return new AutoValue_OntologyTerm(iri, label, description, copyOf(synonyms));
 	}
 
 	/**
