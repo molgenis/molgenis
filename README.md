@@ -21,6 +21,8 @@ install git from http://git-scm.com/download/
 open terminal and start mysql client (command differs in Windows, Linux, Mac): 
 
     /usr/local/mysql/bin/mysql -u root
+    
+Note, if not running you can start the MySQL server from the System Preferences
 
 in mysql client create database and permissions via command:
 
