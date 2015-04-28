@@ -25,7 +25,7 @@ public class MysqlRepositoryStringTest extends MysqlRepositoryAbstractDatatypeTe
 	@Override
 	public String createSql()
 	{
-		return "CREATE TABLE IF NOT EXISTS `VarcharTest`(`col1` VARCHAR(255) NOT NULL, `col2` VARCHAR(255), `col3` VARCHAR(255), PRIMARY KEY (`col1`)) ENGINE=InnoDB;";
+		return "CREATE TABLE IF NOT EXISTS `VarcharTest`(`col1` VARCHAR(255) NOT NULL, `col2` TEXT, `col3` TEXT, PRIMARY KEY (`col1`)) ENGINE=InnoDB;";
 	}
 
 	@Override

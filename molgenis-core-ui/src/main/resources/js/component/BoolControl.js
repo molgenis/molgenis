@@ -63,7 +63,7 @@
 								readOnly: this.props.readOnly,
 								checked : this.props.value,
 								focus: this.props.focus,
-								onValueChange : this.props.onValueChange
+								onValueChange : this._handleValueChange
 							})		
 						)
 					)
@@ -71,7 +71,7 @@
 			}
 		},
 		_handleValueChange: function(e) {
-			this.props.onValueChange({value: this._stringToBool(e.value)});
+			this.props.onValueChange({value: this._eventToBool(e)});
 		},
 		_boolToString: function(value) {
 			if(this.props.multiple) {
@@ -86,17 +86,20 @@
 				return value === true ? 'true' : (value === false ? 'false' : value);
 			}
 		},
-		_stringToBool: function(value) {
+		_eventToBool: function(e) {
+			console.log(e);
 			if(this.props.multiple) {
 				// do not use $.map since it removes null values
-				if(value !== undefined) {
-					value = value.slice(0);
-					for(var i = 0; i < value.length; ++i)
+				if(e.value !== undefined) {
+					var value = [];
+					for(var i = 0; i < e.value.slice(0).length; ++i)
 						value[i] = value[i] === 'true' ? true : (value[i] === 'false' ? false : value[i]);
 				}
 				return value;
+			} else if(e.checked !== undefined) {
+				return e.checked;
 			} else {
-				return value === 'true' ? true : (value === 'false' ? false : value);
+				return e.value === 'true' ? true : (e.value === 'false' ? false : e.value);
 			}
 		}
 	});

@@ -19,8 +19,9 @@ import org.molgenis.data.system.RepositoryTemplateLoader;
 import org.molgenis.data.version.v1_5.Step1UpgradeMetaData;
 import org.molgenis.data.version.v1_5.Step2;
 import org.molgenis.data.version.v1_5.Step3AddOrderColumnToMrefTables;
-import org.molgenis.data.version.v1_5.Step4;
+import org.molgenis.data.version.v1_5.Step4VarcharToText;
 import org.molgenis.data.version.v1_6.Step7UpgradeMetaDataTo1_6;
+import org.molgenis.data.version.v1_6.Step8VarcharToTextRepeated;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
 import org.molgenis.system.core.FreemarkerTemplateRepository;
 import org.molgenis.ui.MolgenisWebAppConfig;
@@ -80,11 +81,12 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(new Step1UpgradeMetaData(dataSource, searchService));
 		upgradeService.addUpgrade(new Step2(dataService, jpaRepositoryCollection, dataSource, searchService));
 		upgradeService.addUpgrade(new Step3AddOrderColumnToMrefTables(dataSource));
-		upgradeService.addUpgrade(new Step4(dataSource, mysqlRepositoryCollection));
+		upgradeService.addUpgrade(new Step4VarcharToText(dataSource, mysqlRepositoryCollection));
 		upgradeService.addUpgrade(new Step5AlterDataexplorerMenuURLs(jpaRepositoryCollection
 				.getRepository("RuntimeProperty")));
 		upgradeService.addUpgrade(new Step6ChangeRScriptType(dataSource, searchService));
 		upgradeService.addUpgrade(new Step7UpgradeMetaDataTo1_6(dataSource, searchService));
+		upgradeService.addUpgrade(new Step8VarcharToTextRepeated(dataSource, mysqlRepositoryCollection));
 	}
 
 	@Override

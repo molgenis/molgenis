@@ -3,19 +3,14 @@
 	
 	$(function() {
 		var data = $('#form-holder').data();
-		getForm(data.name, data.id);
-		
-		$('#submit-button').click(function(e) {
-			$('#entity-form input[name=status]').val('SUBMITTED');
-			$('#entity-form').submit();
-			document.location = data.name + "/thanks";
-		});
+		getForm(data.name, data.id, data.name + "/thanks");
 	});
 	
-	function getForm(name, id) {
+	function getForm(name, id, successUrl) {
 		React.render(molgenis.ui.Questionnaire({
 			entity: name,
 			entityInstance: id,
+			successUrl: successUrl,
 			onContinueLaterClick: function() {
 				history.back();
 			}

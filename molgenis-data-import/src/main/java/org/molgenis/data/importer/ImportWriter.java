@@ -331,7 +331,16 @@ public class ImportWriter
 	private void dropAddedEntities(List<String> addedEntities)
 	{
 		// Rollback metadata, create table statements cannot be rolled back, we have to do it ourselves
-		Lists.reverse(addedEntities).forEach(dataService.getMeta()::deleteEntityMeta);
+		Lists.reverse(addedEntities).forEach(entity -> {
+			try
+			{
+				dataService.getMeta().deleteEntityMeta(entity);
+			}
+			catch (Exception ex)
+			{
+				LOG.error("Failed to rollback creation of entity {}", entity);
+			}
+		});
 	}
 
 	/**
@@ -558,7 +567,7 @@ public class ImportWriter
 		@Override
 		public Iterable<Entity> getEntities(String attributeName)
 		{
-			return from((Iterable<Entity>) super.getEntities(attributeName)).filter(notNull());
+			return from(super.getEntities(attributeName)).filter(notNull());
 		}
 	}
 }

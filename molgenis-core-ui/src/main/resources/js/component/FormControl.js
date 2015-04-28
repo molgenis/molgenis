@@ -4,7 +4,6 @@
 
     var div = React.DOM.div, span = React.DOM.span, label = React.DOM.label, strong = React.DOM.strong, a = React.DOM.a;
     
-    var api = new molgenis.RestClient();
     
     /**
      * @memberOf component
@@ -18,37 +17,25 @@
             attr: React.PropTypes.object.isRequired,
             formLayout: React.PropTypes.oneOf(['horizontal', 'vertical']),
             mode: React.PropTypes.oneOf(['create', 'edit', 'view']),
-            saveOnBlur: React.PropTypes.bool,
             colOffset: React.PropTypes.number,
-            //validate: React.PropTypes.bool,
             errorMessage: React.PropTypes.string,
             focus: React.PropTypes.bool,
             value: React.PropTypes.any,
-            onValueChange: React.PropTypes.func.isRequired
+            errorMessage: React.PropTypes.string,
+            onValueChange: React.PropTypes.func.isRequired,
+            onBlur: React.PropTypes.func.isRequired
         },
         getInitialState: function() {
             return {
                 attr: null,
-                pristine: true
+                pristine : true
             };
         },
         getDefaultProps: function() {
 			return {
 				colOffset: 2,
-				onAttrInit: this._onAttrInit
 			};
 		},
-        componentWillReceiveProps: function(nextProps) {
-           // if(nextProps.validate === true) {
-                // validate control
-            //    this._validate(this._getValue(nextProps.value), function(validity) {
-             //       this.setState({
-              //          pristine: true,
-               //         validity: validity
-               //     });     
-               // }.bind(this));
-            //}
-        },
         render: function() {
             if(this.state.attr === null) {
                 // attribute not fetched yet
@@ -65,12 +52,13 @@
             
             
             // add validation error message
-          //  var validate = this.state.pristine === false || this.props.validate === true;
-            var errorMessageSpan = this.props.errorMessage ? span({className: 'help-block'}, strong({}, this.props.errorMessage)) : null;
+            var errorMessage = this.props.errorMessage;
+            var showErrorMessage = (errorMessage !== undefined) && (errorMessage !== null);
+            var errorMessageSpan = showErrorMessage ? span({className: 'help-block'}, strong({}, this.props.errorMessage)) : null;
             
             // determine success and error classes for control 
             var formGroupClasses = 'form-group';
-            if(this.props.errorMessage) {
+            if (showErrorMessage) {
                 formGroupClasses += ' has-error';
             }
                         
@@ -129,87 +117,24 @@
                 );
             }
         },
-        _onAttrInit: function() {
-        	//this._handleValueChange({value: this._getValue(this.props.value)});
-        },
+
         _handleValueChange: function(e) {
-        	 this.props.onValueChange({
-        		 attr: this.state.attr.name,
-        		 value: this._getValue(e.value),
-        	 });
+        	this.setState({pristine: false});
         	
-//            this._validate(this._getValue(e.value), function(validity) {
-//                this.setState({
-//                    value: this._getValue(e.value),
-//                    valid: validity.valid,
-//                    errorMessage: validity.errorMessage,
-//                    pristine: this.props.value === e.value // mark input as dirty
-//                });
-//                
-//                this.props.onValueChange({
-//                    attr: this.state.attr.name,
-//                    value: this._getValue(e.value),
-//                    valid: validity.valid,
-//                    errorMessage: validity.errorMessage
-//                });
-//                
-//                if(validity.valid === true && this._doPersistAttributeValue()) {
-//	                // persist changes for controls that do not have a blur event
-//	                switch(this.state.attr.fieldType) {
-//		                case 'BOOL':
-//		                case 'CATEGORICAL':
-//		                case 'CATEGORICAL_MREF':
-//		                case 'ENUM':
-//		                case 'MREF':
-//		                case 'XREF':
-//		                	this._persistAttributeValue(e.value);
-//		                	break;
-//		                default:
-//		                	break;
-//	                }
-//                }
-//            }.bind(this));
+        	this.props.onValueChange({
+        		attr: this.state.attr.name,
+                value: this._getValue(e.value),
+            });
         },
+        
         _handleBlur: function(e) {
-            // only validate if control was touched
-//            if(this.state.pristine === true) {
-//                return;
-//            }
-//            
-//            this._validate(this._getValue(e.value), function(validity) {
-//            	if(validity.valid === true && this._doPersistAttributeValue()) {
-//            		this._persistAttributeValue(e.value);
-//                }
-//            	
-//            	this.setState({
-//                    valid: validity.valid,
-//                    errorMessage: validity.errorMessage
-//                });
-//            }.bind(this));
-        },
-        _doPersistAttributeValue: function() {
-        	return this.props.mode === 'edit' && this.props.saveOnBlur && !this.state.attr.readOnly;
-        },
-        _persistAttributeValue: function(value) {
-        	// persist attribute
-    		var val;
-        	switch(this.state.attr.fieldType) {
-        		case 'CATEGORICAL':
-        		case 'XREF':
-        			val = value !== null && value !== undefined ? value[this.state.attr.refEntity.idAttribute] : null;
-        			break;
-        		case 'CATEGORICAL_MREF':
-        		case 'MREF':
-        			val = _.map(value.items, function(item) {
-        				return item[this.state.attr.refEntity.idAttribute];
-        			}.bind(this));
-        			break;
-        		default:
-        			val = value;
-        			break;
-        	}
-        	
-    		api.update(this.props.entityInstance.href + '/' + this.state.attr.name, val);
+        	// only validate if control was touched
+            if(this.state.pristine === true || this.props.onBlur === undefined) {
+                return;
+            }
+            
+            e.attr = this.state.attr;
+            this.props.onBlur(e);
         },
         _getValue: function(value) {
         	// workaround for required bool attribute with no value implying false value

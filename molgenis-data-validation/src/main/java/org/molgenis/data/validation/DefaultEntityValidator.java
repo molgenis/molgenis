@@ -4,12 +4,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +73,7 @@ public class DefaultEntityValidator implements EntityValidator
 				for (Entity entity : entities)
 				{
 					rownr++;
-					if (entity.get(attr.getName()) == null)
+					if (mustDoNotNullCheck(meta, attr, entity) && entity.get(attr.getName()) == null)
 					{
 						String message = String.format(
 								"The attribute '%s' of entity '%s' with key '%s' can not be null.", attr.getName(),
@@ -83,6 +85,18 @@ public class DefaultEntityValidator implements EntityValidator
 		}
 
 		return violations;
+	}
+
+	public boolean mustDoNotNullCheck(EntityMetaData entityMetaData, AttributeMetaData attr, Entity entity)
+	{
+		// Do not validate if Questionnaire status is not SUBMITTED
+		if (EntityUtils.doesExtend(entityMetaData, "Questionnaire") && entity.get("status") != "SUBMITTED") return false;
+
+		// Do not validate is visibleExpression resolves to false
+		if (StringUtils.isNotBlank(attr.getVisibleExpression())
+				&& !ValidationUtils.resolveBooleanExpression(attr.getVisibleExpression(), entity, entityMetaData, attr)) return false;
+
+		return true;
 	}
 
 	private Set<ConstraintViolation> checkUniques(Iterable<? extends Entity> entities, EntityMetaData meta,
