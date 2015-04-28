@@ -130,7 +130,7 @@
 	<#-- load js dependencies -->
 	$.when(
 		$.ajax("<@resource_href "/js/jquery.bootstrap.pager.js"/>", {'cache': true}),
-		$.ajax("<@resource_href "/js/jquery.molgenis.table.js"/>", {'cache': true}),
+		$.ajax("<@resource_href "/js/"+dataTable/>", {'cache': true}),
 		$.ajax("<@resource_href "/js/dalliance-compiled.js"/>", {'cache': true}),
 		$.ajax("<@resource_href "/js/dataexplorer-data.js"/>", {'cache': true}))
 		.done(function() {
