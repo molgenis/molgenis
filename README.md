@@ -21,6 +21,8 @@ install git from http://git-scm.com/download/
 open terminal and start mysql client (command differs in Windows, Linux, Mac): 
 
     /usr/local/mysql/bin/mysql -u root
+    
+Note, if not running you can start the MySQL server from the System Preferences
 
 in mysql client create database and permissions via command:
 
@@ -41,8 +43,11 @@ find and install plugins:
 * 'TestNG for Eclipse'
 * 'm2e-apt'
 
-go to 'Eclipse' -> 'Preferences' -> 'installed JREs' and select 'java 8'
-go to 'Eclipse' -> 'Preferences' -> 'Maven' -> 'Annotation Processing' and select 'Automatically Configure JDT APT'
+go to 'Eclipse' -> 'Preferences' 
+* 'installed JREs' and select 'java 8'
+* 'Maven' -> 'Annotation Processing' and select 'Automatically Configure JDT APT'
+
+Restart
 
 ## 4. Get the code
 
@@ -66,9 +71,7 @@ More information about forking can be found here: https://help.github.com/articl
 
 ## 5. Configure the default admin password
 
-Create the directory ~/.molgenis/omx and create a file called molgenis-server.properties in this folder (~ is your home folder)
-
-Add user and database properties to this file, such as this example:
+Create the file ~/.molgenis/omx/molgenis-server.properties and add user and database properties:
 
     db_user=molgenis
     db_password=molgenis
@@ -86,7 +89,7 @@ Choose 'File' -> 'Import' -> 'Import existing Maven projects'
 
 Browse to your /git/molgenis directory 
 
-Select (and wait to install all kinds of maven connectors)
+Select and wait to install all kinds of maven connectors (this takes a while!)
 
 Right mouse 'molgenis' -> Run as -> Maven install.
 
