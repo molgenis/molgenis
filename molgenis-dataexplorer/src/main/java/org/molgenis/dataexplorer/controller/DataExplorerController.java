@@ -96,7 +96,8 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String KEY_MOD_AGGREGATES_DISTINCT_HIDE = KEY_MOD_AGGREGATES + ".distinct.hide";
 	public static final String KEY_MOD_AGGREGATES_DISTINCT_OVERRIDE = KEY_MOD_AGGREGATES + ".distinct.override";
 	public static final String KEY_MOD_ENTITIESREPORT = "plugin.dataexplorer.mod.entitiesreport";
-
+	public static final String KEY_DATATABLE = "plugin.dataexplorer.table.javascript";
+	private static final String DEFAULT_VAL_DATATABLE = "jquery.molgenis.table.js";
 	private static final boolean DEFAULT_VAL_MOD_AGGREGATES = true;
 	private static final boolean DEFAULT_VAL_MOD_ANNOTATORS = false;
 	private static final boolean DEFAULT_VAL_MOD_CHARTS = true;
@@ -231,12 +232,19 @@ public class DataExplorerController extends MolgenisPluginController
 			model.addAttribute("genomebrowser_patient_list",
 					molgenisSettings.getProperty(GenomeConfig.GENOMEBROWSER_PATIENT_ID, "patient_id"));
 
-			model.addAttribute("tableEditable", isTableEditable());
+			// Galaxy properties
 			model.addAttribute("galaxyEnabled",
 					molgenisSettings.getBooleanProperty(KEY_GALAXY_ENABLED, DEFAULT_VAL_GALAXY_ENABLED));
 			String galaxyUrl = molgenisSettings.getProperty(KEY_GALAXY_URL);
-			model.addAttribute("rowClickable", isRowClickable());
 			if (galaxyUrl != null) model.addAttribute(ATTR_GALAXY_URL, galaxyUrl);
+
+			// Custom report options
+			model.addAttribute("rowClickable", isRowClickable());
+			model.addAttribute("tableEditable", isTableEditable());
+
+			// specific table for entity
+			model.addAttribute("dataTable",
+					parseEntitySpecificRuntimeProperty(entityName, KEY_DATATABLE, DEFAULT_VAL_DATATABLE));
 		}
 		else if (moduleId.equals("diseasematcher"))
 		{
