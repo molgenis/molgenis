@@ -57,7 +57,7 @@ function($, molgenis, settingsXhr) {
 	function getSelectedAttributes() {
 		return selectedAttributes;
 	}
-	
+
 	/**
 	 * @memberOf molgenis.dataexplorer
 	 */
