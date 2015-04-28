@@ -956,3 +956,4 @@ if (!String.prototype.startsWith) {
 }
 Number.MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER || 9007199254740991;
 Number.MIN_SAFE_INTEGER = Number.MIN_SAFE_INTEGER || -9007199254740991;
+
