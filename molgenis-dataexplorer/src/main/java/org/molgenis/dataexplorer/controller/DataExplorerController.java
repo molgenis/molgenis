@@ -246,7 +246,7 @@ public class DataExplorerController extends MolgenisPluginController
 		else if (moduleId.equals("entitiesreport"))
 		{
 			model.addAttribute("datasetRepository", dataService.getRepository(entityName));
-			model.addAttribute("viewName", parseEntitiesReportRuntimeProperty(entityName));
+			model.addAttribute("viewName", parseEntitySpecificRuntimeProperty(entityName, KEY_MOD_ENTITIESREPORT, null));
 		}
 		return "view-dataexplorer-mod-" + moduleId; // TODO bad request in case of invalid module id
 	}
@@ -274,7 +274,7 @@ public class DataExplorerController extends MolgenisPluginController
 			modAggregates = dataService.getCapabilities(entityName).contains(RepositoryCapability.AGGREGATEABLE);
 		}
 
-		String modEntitiesReportName = parseEntitiesReportRuntimeProperty(entityName);
+		String modEntitiesReportName = parseEntitySpecificRuntimeProperty(entityName, KEY_MOD_ENTITIESREPORT, null);
 
 		// set data explorer permission
 		Permission pluginPermission = null;
@@ -685,9 +685,9 @@ public class DataExplorerController extends MolgenisPluginController
 				DEFAULT_VAL_DATAEXPLORER_ROW_CLICKABLE);
 	}
 
-	private String parseEntitiesReportRuntimeProperty(String entityName)
+	private String parseEntitySpecificRuntimeProperty(String entityName, String property, String defaultValue)
 	{
-		String modEntitiesReportRTP = molgenisSettings.getProperty(KEY_MOD_ENTITIESREPORT, null);
+		String modEntitiesReportRTP = molgenisSettings.getProperty(property, null);
 		if (modEntitiesReportRTP != null)
 		{
 			String[] entitiesReports = modEntitiesReportRTP.split(",");
@@ -703,6 +703,6 @@ public class DataExplorerController extends MolgenisPluginController
 				}
 			}
 		}
-		return null;
+		return defaultValue;
 	}
 }
