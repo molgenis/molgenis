@@ -460,6 +460,22 @@
 		});
 
 
+        $(container).on('click', '.molgenis-table.table-hover tbody:not(.editable) tr', function(e){
+            // Issue #1400 ask for IdAttribute directly
+            var entityData = $(this).data('entity').href.split('/');
+            var entityId = decodeURIComponent(entityData.pop());
+            var entityName = decodeURIComponent(entityData.pop());
+
+            $('#entityReport').load("dataexplorer/details",{entityName: entityName, entityId: entityId}, function() {
+                $('#entityReportModal').modal("show");
+
+                // Button event handler when a button is placed inside an entity report ftl
+                $(".modal-body button", "#entityReport").on('click', function() {
+                    $.download($(this).data('href'), {entityName: entityName, entityId: entityId}, "GET");
+                });
+            });
+        });
+
 		return this;
 	};
 
