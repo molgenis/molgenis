@@ -24,7 +24,7 @@
 <div class="row">
 	<div class="col-md-6">
 		<div class="pull-left">
-			<#if requestAttributeMapping.showSuggestedAttributes?c == "true">
+			<#if showSuggestedAttributes?c == "true">
 				<h5>Source Attributes suggested by semantic search</h5>
 			<#else>
 				<h5>Source all attributes</h5>
@@ -32,13 +32,14 @@
 		</div>
 		<div class="pull-right">
 			<form method="get" action="${context_url}/attributeMapping">
-				<input type="hidden" name="mappingProjectId" value="${requestAttributeMapping.mappingProjectId}"/>
-				<input type="hidden" name="target" value="${requestAttributeMapping.target}"/>
-				<input type="hidden" name="source" value="${requestAttributeMapping.source}"/>
-				<input type="hidden" name="attribute" value="${requestAttributeMapping.attribute}"/>
+				<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
+				<input type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name?html}"/>
+				<input type="hidden" name="source" value="${entityMapping.name?html}"/>
+				<input type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name?html}"/>
+				<input type="hidden" name="showSuggestedAttributes" value="${showSuggestedAttributes?string("false", "true")}"/>
 				<div class="btn-group" role="group">
-					<button id="reload-attribute-mapping-table" type="submit" class="btn btn-default" name="showSuggestedAttributes" value="${requestAttributeMapping.showSuggestedAttributes?string("false", "true")}">
-						<#if requestAttributeMapping.showSuggestedAttributes?c == "true">
+					<button id="reload-attribute-mapping-table" type="submit" class="btn btn-default" ">
+						<#if showSuggestedAttributes?c == "true">
 							Show all attributes
 						<#else>
 							Show only attributes suggested by semantic search
@@ -63,7 +64,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						<#list suggestedAttributes as source>
+						<#list attributes as source>
 							<tr>
 								<td>
 									<b>${source.label?html}</b> (${source.dataType})
@@ -87,7 +88,7 @@
 	</div>
 	<div class="col-md-6">
 		<h5>Algorithm</h5>
-		<form method="POST" action="${context_url}/saveattributemapping">
+		<form id="saveattributemapping-form" method="POST" action="${context_url}/saveattributemapping">
 			<textarea class="form-control" name="algorithm" rows="15"
 				id="edit-algorithm-textarea" <#if !hasWritePermission>data-readonly="true"</#if> width="100%">${(attributeMapping.algorithm!"")?html}</textarea>
 			<hr />

@@ -12,8 +12,6 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import javax.validation.Valid;
-
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -338,41 +336,51 @@ public class MappingServiceController extends MolgenisPluginController
 	/**
 	 * Displays an {@link AttributeMapping}
 	 * 
-	 * @param RequestAttributeMapping
-	 *            {@link RequestAttributeMapping}
+	 * @param mappingProjectId
+	 *            ID of the {@link MappingProject}
+	 * @param target
+	 *            name of the target entity
+	 * @param source
+	 *            name of the source entity
+	 * @param targetAttribute
+	 *            name of the target attribute
+	 * @param isShowSuggestedAttributes
+	 *            should the attributes be chosen by the user or semantic search must be used to do that
 	 */
 	@RequestMapping("/attributeMapping")
-	public String viewAttributeMapping(@Valid RequestAttributeMapping request, Model model)
+	public String viewAttributeMapping(@RequestParam(required = true) String mappingProjectId,
+			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
+			@RequestParam(required = true) String targetAttribute,
+			@RequestParam(required = true) boolean showSuggestedAttributes, Model model)
 	{
-		MappingProject project = mappingService.getMappingProject(request.getMappingProjectId());
-		MappingTarget mappingTarget = project.getMappingTarget(request.getTarget());
-		EntityMapping entityMapping = mappingTarget.getMappingForSource(request.getSource());
-		AttributeMapping attributeMapping = entityMapping.getAttributeMapping(request.getAttribute());
+		MappingProject project = mappingService.getMappingProject(mappingProjectId);
+		MappingTarget mappingTarget = project.getMappingTarget(target);
+		EntityMapping entityMapping = mappingTarget.getMappingForSource(source);
+		AttributeMapping attributeMapping = entityMapping.getAttributeMapping(targetAttribute);
 
 		if (attributeMapping == null)
 		{
-			attributeMapping = entityMapping.addAttributeMapping(request.getAttribute());
+			attributeMapping = entityMapping.addAttributeMapping(targetAttribute);
 		}
 
-		final Iterable<AttributeMetaData> suggestedAttributes;
-		if (request.isShowSuggestedAttributes())
+		final Iterable<AttributeMetaData> attributes;
+		if (showSuggestedAttributes)
 		{
-			suggestedAttributes = semanticSearchService.findAttributes(
-					dataService.getEntityMetaData(request.getSource()),
-					dataService.getEntityMetaData(request.getTarget()),
+			attributes = semanticSearchService.findAttributes(dataService.getEntityMetaData(source),
+					dataService.getEntityMetaData(target),
 					attributeMapping.getTargetAttributeMetaData());
 		}
 		else
 		{
-			suggestedAttributes = Lists.newArrayList(dataService.getEntityMetaData(request.getSource())
+			attributes = Lists.newArrayList(dataService.getEntityMetaData(source)
 					.getAtomicAttributes());
 		}
 
-		model.addAttribute("previousRequestAttributeMapping", request);
+		model.addAttribute("showSuggestedAttributes", showSuggestedAttributes);
 		model.addAttribute("mappingProject", project);
 		model.addAttribute("entityMapping", entityMapping);
 		model.addAttribute("attributeMapping", attributeMapping);
-		model.addAttribute("suggestedAttributes", suggestedAttributes);
+		model.addAttribute("attributes", attributes);
 		model.addAttribute("hasWritePermission", hasWritePermission(project, false));
 
 		return VIEW_ATTRIBUTE_MAPPING;
