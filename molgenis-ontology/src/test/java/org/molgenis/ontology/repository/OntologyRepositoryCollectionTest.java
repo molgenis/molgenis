@@ -38,7 +38,7 @@ public class OntologyRepositoryCollectionTest
 	@BeforeClass
 	public static void beforeClass() throws FileNotFoundException, IOException, OWLOntologyCreationException
 	{
-		File file = ResourceUtils.getFile("small_test_data.owl.zip");
+		File file = ResourceUtils.getFile("small_test_data_NGtest.owl.zip");
 		OntologyRepositoryCollection collection = new OntologyRepositoryCollection(file);
 		ontologyRepository = collection.getRepository(OntologyMetaData.ENTITY_NAME);
 		ontologyTermDynamicAnnotationRepository = collection
@@ -55,7 +55,7 @@ public class OntologyRepositoryCollectionTest
 		assertTrue(i.hasNext());
 		Entity entity = i.next();
 		assertEquals(entity.get(OntologyMetaData.ONTOLOGY_IRI), "http://www.molgenis.org");
-		assertEquals(entity.get(OntologyMetaData.ONTOLOGY_NAME), "small_test_data");
+		assertEquals(entity.get(OntologyMetaData.ONTOLOGY_NAME), "small_test_data_NGtest");
 		assertFalse(i.hasNext());
 	}
 

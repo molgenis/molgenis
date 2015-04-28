@@ -5,7 +5,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.elasticsearch.common.collect.Iterables;
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -61,8 +60,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		Iterable<Entity> attributeMetaDataEntities = dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME,
 				new QueryImpl(disMaxQueryRules));
 
-		return Iterables.size(attributeMetaDataEntities) > 0 ? MetaUtils.toExistingAttributeMetaData(
-				sourceEntityMetaData, attributeMetaDataEntities) : sourceEntityMetaData.getAttributes();
+		return MetaUtils.toExistingAttributeMetaData(sourceEntityMetaData, attributeMetaDataEntities);
 	}
 
 	@Override

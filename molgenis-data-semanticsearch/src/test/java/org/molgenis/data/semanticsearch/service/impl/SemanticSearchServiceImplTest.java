@@ -152,8 +152,7 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 		Iterable<AttributeMetaData> termsActual2 = semanticSearchService.findAttributes(sourceEntityMetaData,
 				targetEntityMetaData, targetAttribute);
 
-		Iterable<AttributeMetaData> termsExpected2 = Arrays
-				.<AttributeMetaData> asList(attributeHeight, attributeWeight);
+		Iterable<AttributeMetaData> termsExpected2 = Arrays.<AttributeMetaData> asList();
 
 		assertEquals(termsActual2, termsExpected2);
 	}
