@@ -12,6 +12,8 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import javax.validation.Valid;
+
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -336,34 +338,37 @@ public class MappingServiceController extends MolgenisPluginController
 	/**
 	 * Displays an {@link AttributeMapping}
 	 * 
-	 * @param mappingProjectId
-	 *            ID of the {@link MappingProject}
-	 * @param target
-	 *            name of the target entity
-	 * @param source
-	 *            name of the source entity
-	 * @param attribute
-	 *            name of the target attribute
-	 * @param model
-	 *            the model
-	 * @return name of the attributemapping view
+	 * @param RequestAttributeMapping
+	 *            {@link RequestAttributeMapping}
 	 */
 	@RequestMapping("/attributeMapping")
-	public String viewAttributeMapping(@RequestParam String mappingProjectId, @RequestParam String target,
-			@RequestParam String source, @RequestParam String attribute, Model model)
+	public String viewAttributeMapping(@Valid RequestAttributeMapping request, Model model)
 	{
-		MappingProject project = mappingService.getMappingProject(mappingProjectId);
-		MappingTarget mappingTarget = project.getMappingTarget(target);
-		EntityMapping entityMapping = mappingTarget.getMappingForSource(source);
-		AttributeMapping attributeMapping = entityMapping.getAttributeMapping(attribute);
+		MappingProject project = mappingService.getMappingProject(request.getMappingProjectId());
+		MappingTarget mappingTarget = project.getMappingTarget(request.getTarget());
+		EntityMapping entityMapping = mappingTarget.getMappingForSource(request.getSource());
+		AttributeMapping attributeMapping = entityMapping.getAttributeMapping(request.getAttribute());
+
 		if (attributeMapping == null)
 		{
-			attributeMapping = entityMapping.addAttributeMapping(attribute);
+			attributeMapping = entityMapping.addAttributeMapping(request.getAttribute());
 		}
-		Iterable<AttributeMetaData> suggestedAttributes = semanticSearchService.findAttributes(
-				dataService.getEntityMetaData(source), dataService.getEntityMetaData(target),
-				attributeMapping.getTargetAttributeMetaData());
 
+		final Iterable<AttributeMetaData> suggestedAttributes;
+		if (request.isShowSuggestedAttributes())
+		{
+			suggestedAttributes = semanticSearchService.findAttributes(
+					dataService.getEntityMetaData(request.getSource()),
+					dataService.getEntityMetaData(request.getTarget()),
+					attributeMapping.getTargetAttributeMetaData());
+		}
+		else
+		{
+			suggestedAttributes = Lists.newArrayList(dataService.getEntityMetaData(request.getSource())
+					.getAtomicAttributes());
+		}
+
+		model.addAttribute("previousRequestAttributeMapping", request);
 		model.addAttribute("mappingProject", project);
 		model.addAttribute("entityMapping", entityMapping);
 		model.addAttribute("attributeMapping", attributeMapping);
@@ -372,6 +377,7 @@ public class MappingServiceController extends MolgenisPluginController
 
 		return VIEW_ATTRIBUTE_MAPPING;
 	}
+
 
 	/**
 	 * Tests an algoritm by computing it for all entities in the source repository.

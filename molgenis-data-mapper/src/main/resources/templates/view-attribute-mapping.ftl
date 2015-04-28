@@ -23,7 +23,36 @@
 </div>
 <div class="row">
 	<div class="col-md-6">
-		<h5>Source attributes</h5>
+		<div class="pull-left">
+			<#if requestAttributeMapping.showSuggestedAttributes?c == "true">
+				<h5>Source Attributes suggested by semantic search</h5>
+			<#else>
+				<h5>Source all attributes</h5>
+			</#if>
+		</div>
+		<div class="pull-right">
+			<form method="get" action="${context_url}/attributeMapping">
+				<input type="hidden" name="mappingProjectId" value="${requestAttributeMapping.mappingProjectId}"/>
+				<input type="hidden" name="target" value="${requestAttributeMapping.target}"/>
+				<input type="hidden" name="source" value="${requestAttributeMapping.source}"/>
+				<input type="hidden" name="attribute" value="${requestAttributeMapping.attribute}"/>
+				<div class="btn-group" role="group">
+					<button id="reload-attribute-mapping-table" type="submit" class="btn btn-default" name="showSuggestedAttributes" value="${requestAttributeMapping.showSuggestedAttributes?string("false", "true")}">
+						<#if requestAttributeMapping.showSuggestedAttributes?c == "true">
+							Show all attributes
+						<#else>
+							Show only attributes suggested by semantic search
+						</#if>
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+	<div class="col-md-6">
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-6">
 		<div id="attribute-table-container" >
 				<table id="attribute-mapping-table" class="table table-bordered scroll">
 					<thead>
@@ -70,10 +99,8 @@
 			<#if hasWritePermission>
 				<button type="submit" class="btn btn-primary">Save</button> 
 				<button type="reset" class="btn btn-warning">Reset</button>
-		        <button type="button" class="btn btn-default" onclick="window.history.back()">Cancel</button>
-		    <#else>
-		    	<button type="button" class="btn btn-primary" onclick="window.history.back()">Back</button>
-	        </#if>
+			</#if>
+			<a class="btn btn-primary" href="${context_url}/mappingproject/${mappingProject.identifier}">Back to project</a>
 		</form>
 	</div>
 </div>
