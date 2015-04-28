@@ -15,7 +15,6 @@ function($, molgenis, settingsXhr) {
     self.getChromosomeAttribute = getChromosomeAttribute;
     self.getIdentifierAttribute = getIdentifierAttribute;
     self.getPatientAttribute = getPatientAttribute;
-    self.getAttributeFilters = getAttributeFilters;
 
     var restApi = new molgenis.RestClient();
 	var selectedEntityMetaData = null;
@@ -59,13 +58,6 @@ function($, molgenis, settingsXhr) {
 		return selectedAttributes;
 	}
 
-    /**
-     * @memberOf molgenis.dataexplorer
-     */
-    function getAttributeFilters() {
-        return attributeFilters;
-    }
-	
 	/**
 	 * @memberOf molgenis.dataexplorer
 	 */

@@ -100,9 +100,9 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String KEY_MOD_AGGREGATES_DISTINCT_HIDE = KEY_MOD_AGGREGATES + ".distinct.hide";
 	public static final String KEY_MOD_AGGREGATES_DISTINCT_OVERRIDE = KEY_MOD_AGGREGATES + ".distinct.override";
 	public static final String KEY_MOD_ENTITIESREPORT = "plugin.dataexplorer.mod.entitiesreport";
-    public static final String KEY_DATATABLE = "plugin.dataexplorer.table.javascript";
-    private static final String DEFAULT_VAL_DATATABLE = "jquery.molgenis.table.js";
-    private static final boolean DEFAULT_VAL_MOD_AGGREGATES = true;
+	public static final String KEY_DATATABLE = "plugin.dataexplorer.table.javascript";
+	private static final String DEFAULT_VAL_DATATABLE = "jquery.molgenis.table.js";
+	private static final boolean DEFAULT_VAL_MOD_AGGREGATES = true;
 	private static final boolean DEFAULT_VAL_MOD_ANNOTATORS = false;
 	private static final boolean DEFAULT_VAL_MOD_CHARTS = true;
 	private static final boolean DEFAULT_VAL_MOD_DATA = true;
@@ -161,7 +161,8 @@ public class DataExplorerController extends MolgenisPluginController
 	 * @return the view name
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(value = "entity", required = false) String selectedEntityName, Model model) throws Exception
+	public String init(@RequestParam(value = "entity", required = false) String selectedEntityName, Model model)
+			throws Exception
 	{
 		boolean entityExists = false;
 		boolean hasEntityPermission = false;
@@ -204,7 +205,7 @@ public class DataExplorerController extends MolgenisPluginController
 		model.addAttribute("hideDataItemSelect", molgenisSettings.getBooleanProperty(KEY_HIDE_ITEM_SELECTION, false));
 		model.addAttribute("isAdmin", SecurityUtils.currentUserIsSu());
 
-        return "view-dataexplorer";
+		return "view-dataexplorer";
 	}
 
 	@RequestMapping(value = "/module/{moduleId}", method = GET)
@@ -215,6 +216,7 @@ public class DataExplorerController extends MolgenisPluginController
 		{
 			// Init genome browser
 			model.addAttribute("genomeEntities", getGenomeBrowserEntities());
+
 			model.addAttribute("initLocation", molgenisSettings.getProperty(INITLOCATION));
 			model.addAttribute("coordSystem", molgenisSettings.getProperty(COORDSYSTEM));
 			model.addAttribute("chains", molgenisSettings.getProperty(CHAINS));
@@ -222,6 +224,7 @@ public class DataExplorerController extends MolgenisPluginController
 			model.addAttribute("browserLinks", molgenisSettings.getProperty(BROWSERLINKS));
 			model.addAttribute("showHighlight", String.valueOf(molgenisSettings.getBooleanProperty(HIGHLIGHTREGION,
 					DEFAULT_VAL_KEY_HIGLIGHTREGION)));
+
 			model.addAttribute("genomebrowser_start_list",
 					molgenisSettings.getProperty(GenomeConfig.GENOMEBROWSER_POS, "POS"));
 			model.addAttribute("genomebrowser_chrom_list",
@@ -233,19 +236,20 @@ public class DataExplorerController extends MolgenisPluginController
 			model.addAttribute("genomebrowser_patient_list",
 					molgenisSettings.getProperty(GenomeConfig.GENOMEBROWSER_PATIENT_ID, "patient_id"));
 
-            //Galaxy properties
-            model.addAttribute("galaxyEnabled",
+			// Galaxy properties
+			model.addAttribute("galaxyEnabled",
 					molgenisSettings.getBooleanProperty(KEY_GALAXY_ENABLED, DEFAULT_VAL_GALAXY_ENABLED));
 			String galaxyUrl = molgenisSettings.getProperty(KEY_GALAXY_URL);
 			if (galaxyUrl != null) model.addAttribute(ATTR_GALAXY_URL, galaxyUrl);
 
-            //Custom report options
-            model.addAttribute("rowClickable", isRowClickable());
-            model.addAttribute("tableEditable", isTableEditable());
+			// Custom report options
+			model.addAttribute("rowClickable", isRowClickable());
+			model.addAttribute("tableEditable", isTableEditable());
 
-            //specific table for entity
-            model.addAttribute("dataTable",parseEntitySepecificRuntimeProperty(entityName, KEY_DATATABLE, DEFAULT_VAL_DATATABLE));
-        }
+			// specific table for entity
+			model.addAttribute("dataTable",
+					parseEntitySpecificRuntimeProperty(entityName, KEY_DATATABLE, DEFAULT_VAL_DATATABLE));
+		}
 		else if (moduleId.equals("diseasematcher"))
 		{
 			model.addAttribute("tableEditable", isTableEditable());
@@ -253,8 +257,8 @@ public class DataExplorerController extends MolgenisPluginController
 		}
 		else if (moduleId.equals("entitiesreport"))
 		{
-            model.addAttribute("datasetRepository", dataService.getRepository(entityName));
-			model.addAttribute("viewName", parseEntitySepecificRuntimeProperty(entityName, KEY_MOD_ENTITIESREPORT, null));
+			model.addAttribute("datasetRepository", dataService.getRepository(entityName));
+			model.addAttribute("viewName", parseEntitySpecificRuntimeProperty(entityName, KEY_MOD_ENTITIESREPORT, null));
 		}
 		return "view-dataexplorer-mod-" + moduleId; // TODO bad request in case of invalid module id
 	}
@@ -282,7 +286,7 @@ public class DataExplorerController extends MolgenisPluginController
 			modAggregates = dataService.getCapabilities(entityName).contains(RepositoryCapability.AGGREGATEABLE);
 		}
 
-		String modEntitiesReportName = parseEntitySepecificRuntimeProperty(entityName, KEY_MOD_ENTITIESREPORT, null);
+		String modEntitiesReportName = parseEntitySpecificRuntimeProperty(entityName, KEY_MOD_ENTITIESREPORT, null);
 
 		// set data explorer permission
 		Permission pluginPermission = null;
@@ -623,21 +627,22 @@ public class DataExplorerController extends MolgenisPluginController
 
 	private String getViewName(String entityName)
 	{
-		//first we check if there are any RuntimeProperty mappings of entity to report template
+		// first we check if there are any RuntimeProperty mappings of entity to report template
 		String rtName = "plugin.dataexplorer.mod.entitiesreport";
 		Entity rt = dataService.getRepository("RuntimeProperty").findOne(new QueryImpl().eq("Name", rtName));
-		if(rt != null){
+		if (rt != null)
+		{
 			String entityMapping = rt.get("Value").toString();
 			String[] mappingSplit = entityMapping.split(",", -1);
-			for(String mapping : mappingSplit)
+			for (String mapping : mappingSplit)
 			{
 				String[] valSplit = mapping.split(":", -1);
-				if(valSplit.length == 2)
+				if (valSplit.length == 2)
 				{
 					String entity = valSplit[0];
 					String reportTemplate = valSplit[1];
-					//if found, match to the current selected entity and return the associated template
-					if(entity.equals(entityName))
+					// if found, match to the current selected entity and return the associated template
+					if (entity.equals(entityName))
 					{
 						final String specificViewname = "view-entityreport-specific-" + reportTemplate;
 						if (viewExists(specificViewname))
@@ -646,13 +651,14 @@ public class DataExplorerController extends MolgenisPluginController
 						}
 					}
 				}
-				else{
-					LOG.error("Bad runtime entity "+rtName+" mapping: " + mapping);
+				else
+				{
+					LOG.error("Bad runtime entity " + rtName + " mapping: " + mapping);
 				}
 			}
 		}
 
-		//if there are no RuntimeProperty mappings, execute existing behaviour
+		// if there are no RuntimeProperty mappings, execute existing behaviour
 		final String specificViewname = "view-entityreport-specific-" + entityName;
 		if (viewExists(specificViewname))
 		{
@@ -718,7 +724,7 @@ public class DataExplorerController extends MolgenisPluginController
 				DEFAULT_VAL_DATAEXPLORER_ROW_CLICKABLE);
 	}
 
-	private String parseEntitySepecificRuntimeProperty(String entityName, String property, String defaultValue)
+	private String parseEntitySpecificRuntimeProperty(String entityName, String property, String defaultValue)
 	{
 		String modEntitiesReportRTP = molgenisSettings.getProperty(property, null);
 		if (modEntitiesReportRTP != null)
