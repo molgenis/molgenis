@@ -18,7 +18,6 @@
             formLayout: React.PropTypes.oneOf(['horizontal', 'vertical']),
             mode: React.PropTypes.oneOf(['create', 'edit', 'view']),
             colOffset: React.PropTypes.number,
-            errorMessage: React.PropTypes.string,
             focus: React.PropTypes.bool,
             value: React.PropTypes.any,
             errorMessage: React.PropTypes.string,
