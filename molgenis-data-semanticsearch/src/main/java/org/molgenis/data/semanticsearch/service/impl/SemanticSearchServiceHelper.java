@@ -10,7 +10,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.common.collect.Sets;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -22,6 +21,7 @@ import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.semantic.Relation;
+import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
@@ -30,6 +30,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
 @Component
@@ -94,7 +95,7 @@ public class SemanticSearchServiceHelper
 			QueryRule disMaxQuery = new QueryRule(new ArrayList<QueryRule>());
 			disMaxQuery.setOperator(Operator.DIS_MAX);
 
-			Set<String> synonyms = Sets.newHashSet(ontologyTerm.getSynonyms());
+			List<String> synonyms = Lists.newArrayList(ontologyTerm.getSynonyms());
 			synonyms.add(ontologyTerm.getLabel());
 			for (String synonym : synonyms)
 			{
@@ -119,11 +120,10 @@ public class SemanticSearchServiceHelper
 		if (entityMetaDataEntity == null) throw new MolgenisDataAccessException(
 				"Could not find EntityMetaDataEntity by the name of " + sourceEntityMetaData.getName());
 
-		return FluentIterable
-				.from(
-				entityMetaDataEntity.getEntities(EntityMetaDataMetaData.ATTRIBUTES)).transform(
-				new Function<Entity, String>()
+		return FluentIterable.from(entityMetaDataEntity.getEntities(EntityMetaDataMetaData.ATTRIBUTES))
+				.transform(new Function<Entity, String>()
 				{
+					@Override
 					public String apply(Entity attributeEntity)
 					{
 						return attributeEntity.getString(AttributeMetaDataMetaData.IDENTIFIER);
@@ -131,10 +131,11 @@ public class SemanticSearchServiceHelper
 				}).toList();
 	}
 
-	public List<OntologyTerm> findTagsSync(String description, List<String> ontologyIds)
+	public List<OntologyTerm> findTags(String description, List<String> ontologyIds)
 	{
-		Set<String> searchTerms = stream(description.split("[^a-zA-Z_0-9']+")).map(String::toLowerCase)
-				.filter(w -> !STOP_WORDS.contains(w)).collect(Collectors.toSet());
+		String regex = "[^\\p{L}']+";
+		Set<String> searchTerms = stream(description.split(regex)).map(String::toLowerCase)
+				.filter(w -> !STOP_WORDS.contains(w) && StringUtils.isNotEmpty(w)).collect(Collectors.toSet());
 
 		List<OntologyTerm> matchingOntologyTerms = ontologyService.findOntologyTerms(ontologyIds, searchTerms, 100);
 
