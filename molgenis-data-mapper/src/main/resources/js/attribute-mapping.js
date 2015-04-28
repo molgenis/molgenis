@@ -156,6 +156,7 @@
 	            if (result) {
 	                editor.setValue(initialValue, -1);
 	                updateCheckboxes(initialValue);
+	                $('#statistics-container').empty();
 	            }
 	        });
 			return false;
