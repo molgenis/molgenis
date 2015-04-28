@@ -475,20 +475,13 @@
 	};
 
     function endsWith(str, suffix) {
-        console.log("TESTTESTTESTTESTTESTTEST");
         return str.indexOf(suffix, str.length - suffix.length) !== -1;
     }
 
     var container = $('#feature-selection');
     var fancy = $('.molgenis-tree', container).fancytree("getTree");
-    $(fancy.getNodeByKey("/api/v1/Patients/meta/cDNA%20change%202").li).hide();
-    $(fancy.getNodeByKey("/api/v1/Patients/meta/Protein%20change%202").li).hide();
-    $(fancy.getNodeByKey("/api/v1/Patients/meta/Exon%2FIntron%202").li).hide();
-    $(fancy.getNodeByKey("/api/v1/Patients/meta/Consequence%202").li).hide();
-
-    fancy.getNodeByKey("/api/v1/Patients/meta/cDNA%20change%201").setTitle("cDNA change");
-    fancy.getNodeByKey("/api/v1/Patients/meta/Protein%20change%201").setTitle("Protein change");
-    fancy.getNodeByKey("/api/v1/Patients/meta/Exon%2FIntron%201").setTitle("Exon Intron");
-    fancy.getNodeByKey("/api/v1/Patients/meta/Consequence%201").setTitle("Consequence");
-
+    $(fancy.getNodeByKey("/api/v1/Patients/meta/cDNA%20change%202").li.getElementsByClassName("fancytree-checkbox"))[0].outerHTML = "<span>&nbsp&nbsp&nbsp&nbsp&nbsp</span>";
+    $(fancy.getNodeByKey("/api/v1/Patients/meta/Protein%20change%202").li.getElementsByClassName("fancytree-checkbox"))[0].outerHTML = "<span>&nbsp&nbsp&nbsp&nbsp&nbsp</span>";
+    $(fancy.getNodeByKey("/api/v1/Patients/meta/Exon%2FIntron%202").li.getElementsByClassName("fancytree-checkbox"))[0].outerHTML = "<span>&nbsp&nbsp&nbsp&nbsp&nbsp</span>";
+    $(fancy.getNodeByKey("/api/v1/Patients/meta/Consequence%202").li.getElementsByClassName("fancytree-checkbox"))[0].outerHTML = "<span>&nbsp&nbsp&nbsp&nbsp&nbsp</span>";
 }($, window.top.molgenis = window.top.molgenis || {}));
