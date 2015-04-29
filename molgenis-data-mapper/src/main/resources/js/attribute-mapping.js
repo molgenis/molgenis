@@ -148,7 +148,7 @@
 			return false;
 		});
 
-		$('form').on('reset', function() {
+		$('#saveattributemapping-form').on('reset', function() {
 			if(editor.getValue() === initialValue){
 				return false;
 			}
