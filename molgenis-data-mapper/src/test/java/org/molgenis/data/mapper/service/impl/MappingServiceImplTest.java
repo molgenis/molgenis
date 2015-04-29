@@ -1,4 +1,4 @@
-package org.molgenis.data.mapper.mapping;
+package org.molgenis.data.mapper.service.impl;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -33,6 +33,7 @@ import org.molgenis.data.mem.InMemoryRepositoryCollection;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.PackageImpl;
+import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -259,6 +260,12 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		IdGenerator idGenerator()
 		{
 			return new UuidGenerator();
+		}
+
+		@Bean
+		SemanticSearchService semanticSearchService()
+		{
+			return mock(SemanticSearchService.class);
 		}
 
 		@PostConstruct

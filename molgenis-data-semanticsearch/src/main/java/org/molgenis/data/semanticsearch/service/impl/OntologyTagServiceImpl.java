@@ -29,34 +29,35 @@ import org.molgenis.data.semantic.Tag;
 import org.molgenis.data.semantic.TagImpl;
 import org.molgenis.data.semanticsearch.repository.TagRepository;
 import org.molgenis.data.semanticsearch.semantic.OntologyTag;
-import org.molgenis.data.semanticsearch.service.TagService;
+import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
 /**
  * Service to tag metadata with ontology terms.
  */
-public class OntologyTagService implements TagService<OntologyTerm, Ontology>
+public class OntologyTagServiceImpl implements OntologyTagService
 {
 	private final DataService dataService;
 	private final TagRepository tagRepository;
 	private final OntologyService ontologyService;
 	private final IdGenerator idGenerator;
 
-	private static final Logger LOG = LoggerFactory.getLogger(OntologyTagService.class);
+	private static final Logger LOG = LoggerFactory.getLogger(OntologyTagServiceImpl.class);
 
-	public OntologyTagService(DataService dataService, OntologyService ontologyService, TagRepository tagRepository,
-			IdGenerator idGenerator)
+	public OntologyTagServiceImpl(DataService dataService, OntologyService ontologyService,
+			TagRepository tagRepository, IdGenerator idGenerator)
 	{
 		this.dataService = dataService;
 		this.tagRepository = tagRepository;
@@ -64,6 +65,7 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 		this.idGenerator = idGenerator;
 	}
 
+	@Override
 	public void removeAttributeTag(String entity, String attribute, String relationIRI, String ontologyTermIRI)
 	{
 		Entity attributeEntity = findAttributeEntity(entity, attribute);
@@ -94,10 +96,11 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 	}
 
 	@Override
+	@RunAsSystem
 	public Multimap<Relation, OntologyTerm> getTagsForAttribute(EntityMetaData entityMetaData,
 			AttributeMetaData attributeMetaData)
 	{
-		Multimap<Relation, OntologyTerm> tags = ArrayListMultimap.<Relation, OntologyTerm> create();
+		Multimap<Relation, OntologyTerm> tags = LinkedHashMultimap.<Relation, OntologyTerm> create();
 		Entity entity = findAttributeEntity(entityMetaData.getName(), attributeMetaData.getName());
 		if (entity == null)
 		{
@@ -146,6 +149,7 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 		dataService.update(AttributeMetaDataMetaData.ENTITY_NAME, entity);
 	}
 
+	@Override
 	public OntologyTag addAttributeTag(String entity, String attribute, String relationIRI,
 			List<String> ontologyTermIRIs)
 	{
@@ -190,6 +194,7 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 		}
 	}
 
+	@Override
 	public Map<String, List<OntologyTag>> tagAttributesInEntity(String entity,
 			Map<AttributeMetaData, List<OntologyTerm>> tags)
 	{
@@ -262,6 +267,7 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 				&& relationIRI.equals(e.getString(TagMetaData.RELATION_IRI));
 	}
 
+	@RunAsSystem
 	private Entity findAttributeEntity(String entityName, String attributeName)
 	{
 		Entity entityMetaDataEntity = dataService.findOne(ENTITY_NAME, entityName);
