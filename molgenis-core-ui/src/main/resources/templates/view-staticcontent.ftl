@@ -4,7 +4,7 @@
 <div id="table-container" />
 <script>
     React.render(molgenis.ui.Table({
-        entity: '/api/v1/org_molgenis_test_TypeTest/meta',
+        entity: '/api/v1/Entity/meta',
     }), $('#table-container')[0]);
 </script>
 <@footer/>

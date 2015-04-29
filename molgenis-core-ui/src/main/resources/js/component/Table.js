@@ -27,9 +27,6 @@
 				this._loadAttrs(this.props.attrs ? this.props.attrs : entity.attributes);
 			}.bind(this));
 		},
-		componentWillUpdate: function() {
-			
-		},
 		render: function() {
 			if(this.state.entity === null || this.state.attrs === null) {
 				return molgenis.ui.Spinner(); // entity not available yet
@@ -66,57 +63,25 @@
 		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
 		displayName: 'TableData',
 		propTypes: {
-			entity: React.PropTypes.object.isRequired,
-			attrs: React.PropTypes.arrayOf(React.PropTypes.object)
+			entity: React.PropTypes.object.isRequired
 		},
 		getInitialState: function() {
+			// TODO add attr path to attrs
 			return {
-				expands: {}
+				entity: this.props.entity
 			};
 		},
 		render: function() {
-			var headers = [];
-			for(var i = 0; i < this.props.attrs.length; ++i) {
-				var attr = this.props.attrs[i];
-				headers.push({
-					id: [this.props.entity.name],
-					label: attr.label,
-					canSort: true,
-					canExpand: attr.refEntity !== undefined,
-					headers : attr.refEntity !== undefined ? [ {
-						id : [ 'attr0' ],
-						label : 'attr0',
-						canSort : false,
-						canExpand : false
-					}, {
-						id : [ 'attr1' ],
-						label : 'attr1',
-						canSort : false,
-						canExpand : true,
-						headers : [ {
-							id : [ 'attr10' ],
-							label : 'attr10',
-							canSort : false,
-							canExpand : false
-						}, {
-							id : [ 'attr11' ],
-							label : 'attr11',
-							canSort : false,
-							canExpand : false
-						} ]
-					} ] : undefined
-				});
-			}
 			// table header
 			var TableHeader = TableHeaderFactory({
-				headers: headers,
+				entity: this.state.entity,
 				onSort: this._handleSort,
 				onExpand: this._handleExpand
 			});
 			
 			// table body
 			var TableBody = TableBodyFactory({
-				entity : this.props.entity
+				entity : this.state.entity
 			});
 			
 			return (
@@ -130,8 +95,23 @@
 			console.log(e);
 		},
 		_handleExpand: function(e) {
-			console.log(e);
-		}
+			if(e.expand) {
+				api.getAsync(e.attr.refEntity.href, {'expand': ['attributes']}).done(function(entity) {
+					if (this.isMounted()) {
+						e.attr.refEntity = entity;
+						console.log(this.state.entity);
+						this.forceUpdate();
+					}
+				}.bind(this));
+			} else {
+				delete e.attr.refEntity.attributes;
+			}
+			console.log(e.attr);
+			// load/remove extra attributes 
+		},
+		_loadEntity: function(href, callback) {
+						
+		},
 	});
 	var TableDataFactory = React.createFactory(TableData);
 	
@@ -142,7 +122,7 @@
 		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
 		displayName: 'TableHeader',
 		propTypes: {
-			headers: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
+			entity: React.PropTypes.object.isRequired,
 			onSort: React.PropTypes.func,
 			onExpand: React.PropTypes.func,
 		},
@@ -154,10 +134,11 @@
 		},
 		render: function() {
 			var TableHeaderRows = [];
-			var depth = 0, headers;
-			while((headers = this._getHeadersAtDepth(this.props.headers, depth)) !== null) {
+			var depth = 0, attrs;
+			while((attrs = this._getAttrsAtDepth(this.props.entity.attributes, depth)) !== null) {
 				var TableHeaderRow = TableHeaderRowFactory({
-					headers: headers,
+					attrs: attrs,
+					canSort: depth === 0,
 					onSort: this.props.onSort,
 					onExpand: this.props.onExpand,
 					key: '' + depth
@@ -172,17 +153,16 @@
 				)
 			);
 		},
-		_getHeadersAtDepth: function(headers, depth) {
+		_getAttrsAtDepth: function(attrs, depth) {
 			if(depth === 0) {
-				return headers;
+				return _.map(attrs, function(attr) {
+					return attr;
+				}); // TODO attrs : molgenis.getAtomicAttributes(attrs, api)
 			} else {
-				var headersAtDepth = _.flatten(_.map(headers, function(header) {
-					return header.headers ? this._getHeadersAtDepth(header.headers, depth - 1) : null;
+				var attrsAtDepth = _.flatten(_.map(attrs, function(attr) {
+					return attr.refEntity && attr.refEntity.attributes ? this._getAttrsAtDepth(attr.refEntity.attributes, depth - 1) : null;
 				}.bind(this)));
-				if(_.every(headersAtDepth, function(e) {return e === null;})) {
-					headersAtDepth = null;
-				}
-				return headersAtDepth;
+				return _.some(attrsAtDepth, function(e) {return e !== null;}) ? attrsAtDepth : null;
 			}
 		},
 	});
@@ -195,33 +175,34 @@
 		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
 		displayName: 'TableHeaderRow',
 		propTypes: {
-			headers: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
+			attrs: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
+			canSort: React.PropTypes.bool,
 			onSort: React.PropTypes.func,
 			onExpand: React.PropTypes.func,
 		},
 		render: function() {
 			var TableHeaderCols = [];
-			for(var i = 0; i < this.props.headers.length; ++i) {
-				var header = this.props.headers[i];
-				if(header === null) {
+			for(var i = 0; i < this.props.attrs.length; ++i) {
+				var attr = this.props.attrs[i];
+				if(attr === null) {
 					TableHeaderCols.push(th({key: '' + i}));
 				} else {
 					// create header column
 					var TableHeaderCol = TableHeaderColFactory({
-						label : header.label,
-						colSpan: this._getColSpan(header),
-						canSort : header.canSort,
-						canExpand: header.canExpand,
+						label : attr.label,
+						colSpan: this._getColSpan(attr),
+						canSort : this.props.canSort,
+						canExpand: attr.fieldType === 'XREF', // TODO other ref types
 						onExpand: function(props) {
 							this.onExpand(_.extend({}, props, {
-								id: this.id
+								attr: attr
 							}));
-						}.bind({onExpand: this.props.onExpand, id: header.id}),
+						}.bind({onExpand: this.props.onExpand, attr: attr}),
 						onSort: function(props) {
 							this.onSort(_.extend({}, props, {
-								id: this.id
+								attr: attr
 							}));
-						}.bind({onSort: this.props.onSort, id: header.id}),
+						}.bind({onSort: this.props.onSort, attr: attr}),
 						key: '' + i
 					});
 					TableHeaderCols.push(TableHeaderCol);
@@ -234,11 +215,13 @@
 				)
 			);
 		},
-		_getColSpan: function(header) {
- 			if(header.headers) {
- 				var colSpan = 0;
- 				for(var i = 0; i < header.headers.length; ++i) {
- 					colSpan += this._getColSpan(header.headers[i]);
+		_getColSpan: function(attr) {
+ 			if(attr.refEntity && attr.refEntity.attributes) {
+ 				var colSpan = 0, attrs = attr.refEntity.attributes;
+ 				for(var key in attrs) {
+ 					if(attrs.hasOwnProperty(key)) {
+ 						colSpan += this._getColSpan(attrs[key]);	
+ 					}
  				}
  				return colSpan;
  			} else {
