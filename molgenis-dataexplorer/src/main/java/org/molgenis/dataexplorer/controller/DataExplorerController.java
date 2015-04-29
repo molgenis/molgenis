@@ -44,6 +44,7 @@ import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.ui.MolgenisInterceptor;
 import org.molgenis.ui.menu.Menu;
@@ -160,7 +161,8 @@ public class DataExplorerController extends MolgenisPluginController
 	 * @return the view name
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(value = "entity", required = false) String selectedEntityName, Model model) throws Exception
+	public String init(@RequestParam(value = "entity", required = false) String selectedEntityName, Model model)
+			throws Exception
 	{
 		boolean entityExists = false;
 		boolean hasEntityPermission = false;
@@ -248,7 +250,7 @@ public class DataExplorerController extends MolgenisPluginController
 		}
 		else if (moduleId.equals("entitiesreport"))
 		{
-            model.addAttribute("datasetRepository", dataService.getRepository(entityName));
+			model.addAttribute("datasetRepository", dataService.getRepository(entityName));
 			model.addAttribute("viewName", parseEntitiesReportRuntimeProperty(entityName));
 		}
 		return "view-dataexplorer-mod-" + moduleId; // TODO bad request in case of invalid module id
@@ -612,27 +614,28 @@ public class DataExplorerController extends MolgenisPluginController
 	{
 		model.addAttribute("entity", dataService.getRepository(entityName).findOne(entityId));
 		model.addAttribute("entityMetadata", dataService.getEntityMetaData(entityName));
-		model.addAttribute("viewName", getViewName(entityName));
+		RunAsSystemProxy.runAsSystem(() -> model.addAttribute("viewName", getViewName(entityName)));
 		return "view-entityreport";
 	}
 
 	private String getViewName(String entityName)
 	{
-		//first we check if there are any RuntimeProperty mappings of entity to report template
+		// first we check if there are any RuntimeProperty mappings of entity to report template
 		String rtName = "plugin.dataexplorer.mod.entitiesreport";
 		Entity rt = dataService.getRepository("RuntimeProperty").findOne(new QueryImpl().eq("Name", rtName));
-		if(rt != null){
+		if (rt != null)
+		{
 			String entityMapping = rt.get("Value").toString();
 			String[] mappingSplit = entityMapping.split(",", -1);
-			for(String mapping : mappingSplit)
+			for (String mapping : mappingSplit)
 			{
 				String[] valSplit = mapping.split(":", -1);
-				if(valSplit.length == 2)
+				if (valSplit.length == 2)
 				{
 					String entity = valSplit[0];
 					String reportTemplate = valSplit[1];
-					//if found, match to the current selected entity and return the associated template
-					if(entity.equals(entityName))
+					// if found, match to the current selected entity and return the associated template
+					if (entity.equals(entityName))
 					{
 						final String specificViewname = "view-entityreport-specific-" + reportTemplate;
 						if (viewExists(specificViewname))
@@ -641,13 +644,14 @@ public class DataExplorerController extends MolgenisPluginController
 						}
 					}
 				}
-				else{
-					LOG.error("Bad runtime entity "+rtName+" mapping: " + mapping);
+				else
+				{
+					LOG.error("Bad runtime entity " + rtName + " mapping: " + mapping);
 				}
 			}
 		}
 
-		//if there are no RuntimeProperty mappings, execute existing behaviour
+		// if there are no RuntimeProperty mappings, execute existing behaviour
 		final String specificViewname = "view-entityreport-specific-" + entityName;
 		if (viewExists(specificViewname))
 		{
