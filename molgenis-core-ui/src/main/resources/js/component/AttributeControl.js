@@ -243,6 +243,10 @@
 			}
 		},
 		_idValueToEntity: function(id) {
+			if (id === null || id === undefined) {
+				return undefined;// N/A selected
+			}
+			
 			var entity = {};
 			entity[this.state.attr.refEntity.idAttribute] = id;
 			entity[this.state.attr.refEntity.labelAttribute] = _.find(this.state.options, function(option) {

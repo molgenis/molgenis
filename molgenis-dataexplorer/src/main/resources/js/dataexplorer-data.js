@@ -92,7 +92,8 @@
 			query : {
 				rules : [entityQuery.q]
 			},
-			colNames : $('input[name=colNames]:checked').val()
+			colNames : $('input[name=colNames]:checked').val(),
+			downloadType : $('input[name=downloadTypes]:checked').val()
 		};
 
 		dataRequest.query.sort = $('#data-table-container').table('getSort');
@@ -102,8 +103,6 @@
 		$.each(colAttributes, function() {
 			var feature = this;
 			dataRequest.attributeNames.push(feature.name);
-			if (feature.fieldType === 'XREF' || feature.fieldType === 'MREF' || feature.fieldType === 'CATEGORICAL' || feature.fieldType === 'CATEGORICAL_MREF')
-				dataRequest.attributeNames.push("key-" + feature.name);
 		});
 
 		return dataRequest;
