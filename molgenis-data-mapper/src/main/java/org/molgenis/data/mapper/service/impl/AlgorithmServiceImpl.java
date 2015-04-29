@@ -57,10 +57,44 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		if (Iterables.size(matches) == 1)
 		{
 			AttributeMetaData source = matches.iterator().next();
-			AttributeMapping attributeMapping = mapping.addAttributeMapping(targetAttribute.getName());
-			String algorithm = "$('" + source.getName() + "');";
-			attributeMapping.setAlgorithm(algorithm);
-			LOG.info("Creating attribute mapping: " + targetAttribute.getName() + " = " + algorithm);
+			FieldTypeEnum dataType = targetAttribute.getDataType().getEnumType();
+			String algorithm = null;
+			switch (dataType)
+			{
+				case DATE:
+				case DATE_TIME:
+					algorithm = "$('" + source.getName() + "').age().value();";
+				case DECIMAL:
+				case INT:
+				case LONG:
+					algorithm = "$('" + source.getName() + "').value();";
+					// Unit conversion should happen here
+				case BOOL:
+				case CATEGORICAL:
+				case XREF:
+				case MREF:
+				case CATEGORICAL_MREF:
+					break;
+				case COMPOUND:
+				case EMAIL:
+				case ENUM:
+				case FILE:
+				case HTML:
+				case HYPERLINK:
+				case IMAGE:
+				case SCRIPT:
+				case STRING:
+				case TEXT:
+					algorithm = "$('" + source.getName() + "').value();";
+				default:
+					throw new RuntimeException("Unknown data type [" + dataType + "]");
+			}
+			if (StringUtils.isNotEmpty(algorithm))
+			{
+				AttributeMapping attributeMapping = mapping.addAttributeMapping(targetAttribute.getName());
+				attributeMapping.setAlgorithm(algorithm);
+				LOG.info("Creating attribute mapping: " + targetAttribute.getName() + " = " + algorithm);
+			}
 		}
 	}
 
