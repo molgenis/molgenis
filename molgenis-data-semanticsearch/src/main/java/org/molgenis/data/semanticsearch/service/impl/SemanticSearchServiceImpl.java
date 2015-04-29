@@ -5,7 +5,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.elasticsearch.common.collect.Iterables;
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -16,6 +15,7 @@ import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaUtils;
+import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.model.OntologyTerm;
@@ -46,8 +46,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		Iterable<String> attributeIdentifiers = semanticSearchServiceHelper
 				.getAttributeIdentifiers(sourceEntityMetaData);
 
-		QueryRule createDisMaxQueryRule = semanticSearchServiceHelper.createDisMaxQueryRule(
-				targetEntityMetaData, targetAttribute);
+		QueryRule createDisMaxQueryRule = semanticSearchServiceHelper.createDisMaxQueryRule(targetEntityMetaData,
+				targetAttribute);
 
 		List<QueryRule> disMaxQueryRules = Lists.newArrayList(new QueryRule(AttributeMetaDataMetaData.IDENTIFIER,
 				Operator.IN, attributeIdentifiers));
@@ -60,8 +60,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		Iterable<Entity> attributeMetaDataEntities = dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME,
 				new QueryImpl(disMaxQueryRules));
 
-		return Iterables.size(attributeMetaDataEntities) > 0 ? MetaUtils.toExistingAttributeMetaData(
-				sourceEntityMetaData, attributeMetaDataEntities) : sourceEntityMetaData.getAttributes();
+		return MetaUtils.toExistingAttributeMetaData(sourceEntityMetaData, attributeMetaDataEntities);
 	}
 
 	@Override

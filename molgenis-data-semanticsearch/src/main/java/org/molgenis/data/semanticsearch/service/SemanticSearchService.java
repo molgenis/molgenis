@@ -11,7 +11,7 @@ import org.molgenis.ontology.core.model.OntologyTerm;
 public interface SemanticSearchService
 {
 	/**
-	 * Find all relevant attributes from specified Entity source
+	 * Find all relevant source attributes for the specified target attribute
 	 * 
 	 * @param source
 	 * @param target

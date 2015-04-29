@@ -148,7 +148,7 @@
 			return false;
 		});
 
-		$('form').on('reset', function() {
+		$('#saveattributemapping-form').on('reset', function() {
 			if(editor.getValue() === initialValue){
 				return false;
 			}
@@ -156,6 +156,7 @@
 	            if (result) {
 	                editor.setValue(initialValue, -1);
 	                updateCheckboxes(initialValue);
+	                $('#statistics-container').empty();
 	            }
 	        });
 			return false;

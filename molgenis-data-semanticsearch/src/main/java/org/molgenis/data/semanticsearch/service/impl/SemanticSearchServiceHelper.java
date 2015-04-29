@@ -21,6 +21,7 @@ import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.semantic.Relation;
+import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
@@ -180,6 +181,7 @@ public class SemanticSearchServiceHelper
 		return FluentIterable.from(entityMetaDataEntity.getEntities(EntityMetaDataMetaData.ATTRIBUTES))
 				.transform(new Function<Entity, String>()
 				{
+					@Override
 					public String apply(Entity attributeEntity)
 					{
 						return attributeEntity.getString(AttributeMetaDataMetaData.IDENTIFIER);

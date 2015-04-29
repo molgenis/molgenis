@@ -1,6 +1,7 @@
 package org.molgenis.data.semanticsearch.service.impl;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
@@ -19,6 +20,7 @@ import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.semantic.Relation;
+import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntity;
@@ -204,9 +206,10 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 	public void testFindTagsSync()
 	{
 		String description = "Fall " + SemanticSearchServiceHelper.STOP_WORDS + " sleep";
-		Set<String> expected = Sets.newHashSet("fall", "sleep");
-		Set<String> actual = semanticSearchServiceHelper.removeStopWords(description);
-		assertEquals(actual, expected);
+		List<String> ontologyIds = Arrays.<String> asList("1");
+		Set<String> searchTerms = Sets.newHashSet("fall", "sleep");
+		semanticSearchServiceHelper.findTags(description, ontologyIds);
+		verify(ontologyService).findOntologyTerms(ontologyIds, searchTerms, 100);
 	}
 
 	@Test

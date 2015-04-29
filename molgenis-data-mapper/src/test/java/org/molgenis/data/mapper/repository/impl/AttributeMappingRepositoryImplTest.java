@@ -21,6 +21,7 @@ import org.molgenis.data.IdGenerator;
 import org.molgenis.data.mapper.config.MappingConfig;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.meta.AttributeMappingMetaData;
+import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -123,6 +124,12 @@ public class AttributeMappingRepositoryImplTest extends AbstractTestNGSpringCont
 		DataService dataService()
 		{
 			return mock(DataService.class);
+		}
+
+		@Bean
+		SemanticSearchService semanticSearchService()
+		{
+			return mock(SemanticSearchService.class);
 		}
 
 		@Bean
