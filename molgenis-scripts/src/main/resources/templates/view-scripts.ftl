@@ -124,7 +124,7 @@
 		<div class="form-group">
 			<label class="col-md-3 control-label">{{name}}</label>
 			<div class="col-md-9">
-    			<input type="text" name="{{name}}" value="" class="required">
+    			<input type="text" name="{{name}}" value="" class="form-control" required>
     		</div>
 		</div>	
 	{{/each}}
