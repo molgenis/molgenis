@@ -1,4 +1,4 @@
-f<#include "molgenis-header.ftl">
+<#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 
 <#assign css=[]>
