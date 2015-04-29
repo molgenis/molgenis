@@ -32,7 +32,7 @@
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-data-csv</artifactId>
-			<version>1.2.3-</version>
+			<version>1.2.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
