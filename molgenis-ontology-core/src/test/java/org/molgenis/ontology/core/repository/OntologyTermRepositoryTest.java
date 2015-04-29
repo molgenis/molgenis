@@ -62,7 +62,10 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 		List<OntologyTerm> terms = ontologyTermRepository.findOntologyTerms(asList("1", "2"),
 				of("term1", "term2", "term3"), 100);
 
-		assertEquals(terms, asList(OntologyTerm.create("http://www.test.nl/iri", "Ontology term")));
+		assertEquals(
+				terms,
+				asList(OntologyTerm.create("http://www.test.nl/iri", "Ontology term", null,
+						Arrays.asList("Ontology term"))));
 		assertEquals(
 				queryCaptor.getValue().toString(),
 				"QueryImpl [rules=[ontology IN '[1, 2]',  AND , ( search 'term1' OR  search 'term2' OR  search 'term3')], pageSize=100, offset=0, sort=null]");
@@ -107,9 +110,9 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 				.getChildOntologyTermsByNodePath(nodePathEntity_1);
 		assertEquals(childOntologyTermsByNodePath.size(), 2);
 		assertEquals(childOntologyTermsByNodePath.get(0),
-				OntologyTerm.create("iri 2", "name 2", null, Collections.emptyList()));
+				OntologyTerm.create("iri 2", "name 2", null, Arrays.asList("name 2")));
 		assertEquals(childOntologyTermsByNodePath.get(1),
-				OntologyTerm.create("iri 3", "name 3", null, Collections.emptyList()));
+				OntologyTerm.create("iri 3", "name 3", null, Arrays.asList("name 3")));
 	}
 
 	@Test
@@ -143,7 +146,8 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 		{ "http://www.test.nl/iri" };
 
 		OntologyTerm ontologyTerm = ontologyTermRepository.getOntologyTerm(iris);
-		assertEquals(ontologyTerm, OntologyTerm.create("http://www.test.nl/iri", "Ontology term"));
+		assertEquals(ontologyTerm,
+				OntologyTerm.create("http://www.test.nl/iri", "Ontology term", null, Arrays.asList("Ontology term")));
 	}
 
 	@Configuration

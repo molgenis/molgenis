@@ -153,7 +153,6 @@ public class SemanticSearchServiceHelper
 	public List<String> collectQueryTermsFromOntologyTerm(OntologyTerm ontologyTerm)
 	{
 		List<String> queryTerms = new ArrayList<String>();
-
 		ontologyTerm.getSynonyms().forEach(synonym -> queryTerms.add(parseQueryString(synonym)));
 		queryTerms.add(parseQueryString(ontologyTerm.getLabel()));
 
@@ -161,7 +160,6 @@ public class SemanticSearchServiceHelper
 		{
 			double boostedNumber = Math.pow(0.5,
 					ontologyService.getOntologyTermDistance(ontologyTerm, descendantOntologyTerm));
-
 			descendantOntologyTerm.getSynonyms().forEach(
 					synonym -> queryTerms.add(parseBoostQueryString(synonym, boostedNumber)));
 			queryTerms.add(parseBoostQueryString(descendantOntologyTerm.getLabel(), boostedNumber));
