@@ -2,7 +2,7 @@
 (function(_, React, molgenis) {
     "use strict";
 
-    var div = React.DOM.div, p = React.DOM.p;
+    var div = React.DOM.div, p = React.DOM.p, fieldset = React.DOM.fieldset, legend = React.DOM.legend;
     
     /**
 	 * @memberOf component
@@ -18,6 +18,7 @@
 			mode: React.PropTypes.oneOf(['create', 'edit', 'view']),
 			formLayout: React.PropTypes.oneOf(['horizontal', 'vertical']),
 			colOffset: React.PropTypes.number,
+			hideOptional: React.PropTypes.bool,
 			saveOnBlur: React.PropTypes.bool,
 			validate: React.PropTypes.bool,
 			focus: React.PropTypes.bool,
@@ -38,9 +39,10 @@
 			// add control for each attribute
 			var foundFocusControl = false;
 			var controls = [];
+			var hasVisible = false;
 			for(var i = 0; i < attributes.length; ++i) {
 				var attr = attributes[i];
-				var Control = attr.fieldType === 'COMPOUND' ? molgenis.ui.FormControlGroup : molgenis.ui.FormControl;
+				var ControlFactory = attr.fieldType === 'COMPOUND' ? molgenis.ui.FormControlGroup : molgenis.ui.FormControl;
 				var controlProps = {
 					entity : this.props.entity,
 					attr : attr,
@@ -54,30 +56,40 @@
 					onValueChange : this.props.onValueChange,
 					key : '' + i
 				};
+				if(attr.fieldType === 'COMPOUND') {
+					_.extend(controlProps, {hideOptional: this.props.hideOptional});
+					hasVisible = true; // TODO implement better solution for nested compounds
+				}
 				
 				// IE9 does not support the autofocus attribute, focus the first visible input manually
 				if(!foundFocusControl && attr.visible === true) {
 					_.extend(controlProps, {focus: true});
 					foundFocusControl = true;
 				}
-				controls.push(Control(controlProps));
+				
+				var Control = ControlFactory(controlProps);
+				if(attr.nillable === true && this.props.hideOptional === true) {
+					Control = div({className: 'hide'}, Control);
+				} else {
+					hasVisible = true;
+				}
+				controls.push(Control);
 			}
 			
-			return (
-//					div({className: 'panel panel-default'},
-//						div({className: 'panel-body'},
-							React.DOM.fieldset({},
-									React.DOM.legend({}, this.props.attr.label),
-									p({}, this.props.attr.description),
-									div({className: 'row'},
-										div({className: 'col-md-offset-1 col-md-11'},
-											controls
-										)
-									)
-							)
-//						)
-//					)
+			var Fieldset = fieldset({},
+					legend({}, this.props.attr.label),
+					p({}, this.props.attr.description),
+					div({className: 'row'},
+						div({className: 'col-md-offset-1 col-md-11'},
+							controls
+						)
+					)
 			);
+			
+			if(!hasVisible) {
+				Fieldset = div({className: 'hide'}, Fieldset);
+			}
+			return Fieldset;
 		}
 	});
 	
