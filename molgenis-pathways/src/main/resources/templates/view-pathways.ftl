@@ -1,26 +1,26 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 
-<#assign css=["select2.css"]>
+<#assign css=[]>
 <#assign js=["pathway.js", "svg-pan-zoom.min.js"]>	
 
 <@header css js/>
 
 <div role="tabpanel">
 	<ul class="nav nav-tabs" role="tablist">
-		<li role="presentation" class="active"><a href="#searchTab" aria-controls="searchTab" role="tab" data-toggle="tab">search</a></li>
-		<li role="presentation"><a href="#pathway-selectTab" aria-controls="pathway-selectTab" role="tab" data-toggle="tab">pathway select</a></li>
+		<li role="presentation" class="active"><a href="#searchTab" aria-controls="searchTab" role="tab" data-toggle="tab">Search</a></li>
+		<li role="presentation"><a href="#pathway-selectTab" aria-controls="pathway-selectTab" role="tab" data-toggle="tab">Pathway select</a></li>
 	</ul>
 
 	<div class="tab-content">
 	<div role="tabpanel" class="tab-pane active" id="searchTab">
 		<div class="row" id="search">
-			<div class="col-md-6 col-md-offset-2">
+			<div class="col-md-3 col-md-offset-2">
 				<h5>Search for a pathway (by gene, description, disease etc.) </h5>
 				<form>
-					<input type="text" name="searchTerm" id="gene-search" data-placeholder="enter a gene or description">	
+					<input type="text" class="form-control" name="searchTerm" id="gene-search" data-placeholder="enter a gene or description">	
 					<option val=""></option>
-					<button type="btn" id="submit-genename-btn">submit</button>
+					<button type="btn" class="btn btn-default" id="submit-genename-btn">Search</button>
 				</form>
 				<br/>
 					<input id="pathway-select" value="" /> 
@@ -38,11 +38,11 @@
 	</div>
     <div role="tabpanel" class="tab-pane" id="pathway-selectTab">
 		<div class="row">
-			<div class="col-md-6 col-md-offset-2">	
+			<div class="col-md-3 col-md-offset-2">	
 				<br/>
-                Select a vcf file (Only VCF files with a effect (EFF) Field in the INFO attribute are shown)
+                Select a VCF file (Only VCF files with a effect (EFF) Field in the INFO attribute are shown)
 				<form>
-	   				<select class="form-control" id="dataset-select" data-placeholder="Select a vcf file">
+	   				<select class="form-control" id="dataset-select" data-placeholder="Select a VCF file">
 	   				<option val=""></option>
 			   		<#if entitiesMeta?has_content>
 			        	<#list entitiesMeta as entityMeta>
@@ -51,7 +51,7 @@
 			   		</#if>
 		  			</select>
 		  			<br/>	  
-					<button type="btn" id="submit-vcfFile-btn">submit</button>
+					<button type="btn" class="btn btn-default" id="submit-vcfFile-btn">Submit</button>
 				</form> 
 			</div>
 		</div>

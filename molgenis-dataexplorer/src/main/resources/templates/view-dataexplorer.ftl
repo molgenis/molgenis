@@ -48,7 +48,7 @@
                                 <button class="btn btn-danger dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
                                     Delete <span class="caret"></span>
                                 </button>
-                                <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                                <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                                     <li role="presentation"><a role="menuitem" tabindex="-1" href="#" id="delete-data-btn">Data</a></li>
                                     <li role="presentation"><a role="menuitem" tabindex="-1" href="#" id="delete-data-metadata-btn">Data and meta data</a></li>
                                 </ul>
