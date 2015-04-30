@@ -27,7 +27,7 @@
     	<div class="col-md-12">
 			<div class="data-table-pager-container">
 				<div class="pull-right">
-					<a id="download-modal-button" class="btn btn-default" data-toggle="modal" data-target="#downloadModal">Download as CSV</a>
+					<a id="download-modal-button" class="btn btn-default" data-toggle="modal" data-target="#downloadModal">Download</a>
 				<#if galaxyEnabled?? && galaxyEnabled == true>
 					<a id="galaxy-export-modal-button" class="btn btn-default" data-toggle="modal" data-target="#galaxy-export-modal">Export to Galaxy</a>
 				</#if>
@@ -58,6 +58,18 @@
                     <div class="radio">
                         <label>
                             <input type="radio" name="colNames" value="ATTRIBUTE_NAMES">  Attribute Names
+                        </label>   
+                    </div>
+                    
+                    <span id="helpBlock" class="help-block">As download type I want:</span>
+                    <div class="radio">
+	                    <label>
+	                        <input type="radio" name="downloadTypes" value="DOWNLOAD_TYPE_CSV" checked> CSV
+	                    </label>
+                    </div>
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="downloadTypes" value="DOWNLOAD_TYPE_XLSX">  XLSX
                         </label>   
                     </div>
 	      	    </form>
@@ -118,7 +130,7 @@
 	<#-- load js dependencies -->
 	$.when(
 		$.ajax("<@resource_href "/js/jquery.bootstrap.pager.js"/>", {'cache': true}),
-		$.ajax("<@resource_href "/js/jquery.molgenis.table.js"/>", {'cache': true}),
+		$.ajax("<@resource_href "/js/"+dataTable/>", {'cache': true}),
 		$.ajax("<@resource_href "/js/dalliance-compiled.js"/>", {'cache': true}),
 		$.ajax("<@resource_href "/js/dataexplorer-data.js"/>", {'cache': true}))
 		.done(function() {

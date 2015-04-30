@@ -210,6 +210,41 @@ public class DeNovoAnnotator extends VariantAnnotator
 			resultMap.put(DENOVO, 0);
 			return resultMap;
 		}
+		
+
+		/**
+		 * AB
+		 */
+		
+		Double ABHet = entity.get("ABHet") != null ? Double.parseDouble(entity.get("ABHet").toString()) : 0;
+		if (ABHet < 0.3 || ABHet > 0.5)
+		{
+			LOG.info("Skipping bad het AB variant: " + entity);
+			resultMap.put(DENOVO, 0);
+			return resultMap;
+		}
+		
+		// only keep variants with overall high quality
+		Double ABHom = Double.parseDouble(entity.get("ABHom").toString());
+		if (ABHom < 0.5)
+		{
+			LOG.info("Skipping bad hom AB variant: " + entity);
+			resultMap.put(DENOVO, 0);
+			return resultMap;
+		}
+		
+		/**
+		 * Strand bias
+		 */
+		Double SB = Double.parseDouble(entity.get("SB").toString());
+		if (SB > 0.5)
+		{
+			LOG.info("Skipping bad SB variant: " + entity);
+			resultMap.put(DENOVO, 0);
+			return resultMap;
+		}
+		
+		
 
 		String geneSymbol = SnpEffServiceAnnotator.getGeneNameFromEntity(entity);
 
