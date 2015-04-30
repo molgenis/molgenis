@@ -154,20 +154,18 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator, ApplicationL
 	private boolean checkSnpEffPath()
 	{
 		boolean result = false;
-		snpEffPath = molgenisSettings.getProperty(SNPEFF_JAR_LOCATION_PROPERTY);
-		if (snpEffPath != null)
-		{
-			File snpEffpath = new File(snpEffPath);
-			if (snpEffpath.exists() && snpEffpath.isFile())
-			{
-				LOG.info("SnpEff found at: " + snpEffpath.getAbsolutePath());
-				result = true;
-			}
-			else
-			{
-				LOG.error("SnpEff not found at: " + snpEffpath.getAbsolutePath());
-			}
-		}
+        if(molgenisSettings != null) {
+            snpEffPath = molgenisSettings.getProperty(SNPEFF_JAR_LOCATION_PROPERTY);
+            if (snpEffPath != null) {
+                File snpEffpath = new File(snpEffPath);
+                if (snpEffpath.exists() && snpEffpath.isFile()) {
+                    LOG.info("SnpEff found at: " + snpEffpath.getAbsolutePath());
+                    result = true;
+                } else {
+                    LOG.error("SnpEff not found at: " + snpEffpath.getAbsolutePath());
+                }
+            }
+        }
 		return result;
 	}
 

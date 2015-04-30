@@ -2,7 +2,7 @@ package org.molgenis.data.annotation.impl;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
-import org.molgenis.data.annotators.annotator.test.data.AnnotatorTestData;
+import org.molgenis.data.annotation.AbstractAnnotatorTest;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -18,10 +18,8 @@ import java.util.Iterator;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
-public class ThousandGAnnotatorTest extends AnnotatorTestData
+public class ThousandGAnnotatorTest extends AbstractAnnotatorTest
 {
-	private ThousandGenomesServiceAnnotator annotator;
-
 	@BeforeMethod
 	public void beforeMethod() throws IOException
 	{
@@ -88,17 +86,5 @@ public class ThousandGAnnotatorTest extends AnnotatorTestData
 		mapEntity.set(ThousandGenomesServiceAnnotator.THGEN_MAF, null);
 
 		assertEquals(results.next(), mapEntity);
-	}
-
-	@Test
-	public void canAnnotateTrueTest()
-	{
-		assertEquals(annotator.canAnnotate(metaDataCanAnnotate), "true");
-	}
-
-	@Test
-	public void canAnnotateFalseTest()
-	{
-		assertEquals(annotator.canAnnotate(metaDataCantAnnotate), "a required attribute has the wrong datatype");
 	}
 }

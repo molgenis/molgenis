@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation;
+package org.molgenis.data.annotation.impl;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -7,13 +7,13 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.UUID;
 
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.security.permission.PermissionSystemService;
@@ -78,7 +78,7 @@ public class CrudRepositoryAnnotator
 
 		EntityMetaData entityMetaData = dataService.getMeta().getEntityMetaData(sourceRepo.getName());
 		DefaultAttributeMetaData compoundAttributeMetaData = AnnotatorUtils.getCompoundResultAttribute(annotator,
-				entityMetaData);
+                entityMetaData);
 
 		Repository targetRepo = addAnnotatorMetadataToRepositories(entityMetaData, createCopy,
 				compoundAttributeMetaData);

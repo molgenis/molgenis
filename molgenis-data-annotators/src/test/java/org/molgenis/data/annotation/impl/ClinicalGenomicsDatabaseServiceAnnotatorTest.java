@@ -18,17 +18,15 @@ import org.molgenis.data.annotation.impl.datastructures.CgdData;
 import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
 import org.molgenis.data.annotation.provider.CgdDataProvider;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
-import org.molgenis.data.annotators.annotator.test.data.AnnotatorTestData;
+import org.molgenis.data.annotation.AbstractAnnotatorTest;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.util.ResourceUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class ClinicalGenomicsDatabaseServiceAnnotatorTest extends AnnotatorTestData
+public class ClinicalGenomicsDatabaseServiceAnnotatorTest extends AbstractAnnotatorTest
 {
-	public ClinicalGenomicsDatabaseServiceAnnotator annotator;
-
 	@BeforeMethod
 	public void beforeMethod() throws IOException
 	{
@@ -126,17 +124,5 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest extends AnnotatorTestD
 				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.INTERVENTION_RATIONALE));
 		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.REFERENCES),
 				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.REFERENCES));
-	}
-
-	@Test
-	public void canAnnotateTrueTest()
-	{
-		assertEquals(annotator.canAnnotate(metaDataCanAnnotate), "true");
-	}
-
-	@Test
-	public void canAnnotateFalseTest()
-	{
-		assertEquals(annotator.canAnnotate(metaDataCantAnnotate), "a required attribute has the wrong datatype");
 	}
 }

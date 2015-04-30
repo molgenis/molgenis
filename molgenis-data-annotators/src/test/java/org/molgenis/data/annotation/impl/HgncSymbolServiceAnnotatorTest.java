@@ -15,16 +15,14 @@ import java.util.Map;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
-import org.molgenis.data.annotators.annotator.test.data.AnnotatorTestData;
+import org.molgenis.data.annotation.AbstractAnnotatorTest;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class HgncSymbolServiceAnnotatorTest extends AnnotatorTestData
+public class HgncSymbolServiceAnnotatorTest extends AbstractAnnotatorTest
 {
-	private HgncSymbolServiceAnnotator annotator;
-
 	@BeforeMethod
 	public void beforeMethod() throws IOException
 	{
@@ -60,17 +58,5 @@ public class HgncSymbolServiceAnnotatorTest extends AnnotatorTestData
 		assertEquals(resultEntity.get(HgncSymbolServiceAnnotator.HGNC_SYMBOL),
 				expectedEntity.get(HgncSymbolServiceAnnotator.HGNC_SYMBOL));
 
-	}
-
-	@Test
-	public void canAnnotateTrueTest()
-	{
-		assertEquals(annotator.canAnnotate(metaDataCanAnnotate), "true");
-	}
-
-	@Test
-	public void canAnnotateFalseTest()
-	{
-		assertEquals(annotator.canAnnotate(metaDataCantAnnotate), "a required attribute has the wrong datatype");
 	}
 }

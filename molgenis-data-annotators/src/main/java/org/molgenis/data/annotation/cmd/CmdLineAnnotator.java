@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation;
+package org.molgenis.data.annotation.cmd;
 
 import java.io.File;
 import java.util.Arrays;

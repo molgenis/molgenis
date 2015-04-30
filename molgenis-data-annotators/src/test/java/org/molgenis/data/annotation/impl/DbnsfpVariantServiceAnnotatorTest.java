@@ -11,17 +11,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.annotators.annotator.test.data.AnnotatorTestData;
+import org.molgenis.data.annotation.AbstractAnnotatorTest;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.util.ResourceUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class DbnsfpVariantServiceAnnotatorTest extends AnnotatorTestData
+public class DbnsfpVariantServiceAnnotatorTest extends AbstractAnnotatorTest
 {
-	private DbnsfpVariantServiceAnnotator annotator;
-
 	@BeforeMethod
 	public void beforeMethod() throws IOException
 	{
@@ -83,17 +81,5 @@ public class DbnsfpVariantServiceAnnotatorTest extends AnnotatorTestData
 				expectedEntity.get(DbnsfpVariantServiceAnnotator.CDS_STRAND));
 		assertEquals(resultEntity.get(DbnsfpVariantServiceAnnotator.REFCODON),
 				expectedEntity.get(DbnsfpVariantServiceAnnotator.REFCODON));
-	}
-
-	@Test
-	public void canAnnotateTrueTest()
-	{
-		assertEquals(annotator.canAnnotate(metaDataCanAnnotate), "true");
-	}
-
-	@Test
-	public void canAnnotateFalseTest()
-	{
-		assertEquals(annotator.canAnnotate(metaDataCantAnnotate), "a required attribute has the wrong datatype");
 	}
 }

@@ -17,17 +17,15 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.impl.datastructures.ClinvarData;
 import org.molgenis.data.annotation.provider.ClinvarDataProvider;
-import org.molgenis.data.annotators.annotator.test.data.AnnotatorTestData;
+import org.molgenis.data.annotation.AbstractAnnotatorTest;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.util.ResourceUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class ClinVarServiceAnnotatorTest extends AnnotatorTestData
+public class ClinVarServiceAnnotatorTest extends AbstractAnnotatorTest
 {
-	private ClinVarServiceAnnotator annotator;
-
 	@BeforeMethod
 	public void beforeMethod() throws IOException
 	{
@@ -146,18 +144,6 @@ public class ClinVarServiceAnnotatorTest extends AnnotatorTestData
 				expectedEntity.get(ClinVarServiceAnnotator.GUIDELINES));
 		assertEquals(resultEntity.get(ClinVarServiceAnnotator.OTHERIDS),
 				expectedEntity.get(ClinVarServiceAnnotator.OTHERIDS));
-	}
-
-	@Test
-	public void canAnnotateTrueTest()
-	{
-		assertEquals(annotator.canAnnotate(metaDataCanAnnotate), "true");
-	}
-
-	@Test
-	public void canAnnotateFalseTest()
-	{
-		assertEquals(annotator.canAnnotate(metaDataCantAnnotate), "a required attribute has the wrong datatype");
 	}
 
 }

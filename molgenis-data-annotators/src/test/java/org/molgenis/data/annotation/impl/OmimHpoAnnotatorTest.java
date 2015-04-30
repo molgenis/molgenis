@@ -23,17 +23,15 @@ import org.molgenis.data.annotation.provider.HgncLocationsProvider;
 import org.molgenis.data.annotation.provider.HpoMappingProvider;
 import org.molgenis.data.annotation.provider.OmimMorbidMapProvider;
 import org.molgenis.data.annotation.provider.UrlPinger;
-import org.molgenis.data.annotators.annotator.test.data.AnnotatorTestData;
+import org.molgenis.data.annotation.AbstractAnnotatorTest;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class OmimHpoAnnotatorTest extends AnnotatorTestData
+public class OmimHpoAnnotatorTest extends AbstractAnnotatorTest
 {
-	private OmimHpoAnnotator annotator;
-	
 	@BeforeMethod
 	public void beforeMethod() throws IOException
 	{
@@ -173,17 +171,5 @@ public class OmimHpoAnnotatorTest extends AnnotatorTestData
 				expectedEntity.get(OmimHpoAnnotator.HPO_DISEASE_DATABASE_ENTRY));
 		assertEquals(resultEntity.get(OmimHpoAnnotator.HPO_ENTREZ_ID),
 				expectedEntity.get(OmimHpoAnnotator.HPO_ENTREZ_ID));
-	}
-
-	@Test
-	public void canAnnotateTrueTest()
-	{
-		assertEquals(annotator.canAnnotate(metaDataCanAnnotate), "true");
-	}
-
-	@Test
-	public void canAnnotateFalseTest()
-	{
-		assertEquals(annotator.canAnnotate(metaDataCantAnnotate), "a required attribute has the wrong datatype");
 	}
 }

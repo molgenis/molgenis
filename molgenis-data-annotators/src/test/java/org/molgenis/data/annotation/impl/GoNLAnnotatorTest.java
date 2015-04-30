@@ -2,7 +2,7 @@ package org.molgenis.data.annotation.impl;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
-import org.molgenis.data.annotators.annotator.test.data.AnnotatorTestData;
+import org.molgenis.data.annotation.AbstractAnnotatorTest;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -18,10 +18,8 @@ import java.util.*;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
-public class GoNLAnnotatorTest extends AnnotatorTestData
+public class GoNLAnnotatorTest extends AbstractAnnotatorTest
 {
-
-	private GoNLServiceAnnotator annotator;
 
 	@BeforeMethod
 	public void beforeMethod() throws IOException
@@ -93,17 +91,5 @@ public class GoNLAnnotatorTest extends AnnotatorTestData
 		mapEntity.set(GoNLServiceAnnotator.GONL_GTC, null);
 
 		assertEquals(results.next(), mapEntity);
-	}
-
-	@Test
-	public void canAnnotateTrueTest()
-	{
-		assertEquals(annotator.canAnnotate(metaDataCanAnnotate), "true");
-	}
-
-	@Test
-	public void canAnnotateFalseTest()
-	{
-		assertEquals(annotator.canAnnotate(metaDataCantAnnotate), "a required attribute has the wrong datatype");
 	}
 }

@@ -25,7 +25,8 @@ import org.hamcrest.Description;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.annotators.annotator.test.data.AnnotatorTestData;
+import org.molgenis.data.annotation.AbstractAnnotatorTest;
+import org.molgenis.data.annotation.AnnotatorTestData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -34,8 +35,6 @@ import org.testng.annotations.Test;
 
 public class CosmicServiceAnnotatorTest extends AnnotatorTestData
 {
-	public CosmicServiceAnnotator annotator;
-
 	public DefaultEntityMetaData cosmicMetaDataCanAnnotate = new DefaultEntityMetaData("test");
 	public DefaultEntityMetaData cosmicMetaDataCantAnnotate = new DefaultEntityMetaData("test");
 

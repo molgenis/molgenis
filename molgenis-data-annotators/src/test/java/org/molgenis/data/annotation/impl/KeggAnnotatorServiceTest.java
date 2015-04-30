@@ -18,16 +18,14 @@ import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
 import org.molgenis.data.annotation.provider.KeggDataProvider;
-import org.molgenis.data.annotators.annotator.test.data.AnnotatorTestData;
+import org.molgenis.data.annotation.AbstractAnnotatorTest;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class KeggAnnotatorServiceTest extends AnnotatorTestData
+public class KeggAnnotatorServiceTest extends AbstractAnnotatorTest
 {
-	private KeggServiceAnnotator annotator;
-
 	@BeforeMethod
 	public void beforeMethod() throws IOException
 	{
@@ -78,17 +76,5 @@ public class KeggAnnotatorServiceTest extends AnnotatorTestData
 				expectedEntity.get(KeggServiceAnnotator.KEGG_PATHWAYS_IDS));
 		assertEquals(resultEntity.get(KeggServiceAnnotator.KEGG_PATHWAYS_NAMES),
 				expectedEntity.get(KeggServiceAnnotator.KEGG_PATHWAYS_NAMES));
-	}
-
-	@Test
-	public void canAnnotateTrueTest()
-	{
-		assertEquals(annotator.canAnnotate(metaDataCanAnnotate), "true");
-	}
-
-	@Test
-	public void canAnnotateFalseTest()
-	{
-		assertEquals(annotator.canAnnotate(metaDataCantAnnotate), "a required attribute has the wrong datatype");
 	}
 }

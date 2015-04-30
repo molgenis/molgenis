@@ -1,7 +1,7 @@
 package org.molgenis.data.annotation.impl;
 
 import org.molgenis.data.*;
-import org.molgenis.data.annotators.annotator.test.data.AnnotatorTestData;
+import org.molgenis.data.annotation.AnnotatorTestData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.vcf.VcfRepository;
 import org.testng.annotations.BeforeMethod;
@@ -16,7 +16,7 @@ import java.util.ArrayList;
 
 public class SnpEffServiceAnnotatorTest extends AnnotatorTestData
 {
-	private SnpEffServiceAnnotator annotator;
+	private SnpEffServiceAnnotator snpEffServiceAnnotator;
 	private ArrayList<Entity> entities = new ArrayList<>();;
 
 	@BeforeMethod
@@ -46,7 +46,8 @@ public class SnpEffServiceAnnotatorTest extends AnnotatorTestData
 
 		DataService dataService = mock(DataService.class);
 		when(dataService.findOne("TestEntity", query)).thenReturn(entity2);
-		annotator = new SnpEffServiceAnnotator(null, null, dataService);
+		snpEffServiceAnnotator = new SnpEffServiceAnnotator(null, null, dataService);
+        annotator = snpEffServiceAnnotator;
 	}
 
 	@Test
@@ -55,7 +56,7 @@ public class SnpEffServiceAnnotatorTest extends AnnotatorTestData
 		BufferedReader br = null;
 		try
 		{
-			File file = annotator.getInputTempFile(entities, "testfile");
+			File file = snpEffServiceAnnotator.getInputTempFile(entities, "testfile");
 			br = new BufferedReader(new FileReader(file.getAbsolutePath()));
 
 			assertEquals(br.readLine(), "1\t1234\t.\tA\tT");
@@ -83,7 +84,7 @@ public class SnpEffServiceAnnotatorTest extends AnnotatorTestData
 	@Test
 	public void parseOutputLineToEntityTest()
 	{
-		Entity result = annotator.parseOutputLineToEntity(
+		Entity result = snpEffServiceAnnotator.parseOutputLineToEntity(
 				"X\t12345\t.\tA\tT\tqual\tfilter\t0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15", "TestEntity");
 		assertEquals(result.get(SnpEffServiceAnnotator.ANNOTATION), "1");
 		assertEquals(result.get(SnpEffServiceAnnotator.PUTATIVE_IMPACT), "2");
