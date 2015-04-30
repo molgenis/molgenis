@@ -82,7 +82,7 @@
 			</div>
 			<div class="row">
                 <div class="col-md-12">
-    			    <div class="panel panel-info">
+    			    <div class="panel panel-primary">
                     	<div class="panel-heading">
                             <h4 class="panel-title"> ${i18n.dataexplorer_data_data_item_filters}</h4>
                         </div>
@@ -103,7 +103,7 @@
 			</div>
 			<div class="row"<#if hideDataItemSelect == true> style="display:none"</#if>>
                 <div class="col-md-12">
-                    <div class="panel panel-info">
+                    <div class="panel panel-primary">
                         <div class="panel-heading">
                             <h4 class="panel-title">Data item selection</h4>
                         </div>
