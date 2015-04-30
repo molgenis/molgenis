@@ -64,7 +64,6 @@ import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.fieldtypes.BoolField;
 import org.molgenis.framework.db.EntityNotFoundException;
 import org.molgenis.security.core.MolgenisPermissionService;
-import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.token.TokenExtractor;
 import org.molgenis.security.token.TokenService;
@@ -797,14 +796,15 @@ public class RestController
 			throw new BadCredentialsException("Unknown username or password");
 		}
 
+		// retrieve user before we log the user in
+		MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisUser.USERNAME, authentication.getName()), MolgenisUser.class);
+
 		// User authenticated, log the user in
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
 		// Generate a new token for the user
 		String token = tokenService.generateAndStoreToken(authentication.getName(), "Rest api login");
-
-		MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME,
-				new QueryImpl().eq(MolgenisUser.USERNAME, authentication.getName()), MolgenisUser.class);
 
 		return new LoginResponse(token, user.getUsername(), user.getFirstName(), user.getLastName());
 	}
