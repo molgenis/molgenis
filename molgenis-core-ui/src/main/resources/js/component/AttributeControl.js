@@ -248,7 +248,9 @@
 			}
 			
 			var refEntity = this.state.attr.refEntity; 
-			if(refEntity.attributes[refEntity.idAttribute].fieldType === 'INT') {
+			if(refEntity.attributes[refEntity.idAttribute].fieldType === 'INT' || refEntity.attributes[refEntity.idAttribute].fieldType === 'LONG') {
+				id = parseInt(id);
+			} else if(refEntity.attributes[refEntity.idAttribute].fieldType === 'DOUBLE') {
 				id = parseInt(id);
 			}
 			
