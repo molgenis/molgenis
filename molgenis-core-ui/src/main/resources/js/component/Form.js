@@ -348,7 +348,9 @@
 							onValueChange : this.props.onValueChange,
 							key : key
 						};
-						
+						if(attr.fieldType === 'COMPOUND') {
+							_.extend(controlProps, {hideOptional: this.props.hideOptional});
+						}
 						// IE9 does not support the autofocus attribute, focus the first visible input manually
 						if(this.props.mode !== 'view' && !foundFocusControl && attr.visible === true && (this.props.mode === 'create' || attr.readOnly !== true)) {
 							_.extend(controlProps, {focus: true});
