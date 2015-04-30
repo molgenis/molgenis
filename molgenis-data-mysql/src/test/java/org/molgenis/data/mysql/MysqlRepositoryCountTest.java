@@ -1,7 +1,7 @@
 package org.molgenis.data.mysql;
 
-import org.molgenis.MysqlTestConfig;
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.MysqlTestConfig;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -31,12 +31,10 @@ public class MysqlRepositoryCountTest extends AbstractTestNGSpringContextTests
 	{
 		// define model
 		DefaultEntityMetaData countryMD = new DefaultEntityMetaData("query_country");
-		countryMD.setIdAttribute("code");
-		countryMD.addAttribute("code").setNillable(false); // TODO: make this an enum!
+		countryMD.addAttribute("code").setNillable(false).setIdAttribute(true); // TODO: make this an enum!
 
 		DefaultEntityMetaData personMD = new DefaultEntityMetaData("query_person");
-		personMD.setIdAttribute("email");
-		personMD.addAttribute("email").setNillable(false);
+		personMD.addAttribute("email").setNillable(false).setIdAttribute(true);
 		personMD.addAttribute("firstName");
 		personMD.addAttribute("lastName");
 		personMD.addAttribute("birthday").setDataType(MolgenisFieldTypes.DATE);

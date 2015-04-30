@@ -15,8 +15,7 @@ public class MysqlRepositoryStringTest extends MysqlRepositoryAbstractDatatypeTe
 	public EntityMetaData createMetaData()
 	{
 		EditableEntityMetaData varcharMD = new DefaultEntityMetaData("VarcharTest").setLabel("Varchar Test");
-		varcharMD.setIdAttribute("col1");
-		varcharMD.addAttribute("col1").setDataType(MolgenisFieldTypes.STRING).setNillable(false);
+		varcharMD.addAttribute("col1").setDataType(MolgenisFieldTypes.STRING).setNillable(false).setIdAttribute(true);
 		varcharMD.addAttribute("col2").setDataType(MolgenisFieldTypes.STRING);
 		varcharMD.addAttribute("col3").setDataType(MolgenisFieldTypes.STRING).setDefaultValue("myDefault");
 		return varcharMD;
