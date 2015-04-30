@@ -33,13 +33,12 @@ public class PythonScriptRunner implements ScriptRunner
 	private final FreeMarkerConfigurer freeMarkerConfig;
 
 	@Autowired
-	public PythonScriptRunner(PythonScriptExecutor pythonScriptExecutor, FileStore fileStore, FreeMarkerConfigurer freeMarkerConfig,
-			ScriptRunnerFactory scriptRunnerFactory)
+	public PythonScriptRunner(PythonScriptExecutor pythonScriptExecutor, FileStore fileStore,
+			FreeMarkerConfigurer freeMarkerConfig, ScriptRunnerFactory scriptRunnerFactory)
 	{
 		this.pythonScriptExecutor = pythonScriptExecutor;
 		this.fileStore = fileStore;
 		this.freeMarkerConfig = freeMarkerConfig;
-		scriptRunnerFactory.registerScriptExecutor("python", this);
 	}
 
 	/**
@@ -95,7 +94,8 @@ public class PythonScriptRunner implements ScriptRunner
 	 * @throws IOException
 	 * @throws FileNotFoundException
 	 */
-	public void runPythonScript(String script, PythonOutputHandler outputHandler) throws FileNotFoundException, IOException
+	public void runPythonScript(String script, PythonOutputHandler outputHandler) throws FileNotFoundException,
+			IOException
 	{
 		String scriptName = generateRandomPythonScriptName();
 		File file = fileStore.getFile(scriptName);

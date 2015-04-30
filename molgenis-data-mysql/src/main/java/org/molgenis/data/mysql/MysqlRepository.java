@@ -68,6 +68,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	private final AsyncJdbcTemplate asyncJdbcTemplate;
 	private final DataService dataService;
 	private final DataSource dataSource;
+	private static final String VARCHAR = "VARCHAR(255)";
 
 	/**
 	 * Creates a new MysqlRepository.
@@ -176,7 +177,8 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 					asyncJdbcTemplate.execute(getCreateFKeySql(attr));
 				}
 
-				if (attr.isUnique())
+				// text can't be unique, so don't add unique constraint when type is string
+				if (attr.isUnique() && !(attr.getDataType() instanceof StringField))
 				{
 					asyncJdbcTemplate.execute(getUniqueSql(attr));
 				}
@@ -258,7 +260,8 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				execute(getCreateFKeySql(attributeMetaData), async);
 			}
 
-			if (attributeMetaData.isUnique())
+			// TEXT cannot be UNIQUE, don't add constraint when field type is string
+			if (attributeMetaData.isUnique() && !(attributeMetaData.getDataType() instanceof StringField))
 			{
 				execute(getUniqueSql(attributeMetaData), async);
 			}
@@ -308,15 +311,21 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	{
 		AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
 		StringBuilder sql = new StringBuilder();
+
+		// mysql keys cannot have TEXT value, so change it to VARCHAR when needed
+		String idAttrMysqlType = (idAttribute.getDataType().getEnumType().equals(FieldTypeEnum.STRING) ? VARCHAR : idAttribute
+				.getDataType().getMysqlType());
+
+		String refAttrMysqlType = (att.getRefEntity().getIdAttribute().getDataType() instanceof StringField ? VARCHAR : att
+				.getRefEntity().getIdAttribute().getDataType().getMysqlType());
+
 		sql.append(" CREATE TABLE ").append('`').append(getTableName()).append('_').append(att.getName()).append('`')
-				.append("(`order` INT,`").append(idAttribute.getName()).append('`').append(' ')
-				.append(idAttribute.getDataType().getMysqlType()).append(" NOT NULL, ").append('`')
-				.append(att.getName()).append('`').append(' ')
-				.append(att.getRefEntity().getIdAttribute().getDataType().getMysqlType())
-				.append(" NOT NULL, FOREIGN KEY (").append('`').append(idAttribute.getName()).append('`')
-				.append(") REFERENCES ").append('`').append(getTableName()).append('`').append('(').append('`')
-				.append(idAttribute.getName()).append('`').append(") ON DELETE CASCADE, FOREIGN KEY (").append('`')
-				.append(att.getName()).append('`').append(") REFERENCES ").append('`')
+				.append("(`order` INT,`").append(idAttribute.getName()).append('`').append(' ').append(idAttrMysqlType)
+				.append(" NOT NULL, ").append('`').append(att.getName()).append('`').append(' ')
+				.append(refAttrMysqlType).append(" NOT NULL, FOREIGN KEY (").append('`').append(idAttribute.getName())
+				.append('`').append(") REFERENCES ").append('`').append(getTableName()).append('`').append('(')
+				.append('`').append(idAttribute.getName()).append('`').append(") ON DELETE CASCADE, FOREIGN KEY (")
+				.append('`').append(att.getName()).append('`').append(") REFERENCES ").append('`')
 				.append(getTableName(att.getRefEntity())).append('`').append('(').append('`')
 				.append(att.getRefEntity().getIdAttribute().getName()).append('`').append(") ON DELETE CASCADE);");
 
@@ -336,7 +345,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				sql.append(", ");
 			}
 		}
-		// primary key is first attribute unless otherwise indicate
+		// primary key is first attribute unless otherwise indicated
 		AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
 
 		if (idAttribute == null) throw new MolgenisDataException("Missing idAttribute for entity [" + getName() + "]");
@@ -431,11 +440,33 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 			// xref adopt type of the identifier of referenced entity
 			if (att.getDataType() instanceof XrefField)
 			{
-				sql.append(att.getRefEntity().getIdAttribute().getDataType().getMysqlType());
+				// mysql keys can not be of type TEXT, so don't adopt the field type of a referenced entity when it is
+				// of fieldtype STRING
+				if (att.getRefEntity().getIdAttribute().getDataType() instanceof StringField)
+				{
+					sql.append(VARCHAR);
+				}
+				else
+				{
+					sql.append(att.getRefEntity().getIdAttribute().getDataType().getMysqlType());
+				}
 			}
 			else
 			{
-				sql.append(att.getDataType().getMysqlType());
+				if (att.isIdAtrribute() && att.getDataType() instanceof StringField)
+				{
+					// id attributes can not be of type TEXT so we'll change it to VARCHAR
+					sql.append(VARCHAR);
+				}
+				else if (att.isUnique() && att.getDataType() instanceof StringField)
+				{
+					// mysql TEXT fields cannot be UNIQUE, so use VARCHAR instead
+					sql.append(VARCHAR);
+				}
+				else
+				{
+					sql.append(att.getDataType().getMysqlType());
+				}
 			}
 			// not null
 			if (!att.isNillable())
@@ -925,7 +956,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	{
 		// todo, split in subbatchs
 		final List<Object> deleteByIdBatch = new ArrayList<Object>();
-		
+
 		this.resetXrefValuesBySelfReference(entities);
 
 		for (Entity e : entities)
@@ -945,8 +976,8 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		List<String> xrefAttributesWithSelfReference = new ArrayList<String>();
 		for (AttributeMetaData attributeMetaData : getEntityMetaData().getAttributes())
 		{
-			if (attributeMetaData.getDataType().getEnumType().equals(FieldTypeEnum.XREF) &&
-				getEntityMetaData().getName().equals(attributeMetaData.getRefEntity().getName()))
+			if (attributeMetaData.getDataType().getEnumType().equals(FieldTypeEnum.XREF)
+					&& getEntityMetaData().getName().equals(attributeMetaData.getRefEntity().getName()))
 			{
 				xrefAttributesWithSelfReference.add(attributeMetaData.getName());
 			}

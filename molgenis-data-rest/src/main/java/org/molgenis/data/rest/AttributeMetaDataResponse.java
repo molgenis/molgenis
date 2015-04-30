@@ -134,18 +134,18 @@ public class AttributeMetaDataResponse
 						@Override
 						public Object apply(AttributeMetaData attributeMetaData)
 						{
-							if (attributeExpandsSet != null
-									&& attributeExpandsSet.containsKey("attributes".toLowerCase()))
-							{
-								Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
-								return new AttributeMetaDataResponse(entityParentName, attributeMetaData,
-										subAttributesSet, null, permissionService);
-							}
-							else
-							{
-								return Collections.<String, Object> singletonMap("href", Href.concatMetaAttributeHref(
-										RestController.BASE_URI, entityParentName, attributeMetaData.getName()));
-							}
+							// if (attributeExpandsSet != null
+							// && attributeExpandsSet.containsKey("attributes".toLowerCase()))
+							// {
+							Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
+							return new AttributeMetaDataResponse(entityParentName, attributeMetaData, subAttributesSet,
+									Collections.singletonMap("refEntity".toLowerCase(), null), permissionService);
+							// }
+							// else
+							// {
+							// return Collections.<String, Object> singletonMap("href", Href.concatMetaAttributeHref(
+							// RestController.BASE_URI, entityParentName, attributeMetaData.getName()));
+							// }
 						}
 					})) : null;
 		}

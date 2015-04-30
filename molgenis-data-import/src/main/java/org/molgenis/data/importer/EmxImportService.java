@@ -86,6 +86,7 @@ public class EmxImportService implements ImportService
 			}
 			catch (Exception ignore)
 			{
+				LOG.error("Error rolling back schema changes", ignore);
 			}
 			throw e;
 		}
