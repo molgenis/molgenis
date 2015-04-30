@@ -243,6 +243,11 @@
 			}
 		},
 		_idValueToEntity: function(id) {
+			var refEntity = this.state.attr.refEntity; 
+			if(refEntity.attributes[refEntity.idAttribute].fieldType === 'INT') {
+				id = parseInt(id);
+			}
+			
 			var entity = {};
 			entity[this.state.attr.refEntity.idAttribute] = id;
 			entity[this.state.attr.refEntity.labelAttribute] = _.find(this.state.options, function(option) {
