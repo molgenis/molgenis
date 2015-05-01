@@ -103,13 +103,14 @@ public class MetaDataServiceImpl implements MetaDataService
 		EntityMetaData emd = getEntityMetaData(entityName);
 		if (emd != null)
 		{
-			entityMetaDataRepository.delete(entityName);
 			if (!emd.isAbstract())
 			{
 				getManageableRepositoryCollection(emd).deleteEntityMeta(entityName);
 			}
+
+			entityMetaDataRepository.delete(entityName);
+			if (dataService.hasRepository(entityName)) dataService.removeRepository(entityName);
 		}
-		if (dataService.hasRepository(entityName)) dataService.removeRepository(entityName);
 	}
 
 	@Transactional
