@@ -246,10 +246,12 @@
 				
 				<#if authenticated?? && authenticated>
 					<form class="navbar-form navbar-right" method="post" action="/logout">
-						<button type="submit" class="btn btn-inverse btn-link">Sign out</button>
+						<button type="submit" class="btn btn-primary">Sign out</button>
 					</form>
 				<#else>
-					<a class="modal-href btn btn-default navbar-btn navbar-right" href="/account/login" data-target="login-modal-container-header">Sign in</a>
+					<form class="navbar-form navbar-right" method="post" action="/login">
+						<a type="btn" class="btn btn-default modal-href" href="/account/login" data-target="login-modal-container-header">Sign in</a>
+					</form>
 				</#if>
 			</div>
 			<#-- Navbar items end -->
