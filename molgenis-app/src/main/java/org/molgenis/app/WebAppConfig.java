@@ -86,7 +86,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 				.getRepository("RuntimeProperty")));
 		upgradeService.addUpgrade(new Step6ChangeRScriptType(dataSource, searchService));
 		upgradeService.addUpgrade(new Step7UpgradeMetaDataTo1_6(dataSource, searchService));
-		upgradeService.addUpgrade(new Step8VarcharToTextRepeated(dataSource, mysqlRepositoryCollection));
+		upgradeService.addUpgrade(new Step8VarcharToTextRepeated(dataSource));
 	}
 
 	@Override
