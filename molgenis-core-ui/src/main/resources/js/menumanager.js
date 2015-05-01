@@ -13,7 +13,7 @@
 						'id' : id,
 						'label' : label,
 						'items' : submenu,
-						'type': 'menu'
+						'type' : 'menu'
 					});
 					serializeMenuRec(sublist, submenu);
 
@@ -37,13 +37,50 @@
 		var menuTemplate = Handlebars.compile($("#menu-template").html());
 		var itemTemplate = Handlebars.compile($("#item-template").html());
 
-		$('#menu-item-select').select2({width: 'resolve'});
-		
+		var styleName;
+
+		$('#bootstrap-theme-select').on('change', function() {
+			// Set selected style name to use in ajax post
+			styleName = $(this).find(":selected").text();
+
+			var cssLocation = $(this).val();
+			var link = $('<link />').attr('id', 'bootstrap-theme').attr('rel', 'stylesheet').attr('type', 'text/css');
+
+			if (cssLocation.indexOf("http") === 0) {
+				$(link).attr('href', cssLocation);
+			} else {
+				$(link).attr('href', '/css/themes/' + cssLocation);
+			}
+
+			$('#bootstrap-theme').remove();
+			$('head').append(link);
+		});
+
+		$('#save-selected-bootstrap-theme').on('click', function(event) {
+			event.preventDefault();
+			var selectedBootstrapTheme = $('#bootstrap-theme-select').find(":selected").text();
+			$.ajax({
+				contentType : 'application/json',
+				type : 'POST',
+				url : molgenis.getContextUrl() + '/set-bootstrap-theme',
+				data : '"' + styleName + '"',
+				success : function(succes) {
+					molgenis.createAlert([ {
+						'message' : 'Succesfully updated the molgenis bootstrap theme'
+					} ], 'success');
+				}
+			});
+		});
+
+		$('#menu-item-select').select2({
+			width : 'resolve'
+		});
+
 		// create sortable menu edit control
 		var oldContainer = null;
 		$('ol.vertical').sortable({
 			group : 'nested',
-			handle: 'span.glyphicon-move',
+			handle : 'span.glyphicon-move',
 			afterMove : function(placeholder, container) {
 				if (oldContainer != container) {
 					if (oldContainer)
@@ -57,7 +94,7 @@
 				_super(item);
 			}
 		});
-		
+
 		// delete menu / menu item
 		var container = $('#menu-editor-container');
 		$(container).on('click', '.glyphicon-trash', function(e) {
@@ -65,13 +102,13 @@
 			e.stopPropagation();
 			$(this).closest('li').remove();
 		});
-		
+
 		// edit menu
 		var editMenuForm = $('form[name="edit-menu-form"]');
 		editMenuForm.validate();
 		editMenuForm.submit(function(e) {
 			e.preventDefault();
-			if($(this).valid()) {
+			if ($(this).valid()) {
 				var element = editMenuForm.data('element');
 				element.replaceWith($(menuTemplate({
 					id : $('input[name="menu-id"]', editMenuForm).val(),
@@ -80,20 +117,20 @@
 				$('#edit-menu-modal').modal('hide');
 			}
 		});
-		
-		$(container).on('click', '.edit-menu-btn', function () {
+
+		$(container).on('click', '.edit-menu-btn', function() {
 			var element = $(this).closest('li');
 			$('input[name="menu-id"]', editMenuForm).val(element.data('id'));
 			$('input[name="menu-name"]', editMenuForm).val(element.data('label'));
 			editMenuForm.data('element', element);
 		});
-		
+
 		// add menu group
 		var addGroupForm = $('form[name="add-menu-group-form"]');
 		addGroupForm.validate();
 		addGroupForm.submit(function(e) {
 			e.preventDefault();
-			if($(this).valid()) {
+			if ($(this).valid()) {
 				$('li.root>ol', container).prepend(menuTemplate({
 					id : $('input[name="menu-id"]', addGroupForm).val(),
 					label : $('input[name="menu-name"]', addGroupForm).val()
@@ -104,27 +141,27 @@
 			var id = $(this).val().trim().replace(/\s+/g, '').toLowerCase();
 			$('input[name="menu-id"]', addGroupForm).val(id);
 		});
-		
+
 		// add menu item
 		var addItemForm = $('form[name="add-menu-item-form"]');
 		addItemForm.validate();
 		addItemForm.submit(function(e) {
 			e.preventDefault();
-			if($(this).valid()) {
+			if ($(this).valid()) {
 				$('li.root>ol', container).prepend(itemTemplate({
 					id : $('select[name="menu-item-select"]', addItemForm).val(),
 					label : $('input[name="menu-item-name"]', addItemForm).val(),
-					params: $('input[name="menu-item-params"]', addItemForm).val()
+					params : $('input[name="menu-item-params"]', addItemForm).val()
 				}));
 			}
 		});
-		
+
 		// edit menu item
 		var editItemForm = $('form[name="edit-item-form"]');
 		editItemForm.validate();
 		editItemForm.submit(function(e) {
 			e.preventDefault();
-			if($(this).valid()) {
+			if ($(this).valid()) {
 				editItemForm.data('element').replaceWith(itemTemplate({
 					id : $('select[name="menu-item-select"]', editItemForm).val(),
 					label : $('input[name="menu-item-name"]', editItemForm).val(),
@@ -133,26 +170,26 @@
 				$('#edit-item-modal').modal('hide');
 			}
 		});
-		
-		$(container).on('click', '.edit-item-btn', function () {
+
+		$(container).on('click', '.edit-item-btn', function() {
 			var element = $(this).closest('li');
 			$('select[name="menu-item-select"]', editItemForm).val(element.data('id'));
 			$('input[name="menu-item-name"]', editItemForm).val(element.data('label'));
 			$('input[name="menu-item-params"]', editItemForm).val(element.data('params'));
 			editItemForm.data('element', element);
 		});
-		
+
 		// save menu
 		var saveMenuForm = $('form[name="save-menu-form"]');
 		saveMenuForm.validate();
 		saveMenuForm.submit(function(e) {
 			e.preventDefault();
-			if($(this).valid()) {
+			if ($(this).valid()) {
 				$.ajax({
 					type : $(this).attr('method'),
 					url : $(this).attr('action'),
 					data : JSON.stringify(serializeMenu(container)),
-					contentType: 'application/json'
+					contentType : 'application/json'
 				}).done(function() {
 					location.reload();
 				});
