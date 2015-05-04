@@ -2,6 +2,7 @@ package org.molgenis.data.annotation.impl;
 
 import org.molgenis.data.annotation.AbstractAnnotatorTest;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.io.IOException;
 
@@ -15,4 +16,10 @@ public class DeNovoAnnotatorTest extends AbstractAnnotatorTest
 	{
 		annotator = new DeNovoAnnotator(settings, null);
 	}
+
+    @Test
+    public void annotateTest()
+    {
+        annotator.annotate(entities);
+    }
 }

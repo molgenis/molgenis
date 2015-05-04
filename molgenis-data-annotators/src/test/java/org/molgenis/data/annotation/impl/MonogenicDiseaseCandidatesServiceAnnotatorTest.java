@@ -55,7 +55,9 @@ public class MonogenicDiseaseCandidatesServiceAnnotatorTest
     public MolgenisSettings settings = mock(MolgenisSettings.class);
 
     public RepositoryAnnotator annotator;
-@BeforeMethod
+    private ArrayList<Entity> entities;
+
+    @BeforeMethod
 	public void beforeMethod() throws IOException
 	{
 		annotator = new MonogenicDiseaseCandidatesServiceAnnotator(settings, null);
@@ -86,6 +88,9 @@ public class MonogenicDiseaseCandidatesServiceAnnotatorTest
         entity2 = new MapEntity(metaDataCanAnnotate);
         entity3 = new MapEntity(metaDataCanAnnotate);
         entity4 = new MapEntity(metaDataCanAnnotate);
+
+        entities = new ArrayList<>();
+        entities.add(entity);
 	}
 
     @Test
@@ -98,5 +103,11 @@ public class MonogenicDiseaseCandidatesServiceAnnotatorTest
     public void canAnnotateFalseTest()
     {
         assertEquals(annotator.canAnnotate(metaDataCantAnnotate), "a required attribute has the wrong datatype");
+    }
+
+    @Test
+    public void annotateTest()
+    {
+         annotator.annotate(entities);
     }
 }

@@ -47,8 +47,9 @@ public abstract class AnnotatorTestData
 	public AttributeMetaData attributeMetaDataCantAnnotateAlt;
 
 	public MolgenisSettings settings = mock(MolgenisSettings.class);
+    public ArrayList<Entity> entities;
 
-	public AnnotatorTestData()
+    public AnnotatorTestData()
 	{
 		setValues();
 	}
@@ -73,5 +74,8 @@ public abstract class AnnotatorTestData
 		entity2 = new MapEntity(metaDataCanAnnotate);
 		entity3 = new MapEntity(metaDataCanAnnotate);
 		entity4 = new MapEntity(metaDataCanAnnotate);
+
+        entities = new ArrayList<>();
+        entities.add(entity);
 	}
 }
