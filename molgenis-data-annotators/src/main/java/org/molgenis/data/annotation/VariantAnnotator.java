@@ -22,7 +22,7 @@ public abstract class VariantAnnotator extends LocusAnnotator
 		metadata.addAttributeMetaData(VcfRepository.CHROM_META);
 		metadata.addAttributeMetaData(VcfRepository.POS_META);
 		metadata.addAttributeMetaData(VcfRepository.REF_META);
-		metadata.addAttributeMetaData(VcfRepository.POS_META);
+		metadata.addAttributeMetaData(VcfRepository.ALT_META);
 
 		return metadata;
 	}
