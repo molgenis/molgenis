@@ -6,8 +6,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.molgenis.MysqlTestConfig;
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.MysqlTestConfig;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
@@ -81,7 +81,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		DefaultEntityMetaData metaData = new DefaultEntityMetaData("MysqlPerson");
 
 		metaData.addAttribute("firstName").setNillable(false);
-		metaData.addAttribute("lastName").setNillable(false);
+		metaData.addAttribute("lastName").setNillable(false).setIdAttribute(true);
 
 		// check manually set id (using setIdAttribute)
 
