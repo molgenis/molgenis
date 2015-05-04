@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation.impl.datastructures;
+package org.molgenis.data.vcf.datastructures;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;

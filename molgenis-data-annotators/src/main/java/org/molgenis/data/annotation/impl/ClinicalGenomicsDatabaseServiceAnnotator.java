@@ -17,7 +17,7 @@ import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.annotation.utils.HgncLocationsUtils;
 import org.molgenis.data.annotation.LocusAnnotator;
-import org.molgenis.data.annotation.utils.VcfUtils;
+import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.data.annotation.impl.datastructures.CgdData;
 import org.molgenis.data.annotation.impl.datastructures.Locus;
 import org.molgenis.data.annotation.provider.CgdDataProvider;

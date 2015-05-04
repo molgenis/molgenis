@@ -17,7 +17,7 @@ import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.annotation.utils.TabixReader;
 import org.molgenis.data.annotation.VariantAnnotator;
-import org.molgenis.data.annotation.utils.VcfUtils;
+import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.data.support.AnnotationServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;

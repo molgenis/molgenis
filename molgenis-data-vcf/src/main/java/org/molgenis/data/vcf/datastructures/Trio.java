@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation.impl.datastructures;
+package org.molgenis.data.vcf.datastructures;
 
 public class Trio
 {

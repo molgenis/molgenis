@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation.utils;
+package org.molgenis.data.vcf.utils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -14,9 +14,9 @@ import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.annotation.impl.datastructures.Sample;
-import org.molgenis.data.annotation.impl.datastructures.Trio;
 import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.vcf.datastructures.Sample;
+import org.molgenis.data.vcf.datastructures.Trio;
 
 public class VcfUtils
 {

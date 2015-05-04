@@ -1,14 +1,14 @@
-package org.molgenis.data.annotation.impl;
+package org.molgenis.data.vcf.utils;
 
 import org.apache.commons.io.FileUtils;
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.annotation.utils.VcfUtils;
-import org.molgenis.data.annotation.AnnotatorTestData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ResourceUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -18,13 +18,43 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
 
+import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertTrue;
 
 @Test
-public class VcfUtilsTest extends AnnotatorTestData
+public class VcfUtilsTest
 {
-	private ArrayList<Entity> entities;
 	private DefaultEntityMetaData annotatedEntityMetadata;
+    public DefaultEntityMetaData metaDataCanAnnotate = new DefaultEntityMetaData("test");
+    public DefaultEntityMetaData metaDataCantAnnotate = new DefaultEntityMetaData("test");
+
+    public AttributeMetaData attributeMetaDataChrom = new DefaultAttributeMetaData(VcfRepository.CHROM,
+            MolgenisFieldTypes.FieldTypeEnum.STRING);
+    public AttributeMetaData attributeMetaDataPos = new DefaultAttributeMetaData(VcfRepository.POS, MolgenisFieldTypes.FieldTypeEnum.LONG);
+    public AttributeMetaData attributeMetaDataRef = new DefaultAttributeMetaData(VcfRepository.REF,
+            MolgenisFieldTypes.FieldTypeEnum.STRING);
+    public AttributeMetaData attributeMetaDataAlt = new DefaultAttributeMetaData(VcfRepository.ALT,
+            MolgenisFieldTypes.FieldTypeEnum.STRING);
+    public AttributeMetaData attributeMetaDataCantAnnotateChrom = new DefaultAttributeMetaData(VcfRepository.CHROM,
+            MolgenisFieldTypes.FieldTypeEnum.LONG);
+    public ArrayList<Entity> input = new ArrayList<Entity>();
+    public ArrayList<Entity> input1 = new ArrayList<Entity>();
+    public ArrayList<Entity> input2 = new ArrayList<Entity>();
+    public ArrayList<Entity> input3 = new ArrayList<Entity>();
+    public ArrayList<Entity> input4 = new ArrayList<Entity>();
+    public Entity entity;
+    public Entity entity1;
+    public Entity entity2;
+    public Entity entity3;
+    public Entity entity4;
+
+    public AttributeMetaData attributeMetaDataCantAnnotateFeature;
+    public AttributeMetaData attributeMetaDataCantAnnotatePos;
+    public AttributeMetaData attributeMetaDataCantAnnotateRef;
+    public AttributeMetaData attributeMetaDataCantAnnotateAlt;
+
+    public MolgenisSettings settings = mock(MolgenisSettings.class);
+    public ArrayList<Entity> entities;
 
 	@BeforeMethod
 	public void beforeMethod() throws IOException
@@ -34,8 +64,24 @@ public class VcfUtilsTest extends AnnotatorTestData
 		 * 1 10050001 test22 G A . PASS AC=22;AN=23;GTC=1,2,11 
 		 * 1 10050002 test23 G A . PASS AC=23;AN=24;GTC=2,3,12
 		 */
+        metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom);
+        metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
+        metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataRef);
+        metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataAlt);
+        metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom.getName());
 
-		metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.ID,
+        metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataCantAnnotateChrom);
+        metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataPos);
+        metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataRef);
+        metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataAlt);
+
+        entity = new MapEntity(metaDataCanAnnotate);
+        entity1 = new MapEntity(metaDataCanAnnotate);
+        entity2 = new MapEntity(metaDataCanAnnotate);
+        entity3 = new MapEntity(metaDataCanAnnotate);
+        entity4 = new MapEntity(metaDataCanAnnotate);
+
+        metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.ID,
 				MolgenisFieldTypes.FieldTypeEnum.STRING));
 		metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.QUAL,
 				MolgenisFieldTypes.FieldTypeEnum.STRING));
