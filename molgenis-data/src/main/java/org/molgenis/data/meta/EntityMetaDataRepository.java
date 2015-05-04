@@ -223,9 +223,12 @@ class EntityMetaDataRepository
 	public void delete(String entityName)
 	{
 		Entity entity = getRepository().findOne(entityName);
+		System.out.println("DELETE4 EntityMetaDataRepo:" + entity);
 		if (entity != null)
 		{
 			repository.deleteById(entityName);
+			System.out.println("DELETE5, attributes:" + entity.getEntities(ATTRIBUTES));
+
 			attributeRepository.deleteAttributes(entity.getEntities(ATTRIBUTES));
 			entityMetaDataCache.remove(entityName);
 		}
