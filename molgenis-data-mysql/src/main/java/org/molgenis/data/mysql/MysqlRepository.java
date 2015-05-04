@@ -95,24 +95,17 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	@Override
 	public void drop()
 	{
-		System.out.println("DROP MysqlRepo:" + this.getName());
 		DataAccessException remembered = null;
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 		{
 			if (att.getDataType() instanceof MrefField)
 			{
-				System.out.println("DROP SQL MREF TABLE:DROP TABLE IF EXISTS `" + getTableName() + "_" + att.getName()
-						+ "`");
-
 				DataAccessException e = tryExecute("DROP TABLE IF EXISTS `" + getTableName() + "_" + att.getName()
 						+ "`");
-				System.out.println("Exception=" + e);
 				remembered = remembered != null ? remembered : e;
 			}
 		}
-		System.out.println("DROP SQL:" + getDropSql());
 		DataAccessException e = tryExecute(getDropSql());
-		System.out.println("Exception=" + e);
 
 		remembered = remembered != null ? remembered : e;
 		if (remembered != null)

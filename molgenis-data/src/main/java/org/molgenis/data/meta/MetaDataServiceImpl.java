@@ -100,26 +100,19 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public void deleteEntityMeta(String entityName)
 	{
-		System.out.println("DELETE1:" + entityName);
 		EntityMetaData emd = getEntityMetaData(entityName);
 		if (emd != null)
 		{
-			System.out.println("DELETE2:" + emd.getName());
 			if (!emd.isAbstract())
 			{
-				System.out.println("DELETE3");
-
 				getManageableRepositoryCollection(emd).deleteEntityMeta(entityName);
 			}
 
 			entityMetaDataRepository.delete(entityName);
-			System.out.println("DELETE6");
 			if (dataService.hasRepository(entityName))
 			{
-				System.out.println("DELETE7");
 				dataService.removeRepository(entityName);
 			}
-			System.out.println("DELETE8");
 		}
 	}
 
