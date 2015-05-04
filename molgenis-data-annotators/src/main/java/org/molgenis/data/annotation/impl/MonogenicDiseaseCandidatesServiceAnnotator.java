@@ -131,12 +131,6 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 	}
 
 	@Override
-	public boolean annotationDataExists()
-	{
-		return false;
-	}
-
-	@Override
 	public String getSimpleName()
 	{
 		return NAME;
@@ -327,5 +321,16 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 				.setLabel(MONOGENICDISEASECANDIDATE_LABEL));
 		return metadata;
 	}
+
+    @Override
+    public EntityMetaData getInputMetaData(){
+        DefaultEntityMetaData entityMetaData = (DefaultEntityMetaData)super.getInputMetaData();
+        entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ThousandGenomesServiceAnnotator.THGEN_MAF, FieldTypeEnum.DECIMAL));
+        entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ExACServiceAnnotator.EXAC_MAF, FieldTypeEnum.DECIMAL));
+        entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(GoNLServiceAnnotator.GONL_MAF, FieldTypeEnum.DECIMAL));
+        entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ClinicalGenomicsDatabaseServiceAnnotator.GENERALIZED_INHERITANCE, FieldTypeEnum.TEXT));
+        entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ClinicalGenomicsDatabaseServiceAnnotator.INHERITANCE, FieldTypeEnum.TEXT));
+        return entityMetaData;
+    }
 
 }

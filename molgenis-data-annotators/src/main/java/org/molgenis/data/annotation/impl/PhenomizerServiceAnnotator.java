@@ -200,12 +200,6 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 	}
 
 	@Override
-	public boolean annotationDataExists()
-	{
-		return false;
-	}
-
-	@Override
 	public String getSimpleName()
 	{
 		return NAME;

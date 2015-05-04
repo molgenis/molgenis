@@ -320,7 +320,7 @@ public class OmimHpoAnnotator extends LocusAnnotator
 	{
 		if (geneToOmimTerms == null)
 		{
-			geneToOmimTerms = new HashMap<String, List<OMIMTerm>>();
+			geneToOmimTerms = new HashMap<>();
 
 			for (OMIMTerm omimTerm : getOmimTerms())
 			{
@@ -346,7 +346,7 @@ public class OmimHpoAnnotator extends LocusAnnotator
 	{
 		if (geneToHpoTerms == null)
 		{
-			geneToHpoTerms = new HashMap<String, List<HPOTerm>>();
+			geneToHpoTerms = new HashMap<>();
 			for (HPOTerm hpoTerm : getHpoTerms())
 			{
 				if (geneToHpoTerms.containsKey(hpoTerm.getGeneName()))
@@ -355,7 +355,7 @@ public class OmimHpoAnnotator extends LocusAnnotator
 				}
 				else
 				{
-					ArrayList<HPOTerm> hpoTermList = new ArrayList<HPOTerm>();
+					ArrayList<HPOTerm> hpoTermList = new ArrayList<>();
 					hpoTermList.add(hpoTerm);
 					geneToHpoTerms.put(hpoTerm.getGeneName(), hpoTermList);
 				}

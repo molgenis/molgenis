@@ -163,12 +163,6 @@ public class DeNovoAnnotator extends VariantAnnotator
 	}
 
 	@Override
-	public boolean annotationDataExists()
-	{
-		return true; // no annotation data required
-	}
-
-	@Override
 	public String getSimpleName()
 	{
 		return NAME;
@@ -185,7 +179,7 @@ public class DeNovoAnnotator extends VariantAnnotator
 	{
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 
-		String chrom = entity.get("#CHROM").toString();
+		String chrom = entity.get(VcfRepository.CHROM).toString();
 		if (chrom.equals("X") || chrom.equals("Y"))
 		{
 			LOG.info("Skipping allosomal variant: " + entity);
@@ -194,7 +188,7 @@ public class DeNovoAnnotator extends VariantAnnotator
 		}
 
 		// only look at variants that PASS the filter
-		String filter = entity.get("FILTER").toString();
+		String filter = entity.get(VcfRepository.FILTER).toString();
 		if (!filter.equals("PASS"))
 		{
 			LOG.info("Skipping low quality variant: " + entity);
@@ -203,7 +197,7 @@ public class DeNovoAnnotator extends VariantAnnotator
 		}
 
 		// only keep variants with overall high quality
-		Double qual = Double.parseDouble(entity.get("QUAL").toString());
+		Double qual = Double.parseDouble(entity.get(VcfRepository.QUAL).toString());
 		if (qual < 30)
 		{
 			LOG.info("Skipping low qual (<30) variant: " + entity);

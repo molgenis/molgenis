@@ -26,4 +26,10 @@ public abstract class VariantAnnotator extends LocusAnnotator
 
 		return metadata;
 	}
+
+    @Override
+    protected boolean annotationDataExists()
+    {
+        return true;
+    }
 }

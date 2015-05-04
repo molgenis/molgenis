@@ -291,8 +291,6 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 		if (ref.equals(inputReference) && alt.equals(inputAlternative))
 		{
 			maf = ac / an;
-			// LOG.info("1000G variant found for CHROM: " + chromosome + " POS: " + position + " REF: " + reference +
-			// " ALT: " + alternative + ", MAF = " + maf);
 		}
 
 		// if nothing found, try swapping ref-alt, and do 1-MAF
@@ -309,7 +307,6 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 
 		}
 
-		// FIXME: actually, they should also be inside INFO compound attribute!!
 		resultMap.put(GONL_GTC, gtc);
 		resultMap.put(GONL_MAF, maf);
 		return resultMap;

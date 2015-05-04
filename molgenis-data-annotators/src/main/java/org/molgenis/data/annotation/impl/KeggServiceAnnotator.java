@@ -66,11 +66,7 @@ public class KeggServiceAnnotator extends LocusAnnotator
 	@Override
 	public boolean annotationDataExists()
 	{
-		boolean dataExists = true;
-
-		// TODO Check if the webservices are up
-
-		return dataExists;
+		return true;
 	}
 
 	@Override

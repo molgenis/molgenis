@@ -89,11 +89,8 @@ public class CosmicServiceAnnotator extends AbstractRepositoryAnnotator implemen
 	@Override
 	public boolean annotationDataExists()
 	{
-		boolean dataExists = true;
-
 		// TODO check if the webservice is up and running
-
-		return dataExists;
+        return true;
 	}
 
 	@Override

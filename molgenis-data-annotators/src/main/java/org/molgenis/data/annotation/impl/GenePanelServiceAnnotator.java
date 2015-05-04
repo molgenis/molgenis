@@ -89,18 +89,9 @@ public class GenePanelServiceAnnotator extends VariantAnnotator
 	}
 
 	@Override
-	protected boolean annotationDataExists()
-	{
-		return true;
-	}
-
-	@Override
 	public List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException
 	{
 		List<Entity> results = new ArrayList<Entity>();
-
-		Long position = entity.getLong(VcfRepository.POS);
-		String chromosome = entity.getString(VcfRepository.CHROM);
 
 		String geneSymbol = null;
 

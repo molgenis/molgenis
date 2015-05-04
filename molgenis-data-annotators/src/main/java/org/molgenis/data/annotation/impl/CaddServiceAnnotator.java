@@ -196,8 +196,7 @@ public class CaddServiceAnnotator extends VariantAnnotator
     		}
             catch(NullPointerException npe)
     		{
-    			//overkill to print all missing? depends on CADD source file..
-    			//LOG.info("No data for CHROM: " + chromosome + " POS: " + position + " REF: " + reference + " ALT: " + alternative + " LINE: " + line);
+    			LOG.info("No data for CHROM: " + chromosome + " POS: " + position + " REF: " + reference + " ALT: " + alternative + " LINE: " + line);
     		}
 
             if (line != null)
@@ -241,9 +240,7 @@ public class CaddServiceAnnotator extends VariantAnnotator
             else //case: line == null
             {
                 LOG.warn("No hit found in CADD file for CHROM: " + chromosome + " POS: " + position + " REF: " + reference + " ALT: " + alternative);
-                //not needed? just return..??
                 done = true;
-              //  return resultMap;
             }
         }
 

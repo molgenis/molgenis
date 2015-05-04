@@ -123,7 +123,6 @@ public class CreateOneGenomeReport
 			if(phenomizerScore != null)
 			{
 				stars++;
-			//	System.out.println(phenomizerScore);
 				if(phenomizerScore < 0.05)
 				{
 					stars += 3;

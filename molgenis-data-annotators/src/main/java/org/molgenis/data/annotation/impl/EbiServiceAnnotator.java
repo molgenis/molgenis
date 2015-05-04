@@ -88,11 +88,8 @@ public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements 
 	@Override
 	public boolean annotationDataExists()
 	{
-		boolean dataExists = true;
-
 		// TODO Check if the webservice is up
-
-		return dataExists;
+		return true;
 	}
 
 	@Override

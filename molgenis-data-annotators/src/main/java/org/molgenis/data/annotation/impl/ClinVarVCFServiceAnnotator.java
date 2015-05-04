@@ -52,8 +52,8 @@ public class ClinVarVCFServiceAnnotator extends VariantAnnotator
 			+ ",Number=1,Type=String,Description=\"ClinVar clinical significance\">" });
 
 	@Autowired
-	public ClinVarVCFServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService,
-			ClinvarDataProvider clinvarDataProvider) throws IOException
+	public ClinVarVCFServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService)
+			throws IOException
 	{
 		this.molgenisSettings = molgenisSettings;
 		this.annotatorService = annotatorService;
@@ -149,7 +149,7 @@ public class ClinVarVCFServiceAnnotator extends VariantAnnotator
 		Map<String, Object> resultMap = annotateEntityWithClinVar(entity.getString(VcfRepository.CHROM),
 				entity.getLong(VcfRepository.POS), entity.getString(VcfRepository.REF),
 				entity.getString(VcfRepository.ALT));
-		return Collections.<Entity> singletonList(AnnotatorUtils.getAnnotatedEntity(this, entity, resultMap));
+		return Collections.singletonList(AnnotatorUtils.getAnnotatedEntity(this, entity, resultMap));
 	}
 
 	private synchronized Map<String, Object> annotateEntityWithClinVar(String chromosome, Long position,
