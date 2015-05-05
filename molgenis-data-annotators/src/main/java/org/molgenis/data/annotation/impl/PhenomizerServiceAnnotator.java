@@ -219,15 +219,11 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 		String[] annSplit = entity.getString(VcfRepository.getInfoPrefix() + "ANN").split("\\|", -1);
 		String gene = null;
 
-		if (annSplit[3].length() != 0)
+		if (annSplit[3].length() != 0)// else do nothing, will happen a lot for WGS data
 		{
 			gene = annSplit[3];
 			resultMap.put(PHENOMIZERPVAL, geneToPval.get(gene));
 			resultMap.put(PHENOMIZEROMIM, geneToOmimID.get(gene));
-		}
-		else
-		{
-			// do nothing, will happen a lot for WGS data
 		}
 
 		return resultMap;
@@ -242,5 +238,13 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(PHENOMIZEROMIM, FieldTypeEnum.STRING).setLabel(PHENOMIZEROMIM_LABEL));
 		return metadata;
 	}
+
+    @Override
+    public EntityMetaData getInputMetaData()
+    {
+        DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
+        metadata.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.getInfoPrefix() + "ANN", FieldTypeEnum.TEXT));
+        return metadata;
+    }
 
 }
