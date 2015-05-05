@@ -11,7 +11,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.impl.CrudRepositoryAnnotator;
+import org.molgenis.data.annotation.CrudRepositoryAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.validation.EntityValidator;
