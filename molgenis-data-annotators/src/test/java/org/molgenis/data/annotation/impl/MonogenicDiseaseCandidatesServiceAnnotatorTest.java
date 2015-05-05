@@ -138,12 +138,11 @@ public class MonogenicDiseaseCandidatesServiceAnnotatorTest
 		assertEquals(annotator.canAnnotate(metaDataCantAnnotate), "a required attribute has the wrong datatype");
 	}
 
-	@Test
-	public void annotateTest()
-	{
-		assertEquals(getExpectedEntity(), annotator.annotate(entities).next());
-		;
-	}
+    @Test
+    public void annotateTest()
+    {
+        assertEquals(annotator.annotate(entities).next(),getExpectedEntity());
+    }
 
 	public MapEntity getExpectedEntity()
 	{
