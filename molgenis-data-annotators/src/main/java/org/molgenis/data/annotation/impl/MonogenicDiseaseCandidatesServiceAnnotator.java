@@ -16,6 +16,7 @@ import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.annotation.VariantAnnotator;
@@ -41,9 +42,10 @@ import org.springframework.stereotype.Component;
 @Component("monogenicDiseaseService")
 public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 {
-	private static final Logger LOG = LoggerFactory.getLogger(MonogenicDiseaseCandidatesServiceAnnotator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MonogenicDiseaseCandidatesServiceAnnotator.class);
+    public static final String ANNOTATIONFIELD = VcfRepository.getInfoPrefix() + "ANN";
 
-	private final AnnotationService annotatorService;
+    private final AnnotationService annotatorService;
 	public static final String MONOGENICDISEASECANDIDATE_LABEL = "MONGENDISCAND";
 	private static final String HOMREF_LABEL = "HOMREF";
 	private static final String HOMALT_LABEL = "HOMALT";
@@ -140,7 +142,7 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 	public List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException
 	{
 		Map<String, Object> resultMap = annotateEntityWithMonogenicDiseaseCandidates(entity);
-		return Collections.<Entity> singletonList(AnnotatorUtils.getAnnotatedEntity(this, entity, resultMap));
+		return Collections.singletonList(AnnotatorUtils.getAnnotatedEntity(this, entity, resultMap));
 	}
 
 	private synchronized Map<String, Object> annotateEntityWithMonogenicDiseaseCandidates(Entity entity)
@@ -151,7 +153,8 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 		/**
 		 * Important variables to use in monogenic disease filter
 		 */
-		String[] annSplit = entity.getString(VcfRepository.getInfoPrefix() + "ANN").split("\\|", -1);
+		String[] annSplit = entity.getString(ANNOTATIONFIELD).split("\\|", -1);
+        if(annSplit.length < 4) throw new MolgenisDataException("Annotation field does not contain the expected input (less items than expected)");
 		double thousandGenomesMAF = entity.getDouble(ThousandGenomesServiceAnnotator.THGEN_MAF) != null ? entity
 				.getDouble(ThousandGenomesServiceAnnotator.THGEN_MAF) : 0;
 		double exacMAF = entity.getDouble(ExACServiceAnnotator.EXAC_MAF) != null ? entity
@@ -174,10 +177,10 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 		 */
 		String alleles = null;
 		String zygosity = null;
-		if (entity.getEntities("Samples") != null && !Iterables.isEmpty(entity.getEntities("Samples"))
-				&& Iterables.size(entity.getEntities("Samples")) == 1)
+		if (entity.getEntities(VcfRepository.SAMPLES) != null && !Iterables.isEmpty(entity.getEntities(VcfRepository.SAMPLES))
+				&& Iterables.size(entity.getEntities(VcfRepository.SAMPLES)) == 1)
 		{
-			for (Entity sample : entity.getEntities("SAMPLES"))
+			for (Entity sample : entity.getEntities(VcfRepository.SAMPLES))
 			{
 				alleles = sample.getString("GT");
 				break;
@@ -325,11 +328,13 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
     @Override
     public EntityMetaData getInputMetaData(){
         DefaultEntityMetaData entityMetaData = (DefaultEntityMetaData)super.getInputMetaData();
+        entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ANNOTATIONFIELD, FieldTypeEnum.TEXT));
         entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ThousandGenomesServiceAnnotator.THGEN_MAF, FieldTypeEnum.DECIMAL));
         entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ExACServiceAnnotator.EXAC_MAF, FieldTypeEnum.DECIMAL));
         entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(GoNLServiceAnnotator.GONL_MAF, FieldTypeEnum.DECIMAL));
         entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ClinicalGenomicsDatabaseServiceAnnotator.GENERALIZED_INHERITANCE, FieldTypeEnum.TEXT));
         entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ClinicalGenomicsDatabaseServiceAnnotator.INHERITANCE, FieldTypeEnum.TEXT));
+        entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.SAMPLES, FieldTypeEnum.MREF));
         return entityMetaData;
     }
 
