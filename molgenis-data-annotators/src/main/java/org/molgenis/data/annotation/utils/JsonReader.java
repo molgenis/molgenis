@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation.impl.datastructures;
+package org.molgenis.data.annotation.utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;

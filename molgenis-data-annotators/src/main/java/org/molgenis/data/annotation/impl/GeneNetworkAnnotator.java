@@ -15,7 +15,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.annotation.LocusAnnotator;
-import org.molgenis.data.annotation.impl.datastructures.JsonReader;
+import org.molgenis.data.annotation.utils.JsonReader;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
