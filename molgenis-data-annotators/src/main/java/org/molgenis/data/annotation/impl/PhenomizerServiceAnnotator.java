@@ -41,9 +41,11 @@ import org.springframework.stereotype.Component;
 @Component("phenomizerService")
 public class PhenomizerServiceAnnotator extends VariantAnnotator
 {
-	private static final Logger LOG = LoggerFactory.getLogger(PhenomizerServiceAnnotator.class);
+    //FIXME: the magic happens in a "cmd" only piece of code...
+    private static final Logger LOG = LoggerFactory.getLogger(PhenomizerServiceAnnotator.class);
+    public static final String PHENOMIZER_SERVICE_URI = "http://compbio.charite.de/phenomizer/phenomizer/PhenomizerServiceURI";
 
-	private final AnnotationService annotatorService;
+    private final AnnotationService annotatorService;
 
     public static final String PHENOMIZERPVAL_LABEL = "PHENOMIZERPVAL";
     public static final String PHENOMIZEROMIM_LABEL = "PHENOMIZEROMIM";
@@ -67,7 +69,7 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 	public PhenomizerServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService)
 			throws IOException
 	{
-		this.annotatorService = annotatorService;
+        this.annotatorService = annotatorService;
 	}
 
 	public static List<String> getHtml(String url) throws IOException
@@ -120,7 +122,7 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 		/**
 		 * Invoke web service
 		 */
-		List<String> response = getHtml("http://compbio.charite.de/phenomizer/phenomizer/PhenomizerServiceURI?mobilequery=true&numres="
+		List<String> response = getHtml(PHENOMIZER_SERVICE_URI +"?mobilequery=true&numres="
 				+ limit + "&terms=" + hpoTerms);
 
 		String pval = null;
@@ -196,7 +198,8 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
-		annotatorService.addAnnotator(this);
+        //FIXME: disabled for now
+        //annotatorService.addAnnotator(this);
 	}
 
 	@Override
