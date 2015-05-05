@@ -64,7 +64,9 @@ public class VcfRepository extends AbstractRepository
     public static final AttributeMetaData ALT_META = new DefaultAttributeMetaData(ALT,MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false).setDescription("The alternative allele observed");
     public static final AttributeMetaData POS_META = new DefaultAttributeMetaData(POS,MolgenisFieldTypes.FieldTypeEnum.LONG).setAggregateable(true).setNillable(false).setDescription("The position on the chromosome which the variant is observed");
     public static final AttributeMetaData REF_META = new DefaultAttributeMetaData(REF,MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false).setDescription("The reference allele");
-
+    public static final AttributeMetaData FILTER_META = new DefaultAttributeMetaData(FILTER,MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(true);
+    public static final AttributeMetaData QUAL_META = new DefaultAttributeMetaData(QUAL,MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(true);
+    public static final AttributeMetaData ID_META = new DefaultAttributeMetaData(ID,MolgenisFieldTypes.FieldTypeEnum.STRING).setNillable(true);
     private final File file;
 	private final String entityName;
 
@@ -218,12 +220,9 @@ public class VcfRepository extends AbstractRepository
 				entityMetaData.addAttributeMetaData(ALT_META);
 				entityMetaData.addAttributeMetaData(POS_META);
 				entityMetaData.addAttributeMetaData(REF_META);
-				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(FILTER,
-						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(true));
-				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(QUAL,
-						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(true));
-				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ID,
-						MolgenisFieldTypes.FieldTypeEnum.STRING).setNillable(true));
+				entityMetaData.addAttributeMetaData(FILTER_META);
+				entityMetaData.addAttributeMetaData(QUAL_META);
+				entityMetaData.addAttributeMetaData(ID_META);
 				DefaultAttributeMetaData idAttributeMetaData = new DefaultAttributeMetaData(INTERNAL_ID,
 						MolgenisFieldTypes.FieldTypeEnum.STRING);
 				idAttributeMetaData.setNillable(false);
