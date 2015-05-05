@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.VariantAnnotator;
+import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.support.AnnotationServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -30,7 +32,6 @@ public class GenePanelServiceAnnotator extends VariantAnnotator
 {
 	private static final Logger LOG = LoggerFactory.getLogger(GenePanelServiceAnnotator.class);
 
-	private final MolgenisSettings molgenisSettings;
 	private final AnnotationService annotatorService;
 
 	// 5GPM list
@@ -59,27 +60,23 @@ public class GenePanelServiceAnnotator extends VariantAnnotator
 	public final static String PANEL_ACMG = "GenePanel_ACMG";
 	public final static String PANEL_CHARGE = "GenePanel_CHARGE";
 
-	public static final String CUSTOMPANEL_FILE_LOCATION = "custompanel_location";
-
 	@Autowired
-	public GenePanelServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService)
+	public GenePanelServiceAnnotator(AnnotationService annotatorService)
 			throws IOException
 	{
-		this.molgenisSettings = molgenisSettings;
 		this.annotatorService = annotatorService;
 	}
 
-	public GenePanelServiceAnnotator(File cgdFileLocation, File inputVcfFile, File outputVCFFile) throws IOException
+	public GenePanelServiceAnnotator(File source, File inputVcfFile, File outputVCFFile) throws IOException
 	{
-		this.molgenisSettings = new MolgenisSimpleSettings();
-		molgenisSettings.setProperty(CUSTOMPANEL_FILE_LOCATION, cgdFileLocation.getAbsolutePath());
 		this.annotatorService = new AnnotationServiceImpl();
 	}
 
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
-		annotatorService.addAnnotator(this);
+        //FIXME: disabled for now
+		//annotatorService.addAnnotator(this);
 	}
 
 	@Override
@@ -91,8 +88,6 @@ public class GenePanelServiceAnnotator extends VariantAnnotator
 	@Override
 	public List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException
 	{
-		List<Entity> results = new ArrayList<Entity>();
-
 		String geneSymbol = null;
 
 		if (entity.getString(SnpEffServiceAnnotator.GENE_NAME) != null)
@@ -114,7 +109,6 @@ public class GenePanelServiceAnnotator extends VariantAnnotator
 					if (split[3].length() != 0)
 					{
 						geneSymbol = split[3];
-						// LOG.info("Gene symbol '" + geneSymbol + "' found for " + entity.toString());
 					}
 					else
 					{
@@ -143,7 +137,7 @@ public class GenePanelServiceAnnotator extends VariantAnnotator
 			resultMap.put(PANEL_CHARGE, "TRUE");
 		}
 
-		return results;
+		return Collections.singletonList(AnnotatorUtils.getAnnotatedEntity(this, entity, resultMap));
 
 	}
 
@@ -158,4 +152,11 @@ public class GenePanelServiceAnnotator extends VariantAnnotator
 		return metadata;
 	}
 
+    @Override
+    public EntityMetaData getInputMetaData()
+    {
+        DefaultEntityMetaData entityMetaData = (DefaultEntityMetaData) super.getInputMetaData();
+        entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.getInfoPrefix() + "ANN", FieldTypeEnum.TEXT));
+        return entityMetaData;
+    }
 }
