@@ -8,8 +8,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import org.molgenis.data.AttributeMetaData;
@@ -24,6 +22,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class SemanticSearchServiceImpl implements SemanticSearchService
 {
+	public static private final int MAX_NUM_TAGS = 3;
+
 	@Autowired
 	private OntologyService ontologyService;
 
@@ -82,16 +82,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	public List<OntologyTerm> findTags(AttributeMetaData attribute, List<String> ontologyIds)
 	{
 		String description = attribute.getDescription() == null ? attribute.getLabel() : attribute.getDescription();
-		return findTagsSync(description, ontologyIds);
-	}
-
-	private List<OntologyTerm> findTagsSync(String description, List<String> ontologyIds)
-	{
 		Set<String> searchTerms = stream(description.split("\\W+")).map(String::toLowerCase)
 				.filter(w -> !STOP_WORDS.contains(w)).collect(Collectors.toSet());
-
-		List<OntologyTerm> matchingOntologyTerms = ontologyService.findOntologyTerms(ontologyIds, searchTerms, 100);
-
-		return matchingOntologyTerms;
+		return ontologyService.findOntologyTerms(ontologyIds, searchTerms, MAX_NUM_TAGS);
 	}
 }
