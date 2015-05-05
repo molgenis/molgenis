@@ -3,26 +3,38 @@ package org.molgenis.data.semanticsearch.service.impl;
 import static java.util.Arrays.stream;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.lucene.search.spell.NGramDistance;
+import org.apache.lucene.search.spell.StringDistance;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Package;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.semanticsearch.semantic.Hit;
 import org.molgenis.data.semanticsearch.semantic.ItemizedSearchResult;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
+import org.molgenis.data.semanticsearch.string.Stemmer;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class SemanticSearchServiceImpl implements SemanticSearchService
 {
-	public static private final int MAX_NUM_TAGS = 3;
+	public static final int MAX_NUM_TAGS = 100;
+
+	private static final Logger LOG = LoggerFactory.getLogger(SemanticSearchServiceImpl.class);
 
 	@Autowired
 	private OntologyService ontologyService;
@@ -31,6 +43,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	private MetaDataService metaDataService;
 
 	public static final Set<String> STOP_WORDS;
+
+	private static StringDistance stringDistance = new NGramDistance(2);
 
 	static
 	{
@@ -67,9 +81,9 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	}
 
 	@Override
-	public Map<AttributeMetaData, List<OntologyTerm>> findTags(String entity, List<String> ontologyIds)
+	public Map<AttributeMetaData, List<Hit<OntologyTerm>>> findTags(String entity, List<String> ontologyIds)
 	{
-		Map<AttributeMetaData, List<OntologyTerm>> result = new LinkedHashMap<AttributeMetaData, List<OntologyTerm>>();
+		Map<AttributeMetaData, List<Hit<OntologyTerm>>> result = new LinkedHashMap<AttributeMetaData, List<Hit<OntologyTerm>>>();
 		EntityMetaData emd = metaDataService.getEntityMetaData(entity);
 		for (AttributeMetaData amd : emd.getAtomicAttributes())
 		{
@@ -79,11 +93,49 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	}
 
 	@Override
-	public List<OntologyTerm> findTags(AttributeMetaData attribute, List<String> ontologyIds)
+	public List<Hit<OntologyTerm>> findTags(AttributeMetaData attribute, List<String> ontologyIds)
 	{
 		String description = attribute.getDescription() == null ? attribute.getLabel() : attribute.getDescription();
-		Set<String> searchTerms = stream(description.split("\\W+")).map(String::toLowerCase)
-				.filter(w -> !STOP_WORDS.contains(w)).collect(Collectors.toSet());
-		return ontologyService.findOntologyTerms(ontologyIds, searchTerms, MAX_NUM_TAGS);
+		Set<String> searchTerms = splitIntoTerms(description);
+		LOG.info("findOntologyTerms({},{},{})", ontologyIds, searchTerms, MAX_NUM_TAGS);
+		List<OntologyTerm> candidates = ontologyService.findOntologyTerms(ontologyIds, searchTerms, MAX_NUM_TAGS);
+		LOG.info("Candidates: {}", candidates);
+		Stream<Hit<OntologyTerm>> hits = candidates.stream().map(o -> Hit.create(o, distanceFrom(o, searchTerms)))
+				.sorted();
+		LOG.info("Hits: {}", hits);
+		// TODO: now find the best combination through chao magick
+		return hits.collect(Collectors.toList());
+	}
+
+	/**
+	 * Computes the minimum distance from an ontology term and a set of search terms.<br/>
+	 * Will stem the {@link OntologyTerm} 's synonyms and the search terms, and then compute the maximum
+	 * {@link StringDistance} between them. 0 means disjunct, 1 means identical
+	 * 
+	 * @param o
+	 *            the {@link OntologyTerm}
+	 * @param searchTerms
+	 *            the search terms
+	 * @return the maximum {@link StringDistance} between the ontologyterm and the search terms
+	 */
+	public float distanceFrom(OntologyTerm o, Set<String> searchTerms)
+	{
+		Stemmer stemmer = new Stemmer();
+		Optional<Hit<String>> bestSynonym = o.getSynonyms().stream()
+				.map(synonym -> Hit.<String> create(synonym, distanceFrom(synonym, searchTerms, stemmer)))
+				.max(Comparator.naturalOrder());
+		return bestSynonym.get().getScore();
+	}
+
+	private float distanceFrom(String synonym, Set<String> searchTerms, Stemmer stemmer)
+	{
+		return stringDistance.getDistance(stemmer.stemAndJoin(splitIntoTerms(synonym)),
+				stemmer.stemAndJoin(searchTerms));
+	}
+
+	private Set<String> splitIntoTerms(String description)
+	{
+		return stream(description.split("[^\\p{IsAlphabetic}]+")).map(String::toLowerCase)
+				.filter(w -> !STOP_WORDS.contains(w)).filter(w -> !StringUtils.isEmpty(w)).collect(Collectors.toSet());
 	}
 }

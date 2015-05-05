@@ -30,7 +30,6 @@ import org.molgenis.data.semantic.Tag;
 import org.molgenis.data.semantic.TagImpl;
 import org.molgenis.data.semanticsearch.repository.TagRepository;
 import org.molgenis.data.semanticsearch.semantic.OntologyTag;
-import org.molgenis.data.semanticsearch.service.impl.OntologyTagService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -249,9 +248,8 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 		assertEquals(ontologyTagService.getTagsForPackage(p),
 				Arrays.asList(new TagImpl<Package, OntologyTerm, Ontology>("1234", p, Relation
 						.forIRI("http://molgenis.org/biobankconnect/instanceOf"), OntologyTerm.create(
-						"http://edamontology.org/data_0987", "Chromosome name", "Name of a chromosome.",
-						Collections.emptyList()), Ontology.create("EDAM", "http://edamontology.org",
-						"The EDAM ontology."))));
+						"http://edamontology.org/data_0987", "Chromosome name", "Name of a chromosome."), Ontology
+						.create("EDAM", "http://edamontology.org", "The EDAM ontology."))));
 	}
 
 	@Test
