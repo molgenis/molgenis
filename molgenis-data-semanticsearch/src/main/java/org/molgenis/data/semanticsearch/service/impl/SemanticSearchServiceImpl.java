@@ -1,7 +1,5 @@
 package org.molgenis.data.semanticsearch.service.impl;
 
-import static java.util.Arrays.stream;
-
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -30,6 +28,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.FluentIterable;
+
 public class SemanticSearchServiceImpl implements SemanticSearchService
 {
 	public static final int MAX_NUM_TAGS = 100;
@@ -45,6 +46,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	public static final Set<String> STOP_WORDS;
 
 	private static StringDistance stringDistance = new NGramDistance(2);
+
+	private Splitter termSplitter = Splitter.onPattern("[^\\p{IsAlphabetic}]+");
 
 	static
 	{
@@ -135,7 +138,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 
 	private Set<String> splitIntoTerms(String description)
 	{
-		return stream(description.split("[^\\p{IsAlphabetic}]+")).map(String::toLowerCase)
-				.filter(w -> !STOP_WORDS.contains(w)).filter(w -> !StringUtils.isEmpty(w)).collect(Collectors.toSet());
+		return FluentIterable.from(termSplitter.split(description)).transform(String::toLowerCase)
+				.filter(w -> !STOP_WORDS.contains(w)).filter(w -> !StringUtils.isEmpty(w)).toSet();
 	}
 }

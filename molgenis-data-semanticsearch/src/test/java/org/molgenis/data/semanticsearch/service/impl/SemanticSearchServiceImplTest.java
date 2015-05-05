@@ -88,7 +88,7 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 		when(ontologyService.findOntologyTerms(ontologies, of("standing", "height", "ångstrøm"), 100)).thenReturn(
 				ontologyTerms);
 		List<Hit<OntologyTerm>> terms = semanticSearchService.findTags(attribute, ontologies);
-		assertEquals(terms, asList(Hit.<OntologyTerm> create(standingHeight, 0.54762f)));
+		assertEquals(terms, asList(Hit.<OntologyTerm> create(standingHeight, 0.57143f)));
 	}
 
 	@Test
