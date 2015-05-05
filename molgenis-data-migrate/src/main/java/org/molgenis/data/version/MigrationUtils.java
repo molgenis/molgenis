@@ -32,7 +32,7 @@ public class MigrationUtils
 		String prop = getServerProperty(DB_KEY);
 		if (prop == null)
 		{
-			LOG.error("No {} property found in molgenis-server.properties.", DB_KEY);
+			return null;
 		}
 
 		return prop.substring(prop.lastIndexOf('/') + 1);
