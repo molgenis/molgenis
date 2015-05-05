@@ -151,7 +151,7 @@
                         </#if>
                         
                         <#if messageType??>
-                            <div class="alert alert-${messageType}"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>${messageType?capitalize}!</strong> ${message?html}</div>
+                            <div class="alert alert-${messageType}"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>${messageType?capitalize}!</strong><span id="molgenis-alert" ${message?html}</div>
                         </#if>
                    </div>
                 </div>

@@ -22,7 +22,7 @@
 						span({'aria-hidden': true,}, String.fromCharCode(215)) // &times;
 					) : null,
 					this.props.type === 'danger' ? molgenis.ui.Icon({name: 'exclamation-sign'}) : null,
-					this.props.type === 'danger' ? ' ' + this.props.message : this.props.message  
+					span({id: 'molgenis-alert'},this.props.type === 'danger' ? ' ' + this.props.message : this.props.message)  
 				)
 			);
 		}

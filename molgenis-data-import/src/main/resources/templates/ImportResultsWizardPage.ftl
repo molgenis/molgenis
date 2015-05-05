@@ -158,7 +158,7 @@
                 error: function (xhr, textStatus, errorThrown) {
                     var errorMessage = JSON.parse(xhr.responseText).errorMessage;
                     $('#plugin-container .alert').remove();
-                    $('#plugin-container').prepend('<div class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> ' + errorMessage + '</div>');
+                    $('#plugin-container').prepend('<div class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong><span id="upload-error"> ' + errorMessage + '</span></div>');
                 }
             });
         });
@@ -175,7 +175,7 @@
                 error: function (xhr, textStatus, errorThrown) {
                     var errorMessage = JSON.parse(xhr.responseText).errorMessage;
                     $('#plugin-container .alert').remove();
-                    $('#plugin-container').prepend('<div class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> ' + errorMessage + '</div>');
+                    $('#plugin-container').prepend('<div class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong><span id="upload-error"> ' + errorMessage + '</span></div>');
                 }
             });
         });
