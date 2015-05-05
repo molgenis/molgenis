@@ -1,5 +1,28 @@
 package org.molgenis.data.annotation.impl;
 
+import org.elasticsearch.common.collect.Iterables;
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.VariantAnnotator;
+import org.molgenis.data.annotation.provider.CgdDataProvider;
+import org.molgenis.data.annotation.provider.CgdDataProvider.generalizedInheritance;
+import org.molgenis.data.annotation.utils.AnnotatorUtils;
+import org.molgenis.data.support.AnnotationServiceImpl;
+import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.vcf.utils.VcfUtils;
+import org.molgenis.framework.server.MolgenisSettings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.stereotype.Component;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -12,29 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.elasticsearch.common.collect.Iterables;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.utils.AnnotatorUtils;
-import org.molgenis.data.annotation.VariantAnnotator;
-import org.molgenis.data.vcf.utils.VcfUtils;
-import org.molgenis.data.annotation.provider.CgdDataProvider;
-import org.molgenis.data.annotation.provider.CgdDataProvider.generalizedInheritance;
-import org.molgenis.data.support.AnnotationServiceImpl;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.framework.server.MolgenisSettings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.stereotype.Component;
-
 /**
  * Monogenic disease filter
  * 
@@ -42,10 +42,10 @@ import org.springframework.stereotype.Component;
 @Component("monogenicDiseaseService")
 public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 {
-    private static final Logger LOG = LoggerFactory.getLogger(MonogenicDiseaseCandidatesServiceAnnotator.class);
-    public static final String ANNOTATIONFIELD = VcfRepository.getInfoPrefix() + "ANN";
+	private static final Logger LOG = LoggerFactory.getLogger(MonogenicDiseaseCandidatesServiceAnnotator.class);
+	public static final String ANNOTATIONFIELD = VcfRepository.getInfoPrefix() + "ANN";
 
-    private final AnnotationService annotatorService;
+	private final AnnotationService annotatorService;
 	public static final String MONOGENICDISEASECANDIDATE_LABEL = "MONGENDISCAND";
 	private static final String HOMREF_LABEL = "HOMREF";
 	private static final String HOMALT_LABEL = "HOMALT";
@@ -68,9 +68,9 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 
 	final List<String> infoFields = Arrays
 			.asList(new String[]
-			{ "##INFO=<ID="
-					+ MONOGENICDISEASECANDIDATE.substring(VcfRepository.getInfoPrefix().length())
-					+ ",Number=1,Type=String,Description=\"Possible outcomes: EXCLUDED, INCLUDED_DOMINANT, INCLUDED_DOMINANT_HIGHIMPACT, INCLUDED_RECESSIVE, INCLUDED_RECESSIVE_HIGHIMPACT, INCLUDED_RECESSIVE_COMPOUND, INCLUDED_OTHER\">", });
+                    {"##INFO=<ID="
+                            + MONOGENICDISEASECANDIDATE.substring(VcfRepository.getInfoPrefix().length())
+                            + ",Number=1,Type=String,Description=\"Possible outcomes: EXCLUDED, INCLUDED_DOMINANT, INCLUDED_DOMINANT_HIGHIMPACT, INCLUDED_RECESSIVE, INCLUDED_RECESSIVE_HIGHIMPACT, INCLUDED_RECESSIVE_COMPOUND, INCLUDED_OTHER\">",});
 
 	@Autowired
 	public MonogenicDiseaseCandidatesServiceAnnotator(MolgenisSettings molgenisSettings,
@@ -154,7 +154,8 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 		 * Important variables to use in monogenic disease filter
 		 */
 		String[] annSplit = entity.getString(ANNOTATIONFIELD).split("\\|", -1);
-        if(annSplit.length < 4) throw new MolgenisDataException("Annotation field does not contain the expected input (less items than expected)");
+		if (annSplit.length < 4) throw new MolgenisDataException(
+				"Annotation field does not contain the expected input (less items than expected)");
 		double thousandGenomesMAF = entity.getDouble(ThousandGenomesServiceAnnotator.THGEN_MAF) != null ? entity
 				.getDouble(ThousandGenomesServiceAnnotator.THGEN_MAF) : 0;
 		double exacMAF = entity.getDouble(ExACServiceAnnotator.EXAC_MAF) != null ? entity
@@ -171,13 +172,129 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 		String condition = entity.getString(ClinicalGenomicsDatabaseServiceAnnotator.CONDITION);
 
 		// TODO: can be multiple!! even with canonical output...
+		String zygosity = checkGenotypeData(entity);
+		boolean filter = isApplyBroadSpectrumFilter(thousandGenomesMAF, exacMAF, gonlMAF, cgdGenInh, impact, zygosity);
 
+		if (filter)
+		{
+			resultMap.put(MONOGENICDISEASECANDIDATE, outcome.EXCLUDED);
+		}
+		else
+		{
+
+			/**
+			 * Sensitive filters We already know that zygosity is HET or HOMALT and MAF < 0.05
+			 */
+
+			// dominant disorders, including those may may also be recessive, and X-linked, since CGD does not
+			// distinguish
+			// dominant or recessive for those..
+			if (cgdGenInh.equals(CgdDataProvider.generalizedInheritance.DOMINANT)
+					|| cgdGenInh.equals(CgdDataProvider.generalizedInheritance.DOM_OR_REC)
+					|| cgdGenInh.equals(CgdDataProvider.generalizedInheritance.XLINKED))
+			{
+				// must be rare enough in EACH database
+				annotateForDominantDisorders(resultMap, thousandGenomesMAF, exacMAF, gonlMAF, cgdGenInh, impact);
+			}
+
+			// recessive disorders, including those may may also be dominant, and X-linked, since CGD does not
+			// distinguish
+			// dominant or recessive for those..
+			else if (cgdGenInh.equals(CgdDataProvider.generalizedInheritance.RECESSIVE)
+					|| cgdGenInh.equals(CgdDataProvider.generalizedInheritance.DOM_OR_REC)
+					|| cgdGenInh.equals(CgdDataProvider.generalizedInheritance.XLINKED))
+			{
+				annotateForRecessiveDisorders(entity, resultMap, impact, gene, zygosity);
+			}
+			else
+			{
+				LOG.info("INCLUDED variant with untypical inheritance mode '" + originalInheritance + "', condition '"
+						+ condition + "', keeping variant " + entity.toString());
+				resultMap.put(MONOGENICDISEASECANDIDATE, outcome.INCLUDED_OTHER);
+			}
+		}
+		return resultMap;
+	}
+
+	private void annotateForRecessiveDisorders(Entity entity, Map<String, Object> resultMap,
+			SnpEffServiceAnnotator.impact impact, String gene, String zygosity) throws IOException
+	{
+		// must be HOMALT for this
+		if (zygosity.equals(HOMALT))
+		{
+			resultMap
+					.put(MONOGENICDISEASECANDIDATE,
+                            impact.equals(SnpEffServiceAnnotator.impact.HIGH) ? outcome.INCLUDED_RECESSIVE_HIGHIMPACT : outcome.INCLUDED_RECESSIVE);
+		}
+		// only option left: HET, but check just in case
+		else if (zygosity.equals(HET))
+		{
+			if (genesWithCandidates.contains(gene))
+			{
+				LOG.info("INCLUDED heterozygous variant for comp. het. recessive disease because we've seen at least 1 candidate before in gene '"
+						+ gene + ", for " + entity.toString());
+				resultMap
+						.put(MONOGENICDISEASECANDIDATE,
+                                impact.equals(SnpEffServiceAnnotator.impact.HIGH) ? outcome.INCLUDED_RECESSIVE_COMPOUND_HIGHIMPACT : outcome.INCLUDED_RECESSIVE_COMPOUND);
+			}
+			else
+			{
+				genesWithCandidates.add(gene);
+				resultMap
+						.put(MONOGENICDISEASECANDIDATE,
+                                impact.equals(SnpEffServiceAnnotator.impact.HIGH) ? outcome.EXCLUDED_FIRST_OF_COMPOUND_HIGHIMPACT : outcome.EXCLUDED_FIRST_OF_COMPOUND); // exclude
+			}
+		}
+		else
+		{
+			throw new IOException("Zygosity HOMREF, something went wrong in prefilter!");
+		}
+	}
+
+	private void annotateForDominantDisorders(Map<String, Object> resultMap, double thousandGenomesMAF, double exacMAF,
+			double gonlMAF, generalizedInheritance cgdGenInh, SnpEffServiceAnnotator.impact impact)
+	{
+		if (thousandGenomesMAF < 0.0025 && exacMAF < 0.0025 && gonlMAF < 0.0025)
+		{
+			resultMap
+					.put(MONOGENICDISEASECANDIDATE,
+                            impact.equals(SnpEffServiceAnnotator.impact.HIGH) ? outcome.INCLUDED_DOMINANT_HIGHIMPACT : outcome.INCLUDED_DOMINANT);
+		}
+		// if purely dominant, exclude at this point!
+		else if (cgdGenInh.equals(generalizedInheritance.DOMINANT))
+		{
+			resultMap.put(MONOGENICDISEASECANDIDATE, outcome.EXCLUDED);
+		}
+	}
+
+	private boolean isApplyBroadSpectrumFilter(double thousandGenomesMAF, double exacMAF, double gonlMAF,
+			generalizedInheritance cgdGenInh, SnpEffServiceAnnotator.impact impact, String zygosity)
+	{
+		/**
+		 * Broad spectrum filters, already gets rid of >99% of variants
+		 */
+		boolean filter = false;
+		// not in CGD, skip variant!
+		if (cgdGenInh == null) filter = true;
+		// common variant in one of the three big databases, skip it
+		else if (thousandGenomesMAF > 0.05 || exacMAF > 0.05 || gonlMAF > 0.05) filter = true;
+		// skip any "low impact" variants
+		else if (impact.equals(SnpEffServiceAnnotator.impact.MODIFIER)
+				|| impact.equals(SnpEffServiceAnnotator.impact.LOW)) filter = true;
+		// skip any homozygous reference alleles
+		else if (zygosity.equals(HOMREF)) filter = true;
+		return filter;
+	}
+
+	private String checkGenotypeData(Entity entity) throws IOException
+	{
 		/**
 		 * Read and check genotype data
 		 */
 		String alleles = null;
-		String zygosity = null;
-		if (entity.getEntities(VcfRepository.SAMPLES) != null && !Iterables.isEmpty(entity.getEntities(VcfRepository.SAMPLES))
+		String zygosity;
+		if (entity.getEntities(VcfRepository.SAMPLES) != null
+				&& !Iterables.isEmpty(entity.getEntities(VcfRepository.SAMPLES))
 				&& Iterables.size(entity.getEntities(VcfRepository.SAMPLES)) == 1)
 		{
 			for (Entity sample : entity.getEntities(VcfRepository.SAMPLES))
@@ -216,104 +333,7 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 		{
 			zygosity = HET;
 		}
-
-		/**
-		 * Broad spectrum filters, already gets rid of >99% of variants
-		 */
-		boolean filter = false;
-		// not in CGD, skip variant!
-		if (cgdGenInh == null) filter = true;
-		// common variant in one of the three big databases, skip it
-		else if (thousandGenomesMAF > 0.05 || exacMAF > 0.05 || gonlMAF > 0.05) filter = true;
-		// skip any "low impact" variants
-		else if (impact.equals(SnpEffServiceAnnotator.impact.MODIFIER)
-				|| impact.equals(SnpEffServiceAnnotator.impact.LOW)) filter = true;
-		// skip any homozygous reference alleles
-		else if (zygosity.equals(HOMREF)) filter = true;
-
-		if (filter)
-		{
-			resultMap.put(MONOGENICDISEASECANDIDATE, outcome.EXCLUDED);
-			return resultMap;
-		}
-
-		/**
-		 * Sensitive filters We already know that zygosity is HET or HOMALT and MAF < 0.05
-		 */
-
-		// dominant disorders, including those may may also be recessive, and X-linked, since CGD does not distinguish
-		// dominant or recessive for those..
-		if (cgdGenInh.equals(CgdDataProvider.generalizedInheritance.DOMINANT)
-				|| cgdGenInh.equals(CgdDataProvider.generalizedInheritance.DOM_OR_REC)
-				|| cgdGenInh.equals(CgdDataProvider.generalizedInheritance.XLINKED))
-		{
-			// must be rare enough in EACH database
-			if (thousandGenomesMAF < 0.0025 && exacMAF < 0.0025 && gonlMAF < 0.0025)
-			{
-				resultMap
-						.put(MONOGENICDISEASECANDIDATE,
-								impact.equals(SnpEffServiceAnnotator.impact.HIGH) ? outcome.INCLUDED_DOMINANT_HIGHIMPACT : outcome.INCLUDED_DOMINANT);
-				return resultMap;
-			}
-			// if purely dominant, exclude at this point!
-			else if (cgdGenInh.equals(CgdDataProvider.generalizedInheritance.DOMINANT)) filter = true;
-		}
-
-		if (filter)
-		{
-			resultMap.put(MONOGENICDISEASECANDIDATE, outcome.EXCLUDED);
-			return resultMap;
-		}
-		// recessive disorders, including those may may also be dominant, and X-linked, since CGD does not distinguish
-		// dominant or recessive for those..
-		if (cgdGenInh.equals(CgdDataProvider.generalizedInheritance.RECESSIVE)
-				|| cgdGenInh.equals(CgdDataProvider.generalizedInheritance.DOM_OR_REC)
-				|| cgdGenInh.equals(CgdDataProvider.generalizedInheritance.XLINKED))
-		{
-			// must be HOMALT for this
-			if (zygosity.equals(HOMALT))
-			{
-				resultMap
-						.put(MONOGENICDISEASECANDIDATE,
-								impact.equals(SnpEffServiceAnnotator.impact.HIGH) ? outcome.INCLUDED_RECESSIVE_HIGHIMPACT : outcome.INCLUDED_RECESSIVE);
-				return resultMap;
-			}
-			// only option left: HET, but check just in case
-			else if (zygosity.equals(HET))
-			{
-				if (genesWithCandidates.contains(gene))
-				{
-					LOG.info("INCLUDED heterozygous variant for comp. het. recessive disease because we've seen at least 1 candidate before in gene '"
-							+ gene + ", for " + entity.toString());
-					resultMap
-							.put(MONOGENICDISEASECANDIDATE,
-									impact.equals(SnpEffServiceAnnotator.impact.HIGH) ? outcome.INCLUDED_RECESSIVE_COMPOUND_HIGHIMPACT : outcome.INCLUDED_RECESSIVE_COMPOUND);
-					return resultMap;
-				}
-				else
-				{
-					genesWithCandidates.add(gene);
-					resultMap
-							.put(MONOGENICDISEASECANDIDATE,
-									impact.equals(SnpEffServiceAnnotator.impact.HIGH) ? outcome.EXCLUDED_FIRST_OF_COMPOUND_HIGHIMPACT : outcome.EXCLUDED_FIRST_OF_COMPOUND); // exclude
-					return resultMap;
-				}
-			}
-			else
-			{
-				throw new IOException("Zygosity HOMREF, something went wrong in prefilter!");
-			}
-		}
-
-		else
-		{
-			LOG.info("INCLUDED variant with untypical inheritance mode '" + originalInheritance + "', condition '"
-					+ condition + "', keeping variant " + entity.toString());
-			resultMap.put(MONOGENICDISEASECANDIDATE, outcome.INCLUDED_OTHER);
-			return resultMap;
-		}
-
-
+		return zygosity;
 	}
 
 	@Override
@@ -325,17 +345,23 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 		return metadata;
 	}
 
-    @Override
-    public EntityMetaData getInputMetaData(){
-        DefaultEntityMetaData entityMetaData = (DefaultEntityMetaData)super.getInputMetaData();
-        entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ANNOTATIONFIELD, FieldTypeEnum.TEXT));
-        entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ThousandGenomesServiceAnnotator.THGEN_MAF, FieldTypeEnum.DECIMAL));
-        entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ExACServiceAnnotator.EXAC_MAF, FieldTypeEnum.DECIMAL));
-        entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(GoNLServiceAnnotator.GONL_MAF, FieldTypeEnum.DECIMAL));
-        entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ClinicalGenomicsDatabaseServiceAnnotator.GENERALIZED_INHERITANCE, FieldTypeEnum.TEXT));
-        entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ClinicalGenomicsDatabaseServiceAnnotator.INHERITANCE, FieldTypeEnum.TEXT));
-        entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.SAMPLES, FieldTypeEnum.MREF));
-        return entityMetaData;
-    }
+	@Override
+	public EntityMetaData getInputMetaData()
+	{
+		DefaultEntityMetaData entityMetaData = (DefaultEntityMetaData) super.getInputMetaData();
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ANNOTATIONFIELD, FieldTypeEnum.TEXT));
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ThousandGenomesServiceAnnotator.THGEN_MAF,
+				FieldTypeEnum.DECIMAL));
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ExACServiceAnnotator.EXAC_MAF,
+				FieldTypeEnum.DECIMAL));
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(GoNLServiceAnnotator.GONL_MAF,
+				FieldTypeEnum.DECIMAL));
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(
+				ClinicalGenomicsDatabaseServiceAnnotator.GENERALIZED_INHERITANCE, FieldTypeEnum.TEXT));
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(
+				ClinicalGenomicsDatabaseServiceAnnotator.INHERITANCE, FieldTypeEnum.TEXT));
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.SAMPLES, FieldTypeEnum.MREF));
+		return entityMetaData;
+	}
 
 }

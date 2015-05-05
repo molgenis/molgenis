@@ -36,7 +36,7 @@ public class MonogenicDiseaseCandidatesServiceAnnotatorTest
 			MolgenisFieldTypes.FieldTypeEnum.STRING);
 	public AttributeMetaData attributeMetaDataCantAnnotateChrom = new DefaultAttributeMetaData(VcfRepository.CHROM,
 			MolgenisFieldTypes.FieldTypeEnum.LONG);
-	public ArrayList<Entity> input = new ArrayList<Entity>();
+	public ArrayList<Entity> input = new ArrayList<>();
 	public Entity entity;
 	public Entity sampleEntity;
 
