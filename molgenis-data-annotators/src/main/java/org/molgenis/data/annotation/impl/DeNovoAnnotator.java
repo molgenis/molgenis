@@ -25,8 +25,6 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.framework.server.MolgenisSimpleSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,18 +32,14 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 /**
- * 
  * De novo variant annotator Uses trio data (child-mother-father), read from VCF pedigree data See:
  * http://samtools.github.io/hts-specs/VCFv4.2.pdf
- * 
- *
  **/
 @Component("deNovoService")
 public class DeNovoAnnotator extends VariantAnnotator
 {
 	private static final Logger LOG = LoggerFactory.getLogger(DeNovoAnnotator.class);
 
-	private final MolgenisSettings molgenisSettings;
 	private final AnnotationService annotatorService;
 	private HashMap<String, Trio> pedigree;
 
@@ -67,19 +61,17 @@ public class DeNovoAnnotator extends VariantAnnotator
 			+ ",Number=1,Type=String,Description=\"todo\">" });
 
 	@Autowired
-	public DeNovoAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService) throws IOException
+	public DeNovoAnnotator(AnnotationService annotatorService) throws IOException
 	{
-		this.molgenisSettings = molgenisSettings;
 		this.annotatorService = annotatorService;
 	}
 
-	public DeNovoAnnotator(File exacFileLocation, File inputVcfFile, File outputVCFFile) throws Exception
+	public DeNovoAnnotator(File deNovoFileLocation, File inputVcfFile, File outputVCFFile) throws Exception
 	{
 		// cast to a real logger to adjust to the log level
 		ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LOG;
 		root.setLevel(ch.qos.logback.classic.Level.ERROR);
 
-		this.molgenisSettings = new MolgenisSimpleSettings();
 		this.annotatorService = new AnnotationServiceImpl();
 
 		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
@@ -172,12 +164,12 @@ public class DeNovoAnnotator extends VariantAnnotator
 	public List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException
 	{
 		Map<String, Object> resultMap = annotateEntityWithDeNovo(entity);
-		return Collections.<Entity> singletonList(AnnotatorUtils.getAnnotatedEntity(this, entity, resultMap));
+		return Collections.singletonList(AnnotatorUtils.getAnnotatedEntity(this, entity, resultMap));
 	}
 
 	private synchronized Map<String, Object> annotateEntityWithDeNovo(Entity entity) throws IOException
 	{
-		Map<String, Object> resultMap = new HashMap<String, Object>();
+		Map<String, Object> resultMap = new HashMap<>();
 
 		String chrom = entity.get(VcfRepository.CHROM).toString();
 		if (chrom.equals("X") || chrom.equals("Y"))
@@ -196,109 +188,109 @@ public class DeNovoAnnotator extends VariantAnnotator
 			return resultMap;
 		}
 
+		Double ABHet = entity.get("ABHet") != null ? Double.parseDouble(entity.get("ABHet").toString()) : 0;
 		// only keep variants with overall high quality
-		Double qual = Double.parseDouble(entity.get(VcfRepository.QUAL).toString());
-		if (qual < 30)
+		if (Double.parseDouble(entity.get(VcfRepository.QUAL).toString()) < 30)
 		{
 			LOG.info("Skipping low qual (<30) variant: " + entity);
 			resultMap.put(DENOVO, 0);
-			return resultMap;
 		}
-		
-
-		/**
-		 * AB
-		 */
-		
-		Double ABHet = entity.get("ABHet") != null ? Double.parseDouble(entity.get("ABHet").toString()) : 0;
-		if (ABHet < 0.3 || ABHet > 0.5)
+		else if (ABHet < 0.3 || ABHet > 0.5)
 		{
 			LOG.info("Skipping bad het AB variant: " + entity);
 			resultMap.put(DENOVO, 0);
-			return resultMap;
 		}
-		
-		// only keep variants with overall high quality
-		Double ABHom = Double.parseDouble(entity.get("ABHom").toString());
-		if (ABHom < 0.5)
+		else if (Double.parseDouble(entity.get("ABHom").toString()) < 0.5) // only keep variants with overall high
+																			// quality
 		{
 			LOG.info("Skipping bad hom AB variant: " + entity);
 			resultMap.put(DENOVO, 0);
-			return resultMap;
 		}
-		
-		/**
-		 * Strand bias
-		 */
-		Double SB = Double.parseDouble(entity.get("SB").toString());
-		if (SB > 0.5)
+		else if (Double.parseDouble(entity.get("SB").toString()) > 0.5)// Strand bias
 		{
 			LOG.info("Skipping bad SB variant: " + entity);
 			resultMap.put(DENOVO, 0);
-			return resultMap;
 		}
-		
-		
-
-		String geneSymbol = SnpEffServiceAnnotator.getGeneNameFromEntity(entity);
-
-		// disable for now, but useful in some analyses..
-		if (false)
+		else
 		{
-			// allele frequency filter
-			double thousandGenomesMAF = entity.getDouble(ThousandGenomesServiceAnnotator.THGEN_MAF) != null ? entity
-					.getDouble(ThousandGenomesServiceAnnotator.THGEN_MAF) : 0;
-			double exacMAF = entity.getDouble(ExACServiceAnnotator.EXAC_MAF) != null ? entity
-					.getDouble(ExACServiceAnnotator.EXAC_MAF) : 0;
-			double gonlMAF = entity.getDouble(GoNLServiceAnnotator.GONL_MAF) != null ? entity
-					.getDouble(GoNLServiceAnnotator.GONL_MAF) : 0;
-			if (thousandGenomesMAF > 0.01 || exacMAF > 0.01 || gonlMAF > 0.01)
+			/**
+			 * FIXME: enable or remove -> disable for now, but useful in some analyses.. if
+			 * (alleleFrequencyFilter(entity, resultMap)) return resultMap;
+			 */
+			String geneSymbol = SnpEffServiceAnnotator.getGeneNameFromEntity(entity);
+			Iterable<Entity> samples = entity.getEntities("Samples");
+
+			HashMap<String, Trio> childToParentGenotypes = processSamples(samples);
+			HashMap<String, Trio> completeTrios = getCompleteTrios(childToParentGenotypes);
+
+			int totalDenovoForVariant = 0;
+
+			for (String child : completeTrios.keySet())
 			{
-				LOG.info("Skipping 'common' variant (>1% AF in GoNL/ExAC/1000G): " + entity);
-				resultMap.put(DENOVO, 0);
-				return resultMap;
+
+				int denovoForTrio = findDeNovoVariants(completeTrios.get(child));
+				totalDenovoForVariant += denovoForTrio;
+
+				if (geneSymbol != null)
+				{
+					// matrix of gene x trio x denovo counts
+					if (geneTrioCounts.containsKey(geneSymbol))
+					{
+						if (geneTrioCounts.get(geneSymbol).containsKey(child))
+						{
+							geneTrioCounts.get(geneSymbol).put(child,
+									geneTrioCounts.get(geneSymbol).get(child) + denovoForTrio);
+						}
+						else
+						{
+							geneTrioCounts.get(geneSymbol).put(child, denovoForTrio);
+						}
+					}
+					else
+					{
+						LinkedHashMap<String, Integer> counts = new LinkedHashMap<>();
+						counts.put(child, denovoForTrio);
+						geneTrioCounts.put(geneSymbol, counts);
+					}
+				}
+
 			}
 
-			// impact
-			String[] annSplit = entity.getString(VcfRepository.getInfoPrefix() + "ANN").split("\\|", -1);
-			SnpEffServiceAnnotator.impact impact = SnpEffServiceAnnotator.impact.valueOf(annSplit[2]);
-			if (impact.equals(SnpEffServiceAnnotator.impact.MODIFIER)
-					|| impact.equals(SnpEffServiceAnnotator.impact.LOW))
+			// also add total
+			if (geneTrioCounts.get(geneSymbol).containsKey("TOTAL"))
 			{
-				LOG.info("Skipping MODIFIER/LOW impact variant: " + entity);
-				resultMap.put(DENOVO, 0);
-				return resultMap;
+				geneTrioCounts.get(geneSymbol).put("TOTAL",
+						geneTrioCounts.get(geneSymbol).get("TOTAL") + totalDenovoForVariant);
 			}
+			else
+			{
+				geneTrioCounts.get(geneSymbol).put("TOTAL", totalDenovoForVariant);
+			}
+
+			resultMap.put(DENOVO, totalDenovoForVariant);
 		}
+		return resultMap;
+	}
 
-		Iterable<Entity> samples = entity.getEntities("Samples");
-
-		HashMap<String, Trio> childToParentGenotypes = new HashMap<String, Trio>();
-
-		// System.out.println("Variant: " + entity.get(VcfRepository.CHROM) + " " + entity.get(VcfRepository.POS) + " "
-		// + entity.get(VcfRepository.REF) + " " + entity.get(VcfRepository.ALT));
+	private HashMap<String, Trio> processSamples(Iterable<Entity> samples) throws IOException
+	{
+		HashMap<String, Trio> childToParentGenotypes = new HashMap<>();
 		for (Entity sample : samples)
 		{
 			String sampleID = sample.get("NAME").toString()
 					.substring(sample.get("NAME").toString().lastIndexOf("_") + 1);
-			// String gt = sample.get("GT") == null ? null : sample.get("GT").toString();
-
-			// System.out.println("SAMPLEID: " + sampleID);
-			// System.out.println("GT: " + gt);
-
 			// found a child
 			if (pedigree.keySet().contains(sampleID))
 			{
 				// child not previously added by finding a parent first, add here plus empty trio object
 				if (!childToParentGenotypes.containsKey(sampleID))
 				{
-					// System.out.println("CHILD - NEW TRIO");
 					Trio t = new Trio();
 					t.setChild(new Sample(sampleID, sample));
 					childToParentGenotypes.put(sampleID, t);
 				}
-				// child may have been added because the parent was found first, in that case there is only a key, so
-				// make child object + genotype!
+				// child may have been added because the parent was found first, in that case there is only a key,
+				// so make child object + genotype!
 				else if (childToParentGenotypes.containsKey(sampleID) && sample != null)
 				{
 					// System.out.println("CHILD - UPDATING GENOTYPE");
@@ -317,7 +309,6 @@ public class DeNovoAnnotator extends VariantAnnotator
 				// child not seen yet, look it up and add it here, but without genotype (!)
 				if (!childToParentGenotypes.containsKey(motherToChild.get(sampleID).getId()))
 				{
-					// System.out.println("MOTHER - NEW TRIO");
 					Trio t = new Trio();
 					t.setMother(new Sample(sampleID, sample));
 					childToParentGenotypes.put(motherToChild.get(sampleID).getId(), t);
@@ -330,7 +321,6 @@ public class DeNovoAnnotator extends VariantAnnotator
 						throw new IOException("Mother '" + sampleID + "' already known for child '"
 								+ motherToChild.get(sampleID) + "' !");
 					}
-					// System.out.println("MOTHER - UPDATING GENOTYPE");
 					childToParentGenotypes.get(motherToChild.get(sampleID).getId()).setMother(
 							new Sample(sampleID, sample));
 				}
@@ -340,7 +330,6 @@ public class DeNovoAnnotator extends VariantAnnotator
 				// child not seen yet, look it up and add it here, but without genotype (!)
 				if (!childToParentGenotypes.containsKey(fatherToChild.get(sampleID).getId()))
 				{
-					// System.out.println("FATHER - NEW TRIO");
 					Trio t = new Trio();
 					t.setFather(new Sample(sampleID, sample));
 					childToParentGenotypes.put(fatherToChild.get(sampleID).getId(), t);
@@ -353,7 +342,6 @@ public class DeNovoAnnotator extends VariantAnnotator
 						throw new IOException("Father '" + sampleID + "' already known for child '"
 								+ fatherToChild.get(sampleID) + "' !");
 					}
-					// System.out.println("FATHER - UPDATING GENOTYPE");
 					childToParentGenotypes.get(fatherToChild.get(sampleID).getId()).setFather(
 							new Sample(sampleID, sample));
 				}
@@ -363,74 +351,36 @@ public class DeNovoAnnotator extends VariantAnnotator
 				LOG.warn("Sample ID '" + sampleID
 						+ "' not in list of children, mothers or fathers !! ignoring for further analysis !!");
 			}
-
-			// System.out.println("sampleID " + sampleID);
-			// System.out.println("\t" + sample.get("GT") + " is a " + (pedigree.containsKey(sampleID) ? "child" :
-			// "parent"));
 		}
-
 		LOG.info("Found " + childToParentGenotypes.size() + " trios..");
+		return childToParentGenotypes;
+	}
 
-		HashMap<String, Trio> completeTrios = getCompleteTrios(childToParentGenotypes);
-
-		LOG.info("Of which " + completeTrios.size() + " complete, having child+mother+father..");
-
-		int totalDenovoForVariant = 0;
-
-		for (String child : completeTrios.keySet())
+	private boolean alleleFrequencyFilter(Entity entity, Map<String, Object> resultMap)
+	{
+		double thousandGenomesMAF = entity.getDouble(ThousandGenomesServiceAnnotator.THGEN_MAF) != null ? entity
+				.getDouble(ThousandGenomesServiceAnnotator.THGEN_MAF) : 0;
+		double exacMAF = entity.getDouble(ExACServiceAnnotator.EXAC_MAF) != null ? entity
+				.getDouble(ExACServiceAnnotator.EXAC_MAF) : 0;
+		double gonlMAF = entity.getDouble(GoNLServiceAnnotator.GONL_MAF) != null ? entity
+				.getDouble(GoNLServiceAnnotator.GONL_MAF) : 0;
+		if (thousandGenomesMAF > 0.01 || exacMAF > 0.01 || gonlMAF > 0.01)
 		{
-
-			int denovoForTrio = findDeNovoVariants(completeTrios.get(child));
-			totalDenovoForVariant += denovoForTrio;
-
-			if (geneSymbol != null)
-			{
-				// matrix of gene x trio x denovo counts
-				if (geneTrioCounts.containsKey(geneSymbol))
-				{
-					if (geneTrioCounts.get(geneSymbol).containsKey(child))
-					{
-						geneTrioCounts.get(geneSymbol).put(child,
-								geneTrioCounts.get(geneSymbol).get(child) + denovoForTrio);
-						// System.out.println("GENE see, CHILD seen, for gene " + geneSymbol + " child " + child);
-					}
-					else
-					{
-						// System.out.println("new child for: " + geneSymbol + " child " + child);
-						geneTrioCounts.get(geneSymbol).put(child, denovoForTrio);
-					}
-
-					// System.out.println("gene seen but NEW trio, adding: " + geneSymbol + " - " + denovoForTrio +
-					// " for trio " + child) ;
-
-				}
-				else
-				{
-					// System.out.println("all new! adding: " + geneSymbol + " - " + denovoForTrio + " for trio " +
-					// child) ;
-					LinkedHashMap<String, Integer> counts = new LinkedHashMap<String, Integer>();
-					counts.put(child, denovoForTrio);
-					geneTrioCounts.put(geneSymbol, counts);
-				}
-
-				// System.out.println(child + ", " + childToParentGenotypes.get(child));
-			}
-
+			LOG.info("Skipping 'common' variant (>1% AF in GoNL/ExAC/1000G): " + entity);
+			resultMap.put(DENOVO, 0);
+			return true;
 		}
 
-		// also add total
-		if (geneTrioCounts.get(geneSymbol).containsKey("TOTAL"))
+		// impact
+		String[] annSplit = entity.getString(VcfRepository.getInfoPrefix() + "ANN").split("\\|", -1);
+		SnpEffServiceAnnotator.impact impact = SnpEffServiceAnnotator.impact.valueOf(annSplit[2]);
+		if (impact.equals(SnpEffServiceAnnotator.impact.MODIFIER) || impact.equals(SnpEffServiceAnnotator.impact.LOW))
 		{
-			geneTrioCounts.get(geneSymbol).put("TOTAL",
-					geneTrioCounts.get(geneSymbol).get("TOTAL") + totalDenovoForVariant);
+			LOG.info("Skipping MODIFIER/LOW impact variant: " + entity);
+			resultMap.put(DENOVO, 0);
+			return true;
 		}
-		else
-		{
-			geneTrioCounts.get(geneSymbol).put("TOTAL", totalDenovoForVariant);
-		}
-
-		resultMap.put(DENOVO, totalDenovoForVariant);
-		return resultMap;
+		return false;
 	}
 
 	/**
@@ -441,7 +391,7 @@ public class DeNovoAnnotator extends VariantAnnotator
 	 */
 	public HashMap<String, Trio> getCompleteTrios(HashMap<String, Trio> trios)
 	{
-		HashMap<String, Trio> result = new HashMap<String, Trio>();
+		HashMap<String, Trio> result = new HashMap<>();
 
 		for (String key : trios.keySet())
 		{
@@ -449,71 +399,64 @@ public class DeNovoAnnotator extends VariantAnnotator
 					&& trios.get(key).getFather() != null)
 			{
 				result.put(key, trios.get(key));
-				// System.out.println("TRIO OK: " + trios.get(key));
-			}
-			else
-			{
-				// System.out.println("TRIO BAD: " + trios.get(key));
 			}
 		}
-
+		LOG.info("Of which " + result.size() + " complete, having child+mother+father..");
 		return result;
 	}
 
 	/**
 	 * Find de novo variants in complete trios Genotype may be missing
 	 * 
-	 * @param t
+	 * @param trio
 	 * @return
 	 */
-	public int findDeNovoVariants(Trio t)
+	public int findDeNovoVariants(Trio trio)
 	{
 
 		/**
 		 * Null checks
 		 */
-
-		if (t.getMother().getGenotype().get("GT") == null)
+		if (trio.getMother().getGenotype().get("GT") == null)
 		{
-			LOG.warn("Maternal genotype null, skipping trio for child " + t.getChild().getId());
+			LOG.warn("Maternal genotype null, skipping trio for child " + trio.getChild().getId());
 			return 0;
 		}
-		if (t.getFather().getGenotype().get("GT") == null)
+		if (trio.getFather().getGenotype().get("GT") == null)
 		{
-			LOG.warn("Paternal genotype null, skipping trio for child " + t.getChild().getId());
+			LOG.warn("Paternal genotype null, skipping trio for child " + trio.getChild().getId());
 			return 0;
 		}
-		if (t.getChild().getGenotype().get("GT") == null)
+		if (trio.getChild().getGenotype().get("GT") == null)
 		{
-			LOG.warn("Child genotype null, skipping trio for child " + t.getChild().getId());
+			LOG.warn("Child genotype null, skipping trio for child " + trio.getChild().getId());
 			return 0;
 		}
 
 		/**
 		 * Quality checks: genotype completeness
 		 */
-
-		String[] mat_all = t.getMother().getGenotype().get("GT").toString().split("/", -1);
+		String[] mat_all = trio.getMother().getGenotype().get("GT").toString().split("/", -1);
 		if (mat_all.length != 2)
 		{
 			LOG.warn("Maternal genotype split by '/' does not have 2 elements, skipping trio for child "
-					+ t.getChild().getId());
+					+ trio.getChild().getId());
 			return 0;
 		}
 
-		String[] pat_all = t.getFather().getGenotype().get("GT").toString().split("/", -1);
+		String[] pat_all = trio.getFather().getGenotype().get("GT").toString().split("/", -1);
 		if (pat_all.length != 2)
 		{
 			LOG.warn("Paternal genotype split by '/' does not have 2 elements, skipping trio for child "
-					+ t.getChild().getId());
+					+ trio.getChild().getId());
 			return 0;
 		}
 
-		String[] chi_all = t.getChild().getGenotype().get("GT").toString().split("/", -1);
+		String[] chi_all = trio.getChild().getGenotype().get("GT").toString().split("/", -1);
 		if (chi_all.length != 2)
 		{
 			LOG.warn("Child genotype split by '/' does not have 2 elements, skipping trio for child "
-					+ t.getChild().getId());
+					+ trio.getChild().getId());
 			return 0;
 		}
 
@@ -522,27 +465,27 @@ public class DeNovoAnnotator extends VariantAnnotator
 		 */
 		int minDepth = 20;
 
-		int mat_dp = Integer.parseInt(t.getMother().getGenotype().get("DP").toString());
+		int mat_dp = Integer.parseInt(trio.getMother().getGenotype().get("DP").toString());
 		if (mat_dp < minDepth)
 		{
 			LOG.warn("Maternal genotype has less than " + minDepth + " reads (" + mat_dp
-					+ "), skipping trio for child " + t.getChild().getId());
+					+ "), skipping trio for child " + trio.getChild().getId());
 			return 0;
 		}
 
-		int pat_dp = Integer.parseInt(t.getFather().getGenotype().get("DP").toString());
+		int pat_dp = Integer.parseInt(trio.getFather().getGenotype().get("DP").toString());
 		if (pat_dp < minDepth)
 		{
 			LOG.warn("Paternal genotype has less than " + minDepth + " reads (" + pat_dp
-					+ "), skipping trio for child " + t.getChild().getId());
+					+ "), skipping trio for child " + trio.getChild().getId());
 			return 0;
 		}
 
-		int child_dp = Integer.parseInt(t.getChild().getGenotype().get("DP").toString());
+		int child_dp = Integer.parseInt(trio.getChild().getGenotype().get("DP").toString());
 		if (child_dp < minDepth)
 		{
 			LOG.warn("Child genotype has less than " + minDepth + " reads (" + child_dp + "), skipping trio for child "
-					+ t.getChild().getId());
+					+ trio.getChild().getId());
 			return 0;
 		}
 
@@ -551,34 +494,33 @@ public class DeNovoAnnotator extends VariantAnnotator
 		 */
 		double minQual = 30.00;
 
-		double mat_gq = Double.parseDouble(t.getMother().getGenotype().get("GQ").toString());
+		double mat_gq = Double.parseDouble(trio.getMother().getGenotype().get("GQ").toString());
 		if (mat_gq < minQual)
 		{
 			LOG.warn("Maternal genotype has less than " + minQual + " quality (" + mat_gq
-					+ "), skipping trio for child " + t.getChild().getId());
+					+ "), skipping trio for child " + trio.getChild().getId());
 			return 0;
 		}
 
-		double pat_gq = Double.parseDouble(t.getFather().getGenotype().get("GQ").toString());
+		double pat_gq = Double.parseDouble(trio.getFather().getGenotype().get("GQ").toString());
 		if (pat_gq < minQual)
 		{
 			LOG.warn("Paternal genotype has less than " + minQual + " quality (" + pat_gq
-					+ "), skipping trio for child " + t.getChild().getId());
+					+ "), skipping trio for child " + trio.getChild().getId());
 			return 0;
 		}
 
-		double child_gq = Double.parseDouble(t.getChild().getGenotype().get("GQ").toString());
+		double child_gq = Double.parseDouble(trio.getChild().getGenotype().get("GQ").toString());
 		if (child_gq < minQual)
 		{
 			LOG.warn("Child genotype has less than " + minQual + " quality (" + child_gq
-					+ "), skipping trio for child " + t.getChild().getId());
+					+ "), skipping trio for child " + trio.getChild().getId());
 			return 0;
 		}
 
 		/**
 		 * Test if any combination of parent alleles can form the child alleles and return if possible
 		 */
-
 		for (String ma : mat_all)
 		{
 			for (String pa : pat_all)
@@ -595,8 +537,7 @@ public class DeNovoAnnotator extends VariantAnnotator
 		/**
 		 * If none pass, we found a de novo variant
 		 */
-		// System.out.println("De novo variant found for trio " + t);
-		LOG.info("De novo variant found for trio " + t);
+		LOG.info("De novo variant found for trio " + trio);
 		return 1;
 	}
 
@@ -608,4 +549,19 @@ public class DeNovoAnnotator extends VariantAnnotator
 		return metadata;
 	}
 
+	@Override
+	public EntityMetaData getInputMetaData()
+	{
+		DefaultEntityMetaData entityMetaData = (DefaultEntityMetaData) super.getInputMetaData();
+		entityMetaData.addAttributeMetaData(VcfRepository.FILTER_META);
+		entityMetaData.addAttributeMetaData(VcfRepository.QUAL_META);
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.getInfoPrefix() + "ANN",
+				FieldTypeEnum.TEXT));
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData("ABHet", FieldTypeEnum.STRING));
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData("ABHom", FieldTypeEnum.STRING));
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData("SB", FieldTypeEnum.STRING));
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.SAMPLES, FieldTypeEnum.MREF));
+
+		return entityMetaData;
+	}
 }
