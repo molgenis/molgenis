@@ -6,6 +6,7 @@ import java.util.concurrent.Future;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.ontology.core.model.OntologyTerm;
 
 public interface SemanticSearchService
@@ -19,6 +20,17 @@ public interface SemanticSearchService
 	 * @return AttributeMetaData of resembling attributes, sorted by relevance
 	 */
 	Iterable<AttributeMetaData> findAttributes(org.molgenis.data.EntityMetaData source, EntityMetaData target,
+			AttributeMetaData attributeMetaData);
+
+	/**
+	 * Find all relevant source attributes with explanation
+	 * 
+	 * @param source
+	 * @param target
+	 * @param attributeMetaData
+	 * @return AttributeMetaData of resembling attributes, sorted by relevance
+	 */
+	Iterable<ExplainedAttributeMetaData> explainAttributes(EntityMetaData source, EntityMetaData target,
 			AttributeMetaData attributeMetaData);
 
 	/**

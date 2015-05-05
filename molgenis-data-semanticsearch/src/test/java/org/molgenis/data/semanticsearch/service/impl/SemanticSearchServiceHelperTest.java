@@ -20,6 +20,7 @@ import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.semantic.Relation;
+import org.molgenis.data.semanticsearch.explain.service.ElasticSearchExplainService;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
@@ -288,6 +289,12 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 		OntologyTagService ontologyTagService()
 		{
 			return mock(OntologyTagService.class);
+		}
+
+		@Bean
+		ElasticSearchExplainService elasticSearchExplainService()
+		{
+			return mock(ElasticSearchExplainService.class);
 		}
 
 		@Bean
