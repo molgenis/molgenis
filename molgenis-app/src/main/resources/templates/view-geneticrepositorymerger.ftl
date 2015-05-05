@@ -8,7 +8,10 @@
         </div>
         <div class="form-group">
             <div class="col-md-10">
-                Result dataset name * <input type="text" name="resultDataset" required>
+                <label for="resultDataset" class="col-md-2 control-label">Result dataset name *</label>
+                <div class="col-md-3">
+                    <input type="text" class="form-control" name="resultDataset" id="resultDataset" required>
+                </div>    
             </div>
         </div>
             <div class="col-md-10">

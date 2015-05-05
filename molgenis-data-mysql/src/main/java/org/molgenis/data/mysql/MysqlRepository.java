@@ -178,7 +178,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				}
 
 				// text can't be unique, so don't add unique constraint when type is string
-				if (attr.isUnique() && !attr.getDataType().getEnumType().equals(FieldTypeEnum.STRING))
+				if (attr.isUnique() && !(attr.getDataType() instanceof StringField))
 				{
 					asyncJdbcTemplate.execute(getUniqueSql(attr));
 				}
@@ -261,8 +261,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 			}
 
 			// TEXT cannot be UNIQUE, don't add constraint when field type is string
-			if (attributeMetaData.isUnique()
-					&& attributeMetaData.getDataType().getEnumType().equals(FieldTypeEnum.STRING))
+			if (attributeMetaData.isUnique() && !(attributeMetaData.getDataType() instanceof StringField))
 			{
 				execute(getUniqueSql(attributeMetaData), async);
 			}
@@ -317,9 +316,8 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		String idAttrMysqlType = (idAttribute.getDataType().getEnumType().equals(FieldTypeEnum.STRING) ? VARCHAR : idAttribute
 				.getDataType().getMysqlType());
 
-		String refAttrMysqlType = (att.getRefEntity().getIdAttribute().getDataType().getEnumType()
-				.equals(FieldTypeEnum.STRING) ? VARCHAR : att.getRefEntity().getIdAttribute().getDataType()
-				.getMysqlType());
+		String refAttrMysqlType = (att.getRefEntity().getIdAttribute().getDataType() instanceof StringField ? VARCHAR : att
+				.getRefEntity().getIdAttribute().getDataType().getMysqlType());
 
 		sql.append(" CREATE TABLE ").append('`').append(getTableName()).append('_').append(att.getName()).append('`')
 				.append("(`order` INT,`").append(idAttribute.getName()).append('`').append(' ').append(idAttrMysqlType)
@@ -329,7 +327,8 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				.append('`').append(idAttribute.getName()).append('`').append(") ON DELETE CASCADE, FOREIGN KEY (")
 				.append('`').append(att.getName()).append('`').append(") REFERENCES ").append('`')
 				.append(getTableName(att.getRefEntity())).append('`').append('(').append('`')
-				.append(att.getRefEntity().getIdAttribute().getName()).append('`').append(") ON DELETE CASCADE);");
+				.append(att.getRefEntity().getIdAttribute().getName()).append('`')
+				.append(") ON DELETE CASCADE) ENGINE=InnoDB;");
 
 		return sql.toString();
 	}
@@ -444,7 +443,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 			{
 				// mysql keys can not be of type TEXT, so don't adopt the field type of a referenced entity when it is
 				// of fieldtype STRING
-				if (att.getRefEntity().getIdAttribute().getDataType().getEnumType().equals(FieldTypeEnum.STRING))
+				if (att.getRefEntity().getIdAttribute().getDataType() instanceof StringField)
 				{
 					sql.append(VARCHAR);
 				}
@@ -455,13 +454,12 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 			}
 			else
 			{
-				if (att == getEntityMetaData().getIdAttribute()
-						&& att.getDataType().getEnumType().equals(FieldTypeEnum.STRING))
+				if (att.isIdAtrribute() && att.getDataType() instanceof StringField)
 				{
 					// id attributes can not be of type TEXT so we'll change it to VARCHAR
 					sql.append(VARCHAR);
 				}
-				else if (att.isUnique() && att.getDataType().getEnumType().equals(FieldTypeEnum.STRING))
+				else if (att.isUnique() && att.getDataType() instanceof StringField)
 				{
 					// mysql TEXT fields cannot be UNIQUE, so use VARCHAR instead
 					sql.append(VARCHAR);

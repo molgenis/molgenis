@@ -6,6 +6,7 @@
 
 <@header css js/>
 
+<#if selectedEntityName??>
 <div id="entity-class" class="well clearfix">
     <h3 id="entity-class-name"></h3>
     <span id="entity-class-description"></span>
@@ -53,8 +54,9 @@
 
 <div class="modal" id="cart-modal"></div>
 
-<#if selectedEntityName??>
 <script>var selectedEntityName='${selectedEntityName?js_string}';</script>
+<#else>
+<span>No available catalogues.</span>
+<script>var selectedEntityName=undefined;</script>
 </#if>
-
 <@footer/>

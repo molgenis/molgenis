@@ -105,15 +105,16 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public void deleteEntityMeta(String entityName)
 	{
-		if (dataService.hasRepository(entityName)) dataService.removeRepository(entityName);
 		EntityMetaData emd = getEntityMetaData(entityName);
 		if (emd != null)
 		{
-			entityMetaDataRepository.delete(entityName);
 			if (!emd.isAbstract())
 			{
 				getManageableRepositoryCollection(emd).deleteEntityMeta(entityName);
 			}
+
+			entityMetaDataRepository.delete(entityName);
+			if (dataService.hasRepository(entityName)) dataService.removeRepository(entityName);
 		}
 	}
 
@@ -282,7 +283,10 @@ public class MetaDataServiceImpl implements MetaDataService
 	public void refreshCaches()
 	{
 		packageRepository.updatePackageCache();
-		RunAsSystemProxy.runAsSystem(()->{entityMetaDataRepository.fillEntityMetaDataCache();return null;});
+		RunAsSystemProxy.runAsSystem(() -> {
+			entityMetaDataRepository.fillEntityMetaDataCache();
+			return null;
+		});
 	}
 
 	@Transactional
