@@ -64,6 +64,8 @@ import org.molgenis.data.elasticsearch.util.Hit;
 import org.molgenis.data.elasticsearch.util.MultiSearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
+import org.molgenis.data.meta.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.util.DependencyResolver;
@@ -903,7 +905,7 @@ public class ElasticSearchService implements SearchService
 		{
 			LOG.debug("Deleted all Elasticsearch '" + type + "' docs");
 		}
-		
+
 		DeleteByQueryResponse deleteByQueryResponse = client.prepareDeleteByQuery(indexName)
 				.setQuery(new TermQueryBuilder("_type", type)).execute().actionGet();
 
@@ -1210,15 +1212,20 @@ public class ElasticSearchService implements SearchService
 		for (Pair<EntityMetaData, List<AttributeMetaData>> pair : referencingMetas)
 		{
 			EntityMetaData refEntityMetaData = pair.getA();
-			QueryImpl q = null;
-			for (AttributeMetaData attributeMetaData : pair.getB())
-			{
-				if (q == null) q = new QueryImpl();
-				else q.or();
-				q.in(attributeMetaData.getName(), ids);
-			}
 
-			if (dataService.count(refEntityMetaData.getName(), q) > 0) return false;
+			if (!refEntityMetaData.getName().equals(EntityMetaDataMetaData.ENTITY_NAME)
+					&& !refEntityMetaData.getName().equals(AttributeMetaDataMetaData.ENTITY_NAME))
+			{
+				QueryImpl q = null;
+				for (AttributeMetaData attributeMetaData : pair.getB())
+				{
+					if (q == null) q = new QueryImpl();
+					else q.or();
+					q.in(attributeMetaData.getName(), ids);
+				}
+
+				if (dataService.count(refEntityMetaData.getName(), q) > 0) return false;
+			}
 		}
 
 		return true;
