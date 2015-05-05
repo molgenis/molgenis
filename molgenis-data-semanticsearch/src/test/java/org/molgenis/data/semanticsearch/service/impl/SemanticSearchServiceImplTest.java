@@ -9,9 +9,10 @@ import static org.testng.Assert.assertEquals;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import org.mockito.Mockito;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.semanticsearch.semantic.Hit;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
-import org.molgenis.data.semanticsearch.service.impl.SemanticSearchServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
@@ -57,44 +58,48 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 	@Test
 	public void testSearchDescription() throws InterruptedException, ExecutionException
 	{
+		Mockito.reset(ontologyService);
 		attribute.setDescription("Standing height in meters.");
 		when(
 				ontologyService.findOntologyTerms(ontologies, ImmutableSet.<String> of("standing", "height", "meters"),
 						100)).thenReturn(ontologyTerms);
-		List<OntologyTerm> terms = semanticSearchService.findTags(attribute, ontologies);
-		assertEquals(terms, ontologyTerms);
+		List<Hit<OntologyTerm>> terms = semanticSearchService.findTags(attribute, ontologies);
+		assertEquals(terms, asList(Hit.<OntologyTerm> create(standingHeight, 2.0f / 3)));
 	}
 
 	@Test
 	public void testSearchLabel() throws InterruptedException, ExecutionException
 	{
-		attribute.setLabel("Standing height (m.)");
+		Mockito.reset(ontologyService);
+		attribute.setDescription("Standing height (m.)");
 
 		when(ontologyService.findOntologyTerms(ontologies, ImmutableSet.<String> of("standing", "height", "m"), 100))
 				.thenReturn(ontologyTerms);
-		List<OntologyTerm> terms = semanticSearchService.findTags(attribute, ontologies);
-		assertEquals(terms, ontologyTerms);
+		List<Hit<OntologyTerm>> terms = semanticSearchService.findTags(attribute, ontologies);
+		assertEquals(terms, asList(Hit.<OntologyTerm> create(standingHeight, 0.85714f)));
 	}
 
 	@Test
 	public void testSearchIsoLatin() throws InterruptedException, ExecutionException
 	{
-		attribute.setLabel("Standing height (Ångstrøm)");
+		Mockito.reset(ontologyService);
+		attribute.setDescription("Standing height (Ångstrøm)");
 
 		when(ontologyService.findOntologyTerms(ontologies, of("standing", "height", "ångstrøm"), 100)).thenReturn(
 				ontologyTerms);
-		List<OntologyTerm> terms = semanticSearchService.findTags(attribute, ontologies);
-		assertEquals(terms, ontologyTerms);
+		List<Hit<OntologyTerm>> terms = semanticSearchService.findTags(attribute, ontologies);
+		assertEquals(terms, asList(Hit.<OntologyTerm> create(standingHeight, 0.54762f)));
 	}
 
 	@Test
 	public void testSearchUnicode() throws InterruptedException, ExecutionException
 	{
-		attribute.setLabel("/əˈnædrəməs/");
+		Mockito.reset(ontologyService);
+		attribute.setDescription("/əˈnædrəməs/");
 
-		when(ontologyService.findOntologyTerms(ontologies, of("ə", "nædrəməs"), 100)).thenReturn(ontologyTerms);
-		List<OntologyTerm> terms = semanticSearchService.findTags(attribute, ontologies);
-		assertEquals(terms, ontologyTerms);
+		when(ontologyService.findOntologyTerms(ontologies, of("əˈnædrəməs"), 100)).thenReturn(ontologyTerms);
+		List<Hit<OntologyTerm>> terms = semanticSearchService.findTags(attribute, ontologies);
+		assertEquals(terms, asList(Hit.<OntologyTerm> create(standingHeight, 0.08333f)));
 	}
 
 	@Configuration
