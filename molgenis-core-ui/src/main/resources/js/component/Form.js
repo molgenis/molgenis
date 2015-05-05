@@ -598,7 +598,10 @@
 						};
 						
 						if (attr.fieldType === 'COMPOUND') {
-							controlProps['errorMessages'] = this.props.errorMessages;
+							_.extend(controlProps, {
+								errorMessages : this.props.errorMessages,
+								hideOptional : this.props.hideOptional
+							});
 						} else {
 							controlProps['errorMessage'] = this.props.errorMessages[attr.name];
 						}
