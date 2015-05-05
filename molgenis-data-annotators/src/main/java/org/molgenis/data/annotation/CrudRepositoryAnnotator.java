@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation.impl;
+package org.molgenis.data.annotation;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -12,7 +12,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
