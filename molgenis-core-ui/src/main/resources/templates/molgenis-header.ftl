@@ -136,7 +136,7 @@
         </#if>
         
         <#-- Start application content -->
-        <div class="container-fluid">
+        <div class="header container-fluid">
             <div class="row">
                 <div class="col-md-12">
                     <div id="login-modal-container-header"></div>        

@@ -1,40 +1,4 @@
-/* Sticky footer - start */
-html {
-	position: relative;
-	min-height: 100%;
-}
-
-body {
-	/* Margin bottom by footer height */
-	margin-bottom: 40px;
-}
-
-.footer {
-	position: absolute;
-	bottom: 0;
-	width: 100%;
-	/* Set the fixed height of the footer here */
-	height: 40px;
-}
-
-.footer p {
-    margin: 0 0 5px;
-}
-
-body>.container-fluid {
-    padding-top: 70px;
-}
-/* Sticky footer - end */
-
-/* Support collapsable panels */
-.panel-heading a:after {
-    font-family: 'Glyphicons Halflings';
-    content: "\e114";    
-    float: right;
-}
-.panel-heading a.collapsed:after {
-    content: "\e080";
-}
+/* Application CSS - start */
 
 #plugin-container {
 	height: 100%;
@@ -61,7 +25,54 @@ body>.container-fluid {
 	max-height: 500px;
 }
 
-/* Bootstrap tooltip style */
+/* Application CSS - end */
+/* Header - start */
+
+.header {
+	padding-top: 70px;	
+}
+
+/* Header - end */
+/* Sticky footer - start */
+
+html {
+	position: relative;
+	min-height: 100%;
+}
+
+body {
+	/* Margin bottom by footer height */
+	margin-bottom: 40px;
+}
+
+.footer {
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+	padding-top: 20px;
+	/* Set the fixed height of the footer here */
+	height: 40px;
+}
+
+.footer p {
+    margin: 0 0 5px;
+}
+
+/* Sticky footer - end */
+/* Support collapsable panels - start */
+
+.panel-heading a:after {
+    font-family: 'Glyphicons Halflings';
+    content: "\e114";    
+    float: right;
+}
+.panel-heading a.collapsed:after {
+    content: "\e080";
+}
+
+/* Support collapsable panels - end */
+/* Bootstrap tooltip style - start */
+
 .tooltip {
 	position: absolute;
 	z-index: 1020;
@@ -153,5 +164,5 @@ body>.container-fluid {
 	height: 0
 }
 
-/* end of Bootstrap tooltip style*/
+/* Bootstrap tooltip style - end*/
 
