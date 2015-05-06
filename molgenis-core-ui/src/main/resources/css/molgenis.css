@@ -25,14 +25,11 @@
 	max-height: 500px;
 }
 
-/* Application CSS - end */
-/* Header - start */
-
-.header {
+body>.container-fluid {
 	padding-top: 70px;	
 }
 
-/* Header - end */
+/* Application CSS - end */
 /* Sticky footer - start */
 
 html {
@@ -49,7 +46,6 @@ body {
 	position: absolute;
 	bottom: 0;
 	width: 100%;
-	padding-top: 20px;
 	/* Set the fixed height of the footer here */
 	height: 40px;
 }

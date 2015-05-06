@@ -3,8 +3,8 @@
                 </div><#-- close col-md-12 -->
             </div><#-- close row -->
         </div><#-- close container-fluid -->
-        <div class="footer container-fluid">
-        	<div class="row">
+        <div class="container-fluid">
+        	<div class="row footer">
         		<div class="col-md-12">
             
             		<p class="text-muted text-center small">
