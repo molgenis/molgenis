@@ -22,7 +22,6 @@ import org.molgenis.ui.MolgenisUiMenu;
 import org.molgenis.ui.MolgenisUiMenuItem;
 import org.molgenis.ui.MolgenisUiMenuItemType;
 import org.molgenis.ui.menu.Menu;
-import org.molgenis.ui.style.StyleService;
 import org.molgenis.util.FileStore;
 import org.molgenis.util.FileUploadUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +32,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.google.common.base.Predicate;
@@ -54,24 +52,21 @@ public class MenuManagerController extends MolgenisPluginController
 	private final MenuManagerService menuManagerService;
 	private final FileStore fileStore;
 	private final MolgenisUi molgenisUi;
-	private final StyleService styleService;
 
 	private static final String ERRORMESSAGE_LOGO = "The logo needs to be an image file like png or jpg.";
 
 	@Autowired
 	public MenuManagerController(MenuManagerService menuManagerService, FileStore fileStore, MolgenisUi molgenisUi,
-			MolgenisSettings molgenisSettings, StyleService styleService)
+			MolgenisSettings molgenisSettings)
 	{
 		super(URI);
 		if (menuManagerService == null) throw new IllegalArgumentException("menuManagerService is null");
 		if (molgenisUi == null) throw new IllegalArgumentException("molgenisUi is null");
 		if (fileStore == null) throw new IllegalArgumentException("fileStore is null");
-		if (styleService == null) throw new IllegalArgumentException("styleService is null");
 
 		this.menuManagerService = menuManagerService;
 		this.molgenisUi = molgenisUi;
 		this.fileStore = fileStore;
-		this.styleService = styleService;
 	}
 
 	@RequestMapping(method = GET)
@@ -107,10 +102,7 @@ public class MenuManagerController extends MolgenisPluginController
 				return molgenisPlugin1.getId().compareTo(molgenisPlugin2.getId());
 			}
 		});
-		
-		if (styleService.getSelectedStyle() != null) model.addAttribute("selectedStyle",
-				styleService.getSelectedStyle().getName());
-		model.addAttribute("availableStyles", styleService.getAvailableStyles());
+
 		model.addAttribute("menus", menus);
 		model.addAttribute("plugins", plugins);
 		model.addAttribute("molgenis_ui", molgenisUi);
@@ -168,17 +160,5 @@ public class MenuManagerController extends MolgenisPluginController
 		}
 
 		return init(model);
-	}
-
-	/**
-	 * Set a new bootstrap theme
-	 * 
-	 * @param selectedBootstrapTheme
-	 */
-	@PreAuthorize("hasAnyRole('ROLE_SU')")
-	@RequestMapping(value = "/set-bootstrap-theme", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
-	public @ResponseBody void setBootstrapTheme(@Valid @RequestBody String styleName)
-	{
-		styleService.setSelectedStyle(styleName);
 	}
 }
