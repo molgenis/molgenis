@@ -181,8 +181,6 @@ public class ClinVarVCFServiceAnnotator extends VariantAnnotator
 		catch (NullPointerException npe)
 		{
 			// overkill to print all missing, since ExAC is exome data 'only'
-			// LOG.info("No data for CHROM: " + chromosome + " POS: " + position + " REF: " + reference + " ALT: " +
-			// alternative + " LINE: " + line);
 		}
 
 		// if nothing found, return empty list for no hit

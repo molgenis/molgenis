@@ -30,21 +30,16 @@ public abstract class AnnotatorTestData
 			FieldTypeEnum.STRING);
 	public AttributeMetaData attributeMetaDataCantAnnotateChrom = new DefaultAttributeMetaData(VcfRepository.CHROM,
 			FieldTypeEnum.LONG);
-	public ArrayList<Entity> input = new ArrayList<Entity>();
-	public ArrayList<Entity> input1 = new ArrayList<Entity>();
-	public ArrayList<Entity> input2 = new ArrayList<Entity>();
-	public ArrayList<Entity> input3 = new ArrayList<Entity>();
-	public ArrayList<Entity> input4 = new ArrayList<Entity>();
+	public ArrayList<Entity> input = new ArrayList<>();
+	public ArrayList<Entity> input1 = new ArrayList<>();
+	public ArrayList<Entity> input2 = new ArrayList<>();
+	public ArrayList<Entity> input3 = new ArrayList<>();
+	public ArrayList<Entity> input4 = new ArrayList<>();
 	public Entity entity;
 	public Entity entity1;
 	public Entity entity2;
 	public Entity entity3;
 	public Entity entity4;
-
-	public AttributeMetaData attributeMetaDataCantAnnotateFeature;
-	public AttributeMetaData attributeMetaDataCantAnnotatePos;
-	public AttributeMetaData attributeMetaDataCantAnnotateRef;
-	public AttributeMetaData attributeMetaDataCantAnnotateAlt;
 
 	public MolgenisSettings settings = mock(MolgenisSettings.class);
     public ArrayList<Entity> entities;

@@ -38,8 +38,6 @@ import org.springframework.stereotype.Component;
 @Component("CgdService")
 public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 {
-	private static final Logger LOG = LoggerFactory.getLogger(ClinicalGenomicsDatabaseServiceAnnotator.class);
-
 	private final MolgenisSettings molgenisSettings;
 	private final AnnotationService annotatorService;
 	private final HgncLocationsProvider hgncLocationsProvider;

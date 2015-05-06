@@ -46,6 +46,7 @@ public class CosmicServiceAnnotator extends AbstractRepositoryAnnotator implemen
 		ApplicationListener<ContextRefreshedEvent>
 {
 	// Web url to call the ensembl web service
+    //FIXME: should be RTP
 	private static final String SERVICE_URL = "http://beta.rest.ensembl.org/feature/id/";
 	private static final String SERVICE_POSTFIX = ".json?feature=somatic_variation";
 	// ensembl service is dependant on this ID when the web service is called

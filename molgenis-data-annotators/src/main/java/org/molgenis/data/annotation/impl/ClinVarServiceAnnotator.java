@@ -92,7 +92,7 @@ public class ClinVarServiceAnnotator extends VariantAnnotator
 	@Override
 	public List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException
 	{
-		List<Entity> results = new ArrayList<Entity>();
+		List<Entity> results = new ArrayList<>();
 
 		String chromosome = entity.getString(VcfRepository.CHROM);
 		Long position = entity.getLong(VcfRepository.POS);
@@ -102,7 +102,7 @@ public class ClinVarServiceAnnotator extends VariantAnnotator
 		List<String> clinvarKeys = Arrays.asList(chromosome, Long.toString(position), referenceAllele,
 				alternativeAllele);
 		Map<List<String>, ClinvarData> clinvarData = clinvarDataProvider.getClinvarData();
-		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+		HashMap<String, Object> resultMap = new HashMap<>();
 		if (clinvarData.containsKey(clinvarKeys))
 		{
 			ClinvarData data = clinvarData.get(clinvarKeys);

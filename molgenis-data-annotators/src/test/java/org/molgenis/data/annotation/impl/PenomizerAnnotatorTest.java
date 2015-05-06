@@ -55,9 +55,6 @@ public class PenomizerAnnotatorTest {
             MolgenisFieldTypes.FieldTypeEnum.LONG);
     public ArrayList<Entity> input = new ArrayList<>();
     public Entity entity;
-    public Entity sampleEntity;
-
-    public DefaultEntityMetaData metaDataSample;
 
     public MolgenisSettings settings = mock(MolgenisSettings.class);
 

@@ -159,10 +159,10 @@ public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 	@Override
 	public List<Entity> annotateEntity(Entity entity) throws IOException
 	{
-		List<Entity> results = new ArrayList<Entity>();
-		Map<String, List<String[]>> chromosomeMap = new HashMap<String, List<String[]>>();
+		List<Entity> results = new ArrayList<>();
+		Map<String, List<String[]>> chromosomeMap = new HashMap<>();
 
-		List<String[]> listOfTriplets = new ArrayList<String[]>();
+		List<String[]> listOfTriplets = new ArrayList<>();
 
 		// a triplet contains position, reference and alternative
 		String[] triplets = new String[3];

@@ -124,7 +124,7 @@ public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 	@Override
 	public List<Entity> annotateEntity(Entity entity) throws IOException
 	{
-		List<Entity> results = new ArrayList<Entity>();
+		List<Entity> results = new ArrayList<>();
 
 		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(
 				molgenisSettings.getProperty(GENE_FILE_LOCATION_PROPERTY)), Charset.forName("UTF-8")));
