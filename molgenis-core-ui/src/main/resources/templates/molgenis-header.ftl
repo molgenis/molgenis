@@ -151,7 +151,7 @@
                         </#if>
                         
                         <#if messageType??>
-                            <div class="alert alert-${messageType}"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>${messageType?capitalize}!</strong> ${message?html}</div>
+                            <div class="alert alert-${messageType}"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>${messageType?capitalize}!</strong><span id="molgenis-alert" ${message?html}</div>
                         </#if>
                    </div>
                 </div>
@@ -230,10 +230,10 @@
 				
 				<#if authenticated?? && authenticated>
 					<form class="navbar-form navbar-right" method="post" action="/logout">
-						<button type="submit" class="btn btn-inverse btn-link">Sign out</button>
+						<button id="login-logout" type="submit" class="btn btn-inverse btn-link">Sign out</button>
 					</form>
 				<#else>
-					<a class="modal-href btn btn-default navbar-btn navbar-right" href="/account/login" data-target="login-modal-container-header">Sign in</a>
+					<a id="login-open" class="modal-href btn btn-default navbar-btn navbar-right" href="/account/login" data-target="login-modal-container-header">Sign in</a>
 				</#if>
 			</div>
 			<#-- Navbar items end -->

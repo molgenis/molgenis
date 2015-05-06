@@ -1,7 +1,7 @@
 <#if wizard.validationMessage??>
 	<script>
 		$(function() {
-			$('.bwizard-steps').after($('<div class="alert alert-block alert-danger">${wizard.validationMessage?js_string}</div>'));
+			$('.bwizard-steps').after($('<div class="alert alert-block alert-danger"><span id="molgenis-alert">${wizard.validationMessage?js_string}</span></div>'));
 			$('.pager .next').addClass('disabled');
 		});
 	</script>

@@ -30,9 +30,11 @@
 		items.push(type.charAt(0).toUpperCase() + type.slice(1));
 		items.push('!</strong> ');
 		$.each(alerts, function(i, alert) {
+		    items.push('<span id="molgenis-alert">');
 			if (i > 0)
 				items.push('<br/>');
-			items.push('<span>' + alert.message + '</span>');
+			items.push(' ' + alert.message);
+			items.push('</span>');
 		});
 		items.push('</div>');
 
