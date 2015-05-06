@@ -3,8 +3,9 @@ package org.molgenis.data.version;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 import org.slf4j.Logger;
@@ -45,7 +46,8 @@ public class MigrationUtils
 
 	public static Properties getMolgenisServerProperties()
 	{
-		try (InputStream in = new FileInputStream(getMolgenisServerPropertiesFile()))
+		try (InputStreamReader in = new InputStreamReader(new FileInputStream(getMolgenisServerPropertiesFile()),
+				StandardCharsets.UTF_8))
 		{
 			Properties p = new Properties();
 			p.load(in);
