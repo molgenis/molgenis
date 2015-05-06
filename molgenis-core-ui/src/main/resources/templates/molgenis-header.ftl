@@ -180,38 +180,36 @@
 
 
 <#-- Topmenu -->
-<#--TODO refactor to remove depency on 'Home'-->
-<#macro topmenu menu plugin_id pluginid_with_query_string> 
-	<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+<#macro topmenu menu plugin_id pluginid_with_query_string> <#--TODO refactor to remove depency on 'Home'-->
+    <#if app_top_logo?has_content>
+        <div id="Intro">
+            <img src=${app_top_logo} alt="" border="0" height="150">
+        </div>
+    </#if>
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
         <div class="container-fluid">
-			<div class="navbar-header">
-        		<#-- Logo start -->
-	    		<#if app_top_logo?has_content>
-    	    		<div id="Intro">
-        	    		<img src=${app_top_logo} alt="" border="0" height="150">
-        			</div>
-    			</#if>
-            
-            	<#list menu.items as item> 
-                	<#if item.type != "MENU" && item.name == "Home" && app_home_logo?has_content>
- 						<a class="navbar-brand" href="/menu/${menu.id?html}/${item.url?html}">
-		                	<img class="img-responsive" 
-	                		src="<#if molgenis_ui.hrefLogo?has_content>${molgenis_ui.hrefLogo?html}<#else><@resource_href "/img/logo_molgenis_small.png"/></#if>" 
-	                		alt="<#if molgenis_ui.title?has_content>${molgenis_ui.title?html}</#if>">
-                		</a>						
+            <#-- Logo start -->
+            <#list menu.items as item> 
+                <#if item.type != "MENU" && item.name == "Home" && app_home_logo?has_content>
+					<div class="navbar-header">
 						<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-molgenis-navbar">
 		                    <span class="sr-only">Toggle navigation</span>
 		                    <span class="icon-bar"></span>
         					<span class="icon-bar"></span>
         					<span class="icon-bar"></span>
 		                </button>
-	       			</#if>
-    			</#list>
-    			<#-- Logo end -->
-			</div>
+		                <a class="navbar-brand" href="/menu/${menu.id?html}/${item.url?html}">
+		                	<img class="img-responsive" 
+	                			src="<#if molgenis_ui.hrefLogo?has_content>${molgenis_ui.hrefLogo?html}<#else><@resource_href "/img/logo_molgenis_small.png"/></#if>" 
+	                			alt="<#if molgenis_ui.title?has_content>${molgenis_ui.title?html}</#if>">
+                		</a>
+					</div>
+        		</#if>
+    		</#list>
+    		<#-- Logo end -->
     		
     		<#-- Navbar items start -->
-        	<div class="collapse navbar-collapse" id="bs-molgenis-navbar">
+        	<div class="navbar-collapse collapse" id="bs-molgenis-navbar">
 				<ul class="nav navbar-nav">
 					<#list menu.items as item>
 						
@@ -219,9 +217,13 @@
 						<#if item.type != "MENU">	
 							<#if item.name != "Home" || !app_home_logo?has_content>
 								<#if item.url == pluginid_with_query_string>
-									<li class="active"><a href="#">${item.name?html}</a></li>
+									<li class="active">
+										<a href="#">${item.name?html}</a>
+									</li>
 								<#else>
-									<li><a href="/menu/${menu.id?url('UTF-8')}/${item.url?html}">${item.name?html}</a></li>
+									<li>
+										<a href="/menu/${menu.id?url('UTF-8')}/${item.url?html}">${item.name?html}</a>
+									</li>
 								</#if>
 							</#if>
 							
@@ -230,7 +232,9 @@
 							<#assign sub_menu = item>
 							<#assign menu_counter = 0>
 							<li class="dropdown">
-								<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-expanded="false">${item.name?html}<b class="caret"></b></a>
+								<a class="dropdown-toggle" data-toggle="dropdown" href="#">
+									${item.name?html}<b class="caret"></b>
+								</a>
 								
 								<ul class="dropdown-menu" role="menu">
 									<@dropdown sub_menu menu_counter />	
@@ -253,7 +257,7 @@
 			<#-- Navbar items end -->
 			
 		</div> <#-- close container -->
-	</nav> <#-- close navbar -->
+	</div> <#-- close navbar div -->
 </#macro>
 
 <#-- dropdown for entity -->
