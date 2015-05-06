@@ -40,7 +40,7 @@ public interface SemanticSearchService
 	 *            IDs of ontologies to take the {@link OntologyTerm}s from.
 	 * @return {@link Map} of {@link Hit}s for {@link OntologyTerm} results
 	 */
-	Map<AttributeMetaData, List<Hit<OntologyTerm>>> findTags(String entity, List<String> ontologyIDs);
+	Map<AttributeMetaData, Hit<OntologyTerm>> findTags(String entity, List<String> ontologyIDs);
 
 	/**
 	 * Finds {@link OntologyTerm}s for an attribute.
@@ -51,6 +51,6 @@ public interface SemanticSearchService
 	 *            IDs of ontologies to take the {@link OntologyTerm}s from.
 	 * @return {@link List} of {@link Hit}s for {@link OntologyTerm}s found, most relevant first
 	 */
-	List<Hit<OntologyTerm>> findTags(AttributeMetaData attribute, List<String> ontologyIds);
+	Hit<OntologyTerm> findTags(AttributeMetaData attribute, List<String> ontologyIds);
 
 }

@@ -12,7 +12,6 @@ import static org.testng.Assert.assertEquals;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
@@ -277,8 +276,8 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testTagAttributesInEntity()
 	{
-		Map<String, List<OntologyTag>> attributeTagMap = new HashMap<String, List<OntologyTag>>();
-		Map<AttributeMetaData, List<OntologyTerm>> tags = new HashMap<AttributeMetaData, List<OntologyTerm>>();
+		Map<String, OntologyTag> attributeTagMap = new HashMap<String, OntologyTag>();
+		Map<AttributeMetaData, OntologyTerm> tags = new HashMap<AttributeMetaData, OntologyTerm>();
 
 		EntityMetaData emd = new DefaultEntityMetaData("org.molgenis.SNP");
 		AttributeMetaData attributeMetaData = new DefaultAttributeMetaData("Chr");

@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -42,6 +43,8 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 
 	private OntologyTerm standingHeight;
 
+	private OntologyTerm bodyWeight;
+
 	private List<OntologyTerm> ontologyTerms;
 
 	private DefaultAttributeMetaData attribute;
@@ -50,8 +53,11 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 	public void beforeTest()
 	{
 		ontologies = asList("1", "2");
-		standingHeight = OntologyTerm.create("http://onto/height", "Standing height");
-		ontologyTerms = asList(standingHeight);
+		standingHeight = OntologyTerm.create("http://onto/height", "Standing height",
+				Arrays.asList("Standing height", "length"));
+		bodyWeight = OntologyTerm.create("http://onto/bmi", "Body weight",
+				Arrays.asList("Body weight", "Mass in kilograms"));
+		ontologyTerms = asList(standingHeight, bodyWeight);
 		attribute = new DefaultAttributeMetaData("attr1");
 	}
 
@@ -63,8 +69,8 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 		when(
 				ontologyService.findOntologyTerms(ontologies, ImmutableSet.<String> of("standing", "height", "meters"),
 						100)).thenReturn(ontologyTerms);
-		List<Hit<OntologyTerm>> terms = semanticSearchService.findTags(attribute, ontologies);
-		assertEquals(terms, asList(Hit.<OntologyTerm> create(standingHeight, 2.0f / 3)));
+		Hit<OntologyTerm> result = semanticSearchService.findTags(attribute, ontologies);
+		assertEquals(result, Hit.<OntologyTerm> create(standingHeight, 0.66667f));
 	}
 
 	@Test
@@ -75,8 +81,8 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 
 		when(ontologyService.findOntologyTerms(ontologies, ImmutableSet.<String> of("standing", "height", "m"), 100))
 				.thenReturn(ontologyTerms);
-		List<Hit<OntologyTerm>> terms = semanticSearchService.findTags(attribute, ontologies);
-		assertEquals(terms, asList(Hit.<OntologyTerm> create(standingHeight, 0.85714f)));
+		Hit<OntologyTerm> result = semanticSearchService.findTags(attribute, ontologies);
+		assertEquals(result, Hit.<OntologyTerm> create(standingHeight, 0.85714f));
 	}
 
 	@Test
@@ -87,8 +93,8 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 
 		when(ontologyService.findOntologyTerms(ontologies, of("standing", "height", "ångstrøm"), 100)).thenReturn(
 				ontologyTerms);
-		List<Hit<OntologyTerm>> terms = semanticSearchService.findTags(attribute, ontologies);
-		assertEquals(terms, asList(Hit.<OntologyTerm> create(standingHeight, 0.57143f)));
+		Hit<OntologyTerm> result = semanticSearchService.findTags(attribute, ontologies);
+		assertEquals(result, Hit.<OntologyTerm> create(standingHeight, 0.57143f));
 	}
 
 	@Test
@@ -98,8 +104,19 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 		attribute.setDescription("/əˈnædrəməs/");
 
 		when(ontologyService.findOntologyTerms(ontologies, of("əˈnædrəməs"), 100)).thenReturn(ontologyTerms);
-		List<Hit<OntologyTerm>> terms = semanticSearchService.findTags(attribute, ontologies);
-		assertEquals(terms, asList(Hit.<OntologyTerm> create(standingHeight, 0.08333f)));
+		Hit<OntologyTerm> result = semanticSearchService.findTags(attribute, ontologies);
+		assertEquals(result, Hit.<OntologyTerm> create(standingHeight, 0.11111f));
+	}
+
+	@Test
+	public void testSearchMultipleTags() throws InterruptedException, ExecutionException
+	{
+		Mockito.reset(ontologyService);
+		attribute.setDescription("Body mass index");
+
+		when(ontologyService.findOntologyTerms(ontologies, of("body", "mass", "index"), 100)).thenReturn(ontologyTerms);
+		Hit<OntologyTerm> result = semanticSearchService.findTags(attribute, ontologies);
+		assertEquals(result, Hit.<OntologyTerm> create(standingHeight, 0.11111f));
 	}
 
 	@Configuration
