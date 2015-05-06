@@ -20,6 +20,7 @@ public class MigrationUtils
 
 	public static final String VERSION_KEY = "molgenis.version";
 	public static final String DB_KEY = "db_uri";
+	public static final String MOLGENIS_HOME_KEY = "molgenis.home";
 
 	public static File propertiesFile;
 
@@ -62,13 +63,14 @@ public class MigrationUtils
 
 	public static File getMolgenisServerPropertiesFile()
 	{
-		if (propertiesFile == null)
+		if (propertiesFile == null || !propertiesFile.exists())
 		{
 			// get molgenis home directory
-			String molgenisHomeDir = System.getProperty("molgenis.home");
+			String molgenisHomeDir = System.getProperty(MOLGENIS_HOME_KEY);
 			if (molgenisHomeDir == null)
 			{
-				throw new IllegalArgumentException("missing required java system property 'molgenis.home'");
+				throw new IllegalArgumentException(String.format("missing required java system property '%s'",
+						MOLGENIS_HOME_KEY));
 			}
 			propertiesFile = new File(molgenisHomeDir, "molgenis-server.properties");
 		}
