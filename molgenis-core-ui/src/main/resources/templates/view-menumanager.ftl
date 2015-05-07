@@ -42,8 +42,6 @@
 			</div>
 		</div>
 		
-		<hr></hr>
-		
 		<div class="row">
 			<div class="col-md-12">
 				<form name="save-menu-form" action="${context_url?html}/save" method="POST">
@@ -51,8 +49,6 @@
 				</form>
 			</div>
 		</div>
-		
-		<hr></hr>
 		
 		<div class="row">
 			<div class="col-md-12">
