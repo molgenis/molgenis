@@ -11,7 +11,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.lucene.search.spell.NGramDistance;
 import org.apache.lucene.search.spell.StringDistance;
 import org.elasticsearch.common.base.Joiner;
 import org.molgenis.data.AttributeMetaData;
@@ -24,9 +23,12 @@ import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.semanticsearch.string.Stemmer;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
+import org.molgenis.ontology.utils.NGramMatchingModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import autovalue.shaded.com.google.common.common.collect.Sets;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.FluentIterable;
@@ -47,8 +49,6 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	public static final Set<String> STOP_WORDS;
 
 	private static final float CUTOFF = 0.4f;
-
-	private static StringDistance stringDistance = new NGramDistance(2);
 
 	private Splitter termSplitter = Splitter.onPattern("[^\\p{IsAlphabetic}]+");
 	private Joiner termJoiner = Joiner.on(' ');
@@ -129,8 +129,9 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 			}
 			else
 			{
-				// split first, then join!
-				String joinedSynonyms = termJoiner.join(bestMatchingSynonym, bestMatchingSynonymForHit);
+				Set<String> jointTerms = Sets.union(splitIntoTerms(bestMatchingSynonym),
+						splitIntoTerms(bestMatchingSynonymForHit));
+				String joinedSynonyms = termJoiner.join(jointTerms);
 				Hit<OntologyTerm> joinedHit = Hit.create(OntologyTerm.and(result.getResult(), hit.getResult()),
 						distanceFrom(joinedSynonyms, searchTerms, stemmer));
 				if (joinedHit.compareTo(result) > 0)
@@ -168,11 +169,11 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		return bestSynonym.get();
 	}
 
-	private float distanceFrom(String synonym, Set<String> searchTerms, Stemmer stemmer)
+	float distanceFrom(String synonym, Set<String> searchTerms, Stemmer stemmer)
 	{
 		String s1 = stemmer.stemAndJoin(splitIntoTerms(synonym));
 		String s2 = stemmer.stemAndJoin(searchTerms);
-		float distance = stringDistance.getDistance(s1, s2);
+		float distance = (float) NGramMatchingModel.stringMatching(s1, s2) / 100;
 		LOG.debug("Similarity between: {} and {} is {}", s1, s2, distance);
 		return distance;
 	}
