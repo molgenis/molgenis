@@ -41,6 +41,7 @@ import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.ui.MolgenisInterceptor;
 import org.molgenis.ui.menu.Menu;
@@ -590,7 +591,7 @@ public class DataExplorerController extends MolgenisPluginController
 	{
 		model.addAttribute("entity", dataService.getRepository(entityName).findOne(entityId));
 		model.addAttribute("entityMetadata", dataService.getEntityMetaData(entityName));
-		model.addAttribute("viewName", getViewName(entityName));
+		RunAsSystemProxy.runAsSystem(() -> model.addAttribute("viewName", getViewName(entityName)));
 		return "view-entityreport";
 	}
 
