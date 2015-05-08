@@ -11,7 +11,6 @@ import java.util.concurrent.ExecutionException;
 
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
-import org.molgenis.data.semanticsearch.service.impl.SemanticSearchServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
@@ -60,7 +59,7 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 		attribute.setDescription("Standing height in meters.");
 		when(
 				ontologyService.findOntologyTerms(ontologies, ImmutableSet.<String> of("standing", "height", "meters"),
-						100)).thenReturn(ontologyTerms);
+						SemanticSearchServiceImpl.MAX_NUM_TAGS)).thenReturn(ontologyTerms);
 		List<OntologyTerm> terms = semanticSearchService.findTags(attribute, ontologies);
 		assertEquals(terms, ontologyTerms);
 	}
@@ -70,7 +69,9 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 	{
 		attribute.setLabel("Standing height (m.)");
 
-		when(ontologyService.findOntologyTerms(ontologies, ImmutableSet.<String> of("standing", "height", "m"), 100))
+		when(
+				ontologyService.findOntologyTerms(ontologies, ImmutableSet.<String> of("standing", "height", "m"),
+						SemanticSearchServiceImpl.MAX_NUM_TAGS))
 				.thenReturn(ontologyTerms);
 		List<OntologyTerm> terms = semanticSearchService.findTags(attribute, ontologies);
 		assertEquals(terms, ontologyTerms);
@@ -81,7 +82,9 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 	{
 		attribute.setLabel("Standing height (Ångstrøm)");
 
-		when(ontologyService.findOntologyTerms(ontologies, of("standing", "height", "ångstrøm"), 100)).thenReturn(
+		when(
+				ontologyService.findOntologyTerms(ontologies, of("standing", "height", "ångstrøm"),
+						SemanticSearchServiceImpl.MAX_NUM_TAGS)).thenReturn(
 				ontologyTerms);
 		List<OntologyTerm> terms = semanticSearchService.findTags(attribute, ontologies);
 		assertEquals(terms, ontologyTerms);
@@ -92,7 +95,8 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 	{
 		attribute.setLabel("/əˈnædrəməs/");
 
-		when(ontologyService.findOntologyTerms(ontologies, of("ə", "nædrəməs"), 100)).thenReturn(ontologyTerms);
+		when(ontologyService.findOntologyTerms(ontologies, of("ə", "nædrəməs"), SemanticSearchServiceImpl.MAX_NUM_TAGS))
+				.thenReturn(ontologyTerms);
 		List<OntologyTerm> terms = semanticSearchService.findTags(attribute, ontologies);
 		assertEquals(terms, ontologyTerms);
 	}
