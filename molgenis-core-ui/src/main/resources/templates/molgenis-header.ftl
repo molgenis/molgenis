@@ -30,10 +30,10 @@
     
     <#-- CSS selection, configurable based on RTP setting -->
 	<#if molgeniscsstheme??>
-		<#if molgeniscsstheme?starts_with("http")>
+		<#if molgeniscsstheme?starts_with("//bootswatch.com")>
 			<link id="bootstrap-theme" rel="stylesheet" href="${molgeniscsstheme}" type="text/css">
         <#else>
-        	<link id="bootstrap-theme" rel="stylesheet" href="<@resource_href "/css/themes/${molgeniscsstheme}"/>" type="text/css">
+ 			<link id="bootstrap-theme" rel="stylesheet" href="<@resource_href "/css/themes/${molgeniscsstheme}"/>" type="text/css">
 		</#if>
     <#else>
 		<link rel="stylesheet" href="<@resource_href "/css/themes/bootstrap-molgenis.css"/>" type="text/css">
