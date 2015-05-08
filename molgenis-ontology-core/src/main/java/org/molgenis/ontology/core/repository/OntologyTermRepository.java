@@ -57,20 +57,7 @@ public class OntologyTermRepository
 		}
 
 		Iterable<Entity> termEntities = dataService.findAll(ENTITY_NAME, termsQuery.unnest());
-		List<Entity> termEntitiesList = Lists.<Entity> newArrayList(termEntities);
-
-		if (termEntitiesList.size() > 3)
-		{
-			return Lists.newArrayList(Iterables.transform(termEntitiesList.subList(0, 3),
-					OntologyTermRepository::toOntologyTerm));
-		}
-		else
-		{
-			return Lists.newArrayList(Iterables.transform(termEntitiesList, OntologyTermRepository::toOntologyTerm));
-		}
-
-		// return Lists.newArrayList(Iterables.transform(Iterables.get(termEntities, 3),
-		// OntologyTermRepository::toOntologyTerm));
+		return Lists.newArrayList(Iterables.transform(termEntities, OntologyTermRepository::toOntologyTerm));
 	}
 
 	/**
