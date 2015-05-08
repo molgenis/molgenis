@@ -1,6 +1,8 @@
 package org.molgenis.ui.style;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,14 +37,19 @@ public class StyleServiceImpl implements StyleService
 	{
 		List<Style> availableStyles = new ArrayList<Style>();
 
-		RestTemplate restTemplate = new RestTemplate();
-		String jsonString = restTemplate.getForObject(BOOTSWATCH_API_URL, String.class, "");
+		if (isURLReachable(BOOTSWATCH_API_URL, 200))
+		{
+			RestTemplate restTemplate = new RestTemplate();
+			String jsonString = restTemplate.getForObject(BOOTSWATCH_API_URL, String.class, "");
 
-		Gson gson = new Gson();
-		Map<String, List<LinkedTreeMap<String, String>>> bootSwatchApiResponse = gson.fromJson(jsonString, Map.class);
+			Gson gson = new Gson();
+			Map<String, List<LinkedTreeMap<String, String>>> bootSwatchApiResponse = gson.fromJson(jsonString,
+					Map.class);
 
-		List<LinkedTreeMap<String, String>> themes = bootSwatchApiResponse.get(THEMES_KEY);
-		themes.forEach(tree -> availableStyles.add(Style.createRemote(tree.get(CSS_MIN_KEY), tree.get(THEME_NAME_KEY))));
+			List<LinkedTreeMap<String, String>> themes = bootSwatchApiResponse.get(THEMES_KEY);
+			themes.forEach(tree -> availableStyles.add(Style.createRemote(tree.get(CSS_MIN_KEY),
+					tree.get(THEME_NAME_KEY))));
+		}
 
 		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 		try
@@ -100,5 +107,37 @@ public class StyleServiceImpl implements StyleService
 		}
 
 		return null;
+	}
+
+	/**
+	 * Pings a HTTP URL. This effectively sends a HEAD request and returns <code>true</code> if the response code is in
+	 * the 200-399 range.
+	 * 
+	 * @param url
+	 *            The HTTP URL to be pinged.
+	 * @param timeout
+	 *            The timeout in millis for both the connection timeout and the response read timeout. Note that the
+	 *            total timeout is effectively two times the given timeout.
+	 * @return <code>true</code> if the given HTTP URL has returned response code 200-399 on a HEAD request within the
+	 *         given timeout, otherwise <code>false</code>.
+	 */
+	private static boolean isURLReachable(String url, int timeout)
+	{
+		// Otherwise an exception may be thrown on invalid SSL certificates:
+		url = url.replaceFirst("^https", "http");
+
+		try
+		{
+			HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+			connection.setConnectTimeout(timeout);
+			connection.setReadTimeout(timeout);
+			connection.setRequestMethod("HEAD");
+			int responseCode = connection.getResponseCode();
+			return (200 <= responseCode && responseCode <= 399);
+		}
+		catch (IOException exception)
+		{
+			return false;
+		}
 	}
 }

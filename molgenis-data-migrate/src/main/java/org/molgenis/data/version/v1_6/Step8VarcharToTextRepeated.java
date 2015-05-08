@@ -9,7 +9,6 @@ import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.mysql.AsyncJdbcTemplate;
@@ -40,17 +39,14 @@ public class Step8VarcharToTextRepeated extends MolgenisUpgrade
 {
 	private JdbcTemplate template;
 
-	private RepositoryCollection mysql;
-
 	private DataSource dataSource;
 
 	private static final Logger LOG = LoggerFactory.getLogger(Step8VarcharToTextRepeated.class);
 
-	public Step8VarcharToTextRepeated(DataSource dataSource, RepositoryCollection mysql)
+	public Step8VarcharToTextRepeated(DataSource dataSource)
 	{
 		super(7, 8);
 		this.template = new JdbcTemplate(dataSource);
-		this.mysql = mysql;
 		this.dataSource = dataSource;
 	}
 
@@ -138,16 +134,16 @@ public class Step8VarcharToTextRepeated extends MolgenisUpgrade
 
 	private static String getModifyColumnSql(EntityMetaData emd, AttributeMetaData att)
 	{
-		return String.format("ALTER TABLE %s MODIFY COLUMN %s TEXT;", emd.getName(), att.getName());
+		return String.format("ALTER TABLE `%s` MODIFY COLUMN `%s` TEXT;", emd.getName(), att.getName());
 	}
 
 	private static String getRemoveUniqueConstraintSql(EntityMetaData emd, String keyName)
 	{
-		return String.format("ALTER TABLE %s DROP INDEX %s;", emd.getName(), keyName);
+		return String.format("ALTER TABLE `%s` DROP INDEX `%s`;", emd.getName(), keyName);
 	}
 
 	private static String getShowIndexSql(EntityMetaData emd, AttributeMetaData att)
 	{
-		return String.format("SHOW INDEX FROM %s WHERE Column_name = '%s';", emd.getName(), att.getName());
+		return String.format("SHOW INDEX FROM `%s` WHERE Column_name = '%s';", emd.getName(), att.getName());
 	}
 }

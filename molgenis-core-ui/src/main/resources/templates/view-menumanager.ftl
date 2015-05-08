@@ -45,12 +45,10 @@
 		<div class="row">
 			<div class="col-md-12">
 				<form name="save-menu-form" action="${context_url?html}/save" method="POST">
-					<button type="submit" class="btn btn-info pull-right">Save the new menu layout</button>
+					<button type="submit" class="btn btn-info pull-left">Save the new menu layout</button>
 				</form>
 			</div>
 		</div>
-		
-		<hr></hr>
 		
 		<div class="row">
 			<div class="col-md-12">
@@ -60,7 +58,6 @@
 		
 		<div class="row">
 			<div class="col-md-6">
-			
 				<legend>Upload logo</legend>
 				<form name="upload-new-logo" class="form-horizontal" role="form" action="${context_url?html}/upload-logo" method="POST" enctype="multipart/form-data">
 					<@upload_new_logo />
@@ -70,38 +67,9 @@
 						</div>
 					</div>
 				</form>
-				
-			</div>
-			<div class="col-md-6">
-				
-				<legend>Select a bootstrap theme</legend>
-				<form class="form-horizontal" role="form">
-					<div class="form-group">
-						<div class="col-md-9 col-md-offset-3">
-  							<select class="form-control" id="bootstrap-theme-select">
-  							<#if selectedStyle??>
-									skjhfksdjfslkdjf ${selectedStyle}
-							</#if>
-  							<#list availableStyles as style>
-  								<option value="${style.location}" <#if selectedStyle?? && style.name == selectedStyle>selected</#if>>${style.name}</option>
-  							</#list>
-  							</select>
-						</div>
-  					</div>
-  					
-  					<div class="form-group">
-  						<div class="col-md-9 col-md-offset-3">
-  							<button id="save-selected-bootstrap-theme" type="btn" class="btn btn-primary pull-right">Save current theme</button>
-  						</div>	
-  					</div>
-				</form>
-				
-			</div>
+			</div>			
 		</div>
-		
 	</div>
-	
-
 </div>
 
 <div class="row">

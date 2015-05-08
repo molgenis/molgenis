@@ -31,6 +31,7 @@
 	        <plugin id="usermanager" name="User Manager" url="usermanager"/>
 	        <plugin id="permissionmanager" name="Permission Manager" url="permissionmanager"/>
         	<plugin id="menumanager" name="Menu Manager" url="menumanager"/>
+        	<plugin id="thememanager" name="Theme Manager" url="thememanager"/>
         	<plugin id="indexmanager" name="Index manager" url="indexmanager"/>
         	<plugin id="logmanager" name="Log manager" url="logmanager"/>
 		</menu>
