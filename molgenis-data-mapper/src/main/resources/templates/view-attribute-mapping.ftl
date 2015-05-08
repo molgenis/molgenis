@@ -23,7 +23,37 @@
 </div>
 <div class="row">
 	<div class="col-md-6">
-		<h5>Source attributes</h5>
+		<div class="pull-left">
+			<#if showSuggestedAttributes?c == "true">
+				<h5>Source Attributes suggested by semantic search</h5>
+			<#else>
+				<h5>Source all attributes</h5>
+			</#if>
+		</div>
+		<div class="pull-right">
+			<form method="get" action="${context_url}/attributeMapping">
+				<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
+				<input type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name?html}"/>
+				<input type="hidden" name="source" value="${entityMapping.name?html}"/>
+				<input type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name?html}"/>
+				<input type="hidden" name="showSuggestedAttributes" value="${showSuggestedAttributes?string("false", "true")}"/>
+				<div class="btn-group" role="group">
+					<button id="reload-attribute-mapping-table" type="submit" class="btn btn-default" ">
+						<#if showSuggestedAttributes?c == "true">
+							Show all attributes
+						<#else>
+							Show only attributes suggested by semantic search
+						</#if>
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+	<div class="col-md-6">
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-6">
 		<div id="attribute-table-container" >
 				<table id="attribute-mapping-table" class="table table-bordered scroll">
 					<thead>
@@ -34,7 +64,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						<#list entityMapping.sourceEntityMetaData.attributes as source>
+						<#list attributes as source>
 							<tr>
 								<td>
 									<b>${source.label?html}</b> (${source.dataType})
@@ -58,7 +88,7 @@
 	</div>
 	<div class="col-md-6">
 		<h5>Algorithm</h5>
-		<form method="POST" action="${context_url}/saveattributemapping">
+		<form id="saveattributemapping-form" method="POST" action="${context_url}/saveattributemapping">
 			<textarea class="form-control" name="algorithm" rows="15"
 				id="edit-algorithm-textarea" <#if !hasWritePermission>data-readonly="true"</#if> width="100%">${(attributeMapping.algorithm!"")?html}</textarea>
 			<hr />
@@ -70,10 +100,8 @@
 			<#if hasWritePermission>
 				<button type="submit" class="btn btn-primary">Save</button> 
 				<button type="reset" class="btn btn-warning">Reset</button>
-		        <button type="button" class="btn btn-default" onclick="window.history.back()">Cancel</button>
-		    <#else>
-		    	<button type="button" class="btn btn-primary" onclick="window.history.back()">Back</button>
-	        </#if>
+			</#if>
+			<a class="btn btn-primary" href="${context_url}/mappingproject/${mappingProject.identifier}">Back to project</a>
 		</form>
 	</div>
 </div>

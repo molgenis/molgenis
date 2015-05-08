@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -15,14 +17,15 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
-import org.molgenis.data.mapper.algorithm.AlgorithmService;
 import org.molgenis.data.mapper.data.request.MappingServiceRequest;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
+import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
-import org.molgenis.data.semanticsearch.service.impl.OntologyTagService;
+import org.molgenis.data.semanticsearch.service.OntologyTagService;
+import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -43,6 +46,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -74,9 +78,15 @@ public class MappingServiceController extends MolgenisPluginController
 	@Autowired
 	private OntologyTagService ontologyTagService;
 
+	@Autowired
+	private SemanticSearchService semanticSearchService;
+
+	private ExecutorService executors;
+
 	public MappingServiceController()
 	{
 		super(URI);
+		executors = Executors.newSingleThreadExecutor();
 	}
 
 	/**
@@ -175,13 +185,33 @@ public class MappingServiceController extends MolgenisPluginController
 	@RequestMapping(value = "/addEntityMapping", method = RequestMethod.POST)
 	public String addEntityMapping(@RequestParam String mappingProjectId, String target, String source)
 	{
+		EntityMetaData sourceEntityMetaData = dataService.getEntityMetaData(source);
+		EntityMetaData targetEntityMetaData = dataService.getEntityMetaData(target);
+
+		Iterable<AttributeMetaData> attributes = targetEntityMetaData.getAtomicAttributes();
+
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
+
 		if (hasWritePermission(project))
 		{
-			project.getMappingTarget(target).addSource(dataService.getEntityMetaData(source));
+			EntityMapping mapping = project.getMappingTarget(target).addSource(sourceEntityMetaData);
 			mappingService.updateMappingProject(project);
+			executors.execute(() -> autoGenerateAlgorithms(mapping, target, sourceEntityMetaData, targetEntityMetaData,
+					attributes, project));
 		}
+
 		return "redirect:/menu/main/mappingservice/mappingproject/" + mappingProjectId;
+	}
+
+	private void autoGenerateAlgorithms(EntityMapping mapping, String target, EntityMetaData sourceEntityMetaData,
+			EntityMetaData targetEntityMetaData, Iterable<AttributeMetaData> attributes, MappingProject project)
+	{
+		Stopwatch stopwatch = Stopwatch.createStarted();
+		attributes.forEach(attribute -> algorithmService.autoGenerateAlgorithm(sourceEntityMetaData,
+				targetEntityMetaData, mapping, attribute));
+		mappingService.updateMappingProject(project);
+		stopwatch.stop();
+		System.out.println(stopwatch);
 	}
 
 	/**
@@ -312,30 +342,50 @@ public class MappingServiceController extends MolgenisPluginController
 	 *            name of the target entity
 	 * @param source
 	 *            name of the source entity
-	 * @param attribute
+	 * @param targetAttribute
 	 *            name of the target attribute
-	 * @param model
-	 *            the model
-	 * @return name of the attributemapping view
+	 * @param isShowSuggestedAttributes
+	 *            should the attributes be chosen by the user or semantic search must be used to do that
 	 */
 	@RequestMapping("/attributeMapping")
-	public String viewAttributeMapping(@RequestParam String mappingProjectId, @RequestParam String target,
-			@RequestParam String source, @RequestParam String attribute, Model model)
+	public String viewAttributeMapping(@RequestParam(required = true) String mappingProjectId,
+			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
+			@RequestParam(required = true) String targetAttribute,
+			@RequestParam(required = true) boolean showSuggestedAttributes, Model model)
 	{
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
 		MappingTarget mappingTarget = project.getMappingTarget(target);
 		EntityMapping entityMapping = mappingTarget.getMappingForSource(source);
-		AttributeMapping attributeMapping = entityMapping.getAttributeMapping(attribute);
+		AttributeMapping attributeMapping = entityMapping.getAttributeMapping(targetAttribute);
+
 		if (attributeMapping == null)
 		{
-			attributeMapping = entityMapping.addAttributeMapping(attribute);
+			attributeMapping = entityMapping.addAttributeMapping(targetAttribute);
 		}
+
+		final Iterable<AttributeMetaData> attributes;
+		if (showSuggestedAttributes)
+		{
+			attributes = semanticSearchService.findAttributes(dataService.getEntityMetaData(source),
+					dataService.getEntityMetaData(target),
+					attributeMapping.getTargetAttributeMetaData());
+		}
+		else
+		{
+			attributes = Lists.newArrayList(dataService.getEntityMetaData(source)
+					.getAtomicAttributes());
+		}
+
+		model.addAttribute("showSuggestedAttributes", showSuggestedAttributes);
 		model.addAttribute("mappingProject", project);
 		model.addAttribute("entityMapping", entityMapping);
 		model.addAttribute("attributeMapping", attributeMapping);
+		model.addAttribute("attributes", attributes);
 		model.addAttribute("hasWritePermission", hasWritePermission(project, false));
+
 		return VIEW_ATTRIBUTE_MAPPING;
 	}
+
 
 	/**
 	 * Tests an algoritm by computing it for all entities in the source repository.
