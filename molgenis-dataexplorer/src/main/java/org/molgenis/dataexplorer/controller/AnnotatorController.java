@@ -1,6 +1,6 @@
-package org.molgenis.annotators;
+package org.molgenis.dataexplorer.controller;
 
-import static org.molgenis.annotators.AnnotatorController.URI;
+import static org.molgenis.dataexplorer.controller.AnnotatorController.URI;
 
 import java.io.IOException;
 import java.util.HashMap;

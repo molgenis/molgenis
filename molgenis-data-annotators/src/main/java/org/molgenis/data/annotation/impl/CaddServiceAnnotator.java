@@ -14,10 +14,10 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.AnnotatorUtils;
-import org.molgenis.data.annotation.TabixReader;
+import org.molgenis.data.annotation.utils.AnnotatorUtils;
+import org.molgenis.data.annotation.utils.TabixReader;
 import org.molgenis.data.annotation.VariantAnnotator;
-import org.molgenis.data.annotation.VcfUtils;
+import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.data.support.AnnotationServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -55,20 +55,22 @@ public class CaddServiceAnnotator extends VariantAnnotator
 
 	// the cadd service returns these two values
 	// must be compatible with VCF format, ie no funny characters
-	public static final String CADD_SCALED = "CADDSCALED";
-	public static final String CADD_ABS = "CADDABS";
+	public static final String CADD_SCALED_LABEL = "CADDSCALED";
+	public static final String CADD_ABS_LABEL = "CADDABS";
+    public static final String CADD_SCALED = VcfRepository.getInfoPrefix()+"CADDSCALED";
+    public static final String CADD_ABS = VcfRepository.getInfoPrefix()+"CADDABS";
 
 	private static final String NAME = "CADD";
 
 	final List<String> infoFields = Arrays
-        .asList(new String[]
-                {
-                        "##INFO=<ID="
-                                + CADD_SCALED.substring(VcfRepository.getInfoPrefix().length())
-                                + ",Number=1,Type=Float,Description=\"CADD scaled C score, ie. phred-like. See Kircher et al. 2014 (http://www.ncbi.nlm.nih.gov/pubmed/24487276) or CADD website (http://cadd.gs.washington.edu/) for more information.\">",
-                        "##INFO=<ID="
-                                + CADD_ABS.substring(VcfRepository.getInfoPrefix().length())
-                                + ",Number=1,Type=Float,Description=\"CADD absolute C score, ie. unscaled SVM output. Useful as  reference when the scaled score may be unexpected.\">" });
+			.asList(new String[]
+			{
+					"##INFO=<ID="
+							+ CADD_SCALED.substring(VcfRepository.getInfoPrefix().length())
+							+ ",Number=1,Type=Float,Description=\"CADD scaled C score, ie. phred-like. See Kircher et al. 2014 (http://www.ncbi.nlm.nih.gov/pubmed/24487276) or CADD website (http://cadd.gs.washington.edu/) for more information.\">",
+					"##INFO=<ID="
+							+ CADD_ABS.substring(VcfRepository.getInfoPrefix().length())
+							+ ",Number=1,Type=Float,Description=\"CADD absolute C score, ie. unscaled SVM output. Useful as  reference when the scaled score may be unexpected.\">" });
 
     public static final String CADD_FILE_LOCATION_PROPERTY = "cadd_location";
 
@@ -194,8 +196,7 @@ public class CaddServiceAnnotator extends VariantAnnotator
     		}
             catch(NullPointerException npe)
     		{
-    			//overkill to print all missing? depends on CADD source file..
-    			//LOG.info("No data for CHROM: " + chromosome + " POS: " + position + " REF: " + reference + " ALT: " + alternative + " LINE: " + line);
+    			LOG.info("No data for CHROM: " + chromosome + " POS: " + position + " REF: " + reference + " ALT: " + alternative + " LINE: " + line);
     		}
 
             if (line != null)
@@ -239,9 +240,7 @@ public class CaddServiceAnnotator extends VariantAnnotator
             else //case: line == null
             {
                 LOG.warn("No hit found in CADD file for CHROM: " + chromosome + " POS: " + position + " REF: " + reference + " ALT: " + alternative);
-                //not needed? just return..??
                 done = true;
-              //  return resultMap;
             }
         }
 
@@ -271,11 +270,8 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	public EntityMetaData getOutputMetaData()
 	{
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		DefaultAttributeMetaData cadd_abs = new DefaultAttributeMetaData(CADD_ABS, FieldTypeEnum.DECIMAL);
-		cadd_abs.setDescription("\"Raw\" CADD scores come straight from the model, and are interpretable as the extent to which the annotation profile for a given variant suggests that that variant is likely to be \"observed\" (negative values) vs \"simulated\" (positive values). These values have no absolute unit of meaning and are incomparable across distinct annotation combinations, training sets, or model parameters. However, raw values do have relative meaning, with higher values indicating that a variant is more likely to be simulated (or \"not observed\") and therefore more likely to have deleterious effects.(source: http://cadd.gs.washington.edu/info)");
-		DefaultAttributeMetaData cadd_scaled = new DefaultAttributeMetaData(CADD_SCALED, FieldTypeEnum.DECIMAL);
-		cadd_scaled
-				.setDescription("Since the raw scores do have relative meaning, one can take a specific group of variants, define the rank for each variant within that group, and then use that value as a \"normalized\" and now externally comparable unit of analysis. In our case, we scored and ranked all ~8.6 billion SNVs of the GRCh37/hg19 reference and then \"PHRED-scaled\" those values by expressing the rank in order of magnitude terms rather than the precise rank itself. For example, reference genome single nucleotide variants at the 10th-% of CADD scores are assigned to CADD-10, top 1% to CADD-20, top 0.1% to CADD-30, etc. The results of this transformation are the \"scaled\" CADD scores.(source: http://cadd.gs.washington.edu/info)");
+		DefaultAttributeMetaData cadd_abs = new DefaultAttributeMetaData(CADD_ABS, FieldTypeEnum.DECIMAL).setLabel(CADD_ABS_LABEL).setDescription("\"Raw\" CADD scores come straight from the model, and are interpretable as the extent to which the annotation profile for a given variant suggests that that variant is likely to be \"observed\" (negative values) vs \"simulated\" (positive values). These values have no absolute unit of meaning and are incomparable across distinct annotation combinations, training sets, or model parameters. However, raw values do have relative meaning, with higher values indicating that a variant is more likely to be simulated (or \"not observed\") and therefore more likely to have deleterious effects.(source: http://cadd.gs.washington.edu/info)");
+		DefaultAttributeMetaData cadd_scaled = new DefaultAttributeMetaData(CADD_SCALED, FieldTypeEnum.DECIMAL).setLabel(CADD_SCALED_LABEL).setDescription("Since the raw scores do have relative meaning, one can take a specific group of variants, define the rank for each variant within that group, and then use that value as a \"normalized\" and now externally comparable unit of analysis. In our case, we scored and ranked all ~8.6 billion SNVs of the GRCh37/hg19 reference and then \"PHRED-scaled\" those values by expressing the rank in order of magnitude terms rather than the precise rank itself. For example, reference genome single nucleotide variants at the 10th-% of CADD scores are assigned to CADD-10, top 1% to CADD-20, top 0.1% to CADD-30, etc. The results of this transformation are the \"scaled\" CADD scores.(source: http://cadd.gs.washington.edu/info)");
 
 		metadata.addAttributeMetaData(cadd_abs);
 		metadata.addAttributeMetaData(cadd_scaled);
@@ -287,7 +283,7 @@ public class CaddServiceAnnotator extends VariantAnnotator
     public String getDescription(){
         return "CADD is a tool for scoring the deleteriousness of single nucleotide variants as well as insertion/deletions variants in the human genome.\n" +
                 "\n" +
-                "While many variant annotation and scoring tools are around, most annotations tend to exploit a single information type (e.g. conservation) and/or are restricted in scope (e.g. to missense changes). Thus, a broadly applicable metric that objectively weights and integrates diverse information is needed. Combined Annotation Dependent Depletion (CADD) is a framework that integrates multiple annotations into one metric by contrasting variants that survived natural selection with simulated mutations.\n" +
+                "While many variant annotation and scoring utils are around, most annotations tend to exploit a single information type (e.g. conservation) and/or are restricted in scope (e.g. to missense changes). Thus, a broadly applicable metric that objectively weights and integrates diverse information is needed. Combined Annotation Dependent Depletion (CADD) is a framework that integrates multiple annotations into one metric by contrasting variants that survived natural selection with simulated mutations.\n" +
                 "\n" +
                 "C-scores strongly correlate with allelic diversity, pathogenicity of both coding and non-coding variants, and experimentally measured regulatory effects, and also highly rank causal variants within individual genome sequences. Finally, C-scores of complex trait-associated variants from genome-wide association studies (GWAS) are significantly higher than matched controls and correlate with study sample size, likely reflecting the increased accuracy of larger GWAS.\n" +
                 "\n" +

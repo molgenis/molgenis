@@ -18,7 +18,7 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AbstractRepositoryAnnotator;
-import org.molgenis.data.annotation.AnnotatorUtils;
+import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -88,11 +88,8 @@ public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements 
 	@Override
 	public boolean annotationDataExists()
 	{
-		boolean dataExists = true;
-
 		// TODO Check if the webservice is up
-
-		return dataExists;
+		return true;
 	}
 
 	@Override

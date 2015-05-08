@@ -15,14 +15,15 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.AnnotatorUtils;
-import org.molgenis.data.annotation.HgncLocationsUtils;
+import org.molgenis.data.annotation.utils.AnnotatorUtils;
+import org.molgenis.data.annotation.utils.HgncLocationsUtils;
 import org.molgenis.data.annotation.LocusAnnotator;
 import org.molgenis.data.annotation.impl.datastructures.Locus;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -123,13 +124,13 @@ public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 	@Override
 	public List<Entity> annotateEntity(Entity entity) throws IOException
 	{
-		List<Entity> results = new ArrayList<Entity>();
+		List<Entity> results = new ArrayList<>();
 
 		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(
 				molgenisSettings.getProperty(GENE_FILE_LOCATION_PROPERTY)), Charset.forName("UTF-8")));
 
-		Long position = entity.getLong(POSITION);
-		String chromosome = entity.getString(CHROMOSOME);
+		Long position = entity.getLong(VcfRepository.POS);
+		String chromosome = entity.getString(VcfRepository.CHROM);
 
 		List<String> geneSymbols = HgncLocationsUtils.locationToHgcn(hgncLocationsProvider.getHgncLocations(),
 				new Locus(chromosome, position));

@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation;
+package org.molgenis.data.annotation.utils;
 
 /* The MIT License
 

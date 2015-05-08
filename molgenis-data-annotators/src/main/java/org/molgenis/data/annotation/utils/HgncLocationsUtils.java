@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation;
+package org.molgenis.data.annotation.utils;
 
 import java.io.IOException;
 import java.util.ArrayList;
