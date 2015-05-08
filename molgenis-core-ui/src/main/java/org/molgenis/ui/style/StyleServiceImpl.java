@@ -3,9 +3,10 @@ package org.molgenis.ui.style;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.ui.MolgenisPluginInterceptor;
@@ -33,9 +34,9 @@ public class StyleServiceImpl implements StyleService
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public List<Style> getAvailableStyles()
+	public Set<Style> getAvailableStyles()
 	{
-		List<Style> availableStyles = new ArrayList<Style>();
+		Set<Style> availableStyles = new HashSet<Style>();
 
 		if (isURLReachable(BOOTSWATCH_API_URL, 200))
 		{
