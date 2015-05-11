@@ -11,7 +11,7 @@
 			var cssLocation = $(this).val();
 			var link = $('<link />').attr('id', 'bootstrap-theme').attr('rel', 'stylesheet').attr('type', 'text/css');
 
-			if (cssLocation.indexOf("http") === 0) {
+			if (cssLocation.indexOf("//bootswatch") === 0) {
 				$(link).attr('href', cssLocation);
 			} else {
 				$(link).attr('href', '/css/themes/' + cssLocation);
