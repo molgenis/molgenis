@@ -543,15 +543,8 @@
             return inRange;
         },
         _getValue: function(entityInstance, attr) {
-        	var value = entityInstance[attr.name];
-        	
-        	// workaround for required bool attribute with no value implying false value
-        	// TODO replace with elegant solution
-            if(value === undefined && attr.fieldType === 'BOOL' && !attr.nillable) {
-            	return false;
-            } else {
-            	return value;
-            }
+        	//Please don't manipulate the values here. It is not the place to do it!
+        	return entityInstance[attr.name];
         }
 	});
 		

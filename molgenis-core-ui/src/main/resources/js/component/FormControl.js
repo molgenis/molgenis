@@ -134,13 +134,8 @@
             this.props.onBlur(e);
         },
         _getValue: function(value) {
-        	// workaround for required bool attribute with no value implying false value
-        	// TODO replace with elegant solution
-            if(value === undefined && this.state.attr.fieldType === 'BOOL' && !this.state.attr.nillable) {
-            	return false;
-            } else {
-            	return value;
-            }
+        	//Please don't manipulate the values here. It is not the place to do it!
+            return value;
         }
     });
     
