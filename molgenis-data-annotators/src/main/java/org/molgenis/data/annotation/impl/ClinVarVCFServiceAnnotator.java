@@ -14,6 +14,7 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.cmd.AnnotatorInfo;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.annotation.utils.TabixReader;
 import org.molgenis.data.annotation.VariantAnnotator;
@@ -38,6 +39,22 @@ public class ClinVarVCFServiceAnnotator extends VariantAnnotator
 
 	private final MolgenisSettings molgenisSettings;
 	private final AnnotationService annotatorService;
+	
+	@Override
+	public AnnotatorInfo.status getStatus(){
+		return AnnotatorInfo.status.BETA;
+	}
+
+	@Override
+	public AnnotatorInfo.type getType(){
+		return AnnotatorInfo.type.PHENOTYPE_ASSOCIATION;
+	}
+	
+	@Override
+	public String getCode()
+	{
+		return "clinvar";
+	}
 
 	private static final String NAME = "ClinvarVCF";
 

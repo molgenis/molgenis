@@ -7,6 +7,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.VariantAnnotator;
+import org.molgenis.data.annotation.cmd.AnnotatorInfo;
 import org.molgenis.data.annotation.provider.CgdDataProvider;
 import org.molgenis.data.annotation.provider.CgdDataProvider.generalizedInheritance;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
@@ -42,6 +43,22 @@ import java.util.Set;
 @Component("monogenicDiseaseService")
 public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 {
+	@Override
+	public AnnotatorInfo.status getStatus(){
+		return AnnotatorInfo.status.BETA;
+	}
+
+	@Override
+	public AnnotatorInfo.type getType(){
+		return AnnotatorInfo.type.AUTOMATED_PROTOCOL;
+	}
+	
+	@Override
+	public String getCode()
+	{
+		return "monogenic";
+	}
+	
 	private static final Logger LOG = LoggerFactory.getLogger(MonogenicDiseaseCandidatesServiceAnnotator.class);
 	public static final String ANNOTATIONFIELD = VcfRepository.getInfoPrefix() + "ANN";
 

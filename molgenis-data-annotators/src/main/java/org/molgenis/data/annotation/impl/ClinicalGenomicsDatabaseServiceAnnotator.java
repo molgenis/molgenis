@@ -14,11 +14,9 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
-import org.molgenis.data.annotation.utils.AnnotatorUtils;
-import org.molgenis.data.annotation.utils.HgncLocationsUtils;
 import org.molgenis.data.annotation.LocusAnnotator;
 import org.molgenis.data.vcf.utils.VcfUtils;
+import org.molgenis.data.annotation.cmd.AnnotatorInfo;
 import org.molgenis.data.annotation.impl.datastructures.CgdData;
 import org.molgenis.data.annotation.impl.datastructures.Locus;
 import org.molgenis.data.annotation.provider.CgdDataProvider;
@@ -41,6 +39,22 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ClinicalGenomicsDatabaseServiceAnnotator.class);
 
+	@Override
+	public AnnotatorInfo.status getStatus(){
+		return AnnotatorInfo.status.BETA;
+	}
+
+	@Override
+	public AnnotatorInfo.type getType(){
+		return AnnotatorInfo.type.UNUSED;
+	}
+	
+	@Override
+	public String getCode()
+	{
+		return "unknown";
+	}
+	
 	private final MolgenisSettings molgenisSettings;
 	private final AnnotationService annotatorService;
 	private final HgncLocationsProvider hgncLocationsProvider;

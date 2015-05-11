@@ -14,6 +14,7 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.cmd.AnnotatorInfo;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.annotation.utils.TabixReader;
 import org.molgenis.data.annotation.VariantAnnotator;
@@ -50,6 +51,22 @@ public class ExACServiceAnnotator extends VariantAnnotator
 	private final MolgenisSettings molgenisSettings;
 	private final AnnotationService annotatorService;
 
+	@Override
+	public AnnotatorInfo.status getStatus(){
+		return AnnotatorInfo.status.BETA;
+	}
+
+	@Override
+	public AnnotatorInfo.type getType(){
+		return AnnotatorInfo.type.POPULATION_REFERENCE;
+	}
+	
+	@Override
+	public String getCode()
+	{
+		return "exac";
+	}
+	
 	public static final String EXAC_MAF_LABEL = "EXACMAF";
 	public static final String EXAC_MAF = VcfRepository.getInfoPrefix() + EXAC_MAF_LABEL;
 
