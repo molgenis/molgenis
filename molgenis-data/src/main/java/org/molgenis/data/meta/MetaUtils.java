@@ -22,7 +22,7 @@ public class MetaUtils
 			{
 				throw new MolgenisDataException(
 						"Removing of existing attributes is currently not supported. You tried to remove attribute ["
-								+ attr.getName() + "]");
+								+ attr.getName() + "] of entity [" + entityMeta.getName() + "]");
 			}
 		}
 
@@ -36,12 +36,14 @@ public class MetaUtils
 					throw new MolgenisDataException(
 							"Changing existing attributes is not currently supported. You tried to alter attribute ["
 									+ attr.getName() + "] of entity [" + entityMeta.getName()
-									+ "]. Only adding of new attributes to existing entities is supported.");
+									+ "]. Only adding of new attributes is supported.");
 				}
 			}
 			else if (!attr.isNillable())
 			{
-				throw new MolgenisDataException("Adding non-nillable attributes is not currently supported");
+				throw new MolgenisDataException(
+						"Adding non-nillable attributes is not currently supported.  You tried to add non-nillable attribute ["
+								+ attr.getName() + "] of entity [" + entityMeta.getName() + "].");
 			}
 			else
 			{
