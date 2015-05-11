@@ -7,6 +7,7 @@ import org.molgenis.data.Entity;
 public class Sample
 {
 	String id;
+
 	Entity genotype;
 
 	public Sample()
@@ -56,13 +57,10 @@ public class Sample
 	/**
 	 * Allows compare with String or Sample object
 	 */
-	@Override
-	public boolean equals(Object obj)
+	public boolean equalsSampleOrString(Object obj)
 	{
-		System.out.println("EQUALS!!");
 		if (obj instanceof String)
 		{
-			System.out.println("COMPARING TO STIRNG!!!");
 			return new EqualsBuilder().append(id, obj.toString()).isEquals();
 		}
 		if (!(obj instanceof Sample)) return false;
@@ -71,10 +69,19 @@ public class Sample
 		return new EqualsBuilder().append(id, rhs.id).isEquals();
 	}
 
-	// public boolean equals(String obj)
-	// {
-	// return equals((Object)obj);
-	// }
+	@Override
+	public boolean equals(Object o)
+	{
+		if (this == o) return true;
+		if (!(o instanceof Sample)) return false;
+
+		Sample sample = (Sample) o;
+
+		if (genotype != null ? !genotype.equals(sample.genotype) : sample.genotype != null) return false;
+		if (id != null ? !id.equals(sample.id) : sample.id != null) return false;
+
+		return true;
+	}
 
 	@Override
 	public String toString()
