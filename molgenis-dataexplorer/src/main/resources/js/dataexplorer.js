@@ -369,11 +369,11 @@ function($, molgenis, settingsXhr) {
 	$(function() {
 		// lazy load tab contents
 		$(document).on('show.bs.tab', 'a[data-toggle="tab"]', function(e) {
-			var target = $($(e.target).attr('data-target'));
+			var target = $($(e.target).attr('data-target')), entityHref = encodeURI($(e.target).attr('href'));
 			if(target.data('status') !== 'loaded') {
-				target.load($(e.target).attr('href'), function() {
-					target.data('status', 'loaded');
-				});
+				target.load(entityHref, function() {
+ 					target.data('status', 'loaded');
+ 				});
 			}
 		});
 
