@@ -58,7 +58,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		{
 			AttributeMetaData source = matches.iterator().next();
 			AttributeMapping attributeMapping = mapping.addAttributeMapping(targetAttribute.getName());
-			String algorithm = "$('" + source.getName() + "');";
+			String algorithm = "$('" + source.getName() + "').value()";
 			attributeMapping.setAlgorithm(algorithm);
 			LOG.info("Creating attribute mapping: " + targetAttribute.getName() + " = " + algorithm);
 		}
