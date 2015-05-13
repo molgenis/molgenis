@@ -60,7 +60,7 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 		attribute.setDescription("Standing height in meters.");
 		when(
 				ontologyService.findOntologyTerms(ontologies, ImmutableSet.<String> of("standing", "height", "meters"),
-						100)).thenReturn(ontologyTerms);
+						3)).thenReturn(ontologyTerms);
 		List<OntologyTerm> terms = semanticSearchService.findTags(attribute, ontologies);
 		assertEquals(terms, ontologyTerms);
 	}
@@ -70,7 +70,7 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 	{
 		attribute.setLabel("Standing height (m.)");
 
-		when(ontologyService.findOntologyTerms(ontologies, ImmutableSet.<String> of("standing", "height", "m"), 100))
+		when(ontologyService.findOntologyTerms(ontologies, ImmutableSet.<String> of("standing", "height", "m"), 3))
 				.thenReturn(ontologyTerms);
 		List<OntologyTerm> terms = semanticSearchService.findTags(attribute, ontologies);
 		assertEquals(terms, ontologyTerms);
@@ -81,7 +81,7 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 	{
 		attribute.setLabel("Standing height (Ångstrøm)");
 
-		when(ontologyService.findOntologyTerms(ontologies, of("standing", "height", "ångstrøm"), 100)).thenReturn(
+		when(ontologyService.findOntologyTerms(ontologies, of("standing", "height", "ångstrøm"), 3)).thenReturn(
 				ontologyTerms);
 		List<OntologyTerm> terms = semanticSearchService.findTags(attribute, ontologies);
 		assertEquals(terms, ontologyTerms);
@@ -92,7 +92,7 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 	{
 		attribute.setLabel("/əˈnædrəməs/");
 
-		when(ontologyService.findOntologyTerms(ontologies, of("ə", "nædrəməs"), 100)).thenReturn(ontologyTerms);
+		when(ontologyService.findOntologyTerms(ontologies, of("ə", "nædrəməs"), 3)).thenReturn(ontologyTerms);
 		List<OntologyTerm> terms = semanticSearchService.findTags(attribute, ontologies);
 		assertEquals(terms, ontologyTerms);
 	}
