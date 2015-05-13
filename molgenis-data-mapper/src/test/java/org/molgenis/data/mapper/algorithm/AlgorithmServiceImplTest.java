@@ -11,8 +11,6 @@ import java.util.Collections;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.mapper.algorithm.AlgorithmService;
-import org.molgenis.data.mapper.algorithm.AlgorithmServiceImpl;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -61,6 +59,24 @@ public class AlgorithmServiceImplTest
 				.setAlgorithm("Math.floor((new Date('02/12/2015') - $('dob').value())/(365.2425 * 24 * 60 * 60 * 1000))");
 		Object result = algorithmService.apply(attributeMapping, source, entityMetaData);
 		assertEquals(result, 41);
+	}
+
+	@Test
+	public void testDate() throws ParseException
+	{
+		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("LL");
+		entityMetaData.addAttribute("id").setDataType(MolgenisFieldTypes.INT).setIdAttribute(true);
+		entityMetaData.addAttribute("dob").setDataType(MolgenisFieldTypes.DATE);
+		Entity source = new MapEntity(entityMetaData);
+		source.set("id", 1);
+		source.set("dob", new SimpleDateFormat("dd-MM-yyyy").parse("13-05-2015"));
+
+		DefaultAttributeMetaData targetAttributeMetaData = new DefaultAttributeMetaData("bob");
+		targetAttributeMetaData.setDataType(org.molgenis.MolgenisFieldTypes.DATE);
+		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
+		attributeMapping.setAlgorithm("$('dob').value()");
+		Object result = algorithmService.apply(attributeMapping, source, entityMetaData);
+		assertEquals(result.toString(), "Wed May 13 00:00:00 CEST 2015");
 	}
 
 	@Test
