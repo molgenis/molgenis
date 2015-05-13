@@ -19,8 +19,8 @@ import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.meta.PackageImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.permission.PermissionSystemService;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -130,7 +130,7 @@ public class MappingServiceImpl implements MappingService
 			EntityMetaData targetMetaData, EntityMetaData sourceEntityMetaData)
 	{
 		MapEntity target = new MapEntity(targetMetaData);
-		target.set(targetMetaData.getIdAttribute().getName(), (int) (Math.random() * 100000));
+		target.set(targetMetaData.getIdAttribute().getName(), idGenerator.generateId());
 		target.set("source", sourceMapping.getName());
 		sourceMapping.getAttributeMappings().forEach(
 				attributeMapping -> applyMappingToAttribute(attributeMapping, sourceEntity, target,
