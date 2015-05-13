@@ -28,7 +28,6 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.Ordered;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -357,21 +356,5 @@ public class MetaDataServiceImpl implements MetaDataService
 	public void addToEntityMetaDataRepository(EntityMetaData entityMetaData)
 	{
 		entityMetaDataRepository.add(entityMetaData);
-
-		// add attribute metadata
-		for (AttributeMetaData att : entityMetaData.getAttributes())
-		{
-			if (LOG.isTraceEnabled())
-			{
-				LOG.trace("Adding attribute metadata for entity " + entityMetaData.getName() + ", attribute "
-						+ att.getName());
-			}
-
-			if ((entityMetaData.getExtends() == null)
-					|| !Iterables.contains(entityMetaData.getExtends().getAtomicAttributes(), att))
-			{
-				attributeMetaDataRepository.add(att);
-			}
-		}
 	}
 }
