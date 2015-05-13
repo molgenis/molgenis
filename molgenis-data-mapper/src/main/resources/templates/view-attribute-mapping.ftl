@@ -64,7 +64,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						<#list attributes as source>
+						<#list entityMapping.sourceEntityMetaData.getAtomicAttributes().iterator() as source>
 							<tr>
 								<td>
 									<b>${source.label?html}</b> (${source.dataType})
