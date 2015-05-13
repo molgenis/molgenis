@@ -61,10 +61,6 @@ body:not(.modal-open) #feature-selection .molgenis-tree {
 	
 }
 
-#dataexplorer-grid-data table {
-	background: #DDDDDD;
-}
-
 .viewer {
 	cursor: pointer;
 }

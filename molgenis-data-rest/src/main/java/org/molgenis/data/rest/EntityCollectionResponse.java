@@ -17,11 +17,11 @@ public class EntityCollectionResponse
 	private final String nextHref;
 	private final List<Map<String, Object>> items;
 
-	public EntityCollectionResponse(EntityPager entityPager, List<Map<String, Object>> items, String href,
-			EntityMetaData meta, MolgenisPermissionService permissionService)
+	public EntityCollectionResponse(EntityPager entityPager, List<Map<String, Object>> items, Attributes attributes,
+			String href, EntityMetaData meta, MolgenisPermissionService permissionService)
 	{
 		this.href = href;
-		this.meta = meta != null ? new EntityMetaDataResponse(meta, permissionService) : null;
+		this.meta = new EntityMetaDataResponse(meta, attributes, permissionService);
 		this.start = entityPager.getStart();
 		this.num = entityPager.getNum();
 		this.total = entityPager.getTotal();

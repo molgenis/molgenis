@@ -12,11 +12,13 @@
 		displayName: 'Icon',
 		propTypes: {
 			name: React.PropTypes.string.isRequired,
-			onClick: React.PropTypes.func
+			onClick: React.PropTypes.func,
+			style: React.PropTypes.object
 		},
 		render: function() {
+			var style = this.props.onClick ? _.extend({cursor: 'pointer'}, this.props.style) : this.props.style;
 			return (
-				span({onClick: this.props.onClick, style: this.props.onClick ? {cursor: 'pointer'} : undefined},
+				span({onClick: this.props.onClick, style: style},
 					span({className: 'glyphicon glyphicon-' + this.props.name, 'aria-hidden': true}),
 					span({className: 'sr-only'}, this.props.name)
 				)

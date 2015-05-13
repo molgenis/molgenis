@@ -422,11 +422,11 @@ function createInput(attr, attrs, val, lbl) {
 		if(callback) {
 			config['success'] = function(data) {
 				callback(data);
-			}
+			};
 		} else if(async === false) {
 			config['success'] = function(data) {
 				resource = data;
-			}
+			};
 		}
 		
 		// tunnel get requests with options through a post,
@@ -439,6 +439,11 @@ function createInput(attr, attrs, val, lbl) {
 				for(var i = 0, keys = Object.keys(obj); i < keys.length; ++i) {
 					options[keys[i]] = obj[keys[i]];
 				}
+			}
+			
+			// backward compatibility for legacy code
+			if(options.attributes && Object.prototype.toString.call(options.attributes) === '[object Array]') {
+				options.attributes = {attributes: options.attributes};
 			}
 			
 			var url = resourceUri;

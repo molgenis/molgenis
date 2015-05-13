@@ -29,10 +29,11 @@
     var genomeBrowserSettings = {};
     var featureInfoMap = {};
 
+    var Table;
+    
     $(document).on('dataChange.diseasematcher', function(e) {
-    	if (e.namespace !== 'data'){
-    		//TODO: implement refresh table functionality
-        	$('#data-table-container').table('setQuery', getQuery());
+    	if (e.namespace !== 'data' && Table){
+    		Table.setProps({query: getQuery().q});
     	}
 	});
     
@@ -54,17 +55,36 @@
 	 * @memberOf molgenis.dataexplorer.data
 	 */
 	function createDataTable(editable, rowClickable) {
-		var attributes = getAttributes();
-		$('#data-table-container').table({
-			'entityMetaData' : getEntity(),
-			'attributes' : attributes,
-			'maxRows' : 18,
-			'query' : getQuery(),
-			'editable' : editable,
-			'rowClickable': rowClickable,
-			'onDataChange' : function(){
-				$(document).trigger('dataChange.data');
-			}
+		Table = React.render(molgenis.ui.Table({
+			entity: getEntity().name,
+			attrs: _.map(getAttributes(), function(attr) {
+				return attr.name
+			}),
+			query: getQuery().q,
+			maxRows: 18,
+			onRowAdd: onDataChange,
+			onRowDelete: onDataChange,
+			onRowEdit: onDataChange,
+			onRowInspect: rowClickable ? onRowInspect : undefined
+		}), $('#data-table-container')[0]);
+	}
+	
+	function onDataChange() {
+		$(document).trigger('dataChange.data');
+	}
+	
+	function onRowInspect(entity) {
+		var entityData = entity.split('/');
+		var entityId = decodeURIComponent(entityData.pop());
+		var entityName = decodeURIComponent(entityData.pop());
+		
+		$('#entityReport').load("dataexplorer/details",{entityName: entityName, entityId: entityId}, function() {
+			  $('#entityReportModal').modal("show");
+			  
+			  // Button event handler when a button is placed inside an entity report ftl
+			  $(".modal-body button", "#entityReport").on('click', function() {
+					$.download($(this).data('href'), {entityName: entityName, entityId: entityId}, "GET");
+			  });
 		});
 	}
 	
@@ -316,8 +336,10 @@
 	 */
 	$(function() {
 		$(document).on('changeAttributeSelection.data', function(e, data) {
-			if($('#data-table-container')) {
-				$('#data-table-container').table('setAttributes', data.attributes);
+			if(Table) {
+				Table.setProps({attrs: _.map(data.attributes, function(attr) {
+					return attr.name
+				})});
 			}
 		});
 
@@ -354,7 +376,11 @@
 		});
 
 		$(document).on('changeQuery.data', function(e, query) {
-			$('#data-table-container').table('setQuery', query);
+			if(Table) {
+				Table.setProps({
+					query : query.q
+				});
+			}
 			// TODO what to do for genome browser
 		});
 

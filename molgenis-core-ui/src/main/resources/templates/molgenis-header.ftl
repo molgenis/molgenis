@@ -20,6 +20,7 @@
         <link rel="stylesheet" href="<@resource_href "/css/component/wrapper/JQRangeSlider.css"/>" type="text/css">
         <link rel="stylesheet" href="<@resource_href "/css/component/Checkbox.css"/>" type="text/css">
         <link rel="stylesheet" href="<@resource_href "/css/component/Radio.css"/>" type="text/css">
+        <link rel="stylesheet" href="<@resource_href "/css/component/Table.css"/>" type="text/css">
     <#else>
         <link rel="stylesheet" href="<@resource_href "/css/molgenis-component.min.css"/>" type="text/css">
     </#if>
@@ -69,6 +70,7 @@
         <script src="<@resource_href "/js/component/CheckboxGroup.js"/>"></script>
         <script src="<@resource_href "/js/component/CodeEditor.js"/>"></script>
         <script src="<@resource_href "/js/component/DateControl.js"/>"></script>
+        <script src="<@resource_href "/js/component/Dialog.js"/>"></script>
         <script src="<@resource_href "/js/component/EntitySelectBox.js"/>"></script>
         <script src="<@resource_href "/js/component/Form.js"/>"></script>
         <script src="<@resource_href "/js/component/FormControl.js"/>"></script>
@@ -76,6 +78,8 @@
         <script src="<@resource_href "/js/component/Icon.js"/>"></script>
         <script src="<@resource_href "/js/component/Input.js"/>"></script>
         <script src="<@resource_href "/js/component/Modal.js"/>"></script>
+        <script src="<@resource_href "/js/component/Pager.js"/>"></script>
+        <script src="<@resource_href "/js/component/Popover.js"/>"></script>
         <script src="<@resource_href "/js/component/Questionnaire.js"/>"></script>
         <script src="<@resource_href "/js/component/RadioGroup.js"/>"></script>
         <script src="<@resource_href "/js/component/RangeSlider.js"/>"></script>

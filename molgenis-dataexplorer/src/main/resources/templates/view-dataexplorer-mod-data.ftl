@@ -124,9 +124,6 @@
 </div>
 <script>
     molgenis.dataexplorer.setGenomeAttributes('${genomebrowser_start_list?js_string}', '${genomebrowser_chrom_list?js_string}', '${genomebrowser_id_list?js_string}', '${genomebrowser_patient_list?js_string}');
-    <#-- load css dependencies -->
-	if (!$('link[href="<@resource_href '/css/jquery.molgenis.table.css'/>"]').length)
-		$('head').append('<link rel="stylesheet" href="<@resource_href "/css/jquery.molgenis.table.css"/>" type="text/css" />');
 	<#-- load js dependencies -->
 	$.when(
 		$.ajax("<@resource_href "/js/jquery.bootstrap.pager.js"/>", {'cache': true}),
