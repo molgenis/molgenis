@@ -222,10 +222,11 @@ class EntityMetaDataRepository
 
 	public void delete(String entityName)
 	{
-		Entity entity = getEntity(entityName);
+		Entity entity = getRepository().findOne(entityName);
 		if (entity != null)
 		{
 			repository.deleteById(entityName);
+
 			attributeRepository.deleteAttributes(entity.getEntities(ATTRIBUTES));
 			entityMetaDataCache.remove(entityName);
 		}

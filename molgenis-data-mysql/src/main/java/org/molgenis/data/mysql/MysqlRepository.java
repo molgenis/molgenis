@@ -106,6 +106,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 			}
 		}
 		DataAccessException e = tryExecute(getDropSql());
+
 		remembered = remembered != null ? remembered : e;
 		if (remembered != null)
 		{
@@ -327,7 +328,8 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				.append('`').append(idAttribute.getName()).append('`').append(") ON DELETE CASCADE, FOREIGN KEY (")
 				.append('`').append(att.getName()).append('`').append(") REFERENCES ").append('`')
 				.append(getTableName(att.getRefEntity())).append('`').append('(').append('`')
-				.append(att.getRefEntity().getIdAttribute().getName()).append('`').append(") ON DELETE CASCADE);");
+				.append(att.getRefEntity().getIdAttribute().getName()).append('`')
+				.append(") ON DELETE CASCADE) ENGINE=InnoDB;");
 
 		return sql.toString();
 	}
