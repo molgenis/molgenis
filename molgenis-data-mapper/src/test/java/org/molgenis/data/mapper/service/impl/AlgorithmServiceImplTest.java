@@ -62,6 +62,24 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
+	public void testDate() throws ParseException
+	{
+		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("LL");
+		entityMetaData.addAttribute("id").setDataType(MolgenisFieldTypes.INT).setIdAttribute(true);
+		entityMetaData.addAttribute("dob").setDataType(MolgenisFieldTypes.DATE);
+		Entity source = new MapEntity(entityMetaData);
+		source.set("id", 1);
+		source.set("dob", new SimpleDateFormat("dd-MM-yyyy").parse("13-05-2015"));
+
+		DefaultAttributeMetaData targetAttributeMetaData = new DefaultAttributeMetaData("bob");
+		targetAttributeMetaData.setDataType(org.molgenis.MolgenisFieldTypes.DATE);
+		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
+		attributeMapping.setAlgorithm("$('dob').value()");
+		Object result = algorithmService.apply(attributeMapping, source, entityMetaData);
+		assertEquals(result.toString(), "Wed May 13 00:00:00 CEST 2015");
+	}
+
+	@Test
 	public void testGetAgeScript() throws ParseException
 	{
 		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("LL");
