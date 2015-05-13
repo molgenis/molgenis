@@ -20,7 +20,6 @@ import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.service.AlgorithmService;
-import org.molgenis.data.mapper.service.impl.AlgorithmServiceImpl;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -146,7 +145,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		algorithmService.autoGenerateAlgorithm(sourceEntityMetaData, targetEntityMetaData, mapping,
 				targetAttribute);
 
-		assertEquals(mapping.getAttributeMapping("targetHeight").getAlgorithm(), "$('sourceHeight');");
+		assertEquals(mapping.getAttributeMapping("targetHeight").getAlgorithm(), "$('sourceHeight').value()");
 	}
 
 	@Test
