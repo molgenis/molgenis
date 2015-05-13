@@ -7,6 +7,7 @@ import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
+import org.molgenis.fieldtypes.FieldType;
 
 public interface MappingService
 {
@@ -62,4 +63,5 @@ public interface MappingService
 	 */
 	void deleteMappingProject(String mappingProjectId);
 
+    String generateId(FieldType dataType, Long count);
 }
