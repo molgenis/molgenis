@@ -3,11 +3,13 @@ package org.molgenis.data.mapper.service.impl;
 import java.util.Collections;
 import java.util.List;
 
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IdGenerator;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
@@ -19,6 +21,7 @@ import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.meta.PackageImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
@@ -90,6 +93,8 @@ public class MappingServiceImpl implements MappingService
 		targetMetaData.setPackage(PackageImpl.defaultPackage);
 		targetMetaData.setLabel(newEntityName);
 		targetMetaData.addAttribute("source");
+		if (dataService.hasRepository(newEntityName)) throw new MolgenisDataException("A repository with name ["
+				+ newEntityName + "] already exists");
 		Repository targetRepo = dataService.getMeta().addEntityMeta(targetMetaData);
 		permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
 				Collections.singletonList(targetRepo.getName()));
@@ -121,21 +126,42 @@ public class MappingServiceImpl implements MappingService
 		for (Entity sourceEntity : sourceRepo)
 		{
 			MapEntity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
-					sourceMapping.getSourceEntityMetaData());
+					sourceMapping.getSourceEntityMetaData(), targetRepo);
 			targetRepo.add(mappedEntity);
 		}
 	}
 
 	private MapEntity applyMappingToEntity(EntityMapping sourceMapping, Entity sourceEntity,
-			EntityMetaData targetMetaData, EntityMetaData sourceEntityMetaData)
+			EntityMetaData targetMetaData, EntityMetaData sourceEntityMetaData, Repository targetRepository)
 	{
 		MapEntity target = new MapEntity(targetMetaData);
-		target.set(targetMetaData.getIdAttribute().getName(), idGenerator.generateId());
+		if (!targetMetaData.getIdAttribute().isAuto())
+		{
+			target.set(targetMetaData.getIdAttribute().getName(),
+					generateId(targetMetaData.getIdAttribute().getDataType(), targetRepository.count()));
+		}
 		target.set("source", sourceMapping.getName());
 		sourceMapping.getAttributeMappings().forEach(
 				attributeMapping -> applyMappingToAttribute(attributeMapping, sourceEntity, target,
 						sourceEntityMetaData));
 		return target;
+	}
+
+    @Override
+    public String generateId(FieldType dataType, Long count)
+	{
+		Object id;
+		if (dataType.equals(MolgenisFieldTypes.INT)
+				|| dataType.equals(MolgenisFieldTypes.LONG)
+                || dataType.equals(MolgenisFieldTypes.DECIMAL))
+		{
+			id = count + 1;
+		}
+		else
+		{
+			id = idGenerator.generateId();
+		}
+		return id.toString();
 	}
 
 	private void applyMappingToAttribute(AttributeMapping attributeMapping, Entity sourceEntity, MapEntity target,
