@@ -87,7 +87,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 							{
 								case DATE:
 								case DATE_TIME:
-									derivedValues.add(new Date(Math.round(Context.toNumber(result))));
+									derivedValues.add(Context.jsToJava(result, Date.class));
 									break;
 								case INT:
 									derivedValues.add(Integer.parseInt(Context.toString(result)));
@@ -163,6 +163,10 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		FieldTypeEnum targetDataType = attributeMetaData.getDataType().getEnumType();
 		switch (targetDataType)
 		{
+			case DATE:
+			case DATE_TIME:
+				convertedValue = Context.jsToJava(value, Date.class);
+				break;
 			case INT:
 				convertedValue = Integer.parseInt(Context.toString(value));
 				break;
