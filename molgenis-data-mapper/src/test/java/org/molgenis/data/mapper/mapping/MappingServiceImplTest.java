@@ -1,6 +1,8 @@
 package org.molgenis.data.mapper.mapping;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.DECIMAL;
 import static org.testng.Assert.assertEquals;
@@ -13,7 +15,7 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 
 import org.elasticsearch.common.collect.Lists;
-import org.mockito.Mockito;
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.Entity;
 import org.molgenis.data.IdGenerator;
@@ -79,6 +81,8 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 
 	private DefaultEntityMetaData geneMetaData;
 
+	private UuidGenerator uuidGenerator = new UuidGenerator();
+
 	@BeforeMethod
 	public void beforeMethod()
 	{
@@ -114,6 +118,8 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testAddMappingProject()
 	{
+		when(idGenerator.generateId()).thenReturn(uuidGenerator.generateId());
+
 		MappingProject added = mappingService.addMappingProject("Test123", user, "HopEntity");
 		assertEquals(added.getName(), "Test123");
 
@@ -136,32 +142,31 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testAddTarget()
 	{
+		when(idGenerator.generateId()).thenReturn(uuidGenerator.generateId());
+
 		MappingProject mappingProject = mappingService.addMappingProject("Test123", user, "HopEntity");
 		mappingProject.addTarget(geneMetaData);
+
+		when(idGenerator.generateId()).thenReturn(uuidGenerator.generateId());
 		mappingService.updateMappingProject(mappingProject);
 
 		MappingProject retrieved = mappingService.getMappingProject(mappingProject.getIdentifier());
 		assertEquals(mappingProject, retrieved);
 	}
 
-	@Test
-	public void testAddExistingTarget()
-	{
-		MappingProject mappingProject = mappingService.addMappingProject("Test123", user, "HopEntity");
-		try
-		{
-			mappingProject.addTarget(hopMetaData);
-			fail("Cannot add same target twice");
-		}
-		catch (Exception expected)
-		{
+	@Test(expectedExceptions = IllegalStateException.class)
+	public void testAddExistingTarget() {
+        when(idGenerator.generateId()).thenReturn(uuidGenerator.generateId());
 
-		}
-	}
+        MappingProject mappingProject = mappingService.addMappingProject("Test123", user, "HopEntity");
+        mappingProject.addTarget(hopMetaData);
+    }
 
 	@Test
 	public void testAddNewSource()
 	{
+		when(idGenerator.generateId()).thenReturn(uuidGenerator.generateId());
+
 		MappingProject mappingProject = mappingService.addMappingProject("Test123", user, "HopEntity");
 
 		// now add new source
@@ -177,6 +182,8 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testAddExistingSource()
 	{
+		when(idGenerator.generateId()).thenReturn(uuidGenerator.generateId());
+
 		MappingProject mappingProject = mappingService.addMappingProject("Test123", user, "HopEntity");
 		mappingProject.getMappingTarget("HopEntity").addSource(geneMetaData);
 
@@ -195,6 +202,8 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testApplyMappings()
 	{
+		when(idGenerator.generateId()).thenReturn(uuidGenerator.generateId());
+
 		MappingProject mappingProject = mappingService.addMappingProject("TestRun", user, "HopEntity");
 		MappingTarget target = mappingProject.getMappingTarget("HopEntity");
 		EntityMapping mapping = target.addSource(geneMetaData);
@@ -218,8 +227,26 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		koetje.set("source", "Gene");
 		assertEquals(created, ImmutableList.<Entity> of(koetje));
 
-		Mockito.verify(permissionSystemService).giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
+		verify(permissionSystemService).giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
 				Arrays.asList("Koetjeboe"));
+	}
+
+	@Test
+	public void testNumericId()
+	{
+		assertEquals(mappingService.generateId(MolgenisFieldTypes.INT, 1l), "2");
+		assertEquals(mappingService.generateId(MolgenisFieldTypes.DECIMAL, 2l), "3");
+		assertEquals(mappingService.generateId(MolgenisFieldTypes.LONG, 3l), "4");
+	}
+
+	@Test
+	public void testStringId()
+	{
+		reset(idGenerator);
+		when(idGenerator.generateId()).thenReturn(uuidGenerator.generateId());
+
+		mappingService.generateId(MolgenisFieldTypes.STRING, 1l);
+		verify(idGenerator).generateId();
 	}
 
 	@Configuration
@@ -258,7 +285,8 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		@Bean
 		IdGenerator idGenerator()
 		{
-			return new UuidGenerator();
+			IdGenerator idGenerator = mock(IdGenerator.class);
+			return idGenerator;
 		}
 
 		@PostConstruct
