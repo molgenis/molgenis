@@ -5,6 +5,8 @@ import static org.molgenis.ui.MolgenisPluginAttributes.KEY_MOLGENIS_UI;
 import static org.molgenis.ui.MolgenisPluginAttributes.KEY_PLUGINID_WITH_QUERY_STRING;
 import static org.molgenis.ui.MolgenisPluginAttributes.KEY_PLUGIN_ID;
 
+import java.io.File;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -68,7 +70,20 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 
 			if (molgenisSettings.getProperty(MOLGENIS_CSS_THEME) != null)
 			{
-				modelAndView.addObject(CSS_VARIABLE, molgenisSettings.getProperty(MOLGENIS_CSS_THEME));
+				// If it is an api request, always put it in the model
+				if (molgenisSettings.getProperty(MOLGENIS_CSS_THEME).contains("bootswatch"))
+				{
+					modelAndView.addObject(CSS_VARIABLE, molgenisSettings.getProperty(MOLGENIS_CSS_THEME));
+				}
+				// If it is a file, check if it exists before putting it in the model
+				else
+				{
+					File cssFile = new File(molgenisSettings.getProperty(MOLGENIS_CSS_THEME));
+					if (cssFile.exists() && !cssFile.isDirectory())
+					{
+						modelAndView.addObject(CSS_VARIABLE, molgenisSettings.getProperty(MOLGENIS_CSS_THEME));
+					}
+				}
 			}
 
 			modelAndView.addObject(APP_TRACKING_CODE_VARIABLE, new AppTrackingCodeImpl(molgenisSettings));
@@ -93,7 +108,7 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 		}
 		return (MolgenisPluginController) bean;
 	}
-	
+
 	private String getPluginIdWithQueryString(HttpServletRequest request, String pluginId)
 	{
 		if (null != request)
@@ -104,7 +119,9 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 			if (queryString != null && !queryString.isEmpty()) pluginIdAndQueryStringUrlPart.append('?').append(
 					queryString);
 			return pluginIdAndQueryStringUrlPart.toString();
-		}else{
+		}
+		else
+		{
 			return "";
 		}
 	}
