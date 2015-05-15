@@ -85,7 +85,6 @@ public class MappingTargetRepositoryImpl implements MappingTargetRepository
 	 * @param mappingTargetEntity
 	 *            Entity with {@link MappingProjectMetaData} metadata
 	 * @return fully reconstructed MappingProject
-	 * @throws Exception
 	 */
 	private MappingTarget toMappingTarget(Entity mappingTargetEntity)
 	{
@@ -106,7 +105,6 @@ public class MappingTargetRepositoryImpl implements MappingTargetRepository
 					.getEntities(MappingTargetMetaData.ENTITYMAPPINGS));
 			entityMappings = entityMappingRepository.toEntityMappings(entityMappingEntities);
 		}
-		System.out.println(entityMappings);
 
 		return new MappingTarget(identifier, target, entityMappings);
 	}
