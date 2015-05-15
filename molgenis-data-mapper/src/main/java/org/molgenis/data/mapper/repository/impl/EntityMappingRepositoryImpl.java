@@ -47,10 +47,29 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 	private EntityMapping toEntityMapping(Entity entityMappingEntity)
 	{
 		String identifier = entityMappingEntity.getString(EntityMappingMetaData.IDENTIFIER);
-		EntityMetaData targetEntityMetaData = dataService.getEntityMetaData(entityMappingEntity
-				.getString(EntityMappingMetaData.TARGETENTITYMETADATA));
-		EntityMetaData sourceEntityMetaData = dataService.getEntityMetaData(entityMappingEntity
-				.getString(EntityMappingMetaData.SOURCEENTITYMETADATA));
+
+		EntityMetaData targetEntityMetaData;
+		try
+		{
+			targetEntityMetaData = dataService.getEntityMetaData(entityMappingEntity
+					.getString(EntityMappingMetaData.TARGETENTITYMETADATA));
+		}
+		catch (Exception e)
+		{
+			targetEntityMetaData = null;
+		}
+
+		EntityMetaData sourceEntityMetaData;
+		try
+		{
+			sourceEntityMetaData = dataService.getEntityMetaData(entityMappingEntity
+					.getString(EntityMappingMetaData.SOURCEENTITYMETADATA));
+		}
+		catch (Exception e)
+		{
+			sourceEntityMetaData = null;
+		}
+
 		List<Entity> attributeMappingEntities = Lists.<Entity> newArrayList(entityMappingEntity
 				.getEntities(EntityMappingMetaData.ATTRIBUTEMAPPINGS));
 		List<AttributeMapping> attributeMappings = attributeMappingRepository.getAttributeMappings(
