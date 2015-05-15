@@ -85,19 +85,29 @@ public class MappingTargetRepositoryImpl implements MappingTargetRepository
 	 * @param mappingTargetEntity
 	 *            Entity with {@link MappingProjectMetaData} metadata
 	 * @return fully reconstructed MappingProject
+	 * @throws Exception
 	 */
 	private MappingTarget toMappingTarget(Entity mappingTargetEntity)
 	{
 		List<EntityMapping> entityMappings = Collections.emptyList();
 		String identifier = mappingTargetEntity.getString(MappingTargetMetaData.IDENTIFIER);
+
+		if (!dataService.hasRepository(mappingTargetEntity.getString(MappingTargetMetaData.TARGET)))
+		{
+			return null;
+		}
+
 		EntityMetaData target = dataService.getEntityMetaData(mappingTargetEntity
 				.getString(MappingTargetMetaData.TARGET));
+
 		if (mappingTargetEntity.getEntities(MappingTargetMetaData.ENTITYMAPPINGS) != null)
 		{
 			List<Entity> entityMappingEntities = Lists.newArrayList(mappingTargetEntity
 					.getEntities(MappingTargetMetaData.ENTITYMAPPINGS));
 			entityMappings = entityMappingRepository.toEntityMappings(entityMappingEntities);
 		}
+		System.out.println(entityMappings);
+
 		return new MappingTarget(identifier, target, entityMappings);
 	}
 }

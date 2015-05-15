@@ -109,6 +109,7 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 		List<Entity> mappingTargetEntities = Lists.newArrayList(mappingProjectEntity
 				.getEntities(MappingProjectMetaData.MAPPINGTARGETS));
 		List<MappingTarget> mappingTargets = mappingTargetRepository.toMappingTargets(mappingTargetEntities);
+
 		return new MappingProject(identifier, name, owner, mappingTargets);
 	}
 
