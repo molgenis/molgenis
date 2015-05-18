@@ -15,28 +15,30 @@ import org.springframework.context.annotation.Configuration;
 
 public class AvailableAnnotators
 {
-//	@Configuration
-//	public static class Config 
-//	{
-//		@Bean
-//		MolgenisSettings settings(){
-//			return new MolgenisSimpleSettings();
-//		}
-//		
-//		@Bean 
-//		AnnotationService annotationService(){
-//			return new AnnotationServiceImpl();
-//		}
-//	}
-//
-//	@Autowired
-//	private GoNLServiceAnnotator gonlAnnotator;
-//	
-//	public List<VariantAnnotator> getAnnotators()
-//	{
-//		List<VariantAnnotator> res = new ArrayList<VariantAnnotator>();
-//		res.add(gonlAnnotator);
-//		return res;
-//	}
-	
+	@Configuration
+	public static class Config
+	{
+		@Bean
+		MolgenisSettings settings()
+		{
+			return new MolgenisSimpleSettings();
+		}
+
+		@Bean
+		AnnotationService annotationService()
+		{
+			return new AnnotationServiceImpl();
+		}
+	}
+
+	@Autowired
+	private GoNLServiceAnnotator gonlAnnotator;
+
+	public List<VariantAnnotator> getAnnotators()
+	{
+		List<VariantAnnotator> res = new ArrayList<VariantAnnotator>();
+		res.add(gonlAnnotator);
+		return res;
+	}
+
 }
