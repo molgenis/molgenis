@@ -25,6 +25,7 @@ import org.molgenis.js.RhinoConfig;
 import org.molgenis.js.ScriptEvaluator;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.mozilla.javascript.Context;
+import org.mozilla.javascript.NativeArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,7 +88,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 							{
 								case DATE:
 								case DATE_TIME:
-									derivedValues.add(new Date(Math.round(Context.toNumber(result))));
+									derivedValues.add(Context.jsToJava(result, Date.class));
 									break;
 								case INT:
 									derivedValues.add(Integer.parseInt(Context.toString(result)));
@@ -101,7 +102,9 @@ public class AlgorithmServiceImpl implements AlgorithmService
 											Context.toString(result)).getIdValue());
 									break;
 								case MREF:
-									throw new UnsupportedOperationException();
+								case CATEGORICAL_MREF:
+									derivedValues.add((NativeArray) result);
+									break;
 								default:
 									derivedValues.add(Context.toString(result));
 									break;
@@ -163,6 +166,10 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		FieldTypeEnum targetDataType = attributeMetaData.getDataType().getEnumType();
 		switch (targetDataType)
 		{
+			case DATE:
+			case DATE_TIME:
+				convertedValue = Context.jsToJava(value, Date.class);
+				break;
 			case INT:
 				convertedValue = Integer.parseInt(Context.toString(value));
 				break;
@@ -175,7 +182,20 @@ public class AlgorithmServiceImpl implements AlgorithmService
 						Context.toString(value));
 				break;
 			case MREF:
-				throw new UnsupportedOperationException();
+			case CATEGORICAL_MREF:
+			{
+				NativeArray mrefIds = (NativeArray) value;
+				if (mrefIds != null && !mrefIds.isEmpty())
+				{
+					EntityMetaData refEntityMeta = attributeMetaData.getRefEntity();
+					convertedValue = dataService.findAll(refEntityMeta.getName(), mrefIds);
+				}
+				else
+				{
+					convertedValue = null;
+				}
+				break;
+			}
 			default:
 				convertedValue = Context.toString(value);
 				break;
