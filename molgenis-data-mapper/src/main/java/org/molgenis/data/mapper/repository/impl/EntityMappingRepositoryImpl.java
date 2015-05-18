@@ -8,12 +8,16 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IdGenerator;
+import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.mapper.controller.MappingServiceController;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.meta.EntityMappingMetaData;
 import org.molgenis.data.mapper.repository.AttributeMappingRepository;
 import org.molgenis.data.mapper.repository.EntityMappingRepository;
 import org.molgenis.data.support.MapEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.collect.Lists;
@@ -23,6 +27,8 @@ import com.google.common.collect.Lists;
  */
 public class EntityMappingRepositoryImpl implements EntityMappingRepository
 {
+	private static final Logger LOG = LoggerFactory.getLogger(MappingServiceController.class);
+
 	public static final EntityMetaData META_DATA = new EntityMappingMetaData();
 
 	@Autowired
@@ -54,8 +60,9 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 			targetEntityMetaData = dataService.getEntityMetaData(entityMappingEntity
 					.getString(EntityMappingMetaData.TARGETENTITYMETADATA));
 		}
-		catch (Exception e)
+		catch (UnknownEntityException uee)
 		{
+			LOG.error(uee.getMessage());
 			targetEntityMetaData = null;
 		}
 
@@ -65,8 +72,9 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 			sourceEntityMetaData = dataService.getEntityMetaData(entityMappingEntity
 					.getString(EntityMappingMetaData.SOURCEENTITYMETADATA));
 		}
-		catch (Exception e)
+		catch (UnknownEntityException uee)
 		{
+			LOG.error(uee.getMessage());
 			sourceEntityMetaData = null;
 		}
 
