@@ -37,7 +37,7 @@
 			var attributes = this.state.attr.attributes;
 			
 			// add control for each attribute
-			var foundFocusControl = false;
+			var foundFocusControl = !this.props.focus;
 			var controls = [];
 			var hasVisible = false;
 			for(var i = 0; i < attributes.length; ++i) {
