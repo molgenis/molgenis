@@ -33,7 +33,7 @@ public class HgncSymbolServiceAnnotator extends LocusAnnotator
 
 	static final String HGNC_SYMBOL = "HGNC_SYMBOL";
 	private static final String NAME = "HGNC-Symbol";
-    private Map<String, HGNCLocations> hgncLocations;
+    private Map<String, HGNCLocations> hgncLocations = new HashMap<>();
 
     @Autowired
 	public HgncSymbolServiceAnnotator(HgncLocationsProvider hgncLocationsProvider)
