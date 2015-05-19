@@ -76,33 +76,8 @@ public class KeggServiceAnnotator extends LocusAnnotator {
 
     @Override
     public List<Entity> annotateEntity(Entity entity) throws IOException {
-        if (this.keggPathwayGenes.isEmpty()) {
-            LOG.info("keggPathwayGenes empty, started fetching the data");
-            this.keggPathwayGenes = getKeggPathwayGenes();
-            LOG.info("finished fetching the keggPathwayGenes data");
-        }
-        if (this.keggGenes.isEmpty()) {
-            LOG.info("keggGenes empty, started fetching the data");
-            this.keggGenes = getKeggGenes();
-            LOG.info("finished fetching the keggGenes data");
-        }
-        if (this.pathwayInfo.isEmpty()) {
-            LOG.info("pathwayInfo empty, started fetching the data");
-            this.pathwayInfo = getKeggPathwayInfo();
-            LOG.info("finished fetching the pathwayInfo data");
-        }
-        if (this.hgncLocations.isEmpty()) {
-            LOG.info("hgncLocations empty, started fetching the data");
-            this.hgncLocations = hgncLocationsProvider.getHgncLocations();
-            LOG.info("finished fetching the hgncLocations data");
-        }
-        if (this.hgncToKeggGeneId.isEmpty()) {
-            LOG.info("hgncToKeggGeneId empty, started fetching the data");
-            this.hgncToKeggGeneId = hgncToKeggGeneId();
-            LOG.info("finished fetching the hgncToKeggGeneId data");
-        }
-
-        List<Entity> results = new ArrayList<Entity>();
+        getAnnotationDataFromSources();
+       List<Entity> results = new ArrayList<>();
         String chromosome = entity.getString(VcfRepository.CHROM);
         Long position = entity.getLong(VcfRepository.POS);
         Locus locus = new Locus(chromosome, position);
@@ -115,7 +90,7 @@ public class KeggServiceAnnotator extends LocusAnnotator {
         try {
             for (String geneSymbol : geneSymbols) {
                 if (geneSymbol != null) {
-                    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+                    HashMap<String, Object> resultMap = new HashMap<>();
 
                     resultMap.put(VcfRepository.CHROM, locus.getChrom());
                     resultMap.put(VcfRepository.POS, locus.getPos());
@@ -152,6 +127,34 @@ public class KeggServiceAnnotator extends LocusAnnotator {
         }
 
         return results;
+    }
+
+    private void getAnnotationDataFromSources() throws IOException {
+        if (this.keggPathwayGenes.isEmpty()) {
+            LOG.info("keggPathwayGenes empty, started fetching the data");
+            this.keggPathwayGenes = getKeggPathwayGenes();
+            LOG.info("finished fetching the keggPathwayGenes data");
+        }
+        if (this.keggGenes.isEmpty()) {
+            LOG.info("keggGenes empty, started fetching the data");
+            this.keggGenes = getKeggGenes();
+            LOG.info("finished fetching the keggGenes data");
+        }
+        if (this.pathwayInfo.isEmpty()) {
+            LOG.info("pathwayInfo empty, started fetching the data");
+            this.pathwayInfo = getKeggPathwayInfo();
+            LOG.info("finished fetching the pathwayInfo data");
+        }
+        if (this.hgncLocations.isEmpty()) {
+            LOG.info("hgncLocations empty, started fetching the data");
+            this.hgncLocations = hgncLocationsProvider.getHgncLocations();
+            LOG.info("finished fetching the hgncLocations data");
+        }
+        if (this.hgncToKeggGeneId.isEmpty()) {
+            LOG.info("hgncToKeggGeneId empty, started fetching the data");
+            this.hgncToKeggGeneId = hgncToKeggGeneId();
+            LOG.info("finished fetching the hgncToKeggGeneId data");
+        }
     }
 
 
@@ -250,23 +253,15 @@ public class KeggServiceAnnotator extends LocusAnnotator {
 
         for (Map.Entry<String, KeggGene> entry : keggGenes.entrySet()) {
             String keggId = entry.getKey();
-            KeggGene k = keggGenes.get(keggId);
+            KeggGene keggGene = keggGenes.get(keggId);
 
-            for (String symbol : k.getSymbols()) {
+            for (String symbol : keggGene.getSymbols()) {
                 if (hgncLocs.containsKey(symbol)) {
                     res.put(symbol, keggId);
                     break;
                 }
             }
         }
-
-        Integer mapped = 0;
-        for (String hgnc : hgncLocs.keySet()) {
-            if (res.containsKey(hgnc)) {
-                mapped++;
-            }
-        }
-
         return res;
     }
 
