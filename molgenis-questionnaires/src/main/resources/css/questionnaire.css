@@ -14,3 +14,18 @@ li {
   }
 }
 
+fieldset legend {
+	font-size: 30px;
+}
+
+fieldset fieldset legend {
+	font-size: 25px;
+}
+
+fieldset fieldset fieldset legend {
+	font-size: 20px;
+}
+
+fieldset fieldset fieldset fieldset legend {
+	font-size: 15px;
+}
