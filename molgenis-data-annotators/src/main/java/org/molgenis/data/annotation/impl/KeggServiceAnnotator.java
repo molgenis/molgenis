@@ -24,6 +24,8 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -32,263 +34,251 @@ import org.springframework.stereotype.Component;
  * @author jvelde
  */
 @Component("KeggService")
-public class KeggServiceAnnotator extends LocusAnnotator
-{
-	private final AnnotationService annotatorService;
-	private final HgncLocationsProvider hgncLocationsProvider;
-	private final KeggDataProvider keggDataProvider;
+public class KeggServiceAnnotator extends LocusAnnotator {
+    private static final Logger LOG = LoggerFactory.getLogger(KeggServiceAnnotator.class);
 
-	public static final String KEGG_GENE_ID = "KEGG_gene_id";
-	public static final String KEGG_PATHWAYS_IDS = "KEGG_pathway_ids";
-	public static final String KEGG_PATHWAYS_NAMES = "KEGG_pathway_names";
+    private final AnnotationService annotatorService;
+    private final HgncLocationsProvider hgncLocationsProvider;
+    private final KeggDataProvider keggDataProvider;
 
-	@Autowired
-	public KeggServiceAnnotator(AnnotationService annotatorService, HgncLocationsProvider hgncLocationsProvider,
-			KeggDataProvider keggDataProvider) throws IOException
-	{
-		this.annotatorService = annotatorService;
-		this.hgncLocationsProvider = hgncLocationsProvider;
-		this.keggDataProvider = keggDataProvider;
-	}
+    public static final String KEGG_GENE_ID = "KEGG_gene_id";
+    public static final String KEGG_PATHWAYS_IDS = "KEGG_pathway_ids";
+    public static final String KEGG_PATHWAYS_NAMES = "KEGG_pathway_names";
 
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		annotatorService.addAnnotator(this);
-	}
+    Map<String, ArrayList<String>> keggPathwayGenes = new HashMap<>();
+    Map<String, KeggGene> keggGenes = new HashMap<>();
+    Map<String, String> pathwayInfo = new HashMap<>();
+    Map<String, HGNCLocations> hgncLocations = new HashMap<>();
+    Map<String, String> hgncToKeggGeneId = new HashMap<>();
 
-	@Override
-	public String getSimpleName()
-	{
-		return "KEGG";
-	}
+    @Autowired
+    public KeggServiceAnnotator(AnnotationService annotatorService, HgncLocationsProvider hgncLocationsProvider,
+                                KeggDataProvider keggDataProvider) throws IOException {
+        this.annotatorService = annotatorService;
+        this.hgncLocationsProvider = hgncLocationsProvider;
+        this.keggDataProvider = keggDataProvider;
+    }
 
-	@Override
-	public boolean annotationDataExists()
-	{
-		return true;
-	}
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        annotatorService.addAnnotator(this);
+    }
 
-	@Override
-	public List<Entity> annotateEntity(Entity entity) throws IOException
-	{
-		List<Entity> results = new ArrayList<Entity>();
+    @Override
+    public String getSimpleName() {
+        return "KEGG";
+    }
 
-		String chromosome = entity.getString(VcfRepository.CHROM);
-		Long position = entity.getLong(VcfRepository.POS);
+    @Override
+    public boolean annotationDataExists() {
+        return true;
+    }
 
-		Locus locus = new Locus(chromosome, position);
+    @Override
+    public List<Entity> annotateEntity(Entity entity) throws IOException {
+        if (this.keggPathwayGenes.isEmpty()) {
+            LOG.info("keggPathwayGenes empty, started fetching the data");
+            this.keggPathwayGenes = getKeggPathwayGenes();
+            LOG.info("finished fetching the keggPathwayGenes data");
+        }
+        if (this.keggGenes.isEmpty()) {
+            LOG.info("keggGenes empty, started fetching the data");
+            this.keggGenes = getKeggGenes();
+            LOG.info("finished fetching the keggGenes data");
+        }
+        if (this.pathwayInfo.isEmpty()) {
+            LOG.info("pathwayInfo empty, started fetching the data");
+            this.pathwayInfo = getKeggPathwayInfo();
+            LOG.info("finished fetching the pathwayInfo data");
+        }
+        if (this.hgncLocations.isEmpty()) {
+            LOG.info("hgncLocations empty, started fetching the data");
+            this.hgncLocations = hgncLocationsProvider.getHgncLocations();
+            LOG.info("finished fetching the hgncLocations data");
+        }
+        if (this.hgncToKeggGeneId.isEmpty()) {
+            LOG.info("hgncToKeggGeneId empty, started fetching the data");
+            this.hgncToKeggGeneId = hgncToKeggGeneId();
+            LOG.info("finished fetching the hgncToKeggGeneId data");
+        }
 
-		Map<String, ArrayList<String>> keggPathwayGenes = getKeggPathwayGenes();
-		Map<String, String> pathwayInfo = getKeggPathwayInfo();
+        List<Entity> results = new ArrayList<Entity>();
+        String chromosome = entity.getString(VcfRepository.CHROM);
+        Long position = entity.getLong(VcfRepository.POS);
+        Locus locus = new Locus(chromosome, position);
+        List<String> geneSymbols = HgncLocationsUtils.locationToHgcn(hgncLocations, locus);
 
-		List<String> geneSymbols = HgncLocationsUtils.locationToHgcn(hgncLocationsProvider.getHgncLocations(), locus);
+        // TODO: cache this
 
-		// TODO: cache this
-		Map<String, String> hgncToKeggGeneId = hgncToKeggGeneId();
-		Map<String, ArrayList<String>> keggGenePathways = getKeggGenePathways(keggPathwayGenes);
+        Map<String, ArrayList<String>> keggGenePathways = getKeggGenePathways(keggPathwayGenes);
 
-		try
-		{
-			for (String geneSymbol : geneSymbols)
-			{
-				if (geneSymbol != null)
-				{
-					HashMap<String, Object> resultMap = new HashMap<String, Object>();
+        try {
+            for (String geneSymbol : geneSymbols) {
+                if (geneSymbol != null) {
+                    HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
-					resultMap.put(VcfRepository.CHROM, locus.getChrom());
-					resultMap.put(VcfRepository.POS, locus.getPos());
+                    resultMap.put(VcfRepository.CHROM, locus.getChrom());
+                    resultMap.put(VcfRepository.POS, locus.getPos());
 
-					String keggGeneId = hgncToKeggGeneId.get(geneSymbol);
+                    String keggGeneId = hgncToKeggGeneId.get(geneSymbol);
 
-					resultMap.put(KEGG_GENE_ID, keggGeneId);
+                    resultMap.put(KEGG_GENE_ID, keggGeneId);
 
-					if (keggGenePathways.get(keggGeneId) != null)
-					{
+                    if (keggGenePathways.get(keggGeneId) != null) {
 
-						StringBuilder sb = new StringBuilder();
-						for (String pathwayId : keggGenePathways.get(keggGeneId))
-						{
-							sb.append(pathwayId + ", ");
-						}
-						sb.delete(sb.length() - 2, sb.length());
-						resultMap.put(KEGG_PATHWAYS_IDS, sb.toString());
+                        StringBuilder sb = new StringBuilder();
+                        for (String pathwayId : keggGenePathways.get(keggGeneId)) {
+                            sb.append(pathwayId + ", ");
+                        }
+                        sb.delete(sb.length() - 2, sb.length());
+                        resultMap.put(KEGG_PATHWAYS_IDS, sb.toString());
 
-						sb = new StringBuilder();
-						for (String pathwayId : keggGenePathways.get(keggGeneId))
-						{
-							sb.append(pathwayInfo.get(pathwayId) + ", ");
-						}
+                        sb = new StringBuilder();
+                        for (String pathwayId : keggGenePathways.get(keggGeneId)) {
+                            sb.append(pathwayInfo.get(pathwayId) + ", ");
+                        }
 
-						sb.delete(sb.length() - 2, sb.length());
-						resultMap.put(KEGG_PATHWAYS_NAMES, sb.toString());
-					}
+                        sb.delete(sb.length() - 2, sb.length());
+                        resultMap.put(KEGG_PATHWAYS_NAMES, sb.toString());
+                    } else {
+                        // no genes for this pathway, do nothing
+                    }
 
-					else
-					{
-						// no genes for this pathway, do nothing
-					}
+                    results.add(AnnotatorUtils.getAnnotatedEntity(this, entity, resultMap));
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
-					results.add(AnnotatorUtils.getAnnotatedEntity(this, entity, resultMap));
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			throw new RuntimeException(e);
-		}
+        return results;
+    }
 
-		return results;
-	}
 
-	/**
-	 * // KEGG genes for homo sapiens // // stored in KeggID - KeggGene map, though KeggGene also has this identifier //
-	 * // example: // hsa:4351 MPI, CDG1B, PMI, PMI1; mannose phosphate isomerase (EC:5.3.1.8); K01809
-	 * mannose-6-phosphate isomerase // [EC:5.3.1.8]
-	 **/
-	private Map<String, KeggGene> getKeggGenes() throws IOException
-	{
-		Map<String, KeggGene> res = new HashMap<String, KeggGene>();
-		List<String> keggGenes = IOUtils.readLines(keggDataProvider.getKeggHsaReader());
-		for (String s : keggGenes)
-		{
-			String[] line = s.split("\t");
-			String[] allSymbolsAndProteins = line[1].split("; ");
+    /**
+     * Convert map of (pathway -> genes) to (gene -> pathways)
+     *
+     * @param pathwayGenes
+     * @return
+     */
+    public static Map<String, ArrayList<String>> getKeggGenePathways(Map<String, ArrayList<String>> pathwayGenes) {
+        Map<String, ArrayList<String>> res = new HashMap<String, ArrayList<String>>();
 
-			String id = line[0];
-			List<String> symbols = new ArrayList<String>(Arrays.asList(allSymbolsAndProteins[0].split(", ")));
-			List<String> proteins = new ArrayList<String>(Arrays.asList(allSymbolsAndProteins).subList(1,
-					allSymbolsAndProteins.length));
+        for (Map.Entry<String, ArrayList<String>> entry : pathwayGenes.entrySet()) {
+            String pathwayId = entry.getKey();
+            for (String geneId : entry.getValue()) {
+                if (res.containsKey(geneId)) {
+                    res.get(geneId).add(pathwayId);
+                } else {
+                    ArrayList<String> list = new ArrayList<String>();
+                    list.add(pathwayId);
+                    res.put(geneId, list);
+                }
+            }
+        }
+        return res;
+    }
 
-			KeggGene kg = new KeggGene(id, symbols, proteins);
-			res.put(id, kg);
+    /**
+     * // KEGG genes for homo sapiens // // stored in KeggID - KeggGene map, though KeggGene also has this identifier //
+     * // example: // hsa:4351 MPI, CDG1B, PMI, PMI1; mannose phosphate isomerase (EC:5.3.1.8); K01809
+     * mannose-6-phosphate isomerase // [EC:5.3.1.8]
+     */
+    private Map<String, KeggGene> getKeggGenes() throws IOException {
+        Map<String, KeggGene> res = new HashMap<>();
+        List<String> keggGenes = IOUtils.readLines(keggDataProvider.getKeggHsaReader());
+        for (String s : keggGenes) {
+            String[] line = s.split("\t");
+            String[] allSymbolsAndProteins = line[1].split("; ");
 
-		}
-		return res;
-	}
+            String id = line[0];
+            List<String> symbols = new ArrayList<String>(Arrays.asList(allSymbolsAndProteins[0].split(", ")));
+            List<String> proteins = new ArrayList<String>(Arrays.asList(allSymbolsAndProteins).subList(1,
+                    allSymbolsAndProteins.length));
 
-	/**
-	 * Convert map of (pathway -> genes) to (gene -> pathways)
-	 * 
-	 * @param pathwayGenes
-	 * @return
-	 */
-	public static Map<String, ArrayList<String>> getKeggGenePathways(Map<String, ArrayList<String>> pathwayGenes)
-	{
-		Map<String, ArrayList<String>> res = new HashMap<String, ArrayList<String>>();
+            KeggGene kg = new KeggGene(id, symbols, proteins);
+            res.put(id, kg);
 
-		for (Map.Entry<String, ArrayList<String>> entry : pathwayGenes.entrySet())
-		{
-			String pathwayId = entry.getKey();
-			for (String geneId : entry.getValue())
-			{
-				if (res.containsKey(geneId))
-				{
-					res.get(geneId).add(pathwayId);
-				}
-				else
-				{
-					ArrayList<String> list = new ArrayList<String>();
-					list.add(pathwayId);
-					res.put(geneId, list);
-				}
-			}
-		}
-		return res;
-	}
+        }
+        return res;
+    }
 
-	/**
-	 * // KEGG pathway and gene info // // stored in map of pathwayId - List of KeggIDs // // example: // path:hsa00010
-	 * hsa:92483 // path:hsa00010 hsa:92579 // path:hsa00020 hsa:1431 // path:hsa00020 hsa:1737
-	 **/
-	private Map<String, ArrayList<String>> getKeggPathwayGenes() throws IOException
-	{
-		List<String> keggGenesToPathway = IOUtils.readLines(keggDataProvider.getKeggPathwayHsaReader());
-		Map<String, ArrayList<String>> res = new HashMap<String, ArrayList<String>>();
-		for (String s : keggGenesToPathway)
-		{
-			String[] split = s.split("\t");
+    /**
+     * // KEGG pathway and gene info // // stored in map of pathwayId - List of KeggIDs // // example: // path:hsa00010
+     * hsa:92483 // path:hsa00010 hsa:92579 // path:hsa00020 hsa:1431 // path:hsa00020 hsa:1737
+     */
+    private Map<String, ArrayList<String>> getKeggPathwayGenes() throws IOException {
+        List<String> keggGenesToPathway = IOUtils.readLines(keggDataProvider.getKeggPathwayHsaReader());
+        Map<String, ArrayList<String>> res = new HashMap<>();
+        for (String s : keggGenesToPathway) {
+            String[] split = s.split("\t");
 
-			if (res.containsKey(split[0]))
-			{
-				res.get(split[0]).add(split[1]);
-			}
-			else
-			{
-				res.put(split[0], new ArrayList<String>(Arrays.asList(split[1])));
-			}
-		}
-		return res;
-	}
+            if (res.containsKey(split[0])) {
+                res.get(split[0]).add(split[1]);
+            } else {
+                res.put(split[0], new ArrayList<>(Arrays.asList(split[1])));
+            }
+        }
+        return res;
+    }
 
-	/**
-	 * // KEGG pathway and gene info // // stored in map of pathwayId - info // // example: // path:hsa00010 Glycolysis
-	 * / Gluconeogenesis - Homo sapiens (human)
-	 **/
-	private Map<String, String> getKeggPathwayInfo() throws IOException
-	{
-		List<String> keggPathwayInfo = IOUtils.readLines(keggDataProvider.getKeggPathwayReader());
+    /**
+     * // KEGG pathway and gene info // // stored in map of pathwayId - info // // example: // path:hsa00010 Glycolysis
+     * / Gluconeogenesis - Homo sapiens (human)
+     */
+    private Map<String, String> getKeggPathwayInfo() throws IOException {
+        List<String> keggPathwayInfo = IOUtils.readLines(keggDataProvider.getKeggPathwayReader());
 
-		Map<String, String> res = new HashMap<String, String>();
+        Map<String, String> res = new HashMap<>();
 
-		for (String s : keggPathwayInfo)
-		{
-			String[] split = s.split("\t");
-			res.put(split[0], split[1]);
-		}
+        for (String s : keggPathwayInfo) {
+            String[] split = s.split("\t");
+            res.put(split[0], split[1]);
+        }
 
-		return res;
+        return res;
 
-	}
+    }
 
-	/**
-	 * // map HGNC to a KeggGene identifier
-	 **/
-	private Map<String, String> hgncToKeggGeneId() throws IOException
-	{
-		// TODO: Cache this!!!
-		Map<String, KeggGene> keggGenes = getKeggGenes();
-		Map<String, String> res = new HashMap<String, String>();
+    /**
+     * // map HGNC to a KeggGene identifier
+     */
+    private Map<String, String> hgncToKeggGeneId() throws IOException {
+        Map<String, String> res = new HashMap<>();
 
-		Map<String, HGNCLocations> hgncLocs = hgncLocationsProvider.getHgncLocations();
+        Map<String, HGNCLocations> hgncLocs = hgncLocationsProvider.getHgncLocations();
 
-		for (Map.Entry<String, KeggGene> entry : keggGenes.entrySet())
-		{
-			String keggId = entry.getKey();
-			KeggGene k = keggGenes.get(keggId);
+        for (Map.Entry<String, KeggGene> entry : keggGenes.entrySet()) {
+            String keggId = entry.getKey();
+            KeggGene k = keggGenes.get(keggId);
 
-			for (String symbol : k.getSymbols())
-			{
-				if (hgncLocs.containsKey(symbol))
-				{
-					res.put(symbol, keggId);
-					break;
-				}
-			}
-		}
+            for (String symbol : k.getSymbols()) {
+                if (hgncLocs.containsKey(symbol)) {
+                    res.put(symbol, keggId);
+                    break;
+                }
+            }
+        }
 
-		Integer mapped = 0;
-		for (String hgnc : hgncLocs.keySet())
-		{
-			if (res.containsKey(hgnc))
-			{
-				mapped++;
-			}
-		}
+        Integer mapped = 0;
+        for (String hgnc : hgncLocs.keySet()) {
+            if (res.containsKey(hgnc)) {
+                mapped++;
+            }
+        }
 
-		return res;
-	}
+        return res;
+    }
 
-	@Override
-	public EntityMetaData getOutputMetaData()
-	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(KEGG_GENE_ID,
-				MolgenisFieldTypes.FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(KEGG_PATHWAYS_IDS,
-				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(KEGG_PATHWAYS_NAMES,
-				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		return metadata;
-	}
+    @Override
+    public EntityMetaData getOutputMetaData() {
+        DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
+        metadata.addAttributeMetaData(new DefaultAttributeMetaData(KEGG_GENE_ID,
+                MolgenisFieldTypes.FieldTypeEnum.STRING));
+        metadata.addAttributeMetaData(new DefaultAttributeMetaData(KEGG_PATHWAYS_IDS,
+                MolgenisFieldTypes.FieldTypeEnum.TEXT));
+        metadata.addAttributeMetaData(new DefaultAttributeMetaData(KEGG_PATHWAYS_NAMES,
+                MolgenisFieldTypes.FieldTypeEnum.TEXT));
+        return metadata;
+    }
 }
