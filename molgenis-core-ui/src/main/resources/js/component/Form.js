@@ -348,7 +348,7 @@
 			}
 			this.props.onSubmitCancel();
 		},
-		_handleSubmitSuccess: function() {
+		_handleSubmitSuccess: function(responseText, statusText, xhr, element) {
 			var message = this.props.mode === 'create' ? 'has been created.' : 'changes have been saved.';
 			var stateProps = {
 				submitMsg: {type: 'success', message: this.state.entity.label + ' ' + message},
@@ -372,7 +372,11 @@
 				window.scrollTo(0, 0);
 			}
 			
-			this.props.onSubmitSuccess();
+			var e = {};
+			if (this.props.mode === 'create') {
+				e.location = xhr.getResponseHeader('Location')
+			}
+			this.props.onSubmitSuccess(e);
 		},
 		_handleSubmitError: function() {
 			var message = this.props.mode === 'create' ? 'could not be created.' : 'changes could not be saved.';
