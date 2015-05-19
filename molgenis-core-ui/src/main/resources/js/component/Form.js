@@ -623,9 +623,9 @@
 						
 						var Control = ControlFactory(controlProps);
 						if(attr.nillable === true && this.props.hideOptional === true || (this.props.showHidden === false && attr.visible === false)) {
-							Control = div({className: 'hide'}, Control);
+							Control = div({className: 'hide', key: key + '-hide'}, Control);
 						} else if(this.props.enableFormIndex === true && attr.fieldType === 'COMPOUND') {
-							controls.push(div({id: this._getLinkId(attr), className: 'anchor'}));
+							controls.push(div({id: this._getLinkId(attr), className: 'anchor', key: key + '-link'}));
 						}
 						controls.push(Control);
 					}
