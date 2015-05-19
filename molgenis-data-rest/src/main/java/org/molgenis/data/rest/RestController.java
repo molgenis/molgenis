@@ -890,7 +890,7 @@ public class RestController
 	@ResponseBody
 	public ErrorMessageResponse handleMolgenisDataException(MolgenisDataException e)
 	{
-		LOG.error("SUPERTEST", e);
+		LOG.error("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
