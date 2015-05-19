@@ -615,7 +615,7 @@
 						if(attr.nillable === true && this.props.hideOptional === true || (this.props.showHidden === false && attr.visible === false)) {
 							Control = div({className: 'hide'}, Control);
 						} else if(this.props.enableFormIndex === true && attr.fieldType === 'COMPOUND') {
-							Control = div({id: this._getLinkId(attr)}, Control);
+							controls.push(div({id: this._getLinkId(attr), className: 'anchor'}));
 						}
 						controls.push(Control);
 					}
