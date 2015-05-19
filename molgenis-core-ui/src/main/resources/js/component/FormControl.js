@@ -23,7 +23,8 @@
             value: React.PropTypes.any,
             onValueChange: React.PropTypes.func.isRequired,
             onBlur: React.PropTypes.func.isRequired,
-            categorigalMrefShowSelectAll: React.PropTypes.bool
+            categorigalMrefShowSelectAll: React.PropTypes.bool,
+            showAsteriskIfNotNillable: React.PropTypes.bool
         },
         getInitialState: function() {
             return {
@@ -33,7 +34,7 @@
         },
         getDefaultProps: function() {
 			return {
-				colOffset: 2,
+				colOffset: 2
 			};
 		},
         render: function() {
@@ -46,7 +47,7 @@
             
             var lbl = attr.label;
             
-            if(attr.nillable === false) {
+            if((attr.nillable === false) && (this.props.showAsteriskIfNotNillable === true)) {
                 lbl += ' *';
             }
             

@@ -22,6 +22,7 @@
 			enableFormIndex: React.PropTypes.bool, // whether or not to show a form index to navigate to form controls
 			showHidden: React.PropTypes.bool, // whether or not to show not-visible attributes
 			categorigalMrefShowSelectAll: React.PropTypes.bool, //whether to show 'select all' and 'hide all' links under the categorical mref checkboxes
+			showAsteriskIfNotNillable: React.PropTypes.bool, //whether to show a '*' after the label when an attribute is not nillable
 			beforeSubmit: React.PropTypes.func,
 			onSubmitCancel: React.PropTypes.func,
 			onSubmitSuccess: React.PropTypes.func,
@@ -39,6 +40,7 @@
 				saveOnBlur: false,
 				showHidden: false,
 				categorigalMrefShowSelectAll: true,
+				showAsteriskIfNotNillable: true,
 				beforeSubmit: function() {},
 				onSubmitCancel: function() {},
 				onSubmitSuccess: function() {},
@@ -164,11 +166,12 @@
 				showHidden: this.props.showHidden,
 				enableFormIndex: this.props.enableFormIndex,
 				categorigalMrefShowSelectAll: this.props.categorigalMrefShowSelectAll,
+				showAsteriskIfNotNillable: this.props.showAsteriskIfNotNillable,
 				onValueChange : this._handleValueChange,
 				onBlur: this._handleBlur,
 				errorMessages: this.state.errorMessages
 			};
-			
+		
 			var AlertMessage = this.state.submitMsg ? (
 				molgenis.ui.AlertMessage({type: this.state.submitMsg.type, message: this.state.submitMsg.message, onDismiss: this._handleAlertMessageDismiss, key: 'alert'})	
 			) : null;
@@ -571,6 +574,7 @@
 			hideOptional: React.PropTypes.bool,
 			showHidden: React.PropTypes.bool,
 			categorigalMrefShowSelectAll: React.PropTypes.bool,
+			showAsteriskIfNotNillable: React.PropTypes.bool,
 			enableFormIndex: React.PropTypes.bool,
 			errorMessages: React.PropTypes.object.isRequired,
 			onValueChange: React.PropTypes.func.isRequired,
@@ -597,6 +601,7 @@
 							colOffset: this.props.colOffset,
 							onBlur: this.props.onBlur,
 							categorigalMrefShowSelectAll: this.props.categorigalMrefShowSelectAll,
+							showAsteriskIfNotNillable: this.props.showAsteriskIfNotNillable,
 							onValueChange : this.props.onValueChange,
 							key : key 
 						};

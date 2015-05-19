@@ -22,7 +22,8 @@
 			focus: React.PropTypes.bool,
 			onValueChange: React.PropTypes.func.isRequired,
 			onBlur: React.PropTypes.func.isRequired,
-			categorigalMrefShowSelectAll: React.PropTypes.bool
+			categorigalMrefShowSelectAll: React.PropTypes.bool,
+			showAsteriskIfNotNillable: React.PropTypes.bool
 		},
 		getInitialState: function() {
 			return {
@@ -57,6 +58,7 @@
 						onValueChange : this.props.onValueChange,
 						onBlur: this.props.onBlur,
 						categorigalMrefShowSelectAll: this.props.categorigalMrefShowSelectAll,
+						showAsteriskIfNotNillable: this.props.showAsteriskIfNotNillable,
 						key : '' + i
 					};
 					
