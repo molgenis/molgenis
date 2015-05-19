@@ -66,7 +66,6 @@
 			}
 		},
 		_eventToBool: function(e) {
-			console.log(e);
 			if(this.props.multiple) {
 				// do not use $.map since it removes null values
 				if(e.value !== undefined) {
