@@ -13,6 +13,8 @@ import org.molgenis.data.mysql.AsyncJdbcTemplate;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.semanticsearch.config.SemanticSearchConfig;
+import org.molgenis.data.semanticsearch.service.SemanticSearchService;
+import org.molgenis.data.semanticsearch.service.impl.SemanticSearchServiceHelper;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
@@ -117,6 +119,18 @@ public class ImportTestConfig
 		};
 
 		return mysqlRepositoryCollection;
+	}
+
+	@Bean
+	public SemanticSearchService semanticSearchService()
+	{
+		return mock(SemanticSearchService.class);
+	}
+
+	@Bean
+	public SemanticSearchServiceHelper semanticSearchServiceHelper()
+	{
+		return mock(SemanticSearchServiceHelper.class);
 	}
 
 	@Bean

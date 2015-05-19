@@ -1,7 +1,7 @@
 <div class="row">
 	<div class="col-md-8">
 		<form method="post" id="wizardForm" name="wizardForm" action="">
-			<div id="message-panel" class="panel">
+			<div id="message-panel" class="panel panel-primary">
     			<div class="panel-heading">
         			<h3 class="panel-title">Importing...</h3>
     			</div>
@@ -15,7 +15,7 @@
 </div>
 <div class="row">
 	<div class="col-md-8">        
-        <div id="permission-panel" class="hidden panel">
+        <div id="permission-panel" class="hidden panel panel-primary">
         	<div class="panel-heading"><h4 class="panel-title">Permissions</h4></div>
             <div class="panel-body">
                 <div class="tab-content">

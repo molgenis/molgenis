@@ -18,11 +18,12 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.AnnotatorUtils;
+import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.annotation.VariantAnnotator;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -158,19 +159,19 @@ public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 	@Override
 	public List<Entity> annotateEntity(Entity entity) throws IOException
 	{
-		List<Entity> results = new ArrayList<Entity>();
-		Map<String, List<String[]>> chromosomeMap = new HashMap<String, List<String[]>>();
+		List<Entity> results = new ArrayList<>();
+		Map<String, List<String[]>> chromosomeMap = new HashMap<>();
 
-		List<String[]> listOfTriplets = new ArrayList<String[]>();
+		List<String[]> listOfTriplets = new ArrayList<>();
 
 		// a triplet contains position, reference and alternative
 		String[] triplets = new String[3];
 
-		String chromosome = entity.getString(CHROMOSOME);
+		String chromosome = entity.getString(VcfRepository.CHROM);
 
-		triplets[0] = entity.getLong(POSITION).toString();
-		triplets[1] = entity.getString(REFERENCE);
-		triplets[2] = entity.getString(ALTERNATIVE);
+		triplets[0] = entity.getLong(VcfRepository.POS).toString();
+		triplets[1] = entity.getString(VcfRepository.REF);
+		triplets[2] = entity.getString(VcfRepository.ALT);
 
 		listOfTriplets.add(triplets);
 
@@ -232,10 +233,10 @@ public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 									}
 								}
 
-								resultMap.put(CHROMOSOME, entry.getKey());
-								resultMap.put(POSITION, position);
-								resultMap.put(REFERENCE, reference);
-								resultMap.put(ALTERNATIVE, alternative);
+								resultMap.put(VcfRepository.CHROM, entry.getKey());
+								resultMap.put(VcfRepository.POS, position);
+								resultMap.put(VcfRepository.REF, reference);
+								resultMap.put(VcfRepository.ALT, alternative);
 
 								results.add(AnnotatorUtils.getAnnotatedEntity(this, entity, resultMap));
 							}

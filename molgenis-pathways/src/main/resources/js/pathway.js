@@ -102,7 +102,7 @@
 
 		$('#pathway-select').select2({
 			placeholder : "Select a pathway",
-			width : '400px',
+			width : '100%',
 			data : function() {
 				return {
 					results : select2_items
@@ -120,8 +120,8 @@
 		});
 		
 		$('#dataset-select').select2({
-			placeholder : "Select a vcf file",
-			width : '400px'
+			placeholder : "Select a VCF file",
+			width : '100%'
 		});
 		
 		$('#submit-vcfFile-btn').on('click', function() {
@@ -133,7 +133,7 @@
 		
 		$('#pathway-select2').select2({
 			placeholder : "Select a pathway",
-			width : '400px',
+			width : '100%',
 			data : function() {
 				return {
 					results : select2_items_vcf

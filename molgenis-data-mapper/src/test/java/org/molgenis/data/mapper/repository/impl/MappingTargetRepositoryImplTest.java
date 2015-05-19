@@ -92,8 +92,10 @@ public class MappingTargetRepositoryImplTest extends AbstractTestNGSpringContext
 		Entity mappingTargetEntity = new MapEntity(MappingTargetRepositoryImpl.META_DATA);
 		mappingTargetEntity.set(IDENTIFIER, "mappingTargetID");
 		mappingTargetEntity.set(TARGET, "target");
+
 		entityMappingEntities = asList(entityMappingEntity);
 		mappingTargetEntity.set(ENTITYMAPPINGS, entityMappingEntities);
+
 		mappingTargetEntities = asList(mappingTargetEntity);
 	}
 
@@ -102,6 +104,7 @@ public class MappingTargetRepositoryImplTest extends AbstractTestNGSpringContext
 	{
 		when(dataService.getEntityMetaData("target")).thenReturn(targetEntityMetaData);
 		when(entityMappingRepository.toEntityMappings(entityMappingEntities)).thenReturn(entityMappings);
+		when(dataService.hasRepository("target")).thenReturn(true);
 
 		assertEquals(mappingTargetRepository.toMappingTargets(mappingTargetEntities), mappingTargets);
 	}
