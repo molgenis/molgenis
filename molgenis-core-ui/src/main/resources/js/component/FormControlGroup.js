@@ -21,7 +21,8 @@
 			errorMessages: React.PropTypes.object.isRequired,
 			focus: React.PropTypes.bool,
 			onValueChange: React.PropTypes.func.isRequired,
-			onBlur: React.PropTypes.func.isRequired
+			onBlur: React.PropTypes.func.isRequired,
+			categorigalMrefShowSelectAll: React.PropTypes.bool
 		},
 		getInitialState: function() {
 			return {
@@ -55,6 +56,7 @@
 						validate: this.props.validate,
 						onValueChange : this.props.onValueChange,
 						onBlur: this.props.onBlur,
+						categorigalMrefShowSelectAll: this.props.categorigalMrefShowSelectAll,
 						key : '' + i
 					};
 					

@@ -22,7 +22,8 @@
             focus: React.PropTypes.bool,
             value: React.PropTypes.any,
             onValueChange: React.PropTypes.func.isRequired,
-            onBlur: React.PropTypes.func.isRequired
+            onBlur: React.PropTypes.func.isRequired,
+            categorigalMrefShowSelectAll: React.PropTypes.bool
         },
         getInitialState: function() {
             return {
@@ -76,7 +77,8 @@
                 formLayout : undefined,
                 value: this._getValue(this.props.value),
                 onValueChange : this._handleValueChange,
-                onBlur : this._handleBlur
+                onBlur : this._handleBlur,
+                categorigalMrefShowSelectAll: this.props.categorigalMrefShowSelectAll
             });
             
             // allow editing readonly controls in create mode
