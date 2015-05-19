@@ -21,7 +21,6 @@
             errorMessage: React.PropTypes.string,
             focus: React.PropTypes.bool,
             value: React.PropTypes.any,
-            errorMessage: React.PropTypes.string,
             onValueChange: React.PropTypes.func.isRequired,
             onBlur: React.PropTypes.func.isRequired
         },
