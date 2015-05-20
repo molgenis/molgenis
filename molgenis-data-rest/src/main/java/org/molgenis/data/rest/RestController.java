@@ -50,6 +50,7 @@ import org.molgenis.data.EntityCollection;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.MolgenisReferencedEntityException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.Repository;
@@ -915,6 +916,15 @@ public class RestController
 	@ResponseStatus(INTERNAL_SERVER_ERROR)
 	@ResponseBody
 	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
+	{
+		LOG.error("", e);
+		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
+	}
+
+	@ExceptionHandler(MolgenisReferencedEntityException.class)
+	@ResponseStatus(INTERNAL_SERVER_ERROR)
+	@ResponseBody
+	public ErrorMessageResponse handleMolgenisReferencingEntityException(MolgenisReferencedEntityException e)
 	{
 		LOG.error("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));

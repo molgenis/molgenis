@@ -30,6 +30,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Manageable;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.MolgenisReferencedEntityException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.Repository;
@@ -48,6 +49,7 @@ import org.molgenis.fieldtypes.TextField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.model.MolgenisModelException;
 import org.molgenis.util.EntityUtils;
+import org.molgenis.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -106,8 +108,27 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				remembered = remembered != null ? remembered : e;
 			}
 		}
-		DataAccessException e = tryExecute(getDropSql());
-		remembered = remembered != null ? remembered : e;
+
+		// Deleting entites that are referenced won't work due to failing key constraints
+		// Find out if the entity is referenced and if it is, report those entities
+		List<Pair<EntityMetaData, List<AttributeMetaData>>> referencingEntities = EntityUtils
+				.getReferencingEntityMetaData(getEntityMetaData(), dataService);
+		if (!referencingEntities.isEmpty())
+		{
+			List<String> entityNames = Lists.newArrayList();
+			referencingEntities.forEach(pair -> entityNames.add(pair.getA().getName()));
+
+			StringBuilder msg = new StringBuilder("Cannot delete entity '").append(getEntityMetaData().getName())
+					.append("' because it is referenced by the following entities: ").append(entityNames.toString());
+
+			throw new MolgenisReferencedEntityException(msg.toString());
+		}
+		else
+		{
+			DataAccessException e = tryExecute(getDropSql());
+			remembered = remembered != null ? remembered : e;
+		}
+
 		if (remembered != null)
 		{
 			throw remembered;
