@@ -31,7 +31,7 @@ public class HgncSymbolServiceAnnotatorTest extends AbstractAnnotatorTest
 				41196312l - 10, 41277500l + 10, "17"));
 		when(hgncLocationsProvider.getHgncLocations()).thenReturn(hgncLocations);
 
-		annotator = new HgncSymbolServiceAnnotator(null, hgncLocationsProvider);
+		annotator = new HgncSymbolServiceAnnotator(hgncLocationsProvider);
 
 		entity.set(VcfRepository.CHROM, "17");
 		entity.set(VcfRepository.POS, new Long(41196312));

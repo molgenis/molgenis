@@ -14,6 +14,7 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.annotation.utils.HgncLocationsUtils;
 import org.molgenis.data.annotation.LocusAnnotator;
@@ -38,6 +39,8 @@ import org.springframework.stereotype.Component;
 @Component("CgdService")
 public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 {
+	private static final Logger LOG = LoggerFactory.getLogger(ClinicalGenomicsDatabaseServiceAnnotator.class);
+
 	private final MolgenisSettings molgenisSettings;
 	private final AnnotationService annotatorService;
 	private final HgncLocationsProvider hgncLocationsProvider;
@@ -78,6 +81,8 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 					+ ",Number=1,Type=String,Description=\"CGD_INHERITANCE\">",
 			"##INFO=<ID=" + GENERALIZED_INHERITANCE.substring(VcfRepository.getInfoPrefix().length())
 					+ ",Number=1,Type=String,Description=\"CGD_GENERALIZED_INHERITANCE\">", });
+	private Map<String, CgdData> cgdData = new HashMap<>();
+	private Map<String, HGNCLocations> hgncLocations = new HashMap<>();
 
 	@Autowired
 	public ClinicalGenomicsDatabaseServiceAnnotator(MolgenisSettings molgenisSettings,
@@ -167,22 +172,17 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 	@Override
 	public List<Entity> annotateEntity(Entity entity) throws IOException
 	{
-
 		List<Entity> results = new ArrayList<Entity>();
+		getAnnotationDataFromSources();
 
 		Long position = entity.getLong(VcfRepository.POS);
 		String chromosome = entity.getString(VcfRepository.CHROM);
-
-		String geneSymbol = HgncLocationsUtils.locationToHgcn(hgncLocationsProvider.getHgncLocations(),
-				new Locus(chromosome, position)).get(0);
-
-		Map<String, CgdData> cgdData = cgdDataProvider.getCgdData();
+		String geneSymbol = HgncLocationsUtils.locationToHgcn(hgncLocations, new Locus(chromosome, position)).get(0);
 
 		try
 		{
 			HashMap<String, Object> resultMap = new HashMap<String, Object>();
-
-			if (cgdData.containsKey(geneSymbol))
+            if (cgdData.containsKey(geneSymbol))
 			{
 				CgdData data = cgdData.get(geneSymbol);
 
@@ -250,5 +250,23 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(REFERENCES, MolgenisFieldTypes.FieldTypeEnum.TEXT));
 
 		return metadata;
+	}
+
+	private void getAnnotationDataFromSources() throws IOException
+	{
+
+		if (this.hgncLocations.isEmpty())
+		{
+			LOG.info("hgncLocations empty, started fetching the data");
+			this.hgncLocations = hgncLocationsProvider.getHgncLocations();
+			LOG.info("finished fetching the hgncLocations data");
+		}
+		if (this.cgdData.isEmpty())
+		{
+			LOG.info("cgdData empty, started fetching the data");
+			this.cgdData = cgdDataProvider.getCgdData();
+			LOG.info("finished fetching the cgdData data");
+		}
+
 	}
 }

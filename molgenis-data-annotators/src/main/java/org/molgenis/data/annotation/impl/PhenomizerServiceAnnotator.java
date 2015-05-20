@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -100,7 +102,7 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 		/**
 		 * Check input HPO terms
 		 */
-		Scanner s = new Scanner(hpoTermFile);
+		Scanner s = new Scanner(hpoTermFile, "UTF-8");
 		String hpoTerms = s.nextLine();
 		if (s.hasNextLine())
 		{
@@ -137,7 +139,7 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 
 		URL loc = new URL(molgenisSettings.getProperty(KEY_PHENOMIZER_URL, "") + "?mobilequery=true&numres=" + limit
 				+ "&terms=" + hpoTerms);
-		BufferedReader in = new BufferedReader(new InputStreamReader(loc.openStream()));
+		BufferedReader in = new BufferedReader(new InputStreamReader(loc.openStream(), StandardCharsets.UTF_8));
 
 		System.out.println("Now starting to process the data.");
 
@@ -238,7 +240,7 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 		String hpoTerms = entity.getString(HpoServiceAnnotator.HPO_TERMS);
 		URL loc = new URL(molgenisSettings.getProperty(KEY_PHENOMIZER_URL, "") + "?mobilequery=true&numres=" + limit
 				+ "&terms=" + hpoTerms);
-		BufferedReader in = new BufferedReader(new InputStreamReader(loc.openStream()));
+		BufferedReader in = new BufferedReader(new InputStreamReader(loc.openStream(), Charset.forName("UTF8")));
 
 		return annotateEntityWithPhenomizerPvalue(entity, in);
 	}
