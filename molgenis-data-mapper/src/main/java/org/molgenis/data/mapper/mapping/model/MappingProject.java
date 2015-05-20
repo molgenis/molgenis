@@ -45,7 +45,10 @@ public class MappingProject
 		this.mappingTargets = new LinkedHashMap<String, MappingTarget>();
 		for (MappingTarget mappingTarget : mappingTargets)
 		{
-			this.mappingTargets.put(mappingTarget.getTarget().getName(), mappingTarget);
+			if (mappingTarget != null)
+			{
+				this.mappingTargets.put(mappingTarget.getTarget().getName(), mappingTarget);
+			}
 		}
 	}
 

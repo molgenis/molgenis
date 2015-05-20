@@ -72,14 +72,17 @@ public class MysqlRepositoryXrefTest extends MysqlRepositoryAbstractDatatypeTest
 		Assert.assertEquals(xrefRepo.getCreateFKeySql(getMetaData().getAttribute("stringRef")),
 				"ALTER TABLE `XrefTest` ADD FOREIGN KEY (`stringRef`) REFERENCES `StringTarget`(`identifier`)");
 
-		xrefRepo.drop();
-		stringRepo.drop();
-		intRepo.drop();
+		// simply dropping the repos won't work because the references keep existing after the tables are deleted, so we
+		// use the data service
+		dataService.getMeta().deleteEntityMeta(xrefRepo.getName());
+		dataService.getMeta().deleteEntityMeta(stringRepo.getName());
+		dataService.getMeta().deleteEntityMeta(intRepo.getName());
 
 		Assert.assertEquals(xrefRepo.getCreateSql(), createSql());
-		stringRepo.create();
-		intRepo.create();
-		xrefRepo.create();
+
+		dataService.getMeta().addEntityMeta(getMetaData().getAttribute("intRef").getRefEntity());
+		dataService.getMeta().addEntityMeta(getMetaData().getAttribute("stringRef").getRefEntity());
+		dataService.getMeta().addEntityMeta(getMetaData());
 
 		// add records
 		Entity entity = new MapEntity();
