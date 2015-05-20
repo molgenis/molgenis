@@ -9,7 +9,7 @@
 	 * @memberOf component
 	 */
 	var Form = React.createClass({
-		mixins: [molgenis.ui.mixin.EntityLoaderMixin, molgenis.ui.mixin.EntityInstanceLoaderMixin, molgenis.ui.mixin.ReactLayeredComponentMixin],
+		mixins: [molgenis.DeepPureRenderMixin, molgenis.ui.mixin.EntityLoaderMixin, molgenis.ui.mixin.EntityInstanceLoaderMixin, molgenis.ui.mixin.ReactLayeredComponentMixin],
 		displayName: 'Form',
 		propTypes: {
 			entity: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]).isRequired,
@@ -278,7 +278,7 @@
 			var value = e.value;
 			var entityInstance = _.extend({}, this.state.entityInstance);
 			entityInstance[e.attr] = value;
-			var attr = this.state.entity.atomicAttributes[e.attr];
+			var attr = this.state.entity.allAttributes[e.attr];
 			
 			//Validate new value
 			this._validate(attr, value, function(validationResult) {
@@ -326,17 +326,19 @@
 			var promises = [];
 			var target = e.target;
 			
-			_.each(this.state.entity.atomicAttributes, function(attr) {
-				var p = new Promise(function(resolve, reject) {
-					this._validate(attr, this._getValue(this.state.entityInstance, attr), function(validationResult) {
-						if (validationResult.valid === false) {
-							errorMessages[attr.name] = validationResult.errorMessage;
-						}
-						resolve(validationResult.valid);
+			_.each(this.state.entity.allAttributes, function(attr) {
+				if (attr.fieldType !== 'COMPOUND') {
+					var p = new Promise(function(resolve, reject) {
+						this._validate(attr, this._getValue(this.state.entityInstance, attr), function(validationResult) {
+							if (validationResult.valid === false) {
+								errorMessages[attr.name] = validationResult.errorMessage;
+							}
+							resolve(validationResult.valid);
+						}.bind(this));
 					}.bind(this));
-				}.bind(this));
 				
-				promises.push(p);
+					promises.push(p);
+				}
 			}, this);
 			
 			Promise.all(promises).done(function(results) {

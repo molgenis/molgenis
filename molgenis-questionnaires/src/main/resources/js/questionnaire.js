@@ -12,7 +12,7 @@
 			entityInstance: id,
 			successUrl: successUrl,
 			onContinueLaterClick: function() {
-				history.back();
+				document.location = '/menu/main/questionnaires';
 			}
 		}), $('#form-holder')[0]);
 	}

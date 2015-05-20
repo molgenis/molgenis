@@ -117,6 +117,24 @@
 		createAtomicAttributesRec(attributes);
 		return compoundAttributes;
 	};
+	
+	molgenis.getAllAttributes = function(attributes, restClient) {
+		var tree = [];
+		function createAttributesRec(attributes) {
+			$.each(attributes, function(i, attribute) {
+				tree.push(attribute);
+				if (attribute.fieldType === 'COMPOUND') {
+					// FIXME improve performance by retrieving async
+					attribute = restClient.get(attribute.href, {
+						'expand' : [ 'attributes' ]
+					});
+					createAttributesRec(attribute.attributes);
+				}
+			});
+		}
+		createAttributesRec(attributes);
+		return tree;
+	}
 
 	/*
 	 * Natural Sort algorithm for Javascript - Version 0.7 - Released under MIT
@@ -525,7 +543,7 @@ function createInput(attr, attrs, val, lbl) {
 			url : href + '?_method=PUT',
 			contentType : 'application/json',
 			data : JSON.stringify(entity),
-			async : false,
+			async : true,
 			success : callback && callback.success ? callback.success : function() {},
 			error : callback && callback.error ? callback.error : function() {}
 		});
