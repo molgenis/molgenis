@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.poi.ss.formula.eval.NotImplementedException;
+import org.molgenis.CommandLineOnlyConfiguration;
 import org.molgenis.DatabaseConfig;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
@@ -24,7 +25,6 @@ import org.molgenis.data.version.v1_6.Step7UpgradeMetaDataTo1_6;
 import org.molgenis.data.version.v1_6.Step8VarcharToTextRepeated;
 import org.molgenis.data.version.v1_6.Step9MysqlTablesToInnoDB;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
-import org.molgenis.system.core.FreemarkerTemplateRepository;
 import org.molgenis.ui.MolgenisWebAppConfig;
 import org.molgenis.ui.migrate.v1_5.Step5AlterDataexplorerMenuURLs;
 import org.molgenis.ui.migrate.v1_5.Step6ChangeRScriptType;
@@ -34,7 +34,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -50,7 +52,7 @@ import freemarker.template.TemplateException;
 @EnableTransactionManagement
 @EnableWebMvc
 @EnableAsync
-@ComponentScan("org.molgenis")
+@ComponentScan(basePackages = "org.molgenis", excludeFilters = @Filter(type = FilterType.ANNOTATION, value = CommandLineOnlyConfiguration.class))
 @Import(
 { WebAppSecurityConfig.class, DatabaseConfig.class, EmbeddedElasticSearchConfig.class })
 public class WebAppConfig extends MolgenisWebAppConfig
