@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.TransactionManagementConfigure
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
+import org.molgenis.data.transaction.MolgenisTransactionManager;
 /**
  * Database configuration
  */
@@ -97,7 +98,7 @@ public class DatabaseConfig implements TransactionManagementConfigurer
 	@Bean
 	public PlatformTransactionManager transactionManager()
 	{
-		return new JpaTransactionManager();
+		return new MolgenisTransactionManager();
 	}
 	
 	@Override
