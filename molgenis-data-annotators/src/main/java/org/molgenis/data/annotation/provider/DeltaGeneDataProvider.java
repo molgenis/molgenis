@@ -54,21 +54,17 @@ public class DeltaGeneDataProvider
 		}
 	}
 	
-	public Stack<String> getHPOGeneStack (String hpo) {
+	public void getHPOGeneStack (String hpo, Stack<String> out) {
 		if (!isReady())
 			getData();
-		Stack<String> out = new Stack<String>();
 		if (hpoHeirarchy.containsKey(hpo)) {
 			for (String child : hpoHeirarchy.get(hpo)) 
-				out.addAll(getHPOGeneStack(child));
+				getHPOGeneStack(child, out);
 			if (hpoGeneData.containsKey(hpo)){
-				out.addAll(hpoGeneData.get(hpo));
-				return out;
+				for (String gene : hpoGeneData.get(hpo))
+					if (!out.contains(gene))
+						out.add(gene);
 			}
-			else
-				return out;
-		}else{
-			return out;
 		}
 	}
 	
@@ -180,7 +176,8 @@ public class DeltaGeneDataProvider
 						hpoGeneData.put(hpo, new Stack<String>());
 					gene = lineSplit[GeneColumn];
 					if (hpoGeneData.containsKey(hpo))
-						hpoGeneData.get(hpo).add(gene);
+						if (!hpoGeneData.get(hpo).contains(gene))
+							hpoGeneData.get(hpo).add(gene);
 				}
 				out.removeAllElements();
 			}

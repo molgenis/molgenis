@@ -136,18 +136,18 @@ class DeltaGeneAnnotator extends AbstractRepositoryAnnotator
 	
 	private Stack<String> getInputStack(String input) 
 	{
-		Stack<String> out;
+		Stack<String> out = new Stack<String>();
 		switch (getInputType(input)) {
 		case 0:
 			return null;
 		case 1:
-			return DGData.getHPOGeneStack(input);
+			DGData.getHPOGeneStack(input, out);
+			return out;
 		case 2:
-			out = new Stack<String>();
 			for (String hpo : input.split("[,\\n\\t]"))
-				out.addAll(DGData.getHPOGeneStack(hpo));
+				DGData.getHPOGeneStack(hpo, out);
+			return out;
 		case 3:
-			out = new Stack<String>();
 			for (String gene : input.split(","))
 				out.add(gene);
 			return out;
