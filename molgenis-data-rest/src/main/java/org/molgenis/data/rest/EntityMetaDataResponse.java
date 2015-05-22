@@ -1,8 +1,10 @@
 package org.molgenis.data.rest;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.AttributeMetaData;
@@ -13,6 +15,7 @@ import org.molgenis.security.core.Permission;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 
 public class EntityMetaDataResponse
 {
@@ -36,60 +39,101 @@ public class EntityMetaDataResponse
 	 */
 	public EntityMetaDataResponse(EntityMetaData meta, MolgenisPermissionService permissionService)
 	{
-		this(meta, null, permissionService);
+		this(meta, null, null, permissionService);
 	}
 
 	/**
 	 * 
 	 * @param meta
-	 * @param attributes
+	 * @param attributesSet
 	 *            set of lowercase attribute names to include in response
+	 * @param attributeExpandsSet
+	 *            set of lowercase attribute names to expand in response
 	 */
-	public EntityMetaDataResponse(EntityMetaData meta, Attributes attributes,
-			MolgenisPermissionService permissionService)
+	public EntityMetaDataResponse(EntityMetaData meta, Set<String> attributesSet,
+			Map<String, Set<String>> attributeExpandsSet, MolgenisPermissionService permissionService)
 	{
 		String name = meta.getName();
 		this.href = Href.concatMetaEntityHref(RestController.BASE_URI, name);
 		this.hrefCollection = String.format("%s/%s", RestController.BASE_URI, name); // FIXME apply Href escaping fix
 
-		this.name = name;
-		this.description = meta.getDescription();
-		this.label = meta.getLabel();
-
-		this.attributes = new LinkedHashMap<String, Object>();
-
-		for (AttributeMetaData attr : meta.getAttributes())
+		if (attributesSet == null || attributesSet.contains("name".toLowerCase()))
 		{
-			String attrName = attr.getName();
-			if (!attrName.equals("__Type")) // FIXME check if still needed for JPA
+			this.name = name;
+		}
+		else this.name = null;
+
+		if (attributesSet == null || attributesSet.contains("description".toLowerCase()))
+		{
+			this.description = meta.getDescription();
+		}
+		else this.description = null;
+
+		if (attributesSet == null || attributesSet.contains("label".toLowerCase()))
+		{
+			label = meta.getLabel();
+		}
+		else this.label = null;
+
+		if (attributesSet == null || attributesSet.contains("attributes".toLowerCase()))
+		{
+			this.attributes = new LinkedHashMap<String, Object>();
+
+			for (AttributeMetaData attr : meta.getAttributes())
 			{
-				if (attributes == null || attributes.contains(attrName))
+				if (!attr.getName().equals("__Type"))
 				{
-					Attributes subAttributes = attributes != null ? attributes.getAttribute(attrName).getAttributes() : null;
-					this.attributes.put(attrName, new AttributeMetaDataResponse(name, attr, subAttributes,
-							permissionService));
+					if (attributeExpandsSet != null && attributeExpandsSet.containsKey("attributes".toLowerCase()))
+					{
+						Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
+						this.attributes.put(attr.getName(), new AttributeMetaDataResponse(name, attr, subAttributesSet,
+								Collections.singletonMap("refEntity".toLowerCase(), Sets.newHashSet("idattribute")),
+								permissionService));
+					}
+					else
+					{
+						String attrHref = Href.concatMetaAttributeHref(RestController.BASE_URI, name, attr.getName());
+						this.attributes.put(attr.getName(), Collections.singletonMap("href", attrHref));
+					}
 				}
 			}
 		}
+		else this.attributes = null;
 
-		AttributeMetaData labelAttribute = meta.getLabelAttribute();
-		this.labelAttribute = labelAttribute != null ? labelAttribute.getName() : null;
+		if (attributesSet == null || attributesSet.contains("labelAttribute".toLowerCase()))
+		{
+			AttributeMetaData labelAttribute = meta.getLabelAttribute();
+			this.labelAttribute = labelAttribute != null ? labelAttribute.getName() : null;
+		}
+		else this.labelAttribute = null;
 
-		AttributeMetaData idAttribute = meta.getIdAttribute();
-		this.idAttribute = idAttribute != null ? idAttribute.getName() : null;
+		if (attributesSet == null || attributesSet.contains("idAttribute".toLowerCase()))
+		{
+			AttributeMetaData idAttribute = meta.getIdAttribute();
+			this.idAttribute = idAttribute != null ? idAttribute.getName() : null;
+		}
+		else this.idAttribute = null;
 
-		Iterable<AttributeMetaData> lookupAttributes = meta.getLookupAttributes();
-		this.lookupAttributes = lookupAttributes != null ? Lists.newArrayList(Iterables.transform(lookupAttributes,
-				new Function<AttributeMetaData, String>()
-				{
-					@Override
-					public String apply(AttributeMetaData attribute)
+		if (attributesSet == null || attributesSet.contains("lookupAttributes".toLowerCase()))
+		{
+			Iterable<AttributeMetaData> lookupAttributes = meta.getLookupAttributes();
+			this.lookupAttributes = lookupAttributes != null ? Lists.newArrayList(Iterables.transform(lookupAttributes,
+					new Function<AttributeMetaData, String>()
 					{
-						return attribute.getName();
-					}
-				})) : null;
+						@Override
+						public String apply(AttributeMetaData attribute)
+						{
+							return attribute.getName();
+						}
+					})) : null;
+		}
+		else this.lookupAttributes = null;
 
-		this.isAbstract = meta.isAbstract();
+		if (attributesSet == null || attributesSet.contains("abstract".toLowerCase()))
+		{
+			isAbstract = meta.isAbstract();
+		}
+		else this.isAbstract = null;
 
 		this.writable = permissionService.hasPermissionOnEntity(name, Permission.WRITE);
 	}

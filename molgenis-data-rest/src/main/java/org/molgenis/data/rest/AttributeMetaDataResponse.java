@@ -1,6 +1,9 @@
 package org.molgenis.data.rest;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
@@ -37,89 +40,189 @@ public class AttributeMetaDataResponse
 	private String visibleExpression;
 	private String validationExpression;
 
+	public AttributeMetaDataResponse(String entityParentName, AttributeMetaData attr,
+			MolgenisPermissionService permissionService)
+	{
+		this(entityParentName, attr, null, null, permissionService);
+	}
+
 	/**
 	 * 
 	 * @param entityParentName
 	 * @param attr
-	 * @param attributes
+	 * @param attributesSet
 	 *            set of lowercase attribute names to include in response
 	 * @param attributeExpandsSet
 	 *            set of lowercase attribute names to expand in response
 	 */
-	public AttributeMetaDataResponse(final String entityParentName, AttributeMetaData attr, Attributes attributes,
-			MolgenisPermissionService permissionService)
+	public AttributeMetaDataResponse(final String entityParentName, AttributeMetaData attr, Set<String> attributesSet,
+			final Map<String, Set<String>> attributeExpandsSet, MolgenisPermissionService permissionService)
 	{
 		String attrName = attr.getName();
 		this.href = Href.concatMetaAttributeHref(RestController.BASE_URI, entityParentName, attrName);
 
-		this.fieldType = attr.getDataType().getEnumType();
-		this.name = attrName;
-		this.label = attr.getLabel();
-		this.description = attr.getDescription();
-		this.enumOptions = attr.getEnumOptions();
-		this.maxLength = attr.getDataType().getMaxLength();
-		this.expression = attr.getExpression();
-
-		EntityMetaData refEntity = attr.getRefEntity();
-		if (refEntity != null)
+		if (attributesSet == null || attributesSet.contains("fieldType".toLowerCase()))
 		{
-			Attributes subAttributes = attributes != null ? attributes.getAttribute(attrName).getAttributes() : null;
-			this.refEntity = new EntityMetaDataResponse(refEntity, subAttributes, permissionService);
+			this.fieldType = attr.getDataType().getEnumType();
 		}
-		else
+		else this.fieldType = null;
+
+		if (attributesSet == null || attributesSet.contains("name".toLowerCase()))
 		{
-			this.refEntity = null;
+			this.name = attrName;
 		}
+		else this.name = null;
 
-		// }
-		// else
-		// {
-		// this.refEntity = refEntity != null ? new Href(Href.concatMetaEntityHref(RestController.BASE_URI,
-		// refEntity.getName()), String.format("%s/%s", RestController.BASE_URI, refEntity.getName())) : null; //
-		// FIXME
-		// // apply
-		// // Href
-		// // escaping
-		// // fix
-		// }
+		if (attributesSet == null || attributesSet.contains("label".toLowerCase()))
+		{
+			this.label = attr.getLabel();
+		}
+		else this.label = null;
 
-		Iterable<AttributeMetaData> attributeParts = attr.getAttributeParts();
-		this.attributes = attributeParts != null ? Lists.newArrayList(Iterables.transform(attributeParts,
-				new Function<AttributeMetaData, Object>()
-				{
+		if (attributesSet == null || attributesSet.contains("description".toLowerCase()))
+		{
+			this.description = attr.getDescription();
+		}
+		else this.description = null;
 
-					@Override
-					public Object apply(AttributeMetaData attributeMetaData)
+		if (attributesSet == null || attributesSet.contains("enumOptions".toLowerCase()))
+		{
+			this.enumOptions = attr.getEnumOptions();
+		}
+		else this.enumOptions = null;
+
+		if (attributesSet == null || attributesSet.contains("maxLength".toLowerCase()))
+		{
+			this.maxLength = attr.getDataType().getMaxLength();
+		}
+		else this.maxLength = null;
+
+		if (attributesSet == null || attributesSet.contains("expression".toLowerCase()))
+		{
+			this.expression = attr.getExpression();
+		}
+		else this.expression = null;
+
+		if (attributesSet == null || attributesSet.contains("refEntity".toLowerCase()))
+		{
+			EntityMetaData refEntity = attr.getRefEntity();
+			if (attributeExpandsSet != null && attributeExpandsSet.containsKey("refEntity".toLowerCase()))
+			{
+				Set<String> subAttributesSet = attributeExpandsSet.get("refEntity".toLowerCase());
+				this.refEntity = refEntity != null ? new EntityMetaDataResponse(refEntity, subAttributesSet,
+						Collections.singletonMap("attributes".toLowerCase(), null), permissionService) : null;
+			}
+			else
+			{
+				this.refEntity = refEntity != null ? new Href(Href.concatMetaEntityHref(RestController.BASE_URI,
+						refEntity.getName()), String.format("%s/%s", RestController.BASE_URI, refEntity.getName())) : null; // FIXME
+																															// apply
+																															// Href
+																															// escaping
+																															// fix
+			}
+		}
+		else this.refEntity = null;
+
+		if (attributesSet == null || attributesSet.contains("attributes".toLowerCase()))
+		{
+			Iterable<AttributeMetaData> attributeParts = attr.getAttributeParts();
+			this.attributes = attributeParts != null ? Lists.newArrayList(Iterables.transform(attributeParts,
+					new Function<AttributeMetaData, Object>()
 					{
-						String attrName = attributeMetaData.getName();
-						Attributes subAttributes = attributes != null ? attributes.getAttribute(attrName)
-								.getAttributes() : null;
-						// if (attributeExpandsSet != null
-						// && attributeExpandsSet.containsKey("attributes"))
-						// {
-						return new AttributeMetaDataResponse(entityParentName, attributeMetaData, subAttributes,
-								permissionService);
-						// }
-						// else
-						// {
-						// return Collections.<String, Object> singletonMap("href", Href.concatMetaAttributeHref(
-						// RestController.BASE_URI, entityParentName, attributeMetaData.getName()));
-						// }
-					}
-				})) : null;
 
-		this.auto = attr.isAuto();
-		this.nillable = attr.isNillable();
-		this.readOnly = attr.isReadonly();
-		this.defaultValue = attr.getDefaultValue();
-		this.labelAttribute = attr.isLabelAttribute();
-		this.unique = attr.isUnique();
-		this.lookupAttribute = attr.isLookupAttribute();
-		this.aggregateable = attr.isAggregateable();
-		this.range = attr.getRange();
-		this.visible = attr.isVisible();
-		this.visibleExpression = attr.getVisibleExpression();
-		this.validationExpression = attr.getValidationExpression();
+						@Override
+						public Object apply(AttributeMetaData attributeMetaData)
+						{
+							if (attributeExpandsSet != null
+									&& attributeExpandsSet.containsKey("attributes".toLowerCase()))
+							{
+								Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
+								return new AttributeMetaDataResponse(entityParentName, attributeMetaData,
+										subAttributesSet, Collections.singletonMap("refEntity".toLowerCase(), null),
+										permissionService);
+							}
+							else
+							{
+								return Collections.<String, Object> singletonMap("href", Href.concatMetaAttributeHref(
+										RestController.BASE_URI, entityParentName, attributeMetaData.getName()));
+							}
+						}
+					})) : null;
+		}
+		else this.attributes = null;
+
+		if (attributesSet == null || attributesSet.contains("auto".toLowerCase()))
+		{
+			this.auto = attr.isAuto();
+		}
+		else this.auto = null;
+
+		if (attributesSet == null || attributesSet.contains("nillable".toLowerCase()))
+		{
+			this.nillable = attr.isNillable();
+		}
+		else this.nillable = null;
+
+		if (attributesSet == null || attributesSet.contains("readOnly".toLowerCase()))
+		{
+			this.readOnly = attr.isReadonly();
+		}
+		else this.readOnly = null;
+
+		if (attributesSet == null || attributesSet.contains("defaultValue".toLowerCase()))
+		{
+			this.defaultValue = attr.getDefaultValue();
+		}
+		else this.defaultValue = null;
+
+		if (attributesSet == null || attributesSet.contains("labelAttribute".toLowerCase()))
+		{
+			this.labelAttribute = attr.isLabelAttribute();
+		}
+		else this.labelAttribute = null;
+
+		if (attributesSet == null || attributesSet.contains("unique".toLowerCase()))
+		{
+			this.unique = attr.isUnique();
+		}
+		else this.unique = null;
+
+		if (attributesSet == null || attributesSet.contains("lookupAttribute".toLowerCase()))
+		{
+			this.lookupAttribute = attr.isLookupAttribute();
+		}
+		else this.lookupAttribute = null;
+
+		if (attributesSet == null || attributesSet.contains("aggregateable".toLowerCase()))
+		{
+			this.aggregateable = attr.isAggregateable();
+		}
+		else this.aggregateable = null;
+
+		if (attributesSet == null || attributesSet.contains("range".toLowerCase()))
+		{
+			this.range = attr.getRange();
+		}
+		else this.range = null;
+
+		if (attributesSet == null || attributesSet.contains("isVisible".toLowerCase()))
+		{
+			this.visible = attr.isVisible();
+		}
+		else this.visible = null;
+
+		if (attributesSet == null || attributesSet.contains("visibleExpression".toLowerCase()))
+		{
+			this.visibleExpression = attr.getVisibleExpression();
+		}
+		else this.visibleExpression = null;
+
+		if (attributesSet == null || attributesSet.contains("validationExpression".toLowerCase()))
+		{
+			this.validationExpression = attr.getValidationExpression();
+		}
+		else this.validationExpression = null;
 	}
 
 	public String getHref()

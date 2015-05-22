@@ -2,15 +2,15 @@ package org.molgenis.data.rest;
 
 public class EntityMetaRequest
 {
-	private Attributes attributes;
+	private String[] attributes;
 	private String[] expand;
-
-	public Attributes getAttributes()
+	
+	public String[] getAttributes()
 	{
 		return attributes;
 	}
-
-	public void setAttributes(Attributes attributes)
+	
+	public void setAttributes(String[] attributes)
 	{
 		this.attributes = attributes;
 	}
