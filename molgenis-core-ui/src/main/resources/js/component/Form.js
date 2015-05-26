@@ -512,7 +512,7 @@
         _resolveBoolExpression: function(expression, entityInstance) {
         	//TODO make evalScript work with entities
         	var form = {};
-        	_.each(this.state.entity.atomicAttributes, function(attr) {
+        	_.each(this.state.entity.allAttributes, function(attr) {
         		var value = entityInstance[attr.name];
         		
         		if (value !== null && value !== undefined) {
@@ -527,6 +527,9 @@
                         	 return item[attr.refEntity.idAttribute]; 
                          }).join();
                          break;
+                     case 'COMPOUND':
+                    	 //nothing, no value
+                    	 break;
                      default:
                     	 form[attr.name] = value;
                          break;
