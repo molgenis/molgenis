@@ -603,9 +603,10 @@ public class RestController
 		updateAttribute(entityName, attributeName, id, paramValue);
 	}
 
+	// TODO alternative for synchronization, for example by adding updatAttribute methods to the REST api
 	@RequestMapping(value = "/{entityName}/{id}/{attributeName}", method = POST, params = "_method=PUT")
 	@ResponseStatus(OK)
-	public void updateAttribute(@PathVariable("entityName") String entityName,
+	public synchronized void updateAttribute(@PathVariable("entityName") String entityName,
 			@PathVariable("attributeName") String attributeName, @PathVariable("id") Object id,
 			@RequestBody Object paramValue)
 	{
