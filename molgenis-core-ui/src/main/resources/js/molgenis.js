@@ -537,13 +537,14 @@ function createInput(attr, attrs, val, lbl) {
 		});
 	};
 	
-	molgenis.RestClient.prototype.update = function(href, entity, callback) {
+	molgenis.RestClient.prototype.update = function(href, entity, callback, showSpinner) {
 		return this._ajax({
 			type : 'POST',
 			url : href + '?_method=PUT',
 			contentType : 'application/json',
 			data : JSON.stringify(entity),
 			async : true,
+			showSpinner: showSpinner,
 			success : callback && callback.success ? callback.success : function() {},
 			error : callback && callback.error ? callback.error : function() {}
 		});
@@ -709,8 +710,10 @@ $(function() {
 	// use ajaxPrefilter instead of ajaxStart and ajaxStop
 	// to work around issue http://bugs.jquery.com/ticket/13680
 	$.ajaxPrefilter(function(options, _, jqXHR) {
-		showSpinner();
-		jqXHR.always(hideSpinner);
+		if (options.showSpinner !== false) {
+			showSpinner();
+			jqXHR.always(hideSpinner);
+		}
 	});
 
 	$(document)

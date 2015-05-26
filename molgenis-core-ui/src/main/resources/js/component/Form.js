@@ -268,7 +268,7 @@
         			break;
         	}
         	
-        	api.update(this.state.entityInstance.href + '/' + attr.name, val);
+        	api.update(this.state.entityInstance.href + '/' + attr.name, val, {}, false);
 	    },
 		_handleValueChange: function(e) {
 			var attribute = this.state.entity.allAttributes[e.attr];
