@@ -111,7 +111,7 @@ public class QueryGenerator implements QueryPartGenerator
 			}
 			queryBuilder = boolQuery;
 		}
-
+		System.out.println(queryBuilder.toString());
 		return queryBuilder;
 	}
 
@@ -131,6 +131,8 @@ public class QueryGenerator implements QueryPartGenerator
 		Object queryValue = queryRule.getValue();
 
 		QueryBuilder queryBuilder;
+
+		System.out.println(queryRule);
 
 		switch (queryOperator)
 		{
@@ -420,48 +422,80 @@ public class QueryGenerator implements QueryPartGenerator
 				}
 				else
 				{
-					AttributeMetaData attr = entityMetaData.getAttribute(queryField);
-					if (attr == null) throw new UnknownAttributeException(queryField);
+					System.out.println("#### ATTR: " + queryField);
 
-					// construct query part
-					FieldTypeEnum dataType = attr.getDataType().getEnumType();
-					switch (dataType)
+					String[] entityPaths = queryField.split("\\.");
+
+					if (entityPaths.length == 1)
 					{
-						case BOOL:
-							throw new MolgenisQueryException("Cannot execute search query on [" + dataType
-									+ "] attribute");
-						case DATE:
-						case DATE_TIME:
-						case DECIMAL:
-						case EMAIL:
-						case ENUM:
-						case HTML:
-						case HYPERLINK:
-						case INT:
-						case LONG:
-						case SCRIPT:
-						case STRING:
-						case TEXT:
-							queryBuilder = QueryBuilders.matchQuery(queryField, queryValue);
-							break;
-						case CATEGORICAL:
-						case CATEGORICAL_MREF:
-						case MREF:
-						case XREF:
-							queryBuilder = QueryBuilders.nestedQuery(queryField,
-									QueryBuilders.matchQuery(queryField + '.' + "_all", queryValue));
-							break;
-						case COMPOUND:
-							throw new MolgenisQueryException("Illegal data type [" + dataType + "] for operator ["
-									+ queryOperator + "]");
-						case FILE:
-						case IMAGE:
-							throw new UnsupportedOperationException("Query with data type [" + dataType
-									+ "] not supported");
-						default:
-							throw new RuntimeException("Unknown data type [" + dataType + "]");
+						AttributeMetaData attr = entityMetaData.getAttribute(queryField);
+						if (attr == null) throw new UnknownAttributeException(queryField);
+
+						// construct query part
+						FieldTypeEnum dataType = attr.getDataType().getEnumType();
+						switch (dataType)
+						{
+							case BOOL:
+								throw new MolgenisQueryException("Cannot execute search query on [" + dataType
+										+ "] attribute");
+							case DATE:
+							case DATE_TIME:
+							case DECIMAL:
+							case EMAIL:
+							case ENUM:
+							case HTML:
+							case HYPERLINK:
+							case INT:
+							case LONG:
+							case SCRIPT:
+							case STRING:
+							case TEXT:
+								queryBuilder = QueryBuilders.matchQuery(queryField, queryValue);
+								break;
+							case CATEGORICAL:
+							case CATEGORICAL_MREF:
+							case MREF:
+							case XREF:
+								queryBuilder = QueryBuilders.nestedQuery(queryField,
+										QueryBuilders.matchQuery(queryField + '.' + "_all", queryValue));
+								break;
+							case COMPOUND:
+								throw new MolgenisQueryException("Illegal data type [" + dataType + "] for operator ["
+										+ queryOperator + "]");
+							case FILE:
+							case IMAGE:
+								throw new UnsupportedOperationException("Query with data type [" + dataType
+										+ "] not supported");
+							default:
+								throw new RuntimeException("Unknown data type [" + dataType + "]");
+						}
+					}
+					else if (entityPaths.length > 2)
+					{
+						throw new UnsupportedOperationException("Can not filter on references deeper than 1.");
+					}
+					else
+					{
+						// filter on reference
+						AttributeMetaData attr = entityMetaData.getAttribute(entityPaths[0]);
+						if (attr == null) throw new UnknownAttributeException(queryField);
+
+						// construct query part
+						attr = attr.getRefEntity().getAttribute(entityPaths[1]);
+						System.out.println(attr);
+						FieldTypeEnum dataType = attr.getDataType().getEnumType();
+						switch (dataType)
+						{
+							case STRING:
+								queryBuilder = QueryBuilders.nestedQuery(entityPaths[0], QueryBuilders.boolQuery()
+										.must(QueryBuilders.matchQuery(queryField, queryValue)));
+								System.out.println(queryBuilder);
+							default:
+								queryBuilder = QueryBuilders.boolQuery();
+						}
 					}
 				}
+
 				break;
 			}
 			case FUZZY_MATCH:

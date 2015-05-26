@@ -200,7 +200,7 @@
 		'icon' : null,
 		'onAttributeClick' : null,
 		'onAttributesSelect' : null,
-		'maxRefEntityDepth': 0	// -1 = infinite depth
+		'maxRefEntityDepth': -1	// -1 = infinite depth
 							   	//  0 = default behavior (no expanding refEntities)
 							   	// >0 = nr. of nested refEntities that can be expanded
 	};
