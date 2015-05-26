@@ -100,7 +100,6 @@ public abstract class AbstractElasticsearchRepository implements IndexedReposito
 	}
 
 	@Override
-	@Transactional
 	public void add(Entity entity)
 	{
 		elasticSearchService.index(entity, getEntityMetaData(), IndexingMode.ADD);

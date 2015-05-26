@@ -9,6 +9,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
+import org.molgenis.data.elasticsearch.ESTransactionMetaData;
 import org.molgenis.data.elasticsearch.util.MapperTypeSanitizer;
 
 /**
@@ -78,15 +79,23 @@ public class MappingsBuilder
 			boolean createAllIndex) throws IOException
 	{
 		String documentType = MapperTypeSanitizer.sanitizeMapperType(entityMetaData.getName());
-		XContentBuilder jsonBuilder = XContentFactory.jsonBuilder().startObject().startObject(documentType)
-				.startObject("_source").field("enabled", storeSource).endObject().startObject("properties");
+		XContentBuilder jsonBuilder = XContentFactory.jsonBuilder().startObject().startObject(documentType);
+
+		if (!entityMetaData.getName().equalsIgnoreCase(ESTransactionMetaData.ENTITY_NAME))
+		{
+			jsonBuilder.startObject("_parent").field("type").value(ESTransactionMetaData.ENTITY_NAME).endObject();
+		}
+
+		jsonBuilder.startObject("_source").field("enabled", storeSource).endObject();
+
+		jsonBuilder.startObject("properties");
 
 		for (AttributeMetaData attr : entityMetaData.getAtomicAttributes())
 		{
 			createAttributeMapping(attr, enableNorms, createAllIndex, true, true, jsonBuilder);
 		}
-
 		jsonBuilder.endObject();
+
 		jsonBuilder.endObject().endObject();
 
 		return jsonBuilder;

@@ -60,7 +60,8 @@ public class ElasticSearchServiceTest
 		client = mock(Client.class);
 		entityToSourceConverter = mock(EntityToSourceConverter.class);
 		dataService = spy(new DataServiceImpl(new NonDecoratingRepositoryDecoratorFactory()));
-		searchService = spy(new ElasticSearchService(client, indexName, dataService, entityToSourceConverter, false));
+		searchService = spy(new ElasticSearchService(null, client, indexName, dataService, entityToSourceConverter,
+				false));
 		BulkProcessorFactory bulkProcessorFactory = mock(BulkProcessorFactory.class);
 		ElasticSearchService.setBulkProcessorFactory(bulkProcessorFactory);
 		doNothing().when(searchService).refresh();

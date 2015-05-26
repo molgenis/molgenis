@@ -6,6 +6,7 @@ import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toEl
 import static org.molgenis.data.elasticsearch.util.MapperTypeSanitizer.sanitizeMapperType;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -52,6 +53,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator;
 import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.data.elasticsearch.index.IndexRequestGenerator;
@@ -67,12 +69,20 @@ import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.support.DefaultEntity;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.transaction.MolgenisTransaction;
+import org.molgenis.data.transaction.MolgenisTransactionManager;
+import org.molgenis.data.transaction.TransactionJoiner;
 import org.molgenis.util.DependencyResolver;
 import org.molgenis.util.EntityUtils;
 import org.molgenis.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
+import org.springframework.transaction.support.DefaultTransactionStatus;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -83,7 +93,7 @@ import com.google.common.collect.Iterables;
  * 
  * @author erwin
  */
-public class ElasticSearchService implements SearchService
+public class ElasticSearchService implements SearchService, TransactionJoiner
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ElasticSearchService.class);
 
@@ -101,10 +111,10 @@ public class ElasticSearchService implements SearchService
 	private final SearchRequestGenerator generator = new SearchRequestGenerator();
 	private final EntityToSourceConverter entityToSourceConverter;
 
-	public ElasticSearchService(Client client, String indexName, DataService dataService,
-			EntityToSourceConverter entityToSourceConverter)
+	public ElasticSearchService(MolgenisTransactionManager molgenisTransactionManager, Client client, String indexName,
+			DataService dataService, EntityToSourceConverter entityToSourceConverter)
 	{
-		this(client, indexName, dataService, entityToSourceConverter, true);
+		this(molgenisTransactionManager, client, indexName, dataService, entityToSourceConverter, true);
 	}
 
 	/**
@@ -116,8 +126,8 @@ public class ElasticSearchService implements SearchService
 	 * @param entityToSourceConverter
 	 * @param createIndexIfNotExists
 	 */
-	ElasticSearchService(Client client, String indexName, DataService dataService,
-			EntityToSourceConverter entityToSourceConverter, boolean createIndexIfNotExists)
+	ElasticSearchService(MolgenisTransactionManager molgenisTransactionManager, Client client, String indexName,
+			DataService dataService, EntityToSourceConverter entityToSourceConverter, boolean createIndexIfNotExists)
 	{
 		if (client == null) throw new IllegalArgumentException("Client is null");
 		if (indexName == null) throw new IllegalArgumentException("IndexName is null");
@@ -138,6 +148,26 @@ public class ElasticSearchService implements SearchService
 			{
 				throw new RuntimeException(e);
 			}
+		}
+
+		try
+		{
+			createMappings(ESTransactionMetaData.INSTANCE);
+
+			// Workaround for non transactional inserts
+			Entity entity = new MapEntity(ESTransactionMetaData.INSTANCE);
+			entity.set(ESTransactionMetaData.ID, "NOTRANS");
+			entity.set(ESTransactionMetaData.STATUS, ESTransactionMetaData.STATUS_COMMITTED);
+			index(entity, ESTransactionMetaData.INSTANCE, IndexingMode.ADD);
+		}
+		catch (IOException e)
+		{
+			throw new UncheckedIOException(e);
+		}
+
+		if (molgenisTransactionManager != null)
+		{
+			molgenisTransactionManager.addTransactionJoiner(this);
 		}
 	}
 
@@ -662,8 +692,19 @@ public class ElasticSearchService implements SearchService
 	{
 		String type = sanitizeMapperType(entityMetaData.getName());
 		String id = toElasticsearchId(entity, entityMetaData);
+
 		Map<String, Object> source = entityToSourceConverter.convert(entity, entityMetaData);
-		client.prepareIndex(indexName, type, id).setSource(source).execute().actionGet();
+
+		if (!entityMetaData.getName().equalsIgnoreCase(ESTransactionMetaData.ENTITY_NAME))
+		{
+			String transactionId = getCurrentTransactionId();
+			client.prepareIndex(indexName, type, id).setSource(source).setParent(transactionId).setRouting(id)
+					.execute().actionGet();
+		}
+		else
+		{
+			client.prepareIndex(indexName, type, id).setSource(source).execute().actionGet();
+		}
 		refresh();
 
 		if (updateIndex && indexingMode == IndexingMode.UPDATE) updateReferences(entity, entityMetaData);
@@ -682,6 +723,21 @@ public class ElasticSearchService implements SearchService
 		refresh();
 	}
 
+	private String getCurrentTransactionId()
+	{
+
+		if (TransactionSynchronizationManager.isActualTransactionActive())
+		{
+			TransactionStatus status = TransactionAspectSupport.currentTransactionStatus();
+			MolgenisTransaction transaction = (MolgenisTransaction) ((DefaultTransactionStatus) status)
+					.getTransaction();
+
+			return transaction.getId();
+		}
+
+		return "NOTRANS";
+	}
+
 	void index(Iterable<? extends Entity> entities, EntityMetaData entityMetaData, IndexingMode indexingMode,
 			boolean updateIndex)
 	{
@@ -691,11 +747,13 @@ public class ElasticSearchService implements SearchService
 		BulkProcessor bulkProcessor = BULK_PROCESSOR_FACTORY.create(client);
 		try
 		{
+			String transactionId = getCurrentTransactionId();
 			for (Entity entity : entities)
 			{
 				String id = toElasticsearchId(entity, entityMetaData);
 				Map<String, Object> source = entityToSourceConverter.convert(entity, entityMetaData);
-				bulkProcessor.add(new IndexRequest(indexName, type, id).source(source));
+				bulkProcessor.add(new IndexRequest(indexName, type, id).source(source).parent(transactionId)
+						.routing(id));// TODO only works with 1 shard
 			}
 		}
 		finally
@@ -937,7 +995,7 @@ public class ElasticSearchService implements SearchService
 		{
 			LOG.trace("Retrieving Elasticsearch '" + type + "' doc with id [" + id + "] ...");
 		}
-		GetResponse response = client.prepareGet(indexName, type, id).execute().actionGet();
+		GetResponse response = client.prepareGet(indexName, type, id).setRouting(id).execute().actionGet();
 		if (LOG.isDebugEnabled())
 		{
 			LOG.debug("Retrieved Elasticsearch '" + type + "' doc with id [" + id + "]");
@@ -1336,5 +1394,39 @@ public class ElasticSearchService implements SearchService
 				}
 			};
 		}
+	}
+
+	@Override
+	public void transactionStarted(String transactionId)
+	{
+		Entity transaction = new MapEntity(ESTransactionMetaData.INSTANCE);
+		transaction.set(ESTransactionMetaData.ID, transactionId);
+		transaction.set(ESTransactionMetaData.STATUS, ESTransactionMetaData.STATUS_STARTED);
+
+		index(transaction, ESTransactionMetaData.INSTANCE, IndexingMode.ADD);
+	}
+
+	@Override
+	public void commitTransaction(String transactionId)
+	{
+		updateTransactionStatus(transactionId, ESTransactionMetaData.STATUS_COMMITTED);
+	}
+
+	@Override
+	public void rollbackTransaction(String transactionId)
+	{
+		updateTransactionStatus(transactionId, ESTransactionMetaData.STATUS_ROLLBACK);
+	}
+
+	private void updateTransactionStatus(String transactionId, String status)
+	{
+		Entity transaction = get(transactionId, ESTransactionMetaData.INSTANCE);
+		if (transaction == null)
+		{
+			throw new UnknownEntityException("Unknown ES transaction with id [" + transactionId + "]");
+		}
+
+		transaction.set(ESTransactionMetaData.STATUS, status);
+		index(transaction, ESTransactionMetaData.INSTANCE, IndexingMode.UPDATE);
 	}
 }

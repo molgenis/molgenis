@@ -1,9 +1,8 @@
 package org.molgenis.data.transaction;
 
 import org.molgenis.data.support.DefaultEntityMetaData;
-import org.springframework.stereotype.Component;
 
-@Component
+//@Component
 public class TransactionMetaData extends DefaultEntityMetaData
 {
 	public static final String ENTITY_NAME = "MolgenisTransaction";

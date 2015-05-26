@@ -15,6 +15,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.ElasticSearchService;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
+import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,9 +78,11 @@ public class EmbeddedElasticSearchServiceFactory implements Closeable
 		LOG.info("Embedded elasticsearch server started, data path=[" + settings.get("path.data") + "]");
 	}
 
-	public SearchService create(DataService dataService, EntityToSourceConverter entityToSourceConverter)
+	public SearchService create(DataService dataService, EntityToSourceConverter entityToSourceConverter,
+			MolgenisTransactionManager molgenisTransactionmanager)
 	{
-		return new ElasticSearchService(client, indexName, dataService, entityToSourceConverter);
+		return new ElasticSearchService(molgenisTransactionmanager, client, indexName, dataService,
+				entityToSourceConverter);
 	}
 
 	public Client getClient()
