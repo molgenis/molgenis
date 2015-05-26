@@ -333,7 +333,7 @@
 					genomeBrowser.setLocation(chr, viewStart, viewEnd);
 				}
 			}
-				
+
 			if(molgenis.dataexplorer.settings["genomebrowser"] !== 'false'){
 				// TODO implement elegant solution for genome browser specific code
 				$.each(data.filters, function() {

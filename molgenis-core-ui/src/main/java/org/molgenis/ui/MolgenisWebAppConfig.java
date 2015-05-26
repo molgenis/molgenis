@@ -62,6 +62,7 @@ import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.DependencyResolver;
 import org.molgenis.util.FileStore;
 import org.molgenis.util.GsonHttpMessageConverter;
+import org.molgenis.util.IndexedRepositoryExceptionTranslatorDecorator;
 import org.molgenis.util.ResourceFingerprintRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -464,12 +465,14 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 				// 1. security decorator
 				// 2. autoid decorator
 				// 3. validation decorator
+				// 4. IndexedRepositoryExceptionTranslatorDecorator
 				if (repository instanceof IndexedRepository)
 				{
 					IndexedRepository indexedRepos = (IndexedRepository) repository;
 
 					return new IndexedCrudRepositorySecurityDecorator(new IndexedAutoValueRepositoryDecorator(
-							new IndexedRepositoryValidationDecorator(dataService(), indexedRepos,
+							new IndexedRepositoryValidationDecorator(dataService(),
+									new IndexedRepositoryExceptionTranslatorDecorator(indexedRepos),
 									new EntityAttributesValidator()), molgenisIdGenerator()), molgenisSettings);
 				}
 

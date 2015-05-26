@@ -8,12 +8,16 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IdGenerator;
+import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.mapper.controller.MappingServiceController;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.meta.EntityMappingMetaData;
 import org.molgenis.data.mapper.repository.AttributeMappingRepository;
 import org.molgenis.data.mapper.repository.EntityMappingRepository;
 import org.molgenis.data.support.MapEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.collect.Lists;
@@ -23,6 +27,8 @@ import com.google.common.collect.Lists;
  */
 public class EntityMappingRepositoryImpl implements EntityMappingRepository
 {
+	private static final Logger LOG = LoggerFactory.getLogger(MappingServiceController.class);
+
 	public static final EntityMetaData META_DATA = new EntityMappingMetaData();
 
 	@Autowired
@@ -47,10 +53,31 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 	private EntityMapping toEntityMapping(Entity entityMappingEntity)
 	{
 		String identifier = entityMappingEntity.getString(EntityMappingMetaData.IDENTIFIER);
-		EntityMetaData targetEntityMetaData = dataService.getEntityMetaData(entityMappingEntity
-				.getString(EntityMappingMetaData.TARGETENTITYMETADATA));
-		EntityMetaData sourceEntityMetaData = dataService.getEntityMetaData(entityMappingEntity
-				.getString(EntityMappingMetaData.SOURCEENTITYMETADATA));
+
+		EntityMetaData targetEntityMetaData;
+		try
+		{
+			targetEntityMetaData = dataService.getEntityMetaData(entityMappingEntity
+					.getString(EntityMappingMetaData.TARGETENTITYMETADATA));
+		}
+		catch (UnknownEntityException uee)
+		{
+			LOG.error(uee.getMessage());
+			targetEntityMetaData = null;
+		}
+
+		EntityMetaData sourceEntityMetaData;
+		try
+		{
+			sourceEntityMetaData = dataService.getEntityMetaData(entityMappingEntity
+					.getString(EntityMappingMetaData.SOURCEENTITYMETADATA));
+		}
+		catch (UnknownEntityException uee)
+		{
+			LOG.error(uee.getMessage());
+			sourceEntityMetaData = null;
+		}
+
 		List<Entity> attributeMappingEntities = Lists.<Entity> newArrayList(entityMappingEntity
 				.getEntities(EntityMappingMetaData.ATTRIBUTEMAPPINGS));
 		List<AttributeMapping> attributeMappings = attributeMappingRepository.getAttributeMappings(

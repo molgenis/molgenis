@@ -72,7 +72,8 @@
 											<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
 											<input type="hidden" name="target" value="${selectedTarget}"/>
 											<input type="hidden" name="source" value="${source.name}"/>
-											<input type="hidden" name="attribute" value="${attribute.name}"/>
+											<input type="hidden" name="targetAttribute" value="${attribute.name}"/>
+											<input type="hidden" name="showSuggestedAttributes" value="true"/>
 										</form>
 										<#if hasWritePermission && source.getAttributeMapping(attribute.name)??>
 											<form method="post" action="${context_url}/removeAttributeMapping" class="pull-right verify">

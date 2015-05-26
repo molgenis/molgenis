@@ -97,22 +97,22 @@
 	 *            the results from the server
 	 */
 	function showStatistics(data) {
-		if (data.results.length > 0) {
-			$('#stats-total').text(data.totalCount);
-			$('#stats-valid').text(data.results.length);
-			$('#stats-mean').text(jStat.mean(data.results));
-			$('#stats-median').text(jStat.median(data.results));
-			$('#stats-stdev').text(jStat.stdev(data.results));
-
-			$('#statistics-container').show();
-			if($('.distribution').length){
-				$('.distribution').bcgraph(data.results);
-			}
-		} else {
+		if (data.results.length === 0) {
 			$('#statistics-container').hide();
 			molgenis.createAlert([ {
-				'message' : 'There are no values generated for this algorithm'
-			} ], 'error');
+			'message' : 'No valid cases are produced by the algorithm. TIP: Maybe your data set is empty.'
+			} ], 'warning');
+		}
+		
+		$('#stats-total').text(data.totalCount);
+		$('#stats-valid').text(data.results.length);
+		$('#stats-mean').text(jStat.mean(data.results));
+		$('#stats-median').text(jStat.median(data.results));
+		$('#stats-stdev').text(jStat.stdev(data.results));
+
+		$('#statistics-container').show();
+		if($('.distribution').length){
+			$('.distribution').bcgraph(data.results);
 		}
 	};
 
@@ -148,7 +148,7 @@
 			return false;
 		});
 
-		$('form').on('reset', function() {
+		$('#saveattributemapping-form').on('reset', function() {
 			if(editor.getValue() === initialValue){
 				return false;
 			}
@@ -156,6 +156,7 @@
 	            if (result) {
 	                editor.setValue(initialValue, -1);
 	                updateCheckboxes(initialValue);
+	                $('#statistics-container').empty();
 	            }
 	        });
 			return false;
