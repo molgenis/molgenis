@@ -135,6 +135,15 @@
 		createAttributesRec(attributes);
 		return tree;
 	}
+	
+	molgenis.getAttributeLabel = function(attribute) {
+		var label = attribute.label || attribute.name;
+		if (attribute.parent) {
+			label = molgenis.getAttributeLabel(attribute.parent) + '.' + label;
+		}
+		
+		return label;
+	}
 
 	/*
 	 * Natural Sort algorithm for Javascript - Version 0.7 - Released under MIT
