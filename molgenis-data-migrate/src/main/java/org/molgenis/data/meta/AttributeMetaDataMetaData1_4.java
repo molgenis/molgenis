@@ -1,4 +1,4 @@
-package org.molgenis.data.meta.migrate.v1_4;
+package org.molgenis.data.meta;
 
 import static org.molgenis.MolgenisFieldTypes.BOOL;
 import static org.molgenis.MolgenisFieldTypes.MREF;
