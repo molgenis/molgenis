@@ -4,7 +4,7 @@
 	
 	var div = React.DOM.div, table = React.DOM.table, thead = React.DOM.thead, tbody = React.DOM.tbody, tr = React.DOM.tr, th = React.DOM.th, td = React.DOM.td, a = React.DOM.a, span = React.DOM.span, em = React.DOM.em;
 	
-	var api = new molgenis.RestClient();
+	var api = new molgenis.RestClientV2();
 	
 	/**
 	 * @memberOf component.mixin
@@ -152,16 +152,14 @@
 			}
 			if(this.state.sort) {
 				opts.sort = {
-					'orders' : [ {
-						'property' : this.state.sort.attr.name,
-						'direction' : this.state.sort.order
-					} ]
+					'attrs': [this.state.sort.attr.name],
+					'order': this.state.sort.order
 				};
 			}
 			if(this.state.start !== 0) {
 				opts.start = this.state.start; 
 			}
-			api.getAsync('/api/v1/' + htmlEscape(props.entity), opts).done(function(data) { // FIXME entity resource href instead of id?
+			api.get(props.entity, opts).done(function(data) {
 				this.setState({data: data});
 			}.bind(this));
 		},
