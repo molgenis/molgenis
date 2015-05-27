@@ -1,19 +1,19 @@
-package org.molgenis.data.rest;
+package org.molgenis.data.rest.v2;
 
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class Attributes implements Iterable<Attribute>
+class AttributeFilter implements Iterable<AttributeFilter>
 {
-	private final Map<String, Attribute> attributes;
+	private final Map<String, AttributeFilter> attributes;
 
-	public Attributes(String attributesStr)
+	public AttributeFilter()
 	{
-		this.attributes = parse(attributesStr);
+		this.attributes = new LinkedHashMap<String, AttributeFilter>();
 	}
 
-	public Attribute getAttribute(String name)
+	public AttributeFilter getAttributeFilter(String name)
 	{
 		return attributes.get(normalize(name));
 
@@ -25,21 +25,20 @@ public class Attributes implements Iterable<Attribute>
 	}
 
 	@Override
-	public Iterator<Attribute> iterator()
+	public Iterator<AttributeFilter> iterator()
 	{
 		return attributes.values().iterator();
 	}
 
-	private Map<String, Attribute> parse(String attributesStr)
+	public AttributeFilter add(String name)
 	{
-		String[] tokens = attributesStr.split(",");
-		Map<String, Attribute> attributeRequests = new LinkedHashMap<>();
-		for (String token : tokens)
-		{
-			Attribute attribute = new Attribute(token);
-			attributeRequests.put(normalize(attribute.getName()), attribute);
-		}
-		return attributeRequests;
+		return add(name, null);
+	}
+
+	public AttributeFilter add(String name, AttributeFilter attributeSelection)
+	{
+		attributes.put(normalize(name), attributeSelection);
+		return this;
 	}
 
 	private String normalize(String name)
@@ -62,7 +61,7 @@ public class Attributes implements Iterable<Attribute>
 		if (this == obj) return true;
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
-		Attributes other = (Attributes) obj;
+		AttributeFilter other = (AttributeFilter) obj;
 		if (attributes == null)
 		{
 			if (other.attributes != null) return false;
@@ -74,6 +73,6 @@ public class Attributes implements Iterable<Attribute>
 	@Override
 	public String toString()
 	{
-		return "Attributes [attributes=" + attributes + "]";
+		return "AttributeFilter [attributes=" + attributes + "]";
 	}
 }
