@@ -23,7 +23,6 @@ public class GsonHttpMessageConverterTest
 		boolean containsApplicationJsonWithoutCharset = false;
 		for (MediaType mediaType : gsonHttpMessageConverter.getSupportedMediaTypes())
 		{
-			System.out.println(mediaType + " - " + mediaType.getCharSet());
 			if (mediaType.getType().equals("application") && mediaType.getSubtype().equals("json")
 					&& mediaType.getCharSet() == null)
 			{
