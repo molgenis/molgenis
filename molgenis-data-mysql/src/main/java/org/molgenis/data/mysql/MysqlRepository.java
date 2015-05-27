@@ -1498,7 +1498,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	@Override
 	public Set<RepositoryCapability> getCapabilities()
 	{
-		return Sets.newHashSet(WRITABLE, UPDATEABLE, QUERYABLE);
+		return Sets.newHashSet(WRITABLE, UPDATEABLE);
 	}
 
 	@Override
