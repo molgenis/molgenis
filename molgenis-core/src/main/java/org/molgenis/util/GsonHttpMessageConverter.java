@@ -52,6 +52,8 @@ public class GsonHttpMessageConverter extends BaseHttpMessageConverter<Object>
 {
 	private static final Logger LOG = LoggerFactory.getLogger(GsonHttpMessageConverter.class);
 
+	private static final MediaType APPLICATION_JAVASCRIPT = new MediaType("application", "javascript", DEFAULT_CHARSET);
+
 	private final Gson gson;
 	private Type type = null;
 	private boolean prefixJson = false;
@@ -69,8 +71,7 @@ public class GsonHttpMessageConverter extends BaseHttpMessageConverter<Object>
 	 */
 	public GsonHttpMessageConverter(boolean prettyPrinting)
 	{
-		super(new MediaType("application", "json", DEFAULT_CHARSET), new MediaType("application", "javascript",
-				DEFAULT_CHARSET));
+		super(MediaType.APPLICATION_JSON, APPLICATION_JAVASCRIPT);
 
 		GsonBuilder builder = new GsonBuilder().setDateFormat(MolgenisDateFormat.DATEFORMAT_DATETIME)
 				.disableHtmlEscaping();
@@ -91,8 +92,7 @@ public class GsonHttpMessageConverter extends BaseHttpMessageConverter<Object>
 	 */
 	public GsonHttpMessageConverter(Gson gson)
 	{
-		super(new MediaType("application", "json", DEFAULT_CHARSET), new MediaType("application", "javascript",
-				DEFAULT_CHARSET));
+		super(MediaType.APPLICATION_JSON, APPLICATION_JAVASCRIPT);
 		this.gson = gson;
 	}
 
@@ -126,6 +126,7 @@ public class GsonHttpMessageConverter extends BaseHttpMessageConverter<Object>
 	@Override
 	public boolean canRead(Class<?> clazz, MediaType mediaType)
 	{
+
 		return canRead(mediaType);
 	}
 
