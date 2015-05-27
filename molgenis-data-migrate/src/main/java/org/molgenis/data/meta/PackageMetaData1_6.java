@@ -1,4 +1,4 @@
-package org.molgenis.data.meta.migrate.v1_4;
+package org.molgenis.data.meta;
 
 import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
@@ -6,7 +6,7 @@ import static org.molgenis.MolgenisFieldTypes.XREF;
 
 import org.molgenis.data.support.DefaultEntityMetaData;
 
-public class PackageMetaData1_4 extends DefaultEntityMetaData
+public class PackageMetaData1_6 extends DefaultEntityMetaData
 {
 	public static final String ENTITY_NAME = "packages";
 	public static final String FULL_NAME = "fullName";
@@ -15,7 +15,7 @@ public class PackageMetaData1_4 extends DefaultEntityMetaData
 	public static final String PARENT = "parent";
 	public static final String TAGS = "tags";
 
-	public PackageMetaData1_4()
+	public PackageMetaData1_6()
 	{
 		super(ENTITY_NAME);
 
@@ -23,7 +23,7 @@ public class PackageMetaData1_4 extends DefaultEntityMetaData
 		addAttribute(SIMPLE_NAME);
 		addAttribute(DESCRIPTION).setDataType(TEXT);
 		addAttribute(PARENT).setDataType(XREF).setRefEntity(this);
-		addAttribute(TAGS).setDataType(MREF).setRefEntity(new TagMetaData1_4());
+		addAttribute(TAGS).setDataType(MREF).setRefEntity(new TagMetaData1_6());
 	}
 
 }

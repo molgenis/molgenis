@@ -1,8 +1,8 @@
-package org.molgenis.data.meta.migrate.v1_4;
+package org.molgenis.data.meta;
 
 import org.molgenis.data.support.DefaultEntityMetaData;
 
-public class TagMetaData1_4 extends DefaultEntityMetaData
+public class TagMetaData1_6 extends DefaultEntityMetaData
 {
 
 	public static final String ENTITY_NAME = "tags";
@@ -13,7 +13,7 @@ public class TagMetaData1_4 extends DefaultEntityMetaData
 	public static final String RELATION_LABEL = "relationLabel";
 	public static final String CODE_SYSTEM = "codeSystem";
 
-	public TagMetaData1_4()
+	public TagMetaData1_6()
 	{
 		super(ENTITY_NAME);
 		addAttribute(IDENTIFIER).setIdAttribute(true).setNillable(false);
