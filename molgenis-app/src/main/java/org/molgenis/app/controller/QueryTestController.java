@@ -2,6 +2,8 @@ package org.molgenis.app.controller;
 
 import static org.molgenis.app.controller.QueryTestController.URI;
 
+import java.util.Iterator;
+
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -27,12 +29,16 @@ public class QueryTestController
 	{
 		// filter on root level:
 
-		Query q = new QueryImpl().search("house.address", "Berendsen");
+		Query q = new QueryImpl().gt("mref.xdate", "1980-01-29");
 
 		System.out.println("###### Query written in code   : " + q);
 
-		Iterable<Entity> t = dataService.findAll("persons", q);
-		System.out.println(t.iterator().next());
+		Iterator<Entity> t = dataService.findAll("entity", q).iterator();
+		while (t.hasNext())
+		{
+			Entity x = t.next();
+			System.out.println(x.toString());
+		}
 
 		return null;
 	}
