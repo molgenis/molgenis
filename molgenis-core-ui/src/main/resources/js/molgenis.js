@@ -585,6 +585,89 @@ function createInput(attr, attrs, val, lbl) {
 	};
 }($, window.top.molgenis = window.top.molgenis || {}));
 
+(function($, molgenis) {
+	"use strict";
+
+	var createAttrsValue = function(attrs) {
+		var key, items = [];
+		for (key in attrs) {
+			if (attrs.hasOwnProperty(key)) {
+				if(attrs[key]) {
+					items.push(encodeURIComponent(key + '(' + createAttrsQs(attrs[key]) + ')')); // do not encode parenthesis
+				} else {
+					items.push(encodeURIComponent(key));
+				}
+			}
+		}
+		return items.join(','); // do not encode comma
+	};
+	
+	var createQueryValue = function(rules) {
+		
+	};
+	
+	var createSortValue = function(sort) {
+		var qs = _.map(sort.attrs, function(attr) {
+			return encodeURIComponent(attr);
+		}).join(','); // do not encode comma
+		 
+		if(sort.order === 'DESC') {
+			qs += ':desc'; // do not encode semi colon
+		}
+		return qs; 
+	};
+	
+	molgenis.RestClientV2 = function RestClientV2() {
+	};
+
+	molgenis.RestClientV2.prototype.get = function(resourceUri, options) {
+		if(!resourceUri.startsWith('/api')) {
+			// assume that resourceUri is a entity name
+			resourceUri = '/api/v2/' + htmlEscape(resourceUri);
+		}
+		
+		var qs;
+		if (options) {
+			var items = [];
+			if (options.attributes) {
+				//items.push('attributes=' + createAttrsValue(options.attributes));
+			}
+			if(options.q) {
+				//items.push('q=' + createQueryValue(options.q));
+			}
+			if(options.sort) {
+				items.push('sort=' + createSortValue(options.sort));
+			}
+			if(options.start !== undefined) {
+				items.push('start=' + options.start);
+			}
+			if(options.num !== undefined) {
+				items.push('num=' + options.num);
+			}
+			qs = items.join('&');
+		} else {
+			qs = null;
+		}
+		
+		return $.ajax({
+			method: 'GET',
+			url: qs ? resourceUri + '?' + qs : resourceUri,
+			dataType : 'json',
+			cache : true
+		});
+		
+//		private List<QueryRule> q;
+//		private Sort sort;
+//		private AttributeFilter attributes;
+//
+//		@Min(0)
+//		private int start = 0;
+//		@Min(0)
+//		@Max(MAX_ROWS)
+//		private int num = DEFAULT_ROW_COUNT;
+	};
+}($, window.top.molgenis = window.top.molgenis || {}));
+
 function showSpinner(callback) {
 	var spinner = $('#spinner');
 	
