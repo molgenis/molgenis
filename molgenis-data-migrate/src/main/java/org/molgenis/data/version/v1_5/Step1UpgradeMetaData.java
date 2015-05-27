@@ -14,20 +14,22 @@ import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.meta.AttributeMetaDataMetaData;
-import org.molgenis.data.meta.EntityMetaDataMetaData;
+import org.molgenis.data.meta.AttributeMetaDataMetaData1_4;
+import org.molgenis.data.meta.AttributeMetaDataMetaData1_5;
+import org.molgenis.data.meta.EntityMetaDataMetaData1_4;
+import org.molgenis.data.meta.EntityMetaDataMetaData1_5;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
-import org.molgenis.data.meta.PackageMetaData;
-import org.molgenis.data.meta.TagMetaData;
-import org.molgenis.data.meta.migrate.v1_4.AttributeMetaDataMetaData1_4;
-import org.molgenis.data.meta.migrate.v1_4.EntityMetaDataMetaData1_4;
+import org.molgenis.data.meta.PackageMetaData1_4;
+import org.molgenis.data.meta.PackageMetaData1_5;
+import org.molgenis.data.meta.TagMetaData1_4;
+import org.molgenis.data.meta.TagMetaData1_5;
 import org.molgenis.data.mysql.AsyncJdbcTemplate;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.data.version.MolgenisUpgrade;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -128,8 +130,8 @@ public class Step1UpgradeMetaData extends MolgenisUpgrade
 	private void updateAttributesInMysql()
 	{
 		LOG.info("Update attribute order in MySQL...");
-		Repository entityRepository = undecoratedMySQL.getRepository(EntityMetaDataMetaData.ENTITY_NAME);
-		Repository attributeRepository = undecoratedMySQL.getRepository(AttributeMetaDataMetaData.ENTITY_NAME);
+		Repository entityRepository = undecoratedMySQL.getRepository(EntityMetaDataMetaData1_4.ENTITY_NAME);
+		Repository attributeRepository = undecoratedMySQL.getRepository(AttributeMetaDataMetaData1_4.ENTITY_NAME);
 
 		// save all entity metadata with attributes in proper order
 		for (Entity v15EntityMetaDataEntity : entityRepository)
@@ -138,7 +140,7 @@ public class Step1UpgradeMetaData extends MolgenisUpgrade
 					+ v15EntityMetaDataEntity.get(EntityMetaDataMetaData1_4.FULL_NAME));
 			List<Entity> attributes = Lists.newArrayList(searchService.search(
 					EQ(AttributeMetaDataMetaData1_4.ENTITY,
-							v15EntityMetaDataEntity.getString(EntityMetaDataMetaData.FULL_NAME)),
+							v15EntityMetaDataEntity.getString(EntityMetaDataMetaData1_4.FULL_NAME)),
 					new AttributeMetaDataMetaData1_4()));
 			attributes = attributes.stream().filter(a -> a.get(AttributeMetaDataMetaData1_4.PART_OF_ATTRIBUTE) == null)
 					.collect(Collectors.toList());
@@ -147,8 +149,8 @@ public class Step1UpgradeMetaData extends MolgenisUpgrade
 				updateAttribute(attributeRepository, attribute);
 			}
 
-			v15EntityMetaDataEntity.set(EntityMetaDataMetaData.ATTRIBUTES, attributes);
-			v15EntityMetaDataEntity.set(EntityMetaDataMetaData.BACKEND, "MySQL");
+			v15EntityMetaDataEntity.set(EntityMetaDataMetaData1_5.ATTRIBUTES, attributes);
+			v15EntityMetaDataEntity.set(EntityMetaDataMetaData1_5.BACKEND, "MySQL");
 			entityRepository.update(v15EntityMetaDataEntity);
 		}
 		LOG.info("Update attribute order done.");
@@ -171,7 +173,7 @@ public class Step1UpgradeMetaData extends MolgenisUpgrade
 						AttributeMetaDataMetaData1_4.ENTITY, attribute_v1_4.get(AttributeMetaDataMetaData1_4.ENTITY)),
 				new AttributeMetaDataMetaData1_4()));
 		Entity attribute_v1_5FromRepo = attributeRepository.findOne(attribute_v1_4.getIdValue());
-		attribute_v1_5FromRepo.set(AttributeMetaDataMetaData.PARTS, attributeParts_v1_4);
+		attribute_v1_5FromRepo.set(AttributeMetaDataMetaData1_5.PARTS, attributeParts_v1_4);
 		attributeRepository.update(attribute_v1_5FromRepo);
 		for (Entity part : attributeParts_v1_4)
 		{
@@ -182,10 +184,10 @@ public class Step1UpgradeMetaData extends MolgenisUpgrade
 	private void recreateElasticSearchMetaDataIndices()
 	{
 		LOG.info("Deleting metadata indices...");
-		searchService.delete(EntityMetaDataMetaData.ENTITY_NAME);
-		searchService.delete(AttributeMetaDataMetaData.ENTITY_NAME);
-		searchService.delete(TagMetaData.ENTITY_NAME);
-		searchService.delete(PackageMetaData.ENTITY_NAME);
+		searchService.delete(EntityMetaDataMetaData1_4.ENTITY_NAME);
+		searchService.delete(AttributeMetaDataMetaData1_4.ENTITY_NAME);
+		searchService.delete(TagMetaData1_4.ENTITY_NAME);
+		searchService.delete(PackageMetaData1_4.ENTITY_NAME);
 
 		searchService.refresh();
 
@@ -204,10 +206,10 @@ public class Step1UpgradeMetaData extends MolgenisUpgrade
 
 		try
 		{
-			searchService.createMappings(new TagMetaData());
-			searchService.createMappings(new PackageMetaData());
-			searchService.createMappings(new AttributeMetaDataMetaData());
-			searchService.createMappings(new EntityMetaDataMetaData());
+			searchService.createMappings(new TagMetaData1_5());
+			searchService.createMappings(new PackageMetaData1_5());
+			searchService.createMappings(new AttributeMetaDataMetaData1_5());
+			searchService.createMappings(new EntityMetaDataMetaData1_5());
 		}
 		catch (IOException e)
 		{
@@ -216,12 +218,13 @@ public class Step1UpgradeMetaData extends MolgenisUpgrade
 
 		LOG.info("Reindexing MySQL repositories...");
 
-		searchService.rebuildIndex(undecoratedMySQL.getRepository(TagMetaData.ENTITY_NAME), new TagMetaData());
-		searchService.rebuildIndex(undecoratedMySQL.getRepository(PackageMetaData.ENTITY_NAME), new PackageMetaData());
-		searchService.rebuildIndex(undecoratedMySQL.getRepository(AttributeMetaDataMetaData.ENTITY_NAME),
-				new AttributeMetaDataMetaData());
-		searchService.rebuildIndex(undecoratedMySQL.getRepository(EntityMetaDataMetaData.ENTITY_NAME),
-				new EntityMetaDataMetaData());
+		searchService.rebuildIndex(undecoratedMySQL.getRepository(TagMetaData1_5.ENTITY_NAME), new TagMetaData1_5());
+		searchService.rebuildIndex(undecoratedMySQL.getRepository(PackageMetaData1_5.ENTITY_NAME),
+				new PackageMetaData1_5());
+		searchService.rebuildIndex(undecoratedMySQL.getRepository(AttributeMetaDataMetaData1_5.ENTITY_NAME),
+				new AttributeMetaDataMetaData1_5());
+		searchService.rebuildIndex(undecoratedMySQL.getRepository(EntityMetaDataMetaData1_5.ENTITY_NAME),
+				new EntityMetaDataMetaData1_5());
 
 		LOG.info("Reindexing MySQL repositories DONE.");
 
