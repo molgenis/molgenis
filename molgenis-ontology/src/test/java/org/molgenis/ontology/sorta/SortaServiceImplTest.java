@@ -204,7 +204,7 @@ public class SortaServiceImplTest
 		assertEquals(iterator_test1.hasNext(), true);
 		Entity secondMatch_test1 = iterator_test1.next();
 		assertEquals(secondMatch_test1.getDouble(SortaServiceImpl.COMBINED_SCORE).intValue(),
-				new Double(85.714).intValue());
+				new Double(75.714).intValue());
 
 		assertEquals(iterator_test1.hasNext(), false);
 

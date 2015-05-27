@@ -133,8 +133,7 @@ public class NGramMatchingModel
 	private static double calculateScore(Map<String, Integer> inputStringTokens, Map<String, Integer> ontologyTermTokens)
 	{
 		if (inputStringTokens.size() == 0 || ontologyTermTokens.size() == 0) return (double) 0;
-		double totalToken = getTotalNumTokens(inputStringTokens) + getTotalNumTokens(ontologyTermTokens);
-
+		double totalToken = Math.max(getTotalNumTokens(inputStringTokens), getTotalNumTokens(ontologyTermTokens));
 		int numMatchedToken = 0;
 
 		for (String token : inputStringTokens.keySet())
@@ -146,10 +145,11 @@ public class NGramMatchingModel
 		}
 
 		DecimalFormat df = new DecimalFormat("##.###", new DecimalFormatSymbols(Locale.ENGLISH));
-		return Double.parseDouble(df.format(2 * numMatchedToken / totalToken * 100));
+
+		return Double.parseDouble(df.format(numMatchedToken / totalToken * 100));
 	}
 
-	private static int getTotalNumTokens(Map<String, Integer> inputStringTokens)
+	private static double getTotalNumTokens(Map<String, Integer> inputStringTokens)
 	{
 		int totalNum = 0;
 
@@ -157,7 +157,7 @@ public class NGramMatchingModel
 		{
 			totalNum += frequency;
 		}
-		return totalNum;
+		return (double) totalNum;
 	}
 
 	private static synchronized String stemmerString(String originalString)
