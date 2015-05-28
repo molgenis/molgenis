@@ -448,7 +448,8 @@ function($, molgenis, settingsXhr) {
 		});
 		
 		$(document).on('clickAttribute', function(e, data) {
-			if(data.attribute.fieldType !== 'COMPOUND')
+			var attr = data.attribute;
+			if(attr.fieldType !== 'COMPOUND' && (!attr.refEntity || !attr.parent))
 				self.filter.dialog.openFilterModal(data.attribute, attributeFilters[data.attribute.href]);
 		});
 		
