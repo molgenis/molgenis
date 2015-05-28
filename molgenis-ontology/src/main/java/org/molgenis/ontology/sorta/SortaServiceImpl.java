@@ -35,7 +35,6 @@ public class SortaServiceImpl implements SortaService
 	private static final Set<String> ELASTICSEARCH_RESERVED_WORDS = Sets.newHashSet("or", "and", "if");
 	private static final String NON_WORD_SEPARATOR = "[^a-zA-Z0-9]";
 	private static final String ILLEGAL_CHARACTERS_PATTERN = "[^a-zA-Z0-9 ]";
-	private static final String FUZZY_MATCH_SIMILARITY = "~0.8";
 	private static final String SINGLE_WHITESPACE = " ";
 	private static final int MAX_NUMBER_MATCHES = 100;
 
@@ -384,7 +383,7 @@ public class SortaServiceImpl implements SortaService
 				String afterStem = stemmer.getCurrent();
 				if (StringUtils.isNotEmpty(afterStem))
 				{
-					stringBuilder.append(afterStem).append(FUZZY_MATCH_SIMILARITY).append(SINGLE_WHITESPACE);
+					stringBuilder.append(afterStem).append(SINGLE_WHITESPACE);
 				}
 			}
 		}

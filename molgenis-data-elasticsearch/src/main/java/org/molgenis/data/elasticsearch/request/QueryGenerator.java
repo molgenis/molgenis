@@ -492,11 +492,13 @@ public class QueryGenerator implements QueryPartGenerator
 						case SCRIPT:
 						case STRING:
 						case TEXT:
+							queryField = queryField + ".ngram";
 							queryBuilder = QueryBuilders.queryString(queryField + ":(" + queryValue + ")");
 							break;
 						case MREF:
 						case XREF:
-							queryField = attr.getName() + "." + attr.getRefEntity().getLabelAttribute().getName();
+							queryField = attr.getName() + "." + attr.getRefEntity().getLabelAttribute().getName()
+									+ ".ngram";
 							queryBuilder = QueryBuilders.nestedQuery(attr.getName(),
 									QueryBuilders.queryString(queryField + ":(" + queryValue + ")")).scoreMode("max");
 							break;
