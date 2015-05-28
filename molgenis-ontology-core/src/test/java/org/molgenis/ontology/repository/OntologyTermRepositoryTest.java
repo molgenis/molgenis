@@ -68,7 +68,7 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 		assertEquals(terms, asList(OntologyTerm.create("http://www.test.nl/iri", "Ontology term")));
 		assertEquals(
 				queryCaptor.getValue().toString(),
-				"QueryImpl [rules=[ontology IN '[1, 2]',  AND , ( search 'term1' search 'term2' search 'term3')], pageSize=100, offset=0, sort=null]");
+				"QueryImpl [rules=[ontology IN '[1, 2]',  AND , ( search 'term1' OR  search 'term2' OR  search 'term3')], pageSize=100, offset=0, sort=null]");
 
 	}
 }
