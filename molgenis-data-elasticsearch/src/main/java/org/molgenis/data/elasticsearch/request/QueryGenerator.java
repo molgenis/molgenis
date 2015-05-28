@@ -492,6 +492,48 @@ public class QueryGenerator implements QueryPartGenerator
 						case SCRIPT:
 						case STRING:
 						case TEXT:
+							queryBuilder = QueryBuilders.queryString(queryField + ":(" + queryValue + ")");
+							break;
+						case MREF:
+						case XREF:
+							queryField = attr.getName() + "." + attr.getRefEntity().getLabelAttribute().getName();
+							queryBuilder = QueryBuilders.nestedQuery(attr.getName(),
+									QueryBuilders.queryString(queryField + ":(" + queryValue + ")")).scoreMode("max");
+							break;
+						default:
+							throw new RuntimeException("Unknown data type [" + dataType + "]");
+					}
+				}
+				break;
+			}
+			case FUZZY_MATCH_NGRAM:
+			{
+				if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
+
+				if (queryField == null)
+				{
+					queryBuilder = QueryBuilders.matchQuery("_all", queryValue);
+				}
+				else
+				{
+					AttributeMetaData attr = entityMetaData.getAttribute(queryField);
+					if (attr == null) throw new UnknownAttributeException(queryField);
+					// construct query part
+					FieldTypeEnum dataType = attr.getDataType().getEnumType();
+					switch (dataType)
+					{
+						case DATE:
+						case DATE_TIME:
+						case DECIMAL:
+						case EMAIL:
+						case ENUM:
+						case HTML:
+						case HYPERLINK:
+						case INT:
+						case LONG:
+						case SCRIPT:
+						case STRING:
+						case TEXT:
 							queryField = queryField + ".ngram";
 							queryBuilder = QueryBuilders.queryString(queryField + ":(" + queryValue + ")");
 							break;

@@ -121,7 +121,7 @@ public class SortaServiceImpl implements SortaService
 					if (StringUtils.isNotEmpty(medicalStemProxy))
 					{
 						rulesForOntologyTermFields.add(new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
-								Operator.FUZZY_MATCH, medicalStemProxy));
+								Operator.FUZZY_MATCH_NGRAM, medicalStemProxy));
 					}
 				}
 				else
