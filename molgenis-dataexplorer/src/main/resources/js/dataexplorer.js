@@ -263,10 +263,10 @@ function($, molgenis, settingsXhr) {
 		/**
 		 * Debug info: 
 		 * Activate this code to see the query
-		 */ 
-		 $("#debugFilterQuery").remove();
-		 $("#tab-data").append($('<div id="debugFilterQuery"><p>QUERY : </p><p>' + JSON.stringify(entityCollectionRequest) + '</p></div>'));
-
+		 * 
+		 * $("#debugFilterQuery").remove();
+		 * $("#tab-data").append($('<div id="debugFilterQuery"><p>QUERY : </p><p>' + JSON.stringify(entityCollectionRequest) + '</p></div>'));
+		 */
 		
 		return entityCollectionRequest;
 	}
