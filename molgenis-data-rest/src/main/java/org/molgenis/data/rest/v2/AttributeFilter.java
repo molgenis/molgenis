@@ -6,11 +6,25 @@ import java.util.Map;
 
 class AttributeFilter implements Iterable<AttributeFilter>
 {
+	public static final AttributeFilter ALL_ATTRS_FILTER = new AttributeFilter().setIncludeAllAttrs(true);
+
 	private final Map<String, AttributeFilter> attributes;
+	private boolean includeAllAttrs;
 
 	public AttributeFilter()
 	{
 		this.attributes = new LinkedHashMap<String, AttributeFilter>();
+	}
+
+	public boolean isIncludeAllAttrs()
+	{
+		return includeAllAttrs;
+	}
+
+	AttributeFilter setIncludeAllAttrs(boolean includeAllAttrs)
+	{
+		this.includeAllAttrs = includeAllAttrs;
+		return this;
 	}
 
 	public AttributeFilter getAttributeFilter(String name)
@@ -19,9 +33,9 @@ class AttributeFilter implements Iterable<AttributeFilter>
 
 	}
 
-	public boolean contains(String name)
+	public boolean includeAttribute(String name)
 	{
-		return attributes.containsKey(normalize(name));
+		return this.isIncludeAllAttrs() ? true : attributes.containsKey(normalize(name));
 	}
 
 	@Override
@@ -52,6 +66,7 @@ class AttributeFilter implements Iterable<AttributeFilter>
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((attributes == null) ? 0 : attributes.hashCode());
+		result = prime * result + (includeAllAttrs ? 1231 : 1237);
 		return result;
 	}
 
@@ -67,12 +82,13 @@ class AttributeFilter implements Iterable<AttributeFilter>
 			if (other.attributes != null) return false;
 		}
 		else if (!attributes.equals(other.attributes)) return false;
+		if (includeAllAttrs != other.includeAllAttrs) return false;
 		return true;
 	}
 
 	@Override
 	public String toString()
 	{
-		return "AttributeFilter [attributes=" + attributes + "]";
+		return "AttributeFilter [attributes=" + attributes + ", includeAllAttrs=" + includeAllAttrs + "]";
 	}
 }

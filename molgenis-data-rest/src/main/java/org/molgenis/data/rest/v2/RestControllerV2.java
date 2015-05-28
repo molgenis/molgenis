@@ -74,7 +74,7 @@ class RestControllerV2
 			throw new UnknownEntityException(entityName + " [" + id + "] not found");
 		}
 
-		return createEntityResponse(entity, attributeFilter);
+		return createEntityResponse(entity, attributeFilter, true);
 	}
 
 	/**
@@ -119,10 +119,13 @@ class RestControllerV2
 				permissionService);
 	}
 
-	private Map<String, Object> createEntityResponse(Entity entity, AttributeFilter attrFilter)
+	private Map<String, Object> createEntityResponse(Entity entity, AttributeFilter attrFilter, boolean includeMetaData)
 	{
 		Map<String, Object> responseData = new LinkedHashMap<String, Object>();
-		createEntityMetaResponse(entity.getEntityMetaData(), attrFilter, responseData);
+		if (includeMetaData)
+		{
+			createEntityMetaResponse(entity.getEntityMetaData(), attrFilter, responseData);
+		}
 		createEntityValuesResponse(entity, attrFilter, responseData);
 		return responseData;
 	}
@@ -136,6 +139,7 @@ class RestControllerV2
 	private void createEntityValuesResponse(Entity entity, AttributeFilter attrFilter, Map<String, Object> responseData)
 	{
 		Iterable<AttributeMetaData> attrs = entity.getEntityMetaData().getAttributes();
+		attrFilter = attrFilter != null ? attrFilter : AttributeFilter.ALL_ATTRS_FILTER;
 		createEntityValuesResponseRec(entity, attrs, attrFilter, responseData);
 	}
 
@@ -145,7 +149,7 @@ class RestControllerV2
 		for (AttributeMetaData attr : attrs)
 		{
 			String attrName = attr.getName();
-			if (attrFilter == null || attrFilter.contains(attrName))
+			if (attrFilter.includeAttribute(attrName))
 			{
 				FieldTypeEnum dataType = attr.getDataType().getEnumType();
 				switch (dataType)
@@ -159,16 +163,12 @@ class RestControllerV2
 						Map<String, Object> refEntityResponse;
 						if (refEntity != null)
 						{
-							AttributeFilter refAttrFilter;
-							if (attrFilter != null)
+							AttributeFilter refAttrFilter = attrFilter.getAttributeFilter(attrName);
+							if (refAttrFilter == null)
 							{
-								refAttrFilter = attrFilter.getAttributeFilter(attrName);
+								refAttrFilter = createDefaultRefAttributeFilter(attr);
 							}
-							else
-							{
-								refAttrFilter = null;
-							}
-							refEntityResponse = createEntityResponse(refEntity, refAttrFilter);
+							refEntityResponse = createEntityResponse(refEntity, refAttrFilter, false);
 						}
 						else
 						{
@@ -183,18 +183,14 @@ class RestControllerV2
 						if (refEntities != null)
 						{
 							refEntityResponses = new ArrayList<Map<String, Object>>();
-							AttributeFilter refAttrFilter;
-							if (attrFilter != null)
+							AttributeFilter refAttrFilter = attrFilter.getAttributeFilter(attrName);
+							if (refAttrFilter == null)
 							{
-								refAttrFilter = attrFilter.getAttributeFilter(attrName);
-							}
-							else
-							{
-								refAttrFilter = null;
+								refAttrFilter = createDefaultRefAttributeFilter(attr);
 							}
 							for (Entity refEntitiesEntity : refEntities)
 							{
-								refEntityResponses.add(createEntityResponse(refEntitiesEntity, refAttrFilter));
+								refEntityResponses.add(createEntityResponse(refEntitiesEntity, refAttrFilter, false));
 							}
 						}
 						else
@@ -204,7 +200,13 @@ class RestControllerV2
 						responseData.put(attrName, refEntityResponses);
 						break;
 					case COMPOUND:
-						createEntityValuesResponseRec(entity, attr.getAttributeParts(), attrFilter, responseData);
+						Iterable<AttributeMetaData> attrParts = attr.getAttributeParts();
+						AttributeFilter compoundAttrFilter = new AttributeFilter();
+						for (AttributeMetaData attrPart : attrParts)
+						{
+							compoundAttrFilter.add(attrPart.getName());
+						}
+						createEntityValuesResponseRec(entity, attrParts, compoundAttrFilter, responseData);
 						break;
 					case DATE:
 						Date dateValue = entity.getDate(attrName);
@@ -242,5 +244,13 @@ class RestControllerV2
 				}
 			}
 		}
+	}
+
+	private AttributeFilter createDefaultRefAttributeFilter(AttributeMetaData attr)
+	{
+		EntityMetaData refEntityMeta = attr.getRefEntity();
+		String idAttrName = refEntityMeta.getIdAttribute().getName();
+		String labelAttrName = refEntityMeta.getLabelAttribute().getName();
+		return new AttributeFilter().add(idAttrName).add(labelAttrName);
 	}
 }

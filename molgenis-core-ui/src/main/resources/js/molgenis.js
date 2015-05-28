@@ -593,7 +593,11 @@ function createInput(attr, attrs, val, lbl) {
 		for (key in attrs) {
 			if (attrs.hasOwnProperty(key)) {
 				if(attrs[key]) {
-					items.push(encodeURIComponent(key + '(' + createAttrsQs(attrs[key]) + ')')); // do not encode parenthesis
+					if(attrs[key] === '*') {
+						items.push(encodeURIComponent(key) + '(*)'); // do not encode wildcard and parenthesis
+					} else {
+						items.push(encodeURIComponent(key) + '(' + createAttrsValue(attrs[key]) + ')'); // do not encode parenthesis	
+					}					
 				} else {
 					items.push(encodeURIComponent(key));
 				}
@@ -621,7 +625,7 @@ function createInput(attr, attrs, val, lbl) {
 	};
 
 	molgenis.RestClientV2.prototype.get = function(resourceUri, options) {
-		if(!resourceUri.startsWith('/api')) {
+		if(!resourceUri.startsWith('/api/')) {
 			// assume that resourceUri is a entity name
 			resourceUri = '/api/v2/' + htmlEscape(resourceUri);
 		}
@@ -630,7 +634,7 @@ function createInput(attr, attrs, val, lbl) {
 		if (options) {
 			var items = [];
 			if (options.attributes) {
-				//items.push('attributes=' + createAttrsValue(options.attributes));
+				items.push('attributes=' + createAttrsValue(options.attributes));
 			}
 			if(options.q) {
 				//items.push('q=' + createQueryValue(options.q));

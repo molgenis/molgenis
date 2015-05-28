@@ -7,11 +7,6 @@ class AttributeFilterConverter implements Converter<String, AttributeFilter>
 	@Override
 	public AttributeFilter convert(String source)
 	{
-		if (source == null || source.isEmpty())
-		{
-			return null;
-		}
-
 		AttributeFilter attributeFilter = new AttributeFilter();
 		parseAttributeFilter(source, 0, attributeFilter);
 		return attributeFilter;
@@ -34,8 +29,11 @@ class AttributeFilterConverter implements Converter<String, AttributeFilter>
 						escaped = true;
 						break;
 					case ',':
-						attributeFilter.add(strBuilder.toString());
-						strBuilder.setLength(0);
+						if (!strBuilder.toString().isEmpty())
+						{
+							attributeFilter.add(strBuilder.toString());
+							strBuilder.setLength(0);
+						}
 						break;
 					// TODO support slash as alternative for parenthesis with one element
 					// case '/':
@@ -50,8 +48,14 @@ class AttributeFilterConverter implements Converter<String, AttributeFilter>
 						strBuilder.setLength(0);
 						break;
 					case ')':
-						attributeFilter.add(strBuilder.toString());
+						if (!strBuilder.toString().isEmpty())
+						{
+							attributeFilter.add(strBuilder.toString());
+						}
 						return i;
+					case '*':
+						attributeFilter.setIncludeAllAttrs(true);
+						break;
 					default:
 						strBuilder.append(c);
 						if (i == nrChars - 1)

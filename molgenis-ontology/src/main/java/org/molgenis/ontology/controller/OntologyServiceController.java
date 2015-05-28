@@ -276,8 +276,8 @@ public class OntologyServiceController extends MolgenisPluginController
 
 		uploadProgress.setUserClickMode(userAccountService.getCurrentUser().getUsername(), isMatched);
 		EntityPager pager = new EntityPager(start, num, (long) count, null);
-		return new EntityCollectionResponse(pager, entityMaps, null, "/match/retrieve", OntologyTermMetaData.INSTANCE,
-				molgenisPermissionService); // FIXME replace null with attributes
+		return new EntityCollectionResponse(pager, entityMaps, "/match/retrieve", OntologyTermMetaData.INSTANCE,
+				molgenisPermissionService);
 	}
 
 	@RequestMapping(method = POST, value = "/match")

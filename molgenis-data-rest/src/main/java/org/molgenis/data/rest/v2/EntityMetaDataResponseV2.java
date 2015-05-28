@@ -66,7 +66,7 @@ class EntityMetaDataResponseV2
 			String attrName = attr.getName();
 			if (!attrName.equals("__Type")) // FIXME check if still needed for JPA
 			{
-				if (attributes == null || attributes.contains(attrName))
+				if (attributes == null || attributes.includeAttribute(attrName))
 				{
 					AttributeFilter subAttributes = attributes != null ? attributes.getAttributeFilter(attrName) : null;
 					this.attributes.put(attrName, new AttributeMetaDataResponseV2(name, attr, subAttributes,

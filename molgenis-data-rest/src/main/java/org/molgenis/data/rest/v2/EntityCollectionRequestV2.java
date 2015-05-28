@@ -71,4 +71,11 @@ class EntityCollectionRequestV2
 	{
 		this.attributes = attributes;
 	}
+
+	@Override
+	public String toString()
+	{
+		return "EntityCollectionRequestV2 [q=" + q + ", sort=" + sort + ", attributes=" + attributes + ", start="
+				+ start + ", num=" + num + "]";
+	}
 }

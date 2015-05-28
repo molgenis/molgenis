@@ -335,7 +335,7 @@
 	 * @memberOf molgenis.dataexplorer.data
 	 */
 	$(function() {
-		$(document).on('changeAttributeSelection.data', function(e, data) {
+		$(document).on('changeAttributeSelection.data', function(e, data) {console.log(data);
 			if(Table) {
 				Table.setProps({attrs: _.map(data.attributes, function(attr) {
 					return attr.name

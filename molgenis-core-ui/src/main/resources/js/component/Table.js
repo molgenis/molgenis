@@ -21,6 +21,15 @@
 					return false;
 			}  
 		},
+		_isMrefAttr: function(attr) {
+			switch(attr.fieldType) {
+				case 'CATEGORICAL_MREF':
+				case 'MREF':
+					return true;
+				default:
+					return false;
+			}  
+		},
 		_isXrefAttr: function(attr) {
 			return attr.fieldType === 'CATEGORICAL' || attr.fieldType === 'XREF';
 		},
@@ -39,6 +48,15 @@
 			return _.map(attrs, function(attr) {
 				return attr;
 			});
+		},
+		_isExpandedAttr: function(attrPath, expands) {
+			for(var i = 0, expandsAtDepth = expands; i < attrPath.length; ++i) {
+				if(expandsAtDepth[attrPath[i]] === undefined) {
+					return false;
+				}
+				expandsAtDepth = expandsAtDepth[attrPath[i]]; 
+			}
+			return true;
 		}
 	};
 	
@@ -50,7 +68,7 @@
 		displayName: 'Table',
 		propTypes: {
 			entity: React.PropTypes.string.isRequired,
-			attrs: React.PropTypes.arrayOf(React.PropTypes.string),
+			attrs: React.PropTypes.arrayOf(React.PropTypes.string), // TODO can we merge props.attrs and state.expands?
 			query: React.PropTypes.arrayOf(React.PropTypes.object),
 			maxRows: React.PropTypes.number,
 			onRowAdd: React.PropTypes.func,
@@ -61,7 +79,7 @@
 		getInitialState: function() {
 			return {
 				data: null,
-				expands: {},
+				expands: {}, // TODO can we merge props.attrs and state.expands?
 				sort: null,
 				start: 0
 			};
@@ -144,16 +162,28 @@
 			var opts = {
 				num : props.maxRows
 			};
-			if(props.attrs) {
-				opts.attributes = props.attrs;
+			if(props.attrs && props.attrs.length > 0) {
+				opts.attributes = {};
+				for(var i = 0; i < props.attrs.length; ++i) {
+					opts.attributes[props.attrs[i]] = null;
+				}
+			}
+			if(_.size(this.state.expands) > 0) {
+				if(opts.attributes) {
+					opts.attributes = _.extend(opts.attributes, this.state.expands);	
+				} else {
+					opts.attributes = _.extend({}, {'*': null}, this.state.expands);	
+				}
 			}
 			if(props.query) {
 				opts.q = props.query; 
 			}
 			if(this.state.sort) {
 				opts.sort = {
-					'attrs': [this.state.sort.attr.name],
-					'order': this.state.sort.order
+					'orders' : [ {
+						'property' : this.state.sort.attr.name,
+						'direction' : this.state.sort.order
+					} ]
 				};
 			}
 			if(this.state.start !== 0) {
@@ -164,8 +194,15 @@
 			}.bind(this));
 		},
 		_handleExpand: function(e) {
-			var expands = _.extend({}, this.state.expands);
-			expands[this._getAttrId(e.attr, e.path)] = null;				
+			var expands = JSON.parse(JSON.stringify(this.state.expands)); // deep clone
+			
+			for(var i = 0, expandsAtDepth = expands; i < e.attrPath.length; ++i) {
+				var attr = e.attrPath[i];
+				if(!expandsAtDepth[attr]) {
+					expandsAtDepth[attr] = (i < e.attrPath.length - 1) ? {} : {'*': null};
+				}
+				expandsAtDepth = expandsAtDepth[attr];
+			}
 			
 			this.setState({expands: expands}, function() {
 				this._refreshData(this.props);
@@ -173,7 +210,15 @@
 		},
 		_handleCollapse: function(e) {
 			var expands = _.extend({}, this.state.expands);
-			delete expands[e.path.join('.')];
+			
+			for(var i = 0, expandsAtDepth = expands; i < e.attrPath.length; ++i) {
+				var attr = e.attrPath[i];
+				if(i < e.attrPath.length - 1) {
+					expandsAtDepth = expandsAtDepth[attr];
+				} else {
+					delete expandsAtDepth[attr];
+				}
+			}
 			
 			this.setState({expands: expands}, function() {
 				this._refreshData(this.props);
@@ -205,9 +250,6 @@
 			this.setState({start : e.start}, function() {
 				this._refreshData(this.props);
 			});
-		},
-		_getAttrId: function(attr, path) {
-			return path.concat(attr.name).join('.');
 		}
 	});
 	
@@ -259,39 +301,39 @@
 					var attr = attrs[i];
 					if(this._isCompoundAttr(attr)) {
 						this._createHeadersRec(attr.attributes, Headers, path, expanded);
-					}  
-					else if(this._isExpandedAttr(attr, path)) {
-						var EntityCollapseBtn = EntityCollapseBtnFactory({
-							attr: attr,
-							path: path.concat(attr.name),
-							onCollapse: this.props.onCollapse
-						});
-						Headers.push(th({className: 'expanded-left compact', key: 'c' + this._getAttrId(attr, path)}, EntityCollapseBtn));
-						this._createHeadersRec(attr.refEntity.attributes, Headers, path.concat(attr.name), true);
-					}
-					else {
-						if(this._isRefAttr(attr)) {
-							var EntityExpandBtn = EntityExpandBtnFactory({
+					} else {
+						var attrPath = path.concat(attr.name);
+						if(this._isExpandedAttr(attrPath, this.props.expands)) {
+							var EntityCollapseBtn = EntityCollapseBtnFactory({
+								attrPath: attrPath,
+								onCollapse: this.props.onCollapse
+							});
+							Headers.push(th({className: 'expanded-left compact', key: 'c' + attrPath.join()}, EntityCollapseBtn));
+							this._createHeadersRec(attr.refEntity.attributes, Headers, path.concat(attr.name), true);
+						}
+						else {
+							if(this._isRefAttr(attr)) {
+								var EntityExpandBtn = EntityExpandBtnFactory({
+									attrPath: attrPath,
+									onExpand: this.props.onExpand
+								});
+								Headers.push(th({className: 'compact', key: 'e' + attrPath.join()}, EntityExpandBtn));
+							}
+							var TableHeaderCell = TableHeaderCellFactory({
+								className: i === attrs.length - 1 && expanded ? 'expanded-right' : undefined,
 								attr: attr,
 								path: path,
-								onExpand: this.props.onExpand
+								canSort: path.length === 0, // only allow sorting of top-level attributes
+								sortOrder: this._getSortOrder(attr, path),
+								onSort: this.props.onSort,
+								canCollapse: expanded,
+								canExpand: this._isRefAttr(attr), 
+								expanded: this._isExpandedAttr(attrPath, this.props.expands),
+								onExpand: this.props.onExpand,
+								key: attrPath.join()
 							});
-							Headers.push(th({className: 'compact', key: 'e' + this._getAttrId(attr, path)}, EntityExpandBtn));
+							Headers.push(TableHeaderCell);
 						}
-						var TableHeaderCell = TableHeaderCellFactory({
-							className: i === attrs.length - 1 && expanded ? 'expanded-right' : undefined,
-							attr: attr,
-							path: path,
-							canSort: path.length === 0, // only allow sorting of top-level attributes
-							sortOrder: this._getSortOrder(attr, path),
-							onSort: this.props.onSort,
-							canCollapse: expanded,
-							canExpand: this._isRefAttr(attr), 
-							expanded: this._isExpandedAttr(attr, path),
-							onExpand: this.props.onExpand,
-							key: this._getAttrId(attr, path)
-						});
-						Headers.push(TableHeaderCell);
 					}
 				}
 			}
@@ -300,10 +342,7 @@
 			var sort = this.props.sort;
 			return sort && this._getAttrId(sort.attr, sort.path) === this._getAttrId(attr, path) ? sort.order : null;
 		},
-		_isExpandedAttr: function(attr, path) { // FIXME code duplication
-			return this.props.expands[this._getAttrId(attr, path)] !== undefined;
-		},
-		_getAttrId: function(attr, path) { // FIXME code duplication
+		_getAttrId: function(attr, path) {
 			return path.concat(attr.name).join('.');
 		}
 	});
@@ -423,36 +462,32 @@
 			for(var j = 0; j < attrs.length; ++j) {
 				var attr = attrs[j];
 				if(attr.visible === true) {
+					var attrPath = path.concat(attr.name);
 					if(this._isCompoundAttr(attr)) {
-						this._createColsRec(item, entity, attr.attributes, Cols, path.concat([attr.name]), expanded);
-					} else if(this._isExpandedAttr(attr, path)) {
-						Cols.push(td({className: 'expanded-left', key : this._getAttrId(attr, path)}));
-						this._createColsRec(item[attr.name], attr.refEntity, attr.refEntity.attributes, Cols, path.concat([attr.name]), true);
+						this._createColsRec(item, entity, attr.attributes, Cols, attrPath, expanded);
 					} else {
-						if(this._isRefAttr(attr)) {
-							Cols.push(td({key: 'e' + this._getAttrId(attr, path)}));
+						if(this._isExpandedAttr(attrPath, this.props.expands)) {
+							Cols.push(td({className: 'expanded-left', key : attrPath.join()}));
+							this._createColsRec(item[attr.name], attr.refEntity, attr.refEntity.attributes, Cols, attrPath, true);
+						} else {
+							if(this._isRefAttr(attr)) {
+								Cols.push(td({key: 'e' + attrPath.join()}));
+							}
+							var value = _.isArray(item) ? _.map(item, function(value) { return value[attr.name];}) : item[attr.name];
+							var TableCell = TableCellFactory({
+								className: j === attrs.length - 1 && expanded ? 'expanded-right' : undefined, 
+								entity: entity,
+								attr : attr,
+								value: value,
+								valueHref: item.href + '/' + htmlEscape(attr.name),
+								multiple: _.isArray(item),
+								key : attrPath.join()
+							});
+							Cols.push(TableCell);
 						}
-						// FIXME check if parent is mref instead of checking if items exists
-						var value = item.items ? _.map(item.items, function(item) { return item[attr.name]; }): item[attr.name]; 
-						var TableCell = TableCellFactory({
-							className: j === attrs.length - 1 && expanded ? 'expanded-right' : undefined, 
-							entity: entity,
-							attr : attr,
-							value: value,//item[attr.name],
-							valueHref: item.href + '/' + htmlEscape(attr.name),
-							multiple: item.items ? true : false,
-							key : this._getAttrId(attr, path)
-						});
-						Cols.push(TableCell);
 					}
 				}
 			}
-		},
-		_isExpandedAttr: function(attr, path) { // FIXME code duplication
-			return this.props.expands[this._getAttrId(attr, path)] !== undefined;
-		},
-		_getAttrId: function(attr, path) {
-			return path.concat(attr.name).join('.'); // FIXME code duplication
 		}
 	});
 	var TableBodyFactory = React.createFactory(TableBody);
@@ -550,9 +585,9 @@
 						break;
 					case 'CATEGORICAL_MREF':
 					case 'MREF':
-						CellContent = _.flatten(_.map(value.items, function(item, i) {
+						CellContent = _.flatten(_.map(value, function(item, i) {
 							var Anchor = a({href: '#', onClick: this._toggleModal.bind(null, true), key: 'a' + i}, span(null, item[attr.refEntity.labelAttribute]));
-							var Seperator = i < value.items.length - 1 ? span({key: 's' + i}, ',') : null; 
+							var Seperator = i < value.length - 1 ? span({key: 's' + i}, ',') : null; 
 							return [Anchor, Seperator];
 						}.bind(this)));
 						break;
@@ -601,8 +636,7 @@
 		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
 		displayName: 'EntityExpandBtn',
 		propTypes: {
-			attr: React.PropTypes.object.isRequired,
-			path: React.PropTypes.array.isRequired,
+			attrPath: React.PropTypes.array.isRequired,
 			onExpand: React.PropTypes.func,
 		},
 		getDefaultProps: function() {
@@ -620,9 +654,7 @@
 		},
 		_handleExpand: function() {
 			this.props.onExpand({
-				attr: this.props.attr,
-				path: this.props.path,
-				expand : true
+				attrPath: this.props.attrPath
 			});
 		}
 	});
@@ -635,8 +667,7 @@
 		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
 		displayName: 'EntityCollapseBtn',
 		propTypes: {
-			attr: React.PropTypes.object.isRequired,
-			path: React.PropTypes.array.isRequired,
+			attrPath: React.PropTypes.array.isRequired,
 			onCollapse: React.PropTypes.func,
 		},
 		getDefaultProps: function() {
@@ -654,8 +685,7 @@
 		},
 		_handleCollapse: function() {
 			this.props.onCollapse({
-				attr: this.props.attr,
-				path: this.props.path
+				attrPath: this.props.attrPath
 			});
 		}
 	});
