@@ -48,10 +48,10 @@ public class StyleServiceImpl implements StyleService
 					Map.class);
 
 			List<LinkedTreeMap<String, String>> themes = bootSwatchApiResponse.get(THEMES_KEY);
-			
-			// Replace 'http://' with '//' to allow the parent page to set the protocol to either https or http 
-			themes.forEach(tree -> availableStyles.add(Style.createRemote(tree.get(CSS_MIN_KEY).replace("http:", ""),
-					tree.get(THEME_NAME_KEY))));
+
+			// Replace 'http://' with '//' to allow the parent page to set the protocol to either https or http
+			themes.forEach(tree -> availableStyles.add(Style.createRemote(tree.get(CSS_MIN_KEY).replace("http:", "")
+					.replace("https:", ""), tree.get(THEME_NAME_KEY))));
 		}
 
 		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
