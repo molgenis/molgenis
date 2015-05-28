@@ -10,7 +10,6 @@
 			
 			var isFolder = false;		
 			var classes = null;
-			
 			if (this.fieldType === 'MREF' || this.fieldType === 'XREF'){
 				var maxDepth = $.fn.tree.defaults.maxRefEntityDepth;
 				if (maxDepth >= 0){
@@ -20,6 +19,12 @@
 				}
 				if (isFolder) classes = 'refentitynode';
 			}
+			
+			if (this.refEntity && (refEntityDepth > 0)) {
+				classes = 'nofilter';
+			}
+			
+			
             if(this.visible) {
                 var isFolder = isFolder || this.fieldType === 'COMPOUND';
 
@@ -136,8 +141,13 @@
 			}),
 			'click' : function(e, data) {
 				if (data.targetType === 'title' || data.targetType === 'icon') {
-					if (settings.onAttributeClick)
-						settings.onAttributeClick(data.node.data.attribute);
+					if (settings.onAttributeClick) {
+						var attr = data.node.data.attribute;
+						if (data.node.parent.data.attribute && data.node.parent.data.attribute.refEntity) {
+							attr.parent = data.node.parent.data.attribute;
+						}
+						settings.onAttributeClick(attr);
+					}
 				}
 			},
 			'select' : function(e, data) {
@@ -200,7 +210,7 @@
 		'icon' : null,
 		'onAttributeClick' : null,
 		'onAttributesSelect' : null,
-		'maxRefEntityDepth': -1	// -1 = infinite depth
+		'maxRefEntityDepth': 1	// -1 = infinite depth
 							   	//  0 = default behavior (no expanding refEntities)
 							   	// >0 = nr. of nested refEntities that can be expanded
 	};

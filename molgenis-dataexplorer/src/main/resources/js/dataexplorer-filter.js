@@ -75,7 +75,8 @@
 	self.createFilterQueryUserReadableList = function (attributeFilters) {
 		var items = [];
 		$.each(attributeFilters, function(attributeUri, filter) {
-			var attributeLabel = filter.attribute.label || filter.attribute.name;
+			var attributeLabel = molgenis.getAttributeLabel(filter.attribute);
+			
 			items.push('<p><a class="feature-filter-edit" data-href="' + attributeUri + '" href="#">'
 					+ attributeLabel + ': ' + self.createFilterQueyUserReadable(filter)
 					+ '</a><a class="feature-filter-remove" data-href="' + attributeUri + '" href="#" title="Remove '
@@ -709,7 +710,8 @@
 			var operator = this.operator;
 			var rule;
 			var rangeQuery = attribute.fieldType === 'DATE' || attribute.fieldType === 'DATE_TIME' || attribute.fieldType === 'DECIMAL' || attribute.fieldType === 'INT' || attribute.fieldType === 'LONG';
-
+			var queryRuleField = attribute.parent ? attribute.parent.name + '.' + attribute.name : attribute.name;
+			
 			if (rangeQuery) {
 				if(attribute.fieldType === 'DATE_TIME'){
 					if(fromValue){
@@ -726,7 +728,7 @@
 						operator: 'NESTED',
 						nestedRules:[
 						{
-							field : attribute.name,
+							field : queryRuleField,
 							operator : 'GREATER_EQUAL',
 							value : fromValue
 						},
@@ -734,20 +736,20 @@
 							operator : 'AND'
 						},
 						{
-							field : attribute.name,
+							field : queryRuleField,
 							operator : 'LESS_EQUAL',
 							value : toValue
 						}]
 					};
 				} else if (fromValue) {
 					rule = {
-						field : attribute.name,
+						field : queryRuleField,
 						operator : 'GREATER_EQUAL',
 						value : fromValue
 					};
 				} else if (toValue) {
 					rule = {
-						field : attribute.name,
+						field : queryRuleField,
 						operator : 'LESS_EQUAL',
 						value : toValue
 					};
@@ -800,7 +802,7 @@
 							}
 		
 							nestedRule.nestedRules.push({
-								field : attribute.name,
+								field : queryRuleField,
 								operator : attrOperator,
 								value : value
 							});
@@ -808,7 +810,7 @@
 						rule = nestedRule;
 					} else {
 						rule = {
-							field : attribute.name,
+							field : queryRuleField,
 							operator : attrOperator,
 							value : values[0]
 						};
