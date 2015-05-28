@@ -143,8 +143,9 @@
 				if (data.targetType === 'title' || data.targetType === 'icon') {
 					if (settings.onAttributeClick) {
 						var attr = data.node.data.attribute;
-						if (data.node.parent.data.attribute && data.node.parent.data.attribute.refEntity) {
-							attr.parent = data.node.parent.data.attribute;
+						var node = getRefParentNode(data.node);
+						if (node !== null) {
+							attr.parent = node.data.attribute;
 						}
 						settings.onAttributeClick(attr);
 					}
@@ -156,6 +157,21 @@
 			}
 		};
 		tree.fancytree(treeConfig);
+		
+		//Give the mref/xref/categorical parent of the given node or null if it does not have such a parent
+		function getRefParentNode(node) {
+			var parent = node.parent;
+			var attr = parent.data.attribute;
+			while (attr) {
+				if (attr.refEntity) {
+					return parent;
+				}
+				parent = parent.parent;
+				attr = parent.data.attribute;
+			}
+			
+			return null;
+		}
 		
 		$('.tree-select-all-btn', container).click(function(e) {
 			e.preventDefault();
