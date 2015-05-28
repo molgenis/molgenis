@@ -139,7 +139,8 @@
 	molgenis.getAttributeLabel = function(attribute) {
 		var label = attribute.label || attribute.name;
 		if (attribute.parent) {
-			label = molgenis.getAttributeLabel(attribute.parent) + '.' + label;
+			var parentLabel = attribute.parent.label || attribute.parent.name;
+			label = parentLabel + '.' + label;
 		}
 		
 		return label;
