@@ -14,10 +14,10 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.AnnotatorUtils;
-import org.molgenis.data.annotation.TabixReader;
+import org.molgenis.data.annotation.utils.AnnotatorUtils;
+import org.molgenis.data.annotation.utils.TabixReader;
 import org.molgenis.data.annotation.VariantAnnotator;
-import org.molgenis.data.annotation.VcfUtils;
+import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.data.support.AnnotationServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -50,7 +50,8 @@ public class ExACServiceAnnotator extends VariantAnnotator
 	private final MolgenisSettings molgenisSettings;
 	private final AnnotationService annotatorService;
 
-	public static final String EXAC_MAF = "EXAC_MAF";
+	public static final String EXAC_MAF_LABEL = "EXACMAF";
+	public static final String EXAC_MAF = VcfRepository.getInfoPrefix() + EXAC_MAF_LABEL;
 
 	private static final String NAME = "EXAC";
 
@@ -157,11 +158,14 @@ public class ExACServiceAnnotator extends VariantAnnotator
 	 */
 	private void checkTabixReader() throws IOException
 	{
-		synchronized (this)
+		if (tabixReader == null)
 		{
-			if (tabixReader == null)
+			synchronized (this)
 			{
-				tabixReader = new TabixReader(molgenisSettings.getProperty(EXAC_VCFGZ_LOCATION));
+				if (tabixReader == null)
+				{
+					tabixReader = new TabixReader(molgenisSettings.getProperty(EXAC_VCFGZ_LOCATION));
+				}
 			}
 		}
 	}
@@ -275,7 +279,8 @@ public class ExACServiceAnnotator extends VariantAnnotator
 	{
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
 
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(EXAC_MAF, FieldTypeEnum.DECIMAL));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(EXAC_MAF, FieldTypeEnum.DECIMAL)
+				.setLabel(EXAC_MAF_LABEL));
 
 		return metadata;
 	}

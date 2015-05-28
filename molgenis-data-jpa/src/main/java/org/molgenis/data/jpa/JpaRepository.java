@@ -1,6 +1,5 @@
 package org.molgenis.data.jpa;
 
-import static org.molgenis.data.RepositoryCapability.QUERYABLE;
 import static org.molgenis.data.RepositoryCapability.UPDATEABLE;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 
@@ -709,6 +708,6 @@ public class JpaRepository extends AbstractRepository
 	@Override
 	public Set<RepositoryCapability> getCapabilities()
 	{
-		return Sets.newHashSet(QUERYABLE, UPDATEABLE, WRITABLE);
+		return Sets.newHashSet(UPDATEABLE, WRITABLE);
 	}
 }

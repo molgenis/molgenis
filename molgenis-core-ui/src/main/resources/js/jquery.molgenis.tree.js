@@ -10,7 +10,6 @@
 			
 			var isFolder = false;		
 			var classes = null;
-			
 			if (this.fieldType === 'MREF' || this.fieldType === 'XREF'){
 				if (maxDepth >= 0){
 					isFolder = refEntityDepth < maxDepth ? true : false;
@@ -19,6 +18,12 @@
 				}
 				if (isFolder) classes = 'refentitynode';
 			}
+			
+			if (this.refEntity && (refEntityDepth > 0)) {
+				classes = 'nofilter';
+			}
+			
+			
             if(this.visible) {
                 var isFolder = isFolder || this.fieldType === 'COMPOUND';
 
@@ -135,8 +140,14 @@
 			}),
 			'click' : function(e, data) {
 				if (data.targetType === 'title' || data.targetType === 'icon') {
-					if (settings.onAttributeClick)
-						settings.onAttributeClick(data.node.data.attribute);
+					if (settings.onAttributeClick) {
+						var attr = data.node.data.attribute;
+						var node = getRefParentNode(data.node);
+						if (node !== null) {
+							attr.parent = node.data.attribute;
+						}
+						settings.onAttributeClick(attr);
+					}
 				}
 			},
 			'select' : function(e, data) {
@@ -145,6 +156,21 @@
 			}
 		};
 		tree.fancytree(treeConfig);
+		
+		//Give the mref/xref/categorical parent of the given node or null if it does not have such a parent
+		function getRefParentNode(node) {
+			var parent = node.parent;
+			var attr = parent.data.attribute;
+			while (attr) {
+				if (attr.refEntity) {
+					return parent;
+				}
+				parent = parent.parent;
+				attr = parent.data.attribute;
+			}
+			
+			return null;
+		}
 		
 		$('.tree-select-all-btn', container).click(function(e) {
 			e.preventDefault();
@@ -199,7 +225,7 @@
 		'icon' : null,
 		'onAttributeClick' : null,
 		'onAttributesSelect' : null,
-		'maxRefEntityDepth': 0	// -1 = infinite depth
+		'maxRefEntityDepth': 1	// -1 = infinite depth
 							   	//  0 = default behavior (no expanding refEntities)
 							   	// >0 = nr. of nested refEntities that can be expanded
 	};

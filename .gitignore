@@ -32,3 +32,9 @@ molgenis-model-registry/.factorypath
 molgenis-ontology-core/.factorypath
 molgenis-ontology/.factorypath
 molgenis-data-import/.factorypath
+molgenis-core-ui/.factorypath
+molgenis-catalogue/.factorypath
+molgenis-charts/.factorypath
+molgenis-data-annotators/.factorypath
+molgenis-data-rest/.factorypath
+molgenis-dataexplorer/.factorypath

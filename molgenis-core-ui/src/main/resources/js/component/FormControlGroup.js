@@ -2,7 +2,7 @@
 (function(_, React, molgenis) {
     "use strict";
 
-    var div = React.DOM.div, p = React.DOM.p;
+    var div = React.DOM.div, p = React.DOM.p, fieldset = React.DOM.fieldset, legend = React.DOM.legend;;
     
     /**
 	 * @memberOf component
@@ -21,7 +21,9 @@
 			errorMessages: React.PropTypes.object.isRequired,
 			focus: React.PropTypes.bool,
 			onValueChange: React.PropTypes.func.isRequired,
-			onBlur: React.PropTypes.func.isRequired
+			onBlur: React.PropTypes.func.isRequired,
+			categorigalMrefShowSelectAll: React.PropTypes.bool,
+			showAsteriskIfNotNillable: React.PropTypes.bool
 		},
 		getInitialState: function() {
 			return {
@@ -36,12 +38,13 @@
 			var attributes = this.state.attr.attributes;
 			
 			// add control for each attribute
-			var foundFocusControl = false;
+			var foundFocusControl = !this.props.focus;
 			var controls = [];
+			var hasVisible = false;
 			for(var i = 0; i < attributes.length; ++i) {
 				var attr = attributes[i];
 				if ((attr.visibleExpression === undefined) || (this.props.entity.allAttributes[attr.name].visible === true)) {
-					var Control = attr.fieldType === 'COMPOUND' ? molgenis.ui.FormControlGroup : molgenis.ui.FormControl;
+					var ControlFactory = attr.fieldType === 'COMPOUND' ? molgenis.ui.FormControlGroup : molgenis.ui.FormControl;
 					var controlProps = {
 						entity : this.props.entity,
 						attr : attr,
@@ -54,11 +57,16 @@
 						validate: this.props.validate,
 						onValueChange : this.props.onValueChange,
 						onBlur: this.props.onBlur,
+						categorigalMrefShowSelectAll: this.props.categorigalMrefShowSelectAll,
+						showAsteriskIfNotNillable: this.props.showAsteriskIfNotNillable,
 						key : '' + i
 					};
 					
 					if (attr.fieldType === 'COMPOUND') {
-						controlProps['errorMessages'] = this.props.errorMessages;
+						_.extend(controlProps, {
+							errorMessages : this.props.errorMessages,
+							hideOptional : this.props.hideOptional
+						});
 					} else {
 						controlProps['errorMessage'] = this.props.errorMessages[attr.name];
 					}
@@ -68,25 +76,30 @@
 						foundFocusControl = true;
 					}
 					
-					controls.push(Control(controlProps));
+					var Control = ControlFactory(controlProps);
+					if(attr.nillable === true && this.props.hideOptional === true) {
+						Control = div({className: 'hide'}, Control);
+					} else {
+						hasVisible = true;
+					}
+					controls.push(Control);
 				}
 			}
 			
-			return (
-//					div({className: 'panel panel-default'},
-//						div({className: 'panel-body'},
-							React.DOM.fieldset({},
-									React.DOM.legend({}, this.props.attr.label),
-									p({}, this.props.attr.description),
-									div({className: 'row'},
-										div({className: 'col-md-offset-1 col-md-11'},
-											controls
-										)
-									)
-							)
-//						)
-//					)
+			var Fieldset = fieldset({},
+					legend({}, this.props.attr.label),
+					p({}, this.props.attr.description),
+					div({className: 'row'},
+						div({className: 'col-md-offset-1 col-md-11'},
+							controls
+						)
+					)
 			);
+			
+			if(!hasVisible) {
+				Fieldset = div({className: 'hide'}, Fieldset);
+			}
+			return Fieldset;
 		}
 	});
 	

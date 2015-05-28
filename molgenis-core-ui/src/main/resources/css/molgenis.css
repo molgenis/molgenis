@@ -1,4 +1,37 @@
+/* Application CSS - start */
+
+#plugin-container {
+	height: 100%;
+}
+
+#spinner img {
+	display: block;
+	margin:0 auto;
+}
+
+.modal-backdrop {
+	opacity: .3;
+}
+
+.modal-backdrop.fade.in {
+	opacity: .3;
+}
+
+.dropdown-menu{
+	overflow-y: auto;
+	overflow-x: hidden;
+	width: auto;
+	height: auto;
+	max-height: 500px;
+}
+
+body>.container-fluid {
+	padding-top: 70px;	
+}
+
+/* Application CSS - end */
 /* Sticky footer - start */
+
 html {
 	position: relative;
 	min-height: 100%;
@@ -21,19 +54,8 @@ body {
     margin: 0 0 5px;
 }
 
-body>.container-fluid {
-    padding-top: 60px;
-}
 /* Sticky footer - end */
-
-/* Support collapsable panels */
-.panel-title {
-    color: white;
-}
-
-.panel-heading {
-    background-color: #5B82A4;  
-}
+/* Support collapsable panels - start */
 
 .panel-heading a:after {
     font-family: 'Glyphicons Halflings';
@@ -44,42 +66,9 @@ body>.container-fluid {
     content: "\e080";
 }
 
-#plugin-container {
-	background: #F8FAFB;
-	height: 100%;
-	padding: 5px;
-}
+/* Support collapsable panels - end */
+/* Bootstrap tooltip style - start */
 
-#spinner img {
-	display: block;
-	margin:0 auto;
-}
-
-.modal-backdrop {
-	opacity: .3;
-}
-
-.modal-backdrop.fade.in {
-	opacity: .3;
-}
-
-label.horizontal-inline {
-	margin-right: 5px;
-}
-
-label.horizontal-inline.inbetween {
-	margin-left: 5px;
-}
-
-.dropdown-menu{
-	overflow-y: auto;
-	overflow-x: hidden;
-	width: auto;
-	height: auto;
-	max-height: 500px;
-}
-
-/* Bootstrap tooltip style */
 .tooltip {
 	position: absolute;
 	z-index: 1020;
@@ -171,4 +160,5 @@ label.horizontal-inline.inbetween {
 	height: 0
 }
 
-/* end of Bootstrap tooltip style*/
+/* Bootstrap tooltip style - end*/
+

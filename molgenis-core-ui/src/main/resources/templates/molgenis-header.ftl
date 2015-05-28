@@ -13,9 +13,11 @@
         <meta http-equiv="X-UA-Compatible" content="chrome=1">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="icon" href="<@resource_href "/img/molgenis.ico"/>" type="image/x-icon">
-        <#-- Bundle of third party CSS resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
+        
+	<#-- Bundle of third party CSS resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
         <link rel="stylesheet" href="<@resource_href "/css/molgenis-bundle.min.css"/>" type="text/css">
-    <#if environment == "development">
+    
+	<#if environment == "development">
         <link rel="stylesheet" href="<@resource_href "/css/component/wrapper/DateTimePicker.css"/>" type="text/css">
         <link rel="stylesheet" href="<@resource_href "/css/component/wrapper/JQRangeSlider.css"/>" type="text/css">
         <link rel="stylesheet" href="<@resource_href "/css/component/Checkbox.css"/>" type="text/css">
@@ -24,22 +26,36 @@
     <#else>
         <link rel="stylesheet" href="<@resource_href "/css/molgenis-component.min.css"/>" type="text/css">
     </#if>
+        
         <link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
-    <#if molgeniscsstheme??>
-        <link rel="stylesheet" href="<@resource_href "/css/${molgeniscsstheme}"/>" type="text/css">
-    </#if>
+    
+    <#-- CSS selection, configurable based on RTP setting -->
+	<#if molgeniscsstheme??>
+		<#if molgeniscsstheme?starts_with("//bootswatch.com")>
+			<link id="bootstrap-theme" rel="stylesheet" href="${molgeniscsstheme}" type="text/css">
+        <#else>
+ 			<link id="bootstrap-theme" rel="stylesheet" href="<@resource_href "/css/themes/${molgeniscsstheme}"/>" type="text/css">
+		</#if>
+    <#else>
+		<link rel="stylesheet" href="<@resource_href "/css/themes/bootstrap-molgenis.css"/>" type="text/css">
+	</#if>
+
     <#if app_top_logo?has_content>
         <link rel="stylesheet" href="<@resource_href "/css/molgenis-top-logo.css"/>" type="text/css">
     </#if>
+
     <#list css as css_file_name>
         <link rel="stylesheet" href="<@resource_href "/css/${css_file_name?html}"/>" type="text/css">
     </#list>
+
     <#if molgenis_ui.hrefCss?has_content>
         <link rel="stylesheet" href="<@resource_href "/css/${molgenis_ui.hrefCss?html}"/>" type="text/css">
     </#if>
+
     <!--[if lt IE 9]>
         <script src="<@resource_href "/js/molgenis-ie8.js"/>"></script>
     <![endif]-->
+    
         <#-- Bundle of third party JavaScript resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
 		<script src="<@resource_href "/js/es6-promise.min.js"/>"></script>
 		<script src="<@resource_href "/js/promise-done-6.1.0.min.js"/>"></script>
@@ -169,36 +185,38 @@
 
 
 <#-- Topmenu -->
-<#macro topmenu menu plugin_id pluginid_with_query_string> <#--TODO refactor to remove depency on 'Home'-->
-    <#if app_top_logo?has_content>
-        <div id="Intro">
-            <img src=${app_top_logo} alt="" border="0" height="150">
-        </div>
-    </#if>
-    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+<#--TODO refactor to remove depency on 'Home'-->
+<#macro topmenu menu plugin_id pluginid_with_query_string> 
+	<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
         <div class="container-fluid">
-            <#-- Logo start -->
-            <#list menu.items as item> 
-                <#if item.type != "MENU" && item.name == "Home" && app_home_logo?has_content>
-					<div class="navbar-header">
+			<div class="navbar-header">
+        		<#-- Logo start -->
+	    		<#if app_top_logo?has_content>
+    	    		<div id="Intro">
+        	    		<img src=${app_top_logo} alt="" border="0" height="150">
+        			</div>
+    			</#if>
+            
+            	<#list menu.items as item> 
+                	<#if item.type != "MENU" && item.name == "Home" && app_home_logo?has_content>
+ 						<a class="navbar-brand" href="/menu/${menu.id?html}/${item.url?html}">
+		                	<img class="img-responsive" 
+	                		src="<#if molgenis_ui.hrefLogo?has_content>${molgenis_ui.hrefLogo?html}<#else><@resource_href "/img/logo_molgenis_small.png"/></#if>" 
+	                		alt="<#if molgenis_ui.title?has_content>${molgenis_ui.title?html}</#if>">
+                		</a>						
 						<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-molgenis-navbar">
 		                    <span class="sr-only">Toggle navigation</span>
 		                    <span class="icon-bar"></span>
         					<span class="icon-bar"></span>
         					<span class="icon-bar"></span>
 		                </button>
-		                <a class="navbar-brand" href="/menu/${menu.id?html}/${item.url?html}">
-		                	<img class="img-responsive" 
-	                			src="<#if molgenis_ui.hrefLogo?has_content>${molgenis_ui.hrefLogo?html}<#else><@resource_href "/img/logo_molgenis_small.png"/></#if>" 
-	                			alt="<#if molgenis_ui.title?has_content>${molgenis_ui.title?html}</#if>">
-                		</a>
-					</div>
-        		</#if>
-    		</#list>
-    		<#-- Logo end -->
+	       			</#if>
+    			</#list>
+    			<#-- Logo end -->
+			</div>
     		
     		<#-- Navbar items start -->
-        	<div class="navbar-collapse collapse" id="bs-molgenis-navbar">
+        	<div class="collapse navbar-collapse" id="bs-molgenis-navbar">
 				<ul class="nav navbar-nav">
 					<#list menu.items as item>
 						
@@ -206,13 +224,9 @@
 						<#if item.type != "MENU">	
 							<#if item.name != "Home" || !app_home_logo?has_content>
 								<#if item.url == pluginid_with_query_string>
-									<li class="active">
-										<a href="#">${item.name?html}</a>
-									</li>
+									<li class="active"><a href="#">${item.name?html}</a></li>
 								<#else>
-									<li>
-										<a href="/menu/${menu.id?url('UTF-8')}/${item.url?html}">${item.name?html}</a>
-									</li>
+									<li><a href="/menu/${menu.id?url('UTF-8')}/${item.url?html}">${item.name?html}</a></li>
 								</#if>
 							</#if>
 							
@@ -221,9 +235,7 @@
 							<#assign sub_menu = item>
 							<#assign menu_counter = 0>
 							<li class="dropdown">
-								<a class="dropdown-toggle" data-toggle="dropdown" href="#">
-									${item.name?html}<b class="caret"></b>
-								</a>
+								<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-expanded="false">${item.name?html}<b class="caret"></b></a>
 								
 								<ul class="dropdown-menu" role="menu">
 									<@dropdown sub_menu menu_counter />	
@@ -235,16 +247,18 @@
 				
 				<#if authenticated?? && authenticated>
 					<form class="navbar-form navbar-right" method="post" action="/logout">
-						<button type="submit" class="btn btn-inverse btn-link">Sign out</button>
+						<button type="submit" class="btn btn-primary">Sign out</button>
 					</form>
 				<#else>
-					<a class="modal-href btn btn-default navbar-btn navbar-right" href="/account/login" data-target="login-modal-container-header">Sign in</a>
+					<form class="navbar-form navbar-right" method="post" action="/login">
+						<a type="btn" class="btn btn-default modal-href" href="/account/login" data-target="login-modal-container-header">Sign in</a>
+					</form>
 				</#if>
 			</div>
 			<#-- Navbar items end -->
 			
 		</div> <#-- close container -->
-	</div> <#-- close navbar div -->
+	</nav> <#-- close navbar -->
 </#macro>
 
 <#-- dropdown for entity -->

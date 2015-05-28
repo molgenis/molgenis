@@ -38,7 +38,7 @@ public class OntologyRepositoryCollectionTest
 	@BeforeClass
 	public static void beforeClass() throws FileNotFoundException, IOException, OWLOntologyCreationException
 	{
-		File file = ResourceUtils.getFile("small_test_data.owl.zip");
+		File file = ResourceUtils.getFile("small_test_data_NGtest.owl.zip");
 		OntologyRepositoryCollection collection = new OntologyRepositoryCollection(file);
 		ontologyRepository = collection.getRepository(OntologyMetaData.ENTITY_NAME);
 		ontologyTermDynamicAnnotationRepository = collection
@@ -55,7 +55,7 @@ public class OntologyRepositoryCollectionTest
 		assertTrue(i.hasNext());
 		Entity entity = i.next();
 		assertEquals(entity.get(OntologyMetaData.ONTOLOGY_IRI), "http://www.molgenis.org");
-		assertEquals(entity.get(OntologyMetaData.ONTOLOGY_NAME), "small_test_data");
+		assertEquals(entity.get(OntologyMetaData.ONTOLOGY_NAME), "small_test_data_NGtest");
 		assertFalse(i.hasNext());
 	}
 
@@ -131,6 +131,26 @@ public class OntologyRepositoryCollectionTest
 		assertEquals(entity.get(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH), "0[0].1[1].0[2]");
 		assertFalse(entity.getBoolean(OntologyTermNodePathMetaData.ROOT));
 
+		entity = i.next();
+		assertNotNull(entity.get(OntologyTermNodePathMetaData.ID));
+		assertEquals(entity.get(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH), "0[0].2[1]");
+		assertFalse(entity.getBoolean(OntologyTermNodePathMetaData.ROOT));
+
+		entity = i.next();
+		assertNotNull(entity.get(OntologyTermNodePathMetaData.ID));
+		assertEquals(entity.get(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH), "0[0].2[1].0[2]");
+		assertFalse(entity.getBoolean(OntologyTermNodePathMetaData.ROOT));
+
+		entity = i.next();
+		assertNotNull(entity.get(OntologyTermNodePathMetaData.ID));
+		assertEquals(entity.get(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH), "0[0].2[1].1[2]");
+		assertFalse(entity.getBoolean(OntologyTermNodePathMetaData.ROOT));
+
+		entity = i.next();
+		assertNotNull(entity.get(OntologyTermNodePathMetaData.ID));
+		assertEquals(entity.get(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH), "0[0].2[1].1[2].0[3]");
+		assertFalse(entity.getBoolean(OntologyTermNodePathMetaData.ROOT));
+
 		assertFalse(i.hasNext());
 	}
 
@@ -157,7 +177,27 @@ public class OntologyRepositoryCollectionTest
 		assertTrue(i.hasNext());
 		entity = i.next();
 		assertNotNull(entity.get(OntologyTermSynonymMetaData.ID));
+		assertEquals(entity.get(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM), "weight");
+
+		assertTrue(i.hasNext());
+		entity = i.next();
+		assertNotNull(entity.get(OntologyTermSynonymMetaData.ID));
 		assertEquals(entity.get(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM), "top");
+
+		assertTrue(i.hasNext());
+		entity = i.next();
+		assertNotNull(entity.get(OntologyTermSynonymMetaData.ID));
+		assertEquals(entity.get(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM), "measurement");
+
+		assertTrue(i.hasNext());
+		entity = i.next();
+		assertNotNull(entity.get(OntologyTermSynonymMetaData.ID));
+		assertEquals(entity.get(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM), "body length");
+
+		assertTrue(i.hasNext());
+		entity = i.next();
+		assertNotNull(entity.get(OntologyTermSynonymMetaData.ID));
+		assertEquals(entity.get(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM), "height");
 
 		assertTrue(i.hasNext());
 		entity = i.next();
@@ -174,6 +214,8 @@ public class OntologyRepositoryCollectionTest
 
 		Iterator<Entity> i = ontologyTermRepository.iterator();
 		assertTrue(i.hasNext());
+
+		// Organization
 		Entity entity = i.next();
 		assertNotNull(entity.get(OntologyTermMetaData.ID));
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_IRI), "http://www.molgenis.org#Organization");
@@ -189,6 +231,7 @@ public class OntologyRepositoryCollectionTest
 						OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH), Arrays.asList("0[0].0[1]"));
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY), entityOntology);
 
+		// Team
 		entity = i.next();
 		assertNotNull(entity.get(OntologyTermMetaData.ID));
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_IRI), "http://www.molgenis.org#Team");
@@ -205,6 +248,7 @@ public class OntologyRepositoryCollectionTest
 						OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH), Arrays.asList("0[0].1[1]"));
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY), entityOntology);
 
+		// GCC
 		entity = i.next();
 		assertNotNull(entity.get(OntologyTermMetaData.ID));
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_IRI), "http://www.molgenis.org#GCC");
@@ -222,6 +266,23 @@ public class OntologyRepositoryCollectionTest
 						"0[0].1[1].0[2]"));
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY), entityOntology);
 
+		// Weight
+		entity = i.next();
+		assertNotNull(entity.get(OntologyTermMetaData.ID));
+		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_IRI), "http://www.molgenis.org#weight");
+		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_NAME), "weight");
+		assertEquals(
+				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
+						OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM), Arrays.asList("weight"));
+		assertEquals(
+				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
+						OntologyTermDynamicAnnotationMetaData.LABEL), Arrays.asList());
+		assertEquals(
+				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH,
+						OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH), Arrays.asList("0[0].2[1].0[2]"));
+		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY), entityOntology);
+
+		// Top
 		entity = i.next();
 		assertNotNull(entity.get(OntologyTermMetaData.ID));
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_IRI), "top");
@@ -237,6 +298,55 @@ public class OntologyRepositoryCollectionTest
 						OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH), Arrays.asList("0[0]"));
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY), entityOntology);
 
+		// Measurement
+		entity = i.next();
+		assertNotNull(entity.get(OntologyTermMetaData.ID));
+		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_IRI), "http://www.molgenis.org#measurement");
+		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_NAME), "measurement");
+		assertEquals(
+				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
+						OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM), Arrays.asList("measurement"));
+		assertEquals(
+				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
+						OntologyTermDynamicAnnotationMetaData.LABEL), Arrays.asList());
+		assertEquals(
+				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH,
+						OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH), Arrays.asList("0[0].2[1]"));
+		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY), entityOntology);
+
+		// Body length
+		entity = i.next();
+		assertNotNull(entity.get(OntologyTermMetaData.ID));
+		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_IRI), "http://www.molgenis.org#body_length");
+		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_NAME), "body length");
+		assertEquals(
+				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
+						OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM), Arrays.asList("body length"));
+		assertEquals(
+				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
+						OntologyTermDynamicAnnotationMetaData.LABEL), Arrays.asList());
+		assertEquals(
+				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH,
+						OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH), Arrays.asList("0[0].2[1].1[2].0[3]"));
+		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY), entityOntology);
+
+		// Height
+		entity = i.next();
+		assertNotNull(entity.get(OntologyTermMetaData.ID));
+		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_IRI), "http://www.molgenis.org#height");
+		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_NAME), "height");
+		assertEquals(
+				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
+						OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM), Arrays.asList("height"));
+		assertEquals(
+				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
+						OntologyTermDynamicAnnotationMetaData.LABEL), Arrays.asList());
+		assertEquals(
+				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH,
+						OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH), Arrays.asList("0[0].2[1].1[2]"));
+		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY), entityOntology);
+
+		// Hospital
 		entity = i.next();
 		assertNotNull(entity.get(OntologyTermMetaData.ID));
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_IRI), "http://www.molgenis.org#hospital");

@@ -1,5 +1,6 @@
 $.when( $, 
-		window.top.molgenis = window.top.molgenis || {}, $.get('/menu/main/dataexplorer/settings')
+		window.top.molgenis = window.top.molgenis || {}, 
+		$.get('dataexplorer/settings') 
 ).then(
 function($, molgenis, settingsXhr) {	
 	"use strict";
@@ -74,11 +75,15 @@ function($, molgenis, settingsXhr) {
 	 */
 	function createModuleNav(modules, entity, container) {
 		var items = [];
-		items.push('<ul class="nav nav-tabs pull-left" role="tablist">');
+		items.push('<ul class="nav nav-tabs pull-left" style="width: 100%" role="tablist">');
 		$.each(modules, function() {
 			var href = molgenis.getContextUrl() + '/module/' + this.id+'?entity=' + entity;
 			items.push('<li data-id="' + this.id + '"><a href="' + href + '" data-target="#tab-' + this.id + '" data-id="' + this.id + '" role="tab" data-toggle="tab"><img src="/img/' + this.icon + '"> ' + this.label + '</a></li>');
 		});
+        items.push('<li class="pull-right">');
+        items.push('<button type="button" class="btn btn-default" id="toggleSelectors">')+
+        items.push('<span id="toggleSelectorsIcon" class="glyphicon glyphicon-resize-horizontal"></span>')+
+        items.push('</button></li>');
 		items.push('</ul>');
 		items.push('<div class="tab-content">');
 		$.each(modules, function() {
@@ -365,15 +370,14 @@ function($, molgenis, settingsXhr) {
 		// lazy load tab contents
 		$(document).on('show.bs.tab', 'a[data-toggle="tab"]', function(e) {
 			var target = $($(e.target).attr('data-target')), entityHref = encodeURI($(e.target).attr('href'));
-			
 			if(target.data('status') !== 'loaded') {
 				target.load(entityHref, function() {
-					target.data('status', 'loaded');
-				});
+ 					target.data('status', 'loaded');
+ 				});
 			}
 		});
-		
-		$(document).on('changeQuery', function(e, query) {
+
+        $(document).on('changeQuery', function(e, query) {
 			state.query = query;
 			pushState();
 		});
@@ -444,7 +448,8 @@ function($, molgenis, settingsXhr) {
 		});
 		
 		$(document).on('clickAttribute', function(e, data) {
-			if(data.attribute.fieldType !== 'COMPOUND')
+			var attr = data.attribute;
+			if(attr.fieldType !== 'COMPOUND' && (!attr.refEntity || !attr.parent))
 				self.filter.dialog.openFilterModal(data.attribute, attributeFilters[data.attribute.href]);
 		});
 		

@@ -44,6 +44,21 @@ public class EntityUtilsTest
 
 	}
 
+	@Test
+	public void doesExtend()
+	{
+		DefaultEntityMetaData grandfather = new DefaultEntityMetaData("grandfather");
+		assertFalse(EntityUtils.doesExtend(grandfather, "grandfather"));
+
+		DefaultEntityMetaData father = new DefaultEntityMetaData("father");
+		father.setExtends(grandfather);
+		assertTrue(EntityUtils.doesExtend(father, "grandfather"));
+
+		DefaultEntityMetaData child = new DefaultEntityMetaData("child");
+		child.setExtends(father);
+		assertTrue(EntityUtils.doesExtend(child, "grandfather"));
+	}
+
 	public static class User extends DefaultEntity
 	{
 		private static final long serialVersionUID = 1L;

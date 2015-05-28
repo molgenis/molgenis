@@ -6,9 +6,10 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semanticsearch.repository.TagRepository;
+import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.semanticsearch.service.TagService;
-import org.molgenis.data.semanticsearch.service.impl.OntologyTagService;
+import org.molgenis.data.semanticsearch.service.impl.OntologyTagServiceImpl;
 import org.molgenis.data.semanticsearch.service.impl.SemanticSearchServiceImpl;
 import org.molgenis.data.semanticsearch.service.impl.UntypedTagService;
 import org.molgenis.ontology.core.service.OntologyService;
@@ -31,7 +32,7 @@ public class SemanticSearchConfig
 	@Bean
 	public OntologyTagService ontologyTagService()
 	{
-		return new OntologyTagService(dataService, ontologyService, tagRepository(), idGenerator);
+		return new OntologyTagServiceImpl(dataService, ontologyService, tagRepository(), idGenerator);
 	}
 
 	@Bean

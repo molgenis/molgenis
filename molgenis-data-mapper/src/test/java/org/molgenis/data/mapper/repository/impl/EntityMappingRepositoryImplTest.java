@@ -18,6 +18,7 @@ import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.meta.AttributeMappingMetaData;
 import org.molgenis.data.mapper.meta.EntityMappingMetaData;
+import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -128,6 +129,12 @@ public class EntityMappingRepositoryImplTest extends AbstractTestNGSpringContext
 		DataServiceImpl dataService()
 		{
 			return mock(DataServiceImpl.class);
+		}
+
+		@Bean
+		SemanticSearchService semanticSearchService()
+		{
+			return mock(SemanticSearchService.class);
 		}
 
 		@Bean

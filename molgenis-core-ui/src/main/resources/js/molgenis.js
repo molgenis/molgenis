@@ -117,6 +117,34 @@
 		createAtomicAttributesRec(attributes);
 		return compoundAttributes;
 	};
+	
+	molgenis.getAllAttributes = function(attributes, restClient) {
+		var tree = [];
+		function createAttributesRec(attributes) {
+			$.each(attributes, function(i, attribute) {
+				tree.push(attribute);
+				if (attribute.fieldType === 'COMPOUND') {
+					// FIXME improve performance by retrieving async
+					attribute = restClient.get(attribute.href, {
+						'expand' : [ 'attributes' ]
+					});
+					createAttributesRec(attribute.attributes);
+				}
+			});
+		}
+		createAttributesRec(attributes);
+		return tree;
+	}
+	
+	molgenis.getAttributeLabel = function(attribute) {
+		var label = attribute.label || attribute.name;
+		if (attribute.parent) {
+			var parentLabel = attribute.parent.label || attribute.parent.name;
+			label = parentLabel + '.' + label;
+		}
+		
+		return label;
+	}
 
 	/*
 	 * Natural Sort algorithm for Javascript - Version 0.7 - Released under MIT
@@ -524,13 +552,14 @@ function createInput(attr, attrs, val, lbl) {
 		});
 	};
 	
-	molgenis.RestClient.prototype.update = function(href, entity, callback) {
+	molgenis.RestClient.prototype.update = function(href, entity, callback, showSpinner) {
 		return this._ajax({
 			type : 'POST',
 			url : href + '?_method=PUT',
 			contentType : 'application/json',
 			data : JSON.stringify(entity),
-			async : false,
+			async : true,
+			showSpinner: showSpinner,
 			success : callback && callback.success ? callback.success : function() {},
 			error : callback && callback.error ? callback.error : function() {}
 		});
@@ -678,7 +707,7 @@ function showSpinner(callback) {
 	if (spinner.length === 0) {
 		// do not add fade effect on modal: http://stackoverflow.com/a/22101894
 		var items = [];
-		items.push('<div class="modal" id="spinner" tabindex="-1" aria-labelledby="spinner-modal-label" aria-hidden="true">');
+		items.push('<div class="modal" id="spinner" aria-labelledby="spinner-modal-label" aria-hidden="true">');
 		items.push('<div class="modal-dialog modal-sm">');
 		items.push('<div class="modal-content">');
 		items.push('<div class="modal-header"><h4 class="modal-title" id="spinner-modal-label">Loading ...</h4></div>');
@@ -783,8 +812,10 @@ $(function() {
 	// use ajaxPrefilter instead of ajaxStart and ajaxStop
 	// to work around issue http://bugs.jquery.com/ticket/13680
 	$.ajaxPrefilter(function(options, _, jqXHR) {
-		showSpinner();
-		jqXHR.always(hideSpinner);
+		if (options.showSpinner !== false) {
+			showSpinner();
+			jqXHR.always(hideSpinner);
+		}
 	});
 
 	$(document)
