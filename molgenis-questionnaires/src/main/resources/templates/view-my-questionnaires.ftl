@@ -9,7 +9,7 @@
 <div class="row">
 	<div class="col-md-6">
 		<h1>My questionnaires</h1>
-		<p>Submitted and open questionnares</p>
+		<p>Submitted and open questionnaires</p>
 	</div>  	
 </div>
 
