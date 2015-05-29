@@ -492,7 +492,8 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				}
 			}
 			// not null
-			if (!att.isNillable())
+			if (!att.isNillable() && !EntityUtils.doesExtend(metaData, "Questionnaire")
+					&& (att.getVisibleExpression() == null))
 			{
 				sql.append(" NOT NULL");
 			}

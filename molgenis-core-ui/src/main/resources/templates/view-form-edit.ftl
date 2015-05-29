@@ -35,6 +35,7 @@
 <#else>
         mode: 'create',
 </#if>
+        showHidden: true
     }), $('#form-container')[0]);
 </script>
 

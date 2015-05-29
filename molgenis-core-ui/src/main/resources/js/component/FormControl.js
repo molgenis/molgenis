@@ -18,11 +18,13 @@
             formLayout: React.PropTypes.oneOf(['horizontal', 'vertical']),
             mode: React.PropTypes.oneOf(['create', 'edit', 'view']),
             colOffset: React.PropTypes.number,
+            errorMessage: React.PropTypes.string,
             focus: React.PropTypes.bool,
             value: React.PropTypes.any,
-            errorMessage: React.PropTypes.string,
             onValueChange: React.PropTypes.func.isRequired,
-            onBlur: React.PropTypes.func.isRequired
+            onBlur: React.PropTypes.func.isRequired,
+            categorigalMrefShowSelectAll: React.PropTypes.bool,
+            showAsteriskIfNotNillable: React.PropTypes.bool
         },
         getInitialState: function() {
             return {
@@ -32,7 +34,7 @@
         },
         getDefaultProps: function() {
 			return {
-				colOffset: 2,
+				colOffset: 2
 			};
 		},
         render: function() {
@@ -45,9 +47,10 @@
             
             var lbl = attr.label;
             
-            if(attr.nillable === false) {
+            if((attr.nillable === false) && (this.props.showAsteriskIfNotNillable === true)) {
                 lbl += ' *';
             }
+            
             
             // add validation error message
             var errorMessage = this.props.errorMessage;
@@ -75,7 +78,8 @@
                 formLayout : undefined,
                 value: this._getValue(this.props.value),
                 onValueChange : this._handleValueChange,
-                onBlur : this._handleBlur
+                onBlur : this._handleBlur,
+                categorigalMrefShowSelectAll: this.props.categorigalMrefShowSelectAll
             });
             
             // allow editing readonly controls in create mode
@@ -115,6 +119,7 @@
                 );
             }
         },
+
         _handleValueChange: function(e) {
         	this.setState({pristine: false});
         	
