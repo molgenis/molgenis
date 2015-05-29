@@ -23,6 +23,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.rest.EntityPager;
+import org.molgenis.data.rest.Href;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.slf4j.Logger;
@@ -146,6 +147,8 @@ class RestControllerV2
 	private void createEntityValuesResponseRec(Entity entity, Iterable<AttributeMetaData> attrs,
 			AttributeFilter attrFilter, Map<String, Object> responseData)
 	{
+		responseData.put("_href",
+				Href.concatEntityHref(BASE_URI, entity.getEntityMetaData().getName(), entity.getIdValue()));
 		for (AttributeMetaData attr : attrs)
 		{
 			String attrName = attr.getName();

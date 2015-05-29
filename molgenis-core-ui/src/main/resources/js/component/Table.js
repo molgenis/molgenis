@@ -21,15 +21,6 @@
 					return false;
 			}  
 		},
-		_isMrefAttr: function(attr) {
-			switch(attr.fieldType) {
-				case 'CATEGORICAL_MREF':
-				case 'MREF':
-					return true;
-				default:
-					return false;
-			}  
-		},
 		_isXrefAttr: function(attr) {
 			return attr.fieldType === 'CATEGORICAL' || attr.fieldType === 'XREF';
 		},
@@ -435,8 +426,8 @@
 			var Cols = [];
 			if(this.props.mode === 'edit') {
 				var EntityEditBtn = EntityEditBtnFactory({
-					entity: entity,
-					href : item.href,
+					name: entity.name,
+					id : item[entity.idAttribute],
 					onEdit: this.props.onEdit
 				});
 				Cols.push(td({className: 'compact', key: 'edit'}, EntityEditBtn));
@@ -722,7 +713,7 @@
 		},
 		renderLayer: function() {
 			return this.state.form ? molgenis.ui.Form({
-				entity: this.props.entity,
+				entity: this.props.entity.name,
 				mode: 'create',
 				modal: true,
 				onSubmitSuccess: this._handleCreateConfirm,
@@ -757,8 +748,8 @@
 		mixins: [molgenis.ui.mixin.DeepPureRenderMixin, molgenis.ui.mixin.ReactLayeredComponentMixin],
 		displayName: 'EntityEditBtn',
 		propTypes: {
-			entity: React.PropTypes.object.isRequired,
-			href: React.PropTypes.string.isRequired,
+			name: React.PropTypes.string.isRequired,
+			id: React.PropTypes.string.isRequired,
 			onEdit: React.PropTypes.func
 		},
 		getInitialState: function() {
@@ -781,8 +772,8 @@
 		},
 		renderLayer: function() {
 			return this.state.form ? molgenis.ui.Form({
-				entity : this.props.entity,
-				entityInstance: this.props.href,
+				entity : this.props.name,
+				entityInstance: this.props.id,
 				mode: 'edit',
 				modal: true,
 				onSubmitSuccess: this._handleEditConfirm,
@@ -804,7 +795,8 @@
 				form: false
 			});
 			this.props.onEdit({
-				href : this.props.href
+				name: this.props.name,
+				id: this.props.id
 			});
 		}
 	});
