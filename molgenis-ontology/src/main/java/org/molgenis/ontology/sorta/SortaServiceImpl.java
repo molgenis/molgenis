@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.common.collect.ImmutableList;
 import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -28,6 +27,7 @@ import org.tartarus.snowball.ext.PorterStemmer;
 
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 
 public class SortaServiceImpl implements SortaService
@@ -35,8 +35,10 @@ public class SortaServiceImpl implements SortaService
 	private static final Set<String> ELASTICSEARCH_RESERVED_WORDS = Sets.newHashSet("or", "and", "if");
 	private static final String NON_WORD_SEPARATOR = "[^a-zA-Z0-9]";
 	private static final String ILLEGAL_CHARACTERS_PATTERN = "[^a-zA-Z0-9 ]";
+	private static final String FUZZY_MATCH_SIMILARITY = "~0.8";
 	private static final String SINGLE_WHITESPACE = " ";
 	private static final int MAX_NUMBER_MATCHES = 100;
+	private static final int NUMBER_NGRAM_MATCHES = 10;
 
 	// Global fields that are used by other classes
 	public static final String SIGNIFICANT_VALUE = "Significant";
@@ -109,6 +111,8 @@ public class SortaServiceImpl implements SortaService
 		// query rules for ontology name and synonyms, e.g. name = proptosis, sysnonym = protruding eye
 		List<QueryRule> rulesForOntologyTermFields = new ArrayList<QueryRule>();
 
+		List<QueryRule> rulesForOntologyTermFieldsNGram = new ArrayList<QueryRule>();
+
 		for (String attributeName : inputEntity.getAttributeNames())
 		{
 			if (StringUtils.isNotEmpty(inputEntity.getString(attributeName))
@@ -117,11 +121,14 @@ public class SortaServiceImpl implements SortaService
 				// The attribute name is either equal to 'Name' or starts with string 'Synonym'
 				if (isAttrNameValidForLexicalMatch(attributeName))
 				{
-					String medicalStemProxy = fuzzyMatchQuerySyntax(inputEntity.getString(attributeName));
-					if (StringUtils.isNotEmpty(medicalStemProxy))
+					String stemmedQueryString = stemQuery(inputEntity.getString(attributeName));
+					if (StringUtils.isNotEmpty(stemmedQueryString))
 					{
 						rulesForOntologyTermFields.add(new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
-								Operator.FUZZY_MATCH_NGRAM, medicalStemProxy));
+								Operator.FUZZY_MATCH, fuzzyMatchQuerySyntax(stemmedQueryString)));
+
+						rulesForOntologyTermFieldsNGram.add(new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
+								Operator.FUZZY_MATCH_NGRAM, stemmedQueryString));
 					}
 				}
 				else
@@ -142,80 +149,21 @@ public class SortaServiceImpl implements SortaService
 		// Find the ontology terms that have the same annotations as the input ontology annotations
 		if (rulesForOtherFields.size() > 0)
 		{
-			Iterable<Entity> ontologyTermAnnotationEntities = dataService.findAll(
-					OntologyTermDynamicAnnotationMetaData.ENTITY_NAME,
-					new QueryImpl(rulesForOtherFields).pageSize(Integer.MAX_VALUE));
-
-			if (Iterables.size(ontologyTermAnnotationEntities) > 0)
-			{
-				List<QueryRule> rules = Arrays.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS,
-						ontologyEntity), new QueryRule(Operator.AND), new QueryRule(
-						OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION, Operator.IN,
-						ontologyTermAnnotationEntities));
-
-				Iterable<Entity> ontologyTermEntities = dataService.findAll(OntologyTermMetaData.ENTITY_NAME,
-						new QueryImpl(rules).pageSize(Integer.MAX_VALUE));
-
-				Iterable<Entity> relevantOntologyTermEntities = FluentIterable.from(ontologyTermEntities).transform(
-						new Function<Entity, Entity>()
-						{
-							public Entity apply(Entity ontologyTermEntity)
-							{
-								return calculateNGromOTAnnotations(inputEntity, ontologyTermEntity);
-							}
-						});
-				relevantEntities.addAll(ImmutableList.copyOf(relevantOntologyTermEntities));
-			}
+			annotationMatchOntologyTerms(inputEntity, ontologyEntity, relevantEntities, rulesForOtherFields);
 		}
 
 		// Find the ontology terms based on the lexical similarities
 		if (rulesForOntologyTermFields.size() > 0)
 		{
-			QueryRule disMaxQueryRule = new QueryRule(rulesForOntologyTermFields);
-			disMaxQueryRule.setOperator(Operator.DIS_MAX);
-
-			List<QueryRule> finalQueryRules = Arrays.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY,
-					Operator.EQUALS, ontologyEntity), new QueryRule(Operator.AND), disMaxQueryRule);
-
 			int pageSize = MAX_NUMBER_MATCHES - relevantEntities.size();
+			lexicalMatchOntologyTerms(ontologyIri, inputEntity, ontologyEntity, pageSize, rulesForOntologyTermFields,
+					relevantEntities);
+		}
 
-			Iterable<Entity> ontologyTermEntities = dataService.findAll(OntologyTermMetaData.ENTITY_NAME,
-					new QueryImpl(finalQueryRules).pageSize(pageSize));
-
-			Iterable<Entity> lexicalMatchedOntologyTermEntities = FluentIterable.from(ontologyTermEntities).transform(
-					new Function<Entity, Entity>()
-					{
-						public Entity apply(Entity matchedOntologyTermEntity)
-						{
-							double maxNgramScore = 0;
-							double maxNgramIDFScore = 0;
-							for (String inputAttrName : inputEntity.getAttributeNames())
-							{
-								String queryString = inputEntity.getString(inputAttrName);
-
-								if (StringUtils.isNotEmpty(queryString)
-										&& isAttrNameValidForLexicalMatch(inputAttrName))
-								{
-									Entity topMatchedSynonymEntity = calculateNGramOTSynonyms(ontologyIri, queryString,
-											matchedOntologyTermEntity);
-									if (maxNgramScore < topMatchedSynonymEntity.getDouble(SCORE))
-									{
-										maxNgramScore = topMatchedSynonymEntity.getDouble(SCORE);
-									}
-									if (maxNgramIDFScore < topMatchedSynonymEntity.getDouble(COMBINED_SCORE))
-									{
-										maxNgramIDFScore = topMatchedSynonymEntity.getDouble(COMBINED_SCORE);
-									}
-								}
-							}
-							MapEntity mapEntity = new MapEntity(matchedOntologyTermEntity);
-							mapEntity.set(SCORE, maxNgramScore);
-							mapEntity.set(COMBINED_SCORE, maxNgramIDFScore);
-							return mapEntity;
-						}
-					});
-
-			relevantEntities.addAll(ImmutableList.copyOf(lexicalMatchedOntologyTermEntities));
+		if (rulesForOntologyTermFieldsNGram.size() > 0)
+		{
+			lexicalMatchOntologyTerms(ontologyIri, inputEntity, ontologyEntity, NUMBER_NGRAM_MATCHES,
+					rulesForOntologyTermFieldsNGram, relevantEntities);
 		}
 
 		Collections.sort(relevantEntities, new Comparator<Entity>()
@@ -227,6 +175,89 @@ public class SortaServiceImpl implements SortaService
 		});
 
 		return relevantEntities;
+	}
+
+	private void annotationMatchOntologyTerms(Entity inputEntity, Entity ontologyEntity, List<Entity> relevantEntities,
+			List<QueryRule> rulesForOtherFields)
+	{
+		Iterable<Entity> ontologyTermAnnotationEntities = dataService.findAll(
+				OntologyTermDynamicAnnotationMetaData.ENTITY_NAME,
+				new QueryImpl(rulesForOtherFields).pageSize(Integer.MAX_VALUE));
+
+		if (Iterables.size(ontologyTermAnnotationEntities) > 0)
+		{
+			List<QueryRule> rules = Arrays
+					.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
+							new QueryRule(Operator.AND), new QueryRule(
+									OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION, Operator.IN,
+									ontologyTermAnnotationEntities));
+
+			Iterable<Entity> ontologyTermEntities = dataService.findAll(OntologyTermMetaData.ENTITY_NAME,
+					new QueryImpl(rules).pageSize(Integer.MAX_VALUE));
+
+			Iterable<Entity> relevantOntologyTermEntities = FluentIterable.from(ontologyTermEntities).transform(
+					new Function<Entity, Entity>()
+					{
+						public Entity apply(Entity ontologyTermEntity)
+						{
+							return calculateNGromOTAnnotations(inputEntity, ontologyTermEntity);
+						}
+					});
+			relevantEntities.addAll(ImmutableList.copyOf(relevantOntologyTermEntities));
+		}
+	}
+
+	private void lexicalMatchOntologyTerms(String ontologyIri, Entity inputEntity, Entity ontologyEntity, int pageSize,
+			List<QueryRule> rulesForOntologyTermFields, List<Entity> relevantEntities)
+	{
+		QueryRule disMaxQueryRule = new QueryRule(rulesForOntologyTermFields);
+		disMaxQueryRule.setOperator(Operator.DIS_MAX);
+
+		List<QueryRule> finalQueryRules = Arrays.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS,
+				ontologyEntity), new QueryRule(Operator.AND), disMaxQueryRule);
+
+		Iterable<Entity> ontologyTermEntities = dataService.findAll(OntologyTermMetaData.ENTITY_NAME, new QueryImpl(
+				finalQueryRules).pageSize(pageSize));
+
+		Iterable<Entity> lexicalMatchedOntologyTermEntities = FluentIterable.from(ontologyTermEntities).transform(
+				new Function<Entity, Entity>()
+				{
+					public Entity apply(Entity matchedOntologyTermEntity)
+					{
+						double maxNgramScore = 0;
+						double maxNgramIDFScore = 0;
+						for (String inputAttrName : inputEntity.getAttributeNames())
+						{
+							String queryString = inputEntity.getString(inputAttrName);
+
+							if (StringUtils.isNotEmpty(queryString) && isAttrNameValidForLexicalMatch(inputAttrName))
+							{
+								Entity topMatchedSynonymEntity = calculateNGramOTSynonyms(ontologyIri, queryString,
+										matchedOntologyTermEntity);
+								if (maxNgramScore < topMatchedSynonymEntity.getDouble(SCORE))
+								{
+									maxNgramScore = topMatchedSynonymEntity.getDouble(SCORE);
+								}
+								if (maxNgramIDFScore < topMatchedSynonymEntity.getDouble(COMBINED_SCORE))
+								{
+									maxNgramIDFScore = topMatchedSynonymEntity.getDouble(COMBINED_SCORE);
+								}
+							}
+						}
+						MapEntity mapEntity = new MapEntity(matchedOntologyTermEntity);
+						mapEntity.set(SCORE, maxNgramScore);
+						mapEntity.set(COMBINED_SCORE, maxNgramIDFScore);
+						return mapEntity;
+					}
+				});
+
+		for (Entity entity : lexicalMatchedOntologyTermEntities)
+		{
+			if (!relevantEntities.contains(entity))
+			{
+				relevantEntities.add(entity);
+			}
+		}
 	}
 
 	/**
@@ -340,7 +371,7 @@ public class SortaServiceImpl implements SortaService
 			// The similarity scores are adjusted based on the inverse document frequency of the words.
 			// The idea is that all the words from query string are weighted (important words occur fewer times across
 			// all ontology terms than common words), the final score should be compensated for according to the word
-			// weight.
+			// // weight.
 			Map<String, Double> weightedWordSimilarity = informationContentService.redistributedNGramScore(
 					cleanedQueryString, ontologyIri);
 
@@ -355,6 +386,7 @@ public class SortaServiceImpl implements SortaService
 					.forEach(
 							word -> firstMatchedSynonymEntity.set(COMBINED_SCORE, (firstMatchedSynonymEntity
 									.getDouble(COMBINED_SCORE) + weightedWordSimilarity.get(word))));
+
 			return firstMatchedSynonymEntity;
 		}
 
@@ -369,7 +401,8 @@ public class SortaServiceImpl implements SortaService
 	 * @param queryString
 	 * @return
 	 */
-	private String fuzzyMatchQuerySyntax(String queryString)
+
+	private String stemQuery(String queryString)
 	{
 		StringBuilder stringBuilder = new StringBuilder();
 		Set<String> uniqueTerms = Sets.newHashSet(queryString.toLowerCase().trim().split(NON_WORD_SEPARATOR));
@@ -386,6 +419,16 @@ public class SortaServiceImpl implements SortaService
 					stringBuilder.append(afterStem).append(SINGLE_WHITESPACE);
 				}
 			}
+		}
+		return stringBuilder.toString().trim();
+	}
+
+	private String fuzzyMatchQuerySyntax(String queryString)
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		for (String word : queryString.split(SINGLE_WHITESPACE))
+		{
+			stringBuilder.append(word).append(FUZZY_MATCH_SIMILARITY).append(SINGLE_WHITESPACE);
 		}
 		return stringBuilder.toString().trim();
 	}
