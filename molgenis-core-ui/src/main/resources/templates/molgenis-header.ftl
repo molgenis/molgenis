@@ -36,7 +36,7 @@
  			<link id="bootstrap-theme" rel="stylesheet" href="<@resource_href "/css/themes/${molgeniscsstheme}"/>" type="text/css">
 		</#if>
     <#else>
-		<link rel="stylesheet" href="<@resource_href "/css/themes/bootstrap-molgenis.css"/>" type="text/css">
+		<link rel="stylesheet" href="<@resource_href "/css/themes/bootstrap-molgenis.min.css"/>" type="text/css">
 	</#if>
 
     <#if app_top_logo?has_content>

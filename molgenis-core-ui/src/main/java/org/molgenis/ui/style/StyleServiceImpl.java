@@ -22,7 +22,7 @@ import com.google.gson.internal.LinkedTreeMap;
 @Component
 public class StyleServiceImpl implements StyleService
 {
-	private static final String LOCAL_CSS_BOOTSTRAP_THEME_LOCATION = "css/themes/bootstrap-*.css";
+	private static final String LOCAL_CSS_BOOTSTRAP_THEME_LOCATION = "css/themes/bootstrap-*.min.css";
 	private static final String THEME_NAME_KEY = "name";
 	private static final String CSS_MIN_KEY = "cssMin";
 	private static final String THEMES_KEY = "themes";
@@ -58,9 +58,9 @@ public class StyleServiceImpl implements StyleService
 		try
 		{
 			Resource[] resources = resolver.getResources(LOCAL_CSS_BOOTSTRAP_THEME_LOCATION);
-
 			for (Resource resource : resources)
 			{
+
 				availableStyles.add(Style.createLocal(resource.getFilename()));
 			}
 		}
