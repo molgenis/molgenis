@@ -43,6 +43,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.Lists;
+
 public class ElasticSearchServiceTest
 {
 	private Client client;
@@ -92,6 +94,8 @@ public class ElasticSearchServiceTest
 		DefaultEntityMetaData entityMetaData = createEntityMeta("entity");
 
 		MapEntity entity = createEntityAndRegisterSource(entityMetaData, "id0");
+
+		when(dataService.getEntityNames()).thenReturn(Lists.newArrayList());
 
 		searchService.index(entity, entityMetaData, IndexingMode.UPDATE);
 		verify(client, times(1)).prepareIndex(eq(indexName), eq("entity"), any(String.class));

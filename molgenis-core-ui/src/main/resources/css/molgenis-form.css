@@ -52,3 +52,10 @@ h3 {
 #entity-table-container {
 	overflow: auto;
 }
+
+.anchor{
+  display: block;
+  height: 70px; /*same height as header*/
+  margin-top: -70px; /*same height as header*/
+  visibility: hidden;
+}

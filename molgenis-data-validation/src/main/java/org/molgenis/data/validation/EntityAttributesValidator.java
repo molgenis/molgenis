@@ -11,13 +11,8 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Range;
 import org.molgenis.fieldtypes.FieldType;
-import org.molgenis.js.ScriptEvaluator;
-import org.mozilla.javascript.EcmaError;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
@@ -30,7 +25,6 @@ import com.google.common.collect.Sets;
 @Component
 public class EntityAttributesValidator
 {
-	private static final Logger LOG = LoggerFactory.getLogger(EntityAttributesValidator.class);
 	private EmailValidator emailValidator;
 
 	public Set<ConstraintViolation> validate(Entity entity, EntityMetaData meta)
@@ -109,25 +103,7 @@ public class EntityAttributesValidator
 	{
 		if (StringUtils.isNotBlank(attribute.getValidationExpression()))
 		{
-
-			Object result = null;
-			try
-			{
-				result = ScriptEvaluator.eval(attribute.getValidationExpression(), entity, meta);
-			}
-			catch (EcmaError e)
-			{
-				LOG.warn("Error evaluation validationExpression", e);
-			}
-
-			if ((result == null) || !(result instanceof Boolean))
-			{
-				throw new MolgenisDataException(String.format(
-						"Invalid validation expression '%s' for attribute '%s' of entity '%s'",
-						attribute.getValidationExpression(), attribute.getName(), meta.getName()));
-			}
-
-			if (!(Boolean) result)
+			if (!ValidationUtils.resolveBooleanExpression(attribute.getValidationExpression(), entity, meta, attribute))
 			{
 				return createConstraintViolation(entity, attribute, meta);
 			}

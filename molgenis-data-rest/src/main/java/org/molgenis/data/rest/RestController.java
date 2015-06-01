@@ -50,6 +50,7 @@ import org.molgenis.data.EntityCollection;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.MolgenisReferencedEntityException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.Repository;
@@ -602,9 +603,10 @@ public class RestController
 		updateAttribute(entityName, attributeName, id, paramValue);
 	}
 
+	// TODO alternative for synchronization, for example by adding updatAttribute methods to the REST api
 	@RequestMapping(value = "/{entityName}/{id}/{attributeName}", method = POST, params = "_method=PUT")
 	@ResponseStatus(OK)
-	public void updateAttribute(@PathVariable("entityName") String entityName,
+	public synchronized void updateAttribute(@PathVariable("entityName") String entityName,
 			@PathVariable("attributeName") String attributeName, @PathVariable("id") Object id,
 			@RequestBody Object paramValue)
 	{
@@ -915,6 +917,15 @@ public class RestController
 	@ResponseStatus(INTERNAL_SERVER_ERROR)
 	@ResponseBody
 	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
+	{
+		LOG.error("", e);
+		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
+	}
+
+	@ExceptionHandler(MolgenisReferencedEntityException.class)
+	@ResponseStatus(INTERNAL_SERVER_ERROR)
+	@ResponseBody
+	public ErrorMessageResponse handleMolgenisReferencingEntityException(MolgenisReferencedEntityException e)
 	{
 		LOG.error("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
