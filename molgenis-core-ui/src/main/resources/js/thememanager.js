@@ -5,20 +5,15 @@
 		var styleName;
 
 		$('#bootstrap-theme-select').on('change', function() {
-			// Set selected style name to use in ajax post
 			styleName = $(this).find(":selected").text();
-			
+
 			var cssLocation = $(this).val();
 			var link = $('<link />').attr('id', 'bootstrap-theme').attr('rel', 'stylesheet').attr('type', 'text/css');
 
-			if (cssLocation.indexOf("//bootswatch") === 0) {
-				$(link).attr('href', cssLocation);
-			} else {
-				$(link).attr('href', '/css/themes/' + cssLocation);
-			}
+			$(link).attr('href', "/css/themes/" + cssLocation);
 
-			$('#bootstrap-theme').remove();
-			$('head').append(link);
+			$('#bootstrap-theme').remove(); // Remove existing preview theme
+			$('head').append(link); // Set new preview theme
 		});
 
 		$('#save-selected-bootstrap-theme').on('click', function(event) {
@@ -31,7 +26,7 @@
 				data : '"' + styleName + '"',
 				success : function(succes) {
 					molgenis.createAlert([ {
-						'message' : 'Succesfully updated the molgenis bootstrap theme'
+						'message' : 'Succesfully updated the application theme'
 					} ], 'success');
 				}
 			});

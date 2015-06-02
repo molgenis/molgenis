@@ -29,12 +29,8 @@
         <link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
     
     <#-- CSS selection, configurable based on RTP setting -->
-	<#if molgeniscsstheme??>
-		<#if molgeniscsstheme?starts_with("//bootswatch.com")>
-			<link id="bootstrap-theme" rel="stylesheet" href="${molgeniscsstheme}" type="text/css">
-        <#else>
- 			<link id="bootstrap-theme" rel="stylesheet" href="<@resource_href "/css/themes/${molgeniscsstheme}"/>" type="text/css">
-		</#if>
+	<#if molgeniscsstheme??>		
+ 		<link id="bootstrap-theme" rel="stylesheet" href="<@resource_href "/css/themes/${molgeniscsstheme}"/>" type="text/css">	
     <#else>
 		<link rel="stylesheet" href="<@resource_href "/css/themes/bootstrap-molgenis.min.css"/>" type="text/css">
 	</#if>

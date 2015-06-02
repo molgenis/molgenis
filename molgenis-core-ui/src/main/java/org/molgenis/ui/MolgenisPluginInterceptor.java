@@ -68,22 +68,10 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 				modelAndView.addObject(KEY_PLUGIN_ID, pluginId);
 			}
 
+			// TODO Check if the selected theme file exists to prevent the app from breaking (What is the correct path?)
 			if (molgenisSettings.getProperty(MOLGENIS_CSS_THEME) != null)
 			{
-				// If it is an api request, always put it in the model
-				if (molgenisSettings.getProperty(MOLGENIS_CSS_THEME).contains("bootswatch"))
-				{
-					modelAndView.addObject(CSS_VARIABLE, molgenisSettings.getProperty(MOLGENIS_CSS_THEME));
-				}
-				// If it is a file, check if it exists before putting it in the model
-				else
-				{
-					File cssFile = new File(molgenisSettings.getProperty(MOLGENIS_CSS_THEME));
-					if (cssFile.exists() && !cssFile.isDirectory())
-					{
-						modelAndView.addObject(CSS_VARIABLE, molgenisSettings.getProperty(MOLGENIS_CSS_THEME));
-					}
-				}
+				modelAndView.addObject(CSS_VARIABLE, molgenisSettings.getProperty(MOLGENIS_CSS_THEME));
 			}
 
 			modelAndView.addObject(APP_TRACKING_CODE_VARIABLE, new AppTrackingCodeImpl(molgenisSettings));
