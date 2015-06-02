@@ -160,6 +160,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public Repository add(EntityMetaData emd, RepositoryDecoratorFactory decoratorFactory)
 	{
+		MetaUtils.validateEntity(emd);
 		RepositoryCollection backend = getRepositoryCollection(emd);
 
 		if (getEntityMetaData(emd.getName()) != null)
@@ -211,6 +212,8 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public void addAttribute(String fullyQualifiedEntityName, AttributeMetaData attr)
 	{
+		MetaUtils.validateAttributeName(attr.getName());
+
 		EntityMetaData emd = entityMetaDataRepository.addAttribute(fullyQualifiedEntityName, attr);
 		getManageableRepositoryCollection(emd).addAttribute(fullyQualifiedEntityName, attr);
 	}
@@ -218,6 +221,8 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public void addAttributeSync(String fullyQualifiedEntityName, AttributeMetaData attr)
 	{
+		MetaUtils.validateAttributeName(attr.getName());
+
 		EntityMetaData emd = entityMetaDataRepository.addAttribute(fullyQualifiedEntityName, attr);
 		getManageableRepositoryCollection(emd).addAttributeSync(fullyQualifiedEntityName, attr);
 	}
@@ -236,6 +241,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public void addPackage(Package p)
 	{
+		MetaUtils.validateName(p.getName());
 		packageRepository.add(p);
 	}
 
@@ -355,6 +361,7 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	public void addToEntityMetaDataRepository(EntityMetaData entityMetaData)
 	{
+		MetaUtils.validateEntity(entityMetaData);
 		entityMetaDataRepository.add(entityMetaData);
 	}
 }

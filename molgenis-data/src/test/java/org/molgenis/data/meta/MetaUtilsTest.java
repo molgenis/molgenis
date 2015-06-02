@@ -7,6 +7,7 @@ import java.util.Arrays;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -24,13 +25,14 @@ public class MetaUtilsTest
 		AttributeMetaData attributeWeight = new DefaultAttributeMetaData("weight_0");
 		entityMetaData.addAttributeMetaData(attributeHeight);
 		entityMetaData.addAttributeMetaData(attributeWeight);
-				
+
 		MapEntity entity1 = new MapEntity(ImmutableMap.of(AttributeMetaDataMetaData.NAME, "height_0",
-						AttributeMetaDataMetaData.LABEL, "height",
-						AttributeMetaDataMetaData.DESCRIPTION, "this is a height measurement in m!"));
-		Iterable <Entity> attributeMetaDataEntities = Arrays.<Entity> asList(entity1);
-		
-		Iterable<AttributeMetaData> actual = MetaUtils.toExistingAttributeMetaData(entityMetaData, attributeMetaDataEntities);
+				AttributeMetaDataMetaData.LABEL, "height", AttributeMetaDataMetaData.DESCRIPTION,
+				"this is a height measurement in m!"));
+		Iterable<Entity> attributeMetaDataEntities = Arrays.<Entity> asList(entity1);
+
+		Iterable<AttributeMetaData> actual = MetaUtils.toExistingAttributeMetaData(entityMetaData,
+				attributeMetaDataEntities);
 		Iterable<AttributeMetaData> expected = Arrays.<AttributeMetaData> asList(attributeHeight);
 		assertEquals(actual, expected);
 	}
@@ -50,5 +52,29 @@ public class MetaUtilsTest
 				"this is a height measurement in m!"));
 		Iterable<Entity> attributeMetaDataEntities = Arrays.<Entity> asList(entity1);
 		MetaUtils.toExistingAttributeMetaData(entityMetaData, attributeMetaDataEntities);
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class)
+	public void testValidateNameTooLong()
+	{
+		MetaUtils.validateAttributeName("ThisNameIsTooLongToUseAsAnAttributeName");
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class)
+	public void testValidateNameInvalidCharacters()
+	{
+		MetaUtils.validateAttributeName("Invalid.Name");
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class)
+	public void testValidateNameInvalidCharacters2()
+	{
+		MetaUtils.validateAttributeName("Invalid_Name");
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class)
+	public void testValidateNameStartsWithDigit()
+	{
+		MetaUtils.validateAttributeName("6invalid");
 	}
 }
