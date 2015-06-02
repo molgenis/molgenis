@@ -62,6 +62,7 @@ public class MappingServiceController extends MolgenisPluginController
 	private static final String VIEW_MAPPING_PROJECTS = "view-mapping-projects";
 	private static final String VIEW_ATTRIBUTE_MAPPING = "view-attribute-mapping";
 	private static final String VIEW_SINGLE_MAPPING_PROJECT = "view-single-mapping-project";
+	private static final String VIEW_CATEGORY_MAPPING_EDITOR = "view-category-mapping-editor";
 
 	@Autowired
 	private MolgenisUserService molgenisUserService;
@@ -367,13 +368,11 @@ public class MappingServiceController extends MolgenisPluginController
 		if (showSuggestedAttributes)
 		{
 			attributes = semanticSearchService.findAttributes(dataService.getEntityMetaData(source),
-					dataService.getEntityMetaData(target),
-					attributeMapping.getTargetAttributeMetaData());
+					dataService.getEntityMetaData(target), attributeMapping.getTargetAttributeMetaData());
 		}
 		else
 		{
-			attributes = Lists.newArrayList(dataService.getEntityMetaData(source)
-					.getAtomicAttributes());
+			attributes = Lists.newArrayList(dataService.getEntityMetaData(source).getAtomicAttributes());
 		}
 
 		model.addAttribute("showSuggestedAttributes", showSuggestedAttributes);
@@ -386,6 +385,44 @@ public class MappingServiceController extends MolgenisPluginController
 		return VIEW_ATTRIBUTE_MAPPING;
 	}
 
+	/**
+	 * Returns a view that allows the user to edit mappings involving xrefs / categoricals / strings
+	 * 
+	 * @param mappingProjectId
+	 * @param target
+	 * @param source
+	 * @param targetAttribute
+	 * @param sourceAttribute
+	 * @param model
+	 */
+	@RequestMapping("/categoryMappingEditor")
+	public String categoryMappingEditor(@RequestParam(required = true) String mappingProjectId,
+			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
+			@RequestParam(required = true) String targetAttribute,
+			@RequestParam(required = true) String sourceAttribute, Model model)
+	{
+		MappingProject project = mappingService.getMappingProject(mappingProjectId);
+		MappingTarget mappingTarget = project.getMappingTarget(target);
+		EntityMapping entityMapping = mappingTarget.getMappingForSource(source);
+		AttributeMapping attributeMapping = entityMapping.getAttributeMapping(targetAttribute);
+
+		// TODO If an algorithm with the map function exists, dissect it into usable interface things
+
+		model.addAttribute("mappingProject", project);
+		model.addAttribute("entityMapping", entityMapping);
+		model.addAttribute("attributeMapping", attributeMapping);
+		model.addAttribute("targetAttribute", targetAttribute);
+		model.addAttribute("sourceAttribute", sourceAttribute);
+		model.addAttribute("hasWritePermission", hasWritePermission(project, false));
+
+		return VIEW_CATEGORY_MAPPING_EDITOR;
+	}
+
+	@RequestMapping("/savecategorymapping")
+	public void saveCategoryMapping()
+	{
+
+	}
 
 	/**
 	 * Tests an algoritm by computing it for all entities in the source repository.

@@ -55,17 +55,19 @@
 	};
 
 	/**
-	 * Checks those checkboxes that are mentioned in an algorithm.
+	 * Colors the backgrounds of the attributes mentioned in the algorithm
 	 * 
 	 * @param algorithm
 	 *            the algorithm string
 	 */
-	function updateCheckboxes(algorithm) {
+	function updateAttributeSelectionMarker(algorithm) {
 		var sourceAttrs = getSourceAttrs(algorithm);
-		$('input:checkbox').each(function(index, value) {
-			var name = $(this).attr('name'),
+		$('#attribute-mapping-table').find('td').each(function(index, value) {
+			var name = $(this).attr('class'),
 				inArray = $.inArray(name, sourceAttrs);
-			$(this).prop('checked', inArray >= 0);
+			if(inArray >= 0){
+				$(this).css('background-color', '#CCFFCC');				
+			}
 		});
 	};
 
@@ -127,7 +129,11 @@
 		$('#attribute-mapping-table').scrollTableBody({
 			rowsToDisplay : 6
 		});
-
+		
+		$('#mapping-result-preview-btn').on('click', function(){
+			$('#mapping-result-preview-container').html("<h1>Preview table here</h1>");
+		});
+		
 		$("#edit-algorithm-textarea").ace({
 			options : {
 				enableBasicAutocompletion : true
@@ -144,7 +150,9 @@
 		updateColumnWidths($scrollTable);
 
 		$('button.insert').click(function() {
-			insertAttribute($(this).data('attribute'), editor);
+			var sourceName = $(this).data('attribute');
+			insertAttribute(sourceName, editor);
+			
 			return false;
 		});
 
@@ -155,17 +163,18 @@
 			bootbox.confirm("Do you want to revert your changes?", function(result) {
 	            if (result) {
 	                editor.setValue(initialValue, -1);
-	                updateCheckboxes(initialValue);
+	                updateAttributeSelectionMarker(initialValue);
 	                $('#statistics-container').empty();
 	            }
 	        });
 			return false;
 		});
 
+		// TODO change the background color of selected attributes back to normal when they get deselected
 		editor.getSession().on('change', function() {
-			updateCheckboxes(editor.getValue());
+			updateAttributeSelectionMarker(editor.getValue());
 		});
-		updateCheckboxes(initialValue);
+		updateAttributeSelectionMarker(initialValue);
 
 		$('#btn-test').click(function() {
 			testAlgorithm(editor.getValue());
