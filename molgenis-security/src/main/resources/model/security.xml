@@ -5,7 +5,7 @@
 			<description>Anyone who can login</description>
 			<field name="id" type="autoid" hidden="true" description="automatically generated internal id, only for internal use."/>
 			<field name="username" label="Username" type="string"/>
-			<field name="password_" label="Password" type="string" description="big fixme: password type"/>
+			<field name="password" label="Password" type="string" description="big fixme: password type"/>
 			<field name="activationCode" label="Activation code" type="string" nillable="true" description="Used as alternative authentication mechanism to verify user email and/or if user has lost password."/>
 			<field name="active" label="Active" type="bool" default="false" description="Boolean to indicate if this account can be used to login"/>
 			<field name="superuser" label="Superuser" type="bool" default="false"/>

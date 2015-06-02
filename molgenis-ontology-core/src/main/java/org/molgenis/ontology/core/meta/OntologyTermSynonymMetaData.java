@@ -8,7 +8,7 @@ import org.molgenis.ontology.core.model.OntologyPackage;
 public class OntologyTermSynonymMetaData extends DefaultEntityMetaData
 {
 	public final static String ID = "id";
-	public final static String ONTOLOGY_TERM_SYNONYM = "ontologyTermSynonym";
+	public final static String ONTOLOGY_TERM_SYNONYM = "oTermSynonym";
 	public final static String SIMPLE_NAME = "OntologyTermSynonym";
 	public final static String ENTITY_NAME = OntologyPackage.PACKAGE_NAME + "_" + SIMPLE_NAME;
 	public final static OntologyTermSynonymMetaData INSTANCE = new OntologyTermSynonymMetaData();

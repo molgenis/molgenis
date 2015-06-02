@@ -8,9 +8,9 @@ public class MatchingTaskEntityMetaData extends DefaultEntityMetaData
 {
 	public final static String ENTITY_NAME = "MatchingTask";
 	public final static String IDENTIFIER = "Identifier";
-	public final static String DATA_CREATED = "Date_created";
-	public final static String MOLGENIS_USER = "Molgenis_user";
-	public final static String CODE_SYSTEM = "Code_system";
+	public final static String DATA_CREATED = "DateCreated";
+	public final static String MOLGENIS_USER = "MolgenisUser";
+	public final static String CODE_SYSTEM = "CodeSystem";
 	public final static String THRESHOLD = "Threshold";
 	public static final MatchingTaskEntityMetaData INSTANCE = new MatchingTaskEntityMetaData();
 

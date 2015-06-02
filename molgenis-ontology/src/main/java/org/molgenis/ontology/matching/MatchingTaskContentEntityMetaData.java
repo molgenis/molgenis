@@ -8,9 +8,9 @@ public class MatchingTaskContentEntityMetaData extends DefaultEntityMetaData
 {
 	public final static String ENTITY_NAME = "MatchingTaskContent";
 	public final static String IDENTIFIER = "Identifier";
-	public final static String INPUT_TERM = "Input_term";
-	public final static String REF_ENTITY = "Ref_entity";
-	public final static String MATCHED_TERM = "Match_term";
+	public final static String INPUT_TERM = "InputTerm";
+	public final static String REF_ENTITY = "RefEntity";
+	public final static String MATCHED_TERM = "MatchTerm";
 	public final static String SCORE = "Score";
 	public final static String VALIDATED = "Validated";
 
