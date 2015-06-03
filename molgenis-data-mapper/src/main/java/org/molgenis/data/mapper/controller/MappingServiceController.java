@@ -463,6 +463,8 @@ public class MappingServiceController extends MolgenisPluginController
 		model.addAttribute("aggregates", aggregateCounts);
 
 		// TODO If an algorithm with the map function exists, dissect it into usable interface thing
+		model.addAttribute("target", target);
+		model.addAttribute("source", source);
 		model.addAttribute("targetAttribute", targetAttribute);
 		model.addAttribute("sourceAttribute", sourceAttribute);
 		model.addAttribute("hasWritePermission", hasWritePermission(project, false));
@@ -471,9 +473,25 @@ public class MappingServiceController extends MolgenisPluginController
 	}
 
 	@RequestMapping("/savecategorymapping")
-	public void saveCategoryMapping()
+	public String saveCategoryMapping(@RequestParam(required = true) String mappingProjectId,
+			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
+			@RequestParam(required = true) String targetAttribute, @RequestParam(required = true) String algorithm)
 	{
+		MappingProject mappingProject = mappingService.getMappingProject(mappingProjectId);
+		if (hasWritePermission(mappingProject))
+		{
+			MappingTarget mappingTarget = mappingProject.getMappingTarget(target);
+			EntityMapping mappingForSource = mappingTarget.getMappingForSource(source);
+			AttributeMapping attributeMapping = mappingForSource.getAttributeMapping(targetAttribute);
+			if (attributeMapping == null)
+			{
+				attributeMapping = mappingForSource.addAttributeMapping(targetAttribute);
+			}
+			attributeMapping.setAlgorithm(algorithm);
+			mappingService.updateMappingProject(mappingProject);
+		}
 
+		return "redirect:/menu/main/mappingservice/mappingproject/" + mappingProject.getIdentifier();
 	}
 
 	/**
