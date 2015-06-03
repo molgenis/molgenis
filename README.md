@@ -78,6 +78,7 @@ Create the file ~/.molgenis/omx/molgenis-server.properties and add user and data
     db_uri=jdbc:mysql://localhost/omx
     admin.password=admin
     user.password=admin
+    environment=development
 
 If these properties are not present, the MolgenisDatabasePopulator will fail (RuntimeException). This properties-file should be in your home folder, if the file is not there yet, just create it.
 
