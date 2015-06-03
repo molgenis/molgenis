@@ -67,6 +67,8 @@
 				inArray = $.inArray(name, sourceAttrs);
 			if(inArray >= 0){
 				$(this).css('background-color', '#CCFFCC');				
+			} else {
+				$(this).css('background-color', '');
 			}
 		});
 	};
