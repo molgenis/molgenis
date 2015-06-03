@@ -12,9 +12,12 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.auth.MolgenisUser;
+import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.mapper.data.request.MappingServiceRequest;
@@ -26,6 +29,9 @@ import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
+import org.molgenis.data.support.AggregateQueryImpl;
+import org.molgenis.data.support.QueryImpl;
+import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -123,6 +129,8 @@ public class MappingServiceController extends MolgenisPluginController
 		MappingProject newMappingProject = mappingService.addMappingProject(name, getCurrentUser(), targetEntity);
 		// FIXME need to write complete URL else it will use /plugin as root and the molgenis header and footer wont be
 		// loaded
+
+		// FIXME redirect puts all model elements into the url
 		return "redirect:/menu/main/mappingservice/mappingproject/" + newMappingProject.getIdentifier();
 	}
 
@@ -402,15 +410,59 @@ public class MappingServiceController extends MolgenisPluginController
 			@RequestParam(required = true) String sourceAttribute, Model model)
 	{
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
+		model.addAttribute("mappingProject", project);
+
 		MappingTarget mappingTarget = project.getMappingTarget(target);
 		EntityMapping entityMapping = mappingTarget.getMappingForSource(source);
-		AttributeMapping attributeMapping = entityMapping.getAttributeMapping(targetAttribute);
-
-		// TODO If an algorithm with the map function exists, dissect it into usable interface things
-
-		model.addAttribute("mappingProject", project);
 		model.addAttribute("entityMapping", entityMapping);
+
+		AttributeMapping attributeMapping = entityMapping.getAttributeMapping(targetAttribute);
 		model.addAttribute("attributeMapping", attributeMapping);
+
+		FieldType sourceAttributeDataType = dataService.getEntityMetaData(source).getAttribute(sourceAttribute)
+				.getDataType();
+
+		// values for source xref / categoricals / String
+		Iterable<Entity> sourceAttributeRefEntityEntities = null;
+		if (sourceAttributeDataType.equals(MolgenisFieldTypes.CATEGORICAL)
+				|| sourceAttributeDataType.equals(MolgenisFieldTypes.XREF))
+		{
+			sourceAttributeRefEntityEntities = dataService.findAll(dataService.getEntityMetaData(source)
+					.getAttribute(sourceAttribute).getRefEntity().getName());
+		}
+		model.addAttribute("sourceAttributeRefEntityEntities", sourceAttributeRefEntityEntities);
+
+		Iterable<Entity> targetAttributeRefEntityEntities = dataService.findAll(dataService.getEntityMetaData(target)
+				.getAttribute(targetAttribute).getRefEntity().getName());
+		model.addAttribute("targetAttributeRefEntityEntities", targetAttributeRefEntityEntities);
+
+		String sourceAttributeRefEntityIdAttribute = dataService.getEntityMetaData(source)
+				.getAttribute(sourceAttribute).getRefEntity().getIdAttribute().getName();
+		model.addAttribute("sourceAttributeRefEntityIdAttribute", sourceAttributeRefEntityIdAttribute);
+
+		String sourceAttributeRefEntityLabelAttribute = dataService.getEntityMetaData(source)
+				.getAttribute(sourceAttribute).getRefEntity().getLabelAttribute().getName();
+		model.addAttribute("sourceAttributeRefEntityLabelAttribute", sourceAttributeRefEntityLabelAttribute);
+
+		String targetAttributeRefEntityIdAttribute = dataService.getEntityMetaData(target)
+				.getAttribute(targetAttribute).getRefEntity().getIdAttribute().getName();
+		model.addAttribute("targetAttributeRefEntityIdAttribute", targetAttributeRefEntityIdAttribute);
+
+		String targetAttributeRefEntityLabelAttribute = dataService.getEntityMetaData(target)
+				.getAttribute(targetAttribute).getRefEntity().getLabelAttribute().getName();
+		model.addAttribute("targetAttributeRefEntityLabelAttribute", targetAttributeRefEntityLabelAttribute);
+
+		AggregateResult aggregate = dataService.aggregate(source,
+				new AggregateQueryImpl().attrX(dataService.getEntityMetaData(source).getAttribute(sourceAttribute))
+						.query(new QueryImpl()));
+		List<Long> aggregateCounts = new ArrayList<Long>();
+		for (List<Long> count : aggregate.getMatrix())
+		{
+			aggregateCounts.add(count.get(0));
+		}
+		model.addAttribute("aggregates", aggregateCounts);
+
+		// TODO If an algorithm with the map function exists, dissect it into usable interface thing
 		model.addAttribute("targetAttribute", targetAttribute);
 		model.addAttribute("sourceAttribute", sourceAttribute);
 		model.addAttribute("hasWritePermission", hasWritePermission(project, false));

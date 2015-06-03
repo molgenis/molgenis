@@ -1,83 +1,68 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 
-<#assign css=[""]>
-<#assign js=['category-mapping-editor.js']>
+<#assign css=['']>
+<#assign js=['category-mapping-editor.js', 'bootbox.min.js']>
 
 <@header css js/>
 
 <div class="row">
 	<div class="col-md-6">
 		<legend>Category mapping editor</legend>
-		<h5>Map ${sourceAttribute} to ${targetAttribute}. Select the correct category that you want to map the source attribute to from the target attribute dropdown</h5>
-		<#--Only show when selecting xref or categorical-->
+		<h5>
+			Map ${sourceAttribute} to ${targetAttribute}. Select the correct category that you want to map the source attribute to from the target attribute dropdown
+		</h5>
 
-		<#-- TODO: show if more than 10 rows --->
-		<p>default</p>
-		<select <#if !hasWritePermission>disabled</#if>>
-			<#--If nillable-->
-			<option value="null">Not mapped</option>
-			<option value="0">Male</option>
-			<option value="1">Female</option>
-		</select>
+		<div class="form-group">
+			<div class="col-md-2">
+				<#-- TODO: show if more than 10 rows --->
+				<label>Default value </label>
+				<select class="form-control" <#if !hasWritePermission>disabled</#if>>
+					<#--If nillable-->
+					<option value="9999">None</option>
+				<#list targetAttributeRefEntityEntities.iterator() as targetEntity>
+					<#--If an algorithm exists and maps to an existing value: selected="selected"-->
+					<option value="${targetEntity.get(targetAttributeRefEntityIdAttribute)}">${targetEntity.get(targetAttributeRefEntityLabelAttribute)}</option> 
+				</#list>
+				</select>
+			</div>
+		</div>
+		
 		<table id="category-mapping-table" class="table">
 			<thead>
 				<th>Source attribute value</th>
-				<th>Number of rows</th>
+				<th>Number of rows containing said value</th>
 				<th>Target attribute selection</th>
 			</thead>
 			<tbody>
-				
-				<tr>
-					<td>Male</td>
-					<td>12</td>
+			<#--This is for xrefs and categoricals!-->
+			<#assign count = 0 />
+			<#list sourceAttributeRefEntityEntities.iterator() as sourceEntity>
+				<tr id="${sourceEntity.get(sourceAttributeRefEntityIdAttribute)}"> 
+					<td>${sourceEntity.get(sourceAttributeRefEntityLabelAttribute)}</td>
+					<td>${aggregates[count]!'0'}</td>
 					<td>
-						<select <#if !hasWritePermission>disabled</#if>>
+						<select class="form-control" <#if !hasWritePermission>disabled</#if>>
 							<#--If nillable-->
-							<option value="null">Use default</option>
-							<option value="0">Male</option>
-							<option value="1">Female</option>
+							<option value="9999">None</option>
+						<#list targetAttributeRefEntityEntities.iterator() as targetEntity>
+							<#--If an algorithm exists and maps to an existing value: selected="selected"-->
+							<option value="${targetEntity.get(targetAttributeRefEntityIdAttribute)}">${targetEntity.get(targetAttributeRefEntityLabelAttribute)}</option> 
+						</#list>
 						</select>
 					</td>
 				</tr>
-				<tr>
-					<td>Female</td>
-					<td>15</td>
-					<td>
-						<select <#if !hasWritePermission>disabled</#if>>
-							<#--If nillable-->
-							<option value="null">Use default</option>
-							<option value="0">Male</option>
-							<option value="1">Female</option>
-						</select>
-					</td>
-				</tr>
-				<tr>
-					<td>NA</td>
-					<td>1</td>
-					<td>
-						<select <#if !hasWritePermission>disabled</#if>>
-							<#--If nillable-->
-							<option value="null">None</option>							
-							<option value="0">Male</option>
-							<option value="1">Female</option>
-						</select>
-					</td>
-				</tr>
+			<#assign count = count + 1 />
+			</#list>
+			
+			<#--TODO: Do this for other data types-->
 			</tbody>
 		</table>
-		<hr></hr>
-		<form id="save-category-mapping-form" method="POST" action="${context_url}/savecategorymapping">
-			<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
-			<input type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name?html}"/>
-			<input type="hidden" name="source" value="${entityMapping.name?html}"/>
-			<input type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name?html}"/>
 
-			<button type="submit" class="btn btn-primary">Save</button> 
-			<button type="reset" class="btn btn-warning">Reset</button>
-			
-			<button id="cancel-edit-btn" class="btn btn-default" type="button" onclick="history.back();" value="Back">Cancel</button>
-		</form>
+		<hr></hr>
+
+		<button id="save-category-mapping-btn" type="btn" class="btn btn-primary">Save</button>
+		<button id="cancel-category-mapping-btn" class="btn btn-default" type="button">Cancel</button>
 	</div>
 </div>
 
