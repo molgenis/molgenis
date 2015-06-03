@@ -34,6 +34,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.Sort;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.QueryImpl;
@@ -42,7 +43,6 @@ import org.molgenis.generators.GeneratorHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
@@ -513,13 +513,13 @@ public class JpaRepository extends AbstractRepository
 		{
 			for (Sort.Order sortOrder : sort)
 			{
-				if (sortOrder.isAscending())
+				if (sortOrder.getDirection() == Sort.Direction.ASC)
 				{
-					orders.add(cb.asc(from.get(GeneratorHelper.firstToLower(sortOrder.getProperty()))));
+					orders.add(cb.asc(from.get(GeneratorHelper.firstToLower(sortOrder.getAttr()))));
 				}
 				else
 				{
-					orders.add(cb.desc(from.get(GeneratorHelper.firstToLower(sortOrder.getProperty()))));
+					orders.add(cb.desc(from.get(GeneratorHelper.firstToLower(sortOrder.getAttr()))));
 				}
 			}
 		}

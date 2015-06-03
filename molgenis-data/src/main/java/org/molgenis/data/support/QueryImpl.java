@@ -12,7 +12,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
-import org.springframework.data.domain.Sort;
+import org.molgenis.data.Sort;
 
 public class QueryImpl implements Query
 {
@@ -283,10 +283,9 @@ public class QueryImpl implements Query
 	}
 
 	@Override
-	public Query sort(Sort.Direction direction, String... fields)
+	public Sort sort()
 	{
-		this.sort(new Sort(direction, fields));
-		return this;
+		return new Sort();
 	}
 
 	@Override
