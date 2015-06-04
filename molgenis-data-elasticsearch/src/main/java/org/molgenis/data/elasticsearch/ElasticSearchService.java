@@ -35,7 +35,6 @@ import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.get.MultiGetItemResponse;
 import org.elasticsearch.action.get.MultiGetResponse;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.search.ClearScrollRequest;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -1459,33 +1458,32 @@ public class ElasticSearchService implements SearchService, TransactionJoiner
 		try
 		{
 			SearchResponse searchResponse = client.prepareSearch(transactionId).setQuery(QueryBuilders.matchAllQuery())
-					.setSearchType(SearchType.SCAN).setScroll(TimeValue.timeValueHours(4)).setSize(1000).execute()
-					.actionGet();
+					.setSearchType(SearchType.SCAN).setScroll(TimeValue.timeValueMinutes(2)).execute().actionGet();
 
-			BulkProcessor bulkProcessor = BULK_PROCESSOR_FACTORY.create(client);
-
-			while (true)
+			if (searchResponse.getHits().getTotalHits() > 0)
 			{
-				searchResponse = client.prepareSearchScroll(searchResponse.getScrollId())
-						.setScroll(TimeValue.timeValueHours(4)).execute().actionGet();
+				BulkProcessor bulkProcessor = BULK_PROCESSOR_FACTORY.create(client);
 
-				if (searchResponse.getHits().getHits().length == 0)
+				while (true)
 				{
-					bulkProcessor.close();
-					break; // Break condition: No hits are returned
-				}
+					searchResponse = client.prepareSearchScroll(searchResponse.getScrollId())
+							.setScroll(TimeValue.timeValueMinutes(2)).execute().actionGet();
 
-				for (SearchHit hit : searchResponse.getHits())
-				{
-					IndexRequest request = new IndexRequest(indexName, hit.type(), hit.id()).source(hit.source());
-					bulkProcessor.add(request);
+					if (searchResponse.getHits().getHits().length == 0)
+					{
+						bulkProcessor.close();
+						break; // Break condition: No hits are returned
+					}
+
+					for (SearchHit hit : searchResponse.getHits())
+					{
+						IndexRequest request = new IndexRequest(indexName, hit.type(), hit.id()).source(hit.source());
+						bulkProcessor.add(request);
+					}
 				}
+				refresh();
 			}
-			refresh();
 
-			ClearScrollRequest clearScrollRequest = new ClearScrollRequest();
-			clearScrollRequest.addScrollId(searchResponse.getScrollId());
-			client.clearScroll(clearScrollRequest).actionGet();
 		}
 		finally
 		{
@@ -1509,7 +1507,7 @@ public class ElasticSearchService implements SearchService, TransactionJoiner
 
 		if (client.admin().indices().prepareExists(transactionId).execute().actionGet().isExists())
 		{
-			client.admin().indices().prepareDelete(transactionId).execute().actionGet();
+			// client.admin().indices().prepareDelete(transactionId).execute().actionGet();
 		}
 	}
 }
