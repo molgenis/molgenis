@@ -40,7 +40,7 @@
 			<#list sourceAttributeRefEntityEntities.iterator() as sourceEntity>
 				<tr id="${sourceEntity.get(sourceAttributeRefEntityIdAttribute)}"> 
 					<td>${sourceEntity.get(sourceAttributeRefEntityLabelAttribute)}</td>
-					<td>${aggregates[count]!'0'}</td>
+					<td><#if aggregates??>${aggregates[count]!'0'}<#else>NA</#if></td>
 					<td>
 						<select class="form-control" <#if !hasWritePermission>disabled</#if>>
 							<#--TODO: If nillable-->

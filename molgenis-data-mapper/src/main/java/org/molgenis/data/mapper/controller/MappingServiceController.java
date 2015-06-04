@@ -432,35 +432,45 @@ public class MappingServiceController extends MolgenisPluginController
 		}
 		model.addAttribute("sourceAttributeRefEntityEntities", sourceAttributeRefEntityEntities);
 
+		// values for target xref / categoricals / String
 		Iterable<Entity> targetAttributeRefEntityEntities = dataService.findAll(dataService.getEntityMetaData(target)
 				.getAttribute(targetAttribute).getRefEntity().getName());
 		model.addAttribute("targetAttributeRefEntityEntities", targetAttributeRefEntityEntities);
 
+		// ID attribute for the target ref entity
 		String sourceAttributeRefEntityIdAttribute = dataService.getEntityMetaData(source)
 				.getAttribute(sourceAttribute).getRefEntity().getIdAttribute().getName();
 		model.addAttribute("sourceAttributeRefEntityIdAttribute", sourceAttributeRefEntityIdAttribute);
 
+		// Label attribute for the source ref entity
 		String sourceAttributeRefEntityLabelAttribute = dataService.getEntityMetaData(source)
 				.getAttribute(sourceAttribute).getRefEntity().getLabelAttribute().getName();
 		model.addAttribute("sourceAttributeRefEntityLabelAttribute", sourceAttributeRefEntityLabelAttribute);
 
+		// ID attribute for the target ref entity
 		String targetAttributeRefEntityIdAttribute = dataService.getEntityMetaData(target)
 				.getAttribute(targetAttribute).getRefEntity().getIdAttribute().getName();
 		model.addAttribute("targetAttributeRefEntityIdAttribute", targetAttributeRefEntityIdAttribute);
 
+		// Label attribute for the target ref entity
 		String targetAttributeRefEntityLabelAttribute = dataService.getEntityMetaData(target)
 				.getAttribute(targetAttribute).getRefEntity().getLabelAttribute().getName();
 		model.addAttribute("targetAttributeRefEntityLabelAttribute", targetAttributeRefEntityLabelAttribute);
 
-		AggregateResult aggregate = dataService.aggregate(source,
-				new AggregateQueryImpl().attrX(dataService.getEntityMetaData(source).getAttribute(sourceAttribute))
-						.query(new QueryImpl()));
-		List<Long> aggregateCounts = new ArrayList<Long>();
-		for (List<Long> count : aggregate.getMatrix())
+		// Check if the selected source attribute is aggregateable
+		AttributeMetaData sourceAttributeAttributeMetaData = dataService.getEntityMetaData(source).getAttribute(
+				sourceAttribute);
+		if (sourceAttributeAttributeMetaData.isAggregateable())
 		{
-			aggregateCounts.add(count.get(0));
+			AggregateResult aggregate = dataService.aggregate(source,
+					new AggregateQueryImpl().attrX(sourceAttributeAttributeMetaData).query(new QueryImpl()));
+			List<Long> aggregateCounts = new ArrayList<Long>();
+			for (List<Long> count : aggregate.getMatrix())
+			{
+				aggregateCounts.add(count.get(0));
+			}
+			model.addAttribute("aggregates", aggregateCounts);
 		}
-		model.addAttribute("aggregates", aggregateCounts);
 
 		// TODO If an algorithm with the map function exists, dissect it into usable interface thing
 		model.addAttribute("target", target);
