@@ -236,25 +236,21 @@ public class DefaultEntity implements Entity
 	public Entity getEntity(String attributeName)
 	{
 		Object value = values.get(attributeName);
-		System.out.println(value);
 		if (value == null) return null;
 		if (value instanceof Entity) return (Entity) value;
-		System.out.println(1);
 
 		// value represents the id of the referenced entity
 		AttributeMetaData attribute = entityMetaData.getAttribute(attributeName);
 		if (attribute == null) throw new UnknownAttributeException(attributeName);
-		System.out.println(2);
 
 		if (value instanceof Map) return new DefaultEntity(attribute.getRefEntity(), dataService,
 				(Map<String, Object>) value);
-		System.out.println(3);
 
 		value = attribute.getDataType().convert(value);
 		Entity refEntity = dataService.findOne(attribute.getRefEntity().getName(), value);
 		if (refEntity == null) throw new UnknownEntityException(attribute.getRefEntity().getName() + " with "
 				+ attribute.getRefEntity().getIdAttribute().getName() + " [" + value + "] does not exist");
-		System.out.println(4);
+
 		return refEntity;
 	}
 

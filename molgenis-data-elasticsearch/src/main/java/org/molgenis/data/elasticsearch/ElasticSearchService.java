@@ -35,6 +35,7 @@ import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.get.MultiGetItemResponse;
 import org.elasticsearch.action.get.MultiGetResponse;
 import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.search.ClearScrollRequest;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -1004,12 +1005,16 @@ public class ElasticSearchService implements SearchService, TransactionJoiner
 		String transactionId = this.getCurrentTransactionId();
 		if (transactionId != null)
 		{
-			MultiGetResponse response = client.prepareMultiGet().add(indexName, type, id).add(transactionId, type, id)
+			MultiGetResponse response = client.prepareMultiGet().add(transactionId, type, id).add(indexName, type, id)
 					.execute().actionGet();
-			MultiGetItemResponse[] responses = response.getResponses();
-			if ((responses == null) || (responses.length == 0)) return null;
-			return new DefaultEntity(entityMetaData, dataService, responses[responses.length - 1].getResponse()
-					.getSource());
+
+			for (MultiGetItemResponse res : response.getResponses())
+			{
+				if (res.getResponse().isExists()) return new DefaultEntity(entityMetaData, dataService, res
+						.getResponse().getSource());
+			}
+
+			return null;
 		}
 		else
 		{
@@ -1389,8 +1394,6 @@ public class ElasticSearchService implements SearchService, TransactionJoiner
 						LOG.trace("Searching Elasticsearch '" + type + "' docs using query [" + q + "] ...");
 					}
 
-					System.out.println(Arrays.asList(indexNames));
-
 					SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexNames);
 					searchRequestGenerator.buildSearchRequest(searchRequestBuilder, type, SearchType.QUERY_AND_FETCH,
 							q, fieldsToReturn, null, null, null, entityMetaData);
@@ -1451,15 +1454,13 @@ public class ElasticSearchService implements SearchService, TransactionJoiner
 	@Override
 	public void commitTransaction(String transactionId)
 	{
+		System.out.println("COMMIT TRANS " + transactionId);
+
 		try
 		{
-			System.out.println("COMMIT TRANS " + transactionId);
-			// updateTransactionStatus(transactionId, ESTransactionMetaData.STATUS_COMMITTED);
-
 			SearchResponse searchResponse = client.prepareSearch(transactionId).setQuery(QueryBuilders.matchAllQuery())
 					.setSearchType(SearchType.SCAN).setScroll(TimeValue.timeValueHours(4)).setSize(1000).execute()
 					.actionGet();
-			System.out.println(searchResponse.getHits().getTotalHits());
 
 			BulkProcessor bulkProcessor = BULK_PROCESSOR_FACTORY.create(client);
 
@@ -1480,38 +1481,35 @@ public class ElasticSearchService implements SearchService, TransactionJoiner
 					bulkProcessor.add(request);
 				}
 			}
-			this.refresh();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+			refresh();
 
-		cleanUpTrans();
-		// todo remove temp index
+			ClearScrollRequest clearScrollRequest = new ClearScrollRequest();
+			clearScrollRequest.addScrollId(searchResponse.getScrollId());
+			client.clearScroll(clearScrollRequest).actionGet();
+		}
+		finally
+		{
+			cleanUpTrans(transactionId);
+		}
 	}
 
 	@Override
 	public void rollbackTransaction(String transactionId)
 	{
-		cleanUpTrans();
-		// updateTransactionStatus(transactionId, ESTransactionMetaData.STATUS_ROLLBACK);
+		System.out.println("ROLLBACK TRANS " + transactionId);
+		cleanUpTrans(transactionId);
 	}
 
-	private void cleanUpTrans()
+	private void cleanUpTrans(String transactionId)
 	{
-		TransactionSynchronizationManager.unbindResource("transactionId");
-	}
+		if (TransactionSynchronizationManager.hasResource("transactionId"))
+		{
+			TransactionSynchronizationManager.unbindResource("transactionId");
+		}
 
-	private void updateTransactionStatus(String transactionId, String status)
-	{
-		// Entity transaction = get(transactionId, ESTransactionMetaData.INSTANCE);
-		// if (transaction == null)
-		// {
-		// throw new UnknownEntityException("Unknown ES transaction with id [" + transactionId + "]");
-		// }
-		//
-		// transaction.set(ESTransactionMetaData.STATUS, status);
-		// index(transaction, ESTransactionMetaData.INSTANCE, IndexingMode.UPDATE);
+		if (client.admin().indices().prepareExists(transactionId).execute().actionGet().isExists())
+		{
+			client.admin().indices().prepareDelete(transactionId).execute().actionGet();
+		}
 	}
 }
