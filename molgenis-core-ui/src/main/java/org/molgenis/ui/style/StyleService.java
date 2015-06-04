@@ -5,14 +5,14 @@ import java.util.Set;
 public interface StyleService
 {
 	/**
-	 * Scans the bootswatch API and the file system for bootstrap theme css files stores them in a list
+	 * Scans the file system for bootstrap theme css files and stores them in a list
 	 * 
-	 * @return A Set of available Styles found on the file system and via the bootswatch API
+	 * @return A Set of available Styles found on the file system
 	 */
 	public Set<Style> getAvailableStyles();
 
 	/**
-	 * Set the runtime property that controls the css style via a selected style
+	 * Set the runtime property that controls the css style with a selected style
 	 * 
 	 * @param styleName
 	 */
@@ -26,7 +26,7 @@ public interface StyleService
 	public Style getSelectedStyle();
 	
 	/**
-	 * Returns a style which matches the name of the given input
+	 * Returns a style that matches the name of the given input
 	 * 
 	 * @param styleName
 	 * @return The Style that matches the name
