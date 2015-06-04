@@ -1,8 +1,5 @@
 package org.molgenis.data.elasticsearch;
 
-import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchId;
-import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchIds;
-
 import java.io.IOException;
 import java.util.Iterator;
 
@@ -14,6 +11,7 @@ import org.molgenis.data.IndexedRepository;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.ElasticSearchService.IndexingMode;
+import org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -163,7 +161,7 @@ public abstract class AbstractElasticsearchRepository implements IndexedReposito
 	@Transactional
 	public void deleteById(Object id)
 	{
-		elasticSearchService.deleteById(toElasticsearchId(id), getEntityMetaData());
+		elasticSearchService.deleteById(ElasticsearchEntityUtils.toElasticsearchId(id), getEntityMetaData());
 		elasticSearchService.refresh();
 	}
 
@@ -171,7 +169,7 @@ public abstract class AbstractElasticsearchRepository implements IndexedReposito
 	@Transactional
 	public void deleteById(Iterable<Object> ids)
 	{
-		elasticSearchService.deleteById(toElasticsearchIds(ids), getEntityMetaData());
+		elasticSearchService.deleteById(ElasticsearchEntityUtils.toElasticsearchId(ids), getEntityMetaData());
 		elasticSearchService.refresh();
 	}
 

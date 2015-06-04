@@ -146,6 +146,8 @@ public class RepositoryValidationDecorator implements Repository
 			{
 				if (!attr.isNillable())
 				{
+					System.out.println(entity.getClass());
+					System.out.println(entity);
 					Object value = entity.get(attr.getName());
 					if ((value == null) && !attr.isAuto() && (attr.getDefaultValue() == null)
 							&& mustDoNotNullCheck(getEntityMetaData(), attr, entity))

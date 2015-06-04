@@ -38,8 +38,8 @@ public class ElasticsearchRepository extends AbstractElasticsearchRepository
 	@Override
 	public void rebuildIndex()
 	{
-		throw new UnsupportedOperationException(); // FIXME reindex from source
-													// documents
+		// throw new UnsupportedOperationException(); // FIXME reindex from source
+		// documents
 	}
 
 }

@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
 
@@ -57,6 +58,7 @@ public class VcfImporterService implements ImportService
 	}
 
 	@Override
+	@Transactional
 	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction, String defaultPackage)
 	{
 		if (databaseAction != DatabaseAction.ADD) throw new IllegalArgumentException("Only ADD is supported");
@@ -98,11 +100,12 @@ public class VcfImporterService implements ImportService
 
 			throw new MolgenisDataException(e);
 		}
-        //Should not be necessary, bug in elasticsearch?
-        //"All shards failed" for big datasets if this flush is not here...
-        for(EntityMetaData entityMetaData : addedEntities) {
-            dataService.getRepository(entityMetaData.getName()).flush();
-        }
+		// Should not be necessary, bug in elasticsearch?
+		// "All shards failed" for big datasets if this flush is not here...
+		for (EntityMetaData entityMetaData : addedEntities)
+		{
+			dataService.getRepository(entityMetaData.getName()).flush();
+		}
 		return report;
 	}
 

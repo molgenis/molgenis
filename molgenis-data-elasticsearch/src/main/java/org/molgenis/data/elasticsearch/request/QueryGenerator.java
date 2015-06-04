@@ -36,7 +36,19 @@ public class QueryGenerator implements QueryPartGenerator
 	{
 		List<QueryRule> queryRules = query.getRules();
 		if (queryRules == null || queryRules.isEmpty()) return;
-		searchRequestBuilder.setQuery(createQueryBuilder(queryRules, entityMetaData));
+
+		QueryBuilder q = createQueryBuilder(queryRules, entityMetaData);
+
+		// FilterBuilder transactionCommitedFilter = FilterBuilders.hasParentFilter(
+		// ESTransactionMetaData.ENTITY_NAME,
+		// FilterBuilders.notFilter(FilterBuilders.termFilter(ESTransactionMetaData.STATUS + "."
+		// + MappingsBuilder.FIELD_NOT_ANALYZED, ESTransactionMetaData.STATUS_ROLLBACK)));
+		// FilterBuilder notPartOfTransactionFilter = FilterBuilders.notFilter(FilterBuilders.hasParentFilter(
+		// ESTransactionMetaData.ENTITY_NAME, FilterBuilders.matchAllFilter()));
+		// QueryBuilder qb = QueryBuilders.filteredQuery(q,
+		// FilterBuilders.orFilter(transactionCommitedFilter, notPartOfTransactionFilter));
+
+		searchRequestBuilder.setQuery(q);
 	}
 
 	private QueryBuilder createQueryBuilder(List<QueryRule> queryRules, EntityMetaData entityMetaData)
@@ -54,6 +66,7 @@ public class QueryGenerator implements QueryPartGenerator
 			// boolean query consisting of combination of query clauses
 			Operator occur = null;
 			BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+
 			for (int i = 0; i < nrQueryRules; i += 2)
 			{
 				QueryRule queryRule = queryRules.get(i);

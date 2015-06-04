@@ -15,6 +15,12 @@ public class MolgenisTransactionManager extends JpaTransactionManager
 	private UuidGenerator idGenerator = new UuidGenerator();
 	private List<TransactionJoiner> transactionJoiners = new ArrayList<>();
 
+	public MolgenisTransactionManager()
+	{
+		super();
+		this.setNestedTransactionAllowed(false);
+	}
+
 	public void addTransactionJoiner(TransactionJoiner transactionJoiner)
 	{
 		this.transactionJoiners.add(transactionJoiner);
@@ -23,19 +29,22 @@ public class MolgenisTransactionManager extends JpaTransactionManager
 	@Override
 	protected Object doGetTransaction() throws TransactionException
 	{
-		// System.out.println("doGetTransaction");
 		Object jpaTransaction = super.doGetTransaction();
-		return new MolgenisTransaction(idGenerator.generateId(), jpaTransaction);
+		String id = idGenerator.generateId().toLowerCase();
+
+		return new MolgenisTransaction(id, jpaTransaction);
 	}
 
 	@Override
 	protected void doBegin(Object transaction, TransactionDefinition definition) throws TransactionException
 	{
-		// System.out.println("BEGIN TRANS: " + transaction + ", readOnly=" + definition.isReadOnly());
 		MolgenisTransaction molgenisTransaction = (MolgenisTransaction) transaction;
 		super.doBegin(molgenisTransaction.getJpaTransaction(), definition);
 
-		transactionJoiners.forEach(j -> j.transactionStarted(molgenisTransaction.getId()));
+		if (!definition.isReadOnly())
+		{
+			transactionJoiners.forEach(j -> j.transactionStarted(molgenisTransaction.getId()));
+		}
 	}
 
 	@Override
@@ -50,7 +59,10 @@ public class MolgenisTransactionManager extends JpaTransactionManager
 
 		super.doCommit(jpaTransactionStatus);
 
-		transactionJoiners.forEach(j -> j.commitTransaction(transaction.getId()));
+		if (!status.isReadOnly())
+		{
+			transactionJoiners.forEach(j -> j.commitTransaction(transaction.getId()));
+		}
 	}
 
 	@Override
@@ -65,7 +77,22 @@ public class MolgenisTransactionManager extends JpaTransactionManager
 
 		super.doRollback(jpaTransactionStatus);
 
-		transactionJoiners.forEach(j -> j.rollbackTransaction(transaction.getId()));
+		if (!status.isReadOnly())
+		{
+			transactionJoiners.forEach(j -> j.rollbackTransaction(transaction.getId()));
+		}
+	}
+
+	@Override
+	protected void doSetRollbackOnly(DefaultTransactionStatus status)
+	{
+		MolgenisTransaction transaction = (MolgenisTransaction) status.getTransaction();
+
+		DefaultTransactionStatus jpaTransactionStatus = new DefaultTransactionStatus(transaction.getJpaTransaction(),
+				status.isNewTransaction(), status.isNewSynchronization(), status.isReadOnly(), status.isDebug(),
+				status.getSuspendedResources());
+
+		super.doSetRollbackOnly(jpaTransactionStatus);
 	}
 
 	@Override

@@ -7,7 +7,7 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 
 public class ESTransactionMetaData extends DefaultEntityMetaData
 {
-	public static final ESTransactionMetaData INSTANCE = new ESTransactionMetaData();
+	// spublic static final ESTransactionMetaData INSTANCE = new ESTransactionMetaData();
 	public static final String ENTITY_NAME = "ESTransaction";
 	public static final String ID = "id";
 	public static final String STATUS = "status";

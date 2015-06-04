@@ -557,6 +557,7 @@ public class ImportWriter
 			}
 			catch (UnknownEntityException uee)
 			{
+				uee.printStackTrace();
 				return null;
 			}
 		}
