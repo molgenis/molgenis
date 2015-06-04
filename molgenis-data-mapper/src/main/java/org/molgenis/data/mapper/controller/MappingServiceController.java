@@ -1,5 +1,6 @@
 package org.molgenis.data.mapper.controller;
 
+import static com.google.common.collect.Iterators.size;
 import static org.molgenis.data.mapper.controller.MappingServiceController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -431,6 +432,7 @@ public class MappingServiceController extends MolgenisPluginController
 					.getAttribute(sourceAttribute).getRefEntity().getName());
 		}
 		model.addAttribute("sourceAttributeRefEntityEntities", sourceAttributeRefEntityEntities);
+		model.addAttribute("numberOfSourceAttributes", size(sourceAttributeRefEntityEntities.iterator()));
 
 		// values for target xref / categoricals / String
 		Iterable<Entity> targetAttributeRefEntityEntities = dataService.findAll(dataService.getEntityMetaData(target)
@@ -476,8 +478,8 @@ public class MappingServiceController extends MolgenisPluginController
 		// TODO If an algorithm with the map function exists, dissect it into usable interface thing
 		model.addAttribute("target", target);
 		model.addAttribute("source", source);
-		model.addAttribute("targetAttribute", targetAttribute);
-		model.addAttribute("sourceAttribute", sourceAttribute);
+		model.addAttribute("targetAttribute", dataService.getEntityMetaData(target).getAttribute(targetAttribute));
+		model.addAttribute("sourceAttribute", dataService.getEntityMetaData(source).getAttribute(sourceAttribute));
 		model.addAttribute("hasWritePermission", hasWritePermission(project, false));
 
 		return VIEW_CATEGORY_MAPPING_EDITOR;
