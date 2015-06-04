@@ -126,14 +126,6 @@ body:not(.modal-open) #feature-selection .molgenis-tree {
 	width: 100% !important;
 }
 
-.molgenis-xrefmrefsearch .select2-result:nth-child(even) {
-	background-color: #DDD;
-}
-
-.molgenis-xrefmrefsearch .select2-result:nth-child(odd) {
-	background-color: #FFF;
-}
-
 .molgenis-xrefmrefsearch .select2-results .select2-highlighted {
     background: #04c;
     color: #fff;
