@@ -17,10 +17,17 @@ public class CategoryMappingTest
 	private CategoryMapping<String, String> mappingWithNullValue = CategoryMapping.<String, String> create("blah",
 			ImmutableMap.<String, String> of("Human", "1", "Orc", "2"), "3", "5");
 
+	private CategoryMapping<String, String> mappingWithNullValueEqualsNull = CategoryMapping.<String, String> create(
+			"blah", ImmutableMap.<String, String> of("Human", "1", "Orc", "2"), "3", null);
+
 	@Test
 	public void testCreateFromAlgorithm()
 	{
-		assertEquals(CategoryMapping.<String, String> create(mapping.getAlgorithm()), mapping);
+		assertEquals(CategoryMapping.create(mapping.getAlgorithm()), mapping);
+		assertEquals(CategoryMapping.create(mappingWithDefault.getAlgorithm()), mappingWithDefault);
+		assertEquals(CategoryMapping.create(mappingWithNullValue.getAlgorithm()), mappingWithNullValue);
+		assertEquals(CategoryMapping.create(mappingWithNullValueEqualsNull.getAlgorithm()),
+				mappingWithNullValueEqualsNull);
 	}
 
 	@Test
@@ -33,5 +40,8 @@ public class CategoryMappingTest
 
 		assertEquals(mappingWithNullValue.getAlgorithm(),
 				"$('blah').map({\"Human\":\"1\",\"Orc\":\"2\"}, \"3\", \"5\").value();");
+
+		assertEquals(mappingWithNullValueEqualsNull.getAlgorithm(),
+				"$('blah').map({\"Human\":\"1\",\"Orc\":\"2\"}, \"3\", null).value();");
 	}
 }
