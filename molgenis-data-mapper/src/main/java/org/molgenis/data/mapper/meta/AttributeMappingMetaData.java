@@ -8,7 +8,7 @@ public class AttributeMappingMetaData extends DefaultEntityMetaData
 {
 	public static final String ENTITY_NAME = "AttributeMapping";
 	public static final String IDENTIFIER = "identifier";
-	public static final String TARGETATTRIBUTEMETADATA = "targetAMD";
+	public static final String TARGETATTRIBUTEMETADATA = "targetAttribute";
 	public static final String ALGORITHM = "algorithm";
 
 	public AttributeMappingMetaData()
