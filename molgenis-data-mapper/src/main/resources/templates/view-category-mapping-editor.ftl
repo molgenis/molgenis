@@ -9,8 +9,9 @@
 <div class="row">
 	<div class="col-md-6">
 		<legend>Category mapping editor</legend>
+		<#if categoryMapping??><code>${categoryMapping.algorithm}</code></#if>
 		<h5>
-			Map ${sourceAttribute.name?html} to ${targetAttribute.name?html}. Select the correct category that you want to map the source attribute to from the target attribute dropdown
+			Map ${sourceAttribute.label?html} values to ${targetAttribute.label?html} values. Select the correct category that you want to map the source attribute to from the target attribute dropdown
 		</h5>
 
 		<#if numberOfSourceAttributes gt 10> 
@@ -19,11 +20,14 @@
 					<label>Default value </label>
 					<select id="default-value" class="form-control" <#if !hasWritePermission>disabled</#if>>
 					<#if targetAttribute.nillable>
-						<option selected val="">None</option>
+						<option <#if !categoryMapping.defaultValue?? >selected </#if> val="">None</option>
 					</#if>
 					<#list targetAttributeRefEntityEntities.iterator() as targetEntity>
-						<#--TODO: If a default option was already selected: selected="selected"-->
-						<option value="${targetEntity.get(targetAttributeRefEntityIdAttribute)}">${targetEntity.get(targetAttributeRefEntityLabelAttribute)}</option> 
+						<option value="${targetEntity.getString(targetAttributeRefEntityIdAttribute)}" 
+							<#if categoryMapping.defaultValue??>
+								<#if categoryMapping.defaultValue = targetEntity.getString(targetAttributeRefEntityIdAttribute) >selected </#if>
+							</#if>
+							>${targetEntity.get(targetAttributeRefEntityLabelAttribute)}</option> 
 					</#list>
 					</select>
 				</div>
@@ -45,15 +49,19 @@
 					<td><#if aggregates??>${aggregates[count]!'0'}<#else>NA</#if></td>
 					<td>
 						<select class="form-control" <#if !hasWritePermission>disabled</#if>>
-						<#if targetAttribute.nillable>
-							<option val="">None</option>
-						</#if>
 						<#if numberOfSourceAttributes gt 10>
-							<option val="use-default-option">use default</option>
+							<option val="use-default-option" 
+								<#if !categoryMapping?keys?seq_contains(sourceEntity.getString(sourceAttributeRefEntityIdAttribute)) >selected </#if>
+								>use default</option>
+						</#if>
+						<#if targetAttribute.nillable>
+							<option val="" <#if !categoryMapping.map[sourceEntity.getString(sourceAttributeRefEntityIdAttribute)]?? >selected </#if>>None</option>
 						</#if>	
 						<#list targetAttributeRefEntityEntities.iterator() as targetEntity>
-							<#--TODO: If an algorithm exists and maps to an existing value: selected="selected"-->
-							<option value="${targetEntity.get(targetAttributeRefEntityIdAttribute)}">${targetEntity.get(targetAttributeRefEntityLabelAttribute)}</option> 
+							<option <#if categoryMapping.map[sourceEntity.getString(sourceAttributeRefEntityIdAttribute)]?? >
+								<#if categoryMapping.map[sourceEntity.getString(sourceAttributeRefEntityIdAttribute)]=targetEntity.getString(targetAttributeRefEntityIdAttribute)>selected </#if>
+								</#if>
+							value="${targetEntity.get(targetAttributeRefEntityIdAttribute)}">${targetEntity.get(targetAttributeRefEntityLabelAttribute)}</option> 
 						</#list>
 						</select>
 						<#--TODO: + button to add a new category to target dropdown-->
@@ -68,15 +76,18 @@
 					<td><#if aggregates??>${aggregates[count]!'0'}<#else>NA</#if></td>
 					<td>
 						<select class="form-control" <#if !hasWritePermission>disabled</#if>>
+							<#if numberOfSourceAttributes gt 10>
+								<option <#if categoryMapping.nullValue?? >
+								<#if categoryMapping.nullValue=targetEntity.getString(targetAttributeRefEntityIdAttribute)>selected </#if>
+								</#if> value="use-default-option">use default</option>
+							</#if>
 							<#if targetAttribute.nillable>
 								<option val="">None</option>
 							</#if>
-							<#if numberOfSourceAttributes gt 10>
-								<option value="use-default-option">use default</option>
-							</#if>
 							<#list targetAttributeRefEntityEntities.iterator() as targetEntity>
-								<#--TODO: If an algorithm exists and maps to an existing value: selected="selected"-->
-								<option value="${targetEntity.get(targetAttributeRefEntityIdAttribute)}">${targetEntity.get(targetAttributeRefEntityLabelAttribute)}</option> 
+								<option <#if categoryMapping.nullValue?? >
+								<#if categoryMapping.nullValue=targetEntity.getString(targetAttributeRefEntityIdAttribute)>selected </#if>
+								</#if> value="${targetEntity.get(targetAttributeRefEntityIdAttribute)}">${targetEntity.get(targetAttributeRefEntityLabelAttribute)}</option> 
 							</#list>
 						</select>
 						<#--TODO: + button to add a new category to target dropdown-->

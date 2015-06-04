@@ -10,12 +10,13 @@ import javax.annotation.Nullable;
 
 import com.google.auto.value.AutoValue;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 @AutoValue
 public abstract class CategoryMapping<S, T>
 {
-	private static Gson gson = new Gson();
+	private static Gson gson = new GsonBuilder().serializeNulls().create();
 
 	public abstract String getSourceAttributeName();
 
@@ -24,6 +25,8 @@ public abstract class CategoryMapping<S, T>
 	@Nullable
 	public abstract T getDefaultValue();
 
+	public abstract boolean isDefaultValueUndefined();
+
 	@Nullable
 	public abstract T getNullValue();
 
@@ -31,18 +34,18 @@ public abstract class CategoryMapping<S, T>
 
 	public static <S, T> CategoryMapping<S, T> create(String sourceAttributeName, Map<S, T> map)
 	{
-		return new AutoValue_CategoryMapping<S, T>(sourceAttributeName, map, null, null, true);
+		return new AutoValue_CategoryMapping<S, T>(sourceAttributeName, map, null, true, null, true);
 	}
 
 	public static <S, T> CategoryMapping<S, T> create(String sourceAttributeName, Map<S, T> map, T defaultValue)
 	{
-		return new AutoValue_CategoryMapping<S, T>(sourceAttributeName, map, defaultValue, null, true);
+		return new AutoValue_CategoryMapping<S, T>(sourceAttributeName, map, defaultValue, false, null, true);
 	}
 
 	public static <S, T> CategoryMapping<S, T> create(String sourceAttributeName, Map<S, T> map, T defaultValue,
 			T nullValue)
 	{
-		return new AutoValue_CategoryMapping<S, T>(sourceAttributeName, map, defaultValue, nullValue, false);
+		return new AutoValue_CategoryMapping<S, T>(sourceAttributeName, map, defaultValue, false, nullValue, false);
 	}
 
 	public String getAlgorithm()
@@ -52,7 +55,7 @@ public abstract class CategoryMapping<S, T>
 			return String.format("$('%s').map(%s, %s, %s).value();", getSourceAttributeName(), gson.toJson(getMap()),
 					gson.toJson(getDefaultValue()), gson.toJson(getNullValue()));
 		}
-		if (getDefaultValue() != null)
+		if (!isDefaultValueUndefined())
 		{
 			return String.format("$('%s').map(%s, %s).value();", getSourceAttributeName(), gson.toJson(getMap()),
 					gson.toJson(getDefaultValue()));
@@ -84,15 +87,20 @@ public abstract class CategoryMapping<S, T>
 
 		String attr = m.group("attr");
 		Map<S, T> map = gson.fromJson(m.group("map"), mapType);
-		T defaultValue = gson.fromJson(m.group("default"), tType);
-		String nullValue = m.group("null");
-		if (nullValue == null)
+		String defaultValueString = m.group("default");
+		if (defaultValueString == null)
+		{
+			return CategoryMapping.<S, T> create(attr, map);
+		}
+		T defaultValue = gson.fromJson(defaultValueString, tType);
+		String nullValueString = m.group("null");
+		if (nullValueString == null)
 		{
 			return CategoryMapping.<S, T> create(attr, map, defaultValue);
 		}
 		else
 		{
-			T nullValueJson = gson.fromJson(nullValue, tType);
+			T nullValueJson = gson.fromJson(nullValueString, tType);
 			return CategoryMapping.<S, T> create(attr, map, defaultValue, nullValueJson);
 		}
 	}

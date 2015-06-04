@@ -23,6 +23,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.mapper.data.request.MappingServiceRequest;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
+import org.molgenis.data.mapper.mapping.model.CategoryMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
@@ -475,12 +476,22 @@ public class MappingServiceController extends MolgenisPluginController
 			model.addAttribute("aggregates", aggregateCounts);
 		}
 
-		// TODO If an algorithm with the map function exists, dissect it into usable interface thing
 		model.addAttribute("target", target);
 		model.addAttribute("source", source);
 		model.addAttribute("targetAttribute", dataService.getEntityMetaData(target).getAttribute(targetAttribute));
 		model.addAttribute("sourceAttribute", dataService.getEntityMetaData(source).getAttribute(sourceAttribute));
 		model.addAttribute("hasWritePermission", hasWritePermission(project, false));
+
+		CategoryMapping<String, String> categoryMapping = null;
+		if (attributeMapping != null)
+		{
+			categoryMapping = CategoryMapping.<String, String> create(attributeMapping.getAlgorithm());
+		}
+		if (categoryMapping == null)
+		{
+			categoryMapping = CategoryMapping.<String, String> createEmpty(sourceAttribute);
+		}
+		model.addAttribute("categoryMapping", categoryMapping);
 
 		return VIEW_CATEGORY_MAPPING_EDITOR;
 	}

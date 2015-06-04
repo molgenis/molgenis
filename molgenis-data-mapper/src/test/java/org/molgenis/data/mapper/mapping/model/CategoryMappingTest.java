@@ -11,8 +11,14 @@ public class CategoryMappingTest
 	private CategoryMapping<String, String> mapping = CategoryMapping.<String, String> create("blah",
 			ImmutableMap.<String, String> of("Human", "1", "Orc", "2"));
 
+	private CategoryMapping<String, String> mappingWithNullValueInMap = CategoryMapping
+			.create("$('LifeLines_GENDER').map({\"0\":null,\"1\":\"0\"}).value();");
+
 	private CategoryMapping<String, String> mappingWithDefault = CategoryMapping.<String, String> create("blah",
 			ImmutableMap.<String, String> of("Human", "1", "Orc", "2"), "3");
+
+	private CategoryMapping<String, String> mappingWithDefaultNull = CategoryMapping.<String, String> create("blah",
+			ImmutableMap.<String, String> of("Human", "1", "Orc", "2"), null);
 
 	private CategoryMapping<String, String> mappingWithNullValue = CategoryMapping.<String, String> create("blah",
 			ImmutableMap.<String, String> of("Human", "1", "Orc", "2"), "3", "5");
@@ -24,7 +30,9 @@ public class CategoryMappingTest
 	public void testCreateFromAlgorithm()
 	{
 		assertEquals(CategoryMapping.create(mapping.getAlgorithm()), mapping);
+		assertEquals(CategoryMapping.create(mappingWithNullValueInMap.getAlgorithm()), mappingWithNullValueInMap);
 		assertEquals(CategoryMapping.create(mappingWithDefault.getAlgorithm()), mappingWithDefault);
+		assertEquals(CategoryMapping.create(mappingWithDefaultNull.getAlgorithm()), mappingWithDefaultNull);
 		assertEquals(CategoryMapping.create(mappingWithNullValue.getAlgorithm()), mappingWithNullValue);
 		assertEquals(CategoryMapping.create(mappingWithNullValueEqualsNull.getAlgorithm()),
 				mappingWithNullValueEqualsNull);
