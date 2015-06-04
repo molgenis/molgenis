@@ -2,7 +2,6 @@ package org.molgenis.data.meta;
 
 import java.util.List;
 
-import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -83,70 +82,5 @@ public class MetaUtils
 				return attribute;
 			}
 		}).toList();
-	}
-
-	/**
-	 * Validates names of entities and packages. Rules: only [a-zA-Z0-9] are allowed, name must start with a letter
-	 */
-	public static void validateName(String name)
-	{
-		if (!name.matches("[a-zA-Z0-9]+"))
-		{
-			throw new MolgenisDataException("Invalid characters in: [" + name
-					+ "] Only letters (a-z, A-Z) and digits (0-9) are allowed.");
-		}
-
-		if (Character.isDigit(name.charAt(0)))
-		{
-			throw new MolgenisDataException("Invalid name: [" + name + "] Names must start with a letter.");
-		}
-	}
-
-	/**
-	 * Validates attribute names. Extends the rules of entity/package names with a maximum length of 16 characters.
-	 */
-	public static void validateAttributeName(String name)
-	{
-		if (name.length() > 16)
-		{
-			throw new MolgenisDataException("Attribute name [" + name
-					+ "] is too long: maximum length is 16 characters.");
-		}
-		validateName(name);
-	}
-
-	/**
-	 * Recursively traverses attributes and validates the names.
-	 */
-	public static void validateAttributeNames(Iterable<AttributeMetaData> amds)
-	{
-		for (AttributeMetaData amd : amds)
-		{
-			if (amd.getDataType().getEnumType().equals(MolgenisFieldTypes.COMPOUND))
-			{
-				validateAttributeNames(amd.getAttributeParts());
-			}
-			else
-			{
-				validateAttributeName(amd.getName());
-			}
-		}
-	}
-
-	/**
-	 * Validates the names of an entity and all its attributes.
-	 */
-	public static void validateEntity(EntityMetaData emd)
-	{
-		validateName(emd.getSimpleName());
-
-		try
-		{
-			validateAttributeNames(emd.getAttributes());
-		}
-		catch (MolgenisDataException e)
-		{
-			throw new MolgenisDataException("Validation error in entity [" + emd.getName() + "]: " + e.getMessage(), e);
-		}
 	}
 }

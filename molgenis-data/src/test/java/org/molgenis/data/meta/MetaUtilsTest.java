@@ -7,7 +7,6 @@ import java.util.Arrays;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -52,29 +51,5 @@ public class MetaUtilsTest
 				"this is a height measurement in m!"));
 		Iterable<Entity> attributeMetaDataEntities = Arrays.<Entity> asList(entity1);
 		MetaUtils.toExistingAttributeMetaData(entityMetaData, attributeMetaDataEntities);
-	}
-
-	@Test(expectedExceptions = MolgenisDataException.class)
-	public void testValidateNameTooLong()
-	{
-		MetaUtils.validateAttributeName("ThisNameIsTooLongToUseAsAnAttributeName");
-	}
-
-	@Test(expectedExceptions = MolgenisDataException.class)
-	public void testValidateNameInvalidCharacters()
-	{
-		MetaUtils.validateAttributeName("Invalid.Name");
-	}
-
-	@Test(expectedExceptions = MolgenisDataException.class)
-	public void testValidateNameInvalidCharacters2()
-	{
-		MetaUtils.validateAttributeName("Invalid_Name");
-	}
-
-	@Test(expectedExceptions = MolgenisDataException.class)
-	public void testValidateNameStartsWithDigit()
-	{
-		MetaUtils.validateAttributeName("6invalid");
 	}
 }
