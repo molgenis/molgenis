@@ -17,9 +17,34 @@
 
 <div class="row">
 	<div class="col-md-12">
+		<a href="${context_url}/mappingproject/${mappingProject.identifier}" class="btn btn-default">
+			<span class="glyphicon glyphicon-chevron-left"></span> Back to project
+		</a>
+		
+		<hr></hr>
+	</div>
+</div>
+
+<div class="row" role="tabpanel"> 
+	<div class="col-md-12">
+		<ul class="nav nav-tabs" role="tablist">
+    		<li role="presentation" class="active"><a href="#basic" aria-controls="basic" role="tab" data-toggle="tab">Basic</a></li>
+    		<li role="presentation"><a href="#advanced" aria-controls="advanced" role="tab" data-toggle="tab">Advanced</a></li> 
+   		</ul>
+		
+		 <div class="tab-content">
+    		<div role="tabpanel" class="tab-pane active" id="basic"><@basic /></div>
+    		<div role="tabpanel" class="tab-pane" id="advanced"><@advanced /></div>
+    	</div>	
+	</div>
+</div>
+
+<#macro basic>
+
+<div class="row">
+	<div class="col-md-12">
 		<h4>Mapping from <i>${entityMapping.sourceEntityMetaData.name}</i> to <i>${entityMapping.targetEntityMetaData.name?html}.${attributeMapping.targetAttributeMetaData.label?html}</i>.</h4>
 		${(attributeMapping.targetAttributeMetaData.description!"")?html}
-		<hr />
 	</div>
 </div>
 
@@ -51,9 +76,9 @@
 			</form>
 		</div>
 	</div>
-	<div class="col-md-6">
-	</div>
+	<div class="col-md-6"></div>
 </div>
+
 <div class="row">
 	<div class="col-md-6">
 		<div id="attribute-table-container">
@@ -88,7 +113,7 @@
 										<input type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name?html}"/>
 										<input type="hidden" name="sourceAttribute" value="${source.name}"/>
 								
-										<button type="submit" class="btn btn-default category-mapping-edit-btn"><span class="glyphicon glyphicon-list-alt"></span></button>	
+										<button class="btn btn-default category-mapping-edit-btn"><span class="glyphicon glyphicon-list-alt"></span></button>
 									</form>	
 								</#if>
 								</td>
@@ -97,17 +122,17 @@
 					</#list>
 				</tbody>
 			</table>
-			<a class="btn btn-default" href="${context_url}/mappingproject/${mappingProject.identifier}">Back to project</a>
+			<#if hasWritePermission>
+				<button id="save-attribute-selection-btn" class="btn btn-primary">Save</button>  
+			</#if>
 			<button class="btn btn-success" id="mapping-result-preview-btn">Preview mapping result</button>
-			<hr></hr>
 		</div>
 	</div>
-	<div id="mapping-result-preview-container" class="col-md-6">
-		
-	</div>
+	<div id="mapping-result-preview-container" class="col-md-6"></div>
 </div>
+</#macro>
 
-
+<#macro advanced>
 <div class="row">
 	<div class="col-md-6">
 		<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
@@ -191,6 +216,6 @@
 		</div>
 	</div>
 </div>
-
+</#macro>
 
 <@footer/>
