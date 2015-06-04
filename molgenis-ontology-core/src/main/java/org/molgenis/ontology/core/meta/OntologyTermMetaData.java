@@ -10,8 +10,8 @@ public class OntologyTermMetaData extends DefaultEntityMetaData
 	public final static String ID = "id";
 	public final static String ONTOLOGY_TERM_IRI = "ontologyTermIRI";
 	public final static String ONTOLOGY_TERM_NAME = "ontologyTermName";
-	public final static String ONTOLOGY_TERM_SYNONYM = "oTermSynonym";
-	public final static String ONTOLOGY_TERM_DYNAMIC_ANNOTATION = "oTermDynAnnot";
+	public final static String ONTOLOGY_TERM_SYNONYM = "ontologyTermSynonym";
+	public final static String ONTOLOGY_TERM_DYNAMIC_ANNOTATION = "ontologyTermDynamicAnnotation";
 	public final static String ONTOLOGY_TERM_NODE_PATH = "nodePath";
 	public final static String ONTOLOGY = "ontology";
 	public final static String SIMPLE_NAME = "OntologyTerm";

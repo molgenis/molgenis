@@ -46,7 +46,7 @@ public class MolgenisUserDecoratorTest
 	{
 		String password = "password";
 		Entity entity = new MapEntity();
-		entity.set(MolgenisUser.PASSWORD, password);
+		entity.set(MolgenisUser.PASSWORD_, password);
 		entity.set(MolgenisUser.SUPERUSER, false);
 		molgenisUserDecorator.add(entity);
 		verify(passwordEncoder).encode(password);
@@ -60,7 +60,7 @@ public class MolgenisUserDecoratorTest
 		String password = "password";
 		Entity entity = new MapEntity("id");
 		entity.set("id", 1);
-		entity.set(MolgenisUser.PASSWORD, password);
+		entity.set(MolgenisUser.PASSWORD_, password);
 		entity.set(MolgenisUser.SUPERUSER, true);
 		when(decoratedRepository.findOne(1)).thenReturn(entity);
 

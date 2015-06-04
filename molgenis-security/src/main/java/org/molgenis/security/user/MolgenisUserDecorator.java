@@ -99,7 +99,7 @@ public class MolgenisUserDecorator implements Repository
 		currentUser.set(findOne(entity.getIdValue()));
 
 		String currentPassword = currentUser.getPassword();
-		String password = entity.getString(MolgenisUser.PASSWORD);
+		String password = entity.getString(MolgenisUser.PASSWORD_);
 
 		if (!password.equals(currentPassword))
 		{
@@ -109,9 +109,9 @@ public class MolgenisUserDecorator implements Repository
 
 	private void encodePassword(Entity entity)
 	{
-		String password = entity.getString(MolgenisUser.PASSWORD);
+		String password = entity.getString(MolgenisUser.PASSWORD_);
 		String encodedPassword = getPasswordEncoder().encode(password);
-		entity.set(MolgenisUser.PASSWORD, encodedPassword);
+		entity.set(MolgenisUser.PASSWORD_, encodedPassword);
 	}
 
 	private void addSuperuserAuthorities(Iterable<? extends Entity> entities)

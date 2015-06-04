@@ -32,10 +32,10 @@ public class Script extends DefaultEntity
 	public static final String CONTENT = "content";// The freemarker code
 	public static final String GENERATE_TOKEN = "generateToken";// If true a security token is generated for the script
 																// (available as ${molgenisToken})
-	public static final String RESULT_FILE_EXTENSION = "resultFileExtens"; // If the script generates an outputfile,
-																			// this is it's file extension
-																			// (outputfile available as
-																			// ${outputFile})
+	public static final String RESULT_FILE_EXTENSION = "resultFileExtension"; // If the script generates an outputfile,
+																				// this is it's file extension
+																				// (outputfile available as
+																				// ${outputFile})
 	public static final String PARAMETERS = "parameters";// The names of the parameters required by this script
 															// (excluding 'molgenisToken' and 'outputFile'
 	public static final EntityMetaData META_DATA = new ScriptMetaData();
