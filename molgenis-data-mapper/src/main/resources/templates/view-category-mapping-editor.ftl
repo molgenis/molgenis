@@ -9,18 +9,21 @@
 <div class="row">
 	<div class="col-md-6">
 		<legend>Category mapping editor</legend>
-		<#if categoryMapping??><code>${categoryMapping.algorithm}</code></#if>
+		<#if categoryMapping??><code>${categoryMapping.algorithm}</code><br/>
+		Keys: <#list categoryMapping.map?keys as key><code>${key}</code></#list></#if>
 		<h5>
 			Map ${sourceAttribute.label?html} values to ${targetAttribute.label?html} values. Select the correct category that you want to map the source attribute to from the target attribute dropdown
 		</h5>
 
-		<#if numberOfSourceAttributes gt 10> 
+		<#assign showDefault = numberOfSourceAttributes gt 10>
+
+		<#if showDefault>
  			<div class="form-group">
 				<div class="col-md-2">	
 					<label>Default value </label>
 					<select id="default-value" class="form-control" <#if !hasWritePermission>disabled</#if>>
 					<#if targetAttribute.nillable>
-						<option <#if !categoryMapping.defaultValue?? >selected </#if> val="">None</option>
+						<option <#if !categoryMapping.defaultValue?? >selected </#if> value="use-null-value"><em>None</em></option>
 					</#if>
 					<#list targetAttributeRefEntityEntities.iterator() as targetEntity>
 						<option value="${targetEntity.getString(targetAttributeRefEntityIdAttribute)}" 
@@ -44,22 +47,23 @@
 			<#--This is for xrefs and categoricals!-->
 			<#assign count = 0 />
 			<#list sourceAttributeRefEntityEntities.iterator() as sourceEntity>
-				<tr id="${sourceEntity.get(sourceAttributeRefEntityIdAttribute)}"> 
+				<#assign id = sourceEntity.getString(sourceAttributeRefEntityIdAttribute)>
+				<tr id="${id}">
 					<td>${sourceEntity.get(sourceAttributeRefEntityLabelAttribute)}</td>
 					<td><#if aggregates??>${aggregates[count]!'0'}<#else>NA</#if></td>
 					<td>
 						<select class="form-control" <#if !hasWritePermission>disabled</#if>>
-						<#if numberOfSourceAttributes gt 10>
-							<option val="use-default-option" 
-								<#if !categoryMapping?keys?seq_contains(sourceEntity.getString(sourceAttributeRefEntityIdAttribute)) >selected </#if>
-								>use default</option>
+						<#if showDefault>
+							<option value="use-default-option"
+								<#if !categoryMapping.map?keys?seq_contains(id) > selected </#if>>use default</option>
 						</#if>
 						<#if targetAttribute.nillable>
-							<option val="" <#if !categoryMapping.map[sourceEntity.getString(sourceAttributeRefEntityIdAttribute)]?? >selected </#if>>None</option>
+							<#-- if the key exists but the value doesn't, the value is null -->
+							<option value="use-null-value"<#if categoryMapping.map?keys?seq_contains(id) && !categoryMapping.map[id]?? > selected </#if>><em>None</em></option>
 						</#if>	
 						<#list targetAttributeRefEntityEntities.iterator() as targetEntity>
-							<option <#if categoryMapping.map[sourceEntity.getString(sourceAttributeRefEntityIdAttribute)]?? >
-								<#if categoryMapping.map[sourceEntity.getString(sourceAttributeRefEntityIdAttribute)]=targetEntity.getString(targetAttributeRefEntityIdAttribute)>selected </#if>
+							<option <#if categoryMapping.map[id]?? >
+								<#if categoryMapping.map[id]=targetEntity.getString(targetAttributeRefEntityIdAttribute)>selected </#if>
 								</#if>
 							value="${targetEntity.get(targetAttributeRefEntityIdAttribute)}">${targetEntity.get(targetAttributeRefEntityLabelAttribute)}</option> 
 						</#list>
@@ -70,23 +74,21 @@
 			<#assign count = count + 1 />
 			</#list>
 			
-			<#if targetAttribute.nillable>
+			<#if sourceAttribute.nillable>
 				<tr id="nullValue">
-					<td><i>no value</i></td>
+					<td><em>None</em></td>
 					<td><#if aggregates??>${aggregates[count]!'0'}<#else>NA</#if></td>
 					<td>
 						<select class="form-control" <#if !hasWritePermission>disabled</#if>>
-							<#if numberOfSourceAttributes gt 10>
-								<option <#if categoryMapping.nullValue?? >
-								<#if categoryMapping.nullValue=targetEntity.getString(targetAttributeRefEntityIdAttribute)>selected </#if>
-								</#if> value="use-default-option">use default</option>
+							<#if showDefault>
+								<option<#if categoryMapping.nullValueUndefined> selected </#if> value="use-default-option">use default</option>
 							</#if>
 							<#if targetAttribute.nillable>
-								<option val="">None</option>
+								<option<#if !categoryMapping.nullValueUndefined && !categoryMapping.nullValue??> selected </#if> value="use-null-value"><em>None<em></option>
 							</#if>
 							<#list targetAttributeRefEntityEntities.iterator() as targetEntity>
-								<option <#if categoryMapping.nullValue?? >
-								<#if categoryMapping.nullValue=targetEntity.getString(targetAttributeRefEntityIdAttribute)>selected </#if>
+								<option<#if categoryMapping.nullValue??>
+								<#if categoryMapping.nullValue=targetEntity.getString(targetAttributeRefEntityIdAttribute)> selected </#if>
 								</#if> value="${targetEntity.get(targetAttributeRefEntityIdAttribute)}">${targetEntity.get(targetAttributeRefEntityLabelAttribute)}</option> 
 							</#list>
 						</select>
