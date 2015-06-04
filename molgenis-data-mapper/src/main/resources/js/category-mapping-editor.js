@@ -2,17 +2,8 @@
 	"use strict";
 
 	function generateAlgorithm(mappedCategoryIds, attribute) {
-		var mapping = '';
-		var first = true;
-		for (var key in mappedCategoryIds) {
-			if(first) {
-				mapping = mapping.concat(key + " : " + mappedCategoryIds[key]);
-				first = false;
-			} else {
-				mapping = mapping.concat(", " + key + " : " + mappedCategoryIds[key]);
-			}
-		}
-		return "$('" + attribute + "').map({" + mapping + "}).value();";
+		//TODO: type JSON should depend on the type of the source and target attributes and of the xref's id attribute's type
+		return "$('" + attribute + "').map(" + JSON.stringify(mappedCategoryIds) + ").value();";
 	}
 
 	$(function() {
@@ -22,10 +13,7 @@
 			// for each source xref value, check which target xref value was
 			// chosen
 			$('#category-mapping-table > tbody > tr').each(function() {
-
-				// switched key value to work with algorithm map function out of
-				// the box
-				mappedCategoryIds[$(this).find('option:selected').val()] = $(this).attr('id');
+				mappedCategoryIds[$(this).attr('id')] = $(this).find('option:selected').val();
 			});
 
 			var mappingProjectId = $('input[name="mappingProjectId"]').val();
@@ -40,7 +28,10 @@
 				target : target,
 				source : source,
 				targetAttribute : targetAttribute,
-				algorithm : algorithm
+				algorithm : algorithm,
+				success: function() {
+					window.history.back();
+				}
 			});
 		});
 

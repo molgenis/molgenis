@@ -438,6 +438,7 @@ public class MappingServiceController extends MolgenisPluginController
 		model.addAttribute("targetAttributeRefEntityEntities", targetAttributeRefEntityEntities);
 
 		// ID attribute for the target ref entity
+		// TODO: Source can be String / enum, those don't have refEntity
 		String sourceAttributeRefEntityIdAttribute = dataService.getEntityMetaData(source)
 				.getAttribute(sourceAttribute).getRefEntity().getIdAttribute().getName();
 		model.addAttribute("sourceAttributeRefEntityIdAttribute", sourceAttributeRefEntityIdAttribute);
