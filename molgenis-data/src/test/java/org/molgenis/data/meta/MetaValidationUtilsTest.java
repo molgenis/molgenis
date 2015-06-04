@@ -15,7 +15,7 @@ public class MetaValidationUtilsTest
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testValidateNameTooLong()
 	{
-		MetaValidationUtils.validateAttributeName("ThisNameIsTooLongToUseAsAnAttributeName");
+		MetaValidationUtils.validateName("ThisNameIsTooLongToUseAsAnAttributeName");
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
@@ -36,7 +36,8 @@ public class MetaValidationUtilsTest
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("entity");
 
 		List<AttributeMetaData> compAttrs = new ArrayList<>();
-		compAttrs.add(new DefaultAttributeMetaData("aCompStringTooLong1").setDataType(MolgenisFieldTypes.STRING));
+		compAttrs.add(new DefaultAttributeMetaData("aCompStringWayTooLongToUseAsAnAttributeName1")
+				.setDataType(MolgenisFieldTypes.STRING));
 		compAttrs.add(new DefaultAttributeMetaData("aCompString2").setDataType(MolgenisFieldTypes.STRING));
 		emd.addAttribute("aComp").setDataType(MolgenisFieldTypes.COMPOUND).setAttributesMetaData(compAttrs);
 		emd.addAttribute("aString").setDataType(MolgenisFieldTypes.STRING).setIdAttribute(true);

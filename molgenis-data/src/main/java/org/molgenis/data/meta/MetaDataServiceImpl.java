@@ -212,7 +212,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public void addAttribute(String fullyQualifiedEntityName, AttributeMetaData attr)
 	{
-		MetaValidationUtils.validateAttributeName(attr.getName());
+		MetaValidationUtils.validateName(attr.getName());
 
 		EntityMetaData emd = entityMetaDataRepository.addAttribute(fullyQualifiedEntityName, attr);
 		getManageableRepositoryCollection(emd).addAttribute(fullyQualifiedEntityName, attr);
@@ -221,7 +221,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public void addAttributeSync(String fullyQualifiedEntityName, AttributeMetaData attr)
 	{
-		MetaValidationUtils.validateAttributeName(attr.getName());
+		MetaValidationUtils.validateName(attr.getName());
 
 		EntityMetaData emd = entityMetaDataRepository.addAttribute(fullyQualifiedEntityName, attr);
 		getManageableRepositoryCollection(emd).addAttributeSync(fullyQualifiedEntityName, attr);
