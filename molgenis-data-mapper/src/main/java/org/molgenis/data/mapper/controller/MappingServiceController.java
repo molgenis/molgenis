@@ -262,12 +262,19 @@ public class MappingServiceController extends MolgenisPluginController
 		{
 			MappingTarget mappingTarget = mappingProject.getMappingTarget(target);
 			EntityMapping mappingForSource = mappingTarget.getMappingForSource(source);
-			AttributeMapping attributeMapping = mappingForSource.getAttributeMapping(targetAttribute);
-			if (attributeMapping == null)
+			if (algorithm.isEmpty())
 			{
-				attributeMapping = mappingForSource.addAttributeMapping(targetAttribute);
+				mappingForSource.deleteAttributeMapping(targetAttribute);
 			}
-			attributeMapping.setAlgorithm(algorithm);
+			else
+			{
+				AttributeMapping attributeMapping = mappingForSource.getAttributeMapping(targetAttribute);
+				if (attributeMapping == null)
+				{
+					attributeMapping = mappingForSource.addAttributeMapping(targetAttribute);
+				}
+				attributeMapping.setAlgorithm(algorithm);
+			}
 			mappingService.updateMappingProject(mappingProject);
 		}
 		return "redirect:/menu/main/mappingservice/mappingproject/" + mappingProject.getIdentifier();
@@ -367,13 +374,11 @@ public class MappingServiceController extends MolgenisPluginController
 		if (showSuggestedAttributes)
 		{
 			attributes = semanticSearchService.findAttributes(dataService.getEntityMetaData(source),
-					dataService.getEntityMetaData(target),
-					attributeMapping.getTargetAttributeMetaData());
+					dataService.getEntityMetaData(target), attributeMapping.getTargetAttributeMetaData());
 		}
 		else
 		{
-			attributes = Lists.newArrayList(dataService.getEntityMetaData(source)
-					.getAtomicAttributes());
+			attributes = Lists.newArrayList(dataService.getEntityMetaData(source).getAtomicAttributes());
 		}
 
 		model.addAttribute("showSuggestedAttributes", showSuggestedAttributes);
@@ -385,7 +390,6 @@ public class MappingServiceController extends MolgenisPluginController
 
 		return VIEW_ATTRIBUTE_MAPPING;
 	}
-
 
 	/**
 	 * Tests an algoritm by computing it for all entities in the source repository.
