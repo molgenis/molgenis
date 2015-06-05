@@ -4,9 +4,9 @@
 	function generateAlgorithm(mappedCategoryIds, attribute, defaultValue, nullValue) {
 		var algorithm;
 		if(nullValue !== undefined) {
-			algorithm = "$('" + attribute + "').map(" + JSON.stringify(mappedCategoryIds) + ", " + defaultValue + ", " + nullValue +").value();"; 			
+			algorithm = "$('" + attribute + "').map(" + JSON.stringify(mappedCategoryIds) + ", " + JSON.stringify(defaultValue) + ", " + JSON.stringify(nullValue) +").value();";
 		} else if(defaultValue !== undefined) {
-			algorithm = "$('" + attribute + "').map(" + JSON.stringify(mappedCategoryIds) + ", " + defaultValue + ").value();";
+			algorithm = "$('" + attribute + "').map(" + JSON.stringify(mappedCategoryIds) + ", " + JSON.stringify(defaultValue) + ").value();";
 		} else {
 			algorithm = "$('" + attribute + "').map(" + JSON.stringify(mappedCategoryIds) + ").value();";
 		}
@@ -16,39 +16,48 @@
 	$(function() {
 		
 		$('#save-category-mapping-btn').on('click',function() {
-			var mappedCategoryIds = {}, mappingProjectId, target, source, targetAttribute, sourceAttribute, algorithm, defaultValue, nullValue;
+			var mappedCategoryIds = {}, defaultValue = undefined, nullValue = undefined, key, val;
 	
 			// for each source xref value, check which target xref value
 			// was chosen
 			$('#category-mapping-table > tbody > tr').each(function() {
-				if ($(this).attr('id') === 'nullValue') {
-					nullValue = $(this).find('option:selected').val();
-					
+				key = $(this).attr('id');
+				val = $(this).find('option:selected').val();
+				if ( key === 'nullValue') {
+					if(val !== 'use-default-option') {
+						if(val === 'use-null-value') {
+							nullValue = null;
+						} else {
+							nullValue = val;
+						}
+					}
 				} else {
-					if($(this).find('option:selected').val() !== 'use default') {
-						if($(this).find('option:selected').val() === '') {
+					if(val !== 'use-default-option') {
+						if(val === 'use-null-value') {
 							mappedCategoryIds[$(this).attr('id')] = null;
-						} else{
-							mappedCategoryIds[$(this).attr('id')] = $(this).find('option:selected').val();
+						} else {
+							mappedCategoryIds[$(this).attr('id')] = val;
 						}
 					}
 				}
 			});
-	
-			mappingProjectId = $('input[name="mappingProjectId"]').val(), 
-			target = $('input[name="target"]').val(), 
-			source = $('input[name="source"]').val(), 
-			targetAttribute = $('input[name="targetAttribute"]').val(), 
-			sourceAttribute = $('input[name="sourceAttribute"]').val(),
-			defaultValue = $('#default-value').find('option:selected').val();
-			algorithm = generateAlgorithm(mappedCategoryIds, sourceAttribute, defaultValue, nullValue);
 			
+			if(nullValue !== undefined) {
+				defaultValue = null;
+			}
+			if($('#default-value').is(":visible")){
+				defaultValue = $('#default-value').find('option:selected').val();
+				if(defaultValue === 'use-null-value') {
+					defaultValue = null;
+				}
+			}
+
 			$.post(molgenis.getContextUrl() + '/savecategorymapping', {
-				mappingProjectId : mappingProjectId,
-				target : target,
-				source : source,
-				targetAttribute : targetAttribute,
-				algorithm : algorithm,
+				mappingProjectId : $('input[name="mappingProjectId"]').val(),
+				target : $('input[name="target"]').val(),
+				source : $('input[name="source"]').val(),
+				targetAttribute : $('input[name="targetAttribute"]').val(),
+				algorithm : generateAlgorithm(mappedCategoryIds, $('input[name="sourceAttribute"]').val(), defaultValue, nullValue),
 				success : function() {
 					//window.history.back();
 				}
