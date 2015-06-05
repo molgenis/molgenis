@@ -118,10 +118,10 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				.filter(ref -> !getEntityMetaData().getName().equals(referencingEntities.get(0).getA().getName()))
 				.collect(Collectors.toList());
 
-		if (!referencingEntities.isEmpty())
+		if (!nonSelfReferencingEntities.isEmpty())
 		{
 			List<String> entityNames = Lists.newArrayList();
-			referencingEntities.forEach(pair -> entityNames.add(pair.getA().getName()));
+            nonSelfReferencingEntities.forEach(pair -> entityNames.add(pair.getA().getName()));
 
 			StringBuilder msg = new StringBuilder("Cannot delete entity '").append(getEntityMetaData().getName())
 					.append("' because it is referenced by the following entities: ").append(entityNames.toString());
