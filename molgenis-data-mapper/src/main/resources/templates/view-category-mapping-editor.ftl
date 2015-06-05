@@ -28,7 +28,7 @@
 					<#list targetAttributeRefEntityEntities.iterator() as targetEntity>
 						<option value="${targetEntity.getString(targetAttributeRefEntityIdAttribute)}" 
 							<#if categoryMapping.defaultValue??>
-								<#if categoryMapping.defaultValue = targetEntity.getString(targetAttributeRefEntityIdAttribute) >selected </#if>
+								<#if categoryMapping.defaultValue == targetEntity.get(targetAttributeRefEntityIdAttribute)>selected </#if>
 							</#if>
 							>${targetEntity.get(targetAttributeRefEntityLabelAttribute)}</option> 
 					</#list>
