@@ -169,20 +169,24 @@ public class ImportWriter
 			@Override
 			public boolean apply(Entity entity)
 			{
-                Iterator<AttributeMetaData> attributes = entity.getEntityMetaData().getAttributes().iterator();
+				Iterator<AttributeMetaData> attributes = entity.getEntityMetaData().getAttributes().iterator();
 				while (attributes.hasNext())
 				{
 					AttributeMetaData attribute = attributes.next();
 					if (attribute.getRefEntity() != null
-							&& attribute.getRefEntity().getName().equals(entity.getEntityMetaData().getName())){
-                        List<String> ids = entity.getList(attribute.getName());
-                        Iterable<Entity> refEntities = entity.getEntities(attribute.getName());
-                        if(ids != null && ids.size() != Iterators.size(refEntities.iterator())){
-                            throw new UnknownEntityException("One or more values ["+ids+"] from "+attribute.getDataType()+" field "+attribute.getName()+" could not be resolved");
-                        }
-                        return true;
-                    }
-                }
+							&& attribute.getRefEntity().getName().equals(entity.getEntityMetaData().getName()))
+					{
+						List<String> ids = entity.getList(attribute.getName());
+						Iterable<Entity> refEntities = entity.getEntities(attribute.getName());
+						if (ids != null && ids.size() != Iterators.size(refEntities.iterator()))
+						{
+							throw new UnknownEntityException("One or more values [" + ids + "] from "
+									+ attribute.getDataType() + " field " + attribute.getName()
+									+ " could not be resolved");
+						}
+						return true;
+					}
+				}
 
 				return false;
 			}
@@ -547,12 +551,12 @@ public class ImportWriter
 		 * Auto generated
 		 */
 		private static final long serialVersionUID = -5994977400560081655L;
-        private final EntityMetaData entityMetaData;
+		private final EntityMetaData entityMetaData;
 
-        public DefaultEntityImporter(EntityMetaData entityMetaData, DataService dataService, Entity entity)
+		public DefaultEntityImporter(EntityMetaData entityMetaData, DataService dataService, Entity entity)
 		{
 			super(entityMetaData, dataService, entity);
-            this.entityMetaData = entityMetaData;
+			this.entityMetaData = entityMetaData;
 		}
 
 		/**
@@ -567,11 +571,13 @@ public class ImportWriter
 			}
 			catch (UnknownEntityException uee)
 			{
-                //self reference? ignore UnknownEntityExceptions those are solved in a later step
-				if(entityMetaData.getName().equals(entityMetaData.getAttribute(attributeName).getRefEntity().getName())){
-                    return null;
-                }
-                throw uee;
+				// self reference? ignore UnknownEntityExceptions those are solved in a later step
+				if (entityMetaData.getName()
+						.equals(entityMetaData.getAttribute(attributeName).getRefEntity().getName()))
+				{
+					return null;
+				}
+				throw uee;
 			}
 		}
 
@@ -581,11 +587,14 @@ public class ImportWriter
 		@Override
 		public Iterable<Entity> getEntities(String attributeName)
 		{
-            if(entityMetaData.getName().equals(entityMetaData.getAttribute(attributeName).getRefEntity().getName())) {
-                return from(super.getEntities(attributeName)).filter(notNull());
-            }else{
-                return super.getEntities(attributeName);
-            }
+			if (entityMetaData.getName().equals(entityMetaData.getAttribute(attributeName).getRefEntity().getName()))
+			{
+				return from(super.getEntities(attributeName)).filter(notNull());
+			}
+			else
+			{
+				return super.getEntities(attributeName);
+			}
 		}
 	}
 }
