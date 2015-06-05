@@ -89,7 +89,7 @@
         $('#filter-wizard-modal ul.pager.wizard').html('<li class="previous"><a href="#">Previous</a></li><li class="next"><a href="#">Next</a></li>');
         
 		wizard.bootstrapWizard({
-	   		tabClass: 'bwizard-steps',
+			tabClass: 'wizard-steps nav nav-pills',
 	   		onTabShow: function(tab, navigation, index) {
 	   			var $total = navigation.find('li').length;
 	   			var $current = index+1;
