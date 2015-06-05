@@ -127,7 +127,7 @@ public class EntityAttributesValidator
 
 		if (!emailValidator.isValid(email, null))
 		{
-			return createConstraintViolation(entity, attribute, meta);
+			return createConstraintViolation(entity, attribute, meta, "Not a valid e-mail address.");
 		}
 
 		if (email.length() > MolgenisFieldTypes.EMAIL.getMaxLength())
@@ -204,7 +204,7 @@ public class EntityAttributesValidator
 		}
 		catch (MalformedURLException e)
 		{
-			return createConstraintViolation(entity, attribute, meta);
+			return createConstraintViolation(entity, attribute, meta, "Not a valid hyperlink.");
 		}
 
 		if (link.length() > MolgenisFieldTypes.HYPERLINK.getMaxLength())
@@ -314,5 +314,16 @@ public class EntityAttributesValidator
 		}
 
 		return new ConstraintViolation(message, entity.getString(attribute.getName()), entity, attribute, meta, 0);
+	}
+
+	private ConstraintViolation createConstraintViolation(Entity entity, AttributeMetaData attribute,
+			EntityMetaData meta, String message)
+	{
+		String fullMessage = String.format("Invalid %s value '%s' for attribute '%s' of entity '%s'.", attribute
+				.getDataType().getEnumType().toString().toLowerCase(), entity.getString(attribute.getName()),
+				attribute.getLabel(), meta.getName());
+		fullMessage += " " + message;
+
+		return new ConstraintViolation(fullMessage, entity.getString(attribute.getName()), entity, attribute, meta, 0);
 	}
 }
