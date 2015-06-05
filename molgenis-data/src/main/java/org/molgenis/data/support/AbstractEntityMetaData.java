@@ -241,9 +241,9 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 			{
 				idAttributeMetaData = getExtends().getIdAttribute();
 			}
-			if (idAttributeMetaData == null)
+			if (idAttributeMetaData == null && !isAbstract())
 			{
-				LOG.error("No idAttribute specified, this attribute is required");
+				LOG.error("No idAttribute specified for entity{}, this attribute is required", getName());
 				// FIXME entity must be identifiable but in reality this is not always the case
 				// throw new RuntimeException("No idAttribute specified, this attribute is required");
 			}

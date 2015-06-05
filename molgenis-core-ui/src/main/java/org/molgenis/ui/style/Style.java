@@ -19,9 +19,4 @@ public abstract class Style
 		String name = location.split("-")[1].split("\\.")[0];
 		return new AutoValue_Style(name, false, location);
 	}
-
-	public static Style createRemote(String location, String name)
-	{
-		return new AutoValue_Style(name, true, location);
-	}
 }
