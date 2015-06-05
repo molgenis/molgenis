@@ -24,10 +24,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class DependencyResolver
 {
-    @Autowired
-    private DataService dataService;
+	@Autowired
+	private DataService dataService;
 
-    /**
+	/**
 	 * Determine the entity import order
 	 * 
 	 * @param repos
@@ -209,13 +209,17 @@ public class DependencyResolver
 						{
 							dependenciesById.get(id).add(refId);
 						}
-                        else{
-                            Entity refEntity = dataService.getRepository(emd.getAttribute(attr.getName()).getRefEntity().getName()).findOne(refId);
-                            if(refEntity == null){
-                                throw new UnknownEntityException(attr.getRefEntity().getName() + " with "
-                                        + attr.getRefEntity().getIdAttribute().getName() + " [" + refId + "] does not exist");
-                            }
-                        }
+						else
+						{
+							Entity refEntity = dataService.getRepository(
+									emd.getAttribute(attr.getName()).getRefEntity().getName()).findOne(refId);
+							if (refEntity == null)
+							{
+								throw new UnknownEntityException(attr.getRefEntity().getName() + " with "
+										+ attr.getRefEntity().getIdAttribute().getName() + " [" + refId
+										+ "] does not exist");
+							}
+						}
 					}
 				}
 			}

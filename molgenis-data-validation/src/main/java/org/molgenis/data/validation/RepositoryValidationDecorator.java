@@ -267,17 +267,17 @@ public class RepositoryValidationDecorator implements Repository
 					{
 						for (Entity refEntity : refEntities)
 						{
-                            if (refEntity == null)
-                            {
-                                String message = String.format(
-                                        "Unknown refEntity for attribute '%s' of entity '%s'." , attr.getName(),
-                                        getEntityMetaData().getLabel());
-                                violations.add(new ConstraintViolation(message, attr, rownr));
-                                if (violations.size() > 4) break;
-                            }
+							if (refEntity == null)
+							{
+								String message = String.format("Unknown refEntity for attribute '%s' of entity '%s'.",
+										attr.getName(), getEntityMetaData().getLabel());
+								violations.add(new ConstraintViolation(message, attr, rownr));
+								if (violations.size() > 4) break;
+							}
 
-                            else if ((refEntity.getIdValue() != null) && !refEntityIdValues.contains(refEntity.getIdValue()))
-                            {
+							else if ((refEntity.getIdValue() != null)
+									&& !refEntityIdValues.contains(refEntity.getIdValue()))
+							{
 								String message = String.format(
 										"Unknown mref value '%s' for attribute '%s' of entity '%s'.",
 										DataConverter.toString(refEntity.getIdValue()), attr.getName(),
