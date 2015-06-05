@@ -67,7 +67,7 @@
 			var paneContainer = $('<div class="well filter-wizard-fixed-height"></div>');
 			
 			$.each(compoundAttribute.attributes, function(i, attribute) {
-				if(attribute.fieldType !== 'COMPOUND') {
+				if(attribute.fieldType !== 'COMPOUND' && attribute.visible) {
 					paneContainer.append(molgenis.dataexplorer.filter.createFilter(attribute, attributeFilters[attribute.href], true));
 				}
 			});
