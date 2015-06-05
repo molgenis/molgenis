@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
@@ -113,7 +114,11 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		// Find out if the entity is referenced and if it is, report those entities
 		List<Pair<EntityMetaData, List<AttributeMetaData>>> referencingEntities = EntityUtils
 				.getReferencingEntityMetaData(getEntityMetaData(), dataService);
-		if (!referencingEntities.isEmpty() && !isSelfReferencing(referencingEntities))
+		List<Pair<EntityMetaData, List<AttributeMetaData>>> nonSelfReferencingEntities = referencingEntities.stream()
+				.filter(ref -> !getEntityMetaData().getName().equals(referencingEntities.get(0).getA().getName()))
+				.collect(Collectors.toList());
+
+		if (!referencingEntities.isEmpty())
 		{
 			List<String> entityNames = Lists.newArrayList();
 			referencingEntities.forEach(pair -> entityNames.add(pair.getA().getName()));
@@ -135,11 +140,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		}
 	}
 
-    private boolean isSelfReferencing(List<Pair<EntityMetaData, List<AttributeMetaData>>> referencingEntities) {
-        return referencingEntities.size() == 1 && getEntityMetaData().getName().equals(referencingEntities.get(0).getA().getName());
-    }
-
-    /**
+	/**
 	 * Tries to execute a piece of SQL.
 	 *
 	 * @param sql
