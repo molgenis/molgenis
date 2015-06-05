@@ -9,8 +9,6 @@
 <div class="row">
 	<div class="col-md-6">
 		<legend>Category mapping editor</legend>
-		<#if categoryMapping??><code>${categoryMapping.algorithm}</code><br/>
-		Keys: <#list categoryMapping.map?keys as key><code>${key}</code></#list></#if>
 		<h5>
 			Map ${sourceAttribute.label?html} values to ${targetAttribute.label?html} values. Select the correct category that you want to map the source attribute to from the target attribute dropdown
 		</h5>
