@@ -126,8 +126,6 @@
     molgenis.dataexplorer.setGenomeAttributes('${genomebrowser_start_list?js_string}', '${genomebrowser_chrom_list?js_string}', '${genomebrowser_id_list?js_string}', '${genomebrowser_patient_list?js_string}');
 	<#-- load js dependencies -->
 	$.when(
-		$.ajax("<@resource_href "/js/jquery.bootstrap.pager.js"/>", {'cache': true}),
-		$.ajax("<@resource_href "/js/"+dataTable/>", {'cache': true}),
 		$.ajax("<@resource_href "/js/dalliance-compiled.js"/>", {'cache': true}),
 		$.ajax("<@resource_href "/js/dataexplorer-data.js"/>", {'cache': true}))
 		.done(function() {
@@ -149,13 +147,7 @@
 		            $('#genomebrowser').css('display', 'none');
 		        }
 
-			<#-- create data table -->
-			var rowClickable = ${rowClickable?string('true', 'false')};
-			var tableEditable = ${tableEditable?string('true', 'false')};
-			if (tableEditable) {
-				tableEditable = molgenis.hasWritePermission(molgenis.dataexplorer.getSelectedEntityMeta().name);
-			}
-			molgenis.dataexplorer.data.createDataTable(tableEditable, rowClickable);
+			molgenis.dataexplorer.data.createDataTable();
 		})
 		.fail(function() {
 			molgenis.createAlert([{'message': 'An error occured. Please contact the administrator.'}], 'error');

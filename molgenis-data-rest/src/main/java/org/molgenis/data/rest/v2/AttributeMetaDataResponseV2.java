@@ -11,6 +11,7 @@ import org.molgenis.data.rest.RestController;
 import org.molgenis.security.core.MolgenisPermissionService;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
@@ -43,13 +44,13 @@ class AttributeMetaDataResponseV2
 	 * 
 	 * @param entityParentName
 	 * @param attr
-	 * @param attributes
+	 * @param attrFilter
 	 *            set of lowercase attribute names to include in response
 	 * @param attributeExpandsSet
 	 *            set of lowercase attribute names to expand in response
 	 */
 	public AttributeMetaDataResponseV2(final String entityParentName, AttributeMetaData attr,
-			AttributeFilter attributes, MolgenisPermissionService permissionService)
+			AttributeFilter attrFilter, MolgenisPermissionService permissionService)
 	{
 		String attrName = attr.getName();
 		this.href = Href.concatMetaAttributeHref(RestController.BASE_URI, entityParentName, attrName);
@@ -65,49 +66,55 @@ class AttributeMetaDataResponseV2
 		EntityMetaData refEntity = attr.getRefEntity();
 		if (refEntity != null)
 		{
-			AttributeFilter subAttributes = attributes != null ? attributes.getAttributeFilter(attrName) : null;
-			this.refEntity = new EntityMetaDataResponseV2(refEntity, subAttributes, permissionService);
+			AttributeFilter subAttrs = attrFilter != null ? attrFilter.getAttributeFilter(attr) : null;
+			this.refEntity = new EntityMetaDataResponseV2(refEntity, subAttrs, permissionService);
 		}
 		else
 		{
 			this.refEntity = null;
 		}
 
-		// }
-		// else
-		// {
-		// this.refEntity = refEntity != null ? new Href(Href.concatMetaEntityHref(RestController.BASE_URI,
-		// refEntity.getName()), String.format("%s/%s", RestController.BASE_URI, refEntity.getName())) : null; //
-		// FIXME
-		// // apply
-		// // Href
-		// // escaping
-		// // fix
-		// }
-
-		Iterable<AttributeMetaData> attributeParts = attr.getAttributeParts();
-		this.attributes = attributeParts != null ? Lists.newArrayList(Iterables.transform(attributeParts,
-				new Function<AttributeMetaData, Object>()
+		Iterable<AttributeMetaData> attrParts = attr.getAttributeParts();
+		if (attrParts != null)
+		{
+			// filter attribute parts
+			if (attrFilter != null)
+			{
+				attrParts = Iterables.filter(attrParts, new Predicate<AttributeMetaData>()
 				{
-
 					@Override
-					public Object apply(AttributeMetaData attributeMetaData)
+					public boolean apply(AttributeMetaData attr)
 					{
-						String attrName = attributeMetaData.getName();
-						AttributeFilter subAttributes = attributes != null ? attributes.getAttributeFilter(attrName) : null;
-						// if (attributeExpandsSet != null
-						// && attributeExpandsSet.containsKey("attributes"))
-						// {
-						return new AttributeMetaDataResponseV2(entityParentName, attributeMetaData, subAttributes,
-								permissionService);
-						// }
-						// else
-						// {
-						// return Collections.<String, Object> singletonMap("href", Href.concatMetaAttributeHref(
-						// RestController.BASE_URI, entityParentName, attributeMetaData.getName()));
-						// }
+						return attrFilter.includeAttribute(attr);
 					}
-				})) : null;
+				});
+			}
+
+			// create attribute response
+			this.attributes = Lists.newArrayList(Iterables.transform(attrParts,
+					new Function<AttributeMetaData, AttributeMetaDataResponseV2>()
+					{
+						@Override
+						public AttributeMetaDataResponseV2 apply(AttributeMetaData attr)
+						{
+							AttributeFilter subAttrFilter;
+							if (attrFilter != null)
+							{
+								subAttrFilter = attrFilter.getAttributeFilter(attr);
+							}
+							else
+							{
+								subAttrFilter = null;
+							}
+							return new AttributeMetaDataResponseV2(entityParentName, attr, subAttrFilter,
+									permissionService);
+						}
+					}));
+		}
+		else
+		{
+			this.attributes = null;
+		}
 
 		this.auto = attr.isAuto();
 		this.nillable = attr.isNillable();
@@ -156,6 +163,11 @@ class AttributeMetaDataResponseV2
 	public List<String> getEnumOptions()
 	{
 		return enumOptions;
+	}
+
+	public Long getMaxLength()
+	{
+		return maxLength;
 	}
 
 	public Object getRefEntity()
@@ -252,5 +264,4 @@ class AttributeMetaDataResponseV2
 	{
 		return validationExpression;
 	}
-
 }

@@ -8,7 +8,8 @@ function($, molgenis, settingsXhr) {
 	
 	// module api
 	self.getSelectedEntityMeta = getSelectedEntityMeta;
-	self.getSelectedAttributes = getSelectedAttributes; 
+	self.getSelectedAttributes = getSelectedAttributes;
+	self.getSelectedAttributesTree = getSelectedAttributesTree;
 	self.getEntityQuery = getEntityQuery;
     self.createHeader = createHeader;
     self.setGenomeAttributes = setGenomeAttributes;
@@ -21,6 +22,7 @@ function($, molgenis, settingsXhr) {
 	var selectedEntityMetaData = null;
 	var attributeFilters = {};
 	var selectedAttributes = [];
+	var selectedAttributesTree = {};
 	var searchQuery = null;
 	var modules = [];
 
@@ -57,6 +59,13 @@ function($, molgenis, settingsXhr) {
 	 */
 	function getSelectedAttributes() {
 		return selectedAttributes;
+	}
+	
+	/**
+	 * @memberOf molgenis.dataexplorer
+	 */
+	function getSelectedAttributesTree() {
+		return selectedAttributesTree;
 	}
 	
 	/**
@@ -105,7 +114,12 @@ function($, molgenis, settingsXhr) {
 			'selectedAttributes' : attributes,
 			'onAttributesSelect' : function(selects) {
 				selectedAttributes = container.tree('getSelectedAttributes');
-				$(document).trigger('changeAttributeSelection', {'attributes': selectedAttributes, 'totalNrAttributes': Object.keys(entityMetaData.attributes).length});
+				selectedAttributesTree = container.tree('getSelectedAttributesTree') 
+				$(document).trigger('changeAttributeSelection', {
+					'attributes' : selectedAttributes,
+					'attributesTree' : selectedAttributesTree,
+					'totalNrAttributes' : Object.keys(entityMetaData.attributes).length
+				});
 			},
 			'onAttributeClick' : function(attribute) {
 				$(document).trigger('clickAttribute', {'attribute': attribute});
@@ -281,9 +295,31 @@ function($, molgenis, settingsXhr) {
 			selectedAttributes = $.map(entityMetaData.attributes, function(attribute) {
 				if(state.attrs === undefined || state.attrs === null) return attribute.fieldType !== 'COMPOUND' ? attribute : null;
 				else if(state.attrs === 'none') return null;
-				else return state.attrs.indexOf(attribute.name) !== -1 && attribute.fieldType !== 'COMPOUND' ? attribute : null;
+				else {
+					// TODO elegant solution
+					for(var i = 0; i < state.attrs.length; ++i) {
+						var attrName = state.attrs[i]; 
+						if(attrName.indexOf('(') !== -1) {
+							attrName = attrName.substring(0, attrName.indexOf('('));
+							attribute.expanded = true;
+						} else {
+							attribute.expanded = false;
+						}
+						if(attribute.name === attrName) {
+							return attribute.fieldType !== 'COMPOUND' ? attribute : null;
+						}
+					}
+					return null;
+				}
 			});
 			
+			selectedAttributesTree = {};
+			for(var i = 0; i < selectedAttributes.length; ++i) {
+				var key = selectedAttributes[i].name;
+				var value = selectedAttributes[i].expanded === true ? {'*': null} : null;
+				selectedAttributesTree[key] = value;	
+			}
+			console.log(selectedAttributesTree);
 			createEntityMetaTree(entityMetaData, selectedAttributes);
 			
 			//Show wizard on show of dataexplorer if url param 'wizard=true' is added

@@ -1,12 +1,17 @@
 package org.molgenis.data.importer;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.WritableFactory;
+import org.molgenis.data.excel.ExcelWriter;
+import org.molgenis.data.exporter.EmxExporterService;
 import org.molgenis.ui.wizard.AbstractWizardPage;
 import org.molgenis.ui.wizard.Wizard;
 import org.molgenis.util.FileUploadUtils;
@@ -27,6 +32,9 @@ public class UploadWizardPage extends AbstractWizardPage
 	private final FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
 
 	@Autowired
+	private EmxExporterService emxExporterService;
+
+	@Autowired
 	public UploadWizardPage(ImportServiceFactory importServiceFactory,
 			FileRepositoryCollectionFactory fileRepositoryCollectionFactory)
 	{
@@ -44,6 +52,30 @@ public class UploadWizardPage extends AbstractWizardPage
 	@Override
 	public String handleRequest(HttpServletRequest request, BindingResult result, Wizard wizard)
 	{
+		WritableFactory xlsWritableFactory = null;
+		try
+		{
+			xlsWritableFactory = new ExcelWriter(new File("D:\\tmp\\dump.xls"));
+			emxExporterService.export(xlsWritableFactory);
+		}
+		catch (FileNotFoundException e)
+		{
+			throw new RuntimeException(e);
+		}
+		finally
+		{
+			if (xlsWritableFactory != null)
+			{
+				try
+				{
+					xlsWritableFactory.close();
+				}
+				catch (IOException e)
+				{
+					throw new RuntimeException(e);
+				}
+			}
+		}
 		if (!(wizard instanceof ImportWizard))
 		{
 			throw new RuntimeException("Wizard must be of type '" + ImportWizard.class.getSimpleName()

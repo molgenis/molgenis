@@ -3,11 +3,14 @@ package org.molgenis.data.rest.v2;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
 import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
+import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import java.sql.Date;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,27 +23,28 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.rest.Href;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.util.ErrorMessageResponse;
+import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Controller
 @RequestMapping(BASE_URI)
 class RestControllerV2
 {
-	// TODO error handling
-
 	private static final Logger LOG = LoggerFactory.getLogger(RestControllerV2.class);
 
 	public static final String BASE_URI = "/api/v2";
@@ -78,6 +82,28 @@ class RestControllerV2
 		return createEntityResponse(entity, attributeFilter, true);
 	}
 
+	@RequestMapping(value = "/{entityName}/{id:.+}", method = POST, params = "_method=GET")
+	@ResponseBody
+	public Map<String, Object> retrieveEntityPost(@PathVariable("entityName") String entityName,
+			@PathVariable("id") Object id,
+			@RequestParam(value = "attributes", required = false) AttributeFilter attributeFilter)
+	{
+		Entity entity = dataService.findOne(entityName, id);
+		if (entity == null)
+		{
+			throw new UnknownEntityException(entityName + " [" + id + "] not found");
+		}
+
+		return createEntityResponse(entity, attributeFilter, true);
+	}
+
+	@RequestMapping(value = "/{entityName}/{id:.+}", method = DELETE)
+	@ResponseStatus(NO_CONTENT)
+	public void deleteEntity(@PathVariable("entityName") String entityName, @PathVariable("id") Object id)
+	{
+		dataService.delete(entityName, id);
+	}
+
 	/**
 	 * Retrieve an entity collection, optionally specify which attributes to include in the response.
 	 * 
@@ -94,20 +120,36 @@ class RestControllerV2
 		return createEntityCollectionResponse(entityName, request);
 	}
 
+	@RequestMapping(value = "/{entityName}", method = POST, params = "_method=GET")
+	@ResponseBody
+	public EntityCollectionResponseV2 retrieveEntityCollectionPost(@PathVariable("entityName") String entityName,
+			@Valid EntityCollectionRequestV2 request)
+	{
+		return createEntityCollectionResponse(entityName, request);
+	}
+
+	@ExceptionHandler(RuntimeException.class)
+	@ResponseStatus(INTERNAL_SERVER_ERROR)
+	@ResponseBody
+	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
+	{
+		LOG.error("", e);
+		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
+	}
+
 	private EntityCollectionResponseV2 createEntityCollectionResponse(String entityName,
 			EntityCollectionRequestV2 request)
 	{
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
 
-		List<QueryRule> queryRules = request.getQ() == null ? Collections.<QueryRule> emptyList() : request.getQ();
-		Query q = new QueryImpl(queryRules).pageSize(request.getNum()).offset(request.getStart())
-				.sort(request.getSort());
+		Query q = request.getQ() != null ? request.getQ().createQuery(meta) : new QueryImpl();
+		q.pageSize(request.getNum()).offset(request.getStart()).sort(request.getSort());
 
 		Iterable<Entity> it = dataService.findAll(entityName, q);
 		Long count = dataService.count(entityName, q);
 		EntityPager pager = new EntityPager(request.getStart(), request.getNum(), count, it);
 
-		AttributeFilter attributeFilter = request.getAttributes();
+		AttributeFilter attributeFilter = request.getAttrs();
 		List<Map<String, Object>> entities = new ArrayList<>();
 		for (Entity entity : it)
 		{
@@ -152,7 +194,7 @@ class RestControllerV2
 		for (AttributeMetaData attr : attrs)
 		{
 			String attrName = attr.getName();
-			if (attrFilter.includeAttribute(attrName))
+			if (attrFilter.includeAttribute(attr))
 			{
 				FieldTypeEnum dataType = attr.getDataType().getEnumType();
 				switch (dataType)
@@ -166,7 +208,7 @@ class RestControllerV2
 						Map<String, Object> refEntityResponse;
 						if (refEntity != null)
 						{
-							AttributeFilter refAttrFilter = attrFilter.getAttributeFilter(attrName);
+							AttributeFilter refAttrFilter = attrFilter.getAttributeFilter(attr);
 							if (refAttrFilter == null)
 							{
 								refAttrFilter = createDefaultRefAttributeFilter(attr);
@@ -186,7 +228,7 @@ class RestControllerV2
 						if (refEntities != null)
 						{
 							refEntityResponses = new ArrayList<Map<String, Object>>();
-							AttributeFilter refAttrFilter = attrFilter.getAttributeFilter(attrName);
+							AttributeFilter refAttrFilter = attrFilter.getAttributeFilter(attr);
 							if (refAttrFilter == null)
 							{
 								refAttrFilter = createDefaultRefAttributeFilter(attr);

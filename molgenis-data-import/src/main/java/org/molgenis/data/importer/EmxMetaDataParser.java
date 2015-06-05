@@ -75,15 +75,15 @@ import com.google.common.collect.Sets;
 public class EmxMetaDataParser implements MetaDataParser
 {
 
-	static final String PACKAGES = PackageMetaData.ENTITY_NAME;
-	static final String TAGS = TagMetaData.ENTITY_NAME;
-	static final String ATTRIBUTES = AttributeMetaDataMetaData.ENTITY_NAME;
+	public static final String PACKAGES = PackageMetaData.ENTITY_NAME;
+	public static final String TAGS = TagMetaData.ENTITY_NAME;
+	public static final String ATTRIBUTES = AttributeMetaDataMetaData.ENTITY_NAME;
 
 	public static final String ENTITY = "entity";
 	public static final String PART_OF_ATTRIBUTE = "partOfAttribute";
 
 	// Sheet names
-	static final String ENTITIES = EntityMetaDataMetaData.ENTITY_NAME;
+	public static final String ENTITIES = EntityMetaDataMetaData.ENTITY_NAME;
 	static final List<String> SUPPORTED_ENTITY_ATTRIBUTES = Arrays.asList(
 			org.molgenis.data.meta.EntityMetaDataMetaData.LABEL.toLowerCase(),
 			org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION.toLowerCase(), "name", ABSTRACT.toLowerCase(),

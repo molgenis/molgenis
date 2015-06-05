@@ -33,7 +33,7 @@
     
     $(document).on('dataChange.diseasematcher', function(e) {
     	if (e.namespace !== 'data' && Table){
-    		Table.setProps({query: getQuery().q});
+    		Table.setProps({query: getQuery()});
     	}
 	});
     
@@ -54,18 +54,16 @@
 	/**
 	 * @memberOf molgenis.dataexplorer.data
 	 */
-	function createDataTable(editable, rowClickable) {
+	function createDataTable() {
 		Table = React.render(molgenis.ui.Table({
 			entity: getEntity().name,
-			attrs: _.map(getAttributes(), function(attr) {
-				return attr.name
-			}),
-			query: getQuery().q,
+			attrs: getAttributesTree(),
+			query: getQuery(),
 			maxRows: 18,
 			onRowAdd: onDataChange,
 			onRowDelete: onDataChange,
 			onRowEdit: onDataChange,
-			onRowInspect: rowClickable ? onRowInspect : undefined
+			onRowInspect: onRowInspect
 		}), $('#data-table-container')[0]);
 	}
 	
@@ -73,10 +71,9 @@
 		$(document).trigger('dataChange.data');
 	}
 	
-	function onRowInspect(entity) {
-		var entityData = entity.split('/');
-		var entityId = decodeURIComponent(entityData.pop());
-		var entityName = decodeURIComponent(entityData.pop());
+	function onRowInspect(e) {
+		var entityId = e.id;
+		var entityName = e.name;
 		
 		$('#entityReport').load("dataexplorer/details",{entityName: entityName, entityId: entityId}, function() {
 			  $('#entityReportModal').modal("show");
@@ -317,6 +314,13 @@
 	/**
 	 * @memberOf molgenis.dataexplorer.data
 	 */
+	function getAttributesTree() {
+		return molgenis.dataexplorer.getSelectedAttributesTree();
+	}
+	
+	/**
+	 * @memberOf molgenis.dataexplorer.data
+	 */
 	function getQuery() {
 		return molgenis.dataexplorer.getEntityQuery();
 	}
@@ -335,11 +339,9 @@
 	 * @memberOf molgenis.dataexplorer.data
 	 */
 	$(function() {
-		$(document).on('changeAttributeSelection.data', function(e, data) {console.log(data);
+		$(document).on('changeAttributeSelection.data', function(e, data) {
 			if(Table) {
-				Table.setProps({attrs: _.map(data.attributes, function(attr) {
-					return attr.name
-				})});
+				Table.setProps({attrs: data.attributesTree});
 			}
 		});
 
@@ -378,7 +380,7 @@
 		$(document).on('changeQuery.data', function(e, query) {
 			if(Table) {
 				Table.setProps({
-					query : query.q
+					query : query
 				});
 			}
 			// TODO what to do for genome browser

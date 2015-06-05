@@ -10,7 +10,7 @@
 			
 			var isFolder = false;		
 			var classes = null;
-			if (this.fieldType === 'MREF' || this.fieldType === 'XREF'){
+			if (molgenis.isRefAttr(this)) {
 				if (maxDepth >= 0){
 					isFolder = refEntityDepth < maxDepth ? true : false;
 				}else{
@@ -25,13 +25,14 @@
 			
 			
             if(this.visible) {
-                var isFolder = isFolder || this.fieldType === 'COMPOUND';
+                var isFolder = isFolder || molgenis.isCompoundAttr(this);
 
                 children.push({
                     'key': this.href,
                     'title': this.label,
                     'tooltip': this.description,
                     'folder': isFolder,
+                    'hideCheckbox': refEntityDepth > 0,
                     'lazy': isFolder,
                     'expanded': !isFolder,
                     'selected': doSelect(this),
@@ -89,6 +90,30 @@
 		
 		// plugin methods
 		container.data('tree', {
+			'getSelectedAttributesTree' : function(options) {
+				var selectedNodes = tree.fancytree('getTree').getSelectedNodes(true);
+				var attrs = {};
+				for(var i = 0; i < selectedNodes.length; ++i) {
+					// construct path to node
+					var path = [];
+					for(var node = selectedNodes[i]; node !== null;) {
+						if(node.data && node.data.attribute) {
+							path.push(node.data.attribute.name);
+						}
+						node = node.getParent();
+					}
+					
+					// update attrs
+					for (var j = path.length - 1, attrsAtDepth = attrs; j >= 0; --j) {
+						var attrName = path[j];
+						if(attrsAtDepth[attrName] === undefined) {
+							attrsAtDepth[attrName] = j > 0 ? {} : null; 
+						}
+						attrsAtDepth = attrsAtDepth[attrName];
+					}
+				}
+				return attrs;
+			},
 			'getSelectedAttributes' : function(options) {
 				var selectedNodes = tree.fancytree('getTree').getSelectedNodes(true);
 				return $.map(selectedNodes, function(selectedNode) {
@@ -119,7 +144,7 @@
 				
 				var target;
 				var increaseDepth = 0;
-				if (node.data.attribute.fieldType === "MREF" || node.data.attribute.fieldType === "XREF"){
+				if (molgenis.isRefAttr(node.data.attribute)){
 					target = node.data.attribute.refEntity.href;
 					increaseDepth = 1;
 				}else{

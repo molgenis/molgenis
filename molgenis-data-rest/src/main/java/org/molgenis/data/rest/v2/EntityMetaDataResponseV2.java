@@ -2,9 +2,7 @@ package org.molgenis.data.rest.v2;
 
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.AttributeMetaData;
@@ -14,7 +12,7 @@ import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 
 import com.google.common.base.Function;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 
 class EntityMetaDataResponseV2
@@ -24,7 +22,7 @@ class EntityMetaDataResponseV2
 	private final String name;
 	private final String label;
 	private final String description;
-	private final Map<String, Object> attributes;
+	private final List<AttributeMetaDataResponseV2> attributes;
 	private final String labelAttribute;
 	private final String idAttribute;
 	private final List<String> lookupAttributes;
@@ -45,10 +43,10 @@ class EntityMetaDataResponseV2
 	/**
 	 * 
 	 * @param meta
-	 * @param attributes
+	 * @param attrFilter
 	 *            set of lowercase attribute names to include in response
 	 */
-	public EntityMetaDataResponseV2(EntityMetaData meta, AttributeFilter attributes,
+	public EntityMetaDataResponseV2(EntityMetaData meta, AttributeFilter attrFilter,
 			MolgenisPermissionService permissionService)
 	{
 		String name = meta.getName();
@@ -59,21 +57,35 @@ class EntityMetaDataResponseV2
 		this.description = meta.getDescription();
 		this.label = meta.getLabel();
 
-		this.attributes = new LinkedHashMap<String, Object>();
-
-		for (AttributeMetaData attr : meta.getAttributes())
-		{
-			String attrName = attr.getName();
-			if (!attrName.equals("__Type")) // FIXME check if still needed for JPA
-			{
-				if (attributes == null || attributes.includeAttribute(attrName))
+		// filter attribute parts
+		Iterable<AttributeMetaData> filteredAttrs = attrFilter != null ? Iterables.filter(meta.getAttributes(),
+				new Predicate<AttributeMetaData>()
 				{
-					AttributeFilter subAttributes = attributes != null ? attributes.getAttributeFilter(attrName) : null;
-					this.attributes.put(attrName, new AttributeMetaDataResponseV2(name, attr, subAttributes,
-							permissionService));
-				}
-			}
-		}
+					@Override
+					public boolean apply(AttributeMetaData attr)
+					{
+						return attrFilter.includeAttribute(attr);
+					}
+				}) : meta.getAttributes();
+
+		this.attributes = Lists.newArrayList(Iterables.transform(filteredAttrs,
+				new Function<AttributeMetaData, AttributeMetaDataResponseV2>()
+				{
+					@Override
+					public AttributeMetaDataResponseV2 apply(AttributeMetaData attr)
+					{
+						AttributeFilter subAttrFilter;
+						if (attrFilter != null)
+						{
+							subAttrFilter = attrFilter.getAttributeFilter(attr);
+						}
+						else
+						{
+							subAttrFilter = null;
+						}
+						return new AttributeMetaDataResponseV2(name, attr, subAttrFilter, permissionService);
+					}
+				}));
 
 		AttributeMetaData labelAttribute = meta.getLabelAttribute();
 		this.labelAttribute = labelAttribute != null ? labelAttribute.getName() : null;
@@ -132,9 +144,9 @@ class EntityMetaDataResponseV2
 		return lookupAttributes;
 	}
 
-	public Map<String, Object> getAttributes()
+	public List<AttributeMetaDataResponseV2> getAttributes()
 	{
-		return ImmutableMap.copyOf(attributes);
+		return attributes;
 	}
 
 	public String getLabelAttribute()

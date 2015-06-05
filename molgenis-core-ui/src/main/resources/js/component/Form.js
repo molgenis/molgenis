@@ -35,7 +35,7 @@
 				formLayout: 'horizontal',
 				modal: false,
 				enableOptionalFilter: true,
-				enableFormIndex: false,
+				enableFormIndex: true,
 				colOffset: 3,
 				saveOnBlur: false,
 				showHidden: false,

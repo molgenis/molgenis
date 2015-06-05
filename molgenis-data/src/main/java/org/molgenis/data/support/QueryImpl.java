@@ -285,7 +285,8 @@ public class QueryImpl implements Query
 	@Override
 	public Sort sort()
 	{
-		return new Sort();
+		this.sort = new Sort();
+		return this.sort;
 	}
 
 	@Override

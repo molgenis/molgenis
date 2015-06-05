@@ -1,20 +1,18 @@
 package org.molgenis.data.rest.v2;
 
-import java.util.List;
-
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
-import org.molgenis.data.QueryRule;
-import org.springframework.data.domain.Sort;
+import org.molgenis.data.Sort;
+import org.molgenis.data.rsql.QueryRsql;
 
 class EntityCollectionRequestV2
 {
 	public static final int MAX_ROWS = 10000;
 	public static final int DEFAULT_ROW_COUNT = 100;
-	private List<QueryRule> q;
+	private QueryRsql q;
 	private Sort sort;
-	private AttributeFilter attributes;
+	private AttributeFilter attrs;
 
 	@Min(0)
 	private int start = 0;
@@ -42,12 +40,12 @@ class EntityCollectionRequestV2
 		this.num = num;
 	}
 
-	public List<QueryRule> getQ()
+	public QueryRsql getQ()
 	{
 		return q;
 	}
 
-	public void setQ(List<QueryRule> q)
+	public void setQ(QueryRsql q)
 	{
 		this.q = q;
 	}
@@ -62,20 +60,20 @@ class EntityCollectionRequestV2
 		this.sort = sort;
 	}
 
-	public AttributeFilter getAttributes()
+	public AttributeFilter getAttrs()
 	{
-		return attributes;
+		return attrs;
 	}
 
-	public void setAttributes(AttributeFilter attributes)
+	public void setAttrs(AttributeFilter attrs)
 	{
-		this.attributes = attributes;
+		this.attrs = attrs;
 	}
 
 	@Override
 	public String toString()
 	{
-		return "EntityCollectionRequestV2 [q=" + q + ", sort=" + sort + ", attributes=" + attributes + ", start="
-				+ start + ", num=" + num + "]";
+		return "EntityCollectionRequestV2 [q=" + q + ", sort=" + sort + ", attrs=" + attrs + ", start=" + start
+				+ ", num=" + num + "]";
 	}
 }

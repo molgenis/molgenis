@@ -1,35 +1,23 @@
 package org.molgenis.data.rsql;
 
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DATE;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DATE_TIME;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DECIMAL;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.INT;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.LONG;
-
 import java.util.Iterator;
+import java.util.List;
 
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisQueryException;
 import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule;
-import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.support.QueryImpl;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
+
 import cz.jirutka.rsql.parser.ast.AndNode;
 import cz.jirutka.rsql.parser.ast.ComparisonNode;
-import cz.jirutka.rsql.parser.ast.EqualNode;
-import cz.jirutka.rsql.parser.ast.GreaterThanNode;
-import cz.jirutka.rsql.parser.ast.GreaterThanOrEqualNode;
-import cz.jirutka.rsql.parser.ast.InNode;
-import cz.jirutka.rsql.parser.ast.LessThanNode;
-import cz.jirutka.rsql.parser.ast.LessThanOrEqualNode;
 import cz.jirutka.rsql.parser.ast.NoArgRSQLVisitorAdapter;
 import cz.jirutka.rsql.parser.ast.Node;
-import cz.jirutka.rsql.parser.ast.NotEqualNode;
-import cz.jirutka.rsql.parser.ast.NotInNode;
 import cz.jirutka.rsql.parser.ast.OrNode;
 
 /**
@@ -50,10 +38,9 @@ public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query>
 	@Override
 	public Query visit(AndNode node)
 	{
-		q.nest();
+		q.nest(); // TODO only nest if more than one child
 
-		Iterator<Node> it = node.iterator();
-		while (it.hasNext())
+		for (Iterator<Node> it = node.iterator(); it.hasNext();)
 		{
 			Node child = it.next();
 			child.accept(this);
@@ -72,10 +59,9 @@ public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query>
 	@Override
 	public Query visit(OrNode node)
 	{
-		q.nest();
+		q.nest(); // TODO only nest if more than one child
 
-		Iterator<Node> it = node.iterator();
-		while (it.hasNext())
+		for (Iterator<Node> it = node.iterator(); it.hasNext();)
 		{
 			Node child = it.next();
 			child.accept(this);
@@ -92,59 +78,114 @@ public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query>
 	}
 
 	@Override
-	public Query visit(EqualNode node)
+	public Query visit(ComparisonNode node)
 	{
-		AttributeMetaData attr = getAttribute(node);
-		Object value = DataConverter.convert(node.getArguments().get(0), attr);
-
-		return q.eq(attr.getName(), value);
+		String attrName = node.getSelector();
+		String symbol = node.getOperator().getSymbol();
+		List<String> values = node.getArguments();
+		switch (symbol)
+		{
+			case "=q=":
+				String searchValue = values.get(0);
+				if (attrName.equals("*"))
+				{
+					q.search(searchValue);
+				}
+				else
+				{
+					q.search(attrName, searchValue);
+				}
+				break;
+			case "==":
+				Object eqValue = DataConverter.convert(values.get(0), getAttribute(node));
+				q.eq(attrName, eqValue);
+				break;
+			case "=in=":
+				AttributeMetaData inAttr = getAttribute(node);
+				q.in(attrName, Iterables.transform(values, new Function<String, Object>()
+				{
+					@Override
+					public Object apply(String value)
+					{
+						return DataConverter.convert(value, inAttr);
+					}
+				}));
+				break;
+			case "=lt=":
+			case "<":
+				AttributeMetaData ltAttr = getAttribute(node);
+				validateNumericOrDate(ltAttr, symbol);
+				Object ltValue = DataConverter.convert(values.get(0), ltAttr);
+				q.lt(attrName, ltValue);
+				break;
+			case "=le=":
+			case "<=":
+				AttributeMetaData leAttr = getAttribute(node);
+				validateNumericOrDate(leAttr, symbol);
+				Object leValue = DataConverter.convert(values.get(0), leAttr);
+				q.le(attrName, leValue);
+				break;
+			case "=gt=":
+			case ">":
+				AttributeMetaData gtAttr = getAttribute(node);
+				validateNumericOrDate(gtAttr, symbol);
+				Object gtValue = DataConverter.convert(values.get(0), gtAttr);
+				q.gt(attrName, gtValue);
+				break;
+			case "=ge=":
+			case ">=":
+				AttributeMetaData geAttr = getAttribute(node);
+				validateNumericOrDate(geAttr, symbol);
+				Object geValue = DataConverter.convert(values.get(0), geAttr);
+				q.ge(attrName, geValue);
+				break;
+			case "=rng=":
+				AttributeMetaData rngAttr = getAttribute(node);
+				validateNumericOrDate(rngAttr, symbol);
+				Object fromValue = values.get(0) != null ? DataConverter.convert(values.get(0), rngAttr) : null;
+				Object toValue = values.get(1) != null ? DataConverter.convert(values.get(1), rngAttr) : null;
+				q.rng(attrName, fromValue, toValue);
+				break;
+			case "=like=":
+				String likeValue = values.get(0);
+				q.like(attrName, likeValue);
+				break;
+			case "!=":
+				Object notEqValue = DataConverter.convert(values.get(0), getAttribute(node));
+				q.not().eq(attrName, notEqValue);
+				break;
+			case "=should=":
+				throw new MolgenisQueryException("Unsupported RSQL query operator [" + symbol + "]");
+			case "=dismax=":
+				throw new MolgenisQueryException("Unsupported RSQL query operator [" + symbol + "]");
+			case "=fuzzy=":
+				throw new MolgenisQueryException("Unsupported RSQL query operator [" + symbol + "]");
+			default:
+				throw new MolgenisQueryException("Unknown RSQL query operator [" + symbol + "]");
+		}
+		return q;
 	}
 
-	@Override
-	public Query visit(GreaterThanOrEqualNode node)
+	private void validateNumericOrDate(AttributeMetaData attr, String symbol)
 	{
-		return numericalQueryRule(node, Operator.GREATER_EQUAL);
-	}
-
-	@Override
-	public Query visit(GreaterThanNode node)
-	{
-		return numericalQueryRule(node, Operator.GREATER);
-	}
-
-	@Override
-	public Query visit(LessThanOrEqualNode node)
-	{
-		return numericalQueryRule(node, Operator.LESS_EQUAL);
-	}
-
-	@Override
-	public Query visit(LessThanNode node)
-	{
-		return numericalQueryRule(node, Operator.LESS);
-	}
-
-	@Override
-	public Query visit(NotEqualNode node)
-	{
-		throw new UnsupportedOperationException("!= not supported");
-	}
-
-	@Override
-	public Query visit(NotInNode node)
-	{
-		throw new UnsupportedOperationException("=out= not supported");
-	}
-
-	@Override
-	public Query visit(InNode node)
-	{
-		// IN is not implemented ES
-		throw new UnsupportedOperationException("=in= not supported");
+		switch (attr.getDataType().getEnumType())
+		{
+			case DATE:
+			case DATE_TIME:
+			case DECIMAL:
+			case INT:
+			case LONG:
+				break;
+			// $CASES-OMITTED$
+			default:
+				throw new IllegalArgumentException("Can't perform operator '\" + symbol + \"' on attribute '\""
+						+ attr.getName() + "\"");
+		}
 	}
 
 	private AttributeMetaData getAttribute(ComparisonNode node)
 	{
+		// FIXME a.b ref attribute selectors
 		String attrName = node.getSelector();
 		AttributeMetaData attr = entityMetaData.getAttribute(attrName);
 		if (attr == null)
@@ -153,24 +194,5 @@ public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query>
 		}
 
 		return attr;
-	}
-
-	private Query numericalQueryRule(ComparisonNode node, Operator operator)
-	{
-		AttributeMetaData attr = getAttribute(node);
-		FieldTypeEnum fieldType = attr.getDataType().getEnumType();
-
-		if ((fieldType != INT) && (fieldType != LONG) && (fieldType != DECIMAL) && (fieldType != DATE)
-				&& (fieldType != DATE_TIME))
-		{
-			throw new IllegalArgumentException("Can't perform operator '" + operator + "' on attribute '"
-					+ attr.getName() + "'");
-		}
-
-		Object value = DataConverter.convert(node.getArguments().get(0), attr);
-
-		q.addRule(new QueryRule(attr.getName(), operator, value));
-
-		return q;
 	}
 }

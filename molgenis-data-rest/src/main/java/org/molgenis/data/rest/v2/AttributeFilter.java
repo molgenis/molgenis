@@ -4,12 +4,18 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.molgenis.data.AttributeMetaData;
+
 class AttributeFilter implements Iterable<AttributeFilter>
 {
 	public static final AttributeFilter ALL_ATTRS_FILTER = new AttributeFilter().setIncludeAllAttrs(true);
 
 	private final Map<String, AttributeFilter> attributes;
 	private boolean includeAllAttrs;
+	private boolean includeIdAttr;
+	private boolean includeLabelAttr;
+	private AttributeFilter idAttrFilter;
+	private AttributeFilter labelAttrFilter;
 
 	public AttributeFilter()
 	{
@@ -27,15 +33,73 @@ class AttributeFilter implements Iterable<AttributeFilter>
 		return this;
 	}
 
-	public AttributeFilter getAttributeFilter(String name)
+	public boolean isIncludeIdAttr()
 	{
-		return attributes.get(normalize(name));
-
+		return includeIdAttr;
 	}
 
-	public boolean includeAttribute(String name)
+	public AttributeFilter setIncludeIdAttr(boolean includeIdAttr)
 	{
-		return this.isIncludeAllAttrs() ? true : attributes.containsKey(normalize(name));
+		return setIncludeIdAttr(includeIdAttr, null);
+	}
+
+	public AttributeFilter setIncludeIdAttr(boolean includeIdAttr, AttributeFilter idAttrFilter)
+	{
+		this.includeIdAttr = includeIdAttr;
+		this.idAttrFilter = idAttrFilter;
+		return this;
+	}
+
+	public boolean isIncludeLabelAttr()
+	{
+		return includeLabelAttr;
+	}
+
+	public void setIncludeLabelAttr(boolean includeLabelAttr)
+	{
+		setIncludeLabelAttr(includeLabelAttr, null);
+	}
+
+	public void setIncludeLabelAttr(boolean includeLabelAttr, AttributeFilter labelAttrFilter)
+	{
+		this.includeLabelAttr = includeLabelAttr;
+		this.labelAttrFilter = labelAttrFilter;
+	}
+
+	public AttributeFilter getAttributeFilter(AttributeMetaData attr)
+	{
+		if (idAttrFilter != null && attr.isIdAtrribute())
+		{
+			return idAttrFilter;
+		}
+		else if (labelAttrFilter != null && attr.isLabelAttribute())
+		{
+			return labelAttrFilter;
+		}
+		else
+		{
+			return attributes.get(normalize(attr.getName()));
+		}
+	}
+
+	public boolean includeAttribute(AttributeMetaData attr)
+	{
+		if (this.includeAllAttrs)
+		{
+			return true;
+		}
+		else if (this.includeIdAttr && attr.isIdAtrribute())
+		{
+			return true;
+		}
+		else if (this.includeLabelAttr && attr.isLabelAttribute())
+		{
+			return true;
+		}
+		else
+		{
+			return attributes.containsKey(normalize(attr.getName()));
+		}
 	}
 
 	@Override

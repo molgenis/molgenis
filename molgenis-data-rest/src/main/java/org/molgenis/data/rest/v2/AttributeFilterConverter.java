@@ -12,7 +12,7 @@ class AttributeFilterConverter implements Converter<String, AttributeFilter>
 		return attributeFilter;
 	}
 
-	private int parseAttributeFilter(String source, int offset, AttributeFilter attributeFilter)
+	private int parseAttributeFilter(String source, int offset, AttributeFilter attrFilter)
 	{
 		boolean escaped = false;
 		int nrChars = source.length();
@@ -31,7 +31,7 @@ class AttributeFilterConverter implements Converter<String, AttributeFilter>
 					case ',':
 						if (!strBuilder.toString().isEmpty())
 						{
-							attributeFilter.add(strBuilder.toString());
+							addFilter(attrFilter, strBuilder.toString());
 							strBuilder.setLength(0);
 						}
 						break;
@@ -44,23 +44,23 @@ class AttributeFilterConverter implements Converter<String, AttributeFilter>
 					case '(':
 						AttributeFilter nestedAttributeFilter = new AttributeFilter();
 						i = parseAttributeFilter(source, i + 1, nestedAttributeFilter);
-						attributeFilter.add(strBuilder.toString(), nestedAttributeFilter);
+						addFilter(attrFilter, strBuilder.toString(), nestedAttributeFilter);
 						strBuilder.setLength(0);
 						break;
 					case ')':
 						if (!strBuilder.toString().isEmpty())
 						{
-							attributeFilter.add(strBuilder.toString());
+							attrFilter.add(strBuilder.toString());
 						}
 						return i;
 					case '*':
-						attributeFilter.setIncludeAllAttrs(true);
+						attrFilter.setIncludeAllAttrs(true);
 						break;
 					default:
 						strBuilder.append(c);
 						if (i == nrChars - 1)
 						{
-							attributeFilter.add(strBuilder.toString());
+							addFilter(attrFilter, strBuilder.toString());
 						}
 						break;
 				}
@@ -74,15 +74,24 @@ class AttributeFilterConverter implements Converter<String, AttributeFilter>
 		return i;
 	}
 
-	// private Map<String, AttributeFilter> parse(String attributesStr)
-	// {
-	// String[] tokens = attributesStr.split(",");
-	// Map<String, Attribute> attributeRequests = new LinkedHashMap<>();
-	// for (String token : tokens)
-	// {
-	// AttributeFilter attribute = new AttributeFilter(token);
-	// attributeRequests.put(normalize(attribute.getName()), attribute);
-	// }
-	// return attributeRequests;
-	// }
+	private void addFilter(AttributeFilter attrFilter, String attrName)
+	{
+		addFilter(attrFilter, attrName, null);
+	}
+
+	private void addFilter(AttributeFilter attrFilter, String attrName, AttributeFilter nestedAttrFilter)
+	{
+		if (attrName.equals("~id"))
+		{
+			attrFilter.setIncludeIdAttr(true, nestedAttrFilter);
+		}
+		else if (attrName.equals("~lbl"))
+		{
+			attrFilter.setIncludeLabelAttr(true, nestedAttrFilter);
+		}
+		else
+		{
+			attrFilter.add(attrName, nestedAttrFilter);
+		}
+	}
 }

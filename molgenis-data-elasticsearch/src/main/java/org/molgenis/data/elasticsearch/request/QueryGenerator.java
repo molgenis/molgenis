@@ -243,6 +243,8 @@ public class QueryGenerator implements QueryPartGenerator
 
 				String[] attributePath = parseAttributePath(queryField);
 
+				// Workaround for Elasticsearch Date to String conversion issue
+				queryValue = queryValue instanceof java.util.Date ? queryValue.toString() : queryValue;
 				FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).gt(queryValue);
 				filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
 				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
@@ -256,6 +258,8 @@ public class QueryGenerator implements QueryPartGenerator
 
 				String[] attributePath = parseAttributePath(queryField);
 
+				// Workaround for Elasticsearch Date to String conversion issue
+				queryValue = queryValue instanceof java.util.Date ? queryValue.toString() : queryValue;
 				FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).gte(queryValue);
 				filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
 				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
@@ -346,6 +350,8 @@ public class QueryGenerator implements QueryPartGenerator
 
 				String[] attributePath = parseAttributePath(queryField);
 
+				// Workaround for Elasticsearch Date to String conversion issue
+				queryValue = queryValue instanceof java.util.Date ? queryValue.toString() : queryValue;
 				FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).lt(queryValue);
 				filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
 				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
@@ -358,10 +364,11 @@ public class QueryGenerator implements QueryPartGenerator
 
 				String[] attributePath = parseAttributePath(queryField);
 
+				// Workaround for Elasticsearch Date to String conversion issue
+				queryValue = queryValue instanceof java.util.Date ? queryValue.toString() : queryValue;
 				FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).lte(queryValue);
 				filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
 				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
-
 				break;
 			}
 			case RANGE:
@@ -378,9 +385,17 @@ public class QueryGenerator implements QueryPartGenerator
 
 				Iterator<?> iterator = iterable.iterator();
 
+				Object queryValueFrom = iterator.next();
+				// Workaround for Elasticsearch Date to String conversion issue
+				queryValueFrom = queryValueFrom instanceof java.util.Date ? queryValueFrom.toString() : queryValueFrom;
+
+				Object queryValueTo = iterator.next();
+				// Workaround for Elasticsearch Date to String conversion issue
+				queryValueTo = queryValueTo instanceof java.util.Date ? queryValueTo.toString() : queryValueTo;
+
 				String[] attributePath = parseAttributePath(queryField);
-				FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).gte(iterator.next())
-						.lte(iterator.next());
+				FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).gte(queryValueFrom)
+						.lte(queryValueTo);
 				filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
 				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
 				break;
