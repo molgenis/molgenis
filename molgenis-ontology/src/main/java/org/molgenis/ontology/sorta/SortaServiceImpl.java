@@ -37,7 +37,7 @@ public class SortaServiceImpl implements SortaService
 	private static final String ILLEGAL_CHARACTERS_PATTERN = "[^a-zA-Z0-9 ]";
 	private static final String FUZZY_MATCH_SIMILARITY = "~0.8";
 	private static final String SINGLE_WHITESPACE = " ";
-	private static final int MAX_NUMBER_MATCHES = 100;
+	private static final int MAX_NUMBER_MATCHES = 50;
 	private static final int NUMBER_NGRAM_MATCHES = 10;
 
 	// Global fields that are used by other classes
