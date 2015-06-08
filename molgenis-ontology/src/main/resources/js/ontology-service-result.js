@@ -194,8 +194,7 @@
 						updatedMappedEntity['Score'] = 0;
 						updatedMappedEntity['Match_term'] = null;
 					}
-					restApi.update('/api/v1/MatchingTaskContent/' + responseData.matchedTerm.Identifier, updatedMappedEntity);
-					molgenis.OntologyService.prototype.renderPage();
+					restApi.update('/api/v1/MatchingTaskContent/' + responseData.matchedTerm.Identifier, updatedMappedEntity, createCallBackFunction(), true);
 				});
 			});
 		}else{
@@ -236,8 +235,7 @@
 						if(key === 'Score') updatedMappedEntity[key] = 0;
 						if(key === 'Match_term') updatedMappedEntity[key] = null;
 					});
-					restApi.update(href, updatedMappedEntity);
-					molgenis.OntologyService.prototype.renderPage();
+					restApi.update(href, updatedMappedEntity, createCallBackFunction(), true);
 				}
 			});
 		});
@@ -282,8 +280,7 @@
 								else if(key === 'Score') updatedMappedEntity['Score'] = row.data('ontologyTerm').Score;
 								else if(key !== 'Identifier') updatedMappedEntity[key] = val;
 							});
-							restApi.update(href, updatedMappedEntity);
-							molgenis.OntologyService.prototype.renderPage();
+							restApi.update(href, updatedMappedEntity, createCallBackFunction(), true);
 						}
 					});
 				});
@@ -293,6 +290,10 @@
 			$('<tr />').append(gatherInputInfoHelper(inputEntity)).append('<td>' + NO_MATCH_INFO + '</td><td>' + NO_MATCH_INFO + '</td><td>' + NO_MATCH_INFO + '</td><td>' + NO_MATCH_INFO + '</td>').appendTo(table);
 		}
 		$('<div class="col-md-12"></div>').append(hintInformation).append(backButton).append(unknownButton).append(table).appendTo(container);
+	}
+	
+	function createCallBackFunction(){
+		return {'success' : function(){ molgenis.OntologyService.prototype.renderPage();}, 'error' : function(){molgenis.OntologyService.prototype.renderPage();}};
 	}
 	
 	function getMappingEntity(inputTermIdentifier, entityName, callback){
