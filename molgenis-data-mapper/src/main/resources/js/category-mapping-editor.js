@@ -59,7 +59,7 @@
 				targetAttribute : $('input[name="targetAttribute"]').val(),
 				algorithm : generateAlgorithm(mappedCategoryIds, $('input[name="sourceAttribute"]').val(), defaultValue, nullValue),
 				success : function() {
-					//window.history.back();
+					window.history.back();
 				}
 			});
 		});
