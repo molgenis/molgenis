@@ -17,6 +17,7 @@ import org.molgenis.data.annotation.impl.ClinVarServiceAnnotator;
 import org.molgenis.data.annotation.impl.DbnsfpGeneServiceAnnotator;
 import org.molgenis.data.annotation.impl.DbnsfpVariantServiceAnnotator;
 import org.molgenis.data.annotation.provider.CgdDataProvider;
+import org.molgenis.data.annotation.impl.SnpEffServiceAnnotator;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
 import org.molgenis.data.annotation.provider.HpoMappingProvider;
 import org.molgenis.data.support.GenomeConfig;
@@ -81,7 +82,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		runtimePropertyMap.put(DataExplorerController.KEY_MOD_CHARTS, String.valueOf(true));
 		runtimePropertyMap.put(DataExplorerController.KEY_MOD_DATA, String.valueOf(true));
 		runtimePropertyMap.put(DataExplorerController.KEY_MOD_DISEASEMATCHER, String.valueOf(false));
-		runtimePropertyMap.put(DataExplorerController.KEY_MOD_ANNOTATORS, String.valueOf(false));
+		runtimePropertyMap.put(DataExplorerController.KEY_MOD_ANNOTATORS, String.valueOf(true));
 
 		// DataExplorer table editable yes/no
 		runtimePropertyMap.put(DataExplorerController.KEY_DATAEXPLORER_EDITABLE, String.valueOf(false));
@@ -120,6 +121,8 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 				molgenisHomeDirAnnotationResources + "/dbnsfp/dbNSFP2.3_variant.chr");
 		runtimePropertyMap.put(ClinVarServiceAnnotator.CLINVAR_FILE_LOCATION_PROPERTY,
 				molgenisHomeDirAnnotationResources + "/Clinvar/variant_summary.txt");
+        runtimePropertyMap.put(SnpEffServiceAnnotator.SNPEFF_JAR_LOCATION_PROPERTY,
+                molgenisHomeDirAnnotationResources + "/Applications/snpEff/snpEff.jar");
 
 		runtimePropertyMap.put(KEY_FOOTER, DEFAULT_VAL_FOOTER);
 

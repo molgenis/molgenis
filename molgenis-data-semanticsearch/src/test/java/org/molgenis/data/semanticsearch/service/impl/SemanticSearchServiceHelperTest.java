@@ -210,7 +210,7 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 		List<String> ontologyIds = Arrays.<String> asList("1");
 		Set<String> searchTerms = Sets.newHashSet("fall", "sleep");
 		semanticSearchServiceHelper.findTags(description, ontologyIds);
-		verify(ontologyService).findOntologyTerms(ontologyIds, searchTerms, 100);
+		verify(ontologyService).findOntologyTerms(ontologyIds, searchTerms, SemanticSearchServiceHelper.MAX_NUM_TAGS);
 	}
 
 	@Test
@@ -244,18 +244,20 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 	public void testSearchIsoLatin() throws InterruptedException, ExecutionException
 	{
 		String description = "Standing height (Ångstrøm)";
-		Set<String> expected = Sets.newHashSet("standing", "height", "ångstrøm");
-		Set<String> actual = semanticSearchServiceHelper.removeStopWords(description);
-		assertEquals(actual, expected);
+		List<String> ontologyIds = Arrays.<String> asList("1");
+		Set<String> searchTerms = Sets.newHashSet("standing", "height", "ångstrøm");
+		semanticSearchServiceHelper.findTags(description, ontologyIds);
+		verify(ontologyService).findOntologyTerms(ontologyIds, searchTerms, SemanticSearchServiceHelper.MAX_NUM_TAGS);
 	}
 
 	@Test
 	public void testSearchUnicode() throws InterruptedException, ExecutionException
 	{
 		String description = "/əˈnædrəməs/";
-		Set<String> expected = Sets.newHashSet("əˈnædrəməs");
-		Set<String> actual = semanticSearchServiceHelper.removeStopWords(description);
-		assertEquals(actual, expected);
+		List<String> ontologyIds = Arrays.<String> asList("1");
+		Set<String> searchTerms = Sets.newHashSet("əˈnædrəməs");
+		semanticSearchServiceHelper.findTags(description, ontologyIds);
+		verify(ontologyService).findOntologyTerms(ontologyIds, searchTerms, SemanticSearchServiceHelper.MAX_NUM_TAGS);
 	}
 
 	@Configuration

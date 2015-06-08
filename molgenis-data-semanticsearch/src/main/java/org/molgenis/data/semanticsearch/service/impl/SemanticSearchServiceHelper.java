@@ -43,6 +43,8 @@ public class SemanticSearchServiceHelper
 
 	public static final Set<String> STOP_WORDS;
 
+	public static final int MAX_NUM_TAGS = 3;
+
 	static
 	{
 		STOP_WORDS = new HashSet<String>(Arrays.asList("a", "you", "about", "above", "after", "again", "against",
@@ -191,7 +193,8 @@ public class SemanticSearchServiceHelper
 	{
 		Set<String> searchTerms = removeStopWords(description);
 
-		List<OntologyTerm> matchingOntologyTerms = ontologyService.findOntologyTerms(ontologyIds, searchTerms, 100);
+		List<OntologyTerm> matchingOntologyTerms = ontologyService.findOntologyTerms(ontologyIds, searchTerms,
+				MAX_NUM_TAGS);
 
 		return matchingOntologyTerms;
 	}

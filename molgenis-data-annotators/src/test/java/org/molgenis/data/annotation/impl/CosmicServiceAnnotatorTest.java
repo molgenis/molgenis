@@ -22,28 +22,27 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
-import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.annotation.AbstractAnnotatorTest;
+import org.molgenis.data.annotation.AnnotatorTestData;
+import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class CosmicServiceAnnotatorTest
+public class CosmicServiceAnnotatorTest extends AnnotatorTestData
 {
-	private DefaultEntityMetaData metaDataCanAnnotate;
-	private EntityMetaData metaDataCantAnnotate;
-	private CosmicServiceAnnotator annotator;
-	private AttributeMetaData attributeMetaDataCanAnnotate;
-	private AttributeMetaData attributeMetaDataCantAnnotate;
-	private AttributeMetaData attributeMetaDataCantAnnotate2;
-	private Entity entity;
+	public DefaultEntityMetaData cosmicMetaDataCanAnnotate = new DefaultEntityMetaData("test");
+	public DefaultEntityMetaData cosmicMetaDataCantAnnotate = new DefaultEntityMetaData("test");
+
+	public AttributeMetaData attributeMetaDataCanAnnotate;
+	public AttributeMetaData attributeMetaDataCantAnnotate;
+
 	private HttpClient httpClient;
 	private static String SERVICE_RESPONSE;
-	private ArrayList<Entity> input;
 
 	@BeforeMethod
 	public void beforeMethod()
@@ -51,29 +50,17 @@ public class CosmicServiceAnnotatorTest
 		this.httpClient = mock(HttpClient.class);
 		annotator = new CosmicServiceAnnotator(this.httpClient);
 
-		attributeMetaDataCanAnnotate = mock(AttributeMetaData.class);
-		when(attributeMetaDataCanAnnotate.getName()).thenReturn("ensemblId");
-		when(attributeMetaDataCanAnnotate.getDataType()).thenReturn(
-				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
-		metaDataCanAnnotate = new DefaultEntityMetaData("test");
-		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataCanAnnotate);
-		metaDataCanAnnotate.setIdAttribute("ensemblId");
+		attributeMetaDataCanAnnotate = new DefaultAttributeMetaData(CosmicServiceAnnotator.ENSEMBLE_ID,
+				FieldTypeEnum.STRING);
+		cosmicMetaDataCanAnnotate.addAttributeMetaData(attributeMetaDataCanAnnotate);
+		cosmicMetaDataCanAnnotate.setIdAttribute(CosmicServiceAnnotator.ENSEMBLE_ID);
 
-		metaDataCantAnnotate = mock(EntityMetaData.class);
-		attributeMetaDataCantAnnotate = mock(AttributeMetaData.class);
-		when(attributeMetaDataCantAnnotate.getName()).thenReturn("otherID");
-		when(attributeMetaDataCantAnnotate.getDataType()).thenReturn(
-				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
-		attributeMetaDataCantAnnotate2 = mock(AttributeMetaData.class);
-		when(attributeMetaDataCantAnnotate2.getName()).thenReturn("ensemblId");
-		when(attributeMetaDataCantAnnotate2.getDataType()).thenReturn(
-				MolgenisFieldTypes.getType(FieldTypeEnum.DATE.toString().toLowerCase()));
+		attributeMetaDataCantAnnotate = new DefaultAttributeMetaData(CosmicServiceAnnotator.ENSEMBLE_ID,
+				FieldTypeEnum.BOOL);
+		cosmicMetaDataCantAnnotate.addAttributeMetaData(attributeMetaDataCantAnnotate);
+		cosmicMetaDataCantAnnotate.setIdAttribute(CosmicServiceAnnotator.ENSEMBLE_ID);
 
-		when(metaDataCantAnnotate.getAttribute("ensemblId")).thenReturn(attributeMetaDataCantAnnotate2);
-
-		entity = new MapEntity(metaDataCanAnnotate);
-		entity.set("ensemblId","ENSG00000186092");
-		input = new ArrayList<Entity>();
+		entity.set("ensemblId", "ENSG00000186092");
 		input.add(entity);
 
 		SERVICE_RESPONSE = "[{\"ID\":\"COSM911918\",\"feature_type\":\"somatic_variation\",\"alt_alleles\":[\"C\",\"A\"],\"end\":69345,\"seq_region_name\":\"1\",\"consequence_type\":\"synonymous_variant\",\"strand\":1,\"start\":69345},{\"ID\":\"COSM426644\",\"feature_type\":\"somatic_variation\",\"alt_alleles\":[\"G\",\"T\"],\"end\":69523,\"seq_region_name\":\"1\",\"consequence_type\":\"missense_variant\",\"strand\":1,\"start\":69523},{\"ID\":\"COSM75742\",\"feature_type\":\"somatic_variation\",\"alt_alleles\":[\"G\",\"A\"],\"end\":69538,\"seq_region_name\":\"1\",\"consequence_type\":\"missense_variant\",\"strand\":1,\"start\":69538}]";
@@ -201,12 +188,12 @@ public class CosmicServiceAnnotatorTest
 	@Test
 	public void canAnnotateTrueTest()
 	{
-		assertEquals(annotator.canAnnotate(metaDataCanAnnotate), "true");
+		assertEquals(annotator.canAnnotate(cosmicMetaDataCanAnnotate), "true");
 	}
 
 	@Test
 	public void canAnnotateFalseTest()
 	{
-		assertEquals(annotator.canAnnotate(metaDataCantAnnotate), "a required attribute has the wrong datatype");
+		assertEquals(annotator.canAnnotate(cosmicMetaDataCantAnnotate), "a required attribute has the wrong datatype");
 	}
 }

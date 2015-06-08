@@ -6,6 +6,7 @@ import static org.molgenis.data.meta.EntityMetaDataMetaData.ATTRIBUTES;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_NAME;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -205,14 +206,12 @@ public class OntologyTagServiceImpl implements OntologyTagService
 			result.put(amd.getName(), attributeTags);
 			if (!tags.get(amd).isEmpty())
 			{
-				List<String> ontologyTermIRIs = new ArrayList<String>();
 				for (OntologyTerm ontologyTerm : tags.get(amd))
 				{
-					ontologyTermIRIs.add(ontologyTerm.getIRI());
+					OntologyTag tag = addAttributeTag(entity, amd.getName(), Relation.isAssociatedWith.getIRI(),
+							Collections.singletonList(ontologyTerm.getIRI()));
+					attributeTags.add(tag);
 				}
-				OntologyTag tag = addAttributeTag(entity, amd.getName(), Relation.isAssociatedWith.getIRI(),
-						ontologyTermIRIs);
-				attributeTags.add(tag);
 			}
 		}
 		return result;

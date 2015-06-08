@@ -14,10 +14,11 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.AnnotatorUtils;
-import org.molgenis.data.annotation.HgncLocationsUtils;
+import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
+import org.molgenis.data.annotation.utils.AnnotatorUtils;
+import org.molgenis.data.annotation.utils.HgncLocationsUtils;
 import org.molgenis.data.annotation.LocusAnnotator;
-import org.molgenis.data.annotation.VcfUtils;
+import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.data.annotation.impl.datastructures.CgdData;
 import org.molgenis.data.annotation.impl.datastructures.Locus;
 import org.molgenis.data.annotation.provider.CgdDataProvider;
@@ -58,23 +59,30 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 	public static final String GENE = "GENE";
 	public static final String HGNC_ID = "HGNC ID";
 
+	public static final String CONDITION_LABEL = "CGDCOND";
+	public static final String AGE_GROUP_LABEL = "CGDAGE";
+	public static final String INHERITANCE_LABEL = "CGDINH";
+	public static final String GENERALIZED_INHERITANCE_LABEL = "CGDGIN";
+
+	public static final String CONDITION = VcfRepository.getInfoPrefix() + CONDITION_LABEL;
+	public static final String AGE_GROUP = VcfRepository.getInfoPrefix() + AGE_GROUP_LABEL;
+	public static final String INHERITANCE = VcfRepository.getInfoPrefix() + INHERITANCE_LABEL;
+	public static final String GENERALIZED_INHERITANCE = VcfRepository.getInfoPrefix() + GENERALIZED_INHERITANCE_LABEL;
+
 	public static final String CGD_FILE_LOCATION = "cgd_location";
-    // FIXME for the commandline VCF output we have to use different names for conciseness/uniqueness..
-	public static final String CGD_CONDITION = "CGDCOND";
-	public static final String CGD_AGE_GROUP = "CGDAGE";
-	public static final String CGD_INHERITANCE = "CGDINH";
-	public static final String CGD_GENERALIZED_INHERITANCE = "CGDGIN";
 
 	final List<String> infoFields = Arrays.asList(new String[]
 	{
-			"##INFO=<ID=" + CGD_CONDITION.substring(VcfRepository.getInfoPrefix().length())
+			"##INFO=<ID=" + CONDITION.substring(VcfRepository.getInfoPrefix().length())
 					+ ",Number=1,Type=String,Description=\"CGD_CONDITION\">",
-			"##INFO=<ID=" + CGD_AGE_GROUP.substring(VcfRepository.getInfoPrefix().length())
+			"##INFO=<ID=" + AGE_GROUP.substring(VcfRepository.getInfoPrefix().length())
 					+ ",Number=1,Type=String,Description=\"CGD_AGE_GROUP\">",
-			"##INFO=<ID=" + CGD_INHERITANCE.substring(VcfRepository.getInfoPrefix().length())
+			"##INFO=<ID=" + INHERITANCE.substring(VcfRepository.getInfoPrefix().length())
 					+ ",Number=1,Type=String,Description=\"CGD_INHERITANCE\">",
-			"##INFO=<ID=" + CGD_GENERALIZED_INHERITANCE.substring(VcfRepository.getInfoPrefix().length())
+			"##INFO=<ID=" + GENERALIZED_INHERITANCE.substring(VcfRepository.getInfoPrefix().length())
 					+ ",Number=1,Type=String,Description=\"CGD_GENERALIZED_INHERITANCE\">", });
+	private Map<String, CgdData> cgdData = new HashMap<>();
+	private Map<String, HGNCLocations> hgncLocations = new HashMap<>();
 
 	@Autowired
 	public ClinicalGenomicsDatabaseServiceAnnotator(MolgenisSettings molgenisSettings,
@@ -112,7 +120,7 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 		Iterator<Entity> vcfIter = vcfRepo.iterator();
 
 		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields,
-				CGD_CONDITION.substring(VcfRepository.getInfoPrefix().length()));
+				CONDITION.substring(VcfRepository.getInfoPrefix().length()));
 
 		System.out.println("Now starting to process the data.");
 
@@ -164,29 +172,24 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 	@Override
 	public List<Entity> annotateEntity(Entity entity) throws IOException
 	{
-
 		List<Entity> results = new ArrayList<Entity>();
+		getAnnotationDataFromSources();
 
 		Long position = entity.getLong(VcfRepository.POS);
 		String chromosome = entity.getString(VcfRepository.CHROM);
-
-        String geneSymbol = HgncLocationsUtils.locationToHgcn(hgncLocationsProvider.getHgncLocations(),
-                new Locus(chromosome, position)).get(0);
-
-        Map<String, CgdData> cgdData = cgdDataProvider.getCgdData();
+		String geneSymbol = HgncLocationsUtils.locationToHgcn(hgncLocations, new Locus(chromosome, position)).get(0);
 
 		try
 		{
 			HashMap<String, Object> resultMap = new HashMap<String, Object>();
-
-			if (cgdData.containsKey(geneSymbol))
+            if (cgdData.containsKey(geneSymbol))
 			{
 				CgdData data = cgdData.get(geneSymbol);
 
-				resultMap.put(CGD_CONDITION, data.getCondition().replace(";", " /").replace(",", ""));
-				resultMap.put(CGD_INHERITANCE, data.getInheritance().replace(";", " /").replace(",", ""));
-				resultMap.put(CGD_GENERALIZED_INHERITANCE, data.getGeneralizedInheritance());
-				resultMap.put(CGD_AGE_GROUP, data.getAge_group().replace(";", " /").replace(",", ""));
+				resultMap.put(CONDITION, data.getCondition().replace(";", " /").replace(",", ""));
+				resultMap.put(INHERITANCE, data.getInheritance().replace(";", " /").replace(",", ""));
+				resultMap.put(GENERALIZED_INHERITANCE, data.getGeneralizedInheritance());
+				resultMap.put(AGE_GROUP, data.getAge_group().replace(";", " /").replace(",", ""));
 
 				if (!runningFromCommandLine)
 				{
@@ -227,12 +230,14 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HGNC_ID, MolgenisFieldTypes.FieldTypeEnum.LONG));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ENTREZ_GENE_ID,
 				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CGD_CONDITION, MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CGD_INHERITANCE,
-				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CGD_GENERALIZED_INHERITANCE,
-				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CGD_AGE_GROUP, MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CONDITION, MolgenisFieldTypes.FieldTypeEnum.TEXT)
+				.setLabel(CONDITION_LABEL));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(INHERITANCE, MolgenisFieldTypes.FieldTypeEnum.TEXT)
+				.setLabel(INHERITANCE_LABEL));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GENERALIZED_INHERITANCE,
+				MolgenisFieldTypes.FieldTypeEnum.TEXT).setLabel(GENERALIZED_INHERITANCE_LABEL));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(AGE_GROUP, MolgenisFieldTypes.FieldTypeEnum.TEXT)
+				.setLabel(AGE_GROUP_LABEL));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ALLELIC_CONDITIONS,
 				MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(MANIFESTATION_CATEGORIES,
@@ -245,5 +250,23 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(REFERENCES, MolgenisFieldTypes.FieldTypeEnum.TEXT));
 
 		return metadata;
+	}
+
+	private void getAnnotationDataFromSources() throws IOException
+	{
+
+		if (this.hgncLocations.isEmpty())
+		{
+			LOG.info("hgncLocations empty, started fetching the data");
+			this.hgncLocations = hgncLocationsProvider.getHgncLocations();
+			LOG.info("finished fetching the hgncLocations data");
+		}
+		if (this.cgdData.isEmpty())
+		{
+			LOG.info("cgdData empty, started fetching the data");
+			this.cgdData = cgdDataProvider.getCgdData();
+			LOG.info("finished fetching the cgdData data");
+		}
+
 	}
 }

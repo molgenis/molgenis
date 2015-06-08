@@ -126,14 +126,6 @@ body:not(.modal-open) #feature-selection .molgenis-tree {
 	width: 100% !important;
 }
 
-.molgenis-xrefmrefsearch .select2-result:nth-child(even) {
-	background-color: #DDD;
-}
-
-.molgenis-xrefmrefsearch .select2-result:nth-child(odd) {
-	background-color: #FFF;
-}
-
 .molgenis-xrefmrefsearch .select2-results .select2-highlighted {
     background: #04c;
     color: #fff;
@@ -225,3 +217,10 @@ ul.fancytree-container {
 .molgenis-table-pager .pagination {
 	margin: 0px;
 }
+
+.togglediv_border { border: 1px solid; border-color: #C0C0C0; }
+.togglediv_grey { background-color: #F6F6F6; }
+.togglediv_lightgreen { background-color: #D6FFDB; }
+.togglediv_green { background-color: #8EFF9B; }
+.togglediv_red { background-color: #FFDDDD; }
+.togglediv_blue { background-color: #DDE4FF; }

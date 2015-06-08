@@ -2,6 +2,8 @@ package org.molgenis.data.rest.client;
 
 import static com.google.common.collect.ImmutableMap.of;
 import static java.util.Collections.singletonList;
+import static org.springframework.http.HttpMethod.DELETE;
+import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.HttpMethod.PUT;
 import static org.springframework.http.HttpStatus.OK;
@@ -49,8 +51,30 @@ public class MolgenisClient
 	private static <T> HttpEntity<T> createHttpEntity(String token, T body)
 	{
 		HttpHeaders headers = new HttpHeaders();
-		headers.set("x-molgenis-token", token);
+		if (token != null)
+		{
+			headers.set("x-molgenis-token", token);
+		}
 		return new HttpEntity<T>(body, headers);
+	}
+
+	/**
+	 * Creates a HTTP entity with an empty body and a molgenis header
+	 * 
+	 * @param token
+	 *            token to put in the molgenis header
+	 * @return the {@link HttpEntity}
+	 */
+	@SuppressWarnings(
+	{ "rawtypes", "unchecked" })
+	private static HttpEntity createHttpEntity(String token)
+	{
+		HttpHeaders headers = new HttpHeaders();
+		if (token != null)
+		{
+			headers.set("x-molgenis-token", token);
+		}
+		return new HttpEntity(headers);
 	}
 
 	/**
@@ -71,6 +95,11 @@ public class MolgenisClient
 			return result.getBody();
 		}
 		throw new RestClientException("Not authenticated");
+	}
+
+	public void logout(String token)
+	{
+		template.exchange("{apiHref}/logout", POST, createHttpEntity(token), Map.class, apiHref);
 	}
 
 	/**
@@ -147,6 +176,32 @@ public class MolgenisClient
 	{
 		template.exchange("{apiHref}/{entityName}/{id}/{attributeName}", PUT, createHttpEntity(token, value),
 				Object.class, apiHref, entityName, id, attributeName);
+	}
+
+	public Map<String, Object> get(String token, String entityName, Object id)
+	{
+		ResponseEntity<Map> responseEntity = template.exchange("{apiHref}/{entityName}/{id}", GET,
+				createHttpEntity(token), Map.class, apiHref, entityName, id);
+		return responseEntity.getBody();
+	}
+
+	public QueryResponse get(String token, String entityName)
+	{
+		ResponseEntity<QueryResponse> responseEntity = template.exchange("{apiHref}/{entityName}", GET,
+				createHttpEntity(token), QueryResponse.class, apiHref, entityName);
+		return responseEntity.getBody();
+	}
+
+	public void create(String token, String entityName, Map<String, Object> entity)
+	{
+		template.exchange("{apiHref}/{entityName}/", POST, createHttpEntity(token, entity), Object.class, apiHref,
+				entityName);
+	}
+
+	public void delete(String token, String entityName, Object id)
+	{
+		template.exchange("{apiHref}/{entityName}/{id}", DELETE, createHttpEntity(token), Object.class, apiHref,
+				entityName, id);
 	}
 
 	/**

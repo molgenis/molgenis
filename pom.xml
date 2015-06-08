@@ -9,7 +9,7 @@
     </parent>
     <groupId>org.molgenis</groupId>
     <artifactId>molgenis</artifactId>
-    <version>1.7.0-SNAPSHOT</version>
+    <version>1.8.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <!-- More Project Information -->
@@ -529,11 +529,14 @@
                                 <webappTargetDir>${project.build.directory}/generated-resources</webappTargetDir>
                                 <cssSourceIncludes>
                                     <cssSourceInclude>**/*.css</cssSourceInclude>
+                                    <cssSourceInclude>**/**/*.css</cssSourceInclude>
                                 </cssSourceIncludes>
                                 <cssSourceExcludes>
                                     <!-- changes to excludes must be applied to molgenis-core-ui/src/main/resources/templates/resource-macros.ftl -->
                                     <cssSourceExclude>**/*.min.css</cssSourceExclude>
                                     <cssSourceExclude>**/*-min.css</cssSourceExclude>
+                                    <cssSourceExclude>**/**/*.min.css</cssSourceExclude>
+                                    <cssSourceExclude>**/**/*-min.css</cssSourceExclude>
                                 </cssSourceExcludes>
                                 <jsSourceIncludes>
                                     <jsSourceInclude>**/*.js</jsSourceInclude>
@@ -734,7 +737,6 @@
         <module>molgenis-python</module>
         <module>molgenis-r</module>
         <module>molgenis-charts</module>
-        <module>molgenis-annotators</module>
         <module>molgenis-js</module>
         <module>molgenis-model-registry</module>
         <module>molgenis-disease-matcher</module>
@@ -745,6 +747,7 @@
         <module>molgenis-data-mapper</module>
         <module>molgenis-pathways</module>
         <module>molgenis-data-rest-client</module>
-	<module>molgenis-data-migrate</module>
+        <module>molgenis-data-migrate</module>
+        <module>molgenis-questionnaires</module>
     </modules>
 </project>

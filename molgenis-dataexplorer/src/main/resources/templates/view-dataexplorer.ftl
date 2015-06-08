@@ -4,7 +4,6 @@
 <#assign css=[
 	"jquery.molgenis.tree.css",
 	"ui.fancytree.min.css",
-	"bootstrap-switch.min.css",
 	"dataexplorer.css",
 	"dataexplorer-filter.css",
 	"diseasematcher.css"]>
@@ -15,7 +14,6 @@
 	"dataexplorer-filter-wizard.js",
 	"jquery.fancytree.min.js",
 	"jquery.molgenis.tree.js",
-	"bootstrap-switch.min.js",
 	"jquery.molgenis.xrefmrefsearch.js",
 	"dataexplorer.js",
 	"bootbox.min.js"]>
@@ -82,8 +80,8 @@
 			</div>
 			<div class="row">
                 <div class="col-md-12">
-    			    <div class="panel">
-                        <div class="panel-heading">
+    			    <div class="panel panel-primary">
+                    	<div class="panel-heading">
                             <h4 class="panel-title"> ${i18n.dataexplorer_data_data_item_filters}</h4>
                         </div>
                         <div class="panel-body">
@@ -103,7 +101,7 @@
 			</div>
 			<div class="row"<#if hideDataItemSelect == true> style="display:none"</#if>>
                 <div class="col-md-12">
-                    <div class="panel">
+                    <div class="panel panel-primary">
                         <div class="panel-heading">
                             <h4 class="panel-title">Data item selection</h4>
                         </div>

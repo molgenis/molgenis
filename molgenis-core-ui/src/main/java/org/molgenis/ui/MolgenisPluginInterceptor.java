@@ -5,6 +5,8 @@ import static org.molgenis.ui.MolgenisPluginAttributes.KEY_MOLGENIS_UI;
 import static org.molgenis.ui.MolgenisPluginAttributes.KEY_PLUGINID_WITH_QUERY_STRING;
 import static org.molgenis.ui.MolgenisPluginAttributes.KEY_PLUGIN_ID;
 
+import java.io.File;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -66,6 +68,7 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 				modelAndView.addObject(KEY_PLUGIN_ID, pluginId);
 			}
 
+			// TODO Check if the selected theme file exists to prevent the app from breaking (What is the correct path?)
 			if (molgenisSettings.getProperty(MOLGENIS_CSS_THEME) != null)
 			{
 				modelAndView.addObject(CSS_VARIABLE, molgenisSettings.getProperty(MOLGENIS_CSS_THEME));
@@ -93,7 +96,7 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 		}
 		return (MolgenisPluginController) bean;
 	}
-	
+
 	private String getPluginIdWithQueryString(HttpServletRequest request, String pluginId)
 	{
 		if (null != request)
@@ -104,7 +107,9 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 			if (queryString != null && !queryString.isEmpty()) pluginIdAndQueryStringUrlPart.append('?').append(
 					queryString);
 			return pluginIdAndQueryStringUrlPart.toString();
-		}else{
+		}
+		else
+		{
 			return "";
 		}
 	}

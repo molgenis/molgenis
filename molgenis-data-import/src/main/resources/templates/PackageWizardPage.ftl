@@ -2,7 +2,7 @@
 
 <div class="row">
 	<div class="col-md-4">
-		<div class="panel">
+		<div class="panel panel-primary">
 			<div class="panel-heading">
 				<h4 class="panel-title">Entities not in a package</h4>
 			</div>
@@ -18,7 +18,7 @@
 		</div>
 	</div>
 	<div class="col-md-4">
-		<div class="panel">
+		<div class="panel panel-primary">
 			<div class="panel-heading">
 				<h4 class="panel-title">Add to package</h4>
 			</div>

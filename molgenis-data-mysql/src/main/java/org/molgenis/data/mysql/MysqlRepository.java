@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
@@ -30,6 +31,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Manageable;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.MolgenisReferencedEntityException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.Repository;
@@ -47,6 +49,8 @@ import org.molgenis.fieldtypes.StringField;
 import org.molgenis.fieldtypes.TextField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.model.MolgenisModelException;
+import org.molgenis.util.EntityUtils;
+import org.molgenis.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -72,7 +76,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 
 	/**
 	 * Creates a new MysqlRepository.
-	 * 
+	 *
 	 * @param dataSource
 	 *            the datasource to use to execute statements on the Mysql database
 	 * @param asyncJdbcTemplate
@@ -105,8 +109,31 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				remembered = remembered != null ? remembered : e;
 			}
 		}
-		DataAccessException e = tryExecute(getDropSql());
-		remembered = remembered != null ? remembered : e;
+
+		// Deleting entites that are referenced won't work due to failing key constraints
+		// Find out if the entity is referenced and if it is, report those entities
+		List<Pair<EntityMetaData, List<AttributeMetaData>>> referencingEntities = EntityUtils
+				.getReferencingEntityMetaData(getEntityMetaData(), dataService);
+		List<Pair<EntityMetaData, List<AttributeMetaData>>> nonSelfReferencingEntities = referencingEntities.stream()
+				.filter(ref -> !getEntityMetaData().getName().equals(referencingEntities.get(0).getA().getName()))
+				.collect(Collectors.toList());
+
+		if (!nonSelfReferencingEntities.isEmpty())
+		{
+			List<String> entityNames = Lists.newArrayList();
+            nonSelfReferencingEntities.forEach(pair -> entityNames.add(pair.getA().getName()));
+
+			StringBuilder msg = new StringBuilder("Cannot delete entity '").append(getEntityMetaData().getName())
+					.append("' because it is referenced by the following entities: ").append(entityNames.toString());
+
+			throw new MolgenisReferencedEntityException(msg.toString());
+		}
+		else
+		{
+			DataAccessException e = tryExecute(getDropSql());
+			remembered = remembered != null ? remembered : e;
+		}
+
 		if (remembered != null)
 		{
 			throw remembered;
@@ -115,7 +142,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 
 	/**
 	 * Tries to execute a piece of SQL.
-	 * 
+	 *
 	 * @param sql
 	 *            the SQL to execute
 	 * @return Exception if one was caught, or null if all went well
@@ -201,9 +228,9 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	/**
 	 * Adds an attribute to the repository. Will execute the alter table statement in a different thread so that the
 	 * current transaction does not get committed.
-	 * 
+	 *
 	 * This is needed for adding columns during an import.
-	 * 
+	 *
 	 * @param attributeMetaData
 	 *            the {@link AttributeMetaData} to add
 	 */
@@ -215,9 +242,9 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	/**
 	 * Adds an attribute to the repository. Will excecute the alter table statement in the current thread. Please note
 	 * that this *will* commit any existing transactions.
-	 * 
+	 *
 	 * This is needed for adding columns in the annotator.
-	 * 
+	 *
 	 * @param attributeMetaData
 	 *            the {@link AttributeMetaData} to add
 	 */
@@ -228,7 +255,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 
 	/**
 	 * Adds an attribute to the repository.
-	 * 
+	 *
 	 * @param attributeMetaData
 	 *            the {@link AttributeMetaData} to add
 	 * @param addToEntityMetaData
@@ -289,7 +316,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 
 	/**
 	 * Executes a SQL string.
-	 * 
+	 *
 	 * @param sql
 	 *            the String to execute
 	 * @param async
@@ -470,7 +497,8 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				}
 			}
 			// not null
-			if (!att.isNillable())
+			if (!att.isNillable() && !EntityUtils.doesExtend(metaData, "Questionnaire")
+					&& (att.getVisibleExpression() == null))
 			{
 				sql.append(" NOT NULL");
 			}
@@ -969,7 +997,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 
 	/**
 	 * Use before a delete action of a entity with XREF data type where the entity and refEntity are the same entities.
-	 * 
+	 *
 	 * @param entities
 	 */
 	private void resetXrefValuesBySelfReference(Iterable<? extends Entity> entities)
@@ -1435,7 +1463,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 
 	/**
 	 * Adds an attribute to the table for this entity. Looks up the type of the attribute in {@link #metaData}.
-	 * 
+	 *
 	 * @param attributeName
 	 *            name of the attribute to add
 	 */
@@ -1459,7 +1487,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 
 	/**
 	 * Creates the table for this repository if it does not already exist.
-	 * 
+	 *
 	 * @return boolean indicating if the table was created
 	 */
 	public boolean createTableIfNotExists()

@@ -69,6 +69,7 @@ import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.util.DependencyResolver;
+import org.molgenis.util.EntityUtils;
 import org.molgenis.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1049,7 +1050,7 @@ public class ElasticSearchService implements SearchService
 					}
 				});
 
-				Iterable<Entity> resolved = DependencyResolver.resolveSelfReferences(iterable, entityMetaData);
+				Iterable<Entity> resolved = new DependencyResolver().resolveSelfReferences(iterable, entityMetaData);
 				if (hasMapping(entityMetaData))
 				{
 					delete(entityMetaData.getName());
@@ -1080,7 +1081,8 @@ public class ElasticSearchService implements SearchService
 
 	private void updateReferences(Entity refEntity, EntityMetaData refEntityMetaData)
 	{
-		for (Pair<EntityMetaData, List<AttributeMetaData>> pair : getReferencingEntityMetaData(refEntityMetaData))
+		for (Pair<EntityMetaData, List<AttributeMetaData>> pair : EntityUtils.getReferencingEntityMetaData(
+				refEntityMetaData, dataService))
 		{
 			EntityMetaData entityMetaData = pair.getA();
 
@@ -1116,43 +1118,6 @@ public class ElasticSearchService implements SearchService
 		{
 			updateReferences(entity, entityMetaData);
 		}
-	}
-
-	private List<Pair<EntityMetaData, List<AttributeMetaData>>> getReferencingEntityMetaData(
-			EntityMetaData entityMetaData)
-	{
-		List<Pair<EntityMetaData, List<AttributeMetaData>>> referencingEntityMetaData = null;
-
-		// get entity types that referencing the given entity (including self)
-		String entityName = entityMetaData.getName();
-		for (String otherEntityName : dataService.getEntityNames())
-		{
-			EntityMetaData otherEntityMetaData = dataService.getEntityMetaData(otherEntityName);
-
-			// get referencing attributes for other entity
-			List<AttributeMetaData> referencingAttributes = null;
-			for (AttributeMetaData attributeMetaData : otherEntityMetaData.getAtomicAttributes())
-			{
-				EntityMetaData refEntityMetaData = attributeMetaData.getRefEntity();
-				if (refEntityMetaData != null && refEntityMetaData.getName().equals(entityName))
-				{
-					if (referencingAttributes == null) referencingAttributes = new ArrayList<AttributeMetaData>();
-					referencingAttributes.add(attributeMetaData);
-				}
-			}
-
-			// store references
-			if (referencingAttributes != null)
-			{
-				if (referencingEntityMetaData == null) referencingEntityMetaData = new ArrayList<Pair<EntityMetaData, List<AttributeMetaData>>>();
-				referencingEntityMetaData.add(new Pair<EntityMetaData, List<AttributeMetaData>>(otherEntityMetaData,
-						referencingAttributes));
-			}
-		}
-
-		return referencingEntityMetaData != null ? referencingEntityMetaData : Collections
-				.<Pair<EntityMetaData, List<AttributeMetaData>>> emptyList();
-
 	}
 
 	/**
@@ -1206,7 +1171,8 @@ public class ElasticSearchService implements SearchService
 	// Checks if entities can be deleted, have no ref entities pointing to it
 	private boolean canBeDeleted(Iterable<?> ids, EntityMetaData meta)
 	{
-		List<Pair<EntityMetaData, List<AttributeMetaData>>> referencingMetas = getReferencingEntityMetaData(meta);
+		List<Pair<EntityMetaData, List<AttributeMetaData>>> referencingMetas = EntityUtils
+				.getReferencingEntityMetaData(meta, dataService);
 		if (referencingMetas.isEmpty()) return true;
 
 		for (Pair<EntityMetaData, List<AttributeMetaData>> pair : referencingMetas)
