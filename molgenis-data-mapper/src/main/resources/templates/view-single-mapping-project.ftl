@@ -92,8 +92,9 @@
 									</div>
 									<div>
 										<#if source.getAttributeMapping(attribute.name)??>
-											<div class="ace readonly" id="algorithm-${attribute.name?js_string}-${source.name?js_string}"
-												style="height: 25px">${(source.getAttributeMapping(attribute.name).algorithm!"")?html}</div>
+											<#list source.getAttributeMapping(attribute.name).sourceAttributeMetaDatas as mappedSourceAttribute>
+												${mappedSourceAttribute.name?html}<#if mappedSourceAttribute_has_next>, </#if>
+											</#list>
 										<#elseif !attribute.nillable>
 											<span class="label label-danger">missing</span>
 										</#if>

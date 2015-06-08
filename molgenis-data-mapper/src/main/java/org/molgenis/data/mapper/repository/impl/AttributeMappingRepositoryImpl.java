@@ -3,6 +3,8 @@ package org.molgenis.data.mapper.repository.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -83,8 +85,10 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 		String targetAtributeName = attributeMappingEntity.getString(AttributeMappingMetaData.TARGETATTRIBUTEMETADATA);
 		AttributeMetaData targetAttributeMetaData = targetEntityMetaData.getAttribute(targetAtributeName);
 		String algorithm = attributeMappingEntity.getString(AttributeMappingMetaData.ALGORITHM);
+		List<AttributeMetaData> sourceAttributeMetaDatas = retrieveSourceAttributeMetaDatasFromAlgorithm(algorithm,
+				sourceEntityMetaData);
 
-		return new AttributeMapping(identifier, targetAttributeMetaData, algorithm);
+		return new AttributeMapping(identifier, targetAttributeMetaData, algorithm, sourceAttributeMetaDatas);
 	}
 
 	private Entity toAttributeMappingEntity(AttributeMapping attributeMapping)
@@ -94,6 +98,24 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 		attributeMappingEntity.set(AttributeMappingMetaData.TARGETATTRIBUTEMETADATA, attributeMapping
 				.getTargetAttributeMetaData() != null ? attributeMapping.getTargetAttributeMetaData().getName() : null);
 		attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHM, attributeMapping.getAlgorithm());
+		attributeMappingEntity.set(AttributeMappingMetaData.SOURCEATTRIBUTEMETADATAS,
+				attributeMapping.getSourceAttributeMetaDatas());
 		return attributeMappingEntity;
+	}
+
+	private List<AttributeMetaData> retrieveSourceAttributeMetaDatasFromAlgorithm(String algorithm,
+			EntityMetaData sourceEntityMetaData)
+	{
+		List<AttributeMetaData> sourceAttributeMetaDatas = new ArrayList<AttributeMetaData>();
+
+		Pattern pattern = Pattern.compile("\\$\\('([^']+)'\\)");
+		Matcher matcher = pattern.matcher(algorithm);
+
+		while (matcher.find())
+		{
+			sourceAttributeMetaDatas.add(sourceEntityMetaData.getAttribute(matcher.group(1)));
+		}
+
+		return sourceAttributeMetaDatas;
 	}
 }
