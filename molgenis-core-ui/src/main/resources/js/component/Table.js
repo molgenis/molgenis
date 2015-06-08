@@ -264,7 +264,7 @@
 			return Headers;
 		},
 		_createHeadersRec: function(attrs, selectedAttrs, Headers, path, expanded) {
-			if(attrs.length > 0) {
+			if(_.size(selectedAttrs) > 0) {
 				for(var i = 0; i < attrs.length; ++i) {
 					if(attrs[i].visible === true) {
 						var attr = attrs[i];
@@ -444,7 +444,7 @@
 			return Cols;
 		},
 		_createColsRec: function(item, entity, attrs, selectedAttrs, Cols, path, expanded) {
-			if(attrs.length > 0) {
+			if(_.size(selectedAttrs) > 0) {
 				for(var j = 0; j < attrs.length; ++j) {
 					var attr = attrs[j];
 					if(this._isSelectedAttr(attr, selectedAttrs)) {
