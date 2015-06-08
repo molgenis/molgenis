@@ -14,6 +14,9 @@
 	}
 
 	$(function() {
+		// N.B. Always do this first cause it fiddles with the DOM and disrupts
+		// listeners you may have placed on the table elements!
+		$('#category-mapping-table').scrollTableBody({rowsToDisplay : 6});
 		
 		$('#save-category-mapping-btn').on('click',function() {
 			var mappedCategoryIds = {}, defaultValue = undefined, nullValue = undefined, key, val;
