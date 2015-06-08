@@ -77,6 +77,23 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 		});
 
 	}
+	
+	@Override
+	public List<AttributeMetaData> retrieveAttributeMetaDatasFromAlgorithm(String algorithm,
+			EntityMetaData sourceEntityMetaData)
+	{
+		List<AttributeMetaData> sourceAttributeMetaDatas = new ArrayList<AttributeMetaData>();
+
+		Pattern pattern = Pattern.compile("\\$\\('([^']+)'\\)");
+		Matcher matcher = pattern.matcher(algorithm);
+
+		while (matcher.find())
+		{
+			sourceAttributeMetaDatas.add(sourceEntityMetaData.getAttribute(matcher.group(1)));
+		}
+
+		return sourceAttributeMetaDatas;
+	}
 
 	private AttributeMapping toAttributeMapping(Entity attributeMappingEntity, EntityMetaData sourceEntityMetaData,
 			EntityMetaData targetEntityMetaData)
@@ -85,7 +102,7 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 		String targetAtributeName = attributeMappingEntity.getString(AttributeMappingMetaData.TARGETATTRIBUTEMETADATA);
 		AttributeMetaData targetAttributeMetaData = targetEntityMetaData.getAttribute(targetAtributeName);
 		String algorithm = attributeMappingEntity.getString(AttributeMappingMetaData.ALGORITHM);
-		List<AttributeMetaData> sourceAttributeMetaDatas = retrieveSourceAttributeMetaDatasFromAlgorithm(algorithm,
+		List<AttributeMetaData> sourceAttributeMetaDatas = retrieveAttributeMetaDatasFromAlgorithm(algorithm,
 				sourceEntityMetaData);
 
 		return new AttributeMapping(identifier, targetAttributeMetaData, algorithm, sourceAttributeMetaDatas);
@@ -103,19 +120,5 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 		return attributeMappingEntity;
 	}
 
-	private List<AttributeMetaData> retrieveSourceAttributeMetaDatasFromAlgorithm(String algorithm,
-			EntityMetaData sourceEntityMetaData)
-	{
-		List<AttributeMetaData> sourceAttributeMetaDatas = new ArrayList<AttributeMetaData>();
-
-		Pattern pattern = Pattern.compile("\\$\\('([^']+)'\\)");
-		Matcher matcher = pattern.matcher(algorithm);
-
-		while (matcher.find())
-		{
-			sourceAttributeMetaDatas.add(sourceEntityMetaData.getAttribute(matcher.group(1)));
-		}
-
-		return sourceAttributeMetaDatas;
-	}
+	
 }

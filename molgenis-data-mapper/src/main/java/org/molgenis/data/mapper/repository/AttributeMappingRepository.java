@@ -39,5 +39,7 @@ public interface AttributeMappingRepository
 	 * @return a list of Entities that have been added or updated
 	 */
 	abstract List<Entity> upsert(Collection<AttributeMapping> collection);
+	
+	abstract List<AttributeMetaData> retrieveAttributeMetaDatasFromAlgorithm(String algorithm, EntityMetaData sourceEntityMetaData);
 
 }

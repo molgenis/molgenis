@@ -127,6 +127,25 @@ public class AttributeMappingRepositoryImplTest extends AbstractTestNGSpringCont
 		verify(dataService).add(META_DATA.getName(), attributeMappingEntity);
 	}
 
+	@Test
+	public void testRetrieveAttributeMetaDatasFromAlgorithm()
+	{
+		String algorithm = "$('attribute_1').value()$('attribute_2').value()";
+
+		DefaultAttributeMetaData attr1 = new DefaultAttributeMetaData("attribute_1");
+		DefaultAttributeMetaData attr2 = new DefaultAttributeMetaData("attribute_2");
+
+		DefaultEntityMetaData sourceEntityMetaData = new DefaultEntityMetaData("source");
+		sourceEntityMetaData.addAttributeMetaData(attr1);
+		sourceEntityMetaData.addAttributeMetaData(attr2);
+
+		List<AttributeMetaData> sourceAttributeMetaDatas = new ArrayList<AttributeMetaData>();
+		sourceAttributeMetaDatas.add(attr1);
+		sourceAttributeMetaDatas.add(attr2);
+
+		assertEquals(attributeMappingRepository.retrieveAttributeMetaDatasFromAlgorithm(algorithm, sourceEntityMetaData), sourceAttributeMetaDatas);
+	}
+
 	@Configuration
 	public static class Config
 	{
