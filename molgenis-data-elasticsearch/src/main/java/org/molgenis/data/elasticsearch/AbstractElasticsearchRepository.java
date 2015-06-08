@@ -8,7 +8,6 @@ import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IndexedRepository;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.ElasticSearchService.IndexingMode;
 import org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils;
@@ -184,14 +183,8 @@ public abstract class AbstractElasticsearchRepository implements IndexedReposito
 	@Override
 	public void create()
 	{
-		try
-		{
-			elasticSearchService.createMappings(getEntityMetaData());
-		}
-		catch (IOException e)
-		{
-			throw new MolgenisDataException(e);
-		}
+		elasticSearchService.createMappings(getEntityMetaData());
+
 	}
 
 	@Override

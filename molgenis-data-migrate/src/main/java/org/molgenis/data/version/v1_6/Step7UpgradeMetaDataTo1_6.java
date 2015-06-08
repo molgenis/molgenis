@@ -1,7 +1,5 @@
 package org.molgenis.data.version.v1_6;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -79,14 +77,7 @@ public class Step7UpgradeMetaDataTo1_6 extends MolgenisUpgrade
 		RunAsSystemProxy.runAsSystem(() -> metaData.setDefaultBackend(undecoratedMySQL));
 
 		searchService.delete(AttributeMetaDataMetaData.ENTITY_NAME);
-		try
-		{
-			searchService.createMappings(new AttributeMetaDataMetaData());
-		}
-		catch (IOException e)
-		{
-			throw new UncheckedIOException(e);
-		}
+		searchService.createMappings(new AttributeMetaDataMetaData());
 
 		searchService.rebuildIndex(undecoratedMySQL.getRepository(AttributeMetaDataMetaData.ENTITY_NAME),
 				new AttributeMetaDataMetaData());

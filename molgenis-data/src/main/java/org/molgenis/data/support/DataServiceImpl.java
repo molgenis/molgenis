@@ -23,6 +23,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -159,48 +160,56 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
+	@Transactional
 	public void add(String entityName, Entity entity)
 	{
 		getRepository(entityName).add(entity);
 	}
 
 	@Override
+	@Transactional
 	public void add(String entityName, Iterable<? extends Entity> entities)
 	{
 		getRepository(entityName).add(entities);
 	}
 
 	@Override
+	@Transactional
 	public void update(String entityName, Entity entity)
 	{
 		getRepository(entityName).update(entity);
 	}
 
 	@Override
+	@Transactional
 	public void update(String entityName, Iterable<? extends Entity> entities)
 	{
 		getRepository(entityName).update(entities);
 	}
 
 	@Override
+	@Transactional
 	public void delete(String entityName, Entity entity)
 	{
 		getRepository(entityName).delete(entity);
 	}
 
 	@Override
+	@Transactional
 	public void delete(String entityName, Iterable<? extends Entity> entities)
 	{
 		getRepository(entityName).delete(entities);
 	}
 
 	@Override
+	@Transactional
 	public void delete(String entityName, Object id)
 	{
 		getRepository(entityName).deleteById(id);
 	}
 
 	@Override
+	@Transactional
 	public void deleteAll(String entityName)
 	{
 		getRepository(entityName).deleteAll();

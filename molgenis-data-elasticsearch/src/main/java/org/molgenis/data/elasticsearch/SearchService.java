@@ -1,6 +1,5 @@
 package org.molgenis.data.elasticsearch;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.elasticsearch.action.search.SearchType;
@@ -67,8 +66,6 @@ public interface SearchService
 
 	void updateRepositoryIndex(Repository repository);
 
-	void updateDocumentById(String documentType, String documentId, String updateScript);
-
 	boolean hasMapping(Repository repository);
 
 	boolean hasMapping(EntityMetaData entityMetaData);
@@ -77,13 +74,11 @@ public interface SearchService
 	 * @deprecated see createMappings(EntityMetaData)
 	 */
 	@Deprecated
-	void createMappings(Repository repository, boolean storeSource, boolean enableNorms, boolean createAllIndex)
-			throws IOException;
+	void createMappings(Repository repository, boolean storeSource, boolean enableNorms, boolean createAllIndex);
 
-	void createMappings(EntityMetaData entityMetaData) throws IOException;
+	void createMappings(EntityMetaData entityMetaData);
 
-	void createMappings(EntityMetaData entityMetaData, boolean storeSource, boolean enableNorms, boolean createAllIndex)
-			throws IOException;
+	void createMappings(EntityMetaData entityMetaData, boolean storeSource, boolean enableNorms, boolean createAllIndex);
 
 	/**
 	 * Refresh index, making all operations performed since the last refresh available for search

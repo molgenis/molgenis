@@ -26,8 +26,8 @@ import org.molgenis.data.mysql.AsyncJdbcTemplate;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.data.version.MolgenisUpgrade;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -202,17 +202,10 @@ public class Step1UpgradeMetaData extends MolgenisUpgrade
 
 		LOG.info("Adding metadata indices...");
 
-		try
-		{
-			searchService.createMappings(new TagMetaData());
-			searchService.createMappings(new PackageMetaData());
-			searchService.createMappings(new AttributeMetaDataMetaData());
-			searchService.createMappings(new EntityMetaDataMetaData());
-		}
-		catch (IOException e)
-		{
-			LOG.error("error creating metadata mappings", e);
-		}
+		searchService.createMappings(new TagMetaData());
+		searchService.createMappings(new PackageMetaData());
+		searchService.createMappings(new AttributeMetaDataMetaData());
+		searchService.createMappings(new EntityMetaDataMetaData());
 
 		LOG.info("Reindexing MySQL repositories...");
 

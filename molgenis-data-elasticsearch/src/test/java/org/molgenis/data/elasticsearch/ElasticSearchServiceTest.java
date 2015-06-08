@@ -86,7 +86,8 @@ public class ElasticSearchServiceTest
 		searchService.index(entity, entityMetaData, IndexingMode.ADD);
 
 		verify(client, times(1)).prepareIndex(eq(indexName), eq("entity"), any(String.class));
-		verify(searchService, times(0)).index(Arrays.asList(entity), entityMetaData, IndexingMode.ADD, false);
+		verify(searchService, times(0))
+				.index(indexName, Arrays.asList(entity), entityMetaData, IndexingMode.ADD, false);
 	}
 
 	@Test
@@ -100,7 +101,8 @@ public class ElasticSearchServiceTest
 
 		searchService.index(entity, entityMetaData, IndexingMode.UPDATE);
 		verify(client, times(1)).prepareIndex(eq(indexName), eq("entity"), any(String.class));
-		verify(searchService, times(0)).index(Arrays.asList(entity), entityMetaData, IndexingMode.UPDATE, false);
+		verify(searchService, times(0)).index(indexName, Arrays.asList(entity), entityMetaData, IndexingMode.UPDATE,
+				false);
 	}
 
 	@SuppressWarnings("unchecked")
