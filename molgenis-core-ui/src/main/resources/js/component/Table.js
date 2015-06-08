@@ -36,7 +36,8 @@
 			enableAdd: React.PropTypes.bool,
 			enableEdit: React.PropTypes.bool,
 			enableDelete: React.PropTypes.bool,
-			enableInspect: React.PropTypes.bool
+			enableInspect: React.PropTypes.bool,
+			onSort: React.PropTypes.func
 		},
 		getInitialState: function() {
 			return {
@@ -57,7 +58,8 @@
 				enableAdd: true,
 				enableEdit: true,
 				enableDelete: true,
-				enableInspect: true
+				enableInspect: true,
+				onSort: function() {}
 			};
 		},
 		componentDidMount: function() {
@@ -209,6 +211,7 @@
 			this.setState({sort : e}, function() {
 				this._refreshData(this.props);
 			});
+			this.props.onSort(e);
 		},
 		_handlePageChange: function(e) {
 			this.setState({start : e.start}, function() {

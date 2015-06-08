@@ -29,7 +29,7 @@
     var genomeBrowserSettings = {};
     var featureInfoMap = {};
 
-    var Table;
+    var Table, tableSort;
     
     $(document).on('dataChange.diseasematcher', function(e) {
     	if (e.namespace !== 'data' && Table){
@@ -63,7 +63,15 @@
 			onRowAdd: onDataChange,
 			onRowDelete: onDataChange,
 			onRowEdit: onDataChange,
-			onRowInspect: onRowInspect
+			onRowInspect: onRowInspect,
+			onSort: function(e) {
+				tableSort = {
+					'orders' : [ {
+						'attr' : e.attr.name,
+						'direction' : e.order === 'desc' ? 'DESC' : 'ASC'
+					} ]
+				};
+			}
 		}), $('#data-table-container')[0]);
 	}
 	
@@ -113,7 +121,7 @@
 			downloadType : $('input[name=downloadTypes]:checked').val()
 		};
 
-		dataRequest.query.sort = $('#data-table-container').table('getSort');
+		dataRequest.query.sort = tableSort;
 		
 		var colAttributes = molgenis.getAtomicAttributes(getAttributes(), restApi);
 		
