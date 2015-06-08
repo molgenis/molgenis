@@ -127,14 +127,15 @@ public class MappingsBuilder
 					jsonBuilder.startObject("properties");
 					for (AttributeMetaData refAttr : refEntity.getAtomicAttributes())
 					{
-						createAttributeMapping(refAttr, enableNorms, createAllIndex, false, false, jsonBuilder);
+						createAttributeMapping(refAttr, enableNorms, createAllIndex, false, enableNgramAnalyzer,
+								jsonBuilder);
 					}
 					jsonBuilder.endObject();
 				}
 				else
 				{
 					createAttributeMappingContents(refEntity.getLabelAttribute(), enableNorms, createAllIndex, false,
-							false, jsonBuilder);
+							enableNgramAnalyzer, jsonBuilder);
 				}
 				break;
 			case COMPOUND:

@@ -7,11 +7,15 @@
 	var reserved_identifier_field = 'Identifier';
 	var NO_MATCH_INFO = 'N/A';
 	var itermsPerPage = 5;
-
+	
 	molgenis.OntologyService = function OntologySerivce(container, request){
-		result_container = container;
-		ontologyServiceRequest = request ? request : {};
-		ontologyServiceRequest.entityPager = {'start' : 0, 'num' : itermsPerPage, 'total' : 5};
+		if(container){
+			result_container = container;
+		}
+		if(request){
+			ontologyServiceRequest = request;
+			ontologyServiceRequest.entityPager = {'start' : 0, 'num' : itermsPerPage, 'total' : 5};
+		}
 	};
 	
 	molgenis.OntologyService.prototype.renderPage = function(){
