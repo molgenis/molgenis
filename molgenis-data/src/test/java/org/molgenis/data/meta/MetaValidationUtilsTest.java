@@ -31,6 +31,24 @@ public class MetaValidationUtilsTest
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
+	public void testReservedKeyword()
+	{
+		MetaValidationUtils.validateName("implements");
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class)
+	public void testReservedKeywordMysqlLowerCase()
+	{
+		MetaValidationUtils.validateName("select");
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class)
+	public void testReservedKeywordMysqlUpperCase()
+	{
+		MetaValidationUtils.validateName("SELECT");
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testValidateEntityMetaDataTooLong()
 	{
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("entity");
