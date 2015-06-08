@@ -1047,7 +1047,7 @@ public class ElasticSearchService implements SearchService, TransactionJoiner
 				}
 			});
 
-			Iterable<Entity> resolved = DependencyResolver.resolveSelfReferences(iterable, entityMetaData);
+			Iterable<Entity> resolved = new DependencyResolver().resolveSelfReferences(iterable, entityMetaData);
 			if (hasMapping(entityMetaData))
 			{
 				delete(entityMetaData.getName());
