@@ -1050,7 +1050,7 @@ public class ElasticSearchService implements SearchService
 					}
 				});
 
-				Iterable<Entity> resolved = DependencyResolver.resolveSelfReferences(iterable, entityMetaData);
+				Iterable<Entity> resolved = new DependencyResolver().resolveSelfReferences(iterable, entityMetaData);
 				if (hasMapping(entityMetaData))
 				{
 					delete(entityMetaData.getName());
