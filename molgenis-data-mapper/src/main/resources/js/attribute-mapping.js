@@ -34,6 +34,18 @@
 	function insertAttribute(attribute, editor) {
 		editor.insert("$('" + attribute + "').value()", -1);
 	};
+	
+	/**
+	 * Removes attribute from the editor
+	 * 
+	 * @param attribute
+	 *            the name of the attribute
+	 * @param editor
+	 *            the ace algorithm editor to insert the attribute into
+	 */
+	function outsertAttribute(attribute, editor) {
+		editor.remove("$('" + attribute + "').value()");
+	}
 
 	/**
 	 * Searches the source attributes in an algorithm string.
@@ -153,11 +165,21 @@
 		$(window).resize(updateColumnWidths($scrollTable));
 		updateColumnWidths($scrollTable);
 
-		$('button.insert').click(function() {
+		$('button.insert').on('click', function() {
 			var sourceName = $(this).data('attribute');
+			
+			// On click, switch the classes to give it a 'click-to-remove' look
+			$(this).find('span').toggleClass('glyphicon-ok').toggleClass('glyphicon-remove');
+			$(this).toggleClass('insert').toggleClass('outsert');
+			
 			insertAttribute(sourceName, editor);
 			
 			return false;
+		});
+		
+		$('button.outsert').on('click', function() {
+			var sourceName = $(this).data('attribute');
+			
 		});
 
 		$('#saveattributemapping-form').on('reset', function() {
