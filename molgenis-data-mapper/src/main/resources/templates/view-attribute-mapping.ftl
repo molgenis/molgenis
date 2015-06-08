@@ -2,7 +2,7 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=['mapping-service.css']>
-<#assign js=['attribute-mapping.js', 'd3.min.js','vega.min.js','jstat.min.js', 'biobankconnect-graph.js', 'jquery/scrollTableBody/jquery.scrollTableBody-1.0.0.js', 'bootbox.min.js', 'jquery.ace.js']>
+<#assign js=['attribute-mapping.js', 'd3.min.js','vega.min.js','jstat.min.js', 'biobankconnect-graph.js', '/jquery/scrollTableBody/jquery.scrollTableBody-1.0.0.js', 'bootbox.min.js', 'jquery.ace.js']>
 
 <@header css js/>
 
@@ -99,7 +99,7 @@
 								<#if source.nillable> <span class="label label-warning">nillable</span></#if>
 								<#if source.unique> <span class="label label-default">unique</span></#if>
 								<#if source.description??><br />${source.description?html}</#if>
-								<#if hasWritePermission><button type="button" class="btn btn-default insert pull-right" data-attribute="${source.name}"><span class="glyphicon glyphicon-log-in"></span></button></#if>
+								<#if hasWritePermission><button type="button" class="btn btn-default insert pull-right" data-attribute="${source.name}"><span class="glyphicon glyphicon-ok"></span></button></#if>
 							</td>
 							
 							<#--If the target is an xref/categorical and the source attribute is an xref/categorical/string-->
@@ -123,9 +123,28 @@
 				</tbody>
 			</table>
 			<#if hasWritePermission>
-				<button id="save-attribute-selection-btn" class="btn btn-primary">Save</button>  
+				<form id="saveattributemapping-form" method="POST" action="${context_url}/saveattributemapping">
+					<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
+					<input type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name?html}"/>
+					<input type="hidden" name="source" value="${entityMapping.name?html}"/>
+					<input type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name?html}"/>
+					<input type="hidden" name="algorithm" value="${(attributeMapping.algorithm!"")?html}" id="edit-algorithm-textarea"></input>				
+
+					<button type="submit" class="btn btn-primary">Save</button>
+					
+				</form>  
 			</#if>
-			<button class="btn btn-success" id="mapping-result-preview-btn">Preview mapping result</button>
+	
+			<form id="" method="POST" action="${context_url}/attributeMappingFeedback">
+				<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
+				<input type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name?html}"/>
+				<input type="hidden" name="source" value="${entityMapping.name?html}"/>
+				<input type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name?html}"/>
+				<input type="hidden" name="algorithm" value="${(attributeMapping.algorithm!"")?html}" id="edit-algorithm-textarea"></input>
+	
+				<button type="submit" class="btn btn-success">Preview mapping result</button>
+			</form>
+
 		</div>
 	</div>
 	<div id="mapping-result-preview-container" class="col-md-6"></div>
@@ -150,8 +169,7 @@
       				<div class="panel-body">
         				<h5>Algorithm</h5>
 						<form id="saveattributemapping-form" method="POST" action="${context_url}/saveattributemapping">
-							<textarea class="form-control" name="algorithm" rows="15"
-								id="edit-algorithm-textarea" <#if !hasWritePermission>data-readonly="true"</#if> width="100%">${(attributeMapping.algorithm!"")?html}</textarea>
+							<textarea class="form-control" name="algorithm" rows="15" id="edit-algorithm-textarea" <#if !hasWritePermission>data-readonly="true"</#if> width="100%">${(attributeMapping.algorithm!"")?html}</textarea>
 							<hr />
 							<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
 							<input type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name?html}"/>
@@ -161,8 +179,7 @@
 							<#if hasWritePermission>
 								<button type="submit" class="btn btn-primary">Save</button> 
 								<button type="reset" class="btn btn-warning">Reset</button>
-							</#if>
-							
+							</#if>			
 						</form>
       				</div>
     			</div>
