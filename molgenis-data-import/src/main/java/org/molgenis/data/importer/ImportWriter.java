@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.collect.Iterators;
 import org.apache.commons.io.IOUtils;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -30,6 +31,7 @@ import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.framework.db.EntityImportReport;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.DependencyResolver;
@@ -76,7 +78,10 @@ public class ImportWriter
 	@Transactional
 	public EntityImportReport doImport(EmxImportJob job)
 	{
-		importTags(job.source);
+		RunAsSystemProxy.runAsSystem(() -> {
+			importTags(job.source);
+			return null;
+		});
 		importPackages(job.parsedMetaData);
 		addEntityMetaData(job.parsedMetaData, job.report, job.metaDataChanges);
 		addEntityPermissions(job.metaDataChanges);
@@ -139,7 +144,7 @@ public class ImportWriter
 								}
 							});
 
-					entities = DependencyResolver.resolveSelfReferences(entities, entityMetaData);
+					entities = new DependencyResolver().resolveSelfReferences(entities, entityMetaData);
 					int count = update(repository, entities, dbAction);
 
 					// Fix self referenced entities were not imported
@@ -169,9 +174,20 @@ public class ImportWriter
 				{
 					AttributeMetaData attribute = attributes.next();
 					if (attribute.getRefEntity() != null
-							&& attribute.getRefEntity().getName().equals(entity.getEntityMetaData().getName())
-							&& entity.getEntities(attribute.getName()).iterator().hasNext()) return true;
+							&& attribute.getRefEntity().getName().equals(entity.getEntityMetaData().getName()))
+					{
+						List<String> ids = entity.getList(attribute.getName());
+						Iterable<Entity> refEntities = entity.getEntities(attribute.getName());
+						if (ids != null && ids.size() != Iterators.size(refEntities.iterator()))
+						{
+							throw new UnknownEntityException("One or more values [" + ids + "] from "
+									+ attribute.getDataType() + " field " + attribute.getName()
+									+ " could not be resolved");
+						}
+						return true;
+					}
 				}
+
 				return false;
 			}
 		});
@@ -238,6 +254,7 @@ public class ImportWriter
 	/**
 	 * Imports the tags from the tag sheet.
 	 */
+	// FIXME: can everybody always update a tag?
 	private void importTags(RepositoryCollection source)
 	{
 		Repository tagRepo = source.getRepository(TagMetaData.ENTITY_NAME);
@@ -326,7 +343,16 @@ public class ImportWriter
 	private void dropAddedEntities(List<String> addedEntities)
 	{
 		// Rollback metadata, create table statements cannot be rolled back, we have to do it ourselves
-		Lists.reverse(addedEntities).forEach(dataService.getMeta()::deleteEntityMeta);
+		Lists.reverse(addedEntities).forEach(entity -> {
+			try
+			{
+				dataService.getMeta().deleteEntityMeta(entity);
+			}
+			catch (Exception ex)
+			{
+				LOG.error("Failed to rollback creation of entity {}", entity);
+			}
+		});
 	}
 
 	/**
@@ -525,10 +551,12 @@ public class ImportWriter
 		 * Auto generated
 		 */
 		private static final long serialVersionUID = -5994977400560081655L;
+		private final EntityMetaData entityMetaData;
 
 		public DefaultEntityImporter(EntityMetaData entityMetaData, DataService dataService, Entity entity)
 		{
 			super(entityMetaData, dataService, entity);
+			this.entityMetaData = entityMetaData;
 		}
 
 		/**
@@ -543,7 +571,13 @@ public class ImportWriter
 			}
 			catch (UnknownEntityException uee)
 			{
-				return null;
+				// self reference? ignore UnknownEntityExceptions those are solved in a later step
+				if (entityMetaData.getName()
+						.equals(entityMetaData.getAttribute(attributeName).getRefEntity().getName()))
+				{
+					return null;
+				}
+				throw uee;
 			}
 		}
 
@@ -553,7 +587,14 @@ public class ImportWriter
 		@Override
 		public Iterable<Entity> getEntities(String attributeName)
 		{
-			return from(super.getEntities(attributeName)).filter(notNull());
+			if (entityMetaData.getName().equals(entityMetaData.getAttribute(attributeName).getRefEntity().getName()))
+			{
+				return from(super.getEntities(attributeName)).filter(notNull());
+			}
+			else
+			{
+				return super.getEntities(attributeName);
+			}
 		}
 	}
 }

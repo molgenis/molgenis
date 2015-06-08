@@ -1,6 +1,9 @@
 package org.molgenis.util;
 
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -16,6 +19,7 @@ import com.google.common.collect.Iterables;
 
 public class EntityUtils
 {
+
 	/**
 	 * Checks if an entity contains data or not
 	 * 
@@ -32,6 +36,43 @@ public class EntityUtils
 		}
 
 		return true;
+	}
+
+	public static List<Pair<EntityMetaData, List<AttributeMetaData>>> getReferencingEntityMetaData(
+			EntityMetaData entityMetaData, DataService dataService)
+	{
+		List<Pair<EntityMetaData, List<AttributeMetaData>>> referencingEntityMetaData = null;
+
+		// get entity types that referencing the given entity (including self)
+		String entityName = entityMetaData.getName();
+		for (String otherEntityName : dataService.getEntityNames())
+		{
+			EntityMetaData otherEntityMetaData = dataService.getEntityMetaData(otherEntityName);
+
+			// get referencing attributes for other entity
+			List<AttributeMetaData> referencingAttributes = null;
+			for (AttributeMetaData attributeMetaData : otherEntityMetaData.getAtomicAttributes())
+			{
+				EntityMetaData refEntityMetaData = attributeMetaData.getRefEntity();
+				if (refEntityMetaData != null && refEntityMetaData.getName().equals(entityName))
+				{
+					if (referencingAttributes == null) referencingAttributes = new ArrayList<AttributeMetaData>();
+					referencingAttributes.add(attributeMetaData);
+				}
+			}
+
+			// store references
+			if (referencingAttributes != null)
+			{
+				if (referencingEntityMetaData == null) referencingEntityMetaData = new ArrayList<Pair<EntityMetaData, List<AttributeMetaData>>>();
+				referencingEntityMetaData.add(new Pair<EntityMetaData, List<AttributeMetaData>>(otherEntityMetaData,
+						referencingAttributes));
+			}
+		}
+
+		return referencingEntityMetaData != null ? referencingEntityMetaData : Collections
+				.<Pair<EntityMetaData, List<AttributeMetaData>>> emptyList();
+
 	}
 
 	/**
@@ -114,5 +155,24 @@ public class EntityUtils
 		convertedEntity.set(entity);
 
 		return convertedEntity;
+	}
+
+	/**
+	 * Checks if an entity has another entity as one of its parents
+	 * 
+	 * @param entityMetaData
+	 * @param entityName
+	 * @return
+	 */
+	public static boolean doesExtend(EntityMetaData entityMetaData, String entityName)
+	{
+		EntityMetaData parent = entityMetaData.getExtends();
+		while (parent != null)
+		{
+			if (parent.getName().equalsIgnoreCase(entityName)) return true;
+			parent = parent.getExtends();
+		}
+
+		return false;
 	}
 }

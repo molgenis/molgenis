@@ -6,8 +6,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.molgenis.MysqlTestConfig;
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.MysqlTestConfig;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
@@ -81,7 +81,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		DefaultEntityMetaData metaData = new DefaultEntityMetaData("MysqlPerson");
 
 		metaData.addAttribute("firstName").setNillable(false);
-		metaData.addAttribute("lastName").setNillable(false);
+		metaData.addAttribute("lastName").setNillable(false).setIdAttribute(true);
 
 		// check manually set id (using setIdAttribute)
 
@@ -93,7 +93,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		Assert.assertEquals(repo.getInsertSql(), "INSERT INTO `MysqlPerson` (`firstName`, `lastName`) VALUES (?, ?)");
 		Assert.assertEquals(
 				repo.getCreateSql(),
-				"CREATE TABLE IF NOT EXISTS `MysqlPerson`(`firstName` VARCHAR(255) NOT NULL, `lastName` VARCHAR(255) NOT NULL, PRIMARY KEY (`lastName`)) ENGINE=InnoDB;");
+				"CREATE TABLE IF NOT EXISTS `MysqlPerson`(`firstName` TEXT NOT NULL, `lastName` VARCHAR(255) NOT NULL, PRIMARY KEY (`lastName`)) ENGINE=InnoDB;");
 
 		metaData.addAttribute("age").setDataType(MolgenisFieldTypes.INT);
 		metaDataRepositories.updateEntityMeta(metaData);
@@ -102,7 +102,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 				"INSERT INTO `MysqlPerson` (`firstName`, `lastName`, `age`) VALUES (?, ?, ?)");
 		Assert.assertEquals(
 				repo.getCreateSql(),
-				"CREATE TABLE IF NOT EXISTS `MysqlPerson`(`firstName` VARCHAR(255) NOT NULL, `lastName` VARCHAR(255) NOT NULL, `age` INTEGER, PRIMARY KEY (`lastName`)) ENGINE=InnoDB;");
+				"CREATE TABLE IF NOT EXISTS `MysqlPerson`(`firstName` TEXT NOT NULL, `lastName` VARCHAR(255) NOT NULL, `age` INTEGER, PRIMARY KEY (`lastName`)) ENGINE=InnoDB;");
 		Assert.assertEquals(repo.getCountSql(new QueryImpl(), Lists.newArrayList()),
 				"SELECT COUNT(DISTINCT this.`lastName`) FROM `MysqlPerson` AS this");
 

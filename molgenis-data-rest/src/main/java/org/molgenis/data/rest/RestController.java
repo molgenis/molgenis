@@ -50,6 +50,7 @@ import org.molgenis.data.EntityCollection;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.MolgenisReferencedEntityException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.Repository;
@@ -64,6 +65,7 @@ import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.fieldtypes.BoolField;
 import org.molgenis.framework.db.EntityNotFoundException;
 import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.token.TokenExtractor;
 import org.molgenis.security.token.TokenService;
 import org.molgenis.security.token.UnknownTokenException;
@@ -601,9 +603,10 @@ public class RestController
 		updateAttribute(entityName, attributeName, id, paramValue);
 	}
 
+	// TODO alternative for synchronization, for example by adding updatAttribute methods to the REST api
 	@RequestMapping(value = "/{entityName}/{id}/{attributeName}", method = POST, params = "_method=PUT")
 	@ResponseStatus(OK)
-	public void updateAttribute(@PathVariable("entityName") String entityName,
+	public synchronized void updateAttribute(@PathVariable("entityName") String entityName,
 			@PathVariable("attributeName") String attributeName, @PathVariable("id") Object id,
 			@RequestBody Object paramValue)
 	{
@@ -776,6 +779,7 @@ public class RestController
 	 */
 	@RequestMapping(value = "/login", method = POST, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
+	@RunAsSystem
 	public LoginResponse login(@Valid @RequestBody LoginRequest login, HttpServletRequest request)
 	{
 		if (login == null)
@@ -794,14 +798,14 @@ public class RestController
 			throw new BadCredentialsException("Unknown username or password");
 		}
 
+		MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisUser.USERNAME, authentication.getName()), MolgenisUser.class);
+
 		// User authenticated, log the user in
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
 		// Generate a new token for the user
 		String token = tokenService.generateAndStoreToken(authentication.getName(), "Rest api login");
-
-		MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME,
-				new QueryImpl().eq(MolgenisUser.USERNAME, authentication.getName()), MolgenisUser.class);
 
 		return new LoginResponse(token, user.getUsername(), user.getFirstName(), user.getLastName());
 	}
@@ -913,6 +917,15 @@ public class RestController
 	@ResponseStatus(INTERNAL_SERVER_ERROR)
 	@ResponseBody
 	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
+	{
+		LOG.error("", e);
+		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
+	}
+
+	@ExceptionHandler(MolgenisReferencedEntityException.class)
+	@ResponseStatus(INTERNAL_SERVER_ERROR)
+	@ResponseBody
+	public ErrorMessageResponse handleMolgenisReferencingEntityException(MolgenisReferencedEntityException e)
 	{
 		LOG.error("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));

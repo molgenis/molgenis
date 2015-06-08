@@ -162,7 +162,7 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 		authorities.add(authority4);
 
 		webRequest = mock(WebRequest.class);
-		when(webRequest.getParameter("entitieIds")).thenReturn("entity1,entity2");
+		when(webRequest.getParameter("entityIds")).thenReturn("entity1,entity2");
 		when(dataService.findOne(MolgenisGroup.ENTITY_NAME, "ID", MolgenisGroup.class)).thenReturn(group1);
 		when(
 				dataService.findAll(GroupAuthority.ENTITY_NAME,
@@ -217,7 +217,7 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 		when(userAccountService.getCurrentUser()).thenReturn(user);
 
 		webRequest = mock(WebRequest.class);
-		when(webRequest.getParameter("entitieIds")).thenReturn("entity3,entity4");
+		when(webRequest.getParameter("entityIds")).thenReturn("entity3,entity4");
 		when(webRequest.getParameter("radio-entity3")).thenReturn(
 				org.molgenis.security.core.Permission.COUNT.toString());
 		when(webRequest.getParameter("radio-entity4")).thenReturn(
@@ -241,7 +241,7 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 		when(userAccountService.getCurrentUser()).thenReturn(user);
 
 		webRequest = mock(WebRequest.class);
-		when(webRequest.getParameter("entitieIds")).thenReturn("entity3,entity5");
+		when(webRequest.getParameter("entityIds")).thenReturn("entity3,entity5");
 		when(webRequest.getParameter("radio-entity3")).thenReturn(
 				org.molgenis.security.core.Permission.COUNT.toString());
 		when(webRequest.getParameter("radio-entity5")).thenReturn(
@@ -258,7 +258,7 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 		when(userAccountService.getCurrentUser()).thenReturn(user);
 
 		webRequest = mock(WebRequest.class);
-		when(webRequest.getParameter("entitieIds")).thenReturn("entity3,entity5");
+		when(webRequest.getParameter("entityIds")).thenReturn("entity3,entity5");
 		when(webRequest.getParameter("radio-entity3")).thenReturn(
 				org.molgenis.security.core.Permission.COUNT.toString());
 		when(webRequest.getParameter("radio-entity5")).thenReturn(

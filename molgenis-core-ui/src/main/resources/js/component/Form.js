@@ -3,12 +3,13 @@
     "use strict";
 
     var div = React.DOM.div, span = React.DOM.span, ol = React.DOM.ol, li = React.DOM.li, a = React.DOM.a;
-	
+    var api = new molgenis.RestClient();
+    
 	/**
 	 * @memberOf component
 	 */
 	var Form = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin, molgenis.ui.mixin.EntityLoaderMixin, molgenis.ui.mixin.EntityInstanceLoaderMixin, molgenis.ui.mixin.ReactLayeredComponentMixin],
+		mixins: [molgenis.DeepPureRenderMixin, molgenis.ui.mixin.EntityLoaderMixin, molgenis.ui.mixin.EntityInstanceLoaderMixin, molgenis.ui.mixin.ReactLayeredComponentMixin],
 		displayName: 'Form',
 		propTypes: {
 			entity: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]).isRequired,
@@ -19,6 +20,9 @@
 			enableOptionalFilter: React.PropTypes.bool, // whether or not to show a control to filter optional form fields
 			saveOnBlur: React.PropTypes.bool, // save form control values on blur
 			enableFormIndex: React.PropTypes.bool, // whether or not to show a form index to navigate to form controls
+			showHidden: React.PropTypes.bool, // whether or not to show not-visible attributes
+			categorigalMrefShowSelectAll: React.PropTypes.bool, //whether to show 'select all' and 'hide all' links under the categorical mref checkboxes
+			showAsteriskIfNotNillable: React.PropTypes.bool, //whether to show a '*' after the label when an attribute is not nillable
 			beforeSubmit: React.PropTypes.func,
 			onSubmitCancel: React.PropTypes.func,
 			onSubmitSuccess: React.PropTypes.func,
@@ -34,6 +38,9 @@
 				enableFormIndex: false,
 				colOffset: 3,
 				saveOnBlur: false,
+				showHidden: false,
+				categorigalMrefShowSelectAll: true,
+				showAsteriskIfNotNillable: true,
 				beforeSubmit: function() {},
 				onSubmitCancel: function() {},
 				onSubmitSuccess: function() {},
@@ -43,30 +50,30 @@
 		},
 		componentWillReceiveProps : function(nextProps) {
 			var newState = {
-				invalids : {},
+				errorMessages : {},
 				validate: false,
 				showModal: true,
 				submitMsg: null
 			};
-			if(this.props.mode === 'create') {
-				_.extend(newState, {entityInstance: {}});
-			}
+			
 			this.setState(newState);
 		},
 		getInitialState: function() {
 			return {
 				entity : null,			// transfered from props to state, loaded from server if required
 				entityInstance : null,	// transfered from props to state, loaded from server if required
-				invalids : {},
+				errorMessages : {},
 				validate : false,
 				showModal: true,
 				hideOptional: false
 			};
 		},
-		componentWillMount: function() {
-			if(this.props.mode === 'create') {
-				this.setState({entityInstance: {}});
-			}
+		_willSetEntityInstance: function(entity, entityInstance) {
+			_.each(entity.allAttributes, function(attr) {
+				if (attr.visibleExpression) {
+					attr.visible = this._resolveBoolExpression(attr.visibleExpression, entityInstance);
+				}
+			}, this);
 		},
 		render: function() {
 			// render form in component container
@@ -144,7 +151,6 @@
 				encType : 'application/x-www-form-urlencoded', // TODO use multipart/form-data if form contains one or more file inputs
 				noValidate : true,
 				beforeSubmit: this.props.beforeSubmit,
-				onSubmit : this._handleSubmit,
 				success: this._handleSubmitSuccess,
 				error: this._handleSubmitError,
 				key: 'form'
@@ -157,12 +163,15 @@
 				formLayout : this.props.formLayout,
 				colOffset : this.props.colOffset,
 				hideOptional: this.state.hideOptional,
-				saveOnBlur: this.props.saveOnBlur,
+				showHidden: this.props.showHidden,
 				enableFormIndex: this.props.enableFormIndex,
-				validate: this.state.validate,
-				onValueChange : this._handleValueChange
+				categorigalMrefShowSelectAll: this.props.categorigalMrefShowSelectAll,
+				showAsteriskIfNotNillable: this.props.showAsteriskIfNotNillable,
+				onValueChange : this._handleValueChange,
+				onBlur: this._handleBlur,
+				errorMessages: this.state.errorMessages
 			};
-			
+		
 			var AlertMessage = this.state.submitMsg ? (
 				molgenis.ui.AlertMessage({type: this.state.submitMsg.type, message: this.state.submitMsg.message, onDismiss: this._handleAlertMessageDismiss, key: 'alert'})	
 			) : null;
@@ -192,7 +201,8 @@
  						formLayout : this.props.formLayout,
 						colOffset : this.props.colOffset,
 						cancelBtn: this.props.modal === true,
-						onCancelClick : this.props.modal === true ? this._handleCancel : undefined
+						onCancelClick : this.props.modal === true ? this._handleCancel : undefined,
+						onSubmitClick: this.submit
 					}) : null,
 					this.props.children
 				)
@@ -209,11 +219,11 @@
 			if(this.props.enableFormIndex) {
 				return (
 					div({className: 'row'},
-						div({className: 'col-md-2'},
-							FormIndexFactory({entity: this.state.entity})
-						),
 						div({className: 'col-md-10'},
 							FormWithMessageAndFilter
+						),
+						div({className: 'col-md-2'},
+							FormIndexFactory({entity: this.state.entity})
 						)
 					)
 				);
@@ -221,35 +231,128 @@
 				return FormWithMessageAndFilter;
 			}
 		},
-		_handleValueChange: function(e) {
-			// update value in entity instance
-			var entityInstance = _.extend({}, this.state.entityInstance);
-			entityInstance[e.attr] = e.value;
-			this.setState({entityInstance: entityInstance});
+		_handleBlur: function(e) {
+			var attr = e.attr;
+			var value = e.value;
 			
-			var invalids = this.state.invalids;
-			if(e.valid === true) {
-				// remove item from invalids
-				if(_.has(invalids, e.attr)) {
-					invalids = _.omit(this.state.invalids, e.attr);
-					this.setState({invalids: invalids});
-				}
-			} else {
-				// add item to invalids
-				if(!_.has(invalids, e.attr)) {
-					invalids[e.attr] = null;
-					this.setState({invalids: invalids});
-				}
-			}
-			
-			this.props.onValueChange(e);
+			this._validate(attr, this._getValue(this.state.entityInstance, attr), function(validationResult) {
+            	if(validationResult.valid === true && this._doPersistAttributeValue(attr)) {
+            		this._persistAttributeValue(attr, value);
+                }
+            	
+            	this.setState({
+					errorMessages: this._updateErrorMessages(attr, validationResult)
+				});
+            	
+            }.bind(this));
 		},
-		_handleSubmit: function(e) {
+		_doPersistAttributeValue: function(attr) {
+			return this.props.mode === 'edit' && this.props.saveOnBlur && !attr.readOnly;
+	    },
+		_persistAttributeValue: function(attr, value) {
+			// persist attribute
+    		var val;
+        	switch(attr.fieldType) {
+        		case 'CATEGORICAL':
+        		case 'XREF':
+        			val = value !== null && value !== undefined ? value[attr.refEntity.idAttribute] : null;
+        			break;
+        		case 'CATEGORICAL_MREF':
+        		case 'MREF':
+        			val = _.map(value.items, function(item) {
+        				return item[attr.refEntity.idAttribute];
+        			});
+        			break;
+        		default:
+        			val = value;
+        			break;
+        	}
+        	
+        	api.update(this.state.entityInstance.href + '/' + attr.name, val, {}, false);
+	    },
+		_handleValueChange: function(e) {
+			var attribute = this.state.entity.allAttributes[e.attr];
+			if (attribute === undefined) return;//compound
+			
+			// update value in entity instance
+			var value = e.value;
+			var entityInstance = _.extend({}, this.state.entityInstance);
+			entityInstance[e.attr] = value;
+			var attr = this.state.entity.allAttributes[e.attr];
+			
+			//Validate new value
+			this._validate(attr, value, function(validationResult) {
+				
+				if(validationResult.valid === true) {
+					// Resolve visible expressions
+					_.each(this.state.entity.allAttributes, function(entityAttr) {
+						if (entityAttr.visibleExpression) {
+							entityAttr.visible = this._resolveBoolExpression(entityAttr.visibleExpression, entityInstance);
+						}
+					}, this);
+				}
+				
+				this.setState({
+					entityInstance: entityInstance,
+					errorMessages: this._updateErrorMessages(attr, validationResult)
+				});
+				
+				if (validationResult.valid) {
+					this.props.onValueChange(e);
+				}
+				
+				if(validationResult.valid === true && this._doPersistAttributeValue(attr)) {
+                    // persist changes for controls that do not have a blur event
+	                switch(attr.fieldType) {
+		                case 'BOOL':
+		                case 'CATEGORICAL':
+		                case 'CATEGORICAL_MREF':
+		                case 'ENUM':
+		                case 'MREF':
+		                case 'XREF':
+		                case 'DATE':
+		                case 'DATE_TIME':
+		                	this._persistAttributeValue(attr, value);
+		                	break;
+		                default:
+		                	break;
+	                }
+                }
+			}.bind(this));
+		},
+		submit: function(e) {
 			// determine if form is valid
-			if(_.size(this.state.invalids) > 0) {
-				e.preventDefault(); // do not submit form
-				this.setState({validate: true}); // render validated controls
-			}
+			var errorMessages = {};
+			var promises = [];
+			var target = e.target;
+			
+			_.each(this.state.entity.allAttributes, function(attr) {
+				if (attr.fieldType !== 'COMPOUND') {
+					var p = new Promise(function(resolve, reject) {
+						this._validate(attr, this._getValue(this.state.entityInstance, attr), function(validationResult) {
+							if (validationResult.valid === false) {
+								errorMessages[attr.name] = validationResult.errorMessage;
+							}
+							resolve(validationResult.valid);
+						}.bind(this));
+					}.bind(this));
+				
+					promises.push(p);
+				}
+			}, this);
+			
+			Promise.all(promises).done(function(results) {
+				var valid = true;
+				for (var i = 0; i < results.length && valid; i++) {
+					valid = valid && results[i];
+				}
+				
+				if (valid) {
+					$(target).closest('form').submit();//TODO remove jquery form submit workaround, see also componentDidMount in JQueryForm.js
+				} else {
+					this.setState({errorMessages: errorMessages});
+				}
+			}.bind(this));
 		},
 		_handleCancel: function() {
 			if(this.props.modal) {
@@ -257,11 +360,11 @@
 			}
 			this.props.onSubmitCancel();
 		},
-		_handleSubmitSuccess: function() {
+		_handleSubmitSuccess: function(responseText, statusText, xhr, element) {
 			var message = this.props.mode === 'create' ? 'has been created.' : 'changes have been saved.';
 			var stateProps = {
 				submitMsg: {type: 'success', message: this.state.entity.label + ' ' + message},
-				invalids : {},
+				errorMessages : {},
 				validate : false,
 			};
 			if(this.props.modal) {
@@ -281,7 +384,11 @@
 				window.scrollTo(0, 0);
 			}
 			
-			this.props.onSubmitSuccess();
+			var e = {};
+			if (this.props.mode === 'create') {
+				e.location = xhr.getResponseHeader('Location')
+			}
+			this.props.onSubmitSuccess(e);
 		},
 		_handleSubmitError: function() {
 			var message = this.props.mode === 'create' ? 'could not be created.' : 'changes could not be saved.';
@@ -304,7 +411,161 @@
 			this.setState({
 				hideOptional: !this.state.hideOptional
 			});
-		}
+		},
+		_updateErrorMessages: function(attr, validationResult) {
+			var errorMessages = this.state.errorMessages;
+			
+			if (validationResult.valid) {
+				if (_.has(errorMessages, attr.name)) {
+					delete errorMessages[attr.name];
+				}
+			} else {
+				errorMessages[attr.name] = validationResult.errorMessage;
+			}
+			
+			return errorMessages;
+		},
+		_validate: function(attr, value, callback) {
+            // apply validation rules, not that IE9 does not support constraint validation API 
+            var type = attr.fieldType;
+            var nullOrUndefinedValue = value === null || value === undefined;
+        	var entityInstance = _.extend({}, this.state.entityInstance);
+            var errorMessage = undefined;
+            
+            if(attr.nillable === false && type !== 'CATEGORICAL_MREF' && type !== 'MREF' && nullOrUndefinedValue && !attr.auto) { // required value constraint
+            	if (attr.visibleExpression === undefined || this._resolveBoolExpression(attr.visibleExpression, entityInstance) === true) {
+            		errorMessage = 'Please enter a value.';
+            	}
+            }
+            else if(attr.nillable === false && (type === 'CATEGORICAL_MREF' || type === 'MREF') && (nullOrUndefinedValue || value.items.length === 0)) { // required value constraint
+                errorMessage = 'Please enter a value.';
+            }
+            else if(type === 'EMAIL' && !nullOrUndefinedValue && !this._statics.REGEX_EMAIL.test(value)) {
+                errorMessage = 'Please enter a valid email address.';
+            }
+            else if(type === 'HYPERLINK' && !nullOrUndefinedValue && !this._statics.REGEX_URL.test(value)) {
+                errorMessage = 'Please enter a valid URL.';
+            }
+            else if(!attr.range && (type === 'INT' || type === 'LONG') && !nullOrUndefinedValue && !this._isInteger(value)) {
+                errorMessage = 'Please enter an integer value.';
+            }
+            else if(!attr.range && type === 'INT' && !nullOrUndefinedValue && !this._inRange(value, {min: this._statics.INT_MIN, max: this._statics.INT_MAX})) {
+                errorMessage = 'Please enter a value between ' + this._statics.INT_MIN + ' and ' + this._statics.INT_MAX + '.';
+            }
+            else if(!attr.range && type === 'LONG' && !nullOrUndefinedValue && !this._inRange(value, {min: this._statics.LONG_MIN, max: this._statics.LONG_MAX})) {
+                errorMessage = 'Please enter a value between ' + this._statics.LONG_MIN + ' and ' + this._statics.LONG_MAX + '.';
+            }
+            else if(attr.range && (type === 'INT' || type === 'LONG') && !nullOrUndefinedValue && !this._inRange(value, attr.range)) {
+                if(attr.range.min !== undefined && attr.range.max !== undefined) {
+                    errorMessage = 'Please enter a value between ' + attr.range.min + ' and ' + attr.range.max + '.';
+                }
+                else if(attr.range.min !== undefined) {
+                    errorMessage = 'Please enter a value greater than or equal to ' + attr.range.min + '.';
+                }
+                else if(attr.range.max !== undefined) {
+                    errorMessage = 'Please enter a value lower than or equal to ' + attr.range.max + '.';
+                }
+            }
+            else if(attr.unique === true && !nullOrUndefinedValue) { // value uniqueness constraint
+            	
+                // determine query value
+                var queryValue;
+                switch(type) {
+                    case 'CATEGORICAL':
+                    case 'XREF':
+                        queryValue = value[attr.refEntity.idAttribute];
+                        break;
+                    case 'CATEGORICAL_MREF':
+                    case 'MREF':
+                        queryValue = _.map(value, function(item) {
+							return item[attr.refEntity.idAttribute];
+						});
+                        break;
+                    default:
+                        queryValue = value;
+                        break;
+                }
+
+                // check if value already exists for this attribute
+                var rules = [{field: attr.name, operator: 'EQUALS', value: queryValue}];
+               
+                api.getAsync(this.state.entity.hrefCollection, {q: {q: rules}}, function(data) {
+                	var idAttribute = data.meta.idAttribute;
+                    if(data.total > 0 && ((this.props.mode === 'create') || (data.items[0][idAttribute] !== this.state.entityInstance[idAttribute]))) {
+                        callback({valid: false, errorMessage: 'This ' + attr.label + ' already exists. It must be unique.'});
+                    } else {
+                        callback({valid: true, errorMessage: undefined});
+                    }
+                }.bind(this));
+                return;
+            }
+            
+            if (attr.validationExpression) {
+            	entityInstance[attr.name] = value;
+            	if (this._resolveBoolExpression(attr.validationExpression, entityInstance) === false) {
+            		errorMessage = 'Please enter a valid value.';
+            	}
+            }
+            
+            callback({valid: errorMessage === undefined, errorMessage: errorMessage});
+        },
+        _resolveBoolExpression: function(expression, entityInstance) {
+        	//TODO make evalScript work with entities
+        	var form = {};
+        	_.each(this.state.entity.allAttributes, function(attr) {
+        		var value = entityInstance[attr.name];
+        		
+        		if (value !== null && value !== undefined) {
+        			 switch(attr.fieldType) {
+                     case 'CATEGORICAL':
+                     case 'XREF':
+                    	 form[attr.name] = value[attr.refEntity.idAttribute];
+                         break;
+                     case 'CATEGORICAL_MREF':
+                     case 'MREF':
+                         form[attr.name] = _.map(value.items, function(item) {
+                        	 return item[attr.refEntity.idAttribute]; 
+                         }).join();
+                         break;
+                     case 'COMPOUND':
+                    	 //nothing, no value
+                    	 break;
+                     default:
+                    	 form[attr.name] = value;
+                         break;
+        			 }
+        		}
+        	}, this);
+        	
+        	return evalScript(expression, form);
+        },
+        _statics: {
+            // https://gist.github.com/dperini/729294
+            REGEX_URL: /^(?:(?:https?|ftp):\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/i,
+            // http://www.w3.org/TR/html5/forms.html#valid-e-mail-address
+            REGEX_EMAIL: /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
+            INT_MIN: -2147483648, 
+            INT_MAX: 2147483647,
+            LONG_MIN: Number.MIN_SAFE_INTEGER,
+            LONG_MAX: Number.MAX_SAFE_INTEGER
+        },
+        _isInteger: function(value) {
+            return Number.isInteger(value);
+        },
+        _inRange: function(value, range) {
+            var inRange = true;
+            if(range.min !== undefined) {
+                inRange = inRange && value >= range.min;
+            }
+            if(range.max !== undefined) {
+                inRange = inRange && value <= range.max;
+            }
+            return inRange;
+        },
+        _getValue: function(entityInstance, attr) {
+        	//Please don't manipulate the values here. It is not the place to do it!
+        	return entityInstance[attr.name];
+        }
 	});
 		
 	/**
@@ -320,10 +581,13 @@
 			formLayout: React.PropTypes.oneOf(['horizontal', 'vertical']),
 			colOffset: React.PropTypes.number,
 			hideOptional: React.PropTypes.bool,
-			saveOnBlur: React.PropTypes.bool,
+			showHidden: React.PropTypes.bool,
+			categorigalMrefShowSelectAll: React.PropTypes.bool,
+			showAsteriskIfNotNillable: React.PropTypes.bool,
 			enableFormIndex: React.PropTypes.bool,
-			validate: React.PropTypes.bool,
-			onValueChange: React.PropTypes.func.isRequired
+			errorMessages: React.PropTypes.object.isRequired,
+			onValueChange: React.PropTypes.func.isRequired,
+			onBlur: React.PropTypes.func.isRequired
 		},
 		render: function() {
 			// add control for each attribute
@@ -333,7 +597,8 @@
 			for(var key in attributes) {
 				if(attributes.hasOwnProperty(key)) {
 					var attr = attributes[key];
-					if(this.props.mode !== 'create' || (this.props.mode === 'create' && attr.auto !== true)) {
+					if((this.props.mode !== 'create' || (this.props.mode === 'create' && attr.auto !== true)) && 
+						((attr.visibleExpression === undefined) || (this.props.entity.allAttributes[attr.name].visible === true))) {
 						var ControlFactory = attr.fieldType === 'COMPOUND' ? molgenis.ui.FormControlGroup : molgenis.ui.FormControl;
 						var controlProps = {
 							entity : this.props.entity,
@@ -343,11 +608,21 @@
 							mode : this.props.mode,
 							formLayout : this.props.formLayout,
 							colOffset: this.props.colOffset,
-							saveOnBlur: this.props.saveOnBlur,
-							validate: this.props.validate,
+							onBlur: this.props.onBlur,
+							categorigalMrefShowSelectAll: this.props.categorigalMrefShowSelectAll,
+							showAsteriskIfNotNillable: this.props.showAsteriskIfNotNillable,
 							onValueChange : this.props.onValueChange,
-							key : key
+							key : key 
 						};
+						
+						if (attr.fieldType === 'COMPOUND') {
+							_.extend(controlProps, {
+								errorMessages : this.props.errorMessages,
+								hideOptional : this.props.hideOptional
+							});
+						} else {
+							controlProps['errorMessage'] = this.props.errorMessages[attr.name];
+						}
 						
 						// IE9 does not support the autofocus attribute, focus the first visible input manually
 						if(this.props.mode !== 'view' && !foundFocusControl && attr.visible === true && (this.props.mode === 'create' || attr.readOnly !== true)) {
@@ -356,10 +631,10 @@
 						}
 						
 						var Control = ControlFactory(controlProps);
-						if(attr.nillable === true && this.props.hideOptional === true) {
-							Control = div({className: 'hide'}, Control);
+						if(attr.nillable === true && this.props.hideOptional === true || (this.props.showHidden === false && attr.visible === false)) {
+							Control = div({className: 'hide', key: key + '-hide'}, Control);
 						} else if(this.props.enableFormIndex === true && attr.fieldType === 'COMPOUND') {
-							Control = div({id: this._getLinkId(attr)}, Control);
+							controls.push(div({id: this._getLinkId(attr), className: 'anchor', key: key + '-link'}));
 						}
 						controls.push(Control);
 					}
@@ -385,6 +660,7 @@
 			colOffset: React.PropTypes.number,
 			cancelBtn: React.PropTypes.bool,
 			onCancelClick: React.PropTypes.func,
+			onSubmitClick: React.PropTypes.func.isRequired
 		},
 		getDefaultProps: function() {
 			return {
@@ -404,7 +680,7 @@
 				div({className: 'row', style: {textAlign: 'right'}},
 					div({className: divClasses},
 						this.props.cancelBtn ? molgenis.ui.Button({text: 'Cancel', onClick: this.props.onCancelClick}, 'Cancel') : null,
-						molgenis.ui.Button({type: 'submit', style: 'primary', css: {marginLeft: 5}, text: submitBtnText})
+						molgenis.ui.Button({type: 'button', style: 'primary', css: {marginLeft: 5}, text: submitBtnText, onClick: this.props.onSubmitClick})
 					)
 				)
 			);
@@ -429,7 +705,7 @@
 					var attr = attrs[key];
 					if(attr.fieldType === 'COMPOUND') {
 						var IndexItem = (
-							li({key: attr.name},
+							li({key: attr.name, className: 'list-group-item'},
 								a({href: this._getLinkName(attr)}, attr.label)
 							)
 						);
@@ -439,8 +715,10 @@
 			}
 			
 			return (
-				ol({style: {'list-style-type': 'none'}},
-					IndexItems
+				div({id: 'sidebar', className: 'affix'},
+						ol({style: {listStyleType: 'none'}, className: 'list-group'},
+								IndexItems
+						)
 				)
 			);
 		},

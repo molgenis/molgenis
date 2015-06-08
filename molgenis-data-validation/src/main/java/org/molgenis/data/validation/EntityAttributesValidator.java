@@ -11,13 +11,8 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Range;
 import org.molgenis.fieldtypes.FieldType;
-import org.molgenis.js.ScriptEvaluator;
-import org.mozilla.javascript.EcmaError;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
@@ -30,7 +25,6 @@ import com.google.common.collect.Sets;
 @Component
 public class EntityAttributesValidator
 {
-	private static final Logger LOG = LoggerFactory.getLogger(EntityAttributesValidator.class);
 	private EmailValidator emailValidator;
 
 	public Set<ConstraintViolation> validate(Entity entity, EntityMetaData meta)
@@ -109,25 +103,7 @@ public class EntityAttributesValidator
 	{
 		if (StringUtils.isNotBlank(attribute.getValidationExpression()))
 		{
-
-			Object result = null;
-			try
-			{
-				result = ScriptEvaluator.eval(attribute.getValidationExpression(), entity, meta);
-			}
-			catch (EcmaError e)
-			{
-				LOG.warn("Error evaluation validationExpression", e);
-			}
-
-			if ((result == null) || !(result instanceof Boolean))
-			{
-				throw new MolgenisDataException(String.format(
-						"Invalid validation expression '%s' for attribute '%s' of entity '%s'",
-						attribute.getValidationExpression(), attribute.getName(), meta.getName()));
-			}
-
-			if (!(Boolean) result)
+			if (!ValidationUtils.resolveBooleanExpression(attribute.getValidationExpression(), entity, meta, attribute))
 			{
 				return createConstraintViolation(entity, attribute, meta);
 			}
@@ -151,7 +127,7 @@ public class EntityAttributesValidator
 
 		if (!emailValidator.isValid(email, null))
 		{
-			return createConstraintViolation(entity, attribute, meta);
+			return createConstraintViolation(entity, attribute, meta, "Not a valid e-mail address.");
 		}
 
 		if (email.length() > MolgenisFieldTypes.EMAIL.getMaxLength())
@@ -228,7 +204,7 @@ public class EntityAttributesValidator
 		}
 		catch (MalformedURLException e)
 		{
-			return createConstraintViolation(entity, attribute, meta);
+			return createConstraintViolation(entity, attribute, meta, "Not a valid hyperlink.");
 		}
 
 		if (link.length() > MolgenisFieldTypes.HYPERLINK.getMaxLength())
@@ -269,7 +245,9 @@ public class EntityAttributesValidator
 	{
 		Range range = attribute.getRange();
 		Long value = entity.getLong(attribute.getName());
-		if ((value != null) && ((value < range.getMin()) || (value > range.getMax())))
+		if ((value != null)
+				&& ((range.getMin() != null && value < range.getMin()) || (range.getMax() != null && value > range
+						.getMax())))
 		{
 			return createConstraintViolation(entity, attribute, meta);
 		}
@@ -336,5 +314,16 @@ public class EntityAttributesValidator
 		}
 
 		return new ConstraintViolation(message, entity.getString(attribute.getName()), entity, attribute, meta, 0);
+	}
+
+	private ConstraintViolation createConstraintViolation(Entity entity, AttributeMetaData attribute,
+			EntityMetaData meta, String message)
+	{
+		String fullMessage = String.format("Invalid %s value '%s' for attribute '%s' of entity '%s'.", attribute
+				.getDataType().getEnumType().toString().toLowerCase(), entity.getString(attribute.getName()),
+				attribute.getLabel(), meta.getName());
+		fullMessage += " " + message;
+
+		return new ConstraintViolation(fullMessage, entity.getString(attribute.getName()), entity, attribute, meta, 0);
 	}
 }

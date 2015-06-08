@@ -10,8 +10,11 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
@@ -31,11 +34,8 @@ import org.molgenis.vcf.VcfSample;
 import org.molgenis.vcf.meta.VcfMeta;
 import org.molgenis.vcf.meta.VcfMetaFormat;
 import org.molgenis.vcf.meta.VcfMetaInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 /**
@@ -45,7 +45,7 @@ import com.google.common.collect.Lists;
  */
 public class VcfRepository extends AbstractRepository
 {
-	private static final Logger LOG = LoggerFactory.getLogger(VcfRepository.class);
+	private static final Logger logger = Logger.getLogger(VcfRepository.class);
 
 	public static final String CHROM = "#CHROM";
 	public static final String ALT = "ALT";
@@ -64,7 +64,9 @@ public class VcfRepository extends AbstractRepository
     public static final AttributeMetaData ALT_META = new DefaultAttributeMetaData(ALT,MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false).setDescription("The alternative allele observed");
     public static final AttributeMetaData POS_META = new DefaultAttributeMetaData(POS,MolgenisFieldTypes.FieldTypeEnum.LONG).setAggregateable(true).setNillable(false).setDescription("The position on the chromosome which the variant is observed");
     public static final AttributeMetaData REF_META = new DefaultAttributeMetaData(REF,MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false).setDescription("The reference allele");
-
+    public static final AttributeMetaData FILTER_META = new DefaultAttributeMetaData(FILTER,MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(true);
+    public static final AttributeMetaData QUAL_META = new DefaultAttributeMetaData(QUAL,MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(true);
+    public static final AttributeMetaData ID_META = new DefaultAttributeMetaData(ID,MolgenisFieldTypes.FieldTypeEnum.STRING).setNillable(true);
     private final File file;
 	private final String entityName;
 
@@ -181,12 +183,16 @@ public class VcfRepository extends AbstractRepository
 				}
 				catch (IOException e)
 				{
-					LOG.error("Unable to load VCF metadata. ", e);
+					logger.error("Unable to load VCF metadata. " + e.getStackTrace());
 				}
-
 				return entity;
 			}
 
+			@Override
+			public void remove()
+			{
+				throw new UnsupportedOperationException();
+			}
 		};
 	}
 
@@ -214,12 +220,9 @@ public class VcfRepository extends AbstractRepository
 				entityMetaData.addAttributeMetaData(ALT_META);
 				entityMetaData.addAttributeMetaData(POS_META);
 				entityMetaData.addAttributeMetaData(REF_META);
-				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(FILTER,
-						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(true));
-				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(QUAL,
-						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(true));
-				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ID,
-						MolgenisFieldTypes.FieldTypeEnum.STRING).setNillable(true));
+				entityMetaData.addAttributeMetaData(FILTER_META);
+				entityMetaData.addAttributeMetaData(QUAL_META);
+				entityMetaData.addAttributeMetaData(ID_META);
 				DefaultAttributeMetaData idAttributeMetaData = new DefaultAttributeMetaData(INTERNAL_ID,
 						MolgenisFieldTypes.FieldTypeEnum.STRING);
 				idAttributeMetaData.setNillable(false);
@@ -231,7 +234,7 @@ public class VcfRepository extends AbstractRepository
 				List<AttributeMetaData> metadataInfoField = new ArrayList<AttributeMetaData>();
 				for (VcfMetaInfo info : vcfMeta.getInfoMeta())
 				{
-					DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData(getInfoPrefix()+info.getId(),
+					DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData(getInfoPrefix() + info.getId(),
 							vcfReaderFormatToMolgenisType(info)).setAggregateable(true);
 					attributeMetaData.setDescription(info.getDescription());
 					metadataInfoField.add(attributeMetaData);
@@ -334,9 +337,9 @@ public class VcfRepository extends AbstractRepository
 				if (isListValue)
 				{
 					// TODO support list of primitives datatype
-					return MolgenisFieldTypes.FieldTypeEnum.STRING;
+					return MolgenisFieldTypes.FieldTypeEnum.TEXT;
 				}
-				return MolgenisFieldTypes.FieldTypeEnum.STRING;
+				return MolgenisFieldTypes.FieldTypeEnum.TEXT;
 			default:
 				throw new MolgenisDataException("unknown vcf info type [" + vcfMetaInfo.getType() + "]");
 		}
@@ -414,7 +417,7 @@ public class VcfRepository extends AbstractRepository
 				}
 				catch (IOException e)
 				{
-					LOG.warn("", e);
+					logger.warn("", e);
 				}
 			}
 		}

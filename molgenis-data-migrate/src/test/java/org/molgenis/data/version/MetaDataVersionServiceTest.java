@@ -86,7 +86,7 @@ public class MetaDataVersionServiceTest
 	public void getMolgenisServerProperties()
 	{
 		createMetaDataVersionNoServerProperties(false);
-		assertNotNull(metaDataVersionService.getMolgenisServerProperties());
+		assertNotNull(MigrationUtils.getMolgenisServerProperties());
 	}
 
 	@Test

@@ -50,6 +50,10 @@ public final class ParsedMetaData
 		for (String simpleEntityName : attributeTags.keys())
 		{
 			EntityMetaData emd = this.entities.get(simpleEntityName);
+			if (emd == null)
+			{
+				throw new NullPointerException("Unknown entity [" + simpleEntityName + "]");
+			}
 			for (Tag<AttributeMetaData, LabeledResource, LabeledResource> tag : attributeTags.get(simpleEntityName))
 			{
 				attrTagBuilder.put(emd, tag);

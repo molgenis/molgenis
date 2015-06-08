@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.molgenis</groupId>
 		<artifactId>molgenis</artifactId>
-		<version>1.6.0-SNAPSHOT</version>
+		<version>1.8.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>molgenis-app</artifactId>
 	<packaging>war</packaging>
@@ -212,6 +212,11 @@
 			<version>${project.version}</version>
 		</dependency>		
 		<dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-python</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-r</artifactId>
 			<version>${project.version}</version>
@@ -219,11 +224,6 @@
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-data-annotators</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-annotators</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -338,5 +338,10 @@
 			<artifactId>molgenis-data-migrate</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-questionnaires</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 	</dependencies>
 </project>

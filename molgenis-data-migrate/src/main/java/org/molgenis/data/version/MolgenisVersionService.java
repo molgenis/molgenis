@@ -1,10 +1,7 @@
 package org.molgenis.data.version;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.sql.DatabaseMetaData;
@@ -42,17 +39,16 @@ import org.springframework.stereotype.Service;
 @Service
 public class MolgenisVersionService
 {
-	public static final int CURRENT_VERSION = 6;
-	private static final String VERSION_KEY = "molgenis.version";
+	public static final int CURRENT_VERSION = 9;
 
 	private static final Logger LOG = LoggerFactory.getLogger(MolgenisVersionService.class);
 
 	@Autowired
 	public MolgenisVersionService(DataSource dataSource)
 	{
-		if (getMolgenisServerProperties().getProperty(VERSION_KEY) == null)
+		if (MigrationUtils.getVersion() == null)
 		{
-			LOG.warn("No {} property found in molgenis-server.properties.", VERSION_KEY);
+			LOG.warn("No {} property found in molgenis-server.properties.", MigrationUtils.VERSION_KEY);
 			if (isPopulatedDatabase(dataSource))
 			{
 				LOG.info("Database is populated. Setting molgenis-server.properties to 0. (Molgenis 1.4.3)");
@@ -103,7 +99,7 @@ public class MolgenisVersionService
 	 */
 	public int getMolgenisVersionFromServerProperties()
 	{
-		return Integer.parseInt(getMolgenisServerProperties().getProperty(VERSION_KEY));
+		return Integer.parseInt(MigrationUtils.getVersion());
 	}
 
 	public void updateToCurrentVersion()
@@ -113,10 +109,10 @@ public class MolgenisVersionService
 
 	public void updateToVersion(int version)
 	{
-		Properties properties = getMolgenisServerProperties();
-		properties.setProperty(VERSION_KEY, Integer.toString(version));
+		Properties properties = MigrationUtils.getMolgenisServerProperties();
+		properties.setProperty(MigrationUtils.VERSION_KEY, Integer.toString(version));
 
-		try (OutputStream out = new FileOutputStream(getMolgenisServerPropertiesFile()))
+		try (OutputStream out = new FileOutputStream(MigrationUtils.getMolgenisServerPropertiesFile()))
 		{
 			properties.store(out, "Molgenis server properties");
 		}
@@ -124,32 +120,5 @@ public class MolgenisVersionService
 		{
 			throw new UncheckedIOException(e);
 		}
-	}
-
-	public Properties getMolgenisServerProperties()
-	{
-		try (InputStream in = new FileInputStream(getMolgenisServerPropertiesFile()))
-		{
-			Properties p = new Properties();
-			p.load(in);
-
-			return p;
-		}
-		catch (IOException e)
-		{
-			throw new UncheckedIOException(e);
-		}
-	}
-
-	private File getMolgenisServerPropertiesFile()
-	{
-		// get molgenis home directory
-		String molgenisHomeDir = System.getProperty("molgenis.home");
-		if (molgenisHomeDir == null)
-		{
-			throw new IllegalArgumentException("missing required java system property 'molgenis.home'");
-		}
-
-		return new File(molgenisHomeDir, "molgenis-server.properties");
 	}
 }

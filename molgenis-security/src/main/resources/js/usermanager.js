@@ -2,7 +2,8 @@
 	"use strict";
 
 	var self = molgenis.usermanager = molgenis.usermanager || {};
-
+	 var api = new molgenis.RestClient();
+	 
 	/**
 	 * @memberOf molgenis.usermanager
 	 */
@@ -22,8 +23,18 @@
 			mode: 'create',
 			entity : 'molgenis' + type,
 			modal: true,
-			onSubmitSuccess : function() {
-				location.reload();
+			onSubmitSuccess : function(e) {
+				
+				//Put user in 'All users' group if not SuperUser
+				api.getAsync(e.location, null, function(user) {
+					if (user.superuser === false) {
+						addUserToAllUsersGroup(api.getPrimaryKeyFromHref(e.location), function() {
+							location.reload();
+						});
+					} else {
+						location.reload();
+					}
+				});
 			}
 		}), $('<div>')[0]);
 	}
@@ -104,7 +115,43 @@
 			}
 		});
 	}
-
+	
+	function addUserToAllUsersGroup(userId, callback) {
+		getAllUsersGroup(function(groupId) {
+			if (groupId === null) {
+				callback();
+			} else {
+				$.ajax({
+					headers: { 
+						'Accept': 'application/json',
+						'Content-Type': 'application/json' 
+					},
+					type : 'PUT',
+					dataType: 'json',
+					url : molgenis.getContextUrl() + '/changeGroupMembership',
+					data: JSON.stringify({
+						userId: userId,
+						groupId: groupId,
+						member: true
+					}),
+					success : function() {
+						callback();
+					}
+				});
+			}
+		});
+	}
+	
+	function getAllUsersGroup(callback) {
+		api.getAsync('/api/v1/MolgenisGroup', {q:[{field:'name', operator:'EQUALS', value:'All Users'}]}, function(result) {
+			var groupId = null;
+			if (result.total > 0) {
+				groupId = result.items[0].id;
+			}
+			callback(groupId);
+		});
+	}
+	
 	$(function() {
 		
 		$('#usersTab a').click(function(e) {
