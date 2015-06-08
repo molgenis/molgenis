@@ -185,12 +185,19 @@ public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query>
 
 	private AttributeMetaData getAttribute(ComparisonNode node)
 	{
-		// FIXME a.b ref attribute selectors
 		String attrName = node.getSelector();
-		AttributeMetaData attr = entityMetaData.getAttribute(attrName);
-		if (attr == null)
+
+		String[] attrTokens = attrName.split("\\.");
+		AttributeMetaData attr = entityMetaData.getAttribute(attrTokens[0]);
+		EntityMetaData entityMetaDataAtDepth = entityMetaData;
+		for (int i = 1; i < attrTokens.length; ++i)
 		{
-			throw new UnknownAttributeException("Unknown attribute [" + attrName + "]");
+			entityMetaDataAtDepth = attr.getRefEntity();
+			attr = entityMetaDataAtDepth.getAttribute(attrTokens[i]);
+			if (attr == null)
+			{
+				throw new UnknownAttributeException("Unknown attribute [" + attrName + "]");
+			}
 		}
 
 		return attr;
