@@ -529,11 +529,14 @@
                                 <webappTargetDir>${project.build.directory}/generated-resources</webappTargetDir>
                                 <cssSourceIncludes>
                                     <cssSourceInclude>**/*.css</cssSourceInclude>
+                                    <cssSourceInclude>**/**/*.css</cssSourceInclude>
                                 </cssSourceIncludes>
                                 <cssSourceExcludes>
                                     <!-- changes to excludes must be applied to molgenis-core-ui/src/main/resources/templates/resource-macros.ftl -->
                                     <cssSourceExclude>**/*.min.css</cssSourceExclude>
                                     <cssSourceExclude>**/*-min.css</cssSourceExclude>
+                                    <cssSourceExclude>**/**/*.min.css</cssSourceExclude>
+                                    <cssSourceExclude>**/**/*-min.css</cssSourceExclude>
                                 </cssSourceExcludes>
                                 <jsSourceIncludes>
                                     <jsSourceInclude>**/*.js</jsSourceInclude>

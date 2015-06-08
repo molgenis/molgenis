@@ -86,7 +86,7 @@ public class DependencyResolverTest
 				klaas), new DefaultEntity(emd, ds, jan), new DefaultEntity(emd, ds, katrijn), new DefaultEntity(emd,
 				ds, marie));
 
-		Iterable<Entity> sorted = DependencyResolver.resolveSelfReferences(entities, emd);
+		Iterable<Entity> sorted = new DependencyResolver().resolveSelfReferences(entities, emd);
 		List<Entity> sortedList = Lists.newArrayList(sorted);
 		assertEquals(sortedList.size(), 5);
 		assertEquals(sortedList.get(0).getIdValue(), "Marie");
