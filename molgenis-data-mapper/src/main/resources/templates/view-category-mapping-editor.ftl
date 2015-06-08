@@ -2,7 +2,7 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=['']>
-<#assign js=['category-mapping-editor.js', 'bootbox.min.js']>
+<#assign js=['category-mapping-editor.js', 'bootbox.min.js', '/jquery/scrollTableBody/jquery.scrollTableBody-1.0.0.js']>
 
 <@header css js/>
 
@@ -26,7 +26,7 @@
 					<#list targetAttributeRefEntityEntities.iterator() as targetEntity>
 						<option value="${targetEntity.getString(targetAttributeRefEntityIdAttribute)}" 
 							<#if categoryMapping.defaultValue??>
-								<#if categoryMapping.defaultValue == targetEntity.get(targetAttributeRefEntityIdAttribute)>selected </#if>
+								<#if categoryMapping.defaultValue?string == targetEntity.getString(targetAttributeRefEntityIdAttribute)>selected </#if>
 							</#if>
 							>${targetEntity.get(targetAttributeRefEntityLabelAttribute)}</option> 
 					</#list>
@@ -34,8 +34,13 @@
 				</div>
 			</div>
 		</#if>
-		
-		<table id="category-mapping-table" class="table">
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-6">
+		<#if showDefault><br></br></#if>
+		<table id="category-mapping-table" class="table table-bordered scroll">
 			<thead>
 				<th>${source} attribute value</th>
 				<th>Number of rows</th>
