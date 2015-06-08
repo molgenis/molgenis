@@ -273,12 +273,19 @@ public class MappingServiceController extends MolgenisPluginController
 		{
 			MappingTarget mappingTarget = mappingProject.getMappingTarget(target);
 			EntityMapping mappingForSource = mappingTarget.getMappingForSource(source);
-			AttributeMapping attributeMapping = mappingForSource.getAttributeMapping(targetAttribute);
-			if (attributeMapping == null)
+			if (algorithm.isEmpty())
 			{
-				attributeMapping = mappingForSource.addAttributeMapping(targetAttribute);
+				mappingForSource.deleteAttributeMapping(targetAttribute);
 			}
-			attributeMapping.setAlgorithm(algorithm);
+			else
+			{
+				AttributeMapping attributeMapping = mappingForSource.getAttributeMapping(targetAttribute);
+				if (attributeMapping == null)
+				{
+					attributeMapping = mappingForSource.addAttributeMapping(targetAttribute);
+				}
+				attributeMapping.setAlgorithm(algorithm);
+			}
 			mappingService.updateMappingProject(mappingProject);
 		}
 		return "redirect:/menu/main/mappingservice/mappingproject/" + mappingProject.getIdentifier();

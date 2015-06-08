@@ -124,7 +124,7 @@ class PackageRepository
 	 */
 	public void deleteAll()
 	{
-		List<Entity> importOrderPackages = Lists.newLinkedList(DependencyResolver.resolveSelfReferences(repository,
+		List<Entity> importOrderPackages = Lists.newLinkedList(new DependencyResolver().resolveSelfReferences(repository,
 				META_DATA));
 		Collections.reverse(importOrderPackages);
 		for (Entity p : importOrderPackages)
