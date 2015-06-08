@@ -319,7 +319,6 @@ function($, molgenis, settingsXhr) {
 				var value = selectedAttributes[i].expanded === true ? {'*': null} : null;
 				selectedAttributesTree[key] = value;	
 			}
-			console.log(selectedAttributesTree);
 			createEntityMetaTree(entityMetaData, selectedAttributes);
 			
 			//Show wizard on show of dataexplorer if url param 'wizard=true' is added
@@ -432,7 +431,7 @@ function($, molgenis, settingsXhr) {
 			attributeFilters = {};
 			selectedAttributes = [];
 			searchQuery = null;
-			
+			React.unmountComponentAtNode($('#data-table-container')[0]); // must occur before mod-data is loaded
 			$('#feature-filters p').remove();
 			$("#observationset-search").val("");
 			$('#data-table-pager').empty();
