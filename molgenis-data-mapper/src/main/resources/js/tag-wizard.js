@@ -99,9 +99,7 @@
 						} ], 'success');
 
 						$.each(data, function(attributeName, tags) {
-						console.log(tags);
 							$.each(tags, function(index) {
-								console.log(tags[index]);
 								if(tags[index] !== null){
 									$('#' + attributeName + '-tag-column').append(createNewButtonHtml(attributeName, tags[index]));
 								}
