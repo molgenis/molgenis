@@ -176,7 +176,7 @@ public abstract class AbstractElasticsearchRepository implements IndexedReposito
 	@Transactional
 	public void deleteAll()
 	{
-		elasticSearchService.deleteDocumentsByType(getEntityMetaData().getName());
+		elasticSearchService.delete(getEntityMetaData().getName());
 		elasticSearchService.refresh();
 	}
 

@@ -6,7 +6,6 @@ import static org.molgenis.data.elasticsearch.util.MapperTypeSanitizer.sanitizeM
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -18,13 +17,11 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.elasticsearch.ElasticsearchException;
-import org.elasticsearch.action.admin.indices.exists.types.TypesExistsRequest;
 import org.elasticsearch.action.admin.indices.exists.types.TypesExistsResponse;
 import org.elasticsearch.action.admin.indices.mapping.delete.DeleteMappingResponse;
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.action.bulk.BulkRequest;
-import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
@@ -54,18 +51,14 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
-import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator;
 import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
-import org.molgenis.data.elasticsearch.index.IndexRequestGenerator;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
 import org.molgenis.data.elasticsearch.request.SearchRequestGenerator;
 import org.molgenis.data.elasticsearch.response.ResponseParser;
 import org.molgenis.data.elasticsearch.util.BulkProcessor;
 import org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils;
 import org.molgenis.data.elasticsearch.util.ElasticsearchUtils;
-import org.molgenis.data.elasticsearch.util.Hit;
-import org.molgenis.data.elasticsearch.util.MultiSearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
@@ -187,94 +180,6 @@ public class ElasticSearchService implements SearchService, TransactionJoiner
 		return search(SearchType.QUERY_AND_FETCH, request);
 	}
 
-	/*
-	 * TODO this method is only used by BiobankConnect and should be removed in the future
-	 */
-	@Override
-	@Deprecated
-	public SearchResult multiSearch(MultiSearchRequest request)
-	{
-		return multiSearch(SearchType.QUERY_AND_FETCH, request);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.elasticsearch.SearchService#count(java.lang.String, org.molgenis.data.Query)
-	 */
-	@Override
-	@Deprecated
-	public long count(String documentType, Query q)
-	{
-		String type = sanitizeMapperType(documentType);
-
-		if (LOG.isTraceEnabled())
-		{
-			LOG.trace("Counting Elasticsearch '" + type + "' docs using query [" + q + "] ...");
-		}
-		SearchRequest request = new SearchRequest(type, q, Collections.<String> emptyList());
-		long count = search(SearchType.COUNT, request).getTotalHitCount();
-		if (LOG.isDebugEnabled())
-		{
-			LOG.debug("Counted " + count + " Elasticsearch '" + type + "' docs using query [" + q + "] ...");
-		}
-
-		return count;
-	}
-
-	@Override
-	public Hit searchById(String documentType, String id)
-	{
-		GetResponse response = client.prepareGet(indexName, sanitizeMapperType(documentType), id).execute().actionGet();
-		Hit hit = null;
-		if (response.isExists())
-		{
-			hit = new Hit(response.getId(), response.getType(), response.getSourceAsMap());
-		}
-		return hit;
-	}
-
-	/*
-	 * TODO this method is only used by BiobankConnect and should be removed in the future (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.elasticsearch.SearchService#multiSearch(org.elasticsearch .action.search.SearchType,
-	 * org.elasticsearch.action.search.MultiSearchRequest)
-	 */
-	@Override
-	@Deprecated
-	public SearchResult multiSearch(SearchType searchType, MultiSearchRequest request)
-	{
-
-		List<String> documentTypes = null;
-		if (request.getDocumentType() != null)
-		{
-			documentTypes = new ArrayList<String>();
-			for (String documentType : request.getDocumentType())
-			{
-				documentTypes.add(sanitizeMapperType(documentType));
-			}
-		}
-
-		SearchRequestBuilder builder = client.prepareSearch(indexName);
-
-		generator.buildSearchRequest(builder, documentTypes, searchType, request.getQuery(),
-				request.getFieldsToReturn(), null, null, null, null);
-
-		if (LOG.isTraceEnabled())
-		{
-			LOG.trace("SearchRequestBuilder:" + builder);
-		}
-
-		SearchResponse response = builder.execute().actionGet();
-		if (LOG.isDebugEnabled())
-		{
-			LOG.debug("SearchResponse:" + response);
-		}
-
-		// FIXME passing null as request is not cool (and breaks aggregates)
-		return responseParser.parseSearchResponse(null, response, null, dataService);
-	}
-
 	private SearchResult search(SearchType searchType, SearchRequest request)
 	{
 		SearchRequestBuilder builder = client.prepareSearch(indexName);
@@ -304,170 +209,6 @@ public class ElasticSearchService implements SearchService, TransactionJoiner
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.molgenis.data.elasticsearch.SearchService#indexRepository(org.molgenis .data.Repository)
-	 */
-	@Override
-	@Deprecated
-	public void indexRepository(Repository repository)
-	{
-		if (!repository.iterator().hasNext())
-		{
-			return;
-		}
-
-		LOG.info("Going to create mapping for repository [" + repository.getName() + "]");
-		createMappings(repository, true, true, true);
-
-		LOG.info("Going to update index [" + indexName + "] for repository type [" + repository.getName() + "]");
-		deleteDocumentsByType(repository.getName());
-
-		LOG.info("Going to insert documents of type [" + repository.getName() + "]");
-		IndexRequestGenerator requestGenerator = new IndexRequestGenerator(client, indexName, entityToSourceConverter);
-		Iterable<BulkRequestBuilder> requests = requestGenerator.buildIndexRequest(repository);
-		for (BulkRequestBuilder request : requests)
-		{
-			LOG.info("Request created");
-			if (LOG.isTraceEnabled())
-			{
-				LOG.trace("BulkRequest:" + request);
-			}
-
-			BulkResponse response = request.execute().actionGet();
-			LOG.info("Request done");
-			if (LOG.isDebugEnabled())
-			{
-				LOG.debug("BulkResponse:" + response);
-			}
-
-			if (response.hasFailures())
-			{
-				throw new ElasticsearchException(response.buildFailureMessage());
-			}
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.elasticsearch.SearchService#documentTypeExists(java .lang.String)
-	 */
-	@Override
-	public boolean documentTypeExists(String documentType)
-	{
-		String documentTypeSantized = sanitizeMapperType(documentType);
-
-		return client.admin().indices().typesExists(new TypesExistsRequest(new String[]
-		{ indexName }, documentTypeSantized)).actionGet().isExists();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.elasticsearch.SearchService#deleteDocumentsByType(java .lang.String)
-	 */
-	@Override
-	@Deprecated
-	public void deleteDocumentsByType(String documentType)
-	{
-		LOG.info("Going to delete all documents of type [" + documentType + "]");
-
-		String documentTypeSantized = sanitizeMapperType(documentType);
-
-		DeleteByQueryResponse deleteResponse = client.prepareDeleteByQuery(indexName)
-				.setQuery(new TermQueryBuilder("_type", documentTypeSantized)).execute().actionGet();
-
-		if (deleteResponse != null)
-		{
-			IndexDeleteByQueryResponse idbqr = deleteResponse.getIndex(indexName);
-			if ((idbqr != null) && (idbqr.getFailedShards() > 0))
-			{
-				throw new ElasticsearchException("Delete failed. Returned headers:" + idbqr.getHeaders());
-			}
-		}
-
-		LOG.info("Delete done.");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.elasticsearch.SearchService#deleteDocumentByIds(java .lang.String, java.util.List)
-	 */
-	@Override
-	@Deprecated
-	public void deleteDocumentByIds(String documentType, List<String> documentIds)
-	{
-		String documentTypeSantized = sanitizeMapperType(documentType);
-		LOG.info("Deleting Elasticsearch '" + documentTypeSantized + "' docs with ids [" + documentIds + "]");
-
-		for (String documentId : documentIds)
-		{
-			DeleteResponse deleteResponse = client.prepareDelete(indexName, documentTypeSantized, documentId)
-					.setRefresh(true).execute().actionGet();
-			if (deleteResponse != null)
-			{
-				if (!deleteResponse.isFound())
-				{
-					throw new ElasticsearchException("Delete failed. Returned headers:" + deleteResponse.getHeaders());
-				}
-			}
-		}
-		LOG.info("Deleted Elasticsearch '" + documentTypeSantized + "' docs with ids [" + documentIds + "]");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.elasticsearch.SearchService#updateRepositoryIndex(org .molgenis.data.Repository)
-	 */
-	@Override
-	public void updateRepositoryIndex(Repository repository)
-	{
-		if (!repository.iterator().hasNext())
-		{
-			return;
-		}
-
-		LOG.info("Going to create mapping for repository [" + repository.getName() + "]");
-		createMappings(repository, true, true, true);
-
-		LOG.info("Going to insert documents of type [" + repository.getName() + "]");
-		IndexRequestGenerator requestGenerator = new IndexRequestGenerator(client, indexName, entityToSourceConverter);
-		Iterable<BulkRequestBuilder> requests = requestGenerator.buildIndexRequest(repository);
-		for (BulkRequestBuilder request : requests)
-		{
-			if (LOG.isTraceEnabled())
-			{
-				LOG.trace("BulkRequest:" + request);
-			}
-
-			BulkResponse response = request.execute().actionGet();
-			if (LOG.isDebugEnabled())
-			{
-				LOG.debug("BulkResponse:" + response);
-			}
-
-			if (response.hasFailures())
-			{
-				throw new ElasticsearchException(response.buildFailureMessage());
-			}
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.elasticsearch.SearchService#hasMapping(org.molgenis .data.Repository)
-	 */
-	@Override
-	public boolean hasMapping(Repository repository)
-	{
-		return hasMapping(repository.getEntityMetaData());
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see org.molgenis.data.elasticsearch.SearchService#hasMapping(org.molgenis .data.EntityMetaData)
 	 */
 	@Override
@@ -481,19 +222,6 @@ public class ElasticSearchService implements SearchService, TransactionJoiner
 				.getMappings();
 		final ImmutableOpenMap<String, MappingMetaData> indexMappings = allMappings.get("molgenis");
 		return indexMappings.containsKey(docType);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.elasticsearch.SearchService#createMappings(org.molgenis .data.Repository, boolean,
-	 * boolean, boolean)
-	 */
-	@Override
-	@Deprecated
-	public void createMappings(Repository repository, boolean storeSource, boolean enableNorms, boolean createAllIndex)
-	{
-		createMappings(repository.getEntityMetaData(), storeSource, enableNorms, createAllIndex);
 	}
 
 	/*
