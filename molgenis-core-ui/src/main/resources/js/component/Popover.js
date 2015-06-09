@@ -17,7 +17,7 @@
 		componentDidMount: function() {
 			var $container = $(this.refs.popover.getDOMNode());
 			$container.popover({
-				trigger : 'hover',
+				trigger : 'hover click',
 				placement : 'bottom',
 				container : 'body'
 			});
