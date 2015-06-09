@@ -23,6 +23,7 @@ import org.molgenis.data.version.v1_5.Step4VarcharToText;
 import org.molgenis.data.version.v1_6.Step7UpgradeMetaDataTo1_6;
 import org.molgenis.data.version.v1_6.Step8VarcharToTextRepeated;
 import org.molgenis.data.version.v1_6.Step9MysqlTablesToInnoDB;
+import org.molgenis.data.version.v1_8.Step11ConvertNames;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
 import org.molgenis.system.core.FreemarkerTemplateRepository;
 import org.molgenis.ui.MolgenisWebAppConfig;
@@ -89,6 +90,8 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(new Step7UpgradeMetaDataTo1_6(dataSource, searchService));
 		upgradeService.addUpgrade(new Step8VarcharToTextRepeated(dataSource));
 		upgradeService.addUpgrade(new Step9MysqlTablesToInnoDB(dataSource));
+		// Step 10
+		upgradeService.addUpgrade(new Step11ConvertNames(dataSource));
 	}
 
 	@Override

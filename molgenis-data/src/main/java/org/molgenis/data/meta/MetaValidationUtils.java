@@ -64,7 +64,8 @@ public class MetaValidationUtils
 			"volatile", "while", "with", "yield");
 
 	// Case sensitive
-	public static final Set<String> MOLGENIS_KEYWORDS = Sets.newHashSet("login", "logout", "csv");
+	public static final Set<String> MOLGENIS_KEYWORDS = Sets.newHashSet("login", "logout", "csv", "entities",
+			"attributes");
 
 	public static Set<String> KEYWORDS = Sets.newHashSet();
 	static
@@ -78,7 +79,7 @@ public class MetaValidationUtils
 	/**
 	 * Checks if a name is a reserved keyword.
 	 */
-	private static void checkForKeyword(String name)
+	public static void checkForKeyword(String name)
 	{
 		if (KEYWORDS.contains(name) || KEYWORDS.contains(name.toUpperCase()))
 		{
@@ -143,4 +144,5 @@ public class MetaValidationUtils
 			throw new MolgenisDataException("Validation error in entity [" + emd.getName() + "]: " + e.getMessage(), e);
 		}
 	}
+
 }
