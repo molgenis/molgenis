@@ -19,6 +19,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.service.AlgorithmService;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.js.RhinoConfig;
@@ -55,13 +56,60 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		LOG.debug("createAttributeMappingIfOnlyOneMatch: target= " + targetAttribute.getName());
 		Iterable<AttributeMetaData> matches = semanticSearchService.findAttributes(sourceEntityMetaData,
 				targetEntityMetaData, targetAttribute);
+		Iterable<ExplainedAttributeMetaData> explainAttributes = semanticSearchService.explainAttributes(
+				sourceEntityMetaData, targetEntityMetaData, targetAttribute);
+
+		for (ExplainedAttributeMetaData attribute : explainAttributes)
+		{
+			System.out.println(attribute.getAttributeMetaData());
+			System.out.println(attribute.getExplainedQueryStrings());
+		}
+
 		if (Iterables.size(matches) == 1)
 		{
 			AttributeMetaData source = matches.iterator().next();
-			AttributeMapping attributeMapping = mapping.addAttributeMapping(targetAttribute.getName());
-			String algorithm = "$('" + source.getName() + "').value()";
-			attributeMapping.setAlgorithm(algorithm);
-			LOG.info("Creating attribute mapping: " + targetAttribute.getName() + " = " + algorithm);
+
+			FieldTypeEnum dataType = targetAttribute.getDataType().getEnumType();
+			String algorithm = null;
+			switch (dataType)
+			{
+				case DATE:
+				case DATE_TIME:
+					algorithm = "$('" + source.getName() + "').age().value();";
+					break;
+				case DECIMAL:
+				case INT:
+				case LONG:
+					algorithm = "$('" + source.getName() + "').value();";
+					break;
+				// Unit conversion should happen here
+				case BOOL:
+				case CATEGORICAL:
+				case XREF:
+				case MREF:
+				case CATEGORICAL_MREF:
+					break;
+				case COMPOUND:
+				case EMAIL:
+				case ENUM:
+				case FILE:
+				case HTML:
+				case HYPERLINK:
+				case IMAGE:
+				case SCRIPT:
+				case STRING:
+				case TEXT:
+					algorithm = "$('" + source.getName() + "').value();";
+					break;
+				default:
+					throw new RuntimeException("Unknown data type [" + dataType + "]");
+			}
+			if (StringUtils.isNotEmpty(algorithm))
+			{
+				AttributeMapping attributeMapping = mapping.addAttributeMapping(targetAttribute.getName());
+				attributeMapping.setAlgorithm(algorithm);
+				LOG.info("Creating attribute mapping: " + targetAttribute.getName() + " = " + algorithm);
+			}
 		}
 	}
 
