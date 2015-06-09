@@ -189,6 +189,10 @@ public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query>
 
 		String[] attrTokens = attrName.split("\\.");
 		AttributeMetaData attr = entityMetaData.getAttribute(attrTokens[0]);
+		if (attr == null)
+		{
+			throw new UnknownAttributeException("Unknown attribute [" + attrName + "]");
+		}
 		EntityMetaData entityMetaDataAtDepth = entityMetaData;
 		for (int i = 1; i < attrTokens.length; ++i)
 		{
