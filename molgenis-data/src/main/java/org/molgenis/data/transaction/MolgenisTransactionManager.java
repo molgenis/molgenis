@@ -9,21 +9,33 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.support.DefaultTransactionStatus;
 
+/**
+ * TransactionManager used by Molgenis.
+ * 
+ * Extends the JpaTransactionManager because that is needed for JPA to work.
+ * 
+ * TransactionListeners can be registered and will be notified on transaction begin, commit and rollback of transactions
+ * that are not readonly.
+ * 
+ * Each transaction is given a unique transaction id.
+ * 
+ */
 public class MolgenisTransactionManager extends JpaTransactionManager
 {
 	private static final long serialVersionUID = 1L;
 	private UuidGenerator idGenerator = new UuidGenerator();
-	private List<TransactionJoiner> transactionJoiners = new ArrayList<>();
+	private List<MolgenisTransactionListener> transactionListeners = new ArrayList<>();
 
 	public MolgenisTransactionManager()
 	{
 		super();
-		this.setNestedTransactionAllowed(false);
+		setNestedTransactionAllowed(false);
 	}
 
-	public void addTransactionJoiner(TransactionJoiner transactionJoiner)
+	public void addTransactionListener(MolgenisTransactionListener transactionListener)
 	{
-		this.transactionJoiners.add(transactionJoiner);
+		System.out.println("ADD " + transactionListener);
+		transactionListeners.add(transactionListener);
 	}
 
 	@Override
@@ -43,7 +55,7 @@ public class MolgenisTransactionManager extends JpaTransactionManager
 
 		if (!definition.isReadOnly())
 		{
-			transactionJoiners.forEach(j -> j.transactionStarted(molgenisTransaction.getId()));
+			transactionListeners.forEach(j -> j.transactionStarted(molgenisTransaction.getId()));
 		}
 	}
 
@@ -51,7 +63,6 @@ public class MolgenisTransactionManager extends JpaTransactionManager
 	protected void doCommit(DefaultTransactionStatus status) throws TransactionException
 	{
 		MolgenisTransaction transaction = (MolgenisTransaction) status.getTransaction();
-		// System.out.println("COMMIT TRANS:" + transaction + ",new=" + status.isNewTransaction());
 
 		DefaultTransactionStatus jpaTransactionStatus = new DefaultTransactionStatus(transaction.getJpaTransaction(),
 				status.isNewTransaction(), status.isNewSynchronization(), status.isReadOnly(), status.isDebug(),
@@ -61,7 +72,7 @@ public class MolgenisTransactionManager extends JpaTransactionManager
 
 		if (!status.isReadOnly())
 		{
-			transactionJoiners.forEach(j -> j.commitTransaction(transaction.getId()));
+			transactionListeners.forEach(j -> j.commitTransaction(transaction.getId()));
 		}
 	}
 
@@ -69,7 +80,6 @@ public class MolgenisTransactionManager extends JpaTransactionManager
 	protected void doRollback(DefaultTransactionStatus status) throws TransactionException
 	{
 		MolgenisTransaction transaction = (MolgenisTransaction) status.getTransaction();
-		// System.out.println("ROLLBACK TRANS:" + transaction);
 
 		DefaultTransactionStatus jpaTransactionStatus = new DefaultTransactionStatus(transaction.getJpaTransaction(),
 				status.isNewTransaction(), status.isNewSynchronization(), status.isReadOnly(), status.isDebug(),
@@ -79,7 +89,7 @@ public class MolgenisTransactionManager extends JpaTransactionManager
 
 		if (!status.isReadOnly())
 		{
-			transactionJoiners.forEach(j -> j.rollbackTransaction(transaction.getId()));
+			transactionListeners.forEach(j -> j.rollbackTransaction(transaction.getId()));
 		}
 	}
 

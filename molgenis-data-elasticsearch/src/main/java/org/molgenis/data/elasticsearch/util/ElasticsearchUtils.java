@@ -34,7 +34,6 @@ public class ElasticsearchUtils
 
 	public void refreshIndex(String index)
 	{
-		System.out.println(client.admin());
 		client.admin().indices().refresh(refreshRequest(index)).actionGet();
 	}
 

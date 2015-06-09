@@ -389,7 +389,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		addReposToReindex(localDataService);
 
 		SearchService localSearchService = embeddedElasticSearchServiceFactory.create(localDataService,
-				new EntityToSourceConverter(), null);
+				new EntityToSourceConverter());
 
 		DependencyResolver.resolve(localDataService).forEach(repo -> {
 			localSearchService.rebuildIndex(repo, repo.getEntityMetaData());

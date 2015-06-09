@@ -1,5 +1,10 @@
 package org.molgenis.data.transaction;
 
+/**
+ * Class representing a transaction in Molgenis.
+ * 
+ * Wraps the JpaTransaction object because JPA needs a JpaTransaction to work
+ */
 public class MolgenisTransaction
 {
 	private String id;
@@ -7,7 +12,6 @@ public class MolgenisTransaction
 
 	public MolgenisTransaction(String id, Object jpaTransaction)
 	{
-		super();
 		this.id = id;
 		this.jpaTransaction = jpaTransaction;
 	}

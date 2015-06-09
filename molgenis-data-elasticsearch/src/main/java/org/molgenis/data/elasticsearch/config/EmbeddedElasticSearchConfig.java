@@ -6,6 +6,7 @@ import java.util.Collections;
 import org.elasticsearch.common.logging.ESLoggerFactory;
 import org.elasticsearch.common.logging.slf4j.Slf4jESLoggerFactory;
 import org.molgenis.data.DataService;
+import org.molgenis.data.elasticsearch.ElasticSearchService;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
@@ -67,7 +68,10 @@ public class EmbeddedElasticSearchConfig
 	@Bean
 	public SearchService searchService()
 	{
-		return embeddedElasticSearchServiceFactory().create(dataService, entityToSourceConverter,
-				molgenisTransactionManager);
+		ElasticSearchService elasticSearchService = embeddedElasticSearchServiceFactory().create(dataService,
+				entityToSourceConverter);
+		molgenisTransactionManager.addTransactionListener(elasticSearchService);
+
+		return elasticSearchService;
 	}
 }

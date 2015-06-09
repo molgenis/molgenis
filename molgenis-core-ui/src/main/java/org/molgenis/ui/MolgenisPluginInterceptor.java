@@ -5,8 +5,6 @@ import static org.molgenis.ui.MolgenisPluginAttributes.KEY_MOLGENIS_UI;
 import static org.molgenis.ui.MolgenisPluginAttributes.KEY_PLUGINID_WITH_QUERY_STRING;
 import static org.molgenis.ui.MolgenisPluginAttributes.KEY_PLUGIN_ID;
 
-import java.io.File;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 

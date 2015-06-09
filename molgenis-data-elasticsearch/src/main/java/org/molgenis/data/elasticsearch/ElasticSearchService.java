@@ -65,8 +65,7 @@ import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.transaction.MolgenisTransactionManager;
-import org.molgenis.data.transaction.TransactionJoiner;
+import org.molgenis.data.transaction.MolgenisTransactionListener;
 import org.molgenis.util.DependencyResolver;
 import org.molgenis.util.EntityUtils;
 import org.molgenis.util.Pair;
@@ -83,7 +82,7 @@ import com.google.common.collect.Iterables;
  * 
  * @author erwin
  */
-public class ElasticSearchService implements SearchService, TransactionJoiner
+public class ElasticSearchService implements SearchService, MolgenisTransactionListener
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ElasticSearchService.class);
 
@@ -104,10 +103,10 @@ public class ElasticSearchService implements SearchService, TransactionJoiner
 	private final EntityToSourceConverter entityToSourceConverter;
 	private ElasticsearchUtils elasticsearchUtils;
 
-	public ElasticSearchService(MolgenisTransactionManager molgenisTransactionManager, Client client, String indexName,
-			DataService dataService, EntityToSourceConverter entityToSourceConverter)
+	public ElasticSearchService(Client client, String indexName, DataService dataService,
+			EntityToSourceConverter entityToSourceConverter)
 	{
-		this(molgenisTransactionManager, client, indexName, dataService, entityToSourceConverter, true);
+		this(client, indexName, dataService, entityToSourceConverter, true);
 	}
 
 	/**
@@ -119,8 +118,8 @@ public class ElasticSearchService implements SearchService, TransactionJoiner
 	 * @param entityToSourceConverter
 	 * @param createIndexIfNotExists
 	 */
-	ElasticSearchService(MolgenisTransactionManager molgenisTransactionManager, Client client, String indexName,
-			DataService dataService, EntityToSourceConverter entityToSourceConverter, boolean createIndexIfNotExists)
+	ElasticSearchService(Client client, String indexName, DataService dataService,
+			EntityToSourceConverter entityToSourceConverter, boolean createIndexIfNotExists)
 	{
 		if (client == null) throw new IllegalArgumentException("Client is null");
 		if (indexName == null) throw new IllegalArgumentException("IndexName is null");
@@ -135,11 +134,6 @@ public class ElasticSearchService implements SearchService, TransactionJoiner
 		if (createIndexIfNotExists)
 		{
 			new ElasticsearchIndexCreator(client).createIndexIfNotExists(indexName);
-		}
-
-		if (molgenisTransactionManager != null)
-		{
-			molgenisTransactionManager.addTransactionJoiner(this);
 		}
 	}
 

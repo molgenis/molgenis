@@ -63,8 +63,7 @@ public class ElasticSearchServiceTest
 
 		entityToSourceConverter = mock(EntityToSourceConverter.class);
 		dataService = spy(new DataServiceImpl(new NonDecoratingRepositoryDecoratorFactory()));
-		searchService = spy(new ElasticSearchService(null, client, indexName, dataService, entityToSourceConverter,
-				false));
+		searchService = spy(new ElasticSearchService(client, indexName, dataService, entityToSourceConverter, false));
 		BulkProcessorFactory bulkProcessorFactory = mock(BulkProcessorFactory.class);
 		BulkProcessor bulkProcessor = mock(BulkProcessor.class);
 		when(bulkProcessor.awaitClose(any(Long.class), any(TimeUnit.class))).thenReturn(true);
