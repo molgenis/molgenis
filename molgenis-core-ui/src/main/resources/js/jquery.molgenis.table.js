@@ -1,3 +1,9 @@
+/**
+ * @deprecated Use /molgenis-core-ui/src/main/resources/js/component/Table.js instead
+ * 
+ * @param $
+ * @param molgenis
+ */
 (function($, molgenis) {
 	"use strict";
 
