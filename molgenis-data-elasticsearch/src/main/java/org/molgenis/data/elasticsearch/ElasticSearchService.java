@@ -289,8 +289,13 @@ public class ElasticSearchService implements SearchService, TransactionJoiner
 	public void refresh()
 	{
 		if (LOG.isTraceEnabled()) LOG.trace("Refreshing Elasticsearch index [" + indexName + "]");
-		elasticsearchUtils.refreshIndex(indexName);
+		refresh(indexName);
 		if (LOG.isDebugEnabled()) LOG.debug("Refreshed Elasticsearch index [" + indexName + "]");
+	}
+
+	public void refresh(String index)
+	{
+		elasticsearchUtils.refreshIndex(index);
 	}
 
 	/*
@@ -399,6 +404,7 @@ public class ElasticSearchService implements SearchService, TransactionJoiner
 		String transactionId = getCurrentTransactionId();
 
 		BulkProcessor bulkProcessor = BULK_PROCESSOR_FACTORY.create(client);
+
 		try
 		{
 			for (Entity entity : entities)
@@ -418,7 +424,7 @@ public class ElasticSearchService implements SearchService, TransactionJoiner
 			elasticsearchUtils.waitForCompletion(bulkProcessor);
 		}
 
-		elasticsearchUtils.refreshIndex(index);
+		refresh(index);
 
 		// If not in transaction update references now, if in transaction the references are updated in
 		// the commitTransaction method

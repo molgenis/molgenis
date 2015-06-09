@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.elasticsearch.action.ListenableActionFuture;
 import org.elasticsearch.action.index.IndexRequestBuilder;
@@ -33,6 +34,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.ElasticSearchService.BulkProcessorFactory;
 import org.molgenis.data.elasticsearch.ElasticSearchService.IndexingMode;
 import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
+import org.molgenis.data.elasticsearch.util.BulkProcessor;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -54,17 +56,21 @@ public class ElasticSearchServiceTest
 	private DataService dataService;
 
 	@BeforeMethod
-	public void beforeMethod()
+	public void beforeMethod() throws InterruptedException
 	{
 		indexName = "molgenis";
 		client = mock(Client.class);
+
 		entityToSourceConverter = mock(EntityToSourceConverter.class);
 		dataService = spy(new DataServiceImpl(new NonDecoratingRepositoryDecoratorFactory()));
 		searchService = spy(new ElasticSearchService(null, client, indexName, dataService, entityToSourceConverter,
 				false));
 		BulkProcessorFactory bulkProcessorFactory = mock(BulkProcessorFactory.class);
+		BulkProcessor bulkProcessor = mock(BulkProcessor.class);
+		when(bulkProcessor.awaitClose(any(Long.class), any(TimeUnit.class))).thenReturn(true);
+		when(bulkProcessorFactory.create(client)).thenReturn(bulkProcessor);
 		ElasticSearchService.setBulkProcessorFactory(bulkProcessorFactory);
-		doNothing().when(searchService).refresh();
+		doNothing().when(searchService).refresh(any(String.class));
 	}
 
 	@BeforeClass
@@ -84,25 +90,19 @@ public class ElasticSearchServiceTest
 		MapEntity entity = createEntityAndRegisterSource(entityMetaData, "id0");
 
 		searchService.index(entity, entityMetaData, IndexingMode.ADD);
-
-		verify(client, times(1)).prepareIndex(eq(indexName), eq("entity"), any(String.class));
-		verify(searchService, times(0))
-				.index(indexName, Arrays.asList(entity), entityMetaData, IndexingMode.ADD, false);
+		verify(searchService, times(1)).index(indexName, Arrays.asList(entity), entityMetaData, IndexingMode.ADD, true);
 	}
 
 	@Test
 	public void indexEntityUpdateNoRefs()
 	{
 		DefaultEntityMetaData entityMetaData = createEntityMeta("entity");
-
 		MapEntity entity = createEntityAndRegisterSource(entityMetaData, "id0");
-
 		when(dataService.getEntityNames()).thenReturn(Lists.newArrayList());
 
 		searchService.index(entity, entityMetaData, IndexingMode.UPDATE);
-		verify(client, times(1)).prepareIndex(eq(indexName), eq("entity"), any(String.class));
-		verify(searchService, times(0)).index(indexName, Arrays.asList(entity), entityMetaData, IndexingMode.UPDATE,
-				false);
+		verify(searchService, times(1)).index(indexName, Arrays.asList(entity), entityMetaData, IndexingMode.UPDATE,
+				true);
 	}
 
 	@SuppressWarnings("unchecked")

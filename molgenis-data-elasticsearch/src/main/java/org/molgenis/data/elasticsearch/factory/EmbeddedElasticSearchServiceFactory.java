@@ -85,6 +85,11 @@ public class EmbeddedElasticSearchServiceFactory implements Closeable
 				entityToSourceConverter);
 	}
 
+	public SearchService create(DataService dataService, EntityToSourceConverter entityToSourceConverter)
+	{
+		return create(dataService, entityToSourceConverter, null);
+	}
+
 	public Client getClient()
 	{
 		return client;
