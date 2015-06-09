@@ -5,7 +5,6 @@ import static org.molgenis.data.mapper.controller.MappingServiceController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,8 +28,6 @@ import org.molgenis.data.mapper.mapping.model.CategoryMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
-import org.molgenis.data.mapper.repository.AttributeMappingRepository;
-import org.molgenis.data.mapper.repository.impl.AttributeMappingRepositoryImpl;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;

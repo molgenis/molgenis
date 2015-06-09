@@ -19,7 +19,6 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.service.AlgorithmService;
-import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.js.RhinoConfig;
@@ -56,14 +55,6 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		LOG.debug("createAttributeMappingIfOnlyOneMatch: target= " + targetAttribute.getName());
 		Iterable<AttributeMetaData> matches = semanticSearchService.findAttributes(sourceEntityMetaData,
 				targetEntityMetaData, targetAttribute);
-		Iterable<ExplainedAttributeMetaData> explainAttributes = semanticSearchService.explainAttributes(
-				sourceEntityMetaData, targetEntityMetaData, targetAttribute);
-
-		for (ExplainedAttributeMetaData attribute : explainAttributes)
-		{
-			System.out.println(attribute.getAttributeMetaData());
-			System.out.println(attribute.getExplainedQueryStrings());
-		}
 
 		if (Iterables.size(matches) == 1)
 		{
