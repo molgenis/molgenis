@@ -16,6 +16,8 @@ import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableMap;
+
 public class ElasticSearchExplainServiceImplTest
 {
 	private ElasticSearchExplainService elasticSearchExplainService;
@@ -92,11 +94,11 @@ public class ElasticSearchExplainServiceImplTest
 		QueryRule finalDisMaxQueryRule = new QueryRule(Arrays.asList(shouldQueryRule));
 		finalDisMaxQueryRule.setOperator(Operator.DIS_MAX);
 
-		assertEquals(explainServiceHelper.recursivelyFindQuery("high blood", finalDisMaxQueryRule.getNestedRules()),
-				"high blood pressure");
+		assertEquals(explainServiceHelper.recursivelyFindQuery("high blood", finalDisMaxQueryRule.getNestedRules())
+				.toString(), ImmutableMap.of("high blood pressure", 73.333).toString());
 
-		assertEquals(explainServiceHelper.recursivelyFindQuery("medication", finalDisMaxQueryRule.getNestedRules()),
-				"medication");
+		assertEquals(explainServiceHelper.recursivelyFindQuery("medication", finalDisMaxQueryRule.getNestedRules())
+				.toString(), ImmutableMap.of("medication", 100.0).toString());
 	}
 
 	@Test
@@ -135,7 +137,7 @@ public class ElasticSearchExplainServiceImplTest
 		QueryRule finalDisMaxQueryRule = new QueryRule(Arrays.asList(shouldQueryRule));
 		finalDisMaxQueryRule.setOperator(Operator.DIS_MAX);
 
-		assertEquals(elasticSearchExplainService.reverseSearchQueryStrings(finalDisMaxQueryRule, explanation_1),
-				Sets.newHashSet("high blood pressure", "medication"));
+		assertEquals(elasticSearchExplainService.reverseSearchQueryStrings(finalDisMaxQueryRule, explanation_1)
+				.toString(), "[high blood pressure=73.333, medication=100.0]");
 	}
 }

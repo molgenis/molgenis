@@ -19,6 +19,7 @@
 	}
 
 	function createNewButtonHtml(attributeName, tag) {
+		console.log(attributeName, tag);
 		var btnHtml = '';
 
 		btnHtml += '<button '
@@ -98,10 +99,8 @@
 							'message' : 'Automatic tagging is a success!'
 						} ], 'success');
 
-						$.each(data, function(attributeName, tags) {
-							$.each(tags, function(index) {
-								$('#' + attributeName + '-tag-column').append(createNewButtonHtml(attributeName, tags[index]));
-							});
+						$.each(data, function(attributeName, tag) {
+							$('#' + attributeName + '-tag-column').append(createNewButtonHtml(attributeName, tag));
 						});
 					}
 				});

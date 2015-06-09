@@ -78,7 +78,7 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 		String multiOntologyTermIri = "http://www.molgenis.org/1,http://www.molgenis.org/2";
 		OntologyTerm ontologyTerm_1 = OntologyTerm.create("http://www.molgenis.org/1", "molgenis label in the gcc");
 		OntologyTerm ontologyTerm_2 = OntologyTerm.create("http://www.molgenis.org/2",
-				"molgenis label 2 in the genetics", "", Arrays.asList("label 2"));
+				"molgenis label 2 in the genetics", Arrays.asList("label 2"));
 		when(ontologyService.getOntologyTerm(ontologyTerm_1.getIRI())).thenReturn(ontologyTerm_1);
 		when(ontologyService.getOntologyTerm(ontologyTerm_2.getIRI())).thenReturn(ontologyTerm_2);
 
@@ -151,7 +151,7 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 		OntologyTerm ontologyTerm2 = OntologyTerm.create("http://onto/standingheight", "height",
 				"Description is not used", Collections.emptyList());
 
-		OntologyTerm ontologyTerm3 = OntologyTerm.create("http://onto/standingheight-children", "length", "",
+		OntologyTerm ontologyTerm3 = OntologyTerm.create("http://onto/standingheight-children", "length",
 				Arrays.<String> asList("body_length"));
 
 		when(ontologyService.getChildren(ontologyTerm2)).thenReturn(Arrays.asList(ontologyTerm3));

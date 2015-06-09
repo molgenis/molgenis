@@ -154,9 +154,15 @@ public class SemanticSearchServiceHelper
 
 	public List<String> collectQueryTermsFromOntologyTerm(OntologyTerm ontologyTerm)
 	{
-		List<String> queryTerms = new ArrayList<String>();
-		ontologyTerm.getSynonyms().forEach(synonym -> queryTerms.add(parseQueryString(synonym)));
-		queryTerms.add(parseQueryString(ontologyTerm.getLabel()));
+		List<String> queryTerms = ontologyTerm.getSynonyms().stream().map(synonym -> parseQueryString(synonym))
+				.collect(Collectors.<String> toList());
+
+		String labelParsedAsQueryString = parseQueryString(ontologyTerm.getLabel());
+		// Check if label has been added to the list of query terms
+		if (!queryTerms.contains(labelParsedAsQueryString))
+		{
+			queryTerms.add(labelParsedAsQueryString);
+		}
 
 		for (OntologyTerm descendantOntologyTerm : ontologyService.getChildren(ontologyTerm))
 		{

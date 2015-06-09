@@ -4,7 +4,7 @@ import static org.molgenis.data.elasticsearch.util.MapperTypeSanitizer.sanitizeM
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -52,7 +52,7 @@ public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainServ
 
 	public Set<Entry<String, Double>> reverseSearchQueryStrings(QueryRule disMaxQueryRule, Explanation explanation)
 	{
-		Set<Entry<String, Double>> matchedQueryStrings = new HashSet<Entry<String, Double>>();
+		Set<Entry<String, Double>> matchedQueryStrings = new LinkedHashSet<Entry<String, Double>>();
 		String discoverMatchedQueries = explainServiceHelper.discoverMatchedQueries(explanation);
 
 		for (String queryPart : discoverMatchedQueries.split("\\|"))
