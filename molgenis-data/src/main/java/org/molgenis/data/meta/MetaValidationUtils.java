@@ -96,7 +96,7 @@ public class MetaValidationUtils
 
 		if (name.length() > MAX_ATTRIBUTE_LENGTH)
 		{
-			throw new MolgenisDataException("Attribute name [" + name + "] is too long: maximum length is "
+			throw new MolgenisDataException("Name [" + name + "] is too long: maximum length is "
 					+ MAX_ATTRIBUTE_LENGTH + " characters.");
 		}
 
@@ -108,7 +108,7 @@ public class MetaValidationUtils
 
 		if (Character.isDigit(name.charAt(0)))
 		{
-			throw new MolgenisDataException("Invalid name: [" + name + "] Names must start with a letter.");
+			throw new MolgenisDataException("Invalid name: [" + name + "] Names may not start with a digit.");
 		}
 	}
 
