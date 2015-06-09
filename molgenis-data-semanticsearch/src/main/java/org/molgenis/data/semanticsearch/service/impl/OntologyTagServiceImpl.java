@@ -44,6 +44,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Maps;
 
 /**
  * Service to tag metadata with ontology terms.
@@ -154,8 +155,8 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	public OntologyTag addAttributeTag(String entity, String attribute, String relationIRI,
 			List<String> ontologyTermIRIs)
 	{
+		boolean added = false;
 		Entity attributeEntity = findAttributeEntity(entity, attribute);
-		List<Entity> tags = Lists.<Entity> newArrayList(attributeEntity.getEntities(AttributeMetaDataMetaData.TAGS));
 		Entity tagEntity = new DefaultEntity(TagRepository.META_DATA, dataService);
 		Stream<OntologyTerm> terms = ontologyTermIRIs.stream().map(ontologyService::getOntologyTerm);
 		OntologyTerm combinedOntologyTerm = OntologyTerm.and(terms.toArray(OntologyTerm[]::new));
@@ -167,11 +168,21 @@ public class OntologyTagServiceImpl implements OntologyTagService
 		tagEntity.set(TagMetaData.LABEL, combinedOntologyTerm.getLabel());
 		tagEntity.set(TagMetaData.OBJECT_IRI, combinedOntologyTerm.getIRI());
 		dataService.add(TagMetaData.ENTITY_NAME, tagEntity);
-		tags.add(tagEntity);
-		attributeEntity.set(AttributeMetaDataMetaData.TAGS, tags);
+
+		Map<String, Entity> tags = Maps.<String, Entity> newHashMap();
+		for (Entity tag : attributeEntity.getEntities(AttributeMetaDataMetaData.TAGS))
+		{
+			tags.put(tag.get(TagMetaData.OBJECT_IRI).toString(), tag);
+		}
+		if (!tags.containsKey(tagEntity.get(TagMetaData.OBJECT_IRI).toString()))
+		{
+			tags.put(tagEntity.get(TagMetaData.OBJECT_IRI).toString(), tagEntity);
+			added = true;
+		}
+		attributeEntity.set(AttributeMetaDataMetaData.TAGS, tags.values());
 		dataService.update(AttributeMetaDataMetaData.ENTITY_NAME, attributeEntity);
 		updateEntityMetaDataEntityWithNewAttributeEntity(entity, attribute, attributeEntity);
-		return OntologyTag.create(combinedOntologyTerm, relation);
+		return added ? OntologyTag.create(combinedOntologyTerm, relation) : null;
 	}
 
 	public Entity getTagEntity(Tag<?, OntologyTerm, Ontology> tag)

@@ -100,7 +100,9 @@
 
 						$.each(data, function(attributeName, tags) {
 							$.each(tags, function(index) {
-								$('#' + attributeName + '-tag-column').append(createNewButtonHtml(attributeName, tags[index]));
+								if(tags[index] !== null){
+									$('#' + attributeName + '-tag-column').append(createNewButtonHtml(attributeName, tags[index]));
+								}
 							});
 						});
 					}
@@ -162,7 +164,9 @@
 				}),
 				success : function(ontologyTag) {
 					$('#tag-dropdown').select2('val', '');
-					$('#' + attributeName + '-tag-column').append(createNewButtonHtml(attributeName, ontologyTag));
+					if(ontologyTag !== undefined){
+						$('#' + attributeName + '-tag-column').append(createNewButtonHtml(attributeName, ontologyTag));
+					}
 				}
 			});
 		});
