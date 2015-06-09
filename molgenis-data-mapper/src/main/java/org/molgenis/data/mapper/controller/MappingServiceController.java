@@ -1,9 +1,11 @@
 package org.molgenis.data.mapper.controller;
 
+import static com.google.common.collect.Iterators.size;
 import static org.molgenis.data.mapper.controller.MappingServiceController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,20 +14,30 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.auth.MolgenisUser;
+import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.mapper.data.request.MappingServiceRequest;
+import org.molgenis.data.mapper.mapping.model.AlgorithmResult;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
+import org.molgenis.data.mapper.mapping.model.CategoryMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
+import org.molgenis.data.mapper.repository.AttributeMappingRepository;
+import org.molgenis.data.mapper.repository.impl.AttributeMappingRepositoryImpl;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
+import org.molgenis.data.support.AggregateQueryImpl;
+import org.molgenis.data.support.QueryImpl;
+import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -47,6 +59,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -62,6 +75,8 @@ public class MappingServiceController extends MolgenisPluginController
 	private static final String VIEW_MAPPING_PROJECTS = "view-mapping-projects";
 	private static final String VIEW_ATTRIBUTE_MAPPING = "view-attribute-mapping";
 	private static final String VIEW_SINGLE_MAPPING_PROJECT = "view-single-mapping-project";
+	private static final String VIEW_CATEGORY_MAPPING_EDITOR = "view-category-mapping-editor";
+	private static final String VIEW_ATTRIBUTE_MAPPING_FEEDBACK = "view-attribute-mapping-feedback";
 
 	@Autowired
 	private MolgenisUserService molgenisUserService;
@@ -122,6 +137,8 @@ public class MappingServiceController extends MolgenisPluginController
 		MappingProject newMappingProject = mappingService.addMappingProject(name, getCurrentUser(), targetEntity);
 		// FIXME need to write complete URL else it will use /plugin as root and the molgenis header and footer wont be
 		// loaded
+
+		// FIXME redirect puts all model elements into the url
 		return "redirect:/menu/main/mappingservice/mappingproject/" + newMappingProject.getIdentifier();
 	}
 
@@ -211,7 +228,6 @@ public class MappingServiceController extends MolgenisPluginController
 				targetEntityMetaData, mapping, attribute));
 		mappingService.updateMappingProject(project);
 		stopwatch.stop();
-		System.out.println(stopwatch);
 	}
 
 	/**
@@ -389,6 +405,177 @@ public class MappingServiceController extends MolgenisPluginController
 		model.addAttribute("hasWritePermission", hasWritePermission(project, false));
 
 		return VIEW_ATTRIBUTE_MAPPING;
+	}
+
+	@RequestMapping("/attributeMappingFeedback")
+	public String attributeMappingFeedback(@RequestParam(required = true) String mappingProjectId,
+			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
+			@RequestParam(required = true) String targetAttribute, @RequestParam(required = true) String algorithm,
+			Model model)
+	{
+		MappingProject project = mappingService.getMappingProject(mappingProjectId);
+
+		MappingTarget mappingTarget = project.getMappingTarget(target);
+		EntityMapping entityMapping = mappingTarget.getMappingForSource(source);
+
+		AttributeMapping attributeMapping = entityMapping.getAttributeMapping(targetAttribute);
+
+		FluentIterable<Entity> sourceEntities = FluentIterable.from(dataService.findAll(source)).limit(20);
+
+		// query first 20 rows
+		// apply algorithm to those rows
+		// add result objects for each row to model
+
+		// model.addAttribute("rows", Arrays.asList(AlgorithmResult.createFailure("NullPointer Exception blah"),
+		// AlgorithmResult.createSuccess("5.3")));
+
+		model.addAttribute("target", target);
+		model.addAttribute("source", source);
+		model.addAttribute("sourceAttributeNames", algorithmService.getSourceAttributeNames(algorithm));
+		model.addAttribute("targetAttribute", dataService.getEntityMetaData(target).getAttribute(targetAttribute));
+
+		model.addAttribute(
+				"feedbackRows",
+				sourceEntities.transform(
+						sourceEntity -> {
+							try
+							{
+								return AlgorithmResult.createSuccess(
+										algorithmService.apply(attributeMapping, sourceEntity,
+												sourceEntity.getEntityMetaData()), sourceEntity);
+							}
+							catch (Exception e)
+							{
+								return AlgorithmResult.createFailure(e, sourceEntity);
+							}
+						}).toList());
+
+		// model.addAttribute("algorithm", algorithm);
+
+		return VIEW_ATTRIBUTE_MAPPING_FEEDBACK;
+	}
+
+	/**
+	 * Returns a view that allows the user to edit mappings involving xrefs / categoricals / strings
+	 * 
+	 * @param mappingProjectId
+	 * @param target
+	 * @param source
+	 * @param targetAttribute
+	 * @param sourceAttribute
+	 * @param model
+	 */
+	@RequestMapping("/categoryMappingEditor")
+	public String categoryMappingEditor(@RequestParam(required = true) String mappingProjectId,
+			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
+			@RequestParam(required = true) String targetAttribute,
+			@RequestParam(required = true) String sourceAttribute, Model model)
+	{
+		MappingProject project = mappingService.getMappingProject(mappingProjectId);
+		model.addAttribute("mappingProject", project);
+
+		MappingTarget mappingTarget = project.getMappingTarget(target);
+		EntityMapping entityMapping = mappingTarget.getMappingForSource(source);
+		model.addAttribute("entityMapping", entityMapping);
+
+		AttributeMapping attributeMapping = entityMapping.getAttributeMapping(targetAttribute);
+		model.addAttribute("attributeMapping", attributeMapping);
+
+		FieldType sourceAttributeDataType = dataService.getEntityMetaData(source).getAttribute(sourceAttribute)
+				.getDataType();
+
+		// values for source xref / categoricals / String
+		Iterable<Entity> sourceAttributeRefEntityEntities = null;
+		if (sourceAttributeDataType.equals(MolgenisFieldTypes.CATEGORICAL)
+				|| sourceAttributeDataType.equals(MolgenisFieldTypes.XREF))
+		{
+			sourceAttributeRefEntityEntities = dataService.findAll(dataService.getEntityMetaData(source)
+					.getAttribute(sourceAttribute).getRefEntity().getName());
+		}
+		model.addAttribute("sourceAttributeRefEntityEntities", sourceAttributeRefEntityEntities);
+		model.addAttribute("numberOfSourceAttributes", size(sourceAttributeRefEntityEntities.iterator()));
+
+		// values for target xref / categoricals / String
+		Iterable<Entity> targetAttributeRefEntityEntities = dataService.findAll(dataService.getEntityMetaData(target)
+				.getAttribute(targetAttribute).getRefEntity().getName());
+		model.addAttribute("targetAttributeRefEntityEntities", targetAttributeRefEntityEntities);
+
+		// ID attribute for the target ref entity
+		// TODO: Source can be String / enum, those don't have refEntity
+		String sourceAttributeRefEntityIdAttribute = dataService.getEntityMetaData(source)
+				.getAttribute(sourceAttribute).getRefEntity().getIdAttribute().getName();
+		model.addAttribute("sourceAttributeRefEntityIdAttribute", sourceAttributeRefEntityIdAttribute);
+
+		// Label attribute for the source ref entity
+		String sourceAttributeRefEntityLabelAttribute = dataService.getEntityMetaData(source)
+				.getAttribute(sourceAttribute).getRefEntity().getLabelAttribute().getName();
+		model.addAttribute("sourceAttributeRefEntityLabelAttribute", sourceAttributeRefEntityLabelAttribute);
+
+		// ID attribute for the target ref entity
+		String targetAttributeRefEntityIdAttribute = dataService.getEntityMetaData(target)
+				.getAttribute(targetAttribute).getRefEntity().getIdAttribute().getName();
+		model.addAttribute("targetAttributeRefEntityIdAttribute", targetAttributeRefEntityIdAttribute);
+
+		// Label attribute for the target ref entity
+		String targetAttributeRefEntityLabelAttribute = dataService.getEntityMetaData(target)
+				.getAttribute(targetAttribute).getRefEntity().getLabelAttribute().getName();
+		model.addAttribute("targetAttributeRefEntityLabelAttribute", targetAttributeRefEntityLabelAttribute);
+
+		// Check if the selected source attribute is aggregateable
+		AttributeMetaData sourceAttributeAttributeMetaData = dataService.getEntityMetaData(source).getAttribute(
+				sourceAttribute);
+		if (sourceAttributeAttributeMetaData.isAggregateable())
+		{
+			AggregateResult aggregate = dataService.aggregate(source,
+					new AggregateQueryImpl().attrX(sourceAttributeAttributeMetaData).query(new QueryImpl()));
+			List<Long> aggregateCounts = new ArrayList<Long>();
+			for (List<Long> count : aggregate.getMatrix())
+			{
+				aggregateCounts.add(count.get(0));
+			}
+			model.addAttribute("aggregates", aggregateCounts);
+		}
+
+		model.addAttribute("target", target);
+		model.addAttribute("source", source);
+		model.addAttribute("targetAttribute", dataService.getEntityMetaData(target).getAttribute(targetAttribute));
+		model.addAttribute("sourceAttribute", dataService.getEntityMetaData(source).getAttribute(sourceAttribute));
+		model.addAttribute("hasWritePermission", hasWritePermission(project, false));
+
+		CategoryMapping<String, String> categoryMapping = null;
+		if (attributeMapping != null)
+		{
+			categoryMapping = CategoryMapping.<String, String> create(attributeMapping.getAlgorithm());
+		}
+		if (categoryMapping == null)
+		{
+			categoryMapping = CategoryMapping.<String, String> createEmpty(sourceAttribute);
+		}
+		model.addAttribute("categoryMapping", categoryMapping);
+
+		return VIEW_CATEGORY_MAPPING_EDITOR;
+	}
+
+	@RequestMapping("/savecategorymapping")
+	public String saveCategoryMapping(@RequestParam(required = true) String mappingProjectId,
+			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
+			@RequestParam(required = true) String targetAttribute, @RequestParam(required = true) String algorithm)
+	{
+		MappingProject mappingProject = mappingService.getMappingProject(mappingProjectId);
+		if (hasWritePermission(mappingProject))
+		{
+			MappingTarget mappingTarget = mappingProject.getMappingTarget(target);
+			EntityMapping mappingForSource = mappingTarget.getMappingForSource(source);
+			AttributeMapping attributeMapping = mappingForSource.getAttributeMapping(targetAttribute);
+			if (attributeMapping == null)
+			{
+				attributeMapping = mappingForSource.addAttributeMapping(targetAttribute);
+			}
+			attributeMapping.setAlgorithm(algorithm);
+			mappingService.updateMappingProject(mappingProject);
+		}
+
+		return "redirect:/menu/main/mappingservice/mappingproject/" + mappingProject.getIdentifier();
 	}
 
 	/**

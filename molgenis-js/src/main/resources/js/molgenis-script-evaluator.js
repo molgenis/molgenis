@@ -29,16 +29,15 @@ function evalScript(script, entity) {
 				}
 				return this;
 			},
-			map: function(categoryMapping) {
-				var MISSING_VALUE = 9999;
-				
-				var categoryMappingReversed = {};//Keys and values reversed
-				for (var key in categoryMapping) {
-					categoryMappingReversed[categoryMapping[key]] = key;
-				}
-				this.val = categoryMappingReversed[this.val];
-				if ((this.val === undefined) || (this.val === null)) {
-					this.val = MISSING_VALUE;
+			map: function(categoryMapping, defaultValue, nullValue) {
+				if( this.val in categoryMapping ) {
+					this.val = categoryMapping[this.val];
+				} else {
+					if (nullValue !== undefined && ((this.val === undefined) || (this.val === null))) {
+						this.val = nullValue;
+					} else {
+						this.val = defaultValue;
+					}
 				}
 				return this;
 			},
