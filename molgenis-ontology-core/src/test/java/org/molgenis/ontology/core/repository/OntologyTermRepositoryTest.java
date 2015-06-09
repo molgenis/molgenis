@@ -147,7 +147,7 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 
 		OntologyTerm ontologyTerm = ontologyTermRepository.getOntologyTerm(iris);
 		assertEquals(ontologyTerm,
-				OntologyTerm.create("http://www.test.nl/iri", "Ontology term", null, Arrays.asList("Ontology term")));
+				OntologyTerm.create("http://www.test.nl/iri", "Ontology term", Arrays.asList("Ontology term")));
 	}
 
 	@Configuration
