@@ -296,7 +296,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	@Test
 	public void retrieveResourcePartialResponseAttribute() throws Exception
 	{
-		mockMvc.perform(get(HREF_ENTITY_ID).param("attributes", attrBool)).andExpect(status().isOk())
+		mockMvc.perform(get(HREF_ENTITY_ID).param("attrs", attrBool)).andExpect(status().isOk())
 				.andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(content().string(resourcePartialAttributeResponse));
 	}
@@ -304,15 +304,15 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	@Test
 	public void retrieveResourcePartialResponseAttributes() throws Exception
 	{
-		mockMvc.perform(get(HREF_ENTITY_ID).param("attributes", attrBool + ',' + attrString))
-				.andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON))
+		mockMvc.perform(get(HREF_ENTITY_ID).param("attrs", attrBool + ',' + attrString)).andExpect(status().isOk())
+				.andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(content().string(resourcePartialAttributesResponse));
 	}
 
 	@Test
 	public void retrieveResourcePartialResponseSubAttribute() throws Exception
 	{
-		mockMvc.perform(get(HREF_ENTITY_ID).param("attributes", attrXref + '(' + refAttrValue + ')'))
+		mockMvc.perform(get(HREF_ENTITY_ID).param("attrs", attrXref + '(' + refAttrValue + ')'))
 				.andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(content().string(resourcePartialSubAttributeResponse));
 	}
@@ -320,7 +320,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	@Test
 	public void retrieveResourcePartialResponseSubAttributes() throws Exception
 	{
-		mockMvc.perform(get(HREF_ENTITY_ID).param("attributes", attrXref + '(' + refAttrId + ',' + refAttrValue + ')'))
+		mockMvc.perform(get(HREF_ENTITY_ID).param("attrs", attrXref + '(' + refAttrId + ',' + refAttrValue + ')'))
 				.andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(content().string(resourcePartialSubAttributesResponse));
 	}
@@ -329,7 +329,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	public void retrieveResourcePartialResponseSubSubAttributes() throws Exception
 	{
 		mockMvc.perform(
-				get(HREF_ENTITY_ID).param("attributes",
+				get(HREF_ENTITY_ID).param("attrs",
 						attrXref + '(' + refAttrId + ',' + refAttrRef + '(' + refRefAttrValue + ')' + ')'))
 				.andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(content().string(resourcePartialSubSubAttributesResponse));

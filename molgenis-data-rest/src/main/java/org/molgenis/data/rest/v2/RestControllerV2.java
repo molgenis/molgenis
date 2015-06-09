@@ -71,7 +71,7 @@ class RestControllerV2
 	@ResponseBody
 	public Map<String, Object> retrieveEntity(@PathVariable("entityName") String entityName,
 			@PathVariable("id") Object id,
-			@RequestParam(value = "attributes", required = false) AttributeFilter attributeFilter)
+			@RequestParam(value = "attrs", required = false) AttributeFilter attributeFilter)
 	{
 		Entity entity = dataService.findOne(entityName, id);
 		if (entity == null)
@@ -86,7 +86,7 @@ class RestControllerV2
 	@ResponseBody
 	public Map<String, Object> retrieveEntityPost(@PathVariable("entityName") String entityName,
 			@PathVariable("id") Object id,
-			@RequestParam(value = "attributes", required = false) AttributeFilter attributeFilter)
+			@RequestParam(value = "attrs", required = false) AttributeFilter attributeFilter)
 	{
 		Entity entity = dataService.findOne(entityName, id);
 		if (entity == null)
