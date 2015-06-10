@@ -329,12 +329,14 @@ public class MappingServiceController extends MolgenisPluginController
 		{
 			MappingTarget mappingTarget = mappingService.getMappingProject(mappingProjectId).getMappingTarget(target);
 			String name = mappingService.applyMappings(mappingTarget, newEntityName);
+			//FIXME
 			return "redirect:/menu/main/dataexplorer?entity=" + name;
 		}
 		catch (RuntimeException ex)
 		{
 			model.addAttribute("heading", "Failed to create integrated entity.");
 			model.addAttribute("message", ex.getMessage());
+			//FIXME
 			model.addAttribute("href", "/menu/main/mappingservice/mappingproject/" + mappingProjectId);
 			return "error-msg";
 		}
