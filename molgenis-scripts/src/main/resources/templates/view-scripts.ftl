@@ -1,7 +1,7 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 
-<#assign css=['molgenis-form.css']>
+<#assign css=[]>
 <#assign js=['jquery.validate.min.js', 'scripts.js']>
 
 <@header css js/>

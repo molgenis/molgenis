@@ -52,7 +52,6 @@ import org.molgenis.security.freemarker.HasPermissionDirective;
 import org.molgenis.security.freemarker.NotHasPermissionDirective;
 import org.molgenis.security.owned.OwnedEntityMetaData;
 import org.molgenis.security.owned.OwnedEntityRepositoryDecorator;
-import org.molgenis.ui.freemarker.FormLinkDirective;
 import org.molgenis.ui.freemarker.LimitMethod;
 import org.molgenis.ui.menu.MenuMolgenisUi;
 import org.molgenis.ui.menu.MenuReaderService;
@@ -325,7 +324,6 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		freemarkerVariables.put("limit", new LimitMethod());
 		freemarkerVariables.put("hasPermission", new HasPermissionDirective(molgenisPermissionService));
 		freemarkerVariables.put("notHasPermission", new NotHasPermissionDirective(molgenisPermissionService));
-		freemarkerVariables.put("formLink", new FormLinkDirective());
 		addFreemarkerVariables(freemarkerVariables);
 
 		result.setFreemarkerVariables(freemarkerVariables);
