@@ -8,10 +8,12 @@ import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
+import javax.servlet.http.HttpSessionEvent;
+import javax.servlet.http.HttpSessionListener;
 
+import org.molgenis.security.CorsFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.molgenis.security.CorsFilter;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.request.RequestContextListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
@@ -73,5 +75,21 @@ public class MolgenisWebAppInitializer
 
 		// enable use of request scoped beans in FrontController
 		servletContext.addListener(new RequestContextListener());
+		servletContext.addListener(new HttpSessionListener()
+		{
+
+			@Override
+			public void sessionDestroyed(HttpSessionEvent se)
+			{
+				LOG.info("destroy session " + se.getSession().getId());
+			}
+
+			@Override
+			public void sessionCreated(HttpSessionEvent se)
+			{
+				se.getSession().setMaxInactiveInterval(10);
+				LOG.info("create session " + se.getSession().getId());
+			}
+		});
 	}
 }
