@@ -82,13 +82,13 @@
 <div class="row">
 	<div class="col-md-6">
 		<div id="attribute-table-container">
-			<table id="attribute-mapping-table" class="table table-bordered scroll">
+			<table id="attribute-mapping-table" class="table table-bordered scroll" style="width:100%;">
 				<thead>
 					<tr>
 						<th>Attribute</th>
 						<#if attributeMapping.targetAttributeMetaData.dataType == "xref" || attributeMapping.targetAttributeMetaData.dataType == "categorical">
-							<th>Category editor</th>
-						</#if>					
+							<th>Advanced editor</th>
+						</#if>
 					</tr>
 				</thead>
 				<tbody>
@@ -117,35 +117,52 @@
 									</form>	
 								</#if>
 								</td>
-							</#if>	
+							</#if>							
 						</tr>
 					</#list>
 				</tbody>
 			</table>
+		</div>
+			
+	    <div class="form-group">
+    		<div class="col-md-6">
+				
+				<#list entityMapping.attributeMappings as key>
+					<#if key.algorithm??>
+						<#if key.targetAttributeMetaData.name?string == attributeMapping.targetAttributeMetaData.name?string>
+							<legend>Generated Mapping</legend>
+							<form class="form-horizontal" method="POST" action="${context_url}/attributeMappingFeedback">
+								<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
+								<input type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name?html}"/>
+								<input type="hidden" name="source" value="${entityMapping.name?html}"/>
+								<input type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name?html}"/>
+								<input type="hidden" name="algorithm" value="${(attributeMapping.algorithm!"")?html}" id="edit-algorithm-textarea"></input>
+								
+								<strong>
+									<p>Target attribute: ${attributeMapping.targetAttributeMetaData.name?html}</p> 
+									<p>Source mapping algorithm: <mark><em>${key.algorithm}</em></mark></p>			
+								</strong>
+									
+								<button type="submit" class="btn btn-success">Preview mapping result</button>
+							</form>
+						</#if>
+					</#if>
+				</#list>
+			</div>
+			
+		
 			<#if hasWritePermission>
-				<form id="saveattributemapping-form" method="POST" action="${context_url}/saveattributemapping">
+				<form class="form-horizontal" method="POST" action="${context_url}/saveattributemapping">
 					<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
 					<input type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name?html}"/>
 					<input type="hidden" name="source" value="${entityMapping.name?html}"/>
 					<input type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name?html}"/>
 					<input type="hidden" name="algorithm" value="${(attributeMapping.algorithm!"")?html}" id="edit-algorithm-textarea"></input>				
 
-					<button type="submit" class="btn btn-primary">Save</button>
-					
+					<button type="submit" class="btn btn-primary">Save mapping</button>
 				</form>  
 			</#if>
-	
-			<form id="" method="POST" action="${context_url}/attributeMappingFeedback">
-				<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
-				<input type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name?html}"/>
-				<input type="hidden" name="source" value="${entityMapping.name?html}"/>
-				<input type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name?html}"/>
-				<input type="hidden" name="algorithm" value="${(attributeMapping.algorithm!"")?html}" id="edit-algorithm-textarea"></input>
-	
-				<button type="submit" class="btn btn-success">Preview mapping result</button>
-			</form>
-
-		</div>
+	    </div>		
 	</div>
 	<div id="mapping-result-preview-container" class="col-md-6"></div>
 </div>

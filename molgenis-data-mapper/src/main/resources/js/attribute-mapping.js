@@ -148,8 +148,6 @@
 			$('#mapping-result-preview-container').html("<h1>Preview table here</h1>");
 		});
 		
-//		$('a[href="#advanced"]').on('shown.bs.tab', function() {});
-
 		$("#edit-algorithm-textarea").ace({
 			options : {
 				enableBasicAutocompletion : true
@@ -182,7 +180,7 @@
 			
 		});
 
-		$('#saveattributemapping-form').on('reset', function() {
+		$('#save-attribute-mapping-form').on('reset', function() {
 			if(editor.getValue() === initialValue){
 				return false;
 			}

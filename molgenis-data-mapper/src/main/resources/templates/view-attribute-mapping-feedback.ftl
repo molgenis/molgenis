@@ -7,6 +7,16 @@
 <@header css js/>
 
 <div class="row">
+	<div class="col-md-12">
+		<a href="${context_url}/mappingproject/${mappingProject.identifier}" class="btn btn-default">
+			<span class="glyphicon glyphicon-chevron-left"></span> Back to project
+		</a>
+		
+		<hr></hr>
+	</div>
+</div>
+
+<div class="row">
 	<div class="col-md-6">		
 		<table class="table">
 			<thead>
