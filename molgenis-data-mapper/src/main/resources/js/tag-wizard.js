@@ -98,9 +98,12 @@
 						molgenis.createAlert([ {
 							'message' : 'Automatic tagging is a success!'
 						} ], 'success');
-
-						$.each(data, function(attributeName, tag) {
-							$('#' + attributeName + '-tag-column').append(createNewButtonHtml(attributeName, tag));
+						$.each(data, function(attributeName, tags) {
+							$.each(tags, function(index) {
+								if(tags[index] !== null){
+									$('#' + attributeName + '-tag-column').append(createNewButtonHtml(attributeName, tags[index]));
+								}
+							});
 						});
 					}
 				});
@@ -161,7 +164,9 @@
 				}),
 				success : function(ontologyTag) {
 					$('#tag-dropdown').select2('val', '');
-					$('#' + attributeName + '-tag-column').append(createNewButtonHtml(attributeName, ontologyTag));
+					if(ontologyTag !== undefined){
+						$('#' + attributeName + '-tag-column').append(createNewButtonHtml(attributeName, ontologyTag));
+					}
 				}
 			});
 		});
