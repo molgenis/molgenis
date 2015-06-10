@@ -16,14 +16,14 @@
 	$(function() {
 		// N.B. Always do this first cause it fiddles with the DOM and disrupts
 		// listeners you may have placed on the table elements!
-		$('#category-mapping-table').scrollTableBody({rowsToDisplay : 6});
+		$('#advanced-mapping-table').scrollTableBody({rowsToDisplay : 6});
 		
-		$('#save-category-mapping-btn').on('click',function() {
+		$('#save-advanced-mapping-btn').on('click',function() {
 			var mappedCategoryIds = {}, defaultValue = undefined, nullValue = undefined, key, val;
 	
 			// for each source xref value, check which target xref value
 			// was chosen
-			$('#category-mapping-table > tbody > tr').each(function() {
+			$('#advanced-mapping-table > tbody > tr').each(function() {
 				key = $(this).attr('id');
 				val = $(this).find('option:selected').val();
 				if ( key === 'nullValue') {
@@ -67,7 +67,7 @@
 			});
 		});
 
-		$('#cancel-category-mapping-btn').on('click', function() {
+		$('#cancel-advanced-mapping-btn').on('click', function() {
 			bootbox.confirm("Are you sure you want to go back? All unsaved changes will be lost!", function(result) {
 				if (result) {
 					window.history.back();
