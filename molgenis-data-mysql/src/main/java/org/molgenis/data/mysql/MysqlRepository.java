@@ -36,6 +36,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.Sort;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.BatchingQueryResult;
 import org.molgenis.data.support.DefaultEntity;
@@ -54,7 +55,6 @@ import org.molgenis.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
-import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -927,7 +927,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		{
 			for (Sort.Order o : q.getSort())
 			{
-				AttributeMetaData att = getEntityMetaData().getAttribute(o.getProperty());
+				AttributeMetaData att = getEntityMetaData().getAttribute(o.getAttr());
 				if (att.getDataType() instanceof MrefField) sortSql.append(", ").append(att.getName());
 				else sortSql.append(", ").append('`').append(att.getName()).append('`');
 				if (o.getDirection().equals(Sort.Direction.DESC))
@@ -1503,7 +1503,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	@Override
 	public Set<RepositoryCapability> getCapabilities()
 	{
-		return Sets.newHashSet(WRITABLE, UPDATEABLE, QUERYABLE);
+		return Sets.newHashSet(WRITABLE, UPDATEABLE);
 	}
 
 	@Override

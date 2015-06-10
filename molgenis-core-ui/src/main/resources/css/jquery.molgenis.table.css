@@ -14,6 +14,12 @@
 	padding-left: 8px;
 }
 
+.molgenis-table thead th.ref-attr {
+    background-color: #8AAAC7;
+    color: white;
+    padding-left: 8px;
+}
+
 .molgenis-table thead th .ui-icon {
 	display: inline-block;
 	cursor: pointer;
@@ -110,4 +116,14 @@ label.error {
 
 input.error {
 	border: 1px solid red;
+}
+
+.molgenis-table .expand-btn {
+	cursor: pointer;
+	color: black;
+}
+
+.molgenis-table .collapse-btn {
+    cursor: pointer;
+    color: black;
 }
