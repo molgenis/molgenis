@@ -6,6 +6,8 @@ import java.util.Map;
 
 import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.molgenis.DatabaseConfig;
+import org.molgenis.auth.GroupAuthority;
+import org.molgenis.auth.UserAuthority;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
@@ -25,9 +27,12 @@ import org.molgenis.data.version.v1_6.Step8VarcharToTextRepeated;
 import org.molgenis.data.version.v1_6.Step9MysqlTablesToInnoDB;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
 import org.molgenis.system.core.FreemarkerTemplateRepository;
+import org.molgenis.system.core.RuntimeProperty;
 import org.molgenis.ui.MolgenisWebAppConfig;
+import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.ui.migrate.v1_5.Step5AlterDataexplorerMenuURLs;
 import org.molgenis.ui.migrate.v1_5.Step6ChangeRScriptType;
+import org.molgenis.ui.migrate.v1_8.Step10DeleteFormReferences;
 import org.molgenis.util.DependencyResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,6 +75,9 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	@Autowired
 	private JpaRepositoryCollection jpaRepositoryCollection;
 
+	@Autowired
+	private MenuManagerService menuManagerService;
+
 	@Override
 	public ManageableRepositoryCollection getBackend()
 	{
@@ -89,6 +97,10 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(new Step7UpgradeMetaDataTo1_6(dataSource, searchService));
 		upgradeService.addUpgrade(new Step8VarcharToTextRepeated(dataSource));
 		upgradeService.addUpgrade(new Step9MysqlTablesToInnoDB(dataSource));
+		upgradeService.addUpgrade(new Step10DeleteFormReferences(jpaRepositoryCollection
+				.getRepository(RuntimeProperty.ENTITY_NAME), jpaRepositoryCollection
+				.getRepository(UserAuthority.ENTITY_NAME), jpaRepositoryCollection
+				.getRepository(GroupAuthority.ENTITY_NAME)));
 	}
 
 	@Override

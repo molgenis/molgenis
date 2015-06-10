@@ -22,9 +22,9 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.Repository;
+import org.molgenis.data.Sort;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -97,7 +97,7 @@ public class ChartDataServiceImpl implements ChartDataService
 		serie.setAttributeXFieldTypeEnum(attributeXFieldTypeEnum);
 		serie.setAttributeYFieldTypeEnum(attributeYFieldTypeEnum);
 
-		Sort sort = new Sort(Sort.DEFAULT_DIRECTION, attributeNameXaxis, attributeNameYaxis);
+		Sort sort = new Sort().on(attributeNameXaxis).on(attributeNameYaxis);
 		Iterable<? extends Entity> iterable = getIterable(entityName, repo, queryRules, sort);
 		for (Entity entity : iterable)
 		{
@@ -115,7 +115,7 @@ public class ChartDataServiceImpl implements ChartDataService
 			String split, List<QueryRule> queryRules)
 
 	{
-		Sort sort = new Sort(Sort.DEFAULT_DIRECTION, attributeNameXaxis, attributeNameYaxis);
+		Sort sort = new Sort().on(attributeNameXaxis).on(attributeNameYaxis);
 		Iterable<? extends Entity> iterable = getIterable(entityName, repo, queryRules, sort);
 
 		Map<String, XYDataSerie> xYDataSeriesMap = new HashMap<String, XYDataSerie>();
@@ -213,7 +213,7 @@ public class ChartDataServiceImpl implements ChartDataService
 		BoxPlotChart boxPlotChart = new BoxPlotChart();
 		boxPlotChart.setyLabel(entityMetaData.getAttribute(attributeName).getLabel());
 
-		Sort sort = new Sort(Sort.DEFAULT_DIRECTION, attributeName);
+		Sort sort = new Sort().on(attributeName);
 		Iterable<Entity> iterable = getIterable(entityName, repo, queryRules, sort);
 		Map<String, List<Double>> boxPlotDataListMap = getBoxPlotDataListMap(entityMetaData, iterable, attributeName,
 				split);

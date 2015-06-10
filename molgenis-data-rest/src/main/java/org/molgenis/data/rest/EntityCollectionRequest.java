@@ -6,17 +6,16 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
 import org.molgenis.data.QueryRule;
-import org.springframework.data.domain.Sort;
 
 public class EntityCollectionRequest
 {
 	public static final int MAX_ROWS = 10000;
 	public static final int DEFAULT_ROW_COUNT = 100;
 	private List<QueryRule> q;
-	private Sort sort;
+	private SortV1 sort;
 	private String[] attributes;
 	private String[] expand;
-	
+
 	@Min(0)
 	private int start = 0;
 	@Min(0)
@@ -53,12 +52,12 @@ public class EntityCollectionRequest
 		this.q = q;
 	}
 
-	public Sort getSort()
+	public SortV1 getSort()
 	{
 		return sort;
 	}
 
-	public void setSort(Sort sort)
+	public void setSort(SortV1 sort)
 	{
 		this.sort = sort;
 	}
