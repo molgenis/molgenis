@@ -12,13 +12,13 @@ import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
+import org.molgenis.data.Sort;
+import org.molgenis.data.Sort.Direction;
 import org.molgenis.data.jpa.importer.EntityImportService;
 import org.molgenis.data.support.ConvertingIterable;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.util.EntityUtils;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Iterables;
@@ -584,7 +584,7 @@ public class JpaRepositoryTest extends BaseJpaTest
 		Person p3 = new Person("Klaas", "Vaak");
 		repo.add(Arrays.asList(p1, p2, p3));
 
-		Iterable<Entity> iter = repo.findAll(new QueryImpl().sort(new Sort(Direction.ASC, "lastName")));
+		Iterable<Entity> iter = repo.findAll(new QueryImpl().sort(new Sort("lastName", Direction.ASC)));
 		assertEquals(Iterables.size(iter), 3);
 
 		Iterator<Entity> it = iter.iterator();
@@ -602,7 +602,7 @@ public class JpaRepositoryTest extends BaseJpaTest
 		repo.add(Arrays.asList(p1, p2, p3));
 
 		Iterable<Entity> it = repo.findAll(new QueryImpl().pageSize(1).offset(1)
-				.sort(new Sort(Direction.ASC, "lastName")));
+				.sort(new Sort("lastName", Direction.ASC)));
 
 		assertEquals(Iterables.size(it), 1);
 		assertTrue(Iterables.contains(it, p3));

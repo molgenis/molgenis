@@ -3,7 +3,6 @@ package org.molgenis.data.vcf;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -13,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
@@ -33,8 +33,6 @@ import org.molgenis.vcf.VcfSample;
 import org.molgenis.vcf.meta.VcfMeta;
 import org.molgenis.vcf.meta.VcfMetaFormat;
 import org.molgenis.vcf.meta.VcfMetaInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
@@ -46,7 +44,7 @@ import com.google.common.collect.Lists;
  */
 public class VcfRepository extends AbstractRepository
 {
-	private static final Logger LOG = LoggerFactory.getLogger(VcfRepository.class);
+	private static final Logger logger = Logger.getLogger(VcfRepository.class);
 
 	public static final String CHROM = "#CHROM";
 	public static final String ALT = "ALT";
@@ -105,9 +103,11 @@ public class VcfRepository extends AbstractRepository
 		{
 			throw new RuntimeException(e);
 		}
+		final VcfReader finalVcfReader = vcfReader;
+
 		return new Iterator<Entity>()
 		{
-			Iterator<VcfRecord> vcfRecordIterator = vcfReader.iterator();
+			Iterator<VcfRecord> vcfRecordIterator = finalVcfReader.iterator();
 
 			@Override
 			public boolean hasNext()
@@ -123,11 +123,81 @@ public class VcfRepository extends AbstractRepository
 				try
 				{
 					VcfRecord vcfRecord = vcfRecordIterator.next();
-					parseVcfRecord(vcfReader, entity, vcfRecord);
+					entity.set(CHROM, vcfRecord.getChromosome());
+					entity.set(
+							ALT,
+							StringUtils.join(
+									Lists.transform(vcfRecord.getAlternateAlleles(), new Function<Allele, String>()
+									{
+										@Override
+										public String apply(Allele allele)
+										{
+											return allele.toString();
+										}
+									}), ','));
+
+					entity.set(POS, vcfRecord.getPosition());
+					entity.set(REF, vcfRecord.getReferenceAllele().toString());
+					entity.set(FILTER, vcfRecord.getFilterStatus());
+					entity.set(QUAL, vcfRecord.getQuality());
+					entity.set(ID, StringUtils.join(vcfRecord.getIdentifiers(), ','));
+
+					StringBuilder id = new StringBuilder();
+					id.append(StringUtils.strip(entity.get(CHROM).toString()));
+					id.append("_");
+					id.append(StringUtils.strip(entity.get(POS).toString()));
+					id.append("_");
+					id.append(StringUtils.strip(entity.get(REF).toString()));
+					id.append("_");
+					id.append(StringUtils.strip(entity.get(ALT).toString()));
+					entity.set(INTERNAL_ID, id.toString());
+
+					for (VcfInfo vcfInfo : vcfRecord.getInformation())
+					{
+						Object val = vcfInfo.getVal();
+						if (val instanceof List<?>)
+						{
+							// TODO support list of primitives datatype
+							val = StringUtils.join((List<?>) val, ',');
+						}
+						if (val instanceof Float && Float.isNaN((Float) val))
+						{
+							val = null;
+						}
+						entity.set(getInfoPrefix() + vcfInfo.getKey(), val);
+					}
+					if (hasFormatMetaData)
+					{
+						List<Entity> samples = new ArrayList<Entity>();
+						Iterator<VcfSample> sampleIterator = vcfRecord.getSamples().iterator();
+						if (vcfRecord.getNrSamples() > 0)
+						{
+							Iterator<String> sampleNameIterator = finalVcfReader.getVcfMeta().getSampleNames()
+									.iterator();
+							for (int j = 0; sampleIterator.hasNext(); ++j)
+							{
+								String[] format = vcfRecord.getFormat();
+								VcfSample sample = sampleIterator.next();
+								Entity sampleEntity = new MapEntity(sampleEntityMetaData);
+								for (int i = 0; i < format.length; i = i + 1)
+								{
+									sampleEntity.set(format[i], sample.getData(i));
+								}
+								sampleEntity.set(ID, id.toString() + j);
+
+								// FIXME remove entity ID from Sample label after #1400 is fixed, see also:
+								// jquery.molgenis.table.js line 152
+								sampleEntity.set(NAME, entity.get(POS) + "_" + entity.get(ALT) + "_"
+										+ sampleNameIterator.next());
+								samples.add(sampleEntity);
+							}
+						}
+						entity.set(SAMPLES, samples);
+					}
 				}
 				catch (IOException e)
 				{
-					LOG.error("Unable to load VCF metadata.", e);
+					logger.error("Unable to load VCF metadata. " + e.getStackTrace());
 				}
 				return entity;
 			}
@@ -138,87 +208,6 @@ public class VcfRepository extends AbstractRepository
 				throw new UnsupportedOperationException();
 			}
 		};
-	}
-
-	protected void parseVcfRecord(final VcfReader vcfReader, Entity entity, VcfRecord vcfRecord) throws IOException
-	{
-		parseFixedFields(entity, vcfRecord);
-		vcfRecord.getInformation().forEach(vcfInfo -> parseInformation(entity, vcfInfo));
-		if (hasFormatMetaData)
-		{
-			Iterable<String> sampleNames = vcfReader.getVcfMeta().getSampleNames();
-			parseSamples(entity, vcfRecord, sampleNames);
-		}
-	}
-
-	private static void parseInformation(Entity entity, VcfInfo vcfInfo)
-	{
-		Object val = vcfInfo.getVal();
-		if (val instanceof List<?>)
-		{
-			// TODO support list of primitives datatype
-			val = StringUtils.join((List<?>) val, ',');
-		}
-		entity.set(getInfoPrefix() + vcfInfo.getKey(), val);
-	}
-
-	private void parseSamples(Entity entity, VcfRecord vcfRecord, Iterable<String> sampleNames)
-	{
-		String entityId = entity.getString(INTERNAL_ID);
-		List<Entity> samples = new ArrayList<Entity>();
-		Iterator<VcfSample> sampleIterator = vcfRecord.getSamples().iterator();
-		if (vcfRecord.getNrSamples() > 0)
-		{
-			Iterator<String> sampleNameIterator = sampleNames.iterator();
-			for (int j = 0; sampleIterator.hasNext(); ++j)
-			{
-				String[] format = vcfRecord.getFormat();
-				VcfSample sample = sampleIterator.next();
-				Entity sampleEntity = new MapEntity(sampleEntityMetaData);
-				for (int i = 0; i < format.length; i = i + 1)
-				{
-					sampleEntity.set(format[i], sample.getData(i));
-				}
-				sampleEntity.set(ID, entityId + j);
-
-				// FIXME remove entity ID from Sample label after #1400 is fixed, see also:
-				// jquery.molgenis.table.js line 152
-				sampleEntity.set(NAME, entity.get(POS) + "_" + entity.get(ALT) + "_" + sampleNameIterator.next());
-				samples.add(sampleEntity);
-			}
-		}
-		entity.set(SAMPLES, samples);
-	}
-
-	private static String parseFixedFields(Entity entity, VcfRecord vcfRecord)
-	{
-		entity.set(CHROM, vcfRecord.getChromosome());
-		entity.set(ALT,
-				StringUtils.join(Lists.transform(vcfRecord.getAlternateAlleles(), new Function<Allele, String>()
-				{
-					@Override
-					public String apply(Allele allele)
-					{
-						return allele.toString();
-					}
-				}), ','));
-
-		entity.set(POS, vcfRecord.getPosition());
-		entity.set(REF, vcfRecord.getReferenceAllele().toString());
-		entity.set(FILTER, vcfRecord.getFilterStatus());
-		entity.set(QUAL, vcfRecord.getQuality());
-		entity.set(ID, StringUtils.join(vcfRecord.getIdentifiers(), ','));
-
-		StringBuilder id = new StringBuilder();
-		id.append(StringUtils.strip(entity.get(CHROM).toString()));
-		id.append("_");
-		id.append(StringUtils.strip(entity.get(POS).toString()));
-		id.append("_");
-		id.append(StringUtils.strip(entity.get(REF).toString()));
-		id.append("_");
-		id.append(StringUtils.strip(entity.get(ALT).toString()));
-		entity.set(INTERNAL_ID, id.toString());
-		return id.toString();
 	}
 
 	@Override
@@ -234,7 +223,8 @@ public class VcfRepository extends AbstractRepository
 				try
 				{
 					vcfMeta = vcfReader.getVcfMeta();
-					createSampleEntityMetaData(vcfMeta.getFormatMeta());
+					Iterable<VcfMetaFormat> formatMetaData = vcfReader.getVcfMeta().getFormatMeta();
+					createSampleEntityMetaData(formatMetaData);
 				}
 				finally
 				{
@@ -422,17 +412,12 @@ public class VcfRepository extends AbstractRepository
 
 	private VcfReader createVcfReader() throws IOException
 	{
-		VcfReader reader = new VcfReader(new InputStreamReader(createInputStream(), Charset.forName("UTF-8")));
+		VcfReader reader = new VcfReader(new InputStreamReader(new FileInputStream(file), Charset.forName("UTF-8")));
 		// register reader so close() can close all readers
 		if (vcfReaderRegistry == null) vcfReaderRegistry = new ArrayList<VcfReader>();
 		vcfReaderRegistry.add(reader);
 
 		return reader;
-	}
-
-	protected InputStream createInputStream() throws IOException
-	{
-		return new FileInputStream(file);
 	}
 
 	@Override
@@ -448,7 +433,7 @@ public class VcfRepository extends AbstractRepository
 				}
 				catch (IOException e)
 				{
-					LOG.warn("Failed to close reader", e);
+					logger.warn("", e);
 				}
 			}
 		}

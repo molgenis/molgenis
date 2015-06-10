@@ -28,6 +28,8 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
+import org.molgenis.data.Sort;
+import org.molgenis.data.Sort.Direction;
 import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.processor.CellProcessor;
@@ -55,7 +57,6 @@ import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -255,8 +256,8 @@ public class OntologyServiceController extends MolgenisPluginController
 				MatchingTaskContentEntityMetaData.ENTITY_NAME,
 				query.offset(start)
 						.pageSize(num)
-						.sort(Direction.DESC, MatchingTaskContentEntityMetaData.VALIDATED,
-								MatchingTaskContentEntityMetaData.SCORE)))
+						.sort(new Sort().on(MatchingTaskContentEntityMetaData.VALIDATED, Direction.DESC).on(
+								MatchingTaskContentEntityMetaData.SCORE, Direction.DESC))))
 		{
 			Entity RefEntity = dataService.findOne(
 					entityName,
