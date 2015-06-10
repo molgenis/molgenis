@@ -52,12 +52,6 @@ public class ImportJob implements Runnable
 
 			EntityImportReport importReport = importService.doImport(source, databaseAction, defaultPackage);
 
-			if (!importReport.getNewEntities().isEmpty())
-			{
-				// Add new entities to entities menu if that exists
-				importPostProcessingService.addMenuItems(importReport.getNewEntities());
-			}
-
 			session.setAttribute("SPRING_SECURITY_CONTEXT", securityContext);
 			importRunService.finishImportRun(importRunId, importReport.toString(),
 					StringUtils.join(importReport.getNewEntities(), ','));
