@@ -63,5 +63,5 @@ public interface MappingService
 	 */
 	void deleteMappingProject(String mappingProjectId);
 
-    String generateId(FieldType dataType, Long count);
+	String generateId(FieldType dataType, Long count);
 }

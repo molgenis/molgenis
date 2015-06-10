@@ -156,12 +156,13 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test(expectedExceptions = IllegalStateException.class)
-	public void testAddExistingTarget() {
-        when(idGenerator.generateId()).thenReturn(uuidGenerator.generateId());
+	public void testAddExistingTarget()
+	{
+		when(idGenerator.generateId()).thenReturn(uuidGenerator.generateId());
 
-        MappingProject mappingProject = mappingService.addMappingProject("Test123", user, "HopEntity");
-        mappingProject.addTarget(hopMetaData);
-    }
+		MappingProject mappingProject = mappingService.addMappingProject("Test123", user, "HopEntity");
+		mappingProject.addTarget(hopMetaData);
+	}
 
 	@Test
 	public void testAddNewSource()
