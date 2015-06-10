@@ -31,6 +31,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 
 @Component
 public class SemanticSearchServiceHelper
@@ -103,7 +104,7 @@ public class SemanticSearchServiceHelper
 				targetEntityMetaData, targetAttribute);
 
 		tagsForAttribute.values().stream().filter(ot -> !ot.getIRI().contains(",")).forEach(ot -> {
-			queryTerms.addAll(collectQueryTermsFromOntologyTerm(ot));
+			queryTerms.addAll(parseOntologyTermQueries(ot));
 		});
 
 		QueryRule disMaxQueryRule = createDisMaxQueryRule(queryTerms);
@@ -146,34 +147,32 @@ public class SemanticSearchServiceHelper
 		for (String ontologyTermIri : multiOntologyTermIri.split(","))
 		{
 			OntologyTerm ontologyTerm = ontologyService.getOntologyTerm(ontologyTermIri);
-			List<String> queryTerms = collectQueryTermsFromOntologyTerm(ontologyTerm);
+			List<String> queryTerms = parseOntologyTermQueries(ontologyTerm);
 			shouldQueryRule.getNestedRules().add(createDisMaxQueryRule(queryTerms));
 		}
 		return shouldQueryRule;
 	}
 
-	public List<String> collectQueryTermsFromOntologyTerm(OntologyTerm ontologyTerm)
+	public List<String> parseOntologyTermQueries(OntologyTerm ot)
 	{
-		List<String> queryTerms = ontologyTerm.getSynonyms().stream().map(synonym -> parseQueryString(synonym))
+		List<String> queryTerms = collectTermsFromOntologyTerm(ot).stream().map(synonym -> parseQueryString(synonym))
 				.collect(Collectors.<String> toList());
 
-		String labelParsedAsQueryString = parseQueryString(ontologyTerm.getLabel());
-		// Check if label has been added to the list of query terms
-		if (!queryTerms.contains(labelParsedAsQueryString))
+		for (OntologyTerm childOt : ontologyService.getChildren(ot))
 		{
-			queryTerms.add(labelParsedAsQueryString);
-		}
-
-		for (OntologyTerm descendantOntologyTerm : ontologyService.getChildren(ontologyTerm))
-		{
-			double boostedNumber = Math.pow(0.5,
-					ontologyService.getOntologyTermDistance(ontologyTerm, descendantOntologyTerm));
-			descendantOntologyTerm.getSynonyms().forEach(
+			double boostedNumber = Math.pow(0.5, ontologyService.getOntologyTermDistance(ot, childOt));
+			collectTermsFromOntologyTerm(childOt).forEach(
 					synonym -> queryTerms.add(parseBoostQueryString(synonym, boostedNumber)));
-			queryTerms.add(parseBoostQueryString(descendantOntologyTerm.getLabel(), boostedNumber));
 		}
 
 		return queryTerms;
+	}
+
+	public Set<String> collectTermsFromOntologyTerm(OntologyTerm ot)
+	{
+		Set<String> allTerms = Sets.newHashSet(ot.getSynonyms());
+		allTerms.add(ot.getLabel());
+		return allTerms;
 	}
 
 	public List<String> getAttributeIdentifiers(EntityMetaData sourceEntityMetaData)

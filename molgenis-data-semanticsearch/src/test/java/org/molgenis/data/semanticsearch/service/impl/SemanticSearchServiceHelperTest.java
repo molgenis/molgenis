@@ -144,7 +144,7 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 		// Case 1
 		OntologyTerm ontologyTerm1 = OntologyTerm.create("http://onto/standingheight", "Standing height",
 				"Description is not used", Arrays.<String> asList("body_length"));
-		List<String> actual_1 = semanticSearchServiceHelper.collectQueryTermsFromOntologyTerm(ontologyTerm1);
+		List<String> actual_1 = semanticSearchServiceHelper.parseOntologyTermQueries(ontologyTerm1);
 		assertEquals(actual_1, Arrays.asList("length body", "standing height"));
 
 		// Case 2
@@ -158,7 +158,7 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 
 		when(ontologyService.getOntologyTermDistance(ontologyTerm2, ontologyTerm3)).thenReturn(1);
 
-		List<String> actual_2 = semanticSearchServiceHelper.collectQueryTermsFromOntologyTerm(ontologyTerm2);
+		List<String> actual_2 = semanticSearchServiceHelper.parseOntologyTermQueries(ontologyTerm2);
 
 		assertEquals(actual_2, Arrays.asList("height", "length^0.5 body^0.5", "length^0.5"));
 	}

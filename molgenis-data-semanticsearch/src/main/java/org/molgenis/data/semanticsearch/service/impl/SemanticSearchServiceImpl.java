@@ -169,17 +169,18 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	{
 		String description = attribute.getDescription() == null ? attribute.getLabel() : attribute.getDescription();
 		Set<String> searchTerms = splitIntoTerms(description);
+		Stemmer stemmer = new Stemmer();
 		LOG.debug("findOntologyTerms({},{},{})", ontologyIds, searchTerms, MAX_NUM_TAGS);
 		List<OntologyTerm> candidates = ontologyService.findOntologyTerms(ontologyIds, searchTerms, MAX_NUM_TAGS);
 		LOG.debug("Candidates: {}", candidates);
 		List<Hit<OntologyTerm>> hits = candidates.stream()
+				.filter(ot -> filterOntologyTerm(splitIntoTerms(stemmer.stemAndJoin(searchTerms)), ot, stemmer))
 				.map(o -> Hit.<OntologyTerm> create(o, bestMatchingSynonym(o, searchTerms).getScore()))
 				.sorted(Ordering.natural().reverse()).collect(Collectors.toList());
 		LOG.debug("Hits: {}", hits);
 
 		Hit<OntologyTerm> result = null;
 		String bestMatchingSynonym = null;
-		Stemmer stemmer = new Stemmer();
 		for (Hit<OntologyTerm> hit : hits)
 		{
 			String bestMatchingSynonymForHit = bestMatchingSynonym(hit.getResult(), searchTerms).getResult();
@@ -208,6 +209,18 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 			return result;
 		}
 		return null;
+	}
+
+	private boolean filterOntologyTerm(Set<String> keywordsFromAttribute, OntologyTerm ot, Stemmer stemmer)
+	{
+		Set<String> ontologyTermSynonyms = semanticSearchServiceHelper.collectTermsFromOntologyTerm(ot);
+
+		for (String synonym : ontologyTermSynonyms)
+		{
+			if (keywordsFromAttribute.containsAll(splitIntoTerms(stemmer.stemAndJoin(splitIntoTerms(synonym))))) return true;
+		}
+
+		return false;
 	}
 
 	/**
