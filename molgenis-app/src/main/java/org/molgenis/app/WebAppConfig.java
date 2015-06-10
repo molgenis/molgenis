@@ -70,10 +70,15 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	@Autowired
 	private JpaRepositoryCollection jpaRepositoryCollection;
 
+	@Autowired
+	@Qualifier("ElasticsearchRepositoryCollection")
+	private ManageableRepositoryCollection elasticSearchRepositoryCollection;
+
 	@Override
 	public ManageableRepositoryCollection getBackend()
 	{
-		return mysqlRepositoryCollection;
+		return elasticSearchRepositoryCollection;
+		// return mysqlRepositoryCollection;
 	}
 
 	@Override

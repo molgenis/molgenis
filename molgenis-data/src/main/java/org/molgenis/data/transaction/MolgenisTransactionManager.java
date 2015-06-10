@@ -34,7 +34,6 @@ public class MolgenisTransactionManager extends JpaTransactionManager
 
 	public void addTransactionListener(MolgenisTransactionListener transactionListener)
 	{
-		System.out.println("ADD " + transactionListener);
 		transactionListeners.add(transactionListener);
 	}
 

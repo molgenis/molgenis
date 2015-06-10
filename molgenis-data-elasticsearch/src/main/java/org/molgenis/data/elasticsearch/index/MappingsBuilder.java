@@ -9,6 +9,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
+import org.molgenis.data.elasticsearch.ElasticSearchService;
 import org.molgenis.data.elasticsearch.util.MapperTypeSanitizer;
 
 /**
@@ -80,14 +81,13 @@ public class MappingsBuilder
 		String documentType = MapperTypeSanitizer.sanitizeMapperType(entityMetaData.getName());
 		XContentBuilder jsonBuilder = XContentFactory.jsonBuilder().startObject().startObject(documentType);
 
-		// if (!entityMetaData.getName().equalsIgnoreCase(ESTransactionMetaData.ENTITY_NAME))
-		// {
-		// jsonBuilder.startObject("_parent").field("type").value(ESTransactionMetaData.ENTITY_NAME).endObject();
-		// }
-
 		jsonBuilder.startObject("_source").field("enabled", storeSource).endObject();
 
 		jsonBuilder.startObject("properties");
+
+		jsonBuilder.startObject(ElasticSearchService.CRUD_TYPE_FIELD_NAME);
+		jsonBuilder.field("type", "string").field("index", "not_analyzed");
+		jsonBuilder.endObject();
 
 		for (AttributeMetaData attr : entityMetaData.getAtomicAttributes())
 		{

@@ -384,7 +384,8 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	{
 		// Create local dataservice and metadataservice
 		DataServiceImpl localDataService = new DataServiceImpl();
-		new MetaDataServiceImpl(localDataService);
+		MetaDataService metaDataService = new MetaDataServiceImpl(localDataService);
+		localDataService.setMeta(metaDataService);
 
 		addReposToReindex(localDataService);
 
@@ -416,6 +417,8 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@PostConstruct
 	public void initRepositories()
 	{
+		dataService().setMeta(metaDataService());
+
 		addUpgrades();
 		upgradeService.upgrade();
 		if (!indexExists())
@@ -445,10 +448,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Bean
 	public MetaDataService metaDataService()
 	{
-		DataService dataService = dataService();
-		MetaDataService metaDataService = new MetaDataServiceImpl((DataServiceImpl) dataService);
-
-		return metaDataService;
+		return new MetaDataServiceImpl((DataServiceImpl) dataService());
 	}
 
 	@Bean

@@ -63,7 +63,8 @@ public class DataServiceImpl implements DataService
 		repositoryNames.clear();
 	}
 
-	public void setMetaDataService(MetaDataService metaDataService)
+	@Override
+	public void setMeta(MetaDataService metaDataService)
 	{
 		this.metaDataService = metaDataService;
 	}
