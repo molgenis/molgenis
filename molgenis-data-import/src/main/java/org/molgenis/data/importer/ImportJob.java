@@ -58,7 +58,14 @@ public class ImportJob implements Runnable
 				importPostProcessingService.addMenuItems(importReport.getNewEntities());
 			}
 
-			session.setAttribute("SPRING_SECURITY_CONTEXT", securityContext);
+			try
+			{
+				session.setAttribute("SPRING_SECURITY_CONTEXT", securityContext);
+			}
+			catch (IllegalStateException e)
+			{
+				// session invalidated
+			}
 			importRunService.finishImportRun(importRunId, importReport.toString(),
 					StringUtils.join(importReport.getNewEntities(), ','));
 
