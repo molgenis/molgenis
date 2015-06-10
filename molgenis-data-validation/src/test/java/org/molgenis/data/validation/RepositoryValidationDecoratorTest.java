@@ -6,6 +6,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Set;
 
 import org.molgenis.MolgenisFieldTypes;
@@ -59,6 +60,36 @@ public class RepositoryValidationDecoratorTest
 		violations = repositoryValidationDecorator.checkNillable(Arrays.asList(e2));
 		assertTrue(violations.isEmpty());
 
+	}
+
+	@Test
+	public void checkNillableMref()
+	{
+		DefaultEntityMetaData refEmd = new DefaultEntityMetaData("refEntity");
+		String refIdAttrName = "refId";
+		refEmd.addAttribute(refIdAttrName).setIdAttribute(true);
+
+		Entity refEntity0 = new MapEntity(refEmd);
+		refEntity0.set(refIdAttrName, "0");
+
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("entity");
+		String requiredMrefAttrName = "requiredMref";
+		emd.addAttribute(requiredMrefAttrName).setDataType(MolgenisFieldTypes.MREF).setNillable(false)
+				.setRefEntity(refEmd);
+		when(decoratedRepository.getEntityMetaData()).thenReturn(emd);
+
+		Entity entity0 = new MapEntity();
+		entity0.set(requiredMrefAttrName, null);
+
+		Entity entity1 = new MapEntity();
+		entity1.set(requiredMrefAttrName, Collections.emptyList());
+
+		Entity entity2 = new MapEntity();
+		entity2.set(requiredMrefAttrName, Arrays.asList(refEntity0));
+
+		Set<ConstraintViolation> violations = repositoryValidationDecorator.checkNillable(Arrays.asList(entity0,
+				entity1, entity2));
+		assertEquals(violations.size(), 2);
 	}
 
 	@Test
