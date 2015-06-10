@@ -204,6 +204,7 @@ class RestControllerV2
 						break;
 					case CATEGORICAL:
 					case XREF:
+					case FILE:
 						Entity refEntity = entity.getEntity(attrName);
 						Map<String, Object> refEntityResponse;
 						if (refEntity != null)
@@ -275,7 +276,6 @@ class RestControllerV2
 					case TEXT:
 						responseData.put(attrName, entity.getString(attrName));
 						break;
-					case FILE:
 					case IMAGE:
 						throw new UnsupportedOperationException("Unsupported data type [" + dataType + "]");
 					case INT:

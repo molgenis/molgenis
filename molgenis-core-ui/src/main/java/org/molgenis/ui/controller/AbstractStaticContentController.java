@@ -6,10 +6,10 @@ import java.io.IOException;
 import javax.servlet.http.Part;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.molgenis.file.FileStore;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ui.XmlMolgenisUi;
-import org.molgenis.util.FileStore;
 import org.molgenis.util.FileUploadUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

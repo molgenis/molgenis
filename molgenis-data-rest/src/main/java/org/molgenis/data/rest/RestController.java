@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -48,6 +49,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityCollection;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.IdGenerator;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisReferencedEntityException;
@@ -64,6 +66,9 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.fieldtypes.BoolField;
+import org.molgenis.file.FileDownloadController;
+import org.molgenis.file.FileMeta;
+import org.molgenis.file.FileStore;
 import org.molgenis.framework.db.EntityNotFoundException;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -96,6 +101,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -129,11 +137,14 @@ public class RestController
 	private final AuthenticationManager authenticationManager;
 	private final MolgenisPermissionService molgenisPermissionService;
 	private final MolgenisRSQL molgenisRSQL;
+	private final IdGenerator idGenerator;
+	private final FileStore fileStore;
 
 	@Autowired
 	public RestController(DataService dataService, TokenService tokenService,
 			AuthenticationManager authenticationManager, MolgenisPermissionService molgenisPermissionService,
-			MolgenisRSQL molgenisRSQL, ResourceFingerprintRegistry resourceFingerprintRegistry)
+			MolgenisRSQL molgenisRSQL, ResourceFingerprintRegistry resourceFingerprintRegistry,
+			IdGenerator idGenerator, FileStore fileStore)
 	{
 		if (dataService == null) throw new IllegalArgumentException("dataService is null");
 		if (tokenService == null) throw new IllegalArgumentException("tokenService is null");
@@ -145,6 +156,8 @@ public class RestController
 		this.authenticationManager = authenticationManager;
 		this.molgenisPermissionService = molgenisPermissionService;
 		this.molgenisRSQL = molgenisRSQL;
+		this.idGenerator = idGenerator;
+		this.fileStore = fileStore;
 	}
 
 	/**
@@ -545,6 +558,43 @@ public class RestController
 			}
 		}
 
+		createInternal(entityName, paramMap, response);
+	}
+
+	/**
+	 * Creates a new entity from a html form post.
+	 * 
+	 * @param entityName
+	 * @param request
+	 * @param response
+	 * @throws UnknownEntityException
+	 */
+	@RequestMapping(value = "/{entityName}", method = POST, headers = "Content-Type=multipart/form-data")
+	public void createFromFormPostMultiPart(@PathVariable("entityName") String entityName,
+			MultipartHttpServletRequest request, HttpServletResponse response)
+	{
+		Map<String, Object> paramMap = new HashMap<String, Object>();
+		for (String param : request.getParameterMap().keySet())
+		{
+			String[] values = request.getParameterValues(param);
+			String value = values != null ? StringUtils.join(values, ',') : null;
+			if (StringUtils.isNotBlank(value))
+			{
+				paramMap.put(param, value);
+			}
+		}
+
+		// add files to param map
+		for (Entry<String, List<MultipartFile>> entry : request.getMultiFileMap().entrySet())
+		{
+			String param = entry.getKey();
+			List<MultipartFile> files = entry.getValue();
+			if (files != null && files.size() > 1)
+			{
+				throw new IllegalArgumentException("Multiple file input not supported");
+			}
+			paramMap.put(param, files != null && !files.isEmpty() ? files.get(0) : null);
+		}
 		createInternal(entityName, paramMap, response);
 	}
 
@@ -1001,6 +1051,33 @@ public class RestController
 
 		if (paramValue != null)
 		{
+			if (attr.getDataType().getEnumType() == FieldTypeEnum.FILE)
+			{
+				MultipartFile multipartFile = (MultipartFile) paramValue;
+
+				String id = idGenerator.generateId();
+				try
+				{
+					fileStore.store(multipartFile.getInputStream(), id);
+				}
+				catch (IOException e)
+				{
+					throw new MolgenisDataException(e);
+				}
+
+				;
+				FileMeta fileEntity = new FileMeta(dataService);
+				fileEntity.setId(id);
+				fileEntity.setFilename(multipartFile.getOriginalFilename());
+				fileEntity.setContentType(multipartFile.getContentType());
+				fileEntity.setSize(multipartFile.getSize());
+				fileEntity.setUrl(ServletUriComponentsBuilder.fromCurrentRequest()
+						.replacePath(FileDownloadController.URI + "/" + id).build().toUriString());
+				dataService.add(FileMeta.ENTITY_NAME, fileEntity);
+
+				return fileEntity;
+			}
+
 			if (attr.getDataType().getEnumType() == XREF || attr.getDataType().getEnumType() == CATEGORICAL)
 			{
 				value = dataService.findOne(attr.getRefEntity().getName(), paramValue);

@@ -749,5 +749,6 @@
         <module>molgenis-data-rest-client</module>
         <module>molgenis-data-migrate</module>
         <module>molgenis-questionnaires</module>
+		<module>molgenis-file</module>
     </modules>
 </project>

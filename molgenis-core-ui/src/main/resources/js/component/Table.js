@@ -590,6 +590,7 @@
 						break;
 					case 'CATEGORICAL':
 					case 'XREF':
+					case 'FILE':
 						CellContent = a({href: '#', onClick: this._toggleModal.bind(null, true)}, span(null, value[attr.refEntity.labelAttribute]));
 						break;
 					case 'CATEGORICAL_MREF':
@@ -619,7 +620,6 @@
 							CellContent = span(null, value);	
 						}
 						break;
-					case 'FILE':
 					case 'IMAGE':
 						throw 'Unsupported data type: ' + attr.fieldType;
 					default:

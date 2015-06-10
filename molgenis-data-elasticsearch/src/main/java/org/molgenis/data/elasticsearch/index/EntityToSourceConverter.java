@@ -100,6 +100,7 @@ public class EntityToSourceConverter
 				break;
 			case CATEGORICAL:
 			case XREF:
+			case FILE:
 			{
 				Entity xrefEntity = entity.getEntity(attrName);
 				if (xrefEntity != null)
@@ -151,7 +152,6 @@ public class EntityToSourceConverter
 			}
 			case COMPOUND:
 				throw new RuntimeException("Compound attribute is not an atomic attribute");
-			case FILE:
 			case IMAGE:
 				throw new MolgenisDataException("Unsupported data type for indexing [" + dataType + "]");
 			default:
