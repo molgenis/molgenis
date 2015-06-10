@@ -11,13 +11,13 @@ import org.molgenis.MysqlTestConfig;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
+import org.molgenis.data.Sort;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
@@ -124,14 +124,14 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		Assert.assertEquals(params, Lists.<Object> newArrayList("%John%", "%John%", "%John%"));
 
 		// sort
-		Assert.assertEquals(repo.getSortSql(new QueryImpl().sort(Sort.Direction.ASC, "firstName")),
+		Assert.assertEquals(repo.getSortSql(new QueryImpl().sort(new Sort("firstName", Sort.Direction.ASC))),
 				"ORDER BY `firstName` ASC");
-		Assert.assertEquals(repo.getSortSql(new QueryImpl().sort(Sort.Direction.DESC, "firstName")),
+		Assert.assertEquals(repo.getSortSql(new QueryImpl().sort(new Sort("firstName", Sort.Direction.DESC))),
 				"ORDER BY `firstName` DESC");
 
 		params.clear();
 		Assert.assertEquals(repo.getWhereSql(
-				new QueryImpl().eq("firstName", "John").sort(Sort.Direction.DESC, "firstName"), params, 0),
+				new QueryImpl().eq("firstName", "John").sort(new Sort("firstName", Sort.Direction.DESC)), params, 0),
 				"this.`firstName` = ?");
 		Assert.assertEquals(params, Lists.<Object> newArrayList("John"));
 

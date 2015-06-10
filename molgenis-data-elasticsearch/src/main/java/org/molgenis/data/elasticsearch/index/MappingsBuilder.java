@@ -135,7 +135,7 @@ public class MappingsBuilder
 					jsonBuilder.startObject("properties");
 					for (AttributeMetaData refAttr : refEntity.getAtomicAttributes())
 					{
-						createAttributeMapping(refAttr, enableNorms, createAllIndex, false, false, jsonBuilder);
+						createAttributeMapping(refAttr, enableNorms, createAllIndex, false, true, jsonBuilder);
 					}
 					jsonBuilder.endObject();
 				}

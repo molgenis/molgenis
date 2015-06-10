@@ -39,7 +39,6 @@ public class CsvHttpMessageConverter extends BaseHttpMessageConverter<EntityColl
 		{
 			IOUtils.closeQuietly(writer);
 		}
-
 	}
 
 	@Override
