@@ -217,7 +217,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 
 		for (String synonym : ontologyTermSynonyms)
 		{
-			if (keywordsFromAttribute.containsAll(splitIntoTerms(stemmer.stemAndJoin(splitIntoTerms(synonym))))) return true;
+			Set<String> splitIntoTerms = splitIntoTerms(stemmer.stemAndJoin(splitIntoTerms(synonym)));
+			if (splitIntoTerms.size() != 0 && keywordsFromAttribute.containsAll(splitIntoTerms)) return true;
 		}
 
 		return false;
