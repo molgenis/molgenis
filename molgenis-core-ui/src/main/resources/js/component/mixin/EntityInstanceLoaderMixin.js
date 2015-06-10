@@ -26,6 +26,11 @@
 					var href = entityInstance.startsWith('/api/') ? entityInstance : '/api/v1/' + this.state.entity.name + '/' + entityInstance;					
 					this._loadEntityInstance(entity, href);
 				}
+			} else if (typeof entityInstance === 'number') {
+				if(entity && entity.name) {
+					var href = '/api/v1/' + this.state.entity.name + '/' + entityInstance.toString();					
+					this._loadEntityInstance(entity, href);
+				}
 			} 
 		},
 		_loadEntityInstance: function(entity, href) {

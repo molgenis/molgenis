@@ -54,6 +54,7 @@ import org.molgenis.data.MolgenisReferencedEntityException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.Repository;
+import org.molgenis.data.Sort;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.rsql.MolgenisRSQL;
@@ -78,7 +79,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConversionFailedException;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -450,7 +450,7 @@ public class RestController
 			{
 				String sortAttribute = sortAttributeArray[0];
 				String sortOrderArray[] = req.getParameterMap().get("sortOrder");
-				Sort.Direction order = Sort.DEFAULT_DIRECTION;
+				Sort.Direction order = Sort.Direction.ASC;
 
 				if (sortOrderArray != null && sortOrderArray.length == 1 && StringUtils.isNotEmpty(sortOrderArray[0]))
 				{
@@ -468,7 +468,7 @@ public class RestController
 						throw new RuntimeException("unknown sort order");
 					}
 				}
-				q.sort(order, sortAttribute);
+				q.sort().on(sortAttribute, order);
 			}
 
 			if (q.getPageSize() == 0)
@@ -1123,9 +1123,25 @@ public class RestController
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
 		Repository repository = dataService.getRepository(entityName);
 
+		// convert sort
+		Sort sort;
+		SortV1 sortV1 = request.getSort();
+		if (sortV1 != null)
+		{
+			sort = new Sort();
+			for (SortV1.OrderV1 orderV1 : sortV1)
+			{
+				sort.on(orderV1.getProperty(),
+						orderV1.getDirection() == SortV1.DirectionV1.ASC ? Sort.Direction.ASC : Sort.Direction.DESC);
+			}
+		}
+		else
+		{
+			sort = null;
+		}
+
 		List<QueryRule> queryRules = request.getQ() == null ? Collections.<QueryRule> emptyList() : request.getQ();
-		Query q = new QueryImpl(queryRules).pageSize(request.getNum()).offset(request.getStart())
-				.sort(request.getSort());
+		Query q = new QueryImpl(queryRules).pageSize(request.getNum()).offset(request.getStart()).sort(sort);
 
 		Iterable<Entity> it = dataService.findAll(entityName, q);
 		Long count = repository.count(q);

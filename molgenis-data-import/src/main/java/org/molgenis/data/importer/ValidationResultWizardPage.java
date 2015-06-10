@@ -48,9 +48,6 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 	private ImportRunService importRunService;
 
 	@Autowired
-	private ImportPostProcessingService importPostProcessingService;
-
-	@Autowired
 	UserAccountService userAccountService;
 	private List<MolgenisGroup> groups;
 
@@ -91,8 +88,8 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 					((ImportWizard) wizard).setImportRunId(importRun.getId());
 
 					asyncImportJobs.execute(new ImportJob(importService, SecurityContextHolder.getContext(),
-							repositoryCollection, entityDbAction, importRun.getId(), importRunService,
-							importPostProcessingService, request.getSession(), importWizard.getDefaultEntity()));
+							repositoryCollection, entityDbAction, importRun.getId(), importRunService, request
+									.getSession(), importWizard.getDefaultEntity()));
 				}
 
 			}

@@ -115,6 +115,7 @@
                                 <cssSourceFile>/component/wrapper/JQRangeSlider.css</cssSourceFile>
                                 <cssSourceFile>/component/Checkbox.css</cssSourceFile>
                                 <cssSourceFile>/component/Radio.css</cssSourceFile>
+                                <cssSourceFile>/component/Table.css</cssSourceFile>
                             </cssSourceFiles>
                             <cssFinalFile>molgenis-component.min.css</cssFinalFile>
                             <skipMerge>false</skipMerge>
@@ -156,6 +157,7 @@
 	                            <jsSourceFile>/component/CheckboxGroup.js</jsSourceFile>
 	                            <jsSourceFile>/component/CodeEditor.js</jsSourceFile>
 	                            <jsSourceFile>/component/DateControl.js</jsSourceFile>
+	                            <jsSourceFile>/component/Dialog.js</jsSourceFile>
 	                            <jsSourceFile>/component/EntitySelectBox.js</jsSourceFile>
 	                            <jsSourceFile>/component/Form.js</jsSourceFile>
 	                            <jsSourceFile>/component/FormControl.js</jsSourceFile>
@@ -163,10 +165,13 @@
 	                            <jsSourceFile>/component/Icon.js</jsSourceFile>
 	                            <jsSourceFile>/component/Input.js</jsSourceFile>
 	                            <jsSourceFile>/component/Modal.js</jsSourceFile>
+	                            <jsSourceFile>/component/Pager.js</jsSourceFile>
+	                            <jsSourceFile>/component/Popover.js</jsSourceFile>
 	                            <jsSourceFile>/component/Questionnaire.js</jsSourceFile>
 	                            <jsSourceFile>/component/RadioGroup.js</jsSourceFile>
 	                            <jsSourceFile>/component/RangeSlider.js</jsSourceFile>
 	                            <jsSourceFile>/component/Spinner.js</jsSourceFile>
+	                            <jsSourceFile>/component/Table.js</jsSourceFile>
 	                            <jsSourceFile>/component/TextArea.js</jsSourceFile>
 	                        </jsSourceFiles>
 	                        <jsFinalFile>molgenis-component.min.js</jsFinalFile>

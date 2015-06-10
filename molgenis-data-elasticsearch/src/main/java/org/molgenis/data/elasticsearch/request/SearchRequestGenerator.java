@@ -72,6 +72,7 @@ public class SearchRequestGenerator
 		{
 			aggregateQueryGenerator.generate(searchRequestBuilder, aggAttr1, aggAttr2, aggAttrDistinct);
 		}
+
 	}
 
 	public void buildSearchRequest(SearchRequestBuilder searchRequestBuilder, String entityName, SearchType searchType,
