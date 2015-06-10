@@ -14,20 +14,23 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
-import org.molgenis.data.annotation.utils.AnnotatorUtils;
-import org.molgenis.data.annotation.utils.HgncLocationsUtils;
 import org.molgenis.data.annotation.LocusAnnotator;
-import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.data.annotation.impl.datastructures.CgdData;
+import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
 import org.molgenis.data.annotation.impl.datastructures.Locus;
+import org.molgenis.data.annotation.mini.AnnotatorInfo;
+import org.molgenis.data.annotation.mini.AnnotatorInfo.Status;
+import org.molgenis.data.annotation.mini.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.provider.CgdDataProvider;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
+import org.molgenis.data.annotation.utils.AnnotatorUtils;
+import org.molgenis.data.annotation.utils.HgncLocationsUtils;
 import org.molgenis.data.support.AnnotationServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.server.MolgenisSimpleSettings;
 import org.slf4j.Logger;
@@ -40,6 +43,12 @@ import org.springframework.stereotype.Component;
 public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ClinicalGenomicsDatabaseServiceAnnotator.class);
+
+	@Override
+	public AnnotatorInfo getInfo()
+	{
+		return AnnotatorInfo.create(Status.BETA, Type.UNUSED, "unknown", "Clinical Genomics Database");
+	}
 
 	private final MolgenisSettings molgenisSettings;
 	private final AnnotationService annotatorService;
@@ -182,7 +191,7 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 		try
 		{
 			HashMap<String, Object> resultMap = new HashMap<String, Object>();
-            if (cgdData.containsKey(geneSymbol))
+			if (cgdData.containsKey(geneSymbol))
 			{
 				CgdData data = cgdData.get(geneSymbol);
 

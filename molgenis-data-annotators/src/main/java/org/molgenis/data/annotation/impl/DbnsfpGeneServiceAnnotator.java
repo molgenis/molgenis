@@ -15,11 +15,14 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.utils.AnnotatorUtils;
-import org.molgenis.data.annotation.utils.HgncLocationsUtils;
 import org.molgenis.data.annotation.LocusAnnotator;
 import org.molgenis.data.annotation.impl.datastructures.Locus;
+import org.molgenis.data.annotation.mini.AnnotatorInfo;
+import org.molgenis.data.annotation.mini.AnnotatorInfo.Status;
+import org.molgenis.data.annotation.mini.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
+import org.molgenis.data.annotation.utils.AnnotatorUtils;
+import org.molgenis.data.annotation.utils.HgncLocationsUtils;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -229,5 +232,11 @@ public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ESSENTIAL_GENE, FieldTypeEnum.TEXT));
 
 		return metadata;
+	}
+
+	@Override
+	public AnnotatorInfo getInfo()
+	{
+		return AnnotatorInfo.create(Status.INDEV, Type.UNUSED, "unknown", "no description");
 	}
 }

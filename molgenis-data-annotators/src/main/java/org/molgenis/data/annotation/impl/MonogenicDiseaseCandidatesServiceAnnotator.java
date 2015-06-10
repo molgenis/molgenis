@@ -1,5 +1,17 @@
 package org.molgenis.data.annotation.impl;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
@@ -7,6 +19,9 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.VariantAnnotator;
+import org.molgenis.data.annotation.mini.AnnotatorInfo;
+import org.molgenis.data.annotation.mini.AnnotatorInfo.Status;
+import org.molgenis.data.annotation.mini.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.provider.CgdDataProvider;
 import org.molgenis.data.annotation.provider.CgdDataProvider.generalizedInheritance;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
@@ -23,18 +38,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 /**
  * Monogenic disease filter
  * 
@@ -42,6 +45,12 @@ import java.util.Set;
 @Component("monogenicDiseaseService")
 public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 {
+	@Override
+	public AnnotatorInfo getInfo()
+	{
+		return AnnotatorInfo.create(Status.BETA, Type.AUTOMATED_PROTOCOL, "monogenic", "Monogenic disease candidates");
+	}
+
 	private static final Logger LOG = LoggerFactory.getLogger(MonogenicDiseaseCandidatesServiceAnnotator.class);
 	public static final String ANNOTATIONFIELD = VcfRepository.getInfoPrefix() + "ANN";
 
@@ -68,9 +77,9 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 
 	final List<String> infoFields = Arrays
 			.asList(new String[]
-                    {"##INFO=<ID="
-                            + MONOGENICDISEASECANDIDATE.substring(VcfRepository.getInfoPrefix().length())
-                            + ",Number=1,Type=String,Description=\"Possible outcomes: EXCLUDED, INCLUDED_DOMINANT, INCLUDED_DOMINANT_HIGHIMPACT, INCLUDED_RECESSIVE, INCLUDED_RECESSIVE_HIGHIMPACT, INCLUDED_RECESSIVE_COMPOUND, INCLUDED_OTHER\">",});
+			{ "##INFO=<ID="
+					+ MONOGENICDISEASECANDIDATE.substring(VcfRepository.getInfoPrefix().length())
+					+ ",Number=1,Type=String,Description=\"Possible outcomes: EXCLUDED, INCLUDED_DOMINANT, INCLUDED_DOMINANT_HIGHIMPACT, INCLUDED_RECESSIVE, INCLUDED_RECESSIVE_HIGHIMPACT, INCLUDED_RECESSIVE_COMPOUND, INCLUDED_OTHER\">", });
 
 	@Autowired
 	public MonogenicDiseaseCandidatesServiceAnnotator(MolgenisSettings molgenisSettings,
@@ -167,7 +176,7 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 				.valueOf(entity.getString(ClinicalGenomicsDatabaseServiceAnnotator.GENERALIZED_INHERITANCE)) : null;
 		String originalInheritance = entity.getString(ClinicalGenomicsDatabaseServiceAnnotator.INHERITANCE) != null ? entity
 				.getString(ClinicalGenomicsDatabaseServiceAnnotator.INHERITANCE) : null;
-		SnpEffServiceAnnotator.impact impact = SnpEffServiceAnnotator.impact.valueOf(annSplit[2]);
+		SnpEffServiceAnnotator.impact impact = Enum.valueOf(SnpEffServiceAnnotator.impact.class, annSplit[2]);
 		String gene = annSplit[3];
 		String condition = entity.getString(ClinicalGenomicsDatabaseServiceAnnotator.CONDITION);
 
@@ -224,7 +233,7 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 		{
 			resultMap
 					.put(MONOGENICDISEASECANDIDATE,
-                            impact.equals(SnpEffServiceAnnotator.impact.HIGH) ? outcome.INCLUDED_RECESSIVE_HIGHIMPACT : outcome.INCLUDED_RECESSIVE);
+							impact.equals(SnpEffServiceAnnotator.impact.HIGH) ? outcome.INCLUDED_RECESSIVE_HIGHIMPACT : outcome.INCLUDED_RECESSIVE);
 		}
 		// only option left: HET, but check just in case
 		else if (zygosity.equals(HET))
@@ -235,14 +244,14 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 						+ gene + ", for " + entity.toString());
 				resultMap
 						.put(MONOGENICDISEASECANDIDATE,
-                                impact.equals(SnpEffServiceAnnotator.impact.HIGH) ? outcome.INCLUDED_RECESSIVE_COMPOUND_HIGHIMPACT : outcome.INCLUDED_RECESSIVE_COMPOUND);
+								impact.equals(SnpEffServiceAnnotator.impact.HIGH) ? outcome.INCLUDED_RECESSIVE_COMPOUND_HIGHIMPACT : outcome.INCLUDED_RECESSIVE_COMPOUND);
 			}
 			else
 			{
 				genesWithCandidates.add(gene);
 				resultMap
 						.put(MONOGENICDISEASECANDIDATE,
-                                impact.equals(SnpEffServiceAnnotator.impact.HIGH) ? outcome.EXCLUDED_FIRST_OF_COMPOUND_HIGHIMPACT : outcome.EXCLUDED_FIRST_OF_COMPOUND); // exclude
+								impact.equals(SnpEffServiceAnnotator.impact.HIGH) ? outcome.EXCLUDED_FIRST_OF_COMPOUND_HIGHIMPACT : outcome.EXCLUDED_FIRST_OF_COMPOUND); // exclude
 			}
 		}
 		else
@@ -258,7 +267,7 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 		{
 			resultMap
 					.put(MONOGENICDISEASECANDIDATE,
-                            impact.equals(SnpEffServiceAnnotator.impact.HIGH) ? outcome.INCLUDED_DOMINANT_HIGHIMPACT : outcome.INCLUDED_DOMINANT);
+							impact.equals(SnpEffServiceAnnotator.impact.HIGH) ? outcome.INCLUDED_DOMINANT_HIGHIMPACT : outcome.INCLUDED_DOMINANT);
 		}
 		// if purely dominant, exclude at this point!
 		else if (cgdGenInh.equals(generalizedInheritance.DOMINANT))

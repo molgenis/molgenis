@@ -19,9 +19,10 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AbstractRepositoryAnnotator;
-import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.impl.datastructures.CosmicData;
+import org.molgenis.data.annotation.mini.AnnotatorInfo;
+import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -46,7 +47,7 @@ public class CosmicServiceAnnotator extends AbstractRepositoryAnnotator implemen
 		ApplicationListener<ContextRefreshedEvent>
 {
 	// Web url to call the ensembl web service
-    //FIXME: should be RTP
+	// FIXME: should be RTP
 	private static final String SERVICE_URL = "http://beta.rest.ensembl.org/feature/id/";
 	private static final String SERVICE_POSTFIX = ".json?feature=somatic_variation";
 	// ensembl service is dependant on this ID when the web service is called
@@ -91,7 +92,7 @@ public class CosmicServiceAnnotator extends AbstractRepositoryAnnotator implemen
 	public boolean annotationDataExists()
 	{
 		// TODO check if the webservice is up and running
-        return true;
+		return true;
 	}
 
 	@Override
@@ -192,5 +193,11 @@ public class CosmicServiceAnnotator extends AbstractRepositoryAnnotator implemen
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(STRAND, FieldTypeEnum.INT));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(START, FieldTypeEnum.INT));
 		return metadata;
+	}
+
+	@Override
+	public AnnotatorInfo getInfo()
+	{
+		return null;
 	}
 }

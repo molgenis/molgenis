@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation.utils;
+package org.molgenis.data.annotator.tabix;
 
 /* The MIT License
 

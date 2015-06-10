@@ -12,10 +12,13 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.annotation.VariantAnnotator;
 import org.molgenis.data.annotation.impl.datastructures.ClinvarData;
+import org.molgenis.data.annotation.mini.AnnotatorInfo;
+import org.molgenis.data.annotation.mini.AnnotatorInfo.Status;
+import org.molgenis.data.annotation.mini.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.provider.ClinvarDataProvider;
+import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -174,6 +177,12 @@ public class ClinVarServiceAnnotator extends VariantAnnotator
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OTHERIDS, FieldTypeEnum.TEXT));
 
 		return metadata;
+	}
+
+	@Override
+	public AnnotatorInfo getInfo()
+	{
+		return AnnotatorInfo.create(Status.BETA, Type.PHENOTYPE_ASSOCIATION, "clinvar", "");
 	}
 
 }

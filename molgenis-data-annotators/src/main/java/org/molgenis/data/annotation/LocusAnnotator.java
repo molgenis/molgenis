@@ -1,9 +1,6 @@
 package org.molgenis.data.annotation;
 
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
@@ -27,4 +24,5 @@ public abstract class LocusAnnotator extends AbstractRepositoryAnnotator impleme
 
 		return metadata;
 	}
+
 }
