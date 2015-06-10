@@ -1,29 +1,5 @@
 package org.molgenis.data.annotation.impl;
 
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule;
-import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.RepositoryAnnotator;
-import org.molgenis.data.support.AnnotationServiceImpl;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.framework.server.MolgenisSimpleSettings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.stereotype.Component;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -38,6 +14,33 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
+
+import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule;
+import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.mini.AnnotatorInfo;
+import org.molgenis.data.annotation.mini.AnnotatorInfo.Status;
+import org.molgenis.data.annotation.mini.AnnotatorInfo.Type;
+import org.molgenis.data.support.AnnotationServiceImpl;
+import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.framework.server.MolgenisSimpleSettings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.stereotype.Component;
 
 /**
  * 
@@ -63,7 +66,7 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator, ApplicationL
 
 	private static final String NAME = "SnpEff";
 
-    public static final String ANNOTATION_LABEL = "Annotation";
+	public static final String ANNOTATION_LABEL = "Annotation";
 	public static final String PUTATIVE_IMPACT_LABEL = "Putative_impact";
 	public static final String GENE_NAME_LABEL = "Gene_Name";
 	public static final String GENE_ID_LABEL = "Gene_ID";
@@ -81,25 +84,25 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator, ApplicationL
 	public static final String LOF_LABEL = "LOF";
 	public static final String NMD_LABEL = "NMD";
 
-    public static final String ANNOTATION = VcfRepository.getInfoPrefix() + ANNOTATION_LABEL;
-    public static final String PUTATIVE_IMPACT = VcfRepository.getInfoPrefix() + PUTATIVE_IMPACT_LABEL;
-    public static final String GENE_NAME = VcfRepository.getInfoPrefix() + GENE_NAME_LABEL;
-    public static final String GENE_ID = VcfRepository.getInfoPrefix() + GENE_ID_LABEL;
-    public static final String FEATURE_TYPE = VcfRepository.getInfoPrefix() + FEATURE_TYPE_LABEL;
-    public static final String FEATURE_ID = VcfRepository.getInfoPrefix() + FEATURE_ID_LABEL;
-    public static final String TRANSCRIPT_BIOTYPE = VcfRepository.getInfoPrefix() + TRANSCRIPT_BIOTYPE_LABEL;
-    public static final String RANK_TOTAL = VcfRepository.getInfoPrefix() + RANK_TOTAL_LABEL;
-    public static final String HGVS_C = VcfRepository.getInfoPrefix() + HGVS_C_LABEL;
-    public static final String HGVS_P = VcfRepository.getInfoPrefix() + HGVS_P_LABEL;
-    public static final String C_DNA_POSITION = VcfRepository.getInfoPrefix() + C_DNA_POSITION_LABEL;
-    public static final String CDS_POSITION = VcfRepository.getInfoPrefix() + CDS_POSITION_LABEL;
-    public static final String PROTEIN_POSITION = VcfRepository.getInfoPrefix() + PROTEIN_POSITION_LABEL;
-    public static final String DISTANCE_TO_FEATURE = VcfRepository.getInfoPrefix() + DISTANCE_TO_FEATURE_LABEL;
-    public static final String ERRORS = VcfRepository.getInfoPrefix() + ERRORS_LABEL;
-    public static final String LOF = VcfRepository.getInfoPrefix() + LOF_LABEL;
-    public static final String NMD = VcfRepository.getInfoPrefix() + NMD_LABEL;
+	public static final String ANNOTATION = VcfRepository.getInfoPrefix() + ANNOTATION_LABEL;
+	public static final String PUTATIVE_IMPACT = VcfRepository.getInfoPrefix() + PUTATIVE_IMPACT_LABEL;
+	public static final String GENE_NAME = VcfRepository.getInfoPrefix() + GENE_NAME_LABEL;
+	public static final String GENE_ID = VcfRepository.getInfoPrefix() + GENE_ID_LABEL;
+	public static final String FEATURE_TYPE = VcfRepository.getInfoPrefix() + FEATURE_TYPE_LABEL;
+	public static final String FEATURE_ID = VcfRepository.getInfoPrefix() + FEATURE_ID_LABEL;
+	public static final String TRANSCRIPT_BIOTYPE = VcfRepository.getInfoPrefix() + TRANSCRIPT_BIOTYPE_LABEL;
+	public static final String RANK_TOTAL = VcfRepository.getInfoPrefix() + RANK_TOTAL_LABEL;
+	public static final String HGVS_C = VcfRepository.getInfoPrefix() + HGVS_C_LABEL;
+	public static final String HGVS_P = VcfRepository.getInfoPrefix() + HGVS_P_LABEL;
+	public static final String C_DNA_POSITION = VcfRepository.getInfoPrefix() + C_DNA_POSITION_LABEL;
+	public static final String CDS_POSITION = VcfRepository.getInfoPrefix() + CDS_POSITION_LABEL;
+	public static final String PROTEIN_POSITION = VcfRepository.getInfoPrefix() + PROTEIN_POSITION_LABEL;
+	public static final String DISTANCE_TO_FEATURE = VcfRepository.getInfoPrefix() + DISTANCE_TO_FEATURE_LABEL;
+	public static final String ERRORS = VcfRepository.getInfoPrefix() + ERRORS_LABEL;
+	public static final String LOF = VcfRepository.getInfoPrefix() + LOF_LABEL;
+	public static final String NMD = VcfRepository.getInfoPrefix() + NMD_LABEL;
 
-    private DataService dataService = null;
+	private DataService dataService = null;
 
 	public enum impact
 	{
@@ -154,18 +157,23 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator, ApplicationL
 	private boolean checkSnpEffPath()
 	{
 		boolean result = false;
-        if(molgenisSettings != null) {
-            snpEffPath = molgenisSettings.getProperty(SNPEFF_JAR_LOCATION_PROPERTY);
-            if (snpEffPath != null) {
-                File snpEffpath = new File(snpEffPath);
-                if (snpEffpath.exists() && snpEffpath.isFile()) {
-                    LOG.info("SnpEff found at: " + snpEffpath.getAbsolutePath());
-                    result = true;
-                } else {
-                    LOG.error("SnpEff not found at: " + snpEffpath.getAbsolutePath());
-                }
-            }
-        }
+		if (molgenisSettings != null)
+		{
+			snpEffPath = molgenisSettings.getProperty(SNPEFF_JAR_LOCATION_PROPERTY);
+			if (snpEffPath != null)
+			{
+				File snpEffpath = new File(snpEffPath);
+				if (snpEffpath.exists() && snpEffpath.isFile())
+				{
+					LOG.info("SnpEff found at: " + snpEffpath.getAbsolutePath());
+					result = true;
+				}
+				else
+				{
+					LOG.error("SnpEff not found at: " + snpEffpath.getAbsolutePath());
+				}
+			}
+		}
 		return result;
 	}
 
@@ -398,11 +406,13 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator, ApplicationL
 				.setDescription("Exon or Intron rank / total number of exons or introns(source:http://snpeff.sourceforge.net)");
 		metadata.addAttributeMetaData(rank_total);
 
-		DefaultAttributeMetaData HGVS_c = new DefaultAttributeMetaData(HGVS_C, MolgenisFieldTypes.FieldTypeEnum.STRING).setLabel(FEATURE_ID_LABEL);
+		DefaultAttributeMetaData HGVS_c = new DefaultAttributeMetaData(HGVS_C, MolgenisFieldTypes.FieldTypeEnum.STRING)
+				.setLabel(FEATURE_ID_LABEL);
 		HGVS_c.setDescription("Variant using HGVS notation (DNA level)(source:http://snpeff.sourceforge.net)");
 		metadata.addAttributeMetaData(HGVS_c);
 
-		DefaultAttributeMetaData HGVS_p = new DefaultAttributeMetaData(HGVS_P, MolgenisFieldTypes.FieldTypeEnum.STRING).setLabel(FEATURE_ID_LABEL);
+		DefaultAttributeMetaData HGVS_p = new DefaultAttributeMetaData(HGVS_P, MolgenisFieldTypes.FieldTypeEnum.STRING)
+				.setLabel(FEATURE_ID_LABEL);
 		HGVS_p.setDescription("If variant is coding, this field describes the variant using HGVS notation (Protein level). Since transcript ID is already mentioned in ‘feature ID’, it may be omitted here.(source:http://snpeff.sourceforge.net)");
 		metadata.addAttributeMetaData(HGVS_p);
 
@@ -429,15 +439,18 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator, ApplicationL
 				.setDescription("All items in this field are options, so the field could be empty. Up/Downstream: Distance to first / last codon Intergenic: Distance to closest gene Distance to closest Intron boundary in exon (+/- up/downstream). If same, use positive number. Distance to closest exon boundary in Intron (+/- up/downstream) Distance to first base in MOTIF Distance to first base in miRNA Distance to exon-intron boundary in splice_site or splice _region ChipSeq peak: Distance to summit (or peak center) Histone mark / Histone state: Distance to summit (or peak center)(source:http://snpeff.sourceforge.net)");
 		metadata.addAttributeMetaData(Distance_to_feature);
 
-		DefaultAttributeMetaData Errors = new DefaultAttributeMetaData(ERRORS, MolgenisFieldTypes.FieldTypeEnum.STRING).setLabel(FEATURE_ID_LABEL);
+		DefaultAttributeMetaData Errors = new DefaultAttributeMetaData(ERRORS, MolgenisFieldTypes.FieldTypeEnum.STRING)
+				.setLabel(FEATURE_ID_LABEL);
 		Errors.setDescription("Add errors, warnings oErrors, Warnings or Information messages: Add errors, warnings or r informative message that can affect annotation accuracy. It can be added using either ‘codes’ (as shown in column 1, e.g. W1) or ‘message types’ (as shown in column 2, e.g. WARNING_REF_DOES_NOT_MATCH_GENOME). All these errors, warnings or information messages messages are optional.(source:http://snpeff.sourceforge.net)");
 		metadata.addAttributeMetaData(Errors);
 
-		DefaultAttributeMetaData lof = new DefaultAttributeMetaData(LOF, MolgenisFieldTypes.FieldTypeEnum.STRING).setLabel(FEATURE_ID_LABEL);
+		DefaultAttributeMetaData lof = new DefaultAttributeMetaData(LOF, MolgenisFieldTypes.FieldTypeEnum.STRING)
+				.setLabel(FEATURE_ID_LABEL);
 		lof.setDescription("snpEff can estimate if a variant is deemed to have a loss of function on the protein.(source:http://snpeff.sourceforge.net)");
 		metadata.addAttributeMetaData(lof);
 
-		DefaultAttributeMetaData nmd = new DefaultAttributeMetaData(NMD, MolgenisFieldTypes.FieldTypeEnum.STRING).setLabel(FEATURE_ID_LABEL);
+		DefaultAttributeMetaData nmd = new DefaultAttributeMetaData(NMD, MolgenisFieldTypes.FieldTypeEnum.STRING)
+				.setLabel(FEATURE_ID_LABEL);
 		nmd.setDescription("Nonsense mediate decay assessment. Some mutations may cause mRNA to be degraded thus not translated into a protein. NMD analysis marks mutations that are estimated to trigger nonsense mediated decay.(source:http://snpeff.sourceforge.net)");
 		metadata.addAttributeMetaData(nmd);
 
@@ -483,6 +496,12 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator, ApplicationL
 		}
 
 		return "true";
+	}
+
+	@Override
+	public AnnotatorInfo getInfo()
+	{
+		return AnnotatorInfo.create(Status.INDEV, Type.UNUSED, "unknown", "no description");
 	}
 
 }

@@ -3,6 +3,7 @@ package org.molgenis.data.vcf;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -10,10 +11,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
@@ -34,6 +33,8 @@ import org.molgenis.vcf.VcfSample;
 import org.molgenis.vcf.meta.VcfMeta;
 import org.molgenis.vcf.meta.VcfMetaFormat;
 import org.molgenis.vcf.meta.VcfMetaInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
@@ -45,7 +46,7 @@ import com.google.common.collect.Lists;
  */
 public class VcfRepository extends AbstractRepository
 {
-	private static final Logger logger = Logger.getLogger(VcfRepository.class);
+	private static final Logger LOG = LoggerFactory.getLogger(VcfRepository.class);
 
 	public static final String CHROM = "#CHROM";
 	public static final String ALT = "ALT";
@@ -58,16 +59,27 @@ public class VcfRepository extends AbstractRepository
 	public static final String INFO = "INFO";
 	public static final String SAMPLES = "SAMPLES_ENTITIES";
 	public static final String NAME = "NAME";
-    public static final String PREFIX = "##";
+	public static final String PREFIX = "##";
 
-    public static final AttributeMetaData CHROM_META = new DefaultAttributeMetaData(CHROM,MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false).setDescription("The chromosome on which the variant is observed");
-    public static final AttributeMetaData ALT_META = new DefaultAttributeMetaData(ALT,MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false).setDescription("The alternative allele observed");
-    public static final AttributeMetaData POS_META = new DefaultAttributeMetaData(POS,MolgenisFieldTypes.FieldTypeEnum.LONG).setAggregateable(true).setNillable(false).setDescription("The position on the chromosome which the variant is observed");
-    public static final AttributeMetaData REF_META = new DefaultAttributeMetaData(REF,MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false).setDescription("The reference allele");
-    public static final AttributeMetaData FILTER_META = new DefaultAttributeMetaData(FILTER,MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(true);
-    public static final AttributeMetaData QUAL_META = new DefaultAttributeMetaData(QUAL,MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(true);
-    public static final AttributeMetaData ID_META = new DefaultAttributeMetaData(ID,MolgenisFieldTypes.FieldTypeEnum.STRING).setNillable(true);
-    private final File file;
+	public static final AttributeMetaData CHROM_META = new DefaultAttributeMetaData(CHROM,
+			MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false)
+			.setDescription("The chromosome on which the variant is observed");
+	public static final AttributeMetaData ALT_META = new DefaultAttributeMetaData(ALT,
+			MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false)
+			.setDescription("The alternative allele observed");
+	public static final AttributeMetaData POS_META = new DefaultAttributeMetaData(POS,
+			MolgenisFieldTypes.FieldTypeEnum.LONG).setAggregateable(true).setNillable(false)
+			.setDescription("The position on the chromosome which the variant is observed");
+	public static final AttributeMetaData REF_META = new DefaultAttributeMetaData(REF,
+			MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false)
+			.setDescription("The reference allele");
+	public static final AttributeMetaData FILTER_META = new DefaultAttributeMetaData(FILTER,
+			MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(true);
+	public static final AttributeMetaData QUAL_META = new DefaultAttributeMetaData(QUAL,
+			MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(true);
+	public static final AttributeMetaData ID_META = new DefaultAttributeMetaData(ID,
+			MolgenisFieldTypes.FieldTypeEnum.STRING).setNillable(true);
+	private final File file;
 	private final String entityName;
 
 	private DefaultEntityMetaData entityMetaData;
@@ -93,11 +105,9 @@ public class VcfRepository extends AbstractRepository
 		{
 			throw new RuntimeException(e);
 		}
-		final VcfReader finalVcfReader = vcfReader;
-
 		return new Iterator<Entity>()
 		{
-			Iterator<VcfRecord> vcfRecordIterator = finalVcfReader.iterator();
+			Iterator<VcfRecord> vcfRecordIterator = vcfReader.iterator();
 
 			@Override
 			public boolean hasNext()
@@ -113,77 +123,11 @@ public class VcfRepository extends AbstractRepository
 				try
 				{
 					VcfRecord vcfRecord = vcfRecordIterator.next();
-					entity.set(CHROM, vcfRecord.getChromosome());
-					entity.set(
-							ALT,
-							StringUtils.join(
-									Lists.transform(vcfRecord.getAlternateAlleles(), new Function<Allele, String>()
-									{
-										@Override
-										public String apply(Allele allele)
-										{
-											return allele.toString();
-										}
-									}), ','));
-
-					entity.set(POS, vcfRecord.getPosition());
-					entity.set(REF, vcfRecord.getReferenceAllele().toString());
-					entity.set(FILTER, vcfRecord.getFilterStatus());
-					entity.set(QUAL, vcfRecord.getQuality());
-					entity.set(ID, StringUtils.join(vcfRecord.getIdentifiers(), ','));
-
-					StringBuilder id = new StringBuilder();
-					id.append(StringUtils.strip(entity.get(CHROM).toString()));
-					id.append("_");
-					id.append(StringUtils.strip(entity.get(POS).toString()));
-					id.append("_");
-					id.append(StringUtils.strip(entity.get(REF).toString()));
-					id.append("_");
-					id.append(StringUtils.strip(entity.get(ALT).toString()));
-					entity.set(INTERNAL_ID, id.toString());
-
-					for (VcfInfo vcfInfo : vcfRecord.getInformation())
-					{
-						Object val = vcfInfo.getVal();
-						if (val instanceof List<?>)
-						{
-							// TODO support list of primitives datatype
-							val = StringUtils.join((List<?>) val, ',');
-						}
-						entity.set(getInfoPrefix() + vcfInfo.getKey(), val);
-					}
-					if (hasFormatMetaData)
-					{
-						List<Entity> samples = new ArrayList<Entity>();
-						Iterator<VcfSample> sampleIterator = vcfRecord.getSamples().iterator();
-						if (vcfRecord.getNrSamples() > 0)
-						{
-							Iterator<String> sampleNameIterator = finalVcfReader.getVcfMeta().getSampleNames()
-									.iterator();
-							for (int j = 0; sampleIterator.hasNext(); ++j)
-							{
-								String[] format = vcfRecord.getFormat();
-								VcfSample sample = sampleIterator.next();
-								Entity sampleEntity = new MapEntity(sampleEntityMetaData);
-								for (int i = 0; i < format.length; i = i + 1)
-								{
-									sampleEntity.set(format[i], sample.getData(i));
-								}
-								sampleEntity.set(ID, id.toString() + j);
-
-								// FIXME remove entity ID from Sample label after #1400 is fixed, see also:
-								// jquery.molgenis.table.js line 152
-								sampleEntity.set(NAME, entity.get(POS) + "_" + entity.get(ALT) + "_"
-										+ sampleNameIterator.next());
-								samples.add(sampleEntity);
-							}
-						}
-						entity.set(SAMPLES, samples);
-					}
+					parseVcfRecord(vcfReader, entity, vcfRecord);
 				}
 				catch (IOException e)
 				{
-					logger.error("Unable to load VCF metadata. " + e.getStackTrace());
+					LOG.error("Unable to load VCF metadata.", e);
 				}
 				return entity;
 			}
@@ -194,6 +138,87 @@ public class VcfRepository extends AbstractRepository
 				throw new UnsupportedOperationException();
 			}
 		};
+	}
+
+	protected void parseVcfRecord(final VcfReader vcfReader, Entity entity, VcfRecord vcfRecord) throws IOException
+	{
+		parseFixedFields(entity, vcfRecord);
+		vcfRecord.getInformation().forEach(vcfInfo -> parseInformation(entity, vcfInfo));
+		if (hasFormatMetaData)
+		{
+			Iterable<String> sampleNames = vcfReader.getVcfMeta().getSampleNames();
+			parseSamples(entity, vcfRecord, sampleNames);
+		}
+	}
+
+	private static void parseInformation(Entity entity, VcfInfo vcfInfo)
+	{
+		Object val = vcfInfo.getVal();
+		if (val instanceof List<?>)
+		{
+			// TODO support list of primitives datatype
+			val = StringUtils.join((List<?>) val, ',');
+		}
+		entity.set(getInfoPrefix() + vcfInfo.getKey(), val);
+	}
+
+	private void parseSamples(Entity entity, VcfRecord vcfRecord, Iterable<String> sampleNames)
+	{
+		String entityId = entity.getString(INTERNAL_ID);
+		List<Entity> samples = new ArrayList<Entity>();
+		Iterator<VcfSample> sampleIterator = vcfRecord.getSamples().iterator();
+		if (vcfRecord.getNrSamples() > 0)
+		{
+			Iterator<String> sampleNameIterator = sampleNames.iterator();
+			for (int j = 0; sampleIterator.hasNext(); ++j)
+			{
+				String[] format = vcfRecord.getFormat();
+				VcfSample sample = sampleIterator.next();
+				Entity sampleEntity = new MapEntity(sampleEntityMetaData);
+				for (int i = 0; i < format.length; i = i + 1)
+				{
+					sampleEntity.set(format[i], sample.getData(i));
+				}
+				sampleEntity.set(ID, entityId + j);
+
+				// FIXME remove entity ID from Sample label after #1400 is fixed, see also:
+				// jquery.molgenis.table.js line 152
+				sampleEntity.set(NAME, entity.get(POS) + "_" + entity.get(ALT) + "_" + sampleNameIterator.next());
+				samples.add(sampleEntity);
+			}
+		}
+		entity.set(SAMPLES, samples);
+	}
+
+	private static String parseFixedFields(Entity entity, VcfRecord vcfRecord)
+	{
+		entity.set(CHROM, vcfRecord.getChromosome());
+		entity.set(ALT,
+				StringUtils.join(Lists.transform(vcfRecord.getAlternateAlleles(), new Function<Allele, String>()
+				{
+					@Override
+					public String apply(Allele allele)
+					{
+						return allele.toString();
+					}
+				}), ','));
+
+		entity.set(POS, vcfRecord.getPosition());
+		entity.set(REF, vcfRecord.getReferenceAllele().toString());
+		entity.set(FILTER, vcfRecord.getFilterStatus());
+		entity.set(QUAL, vcfRecord.getQuality());
+		entity.set(ID, StringUtils.join(vcfRecord.getIdentifiers(), ','));
+
+		StringBuilder id = new StringBuilder();
+		id.append(StringUtils.strip(entity.get(CHROM).toString()));
+		id.append("_");
+		id.append(StringUtils.strip(entity.get(POS).toString()));
+		id.append("_");
+		id.append(StringUtils.strip(entity.get(REF).toString()));
+		id.append("_");
+		id.append(StringUtils.strip(entity.get(ALT).toString()));
+		entity.set(INTERNAL_ID, id.toString());
+		return id.toString();
 	}
 
 	@Override
@@ -209,8 +234,7 @@ public class VcfRepository extends AbstractRepository
 				try
 				{
 					vcfMeta = vcfReader.getVcfMeta();
-					Iterable<VcfMetaFormat> formatMetaData = vcfReader.getVcfMeta().getFormatMeta();
-					createSampleEntityMetaData(formatMetaData);
+					createSampleEntityMetaData(vcfMeta.getFormatMeta());
 				}
 				finally
 				{
@@ -234,8 +258,8 @@ public class VcfRepository extends AbstractRepository
 				List<AttributeMetaData> metadataInfoField = new ArrayList<AttributeMetaData>();
 				for (VcfMetaInfo info : vcfMeta.getInfoMeta())
 				{
-					DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData(getInfoPrefix() + info.getId(),
-							vcfReaderFormatToMolgenisType(info)).setAggregateable(true);
+					DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData(getInfoPrefix()
+							+ info.getId(), vcfReaderFormatToMolgenisType(info)).setAggregateable(true);
 					attributeMetaData.setDescription(info.getDescription());
 					metadataInfoField.add(attributeMetaData);
 				}
@@ -244,7 +268,8 @@ public class VcfRepository extends AbstractRepository
 				if (hasFormatMetaData)
 				{
 					DefaultAttributeMetaData samplesAttributeMeta = new DefaultAttributeMetaData(SAMPLES,
-							MolgenisFieldTypes.FieldTypeEnum.MREF).setRefEntity(sampleEntityMetaData).setLabel("SAMPLES");
+							MolgenisFieldTypes.FieldTypeEnum.MREF).setRefEntity(sampleEntityMetaData).setLabel(
+							"SAMPLES");
 					entityMetaData.addAttributeMetaData(samplesAttributeMeta);
 				}
 				entityMetaData.setIdAttribute(INTERNAL_ID);
@@ -259,9 +284,10 @@ public class VcfRepository extends AbstractRepository
 	}
 
 	/**
-	 * Prefix to make INFO column names safe-ish. For example, 'Samples' is sometimes used as an INFO field
-	 * and clashes with the 'Samples' key used by Genotype-IO to store sample data in memory.
-	 * By prefixing a tag we hope to create unique INFO field names that do not clash.
+	 * Prefix to make INFO column names safe-ish. For example, 'Samples' is sometimes used as an INFO field and clashes
+	 * with the 'Samples' key used by Genotype-IO to store sample data in memory. By prefixing a tag we hope to create
+	 * unique INFO field names that do not clash.
+	 * 
 	 * @return
 	 */
 	public static String getInfoPrefix()
@@ -396,12 +422,17 @@ public class VcfRepository extends AbstractRepository
 
 	private VcfReader createVcfReader() throws IOException
 	{
-		VcfReader reader = new VcfReader(new InputStreamReader(new FileInputStream(file), Charset.forName("UTF-8")));
+		VcfReader reader = new VcfReader(new InputStreamReader(createInputStream(), Charset.forName("UTF-8")));
 		// register reader so close() can close all readers
 		if (vcfReaderRegistry == null) vcfReaderRegistry = new ArrayList<VcfReader>();
 		vcfReaderRegistry.add(reader);
 
 		return reader;
+	}
+
+	protected InputStream createInputStream() throws IOException
+	{
+		return new FileInputStream(file);
 	}
 
 	@Override
@@ -417,7 +448,7 @@ public class VcfRepository extends AbstractRepository
 				}
 				catch (IOException e)
 				{
-					logger.warn("", e);
+					LOG.warn("Failed to close reader", e);
 				}
 			}
 		}

@@ -1,21 +1,16 @@
 package org.molgenis.data.annotation;
 
-import org.molgenis.MolgenisFieldTypes;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
+
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA. User: charbonb Date: 21/02/14 Time: 11:24 To change this template use File | Settings |
@@ -140,6 +135,12 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 	public String getFullName()
 	{
 		return RepositoryAnnotator.ANNOTATOR_PREFIX + getSimpleName();
+	}
+
+	@Override
+	public String getDescription()
+	{
+		return getInfo().getDescription();
 	}
 
 }
