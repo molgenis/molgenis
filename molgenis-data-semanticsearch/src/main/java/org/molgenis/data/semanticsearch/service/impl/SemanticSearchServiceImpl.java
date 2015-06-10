@@ -30,11 +30,11 @@ import org.molgenis.data.semanticsearch.explain.service.ElasticSearchExplainServ
 import org.molgenis.data.semanticsearch.semantic.Hit;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
+import org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm;
 import org.molgenis.data.semanticsearch.string.Stemmer;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
-import org.molgenis.ontology.core.utils.CustomNGramAlgorithm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -247,7 +247,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	{
 		String s1 = stemmer.stemAndJoin(splitIntoTerms(synonym));
 		String s2 = stemmer.stemAndJoin(searchTerms);
-		float distance = (float) CustomNGramAlgorithm.stringMatching(s1, s2) / 100;
+		float distance = (float) NGramDistanceAlgorithm.stringMatching(s1, s2) / 100;
 		LOG.debug("Similarity between: {} and {} is {}", s1, s2, distance);
 		return distance;
 	}
@@ -255,7 +255,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	private Set<String> splitIntoTerms(String description)
 	{
 		return FluentIterable.from(termSplitter.split(description)).transform(String::toLowerCase)
-				.filter(w -> !CustomNGramAlgorithm.STOPWORDSLIST.contains(w)).filter(w -> !StringUtils.isEmpty(w))
+				.filter(w -> !NGramDistanceAlgorithm.STOPWORDSLIST.contains(w)).filter(w -> !StringUtils.isEmpty(w))
 				.toSet();
 	}
 }

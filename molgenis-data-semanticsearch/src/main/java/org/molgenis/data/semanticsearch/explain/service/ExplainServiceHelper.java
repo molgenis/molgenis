@@ -1,6 +1,6 @@
 package org.molgenis.data.semanticsearch.explain.service;
 
-import static org.molgenis.ontology.core.utils.CustomNGramAlgorithm.stringMatching;
+import static org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm.stringMatching;
 
 import java.util.Comparator;
 import java.util.HashMap;

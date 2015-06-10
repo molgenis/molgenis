@@ -1,4 +1,4 @@
-package org.molgenis.ontology.core.utils;
+package org.molgenis.data.semanticsearch.string;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -33,9 +33,8 @@ import org.elasticsearch.common.collect.Sets;
  * 
  */
 
-public class CustomNGramAlgorithm
+public class NGramDistanceAlgorithm
 {
-
 	private static int nGrams = 2;
 	public static final Set<String> STOPWORDSLIST;
 	static
@@ -57,7 +56,7 @@ public class CustomNGramAlgorithm
 				"won't", "would", "wouldn't", "you", "you'd", "you'll", "you're", "you've", "your", "yours",
 				"yourself", "yourselves", "many", ")", "(");
 	}
-	private static CustomPorterStemmer CUSTOM_PORTER_STEMMER = new CustomPorterStemmer();
+	private static Stemmer CUSTOM_STEMMER = new Stemmer("EN");
 
 	public static double stringMatching(String queryOne, String queryTwo)
 	{
@@ -161,6 +160,6 @@ public class CustomNGramAlgorithm
 
 	private static String stemPhrase(String originalString)
 	{
-		return CUSTOM_PORTER_STEMMER.cleanStemPhrase(originalString.toLowerCase().trim());
+		return CUSTOM_STEMMER.cleanStemPhrase(originalString.toLowerCase().trim());
 	}
 }

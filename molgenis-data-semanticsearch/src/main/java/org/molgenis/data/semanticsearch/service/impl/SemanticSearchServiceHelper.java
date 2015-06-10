@@ -170,7 +170,7 @@ public class SemanticSearchServiceHelper
 
 	public Set<String> collectTermsFromOntologyTerm(OntologyTerm ot)
 	{
-		Set<String> allTerms = Sets.newHashSet(ot.getSynonyms());
+		Set<String> allTerms = Sets.newLinkedHashSet(ot.getSynonyms());
 		allTerms.add(ot.getLabel());
 		return allTerms;
 	}

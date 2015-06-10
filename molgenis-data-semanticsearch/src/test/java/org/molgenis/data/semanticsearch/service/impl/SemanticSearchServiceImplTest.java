@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import org.elasticsearch.common.collect.Sets;
 import org.mockito.Mockito;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -36,6 +37,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -90,6 +92,22 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 		maternalHypertension = OntologyTerm.create("http://onto/mhyp", "Maternal hypertension");
 		ontologyTerms = asList(standingHeight, bodyWeight, hypertension, maternalHypertension);
 		attribute = new DefaultAttributeMetaData("attr1");
+	}
+
+	@BeforeMethod
+	public void init()
+	{
+		when(semanticSearchServiceHelper.collectTermsFromOntologyTerm(standingHeight)).thenReturn(
+				Sets.newHashSet("Standing height", "Standing height", "length"));
+
+		when(semanticSearchServiceHelper.collectTermsFromOntologyTerm(bodyWeight)).thenReturn(
+				Sets.newHashSet("Body weight", "Body weight", "Mass in kilograms"));
+
+		when(semanticSearchServiceHelper.collectTermsFromOntologyTerm(hypertension)).thenReturn(
+				Sets.newHashSet("Hypertension"));
+
+		when(semanticSearchServiceHelper.collectTermsFromOntologyTerm(maternalHypertension)).thenReturn(
+				Sets.newHashSet("Maternal hypertension"));
 	}
 
 	@Test
