@@ -593,7 +593,6 @@
 						CellContent = a({href: '#', onClick: this._toggleModal.bind(null, true)}, span(null, value[attr.refEntity.labelAttribute]));
 						break;
 					case 'FILE':
-						// FIXME add download btn
 						CellContent = (
 							div(null,
 								a({href: '#', onClick: this._toggleModal.bind(null, true)}, span(null, value[attr.refEntity.labelAttribute])),
