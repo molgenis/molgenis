@@ -11,6 +11,9 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.vcf.VcfReader;
+import org.molgenis.vcf.VcfRecord;
+import org.molgenis.vcf.meta.VcfMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +27,8 @@ import com.google.common.collect.ImmutableList.Builder;
 public class TabixVcfRepository extends VcfRepository
 {
 	private static final Logger LOG = LoggerFactory.getLogger(TabixVcfRepository.class);
+	private final VcfMeta vcfMeta;
+	private final VcfReader vcfReader;
 
 	private TabixReader tabixReader;
 
@@ -31,12 +36,14 @@ public class TabixVcfRepository extends VcfRepository
 	{
 		super(file, entityName);
 		tabixReader = new TabixReader(file.getCanonicalPath());
+		vcfReader = createVcfReader();
+		vcfMeta = vcfReader.getVcfMeta();
 	}
 
 	@Override
 	public Set<RepositoryCapability> getCapabilities()
 	{
-		return Collections.singleton(RepositoryCapability.QUERYABLE);
+		return Collections.emptySet();
 	}
 
 	/**
@@ -76,15 +83,14 @@ public class TabixVcfRepository extends VcfRepository
 	private synchronized ImmutableList<Entity> query(String chrom, long pos)
 	{
 		String queryString = String.format("%s:%s-%2$s", chrom, pos);
-		LOG.info("query({})", queryString);
-		org.molgenis.data.annotator.tabix.TabixReader.Iterator iterator = reader.query(queryString);
+		org.molgenis.data.annotator.tabix.TabixReader.Iterator iterator = tabixReader.query(queryString);
 		Builder<Entity> builder = ImmutableList.<Entity> builder();
 		try
 		{
 			String line = iterator.next();
 			while (line != null)
 			{
-				builder.add(toEntity(line));
+				builder.add(toEntity(getEntityMetaData(), new VcfRecord(vcfMeta, line.split("\t")), vcfMeta));
 				line = iterator.next();
 			}
 		}

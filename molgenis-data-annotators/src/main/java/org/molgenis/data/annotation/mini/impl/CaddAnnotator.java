@@ -5,17 +5,33 @@ import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.mini.AnnotatorInfo;
 import org.molgenis.data.annotation.mini.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.mini.EntityAnnotator;
+import org.molgenis.data.annotator.tabix.TabixVcfRepository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.system.MolgenisDbSettings;
+import org.molgenis.framework.server.MolgenisSettings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.io.File;
+import java.io.IOException;
 
 @Configuration
 public class CaddAnnotator
 {
 	public static final String CADD_SCALED = "CADDSCALED";
 	public static final String CADD_ABS = "CADDABS";
+	public static final String CADD_FILE_LOCATION_PROPERTY = "cadd_location";
+	public static final String CADD_TABIX_REPOSITORY = "CADDTabixRepository";
+
+	private static final Logger LOG = LoggerFactory.getLogger(CaddAnnotator.class);
+
+	@Autowired
+	private MolgenisSettings molgenisSettings;
 
 	@Bean
 	public RepositoryAnnotator cadd()
@@ -37,7 +53,7 @@ public class CaddAnnotator
 								+ "CADD can quantitatively prioritize functional, deleterious, and disease causal variants across a wide range of functional categories, "
 								+ "effect sizes and genetic architectures and can be used prioritize "
 								+ "causal variation in both research and clinical settings. (source: http://cadd.gs.washington.edu/info)");
-		EntityAnnotator entityAnnotator = new AnnotatorImpl("CADDTabixRepository", caddInfo, new LocusQueryCreator(),
+		EntityAnnotator entityAnnotator = new AnnotatorImpl(CADD_TABIX_REPOSITORY, caddInfo, new LocusQueryCreator(),
 				new VariantResultFilter());
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
 		DefaultAttributeMetaData cadd_abs = new DefaultAttributeMetaData(CADD_ABS, FieldTypeEnum.DECIMAL)
@@ -57,5 +73,21 @@ public class CaddAnnotator
 		metadata.addAttributeMetaData(cadd_scaled);
 
 		return new RepositoryAnnotatorImpl(entityAnnotator, metadata);
+	}
+
+	@Bean
+	TabixVcfRepository caddRepository()
+	{
+		TabixVcfRepository tabixRepo = null;
+		try
+		{
+			tabixRepo = new TabixVcfRepository(new File(molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY)),
+					CADD_TABIX_REPOSITORY);
+		}
+		catch (IOException e)
+		{
+			LOG.error("could not create TabixVcfRepository: " + e);
+		}
+		return tabixRepo;
 	}
 }

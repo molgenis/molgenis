@@ -16,6 +16,7 @@ public interface RepositoryAnnotator
 
 	AnnotatorInfo getInfo();
 
+	// add entityAnnotator
 	Iterator<Entity> annotate(Iterable<Entity> source);
 
 	/**
