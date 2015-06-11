@@ -16,10 +16,16 @@ import org.apache.lucene.search.Explanation;
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.QueryRule;
+import org.molgenis.data.semanticsearch.string.Stemmer;
+
+import com.google.common.base.Splitter;
+import com.google.common.collect.FluentIterable;
 
 public class ExplainServiceHelper
 {
 	public final static Pattern REGEXR_PATTERN = Pattern.compile("^weight\\(\\w*:(\\w*)(.*|)\\s.*");
+	private final Splitter termSplitter = Splitter.onPattern("[^\\p{IsAlphabetic}]+");
+	private final Stemmer stemmer = new Stemmer("en");
 
 	public enum Options
 	{
@@ -62,18 +68,11 @@ public class ExplainServiceHelper
 		String description = explanation.getDescription();
 		if (description.startsWith(Options.SUM_OF.toString()) || description.startsWith(Options.PRODUCT_OF.toString()))
 		{
-			Set<String> matchedTermsFromElasticExplanation = Lists.newArrayList(explanation.getDetails()).stream()
+			List<String> matchedTermsFromElasticExplanation = Lists.newArrayList(explanation.getDetails()).stream()
 					.map(this::discoverMatchedQueries).filter(term -> StringUtils.isNotEmpty(term))
-					.collect(Collectors.toSet());
+					.collect(Collectors.toList());
 
-			if (termsConsistOfSingleWord(matchedTermsFromElasticExplanation))
-			{
-				stringBuilder.append(StringUtils.join(matchedTermsFromElasticExplanation, ' '));
-			}
-			else
-			{
-				stringBuilder.append(StringUtils.join(matchedTermsFromElasticExplanation, '|'));
-			}
+			stringBuilder.append(joinTerms(StringUtils.join(matchedTermsFromElasticExplanation, ' ')));
 		}
 		else if (description.startsWith(Options.MAX_OF.toString()))
 		{
@@ -86,7 +85,7 @@ public class ExplainServiceHelper
 						}
 					}).get();
 
-			stringBuilder.append(discoverMatchedQueries(maxExplanation));
+			stringBuilder.append('|').append(discoverMatchedQueries(maxExplanation)).append('|');
 		}
 		else if (description.startsWith(Options.WEIGHT.toString()))
 		{
@@ -94,6 +93,25 @@ public class ExplainServiceHelper
 		}
 
 		return stringBuilder.toString();
+	}
+
+	public String joinTerms(String description)
+	{
+		if (StringUtils.isNotEmpty(description))
+		{
+			if (description.charAt(0) == '|')
+			{
+				description = description.substring(1);
+			}
+
+			if (description.charAt(description.length() - 1) == '|')
+			{
+				description = description.substring(0, description.length() - 1);
+			}
+
+			description = description.replaceAll("(\\|\\s*\\||\\s*\\|\\s*)", "|");
+		}
+		return description;
 	}
 
 	public Map<String, Double> recursivelyFindQuery(String queryPart, List<QueryRule> rules)
@@ -105,10 +123,15 @@ public class ExplainServiceHelper
 			{
 				qualifiedTerms.putAll(recursivelyFindQuery(queryPart, queryRule.getNestedRules()));
 			}
-			else if (queryRule.getValue().toString().contains(queryPart))
+			else
 			{
-				qualifiedTerms.put(queryRule.getValue().toString(),
-						stringMatching(queryPart, queryRule.getValue().toString()));
+				String removeBoostFromQuery = removeBoostFromQuery(queryRule.getValue().toString());
+				if (splitIntoTerms(stemmer.cleanStemPhrase(removeBoostFromQuery))
+						.containsAll(splitIntoTerms(queryPart)))
+				{
+					qualifiedTerms
+							.put(removeBoostFromQuery, stringMatching(queryPart, queryRule.getValue().toString()));
+				}
 			}
 		}
 		return qualifiedTerms;
@@ -119,6 +142,11 @@ public class ExplainServiceHelper
 		return terms.stream().allMatch(word -> word.split("\\s+").length == 1);
 	}
 
+	public String removeBoostFromQuery(String description)
+	{
+		return description.replaceAll("\\^\\d*\\.{0,1}\\d+", "");
+	}
+
 	public String getMatchedWord(String description)
 	{
 		Matcher matcher = REGEXR_PATTERN.matcher(description);
@@ -127,5 +155,11 @@ public class ExplainServiceHelper
 			return matcher.group(1);
 		}
 		throw new MolgenisDataAccessException("Failed to find matched word in : " + description);
+	}
+
+	private Set<String> splitIntoTerms(String description)
+	{
+		return FluentIterable.from(termSplitter.split(description)).transform(String::toLowerCase)
+				.filter(w -> !StringUtils.isEmpty(w)).toSet();
 	}
 }

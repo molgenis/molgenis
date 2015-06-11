@@ -2,6 +2,7 @@ package org.molgenis.data.semanticsearch.string;
 
 import static org.testng.Assert.assertEquals;
 
+import org.tartarus.snowball.ext.PorterStemmer;
 import org.testng.annotations.Test;
 
 public class StemmerTest
@@ -28,5 +29,10 @@ public class StemmerTest
 	{
 		assertEquals(customPorterStemmer.stem("use"), "use");
 		assertEquals(customPorterStemmer.stem("hypertension"), "hypertens");
+
+		PorterStemmer porterStemmer = new PorterStemmer();
+		porterStemmer.setCurrent("use");
+		porterStemmer.stem();
+		assertEquals(porterStemmer.getCurrent(), "us");
 	}
 }

@@ -59,16 +59,18 @@ public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainServ
 		{
 			Map<String, Double> matchedQueryRule = explainServiceHelper.recursivelyFindQuery(queryPart,
 					Arrays.asList(disMaxQueryRule));
-
-			Entry<String, Double> entry = matchedQueryRule.entrySet().stream()
-					.max(new Comparator<Entry<String, Double>>()
-					{
-						public int compare(Entry<String, Double> o1, Entry<String, Double> o2)
+			if (matchedQueryRule.size() > 0)
+			{
+				Entry<String, Double> entry = matchedQueryRule.entrySet().stream()
+						.max(new Comparator<Entry<String, Double>>()
 						{
-							return Double.compare(o1.getValue(), o2.getValue());
-						}
-					}).get();
-			matchedQueryStrings.add(entry);
+							public int compare(Entry<String, Double> o1, Entry<String, Double> o2)
+							{
+								return Double.compare(o1.getValue(), o2.getValue());
+							}
+						}).get();
+				matchedQueryStrings.add(entry);
+			}
 		}
 		return matchedQueryStrings;
 	}

@@ -45,6 +45,22 @@ public class ElasticSearchExplainServiceImplTest
 	}
 
 	@Test
+	public void testRemoveBoostFromQuery()
+	{
+		String description = "Measurement^0.5 glucose^0.25 fasting^0.5";
+		assertEquals(explainServiceHelper.removeBoostFromQuery(description), "Measurement glucose fasting");
+
+		String description2 = "Measurement^5 glucose^5.0 fasting^00.52";
+		assertEquals(explainServiceHelper.removeBoostFromQuery(description2), "Measurement glucose fasting");
+
+		String description3 = "Measurement glucose 5 fasting43";
+		assertEquals(explainServiceHelper.removeBoostFromQuery(description3), "Measurement glucose 5 fasting43");
+
+		String description4 = "glycemia^0.03125";
+		assertEquals(explainServiceHelper.removeBoostFromQuery(description4), "glycemia");
+	}
+
+	@Test
 	public void testIsSingleQuery()
 	{
 		assertTrue(explainServiceHelper.termsConsistOfSingleWord(Sets.newHashSet("test", "test2", "test3")));

@@ -33,6 +33,17 @@ public class ExplainServiceHelperTest
 	}
 
 	@Test
+	public void joinTermsTest()
+	{
+		assertEquals(explainServiceHelper.joinTerms("|high blood pressure| |medication"),
+				"high blood pressure|medication");
+
+		assertEquals(explainServiceHelper.joinTerms("|high||pressure|  |medication"), "high|pressure|medication");
+
+		assertEquals(explainServiceHelper.joinTerms("high pressure |medication"), "high pressure|medication");
+	}
+
+	@Test
 	public void getMatchedWord()
 	{
 		assertEquals(
@@ -69,9 +80,8 @@ public class ExplainServiceHelperTest
 		QueryRule finalDisMaxQueryRule = new QueryRule(Arrays.asList(shouldQueryRule));
 		finalDisMaxQueryRule.setOperator(Operator.DIS_MAX);
 
-		assertEquals(explainServiceHelper.recursivelyFindQuery("high blood", finalDisMaxQueryRule.getNestedRules())
+		assertEquals(explainServiceHelper.recursivelyFindQuery("blood high", finalDisMaxQueryRule.getNestedRules())
 				.toString(), "{high blood pressure=73.333}");
-
 	}
 
 	@Test
