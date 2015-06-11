@@ -10,10 +10,14 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.Resources;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class ResourcesImpl implements Resources
 {
+	private static final Logger LOG = LoggerFactory.getLogger(ResourcesImpl.class);
+
 	@Autowired
 	private DataService dataService;
 
@@ -33,9 +37,25 @@ public class ResourcesImpl implements Resources
 	}
 
 	@Override
-	public Iterable<Entity> findAll(String entityName, Query q)
+	public Iterable<Entity> findAll(String name, Query q)
 	{
-		return dataService.findAll(entityName, q);
+		if (resources.containsKey(name))
+		{
+			// Don't check isAvailable() yet, it's too costly.
+			try
+			{
+				return resources.get(name).findAll(q);
+			}
+			catch (Exception ex)
+			{
+				if (resources.get(name).isAvailable())
+				{
+					LOG.error("Error querying Resource {}.", name);
+					throw ex;
+				}
+				LOG.error("Resource {} is unavailable, trying dataService instead.", name);
+			}
+		}
+		return dataService.findAll(name, q);
 	}
-
 }
