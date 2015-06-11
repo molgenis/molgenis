@@ -16,6 +16,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AbstractRepositoryAnnotator;
@@ -81,10 +82,10 @@ public class CosmicServiceAnnotator extends AbstractRepositoryAnnotator implemen
 	}
 
 	@Override
-	public EntityMetaData getInputMetaData()
+	public List<AttributeMetaData> getInputMetaData()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ENSEMBLE_ID, FieldTypeEnum.STRING));
+		List<AttributeMetaData> metadata = new ArrayList<>();
+		metadata.add(new DefaultAttributeMetaData(ENSEMBLE_ID, FieldTypeEnum.STRING));
 		return metadata;
 	}
 
@@ -181,17 +182,17 @@ public class CosmicServiceAnnotator extends AbstractRepositoryAnnotator implemen
 	}
 
 	@Override
-	public EntityMetaData getOutputMetaData()
+	public List<AttributeMetaData> getOutputMetaData()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ID, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(FEATURE_TYPE, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ALT_ALLELES, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(END, FieldTypeEnum.INT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(SEQ_REGION_NAME, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CONSEQUENCE_TYPE, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(STRAND, FieldTypeEnum.INT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(START, FieldTypeEnum.INT));
+		List<AttributeMetaData> metadata = new ArrayList<>();
+		metadata.add(new DefaultAttributeMetaData(ID, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(FEATURE_TYPE, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(ALT_ALLELES, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(END, FieldTypeEnum.INT));
+		metadata.add(new DefaultAttributeMetaData(SEQ_REGION_NAME, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(CONSEQUENCE_TYPE, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(STRAND, FieldTypeEnum.INT));
+		metadata.add(new DefaultAttributeMetaData(START, FieldTypeEnum.INT));
 		return metadata;
 	}
 

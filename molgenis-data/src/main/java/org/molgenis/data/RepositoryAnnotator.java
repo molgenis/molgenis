@@ -1,14 +1,17 @@
 package org.molgenis.data;
 
 import java.util.Iterator;
+import java.util.List;
 
-public interface RepositoryAnnotator {
+public interface RepositoryAnnotator
+{
+	Iterator<Entity> annotate(Iterator<Entity> source);
 
-	Iterator<Entity> annotate (Iterator<Entity> source);  
-	EntityMetaData getOutputMetaData ();
-	EntityMetaData getInputMetaData ();
-	Boolean canAnnotate (EntityMetaData sourceMetaData);
+	List<AttributeMetaData> getOutputMetaData();
+
+	List<AttributeMetaData> getInputMetaData();
+
+	Boolean canAnnotate(EntityMetaData sourceMetaData);
+
 	String getName();
-	
-	
 }

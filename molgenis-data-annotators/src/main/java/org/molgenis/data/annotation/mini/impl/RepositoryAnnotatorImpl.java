@@ -1,9 +1,11 @@
 package org.molgenis.data.annotation.mini.impl;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.elasticsearch.common.collect.Lists;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AbstractRepositoryAnnotator;
@@ -22,18 +24,17 @@ public class RepositoryAnnotatorImpl extends AbstractRepositoryAnnotator
 	}
 
 	@Override
-	public EntityMetaData getOutputMetaData()
+	public List<AttributeMetaData> getOutputMetaData()
 	{
-		// DefaultEntityMetaData result = new DefaultEntityMetaData(entityAnnotator.getInfo().getCode());
-		// result.addAttributeMetaData(entityAnnotator.getAnnotationAttributeMetaData());
-		// return result;
-		return metaData;
+		List<AttributeMetaData> result = new ArrayList<>();
+		result.add(entityAnnotator.getAnnotationAttributeMetaData());
+		return result;
 	}
 
 	@Override
-	public EntityMetaData getInputMetaData()
+	public List<AttributeMetaData> getInputMetaData()
 	{
-		return entityAnnotator.getRequiredEntityMetaData();
+		return entityAnnotator.getRequiredAttributes();
 	}
 
 	@Override

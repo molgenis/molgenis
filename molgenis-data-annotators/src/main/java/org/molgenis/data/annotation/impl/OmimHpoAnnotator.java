@@ -12,6 +12,7 @@ import java.util.Set;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
@@ -368,31 +369,31 @@ public class OmimHpoAnnotator extends LocusAnnotator
 	}
 
 	@Override
-	public EntityMetaData getOutputMetaData()
+	public List<AttributeMetaData> getOutputMetaData()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_CAUSAL_IDENTIFIER,
+		List<AttributeMetaData> metadata = new ArrayList<>();
+		metadata.add(new DefaultAttributeMetaData(OMIM_CAUSAL_IDENTIFIER,
 				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_DISORDERS,
+		metadata.add(new DefaultAttributeMetaData(OMIM_DISORDERS,
 				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_IDENTIFIERS,
+		metadata.add(new DefaultAttributeMetaData(OMIM_IDENTIFIERS,
 				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_TYPE, MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_HGNC_IDENTIFIERS,
+		metadata.add(new DefaultAttributeMetaData(OMIM_TYPE, MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(OMIM_HGNC_IDENTIFIERS,
 				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_CYTOGENIC_LOCATION,
+		metadata.add(new DefaultAttributeMetaData(OMIM_CYTOGENIC_LOCATION,
 				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_ENTRY, MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_IDENTIFIERS,
+		metadata.add(new DefaultAttributeMetaData(OMIM_ENTRY, MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(HPO_IDENTIFIERS,
 				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_GENE_NAME, MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_DESCRIPTIONS,
+		metadata.add(new DefaultAttributeMetaData(HPO_GENE_NAME, MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(HPO_DESCRIPTIONS,
 				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_DISEASE_DATABASE,
+		metadata.add(new DefaultAttributeMetaData(HPO_DISEASE_DATABASE,
 				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_DISEASE_DATABASE_ENTRY,
+		metadata.add(new DefaultAttributeMetaData(HPO_DISEASE_DATABASE_ENTRY,
 				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_ENTREZ_ID, MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(HPO_ENTREZ_ID, MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		return metadata;
 	}
 

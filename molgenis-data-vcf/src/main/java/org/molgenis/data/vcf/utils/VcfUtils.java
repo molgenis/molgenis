@@ -152,7 +152,7 @@ public class VcfUtils
 	 * @throws Exception
 	 */
 	public static boolean checkPreviouslyAnnotatedAndAddMetadata(File inputVcfFile, PrintWriter outputVCFWriter,
-			List<String> infoFields, String checkAnnotatedBeforeValue) throws FileFormatException,
+			List<AttributeMetaData> infoFields, String checkAnnotatedBeforeValue) throws FileFormatException,
 			FileNotFoundException
 	{
 		boolean annotatedBefore = false;
@@ -199,9 +199,9 @@ public class VcfUtils
 			// print INFO lines for stuff to be annotated
 			if (!annotatedBefore)
 			{
-				for (String infoField : infoFields)
+				for (AttributeMetaData infoAttributeMetaData : infoFields)
 				{
-					outputVCFWriter.println(infoField);
+					outputVCFWriter.println(attributeMetaDataToInfoField(infoAttributeMetaData));
 				}
 			}
 
@@ -217,6 +217,12 @@ public class VcfUtils
 
 		inputVcfFileScanner.close();
 		return annotatedBefore;
+	}
+
+	private static String attributeMetaDataToInfoField(AttributeMetaData infoAttributeMetaData) {
+		StringBuilder sb = new StringBuilder();
+		//TODO: implement
+		return sb.toString();
 	}
 
 	/**

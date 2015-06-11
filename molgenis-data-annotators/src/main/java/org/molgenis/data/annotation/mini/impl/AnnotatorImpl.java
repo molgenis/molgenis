@@ -1,5 +1,6 @@
 package org.molgenis.data.annotation.mini.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.elasticsearch.common.collect.Lists;
@@ -69,11 +70,11 @@ public class AnnotatorImpl implements EntityAnnotator
 	}
 
 	@Override
-	public EntityMetaData getRequiredEntityMetaData()
+	public List<AttributeMetaData> getRequiredAttributes()
 	{
-		DefaultEntityMetaData sourceMetaData = new DefaultEntityMetaData(info.getCode());
-		sourceMetaData.addAllAttributeMetaData(queryCreator.getRequiredAttributes());
-		sourceMetaData.addAllAttributeMetaData(resultFilter.getRequiredAttributes());
+		List<AttributeMetaData> sourceMetaData = new ArrayList<>();
+		sourceMetaData.addAll(queryCreator.getRequiredAttributes());
+		sourceMetaData.addAll(resultFilter.getRequiredAttributes());
 		return sourceMetaData;
 	}
 
