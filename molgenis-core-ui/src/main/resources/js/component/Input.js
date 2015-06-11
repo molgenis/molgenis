@@ -2,7 +2,7 @@
 (function(_, React, molgenis) {
 	"use strict";
 	
-	var input = React.DOM.input, div = React.DOM.div;
+	var input = React.DOM.input, div = React.DOM.div, span = React.DOM.span;
 	
 	/**
 	 * @memberOf component
@@ -42,7 +42,7 @@
 			
 			var inputProps = {
 				type: props.type,
-				className: this._isRadioOrCheckbox() ? undefined : 'form-control',
+				className: this._isRadioOrCheckbox() || this._isFile() ? undefined : 'form-control',
 				id: props.id,
 				name: props.name,
 				placeholder: props.placeholder,
@@ -57,7 +57,7 @@
 				checked: this._isRadioOrCheckbox() ? this.state.checked : undefined,
 				onChange: this._handleChange,
 				onBlur: this._handleBlur,
-				ref: this.props.focus ? 'input' : undefined
+				ref: this.props.focus || this._isFile() ? 'input' : undefined
 			};
 			
 			if(props.readOnly && this._isRadioOrCheckbox()) {
@@ -82,7 +82,43 @@
 				 	return input(inputProps);
 				 }
 			} else {
-				return input(inputProps);
+				if(this._isFile()) {
+					// see http://www.abeautifulsite.net/whipping-file-inputs-into-shape-with-bootstrap-3/
+					return (
+						div({className: 'input-group'},
+							span({className: 'input-group-btn'},
+								span({className: 'btn btn-primary', style: {position: 'relative', overflow: 'hidden'}}, 'Browse...',
+									input(_.extend(inputProps, {
+										onChange: this._handleFileBrowseClick,
+										style: {
+											position: 'absolute',
+										    top: 0,
+										    right: 0,
+										    minWidth: '100%',
+										    minHeight: '100%',
+										    fontSize: 100,
+										    textAlign: 'right',
+										    opacity: 0,
+										    outline: 'none',
+										    background: 'white',
+										    cursor: 'inherit',
+										    display: 'block'
+										}
+									}))
+								)
+							),
+ 							input({
+								type : 'text',
+								className : 'form-control',
+								ref : 'fileTextInput',
+								readOnly : true,
+								style : {backgroundColor: 'white !important', cursor: 'text !important'}
+							})
+						)
+					);
+				} else {
+					return input(inputProps);
+				}
 			}
 		},
 		componentDidUpdate: function() {
@@ -129,8 +165,20 @@
 			}
 			callback(valueEvent);
 		},
+		_handleFileBrowseClick: function() {
+			var input = $(this.refs.input.getDOMNode()),
+				value = input.val(),
+	        	label = value.replace(/\\/g, '/').replace(/.*\//, '');
+	        $(this.refs.fileTextInput.getDOMNode()).val(label);
+	        
+	        this.setState({value: value});
+	        this._handleChangeOrBlur(value, undefined, this.props.onValueChange);
+		},
 		_isRadioOrCheckbox: function() {
 			return this.props.type === 'radio' || this.props.type === 'checkbox';
+		},
+		_isFile: function() {
+			return this.props.type === 'file';
 		},
 		_emptyValueToNull: function(value) {
 			return value !== '' ? value : null;
