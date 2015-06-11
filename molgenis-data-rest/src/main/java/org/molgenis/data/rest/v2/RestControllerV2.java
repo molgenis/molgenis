@@ -27,6 +27,7 @@ import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.rest.Href;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.file.FileMeta;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
@@ -296,6 +297,11 @@ class RestControllerV2
 		EntityMetaData refEntityMeta = attr.getRefEntity();
 		String idAttrName = refEntityMeta.getIdAttribute().getName();
 		String labelAttrName = refEntityMeta.getLabelAttribute().getName();
-		return new AttributeFilter().add(idAttrName).add(labelAttrName);
+		AttributeFilter attrFilter = new AttributeFilter().add(idAttrName).add(labelAttrName);
+		if (attr.getDataType().getEnumType() == FieldTypeEnum.FILE)
+		{
+			attrFilter.add(FileMeta.URL);
+		}
+		return attrFilter;
 	}
 }

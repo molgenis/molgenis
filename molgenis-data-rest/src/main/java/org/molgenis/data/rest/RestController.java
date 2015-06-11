@@ -5,6 +5,7 @@ import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL_MREF;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DATE;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DATE_TIME;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.FILE;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
 import static org.molgenis.data.rest.RestController.BASE_URI;
@@ -697,6 +698,48 @@ public class RestController
 	 * @param request
 	 * @throws UnknownEntityException
 	 */
+	@RequestMapping(value = "/{entityName}/{id}", method = POST, params = "_method=PUT", headers = "Content-Type=multipart/form-data")
+	@ResponseStatus(NO_CONTENT)
+	public void updateFromFormPostMultiPart(@PathVariable("entityName") String entityName,
+			@PathVariable("id") Object id, MultipartHttpServletRequest request)
+	{
+		Object typedId = dataService.getRepository(entityName).getEntityMetaData().getIdAttribute().getDataType()
+				.convert(id);
+
+		Map<String, Object> paramMap = new HashMap<String, Object>();
+		for (String param : request.getParameterMap().keySet())
+		{
+			String[] values = request.getParameterValues(param);
+			String value = values != null ? StringUtils.join(values, ',') : null;
+			paramMap.put(param, value);
+		}
+
+		// add files to param map
+		for (Entry<String, List<MultipartFile>> entry : request.getMultiFileMap().entrySet())
+		{
+			String param = entry.getKey();
+			List<MultipartFile> files = entry.getValue();
+			if (files != null && files.size() > 1)
+			{
+				throw new IllegalArgumentException("Multiple file input not supported");
+			}
+			paramMap.put(param, files != null && !files.isEmpty() ? files.get(0) : null);
+		}
+		updateInternal(entityName, typedId, paramMap);
+	}
+
+	/**
+	 * Updates an entity from a html form post.
+	 * 
+	 * Tunnels PUT through POST
+	 * 
+	 * Example url: /api/v1/person/99?_method=PUT
+	 * 
+	 * @param entityName
+	 * @param id
+	 * @param request
+	 * @throws UnknownEntityException
+	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = POST, params = "_method=PUT", headers = "Content-Type=application/x-www-form-urlencoded")
 	@ResponseStatus(NO_CONTENT)
 	public void updateFromFormPost(@PathVariable("entityName") String entityName, @PathVariable("id") Object id,
@@ -1065,14 +1108,13 @@ public class RestController
 					throw new MolgenisDataException(e);
 				}
 
-				;
 				FileMeta fileEntity = new FileMeta(dataService);
 				fileEntity.setId(id);
 				fileEntity.setFilename(multipartFile.getOriginalFilename());
 				fileEntity.setContentType(multipartFile.getContentType());
 				fileEntity.setSize(multipartFile.getSize());
 				fileEntity.setUrl(ServletUriComponentsBuilder.fromCurrentRequest()
-						.replacePath(FileDownloadController.URI + "/" + id).build().toUriString());
+						.replacePath(FileDownloadController.URI + "/" + id).replaceQuery(null).build().toUriString());
 				dataService.add(FileMeta.ENTITY_NAME, fileEntity);
 
 				return fileEntity;
@@ -1292,12 +1334,12 @@ public class RestController
 											.format(date) : null);
 				}
 				else if (attrType != XREF && attrType != CATEGORICAL && attrType != MREF
-						&& attrType != CATEGORICAL_MREF)
+						&& attrType != CATEGORICAL_MREF && attrType != FILE)
 				{
 					entityMap.put(attrName, entity.get(attr.getName()));
 				}
-				else if ((attrType == XREF || attrType == CATEGORICAL) && attributeExpandsSet != null
-						&& attributeExpandsSet.containsKey(attrName.toLowerCase()))
+				else if ((attrType == XREF || attrType == CATEGORICAL || attrType == FILE)
+						&& attributeExpandsSet != null && attributeExpandsSet.containsKey(attrName.toLowerCase()))
 				{
 					Entity refEntity = entity.getEntity(attr.getName());
 					if (refEntity != null)
@@ -1333,7 +1375,8 @@ public class RestController
 					entityMap.put(attrName, ecr);
 				}
 				else if ((attrType == XREF && entity.get(attr.getName()) != null)
-						|| (attrType == CATEGORICAL && entity.get(attr.getName()) != null) || attrType == MREF
+						|| (attrType == CATEGORICAL && entity.get(attr.getName()) != null)
+						|| (attrType == FILE && entity.get(attr.getName()) != null) || attrType == MREF
 						|| attrType == CATEGORICAL_MREF)
 				{
 					// Add href to ref field

@@ -110,9 +110,10 @@
  							input({
 								type : 'text',
 								className : 'form-control',
-								ref : 'fileTextInput',
 								readOnly : true,
-								style : {backgroundColor: 'white !important', cursor: 'text !important'}
+								style : {backgroundColor: 'white !important', cursor: 'text !important'},
+ 								value: this.state.value ? this.state.value.filename : null,
+ 								ref : 'fileTextInput'
 							})
 						)
 					);
@@ -168,11 +169,14 @@
 		_handleFileBrowseClick: function() {
 			var input = $(this.refs.input.getDOMNode()),
 				value = input.val(),
-	        	label = value.replace(/\\/g, '/').replace(/.*\//, '');
+				label = this._toFileLabel(value);
 	        $(this.refs.fileTextInput.getDOMNode()).val(label);
 	        
 	        this.setState({value: value});
 	        this._handleChangeOrBlur(value, undefined, this.props.onValueChange);
+		},
+		_toFileLabel: function(value) {
+			return value.replace(/\\/g, '/').replace(/.*\//, '');
 		},
 		_isRadioOrCheckbox: function() {
 			return this.props.type === 'radio' || this.props.type === 'checkbox';

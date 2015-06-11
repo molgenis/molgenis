@@ -590,8 +590,22 @@
 						break;
 					case 'CATEGORICAL':
 					case 'XREF':
-					case 'FILE':
 						CellContent = a({href: '#', onClick: this._toggleModal.bind(null, true)}, span(null, value[attr.refEntity.labelAttribute]));
+						break;
+					case 'FILE':
+						// FIXME add download btn
+						CellContent = (
+							div(null,
+								a({href: '#', onClick: this._toggleModal.bind(null, true)}, span(null, value[attr.refEntity.labelAttribute])),
+								' ',
+								a({href: value['url']},
+									molgenis.ui.Icon({
+										name: 'download',
+										style: {cursor: 'pointer'}
+									})
+								)
+							)
+						);
 						break;
 					case 'CATEGORICAL_MREF':
 					case 'MREF':
@@ -634,6 +648,9 @@
 			this.setState({
 				showRef : show
 			});
+		},
+		_handleFileDownloadClickfunction: function(id) {
+			
 		}
 	});
 	var TableCellFactory = React.createFactory(TableCell);

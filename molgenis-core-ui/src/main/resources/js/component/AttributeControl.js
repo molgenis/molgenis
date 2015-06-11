@@ -201,7 +201,12 @@
 		},
 		_createFileControl: function(controlProps) {
 			return molgenis.ui.Input(_.extend({}, controlProps, {
-				type : 'file'
+				type : 'file',
+				value: this.props.value ? this.props.value.filename : null,
+				onValueChange: function(event) {
+					event.value = _.extend({}, this.state.attr.refEntity, {filename: event.value});
+					this._handleValueChange(event);
+				}.bind(this)
 			}));
 		},
 		_createStringControl: function(controlProps, type, placeholder) {
