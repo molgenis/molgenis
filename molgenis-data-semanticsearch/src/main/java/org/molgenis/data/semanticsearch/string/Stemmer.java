@@ -89,6 +89,6 @@ public class Stemmer
 
 	public String replaceIllegalCharacter(String string)
 	{
-		return string.replaceAll(ILLEGAL_REGEX_PATTERN, " ").replaceAll(" +", " ").trim();
+		return string.replaceAll(ILLEGAL_REGEX_PATTERN, " ").replaceAll(" +", " ").trim().toLowerCase();
 	}
 }

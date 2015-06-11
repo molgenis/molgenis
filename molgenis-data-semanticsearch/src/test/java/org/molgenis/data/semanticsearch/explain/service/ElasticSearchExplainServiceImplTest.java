@@ -2,14 +2,11 @@ package org.molgenis.data.semanticsearch.explain.service;
 
 import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
 
 import org.apache.lucene.search.Explanation;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.common.collect.Sets;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
@@ -58,13 +55,6 @@ public class ElasticSearchExplainServiceImplTest
 
 		String description4 = "glycemia^0.03125";
 		assertEquals(explainServiceHelper.removeBoostFromQuery(description4), "glycemia");
-	}
-
-	@Test
-	public void testIsSingleQuery()
-	{
-		assertTrue(explainServiceHelper.termsConsistOfSingleWord(Sets.newHashSet("test", "test2", "test3")));
-		assertFalse(explainServiceHelper.termsConsistOfSingleWord(Sets.newHashSet("test", "test2 test3")));
 	}
 
 	@Test

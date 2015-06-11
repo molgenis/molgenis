@@ -126,20 +126,14 @@ public class ExplainServiceHelper
 			else
 			{
 				String removeBoostFromQuery = removeBoostFromQuery(queryRule.getValue().toString());
-				if (splitIntoTerms(stemmer.cleanStemPhrase(removeBoostFromQuery))
-						.containsAll(splitIntoTerms(queryPart)))
+				String cleanStemPhrase = stemmer.cleanStemPhrase(removeBoostFromQuery);
+				if (splitIntoTerms(cleanStemPhrase).containsAll(splitIntoTerms(queryPart)))
 				{
-					qualifiedTerms
-							.put(removeBoostFromQuery, stringMatching(queryPart, queryRule.getValue().toString()));
+					qualifiedTerms.put(removeBoostFromQuery, stringMatching(queryPart, cleanStemPhrase));
 				}
 			}
 		}
 		return qualifiedTerms;
-	}
-
-	public boolean termsConsistOfSingleWord(Set<String> terms)
-	{
-		return terms.stream().allMatch(word -> word.split("\\s+").length == 1);
 	}
 
 	public String removeBoostFromQuery(String description)

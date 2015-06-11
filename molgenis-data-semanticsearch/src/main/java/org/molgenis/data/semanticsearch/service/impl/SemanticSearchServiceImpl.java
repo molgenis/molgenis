@@ -5,7 +5,6 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -26,6 +25,7 @@ import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaUtils;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.semanticsearch.explain.service.ElasticSearchExplainService;
 import org.molgenis.data.semanticsearch.semantic.Hit;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
@@ -141,7 +141,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		Explanation explanation = elasticSearchExplainService.explain(new QueryImpl(finalQueryRules),
 				dataService.getEntityMetaData(AttributeMetaDataMetaData.ENTITY_NAME), attributeId);
 
-		Set<Entry<String, Double>> reverseSearchQueryStrings = elasticSearchExplainService.reverseSearchQueryStrings(
+		Set<ExplainedQueryString> reverseSearchQueryStrings = elasticSearchExplainService.reverseSearchQueryStrings(
 				disMaxQueryRule, explanation);
 
 		return new ExplainedAttributeMetaData(sourceEntityMetaData.getAttribute(attributeName),

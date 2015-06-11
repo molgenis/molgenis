@@ -1,14 +1,11 @@
 package org.molgenis.data.semanticsearch.explain.service;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Arrays;
 
 import org.apache.lucene.search.Explanation;
-import org.elasticsearch.common.collect.Sets;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
@@ -82,13 +79,5 @@ public class ExplainServiceHelperTest
 
 		assertEquals(explainServiceHelper.recursivelyFindQuery("blood high", finalDisMaxQueryRule.getNestedRules())
 				.toString(), "{high blood pressure=73.333}");
-	}
-
-	@Test
-	public void termsConsistOfSingleWord()
-	{
-		assertTrue(explainServiceHelper.termsConsistOfSingleWord(Sets.newHashSet("blood", "high")));
-		assertTrue(explainServiceHelper.termsConsistOfSingleWord(Sets.newHashSet("blood", "high_pressure")));
-		assertFalse(explainServiceHelper.termsConsistOfSingleWord(Sets.newHashSet("blood", "high pressure")));
 	}
 }

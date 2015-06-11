@@ -18,6 +18,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.elasticsearch.request.QueryGenerator;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainService
@@ -50,11 +51,11 @@ public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainServ
 		return null;
 	}
 
-	public Set<Entry<String, Double>> reverseSearchQueryStrings(QueryRule disMaxQueryRule, Explanation explanation)
+	public Set<ExplainedQueryString> reverseSearchQueryStrings(QueryRule disMaxQueryRule, Explanation explanation)
 	{
-		Set<Entry<String, Double>> matchedQueryStrings = new LinkedHashSet<Entry<String, Double>>();
-		String discoverMatchedQueries = explainServiceHelper.discoverMatchedQueries(explanation);
+		Set<ExplainedQueryString> matchedQueryStrings = new LinkedHashSet<ExplainedQueryString>();
 
+		String discoverMatchedQueries = explainServiceHelper.discoverMatchedQueries(explanation);
 		for (String queryPart : discoverMatchedQueries.split("\\|"))
 		{
 			Map<String, Double> matchedQueryRule = explainServiceHelper.recursivelyFindQuery(queryPart,
@@ -69,7 +70,8 @@ public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainServ
 								return Double.compare(o1.getValue(), o2.getValue());
 							}
 						}).get();
-				matchedQueryStrings.add(entry);
+
+				matchedQueryStrings.add(new ExplainedQueryString(queryPart, entry.getKey(), entry.getValue()));
 			}
 		}
 		return matchedQueryStrings;
