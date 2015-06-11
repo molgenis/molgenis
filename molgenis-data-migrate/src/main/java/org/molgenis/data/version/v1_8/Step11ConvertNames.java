@@ -1,5 +1,6 @@
 package org.molgenis.data.version.v1_8;
 
+import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,7 @@ import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
 import com.google.common.collect.Sets;
 
@@ -40,7 +42,16 @@ public class Step11ConvertNames extends MolgenisUpgrade
 	public Step11ConvertNames(DataSource dataSource)
 	{
 		super(10, 11);
-		this.template = new JdbcTemplate(dataSource);
+
+		try
+		{
+			// InnoDB only allows setting foreign_key_checks=0 for a single session, so use a single connection source
+			this.template = new JdbcTemplate(new SingleConnectionDataSource(dataSource.getConnection(), true));
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
 		this.dataSource = dataSource;
 	}
 
@@ -71,6 +82,110 @@ public class Step11ConvertNames extends MolgenisUpgrade
 		LOG.info("Validating JPA entities...");
 		checkJPAentities();
 
+		setForeignKeyConstraintCheck(false);
+
+		LOG.info("Validating package names...");
+		checkAndUpdatePackages(null, null);
+
+		setForeignKeyConstraintCheck(true);
+
+		try
+		{
+			// manually close the single datasource connection
+			template.getDataSource().getConnection().close();
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+
+		// TODO: remove
+		throw new RuntimeException("EXIT");
+	}
+
+	/**
+	 * Recursively checks the names of packages and changes the names when they are not valid.
+	 */
+	public void checkAndUpdatePackages(String parent, String parentFix)
+	{
+		List<Map<String, Object>> packages = template.queryForList(getPackagesWithParentSql(parent));
+		if (packages.isEmpty()) return;
+
+		// first add packages in this package to the scope
+		HashSet<String> scope = Sets.newHashSet();
+		packages.forEach(pack -> scope.add(pack.get("name").toString()));
+
+		// iterate over the packages and check the names
+		for (Map<String, Object> pack : packages)
+		{
+			String name = pack.get("name").toString();
+			String nameFix = fixName(name);
+
+			String fullName = pack.get("fullName").toString();
+
+			String fullNameFix = fullName;
+
+			if (parentFix != null) fullNameFix = String.format("%s_%s", parentFix, nameFix);
+
+			if (!name.equals(nameFix))
+			{
+				// name wasn't valid, make sure the new one is unique for this scope
+				if (scope.contains(nameFix))
+				{
+					nameFix = makeNameUnique(nameFix, scope);
+				}
+
+				LOG.info(String.format("In Package [%s]: package name [%s] is not valid. Changing to [%s]...", parent,
+						name, nameFix));
+
+				// update the scope with the new name
+				scope.remove(name);
+				scope.add(nameFix);
+
+				// change the end of fullNameFix with the new package name
+				fullNameFix = fullNameFix.replaceAll(name + "$", nameFix);
+
+				// update fullname, name and parent in database
+				template.execute(getUpdatePackageNamesSql(fullName, fullNameFix, nameFix, parentFix));
+
+				checkAndUpdatePackages(fullName, fullNameFix);
+			}
+			else
+			{
+				// nothing chagned in this name, only update the parent
+				template.execute(getUpdatePackageNamesSql(fullName, fullNameFix, nameFix, parentFix));
+				checkAndUpdatePackages(fullName, fullNameFix);
+			}
+		}
+	}
+
+	public String getPackagesWithParentSql(String parentFullName)
+	{
+		String query = (parentFullName == null) ? "IS NULL" : String.format("= '%s'", parentFullName);
+
+		return String.format("SELECT fullName, name, parent FROM packages WHERE parent %s;", query);
+	}
+
+	public String getUpdatePackageParentNameSql(String parent, String fullName)
+	{
+		parent = (parent == null) ? "NULL" : String.format("'%s'", parent);
+		return String.format("UPDATE packages SET parent=%s WHERE fullName='%s';", parent, fullName);
+	}
+
+	public String getUpdatePackageNamesSql(String fullName, String fullNameFix, String nameFix, String parent)
+	{
+		parent = (parent == null) ? "NULL" : String.format("'%s'", parent);
+		return String.format("UPDATE packages SET fullName='%s', name='%s', parent=%s WHERE fullName='%s';",
+				fullNameFix, nameFix, parent, fullName);
+	}
+
+	/**
+	 * Turns the MySQL foreign key check on or off.
+	 */
+	public void setForeignKeyConstraintCheck(boolean doCheck)
+	{
+		int check = (doCheck == true) ? 1 : 0;
+		template.execute(String.format("SET FOREIGN_KEY_CHECKS = %d;", check));
 	}
 
 	/**
@@ -86,7 +201,7 @@ public class Step11ConvertNames extends MolgenisUpgrade
 		{
 			// check name of this JPA entity
 			String entityName = jpaEntity.get("fullName").toString();
-			System.out.println("name : " + entityName);
+
 			if (!entityName.equals(fixName(entityName)))
 			{
 				throw new RuntimeException(
@@ -102,7 +217,7 @@ public class Step11ConvertNames extends MolgenisUpgrade
 			for (Map<String, Object> attribute : jpaEntityAttributes)
 			{
 				String attributeName = attribute.get("name").toString();
-				System.out.println("attr : " + attributeName);
+
 				if (!attributeName.equals(fixName(attributeName)))
 				{
 					throw new RuntimeException(
@@ -138,6 +253,7 @@ public class Step11ConvertNames extends MolgenisUpgrade
 		if (name.length() > MAX_NAME_LENGTH)
 		{
 			name = name.substring(0, MAX_NAME_LENGTH);
+			// TODO: keyword check
 		}
 
 		return name;
@@ -169,9 +285,9 @@ public class Step11ConvertNames extends MolgenisUpgrade
 		return newName;
 	}
 
-	public String makeNameUnique(String name, HashSet<String> source)
+	public String makeNameUnique(String name, HashSet<String> scope)
 	{
-		return makeNameUnique(name, 1, source);
+		return makeNameUnique(name, 1, scope);
 	}
 
 	private String fetchAttributesForEntitySql(String fullyQualifiedEntityName)
@@ -236,6 +352,9 @@ public class Step11ConvertNames extends MolgenisUpgrade
 	public static final Set<String> MOLGENIS_KEYWORDS = Sets.newHashSet("login", "logout", "csv", "entities",
 			"attributes");
 
+	// TODO: REMOVE!!!!
+	public static final Set<String> TEST = Sets.newHashSet("molgenis");
+
 	public static Set<String> KEYWORDS = Sets.newHashSet();
 	static
 	{
@@ -243,5 +362,6 @@ public class Step11ConvertNames extends MolgenisUpgrade
 		KEYWORDS.addAll(JAVASCRIPT_KEYWORDS);
 		KEYWORDS.addAll(MOLGENIS_KEYWORDS);
 		KEYWORDS.addAll(MYSQL_KEYWORDS);
+		KEYWORDS.addAll(TEST);
 	}
 }

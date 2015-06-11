@@ -68,6 +68,6 @@ public class Step11ConvertNamesTest
 		scope.add("ThisAttributeIsWayTooLongAn533");
 		assertEquals(converter.makeNameUnique("ThisAttributeIsWayTooLongAndSh", 533, scope),
 				"ThisAttributeIsWayTooLongAn534");
-
 	}
+
 }
