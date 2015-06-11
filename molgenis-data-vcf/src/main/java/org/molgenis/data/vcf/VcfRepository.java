@@ -10,7 +10,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -58,16 +57,27 @@ public class VcfRepository extends AbstractRepository
 	public static final String INFO = "INFO";
 	public static final String SAMPLES = "SAMPLES_ENTITIES";
 	public static final String NAME = "NAME";
-    public static final String PREFIX = "##";
+	public static final String PREFIX = "##";
 
-    public static final AttributeMetaData CHROM_META = new DefaultAttributeMetaData(CHROM,MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false).setDescription("The chromosome on which the variant is observed");
-    public static final AttributeMetaData ALT_META = new DefaultAttributeMetaData(ALT,MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false).setDescription("The alternative allele observed");
-    public static final AttributeMetaData POS_META = new DefaultAttributeMetaData(POS,MolgenisFieldTypes.FieldTypeEnum.LONG).setAggregateable(true).setNillable(false).setDescription("The position on the chromosome which the variant is observed");
-    public static final AttributeMetaData REF_META = new DefaultAttributeMetaData(REF,MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false).setDescription("The reference allele");
-    public static final AttributeMetaData FILTER_META = new DefaultAttributeMetaData(FILTER,MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(true);
-    public static final AttributeMetaData QUAL_META = new DefaultAttributeMetaData(QUAL,MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(true);
-    public static final AttributeMetaData ID_META = new DefaultAttributeMetaData(ID,MolgenisFieldTypes.FieldTypeEnum.STRING).setNillable(true);
-    private final File file;
+	public static final AttributeMetaData CHROM_META = new DefaultAttributeMetaData(CHROM,
+			MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false)
+			.setDescription("The chromosome on which the variant is observed");
+	public static final AttributeMetaData ALT_META = new DefaultAttributeMetaData(ALT,
+			MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false)
+			.setDescription("The alternative allele observed");
+	public static final AttributeMetaData POS_META = new DefaultAttributeMetaData(POS,
+			MolgenisFieldTypes.FieldTypeEnum.LONG).setAggregateable(true).setNillable(false)
+			.setDescription("The position on the chromosome which the variant is observed");
+	public static final AttributeMetaData REF_META = new DefaultAttributeMetaData(REF,
+			MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false)
+			.setDescription("The reference allele");
+	public static final AttributeMetaData FILTER_META = new DefaultAttributeMetaData(FILTER,
+			MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(true);
+	public static final AttributeMetaData QUAL_META = new DefaultAttributeMetaData(QUAL,
+			MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(true);
+	public static final AttributeMetaData ID_META = new DefaultAttributeMetaData(ID,
+			MolgenisFieldTypes.FieldTypeEnum.STRING).setNillable(true);
+	private final File file;
 	private final String entityName;
 
 	private DefaultEntityMetaData entityMetaData;
@@ -149,6 +159,10 @@ public class VcfRepository extends AbstractRepository
 						{
 							// TODO support list of primitives datatype
 							val = StringUtils.join((List<?>) val, ',');
+						}
+						if (val instanceof Float && Float.isNaN((Float) val))
+						{
+							val = null;
 						}
 						entity.set(getInfoPrefix() + vcfInfo.getKey(), val);
 					}
@@ -234,8 +248,8 @@ public class VcfRepository extends AbstractRepository
 				List<AttributeMetaData> metadataInfoField = new ArrayList<AttributeMetaData>();
 				for (VcfMetaInfo info : vcfMeta.getInfoMeta())
 				{
-					DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData(getInfoPrefix() + info.getId(),
-							vcfReaderFormatToMolgenisType(info)).setAggregateable(true);
+					DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData(getInfoPrefix()
+							+ info.getId(), vcfReaderFormatToMolgenisType(info)).setAggregateable(true);
 					attributeMetaData.setDescription(info.getDescription());
 					metadataInfoField.add(attributeMetaData);
 				}
@@ -244,7 +258,8 @@ public class VcfRepository extends AbstractRepository
 				if (hasFormatMetaData)
 				{
 					DefaultAttributeMetaData samplesAttributeMeta = new DefaultAttributeMetaData(SAMPLES,
-							MolgenisFieldTypes.FieldTypeEnum.MREF).setRefEntity(sampleEntityMetaData).setLabel("SAMPLES");
+							MolgenisFieldTypes.FieldTypeEnum.MREF).setRefEntity(sampleEntityMetaData).setLabel(
+							"SAMPLES");
 					entityMetaData.addAttributeMetaData(samplesAttributeMeta);
 				}
 				entityMetaData.setIdAttribute(INTERNAL_ID);
@@ -259,9 +274,10 @@ public class VcfRepository extends AbstractRepository
 	}
 
 	/**
-	 * Prefix to make INFO column names safe-ish. For example, 'Samples' is sometimes used as an INFO field
-	 * and clashes with the 'Samples' key used by Genotype-IO to store sample data in memory.
-	 * By prefixing a tag we hope to create unique INFO field names that do not clash.
+	 * Prefix to make INFO column names safe-ish. For example, 'Samples' is sometimes used as an INFO field and clashes
+	 * with the 'Samples' key used by Genotype-IO to store sample data in memory. By prefixing a tag we hope to create
+	 * unique INFO field names that do not clash.
+	 * 
 	 * @return
 	 */
 	public static String getInfoPrefix()
