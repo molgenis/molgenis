@@ -13,7 +13,9 @@ import org.molgenis.data.annotation.resources.Resources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ResourcesImpl implements Resources
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ResourcesImpl.class);
