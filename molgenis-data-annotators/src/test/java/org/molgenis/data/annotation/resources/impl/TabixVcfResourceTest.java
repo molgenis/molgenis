@@ -56,7 +56,7 @@ public class TabixVcfResourceTest
 	{
 		when(molgenisSettings.getProperty("cadd_key", null)).thenReturn(
 				"src/test/resources/gonl.chr1.snps_indels.r5.vcf.gz");
-		Query query = QueryImpl.EQ("#CHROM", "1").and().eq("POS", "126108");
+		Query query = QueryImpl.EQ("#CHROM", "1").and().eq("POS", 126108);
 
 		System.out.println(resource.findAll(query));
 	}
