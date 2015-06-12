@@ -121,7 +121,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		if (!nonSelfReferencingEntities.isEmpty())
 		{
 			List<String> entityNames = Lists.newArrayList();
-            nonSelfReferencingEntities.forEach(pair -> entityNames.add(pair.getA().getName()));
+			nonSelfReferencingEntities.forEach(pair -> entityNames.add(pair.getA().getName()));
 
 			StringBuilder msg = new StringBuilder("Cannot delete entity '").append(getEntityMetaData().getName())
 					.append("' because it is referenced by the following entities: ").append(entityNames.toString());
@@ -418,8 +418,6 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				break;
 			case ENUM:
 				break;
-			case FILE:
-				break;
 			case HTML:
 				break;
 			case HYPERLINK:
@@ -442,6 +440,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 			case CATEGORICAL:
 			case CATEGORICAL_MREF:
 			case XREF:
+			case FILE:
 				if (att.isLabelAttribute())
 				{
 					throw new MolgenisDataException("Attribute [" + att.getName() + "] of entity [" + getName()
