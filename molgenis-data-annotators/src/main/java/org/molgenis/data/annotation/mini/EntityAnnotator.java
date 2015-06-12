@@ -1,7 +1,10 @@
 package org.molgenis.data.annotation.mini;
 
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+
+import java.util.List;
 
 /**
  * Simple interface to implement for fine-grained annotators.
@@ -21,9 +24,9 @@ public interface EntityAnnotator extends Annotator
 	Iterable<Entity> annotateEntity(Entity sourceEntity);
 
 	/**
-	 * @return the {@link EntityMetaData} that must be present in the source entity.
+	 * @return the {@link List<AttributeMetaData>} that must be present in the source entity.
 	 */
-	EntityMetaData getRequiredEntityMetaData();
+	List<AttributeMetaData> getRequiredAttributes();
 
 	// TODO: plus aanwijzing wat er ontbreekt
 	/**

@@ -20,6 +20,7 @@ import org.molgenis.data.annotation.impl.MonogenicDiseaseCandidatesServiceAnnota
 import org.molgenis.data.annotation.impl.PhenomizerServiceAnnotator;
 import org.molgenis.data.annotation.impl.SnpEffServiceAnnotator;
 import org.molgenis.data.annotation.impl.ThousandGenomesServiceAnnotator;
+import org.molgenis.data.annotation.mini.EntityAnnotator;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.framework.server.MolgenisSettings;
@@ -59,7 +60,7 @@ public class CmdLineAnnotator
 			return;
 		}
 
-		RepositoryAnnotator annotator = annotationService.getAnnotatorByName(annotatorName);
+		// EntityAnnotator annotator = annotationService.getAnnotatorByName(annotatorName);
 
 		File annotationSourceFile = new File(args[1]);
 		if (!annotationSourceFile.exists())
@@ -101,7 +102,7 @@ public class CmdLineAnnotator
 			Entity record = vcfIter.next();
 
 			// TODO: this is not part of the interface, a RepositoryAnnotator will annotate entire repositories!
-			List<Entity> annotatedRecord = annotator.annotateEntity(record);
+			List<Entity> annotatedRecord = null;// annotator.annotateEntity(record);
 
 			if (annotatedRecord.size() > 1)
 			{

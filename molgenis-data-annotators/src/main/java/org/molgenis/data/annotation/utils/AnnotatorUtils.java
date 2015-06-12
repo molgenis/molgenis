@@ -24,8 +24,7 @@ public class AnnotatorUtils
 				MolgenisFieldTypes.FieldTypeEnum.COMPOUND);
 		compoundAttributeMetaData.setLabel(annotator.getSimpleName());
 
-		Iterator<AttributeMetaData> attributeMetaDataIterator = annotator.getOutputMetaData().getAtomicAttributes()
-				.iterator();
+		Iterator<AttributeMetaData> attributeMetaDataIterator = annotator.getOutputMetaData().iterator();
 
 		while (attributeMetaDataIterator.hasNext())
 		{
@@ -47,7 +46,7 @@ public class AnnotatorUtils
 				entity.getEntityMetaData()));
 
 		MapEntity resultEntity = new MapEntity(entity, resultEntityMetadata);
-		for (AttributeMetaData attributeMetaData : annotator.getOutputMetaData().getAtomicAttributes())
+		for (AttributeMetaData attributeMetaData : annotator.getOutputMetaData())
 		{
 			resultEntity.set(attributeMetaData.getName(), resultMap.get(attributeMetaData.getName()));
 		}

@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
@@ -309,14 +310,14 @@ public class KeggServiceAnnotator extends LocusAnnotator
 	}
 
 	@Override
-	public EntityMetaData getOutputMetaData()
+	public List<AttributeMetaData> getOutputMetaData()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(KEGG_GENE_ID,
+		List<AttributeMetaData> metadata = new ArrayList<>();
+		metadata.add(new DefaultAttributeMetaData(KEGG_GENE_ID,
 				MolgenisFieldTypes.FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(KEGG_PATHWAYS_IDS,
+		metadata.add(new DefaultAttributeMetaData(KEGG_PATHWAYS_IDS,
 				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(KEGG_PATHWAYS_NAMES,
+		metadata.add(new DefaultAttributeMetaData(KEGG_PATHWAYS_NAMES,
 				MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		return metadata;
 	}

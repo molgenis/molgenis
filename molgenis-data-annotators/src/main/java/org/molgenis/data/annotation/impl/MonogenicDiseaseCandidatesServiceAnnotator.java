@@ -3,17 +3,11 @@ package org.molgenis.data.annotation.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
@@ -104,7 +98,7 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
 		Iterator<Entity> vcfIter = vcfRepo.iterator();
 
-		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields,
+		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, getOutputMetaData(),
 				MONOGENICDISEASECANDIDATE.substring(VcfRepository.getInfoPrefix().length()));
 
 		System.out.println("Now starting to process the data.");
@@ -346,30 +340,30 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 	}
 
 	@Override
-	public EntityMetaData getOutputMetaData()
+	public List<AttributeMetaData> getOutputMetaData()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(MONOGENICDISEASECANDIDATE, FieldTypeEnum.STRING)
+		List<AttributeMetaData> metadata = new ArrayList<>();
+		metadata.add(new DefaultAttributeMetaData(MONOGENICDISEASECANDIDATE, FieldTypeEnum.STRING)
 				.setLabel(MONOGENICDISEASECANDIDATE_LABEL));
 		return metadata;
 	}
 
 	@Override
-	public EntityMetaData getInputMetaData()
+	public List<AttributeMetaData> getInputMetaData()
 	{
-		DefaultEntityMetaData entityMetaData = (DefaultEntityMetaData) super.getInputMetaData();
-		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ANNOTATIONFIELD, FieldTypeEnum.TEXT));
-		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ThousandGenomesServiceAnnotator.THGEN_MAF,
+		List<AttributeMetaData> entityMetaData = super.getInputMetaData();
+		entityMetaData.add(new DefaultAttributeMetaData(ANNOTATIONFIELD, FieldTypeEnum.TEXT));
+		entityMetaData.add(new DefaultAttributeMetaData(ThousandGenomesServiceAnnotator.THGEN_MAF,
 				FieldTypeEnum.DECIMAL));
-		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ExACServiceAnnotator.EXAC_MAF,
+		entityMetaData.add(new DefaultAttributeMetaData(ExACServiceAnnotator.EXAC_MAF,
 				FieldTypeEnum.DECIMAL));
-		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(GoNLServiceAnnotator.GONL_MAF,
+		entityMetaData.add(new DefaultAttributeMetaData(GoNLServiceAnnotator.GONL_MAF,
 				FieldTypeEnum.DECIMAL));
-		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(
+		entityMetaData.add(new DefaultAttributeMetaData(
 				ClinicalGenomicsDatabaseServiceAnnotator.GENERALIZED_INHERITANCE, FieldTypeEnum.TEXT));
-		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(
+		entityMetaData.add(new DefaultAttributeMetaData(
 				ClinicalGenomicsDatabaseServiceAnnotator.INHERITANCE, FieldTypeEnum.TEXT));
-		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.SAMPLES, FieldTypeEnum.MREF));
+		entityMetaData.add(new DefaultAttributeMetaData(VcfRepository.SAMPLES, FieldTypeEnum.MREF));
 		return entityMetaData;
 	}
 

@@ -1,7 +1,9 @@
 package org.molgenis.data.annotation;
 
 import java.util.Iterator;
+import java.util.List;
 
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.mini.AnnotatorInfo;
@@ -16,6 +18,7 @@ public interface RepositoryAnnotator
 
 	AnnotatorInfo getInfo();
 
+	// add entityAnnotator
 	Iterator<Entity> annotate(Iterable<Entity> source);
 
 	/**
@@ -23,14 +26,14 @@ public interface RepositoryAnnotator
 	 * 
 	 * @return ouputMetadata
 	 */
-	EntityMetaData getOutputMetaData();
+	List<AttributeMetaData> getOutputMetaData();
 
 	/**
 	 * Returns a entityMetaData containing the attributes needed for the annotator to work
 	 * 
 	 * @return inputMetaData;
 	 */
-	EntityMetaData getInputMetaData();
+	List<AttributeMetaData> getInputMetaData();
 
 	/**
 	 * Returns null if the annotator will work for the given metadata, a reason if not so
