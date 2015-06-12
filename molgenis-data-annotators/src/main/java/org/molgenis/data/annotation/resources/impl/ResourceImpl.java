@@ -1,11 +1,11 @@
 package org.molgenis.data.annotation.resources.impl;
 
 import java.io.File;
-import java.io.IOException;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
+import org.molgenis.data.annotation.resources.RepositoryFactory;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotator.tabix.TabixVcfRepository;
 import org.molgenis.framework.server.MolgenisSettings;
@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 /**
  * A {@link TabixVcfRepository} that is potentially unavailable.
  */
-public class TabixVcfResource implements Resource
+public class ResourceImpl implements Resource
 {
 	private final String name;
 	private final String filenameKey;
@@ -24,17 +24,19 @@ public class TabixVcfResource implements Resource
 	// the file the current repository works on
 	private volatile File file;
 	// the current repository
-	private volatile TabixVcfRepository repository;
+	private volatile Repository repository;
+	private final RepositoryFactory repositoryFactory;
 
-	private static final Logger LOG = LoggerFactory.getLogger(TabixVcfResource.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ResourceImpl.class);
 
-	public TabixVcfResource(String entityName, MolgenisSettings molgenisSettings, String filenameKey,
-			String defaultFilename)
+	public ResourceImpl(String entityName, MolgenisSettings molgenisSettings, String filenameKey,
+			String defaultFilename, RepositoryFactory repositoryFactory)
 	{
 		this.molgenisSettings = molgenisSettings;
 		this.name = entityName;
 		this.filenameKey = filenameKey;
 		this.defaultFilename = defaultFilename;
+		this.repositoryFactory = repositoryFactory;
 	}
 
 	/**
@@ -71,7 +73,7 @@ public class TabixVcfResource implements Resource
 		return getRepository().findAll(q);
 	}
 
-	private TabixVcfRepository getRepository()
+	private Repository getRepository()
 	{
 		if (repository == null && isAvailable())
 		{
@@ -89,10 +91,10 @@ public class TabixVcfResource implements Resource
 				file = getFile();
 				if (file != null)
 				{
-					repository = new TabixVcfRepository(file, name);
+					repository = repositoryFactory.createRepository(file);
 				}
 			}
-			catch (IOException e)
+			catch (Exception e)
 			{
 				LOG.warn("Failed to initialize TabixVcfRepository {} for file {}.", name, file, e);
 			}
@@ -121,6 +123,10 @@ public class TabixVcfResource implements Resource
 			if (result.exists())
 			{
 				return result;
+			}
+			else
+			{
+				LOG.warn("Resource file not found: {}", fileName);
 			}
 		}
 		catch (Exception ex)
