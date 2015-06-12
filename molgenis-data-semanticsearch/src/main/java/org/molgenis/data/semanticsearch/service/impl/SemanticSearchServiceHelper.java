@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -125,7 +126,7 @@ public class SemanticSearchServiceHelper
 	public QueryRule createDisMaxQueryRule(List<String> queryTerms)
 	{
 		List<QueryRule> rules = new ArrayList<QueryRule>();
-		queryTerms.stream().filter(query -> StringUtils.isNotEmpty(query)).forEach(query -> {
+		queryTerms.stream().filter(query -> StringUtils.isNotEmpty(query)).map(QueryParser::escape).forEach(query -> {
 			rules.add(new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, query));
 			rules.add(new QueryRule(AttributeMetaDataMetaData.DESCRIPTION, Operator.FUZZY_MATCH, query));
 		});
@@ -164,7 +165,6 @@ public class SemanticSearchServiceHelper
 			collectTermsFromOntologyTerm(childOt).forEach(
 					synonym -> queryTerms.add(parseBoostQueryString(synonym, boostedNumber)));
 		}
-
 		return queryTerms;
 	}
 

@@ -650,6 +650,12 @@
                 <version>${spring.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+                <exclusions>
+         			<exclusion>
+           				<groupId>commons-logging</groupId>
+           				<artifactId>commons-logging</artifactId>
+       				</exclusion>
+      			</exclusions>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -677,6 +683,11 @@
             <artifactId>log4j-over-slf4j</artifactId>
             <version>1.7.10</version>
         </dependency>
+        <dependency>
+      		<groupId>org.slf4j</groupId>
+      		<artifactId>jcl-over-slf4j</artifactId>
+      		<version>${slf4j.version}</version>
+   		</dependency>
         <!-- scope: test -->
         <dependency>
             <groupId>org.testng</groupId>

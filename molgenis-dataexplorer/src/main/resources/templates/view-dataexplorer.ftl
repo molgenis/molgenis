@@ -16,7 +16,8 @@
 	"jquery.molgenis.tree.js",
 	"jquery.molgenis.xrefmrefsearch.js",
 	"dataexplorer.js",
-	"bootbox.min.js"]>
+	"bootbox.min.js",
+	"jQEditRangeSlider-min.js"]>
 
 <@header css js/>
 <div class="row">
