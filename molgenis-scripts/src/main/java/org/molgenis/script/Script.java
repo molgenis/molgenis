@@ -15,7 +15,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntity;
-import org.molgenis.util.FileStore;
+import org.molgenis.file.FileStore;
 
 import com.google.common.collect.Lists;
 

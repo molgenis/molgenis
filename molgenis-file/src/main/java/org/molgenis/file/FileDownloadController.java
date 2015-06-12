@@ -1,0 +1,76 @@
+package org.molgenis.file;
+
+import static org.molgenis.file.FileDownloadController.URI;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.molgenis.data.DataService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.util.FileCopyUtils;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+@RequestMapping(URI)
+public class FileDownloadController
+{
+	public static final String URI = "/files";
+
+	private final FileStore fileStore;
+	private final DataService dataService;
+
+	@Autowired
+	public FileDownloadController(FileStore fileStore, DataService dataService)
+	{
+		this.fileStore = fileStore;
+		this.dataService = dataService;
+	}
+
+	@RequestMapping(value = "/{fileName}", method = GET)
+	public void getFile(@PathVariable("fileName") String fileName, HttpServletResponse response) throws IOException
+	{
+		java.io.File fileStoreFile = fileStore.getFile(fileName);
+
+		// if file meta data exists for this file
+		String outputFilename;
+
+		FileMeta fileMeta = dataService.findOne(FileMeta.ENTITY_NAME, fileName, FileMeta.class);
+		if (fileMeta != null)
+		{
+			outputFilename = fileMeta.getFilename();
+
+			String contentType = fileMeta.getContentType();
+			if (contentType != null)
+			{
+				response.setContentType(contentType);
+			}
+
+			Long size = fileMeta.getSize();
+			if (size != null)
+			{
+				response.setContentLength(size.intValue());
+			}
+		}
+		else
+		{
+			outputFilename = fileName;
+		}
+		response.setHeader("Content-Disposition", "attachment; filename=" + outputFilename.replace(" ", "_"));
+
+		InputStream is = new FileInputStream(fileStoreFile);
+		try
+		{
+			FileCopyUtils.copy(is, response.getOutputStream());
+		}
+		finally
+		{
+			is.close();
+		}
+	}
+}

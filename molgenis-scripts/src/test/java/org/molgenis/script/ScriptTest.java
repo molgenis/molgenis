@@ -14,7 +14,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.molgenis.data.DataService;
-import org.molgenis.util.FileStore;
+import org.molgenis.file.FileStore;
 import org.springframework.util.FileCopyUtils;
 import org.testng.annotations.Test;
 
