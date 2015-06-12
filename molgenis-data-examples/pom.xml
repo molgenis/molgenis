@@ -27,6 +27,11 @@
             <artifactId>molgenis-data-csv</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-file</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 </project>
