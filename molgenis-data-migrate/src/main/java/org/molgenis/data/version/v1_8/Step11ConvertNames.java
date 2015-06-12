@@ -1,6 +1,7 @@
 package org.molgenis.data.version.v1_8;
 
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,9 @@ public class Step11ConvertNames extends MolgenisUpgrade
 	private JdbcTemplate template;
 	private DataSource dataSource;
 	private static final Logger LOG = LoggerFactory.getLogger(Step11ConvertNames.class);
+
+	private HashMap<String, String> packageNameChanges = new HashMap<>();
+	private HashMap<String, String> entityNameChanges = new HashMap<>();
 
 	public Step11ConvertNames(DataSource dataSource)
 	{
@@ -87,6 +91,9 @@ public class Step11ConvertNames extends MolgenisUpgrade
 		LOG.info("Validating package names...");
 		checkAndUpdatePackages(null, null);
 
+		LOG.info("Validating Entity names...");
+		checkAndUpdateEntities();
+
 		setForeignKeyConstraintCheck(true);
 
 		try
@@ -101,6 +108,11 @@ public class Step11ConvertNames extends MolgenisUpgrade
 
 		// TODO: remove
 		throw new RuntimeException("EXIT");
+	}
+
+	public void checkAndUpdateEntities()
+	{
+
 	}
 
 	/**
@@ -122,9 +134,9 @@ public class Step11ConvertNames extends MolgenisUpgrade
 			String nameFix = fixName(name);
 
 			String fullName = pack.get("fullName").toString();
-
 			String fullNameFix = fullName;
 
+			// rebuild the full name based on (new) names of the parent and this one
 			if (parentFix != null) fullNameFix = String.format("%s_%s", parentFix, nameFix);
 
 			if (!name.equals(nameFix))
@@ -142,18 +154,22 @@ public class Step11ConvertNames extends MolgenisUpgrade
 				scope.remove(name);
 				scope.add(nameFix);
 
-				// change the end of fullNameFix with the new package name
+				// change the full package name
+				// TODO: fullNameFix sometimes changes based on parent
 				fullNameFix = fullNameFix.replaceAll(name + "$", nameFix);
 
 				// update fullname, name and parent in database
 				template.execute(getUpdatePackageNamesSql(fullName, fullNameFix, nameFix, parentFix));
 
+				// add the name changes to the store so we can use it later to update all other tables
+				packageNameChanges.put(fullName, fullNameFix);
 				checkAndUpdatePackages(fullName, fullNameFix);
 			}
 			else
 			{
-				// nothing chagned in this name, only update the parent
+				// nothing changed in this name, only update the parent
 				template.execute(getUpdatePackageNamesSql(fullName, fullNameFix, nameFix, parentFix));
+
 				checkAndUpdatePackages(fullName, fullNameFix);
 			}
 		}
@@ -243,24 +259,24 @@ public class Step11ConvertNames extends MolgenisUpgrade
 		// strip digits at start of string
 		name = name.replaceAll("^[0-9]+", "");
 
-		// append a digit after reserved keywords to make them usable again
-		if (KEYWORDS.contains(name) || KEYWORDS.contains(name.toUpperCase()))
-		{
-			name += "0";
-		}
-
 		// truncate names longer than 30
 		if (name.length() > MAX_NAME_LENGTH)
 		{
 			name = name.substring(0, MAX_NAME_LENGTH);
-			// TODO: keyword check
+		}
+
+		// use the makeNameUnique function to append a digit after keywords
+		if (KEYWORDS.contains(name) || KEYWORDS.contains(name.toUpperCase()))
+		{
+			name = makeNameUnique(name, Sets.newHashSet());
 		}
 
 		return name;
 	}
 
 	/**
-	 * Recursively adds a count at the end of a name until it is unique within its scope
+	 * Recursively adds a count at the end of a name until it is unique within its scope. Assumes that the names passed
+	 * are no longer than the max length.
 	 */
 	public String makeNameUnique(String name, int index, HashSet<String> scope)
 	{
@@ -353,7 +369,7 @@ public class Step11ConvertNames extends MolgenisUpgrade
 			"attributes");
 
 	// TODO: REMOVE!!!!
-	public static final Set<String> TEST = Sets.newHashSet("molgenis");
+	public static final Set<String> TEST = Sets.newHashSet("molgenis", "thispackagenameiswaytoolongtob");
 
 	public static Set<String> KEYWORDS = Sets.newHashSet();
 	static
