@@ -50,12 +50,13 @@ public class ResourcesImpl implements Resources
 			}
 			catch (Exception ex)
 			{
+				// something went wrong, find out what is the cause
 				if (resources.get(name).isAvailable())
 				{
 					LOG.error("Error querying Resource {}.", name);
 					throw ex;
 				}
-				LOG.error("Resource {} is unavailable, trying dataService instead.", name);
+				LOG.warn("Resource {} is unavailable, trying dataService instead.", name);
 			}
 		}
 		return dataService.findAll(name, q);

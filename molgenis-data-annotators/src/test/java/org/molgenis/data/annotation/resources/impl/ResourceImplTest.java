@@ -4,10 +4,7 @@ import static org.mockito.Mockito.when;
 
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Query;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.testng.Assert;
@@ -72,26 +69,6 @@ public class ResourceImplTest
 		when(molgenisSettings.getProperty("cadd_key", null)).thenReturn(
 				"src/test/resources/ALL.chr1.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz");
 		Query query = QueryImpl.EQ("#CHROM", "1").and().eq("POS", 10352);
-
-		System.out.println(resource.findAll(query));
-	}
-
-	@Test
-	public void testFindAllReturnsResultFileCADD()
-	{
-		DefaultEntityMetaData caddMetaData = new DefaultEntityMetaData("CADD");
-		caddMetaData.addAttribute("#Chrom");
-		caddMetaData.addAttribute("Pos");
-		caddMetaData.addAttribute("Ref");
-		caddMetaData.addAttribute("Alt");
-		caddMetaData.addAttributeMetaData(new DefaultAttributeMetaData("RawScore", FieldTypeEnum.DECIMAL));
-		caddMetaData.addAttributeMetaData(new DefaultAttributeMetaData("PHRED", FieldTypeEnum.DECIMAL));
-		caddMetaData.addAttribute("id").setIdAttribute(true);
-
-		resource = new ResourceImpl("cadd_test", molgenisSettings, "cadd_key", null, new TabixRepositoryFactory(
-				caddMetaData));
-		when(molgenisSettings.getProperty("cadd_key", null)).thenReturn("/Users/fkelpin/Downloads/InDels.tsv.gz");
-		Query query = QueryImpl.EQ("#CHROM", "1").and().eq("POS", 10021);
 
 		System.out.println(resource.findAll(query));
 	}
