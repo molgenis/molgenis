@@ -2,12 +2,10 @@ package org.molgenis.data.annotation.impl;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
@@ -141,21 +139,21 @@ public class GenePanelServiceAnnotator extends VariantAnnotator
 	}
 
 	@Override
-	public EntityMetaData getOutputMetaData()
+	public List<AttributeMetaData> getOutputMetaData()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
+		List<AttributeMetaData> metadata = new ArrayList<>();
 
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(PANEL_SEVERELATEONSET, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(PANEL_ACMG, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(PANEL_CHARGE, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(PANEL_SEVERELATEONSET, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(PANEL_ACMG, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(PANEL_CHARGE, FieldTypeEnum.STRING));
 		return metadata;
 	}
 
 	@Override
-	public EntityMetaData getInputMetaData()
+	public List<AttributeMetaData> getInputMetaData()
 	{
-		DefaultEntityMetaData entityMetaData = (DefaultEntityMetaData) super.getInputMetaData();
-		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.getInfoPrefix() + "ANN",
+		List<AttributeMetaData> entityMetaData = super.getInputMetaData();
+		entityMetaData.add(new DefaultAttributeMetaData(VcfRepository.getInfoPrefix() + "ANN",
 				FieldTypeEnum.TEXT));
 		return entityMetaData;
 	}

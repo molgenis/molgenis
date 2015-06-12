@@ -3,15 +3,10 @@ package org.molgenis.data.annotation.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
@@ -82,7 +77,7 @@ public class DeNovoAnnotator extends VariantAnnotator
 		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
 		Iterator<Entity> vcfIter = vcfRepo.iterator();
 
-		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields,
+		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, getOutputMetaData(),
 				DENOVO.substring(VcfRepository.getInfoPrefix().length()));
 
 		pedigree = VcfUtils.getPedigree(inputVcfFile);
@@ -545,25 +540,25 @@ public class DeNovoAnnotator extends VariantAnnotator
 	}
 
 	@Override
-	public EntityMetaData getOutputMetaData()
+	public List<AttributeMetaData> getOutputMetaData()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(DENOVO, FieldTypeEnum.STRING).setLabel(DENOVO_LABEL));
+		List<AttributeMetaData> metadata = new ArrayList<>();
+		metadata.add(new DefaultAttributeMetaData(DENOVO, FieldTypeEnum.STRING).setLabel(DENOVO_LABEL));
 		return metadata;
 	}
 
 	@Override
-	public EntityMetaData getInputMetaData()
+	public List<AttributeMetaData> getInputMetaData()
 	{
-		DefaultEntityMetaData entityMetaData = (DefaultEntityMetaData) super.getInputMetaData();
-		entityMetaData.addAttributeMetaData(VcfRepository.FILTER_META);
-		entityMetaData.addAttributeMetaData(VcfRepository.QUAL_META);
-		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.getInfoPrefix() + "ANN",
+		List<AttributeMetaData> entityMetaData = super.getInputMetaData();
+		entityMetaData.add(VcfRepository.FILTER_META);
+		entityMetaData.add(VcfRepository.QUAL_META);
+		entityMetaData.add(new DefaultAttributeMetaData(VcfRepository.getInfoPrefix() + "ANN",
 				FieldTypeEnum.TEXT));
-		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData("ABHet", FieldTypeEnum.STRING));
-		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData("ABHom", FieldTypeEnum.STRING));
-		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData("SB", FieldTypeEnum.STRING));
-		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.SAMPLES, FieldTypeEnum.MREF));
+		entityMetaData.add(new DefaultAttributeMetaData("ABHet", FieldTypeEnum.STRING));
+		entityMetaData.add(new DefaultAttributeMetaData("ABHom", FieldTypeEnum.STRING));
+		entityMetaData.add(new DefaultAttributeMetaData("SB", FieldTypeEnum.STRING));
+		entityMetaData.add(new DefaultAttributeMetaData(VcfRepository.SAMPLES, FieldTypeEnum.MREF));
 
 		return entityMetaData;
 	}
