@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 /**
@@ -40,8 +41,12 @@ public class Step11ConvertNames extends MolgenisUpgrade
 	private DataSource dataSource;
 	private static final Logger LOG = LoggerFactory.getLogger(Step11ConvertNames.class);
 
+	public static final String OLD_DEFAULT_PACKAGE = "default";
+	public static final String NEW_DEFAULT_PACKAGE = "base";
+
 	private HashMap<String, String> packageNameChanges = new HashMap<>();
 	private HashMap<String, String> entityNameChanges = new HashMap<>();
+	private HashMap<String, HashSet<String>> attributeNameChanges = new HashMap<>();
 
 	public Step11ConvertNames(DataSource dataSource)
 	{
@@ -91,8 +96,11 @@ public class Step11ConvertNames extends MolgenisUpgrade
 		LOG.info("Validating package names...");
 		checkAndUpdatePackages(null, null);
 
-		LOG.info("Validating Entity names...");
+		LOG.info("Validating entity names...");
 		checkAndUpdateEntities();
+
+		LOG.info("Validating attribute names...");
+		checkAndUpdateAttributes();
 
 		setForeignKeyConstraintCheck(true);
 
@@ -110,9 +118,147 @@ public class Step11ConvertNames extends MolgenisUpgrade
 		throw new RuntimeException("EXIT");
 	}
 
+	public void checkAndUpdateAttributes()
+	{
+		// select all entities with attributes
+		List<Map<String, Object>> entities = template
+				.queryForList("SELECT fullName FROM entities_attributes GROUP BY fullName");
+
+		for (Map<String, Object> entity : entities)
+		{
+			// fetch attributes for this entity
+			String entityFullName = entity.get("fullName").toString();
+			List<Map<String, Object>> attributes = template.queryForList(fetchAttributeNamesForEntitySql(entityFullName));
+
+			// build scope for this entity
+			HashSet<String> scope = Sets.newHashSet();
+			attributes.forEach(attribute -> scope.add(attribute.get("name").toString()));
+
+			// update attributes
+			for (Map<String, Object> attribute : attributes)
+			{
+				String identifier = attribute.get("identifier").toString();
+				String name = attribute.get("name").toString();
+
+				String refEntity = null;
+				if (!(attribute.get("refEntity") == null)) refEntity = attribute.get("refEntity").toString();
+
+				String newName = fixName(name);
+				if (!name.equals(newName))
+				{
+					// attribute name did not validate, check if it's unique
+					if (scope.contains(newName))
+					{
+						newName = makeNameUnique(newName, scope);
+					}
+
+					LOG.info(String.format("In Entity [%s]: Attribute name [%s] is not valid. Changing to [%s]...",
+							entityFullName, name, newName));
+				}
+
+				// get the (new) name for refEntity
+				String newRefEntity = refEntity;
+				if (entityNameChanges.containsKey(refEntity))
+				{
+					newRefEntity = entityNameChanges.get(refEntity);
+				}
+
+				// update attribute name + refEntity in database
+				template.execute(getUpdateAttributeNameAndRefEntity(identifier, newName, newRefEntity));
+			}
+
+			// update the fullnames of the entities to the new names we generated before (in entities_attributes)
+			if (entityNameChanges.containsKey(entityFullName))
+			{
+				template.execute(getUpdateEntitiesAttributesFullName(entityFullName, entityNameChanges.get(entityFullName)));
+			}
+		}
+	}
+
+	/**
+	 * Updates the entities table by validating simpleName and using the name changes generated in
+	 * checkAndUpdatePackages().
+	 */
 	public void checkAndUpdateEntities()
 	{
+		List<Map<String, Object>> entities = template
+				.queryForList("SELECT fullName, simpleName, package, extends FROM entities;");
 
+		// build package scopes
+		HashMap<String, HashSet<String>> scopes = Maps.newHashMap();
+		for (Map<String, Object> entity : entities)
+		{
+			String pack = entity.get("package").toString();
+			String simpleName = entity.get("simpleName").toString();
+
+			if (scopes.containsKey(pack))
+			{
+				scopes.get(pack).add(simpleName);
+			}
+			else
+			{
+				scopes.put(pack, Sets.newHashSet(simpleName));
+			}
+		}
+
+		// update entities
+		for (Map<String, Object> entity : entities)
+		{
+			// check the name of each entity
+			String fullName = entity.get("fullName").toString();
+			String simpleName = entity.get("simpleName").toString();
+			String pack = entity.get("package").toString();
+
+			// generate a new simpleName if needed
+			String newSimpleName = fixName(simpleName);
+			if (!simpleName.equals(newSimpleName))
+			{
+				// name didn't validate, make it unique in its package
+				if (scopes.get(pack).contains(newSimpleName))
+				{
+					newSimpleName = makeNameUnique(newSimpleName, scopes.get(pack));
+				}
+
+				LOG.info(String.format("Entity name [%s] is not valid. Changing to [%s]...", simpleName, newSimpleName));
+			}
+
+			// use the newly generated package name if it was changed
+			String newPackage = pack;
+			if (packageNameChanges.containsKey(pack))
+			{
+				newPackage = packageNameChanges.get(pack);
+			}
+
+			// generate a new fullName based on the (new) package and (new) simpleName
+			String newFullName;
+			if (pack.equals(OLD_DEFAULT_PACKAGE))
+			{
+				// default package is not used as a prefix in the fully qualified name
+				newFullName = newSimpleName;
+			}
+			else
+			{
+				newFullName = newPackage + "_" + newSimpleName;
+			}
+
+			entityNameChanges.put(fullName, newFullName);
+			template.execute(getUpdateEntityNamesSql(newFullName, newSimpleName, newPackage, fullName));
+
+		}
+
+		// iterate over the entities one more time to update the extends property with the newly generated fullNames
+		for (Map<String, Object> entity : entities)
+		{
+			if (entity.get("extends") == null) continue;
+
+			String newFullName = entity.get("fullName").toString();
+			String extendz = entity.get("extends").toString();
+			if (entityNameChanges.containsKey(extendz))
+			{
+				String newExtends = entityNameChanges.get(extendz);
+				template.execute(getUpdateEntityExtendsSql(newFullName, newExtends));
+			}
+		}
 	}
 
 	/**
@@ -141,6 +287,13 @@ public class Step11ConvertNames extends MolgenisUpgrade
 
 			if (!name.equals(nameFix))
 			{
+				if (name.equals(OLD_DEFAULT_PACKAGE))
+				{
+					// special case: the default molgenis package has to be renamed because default is a reserved
+					// keyword. rename it to 'base' (which is now also a reserved keyword in MOLGENIS)
+					nameFix = NEW_DEFAULT_PACKAGE;
+				}
+
 				// name wasn't valid, make sure the new one is unique for this scope
 				if (scope.contains(nameFix))
 				{
@@ -175,6 +328,18 @@ public class Step11ConvertNames extends MolgenisUpgrade
 		}
 	}
 
+	public String getUpdateEntityExtendsSql(String newFullName, String newExtends)
+	{
+		return String.format("UPDATE entities SET extends='%s' WHERE fullName='%s'", newExtends, newFullName);
+	}
+
+	public String getUpdateEntityNamesSql(String newFullName, String newSimpleName, String newPackage,
+			String oldFullName)
+	{
+		return String.format("UPDATE entities SET fullName='%s', simpleName='%s', package='%s'WHERE fullName='%s'",
+				newFullName, newSimpleName, newPackage, oldFullName);
+	}
+
 	public String getPackagesWithParentSql(String parentFullName)
 	{
 		String query = (parentFullName == null) ? "IS NULL" : String.format("= '%s'", parentFullName);
@@ -194,6 +359,25 @@ public class Step11ConvertNames extends MolgenisUpgrade
 		return String.format("UPDATE packages SET fullName='%s', name='%s', parent=%s WHERE fullName='%s';",
 				fullNameFix, nameFix, parent, fullName);
 	}
+
+	public String getUpdateAttributeNameAndRefEntity(String identifier, String newName, String newRefEntity)
+	{
+		newRefEntity = (newRefEntity == null) ? "NULL" : String.format("'%s'", newRefEntity);
+		return String.format("UPDATE attributes SET name='%s', refEntity=%s WHERE identifier='%s'", newName,
+				newRefEntity, identifier);
+	}
+
+	public String getUpdateEntitiesAttributesFullName(String fullName, String newFullName)
+	{
+		return String.format("UPDATE entities_attributes SET fullName='%s' WHERE fullName='%s'", newFullName, fullName);
+	}
+
+	public String fetchAttributeNamesForEntitySql(String fullyQualifiedEntityName)
+	{
+		return String
+				.format("SELECT attributes.identifier, attributes.name, attributes.refEntity FROM attributes INNER JOIN entities_attributes ON entities_attributes.attributes = attributes.identifier WHERE entities_attributes.fullName = '%s'",
+						fullyQualifiedEntityName);
+	};
 
 	/**
 	 * Turns the MySQL foreign key check on or off.
@@ -228,7 +412,7 @@ public class Step11ConvertNames extends MolgenisUpgrade
 
 			// check attributes of this JPA entity
 			List<Map<String, Object>> jpaEntityAttributes = template
-					.queryForList(fetchAttributesForEntitySql(entityName));
+					.queryForList(fetchAttributeNamesForEntitySql(entityName));
 
 			for (Map<String, Object> attribute : jpaEntityAttributes)
 			{
@@ -306,12 +490,6 @@ public class Step11ConvertNames extends MolgenisUpgrade
 		return makeNameUnique(name, 1, scope);
 	}
 
-	private String fetchAttributesForEntitySql(String fullyQualifiedEntityName)
-	{
-		return "SELECT attributes.name FROM attributes INNER JOIN entities_attributes ON entities_attributes.attributes = attributes.identifier WHERE entities_attributes.fullName = '"
-				+ fullyQualifiedEntityName + "'";
-	};
-
 	public static final int MAX_NAME_LENGTH = 30;
 
 	// https://docs.oracle.com/javase/tutorial/java/nutsandbolts/_keywords.html
@@ -365,11 +543,13 @@ public class Step11ConvertNames extends MolgenisUpgrade
 			"volatile", "while", "with", "yield");
 
 	// Case sensitive
+	// TODO: update MetaValidationUtils with new keywords!
 	public static final Set<String> MOLGENIS_KEYWORDS = Sets.newHashSet("login", "logout", "csv", "entities",
-			"attributes");
+			"attributes", "base");
 
 	// TODO: REMOVE!!!!
-	public static final Set<String> TEST = Sets.newHashSet("molgenis", "thispackagenameiswaytoolongtob");
+	public static final Set<String> TEST = Sets.newHashSet("molgenis", "thispackagenameiswaytoolongtob", "Ontology",
+			"OntologyTermNodePath", "Owned", "tommy", "ontologyTermSynonym");
 
 	public static Set<String> KEYWORDS = Sets.newHashSet();
 	static
