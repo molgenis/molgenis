@@ -44,8 +44,8 @@ public class TabixRepositoryTest
 		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("CADD_SCALED", DECIMAL));
 		repoMetaData.addAttribute("id").setIdAttribute(true).setVisible(false);
 
-		tabixRepository = new TabixRepository("target" + File.separator + "test-classes" + File.separator
-				+ "cadd_test.vcf.gz", repoMetaData);
+		tabixRepository = new TabixRepository(new File("target" + File.separator + "test-classes" + File.separator
+				+ "cadd_test.vcf.gz"), repoMetaData);
 	}
 
 	@Test

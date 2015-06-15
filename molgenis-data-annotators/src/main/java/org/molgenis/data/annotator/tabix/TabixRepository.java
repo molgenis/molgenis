@@ -1,5 +1,6 @@
 package org.molgenis.data.annotator.tabix;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
@@ -40,10 +41,10 @@ public class TabixRepository extends AbstractRepository
 	 * @throws IOException
 	 *             if something goes wrong creating the {@link TabixReader} for the file
 	 */
-	public TabixRepository(String fileName, EntityMetaData entityMetaData) throws IOException
+	public TabixRepository(File file, EntityMetaData entityMetaData) throws IOException
 	{
 		this.entityMetaData = entityMetaData;
-		this.reader = new TabixReader(fileName);
+		this.reader = new TabixReader(file.getAbsolutePath());
 	}
 
 	public static CSVParser getCsvParser()
