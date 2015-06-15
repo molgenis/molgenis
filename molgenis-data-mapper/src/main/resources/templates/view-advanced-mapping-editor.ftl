@@ -2,7 +2,7 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=['']>
-<#assign js=['category-mapping-editor.js', 'bootbox.min.js', '/jquery/scrollTableBody/jquery.scrollTableBody-1.0.0.js']>
+<#assign js=['advanced-mapping-editor.js', 'bootbox.min.js', '/jquery/scrollTableBody/jquery.scrollTableBody-1.0.0.js']>
 
 <@header css js/>
 
@@ -40,7 +40,7 @@
 <div class="row">
 	<div class="col-md-6">
 		<#if showDefault><br></br></#if>
-		<table id="category-mapping-table" class="table table-bordered scroll">
+		<table id="advanced-mapping-table" class="table table-bordered scroll">
 			<thead>
 				<th>${source} attribute value</th>
 				<th>Number of rows</th>
@@ -112,8 +112,8 @@
 		<input type="hidden" name="targetAttribute" value="${targetAttribute.name?html}"/>
 		<input type="hidden" name="sourceAttribute" value="${sourceAttribute.name?html}"/>
 
-		<button id="save-category-mapping-btn" type="submit" class="btn btn-primary">Save</button>
-		<button id="cancel-category-mapping-btn" class="btn btn-default" type="button">Cancel</button>
+		<button id="save-advanced-mapping-btn" type="submit" class="btn btn-primary">Save</button>
+		<button id="cancel-advanced-mapping-btn" class="btn btn-default" type="button">Cancel</button>
 	</div>
 </div>
 

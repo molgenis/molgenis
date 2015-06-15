@@ -4,235 +4,325 @@
 <#assign css=['mapping-service.css']>
 <#assign js=['attribute-mapping.js', 'd3.min.js','vega.min.js','jstat.min.js', 'biobankconnect-graph.js', '/jquery/scrollTableBody/jquery.scrollTableBody-1.0.0.js', 'bootbox.min.js', 'jquery.ace.js']>
 
-<@header css js/>
+<@header css/>
 
 <script src="<@resource_href "/js/ace/src-min-noconflict/ace.js"/>" type="text/javascript" charset="utf-8"></script>
 <script src="<@resource_href "/js/ace/src-min-noconflict/ext-language_tools.js"/>" type="text/javascript" charset="utf-8"></script>
 
-<#if attributeMapping.sourceAttributeMetaData??>
-	<#assign selected = attributeMapping.sourceAttributeMetaData.name>
-<#else>
-	<#assign selected = "null">
-</#if>
-
 <div class="row">
 	<div class="col-md-12">
-		<a href="${context_url}/mappingproject/${mappingProject.identifier}" class="btn btn-default">
+		<h1>Mapping: <i>${entityMapping.sourceEntityMetaData.name}</i> to <i>${entityMapping.targetEntityMetaData.name?html}.${attributeMapping.targetAttributeMetaData.label?html}</i>.</h1>
+		${(attributeMapping.targetAttributeMetaData.description!"")?html}
+		
+		<a href="${context_url}/mappingproject/${mappingProject.identifier}" class="btn btn-default btn-xs pull-left">
 			<span class="glyphicon glyphicon-chevron-left"></span> Back to project
 		</a>
-		
-		<hr></hr>
-	</div>
-</div>
-
-<div class="row" role="tabpanel"> 
-	<div class="col-md-12">
-		<ul class="nav nav-tabs" role="tablist">
-    		<li role="presentation" class="active"><a href="#basic" aria-controls="basic" role="tab" data-toggle="tab">Basic</a></li>
-    		<li role="presentation"><a href="#advanced" aria-controls="advanced" role="tab" data-toggle="tab">Advanced</a></li> 
-   		</ul>
-		
-		 <div class="tab-content">
-    		<div role="tabpanel" class="tab-pane active" id="basic"><@basic /></div>
-    		<div role="tabpanel" class="tab-pane" id="advanced"><@advanced /></div>
-    	</div>	
-	</div>
-</div>
-
-<#macro basic>
-
-<div class="row">
-	<div class="col-md-12">
-		<h4>Mapping from <i>${entityMapping.sourceEntityMetaData.name}</i> to <i>${entityMapping.targetEntityMetaData.name?html}.${attributeMapping.targetAttributeMetaData.label?html}</i>.</h4>
-		${(attributeMapping.targetAttributeMetaData.description!"")?html}
 	</div>
 </div>
 
 <div class="row">
-	<div class="col-md-6">
-		<div class="pull-left">
-			<#if showSuggestedAttributes?c == "true">
-				<h5>Source Attributes suggested by semantic search</h5>
-			<#else>
-				<h5>Source all attributes</h5>
-			</#if>
+	<div class="col-md-12">
+		<br/>
+		<p>
+			${attributeMapping.targetAttributeMetaData.name?html} (${attributeMapping.targetAttributeMetaData.dataType}) : ${(attributeMapping.targetAttributeMetaData.description!"")?html}
+		</p>
+	</div>
+</div>
+
+<div class="row"> <#-- Start: Master row -->
+	
+	<div class="col-md-6 col-lg-4"> <#-- Start: Attribute table column -->
+		<div class="attribute-mapping-table-container"> <#-- Start: Attribute table container -->	
+			
+			<div class="row">
+				<div class="col-md-12">
+					<legend>Attributes</legend>
+					<form class="form-inline">
+						
+						<div class="form-group"> 
+							<label>Select Attributes:</label>
+						</div> 
+						
+						<div class="form-group pull-right">
+							<div class="checkbox">
+			    				<label>
+			      					<input id="selected-only-checkbox" type="checkbox"> Show selected only
+			    				</label>
+			  				</div>
+			  				
+							<div class="input-group">
+			      				<span class="input-group-btn">
+			        				<button id="attribute-search-btn" class="btn btn-default" type="button"><span class="glyphicon glyphicon-search"></button>
+			      				</span>
+			      				<input id="attribute-search-field" type="text" class="form-control" placeholder="Search">
+			    			</div>
+						</div>
+						
+					</form>
+					<br/>
+				</div>
+			</div>
+			
+			<div class="row">
+				<div class="col-md-12">
+					<table id="attribute-mapping-table" class="table table-bordered scroll">
+						<thead>
+							<tr>
+								<th>Select</th>
+								<th>Attribute</th>
+								<th>Algorithm value</th>
+							</tr>
+						</thead>
+						<tbody>
+							<#list entityMapping.sourceEntityMetaData.attributes as source>
+								<tr>
+									<td>
+										<div class="checkbox">
+											<label>
+												<input class="${source.name}" type="checkbox">
+											</label>
+										</div>
+									</td>
+									<td>
+										<b>${source.label?html}</b> (${source.dataType})
+										<#if source.nillable> <span class="label label-warning">nillable</span></#if>
+										<#if source.unique> <span class="label label-default">unique</span></#if>
+										<#if source.description??><br />${source.description?html}</#if>
+									</td>
+									<td>
+										${source.name?html}
+									</td>
+								</tr>
+							</#list>
+						</tbody>
+					</table>
+					
+					<nav style="text-align:center">
+			  			<ul class="pagination">
+			    			<li>
+					      		<a href="#" aria-label="Previous">
+					        		<span aria-hidden="true">&laquo;</span>
+					      		</a>
+					    	</li>
+					    	<li><a href="#">1</a></li>
+					    	<li><a href="#">2</a></li>
+					    	<li><a href="#">3</a></li>
+					    	<li><a href="#">4</a></li>
+					    	<li><a href="#">5</a></li>
+					    	<li>
+					     		<a href="#" aria-label="Next">
+					        		<span aria-hidden="true">&raquo;</span>
+					      		</a>
+					    	</li>
+					  	</ul>
+					</nav>		
+				</div>
+			</div>
+			
+		</div> <#-- End: Attribute table container -->
+	</div> <#-- End: Attribute table column --> 
+	
+	<div class="col-md-6 col-lg-4"> <#-- Start: Mapping column -->
+		<div class="attribute-mapping-container">  <#-- Start: Mapping container -->
+			
+			<div class="row">
+				<div class="col-md-12">
+					<legend>Mapping</legend>
+				</div>
+			</div>
+			
+			<div class="row">
+				<div class="col-md-12">
+					<ul class="nav nav-pills" role="tablist">
+			    		<li role="presentation" class="active"><a href="#equal" aria-controls="equal" role="tab" data-toggle="tab"> = </a></li>
+			    		<li role="presentation"><a href="#function" aria-controls="function" role="tab" data-toggle="tab">Function</a></li>
+			    		<li role="presentation"><a href="#map" aria-controls="map" role="tab" data-toggle="tab">Map</a></li> 
+			    		<li role="presentation"><a href="#script" aria-controls="script" role="tab" data-toggle="tab">Script</a></li>
+			   		</ul>
+			   		<br/>
+				</div>
+			</div>
+			
+			<div class="row">
+				<div class="col-md-12">
+					 <div class="tab-content">
+			    		<div role="tabpanel" class="tab-pane fade active" id="equal"><@equal /></div>
+			    		<div role="tabpanel" class="tab-pane fade" id="function"><@function /></div>
+			    		<div role="tabpanel" class="tab-pane fade" id="map"><@map /></div>
+			    		<div role="tabpanel" class="tab-pane fade" id="script"><@script /></div>
+			    	</div>
+			    	<br/>
+				</div>
+			</div>
+			
+		</div> <#-- End: Mapping container -->
+	</div>  <#-- End: Mapping column -->
+	
+	<div class="col-md-6 col-lg-4"> <#-- Start Result column -->
+		<div class="result-container"> <#-- Start: Result container -->
+			
+			<div class="row">
+				<div class="col-md-12">
+					<legend>Result</legend>
+					<form class="form-inline">		
+		
+						<div class="form-group">
+							X success, X missing, X errors
+						</div>
+						<div class="form-group pull-right">
+							<div class="checkbox">
+			    				<label>
+			      					<input id="errors-only-checkbox" type="checkbox"> Errors only
+			    				</label>
+			  				</div>
+			  				
+							<div class="input-group">
+			      				<span class="input-group-btn">
+			        				<button id="result-search-btn" class="btn btn-default" type="button"><span class="glyphicon glyphicon-search"></button>
+			      				</span>
+			      				<input id="result-search-field" type="text" class="form-control" placeholder="Search">
+			    			</div>
+						</div>
+					</form>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-md-12">
+					<table class="table table-bordered">
+						<thead>
+							<th>Source attribute X values</th>
+							<th>Result values</th>
+							<th>Status</th>
+						</thead>
+						<tbody>
+							<tr>
+								<td>value</td>
+								<td>result value</td>
+								<td>OK</td>
+							</tr>
+							<tr>
+								<td>value</td>
+								<td>result value</td>
+								<td>OK</td>
+							</tr>
+							<tr>
+								<td>value</td>
+								<td>result value</td>
+								<td>OK</td>
+							</tr>
+						</tbody>
+					</table>
+					
+					<nav style="text-align:center">
+		  			<ul class="pagination">
+		    			<li>
+				      		<a href="#" aria-label="Previous">
+				        		<span aria-hidden="true">&laquo;</span>
+				      		</a>
+				    	</li>
+				    	<li><a href="#">1</a></li>
+				    	<li><a href="#">2</a></li>
+				    	<li><a href="#">3</a></li>
+				    	<li><a href="#">4</a></li>
+				    	<li><a href="#">5</a></li>
+				    	<li>
+				     		<a href="#" aria-label="Next">
+				        		<span aria-hidden="true">&raquo;</span>
+				      		</a>
+				    	</li>
+				  	</ul>
+				</nav>		
+			</div>
+			
+		</div> <#-- End: Result container -->
+	</div> <#-- End: Result column -->
+	
+</div> <#-- End: Master row -->
+
+
+<div class="row">
+	<div class="col-md-12"> <#-- Start: Save column -->
+		<div class="save-and-test-btn-container"> <#-- Start: Save container -->
+			<hr></hr>
+			<form>
+			</form>
+		</div> <#-- End: Save container -->
+	</div> <#-- End: Save column -->
+</div>
+
+
+<#-- equal tab -->
+<#macro equal> 
+	<div class="row">
+		<div class="col-md-12">
+			<h4>Simple direct one on one mapping</h4>
 		</div>
-		<div class="pull-right">
-			<form method="get" action="${context_url}/attributeMapping">
-				<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
-				<input type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name?html}"/>
-				<input type="hidden" name="source" value="${entityMapping.name?html}"/>
-				<input type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name?html}"/>
-				<input type="hidden" name="showSuggestedAttributes" value="${showSuggestedAttributes?string("false", "true")}"/>
-				<div class="btn-group" role="group">
-					<button id="reload-attribute-mapping-table" type="submit" class="btn btn-default" ">
-						<#if showSuggestedAttributes?c == "true">
-							Show all attributes
-						<#else>
-							Show only attributes suggested by semantic search
-						</#if>
-					</button>
+	</div>
+</#macro>
+
+<#-- function tab -->
+<#macro function>
+	<div class="row">
+		<div class="col-md-12">
+			<h4>Apply a mathematical function to the values of the selected attribute</h4>
+			<form class="form-inline">
+				
+				<div id="function-selected-attribute-field" class="form-group">
+			    	Attribute: 
+		    	</div>
+		    	
+		    	<div class="form-group">
+		    		<div class="input-group">
+		    			<div class="input-group-btn">
+					    	<select class="form-control" id="function-operator-field">
+					    		<option value="" selected disabled>Please select</option>
+					    		<option value="divide">Divide</option>
+					    		<option value="multiply">Multiply</option>
+					    		<option value="min">Minus</option>
+					    		<option value="sum">Plus</option>
+					    	</select>
+				    	</div>
+			    		<input type="text" class="form-control" id="function-value-field" placeholder="function value..."></input>
+		    		</div>
+			  	</div>
+			  	
+			</form>
+			<br/>
+		</div>
+	</div>
+</#macro>
+
+<#-- map tab -->
+<#macro map>
+	<div class="row">
+		<div class="col-md-12">
+			<div id="advanced-mapping-table"></div>
+			<script>
+				$("#advanced-mapping-table").load("advancedmappingeditor #advanced-mapping-table", {
+					mappingProjectId : "${mappingProject.identifier}",
+					target : "${entityMapping.targetEntityMetaData.name?html}",
+					source : "${entityMapping.name?html}",
+					targetAttribute : "${attributeMapping.targetAttributeMetaData.name?html}",
+					sourceAttribute : "LifeLines_GENDER"
+				});
+			</script>
+		</div>
+	</div>
+</#macro>
+
+<#-- algorithm editor tab -->
+<#macro script>
+	<div class="row">
+		<div class="col-md-12">
+			<h4>Algorithm</h4>
+			<form>
+				<div class="form-group">
+					<input type="text"></input>
 				</div>
 			</form>
 		</div>
 	</div>
-	<div class="col-md-6"></div>
-</div>
-
-<div class="row">
-	<div class="col-md-6">
-		<div id="attribute-table-container">
-			<table id="attribute-mapping-table" class="table table-bordered scroll">
-				<thead>
-					<tr>
-						<th>Attribute</th>
-						<#if attributeMapping.targetAttributeMetaData.dataType == "xref" || attributeMapping.targetAttributeMetaData.dataType == "categorical">
-							<th>Category editor</th>
-						</#if>					
-					</tr>
-				</thead>
-				<tbody>
-					<#list entityMapping.sourceEntityMetaData.attributes as source>
-						<tr>
-							<td class="${source.name}">
-								<b>${source.label?html}</b> (${source.dataType})
-								<#if source.nillable> <span class="label label-warning">nillable</span></#if>
-								<#if source.unique> <span class="label label-default">unique</span></#if>
-								<#if source.description??><br />${source.description?html}</#if>
-								<#if hasWritePermission><button type="button" class="btn btn-default insert pull-right" data-attribute="${source.name}"><span class="glyphicon glyphicon-ok"></span></button></#if>
-							</td>
-							
-							<#--If the target is an xref/categorical and the source attribute is an xref/categorical/string-->
-							<#if attributeMapping.targetAttributeMetaData.dataType == "xref" || attributeMapping.targetAttributeMetaData.dataType == "categorical">
-								<td>	
-								<#if source.dataType == "xref" || source.dataType == "categorical" || source.dataType == "string">
-									<form method="post" action="${context_url}/categoryMappingEditor">
-										<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
-										<input type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name?html}"/>
-										<input type="hidden" name="source" value="${entityMapping.name?html}"/>
-										<input type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name?html}"/>
-										<input type="hidden" name="sourceAttribute" value="${source.name}"/>
-								
-										<button class="btn btn-default category-mapping-edit-btn"><span class="glyphicon glyphicon-list-alt"></span></button>
-									</form>	
-								</#if>
-								</td>
-							</#if>	
-						</tr>
-					</#list>
-				</tbody>
-			</table>
-			<#if hasWritePermission>
-				<form id="saveattributemapping-form" method="POST" action="${context_url}/saveattributemapping">
-					<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
-					<input type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name?html}"/>
-					<input type="hidden" name="source" value="${entityMapping.name?html}"/>
-					<input type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name?html}"/>
-					<input type="hidden" name="algorithm" value="${(attributeMapping.algorithm!"")?html}" id="edit-algorithm-textarea"></input>				
-
-					<button type="submit" class="btn btn-primary">Save</button>
-					
-				</form>  
-			</#if>
-	
-			<form id="" method="POST" action="${context_url}/attributeMappingFeedback">
-				<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
-				<input type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name?html}"/>
-				<input type="hidden" name="source" value="${entityMapping.name?html}"/>
-				<input type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name?html}"/>
-				<input type="hidden" name="algorithm" value="${(attributeMapping.algorithm!"")?html}" id="edit-algorithm-textarea"></input>
-	
-				<button type="submit" class="btn btn-success">Preview mapping result</button>
-			</form>
-
-		</div>
-	</div>
-	<div id="mapping-result-preview-container" class="col-md-6"></div>
-</div>
-</#macro>
-
-<#macro advanced>
-<div class="row">
-	<div class="col-md-6">
-		<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-  			<div class="panel panel-primary">
-    			
-    			<div class="panel-heading" role="tab" id="advanced-options">
-      				<h4 class="panel-title">
-        				<a data-toggle="collapse" data-parent="#accordion" href="#collapse-advanced-options" aria-expanded="true" aria-controls="collapse-advanced-options">
-          					Advanced options
-        				</a>
-      				</h4>
-    			</div>
-    			
-    			<div id="collapse-advanced-options" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="advanced-options">
-      				<div class="panel-body">
-        				<h5>Algorithm</h5>
-						<form id="saveattributemapping-form" method="POST" action="${context_url}/saveattributemapping">
-							<textarea class="form-control" name="algorithm" rows="15" id="edit-algorithm-textarea" <#if !hasWritePermission>data-readonly="true"</#if> width="100%">${(attributeMapping.algorithm!"")?html}</textarea>
-							<hr />
-							<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
-							<input type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name?html}"/>
-							<input type="hidden" name="source" value="${entityMapping.name?html}"/>
-							<input type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name?html}"/>
-							<button type="button" class="btn btn-primary" id="btn-test">Test</button>
-							<#if hasWritePermission>
-								<button type="submit" class="btn btn-primary">Save</button> 
-								<button type="reset" class="btn btn-warning">Reset</button>
-							</#if>			
-						</form>
-      				</div>
-    			</div>
-  			</div>
-  			
-  			<div class="panel panel-primary">
-    			
-				<div class="panel-heading" role="tab" id="mapping-statistics">
-      				<h4 class="panel-title">
-        				<a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapse-mapping-statistics" aria-expanded="false" aria-controls="collapse-mapping-statistics">
-          					Mapping statistics
-        				</a>
-      				</h4>
-    			</div>
-    		
-    			<div id="collapse-mapping-statistics" class="panel-collapse collapse" role="tabpanel" aria-labelledby="mapping-statistics">
-      				<div class="panel-body">
-        				<div id="statistics-container">
-							<div class="row">
-								<div class="col-md-6">
-									<center><legend>Summary statistics</legend></center>
-									<table class="table table-bordered">
-											<tr><th>Total cases</th><td id="stats-total"></td></tr>
-											<tr><th>Valid cases</th><td id="stats-valid"></td></tr>
-											<#switch attributeMapping.targetAttributeMetaData.dataType>
-					  						<#case "long">
-					  						<#case "decimal">
-					  						<#case "int">
-												<tr><th>Mean</th><td id="stats-mean"></td></tr>
-												<tr><th>Median</th><td id="stats-median"></td></tr>
-												<tr><th>Standard deviation</th><td id="stats-stdev"></td></tr>
-										</#switch>
-									</table>
-								</div>
-								<#switch attributeMapping.targetAttributeMetaData.dataType>
-									<#case "long">
-									<#case "decimal">
-									<#case "int">
-										<div class="col-md-6">
-											<center><legend>Distribution plot</legend></center>
-											<div class="distribution">
-											</div>
-										</div>
-								</#switch>
-							</div>
-						</div>
-      				</div>
-    			</div>
-
-  			</div>
-		</div>
-	</div>
-</div>
 </#macro>
 
 <@footer/>

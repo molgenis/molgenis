@@ -57,6 +57,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -72,7 +73,7 @@ public class MappingServiceController extends MolgenisPluginController
 	private static final String VIEW_MAPPING_PROJECTS = "view-mapping-projects";
 	private static final String VIEW_ATTRIBUTE_MAPPING = "view-attribute-mapping";
 	private static final String VIEW_SINGLE_MAPPING_PROJECT = "view-single-mapping-project";
-	private static final String VIEW_CATEGORY_MAPPING_EDITOR = "view-category-mapping-editor";
+	private static final String VIEW_CATEGORY_MAPPING_EDITOR = "view-advanced-mapping-editor";
 	private static final String VIEW_ATTRIBUTE_MAPPING_FEEDBACK = "view-attribute-mapping-feedback";
 
 	@Autowired
@@ -404,7 +405,41 @@ public class MappingServiceController extends MolgenisPluginController
 		return VIEW_ATTRIBUTE_MAPPING;
 	}
 
-	@RequestMapping("/attributeMappingFeedback")
+	@RequestMapping(method = RequestMethod.POST, value = "/dynamicattributemappingfeedback")
+	public @ResponseBody Map<String, List<Entity>> dynamicFeedback(
+			@RequestParam(required = true) String mappingProjectId, @RequestParam(required = true) String target,
+			@RequestParam(required = true) String source, @RequestParam(required = true) String targetAttribute,
+			@RequestParam(required = true) String algorithm)
+	{
+		// TODO put this in some kind of response object, this is duplicated a lot
+		MappingProject project = mappingService.getMappingProject(mappingProjectId);
+		MappingTarget mappingTarget = project.getMappingTarget(target);
+		EntityMapping entityMapping = mappingTarget.getMappingForSource(source);
+		AttributeMapping attributeMapping = entityMapping.getAttributeMapping(targetAttribute);
+
+		FluentIterable<Entity> sourceEntities = FluentIterable.from(dataService.findAll(source)).limit(10);
+		
+		// Key: attribute name, Source: entities
+		Map<String, List<Entity>> previewTable = new HashMap<String, List<Entity>>();
+		ImmutableList<AlgorithmResult> algorithmResults = sourceEntities.transform(
+				sourceEntity -> {
+					try
+					{
+						return AlgorithmResult.createSuccess(algorithmService.apply(attributeMapping, sourceEntity,
+								sourceEntity.getEntityMetaData()), sourceEntity);
+					}
+					catch (Exception e)
+					{
+						return AlgorithmResult.createFailure(e, sourceEntity);
+					}
+				}).toList();
+
+		System.out.println(algorithmResults);
+
+		return previewTable;
+	}
+
+	@RequestMapping(value = "/attributemappingfeedback")
 	public String attributeMappingFeedback(@RequestParam(required = true) String mappingProjectId,
 			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
 			@RequestParam(required = true) String targetAttribute, @RequestParam(required = true) String algorithm,
@@ -419,13 +454,10 @@ public class MappingServiceController extends MolgenisPluginController
 
 		FluentIterable<Entity> sourceEntities = FluentIterable.from(dataService.findAll(source)).limit(20);
 
-		// query first 20 rows
-		// apply algorithm to those rows
-		// add result objects for each row to model
-
 		// model.addAttribute("rows", Arrays.asList(AlgorithmResult.createFailure("NullPointer Exception blah"),
 		// AlgorithmResult.createSuccess("5.3")));
 
+		model.addAttribute("mappingProjectId", mappingProjectId);
 		model.addAttribute("target", target);
 		model.addAttribute("source", source);
 		model.addAttribute("sourceAttributeNames", algorithmService.getSourceAttributeNames(algorithm));
@@ -462,8 +494,8 @@ public class MappingServiceController extends MolgenisPluginController
 	 * @param sourceAttribute
 	 * @param model
 	 */
-	@RequestMapping("/categoryMappingEditor")
-	public String categoryMappingEditor(@RequestParam(required = true) String mappingProjectId,
+	@RequestMapping("/advancedmappingeditor")
+	public String advancedMappingEditor(@RequestParam(required = true) String mappingProjectId,
 			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
 			@RequestParam(required = true) String targetAttribute,
 			@RequestParam(required = true) String sourceAttribute, Model model)
