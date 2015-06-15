@@ -3,26 +3,25 @@ package org.molgenis.data.annotation.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.utils.AnnotatorUtils;
-import org.molgenis.data.annotation.utils.TabixReader;
 import org.molgenis.data.annotation.VariantAnnotator;
-import org.molgenis.data.vcf.utils.VcfUtils;
+import org.molgenis.data.annotation.mini.AnnotatorInfo;
+import org.molgenis.data.annotation.mini.AnnotatorInfo.Status;
+import org.molgenis.data.annotation.mini.AnnotatorInfo.Type;
+import org.molgenis.data.annotation.utils.AnnotatorUtils;
+import org.molgenis.data.annotator.tabix.TabixReader;
 import org.molgenis.data.support.AnnotationServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.server.MolgenisSimpleSettings;
 import org.slf4j.Logger;
@@ -52,6 +51,23 @@ public class CaddServiceAnnotator extends VariantAnnotator
 
 	private final MolgenisSettings molgenisSettings;
 	private final AnnotationService annotatorService;
+	private final AnnotatorInfo info = AnnotatorInfo
+			.create(Status.BETA,
+					Type.PATHOGENICITY_ESTIMATE,
+					"cadd",
+					"CADD is a tool for scoring the deleteriousness of single nucleotide variants as well as insertion/deletions variants in the human genome.\n"
+							+ "\n"
+							+ "While many variant annotation and scoring utils are around, most annotations tend to exploit a single information type (e.g. conservation) and/or are restricted in scope (e.g. to missense changes). Thus, a broadly applicable metric that objectively weights and integrates diverse information is needed. Combined Annotation Dependent Depletion (CADD) is a framework that integrates multiple annotations into one metric by contrasting variants that survived natural selection with simulated mutations.\n"
+							+ "\n"
+							+ "C-scores strongly correlate with allelic diversity, pathogenicity of both coding and non-coding variants, and experimentally measured regulatory effects, and also highly rank causal variants within individual genome sequences. Finally, C-scores of complex trait-associated variants from genome-wide association studies (GWAS) are significantly higher than matched controls and correlate with study sample size, likely reflecting the increased accuracy of larger GWAS.\n"
+							+ "\n"
+							+ "CADD can quantitatively prioritize functional, deleterious, and disease causal variants across a wide range of functional categories, effect sizes and genetic architectures and can be used prioritize causal variation in both research and clinical settings. (source: http://cadd.gs.washington.edu/info)");
+
+	@Override
+	public AnnotatorInfo getInfo()
+	{
+		return info;
+	}
 
 	// the cadd service returns these two values
 	// must be compatible with VCF format, ie no funny characters
@@ -100,7 +116,7 @@ public class CaddServiceAnnotator extends VariantAnnotator
 		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
 		Iterator<Entity> vcfIter = vcfRepo.iterator();
 
-		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields, CADD_SCALED);
+		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, getOutputMetaData(), CADD_SCALED);
 
 		System.out.println("Now starting to process the data.");
 
@@ -267,27 +283,16 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	}
 
 	@Override
-	public EntityMetaData getOutputMetaData()
+	public List<AttributeMetaData> getOutputMetaData()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
+		List<AttributeMetaData> metadata = new ArrayList<>();
 		DefaultAttributeMetaData cadd_abs = new DefaultAttributeMetaData(CADD_ABS, FieldTypeEnum.DECIMAL).setLabel(CADD_ABS_LABEL).setDescription("\"Raw\" CADD scores come straight from the model, and are interpretable as the extent to which the annotation profile for a given variant suggests that that variant is likely to be \"observed\" (negative values) vs \"simulated\" (positive values). These values have no absolute unit of meaning and are incomparable across distinct annotation combinations, training sets, or model parameters. However, raw values do have relative meaning, with higher values indicating that a variant is more likely to be simulated (or \"not observed\") and therefore more likely to have deleterious effects.(source: http://cadd.gs.washington.edu/info)");
 		DefaultAttributeMetaData cadd_scaled = new DefaultAttributeMetaData(CADD_SCALED, FieldTypeEnum.DECIMAL).setLabel(CADD_SCALED_LABEL).setDescription("Since the raw scores do have relative meaning, one can take a specific group of variants, define the rank for each variant within that group, and then use that value as a \"normalized\" and now externally comparable unit of analysis. In our case, we scored and ranked all ~8.6 billion SNVs of the GRCh37/hg19 reference and then \"PHRED-scaled\" those values by expressing the rank in order of magnitude terms rather than the precise rank itself. For example, reference genome single nucleotide variants at the 10th-% of CADD scores are assigned to CADD-10, top 1% to CADD-20, top 0.1% to CADD-30, etc. The results of this transformation are the \"scaled\" CADD scores.(source: http://cadd.gs.washington.edu/info)");
 
-		metadata.addAttributeMetaData(cadd_abs);
-		metadata.addAttributeMetaData(cadd_scaled);
+		metadata.add(cadd_abs);
+		metadata.add(cadd_scaled);
 
 		return metadata;
 	}
-
-    @Override
-    public String getDescription(){
-        return "CADD is a tool for scoring the deleteriousness of single nucleotide variants as well as insertion/deletions variants in the human genome.\n" +
-                "\n" +
-                "While many variant annotation and scoring utils are around, most annotations tend to exploit a single information type (e.g. conservation) and/or are restricted in scope (e.g. to missense changes). Thus, a broadly applicable metric that objectively weights and integrates diverse information is needed. Combined Annotation Dependent Depletion (CADD) is a framework that integrates multiple annotations into one metric by contrasting variants that survived natural selection with simulated mutations.\n" +
-                "\n" +
-                "C-scores strongly correlate with allelic diversity, pathogenicity of both coding and non-coding variants, and experimentally measured regulatory effects, and also highly rank causal variants within individual genome sequences. Finally, C-scores of complex trait-associated variants from genome-wide association studies (GWAS) are significantly higher than matched controls and correlate with study sample size, likely reflecting the increased accuracy of larger GWAS.\n" +
-                "\n" +
-                "CADD can quantitatively prioritize functional, deleterious, and disease causal variants across a wide range of functional categories, effect sizes and genetic architectures and can be used prioritize causal variation in both research and clinical settings. (source: http://cadd.gs.washington.edu/info)";
-    }
 
 }

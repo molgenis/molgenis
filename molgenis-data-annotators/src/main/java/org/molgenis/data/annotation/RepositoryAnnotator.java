@@ -1,9 +1,12 @@
 package org.molgenis.data.annotation;
 
+import java.util.Iterator;
+import java.util.List;
+
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-
-import java.util.Iterator;
+import org.molgenis.data.annotation.mini.AnnotatorInfo;
 
 /**
  * interface for annotators. annotators take an iterator and return an iterator with some information added or updated
@@ -11,8 +14,11 @@ import java.util.Iterator;
 
 public interface RepositoryAnnotator
 {
-    final static String ANNOTATOR_PREFIX = "molgenis_annotated_";
+	final static String ANNOTATOR_PREFIX = "molgenis_annotated_";
 
+	AnnotatorInfo getInfo();
+
+	// add entityAnnotator
 	Iterator<Entity> annotate(Iterable<Entity> source);
 
 	/**
@@ -20,14 +26,14 @@ public interface RepositoryAnnotator
 	 * 
 	 * @return ouputMetadata
 	 */
-	EntityMetaData getOutputMetaData();
+	List<AttributeMetaData> getOutputMetaData();
 
 	/**
 	 * Returns a entityMetaData containing the attributes needed for the annotator to work
 	 * 
 	 * @return inputMetaData;
 	 */
-	EntityMetaData getInputMetaData();
+	List<AttributeMetaData> getInputMetaData();
 
 	/**
 	 * Returns null if the annotator will work for the given metadata, a reason if not so
@@ -44,9 +50,11 @@ public interface RepositoryAnnotator
 	 */
 	String getSimpleName();
 
-    String getFullName();
+	String getFullName();
 
-    default String getDescription(){
-        return "no description";
-    }
+	default String getDescription()
+	{
+		return getInfo() == null ? "no description" : getInfo().getDescription();
+	}
+
 }

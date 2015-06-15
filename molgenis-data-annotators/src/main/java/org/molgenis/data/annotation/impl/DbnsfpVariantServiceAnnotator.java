@@ -18,8 +18,11 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.annotation.VariantAnnotator;
+import org.molgenis.data.annotation.mini.AnnotatorInfo;
+import org.molgenis.data.annotation.mini.AnnotatorInfo.Status;
+import org.molgenis.data.annotation.mini.AnnotatorInfo.Type;
+import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -222,7 +225,7 @@ public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 								int lineSplitIndex = 0;
 
 								HashMap<String, Object> resultMap = new HashMap<String, Object>();
-								Iterable<AttributeMetaData> featureList = getOutputMetaData().getAtomicAttributes();
+								Iterable<AttributeMetaData> featureList = getOutputMetaData();
 
 								for (AttributeMetaData feature : featureList)
 								{
@@ -266,79 +269,84 @@ public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 	}
 
 	@Override
-	public EntityMetaData getOutputMetaData()
+	public List<AttributeMetaData> getOutputMetaData()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
+		List<AttributeMetaData> metadata = new ArrayList<>();
 
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CHR, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(POS_1_COOR, FieldTypeEnum.LONG));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(REF, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ALT, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(AAREF, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(AAALT, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HG18_POS_1_COOR, FieldTypeEnum.LONG));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GENENAME, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(UNIPROT_ACC, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(UNIPROT_ID, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(UNIPROT_AAPOS, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(INTERPRO_DOMAIN, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CDS_STRAND, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(REFCODON, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(SLR_TEST_STATISTIC, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CODONPOS, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(FOLD_DEGENERATE, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ANCESTRAL_ALLELE, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ENSEMBL_GENEID, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ENSEMBL_TRANSCRIPTID, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(AAPOS, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(AAPOS_SIFT, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(AAPOS_FATHMM, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(SIFT_SCORE, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(SIFT_SCORE_CONVERTED, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(SIFT_PRED, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(POLYPHEN2_HDIV_SCORE, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(POLYPHEN2_HDIV_PRED, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(POLYPHEN2_HVAR_SCORE, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(POLYPHEN2_HVAR_PRED, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(LRT_SCORE, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(LRT_SCORE_CONVERTED, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(LRT_PRED, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(MUTATIONTASTER_SCORE, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(MUTATIONTASTER_SCORE_CONVERTED, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(MUTATIONTASTER_PRED, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(MUTATIONASSESSOR_SCORE, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(MUTATIONASSESSOR_SCORE_CONVERTED,
-				FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(MUTATIONASSESSOR_PRED, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(FATHMM_SCORE, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(FATHMM_SCORE_CONVERTED, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(FATHMM_PRED, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(RADIALSVM_SCORE, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(RADIALSVM_SCORE_CONVERTED, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(RADIALSVM_PRED, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(LR_SCORE, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(LR_PRED, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(RELIABILITY_INDEX, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GERP_NR, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GERP_RS, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(PHYLOP, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(TWONINE_WAY_PI, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(TWONINE_WAY_LOGODDS, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(LRT_OMEGA, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(UNISNP_IDS, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(THOUSAND_GP1_AC, FieldTypeEnum.INT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(THOUSAND_GP1_AF, FieldTypeEnum.DECIMAL));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(THOUSAND_GP1_AFR_AC, FieldTypeEnum.INT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(THOUSAND_GP1_AFR_AF, FieldTypeEnum.DECIMAL));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(THOUSAND_GP1_EUR_AC, FieldTypeEnum.INT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(THOUSAND_GP1_EUR_AF, FieldTypeEnum.DECIMAL));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(THOUSAND_GP1_AMR_AC, FieldTypeEnum.INT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(THOUSAND_GP1_AMR_AF, FieldTypeEnum.DECIMAL));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(THOUSAND_GP1_ASN_AC, FieldTypeEnum.INT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(THOUSAND_GP1_ASN_AF, FieldTypeEnum.DECIMAL));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ESP6500_AA_AF, FieldTypeEnum.DECIMAL));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ESP6500_EA_AF, FieldTypeEnum.DECIMAL));
+		metadata.add(new DefaultAttributeMetaData(CHR, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(POS_1_COOR, FieldTypeEnum.LONG));
+		metadata.add(new DefaultAttributeMetaData(REF, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(ALT, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(AAREF, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(AAALT, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(HG18_POS_1_COOR, FieldTypeEnum.LONG));
+		metadata.add(new DefaultAttributeMetaData(GENENAME, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(UNIPROT_ACC, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(UNIPROT_ID, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(UNIPROT_AAPOS, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(INTERPRO_DOMAIN, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(CDS_STRAND, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(REFCODON, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(SLR_TEST_STATISTIC, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(CODONPOS, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(FOLD_DEGENERATE, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(ANCESTRAL_ALLELE, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(ENSEMBL_GENEID, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(ENSEMBL_TRANSCRIPTID, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(AAPOS, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(AAPOS_SIFT, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(AAPOS_FATHMM, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(SIFT_SCORE, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(SIFT_SCORE_CONVERTED, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(SIFT_PRED, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(POLYPHEN2_HDIV_SCORE, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(POLYPHEN2_HDIV_PRED, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(POLYPHEN2_HVAR_SCORE, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(POLYPHEN2_HVAR_PRED, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(LRT_SCORE, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(LRT_SCORE_CONVERTED, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(LRT_PRED, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(MUTATIONTASTER_SCORE, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(MUTATIONTASTER_SCORE_CONVERTED, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(MUTATIONTASTER_PRED, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(MUTATIONASSESSOR_SCORE, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(MUTATIONASSESSOR_SCORE_CONVERTED, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(MUTATIONASSESSOR_PRED, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(FATHMM_SCORE, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(FATHMM_SCORE_CONVERTED, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(FATHMM_PRED, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(RADIALSVM_SCORE, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(RADIALSVM_SCORE_CONVERTED, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(RADIALSVM_PRED, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(LR_SCORE, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(LR_PRED, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(RELIABILITY_INDEX, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(GERP_NR, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(GERP_RS, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(PHYLOP, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(TWONINE_WAY_PI, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(TWONINE_WAY_LOGODDS, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(LRT_OMEGA, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(UNISNP_IDS, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(THOUSAND_GP1_AC, FieldTypeEnum.INT));
+		metadata.add(new DefaultAttributeMetaData(THOUSAND_GP1_AF, FieldTypeEnum.DECIMAL));
+		metadata.add(new DefaultAttributeMetaData(THOUSAND_GP1_AFR_AC, FieldTypeEnum.INT));
+		metadata.add(new DefaultAttributeMetaData(THOUSAND_GP1_AFR_AF, FieldTypeEnum.DECIMAL));
+		metadata.add(new DefaultAttributeMetaData(THOUSAND_GP1_EUR_AC, FieldTypeEnum.INT));
+		metadata.add(new DefaultAttributeMetaData(THOUSAND_GP1_EUR_AF, FieldTypeEnum.DECIMAL));
+		metadata.add(new DefaultAttributeMetaData(THOUSAND_GP1_AMR_AC, FieldTypeEnum.INT));
+		metadata.add(new DefaultAttributeMetaData(THOUSAND_GP1_AMR_AF, FieldTypeEnum.DECIMAL));
+		metadata.add(new DefaultAttributeMetaData(THOUSAND_GP1_ASN_AC, FieldTypeEnum.INT));
+		metadata.add(new DefaultAttributeMetaData(THOUSAND_GP1_ASN_AF, FieldTypeEnum.DECIMAL));
+		metadata.add(new DefaultAttributeMetaData(ESP6500_AA_AF, FieldTypeEnum.DECIMAL));
+		metadata.add(new DefaultAttributeMetaData(ESP6500_EA_AF, FieldTypeEnum.DECIMAL));
 
 		return metadata;
+	}
+
+	@Override
+	public AnnotatorInfo getInfo()
+	{
+		return AnnotatorInfo.create(Status.INDEV, Type.UNUSED, "unknown", "no description");
 	}
 }

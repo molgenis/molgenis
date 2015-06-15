@@ -11,12 +11,14 @@ import java.util.Scanner;
 
 import org.apache.xmlbeans.impl.piccolo.io.FileFormatException;
 import org.elasticsearch.common.collect.Iterables;
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.datastructures.Sample;
 import org.molgenis.data.vcf.datastructures.Trio;
+import org.molgenis.vcf.meta.VcfMetaInfo;
 
 public class VcfUtils
 {
@@ -152,7 +154,7 @@ public class VcfUtils
 	 * @throws Exception
 	 */
 	public static boolean checkPreviouslyAnnotatedAndAddMetadata(File inputVcfFile, PrintWriter outputVCFWriter,
-			List<String> infoFields, String checkAnnotatedBeforeValue) throws FileFormatException,
+			List<AttributeMetaData> infoFields, String checkAnnotatedBeforeValue) throws FileFormatException,
 			FileNotFoundException
 	{
 		boolean annotatedBefore = false;
@@ -199,9 +201,9 @@ public class VcfUtils
 			// print INFO lines for stuff to be annotated
 			if (!annotatedBefore)
 			{
-				for (String infoField : infoFields)
+				for (AttributeMetaData infoAttributeMetaData : infoFields)
 				{
-					outputVCFWriter.println(infoField);
+					outputVCFWriter.println(attributeMetaDataToInfoField(infoAttributeMetaData));
 				}
 			}
 
@@ -219,12 +221,59 @@ public class VcfUtils
 		return annotatedBefore;
 	}
 
+	private static String attributeMetaDataToInfoField(AttributeMetaData infoAttributeMetaData)
+	{
+		StringBuilder sb = new StringBuilder();
+		sb.append("##INFO=<ID=");
+		sb.append(infoAttributeMetaData.getName());
+		sb.append(",Number=.");// FIXME: once we support list of primitives we can calculate based on combination of
+								// type and nillable
+		sb.append(",Type=");
+		sb.append(toVcfDataType(infoAttributeMetaData.getDataType().getEnumType()));
+		sb.append(",Description=");
+		sb.append(infoAttributeMetaData.getDescription());
+		return sb.toString();
+	}
+
+	private static String toVcfDataType(MolgenisFieldTypes.FieldTypeEnum dataType)
+	{
+		switch (dataType)
+		{
+			case BOOL:
+				return VcfMetaInfo.Type.FLAG.toString();
+			case LONG:
+			case DECIMAL:
+				return VcfMetaInfo.Type.FLOAT.toString();
+			case INT:
+				return VcfMetaInfo.Type.INTEGER.toString();
+			case EMAIL:
+			case ENUM:
+			case HTML:
+			case HYPERLINK:
+			case STRING:
+			case TEXT:
+			case DATE:
+			case DATE_TIME:
+			case CATEGORICAL:
+			case XREF:
+			case CATEGORICAL_MREF:
+			case MREF:
+				return VcfMetaInfo.Type.STRING.toString();
+			case COMPOUND:
+			case FILE:
+			case IMAGE:
+				throw new RuntimeException("invalid vcf data type " + dataType);
+			default:
+				throw new RuntimeException("unsupported vcf data type " + dataType);
+		}
+	}
+
 	/**
-	 * 
+	 *
 	 * Get pedigree data from VCF Now only support child, father, mother No fancy data structure either Output:
 	 * result.put(childID, Arrays.asList(new String[]{motherID, fatherID}));
-	 * 
-	 * @param vcfFile
+	 *
+	 * @param inputVcfFile
 	 * @return
 	 * @throws FileNotFoundException
 	 */

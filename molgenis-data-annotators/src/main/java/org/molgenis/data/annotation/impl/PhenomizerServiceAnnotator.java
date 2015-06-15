@@ -19,19 +19,23 @@ import java.util.Scanner;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.VariantAnnotator;
+import org.molgenis.data.annotation.mini.AnnotatorInfo;
+import org.molgenis.data.annotation.mini.AnnotatorInfo.Status;
+import org.molgenis.data.annotation.mini.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.provider.UrlPinger;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
-import org.molgenis.data.annotation.VariantAnnotator;
-import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.data.support.AnnotationServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.server.MolgenisSimpleSettings;
 import org.slf4j.Logger;
@@ -134,7 +138,7 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
 		Iterator<Entity> vcfIter = vcfRepo.iterator();
 
-		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields,
+		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, getOutputMetaData(),
 				PHENOMIZERPVAL.substring(VcfRepository.getInfoPrefix().length()));
 
 		URL loc = new URL(molgenisSettings.getProperty(KEY_PHENOMIZER_URL, "") + "?mobilequery=true&numres=" + limit
@@ -264,25 +268,31 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 	}
 
 	@Override
-	public EntityMetaData getOutputMetaData()
+	public List<AttributeMetaData> getOutputMetaData()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(PHENOMIZERPVAL, FieldTypeEnum.DECIMAL)
+		List<AttributeMetaData> metadata = new ArrayList<>();
+		metadata.add(new DefaultAttributeMetaData(PHENOMIZERPVAL, FieldTypeEnum.DECIMAL)
 				.setLabel(PHENOMIZERPVAL_LABEL));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(PHENOMIZEROMIM, FieldTypeEnum.STRING)
+		metadata.add(new DefaultAttributeMetaData(PHENOMIZEROMIM, FieldTypeEnum.STRING)
 				.setLabel(PHENOMIZEROMIM_LABEL));
 		return metadata;
 	}
 
 	@Override
-	public EntityMetaData getInputMetaData()
+	public List<AttributeMetaData> getInputMetaData()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.getInfoPrefix() + "ANN",
+		List<AttributeMetaData> metadata = new ArrayList<>();
+		metadata.add(new DefaultAttributeMetaData(VcfRepository.getInfoPrefix() + "ANN",
 				FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HpoServiceAnnotator.HPO_TERMS,
+		metadata.add(new DefaultAttributeMetaData(HpoServiceAnnotator.HPO_TERMS,
 				MolgenisFieldTypes.FieldTypeEnum.STRING));
 		return metadata;
+	}
+
+	@Override
+	public AnnotatorInfo getInfo()
+	{
+		return AnnotatorInfo.create(Status.INDEV, Type.UNUSED, "unknown", "no description");
 	}
 
 }

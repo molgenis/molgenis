@@ -159,10 +159,10 @@ public class AnnotatorController
 				Map<String, Object> map = new HashMap<String, Object>();
 				map.put("description", annotator.getDescription());
 				map.put("canAnnotate", annotator.canAnnotate(entityMetaData));
-				map.put("inputAttributes", annotator.getInputMetaData().getAttributes());
-				map.put("inputAttributeTypes", toMap(annotator.getInputMetaData().getAttributes()));
-				map.put("outputAttributes", annotator.getOutputMetaData().getAttributes());
-				map.put("outputAttributeTypes", toMap(annotator.getOutputMetaData().getAttributes()));
+				map.put("inputAttributes", annotator.getInputMetaData());
+				map.put("inputAttributeTypes", toMap(annotator.getInputMetaData()));
+				map.put("outputAttributes", annotator.getOutputMetaData());
+				map.put("outputAttributeTypes", toMap(annotator.getOutputMetaData()));
 				mapOfAnnotators.put(annotator.getSimpleName(), map);
 			}
 

@@ -2,25 +2,23 @@ package org.molgenis.data.annotation.impl;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.VariantAnnotator;
+import org.molgenis.data.annotation.mini.AnnotatorInfo;
+import org.molgenis.data.annotation.mini.AnnotatorInfo.Status;
+import org.molgenis.data.annotation.mini.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.support.AnnotationServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.framework.server.MolgenisSimpleSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,8 +59,7 @@ public class GenePanelServiceAnnotator extends VariantAnnotator
 	public final static String PANEL_CHARGE = "GenePanel_CHARGE";
 
 	@Autowired
-	public GenePanelServiceAnnotator(AnnotationService annotatorService)
-			throws IOException
+	public GenePanelServiceAnnotator(AnnotationService annotatorService) throws IOException
 	{
 		this.annotatorService = annotatorService;
 	}
@@ -75,8 +72,8 @@ public class GenePanelServiceAnnotator extends VariantAnnotator
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
-        //FIXME: disabled for now
-		//annotatorService.addAnnotator(this);
+		// FIXME: disabled for now
+		// annotatorService.addAnnotator(this);
 	}
 
 	@Override
@@ -142,21 +139,28 @@ public class GenePanelServiceAnnotator extends VariantAnnotator
 	}
 
 	@Override
-	public EntityMetaData getOutputMetaData()
+	public List<AttributeMetaData> getOutputMetaData()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
+		List<AttributeMetaData> metadata = new ArrayList<>();
 
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(PANEL_SEVERELATEONSET, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(PANEL_ACMG, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(PANEL_CHARGE, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(PANEL_SEVERELATEONSET, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(PANEL_ACMG, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(PANEL_CHARGE, FieldTypeEnum.STRING));
 		return metadata;
 	}
 
-    @Override
-    public EntityMetaData getInputMetaData()
-    {
-        DefaultEntityMetaData entityMetaData = (DefaultEntityMetaData) super.getInputMetaData();
-        entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.getInfoPrefix() + "ANN", FieldTypeEnum.TEXT));
-        return entityMetaData;
-    }
+	@Override
+	public List<AttributeMetaData> getInputMetaData()
+	{
+		List<AttributeMetaData> entityMetaData = super.getInputMetaData();
+		entityMetaData.add(new DefaultAttributeMetaData(VcfRepository.getInfoPrefix() + "ANN",
+				FieldTypeEnum.TEXT));
+		return entityMetaData;
+	}
+
+	@Override
+	public AnnotatorInfo getInfo()
+	{
+		return AnnotatorInfo.create(Status.INDEV, Type.UNUSED, "unknown", "no description");
+	}
 }

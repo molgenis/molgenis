@@ -1,23 +1,27 @@
 package org.molgenis.data.annotation;
 
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public abstract class VariantAnnotator extends LocusAnnotator
 {
     @Override
-	public EntityMetaData getInputMetaData()
+	public List<AttributeMetaData> getInputMetaData()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
+		List<AttributeMetaData> metadata = new ArrayList<>();
 
-		metadata.addAttributeMetaData(VcfRepository.CHROM_META);
-		metadata.addAttributeMetaData(VcfRepository.POS_META);
-		metadata.addAttributeMetaData(VcfRepository.REF_META);
-		metadata.addAttributeMetaData(VcfRepository.ALT_META);
+		metadata.add(VcfRepository.CHROM_META);
+		metadata.add(VcfRepository.POS_META);
+		metadata.add(VcfRepository.REF_META);
+		metadata.add(VcfRepository.ALT_META);
 
 		return metadata;
 	}
