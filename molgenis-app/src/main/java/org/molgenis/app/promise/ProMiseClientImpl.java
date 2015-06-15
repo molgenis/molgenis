@@ -144,11 +144,10 @@ public class ProMiseClientImpl implements ProMiseClient
 
 		// SOAP Envelope
 		SOAPEnvelope envelope = soapPart.getEnvelope();
-		envelope.addNamespaceDeclaration(NAMESPACE_KEY, NAMESPACE_VALUE);
 
 		// SOAP Body
 		SOAPBody soapBody = envelope.getBody();
-		SOAPElement container = soapBody.addChildElement(action, NAMESPACE_KEY);
+		SOAPElement container = soapBody.addChildElement(action, null, NAMESPACE_VALUE);
 		if (!args.isEmpty())
 		{
 			for (Map.Entry<String, String> entry : args.entrySet())
