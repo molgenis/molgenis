@@ -690,7 +690,7 @@
    		</dependency>
    		<dependency>
             <groupId>org.slf4j</groupId>
-            <artifactId>jul-over-slf4j</artifactId>
+            <artifactId>jul-to-slf4j</artifactId>
             <version>${slf4j.version}</version>
         </dependency>
         <!-- scope: test -->
