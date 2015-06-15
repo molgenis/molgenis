@@ -3,6 +3,7 @@ package org.molgenis.data.vcf;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -139,8 +141,7 @@ public class VcfRepository extends AbstractRepository
 		};
 	}
 
-	public Entity toEntity(EntityMetaData emd, VcfRecord vcfRecord, VcfMeta vcfMeta)
-			throws IOException
+	public Entity toEntity(EntityMetaData emd, VcfRecord vcfRecord, VcfMeta vcfMeta) throws IOException
 	{
 		Entity entity = new MapEntity(emd);
 		entity.set(CHROM, vcfRecord.getChromosome());
@@ -415,7 +416,12 @@ public class VcfRepository extends AbstractRepository
 
 	protected VcfReader createVcfReader() throws IOException
 	{
-		VcfReader reader = new VcfReader(new InputStreamReader(new FileInputStream(file), Charset.forName("UTF-8")));
+		InputStream inputStream = new FileInputStream(file);
+		if (file.getName().endsWith(".gz"))
+		{
+			inputStream = new GZIPInputStream(inputStream);
+		}
+		VcfReader reader = new VcfReader(new InputStreamReader(inputStream, Charset.forName("UTF-8")));
 		// register reader so close() can close all readers
 		if (vcfReaderRegistry == null) vcfReaderRegistry = new ArrayList<VcfReader>();
 		vcfReaderRegistry.add(reader);

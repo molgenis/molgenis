@@ -1,47 +1,62 @@
 package org.molgenis.data.annotation.resources.impl;
 
 import java.io.File;
-import java.io.IOException;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.resources.Resource;
-import org.molgenis.data.annotator.tabix.TabixVcfRepository;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A {@link TabixVcfRepository} that is potentially unavailable.
+ * Implementation of {@link Resource}, a file-based repository. The location of the file is configured in
+ * MolgenisSettings.
  */
-public class TabixVcfResource implements Resource
+public class ResourceImpl implements Resource
 {
 	private final String name;
 	private final String filenameKey;
 	private final String defaultFilename;
 	private final MolgenisSettings molgenisSettings;
+	private final RepositoryFactory repositoryFactory;
 	// the file the current repository works on
 	private volatile File file;
 	// the current repository
-	private volatile TabixVcfRepository repository;
+	private volatile Repository repository;
 
-	private static final Logger LOG = LoggerFactory.getLogger(TabixVcfResource.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ResourceImpl.class);
 
-	public TabixVcfResource(String entityName, MolgenisSettings molgenisSettings, String filenameKey,
-			String defaultFilename)
+	/**
+	 * Creates a new {@link Resource}
+	 * 
+	 * @param name
+	 *            the name of the Resource
+	 * @param molgenisSettings
+	 *            MolgenisSettings that configure the location of the file
+	 * @param filenameKey
+	 *            Key for the location of the file in {@link MolgenisSettings}
+	 * @param defaultFilename
+	 *            default name for the file
+	 * @param repositoryFactory
+	 *            Factory used to create the Repository when the file becomes available
+	 */
+	public ResourceImpl(String name, MolgenisSettings molgenisSettings, String filenameKey, String defaultFilename,
+			RepositoryFactory repositoryFactory)
 	{
 		this.molgenisSettings = molgenisSettings;
-		this.name = entityName;
+		this.name = name;
 		this.filenameKey = filenameKey;
 		this.defaultFilename = defaultFilename;
+		this.repositoryFactory = repositoryFactory;
 	}
 
 	/**
 	 * Indicates if the repository is available.
 	 * 
 	 * Checks if the current fileName in MolgenisSettings still matches the file that the current repository was
-	 * instantiated for, and removes a previously instantiated {@link Repository} if it no longer matches.
+	 * instantiated for, and removes a previously instantiated {@link Repository} if the filename no longer matches.
 	 * 
 	 * @return indication if this resource is available
 	 */
@@ -57,7 +72,7 @@ public class TabixVcfResource implements Resource
 	}
 
 	/**
-	 * Searches the repository
+	 * Searches the repository if it is available.
 	 * 
 	 * @param q
 	 *            the {@link Query} to use
@@ -71,7 +86,7 @@ public class TabixVcfResource implements Resource
 		return getRepository().findAll(q);
 	}
 
-	private TabixVcfRepository getRepository()
+	private Repository getRepository()
 	{
 		if (repository == null && isAvailable())
 		{
@@ -89,12 +104,12 @@ public class TabixVcfResource implements Resource
 				file = getFile();
 				if (file != null)
 				{
-					repository = new TabixVcfRepository(file, name);
+					repository = repositoryFactory.createRepository(file);
 				}
 			}
-			catch (IOException e)
+			catch (Exception e)
 			{
-				LOG.warn("Failed to initialize TabixVcfRepository {} for file {}.", name, file, e);
+				LOG.warn("Resource {} failed to create Repository for file {}.", name, file, e);
 			}
 		}
 	}
@@ -122,10 +137,14 @@ public class TabixVcfResource implements Resource
 			{
 				return result;
 			}
+			else
+			{
+				LOG.warn("Resource file not found: {}", fileName);
+			}
 		}
 		catch (Exception ex)
 		{
-			LOG.info("Resource file for {} unavailable", name, ex);
+			LOG.info("File for Resource {} unavailable", name, ex);
 		}
 		return null;
 	}
