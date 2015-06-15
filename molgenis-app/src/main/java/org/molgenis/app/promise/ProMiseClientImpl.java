@@ -166,7 +166,8 @@ public class ProMiseClientImpl implements ProMiseClient
 
 	private XMLStreamReader createXmlResponse(ByteArrayOutputStream bos) throws XMLStreamException
 	{
-		XMLInputFactory f = XMLInputFactory.newInstance();
-		return f.createXMLStreamReader(new ByteArrayInputStream(bos.toByteArray()));
+		XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
+		xmlInputFactory.setProperty("javax.xml.stream.isCoalescing", true);
+		return xmlInputFactory.createXMLStreamReader(new ByteArrayInputStream(bos.toByteArray()));
 	}
 }

@@ -11,9 +11,11 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Controller
 @RequestMapping(URI)
@@ -40,6 +42,7 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "load", method = RequestMethod.POST)
+	@ResponseStatus(HttpStatus.OK)
 	public void load() throws IOException
 	{
 		Iterable<Entity> entities = promiseDataParser.parse();

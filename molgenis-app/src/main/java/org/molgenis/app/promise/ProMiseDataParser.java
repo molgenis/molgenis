@@ -4,9 +4,11 @@ import static javax.xml.stream.XMLStreamConstants.END_ELEMENT;
 import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
@@ -88,8 +90,20 @@ public class ProMiseDataParser
 					case START_ELEMENT:
 						if (parseContent)
 						{
-							Entity entity = parseStudy(xmlStreamReader, xmlStreamReader.getLocalName());
-							entities.add(entity);
+							String xmlContent = xmlStreamReader.getElementText();
+
+							XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
+							XMLStreamReader xmlContentReader = xmlInputFactory.createXMLStreamReader(new StringReader(
+									xmlContent));
+							try
+							{
+								Entity entity = parseStudy(xmlStreamReader, xmlStreamReader.getLocalName());
+								entities.add(entity);
+							}
+							finally
+							{
+								xmlContentReader.close();
+							}
 						}
 						else if (xmlStreamReader.getLocalName().equals(DATA_CONTAINER_ELEMENT))
 						{
