@@ -81,14 +81,13 @@ public class ProMiseDataParser
 				password);
 		try
 		{
-			boolean parseContent = false;
 			while (xmlStreamReader.hasNext())
 			{
 
 				switch (xmlStreamReader.next())
 				{
 					case START_ELEMENT:
-						if (parseContent)
+						if (xmlStreamReader.getLocalName().equals(DATA_CONTAINER_ELEMENT))
 						{
 							String xmlContent = xmlStreamReader.getElementText();
 
@@ -104,16 +103,6 @@ public class ProMiseDataParser
 							{
 								xmlContentReader.close();
 							}
-						}
-						else if (xmlStreamReader.getLocalName().equals(DATA_CONTAINER_ELEMENT))
-						{
-							parseContent = true;
-						}
-						break;
-					case END_ELEMENT:
-						if (xmlStreamReader.getLocalName().equals(DATA_CONTAINER_ELEMENT))
-						{
-							parseContent = false;
 						}
 						break;
 					default:
