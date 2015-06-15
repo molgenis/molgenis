@@ -12,68 +12,87 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.molgenis.data.Entity;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DeltaGeneDataProvider
+public class HPOFilterDataProvider
 {
-	HashMap<String, Stack<String>> hpoGeneData;
+	HashMap<String, Stack<String>> assocData;
 	HashMap<String, List<String>> hpoHeirarchy;
 	MolgenisSettings molgenisSettings;
 	private boolean assocIsParsed = false;
 	private boolean hpoIsParsed = false;
+	private long count = 0L;
+	private List<Entity> results;
 	
 	public final static ExecutorService THREADPOOL = Executors.newFixedThreadPool(2);
 
 	// loads gene and hpo data when needed
 	public void getData() {
 		try {
-			if (hpoGeneData.isEmpty() || hpoHeirarchy.isEmpty()) {
+			if (assocData.isEmpty() || hpoHeirarchy.isEmpty()) {
 				// process gene association and hpo heirarchy simultaneuously 
-				Future<?> hpoFuture = THREADPOOL.submit(new Runnable() {
+				THREADPOOL.submit(new Runnable() {
 					@Override
 					public void run()  {
 						hpoIsParsed = parseHPOFile();
 					}
 				});
-				Future<?> assocFuture = THREADPOOL.submit(new Runnable() {
+				THREADPOOL.submit(new Runnable() {
 					@Override
 					public void run() {
 						assocIsParsed = parseAssociationFile();
 					}
 				});
 				// but block until processing is done
-				while (!hpoFuture.isDone() || !assocFuture.isDone()) {
+				while (!hpoIsParsed || !assocIsParsed) {
 					Thread.sleep(1);
 				}
 			}
 		}catch (InterruptedException e){
-			throw new RuntimeException("Error while waiting for Deltagene data to finish building in function getData()");
+			throw new RuntimeException("Error while waiting for HPO filter data to finish building in function getData()");
 		}
 	}
 	
-	public void getHPOGeneStack (String hpo, Stack<String> out) {
-		if (!isReady())
+	public HashMap<String, List<String>> getHPOData() {
+		if (!hpoIsParsed)
 			getData();
-		if (hpoHeirarchy.containsKey(hpo)) {
-			for (String child : hpoHeirarchy.get(hpo)) 
-				getHPOGeneStack(child, out);
-			if (hpoGeneData.containsKey(hpo)){
-				for (String gene : hpoGeneData.get(hpo))
-					if (!out.contains(gene))
-						out.add(gene);
-			}
-		}
+		return hpoHeirarchy;
+	}
+	
+	public List<Entity> getResults() {
+		return results;
+	}
+	
+	public void addEntityToResult(Entity entity) {
+		results.add(entity);
+	}
+
+	public HashMap<String, Stack<String>> getAssocData() {
+		if (!assocIsParsed)
+			getData();
+		return assocData;
+	}
+	
+	public long getCount()
+	{
+		return count;
+	}
+	
+	public void plus()
+	{
+		count++;
 	}
 	
 	@Autowired
-	public DeltaGeneDataProvider(MolgenisSettings molgenisSettings)  
+	public HPOFilterDataProvider(MolgenisSettings molgenisSettings)  
 	{
 		this.molgenisSettings = molgenisSettings;
 		
-		hpoGeneData = new HashMap<String, Stack<String>>();
+		assocData = new HashMap<String, Stack<String>>();
 		
 		/* using a hashmap for heirarchy instead of a tree.
 		 * no duplicate values should occur, hashtable has O(1)
@@ -172,12 +191,12 @@ public class DeltaGeneDataProvider
 				if (line.contains("HP:") && HPOColumn > -1 && GeneColumn > -1) {
 					lineSplit = line.split("\t");
 					hpo = lineSplit[HPOColumn];
-					if (!hpoGeneData.containsKey(hpo))
-						hpoGeneData.put(hpo, new Stack<String>());
+					if (!assocData.containsKey(hpo))
+						assocData.put(hpo, new Stack<String>());
 					gene = lineSplit[GeneColumn];
-					if (hpoGeneData.containsKey(hpo))
-						if (!hpoGeneData.get(hpo).contains(gene))
-							hpoGeneData.get(hpo).add(gene);
+					if (assocData.containsKey(hpo))
+						if (!assocData.get(hpo).contains(gene))
+							assocData.get(hpo).add(gene);
 				}
 				out.removeAllElements();
 			}
