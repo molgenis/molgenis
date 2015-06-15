@@ -47,7 +47,7 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 		String promiseEntityName = "promise";
 		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData(promiseEntityName);
 		entityMetaData.setLabel("ProMISe");
-		entityMetaData.addAttribute("_id").setAuto(true).setVisible(false).setNillable(false);
+		entityMetaData.addAttribute("_id").setIdAttribute(true).setAuto(true).setVisible(false).setNillable(false);
 
 		Set<String> attrNames = new HashSet<String>();
 		for (Entity entity : entities)
