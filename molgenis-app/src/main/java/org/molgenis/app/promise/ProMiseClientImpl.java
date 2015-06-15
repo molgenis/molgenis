@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
 public class ProMiseClientImpl implements ProMiseClient
 {
 	private static final String NAMESPACE_KEY = "tem";
-	private static final String NAMESPACE_VALUE = "http://tempuri.org";
+	private static final String NAMESPACE_VALUE = "http://tempuri.org/";
 	private static final String ACTION_GETDATAFORXML = "getDataForXML";
 	private static final String ACTION_HELLOWORLD = "HelloWorld";
 
@@ -158,7 +158,7 @@ public class ProMiseClientImpl implements ProMiseClient
 		}
 
 		MimeHeaders headers = soapMessage.getMimeHeaders();
-		headers.addHeader("SOAPAction", NAMESPACE_VALUE + '/' + action);
+		headers.addHeader("SOAPAction", NAMESPACE_VALUE + action);
 
 		soapMessage.saveChanges();
 
