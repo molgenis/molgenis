@@ -681,13 +681,18 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>log4j-over-slf4j</artifactId>
-            <version>1.7.10</version>
+            <version>${slf4j.version}</version>
         </dependency>
         <dependency>
       		<groupId>org.slf4j</groupId>
       		<artifactId>jcl-over-slf4j</artifactId>
       		<version>${slf4j.version}</version>
    		</dependency>
+   		<dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jul-over-slf4j</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
         <!-- scope: test -->
         <dependency>
             <groupId>org.testng</groupId>
