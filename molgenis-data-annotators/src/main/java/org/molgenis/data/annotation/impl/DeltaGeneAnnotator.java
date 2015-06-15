@@ -55,12 +55,14 @@ class DeltaGeneAnnotator extends AbstractRepositoryAnnotator
 	public EntityMetaData getOutputMetaData()
 	{
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(COMMON_GENES_LABEL, MolgenisFieldTypes.FieldTypeEnum.TEXT)
-		.setLabel(COMMON_GENES_LABEL).setDescription("Comma-seperated list of genes that occur in both inputs."));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(UNIQUE_GENES_A_LABEL, MolgenisFieldTypes.FieldTypeEnum.TEXT)
-		.setLabel(UNIQUE_GENES_A_LABEL).setDescription("Comma-seperated list of genes that occur only in input A."));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(UNIQUE_GENES_B_LABEL, MolgenisFieldTypes.FieldTypeEnum.TEXT)
-		.setLabel(UNIQUE_GENES_B_LABEL).setDescription("Comma-seperated list of genes that occur only in input B."));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData("comp_test", MolgenisFieldTypes.FieldTypeEnum.COMPOUND)
+		.setLabel("comp_test").setDescription("Compound result data."));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData("comp_A", MolgenisFieldTypes.FieldTypeEnum.INT)
+		.setLabel("comp_A"));
+			metadata.addAttributeMetaData(new DefaultAttributeMetaData("comp_B", MolgenisFieldTypes.FieldTypeEnum.INT)
+		.setLabel("comp_B"));
+			metadata.addAttributeMetaData(new DefaultAttributeMetaData("comp_C", MolgenisFieldTypes.FieldTypeEnum.INT)
+		.setLabel("comp_C"));
 		return metadata;
 	}
 	
@@ -107,7 +109,13 @@ class DeltaGeneAnnotator extends AbstractRepositoryAnnotator
 		Enumeration<String> e;
 		String gene;
 
-		AStack = getInputStack(A);
+		
+		
+		for (int i = 0; i < 10; i++) {
+			
+		}
+		
+		/*AStack = getInputStack(A);
 		BStack = getInputStack(B);
 		
 		e = AStack.elements();
@@ -128,7 +136,7 @@ class DeltaGeneAnnotator extends AbstractRepositoryAnnotator
 		
 		resultMap.put(UNIQUE_GENES_A_LABEL, uniqueAString.toString());
 		
-		resultMap.put(UNIQUE_GENES_B_LABEL, uniqueBString.toString());
+		resultMap.put(UNIQUE_GENES_B_LABEL, uniqueBString.toString());*/
 		
 		results.add(AnnotatorUtils.getAnnotatedEntity(this, entity, resultMap));
 		return results;
