@@ -23,6 +23,7 @@ import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.excel.ExcelWriter.FileFormat;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.file.FileStore;
 import org.molgenis.ontology.beans.OntologyServiceResult;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.molgenis.ontology.matching.MatchingTaskContentEntityMetaData;
@@ -31,7 +32,6 @@ import org.molgenis.ontology.matching.OntologyService;
 import org.molgenis.ontology.matching.OntologyServiceImpl;
 import org.molgenis.ontology.utils.OntologyServiceUtil;
 import org.molgenis.security.user.UserAccountService;
-import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class MatchQualityRocService

@@ -1,7 +1,7 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 
-<#assign css=["molgenis-form.css", "usermanager.css"]>
+<#assign css=["usermanager.css"]>
 <#assign js=["usermanager.js"]>
 
 <@header css js/>

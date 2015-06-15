@@ -42,6 +42,7 @@ public abstract class AbstractEntity implements Entity
 				return new DateToStringConverter().convert(date);
 			case CATEGORICAL:
 			case XREF:
+			case FILE:
 				Entity refEntity = getEntity(labelAttributeName);
 				return refEntity != null ? refEntity.getLabelValue() : null;
 			case CATEGORICAL_MREF:
@@ -59,7 +60,6 @@ public abstract class AbstractEntity implements Entity
 				}
 				return null;
 			case COMPOUND:
-			case FILE:
 			case IMAGE:
 				throw new RuntimeException("invalid label data type " + dataType);
 			default:

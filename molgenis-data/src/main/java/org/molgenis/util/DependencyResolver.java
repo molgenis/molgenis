@@ -8,19 +8,25 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.fieldtypes.XrefField;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class DependencyResolver
 {
+	@Autowired
+	private DataService dataService;
+
 	/**
 	 * Determine the entity import order
 	 * 
@@ -136,7 +142,7 @@ public class DependencyResolver
 	 * @param emd
 	 * @return
 	 */
-	public static Iterable<Entity> resolveSelfReferences(Iterable<Entity> entities, EntityMetaData emd)
+	public Iterable<Entity> resolveSelfReferences(Iterable<Entity> entities, EntityMetaData emd)
 	{
 		List<AttributeMetaData> selfRefAttributes = Lists.newArrayList();
 		for (AttributeMetaData attr : emd.getAtomicAttributes())
@@ -198,11 +204,21 @@ public class DependencyResolver
 							+ "] contains an attribute that has a self reference but is missing an id.");
 					if (!id.equals(refId))// Ref to the entity itself, should that be possible?
 					{
-						// If it is an unknown id it is already in the repository (or is missing, this is checked in
-						// the validator)
+						// If it is an unknown id it is already in the repository or missing
 						if (entitiesById.containsKey(refId))
 						{
 							dependenciesById.get(id).add(refId);
+						}
+						else
+						{
+							Entity refEntity = dataService.getRepository(
+									emd.getAttribute(attr.getName()).getRefEntity().getName()).findOne(refId);
+							if (refEntity == null)
+							{
+								throw new UnknownEntityException(attr.getRefEntity().getName() + " with "
+										+ attr.getRefEntity().getIdAttribute().getName() + " [" + refId
+										+ "] does not exist");
+							}
 						}
 					}
 				}

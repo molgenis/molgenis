@@ -236,7 +236,7 @@ class EntityMetaDataRepository
 	 */
 	public void deleteAll()
 	{
-		List<Entity> entities = Lists.newLinkedList(DependencyResolver.resolveSelfReferences(repository, META_DATA));
+		List<Entity> entities = Lists.newLinkedList(new DependencyResolver().resolveSelfReferences(repository, META_DATA));
 		Collections.reverse(entities);
 		for (Entity entity : entities)
 		{

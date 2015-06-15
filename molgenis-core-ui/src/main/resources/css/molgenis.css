@@ -162,3 +162,6 @@ body {
 
 /* Bootstrap tooltip style - end*/
 
+.popover-content {
+	word-wrap: break-word;
+}

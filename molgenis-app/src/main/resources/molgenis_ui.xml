@@ -18,16 +18,6 @@
             <plugin id="references" name="References" url="references"/>
             <plugin id="scripts" name="Scripts" url="scripts" />
 	    </menu>
-		<menu label="Entities" name ="entities">
-			<plugin id="form.entities" name="EntityMeta" url="form.entities"/>
-        	<plugin id="form.RuntimeProperty" name="RuntimeProperty" url="form.RuntimeProperty"/>
-        	<plugin id="form.MolgenisUser" name="MolgenisUser" url="form.MolgenisUser"/>
-        	<plugin id="form.MolgenisGroup" name="MolgenisGroup" url="form.MolgenisGroup"/>
-        	<plugin id="form.MolgenisToken" name="Tokens" url="form.MolgenisToken"/>
-        	<plugin id="form.Script" name="Script" url="form.Script"/>
-        	<plugin id="form.ScriptParameter" name="ScriptParameter" url="form.ScriptParameter"/>
-        	<plugin id="form.FreemarkerTemplate" name="FreemarkerTemplate" url="form.FreemarkerTemplate"/>
-	    </menu>
         <menu label="Admin" name="admin">
 	        <plugin id="usermanager" name="User Manager" url="usermanager"/>
 	        <plugin id="permissionmanager" name="Permission Manager" url="permissionmanager"/>
