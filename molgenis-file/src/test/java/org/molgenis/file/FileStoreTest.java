@@ -1,10 +1,11 @@
-package org.molgenis.util;
+package org.molgenis.file;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
+import org.molgenis.file.FileStore;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

@@ -204,6 +204,7 @@ public class QueryGenerator implements QueryPartGenerator
 						case CATEGORICAL_MREF:
 						case XREF:
 						case MREF:
+						case FILE:
 						{
 							if (attributePath.length > 1) throw new UnsupportedOperationException(
 									"Can not filter on references deeper than 1.");
@@ -221,7 +222,6 @@ public class QueryGenerator implements QueryPartGenerator
 						case COMPOUND:
 							throw new MolgenisQueryException("Illegal data type [" + dataType + "] for operator ["
 									+ queryOperator + "]");
-						case FILE:
 						case IMAGE:
 							throw new UnsupportedOperationException("Query with data type [" + dataType
 									+ "] not supported");
@@ -573,6 +573,7 @@ public class QueryGenerator implements QueryPartGenerator
 			case CATEGORICAL:
 			case CATEGORICAL_MREF:
 			case MREF:
+			case FILE:
 				return queryField;
 			case BOOL:
 			case DATE:
@@ -591,7 +592,6 @@ public class QueryGenerator implements QueryPartGenerator
 				return new StringBuilder(queryField).append('.').append(MappingsBuilder.FIELD_NOT_ANALYZED).toString();
 			case COMPOUND:
 				throw new MolgenisQueryException("Illegal data type [" + dataType + "] not supported");
-			case FILE:
 			case IMAGE:
 				throw new UnsupportedOperationException("Query with data type [" + dataType + "] not supported");
 			default:

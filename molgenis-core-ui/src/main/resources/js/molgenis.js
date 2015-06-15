@@ -233,7 +233,7 @@
 	};
 	
 	molgenis.isXrefAttr = function(attr) {
-		return attr.fieldType === 'CATEGORICAL' || attr.fieldType === 'XREF';
+		return attr.fieldType === 'CATEGORICAL' || attr.fieldType === 'XREF' || attr.fieldType === 'FILE';
 	};
 	
 	molgenis.isMrefAttr = function(attr) {
