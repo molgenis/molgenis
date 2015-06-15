@@ -153,7 +153,7 @@ public class ProMiseClientImpl implements ProMiseClient
 		{
 			for (Map.Entry<String, String> entry : args.entrySet())
 			{
-				container.addChildElement(entry.getKey(), NAMESPACE_KEY).addTextNode(entry.getValue());
+				container.addChildElement(entry.getKey()).addTextNode(entry.getValue());
 			}
 		}
 
