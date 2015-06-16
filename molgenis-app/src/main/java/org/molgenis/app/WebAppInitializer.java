@@ -11,7 +11,7 @@ public class WebAppInitializer extends MolgenisWebAppInitializer implements WebA
 	@Override
 	public void onStartup(ServletContext servletContext) throws ServletException
 	{
-		super.onStartup(servletContext, WebAppConfig.class, true, 150);
+		super.onStartup(servletContext, WebAppConfig.class, true, 4096);
 
 		// TODO : Add a session expire lister for omx biobankconnect
 		// servletContext.addListener(new SessionExpireListener());
