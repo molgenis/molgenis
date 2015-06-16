@@ -9,9 +9,9 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 
+import org.molgenis.security.CorsFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.molgenis.security.CorsFilter;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.request.RequestContextListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
@@ -57,11 +57,12 @@ public class MolgenisWebAppInitializer
 		}
 		else
 		{
-			final int maxSize = maxFileSize * 1024 * 1024;
+			final long maxSize = maxFileSize * 1024 * 1024;
 			int loadOnStartup = (isDasUsed ? 2 : 1);
 			dispatcherServlet.setLoadOnStartup(loadOnStartup);
 			dispatcherServlet.addMapping("/");
-			dispatcherServlet.setMultipartConfig(new MultipartConfigElement(null, maxSize, maxSize, maxSize));
+			dispatcherServlet.setMultipartConfig(new MultipartConfigElement(null, maxSize, maxSize,
+					maxSize > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) maxSize));
 			dispatcherServlet.setInitParameter("dispatchOptionsRequest", "true");
 		}
 
