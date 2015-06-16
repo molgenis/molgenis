@@ -4,6 +4,8 @@ import static org.molgenis.app.promise.ProMiseDataLoaderController.URI;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
 import org.molgenis.MolgenisFieldTypes;
@@ -14,6 +16,7 @@ import org.molgenis.framework.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -44,13 +47,35 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 
 	@RequestMapping(value = "load", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
+	@Transactional
 	public void load() throws IOException
 	{
-		Iterable<Entity> entities = promiseDataParser.parse();
+		Map<Integer, String> seqNrMap = new LinkedHashMap<Integer, String>();
+		seqNrMap.put(0, "Biobanks");
+		seqNrMap.put(1, "Samples");
+		seqNrMap.put(10, "Queries");
+		seqNrMap.put(11, "Tables");
+		seqNrMap.put(12, "Items");
+		seqNrMap.put(13, "Headers");
+		seqNrMap.put(14, "Labels");
+		seqNrMap.put(15, "Centers");
+		seqNrMap.put(16, "Users");
+		seqNrMap.put(17, "Logins");
+		seqNrMap.put(18, "Contact");
 
-		String promiseEntityName = "promise";
+		for (Map.Entry<Integer, String> entry : seqNrMap.entrySet())
+		{
+			load(entry.getKey(), entry.getValue());
+		}
+	}
+
+	private void load(Integer seqNr, String label) throws IOException
+	{
+		Iterable<Entity> entities = promiseDataParser.parse(seqNr);
+
+		String promiseEntityName = "promise" + '_' + label.toLowerCase();
 		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData(promiseEntityName);
-		entityMetaData.setLabel("ProMISe");
+		entityMetaData.setLabel("ProMISe " + label);
 		entityMetaData.addAttribute("_id").setIdAttribute(true).setAuto(true).setVisible(false).setNillable(false);
 
 		Set<String> attrNames = new HashSet<String>();

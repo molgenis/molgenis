@@ -73,12 +73,10 @@ public class ProMiseDataParser
 		this.password = password;
 	}
 
-	public Iterable<Entity> parse() throws IOException
+	public Iterable<Entity> parse(Integer seqNr) throws IOException
 	{
-		String seqNr = "0";
-
-		XMLStreamReader xmlStreamReader = promiseClient.getDataForXml(project, pws, seqNr, securityCode, username,
-				password);
+		XMLStreamReader xmlStreamReader = promiseClient.getDataForXml(project, pws, seqNr.toString(), securityCode,
+				username, password);
 		try
 		{
 			while (xmlStreamReader.hasNext())
@@ -104,7 +102,7 @@ public class ProMiseDataParser
 									strBuilder.toString()));
 							try
 							{
-								return parseStudies(xmlContentReader, rootElementName);
+								return parseContentContainer(xmlContentReader, rootElementName);
 							}
 							finally
 							{
@@ -135,7 +133,7 @@ public class ProMiseDataParser
 		return Collections.emptyList();
 	}
 
-	private static Iterable<Entity> parseStudies(XMLStreamReader xmlStreamReader, String parentLocalName)
+	private static Iterable<Entity> parseContentContainer(XMLStreamReader xmlStreamReader, String parentLocalName)
 			throws XMLStreamException
 	{
 		List<Entity> entities = new ArrayList<Entity>();
@@ -148,7 +146,7 @@ public class ProMiseDataParser
 					if (!xmlStreamReader.getLocalName().equals(parentLocalName))
 					{
 						// parse study
-						Entity entity = parseStudy(xmlStreamReader, xmlStreamReader.getLocalName());
+						Entity entity = parseContent(xmlStreamReader, xmlStreamReader.getLocalName());
 						entities.add(entity);
 					}
 					break;
@@ -159,7 +157,7 @@ public class ProMiseDataParser
 		return entities;
 	}
 
-	private static Entity parseStudy(XMLStreamReader xmlStreamReader, String parentLocalName) throws XMLStreamException
+	private static Entity parseContent(XMLStreamReader xmlStreamReader, String parentLocalName) throws XMLStreamException
 	{
 		MapEntity entity = new MapEntity();
 		boolean parse = true;
