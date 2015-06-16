@@ -76,12 +76,12 @@ public class SortGenerator implements QueryPartGenerator
 			case CATEGORICAL_MREF:
 			case MREF:
 			case XREF:
+			case FILE:
 				// use nested field for sorting
 				String refSortField = getSortField(attr.getRefEntity().getLabelAttribute());
 				sortField = new StringBuilder(attr.getName()).append('.').append(refSortField).toString();
 				break;
 			case COMPOUND:
-			case FILE:
 			case IMAGE:
 				throw new UnsupportedOperationException();
 			default:
