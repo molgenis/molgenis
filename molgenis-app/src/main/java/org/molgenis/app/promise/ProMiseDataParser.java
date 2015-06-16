@@ -6,6 +6,7 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.xml.stream.XMLInputFactory;
@@ -76,7 +77,6 @@ public class ProMiseDataParser
 	{
 		String seqNr = "0";
 
-		List<Entity> entities = new ArrayList<Entity>();
 		XMLStreamReader xmlStreamReader = promiseClient.getDataForXml(project, pws, seqNr, securityCode, username,
 				password);
 		try
@@ -89,15 +89,22 @@ public class ProMiseDataParser
 					case START_ELEMENT:
 						if (xmlStreamReader.getLocalName().equals(DATA_CONTAINER_ELEMENT))
 						{
-							String xmlContent = xmlStreamReader.getElementText();
+							String rootElementName = "root";
+							StringBuilder strBuilder = new StringBuilder();
+							strBuilder.append('<');
+							strBuilder.append(rootElementName);
+							strBuilder.append('>');
+							strBuilder.append(xmlStreamReader.getElementText());
+							strBuilder.append("</");
+							strBuilder.append(rootElementName);
+							strBuilder.append('>');
 
 							XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
 							XMLStreamReader xmlContentReader = xmlInputFactory.createXMLStreamReader(new StringReader(
-									xmlContent));
+									strBuilder.toString()));
 							try
 							{
-								Entity entity = parseStudy(xmlStreamReader, xmlStreamReader.getLocalName());
-								entities.add(entity);
+								return parseStudies(xmlContentReader, rootElementName);
 							}
 							finally
 							{
@@ -125,13 +132,38 @@ public class ProMiseDataParser
 				throw new RuntimeException(e);
 			}
 		}
+		return Collections.emptyList();
+	}
+
+	private static Iterable<Entity> parseStudies(XMLStreamReader xmlStreamReader, String parentLocalName)
+			throws XMLStreamException
+	{
+		List<Entity> entities = new ArrayList<Entity>();
+
+		while (xmlStreamReader.hasNext())
+		{
+			switch (xmlStreamReader.next())
+			{
+				case START_ELEMENT:
+					if (!xmlStreamReader.getLocalName().equals(parentLocalName))
+					{
+						// parse study
+						Entity entity = parseStudy(xmlStreamReader, xmlStreamReader.getLocalName());
+						entities.add(entity);
+					}
+					break;
+				default:
+					break;
+			}
+		}
 		return entities;
 	}
 
 	private static Entity parseStudy(XMLStreamReader xmlStreamReader, String parentLocalName) throws XMLStreamException
 	{
 		MapEntity entity = new MapEntity();
-		for (boolean parse = true; parse && xmlStreamReader.hasNext();)
+		boolean parse = true;
+		while (parse && xmlStreamReader.hasNext())
 		{
 			switch (xmlStreamReader.next())
 			{

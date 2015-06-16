@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -59,7 +60,7 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 			{
 				if (!attrNames.contains(attrName))
 				{
-					entityMetaData.addAttribute(attrName).setNillable(true);
+					entityMetaData.addAttribute(attrName).setDataType(MolgenisFieldTypes.TEXT).setNillable(true);
 					attrNames.add(attrName);
 				}
 			}
