@@ -4,19 +4,26 @@
 <#assign css=['mapping-service.css']>
 <#assign js=['attribute-mapping.js', 'd3.min.js','vega.min.js','jstat.min.js', 'biobankconnect-graph.js', '/jquery/scrollTableBody/jquery.scrollTableBody-1.0.0.js', 'bootbox.min.js', 'jquery.ace.js']>
 
-<@header css/>
+<@header css js/>
 
 <script src="<@resource_href "/js/ace/src-min-noconflict/ace.js"/>" type="text/javascript" charset="utf-8"></script>
 <script src="<@resource_href "/js/ace/src-min-noconflict/ext-language_tools.js"/>" type="text/javascript" charset="utf-8"></script>
 
 <div class="row">
 	<div class="col-md-12">
-		<h1>Mapping: <i>${entityMapping.sourceEntityMetaData.name}</i> to <i>${entityMapping.targetEntityMetaData.name?html}.${attributeMapping.targetAttributeMetaData.label?html}</i>.</h1>
+		<h1>Mapping: <i>${entityMapping.sourceEntityMetaData.name?html}</i> to <i>${entityMapping.targetEntityMetaData.name?html}.${attributeMapping.targetAttributeMetaData.label?html}</i>.</h1>
 		${(attributeMapping.targetAttributeMetaData.description!"")?html}
 		
 		<a href="${context_url}/mappingproject/${mappingProject.identifier}" class="btn btn-default btn-xs pull-left">
 			<span class="glyphicon glyphicon-chevron-left"></span> Back to project
 		</a>
+		
+		<#-- Hidden fields containing information needed for ajax requests -->
+		<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier?html}"/>
+		<input type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name?html}"/>
+		<input type="hidden" name="source" value="${entityMapping.sourceEntityMetaData.name?html}"/>
+		<input type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name?html}"/>
+		
 	</div>
 </div>
 
@@ -32,7 +39,7 @@
 <div class="row"> <#-- Start: Master row -->
 	
 	<div class="col-md-6 col-lg-4"> <#-- Start: Attribute table column -->
-		<div class="attribute-mapping-table-container"> <#-- Start: Attribute table container -->	
+		<div id="attribute-mapping-table-container"> <#-- Start: Attribute table container -->	
 			
 			<div class="row">
 				<div class="col-md-12">
@@ -75,7 +82,7 @@
 						</thead>
 						<tbody>
 							<#list entityMapping.sourceEntityMetaData.attributes as source>
-								<tr>
+								<tr class="${source.name}">
 									<td>
 										<div class="checkbox">
 											<label>
@@ -123,7 +130,7 @@
 	</div> <#-- End: Attribute table column --> 
 	
 	<div class="col-md-6 col-lg-4"> <#-- Start: Mapping column -->
-		<div class="attribute-mapping-container">  <#-- Start: Mapping container -->
+		<div id="attribute-mapping-container">  <#-- Start: Mapping container -->
 			
 			<div class="row">
 				<div class="col-md-12">
@@ -133,23 +140,22 @@
 			
 			<div class="row">
 				<div class="col-md-12">
-					<ul class="nav nav-pills" role="tablist">
-			    		<li role="presentation" class="active"><a href="#equal" aria-controls="equal" role="tab" data-toggle="tab"> = </a></li>
+					<ul class="nav nav-tabs" role="tablist">
+			    		<li role="presentation"><a href="#equal" aria-controls="equal" role="tab" data-toggle="tab"> = </a></li>
 			    		<li role="presentation"><a href="#function" aria-controls="function" role="tab" data-toggle="tab">Function</a></li>
 			    		<li role="presentation"><a href="#map" aria-controls="map" role="tab" data-toggle="tab">Map</a></li> 
-			    		<li role="presentation"><a href="#script" aria-controls="script" role="tab" data-toggle="tab">Script</a></li>
+			    		<li role="presentation" class="active"><a href="#script" aria-controls="script" role="tab" data-toggle="tab">Script</a></li>
 			   		</ul>
-			   		<br/>
 				</div>
 			</div>
 			
 			<div class="row">
 				<div class="col-md-12">
 					 <div class="tab-content">
-			    		<div role="tabpanel" class="tab-pane fade active" id="equal"><@equal /></div>
-			    		<div role="tabpanel" class="tab-pane fade" id="function"><@function /></div>
-			    		<div role="tabpanel" class="tab-pane fade" id="map"><@map /></div>
-			    		<div role="tabpanel" class="tab-pane fade" id="script"><@script /></div>
+			    		<div role="tabpanel" class="tab-pane" id="equal"><@equal /></div>
+			    		<div role="tabpanel" class="tab-pane" id="function"><@function /></div>
+			    		<div role="tabpanel" class="tab-pane" id="map"><@map /></div>
+			    		<div role="tabpanel" class="tab-pane active" id="script"><@script /></div>
 			    	</div>
 			    	<br/>
 				</div>
@@ -159,94 +165,28 @@
 	</div>  <#-- End: Mapping column -->
 	
 	<div class="col-md-6 col-lg-4"> <#-- Start Result column -->
-		<div class="result-container"> <#-- Start: Result container -->
+		<div id="result-container"> <#-- Start: Result container -->
 			
 			<div class="row">
 				<div class="col-md-12">
 					<legend>Result</legend>
-					<form class="form-inline">		
-		
-						<div class="form-group">
-							X success, X missing, X errors
-						</div>
-						<div class="form-group pull-right">
-							<div class="checkbox">
-			    				<label>
-			      					<input id="errors-only-checkbox" type="checkbox"> Errors only
-			    				</label>
-			  				</div>
-			  				
-							<div class="input-group">
-			      				<span class="input-group-btn">
-			        				<button id="result-search-btn" class="btn btn-default" type="button"><span class="glyphicon glyphicon-search"></button>
-			      				</span>
-			      				<input id="result-search-field" type="text" class="form-control" placeholder="Search">
-			    			</div>
-						</div>
-					</form>
+					<div id="result-table-container"></div>
 				</div>
 			</div>
-
-			<div class="row">
-				<div class="col-md-12">
-					<table class="table table-bordered">
-						<thead>
-							<th>Source attribute X values</th>
-							<th>Result values</th>
-							<th>Status</th>
-						</thead>
-						<tbody>
-							<tr>
-								<td>value</td>
-								<td>result value</td>
-								<td>OK</td>
-							</tr>
-							<tr>
-								<td>value</td>
-								<td>result value</td>
-								<td>OK</td>
-							</tr>
-							<tr>
-								<td>value</td>
-								<td>result value</td>
-								<td>OK</td>
-							</tr>
-						</tbody>
-					</table>
-					
-					<nav style="text-align:center">
-		  			<ul class="pagination">
-		    			<li>
-				      		<a href="#" aria-label="Previous">
-				        		<span aria-hidden="true">&laquo;</span>
-				      		</a>
-				    	</li>
-				    	<li><a href="#">1</a></li>
-				    	<li><a href="#">2</a></li>
-				    	<li><a href="#">3</a></li>
-				    	<li><a href="#">4</a></li>
-				    	<li><a href="#">5</a></li>
-				    	<li>
-				     		<a href="#" aria-label="Next">
-				        		<span aria-hidden="true">&raquo;</span>
-				      		</a>
-				    	</li>
-				  	</ul>
-				</nav>		
-			</div>
-			
+			 
 		</div> <#-- End: Result container -->
 	</div> <#-- End: Result column -->
 	
 </div> <#-- End: Master row -->
 
-
 <div class="row">
 	<div class="col-md-12"> <#-- Start: Save column -->
 		<div class="save-and-test-btn-container"> <#-- Start: Save container -->
 			<hr></hr>
-			<form>
-			</form>
+			
+			<button id="save-mapping-btn" type="btn" class="btn btn-primary">Save</button>
+			<button id="test-mapping-btn" type="btn" class="btn btn-success">Test selection</button>
+			
 		</div> <#-- End: Save container -->
 	</div> <#-- End: Save column -->
 </div>
@@ -298,15 +238,6 @@
 	<div class="row">
 		<div class="col-md-12">
 			<div id="advanced-mapping-table"></div>
-			<script>
-				$("#advanced-mapping-table").load("advancedmappingeditor #advanced-mapping-table", {
-					mappingProjectId : "${mappingProject.identifier}",
-					target : "${entityMapping.targetEntityMetaData.name?html}",
-					source : "${entityMapping.name?html}",
-					targetAttribute : "${attributeMapping.targetAttributeMetaData.name?html}",
-					sourceAttribute : "LifeLines_GENDER"
-				});
-			</script>
 		</div>
 	</div>
 </#macro>
@@ -315,12 +246,21 @@
 <#macro script>
 	<div class="row">
 		<div class="col-md-12">
-			<h4>Algorithm</h4>
-			<form>
-				<div class="form-group">
-					<input type="text"></input>
-				</div>
-			</form>
+			<div class="ace-editor-container">
+				<h4>Algorithm</h4>
+				<textarea id="ace-editor-text-area" name="algorithm" rows="15" <#if !hasWritePermission>data-readonly="true"</#if> 
+					style="width:100%;">${(attributeMapping.algorithm!"")?html}</textarea>
+			</div>
+		</div>
+	</div>
+	
+	<div class="row">
+		<div class="col-md-12">
+			<br/>
+			<div id="test-and-reset-btn-container" class="pull-right">
+				<button id="reset-algorithm-changes-btn" type="btn" class="btn btn-warning">Reset</button>
+				<button id="test-algorithm-btn" type="btn" class="btn btn-primary">Test</button>
+			</div>
 		</div>
 	</div>
 </#macro>

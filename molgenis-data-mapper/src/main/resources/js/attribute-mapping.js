@@ -2,44 +2,6 @@
 	"use strict";
 
 	/**
-	 * Updates a table's column widths.
-	 * 
-	 * @param $table
-	 *            the scrollable table whose header and body cells should be
-	 *            realigned
-	 */
-	function updateColumnWidths($table) {
-		var $bodyCells = $table.find('tbody tr:first').children(), colWidth;
-
-		// Get the tbody columns width array
-		colWidth = $bodyCells.map(function() {
-			return $(this).width();
-		}).get();
-
-		// Set the width of thead columns
-		$table.find('thead tr').children().each(function(i, v) {
-			$(v).width(colWidth[i]);
-		});
-	}
-
-	/**
-	 * Searches the source attributes in an algorithm string.
-	 * 
-	 * @param algorithm
-	 *            the algorithm string to search
-	 */
-	function getSourceAttrs(algorithm) {
-		var regex = /\$\(['"]([^\$\(\)]+)['"]\)/g, match, result = [];
-
-		while ((match = regex.exec(algorithm))) {
-			if (match) {
-				result.push(match[1]);
-			}
-		}
-		return result;
-	}
-
-	/**
 	 * Sends an algorithm to the server for testing.
 	 * 
 	 * @param algorithm
@@ -87,58 +49,71 @@
 	}
 
 	/**
-	 * Colors the backgrounds of the attributes mentioned in the algorithm
+	 * Searches the source attributes in an algorithm string.
+	 * 
+	 * @param algorithm
+	 *            the algorithm string to search
+	 */
+	function getSourceAttrs(algorithm) {
+		var regex = /\$\(['"]([^\$\(\)]+)['"]\)/g, match, result = [];
+
+		while ((match = regex.exec(algorithm))) {
+			if (match) {
+				result.push(match[1]);
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Load result table from view-attribute-mapping-feedback.ftl
+	 * 
+	 * @param algorithm
+	 *            the algorithm that is send to the server to apply over the
+	 *            submitted source values
+	 */
+	function loadAlgorithmResult(algorithm) {
+		$("#result-table-container").load("attributemappingfeedback #algorithm-result-feedback-container", {
+			mappingProjectId : $('input[name="mappingProjectId"]').val(),
+			target : $('input[name="target"]').val(),
+			source : $('input[name="source"]').val(),
+			targetAttribute : $('input[name="targetAttribute"]').val(),
+			algorithm : algorithm
+		});
+	}
+
+	/**
+	 * Selects the attributes mentioned in the algorithm
 	 * 
 	 * @param algorithm
 	 *            the algorithm string
 	 */
-	function updateAttributeSelectionMarker(algorithm) {
+	function checkSelectedAttributes(algorithm) {
 		var sourceAttrs = getSourceAttrs(algorithm);
-		$('#attribute-mapping-table').find('td').each(function(index, value) {
-			
-			var name = $(this).attr('class'), inArray = $.inArray(name, sourceAttrs), btn = $(this).find('button');
-			
-			if (inArray >= 0) { // If this is an attribute present in algorithm
-				$(this).css('background-color', '#CCFFCC'); // set background color
-				btn.removeClass('not-selected').addClass('selected'); // add selected class
-				btn.find('span').removeClass('glyphicon-ok').addClass('glyphicon-remove'); // change icon
-			} else { // Attribute is not present in algorithm
-				$(this).css('background-color', ''); // remove background color
-				btn.find('span').removeClass('glyphicon-remove').addClass('glyphicon-ok'); // change icon
-			}
+		$('input:checkbox').each(function(index, value) {
+			var name = $(this).attr('class'), inArray = $.inArray(name, sourceAttrs);
+			$(this).prop('checked', inArray >= 0);
 		});
-	}
-	
-	/**
-	 * Inserts attribute in the editor.
-	 * 
-	 * @param attribute
-	 *            the name of the attribute
-	 * @param editor
-	 *            the ace algorithm editor to insert the attribute into
-	 */
-	function insertAttribute(attribute, editor) {
-		var algorithm = "$('" + attribute + "').value()";
-		editor.insert(algorithm, -1);
-		$('#algorithm-container').append(algorithm);
 	}
 
 	/**
-	 * Removes attribute from the editor
+	 * Clears the editor and inserts selected attributes.
 	 * 
 	 * @param attribute
 	 *            the name of the attribute
 	 * @param editor
 	 *            the ace algorithm editor to insert the attribute into
 	 */
-	function outsertAttribute(attribute, editor) {
-		var algorithm = "$('" + attribute + "').value()", algorithmContainer = $('#algorithm-container');
-		editor.replaceAll("", algorithm);
-		algorithmContainer.html(algorithmContainer.text().split(algorithm).join(""));
+	function insertSelectedAttributes(selectedAttributes, editor) {
+		editor.setValue(""); // clear the editor
+		$(selectedAttributes).each(function() {
+			editor.insert("$('" + this + "').value();", -1);
+		});
 	}
-	
+
 	$(function() {
-		var $textarea = $("#edit-algorithm-textarea"), initialValue = $textarea.val(), editor, $scrollTable = $('table.scroll');
+
+		var editor, searchQuery, selectedAttributes, $textarea, initialValue, algorithm, feedBackRequest, row;
 
 		// N.B. Always do this first cause it fiddles with the DOM and disrupts
 		// listeners you may have placed on the table elements!
@@ -146,94 +121,103 @@
 			rowsToDisplay : 6
 		});
 
-		// buttons outside of forms to submit forms
-		$('#preview-mapping-result-btn').on('click', function() {
-			$('#preview-mapping-result-form').submit();
-		});
+		// TODO $.ajax / $.post or form submit?
+		// TODO Load mapping options for initial selection of attributes
 
-		$('#save-attribute-mapping-btn').on('click', function() {
-			$('#save-attribute-mapping-form').submit();
-		});
+		$textarea = $("#ace-editor-text-area");
+		initialValue = $textarea.val();
 
-		$('button.toggle-btn').on('click', function() {
-			var sourceName = $(this).data('attribute'), btn = $(this); // attribute name / row indicator
-			
-			
-			// Dynamicly update the preview table based on selected attributes
-			$.ajax({
-				url : molgenis.getContextUrl() + '/dynamicattributemappingfeedback',
-				data : {
-					mappingProjectId : $('input[name="mappingProjectId"]').val(),
-					target : $('input[name="target"]').val(),
-					source : $('input[name="source"]').val(),
-					targetAttribute : $('input[name="targetAttribute"]').val(),
-					algorithm : $('#algorithm-container').text()
-				},
-				type : 'POST',
-				success : function(result) {
-					for(var key in result) {
-						$('#mapping-preview-container').html(result[key]);
-					}
-				}
-			});
-			
-			if (btn.hasClass('not-selected')) { // switching to selected
-				btn.removeClass('not-selected').addClass('selected'); // change class
-				btn.find('span').toggleClass('glyphicon-ok').toggleClass('glyphicon-remove'); // toggle icons
-				$('td[class='+sourceName+']').css('background-color', '#CCFFCC'); // change background
-				insertAttribute(sourceName, editor); // add algorithm to editor
-				
-			} else if (btn.hasClass('selected')) { // switching to non-selected
-				btn.removeClass('selected').addClass('not-selected'); // change class
-				btn.find('span').toggleClass('glyphicon-remove').toggleClass('glyphicon-ok'); // toggle icons
-				$('td[class='+sourceName+']').css('background-color', ''); // change background
-				outsertAttribute(sourceName, editor); // remove algorithm from editor
-			}
-			
-		});
-
-		$("#edit-algorithm-textarea").ace({
+		$textarea.ace({
 			options : {
 				enableBasicAutocompletion : true
 			},
-			readOnly : $("#edit-algorithm-textarea").data('readonly') === true,
+			readOnly : $textarea.data('readonly') === true,
 			theme : 'eclipse',
 			mode : 'javascript',
 			showGutter : true,
 			highlightActiveLine : false
 		});
-		editor = $('#edit-algorithm-textarea').data('ace').editor;
+		editor = $textarea.data('ace').editor;
 
-		$(window).resize(updateColumnWidths($scrollTable));
-		updateColumnWidths($scrollTable);
-		
-		$('#save-attribute-mapping-form').on('reset', function() {
-			if (editor.getValue() === initialValue) {
-				return false;
-			}
-			bootbox.confirm("Do you want to revert your changes?", function(result) {
-				if (result) {
-					editor.setValue(initialValue, -1);
-					updateAttributeSelectionMarker(initialValue);
-					$('#statistics-container').empty();
+		editor.getSession().on('change', function() {
+			checkSelectedAttributes(editor.getValue());
+			algorithm = editor.getSession().getValue();
+		});
+		checkSelectedAttributes(initialValue);
+		algorithm = editor.getSession().getValue();
+
+		$('#save-mapping-btn').on('click', function() {
+			$.post(molgenis.getContextUrl() + "/saveattributemapping", {
+				mappingProjectId : $('input[name="mappingProjectId"]').val(),
+				target : $('input[name="target"]').val(),
+				source : $('input[name="source"]').val(),
+				targetAttribute : $('input[name="targetAttribute"]').val(),
+				algorithm : algorithm
+			}, function() {
+				molgenis.createAlert([ {
+					'message' : 'Succesfully saved the created mapping'
+				} ], 'success');
+			});
+		});
+
+		$('#test-mapping-btn').on('click', function() {
+			selectedAttributes = [];
+			$('#attribute-mapping-table').find('tr').each(function() {
+				row = $(this);
+				if (row.find('input[type="checkbox"]').is(':checked')) {
+					selectedAttributes.push(row.attr('class'));
 				}
 			});
-			return false;
+
+			// inserts the attributes into the editor
+			insertSelectedAttributes(selectedAttributes, editor);
+			algorithm = editor.getSession().getValue()
+
+			loadAlgorithmResult(algorithm);
 		});
 
-		// TODO change the background color of selected attributes back to
-		// normal when they get deselected
-		editor.getSession().on('change', function() {
-			updateAttributeSelectionMarker(editor.getValue());
-		});
-		updateAttributeSelectionMarker(initialValue);
-
-		$('#btn-test').click(function() {
-			testAlgorithm(editor.getValue());
-			return false;
+		$('#test-algorithm-btn').on('click', function() {
+			loadAlgorithmResult(algorithm);
 		});
 
-		$('#statistics-container').hide();
+		// $('#reset-algorithm-changes-btn').on('click', function() {
+		// if (editor.getValue() === initialValue) {
+		// return false;
+		// }
+		// bootbox.confirm("Do you want to revert your changes?",
+		// function(result) {
+		// if (result) {
+		// editor.setValue(initialValue, -1);
+		// insertSelectedAttributes(initialValue, editor);
+		// }
+		// });
+		// return false;
+		// });
+
+		$('#selected-only-checkbox').on('click', function() {
+			if ($(this).is(':checked')) {
+				// filter the attribute-mapping-table to only show selected
+				// attributes
+			} else {
+				// show all attributes
+			}
+		});
+
+		$('#attribute-search-btn').on('click', function() {
+			searchQuery = $('#attribute-search-field').val();
+			// use the value of attribute-search-field to apply a filter on the
+			// attribute-mapping-table
+		});
+
+		$('a[href=#map]').on('shown.bs.tab', function() {
+			$("#advanced-mapping-table").load("advancedmappingeditor #advanced-mapping-table", {
+				mappingProjectId : $('input[name="mappingProjectId"]').val(),
+				target : $('input[name="target"]').val(),
+				source : $('input[name="source"]').val(),
+				targetAttribute : $('input[name="targetAttribute"]').val(),
+				sourceAttribute : selectedAttributes[0]
+			});
+		});
 	});
 
 }($, window.top.molgenis = window.top.molgenis || {}));
