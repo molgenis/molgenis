@@ -25,8 +25,6 @@ public class HPOFilterDataProvider
 	MolgenisSettings molgenisSettings;
 	private boolean assocIsParsed = false;
 	private boolean hpoIsParsed = false;
-	private long count = 0L;
-	private List<Entity> results;
 	
 	public final static ExecutorService THREADPOOL = Executors.newFixedThreadPool(2);
 
@@ -62,29 +60,11 @@ public class HPOFilterDataProvider
 			getData();
 		return hpoHeirarchy;
 	}
-	
-	public List<Entity> getResults() {
-		return results;
-	}
-	
-	public void addEntityToResult(Entity entity) {
-		results.add(entity);
-	}
 
 	public HashMap<String, Stack<String>> getAssocData() {
 		if (!assocIsParsed)
 			getData();
 		return assocData;
-	}
-	
-	public long getCount()
-	{
-		return count;
-	}
-	
-	public void plus()
-	{
-		count++;
 	}
 	
 	@Autowired

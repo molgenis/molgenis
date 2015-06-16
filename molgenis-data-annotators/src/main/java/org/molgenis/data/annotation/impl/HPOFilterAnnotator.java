@@ -8,10 +8,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 
+import net.sf.samtools.util.RuntimeEOFException;
+
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AbstractRepositoryAnnotator;
+import org.molgenis.data.annotation.LocusAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.impl.datastructures.Locus;
 import org.molgenis.data.annotation.provider.HPOFilterDataProvider;
@@ -33,7 +36,7 @@ import org.springframework.stereotype.Component;
  */
 
 @Component("HPOFilterService")
-class HPOFilterAnnotator
+class HPOFilterAnnotator extends LocusAnnotator
 {
 	public static final String CHROM_LABEL = "#CHROM";
 	public static final String POS_LABEL = "POS";
@@ -47,7 +50,8 @@ class HPOFilterAnnotator
 	// time out for waiting for the HPOFilterDataProvider to complete is 10 seconds
 	Long TIME_OUT = 10000L;
 	
-	String hpo = "HP:0000006";
+	String hpo = "HP:0000769";
+	boolean recursive = true;
 	
 	@Autowired
 	HPOFilterAnnotator(HPOFilterDataProvider hpoFilterData, MolgenisSettings molgenisSettings, 
@@ -57,15 +61,17 @@ class HPOFilterAnnotator
 		this.molgenisSettings = molgenisSettings;
 		this.hgncLocationsProvider = hgncLocationsProvider;
 	}
-	
+
+	@Override
 	public EntityMetaData getOutputMetaData()
 	{
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		/*metadata.addAttributeMetaData(new DefaultAttributeMetaData(PASS_LABEL, MolgenisFieldTypes.FieldTypeEnum.BOOL)
-		.setLabel(PASS_LABEL).setDescription("True if variant passed filter, false if not."));*/
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(PASS_LABEL, MolgenisFieldTypes.FieldTypeEnum.BOOL)
+		.setLabel(PASS_LABEL).setDescription("True if variant passed filter, false if not."));
 		return metadata;
 	}
 
+	@Override
 	public EntityMetaData getInputMetaData()
 	{
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
@@ -76,11 +82,13 @@ class HPOFilterAnnotator
 		return metadata;
 	}
 
+	@Override
 	public String getDescription()
 	{
 		return DESC;
 	}
 
+	@Override
 	public String getSimpleName() 
 	{
 		return NAME;
@@ -90,29 +98,33 @@ class HPOFilterAnnotator
 		return true;
 	}
 	
-	//public List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException
-	public void annotateEntity(Entity entity) throws IOException, InterruptedException 
+	@Override
+	public List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException 
 	{
-		//HashMap<String,Object> resultMap = new HashMap<String,Object>();	
+		HashMap<String,Object> resultMap = new HashMap<String,Object>();	
 		List<String> genes;
 		String c = entity.getString(CHROM_LABEL);
 		Long pos = entity.getLong(POS_LABEL);
 		Locus l = new Locus(c, pos);
+		List<Entity> results = new ArrayList<>();
+		
+		if (!hpoFilterData.getHPOData().containsKey(hpo))
+			throw new RuntimeException(hpo+" does not exist!");
 		
 		genes = HgncLocationsUtils.locationToHgcn(hgncLocationsProvider.getHgncLocations(), l);
-		System.out.println(genes.size()+"genes");
-		//resultMap.put(PASS_LABEL, false);
+		resultMap.put(PASS_LABEL, false);
 		
 		for (String gene : genes) {
-			if (HPOContainsGene(hpo, gene, true))
-				hpoFilterData.addEntityToResult(entity);
-				//resultMap.put(PASS_LABEL, true);
+			if (HPOContainsGene(hpo, gene, recursive))
+				resultMap.put(PASS_LABEL, true);
 		}
+		results.add(AnnotatorUtils.getAnnotatedEntity(this, entity, resultMap));
 		
+		return results;
 	}
 	
 	private boolean HPOContainsGene(String hpo, String gene, boolean recursive) {
-		if (hpoFilterData.getAssocData().containsKey(hpo))
+		if (hpoFilterData.getAssocData().containsKey(hpo)) 
 			if (hpoFilterData.getAssocData().get(hpo).contains(gene))
 				return true;
 			if (recursive)
