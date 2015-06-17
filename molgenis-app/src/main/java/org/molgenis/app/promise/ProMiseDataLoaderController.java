@@ -83,13 +83,13 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 			targetEntity.set("sex", toSex(promiseBiobankSamplesEntity));
 			targetEntity.set("age_low", toAgeLow(promiseBiobankSamplesEntity));
 			targetEntity.set("age_high", toAgeHigh(promiseBiobankSamplesEntity));
-			targetEntity.set("age_unit", dataService.findOne("bbmri_nl_age_types", "YEAR"));
+			targetEntity.set("age_unit", toAgeUnit());
 			targetEntity.set("numberOfDonors", 1); // FIXME
 			targetEntity.set("description", promiseBiobankEntity.getString("OMSCHRIJVING"));
 			// targetEntity.set("publications", null);
 			targetEntity.set("contact_person", getCreatePersons(promiseBiobankEntity));
 			targetEntity.set("principal_investigators", toPrincipalInvestigators());
-			targetEntity.set("institutes", Arrays.asList(dataService.findOne("bbmri_nl_juristic_persons", "83")));
+			targetEntity.set("institutes", toInstitutes());
 			targetEntity.set("biobanks", "Radboud Biobank");
 			// targetEntity.set("website", null);
 			// targetEntity.set("sample_access", null);
@@ -108,11 +108,36 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 		}
 	}
 
+	private Iterable<Entity> toInstitutes()
+	{
+		Entity juristicPerson = dataService.findOne("bbmri_nl_juristic_persons", "83");
+		if (juristicPerson == null)
+		{
+			throw new RuntimeException("Unknown 'bbmri_nl_juristic_persons' [83]");
+		}
+		return Collections.singletonList(juristicPerson);
+	}
+
+	private Entity toAgeUnit()
+	{
+		Entity ageUnit = dataService.findOne("bbmri_nl_age_types", "YEAR");
+		if (ageUnit == null)
+		{
+			throw new RuntimeException("Unknown 'bbmri_nl_age_types' [YEAR]");
+		}
+		return ageUnit;
+	}
+
 	private Iterable<Entity> toPrincipalInvestigators()
 	{
 		MapEntity principalInvestigators = new MapEntity(dataService.getEntityMetaData("bbmri_nl_persons"));
 		principalInvestigators.set("id", new UuidGenerator().generateId());
-		principalInvestigators.set("country", dataService.findOne("bbmri_nl_countries", "NL"));
+		Entity countryNl = dataService.findOne("bbmri_nl_countries", "NL");
+		if (countryNl == null)
+		{
+			throw new RuntimeException("Unknown 'bbmri_nl_countries' [NL]");
+		}
+		principalInvestigators.set("country", countryNl);
 		dataService.add("bbmri_nl_persons", principalInvestigators);
 		return Collections.singletonList(principalInvestigators);
 	}
@@ -166,8 +191,13 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 			}
 			newPerson.set("zip", postalCode);
 			newPerson.set("city", city);
-			newPerson.set("country", dataService.findOne("bbmri_nl_countries", "NL")); // TODO what to put here, this is
-																						// a required attribute?
+			Entity countryNl = dataService.findOne("bbmri_nl_countries", "NL");
+			if (countryNl == null)
+			{
+				throw new RuntimeException("Unknown 'bbmri_nl_countries' [NL]");
+			}
+			newPerson.set("country", countryNl); // TODO what to put here, this is
+													// a required attribute?
 			dataService.add("bbmri_nl_persons", newPerson);
 
 			return Collections.singletonList(newPerson);
