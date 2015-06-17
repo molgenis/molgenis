@@ -27,6 +27,12 @@ public class HPOFilterDataProvider
 	private boolean hpoIsParsed = false;
 	
 	public final static ExecutorService THREADPOOL = Executors.newFixedThreadPool(2);
+	public static final String HPO_LOCATION = "http://compbio.charite.de/hudson/job/"
+					+ "hpo/lastStableBuild/artifact/hp/hp.obo";
+	public static final String ASSOC_LOCATION = "http://compbio.charite.de/hudson/job/"
+			+ "hpo.annotations.monthly/lastStableBuild/artifact/"
+			+ "annotation/ALL_SOURCES_ALL_FREQUENCIES_"
+			+ "diseases_to_genes_to_phenotypes.txt";
 
 	// loads gene and hpo data when needed
 	public void getData() {
@@ -93,8 +99,7 @@ public class HPOFilterDataProvider
 	{
 		try {
 			// temporary, make local copy & check if newer!
-			URL url = new URL("http://compbio.charite.de/hudson/job/"
-					+ "hpo/lastStableBuild/artifact/hp/hp.obo");
+			URL url = new URL(HPO_LOCATION);
 			BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()), 1200);
 			String line;
 			String hpo = null;
@@ -143,10 +148,7 @@ public class HPOFilterDataProvider
 		start = System.currentTimeMillis();
 		try {
 			// temporary, make local copy & check if newer!
-			URL url = new URL("http://compbio.charite.de/hudson/job/"
-					+ "hpo.annotations.monthly/lastStableBuild/artifact/"
-					+ "annotation/ALL_SOURCES_ALL_FREQUENCIES_"
-					+ "diseases_to_genes_to_phenotypes.txt");
+			URL url = new URL(ASSOC_LOCATION);
 			BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()), 150);
 			String hpo;
 			String gene;

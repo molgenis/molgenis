@@ -54,7 +54,7 @@ class HPOFilterAnnotator extends LocusAnnotator
 	Long TIME_OUT = 10000L;
 	
 	// TODO These parameters need to be set by the user!
-	String hpo = "12345";
+	String hpo = "1234567";
 	boolean recursive = true;
 	
 	@Autowired
@@ -64,6 +64,7 @@ class HPOFilterAnnotator extends LocusAnnotator
 		this.hpoFilterData = hpoFilterData;
 		this.molgenisSettings = molgenisSettings;
 		this.hgncLocationsProvider = hgncLocationsProvider;
+		pinger = new UrlPinger();
 	}
 
 	@Override
@@ -98,8 +99,13 @@ class HPOFilterAnnotator extends LocusAnnotator
 		return NAME;
 	}
 
+	// TODO Implemet hpo heirarchy file into molgenissettings
 	protected boolean annotationDataExists() {
-		return true;
+		if (pinger.ping(HPOFilterDataProvider.HPO_LOCATION, 500) &&
+				pinger.ping(HPOFilterDataProvider.ASSOC_LOCATION, 500) &&
+				pinger.ping(molgenisSettings.getProperty(HgncLocationsProvider.KEY_HGNC_LOCATIONS_VALUE, ""), 500))
+			return true;
+		return false;
 	}
 	
 	
@@ -118,7 +124,7 @@ class HPOFilterAnnotator extends LocusAnnotator
 		
 		// Throw an error if the HPO term specified by the user does not exist
 		if (!hpoFilterData.getHPOData().containsKey(hpo))
-			throw new RuntimeException(hpo+" does not exist!");
+			throw new IllegalArgumentException("The term \""+hpo+"\" does not exist!");
 		
 		genes = HgncLocationsUtils.locationToHgcn(hgncLocationsProvider.getHgncLocations(), l);
 		resultMap.put(PASS_LABEL, false);
