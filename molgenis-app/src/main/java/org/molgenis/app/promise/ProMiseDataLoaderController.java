@@ -21,6 +21,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -86,7 +87,7 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 			targetEntity.set("description", promiseBiobankEntity.getString("OMSCHRIJVING"));
 			// targetEntity.set("publications", null);
 			targetEntity.set("contact_person", getCreatePersons(promiseBiobankEntity));
-			// targetEntity.set("principal_investigators", null);
+			targetEntity.set("principal_investigators", toPrincipalInvestigators());
 			targetEntity.set("institutes", Arrays.asList(dataService.findOne("bbmri_nl_juristic_persons", "83")));
 			targetEntity.set("biobanks", "Radboud Biobank");
 			// targetEntity.set("website", null);
@@ -104,6 +105,15 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 
 			dataService.add("bbmri_nl_sample_collections", targetEntity);
 		}
+	}
+
+	private Iterable<Entity> toPrincipalInvestigators()
+	{
+		MapEntity principalInvestigators = new MapEntity(dataService.getEntityMetaData("bbmri_nl_persons"));
+		principalInvestigators.set("id", new UuidGenerator().generateId());
+		principalInvestigators.set("country", dataService.findOne("bbmri_nl_countries", "NL"));
+		dataService.add("bbmri_nl_persons", principalInvestigators);
+		return Collections.singletonList(principalInvestigators);
 	}
 
 	private Iterable<Entity> getCreatePersons(Entity promiseBiobankEntity)
