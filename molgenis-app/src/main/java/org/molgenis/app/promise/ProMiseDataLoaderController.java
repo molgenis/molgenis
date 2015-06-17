@@ -22,7 +22,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -140,16 +139,23 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 
 	private Iterable<Entity> toPrincipalInvestigators()
 	{
-		MapEntity principalInvestigators = new MapEntity(dataService.getEntityMetaData("bbmri_nl_persons"));
-		principalInvestigators.set("id", new UuidGenerator().generateId());
-		Entity countryNl = dataService.findOne("bbmri_nl_countries", "NL");
-		if (countryNl == null)
+		Entity newPerson = dataService.findOne("bbmri_nl_persons", "612");
+		if (newPerson == null)
 		{
-			throw new RuntimeException("Unknown 'bbmri_nl_countries' [NL]");
+			throw new RuntimeException("Unknown 'bbmri_nl_persons' [612]");
 		}
-		principalInvestigators.set("country", countryNl);
-		dataService.add("bbmri_nl_persons", principalInvestigators);
-		return Collections.singletonList(principalInvestigators);
+		return Collections.singletonList(newPerson);
+
+		// MapEntity principalInvestigators = new MapEntity(dataService.getEntityMetaData("bbmri_nl_persons"));
+		// principalInvestigators.set("id", new UuidGenerator().generateId());
+		// Entity countryNl = dataService.findOne("bbmri_nl_countries", "NL");
+		// if (countryNl == null)
+		// {
+		// throw new RuntimeException("Unknown 'bbmri_nl_countries' [NL]");
+		// }
+		// principalInvestigators.set("country", countryNl);
+		// dataService.add("bbmri_nl_persons", principalInvestigators);
+		// return Collections.singletonList(principalInvestigators);
 	}
 
 	private Iterable<Entity> getCreatePersons(Entity promiseBiobankEntity)
