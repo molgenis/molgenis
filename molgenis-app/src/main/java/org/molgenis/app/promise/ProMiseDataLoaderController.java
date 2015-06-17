@@ -131,7 +131,7 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 		Entity person = dataService.findOne("bbmri_nl_persons", personId);
 		if (person != null)
 		{
-			return null;
+			return Collections.singletonList(person);
 		}
 		else
 		{
