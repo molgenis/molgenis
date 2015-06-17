@@ -1,6 +1,7 @@
 package org.molgenis.app;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +39,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -91,7 +93,17 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(new Step8VarcharToTextRepeated(dataSource));
 		upgradeService.addUpgrade(new Step9MysqlTablesToInnoDB(dataSource));
 		// Step 10
-		upgradeService.addUpgrade(new Step11ConvertNames(dataSource));
+
+		SingleConnectionDataSource singleConnectionDS = null;
+		try
+		{
+			singleConnectionDS = new SingleConnectionDataSource(dataSource.getConnection(), true);
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+		upgradeService.addUpgrade(new Step11ConvertNames(singleConnectionDS));
 	}
 
 	@Override

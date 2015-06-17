@@ -65,7 +65,7 @@ public class MetaValidationUtils
 
 	// Case sensitive
 	public static final Set<String> MOLGENIS_KEYWORDS = Sets.newHashSet("login", "logout", "csv", "entities",
-			"attributes");
+			"attributes", "base");
 
 	public static Set<String> KEYWORDS = Sets.newHashSet();
 	static
