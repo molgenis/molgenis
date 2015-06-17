@@ -242,7 +242,7 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 				}
 			}
 		}
-		return ageMinOrMax.intValue();
+		return ageMinOrMax != null ? ageMinOrMax.intValue() : null;
 	}
 
 	// Mapping, meerdere waarden:
