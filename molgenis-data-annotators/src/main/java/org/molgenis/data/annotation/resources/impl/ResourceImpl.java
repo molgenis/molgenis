@@ -46,21 +46,13 @@ public class ResourceImpl implements Resource
 	}
 
 	/**
-	 * Indicates if the repository is available.
-	 * 
-	 * Checks if the current fileName in MolgenisSettings still matches the file that the current repository was
-	 * instantiated for, and removes a previously instantiated {@link Repository} if the filename no longer matches.
+	 * Indicates if the resource is available.
 	 * 
 	 * @return indication if this resource is available
 	 */
 	@Override
 	public synchronized boolean isAvailable()
 	{
-		if (repository != null && needsRefresh())
-		{
-			repository = null;
-			file = null;
-		}
 		return getFile() != null;
 	}
 
@@ -83,7 +75,13 @@ public class ResourceImpl implements Resource
 	public boolean needsRefresh()
 	{
 		File newFile = config.getFile();
-		return !newFile.equals(file);
+		boolean needsRefresh = !newFile.equals(file);
+		if (needsRefresh)
+		{
+			repository = null;
+			file = null;
+		}
+		return repository == null;
 	}
 
 	private Repository getRepository()
