@@ -2,7 +2,17 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=['mapping-service.css']>
-<#assign js=['attribute-mapping.js', 'd3.min.js','vega.min.js','jstat.min.js', 'biobankconnect-graph.js', '/jquery/scrollTableBody/jquery.scrollTableBody-1.0.0.js', 'bootbox.min.js', 'jquery.ace.js']>
+<#assign js=[
+	'attribute-mapping.js', 
+	'd3.min.js',
+	'vega.min.js',
+	'jstat.min.js',
+	'biobankconnect-graph.js',
+	'/jquery/scrollTableBody/jquery.scrollTableBody-1.0.0.js',
+	'bootbox.min.js',
+	'jquery.ace.js',
+	'advanced-mapping-editor.js'
+]>
 
 <@header css js/>
 
@@ -23,6 +33,7 @@
 		<input type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name?html}"/>
 		<input type="hidden" name="source" value="${entityMapping.sourceEntityMetaData.name?html}"/>
 		<input type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name?html}"/>
+		<input type="hidden" name="targetAttributeType" value="${attributeMapping.targetAttributeMetaData.dataType}"/>
 		
 	</div>
 </div>
@@ -74,11 +85,9 @@
 				<div class="col-md-12">
 					<table id="attribute-mapping-table" class="table table-bordered scroll">
 						<thead>
-							<tr>
-								<th>Select</th>
-								<th>Attribute</th>
-								<th>Algorithm value</th>
-							</tr>
+							<th>Select</th>
+							<th>Attribute</th>
+							<th>Algorithm value</th>
 						</thead>
 						<tbody>
 							<#list entityMapping.sourceEntityMetaData.attributes as source>
@@ -104,25 +113,9 @@
 						</tbody>
 					</table>
 					
-					<nav style="text-align:center">
-			  			<ul class="pagination">
-			    			<li>
-					      		<a href="#" aria-label="Previous">
-					        		<span aria-hidden="true">&laquo;</span>
-					      		</a>
-					    	</li>
-					    	<li><a href="#">1</a></li>
-					    	<li><a href="#">2</a></li>
-					    	<li><a href="#">3</a></li>
-					    	<li><a href="#">4</a></li>
-					    	<li><a href="#">5</a></li>
-					    	<li>
-					     		<a href="#" aria-label="Next">
-					        		<span aria-hidden="true">&raquo;</span>
-					      		</a>
-					    	</li>
-					  	</ul>
-					</nav>		
+					<div class="test-btn-container">
+						<button id="test-mapping-btn" type="btn" class="btn btn-success pull-right">Test selection</button>
+					</div>
 				</div>
 			</div>
 			
@@ -141,10 +134,15 @@
 			<div class="row">
 				<div class="col-md-12">
 					<ul class="nav nav-tabs" role="tablist">
-			    		<li role="presentation"><a href="#equal" aria-controls="equal" role="tab" data-toggle="tab"> = </a></li>
-			    		<li role="presentation"><a href="#function" aria-controls="function" role="tab" data-toggle="tab">Function</a></li>
-			    		<li role="presentation"><a href="#map" aria-controls="map" role="tab" data-toggle="tab">Map</a></li> 
 			    		<li role="presentation" class="active"><a href="#script" aria-controls="script" role="tab" data-toggle="tab">Script</a></li>
+			    		
+			    		<#--<#if attributeMapping.targetAttributeMetaData.dataType == "decimal">
+			    			<li role="presentation"><a href="#function" aria-controls="function" role="tab" data-toggle="tab">Function</a></li>
+		    			</#if>-->
+			    		
+			    		<#if attributeMapping.targetAttributeMetaData.dataType == "xref" || attributeMapping.targetAttributeMetaData.dataType == "categorical">
+			    			<li role="presentation"><a href="#map" aria-controls="map" role="tab" data-toggle="tab">Map</a></li>
+		    			</#if> 
 			   		</ul>
 				</div>
 			</div>
@@ -152,10 +150,9 @@
 			<div class="row">
 				<div class="col-md-12">
 					 <div class="tab-content">
-			    		<div role="tabpanel" class="tab-pane" id="equal"><@equal /></div>
-			    		<div role="tabpanel" class="tab-pane" id="function"><@function /></div>
-			    		<div role="tabpanel" class="tab-pane" id="map"><@map /></div>
 			    		<div role="tabpanel" class="tab-pane active" id="script"><@script /></div>
+			    		<#--<div role="tabpanel" class="tab-pane" id="function"><@function /></div>-->
+			    		<div role="tabpanel" class="tab-pane" id="map"><@map /></div>
 			    	</div>
 			    	<br/>
 				</div>
@@ -163,8 +160,8 @@
 			
 		</div> <#-- End: Mapping container -->
 	</div>  <#-- End: Mapping column -->
-	
-	<div class="col-md-6 col-lg-4"> <#-- Start Result column -->
+
+<div class="col-md-6 col-lg-4"> <#-- Start Result column -->
 		<div id="result-container"> <#-- Start: Result container -->
 			
 			<div class="row">
@@ -174,32 +171,18 @@
 				</div>
 			</div>
 			 
+			<div class="row">
+				<div class="col-md-12">
+					<div id="save-btn-container">
+						<button id="save-mapping-btn" type="btn" class="btn btn-primary pull-right">Save</button>
+					</div> 
+			 	</div>
+			</div>
+			
 		</div> <#-- End: Result container -->
-	</div> <#-- End: Result column -->
-	
+	</div> <#-- End: Result column -->	
+
 </div> <#-- End: Master row -->
-
-<div class="row">
-	<div class="col-md-12"> <#-- Start: Save column -->
-		<div class="save-and-test-btn-container"> <#-- Start: Save container -->
-			<hr></hr>
-			
-			<button id="save-mapping-btn" type="btn" class="btn btn-primary">Save</button>
-			<button id="test-mapping-btn" type="btn" class="btn btn-success">Test selection</button>
-			
-		</div> <#-- End: Save container -->
-	</div> <#-- End: Save column -->
-</div>
-
-
-<#-- equal tab -->
-<#macro equal> 
-	<div class="row">
-		<div class="col-md-12">
-			<h4>Simple direct one on one mapping</h4>
-		</div>
-	</div>
-</#macro>
 
 <#-- function tab -->
 <#macro function>
@@ -257,9 +240,8 @@
 	<div class="row">
 		<div class="col-md-12">
 			<br/>
-			<div id="test-and-reset-btn-container" class="pull-right">
+			<div id="reset-btn-container" class="pull-right">
 				<button id="reset-algorithm-changes-btn" type="btn" class="btn btn-warning">Reset</button>
-				<button id="test-algorithm-btn" type="btn" class="btn btn-primary">Test</button>
 			</div>
 		</div>
 	</div>

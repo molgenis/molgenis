@@ -5,6 +5,7 @@ import static org.molgenis.data.mapper.controller.MappingServiceController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -487,14 +488,25 @@ public class MappingServiceController extends MolgenisPluginController
 			algorithmTest.setAlgorithm(algorithm);
 		}
 
-		FluentIterable<Entity> sourceEntities = FluentIterable.from(dataService.findAll(source)).limit(10);
+		try
+		{
+			Collection<String> sourceAttributeNames = algorithmService.getSourceAttributeNames(algorithm);
+			if (!sourceAttributeNames.isEmpty())
+			{
+				model.addAttribute("sourceAttributeNames", sourceAttributeNames);
+			}
+		}
+		catch (Exception e)
+		{
+
+		}
 
 		model.addAttribute("mappingProjectId", mappingProjectId);
 		model.addAttribute("target", target);
 		model.addAttribute("source", source);
-		model.addAttribute("sourceAttributeNames", algorithmService.getSourceAttributeNames(algorithm));
 		model.addAttribute("targetAttribute", dataService.getEntityMetaData(target).getAttribute(targetAttribute));
 
+		FluentIterable<Entity> sourceEntities = FluentIterable.from(dataService.findAll(source)).limit(10);
 		ImmutableList<AlgorithmResult> algorithmResults = sourceEntities.transform(
 				sourceEntity -> {
 					try
@@ -549,54 +561,63 @@ public class MappingServiceController extends MolgenisPluginController
 			@RequestParam(required = true) String sourceAttribute, Model model)
 	{
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
-		model.addAttribute("mappingProject", project);
-
 		MappingTarget mappingTarget = project.getMappingTarget(target);
 		EntityMapping entityMapping = mappingTarget.getMappingForSource(source);
-		model.addAttribute("entityMapping", entityMapping);
-
 		AttributeMapping attributeMapping = entityMapping.getAttributeMapping(targetAttribute);
+
+		model.addAttribute("mappingProject", project);
+		model.addAttribute("entityMapping", entityMapping);
 		model.addAttribute("attributeMapping", attributeMapping);
 
 		FieldType sourceAttributeDataType = dataService.getEntityMetaData(source).getAttribute(sourceAttribute)
 				.getDataType();
 
-		// values for source xref / categoricals / String
-		Iterable<Entity> sourceAttributeRefEntityEntities = null;
-		if (sourceAttributeDataType.equals(MolgenisFieldTypes.CATEGORICAL)
-				|| sourceAttributeDataType.equals(MolgenisFieldTypes.XREF))
-		{
-			sourceAttributeRefEntityEntities = dataService.findAll(dataService.getEntityMetaData(source)
-					.getAttribute(sourceAttribute).getRefEntity().getName());
-		}
-		model.addAttribute("sourceAttributeRefEntityEntities", sourceAttributeRefEntityEntities);
-		model.addAttribute("numberOfSourceAttributes", size(sourceAttributeRefEntityEntities.iterator()));
-
-		// values for target xref / categoricals / String
-		Iterable<Entity> targetAttributeRefEntityEntities = dataService.findAll(dataService.getEntityMetaData(target)
+		// values for target
+		Iterable<Entity> targetAttributeEntities = dataService.findAll(dataService.getEntityMetaData(target)
 				.getAttribute(targetAttribute).getRefEntity().getName());
-		model.addAttribute("targetAttributeRefEntityEntities", targetAttributeRefEntityEntities);
+		model.addAttribute("targetAttributeEntities", targetAttributeEntities);
 
 		// ID attribute for the target ref entity
-		// TODO: Source can be String / enum, those don't have refEntity
-		String sourceAttributeRefEntityIdAttribute = dataService.getEntityMetaData(source)
-				.getAttribute(sourceAttribute).getRefEntity().getIdAttribute().getName();
-		model.addAttribute("sourceAttributeRefEntityIdAttribute", sourceAttributeRefEntityIdAttribute);
-
-		// Label attribute for the source ref entity
-		String sourceAttributeRefEntityLabelAttribute = dataService.getEntityMetaData(source)
-				.getAttribute(sourceAttribute).getRefEntity().getLabelAttribute().getName();
-		model.addAttribute("sourceAttributeRefEntityLabelAttribute", sourceAttributeRefEntityLabelAttribute);
-
-		// ID attribute for the target ref entity
-		String targetAttributeRefEntityIdAttribute = dataService.getEntityMetaData(target)
-				.getAttribute(targetAttribute).getRefEntity().getIdAttribute().getName();
-		model.addAttribute("targetAttributeRefEntityIdAttribute", targetAttributeRefEntityIdAttribute);
+		String targetAttributeIdAttribute = dataService.getEntityMetaData(target).getAttribute(targetAttribute)
+				.getRefEntity().getIdAttribute().getName();
+		model.addAttribute("targetAttributeIdAttribute", targetAttributeIdAttribute);
 
 		// Label attribute for the target ref entity
-		String targetAttributeRefEntityLabelAttribute = dataService.getEntityMetaData(target)
-				.getAttribute(targetAttribute).getRefEntity().getLabelAttribute().getName();
-		model.addAttribute("targetAttributeRefEntityLabelAttribute", targetAttributeRefEntityLabelAttribute);
+		String targetAttributeLabelAttribute = dataService.getEntityMetaData(target).getAttribute(targetAttribute)
+				.getRefEntity().getLabelAttribute().getName();
+		model.addAttribute("targetAttributeLabelAttribute", targetAttributeLabelAttribute);
+
+		Iterable<Entity> sourceAttributeEntities = null;
+		String sourceAttributeIdAttribute = null;
+		String sourceAttributeLabelAttribute = null;
+
+		if (sourceAttributeDataType.equals(MolgenisFieldTypes.CATEGORICAL)
+				|| sourceAttributeDataType.equals(MolgenisFieldTypes.XREF)
+				|| sourceAttributeDataType.equals(MolgenisFieldTypes.MREF))
+		{
+			sourceAttributeEntities = dataService.findAll(dataService.getEntityMetaData(source)
+					.getAttribute(sourceAttribute).getRefEntity().getName());
+
+			sourceAttributeIdAttribute = dataService.getEntityMetaData(source).getAttribute(sourceAttribute)
+					.getRefEntity().getIdAttribute().getName();
+
+			sourceAttributeLabelAttribute = dataService.getEntityMetaData(source).getAttribute(sourceAttribute)
+					.getRefEntity().getLabelAttribute().getName();
+		}
+		else
+		{
+			System.out.println(dataService.getEntityMetaData(source));
+			sourceAttributeEntities = dataService.findAll(dataService.getEntityMetaData(source).getName());
+
+			sourceAttributeIdAttribute = dataService.getEntityMetaData(source).getIdAttribute().getName();
+
+			sourceAttributeLabelAttribute = sourceAttribute;
+		}
+
+		model.addAttribute("sourceAttributeEntities", sourceAttributeEntities);
+		model.addAttribute("numberOfSourceAttributes", size(sourceAttributeEntities.iterator()));
+		model.addAttribute("sourceAttributeIdAttribute", sourceAttributeIdAttribute);
+		model.addAttribute("sourceAttributeLabelAttribute", sourceAttributeLabelAttribute);
 
 		// Check if the selected source attribute is aggregateable
 		AttributeMetaData sourceAttributeAttributeMetaData = dataService.getEntityMetaData(source).getAttribute(
@@ -634,7 +655,7 @@ public class MappingServiceController extends MolgenisPluginController
 	}
 
 	@RequestMapping("/savecategorymapping")
-	public String saveCategoryMapping(@RequestParam(required = true) String mappingProjectId,
+	public @ResponseBody void saveCategoryMapping(@RequestParam(required = true) String mappingProjectId,
 			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
 			@RequestParam(required = true) String targetAttribute, @RequestParam(required = true) String algorithm)
 	{
@@ -651,8 +672,6 @@ public class MappingServiceController extends MolgenisPluginController
 			attributeMapping.setAlgorithm(algorithm);
 			mappingService.updateMappingProject(mappingProject);
 		}
-
-		return "redirect:/menu/main/mappingservice/mappingproject/" + mappingProject.getIdentifier();
 	}
 
 	/**
