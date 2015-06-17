@@ -87,7 +87,7 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 			// targetEntity.set("publications", null);
 			targetEntity.set("contact_person", getCreatePersons(promiseBiobankEntity));
 			// targetEntity.set("principal_investigators", null);
-			// targetEntity.set("institutes", null);
+			targetEntity.set("institutes", Arrays.asList(dataService.findOne("bbmri_nl_juristic_persons", "83")));
 			targetEntity.set("biobanks", "Radboud Biobank");
 			// targetEntity.set("website", null);
 			// targetEntity.set("sample_access", null);
