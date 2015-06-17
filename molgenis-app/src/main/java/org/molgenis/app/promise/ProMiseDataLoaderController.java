@@ -263,7 +263,12 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 		{
 			genderTypeIds.add("NAV");
 		}
-		return dataService.findAll("bbmri_nl_gender_types", genderTypeIds);
+		Iterable<Entity> genderTypes = dataService.findAll("bbmri_nl_gender_types", genderTypeIds);
+		if (!genderTypeIds.iterator().hasNext())
+		{
+			throw new RuntimeException("Unknown 'bbmri_nl_gender_types' [" + StringUtils.join(genderTypeIds, ',') + "]");
+		}
+		return genderTypes;
 	}
 
 	private Iterable<Entity> toTypes(String promiseTypeBiobank)
