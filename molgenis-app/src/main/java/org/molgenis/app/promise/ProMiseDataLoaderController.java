@@ -489,7 +489,7 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 		if ("1".equals(promiseBiobankSampleEntity.getString("RNA"))
 				|| "1".equals(promiseBiobankSampleEntity.getString("RNABEENMERG")))
 		{
-			materialTypeIds.add("RNA");
+			materialTypeIds.add("MICRO_RNA");
 		}
 
 		if ("1".equals(promiseBiobankSampleEntity.getString(""))
