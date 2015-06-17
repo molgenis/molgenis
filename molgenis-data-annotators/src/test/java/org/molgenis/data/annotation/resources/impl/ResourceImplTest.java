@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.molgenis.data.Query;
+import org.molgenis.data.annotation.resources.ResourceConfig;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.testng.Assert;
@@ -16,13 +17,16 @@ public class ResourceImplTest
 	@Mock
 	MolgenisSettings molgenisSettings;
 
+	@Mock
+	ResourceConfig config;
+
 	private ResourceImpl resource;
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
 		MockitoAnnotations.initMocks(this);
-		resource = new ResourceImpl("cadd_test", molgenisSettings, "cadd_key", null, new TabixVcfRepositoryFactory(
+		resource = new ResourceImpl("cadd_test", config, new TabixVcfRepositoryFactory(
 				"cadd"));
 	}
 
@@ -48,7 +52,7 @@ public class ResourceImplTest
 	@Test
 	public void ifDefaultDoesNotExistResourceIsUnavailable()
 	{
-		resource = new ResourceImpl("cadd_test", molgenisSettings, "cadd_key", "defaultNoExist",
+		resource = new ResourceImpl("cadd_test", config,
 				new TabixVcfRepositoryFactory("cadd"));
 		Assert.assertFalse(resource.isAvailable());
 	}

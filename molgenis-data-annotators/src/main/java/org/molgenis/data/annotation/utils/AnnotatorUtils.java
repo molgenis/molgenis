@@ -1,5 +1,7 @@
 package org.molgenis.data.annotation.utils;
 
+import autovalue.shaded.com.google.common.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
@@ -9,7 +11,10 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -24,18 +29,25 @@ public class AnnotatorUtils
 				MolgenisFieldTypes.FieldTypeEnum.COMPOUND);
 		compoundAttributeMetaData.setLabel(annotator.getSimpleName());
 
-		Iterator<AttributeMetaData> attributeMetaDataIterator = annotator.getOutputMetaData().iterator();
+		Iterable<AttributeMetaData> outputAttrs = annotator.getOutputMetaData();
 
-		while (attributeMetaDataIterator.hasNext())
+		if (Iterables.size(outputAttrs) == 1
+				&& Iterables.get(outputAttrs,0).getDataType().getEnumType()
+						.equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
 		{
-			AttributeMetaData currentAmd = attributeMetaDataIterator.next();
-			String currentAttributeName = currentAmd.getName();
-			if (entityMetaData.getAttribute(currentAttributeName) == null)
+			compoundAttributeMetaData = (DefaultAttributeMetaData) Iterables.get(outputAttrs,0);
+		}else{
+			Iterator<AttributeMetaData> attributeMetaDataIterator = outputAttrs.iterator();
+			while (attributeMetaDataIterator.hasNext())
 			{
-				compoundAttributeMetaData.addAttributePart(currentAmd);
+				AttributeMetaData currentAmd = attributeMetaDataIterator.next();
+				String currentAttributeName = currentAmd.getName();
+				if (entityMetaData.getAttribute(currentAttributeName) == null)
+				{
+					compoundAttributeMetaData.addAttributePart(currentAmd);
+				}
 			}
 		}
-
 		return compoundAttributeMetaData;
 	}
 

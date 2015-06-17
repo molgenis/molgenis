@@ -61,7 +61,7 @@ public class CaddServiceAnnotator extends VariantAnnotator
 							+ "\n"
 							+ "C-scores strongly correlate with allelic diversity, pathogenicity of both coding and non-coding variants, and experimentally measured regulatory effects, and also highly rank causal variants within individual genome sequences. Finally, C-scores of complex trait-associated variants from genome-wide association studies (GWAS) are significantly higher than matched controls and correlate with study sample size, likely reflecting the increased accuracy of larger GWAS.\n"
 							+ "\n"
-							+ "CADD can quantitatively prioritize functional, deleterious, and disease causal variants across a wide range of functional categories, effect sizes and genetic architectures and can be used prioritize causal variation in both research and clinical settings. (source: http://cadd.gs.washington.edu/info)");
+							+ "CADD can quantitatively prioritize functional, deleterious, and disease causal variants across a wide range of functional categories, effect sizes and genetic architectures and can be used prioritize causal variation in both research and clinical settings. (source: http://cadd.gs.washington.edu/info)", getOutputMetaData());
 
 	@Override
 	public AnnotatorInfo getInfo()
@@ -149,7 +149,8 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
-		annotatorService.addAnnotator(this);
+
+		//annotatorService.addAnnotator(this);
 	}
 
 	@Override

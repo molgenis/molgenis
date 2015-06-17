@@ -347,6 +347,6 @@ public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 	@Override
 	public AnnotatorInfo getInfo()
 	{
-		return AnnotatorInfo.create(Status.INDEV, Type.UNUSED, "unknown", "no description");
+		return AnnotatorInfo.create(Status.INDEV, Type.UNUSED, "unknown", "no description", getOutputMetaData());
 	}
 }

@@ -98,6 +98,6 @@ public class HgncSymbolServiceAnnotator extends LocusAnnotator
 	public AnnotatorInfo getInfo()
 	{
 		return AnnotatorInfo.create(Status.INDEV, Type.UNUSED, "unknown",
-				"This is the description for the HGNC Annotator");
+				"This is the description for the HGNC Annotator", getOutputMetaData());
 	}
 }

@@ -52,7 +52,7 @@ public class ExACServiceAnnotator extends VariantAnnotator
 	@Override
 	public AnnotatorInfo getInfo()
 	{
-		return AnnotatorInfo.create(Status.BETA, Type.POPULATION_REFERENCE, "exac", "no description");
+		return AnnotatorInfo.create(Status.BETA, Type.POPULATION_REFERENCE, "exac", "no description", getOutputMetaData());
 	}
 
 	public static final String EXAC_MAF_LABEL = "EXACMAF";

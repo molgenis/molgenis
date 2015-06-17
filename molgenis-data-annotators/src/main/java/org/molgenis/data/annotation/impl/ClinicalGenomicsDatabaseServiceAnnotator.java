@@ -48,7 +48,7 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 	@Override
 	public AnnotatorInfo getInfo()
 	{
-		return AnnotatorInfo.create(Status.BETA, Type.UNUSED, "unknown", "Clinical Genomics Database");
+		return AnnotatorInfo.create(Status.BETA, Type.UNUSED, "unknown", "Clinical Genomics Database", getOutputMetaData());
 	}
 
 	private final MolgenisSettings molgenisSettings;

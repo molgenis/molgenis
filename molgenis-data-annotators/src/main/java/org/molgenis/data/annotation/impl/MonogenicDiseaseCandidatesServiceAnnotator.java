@@ -42,7 +42,7 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 	@Override
 	public AnnotatorInfo getInfo()
 	{
-		return AnnotatorInfo.create(Status.BETA, Type.AUTOMATED_PROTOCOL, "monogenic", "Monogenic disease candidates");
+		return AnnotatorInfo.create(Status.BETA, Type.AUTOMATED_PROTOCOL, "monogenic", "Monogenic disease candidates", getOutputMetaData());
 	}
 
 	private static final Logger LOG = LoggerFactory.getLogger(MonogenicDiseaseCandidatesServiceAnnotator.class);

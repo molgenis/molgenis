@@ -58,7 +58,7 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 	@Override
 	public AnnotatorInfo getInfo()
 	{
-		return AnnotatorInfo.create(Status.BETA, Type.POPULATION_REFERENCE, "gonl", "no description");
+		return AnnotatorInfo.create(Status.BETA, Type.POPULATION_REFERENCE, "gonl", "no description", getOutputMetaData());
 	}
 
 	public static final String GONL_MAF_LABEL = "GONLMAF";

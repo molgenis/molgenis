@@ -15,12 +15,10 @@ import org.molgenis.data.annotation.mini.EntityAnnotator;
 public class RepositoryAnnotatorImpl extends AbstractRepositoryAnnotator
 {
 	private EntityAnnotator entityAnnotator;
-	private EntityMetaData metaData;
 
-	public RepositoryAnnotatorImpl(EntityAnnotator entityAnnotator, EntityMetaData metaData)
+	public RepositoryAnnotatorImpl(EntityAnnotator entityAnnotator)
 	{
 		this.entityAnnotator = entityAnnotator;
-		this.metaData = metaData;
 	}
 
 	@Override

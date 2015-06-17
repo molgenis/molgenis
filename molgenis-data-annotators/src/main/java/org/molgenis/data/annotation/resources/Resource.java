@@ -27,4 +27,5 @@ public interface Resource
 	 */
 	Iterable<Entity> findAll(Query q);
 
+	boolean needsRefresh();
 }

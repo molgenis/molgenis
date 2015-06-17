@@ -1,41 +1,74 @@
 package org.molgenis.data.annotation.mini.impl;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DataService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.mini.AnnotatorInfo;
 import org.molgenis.data.annotation.mini.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.mini.EntityAnnotator;
-import org.molgenis.data.annotator.tabix.TabixVcfRepository;
+import org.molgenis.data.annotation.resources.Resource;
+import org.molgenis.data.annotation.resources.impl.ResourceImpl;
+import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
+import org.molgenis.data.annotation.resources.impl.TabixRepositoryFactory;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.system.MolgenisDbSettings;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.io.File;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DECIMAL;
+import static org.molgenis.data.vcf.VcfRepository.ALT_META;
+import static org.molgenis.data.vcf.VcfRepository.CHROM_META;
+import static org.molgenis.data.vcf.VcfRepository.POS_META;
+import static org.molgenis.data.vcf.VcfRepository.REF_META;
 
 @Configuration
 public class CaddAnnotator
 {
-	public static final String CADD_SCALED = "CADDSCALED";
-	public static final String CADD_ABS = "CADDABS";
+	public static final String CADD_SCALED = "CADD_SCALED";
+	public static final String CADD_ABS = "CADD";
+	public static final String CADD_SCALED_LABEL = "CADDSCALED";
+	public static final String CADD_ABS_LABEL = "CADDABS";
 	public static final String CADD_FILE_LOCATION_PROPERTY = "cadd_location";
-	public static final String CADD_TABIX_REPOSITORY = "CADDTabixRepository";
+	public static final String CADD_TABIX_RESOURCE = "CADDTabixResource";
 
 	private static final Logger LOG = LoggerFactory.getLogger(CaddAnnotator.class);
 
 	@Autowired
 	private MolgenisSettings molgenisSettings;
+	@Autowired
+	private DataService dataService;
+	@Autowired
+	private ApplicationContext applicationContext;
 
 	@Bean
 	public RepositoryAnnotator cadd()
 	{
+		List<AttributeMetaData> attributes = new ArrayList<>();
+		DefaultAttributeMetaData cadd_abs = new DefaultAttributeMetaData(CADD_ABS, FieldTypeEnum.DECIMAL)
+				.setDescription("\"Raw\" CADD scores come straight from the model, and are interpretable as the extent to which the annotation profile for a given variant suggests that "
+						+ "that variant is likely to be \"observed\" (negative values) vs \"simulated\" (positive values). These values have no absolute unit of meaning and are "
+						+ "incomparable across distinct annotation combinations, training sets, or model parameters. However, raw values do have relative meaning, with higher values "
+						+ "indicating that a variant is more likely to be simulated (or \"not observed\") and therefore more likely to have deleterious effects."
+						+ "(source: http://cadd.gs.washington.edu/info)").setLabel(CADD_ABS_LABEL);
+		DefaultAttributeMetaData cadd_scaled = new DefaultAttributeMetaData(CADD_SCALED, FieldTypeEnum.DECIMAL)
+				.setDescription("Since the raw scores do have relative meaning, one can take a specific group of variants, define the rank for each variant within that group, and then use "
+						+ "that value as a \"normalized\" and now externally comparable unit of analysis. In our case, we scored and ranked all ~8.6 billion SNVs of the "
+						+ "GRCh37/hg19 reference and then \"PHRED-scaled\" those values by expressing the rank in order of magnitude terms rather than the precise rank itself. "
+						+ "For example, reference genome single nucleotide variants at the 10th-% of CADD scores are assigned to CADD-10, top 1% to CADD-20, top 0.1% to CADD-30, etc. "
+						+ "The results of this transformation are the \"scaled\" CADD scores.(source: http://cadd.gs.washington.edu/info)").setLabel(CADD_SCALED_LABEL);
+
+		attributes.add(cadd_abs);
+		attributes.add(cadd_scaled);
+
 		AnnotatorInfo caddInfo = AnnotatorInfo
 				.create(Status.BETA,
 						AnnotatorInfo.Type.PATHOGENICITY_ESTIMATE,
@@ -52,42 +85,32 @@ public class CaddAnnotator
 								+ "significantly higher than matched controls and correlate with study sample size, likely reflecting the increased accuracy of larger GWAS.\n"
 								+ "CADD can quantitatively prioritize functional, deleterious, and disease causal variants across a wide range of functional categories, "
 								+ "effect sizes and genetic architectures and can be used prioritize "
-								+ "causal variation in both research and clinical settings. (source: http://cadd.gs.washington.edu/info)");
-		EntityAnnotator entityAnnotator = new AnnotatorImpl(CADD_TABIX_REPOSITORY, caddInfo, new LocusQueryCreator(),
-				new VariantResultFilter());
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		DefaultAttributeMetaData cadd_abs = new DefaultAttributeMetaData(CADD_ABS, FieldTypeEnum.DECIMAL)
-				.setDescription("\"Raw\" CADD scores come straight from the model, and are interpretable as the extent to which the annotation profile for a given variant suggests that "
-						+ "that variant is likely to be \"observed\" (negative values) vs \"simulated\" (positive values). These values have no absolute unit of meaning and are "
-						+ "incomparable across distinct annotation combinations, training sets, or model parameters. However, raw values do have relative meaning, with higher values "
-						+ "indicating that a variant is more likely to be simulated (or \"not observed\") and therefore more likely to have deleterious effects."
-						+ "(source: http://cadd.gs.washington.edu/info)");
-		DefaultAttributeMetaData cadd_scaled = new DefaultAttributeMetaData(CADD_SCALED, FieldTypeEnum.DECIMAL)
-				.setDescription("Since the raw scores do have relative meaning, one can take a specific group of variants, define the rank for each variant within that group, and then use "
-						+ "that value as a \"normalized\" and now externally comparable unit of analysis. In our case, we scored and ranked all ~8.6 billion SNVs of the "
-						+ "GRCh37/hg19 reference and then \"PHRED-scaled\" those values by expressing the rank in order of magnitude terms rather than the precise rank itself. "
-						+ "For example, reference genome single nucleotide variants at the 10th-% of CADD scores are assigned to CADD-10, top 1% to CADD-20, top 0.1% to CADD-30, etc. "
-						+ "The results of this transformation are the \"scaled\" CADD scores.(source: http://cadd.gs.washington.edu/info)");
+								+ "causal variation in both research and clinical settings. (source: http://cadd.gs.washington.edu/info)",
+						attributes);
+		EntityAnnotator entityAnnotator = new AnnotatorImpl(CADD_TABIX_RESOURCE, caddInfo, new LocusQueryCreator(),
+				new VariantResultFilter(), dataService, applicationContext);
 
-		metadata.addAttributeMetaData(cadd_abs);
-		metadata.addAttributeMetaData(cadd_scaled);
 
-		return new RepositoryAnnotatorImpl(entityAnnotator, metadata);
+		return new RepositoryAnnotatorImpl(entityAnnotator);
 	}
 
 	@Bean
-	TabixVcfRepository caddRepository()
+	Resource caddResource()
 	{
-		TabixVcfRepository tabixRepo = null;
-		try
-		{
-			tabixRepo = new TabixVcfRepository(new File(molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY)),
-					CADD_TABIX_REPOSITORY);
-		}
-		catch (IOException e)
-		{
-			LOG.error("could not create TabixVcfRepository: " + e);
-		}
-		return tabixRepo;
+		Resource caddTabixResource = null;
+
+		DefaultEntityMetaData repoMetaData = new DefaultEntityMetaData(CADD_TABIX_RESOURCE);
+		repoMetaData.addAttributeMetaData(CHROM_META);
+		repoMetaData.addAttributeMetaData(POS_META);
+		repoMetaData.addAttributeMetaData(REF_META);
+		repoMetaData.addAttributeMetaData(ALT_META);
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("CADD", DECIMAL));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("CADD_SCALED", DECIMAL));
+		repoMetaData.addAttribute("id").setIdAttribute(true).setVisible(false);
+
+		caddTabixResource = new ResourceImpl(CADD_TABIX_RESOURCE,
+				new SingleResourceConfig(CADD_FILE_LOCATION_PROPERTY,molgenisSettings), new TabixRepositoryFactory(repoMetaData));
+
+		return caddTabixResource;
 	}
 }

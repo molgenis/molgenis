@@ -7,6 +7,7 @@ import java.util.List;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.annotation.mini.AnnotatorInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -140,7 +141,10 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 	@Override
 	public String getDescription()
 	{
-		return getInfo().getDescription();
+		String desc = "TODO";
+		AnnotatorInfo annotatorInfo = getInfo();
+		if(annotatorInfo != null) desc = annotatorInfo.getDescription();
+		return desc;
 	}
 
 }
