@@ -241,7 +241,7 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 			case "2":
 				return Arrays.asList(dataService.findOne("bbmri_nl_collection_types", "POPULATION_BASED"));
 			default:
-				throw new RuntimeException();
+				throw new RuntimeException("Unknown biobank type [" + promiseTypeBiobank + "]");
 		}
 	}
 
