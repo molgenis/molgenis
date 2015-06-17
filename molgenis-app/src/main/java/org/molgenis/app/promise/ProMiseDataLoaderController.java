@@ -15,6 +15,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -237,27 +238,44 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 
 	private Iterable<Entity> toTypes(String promiseTypeBiobank)
 	{
+		String collectionTypeId;
 		if (promiseTypeBiobank == null || promiseTypeBiobank.isEmpty())
 		{
-			return Arrays.asList(dataService.findOne("bbmri_nl_collection_types", "OTHER"));
+			collectionTypeId = "OTHER";
 		}
-
-		switch (promiseTypeBiobank)
+		else
 		{
-			case "0":
-				return Arrays.asList(dataService.findOne("bbmri_nl_collection_types", "OTHER"));
-			case "1":
-				return Arrays.asList(dataService.findOne("bbmri_nl_collection_types", "DISEASE_SPECIFIC"));
-			case "2":
-				return Arrays.asList(dataService.findOne("bbmri_nl_collection_types", "POPULATION_BASED"));
-			default:
-				throw new RuntimeException("Unknown biobank type [" + promiseTypeBiobank + "]");
+			switch (promiseTypeBiobank)
+			{
+				case "0":
+					collectionTypeId = "OTHER";
+					break;
+				case "1":
+					collectionTypeId = "DISEASE_SPECIFIC";
+					break;
+				case "2":
+					collectionTypeId = "POPULATION_BASED";
+					break;
+				default:
+					throw new RuntimeException("Unknown biobank type [" + promiseTypeBiobank + "]");
+			}
 		}
+		Entity collectionType = dataService.findOne("bbmri_nl_collection_types", collectionTypeId);
+		if (collectionType == null)
+		{
+			throw new RuntimeException("Unknown 'bbmri_nl_collection_types' [" + collectionTypeId + "]");
+		}
+		return Arrays.asList(collectionType);
 	}
 
 	private Iterable<Entity> toDiseases()
 	{
-		return Arrays.asList(dataService.findOne("bbmri_nl_disease_types", "NAV")); // FIXME
+		Entity diseaseType = dataService.findOne("bbmri_nl_disease_types", "NAV");
+		if (diseaseType == null)
+		{
+			throw new RuntimeException("Unknown 'bbmri_nl_disease_types' [NAV]");
+		}
+		return Arrays.asList(diseaseType); // FIXME
 	}
 
 	private Iterable<Entity> toDataCategories(Entity promiseBiobankEntity, Entity promiseBiobankSamplesEntity)
@@ -337,7 +355,13 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 		{
 			dataCategoryTypeIds.add("NAV");
 		}
-		return dataService.findAll("bbmri_nl_data_category_types", dataCategoryTypeIds);
+		Iterable<Entity> dataCategoryTypes = dataService.findAll("bbmri_nl_data_category_types", dataCategoryTypeIds);
+		if (!dataCategoryTypes.iterator().hasNext())
+		{
+			throw new RuntimeException("Unknown 'bbmri_nl_data_category_types' ["
+					+ StringUtils.join(dataCategoryTypeIds, ',') + "]");
+		}
+		return dataCategoryTypes;
 	}
 
 	// Mapping, meerdere waarden voor velden waar de waarde 1 / ja is:
@@ -430,7 +454,13 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 		{
 			materialTypeIds.add("NAV");
 		}
-		return dataService.findAll("bbmri_nl_material_types", materialTypeIds);
+		Iterable<Entity> materialTypes = dataService.findAll("bbmri_nl_material_types", materialTypeIds);
+		if (!materialTypes.iterator().hasNext())
+		{
+			throw new RuntimeException("Unknown 'bbmri_nl_material_types' [" + StringUtils.join(materialTypeIds, ',')
+					+ "]");
+		}
+		return materialTypes;
 	}
 
 	// Mapping, meerdere waarden:
@@ -451,7 +481,13 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 		{
 			omicsTypeIds.add("NAV");
 		}
-		return dataService.findAll("bbmri_nl_omics_data_types", omicsTypeIds);
+		Iterable<Entity> omicsTypes = dataService.findAll("bbmri_nl_omics_data_types", omicsTypeIds);
+		if (!omicsTypes.iterator().hasNext())
+		{
+			throw new RuntimeException("Unknown 'bbmri_nl_omics_data_types' [" + StringUtils.join(omicsTypeIds, ',')
+					+ "]");
+		}
+		return omicsTypes;
 	}
 
 	private Entity getPromiseBiobankSamples(Entity promiseBiobankEntity, Iterable<Entity> promiseSampleEntities)
