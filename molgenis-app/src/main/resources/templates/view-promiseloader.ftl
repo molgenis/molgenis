@@ -1,7 +1,14 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 <@header/>
-<div id="btn-container"></div>
+<div class="row">
+    <div class="col-md-1">
+        <div id="load-btn-container"></div>
+    </div>
+    <div class="col-md-1">
+        <div id="map-btn-container"></div>
+    </div>
+</div>
 <script>
     React.render(molgenis.ui.Button({
         text: 'Load',
@@ -9,6 +16,13 @@
         onClick: function() {
             $.post(molgenis.getContextUrl() + '/load');            
         }
-    }, 'Load'), $('#btn-container')[0]);
+    }, 'Load'), $('#load-btn-container')[0]);
+    React.render(molgenis.ui.Button({
+        text: 'Map',
+        style: 'primary',
+        onClick: function() {
+            $.post(molgenis.getContextUrl() + '/map');            
+        }
+    }, 'Map'), $('#map-btn-container')[0]);
 </script>
 <@footer/>
