@@ -64,7 +64,7 @@ public class AppConfig
 	{
 		DataServiceImpl dataService = (DataServiceImpl) dataService();
 		MetaDataService metaDataService = new MetaDataServiceImpl(dataService);
-		dataService.setMetaDataService(metaDataService);
+		dataService.setMeta(metaDataService);
 
 		metaDataService.setDefaultBackend(elasticsearchRepositoryCollection());
 

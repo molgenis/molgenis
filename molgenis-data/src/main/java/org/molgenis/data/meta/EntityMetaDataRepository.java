@@ -43,7 +43,7 @@ import com.google.common.collect.Lists;
  */
 class EntityMetaDataRepository
 {
-	public static final EntityMetaDataMetaData META_DATA = new EntityMetaDataMetaData();
+	public static final EntityMetaDataMetaData META_DATA = EntityMetaDataMetaData.INSTANCE;
 	private final Repository repository;
 	private final PackageRepository packageRepository;
 	private final ManageableRepositoryCollection collection;

@@ -23,7 +23,9 @@ public class EntityMetaDataMetaData extends DefaultEntityMetaData
 	public static final String TAGS = "tags";
 	public static final String ATTRIBUTES = "attributes";
 
-	public EntityMetaDataMetaData()
+	public static final EntityMetaDataMetaData INSTANCE = new EntityMetaDataMetaData();
+
+	private EntityMetaDataMetaData()
 	{
 		super(ENTITY_NAME);
 		addAttribute(FULL_NAME).setIdAttribute(true).setUnique(true).setNillable(false);
@@ -36,8 +38,8 @@ public class EntityMetaDataMetaData extends DefaultEntityMetaData
 		addAttribute(LABEL);
 		addAttribute(EXTENDS).setDataType(XREF).setRefEntity(this);
 		addAttribute(DESCRIPTION).setDataType(TEXT);
-		addAttribute(TAGS).setDataType(MREF).setRefEntity(new TagMetaData());
-		addAttribute(ATTRIBUTES).setDataType(MREF).setRefEntity(new AttributeMetaDataMetaData());
+		addAttribute(TAGS).setDataType(MREF).setRefEntity(TagMetaData.INSTANCE);
+		addAttribute(ATTRIBUTES).setDataType(MREF).setRefEntity(AttributeMetaDataMetaData.INSTANCE);
 	}
 
 }

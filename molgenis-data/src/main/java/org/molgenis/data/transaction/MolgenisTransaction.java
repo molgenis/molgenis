@@ -21,6 +21,11 @@ public class MolgenisTransaction
 		return id;
 	}
 
+	public void setId(String id)
+	{
+		this.id = id;
+	}
+
 	public Object getJpaTransaction()
 	{
 		return jpaTransaction;

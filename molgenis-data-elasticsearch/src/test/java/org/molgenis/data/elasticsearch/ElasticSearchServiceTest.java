@@ -89,7 +89,8 @@ public class ElasticSearchServiceTest
 		MapEntity entity = createEntityAndRegisterSource(entityMetaData, "id0");
 
 		searchService.index(entity, entityMetaData, IndexingMode.ADD);
-		verify(searchService, times(1)).index(indexName, Arrays.asList(entity), entityMetaData, IndexingMode.ADD, true);
+		verify(searchService, times(1)).index(indexName, Arrays.asList(entity), entityMetaData,
+				ElasticSearchService.CrudType.ADD, true);
 	}
 
 	@Test
@@ -100,8 +101,8 @@ public class ElasticSearchServiceTest
 		when(dataService.getEntityNames()).thenReturn(Lists.newArrayList());
 
 		searchService.index(entity, entityMetaData, IndexingMode.UPDATE);
-		verify(searchService, times(1)).index(indexName, Arrays.asList(entity), entityMetaData, IndexingMode.UPDATE,
-				true);
+		verify(searchService, times(1)).index(indexName, Arrays.asList(entity), entityMetaData,
+				ElasticSearchService.CrudType.UPDATE, true);
 	}
 
 	@SuppressWarnings("unchecked")

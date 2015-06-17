@@ -15,7 +15,9 @@ public class PackageMetaData extends DefaultEntityMetaData
 	public static final String PARENT = "parent";
 	public static final String TAGS = "tags";
 
-	public PackageMetaData()
+	public static final PackageMetaData INSTANCE = new PackageMetaData();
+
+	private PackageMetaData()
 	{
 		super(ENTITY_NAME);
 
@@ -23,7 +25,7 @@ public class PackageMetaData extends DefaultEntityMetaData
 		addAttribute(SIMPLE_NAME);
 		addAttribute(DESCRIPTION).setDataType(TEXT);
 		addAttribute(PARENT).setDataType(XREF).setRefEntity(this);
-		addAttribute(TAGS).setDataType(MREF).setRefEntity(new TagMetaData());
+		addAttribute(TAGS).setDataType(MREF).setRefEntity(TagMetaData.INSTANCE);
 	}
 
 }

@@ -63,13 +63,19 @@ public class MetaDataServiceImpl implements MetaDataService
 		this.defaultBackend = backend;
 		backends.put(backend.getName(), backend);
 
+		PackageMetaData.INSTANCE.setBackend(backend.getName());
+		TagMetaData.INSTANCE.setBackend(backend.getName());
+		EntityMetaDataMetaData.INSTANCE.setBackend(backend.getName());
+		AttributeMetaDataMetaData.INSTANCE.setBackend(backend.getName());
+
 		bootstrapMetaRepos();
 		return this;
 	}
 
 	private void bootstrapMetaRepos()
 	{
-		Repository tagRepo = defaultBackend.addEntityMeta(new TagMetaData());
+
+		Repository tagRepo = defaultBackend.addEntityMeta(TagMetaData.INSTANCE);
 		dataService.addRepository(tagRepo);
 
 		Repository packages = defaultBackend.addEntityMeta(PackageRepository.META_DATA);
@@ -90,6 +96,12 @@ public class MetaDataServiceImpl implements MetaDataService
 	public ManageableRepositoryCollection getDefaultBackend()
 	{
 		return defaultBackend;
+	}
+
+	@Override
+	public RepositoryCollection getBackend(String name)
+	{
+		return backends.get(name);
 	}
 
 	/**
@@ -138,7 +150,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		return (ManageableRepositoryCollection) backend;
 	}
 
-	private RepositoryCollection getRepositoryCollection(EntityMetaData emd)
+	public RepositoryCollection getRepositoryCollection(EntityMetaData emd)
 	{
 		String backendName = emd.getBackend() == null ? getDefaultBackend().getName() : emd.getBackend();
 		RepositoryCollection backend = backends.get(backendName);

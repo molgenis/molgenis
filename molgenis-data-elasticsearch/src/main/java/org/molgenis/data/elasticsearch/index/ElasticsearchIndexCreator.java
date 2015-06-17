@@ -9,14 +9,13 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.ImmutableSettings.Builder;
 import org.elasticsearch.common.xcontent.XContentFactory;
-import org.molgenis.data.elasticsearch.ElasticSearchService;
 import org.molgenis.data.elasticsearch.util.ElasticsearchUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ElasticsearchIndexCreator
 {
-	private static final Logger LOG = LoggerFactory.getLogger(ElasticSearchService.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ElasticsearchIndexCreator.class);
 
 	public static final String DEFAULT_ANALYZER = "default";
 	public static final String NGRAM_ANALYZER = "ngram_analyzer";
@@ -77,6 +76,6 @@ public class ElasticsearchIndexCreator
 
 		elasticsearchUtils.waitForYellowStatus();
 
-		LOG.info("Created Elasticsearch index [" + indexName + "]");
+		LOG.debug("Created Elasticsearch index [" + indexName + "]");
 	}
 }

@@ -35,6 +35,9 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.UuidGenerator;
+import org.molgenis.data.transaction.TransactionLogIndexedRepositoryDecorator;
+import org.molgenis.data.transaction.TransactionLogRepositoryDecorator;
+import org.molgenis.data.transaction.TransactionLogService;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.IndexedRepositoryValidationDecorator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
@@ -119,6 +122,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 	@Autowired
 	public DataSource dataSource;
+
+	@Autowired
+	public TransactionLogService transactionLogService;
 
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry)
@@ -434,7 +440,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 	private boolean indexExists()
 	{
-		return searchService.hasMapping(new EntityMetaDataMetaData());
+		return searchService.hasMapping(EntityMetaDataMetaData.INSTANCE);
 	}
 
 	@Bean
@@ -477,12 +483,15 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 					return new IndexedCrudRepositorySecurityDecorator(new IndexedAutoValueRepositoryDecorator(
 							new IndexedRepositoryValidationDecorator(dataService(),
-									new IndexedRepositoryExceptionTranslatorDecorator(indexedRepos),
-									new EntityAttributesValidator()), molgenisIdGenerator()), molgenisSettings);
+									new IndexedRepositoryExceptionTranslatorDecorator(
+											new TransactionLogIndexedRepositoryDecorator(indexedRepos,
+													transactionLogService)), new EntityAttributesValidator()),
+							molgenisIdGenerator()), molgenisSettings);
 				}
 
 				return new RepositorySecurityDecorator(new AutoValueRepositoryDecorator(
-						new RepositoryValidationDecorator(dataService(), repository, new EntityAttributesValidator()),
+						new RepositoryValidationDecorator(dataService(), new TransactionLogRepositoryDecorator(
+								repository, transactionLogService), new EntityAttributesValidator()),
 						molgenisIdGenerator()));
 			}
 		};

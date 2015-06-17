@@ -202,19 +202,20 @@ public class Step1UpgradeMetaData extends MolgenisUpgrade
 
 		LOG.info("Adding metadata indices...");
 
-		searchService.createMappings(new TagMetaData());
-		searchService.createMappings(new PackageMetaData());
-		searchService.createMappings(new AttributeMetaDataMetaData());
-		searchService.createMappings(new EntityMetaDataMetaData());
+		searchService.createMappings(TagMetaData.INSTANCE);
+		searchService.createMappings(PackageMetaData.INSTANCE);
+		searchService.createMappings(AttributeMetaDataMetaData.INSTANCE);
+		searchService.createMappings(EntityMetaDataMetaData.INSTANCE);
 
 		LOG.info("Reindexing MySQL repositories...");
 
-		searchService.rebuildIndex(undecoratedMySQL.getRepository(TagMetaData.ENTITY_NAME), new TagMetaData());
-		searchService.rebuildIndex(undecoratedMySQL.getRepository(PackageMetaData.ENTITY_NAME), new PackageMetaData());
+		searchService.rebuildIndex(undecoratedMySQL.getRepository(TagMetaData.ENTITY_NAME), TagMetaData.INSTANCE);
+		searchService.rebuildIndex(undecoratedMySQL.getRepository(PackageMetaData.ENTITY_NAME),
+				PackageMetaData.INSTANCE);
 		searchService.rebuildIndex(undecoratedMySQL.getRepository(AttributeMetaDataMetaData.ENTITY_NAME),
-				new AttributeMetaDataMetaData());
+				AttributeMetaDataMetaData.INSTANCE);
 		searchService.rebuildIndex(undecoratedMySQL.getRepository(EntityMetaDataMetaData.ENTITY_NAME),
-				new EntityMetaDataMetaData());
+				EntityMetaDataMetaData.INSTANCE);
 
 		LOG.info("Reindexing MySQL repositories DONE.");
 

@@ -272,6 +272,8 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		public void initRepositories()
 		{
 			MetaDataService metaDataService = metaDataService();
+			dataService().setMeta(metaDataService);
+
 			ManageableRepositoryCollection manageableRepositoryCollection = manageableRepositoryCollection();
 			metaDataService.setDefaultBackend(manageableRepositoryCollection);
 			metaDataService.addEntityMeta(AttributeMappingRepositoryImpl.META_DATA);

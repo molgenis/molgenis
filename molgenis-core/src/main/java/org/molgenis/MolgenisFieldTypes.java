@@ -55,7 +55,7 @@ public class MolgenisFieldTypes
 	public static final FieldType DATETIME = new DatetimeField();
 	public static final FieldType DECIMAL = new DecimalField();
 	public static final FieldType EMAIL = new EmailField();
-	public static final FieldType ENUM = new EnumField();
+
 	@Deprecated
 	public static final FieldType FILE = new FileField();
 	public static final FieldType HTML = new HtmlField();
@@ -82,7 +82,7 @@ public class MolgenisFieldTypes
 			addType(DATETIME);
 			addType(DECIMAL);
 			addType(EMAIL);
-			addType(ENUM);
+			addType(new EnumField());
 			addType(FILE);
 			addType(HTML);
 			addType(HYPERLINK);

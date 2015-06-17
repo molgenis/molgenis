@@ -77,10 +77,10 @@ public class Step7UpgradeMetaDataTo1_6 extends MolgenisUpgrade
 		RunAsSystemProxy.runAsSystem(() -> metaData.setDefaultBackend(undecoratedMySQL));
 
 		searchService.delete(AttributeMetaDataMetaData.ENTITY_NAME);
-		searchService.createMappings(new AttributeMetaDataMetaData());
+		searchService.createMappings(AttributeMetaDataMetaData.INSTANCE);
 
 		searchService.rebuildIndex(undecoratedMySQL.getRepository(AttributeMetaDataMetaData.ENTITY_NAME),
-				new AttributeMetaDataMetaData());
+				AttributeMetaDataMetaData.INSTANCE);
 
 	}
 
