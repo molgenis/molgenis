@@ -90,7 +90,7 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 			targetEntity.set("contact_person", getCreatePersons(promiseBiobankEntity));
 			targetEntity.set("principal_investigators", toPrincipalInvestigators());
 			targetEntity.set("institutes", toInstitutes());
-			targetEntity.set("biobanks", "Radboud Biobank");
+			targetEntity.set("biobanks", toBiobanks());
 			// targetEntity.set("website", null);
 			// targetEntity.set("sample_access", null);
 			targetEntity.set("biobankSampleAccessFee", false);
@@ -106,6 +106,16 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 
 			dataService.add("bbmri_nl_sample_collections", targetEntity);
 		}
+	}
+
+	private Iterable<Entity> toBiobanks()
+	{
+		Entity biobank = dataService.findOne("bbmri_nl_biobanks", "RBB");
+		if (biobank == null)
+		{
+			throw new RuntimeException("Unknown 'bbmri_nl_biobanks' [RBB]");
+		}
+		return Collections.singletonList(biobank);
 	}
 
 	private Iterable<Entity> toInstitutes()
