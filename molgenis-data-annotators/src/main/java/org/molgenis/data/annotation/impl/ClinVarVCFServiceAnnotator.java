@@ -8,18 +8,13 @@ import java.util.*;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.VariantAnnotator;
 import org.molgenis.data.annotation.mini.AnnotatorInfo;
 import org.molgenis.data.annotation.mini.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.mini.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.annotator.tabix.TabixReader;
-import org.molgenis.data.support.AnnotationServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.framework.server.MolgenisSettings;
@@ -27,7 +22,6 @@ import org.molgenis.framework.server.MolgenisSimpleSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 @Component("clinvarVcfService")
@@ -36,8 +30,6 @@ public class ClinVarVCFServiceAnnotator extends VariantAnnotator
 	private static final Logger LOG = LoggerFactory.getLogger(ClinVarVCFServiceAnnotator.class);
 
 	private final MolgenisSettings molgenisSettings;
-	private final AnnotationService annotatorService;
-
 	private static final String NAME = "ClinvarVCF";
 
 	public static final String CLINVAR_VCF_LOCATION_PROPERTY = "clinvar_location";
@@ -50,11 +42,9 @@ public class ClinVarVCFServiceAnnotator extends VariantAnnotator
 			+ ",Number=1,Type=String,Description=\"ClinVar clinical significance\">" });
 
 	@Autowired
-	public ClinVarVCFServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService)
-			throws IOException
+	public ClinVarVCFServiceAnnotator(MolgenisSettings molgenisSettings) throws IOException
 	{
 		this.molgenisSettings = molgenisSettings;
-		this.annotatorService = annotatorService;
 	}
 
 	public ClinVarVCFServiceAnnotator(File clinvarVcfFileLocation, File inputVcfFile, File outputVCFFile)
@@ -63,8 +53,6 @@ public class ClinVarVCFServiceAnnotator extends VariantAnnotator
 
 		this.molgenisSettings = new MolgenisSimpleSettings();
 		molgenisSettings.setProperty(CLINVAR_VCF_LOCATION_PROPERTY, clinvarVcfFileLocation.getAbsolutePath());
-
-		this.annotatorService = new AnnotationServiceImpl();
 
 		checkTabixReader();
 
@@ -102,12 +90,6 @@ public class ClinVarVCFServiceAnnotator extends VariantAnnotator
 		outputVCFWriter.close();
 		vcfRepo.close();
 		System.out.println("All done!");
-	}
-
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		annotatorService.addAnnotator(this);
 	}
 
 	@Override

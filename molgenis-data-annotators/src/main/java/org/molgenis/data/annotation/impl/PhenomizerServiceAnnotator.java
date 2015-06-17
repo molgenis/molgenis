@@ -22,18 +22,13 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.VariantAnnotator;
 import org.molgenis.data.annotation.mini.AnnotatorInfo;
 import org.molgenis.data.annotation.mini.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.mini.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.provider.UrlPinger;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
-import org.molgenis.data.support.AnnotationServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.framework.server.MolgenisSettings;
@@ -41,7 +36,6 @@ import org.molgenis.framework.server.MolgenisSimpleSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 /**
@@ -53,7 +47,6 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 {
 	private static final Logger LOG = LoggerFactory.getLogger(PhenomizerServiceAnnotator.class);
 	public static final String KEY_PHENOMIZER_URL = ""; // "http://compbio.charite.de/phenomizer/phenomizer/PhenomizerServiceURI";
-	private final AnnotationService annotatorService;
 
 	public static final String PHENOMIZERPVAL_LABEL = "PHENOMIZERPVAL";
 	public static final String PHENOMIZEROMIM_LABEL = "PHENOMIZEROMIM";
@@ -76,10 +69,8 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 					+ ",Number=1,Type=String,Description=\"Phenomizer OMIM ID\">", });
 
 	@Autowired
-	public PhenomizerServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService,
-			UrlPinger urlPinger) throws IOException
+	public PhenomizerServiceAnnotator(MolgenisSettings molgenisSettings, UrlPinger urlPinger) throws IOException
 	{
-		this.annotatorService = annotatorService;
 		this.molgenisSettings = molgenisSettings;
 		this.urlPinger = urlPinger;
 	}
@@ -130,8 +121,6 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 				LOG.info("Term OK: " + term);
 			}
 		}
-
-		this.annotatorService = new AnnotationServiceImpl();
 
 		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
 
@@ -216,12 +205,6 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 	}
 
 	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		annotatorService.addAnnotator(this);
-	}
-
-	@Override
 	public boolean annotationDataExists()
 	{
 		boolean dataExists = false;
@@ -271,10 +254,8 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 	public List<AttributeMetaData> getOutputMetaData()
 	{
 		List<AttributeMetaData> metadata = new ArrayList<>();
-		metadata.add(new DefaultAttributeMetaData(PHENOMIZERPVAL, FieldTypeEnum.DECIMAL)
-				.setLabel(PHENOMIZERPVAL_LABEL));
-		metadata.add(new DefaultAttributeMetaData(PHENOMIZEROMIM, FieldTypeEnum.STRING)
-				.setLabel(PHENOMIZEROMIM_LABEL));
+		metadata.add(new DefaultAttributeMetaData(PHENOMIZERPVAL, FieldTypeEnum.DECIMAL).setLabel(PHENOMIZERPVAL_LABEL));
+		metadata.add(new DefaultAttributeMetaData(PHENOMIZEROMIM, FieldTypeEnum.STRING).setLabel(PHENOMIZEROMIM_LABEL));
 		return metadata;
 	}
 
@@ -282,8 +263,7 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 	public List<AttributeMetaData> getInputMetaData()
 	{
 		List<AttributeMetaData> metadata = new ArrayList<>();
-		metadata.add(new DefaultAttributeMetaData(VcfRepository.getInfoPrefix() + "ANN",
-				FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(VcfRepository.getInfoPrefix() + "ANN", FieldTypeEnum.TEXT));
 		metadata.add(new DefaultAttributeMetaData(HpoServiceAnnotator.HPO_TERMS,
 				MolgenisFieldTypes.FieldTypeEnum.STRING));
 		return metadata;

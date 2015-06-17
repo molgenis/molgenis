@@ -9,9 +9,7 @@ import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.VariantAnnotator;
 import org.molgenis.data.annotation.mini.AnnotatorInfo;
 import org.molgenis.data.annotation.mini.AnnotatorInfo.Status;
@@ -19,7 +17,6 @@ import org.molgenis.data.annotation.mini.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.provider.CgdDataProvider;
 import org.molgenis.data.annotation.provider.CgdDataProvider.generalizedInheritance;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
-import org.molgenis.data.support.AnnotationServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -39,6 +36,7 @@ import org.springframework.stereotype.Component;
 @Component("monogenicDiseaseService")
 public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 {
+
 	@Override
 	public AnnotatorInfo getInfo()
 	{
@@ -48,7 +46,6 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 	private static final Logger LOG = LoggerFactory.getLogger(MonogenicDiseaseCandidatesServiceAnnotator.class);
 	public static final String ANNOTATIONFIELD = VcfRepository.getInfoPrefix() + "ANN";
 
-	private final AnnotationService annotatorService;
 	public static final String MONOGENICDISEASECANDIDATE_LABEL = "MONGENDISCAND";
 	private static final String HOMREF_LABEL = "HOMREF";
 	private static final String HOMALT_LABEL = "HOMALT";
@@ -74,12 +71,9 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 			{ "##INFO=<ID="
 					+ MONOGENICDISEASECANDIDATE.substring(VcfRepository.getInfoPrefix().length())
 					+ ",Number=1,Type=String,Description=\"Possible outcomes: EXCLUDED, INCLUDED_DOMINANT, INCLUDED_DOMINANT_HIGHIMPACT, INCLUDED_RECESSIVE, INCLUDED_RECESSIVE_HIGHIMPACT, INCLUDED_RECESSIVE_COMPOUND, INCLUDED_OTHER\">", });
-
-	@Autowired
-	public MonogenicDiseaseCandidatesServiceAnnotator(MolgenisSettings molgenisSettings,
-			AnnotationService annotatorService) throws IOException
+	public MonogenicDiseaseCandidatesServiceAnnotator()
 	{
-		this.annotatorService = annotatorService;
+
 	}
 
 	public MonogenicDiseaseCandidatesServiceAnnotator(File filterSettings, File inputVcfFile, File outputVCFFile)
@@ -90,8 +84,6 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 		// http://compbio.charite.de/phenomizer/phenomizer/PhenomizerServiceURI?mobilequery=true&terms=HP:0001300,HP:0007325&numres=100
 
 		genesWithCandidates = new HashSet<String>();
-
-		this.annotatorService = new AnnotationServiceImpl();
 
 		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
 
@@ -127,12 +119,6 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 		outputVCFWriter.close();
 		vcfRepo.close();
 		System.out.println("All done!");
-	}
-
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		annotatorService.addAnnotator(this);
 	}
 
 	@Override

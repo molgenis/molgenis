@@ -14,8 +14,7 @@ import java.util.List;
 /**
  * Created by jvelde on 2/13/14.
  */
-public abstract class LocusAnnotator extends AbstractRepositoryAnnotator implements RepositoryAnnotator,
-		ApplicationListener<ContextRefreshedEvent>
+public abstract class LocusAnnotator extends AbstractRepositoryAnnotator
 {
 	// TODO: needs genome build and possible organism !?
 

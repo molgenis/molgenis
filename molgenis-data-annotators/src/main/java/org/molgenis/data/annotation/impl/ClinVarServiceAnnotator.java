@@ -33,7 +33,6 @@ import org.springframework.stereotype.Component;
 public class ClinVarServiceAnnotator extends VariantAnnotator
 {
 	private final MolgenisSettings molgenisSettings;
-	private final AnnotationService annotatorService;
 
 	private static final String NAME = "Clinvar";
 
@@ -67,18 +66,11 @@ public class ClinVarServiceAnnotator extends VariantAnnotator
 	public final static String VARIANTIDS = "VariantID";
 
 	@Autowired
-	public ClinVarServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService,
-			ClinvarDataProvider clinvarDataProvider) throws IOException
+	public ClinVarServiceAnnotator(MolgenisSettings molgenisSettings, ClinvarDataProvider clinvarDataProvider)
+			throws IOException
 	{
 		this.molgenisSettings = molgenisSettings;
-		this.annotatorService = annotatorService;
 		this.clinvarDataProvider = clinvarDataProvider;
-	}
-
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		annotatorService.addAnnotator(this);
 	}
 
 	@Override

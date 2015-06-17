@@ -48,11 +48,11 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 	@Override
 	public AnnotatorInfo getInfo()
 	{
-		return AnnotatorInfo.create(Status.BETA, Type.UNUSED, "unknown", "Clinical Genomics Database", getOutputMetaData());
+		return AnnotatorInfo.create(Status.BETA, Type.UNUSED, "unknown", "Clinical Genomics Database",
+				getOutputMetaData());
 	}
 
 	private final MolgenisSettings molgenisSettings;
-	private final AnnotationService annotatorService;
 	private final HgncLocationsProvider hgncLocationsProvider;
 	private final CgdDataProvider cgdDataProvider;
 
@@ -104,7 +104,6 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 		if (hgncLocationsProvider == null) throw new IllegalArgumentException("hgncLocationsProvider is null");
 		if (cgdDataProvider == null) throw new IllegalArgumentException("cgdData is null");
 		this.molgenisSettings = molgenisSettings;
-		this.annotatorService = annotationService;
 		this.hgncLocationsProvider = hgncLocationsProvider;
 		this.cgdDataProvider = cgdDataProvider;
 	}
@@ -121,8 +120,6 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 		this.molgenisSettings = new MolgenisSimpleSettings();
 		molgenisSettings.setProperty(CGD_FILE_LOCATION, cgdFileLocation.getAbsolutePath());
 		cgdDataProvider = new CgdDataProvider(molgenisSettings);
-
-		this.annotatorService = new AnnotationServiceImpl();
 
 		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
 
@@ -159,12 +156,6 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 		vcfRepo.close();
 		System.out.println("All done!");
 
-	}
-
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		annotatorService.addAnnotator(this);
 	}
 
 	@Override

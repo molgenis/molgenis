@@ -53,12 +53,12 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 	private static final Logger LOG = LoggerFactory.getLogger(GoNLServiceAnnotator.class);
 
 	private final MolgenisSettings molgenisSettings;
-	private final AnnotationService annotatorService;
 
 	@Override
 	public AnnotatorInfo getInfo()
 	{
-		return AnnotatorInfo.create(Status.BETA, Type.POPULATION_REFERENCE, "gonl", "no description", getOutputMetaData());
+		return AnnotatorInfo.create(Status.BETA, Type.POPULATION_REFERENCE, "gonl", "no description",
+				getOutputMetaData());
 	}
 
 	public static final String GONL_MAF_LABEL = "GONLMAF";
@@ -88,7 +88,6 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 			throws IOException
 	{
 		this.molgenisSettings = molgenisSettings;
-		this.annotatorService = annotatorService;
 	}
 
 	public GoNLServiceAnnotator(File gonlR5directory, File inputVcfFile, File outputVCFFile) throws Exception
@@ -96,8 +95,6 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 
 		this.molgenisSettings = new MolgenisSimpleSettings();
 		molgenisSettings.setProperty(GONL_DIRECTORY_LOCATION_PROPERTY, gonlR5directory.getAbsolutePath());
-
-		this.annotatorService = new AnnotationServiceImpl();
 
 		getTabixReaders();
 
@@ -135,12 +132,6 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 		outputVCFWriter.close();
 		vcfRepo.close();
 		System.out.println("All done!");
-	}
-
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		annotatorService.addAnnotator(this);
 	}
 
 	@Override
@@ -323,10 +314,8 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 	{
 		List<AttributeMetaData> metadata = new ArrayList<>();
 
-		metadata.add(new DefaultAttributeMetaData(GONL_MAF, FieldTypeEnum.DECIMAL)
-				.setLabel(GONL_MAF_LABEL));
-		metadata.add(new DefaultAttributeMetaData(GONL_GTC, FieldTypeEnum.STRING)
-				.setLabel(GONL_GTC_LABEL));
+		metadata.add(new DefaultAttributeMetaData(GONL_MAF, FieldTypeEnum.DECIMAL).setLabel(GONL_MAF_LABEL));
+		metadata.add(new DefaultAttributeMetaData(GONL_GTC, FieldTypeEnum.STRING).setLabel(GONL_GTC_LABEL));
 
 		return metadata;
 	}

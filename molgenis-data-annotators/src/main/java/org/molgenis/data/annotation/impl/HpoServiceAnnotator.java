@@ -47,7 +47,6 @@ import org.springframework.stereotype.Component;
 public class HpoServiceAnnotator extends LocusAnnotator
 {
 	private final MolgenisSettings molgenisSettings;
-	private final AnnotationService annotatorService;
 	private final HpoDataProvider hpoDataProvider;
 
 	private static final String NAME = "HPO";
@@ -66,14 +65,11 @@ public class HpoServiceAnnotator extends LocusAnnotator
 					+ ",Number=1,Type=String,Description=\"HPO terms\">", });
 
 	@Autowired
-	public HpoServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotationService,
-			HpoDataProvider hpoDataProvider) throws IOException
+	public HpoServiceAnnotator(MolgenisSettings molgenisSettings, HpoDataProvider hpoDataProvider) throws IOException
 	{
 		if (molgenisSettings == null) throw new IllegalArgumentException("molgenisSettings is null");
-		if (annotationService == null) throw new IllegalArgumentException("annotationService is null");
 		if (hpoDataProvider == null) throw new IllegalArgumentException("hpoDataProvider is null");
 		this.molgenisSettings = molgenisSettings;
-		this.annotatorService = annotationService;
 		this.hpoDataProvider = hpoDataProvider;
 	}
 
@@ -83,7 +79,6 @@ public class HpoServiceAnnotator extends LocusAnnotator
 		molgenisSettings.setProperty(HPO_FILE_LOCATION, hpoFileLocation.getAbsolutePath());
 		hpoDataProvider = new HpoDataProvider(molgenisSettings);
 
-		this.annotatorService = new AnnotationServiceImpl();
 
 		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
 
@@ -119,12 +114,6 @@ public class HpoServiceAnnotator extends LocusAnnotator
 		outputVCFWriter.close();
 		vcfRepo.close();
 		System.out.println("All done!");
-	}
-
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		annotatorService.addAnnotator(this);
 	}
 
 	@Override

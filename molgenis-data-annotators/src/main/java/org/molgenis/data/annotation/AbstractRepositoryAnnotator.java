@@ -17,17 +17,10 @@ import org.springframework.transaction.annotation.Transactional;
  * Created with IntelliJ IDEA. User: charbonb Date: 21/02/14 Time: 11:24 To change this template use File | Settings |
  * File Templates.
  */
-public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator,
-		ApplicationListener<ContextRefreshedEvent>
+public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 {
 	@Autowired
 	AnnotationService annotatorService;
-
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		annotatorService.addAnnotator(this);
-	}
 
 	@Override
 	public String canAnnotate(EntityMetaData repoMetaData)

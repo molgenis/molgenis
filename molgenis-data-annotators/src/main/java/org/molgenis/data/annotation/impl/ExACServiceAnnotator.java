@@ -47,12 +47,12 @@ public class ExACServiceAnnotator extends VariantAnnotator
 	private static final Logger LOG = LoggerFactory.getLogger(ExACServiceAnnotator.class);
 
 	private final MolgenisSettings molgenisSettings;
-	private final AnnotationService annotatorService;
 
 	@Override
 	public AnnotatorInfo getInfo()
 	{
-		return AnnotatorInfo.create(Status.BETA, Type.POPULATION_REFERENCE, "exac", "no description", getOutputMetaData());
+		return AnnotatorInfo.create(Status.BETA, Type.POPULATION_REFERENCE, "exac", "no description",
+				getOutputMetaData());
 	}
 
 	public static final String EXAC_MAF_LABEL = "EXACMAF";
@@ -71,11 +71,9 @@ public class ExACServiceAnnotator extends VariantAnnotator
 	private volatile TabixReader tabixReader;
 
 	@Autowired
-	public ExACServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService)
-			throws IOException
+	public ExACServiceAnnotator(MolgenisSettings molgenisSettings) throws IOException
 	{
 		this.molgenisSettings = molgenisSettings;
-		this.annotatorService = annotatorService;
 	}
 
 	public ExACServiceAnnotator(File exacFileLocation, File inputVcfFile, File outputVCFFile) throws Exception
@@ -83,8 +81,6 @@ public class ExACServiceAnnotator extends VariantAnnotator
 
 		this.molgenisSettings = new MolgenisSimpleSettings();
 		molgenisSettings.setProperty(EXAC_VCFGZ_LOCATION, exacFileLocation.getAbsolutePath());
-
-		this.annotatorService = new AnnotationServiceImpl();
 
 		checkTabixReader();
 
@@ -122,12 +118,6 @@ public class ExACServiceAnnotator extends VariantAnnotator
 		outputVCFWriter.close();
 		vcfRepo.close();
 		System.out.println("All done!");
-	}
-
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		annotatorService.addAnnotator(this);
 	}
 
 	@Override
@@ -284,8 +274,7 @@ public class ExACServiceAnnotator extends VariantAnnotator
 	{
 		List<AttributeMetaData> metadata = new ArrayList<>();
 
-		metadata.add(new DefaultAttributeMetaData(EXAC_MAF, FieldTypeEnum.DECIMAL)
-				.setLabel(EXAC_MAF_LABEL));
+		metadata.add(new DefaultAttributeMetaData(EXAC_MAF, FieldTypeEnum.DECIMAL).setLabel(EXAC_MAF_LABEL));
 
 		return metadata;
 	}

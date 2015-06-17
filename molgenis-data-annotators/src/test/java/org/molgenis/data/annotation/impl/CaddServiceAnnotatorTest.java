@@ -25,37 +25,37 @@ public class CaddServiceAnnotatorTest extends AbstractAnnotatorTest
 	{
 		when(settings.getProperty(CaddServiceAnnotator.CADD_FILE_LOCATION_PROPERTY)).thenReturn(
 				ResourceUtils.getFile(getClass(), "/cadd_test.vcf.gz").getPath());
-	
+
 		entity1.set(VcfRepository.CHROM, "1");
 		entity1.set(VcfRepository.POS, 100);
 		entity1.set(VcfRepository.REF, "C");
 		entity1.set(VcfRepository.ALT, "T");
-		
+
 		input1.add(entity1);
 
 		entity2.set(VcfRepository.CHROM, "2");
 		entity2.set(VcfRepository.POS, new Long(200));
 		entity2.set(VcfRepository.REF, "A");
 		entity2.set(VcfRepository.ALT, "C");
-		
+
 		input2.add(entity2);
-		annotator = new CaddServiceAnnotator(settings, null);
+		annotator = new CaddServiceAnnotator(settings);
 
 		entity3.set(VcfRepository.CHROM, "3");
 		entity3.set(VcfRepository.POS, new Long(300));
 		entity3.set(VcfRepository.REF, "G");
 		entity3.set(VcfRepository.ALT, "C");
-		
+
 		input3.add(entity3);
-		annotator = new CaddServiceAnnotator(settings, null);
+		annotator = new CaddServiceAnnotator(settings);
 
 		entity4.set(VcfRepository.CHROM, "1");
 		entity4.set(VcfRepository.POS, new Long(100));
 		entity4.set(VcfRepository.REF, "T");
 		entity4.set(VcfRepository.ALT, "C");
-		
+
 		input4.add(entity4);
-		annotator = new CaddServiceAnnotator(settings, null);
+		annotator = new CaddServiceAnnotator(settings);
 	}
 
 	@Test

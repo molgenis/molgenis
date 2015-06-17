@@ -70,7 +70,6 @@ public class OmimHpoAnnotator extends LocusAnnotator
 	public static final String HPO_DISEASE_DATABASE_ENTRY = "HPO_Disease_Database_Entry";
 	public static final String HPO_ENTREZ_ID = "HPO_Entrez_ID";
 
-	private final AnnotationService annotatorService;
 	private List<HPOTerm> hpoTerms;
 	private List<OMIMTerm> omimTerms;
 	private Map<String, List<HPOTerm>> geneToHpoTerms;
@@ -91,18 +90,11 @@ public class OmimHpoAnnotator extends LocusAnnotator
 		if (omimMorbidMapProvider == null) throw new IllegalArgumentException("omimMorbidMapProvider is null");
 		if (hgncLocationsProvider == null) throw new IllegalArgumentException("hgncLocationsProvider is null");
 		if (hpoMappingProvider == null) throw new IllegalArgumentException("hpoMappingProvider is null");
-		this.annotatorService = annotatorService;
 		this.omimMorbidMapProvider = omimMorbidMapProvider;
 		this.hgncLocationsProvider = hgncLocationsProvider;
 		this.hpoMappingProvider = hpoMappingProvider;
 		this.molgenisSettings = molgenisSettings;
 		this.urlPinger = urlPinger;
-	}
-
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		annotatorService.addAnnotator(this);
 	}
 
 	@Override

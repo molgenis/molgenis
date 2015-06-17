@@ -50,7 +50,6 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	private static final Logger LOG = LoggerFactory.getLogger(CaddServiceAnnotator.class);
 
 	private final MolgenisSettings molgenisSettings;
-	private final AnnotationService annotatorService;
 	private final AnnotatorInfo info = AnnotatorInfo
 			.create(Status.BETA,
 					Type.PATHOGENICITY_ESTIMATE,
@@ -61,7 +60,8 @@ public class CaddServiceAnnotator extends VariantAnnotator
 							+ "\n"
 							+ "C-scores strongly correlate with allelic diversity, pathogenicity of both coding and non-coding variants, and experimentally measured regulatory effects, and also highly rank causal variants within individual genome sequences. Finally, C-scores of complex trait-associated variants from genome-wide association studies (GWAS) are significantly higher than matched controls and correlate with study sample size, likely reflecting the increased accuracy of larger GWAS.\n"
 							+ "\n"
-							+ "CADD can quantitatively prioritize functional, deleterious, and disease causal variants across a wide range of functional categories, effect sizes and genetic architectures and can be used prioritize causal variation in both research and clinical settings. (source: http://cadd.gs.washington.edu/info)", getOutputMetaData());
+							+ "CADD can quantitatively prioritize functional, deleterious, and disease causal variants across a wide range of functional categories, effect sizes and genetic architectures and can be used prioritize causal variation in both research and clinical settings. (source: http://cadd.gs.washington.edu/info)",
+					getOutputMetaData());
 
 	@Override
 	public AnnotatorInfo getInfo()
@@ -73,8 +73,8 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	// must be compatible with VCF format, ie no funny characters
 	public static final String CADD_SCALED_LABEL = "CADDSCALED";
 	public static final String CADD_ABS_LABEL = "CADDABS";
-    public static final String CADD_SCALED = VcfRepository.getInfoPrefix()+"CADDSCALED";
-    public static final String CADD_ABS = VcfRepository.getInfoPrefix()+"CADDABS";
+	public static final String CADD_SCALED = VcfRepository.getInfoPrefix() + "CADDSCALED";
+	public static final String CADD_ABS = VcfRepository.getInfoPrefix() + "CADDABS";
 
 	private static final String NAME = "CADD";
 
@@ -88,16 +88,14 @@ public class CaddServiceAnnotator extends VariantAnnotator
 							+ CADD_ABS.substring(VcfRepository.getInfoPrefix().length())
 							+ ",Number=1,Type=Float,Description=\"CADD absolute C score, ie. unscaled SVM output. Useful as  reference when the scaled score may be unexpected.\">" });
 
-    public static final String CADD_FILE_LOCATION_PROPERTY = "cadd_location";
+	public static final String CADD_FILE_LOCATION_PROPERTY = "cadd_location";
 
-    private volatile TabixReader tabixReader;
+	private volatile TabixReader tabixReader;
 
 	@Autowired
-	public CaddServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService)
-			throws IOException
+	public CaddServiceAnnotator(MolgenisSettings molgenisSettings) throws IOException
 	{
 		this.molgenisSettings = molgenisSettings;
-		this.annotatorService = annotatorService;
 	}
 
 	public CaddServiceAnnotator(File caddTsvGzFile, File inputVcfFile, File outputVCFFile) throws Exception
@@ -105,8 +103,6 @@ public class CaddServiceAnnotator extends VariantAnnotator
 
 		this.molgenisSettings = new MolgenisSimpleSettings();
 		molgenisSettings.setProperty(CADD_FILE_LOCATION_PROPERTY, caddTsvGzFile.getAbsolutePath());
-
-		this.annotatorService = new AnnotationServiceImpl();
 
 		tabixReader = new TabixReader(molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY));
 		checkTabixReader();
@@ -147,13 +143,6 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	}
 
 	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-
-		//annotatorService.addAnnotator(this);
-	}
-
-	@Override
 	public boolean annotationDataExists()
 	{
 		return new File(molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY)).exists();
@@ -169,101 +158,107 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	public List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException
 	{
 		checkTabixReader();
-        Map<String, Object> resultMap = annotateEntityWithCADD(entity.getString(VcfRepository.CHROM), entity.getLong(VcfRepository.POS),
-				entity.getString(VcfRepository.REF), entity.getString(VcfRepository.ALT));
+		Map<String, Object> resultMap = annotateEntityWithCADD(entity.getString(VcfRepository.CHROM),
+				entity.getLong(VcfRepository.POS), entity.getString(VcfRepository.REF),
+				entity.getString(VcfRepository.ALT));
 		return Collections.<Entity> singletonList(AnnotatorUtils.getAnnotatedEntity(this, entity, resultMap));
 	}
 
-	private synchronized Map<String, Object> annotateEntityWithCADD(String chromosome, Long position, String reference, String alternative) throws IOException, InterruptedException
+	private synchronized Map<String, Object> annotateEntityWithCADD(String chromosome, Long position, String reference,
+			String alternative) throws IOException, InterruptedException
 	{
 		TabixReader.Iterator tabixIterator = null;
 		try
 		{
 			tabixIterator = tabixReader.query(chromosome + ":" + position + "-" + position);
 		}
-		catch(Exception e)
+		catch (Exception e)
 		{
-			LOG.error("Something went wrong (chromosome not in data?) when querying CADD tabix file for " + chromosome + " POS: " + position + " REF: " + reference
-					+ " ALT: " + alternative + "! skipping...");
+			LOG.error("Something went wrong (chromosome not in data?) when querying CADD tabix file for " + chromosome
+					+ " POS: " + position + " REF: " + reference + " ALT: " + alternative + "! skipping...");
 		}
 
-        Double caddAbs = null;
-        Double caddScaled = null;
+		Double caddAbs = null;
+		Double caddScaled = null;
 
-        // TabixReaderIterator does not have a hasNext();
-        boolean done = tabixIterator == null;
-        int i = 0;
+		// TabixReaderIterator does not have a hasNext();
+		boolean done = tabixIterator == null;
+		int i = 0;
 
-        Map<String, Object> resultMap = new HashMap<String, Object>();
+		Map<String, Object> resultMap = new HashMap<String, Object>();
 
-      //get line(s) from data, we expect 0 (no hit), 1 (specialized files such as 1000G) or 3 (whole genome file), so 0 to 3 hits
-        while (!done)
-        {
-            String line = null;
+		// get line(s) from data, we expect 0 (no hit), 1 (specialized files such as 1000G) or 3 (whole genome file), so
+		// 0 to 3 hits
+		while (!done)
+		{
+			String line = null;
 
-            try
-    		{
-    			line = tabixIterator.next();
-    		}
-    		catch(net.sf.samtools.SAMFormatException sfx)
-    		{
-    			LOG.error("Bad GZIP file for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
-    					+ " ALT: " + alternative + " LINE: " + line);
-    			throw sfx;
-    		}
-            catch(NullPointerException npe)
-    		{
-    			LOG.info("No data for CHROM: " + chromosome + " POS: " + position + " REF: " + reference + " ALT: " + alternative + " LINE: " + line);
-    		}
+			try
+			{
+				line = tabixIterator.next();
+			}
+			catch (net.sf.samtools.SAMFormatException sfx)
+			{
+				LOG.error("Bad GZIP file for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
+						+ " ALT: " + alternative + " LINE: " + line);
+				throw sfx;
+			}
+			catch (NullPointerException npe)
+			{
+				LOG.info("No data for CHROM: " + chromosome + " POS: " + position + " REF: " + reference + " ALT: "
+						+ alternative + " LINE: " + line);
+			}
 
-            if (line != null)
-            {
-                String[] split = null;
-                i++;
-                split = line.split("\t");
-                if (split.length != 6)
-                {
-                    LOG.error("bad CADD output for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
-                            + " ALT: " + alternative + " LINE: " + line);
-                    continue;
-                }
-                if (split[2].equals(reference) && split[3].equals(alternative))
-                {
+			if (line != null)
+			{
+				String[] split = null;
+				i++;
+				split = line.split("\t");
+				if (split.length != 6)
+				{
+					LOG.error("bad CADD output for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
+							+ " ALT: " + alternative + " LINE: " + line);
+					continue;
+				}
+				if (split[2].equals(reference) && split[3].equals(alternative))
+				{
 					LOG.info("CADD scores found for CHROM: " + chromosome + " POS: " + position + " REF: " + reference
 							+ " ALT: " + alternative + " LINE: " + line);
-                    caddAbs = Double.parseDouble(split[4]);
-                    caddScaled = Double.parseDouble(split[5]);
-                    done = true;
-                }
-                // In some cases, the ref and alt are swapped. If this is the case, the initial if statement above will
-                // fail, we can just check whether such a swapping has occured
-                else if (split[3].equals(reference) && split[2].equals(alternative))
-                {
-                    LOG.info("CADD scores found [swapped REF and ALT!] for CHROM: " + chromosome + " POS: " + position
-                            + " REF: " + reference + " ALT: " + alternative + " LINE: " + line);
-                    caddAbs = Double.parseDouble(split[4]);
-                    caddScaled = Double.parseDouble(split[5]);
-                    done = true;
-                }
-                else
-                {
-                    if (i > 3)
-                    {
-                        LOG.warn("More than 3 hits in the CADD file! for CHROM: " + chromosome + " POS: " + position
-                                + " REF: " + reference + " ALT: " + alternative);
-                    }
-                }
-            }
-            else //case: line == null
-            {
-                LOG.warn("No hit found in CADD file for CHROM: " + chromosome + " POS: " + position + " REF: " + reference + " ALT: " + alternative);
-                done = true;
-            }
-        }
+					caddAbs = Double.parseDouble(split[4]);
+					caddScaled = Double.parseDouble(split[5]);
+					done = true;
+				}
+				// In some cases, the ref and alt are swapped. If this is the case, the initial if statement above will
+				// fail, we can just check whether such a swapping has occured
+				else if (split[3].equals(reference) && split[2].equals(alternative))
+				{
+					LOG.info("CADD scores found [swapped REF and ALT!] for CHROM: " + chromosome + " POS: " + position
+							+ " REF: " + reference + " ALT: " + alternative + " LINE: " + line);
+					caddAbs = Double.parseDouble(split[4]);
+					caddScaled = Double.parseDouble(split[5]);
+					done = true;
+				}
+				else
+				{
+					if (i > 3)
+					{
+						LOG.warn("More than 3 hits in the CADD file! for CHROM: " + chromosome + " POS: " + position
+								+ " REF: " + reference + " ALT: " + alternative);
+					}
+				}
+			}
+			else
+			// case: line == null
+			{
+				LOG.warn("No hit found in CADD file for CHROM: " + chromosome + " POS: " + position + " REF: "
+						+ reference + " ALT: " + alternative);
+				done = true;
+			}
+		}
 
-        resultMap.put(CADD_ABS, caddAbs);
-        resultMap.put(CADD_SCALED, caddScaled);
-        return resultMap;
+		resultMap.put(CADD_ABS, caddAbs);
+		resultMap.put(CADD_SCALED, caddScaled);
+		return resultMap;
 	}
 
 	/**
@@ -287,8 +282,14 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	public List<AttributeMetaData> getOutputMetaData()
 	{
 		List<AttributeMetaData> metadata = new ArrayList<>();
-		DefaultAttributeMetaData cadd_abs = new DefaultAttributeMetaData(CADD_ABS, FieldTypeEnum.DECIMAL).setLabel(CADD_ABS_LABEL).setDescription("\"Raw\" CADD scores come straight from the model, and are interpretable as the extent to which the annotation profile for a given variant suggests that that variant is likely to be \"observed\" (negative values) vs \"simulated\" (positive values). These values have no absolute unit of meaning and are incomparable across distinct annotation combinations, training sets, or model parameters. However, raw values do have relative meaning, with higher values indicating that a variant is more likely to be simulated (or \"not observed\") and therefore more likely to have deleterious effects.(source: http://cadd.gs.washington.edu/info)");
-		DefaultAttributeMetaData cadd_scaled = new DefaultAttributeMetaData(CADD_SCALED, FieldTypeEnum.DECIMAL).setLabel(CADD_SCALED_LABEL).setDescription("Since the raw scores do have relative meaning, one can take a specific group of variants, define the rank for each variant within that group, and then use that value as a \"normalized\" and now externally comparable unit of analysis. In our case, we scored and ranked all ~8.6 billion SNVs of the GRCh37/hg19 reference and then \"PHRED-scaled\" those values by expressing the rank in order of magnitude terms rather than the precise rank itself. For example, reference genome single nucleotide variants at the 10th-% of CADD scores are assigned to CADD-10, top 1% to CADD-20, top 0.1% to CADD-30, etc. The results of this transformation are the \"scaled\" CADD scores.(source: http://cadd.gs.washington.edu/info)");
+		DefaultAttributeMetaData cadd_abs = new DefaultAttributeMetaData(CADD_ABS, FieldTypeEnum.DECIMAL)
+				.setLabel(CADD_ABS_LABEL)
+				.setDescription(
+						"\"Raw\" CADD scores come straight from the model, and are interpretable as the extent to which the annotation profile for a given variant suggests that that variant is likely to be \"observed\" (negative values) vs \"simulated\" (positive values). These values have no absolute unit of meaning and are incomparable across distinct annotation combinations, training sets, or model parameters. However, raw values do have relative meaning, with higher values indicating that a variant is more likely to be simulated (or \"not observed\") and therefore more likely to have deleterious effects.(source: http://cadd.gs.washington.edu/info)");
+		DefaultAttributeMetaData cadd_scaled = new DefaultAttributeMetaData(CADD_SCALED, FieldTypeEnum.DECIMAL)
+				.setLabel(CADD_SCALED_LABEL)
+				.setDescription(
+						"Since the raw scores do have relative meaning, one can take a specific group of variants, define the rank for each variant within that group, and then use that value as a \"normalized\" and now externally comparable unit of analysis. In our case, we scored and ranked all ~8.6 billion SNVs of the GRCh37/hg19 reference and then \"PHRED-scaled\" those values by expressing the rank in order of magnitude terms rather than the precise rank itself. For example, reference genome single nucleotide variants at the 10th-% of CADD scores are assigned to CADD-10, top 1% to CADD-20, top 0.1% to CADD-30, etc. The results of this transformation are the \"scaled\" CADD scores.(source: http://cadd.gs.washington.edu/info)");
 
 		metadata.add(cadd_abs);
 		metadata.add(cadd_scaled);

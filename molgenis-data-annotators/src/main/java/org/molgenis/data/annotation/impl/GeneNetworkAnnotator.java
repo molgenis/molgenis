@@ -31,8 +31,6 @@ public class GeneNetworkAnnotator extends LocusAnnotator
 	// FIXME hardcopy url
 	public static final String GENE_NETWORK_API_URL = "http://molgenis58.target.rug.nl/api/v1/prioritization/";
 
-	private final AnnotationService annotatorService;
-
 	private JSONObject geneNetworkJsonCallback;
 
 	public final String HPO_TERMS = "HPO_TERMS";
@@ -40,18 +38,6 @@ public class GeneNetworkAnnotator extends LocusAnnotator
 
 	// In the future will change to a P-value
 	public static final String SCORE = "SCORE";
-
-	public GeneNetworkAnnotator(AnnotationService annotatorService)
-	{
-		this.annotatorService = annotatorService;
-	}
-
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		// FIXME: disabled for now
-		// annotatorService.addAnnotator(this);
-	}
 
 	@Override
 	public List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException

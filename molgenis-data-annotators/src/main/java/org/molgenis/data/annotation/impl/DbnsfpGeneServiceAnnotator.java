@@ -58,7 +58,6 @@ import org.springframework.stereotype.Component;
 public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 {
 	private final MolgenisSettings molgenisSettings;
-	private final AnnotationService annotatorService;
 	private final HgncLocationsProvider hgncLocationsProvider;
 
 	private static final String NAME = "dbNSFP-Gene";
@@ -98,18 +97,11 @@ public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 	static final String ESSENTIAL_GENE = "Essential_gene";
 
 	@Autowired
-	public DbnsfpGeneServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService,
+	public DbnsfpGeneServiceAnnotator(MolgenisSettings molgenisSettings,
 			HgncLocationsProvider hgncLocationsProvider) throws IOException
 	{
 		this.molgenisSettings = molgenisSettings;
-		this.annotatorService = annotatorService;
 		this.hgncLocationsProvider = hgncLocationsProvider;
-	}
-
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		annotatorService.addAnnotator(this);
 	}
 
 	@Override

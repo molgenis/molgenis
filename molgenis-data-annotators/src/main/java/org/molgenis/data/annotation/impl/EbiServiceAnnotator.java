@@ -51,8 +51,7 @@ import com.google.gson.reflect.TypeToken;
  * 
  * */
 @Component("ebiService")
-public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements RepositoryAnnotator,
-		ApplicationListener<ContextRefreshedEvent>
+public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements RepositoryAnnotator
 {
 	// Web url to call the EBI web service
 	private static final String EBI_CHEMBLWS_URL = "https://www.ebi.ac.uk/chemblws/targets/uniprot/";

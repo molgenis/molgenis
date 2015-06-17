@@ -61,8 +61,6 @@ import org.springframework.stereotype.Component;
 public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 {
 	private final MolgenisSettings molgenisSettings;
-	private final AnnotationService annotatorService;
-
 	private static final String NAME = "dbNSFP-Variant";
 	public static final String CHROMOSOME_FILE_LOCATION_PROPERTY = "dbsnfp_variant_location";
 
@@ -138,13 +136,6 @@ public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 	public DbnsfpVariantServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService)
 	{
 		this.molgenisSettings = molgenisSettings;
-		this.annotatorService = annotatorService;
-	}
-
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		annotatorService.addAnnotator(this);
 	}
 
 	@Override
