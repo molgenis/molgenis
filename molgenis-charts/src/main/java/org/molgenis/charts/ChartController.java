@@ -25,7 +25,7 @@ import org.molgenis.charts.requests.HeatMapRequest;
 import org.molgenis.charts.requests.XYDataChartRequest;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
-import org.molgenis.util.FileStore;
+import org.molgenis.file.FileStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

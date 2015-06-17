@@ -127,6 +127,8 @@
 							options : this.state.options,
 							layout : props.layout
 						}));
+					case 'FILE':
+						return this._createFileControl(controlProps);
 					case 'HTML':
 						return molgenis.ui.CodeEditor(_.extend({}, controlProps, {
 							placeholder : this.props.placeholder,
@@ -154,7 +156,6 @@
 							maxLength: attr.maxLength
 						}));
 					case 'COMPOUND' :
-					case 'FILE':
 					case 'IMAGE':
 						throw 'Unsupported data type: ' + attr.fieldType;
 					default:
@@ -196,6 +197,16 @@
 				step : step,
 				min : min,
 				max : max,
+			}));
+		},
+		_createFileControl: function(controlProps) {
+			return molgenis.ui.Input(_.extend({}, controlProps, {
+				type : 'file',
+				value: this.props.value ? this.props.value.filename : null,
+				onValueChange: function(event) {
+					event.value = _.extend({}, this.state.attr.refEntity, {filename: event.value});
+					this._handleValueChange(event);
+				}.bind(this)
 			}));
 		},
 		_createStringControl: function(controlProps, type, placeholder) {

@@ -11,7 +11,7 @@ import java.util.UUID;
 
 import javax.annotation.PreDestroy;
 
-import org.molgenis.util.FileStore;
+import org.molgenis.file.FileStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

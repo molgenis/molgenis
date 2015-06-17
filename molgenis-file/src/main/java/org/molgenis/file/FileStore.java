@@ -1,4 +1,4 @@
-package org.molgenis.util;
+package org.molgenis.file;
 
 import java.io.File;
 import java.io.FileOutputStream;

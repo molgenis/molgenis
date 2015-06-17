@@ -12,6 +12,8 @@ import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
@@ -66,10 +68,15 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 				modelAndView.addObject(KEY_PLUGIN_ID, pluginId);
 			}
 
-			// TODO Check if the selected theme file exists to prevent the app from breaking (What is the correct path?)
+			PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 			if (molgenisSettings.getProperty(MOLGENIS_CSS_THEME) != null)
 			{
-				modelAndView.addObject(CSS_VARIABLE, molgenisSettings.getProperty(MOLGENIS_CSS_THEME));
+				Resource resource = resolver.getResource("/css/themes/"
+						+ molgenisSettings.getProperty(MOLGENIS_CSS_THEME));
+				if (resource.exists())
+				{
+					modelAndView.addObject(CSS_VARIABLE, molgenisSettings.getProperty(MOLGENIS_CSS_THEME));
+				}
 			}
 
 			modelAndView.addObject(APP_TRACKING_CODE_VARIABLE, new AppTrackingCodeImpl(molgenisSettings));

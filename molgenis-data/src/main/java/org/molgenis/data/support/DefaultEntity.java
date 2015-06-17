@@ -103,6 +103,7 @@ public class DefaultEntity implements Entity
 				return getBoolean(attributeName);
 			case CATEGORICAL:
 			case XREF:
+			case FILE:
 				return getEntity(attributeName);
 			case COMPOUND:
 				throw new UnsupportedOperationException();
@@ -120,7 +121,6 @@ public class DefaultEntity implements Entity
 			case STRING:
 			case TEXT:
 				return getString(attributeName);
-			case FILE:
 			case IMAGE:
 				throw new MolgenisDataException("Unsupported data type [" + dataType + "]");
 			case INT:

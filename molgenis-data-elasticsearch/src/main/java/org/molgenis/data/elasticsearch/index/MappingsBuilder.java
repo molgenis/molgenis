@@ -127,6 +127,7 @@ public class MappingsBuilder
 			case CATEGORICAL_MREF:
 			case MREF:
 			case XREF:
+			case FILE:
 				EntityMetaData refEntity = attr.getRefEntity();
 				if (nestRefs)
 				{
@@ -172,7 +173,6 @@ public class MappingsBuilder
 				// disable norms for numeric fields
 				jsonBuilder.field("norms").startObject().field("enabled", false).endObject();
 				break;
-			case FILE:
 			case IMAGE:
 				throw new MolgenisDataException("Unsupported data type [" + dataType + "]");
 			case INT:

@@ -55,8 +55,6 @@ public class MolgenisFieldTypes
 	public static final FieldType DATETIME = new DatetimeField();
 	public static final FieldType DECIMAL = new DecimalField();
 	public static final FieldType EMAIL = new EmailField();
-
-	@Deprecated
 	public static final FieldType FILE = new FileField();
 	public static final FieldType HTML = new HtmlField();
 	public static final FieldType HYPERLINK = new HyperlinkField();

@@ -430,8 +430,6 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				break;
 			case ENUM:
 				break;
-			case FILE:
-				break;
 			case HTML:
 				break;
 			case HYPERLINK:
@@ -454,6 +452,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 			case CATEGORICAL:
 			case CATEGORICAL_MREF:
 			case XREF:
+			case FILE:
 				if (att.isLabelAttribute())
 				{
 					throw new MolgenisDataException("Attribute [" + att.getName() + "] of entity [" + getName()

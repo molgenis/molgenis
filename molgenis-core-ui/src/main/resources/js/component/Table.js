@@ -592,6 +592,20 @@
 					case 'XREF':
 						CellContent = a({href: '#', onClick: this._toggleModal.bind(null, true)}, span(null, value[attr.refEntity.labelAttribute]));
 						break;
+					case 'FILE':
+						CellContent = (
+							div(null,
+								a({href: '#', onClick: this._toggleModal.bind(null, true)}, span(null, value[attr.refEntity.labelAttribute])),
+								' ',
+								a({href: value['url']},
+									molgenis.ui.Icon({
+										name: 'download',
+										style: {cursor: 'pointer'}
+									})
+								)
+							)
+						);
+						break;
 					case 'CATEGORICAL_MREF':
 					case 'MREF':
 						CellContent = _.flatten(_.map(value, function(item, i) {
@@ -619,7 +633,6 @@
 							CellContent = span(null, value);	
 						}
 						break;
-					case 'FILE':
 					case 'IMAGE':
 						throw 'Unsupported data type: ' + attr.fieldType;
 					default:
@@ -634,6 +647,9 @@
 			this.setState({
 				showRef : show
 			});
+		},
+		_handleFileDownloadClickfunction: function(id) {
+			
 		}
 	});
 	var TableCellFactory = React.createFactory(TableCell);
