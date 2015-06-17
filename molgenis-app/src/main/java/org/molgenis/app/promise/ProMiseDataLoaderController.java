@@ -7,11 +7,13 @@ import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -32,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.google.common.collect.Iterables;
 import com.google.common.hash.Hashing;
 
 @Controller
@@ -69,7 +72,8 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 		Iterable<Entity> promiseSampleEntities = promiseDataParser.parse(1);
 		for (Entity promiseBiobankEntity : promiseBiobankEntities)
 		{
-			Entity promiseBiobankSamplesEntity = getPromiseBiobankSamples(promiseBiobankEntity, promiseSampleEntities);
+			Iterable<Entity> promiseBiobankSamplesEntity = getPromiseBiobankSamples(promiseBiobankEntity,
+					promiseSampleEntities);
 
 			MapEntity targetEntity = new MapEntity(targetEntityMetaData);
 			targetEntity.set("id", "promise_" + promiseBiobankEntity.getString("DEELBIOBANK"));
@@ -81,17 +85,17 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 			targetEntity.set("materials", toMaterials(promiseBiobankSamplesEntity));
 			targetEntity.set("omics", toOmics(promiseBiobankSamplesEntity));
 			targetEntity.set("sex", toSex(promiseBiobankSamplesEntity));
-			targetEntity.set("age_low", toAgeLow(promiseBiobankSamplesEntity));
-			targetEntity.set("age_high", toAgeHigh(promiseBiobankSamplesEntity));
+			targetEntity.set("age_low", toAgeMinOrMax(promiseBiobankSamplesEntity, true));
+			targetEntity.set("age_high", toAgeMinOrMax(promiseBiobankSamplesEntity, false));
 			targetEntity.set("age_unit", toAgeUnit());
-			targetEntity.set("numberOfDonors", 1); // FIXME
+			targetEntity.set("numberOfDonors", Iterables.size(promiseBiobankSamplesEntity));
 			targetEntity.set("description", promiseBiobankEntity.getString("OMSCHRIJVING"));
 			// targetEntity.set("publications", null);
 			targetEntity.set("contact_person", getCreatePersons(promiseBiobankEntity));
 			targetEntity.set("principal_investigators", toPrincipalInvestigators());
 			targetEntity.set("institutes", toInstitutes());
 			targetEntity.set("biobanks", toBiobanks());
-			// targetEntity.set("website", null);
+			targetEntity.set("website", "http://www.radboudbiobank.nl/");
 			// targetEntity.set("sample_access", null);
 			targetEntity.set("biobankSampleAccessFee", false);
 			targetEntity.set("biobankSampleAccessJointProjects", true);
@@ -221,59 +225,48 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 		}
 	}
 
-	private Integer toAgeLow(Entity promiseBiobankSamplesEntity)
+	private Integer toAgeMinOrMax(Iterable<Entity> promiseBiobankSamplesEntities, boolean lowest)
 	{
-		Integer ageLow;
-		String geboorteDatum = promiseBiobankSamplesEntity.getString("GEBOORTEDATUM");
-		if (geboorteDatum != null && !geboorteDatum.isEmpty())
+		Long ageMinOrMax = null;
+		for (Entity promiseBiobankSamplesEntity : promiseBiobankSamplesEntities)
 		{
-			LocalDate start = LocalDate.parse(geboorteDatum, DateTimeFormatter.ISO_DATE_TIME);
-			LocalDate end = LocalDate.now();
-			return (int) ChronoUnit.YEARS.between(start, end);
+			String geboorteDatum = promiseBiobankSamplesEntity.getString("GEBOORTEDATUM");
+			if (geboorteDatum != null && !geboorteDatum.isEmpty())
+			{
+				LocalDate start = LocalDate.parse(geboorteDatum, DateTimeFormatter.ISO_DATE_TIME);
+				LocalDate end = LocalDate.now();
+				long age = ChronoUnit.YEARS.between(start, end);
+				if (ageMinOrMax == null || (lowest && age < ageMinOrMax) || (!lowest && age > ageMinOrMax))
+				{
+					ageMinOrMax = age;
+				}
+			}
 		}
-		else
-		{
-			ageLow = null;
-		}
-		return ageLow;
-	}
-
-	private Integer toAgeHigh(Entity promiseBiobankSamplesEntity)
-	{
-		Integer ageHigh;
-		String geboorteDatum = promiseBiobankSamplesEntity.getString("GEBOORTEDATUM");
-		if (geboorteDatum != null && !geboorteDatum.isEmpty())
-		{
-			LocalDate start = LocalDate.parse(geboorteDatum, DateTimeFormatter.ISO_DATE_TIME);
-			LocalDate end = LocalDate.now();
-			return (int) ChronoUnit.YEARS.between(start, end);
-		}
-		else
-		{
-			ageHigh = null;
-		}
-		return ageHigh;
+		return ageMinOrMax.intValue();
 	}
 
 	// Mapping, meerdere waarden:
 	// 1 = FEMALE
 	// 2 = MALE
 	// 3 = UNKNOWN
-	private Iterable<Entity> toSex(Entity promiseBiobankSamplesEntity)
+	private Iterable<Entity> toSex(Iterable<Entity> promiseBiobankSamplesEntities)
 	{
 		Set<Object> genderTypeIds = new LinkedHashSet<Object>();
 
-		if ("1".equals(promiseBiobankSamplesEntity.getString("GESLACHT")))
+		for (Entity promiseBiobankSamplesEntity : promiseBiobankSamplesEntities)
 		{
-			genderTypeIds.add("FEMALE");
-		}
-		if ("2".equals(promiseBiobankSamplesEntity.getString("GESLACHT")))
-		{
-			genderTypeIds.add("MALE");
-		}
-		if ("3".equals(promiseBiobankSamplesEntity.getString("GESLACHT")))
-		{
-			genderTypeIds.add("UNKNOWN");
+			if ("1".equals(promiseBiobankSamplesEntity.getString("GESLACHT")))
+			{
+				genderTypeIds.add("FEMALE");
+			}
+			if ("2".equals(promiseBiobankSamplesEntity.getString("GESLACHT")))
+			{
+				genderTypeIds.add("MALE");
+			}
+			if ("3".equals(promiseBiobankSamplesEntity.getString("GESLACHT")))
+			{
+				genderTypeIds.add("UNKNOWN");
+			}
 		}
 
 		if (genderTypeIds.isEmpty())
@@ -330,83 +323,88 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 		return Arrays.asList(diseaseType); // FIXME
 	}
 
-	private Iterable<Entity> toDataCategories(Entity promiseBiobankEntity, Entity promiseBiobankSamplesEntity)
+	private Iterable<Entity> toDataCategories(Entity promiseBiobankEntity,
+			Iterable<Entity> promiseBiobankSamplesEntities)
 	{
 		Set<Object> dataCategoryTypeIds = new LinkedHashSet<Object>();
 
-		if (promiseBiobankSamplesEntity != null)
+		for (Entity promiseBiobankSamplesEntity : promiseBiobankSamplesEntities)
 		{
-			String deelbiobanks = promiseBiobankSamplesEntity.getString("DEELBIOBANKS");
-			if (deelbiobanks != null && Integer.valueOf(deelbiobanks) >= 1)
+			if (promiseBiobankSamplesEntity != null)
 			{
-				dataCategoryTypeIds.add("BIOLOGICAL_SAMPLES");
+				String deelbiobanks = promiseBiobankSamplesEntity.getString("DEELBIOBANKS");
+				if (deelbiobanks != null && Integer.valueOf(deelbiobanks) >= 1)
+				{
+					dataCategoryTypeIds.add("BIOLOGICAL_SAMPLES");
+				}
 			}
-		}
 
-		if ("1".equals(promiseBiobankEntity.getString("VOORGESCH")))
-		{
-			dataCategoryTypeIds.add("OTHER");
-		}
+			if ("1".equals(promiseBiobankEntity.getString("VOORGESCH")))
+			{
+				dataCategoryTypeIds.add("OTHER");
+			}
 
-		if ("1".equals(promiseBiobankEntity.getString("FAMANAM")))
-		{
-			dataCategoryTypeIds.add("GENEALOGICAL_RECORDS");
-		}
+			if ("1".equals(promiseBiobankEntity.getString("FAMANAM")))
+			{
+				dataCategoryTypeIds.add("GENEALOGICAL_RECORDS");
+			}
 
-		if ("1".equals(promiseBiobankEntity.getString("BEHANDEL")))
-		{
-			dataCategoryTypeIds.add("MEDICAL_RECORDS");
-		}
+			if ("1".equals(promiseBiobankEntity.getString("BEHANDEL")))
+			{
+				dataCategoryTypeIds.add("MEDICAL_RECORDS");
+			}
 
-		if ("1".equals(promiseBiobankEntity.getString("FOLLOWUP")))
-		{
-			dataCategoryTypeIds.add("OTHER");
-		}
+			if ("1".equals(promiseBiobankEntity.getString("FOLLOWUP")))
+			{
+				dataCategoryTypeIds.add("OTHER");
+			}
 
-		if ("1".equals(promiseBiobankEntity.getString("BEELDEN")))
-		{
-			dataCategoryTypeIds.add("IMAGING_DATA");
-		}
+			if ("1".equals(promiseBiobankEntity.getString("BEELDEN")))
+			{
+				dataCategoryTypeIds.add("IMAGING_DATA");
+			}
 
-		if ("1".equals(promiseBiobankEntity.getString("VRAGENLIJST")))
-		{
-			dataCategoryTypeIds.add("SURVEY_DATA");
-		}
+			if ("1".equals(promiseBiobankEntity.getString("VRAGENLIJST")))
+			{
+				dataCategoryTypeIds.add("SURVEY_DATA");
+			}
 
-		if ("1".equals(promiseBiobankEntity.getString("OMICS")))
-		{
-			dataCategoryTypeIds.add("PHYSIOLOGICAL_BIOCHEMICAL_MEASUREMENTS");
-		}
+			if ("1".equals(promiseBiobankEntity.getString("OMICS")))
+			{
+				dataCategoryTypeIds.add("PHYSIOLOGICAL_BIOCHEMICAL_MEASUREMENTS");
+			}
 
-		if ("1".equals(promiseBiobankEntity.getString("ROUTINEBEP")))
-		{
-			dataCategoryTypeIds.add("PHYSIOLOGICAL_BIOCHEMICAL_MEASUREMENTS");
-		}
+			if ("1".equals(promiseBiobankEntity.getString("ROUTINEBEP")))
+			{
+				dataCategoryTypeIds.add("PHYSIOLOGICAL_BIOCHEMICAL_MEASUREMENTS");
+			}
 
-		if ("1".equals(promiseBiobankEntity.getString("GWAS")))
-		{
-			dataCategoryTypeIds.add("OTHER");
-		}
+			if ("1".equals(promiseBiobankEntity.getString("GWAS")))
+			{
+				dataCategoryTypeIds.add("OTHER");
+			}
 
-		if ("1".equals(promiseBiobankEntity.getString("HISTOPATH")))
-		{
-			dataCategoryTypeIds.add("OTHER");
-		}
+			if ("1".equals(promiseBiobankEntity.getString("HISTOPATH")))
+			{
+				dataCategoryTypeIds.add("OTHER");
+			}
 
-		if ("1".equals(promiseBiobankEntity.getString("OUTCOME")))
-		{
-			dataCategoryTypeIds.add("NATIONAL_REGISTRIES");
-		}
+			if ("1".equals(promiseBiobankEntity.getString("OUTCOME")))
+			{
+				dataCategoryTypeIds.add("NATIONAL_REGISTRIES");
+			}
 
-		if ("1".equals(promiseBiobankEntity.getString("ANDERS")))
-		{
-			dataCategoryTypeIds.add("OTHER");
+			if ("1".equals(promiseBiobankEntity.getString("ANDERS")))
+			{
+				dataCategoryTypeIds.add("OTHER");
+			}
 		}
 
 		if (dataCategoryTypeIds.isEmpty())
 		{
 			dataCategoryTypeIds.add("NAV");
 		}
+
 		Iterable<Entity> dataCategoryTypes = dataService.findAll("bbmri_nl_data_category_types", dataCategoryTypeIds);
 		if (!dataCategoryTypes.iterator().hasNext())
 		{
@@ -433,73 +431,74 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 	// PATHOGEN
 	// (RNA|RNABEENMERG) = RNA
 	// (GASTROINTMUC|LIQUOR|CELLBEENMERG|MONONUCLBLOED|MONONUCMERG|GRANULOCYTMERG|MONOCYTMERG|MICROBIOOM) = OTHER
-	private Iterable<Entity> toMaterials(Entity promiseBiobankSampleEntity)
+	private Iterable<Entity> toMaterials(Iterable<Entity> promiseBiobankSamplesEntities)
 	{
 		Set<Object> materialTypeIds = new LinkedHashSet<Object>();
 
-		if ("1".equals(promiseBiobankSampleEntity.getString("DNA"))
-				|| "1".equals(promiseBiobankSampleEntity.getString("DNABEENMERG")))
+		for (Entity promiseBiobankSamplesEntity : promiseBiobankSamplesEntities)
 		{
-			materialTypeIds.add("DNA");
-		}
+			if ("1".equals(promiseBiobankSamplesEntity.getString("DNA"))
+					|| "1".equals(promiseBiobankSamplesEntity.getString("DNABEENMERG")))
+			{
+				materialTypeIds.add("DNA");
+			}
 
-		if ("1".equals(promiseBiobankSampleEntity.getString("BLOED")))
-		{
-			materialTypeIds.add("WHOLE_BLOOD");
-		}
+			if ("1".equals(promiseBiobankSamplesEntity.getString("BLOED")))
+			{
+				materialTypeIds.add("WHOLE_BLOOD");
+			}
 
-		if ("1".equals(promiseBiobankSampleEntity.getString("BLOEDPLASMA")))
-		{
-			materialTypeIds.add("PLASMA");
-		}
+			if ("1".equals(promiseBiobankSamplesEntity.getString("BLOEDPLASMA")))
+			{
+				materialTypeIds.add("PLASMA");
+			}
 
-		if ("1".equals(promiseBiobankSampleEntity.getString("BLOEDSERUM")))
-		{
-			materialTypeIds.add("SERUM");
-		}
+			if ("1".equals(promiseBiobankSamplesEntity.getString("BLOEDSERUM")))
+			{
+				materialTypeIds.add("SERUM");
+			}
 
-		if ("1".equals(promiseBiobankSampleEntity.getString("WEEFSELSOORT")))
-		{
-			materialTypeIds.add("TISSUE_PARAFFIN_EMBEDDED");
-		}
-		else if ("2".equals(promiseBiobankSampleEntity.getString("WEEFSELSOORT")))
-		{
-			materialTypeIds.add("TISSUE_FROZEN");
-		}
+			if ("1".equals(promiseBiobankSamplesEntity.getString("WEEFSELSOORT")))
+			{
+				materialTypeIds.add("TISSUE_PARAFFIN_EMBEDDED");
+			}
+			else if ("2".equals(promiseBiobankSamplesEntity.getString("WEEFSELSOORT")))
+			{
+				materialTypeIds.add("TISSUE_FROZEN");
+			}
 
-		if ("1".equals(promiseBiobankSampleEntity.getString("URINE")))
-		{
-			materialTypeIds.add("URINE");
-		}
+			if ("1".equals(promiseBiobankSamplesEntity.getString("URINE")))
+			{
+				materialTypeIds.add("URINE");
+			}
 
-		if ("1".equals(promiseBiobankSampleEntity.getString("SPEEKSEL")))
-		{
-			materialTypeIds.add("SALIVA");
-		}
+			if ("1".equals(promiseBiobankSamplesEntity.getString("SPEEKSEL")))
+			{
+				materialTypeIds.add("SALIVA");
+			}
 
-		if ("1".equals(promiseBiobankSampleEntity.getString("FECES")))
-		{
-			materialTypeIds.add("FECES");
-		}
+			if ("1".equals(promiseBiobankSamplesEntity.getString("FECES")))
+			{
+				materialTypeIds.add("FECES");
+			}
 
-		if ("1".equals(promiseBiobankSampleEntity.getString("RNA"))
-				|| "1".equals(promiseBiobankSampleEntity.getString("RNABEENMERG")))
-		{
-			materialTypeIds.add("MICRO_RNA");
-		}
+			if ("1".equals(promiseBiobankSamplesEntity.getString("RNA"))
+					|| "1".equals(promiseBiobankSamplesEntity.getString("RNABEENMERG")))
+			{
+				materialTypeIds.add("MICRO_RNA");
+			}
 
-		if ("1".equals(promiseBiobankSampleEntity.getString(""))
-				|| "1".equals(promiseBiobankSampleEntity.getString("LIQUOR"))
-				|| "1".equals(promiseBiobankSampleEntity.getString("CELLBEENMERG"))
-				|| "1".equals(promiseBiobankSampleEntity.getString("MONONUCLBLOED"))
-				|| "1".equals(promiseBiobankSampleEntity.getString("MONONUCMERG"))
-				|| "1".equals(promiseBiobankSampleEntity.getString("GRANULOCYTMERG"))
-				|| "1".equals(promiseBiobankSampleEntity.getString("LIQUOR"))
-				|| "1".equals(promiseBiobankSampleEntity.getString("MONOCYTMERG"))
-				|| "1".equals(promiseBiobankSampleEntity.getString("GASTROINTMUC"))
-				|| "1".equals(promiseBiobankSampleEntity.getString("MICROBIOOM")))
-		{
-			materialTypeIds.add("OTHER");
+			if ("1".equals(promiseBiobankSamplesEntity.getString("GASTROINTMUC"))
+					|| "1".equals(promiseBiobankSamplesEntity.getString("LIQUOR"))
+					|| "1".equals(promiseBiobankSamplesEntity.getString("CELLBEENMERG"))
+					|| "1".equals(promiseBiobankSamplesEntity.getString("MONONUCLBLOED"))
+					|| "1".equals(promiseBiobankSamplesEntity.getString("MONONUCMERG"))
+					|| "1".equals(promiseBiobankSamplesEntity.getString("GRANULOCYTMERG"))
+					|| "1".equals(promiseBiobankSamplesEntity.getString("MONOCYTMERG"))
+					|| "1".equals(promiseBiobankSamplesEntity.getString("MICROBIOOM")))
+			{
+				materialTypeIds.add("OTHER");
+			}
 		}
 
 		if (materialTypeIds.isEmpty())
@@ -512,21 +511,25 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 			throw new RuntimeException("Unknown 'bbmri_nl_material_types' [" + StringUtils.join(materialTypeIds, ',')
 					+ "]");
 		}
+
 		return materialTypes;
 	}
 
 	// Mapping, meerdere waarden:
 	// GWAS=1 GENOMICS
 	// VOOR
-	private Iterable<Entity> toOmics(Entity promiseBiobankSampleEntity)
+	private Iterable<Entity> toOmics(Iterable<Entity> promiseBiobankSamplesEntities)
 	{
 		Set<Object> omicsTypeIds = new LinkedHashSet<Object>();
 
-		if ("1".equals(promiseBiobankSampleEntity.getString("GWASOMNI"))
-				|| "1".equals(promiseBiobankSampleEntity.getString("GWAS370CNV"))
-				|| "1".equals(promiseBiobankSampleEntity.getString("EXOOMCHIP")))
+		for (Entity promiseBiobankSamplesEntity : promiseBiobankSamplesEntities)
 		{
-			omicsTypeIds.add("GENOMICS");
+			if ("1".equals(promiseBiobankSamplesEntity.getString("GWASOMNI"))
+					|| "1".equals(promiseBiobankSamplesEntity.getString("GWAS370CNV"))
+					|| "1".equals(promiseBiobankSamplesEntity.getString("EXOOMCHIP")))
+			{
+				omicsTypeIds.add("GENOMICS");
+			}
 		}
 
 		if (omicsTypeIds.isEmpty())
@@ -542,18 +545,20 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 		return omicsTypes;
 	}
 
-	private Entity getPromiseBiobankSamples(Entity promiseBiobankEntity, Iterable<Entity> promiseSampleEntities)
+	private Iterable<Entity> getPromiseBiobankSamples(Entity promiseBiobankEntity,
+			Iterable<Entity> promiseSampleEntities)
 	{
+		List<Entity> promiseBiobankSampleEntities = new ArrayList<Entity>();
 		String biobankId = promiseBiobankEntity.getString("ID") + promiseBiobankEntity.getString("IDAA");
 		for (Entity promiseSampleEntity : promiseSampleEntities)
 		{
 			String biobankSamplesId = promiseSampleEntity.getString("ID") + promiseSampleEntity.getString("IDAA");
 			if (biobankId.equals(biobankSamplesId))
 			{
-				return promiseSampleEntity;
+				promiseBiobankSampleEntities.add(promiseSampleEntity);
 			}
 		}
-		return null;
+		return promiseBiobankSampleEntities;
 	}
 
 	@RequestMapping(value = "load", method = RequestMethod.POST)
