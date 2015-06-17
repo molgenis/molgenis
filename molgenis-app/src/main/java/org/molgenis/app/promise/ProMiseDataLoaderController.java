@@ -118,13 +118,13 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 		String phoneNumber = promiseBiobankEntity.getString("TELEFOON");
 
 		StringBuilder contentBuilder = new StringBuilder();
-		if (contactPerson != null) contentBuilder.append(contactPerson);
-		if (address1 != null) contentBuilder.append(address1);
-		if (address2 != null) contentBuilder.append(address2);
-		if (postalCode != null) contentBuilder.append(postalCode);
-		if (city != null) contentBuilder.append(city);
-		if (email != null) contentBuilder.append(email);
-		if (phoneNumber != null) contentBuilder.append(phoneNumber);
+		if (contactPerson != null && !contactPerson.isEmpty()) contentBuilder.append(contactPerson);
+		if (address1 != null && !address1.isEmpty()) contentBuilder.append(address1);
+		if (address2 != null && !address2.isEmpty()) contentBuilder.append(address2);
+		if (postalCode != null && !postalCode.isEmpty()) contentBuilder.append(postalCode);
+		if (city != null && !city.isEmpty()) contentBuilder.append(city);
+		if (email != null && !email.isEmpty()) contentBuilder.append(email);
+		if (phoneNumber != null && !phoneNumber.isEmpty()) contentBuilder.append(phoneNumber);
 
 		String personId = Hashing.md5().newHasher().putString(contentBuilder, Charset.forName("UTF-8")).hash()
 				.toString();
@@ -143,10 +143,10 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 			newPerson.set("email", email);
 
 			StringBuilder addressBuilder = new StringBuilder();
-			if (address1 != null) addressBuilder.append(address1);
-			if (address2 != null)
+			if (address1 != null && !address1.isEmpty()) addressBuilder.append(address1);
+			if (address2 != null && !address2.isEmpty())
 			{
-				if (address1 != null) addressBuilder.append(' ');
+				if (address1 != null && !address1.isEmpty()) addressBuilder.append(' ');
 				addressBuilder.append(address2);
 			}
 			if (addressBuilder.length() > 0)
@@ -167,7 +167,7 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 	{
 		Integer ageLow;
 		String geboorteDatum = promiseBiobankSamplesEntity.getString("GEBOORTEDATUM");
-		if (geboorteDatum != null)
+		if (geboorteDatum != null && !geboorteDatum.isEmpty())
 		{
 			LocalDate start = LocalDate.parse(geboorteDatum, DateTimeFormatter.ISO_DATE_TIME);
 			LocalDate end = LocalDate.now();
@@ -184,7 +184,7 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 	{
 		Integer ageHigh;
 		String geboorteDatum = promiseBiobankSamplesEntity.getString("GEBOORTEDATUM");
-		if (geboorteDatum != null)
+		if (geboorteDatum != null && !geboorteDatum.isEmpty())
 		{
 			LocalDate start = LocalDate.parse(geboorteDatum, DateTimeFormatter.ISO_DATE_TIME);
 			LocalDate end = LocalDate.now();
@@ -227,7 +227,7 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 
 	private Iterable<Entity> toTypes(String promiseTypeBiobank)
 	{
-		if (promiseTypeBiobank == null)
+		if (promiseTypeBiobank == null || promiseTypeBiobank.isEmpty())
 		{
 			return Arrays.asList(dataService.findOne("bbmri_nl_collection_types", "OTHER"));
 		}
