@@ -181,35 +181,40 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 		}
 		else
 		{
-			MapEntity newPerson = new MapEntity(dataService.getEntityMetaData("bbmri_nl_persons"));
-			newPerson.set("id", personId);
-			// entity.set("first_name", );
-			newPerson.set("last_name", contactPerson); // TODO how to split name into first and last name?
-			newPerson.set("phone", phoneNumber);
-			newPerson.set("email", email);
+			// MapEntity newPerson = new MapEntity(dataService.getEntityMetaData("bbmri_nl_persons"));
+			// newPerson.set("id", personId);
+			// // entity.set("first_name", );
+			// newPerson.set("last_name", contactPerson); // TODO how to split name into first and last name?
+			// newPerson.set("phone", phoneNumber);
+			// newPerson.set("email", email);
+			//
+			// StringBuilder addressBuilder = new StringBuilder();
+			// if (address1 != null && !address1.isEmpty()) addressBuilder.append(address1);
+			// if (address2 != null && !address2.isEmpty())
+			// {
+			// if (address1 != null && !address1.isEmpty()) addressBuilder.append(' ');
+			// addressBuilder.append(address2);
+			// }
+			// if (addressBuilder.length() > 0)
+			// {
+			// newPerson.set("address", addressBuilder.toString());
+			// }
+			// newPerson.set("zip", postalCode);
+			// newPerson.set("city", city);
+			// Entity countryNl = dataService.findOne("bbmri_nl_countries", "NL");
+			// if (countryNl == null)
+			// {
+			// throw new RuntimeException("Unknown 'bbmri_nl_countries' [NL]");
+			// }
+			// newPerson.set("country", countryNl); // TODO what to put here, this is
+			// // a required attribute?
+			// dataService.add("bbmri_nl_persons", newPerson);
 
-			StringBuilder addressBuilder = new StringBuilder();
-			if (address1 != null && !address1.isEmpty()) addressBuilder.append(address1);
-			if (address2 != null && !address2.isEmpty())
+			Entity newPerson = dataService.findOne("bbmri_nl_persons", "612");
+			if (newPerson == null)
 			{
-				if (address1 != null && !address1.isEmpty()) addressBuilder.append(' ');
-				addressBuilder.append(address2);
+				throw new RuntimeException("Unknown 'bbmri_nl_persons' [612]");
 			}
-			if (addressBuilder.length() > 0)
-			{
-				newPerson.set("address", addressBuilder.toString());
-			}
-			newPerson.set("zip", postalCode);
-			newPerson.set("city", city);
-			Entity countryNl = dataService.findOne("bbmri_nl_countries", "NL");
-			if (countryNl == null)
-			{
-				throw new RuntimeException("Unknown 'bbmri_nl_countries' [NL]");
-			}
-			newPerson.set("country", countryNl); // TODO what to put here, this is
-													// a required attribute?
-			dataService.add("bbmri_nl_persons", newPerson);
-
 			return Collections.singletonList(newPerson);
 		}
 	}
