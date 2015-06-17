@@ -83,7 +83,7 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 			targetEntity.set("age_high", toAgeHigh(promiseBiobankSamplesEntity));
 			targetEntity.set("age_unit", dataService.findOne("bbmri_nl_age_types", "YEAR"));
 			targetEntity.set("numberOfDonors", 1); // FIXME
-			targetEntity.set("description", toTypes(promiseBiobankEntity.getString("OMSCHRIJVING")));
+			targetEntity.set("description", promiseBiobankEntity.getString("OMSCHRIJVING"));
 			// targetEntity.set("publications", null);
 			targetEntity.set("contact_person", getCreatePersons(promiseBiobankEntity));
 			// targetEntity.set("principal_investigators", null);
