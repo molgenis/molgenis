@@ -84,7 +84,7 @@ public class TabixRepository extends AbstractRepository
 	private synchronized ImmutableList<Entity> query(String chrom, long pos)
 	{
 		String queryString = String.format("%s:%s-%2$s", chrom, pos);
-		LOG.info("query({})", queryString);
+		LOG.debug("query({})", queryString);
 		org.molgenis.data.annotator.tabix.TabixReader.Iterator iterator = reader.query(queryString);
 		Builder<Entity> builder = ImmutableList.<Entity> builder();
 		try
