@@ -272,7 +272,7 @@ public class SemanticSearchServiceHelper
 
 	public String reverseEscapeLuceneChar(String string)
 	{
-		return string.replace("\\~", "~").replace("\\^", "^");
+		return string.replace("\\^", "^");
 	}
 
 	public Set<String> removeStopWords(String description)

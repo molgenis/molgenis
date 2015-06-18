@@ -54,37 +54,8 @@ public class ExplainServiceHelperTest
 				"blood");
 	}
 
-	// @Test
-	// public void recursivelyFindQuery()
-	// {
-	// QueryRule queryRule_1 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, "hypertension");
-	// QueryRule queryRule_2 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH,
-	// "hypertensive disorder");
-	// QueryRule queryRule_3 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH,
-	// "high blood pressure");
-	//
-	// QueryRule queryRule_4 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, "drug");
-	// QueryRule queryRule_5 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, "medication");
-	// QueryRule queryRule_6 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, "pill");
-	//
-	// QueryRule disMaxQueryRule_1 = new QueryRule(Arrays.asList(queryRule_1, queryRule_2, queryRule_3));
-	// disMaxQueryRule_1.setOperator(Operator.DIS_MAX);
-	//
-	// QueryRule disMaxQueryRule_2 = new QueryRule(Arrays.asList(queryRule_4, queryRule_5, queryRule_6));
-	// disMaxQueryRule_2.setOperator(Operator.DIS_MAX);
-	//
-	// QueryRule shouldQueryRule = new QueryRule(Arrays.asList(disMaxQueryRule_1, disMaxQueryRule_2));
-	// shouldQueryRule.setOperator(Operator.SHOULD);
-	//
-	// QueryRule finalDisMaxQueryRule = new QueryRule(Arrays.asList(shouldQueryRule));
-	// finalDisMaxQueryRule.setOperator(Operator.DIS_MAX);
-	//
-	// assertEquals(explainServiceHelper.recursivelyFindQuery("blood high", finalDisMaxQueryRule.getNestedRules())
-	// .toString(), "{high blood pressure=73.333}");
-	// }
-
 	@Test
-	public void recursivelyFindQuery()
+	public void testFindQuery()
 	{
 		QueryRule queryRule_1 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, "hypertension");
 		QueryRule queryRule_2 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH,
@@ -116,7 +87,7 @@ public class ExplainServiceHelperTest
 		expanedQueryMap.put("drug", "medication");
 		expanedQueryMap.put("pill", "medication");
 
-		assertEquals(explainServiceHelper.recursivelyFindQuery("blood high", expanedQueryMap).toString(),
+		assertEquals(explainServiceHelper.findMatchQueries("blood high", expanedQueryMap).toString(),
 				"{high blood pressure=73.333}");
 	}
 }

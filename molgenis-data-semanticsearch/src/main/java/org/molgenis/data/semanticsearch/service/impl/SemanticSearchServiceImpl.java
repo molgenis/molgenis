@@ -1,6 +1,5 @@
 package org.molgenis.data.semanticsearch.service.impl;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -14,7 +13,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.search.Explanation;
 import org.apache.lucene.search.spell.StringDistance;
 import org.elasticsearch.common.base.Joiner;
-import org.elasticsearch.common.collect.Iterables;
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -124,32 +122,11 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		Map<String, String> collectExpanedQueryMap = semanticSearchServiceHelper.collectExpanedQueryMap(
 				targetEntityMetaData, targetAttribute);
 
-		List<ExplainedAttributeMetaData> explainedAttributes = new ArrayList<ExplainedAttributeMetaData>(
-				Iterables.size(attributeMetaDataEntities));
-		int count = 0;
-		for (Entity attributeMetaDataEntity : attributeMetaDataEntities)
-		{
-			final ExplainedAttributeMetaData explainedAttribute;
-			if (count < 100)
-			{
-				explainedAttribute = convertAttributeEntityToExplainedAttribute(attributeMetaDataEntity,
-						sourceEntityMetaData, collectExpanedQueryMap, finalQueryRules);
-			}
-			else
-			{
-				explainedAttribute = new ExplainedAttributeMetaData(
-						sourceEntityMetaData.getAttribute(attributeMetaDataEntity
-								.getString(AttributeMetaDataMetaData.NAME)));
-			}
-			explainedAttributes.add(explainedAttribute);
-			count++;
-		}
-
-		// List<ExplainedAttributeMetaData> explainedAttributes = FluentIterable
-		// .from(attributeMetaDataEntities)
-		// .transform(
-		// entity -> convertAttributeEntityToExplainedAttribute(entity, sourceEntityMetaData,
-		// collectExpanedQueryMap, finalQueryRules)).toList();
+		List<ExplainedAttributeMetaData> explainedAttributes = FluentIterable
+				.from(attributeMetaDataEntities)
+				.transform(
+						entity -> convertAttributeEntityToExplainedAttribute(entity, sourceEntityMetaData,
+								collectExpanedQueryMap, finalQueryRules)).toList();
 		return explainedAttributes;
 	}
 

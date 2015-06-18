@@ -73,7 +73,7 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 
 		List<String> createdTargetAttributeQueries2 = Arrays.asList("(Height) [stand^~]");
 		QueryRule actualRule2 = semanticSearchServiceHelper.createDisMaxQueryRule(createdTargetAttributeQueries2);
-		String expectedQueryRuleToString2 = "(label FUZZY_MATCH '\\(Height\\) \\[stand\\^\\~\\]'description FUZZY_MATCH '\\(Height\\) \\[stand\\^\\~\\]')";
+		String expectedQueryRuleToString2 = "(label FUZZY_MATCH '\\(Height\\) \\[stand^\\~\\]'description FUZZY_MATCH '\\(Height\\) \\[stand^\\~\\]')";
 		assertEquals(actualRule2.getOperator(), Operator.DIS_MAX);
 		assertEquals(actualRule2.toString(), expectedQueryRuleToString2);
 	}

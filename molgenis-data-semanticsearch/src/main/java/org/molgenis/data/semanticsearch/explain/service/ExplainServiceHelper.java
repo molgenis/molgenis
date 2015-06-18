@@ -24,8 +24,6 @@ public class ExplainServiceHelper
 	public final static Pattern REGEXR_PATTERN = Pattern.compile("^weight\\(\\w*:(\\w*)(.*|)\\s.*");
 	private final Splitter termSplitter = Splitter.onPattern("[^\\p{IsAlphabetic}]+");
 
-	// private final Stemmer stemmer = new Stemmer("en");
-
 	public enum Options
 	{
 		/**
@@ -113,7 +111,7 @@ public class ExplainServiceHelper
 		return description;
 	}
 
-	public Map<String, Double> recursivelyFindQuery(String queryPart, Map<String, String> collectExpanedQueryMap)
+	public Map<String, Double> findMatchQueries(String queryPart, Map<String, String> collectExpanedQueryMap)
 	{
 		Map<String, Double> qualifiedTerms = new HashMap<String, Double>();
 
@@ -124,22 +122,6 @@ public class ExplainServiceHelper
 				qualifiedTerms.put(entry.getKey(), NGramDistanceAlgorithm.stringMatching(queryPart, entry.getKey()));
 			}
 		}
-		// for (QueryRule queryRule : rules)
-		// {
-		// if (queryRule.getNestedRules().size() > 0)
-		// {
-		// qualifiedTerms.putAll(recursivelyFindQuery(queryPart, queryRule.getNestedRules()));
-		// }
-		// else
-		// {
-		// String removeBoostFromQuery = removeBoostFromQuery(queryRule.getValue().toString());
-		// String cleanStemPhrase = stemmer.cleanStemPhrase(removeBoostFromQuery);
-		// if (splitIntoTerms(cleanStemPhrase).containsAll(splitIntoTerms(queryPart)))
-		// {
-		// qualifiedTerms.put(removeBoostFromQuery, stringMatching(queryPart, cleanStemPhrase));
-		// }
-		// }
-		// }
 		return qualifiedTerms;
 	}
 
