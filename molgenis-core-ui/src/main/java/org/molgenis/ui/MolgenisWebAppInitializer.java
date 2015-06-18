@@ -61,8 +61,7 @@ public class MolgenisWebAppInitializer
 			int loadOnStartup = (isDasUsed ? 2 : 1);
 			dispatcherServlet.setLoadOnStartup(loadOnStartup);
 			dispatcherServlet.addMapping("/");
-			dispatcherServlet.setMultipartConfig(new MultipartConfigElement(null, maxSize, maxSize,
-					maxSize > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) maxSize));
+			dispatcherServlet.setMultipartConfig(new MultipartConfigElement(null, maxSize, maxSize, 10 * 1024 * 1024));
 			dispatcherServlet.setInitParameter("dispatchOptionsRequest", "true");
 		}
 
