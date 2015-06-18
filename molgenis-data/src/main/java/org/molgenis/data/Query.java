@@ -2,8 +2,6 @@ package org.molgenis.data;
 
 import java.util.List;
 
-import org.springframework.data.domain.Sort;
-
 /**
  * Definition of a query
  */
@@ -132,7 +130,7 @@ public interface Query extends Iterable<Entity>
 
 	Query offset(int offset);
 
-	Query sort(Sort.Direction direction, String... fields);
+	Sort sort();
 
 	Query sort(Sort sort);
 }

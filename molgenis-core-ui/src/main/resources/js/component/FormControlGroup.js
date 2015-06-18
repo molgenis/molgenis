@@ -21,7 +21,9 @@
 			errorMessages: React.PropTypes.object.isRequired,
 			focus: React.PropTypes.bool,
 			onValueChange: React.PropTypes.func.isRequired,
-			onBlur: React.PropTypes.func.isRequired
+			onBlur: React.PropTypes.func.isRequired,
+			categorigalMrefShowSelectAll: React.PropTypes.bool,
+			showAsteriskIfNotNillable: React.PropTypes.bool
 		},
 		getInitialState: function() {
 			return {
@@ -36,7 +38,7 @@
 			var attributes = this.state.attr.attributes;
 			
 			// add control for each attribute
-			var foundFocusControl = false;
+			var foundFocusControl = !this.props.focus;
 			var controls = [];
 			var hasVisible = false;
 			for(var i = 0; i < attributes.length; ++i) {
@@ -55,6 +57,8 @@
 						validate: this.props.validate,
 						onValueChange : this.props.onValueChange,
 						onBlur: this.props.onBlur,
+						categorigalMrefShowSelectAll: this.props.categorigalMrefShowSelectAll,
+						showAsteriskIfNotNillable: this.props.showAsteriskIfNotNillable,
 						key : '' + i
 					};
 					

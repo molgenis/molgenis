@@ -21,13 +21,12 @@ public class ImportJob implements Runnable
 	private final DatabaseAction databaseAction;
 	private final String importRunId;
 	private final ImportRunService importRunService;
-	private final ImportPostProcessingService importPostProcessingService;
 	private final HttpSession session;
 	private final String defaultPackage;
 
 	public ImportJob(ImportService importService, SecurityContext securityContext, RepositoryCollection source,
-			DatabaseAction databaseAction, String importRunId, ImportRunService importRunService,
-			ImportPostProcessingService importPostProcessingService, HttpSession session, String defaultPackage)
+			DatabaseAction databaseAction, String importRunId, ImportRunService importRunService, HttpSession session,
+			String defaultPackage)
 	{
 		this.importService = importService;
 		this.securityContext = securityContext;
@@ -35,7 +34,6 @@ public class ImportJob implements Runnable
 		this.databaseAction = databaseAction;
 		this.importRunId = importRunId;
 		this.importRunService = importRunService;
-		this.importPostProcessingService = importPostProcessingService;
 		this.session = session;
 		this.defaultPackage = defaultPackage;
 	}
@@ -52,13 +50,17 @@ public class ImportJob implements Runnable
 
 			EntityImportReport importReport = importService.doImport(source, databaseAction, defaultPackage);
 
-			if (!importReport.getNewEntities().isEmpty())
-			{
-				// Add new entities to entities menu if that exists
-				importPostProcessingService.addMenuItems(importReport.getNewEntities());
-			}
-
 			session.setAttribute("SPRING_SECURITY_CONTEXT", securityContext);
+
+			try
+			{
+				session.setAttribute("SPRING_SECURITY_CONTEXT", securityContext);
+			}
+			catch (IllegalStateException e)
+			{
+				// session invalidated
+			}
+			
 			importRunService.finishImportRun(importRunId, importReport.toString(),
 					StringUtils.join(importReport.getNewEntities(), ','));
 

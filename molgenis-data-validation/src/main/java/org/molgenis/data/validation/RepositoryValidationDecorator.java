@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
@@ -19,6 +20,7 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
+import org.molgenis.util.EntityUtils;
 import org.molgenis.util.HugeMap;
 import org.molgenis.util.HugeSet;
 
@@ -145,7 +147,11 @@ public class RepositoryValidationDecorator implements Repository
 				if (!attr.isNillable())
 				{
 					Object value = entity.get(attr.getName());
-					if ((value == null) && !attr.isAuto() && (attr.getDefaultValue() == null))
+					if ((value == null || (attr.getDataType() instanceof MrefField && !(((Iterable<Entity>) value)
+							.iterator().hasNext())))
+							&& !attr.isAuto()
+							&& (attr.getDefaultValue() == null)
+							&& mustDoNotNullCheck(getEntityMetaData(), attr, entity))
 					{
 						String message = String.format("The attribute '%s' of entity '%s' can not be null.",
 								attr.getName(), getName());
@@ -157,6 +163,18 @@ public class RepositoryValidationDecorator implements Repository
 		}
 
 		return violations;
+	}
+
+	public boolean mustDoNotNullCheck(EntityMetaData entityMetaData, AttributeMetaData attr, Entity entity)
+	{
+		// Do not validate if Questionnaire status is not SUBMITTED
+		if (EntityUtils.doesExtend(entityMetaData, "Questionnaire") && entity.get("status") != "SUBMITTED") return false;
+
+		// Do not validate is visibleExpression resolves to false
+		if (StringUtils.isNotBlank(attr.getVisibleExpression())
+				&& !ValidationUtils.resolveBooleanExpression(attr.getVisibleExpression(), entity, entityMetaData, attr)) return false;
+
+		return true;
 	}
 
 	protected Set<ConstraintViolation> checkReadonlyByUpdate(Iterable<? extends Entity> entities)
@@ -252,7 +270,16 @@ public class RepositoryValidationDecorator implements Repository
 					{
 						for (Entity refEntity : refEntities)
 						{
-							if ((refEntity.getIdValue() != null) && !refEntityIdValues.contains(refEntity.getIdValue()))
+							if (refEntity == null)
+							{
+								String message = String.format("Unknown refEntity for attribute '%s' of entity '%s'.",
+										attr.getName(), getEntityMetaData().getLabel());
+								violations.add(new ConstraintViolation(message, attr, rownr));
+								if (violations.size() > 4) break;
+							}
+
+							else if ((refEntity.getIdValue() != null)
+									&& !refEntityIdValues.contains(refEntity.getIdValue()))
 							{
 								String message = String.format(
 										"Unknown mref value '%s' for attribute '%s' of entity '%s'.",

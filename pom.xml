@@ -529,11 +529,14 @@
                                 <webappTargetDir>${project.build.directory}/generated-resources</webappTargetDir>
                                 <cssSourceIncludes>
                                     <cssSourceInclude>**/*.css</cssSourceInclude>
+                                    <cssSourceInclude>**/**/*.css</cssSourceInclude>
                                 </cssSourceIncludes>
                                 <cssSourceExcludes>
                                     <!-- changes to excludes must be applied to molgenis-core-ui/src/main/resources/templates/resource-macros.ftl -->
                                     <cssSourceExclude>**/*.min.css</cssSourceExclude>
                                     <cssSourceExclude>**/*-min.css</cssSourceExclude>
+                                    <cssSourceExclude>**/**/*.min.css</cssSourceExclude>
+                                    <cssSourceExclude>**/**/*-min.css</cssSourceExclude>
                                 </cssSourceExcludes>
                                 <jsSourceIncludes>
                                     <jsSourceInclude>**/*.js</jsSourceInclude>
@@ -647,6 +650,12 @@
                 <version>${spring.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+                <exclusions>
+         			<exclusion>
+           				<groupId>commons-logging</groupId>
+           				<artifactId>commons-logging</artifactId>
+       				</exclusion>
+      			</exclusions>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -674,6 +683,11 @@
             <artifactId>log4j-over-slf4j</artifactId>
             <version>1.7.10</version>
         </dependency>
+        <dependency>
+      		<groupId>org.slf4j</groupId>
+      		<artifactId>jcl-over-slf4j</artifactId>
+      		<version>${slf4j.version}</version>
+   		</dependency>
         <!-- scope: test -->
         <dependency>
             <groupId>org.testng</groupId>
@@ -744,6 +758,8 @@
         <module>molgenis-data-mapper</module>
         <module>molgenis-pathways</module>
         <module>molgenis-data-rest-client</module>
-	    <module>molgenis-data-migrate</module>
+        <module>molgenis-data-migrate</module>
+        <module>molgenis-questionnaires</module>
+		<module>molgenis-file</module>
     </modules>
 </project>

@@ -30,7 +30,6 @@
 		var aggregableAttributes = $.grep(attributes, function(attribute) {
 			if(attribute.aggregateable) {
 				if(attribute.nillable) {
-					// see: https://github.com/molgenis/molgenis/issues/1937
 					return attribute.fieldType !== 'CATEGORICAL' && attribute.fieldType !== 'XREF' && attribute.fieldType !== 'MREF' && attribute.fieldType !== 'CATEGORICAL_MREF';
 				}
 				return true;
@@ -211,6 +210,13 @@
 	 */
 	function getAttributes() {
 		var attributes = molgenis.dataexplorer.getSelectedAttributes();
+		var selectedEntityMeta = getEntity();
+		
+		//No 'nested' mref attributes
+		attributes = $.grep(attributes, function(attribute) {
+			return selectedEntityMeta.attributes[attribute.name] !== undefined;
+		});
+		
 		return molgenis.getAtomicAttributes(attributes, restApi);
 	}
 	
