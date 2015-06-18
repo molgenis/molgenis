@@ -453,14 +453,16 @@
 							if(molgenis.isCompoundAttr(attr)) {
 								this._createColsRec(item, entity, attr.attributes, {'*': null}, Cols, attrPath, expanded);
 							} else {
-								var value = item !== undefined && item !== null ? (_.isArray(item) ? _.map(item, function(value) { return value[attr.name];}) : item[attr.name]) : null;
+								
 								if(this._isExpandedAttr(attr, selectedAttrs)) {
 									Cols.push(td({className: 'expanded-left', key : attrPath.join()}));
+									var value = item !== undefined && item !== null ? item[attr.name] : null;
 									this._createColsRec(value, attr.refEntity, attr.refEntity.attributes, selectedAttrs[attr.name], Cols, attrPath, true);
 								} else {
 									if(molgenis.isRefAttr(attr)) {
 										Cols.push(td({key: 'e' + attrPath.join()}));
 									}
+									var value = (item !== undefined && item !== null) ? (_.isArray(item) ? _.map(item, function(value) { return value[attr.name];}) : item[attr.name]) : null;
 									var TableCell = TableCellFactory({
 										className: j === attrs.length - 1 && expanded ? 'expanded-right' : undefined, 
 										entity: entity,

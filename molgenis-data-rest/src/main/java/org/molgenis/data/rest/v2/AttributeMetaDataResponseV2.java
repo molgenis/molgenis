@@ -1,6 +1,6 @@
 package org.molgenis.data.rest.v2;
 
-import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
+import static org.molgenis.data.rest.v2.RestControllerV2.createDefaultRefAttributeFilter;
 
 import java.util.List;
 
@@ -74,13 +74,9 @@ class AttributeMetaDataResponseV2
 			}
 			else
 			{
-				String refEntityHref = Href.concatMetaEntityHref(BASE_URI, refEntity.getName());
-				String refEntityHrefCollection = String.format("%s/%s", BASE_URI, refEntity.getName()); // FIXME apply
-																										// Href escaping
-				// fix
-				this.refEntity = new Href(refEntityHref, refEntityHrefCollection);
+				this.refEntity = new EntityMetaDataResponseV2(refEntity, createDefaultRefAttributeFilter(attr),
+						permissionService);
 			}
-
 		}
 		else
 		{

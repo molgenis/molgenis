@@ -292,7 +292,7 @@ class RestControllerV2
 		}
 	}
 
-	private AttributeFilter createDefaultRefAttributeFilter(AttributeMetaData attr)
+	static AttributeFilter createDefaultRefAttributeFilter(AttributeMetaData attr)
 	{
 		EntityMetaData refEntityMeta = attr.getRefEntity();
 		String idAttrName = refEntityMeta.getIdAttribute().getName();
