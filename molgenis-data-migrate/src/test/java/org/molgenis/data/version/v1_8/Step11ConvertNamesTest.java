@@ -7,6 +7,7 @@ import java.util.HashSet;
 
 import javax.sql.DataSource;
 
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -20,20 +21,21 @@ public class Step11ConvertNamesTest
 	@BeforeClass
 	public void setup()
 	{
-		converter = new Step11ConvertNames(mock(DataSource.class));
+
+		converter = new Step11ConvertNames(mock(SingleConnectionDataSource.class));
 	}
 
 	@Test
 	public void testFixName()
 	{
 		assertEquals(converter.fixName("NameWith.InvalidChars()"), "NameWithInvalidChars");
-		assertEquals(converter.fixName("debugger"), "debugger0");
+		assertEquals(converter.fixName("debugger"), "debugger1");
 		assertEquals(converter.fixName("52NameWithDigit"), "NameWithDigit");
 		assertEquals(converter.fixName("ThisAttributeIsWayTooLongAndShouldBeTruncated"),
 				"ThisAttributeIsWayTooLongAndSh");
 
-		assertEquals(converter.fixName("debugger()"), "debugger0");
-		assertEquals(converter.fixName("1debugger"), "debugger0");
+		assertEquals(converter.fixName("debugger()"), "debugger1");
+		assertEquals(converter.fixName("1debugger"), "debugger1");
 
 	}
 

@@ -3,9 +3,12 @@ package org.molgenis.data.version.v1_8;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.sql.DataSource;
 
@@ -23,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -32,6 +36,8 @@ import com.google.common.collect.Sets;
  * Package/entity/attribute names must now bow to the following rules: 1. The only characters allowed are [a-zA-Z0-9_#].
  * 2. Names may not begin with digits. 3. The maximum length is 30 characters. 4. Keywords reserved by Java, JavaScript
  * and MySQL can not be used.
+ * 
+ * This migration script finds all invalid names within the MySQL back-end and changes them to valid names.
  * 
  * @author tommy
  */
@@ -46,21 +52,18 @@ public class Step11ConvertNames extends MolgenisUpgrade
 
 	private HashMap<String, String> packageNameChanges = new HashMap<>();
 	private HashMap<String, String> entityNameChanges = new HashMap<>();
-	private HashMap<String, HashSet<String>> attributeNameChanges = new HashMap<>();
+	private HashMap<String, HashMap<String, String>> attributeNameChanges = new HashMap<>();
+	private HashMap<String, HashMap<String, String>> mrefNameChanges = new HashMap<>();
+	private HashMap<String, String> mrefNoChanges = new HashMap();
+	private HashMap<String, List<String>> entitiesAttributesIds = new HashMap<>();
 
-	public Step11ConvertNames(DataSource dataSource)
+	public Step11ConvertNames(SingleConnectionDataSource dataSource)
 	{
 		super(10, 11);
 
-		try
-		{
-			// InnoDB only allows setting foreign_key_checks=0 for a single session, so use a single connection source
-			this.template = new JdbcTemplate(new SingleConnectionDataSource(dataSource.getConnection(), true));
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-		}
+		// InnoDB only allows setting foreign_key_checks=0 for a single session, so use a single connection source
+		this.template = new JdbcTemplate(dataSource);
+
 		this.dataSource = dataSource;
 	}
 
@@ -102,6 +105,12 @@ public class Step11ConvertNames extends MolgenisUpgrade
 		LOG.info("Validating attribute names...");
 		checkAndUpdateAttributes();
 
+		LOG.info("Updating tags...");
+		updateTags();
+
+		LOG.info("Updating MySQL tables...");
+		updateEntityTables();
+
 		setForeignKeyConstraintCheck(true);
 
 		try
@@ -114,31 +123,165 @@ public class Step11ConvertNames extends MolgenisUpgrade
 			e.printStackTrace();
 		}
 
-		// TODO: remove
-		throw new RuntimeException("EXIT");
+		// throw new RuntimeException("EXIT");
 	}
 
+	/** Updates the names of columns in (mref)tables and updates the table names themselves. */
+	public void updateEntityTables()
+	{
+		// get a list of all the tables
+		HashSet<String> tableNames = Sets.newHashSet();
+		List<Map<String, Object>> tables = template.queryForList("SHOW TABLES");
+
+		// The name of this column (Tables-in-omx) depends on the database name, workaround:
+		tables.forEach(row -> tableNames.add(row.get(row.keySet().iterator().next()).toString()));
+
+		// get the fullNames of all the entities that have changes (in entity or attribute names)
+		HashSet<String> entitiesToChange = Sets.newHashSet();
+		entitiesToChange.addAll(entityNameChanges.keySet());
+		entitiesToChange.addAll(attributeNameChanges.keySet());
+
+		// update all mref tables that have a change in the mref name
+		for (Map.Entry<String, HashMap<String, String>> mrefTable : mrefNameChanges.entrySet())
+		{
+			// mref tables only have one column we need to change, so just get the first attr
+			Map.Entry<String, String> attributeChange = mrefTable.getValue().entrySet().iterator().next();
+
+			// we can't update a column name without specifying its type, so retrieve the type first
+			List<Map<String, Object>> column = template.queryForList(String.format(
+					"SHOW COLUMNS FROM `%s` WHERE Field='%s'", mrefTable.getKey(), attributeChange.getKey()));
+
+			String type = column.iterator().next().get("Type").toString();
+
+			template.execute(String.format("ALTER TABLE `%s` CHANGE `%s` `%s` %s", mrefTable.getKey(),
+					attributeChange.getKey(), attributeChange.getValue(), type));
+
+			// we're done with the attributes of this mref table, now fix the table name itself
+			String entityName = mrefTable.getKey().replaceAll("_" + attributeChange.getKey() + "$", "");
+			if (entityNameChanges.containsKey(entityName)) entityName = entityNameChanges.get(entityName);
+			String newTableName = String.format("%s_%s", entityName, attributeChange.getValue());
+
+			template.execute(String.format("RENAME TABLE `%s` TO `%s`", mrefTable.getKey(), newTableName));
+		}
+
+		// update the rest of the mref tables
+		for (Map.Entry<String, String> mrefTable : mrefNoChanges.entrySet())
+		{
+			String entityName = mrefTable.getKey().replaceAll("_" + mrefTable.getValue() + "$", "");
+			if (entityNameChanges.containsKey(entityName))
+			{
+				entityName = entityNameChanges.get(entityName);
+			}
+			else
+			{
+				continue;
+			}
+			String newTableName = String.format("%s_%s", entityName, mrefTable.getValue());
+
+			template.execute(String.format("RENAME TABLE `%s` TO `%s`", mrefTable.getKey(), newTableName));
+		}
+
+		// update rest of entities
+		for (String entity : entitiesToChange)
+		{
+			// check if we need to change the attribute names
+			if (attributeNameChanges.containsKey(entity))
+			{
+				for (Map.Entry<String, String> attributeChange : attributeNameChanges.get(entity).entrySet())
+				{
+					// we can't update a column name without specifying its type, so retrieve the type first
+					List<Map<String, Object>> column = template.queryForList(String.format(
+							"SHOW COLUMNS FROM `%s` WHERE Field='%s'", entity, attributeChange.getKey()));
+
+					String type = column.iterator().next().get("Type").toString();
+
+					template.execute(String.format("ALTER TABLE `%s` CHANGE `%s` `%s` %s", entity,
+							attributeChange.getKey(), attributeChange.getValue(), type));
+				}
+			}
+
+			// check if we need to change the entity name
+			if (entityNameChanges.containsKey(entity))
+			{
+				template.execute(String.format("RENAME TABLE `%s` TO `%s`", entity, entityNameChanges.get(entity)));
+			}
+		}
+	}
+
+	/**
+	 * Updates the fullNames in the *_tags tables.
+	 */
+	public void updateTags()
+	{
+		// attributes_tags doesn't need change
+		// tags doesn't need change
+
+		// entities_tags has fullNames, which need to be updated
+		List<Map<String, Object>> entityTags = template.queryForList("SELECT fullName FROM entities_tags");
+		for (Map<String, Object> tag : entityTags)
+		{
+			String fullName = tag.get("fullName").toString();
+
+			if (entityNameChanges.containsKey(fullName))
+			{
+				template.execute(String.format("UPDATE entities_tags SET fullName='%s' WHERE fullName='%s'",
+						entityNameChanges.get(fullName), fullName));
+			}
+		}
+
+		// packages_tags has fullNames, which need to be updated
+		List<Map<String, Object>> packagesTags = template.queryForList("SELECT fullName FROM packages_tags");
+		for (Map<String, Object> tag : packagesTags)
+		{
+			String fullName = tag.get("fullName").toString();
+
+			if (entityNameChanges.containsKey(fullName))
+			{
+				template.execute(String.format("UPDATE packages_tags SET fullName='%s' WHERE fullName='%s'",
+						entityNameChanges.get(fullName), fullName));
+			}
+		}
+	}
+
+	/**
+	 * Updates attribute names and refEntity references. Attribute names must be unique per entity, so this method
+	 * builds a scope per entity by iterating over the (nested) attributes.
+	 */
 	public void checkAndUpdateAttributes()
 	{
-		// select all entities with attributes
-		List<Map<String, Object>> entities = template
-				.queryForList("SELECT fullName FROM entities_attributes GROUP BY fullName");
+		List<Map<String, Object>> entityAttributes = template.queryForList("SELECT * FROM entities_attributes");
 
-		for (Map<String, Object> entity : entities)
+		// instead of doing multiple queries, we'll build a map of entity-attribute relations
+		for (Map<String, Object> entityAttribute : entityAttributes)
 		{
-			// fetch attributes for this entity
-			String entityFullName = entity.get("fullName").toString();
-			List<Map<String, Object>> attributes = template.queryForList(fetchAttributeNamesForEntitySql(entityFullName));
+			String entityFullName = entityAttribute.get("fullName").toString();
+			String entityAttributeId = entityAttribute.get("attributes").toString();
+			if (entitiesAttributesIds.containsKey(entityFullName))
+			{
+				entitiesAttributesIds.get(entityFullName).add(entityAttributeId);
+			}
+			else
+			{
+				entitiesAttributesIds.put(entityFullName, Lists.newArrayList(entityAttributeId));
+			}
+		}
+
+		// now use this map to update every entities' attributes
+		for (Map.Entry<String, List<String>> entity : entitiesAttributesIds.entrySet())
+		{
+			List<String> allAttributeIds = getAllAttributeIdsRecursive(entity.getValue());
+
+			List<Map<String, Object>> attributes = template.queryForList(getAttributesByIdSql(allAttributeIds));
 
 			// build scope for this entity
 			HashSet<String> scope = Sets.newHashSet();
 			attributes.forEach(attribute -> scope.add(attribute.get("name").toString()));
 
-			// update attributes
 			for (Map<String, Object> attribute : attributes)
 			{
 				String identifier = attribute.get("identifier").toString();
 				String name = attribute.get("name").toString();
+				String dataType = attribute.get("dataType").toString();
 
 				String refEntity = null;
 				if (!(attribute.get("refEntity") == null)) refEntity = attribute.get("refEntity").toString();
@@ -153,7 +296,41 @@ public class Step11ConvertNames extends MolgenisUpgrade
 					}
 
 					LOG.info(String.format("In Entity [%s]: Attribute name [%s] is not valid. Changing to [%s]...",
-							entityFullName, name, newName));
+							entity.getKey(), name, newName));
+
+					// store the attribute name changes with the entity they belong to as a key
+					// we don't need to store compounds because they only live in the attributes table
+					// store mref attributes in a separate map for convenience later on
+					if (!dataType.equals("compound"))
+					{
+						if (dataType.equals("mref") || dataType.equals("categoricalmref"))
+						{
+							String mrefTableName = String.format("%s_%s", entity.getKey(), name);
+							if (!mrefNameChanges.containsKey(mrefTableName))
+							{
+								mrefNameChanges.put(mrefTableName, Maps.newHashMap());
+							}
+							mrefNameChanges.get(mrefTableName).put(name, newName);
+						}
+						else
+						{
+							if (!attributeNameChanges.containsKey(entity.getKey()))
+							{
+								attributeNameChanges.put(entity.getKey(), Maps.newHashMap());
+							}
+							attributeNameChanges.get(entity.getKey()).put(name, newName);
+						}
+					}
+				}
+				else
+				{
+					// we also need to store the names of mrefs that didn't change, because there are cases where we DO
+					// need to fix the entity prefix for the mref tables
+					if (dataType.equals("mref") || dataType.equals("categoricalmref"))
+					{
+						String mrefTableName = String.format("%s_%s", entity.getKey(), name);
+						mrefNoChanges.put(mrefTableName, newName);
+					}
 				}
 
 				// get the (new) name for refEntity
@@ -163,16 +340,111 @@ public class Step11ConvertNames extends MolgenisUpgrade
 					newRefEntity = entityNameChanges.get(refEntity);
 				}
 
-				// update attribute name + refEntity in database
 				template.execute(getUpdateAttributeNameAndRefEntity(identifier, newName, newRefEntity));
 			}
 
-			// update the fullnames of the entities to the new names we generated before (in entities_attributes)
-			if (entityNameChanges.containsKey(entityFullName))
+			// finally, update the expressions for this entity's attributes
+			updateAttributeExpressions(attributes, attributeNameChanges.get(entity.getKey()));
+
+			// update the fullNames of the entities to the new names we generated before (in entities_attributes)
+			if (entityNameChanges.containsKey(entity.getKey()))
 			{
-				template.execute(getUpdateEntitiesAttributesFullName(entityFullName, entityNameChanges.get(entityFullName)));
+				template.execute(getUpdateEntitiesAttributesFullName(entity.getKey(),
+						entityNameChanges.get(entity.getKey())));
 			}
 		}
+	}
+
+	/**
+	 * Updates attribute names in expressions. Attribute expression can refer to attributes within the same entity, so
+	 * we pass this method an entity-scoped map of changes.
+	 */
+	public void updateAttributeExpressions(List<Map<String, Object>> attributes, HashMap<String, String> nameChanges)
+	{
+		if (nameChanges == null) return;
+
+		for (Map<String, Object> attribute : attributes)
+		{
+			String identifier = attribute.get("identifier").toString();
+			String name = attribute.get("name").toString();
+
+			HashMap<String, String> expressions = Maps.newHashMap();
+			if (attribute.get("expression") != null)
+			{
+				expressions.put("expression", attribute.get("expression").toString());
+			}
+			if (attribute.get("visibleExpression") != null)
+			{
+				expressions.put("visibleExpression", attribute.get("visibleExpression").toString());
+			}
+			if (attribute.get("validationExpression") != null)
+			{
+				expressions.put("validationExpression", attribute.get("validationExpression").toString());
+			}
+
+			// check each expression column for attribute names
+			for (Map.Entry<String, String> expr : expressions.entrySet())
+			{
+				String expression = expr.getValue();
+				String newExpression = expression;
+
+				// interesting parts in expressions look like this: $('attributeName')
+				Pattern pattern = Pattern.compile("\\$\\('(.*)'\\)");
+				Matcher matcher = pattern.matcher(expression);
+				boolean changesFound = false;
+				while (matcher.find())
+				{
+					// for each occurence of an attribute name, we check if it changed and update the expression
+					String exprAttr = matcher.group(1);
+					if (nameChanges.containsKey(exprAttr))
+					{
+						newExpression = newExpression.replaceAll("\\$\\('" + exprAttr + "'\\)",
+								"\\$\\('" + nameChanges.get(exprAttr) + "'\\)");
+
+						changesFound = true;
+					}
+				}
+
+				if (changesFound)
+				{
+					LOG.info(String.format("In attribute [%s]: %s is not valid, changing from [%s] to [%s]", name,
+							expr.getKey(), expression, newExpression));
+				}
+
+				// update the (validation|visible)expression column
+				template.execute(String.format("UPDATE attributes SET %s=\"%s\" WHERE identifier='%s'", expr.getKey(),
+						newExpression, identifier));
+			}
+		}
+	}
+
+	/**
+	 * Recursively gets a list of identifiers for all attributes belonging to an entity (including compounds).
+	 */
+	public List<String> getAllAttributeIdsRecursive(List<String> partialIds)
+	{
+		List<String> ids = Lists.newArrayList(partialIds);
+
+		for (String id : partialIds)
+		{
+			// get values for this attribute id
+			Map<String, Object> attribute = template.queryForMap(String.format(
+					"SELECT identifier, dataType FROM attributes WHERE identifier = '%s'", id));
+
+			if (attribute.get("dataType").toString().equals("compound"))
+			{
+				// possibly more attributes below this one
+				List<Map<String, Object>> attributeParts = template.queryForList(String.format(
+						"SELECT * FROM attributes_parts WHERE identifier='%s'", id));
+
+				// get the ids of these attributes and go deeper into the recursion
+				List<String> partIds = Lists.newArrayList();
+				attributeParts.forEach(part -> partIds.add(part.get("parts").toString()));
+				ids.addAll(getAllAttributeIdsRecursive(partIds));
+			}
+		}
+
+		return ids;
 	}
 
 	/**
@@ -182,7 +454,7 @@ public class Step11ConvertNames extends MolgenisUpgrade
 	public void checkAndUpdateEntities()
 	{
 		List<Map<String, Object>> entities = template
-				.queryForList("SELECT fullName, simpleName, package, extends FROM entities;");
+				.queryForList("SELECT fullName, simpleName, package, extends, abstract FROM entities;");
 
 		// build package scopes
 		HashMap<String, HashSet<String>> scopes = Maps.newHashMap();
@@ -241,7 +513,12 @@ public class Step11ConvertNames extends MolgenisUpgrade
 				newFullName = newPackage + "_" + newSimpleName;
 			}
 
-			entityNameChanges.put(fullName, newFullName);
+			// update the 'store' if we've changed the name (don't care about abstracts)
+			if (!fullName.equals(newFullName) && !((boolean) entity.get("abstract")))
+			{
+				entityNameChanges.put(fullName, newFullName);
+			}
+
 			template.execute(getUpdateEntityNamesSql(newFullName, newSimpleName, newPackage, fullName));
 
 		}
@@ -377,7 +654,26 @@ public class Step11ConvertNames extends MolgenisUpgrade
 		return String
 				.format("SELECT attributes.identifier, attributes.name, attributes.refEntity FROM attributes INNER JOIN entities_attributes ON entities_attributes.attributes = attributes.identifier WHERE entities_attributes.fullName = '%s'",
 						fullyQualifiedEntityName);
-	};
+	}
+
+	public String getAttributesByIdSql(List<String> ids)
+	{
+		if (ids.isEmpty()) return null;
+
+		StringBuilder sb = new StringBuilder(
+				"SELECT identifier, name, refEntity, dataType, expression, visibleExpression, validationExpression FROM attributes WHERE ");
+		Iterator<String> it = ids.iterator();
+		while (it.hasNext())
+		{
+			sb.append("identifier = '").append(it.next()).append("'");
+			if (it.hasNext())
+			{
+				sb.append(" OR ");
+			}
+		}
+
+		return sb.toString();
+	}
 
 	/**
 	 * Turns the MySQL foreign key check on or off.
@@ -543,13 +839,13 @@ public class Step11ConvertNames extends MolgenisUpgrade
 			"volatile", "while", "with", "yield");
 
 	// Case sensitive
-	// TODO: update MetaValidationUtils with new keywords!
 	public static final Set<String> MOLGENIS_KEYWORDS = Sets.newHashSet("login", "logout", "csv", "entities",
 			"attributes", "base");
 
 	// TODO: REMOVE!!!!
-	public static final Set<String> TEST = Sets.newHashSet("molgenis", "thispackagenameiswaytoolongtob", "Ontology",
-			"OntologyTermNodePath", "Owned", "tommy", "ontologyTermSynonym");
+	public static final Set<String> TEST = Sets.newHashSet("molgenis", "thispackagenameiswaytoolongtob", "Owned",
+			"tommy", "ontologyTermSynonym", "chromosome6_survey1", "Abnormality_of_body_height", "ontologyIRI",
+			"Ontology", "umbilicalcord");
 
 	public static Set<String> KEYWORDS = Sets.newHashSet();
 	static
@@ -558,6 +854,6 @@ public class Step11ConvertNames extends MolgenisUpgrade
 		KEYWORDS.addAll(JAVASCRIPT_KEYWORDS);
 		KEYWORDS.addAll(MOLGENIS_KEYWORDS);
 		KEYWORDS.addAll(MYSQL_KEYWORDS);
-		KEYWORDS.addAll(TEST);
+		// KEYWORDS.addAll(TEST);
 	}
 }
