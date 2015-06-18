@@ -8,7 +8,7 @@ import org.molgenis.model.MolgenisModelException;
 public class TextField extends FieldType
 {
 	private static final long serialVersionUID = 1L;
-	private static final long MAX_TEXT_LENGTH = 4294967295L;
+	private static final long MAX_TEXT_LENGTH = 65535L;
 
 	@Override
 	public String getJavaAssignment(String value)
@@ -26,7 +26,7 @@ public class TextField extends FieldType
 	@Override
 	public String getMysqlType() throws MolgenisModelException
 	{
-		return "LONGTEXT";
+		return "TEXT";
 	}
 
 	@Override
