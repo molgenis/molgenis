@@ -104,6 +104,8 @@ public class WebAppConfig extends MolgenisWebAppConfig
 			e.printStackTrace();
 		}
 		upgradeService.addUpgrade(new Step11ConvertNames(singleConnectionDS));
+
+		reindex();
 	}
 
 	@Override
