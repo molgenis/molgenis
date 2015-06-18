@@ -12,15 +12,7 @@ import java.util.regex.Pattern;
 
 import javax.sql.DataSource;
 
-import org.apache.poi.ss.formula.eval.NotImplementedException;
-import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.MetaDataServiceImpl;
-import org.molgenis.data.mysql.AsyncJdbcTemplate;
-import org.molgenis.data.mysql.MysqlRepository;
-import org.molgenis.data.mysql.MysqlRepositoryCollection;
-import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.version.MolgenisUpgrade;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -54,7 +46,7 @@ public class Step11ConvertNames extends MolgenisUpgrade
 	private HashMap<String, String> entityNameChanges = new HashMap<>();
 	private HashMap<String, HashMap<String, String>> attributeNameChanges = new HashMap<>();
 	private HashMap<String, HashMap<String, String>> mrefNameChanges = new HashMap<>();
-	private HashMap<String, String> mrefNoChanges = new HashMap();
+	private HashMap<String, String> mrefNoChanges = new HashMap<>();
 	private HashMap<String, List<String>> entitiesAttributesIds = new HashMap<>();
 
 	public Step11ConvertNames(SingleConnectionDataSource dataSource)
@@ -70,27 +62,8 @@ public class Step11ConvertNames extends MolgenisUpgrade
 	@Override
 	public void upgrade()
 	{
-		DataServiceImpl dataService = new DataServiceImpl();
+		if (true) throw new RuntimeException();
 
-		// Get the undecorated repos
-		MysqlRepositoryCollection undecoratedMySQL = new MysqlRepositoryCollection()
-		{
-			@Override
-			protected MysqlRepository createMysqlRepository()
-			{
-				return new MysqlRepository(dataService, dataSource, new AsyncJdbcTemplate(new JdbcTemplate(dataSource)));
-			}
-
-			@Override
-			public boolean hasRepository(String name)
-			{
-				throw new NotImplementedException("Not implemented yet");
-			}
-		};
-		MetaDataService metaData = new MetaDataServiceImpl(dataService);
-		RunAsSystemProxy.runAsSystem(() -> metaData.setDefaultBackend(undecoratedMySQL));
-
-		// MIGRATION STARTS HERE
 		LOG.info("Validating JPA entities...");
 		checkJPAentities();
 
@@ -548,7 +521,10 @@ public class Step11ConvertNames extends MolgenisUpgrade
 
 		// first add packages in this package to the scope
 		HashSet<String> scope = Sets.newHashSet();
-		packages.forEach(pack -> scope.add(pack.get("name").toString()));
+		packages.forEach(pack -> {
+			scope.add(pack.get("name").toString());
+			if (pack.get("name").toString().equals(NEW_DEFAULT_PACKAGE)) throw new RuntimeException("EXIT!");
+		});
 
 		// iterate over the packages and check the names
 		for (Map<String, Object> pack : packages)
@@ -566,8 +542,8 @@ public class Step11ConvertNames extends MolgenisUpgrade
 			{
 				if (name.equals(OLD_DEFAULT_PACKAGE))
 				{
-					// special case: the default molgenis package has to be renamed because default is a reserved
-					// keyword. rename it to 'base' (which is now also a reserved keyword in MOLGENIS)
+					// special case: the 'default' package is renamed to 'base'. The 'base' package is added before the
+					// migration starts, so just remove the old 'default' package
 					nameFix = NEW_DEFAULT_PACKAGE;
 				}
 
