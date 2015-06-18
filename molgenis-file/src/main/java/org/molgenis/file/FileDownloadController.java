@@ -3,9 +3,9 @@ package org.molgenis.file;
 import static org.molgenis.file.FileDownloadController.URI;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -35,7 +35,7 @@ public class FileDownloadController
 	@RequestMapping(value = "/{fileName}", method = GET)
 	public void getFile(@PathVariable("fileName") String fileName, HttpServletResponse response) throws IOException
 	{
-		java.io.File fileStoreFile = fileStore.getFile(fileName);
+		File fileStoreFile = fileStore.getFile(fileName);
 
 		// if file meta data exists for this file
 		String outputFilename;
@@ -61,16 +61,8 @@ public class FileDownloadController
 		{
 			outputFilename = fileName;
 		}
-		response.setHeader("Content-Disposition", "attachment; filename=" + outputFilename.replace(" ", "_"));
 
-		InputStream is = new FileInputStream(fileStoreFile);
-		try
-		{
-			FileCopyUtils.copy(is, response.getOutputStream());
-		}
-		finally
-		{
-			is.close();
-		}
+		response.setHeader("Content-Disposition", "attachment; filename=" + outputFilename.replace(" ", "_"));
+		FileCopyUtils.copy(new FileInputStream(fileStoreFile), response.getOutputStream());
 	}
 }

@@ -343,5 +343,10 @@
             <artifactId>molgenis-questionnaires</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-vortext</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 	</dependencies>
 </project>
