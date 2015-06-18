@@ -32,6 +32,7 @@
 	 					<th>Owner</th>
 	 					<th>Target entities</th>
 	 					<th>Mapped sources</th>
+	 					<th>Test explain api</th>
 	 				</tr>
 	 			</thead>
 	 			<tbody>
@@ -67,7 +68,10 @@
 			 					<#list project.mappingTargets[0].entityMappings as mapping>
 			 						${mapping.name}<#if mapping_has_next>, </#if> 
 		 						</#list>
-			 					</td>	
+			 					</td>
+								<td>
+									<a href="${context_url}/explainTargetAttributeMappingProject/${project.identifier}" class="btn"><span class="glyphicon glyphicon-wrench"></span></a></td>
+								</td>	
 			 				</tr>
 						<#else>
 							<tr class="danger">

@@ -1,11 +1,11 @@
 package org.molgenis.data.semanticsearch.explain.service;
 
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.lucene.search.Explanation;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 
 public interface ElasticSearchExplainService
@@ -25,5 +25,6 @@ public interface ElasticSearchExplainService
 	 * @param explanationBean
 	 * @return
 	 */
-	abstract Set<ExplainedQueryString> reverseSearchQueryStrings(QueryRule disMaxQueryRule, Explanation explanation);
+	abstract Set<ExplainedQueryString> reverseSearchQueryStrings(Map<String, String> collectExpanedQueryMap,
+			Explanation explanation);
 }

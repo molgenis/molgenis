@@ -3,13 +3,11 @@ package org.molgenis.data.semanticsearch.explain.service;
 import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
 
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.lucene.search.Explanation;
 import org.elasticsearch.client.Client;
-import org.molgenis.data.QueryRule;
-import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -78,33 +76,47 @@ public class ElasticSearchExplainServiceImplTest
 	@Test
 	public void testRecursivelyFindQuery()
 	{
-		QueryRule queryRule_1 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, "hypertension");
-		QueryRule queryRule_2 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH,
-				"hypertensive disorder");
-		QueryRule queryRule_3 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH,
-				"high blood pressure");
+		// QueryRule queryRule_1 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, "hypertension");
+		// QueryRule queryRule_2 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH,
+		// "hypertensive disorder");
+		// QueryRule queryRule_3 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH,
+		// "high blood pressure");
+		//
+		// QueryRule queryRule_4 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, "drug");
+		// QueryRule queryRule_5 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, "medication");
+		// QueryRule queryRule_6 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, "pill");
+		//
+		// QueryRule disMaxQueryRule_1 = new QueryRule(Arrays.asList(queryRule_1, queryRule_2, queryRule_3));
+		// disMaxQueryRule_1.setOperator(Operator.DIS_MAX);
+		//
+		// QueryRule disMaxQueryRule_2 = new QueryRule(Arrays.asList(queryRule_4, queryRule_5, queryRule_6));
+		// disMaxQueryRule_2.setOperator(Operator.DIS_MAX);
+		//
+		// QueryRule shouldQueryRule = new QueryRule(Arrays.asList(disMaxQueryRule_1, disMaxQueryRule_2));
+		// shouldQueryRule.setOperator(Operator.SHOULD);
+		//
+		// QueryRule finalDisMaxQueryRule = new QueryRule(Arrays.asList(shouldQueryRule));
+		// finalDisMaxQueryRule.setOperator(Operator.DIS_MAX);
 
-		QueryRule queryRule_4 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, "drug");
-		QueryRule queryRule_5 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, "medication");
-		QueryRule queryRule_6 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, "pill");
+		// assertEquals(explainServiceHelper.recursivelyFindQuery("high blood", finalDisMaxQueryRule.getNestedRules())
+		// .toString(), ImmutableMap.of("high blood pressure", 73.333).toString());
+		//
+		// assertEquals(explainServiceHelper.recursivelyFindQuery("medication", finalDisMaxQueryRule.getNestedRules())
+		// .toString(), ImmutableMap.of("medication", 100.0).toString());
 
-		QueryRule disMaxQueryRule_1 = new QueryRule(Arrays.asList(queryRule_1, queryRule_2, queryRule_3));
-		disMaxQueryRule_1.setOperator(Operator.DIS_MAX);
+		Map<String, String> expanedQueryMap = new HashMap<String, String>();
+		expanedQueryMap.put("hypertension", "hypertension");
+		expanedQueryMap.put("hypertensive disorder", "hypertension");
+		expanedQueryMap.put("high blood pressure", "hypertension");
+		expanedQueryMap.put("medication", "medication");
+		expanedQueryMap.put("drug", "medication");
+		expanedQueryMap.put("pill", "medication");
 
-		QueryRule disMaxQueryRule_2 = new QueryRule(Arrays.asList(queryRule_4, queryRule_5, queryRule_6));
-		disMaxQueryRule_2.setOperator(Operator.DIS_MAX);
+		assertEquals(explainServiceHelper.recursivelyFindQuery("high blood", expanedQueryMap).toString(), ImmutableMap
+				.of("high blood pressure", 73.333).toString());
 
-		QueryRule shouldQueryRule = new QueryRule(Arrays.asList(disMaxQueryRule_1, disMaxQueryRule_2));
-		shouldQueryRule.setOperator(Operator.SHOULD);
-
-		QueryRule finalDisMaxQueryRule = new QueryRule(Arrays.asList(shouldQueryRule));
-		finalDisMaxQueryRule.setOperator(Operator.DIS_MAX);
-
-		assertEquals(explainServiceHelper.recursivelyFindQuery("high blood", finalDisMaxQueryRule.getNestedRules())
-				.toString(), ImmutableMap.of("high blood pressure", 73.333).toString());
-
-		assertEquals(explainServiceHelper.recursivelyFindQuery("medication", finalDisMaxQueryRule.getNestedRules())
-				.toString(), ImmutableMap.of("medication", 100.0).toString());
+		assertEquals(explainServiceHelper.recursivelyFindQuery("medication", expanedQueryMap).toString(), ImmutableMap
+				.of("medication", 100.0).toString());
 	}
 
 	@Test
@@ -121,29 +133,40 @@ public class ElasticSearchExplainServiceImplTest
 		explanation_1.addDetail(explanation_2);
 		explanation_1.addDetail(explanation_3);
 
-		QueryRule queryRule_1 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, "hypertension");
-		QueryRule queryRule_2 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH,
-				"hypertensive disorder");
-		QueryRule queryRule_3 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH,
-				"high blood pressure");
+		// QueryRule queryRule_1 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, "hypertension");
+		// QueryRule queryRule_2 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH,
+		// "hypertensive disorder");
+		// QueryRule queryRule_3 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH,
+		// "high blood pressure");
+		//
+		// QueryRule queryRule_4 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, "drug");
+		// QueryRule queryRule_5 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, "medication");
+		// QueryRule queryRule_6 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, "pill");
+		//
+		// QueryRule disMaxQueryRule_1 = new QueryRule(Arrays.asList(queryRule_1, queryRule_2, queryRule_3));
+		// disMaxQueryRule_1.setOperator(Operator.DIS_MAX);
+		//
+		// QueryRule disMaxQueryRule_2 = new QueryRule(Arrays.asList(queryRule_4, queryRule_5, queryRule_6));
+		// disMaxQueryRule_2.setOperator(Operator.DIS_MAX);
+		//
+		// QueryRule shouldQueryRule = new QueryRule(Arrays.asList(disMaxQueryRule_1, disMaxQueryRule_2));
+		// shouldQueryRule.setOperator(Operator.SHOULD);
+		//
+		// QueryRule finalDisMaxQueryRule = new QueryRule(Arrays.asList(shouldQueryRule));
+		// finalDisMaxQueryRule.setOperator(Operator.DIS_MAX);
 
-		QueryRule queryRule_4 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, "drug");
-		QueryRule queryRule_5 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, "medication");
-		QueryRule queryRule_6 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, "pill");
+		// assertEquals(elasticSearchExplainService.reverseSearchQueryStrings(finalDisMaxQueryRule, explanation_1)
+		// .toString(), "[high blood pressure=73.333, medication=100.0]");
 
-		QueryRule disMaxQueryRule_1 = new QueryRule(Arrays.asList(queryRule_1, queryRule_2, queryRule_3));
-		disMaxQueryRule_1.setOperator(Operator.DIS_MAX);
+		Map<String, String> expanedQueryMap = new HashMap<String, String>();
+		expanedQueryMap.put("hypertension", "hypertension");
+		expanedQueryMap.put("hypertensive disorder", "hypertension");
+		expanedQueryMap.put("high blood pressure", "hypertension");
+		expanedQueryMap.put("medication", "medication");
+		expanedQueryMap.put("drug", "medication");
+		expanedQueryMap.put("pill", "medication");
 
-		QueryRule disMaxQueryRule_2 = new QueryRule(Arrays.asList(queryRule_4, queryRule_5, queryRule_6));
-		disMaxQueryRule_2.setOperator(Operator.DIS_MAX);
-
-		QueryRule shouldQueryRule = new QueryRule(Arrays.asList(disMaxQueryRule_1, disMaxQueryRule_2));
-		shouldQueryRule.setOperator(Operator.SHOULD);
-
-		QueryRule finalDisMaxQueryRule = new QueryRule(Arrays.asList(shouldQueryRule));
-		finalDisMaxQueryRule.setOperator(Operator.DIS_MAX);
-
-		assertEquals(elasticSearchExplainService.reverseSearchQueryStrings(finalDisMaxQueryRule, explanation_1)
-				.toString(), "[high blood pressure=73.333, medication=100.0]");
+		assertEquals(elasticSearchExplainService.reverseSearchQueryStrings(expanedQueryMap, explanation_1).toString(),
+				"[high blood pressure=73.333, medication=100.0]");
 	}
 }

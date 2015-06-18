@@ -2,7 +2,6 @@ package org.molgenis.data.semanticsearch.explain.service;
 
 import static org.molgenis.data.elasticsearch.util.MapperTypeSanitizer.sanitizeMapperType;
 
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -16,7 +15,6 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule;
 import org.molgenis.data.elasticsearch.request.QueryGenerator;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +49,8 @@ public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainServ
 		return null;
 	}
 
-	public Set<ExplainedQueryString> reverseSearchQueryStrings(QueryRule disMaxQueryRule, Explanation explanation)
+	public Set<ExplainedQueryString> reverseSearchQueryStrings(Map<String, String> collectExpanedQueryMap,
+			Explanation explanation)
 	{
 		Set<ExplainedQueryString> matchedQueryStrings = new LinkedHashSet<ExplainedQueryString>();
 
@@ -59,7 +58,7 @@ public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainServ
 		for (String queryPart : discoverMatchedQueries.split("\\|"))
 		{
 			Map<String, Double> matchedQueryRule = explainServiceHelper.recursivelyFindQuery(queryPart,
-					Arrays.asList(disMaxQueryRule));
+					collectExpanedQueryMap);
 			if (matchedQueryRule.size() > 0)
 			{
 				Entry<String, Double> entry = matchedQueryRule.entrySet().stream()
@@ -71,7 +70,8 @@ public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainServ
 							}
 						}).get();
 
-				matchedQueryStrings.add(new ExplainedQueryString(queryPart, entry.getKey(), entry.getValue()));
+				matchedQueryStrings.add(new ExplainedQueryString(queryPart, entry.getKey(), collectExpanedQueryMap
+						.get(entry.getKey()), entry.getValue()));
 			}
 		}
 		return matchedQueryStrings;

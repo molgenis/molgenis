@@ -4,8 +4,10 @@ import static java.util.Arrays.stream;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,6 +25,7 @@ import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
+import org.molgenis.data.semanticsearch.string.Stemmer;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
@@ -42,6 +45,8 @@ public class SemanticSearchServiceHelper
 	private final DataService dataService;
 
 	private final OntologyService ontologyService;
+
+	private final Stemmer stemmer = new Stemmer();
 
 	public static final Set<String> STOP_WORDS;
 
@@ -117,6 +122,55 @@ public class SemanticSearchServiceHelper
 		return disMaxQueryRule;
 	}
 
+	public Map<String, String> collectExpanedQueryMap(EntityMetaData targetEntityMetaData,
+			AttributeMetaData targetAttribute)
+	{
+		Map<String, String> expanedQueryMap = new HashMap<String, String>();
+
+		if (StringUtils.isNotEmpty(targetAttribute.getLabel()))
+		{
+			expanedQueryMap.put(stemmer.cleanStemPhrase(targetAttribute.getLabel()), targetAttribute.getLabel());
+		}
+
+		if (StringUtils.isNotEmpty(targetAttribute.getDescription()))
+		{
+			expanedQueryMap.put(stemmer.cleanStemPhrase(targetAttribute.getDescription()),
+					targetAttribute.getDescription());
+		}
+
+		for (OntologyTerm ot : ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute).values())
+		{
+			if (!ot.getIRI().contains(","))
+			{
+				collectOntologyTermQueryMap(expanedQueryMap, ot);
+			}
+			else
+			{
+				for (String ontologyTermIri : ot.getIRI().split(","))
+				{
+					collectOntologyTermQueryMap(expanedQueryMap, ontologyService.getOntologyTerm(ontologyTermIri));
+				}
+			}
+		}
+
+		return expanedQueryMap;
+	}
+
+	public void collectOntologyTermQueryMap(Map<String, String> expanedQueryMap, OntologyTerm ot)
+	{
+		if (ot != null)
+		{
+			collectTermsFromOntologyTerm(ot).forEach(
+					synonym -> expanedQueryMap.put(stemmer.cleanStemPhrase(synonym), ot.getLabel()));
+
+			for (OntologyTerm childOt : ontologyService.getChildren(ot))
+			{
+				collectTermsFromOntologyTerm(childOt).forEach(
+						synonym -> expanedQueryMap.put(stemmer.cleanStemPhrase(synonym), ot.getLabel()));
+			}
+		}
+	}
+
 	/**
 	 * Create disMaxJunc query rule based a list of queryTerm. All queryTerms are lower cased and stop words are removed
 	 * 
@@ -126,10 +180,11 @@ public class SemanticSearchServiceHelper
 	public QueryRule createDisMaxQueryRule(List<String> queryTerms)
 	{
 		List<QueryRule> rules = new ArrayList<QueryRule>();
-		queryTerms.stream().filter(query -> StringUtils.isNotEmpty(query)).map(QueryParser::escape).forEach(query -> {
-			rules.add(new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, query));
-			rules.add(new QueryRule(AttributeMetaDataMetaData.DESCRIPTION, Operator.FUZZY_MATCH, query));
-		});
+		queryTerms.stream().filter(query -> StringUtils.isNotEmpty(query)).map(QueryParser::escape)
+				.map(this::reverseEscapeLuceneChar).forEach(query -> {
+					rules.add(new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, query));
+					rules.add(new QueryRule(AttributeMetaDataMetaData.DESCRIPTION, Operator.FUZZY_MATCH, query));
+				});
 		QueryRule finalDisMaxQuery = new QueryRule(rules);
 		finalDisMaxQuery.setOperator(Operator.DIS_MAX);
 		return finalDisMaxQuery;
@@ -213,6 +268,11 @@ public class SemanticSearchServiceHelper
 	{
 		return StringUtils.join(
 				removeStopWords(queryString).stream().map(word -> word + "^" + boost).collect(Collectors.toSet()), ' ');
+	}
+
+	public String reverseEscapeLuceneChar(String string)
+	{
+		return string.replace("\\~", "~").replace("\\^", "^");
 	}
 
 	public Set<String> removeStopWords(String description)

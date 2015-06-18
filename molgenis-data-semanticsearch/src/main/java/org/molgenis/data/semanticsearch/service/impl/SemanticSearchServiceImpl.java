@@ -1,5 +1,6 @@
 package org.molgenis.data.semanticsearch.service.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -13,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.search.Explanation;
 import org.apache.lucene.search.spell.StringDistance;
 import org.elasticsearch.common.base.Joiner;
+import org.elasticsearch.common.collect.Iterables;
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -119,16 +121,41 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		Iterable<Entity> attributeMetaDataEntities = dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME,
 				new QueryImpl(finalQueryRules));
 
-		List<ExplainedAttributeMetaData> explainedAttributes = FluentIterable
-				.from(attributeMetaDataEntities)
-				.transform(
-						entity -> convertAttributeEntityToExplainedAttribute(entity, sourceEntityMetaData,
-								disMaxQueryRule, finalQueryRules)).toList();
+		Map<String, String> collectExpanedQueryMap = semanticSearchServiceHelper.collectExpanedQueryMap(
+				targetEntityMetaData, targetAttribute);
+
+		List<ExplainedAttributeMetaData> explainedAttributes = new ArrayList<ExplainedAttributeMetaData>(
+				Iterables.size(attributeMetaDataEntities));
+		int count = 0;
+		for (Entity attributeMetaDataEntity : attributeMetaDataEntities)
+		{
+			final ExplainedAttributeMetaData explainedAttribute;
+			if (count < 100)
+			{
+				explainedAttribute = convertAttributeEntityToExplainedAttribute(attributeMetaDataEntity,
+						sourceEntityMetaData, collectExpanedQueryMap, finalQueryRules);
+			}
+			else
+			{
+				explainedAttribute = new ExplainedAttributeMetaData(
+						sourceEntityMetaData.getAttribute(attributeMetaDataEntity
+								.getString(AttributeMetaDataMetaData.NAME)));
+			}
+			explainedAttributes.add(explainedAttribute);
+			count++;
+		}
+
+		// List<ExplainedAttributeMetaData> explainedAttributes = FluentIterable
+		// .from(attributeMetaDataEntities)
+		// .transform(
+		// entity -> convertAttributeEntityToExplainedAttribute(entity, sourceEntityMetaData,
+		// collectExpanedQueryMap, finalQueryRules)).toList();
 		return explainedAttributes;
 	}
 
 	public ExplainedAttributeMetaData convertAttributeEntityToExplainedAttribute(Entity attributeEntity,
-			EntityMetaData sourceEntityMetaData, QueryRule disMaxQueryRule, List<QueryRule> finalQueryRules)
+			EntityMetaData sourceEntityMetaData, Map<String, String> collectExpanedQueryMap,
+			List<QueryRule> finalQueryRules)
 	{
 		String attributeId = attributeEntity.getString(AttributeMetaDataMetaData.IDENTIFIER);
 		String attributeName = attributeEntity.getString(AttributeMetaDataMetaData.NAME);
@@ -142,7 +169,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 				dataService.getEntityMetaData(AttributeMetaDataMetaData.ENTITY_NAME), attributeId);
 
 		Set<ExplainedQueryString> reverseSearchQueryStrings = elasticSearchExplainService.reverseSearchQueryStrings(
-				disMaxQueryRule, explanation);
+				collectExpanedQueryMap, explanation);
 
 		return new ExplainedAttributeMetaData(sourceEntityMetaData.getAttribute(attributeName),
 				reverseSearchQueryStrings);

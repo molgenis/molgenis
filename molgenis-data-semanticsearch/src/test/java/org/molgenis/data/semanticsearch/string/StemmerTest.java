@@ -12,9 +12,9 @@ public class StemmerTest
 	@Test
 	public void replaceIllegalCharacter()
 	{
-		assertEquals(customPorterStemmer.replaceIllegalCharacter("Hello__world!"), "Hello world");
-		assertEquals(customPorterStemmer.replaceIllegalCharacter("Hello__world! 1234"), "Hello world 1234");
-		assertEquals(customPorterStemmer.replaceIllegalCharacter("Hello_#45_world! 1234"), "Hello 45 world 1234");
+		assertEquals(customPorterStemmer.replaceIllegalCharacter("Hello__world!"), "hello world");
+		assertEquals(customPorterStemmer.replaceIllegalCharacter("Hello__world! 1234"), "hello world 1234");
+		assertEquals(customPorterStemmer.replaceIllegalCharacter("Hello_#45_world! 1234"), "hello 45 world 1234");
 	}
 
 	@Test

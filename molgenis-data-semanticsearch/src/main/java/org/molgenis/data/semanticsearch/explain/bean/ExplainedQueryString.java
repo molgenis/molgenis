@@ -4,12 +4,14 @@ public class ExplainedQueryString
 {
 	private final String matchedTerm;
 	private final String queryValue;
+	private final String relatedQuery;
 	private final double score;
 
-	public ExplainedQueryString(String matchedTerm, String queryValue, double score)
+	public ExplainedQueryString(String matchedTerm, String queryValue, String relatedQuery, double score)
 	{
 		this.matchedTerm = matchedTerm;
 		this.queryValue = queryValue;
+		this.relatedQuery = relatedQuery;
 		this.score = score;
 	}
 
@@ -21,6 +23,11 @@ public class ExplainedQueryString
 	public String getQueryValue()
 	{
 		return queryValue;
+	}
+
+	public String getRelatedQuery()
+	{
+		return relatedQuery;
 	}
 
 	public double getScore()

@@ -1,11 +1,10 @@
 package org.molgenis.data.semanticsearch.explain.service;
 
-import static org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm.stringMatching;
-
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,8 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.search.Explanation;
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.data.QueryRule;
-import org.molgenis.data.semanticsearch.string.Stemmer;
+import org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.FluentIterable;
@@ -25,7 +23,8 @@ public class ExplainServiceHelper
 {
 	public final static Pattern REGEXR_PATTERN = Pattern.compile("^weight\\(\\w*:(\\w*)(.*|)\\s.*");
 	private final Splitter termSplitter = Splitter.onPattern("[^\\p{IsAlphabetic}]+");
-	private final Stemmer stemmer = new Stemmer("en");
+
+	// private final Stemmer stemmer = new Stemmer("en");
 
 	public enum Options
 	{
@@ -114,25 +113,33 @@ public class ExplainServiceHelper
 		return description;
 	}
 
-	public Map<String, Double> recursivelyFindQuery(String queryPart, List<QueryRule> rules)
+	public Map<String, Double> recursivelyFindQuery(String queryPart, Map<String, String> collectExpanedQueryMap)
 	{
 		Map<String, Double> qualifiedTerms = new HashMap<String, Double>();
-		for (QueryRule queryRule : rules)
+
+		for (Entry<String, String> entry : collectExpanedQueryMap.entrySet())
 		{
-			if (queryRule.getNestedRules().size() > 0)
+			if (splitIntoTerms(entry.getKey()).containsAll(splitIntoTerms(queryPart)))
 			{
-				qualifiedTerms.putAll(recursivelyFindQuery(queryPart, queryRule.getNestedRules()));
-			}
-			else
-			{
-				String removeBoostFromQuery = removeBoostFromQuery(queryRule.getValue().toString());
-				String cleanStemPhrase = stemmer.cleanStemPhrase(removeBoostFromQuery);
-				if (splitIntoTerms(cleanStemPhrase).containsAll(splitIntoTerms(queryPart)))
-				{
-					qualifiedTerms.put(removeBoostFromQuery, stringMatching(queryPart, cleanStemPhrase));
-				}
+				qualifiedTerms.put(entry.getKey(), NGramDistanceAlgorithm.stringMatching(queryPart, entry.getKey()));
 			}
 		}
+		// for (QueryRule queryRule : rules)
+		// {
+		// if (queryRule.getNestedRules().size() > 0)
+		// {
+		// qualifiedTerms.putAll(recursivelyFindQuery(queryPart, queryRule.getNestedRules()));
+		// }
+		// else
+		// {
+		// String removeBoostFromQuery = removeBoostFromQuery(queryRule.getValue().toString());
+		// String cleanStemPhrase = stemmer.cleanStemPhrase(removeBoostFromQuery);
+		// if (splitIntoTerms(cleanStemPhrase).containsAll(splitIntoTerms(queryPart)))
+		// {
+		// qualifiedTerms.put(removeBoostFromQuery, stringMatching(queryPart, cleanStemPhrase));
+		// }
+		// }
+		// }
 		return qualifiedTerms;
 	}
 
