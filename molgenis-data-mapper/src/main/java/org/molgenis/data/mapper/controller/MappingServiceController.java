@@ -2,6 +2,8 @@ package org.molgenis.data.mapper.controller;
 
 import static com.google.common.collect.Iterators.size;
 import static org.molgenis.data.mapper.controller.MappingServiceController.URI;
+import static org.molgenis.data.mapper.mapping.model.CategoryMapping.create;
+import static org.molgenis.data.mapper.mapping.model.CategoryMapping.createEmpty;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.util.ArrayList;
@@ -558,7 +560,7 @@ public class MappingServiceController extends MolgenisPluginController
 	public String advancedMappingEditor(@RequestParam(required = true) String mappingProjectId,
 			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
 			@RequestParam(required = true) String targetAttribute,
-			@RequestParam(required = true) String sourceAttribute, Model model)
+			@RequestParam(required = true) String sourceAttribute, @RequestParam String algorithm, Model model)
 	{
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
 		MappingTarget mappingTarget = project.getMappingTarget(target);
@@ -606,11 +608,8 @@ public class MappingServiceController extends MolgenisPluginController
 		}
 		else
 		{
-			System.out.println(dataService.getEntityMetaData(source));
 			sourceAttributeEntities = dataService.findAll(dataService.getEntityMetaData(source).getName());
-
 			sourceAttributeIdAttribute = dataService.getEntityMetaData(source).getIdAttribute().getName();
-
 			sourceAttributeLabelAttribute = sourceAttribute;
 		}
 
@@ -641,13 +640,21 @@ public class MappingServiceController extends MolgenisPluginController
 		model.addAttribute("hasWritePermission", hasWritePermission(project, false));
 
 		CategoryMapping<String, String> categoryMapping = null;
-		if (attributeMapping != null)
+		if (algorithm == null)
 		{
-			categoryMapping = CategoryMapping.<String, String> create(attributeMapping.getAlgorithm());
+			algorithm = attributeMapping.getAlgorithm();
 		}
+		try
+		{
+			categoryMapping = create(algorithm);
+		}
+		catch (Exception ignore)
+		{
+		}
+
 		if (categoryMapping == null)
 		{
-			categoryMapping = CategoryMapping.<String, String> createEmpty(sourceAttribute);
+			categoryMapping = createEmpty(sourceAttribute);
 		}
 		model.addAttribute("categoryMapping", categoryMapping);
 

@@ -112,66 +112,22 @@
 		});
 	}
 
+	/**
+	 * Load mapping table from view-advanced-mapping-editor.ftl
+	 * 
+	 * @param algorithm
+	 *            The algorithm to set presets when opening the editor a second
+	 *            time
+	 */
 	function loadMappingEditor(algorithm) {
 		$("#advanced-mapping-table").load("advancedmappingeditor #advanced-mapping-editor", {
 			mappingProjectId : $('input[name="mappingProjectId"]').val(),
 			target : $('input[name="target"]').val(),
 			source : $('input[name="source"]').val(),
 			targetAttribute : $('input[name="targetAttribute"]').val(),
-			sourceAttribute : getSourceAttrs(algorithm)[0]
-		}, function() {
-
-			$('#save-advanced-mapping-btn').on('click', function() {
-				var mappedCategoryIds = {}, defaultValue = undefined, nullValue = undefined, key, val;
-
-				// for each source xref value, check which target xref value
-				// was chosen
-				$('#advanced-mapping-table > tbody > tr').each(function() {
-					key = $(this).attr('id');
-					val = $(this).find('option:selected').val();
-					if (key === 'nullValue') {
-						if (val !== 'use-default-option') {
-							if (val === 'use-null-value') {
-								nullValue = null;
-							} else {
-								nullValue = val;
-							}
-						}
-					} else {
-						if (val !== 'use-default-option') {
-							if (val === 'use-null-value') {
-								mappedCategoryIds[$(this).attr('id')] = null;
-							} else {
-								mappedCategoryIds[$(this).attr('id')] = val;
-							}
-						}
-					}
-				});
-
-				if (nullValue !== undefined) {
-					defaultValue = null;
-				}
-
-				if ($('#default-value').is(":visible")) {
-					defaultValue = $('#default-value').find('option:selected').val();
-					if (defaultValue === 'use-null-value') {
-						defaultValue = null;
-					}
-				}
-
-				algorithm = generateAlgorithm(mappedCategoryIds, $('input[name="sourceAttribute"]').val(), defaultValue, nullValue)
-
-				$.post(molgenis.getContextUrl() + '/savecategorymapping', {
-					mappingProjectId : $('input[name="mappingProjectId"]').val(),
-					target : $('input[name="target"]').val(),
-					source : $('input[name="source"]').val(),
-					targetAttribute : $('input[name="targetAttribute"]').val(),
-					algorithm : generateAlgorithm(mappedCategoryIds, $('input[name="sourceAttribute"]').val(), defaultValue, nullValue),
-					success : function() {
-						loadAlgorithmResult(algorithm);
-					}
-				});
-			});
+			// TODO mapping editor for > 1 attribute
+			sourceAttribute : getSourceAttrs(algorithm)[0],
+			algorithm : algorithm
 		});
 	}
 
@@ -206,7 +162,7 @@
 
 	$(function() {
 
-		var editor, searchQuery, selectedAttributes, $textarea, initialValue, algorithm, feedBackRequest, row;
+		var editor, searchQuery, selectedAttributes, $textarea, initialValue, algorithm, feedBackRequest, row, targetAttributeDataType;
 
 		// create ace editor
 		$textarea = $("#ace-editor-text-area");
@@ -231,10 +187,10 @@
 			// check attributes if manually added
 			checkSelectedAttributes(editor.getValue());
 
-			// Update algorithm
+			// update algorithm
 			algorithm = editor.getSession().getValue();
 
-			// Update result
+			// update result
 			loadAlgorithmResult(algorithm);
 		});
 
@@ -262,6 +218,14 @@
 			});
 		});
 
+		$('#attribute-mapping-table :checkbox').on('change', function() {
+			var $checkedAttributes = $('#attribute-mapping-table :checkbox:checked');
+			var amountChecked = $checkedAttributes.length;
+			if (this.checked) {
+
+			}
+
+		});
 		// test button for simple attribute selection
 		$('#test-mapping-btn').on('click', function() {
 			selectedAttributes = [];
@@ -285,7 +249,8 @@
 
 			// generate mapping editor if target attribute is an xref or
 			// categorical
-			if ($('input[name="targetAttributeType"]') === 'xref' || $('input[name="targetAttributeType"]') === 'categorical') {
+			targetAttributeDataType = $('input[name="targetAttributeType"]').val();
+			if (targetAttributeDataType === 'xref' || targetAttributeDataType === 'categorical') {
 				loadMappingEditor(algorithm);
 			}
 
@@ -317,9 +282,57 @@
 
 		// when the map tab is selected, load its contents
 		// loading on page load will fail because bootstrap tab blocks it
-		// load javascript for the save button in the callback of load
 		$('a[href=#map]').on('shown.bs.tab', function() {
 			loadMappingEditor(algorithm);
+		});
+
+		$('a[href=#script]').on('shown.bs.tab', function() {
+			// Clearing the editor will empty the algorithm
+			var newAlgorithm = algorithm;
+			editor.setValue("");
+			editor.insert(newAlgorithm, -1);
+		});
+
+		$('#advanced-mapping-table').on('change', function() {
+			var mappedCategoryIds = {}, defaultValue = undefined, nullValue = undefined, key, val;
+
+			// for each source xref value, check which target xref value
+			// was chosen
+			$('#advanced-mapping-table > tbody > tr').each(function() {
+				key = $(this).attr('id');
+				val = $(this).find('option:selected').val();
+				if (key === 'nullValue') {
+					if (val !== 'use-default-option') {
+						if (val === 'use-null-value') {
+							nullValue = null;
+						} else {
+							nullValue = val;
+						}
+					}
+				} else {
+					if (val !== 'use-default-option') {
+						if (val === 'use-null-value') {
+							mappedCategoryIds[$(this).attr('id')] = null;
+						} else {
+							mappedCategoryIds[$(this).attr('id')] = val;
+						}
+					}
+				}
+			});
+
+			if (nullValue !== undefined) {
+				defaultValue = null;
+			}
+
+			if ($('#default-value').is(":visible")) {
+				defaultValue = $('#default-value').find('option:selected').val();
+				if (defaultValue === 'use-null-value') {
+					defaultValue = null;
+				}
+			}
+
+			algorithm = generateAlgorithm(mappedCategoryIds, $('input[name="sourceAttribute"]').val(), defaultValue, nullValue);
+			loadAlgorithmResult(algorithm);
 		});
 	});
 

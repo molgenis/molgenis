@@ -1,10 +1,11 @@
 <div id="advanced-mapping-editor">
 	<div class="row">
 		<div class="col-md-12">
-			<legend>Category mapping editor</legend>
-			<h5>
-				Map ${sourceAttribute.label?html} values to ${targetAttribute.label?html} values. Select the correct category that you want to map the source attribute to from the target attribute dropdown
-			</h5>
+			<h4>Category mapping editor</h4>
+			<p>
+				Map ${sourceAttribute.label?html} values to ${targetAttribute.label?html} values. 
+				Select the correct category that you want to map the source attribute to from the target attribute dropdown.
+			</p>
 	
 			<#assign showDefault = numberOfSourceAttributes gt 10>
 	
@@ -45,7 +46,7 @@
 				<#list sourceAttributeEntities.iterator() as sourceEntity>
 					<#assign id = sourceEntity.getString(sourceAttributeIdAttribute)>
 					<tr id="${id}">
-						<td>${sourceEntity.get(sourceAttributeLabelAttribute)}, ${sourceAttributeLabelAttribute?html}, ${sourceEntity?html}</td>
+						<td>${sourceEntity.get(sourceAttributeLabelAttribute)}</td>
 						<td><#if aggregates??>${aggregates[count]!'0'}<#else>NA</#if></td>
 						<td>
 							<select class="form-control" <#if !hasWritePermission>disabled</#if>>
@@ -96,14 +97,8 @@
 				</tbody>
 			</table>
 	
-			<#--Hidden inputs for the javascript post-->
-			<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
-			<input type="hidden" name="target" value="${target?html}"/>
-			<input type="hidden" name="source" value="${source?html}"/>
-			<input type="hidden" name="targetAttribute" value="${targetAttribute.name?html}"/>
-			<input type="hidden" name="sourceAttribute" value="${sourceAttribute.name?html}"/>
-	
-			<button id="save-advanced-mapping-btn" type="submit" class="btn btn-primary pull-right">Save</button>
+			<#--Hidden inputs for the javascript post-->	
+			<input type="hidden" name="sourceAttribute" value="${sourceAttribute.name?html}"/>		
 		</div>
 	</div>
 </div>

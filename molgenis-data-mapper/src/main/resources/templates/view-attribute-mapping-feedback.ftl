@@ -1,21 +1,21 @@
 <div id="algorithm-result-feedback-container">
+	<strong>Success: ${success}, Missing: ${missing}, Error: ${error}</strong></p>
 	<form class="form-inline">		
 		<div class="form-group">
-			<div id="result-text-container">Success: ${success}, Missing: ${missing}, Error: ${error}</div>
-		</div>
-		<div class="form-group pull-right">
 			<div class="checkbox">
 				<label>
   					<input id="errors-only-checkbox" type="checkbox"> Errors only
 				</label>
 			</div>
-			
+		</div>	
+		<div class="form-group pull-right">
 			<div class="input-group">
   				<span class="input-group-btn">
     				<button id="result-search-btn" class="btn btn-default" type="button"><span class="glyphicon glyphicon-search"></button>
   				</span>
   				<input id="result-search-field" type="text" class="form-control" placeholder="Search">
 			</div>
+			<br></br>
 		</div>
 	</form>
 	<br/>
@@ -23,10 +23,10 @@
 		<thead>
 		<#if (sourceAttributeNames)?has_content>
 			<#list sourceAttributeNames as sourceAttributeName>
-				<th>${sourceAttributeName?html}</th>
+				<th>Source: ${sourceAttributeName?html}</th>
 			</#list>
 		</#if>
-			<th>${targetAttribute.name?html}</th>
+			<th>Target: ${targetAttribute.name?html}</th>
 		</thead>
 		<tbody>
 			<#list feedbackRows as feedbackRow>
