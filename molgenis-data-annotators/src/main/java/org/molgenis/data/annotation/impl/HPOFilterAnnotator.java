@@ -1,26 +1,17 @@
 package org.molgenis.data.annotation.impl;
 
 import java.io.IOException;
-import java.rmi.dgc.DGC;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Stack;
-import java.util.regex.Pattern;
-
-import net.sf.samtools.util.RuntimeEOFException;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.annotation.AbstractRepositoryAnnotator;
 import org.molgenis.data.annotation.LocusAnnotator;
-import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.impl.datastructures.Locus;
 import org.molgenis.data.annotation.provider.HPOFilterDataProvider;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
-import org.molgenis.data.annotation.provider.HpoDataProvider;
 import org.molgenis.data.annotation.provider.UrlPinger;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.annotation.utils.HgncLocationsUtils;
@@ -30,8 +21,6 @@ import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import ch.qos.logback.core.boolex.Matcher;
 
 /**
  * exclusive and common genes per phenotype / hpo term
@@ -54,7 +43,7 @@ class HPOFilterAnnotator extends LocusAnnotator
 	Long TIME_OUT = 10000L;
 	
 	// TODO These parameters need to be set by the user!
-	String hpo = "1234567";
+	String hpo = "HP:0001392";
 	boolean recursive = true;
 	
 	@Autowired
@@ -67,48 +56,6 @@ class HPOFilterAnnotator extends LocusAnnotator
 		pinger = new UrlPinger();
 	}
 
-	@Override
-	public EntityMetaData getOutputMetaData()
-	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(PASS_LABEL, MolgenisFieldTypes.FieldTypeEnum.BOOL)
-		.setLabel(PASS_LABEL).setDescription("True if variant passed filter, false if not."));
-		return metadata;
-	}
-
-	@Override
-	public EntityMetaData getInputMetaData()
-	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CHROM_LABEL, MolgenisFieldTypes.FieldTypeEnum.STRING)
-		.setLabel(CHROM_LABEL).setDescription("Chromosome on which the variant is located"));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(POS_LABEL, MolgenisFieldTypes.FieldTypeEnum.LONG)
-		.setLabel(POS_LABEL).setDescription("Nucleotide on the chromosome on which the variant is located"));
-		return metadata;
-	}
-
-	@Override
-	public String getDescription()
-	{
-		return DESC;
-	}
-
-	@Override
-	public String getSimpleName() 
-	{
-		return NAME;
-	}
-
-	// TODO Implemet hpo heirarchy file into molgenissettings
-	protected boolean annotationDataExists() {
-		if (pinger.ping(HPOFilterDataProvider.HPO_LOCATION, 500) &&
-				pinger.ping(HPOFilterDataProvider.ASSOC_LOCATION, 500) &&
-				pinger.ping(molgenisSettings.getProperty(HgncLocationsProvider.KEY_HGNC_LOCATIONS_VALUE, ""), 500))
-			return true;
-		return false;
-	}
-	
-	
 	@Override
 	public List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException 
 	{
@@ -124,7 +71,7 @@ class HPOFilterAnnotator extends LocusAnnotator
 		
 		// Throw an error if the HPO term specified by the user does not exist
 		if (!hpoFilterData.getHPOData().containsKey(hpo))
-			throw new IllegalArgumentException("The term \""+hpo+"\" does not exist!");
+			throw new IllegalArgumentException("Term \""+hpo+"\" does not exist!");
 		
 		genes = HgncLocationsUtils.locationToHgcn(hgncLocationsProvider.getHgncLocations(), l);
 		resultMap.put(PASS_LABEL, false);
@@ -136,6 +83,72 @@ class HPOFilterAnnotator extends LocusAnnotator
 		results.add(AnnotatorUtils.getAnnotatedEntity(this, entity, resultMap));
 		
 		return results;
+	}
+
+	// TODO Implemet hpo heirarchy file into molgenissettings
+	protected boolean annotationDataExists() {
+		if (pinger.ping(molgenisSettings.getProperty(HPOFilterDataProvider.KEY_HPO_MAPPING, ""), 500) &&
+				pinger.ping(molgenisSettings.getProperty(HPOFilterDataProvider.KEY_HPO_HEIRARCHY, ""), 500) &&
+				pinger.ping(molgenisSettings.getProperty(HgncLocationsProvider.KEY_HGNC_LOCATIONS_VALUE, ""), 500))
+			return true;
+		return false;
+	}
+
+	/**
+	 * converts any number of 1-7 digits as a valid HPO term. Returns null if
+	 * 1 > length > 8.<br>
+	 * <br>
+	 * Example: 123 -> HP:0000123
+	 * @param num
+	 * @return a valid hpo number
+	 */
+	public String convertNumberToHPO(String num) {
+		for (String number : num.split("([^\\d]+)")) {
+			StringBuilder sb = new StringBuilder("HP:");
+			if (number.length() < 8) {
+				for (int i = number.length(); i < 7; i++) {
+					sb.append('0');
+				}
+				sb.append(number);
+				return sb.toString();
+			}else{
+				return null;
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public String getDescription()
+	{
+		return DESC;
+	}
+
+	@Override
+	public EntityMetaData getInputMetaData()
+	{
+		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CHROM_LABEL, MolgenisFieldTypes.FieldTypeEnum.STRING)
+		.setLabel(CHROM_LABEL).setDescription("Chromosome on which the variant is located"));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(POS_LABEL, MolgenisFieldTypes.FieldTypeEnum.LONG)
+		.setLabel(POS_LABEL).setDescription("Nucleotide on the chromosome on which the variant is located"));
+		return metadata;
+	}
+	
+	
+	@Override
+	public EntityMetaData getOutputMetaData()
+	{
+		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(PASS_LABEL, MolgenisFieldTypes.FieldTypeEnum.BOOL)
+		.setLabel(PASS_LABEL).setDescription("True if variant passed filter, false if not."));
+		return metadata;
+	}
+	
+	@Override
+	public String getSimpleName() 
+	{
+		return NAME;
 	}
 	
 	/**
@@ -169,29 +182,5 @@ class HPOFilterAnnotator extends LocusAnnotator
 		if (input.matches("([0-9]{1,7})"))
 			return 2;
 		return 0;
-	}
-	
-	/**
-	 * converts any number of 1-7 digits as a valid HPO term. Returns null if
-	 * 1 > length > 8.<br>
-	 * <br>
-	 * Example: 123 -> HP:0000123
-	 * @param num
-	 * @return a valid hpo number
-	 */
-	public String convertNumberToHPO(String num) {
-		for (String number : num.split("([^\\d]+)")) {
-			StringBuilder sb = new StringBuilder("HP:");
-			if (number.length() < 8) {
-				for (int i = number.length(); i < 7; i++) {
-					sb.append('0');
-				}
-				sb.append(number);
-				return sb.toString();
-			}else{
-				return null;
-			}
-		}
-		return null;
 	}
 }
