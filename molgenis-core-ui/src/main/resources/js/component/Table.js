@@ -63,12 +63,10 @@
 			};
 		},
 		componentDidMount: function() {
-			this._refreshData(this.props);
+			this._refreshData(this.props, this.props.attrs);
 		},
 		componentWillReceiveProps : function(nextProps) {
-			this.setState({attrs: nextProps.attrs}, function() {
-				this._refreshData(nextProps);	
-			});
+			this._refreshData(nextProps, nextProps.attrs);
 		},
 		render: function() {
 			if(this.state.data === null) {
@@ -130,15 +128,15 @@
 				)
 			);
 		},
-		_refreshData: function(props) {
+		_refreshData: function(props, attrs) {
 			var opts = {
 				attrs: {'~id' : null}, // always include the id attribute
 				num : props.maxRows
 			};
 			
 			// add selected attrs
-			if(this.state.attrs && _.size(this.state.attrs) > 0) {
-				_.extend(opts.attrs, this.state.attrs);
+			if(attrs && _.size(attrs) > 0) {
+				_.extend(opts.attrs, attrs);
 			}
 			
 			if(props.query) {
@@ -156,7 +154,10 @@
 				opts.start = this.state.start; 
 			}
 			api.get(props.entity, opts).done(function(data) {
-				this.setState({data: data});
+				this.setState({
+					attrs : attrs,
+					data : data
+				});
 			}.bind(this));
 		},
 		_handleExpand: function(e) {
@@ -170,9 +171,7 @@
 				attrsAtDepth = attrsAtDepth[attr];
 			}
 			
-			this.setState({attrs: attrs}, function() {
-				this._refreshData(this.props);
-			});
+			this._refreshData(this.props, attrs);
 		},
 		_handleCollapse: function(e) {
 			var attrs = _.extend({}, this.state.attrs);
@@ -186,9 +185,7 @@
 				}
 			}
 			
-			this.setState({attrs: attrs}, function() {
-				this._refreshData(this.props);
-			});
+			this._refreshData(this.props, attrs);
 		},
 		_handleCreate: function() {
 			this._resetTable();
@@ -204,18 +201,18 @@
 		},
 		_resetTable: function() {
 			this.setState({start : 0}, function() {
-				this._refreshData(this.props);
+				this._refreshData(this.props, this.state.attrs);
 			});
 		},
 		_handleSort: function(e) {
 			this.setState({sort : e}, function() {
-				this._refreshData(this.props);
+				this._refreshData(this.props, this.state.attrs);
 			});
 			this.props.onSort(e);
 		},
 		_handlePageChange: function(e) {
 			this.setState({start : e.start}, function() {
-				this._refreshData(this.props);
+				this._refreshData(this.props, this.state.attrs);
 			});
 		}
 	});
@@ -456,14 +453,14 @@
 							if(molgenis.isCompoundAttr(attr)) {
 								this._createColsRec(item, entity, attr.attributes, {'*': null}, Cols, attrPath, expanded);
 							} else {
+								var value = item !== undefined && item !== null ? (_.isArray(item) ? _.map(item, function(value) { return value[attr.name];}) : item[attr.name]) : null;
 								if(this._isExpandedAttr(attr, selectedAttrs)) {
 									Cols.push(td({className: 'expanded-left', key : attrPath.join()}));
-									this._createColsRec(item[attr.name], attr.refEntity, attr.refEntity.attributes, selectedAttrs[attr.name], Cols, attrPath, true);
+									this._createColsRec(value, attr.refEntity, attr.refEntity.attributes, selectedAttrs[attr.name], Cols, attrPath, true);
 								} else {
 									if(molgenis.isRefAttr(attr)) {
 										Cols.push(td({key: 'e' + attrPath.join()}));
 									}
-									var value = item !== undefined ? (_.isArray(item) ? _.map(item, function(value) { return value[attr.name];}) : item[attr.name]) : null;
 									var TableCell = TableCellFactory({
 										className: j === attrs.length - 1 && expanded ? 'expanded-right' : undefined, 
 										entity: entity,
