@@ -62,8 +62,6 @@ public class Step11ConvertNames extends MolgenisUpgrade
 	@Override
 	public void upgrade()
 	{
-		if (true) throw new RuntimeException();
-
 		LOG.info("Validating JPA entities...");
 		checkJPAentities();
 
@@ -467,11 +465,20 @@ public class Step11ConvertNames extends MolgenisUpgrade
 				LOG.info(String.format("Entity name [%s] is not valid. Changing to [%s]...", simpleName, newSimpleName));
 			}
 
-			// use the newly generated package name if it was changed
 			String newPackage = pack;
-			if (packageNameChanges.containsKey(pack))
+			if (fullName.equals(simpleName))
 			{
-				newPackage = packageNameChanges.get(pack);
+				// special case: if simple name is the same as fullname, we are in the default package, which should be
+				// renamed to 'base'
+				newPackage = "base";
+			}
+			else
+			{
+				// use the newly generated package name if it was changed
+				if (packageNameChanges.containsKey(pack))
+				{
+					newPackage = packageNameChanges.get(pack);
+				}
 			}
 
 			// generate a new fullName based on the (new) package and (new) simpleName
@@ -544,7 +551,9 @@ public class Step11ConvertNames extends MolgenisUpgrade
 				{
 					// special case: the 'default' package is renamed to 'base'. The 'base' package is added before the
 					// migration starts, so just remove the old 'default' package
-					nameFix = NEW_DEFAULT_PACKAGE;
+					LOG.info("Removing old default package (is now called 'base')");
+					template.execute("DELETE FROM packages WHERE fullName = 'default'");
+					continue;
 				}
 
 				// name wasn't valid, make sure the new one is unique for this scope
