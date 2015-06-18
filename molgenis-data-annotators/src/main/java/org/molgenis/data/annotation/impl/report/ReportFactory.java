@@ -11,9 +11,9 @@ import java.util.TreeMap;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.annotation.impl.CaddServiceAnnotator;
 import org.molgenis.data.annotation.impl.MonogenicDiseaseCandidatesServiceAnnotator;
 import org.molgenis.data.annotation.impl.PhenomizerServiceAnnotator;
+import org.molgenis.data.annotation.mini.impl.CaddAnnotator;
 import org.molgenis.data.vcf.VcfRepository;
 
 public class ReportFactory
@@ -146,8 +146,8 @@ public class ReportFactory
 
 			for (Entity variant : allCandidates.get(gene))
 			{
-				Double caddScore = variant.getDouble(CaddServiceAnnotator.CADD_SCALED) != null ? variant
-						.getDouble(CaddServiceAnnotator.CADD_SCALED) : null;
+				Double caddScore = variant.getDouble(CaddAnnotator.CADD_SCALED) != null ? variant
+						.getDouble(CaddAnnotator.CADD_SCALED) : null;
 				if (caddScore != null)
 				{
 					if (caddScore > 30)

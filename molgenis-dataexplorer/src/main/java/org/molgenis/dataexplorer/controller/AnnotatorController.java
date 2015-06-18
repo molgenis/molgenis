@@ -162,14 +162,14 @@ public class AnnotatorController
 			{
 
 				List<AttributeMetaData> outputAttrs = annotator.getOutputMetaData();
-				getAtomicAttributesFromList(outputAttrs);
+				outputAttrs = getAtomicAttributesFromList(outputAttrs);
 
 				Map<String, Object> map = new HashMap<String, Object>();
 				map.put("description", annotator.getDescription());
 				map.put("canAnnotate", annotator.canAnnotate(entityMetaData));
 				map.put("inputAttributes", annotator.getInputMetaData());
 				map.put("inputAttributeTypes", toMap(annotator.getInputMetaData()));
-				map.put("outputAttributes", annotator.getOutputMetaData());
+				map.put("outputAttributes", outputAttrs);
 				map.put("outputAttributeTypes", toMap(annotator.getOutputMetaData()));
 				mapOfAnnotators.put(annotator.getSimpleName(), map);
 			}

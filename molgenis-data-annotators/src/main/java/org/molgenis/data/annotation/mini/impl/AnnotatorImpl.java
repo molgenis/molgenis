@@ -99,7 +99,8 @@ public class AnnotatorImpl implements EntityAnnotator
 	@Override
 	public AttributeMetaData getAnnotationAttributeMetaData()
 	{
-		DefaultAttributeMetaData result = new DefaultAttributeMetaData(ANNOTATORPREFIX+info.getCode(), FieldTypeEnum.COMPOUND).setLabel(info.getCode());
+		DefaultAttributeMetaData result = new DefaultAttributeMetaData(ANNOTATORPREFIX + info.getCode(),
+				FieldTypeEnum.COMPOUND).setLabel(info.getCode());
 		getInfo().getOutputAttributes().forEach(result::addAttributePart);
 
 		return result;
@@ -108,7 +109,8 @@ public class AnnotatorImpl implements EntityAnnotator
 	@Override
 	public boolean sourceExists()
 	{
-		return getResource() != null || dataService.hasRepository(sourceRepositoryName);
+		return (getResource() != null && getResource().isAvailable())
+				|| dataService.hasRepository(sourceRepositoryName);
 	}
 
 	@Override
