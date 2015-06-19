@@ -63,19 +63,15 @@
 			};
 		},
 		componentDidMount: function() {
-			this._refreshData(this.props);
+			this._refreshData(this.props, this.state);
 		},
-		componentWillReceiveProps : function(nextProps) {
-			var newState = {
-				attrs: nextProps.attrs
-			};
+		componentWillReceiveProps : function(nextProps) {			
 			// reset pager on query change
+			var nextState = _.extend({}, this.state, {attrs: nextProps.attrs});
 			if(JSON.stringify(this.props.query) !== JSON.stringify(nextProps.query)) {
-				_.extend(newState, {start: 0});
+				_.extend(nextState, {start: 0});
 			}
-			this.setState(newState, function() {
-				this._refreshData(nextProps);	
-			});
+			this._refreshData(nextProps, nextState);
 		},
 		render: function() {
 			if(this.state.data === null) {
@@ -137,33 +133,34 @@
 				)
 			);
 		},
-		_refreshData: function(props) {
+		_refreshData: function(props, state) {
 			var opts = {
 				attrs: {'~id' : null}, // always include the id attribute
 				num : props.maxRows
 			};
 			
 			// add selected attrs
-			if(this.state.attrs && _.size(this.state.attrs) > 0) {
-				_.extend(opts.attrs, this.state.attrs);
+			if(state.attrs && _.size(state.attrs) > 0) {
+				_.extend(opts.attrs, state.attrs);
 			}
 			
 			if(props.query) {
 				opts.q = props.query.q; 
 			}
-			if(this.state.sort) {
+			if(state.sort) {
 				opts.sort = {
 					'orders' : [ {
-						'attr' : this.state.sort.attr.name,
-						'direction' : this.state.sort.order
+						'attr' : state.sort.attr.name,
+						'direction' : state.sort.order
 					} ]
 				};
 			}
-			if(this.state.start !== 0) {
-				opts.start = this.state.start; 
+			if(state.start !== 0) {
+				opts.start = state.start; 
 			}
 			api.get(props.entity, opts).done(function(data) {
-				this.setState({data: data});
+				var newState = _.extend({}, state, {data: data});
+				this.setState(newState);
 			}.bind(this));
 		},
 		_handleExpand: function(e) {
@@ -177,9 +174,7 @@
 				attrsAtDepth = attrsAtDepth[attr];
 			}
 			
-			this.setState({attrs: attrs}, function() {
-				this._refreshData(this.props);
-			});
+			this._refreshData(this.props, _.extend({}, this.state, {attrs: attrs}));
 		},
 		_handleCollapse: function(e) {
 			var attrs = _.extend({}, this.state.attrs);
@@ -193,9 +188,7 @@
 				}
 			}
 			
-			this.setState({attrs: attrs}, function() {
-				this._refreshData(this.props);
-			});
+			this._refreshData(this.props, _.extend({}, this.state, {attrs: attrs}));
 		},
 		_handleCreate: function() {
 			this._resetTable();
@@ -210,20 +203,14 @@
 			this.props.onRowDelete();
 		},
 		_resetTable: function() {
-			this.setState({start : 0}, function() {
-				this._refreshData(this.props);
-			});
+			this._refreshData(this.props, _.extend({}, this.state, {start: 0}));
 		},
 		_handleSort: function(e) {
-			this.setState({sort : e}, function() {
-				this._refreshData(this.props);
-			});
+			this._refreshData(this.props, _.extend({}, this.state, {sort: e}));
 			this.props.onSort(e);
 		},
 		_handlePageChange: function(e) {
-			this.setState({start : e.start}, function() {
-				this._refreshData(this.props);
-			});
+			this._refreshData(this.props, _.extend({}, this.state, {start: e.start}));
 		}
 	});
 	
@@ -463,14 +450,16 @@
 							if(molgenis.isCompoundAttr(attr)) {
 								this._createColsRec(item, entity, attr.attributes, {'*': null}, Cols, attrPath, expanded);
 							} else {
+								
 								if(this._isExpandedAttr(attr, selectedAttrs)) {
 									Cols.push(td({className: 'expanded-left', key : attrPath.join()}));
-									this._createColsRec(item[attr.name], attr.refEntity, attr.refEntity.attributes, selectedAttrs[attr.name], Cols, attrPath, true);
+									var value = item !== undefined && item !== null ? item[attr.name] : null;
+									this._createColsRec(value, attr.refEntity, attr.refEntity.attributes, selectedAttrs[attr.name], Cols, attrPath, true);
 								} else {
 									if(molgenis.isRefAttr(attr)) {
 										Cols.push(td({key: 'e' + attrPath.join()}));
 									}
-									var value = item !== undefined ? (_.isArray(item) ? _.map(item, function(value) { return value[attr.name];}) : item[attr.name]) : null;
+									var value = (item !== undefined && item !== null) ? (_.isArray(item) ? _.map(item, function(value) { return value[attr.name];}) : item[attr.name]) : null;
 									var TableCell = TableCellFactory({
 										className: j === attrs.length - 1 && expanded ? 'expanded-right' : undefined, 
 										entity: entity,
