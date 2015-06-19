@@ -4,6 +4,7 @@
 		<plugin id="home" name="Home" url="home"/>
         <plugin id="importwizard" name="Upload" url="importwizard"/>
         <plugin id="catalogue" name="Catalogue" url="catalogue"/>
+        <plugin id="hpofilter" name="HPO Filter" url="hpofilter"/>
 		<plugin id="dataexplorer" name="Data Explorer" url="dataexplorer"/>
 		<plugin id="mappingservice" name="Mapping Service" url="mappingservice"/>
         <menu label="Plugins" name="plugins">
