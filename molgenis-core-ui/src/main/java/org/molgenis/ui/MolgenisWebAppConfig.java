@@ -34,7 +34,6 @@ import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.data.transaction.TransactionLogIndexedRepositoryDecorator;
 import org.molgenis.data.transaction.TransactionLogRepositoryDecorator;
 import org.molgenis.data.transaction.TransactionLogService;
@@ -125,6 +124,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 	@Autowired
 	public TransactionLogService transactionLogService;
+
+	@Autowired
+	public IdGenerator idGenerator;
 
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry)
@@ -456,12 +458,6 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	@Bean
-	public IdGenerator molgenisIdGenerator()
-	{
-		return new UuidGenerator();
-	}
-
-	@Bean
 	public RepositoryDecoratorFactory repositoryDecoratorFactory()
 	{
 		return new RepositoryDecoratorFactory()
@@ -486,13 +482,12 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 									new IndexedRepositoryExceptionTranslatorDecorator(
 											new TransactionLogIndexedRepositoryDecorator(indexedRepos,
 													transactionLogService)), new EntityAttributesValidator()),
-							molgenisIdGenerator()), molgenisSettings);
+							idGenerator), molgenisSettings);
 				}
 
 				return new RepositorySecurityDecorator(new AutoValueRepositoryDecorator(
 						new RepositoryValidationDecorator(dataService(), new TransactionLogRepositoryDecorator(
-								repository, transactionLogService), new EntityAttributesValidator()),
-						molgenisIdGenerator()));
+								repository, transactionLogService), new EntityAttributesValidator()), idGenerator));
 			}
 		};
 	}
