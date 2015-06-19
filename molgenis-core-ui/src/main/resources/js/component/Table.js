@@ -66,7 +66,14 @@
 			this._refreshData(this.props);
 		},
 		componentWillReceiveProps : function(nextProps) {
-			this.setState({attrs: nextProps.attrs}, function() {
+			var newState = {
+				attrs: nextProps.attrs
+			};
+			// reset pager on query change
+			if(JSON.stringify(this.props.query) !== JSON.stringify(nextProps.query)) {
+				_.extend(newState, {start: 0});
+			}
+			this.setState(newState, function() {
 				this._refreshData(nextProps);	
 			});
 		},
