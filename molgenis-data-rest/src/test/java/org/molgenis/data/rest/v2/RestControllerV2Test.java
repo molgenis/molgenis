@@ -10,7 +10,6 @@ import static org.molgenis.MolgenisFieldTypes.DATE;
 import static org.molgenis.MolgenisFieldTypes.DATETIME;
 import static org.molgenis.MolgenisFieldTypes.DECIMAL;
 import static org.molgenis.MolgenisFieldTypes.EMAIL;
-import static org.molgenis.MolgenisFieldTypes.ENUM;
 import static org.molgenis.MolgenisFieldTypes.HTML;
 import static org.molgenis.MolgenisFieldTypes.HYPERLINK;
 import static org.molgenis.MolgenisFieldTypes.INT;
@@ -35,6 +34,7 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -159,7 +159,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		entityMetaData.addAttribute(attrDateTime).setDataType(DATETIME);
 		entityMetaData.addAttribute(attrDecimal).setDataType(DECIMAL);
 		entityMetaData.addAttribute(attrEmail).setDataType(EMAIL);
-		entityMetaData.addAttribute(attrEnum).setDataType(ENUM).setEnumOptions(Arrays.asList(enum0, enum1, enum2));
+		entityMetaData.addAttribute(attrEnum).setDataType(new EnumField())
+				.setEnumOptions(Arrays.asList(enum0, enum1, enum2));
 		entityMetaData.addAttribute(attrHtml).setDataType(HTML);
 		entityMetaData.addAttribute(attrHyperlink).setDataType(HYPERLINK);
 		entityMetaData.addAttribute(attrInt).setDataType(INT);
@@ -181,7 +182,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		entityMetaData.addAttribute(attrDateTimeOptional).setDataType(DATETIME).setNillable(true);
 		entityMetaData.addAttribute(attrDecimalOptional).setDataType(DECIMAL).setNillable(true);
 		entityMetaData.addAttribute(attrEmailOptional).setDataType(EMAIL).setNillable(true);
-		entityMetaData.addAttribute(attrEnumOptional).setDataType(ENUM)
+		entityMetaData.addAttribute(attrEnumOptional).setDataType(new EnumField())
 				.setEnumOptions(Arrays.asList(enum0, enum1, enum2)).setNillable(true);
 		entityMetaData.addAttribute(attrHtmlOptional).setDataType(HTML).setNillable(true);
 		entityMetaData.addAttribute(attrHyperlinkOptional).setDataType(HYPERLINK).setNillable(true);
