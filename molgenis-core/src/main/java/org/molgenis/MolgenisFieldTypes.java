@@ -67,6 +67,9 @@ public class MolgenisFieldTypes
 	public static final FieldType TEXT = new TextField();
 	public static final FieldType XREF = new XrefField();
 
+	// FIXME Do not add public static final ENUM here, as it holds the enum options so it is different per attribute,
+	// this should be fixed. The options should not be added to the field
+
 	/** Initialize default field types */
 	private static void init()
 	{

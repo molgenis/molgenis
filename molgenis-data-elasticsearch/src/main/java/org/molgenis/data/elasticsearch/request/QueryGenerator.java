@@ -40,16 +40,6 @@ public class QueryGenerator implements QueryPartGenerator
 		if (queryRules == null || queryRules.isEmpty()) return;
 
 		QueryBuilder q = createQueryBuilder(queryRules, entityMetaData);
-
-		// FilterBuilder transactionCommitedFilter = FilterBuilders.hasParentFilter(
-		// ESTransactionMetaData.ENTITY_NAME,
-		// FilterBuilders.notFilter(FilterBuilders.termFilter(ESTransactionMetaData.STATUS + "."
-		// + MappingsBuilder.FIELD_NOT_ANALYZED, ESTransactionMetaData.STATUS_ROLLBACK)));
-		// FilterBuilder notPartOfTransactionFilter = FilterBuilders.notFilter(FilterBuilders.hasParentFilter(
-		// ESTransactionMetaData.ENTITY_NAME, FilterBuilders.matchAllFilter()));
-		// QueryBuilder qb = QueryBuilders.filteredQuery(q,
-		// FilterBuilders.orFilter(transactionCommitedFilter, notPartOfTransactionFilter));
-
 		searchRequestBuilder.setQuery(q);
 	}
 

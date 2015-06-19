@@ -29,7 +29,7 @@ public class TransactionLogService implements MolgenisTransactionListener, Appli
 	public static final List<String> EXCLUDED_ENTITIES = Arrays.asList(MolgenisTransactionLogEntryMetaData.ENTITY_NAME,
 			MolgenisTransactionLogMetaData.ENTITY_NAME, LockMetaData.ENTITY_NAME);
 
-	private DataService dataService;
+	private final DataService dataService;
 
 	public TransactionLogService(DataService dataService)
 	{

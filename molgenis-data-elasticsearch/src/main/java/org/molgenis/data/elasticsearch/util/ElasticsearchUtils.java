@@ -9,7 +9,7 @@ import org.molgenis.data.MolgenisDataException;
 
 public class ElasticsearchUtils
 {
-	private Client client;
+	private final Client client;
 
 	public ElasticsearchUtils(Client client)
 	{

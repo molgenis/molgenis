@@ -37,7 +37,7 @@ public interface MetaDataService extends Iterable<RepositoryCollection>, Applica
 	 * @param emd
 	 * @return
 	 */
-	RepositoryCollection getRepositoryCollection(EntityMetaData emd);
+	RepositoryCollection getBackend(EntityMetaData emd);
 
 	/**
 	 * Get the default backend

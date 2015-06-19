@@ -108,7 +108,7 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 	private final ResponseParser responseParser = new ResponseParser();
 	private final SearchRequestGenerator generator = new SearchRequestGenerator();
 	private final EntityToSourceConverter entityToSourceConverter;
-	private ElasticsearchUtils elasticsearchUtils;
+	private final ElasticsearchUtils elasticsearchUtils;
 
 	public ElasticSearchService(Client client, String indexName, DataService dataService,
 			EntityToSourceConverter entityToSourceConverter)

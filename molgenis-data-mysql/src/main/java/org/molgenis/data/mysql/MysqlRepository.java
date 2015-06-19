@@ -203,7 +203,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				}
 				else if (attr.getDataType() instanceof XrefField)
 				{
-					String backend = dataService.getMeta().getRepositoryCollection(attr.getRefEntity()).getName();
+					String backend = dataService.getMeta().getBackend(attr.getRefEntity()).getName();
 					if (backend.equalsIgnoreCase(MysqlRepositoryCollection.NAME))
 					{
 						asyncJdbcTemplate.execute(getCreateFKeySql(attr));
@@ -359,7 +359,8 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				.append('`').append(") REFERENCES ").append('`').append(getTableName()).append('`').append('(')
 				.append('`').append(idAttribute.getName()).append("`) ON DELETE CASCADE");
 
-		String refEntityBackend = dataService.getMeta().getRepositoryCollection(att.getRefEntity()).getName();
+		// If the refEntity is not of type MySQL do not add a foreign key to it
+		String refEntityBackend = dataService.getMeta().getBackend(att.getRefEntity()).getName();
 		if (refEntityBackend.equalsIgnoreCase(MysqlRepositoryCollection.NAME))
 		{
 			sql.append(", FOREIGN KEY (").append('`').append(att.getName()).append('`').append(") REFERENCES ")

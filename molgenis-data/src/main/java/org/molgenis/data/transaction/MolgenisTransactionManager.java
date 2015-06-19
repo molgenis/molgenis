@@ -3,7 +3,7 @@ package org.molgenis.data.transaction;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.molgenis.data.support.UuidGenerator;
+import org.molgenis.data.IdGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -28,13 +28,14 @@ public class MolgenisTransactionManager extends JpaTransactionManager
 	private static final long serialVersionUID = 1L;
 	public static String TRANSACTION_ID_RESOURCE_NAME = "transactionId";
 	private static final Logger LOG = LoggerFactory.getLogger(MolgenisTransactionManager.class);
-	private UuidGenerator idGenerator = new UuidGenerator();
+	private IdGenerator idGenerator;
 	private List<MolgenisTransactionListener> transactionListeners = new ArrayList<>();
 
-	public MolgenisTransactionManager()
+	public MolgenisTransactionManager(IdGenerator idGenerator)
 	{
 		super();
 		setNestedTransactionAllowed(false);
+		this.idGenerator = idGenerator;
 	}
 
 	public void addTransactionListener(MolgenisTransactionListener transactionListener)

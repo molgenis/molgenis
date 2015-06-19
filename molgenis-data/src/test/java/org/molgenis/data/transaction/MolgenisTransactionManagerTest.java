@@ -6,6 +6,7 @@ import static org.testng.Assert.assertTrue;
 
 import javax.persistence.EntityManagerFactory;
 
+import org.molgenis.data.support.UuidGenerator;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -17,7 +18,7 @@ public class MolgenisTransactionManagerTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		molgenisTransactionManager = new MolgenisTransactionManager();
+		molgenisTransactionManager = new MolgenisTransactionManager(new UuidGenerator());
 
 		mockEntityManagerFactory = mock(EntityManagerFactory.class);
 		molgenisTransactionManager.setEntityManagerFactory(mockEntityManagerFactory);

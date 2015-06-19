@@ -143,14 +143,15 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	private ManageableRepositoryCollection getManageableRepositoryCollection(EntityMetaData emd)
 	{
-		RepositoryCollection backend = getRepositoryCollection(emd);
+		RepositoryCollection backend = getBackend(emd);
 		if (!(backend instanceof ManageableRepositoryCollection)) throw new RuntimeException(
 				"Backend  is not a ManageableCrudRepositoryCollection");
 
 		return (ManageableRepositoryCollection) backend;
 	}
 
-	public RepositoryCollection getRepositoryCollection(EntityMetaData emd)
+	@Override
+	public RepositoryCollection getBackend(EntityMetaData emd)
 	{
 		String backendName = emd.getBackend() == null ? getDefaultBackend().getName() : emd.getBackend();
 		RepositoryCollection backend = backends.get(backendName);
@@ -163,7 +164,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public Repository add(EntityMetaData emd, RepositoryDecoratorFactory decoratorFactory)
 	{
-		RepositoryCollection backend = getRepositoryCollection(emd);
+		RepositoryCollection backend = getBackend(emd);
 
 		if (getEntityMetaData(emd.getName()) != null)
 		{
