@@ -63,10 +63,15 @@
 			};
 		},
 		componentDidMount: function() {
-			this._refreshData(this.props, this.props.attrs);
+			this._refreshData(this.props, this.state);
 		},
-		componentWillReceiveProps : function(nextProps) {
-			this._refreshData(nextProps, nextProps.attrs);
+		componentWillReceiveProps : function(nextProps) {			
+			// reset pager on query change
+			var nextState = _.extend({}, this.state, {attrs: nextProps.attrs});
+			if(JSON.stringify(this.props.query) !== JSON.stringify(nextProps.query)) {
+				_.extend(nextState, {start: 0});
+			}
+			this._refreshData(nextProps, nextState);
 		},
 		render: function() {
 			if(this.state.data === null) {
@@ -128,36 +133,34 @@
 				)
 			);
 		},
-		_refreshData: function(props, attrs) {
+		_refreshData: function(props, state) {
 			var opts = {
 				attrs: {'~id' : null}, // always include the id attribute
 				num : props.maxRows
 			};
 			
 			// add selected attrs
-			if(attrs && _.size(attrs) > 0) {
-				_.extend(opts.attrs, attrs);
+			if(state.attrs && _.size(state.attrs) > 0) {
+				_.extend(opts.attrs, state.attrs);
 			}
 			
 			if(props.query) {
 				opts.q = props.query.q; 
 			}
-			if(this.state.sort) {
+			if(state.sort) {
 				opts.sort = {
 					'orders' : [ {
-						'attr' : this.state.sort.attr.name,
-						'direction' : this.state.sort.order
+						'attr' : state.sort.attr.name,
+						'direction' : state.sort.order
 					} ]
 				};
 			}
-			if(this.state.start !== 0) {
-				opts.start = this.state.start; 
+			if(state.start !== 0) {
+				opts.start = state.start; 
 			}
 			api.get(props.entity, opts).done(function(data) {
-				this.setState({
-					attrs : attrs,
-					data : data
-				});
+				var newState = _.extend({}, state, {data: data});
+				this.setState(newState);
 			}.bind(this));
 		},
 		_handleExpand: function(e) {
@@ -171,7 +174,7 @@
 				attrsAtDepth = attrsAtDepth[attr];
 			}
 			
-			this._refreshData(this.props, attrs);
+			this._refreshData(this.props, _.extend({}, this.state, {attrs: attrs}));
 		},
 		_handleCollapse: function(e) {
 			var attrs = _.extend({}, this.state.attrs);
@@ -185,7 +188,7 @@
 				}
 			}
 			
-			this._refreshData(this.props, attrs);
+			this._refreshData(this.props, _.extend({}, this.state, {attrs: attrs}));
 		},
 		_handleCreate: function() {
 			this._resetTable();
@@ -200,20 +203,14 @@
 			this.props.onRowDelete();
 		},
 		_resetTable: function() {
-			this.setState({start : 0}, function() {
-				this._refreshData(this.props, this.state.attrs);
-			});
+			this._refreshData(this.props, _.extend({}, this.state, {start: 0}));
 		},
 		_handleSort: function(e) {
-			this.setState({sort : e}, function() {
-				this._refreshData(this.props, this.state.attrs);
-			});
+			this._refreshData(this.props, _.extend({}, this.state, {sort: e}));
 			this.props.onSort(e);
 		},
 		_handlePageChange: function(e) {
-			this.setState({start : e.start}, function() {
-				this._refreshData(this.props, this.state.attrs);
-			});
+			this._refreshData(this.props, _.extend({}, this.state, {start: e.start}));
 		}
 	});
 	
