@@ -19,6 +19,7 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.UNIQUE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.VALIDATION_EXPRESSION;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.VISIBLE;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.BACKEND;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.EXTENDS;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.PACKAGE;
 
@@ -88,7 +89,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	static final List<String> SUPPORTED_ENTITY_ATTRIBUTES = Arrays.asList(
 			org.molgenis.data.meta.EntityMetaDataMetaData.LABEL.toLowerCase(),
 			org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION.toLowerCase(), "name", ABSTRACT.toLowerCase(),
-			EXTENDS.toLowerCase(), "package", EntityMetaDataMetaData.TAGS);
+			EXTENDS.toLowerCase(), "package", EntityMetaDataMetaData.TAGS, BACKEND);
 	static final List<String> SUPPORTED_ATTRIBUTE_ATTRIBUTES = Arrays.asList(AGGREGATEABLE.toLowerCase(),
 			DATA_TYPE.toLowerCase(), DESCRIPTION.toLowerCase(), ENTITY.toLowerCase(), ENUM_OPTIONS.toLowerCase(),
 			ID_ATTRIBUTE.toLowerCase(), LABEL.toLowerCase(), LABEL_ATTRIBUTE.toLowerCase(),
@@ -502,6 +503,16 @@ public class EmxMetaDataParser implements MetaDataParser
 				if (md == null)
 				{
 					md = intermediateResults.addEntityMetaData(entityName);
+				}
+
+				String backend = entity.getString(BACKEND);
+				if (backend != null)
+				{
+					if (dataService.getMeta().getBackend(backend) == null)
+					{
+						throw new MolgenisDataException("Unknown backend '" + backend + "'");
+					}
+					md.setBackend(backend);
 				}
 
 				if (packageName != null)
