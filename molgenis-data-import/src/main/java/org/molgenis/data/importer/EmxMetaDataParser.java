@@ -43,6 +43,7 @@ import org.molgenis.data.Package;
 import org.molgenis.data.Range;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.importer.MyEntitiesValidationReport.AttributeState;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
@@ -706,12 +707,17 @@ public class EmxMetaDataParser implements MetaDataParser
 				}
 				else
 				{
-					EntityMetaData refEntityMeta = dataService.getEntityMetaData(refEntityName);
-					if (refEntityMeta == null)
+					EntityMetaData refEntityMeta;
+					try
+					{
+						refEntityMeta = dataService.getEntityMetaData(refEntityName);
+					}
+					catch (UnknownEntityException e)
 					{
 						throw new IllegalArgumentException("attributes.refEntity error on line " + i + ": "
 								+ refEntityName + " unknown");
 					}
+
 					// allow computed xref attributes to refer to pre-existing entities
 					defaultAttributeMetaData.setRefEntity(refEntityMeta);
 				}
