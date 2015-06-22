@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
-import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.SearchService;
@@ -26,8 +25,8 @@ import org.molgenis.data.mysql.AsyncJdbcTemplate;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.data.version.MolgenisUpgrade;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -82,7 +81,7 @@ public class Step1UpgradeMetaData extends MolgenisUpgrade
 			@Override
 			public boolean hasRepository(String name)
 			{
-				throw new NotImplementedException("Not implemented yet");
+				throw new UnsupportedOperationException();
 			}
 		};
 		MetaDataService metaData = new MetaDataServiceImpl(dataService);
