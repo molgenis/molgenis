@@ -2,7 +2,6 @@ package org.molgenis.data.version.v1_5;
 
 import javax.sql.DataSource;
 
-import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.meta.MetaDataService;
@@ -58,7 +57,7 @@ public class Step3AddOrderColumnToMrefTables extends MolgenisUpgrade
 			@Override
 			public boolean hasRepository(String name)
 			{
-				throw new NotImplementedException("Not implemented yet");
+				throw new UnsupportedOperationException();
 			}
 		};
 
