@@ -1,5 +1,7 @@
 package org.molgenis.data.rest.v2;
 
+import static org.molgenis.data.rest.v2.RestControllerV2.createDefaultRefAttributeFilter;
+
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -66,8 +68,15 @@ class AttributeMetaDataResponseV2
 		EntityMetaData refEntity = attr.getRefEntity();
 		if (refEntity != null)
 		{
-			AttributeFilter subAttrs = attrFilter != null ? attrFilter.getAttributeFilter(attr) : null;
-			this.refEntity = new EntityMetaDataResponseV2(refEntity, subAttrs, permissionService);
+			if (attrFilter != null)
+			{
+				this.refEntity = new EntityMetaDataResponseV2(refEntity, attrFilter, permissionService);
+			}
+			else
+			{
+				this.refEntity = new EntityMetaDataResponseV2(refEntity, createDefaultRefAttributeFilter(attr),
+						permissionService);
+			}
 		}
 		else
 		{
