@@ -38,7 +38,9 @@ public class QueryGenerator implements QueryPartGenerator
 	{
 		List<QueryRule> queryRules = query.getRules();
 		if (queryRules == null || queryRules.isEmpty()) return;
-		searchRequestBuilder.setQuery(createQueryBuilder(queryRules, entityMetaData));
+
+		QueryBuilder q = createQueryBuilder(queryRules, entityMetaData);
+		searchRequestBuilder.setQuery(q);
 	}
 
 	private QueryBuilder createQueryBuilder(List<QueryRule> queryRules, EntityMetaData entityMetaData)
@@ -56,6 +58,7 @@ public class QueryGenerator implements QueryPartGenerator
 			// boolean query consisting of combination of query clauses
 			Operator occur = null;
 			BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+
 			for (int i = 0; i < nrQueryRules; i += 2)
 			{
 				QueryRule queryRule = queryRules.get(i);
