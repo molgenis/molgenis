@@ -36,7 +36,7 @@ public class CbmXmlParser
 		// actually transform the XML back into an object
 		Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
 
-		SchemaFactory sf = SchemaFactory.newInstance(javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI);
+		SchemaFactory sf = SchemaFactory.newInstance(javax.xml.XMLConstants.XML_NS_URI);
 		Schema schema = sf.newSchema(xsdFile);
 		unmarshaller.setSchema(schema);
 
