@@ -17,9 +17,9 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.Writable;
@@ -47,7 +47,7 @@ public class SampleConverter
 	List<MakeEntityNameAndIdentifier> mkObsFeaturelist = new ArrayList<MakeEntityNameAndIdentifier>();
 
 	public void convert(InputStream in, OutputStream out, String outputdir, String projectName) throws IOException,
-			InvalidFormatException
+			MolgenisInvalidFormatException
 	{
 
 		OUTPUTDIR = outputdir;
