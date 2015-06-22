@@ -408,64 +408,6 @@ public class MappingServiceController extends MolgenisPluginController
 		return VIEW_ATTRIBUTE_MAPPING;
 	}
 
-	/**
-	 * Method to return algorithm feedback via an ajax request
-	 * 
-	 * @param mappingProjectId
-	 * @param target
-	 * @param source
-	 * @param targetAttribute
-	 * @param algorithm
-	 * 
-	 * @return A list of {@link AlgorithmResult}
-	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/dynamicattributemappingfeedback")
-	public @ResponseBody Map<String, List<String>> dynamicFeedback(
-			@RequestParam(required = true) String mappingProjectId, @RequestParam(required = true) String target,
-			@RequestParam(required = true) String source, @RequestParam(required = true) String targetAttribute,
-			@RequestParam(required = true) String algorithm)
-	{
-		// TODO put this in some kind of response object, this is duplicated a lot
-		MappingProject project = mappingService.getMappingProject(mappingProjectId);
-		MappingTarget mappingTarget = project.getMappingTarget(target);
-		EntityMapping entityMapping = mappingTarget.getMappingForSource(source);
-
-		AttributeMapping algorithmTest = entityMapping.addAttributeMapping(targetAttribute);
-		algorithmTest.setAlgorithm(algorithm);
-
-		FluentIterable<Entity> sourceEntities = FluentIterable.from(dataService.findAll(source)).limit(10);
-		ImmutableList<AlgorithmResult> algorithmResults = sourceEntities.transform(
-				sourceEntity -> {
-					try
-					{
-						System.out.println(algorithmService.apply(algorithmTest, sourceEntity,
-								sourceEntity.getEntityMetaData()));
-						return AlgorithmResult.createSuccess(
-								algorithmService.apply(algorithmTest, sourceEntity, sourceEntity.getEntityMetaData()),
-								sourceEntity);
-					}
-					catch (Exception e)
-					{
-						LOG.error("Error! ", e);
-						return AlgorithmResult.createFailure(e, sourceEntity);
-					}
-				}).toList();
-
-		// getValue = end result
-		// use sourceAttributes to retrieve source values
-		Map<String, List<String>> algorithmTestResults = new HashMap<String, List<String>>();
-		for (String sourceAttribute : algorithmService.getSourceAttributeNames(algorithm))
-		{
-			algorithmTestResults.put(sourceAttribute, getSourceAttributeValues(sourceAttribute, algorithmResults));
-		}
-		List<String> algorithmResultValues = new ArrayList<String>();
-		algorithmResults.forEach(algorithmResult -> algorithmResultValues.add(algorithmResult.getValue().toString()));
-
-		algorithmTestResults.put("algorithmResultValues", algorithmResultValues);
-
-		return algorithmTestResults;
-	}
-
 	@RequestMapping(value = "/attributemappingfeedback")
 	public String attributeMappingFeedback(@RequestParam(required = true) String mappingProjectId,
 			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
@@ -533,17 +475,6 @@ public class MappingServiceController extends MolgenisPluginController
 		model.addAttribute("error", error);
 
 		return VIEW_ATTRIBUTE_MAPPING_FEEDBACK;
-	}
-
-	private List<String> getSourceAttributeValues(String sourceAttribute,
-			ImmutableList<AlgorithmResult> algorithmResults)
-	{
-		List<String> sourceValues = new ArrayList<String>();
-		for (AlgorithmResult algorithmResult : algorithmResults)
-		{
-			sourceValues.add(algorithmResult.getSourceEntity().get(sourceAttribute).toString());
-		}
-		return sourceValues;
 	}
 
 	/**
