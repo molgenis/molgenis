@@ -175,7 +175,7 @@
 			theme : 'eclipse',
 			mode : 'javascript',
 			showGutter : true,
-			highlightActiveLine : false
+			highlightActiveLine : true
 		});
 		editor = $textarea.data('ace').editor;
 
