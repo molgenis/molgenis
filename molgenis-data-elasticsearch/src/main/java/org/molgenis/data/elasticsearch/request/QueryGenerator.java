@@ -460,7 +460,7 @@ public class QueryGenerator implements QueryPartGenerator
 				// 2. no attribute: search in all
 				if (queryField == null)
 				{
-					queryBuilder = QueryBuilders.matchQuery("_all", queryValue);
+					queryBuilder = QueryBuilders.matchPhraseQuery("_all", queryValue).slop(10);
 				}
 				else
 				{

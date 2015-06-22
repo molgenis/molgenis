@@ -1441,6 +1441,18 @@ public class QueryGeneratorTest
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
+	@Test
+	public void generateOneQueryRuleSearchAllFields()
+	{
+		String value = "my text";
+		Query q = new QueryImpl().search(value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+		QueryBuilder expectedQuery = QueryBuilders.matchPhraseQuery("_all", value).slop(10);
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
 	@Test(expectedExceptions = MolgenisQueryException.class)
 	public void generateOneQueryRuleSearchOneFieldBool()
 	{
