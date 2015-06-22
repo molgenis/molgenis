@@ -156,7 +156,7 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator
 				}
 				else
 				{
-					LOG.error("SnpEff not found at: " + snpEffpath.getAbsolutePath());
+					LOG.debug("SnpEff not found at: " + snpEffpath.getAbsolutePath());
 				}
 			}
 		}

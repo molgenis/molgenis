@@ -85,10 +85,10 @@ public class TabixRepository extends AbstractRepository
 	{
 		String queryString = String.format("%s:%s-%2$s", chrom, pos);
 		LOG.debug("query({})", queryString);
-		org.molgenis.data.annotator.tabix.TabixReader.Iterator iterator = reader.query(queryString);
 		Builder<Entity> builder = ImmutableList.<Entity> builder();
 		try
 		{
+			org.molgenis.data.annotator.tabix.TabixReader.Iterator iterator = reader.query(queryString);
 			String line = iterator.next();
 			while (line != null)
 			{
@@ -98,7 +98,15 @@ public class TabixRepository extends AbstractRepository
 		}
 		catch (IOException e)
 		{
-			LOG.error("Error reading from tabix reader.", e);
+			LOG.error("Error reading from tabix reader", e);
+		}
+		catch (NullPointerException e)
+		{
+			LOG.error("Error reading from tabix reader for query: " + queryString, e);
+		}
+		catch (ArrayIndexOutOfBoundsException e)
+		{
+			LOG.error("Error reading from tabix reader for query: " + queryString + " (Unknown Chromosome?)", e);
 		}
 		return builder.build();
 	}
