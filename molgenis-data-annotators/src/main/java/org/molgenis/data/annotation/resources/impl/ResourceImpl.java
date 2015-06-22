@@ -56,7 +56,8 @@ public class ResourceImpl implements Resource
 			repository = null;
 			file = null;
 		}
-		return getFile() != null && getFile().exists();
+		final File file = getFile();
+		return file != null && file.exists();
 	}
 
 	/**
