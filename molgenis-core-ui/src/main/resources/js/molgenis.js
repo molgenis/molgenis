@@ -660,7 +660,7 @@ function createInput(attr, attrs, val, lbl) {
 		var rsqlValue;
 		if (value.indexOf('"') !== -1 || value.indexOf('\'') !== -1 || value.indexOf('(') !== -1 || value.indexOf(')') !== -1 || value.indexOf(';') !== -1
 				|| value.indexOf(',') !== -1 || value.indexOf('=') !== -1 || value.indexOf('!') !== -1 || value.indexOf('~') !== -1 || value.indexOf('<') !== -1
-				|| value.indexOf('>') !== -1) {
+				|| value.indexOf('>') !== -1 || value.indexOf(' ') !== -1) {
 			rsqlValue = '"' + encodeURIComponent(value) + '"';
 		} else {
 			rsqlValue = encodeURIComponent(value);
