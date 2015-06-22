@@ -8,7 +8,7 @@ import java.net.URLConnection;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.molgenis.util.FileStore;
+import org.molgenis.file.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;

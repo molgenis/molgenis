@@ -121,7 +121,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		if (!nonSelfReferencingEntities.isEmpty())
 		{
 			List<String> entityNames = Lists.newArrayList();
-            nonSelfReferencingEntities.forEach(pair -> entityNames.add(pair.getA().getName()));
+			nonSelfReferencingEntities.forEach(pair -> entityNames.add(pair.getA().getName()));
 
 			StringBuilder msg = new StringBuilder("Cannot delete entity '").append(getEntityMetaData().getName())
 					.append("' because it is referenced by the following entities: ").append(entityNames.toString());
@@ -194,14 +194,20 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 					// computed attributes are not persisted
 					continue;
 				}
+
 				// add mref tables
+
 				if (attr.getDataType() instanceof MrefField)
 				{
 					asyncJdbcTemplate.execute(getMrefCreateSql(attr));
 				}
 				else if (attr.getDataType() instanceof XrefField)
 				{
-					asyncJdbcTemplate.execute(getCreateFKeySql(attr));
+					String backend = dataService.getMeta().getBackend(attr.getRefEntity()).getName();
+					if (backend.equalsIgnoreCase(MysqlRepositoryCollection.NAME))
+					{
+						asyncJdbcTemplate.execute(getCreateFKeySql(attr));
+					}
 				}
 
 				// text can't be unique, so don't add unique constraint when type is string
@@ -351,11 +357,18 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				.append(" NOT NULL, ").append('`').append(att.getName()).append('`').append(' ')
 				.append(refAttrMysqlType).append(" NOT NULL, FOREIGN KEY (").append('`').append(idAttribute.getName())
 				.append('`').append(") REFERENCES ").append('`').append(getTableName()).append('`').append('(')
-				.append('`').append(idAttribute.getName()).append('`').append(") ON DELETE CASCADE, FOREIGN KEY (")
-				.append('`').append(att.getName()).append('`').append(") REFERENCES ").append('`')
-				.append(getTableName(att.getRefEntity())).append('`').append('(').append('`')
-				.append(att.getRefEntity().getIdAttribute().getName()).append('`')
-				.append(") ON DELETE CASCADE) ENGINE=InnoDB;");
+				.append('`').append(idAttribute.getName()).append("`) ON DELETE CASCADE");
+
+		// If the refEntity is not of type MySQL do not add a foreign key to it
+		String refEntityBackend = dataService.getMeta().getBackend(att.getRefEntity()).getName();
+		if (refEntityBackend.equalsIgnoreCase(MysqlRepositoryCollection.NAME))
+		{
+			sql.append(", FOREIGN KEY (").append('`').append(att.getName()).append('`').append(") REFERENCES ")
+					.append('`').append(getTableName(att.getRefEntity())).append('`').append('(').append('`')
+					.append(att.getRefEntity().getIdAttribute().getName()).append("`) ON DELETE CASCADE");
+		}
+
+		sql.append(") ENGINE=InnoDB;");
 
 		return sql.toString();
 	}
@@ -418,8 +431,6 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				break;
 			case ENUM:
 				break;
-			case FILE:
-				break;
 			case HTML:
 				break;
 			case HYPERLINK:
@@ -442,6 +453,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 			case CATEGORICAL:
 			case CATEGORICAL_MREF:
 			case XREF:
+			case FILE:
 				if (att.isLabelAttribute())
 				{
 					throw new MolgenisDataException("Attribute [" + att.getName() + "] of entity [" + getName()

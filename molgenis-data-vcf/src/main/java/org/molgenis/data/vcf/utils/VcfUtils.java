@@ -10,12 +10,12 @@ import java.util.List;
 import java.util.Scanner;
 
 import com.google.common.collect.Lists;
-import org.apache.xmlbeans.impl.piccolo.io.FileFormatException;
 import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.datastructures.Sample;
 import org.molgenis.data.vcf.datastructures.Trio;
@@ -155,7 +155,7 @@ public class VcfUtils
 	 * @throws Exception
 	 */
 	public static boolean checkPreviouslyAnnotatedAndAddMetadata(File inputVcfFile, PrintWriter outputVCFWriter,
-			List<AttributeMetaData> infoFields, String checkAnnotatedBeforeValue) throws FileFormatException,
+			List<AttributeMetaData> infoFields, String checkAnnotatedBeforeValue) throws MolgenisInvalidFormatException,
 			FileNotFoundException
 	{
 		boolean annotatedBefore = false;
@@ -196,7 +196,8 @@ public class VcfUtils
 			{
 				outputVCFWriter.close();
 				inputVcfFileScanner.close();
-				throw new FileFormatException("Header does not start with #CHROM, are you sure it is a VCF file?");
+				throw new MolgenisInvalidFormatException(
+						"Header does not start with #CHROM, are you sure it is a VCF file?");
 			}
 
 			// print INFO lines for stuff to be annotated
@@ -216,7 +217,8 @@ public class VcfUtils
 		{
 			outputVCFWriter.close();
 			inputVcfFileScanner.close();
-			throw new FileFormatException("Did not find ## on the first line, are you sure it is a VCF file?");
+			throw new MolgenisInvalidFormatException(
+					"Did not find ## on the first line, are you sure it is a VCF file?");
 		}
 
 		inputVcfFileScanner.close();

@@ -11,10 +11,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.importer.MyEntitiesValidationReport.AttributeState;
 import org.molgenis.data.meta.MetaDataService;
@@ -50,7 +50,7 @@ public class EmxMetaDataParserTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void testValidationReport() throws IOException, InvalidFormatException, URISyntaxException
+	public void testValidationReport() throws IOException, MolgenisInvalidFormatException, URISyntaxException
 	{
 		File f = ResourceUtils.getFile(getClass(), "/example.xlsx");
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
@@ -69,7 +69,7 @@ public class EmxMetaDataParserTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void testValidationReportInvalid() throws IOException, InvalidFormatException, URISyntaxException
+	public void testValidationReportInvalid() throws IOException, MolgenisInvalidFormatException, URISyntaxException
 	{
 		File f = ResourceUtils.getFile(getClass(), "/example_invalid.xlsx");
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
@@ -90,7 +90,7 @@ public class EmxMetaDataParserTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void testValidationReportNoMeta() throws InvalidFormatException, IOException
+	public void testValidationReportNoMeta() throws MolgenisInvalidFormatException, IOException
 	{
 		MysqlRepository repositoryCity = mock(MysqlRepository.class);
 		DefaultEntityMetaData entityMetaDataCity = new DefaultEntityMetaData("import_city");

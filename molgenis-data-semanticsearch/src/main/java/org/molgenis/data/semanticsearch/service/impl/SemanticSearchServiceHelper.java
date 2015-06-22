@@ -27,7 +27,7 @@ import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
+import org.apache.lucene.queryparser.classic.QueryParser;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
@@ -102,7 +102,7 @@ public class SemanticSearchServiceHelper
 			for (String synonym : synonyms)
 			{
 				disMaxQuery.getNestedRules().add(
-						new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, synonym));
+						new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, QueryParser.escape(synonym)));
 			}
 
 			rules.add(disMaxQuery);

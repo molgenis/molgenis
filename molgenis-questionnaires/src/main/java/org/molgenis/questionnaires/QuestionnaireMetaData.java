@@ -3,8 +3,8 @@ package org.molgenis.questionnaires;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.security.owned.OwnedEntityMetaData;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +28,7 @@ public class QuestionnaireMetaData extends DefaultEntityMetaData
 		{
 			enumOptions.add(questionnaireStatus.toString());
 		}
-		addAttribute(ATTR_STATUS).setDataType(MolgenisFieldTypes.ENUM).setEnumOptions(enumOptions).setVisible(false)
+		addAttribute(ATTR_STATUS).setDataType(new EnumField()).setEnumOptions(enumOptions).setVisible(false)
 				.setNillable(false);
 	}
 }

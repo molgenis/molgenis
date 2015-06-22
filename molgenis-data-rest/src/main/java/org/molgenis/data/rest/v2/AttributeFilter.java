@@ -55,15 +55,16 @@ class AttributeFilter implements Iterable<AttributeFilter>
 		return includeLabelAttr;
 	}
 
-	public void setIncludeLabelAttr(boolean includeLabelAttr)
+	public AttributeFilter setIncludeLabelAttr(boolean includeLabelAttr)
 	{
-		setIncludeLabelAttr(includeLabelAttr, null);
+		return setIncludeLabelAttr(includeLabelAttr, null);
 	}
 
-	public void setIncludeLabelAttr(boolean includeLabelAttr, AttributeFilter labelAttrFilter)
+	public AttributeFilter setIncludeLabelAttr(boolean includeLabelAttr, AttributeFilter labelAttrFilter)
 	{
 		this.includeLabelAttr = includeLabelAttr;
 		this.labelAttrFilter = labelAttrFilter;
+		return this;
 	}
 
 	public AttributeFilter getAttributeFilter(AttributeMetaData attr)

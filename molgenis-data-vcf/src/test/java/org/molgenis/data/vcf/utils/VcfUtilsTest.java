@@ -1,9 +1,21 @@
 package org.molgenis.data.vcf.utils;
 
+import static org.mockito.Mockito.mock;
+import static org.testng.Assert.assertTrue;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.commons.io.FileUtils;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -12,14 +24,6 @@ import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ResourceUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.*;
-
-import static org.mockito.Mockito.mock;
-import static org.testng.Assert.assertTrue;
 
 @Test
 public class VcfUtilsTest
@@ -141,7 +145,7 @@ public class VcfUtilsTest
 	}
 
 	@Test
-	public void vcfWriterRoundtripTest() throws IOException
+	public void vcfWriterRoundtripTest() throws IOException, MolgenisInvalidFormatException
 	{
 		File outputVCFFile = File.createTempFile("output", ".vcf");
 		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
@@ -161,7 +165,7 @@ public class VcfUtilsTest
 	}
 
 	@Test
-	public void vcfWriterAnnotateTest() throws IOException
+	public void vcfWriterAnnotateTest() throws IOException, MolgenisInvalidFormatException
 	{
 		File outputVCFFile = File.createTempFile("output", ".vcf");
 		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");

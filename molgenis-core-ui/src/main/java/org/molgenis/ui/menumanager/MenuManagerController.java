@@ -14,6 +14,7 @@ import java.util.List;
 import javax.servlet.http.Part;
 import javax.validation.Valid;
 
+import org.molgenis.file.FileStore;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.framework.ui.MolgenisPluginController;
@@ -22,7 +23,6 @@ import org.molgenis.ui.MolgenisUiMenu;
 import org.molgenis.ui.MolgenisUiMenuItem;
 import org.molgenis.ui.MolgenisUiMenuItemType;
 import org.molgenis.ui.menu.Menu;
-import org.molgenis.util.FileStore;
 import org.molgenis.util.FileUploadUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;

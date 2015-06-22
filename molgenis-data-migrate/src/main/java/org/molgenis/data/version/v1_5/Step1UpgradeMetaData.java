@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
-import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.SearchService;
@@ -26,8 +25,8 @@ import org.molgenis.data.mysql.AsyncJdbcTemplate;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.data.version.MolgenisUpgrade;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -82,7 +81,7 @@ public class Step1UpgradeMetaData extends MolgenisUpgrade
 			@Override
 			public boolean hasRepository(String name)
 			{
-				throw new NotImplementedException("Not implemented yet");
+				throw new UnsupportedOperationException();
 			}
 		};
 		MetaDataService metaData = new MetaDataServiceImpl(dataService);
@@ -202,26 +201,20 @@ public class Step1UpgradeMetaData extends MolgenisUpgrade
 
 		LOG.info("Adding metadata indices...");
 
-		try
-		{
-			searchService.createMappings(new TagMetaData());
-			searchService.createMappings(new PackageMetaData());
-			searchService.createMappings(new AttributeMetaDataMetaData());
-			searchService.createMappings(new EntityMetaDataMetaData());
-		}
-		catch (IOException e)
-		{
-			LOG.error("error creating metadata mappings", e);
-		}
+		searchService.createMappings(TagMetaData.INSTANCE);
+		searchService.createMappings(PackageMetaData.INSTANCE);
+		searchService.createMappings(AttributeMetaDataMetaData.INSTANCE);
+		searchService.createMappings(EntityMetaDataMetaData.INSTANCE);
 
 		LOG.info("Reindexing MySQL repositories...");
 
-		searchService.rebuildIndex(undecoratedMySQL.getRepository(TagMetaData.ENTITY_NAME), new TagMetaData());
-		searchService.rebuildIndex(undecoratedMySQL.getRepository(PackageMetaData.ENTITY_NAME), new PackageMetaData());
+		searchService.rebuildIndex(undecoratedMySQL.getRepository(TagMetaData.ENTITY_NAME), TagMetaData.INSTANCE);
+		searchService.rebuildIndex(undecoratedMySQL.getRepository(PackageMetaData.ENTITY_NAME),
+				PackageMetaData.INSTANCE);
 		searchService.rebuildIndex(undecoratedMySQL.getRepository(AttributeMetaDataMetaData.ENTITY_NAME),
-				new AttributeMetaDataMetaData());
+				AttributeMetaDataMetaData.INSTANCE);
 		searchService.rebuildIndex(undecoratedMySQL.getRepository(EntityMetaDataMetaData.ENTITY_NAME),
-				new EntityMetaDataMetaData());
+				EntityMetaDataMetaData.INSTANCE);
 
 		LOG.info("Reindexing MySQL repositories DONE.");
 
