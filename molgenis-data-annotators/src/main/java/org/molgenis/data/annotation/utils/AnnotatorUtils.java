@@ -29,18 +29,18 @@ public class AnnotatorUtils
 				MolgenisFieldTypes.FieldTypeEnum.COMPOUND);
 		compoundAttributeMetaData.setLabel(annotator.getSimpleName());
 
-		Iterable<AttributeMetaData> outputAttrs = annotator.getOutputMetaData();
+		List<AttributeMetaData> outputAttrs = annotator.getOutputMetaData();
 
-		if (Iterables.size(outputAttrs) == 1
-				&& Iterables.get(outputAttrs,0).getDataType().getEnumType()
+		if (outputAttrs.size() == 1
+				&& Iterables.get(outputAttrs, 0).getDataType().getEnumType()
 						.equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
 		{
-			compoundAttributeMetaData = (DefaultAttributeMetaData) Iterables.get(outputAttrs,0);
-		}else{
-			Iterator<AttributeMetaData> attributeMetaDataIterator = outputAttrs.iterator();
-			while (attributeMetaDataIterator.hasNext())
+			compoundAttributeMetaData = (DefaultAttributeMetaData) outputAttrs.get(0);
+		}
+		else
+		{
+			for (AttributeMetaData currentAmd : outputAttrs)
 			{
-				AttributeMetaData currentAmd = attributeMetaDataIterator.next();
 				String currentAttributeName = currentAmd.getName();
 				if (entityMetaData.getAttribute(currentAttributeName) == null)
 				{
