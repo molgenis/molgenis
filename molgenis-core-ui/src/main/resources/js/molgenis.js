@@ -226,6 +226,7 @@
 			case 'CATEGORICAL_MREF':
 			case 'MREF':
 			case 'XREF':
+			case 'FILE':
 				return true;
 			default:
 				return false;
