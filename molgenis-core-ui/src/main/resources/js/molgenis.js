@@ -226,6 +226,7 @@
 			case 'CATEGORICAL_MREF':
 			case 'MREF':
 			case 'XREF':
+			case 'FILE':
 				return true;
 			default:
 				return false;
@@ -233,7 +234,7 @@
 	};
 	
 	molgenis.isXrefAttr = function(attr) {
-		return attr.fieldType === 'CATEGORICAL' || attr.fieldType === 'XREF';
+		return attr.fieldType === 'CATEGORICAL' || attr.fieldType === 'XREF' || attr.fieldType === 'FILE';
 	};
 	
 	molgenis.isMrefAttr = function(attr) {
@@ -660,7 +661,7 @@ function createInput(attr, attrs, val, lbl) {
 		var rsqlValue;
 		if (value.indexOf('"') !== -1 || value.indexOf('\'') !== -1 || value.indexOf('(') !== -1 || value.indexOf(')') !== -1 || value.indexOf(';') !== -1
 				|| value.indexOf(',') !== -1 || value.indexOf('=') !== -1 || value.indexOf('!') !== -1 || value.indexOf('~') !== -1 || value.indexOf('<') !== -1
-				|| value.indexOf('>') !== -1) {
+				|| value.indexOf('>') !== -1 || value.indexOf(' ') !== -1) {
 			rsqlValue = '"' + encodeURIComponent(value) + '"';
 		} else {
 			rsqlValue = encodeURIComponent(value);

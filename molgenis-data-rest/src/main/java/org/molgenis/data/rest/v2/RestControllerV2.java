@@ -27,6 +27,7 @@ import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.rest.Href;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.file.FileMeta;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
@@ -204,6 +205,7 @@ class RestControllerV2
 						break;
 					case CATEGORICAL:
 					case XREF:
+					case FILE:
 						Entity refEntity = entity.getEntity(attrName);
 						Map<String, Object> refEntityResponse;
 						if (refEntity != null)
@@ -275,7 +277,6 @@ class RestControllerV2
 					case TEXT:
 						responseData.put(attrName, entity.getString(attrName));
 						break;
-					case FILE:
 					case IMAGE:
 						throw new UnsupportedOperationException("Unsupported data type [" + dataType + "]");
 					case INT:
@@ -291,11 +292,16 @@ class RestControllerV2
 		}
 	}
 
-	private AttributeFilter createDefaultRefAttributeFilter(AttributeMetaData attr)
+	static AttributeFilter createDefaultRefAttributeFilter(AttributeMetaData attr)
 	{
 		EntityMetaData refEntityMeta = attr.getRefEntity();
 		String idAttrName = refEntityMeta.getIdAttribute().getName();
 		String labelAttrName = refEntityMeta.getLabelAttribute().getName();
-		return new AttributeFilter().add(idAttrName).add(labelAttrName);
+		AttributeFilter attrFilter = new AttributeFilter().add(idAttrName).add(labelAttrName);
+		if (attr.getDataType().getEnumType() == FieldTypeEnum.FILE)
+		{
+			attrFilter.add(FileMeta.URL);
+		}
+		return attrFilter;
 	}
 }

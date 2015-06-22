@@ -7,11 +7,10 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import javax.persistence.QueryTimeoutException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.QueryTimeoutException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
@@ -49,7 +48,7 @@ public class AsyncJdbcTemplate
 		catch (InterruptedException | TimeoutException e)
 		{
 			LOG.warn("Interrupted awaiting SQL statement: " + sql, e);
-			throw new QueryTimeoutException(e);
+			throw new QueryTimeoutException("Interrupted awaiting SQL statement: " + sql, e);
 		}
 		catch (ExecutionException e)
 		{

@@ -12,9 +12,9 @@ import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.FileWriterWithEncoding;
+import org.molgenis.file.FileStore;
 import org.molgenis.script.Script;
 import org.molgenis.script.ScriptRunner;
-import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;

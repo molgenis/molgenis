@@ -11,6 +11,9 @@ import org.molgenis.data.meta.MetaDataService;
  */
 public interface DataService extends Iterable<Repository>
 {
+
+	void setMeta(MetaDataService metaDataService);
+
 	/**
 	 * Get the MetaDataService
 	 * 

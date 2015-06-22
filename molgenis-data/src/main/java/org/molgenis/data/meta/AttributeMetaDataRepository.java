@@ -46,7 +46,7 @@ import com.google.common.base.Joiner;
  */
 class AttributeMetaDataRepository
 {
-	public static final AttributeMetaDataMetaData META_DATA = new AttributeMetaDataMetaData();
+	public static final AttributeMetaDataMetaData META_DATA = AttributeMetaDataMetaData.INSTANCE;
 
 	private final Repository repository;
 

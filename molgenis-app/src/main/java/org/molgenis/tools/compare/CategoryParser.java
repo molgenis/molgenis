@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
@@ -19,7 +19,7 @@ import org.molgenis.data.processor.TrimProcessor;
 public class CategoryParser
 {
 
-	public static void main(String[] args) throws IOException, InvalidFormatException
+	public static void main(String[] args) throws IOException, MolgenisInvalidFormatException
 	{
 		if (args.length != 2)
 		{
@@ -32,7 +32,7 @@ public class CategoryParser
 		vc.check(args[0], args[1]);
 	}
 
-	public void check(String file, String datasetMatrix) throws IOException, InvalidFormatException
+	public void check(String file, String datasetMatrix) throws IOException, MolgenisInvalidFormatException
 	{
 		RepositoryCollection repositorySource = new ExcelRepositoryCollection(new File(file), new TrimProcessor());
 

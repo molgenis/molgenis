@@ -242,10 +242,10 @@ public class AggregateQueryGenerator
 			case CATEGORICAL_MREF:
 			case XREF:
 			case MREF:
+			case FILE:
 				// use id attribute of nested field
 				return attrName + '.' + getAggregateFieldName(attr.getRefEntity().getIdAttribute());
 			case COMPOUND:
-			case FILE:
 			case IMAGE:
 				throw new UnsupportedOperationException();
 			default:

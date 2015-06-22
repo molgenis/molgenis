@@ -1,8 +1,5 @@
 package org.molgenis.data.elasticsearch;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -34,15 +31,7 @@ public class IndexedManageableRepositoryCollectionDecorator extends IndexedRepos
 		DefaultEntityMetaData meta = new DefaultEntityMetaData(getManageableRepositoryCollection().getRepository(
 				entityName).getEntityMetaData());
 		meta.addAttributeMetaData(attribute);
-
-		try
-		{
-			getSearchService().createMappings(meta);
-		}
-		catch (IOException e)
-		{
-			throw new UncheckedIOException(e);
-		}
+		getSearchService().createMappings(meta);
 	}
 
 	@Override
@@ -57,15 +46,7 @@ public class IndexedManageableRepositoryCollectionDecorator extends IndexedRepos
 		if (attr != null)
 		{
 			meta.removeAttributeMetaData(attr);
-
-			try
-			{
-				getSearchService().createMappings(meta);
-			}
-			catch (IOException e)
-			{
-				throw new UncheckedIOException(e);
-			}
+			getSearchService().createMappings(meta);
 		}
 	}
 
@@ -76,15 +57,7 @@ public class IndexedManageableRepositoryCollectionDecorator extends IndexedRepos
 		DefaultEntityMetaData meta = new DefaultEntityMetaData(getManageableRepositoryCollection().getRepository(
 				entityName).getEntityMetaData());
 		meta.addAttributeMetaData(attribute);
-
-		try
-		{
-			getSearchService().createMappings(meta);
-		}
-		catch (IOException e)
-		{
-			throw new UncheckedIOException(e);
-		}
+		getSearchService().createMappings(meta);
 	}
 
 	protected ManageableRepositoryCollection getManageableRepositoryCollection()

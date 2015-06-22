@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.molgenis.CommandLineOnlyConfiguration;
 import org.molgenis.DatabaseConfig;
 import org.molgenis.auth.GroupAuthority;
@@ -122,7 +121,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 			@Override
 			public boolean hasRepository(String name)
 			{
-				throw new NotImplementedException("Not implemented yet");
+				throw new UnsupportedOperationException();
 			}
 		};
 

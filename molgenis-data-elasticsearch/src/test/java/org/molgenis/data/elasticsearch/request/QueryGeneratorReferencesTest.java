@@ -25,6 +25,7 @@ import org.molgenis.data.elasticsearch.index.MappingsBuilder;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.util.MolgenisDateFormat;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -89,7 +90,7 @@ public class QueryGeneratorReferencesTest
 		refEntityMetaData.addAttribute(refDateTimeAttributeName).setDataType(MolgenisFieldTypes.DATETIME);
 		refEntityMetaData.addAttribute(refDecimalAttributeName).setDataType(MolgenisFieldTypes.DECIMAL);
 		refEntityMetaData.addAttribute(refEmailAttributeName).setDataType(MolgenisFieldTypes.EMAIL);
-		refEntityMetaData.addAttribute(refEnumAttributeName).setDataType(MolgenisFieldTypes.ENUM)
+		refEntityMetaData.addAttribute(refEnumAttributeName).setDataType(new EnumField())
 				.setEnumOptions(Arrays.asList("enum0", "enum1", "enum2"));
 		refEntityMetaData.addAttribute(refHtmlAttributeName).setDataType(MolgenisFieldTypes.HTML);
 		refEntityMetaData.addAttribute(refHyperlinkAttributeName).setDataType(MolgenisFieldTypes.HYPERLINK);

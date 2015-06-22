@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.csv.CsvRepository;
@@ -30,7 +30,7 @@ public class Validator
 	private final static String IDENTIFIER2 = "id_individual";
 
 	public void check(String excelFile1, String file2, BufferedWriter logger) throws IOException,
-			InvalidFormatException
+			MolgenisInvalidFormatException
 	{
 		ValidationFile excelfile = new ValidationFile();
 		RepositoryCollection excelReaderReferenceFile = new ExcelRepositoryCollection(new File(excelFile1),
@@ -181,9 +181,9 @@ public class Validator
 	/**
 	 * @param args
 	 * @throws FileNotFoundException
-	 * @throws InvalidFormatException
+	 * @throws MolgenisInvalidFormatException
 	 */
-	public static void main(String[] args) throws FileNotFoundException, InvalidFormatException
+	public static void main(String[] args) throws FileNotFoundException, MolgenisInvalidFormatException
 	{
 		if (args.length != 3)
 		{

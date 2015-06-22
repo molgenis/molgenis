@@ -38,7 +38,9 @@ public class QueryGenerator implements QueryPartGenerator
 	{
 		List<QueryRule> queryRules = query.getRules();
 		if (queryRules == null || queryRules.isEmpty()) return;
-		searchRequestBuilder.setQuery(createQueryBuilder(queryRules, entityMetaData));
+
+		QueryBuilder q = createQueryBuilder(queryRules, entityMetaData);
+		searchRequestBuilder.setQuery(q);
 	}
 
 	private QueryBuilder createQueryBuilder(List<QueryRule> queryRules, EntityMetaData entityMetaData)
@@ -56,6 +58,7 @@ public class QueryGenerator implements QueryPartGenerator
 			// boolean query consisting of combination of query clauses
 			Operator occur = null;
 			BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+
 			for (int i = 0; i < nrQueryRules; i += 2)
 			{
 				QueryRule queryRule = queryRules.get(i);
@@ -204,6 +207,7 @@ public class QueryGenerator implements QueryPartGenerator
 						case CATEGORICAL_MREF:
 						case XREF:
 						case MREF:
+						case FILE:
 						{
 							if (attributePath.length > 1) throw new UnsupportedOperationException(
 									"Can not filter on references deeper than 1.");
@@ -221,7 +225,6 @@ public class QueryGenerator implements QueryPartGenerator
 						case COMPOUND:
 							throw new MolgenisQueryException("Illegal data type [" + dataType + "] for operator ["
 									+ queryOperator + "]");
-						case FILE:
 						case IMAGE:
 							throw new UnsupportedOperationException("Query with data type [" + dataType
 									+ "] not supported");
@@ -460,7 +463,7 @@ public class QueryGenerator implements QueryPartGenerator
 				// 2. no attribute: search in all
 				if (queryField == null)
 				{
-					queryBuilder = QueryBuilders.matchQuery("_all", queryValue);
+					queryBuilder = QueryBuilders.matchPhraseQuery("_all", queryValue).slop(10);
 				}
 				else
 				{
@@ -573,6 +576,7 @@ public class QueryGenerator implements QueryPartGenerator
 			case CATEGORICAL:
 			case CATEGORICAL_MREF:
 			case MREF:
+			case FILE:
 				return queryField;
 			case BOOL:
 			case DATE:
@@ -591,7 +595,6 @@ public class QueryGenerator implements QueryPartGenerator
 				return new StringBuilder(queryField).append('.').append(MappingsBuilder.FIELD_NOT_ANALYZED).toString();
 			case COMPOUND:
 				throw new MolgenisQueryException("Illegal data type [" + dataType + "] not supported");
-			case FILE:
 			case IMAGE:
 				throw new UnsupportedOperationException("Query with data type [" + dataType + "] not supported");
 			default:

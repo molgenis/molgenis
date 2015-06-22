@@ -2,7 +2,6 @@ package org.molgenis.data.mysql;
 
 import javax.sql.DataSource;
 
-import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.molgenis.data.DataService;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.elasticsearch.IndexedManageableRepositoryCollectionDecorator;
@@ -61,7 +60,7 @@ public class MySqlConfiguration
 			@Override
 			public boolean hasRepository(String name)
 			{
-				throw new NotImplementedException("Not implemented yet");
+				throw new UnsupportedOperationException();
 			}
 		};
 
