@@ -13,10 +13,10 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.excel.ExcelSheetWriter;
 import org.molgenis.data.excel.ExcelWriter;
@@ -53,7 +53,8 @@ public class MatchQualityRocService
 		this.ontologyService = ontologyService;
 	}
 
-	public Map<String, Object> calculateROC(String matchingTaskIdentifier) throws IOException, InvalidFormatException
+	public Map<String, Object> calculateROC(String matchingTaskIdentifier) throws IOException,
+			MolgenisInvalidFormatException
 	{
 		Map<String, Object> data = new HashMap<String, Object>();
 		if (StringUtils.isNotEmpty(matchingTaskIdentifier))

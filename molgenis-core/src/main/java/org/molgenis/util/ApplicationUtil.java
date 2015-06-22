@@ -1,7 +1,5 @@
 package org.molgenis.util;
 
-import javax.persistence.EntityManagerFactory;
-
 import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
@@ -15,12 +13,6 @@ import org.springframework.mail.javamail.JavaMailSender;
  */
 public class ApplicationUtil
 {
-
-	public static EntityManagerFactory getEntityManagerFactory()
-	{
-		return getApplicationContext().getBean("entityManagerFactory", EntityManagerFactory.class);
-	}
-
 	public static JavaMailSender getMailSender()
 	{
 		return getApplicationContext().getBean("mailSender", JavaMailSender.class);

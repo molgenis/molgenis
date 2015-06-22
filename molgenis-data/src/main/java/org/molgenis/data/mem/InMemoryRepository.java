@@ -6,7 +6,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
@@ -59,7 +58,7 @@ public class InMemoryRepository implements Repository
 	@Override
 	public Query query()
 	{
-		throw new NotImplementedException("Not implemented yet");
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -71,13 +70,13 @@ public class InMemoryRepository implements Repository
 	@Override
 	public Iterable<Entity> findAll(Query q)
 	{
-		throw new NotImplementedException("Not implemented yet");
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public Entity findOne(Query q)
 	{
-		throw new NotImplementedException("Not implemented yet");
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -89,7 +88,7 @@ public class InMemoryRepository implements Repository
 	@Override
 	public Iterable<Entity> findAll(Iterable<Object> ids)
 	{
-		throw new NotImplementedException("Not implemented yet");
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -199,7 +198,7 @@ public class InMemoryRepository implements Repository
 	@Override
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
-		throw new NotImplementedException("Not implemented yet");
+		throw new UnsupportedOperationException();
 	}
 
 }

@@ -11,9 +11,9 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.Writable;
@@ -29,7 +29,7 @@ public class SampleTabOmxConverter
 	private final Map<String, String> unitOntologyTermsForFeatures;
 
 	public SampleTabOmxConverter(String inputFilePath, String submissionID, String sheetName) throws IOException,
-			InvalidFormatException
+			MolgenisInvalidFormatException
 	{
 		this.submissionID = submissionID;
 		this.unitOntologyTermsForFeatures = new HashMap<String, String>();
@@ -236,7 +236,7 @@ public class SampleTabOmxConverter
 		return identifiier.toString();
 	}
 
-	public static void main(String args[]) throws IOException, InvalidFormatException
+	public static void main(String args[]) throws IOException, MolgenisInvalidFormatException
 	{
 		new SampleTabOmxConverter(args[0], "GCR-ada", args[1]);
 		if (args.length != 2)
