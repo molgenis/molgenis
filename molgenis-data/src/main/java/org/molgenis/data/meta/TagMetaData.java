@@ -13,7 +13,9 @@ public class TagMetaData extends DefaultEntityMetaData
 	public static final String RELATION_LABEL = "relationLabel";
 	public static final String CODE_SYSTEM = "codeSystem";
 
-	public TagMetaData()
+	public static final TagMetaData INSTANCE = new TagMetaData();
+
+	private TagMetaData()
 	{
 		super(ENTITY_NAME);
 		addAttribute(IDENTIFIER).setIdAttribute(true).setNillable(false);

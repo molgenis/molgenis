@@ -56,6 +56,7 @@ public class ImportTestConfig
 	@PostConstruct
 	public void init()
 	{
+		dataService().setMeta(metaDataService());
 		metaDataService().setDefaultBackend(mysqlRepositoryCollection());
 
 		// Login
@@ -138,7 +139,7 @@ public class ImportTestConfig
 	{
 		return new MolgenisPluginRegistryImpl();
 	}
-	
+
 	@Bean
 	OntologyService ontologyService()
 	{
@@ -156,9 +157,10 @@ public class ImportTestConfig
 	{
 		return mock(OntologyTermRepository.class);
 	}
-	
+
 	@Bean
-	IdGenerator idGenerator(){
+	IdGenerator idGenerator()
+	{
 		return mock(IdGenerator.class);
 	}
 }
