@@ -44,6 +44,7 @@ public class MysqlTestConfig
 	@PostConstruct
 	public void init()
 	{
+		dataService().setMeta(metaDataService());
 		metaDataService().setDefaultBackend(mysqlRepositoryCollection());
 
 		// Login

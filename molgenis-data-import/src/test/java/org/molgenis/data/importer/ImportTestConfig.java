@@ -55,6 +55,7 @@ public class ImportTestConfig
 	@PostConstruct
 	public void init()
 	{
+		dataService().setMeta(metaDataService());
 		metaDataService().setDefaultBackend(mysqlRepositoryCollection());
 
 		// Login
