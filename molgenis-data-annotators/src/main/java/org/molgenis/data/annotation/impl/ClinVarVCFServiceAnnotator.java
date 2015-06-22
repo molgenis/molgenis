@@ -230,4 +230,13 @@ public class ClinVarVCFServiceAnnotator extends VariantAnnotator
 		return metadata;
 	}
 
+	@Override
+	public String getDescription()
+	{
+		return "Fitcon is a tool for scoring the functional change of single nucleotide variants in the human genome.\n"
+				+ "\n"
+				+ "While many variant annotation and scoring utils are around, most annotations tend to exploit a single information type (e.g. conservation) and/or are restricted in scope (e.g. to missense changes). Thus, a broadly applicable metric that objectively weights and integrates diverse information is needed. Combined Annotation Dependent Depletion (CADD) is a framework that integrates multiple functional annotations into one metric by contrasting variants that survived natural selection with simulated mutations.\n";
+
+	}
+
 }

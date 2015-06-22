@@ -7,8 +7,10 @@ import java.util.List;
 import org.molgenis.data.annotation.impl.CaddServiceAnnotator;
 import org.molgenis.data.annotation.impl.ClinVarVCFServiceAnnotator;
 import org.molgenis.data.annotation.impl.ClinicalGenomicsDatabaseServiceAnnotator;
+import org.molgenis.data.annotation.impl.DannAnnotator;
 import org.molgenis.data.annotation.impl.DeNovoAnnotator;
 import org.molgenis.data.annotation.impl.ExACServiceAnnotator;
+import org.molgenis.data.annotation.impl.FitconAnnotator;
 import org.molgenis.data.annotation.impl.GoNLServiceAnnotator;
 import org.molgenis.data.annotation.impl.HpoServiceAnnotator;
 import org.molgenis.data.annotation.impl.MonogenicDiseaseCandidatesServiceAnnotator;
@@ -23,7 +25,7 @@ public class CmdLineAnnotator
 	{
 		List<String> annotators = Arrays.asList(new String[]
 		{ "cadd", "snpeff", "clinvar", "hpo", "ase", "monogenic", "phenomizer", "ccgg", "denovo", "exac", "1kg",
-				"gonl", "gwascatalog", "vkgl", "cgd", "enhancers", "proteinatlas" });
+				"gonl", "gwascatalog", "vkgl", "cgd", "enhancers", "proteinatlas", "fitcon", "dann" });
 
 		if (args.length != 4)
 		{
@@ -77,6 +79,14 @@ public class CmdLineAnnotator
 		else if (annotator.equals("snpeff"))
 		{
 			new SnpEffServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
+		}
+		else if (annotator.equals("dann"))
+		{
+			new DannAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
+		}
+		else if (annotator.equals("fitcon"))
+		{
+			new FitconAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
 		else if (annotator.equals("clinvar"))
 		{
