@@ -18,7 +18,16 @@
 			<artifactId>molgenis-security-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		 <dependency>
+		<dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-orm</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>javax.persistence</artifactId>
+            <version>2.1.0</version>
+        </dependency>
+		<dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.1</version>
@@ -33,16 +42,5 @@
 			<artifactId>uuid</artifactId>
 			<version>3.2</version>
 		</dependency>
-		<dependency>
-            <groupId>com.eaio.uuid</groupId>
-            <artifactId>uuid</artifactId>
-            <version>3.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.persistence</groupId>
-            <artifactId>javax.persistence</artifactId>
-            <version>2.1.0</version>
-            <scope>test</scope>
-        </dependency>
 	</dependencies>
 </project>
