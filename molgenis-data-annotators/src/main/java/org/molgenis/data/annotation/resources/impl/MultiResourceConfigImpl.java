@@ -1,12 +1,12 @@
 package org.molgenis.data.annotation.resources.impl;
 
-import org.molgenis.data.annotation.resources.MultiResourceConfig;
-import org.molgenis.data.annotation.resources.ResourceConfig;
-import org.molgenis.framework.server.MolgenisSettings;
-
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.molgenis.data.annotation.resources.MultiResourceConfig;
+import org.molgenis.data.annotation.resources.ResourceConfig;
+import org.molgenis.framework.server.MolgenisSettings;
 
 /**
  * Created by charbonb on 15/06/15.
@@ -40,7 +40,7 @@ public class MultiResourceConfigImpl implements MultiResourceConfig
 		String pattern = molgenisSettings.getProperty(filePatternProperty, DEFAULT_PATTERN);
 		String folder = molgenisSettings.getProperty(folderProperty, DEFAULT_FOLDER);
 
-		Map<String, ResourceConfig> result = new HashMap();
+		Map<String, ResourceConfig> result = new HashMap<>();
 		for (String chrom : chromosomes)
 		{
 			result.put(chrom, new ResourceConfig()

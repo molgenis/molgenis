@@ -1,10 +1,9 @@
 package org.molgenis.data.annotation.resources.impl;
 
+import java.io.File;
+
 import org.molgenis.data.annotation.resources.ResourceConfig;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.security.core.MolgenisPermissionService;
-
-import java.io.File;
 
 /**
  * Created by charbonb on 16/06/15.
@@ -25,7 +24,7 @@ public class SingleResourceConfig implements ResourceConfig
 	@Override
 	public File getFile()
 	{
-		if(file == null) file = new File(molgenisSettings.getProperty(fileProperty));
+		if (file == null) file = new File(molgenisSettings.getProperty(fileProperty));
 		return file;
 	}
 }
