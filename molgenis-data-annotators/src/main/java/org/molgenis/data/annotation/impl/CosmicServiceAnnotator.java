@@ -21,7 +21,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.AbstractRepositoryAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.impl.datastructures.CosmicData;
-import org.molgenis.data.annotation.mini.AnnotatorInfo;
+import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.springframework.stereotype.Component;

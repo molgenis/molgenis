@@ -34,8 +34,8 @@ public class TabixRepository extends AbstractRepository
 	/**
 	 * Creates a new {@link TabixRepository}
 	 * 
-	 * @param fileName
-	 *            name of the Tabix file
+	 * @param file
+	 *            the Tabix file
 	 * @param entityMetaData
 	 *            {@link EntityMetaData} for the tabix file. Attributes should be in the order of the file's columns
 	 * @throws IOException

@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation.mini.impl;
+package org.molgenis.data.annotation.entity.impl;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -6,7 +6,7 @@ import java.util.Collection;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.annotation.mini.ResultFilter;
+import org.molgenis.data.annotation.entity.ResultFilter;
 import org.molgenis.data.vcf.VcfRepository;
 
 import com.google.common.collect.FluentIterable;

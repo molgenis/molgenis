@@ -31,12 +31,12 @@ public class TabixVcfRepository extends VcfRepository
 	private final VcfMeta vcfMeta;
 	private final VcfReader vcfReader;
 
-	private List<TabixReader> tabixReaders;
+	private TabixReader tabixReader;
 
 	public TabixVcfRepository(File file, String entityName) throws IOException
 	{
 		super(file, entityName);
-		tabixReaders = Collections.singletonList(new TabixReader(file.getCanonicalPath()));
+		tabixReader = new TabixReader(file.getCanonicalPath());
 		vcfReader = createVcfReader();
 		vcfMeta = vcfReader.getVcfMeta();
 	}
@@ -85,23 +85,21 @@ public class TabixVcfRepository extends VcfRepository
 	{
 		String queryString = String.format("%s:%s-%2$s", chrom, pos);
 		Builder<Entity> builder = ImmutableList.<Entity> builder();
-		for (TabixReader tabixReader : tabixReaders)
+		org.molgenis.data.annotator.tabix.TabixReader.Iterator iterator = tabixReader.query(queryString);
+		try
 		{
-			org.molgenis.data.annotator.tabix.TabixReader.Iterator iterator = tabixReader.query(queryString);
-			try
+			String line = iterator.next();
+			while (line != null)
 			{
-				String line = iterator.next();
-				while (line != null)
-				{
-					builder.add(toEntity(getEntityMetaData(), new VcfRecord(vcfMeta, line.split("\t")), vcfMeta));
-					line = iterator.next();
-				}
-			}
-			catch (IOException e)
-			{
-				LOG.error("Error reading from tabix reader.", e);
+				builder.add(toEntity(getEntityMetaData(), new VcfRecord(vcfMeta, line.split("\t")), vcfMeta));
+				line = iterator.next();
 			}
 		}
+		catch (IOException e)
+		{
+			LOG.error("Error reading from tabix reader.", e);
+		}
+
 		return builder.build();
 	}
 

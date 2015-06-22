@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation.mini;
+package org.molgenis.data.annotation.entity;
 
 import com.google.auto.value.AutoValue;
 import org.molgenis.data.AttributeMetaData;

@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation.mini.impl;
+package org.molgenis.data.annotation.entity.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -7,10 +7,9 @@ import java.util.List;
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AbstractRepositoryAnnotator;
-import org.molgenis.data.annotation.mini.AnnotatorInfo;
-import org.molgenis.data.annotation.mini.EntityAnnotator;
+import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.molgenis.data.annotation.entity.EntityAnnotator;
 
 public class RepositoryAnnotatorImpl extends AbstractRepositoryAnnotator
 {

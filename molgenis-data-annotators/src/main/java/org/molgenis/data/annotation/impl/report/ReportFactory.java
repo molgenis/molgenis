@@ -13,7 +13,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.impl.MonogenicDiseaseCandidatesServiceAnnotator;
 import org.molgenis.data.annotation.impl.PhenomizerServiceAnnotator;
-import org.molgenis.data.annotation.mini.impl.CaddAnnotator;
+import org.molgenis.data.annotation.entity.impl.CaddAnnotator;
 import org.molgenis.data.vcf.VcfRepository;
 
 public class ReportFactory

@@ -6,7 +6,7 @@ import java.util.List;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.annotation.mini.AnnotatorInfo;
+import org.molgenis.data.annotation.entity.AnnotatorInfo;
 
 /**
  * interface for annotators. annotators take an iterator and return an iterator with some information added or updated
