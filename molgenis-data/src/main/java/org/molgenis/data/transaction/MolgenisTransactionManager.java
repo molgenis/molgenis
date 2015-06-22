@@ -26,10 +26,10 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 public class MolgenisTransactionManager extends JpaTransactionManager
 {
 	private static final long serialVersionUID = 1L;
-	public static String TRANSACTION_ID_RESOURCE_NAME = "transactionId";
+	public static final String TRANSACTION_ID_RESOURCE_NAME = "transactionId";
 	private static final Logger LOG = LoggerFactory.getLogger(MolgenisTransactionManager.class);
-	private IdGenerator idGenerator;
-	private List<MolgenisTransactionListener> transactionListeners = new ArrayList<>();
+	private final IdGenerator idGenerator;
+	private final List<MolgenisTransactionListener> transactionListeners = new ArrayList<>();
 
 	public MolgenisTransactionManager(IdGenerator idGenerator)
 	{
