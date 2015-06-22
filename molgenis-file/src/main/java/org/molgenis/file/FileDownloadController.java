@@ -3,14 +3,15 @@ package org.molgenis.file;
 import static org.molgenis.file.FileDownloadController.URI;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import javax.servlet.http.HttpServletResponse;
 
 import org.molgenis.data.DataService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,18 +33,21 @@ public class FileDownloadController
 		this.dataService = dataService;
 	}
 
-	@RequestMapping(value = "/{fileName}", method = GET)
+	@RequestMapping(value = "/{fileName:.+}", method = GET)
 	public void getFile(@PathVariable("fileName") String fileName, HttpServletResponse response) throws IOException
 	{
-		File fileStoreFile = fileStore.getFile(fileName);
-
-		// if file meta data exists for this file
-		String outputFilename;
-
 		FileMeta fileMeta = dataService.findOne(FileMeta.ENTITY_NAME, fileName, FileMeta.class);
-		if (fileMeta != null)
+		if (fileMeta == null)
 		{
-			outputFilename = fileMeta.getFilename();
+			response.setStatus(HttpStatus.NOT_FOUND.value());
+		}
+		else
+		{
+
+			java.io.File fileStoreFile = fileStore.getFile(fileName);
+
+			// if file meta data exists for this file
+			String outputFilename = fileMeta.getFilename();
 
 			String contentType = fileMeta.getContentType();
 			if (contentType != null)
@@ -56,13 +60,18 @@ public class FileDownloadController
 			{
 				response.setContentLength(size.intValue());
 			}
-		}
-		else
-		{
-			outputFilename = fileName;
-		}
 
-		response.setHeader("Content-Disposition", "attachment; filename=" + outputFilename.replace(" ", "_"));
-		FileCopyUtils.copy(new FileInputStream(fileStoreFile), response.getOutputStream());
+			response.setHeader("Content-Disposition", "attachment; filename=" + outputFilename.replace(" ", "_"));
+
+			InputStream is = new FileInputStream(fileStoreFile);
+			try
+			{
+				FileCopyUtils.copy(is, response.getOutputStream());
+			}
+			finally
+			{
+				is.close();
+			}
+		}
 	}
 }

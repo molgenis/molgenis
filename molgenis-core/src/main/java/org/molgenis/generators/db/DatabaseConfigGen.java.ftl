@@ -7,6 +7,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,6 +23,8 @@ import org.springframework.transaction.annotation.TransactionManagementConfigure
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
+import org.molgenis.data.IdGenerator;
+import org.molgenis.data.transaction.MolgenisTransactionManager;
 /**
  * Database configuration
  */
@@ -39,6 +42,9 @@ public class DatabaseConfig implements TransactionManagementConfigurer
 	private String dbUser;
 	@Value("${r"${db_password:@null}"}")
 	private String dbPassword;
+	
+	@Autowired
+	private IdGenerator idGenerator;
 	
 	@Bean
 	public DataSource dataSource()
@@ -97,7 +103,7 @@ public class DatabaseConfig implements TransactionManagementConfigurer
 	@Bean
 	public PlatformTransactionManager transactionManager()
 	{
-		return new JpaTransactionManager();
+		return new MolgenisTransactionManager(idGenerator);
 	}
 	
 	@Override
