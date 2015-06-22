@@ -24,6 +24,7 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.util.ResourceUtils;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -43,9 +44,8 @@ public class TabixRepositoryTest
 		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("CADD", DECIMAL));
 		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("CADD_SCALED", DECIMAL));
 		repoMetaData.addAttribute("id").setIdAttribute(true).setVisible(false);
-
-		tabixRepository = new TabixRepository(new File("target" + File.separator + "test-classes" + File.separator
-				+ "cadd_test.vcf.gz"), repoMetaData);
+		File file = ResourceUtils.getFile(getClass(), "/cadd_test.vcf.gz");
+		tabixRepository = new TabixRepository(file, repoMetaData);
 	}
 
 	@Test

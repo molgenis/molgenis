@@ -9,19 +9,16 @@ import java.util.Map;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.LocusAnnotator;
 import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
 import org.molgenis.data.annotation.impl.datastructures.Locus;
-import org.molgenis.data.annotation.mini.AnnotatorInfo;
-import org.molgenis.data.annotation.mini.AnnotatorInfo.Status;
-import org.molgenis.data.annotation.mini.AnnotatorInfo.Type;
+import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.annotation.utils.HgncLocationsUtils;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,6 +95,6 @@ public class HgncSymbolServiceAnnotator extends LocusAnnotator
 	public AnnotatorInfo getInfo()
 	{
 		return AnnotatorInfo.create(Status.INDEV, Type.UNUSED, "unknown",
-				"This is the description for the HGNC Annotator");
+				"This is the description for the HGNC Annotator", getOutputMetaData());
 	}
 }

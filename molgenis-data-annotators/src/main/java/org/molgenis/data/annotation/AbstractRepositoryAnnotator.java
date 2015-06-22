@@ -7,26 +7,18 @@ import java.util.List;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Created with IntelliJ IDEA. User: charbonb Date: 21/02/14 Time: 11:24 To change this template use File | Settings |
  * File Templates.
  */
-public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator,
-		ApplicationListener<ContextRefreshedEvent>
+public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 {
 	@Autowired
 	AnnotationService annotatorService;
-
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		annotatorService.addAnnotator(this);
-	}
 
 	@Override
 	public String canAnnotate(EntityMetaData repoMetaData)
@@ -140,7 +132,10 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 	@Override
 	public String getDescription()
 	{
-		return getInfo().getDescription();
+		String desc = "TODO";
+		AnnotatorInfo annotatorInfo = getInfo();
+		if(annotatorInfo != null) desc = annotatorInfo.getDescription();
+		return desc;
 	}
 
 }

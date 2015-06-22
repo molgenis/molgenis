@@ -13,23 +13,18 @@ import java.util.List;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.LocusAnnotator;
 import org.molgenis.data.annotation.impl.datastructures.Locus;
-import org.molgenis.data.annotation.mini.AnnotatorInfo;
-import org.molgenis.data.annotation.mini.AnnotatorInfo.Status;
-import org.molgenis.data.annotation.mini.AnnotatorInfo.Type;
+import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.annotation.utils.HgncLocationsUtils;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 /**
@@ -58,7 +53,6 @@ import org.springframework.stereotype.Component;
 public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 {
 	private final MolgenisSettings molgenisSettings;
-	private final AnnotationService annotatorService;
 	private final HgncLocationsProvider hgncLocationsProvider;
 
 	private static final String NAME = "dbNSFP-Gene";
@@ -98,18 +92,11 @@ public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 	static final String ESSENTIAL_GENE = "Essential_gene";
 
 	@Autowired
-	public DbnsfpGeneServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService,
+	public DbnsfpGeneServiceAnnotator(MolgenisSettings molgenisSettings,
 			HgncLocationsProvider hgncLocationsProvider) throws IOException
 	{
 		this.molgenisSettings = molgenisSettings;
-		this.annotatorService = annotatorService;
 		this.hgncLocationsProvider = hgncLocationsProvider;
-	}
-
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		annotatorService.addAnnotator(this);
 	}
 
 	@Override
@@ -237,6 +224,6 @@ public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 	@Override
 	public AnnotatorInfo getInfo()
 	{
-		return AnnotatorInfo.create(Status.INDEV, Type.UNUSED, "unknown", "no description");
+		return AnnotatorInfo.create(Status.INDEV, Type.UNUSED, "unknown", "no description", getOutputMetaData());
 	}
 }

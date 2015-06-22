@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
+import com.google.common.collect.Lists;
 import org.apache.xmlbeans.impl.piccolo.io.FileFormatException;
 import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.MolgenisFieldTypes;
@@ -201,7 +202,8 @@ public class VcfUtils
 			// print INFO lines for stuff to be annotated
 			if (!annotatedBefore)
 			{
-				for (AttributeMetaData infoAttributeMetaData : infoFields)
+
+				for (AttributeMetaData infoAttributeMetaData : getAtomicAttributesFromList(infoFields))
 				{
 					outputVCFWriter.println(attributeMetaDataToInfoField(infoAttributeMetaData));
 				}
@@ -219,6 +221,23 @@ public class VcfUtils
 
 		inputVcfFileScanner.close();
 		return annotatedBefore;
+	}
+
+	private static List<AttributeMetaData> getAtomicAttributesFromList(Iterable<AttributeMetaData> outputAttrs)
+	{
+		List<AttributeMetaData> result = new ArrayList<>();
+		for (AttributeMetaData attributeMetaData : outputAttrs)
+		{
+			if (attributeMetaData.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
+			{
+				result.addAll(getAtomicAttributesFromList(attributeMetaData.getAttributeParts()));
+			}
+			else
+			{
+				result.add(attributeMetaData);
+			}
+		}
+		return result;
 	}
 
 	private static String attributeMetaDataToInfoField(AttributeMetaData infoAttributeMetaData)

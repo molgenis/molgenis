@@ -4,12 +4,12 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
-import org.molgenis.data.annotation.impl.CaddServiceAnnotator;
 import org.molgenis.data.annotation.impl.ClinVarVCFServiceAnnotator;
 import org.molgenis.data.annotation.impl.ClinicalGenomicsDatabaseServiceAnnotator;
 import org.molgenis.data.annotation.impl.DeNovoAnnotator;
@@ -20,11 +20,11 @@ import org.molgenis.data.annotation.impl.MonogenicDiseaseCandidatesServiceAnnota
 import org.molgenis.data.annotation.impl.PhenomizerServiceAnnotator;
 import org.molgenis.data.annotation.impl.SnpEffServiceAnnotator;
 import org.molgenis.data.annotation.impl.ThousandGenomesServiceAnnotator;
-import org.molgenis.data.annotation.mini.EntityAnnotator;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -36,6 +36,9 @@ public class CmdLineAnnotator
 
 	@Autowired
 	private MolgenisSettings molgenisSettings;
+
+	@Autowired
+	private ApplicationContext applicationContext;
 
 	public void run(String[] args) throws Exception
 	{
@@ -126,7 +129,9 @@ public class CmdLineAnnotator
 		// engage!
 		if (annotatorName.equals("cadd"))
 		{
-			new CaddServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
+			Map<String, RepositoryAnnotator> annotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
+			RepositoryAnnotator annotator = annotators.get("cadd");
+			annotate(annotator, inputVcfFile, outputVCFFile);
 		}
 		else if (annotatorName.equals("snpeff"))
 		{
@@ -204,5 +209,23 @@ public class CmdLineAnnotator
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext("org.molgenis.data.annotation");
 		CmdLineAnnotator main = ctx.getBean(CmdLineAnnotator.class);
 		main.run(args);
+	}
+
+	public void annotate(RepositoryAnnotator annotator, File inputVcfFile, File outputVCFFile) throws Exception
+	{
+		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
+		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
+		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, annotator.getOutputMetaData(),
+				annotator.getOutputMetaData().get(0).getName());
+		System.out.println("Now starting to process the data.");
+		Iterator<Entity> annotatedRecords = annotator.annotate(vcfRepo);
+		while (annotatedRecords.hasNext())
+		{
+			Entity annotatedRecord = annotatedRecords.next();
+			outputVCFWriter.println(VcfUtils.convertToVCF(annotatedRecord));
+		}
+		outputVCFWriter.close();
+		vcfRepo.close();
+		System.out.println("All done!");
 	}
 }

@@ -5,16 +5,26 @@ import static org.mockito.Mockito.when;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.molgenis.data.Query;
+import org.molgenis.data.annotation.resources.ResourceConfig;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.util.ResourceUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.io.File;
 
 public class ResourceImplTest
 {
 	@Mock
 	MolgenisSettings molgenisSettings;
+
+	@Mock
+	ResourceConfig config;
+
+	@Mock
+	TabixRepositoryFactory factory;
 
 	private ResourceImpl resource;
 
@@ -22,7 +32,7 @@ public class ResourceImplTest
 	public void beforeMethod()
 	{
 		MockitoAnnotations.initMocks(this);
-		resource = new ResourceImpl("cadd_test", molgenisSettings, "cadd_key", null, new TabixVcfRepositoryFactory(
+		resource = new ResourceImpl("cadd_test", config, new TabixVcfRepositoryFactory(
 				"cadd"));
 	}
 
@@ -33,7 +43,9 @@ public class ResourceImplTest
 		Assert.assertFalse(resource.isAvailable());
 	}
 
-	@Test
+	/**
+	 * FIXME: reuse in config test
+	 * @Test
 	public void ifSettingBecomesDefinedAndFileExistsResourceBecomesAvailable()
 	{
 		Assert.assertFalse(resource.isAvailable());
@@ -48,16 +60,16 @@ public class ResourceImplTest
 	@Test
 	public void ifDefaultDoesNotExistResourceIsUnavailable()
 	{
-		resource = new ResourceImpl("cadd_test", molgenisSettings, "cadd_key", "defaultNoExist",
+		resource = new ResourceImpl("cadd_test", config,
 				new TabixVcfRepositoryFactory("cadd"));
 		Assert.assertFalse(resource.isAvailable());
-	}
+	}**/
 
 	@Test
 	public void testFindAllReturnsResult()
 	{
-		when(molgenisSettings.getProperty("cadd_key", null)).thenReturn(
-				"src/test/resources/gonl.chr1.snps_indels.r5.vcf.gz");
+		File file = ResourceUtils.getFile(getClass(), "/gonl.chr1.snps_indels.r5.vcf.gz");
+		when(config.getFile()).thenReturn(file);
 		Query query = QueryImpl.EQ("#CHROM", "1").and().eq("POS", 126108);
 
 		System.out.println(resource.findAll(query));
@@ -66,8 +78,9 @@ public class ResourceImplTest
 	@Test
 	public void testFindAllReturnsResultFile2()
 	{
-		when(molgenisSettings.getProperty("cadd_key", null)).thenReturn(
-				"src/test/resources/ALL.chr1.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz");
+		File file = ResourceUtils.getFile(getClass(), "/ALL.chr1.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz");
+		when(config.getFile()).thenReturn(file);
+
 		Query query = QueryImpl.EQ("#CHROM", "1").and().eq("POS", 10352);
 
 		System.out.println(resource.findAll(query));

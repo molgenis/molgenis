@@ -3,6 +3,7 @@ package org.molgenis.data.annotator.tabix;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import org.molgenis.data.Entity;
@@ -83,8 +84,8 @@ public class TabixVcfRepository extends VcfRepository
 	private synchronized ImmutableList<Entity> query(String chrom, long pos)
 	{
 		String queryString = String.format("%s:%s-%2$s", chrom, pos);
-		org.molgenis.data.annotator.tabix.TabixReader.Iterator iterator = tabixReader.query(queryString);
 		Builder<Entity> builder = ImmutableList.<Entity> builder();
+		org.molgenis.data.annotator.tabix.TabixReader.Iterator iterator = tabixReader.query(queryString);
 		try
 		{
 			String line = iterator.next();
@@ -98,6 +99,7 @@ public class TabixVcfRepository extends VcfRepository
 		{
 			LOG.error("Error reading from tabix reader.", e);
 		}
+
 		return builder.build();
 	}
 
