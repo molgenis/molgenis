@@ -38,7 +38,11 @@
 					</#if>
 					<#if feedbackRow.success>
 						<#if feedbackRow.value??>
-							<td>${feedbackRow.value?html}</td>
+							<#if feedbackRow.value?is_date_like>
+								<td>${feedbackRow.value?datetime}</td>
+							<#else>
+								<td>${feedbackRow.value?html}</td>
+							</#if>
 						<#else>	
 							<td><i>null</i></td>
 						</#if>
