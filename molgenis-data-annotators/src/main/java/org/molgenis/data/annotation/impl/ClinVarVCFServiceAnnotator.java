@@ -3,32 +3,25 @@ package org.molgenis.data.annotation.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.utils.AnnotatorUtils;
-import org.molgenis.data.annotation.utils.TabixReader;
 import org.molgenis.data.annotation.VariantAnnotator;
-import org.molgenis.data.vcf.utils.VcfUtils;
-import org.molgenis.data.support.AnnotationServiceImpl;
+import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
+import org.molgenis.data.annotation.utils.AnnotatorUtils;
+import org.molgenis.data.annotator.tabix.TabixReader;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.server.MolgenisSimpleSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 @Component("clinvarVcfService")
@@ -37,8 +30,6 @@ public class ClinVarVCFServiceAnnotator extends VariantAnnotator
 	private static final Logger LOG = LoggerFactory.getLogger(ClinVarVCFServiceAnnotator.class);
 
 	private final MolgenisSettings molgenisSettings;
-	private final AnnotationService annotatorService;
-
 	private static final String NAME = "ClinvarVCF";
 
 	public static final String CLINVAR_VCF_LOCATION_PROPERTY = "clinvar_location";
@@ -51,11 +42,9 @@ public class ClinVarVCFServiceAnnotator extends VariantAnnotator
 			+ ",Number=1,Type=String,Description=\"ClinVar clinical significance\">" });
 
 	@Autowired
-	public ClinVarVCFServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService)
-			throws IOException
+	public ClinVarVCFServiceAnnotator(MolgenisSettings molgenisSettings) throws IOException
 	{
 		this.molgenisSettings = molgenisSettings;
-		this.annotatorService = annotatorService;
 	}
 
 	public ClinVarVCFServiceAnnotator(File clinvarVcfFileLocation, File inputVcfFile, File outputVCFFile)
@@ -65,8 +54,6 @@ public class ClinVarVCFServiceAnnotator extends VariantAnnotator
 		this.molgenisSettings = new MolgenisSimpleSettings();
 		molgenisSettings.setProperty(CLINVAR_VCF_LOCATION_PROPERTY, clinvarVcfFileLocation.getAbsolutePath());
 
-		this.annotatorService = new AnnotationServiceImpl();
-
 		checkTabixReader();
 
 		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
@@ -74,7 +61,7 @@ public class ClinVarVCFServiceAnnotator extends VariantAnnotator
 		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
 		Iterator<Entity> vcfIter = vcfRepo.iterator();
 
-		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields,
+		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, getOutputMetaData(),
 				CLINVAR_CLINSIG.substring(VcfRepository.getInfoPrefix().length()));
 
 		System.out.println("Now starting to process the data.");
@@ -103,12 +90,6 @@ public class ClinVarVCFServiceAnnotator extends VariantAnnotator
 		outputVCFWriter.close();
 		vcfRepo.close();
 		System.out.println("All done!");
-	}
-
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		annotatorService.addAnnotator(this);
 	}
 
 	@Override
@@ -222,21 +203,18 @@ public class ClinVarVCFServiceAnnotator extends VariantAnnotator
 	}
 
 	@Override
-	public EntityMetaData getOutputMetaData()
+	public List<AttributeMetaData> getOutputMetaData()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CLINVAR_CLINSIG, FieldTypeEnum.STRING)
+		List<AttributeMetaData> metadata = new ArrayList<>();
+		metadata.add(new DefaultAttributeMetaData(CLINVAR_CLINSIG, FieldTypeEnum.STRING)
 				.setLabel(CLINVAR_CLINSIG_LABEL));
 		return metadata;
 	}
 
 	@Override
-	public String getDescription()
+	public AnnotatorInfo getInfo()
 	{
-		return "Fitcon is a tool for scoring the functional change of single nucleotide variants in the human genome.\n"
-				+ "\n"
-				+ "While many variant annotation and scoring utils are around, most annotations tend to exploit a single information type (e.g. conservation) and/or are restricted in scope (e.g. to missense changes). Thus, a broadly applicable metric that objectively weights and integrates diverse information is needed. Combined Annotation Dependent Depletion (CADD) is a framework that integrates multiple functional annotations into one metric by contrasting variants that survived natural selection with simulated mutations.\n";
-
+		return AnnotatorInfo.create(Status.BETA, Type.PHENOTYPE_ASSOCIATION, "clinvar", "", getOutputMetaData());
 	}
 
 }

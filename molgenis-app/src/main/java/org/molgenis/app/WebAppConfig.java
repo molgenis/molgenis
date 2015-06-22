@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.poi.ss.formula.eval.NotImplementedException;
+import org.molgenis.CommandLineOnlyConfiguration;
 import org.molgenis.DatabaseConfig;
 import org.molgenis.auth.GroupAuthority;
 import org.molgenis.auth.UserAuthority;
@@ -39,7 +40,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -55,7 +58,7 @@ import freemarker.template.TemplateException;
 @EnableTransactionManagement
 @EnableWebMvc
 @EnableAsync
-@ComponentScan("org.molgenis")
+@ComponentScan(basePackages = "org.molgenis", excludeFilters = @Filter(type = FilterType.ANNOTATION, value = CommandLineOnlyConfiguration.class))
 @Import(
 { WebAppSecurityConfig.class, DatabaseConfig.class, EmbeddedElasticSearchConfig.class })
 public class WebAppConfig extends MolgenisWebAppConfig

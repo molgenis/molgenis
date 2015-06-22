@@ -12,23 +12,21 @@ import java.util.List;
 import java.util.Map;
 
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.annotation.LocusAnnotator;
-import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.data.annotation.impl.datastructures.HpoData;
+import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.provider.HpoDataProvider;
-import org.molgenis.data.support.AnnotationServiceImpl;
+import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.server.MolgenisSimpleSettings;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 /**
@@ -43,7 +41,6 @@ import org.springframework.stereotype.Component;
 public class HpoServiceAnnotator extends LocusAnnotator
 {
 	private final MolgenisSettings molgenisSettings;
-	private final AnnotationService annotatorService;
 	private final HpoDataProvider hpoDataProvider;
 
 	private static final String NAME = "HPO";
@@ -62,14 +59,11 @@ public class HpoServiceAnnotator extends LocusAnnotator
 					+ ",Number=1,Type=String,Description=\"HPO terms\">", });
 
 	@Autowired
-	public HpoServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotationService,
-			HpoDataProvider hpoDataProvider) throws IOException
+	public HpoServiceAnnotator(MolgenisSettings molgenisSettings, HpoDataProvider hpoDataProvider) throws IOException
 	{
 		if (molgenisSettings == null) throw new IllegalArgumentException("molgenisSettings is null");
-		if (annotationService == null) throw new IllegalArgumentException("annotationService is null");
 		if (hpoDataProvider == null) throw new IllegalArgumentException("hpoDataProvider is null");
 		this.molgenisSettings = molgenisSettings;
-		this.annotatorService = annotationService;
 		this.hpoDataProvider = hpoDataProvider;
 	}
 
@@ -79,14 +73,13 @@ public class HpoServiceAnnotator extends LocusAnnotator
 		molgenisSettings.setProperty(HPO_FILE_LOCATION, hpoFileLocation.getAbsolutePath());
 		hpoDataProvider = new HpoDataProvider(molgenisSettings);
 
-		this.annotatorService = new AnnotationServiceImpl();
 
 		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
 
 		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
 		Iterator<Entity> vcfIter = vcfRepo.iterator();
 
-		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields,
+		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, getOutputMetaData(),
 				HPO_IDS.substring(VcfRepository.getInfoPrefix().length()));
 
 		System.out.println("Now starting to process the data.");
@@ -115,12 +108,6 @@ public class HpoServiceAnnotator extends LocusAnnotator
 		outputVCFWriter.close();
 		vcfRepo.close();
 		System.out.println("All done!");
-	}
-
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		annotatorService.addAnnotator(this);
 	}
 
 	@Override
@@ -208,13 +195,19 @@ public class HpoServiceAnnotator extends LocusAnnotator
 	}
 
 	@Override
-	public EntityMetaData getOutputMetaData()
+	public List<AttributeMetaData> getOutputMetaData()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_IDS, MolgenisFieldTypes.FieldTypeEnum.STRING)
+		List<AttributeMetaData> metadata = new ArrayList<>();
+		metadata.add(new DefaultAttributeMetaData(HPO_IDS, MolgenisFieldTypes.FieldTypeEnum.STRING)
 				.setLabel(HPO_IDS_LABEL));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_TERMS, MolgenisFieldTypes.FieldTypeEnum.STRING)
+		metadata.add(new DefaultAttributeMetaData(HPO_TERMS, MolgenisFieldTypes.FieldTypeEnum.STRING)
 				.setLabel(HPO_TERMS_LABEL));
 		return metadata;
+	}
+
+	@Override
+	public AnnotatorInfo getInfo()
+	{
+		return AnnotatorInfo.create(Status.INDEV, Type.UNUSED, "unknown", "no description", getOutputMetaData());
 	}
 }

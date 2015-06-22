@@ -12,10 +12,10 @@ import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.UserAuthority;
 import org.molgenis.data.DataService;
 import org.molgenis.data.IndexedCrudRepositorySecurityDecorator;
-import org.molgenis.data.annotation.impl.CaddServiceAnnotator;
 import org.molgenis.data.annotation.impl.ClinVarServiceAnnotator;
 import org.molgenis.data.annotation.impl.DbnsfpGeneServiceAnnotator;
 import org.molgenis.data.annotation.impl.DbnsfpVariantServiceAnnotator;
+import org.molgenis.data.annotation.entity.impl.CaddAnnotator;
 import org.molgenis.data.annotation.provider.CgdDataProvider;
 import org.molgenis.data.annotation.impl.SnpEffServiceAnnotator;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
@@ -111,7 +111,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		if (!molgenisHomeDir.endsWith("/")) molgenisHomeDir = molgenisHomeDir + '/';
 		String molgenisHomeDirAnnotationResources = molgenisHomeDir + "data/annotation_resources";
 
-		runtimePropertyMap.put(CaddServiceAnnotator.CADD_FILE_LOCATION_PROPERTY, molgenisHomeDirAnnotationResources
+		runtimePropertyMap.put(CaddAnnotator.CADD_FILE_LOCATION_PROPERTY, molgenisHomeDirAnnotationResources
 				+ "/CADD/1000G.vcf.gz");
 		runtimePropertyMap.put(CgdDataProvider.CGD_FILE_LOCATION_PROPERTY, molgenisHomeDirAnnotationResources
 				+ "/CGD/CGD.txt");
@@ -121,8 +121,8 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 				molgenisHomeDirAnnotationResources + "/dbnsfp/dbNSFP2.3_variant.chr");
 		runtimePropertyMap.put(ClinVarServiceAnnotator.CLINVAR_FILE_LOCATION_PROPERTY,
 				molgenisHomeDirAnnotationResources + "/Clinvar/variant_summary.txt");
-        runtimePropertyMap.put(SnpEffServiceAnnotator.SNPEFF_JAR_LOCATION_PROPERTY,
-                molgenisHomeDirAnnotationResources + "/Applications/snpEff/snpEff.jar");
+		runtimePropertyMap.put(SnpEffServiceAnnotator.SNPEFF_JAR_LOCATION_PROPERTY, molgenisHomeDirAnnotationResources
+				+ "/Applications/snpEff/snpEff.jar");
 
 		runtimePropertyMap.put(KEY_FOOTER, DEFAULT_VAL_FOOTER);
 
