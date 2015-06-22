@@ -38,7 +38,9 @@
 				<tr>
 					<#if (sourceAttributeNames)?has_content>
 						<#list sourceAttributeNames as sourceAttributeName>
-							<td>${feedbackRow.sourceEntity.getString(sourceAttributeName)?html}</td>
+							<#if feedbackRow.sourceEntity.getString(sourceAttributeName)??>
+								<td>${feedbackRow.sourceEntity.getString(sourceAttributeName)?html}</td>
+							</#if>
 						</#list>
 					</#if>
 					<#if feedbackRow.success>
