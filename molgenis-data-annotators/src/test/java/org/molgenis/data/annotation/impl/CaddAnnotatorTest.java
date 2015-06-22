@@ -15,9 +15,14 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.Query;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.entity.QueryCreator;
 import org.molgenis.data.annotation.entity.impl.CaddAnnotator;
+import org.molgenis.data.annotation.entity.impl.LocusQueryCreator;
+import org.molgenis.data.annotation.resources.Resources;
+import org.molgenis.data.annotation.resources.impl.ResourcesImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -32,20 +37,24 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-@ContextConfiguration(classes = {CaddAnnotatorTest.Config.class,CaddAnnotator.class})
+@ContextConfiguration(classes =
+{ CaddAnnotatorTest.Config.class, CaddAnnotator.class })
 public class CaddAnnotatorTest extends AbstractTestNGSpringContextTests
 {
 
-
 	@Autowired
 	RepositoryAnnotator annotator;
+
+	@Autowired
+	Resources resources;
 
 	public DefaultEntityMetaData metaDataCanAnnotate = new DefaultEntityMetaData("test");
 	public DefaultEntityMetaData metaDataCantAnnotate = new DefaultEntityMetaData("test");
 
 	public AttributeMetaData attributeMetaDataChrom = new DefaultAttributeMetaData(VcfRepository.CHROM,
 			MolgenisFieldTypes.FieldTypeEnum.STRING);
-	public AttributeMetaData attributeMetaDataPos = new DefaultAttributeMetaData(VcfRepository.POS, MolgenisFieldTypes.FieldTypeEnum.LONG);
+	public AttributeMetaData attributeMetaDataPos = new DefaultAttributeMetaData(VcfRepository.POS,
+			MolgenisFieldTypes.FieldTypeEnum.LONG);
 	public AttributeMetaData attributeMetaDataRef = new DefaultAttributeMetaData(VcfRepository.REF,
 			MolgenisFieldTypes.FieldTypeEnum.STRING);
 	public AttributeMetaData attributeMetaDataAlt = new DefaultAttributeMetaData(VcfRepository.ALT,
@@ -140,8 +149,7 @@ public class CaddAnnotatorTest extends AbstractTestNGSpringContextTests
 		Entity resultEntity = results.next();
 
 		assertEquals(resultEntity.get(CaddAnnotator.CADD_ABS), expectedEntity.get(CaddAnnotator.CADD_ABS));
-		assertEquals(resultEntity.get(CaddAnnotator.CADD_SCALED),
-				expectedEntity.get(CaddAnnotator.CADD_SCALED));
+		assertEquals(resultEntity.get(CaddAnnotator.CADD_SCALED), expectedEntity.get(CaddAnnotator.CADD_SCALED));
 	}
 
 	@Test
@@ -157,8 +165,7 @@ public class CaddAnnotatorTest extends AbstractTestNGSpringContextTests
 		Entity resultEntity = results.next();
 
 		assertEquals(resultEntity.get(CaddAnnotator.CADD_ABS), expectedEntity.get(CaddAnnotator.CADD_ABS));
-		assertEquals(resultEntity.get(CaddAnnotator.CADD_SCALED),
-				expectedEntity.get(CaddAnnotator.CADD_SCALED));
+		assertEquals(resultEntity.get(CaddAnnotator.CADD_SCALED), expectedEntity.get(CaddAnnotator.CADD_SCALED));
 	}
 
 	@Test
@@ -177,8 +184,7 @@ public class CaddAnnotatorTest extends AbstractTestNGSpringContextTests
 		Entity resultEntity = results.next();
 
 		assertEquals(resultEntity.get(CaddAnnotator.CADD_ABS), expectedEntity.get(CaddAnnotator.CADD_ABS));
-		assertEquals(resultEntity.get(CaddAnnotator.CADD_SCALED),
-				expectedEntity.get(CaddAnnotator.CADD_SCALED));
+		assertEquals(resultEntity.get(CaddAnnotator.CADD_SCALED), expectedEntity.get(CaddAnnotator.CADD_SCALED));
 	}
 
 	@Test
@@ -218,6 +224,12 @@ public class CaddAnnotatorTest extends AbstractTestNGSpringContextTests
 		public AnnotationService annotationService()
 		{
 			return mock(AnnotationService.class);
+		}
+
+		@Bean
+		public Resources resources()
+		{
+			return new ResourcesImpl();
 		}
 	}
 }

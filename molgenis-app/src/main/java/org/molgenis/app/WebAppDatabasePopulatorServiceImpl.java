@@ -15,7 +15,7 @@ import org.molgenis.data.IndexedCrudRepositorySecurityDecorator;
 import org.molgenis.data.annotation.impl.ClinVarServiceAnnotator;
 import org.molgenis.data.annotation.impl.DbnsfpGeneServiceAnnotator;
 import org.molgenis.data.annotation.impl.DbnsfpVariantServiceAnnotator;
-import org.molgenis.data.annotation.mini.impl.CaddAnnotator;
+import org.molgenis.data.annotation.entity.impl.CaddAnnotator;
 import org.molgenis.data.annotation.provider.CgdDataProvider;
 import org.molgenis.data.annotation.impl.SnpEffServiceAnnotator;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;

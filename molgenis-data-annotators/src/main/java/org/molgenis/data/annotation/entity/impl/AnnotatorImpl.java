@@ -15,6 +15,7 @@ import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.annotation.entity.QueryCreator;
 import org.molgenis.data.annotation.entity.ResultFilter;
 import org.molgenis.data.annotation.resources.Resource;
+import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
 
@@ -23,27 +24,22 @@ import org.springframework.context.ApplicationContext;
 
 public class AnnotatorImpl implements EntityAnnotator
 {
-	private ApplicationContext applicationContext;
-
+	private Resources resources;
 	private DataService dataService;
-
 	private String sourceRepositoryName;
-
 	private AnnotatorInfo info;
-
 	private QueryCreator queryCreator;
-
 	private ResultFilter resultFilter;
 
 	public AnnotatorImpl(String sourceRepositoryName, AnnotatorInfo info, QueryCreator queryCreator,
-			ResultFilter resultFilter, DataService dataService, ApplicationContext applicationContext)
+			ResultFilter resultFilter, DataService dataService, Resources resources)
 	{
 		this.sourceRepositoryName = sourceRepositoryName;
 		this.info = info;
 		this.queryCreator = queryCreator;
 		this.resultFilter = resultFilter;
 		this.dataService = dataService;
-		this.applicationContext = applicationContext;
+		this.resources = resources;
 	}
 
 	@Override
@@ -59,10 +55,9 @@ public class AnnotatorImpl implements EntityAnnotator
 		Iterable<Entity> annotatationSourceEntities;
 
 		Query q = queryCreator.createQuery(entity);
-		Resource resource = getResource();
-		if (resource != null)
+		if (resources.hasRepository(sourceRepositoryName))
 		{
-			annotatationSourceEntities = resource.findAll(q);
+			annotatationSourceEntities = resources.findAll(sourceRepositoryName, q);
 		}
 		else
 		{
@@ -85,17 +80,6 @@ public class AnnotatorImpl implements EntityAnnotator
 		return results;
 	}
 
-	private Resource getResource()
-	{
-		Map<String, Resource> resources = applicationContext.getBeansOfType(Resource.class);
-		Resource resource = null;
-		for (Resource res : resources.values())
-		{
-			if (res.getName().equals(sourceRepositoryName)) resource = res;
-		}
-		return resource;
-	}
-
 	@Override
 	public AttributeMetaData getAnnotationAttributeMetaData()
 	{
@@ -109,8 +93,7 @@ public class AnnotatorImpl implements EntityAnnotator
 	@Override
 	public boolean sourceExists()
 	{
-		return (getResource() != null && getResource().isAvailable())
-				|| dataService.hasRepository(sourceRepositoryName);
+		return resources.hasRepository(sourceRepositoryName) || dataService.hasRepository(sourceRepositoryName);
 	}
 
 	@Override
