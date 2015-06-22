@@ -1,6 +1,16 @@
 <div id="algorithm-result-feedback-container">
-	<strong>Success: ${success}, Missing: ${missing}, Error: ${error}</strong></p>
-	<form class="form-inline">		
+	<form>
+		<div class="form-group">
+			<div class="input-group">
+  				<span class="input-group-btn">
+    				<button id="result-search-btn" class="btn btn-default" type="button"><span class="glyphicon glyphicon-search"></button>
+  				</span>
+  				<input id="result-search-field" type="text" class="form-control" placeholder="Search...">
+			</div>
+		</div>
+	</form>
+	
+	<form class="form-inline">
 		<div class="form-group">
 			<div class="checkbox">
 				<label>
@@ -8,16 +18,11 @@
 				</label>
 			</div>
 		</div>	
-		<div class="form-group pull-right">
-			<div class="input-group">
-  				<span class="input-group-btn">
-    				<button id="result-search-btn" class="btn btn-default" type="button"><span class="glyphicon glyphicon-search"></button>
-  				</span>
-  				<input id="result-search-field" type="text" class="form-control" placeholder="Search">
-			</div>
-			<br></br>
+		<div class="form-group  pull-right">
+			<strong>Success: ${success}, Missing: ${missing}, Error: ${error}</strong></p>
 		</div>
 	</form>
+	
 	<br/>
 	<table class="table table-bordered">
 		<thead>

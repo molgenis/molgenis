@@ -125,7 +125,6 @@
 			target : $('input[name="target"]').val(),
 			source : $('input[name="source"]').val(),
 			targetAttribute : $('input[name="targetAttribute"]').val(),
-			// TODO mapping editor for > 1 attribute
 			sourceAttribute : getSourceAttrs(algorithm)[0],
 			algorithm : algorithm
 		});
@@ -163,6 +162,13 @@
 	$(function() {
 
 		var editor, searchQuery, selectedAttributes, $textarea, initialValue, algorithm, feedBackRequest, row, targetAttributeDataType;
+
+		// tooltip placement
+		$(document).ready(function() {
+			$("[rel=tooltip]").tooltip({
+				placement : 'right'
+			});
+		});
 
 		// create ace editor
 		$textarea = $("#ace-editor-text-area");
@@ -218,24 +224,12 @@
 			});
 		});
 
+		// page update on attribute selection / deselection
 		$('#attribute-mapping-table :checkbox').on('change', function() {
-			var $checkedAttributes = $('#attribute-mapping-table :checkbox:checked');
-			var amountChecked = $checkedAttributes.length;
-			if (this.checked) {
-
-			}
-
-		});
-		// test button for simple attribute selection
-		$('#test-mapping-btn').on('click', function() {
 			selectedAttributes = [];
 
-			// for every checkbox that is checked, get the source.name
-			$('#attribute-mapping-table').find('tr').each(function() {
-				row = $(this);
-				if (row.find('input[type="checkbox"]').is(':checked')) {
-					selectedAttributes.push(row.attr('class'));
-				}
+			$('#attribute-mapping-table :checkbox:checked').each(function() {
+				selectedAttributes.push($(this).attr('class'));
 			});
 
 			// attributes into editor
@@ -244,33 +238,32 @@
 			// updates algorithm
 			algorithm = editor.getSession().getValue();
 
-			// generate result table
-			loadAlgorithmResult(algorithm);
+			// events only fired when 1 or more attributes is selected
+			if ($('#attribute-mapping-table :checkbox:checked').length > 0) {
 
-			// generate mapping editor if target attribute is an xref or
-			// categorical
-			targetAttributeDataType = $('input[name="targetAttributeType"]').val();
-			if (targetAttributeDataType === 'xref' || targetAttributeDataType === 'categorical') {
-				loadMappingEditor(algorithm);
+				// on selection of an attribute, show all fields
+				$('#result-container').css('display', 'inline');
+				$('#attribute-mapping-container').css('display', 'inline');
+
+				// generate result table
+				loadAlgorithmResult(algorithm);
+
+				// generate mapping editor if target attribute is an xref or
+				// categorical
+				targetAttributeDataType = $('input[name="targetAttributeType"]').val();
+				if (targetAttributeDataType === 'xref' || targetAttributeDataType === 'categorical') {
+					loadMappingEditor(algorithm);
+				}
+			} else {
+				// events when no attributes are selected
+				$('#result-container').css('display', 'none');
+				$('#attribute-mapping-container').css('display', 'none');
 			}
 
-			// on selection of an attribute, show all fields
-			$('#attribute-mapping-container').css('display', 'inline');
-			$('#result-container').css('display', 'inline');
 		});
 
-		// only show selected attributes in table when checked
-		$('#selected-only-checkbox').on('click', function() {
-			var checkedAttributes;
-
-			if ($(this).is(':checked')) {
-				$('#attribute-mapping-table').find('input[type="checkbox"]:checked').each(function() {
-					checkedAttributes = $(this).attr('class');
-				});
-
-			} else {
-				// show all attributes
-			}
+		$('#js-function-modal-btn').on('click', function() {
+			$('#js-function-modal').modal('show');
 		});
 
 		// look for attributes in the attribute table
