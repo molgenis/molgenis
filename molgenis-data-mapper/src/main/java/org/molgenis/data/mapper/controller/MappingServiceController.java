@@ -368,14 +368,14 @@ public class MappingServiceController extends MolgenisPluginController
 
 		if (attributeMapping == null)
 		{
-			attributeMapping = entityMapping.addAttributeMapping(request.getTargetAttribute());
+			attributeMapping = entityMapping.addAttributeMapping(targetAttribute);
 		}
 
 		model.addAttribute("mappingProject", project);
 		model.addAttribute("entityMapping", entityMapping);
 		model.addAttribute("attributeMapping", attributeMapping);
 		model.addAttribute("attributes",
-				Lists.newArrayList(dataService.getEntityMetaData(request.getSource()).getAtomicAttributes()));
+				Lists.newArrayList(dataService.getEntityMetaData(source).getAtomicAttributes()));
 		model.addAttribute("hasWritePermission", hasWritePermission(project, false));
 
 		return VIEW_ATTRIBUTE_MAPPING;
