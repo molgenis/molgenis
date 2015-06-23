@@ -1,21 +1,30 @@
 (function($, molgenis) {	
 	"use strict";
 	var restApi = new molgenis.RestClient();
-	
+	var selectedEntity;
+	var selectedEntityName;
 	
 	$(function() {
-		var selectedEntityName;
 		
 		$('.entity-dropdown-item').click(function() {
 			var entityUri = $(this).attr('id');
 			load(entityUri);
 		});
-		console.log(molgenis.getContextUrl() + '/ac');
-		$('#term-input').on('keyup paste', null, function(){
+
+		/**$('#term-input').on('keyup paste', null, function(){
+			$('#term-input').dropdown('toggle');
 			$.get(molgenis.getContextUrl() + '/ac',
 				{search:$('#term-input').val()},
 				function(data){
 				$('#ac-menu').html(data);
+			});
+		});*/
+		
+		$('#filter-submit').on('click', null, function() {
+			$.post(molgenis.getContextUrl() + '/filter',
+			{terms:$('#term-input').val(), entity:selectedEntity.label, recursive:true},
+			function(data){
+				console.log(data);
 			});
 		});
 	});

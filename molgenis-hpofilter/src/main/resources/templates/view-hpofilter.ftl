@@ -30,10 +30,11 @@
 	<div class="row">
 		<div class="col-md-4">
 			<div class="dropdown">
-				<button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">dropdown</button>
+				<button class="btn btn-primary dropdown-toggle btn-block" type="button" id="filter-submit">Submit</button>
+				<br/>
 				<div class="input-group">
 					<span class="input-group-addon" id="basic-addon1">HPO Term</span>
-					<input type="text" class="form-control" placeholder="HP:1234567" id="term-input" data-toggle="dropdown">
+					<input type="text" class="form-control" placeholder="HP:1234567" id="term-input">
 				</div>
 				<ul class="dropdown-menu scrollable-menu" id="ac-menu">
 					<li>1</li>
@@ -45,7 +46,7 @@
 			</div>
 		</div>
 	
-		<div class="col-md-8">
+		<div class="col-md-8" id="results-col">
 			Results go here maybe
 		</div>
 	</div>

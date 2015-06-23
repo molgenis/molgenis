@@ -1,4 +1,4 @@
-package org.molgenis.hpofilter;
+package org.molgenis.hpofilter.data;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,6 +14,7 @@ import java.util.concurrent.Future;
 
 import org.molgenis.data.Entity;
 import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.hpofilter.data.HGNCLocations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -56,7 +57,15 @@ public class HpoFilterDataProvider
 		 * O(log(n))-complexity, even if it's marginally faster.
 		 */
 		hpoHeirarchy = new HashMap<String, List<String>>();
+		/*
+		 * This HashMap contains the description -> HPO
+		 * mappings, for autocomplete.
+		 */
 		descriptionMap = new HashMap<String, String>();
+		/*
+		 * 
+		 */
+		HashMap<String, HGNCLocations> hgncGeneMap = new HashMap<String, HGNCLocations>();
 	}
 	
 	public HashMap<String, Stack<String>> getAssocData() {
@@ -86,6 +95,12 @@ public class HpoFilterDataProvider
 					@Override
 					public void run() {
 						assocIsParsed = parseHPOMapping();
+					}
+				});
+				THREADPOOL.submit(new Runnable() {
+					@Override
+					public void run() {
+						assocIsParsed = parseHgncMapping();
 					}
 				});
 				// but block until processing is done
@@ -221,5 +236,10 @@ public class HpoFilterDataProvider
 		}catch (IOException e) {
 			throw new RuntimeException("Error while downloading or reading association file");
 		}
+	}
+	
+	boolean parseHgncMapping()
+	{
+		return true;
 	}
 }
