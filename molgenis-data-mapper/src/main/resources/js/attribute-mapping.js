@@ -146,21 +146,60 @@
 	/**
 	 * Clears the editor and inserts selected attributes.
 	 * 
-	 * @param attribute
-	 *            the name of the attribute
+	 * @param selectedAttributes
+	 *            all the selected attributes
 	 * @param editor
 	 *            the ace algorithm editor to insert the attribute into
 	 */
 	function insertSelectedAttributes(selectedAttributes, editor) {
-		editor.setValue(""); // clear the editor
+		var existingAlgorithm = editor.getSession().getValue(), newAttributes = [], existingAttributes = getSourceAttrs(existingAlgorithm);
 		$(selectedAttributes).each(function() {
-			editor.insert("$('" + this + "').value();", -1);
+			if (existingAlgorithm.indexOf(this) === -1) {
+				insertAttribute(this, editor);
+			}
+		});
+
+		$(existingAttributes).each(function() {
+			if (selectedAttributes.indexOf(this) === -1) {
+				removeAttribute(this, editor);
+			}
+		});
+	}
+
+	/**
+	 * Inserts a single attribute
+	 * 
+	 * @param attribute
+	 *            One attribute to insert into the editor
+	 * @param editor
+	 *            the ace algorithm editor to insert the attribute into
+	 */
+	function insertAttribute(attribute, editor) {
+		editor.insert("$('" + attribute + "').value();");
+	}
+
+	/**
+	 * Removes a single attribute
+	 * 
+	 * @param attribute
+	 *            One attribute to remove from the editor
+	 * @param editor
+	 *            the ace algorithm editor to remove the attribute from
+	 */
+	function removeAttribute(attribute, editor) {
+		// TODO Fix removing algorithms that contain more then just .value()
+		// (like .map())
+		editor.replaceAll("", {
+			needle : "$('" + attribute + "').value();"
+		});
+		editor.replaceAll("", {
+			needle : "$('" + attribute + "')"
 		});
 	}
 
 	$(function() {
 
-		var editor, searchQuery, selectedAttributes, $textarea, initialValue, algorithm, feedBackRequest, row, targetAttributeDataType;
+		var editor, searchQuery, selectedAttributes, initialValue, algorithm, targetAttributeDataType, $textarea;
 
 		// tooltip placement
 		$(document).ready(function() {
@@ -208,21 +247,6 @@
 			$('#result-container').css('display', 'none');
 		}
 
-		// save button for saving generated mapping
-		$('#save-mapping-btn').on('click', function() {
-			$.post(molgenis.getContextUrl() + "/saveattributemapping", {
-				mappingProjectId : $('input[name="mappingProjectId"]').val(),
-				target : $('input[name="target"]').val(),
-				source : $('input[name="source"]').val(),
-				targetAttribute : $('input[name="targetAttribute"]').val(),
-				algorithm : algorithm
-			}, function() {
-				molgenis.createAlert([ {
-					'message' : 'Succesfully saved the created mapping'
-				} ], 'success');
-			});
-		});
-
 		// page update on attribute selection / deselection
 		$('#attribute-mapping-table :checkbox').on('change', function() {
 			selectedAttributes = [];
@@ -258,7 +282,21 @@
 				$('#result-container').css('display', 'none');
 				$('#attribute-mapping-container').css('display', 'none');
 			}
+		});
 
+		// save button for saving generated mapping
+		$('#save-mapping-btn').on('click', function() {
+			$.post(molgenis.getContextUrl() + "/saveattributemapping", {
+				mappingProjectId : $('input[name="mappingProjectId"]').val(),
+				target : $('input[name="target"]').val(),
+				source : $('input[name="source"]').val(),
+				targetAttribute : $('input[name="targetAttribute"]').val(),
+				algorithm : algorithm
+			}, function() {
+				molgenis.createAlert([ {
+					'message' : 'Succesfully saved the created mapping'
+				} ], 'success');
+			});
 		});
 
 		$('#js-function-modal-btn').on('click', function() {

@@ -20,7 +20,7 @@
 
 <div class="row">
 	<div class="col-md-12">
-		<a href="${context_url}/mappingproject/${mappingProject.identifier}" class="btn btn-default btn-xs pull-left">
+		<a href="${context_url?html}/mappingproject/${mappingProject.identifier?html}" class="btn btn-default btn-xs pull-left">
 			<span class="glyphicon glyphicon-chevron-left"></span> Back to project
 		</a>
 		
@@ -29,7 +29,7 @@
 		<input type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name?html}"/>
 		<input type="hidden" name="source" value="${entityMapping.sourceEntityMetaData.name?html}"/>
 		<input type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name?html}"/>
-		<input type="hidden" name="targetAttributeType" value="${attributeMapping.targetAttributeMetaData.dataType}"/>
+		<input type="hidden" name="targetAttributeType" value="${attributeMapping.targetAttributeMetaData.dataType?html}"/>
 		
 	</div>
 </div>
@@ -80,7 +80,7 @@
 						</thead>
 						<tbody>
 							<#list entityMapping.sourceEntityMetaData.attributes as source>
-								<tr class="${source.name}">
+								<tr class="${source.name?html}">
 									<td>
 										<div class="checkbox">
 											<label>
@@ -195,7 +195,7 @@
 				<h4>Algorithm</h4>
 				<p>
 					Use the script editor to determine how the values of selected attributes are processed. 
-					For a list of available functions, click <a id="js-function-modal-btn" href="#">here</a>. 
+					See the <a id="js-function-modal-btn" href="#">list of available functions</a> for more information. 
 				</p>
 				<#-- For future calculator layout around script editor
 					<form>

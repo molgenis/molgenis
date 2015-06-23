@@ -484,7 +484,7 @@ public class MappingServiceController extends MolgenisPluginController
 	 * @param sourceAttribute
 	 * @param model
 	 */
-	@RequestMapping(value = "/advancedmappingeditor", method = RequestMethod.GET)
+	@RequestMapping(value = "/advancedmappingeditor", method = RequestMethod.POST)
 	public String advancedMappingEditor(@RequestParam(required = true) String mappingProjectId,
 			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
 			@RequestParam(required = true) String targetAttribute,
