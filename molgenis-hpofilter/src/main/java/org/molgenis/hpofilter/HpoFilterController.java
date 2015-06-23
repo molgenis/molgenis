@@ -11,22 +11,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.cluster.metadata.RepositoriesMetaData;
-import org.elasticsearch.common.collect.Iterables;
-import org.molgenis.data.AggregateQuery;
-import org.molgenis.data.AggregateResult;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.RepositoryDecoratorFactory;
-import org.molgenis.data.importer.VcfImportService;
 import org.molgenis.data.support.DataServiceImpl;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.hpofilter.data.GeneMapProvider;
 import org.molgenis.hpofilter.data.HpoFilterDataProvider;
@@ -52,7 +45,6 @@ public class HpoFilterController extends MolgenisPluginController
 	private final DataServiceImpl dataService;
 	private final HpoFilterDataProvider hpoFilterDataProvider;
 	private GeneMapProvider hgncProvider;
-	private RepositoryDecoratorFactory repositoryDecoratorFactory;
 	
 	private HashMap<String, String> autoCompletionMap;
 
@@ -66,7 +58,6 @@ public class HpoFilterController extends MolgenisPluginController
 		this.dataService = new DataServiceImpl();
 		this.hpoFilterDataProvider = hpoFilterDataProvider;
 		this.hgncProvider = hgncProvider;
-		this.repositoryDecoratorFactory = repositoryDecoratorFactory;
 	}
 
 	@RequestMapping
@@ -141,14 +132,22 @@ public class HpoFilterController extends MolgenisPluginController
 			Locus locus;
 			List<String> genes;
 			if (null != selectedEntityName) {
-				repository = dataService.getManageableRepository(selectedEntityName);
+				repository = dataService.getRepository(selectedEntityName);
 				if (null == repository.getEntityMetaData().getAttribute("#CHROM") || null == repository.getEntityMetaData().getAttribute("POS"))
 					return false;
 			}else{
 				return false;
 			}
 			
-			Iterator<Entity> e = repository.iterator();
+			Entity newEntity = new MapEntity(repository.getEntityMetaData());
+			String newEntityName = selectedEntityName+"-filtered-hpofilter";
+			dataService.add(newEntityName, newEntity);
+			
+			Repository newRepository = dataService.getRepository(newEntityName);
+			
+			System.out.println(newRepository.getName()+"->"+newRepository.count());
+			
+			/*Iterator<Entity> e = repository.iterator();
 			while (e.hasNext()) {
 				Entity entity = e.next();
 				chrom = entity.getString("#CHROM");
@@ -159,9 +158,9 @@ public class HpoFilterController extends MolgenisPluginController
 					if (HPOContainsGene(terms, gene, true))
 						System.out.println(entity.getString("POS"));
 				}
-			}
+			}*/
 			return true;
-		}catch (IOException e) {
+		}catch (Exception e) {
 			e.printStackTrace();
 			return false;
 		}
