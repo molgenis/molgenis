@@ -102,32 +102,6 @@ public class CmdLineAnnotator
 
 		System.out.println("Now starting to process the data.");
 
-		while (vcfIter.hasNext())
-		{
-			Entity record = vcfIter.next();
-
-			// TODO: this is not part of the interface, a RepositoryAnnotator will annotate entire repositories!
-			List<Entity> annotatedRecord = null;// annotator.annotateEntity(record);
-
-			if (annotatedRecord.size() > 1)
-			{
-				outputVCFWriter.close();
-				vcfRepo.close();
-				throw new Exception("Multiple outputs for " + record.toString());
-			}
-			else if (annotatedRecord.size() == 0)
-			{
-				outputVCFWriter.println(VcfUtils.convertToVCF(record));
-			}
-			else
-			{
-				outputVCFWriter.println(VcfUtils.convertToVCF(annotatedRecord.get(0)));
-			}
-		}
-		outputVCFWriter.close();
-		vcfRepo.close();
-		System.out.println("All done!");
-
 		// engage!
 		if (annotatorName.equals("cadd"))
 		{
@@ -139,13 +113,13 @@ public class CmdLineAnnotator
 		{
 			new SnpEffServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
-		else if (annotator.equals("dann"))
+		else if (annotatorName.equals("dann"))
 		{
-			new DannAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
+			//new DannAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
-		else if (annotator.equals("fitcon"))
+		else if (annotatorName.equals("fitcon"))
 		{
-			new FitconAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
+			//new FitconAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
 		else if (annotatorName.equals("clinvar"))
 		{

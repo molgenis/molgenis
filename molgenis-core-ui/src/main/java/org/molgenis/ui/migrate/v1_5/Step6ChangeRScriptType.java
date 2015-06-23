@@ -4,7 +4,6 @@ import static com.google.common.collect.Iterables.transform;
 
 import javax.sql.DataSource;
 
-import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.SearchService;
@@ -103,7 +102,7 @@ public class Step6ChangeRScriptType extends MolgenisUpgrade
 			@Override
 			public boolean hasRepository(String name)
 			{
-				throw new NotImplementedException("Not implemented yet");
+				throw new UnsupportedOperationException();
 			}
 		};
 		metaData = new MetaDataServiceImpl(dataService);

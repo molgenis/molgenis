@@ -5,7 +5,6 @@ import static org.mockito.Mockito.mock;
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
-import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
@@ -115,7 +114,7 @@ public class ImportTestConfig
 			@Override
 			public boolean hasRepository(String name)
 			{
-				throw new NotImplementedException("Not implemented yet");
+				throw new UnsupportedOperationException();
 			}
 		};
 
