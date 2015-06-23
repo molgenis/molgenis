@@ -11,11 +11,12 @@
 	
 	<build>
 		<plugins>
-			<!-- minify css/js -->
+			<!-- minify css/js 
 			<plugin>
 				<groupId>com.samaxes.maven</groupId>
 				<artifactId>minify-maven-plugin</artifactId>
 			</plugin>
+			-->
 		</plugins>
 	</build>
 	
@@ -33,6 +34,11 @@
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-data</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-file</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

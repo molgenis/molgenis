@@ -45,7 +45,7 @@ define(['JSXTransformer', 'text'], function (JSXTransformer, text) {
         } catch (err) {
           onLoadNative.error(err);
         }
-
+        
         if (config.isBuild) {
           buildMap[name] = content;
         } else if (typeof location !== 'undefined') { // Do not create sourcemap when loaded in Node

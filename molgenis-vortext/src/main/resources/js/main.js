@@ -2,7 +2,7 @@ var spa = "spa/scripts/";
 
 require.config({
   jsx: {
-    fileExtension: '.jsx'
+    fileExtension: '.jsx',
   },
   paths: {
     'spa': "spa/scripts",

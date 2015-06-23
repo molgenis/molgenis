@@ -237,7 +237,7 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 				}
 			}
 
-			if (getExtends() != null)
+			if ((idAttributeMetaData == null) && (getExtends() != null))
 			{
 				idAttributeMetaData = getExtends().getIdAttribute();
 			}
