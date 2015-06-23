@@ -13,6 +13,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.Writable;
 import org.molgenis.data.processor.CellProcessor;
@@ -34,23 +35,30 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 	private final String name;
 	private final Workbook workbook;
 
-	public ExcelRepositoryCollection(File file) throws InvalidFormatException, IOException
+	public ExcelRepositoryCollection(File file) throws IOException, MolgenisInvalidFormatException
 	{
 		this(file, new TrimProcessor());
 	}
 
-	public ExcelRepositoryCollection(File file, CellProcessor... cellProcessors) throws InvalidFormatException,
-			IOException
+	public ExcelRepositoryCollection(File file, CellProcessor... cellProcessors) throws IOException,
+			MolgenisInvalidFormatException
 	{
 		this(file.getName(), new FileInputStream(file), cellProcessors);
 	}
 
-	public ExcelRepositoryCollection(String name, InputStream in, CellProcessor... cellProcessors)
-			throws InvalidFormatException, IOException
+	public ExcelRepositoryCollection(String name, InputStream in, CellProcessor... cellProcessors) throws IOException,
+			MolgenisInvalidFormatException
 	{
 		super(GenericImporterExtensions.getExcel(), cellProcessors);
 		this.name = name;
-		workbook = WorkbookFactory.create(in);
+		try
+		{
+			workbook = WorkbookFactory.create(in);
+		}
+		catch (InvalidFormatException e)
+		{
+			throw new MolgenisInvalidFormatException(e.getMessage());
+		}
 	}
 
 	@Override

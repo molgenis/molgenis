@@ -9,9 +9,9 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.FileRepositoryCollection;
@@ -34,12 +34,12 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 	private List<String> entityNames;
 	private List<String> entityNamesLowerCase;
 
-	public CsvRepositoryCollection(File file) throws InvalidFormatException, IOException
+	public CsvRepositoryCollection(File file) throws MolgenisInvalidFormatException, IOException
 	{
 		this(file, (CellProcessor[]) null);
 	}
 
-	public CsvRepositoryCollection(File file, CellProcessor... cellProcessors) throws InvalidFormatException,
+	public CsvRepositoryCollection(File file, CellProcessor... cellProcessors) throws MolgenisInvalidFormatException,
 			IOException
 	{
 		super(GenericImporterExtensions.getCSV(), cellProcessors);

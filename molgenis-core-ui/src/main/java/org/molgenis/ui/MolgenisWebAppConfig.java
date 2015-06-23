@@ -17,6 +17,7 @@ import javax.sql.DataSource;
 
 import org.molgenis.data.AutoValueRepositoryDecorator;
 import org.molgenis.data.DataService;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.IndexedAutoValueRepositoryDecorator;
 import org.molgenis.data.IndexedCrudRepositorySecurityDecorator;
@@ -34,7 +35,9 @@ import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.support.UuidGenerator;
+import org.molgenis.data.transaction.TransactionLogIndexedRepositoryDecorator;
+import org.molgenis.data.transaction.TransactionLogRepositoryDecorator;
+import org.molgenis.data.transaction.TransactionLogService;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.IndexedRepositoryValidationDecorator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
@@ -91,7 +94,9 @@ import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 import freemarker.template.TemplateException;
 
@@ -119,6 +124,12 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 	@Autowired
 	public DataSource dataSource;
+
+	@Autowired
+	public TransactionLogService transactionLogService;
+
+	@Autowired
+	public IdGenerator idGenerator;
 
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry)
@@ -382,14 +393,23 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	{
 		// Create local dataservice and metadataservice
 		DataServiceImpl localDataService = new DataServiceImpl();
-		new MetaDataServiceImpl(localDataService);
+		MetaDataService metaDataService = new MetaDataServiceImpl(localDataService);
+		localDataService.setMeta(metaDataService);
 
 		addReposToReindex(localDataService);
 
 		SearchService localSearchService = embeddedElasticSearchServiceFactory.create(localDataService,
 				new EntityToSourceConverter());
 
-		DependencyResolver.resolve(localDataService).forEach(repo -> {
+		List<EntityMetaData> metas = DependencyResolver.resolve(Sets.newHashSet(localDataService.getMeta()
+				.getEntityMetaDatas()));
+
+		// Sort repos to the same sequence as the resolves metas
+		List<Repository> repos = Lists.newArrayList(localDataService);
+		repos.sort((r1, r2) -> Integer.compare(metas.indexOf(r1.getEntityMetaData()),
+				metas.indexOf(r2.getEntityMetaData())));
+
+		repos.forEach(repo -> {
 			localSearchService.rebuildIndex(repo, repo.getEntityMetaData());
 		});
 	}
@@ -414,6 +434,8 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@PostConstruct
 	public void initRepositories()
 	{
+		dataService().setMeta(metaDataService());
+
 		addUpgrades();
 		upgradeService.upgrade();
 		if (!indexExists())
@@ -431,7 +453,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 	private boolean indexExists()
 	{
-		return searchService.hasMapping(new EntityMetaDataMetaData());
+		return searchService.hasMapping(EntityMetaDataMetaData.INSTANCE);
 	}
 
 	@Bean
@@ -443,16 +465,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Bean
 	public MetaDataService metaDataService()
 	{
-		DataService dataService = dataService();
-		MetaDataService metaDataService = new MetaDataServiceImpl((DataServiceImpl) dataService);
-
-		return metaDataService;
-	}
-
-	@Bean
-	public IdGenerator molgenisIdGenerator()
-	{
-		return new UuidGenerator();
+		return new MetaDataServiceImpl((DataServiceImpl) dataService());
 	}
 
 	@Bean
@@ -477,13 +490,15 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 					return new IndexedCrudRepositorySecurityDecorator(new IndexedAutoValueRepositoryDecorator(
 							new IndexedRepositoryValidationDecorator(dataService(),
-									new IndexedRepositoryExceptionTranslatorDecorator(indexedRepos),
-									new EntityAttributesValidator()), molgenisIdGenerator()), molgenisSettings);
+									new IndexedRepositoryExceptionTranslatorDecorator(
+											new TransactionLogIndexedRepositoryDecorator(indexedRepos,
+													transactionLogService)), new EntityAttributesValidator()),
+							idGenerator), molgenisSettings);
 				}
 
 				return new RepositorySecurityDecorator(new AutoValueRepositoryDecorator(
-						new RepositoryValidationDecorator(dataService(), repository, new EntityAttributesValidator()),
-						molgenisIdGenerator()));
+						new RepositoryValidationDecorator(dataService(), new TransactionLogRepositoryDecorator(
+								repository, transactionLogService), new EntityAttributesValidator()), idGenerator));
 			}
 		};
 	}

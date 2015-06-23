@@ -9,7 +9,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import com.google.common.collect.Iterators;
 import org.apache.commons.io.IOUtils;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -45,6 +44,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -262,7 +262,7 @@ public class ImportWriter
 		{
 			for (Entity tag : tagRepo)
 			{
-				Entity transformed = new DefaultEntity(new TagMetaData(), dataService, tag);
+				Entity transformed = new DefaultEntity(TagMetaData.INSTANCE, dataService, tag);
 				Entity existingTag = dataService
 						.findOne(TagMetaData.ENTITY_NAME, tag.getString(TagMetaData.IDENTIFIER));
 
