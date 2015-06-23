@@ -59,12 +59,7 @@
 					
 					<form>
 			  			<div class="form-group">
-							<div class="input-group">
-			      				<span class="input-group-btn">
-			        				<button id="attribute-search-btn" class="btn btn-default" type="button"><span class="glyphicon glyphicon-search"></button>
-			      				</span>
-			      				<input id="attribute-search-field" type="text" class="form-control" placeholder="Search...">
-			    			</div>
+							<input id="attribute-search-field" type="text" class="form-control" placeholder="Search...">
 						</div>
 					</form>
 				</div>
@@ -80,7 +75,7 @@
 						</thead>
 						<tbody>
 							<#list entityMapping.sourceEntityMetaData.attributes as source>
-								<tr class="${source.name?html}">
+								<tr class="${source.name?html}" data-attribute-label="${source.label?html}">
 									<td>
 										<div class="checkbox">
 											<label>
@@ -88,7 +83,7 @@
 											</label>
 										</div>
 									</td>
-									<td>
+									<td class="source-attribute-information">
 										<b>${source.label?html}</b> (${source.dataType?html})
 										<#if source.nillable> <span class="label label-warning">nillable</span></#if>
 										<#if source.unique> <span class="label label-default">unique</span></#if>
