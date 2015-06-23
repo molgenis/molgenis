@@ -17,6 +17,7 @@ import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.system.RepositoryTemplateLoader;
+import org.molgenis.data.transaction.MolgenisTransactionLogMetaData;
 import org.molgenis.data.version.v1_5.Step1UpgradeMetaData;
 import org.molgenis.data.version.v1_5.Step2;
 import org.molgenis.data.version.v1_5.Step3AddOrderColumnToMrefTables;
@@ -32,6 +33,7 @@ import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.ui.migrate.v1_5.Step5AlterDataexplorerMenuURLs;
 import org.molgenis.ui.migrate.v1_5.Step6ChangeRScriptType;
 import org.molgenis.ui.migrate.v1_8.Step10DeleteFormReferences;
+import org.molgenis.ui.migrate.v1_8.Step13RemoveCatalogueMenuEntries;
 import org.molgenis.util.DependencyResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,6 +79,9 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	@Autowired
 	private MenuManagerService menuManagerService;
 
+	@Autowired
+	private MolgenisTransactionLogMetaData molgenisTransactionLogMetaData;
+
 	@Override
 	public ManageableRepositoryCollection getBackend()
 	{
@@ -97,6 +102,10 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(new Step8VarcharToTextRepeated(dataSource));
 		upgradeService.addUpgrade(new Step9MysqlTablesToInnoDB(dataSource));
 		upgradeService.addUpgrade(new Step10DeleteFormReferences(jpaRepositoryCollection
+				.getRepository(RuntimeProperty.ENTITY_NAME), jpaRepositoryCollection
+				.getRepository(UserAuthority.ENTITY_NAME), jpaRepositoryCollection
+				.getRepository(GroupAuthority.ENTITY_NAME)));
+		upgradeService.addUpgrade(new Step13RemoveCatalogueMenuEntries(jpaRepositoryCollection
 				.getRepository(RuntimeProperty.ENTITY_NAME), jpaRepositoryCollection
 				.getRepository(UserAuthority.ENTITY_NAME), jpaRepositoryCollection
 				.getRepository(GroupAuthority.ENTITY_NAME)));
