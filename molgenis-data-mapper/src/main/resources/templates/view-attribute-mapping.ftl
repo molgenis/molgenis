@@ -84,7 +84,7 @@
 									<td>
 										<div class="checkbox">
 											<label>
-												<input class="${source.name?html}" type="checkbox">
+												<input class="${source.name}" type="checkbox">
 											</label>
 										</div>
 									</td>
