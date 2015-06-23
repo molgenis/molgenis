@@ -7,6 +7,9 @@ import java.util.List;
 
 public class Wizard implements Serializable
 {
+	private static final String PREVIOUS_BUTTON_ID = "wizard-previous-button";
+	private static final String FINISH_BUTTON_ID = "wizard-finish-button";
+	private static final String NEXT_BUTTON_ID = "wizard-next-button";
 	private static final long serialVersionUID = 1L;
 	private final List<WizardPage> pages = new LinkedList<WizardPage>();
 	private int currentPageIndex = 0;
@@ -74,14 +77,15 @@ public class Wizard implements Serializable
 	public WizardButton getNextButton()
 	{
 		boolean lastPage = isLastPage();
+		String id = lastPage ? FINISH_BUTTON_ID : NEXT_BUTTON_ID;
 		String title = lastPage ? "Finish" : "Next";
 		String uri = lastPage ? "/restart" : "/next";
 
-		return new WizardButton(title, true, uri);
+		return new WizardButton(id, title, true, uri);
 	}
 
 	public WizardButton getPreviousButton()
 	{
-		return new WizardButton("Previous", !isFirstPage(), "/previous");
+		return new WizardButton(PREVIOUS_BUTTON_ID, "Previous", !isFirstPage(), "/previous");
 	}
 }

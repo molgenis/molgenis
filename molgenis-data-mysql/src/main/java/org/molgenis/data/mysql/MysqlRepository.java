@@ -469,13 +469,19 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 			{
 				// mysql keys can not be of type TEXT, so don't adopt the field type of a referenced entity when it is
 				// of fieldtype STRING
-				if (att.getRefEntity().getIdAttribute().getDataType() instanceof StringField)
-				{
-					sql.append(VARCHAR);
+				try{
+					if (att.getRefEntity().getIdAttribute().getDataType() instanceof StringField)
+					{
+						sql.append(VARCHAR);
+					}
+					else
+					{
+						sql.append(att.getRefEntity().getIdAttribute().getDataType().getMysqlType());
+					}
 				}
-				else
+				catch (NullPointerException npe)
 				{
-					sql.append(att.getRefEntity().getIdAttribute().getDataType().getMysqlType());
+					System.out.println("NullPointerException");
 				}
 			}
 			else
