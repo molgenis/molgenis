@@ -124,6 +124,7 @@ public class ExacAnnotator
 		repoMetaData.addAttributeMetaData(POS_META);
 		repoMetaData.addAttributeMetaData(REF_META);
 		repoMetaData.addAttributeMetaData(ALT_META);
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("AC", DECIMAL));
 		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("GMAF", DECIMAL));
 		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("AFR_MAF", DECIMAL));
 		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("AMR_MAF", DECIMAL));
