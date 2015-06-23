@@ -438,7 +438,7 @@ public class MappingServiceController extends MolgenisPluginController
 		}
 		catch (Exception e)
 		{
-
+			throw new RuntimeException(e);
 		}
 
 		model.addAttribute("mappingProjectId", mappingProjectId);
