@@ -102,14 +102,6 @@ public class CmdLineAnnotator
 		{
 			new SnpEffServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
-		else if (annotatorName.equals("dann"))
-		{
-			//new DannAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
-		}
-		else if (annotatorName.equals("fitcon"))
-		{
-			//new FitconAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
-		}
 		else if (annotatorName.equals("clinvar"))
 		{
 			new ClinVarVCFServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
