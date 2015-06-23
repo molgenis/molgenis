@@ -59,7 +59,7 @@ public class ExplainServiceHelper
 		}
 	}
 
-	public Set<String> discoverMatchedQueries(Explanation explanation)
+	public Set<String> findMatchedQueryTerms(Explanation explanation)
 	{
 		Set<String> words = new HashSet<String>();
 		String description = explanation.getDescription();
@@ -73,7 +73,7 @@ public class ExplainServiceHelper
 			{
 				for (Explanation subExplanation : explanation.getDetails())
 				{
-					words.addAll(discoverMatchedQueries(subExplanation));
+					words.addAll(findMatchedQueryTerms(subExplanation));
 				}
 			}
 		}
@@ -88,7 +88,7 @@ public class ExplainServiceHelper
 						}
 					}).get();
 
-			words.addAll(discoverMatchedQueries(maxExplanation));
+			words.addAll(findMatchedQueryTerms(maxExplanation));
 		}
 		else if (description.startsWith(Options.WEIGHT.toString()))
 		{

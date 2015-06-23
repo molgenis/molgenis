@@ -78,7 +78,7 @@ public class ElasticSearchExplainServiceImplTest
 
 		System.out.println(explanation_1);
 
-		Set<String> actual = explainServiceHelper.discoverMatchedQueries(explanation_1);
+		Set<String> actual = explainServiceHelper.findMatchedQueryTerms(explanation_1);
 		assertEquals(actual.size(), 2);
 		assertTrue(actual.contains("high blood"));
 		assertTrue(actual.contains("medication"));
@@ -125,20 +125,20 @@ public class ElasticSearchExplainServiceImplTest
 		expanedQueryMap.put("drug", "medication");
 		expanedQueryMap.put("pill", "medication");
 
-		Set<ExplainedQueryString> reverseSearchQueryStrings = elasticSearchExplainService.detectQueriesFromExplanation(
+		Set<ExplainedQueryString> reverseSearchQueryStrings = elasticSearchExplainService.findQueriesFromExplanation(
 				expanedQueryMap, explanation_1);
 
 		Iterator<ExplainedQueryString> iterator = reverseSearchQueryStrings.iterator();
 
 		ExplainedQueryString first = iterator.next();
 
-		assertEquals(first.getMatchedTerms(), "high blood");
+		assertEquals(first.getMatchedWords(), "high blood");
 		assertEquals(first.getQueryString(), "high blood pressure");
 		assertEquals(first.getTagName(), "hypertension");
 		assertEquals((int) first.getScore(), 73);
 
 		ExplainedQueryString second = iterator.next();
-		assertEquals(second.getMatchedTerms(), "medication");
+		assertEquals(second.getMatchedWords(), "medication");
 		assertEquals(second.getQueryString(), "medication");
 		assertEquals(second.getTagName(), "medication");
 		assertEquals((int) second.getScore(), 100);

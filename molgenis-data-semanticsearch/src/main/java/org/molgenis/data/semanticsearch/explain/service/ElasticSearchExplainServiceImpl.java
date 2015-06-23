@@ -49,16 +49,16 @@ public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainServ
 		return null;
 	}
 
-	public Set<ExplainedQueryString> detectQueriesFromExplanation(Map<String, String> collectExpanedQueryMap,
+	public Set<ExplainedQueryString> findQueriesFromExplanation(Map<String, String> originalQueryInMap,
 			Explanation explanation)
 	{
 		Set<ExplainedQueryString> matchedQueryStrings = new LinkedHashSet<ExplainedQueryString>();
-
-		Set<String> discoverMatchedQueries = explainServiceHelper.discoverMatchedQueries(explanation);
-		for (String queryPart : discoverMatchedQueries)
+		Set<String> matchedQueryTerms = explainServiceHelper.findMatchedQueryTerms(explanation);
+		for (String matchedQueryTerm : matchedQueryTerms)
 		{
-			Map<String, Double> matchedQueryRule = explainServiceHelper.findMatchQueries(queryPart,
-					collectExpanedQueryMap);
+			Map<String, Double> matchedQueryRule = explainServiceHelper.findMatchQueries(matchedQueryTerm,
+					originalQueryInMap);
+
 			if (matchedQueryRule.size() > 0)
 			{
 				Entry<String, Double> entry = matchedQueryRule.entrySet().stream()
@@ -70,7 +70,7 @@ public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainServ
 							}
 						}).get();
 
-				matchedQueryStrings.add(new ExplainedQueryString(queryPart, entry.getKey(), collectExpanedQueryMap
+				matchedQueryStrings.add(new ExplainedQueryString(matchedQueryTerm, entry.getKey(), originalQueryInMap
 						.get(entry.getKey()), entry.getValue()));
 			}
 		}

@@ -29,7 +29,7 @@ public class ExplainServiceHelperTest
 	{
 		Explanation explanation = new Gson().fromJson(ResourceUtils.getString("explain_api_example.json"),
 				Explanation.class);
-		Set<String> discoverMatchedQueries = explainServiceHelper.discoverMatchedQueries(explanation);
+		Set<String> discoverMatchedQueries = explainServiceHelper.findMatchedQueryTerms(explanation);
 		assertEquals(discoverMatchedQueries.size(), 2);
 		assertTrue(discoverMatchedQueries.contains("high blood"));
 		assertTrue(discoverMatchedQueries.contains("medic"));

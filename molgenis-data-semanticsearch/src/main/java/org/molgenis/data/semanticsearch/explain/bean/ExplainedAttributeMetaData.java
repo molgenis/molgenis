@@ -43,7 +43,7 @@ public class ExplainedAttributeMetaData
 	private String combineExplanation(ExplainedQueryString explainedQueryString)
 	{
 		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append("The term [").append(explainedQueryString.getMatchedTerms())
+		stringBuilder.append("The term [").append(explainedQueryString.getMatchedWords())
 				.append("] is matched to related key words [").append(explainedQueryString.getQueryString())
 				.append("] with similarity [").append(explainedQueryString.getScore()).append("%]");
 		return stringBuilder.toString();
