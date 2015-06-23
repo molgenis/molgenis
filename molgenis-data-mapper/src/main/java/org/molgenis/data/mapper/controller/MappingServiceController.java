@@ -5,7 +5,6 @@ import static org.molgenis.data.mapper.controller.MappingServiceController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +13,6 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.AggregateResult;
@@ -32,7 +30,6 @@ import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
-import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.AggregateQueryImpl;
@@ -78,9 +75,6 @@ public class MappingServiceController extends MolgenisPluginController
 	private static final String VIEW_SINGLE_MAPPING_PROJECT = "view-single-mapping-project";
 	private static final String VIEW_CATEGORY_MAPPING_EDITOR = "view-advanced-mapping-editor";
 	private static final String VIEW_ATTRIBUTE_MAPPING_FEEDBACK = "view-attribute-mapping-feedback";
-
-	// For testing purpose
-	private static final String VIEW_SINGLE_MAPPING_PROJECT_EXPLAINED = "view-single-mapping-project-explained";
 
 	@Autowired
 	private MolgenisUserService molgenisUserService;
@@ -411,55 +405,6 @@ public class MappingServiceController extends MolgenisPluginController
 		return VIEW_ATTRIBUTE_MAPPING;
 	}
 
-	@RequestMapping("/explainTargetAttributeMappingProject/{id}")
-	public String viewExplainAttributeMappingProject(@PathVariable("id") String identifier,
-			@RequestParam(value = "target", required = false) String target, Model model)
-	{
-		MappingProject project = mappingService.getMappingProject(identifier);
-		if (target == null)
-		{
-			target = project.getMappingTargets().get(0).getName();
-		}
-
-		model.addAttribute("selectedTarget", target);
-		model.addAttribute("mappingProject", project);
-		model.addAttribute("entityMetaDatas", getNewSources(project.getMappingTarget(target)));
-		model.addAttribute("hasWritePermission", hasWritePermission(project, false));
-		model.addAttribute("attributeTagMap", getTagsForAttribute(target, project));
-
-		return VIEW_SINGLE_MAPPING_PROJECT_EXPLAINED;
-	}
-
-	@RequestMapping(method = RequestMethod.POST, value = "/attributeMapping/explain", consumes = APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public Map<String, Iterable<ExplainedAttributeMetaData>> getExplainedAttributeMapping(
-			@RequestBody Map<String, String> requestBody)
-	{
-		String mappingProjectId = requestBody.get("mappingProjectId");
-		String target = requestBody.get("target");
-		String targetAttribute = requestBody.get("targetAttribute");
-
-		if (StringUtils.isNotEmpty(mappingProjectId) && StringUtils.isNotEmpty(target)
-				&& StringUtils.isNotEmpty(targetAttribute))
-		{
-			Map<String, Iterable<ExplainedAttributeMetaData>> explainAttributeMap = new HashMap<String, Iterable<ExplainedAttributeMetaData>>();
-			MappingProject project = mappingService.getMappingProject(mappingProjectId);
-			MappingTarget mappingTarget = project.getMappingTarget(target);
-			for (EntityMapping entityMapping : mappingTarget.getEntityMappings())
-			{
-				AttributeMetaData targetAttributeMetaData = entityMapping.getTargetEntityMetaData().getAttribute(
-						targetAttribute);
-				explainAttributeMap.put(
-						entityMapping.getSourceEntityMetaData().getName(),
-						semanticSearchService.explainAttributes(entityMapping.getSourceEntityMetaData(),
-								dataService.getEntityMetaData(target), targetAttributeMetaData));
-			}
-			return explainAttributeMap;
-		}
-
-		return Collections.emptyMap();
-	}
-
 	@RequestMapping(method = RequestMethod.POST, value = "/dynamicattributemappingfeedback")
 	public @ResponseBody Map<String, List<Entity>> dynamicFeedback(
 			@RequestParam(required = true) String mappingProjectId, @RequestParam(required = true) String target,
@@ -473,7 +418,7 @@ public class MappingServiceController extends MolgenisPluginController
 		AttributeMapping attributeMapping = entityMapping.getAttributeMapping(targetAttribute);
 
 		FluentIterable<Entity> sourceEntities = FluentIterable.from(dataService.findAll(source)).limit(10);
-
+		
 		// Key: attribute name, Source: entities
 		Map<String, List<Entity>> previewTable = new HashMap<String, List<Entity>>();
 		ImmutableList<AlgorithmResult> algorithmResults = sourceEntities.transform(
