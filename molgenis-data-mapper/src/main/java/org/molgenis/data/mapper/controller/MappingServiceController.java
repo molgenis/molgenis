@@ -136,7 +136,7 @@ public class MappingServiceController extends MolgenisPluginController
 			@RequestParam("target-entity") String targetEntity)
 	{
 		MappingProject newMappingProject = mappingService.addMappingProject(name, getCurrentUser(), targetEntity);
-		return "forward:/menu/main/mappingservice/mappingproject/" + newMappingProject.getIdentifier();
+		return "redirect:/menu/main/mappingservice/mappingproject/" + newMappingProject.getIdentifier();
 	}
 
 	/**
@@ -155,7 +155,7 @@ public class MappingServiceController extends MolgenisPluginController
 			LOG.info("Deleting mappingProject " + project.getName());
 			mappingService.deleteMappingProject(mappingProjectId);
 		}
-		return "forward:/menu/main/mappingservice/";
+		return "redirect:/menu/main/mappingservice/";
 	}
 
 	/**
@@ -182,7 +182,7 @@ public class MappingServiceController extends MolgenisPluginController
 			project.getMappingTarget(target).getMappingForSource(source).deleteAttributeMapping(attribute);
 			mappingService.updateMappingProject(project);
 		}
-		return "forward:/menu/main/mappingservice/mappingproject/" + project.getIdentifier();
+		return "redirect:/menu/main/mappingservice/mappingproject/" + project.getIdentifier();
 	}
 
 	/**
@@ -214,7 +214,7 @@ public class MappingServiceController extends MolgenisPluginController
 					attributes, project));
 		}
 
-		return "forward:/menu/main/mappingservice/mappingproject/" + mappingProjectId;
+		return "redirect:/menu/main/mappingservice/mappingproject/" + mappingProjectId;
 	}
 
 	private void autoGenerateAlgorithms(EntityMapping mapping, String target, EntityMetaData sourceEntityMetaData,
@@ -247,7 +247,7 @@ public class MappingServiceController extends MolgenisPluginController
 			project.getMappingTarget(target).removeSource(source);
 			mappingService.updateMappingProject(project);
 		}
-		return "forward:/menu/main/mappingservice/mappingproject/" + mappingProjectId;
+		return "redirect:/menu/main/mappingservice/mappingproject/" + mappingProjectId;
 	}
 
 	/**
@@ -290,7 +290,7 @@ public class MappingServiceController extends MolgenisPluginController
 			}
 			mappingService.updateMappingProject(mappingProject);
 		}
-		return "forward:/menu/main/mappingservice/mappingproject/" + mappingProject.getIdentifier();
+		return "redirect:/menu/main/mappingservice/mappingproject/" + mappingProject.getIdentifier();
 	}
 
 	/**
