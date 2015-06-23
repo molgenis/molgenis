@@ -89,7 +89,7 @@ public class CmdLineAnnotator
 		{
 			System.out.println("Output VCF file already exists at " + outputVCFFile.getAbsolutePath());
 			return;
-		}
+		} 
 
 		// engage!
 		if (annotatorName.equals("cadd"))
