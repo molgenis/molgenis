@@ -32,7 +32,12 @@ public class MolgenisUpgradeService
 		upgrades.add(upgrade);
 	}
 
-	public void upgrade()
+	/**
+	 * Executes MOLGENIS MetaData version upgrades.
+	 * 
+	 * @return true if an upgrade was necessary, false if not
+	 */
+	public boolean upgrade()
 	{
 		if (versionService.getMolgenisVersionFromServerProperties() < MolgenisVersionService.CURRENT_VERSION)
 		{
@@ -46,11 +51,13 @@ public class MolgenisUpgradeService
 			versionService.updateToCurrentVersion();
 
 			LOG.info("MetaData upgrade done.");
+			return true;
 		}
 		else
 		{
 			LOG.info("MetaData version:{}, current version:{} upgrade not needed",
 					versionService.getMolgenisVersionFromServerProperties(), MolgenisVersionService.CURRENT_VERSION);
+			return false;
 		}
 	}
 
