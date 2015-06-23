@@ -17,6 +17,7 @@ import javax.sql.DataSource;
 
 import org.molgenis.data.AutoValueRepositoryDecorator;
 import org.molgenis.data.DataService;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.IndexedAutoValueRepositoryDecorator;
 import org.molgenis.data.IndexedCrudRepositorySecurityDecorator;
@@ -93,7 +94,9 @@ import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 import freemarker.template.TemplateException;
 
@@ -398,7 +401,15 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		SearchService localSearchService = embeddedElasticSearchServiceFactory.create(localDataService,
 				new EntityToSourceConverter());
 
-		DependencyResolver.resolve(localDataService).forEach(repo -> {
+		List<EntityMetaData> metas = DependencyResolver.resolve(Sets.newHashSet(localDataService.getMeta()
+				.getEntityMetaDatas()));
+
+		// Sort repos to the same sequence as the resolves metas
+		List<Repository> repos = Lists.newArrayList(localDataService);
+		repos.sort((r1, r2) -> Integer.compare(metas.indexOf(r1.getEntityMetaData()),
+				metas.indexOf(r2.getEntityMetaData())));
+
+		repos.forEach(repo -> {
 			localSearchService.rebuildIndex(repo, repo.getEntityMetaData());
 		});
 	}
