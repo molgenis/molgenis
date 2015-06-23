@@ -44,7 +44,7 @@
 		</div>
 	</div>
 	<div class="tab-pane" id="uml">
-		<div class="btn-group hidden-print">
+		<div id="zoom-in-out" class="btn-group hidden-print">
   			<button type="button" id="zoom-in" class="btn btn-default btn-sm" data-toggle="tooltip" data-placement="bottom" title="Zoom in">
   				<span class="glyphicon glyphicon-zoom-in"></span>
   			</button>
@@ -53,7 +53,7 @@
   			</button>
 		</div>
 			
-		<div class="paper-holder">
+		<div id="paper-holder">
 			<div id="paper"></div>
 		</div>
 	
