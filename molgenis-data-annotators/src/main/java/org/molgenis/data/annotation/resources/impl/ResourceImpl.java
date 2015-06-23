@@ -51,7 +51,13 @@ public class ResourceImpl implements Resource
 	@Override
 	public synchronized boolean isAvailable()
 	{
-		return getFile() != null;
+		if (repository != null && needsRefresh())
+		{
+			repository = null;
+			file = null;
+		}
+		final File file = getFile();
+		return file != null && file.exists();
 	}
 
 	/**
@@ -69,11 +75,10 @@ public class ResourceImpl implements Resource
 		return getRepository().findAll(q);
 	}
 
-	@Override
-	public boolean needsRefresh()
+	private boolean needsRefresh()
 	{
 		File newFile = config.getFile();
-		boolean needsRefresh = !newFile.equals(file);
+		boolean needsRefresh = file != null && !file.equals(newFile);
 		if (needsRefresh)
 		{
 			repository = null;

@@ -68,63 +68,28 @@ public class CmdLineAnnotator
 		File annotationSourceFile = new File(args[1]);
 		if (!annotationSourceFile.exists())
 		{
-			throw new Exception("Annotation source file or directory not found at " + annotationSourceFile);
+			System.out.println("Annotation source file or directory not found at " + annotationSourceFile);
+			return;
 		}
 
 		File inputVcfFile = new File(args[2]);
 		if (!inputVcfFile.exists())
 		{
-			throw new Exception("Input VCF file not found at " + inputVcfFile);
+			System.out.println("Input VCF file not found at " + inputVcfFile);
+			return;
 		}
 		if (inputVcfFile.isDirectory())
 		{
-			throw new Exception("Input VCF file is a directory, not a file!");
+			System.out.println("Input VCF file is a directory, not a file!");
+			return;
 		}
 
 		File outputVCFFile = new File(args[3]);
 		if (outputVCFFile.exists())
 		{
-			// TODO: do we make this an input options? or always throw? what is best practice?
-			// throw new Exception("Output VCF file already exists at " + outputVCFFile.getAbsolutePath());
+			System.out.println("Output VCF file already exists at " + outputVCFFile.getAbsolutePath());
+			return;
 		}
-
-		// TODO: What to put here?
-		// molgenisSettings.setProperty(CADD_FILE_LOCATION_PROPERTY, annotationSourceFile.getAbsolutePath());
-
-		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
-
-		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
-		Iterator<Entity> vcfIter = vcfRepo.iterator();
-
-		// VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields, CADD_SCALED);
-
-		System.out.println("Now starting to process the data.");
-
-		while (vcfIter.hasNext())
-		{
-			Entity record = vcfIter.next();
-
-			// TODO: this is not part of the interface, a RepositoryAnnotator will annotate entire repositories!
-			List<Entity> annotatedRecord = null;// annotator.annotateEntity(record);
-
-			if (annotatedRecord.size() > 1)
-			{
-				outputVCFWriter.close();
-				vcfRepo.close();
-				throw new Exception("Multiple outputs for " + record.toString());
-			}
-			else if (annotatedRecord.size() == 0)
-			{
-				outputVCFWriter.println(VcfUtils.convertToVCF(record));
-			}
-			else
-			{
-				outputVCFWriter.println(VcfUtils.convertToVCF(annotatedRecord.get(0)));
-			}
-		}
-		outputVCFWriter.close();
-		vcfRepo.close();
-		System.out.println("All done!");
 
 		// engage!
 		if (annotatorName.equals("cadd"))
@@ -145,10 +110,6 @@ public class CmdLineAnnotator
 		{
 			new HpoServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
-		else if (annotatorName.equals("ase"))
-		{
-			// TODO
-		}
 		else if (annotatorName.equals("monogenic"))
 		{
 			new MonogenicDiseaseCandidatesServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
@@ -156,10 +117,6 @@ public class CmdLineAnnotator
 		else if (annotatorName.equals("phenomizer"))
 		{
 			new PhenomizerServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
-		}
-		else if (annotatorName.equals("ccgg"))
-		{
-			// TODO
 		}
 		else if (annotatorName.equals("denovo"))
 		{
@@ -177,25 +134,9 @@ public class CmdLineAnnotator
 		{
 			new GoNLServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
-		else if (annotatorName.equals("gwascatalog"))
-		{
-			// TODO
-		}
-		else if (annotatorName.equals("vkgl"))
-		{
-			// TODO
-		}
 		else if (annotatorName.equals("cgd"))
 		{
 			new ClinicalGenomicsDatabaseServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
-		}
-		else if (annotatorName.equals("enhancers"))
-		{
-			// TODO
-		}
-		else if (annotatorName.equals("proteinatlas"))
-		{
-			// TODO
 		}
 		else
 		{
