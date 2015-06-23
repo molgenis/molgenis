@@ -1,11 +1,13 @@
 package org.molgenis.data.semanticsearch.explain.service;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.lucene.search.Explanation;
 import org.molgenis.data.QueryRule;
@@ -27,19 +29,10 @@ public class ExplainServiceHelperTest
 	{
 		Explanation explanation = new Gson().fromJson(ResourceUtils.getString("explain_api_example.json"),
 				Explanation.class);
-
-		assertEquals(explainServiceHelper.discoverMatchedQueries(explanation), "high blood|medic");
-	}
-
-	@Test
-	public void joinTermsTest()
-	{
-		assertEquals(explainServiceHelper.joinTerms("|high blood pressure| |medication"),
-				"high blood pressure|medication");
-
-		assertEquals(explainServiceHelper.joinTerms("|high||pressure|  |medication"), "high|pressure|medication");
-
-		assertEquals(explainServiceHelper.joinTerms("high pressure |medication"), "high pressure|medication");
+		Set<String> discoverMatchedQueries = explainServiceHelper.discoverMatchedQueries(explanation);
+		assertEquals(discoverMatchedQueries.size(), 2);
+		assertTrue(discoverMatchedQueries.contains("high blood"));
+		assertTrue(discoverMatchedQueries.contains("medic"));
 	}
 
 	@Test

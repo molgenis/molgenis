@@ -54,8 +54,8 @@ public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainServ
 	{
 		Set<ExplainedQueryString> matchedQueryStrings = new LinkedHashSet<ExplainedQueryString>();
 
-		String discoverMatchedQueries = explainServiceHelper.discoverMatchedQueries(explanation);
-		for (String queryPart : discoverMatchedQueries.split("\\|"))
+		Set<String> discoverMatchedQueries = explainServiceHelper.discoverMatchedQueries(explanation);
+		for (String queryPart : discoverMatchedQueries)
 		{
 			Map<String, Double> matchedQueryRule = explainServiceHelper.findMatchQueries(queryPart,
 					collectExpanedQueryMap);

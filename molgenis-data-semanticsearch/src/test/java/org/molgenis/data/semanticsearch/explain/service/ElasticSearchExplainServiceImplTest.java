@@ -2,6 +2,7 @@ package org.molgenis.data.semanticsearch.explain.service;
 
 import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -77,8 +78,10 @@ public class ElasticSearchExplainServiceImplTest
 
 		System.out.println(explanation_1);
 
-		String actual = explainServiceHelper.discoverMatchedQueries(explanation_1);
-		assertEquals(actual, "high blood|medication");
+		Set<String> actual = explainServiceHelper.discoverMatchedQueries(explanation_1);
+		assertEquals(actual.size(), 2);
+		assertTrue(actual.contains("high blood"));
+		assertTrue(actual.contains("medication"));
 	}
 
 	@Test
@@ -92,11 +95,11 @@ public class ElasticSearchExplainServiceImplTest
 		expanedQueryMap.put("drug", "medication");
 		expanedQueryMap.put("pill", "medication");
 
-		assertEquals(explainServiceHelper.findMatchQueries("high blood", expanedQueryMap).toString(), ImmutableMap
-				.of("high blood pressure", 73.333).toString());
+		assertEquals(explainServiceHelper.findMatchQueries("high blood", expanedQueryMap).toString(),
+				ImmutableMap.of("high blood pressure", 73.333).toString());
 
-		assertEquals(explainServiceHelper.findMatchQueries("medication", expanedQueryMap).toString(), ImmutableMap
-				.of("medication", 100.0).toString());
+		assertEquals(explainServiceHelper.findMatchQueries("medication", expanedQueryMap).toString(),
+				ImmutableMap.of("medication", 100.0).toString());
 	}
 
 	@Test
@@ -129,15 +132,15 @@ public class ElasticSearchExplainServiceImplTest
 
 		ExplainedQueryString first = iterator.next();
 
-		assertEquals(first.getMatchedTerm(), "high blood");
-		assertEquals(first.getQueryValue(), "high blood pressure");
-		assertEquals(first.getRelatedQuery(), "hypertension");
+		assertEquals(first.getMatchedTerms(), "high blood");
+		assertEquals(first.getQueryString(), "high blood pressure");
+		assertEquals(first.getTagName(), "hypertension");
 		assertEquals((int) first.getScore(), 73);
 
 		ExplainedQueryString second = iterator.next();
-		assertEquals(second.getMatchedTerm(), "medication");
-		assertEquals(second.getQueryValue(), "medication");
-		assertEquals(second.getRelatedQuery(), "medication");
+		assertEquals(second.getMatchedTerms(), "medication");
+		assertEquals(second.getQueryString(), "medication");
+		assertEquals(second.getTagName(), "medication");
 		assertEquals((int) second.getScore(), 100);
 
 	}

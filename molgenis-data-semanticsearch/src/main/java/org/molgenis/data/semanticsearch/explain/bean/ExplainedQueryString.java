@@ -2,32 +2,32 @@ package org.molgenis.data.semanticsearch.explain.bean;
 
 public class ExplainedQueryString
 {
-	private final String matchedTerm;
-	private final String queryValue;
-	private final String relatedQuery;
+	private final String matchedTerms;
+	private final String queryString;
+	private final String tagName;
 	private final double score;
 
-	public ExplainedQueryString(String matchedTerm, String queryValue, String relatedQuery, double score)
+	public ExplainedQueryString(String matchedTerms, String queryString, String tagName, double score)
 	{
-		this.matchedTerm = matchedTerm;
-		this.queryValue = queryValue;
-		this.relatedQuery = relatedQuery;
+		this.matchedTerms = matchedTerms;
+		this.queryString = queryString;
+		this.tagName = tagName;
 		this.score = score;
 	}
 
-	public String getMatchedTerm()
+	public String getMatchedTerms()
 	{
-		return matchedTerm;
+		return matchedTerms;
 	}
 
-	public String getQueryValue()
+	public String getQueryString()
 	{
-		return queryValue;
+		return queryString;
 	}
 
-	public String getRelatedQuery()
+	public String getTagName()
 	{
-		return relatedQuery;
+		return tagName;
 	}
 
 	public double getScore()
@@ -40,8 +40,8 @@ public class ExplainedQueryString
 	{
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((matchedTerm == null) ? 0 : matchedTerm.hashCode());
-		result = prime * result + ((queryValue == null) ? 0 : queryValue.hashCode());
+		result = prime * result + ((matchedTerms == null) ? 0 : matchedTerms.hashCode());
+		result = prime * result + ((queryString == null) ? 0 : queryString.hashCode());
 		return result;
 	}
 
@@ -52,16 +52,16 @@ public class ExplainedQueryString
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
 		ExplainedQueryString other = (ExplainedQueryString) obj;
-		if (matchedTerm == null)
+		if (matchedTerms == null)
 		{
-			if (other.matchedTerm != null) return false;
+			if (other.matchedTerms != null) return false;
 		}
-		else if (!matchedTerm.equals(other.matchedTerm)) return false;
-		if (queryValue == null)
+		else if (!matchedTerms.equals(other.matchedTerms)) return false;
+		if (queryString == null)
 		{
-			if (other.queryValue != null) return false;
+			if (other.queryString != null) return false;
 		}
-		else if (!queryValue.equals(other.queryValue)) return false;
+		else if (!queryString.equals(other.queryString)) return false;
 		return true;
 	}
 }

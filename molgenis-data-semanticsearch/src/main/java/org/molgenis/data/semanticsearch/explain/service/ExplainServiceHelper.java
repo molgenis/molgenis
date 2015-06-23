@@ -2,6 +2,7 @@ package org.molgenis.data.semanticsearch.explain.service;
 
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -58,18 +59,23 @@ public class ExplainServiceHelper
 		}
 	}
 
-	public String discoverMatchedQueries(Explanation explanation)
+	public Set<String> discoverMatchedQueries(Explanation explanation)
 	{
-		StringBuilder stringBuilder = new StringBuilder();
-
+		Set<String> words = new HashSet<String>();
 		String description = explanation.getDescription();
 		if (description.startsWith(Options.SUM_OF.toString()) || description.startsWith(Options.PRODUCT_OF.toString()))
 		{
-			List<String> matchedTermsFromElasticExplanation = Lists.newArrayList(explanation.getDetails()).stream()
-					.map(this::discoverMatchedQueries).filter(term -> StringUtils.isNotEmpty(term))
-					.collect(Collectors.toList());
-
-			stringBuilder.append(joinTerms(StringUtils.join(matchedTermsFromElasticExplanation, ' ')));
+			if (Lists.newArrayList(explanation.getDetails()).stream().allMatch(this::reachLastLevel))
+			{
+				words.add(getMatchedTerms(explanation.getDetails()));
+			}
+			else
+			{
+				for (Explanation subExplanation : explanation.getDetails())
+				{
+					words.addAll(discoverMatchedQueries(subExplanation));
+				}
+			}
 		}
 		else if (description.startsWith(Options.MAX_OF.toString()))
 		{
@@ -82,33 +88,25 @@ public class ExplainServiceHelper
 						}
 					}).get();
 
-			stringBuilder.append('|').append(discoverMatchedQueries(maxExplanation)).append('|');
+			words.addAll(discoverMatchedQueries(maxExplanation));
 		}
 		else if (description.startsWith(Options.WEIGHT.toString()))
 		{
-			stringBuilder.append(getMatchedWord(description));
+			words.add(getMatchedWord(description));
 		}
-
-		return stringBuilder.toString();
+		return words;
 	}
 
-	public String joinTerms(String description)
+	public String getMatchedTerms(Explanation[] explanations)
 	{
-		if (StringUtils.isNotEmpty(description))
-		{
-			if (description.charAt(0) == '|')
-			{
-				description = description.substring(1);
-			}
+		List<String> collect = Lists.newArrayList(explanations).stream()
+				.map(explanation -> getMatchedWord(explanation.getDescription())).collect(Collectors.toList());
+		return StringUtils.join(collect, ' ');
+	}
 
-			if (description.charAt(description.length() - 1) == '|')
-			{
-				description = description.substring(0, description.length() - 1);
-			}
-
-			description = description.replaceAll("(\\|\\s*\\||\\s*\\|\\s*)", "|");
-		}
-		return description;
+	public boolean reachLastLevel(Explanation explanation)
+	{
+		return explanation.getDescription().startsWith(Options.WEIGHT.toString());
 	}
 
 	public Map<String, Double> findMatchQueries(String queryPart, Map<String, String> collectExpanedQueryMap)
