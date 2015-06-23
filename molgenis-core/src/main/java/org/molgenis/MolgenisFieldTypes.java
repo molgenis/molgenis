@@ -55,7 +55,6 @@ public class MolgenisFieldTypes
 	public static final FieldType DATETIME = new DatetimeField();
 	public static final FieldType DECIMAL = new DecimalField();
 	public static final FieldType EMAIL = new EmailField();
-	public static final FieldType ENUM = new EnumField();
 	public static final FieldType FILE = new FileField();
 	public static final FieldType HTML = new HtmlField();
 	public static final FieldType HYPERLINK = new HyperlinkField();
@@ -67,6 +66,9 @@ public class MolgenisFieldTypes
 	public static final FieldType STRING = new StringField();
 	public static final FieldType TEXT = new TextField();
 	public static final FieldType XREF = new XrefField();
+
+	// FIXME Do not add public static final ENUM here, as it holds the enum options so it is different per attribute,
+	// this should be fixed. The options should not be added to the field
 
 	/** Initialize default field types */
 	private static void init()
@@ -81,7 +83,7 @@ public class MolgenisFieldTypes
 			addType(DATETIME);
 			addType(DECIMAL);
 			addType(EMAIL);
-			addType(ENUM);
+			addType(new EnumField());
 			addType(FILE);
 			addType(HTML);
 			addType(HYPERLINK);

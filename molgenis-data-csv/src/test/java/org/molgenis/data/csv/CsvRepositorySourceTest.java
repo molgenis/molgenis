@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.molgenis.data.MolgenisInvalidFormatException;
 import org.springframework.util.FileCopyUtils;
 import org.testng.annotations.Test;
 
@@ -20,7 +20,7 @@ public class CsvRepositorySourceTest
 {
 
 	@Test
-	public void getRepositoriesCsv() throws FileNotFoundException, IOException, InvalidFormatException
+	public void getRepositoriesCsv() throws FileNotFoundException, IOException, MolgenisInvalidFormatException
 	{
 		InputStream in = getClass().getResourceAsStream("/testdata.csv");
 		File csvFile = new File(FileUtils.getTempDirectory(), "testdata.csv");
@@ -34,7 +34,7 @@ public class CsvRepositorySourceTest
 	}
 
 	@Test
-	public void getRepositoriesZip() throws IOException, InvalidFormatException
+	public void getRepositoriesZip() throws IOException, MolgenisInvalidFormatException
 	{
 		File zip = File.createTempFile("file", ".zip");
 		FileOutputStream fos = new FileOutputStream(zip);
