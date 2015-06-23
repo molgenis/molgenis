@@ -42,5 +42,6 @@
 	
 	function createHeader(entityMetaData) {
 		$('#filter-title').html("Filtering '"+entityMetaData.label+"' by HPO");
+		$('#dropdown-menu-entities').html(entityMetaData.label+" <span class=\"caret\"></span>");
 	}
 }($, window.top.molgenis = window.top.molgenis || {}));
