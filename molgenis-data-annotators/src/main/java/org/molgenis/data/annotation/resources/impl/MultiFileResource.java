@@ -1,7 +1,14 @@
 package org.molgenis.data.annotation.resources.impl;
 
+<<<<<<< HEAD
 import java.util.HashMap;
 import java.util.Map;
+=======
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+>>>>>>> 8fed8aeee18823890c888a186147e9942d2ddf4e
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -17,21 +24,44 @@ import org.molgenis.data.vcf.VcfRepository;
  */
 public class MultiFileResource implements Resource
 {
-	private String name;
-	private Map<String, Resource> resources;
+	private final String name;
+	private final Map<String, ResourceImpl> resources = new HashMap<>();
+	private final MultiResourceConfig config;
+	private final RepositoryFactory factory;
 
 	public MultiFileResource(String name, MultiResourceConfig config, EntityMetaData emd, RepositoryFactory factory)
 	{
 		this.name = name;
-		config.getConfigs();
-		Map<String, Resource> resources = new HashMap<>();
-		Map<String, ResourceConfig> configs = config.getConfigs();
-		for (String chrom : configs.keySet())
-		{
-			resources.put(chrom, new ResourceImpl(name + chrom, configs.get(chrom), factory));
-		}
+		this.config = config;
+		this.factory = factory;
+		initializeResources();
 
-		this.resources = resources;
+	}
+
+	private void initializeResources()
+	{
+		this.resources.clear();
+		for (Entry<String, ResourceConfig> chromConfig : config.getConfigs().entrySet())
+		{
+			final String key = chromConfig.getKey();
+			this.resources.put(key, new ResourceImpl(name + key, new ResourceConfig()
+			{
+				// Config may change so keep querying the MultiResourceConfig for the current File
+				@Override
+				public File getFile()
+				{
+					ResourceConfig resourceConfig = config.getConfigs().get(key);
+					if (resourceConfig == null)
+					{
+						initializeResources();
+						return null;
+					}
+					File file = resourceConfig.getFile();
+					return file;
+				}
+
+			}, factory));
+		}
 	}
 
 	private static Object getFirstEqualsValueFor(String attributeName, Query q)
@@ -45,9 +75,13 @@ public class MultiFileResource implements Resource
 	@Override
 	public boolean isAvailable()
 	{
-		for (String chrom : resources.keySet())
+		if (!config.getConfigs().keySet().equals(resources.keySet()))
 		{
-			if (resources.get(chrom).isAvailable() == false)
+			initializeResources();
+		}
+		for (Resource chrom : resources.values())
+		{
+			if (!chrom.isAvailable())
 			{
 				return false;
 			}
@@ -69,6 +103,7 @@ public class MultiFileResource implements Resource
 		return resource.findAll(q);
 	}
 
+<<<<<<< HEAD
 	@Override
 	public boolean needsRefresh()
 	{
@@ -82,4 +117,6 @@ public class MultiFileResource implements Resource
 		return false;
 	}
 
+=======
+>>>>>>> 8fed8aeee18823890c888a186147e9942d2ddf4e
 }

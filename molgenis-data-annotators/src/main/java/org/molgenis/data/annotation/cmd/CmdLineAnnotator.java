@@ -12,10 +12,8 @@ import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.impl.ClinVarVCFServiceAnnotator;
 import org.molgenis.data.annotation.impl.ClinicalGenomicsDatabaseServiceAnnotator;
-import org.molgenis.data.annotation.impl.DannAnnotator;
 import org.molgenis.data.annotation.impl.DeNovoAnnotator;
 import org.molgenis.data.annotation.impl.ExACServiceAnnotator;
-import org.molgenis.data.annotation.impl.FitconAnnotator;
 import org.molgenis.data.annotation.impl.GoNLServiceAnnotator;
 import org.molgenis.data.annotation.impl.HpoServiceAnnotator;
 import org.molgenis.data.annotation.impl.MonogenicDiseaseCandidatesServiceAnnotator;
@@ -70,24 +68,27 @@ public class CmdLineAnnotator
 		File annotationSourceFile = new File(args[1]);
 		if (!annotationSourceFile.exists())
 		{
-			throw new Exception("Annotation source file or directory not found at " + annotationSourceFile);
+			System.out.println("Annotation source file or directory not found at " + annotationSourceFile);
+			return;
 		}
 
 		File inputVcfFile = new File(args[2]);
 		if (!inputVcfFile.exists())
 		{
-			throw new Exception("Input VCF file not found at " + inputVcfFile);
+			System.out.println("Input VCF file not found at " + inputVcfFile);
+			return;
 		}
 		if (inputVcfFile.isDirectory())
 		{
-			throw new Exception("Input VCF file is a directory, not a file!");
+			System.out.println("Input VCF file is a directory, not a file!");
+			return;
 		}
 
 		File outputVCFFile = new File(args[3]);
 		if (outputVCFFile.exists())
 		{
-			// TODO: do we make this an input options? or always throw? what is best practice?
-			// throw new Exception("Output VCF file already exists at " + outputVCFFile.getAbsolutePath());
+			System.out.println("Output VCF file already exists at " + outputVCFFile.getAbsolutePath());
+			return;
 		}
 
 		// TODO: What to put here?
@@ -129,10 +130,6 @@ public class CmdLineAnnotator
 		{
 			new HpoServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
-		else if (annotatorName.equals("ase"))
-		{
-			// TODO
-		}
 		else if (annotatorName.equals("monogenic"))
 		{
 			new MonogenicDiseaseCandidatesServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
@@ -141,17 +138,15 @@ public class CmdLineAnnotator
 		{
 			new PhenomizerServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
-		else if (annotatorName.equals("ccgg"))
-		{
-			// TODO
-		}
 		else if (annotatorName.equals("denovo"))
 		{
 			new DeNovoAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
 		else if (annotatorName.equals("exac"))
 		{
-			new ExACServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
+			Map<String, RepositoryAnnotator> annotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
+			RepositoryAnnotator annotator = annotators.get("exac");
+			annotate(annotator, inputVcfFile, outputVCFFile);
 		}
 		else if (annotatorName.equals("1kg"))
 		{
@@ -161,25 +156,9 @@ public class CmdLineAnnotator
 		{
 			new GoNLServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
-		else if (annotatorName.equals("gwascatalog"))
-		{
-			// TODO
-		}
-		else if (annotatorName.equals("vkgl"))
-		{
-			// TODO
-		}
 		else if (annotatorName.equals("cgd"))
 		{
 			new ClinicalGenomicsDatabaseServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
-		}
-		else if (annotatorName.equals("enhancers"))
-		{
-			// TODO
-		}
-		else if (annotatorName.equals("proteinatlas"))
-		{
-			// TODO
 		}
 		else
 		{
