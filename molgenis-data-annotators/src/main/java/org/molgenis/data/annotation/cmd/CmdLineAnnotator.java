@@ -91,6 +91,18 @@ public class CmdLineAnnotator
 			return;
 		}
 
+		// TODO: What to put here?
+		// molgenisSettings.setProperty(CADD_FILE_LOCATION_PROPERTY, annotationSourceFile.getAbsolutePath());
+
+		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
+
+		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
+		Iterator<Entity> vcfIter = vcfRepo.iterator();
+
+		// VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields, CADD_SCALED);
+
+		System.out.println("Now starting to process the data.");
+
 		// engage!
 		if (annotatorName.equals("cadd"))
 		{
@@ -101,6 +113,14 @@ public class CmdLineAnnotator
 		else if (annotatorName.equals("snpeff"))
 		{
 			new SnpEffServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
+		}
+		else if (annotatorName.equals("dann"))
+		{
+			//new DannAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
+		}
+		else if (annotatorName.equals("fitcon"))
+		{
+			//new FitconAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
 		else if (annotatorName.equals("clinvar"))
 		{
@@ -124,7 +144,9 @@ public class CmdLineAnnotator
 		}
 		else if (annotatorName.equals("exac"))
 		{
-			new ExACServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
+			Map<String, RepositoryAnnotator> annotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
+			RepositoryAnnotator annotator = annotators.get("exac");
+			annotate(annotator, inputVcfFile, outputVCFFile);
 		}
 		else if (annotatorName.equals("1kg"))
 		{
