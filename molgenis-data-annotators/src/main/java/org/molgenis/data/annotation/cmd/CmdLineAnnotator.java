@@ -91,18 +91,6 @@ public class CmdLineAnnotator
 			return;
 		}
 
-		// TODO: What to put here?
-		// molgenisSettings.setProperty(CADD_FILE_LOCATION_PROPERTY, annotationSourceFile.getAbsolutePath());
-
-		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
-
-		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
-		Iterator<Entity> vcfIter = vcfRepo.iterator();
-
-		// VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields, CADD_SCALED);
-
-		System.out.println("Now starting to process the data.");
-
 		// engage!
 		if (annotatorName.equals("cadd"))
 		{

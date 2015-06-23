@@ -12,6 +12,7 @@ import java.util.List;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
@@ -32,7 +33,6 @@ import org.springframework.context.annotation.Bean;
 public class ExacAnnotator
 {
 
-	// GMAF|AFR_MAF|AMR_MAF|ASN_MAF|EUR_MAF|AA_MAF|EA_MAF|
 	public static final String EXAC_AC = "EXAC_ALLELE_COUNT";
 	public static final String EXAC_AC_LABEL = "EXACALLELECOUNT";
 	public static final String EXAC_GMAF = "EXAC_GMAF";
@@ -139,5 +139,10 @@ public class ExacAnnotator
 				molgenisSettings), new TabixRepositoryFactory(repoMetaData));
 
 		return exacTabixResource;
+	}
+	
+	public void filterResults(Iterable<Entity> results, Entity annotatedEntity)
+	{
+	
 	}
 }
