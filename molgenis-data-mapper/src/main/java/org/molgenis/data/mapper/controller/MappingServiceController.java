@@ -11,8 +11,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -97,12 +95,9 @@ public class MappingServiceController extends MolgenisPluginController
 	@Autowired
 	private SemanticSearchService semanticSearchService;
 
-	private ExecutorService executors;
-
 	public MappingServiceController()
 	{
 		super(URI);
-		executors = Executors.newSingleThreadExecutor();
 	}
 
 	/**
@@ -210,8 +205,7 @@ public class MappingServiceController extends MolgenisPluginController
 		{
 			EntityMapping mapping = project.getMappingTarget(target).addSource(sourceEntityMetaData);
 			mappingService.updateMappingProject(project);
-			executors.execute(() -> autoGenerateAlgorithms(mapping, target, sourceEntityMetaData, targetEntityMetaData,
-					attributes, project));
+			autoGenerateAlgorithms(mapping, target, sourceEntityMetaData, targetEntityMetaData, attributes, project);
 		}
 
 		return "redirect:/menu/main/mappingservice/mappingproject/" + mappingProjectId;
@@ -358,8 +352,7 @@ public class MappingServiceController extends MolgenisPluginController
 	@RequestMapping("/attributeMapping")
 	public String viewAttributeMapping(@RequestParam(required = true) String mappingProjectId,
 			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
-			@RequestParam(required = true) String targetAttribute,
-			@RequestParam(required = true) boolean showSuggestedAttributes, Model model)
+			@RequestParam(required = true) String targetAttribute, Model model)
 	{
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
 		MappingTarget mappingTarget = project.getMappingTarget(target);
