@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.AttributeMetaData;
@@ -28,7 +29,6 @@ import org.molgenis.generators.db.CrudRepositorySecurityDecoratorGen;
 import org.molgenis.hpofilter.data.GeneMapProvider;
 import org.molgenis.hpofilter.data.HpoFilterDataProvider;
 import org.molgenis.hpofilter.data.Locus;
-import org.molgenis.hpofilter.data.VcfRepositoryCopy;
 import org.molgenis.hpofilter.utils.HgncLocationsUtils;
 import org.molgenis.model.elements.Import;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -137,7 +137,7 @@ public class HpoFilterController extends MolgenisPluginController
 			Locus locus;
 			List<String> genes;
 			EntityMetaData entityMetaData;
-			EditableEntityMetaData newEntityMetaData;
+			DefaultEntityMetaData newEntityMetaData;
 			
 			if (null != selectedEntityName) {
 				repository = dataService.getRepository(selectedEntityName);
@@ -149,14 +149,10 @@ public class HpoFilterController extends MolgenisPluginController
 			}
 
 			String newEntityName = selectedEntityName+"-filtered-hpofilter";
-			newEntityMetaData = new DefaultEntityMetaData(entityMetaData) {
-				@Override
-				public String getSimpleName() {
-					return newEntityName;
-				}
-			};
-			newEntityMetaData.setLabel(newEntityName);
-			newEntityMetaData.setIdAttribute(newEntityName);
+			newEntityMetaData = new DefaultEntityMetaData(newEntityName,
+					entityMetaData);
+			
+			//newEntityMetaData.setLabel(newEntityName);
 			
 			Repository repo = dataService.getMeta().addEntityMeta(newEntityMetaData);
 			
@@ -167,14 +163,16 @@ public class HpoFilterController extends MolgenisPluginController
 				pos = entity.getLong("POS");
 				locus =  new Locus(chrom, pos);
 				genes = HgncLocationsUtils.locationToHgcn(hgncProvider.getHgncLocations(), locus);
-				System.out.println("Checking variant at "+pos+" to be added to repo "+repo.getName());
-				for (String gene : genes) {
+				//System.out.println("Checking variant at "+pos+" to be added to repo "+repo.getName());
+				System.out.println("Adding variant at "+pos+" to repo "+repo.getName());
+				repo.add(entity);
+				/*for (String gene : genes) {
 					if (HPOContainsGene(terms, gene, true)) {
 						System.out.println("Adding variant at "+pos+" to repo "+repo.getName());
 						repo.add(entity);
 						break;
 					}
-				}
+				}*/
 			}
 			return true;
 		}catch (Exception e) {
