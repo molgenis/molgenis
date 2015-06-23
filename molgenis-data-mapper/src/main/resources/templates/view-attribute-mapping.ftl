@@ -195,7 +195,7 @@
 				<h4>Algorithm</h4>
 				<p>
 					Use the script editor to determine how the values of selected attributes are processed. 
-					For a list of available functions, click <a id="js-function-modal-btn" href="#">here</a>. 
+					See the <a id="js-function-modal-btn" href="#">list of available functions</a> for more information. 
 				</p>
 				<#-- For future calculator layout around script editor
 					<form>
