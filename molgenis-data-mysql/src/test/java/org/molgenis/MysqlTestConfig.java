@@ -3,7 +3,6 @@ package org.molgenis;
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
-import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.mysql.AsyncJdbcTemplate;
@@ -45,6 +44,7 @@ public class MysqlTestConfig
 	@PostConstruct
 	public void init()
 	{
+		dataService().setMeta(metaDataService());
 		metaDataService().setDefaultBackend(mysqlRepositoryCollection());
 
 		// Login
@@ -103,7 +103,7 @@ public class MysqlTestConfig
 			@Override
 			public boolean hasRepository(String name)
 			{
-				throw new NotImplementedException("Not implemented yet");
+				throw new UnsupportedOperationException();
 			}
 		};
 

@@ -346,7 +346,7 @@
 				for (var i = 0; i < results.length && valid; i++) {
 					valid = valid && results[i];
 				}
-				
+			
 				if (valid) {
 					$(target).closest('form').submit();//TODO remove jquery form submit workaround, see also componentDidMount in JQueryForm.js
 				} else {

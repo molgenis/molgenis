@@ -36,7 +36,9 @@ public class AttributeMetaDataMetaData extends DefaultEntityMetaData
 	public static final String VISIBLE_EXPRESSION = "visibleExpression";
 	public static final String VALIDATION_EXPRESSION = "validationExpression";
 
-	public AttributeMetaDataMetaData()
+	public static final AttributeMetaDataMetaData INSTANCE = new AttributeMetaDataMetaData();
+
+	private AttributeMetaDataMetaData()
 	{
 		super(ENTITY_NAME);
 
@@ -60,7 +62,7 @@ public class AttributeMetaDataMetaData extends DefaultEntityMetaData
 		addAttribute(LABEL_ATTRIBUTE).setDataType(BOOL).setNillable(false);
 		addAttribute(READ_ONLY).setDataType(BOOL).setNillable(false);
 		addAttribute(UNIQUE).setDataType(BOOL).setNillable(false);
-		addAttribute(TAGS).setDataType(MREF).setRefEntity(new TagMetaData());
+		addAttribute(TAGS).setDataType(MREF).setRefEntity(TagMetaData.INSTANCE);
 		addAttribute(VISIBLE_EXPRESSION).setDataType(SCRIPT).setNillable(true);
 		addAttribute(VALIDATION_EXPRESSION).setDataType(SCRIPT).setNillable(true);
 	}

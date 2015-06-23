@@ -1,7 +1,5 @@
 package org.molgenis.data.elasticsearch;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.Iterator;
 
 import org.molgenis.data.EntityMetaData;
@@ -69,14 +67,7 @@ public class IndexedRepositoryCollectionDecorator implements RepositoryCollectio
 	public Repository addEntityMeta(EntityMetaData entityMeta)
 	{
 		Repository repo = delegate.addEntityMeta(entityMeta);
-		try
-		{
-			searchService.createMappings(entityMeta);
-		}
-		catch (IOException e)
-		{
-			throw new UncheckedIOException(e);
-		}
+		searchService.createMappings(entityMeta);
 
 		return new ElasticsearchRepositoryDecorator(repo, searchService);
 	}
