@@ -18,11 +18,11 @@
 							<option <#if !categoryMapping.defaultValue?? >selected </#if> value="use-null-value"><em>None</em></option>
 						</#if>
 						<#list targetAttributeEntities.iterator() as targetEntity>
-							<option value="${targetEntity.getString(targetAttributeIdAttribute)}" 
+							<option value="${targetEntity.getString(targetAttributeIdAttribute)?html}" 
 								<#if categoryMapping.defaultValue??>
 									<#if categoryMapping.defaultValue?string == targetEntity.getString(targetAttributeIdAttribute)>selected </#if>
 								</#if>
-								>${targetEntity.get(targetAttributeLabelAttribute)}</option> 
+								>${targetEntity.get(targetAttributeLabelAttribute)?html}</option> 
 						</#list>
 						</select>
 					</div>
@@ -36,17 +36,16 @@
 			<#if showDefault><br></br></#if>
 			<table id="advanced-mapping-table" class="table table-bordered scroll">
 				<thead>
-					<th>${source} attribute value</th>
+					<th>${source?html} attribute value</th>
 					<th>Number of rows</th>
-					<th>${target} attribute value</th>
+					<th>${target?html} attribute value</th>
 				</thead>
 				<tbody>
-				<#--This is for xrefs and categoricals!-->
 				<#assign count = 0 />
 				<#list sourceAttributeEntities.iterator() as sourceEntity>
 					<#assign id = sourceEntity.getString(sourceAttributeIdAttribute)>
-					<tr id="${id}">
-						<td>${sourceEntity.get(sourceAttributeLabelAttribute)}</td>
+					<tr id="${id?html}">
+						<td>${sourceEntity.get(sourceAttributeLabelAttribute)?html}</td>
 						<td><#if aggregates??>${aggregates[count]!'0'}<#else>NA</#if></td>
 						<td>
 							<select class="form-control" <#if !hasWritePermission>disabled</#if>>
@@ -62,10 +61,9 @@
 								<option <#if categoryMapping.map[id]?? >
 									<#if categoryMapping.map[id]=targetEntity.getString(targetAttributeIdAttribute)>selected </#if>
 									</#if>
-								value="${targetEntity.get(targetAttributeIdAttribute)?c}">${targetEntity.get(targetAttributeLabelAttribute)}</option> 
+								value="${targetEntity.get(targetAttributeIdAttribute)?c}">${targetEntity.get(targetAttributeLabelAttribute)?html}</option> 
 							</#list>
 							</select>
-							<#--TODO: + button to add a new category to target dropdown-->
 						</td>
 					</tr>
 				<#assign count = count + 1 />
@@ -86,14 +84,12 @@
 								<#list targetAttributeEntities.iterator() as targetEntity>
 									<option<#if categoryMapping.nullValue??>
 									<#if categoryMapping.nullValue=targetEntity.getString(targetAttributeIdAttribute)> selected </#if>
-									</#if> value="${targetEntity.get(targetAttributeIdAttribute)}">${targetEntity.get(targetAttributeLabelAttribute)}</option> 
+									</#if> value="${targetEntity.get(targetAttributeIdAttribute)?html}">${targetEntity.get(targetAttributeLabelAttribute)?html}</option> 
 								</#list>
 							</select>
-							<#--TODO: + button to add a new category to target dropdown-->
 						</td>
 					</tr>
 				</#if>
-				<#--TODO: Do this for other data types-->
 				</tbody>
 			</table>
 	

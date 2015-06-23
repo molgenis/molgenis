@@ -16,7 +16,6 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
@@ -38,6 +37,8 @@ import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.FieldType;
+import org.molgenis.fieldtypes.MrefField;
+import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -136,10 +137,6 @@ public class MappingServiceController extends MolgenisPluginController
 			@RequestParam("target-entity") String targetEntity)
 	{
 		MappingProject newMappingProject = mappingService.addMappingProject(name, getCurrentUser(), targetEntity);
-		// FIXME need to write complete URL else it will use /plugin as root and the molgenis header and footer wont be
-		// loaded
-
-		// FIXME redirect puts all model elements into the url
 		return "redirect:/menu/main/mappingservice/mappingproject/" + newMappingProject.getIdentifier();
 	}
 
@@ -408,7 +405,7 @@ public class MappingServiceController extends MolgenisPluginController
 		return VIEW_ATTRIBUTE_MAPPING;
 	}
 
-	@RequestMapping(value = "/attributemappingfeedback")
+	@RequestMapping(value = "/attributemappingfeedback", method = RequestMethod.POST)
 	public String attributeMappingFeedback(@RequestParam(required = true) String mappingProjectId,
 			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
 			@RequestParam(required = true) String targetAttribute, @RequestParam(required = true) String algorithm,
@@ -442,7 +439,7 @@ public class MappingServiceController extends MolgenisPluginController
 		}
 		catch (Exception e)
 		{
-
+			throw new RuntimeException(e);
 		}
 
 		model.addAttribute("mappingProjectId", mappingProjectId);
@@ -487,7 +484,7 @@ public class MappingServiceController extends MolgenisPluginController
 	 * @param sourceAttribute
 	 * @param model
 	 */
-	@RequestMapping("/advancedmappingeditor")
+	@RequestMapping(value = "/advancedmappingeditor", method = RequestMethod.GET)
 	public String advancedMappingEditor(@RequestParam(required = true) String mappingProjectId,
 			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
 			@RequestParam(required = true) String targetAttribute,
@@ -524,9 +521,7 @@ public class MappingServiceController extends MolgenisPluginController
 		String sourceAttributeIdAttribute = null;
 		String sourceAttributeLabelAttribute = null;
 
-		if (sourceAttributeDataType.equals(MolgenisFieldTypes.CATEGORICAL)
-				|| sourceAttributeDataType.equals(MolgenisFieldTypes.XREF)
-				|| sourceAttributeDataType.equals(MolgenisFieldTypes.MREF))
+		if (sourceAttributeDataType instanceof XrefField || sourceAttributeDataType instanceof MrefField)
 		{
 			sourceAttributeEntities = dataService.findAll(dataService.getEntityMetaData(source)
 					.getAttribute(sourceAttribute).getRefEntity().getName());
@@ -592,7 +587,7 @@ public class MappingServiceController extends MolgenisPluginController
 		return VIEW_CATEGORY_MAPPING_EDITOR;
 	}
 
-	@RequestMapping("/savecategorymapping")
+	@RequestMapping(value = "/savecategorymapping", method = RequestMethod.POST)
 	public @ResponseBody void saveCategoryMapping(@RequestParam(required = true) String mappingProjectId,
 			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
 			@RequestParam(required = true) String targetAttribute, @RequestParam(required = true) String algorithm)

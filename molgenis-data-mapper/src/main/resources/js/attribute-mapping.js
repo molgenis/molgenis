@@ -106,7 +106,6 @@
 			algorithm : algorithm
 		}, function() {
 			$('.show-error-message').on('click', function() {
-				// $(this).append($(this).data('message'));
 				$('#algorithm-error-message-container').html($(this).data('message'));
 			});
 		});
