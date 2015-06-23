@@ -13,18 +13,24 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.support.DataServiceImpl;
+import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.generators.db.CrudRepositorySecurityDecoratorGen;
 import org.molgenis.hpofilter.data.GeneMapProvider;
 import org.molgenis.hpofilter.data.HpoFilterDataProvider;
 import org.molgenis.hpofilter.data.Locus;
+import org.molgenis.hpofilter.data.VcfRepositoryCopy;
 import org.molgenis.hpofilter.utils.HgncLocationsUtils;
+import org.molgenis.model.elements.Import;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -42,7 +48,7 @@ public class HpoFilterController extends MolgenisPluginController
 	public static final String ID = "hpofilter";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	private static final String VIEW_NAME = "view-hpofilter";
-	private final DataServiceImpl dataService;
+	private final DataService dataService;
 	private final HpoFilterDataProvider hpoFilterDataProvider;
 	private GeneMapProvider hgncProvider;
 	
@@ -55,7 +61,7 @@ public class HpoFilterController extends MolgenisPluginController
 			RepositoryDecoratorFactory repositoryDecoratorFactory)
 	{
 		super(URI);
-		this.dataService = new DataServiceImpl();
+		this.dataService = dataService;
 		this.hpoFilterDataProvider = hpoFilterDataProvider;
 		this.hgncProvider = hgncProvider;
 	}
@@ -126,39 +132,50 @@ public class HpoFilterController extends MolgenisPluginController
 			Model model) {
 		try{
 			Repository repository;
-			
 			String chrom;
 			Long pos;
 			Locus locus;
 			List<String> genes;
+			EntityMetaData entityMetaData;
+			EditableEntityMetaData newEntityMetaData;
+			
 			if (null != selectedEntityName) {
 				repository = dataService.getRepository(selectedEntityName);
+				entityMetaData = repository.getEntityMetaData();
 				if (null == repository.getEntityMetaData().getAttribute("#CHROM") || null == repository.getEntityMetaData().getAttribute("POS"))
 					return false;
 			}else{
 				return false;
 			}
-			
-			Entity newEntity = new MapEntity(repository.getEntityMetaData());
+
 			String newEntityName = selectedEntityName+"-filtered-hpofilter";
-			dataService.add(newEntityName, newEntity);
+			newEntityMetaData = new DefaultEntityMetaData(entityMetaData) {
+				@Override
+				public String getSimpleName() {
+					return newEntityName;
+				}
+			};
+			newEntityMetaData.setLabel(newEntityName);
+			newEntityMetaData.setIdAttribute(newEntityName);
 			
-			Repository newRepository = dataService.getRepository(newEntityName);
+			Repository repo = dataService.getMeta().addEntityMeta(newEntityMetaData);
 			
-			System.out.println(newRepository.getName()+"->"+newRepository.count());
-			
-			/*Iterator<Entity> e = repository.iterator();
+			Iterator<Entity> e = repository.iterator();
 			while (e.hasNext()) {
 				Entity entity = e.next();
 				chrom = entity.getString("#CHROM");
 				pos = entity.getLong("POS");
 				locus =  new Locus(chrom, pos);
 				genes = HgncLocationsUtils.locationToHgcn(hgncProvider.getHgncLocations(), locus);
+				System.out.println("Checking variant at "+pos+" to be added to repo "+repo.getName());
 				for (String gene : genes) {
-					if (HPOContainsGene(terms, gene, true))
-						System.out.println(entity.getString("POS"));
+					if (HPOContainsGene(terms, gene, true)) {
+						System.out.println("Adding variant at "+pos+" to repo "+repo.getName());
+						repo.add(entity);
+						break;
+					}
 				}
-			}*/
+			}
 			return true;
 		}catch (Exception e) {
 			e.printStackTrace();
@@ -181,7 +198,7 @@ public class HpoFilterController extends MolgenisPluginController
 				return true;
 			if (recursive)
 				for (String child : hpoFilterDataProvider.getHPOData().get(hpo))
-					if (HPOContainsGene(child, gene, true))
+					if (null != child && HPOContainsGene(child, gene, true))
 						return true;
 		return false;
 	}

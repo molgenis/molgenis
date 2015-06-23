@@ -97,12 +97,12 @@ public class HpoFilterDataProvider
 						assocIsParsed = parseHPOMapping();
 					}
 				});
-				THREADPOOL.submit(new Runnable() {
+				/*THREADPOOL.submit(new Runnable() {
 					@Override
 					public void run() {
 						assocIsParsed = parseHgncMapping();
 					}
-				});
+				});*/
 				// but block until processing is done
 				while (!hpoIsParsed || !assocIsParsed) {
 					Thread.sleep(1);
