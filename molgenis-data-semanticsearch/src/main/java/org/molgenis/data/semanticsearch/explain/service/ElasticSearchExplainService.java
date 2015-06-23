@@ -25,6 +25,6 @@ public interface ElasticSearchExplainService
 	 * @param explanationBean
 	 * @return
 	 */
-	abstract Set<ExplainedQueryString> reverseSearchQueryStrings(Map<String, String> collectExpanedQueryMap,
+	abstract Set<ExplainedQueryString> detectQueriesFromExplanation(Map<String, String> collectExpanedQueryMap,
 			Explanation explanation);
 }

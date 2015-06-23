@@ -122,7 +122,7 @@ public class ElasticSearchExplainServiceImplTest
 		expanedQueryMap.put("drug", "medication");
 		expanedQueryMap.put("pill", "medication");
 
-		Set<ExplainedQueryString> reverseSearchQueryStrings = elasticSearchExplainService.reverseSearchQueryStrings(
+		Set<ExplainedQueryString> reverseSearchQueryStrings = elasticSearchExplainService.detectQueriesFromExplanation(
 				expanedQueryMap, explanation_1);
 
 		Iterator<ExplainedQueryString> iterator = reverseSearchQueryStrings.iterator();

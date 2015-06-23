@@ -81,7 +81,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		Iterable<String> attributeIdentifiers = semanticSearchServiceHelper
 				.getAttributeIdentifiers(sourceEntityMetaData);
 
-		QueryRule createDisMaxQueryRule = semanticSearchServiceHelper.createDisMaxQueryRule(targetEntityMetaData,
+		QueryRule createDisMaxQueryRule = semanticSearchServiceHelper.createDisMaxQueryRuleForAttribute(targetEntityMetaData,
 				targetAttribute);
 
 		List<QueryRule> disMaxQueryRules = Lists.newArrayList(new QueryRule(AttributeMetaDataMetaData.IDENTIFIER,
@@ -105,7 +105,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		Iterable<String> attributeIdentifiers = semanticSearchServiceHelper
 				.getAttributeIdentifiers(sourceEntityMetaData);
 
-		QueryRule disMaxQueryRule = semanticSearchServiceHelper.createDisMaxQueryRule(targetEntityMetaData,
+		QueryRule disMaxQueryRule = semanticSearchServiceHelper.createDisMaxQueryRuleForAttribute(targetEntityMetaData,
 				targetAttribute);
 
 		List<QueryRule> finalQueryRules = Lists.newArrayList(new QueryRule(AttributeMetaDataMetaData.IDENTIFIER,
@@ -130,6 +130,15 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		return explainedAttributes;
 	}
 
+	/**
+	 * A helper function to explain each of the matched attribute by explain-api
+	 * 
+	 * @param attributeEntity
+	 * @param sourceEntityMetaData
+	 * @param collectExpanedQueryMap
+	 * @param finalQueryRules
+	 * @return
+	 */
 	public ExplainedAttributeMetaData convertAttributeEntityToExplainedAttribute(Entity attributeEntity,
 			EntityMetaData sourceEntityMetaData, Map<String, String> collectExpanedQueryMap,
 			List<QueryRule> finalQueryRules)
@@ -145,11 +154,10 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		Explanation explanation = elasticSearchExplainService.explain(new QueryImpl(finalQueryRules),
 				dataService.getEntityMetaData(AttributeMetaDataMetaData.ENTITY_NAME), attributeId);
 
-		Set<ExplainedQueryString> reverseSearchQueryStrings = elasticSearchExplainService.reverseSearchQueryStrings(
+		Set<ExplainedQueryString> detectedQueryStrings = elasticSearchExplainService.detectQueriesFromExplanation(
 				collectExpanedQueryMap, explanation);
 
-		return new ExplainedAttributeMetaData(sourceEntityMetaData.getAttribute(attributeName),
-				reverseSearchQueryStrings);
+		return new ExplainedAttributeMetaData(sourceEntityMetaData.getAttribute(attributeName), detectedQueryStrings);
 	}
 
 	@Override
@@ -217,7 +225,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 
 	private boolean filterOntologyTerm(Set<String> keywordsFromAttribute, OntologyTerm ot, Stemmer stemmer)
 	{
-		Set<String> ontologyTermSynonyms = semanticSearchServiceHelper.collectTermsFromOntologyTerm(ot);
+		Set<String> ontologyTermSynonyms = semanticSearchServiceHelper.getOtLabelAndSynonyms(ot);
 
 		for (String synonym : ontologyTermSynonyms)
 		{

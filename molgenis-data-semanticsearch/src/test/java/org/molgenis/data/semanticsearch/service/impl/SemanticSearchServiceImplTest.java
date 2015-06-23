@@ -97,16 +97,16 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 	@BeforeMethod
 	public void init()
 	{
-		when(semanticSearchServiceHelper.collectTermsFromOntologyTerm(standingHeight)).thenReturn(
+		when(semanticSearchServiceHelper.getOtLabelAndSynonyms(standingHeight)).thenReturn(
 				Sets.newHashSet("Standing height", "Standing height", "length"));
 
-		when(semanticSearchServiceHelper.collectTermsFromOntologyTerm(bodyWeight)).thenReturn(
+		when(semanticSearchServiceHelper.getOtLabelAndSynonyms(bodyWeight)).thenReturn(
 				Sets.newHashSet("Body weight", "Body weight", "Mass in kilograms"));
 
-		when(semanticSearchServiceHelper.collectTermsFromOntologyTerm(hypertension)).thenReturn(
+		when(semanticSearchServiceHelper.getOtLabelAndSynonyms(hypertension)).thenReturn(
 				Sets.newHashSet("Hypertension"));
 
-		when(semanticSearchServiceHelper.collectTermsFromOntologyTerm(maternalHypertension)).thenReturn(
+		when(semanticSearchServiceHelper.getOtLabelAndSynonyms(maternalHypertension)).thenReturn(
 				Sets.newHashSet("Maternal hypertension"));
 	}
 
@@ -184,7 +184,7 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 		QueryRule disMaxQueryRule = new QueryRule(rules);
 		disMaxQueryRule.setOperator(Operator.DIS_MAX);
 
-		when(semanticSearchServiceHelper.createDisMaxQueryRule(targetEntityMetaData, targetAttribute)).thenReturn(
+		when(semanticSearchServiceHelper.createDisMaxQueryRuleForAttribute(targetEntityMetaData, targetAttribute)).thenReturn(
 				disMaxQueryRule);
 
 		MapEntity entity1 = new MapEntity(ImmutableMap.of(AttributeMetaDataMetaData.NAME, "height_0",

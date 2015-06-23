@@ -49,7 +49,7 @@ public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainServ
 		return null;
 	}
 
-	public Set<ExplainedQueryString> reverseSearchQueryStrings(Map<String, String> collectExpanedQueryMap,
+	public Set<ExplainedQueryString> detectQueriesFromExplanation(Map<String, String> collectExpanedQueryMap,
 			Explanation explanation)
 	{
 		Set<ExplainedQueryString> matchedQueryStrings = new LinkedHashSet<ExplainedQueryString>();
