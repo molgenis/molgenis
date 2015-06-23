@@ -59,7 +59,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.google.common.base.Stopwatch;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -216,16 +215,6 @@ public class MappingServiceController extends MolgenisPluginController
 		}
 
 		return "redirect:/menu/main/mappingservice/mappingproject/" + mappingProjectId;
-	}
-
-	private void autoGenerateAlgorithms(EntityMapping mapping, String target, EntityMetaData sourceEntityMetaData,
-			EntityMetaData targetEntityMetaData, Iterable<AttributeMetaData> attributes, MappingProject project)
-	{
-		Stopwatch stopwatch = Stopwatch.createStarted();
-		attributes.forEach(attribute -> algorithmService.autoGenerateAlgorithm(sourceEntityMetaData,
-				targetEntityMetaData, mapping, attribute));
-		mappingService.updateMappingProject(project);
-		stopwatch.stop();
 	}
 
 	/**
@@ -635,6 +624,24 @@ public class MappingServiceController extends MolgenisPluginController
 		LOG.error(e.getMessage(), e);
 		return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(
 				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage()));
+	}
+
+	/**
+	 * Generate algorithms based on semantic matches between attribute tags and descriptions
+	 * 
+	 * @param mapping
+	 * @param target
+	 * @param sourceEntityMetaData
+	 * @param targetEntityMetaData
+	 * @param attributes
+	 * @param project
+	 */
+	private void autoGenerateAlgorithms(EntityMapping mapping, String target, EntityMetaData sourceEntityMetaData,
+			EntityMetaData targetEntityMetaData, Iterable<AttributeMetaData> attributes, MappingProject project)
+	{
+		attributes.forEach(attribute -> algorithmService.autoGenerateAlgorithm(sourceEntityMetaData,
+				targetEntityMetaData, mapping, attribute));
+		mappingService.updateMappingProject(project);
 	}
 
 	/**
