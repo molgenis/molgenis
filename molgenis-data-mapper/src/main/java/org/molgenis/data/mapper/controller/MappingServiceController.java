@@ -16,7 +16,6 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
@@ -38,6 +37,8 @@ import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.FieldType;
+import org.molgenis.fieldtypes.MrefField;
+import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -520,9 +521,7 @@ public class MappingServiceController extends MolgenisPluginController
 		String sourceAttributeIdAttribute = null;
 		String sourceAttributeLabelAttribute = null;
 
-		if (sourceAttributeDataType.equals(MolgenisFieldTypes.CATEGORICAL)
-				|| sourceAttributeDataType.equals(MolgenisFieldTypes.XREF)
-				|| sourceAttributeDataType.equals(MolgenisFieldTypes.MREF))
+		if (sourceAttributeDataType instanceof XrefField || sourceAttributeDataType instanceof MrefField)
 		{
 			sourceAttributeEntities = dataService.findAll(dataService.getEntityMetaData(source)
 					.getAttribute(sourceAttribute).getRefEntity().getName());
