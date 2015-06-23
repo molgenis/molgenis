@@ -11,7 +11,10 @@
 
 <div class="row">
 	<div class="col-md-12">
-		<a href="${context_url}" class="btn btn-default"><span class="glyphicon glyphicon-chevron-left"></span> Back to mapping project overview</a>	
+		<a href="${context_url}" class="btn btn-default btn-xs">
+			<span class="glyphicon glyphicon-chevron-left"></span> Back to mapping project overview
+		</a>
+		<hr></hr>	
 	</div>
 </div>
 
@@ -73,7 +76,6 @@
 											<input type="hidden" name="target" value="${selectedTarget}"/>
 											<input type="hidden" name="source" value="${source.name}"/>
 											<input type="hidden" name="targetAttribute" value="${attribute.name}"/>
-											<input type="hidden" name="showSuggestedAttributes" value="true"/>
 										</form>
 										<#if hasWritePermission && source.getAttributeMapping(attribute.name)??>
 											<form method="post" action="${context_url}/removeAttributeMapping" class="pull-right verify">
@@ -89,8 +91,9 @@
 									</div>
 									<div>
 										<#if source.getAttributeMapping(attribute.name)??>
-											<div class="ace readonly" id="algorithm-${attribute.name?js_string}-${source.name?js_string}"
-												style="height: 25px">${(source.getAttributeMapping(attribute.name).algorithm!"")?html}</div>
+											<#list source.getAttributeMapping(attribute.name).sourceAttributeMetaDatas as mappedSourceAttribute>
+												${mappedSourceAttribute.label?html}<#if mappedSourceAttribute_has_next>, </#if>
+											</#list>
 										<#elseif !attribute.nillable>
 											<span class="label label-danger">missing</span>
 										</#if>
