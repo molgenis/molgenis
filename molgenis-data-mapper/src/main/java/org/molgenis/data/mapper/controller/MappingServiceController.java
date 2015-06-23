@@ -468,23 +468,39 @@ public class MappingServiceController extends MolgenisPluginController
 		model.addAttribute("entityMapping", entityMapping);
 		model.addAttribute("attributeMapping", attributeMapping);
 
-		FieldType sourceAttributeDataType = dataService.getEntityMetaData(source).getAttribute(sourceAttribute)
+		// set variables for the target column in the mapping editor
+		FieldType targetAttributeDataType = dataService.getEntityMetaData(target).getAttribute(targetAttribute)
 				.getDataType();
 
-		// values for target
-		Iterable<Entity> targetAttributeEntities = dataService.findAll(dataService.getEntityMetaData(target)
-				.getAttribute(targetAttribute).getRefEntity().getName());
+		Iterable<Entity> targetAttributeEntities = null;
+		String targetAttributeIdAttribute = null;
+		String targetAttributeLabelAttribute = null;
+
+		if (targetAttributeDataType instanceof XrefField || targetAttributeDataType instanceof MrefField)
+		{
+			targetAttributeEntities = dataService.findAll(dataService.getEntityMetaData(target)
+					.getAttribute(targetAttribute).getRefEntity().getName());
+
+			targetAttributeIdAttribute = dataService.getEntityMetaData(target).getAttribute(targetAttribute)
+					.getRefEntity().getIdAttribute().getName();
+
+			targetAttributeLabelAttribute = dataService.getEntityMetaData(target).getAttribute(targetAttribute)
+					.getRefEntity().getLabelAttribute().getName();
+		}
+		else
+		{
+			targetAttributeEntities = dataService.findAll(dataService.getEntityMetaData(target).getName());
+			targetAttributeIdAttribute = dataService.getEntityMetaData(target).getIdAttribute().getName();
+			targetAttributeLabelAttribute = dataService.getEntityMetaData(target).getLabelAttribute().getName();
+		}
+
 		model.addAttribute("targetAttributeEntities", targetAttributeEntities);
-
-		// ID attribute for the target ref entity
-		String targetAttributeIdAttribute = dataService.getEntityMetaData(target).getAttribute(targetAttribute)
-				.getRefEntity().getIdAttribute().getName();
 		model.addAttribute("targetAttributeIdAttribute", targetAttributeIdAttribute);
-
-		// Label attribute for the target ref entity
-		String targetAttributeLabelAttribute = dataService.getEntityMetaData(target).getAttribute(targetAttribute)
-				.getRefEntity().getLabelAttribute().getName();
 		model.addAttribute("targetAttributeLabelAttribute", targetAttributeLabelAttribute);
+
+		// set variables for the source column in the mapping editor
+		FieldType sourceAttributeDataType = dataService.getEntityMetaData(source).getAttribute(sourceAttribute)
+				.getDataType();
 
 		Iterable<Entity> sourceAttributeEntities = null;
 		String sourceAttributeIdAttribute = null;
