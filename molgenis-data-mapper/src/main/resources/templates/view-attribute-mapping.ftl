@@ -84,12 +84,12 @@
 									<td>
 										<div class="checkbox">
 											<label>
-												<input class="${source.name}" type="checkbox">
+												<input class="${source.name?html}" type="checkbox">
 											</label>
 										</div>
 									</td>
 									<td>
-										<b>${source.label?html}</b> (${source.dataType})
+										<b>${source.label?html}</b> (${source.dataType?html})
 										<#if source.nillable> <span class="label label-warning">nillable</span></#if>
 										<#if source.unique> <span class="label label-default">unique</span></#if>
 										<#if source.description??><br />${source.description?html}</#if>
