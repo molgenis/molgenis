@@ -404,7 +404,7 @@ public class MappingServiceController extends MolgenisPluginController
 		return VIEW_ATTRIBUTE_MAPPING;
 	}
 
-	@RequestMapping(value = "/attributemappingfeedback")
+	@RequestMapping(value = "/attributemappingfeedback", method = RequestMethod.POST)
 	public String attributeMappingFeedback(@RequestParam(required = true) String mappingProjectId,
 			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
 			@RequestParam(required = true) String targetAttribute, @RequestParam(required = true) String algorithm,
@@ -483,7 +483,7 @@ public class MappingServiceController extends MolgenisPluginController
 	 * @param sourceAttribute
 	 * @param model
 	 */
-	@RequestMapping("/advancedmappingeditor")
+	@RequestMapping(value = "/advancedmappingeditor", method = RequestMethod.GET)
 	public String advancedMappingEditor(@RequestParam(required = true) String mappingProjectId,
 			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
 			@RequestParam(required = true) String targetAttribute,
@@ -588,7 +588,7 @@ public class MappingServiceController extends MolgenisPluginController
 		return VIEW_CATEGORY_MAPPING_EDITOR;
 	}
 
-	@RequestMapping("/savecategorymapping")
+	@RequestMapping(value = "/savecategorymapping", method = RequestMethod.POST)
 	public @ResponseBody void saveCategoryMapping(@RequestParam(required = true) String mappingProjectId,
 			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
 			@RequestParam(required = true) String targetAttribute, @RequestParam(required = true) String algorithm)
