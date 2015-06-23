@@ -358,8 +358,7 @@ public class MappingServiceController extends MolgenisPluginController
 	@RequestMapping("/attributeMapping")
 	public String viewAttributeMapping(@RequestParam(required = true) String mappingProjectId,
 			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
-			@RequestParam(required = true) String targetAttribute,
-			@RequestParam(required = true) boolean showSuggestedAttributes, Model model)
+			@RequestParam(required = true) String targetAttribute, Model model)
 	{
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
 		MappingTarget mappingTarget = project.getMappingTarget(target);
