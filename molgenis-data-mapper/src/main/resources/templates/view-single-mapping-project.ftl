@@ -93,7 +93,7 @@
 									<div>
 										<#if source.getAttributeMapping(attribute.name)??>
 											<#list source.getAttributeMapping(attribute.name).sourceAttributeMetaDatas as mappedSourceAttribute>
-												${mappedSourceAttribute.name?html}<#if mappedSourceAttribute_has_next>, </#if>
+												${mappedSourceAttribute.label?html}<#if mappedSourceAttribute_has_next>, </#if>
 											</#list>
 										<#elseif !attribute.nillable>
 											<span class="label label-danger">missing</span>

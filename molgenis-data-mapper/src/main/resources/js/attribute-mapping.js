@@ -2,41 +2,28 @@
 	"use strict";
 
 	/**
-	 * Updates a table's column widths.
+	 * Generate an algorithm based on category selections
 	 * 
-	 * @param $table
-	 *            the scrollable table whose header and body cells should be
-	 *            realigned
+	 * @param mappedCategoryIds
+	 *            a list of category identifiers
+	 * @param attribute
+	 *            the source attribute
+	 * @param defaultValue
+	 *            The value used as a default value
+	 * @param nullValue
+	 *            The value used for missing
 	 */
-	function updateColumnWidths($table) {
-		var $bodyCells = $table.find('tbody tr:first').children(), colWidth;
-
-		// Get the tbody columns width array
-		colWidth = $bodyCells.map(function() {
-			return $(this).width();
-		}).get();
-
-		// Set the width of thead columns
-		$table.find('thead tr').children().each(function(i, v) {
-			$(v).width(colWidth[i]);
-		});
-	}
-
-	/**
-	 * Searches the source attributes in an algorithm string.
-	 * 
-	 * @param algorithm
-	 *            the algorithm string to search
-	 */
-	function getSourceAttrs(algorithm) {
-		var regex = /\$\(['"]([^\$\(\)]+)['"]\)/g, match, result = [];
-
-		while ((match = regex.exec(algorithm))) {
-			if (match) {
-				result.push(match[1]);
-			}
+	function generateAlgorithm(mappedCategoryIds, attribute, defaultValue, nullValue) {
+		var algorithm;
+		if (nullValue !== undefined) {
+			algorithm = "$('" + attribute + "').map(" + JSON.stringify(mappedCategoryIds) + ", " + JSON.stringify(defaultValue) + ", " + JSON.stringify(nullValue)
+					+ ").value();";
+		} else if (defaultValue !== undefined) {
+			algorithm = "$('" + attribute + "').map(" + JSON.stringify(mappedCategoryIds) + ", " + JSON.stringify(defaultValue) + ").value();";
+		} else {
+			algorithm = "$('" + attribute + "').map(" + JSON.stringify(mappedCategoryIds) + ").value();";
 		}
-		return result;
+		return algorithm;
 	}
 
 	/**
@@ -87,153 +74,296 @@
 	}
 
 	/**
-	 * Colors the backgrounds of the attributes mentioned in the algorithm
+	 * Searches the source attributes in an algorithm string.
+	 * 
+	 * @param algorithm
+	 *            the algorithm string to search
+	 */
+	function getSourceAttrs(algorithm) {
+		var regex = /\$\(['"]([^\$\(\)]+)['"]\)/g, match, result = [];
+
+		while ((match = regex.exec(algorithm))) {
+			if (match) {
+				result.push(match[1]);
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Load result table from view-attribute-mapping-feedback.ftl
+	 * 
+	 * @param algorithm
+	 *            the algorithm that is send to the server to apply over the
+	 *            submitted source values
+	 */
+	function loadAlgorithmResult(algorithm) {
+		$("#result-table-container").load("attributemappingfeedback #algorithm-result-feedback-container", {
+			mappingProjectId : $('input[name="mappingProjectId"]').val(),
+			target : $('input[name="target"]').val(),
+			source : $('input[name="source"]').val(),
+			targetAttribute : $('input[name="targetAttribute"]').val(),
+			algorithm : algorithm
+		}, function() {
+			$('.show-error-message').on('click', function() {
+				$('#algorithm-error-message-container').html($(this).data('message'));
+			});
+		});
+	}
+
+	/**
+	 * Load mapping table from view-advanced-mapping-editor.ftl
+	 * 
+	 * @param algorithm
+	 *            The algorithm to set presets when opening the editor a second
+	 *            time
+	 */
+	function loadMappingEditor(algorithm) {
+		$("#advanced-mapping-table").load("advancedmappingeditor #advanced-mapping-editor", {
+			mappingProjectId : $('input[name="mappingProjectId"]').val(),
+			target : $('input[name="target"]').val(),
+			source : $('input[name="source"]').val(),
+			targetAttribute : $('input[name="targetAttribute"]').val(),
+			sourceAttribute : getSourceAttrs(algorithm)[0],
+			algorithm : algorithm
+		});
+	}
+
+	/**
+	 * Selects the attributes mentioned in the algorithm
 	 * 
 	 * @param algorithm
 	 *            the algorithm string
 	 */
-	function updateAttributeSelectionMarker(algorithm) {
+	function checkSelectedAttributes(algorithm) {
 		var sourceAttrs = getSourceAttrs(algorithm);
-		$('#attribute-mapping-table').find('td').each(function(index, value) {
-			
-			var name = $(this).attr('class'), inArray = $.inArray(name, sourceAttrs), btn = $(this).find('button');
-			
-			if (inArray >= 0) { // If this is an attribute present in algorithm
-				$(this).css('background-color', '#CCFFCC'); // set background color
-				btn.removeClass('not-selected').addClass('selected'); // add selected class
-				btn.find('span').removeClass('glyphicon-ok').addClass('glyphicon-remove'); // change icon
-			} else { // Attribute is not present in algorithm
-				$(this).css('background-color', ''); // remove background color
-				btn.find('span').removeClass('glyphicon-remove').addClass('glyphicon-ok'); // change icon
+		$('input:checkbox').each(function(index, value) {
+			var name = $(this).attr('class'), inArray = $.inArray(name, sourceAttrs);
+			$(this).prop('checked', inArray >= 0);
+		});
+	}
+
+	/**
+	 * Clears the editor and inserts selected attributes.
+	 * 
+	 * @param selectedAttributes
+	 *            all the selected attributes
+	 * @param editor
+	 *            the ace algorithm editor to insert the attribute into
+	 */
+	function insertSelectedAttributes(selectedAttributes, editor) {
+		var existingAlgorithm = editor.getSession().getValue(), newAttributes = [], existingAttributes = getSourceAttrs(existingAlgorithm);
+		$(selectedAttributes).each(function() {
+			if (existingAlgorithm.indexOf(this) === -1) {
+				insertAttribute(this, editor);
+			}
+		});
+
+		$(existingAttributes).each(function() {
+			if (selectedAttributes.indexOf(this) === -1) {
+				removeAttribute(this, editor);
 			}
 		});
 	}
-	
+
 	/**
-	 * Inserts attribute in the editor.
+	 * Inserts a single attribute
 	 * 
 	 * @param attribute
-	 *            the name of the attribute
+	 *            One attribute to insert into the editor
 	 * @param editor
 	 *            the ace algorithm editor to insert the attribute into
 	 */
 	function insertAttribute(attribute, editor) {
-		var algorithm = "$('" + attribute + "').value()";
-		editor.insert(algorithm, -1);
-		$('#algorithm-container').append(algorithm);
+		editor.insert("$('" + attribute + "').value();");
 	}
 
 	/**
-	 * Removes attribute from the editor
+	 * Removes a single attribute
 	 * 
 	 * @param attribute
-	 *            the name of the attribute
+	 *            One attribute to remove from the editor
 	 * @param editor
-	 *            the ace algorithm editor to insert the attribute into
+	 *            the ace algorithm editor to remove the attribute from
 	 */
-	function outsertAttribute(attribute, editor) {
-		var algorithm = "$('" + attribute + "').value()", algorithmContainer = $('#algorithm-container');
-		editor.replaceAll("", algorithm);
-		algorithmContainer.html(algorithmContainer.text().split(algorithm).join(""));
+	function removeAttribute(attribute, editor) {
+		// TODO Fix removing algorithms that contain more then just .value()
+		// (like .map())
+		editor.replaceAll("", {
+			needle : "$('" + attribute + "').value();"
+		});
+		editor.replaceAll("", {
+			needle : "$('" + attribute + "')"
+		});
 	}
-	
+
 	$(function() {
-		var $textarea = $("#edit-algorithm-textarea"), initialValue = $textarea.val(), editor, $scrollTable = $('table.scroll');
 
-		// N.B. Always do this first cause it fiddles with the DOM and disrupts
-		// listeners you may have placed on the table elements!
-		$('#attribute-mapping-table').scrollTableBody({
-			rowsToDisplay : 6
-		});
+		var editor, searchQuery, selectedAttributes, initialValue, algorithm, targetAttributeDataType, $textarea;
 
-		// buttons outside of forms to submit forms
-		$('#preview-mapping-result-btn').on('click', function() {
-			$('#preview-mapping-result-form').submit();
-		});
-
-		$('#save-attribute-mapping-btn').on('click', function() {
-			$('#save-attribute-mapping-form').submit();
-		});
-
-		$('button.toggle-btn').on('click', function() {
-			var sourceName = $(this).data('attribute'), btn = $(this); // attribute name / row indicator
-			
-			
-			// Dynamicly update the preview table based on selected attributes
-			$.ajax({
-				url : molgenis.getContextUrl() + '/dynamicattributemappingfeedback',
-				data : {
-					mappingProjectId : $('input[name="mappingProjectId"]').val(),
-					target : $('input[name="target"]').val(),
-					source : $('input[name="source"]').val(),
-					targetAttribute : $('input[name="targetAttribute"]').val(),
-					algorithm : $('#algorithm-container').text()
-				},
-				type : 'POST',
-				success : function(result) {
-					for(var key in result) {
-						$('#mapping-preview-container').html(result[key]);
-					}
-				}
+		// tooltip placement
+		$(document).ready(function() {
+			$("[rel=tooltip]").tooltip({
+				placement : 'right'
 			});
-			
-			if (btn.hasClass('not-selected')) { // switching to selected
-				btn.removeClass('not-selected').addClass('selected'); // change class
-				btn.find('span').toggleClass('glyphicon-ok').toggleClass('glyphicon-remove'); // toggle icons
-				$('td[class='+sourceName+']').css('background-color', '#CCFFCC'); // change background
-				insertAttribute(sourceName, editor); // add algorithm to editor
-				
-			} else if (btn.hasClass('selected')) { // switching to non-selected
-				btn.removeClass('selected').addClass('not-selected'); // change class
-				btn.find('span').toggleClass('glyphicon-remove').toggleClass('glyphicon-ok'); // toggle icons
-				$('td[class='+sourceName+']').css('background-color', ''); // change background
-				outsertAttribute(sourceName, editor); // remove algorithm from editor
-			}
-			
 		});
 
-		$("#edit-algorithm-textarea").ace({
+		// create ace editor
+		$textarea = $("#ace-editor-text-area");
+		initialValue = $textarea.val();
+		$textarea.ace({
 			options : {
 				enableBasicAutocompletion : true
 			},
-			readOnly : $("#edit-algorithm-textarea").data('readonly') === true,
+			readOnly : $textarea.data('readonly') === true,
 			theme : 'eclipse',
 			mode : 'javascript',
 			showGutter : true,
-			highlightActiveLine : false
+			highlightActiveLine : true
 		});
-		editor = $('#edit-algorithm-textarea').data('ace').editor;
+		editor = $textarea.data('ace').editor;
 
-		$(window).resize(updateColumnWidths($scrollTable));
-		updateColumnWidths($scrollTable);
-		
-		$('#save-attribute-mapping-form').on('reset', function() {
-			if (editor.getValue() === initialValue) {
-				return false;
+		// on load use algorithm to set selected attributes and editor value
+		checkSelectedAttributes(initialValue);
+		algorithm = editor.getSession().getValue();
+
+		editor.getSession().on('change', function() {
+			// check attributes if manually added
+			checkSelectedAttributes(editor.getValue());
+
+			// update algorithm
+			algorithm = editor.getSession().getValue();
+
+			// update result
+			loadAlgorithmResult(algorithm);
+		});
+
+		// if there is an algorithm present on load, show the result table
+		if (algorithm.trim()) {
+			loadAlgorithmResult(algorithm);
+		} else {
+			// if no algorithm present hide the mapping and result containers
+			$('#attribute-mapping-container').css('display', 'none');
+			$('#result-container').css('display', 'none');
+		}
+
+		// page update on attribute selection / deselection
+		$('#attribute-mapping-table :checkbox').on('change', function() {
+			selectedAttributes = [];
+
+			$('#attribute-mapping-table :checkbox:checked').each(function() {
+				selectedAttributes.push($(this).attr('class'));
+			});
+
+			// attributes into editor
+			insertSelectedAttributes(selectedAttributes, editor);
+
+			// updates algorithm
+			algorithm = editor.getSession().getValue();
+
+			// events only fired when 1 or more attributes is selected
+			if ($('#attribute-mapping-table :checkbox:checked').length > 0) {
+
+				// on selection of an attribute, show all fields
+				$('#result-container').css('display', 'inline');
+				$('#attribute-mapping-container').css('display', 'inline');
+
+				// generate result table
+				loadAlgorithmResult(algorithm);
+
+				// generate mapping editor if target attribute is an xref or
+				// categorical
+				targetAttributeDataType = $('input[name="targetAttributeType"]').val();
+				if (targetAttributeDataType === 'xref' || targetAttributeDataType === 'categorical') {
+					loadMappingEditor(algorithm);
+				}
+			} else {
+				// events when no attributes are selected
+				$('#result-container').css('display', 'none');
+				$('#attribute-mapping-container').css('display', 'none');
 			}
-			bootbox.confirm("Do you want to revert your changes?", function(result) {
-				if (result) {
-					editor.setValue(initialValue, -1);
-					updateAttributeSelectionMarker(initialValue);
-					$('#statistics-container').empty();
+		});
+
+		// save button for saving generated mapping
+		$('#save-mapping-btn').on('click', function() {
+			$.post(molgenis.getContextUrl() + "/saveattributemapping", {
+				mappingProjectId : $('input[name="mappingProjectId"]').val(),
+				target : $('input[name="target"]').val(),
+				source : $('input[name="source"]').val(),
+				targetAttribute : $('input[name="targetAttribute"]').val(),
+				algorithm : algorithm
+			}, function() {
+				molgenis.createAlert([ {
+					'message' : 'Succesfully saved the created mapping'
+				} ], 'success');
+			});
+		});
+
+		$('#js-function-modal-btn').on('click', function() {
+			$('#js-function-modal').modal('show');
+		});
+
+		// look for attributes in the attribute table
+		$('#attribute-search-btn').on('click', function() {
+			searchQuery = $('#attribute-search-field').val();
+			// use the value of attribute-search-field to apply a filter on the
+			// attribute-mapping-table
+		});
+
+		// when the map tab is selected, load its contents
+		// loading on page load will fail because bootstrap tab blocks it
+		$('a[href=#map]').on('shown.bs.tab', function() {
+			loadMappingEditor(algorithm);
+		});
+
+		$('a[href=#script]').on('shown.bs.tab', function() {
+			// Clearing the editor will empty the algorithm
+			var newAlgorithm = algorithm;
+			editor.setValue("");
+			editor.insert(newAlgorithm, -1);
+		});
+
+		$('#advanced-mapping-table').on('change', function() {
+			var mappedCategoryIds = {}, defaultValue = undefined, nullValue = undefined, key, val;
+
+			// for each source xref value, check which target xref value
+			// was chosen
+			$('#advanced-mapping-table > tbody > tr').each(function() {
+				key = $(this).attr('id');
+				val = $(this).find('option:selected').val();
+				if (key === 'nullValue') {
+					if (val !== 'use-default-option') {
+						if (val === 'use-null-value') {
+							nullValue = null;
+						} else {
+							nullValue = val;
+						}
+					}
+				} else {
+					if (val !== 'use-default-option') {
+						if (val === 'use-null-value') {
+							mappedCategoryIds[$(this).attr('id')] = null;
+						} else {
+							mappedCategoryIds[$(this).attr('id')] = val;
+						}
+					}
 				}
 			});
-			return false;
-		});
 
-		// TODO change the background color of selected attributes back to
-		// normal when they get deselected
-		editor.getSession().on('change', function() {
-			updateAttributeSelectionMarker(editor.getValue());
-		});
-		updateAttributeSelectionMarker(initialValue);
+			if (nullValue !== undefined) {
+				defaultValue = null;
+			}
 
-		$('#btn-test').click(function() {
-			testAlgorithm(editor.getValue());
-			return false;
-		});
+			if ($('#default-value').is(":visible")) {
+				defaultValue = $('#default-value').find('option:selected').val();
+				if (defaultValue === 'use-null-value') {
+					defaultValue = null;
+				}
+			}
 
-		$('#statistics-container').hide();
+			algorithm = generateAlgorithm(mappedCategoryIds, $('input[name="sourceAttribute"]').val(), defaultValue, nullValue);
+			loadAlgorithmResult(algorithm);
+		});
 	});
 
 }($, window.top.molgenis = window.top.molgenis || {}));
