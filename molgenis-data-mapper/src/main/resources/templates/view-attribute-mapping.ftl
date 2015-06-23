@@ -20,7 +20,7 @@
 
 <div class="row">
 	<div class="col-md-12">
-		<a href="${context_url}/mappingproject/${mappingProject.identifier}" class="btn btn-default btn-xs pull-left">
+		<a href="${context_url?html}/mappingproject/${mappingProject.identifier?html}" class="btn btn-default btn-xs pull-left">
 			<span class="glyphicon glyphicon-chevron-left"></span> Back to project
 		</a>
 		
@@ -29,7 +29,7 @@
 		<input type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name?html}"/>
 		<input type="hidden" name="source" value="${entityMapping.sourceEntityMetaData.name?html}"/>
 		<input type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name?html}"/>
-		<input type="hidden" name="targetAttributeType" value="${attributeMapping.targetAttributeMetaData.dataType}"/>
+		<input type="hidden" name="targetAttributeType" value="${attributeMapping.targetAttributeMetaData.dataType?html}"/>
 		
 	</div>
 </div>
@@ -80,11 +80,11 @@
 						</thead>
 						<tbody>
 							<#list entityMapping.sourceEntityMetaData.attributes as source>
-								<tr class="${source.name}">
+								<tr class="${source.name?html}">
 									<td>
 										<div class="checkbox">
 											<label>
-												<input class="${source.name}" type="checkbox">
+												<input class="${source.name?html}" type="checkbox">
 											</label>
 										</div>
 									</td>
