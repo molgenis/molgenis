@@ -11,13 +11,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class MolgenisTransactionLogMetaData extends DefaultEntityMetaData
 {
-	public static String ENTITY_NAME = "MolgenisTransactionLog";
+	public static final String ENTITY_NAME = "MolgenisTransactionLog";
 
-	public static String TRANSACTION_ID = "transactionId";
-	public static String USER_NAME = "userName";
-	public static String START_TIME = "startTime";
-	public static String STATUS = "transactionStatus";
-	public static String END_TIME = "endTime";
+	public static final String TRANSACTION_ID = "transactionId";
+	public static final String USER_NAME = "userName";
+	public static final String START_TIME = "startTime";
+	public static final String STATUS = "transactionStatus";
+	public static final String END_TIME = "endTime";
 
 	public static final MolgenisTransactionLogMetaData INSTANCE = new MolgenisTransactionLogMetaData();
 

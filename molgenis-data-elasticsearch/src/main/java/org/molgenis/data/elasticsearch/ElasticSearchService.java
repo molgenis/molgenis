@@ -33,6 +33,7 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
+import org.elasticsearch.action.search.ShardSearchFailure;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
@@ -217,11 +218,23 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 	{
 		String docType = sanitizeMapperType(entityMetaData.getName());
 
-		GetMappingsResponse getMappingsResponse = client.admin().indices().prepareGetMappings("molgenis").execute()
+		GetMappingsResponse getMappingsResponse = client.admin().indices().prepareGetMappings(indexName).execute()
 				.actionGet();
 		ImmutableOpenMap<String, ImmutableOpenMap<String, MappingMetaData>> allMappings = getMappingsResponse
 				.getMappings();
-		final ImmutableOpenMap<String, MappingMetaData> indexMappings = allMappings.get("molgenis");
+		final ImmutableOpenMap<String, MappingMetaData> indexMappings = allMappings.get(indexName);
+		return indexMappings.containsKey(docType);
+	}
+
+	public boolean hasMapping(String index, EntityMetaData entityMetaData)
+	{
+		String docType = sanitizeMapperType(entityMetaData.getName());
+
+		GetMappingsResponse getMappingsResponse = client.admin().indices().prepareGetMappings(index).execute()
+				.actionGet();
+		ImmutableOpenMap<String, ImmutableOpenMap<String, MappingMetaData>> allMappings = getMappingsResponse
+				.getMappings();
+		final ImmutableOpenMap<String, MappingMetaData> indexMappings = allMappings.get(index);
 		return indexMappings.containsKey(docType);
 	}
 
@@ -717,7 +730,7 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 			transactionId = getCurrentTransactionId();
 		}
 
-		if (transactionId != null)
+		if ((transactionId != null) && hasMapping(transactionId, entityMetaData))
 		{
 			indexNames = ArrayUtils.add(indexNames, transactionId);
 		}
@@ -1034,9 +1047,15 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 						LOG.trace("SearchRequest: " + searchRequestBuilder);
 					}
 					SearchResponse searchResponse = searchRequestBuilder.execute().actionGet();
+
 					if (searchResponse.getFailedShards() > 0)
 					{
-						throw new ElasticsearchException("Search failed.");
+						StringBuilder sb = new StringBuilder("Search failed.");
+						for (ShardSearchFailure failure : searchResponse.getShardFailures())
+						{
+							sb.append("\n").append(failure.reason());
+						}
+						throw new ElasticsearchException(sb.toString());
 					}
 					if (LOG.isDebugEnabled())
 					{

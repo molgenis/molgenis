@@ -7,12 +7,12 @@ import java.util.Arrays;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.Writable;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
@@ -39,7 +39,7 @@ public class BioSampleModelMaker
 		}
 	}
 
-	public void makeModelFile() throws InvalidFormatException, IOException
+	public void makeModelFile() throws IOException, MolgenisInvalidFormatException
 	{
 		File biosampleFile = ResourceUtils.getFile("src/test/resources/BioSample-Model.xlsx");
 

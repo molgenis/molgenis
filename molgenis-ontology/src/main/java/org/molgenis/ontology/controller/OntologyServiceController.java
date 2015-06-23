@@ -22,10 +22,10 @@ import javax.servlet.http.Part;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.Sort;
@@ -128,7 +128,8 @@ public class OntologyServiceController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/calculate/{entityName}")
-	public String calculateRoc(@PathVariable String entityName, Model model) throws IOException, InvalidFormatException
+	public String calculateRoc(@PathVariable String entityName, Model model) throws IOException,
+			MolgenisInvalidFormatException
 	{
 		model.addAllAttributes(matchQualityRocService.calculateROC(entityName));
 		return init(model);
