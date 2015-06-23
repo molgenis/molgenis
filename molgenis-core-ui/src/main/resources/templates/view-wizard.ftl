@@ -44,7 +44,7 @@
 				<li class="next pull-right<#if !wizard.nextButton.enabled> disabled</#if>" role="button">
 					<a <#if wizard.nextButton.id?has_content>id="${wizard.nextButton.id?html}"</#if> href="${context_url?html}${wizard.nextButton.targetUri?html}">${wizard.nextButton.title?html} &rarr;</a>
 				</li>
-				<li class="reset pull-right" role="button">
+				<li class="restart pull-right" role="button">
 					<a href="${context_url?html}/restart">Restart</a>
 				</li>
 			</ul>
