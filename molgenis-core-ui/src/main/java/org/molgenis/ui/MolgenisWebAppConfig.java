@@ -63,7 +63,6 @@ import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.ui.menumanager.MenuManagerServiceImpl;
 import org.molgenis.ui.security.MolgenisUiPermissionDecorator;
 import org.molgenis.util.ApplicationContextProvider;
-import org.molgenis.util.DependencyResolver;
 import org.molgenis.util.EntityUtils;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.IndexedRepositoryExceptionTranslatorDecorator;
@@ -397,8 +396,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 		SearchService localSearchService = embeddedElasticSearchServiceFactory.create(localDataService,
 				new EntityToSourceConverter());
-
-		DependencyResolver.resolve(localDataService).forEach(repo -> {
+		localDataService.forEach(repo -> {
 			localSearchService.rebuildIndex(repo, repo.getEntityMetaData());
 		});
 	}
