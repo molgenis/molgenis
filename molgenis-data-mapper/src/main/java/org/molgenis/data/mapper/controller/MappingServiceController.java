@@ -59,7 +59,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.google.common.base.Stopwatch;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -218,16 +217,6 @@ public class MappingServiceController extends MolgenisPluginController
 		return "redirect:/menu/main/mappingservice/mappingproject/" + mappingProjectId;
 	}
 
-	private void autoGenerateAlgorithms(EntityMapping mapping, String target, EntityMetaData sourceEntityMetaData,
-			EntityMetaData targetEntityMetaData, Iterable<AttributeMetaData> attributes, MappingProject project)
-	{
-		Stopwatch stopwatch = Stopwatch.createStarted();
-		attributes.forEach(attribute -> algorithmService.autoGenerateAlgorithm(sourceEntityMetaData,
-				targetEntityMetaData, mapping, attribute));
-		mappingService.updateMappingProject(project);
-		stopwatch.stop();
-	}
-
 	/**
 	 * Removes entity mapping
 	 * 
@@ -365,8 +354,6 @@ public class MappingServiceController extends MolgenisPluginController
 	 *            name of the source entity
 	 * @param targetAttribute
 	 *            name of the target attribute
-	 * @param isShowSuggestedAttributes
-	 *            should the attributes be chosen by the user or semantic search must be used to do that
 	 */
 	@RequestMapping("/attributeMapping")
 	public String viewAttributeMapping(@RequestParam(required = true) String mappingProjectId,
@@ -384,22 +371,11 @@ public class MappingServiceController extends MolgenisPluginController
 			attributeMapping = entityMapping.addAttributeMapping(targetAttribute);
 		}
 
-		final Iterable<AttributeMetaData> attributes;
-		if (showSuggestedAttributes)
-		{
-			attributes = semanticSearchService.findAttributes(dataService.getEntityMetaData(source),
-					dataService.getEntityMetaData(target), attributeMapping.getTargetAttributeMetaData());
-		}
-		else
-		{
-			attributes = Lists.newArrayList(dataService.getEntityMetaData(source).getAtomicAttributes());
-		}
-
-		model.addAttribute("showSuggestedAttributes", showSuggestedAttributes);
 		model.addAttribute("mappingProject", project);
 		model.addAttribute("entityMapping", entityMapping);
 		model.addAttribute("attributeMapping", attributeMapping);
-		model.addAttribute("attributes", attributes);
+		model.addAttribute("attributes",
+				Lists.newArrayList(dataService.getEntityMetaData(source).getAtomicAttributes()));
 		model.addAttribute("hasWritePermission", hasWritePermission(project, false));
 
 		return VIEW_ATTRIBUTE_MAPPING;
@@ -635,6 +611,24 @@ public class MappingServiceController extends MolgenisPluginController
 		LOG.error(e.getMessage(), e);
 		return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(
 				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage()));
+	}
+
+	/**
+	 * Generate algorithms based on semantic matches between attribute tags and descriptions
+	 * 
+	 * @param mapping
+	 * @param target
+	 * @param sourceEntityMetaData
+	 * @param targetEntityMetaData
+	 * @param attributes
+	 * @param project
+	 */
+	private void autoGenerateAlgorithms(EntityMapping mapping, String target, EntityMetaData sourceEntityMetaData,
+			EntityMetaData targetEntityMetaData, Iterable<AttributeMetaData> attributes, MappingProject project)
+	{
+		attributes.forEach(attribute -> algorithmService.autoGenerateAlgorithm(sourceEntityMetaData,
+				targetEntityMetaData, mapping, attribute));
+		mappingService.updateMappingProject(project);
 	}
 
 	/**
