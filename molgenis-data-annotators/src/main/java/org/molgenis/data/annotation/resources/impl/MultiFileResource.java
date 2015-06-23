@@ -1,14 +1,9 @@
 package org.molgenis.data.annotation.resources.impl;
 
-<<<<<<< HEAD
-import java.util.HashMap;
-import java.util.Map;
-=======
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
->>>>>>> 8fed8aeee18823890c888a186147e9942d2ddf4e
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -103,20 +98,4 @@ public class MultiFileResource implements Resource
 		return resource.findAll(q);
 	}
 
-<<<<<<< HEAD
-	@Override
-	public boolean needsRefresh()
-	{
-		for (Resource resource : resources.values())
-		{
-			if (resource.needsRefresh() == true)
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
-=======
->>>>>>> 8fed8aeee18823890c888a186147e9942d2ddf4e
 }
