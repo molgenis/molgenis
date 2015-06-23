@@ -153,9 +153,7 @@
 	 */
 	function insertSelectedAttributes(selectedAttributes, editor) {
 		var existingAlgorithm = editor.getSession().getValue(), newAttributes = [], existingAttributes = getSourceAttrs(existingAlgorithm);
-		// editor.setValue("");
 		$(selectedAttributes).each(function() {
-			// attribute is not yet in the algorithm
 			if (existingAlgorithm.indexOf(this) === -1) {
 				insertAttribute(this, editor);
 			}
