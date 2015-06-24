@@ -105,10 +105,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 				.getRepository(RuntimeProperty.ENTITY_NAME), jpaRepositoryCollection
 				.getRepository(UserAuthority.ENTITY_NAME), jpaRepositoryCollection
 				.getRepository(GroupAuthority.ENTITY_NAME)));
-		upgradeService.addUpgrade(new Step13RemoveCatalogueMenuEntries(jpaRepositoryCollection
-				.getRepository(RuntimeProperty.ENTITY_NAME), jpaRepositoryCollection
-				.getRepository(UserAuthority.ENTITY_NAME), jpaRepositoryCollection
-				.getRepository(GroupAuthority.ENTITY_NAME)));
+		upgradeService.addUpgrade(new Step13RemoveCatalogueMenuEntries(dataSource));
 	}
 
 	@Override
