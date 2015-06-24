@@ -91,7 +91,7 @@ Browse to your /git/molgenis directory
 
 Select and wait to install all kinds of maven connectors (this takes a while!)
 
-Right mouse 'molgenis' -> Run as -> Maven install.
+Right mouse 'molgenis' -> Run as -> Run configurations. In Goals type: clean install. Under Goals check Update Snapshots and Resolve Workspace artifacts. Then click run.
 
 Right mouse 'molgenis-app' -> Run as -> Maven build ... -> in goals type 'jetty:run' and push run button
 
