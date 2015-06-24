@@ -32,6 +32,7 @@ import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.ui.migrate.v1_5.Step5AlterDataexplorerMenuURLs;
 import org.molgenis.ui.migrate.v1_5.Step6ChangeRScriptType;
 import org.molgenis.ui.migrate.v1_8.Step10DeleteFormReferences;
+import org.molgenis.ui.migrate.v1_8.Step13RemoveCatalogueMenuEntries;
 import org.molgenis.util.DependencyResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,6 +101,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 				.getRepository(RuntimeProperty.ENTITY_NAME), jpaRepositoryCollection
 				.getRepository(UserAuthority.ENTITY_NAME), jpaRepositoryCollection
 				.getRepository(GroupAuthority.ENTITY_NAME)));
+		upgradeService.addUpgrade(new Step13RemoveCatalogueMenuEntries(dataSource));
 	}
 
 	@Override

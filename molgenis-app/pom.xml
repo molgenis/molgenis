@@ -266,12 +266,6 @@
         	<groupId>org.molgenis</groupId>
         	<artifactId>molgenis-data-mysql</artifactId>
         	<version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-catalogue</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data-elasticsearch</artifactId>
