@@ -41,24 +41,29 @@ public class Step13RemoveCatalogueMenuEntries extends MolgenisUpgrade
 	{
 		LOG.info("Removing catalogue plugin menu entries from menu ...");
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-		String menuJson = jdbcTemplate.queryForObject("SELECT Value FROM RuntimeProperty WHERE Name='molgenis.menu'",
-				String.class);
 
-		// new value
-		Menu menu = new Gson().fromJson(menuJson, Menu.class);
-		removePluginEntriesFromMenuRec(menu, PLUGIN_ID);
-		String updatedMenuJson = new Gson().toJson(menu);
+		// check if RuntimeProperty table exists
+		if (!jdbcTemplate.queryForList("SHOW TABLES LIKE 'RuntimeProperty'").isEmpty())
+		{
+			String menuJson = jdbcTemplate.queryForObject(
+					"SELECT Value FROM RuntimeProperty WHERE Name='molgenis.menu'", String.class);
 
-		jdbcTemplate.execute("UPDATE RuntimeProperty SET value='" + updatedMenuJson + "' WHERE Name='molgenis.menu'");
-		LOG.info("Removed catalogue plugin menu entries from menu");
+			// new value
+			Menu menu = new Gson().fromJson(menuJson, Menu.class);
+			removePluginEntriesFromMenuRec(menu, PLUGIN_ID);
+			String updatedMenuJson = new Gson().toJson(menu);
 
-		// remove permissions
-		LOG.info("Removing catalogue plugin permissions ...");
-		String pattern = "ROLE_PLUGIN_%_" + PLUGIN_ID.toUpperCase();
-		jdbcTemplate.execute("DELETE FROM UserAuthority WHERE role LIKE '" + pattern + "'");
-		jdbcTemplate.execute("DELETE FROM GroupAuthority WHERE role LIKE '" + pattern + "'");
-		LOG.info("Removed catalogue plugin permissions");
+			jdbcTemplate.execute("UPDATE RuntimeProperty SET value='" + updatedMenuJson
+					+ "' WHERE Name='molgenis.menu'");
+			LOG.info("Removed catalogue plugin menu entries from menu");
 
+			// remove permissions
+			LOG.info("Removing catalogue plugin permissions ...");
+			String pattern = "ROLE_PLUGIN_%_" + PLUGIN_ID.toUpperCase();
+			jdbcTemplate.execute("DELETE FROM UserAuthority WHERE role LIKE '" + pattern + "'");
+			jdbcTemplate.execute("DELETE FROM GroupAuthority WHERE role LIKE '" + pattern + "'");
+			LOG.info("Removed catalogue plugin permissions");
+		}
 		return this;
 	}
 
