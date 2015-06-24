@@ -53,9 +53,8 @@ public class Step11ConvertNames extends MolgenisUpgrade
 	{
 		super(10, 11);
 
-		// InnoDB only allows setting foreign_key_checks=0 for a single session, so use a single connection source
+		// we use a single connection datasource because InnoDB only allows disabling key-checks for single sessions
 		this.template = new JdbcTemplate(dataSource);
-
 		this.dataSource = dataSource;
 	}
 
@@ -93,8 +92,6 @@ public class Step11ConvertNames extends MolgenisUpgrade
 		{
 			e.printStackTrace();
 		}
-
-		// throw new RuntimeException("EXIT");
 	}
 
 	/** Updates the names of columns in (mref)tables and updates the table names themselves. */
@@ -570,7 +567,6 @@ public class Step11ConvertNames extends MolgenisUpgrade
 				scope.add(nameFix);
 
 				// change the full package name
-				// TODO: fullNameFix sometimes changes based on parent
 				fullNameFix = fullNameFix.replaceAll(name + "$", nameFix);
 
 				// update fullname, name and parent in database
@@ -827,11 +823,6 @@ public class Step11ConvertNames extends MolgenisUpgrade
 	public static final Set<String> MOLGENIS_KEYWORDS = Sets.newHashSet("login", "logout", "csv", "entities",
 			"attributes", "base");
 
-	// TODO: REMOVE!!!!
-	public static final Set<String> TEST = Sets.newHashSet("molgenis", "thispackagenameiswaytoolongtob", "Owned",
-			"tommy", "ontologyTermSynonym", "chromosome6_survey1", "Abnormality_of_body_height", "ontologyIRI",
-			"Ontology", "umbilicalcord");
-
 	public static Set<String> KEYWORDS = Sets.newHashSet();
 	static
 	{
@@ -839,6 +830,5 @@ public class Step11ConvertNames extends MolgenisUpgrade
 		KEYWORDS.addAll(JAVASCRIPT_KEYWORDS);
 		KEYWORDS.addAll(MOLGENIS_KEYWORDS);
 		KEYWORDS.addAll(MYSQL_KEYWORDS);
-		// KEYWORDS.addAll(TEST);
 	}
 }
