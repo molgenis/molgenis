@@ -527,7 +527,6 @@ public class Step11ConvertNames extends MolgenisUpgrade
 		HashSet<String> scope = Sets.newHashSet();
 		packages.forEach(pack -> {
 			scope.add(pack.get("name").toString());
-			if (pack.get("name").toString().equals(NEW_DEFAULT_PACKAGE)) throw new RuntimeException("EXIT!");
 		});
 
 		// iterate over the packages and check the names
