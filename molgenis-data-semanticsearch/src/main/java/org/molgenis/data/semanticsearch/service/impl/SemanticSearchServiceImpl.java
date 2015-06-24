@@ -201,14 +201,28 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		String description = attribute.getDescription() == null ? attribute.getLabel() : attribute.getDescription();
 		Set<String> searchTerms = splitIntoTerms(description);
 		Stemmer stemmer = new Stemmer();
-		LOG.debug("findOntologyTerms({},{},{})", ontologyIds, searchTerms, MAX_NUM_TAGS);
+
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("findOntologyTerms({},{},{})", ontologyIds, searchTerms, MAX_NUM_TAGS);
+		}
+
 		List<OntologyTerm> candidates = ontologyService.findOntologyTerms(ontologyIds, searchTerms, MAX_NUM_TAGS);
-		LOG.debug("Candidates: {}", candidates);
+
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Candidates: {}", candidates);
+		}
+
 		List<Hit<OntologyTerm>> hits = candidates.stream()
 				.filter(ot -> filterOntologyTerm(splitIntoTerms(stemmer.stemAndJoin(searchTerms)), ot, stemmer))
 				.map(o -> Hit.<OntologyTerm> create(o, bestMatchingSynonym(o, searchTerms).getScore()))
 				.sorted(Ordering.natural().reverse()).collect(Collectors.toList());
-		LOG.debug("Hits: {}", hits);
+
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Hits: {}", hits);
+		}
 
 		Hit<OntologyTerm> result = null;
 		String bestMatchingSynonym = null;
@@ -232,11 +246,18 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 					result = joinedHit;
 				}
 			}
-			LOG.debug("result: {}", result);
+
+			if (LOG.isDebugEnabled())
+			{
+				LOG.debug("result: {}", result);
+			}
 		}
 		if (result != null && result.getScore() >= CUTOFF)
 		{
-			LOG.info("Tag {} with {}", attribute, result);
+			if (LOG.isDebugEnabled())
+			{
+				LOG.debug("Tag {} with {}", attribute, result);
+			}
 			return result;
 		}
 		return null;
