@@ -18,6 +18,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.util.MolgenisDateFormat;
 import org.testng.annotations.Test;
 
@@ -77,7 +78,7 @@ public class EntityToSourceConverterTest
 		entityMetaData.addAttribute(dateTimeAttributeName).setDataType(MolgenisFieldTypes.DATETIME);
 		entityMetaData.addAttribute(decimalAttributeName).setDataType(MolgenisFieldTypes.DECIMAL);
 		entityMetaData.addAttribute(emailAttributeName).setDataType(MolgenisFieldTypes.EMAIL);
-		entityMetaData.addAttribute(enumAttributeName).setDataType(MolgenisFieldTypes.ENUM);
+		entityMetaData.addAttribute(enumAttributeName).setDataType(new EnumField());
 		entityMetaData.addAttribute(htmlAttributeName).setDataType(MolgenisFieldTypes.HTML);
 		entityMetaData.addAttribute(hyperlinkAttributeName).setDataType(MolgenisFieldTypes.HYPERLINK);
 		entityMetaData.addAttribute(intAttributeName).setDataType(MolgenisFieldTypes.INT);

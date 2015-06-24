@@ -35,11 +35,14 @@ import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.support.UuidGenerator;
+import org.molgenis.data.transaction.TransactionLogIndexedRepositoryDecorator;
+import org.molgenis.data.transaction.TransactionLogRepositoryDecorator;
+import org.molgenis.data.transaction.TransactionLogService;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.IndexedRepositoryValidationDecorator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
 import org.molgenis.data.version.MolgenisUpgradeService;
+import org.molgenis.file.FileStore;
 import org.molgenis.framework.db.WebAppDatabasePopulator;
 import org.molgenis.framework.db.WebAppDatabasePopulatorService;
 import org.molgenis.framework.server.MolgenisSettings;
@@ -53,7 +56,6 @@ import org.molgenis.security.freemarker.HasPermissionDirective;
 import org.molgenis.security.freemarker.NotHasPermissionDirective;
 import org.molgenis.security.owned.OwnedEntityMetaData;
 import org.molgenis.security.owned.OwnedEntityRepositoryDecorator;
-import org.molgenis.ui.freemarker.FormLinkDirective;
 import org.molgenis.ui.freemarker.LimitMethod;
 import org.molgenis.ui.menu.MenuMolgenisUi;
 import org.molgenis.ui.menu.MenuReaderService;
@@ -64,7 +66,6 @@ import org.molgenis.ui.security.MolgenisUiPermissionDecorator;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.DependencyResolver;
 import org.molgenis.util.EntityUtils;
-import org.molgenis.util.FileStore;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.IndexedRepositoryExceptionTranslatorDecorator;
 import org.molgenis.util.ResourceFingerprintRegistry;
@@ -123,6 +124,12 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 	@Autowired
 	public DataSource dataSource;
+
+	@Autowired
+	public TransactionLogService transactionLogService;
+
+	@Autowired
+	public IdGenerator idGenerator;
 
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry)
@@ -328,7 +335,6 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		freemarkerVariables.put("limit", new LimitMethod());
 		freemarkerVariables.put("hasPermission", new HasPermissionDirective(molgenisPermissionService));
 		freemarkerVariables.put("notHasPermission", new NotHasPermissionDirective(molgenisPermissionService));
-		freemarkerVariables.put("formLink", new FormLinkDirective());
 		addFreemarkerVariables(freemarkerVariables);
 
 		result.setFreemarkerVariables(freemarkerVariables);
@@ -387,7 +393,8 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	{
 		// Create local dataservice and metadataservice
 		DataServiceImpl localDataService = new DataServiceImpl();
-		new MetaDataServiceImpl(localDataService);
+		MetaDataService metaDataService = new MetaDataServiceImpl(localDataService);
+		localDataService.setMeta(metaDataService);
 
 		addReposToReindex(localDataService);
 
@@ -427,6 +434,8 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@PostConstruct
 	public void initRepositories()
 	{
+		dataService().setMeta(metaDataService());
+
 		addUpgrades();
 		boolean didUpgrade = upgradeService.upgrade();
 		if (!indexExists() || didUpgrade)
@@ -445,7 +454,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 	private boolean indexExists()
 	{
-		return searchService.hasMapping(new EntityMetaDataMetaData());
+		return searchService.hasMapping(EntityMetaDataMetaData.INSTANCE);
 	}
 
 	@Bean
@@ -457,16 +466,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Bean
 	public MetaDataService metaDataService()
 	{
-		DataService dataService = dataService();
-		MetaDataService metaDataService = new MetaDataServiceImpl((DataServiceImpl) dataService);
-
-		return metaDataService;
-	}
-
-	@Bean
-	public IdGenerator molgenisIdGenerator()
-	{
-		return new UuidGenerator();
+		return new MetaDataServiceImpl((DataServiceImpl) dataService());
 	}
 
 	@Bean
@@ -491,13 +491,15 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 					return new IndexedCrudRepositorySecurityDecorator(new IndexedAutoValueRepositoryDecorator(
 							new IndexedRepositoryValidationDecorator(dataService(),
-									new IndexedRepositoryExceptionTranslatorDecorator(indexedRepos),
-									new EntityAttributesValidator()), molgenisIdGenerator()), molgenisSettings);
+									new IndexedRepositoryExceptionTranslatorDecorator(
+											new TransactionLogIndexedRepositoryDecorator(indexedRepos,
+													transactionLogService)), new EntityAttributesValidator()),
+							idGenerator), molgenisSettings);
 				}
 
 				return new RepositorySecurityDecorator(new AutoValueRepositoryDecorator(
-						new RepositoryValidationDecorator(dataService(), repository, new EntityAttributesValidator()),
-						molgenisIdGenerator()));
+						new RepositoryValidationDecorator(dataService(), new TransactionLogRepositoryDecorator(
+								repository, transactionLogService), new EntityAttributesValidator()), idGenerator));
 			}
 		};
 	}

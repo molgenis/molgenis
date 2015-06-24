@@ -53,6 +53,10 @@
 											<input type="hidden" name="mappingProjectId" value="${project.identifier}"/>
 											<button type="submit" class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-trash"></span></button>
 										</form>
+										<form method="post" action="${context_url}/mappingproject/clone" class="pull-left">
+                                            <input type="hidden" name="mappingProjectId" value="${project.identifier?html}"/>
+                                            <button type="submit" class="btn btn-default btn-xs clone-btn"><span class="glyphicon glyphicon-duplicate"></span></button>
+                                        </form>
 									</#if>
 			 					</td> 					
 			 					<td>

@@ -61,10 +61,6 @@ body:not(.modal-open) #feature-selection .molgenis-tree {
 	
 }
 
-#dataexplorer-grid-data table {
-	background: #DDDDDD;
-}
-
 .viewer {
 	cursor: pointer;
 }
@@ -124,14 +120,6 @@ body:not(.modal-open) #feature-selection .molgenis-tree {
 
 .select2-input {
 	width: 100% !important;
-}
-
-.molgenis-xrefmrefsearch .select2-result:nth-child(even) {
-	background-color: #DDD;
-}
-
-.molgenis-xrefmrefsearch .select2-result:nth-child(odd) {
-	background-color: #FFF;
 }
 
 .molgenis-xrefmrefsearch .select2-results .select2-highlighted {

@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
@@ -35,6 +36,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.Sort;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.BatchingQueryResult;
 import org.molgenis.data.support.DefaultEntity;
@@ -53,7 +55,6 @@ import org.molgenis.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
-import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -75,7 +76,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 
 	/**
 	 * Creates a new MysqlRepository.
-	 * 
+	 *
 	 * @param dataSource
 	 *            the datasource to use to execute statements on the Mysql database
 	 * @param asyncJdbcTemplate
@@ -113,10 +114,14 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		// Find out if the entity is referenced and if it is, report those entities
 		List<Pair<EntityMetaData, List<AttributeMetaData>>> referencingEntities = EntityUtils
 				.getReferencingEntityMetaData(getEntityMetaData(), dataService);
-		if (!referencingEntities.isEmpty())
+		List<Pair<EntityMetaData, List<AttributeMetaData>>> nonSelfReferencingEntities = referencingEntities.stream()
+				.filter(ref -> !getEntityMetaData().getName().equals(referencingEntities.get(0).getA().getName()))
+				.collect(Collectors.toList());
+
+		if (!nonSelfReferencingEntities.isEmpty())
 		{
 			List<String> entityNames = Lists.newArrayList();
-			referencingEntities.forEach(pair -> entityNames.add(pair.getA().getName()));
+			nonSelfReferencingEntities.forEach(pair -> entityNames.add(pair.getA().getName()));
 
 			StringBuilder msg = new StringBuilder("Cannot delete entity '").append(getEntityMetaData().getName())
 					.append("' because it is referenced by the following entities: ").append(entityNames.toString());
@@ -137,7 +142,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 
 	/**
 	 * Tries to execute a piece of SQL.
-	 * 
+	 *
 	 * @param sql
 	 *            the SQL to execute
 	 * @return Exception if one was caught, or null if all went well
@@ -189,14 +194,20 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 					// computed attributes are not persisted
 					continue;
 				}
+
 				// add mref tables
+
 				if (attr.getDataType() instanceof MrefField)
 				{
 					asyncJdbcTemplate.execute(getMrefCreateSql(attr));
 				}
 				else if (attr.getDataType() instanceof XrefField)
 				{
-					asyncJdbcTemplate.execute(getCreateFKeySql(attr));
+					String backend = dataService.getMeta().getBackend(attr.getRefEntity()).getName();
+					if (backend.equalsIgnoreCase(MysqlRepositoryCollection.NAME))
+					{
+						asyncJdbcTemplate.execute(getCreateFKeySql(attr));
+					}
 				}
 
 				// text can't be unique, so don't add unique constraint when type is string
@@ -223,9 +234,9 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	/**
 	 * Adds an attribute to the repository. Will execute the alter table statement in a different thread so that the
 	 * current transaction does not get committed.
-	 * 
+	 *
 	 * This is needed for adding columns during an import.
-	 * 
+	 *
 	 * @param attributeMetaData
 	 *            the {@link AttributeMetaData} to add
 	 */
@@ -237,9 +248,9 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	/**
 	 * Adds an attribute to the repository. Will excecute the alter table statement in the current thread. Please note
 	 * that this *will* commit any existing transactions.
-	 * 
+	 *
 	 * This is needed for adding columns in the annotator.
-	 * 
+	 *
 	 * @param attributeMetaData
 	 *            the {@link AttributeMetaData} to add
 	 */
@@ -250,7 +261,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 
 	/**
 	 * Adds an attribute to the repository.
-	 * 
+	 *
 	 * @param attributeMetaData
 	 *            the {@link AttributeMetaData} to add
 	 * @param addToEntityMetaData
@@ -311,7 +322,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 
 	/**
 	 * Executes a SQL string.
-	 * 
+	 *
 	 * @param sql
 	 *            the String to execute
 	 * @param async
@@ -346,11 +357,18 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				.append(" NOT NULL, ").append('`').append(att.getName()).append('`').append(' ')
 				.append(refAttrMysqlType).append(" NOT NULL, FOREIGN KEY (").append('`').append(idAttribute.getName())
 				.append('`').append(") REFERENCES ").append('`').append(getTableName()).append('`').append('(')
-				.append('`').append(idAttribute.getName()).append('`').append(") ON DELETE CASCADE, FOREIGN KEY (")
-				.append('`').append(att.getName()).append('`').append(") REFERENCES ").append('`')
-				.append(getTableName(att.getRefEntity())).append('`').append('(').append('`')
-				.append(att.getRefEntity().getIdAttribute().getName()).append('`')
-				.append(") ON DELETE CASCADE) ENGINE=InnoDB;");
+				.append('`').append(idAttribute.getName()).append("`) ON DELETE CASCADE");
+
+		// If the refEntity is not of type MySQL do not add a foreign key to it
+		String refEntityBackend = dataService.getMeta().getBackend(att.getRefEntity()).getName();
+		if (refEntityBackend.equalsIgnoreCase(MysqlRepositoryCollection.NAME))
+		{
+			sql.append(", FOREIGN KEY (").append('`').append(att.getName()).append('`').append(") REFERENCES ")
+					.append('`').append(getTableName(att.getRefEntity())).append('`').append('(').append('`')
+					.append(att.getRefEntity().getIdAttribute().getName()).append("`) ON DELETE CASCADE");
+		}
+
+		sql.append(") ENGINE=InnoDB;");
 
 		return sql.toString();
 	}
@@ -413,8 +431,6 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				break;
 			case ENUM:
 				break;
-			case FILE:
-				break;
 			case HTML:
 				break;
 			case HYPERLINK:
@@ -437,6 +453,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 			case CATEGORICAL:
 			case CATEGORICAL_MREF:
 			case XREF:
+			case FILE:
 				if (att.isLabelAttribute())
 				{
 					throw new MolgenisDataException("Attribute [" + att.getName() + "] of entity [" + getName()
@@ -922,7 +939,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		{
 			for (Sort.Order o : q.getSort())
 			{
-				AttributeMetaData att = getEntityMetaData().getAttribute(o.getProperty());
+				AttributeMetaData att = getEntityMetaData().getAttribute(o.getAttr());
 				if (att.getDataType() instanceof MrefField) sortSql.append(", ").append(att.getName());
 				else sortSql.append(", ").append('`').append(att.getName()).append('`');
 				if (o.getDirection().equals(Sort.Direction.DESC))
@@ -992,7 +1009,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 
 	/**
 	 * Use before a delete action of a entity with XREF data type where the entity and refEntity are the same entities.
-	 * 
+	 *
 	 * @param entities
 	 */
 	private void resetXrefValuesBySelfReference(Iterable<? extends Entity> entities)
@@ -1458,7 +1475,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 
 	/**
 	 * Adds an attribute to the table for this entity. Looks up the type of the attribute in {@link #metaData}.
-	 * 
+	 *
 	 * @param attributeName
 	 *            name of the attribute to add
 	 */
@@ -1482,7 +1499,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 
 	/**
 	 * Creates the table for this repository if it does not already exist.
-	 * 
+	 *
 	 * @return boolean indicating if the table was created
 	 */
 	public boolean createTableIfNotExists()
@@ -1498,7 +1515,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	@Override
 	public Set<RepositoryCapability> getCapabilities()
 	{
-		return Sets.newHashSet(WRITABLE, UPDATEABLE, QUERYABLE);
+		return Sets.newHashSet(WRITABLE, UPDATEABLE);
 	}
 
 	@Override

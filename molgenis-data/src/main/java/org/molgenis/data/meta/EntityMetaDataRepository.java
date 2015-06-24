@@ -43,7 +43,7 @@ import com.google.common.collect.Lists;
  */
 class EntityMetaDataRepository
 {
-	public static final EntityMetaDataMetaData META_DATA = new EntityMetaDataMetaData();
+	public static final EntityMetaDataMetaData META_DATA = EntityMetaDataMetaData.INSTANCE;
 	private final Repository repository;
 	private final PackageRepository packageRepository;
 	private final ManageableRepositoryCollection collection;
@@ -227,8 +227,9 @@ class EntityMetaDataRepository
 		{
 			repository.deleteById(entityName);
 			attributeRepository.deleteAttributes(entity.getEntities(ATTRIBUTES));
-			entityMetaDataCache.remove(entityName);
 		}
+
+		entityMetaDataCache.remove(entityName);
 	}
 
 	/**
@@ -236,7 +237,8 @@ class EntityMetaDataRepository
 	 */
 	public void deleteAll()
 	{
-		List<Entity> entities = Lists.newLinkedList(DependencyResolver.resolveSelfReferences(repository, META_DATA));
+		List<Entity> entities = Lists.newLinkedList(new DependencyResolver().resolveSelfReferences(repository,
+				META_DATA));
 		Collections.reverse(entities);
 		for (Entity entity : entities)
 		{

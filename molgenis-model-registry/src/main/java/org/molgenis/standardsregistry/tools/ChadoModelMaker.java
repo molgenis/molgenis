@@ -6,12 +6,12 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Writable;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.support.MapEntity;
@@ -36,7 +36,7 @@ public class ChadoModelMaker
 
 	}
 
-	public void makeModelFile() throws InvalidFormatException, IOException
+	public void makeModelFile() throws MolgenisInvalidFormatException, IOException
 	{
 		File chadoModelFile = ResourceUtils.getFile("src/test/resources/Chado-Model.xlsx");
 

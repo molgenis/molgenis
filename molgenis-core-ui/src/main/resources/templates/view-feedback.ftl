@@ -1,6 +1,6 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
-<#assign css=['molgenis-form.css']>
+<#assign css=[]>
 
 <@header css />
 

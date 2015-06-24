@@ -1,7 +1,5 @@
 package org.molgenis.data.elasticsearch;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -103,15 +101,8 @@ public class ElasticsearchRepositoryCollection implements ManageableRepositoryCo
 		}
 		if (entityMetaData == null) throw new UnknownEntityException(String.format("Unknown entity '%s'", entityName));
 
-		try
-		{
-			entityMetaData.addAttributeMetaData(attribute);
-			searchService.createMappings(entityMetaData);
-		}
-		catch (IOException e)
-		{
-			throw new UncheckedIOException("Error creating mappings for [" + entityName + "]", e);
-		}
+		entityMetaData.addAttributeMetaData(attribute);
+		searchService.createMappings(entityMetaData);
 	}
 
 	@Override
@@ -127,15 +118,7 @@ public class ElasticsearchRepositoryCollection implements ManageableRepositoryCo
 				attributeName, entityName));
 
 		defaultEntityMetaData.removeAttributeMetaData(attr);
-
-		try
-		{
-			searchService.createMappings(entityMetaData);
-		}
-		catch (IOException e)
-		{
-			throw new UncheckedIOException("Error creating mappings for [" + entityName + "]", e);
-		}
+		searchService.createMappings(entityMetaData);
 	}
 
 	@Override

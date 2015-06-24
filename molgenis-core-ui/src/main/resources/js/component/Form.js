@@ -13,7 +13,7 @@
 		displayName: 'Form',
 		propTypes: {
 			entity: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]).isRequired,
-			entityInstance: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]),
+			entityInstance: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.number, React.PropTypes.object]),
 			mode: React.PropTypes.oneOf(['create', 'edit', 'view']),
 			formLayout: React.PropTypes.oneOf(['horizontal', 'vertical']),
 			modal: React.PropTypes.bool, // whether or not to render form in a modal dialog
@@ -35,7 +35,7 @@
 				formLayout: 'horizontal',
 				modal: false,
 				enableOptionalFilter: true,
-				enableFormIndex: false,
+				enableFormIndex: true,
 				colOffset: 3,
 				saveOnBlur: false,
 				showHidden: false,
@@ -346,7 +346,7 @@
 				for (var i = 0; i < results.length && valid; i++) {
 					valid = valid && results[i];
 				}
-				
+			
 				if (valid) {
 					$(target).closest('form').submit();//TODO remove jquery form submit workaround, see also componentDidMount in JQueryForm.js
 				} else {

@@ -13,16 +13,17 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.excel.ExcelSheetWriter;
 import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.excel.ExcelWriter.FileFormat;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.file.FileStore;
 import org.molgenis.ontology.beans.OntologyServiceResult;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.molgenis.ontology.matching.MatchingTaskContentEntityMetaData;
@@ -31,7 +32,6 @@ import org.molgenis.ontology.matching.OntologyService;
 import org.molgenis.ontology.matching.OntologyServiceImpl;
 import org.molgenis.ontology.utils.OntologyServiceUtil;
 import org.molgenis.security.user.UserAccountService;
-import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class MatchQualityRocService
@@ -53,7 +53,8 @@ public class MatchQualityRocService
 		this.ontologyService = ontologyService;
 	}
 
-	public Map<String, Object> calculateROC(String matchingTaskIdentifier) throws IOException, InvalidFormatException
+	public Map<String, Object> calculateROC(String matchingTaskIdentifier) throws IOException,
+			MolgenisInvalidFormatException
 	{
 		Map<String, Object> data = new HashMap<String, Object>();
 		if (StringUtils.isNotEmpty(matchingTaskIdentifier))

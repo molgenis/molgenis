@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 
@@ -48,9 +49,6 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 	private ImportRunService importRunService;
 
 	@Autowired
-	private ImportPostProcessingService importPostProcessingService;
-
-	@Autowired
 	UserAccountService userAccountService;
 	private List<MolgenisGroup> groups;
 
@@ -61,6 +59,7 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 	}
 
 	@Override
+	@Transactional
 	public String handleRequest(HttpServletRequest request, BindingResult result, Wizard wizard)
 	{
 		if (!(wizard instanceof ImportWizard))
@@ -91,8 +90,8 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 					((ImportWizard) wizard).setImportRunId(importRun.getId());
 
 					asyncImportJobs.execute(new ImportJob(importService, SecurityContextHolder.getContext(),
-							repositoryCollection, entityDbAction, importRun.getId(), importRunService,
-							importPostProcessingService, request.getSession(), importWizard.getDefaultEntity()));
+							repositoryCollection, entityDbAction, importRun.getId(), importRunService, request
+									.getSession(), importWizard.getDefaultEntity()));
 				}
 
 			}

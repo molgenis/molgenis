@@ -14,11 +14,10 @@ import org.mockito.ArgumentCaptor;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
-import org.molgenis.data.elasticsearch.request.SortGenerator;
+import org.molgenis.data.Sort;
+import org.molgenis.data.Sort.Direction;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -50,7 +49,7 @@ public class SortGeneratorTest
 	@Test
 	public void testGenerateAsc()
 	{
-		Query query = new QueryImpl().sort(new Sort(Direction.ASC, "int"));
+		Query query = new QueryImpl().sort(new Sort("int", Direction.ASC));
 		sortGenerator.generate(searchRequestBuilder, query, entityMetaData);
 		ArgumentCaptor<FieldSortBuilder> argument = ArgumentCaptor.forClass(FieldSortBuilder.class);
 		verify(searchRequestBuilder).addSort(argument.capture());
@@ -61,7 +60,7 @@ public class SortGeneratorTest
 	@Test
 	public void testGenerateAscRaw()
 	{
-		Query query = new QueryImpl().sort(new Sort(Direction.ASC, "string"));
+		Query query = new QueryImpl().sort(new Sort("string", Direction.ASC));
 		sortGenerator.generate(searchRequestBuilder, query, entityMetaData);
 		ArgumentCaptor<FieldSortBuilder> argument = ArgumentCaptor.forClass(FieldSortBuilder.class);
 		verify(searchRequestBuilder).addSort(argument.capture());
@@ -72,7 +71,7 @@ public class SortGeneratorTest
 	@Test
 	public void testGenerateDesc()
 	{
-		Query query = new QueryImpl().sort(new Sort(Direction.DESC, "int"));
+		Query query = new QueryImpl().sort(new Sort("int", Direction.DESC));
 		sortGenerator.generate(searchRequestBuilder, query, entityMetaData);
 		ArgumentCaptor<FieldSortBuilder> argument = ArgumentCaptor.forClass(FieldSortBuilder.class);
 		verify(searchRequestBuilder).addSort(argument.capture());
@@ -83,7 +82,7 @@ public class SortGeneratorTest
 	@Test
 	public void testGenerateDescRaw()
 	{
-		Query query = new QueryImpl().sort(new Sort(Direction.DESC, "string"));
+		Query query = new QueryImpl().sort(new Sort("string", Direction.DESC));
 		sortGenerator.generate(searchRequestBuilder, query, entityMetaData);
 		ArgumentCaptor<FieldSortBuilder> argument = ArgumentCaptor.forClass(FieldSortBuilder.class);
 		verify(searchRequestBuilder).addSort(argument.capture());
@@ -95,7 +94,7 @@ public class SortGeneratorTest
 	@Test
 	public void testGenerateDescAscRaw()
 	{
-		Query query = new QueryImpl().sort(new Sort(Direction.DESC, "int").and(new Sort(Direction.ASC, "string")));
+		Query query = new QueryImpl().sort(new Sort().on("int", Direction.DESC).on("string", Direction.ASC));
 		sortGenerator.generate(searchRequestBuilder, query, entityMetaData);
 		ArgumentCaptor<FieldSortBuilder> argument = ArgumentCaptor.forClass(FieldSortBuilder.class);
 		verify(searchRequestBuilder, times(2)).addSort(argument.capture());

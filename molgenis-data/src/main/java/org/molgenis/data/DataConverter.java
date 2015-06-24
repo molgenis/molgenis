@@ -64,6 +64,7 @@ public class DataConverter
 			case CATEGORICAL:
 			case CATEGORICAL_MREF:
 			case MREF:
+			case FILE:
 				return source;
 			case COMPOUND:
 				throw new UnsupportedOperationException();

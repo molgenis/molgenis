@@ -22,8 +22,6 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.util.DependencyResolver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.Ordered;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,8 +37,6 @@ import com.google.common.collect.Sets;
  */
 public class MetaDataServiceImpl implements MetaDataService
 {
-	private static final Logger LOG = LoggerFactory.getLogger(MetaDataServiceImpl.class);
-
 	private PackageRepository packageRepository;
 	private EntityMetaDataRepository entityMetaDataRepository;
 	private AttributeMetaDataRepository attributeMetaDataRepository;
@@ -51,7 +47,6 @@ public class MetaDataServiceImpl implements MetaDataService
 	public MetaDataServiceImpl(DataServiceImpl dataService)
 	{
 		this.dataService = dataService;
-		dataService.setMetaDataService(this);
 	}
 
 	/**
@@ -68,13 +63,19 @@ public class MetaDataServiceImpl implements MetaDataService
 		this.defaultBackend = backend;
 		backends.put(backend.getName(), backend);
 
+		PackageMetaData.INSTANCE.setBackend(backend.getName());
+		TagMetaData.INSTANCE.setBackend(backend.getName());
+		EntityMetaDataMetaData.INSTANCE.setBackend(backend.getName());
+		AttributeMetaDataMetaData.INSTANCE.setBackend(backend.getName());
+
 		bootstrapMetaRepos();
 		return this;
 	}
 
 	private void bootstrapMetaRepos()
 	{
-		Repository tagRepo = defaultBackend.addEntityMeta(new TagMetaData());
+
+		Repository tagRepo = defaultBackend.addEntityMeta(TagMetaData.INSTANCE);
 		dataService.addRepository(tagRepo);
 
 		Repository packages = defaultBackend.addEntityMeta(PackageRepository.META_DATA);
@@ -97,6 +98,12 @@ public class MetaDataServiceImpl implements MetaDataService
 		return defaultBackend;
 	}
 
+	@Override
+	public RepositoryCollection getBackend(String name)
+	{
+		return backends.get(name);
+	}
+
 	/**
 	 * Removes entity meta data if it exists.
 	 */
@@ -105,16 +112,12 @@ public class MetaDataServiceImpl implements MetaDataService
 	public void deleteEntityMeta(String entityName)
 	{
 		EntityMetaData emd = getEntityMetaData(entityName);
-		if (emd != null)
+		if ((emd != null) && !emd.isAbstract())
 		{
-			if (!emd.isAbstract())
-			{
-				getManageableRepositoryCollection(emd).deleteEntityMeta(entityName);
-			}
-
-			entityMetaDataRepository.delete(entityName);
-			if (dataService.hasRepository(entityName)) dataService.removeRepository(entityName);
+			getManageableRepositoryCollection(emd).deleteEntityMeta(entityName);
 		}
+		entityMetaDataRepository.delete(entityName);
+		if (dataService.hasRepository(entityName)) dataService.removeRepository(entityName);
 	}
 
 	@Transactional
@@ -140,14 +143,15 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	private ManageableRepositoryCollection getManageableRepositoryCollection(EntityMetaData emd)
 	{
-		RepositoryCollection backend = getRepositoryCollection(emd);
+		RepositoryCollection backend = getBackend(emd);
 		if (!(backend instanceof ManageableRepositoryCollection)) throw new RuntimeException(
 				"Backend  is not a ManageableCrudRepositoryCollection");
 
 		return (ManageableRepositoryCollection) backend;
 	}
 
-	private RepositoryCollection getRepositoryCollection(EntityMetaData emd)
+	@Override
+	public RepositoryCollection getBackend(EntityMetaData emd)
 	{
 		String backendName = emd.getBackend() == null ? getDefaultBackend().getName() : emd.getBackend();
 		RepositoryCollection backend = backends.get(backendName);
@@ -160,8 +164,9 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public Repository add(EntityMetaData emd, RepositoryDecoratorFactory decoratorFactory)
 	{
+
 		MetaValidationUtils.validateEntityMetaData(emd);
-		RepositoryCollection backend = getRepositoryCollection(emd);
+		RepositoryCollection backend = getBackend(emd);
 
 		if (getEntityMetaData(emd.getName()) != null)
 		{
