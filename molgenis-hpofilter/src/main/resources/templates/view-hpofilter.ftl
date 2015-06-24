@@ -39,16 +39,7 @@
 				<button class="btn btn-primary dropdown-toggle btn-block" type="button" id="filter-submit">Submit</button>
 				<br/>
 				Specify HPO terms to filter:<br>
-				<div class="input-group" id="term-1">
-					<span class="input-group-addon" id="input-addon1">Term</span>
-					<input type="text" class="form-control" placeholder="HP:1234567" id="term-input">
-					<span class="input-group-addon" id="input-addon2">
-						<input type="checkbox" data-toggle="tooltip" data-placement="bottom" title="Search undelying terms"><span class="glyphicon-repeat"></span>
-					</span>
-					<span class="input-group-btn" id="input-addon3">
-						<button class="btn btn-primary" id="add-term">+</button>
-						<button class="btn btn-danger" id="remove-term">-</button>
-					</span>
+				<div id="inputs">
 				</div>
 				<ul class="dropdown-menu scrollable-menu" id="ac-menu">
 					<li>1</li>

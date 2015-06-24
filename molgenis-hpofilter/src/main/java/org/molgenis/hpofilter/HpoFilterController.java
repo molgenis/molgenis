@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
@@ -20,6 +21,7 @@ import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.hpofilter.data.GeneMapProvider;
+import org.molgenis.hpofilter.data.HGNCLocations;
 import org.molgenis.hpofilter.data.HpoFilterDataProvider;
 import org.molgenis.hpofilter.data.Locus;
 import org.molgenis.hpofilter.utils.HgncLocationsUtils;
@@ -161,13 +163,15 @@ public class HpoFilterController extends MolgenisPluginController
 			
 			newRepository = dataService.getMeta().addEntityMeta(newEntityMetaData);
 			
+			Map<String, HGNCLocations> hgncLocations = hgncProvider.getHgncLocations();
+			
 			Iterator<Entity> e = repository.iterator();
 			while (e.hasNext()) {
 				Entity entity = e.next();
 				chrom = entity.getString("#CHROM");
 				pos = entity.getLong("POS");
 				locus =  new Locus(chrom, pos);
-				genes = HgncLocationsUtils.locationToHgcn(hgncProvider.getHgncLocations(), locus);
+				genes = HgncLocationsUtils.locationToHgcn(hgncLocations, locus);
 				System.out.println("Checking variant at "+pos+" to be added to repo "+newRepository.getName());
 				for (String gene : genes) {
 					if (HPOContainsGene(terms, gene, true)) {
