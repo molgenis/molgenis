@@ -44,7 +44,6 @@ import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.ui.MolgenisInterceptor;
-import org.molgenis.ui.menu.Menu;
 import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
@@ -394,19 +393,6 @@ public class DataExplorerController extends MolgenisPluginController
 		AttributeMetaData attributeChromosome = genomeConfig.getAttributeMetadataForAttributeNameArray(
 				GenomeConfig.GENOMEBROWSER_CHROM, entityMetaData);
 		return attributeStartPosition != null && attributeChromosome != null;
-	}
-
-	/**
-	 * Updates the 'Entities' menu when an entity is deleted.
-	 * 
-	 * @param entityName
-	 */
-	@RequestMapping(value = "/removeEntityFromMenu/{entityName}", method = POST)
-	public void updateMenuOnDeleteEntity(@PathVariable("entityName") String entityName, HttpServletResponse response)
-	{
-		Menu menu = menuManager.getMenu();
-		menu.deleteMenuItem("form." + entityName);
-		menuManager.saveMenu(menu);
 	}
 
 	@RequestMapping(value = "/download", method = POST)

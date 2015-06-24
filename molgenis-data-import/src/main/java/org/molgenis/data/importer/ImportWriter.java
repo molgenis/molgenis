@@ -201,7 +201,7 @@ public class ImportWriter
 	{
 		if (!SecurityUtils.currentUserIsSu())
 		{
-			permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
+			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 					metaDataChanges.getAddedEntities());
 		}
 	}

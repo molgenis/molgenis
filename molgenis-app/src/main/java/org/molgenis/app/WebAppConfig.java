@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.molgenis.DatabaseConfig;
 import org.molgenis.auth.GroupAuthority;
 import org.molgenis.auth.UserAuthority;
@@ -35,6 +34,7 @@ import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.ui.migrate.v1_5.Step5AlterDataexplorerMenuURLs;
 import org.molgenis.ui.migrate.v1_5.Step6ChangeRScriptType;
 import org.molgenis.ui.migrate.v1_8.Step10DeleteFormReferences;
+import org.molgenis.ui.migrate.v1_8.Step13RemoveCatalogueMenuEntries;
 import org.molgenis.util.DependencyResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,6 +107,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 				.getRepository(UserAuthority.ENTITY_NAME), jpaRepositoryCollection
 				.getRepository(GroupAuthority.ENTITY_NAME)));
 		upgradeService.addUpgrade(new Step12ChangeElasticsearchTokenizer(embeddedElasticSearchServiceFactory));
+		upgradeService.addUpgrade(new Step13RemoveCatalogueMenuEntries(dataSource));
 	}
 
 	@Override
@@ -125,7 +126,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 			@Override
 			public boolean hasRepository(String name)
 			{
-				throw new NotImplementedException("Not implemented yet");
+				throw new UnsupportedOperationException();
 			}
 		};
 
