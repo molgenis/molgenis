@@ -10,9 +10,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PubMedTermFrequencyService
 {
+	private static final Logger LOG = LoggerFactory.getLogger(PubMedTermFrequencyService.class);
 	private static final String BASE_URL = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?term=";
 	private static final Pattern PATTERN_REGEX = Pattern.compile("<Count>(\\d*)</Count>");
 	private static final int TIME_OUT = 20000;
@@ -71,7 +74,8 @@ public class PubMedTermFrequencyService
 		}
 		catch (Exception e)
 		{
-			throw new RuntimeException(e.getMessage());
+			LOG.error(e.getMessage());
+			return StringUtils.EMPTY;
 		}
 	}
 }
