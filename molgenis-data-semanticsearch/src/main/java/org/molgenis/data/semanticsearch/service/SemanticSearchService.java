@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.semanticsearch.semantic.Hit;
 import org.molgenis.ontology.core.model.OntologyTerm;
 
@@ -22,6 +23,19 @@ public interface SemanticSearchService
 			AttributeMetaData attributeMetaData);
 
 	/**
+	 * Find all relevant source attributes with an explanation
+	 * 
+	 * @param source
+	 * @param target
+	 * @param attributeMetaData
+	 * @return AttributeMetaData of resembling attributes, sorted by relevance
+	 */
+	Map<AttributeMetaData, Iterable<ExplainedQueryString>> explainAttributes(EntityMetaData source,
+			EntityMetaData target, AttributeMetaData attributeMetaData);
+
+	/**
+	 * Finds {@link OntologyTerm}s that can be used to tag an attribute. >>>>>>> 3b45cb9... added a method in
+	 * MappingServiceController that allows us to get the explanations per suggested attributes in json format
 	 * 
 	 * @param entity
 	 *            name of the entity

@@ -1,9 +1,9 @@
 package org.molgenis.data.semanticsearch.service.impl;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +26,6 @@ import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaUtils;
-import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.semanticsearch.explain.service.ElasticSearchExplainService;
 import org.molgenis.data.semanticsearch.semantic.Hit;
@@ -101,8 +100,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	}
 
 	// TODO : remove the findAttributes method later on because of the duplicated code
-	public Iterable<ExplainedAttributeMetaData> explainAttributes(EntityMetaData sourceEntityMetaData,
-			EntityMetaData targetEntityMetaData, AttributeMetaData targetAttribute)
+	public Map<AttributeMetaData, Iterable<ExplainedQueryString>> explainAttributes(
+			EntityMetaData sourceEntityMetaData, EntityMetaData targetEntityMetaData, AttributeMetaData targetAttribute)
 	{
 		Iterable<String> attributeIdentifiers = semanticSearchServiceHelper
 				.getAttributeIdentifiers(sourceEntityMetaData);
@@ -125,23 +124,24 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 				targetEntityMetaData, targetAttribute);
 
 		// Because the explain-API can be computationally expensive we limit the explanation to the top 10 attributes
-		List<ExplainedAttributeMetaData> explainedAttributes = new ArrayList<ExplainedAttributeMetaData>();
+		Map<AttributeMetaData, Iterable<ExplainedQueryString>> explainedAttributes = new HashMap<AttributeMetaData, Iterable<ExplainedQueryString>>();
 		int count = 0;
 		for (Entity attributeEntity : attributeMetaDataEntities)
 		{
-			ExplainedAttributeMetaData explainedAttributeMetaData;
+			AttributeMetaData attribute = sourceEntityMetaData.getAttribute(attributeEntity
+					.getString(AttributeMetaDataMetaData.NAME));
 			if (count < 10)
 			{
-				explainedAttributeMetaData = convertAttributeEntityToExplainedAttribute(attributeEntity,
-						sourceEntityMetaData, collectExpanedQueryMap, finalQueryRules);
+				explainedAttributes.put(
+						attribute,
+						convertAttributeEntityToExplainedAttribute(attributeEntity, sourceEntityMetaData,
+								collectExpanedQueryMap, finalQueryRules));
 			}
 			else
 			{
-				AttributeMetaData attribute = sourceEntityMetaData.getAttribute(attributeEntity
-						.getString(AttributeMetaDataMetaData.NAME));
-				explainedAttributeMetaData = new ExplainedAttributeMetaData(attribute, Collections.emptySet());
+
+				explainedAttributes.put(attribute, Collections.emptySet());
 			}
-			explainedAttributes.add(explainedAttributeMetaData);
 			count++;
 		}
 
@@ -157,7 +157,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	 * @param finalQueryRules
 	 * @return
 	 */
-	public ExplainedAttributeMetaData convertAttributeEntityToExplainedAttribute(Entity attributeEntity,
+	public Set<ExplainedQueryString> convertAttributeEntityToExplainedAttribute(Entity attributeEntity,
 			EntityMetaData sourceEntityMetaData, Map<String, String> collectExpanedQueryMap,
 			List<QueryRule> finalQueryRules)
 	{
@@ -175,7 +175,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		Set<ExplainedQueryString> detectedQueryStrings = elasticSearchExplainService.findQueriesFromExplanation(
 				collectExpanedQueryMap, explanation);
 
-		return new ExplainedAttributeMetaData(sourceEntityMetaData.getAttribute(attributeName), detectedQueryStrings);
+		return detectedQueryStrings;
 	}
 
 	@Override
@@ -213,9 +213,12 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 			LOG.debug("Candidates: {}", candidates);
 		}
 
-		List<Hit<OntologyTerm>> hits = candidates.stream()
-				.filter(ontologyTerm -> filterOntologyTerm(splitIntoTerms(stemmer.stemAndJoin(searchTerms)), ontologyTerm, stemmer))
-				.map(ontolgoyTerm -> Hit.<OntologyTerm> create(ontolgoyTerm, bestMatchingSynonym(ontolgoyTerm, searchTerms).getScore()))
+		List<Hit<OntologyTerm>> hits = candidates
+				.stream()
+				.filter(ontologyTerm -> filterOntologyTerm(splitIntoTerms(stemmer.stemAndJoin(searchTerms)),
+						ontologyTerm, stemmer))
+				.map(ontolgoyTerm -> Hit.<OntologyTerm> create(ontolgoyTerm,
+						bestMatchingSynonym(ontolgoyTerm, searchTerms).getScore()))
 				.sorted(Ordering.natural().reverse()).collect(Collectors.toList());
 
 		if (LOG.isDebugEnabled())
