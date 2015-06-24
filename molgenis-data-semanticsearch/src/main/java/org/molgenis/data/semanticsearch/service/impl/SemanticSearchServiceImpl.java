@@ -121,11 +121,10 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		Iterable<Entity> attributeMetaDataEntities = dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME,
 				new QueryImpl(finalQueryRules));
 
-		Map<String, String> collectExpanedQueryMap = semanticSearchServiceHelper.collectExpanedQueryMap(
+		Map<String, String> collectExpanedQueryMap = semanticSearchServiceHelper.collectExpandedQueryMap(
 				targetEntityMetaData, targetAttribute);
 
-		// Because the explain-API can be computationally expensive, therefore we limit the explanation to only top 10
-		// attributes
+		// Because the explain-API can be computationally expensive we limit the explanation to the top 10 attributes
 		List<ExplainedAttributeMetaData> explainedAttributes = new ArrayList<ExplainedAttributeMetaData>();
 		int count = 0;
 		for (Entity attributeEntity : attributeMetaDataEntities)
@@ -150,7 +149,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	}
 
 	/**
-	 * A helper function to explain each of the matched attribute by explain-api
+	 * A helper function to explain each of the matched attributes returned by the explain-API
 	 * 
 	 * @param attributeEntity
 	 * @param sourceEntityMetaData
@@ -215,8 +214,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		}
 
 		List<Hit<OntologyTerm>> hits = candidates.stream()
-				.filter(ot -> filterOntologyTerm(splitIntoTerms(stemmer.stemAndJoin(searchTerms)), ot, stemmer))
-				.map(o -> Hit.<OntologyTerm> create(o, bestMatchingSynonym(o, searchTerms).getScore()))
+				.filter(ontologyTerm -> filterOntologyTerm(splitIntoTerms(stemmer.stemAndJoin(searchTerms)), ontologyTerm, stemmer))
+				.map(ontolgoyTerm -> Hit.<OntologyTerm> create(ontolgoyTerm, bestMatchingSynonym(ontolgoyTerm, searchTerms).getScore()))
 				.sorted(Ordering.natural().reverse()).collect(Collectors.toList());
 
 		if (LOG.isDebugEnabled())
@@ -263,9 +262,9 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		return null;
 	}
 
-	private boolean filterOntologyTerm(Set<String> keywordsFromAttribute, OntologyTerm ot, Stemmer stemmer)
+	private boolean filterOntologyTerm(Set<String> keywordsFromAttribute, OntologyTerm ontologyTerm, Stemmer stemmer)
 	{
-		Set<String> ontologyTermSynonyms = semanticSearchServiceHelper.getOtLabelAndSynonyms(ot);
+		Set<String> ontologyTermSynonyms = semanticSearchServiceHelper.getOtLabelAndSynonyms(ontologyTerm);
 
 		for (String synonym : ontologyTermSynonyms)
 		{
@@ -281,16 +280,16 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	 * Will stem the {@link OntologyTerm} 's synonyms and the search terms, and then compute the maximum
 	 * {@link StringDistance} between them. 0 means disjunct, 1 means identical
 	 * 
-	 * @param o
+	 * @param ontologyTerm
 	 *            the {@link OntologyTerm}
 	 * @param searchTerms
 	 *            the search terms
 	 * @return the maximum {@link StringDistance} between the ontologyterm and the search terms
 	 */
-	public Hit<String> bestMatchingSynonym(OntologyTerm o, Set<String> searchTerms)
+	public Hit<String> bestMatchingSynonym(OntologyTerm ontologyTerm, Set<String> searchTerms)
 	{
 		Stemmer stemmer = new Stemmer();
-		Optional<Hit<String>> bestSynonym = o.getSynonyms().stream()
+		Optional<Hit<String>> bestSynonym = ontologyTerm.getSynonyms().stream()
 				.map(synonym -> Hit.<String> create(synonym, distanceFrom(synonym, searchTerms, stemmer)))
 				.max(Comparator.naturalOrder());
 		return bestSynonym.get();

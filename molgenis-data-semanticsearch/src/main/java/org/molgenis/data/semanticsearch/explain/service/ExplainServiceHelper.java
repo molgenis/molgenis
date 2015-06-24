@@ -120,14 +120,14 @@ public class ExplainServiceHelper
 	 * words are potential queries.
 	 * 
 	 * @param matchedWords
-	 * @param collectExpanedQueryMap
+	 * @param collectExpandedQueryMap
 	 * @return a map of potentail queries and their matching scores
 	 */
-	public Map<String, Double> findMatchQueries(String matchedWords, Map<String, String> collectExpanedQueryMap)
+	public Map<String, Double> findMatchQueries(String matchedWords, Map<String, String> collectExpandedQueryMap)
 	{
 		Map<String, Double> qualifiedQueries = new HashMap<String, Double>();
 
-		for (Entry<String, String> entry : collectExpanedQueryMap.entrySet())
+		for (Entry<String, String> entry : collectExpandedQueryMap.entrySet())
 		{
 			if (splitIntoTerms(entry.getKey()).containsAll(splitIntoTerms(matchedWords)))
 			{

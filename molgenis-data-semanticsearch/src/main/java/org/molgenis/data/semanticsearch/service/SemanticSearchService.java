@@ -23,7 +23,7 @@ public interface SemanticSearchService
 			AttributeMetaData attributeMetaData);
 
 	/**
-	 * Find all relevant source attributes with explanation
+	 * Find all relevant source attributes with an explanation
 	 * 
 	 * @param source
 	 * @param target

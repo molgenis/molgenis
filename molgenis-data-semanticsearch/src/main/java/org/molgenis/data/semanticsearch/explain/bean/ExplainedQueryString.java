@@ -1,67 +1,23 @@
 package org.molgenis.data.semanticsearch.explain.bean;
 
-public class ExplainedQueryString
+import org.molgenis.gson.AutoGson;
+
+import com.google.auto.value.AutoValue;
+
+@AutoValue
+@AutoGson(autoValueClass = AutoValue_ExplainedQueryString.class)
+public abstract class ExplainedQueryString
 {
-	private final String matchedWords;
-	private final String queryString;
-	private final String tagName;
-	private final double score;
+	public abstract String getMatchedWords();
 
-	public ExplainedQueryString(String matchedWords, String queryString, String tagName, double score)
-	{
-		this.matchedWords = matchedWords;
-		this.queryString = queryString;
-		this.tagName = tagName;
-		this.score = score;
-	}
+	public abstract String getQueryString();
 
-	public String getMatchedWords()
-	{
-		return matchedWords;
-	}
+	public abstract String getTagName();
 
-	public String getQueryString()
-	{
-		return queryString;
-	}
+	public abstract double getScore();
 
-	public String getTagName()
+	public static ExplainedQueryString create(String matchedWords, String queryString, String tagName, double score)
 	{
-		return tagName;
-	}
-
-	public double getScore()
-	{
-		return score;
-	}
-
-	@Override
-	public int hashCode()
-	{
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((matchedWords == null) ? 0 : matchedWords.hashCode());
-		result = prime * result + ((queryString == null) ? 0 : queryString.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj)
-	{
-		if (this == obj) return true;
-		if (obj == null) return false;
-		if (getClass() != obj.getClass()) return false;
-		ExplainedQueryString other = (ExplainedQueryString) obj;
-		if (matchedWords == null)
-		{
-			if (other.matchedWords != null) return false;
-		}
-		else if (!matchedWords.equals(other.matchedWords)) return false;
-		if (queryString == null)
-		{
-			if (other.queryString != null) return false;
-		}
-		else if (!queryString.equals(other.queryString)) return false;
-		return true;
+		return new AutoValue_ExplainedQueryString(matchedWords, queryString, tagName, score);
 	}
 }

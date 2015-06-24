@@ -116,14 +116,14 @@ public class SemanticSearchServiceHelper
 				targetEntityMetaData, targetAttribute);
 
 		// Handle tags with only one ontologyterm
-		tagsForAttribute.values().stream().filter(ot -> !ot.getIRI().contains(",")).forEach(ot -> {
+		tagsForAttribute.values().stream().filter(ontologyTerm -> !ontologyTerm.getIRI().contains(",")).forEach(ot -> {
 			queryTerms.addAll(parseOntologyTermQueries(ot));
 		});
 
 		QueryRule disMaxQueryRule = createDisMaxQueryRuleForTerms(queryTerms);
 
 		// Handle tags with multiple ontologyterms
-		tagsForAttribute.values().stream().filter(ot -> ot.getIRI().contains(",")).forEach(ot -> {
+		tagsForAttribute.values().stream().filter(ontologyTerm -> ontologyTerm.getIRI().contains(",")).forEach(ot -> {
 			disMaxQueryRule.getNestedRules().add(createShouldQueryRule(ot.getIRI()));
 		});
 
@@ -190,17 +190,17 @@ public class SemanticSearchServiceHelper
 	 * Create a list of string queries based on the information collected from current ontologyterm including label,
 	 * synonyms and child ontologyterms
 	 * 
-	 * @param ot
+	 * @param ontologyTerm
 	 * @return
 	 */
-	public List<String> parseOntologyTermQueries(OntologyTerm ot)
+	public List<String> parseOntologyTermQueries(OntologyTerm ontologyTerm)
 	{
-		List<String> queryTerms = getOtLabelAndSynonyms(ot).stream().map(term -> parseQueryString(term))
+		List<String> queryTerms = getOtLabelAndSynonyms(ontologyTerm).stream().map(term -> parseQueryString(term))
 				.collect(Collectors.<String> toList());
 
-		for (OntologyTerm childOt : ontologyService.getChildren(ot))
+		for (OntologyTerm childOt : ontologyService.getChildren(ontologyTerm))
 		{
-			double boostedNumber = Math.pow(0.5, ontologyService.getOntologyTermDistance(ot, childOt));
+			double boostedNumber = Math.pow(0.5, ontologyService.getOntologyTermDistance(ontologyTerm, childOt));
 			getOtLabelAndSynonyms(childOt).forEach(
 					synonym -> queryTerms.add(parseBoostQueryString(synonym, boostedNumber)));
 		}
@@ -210,13 +210,13 @@ public class SemanticSearchServiceHelper
 	/**
 	 * A helper function to collect synonyms as well as label of ontologyterm
 	 * 
-	 * @param ot
+	 * @param ontologyTerm
 	 * @return a list of synonyms plus label
 	 */
-	public Set<String> getOtLabelAndSynonyms(OntologyTerm ot)
+	public Set<String> getOtLabelAndSynonyms(OntologyTerm ontologyTerm)
 	{
-		Set<String> allTerms = Sets.newLinkedHashSet(ot.getSynonyms());
-		allTerms.add(ot.getLabel());
+		Set<String> allTerms = Sets.newLinkedHashSet(ontologyTerm.getSynonyms());
+		allTerms.add(ontologyTerm.getLabel());
 		return allTerms;
 	}
 
@@ -228,50 +228,50 @@ public class SemanticSearchServiceHelper
 	 * @param targetAttribute
 	 * @return
 	 */
-	public Map<String, String> collectExpanedQueryMap(EntityMetaData targetEntityMetaData,
+	public Map<String, String> collectExpandedQueryMap(EntityMetaData targetEntityMetaData,
 			AttributeMetaData targetAttribute)
 	{
-		Map<String, String> expanedQueryMap = new HashMap<String, String>();
+		Map<String, String> expandedQueryMap = new HashMap<String, String>();
 
 		if (StringUtils.isNotEmpty(targetAttribute.getLabel()))
 		{
-			expanedQueryMap.put(stemmer.cleanStemPhrase(targetAttribute.getLabel()), targetAttribute.getLabel());
+			expandedQueryMap.put(stemmer.cleanStemPhrase(targetAttribute.getLabel()), targetAttribute.getLabel());
 		}
 
 		if (StringUtils.isNotEmpty(targetAttribute.getDescription()))
 		{
-			expanedQueryMap.put(stemmer.cleanStemPhrase(targetAttribute.getDescription()),
+			expandedQueryMap.put(stemmer.cleanStemPhrase(targetAttribute.getDescription()),
 					targetAttribute.getDescription());
 		}
 
-		for (OntologyTerm ot : ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute).values())
+		for (OntologyTerm ontologyTerm : ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute).values())
 		{
-			if (!ot.getIRI().contains(","))
+			if (!ontologyTerm.getIRI().contains(","))
 			{
-				collectOntologyTermQueryMap(expanedQueryMap, ot);
+				collectOntologyTermQueryMap(expandedQueryMap, ontologyTerm);
 			}
 			else
 			{
-				for (String ontologyTermIri : ot.getIRI().split(","))
+				for (String ontologyTermIri : ontologyTerm.getIRI().split(","))
 				{
-					collectOntologyTermQueryMap(expanedQueryMap, ontologyService.getOntologyTerm(ontologyTermIri));
+					collectOntologyTermQueryMap(expandedQueryMap, ontologyService.getOntologyTerm(ontologyTermIri));
 				}
 			}
 		}
-		return expanedQueryMap;
+		return expandedQueryMap;
 	}
 
-	public void collectOntologyTermQueryMap(Map<String, String> expanedQueryMap, OntologyTerm ot)
+	public void collectOntologyTermQueryMap(Map<String, String> expanedQueryMap, OntologyTerm ontologyTerm)
 	{
-		if (ot != null)
+		if (ontologyTerm != null)
 		{
-			getOtLabelAndSynonyms(ot)
-					.forEach(term -> expanedQueryMap.put(stemmer.cleanStemPhrase(term), ot.getLabel()));
+			getOtLabelAndSynonyms(ontologyTerm)
+					.forEach(term -> expanedQueryMap.put(stemmer.cleanStemPhrase(term), ontologyTerm.getLabel()));
 
-			for (OntologyTerm childOt : ontologyService.getChildren(ot))
+			for (OntologyTerm childOntologyTerm : ontologyService.getChildren(ontologyTerm))
 			{
-				getOtLabelAndSynonyms(childOt).forEach(
-						term -> expanedQueryMap.put(stemmer.cleanStemPhrase(term), ot.getLabel()));
+				getOtLabelAndSynonyms(childOntologyTerm).forEach(
+						term -> expanedQueryMap.put(stemmer.cleanStemPhrase(term), ontologyTerm.getLabel()));
 			}
 		}
 	}

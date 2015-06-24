@@ -70,8 +70,8 @@ public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainServ
 							}
 						}).get();
 
-				matchedQueryStrings.add(new ExplainedQueryString(matchedQueryTerm, entry.getKey(), originalQueryInMap
-						.get(entry.getKey()), entry.getValue()));
+				matchedQueryStrings.add(ExplainedQueryString.create(matchedQueryTerm, entry.getKey(),
+						originalQueryInMap.get(entry.getKey()), entry.getValue()));
 			}
 		}
 		return matchedQueryStrings;
