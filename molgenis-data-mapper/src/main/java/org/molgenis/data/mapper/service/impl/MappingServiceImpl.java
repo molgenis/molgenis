@@ -1,5 +1,7 @@
 package org.molgenis.data.mapper.service.impl;
 
+import static org.molgenis.data.mapper.meta.MappingProjectMetaData.NAME;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -11,23 +13,30 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
+import org.molgenis.data.mapper.repository.AttributeMappingRepository;
+import org.molgenis.data.mapper.repository.EntityMappingRepository;
 import org.molgenis.data.mapper.repository.MappingProjectRepository;
+import org.molgenis.data.mapper.repository.MappingTargetRepository;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.meta.PackageImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.FieldType;
-import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.security.core.runas.RunAsSystem;
+import org.molgenis.security.permission.PermissionSystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 
 public class MappingServiceImpl implements MappingService
 {
@@ -44,6 +53,15 @@ public class MappingServiceImpl implements MappingService
 
 	@Autowired
 	private MappingProjectRepository mappingProjectRepository;
+
+	@Autowired
+	private MappingTargetRepository mappingTargetRepository;
+
+	@Autowired
+	private EntityMappingRepository entityMappingRepository;
+
+	@Autowired
+	private AttributeMappingRepository attributeMappingRepository;
 
 	@Autowired
 	private PermissionSystemService permissionSystemService;
@@ -63,6 +81,88 @@ public class MappingServiceImpl implements MappingService
 	public void deleteMappingProject(String mappingProjectId)
 	{
 		mappingProjectRepository.delete(mappingProjectId);
+	}
+
+	@Override
+	@PreAuthorize("hasAnyRole('ROLE_SYSTEM, ROLE_SU, ROLE_PLUGIN_WRITE_MENUMANAGER')")
+	@Transactional
+	public MappingProject cloneMappingProject(String mappingProjectId)
+	{
+		MappingProject mappingProject = mappingProjectRepository.getMappingProject(mappingProjectId);
+		if (mappingProject == null)
+		{
+			throw new UnknownEntityException("Mapping project [" + mappingProjectId + "] does not exist");
+		}
+		String mappingProjectName = mappingProject.getName();
+
+		// determine cloned mapping project name (use Windows 7 naming strategy):
+		String clonedMappingProjectName;
+		for (int i = 1;; ++i)
+		{
+			if (i == 1)
+			{
+				clonedMappingProjectName = mappingProjectName + " - Copy";
+			}
+			else
+			{
+				clonedMappingProjectName = mappingProjectName + " - Copy (" + i + ")";
+			}
+
+			if (mappingProjectRepository.getMappingProjects(new QueryImpl().eq(NAME, clonedMappingProjectName))
+					.isEmpty())
+			{
+				break;
+			}
+		}
+
+		return cloneMappingProject(mappingProject, clonedMappingProjectName);
+	}
+
+	@Override
+	@PreAuthorize("hasAnyRole('ROLE_SYSTEM, ROLE_SU, ROLE_PLUGIN_WRITE_MENUMANAGER')")
+	@Transactional
+	public MappingProject cloneMappingProject(String mappingProjectId, String clonedMappingProjectName)
+	{
+		MappingProject mappingProject = mappingProjectRepository.getMappingProject(mappingProjectId);
+		if (mappingProject == null)
+		{
+			throw new UnknownEntityException("Mapping project [" + mappingProjectId + "] does not exist");
+		}
+
+		return cloneMappingProject(mappingProject, clonedMappingProjectName);
+	}
+
+	private MappingProject cloneMappingProject(MappingProject mappingProject, String clonedMappingProjectName)
+	{
+		// clone
+		MappingProject clonedMappingProject = new MappingProject(clonedMappingProjectName, mappingProject.getOwner());
+		for (MappingTarget mappingTarget : mappingProject.getMappingTargets())
+		{
+			// clone target
+			EntityMetaData targetEntityMetaData = mappingTarget.getTarget();
+			MappingTarget clonedMappingTarget = clonedMappingProject.addTarget(targetEntityMetaData);
+
+			// clone entity mappings
+			for (EntityMapping entityMapping : mappingTarget.getEntityMappings())
+			{
+				EntityMetaData sourceEntityMeta = entityMapping.getSourceEntityMetaData();
+				EntityMapping clonedEntityMapping = clonedMappingTarget.addSource(sourceEntityMeta);
+
+				// clone attribute mappings
+				for (AttributeMapping attrMapping : entityMapping.getAttributeMappings())
+				{
+					String targetAttrName = attrMapping.getTargetAttributeMetaData().getName();
+					AttributeMapping clonedAttrMapping = clonedEntityMapping.addAttributeMapping(targetAttrName);
+					clonedAttrMapping.setAlgorithm(attrMapping.getAlgorithm());
+					attributeMappingRepository.upsert(Collections.singleton(clonedAttrMapping));
+				}
+				entityMappingRepository.upsert(Collections.singleton(clonedEntityMapping));
+			}
+			mappingTargetRepository.upsert(Collections.singleton(clonedMappingTarget));
+		}
+		mappingProjectRepository.add(clonedMappingProject);
+
+		return clonedMappingProject;
 	}
 
 	@Override
@@ -96,7 +196,7 @@ public class MappingServiceImpl implements MappingService
 		if (dataService.hasRepository(newEntityName)) throw new MolgenisDataException("A repository with name ["
 				+ newEntityName + "] already exists");
 		Repository targetRepo = dataService.getMeta().addEntityMeta(targetMetaData);
-		permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
+		permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 				Collections.singletonList(targetRepo.getName()));
 		try
 		{
@@ -147,13 +247,12 @@ public class MappingServiceImpl implements MappingService
 		return target;
 	}
 
-    @Override
-    public String generateId(FieldType dataType, Long count)
+	@Override
+	public String generateId(FieldType dataType, Long count)
 	{
 		Object id;
-		if (dataType.equals(MolgenisFieldTypes.INT)
-				|| dataType.equals(MolgenisFieldTypes.LONG)
-                || dataType.equals(MolgenisFieldTypes.DECIMAL))
+		if (dataType.equals(MolgenisFieldTypes.INT) || dataType.equals(MolgenisFieldTypes.LONG)
+				|| dataType.equals(MolgenisFieldTypes.DECIMAL))
 		{
 			id = count + 1;
 		}

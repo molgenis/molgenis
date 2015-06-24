@@ -197,6 +197,31 @@
 		});
 	}
 
+	/**
+	 * Hides rows of the table if atrribute source labels, names, descriptions
+	 * and tags have nothing to do with the query, hide the row
+	 */
+	function filterAttributeTable() {
+		var searchQuery = $('#attribute-search-field').val().toLowerCase(), attrLabel, attrName, attrDescription;
+		if (searchQuery === '') {
+			$('#attribute-mapping-table>tbody').find('tr').each(function() {
+				$(this).show();
+			});
+		} else {
+			$('#attribute-mapping-table>tbody').find('tr').each(function() {
+				attrLabel = $(this).data('attribute-label').toLowerCase();
+				attrName = $(this).attr('class').toLowerCase();
+				attrDescription = $(this).find('td.source-attribute-information').text().toLowerCase();
+
+				$(this).show();
+
+				if (attrLabel.indexOf(searchQuery) < 0 && attrName.indexOf(searchQuery) < 0 && attrDescription.indexOf(searchQuery) < 0) {
+					$(this).hide();
+				}
+			});
+		}
+	}
+
 	$(function() {
 
 		var editor, searchQuery, selectedAttributes, initialValue, algorithm, targetAttributeDataType, $textarea;
@@ -304,10 +329,8 @@
 		});
 
 		// look for attributes in the attribute table
-		$('#attribute-search-btn').on('click', function() {
-			searchQuery = $('#attribute-search-field').val();
-			// use the value of attribute-search-field to apply a filter on the
-			// attribute-mapping-table
+		$('#attribute-search-field').on('onkeydown onpaste oninput change keyup', function(e) {
+			filterAttributeTable();
 		});
 
 		// when the map tab is selected, load its contents
