@@ -78,7 +78,7 @@ public class ElasticSearchExplainServiceImplTest
 
 		System.out.println(explanation_1);
 
-		Set<String> actual = explainServiceHelper.findMatchedQueryTerms(explanation_1);
+		Set<String> actual = explainServiceHelper.findMatchedWords(explanation_1);
 		assertEquals(actual.size(), 2);
 		assertTrue(actual.contains("high blood"));
 		assertTrue(actual.contains("medication"));

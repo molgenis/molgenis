@@ -59,7 +59,13 @@ public class ExplainServiceHelper
 		}
 	}
 
-	public Set<String> findMatchedQueryTerms(Explanation explanation)
+	/**
+	 * This method is able to recursively collect all the matched words from ElastisSearch Explanation document
+	 * 
+	 * @param explanation
+	 * @return a set of matched words that are matched to different ontology terms
+	 */
+	public Set<String> findMatchedWords(Explanation explanation)
 	{
 		Set<String> words = new HashSet<String>();
 		String description = explanation.getDescription();
@@ -67,13 +73,13 @@ public class ExplainServiceHelper
 		{
 			if (Lists.newArrayList(explanation.getDetails()).stream().allMatch(this::reachLastLevel))
 			{
-				words.add(getMatchedTerms(explanation.getDetails()));
+				words.add(extractMatchedWords(explanation.getDetails()));
 			}
 			else
 			{
 				for (Explanation subExplanation : explanation.getDetails())
 				{
-					words.addAll(findMatchedQueryTerms(subExplanation));
+					words.addAll(findMatchedWords(subExplanation));
 				}
 			}
 		}
@@ -88,7 +94,7 @@ public class ExplainServiceHelper
 						}
 					}).get();
 
-			words.addAll(findMatchedQueryTerms(maxExplanation));
+			words.addAll(findMatchedWords(maxExplanation));
 		}
 		else if (description.startsWith(Options.WEIGHT.toString()))
 		{
@@ -97,7 +103,7 @@ public class ExplainServiceHelper
 		return words;
 	}
 
-	public String getMatchedTerms(Explanation[] explanations)
+	public String extractMatchedWords(Explanation[] explanations)
 	{
 		List<String> collect = Lists.newArrayList(explanations).stream()
 				.map(explanation -> getMatchedWord(explanation.getDescription())).collect(Collectors.toList());
@@ -109,18 +115,27 @@ public class ExplainServiceHelper
 		return explanation.getDescription().startsWith(Options.WEIGHT.toString());
 	}
 
-	public Map<String, Double> findMatchQueries(String queryPart, Map<String, String> collectExpanedQueryMap)
+	/**
+	 * This method is able to find the queries that are used in the matching. Only queries that contain all matched
+	 * words are potential queries.
+	 * 
+	 * @param matchedWords
+	 * @param collectExpanedQueryMap
+	 * @return a map of potentail queries and their matching scores
+	 */
+	public Map<String, Double> findMatchQueries(String matchedWords, Map<String, String> collectExpanedQueryMap)
 	{
-		Map<String, Double> qualifiedTerms = new HashMap<String, Double>();
+		Map<String, Double> qualifiedQueries = new HashMap<String, Double>();
 
 		for (Entry<String, String> entry : collectExpanedQueryMap.entrySet())
 		{
-			if (splitIntoTerms(entry.getKey()).containsAll(splitIntoTerms(queryPart)))
+			if (splitIntoTerms(entry.getKey()).containsAll(splitIntoTerms(matchedWords)))
 			{
-				qualifiedTerms.put(entry.getKey(), NGramDistanceAlgorithm.stringMatching(queryPart, entry.getKey()));
+				qualifiedQueries.put(entry.getKey(),
+						NGramDistanceAlgorithm.stringMatching(matchedWords, entry.getKey()));
 			}
 		}
-		return qualifiedTerms;
+		return qualifiedQueries;
 	}
 
 	public String removeBoostFromQuery(String description)
