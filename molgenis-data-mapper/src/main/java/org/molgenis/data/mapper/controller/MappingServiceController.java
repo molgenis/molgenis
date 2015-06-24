@@ -23,6 +23,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
+import org.molgenis.data.importer.ImportWizardController;
 import org.molgenis.data.mapper.data.request.MappingServiceRequest;
 import org.molgenis.data.mapper.mapping.model.AlgorithmResult;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
@@ -44,6 +45,7 @@ import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserService;
+import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,6 +100,9 @@ public class MappingServiceController extends MolgenisPluginController
 	@Autowired
 	private SemanticSearchService semanticSearchService;
 
+	@Autowired
+	private MenuReaderService menuReaderService;
+
 	public MappingServiceController()
 	{
 		super(URI);
@@ -117,6 +122,7 @@ public class MappingServiceController extends MolgenisPluginController
 		model.addAttribute("entityMetaDatas", getEntityMetaDatas());
 		model.addAttribute("user", SecurityUtils.getCurrentUsername());
 		model.addAttribute("admin", SecurityUtils.currentUserIsSu());
+		model.addAttribute("importerUri", menuReaderService.getMenu().findMenuItemPath(ImportWizardController.ID));
 		return VIEW_MAPPING_PROJECTS;
 	}
 
