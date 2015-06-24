@@ -17,7 +17,6 @@ import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.system.RepositoryTemplateLoader;
-import org.molgenis.data.transaction.MolgenisTransactionLogMetaData;
 import org.molgenis.data.version.v1_5.Step1UpgradeMetaData;
 import org.molgenis.data.version.v1_5.Step2;
 import org.molgenis.data.version.v1_5.Step3AddOrderColumnToMrefTables;
@@ -78,9 +77,6 @@ public class WebAppConfig extends MolgenisWebAppConfig
 
 	@Autowired
 	private MenuManagerService menuManagerService;
-
-	@Autowired
-	private MolgenisTransactionLogMetaData molgenisTransactionLogMetaData;
 
 	@Override
 	public ManageableRepositoryCollection getBackend()
