@@ -37,14 +37,35 @@ public class MolgenisJsTest
 	}
 
 	@Test
-	public void map()
+	public void mapSimple()
 	{
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
 		emd.addAttribute("gender").setDataType(MolgenisFieldTypes.CATEGORICAL);
 
-		Object result = ScriptEvaluator.eval("$('gender').map({'2':'20','B2':'B'}).value()", new MapEntity("gender",
+		Object result = ScriptEvaluator.eval("$('gender').map({'20':'2','B':'B2'}).value()", new MapEntity("gender",
 				'B'), emd);
 		assertEquals(result.toString(), "B2");
+	}
+
+	@Test
+	public void mapDefault()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
+		emd.addAttribute("gender").setDataType(MolgenisFieldTypes.CATEGORICAL);
+
+		Object result = ScriptEvaluator.eval("$('gender').map({'20':'2'}, 'B2').value()", new MapEntity("gender", 'B'),
+				emd);
+		assertEquals(result.toString(), "B2");
+	}
+
+	@Test
+	public void mapNull()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
+		emd.addAttribute("gender").setDataType(MolgenisFieldTypes.CATEGORICAL);
+
+		Object result = ScriptEvaluator.eval("$('gender').map({'20':'2'}, 'B2', 'B3').value()", new MapEntity(), emd);
+		assertEquals(result.toString(), "B3");
 	}
 
 	@Test
