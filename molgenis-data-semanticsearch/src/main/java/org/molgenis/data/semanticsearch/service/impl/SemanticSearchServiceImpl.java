@@ -1,6 +1,8 @@
 package org.molgenis.data.semanticsearch.service.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -81,8 +83,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		Iterable<String> attributeIdentifiers = semanticSearchServiceHelper
 				.getAttributeIdentifiers(sourceEntityMetaData);
 
-		QueryRule createDisMaxQueryRule = semanticSearchServiceHelper.createDisMaxQueryRuleForAttribute(targetEntityMetaData,
-				targetAttribute);
+		QueryRule createDisMaxQueryRule = semanticSearchServiceHelper.createDisMaxQueryRuleForAttribute(
+				targetEntityMetaData, targetAttribute);
 
 		List<QueryRule> disMaxQueryRules = Lists.newArrayList(new QueryRule(AttributeMetaDataMetaData.IDENTIFIER,
 				Operator.IN, attributeIdentifiers));
@@ -122,11 +124,28 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		Map<String, String> collectExpanedQueryMap = semanticSearchServiceHelper.collectExpanedQueryMap(
 				targetEntityMetaData, targetAttribute);
 
-		List<ExplainedAttributeMetaData> explainedAttributes = FluentIterable
-				.from(attributeMetaDataEntities)
-				.transform(
-						entity -> convertAttributeEntityToExplainedAttribute(entity, sourceEntityMetaData,
-								collectExpanedQueryMap, finalQueryRules)).toList();
+		// Because the explain-API can be computationally expensive, therefore we limit the explanation to only top 10
+		// attributes
+		List<ExplainedAttributeMetaData> explainedAttributes = new ArrayList<ExplainedAttributeMetaData>();
+		int count = 0;
+		for (Entity attributeEntity : attributeMetaDataEntities)
+		{
+			ExplainedAttributeMetaData explainedAttributeMetaData;
+			if (count < 10)
+			{
+				explainedAttributeMetaData = convertAttributeEntityToExplainedAttribute(attributeEntity,
+						sourceEntityMetaData, collectExpanedQueryMap, finalQueryRules);
+			}
+			else
+			{
+				AttributeMetaData attribute = sourceEntityMetaData.getAttribute(attributeEntity
+						.getString(AttributeMetaDataMetaData.NAME));
+				explainedAttributeMetaData = new ExplainedAttributeMetaData(attribute, Collections.emptySet());
+			}
+			explainedAttributes.add(explainedAttributeMetaData);
+			count++;
+		}
+
 		return explainedAttributes;
 	}
 
