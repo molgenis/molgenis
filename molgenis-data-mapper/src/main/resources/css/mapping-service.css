@@ -8,3 +8,7 @@
 .ace.readonly .ace_cursor {
 	display:none;
 }
+
+.clone-btn {
+	margin-left: 5px;
+}

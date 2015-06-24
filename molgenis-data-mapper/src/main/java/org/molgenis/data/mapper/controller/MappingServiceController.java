@@ -8,7 +8,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -308,13 +307,11 @@ public class MappingServiceController extends MolgenisPluginController
 		return VIEW_SINGLE_MAPPING_PROJECT;
 	}
 
-	@RequestMapping(value = "/mappingproject/clone/{mappingProjectId}", method = RequestMethod.POST)
-	@ResponseBody
-	public Map<String, String> cloneMappingProject(@PathVariable("mappingProjectId") String mappingProjectId,
-			@RequestParam(value = "name") String name)
+	@RequestMapping(value = "/mappingproject/clone", method = RequestMethod.POST)
+	public String cloneMappingProject(@RequestParam("mappingProjectId") String mappingProjectId)
 	{
-		MappingProject clonedMappingProject = mappingService.cloneMappingProject(mappingProjectId, name);
-		return Collections.singletonMap("id", clonedMappingProject.getIdentifier());
+		mappingService.cloneMappingProject(mappingProjectId);
+		return "forward:" + URI;
 	}
 
 	/**
