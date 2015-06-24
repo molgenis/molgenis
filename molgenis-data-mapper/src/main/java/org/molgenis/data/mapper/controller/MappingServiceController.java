@@ -307,6 +307,13 @@ public class MappingServiceController extends MolgenisPluginController
 		return VIEW_SINGLE_MAPPING_PROJECT;
 	}
 
+	@RequestMapping(value = "/mappingproject/clone", method = RequestMethod.POST)
+	public String cloneMappingProject(@RequestParam("mappingProjectId") String mappingProjectId)
+	{
+		mappingService.cloneMappingProject(mappingProjectId);
+		return "forward:" + URI;
+	}
+
 	/**
 	 * Creates the integrated entity for a mapping project's target
 	 * 

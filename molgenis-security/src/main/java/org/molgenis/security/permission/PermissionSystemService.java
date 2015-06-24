@@ -7,8 +7,8 @@ import org.molgenis.auth.UserAuthority;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.core.runas.RunAsSystem;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -31,7 +31,7 @@ public class PermissionSystemService
 	}
 
 	@RunAsSystem
-	public void giveUserEntityAndMenuPermissions(SecurityContext securityContext, List<String> entities)
+	public void giveUserEntityPermissions(SecurityContext securityContext, List<String> entities)
 	{
 		Authentication auth = securityContext.getAuthentication();
 
@@ -53,14 +53,6 @@ public class PermissionSystemService
 								+ entity.toUpperCase();
 						roles.add(new SimpleGrantedAuthority(role));
 						UserAuthority userAuthority = new UserAuthority();
-						userAuthority.setMolgenisUser(user);
-						userAuthority.setRole(role);
-						dataService.add(UserAuthority.ENTITY_NAME, userAuthority);
-
-						role = SecurityUtils.AUTHORITY_PLUGIN_PREFIX + permission.toString() + "_FORM."
-								+ entity.toUpperCase();
-						roles.add(new SimpleGrantedAuthority(role));
-						userAuthority = new UserAuthority();
 						userAuthority.setMolgenisUser(user);
 						userAuthority.setRole(role);
 						dataService.add(UserAuthority.ENTITY_NAME, userAuthority);
