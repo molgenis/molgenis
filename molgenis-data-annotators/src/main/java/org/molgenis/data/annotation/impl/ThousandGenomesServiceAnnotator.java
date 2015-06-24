@@ -8,18 +8,13 @@ import java.util.*;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.VariantAnnotator;
-import org.molgenis.data.annotation.mini.AnnotatorInfo;
-import org.molgenis.data.annotation.mini.AnnotatorInfo.Status;
-import org.molgenis.data.annotation.mini.AnnotatorInfo.Type;
+import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.annotator.tabix.TabixReader;
-import org.molgenis.data.support.AnnotationServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.framework.server.MolgenisSettings;
@@ -27,7 +22,6 @@ import org.molgenis.framework.server.MolgenisSimpleSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 /**
@@ -53,7 +47,6 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 	private static final Logger LOG = LoggerFactory.getLogger(ThousandGenomesServiceAnnotator.class);
 
 	private final MolgenisSettings molgenisSettings;
-	private final AnnotationService annotatorService;
 	private static final String NAME = "1000G";
 	public static final String THGEN_MAF_LABEL = "1KGMAF";
 	public static final String THGEN_MAF = VcfRepository.getInfoPrefix() + THGEN_MAF_LABEL;
@@ -66,11 +59,9 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 	HashMap<String, TabixReader> tabixReaders = null;
 
 	@Autowired
-	public ThousandGenomesServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService)
-			throws IOException
+	public ThousandGenomesServiceAnnotator(MolgenisSettings molgenisSettings) throws IOException
 	{
 		this.molgenisSettings = molgenisSettings;
-		this.annotatorService = annotatorService;
 	}
 
 	public ThousandGenomesServiceAnnotator(File thGenDir, File inputVcfFile, File outputVCFFile) throws Exception
@@ -78,8 +69,6 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 
 		this.molgenisSettings = new MolgenisSimpleSettings();
 		molgenisSettings.setProperty(THGEN_DIRECTORY_LOCATION_PROPERTY, thGenDir.getAbsolutePath());
-
-		this.annotatorService = new AnnotationServiceImpl();
 
 		getTabixReaders();
 
@@ -117,12 +106,6 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 		outputVCFWriter.close();
 		vcfRepo.close();
 		System.out.println("All done!");
-	}
-
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		annotatorService.addAnnotator(this);
 	}
 
 	@Override
@@ -297,8 +280,7 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 	{
 		List<AttributeMetaData> metadata = new ArrayList<>();
 
-		metadata.add(new DefaultAttributeMetaData(THGEN_MAF, FieldTypeEnum.DECIMAL)
-				.setLabel(THGEN_MAF_LABEL));
+		metadata.add(new DefaultAttributeMetaData(THGEN_MAF, FieldTypeEnum.DECIMAL).setLabel(THGEN_MAF_LABEL));
 
 		return metadata;
 	}
@@ -306,7 +288,7 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 	@Override
 	public AnnotatorInfo getInfo()
 	{
-		return AnnotatorInfo.create(Status.INDEV, Type.UNUSED, "unknown", "no description");
+		return AnnotatorInfo.create(Status.INDEV, Type.UNUSED, "unknown", "no description", getOutputMetaData());
 	}
 
 }

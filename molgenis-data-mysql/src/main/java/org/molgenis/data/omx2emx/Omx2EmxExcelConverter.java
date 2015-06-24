@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.WritableFactory;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
@@ -14,7 +14,7 @@ import org.springframework.util.StringUtils;
 
 public class Omx2EmxExcelConverter
 {
-	public static void main(String[] args)
+	public static void main(String[] args) throws MolgenisInvalidFormatException
 	{
 		if (args.length < 2 || args.length > 3)
 		{
@@ -32,18 +32,14 @@ public class Omx2EmxExcelConverter
 		{
 			e.printStackTrace();
 		}
-		catch (InvalidFormatException e)
-		{
-			e.printStackTrace();
-		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
 		}
 	}
 
-	public static void convert(File omxInputFile, File emxOutputFile, String namespace) throws InvalidFormatException,
-			IOException
+	public static void convert(File omxInputFile, File emxOutputFile, String namespace) throws IOException,
+			MolgenisInvalidFormatException
 	{
 
 		RepositoryCollection repositoryCollection = new ExcelRepositoryCollection(omxInputFile);

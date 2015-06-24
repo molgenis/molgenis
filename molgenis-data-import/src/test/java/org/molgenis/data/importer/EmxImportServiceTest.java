@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Package;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.meta.MetaDataServiceImpl;
@@ -67,7 +67,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void testValidationReport() throws IOException, InvalidFormatException, URISyntaxException
+	public void testValidationReport() throws IOException, MolgenisInvalidFormatException, URISyntaxException
 	{
 		// open test source
 		File f = ResourceUtils.getFile(getClass(), "/example_invalid.xlsx");
@@ -113,7 +113,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void testImportReport() throws IOException, InvalidFormatException, InterruptedException
+	public void testImportReport() throws IOException, MolgenisInvalidFormatException, InterruptedException
 	{
 		// create test excel
 		File f = ResourceUtils.getFile(getClass(), "/example.xlsx");
@@ -158,7 +158,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void testImportReportNoMeta() throws IOException, InvalidFormatException, InterruptedException
+	public void testImportReportNoMeta() throws IOException, MolgenisInvalidFormatException, InterruptedException
 	{
 
 		// create test excel

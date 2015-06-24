@@ -24,13 +24,10 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
-import org.molgenis.data.annotation.mini.AnnotatorInfo;
-import org.molgenis.data.annotation.mini.AnnotatorInfo.Status;
-import org.molgenis.data.annotation.mini.AnnotatorInfo.Type;
-import org.molgenis.data.support.AnnotationServiceImpl;
+import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.framework.server.MolgenisSettings;
@@ -38,8 +35,6 @@ import org.molgenis.framework.server.MolgenisSimpleSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 /**
@@ -55,13 +50,12 @@ import org.springframework.stereotype.Component;
  * 
  * */
 @Component("SnpEffServiceAnnotator")
-public class SnpEffServiceAnnotator implements RepositoryAnnotator, ApplicationListener<ContextRefreshedEvent>
+public class SnpEffServiceAnnotator implements RepositoryAnnotator
 {
 	private static final Logger LOG = LoggerFactory.getLogger(SnpEffServiceAnnotator.class);
 	public static final String SNPEFF_JAR_LOCATION_PROPERTY = "snpeff_jar_location";
 
 	private final MolgenisSettings molgenisSettings;
-	private final AnnotationService annotatorService;
 	public static String snpEffPath = "";
 
 	private static final String NAME = "SnpEff";
@@ -109,18 +103,11 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator, ApplicationL
 		MODIFIER, LOW, MODERATE, HIGH
 	}
 
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		annotatorService.addAnnotator(this);
-	}
-
 	@Autowired
 	public SnpEffServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService,
 			DataService dataService) throws IOException
 	{
 		this.molgenisSettings = molgenisSettings;
-		this.annotatorService = annotatorService;
 		this.dataService = dataService;
 	}
 
@@ -128,7 +115,6 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator, ApplicationL
 	{
 		this.molgenisSettings = new MolgenisSimpleSettings();
 		molgenisSettings.setProperty(SNPEFF_JAR_LOCATION_PROPERTY, snpEffLocation.getAbsolutePath());
-		this.annotatorService = new AnnotationServiceImpl();
 
 		checkSnpEffPath();
 		runSnpEff(inputVcfFile, outputVCFFile);
@@ -170,7 +156,7 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator, ApplicationL
 				}
 				else
 				{
-					LOG.error("SnpEff not found at: " + snpEffpath.getAbsolutePath());
+					LOG.debug("SnpEff not found at: " + snpEffpath.getAbsolutePath());
 				}
 			}
 		}
@@ -501,7 +487,7 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator, ApplicationL
 	@Override
 	public AnnotatorInfo getInfo()
 	{
-		return AnnotatorInfo.create(Status.INDEV, Type.UNUSED, "unknown", "no description");
+		return AnnotatorInfo.create(Status.INDEV, Type.UNUSED, "unknown", "no description", getOutputMetaData());
 	}
 
 }

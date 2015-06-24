@@ -34,8 +34,8 @@ public class TabixRepository extends AbstractRepository
 	/**
 	 * Creates a new {@link TabixRepository}
 	 * 
-	 * @param fileName
-	 *            name of the Tabix file
+	 * @param file
+	 *            the Tabix file
 	 * @param entityMetaData
 	 *            {@link EntityMetaData} for the tabix file. Attributes should be in the order of the file's columns
 	 * @throws IOException
@@ -84,11 +84,11 @@ public class TabixRepository extends AbstractRepository
 	private synchronized ImmutableList<Entity> query(String chrom, long pos)
 	{
 		String queryString = String.format("%s:%s-%2$s", chrom, pos);
-		LOG.info("query({})", queryString);
-		org.molgenis.data.annotator.tabix.TabixReader.Iterator iterator = reader.query(queryString);
+		LOG.debug("query({})", queryString);
 		Builder<Entity> builder = ImmutableList.<Entity> builder();
 		try
 		{
+			org.molgenis.data.annotator.tabix.TabixReader.Iterator iterator = reader.query(queryString);
 			String line = iterator.next();
 			while (line != null)
 			{
@@ -98,7 +98,15 @@ public class TabixRepository extends AbstractRepository
 		}
 		catch (IOException e)
 		{
-			LOG.error("Error reading from tabix reader.", e);
+			LOG.error("Error reading from tabix reader", e);
+		}
+		catch (NullPointerException e)
+		{
+			LOG.error("Error reading from tabix reader for query: " + queryString, e);
+		}
+		catch (ArrayIndexOutOfBoundsException e)
+		{
+			LOG.error("Error reading from tabix reader for query: " + queryString + " (Unknown Chromosome?)", e);
 		}
 		return builder.build();
 	}

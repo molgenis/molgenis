@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation.mini;
+package org.molgenis.data.annotation.entity;
 
 import java.util.Collection;
 

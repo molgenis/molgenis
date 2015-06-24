@@ -8,25 +8,18 @@ import java.util.*;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.VariantAnnotator;
-import org.molgenis.data.annotation.mini.AnnotatorInfo;
-import org.molgenis.data.annotation.mini.AnnotatorInfo.Status;
-import org.molgenis.data.annotation.mini.AnnotatorInfo.Type;
+import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
-import org.molgenis.data.support.AnnotationServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.datastructures.Sample;
 import org.molgenis.data.vcf.datastructures.Trio;
 import org.molgenis.data.vcf.utils.VcfUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 /**
@@ -38,7 +31,6 @@ public class DeNovoAnnotator extends VariantAnnotator
 {
 	private static final Logger LOG = LoggerFactory.getLogger(DeNovoAnnotator.class);
 
-	private final AnnotationService annotatorService;
 	private HashMap<String, Trio> pedigree;
 
 	// helper lists for ease of use, derived from HashMap<String, Parents> pedigree
@@ -58,19 +50,15 @@ public class DeNovoAnnotator extends VariantAnnotator
 	{ "##INFO=<ID=" + DENOVO.substring(VcfRepository.getInfoPrefix().length())
 			+ ",Number=1,Type=String,Description=\"todo\">" });
 
-	@Autowired
-	public DeNovoAnnotator(AnnotationService annotatorService) throws IOException
+	public DeNovoAnnotator()
 	{
-		this.annotatorService = annotatorService;
-	}
+	};
 
 	public DeNovoAnnotator(File deNovoFileLocation, File inputVcfFile, File outputVCFFile) throws Exception
 	{
 		// cast to a real logger to adjust to the log level
 		ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LOG;
 		root.setLevel(ch.qos.logback.classic.Level.ERROR);
-
-		this.annotatorService = new AnnotationServiceImpl();
 
 		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
 
@@ -144,12 +132,6 @@ public class DeNovoAnnotator extends VariantAnnotator
 		outputVCFWriter.close();
 		vcfRepo.close();
 		LOG.info("All done!");
-	}
-
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		annotatorService.addAnnotator(this);
 	}
 
 	@Override
@@ -553,8 +535,7 @@ public class DeNovoAnnotator extends VariantAnnotator
 		List<AttributeMetaData> entityMetaData = super.getInputMetaData();
 		entityMetaData.add(VcfRepository.FILTER_META);
 		entityMetaData.add(VcfRepository.QUAL_META);
-		entityMetaData.add(new DefaultAttributeMetaData(VcfRepository.getInfoPrefix() + "ANN",
-				FieldTypeEnum.TEXT));
+		entityMetaData.add(new DefaultAttributeMetaData(VcfRepository.getInfoPrefix() + "ANN", FieldTypeEnum.TEXT));
 		entityMetaData.add(new DefaultAttributeMetaData("ABHet", FieldTypeEnum.STRING));
 		entityMetaData.add(new DefaultAttributeMetaData("ABHom", FieldTypeEnum.STRING));
 		entityMetaData.add(new DefaultAttributeMetaData("SB", FieldTypeEnum.STRING));
@@ -566,6 +547,6 @@ public class DeNovoAnnotator extends VariantAnnotator
 	@Override
 	public AnnotatorInfo getInfo()
 	{
-		return AnnotatorInfo.create(Status.INDEV, Type.UNUSED, "unknown", "no description");
+		return AnnotatorInfo.create(Status.INDEV, Type.UNUSED, "unknown", "no description", getOutputMetaData());
 	}
 }

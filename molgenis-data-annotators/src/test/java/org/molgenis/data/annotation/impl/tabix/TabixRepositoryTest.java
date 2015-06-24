@@ -16,6 +16,7 @@ import static org.testng.Assert.assertEquals;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -24,6 +25,7 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.util.ResourceUtils;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -43,9 +45,8 @@ public class TabixRepositoryTest
 		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("CADD", DECIMAL));
 		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("CADD_SCALED", DECIMAL));
 		repoMetaData.addAttribute("id").setIdAttribute(true).setVisible(false);
-
-		tabixRepository = new TabixRepository(new File("target" + File.separator + "test-classes" + File.separator
-				+ "cadd_test.vcf.gz"), repoMetaData);
+		File file = ResourceUtils.getFile(getClass(), "/cadd_test.vcf.gz");
+		tabixRepository = new TabixRepository(file, repoMetaData);
 	}
 
 	@Test
@@ -60,6 +61,19 @@ public class TabixRepositoryTest
 		Query query = tabixRepository.query().eq(VcfRepository.CHROM, "1").and().eq(VcfRepository.POS, "100");
 		assertEquals(tabixRepository.findAll(query), Arrays.asList(newEntity("1", 100, "C", "T", -0.03, 2.003),
 				newEntity("1", 100, "C", "G", -0.4, 4.321), newEntity("1", 100, "C", "A", 2.102, 43.2)));
+	}
+
+	/**
+	 * If the chromosome send to the TabixIterator is unknown in the inputfile the TabixIterator throws an
+	 * IndexOutOfBoundsException We want to log this, but we don't want the annotationrun to fail The most frequent
+	 * example of this is a Variant found in the Mitochondrial DNA, chrom=MT, these are not in our Tabix file for for
+	 * example CADD. This test checks if the Annotator does not throw an exception but returns an empty list instead.
+	 * */
+	@Test
+	public void testUnknownChromosome()
+	{
+		Query query = tabixRepository.query().eq(VcfRepository.CHROM, "MT").and().eq(VcfRepository.POS, "100");
+		assertEquals(tabixRepository.findAll(query), Collections.emptyList());
 	}
 
 	@Test

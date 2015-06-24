@@ -1,7 +1,5 @@
 package org.molgenis.data.elasticsearch.logback;
 
-import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchId;
-
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
@@ -67,10 +65,9 @@ public class MolgenisAppender extends AppenderBase<ILoggingEvent>
 			}
 
 			Entity entity = toEntity(eventObject);
-			String id = toElasticsearchId(entity, LoggingEventMetaData.INSTANCE);
 			Map<String, Object> source = new EntityToSourceConverter().convert(entity, LoggingEventMetaData.INSTANCE);
 
-			bulkProcessor.add(new IndexRequest(INDEX_NAME, LoggingEventMetaData.INSTANCE.getName(), id).source(source));
+			bulkProcessor.add(new IndexRequest(INDEX_NAME, LoggingEventMetaData.INSTANCE.getName()).source(source));
 		}
 		catch (Throwable t)
 		{

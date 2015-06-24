@@ -6,7 +6,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.resources.Resource;
-import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.data.annotation.resources.ResourceConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,10 +17,8 @@ import org.slf4j.LoggerFactory;
 public class ResourceImpl implements Resource
 {
 	private final String name;
-	private final String filenameKey;
-	private final String defaultFilename;
-	private final MolgenisSettings molgenisSettings;
 	private final RepositoryFactory repositoryFactory;
+	private final ResourceConfig config;
 	// the file the current repository works on
 	private volatile File file;
 	// the current repository
@@ -33,42 +31,33 @@ public class ResourceImpl implements Resource
 	 * 
 	 * @param name
 	 *            the name of the Resource
-	 * @param molgenisSettings
-	 *            MolgenisSettings that configure the location of the file
-	 * @param filenameKey
-	 *            Key for the location of the file in {@link MolgenisSettings}
-	 * @param defaultFilename
-	 *            default name for the file
+	 * @param config
+	 *            ResourceConfig that configure the location of the file
 	 * @param repositoryFactory
 	 *            Factory used to create the Repository when the file becomes available
 	 */
-	public ResourceImpl(String name, MolgenisSettings molgenisSettings, String filenameKey, String defaultFilename,
-			RepositoryFactory repositoryFactory)
+	public ResourceImpl(String name, ResourceConfig config, RepositoryFactory repositoryFactory)
 	{
-		this.molgenisSettings = molgenisSettings;
 		this.name = name;
-		this.filenameKey = filenameKey;
-		this.defaultFilename = defaultFilename;
+		this.config = config;
 		this.repositoryFactory = repositoryFactory;
 	}
 
 	/**
-	 * Indicates if the repository is available.
-	 * 
-	 * Checks if the current fileName in MolgenisSettings still matches the file that the current repository was
-	 * instantiated for, and removes a previously instantiated {@link Repository} if the filename no longer matches.
+	 * Indicates if the resource is available.
 	 * 
 	 * @return indication if this resource is available
 	 */
 	@Override
 	public synchronized boolean isAvailable()
 	{
-		if (repository != null && repositoryNeedsUpdate())
+		if (repository != null && needsRefresh())
 		{
 			repository = null;
 			file = null;
 		}
-		return getFile() != null;
+		final File file = getFile();
+		return file != null && file.exists();
 	}
 
 	/**
@@ -84,6 +73,18 @@ public class ResourceImpl implements Resource
 	public Iterable<Entity> findAll(Query q)
 	{
 		return getRepository().findAll(q);
+	}
+
+	private boolean needsRefresh()
+	{
+		File newFile = config.getFile();
+		boolean needsRefresh = file != null && !file.equals(newFile);
+		if (needsRefresh)
+		{
+			repository = null;
+			file = null;
+		}
+		return repository == null;
 	}
 
 	private Repository getRepository()
@@ -114,39 +115,9 @@ public class ResourceImpl implements Resource
 		}
 	}
 
-	private synchronized boolean repositoryNeedsUpdate()
-	{
-		if (repository == null)
-		{
-			return getFile() != null;
-		}
-		return !file.equals(getFile());
-	}
-
 	private synchronized File getFile()
 	{
-		try
-		{
-			String fileName = molgenisSettings.getProperty(filenameKey, defaultFilename);
-			if (fileName == null)
-			{
-				return null;
-			}
-			File result = new File(fileName);
-			if (result.exists())
-			{
-				return result;
-			}
-			else
-			{
-				LOG.warn("Resource file not found: {}", fileName);
-			}
-		}
-		catch (Exception ex)
-		{
-			LOG.info("File for Resource {} unavailable", name, ex);
-		}
-		return null;
+		return config.getFile();
 	}
 
 	@Override

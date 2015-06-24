@@ -1,6 +1,9 @@
-package org.molgenis.data.annotation.mini;
+package org.molgenis.data.annotation.entity;
 
 import com.google.auto.value.AutoValue;
+import org.molgenis.data.AttributeMetaData;
+
+import java.util.List;
 
 /**
  * Informatin about an {@link Annotator}
@@ -29,9 +32,11 @@ public abstract class AnnotatorInfo
 
 	public abstract String getDescription();
 
-	public static AnnotatorInfo create(Status status, Type type, String code, String description)
+	public abstract List<AttributeMetaData> getOutputAttributes();
+
+	public static AnnotatorInfo create(Status status, Type type, String code, String description, List<AttributeMetaData> outputAttributes)
 	{
-		return new AutoValue_AnnotatorInfo(status, type, code, description);
+		return new AutoValue_AnnotatorInfo(status, type, code, description, outputAttributes);
 	}
 }
 

@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation.mini;
+package org.molgenis.data.annotation.entity;
 
 import org.molgenis.data.AttributeMetaData;
 
@@ -11,6 +11,7 @@ import org.molgenis.data.AttributeMetaData;
  */
 public interface Annotator
 {
+	public static final String ANNOTATORPREFIX = "MOLGENIS_";
 	/**
 	 * @return {@link AnnotatorInfo} for the {@link Annotator}
 	 */
