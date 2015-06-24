@@ -159,7 +159,10 @@ public class SemanticSearchServiceHelper
 	public QueryRule createDisMaxQueryRuleForTermsWithBoost(List<String> queryTerms, Double boostValue)
 	{
 		QueryRule finalDisMaxQuery = createDisMaxQueryRuleForTerms(queryTerms);
-		finalDisMaxQuery.setValue(boostValue);
+		if (boostValue != null && boostValue.intValue() != 0)
+		{
+			finalDisMaxQuery.setValue(boostValue);
+		}
 		return finalDisMaxQuery;
 	}
 

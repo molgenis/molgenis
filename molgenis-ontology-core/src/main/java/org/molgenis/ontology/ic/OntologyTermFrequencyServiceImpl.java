@@ -29,13 +29,13 @@ public class OntologyTermFrequencyServiceImpl implements TermFrequencyService
 	public Double getTermFrequency(String term)
 	{
 		String termFrequency = getAttributeValue(term, TermFrequencyEntityMetaData.FREQUENCY);
-		return StringUtils.isNotEmpty(termFrequency) ? Double.parseDouble(termFrequency) : 0;
+		return StringUtils.isNotEmpty(termFrequency) ? Double.parseDouble(termFrequency) : null;
 	}
 
 	public Integer getTermOccurrence(String term)
 	{
 		String occurrence = getAttributeValue(term, TermFrequencyEntityMetaData.OCCURRENCE);
-		return StringUtils.isNotEmpty(occurrence) ? Integer.parseInt(occurrence) : 0;
+		return StringUtils.isNotEmpty(occurrence) ? Integer.parseInt(occurrence) : null;
 	}
 
 	public String getAttributeValue(String term, String attributeName)
