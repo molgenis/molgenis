@@ -3,6 +3,7 @@ package org.molgenis.ontology.ic;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.MapEntity;
@@ -27,20 +28,30 @@ public class OntologyTermFrequencyServiceImpl implements TermFrequencyService
 
 	public Double getTermFrequency(String term)
 	{
+		String termFrequency = getAttributeValue(term, TermFrequencyEntityMetaData.FREQUENCY);
+		return StringUtils.isNotEmpty(termFrequency) ? Double.parseDouble(termFrequency) : 0;
+	}
+
+	public Integer getTermOccurrence(String term)
+	{
+		String occurrence = getAttributeValue(term, TermFrequencyEntityMetaData.OCCURRENCE);
+		return StringUtils.isNotEmpty(occurrence) ? Integer.parseInt(occurrence) : 0;
+	}
+
+	public String getAttributeValue(String term, String attributeName)
+	{
 		Entity entity = dataService.findOne(TermFrequencyEntityMetaData.ENTITY_NAME,
 				new QueryImpl().eq(TermFrequencyEntityMetaData.TERM, term));
 
-		if (entity != null && entity.getInt(TermFrequencyEntityMetaData.FREQUENCY) != 0)
+		if (entity == null)
 		{
-			return entity.getDouble(TermFrequencyEntityMetaData.FREQUENCY);
+			entity = addEntry(term, pubMedTermFrequencyService.getTermFrequency(term), dataService);
 		}
-		else
-		{
-			return addEntry(term, pubMedTermFrequencyService.getTermFrequency(term), dataService);
-		}
+
+		return entity == null ? null : entity.getString(attributeName);
 	}
 
-	private Double addEntry(String term, PubMedTFEntity pubMedTFEntity, DataService dataService)
+	private Entity addEntry(String term, PubMedTFEntity pubMedTFEntity, DataService dataService)
 	{
 		if (pubMedTFEntity == null) return null;
 
@@ -49,7 +60,7 @@ public class OntologyTermFrequencyServiceImpl implements TermFrequencyService
 		mapEntity.set(TermFrequencyEntityMetaData.FREQUENCY, pubMedTFEntity.getFrequency());
 		mapEntity.set(TermFrequencyEntityMetaData.OCCURRENCE, pubMedTFEntity.getOccurrence());
 		dataService.add(TermFrequencyEntityMetaData.ENTITY_NAME, mapEntity);
-		return pubMedTFEntity.getFrequency();
+		return mapEntity;
 	}
 
 	@Async
