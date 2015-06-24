@@ -61,6 +61,18 @@
                         </label>   
                     </div>
                     
+                    <span id="helpBlock" class="help-block">As entity values I want:</span>
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="entityValues" value="ENTITY_LABELS" checked> Entity labels
+                        </label>
+                    </div>
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="entityValues" value="ENTITY_IDS"> Entity ids
+                        </label>   
+                    </div>
+                    
                     <span id="helpBlock" class="help-block">As download type I want:</span>
                     <div class="radio">
 	                    <label>
