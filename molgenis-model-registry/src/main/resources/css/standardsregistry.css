@@ -81,16 +81,30 @@ p.form-inline {
 	margin-top: 20px;
 }
 
+#uml{
+	margin-left: 1%;
+	margin-right: 1%;
+}
+
 #paper-holder {
-	width: auto; 
-	height: auto; 
+	width: auto;
+	height: auto;
 	margin-left: auto;
 	margin-right: auto;
 	overflow: scroll;
 }
 
-#paper > svg {
-	margin: 5%;
+#paper>svg {
+	margin: 1%;
+	outline: 1px solid gray;
+}
+
+#dpi{
+	height: 1in; 
+	left: -100%; 
+	position: absolute; 
+	top: -100%; 
+	width: 1in;
 }
 
 #zoom-in-out {
