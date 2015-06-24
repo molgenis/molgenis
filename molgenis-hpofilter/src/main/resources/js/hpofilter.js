@@ -5,6 +5,7 @@
 	var selectedEntityName;
 	
 	$(function() {
+  		$('[data-toggle="tooltip"]').tooltip();
 		
 		$('.entity-dropdown-item').click(function() {
 			var entityUri = $(this).attr('id');
@@ -22,7 +23,10 @@
 		
 		$('#filter-submit').on('click', null, function() {
 			$.post(molgenis.getContextUrl() + '/filter',
-			{terms:$('#term-input').val(), entity:selectedEntity.label, recursive:true},
+			{terms:$('#term-input').val(), 
+			entity:selectedEntity.label, 
+			target:$('#name-input').val(), 
+			recursive:true},
 			function(data){
 				console.log(data);
 			});

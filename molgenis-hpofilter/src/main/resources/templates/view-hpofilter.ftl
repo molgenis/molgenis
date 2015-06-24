@@ -8,7 +8,7 @@
 
 <#if selectedEntityName??>
 <div id="entity-class" class="well clearfix">
-    <h3 id="filter-title"></h3>
+    <h3 id="filter-title">HPO Filter</h3>
 
     <#if showEntitySelect?string('true', 'false') == 'true'>
         <div class="dropdown pull-right">
@@ -30,11 +30,25 @@
 	<div class="row">
 		<div class="col-md-4">
 			<div class="dropdown">
+				<div class="input-group">
+					<span class="input-group-addon">Save as</span>
+					<input type="text" class="form-control" placeholder="Enter target entity name here" id="name-input">
+					<span class="input-group-addon"><span class="glyphicon-question-sign"></span></span>
+				</div>
+				<br/>
 				<button class="btn btn-primary dropdown-toggle btn-block" type="button" id="filter-submit">Submit</button>
 				<br/>
-				<div class="input-group">
-					<span class="input-group-addon" id="basic-addon1">HPO Term</span>
+				Specify HPO terms to filter:<br>
+				<div class="input-group" id="term-1">
+					<span class="input-group-addon" id="input-addon1">Term</span>
 					<input type="text" class="form-control" placeholder="HP:1234567" id="term-input">
+					<span class="input-group-addon" id="input-addon2">
+						<input type="checkbox" data-toggle="tooltip" data-placement="bottom" title="Search undelying terms"><span class="glyphicon-repeat"></span>
+					</span>
+					<span class="input-group-btn" id="input-addon3">
+						<button class="btn btn-primary" id="add-term">+</button>
+						<button class="btn btn-danger" id="remove-term">-</button>
+					</span>
 				</div>
 				<ul class="dropdown-menu scrollable-menu" id="ac-menu">
 					<li>1</li>

@@ -5,32 +5,24 @@ import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ENTITY_RE
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserHasRole;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
-import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryDecoratorFactory;
-import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.generators.db.CrudRepositorySecurityDecoratorGen;
 import org.molgenis.hpofilter.data.GeneMapProvider;
 import org.molgenis.hpofilter.data.HpoFilterDataProvider;
 import org.molgenis.hpofilter.data.Locus;
 import org.molgenis.hpofilter.utils.HgncLocationsUtils;
-import org.molgenis.model.elements.Import;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -76,11 +68,14 @@ public class HpoFilterController extends MolgenisPluginController
 		{
 			if (currentUserHasRole(AUTHORITY_SU, AUTHORITY_ENTITY_READ_PREFIX + entityName.toUpperCase()))
 			{
-				emds.add(dataService.getEntityMetaData(entityName));
-				if (StringUtils.isNotBlank(selectedEntityName) && selectedEntityName.equalsIgnoreCase(entityName))
-				{
-					// Hide entity dropdown
-					showEntitySelect = false;
+				if (null != dataService.getRepository(entityName).getEntityMetaData().getAttribute("#CHROM") &&
+						null != dataService.getRepository(entityName).getEntityMetaData().getAttribute("POS")) {
+					emds.add(dataService.getEntityMetaData(entityName));
+					if (StringUtils.isNotBlank(selectedEntityName) && selectedEntityName.equalsIgnoreCase(entityName))
+					{
+						// Hide entity dropdown
+						showEntitySelect = false;
+					}
 				}
 			}
 		}
@@ -126,35 +121,45 @@ public class HpoFilterController extends MolgenisPluginController
 	}
 	
 	@RequestMapping(method = RequestMethod.POST, value = "/filter")
-	private @ResponseBody Boolean filter(@RequestParam(value = "terms", required = true) String terms,
+	private @ResponseBody String filter(@RequestParam(value = "terms", required = true) String terms,
 			@RequestParam(value = "entity", required = true) String selectedEntityName,
+			@RequestParam(value = "target", required = false) String targetEntityName,
 			@RequestParam(value = "recursive", required = false) boolean recursive,
 			Model model) {
 		try{
 			Repository repository;
+			Repository newRepository;
 			String chrom;
 			Long pos;
 			Locus locus;
 			List<String> genes;
 			EntityMetaData entityMetaData;
+			String newEntityName;
 			DefaultEntityMetaData newEntityMetaData;
 			
 			if (null != selectedEntityName) {
 				repository = dataService.getRepository(selectedEntityName);
 				entityMetaData = repository.getEntityMetaData();
-				if (null == repository.getEntityMetaData().getAttribute("#CHROM") || null == repository.getEntityMetaData().getAttribute("POS"))
-					return false;
+				if (null == repository.getEntityMetaData().getAttribute("#CHROM"))
+					throw new RuntimeException("Entity does not contain required attribute '#CHROM'");
+				if (null == repository.getEntityMetaData().getAttribute("POS"))
+					throw new RuntimeException("Entity does not contain required attribute 'POS'");
 			}else{
-				return false;
+				throw new RuntimeException("No entity has been selected");
 			}
 
-			String newEntityName = selectedEntityName+"-filtered-hpofilter";
+			if (null == targetEntityName || targetEntityName.isEmpty()) 
+				newEntityName = selectedEntityName+"-filtered-hpofilter";
+			else
+				newEntityName = targetEntityName;
+			
+			
 			newEntityMetaData = new DefaultEntityMetaData(newEntityName,
 					entityMetaData);
 			
-			//newEntityMetaData.setLabel(newEntityName);
+			newEntityMetaData.setLabel(newEntityName);
 			
-			Repository repo = dataService.getMeta().addEntityMeta(newEntityMetaData);
+			newRepository = dataService.getMeta().addEntityMeta(newEntityMetaData);
 			
 			Iterator<Entity> e = repository.iterator();
 			while (e.hasNext()) {
@@ -163,21 +168,19 @@ public class HpoFilterController extends MolgenisPluginController
 				pos = entity.getLong("POS");
 				locus =  new Locus(chrom, pos);
 				genes = HgncLocationsUtils.locationToHgcn(hgncProvider.getHgncLocations(), locus);
-				//System.out.println("Checking variant at "+pos+" to be added to repo "+repo.getName());
-				System.out.println("Adding variant at "+pos+" to repo "+repo.getName());
-				repo.add(entity);
-				/*for (String gene : genes) {
+				System.out.println("Checking variant at "+pos+" to be added to repo "+newRepository.getName());
+				for (String gene : genes) {
 					if (HPOContainsGene(terms, gene, true)) {
-						System.out.println("Adding variant at "+pos+" to repo "+repo.getName());
-						repo.add(entity);
+						System.out.println("Adding variant at "+pos+" to repo "+newRepository.getName());
+						newRepository.add(entity);
 						break;
 					}
-				}*/
+				}
 			}
-			return true;
+			return "Filtering succeded";
 		}catch (Exception e) {
 			e.printStackTrace();
-			return false;
+			throw new RuntimeException("An unknown error occured when filtering");
 		}
 	}
 	
@@ -199,5 +202,28 @@ public class HpoFilterController extends MolgenisPluginController
 					if (null != child && HPOContainsGene(child, gene, true))
 						return true;
 		return false;
+	}
+	
+	/**
+	 * validates the input from a user and returns the type of input.<br>
+	 * <ol start=0>
+	 * <li>invalid</li>
+	 * <li>HPO term</li>
+	 * <li>numbers</li>
+	 * </ol>
+	 * @param input user input
+	 * @return an integer describing the input
+	 */
+	private @ResponseBody int validateInput(String input) {
+		return 0;
+	}
+	
+	/**
+	 * parses a user-supplied number as a valid HP:nnnnnnn number
+	 * @param num user-supplied number
+	 * @return valid hpo term
+	 */
+	private String parseNumberAsHPO(String num) {
+		return null;
 	}
 }
