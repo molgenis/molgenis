@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.semanticsearch.semantic.Hit;
 import org.molgenis.ontology.core.model.OntologyTerm;
 
@@ -30,8 +30,8 @@ public interface SemanticSearchService
 	 * @param attributeMetaData
 	 * @return AttributeMetaData of resembling attributes, sorted by relevance
 	 */
-	Iterable<ExplainedAttributeMetaData> explainAttributes(EntityMetaData source, EntityMetaData target,
-			AttributeMetaData attributeMetaData);
+	Map<AttributeMetaData, Iterable<ExplainedQueryString>> explainAttributes(EntityMetaData source,
+			EntityMetaData target, AttributeMetaData attributeMetaData);
 
 	/**
 	 * Finds {@link OntologyTerm}s that can be used to tag an attribute.

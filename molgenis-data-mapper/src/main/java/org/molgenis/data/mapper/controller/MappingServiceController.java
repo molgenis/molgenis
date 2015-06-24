@@ -8,12 +8,14 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
@@ -30,6 +32,7 @@ import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.AggregateQueryImpl;
@@ -312,6 +315,32 @@ public class MappingServiceController extends MolgenisPluginController
 	{
 		mappingService.cloneMappingProject(mappingProjectId);
 		return "forward:" + URI;
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/attributeMapping/explain", consumes = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Map<AttributeMetaData, Iterable<ExplainedQueryString>> getExplainedAttributeMapping(
+			@RequestBody Map<String, String> requestBody)
+	{
+		String mappingProjectId = requestBody.get("mappingProjectId");
+		String target = requestBody.get("target");
+		String source = requestBody.get("source");
+		String targetAttribute = requestBody.get("targetAttribute");
+
+		if (StringUtils.isNotEmpty(mappingProjectId) && StringUtils.isNotEmpty(target)
+				&& StringUtils.isNotEmpty(source) && StringUtils.isNotEmpty(targetAttribute))
+		{
+			MappingProject project = mappingService.getMappingProject(mappingProjectId);
+			MappingTarget mappingTarget = project.getMappingTarget(target);
+			EntityMapping entityMapping = mappingTarget.getMappingForSource(source);
+			AttributeMetaData targetAttributeMetaData = entityMapping.getTargetEntityMetaData().getAttribute(
+					targetAttribute);
+
+			return semanticSearchService.explainAttributes(entityMapping.getSourceEntityMetaData(),
+					dataService.getEntityMetaData(target), targetAttributeMetaData);
+		}
+
+		return Collections.emptyMap();
 	}
 
 	/**
