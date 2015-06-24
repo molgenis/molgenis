@@ -75,7 +75,7 @@ public class VcfImporterService implements ImportService
 					report = importVcf(repo, addedEntities);
 					List<String> entityNames = addedEntities.stream().map(emd -> emd.getName())
 							.collect(Collectors.toList());
-					permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
+					permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 							entityNames);
 				}
 			}
@@ -207,7 +207,7 @@ public class VcfImporterService implements ImportService
 			DefaultEntityMetaData samplesEntityMetaData = new DefaultEntityMetaData(sampleAttribute.getRefEntity());
 			samplesEntityMetaData.setBackend(BACKEND);
 			sampleRepository = dataService.getMeta().addEntityMeta(samplesEntityMetaData);
-			permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
+			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 					Collections.singletonList(samplesEntityMetaData.getName()));
 			addedEntities.add(sampleAttribute.getRefEntity());
 		}
@@ -218,7 +218,7 @@ public class VcfImporterService implements ImportService
 		List<Entity> sampleEntities = new ArrayList<>();
 		try (Repository outRepository = dataService.getMeta().addEntityMeta(entityMetaData))
 		{
-			permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
+			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 					Collections.singletonList(entityMetaData.getName()));
 
 			addedEntities.add(entityMetaData);

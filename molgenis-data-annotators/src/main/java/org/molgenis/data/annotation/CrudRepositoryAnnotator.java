@@ -182,7 +182,7 @@ public class CrudRepositoryAnnotator
 			newEntityMetaData.setLabel(newRepositoryLabel);
 
 			// Give current user permissions on the created repo
-			permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
+			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 					Arrays.asList(newEntityMetaData.getName()));
 
 			return dataService.getMeta().addEntityMeta(newEntityMetaData);
