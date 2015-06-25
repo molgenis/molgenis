@@ -503,6 +503,7 @@
 		},
 		render: function() {
 			var CellContentBlocks;
+			// treat expanded mref differently
 			if(this.props.expanded && _.isArray(this.props.value)) {
 				CellContentBlocks = _.flatten(_.map(this.props.value, function(value, i) {
 					if(value !== null && value !== undefined) {
