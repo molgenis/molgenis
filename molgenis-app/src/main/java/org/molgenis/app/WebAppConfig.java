@@ -11,6 +11,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
+import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.jpa.JpaRepositoryCollection;
 import org.molgenis.data.mysql.AsyncJdbcTemplate;
 import org.molgenis.data.mysql.MysqlRepository;
@@ -24,6 +25,7 @@ import org.molgenis.data.version.v1_5.Step4VarcharToText;
 import org.molgenis.data.version.v1_6.Step7UpgradeMetaDataTo1_6;
 import org.molgenis.data.version.v1_6.Step8VarcharToTextRepeated;
 import org.molgenis.data.version.v1_6.Step9MysqlTablesToInnoDB;
+import org.molgenis.data.version.v1_8.Step12ChangeElasticsearchTokenizer;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
 import org.molgenis.system.core.FreemarkerTemplateRepository;
 import org.molgenis.system.core.RuntimeProperty;
@@ -78,6 +80,9 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	@Autowired
 	private MenuManagerService menuManagerService;
 
+	@Autowired
+	private EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory;
+
 	@Override
 	public ManageableRepositoryCollection getBackend()
 	{
@@ -101,6 +106,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 				.getRepository(RuntimeProperty.ENTITY_NAME), jpaRepositoryCollection
 				.getRepository(UserAuthority.ENTITY_NAME), jpaRepositoryCollection
 				.getRepository(GroupAuthority.ENTITY_NAME)));
+		upgradeService.addUpgrade(new Step12ChangeElasticsearchTokenizer(embeddedElasticSearchServiceFactory));
 		upgradeService.addUpgrade(new Step13RemoveCatalogueMenuEntries(dataSource));
 	}
 
