@@ -61,7 +61,7 @@
 								<option <#if categoryMapping.map[id]?? >
 									<#if categoryMapping.map[id]=targetEntity.getString(targetAttributeIdAttribute)>selected </#if>
 									</#if>
-								value="${targetEntity.get(targetAttributeIdAttribute)?c}">${targetEntity.get(targetAttributeLabelAttribute)?html}</option> 
+								value="${targetEntity.get(targetAttributeIdAttribute)}">${targetEntity.get(targetAttributeLabelAttribute)?html}</option> 
 							</#list>
 							</select>
 						</td>
