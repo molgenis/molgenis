@@ -13,10 +13,7 @@
 
 	<div id="createForm"></div>
 	<div class="row" id="upload">
-		<div class="col-md-12">
-			<input accept="pdf" style="display:none" name="file" type="file" id="file" />
-			<button type="button" id="uploadPdfButton" class="btn btn-primary">Upload a new pdf</button>
-		</div>
+		<div class="col-md-12" id="buttonBar"></div>
 	</div>
 
 	<div class="row">

@@ -5,6 +5,7 @@ define(function (require) {
   var React = require("react");
   var FileUtil = require("spa/helpers/fileUtil");
   var Backbone = require("backbone");
+  var Molgenis = window.molgenis;
   
   // Models
   var documentModel = new (require("spa/models/document"))();
@@ -13,154 +14,62 @@ define(function (require) {
   // Components
   var Document = React.createFactory(require("jsx!spa/components/document"));
   var Marginalia = React.createFactory(require("jsx!spa/components/marginalia"));
-
-  var documentComponent = React.render(
-		    new Document({pdf: documentModel, marginalia: marginaliaModel}),
-		    document.getElementById("viewer")
-  		);
+  var ButtonBar = React.createFactory(require("jsx!component/ButtonBar"));
   
-  var marginaliaComponent = React.render(
-		    new Marginalia({marginalia: marginaliaModel}),
-		    document.getElementById("marginalia")
-		);
-  
-  // Set CSRF
-  var _sync = Backbone.sync;
-  Backbone.sync = function(method, model, options){
-    options.beforeSend = function(xhr){
-      xhr.setRequestHeader('X-CSRF-Token', CSRF_TOKEN);
-    };
-    return _sync(method, model, options);
-  };
-  
-  $('#uploadPdfButton').on('click', function() {
-	  $('#file').click();
-  });
-  
-  $('#file').on('change', function() {
-	  var f = this.files[0];
-	  
-	  if (f) {
-		  if (f.type.match(/application\/(x-)?pdf|text\/pdf/)) {
-			  FileUtil.readFileAsBinary(f).then(processFile);
-		  }
-	  }
-  });
+  var documentComponent = React.render(new Document({pdf: documentModel, marginalia: marginaliaModel}), document.getElementById("viewer"));
+  var marginaliaComponent = React.render(new Marginalia({marginalia: marginaliaModel}), document.getElementById("marginalia"));
   
   var processFile = function(data) {
-	    var upload = FileUtil.upload("https://robot-reviewer.vortext.systems/topologies/gen2phen", data);
-	    documentModel.loadFromData(data);
-	    upload.then(function(result) {
-	      var marginalia = JSON.parse(result);
-	      marginaliaModel.reset(marginaliaModel.parse(marginalia));
-	    });
+	  var upload = FileUtil.upload("/plugin/textmining/upload", data);
+	  documentModel.loadFromData(data);
+	  upload.then(function(result) {
+		  var marginalia = JSON.parse(result);
+		  marginaliaModel.reset(marginaliaModel.parse(marginalia));
+		  topBarComponent.enableSaveButton();
+	 });
   };
   
-  
-//  $('#uploadPdfButton').on('click', function() {
-//	  React.render(molgenis.ui.Form({
-//			mode: 'create',
-//			entity: 'MutationArticle',
-//			modal: true,
-//			onSubmitSuccess: fileUploaded
-//		}), document.getElementById('createForm'));
-//  });
-  
-//  var fileUploaded = function(response) {
-//	  var pdfUri = reponse.location;
-//	  
-//	  var request = new XMLHttpRequest();
-//      request.open("GET", pdfUri, true);
-//      request.responseType = "arraybuffer";
-//      request.onload = function (e) {
-//    	  var arrayBuffer = request.response; // Note: not request.responseText
-//    	  if (arrayBuffer) {
-//    		  var byteArray = new Uint8Array(arrayBuffer);
-//    		  processFile(byteArray);
-//    	  }
-//      };
-//      request.send(null);
-//  };
-  
-
-  /*
-   * 
-  // Components
-  var UploadButton = React.createFactory(require("jsx!component/UploadButton"));
-  var uploadButtonComponent = React.render(
-		  new UploadButton({onLoad: processUpload}),
-		  document.getElementById("upload")
-  		);
-  
-  var processUpload = function(data) {
-	  alert(data);
+  var save = function(formData) {
+	  //TODO does not work in IE < 10 (FormData)
+	  topBarComponent.showSpinner();
+	  $.ajax({
+		  url: '/api/v1/Publication',
+		  type: 'POST',
+		  data: formData,
+		  contentType: false,
+		  processData:false,
+		  async: true,
+		  success: function(data, textStatus, jqXHR) {
+			  topBarComponent.disableSaveButton();
+			  var location = jqXHR.getResponseHeader('Location');
+			  var id = location.substring(location.lastIndexOf('/') + 1)
+			  saveMarginalia(id);
+		   },
+		   error: function() {
+			   topBarComponent.hideSpinner();
+		   }
+	  });  
   };
   
- 
-    var _ = require("underscore");
-  var FileUtil = require("spa/helpers/fileUtil");
-   var Backbone = require("backbone");
- 
-    // Set CSRF
-  var _sync = Backbone.sync;
-  Backbone.sync = function(method, model, options){
-    options.beforeSend = function(xhr){
-      xhr.setRequestHeader('X-CSRF-Token', CSRF_TOKEN);
-    };
-    return _sync(method, model, options);
-  };
+  var topBarComponent = React.render(new ButtonBar({onFileChange: processFile, onFileSave: save}), document.getElementById("buttonBar"));
   
-  // Models
-  var documentModel = new (require("spa/models/document"))();
-  var marginaliaModel = new (require("spa/models/marginalia"))();
-
-  // Components
-  var TopBar = React.createFactory(require("jsx!components/topBar"));
-  var Document = React.createFactory(require("jsx!spa/components/document"));
-  var Marginalia = React.createFactory(require("jsx!spa/components/marginalia"));
-
-  var process = function(data) {
-  //  var upload = FileUtil.upload("/topologies/gen2phen", data);
-    documentModel.loadFromData(data);
-    //upload.then(function(result) {
-     // var marginalia = JSON.parse(result);
-      //marginaliaModel.reset(marginaliaModel.parse(marginalia));
-    //});
+  var saveMarginalia = function(publicationId) {
+	  $.ajax({
+		  url: '/plugin/textmining/updatePublication/' + publicationId,
+		  type: 'POST',
+		  data: JSON.stringify(marginaliaModel.toJSON()),
+		  contentType: 'application/json',
+		  async: true,
+		  success: function(data, textStatus, jqXHR) {
+			  Molgenis.createAlert([{message: "Saved pdf."}], "success");
+			  topBarComponent.hideSpinner();
+		  }, 
+		  error: function() {
+			  Molgenis.createAlert([{message: "Could not save pdf."}], "error");
+			  topBarComponent.hideSpinner();
+		  }
+	  });  
   };
-
-  var topBarComponent = React.render(
-    new TopBar({
-      callback: process,
-      accept: ".pdf",
-      mimeType: /application\/(x-)?pdf|text\/pdf/
-    }),
-    document.getElementById("top-bar")
-  );
-	
-  
-  var documentComponent = React.render(
-    new Document({pdf: documentModel, marginalia: marginaliaModel}),
-    document.getElementById("viewer")
-  );
-
-  var request = new XMLHttpRequest();
-  request.open("GET", "/files/AAAACTQ25MS4HKBAMYH3IOAAAE", true);
-  request.responseType = "arraybuffer";
-  request.onload = function (e) {
-    var arrayBuffer = request.response; // Note: not request.responseText
-    if (arrayBuffer) {
-      var byteArray = new Uint8Array(arrayBuffer);
-      process(byteArray);
-    }
-  };
-  request.send(null);
-  
-  var marginaliaComponent = React.render(
-    new Marginalia({marginalia: marginaliaModel}),
-    document.getElementById("marginalia")
-  );
-	
-  */
   
   // Dispatch logic
   // Listen to model change callbacks -> trigger updates to components

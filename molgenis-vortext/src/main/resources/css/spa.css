@@ -1,3 +1,7 @@
+#buttonBar .btn {
+	margin-right: 10px;	
+}
+
 #upload {
 	margin-bottom: 20px;	
 }
@@ -8,14 +12,16 @@
 
 .viewer-container {
     overflow: hidden;
+    height: 750px;
 }
 
 .viewer {
-    width: calc(70% - 40px);
+	position: absolute;
+	width: calc(70% - 40px);
     height: 100%;
     overflow-y: scroll;
     overflow-x: hidden;
-    left: 155px;
+    left: 55px;
     padding-right: 40px;
     line-height: 1.2em;
 }
@@ -27,6 +33,7 @@
     position: absolute;
     z-index: 1000;
     left: calc(70% - 20px);
+    top: 0px;
     width: calc(30% + 20px);
     height: 100%;
     overflow: auto;
@@ -158,9 +165,11 @@
     background-color: inherit;
 }
 
+/*
 .block .content *  {
     font-size: 0.8rem;
 }
+*/
 
 .block .content {
     padding: 10px 20px;
