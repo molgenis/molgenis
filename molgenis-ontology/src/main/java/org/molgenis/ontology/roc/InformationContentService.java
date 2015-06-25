@@ -15,10 +15,10 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.meta.OntologyMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
-import org.molgenis.ontology.utils.NGramMatchingModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.tartarus.snowball.ext.PorterStemmer;
 
@@ -151,7 +151,7 @@ public class InformationContentService
 		PorterStemmer stemmer = new PorterStemmer();
 		for (String term : queryString.toLowerCase().trim().split(NON_WORD_SEPARATOR))
 		{
-			if (!NGramMatchingModel.STOPWORDSLIST.contains(term))
+			if (!NGramDistanceAlgorithm.STOPWORDSLIST.contains(term))
 			{
 				stemmer.setCurrent(term);
 				stemmer.stem();
