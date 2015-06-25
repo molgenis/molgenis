@@ -308,7 +308,7 @@ public class MolgenisJsTest
 		assertEquals(result, false);
 	}
 
-	@Test
+	@Test(enabled = false)
 	public void testBatchPerformance()
 	{
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
