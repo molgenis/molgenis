@@ -102,10 +102,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(new Step7UpgradeMetaDataTo1_6(dataSource, searchService));
 		upgradeService.addUpgrade(new Step8VarcharToTextRepeated(dataSource));
 		upgradeService.addUpgrade(new Step9MysqlTablesToInnoDB(dataSource));
-		upgradeService.addUpgrade(new Step10DeleteFormReferences(jpaRepositoryCollection
-				.getRepository(RuntimeProperty.ENTITY_NAME), jpaRepositoryCollection
-				.getRepository(UserAuthority.ENTITY_NAME), jpaRepositoryCollection
-				.getRepository(GroupAuthority.ENTITY_NAME)));
+		upgradeService.addUpgrade(new Step10DeleteFormReferences(dataSource));
 		upgradeService.addUpgrade(new Step12ChangeElasticsearchTokenizer(embeddedElasticSearchServiceFactory));
 		upgradeService.addUpgrade(new Step13RemoveCatalogueMenuEntries(dataSource));
 	}
