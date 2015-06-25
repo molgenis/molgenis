@@ -1,29 +1,4 @@
 <div id="algorithm-result-feedback-container">
-	<form>
-		<div class="form-group">
-			<div class="input-group">
-  				<span class="input-group-btn">
-    				<button id="result-search-btn" class="btn btn-default" type="button"><span class="glyphicon glyphicon-search"></button>
-  				</span>
-  				<input id="result-search-field" type="text" class="form-control" placeholder="Search...">
-			</div>
-		</div>
-	</form>
-	
-	<form class="form-inline">
-		<div class="form-group">
-			<div class="checkbox">
-				<label>
-  					<input id="errors-only-checkbox" type="checkbox"> Errors only
-				</label>
-			</div>
-		</div>	
-		<div class="form-group  pull-right">
-			<strong>Success: ${success}, Missing: ${missing}, Error: ${error}</strong></p>
-		</div>
-	</form>
-	
-	<br/>
 	<table class="table table-bordered">
 		<thead>
 		<#if (sourceAttributeNames)?has_content>

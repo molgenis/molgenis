@@ -9,6 +9,8 @@ public class MappingServiceRequest
 	private final String targetAttributeName;
 	private final List<String> sourceAttributeNames;
 	private final String algorithm;
+	private Long offset;
+	private Long num;
 
 	public MappingServiceRequest(String targetEntityIdentifier, String sourceEntityIdentifier,
 			String targetAttributeIdentifier, List<String> sourceAttributeIdentifiers, String algorithm)
@@ -43,5 +45,25 @@ public class MappingServiceRequest
 	public String getAlgorithm()
 	{
 		return algorithm;
+	}
+
+	public Long getOffset()
+	{
+		return offset;
+	}
+
+	public void setOffset(Long offset)
+	{
+		this.offset = offset;
+	}
+
+	public Long getNum()
+	{
+		return num;
+	}
+
+	public void setNum(Long num)
+	{
+		this.num = num;
 	}
 }

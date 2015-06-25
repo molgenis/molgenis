@@ -240,6 +240,72 @@ public class MappingServiceController extends MolgenisPluginController
 		return "redirect:/menu/main/mappingservice/mappingproject/" + mappingProjectId;
 	}
 
+	@RequestMapping(value = "/validateAttrMapping", method = RequestMethod.POST)
+	@ResponseBody
+	public AttributeMappingValidationReport validateAttributeMapping(
+			@RequestBody MappingServiceRequest mappingServiceRequest)
+	{
+		try
+		{
+			Thread.sleep(100);
+		}
+		catch (InterruptedException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Long nrSuccess = (long) (Math
+				.floor((mappingServiceRequest.getOffset() + mappingServiceRequest.getNum()) * 2.0 / 3.0));
+		Long nrErrors = (long) (Math
+				.floor((mappingServiceRequest.getOffset() + mappingServiceRequest.getNum()) * 2.0 / 3.0));
+
+		AttributeMappingValidationReport validationReport = new AttributeMappingValidationReport();
+		validationReport.setNrSuccess(nrSuccess);
+		validationReport.setNrErrors(nrErrors);
+		validationReport.setTotal(100000l);
+		return validationReport;
+	}
+
+	private static class AttributeMappingValidationReport
+	{
+		private Long total;
+		private Long nrSuccess;
+		private Long nrErrors;
+
+		@SuppressWarnings("unused")
+		public Long getTotal()
+		{
+			return total;
+		}
+
+		public void setTotal(Long total)
+		{
+			this.total = total;
+		}
+
+		@SuppressWarnings("unused")
+		public Long getNrSuccess()
+		{
+			return nrSuccess;
+		}
+
+		public void setNrSuccess(Long nrSuccess)
+		{
+			this.nrSuccess = nrSuccess;
+		}
+
+		@SuppressWarnings("unused")
+		public Long getNrErrors()
+		{
+			return nrErrors;
+		}
+
+		public void setNrErrors(Long nrErrors)
+		{
+			this.nrErrors = nrErrors;
+		}
+	}
+
 	/**
 	 * Adds a new {@link AttributeMapping} to an {@link EntityMapping}.
 	 * 

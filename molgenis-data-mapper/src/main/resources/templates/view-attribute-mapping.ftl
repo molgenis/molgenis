@@ -158,6 +158,9 @@
 					<p>
 						
 					</p>
+					<h4>Validation</h4>
+                    <div id="mapping-validation-container"></div>
+					<h4>Preview</h4>
 					<div id="result-table-container"></div>
 				</div>
 			</div>

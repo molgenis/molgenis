@@ -90,6 +90,48 @@
 		return result;
 	}
 
+	var isValidating = false;
+	
+	/**
+	 * TODO
+	 */
+	function validateAttrMapping(algorithm) {
+		isValidating = false;
+		
+		$('#mapping-validation-container').html('<span>Pending ...</span>');
+		setTimeout(function() {
+			isValidating = true;
+			
+			var request = {
+				targetEntityName : $('input[name="target"]').val(),
+				sourceEntityName : $('input[name="source"]').val(),
+				targetAttributeName : $('input[name="targetAttribute"]').val(),
+				algorithm : algorithm
+			};
+			
+			validateAttrMappingRec(request, 0, 1000);
+		}, 5000);
+		
+	}
+	
+	function validateAttrMappingRec(request, offset, num) {
+		$.ajax({
+			type : 'POST',
+			url : molgenis.getContextUrl() + '/validateAttrMapping',
+			data : JSON.stringify(_.extend({}, request, {offset: offset, num: num})),
+			contentType : 'application/json'
+		}).done(function(data) {
+			$('#mapping-validation-container').html('<span class="label label-default">Total: ' + data.total + ' </span>&nbsp;<span class="label label-success">Success: ' + data.nrSuccess + '</span>&nbsp;<span class="label label-danger">Errors: ' + data.nrErrors + '</span>');
+			if(offset + num < data.total) {
+				if(isValidating) {
+					validateAttrMappingRec(request, offset + num, num);
+				} else {
+					$('#mapping-validation-container').html('<span>Pending ...</span>');
+				}
+			}
+		});
+	}
+	
 	/**
 	 * Load result table from view-attribute-mapping-feedback.ftl
 	 * 
@@ -259,7 +301,10 @@
 			// update algorithm
 			algorithm = editor.getSession().getValue();
 
-			// update result
+			// validate mapping
+			validateAttrMapping(algorithm);
+			
+			// preview mapping results
 			loadAlgorithmResult(algorithm);
 		});
 
