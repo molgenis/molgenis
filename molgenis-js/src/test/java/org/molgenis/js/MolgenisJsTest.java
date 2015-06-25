@@ -15,6 +15,7 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.mozilla.javascript.EcmaError;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -344,5 +345,28 @@ public class MolgenisJsTest
 		assertEquals(bmis.get(0), 82.0 / (1.89 * 1.89));
 		assertEquals(NullPointerException.class, bmis.get(1).getClass());
 		assertEquals(bmis.get(2), 82.0 / (1.89 * 1.89));
+	}
+
+	@Test
+	public void testBatchSyntaxError()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
+		emd.addAttribute("weight").setDataType(MolgenisFieldTypes.INT);
+		emd.addAttribute("height").setDataType(MolgenisFieldTypes.INT);
+
+		Entity person = new MapEntity();
+		person.set("weight", 82);
+		person.set("height", 189);
+
+		try
+		{
+			ScriptEvaluator.eval("$('weight'))", Arrays.asList(person, person), emd);
+			Assert.fail("Syntax errors should throw exception");
+		}
+		catch (EcmaError expected)
+		{
+			assertEquals(expected.getName(), "SyntaxError");
+			assertEquals(expected.getErrorMessage(), "missing ; before statement");
+		}
 	}
 }
