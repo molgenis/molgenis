@@ -29,7 +29,7 @@ public class EmbeddedElasticSearchServiceFactory implements Closeable
 	private static final Logger LOG = LoggerFactory.getLogger(EmbeddedElasticSearchServiceFactory.class);
 
 	private static final String CONFIG_FILE_NAME = "elasticsearch.yml";
-	private static final String DEFAULT_INDEX_NAME = "molgenis";
+	public static final String DEFAULT_INDEX_NAME = "molgenis";
 	private final Client client;
 	private final Node node;
 	private final String indexName;
