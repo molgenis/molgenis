@@ -10,7 +10,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -207,16 +206,24 @@ public class OntologyTagServiceImpl implements OntologyTagService
 		}
 	}
 
-	public Map<String, OntologyTag> tagAttributesInEntity(String entity, Map<AttributeMetaData, OntologyTerm> tags)
+	@Override
+	public Map<String, List<OntologyTag>> tagAttributesInEntity(String entity,
+			Map<AttributeMetaData, List<OntologyTerm>> tags)
 	{
-		Map<String, OntologyTag> result = new LinkedHashMap<>();
-		for (Entry<AttributeMetaData, OntologyTerm> tag : tags.entrySet())
+		Map<String, List<OntologyTag>> result = new LinkedHashMap<>();
+		for (AttributeMetaData amd : tags.keySet())
 		{
-
-			OntologyTerm ontologyTerm = tag.getValue();
-			OntologyTag ontologyTag = addAttributeTag(entity, tag.getKey().getName(),
-					Relation.isAssociatedWith.getIRI(), Collections.singletonList(ontologyTerm.getIRI()));
-			result.put(tag.getKey().getName(), ontologyTag);
+			List<OntologyTag> attributeTags = Lists.newArrayList();
+			result.put(amd.getName(), attributeTags);
+			if (!tags.get(amd).isEmpty())
+			{
+				for (OntologyTerm ontologyTerm : tags.get(amd))
+				{
+					OntologyTag tag = addAttributeTag(entity, amd.getName(), Relation.isAssociatedWith.getIRI(),
+							Collections.singletonList(ontologyTerm.getIRI()));
+					attributeTags.add(tag);
+				}
+			}
 		}
 		return result;
 	}
