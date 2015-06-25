@@ -26,6 +26,7 @@
 	<br/>
 	<table class="table table-bordered">
 		<thead>
+                <th></th>
 		<#if (sourceAttributeNames)?has_content>
 			<#list sourceAttributeNames as sourceAttributeName>
 				<th>Source: ${sourceAttributeName?html}</th>
@@ -36,6 +37,8 @@
 		<tbody>
 			<#list feedbackRows as feedbackRow>
 				<tr>
+				    <#-- Dataexplorer can't be initialized with query at the moment, for forward compatibility already construct URL -->
+				    <td><a class="btn btn-default btn-xs" href="javascript:window.location='${dataexplorerUri?html}?entity=${source?html}&q=' + molgenis.createRsqlQuery([{field: '${feedbackRow.sourceEntity.getEntityMetaData().getName()?html}', operator: 'EQUALS', value: '${feedbackRow.sourceEntity.getIdValue()?string?html}' }]);" role="button"><span class="glyphicon glyphicon-search"></span></a></td>
 					<#if (sourceAttributeNames)?has_content>
 						<#list sourceAttributeNames as sourceAttributeName>
 							<#if feedbackRow.sourceEntity.getString(sourceAttributeName)??>
