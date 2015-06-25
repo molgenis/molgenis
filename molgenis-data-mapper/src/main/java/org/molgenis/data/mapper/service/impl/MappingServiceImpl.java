@@ -18,10 +18,7 @@ import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
-import org.molgenis.data.mapper.repository.AttributeMappingRepository;
-import org.molgenis.data.mapper.repository.EntityMappingRepository;
 import org.molgenis.data.mapper.repository.MappingProjectRepository;
-import org.molgenis.data.mapper.repository.MappingTargetRepository;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.meta.PackageImpl;
@@ -53,15 +50,6 @@ public class MappingServiceImpl implements MappingService
 
 	@Autowired
 	private MappingProjectRepository mappingProjectRepository;
-
-	@Autowired
-	private MappingTargetRepository mappingTargetRepository;
-
-	@Autowired
-	private EntityMappingRepository entityMappingRepository;
-
-	@Autowired
-	private AttributeMappingRepository attributeMappingRepository;
 
 	@Autowired
 	private PermissionSystemService permissionSystemService;
@@ -134,35 +122,10 @@ public class MappingServiceImpl implements MappingService
 
 	private MappingProject cloneMappingProject(MappingProject mappingProject, String clonedMappingProjectName)
 	{
-		// clone
-		MappingProject clonedMappingProject = new MappingProject(clonedMappingProjectName, mappingProject.getOwner());
-		for (MappingTarget mappingTarget : mappingProject.getMappingTargets())
-		{
-			// clone target
-			EntityMetaData targetEntityMetaData = mappingTarget.getTarget();
-			MappingTarget clonedMappingTarget = clonedMappingProject.addTarget(targetEntityMetaData);
-
-			// clone entity mappings
-			for (EntityMapping entityMapping : mappingTarget.getEntityMappings())
-			{
-				EntityMetaData sourceEntityMeta = entityMapping.getSourceEntityMetaData();
-				EntityMapping clonedEntityMapping = clonedMappingTarget.addSource(sourceEntityMeta);
-
-				// clone attribute mappings
-				for (AttributeMapping attrMapping : entityMapping.getAttributeMappings())
-				{
-					String targetAttrName = attrMapping.getTargetAttributeMetaData().getName();
-					AttributeMapping clonedAttrMapping = clonedEntityMapping.addAttributeMapping(targetAttrName);
-					clonedAttrMapping.setAlgorithm(attrMapping.getAlgorithm());
-					attributeMappingRepository.upsert(Collections.singleton(clonedAttrMapping));
-				}
-				entityMappingRepository.upsert(Collections.singleton(clonedEntityMapping));
-			}
-			mappingTargetRepository.upsert(Collections.singleton(clonedMappingTarget));
-		}
-		mappingProjectRepository.add(clonedMappingProject);
-
-		return clonedMappingProject;
+		mappingProject.removeIdentifiers();
+		mappingProject.setName(clonedMappingProjectName);
+		mappingProjectRepository.add(mappingProject);
+		return mappingProject;
 	}
 
 	@Override
