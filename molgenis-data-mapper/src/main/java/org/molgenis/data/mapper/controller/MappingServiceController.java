@@ -35,6 +35,7 @@ import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
@@ -452,7 +453,7 @@ public class MappingServiceController extends MolgenisPluginController
 		model.addAttribute("success", success);
 		model.addAttribute("missing", missing);
 		model.addAttribute("error", error);
-
+		model.addAttribute("dataexplorerUri", menuReaderService.getMenu().findMenuItemPath(DataExplorerController.ID));
 		return VIEW_ATTRIBUTE_MAPPING_FEEDBACK;
 	}
 
