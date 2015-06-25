@@ -15,13 +15,12 @@
     	** term-is-recursive: checkbox for recursiveness
     	*/
     	
-    	
 		function getInputHtml(id, group) {
-			var html = ['<div class="input-group" id="'+group+'-'+id+'">',
+			var html = ['<div class="input-group" id="'+ id +'">',
 				'<span class="input-group-addon">Term</span>',
-				'<input type="text" class="form-control" id="term-input-'+group+'-'+ id +'" placeholder="HP:1234567">',
+				'<input type="text" class="form-control" id="'+ id +'" placeholder="HP:1234567">',
 				'<span class="input-group-addon">',
-				'<span data-toggle="tooltip" data-placement="right" title="Search undelying terms"><input type="checkbox" id="term-is-recursive-'+group+'-'+ id +'" checked> <span class="glyphicon glyphicon-option-vertical"></span></span>',
+				'<span data-toggle="tooltip" data-placement="right" title="Search undelying terms"><input type="checkbox" class="term-is-recursive-" id="'+ id +'" checked> <span class="glyphicon glyphicon-option-vertical"></span></span>',
 				'</span>',
 				'</div>',
 				].join('');
@@ -29,24 +28,30 @@
 		}
 		
 		function getGroupHtml(group) {
-			var html = ['<div class="panel panel-primary term-group" id="term-group-'+(inputArray.length - 1)+'">',
-			'<div class="btn-group pull-right">',
-			'<button class="btn btn-primary remove-group" id="'+group+'"><span class="glyphicon glyphicon-trash"></span></button>',
-			'<button class="btn btn-success add-input" id="'+group+'"><span class="glyphicon glyphicon-plus"></span></button>',
+			var html1 = ['<div class="panel panel-primary term-group" id="'+ group +'">',
+			'<div class="btn-group pull-right">'
+			].join('');
+			var html2 = '<button class="btn btn-primary rem-group" id="'+group+'"><span class="glyphicon glyphicon-trash"></span></button>';
+			var html3 = ['<button class="btn btn-success add-input" id="'+group+'"><span class="glyphicon glyphicon-plus"></span></button>',
 			'<button class="btn btn-danger rem-input" id="'+group+'"><span class="glyphicon glyphicon-minus"></span></button>',
 			'</div>',
 			'<div class="panel-heading">',
-			'<h4 class="panel-title">Group '+(inputArray.length)+'</h4>',
+			'<h4 class="panel-title" id="'+group+'">Group '+(inputArray.length)+'</h4>',
 			'</div>',
 			'</div>'
 			].join('');
+			var html = html1;
+			if (group != 0) {
+				html = html.concat(html2);
+			}
+			html = html.concat(html3);
 			return html;
 		}
 		
 		// adds an input to a group
 		function addInput(group) {
+			$('.term-group#'+group).append(getInputHtml(inputArray[group], group));
 			inputArray[group]++;
-			$('#inputs').find('#term-group-'+group).append(getInputHtml(inputArray[group], group));
        		$('[data-toggle="tooltip"]').tooltip();
 		}
 		
@@ -66,11 +71,14 @@
 		}
 		
 		// removes a group
-		function removeGroup() {
-			if (inputArray.length > 1) {
-				$('#inputs').find('#term-group-'+(inputArray.length - 1)).remove();
-				inputArray.pop();
+		function removeGroup(group) {
+			$('.term-group#'+(group)).remove();
+			for (var i = group; i < inputArray.length-1; i++) {
+				var j = parseInt(i) + parseInt(1);
+				$('.term-group#'+(j)).attr("id", i);
+				$('.term-group#'+(j)).html('Group '+j);
 			}
+			inputArray.pop();
 		}
     	
     	// listen for click events on the add- and remove-input buttons
@@ -80,14 +88,14 @@
     	$('#inputs').on('click', '.rem-input', function() {
 			removeInput(this.id);
     	});
+    	$('#inputs').on('click', '.rem-group', function() {
+			removeGroup(this.id);
+    	});
     	
     	// same for the add- and remove-group buttons
     	$('#addgroup').on('click', null, function() {
     		addGroup();
-    	});
-    	$('#remgroup').on('click', null, function() {
-    		removeGroup();
-    	}); 	
+    	});	
     	
     	// enables the tooltips that exist on the page when it loads
         $('[data-toggle="tooltip"]').tooltip();
@@ -115,14 +123,16 @@
         $('#filter-submit').on('click', null, function() {
         	if (selectedEntity) {
 	        	var termArray = [];
+	        	var group = 0;
 	        	// loop through each *term* group
 	        	$('.term-group').each(function() {
+	        		group = this.id;
 	        		// loop through each collection of inputs
 	        		$(this).find('.input-group').each(function () {
 	        			var id = this.id;
 	        			var rec = document.getElementById('term-is-recursive-'+id).checked ? true : false;
 	        			var value = document.getElementById('term-input-'+id).value;
-	        			termArray.push(id + '-' + rec + '-' + value);
+	        			termArray.push(group + '-' + id + '-' + rec + '-' + value);
 	        		});
 	        		
 	        	});
