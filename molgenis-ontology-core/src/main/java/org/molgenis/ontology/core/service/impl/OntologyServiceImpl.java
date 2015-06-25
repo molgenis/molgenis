@@ -44,15 +44,4 @@ public class OntologyServiceImpl implements OntologyService
 		return ontologyTermRepository.findOntologyTerms(ontologyIds, terms, pageSize);
 	}
 
-	@Override
-	public List<OntologyTerm> getChildren(OntologyTerm ontologyTerm)
-	{
-		return ontologyTermRepository.getChildren(ontologyTerm);
-	}
-
-	@Override
-	public Integer getOntologyTermDistance(OntologyTerm ontologyTerm1, OntologyTerm ontologyTerm2)
-	{
-		return ontologyTermRepository.getOntologyTermDistance(ontologyTerm1, ontologyTerm2);
-	}
 }
