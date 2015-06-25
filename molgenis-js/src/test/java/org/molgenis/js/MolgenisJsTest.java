@@ -37,6 +37,19 @@ public class MolgenisJsTest
 	}
 
 	@Test
+	public void testUnitConversion()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
+		emd.addAttribute("weight").setDataType(MolgenisFieldTypes.INT);
+
+		Entity person = new MapEntity();
+		person.set("weight", 82);
+
+		Object weight = ScriptEvaluator.eval("$('weight').unit('kg').toUnit('pound').value()", person, emd);
+		assertEquals(weight, 180.7790549915996);
+	}
+
+	@Test
 	public void mapSimple()
 	{
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
