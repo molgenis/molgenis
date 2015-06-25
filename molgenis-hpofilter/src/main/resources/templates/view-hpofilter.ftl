@@ -32,13 +32,17 @@
 			<div class="dropdown">
 				<div class="input-group">
 					<span class="input-group-addon">Save as</span>
-					<input type="text" class="form-control" placeholder="Enter target entity name here" id="name-input">
-					<span class="input-group-addon"><span class="glyphicon-question-sign"></span></span>
+					<input type="text" class="form-control" placeholder="Enter target entity name here (optional)" id="name-input">
+					<span class="input-group-addon"><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="Leave blank to save as <name>-hpofilter-plugin"></span></span>
 				</div>
-				<br/>
+				<br>
 				<button class="btn btn-primary dropdown-toggle btn-block" type="button" id="filter-submit">Submit</button>
-				<br/>
-				Specify HPO terms to filter:<br>
+				<br>
+				<div class="text-center">
+				<button class="btn btn-success" id="addgroup">Add group</button>
+				<button class="btn btn-danger" id="remgroup">Remove group</button>
+				</div>
+				<br>
 				<div id="inputs">
 				</div>
 				<ul class="dropdown-menu scrollable-menu" id="ac-menu">

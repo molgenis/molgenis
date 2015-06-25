@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Stack;
 import java.util.concurrent.ExecutorService;
@@ -35,7 +36,7 @@ public class HpoFilterDataProvider
 	+ "annotation/ALL_SOURCES_ALL_FREQUENCIES_"
 	+ "diseases_to_genes_to_phenotypes.txt";
 
-	HashMap<String, Stack<String>> hpoMap;
+	HashMap<String, HashSet<String>> hpoMap;
 	HashMap<String, List<String>> hpoHeirarchy;
 	HashMap<String, String> descriptionMap;
 	MolgenisSettings molgenisSettings;
@@ -48,7 +49,7 @@ public class HpoFilterDataProvider
 	{
 		this.molgenisSettings = molgenisSettings;
 		
-		hpoMap = new HashMap<String, Stack<String>>();
+		hpoMap = new HashMap<String, HashSet<String>>();
 		
 		/* using a hashmap for heirarchy instead of a tree.
 		 * no duplicate values should occur, hashtable has O(1)
@@ -68,7 +69,7 @@ public class HpoFilterDataProvider
 		HashMap<String, HGNCLocations> hgncGeneMap = new HashMap<String, HGNCLocations>();
 	}
 	
-	public HashMap<String, Stack<String>> getAssocData() {
+	public HashMap<String, HashSet<String>> getAssocData() {
 		if (!assocIsParsed)
 			getData();
 		return hpoMap;
@@ -219,7 +220,7 @@ public class HpoFilterDataProvider
 					lineSplit = line.split("\t");
 					hpo = lineSplit[HPOColumn];
 					if (!hpoMap.containsKey(hpo))
-						hpoMap.put(hpo, new Stack<String>());
+						hpoMap.put(hpo, new HashSet<String>());
 					gene = lineSplit[GeneColumn];
 					if (hpoMap.containsKey(hpo))
 						if (!hpoMap.get(hpo).contains(gene))

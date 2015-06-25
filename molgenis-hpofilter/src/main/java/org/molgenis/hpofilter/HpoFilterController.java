@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
@@ -123,10 +124,9 @@ public class HpoFilterController extends MolgenisPluginController
 	}
 	
 	@RequestMapping(method = RequestMethod.POST, value = "/filter")
-	private @ResponseBody String filter(@RequestParam(value = "terms", required = true) String terms,
+	private @ResponseBody String filter(@RequestParam(value = "terms", required = true) String[] inputList,
 			@RequestParam(value = "entity", required = true) String selectedEntityName,
 			@RequestParam(value = "target", required = false) String targetEntityName,
-			@RequestParam(value = "recursive", required = false) boolean recursive,
 			Model model) {
 		try{
 			Repository repository;
@@ -138,6 +138,8 @@ public class HpoFilterController extends MolgenisPluginController
 			EntityMetaData entityMetaData;
 			String newEntityName;
 			DefaultEntityMetaData newEntityMetaData;
+			HashMap<Integer, Stack<HpoFilterInput>> inputSet = new HashMap<Integer, Stack<HpoFilterInput>>();
+			
 			
 			if (null != selectedEntityName) {
 				repository = dataService.getRepository(selectedEntityName);
@@ -155,6 +157,17 @@ public class HpoFilterController extends MolgenisPluginController
 			else
 				newEntityName = targetEntityName;
 			
+			for (String input : inputList) {
+				String[] hpoProperties = input.split("-");
+				int group = Integer.parseInt(hpoProperties[0]);
+				int id = Integer.parseInt(hpoProperties[1]);
+				boolean recursive = Boolean.parseBoolean(hpoProperties[2]);
+				String hpo = hpoProperties[3];
+				if (!inputSet.containsKey(group))
+					inputSet.put(group, new Stack<HpoFilterInput>());
+				inputSet.get(group).add(new HpoFilterInput(group, id, recursive, hpo));
+				System.out.println(hpo+" is in group "+group+", has ID "+id+" and has recursive set to "+recursive);
+			}
 			
 			newEntityMetaData = new DefaultEntityMetaData(newEntityName,
 					entityMetaData);
@@ -173,19 +186,44 @@ public class HpoFilterController extends MolgenisPluginController
 				locus =  new Locus(chrom, pos);
 				genes = HgncLocationsUtils.locationToHgcn(hgncLocations, locus);
 				System.out.println("Checking variant at "+pos+" to be added to repo "+newRepository.getName());
+				
 				for (String gene : genes) {
-					if (HPOContainsGene(terms, gene, true)) {
+					if (inputContainsGene(inputSet, gene)) {
 						System.out.println("Adding variant at "+pos+" to repo "+newRepository.getName());
 						newRepository.add(entity);
 						break;
 					}
 				}
 			}
+			repository.close();
 			return "Filtering succeded";
 		}catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException("An unknown error occured when filtering");
 		}
+	}
+	
+	@RequestMapping(method = RequestMethod.POST, value = "/exists")
+	private @ResponseBody boolean repoExists(@RequestParam(value = "entityName", required=true) String entityName) {
+		return dataService.hasRepository(entityName);
+	}
+
+	private boolean inputContainsGene(HashMap<Integer, Stack<HpoFilterInput>> inputGroups, String gene) {
+		for (Stack<HpoFilterInput> inputGroup : inputGroups.values()) {
+			if (inputGroupContainsGene(inputGroup, gene)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private boolean inputGroupContainsGene(Stack<HpoFilterInput> inputGroup, String gene) {
+		for (HpoFilterInput input : inputGroup) {
+			if (!hpoContainsGene(input.hpo(), gene, input.recursive())) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	/**
@@ -197,37 +235,14 @@ public class HpoFilterController extends MolgenisPluginController
 	 * @param recursive true if searching children, false if not.
 	 * @return true if HPO contains gene, false if hpo does not contain gene
 	 */
-	private boolean HPOContainsGene(String hpo, String gene, boolean recursive) {
+	private boolean hpoContainsGene(String hpo, String gene, boolean recursive) {
 		if (hpoFilterDataProvider.getAssocData().containsKey(hpo)) 
 			if (hpoFilterDataProvider.getAssocData().get(hpo).contains(gene))
 				return true;
 			if (recursive)
 				for (String child : hpoFilterDataProvider.getHPOData().get(hpo))
-					if (null != child && HPOContainsGene(child, gene, true))
+					if (null != child && hpoContainsGene(child, gene, true))
 						return true;
 		return false;
-	}
-	
-	/**
-	 * validates the input from a user and returns the type of input.<br>
-	 * <ol start=0>
-	 * <li>invalid</li>
-	 * <li>HPO term</li>
-	 * <li>numbers</li>
-	 * </ol>
-	 * @param input user input
-	 * @return an integer describing the input
-	 */
-	private @ResponseBody int validateInput(String input) {
-		return 0;
-	}
-	
-	/**
-	 * parses a user-supplied number as a valid HP:nnnnnnn number
-	 * @param num user-supplied number
-	 * @return valid hpo term
-	 */
-	private String parseNumberAsHPO(String num) {
-		return null;
 	}
 }
