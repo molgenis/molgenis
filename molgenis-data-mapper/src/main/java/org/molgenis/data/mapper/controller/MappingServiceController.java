@@ -21,6 +21,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
+import org.molgenis.data.importer.ImportWizardController;
 import org.molgenis.data.mapper.data.request.MappingServiceRequest;
 import org.molgenis.data.mapper.mapping.model.AlgorithmResult;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
@@ -34,6 +35,7 @@ import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
@@ -41,6 +43,7 @@ import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserService;
+import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,6 +98,9 @@ public class MappingServiceController extends MolgenisPluginController
 	@Autowired
 	private SemanticSearchService semanticSearchService;
 
+	@Autowired
+	private MenuReaderService menuReaderService;
+
 	public MappingServiceController()
 	{
 		super(URI);
@@ -114,6 +120,7 @@ public class MappingServiceController extends MolgenisPluginController
 		model.addAttribute("entityMetaDatas", getEntityMetaDatas());
 		model.addAttribute("user", SecurityUtils.getCurrentUsername());
 		model.addAttribute("admin", SecurityUtils.currentUserIsSu());
+		model.addAttribute("importerUri", menuReaderService.getMenu().findMenuItemPath(ImportWizardController.ID));
 		return VIEW_MAPPING_PROJECTS;
 	}
 
@@ -446,7 +453,7 @@ public class MappingServiceController extends MolgenisPluginController
 		model.addAttribute("success", success);
 		model.addAttribute("missing", missing);
 		model.addAttribute("error", error);
-
+		model.addAttribute("dataexplorerUri", menuReaderService.getMenu().findMenuItemPath(DataExplorerController.ID));
 		return VIEW_ATTRIBUTE_MAPPING_FEEDBACK;
 	}
 

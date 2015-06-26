@@ -50,13 +50,23 @@ public class Step11ConvertNames extends MolgenisUpgrade
 	private HashMap<String, String> mrefNoChanges = new HashMap<>();
 	private HashMap<String, List<String>> entitiesAttributesIds = new HashMap<>();
 
-	public Step11ConvertNames(SingleConnectionDataSource dataSource)
+	public Step11ConvertNames(DataSource dataSource)
 	{
 		super(10, 11);
 
+		SingleConnectionDataSource singleConnectionDS = null;
+		try
+		{
+			singleConnectionDS = new SingleConnectionDataSource(dataSource.getConnection(), true);
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+
 		// we use a single connection datasource because InnoDB only allows disabling key-checks for single sessions
-		this.template = new NamedParameterJdbcTemplate(dataSource);
-		this.dataSource = dataSource;
+		this.template = new NamedParameterJdbcTemplate(singleConnectionDS);
+		this.dataSource = singleConnectionDS;
 	}
 
 	@Override

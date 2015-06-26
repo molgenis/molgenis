@@ -11,7 +11,7 @@
 <div class="row">
 	<div class="col-md-6">
 		<h1>Mapping projects overview</h1>
-		<p>Create and view mapping projects</p>
+		<p>Create and view mapping projects. <#if importerUri??>Upload additional target entities and mapped sources <a href="${importerUri?html}">here</a>.</#if></p>
 		
 		<#if entityMetaDatas?has_content>
 			<div class="btn-group" role="group">
