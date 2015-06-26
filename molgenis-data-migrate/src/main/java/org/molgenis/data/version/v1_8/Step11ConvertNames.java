@@ -877,7 +877,7 @@ public class Step11ConvertNames extends MolgenisUpgrade
 
 	// Case sensitive
 	public static final Set<String> MOLGENIS_KEYWORDS = Sets.newHashSet("login", "logout", "csv", "entities",
-			"attributes", "base");
+			"attributes", "base", "exist", "meta");
 
 	public static Set<String> KEYWORDS = Sets.newHashSet();
 	static
