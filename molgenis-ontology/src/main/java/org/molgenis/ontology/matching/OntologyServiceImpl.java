@@ -16,6 +16,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.beans.Ontology;
@@ -27,7 +28,6 @@ import org.molgenis.ontology.core.meta.OntologyMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData;
 import org.molgenis.ontology.roc.InformationContentService;
-import org.molgenis.ontology.utils.NGramMatchingModel;
 import org.molgenis.ontology.utils.OntologyServiceUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.tartarus.snowball.ext.PorterStemmer;
@@ -316,7 +316,7 @@ public class OntologyServiceImpl implements OntologyService
 
 					String ontologyTermSynonym = removeIllegalCharWithSingleWhiteSpace(input
 							.getString(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM));
-					double score_1 = NGramMatchingModel.stringMatching(queryString, ontologyTermSynonym);
+					double score_1 = NGramDistanceAlgorithm.stringMatching(queryString, ontologyTermSynonym);
 					mapEntity.set(SCORE, score_1);
 
 					return mapEntity;
@@ -344,7 +344,7 @@ public class OntologyServiceImpl implements OntologyService
 				StringBuilder tempCombinedSynonym = new StringBuilder().append(topMatchedSynonym)
 						.append(SINGLE_WHITESPACE).append(nextMatchedSynonym);
 
-				double newScore = NGramMatchingModel.stringMatching(queryString.replaceAll(ILLEGAL_CHARACTERS_PATTERN,
+				double newScore = NGramDistanceAlgorithm.stringMatching(queryString.replaceAll(ILLEGAL_CHARACTERS_PATTERN,
 						SINGLE_WHITESPACE),
 						tempCombinedSynonym.toString().replaceAll(ILLEGAL_CHARACTERS_PATTERN, SINGLE_WHITESPACE));
 
@@ -388,7 +388,7 @@ public class OntologyServiceImpl implements OntologyService
 	{
 		StringBuilder stringBuilder = new StringBuilder();
 		Set<String> uniqueTerms = Sets.newHashSet(queryString.toLowerCase().trim().split(NON_WORD_SEPARATOR));
-		uniqueTerms.removeAll(NGramMatchingModel.STOPWORDSLIST);
+		uniqueTerms.removeAll(NGramDistanceAlgorithm.STOPWORDSLIST);
 		for (String term : uniqueTerms)
 		{
 			if (StringUtils.isNotEmpty(term.trim()) && !(ELASTICSEARCH_RESERVED_WORDS.contains(term)))

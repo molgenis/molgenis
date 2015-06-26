@@ -97,7 +97,6 @@
 						molgenis.createAlert([ {
 							'message' : 'Automatic tagging is a success!'
 						} ], 'success');
-
 						$.each(data, function(attributeName, tags) {
 							$.each(tags, function(index) {
 								if(tags[index] !== null){

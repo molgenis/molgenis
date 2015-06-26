@@ -13,7 +13,6 @@ import org.molgenis.data.IdGenerator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.semantic.Relation;
-import org.molgenis.data.semanticsearch.repository.TagRepository;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -12,7 +12,6 @@ import static org.testng.Assert.assertEquals;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
@@ -248,9 +247,8 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 		assertEquals(ontologyTagService.getTagsForPackage(p),
 				Arrays.asList(new TagImpl<Package, OntologyTerm, Ontology>("1234", p, Relation
 						.forIRI("http://molgenis.org/biobankconnect/instanceOf"), OntologyTerm.create(
-						"http://edamontology.org/data_0987", "Chromosome name", "Name of a chromosome.",
-						Collections.emptyList()), Ontology.create("EDAM", "http://edamontology.org",
-						"The EDAM ontology."))));
+						"http://edamontology.org/data_0987", "Chromosome name", "Name of a chromosome."), Ontology
+						.create("EDAM", "http://edamontology.org", "The EDAM ontology."))));
 	}
 
 	@Test
@@ -278,8 +276,8 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testTagAttributesInEntity()
 	{
-		Map<String, List<OntologyTag>> attributeTagMap = new HashMap<String, List<OntologyTag>>();
-		Map<AttributeMetaData, List<OntologyTerm>> tags = new HashMap<AttributeMetaData, List<OntologyTerm>>();
+		Map<String, OntologyTag> attributeTagMap = new HashMap<String, OntologyTag>();
+		Map<AttributeMetaData, OntologyTerm> tags = new HashMap<AttributeMetaData, OntologyTerm>();
 
 		EntityMetaData emd = new DefaultEntityMetaData("org.molgenis.SNP");
 		AttributeMetaData attributeMetaData = new DefaultAttributeMetaData("Chr");
