@@ -9,10 +9,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import org.elasticsearch.client.Client;
+import org.mockito.Mockito;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Package;
+import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
@@ -24,6 +27,8 @@ import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
@@ -35,9 +40,28 @@ import org.testng.annotations.Test;
  */
 @Test
 @ContextConfiguration(classes =
-{ ImportTestConfig.class, SemanticSearchConfig.class })
+{ ImportTestConfig.class, SemanticSearchConfig.class, EmxImportServiceTest.Config.class })
 public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 {
+	@Configuration
+	public static class Config
+	{
+		@Bean
+		public Client client()
+		{
+			return Mockito.mock(Client.class);
+		}
+
+		@Bean
+		public EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory()
+		{
+
+			EmbeddedElasticSearchServiceFactory result = Mockito.mock(EmbeddedElasticSearchServiceFactory.class);
+			Mockito.when(result.getClient()).thenReturn(client());
+			return result;
+		}
+	}
+
 	@Autowired
 	MysqlRepositoryCollection store;
 
