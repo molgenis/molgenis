@@ -49,6 +49,7 @@ public class Step11ConvertNames extends MolgenisUpgrade
 	private HashMap<String, HashMap<String, String>> mrefNameChanges = new HashMap<>();
 	private HashMap<String, String> mrefNoChanges = new HashMap<>();
 	private HashMap<String, List<String>> entitiesAttributesIds = new HashMap<>();
+	private HashSet<String> mysqlEntities = new HashSet<>();
 
 	public Step11ConvertNames(DataSource dataSource)
 	{
@@ -241,6 +242,10 @@ public class Step11ConvertNames extends MolgenisUpgrade
 		for (Map<String, Object> entityAttribute : entityAttributes)
 		{
 			String entityFullName = entityAttribute.get("fullName").toString();
+
+			// we're only migrating mysql entities
+			if (!mysqlEntities.contains(entityFullName)) continue;
+
 			String entityAttributeId = entityAttribute.get("attributes").toString();
 			if (entitiesAttributesIds.containsKey(entityFullName))
 			{
@@ -444,7 +449,7 @@ public class Step11ConvertNames extends MolgenisUpgrade
 	public void checkAndUpdateEntities()
 	{
 		List<Map<String, Object>> entities = template.getJdbcOperations().queryForList(
-				"SELECT fullName, simpleName, package, extends, abstract FROM entities;");
+				"SELECT fullName, simpleName, package, extends, abstract, backend FROM entities");
 
 		// build package scopes
 		HashMap<String, HashSet<String>> scopes = Maps.newHashMap();
@@ -470,6 +475,10 @@ public class Step11ConvertNames extends MolgenisUpgrade
 			String fullName = entity.get("fullName").toString();
 			String simpleName = entity.get("simpleName").toString();
 			String pack = entity.get("package").toString();
+			String backend = entity.get("backend").toString();
+
+			// store entities having MySQL as backend so we don't try to update non-existing ElasticSearch tables later
+			if (backend.equals("MySQL")) mysqlEntities.add(fullName);
 
 			// generate a new simpleName if needed
 			String newSimpleName = fixName(simpleName);
