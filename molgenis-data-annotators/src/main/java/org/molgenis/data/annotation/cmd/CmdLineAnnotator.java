@@ -63,8 +63,6 @@ public class CmdLineAnnotator
 			return;
 		}
 
-		// EntityAnnotator annotator = annotationService.getAnnotatorByName(annotatorName);
-
 		File annotationSourceFile = new File(args[1]);
 		if (!annotationSourceFile.exists())
 		{
