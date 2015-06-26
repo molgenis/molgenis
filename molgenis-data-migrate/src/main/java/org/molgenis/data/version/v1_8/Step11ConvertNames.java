@@ -107,7 +107,7 @@ public class Step11ConvertNames extends MolgenisUpgrade
 		}
 		catch (SQLException e)
 		{
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 	}
 

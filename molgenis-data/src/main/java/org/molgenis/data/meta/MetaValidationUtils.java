@@ -65,15 +65,19 @@ public class MetaValidationUtils
 
 	// Case sensitive
 	public static final Set<String> MOLGENIS_KEYWORDS = Sets.newHashSet("login", "logout", "csv", "entities",
-			"attributes", "base");
+			"attributes", "base", "exist", "meta");
 
 	public static Set<String> KEYWORDS = Sets.newHashSet();
 	static
 	{
+		// we can generate java(script) files with freemarker, so prevent use of reserved words
 		KEYWORDS.addAll(JAVA_KEYWORDS);
 		KEYWORDS.addAll(JAVASCRIPT_KEYWORDS);
-		KEYWORDS.addAll(MOLGENIS_KEYWORDS);
+
 		KEYWORDS.addAll(MYSQL_KEYWORDS);
+
+		// some words are reserved for the RestAPI and default packages/entities/attributes, etc.
+		KEYWORDS.addAll(MOLGENIS_KEYWORDS);
 	}
 
 	/**
