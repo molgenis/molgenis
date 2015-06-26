@@ -8,7 +8,7 @@
 	'vega.min.js',
 	'jstat.min.js',
 	'biobankconnect-graph.js',
-	'/jquery/scrollTableBody/jquery.scrollTableBody-1.0.0.js',
+	'jquery/scrollTableBody/jquery.scrollTableBody-1.0.0.js',
 	'bootbox.min.js',
 	'jquery.ace.js'
 ]>

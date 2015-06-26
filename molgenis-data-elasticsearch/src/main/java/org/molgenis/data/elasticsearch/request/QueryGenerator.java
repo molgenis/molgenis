@@ -43,7 +43,7 @@ public class QueryGenerator implements QueryPartGenerator
 		searchRequestBuilder.setQuery(q);
 	}
 
-	public QueryBuilder createQueryBuilder(List<QueryRule> queryRules, EntityMetaData entityMetaData)
+	private QueryBuilder createQueryBuilder(List<QueryRule> queryRules, EntityMetaData entityMetaData)
 	{
 		QueryBuilder queryBuilder;
 

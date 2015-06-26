@@ -118,6 +118,7 @@
 				rules : [entityQuery.q]
 			},
 			colNames : $('input[name=colNames]:checked').val(),
+			entityValues : $('input[name=entityValues]:checked').val(),
 			downloadType : $('input[name=downloadTypes]:checked').val()
 		};
 
