@@ -50,7 +50,6 @@ public class HpoFilterDataProvider
 		this.molgenisSettings = molgenisSettings;
 		
 		hpoMap = new HashMap<String, HashSet<String>>();
-		
 		/* using a hashmap for heirarchy instead of a tree.
 		 * no duplicate values should occur, hashtable has O(1)
 		 * insertion and search complexity, and no entries will 

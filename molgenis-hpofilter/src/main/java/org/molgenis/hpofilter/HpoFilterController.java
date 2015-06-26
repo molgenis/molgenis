@@ -16,6 +16,7 @@ import java.util.Stack;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityCollection;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryDecoratorFactory;
@@ -131,6 +132,7 @@ public class HpoFilterController extends MolgenisPluginController
 		try{
 			Repository repository;
 			Repository newRepository;
+			List<Entity> filteredEntities;
 			String chrom;
 			Long pos;
 			Locus locus;
@@ -139,11 +141,15 @@ public class HpoFilterController extends MolgenisPluginController
 			String newEntityName;
 			DefaultEntityMetaData newEntityMetaData;
 			HashMap<Integer, Stack<HpoFilterInput>> inputSet = new HashMap<Integer, Stack<HpoFilterInput>>();
-			
+			Long count = 0L;
+			Long pass = 0L;
+			Long fail = 0L;
+			Long size;
 			
 			if (null != selectedEntityName) {
 				repository = dataService.getRepository(selectedEntityName);
 				entityMetaData = repository.getEntityMetaData();
+				size = repository.count();
 				if (null == repository.getEntityMetaData().getAttribute("#CHROM"))
 					throw new RuntimeException("Entity does not contain required attribute '#CHROM'");
 				if (null == repository.getEntityMetaData().getAttribute("POS"))
@@ -153,7 +159,7 @@ public class HpoFilterController extends MolgenisPluginController
 			}
 
 			if (null == targetEntityName || targetEntityName.isEmpty()) 
-				newEntityName = selectedEntityName+"-filtered-hpofilter";
+				newEntityName = selectedEntityName+"_filtered_hpofilter";
 			else
 				newEntityName = targetEntityName;
 			
@@ -169,12 +175,8 @@ public class HpoFilterController extends MolgenisPluginController
 				System.out.println(hpo+" is in group "+group+", has ID "+id+" and has recursive set to "+recursive);
 			}
 			
-			newEntityMetaData = new DefaultEntityMetaData(newEntityName,
-					entityMetaData);
 			
-			newEntityMetaData.setLabel(newEntityName);
-			
-			newRepository = dataService.getMeta().addEntityMeta(newEntityMetaData);
+			filteredEntities = new Stack<Entity>();
 			
 			Map<String, HGNCLocations> hgncLocations = hgncProvider.getHgncLocations();
 			
@@ -185,18 +187,35 @@ public class HpoFilterController extends MolgenisPluginController
 				pos = entity.getLong("POS");
 				locus =  new Locus(chrom, pos);
 				genes = HgncLocationsUtils.locationToHgcn(hgncLocations, locus);
-				System.out.println("Checking variant at "+pos+" to be added to repo "+newRepository.getName());
 				
 				for (String gene : genes) {
 					if (inputContainsGene(inputSet, gene)) {
-						System.out.println("Adding variant at "+pos+" to repo "+newRepository.getName());
-						newRepository.add(entity);
+						filteredEntities.add(entity);
+						pass++;
 						break;
 					}
 				}
+				count++;
+				if (count%500 == 0)
+					fail = count - pass;
+					System.out.println("Filtered "+count+"/"+size+" entities ("+(100*count)/size+"%). PASS/FAIL: "+pass+"/"+fail);
 			}
 			repository.close();
-			return "Filtering succeded";
+			
+			if (!filteredEntities.isEmpty()) {
+				System.out.println("Adding "+pass+" filtered variants to "+newEntityName);
+				newEntityMetaData = new DefaultEntityMetaData(newEntityName,
+						entityMetaData);
+				newEntityMetaData.setLabel(newEntityName);
+				newRepository = dataService.getMeta().addEntityMeta(newEntityMetaData);
+				
+				newRepository.add(filteredEntities);
+				
+				newRepository.close();
+				return "Filtering succeded";
+			}else {
+				return "Filtering succeded, no entities passed filter.";
+			}
 		}catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException("An unknown error occured when filtering");
