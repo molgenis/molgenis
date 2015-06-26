@@ -3,7 +3,6 @@ package org.molgenis.data.semanticsearch.service.impl;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -124,7 +123,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 				targetEntityMetaData, targetAttribute);
 
 		// Because the explain-API can be computationally expensive we limit the explanation to the top 10 attributes
-		Map<AttributeMetaData, Iterable<ExplainedQueryString>> explainedAttributes = new HashMap<AttributeMetaData, Iterable<ExplainedQueryString>>();
+		Map<AttributeMetaData, Iterable<ExplainedQueryString>> explainedAttributes = new LinkedHashMap<AttributeMetaData, Iterable<ExplainedQueryString>>();
 		int count = 0;
 		for (Entity attributeEntity : attributeMetaDataEntities)
 		{

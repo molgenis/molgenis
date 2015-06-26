@@ -4,8 +4,8 @@ import static java.util.Arrays.stream;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -231,7 +231,7 @@ public class SemanticSearchServiceHelper
 	public Map<String, String> collectExpandedQueryMap(EntityMetaData targetEntityMetaData,
 			AttributeMetaData targetAttribute)
 	{
-		Map<String, String> expandedQueryMap = new HashMap<String, String>();
+		Map<String, String> expandedQueryMap = new LinkedHashMap<String, String>();
 
 		if (StringUtils.isNotEmpty(targetAttribute.getLabel()))
 		{
@@ -244,7 +244,8 @@ public class SemanticSearchServiceHelper
 					targetAttribute.getDescription());
 		}
 
-		for (OntologyTerm ontologyTerm : ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute).values())
+		for (OntologyTerm ontologyTerm : ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute)
+				.values())
 		{
 			if (!ontologyTerm.getIRI().contains(","))
 			{
@@ -265,8 +266,8 @@ public class SemanticSearchServiceHelper
 	{
 		if (ontologyTerm != null)
 		{
-			getOtLabelAndSynonyms(ontologyTerm)
-					.forEach(term -> expanedQueryMap.put(stemmer.cleanStemPhrase(term), ontologyTerm.getLabel()));
+			getOtLabelAndSynonyms(ontologyTerm).forEach(
+					term -> expanedQueryMap.put(stemmer.cleanStemPhrase(term), ontologyTerm.getLabel()));
 
 			for (OntologyTerm childOntologyTerm : ontologyService.getChildren(ontologyTerm))
 			{
