@@ -16,11 +16,11 @@
     	*/
     	
 		function getInputHtml(id, group) {
-			var html = ['<div class="input-group" id="'+ id +'">',
+			var html = ['<div class="input-group" id="input-group-'+group+'-'+ id +'">',
 				'<span class="input-group-addon">Term</span>',
-				'<input type="text" class="form-control" id="'+ id +'" placeholder="HP:1234567">',
+				'<input type="text" class="form-control" id="term-input-'+group+'-'+ id +'" placeholder="HP:1234567">',
 				'<span class="input-group-addon">',
-				'<span data-toggle="tooltip" data-placement="right" title="Search undelying terms"><input type="checkbox" class="term-is-recursive-" id="'+ id +'" checked> <span class="glyphicon glyphicon-option-vertical"></span></span>',
+				'<span data-toggle="tooltip" data-placement="right" title="Search undelying terms"><input type="checkbox" class="term-is-recursive" id="term-is-recursive-'+ group +'-'+ id +'" checked> <span class="glyphicon glyphicon-option-vertical"></span></span>',
 				'</span>',
 				'</div>',
 				].join('');
@@ -28,15 +28,15 @@
 		}
 		
 		function getGroupHtml(group) {
-			var html1 = ['<div class="panel panel-primary term-group" id="'+ group +'">',
+			var html1 = ['<div class="panel panel-primary term-group" id="term-group-'+ group +'">',
 			'<div class="btn-group pull-right">'
 			].join('');
-			var html2 = '<button class="btn btn-primary rem-group" id="'+group+'"><span class="glyphicon glyphicon-trash"></span></button>';
-			var html3 = ['<button class="btn btn-success add-input" id="'+group+'"><span class="glyphicon glyphicon-plus"></span></button>',
-			'<button class="btn btn-danger rem-input" id="'+group+'"><span class="glyphicon glyphicon-minus"></span></button>',
+			var html2 = '<button class="btn btn-primary rem-group" id="rem-group-'+group+'"><span class="glyphicon glyphicon-trash"></span></button>';
+			var html3 = ['<button class="btn btn-success add-input" id="add-input-'+group+'"><span class="glyphicon glyphicon-plus"></span></button>',
+			'<button class="btn btn-danger rem-input" id="rem-input-'+group+'"><span class="glyphicon glyphicon-minus"></span></button>',
 			'</div>',
 			'<div class="panel-heading">',
-			'<h4 class="panel-title" id="'+group+'">Group '+(inputArray.length)+'</h4>',
+			'<h4 class="panel-title" id="panel-title-'+group+'">Group '+(inputArray.length)+'</h4>',
 			'</div>',
 			'</div>'
 			].join('');
@@ -50,7 +50,7 @@
 		
 		// adds an input to a group
 		function addInput(group) {
-			$('.term-group#'+group).append(getInputHtml(inputArray[group], group));
+			$('#term-group-'+group).append(getInputHtml(inputArray[group], group));
 			inputArray[group]++;
        		$('[data-toggle="tooltip"]').tooltip();
 		}
@@ -58,7 +58,8 @@
 		// removes an input from a group
 		function removeInput(group) {
 			if (inputArray[group] > 1) {
-				$('#inputs').find('#term-group-'+group).find('#' + group + '-' + inputArray[group]).remove();
+				var j = inputArray[group] - 1;
+				$('#input-group-'+group+'-'+j).remove();
 				inputArray[group]--;
 			}
 		}
@@ -70,26 +71,36 @@
 			addInput(inputArray.length - 1);
 		}
 		
-		// removes a group
+		/* removes a group and does a whole lot of
+		** stuff to make the IDs appropriate again */
 		function removeGroup(group) {
-			$('.term-group#'+(group)).remove();
+			$('#term-group-'+(group)).remove();
 			for (var i = group; i < inputArray.length-1; i++) {
 				var j = parseInt(i) + parseInt(1);
-				$('.term-group#'+(j)).attr("id", i);
-				$('.term-group#'+(j)).html('Group '+j);
+				document.getElementById('term-group-'+j).setAttribute("id", "term-group-"+i);
+				document.getElementById('panel-title-'+j).setAttribute("id", "panel-title-"+i);
+				document.getElementById('rem-group-'+j).setAttribute("id", "rem-group-"+i);
+				document.getElementById('rem-input-'+j).setAttribute("id", "rem-input-"+i);
+				document.getElementById('add-input-'+j).setAttribute("id", "add-input-"+i);
+				$('#inputs').find('[id|="input-group-'+j+'"]').each(function() {
+					var split = this.id.split('-');
+					this.setAttribute('id', 'input-group-'+i+'-'+split[3]);
+					document.getElementById('term-input-'+j+'-'+split[3]).setAttribute('id', 'term-input-'+i+'-'+split[3]);
+				});
+				$('#panel-title-'+(i)).html('Group '+j);
 			}
-			inputArray.pop();
+			inputArray.splice(group, 1);
 		}
     	
     	// listen for click events on the add- and remove-input buttons
     	$('#inputs').on('click', '.add-input', function() {
-			addInput(this.id);
+			addInput(this.id.substring(10));
     	});
     	$('#inputs').on('click', '.rem-input', function() {
-			removeInput(this.id);
+			removeInput(this.id.substring(10));
     	});
     	$('#inputs').on('click', '.rem-group', function() {
-			removeGroup(this.id);
+			removeGroup(this.id.substring(10));
     	});
     	
     	// same for the add- and remove-group buttons
@@ -123,16 +134,14 @@
         $('#filter-submit').on('click', null, function() {
         	if (selectedEntity) {
 	        	var termArray = [];
-	        	var group = 0;
 	        	// loop through each *term* group
 	        	$('.term-group').each(function() {
-	        		group = this.id;
 	        		// loop through each collection of inputs
 	        		$(this).find('.input-group').each(function () {
-	        			var id = this.id;
+	        			var id = this.id.substring(12);
 	        			var rec = document.getElementById('term-is-recursive-'+id).checked ? true : false;
 	        			var value = document.getElementById('term-input-'+id).value;
-	        			termArray.push(group + '-' + id + '-' + rec + '-' + value);
+	        			termArray.push(id + '-' + rec + '-' + value);
 	        		});
 	        		
 	        	});
