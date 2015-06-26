@@ -43,13 +43,13 @@ public class Step11ConvertNames extends MolgenisUpgrade
 	public static final String OLD_DEFAULT_PACKAGE = "default";
 	public static final String NEW_DEFAULT_PACKAGE = "base";
 
-	private HashMap<String, String> packageNameChanges = new HashMap<>();
-	private HashMap<String, String> entityNameChanges = new HashMap<>();
-	private HashMap<String, HashMap<String, String>> attributeNameChanges = new HashMap<>();
-	private HashMap<String, HashMap<String, String>> mrefNameChanges = new HashMap<>();
-	private HashMap<String, String> mrefNoChanges = new HashMap<>();
-	private HashMap<String, List<String>> entitiesAttributesIds = new HashMap<>();
-	private HashSet<String> mysqlEntities = new HashSet<>();
+	private Map<String, String> packageNameChanges = new HashMap<>();
+	private Map<String, String> entityNameChanges = new HashMap<>();
+	private Map<String, Map<String, String>> attributeNameChanges = new HashMap<>();
+	private Map<String, Map<String, String>> mrefNameChanges = new HashMap<>();
+	private Map<String, String> mrefNoChanges = new HashMap<>();
+	private Map<String, List<String>> entitiesAttributesIds = new HashMap<>();
+	private Set<String> mysqlEntities = new HashSet<>();
 
 	public Step11ConvertNames(DataSource dataSource)
 	{
@@ -78,22 +78,27 @@ public class Step11ConvertNames extends MolgenisUpgrade
 
 		setForeignKeyConstraintCheck(false);
 
-		LOG.info("Validating package names...");
-		checkAndUpdatePackages(null, null);
+		try
+		{
+			LOG.info("Validating package names...");
+			checkAndUpdatePackages(null, null);
 
-		LOG.info("Validating entity names...");
-		checkAndUpdateEntities();
+			LOG.info("Validating entity names...");
+			checkAndUpdateEntities();
 
-		LOG.info("Validating attribute names...");
-		checkAndUpdateAttributes();
+			LOG.info("Validating attribute names...");
+			checkAndUpdateAttributes();
 
-		LOG.info("Updating tags...");
-		updateTags();
+			LOG.info("Updating tags...");
+			updateTags();
 
-		LOG.info("Updating MySQL tables...");
-		updateEntityTables();
-
-		setForeignKeyConstraintCheck(true);
+			LOG.info("Updating MySQL tables...");
+			updateEntityTables();
+		}
+		finally
+		{
+			setForeignKeyConstraintCheck(true);
+		}
 
 		try
 		{
@@ -110,19 +115,19 @@ public class Step11ConvertNames extends MolgenisUpgrade
 	public void updateEntityTables()
 	{
 		// get a list of all the tables
-		HashSet<String> tableNames = Sets.newHashSet();
+		Set<String> tableNames = Sets.newHashSet();
 		List<Map<String, Object>> tables = template.getJdbcOperations().queryForList("SHOW TABLES");
 
 		// The name of this column (Tables-in-omx) depends on the database name, workaround:
 		tables.forEach(row -> tableNames.add(row.get(row.keySet().iterator().next()).toString()));
 
 		// get the fullNames of all the entities that have changes (in entity or attribute names)
-		HashSet<String> entitiesToChange = Sets.newHashSet();
+		Set<String> entitiesToChange = Sets.newHashSet();
 		entitiesToChange.addAll(entityNameChanges.keySet());
 		entitiesToChange.addAll(attributeNameChanges.keySet());
 
 		// update all mref tables that have a change in the mref name
-		for (Map.Entry<String, HashMap<String, String>> mrefTable : mrefNameChanges.entrySet())
+		for (Map.Entry<String, Map<String, String>> mrefTable : mrefNameChanges.entrySet())
 		{
 			// mref tables only have one column we need to change, so just get the first attr
 			Map.Entry<String, String> attributeChange = mrefTable.getValue().entrySet().iterator().next();
@@ -205,7 +210,7 @@ public class Step11ConvertNames extends MolgenisUpgrade
 
 			if (entityNameChanges.containsKey(fullName))
 			{
-				HashMap<String, String> params = Maps.newHashMap();
+				Map<String, String> params = Maps.newHashMap();
 				params.put("newFullName", entityNameChanges.get(fullName));
 				params.put("fullName", fullName);
 				template.update("UPDATE entities_tags SET fullName=:newFullName WHERE fullName=:fullName", params);
@@ -221,7 +226,7 @@ public class Step11ConvertNames extends MolgenisUpgrade
 
 			if (entityNameChanges.containsKey(fullName))
 			{
-				HashMap<String, String> params = Maps.newHashMap();
+				Map<String, String> params = Maps.newHashMap();
 				params.put("newFullName", entityNameChanges.get(fullName));
 				params.put("fullName", fullName);
 				template.update("UPDATE packages_tags SET fullName=:newFullName WHERE fullName=:fullName", params);
@@ -265,7 +270,7 @@ public class Step11ConvertNames extends MolgenisUpgrade
 			List<Map<String, Object>> attributes = selectAttributesById(allAttributeIds);
 
 			// build scope for this entity
-			HashSet<String> scope = Sets.newHashSet();
+			Set<String> scope = Sets.newHashSet();
 			attributes.forEach(attribute -> scope.add(attribute.get("name").toString()));
 
 			for (Map<String, Object> attribute : attributes)
@@ -349,7 +354,7 @@ public class Step11ConvertNames extends MolgenisUpgrade
 	 * Updates attribute names in expressions. Attribute expression can refer to attributes within the same entity, so
 	 * we pass this method an entity-scoped map of changes.
 	 */
-	public void updateAttributeExpressions(List<Map<String, Object>> attributes, HashMap<String, String> nameChanges)
+	public void updateAttributeExpressions(List<Map<String, Object>> attributes, Map<String, String> nameChanges)
 	{
 		if (nameChanges == null) return;
 
@@ -358,7 +363,7 @@ public class Step11ConvertNames extends MolgenisUpgrade
 			String identifier = attribute.get("identifier").toString();
 			String name = attribute.get("name").toString();
 
-			HashMap<String, String> expressions = Maps.newHashMap();
+			Map<String, String> expressions = Maps.newHashMap();
 			if (attribute.get("expression") != null)
 			{
 				expressions.put("expression", attribute.get("expression").toString());
@@ -402,7 +407,7 @@ public class Step11ConvertNames extends MolgenisUpgrade
 				}
 
 				// update the (validation|visible)expression column
-				HashMap<String, String> params = Maps.newHashMap();
+				Map<String, String> params = Maps.newHashMap();
 				params.put("newExpression", newExpression);
 				params.put("identifier", identifier);
 				template.update(
@@ -422,7 +427,7 @@ public class Step11ConvertNames extends MolgenisUpgrade
 		for (String id : partialIds)
 		{
 			// get values for this attribute id
-			HashMap<String, String> params = Maps.newHashMap(ImmutableMap.of("id", id));
+			Map<String, String> params = Maps.newHashMap(ImmutableMap.of("id", id));
 			Map<String, Object> attribute = template.queryForMap(
 					"SELECT identifier, dataType FROM attributes WHERE identifier = :id", params);
 
@@ -452,7 +457,7 @@ public class Step11ConvertNames extends MolgenisUpgrade
 				"SELECT fullName, simpleName, package, extends, abstract, backend FROM entities");
 
 		// build package scopes
-		HashMap<String, HashSet<String>> scopes = Maps.newHashMap();
+		Map<String, Set<String>> scopes = Maps.newHashMap();
 		for (Map<String, Object> entity : entities)
 		{
 			String pack = entity.get("package").toString();
@@ -555,7 +560,7 @@ public class Step11ConvertNames extends MolgenisUpgrade
 		if (packages.isEmpty()) return;
 
 		// first add packages in this package to the scope
-		HashSet<String> scope = Sets.newHashSet();
+		Set<String> scope = Sets.newHashSet();
 		packages.forEach(pack -> {
 			scope.add(pack.get("name").toString());
 		});
@@ -618,13 +623,13 @@ public class Step11ConvertNames extends MolgenisUpgrade
 
 	public Map<String, Object> getColumnForField(String table, String field)
 	{
-		HashMap<String, String> params = Maps.newHashMap(ImmutableMap.of("field", field));
+		Map<String, String> params = Maps.newHashMap(ImmutableMap.of("field", field));
 		return template.queryForMap(String.format("SHOW COLUMNS FROM `%s` WHERE Field=:field", table), params);
 	}
 
 	public void updateEntityExtends(String newFullName, String newExtends)
 	{
-		HashMap<String, String> params = Maps.newHashMap();
+		Map<String, String> params = Maps.newHashMap();
 		params.put("newFullName", newFullName);
 		params.put("newExtends", newExtends);
 		template.update("UPDATE entities SET extends=:newExtends WHERE fullName=:newFullName", params);
@@ -632,7 +637,7 @@ public class Step11ConvertNames extends MolgenisUpgrade
 
 	public void updateEntityNames(String newFullName, String newSimpleName, String newPackage, String oldFullName)
 	{
-		HashMap<String, String> params = Maps.newHashMap();
+		Map<String, String> params = Maps.newHashMap();
 		params.put("newFullName", newFullName);
 		params.put("newSimpleName", newSimpleName);
 		params.put("newPackage", newPackage);
@@ -644,7 +649,7 @@ public class Step11ConvertNames extends MolgenisUpgrade
 
 	public List<Map<String, Object>> selectPackageChildrenOfParent(String parentFullName)
 	{
-		HashMap<String, String> params = Maps.newHashMap();
+		Map<String, String> params = Maps.newHashMap();
 		params.put("parent", parentFullName);
 		return template.queryForList("SELECT fullName, name, parent FROM packages WHERE parent=:parent;", params);
 	}
@@ -657,7 +662,7 @@ public class Step11ConvertNames extends MolgenisUpgrade
 
 	public void updatePackageNames(String fullName, String fullNameFix, String nameFix, String parent)
 	{
-		HashMap<String, String> params = Maps.newHashMap();
+		Map<String, String> params = Maps.newHashMap();
 		params.put("fullName", fullName);
 		params.put("fullNameFix", fullNameFix);
 		params.put("nameFix", nameFix);
@@ -669,7 +674,7 @@ public class Step11ConvertNames extends MolgenisUpgrade
 
 	public void updateAttributeNameAndRefEntity(String identifier, String newName, String newRefEntity)
 	{
-		HashMap<String, String> params = Maps.newHashMap();
+		Map<String, String> params = Maps.newHashMap();
 		params.put("identifier", identifier);
 		params.put("newName", newName);
 		params.put("newRefEntity", newRefEntity);
@@ -679,7 +684,7 @@ public class Step11ConvertNames extends MolgenisUpgrade
 
 	public void updateEntitiesAttributesFullName(String fullName, String newFullName)
 	{
-		HashMap<String, String> params = Maps.newHashMap();
+		Map<String, String> params = Maps.newHashMap();
 		params.put("fullName", fullName);
 		params.put("newFullName", newFullName);
 		template.update("UPDATE entities_attributes SET fullName=:newFullName WHERE fullName=:fullName", params);
@@ -687,7 +692,7 @@ public class Step11ConvertNames extends MolgenisUpgrade
 
 	public List<Map<String, Object>> selectAttributesForEntity(String fullyQualifiedEntityName)
 	{
-		HashMap<String, String> params = Maps.newHashMap();
+		Map<String, String> params = Maps.newHashMap();
 		params.put("name", fullyQualifiedEntityName);
 		return template
 				.queryForList(
@@ -790,7 +795,7 @@ public class Step11ConvertNames extends MolgenisUpgrade
 	 * Recursively adds a count at the end of a name until it is unique within its scope. Assumes that the names passed
 	 * are no longer than the max length.
 	 */
-	public String makeNameUnique(String name, int index, HashSet<String> scope)
+	public String makeNameUnique(String name, int index, Set<String> scope)
 	{
 		int indexLength = String.valueOf(index).length();
 		String newName;
@@ -813,7 +818,7 @@ public class Step11ConvertNames extends MolgenisUpgrade
 		return newName;
 	}
 
-	public String makeNameUnique(String name, HashSet<String> scope)
+	public String makeNameUnique(String name, Set<String> scope)
 	{
 		return makeNameUnique(name, 1, scope);
 	}
