@@ -11,11 +11,8 @@ import java.util.List;
 import java.util.Stack;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
-import org.molgenis.data.Entity;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.hpofilter.data.HGNCLocations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -62,10 +59,6 @@ public class HpoFilterDataProvider
 		 * mappings, for autocomplete.
 		 */
 		descriptionMap = new HashMap<String, String>();
-		/*
-		 * 
-		 */
-		HashMap<String, HGNCLocations> hgncGeneMap = new HashMap<String, HGNCLocations>();
 	}
 	
 	public HashMap<String, HashSet<String>> getAssocData() {
@@ -97,12 +90,6 @@ public class HpoFilterDataProvider
 						assocIsParsed = parseHPOMapping();
 					}
 				});
-				/*THREADPOOL.submit(new Runnable() {
-					@Override
-					public void run() {
-						assocIsParsed = parseHgncMapping();
-					}
-				});*/
 				// but block until processing is done
 				while (!hpoIsParsed || !assocIsParsed) {
 					Thread.sleep(1);
@@ -236,10 +223,5 @@ public class HpoFilterDataProvider
 		}catch (IOException e) {
 			throw new RuntimeException("Error while downloading or reading association file");
 		}
-	}
-	
-	boolean parseHgncMapping()
-	{
-		return true;
 	}
 }
