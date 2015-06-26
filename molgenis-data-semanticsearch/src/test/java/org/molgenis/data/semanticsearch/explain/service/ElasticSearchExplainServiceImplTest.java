@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.lucene.search.Explanation;
-import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
+import org.elasticsearch.client.Client;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -26,9 +26,8 @@ public class ElasticSearchExplainServiceImplTest
 	public void setup()
 	{
 		explainServiceHelper = new ExplainServiceHelper();
-		EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory = mock(EmbeddedElasticSearchServiceFactory.class);
-		elasticSearchExplainService = new ElasticSearchExplainServiceImpl(embeddedElasticSearchServiceFactory,
-				explainServiceHelper);
+		Client client = mock(Client.class);
+		elasticSearchExplainService = new ElasticSearchExplainServiceImpl(client, explainServiceHelper);
 	}
 
 	@Test

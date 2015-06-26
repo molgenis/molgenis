@@ -15,7 +15,6 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
-import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.elasticsearch.request.QueryGenerator;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,11 +28,10 @@ public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainServ
 	private final QueryGenerator queryGenerator = new QueryGenerator();
 
 	@Autowired
-	public ElasticSearchExplainServiceImpl(EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory,
-			ExplainServiceHelper explainServiceHelper)
+	public ElasticSearchExplainServiceImpl(Client client, ExplainServiceHelper explainServiceHelper)
 	{
 		this.explainServiceHelper = explainServiceHelper;
-		this.client = embeddedElasticSearchServiceFactory.getClient();
+		this.client = client;
 	}
 
 	public Explanation explain(Query q, EntityMetaData entityMetaData, String documentId)
