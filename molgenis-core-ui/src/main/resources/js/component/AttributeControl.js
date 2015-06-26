@@ -21,7 +21,8 @@
 			multiple: React.PropTypes.bool,
 			focus: React.PropTypes.bool,
 			onValueChange: React.PropTypes.func.isRequired,
-			onBlur: React.PropTypes.func
+			onBlur: React.PropTypes.func,
+			categorigalMrefShowSelectAll: React.PropTypes.bool
 		},
 		getDefaultProps: function() {
 			return {
@@ -95,6 +96,7 @@
 						}) : [];
 						return molgenis.ui.CheckboxGroup(_.extend({}, controlProps, {
 							options : this.state.options,
+							selectAll: this.props.categorigalMrefShowSelectAll,
 							layout : 'vertical', // FIXME make configurable
 							value : values,
 							onValueChange: function(event) {
@@ -125,6 +127,8 @@
 							options : this.state.options,
 							layout : props.layout
 						}));
+					case 'FILE':
+						return this._createFileControl(controlProps);
 					case 'HTML':
 						return molgenis.ui.CodeEditor(_.extend({}, controlProps, {
 							placeholder : this.props.placeholder,
@@ -152,7 +156,6 @@
 							maxLength: attr.maxLength
 						}));
 					case 'COMPOUND' :
-					case 'FILE':
 					case 'IMAGE':
 						throw 'Unsupported data type: ' + attr.fieldType;
 					default:
@@ -194,6 +197,16 @@
 				step : step,
 				min : min,
 				max : max,
+			}));
+		},
+		_createFileControl: function(controlProps) {
+			return molgenis.ui.Input(_.extend({}, controlProps, {
+				type : 'file',
+				value: this.props.value ? this.props.value.filename : null,
+				onValueChange: function(event) {
+					event.value = _.extend({}, this.state.attr.refEntity, {filename: event.value});
+					this._handleValueChange(event);
+				}.bind(this)
 			}));
 		},
 		_createStringControl: function(controlProps, type, placeholder) {
@@ -265,19 +278,15 @@
 			var attr = this.state.attr;
 			if(attr.fieldType === 'CATEGORICAL' || attr.fieldType === 'CATEGORICAL_MREF') {
 				// retrieve all categories
-				api.getAsync(attr.refEntity.href).done(function(meta) {
-					var idAttr = meta.idAttribute;
-					var lblAttr = meta.labelAttribute;
+				api.getAsync(attr.refEntity.hrefCollection).done(function(data) { // FIXME problems in case of large number of categories
+					var idAttr = data.meta.idAttribute;
+					var lblAttr = data.meta.labelAttribute;
 					
 					if (this.isMounted()) {
-						api.getAsync(attr.refEntity.hrefCollection, {'attributes' : [idAttr, lblAttr]}).done(function(data) { // FIXME problems in case of large number of categories
-							if (this.isMounted()) {
-								var options = _.map(data.items, function(entity) {
-									return {value: entity[idAttr], label: entity[lblAttr]};
-								});
-								this.setState({options: options});
-							}
-						}.bind(this));	
+						var options = _.map(data.items, function(entity) {
+							return {value: entity[idAttr], label: entity[lblAttr]};
+						});
+						this.setState({options: options});
 					}
 				}.bind(this));
 			}

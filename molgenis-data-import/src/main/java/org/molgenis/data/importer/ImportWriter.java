@@ -44,6 +44,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -143,7 +144,7 @@ public class ImportWriter
 								}
 							});
 
-					entities = DependencyResolver.resolveSelfReferences(entities, entityMetaData);
+					entities = new DependencyResolver().resolveSelfReferences(entities, entityMetaData);
 					int count = update(repository, entities, dbAction);
 
 					// Fix self referenced entities were not imported
@@ -173,9 +174,20 @@ public class ImportWriter
 				{
 					AttributeMetaData attribute = attributes.next();
 					if (attribute.getRefEntity() != null
-							&& attribute.getRefEntity().getName().equals(entity.getEntityMetaData().getName())
-							&& entity.getEntities(attribute.getName()).iterator().hasNext()) return true;
+							&& attribute.getRefEntity().getName().equals(entity.getEntityMetaData().getName()))
+					{
+						List<String> ids = entity.getList(attribute.getName());
+						Iterable<Entity> refEntities = entity.getEntities(attribute.getName());
+						if (ids != null && ids.size() != Iterators.size(refEntities.iterator()))
+						{
+							throw new UnknownEntityException("One or more values [" + ids + "] from "
+									+ attribute.getDataType() + " field " + attribute.getName()
+									+ " could not be resolved");
+						}
+						return true;
+					}
 				}
+
 				return false;
 			}
 		});
@@ -189,7 +201,7 @@ public class ImportWriter
 	{
 		if (!SecurityUtils.currentUserIsSu())
 		{
-			permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
+			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 					metaDataChanges.getAddedEntities());
 		}
 	}
@@ -250,7 +262,7 @@ public class ImportWriter
 		{
 			for (Entity tag : tagRepo)
 			{
-				Entity transformed = new DefaultEntity(new TagMetaData(), dataService, tag);
+				Entity transformed = new DefaultEntity(TagMetaData.INSTANCE, dataService, tag);
 				Entity existingTag = dataService
 						.findOne(TagMetaData.ENTITY_NAME, tag.getString(TagMetaData.IDENTIFIER));
 
@@ -539,10 +551,12 @@ public class ImportWriter
 		 * Auto generated
 		 */
 		private static final long serialVersionUID = -5994977400560081655L;
+		private final EntityMetaData entityMetaData;
 
 		public DefaultEntityImporter(EntityMetaData entityMetaData, DataService dataService, Entity entity)
 		{
 			super(entityMetaData, dataService, entity);
+			this.entityMetaData = entityMetaData;
 		}
 
 		/**
@@ -557,7 +571,13 @@ public class ImportWriter
 			}
 			catch (UnknownEntityException uee)
 			{
-				return null;
+				// self reference? ignore UnknownEntityExceptions those are solved in a later step
+				if (entityMetaData.getName()
+						.equals(entityMetaData.getAttribute(attributeName).getRefEntity().getName()))
+				{
+					return null;
+				}
+				throw uee;
 			}
 		}
 
@@ -567,7 +587,14 @@ public class ImportWriter
 		@Override
 		public Iterable<Entity> getEntities(String attributeName)
 		{
-			return from(super.getEntities(attributeName)).filter(notNull());
+			if (entityMetaData.getName().equals(entityMetaData.getAttribute(attributeName).getRefEntity().getName()))
+			{
+				return from(super.getEntities(attributeName)).filter(notNull());
+			}
+			else
+			{
+				return super.getEntities(attributeName);
+			}
 		}
 	}
 }

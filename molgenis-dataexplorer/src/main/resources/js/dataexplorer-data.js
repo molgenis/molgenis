@@ -29,10 +29,11 @@
     var genomeBrowserSettings = {};
     var featureInfoMap = {};
 
+    var Table, tableSort;
+    
     $(document).on('dataChange.diseasematcher', function(e) {
-    	if (e.namespace !== 'data'){
-    		//TODO: implement refresh table functionality
-        	$('#data-table-container').table('setQuery', getQuery());
+    	if (e.namespace !== 'data' && Table){
+    		Table.setProps({query: getQuery()});
     	}
 	});
     
@@ -53,18 +54,42 @@
 	/**
 	 * @memberOf molgenis.dataexplorer.data
 	 */
-	function createDataTable(editable, rowClickable) {
-		var attributes = getAttributes();
-		$('#data-table-container').table({
-			'entityMetaData' : getEntity(),
-			'attributes' : attributes,
-			'maxRows' : 18,
-			'query' : getQuery(),
-			'editable' : editable,
-			'rowClickable': rowClickable,
-			'onDataChange' : function(){
-				$(document).trigger('dataChange.data');
+	function createDataTable() {
+		Table = React.render(molgenis.ui.Table({
+			entity: getEntity().name,
+			attrs: getAttributesTree(),
+			query: getQuery(),
+			maxRows: 18,
+			onRowAdd: onDataChange,
+			onRowDelete: onDataChange,
+			onRowEdit: onDataChange,
+			onRowInspect: onRowInspect,
+			onSort: function(e) {
+				tableSort = {
+					'orders' : [ {
+						'attr' : e.attr.name,
+						'direction' : e.order === 'desc' ? 'DESC' : 'ASC'
+					} ]
+				};
 			}
+		}), $('#data-table-container')[0]);
+	}
+	
+	function onDataChange() {
+		$(document).trigger('dataChange.data');
+	}
+	
+	function onRowInspect(e) {
+		var entityId = e.id;
+		var entityName = e.name;
+		
+		$('#entityReport').load("dataexplorer/details",{entityName: entityName, entityId: entityId}, function() {
+			  $('#entityReportModal').modal("show");
+			  
+			  // Button event handler when a button is placed inside an entity report ftl
+			  $(".modal-body button", "#entityReport").on('click', function() {
+					$.download($(this).data('href'), {entityName: entityName, entityId: entityId}, "GET");
+			  });
 		});
 	}
 	
@@ -93,10 +118,11 @@
 				rules : [entityQuery.q]
 			},
 			colNames : $('input[name=colNames]:checked').val(),
+			entityValues : $('input[name=entityValues]:checked').val(),
 			downloadType : $('input[name=downloadTypes]:checked').val()
 		};
 
-		dataRequest.query.sort = $('#data-table-container').table('getSort');
+		dataRequest.query.sort = tableSort;
 		
 		var colAttributes = molgenis.getAtomicAttributes(getAttributes(), restApi);
 		
@@ -297,6 +323,13 @@
 	/**
 	 * @memberOf molgenis.dataexplorer.data
 	 */
+	function getAttributesTree() {
+		return molgenis.dataexplorer.getSelectedAttributesTree();
+	}
+	
+	/**
+	 * @memberOf molgenis.dataexplorer.data
+	 */
 	function getQuery() {
 		return molgenis.dataexplorer.getEntityQuery();
 	}
@@ -316,8 +349,8 @@
 	 */
 	$(function() {
 		$(document).on('changeAttributeSelection.data', function(e, data) {
-			if($('#data-table-container')) {
-				$('#data-table-container').table('setAttributes', data.attributes);
+			if(Table) {
+				Table.setProps({attrs: data.attributesTree});
 			}
 		});
 
@@ -354,7 +387,11 @@
 		});
 
 		$(document).on('changeQuery.data', function(e, query) {
-			$('#data-table-container').table('setQuery', query);
+			if(Table) {
+				Table.setProps({
+					query : query
+				});
+			}
 			// TODO what to do for genome browser
 		});
 

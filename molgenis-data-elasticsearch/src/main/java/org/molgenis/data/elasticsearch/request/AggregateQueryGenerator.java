@@ -63,7 +63,7 @@ public class AggregateQueryGenerator
 			// see: https://github.com/molgenis/molgenis/issues/1937
 			FieldTypeEnum dataType2 = aggAttr2.getDataType().getEnumType();
 			if (aggAttr2.isNillable()
-					&& (dataType2 == CATEGORICAL || dataType1 == CATEGORICAL_MREF || dataType2 == XREF || dataType2 == MREF))
+					&& (dataType2 == CATEGORICAL || dataType2 == CATEGORICAL_MREF || dataType2 == XREF || dataType2 == MREF))
 			{
 				throw new IllegalArgumentException("Aggregateable attribute of type [" + dataType2
 						+ "] cannot be nillable");
@@ -242,10 +242,10 @@ public class AggregateQueryGenerator
 			case CATEGORICAL_MREF:
 			case XREF:
 			case MREF:
+			case FILE:
 				// use id attribute of nested field
 				return attrName + '.' + getAggregateFieldName(attr.getRefEntity().getIdAttribute());
 			case COMPOUND:
-			case FILE:
 			case IMAGE:
 				throw new UnsupportedOperationException();
 			default:

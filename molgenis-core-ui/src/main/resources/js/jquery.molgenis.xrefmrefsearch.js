@@ -147,7 +147,7 @@
 			},
 			initSelection: function(element, callback) {
 				//Only called when the input has a value
-				var attrNames = (uniqueAttrNames.length ? uniqueAttrNames : lookupAttrNames);
+				var attrNames = uniqueAttrNames;
 				var query = createQuery(attrNames, element.val().split(','), 'EQUALS', false);
 				if(query)
 				{

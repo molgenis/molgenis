@@ -5,7 +5,6 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -67,7 +66,7 @@ public class Step8VarcharToTextRepeated extends MolgenisUpgrade
 			@Override
 			public boolean hasRepository(String name)
 			{
-				throw new NotImplementedException("Not implemented yet");
+				throw new UnsupportedOperationException();
 			}
 		};
 		MetaDataService metaData = new MetaDataServiceImpl(dataService);
@@ -82,47 +81,51 @@ public class Step8VarcharToTextRepeated extends MolgenisUpgrade
 
 				EntityMetaData emd = metaData.getEntityMetaData(mysqlEntityName);
 
-				for (AttributeMetaData amd : emd.getAtomicAttributes())
+				if (!emd.isAbstract())
 				{
-					FieldType fieldType = amd.getDataType();
-					if (fieldType instanceof StringField)
+					for (AttributeMetaData amd : emd.getAtomicAttributes())
 					{
-						// mysql keys cannot be text so leave those columns untouched
-						if (!(amd.isIdAtrribute() || fieldType instanceof CategoricalMrefField
-								|| fieldType instanceof CategoricalField || fieldType instanceof MrefField || fieldType instanceof XrefField))
+						FieldType fieldType = amd.getDataType();
+						if (fieldType instanceof StringField)
 						{
-							if (amd.isUnique())
+							// mysql keys cannot be text so leave those columns untouched
+							if (!(amd.isIdAtrribute() || fieldType instanceof CategoricalMrefField
+									|| fieldType instanceof CategoricalField || fieldType instanceof MrefField || fieldType instanceof XrefField))
 							{
-								// TEXT columns don't like UNIQUE, remove the constraint
-								LOG.info("Removing UNIQUE constraint for {}.{}", emd.getName(), amd.getName());
-
-								try
+								if (amd.isUnique())
 								{
-									// get the unique key name for this column
-									List<Map<String, Object>> rows = template.queryForList(getShowIndexSql(emd, amd));
-									// should be first and only row
-									if (rows.iterator().hasNext())
+									// TEXT columns don't like UNIQUE, remove the constraint
+									LOG.info("Removing UNIQUE constraint for {}.{}", emd.getName(), amd.getName());
+
+									try
 									{
-										String keyName = rows.iterator().next().get("Key_name").toString();
-										template.execute(getRemoveUniqueConstraintSql(emd, keyName));
+										// get the unique key name for this column
+										List<Map<String, Object>> rows = template
+												.queryForList(getShowIndexSql(emd, amd));
+										// should be first and only row
+										if (rows.iterator().hasNext())
+										{
+											String keyName = rows.iterator().next().get("Key_name").toString();
+											template.execute(getRemoveUniqueConstraintSql(emd, keyName));
+										}
+									}
+									catch (Throwable t)
+									{
+										LOG.error("Error removing UNIQUE constraint for {}.{} ", emd.getName(),
+												amd.getName(), t);
 									}
 								}
-								catch (Throwable t)
-								{
-									LOG.error("Error removing UNIQUE constraint for {}.{} ", emd.getName(),
-											amd.getName(), t);
-								}
-							}
 
-							String columnModifySql = getModifyColumnSql(emd, amd);
-							try
-							{
-								LOG.info("Changing column {}.{} to TEXT", emd.getName(), amd.getName());
-								template.execute(columnModifySql);
-							}
-							catch (DataAccessException dae)
-							{
-								LOG.error("Error changing column {}.{} ", emd.getName(), amd.getName(), dae);
+								String columnModifySql = getModifyColumnSql(emd, amd);
+								try
+								{
+									LOG.info("Changing column {}.{} to TEXT", emd.getName(), amd.getName());
+									template.execute(columnModifySql);
+								}
+								catch (DataAccessException dae)
+								{
+									LOG.error("Error changing column {}.{} ", emd.getName(), amd.getName(), dae);
+								}
 							}
 						}
 					}

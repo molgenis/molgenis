@@ -10,14 +10,6 @@
 	 * @memberOf component.mixin
 	 */
 	var EntityInstanceLoaderMixin = {
-		componentDidMount: function() {
-			this._initEntityInstance(this.state.entity, this.props.entityInstance);
-		},
-		componentWillReceiveProps : function(nextProps) {
-			if(_.isEqual(this.props.entity, nextProps.entity) && !_.isEqual(this.props.entityInstance, nextProps.entityInstance)) {
-				this._initEntityInstance(this.state.entity, nextProps.entityInstance);
-			}
-		},
 		_isEntityInstanceLoaded: function(entityInstance) {
 			return (this.props.mode !== 'create') && (typeof entityInstance === 'object') && (_.size(entityInstance) > 1); 
 		},
@@ -27,11 +19,16 @@
 				if(!this._isEntityInstanceLoaded(entityInstance)) {
 					this._loadEntityInstance(entity, entityInstance.href);
 				} else {
-					this._setEntityInstance(entityInstance);
+					this._setEntityInstance(entity, entityInstance);
 				}
 			} else if (typeof entityInstance === 'string') {
 				if(entity && entity.name) {
 					var href = entityInstance.startsWith('/api/') ? entityInstance : '/api/v1/' + this.state.entity.name + '/' + entityInstance;					
+					this._loadEntityInstance(entity, href);
+				}
+			} else if (typeof entityInstance === 'number') {
+				if(entity && entity.name) {
+					var href = '/api/v1/' + this.state.entity.name + '/' + entityInstance.toString();					
 					this._loadEntityInstance(entity, href);
 				}
 			} 
@@ -39,7 +36,7 @@
 		_loadEntityInstance: function(entity, href) {
 			if(entity && entity.name) {
 				// expand attributes with ref entity
-				var expands = _.chain(entity.atomicAttributes).filter(function(attr) {
+				var expands = _.chain(entity.allAttributes).filter(function(attr) {
 					return attr.refEntity !== undefined;
 				}).map(function(attr) {
 					return attr.name;
@@ -47,14 +44,14 @@
 				
 				api.getAsync(href, expands.length > 0 ? {'expand': expands} : undefined).done(function(entityInstance) {
 					if (this.isMounted()) {
-						this._setEntityInstance(entityInstance);
+						this._setEntityInstance(entity, entityInstance);
 					}
 				}.bind(this));
 			}
 		},
-		_setEntityInstance: function(entityInstance) {
+		_setEntityInstance: function(entity, entityInstance) {
 			if(this._willSetEntityInstance) {
-				this._willSetEntityInstance(entityInstance);
+				this._willSetEntityInstance(entity, entityInstance);
 			}
 			
 			this.setState({entityInstance: entityInstance});
@@ -65,7 +62,7 @@
 		},
 		_onEntityInit: function(entity) {
 			if (this.props.mode === 'create') {
-				this._setEntityInstance({});
+				this._setEntityInstance(entity, {});
 			} else {
 				this._initEntityInstance(entity, this.props.entityInstance);
 			}

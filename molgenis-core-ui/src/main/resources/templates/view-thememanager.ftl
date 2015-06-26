@@ -13,9 +13,6 @@
 			<div class="form-group">
 				<div class="col-md-4">	
 					<select class="form-control" id="bootstrap-theme-select">
-						<#if selectedStyle??>
-							${selectedStyle}
-						</#if>
 						<#list availableStyles as style>
 							<option value="${style.location}" <#if selectedStyle?? && style.name == selectedStyle>selected</#if>>${style.name}</option>
 						</#list>

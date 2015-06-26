@@ -6,9 +6,9 @@ import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.file.FileStore;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.token.TokenService;
-import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

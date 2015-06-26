@@ -61,6 +61,18 @@
                         </label>   
                     </div>
                     
+                    <span id="helpBlock" class="help-block">As entity values I want:</span>
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="entityValues" value="ENTITY_LABELS" checked> Entity labels
+                        </label>
+                    </div>
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="entityValues" value="ENTITY_IDS"> Entity ids
+                        </label>   
+                    </div>
+                    
                     <span id="helpBlock" class="help-block">As download type I want:</span>
                     <div class="radio">
 	                    <label>
@@ -124,13 +136,8 @@
 </div>
 <script>
     molgenis.dataexplorer.setGenomeAttributes('${genomebrowser_start_list?js_string}', '${genomebrowser_chrom_list?js_string}', '${genomebrowser_id_list?js_string}', '${genomebrowser_patient_list?js_string}');
-    <#-- load css dependencies -->
-	if (!$('link[href="<@resource_href '/css/jquery.molgenis.table.css'/>"]').length)
-		$('head').append('<link rel="stylesheet" href="<@resource_href "/css/jquery.molgenis.table.css"/>" type="text/css" />');
 	<#-- load js dependencies -->
 	$.when(
-		$.ajax("<@resource_href "/js/jquery.bootstrap.pager.js"/>", {'cache': true}),
-		$.ajax("<@resource_href "/js/"+dataTable/>", {'cache': true}),
 		$.ajax("<@resource_href "/js/dalliance-compiled.js"/>", {'cache': true}),
 		$.ajax("<@resource_href "/js/dataexplorer-data.js"/>", {'cache': true}))
 		.done(function() {
@@ -152,13 +159,7 @@
 		            $('#genomebrowser').css('display', 'none');
 		        }
 
-			<#-- create data table -->
-			var rowClickable = ${rowClickable?string('true', 'false')};
-			var tableEditable = ${tableEditable?string('true', 'false')};
-			if (tableEditable) {
-				tableEditable = molgenis.hasWritePermission(molgenis.dataexplorer.getSelectedEntityMeta().name);
-			}
-			molgenis.dataexplorer.data.createDataTable(tableEditable, rowClickable);
+			molgenis.dataexplorer.data.createDataTable();
 		})
 		.fail(function() {
 			molgenis.createAlert([{'message': 'An error occured. Please contact the administrator.'}], 'error');

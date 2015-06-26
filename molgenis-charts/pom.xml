@@ -34,6 +34,11 @@
 	  		<artifactId>molgenis-data</artifactId>
 	  		<version>${project.version}</version>
       	</dependency>
+      	<dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-file</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>

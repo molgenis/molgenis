@@ -1,13 +1,10 @@
 package org.molgenis.data.version.v1_6;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.sql.DataSource;
 
-import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
@@ -72,24 +69,17 @@ public class Step7UpgradeMetaDataTo1_6 extends MolgenisUpgrade
 			@Override
 			public boolean hasRepository(String name)
 			{
-				throw new NotImplementedException("Not implemented yet");
+				throw new UnsupportedOperationException();
 			}
 		};
 		MetaDataService metaData = new MetaDataServiceImpl(dataService);
 		RunAsSystemProxy.runAsSystem(() -> metaData.setDefaultBackend(undecoratedMySQL));
 
 		searchService.delete(AttributeMetaDataMetaData.ENTITY_NAME);
-		try
-		{
-			searchService.createMappings(new AttributeMetaDataMetaData());
-		}
-		catch (IOException e)
-		{
-			throw new UncheckedIOException(e);
-		}
+		searchService.createMappings(AttributeMetaDataMetaData.INSTANCE);
 
 		searchService.rebuildIndex(undecoratedMySQL.getRepository(AttributeMetaDataMetaData.ENTITY_NAME),
-				new AttributeMetaDataMetaData());
+				AttributeMetaDataMetaData.INSTANCE);
 
 	}
 
