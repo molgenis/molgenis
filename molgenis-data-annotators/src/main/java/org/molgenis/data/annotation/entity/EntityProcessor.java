@@ -11,7 +11,7 @@ import org.molgenis.data.Entity;
  * @author fkelpin
  *
  */
-public interface AnnotationStep
+public interface EntityProcessor
 {
 	/**
 	 * @return {@link Collection} of atomic {@link AttributeMetaData} that must be present in the annotated
