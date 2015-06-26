@@ -13,9 +13,12 @@ import org.molgenis.data.EntityMetaData;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextAction;
 import org.mozilla.javascript.ContextFactory;
+import org.mozilla.javascript.EcmaError;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.FileCopyUtils;
 
 import com.google.common.collect.Iterables;
@@ -26,8 +29,23 @@ import com.google.common.collect.Lists;
  */
 public class ScriptEvaluator
 {
+	private static final Logger LOG = LoggerFactory.getLogger(ScriptEvaluator.class);
+
 	private static String JS_SCRIPT = null;
 
+	/**
+	 * Evaluates a script for a single entity.
+	 * 
+	 * @param source
+	 *            {@link String} containing the script to evaluate
+	 * @param entity
+	 *            the {@link Entity} to evaluate the script on
+	 * @param entityMetaData
+	 *            {@link EntityMetaData} for the entity
+	 * @return result of the evaluation, or a {@link RuntimeException} if one was thrown
+	 * @throws EcmaError
+	 *             if there's a syntax error in the script
+	 */
 	public static Object eval(final String source, final Entity entity, final EntityMetaData entityMetaData)
 	{
 
@@ -49,6 +67,8 @@ public class ScriptEvaluator
 	 * @param entityMetaData
 	 * @return {@link List} of {@link Object} that contain the results of the evaluation, or the
 	 *         {@link RuntimeException} if one was thrown
+	 * @throws EcmaError
+	 *             if there's a syntax error in the script
 	 */
 	@SuppressWarnings("unchecked")
 	public static List<Object> eval(final String source, final Iterable<Entity> entities,
@@ -85,6 +105,18 @@ public class ScriptEvaluator
 						Scriptable scriptableEntity = mapEntity(entity, entityMetaData, cx, scriptableObject);
 						result.add(evalScript.call(cx, scriptableObject, scriptableObject, new Object[]
 						{ source, scriptableEntity }));
+					}
+					catch (EcmaError error)
+					{
+						if ("SyntaxError".equals(error.getName()))
+						{
+							throw error;
+						}
+						else
+						{
+							LOG.warn("EcmaError evaluating script, but it isn't a syntax error.", error);
+							result.add(error);
+						}
 					}
 					catch (RuntimeException ex)
 					{
