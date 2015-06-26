@@ -9,9 +9,9 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 
+import org.molgenis.security.CorsFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.molgenis.security.CorsFilter;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.request.RequestContextListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
@@ -20,6 +20,9 @@ import org.springframework.web.servlet.DispatcherServlet;
 
 public class MolgenisWebAppInitializer
 {
+	private static final int MB = 1024 * 1024;
+	// the size threshold after which multi-part files will be written to disk.
+	private static final int FILE_SIZE_THRESHOLD = 10 * MB;
 	private static final Logger LOG = LoggerFactory.getLogger(MolgenisWebAppInitializer.class);
 
 	protected void onStartup(ServletContext servletContext, Class<?> appConfig, boolean isDasUsed)
@@ -57,12 +60,14 @@ public class MolgenisWebAppInitializer
 		}
 		else
 		{
-			final int maxSize = maxFileSize * 1024 * 1024;
+			final long maxSize = (long) maxFileSize * MB;
 			int loadOnStartup = (isDasUsed ? 2 : 1);
 			dispatcherServlet.setLoadOnStartup(loadOnStartup);
 			dispatcherServlet.addMapping("/");
-			dispatcherServlet.setMultipartConfig(new MultipartConfigElement(null, maxSize, maxSize, maxSize));
+			dispatcherServlet
+					.setMultipartConfig(new MultipartConfigElement(null, maxSize, maxSize, FILE_SIZE_THRESHOLD));
 			dispatcherServlet.setInitParameter("dispatchOptionsRequest", "true");
+
 		}
 
 		// add filters
