@@ -29,7 +29,7 @@
 ##FORMAT=<ID=EC,Number=A,Type=Integer,Description="alternate allele counts">
 ##FORMAT=<ID=CONFS,Number=7,Type=Float,Description="NextGENe Confidence Scores: Overall, Coverage, Read Balance, Allele Balance, Homopolymer, Mismatch, Wrong Allele">
 ##FORMAT=<ID=CONFIRM,Number=1,Type=Integer,Description="Confirmed Allele">
-##FORMAT=<ID=DELETE,Number=1,Type=Integer,Description="Deleted Allele">
+##FORMAT=<ID=DELETED,Number=1,Type=Integer,Description="Deleted Allele">
 ##SAMPLE=<ID=test_S0_L001_R1_001_converted_Unique_Output.pjt,Genomes=G1,Mixture=N1,Description=S1>
 ##ALT=<ID=DEL,Description="Deletion">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	test_S0_L001_R1_001_converted_Unique_Output.pjt

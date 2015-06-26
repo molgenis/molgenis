@@ -1,12 +1,11 @@
 package org.molgenis.app;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
 import org.molgenis.DatabaseConfig;
-import org.molgenis.auth.GroupAuthority;
-import org.molgenis.auth.UserAuthority;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
@@ -25,10 +24,10 @@ import org.molgenis.data.version.v1_5.Step4VarcharToText;
 import org.molgenis.data.version.v1_6.Step7UpgradeMetaDataTo1_6;
 import org.molgenis.data.version.v1_6.Step8VarcharToTextRepeated;
 import org.molgenis.data.version.v1_6.Step9MysqlTablesToInnoDB;
+import org.molgenis.data.version.v1_8.Step11ConvertNames;
 import org.molgenis.data.version.v1_8.Step12ChangeElasticsearchTokenizer;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
 import org.molgenis.system.core.FreemarkerTemplateRepository;
-import org.molgenis.system.core.RuntimeProperty;
 import org.molgenis.ui.MolgenisWebAppConfig;
 import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.ui.migrate.v1_5.Step5AlterDataexplorerMenuURLs;
@@ -44,6 +43,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -103,6 +103,18 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(new Step8VarcharToTextRepeated(dataSource));
 		upgradeService.addUpgrade(new Step9MysqlTablesToInnoDB(dataSource));
 		upgradeService.addUpgrade(new Step10DeleteFormReferences(dataSource));
+
+		SingleConnectionDataSource singleConnectionDS = null;
+		try
+		{
+			singleConnectionDS = new SingleConnectionDataSource(dataSource.getConnection(), true);
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+
+		upgradeService.addUpgrade(new Step11ConvertNames(singleConnectionDS));
 		upgradeService.addUpgrade(new Step12ChangeElasticsearchTokenizer(embeddedElasticSearchServiceFactory));
 		upgradeService.addUpgrade(new Step13RemoveCatalogueMenuEntries(dataSource));
 	}

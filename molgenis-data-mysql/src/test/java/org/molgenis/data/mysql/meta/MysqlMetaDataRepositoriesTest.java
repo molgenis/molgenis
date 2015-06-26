@@ -9,9 +9,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.molgenis.MysqlTestConfig;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.MysqlTestConfig;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Package;
@@ -62,7 +62,7 @@ public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTe
 		metaDataRepositories.addEntityMeta(emd);
 
 		List<String> enumOptions = Arrays.asList("enum1", "enum2");
-		AttributeMetaData enumAttr = emd.addAttribute("enum").setDataType(new EnumField()).setEnumOptions(enumOptions);
+		AttributeMetaData enumAttr = emd.addAttribute("enum0").setDataType(new EnumField()).setEnumOptions(enumOptions);
 		metaDataRepositories.addAttribute(emd.getName(), enumAttr);
 
 		AttributeMetaData intRangeAttr = emd.addAttribute("intrange").setDataType(MolgenisFieldTypes.INT)
@@ -79,7 +79,7 @@ public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTe
 		assertNotNull(retrieved.get(0).getDataType());
 		assertEquals(retrieved.get(0).getDataType().getEnumType(), FieldTypeEnum.STRING);
 
-		assertEquals(retrieved.get(1).getName(), "enum");
+		assertEquals(retrieved.get(1).getName(), "enum0");
 		assertNotNull(retrieved.get(1).getDataType());
 		assertEquals(retrieved.get(1).getDataType().getEnumType(), FieldTypeEnum.ENUM);
 		assertEquals(retrieved.get(1).getEnumOptions(), enumOptions);
@@ -187,9 +187,9 @@ public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTe
 		PackageImpl molgenis = new PackageImpl("molgenis", "The Molgenis package.");
 		metaDataRepositories.addPackage(molgenis);
 
-		Package defaultPackage = metaDataRepositories.getPackage("default");
+		Package defaultPackage = metaDataRepositories.getPackage("base");
 
-		assertEquals(metaDataRepositories.getRootPackages(), Arrays.asList(defaultPackage, test, molgenis));
+		assertEquals(metaDataRepositories.getRootPackages(), Arrays.asList(test, molgenis, defaultPackage));
 	}
 
 }
