@@ -24,7 +24,6 @@ public class SingleResourceConfig implements ResourceConfig
 	@Override
 	public File getFile()
 	{
-		if (file == null) file = new File(molgenisSettings.getProperty(fileProperty));
-		return file;
+		return new File(molgenisSettings.getProperty(fileProperty));
 	}
 }
