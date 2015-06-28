@@ -30,7 +30,6 @@
 <div class="well clearfix">
 	<div class="row">
 		<div class="col-md-4">
-			<div class="dropdown">
 				<div class="input-group" id="name-input-group">
 					<span class="input-group-addon">Save as</span>
 					<input type="text" class="form-control" placeholder="Enter target entity name here (optional)" id="name-input" data-toggle="tooltip" data-placement="bottom" title="Leave blank to save as <name>_hpofilter_plugin">
@@ -48,19 +47,18 @@
 				<br>
 				<div id="inputs">
 				</div>
-				<ul class="dropdown-menu scrollable-menu" id="ac-menu">
-					<li>1</li>
-					<li>2</li>
-					<li>3</li>
-					<li>4</li>
-					<li>5</li>
-				</ul>
-			</div>
+				<ul class="dropdown-menu scrollable-menu" id="ac-menu"><li>1</li><li>2</li><li>3</li><li>4</li><li>5</li></ul>
 		</div>
 	
-		<div class="col-md-8" id="results-col">
-			Results go here maybe
+		<div class="col-md-8" id="term-suggestions" class="list-group">
 		</div>
+		<nav>
+		  <ul class="pagination">
+		    <li class="disabled"><a href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>
+		    <li class="active"><a href="#">1 <span class="sr-only">(current)</span></a></li>
+		    ...
+		  </ul>
+		</nav>
 	</div>
 </div>
 

@@ -72,7 +72,7 @@ public class HpoFilterDataProvider
 			getData();
 		return descriptionMap;
 	}
-
+	
 	// loads gene and hpo data when needed
 	public void getData() {
 		try {

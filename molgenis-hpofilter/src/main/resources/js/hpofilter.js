@@ -4,6 +4,7 @@
     var selectedEntity;
     var selectedEntityName;
     var inputArray = [];
+    var invoker;
  
     $(function () {
     	/* the naming of the classes for these divs can be confusing.
@@ -21,12 +22,12 @@
 			var html2 = '<div class="text-center"><span class="label label-default">AND</span></div>';
 			var html3 = ['<div class="input-group">',
 				'<span class="input-group-addon">Term</span>',
-				'<input type="text" class="form-control" id="term-input-'+group+'-'+ id +'" placeholder="HP:1234567">',
+				'<input type="text" class="form-control term-input" id="term-input-'+group+'-'+ id +'" data-toggle="dropdown" placeholder="HP:1234567">',
 				'<span class="input-group-addon">',
 				'<span data-toggle="tooltip" data-placement="right" title="Search undelying terms"><input type="checkbox" class="term-is-recursive" id="term-is-recursive-'+ group +'-'+ id +'" checked> <span class="glyphicon glyphicon-option-vertical"></span></span>',
 				'</span>',
 				'</div>',
-				'</div<',
+				'</div>',
 				].join('');
 				if (id !== 0)
 					html = html.concat(html2);
@@ -36,7 +37,7 @@
 		
 		function getGroupHtml(group)
 		{
-			var orhtml = '<div class="text-center"><span class="label label-default">OR</span></div>';
+			var orhtml = '<div class="text-center" id="or-label-'+group+'"><span class="label label-default">OR</span></div><br>';
 			var html = ['<div class="panel panel-primary term-group" id="term-group-'+ group +'">',
 			'<div class="btn-group pull-right">'
 			].join('');
@@ -85,12 +86,14 @@
 		}
 		
 		/* removes a group and does a whole lot of
-		** stuff to make the IDs appropriate again */
+		** stuff to make the IDs shift */
 		function removeGroup(group)
 		{
 			$('#term-group-'+(group)).remove();
+			$('#or-label-'+(group)).remove();
 			for (var i = group; i < inputArray.length-1; i++) {
 				var j = parseInt(i) + parseInt(1);
+				document.getElementById('or-label-'+j).setAttribute("id", "or-label-"+i);
 				document.getElementById('term-group-'+j).setAttribute("id", "term-group-"+i);
 				document.getElementById('panel-title-'+j).setAttribute("id", "panel-title-"+i);
 				document.getElementById('rem-group-'+j).setAttribute("id", "rem-group-"+i);
@@ -172,19 +175,23 @@
         });
 
 		// listen for input on hpo terms for autocompletion
-        /**$('#term-input').on('keyup paste', null, function()
-        {
-            $('#term-input').dropdown('toggle');
-            $.get(molgenis.getContextUrl() + '/ac',
-                {search:$('#term-input').val()},
-                function(data){
-                $('#ac-menu').html(data);
-            });
-        });*/
+        $('#inputs').on('keyup paste', '.term-input', function() {
+        	if (this.value.length > 2) {
+	        	invoker = this;
+	        	$.get(molgenis.getContextUrl() + '/ac',
+	        	{
+	        	search:this.value
+	        	}, function(data) {
+	        		document.getElementById('term-suggestions').innerHTML = data;
+	        	});
+		    }
+        });
         
-        function alertEntityNotSelected() {
-        	
-        }
+        // fill in term once user selects a phenotype
+        $('#term-suggestions').on('click', '.term-select', function() {
+        	invoker.value = this.id;
+        	document.getElementById('term-suggestions').innerHTML = "";
+        });	
         
         $('#filter-submit').on('click', null, function() {
         	if (selectedEntity) {
@@ -213,6 +220,10 @@
 				alertEntityNotSelected();
 			}
         });
+        
+        function alertEntityNotSelected() {
+        	
+        }
         
         // stuff that js needs to do as soon as the page loads
         

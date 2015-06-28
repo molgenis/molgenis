@@ -105,16 +105,28 @@ public class HpoFilterController extends MolgenisPluginController
 		return VIEW_NAME;
 	}
 	
+	private String getTermSuggestionMarkup(String hpo, String phenotype) {
+		String html = "<button type=\"button\" class=\"list-group-item term-select\" id=\""+hpo+"\">"
+				+ hpo
+				+ " - "
+				+ phenotype
+				+ "</button>";
+		return html;
+	}
+	
 	@RequestMapping(method = RequestMethod.GET, value = "/ac")
-	public @ResponseBody String autoComplete (@RequestParam(value = "search", required = true) String search)
+	private @ResponseBody String autoComplete (@RequestParam(value = "search", required = true) String search)
 	{
+		int count = 0;
 		ArrayList<String> results = new ArrayList<>();
 		StringBuilder response = new StringBuilder();
 		if (null == autoCompletionMap)
 			this.autoCompletionMap = hpoFilterDataProvider.getDescriptionMap();
 		for (String desc : autoCompletionMap.keySet()) {
-			if (desc.matches(search))
-				results.add("<li>"+autoCompletionMap.get(desc)+" - "+desc+"</li>");
+			if (desc.contains(search)) {
+				results.add(getTermSuggestionMarkup(autoCompletionMap.get(desc),desc));
+				count++;
+			}
 		}
 		Collections.sort(results);
 		for (String item : results) {
