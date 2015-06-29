@@ -23,4 +23,10 @@ public class PubMedTermFrequencyServiceTest
 						.parseResponse("<eSearchResult><Count></Count><RetMax>20</RetMax><RetStart>0</RetStart><IdList>"),
 				null);
 	}
+
+	@Test(enabled = false)
+	public void testRetrieve()
+	{
+		System.out.println(termFrequencyService.getTermFrequency("beer").getFrequency());
+	}
 }

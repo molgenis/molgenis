@@ -61,7 +61,7 @@ public class PubMedTermFrequencyService
 			DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
 			wr.close();
 			InputStream is = connection.getInputStream();
-			BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+			BufferedReader rd = new BufferedReader(new InputStreamReader(is, "UTF-8"));
 			StringBuilder response = new StringBuilder();
 			String line;
 			while ((line = rd.readLine()) != null)
