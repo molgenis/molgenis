@@ -45,7 +45,7 @@ public class ThousandGAnnotatorTest extends AbstractAnnotatorTest
 
 		input2.add(entity2);
 
-		annotator = new ThousandGenomesServiceAnnotator(settings, null);
+		annotator = new ThousandGenomesServiceAnnotator(settings);
 	}
 
 	@Test
