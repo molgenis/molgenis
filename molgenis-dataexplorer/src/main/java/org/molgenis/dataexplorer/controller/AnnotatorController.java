@@ -3,9 +3,13 @@ package org.molgenis.dataexplorer.controller;
 import static org.molgenis.dataexplorer.controller.AnnotatorController.URI;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Lists;
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
@@ -156,19 +160,36 @@ public class AnnotatorController
 
 			for (RepositoryAnnotator annotator : annotationService.getAllAnnotators())
 			{
+
+				List<AttributeMetaData> outputAttrs = annotator.getOutputMetaData();
+				outputAttrs = getAtomicAttributesFromList(outputAttrs);
+
 				Map<String, Object> map = new HashMap<String, Object>();
 				map.put("description", annotator.getDescription());
 				map.put("canAnnotate", annotator.canAnnotate(entityMetaData));
-				map.put("inputAttributes", annotator.getInputMetaData().getAttributes());
-				map.put("inputAttributeTypes", toMap(annotator.getInputMetaData().getAttributes()));
-				map.put("outputAttributes", annotator.getOutputMetaData().getAttributes());
-				map.put("outputAttributeTypes", toMap(annotator.getOutputMetaData().getAttributes()));
+				map.put("inputAttributes", annotator.getInputMetaData());
+				map.put("inputAttributeTypes", toMap(annotator.getInputMetaData()));
+				map.put("outputAttributes", outputAttrs);
+				map.put("outputAttributeTypes", toMap(annotator.getOutputMetaData()));
 				mapOfAnnotators.put(annotator.getSimpleName(), map);
 			}
 
 		}
 
 		return mapOfAnnotators;
+	}
+
+	private List<AttributeMetaData> getAtomicAttributesFromList(List<AttributeMetaData> outputAttrs)
+	{
+		if (outputAttrs.size() == 1
+				&& outputAttrs.get(0).getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
+		{
+			return getAtomicAttributesFromList(Lists.newArrayList(outputAttrs.get(0).getAttributeParts()));
+		}
+		else
+		{
+			return outputAttrs;
+		}
 	}
 
 	private Map<String, String> toMap(Iterable<AttributeMetaData> attrs)

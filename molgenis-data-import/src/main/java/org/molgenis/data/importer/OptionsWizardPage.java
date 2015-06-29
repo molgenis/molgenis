@@ -18,6 +18,7 @@ import org.molgenis.data.validation.EntityNameValidator;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.ui.wizard.AbstractWizardPage;
 import org.molgenis.ui.wizard.Wizard;
+import org.molgenis.util.FileExtensionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,12 +87,12 @@ public class OptionsWizardPage extends AbstractWizardPage
 			{
 				String fileName = tmpFile.getName();
 
-				// TODO FIXME wrong way to decide the extension of the file. It will not detect, for example a file with
-				// the obo.zip extension.
-				int index = fileName.lastIndexOf('.');
-				String extension = (index > -1) ? fileName.substring(index) : "";
+				// FIXME: can this be done a bit cleaner?
+				String extension = FileExtensionUtils
+						.findExtensionFromPossibilities(fileName, fileRepositoryCollectionFactory
+								.createFileRepositoryCollection(tmpFile).getFileNameExtensions());
 
-				File file = new File(tmpFile.getParent(), userGivenName + extension);
+				File file = new File(tmpFile.getParent(), userGivenName + "." + extension);
 				FileCopyUtils.copy(tmpFile, file);
 
 				importWizard.setFile(file);

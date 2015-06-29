@@ -3,32 +3,23 @@ package org.molgenis.data.annotation.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.annotation.VariantAnnotator;
-import org.molgenis.data.vcf.utils.VcfUtils;
+import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
+import org.molgenis.data.annotation.utils.AnnotatorUtils;
+import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.datastructures.Sample;
 import org.molgenis.data.vcf.datastructures.Trio;
-import org.molgenis.data.support.AnnotationServiceImpl;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.vcf.utils.VcfUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 /**
@@ -40,7 +31,6 @@ public class DeNovoAnnotator extends VariantAnnotator
 {
 	private static final Logger LOG = LoggerFactory.getLogger(DeNovoAnnotator.class);
 
-	private final AnnotationService annotatorService;
 	private HashMap<String, Trio> pedigree;
 
 	// helper lists for ease of use, derived from HashMap<String, Parents> pedigree
@@ -60,11 +50,9 @@ public class DeNovoAnnotator extends VariantAnnotator
 	{ "##INFO=<ID=" + DENOVO.substring(VcfRepository.getInfoPrefix().length())
 			+ ",Number=1,Type=String,Description=\"todo\">" });
 
-	@Autowired
-	public DeNovoAnnotator(AnnotationService annotatorService) throws IOException
+	public DeNovoAnnotator()
 	{
-		this.annotatorService = annotatorService;
-	}
+	};
 
 	public DeNovoAnnotator(File deNovoFileLocation, File inputVcfFile, File outputVCFFile) throws Exception
 	{
@@ -72,14 +60,12 @@ public class DeNovoAnnotator extends VariantAnnotator
 		ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LOG;
 		root.setLevel(ch.qos.logback.classic.Level.ERROR);
 
-		this.annotatorService = new AnnotationServiceImpl();
-
 		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
 
 		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
 		Iterator<Entity> vcfIter = vcfRepo.iterator();
 
-		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields,
+		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, getOutputMetaData(),
 				DENOVO.substring(VcfRepository.getInfoPrefix().length()));
 
 		pedigree = VcfUtils.getPedigree(inputVcfFile);
@@ -146,12 +132,6 @@ public class DeNovoAnnotator extends VariantAnnotator
 		outputVCFWriter.close();
 		vcfRepo.close();
 		LOG.info("All done!");
-	}
-
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		annotatorService.addAnnotator(this);
 	}
 
 	@Override
@@ -373,7 +353,7 @@ public class DeNovoAnnotator extends VariantAnnotator
 
 		// impact
 		String[] annSplit = entity.getString(VcfRepository.getInfoPrefix() + "ANN").split("\\|", -1);
-		SnpEffServiceAnnotator.impact impact = SnpEffServiceAnnotator.impact.valueOf(annSplit[2]);
+		SnpEffServiceAnnotator.impact impact = Enum.valueOf(SnpEffServiceAnnotator.impact.class, annSplit[2]);
 		if (impact.equals(SnpEffServiceAnnotator.impact.MODIFIER) || impact.equals(SnpEffServiceAnnotator.impact.LOW))
 		{
 			LOG.info("Skipping MODIFIER/LOW impact variant: " + entity);
@@ -542,26 +522,31 @@ public class DeNovoAnnotator extends VariantAnnotator
 	}
 
 	@Override
-	public EntityMetaData getOutputMetaData()
+	public List<AttributeMetaData> getOutputMetaData()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(DENOVO, FieldTypeEnum.STRING).setLabel(DENOVO_LABEL));
+		List<AttributeMetaData> metadata = new ArrayList<>();
+		metadata.add(new DefaultAttributeMetaData(DENOVO, FieldTypeEnum.STRING).setLabel(DENOVO_LABEL));
 		return metadata;
 	}
 
 	@Override
-	public EntityMetaData getInputMetaData()
+	public List<AttributeMetaData> getInputMetaData()
 	{
-		DefaultEntityMetaData entityMetaData = (DefaultEntityMetaData) super.getInputMetaData();
-		entityMetaData.addAttributeMetaData(VcfRepository.FILTER_META);
-		entityMetaData.addAttributeMetaData(VcfRepository.QUAL_META);
-		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.getInfoPrefix() + "ANN",
-				FieldTypeEnum.TEXT));
-		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData("ABHet", FieldTypeEnum.STRING));
-		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData("ABHom", FieldTypeEnum.STRING));
-		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData("SB", FieldTypeEnum.STRING));
-		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.SAMPLES, FieldTypeEnum.MREF));
+		List<AttributeMetaData> entityMetaData = super.getInputMetaData();
+		entityMetaData.add(VcfRepository.FILTER_META);
+		entityMetaData.add(VcfRepository.QUAL_META);
+		entityMetaData.add(new DefaultAttributeMetaData(VcfRepository.getInfoPrefix() + "ANN", FieldTypeEnum.TEXT));
+		entityMetaData.add(new DefaultAttributeMetaData("ABHet", FieldTypeEnum.STRING));
+		entityMetaData.add(new DefaultAttributeMetaData("ABHom", FieldTypeEnum.STRING));
+		entityMetaData.add(new DefaultAttributeMetaData("SB", FieldTypeEnum.STRING));
+		entityMetaData.add(new DefaultAttributeMetaData(VcfRepository.SAMPLES, FieldTypeEnum.MREF));
 
 		return entityMetaData;
+	}
+
+	@Override
+	public AnnotatorInfo getInfo()
+	{
+		return AnnotatorInfo.create(Status.INDEV, Type.UNUSED, "unknown", "no description", getOutputMetaData());
 	}
 }

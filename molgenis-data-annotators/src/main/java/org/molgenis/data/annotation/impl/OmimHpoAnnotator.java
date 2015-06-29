@@ -12,26 +12,26 @@ import java.util.Set;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.utils.AnnotatorUtils;
-import org.molgenis.data.annotation.utils.HgncLocationsUtils;
 import org.molgenis.data.annotation.LocusAnnotator;
 import org.molgenis.data.annotation.impl.datastructures.HPOTerm;
 import org.molgenis.data.annotation.impl.datastructures.Locus;
 import org.molgenis.data.annotation.impl.datastructures.OMIMTerm;
+import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
 import org.molgenis.data.annotation.provider.HpoMappingProvider;
 import org.molgenis.data.annotation.provider.OmimMorbidMapProvider;
 import org.molgenis.data.annotation.provider.UrlPinger;
+import org.molgenis.data.annotation.utils.AnnotatorUtils;
+import org.molgenis.data.annotation.utils.HgncLocationsUtils;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 /**
@@ -66,7 +66,6 @@ public class OmimHpoAnnotator extends LocusAnnotator
 	public static final String HPO_DISEASE_DATABASE_ENTRY = "HPO_Disease_Database_Entry";
 	public static final String HPO_ENTREZ_ID = "HPO_Entrez_ID";
 
-	private final AnnotationService annotatorService;
 	private List<HPOTerm> hpoTerms;
 	private List<OMIMTerm> omimTerms;
 	private Map<String, List<HPOTerm>> geneToHpoTerms;
@@ -87,18 +86,11 @@ public class OmimHpoAnnotator extends LocusAnnotator
 		if (omimMorbidMapProvider == null) throw new IllegalArgumentException("omimMorbidMapProvider is null");
 		if (hgncLocationsProvider == null) throw new IllegalArgumentException("hgncLocationsProvider is null");
 		if (hpoMappingProvider == null) throw new IllegalArgumentException("hpoMappingProvider is null");
-		this.annotatorService = annotatorService;
 		this.omimMorbidMapProvider = omimMorbidMapProvider;
 		this.hgncLocationsProvider = hgncLocationsProvider;
 		this.hpoMappingProvider = hpoMappingProvider;
 		this.molgenisSettings = molgenisSettings;
 		this.urlPinger = urlPinger;
-	}
-
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		annotatorService.addAnnotator(this);
 	}
 
 	@Override
@@ -365,31 +357,37 @@ public class OmimHpoAnnotator extends LocusAnnotator
 	}
 
 	@Override
-	public EntityMetaData getOutputMetaData()
+	public List<AttributeMetaData> getOutputMetaData()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_CAUSAL_IDENTIFIER,
+		List<AttributeMetaData> metadata = new ArrayList<>();
+		metadata.add(new DefaultAttributeMetaData(OMIM_CAUSAL_IDENTIFIER,
 				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_DISORDERS,
+		metadata.add(new DefaultAttributeMetaData(OMIM_DISORDERS,
 				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_IDENTIFIERS,
+		metadata.add(new DefaultAttributeMetaData(OMIM_IDENTIFIERS,
 				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_TYPE, MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_HGNC_IDENTIFIERS,
+		metadata.add(new DefaultAttributeMetaData(OMIM_TYPE, MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(OMIM_HGNC_IDENTIFIERS,
 				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_CYTOGENIC_LOCATION,
+		metadata.add(new DefaultAttributeMetaData(OMIM_CYTOGENIC_LOCATION,
 				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_ENTRY, MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_IDENTIFIERS,
+		metadata.add(new DefaultAttributeMetaData(OMIM_ENTRY, MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(HPO_IDENTIFIERS,
 				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_GENE_NAME, MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_DESCRIPTIONS,
+		metadata.add(new DefaultAttributeMetaData(HPO_GENE_NAME, MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(HPO_DESCRIPTIONS,
 				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_DISEASE_DATABASE,
+		metadata.add(new DefaultAttributeMetaData(HPO_DISEASE_DATABASE,
 				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_DISEASE_DATABASE_ENTRY,
+		metadata.add(new DefaultAttributeMetaData(HPO_DISEASE_DATABASE_ENTRY,
 				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_ENTREZ_ID, MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(HPO_ENTREZ_ID, MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		return metadata;
+	}
+
+	@Override
+	public AnnotatorInfo getInfo()
+	{
+		return AnnotatorInfo.create(Status.INDEV, Type.UNUSED, "unknown", "no description", getOutputMetaData());
 	}
 }
