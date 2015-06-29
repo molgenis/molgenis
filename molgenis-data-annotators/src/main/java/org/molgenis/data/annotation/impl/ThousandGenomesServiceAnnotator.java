@@ -254,23 +254,6 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 			}
 		}
 
-		// if nothing found, try swapping ref-alt, and do 1-Minor Allele Frequency
-		if (false && maf == null) // FIXME TODO bad idea... ? e.g. C->CT is *not* swappable with CT->CTT,CTTT,C !! one
-									// is insertion, other is deletion (both REF is the real reference!), except
-									// CTT->CT, but that requires smart parsing!
-		{
-			for (int i = 0; i < altAlleles.length; i++)
-			{
-				String altAllele = altAlleles[i];
-				if (altAllele.equals(reference) && split[3].equals(alternative))
-				{
-					maf = 1 - Double.parseDouble(mafs[i]);
-					LOG.info("*ref-alt swapped* 1000G variant found for CHROM: " + chromosome + " POS: " + position
-							+ " REF: " + reference + " ALT: " + alternative + ", MAF (1-originalMAF) = " + maf);
-				}
-			}
-		}
-
 		resultMap.put(THGEN_MAF, maf);
 		return resultMap;
 	}
