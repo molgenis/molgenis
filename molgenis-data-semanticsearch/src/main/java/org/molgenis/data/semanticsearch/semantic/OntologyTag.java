@@ -1,7 +1,6 @@
 package org.molgenis.data.semanticsearch.semantic;
 
 import org.molgenis.data.semantic.Relation;
-import org.molgenis.data.semanticsearch.semantic.AutoValue_OntologyTag;
 import org.molgenis.gson.AutoGson;
 import org.molgenis.ontology.core.model.OntologyTerm;
 

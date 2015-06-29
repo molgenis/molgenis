@@ -267,11 +267,26 @@
 	$(function() {
 
 		var editor, searchQuery, selectedAttributes, initialValue, algorithm, targetAttributeDataType, $textarea;
-
+		
 		// tooltip placement
 		$(document).ready(function() {
 			$("[rel=tooltip]").tooltip({
 				placement : 'right'
+			});
+			var requestBody = {
+				'mappingProjectId': $('[name="mappingProjectId"]').val(), 
+				'target' : $('[name="target"]').val(),
+				'source' : $('[name="source"]').val(),
+				'targetAttribute' : $('[name="targetAttribute"]').val()
+			};
+			$.ajax({
+				type : 'POST',
+				url : molgenis.getContextUrl() + '/attributeMapping/explain',
+				data : JSON.stringify(requestBody),
+				contentType : 'application/json',
+				success : function(data) {
+					console.log(data)
+				}
 			});
 		});
 

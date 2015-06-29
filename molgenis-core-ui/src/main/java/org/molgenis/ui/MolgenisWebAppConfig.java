@@ -437,8 +437,8 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		dataService().setMeta(metaDataService());
 
 		addUpgrades();
-		upgradeService.upgrade();
-		if (!indexExists())
+		boolean didUpgrade = upgradeService.upgrade();
+		if (!indexExists() || didUpgrade)
 		{
 			LOG.info("Reindexing repositories....");
 			reindex();
@@ -446,6 +446,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		}
 		else
 		{
+			reindex();
 			LOG.info("Index found. No need to reindex.");
 		}
 		runAsSystem(() -> metaDataService().setDefaultBackend(getBackend()));
