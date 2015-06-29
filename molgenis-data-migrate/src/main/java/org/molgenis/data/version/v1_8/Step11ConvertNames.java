@@ -869,7 +869,7 @@ public class Step11ConvertNames extends MolgenisUpgrade
 	public static final Set<String> MOLGENIS_KEYWORDS = Sets.newHashSet("login", "logout", "csv", "entities",
 			"attributes", "base", "exist", "meta");
 
-	public static Set<String> KEYWORDS = Sets.newHashSet();
+	public static final Set<String> KEYWORDS = Sets.newHashSet();
 	static
 	{
 		KEYWORDS.addAll(JAVA_KEYWORDS);
