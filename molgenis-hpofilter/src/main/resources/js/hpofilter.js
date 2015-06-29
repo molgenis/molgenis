@@ -37,7 +37,7 @@
 		
 		function getGroupHtml(group)
 		{
-			var orhtml = '<span class="text-center" id="or-label-'+group+'"><span class="label label-default">OR</span></span>';
+			var orhtml = '<div class="text-center" id="or-label-'+group+'"><span class="label label-default">OR</span></div>';
 			var html = ['<div class="panel panel-primary term-group" id="term-group-'+ group +'">',
 			'<div class="btn-group pull-right">'
 			].join('');
@@ -123,7 +123,7 @@
     	{
 			removeGroup(this.id.substring(10));
     	});
-    	$('#name-input').on('keyup paste', null, function()
+    	$('#name-input').on('input', null, function()
     	{
     		validateEntityName(this);
     	});
@@ -131,8 +131,20 @@
     	function validateEntityName(nameInput)
     	{
     		if (!nameInput.value) {
-				document.getElementById('name-input-group').className = "input-group";
-				document.getElementById('name-input-icon').className = "form-control-feedback";
+    			$.post(molgenis.getContextUrl() + '/exists',
+    			{entityName:selectedEntityName+'_filtered_hpofilter'},
+    			function(data){
+	    			if (data) {
+	    				document.getElementById('name-input-group').className = "input-group has-error has-feedback";
+	    				document.getElementById('name-input-icon').className = "glyphicon glyphicon-remove form-control-feedback";
+    					document.getElementById('filter-submit').disabled = true;
+	    				
+	    			}else{
+	    				document.getElementById('name-input-group').className = "input-group has-success has-feedback";
+	    				document.getElementById('name-input-icon').className = "glyphicon glyphicon-ok form-control-feedback";
+    					document.getElementById('filter-submit').disabled = false;
+	    			}
+    			});
     		}
     			
     		// this is the validation regx. change this if something else is ever allowed.
@@ -142,6 +154,7 @@
     		if (nameInput.value.match(regx)) {
     				document.getElementById('name-input-group').className = "input-group has-error has-feedback";
     				document.getElementById('name-input-icon').className = "glyphicon glyphicon-remove form-control-feedback";
+    				document.getElementById('filter-submit').disabled = true;
     		} else {
     			$.post(molgenis.getContextUrl() + '/exists',
     			{entityName:nameInput.value},
@@ -149,9 +162,12 @@
 	    			if (data) {
 	    				document.getElementById('name-input-group').className = "input-group has-error has-feedback";
 	    				document.getElementById('name-input-icon').className = "glyphicon glyphicon-remove form-control-feedback";
+    					document.getElementById('filter-submit').disabled = true;
+	    				
 	    			}else{
 	    				document.getElementById('name-input-group').className = "input-group has-success has-feedback";
 	    				document.getElementById('name-input-icon').className = "glyphicon glyphicon-ok form-control-feedback";
+    					document.getElementById('filter-submit').disabled = false;
 	    			}
     			});
     		}
@@ -183,6 +199,8 @@
 	        	}, function(data) {
 	        		document.getElementById('term-suggestions').innerHTML = data;
 	        	});
+		    }else{
+		    	document.getElementById('term-suggestions').innerHTML = "";
 		    }
         });
         
@@ -201,7 +219,6 @@
 	        		// loop through each collection of inputs
 	        		$(this).find('.input-group-div').each(function () {
 	        			var id = this.id.substring(12);
-	        			console.log(id);
 	        			var rec = document.getElementById('term-is-recursive-'+id).checked ? true : false;
 	        			var value = document.getElementById('term-input-'+id).value;
 	        			termArray.push(id + '-' + rec + '-' + value);
@@ -214,16 +231,17 @@
 	            entity:selectedEntity.label, 
 	            target:document.getElementById('name-input').value
 	            }, function(data) {
-	            	
+	            	var info = data.split("%");
+	            	hpoFilterAlert(info[0], info[1]);
 	            });
 			}else{
-				alertEntityNotSelected();
+				hpoFilterAlert("danger", "Entity not set.");
 			}
         });
-        
-        function alertEntityNotSelected() {
-        	
-        }
+    	
+    	function hpoFilterAlert(state, text) {
+    		document.getElementById('parent-alert-div').innerHTML = '<div class="alert alert-'+state+'" role="alert">'+text+'</div>';
+    	}
         
         // stuff that js needs to do as soon as the page loads
         

@@ -5,6 +5,7 @@ import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ENTITY_RE
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserHasRole;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -46,6 +47,7 @@ public class HpoFilterController extends MolgenisPluginController
 	private final DataService dataService;
 	private final HpoFilterDataProvider hpoFilterDataProvider;
 	private GeneMapProvider hgncProvider;
+	private Map<String, HGNCLocations> hgncLocations;
 	
 	private HashMap<String, String> autoCompletionMap;
 
@@ -66,6 +68,14 @@ public class HpoFilterController extends MolgenisPluginController
 	{
 		boolean showEntitySelect = true;
 		List<EntityMetaData> emds = Lists.newArrayList();
+		
+		if (!hpoFilterDataProvider.isReady())
+			hpoFilterDataProvider.getData();
+		try {
+			hgncLocations = hgncProvider.getHgncLocations();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
 		for (String entityName : dataService.getEntityNames())
 		{
@@ -116,20 +126,16 @@ public class HpoFilterController extends MolgenisPluginController
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/ac")
-	private @ResponseBody String autoComplete (@RequestParam(value = "search", required = true) String keywords)
+	private @ResponseBody String autoComplete (@RequestParam(value = "search", required = true) String search)
 	{
-		int count = 0;
 		ArrayList<String> results = new ArrayList<>();
 		StringBuilder response = new StringBuilder();
 		if (null == autoCompletionMap)
 			this.autoCompletionMap = hpoFilterDataProvider.getDescriptionMap();
 		for (String desc : autoCompletionMap.keySet()) {
-			for (String search : keywords.split("([^A-Za-z0-9])")) {
 				if (desc.toLowerCase().contains(search.toLowerCase())) {
 					results.add(getTermSuggestionMarkup(autoCompletionMap.get(desc),desc));
-					count++;
 				}
-			}
 		}
 		Collections.sort(results);
 		for (String item : results) {
@@ -164,12 +170,14 @@ public class HpoFilterController extends MolgenisPluginController
 				repository = dataService.getRepository(selectedEntityName);
 				entityMetaData = repository.getEntityMetaData();
 				size = repository.count();
-				if (null == repository.getEntityMetaData().getAttribute("#CHROM"))
-					throw new RuntimeException("Entity does not contain required attribute '#CHROM'");
-				if (null == repository.getEntityMetaData().getAttribute("POS"))
-					throw new RuntimeException("Entity does not contain required attribute 'POS'");
+				if (null == repository.getEntityMetaData().getAttribute("#CHROM")) {
+					return "danger%Entity does not contain required attribute '#CHROM'";
+				}
+				if (null == repository.getEntityMetaData().getAttribute("POS")) {
+					return "danger%Entity does not contain required attribute 'POS'";
+				}
 			}else{
-				throw new RuntimeException("No entity has been selected");
+				return "danger%No entity has been selected";
 			}
 
 			if (null == targetEntityName || targetEntityName.isEmpty()) 
@@ -183,16 +191,14 @@ public class HpoFilterController extends MolgenisPluginController
 				int id = Integer.parseInt(hpoProperties[1]);
 				boolean recursive = Boolean.parseBoolean(hpoProperties[2]);
 				String hpo = hpoProperties[3];
-				if (!inputSet.containsKey(group))
+				if (!inputSet.containsKey(group)) {
 					inputSet.put(group, new Stack<HpoFilterInput>());
+				}
 				inputSet.get(group).add(new HpoFilterInput(group, id, recursive, hpo));
 				System.out.println(hpo+" is in group "+group+", has ID "+id+" and has recursive set to "+recursive);
 			}
 			
-			
 			filteredEntities = new Stack<Entity>();
-			
-			Map<String, HGNCLocations> hgncLocations = hgncProvider.getHgncLocations();
 			
 			Iterator<Entity> e = repository.iterator();
 			while (e.hasNext()) {
@@ -210,9 +216,10 @@ public class HpoFilterController extends MolgenisPluginController
 					}
 				}
 				count++;
-				if (count%500 == 0)
+				if (count%500 == 0) {
 					fail = count - pass;
 					System.out.println("Filtered "+count+"/"+size+" entities ("+(100*count)/size+"%). PASS/FAIL: "+pass+"/"+fail);
+				}
 			}
 			repository.close();
 			
@@ -226,22 +233,24 @@ public class HpoFilterController extends MolgenisPluginController
 				newRepository.add(filteredEntities);
 				
 				newRepository.close();
-				return "Filtering succeded";
+				return "success%Filtering succeded. Added "+pass+" filtered variants to "+newEntityName+".";
 			}else {
-				return "Filtering succeded, no entities passed filter.";
+				return "success%Filtering succeded. No entities passed filter, and no new entity has been created.";
 			}
 		}catch (Exception e) {
 			e.printStackTrace();
-			throw new RuntimeException("An unknown error occured when filtering");
+			return "danger%An unknown error occured when filtering. Please try again.";
 		}
 	}
 	
 	@RequestMapping(method = RequestMethod.POST, value = "/exists")
-	private @ResponseBody boolean repoExists(@RequestParam(value = "entityName", required=true) String entityName) {
+	private @ResponseBody boolean repoExists(@RequestParam(value = "entityName", required=true) String entityName)
+	{
 		return dataService.hasRepository(entityName);
 	}
 
-	private boolean inputContainsGene(HashMap<Integer, Stack<HpoFilterInput>> inputGroups, String gene) {
+	private boolean inputContainsGene(HashMap<Integer, Stack<HpoFilterInput>> inputGroups, String gene)
+	{
 		for (Stack<HpoFilterInput> inputGroup : inputGroups.values()) {
 			if (inputGroupContainsGene(inputGroup, gene)) {
 				return true;
@@ -250,7 +259,8 @@ public class HpoFilterController extends MolgenisPluginController
 		return false;
 	}
 	
-	private boolean inputGroupContainsGene(Stack<HpoFilterInput> inputGroup, String gene) {
+	private boolean inputGroupContainsGene(Stack<HpoFilterInput> inputGroup, String gene)
+	{
 		for (HpoFilterInput input : inputGroup) {
 			if (!hpoContainsGene(input.hpo(), gene, input.recursive())) {
 				return false;
@@ -268,10 +278,12 @@ public class HpoFilterController extends MolgenisPluginController
 	 * @param recursive true if searching children, false if not.
 	 * @return true if HPO contains gene, false if hpo does not contain gene
 	 */
-	private boolean hpoContainsGene(String hpo, String gene, boolean recursive) {
+	private boolean hpoContainsGene(String hpo, String gene, boolean recursive)
+	{
 		if (hpoFilterDataProvider.getAssocData().containsKey(hpo)) 
-			if (hpoFilterDataProvider.getAssocData().get(hpo).contains(gene))
+			if (hpoFilterDataProvider.getAssocData().get(hpo).contains(gene)) {
 				return true;
+			}
 			if (recursive)
 				for (String child : hpoFilterDataProvider.getHPOData().get(hpo))
 					if (null != child && hpoContainsGene(child, gene, true))

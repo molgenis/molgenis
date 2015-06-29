@@ -28,6 +28,7 @@
 </div>
 
 <div class="well clearfix">
+	<div id="parent-alert-div"></div>
 	<div class="row">
 		<div class="col-md-4">
 				<div class="input-group" id="name-input-group">
@@ -49,8 +50,10 @@
 				</div>
 				<ul class="dropdown-menu scrollable-menu" id="ac-menu"><li>1</li><li>2</li><li>3</li><li>4</li><li>5</li></ul>
 		</div>
-	
-		<div class="col-md-8" id="term-suggestions" class="list-group">
+		
+		<div class="col-md-8" >
+			<div id="term-suggestions" class="list-group">
+			</div>
 		</div>
 	</div>
 </div>
