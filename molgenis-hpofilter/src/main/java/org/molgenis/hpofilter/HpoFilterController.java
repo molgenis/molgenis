@@ -106,7 +106,8 @@ public class HpoFilterController extends MolgenisPluginController
 	}
 	
 	private String getTermSuggestionMarkup(String hpo, String phenotype) {
-		String html = "<button type=\"button\" class=\"list-group-item term-select\" id=\""+hpo+"\">"
+		String html = "<button type=\"button\" class=\"list-group-item term-select btn-block text-left\" id=\""+hpo+"\">"
+				+ "<span class=\"glyphicon glyphicon-chevron-left\"></span>"
 				+ hpo
 				+ " - "
 				+ phenotype
@@ -115,7 +116,7 @@ public class HpoFilterController extends MolgenisPluginController
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/ac")
-	private @ResponseBody String autoComplete (@RequestParam(value = "search", required = true) String search)
+	private @ResponseBody String autoComplete (@RequestParam(value = "search", required = true) String keywords)
 	{
 		int count = 0;
 		ArrayList<String> results = new ArrayList<>();
@@ -123,9 +124,11 @@ public class HpoFilterController extends MolgenisPluginController
 		if (null == autoCompletionMap)
 			this.autoCompletionMap = hpoFilterDataProvider.getDescriptionMap();
 		for (String desc : autoCompletionMap.keySet()) {
-			if (desc.contains(search)) {
-				results.add(getTermSuggestionMarkup(autoCompletionMap.get(desc),desc));
-				count++;
+			for (String search : keywords.split("([^A-Za-z0-9])")) {
+				if (desc.toLowerCase().contains(search.toLowerCase())) {
+					results.add(getTermSuggestionMarkup(autoCompletionMap.get(desc),desc));
+					count++;
+				}
 			}
 		}
 		Collections.sort(results);

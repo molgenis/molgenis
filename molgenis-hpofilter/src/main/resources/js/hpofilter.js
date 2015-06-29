@@ -37,7 +37,7 @@
 		
 		function getGroupHtml(group)
 		{
-			var orhtml = '<div class="text-center" id="or-label-'+group+'"><span class="label label-default">OR</span></div><br>';
+			var orhtml = '<span class="text-center" id="or-label-'+group+'"><span class="label label-default">OR</span></span>';
 			var html = ['<div class="panel panel-primary term-group" id="term-group-'+ group +'">',
 			'<div class="btn-group pull-right">'
 			].join('');
@@ -146,14 +146,13 @@
     			$.post(molgenis.getContextUrl() + '/exists',
     			{entityName:nameInput.value},
     			function(data){
-    			if (data) {
-    				document.getElementById('name-input-group').className = "input-group has-error has-feedback";
-    				document.getElementById('name-input-icon').className = "glyphicon glyphicon-remove form-control-feedback";
-    			}else{
-    				document.getElementById('name-input-group').className = "input-group has-success has-feedback";
-    				document.getElementById('name-input-icon').className = "glyphicon glyphicon-ok form-control-feedback";
-    			}
-    			
+	    			if (data) {
+	    				document.getElementById('name-input-group').className = "input-group has-error has-feedback";
+	    				document.getElementById('name-input-icon').className = "glyphicon glyphicon-remove form-control-feedback";
+	    			}else{
+	    				document.getElementById('name-input-group').className = "input-group has-success has-feedback";
+	    				document.getElementById('name-input-icon').className = "glyphicon glyphicon-ok form-control-feedback";
+	    			}
     			});
     		}
     	}
@@ -191,6 +190,7 @@
         $('#term-suggestions').on('click', '.term-select', function() {
         	invoker.value = this.id;
         	document.getElementById('term-suggestions').innerHTML = "";
+        	invoker.focus();
         });	
         
         $('#filter-submit').on('click', null, function() {
