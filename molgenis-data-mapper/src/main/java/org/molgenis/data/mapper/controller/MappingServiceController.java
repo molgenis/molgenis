@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import javax.validation.Valid;
+
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.AggregateResult;
@@ -22,7 +24,9 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
+import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.importer.ImportWizardController;
 import org.molgenis.data.mapper.data.request.MappingServiceRequest;
 import org.molgenis.data.mapper.mapping.model.AlgorithmResult;
@@ -247,44 +251,51 @@ public class MappingServiceController extends MolgenisPluginController
 	@RequestMapping(value = "/validateAttrMapping", method = RequestMethod.POST)
 	@ResponseBody
 	public AttributeMappingValidationReport validateAttributeMapping(
-			@RequestBody MappingServiceRequest mappingServiceRequest)
+			@Valid @RequestBody MappingServiceRequest mappingServiceRequest)
 	{
-		try
-		{
-			Thread.sleep(100);
-		}
-		catch (InterruptedException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		Long nrSuccess = (long) (Math
-				.floor((mappingServiceRequest.getOffset() + mappingServiceRequest.getNum()) * 2.0 / 3.0));
-		Long nrErrors = (long) (Math
-				.floor((mappingServiceRequest.getOffset() + mappingServiceRequest.getNum()) * 2.0 / 3.0));
+		String targetEntityName = mappingServiceRequest.getTargetEntityName();
+		EntityMetaData targetEntityMeta = dataService.getEntityMetaData(targetEntityName);
 
-		AttributeMappingValidationReport validationReport = new AttributeMappingValidationReport();
-		validationReport.setNrSuccess(nrSuccess);
-		validationReport.setNrErrors(nrErrors);
-		validationReport.setTotal(100000l);
-		return validationReport;
+		String targetAttributeName = mappingServiceRequest.getTargetAttributeName();
+		AttributeMetaData targetAttr = targetEntityMeta.getAttribute(targetAttributeName);
+		if (targetAttr == null)
+		{
+			throw new UnknownAttributeException("Unknown attribute [" + targetAttributeName + "]");
+		}
+
+		String algorithm = mappingServiceRequest.getAlgorithm();
+		Long offset = mappingServiceRequest.getOffset();
+		Long num = mappingServiceRequest.getNum();
+		Query query = new QueryImpl().offset(offset.intValue()).pageSize(num.intValue());
+		String sourceEntityName = mappingServiceRequest.getSourceEntityName();
+		Iterable<Entity> sourceEntities = dataService.findAll(sourceEntityName, query);
+		List<Object> algorithmResults = algorithmService.applyAlgorithm(targetAttr, algorithm, sourceEntities);
+
+		long total = dataService.count(sourceEntityName, new QueryImpl());
+		long pageTotal = Iterables.size(sourceEntities); // FIXME dataService.count(sourceEntityName, query)
+		long nrSuccess = algorithmResults.size();
+		long nrErrors = pageTotal - nrSuccess;
+
+		return new AttributeMappingValidationReport(total, nrSuccess, nrErrors);
 	}
 
 	private static class AttributeMappingValidationReport
 	{
-		private Long total;
-		private Long nrSuccess;
-		private Long nrErrors;
+		private final Long total;
+		private final Long nrSuccess;
+		private final Long nrErrors;
+
+		public AttributeMappingValidationReport(Long total, Long nrSuccess, Long nrErrors)
+		{
+			this.total = total;
+			this.nrSuccess = nrSuccess;
+			this.nrErrors = nrErrors;
+		}
 
 		@SuppressWarnings("unused")
 		public Long getTotal()
 		{
 			return total;
-		}
-
-		public void setTotal(Long total)
-		{
-			this.total = total;
 		}
 
 		@SuppressWarnings("unused")
@@ -293,20 +304,10 @@ public class MappingServiceController extends MolgenisPluginController
 			return nrSuccess;
 		}
 
-		public void setNrSuccess(Long nrSuccess)
-		{
-			this.nrSuccess = nrSuccess;
-		}
-
 		@SuppressWarnings("unused")
 		public Long getNrErrors()
 		{
 			return nrErrors;
-		}
-
-		public void setNrErrors(Long nrErrors)
-		{
-			this.nrErrors = nrErrors;
 		}
 	}
 

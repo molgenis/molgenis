@@ -15,7 +15,6 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Repository;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.service.AlgorithmService;
@@ -66,21 +65,21 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	}
 
 	@Override
-	public List<Object> applyAlgorithm(AttributeMetaData targetAttribute, String algorithm, Repository sourceRepository)
+	public List<Object> applyAlgorithm(AttributeMetaData targetAttribute, String algorithm,
+			Iterable<Entity> sourceEntities)
 	{
 		List<Object> derivedValues = new ArrayList<Object>();
 		Collection<String> attributeNames = getSourceAttributeNames(algorithm);
 		if (!attributeNames.isEmpty())
 		{
-			for (Entity entity : sourceRepository)
+			for (Entity entity : sourceEntities)
 			{
 				MapEntity mapEntity = createMapEntity(attributeNames, entity);
 				if (!StringUtils.isEmpty(algorithm))
 				{
 					try
 					{
-						Object result = ScriptEvaluator
-								.eval(algorithm, mapEntity, sourceRepository.getEntityMetaData());
+						Object result = ScriptEvaluator.eval(algorithm, mapEntity, entity.getEntityMetaData());
 
 						if (result != null)
 						{

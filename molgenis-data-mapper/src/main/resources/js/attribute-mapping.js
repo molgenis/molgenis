@@ -90,16 +90,19 @@
 		return result;
 	}
 
-	var isValidating = false;
+	var timeoutId, isValidating;
 	
 	/**
 	 * TODO
 	 */
 	function validateAttrMapping(algorithm) {
 		isValidating = false;
+		if(timeoutId) {
+			clearTimeout(timeoutId);
+		}
 		
 		$('#mapping-validation-container').html('<span>Pending ...</span>');
-		setTimeout(function() {
+		timeoutId = setTimeout(function() {
 			isValidating = true;
 			
 			var request = {
@@ -109,22 +112,38 @@
 				algorithm : algorithm
 			};
 			
-			validateAttrMappingRec(request, 0, 1000);
+			var items = [];
+			items.push('<img id="validation-spinner" src="/css/select2-spinner.gif">&nbsp;');
+			items.push('<span class="label label-default">Total: <span id="validation-total">?</span></span>&nbsp;');
+			items.push('<span class="label label-success">Success: <span id="validation-success">0</span></span>&nbsp;');
+			items.push('<span class="label label-danger">Errors: <span id="validation-errors">0</span></span>');
+			$('#mapping-validation-container').html(items.join(''));
+			validateAttrMappingRec(request, 0, 1000, 0, 0);
 		}, 5000);
 		
 	}
 	
-	function validateAttrMappingRec(request, offset, num) {
+	function validateAttrMappingRec(request, offset, num, nrSuccess, nrErrors) {
 		$.ajax({
 			type : 'POST',
 			url : molgenis.getContextUrl() + '/validateAttrMapping',
 			data : JSON.stringify(_.extend({}, request, {offset: offset, num: num})),
+			showSpinner: false,
 			contentType : 'application/json'
 		}).done(function(data) {
-			$('#mapping-validation-container').html('<span class="label label-default">Total: ' + data.total + ' </span>&nbsp;<span class="label label-success">Success: ' + data.nrSuccess + '</span>&nbsp;<span class="label label-danger">Errors: ' + data.nrErrors + '</span>');
+			nrSuccess += data.nrSuccess;
+			nrErrors += data.nrErrors;
+			
+			if(offset + num >= data.total) {
+				$('#validation-spinner').hide();
+			}
+			$('#validation-total').html(data.total);
+			$('#validation-success').html(nrSuccess);
+			$('#validation-errors').html(nrErrors);
+			
 			if(offset + num < data.total) {
 				if(isValidating) {
-					validateAttrMappingRec(request, offset + num, num);
+					validateAttrMappingRec(request, offset + num, num, nrSuccess, nrErrors);
 				} else {
 					$('#mapping-validation-container').html('<span>Pending ...</span>');
 				}
