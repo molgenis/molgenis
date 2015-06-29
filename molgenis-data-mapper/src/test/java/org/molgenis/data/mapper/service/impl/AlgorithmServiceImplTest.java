@@ -248,7 +248,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 
 		algorithmService.autoGenerateAlgorithm(sourceEntityMetaData, targetEntityMetaData, mapping, targetAttribute);
 
-		assertEquals(mapping.getAttributeMapping("targetHeight").getAlgorithm(), "$('sourceHeight').value()");
+		assertEquals(mapping.getAttributeMapping("targetHeight").getAlgorithm(), "$('sourceHeight').value();");
 	}
 
 	@Test
