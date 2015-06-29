@@ -1,0 +1,64 @@
+[Term]
+id: HP:0001511
+name: Intrauterine growth retardation
+alt_id: HP:0001515
+alt_id: HP:0008862
+alt_id: HP:0008892
+alt_id: HP:0008931
+def: "An abnormal restriction of fetal growth with fetal weight below the tenth percentile for gestational age." [HPO:probinson]
+comment: Intrauterine growth restriction is a newer term that is preferred over Intrauterine growth retardation. The causes of IUGR include maternal abnormalities (chronic hypertension, cyanotic heart disease, smoking, drug abuse), placental or umbilical cord abnormalities (including placenta previa and cord anomalies), maternal medicationas, and genetic disorders of the fetus.
+synonym: "In utero growth retardation" EXACT []
+synonym: "Intrauterine growth failure" EXACT []
+synonym: "Intrauterine growth restriction" EXACT []
+synonym: "Intrauterine growth retardation (IUGR)" EXACT []
+synonym: "Intrauterine growth retardation, IUGR" EXACT []
+synonym: "Intrauterine retardation" EXACT []
+synonym: "Prenatal growth deficiency" EXACT []
+synonym: "Prenatal growth failure" EXACT []
+synonym: "Prenatal growth retardation" EXACT []
+synonym: "Prenatal onset growth retardation" EXACT []
+synonym: "Prenatal-onset growth retardation" EXACT []
+synonym: "Small for gestational age infant" EXACT []
+xref: UMLS:C1844889 "Prenatal growth deficiency"
+xref: UMLS:C1855336 "Variable prenatal growth deficiency"
+xref: UMLS:C1855652 "Intrauterine growth failure"
+is_a: HP:0001510 ! Growth delay
+
+[Term]
+id: HP:0008846
+name: Severe intrauterine growth retardation
+alt_id: HP:0008899
+alt_id: HP:0008906
+def: "Intrauterine growth retardation that is 4 or more standard deviations below average, corrected for sex and gestational age." [HPO:probinson]
+synonym: "Intrauterine growth retardation, severe" EXACT []
+synonym: "Severe prenatal growth deficiency" EXACT []
+xref: UMLS:C1855843 "Severe intrauterine growth retardation"
+is_a: HP:0001511 ! Intrauterine growth retardation
+
+[Term]
+id: HP:0008883
+name: Mild intrauterine growth retardation
+alt_id: HP:0008861
+def: "Intrauterine growth retardation that is at least 2 standard deviations (SD) below average, but not as low as 3 SD, corrected for sex and gestational age." [DDD:hfirth]
+synonym: "Mild prenatal growth deficiency" EXACT []
+xref: UMLS:C1840006 "Mild prenatal growth deficiency"
+is_a: HP:0001511 ! Intrauterine growth retardation
+
+
+[Term]
+id: HP:0011408
+name: Moderate intrauterine growth retardation
+def: "Intrauterine growth retardation that is at least 3 standard deviations (SD) below average, but not as low as 4 SD, corrected for sex and gestational age." [DDD:hfirth]
+is_a: HP:0001511 ! Intrauterine growth retardation
+created_by: peter
+creation_date: 2012-03-15T09:52:50Z
+
+[Term]
+id: HP:0000012
+name: Urinary urgency
+def: "Urge incontinence is the strong, sudden need to urinate." [HPO:probinson, pmid:12559262]
+comment: Urinary urgency is the strong, sudden need to urinate and is usually due to bladder spasms or contractions. This symptom is suggestive of, but not necessarily conclusive for urodynamically demonstrable detrusor hyperactivity.
+synonym: "Overactive bladder syndrome" RELATED []
+synonym: "Urgency frequency syndrome" RELATED []
+xref: UMLS:C0085606 "Urinary urgency"
+is_a: HP:0000009 ! Functional abnormality of the bladder

@@ -48,6 +48,7 @@ public class HpoFilterController extends MolgenisPluginController
 	private final HpoFilterDataProvider hpoFilterDataProvider;
 	private GeneMapProvider hgncProvider;
 	private Map<String, HGNCLocations> hgncLocations;
+	private HpoFilterLogic hpoFilterLogic;
 	
 	private HashMap<String, String> autoCompletionMap;
 
@@ -55,12 +56,14 @@ public class HpoFilterController extends MolgenisPluginController
 	public HpoFilterController(DataService dataService,
 			HpoFilterDataProvider hpoFilterDataProvider,
 			GeneMapProvider hgncProvider,
-			RepositoryDecoratorFactory repositoryDecoratorFactory)
+			RepositoryDecoratorFactory repositoryDecoratorFactory,
+			HpoFilterLogic hpoFilterLogic)
 	{
 		super(URI);
 		this.dataService = dataService;
 		this.hpoFilterDataProvider = hpoFilterDataProvider;
 		this.hgncProvider = hgncProvider;
+		this.hpoFilterLogic = hpoFilterLogic;
 	}
 
 	@RequestMapping
@@ -179,6 +182,7 @@ public class HpoFilterController extends MolgenisPluginController
 			}else{
 				return "danger%No entity has been selected";
 			}
+			
 
 			if (null == targetEntityName || targetEntityName.isEmpty()) 
 				newEntityName = selectedEntityName+"_filtered_hpofilter";
@@ -209,7 +213,7 @@ public class HpoFilterController extends MolgenisPluginController
 				genes = HgncLocationsUtils.locationToHgcn(hgncLocations, locus);
 				
 				for (String gene : genes) {
-					if (inputContainsGene(inputSet, gene)) {
+					if (hpoFilterLogic.inputContainsGene(inputSet, gene)) {
 						filteredEntities.add(entity);
 						pass++;
 						break;
@@ -249,45 +253,5 @@ public class HpoFilterController extends MolgenisPluginController
 		return dataService.hasRepository(entityName);
 	}
 
-	private boolean inputContainsGene(HashMap<Integer, Stack<HpoFilterInput>> inputGroups, String gene)
-	{
-		for (Stack<HpoFilterInput> inputGroup : inputGroups.values()) {
-			if (inputGroupContainsGene(inputGroup, gene)) {
-				return true;
-			}
-		}
-		return false;
-	}
 	
-	private boolean inputGroupContainsGene(Stack<HpoFilterInput> inputGroup, String gene)
-	{
-		for (HpoFilterInput input : inputGroup) {
-			if (!hpoContainsGene(input.hpo(), gene, input.recursive())) {
-				return false;
-			}
-		}
-		return true;
-	}
-	
-	/**
-	 * Checks if a specified hpo contains a specified gene. If 
-	 * recursive = true, it will also check the specified HPO's 
-	 * children.
-	 * @param hpo the filter HPO term
-	 * @param gene the variants' gene
-	 * @param recursive true if searching children, false if not.
-	 * @return true if HPO contains gene, false if hpo does not contain gene
-	 */
-	private boolean hpoContainsGene(String hpo, String gene, boolean recursive)
-	{
-		if (hpoFilterDataProvider.getAssocData().containsKey(hpo)) 
-			if (hpoFilterDataProvider.getAssocData().get(hpo).contains(gene)) {
-				return true;
-			}
-			if (recursive)
-				for (String child : hpoFilterDataProvider.getHPOData().get(hpo))
-					if (null != child && hpoContainsGene(child, gene, true))
-						return true;
-		return false;
-	}
 }
