@@ -10,24 +10,21 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.annotation.LocusAnnotator;
+import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
+import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.annotation.utils.JsonReader;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
-import org.springframework.context.event.ContextRefreshedEvent;
 
 public class GeneNetworkAnnotator extends LocusAnnotator
 {
-    private static final String NAME = "GENENETWORK";
-    //FIXME hardcopy url
-    public static final String GENE_NETWORK_API_URL = "http://molgenis58.target.rug.nl/api/v1/prioritization/";
-
-    private final AnnotationService annotatorService;
+	private static final String NAME = "GENENETWORK";
+	// FIXME hardcopy url
+	public static final String GENE_NETWORK_API_URL = "http://molgenis58.target.rug.nl/api/v1/prioritization/";
 
 	private JSONObject geneNetworkJsonCallback;
 
@@ -37,25 +34,14 @@ public class GeneNetworkAnnotator extends LocusAnnotator
 	// In the future will change to a P-value
 	public static final String SCORE = "SCORE";
 
-	public GeneNetworkAnnotator(AnnotationService annotatorService)
-	{
-		this.annotatorService = annotatorService;
-	}
-
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-        //FIXME: disabled for now
-        //annotatorService.addAnnotator(this);
-	}
-
 	@Override
 	public List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException
 	{
 		// Call molgenis server once
 		if (geneNetworkJsonCallback == null)
 		{
-            String geneNetworkUrl = GENE_NETWORK_API_URL
-					+ entity.getString(HPO_TERMS) + "?verbose&genes=" + entity.getString(HGNC_SYMBOL);
+			String geneNetworkUrl = GENE_NETWORK_API_URL + entity.getString(HPO_TERMS) + "?verbose&genes="
+					+ entity.getString(HGNC_SYMBOL);
 			geneNetworkJsonCallback = JsonReader.readJsonFromUrl(geneNetworkUrl);
 		}
 
@@ -73,19 +59,19 @@ public class GeneNetworkAnnotator extends LocusAnnotator
 	}
 
 	@Override
-	public EntityMetaData getOutputMetaData()
+	public List<AttributeMetaData> getOutputMetaData()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(SCORE, MolgenisFieldTypes.FieldTypeEnum.STRING));
+		List<AttributeMetaData> metadata = new ArrayList<>();
+		metadata.add(new DefaultAttributeMetaData(SCORE, MolgenisFieldTypes.FieldTypeEnum.STRING));
 		return metadata;
 	}
 
 	@Override
-	public EntityMetaData getInputMetaData()
+	public List<AttributeMetaData> getInputMetaData()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_TERMS, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HGNC_SYMBOL, FieldTypeEnum.STRING));
+		List<AttributeMetaData> metadata = new ArrayList<>();
+		metadata.add(new DefaultAttributeMetaData(HPO_TERMS, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(HGNC_SYMBOL, FieldTypeEnum.STRING));
 		return metadata;
 	}
 
@@ -106,6 +92,12 @@ public class GeneNetworkAnnotator extends LocusAnnotator
 	protected boolean annotationDataExists()
 	{
 		return true;
+	}
+
+	@Override
+	public AnnotatorInfo getInfo()
+	{
+		return AnnotatorInfo.create(Status.INDEV, Type.UNUSED, "unknown", "no description", getOutputMetaData());
 	}
 
 }

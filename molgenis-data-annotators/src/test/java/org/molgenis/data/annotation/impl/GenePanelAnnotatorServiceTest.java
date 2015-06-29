@@ -50,7 +50,7 @@ public class GenePanelAnnotatorServiceTest
 	@BeforeMethod
 	public void beforeMethod() throws IOException
 	{
-		annotator = new GenePanelServiceAnnotator(null);
+		annotator = new GenePanelServiceAnnotator();
 
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom);
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);

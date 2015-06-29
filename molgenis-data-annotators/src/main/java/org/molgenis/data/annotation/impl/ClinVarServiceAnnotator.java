@@ -9,27 +9,25 @@ import java.util.List;
 import java.util.Map;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.annotation.VariantAnnotator;
 import org.molgenis.data.annotation.impl.datastructures.ClinvarData;
+import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.provider.ClinvarDataProvider;
+import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 @Component("clinvarService")
 public class ClinVarServiceAnnotator extends VariantAnnotator
 {
 	private final MolgenisSettings molgenisSettings;
-	private final AnnotationService annotatorService;
 
 	private static final String NAME = "Clinvar";
 
@@ -63,18 +61,11 @@ public class ClinVarServiceAnnotator extends VariantAnnotator
 	public final static String VARIANTIDS = "VariantID";
 
 	@Autowired
-	public ClinVarServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService,
-			ClinvarDataProvider clinvarDataProvider) throws IOException
+	public ClinVarServiceAnnotator(MolgenisSettings molgenisSettings, ClinvarDataProvider clinvarDataProvider)
+			throws IOException
 	{
 		this.molgenisSettings = molgenisSettings;
-		this.annotatorService = annotatorService;
 		this.clinvarDataProvider = clinvarDataProvider;
-	}
-
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		annotatorService.addAnnotator(this);
 	}
 
 	@Override
@@ -144,36 +135,42 @@ public class ClinVarServiceAnnotator extends VariantAnnotator
 	}
 
 	@Override
-	public EntityMetaData getOutputMetaData()
+	public List<AttributeMetaData> getOutputMetaData()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
+		List<AttributeMetaData> metadata = new ArrayList<>();
 
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ALLELEID, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(TYPE, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GENE_NAME, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GENEID, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GENESYMBOL, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CLINICALSIGNIFICANCE, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(RS_DBSNP, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(NSV_DBVAR, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(RCVACCESSION, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(TESTEDINGTR, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(PHENOTYPEIDS, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ORIGIN, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ASSEMBLY, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CLINVAR_CHROMOSOME, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(START, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(STOP, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CYTOGENETIC, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(REVIEWSTATUS, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HGVS_C, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HGVS_P, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(NUMBERSUBMITTERS, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(LASTEVALUATED, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GUIDELINES, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OTHERIDS, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(ALLELEID, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(TYPE, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(GENE_NAME, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(GENEID, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(GENESYMBOL, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(CLINICALSIGNIFICANCE, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(RS_DBSNP, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(NSV_DBVAR, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(RCVACCESSION, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(TESTEDINGTR, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(PHENOTYPEIDS, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(ORIGIN, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(ASSEMBLY, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(CLINVAR_CHROMOSOME, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(START, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(STOP, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(CYTOGENETIC, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(REVIEWSTATUS, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(HGVS_C, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(HGVS_P, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(NUMBERSUBMITTERS, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(LASTEVALUATED, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(GUIDELINES, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(OTHERIDS, FieldTypeEnum.TEXT));
 
 		return metadata;
+	}
+
+	@Override
+	public AnnotatorInfo getInfo()
+	{
+		return AnnotatorInfo.create(Status.BETA, Type.PHENOTYPE_ASSOCIATION, "clinvar", "", getOutputMetaData());
 	}
 
 }

@@ -176,7 +176,8 @@ public class VcfUtilsTest
 		File inputVcfFile = new File(ResourceUtils.getFile(getClass(), "/testWriter.vcf").getPath());
 		File outputVcfFile = new File(ResourceUtils.getFile(getClass(), "/result_vcfWriter.vcf").getPath());
 
-		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields, "INFO_ANNO");
+		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter,
+				annotatedEntityMetadata.getAttributes(), "INFO_ANNO");
 
 		for (Entity entity : entities)
 		{

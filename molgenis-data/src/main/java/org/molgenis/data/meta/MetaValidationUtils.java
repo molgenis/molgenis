@@ -14,7 +14,7 @@ public class MetaValidationUtils
 {
 	public static final int MAX_ATTRIBUTE_LENGTH = 30;
 
-	public static Set<String> KEYWORDS = Sets.newHashSet();
+	public static final Set<String> KEYWORDS = Sets.newHashSet();
 	static
 	{
 		// we can generate java(script) files with freemarker, so prevent use of reserved words

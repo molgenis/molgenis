@@ -11,8 +11,6 @@ import org.molgenis.data.EntityMetaData;
 public interface AnnotationService
 {
 
-	void addAnnotator(RepositoryAnnotator newAnnotator);
-
 	RepositoryAnnotator getAnnotatorByName(String annotatorName);
 
 	List<RepositoryAnnotator> getAllAnnotators();
