@@ -5,7 +5,7 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 import org.springframework.stereotype.Component;
 
 /**
- * Corresponds to a 'org.molgenis.voretext.Annotation'
+ * Corresponds to a 'org.molgenis.vortext.Annotation'
  */
 @Component
 public class PublicationAnnotationMetaData extends DefaultEntityMetaData
