@@ -108,12 +108,29 @@ public class ExcelSheetWriter extends AbstractWritable
 		}
 		else if (obj instanceof Entity)
 		{
-			value = ((Entity) obj).getLabelValue();
+			if (getWriteMode() != null)
+			{
+				switch (getWriteMode())
+				{
+					case ENTITY_IDS:
+						value = ((Entity) obj).getIdValue().toString();
+						break;
+					case ENTITY_LABELS:
+						value = ((Entity) obj).getLabelValue();
+						break;
+					default:
+						throw new RuntimeException("Unknown write mode [" + getWriteMode() + "]");
+				}
+			}
+			else
+			{
+				value = ((Entity) obj).getLabelValue();
+			}
 		}
-		else if (obj instanceof List<?>)
+		else if (obj instanceof Iterable<?>)
 		{
 			StringBuilder strBuilder = new StringBuilder();
-			for (Object listItem : (List<?>) obj)
+			for (Object listItem : (Iterable<?>) obj)
 			{
 				if (strBuilder.length() > 0) strBuilder.append(',');
 				strBuilder.append(toValue(listItem));

@@ -24,13 +24,14 @@ public class MetaUtilsTest
 		AttributeMetaData attributeWeight = new DefaultAttributeMetaData("weight_0");
 		entityMetaData.addAttributeMetaData(attributeHeight);
 		entityMetaData.addAttributeMetaData(attributeWeight);
-				
+
 		MapEntity entity1 = new MapEntity(ImmutableMap.of(AttributeMetaDataMetaData.NAME, "height_0",
-						AttributeMetaDataMetaData.LABEL, "height",
-						AttributeMetaDataMetaData.DESCRIPTION, "this is a height measurement in m!"));
-		Iterable <Entity> attributeMetaDataEntities = Arrays.<Entity> asList(entity1);
-		
-		Iterable<AttributeMetaData> actual = MetaUtils.toExistingAttributeMetaData(entityMetaData, attributeMetaDataEntities);
+				AttributeMetaDataMetaData.LABEL, "height", AttributeMetaDataMetaData.DESCRIPTION,
+				"this is a height measurement in m!"));
+		Iterable<Entity> attributeMetaDataEntities = Arrays.<Entity> asList(entity1);
+
+		Iterable<AttributeMetaData> actual = MetaUtils.toExistingAttributeMetaData(entityMetaData,
+				attributeMetaDataEntities);
 		Iterable<AttributeMetaData> expected = Arrays.<AttributeMetaData> asList(attributeHeight);
 		assertEquals(actual, expected);
 	}

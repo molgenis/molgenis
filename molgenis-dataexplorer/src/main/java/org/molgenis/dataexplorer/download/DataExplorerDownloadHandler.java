@@ -15,11 +15,11 @@ import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Writable;
-import org.molgenis.data.WritableFactory;
 import org.molgenis.data.csv.CsvWriter;
+import org.molgenis.data.excel.ExcelSheetWriter;
 import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.excel.ExcelWriter.FileFormat;
+import org.molgenis.data.support.AbstractWritable.WriteMode;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,11 +36,11 @@ public class DataExplorerDownloadHandler
 
 	public void writeToExcel(DataRequest dataRequest, OutputStream outputStream) throws IOException
 	{
-		WritableFactory writableFactory = new ExcelWriter(outputStream, FileFormat.XLSX);
+		ExcelWriter excelWriter = new ExcelWriter(outputStream, FileFormat.XLSX);
 		String entityName = dataRequest.getEntityName();
 
 		QueryImpl query = dataRequest.getQuery();
-		Writable writable = null;
+		ExcelSheetWriter excelSheetWriter = null;
 		try
 		{
 			EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
@@ -51,19 +51,31 @@ public class DataExplorerDownloadHandler
 			switch (dataRequest.getColNames())
 			{
 				case ATTRIBUTE_LABELS:
-					writable = writableFactory.createWritable(entityName, Lists.newArrayList(attributeNames));
+					excelSheetWriter = excelWriter.createWritable(entityName, Lists.newArrayList(attributeNames));
 					break;
 				case ATTRIBUTE_NAMES:
 					List<String> attributeNamesList = newArrayList(transform(attributes, AttributeMetaData::getName));
-					writable = writableFactory.createWritable(entityName, attributeNamesList);
+					excelSheetWriter = excelWriter.createWritable(entityName, attributeNamesList);
 					break;
 			}
-			writable.add(dataService.findAll(entityName, query));
-			writable.close();
+			switch (dataRequest.getEntityValues())
+			{
+				case ENTITY_IDS:
+					excelSheetWriter.setWriteMode(WriteMode.ENTITY_IDS);
+					break;
+				case ENTITY_LABELS:
+					excelSheetWriter.setWriteMode(WriteMode.ENTITY_LABELS);
+					break;
+				default:
+					break;
+			}
+
+			excelSheetWriter.add(dataService.findAll(entityName, query));
+			excelSheetWriter.close();
 		}
 		finally
 		{
-			writableFactory.close();
+			excelWriter.close();
 		}
 	}
 
@@ -76,6 +88,17 @@ public class DataExplorerDownloadHandler
 			throws IOException
 	{
 		CsvWriter csvWriter = new CsvWriter(outputStream, separator, noQuotes);
+		switch (dataRequest.getEntityValues())
+		{
+			case ENTITY_IDS:
+				csvWriter.setWriteMode(WriteMode.ENTITY_IDS);
+				break;
+			case ENTITY_LABELS:
+				csvWriter.setWriteMode(WriteMode.ENTITY_LABELS);
+				break;
+			default:
+				break;
+		}
 		String entityName = dataRequest.getEntityName();
 
 		try

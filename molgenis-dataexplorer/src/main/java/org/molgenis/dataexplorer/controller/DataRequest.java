@@ -12,7 +12,12 @@ public class DataRequest
 	{
 		ATTRIBUTE_NAMES, ATTRIBUTE_LABELS
 	}
-	
+
+	public static enum EntityValues
+	{
+		ENTITY_LABELS, ENTITY_IDS
+	}
+
 	public static enum DownloadType
 	{
 		DOWNLOAD_TYPE_CSV, DOWNLOAD_TYPE_XLSX
@@ -26,6 +31,8 @@ public class DataRequest
 	private List<String> attributeNames;
 	@NotNull
 	private ColNames colNames;
+	@NotNull
+	private EntityValues entityValues;
 	@NotNull
 	private DownloadType downloadType;
 
@@ -77,6 +84,16 @@ public class DataRequest
 	public void setDownloadType(DownloadType downloadType)
 	{
 		this.downloadType = downloadType;
+	}
+
+	public EntityValues getEntityValues()
+	{
+		return entityValues;
+	}
+
+	public void setEntityValues(EntityValues entityValues)
+	{
+		this.entityValues = entityValues;
 	}
 
 }

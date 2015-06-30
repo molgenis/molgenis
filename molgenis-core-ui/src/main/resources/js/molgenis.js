@@ -226,6 +226,7 @@
 			case 'CATEGORICAL_MREF':
 			case 'MREF':
 			case 'XREF':
+			case 'FILE':
 				return true;
 			default:
 				return false;
@@ -660,7 +661,7 @@ function createInput(attr, attrs, val, lbl) {
 		var rsqlValue;
 		if (value.indexOf('"') !== -1 || value.indexOf('\'') !== -1 || value.indexOf('(') !== -1 || value.indexOf(')') !== -1 || value.indexOf(';') !== -1
 				|| value.indexOf(',') !== -1 || value.indexOf('=') !== -1 || value.indexOf('!') !== -1 || value.indexOf('~') !== -1 || value.indexOf('<') !== -1
-				|| value.indexOf('>') !== -1) {
+				|| value.indexOf('>') !== -1 || value.indexOf(' ') !== -1) {
 			rsqlValue = '"' + encodeURIComponent(value) + '"';
 		} else {
 			rsqlValue = encodeURIComponent(value);
@@ -749,6 +750,9 @@ function createInput(attr, attrs, val, lbl) {
 		}
 		return rsql;
 	};
+	
+	// export
+	molgenis.createRsqlQuery = createRsqlQuery;
 	
 	var createSortValue = function(sort) {
 		var qs = _.map(sort.orders, function(order) {

@@ -61,6 +61,18 @@
                         </label>   
                     </div>
                     
+                    <span id="helpBlock" class="help-block">As entity values I want:</span>
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="entityValues" value="ENTITY_LABELS" checked> Entity labels
+                        </label>
+                    </div>
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="entityValues" value="ENTITY_IDS"> Entity ids
+                        </label>   
+                    </div>
+                    
                     <span id="helpBlock" class="help-block">As download type I want:</span>
                     <div class="radio">
 	                    <label>
@@ -126,7 +138,7 @@
     molgenis.dataexplorer.setGenomeAttributes('${genomebrowser_start_list?js_string}', '${genomebrowser_chrom_list?js_string}', '${genomebrowser_id_list?js_string}', '${genomebrowser_patient_list?js_string}');
 	<#-- load js dependencies -->
 	$.when(
-		$.ajax("<@resource_href "/js/dalliance-compiled.js"/>", {'cache': true}),
+		$.ajax("<@resource_href "/js/dalliance-compiled.min.js"/>", {'cache': true}),
 		$.ajax("<@resource_href "/js/dataexplorer-data.js"/>", {'cache': true}))
 		.done(function() {
     			molgenis.dataexplorer.data.setGenomeBrowserAttributes('${genomebrowser_start_list?js_string}', '${genomebrowser_chrom_list?js_string}', '${genomebrowser_id_list?js_string}', '${genomebrowser_patient_list?js_string}');

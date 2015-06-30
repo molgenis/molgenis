@@ -48,9 +48,9 @@ public class MonogenicDiseaseCandidatesServiceAnnotatorTest
 	private ArrayList<Entity> entities;
 
 	@BeforeMethod
-	public void beforeMethod() throws IOException
+	public void beforeMethod() throws Exception
 	{
-		annotator = new MonogenicDiseaseCandidatesServiceAnnotator(settings, null);
+		annotator = new MonogenicDiseaseCandidatesServiceAnnotator();
 
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom);
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);

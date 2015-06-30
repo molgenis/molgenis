@@ -37,6 +37,7 @@ public class VcfImporterServiceTest
 		DataServiceImpl dataService = new DataServiceImpl();
 		MetaDataServiceImpl metaDataService = new MetaDataServiceImpl(dataService);
 		metaDataService.setDefaultBackend(new InMemoryRepositoryCollection("ElasticSearch"));
+		dataService.setMeta(metaDataService);
 
 		File f = ResourceUtils.getFile(getClass(), "/testdata.vcf");
 		VcfRepositoryCollection source = new VcfRepositoryCollection(f);

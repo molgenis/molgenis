@@ -3,32 +3,25 @@ package org.molgenis.data.annotation.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.utils.AnnotatorUtils;
-import org.molgenis.data.annotation.utils.TabixReader;
 import org.molgenis.data.annotation.VariantAnnotator;
-import org.molgenis.data.vcf.utils.VcfUtils;
-import org.molgenis.data.support.AnnotationServiceImpl;
+import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
+import org.molgenis.data.annotation.utils.AnnotatorUtils;
+import org.molgenis.data.annotator.tabix.TabixReader;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.server.MolgenisSimpleSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 /**
@@ -48,7 +41,13 @@ public class ExACServiceAnnotator extends VariantAnnotator
 	private static final Logger LOG = LoggerFactory.getLogger(ExACServiceAnnotator.class);
 
 	private final MolgenisSettings molgenisSettings;
-	private final AnnotationService annotatorService;
+
+	@Override
+	public AnnotatorInfo getInfo()
+	{
+		return AnnotatorInfo.create(Status.BETA, Type.POPULATION_REFERENCE, "exac", "no description",
+				getOutputMetaData());
+	}
 
 	public static final String EXAC_MAF_LABEL = "EXACMAF";
 	public static final String EXAC_MAF = VcfRepository.getInfoPrefix() + EXAC_MAF_LABEL;
@@ -66,11 +65,9 @@ public class ExACServiceAnnotator extends VariantAnnotator
 	private volatile TabixReader tabixReader;
 
 	@Autowired
-	public ExACServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService)
-			throws IOException
+	public ExACServiceAnnotator(MolgenisSettings molgenisSettings) throws IOException
 	{
 		this.molgenisSettings = molgenisSettings;
-		this.annotatorService = annotatorService;
 	}
 
 	public ExACServiceAnnotator(File exacFileLocation, File inputVcfFile, File outputVCFFile) throws Exception
@@ -79,8 +76,6 @@ public class ExACServiceAnnotator extends VariantAnnotator
 		this.molgenisSettings = new MolgenisSimpleSettings();
 		molgenisSettings.setProperty(EXAC_VCFGZ_LOCATION, exacFileLocation.getAbsolutePath());
 
-		this.annotatorService = new AnnotationServiceImpl();
-
 		checkTabixReader();
 
 		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
@@ -88,7 +83,7 @@ public class ExACServiceAnnotator extends VariantAnnotator
 		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
 		Iterator<Entity> vcfIter = vcfRepo.iterator();
 
-		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields,
+		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, getOutputMetaData(),
 				EXAC_MAF.substring(VcfRepository.getInfoPrefix().length()));
 
 		System.out.println("Now starting to process the data.");
@@ -117,12 +112,6 @@ public class ExACServiceAnnotator extends VariantAnnotator
 		outputVCFWriter.close();
 		vcfRepo.close();
 		System.out.println("All done!");
-	}
-
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		annotatorService.addAnnotator(this);
 	}
 
 	@Override
@@ -275,12 +264,11 @@ public class ExACServiceAnnotator extends VariantAnnotator
 	}
 
 	@Override
-	public EntityMetaData getOutputMetaData()
+	public List<AttributeMetaData> getOutputMetaData()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
+		List<AttributeMetaData> metadata = new ArrayList<>();
 
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(EXAC_MAF, FieldTypeEnum.DECIMAL)
-				.setLabel(EXAC_MAF_LABEL));
+		metadata.add(new DefaultAttributeMetaData(EXAC_MAF, FieldTypeEnum.DECIMAL).setLabel(EXAC_MAF_LABEL));
 
 		return metadata;
 	}
