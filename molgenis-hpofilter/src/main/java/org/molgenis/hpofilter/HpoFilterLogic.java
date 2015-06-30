@@ -1,6 +1,7 @@
 package org.molgenis.hpofilter;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Stack;
 
 import org.molgenis.hpofilter.data.HpoFilterDataProvider;
@@ -16,6 +17,12 @@ class HpoFilterLogic {
 		this.hpoFilterDataProvider = hpoFilterDataProvider;
 	}
 	
+	/**
+	 * Checks if *any* group in the user input contains a term that contains a gene
+	 * @param inputGroups the set of groups, grouped by group id
+	 * @param gene the target gene
+	 * @return true if a group contains this gene, false if not
+	 */
 	public boolean inputContainsGene(HashMap<Integer, Stack<HpoFilterInput>> inputGroups, String gene)
 	{
 		for (Stack<HpoFilterInput> inputGroup : inputGroups.values()) {
@@ -26,6 +33,15 @@ class HpoFilterLogic {
 		return false;
 	}
 	
+	/**
+	 * Checks if a term in a particular input group contains a gene.
+	 * This function fails-fast, and can be described as returning
+	 * true if an input does not not contain a gene rather than if it
+	 * does
+	 * @param inputGroup the input group, containing hpo terms
+	 * @param gene the target gene
+	 * @return true if group contains gene, false if not
+	 */
 	private boolean inputGroupContainsGene(Stack<HpoFilterInput> inputGroup, String gene)
 	{
 		for (HpoFilterInput input : inputGroup) {
@@ -37,7 +53,7 @@ class HpoFilterLogic {
 	}
 	
 	/**
-	 * Checks if a specified hpo contains a specified gene. If 
+	 * Checks if a specified hpo term contains a specified gene. If 
 	 * recursive = true, it will also check the specified HPO's 
 	 * children.
 	 * @param hpo the filter HPO term
@@ -56,5 +72,36 @@ class HpoFilterLogic {
 					if (null != child && hpoContainsGene(child, gene, true))
 						return true;
 		return false;
+	}
+	
+	public String getInputString(HashMap<Integer, Stack<HpoFilterInput>> groups)
+	{
+		StringBuilder sb = new StringBuilder();
+		Iterator<Stack<HpoFilterInput>> e = groups.values().iterator();
+		Stack<HpoFilterInput> group;
+		while (e.hasNext()) {
+			group = e.next();
+			sb.append('(');
+			sb.append(getTermGroupString(group));
+			sb.append(')');
+			if (e.hasNext()) {
+				sb.append(" OR ");
+			}
+		}
+		return sb.toString();
+	}
+	
+	private String getTermGroupString(Stack<HpoFilterInput> group) {
+		Iterator<HpoFilterInput> e = group.iterator();
+		StringBuilder sb = new StringBuilder();
+		HpoFilterInput term;
+		while (e.hasNext()) {
+			term = e.next();
+			sb.append(term.hpo());
+			if (e.hasNext()) {
+				sb.append(" AND ");
+			}
+		}
+		return sb.toString();
 	}
 }
