@@ -126,7 +126,14 @@ public class TabixRepository extends AbstractRepository
 		{
 			if (i < columns.length)
 			{
-				result.set(amd.getName(), DataConverter.convert(columns[i++], amd));
+				try
+				{
+					result.set(amd.getName(), DataConverter.convert(columns[i++], amd));
+				}
+				catch (Exception e)
+				{
+					System.out.print(e);
+				}
 			}
 		}
 		return result;
