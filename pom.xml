@@ -94,6 +94,7 @@
                         <compilerArguments>
                             <Xlint/>
                         </compilerArguments>
+                        <compilerArgument>-proc:none</compilerArgument>
                     </configuration>
                 </plugin>
                 <plugin>
