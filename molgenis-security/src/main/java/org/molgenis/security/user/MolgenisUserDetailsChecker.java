@@ -13,14 +13,13 @@ public class MolgenisUserDetailsChecker implements UserDetailsChecker
 {
 	protected final MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public void check(UserDetails userDetails)
 	{
 		if (!userDetails.isEnabled())
 		{
 			throw new DisabledException(messages.getMessage("AccountStatusUserDetailsChecker.disabled",
-					"User is not active"), userDetails);
+					"User is not active") + ' ' + userDetails.toString());
 		}
 	}
 }

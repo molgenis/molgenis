@@ -11,29 +11,28 @@ import java.util.List;
 import java.util.Map;
 
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
-import org.molgenis.data.annotation.utils.AnnotatorUtils;
-import org.molgenis.data.annotation.utils.HgncLocationsUtils;
 import org.molgenis.data.annotation.LocusAnnotator;
-import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.data.annotation.impl.datastructures.CgdData;
+import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
 import org.molgenis.data.annotation.impl.datastructures.Locus;
+import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.provider.CgdDataProvider;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
-import org.molgenis.data.support.AnnotationServiceImpl;
+import org.molgenis.data.annotation.utils.AnnotatorUtils;
+import org.molgenis.data.annotation.utils.HgncLocationsUtils;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.server.MolgenisSimpleSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 @Component("CgdService")
@@ -41,8 +40,14 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ClinicalGenomicsDatabaseServiceAnnotator.class);
 
+	@Override
+	public AnnotatorInfo getInfo()
+	{
+		return AnnotatorInfo.create(Status.BETA, Type.UNUSED, "unknown", "Clinical Genomics Database",
+				getOutputMetaData());
+	}
+
 	private final MolgenisSettings molgenisSettings;
-	private final AnnotationService annotatorService;
 	private final HgncLocationsProvider hgncLocationsProvider;
 	private final CgdDataProvider cgdDataProvider;
 
@@ -94,7 +99,6 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 		if (hgncLocationsProvider == null) throw new IllegalArgumentException("hgncLocationsProvider is null");
 		if (cgdDataProvider == null) throw new IllegalArgumentException("cgdData is null");
 		this.molgenisSettings = molgenisSettings;
-		this.annotatorService = annotationService;
 		this.hgncLocationsProvider = hgncLocationsProvider;
 		this.cgdDataProvider = cgdDataProvider;
 	}
@@ -112,14 +116,12 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 		molgenisSettings.setProperty(CGD_FILE_LOCATION, cgdFileLocation.getAbsolutePath());
 		cgdDataProvider = new CgdDataProvider(molgenisSettings);
 
-		this.annotatorService = new AnnotationServiceImpl();
-
 		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
 
 		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
 		Iterator<Entity> vcfIter = vcfRepo.iterator();
 
-		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields,
+		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, getOutputMetaData(),
 				CONDITION.substring(VcfRepository.getInfoPrefix().length()));
 
 		System.out.println("Now starting to process the data.");
@@ -152,12 +154,6 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 	}
 
 	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		annotatorService.addAnnotator(this);
-	}
-
-	@Override
 	public String getSimpleName()
 	{
 		return NAME;
@@ -182,7 +178,7 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 		try
 		{
 			HashMap<String, Object> resultMap = new HashMap<String, Object>();
-            if (cgdData.containsKey(geneSymbol))
+			if (cgdData.containsKey(geneSymbol))
 			{
 				CgdData data = cgdData.get(geneSymbol);
 
@@ -222,32 +218,27 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 	}
 
 	@Override
-	public EntityMetaData getOutputMetaData()
+	public List<AttributeMetaData> getOutputMetaData()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
+		List<AttributeMetaData> metadata = new ArrayList<>();
 
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GENE, MolgenisFieldTypes.FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HGNC_ID, MolgenisFieldTypes.FieldTypeEnum.LONG));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ENTREZ_GENE_ID,
-				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CONDITION, MolgenisFieldTypes.FieldTypeEnum.TEXT)
+		metadata.add(new DefaultAttributeMetaData(GENE, MolgenisFieldTypes.FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(HGNC_ID, MolgenisFieldTypes.FieldTypeEnum.LONG));
+		metadata.add(new DefaultAttributeMetaData(ENTREZ_GENE_ID, MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(CONDITION, MolgenisFieldTypes.FieldTypeEnum.TEXT)
 				.setLabel(CONDITION_LABEL));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(INHERITANCE, MolgenisFieldTypes.FieldTypeEnum.TEXT)
+		metadata.add(new DefaultAttributeMetaData(INHERITANCE, MolgenisFieldTypes.FieldTypeEnum.TEXT)
 				.setLabel(INHERITANCE_LABEL));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GENERALIZED_INHERITANCE,
-				MolgenisFieldTypes.FieldTypeEnum.TEXT).setLabel(GENERALIZED_INHERITANCE_LABEL));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(AGE_GROUP, MolgenisFieldTypes.FieldTypeEnum.TEXT)
+		metadata.add(new DefaultAttributeMetaData(GENERALIZED_INHERITANCE, MolgenisFieldTypes.FieldTypeEnum.TEXT)
+				.setLabel(GENERALIZED_INHERITANCE_LABEL));
+		metadata.add(new DefaultAttributeMetaData(AGE_GROUP, MolgenisFieldTypes.FieldTypeEnum.TEXT)
 				.setLabel(AGE_GROUP_LABEL));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ALLELIC_CONDITIONS,
-				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(MANIFESTATION_CATEGORIES,
-				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(INTERVENTION_CATEGORIES,
-				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(COMMENTS, MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(INTERVENTION_RATIONALE,
-				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(REFERENCES, MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(ALLELIC_CONDITIONS, MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(MANIFESTATION_CATEGORIES, MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(INTERVENTION_CATEGORIES, MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(COMMENTS, MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(INTERVENTION_RATIONALE, MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(REFERENCES, MolgenisFieldTypes.FieldTypeEnum.TEXT));
 
 		return metadata;
 	}

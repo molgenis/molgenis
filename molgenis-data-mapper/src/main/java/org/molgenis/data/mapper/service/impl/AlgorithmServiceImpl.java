@@ -59,7 +59,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		{
 			AttributeMetaData source = matches.iterator().next();
 			AttributeMapping attributeMapping = mapping.addAttributeMapping(targetAttribute.getName());
-			String algorithm = "$('" + source.getName() + "').value()";
+			String algorithm = "$('" + source.getName() + "').value();";
 			attributeMapping.setAlgorithm(algorithm);
 			LOG.info("Creating attribute mapping: " + targetAttribute.getName() + " = " + algorithm);
 		}
@@ -144,16 +144,10 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		{
 			return null;
 		}
-		try
-		{
-			MapEntity entity = createMapEntity(getSourceAttributeNames(attributeMapping.getAlgorithm()), sourceEntity);
-			Object value = ScriptEvaluator.eval(algorithm, entity, sourceEntityMetaData);
-			return convert(value, attributeMapping.getTargetAttributeMetaData());
-		}
-		catch (RuntimeException e)
-		{
-			return null;
-		}
+
+		MapEntity entity = createMapEntity(getSourceAttributeNames(attributeMapping.getAlgorithm()), sourceEntity);
+		Object value = ScriptEvaluator.eval(algorithm, entity, sourceEntityMetaData);
+		return convert(value, attributeMapping.getTargetAttributeMetaData());
 	}
 
 	private Object convert(Object value, AttributeMetaData attributeMetaData)

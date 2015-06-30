@@ -8,8 +8,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
-import org.springframework.security.web.util.ELRequestMatcher;
-import org.springframework.security.web.util.RequestMatcher;
+import org.springframework.security.web.util.matcher.ELRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 /**
  * @author bchild
@@ -20,12 +20,6 @@ public class AjaxAwareLoginUrlAuthenticationEntryPoint extends LoginUrlAuthentic
 
 	private static final RequestMatcher requestMatcher = new ELRequestMatcher(
 			"hasHeader('X-Requested-With','XMLHttpRequest')");
-
-	@SuppressWarnings("deprecation")
-	public AjaxAwareLoginUrlAuthenticationEntryPoint()
-	{
-		super();
-	}
 
 	public AjaxAwareLoginUrlAuthenticationEntryPoint(String loginFormUrl)
 	{

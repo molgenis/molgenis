@@ -1,6 +1,7 @@
 package org.molgenis.ui.menu;
 
 import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ public class MenuReaderServiceImpl implements MenuReaderService
 
 	@Override
 	@Transactional(readOnly = true)
+	@RunAsSystem
 	public Menu getMenu()
 	{
 		String menuJson = molgenisSettings.getProperty(KEY_MOLGENIS_MENU);

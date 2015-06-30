@@ -2,7 +2,7 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=['ui.fancytree.min.css', 'joint.min.css','standardsregistry.css']>
-<#assign js=['jquery.fancytree.min.js', 'jquery.molgenis.entitymetadata.table.js', 'jquery.molgenis.attributemetadata.table.js', 'jquery.bootstrap.pager.js', 'lodash.js', 'backbone-min.js', 'geometry.min.js', 'vectorizer.min.js', 'joint.clean.min.js','joint.shapes.uml.min.js', 'joint.layout.DirectedGraph.min.js', 'jquery.scrollTo.min.js', 'standardsregistry.js']>
+<#assign js=['jquery.fancytree.min.js', 'jquery.bootstrap.pager.js', 'lodash.js', 'backbone-min.js', 'geometry.min.js', 'vectorizer.min.js', 'joint.clean.min.js','joint.shapes.uml.min.js', 'joint.layout.DirectedGraph.min.js', 'jquery.scrollTo.min.js', 'standardsregistry.js']>
 
 <@header css js/>
 <#-- Search box and search results -->

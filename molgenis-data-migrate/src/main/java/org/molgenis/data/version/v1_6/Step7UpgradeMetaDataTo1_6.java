@@ -5,7 +5,6 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
@@ -70,7 +69,7 @@ public class Step7UpgradeMetaDataTo1_6 extends MolgenisUpgrade
 			@Override
 			public boolean hasRepository(String name)
 			{
-				throw new NotImplementedException("Not implemented yet");
+				throw new UnsupportedOperationException();
 			}
 		};
 		MetaDataService metaData = new MetaDataServiceImpl(dataService);

@@ -52,6 +52,12 @@ public class MappingProject
 		}
 	}
 
+	public void removeIdentifiers()
+	{
+		this.identifier = null;
+		mappingTargets.values().forEach(MappingTarget::removeIdentifiers);
+	}
+
 	public String getIdentifier()
 	{
 		return identifier;

@@ -7,6 +7,9 @@ import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermNodePathMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData;
+import org.molgenis.ontology.ic.OntologyTermFrequencyServiceImpl;
+import org.molgenis.ontology.ic.TermFrequencyEntityMetaData;
+import org.molgenis.ontology.ic.TermFrequencyService;
 import org.molgenis.ontology.matching.MatchInputTermBatchService;
 import org.molgenis.ontology.matching.MatchingTaskContentEntityMetaData;
 import org.molgenis.ontology.matching.MatchingTaskEntityMetaData;
@@ -69,6 +72,18 @@ public class OntologyConfiguration
 	public MatchingTaskContentEntityMetaData matchingTaskContentEntityMetaData()
 	{
 		return MatchingTaskContentEntityMetaData.INSTANCE;
+	}
+
+	@Bean
+	public TermFrequencyEntityMetaData termFrequencyEntityMetaData()
+	{
+		return TermFrequencyEntityMetaData.INSTANCE;
+	}
+
+	@Bean
+	public TermFrequencyService termFrequencyService()
+	{
+		return new OntologyTermFrequencyServiceImpl(dataService);
 	}
 
 	@Bean

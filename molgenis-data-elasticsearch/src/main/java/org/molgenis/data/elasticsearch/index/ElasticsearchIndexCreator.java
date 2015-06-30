@@ -79,7 +79,7 @@ public class ElasticsearchIndexCreator
 							.startObject("tokenizer")
 								.startObject(DEFAULT_TOKENIZER)
 									.field("type", "pattern")
-									.field("pattern", "([\\W\\.]+)")
+									.field("pattern", "([^a-zA-Z0-9]+)")
 								.endObject()
 								.startObject(NGRAM_TOKENIZER)
 									.field("type", "nGram")
