@@ -33,6 +33,7 @@ public class HpoFilterDataProvider
 	+ "annotation/ALL_SOURCES_ALL_FREQUENCIES_"
 	+ "diseases_to_genes_to_phenotypes.txt";
 
+	// TODO use multimap?
 	HashMap<String, HashSet<String>> hpoMap;
 	HashMap<String, List<String>> hpoHeirarchy;
 	HashMap<String, String> descriptionMap;
