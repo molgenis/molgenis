@@ -8,14 +8,12 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import org.apache.commons.lang3.StringUtils;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
@@ -326,28 +324,21 @@ public class MappingServiceController extends MolgenisPluginController
 
 	@RequestMapping(method = RequestMethod.POST, value = "/attributeMapping/explain", consumes = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Map<AttributeMetaData, Iterable<ExplainedQueryString>> getExplainedAttributeMapping(
+	public Map<String, Iterable<ExplainedQueryString>> getExplainedAttributeMapping(
 			@RequestBody Map<String, String> requestBody)
 	{
 		String mappingProjectId = requestBody.get("mappingProjectId");
 		String target = requestBody.get("target");
 		String source = requestBody.get("source");
 		String targetAttribute = requestBody.get("targetAttribute");
-
-		if (StringUtils.isNotEmpty(mappingProjectId) && StringUtils.isNotEmpty(target)
-				&& StringUtils.isNotEmpty(source) && StringUtils.isNotEmpty(targetAttribute))
+		Map<AttributeMetaData, Iterable<ExplainedQueryString>> explainedAttributes = getExplainedAttributes(
+				mappingProjectId, target, source, targetAttribute);
+		Map<String, Iterable<ExplainedQueryString>> simpleExplainedAttributes = new HashMap<String, Iterable<ExplainedQueryString>>();
+		for (AttributeMetaData key : explainedAttributes.keySet())
 		{
-			MappingProject project = mappingService.getMappingProject(mappingProjectId);
-			MappingTarget mappingTarget = project.getMappingTarget(target);
-			EntityMapping entityMapping = mappingTarget.getMappingForSource(source);
-			AttributeMetaData targetAttributeMetaData = entityMapping.getTargetEntityMetaData().getAttribute(
-					targetAttribute);
-
-			return semanticSearchService.explainAttributes(entityMapping.getSourceEntityMetaData(),
-					dataService.getEntityMetaData(target), targetAttributeMetaData);
+			simpleExplainedAttributes.put(key.getName(), explainedAttributes.get(key));
 		}
-
-		return Collections.emptyMap();
+		return simpleExplainedAttributes;
 	}
 
 	/**
@@ -663,6 +654,29 @@ public class MappingServiceController extends MolgenisPluginController
 		LOG.error(e.getMessage(), e);
 		return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(
 				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage()));
+	}
+
+	/**
+	 * Creates a map of attributes that are automatically matched. These matches are explained.
+	 * 
+	 * @param mappingProjectId
+	 * @param target
+	 * @param source
+	 * @param targetAttribute
+	 * 
+	 * @return A map of {@link AttributeMetaData} and an iterable of {@link ExplainedQueryString}
+	 */
+	private Map<AttributeMetaData, Iterable<ExplainedQueryString>> getExplainedAttributes(String mappingProjectId,
+			String target, String source, String targetAttribute)
+	{
+		MappingProject project = mappingService.getMappingProject(mappingProjectId);
+		MappingTarget mappingTarget = project.getMappingTarget(target);
+		EntityMapping entityMapping = mappingTarget.getMappingForSource(source);
+		AttributeMetaData targetAttributeMetaData = entityMapping.getTargetEntityMetaData().getAttribute(
+				targetAttribute);
+
+		return semanticSearchService.explainAttributes(entityMapping.getSourceEntityMetaData(),
+				dataService.getEntityMetaData(target), targetAttributeMetaData);
 	}
 
 	/**

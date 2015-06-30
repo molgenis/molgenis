@@ -90,6 +90,91 @@
 		return result;
 	}
 
+	var timeoutId, isValidating;
+
+	/**
+	 * Validate algorithm on source entities, render UI component that displays
+	 * the number of total/success/errors and corresponding error messages.
+	 * Stops after a max. number of validation errors.
+	 */
+	function validateAttrMapping(algorithm) {
+		var validationDelay = 2000;
+		var validationBatchSize = 500;
+		var validationMaxErrors = 100;
+
+		isValidating = false;
+		if (timeoutId) {
+			clearTimeout(timeoutId);
+		}
+
+		$('#mapping-validation-container').html('<span>Pending ...</span>');
+		$('#validation-error-messages-table-body').empty();
+		timeoutId = setTimeout(
+				function() {
+					isValidating = true;
+
+					var request = {
+						targetEntityName : $('input[name="target"]').val(),
+						sourceEntityName : $('input[name="source"]').val(),
+						targetAttributeName : $('input[name="targetAttribute"]').val(),
+						algorithm : algorithm
+					};
+
+					var items = [];
+					items.push('<img id="validation-spinner" src="/css/select2-spinner.gif">&nbsp;');
+					items.push('<span class="label label-default">Total: <span id="validation-total">?</span></span>&nbsp;');
+					items.push('<span class="label label-success">Success: <span id="validation-success">0</span></span>&nbsp;');
+					items
+							.push('<span class="label label-danger"><a class="validation-errors-anchor" href="#validation-error-messages-modal" data-toggle="modal" data-target="#validation-error-messages-modal">Errors: <span id="validation-errors">0</span></a></span>&nbsp;');
+					items.push('<em class="hidden" id="max-errors-msg">(Validation aborted, encountered too many errors)</em>');
+					$('#mapping-validation-container').html(items.join(''));
+					validateAttrMappingRec(request, 0, validationBatchSize, 0, 0, validationMaxErrors);
+				}, validationDelay);
+
+	}
+
+	function validateAttrMappingRec(request, offset, num, nrSuccess, nrErrors, validationMaxErrors) {
+		$.ajax({
+			type : 'POST',
+			url : molgenis.getContextUrl() + '/validateAttrMapping',
+			data : JSON.stringify(_.extend({}, request, {
+				offset : offset,
+				num : num
+			})),
+			showSpinner : false,
+			contentType : 'application/json'
+		}).done(function(data) {
+			nrSuccess += data.nrSuccess;
+			nrErrors += data.nrErrors;
+
+			if (offset + num >= data.total || nrErrors >= validationMaxErrors) {
+				$('#validation-spinner').hide();
+			}
+			$('#validation-total').html(data.total);
+			$('#validation-success').html(nrSuccess);
+			$('#validation-errors').html(nrErrors);
+
+			if (nrErrors > 0) {
+				_.each(data.errorMessages, function(message, id) {
+					$('#validation-error-messages-table-body').append('<tr><td>' + id + '</td><td>' + message + '</td></tr>');
+				});
+			}
+
+			if (nrErrors >= validationMaxErrors) {
+				$('#max-errors-msg').removeClass('hidden');
+				return;
+			}
+
+			if (offset + num < data.total) {
+				if (isValidating) {
+					validateAttrMappingRec(request, offset + num, num, nrSuccess, nrErrors, validationMaxErrors);
+				} else {
+					$('#mapping-validation-container').html('<span>Pending ...</span>');
+				}
+			}
+		});
+	}
+
 	/**
 	 * Load result table from view-attribute-mapping-feedback.ftl
 	 * 
@@ -201,11 +286,23 @@
 	 * Hides rows of the table if atrribute source labels, names, descriptions
 	 * and tags have nothing to do with the query, hide the row
 	 */
-	function filterAttributeTable() {
-		var searchQuery = $('#attribute-search-field').val().toLowerCase(), attrLabel, attrName, attrDescription;
+	function filterAttributeTable(explainedAttributes, attributes) {
+		var searchQuery = $('#attribute-search-field').val().toLowerCase(), attrLabel, attrName, attrDescription, explainedQueryStrings;
 		if (searchQuery === '') {
 			$('#attribute-mapping-table>tbody').find('tr').each(function() {
-				$(this).show();
+				if (attributes !== null) {
+					if (attributes.indexOf($(this).attr('class').toLowerCase()) > -1) {
+						explainedQueryStrings = explainedAttributes[$(this).attr('class')];
+						$(this).show();
+						$(explainedQueryStrings).each(function() {
+							$('td.source-attribute-information').highlight(this.matchedWords);
+						});
+					} else {
+						$(this).hide();
+					}
+				} else {
+					$(this).show();
+				}
 			});
 		} else {
 			$('#attribute-mapping-table>tbody').find('tr').each(function() {
@@ -224,28 +321,42 @@
 
 	$(function() {
 
-		var editor, searchQuery, selectedAttributes, initialValue, algorithm, targetAttributeDataType, $textarea;
-		
+		// Initialize all variables
+		var editor, searchQuery, selectedAttributes, initialValue, algorithm, targetAttributeDataType, $textarea, requestBody = {
+			'mappingProjectId' : $('[name="mappingProjectId"]').val(),
+			'target' : $('[name="target"]').val(),
+			'source' : $('[name="source"]').val(),
+			'targetAttribute' : $('[name="targetAttribute"]').val()
+		}, explainedAttributes, attributes = [];
+
 		// tooltip placement
-		$(document).ready(function() {
-			$("[rel=tooltip]").tooltip({
-				placement : 'right'
-			});
-			var requestBody = {
-				'mappingProjectId': $('[name="mappingProjectId"]').val(), 
-				'target' : $('[name="target"]').val(),
-				'source' : $('[name="source"]').val(),
-				'targetAttribute' : $('[name="targetAttribute"]').val()
-			};
-			$.ajax({
-				type : 'POST',
-				url : molgenis.getContextUrl() + '/attributeMapping/explain',
-				data : JSON.stringify(requestBody),
-				contentType : 'application/json',
-				success : function(data) {
-					console.log(data)
+		$("[rel=tooltip]").tooltip({
+			placement : 'right'
+		});
+
+		// Get the explained attributes
+		$.ajax({
+			type : 'POST',
+			url : molgenis.getContextUrl() + '/attributeMapping/explain',
+			data : JSON.stringify(requestBody),
+			contentType : 'application/json',
+			success : function(result) {
+				explainedAttributes = result;
+
+				// Create an array of attributes which are explained
+				for ( var key in explainedAttributes) {
+					attributes.push(key.toLowerCase());
 				}
-			});
+
+				// Set attributes array to null if it is empty
+				if (attributes.length < 1) {
+					attributes = null;
+				}
+
+				// Call the filterAttributeTable to only show the attributes
+				// that are explained
+				filterAttributeTable(explainedAttributes, attributes);
+			}
 		});
 
 		// create ace editor
@@ -274,7 +385,10 @@
 			// update algorithm
 			algorithm = editor.getSession().getValue();
 
-			// update result
+			// validate mapping
+			validateAttrMapping(algorithm);
+
+			// preview mapping results
 			loadAlgorithmResult(algorithm);
 		});
 
@@ -345,7 +459,7 @@
 
 		// look for attributes in the attribute table
 		$('#attribute-search-field').on('onkeydown onpaste oninput change keyup', function(e) {
-			filterAttributeTable();
+			filterAttributeTable(explainedAttributes, attributes);
 		});
 
 		// when the map tab is selected, load its contents
