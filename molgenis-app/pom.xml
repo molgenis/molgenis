@@ -267,7 +267,6 @@
         	<artifactId>molgenis-data-mysql</artifactId>
         	<version>${project.version}</version>
         </dependency>
-<<<<<<< HEAD
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-hpofilter</artifactId>
@@ -275,8 +274,6 @@
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
-=======
->>>>>>> master
             <artifactId>molgenis-data-elasticsearch</artifactId>
             <version>${project.version}</version>
         </dependency>
