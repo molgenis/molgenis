@@ -62,7 +62,7 @@ public class MonogenicDiseaseCandidatesServiceAnnotatorTest
 				MonogenicDiseaseCandidatesServiceAnnotator.ANNOTATIONFIELD, MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(
 				ThousandGenomesServiceAnnotator.THGEN_MAF, MolgenisFieldTypes.FieldTypeEnum.DECIMAL));
-		metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(ExacAnnotator.EXAC_GMAF,
+		metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(ExacAnnotator.EXAC_AF,
 				MolgenisFieldTypes.FieldTypeEnum.DECIMAL));
 		metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(GoNLServiceAnnotator.GONL_MAF,
 				MolgenisFieldTypes.FieldTypeEnum.DECIMAL));
@@ -90,7 +90,7 @@ public class MonogenicDiseaseCandidatesServiceAnnotatorTest
 				MonogenicDiseaseCandidatesServiceAnnotator.ANNOTATIONFIELD, MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		metaDataCantAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(
 				ThousandGenomesServiceAnnotator.THGEN_MAF, MolgenisFieldTypes.FieldTypeEnum.DECIMAL));
-		metaDataCantAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(ExacAnnotator.EXAC_GMAF,
+		metaDataCantAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(ExacAnnotator.EXAC_AF,
 				MolgenisFieldTypes.FieldTypeEnum.DECIMAL));
 		metaDataCantAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(GoNLServiceAnnotator.GONL_MAF,
 				MolgenisFieldTypes.FieldTypeEnum.DECIMAL));
@@ -117,7 +117,7 @@ public class MonogenicDiseaseCandidatesServiceAnnotatorTest
 		entity.set(MonogenicDiseaseCandidatesServiceAnnotator.ANNOTATIONFIELD, "1|2|"
 				+ SnpEffServiceAnnotator.impact.HIGH + "|4|5");
 		entity.set(ThousandGenomesServiceAnnotator.THGEN_MAF, 0.1);
-		entity.set(ExacAnnotator.EXAC_GMAF, 0.1);
+		entity.set(ExacAnnotator.EXAC_AF, 0.1);
 		entity.set(GoNLServiceAnnotator.GONL_MAF, 0.2);
 		entity.set(ClinicalGenomicsDatabaseServiceAnnotator.GENERALIZED_INHERITANCE, "DOMINANT");
 		entity.set(ClinicalGenomicsDatabaseServiceAnnotator.INHERITANCE, "TEST2");

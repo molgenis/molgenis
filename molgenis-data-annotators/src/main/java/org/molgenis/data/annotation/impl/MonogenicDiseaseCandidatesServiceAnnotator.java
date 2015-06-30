@@ -145,7 +145,7 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 				"Annotation field does not contain the expected input (less items than expected)");
 		double thousandGenomesMAF = entity.getDouble(ThousandGenomesServiceAnnotator.THGEN_MAF) != null ? entity
 				.getDouble(ThousandGenomesServiceAnnotator.THGEN_MAF) : 0;
-		double exacMAF = entity.getDouble(ExacAnnotator.EXAC_GMAF) != null ? entity.getDouble(ExacAnnotator.EXAC_GMAF) : 0;
+		double exacMAF = entity.getDouble(ExacAnnotator.EXAC_AF) != null ? entity.getDouble(ExacAnnotator.EXAC_AF) : 0;
 		double gonlMAF = entity.getDouble(GoNLServiceAnnotator.GONL_MAF) != null ? entity
 				.getDouble(GoNLServiceAnnotator.GONL_MAF) : 0;
 		CgdDataProvider.generalizedInheritance cgdGenInh = entity
@@ -338,7 +338,7 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 		entityMetaData.add(new DefaultAttributeMetaData(ANNOTATIONFIELD, FieldTypeEnum.TEXT));
 		entityMetaData.add(new DefaultAttributeMetaData(ThousandGenomesServiceAnnotator.THGEN_MAF,
 				FieldTypeEnum.DECIMAL));
-		entityMetaData.add(new DefaultAttributeMetaData(ExacAnnotator.EXAC_GMAF, FieldTypeEnum.DECIMAL));
+		entityMetaData.add(new DefaultAttributeMetaData(ExacAnnotator.EXAC_AF, FieldTypeEnum.DECIMAL));
 		entityMetaData.add(new DefaultAttributeMetaData(GoNLServiceAnnotator.GONL_MAF, FieldTypeEnum.DECIMAL));
 		entityMetaData.add(new DefaultAttributeMetaData(
 				ClinicalGenomicsDatabaseServiceAnnotator.GENERALIZED_INHERITANCE, FieldTypeEnum.TEXT));
