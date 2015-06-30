@@ -1,17 +1,26 @@
 package org.molgenis.data.mapper.service;
 
 import java.util.Collection;
-import java.util.List;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
+import org.molgenis.data.mapper.service.impl.AlgorithmEvaluation;
 
 public interface AlgorithmService
 {
-	List<Object> applyAlgorithm(AttributeMetaData targetAttribute, String algorithm, Iterable<Entity> sourceEntities);
+	/**
+	 * Applies an algorithm to the given attribute of given source entities.
+	 * 
+	 * @param targetAttribute
+	 * @param algorithm
+	 * @param sourceEntities
+	 * @return algorithm evaluation for each source entity
+	 */
+	Iterable<AlgorithmEvaluation> applyAlgorithm(AttributeMetaData targetAttribute, String algorithm,
+			Iterable<Entity> sourceEntities);
 
 	/**
 	 * Applies an {@link AttributeMapping} to a source {@link Entity}

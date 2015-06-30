@@ -1,11 +1,9 @@
 package org.molgenis.data.mapper.service.impl;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 
 public class AlgorithmServiceImpl implements AlgorithmService
@@ -65,59 +64,33 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	}
 
 	@Override
-	public List<Object> applyAlgorithm(AttributeMetaData targetAttribute, String algorithm,
+	public Iterable<AlgorithmEvaluation> applyAlgorithm(AttributeMetaData targetAttribute, String algorithm,
 			Iterable<Entity> sourceEntities)
 	{
-		List<Object> derivedValues = new ArrayList<Object>();
-		Collection<String> attributeNames = getSourceAttributeNames(algorithm);
-		if (!attributeNames.isEmpty())
-		{
-			for (Entity entity : sourceEntities)
-			{
-				MapEntity mapEntity = createMapEntity(attributeNames, entity);
-				if (!StringUtils.isEmpty(algorithm))
-				{
-					try
-					{
-						Object result = ScriptEvaluator.eval(algorithm, mapEntity, entity.getEntityMetaData());
+		final Collection<String> attributeNames = getSourceAttributeNames(algorithm);
 
-						if (result != null)
-						{
-							switch (targetAttribute.getDataType().getEnumType())
-							{
-								case DATE:
-								case DATE_TIME:
-									derivedValues.add(Context.jsToJava(result, Date.class));
-									break;
-								case INT:
-									derivedValues.add(Integer.parseInt(Context.toString(result)));
-									break;
-								case DECIMAL:
-									derivedValues.add(Context.toNumber(result));
-									break;
-								case XREF:
-								case CATEGORICAL:
-									derivedValues.add(dataService.findOne(targetAttribute.getRefEntity().getName(),
-											Context.toString(result)).getIdValue());
-									break;
-								case MREF:
-								case CATEGORICAL_MREF:
-									derivedValues.add((NativeArray) result);
-									break;
-								default:
-									derivedValues.add(Context.toString(result));
-									break;
-							}
-						}
-					}
-					catch (RuntimeException e)
-					{
-						LOG.error("error converting result", e);
-					}
+		return Iterables.transform(sourceEntities, new Function<Entity, AlgorithmEvaluation>()
+		{
+			@Override
+			public AlgorithmEvaluation apply(Entity entity)
+			{
+				AlgorithmEvaluation algorithmResult = new AlgorithmEvaluation(entity);
+
+				Object result;
+				MapEntity mapEntity = createMapEntity(attributeNames, entity); // why is this necessary?
+				try
+				{
+					result = ScriptEvaluator.eval(algorithm, mapEntity, entity.getEntityMetaData());
 				}
+				catch (RuntimeException e)
+				{
+					return algorithmResult.errorMessage(e.getMessage());
+				}
+
+				Object derivedValue = convert(result, targetAttribute);
+				return algorithmResult.value(derivedValue);
 			}
-		}
-		return derivedValues;
+		});
 	}
 
 	private MapEntity createMapEntity(Collection<String> attributeNames, Entity entity)

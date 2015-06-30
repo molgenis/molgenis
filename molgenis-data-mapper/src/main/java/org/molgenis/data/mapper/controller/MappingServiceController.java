@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -37,6 +38,7 @@ import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
+import org.molgenis.data.mapper.service.impl.AlgorithmEvaluation;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
@@ -67,6 +69,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -269,14 +272,24 @@ public class MappingServiceController extends MolgenisPluginController
 		Query query = new QueryImpl().offset(offset.intValue()).pageSize(num.intValue());
 		String sourceEntityName = mappingServiceRequest.getSourceEntityName();
 		Iterable<Entity> sourceEntities = dataService.findAll(sourceEntityName, query);
-		List<Object> algorithmResults = algorithmService.applyAlgorithm(targetAttr, algorithm, sourceEntities);
 
 		long total = dataService.count(sourceEntityName, new QueryImpl());
-		long pageTotal = Iterables.size(sourceEntities); // FIXME dataService.count(sourceEntityName, query)
-		long nrSuccess = algorithmResults.size();
-		long nrErrors = pageTotal - nrSuccess;
+		long nrSuccess = 0, nrErrors = 0;
+		Map<String, String> errorMessages = new LinkedHashMap<String, String>();
+		for (AlgorithmEvaluation evaluation : algorithmService.applyAlgorithm(targetAttr, algorithm, sourceEntities))
+		{
+			if (evaluation.hasError())
+			{
+				errorMessages.put(evaluation.getEntity().getIdValue().toString(), evaluation.getErrorMessage());
+				++nrErrors;
+			}
+			else
+			{
+				++nrSuccess;
+			}
+		}
 
-		return new AttributeMappingValidationReport(total, nrSuccess, nrErrors);
+		return new AttributeMappingValidationReport(total, nrSuccess, nrErrors, errorMessages);
 	}
 
 	private static class AttributeMappingValidationReport
@@ -284,12 +297,15 @@ public class MappingServiceController extends MolgenisPluginController
 		private final Long total;
 		private final Long nrSuccess;
 		private final Long nrErrors;
+		private final Map<String, String> errorMessages;
 
-		public AttributeMappingValidationReport(Long total, Long nrSuccess, Long nrErrors)
+		public AttributeMappingValidationReport(Long total, Long nrSuccess, Long nrErrors,
+				Map<String, String> errorMessages)
 		{
 			this.total = total;
 			this.nrSuccess = nrSuccess;
 			this.nrErrors = nrErrors;
+			this.errorMessages = errorMessages;
 		}
 
 		@SuppressWarnings("unused")
@@ -308,6 +324,12 @@ public class MappingServiceController extends MolgenisPluginController
 		public Long getNrErrors()
 		{
 			return nrErrors;
+		}
+
+		@SuppressWarnings("unused")
+		public Map<String, String> getErrorMessages()
+		{
+			return errorMessages;
 		}
 	}
 
@@ -717,8 +739,21 @@ public class MappingServiceController extends MolgenisPluginController
 		AttributeMetaData targetAttribute = targetEntityMetaData != null ? targetEntityMetaData
 				.getAttribute(mappingServiceRequest.getTargetAttributeName()) : null;
 		Repository sourceRepo = dataService.getRepository(mappingServiceRequest.getSourceEntityName());
-		List<Object> calculatedValues = algorithmService.applyAlgorithm(targetAttribute,
+
+		Iterable<AlgorithmEvaluation> algorithmEvaluations = algorithmService.applyAlgorithm(targetAttribute,
 				mappingServiceRequest.getAlgorithm(), sourceRepo);
+
+		List<Object> calculatedValues = Lists.newArrayList(Iterables.transform(algorithmEvaluations,
+				new Function<AlgorithmEvaluation, Object>()
+				{
+
+					@Override
+					public Object apply(AlgorithmEvaluation algorithmEvaluation)
+					{
+						return algorithmEvaluation.getValue();
+					}
+				}));
+
 		return ImmutableMap.<String, Object> of("results", calculatedValues, "totalCount", Iterables.size(sourceRepo));
 	}
 
