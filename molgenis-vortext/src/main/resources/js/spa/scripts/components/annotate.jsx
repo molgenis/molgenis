@@ -3,7 +3,7 @@ define(function (require) {
   'use strict';
 
   var React = require("react");
- // var $ = require("jquery");
+  var $ = require("jquery");
 
   var textSelected = function() {
     return /(\w{2,}\W{1,6}){3}/.test(window.document.getSelection().toString());

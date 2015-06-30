@@ -17,7 +17,8 @@ require.config({
     'immutable': "spa/scripts/vendor/immutable",
 
     'JSXTransformer': "spa/scripts/vendor/JSXTransformer",
-    'PDFJS': "spa/scripts/vendor/pdfjs/pdf"
+    'PDFJS': "spa/scripts/vendor/pdfjs/pdf",
+    'bootstrap': '/js/bootstrap.min'
   },
   shim: {
     'PDFJS': {

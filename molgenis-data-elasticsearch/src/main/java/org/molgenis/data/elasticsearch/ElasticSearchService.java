@@ -906,10 +906,12 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 	// Checks if entities can be deleted, have no ref entities pointing to it
 	private boolean canBeDeleted(Iterable<?> ids, EntityMetaData meta)
 	{
+
 		List<Pair<EntityMetaData, List<AttributeMetaData>>> referencingMetas = EntityUtils
 				.getReferencingEntityMetaData(meta, dataService);
 		if (referencingMetas.isEmpty()) return true;
 
+		// TODO check if in transaction !
 		for (Pair<EntityMetaData, List<AttributeMetaData>> pair : referencingMetas)
 		{
 			EntityMetaData refEntityMetaData = pair.getA();

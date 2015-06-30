@@ -1,30 +1,30 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 
-<#assign css=['spa.css']>
-<#assign js=[]>
+<#assign css=['font-awesome.min.css','foundation.css','style.css','spa.css']>
+<#assign js=['bootstrap.min.js']>
 
 <@header css js/>
 	<script data-main="/js/main" src="/js/require.js"></script>
 	
 	<script>
-   		CSRF_TOKEN = "dGG+9uVIBdMzc4FrzD3zHhO2R6IzI2dop9FQWO4HH8i8LE0jiQA+qEBqFoDWZP7Tp6PA/BIlcvs9hT/8";
-  	</script>
-
-	<div id="createForm"></div>
-	<div class="row" id="upload">
-		<div class="col-md-12" id="buttonBar"></div>
-	</div>
+		//TODO if vortex server is running
+   		CSRF_TOKEN = "dummy";
+   		FILE_META_ID = "${publicationPdfFileMetaId!}";
+   	</script>
 
 	<div class="row">
 		<div class="col-md-12">
-			<main>
-      			<div id="viewer"></div>
-      			<div id="side">
-        			<div id="marginalia"></div>
-      			</div>
-			</main>
+			<div id="buttonBar"></div>
+      			
+			<div id="viewer"></div>
+			
+      		<div id="side">
+      			<div class="clearfix"></div>
+        		<div id="marginalia"></div>
+      		</div>
 		</div>
 	</div>
-
+	
+	
 <@footer />

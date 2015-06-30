@@ -5,7 +5,6 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -61,17 +60,13 @@ public class FileDownloadController
 				response.setContentLength(size.intValue());
 			}
 
-			response.setHeader("Content-Disposition", "attachment; filename=" + outputFilename.replace(" ", "_"));
-
-			InputStream is = new FileInputStream(fileStoreFile);
-			try
-			{
-				FileCopyUtils.copy(is, response.getOutputStream());
-			}
-			finally
-			{
-				is.close();
-			}
+			response.setHeader("Content-Disposition", "attachment; filename=" + normalizeFilename(outputFilename));
+			FileCopyUtils.copy(new FileInputStream(fileStoreFile), response.getOutputStream());
 		}
+	}
+
+	private String normalizeFilename(String filename)
+	{
+		return filename.replace(" ", "_").replace(",", "").replace(";", "");
 	}
 }

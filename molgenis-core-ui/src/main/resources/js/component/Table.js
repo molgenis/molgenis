@@ -938,4 +938,7 @@
 	_.extend(molgenis.ui, {
 		Table: React.createFactory(Table)
 	});
+	_.extend(molgenis.ui, {
+		TableComponent: Table
+	});
 }(_, React, molgenis));

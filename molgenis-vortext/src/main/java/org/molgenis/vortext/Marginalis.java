@@ -1,11 +1,15 @@
 package org.molgenis.vortext;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
-public class AnnotationGroup
+/**
+ * Represents a block on the right side of the screen
+ */
+public class Marginalis implements Iterable<Annotation>
 {
 	private String type;
-	private String id;
 	private String description;
 	private String title;
 	private List<Annotation> annotations;
@@ -18,16 +22,6 @@ public class AnnotationGroup
 	public void setType(String type)
 	{
 		this.type = type;
-	}
-
-	public String getId()
-	{
-		return id;
-	}
-
-	public void setId(String id)
-	{
-		this.id = id;
 	}
 
 	public String getDescription()
@@ -50,8 +44,18 @@ public class AnnotationGroup
 		this.title = title;
 	}
 
+	public void addAnnotation(Annotation annotation)
+	{
+		getAnnotations().add(annotation);
+	}
+
 	public List<Annotation> getAnnotations()
 	{
+		if (annotations == null)
+		{
+			annotations = new ArrayList<Annotation>();
+		}
+
 		return annotations;
 	}
 
@@ -61,10 +65,9 @@ public class AnnotationGroup
 	}
 
 	@Override
-	public String toString()
+	public Iterator<Annotation> iterator()
 	{
-		return "AnnotationGroup [type=" + type + ", id=" + id + ", description=" + description + ", title=" + title
-				+ ", annotations=" + annotations + "]";
+		return getAnnotations().iterator();
 	}
 
 }

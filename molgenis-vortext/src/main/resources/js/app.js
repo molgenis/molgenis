@@ -2,10 +2,12 @@
 define(function (require) {
   'use strict';
   
+  var _ = require("underscore");
   var React = require("react");
   var FileUtil = require("spa/helpers/fileUtil");
   var Backbone = require("backbone");
   var Molgenis = window.molgenis;
+  var self = this;
   
   // Models
   var documentModel = new (require("spa/models/document"))();
@@ -19,106 +21,126 @@ define(function (require) {
   var documentComponent = React.render(new Document({pdf: documentModel, marginalia: marginaliaModel}), document.getElementById("viewer"));
   var marginaliaComponent = React.render(new Marginalia({marginalia: marginaliaModel}), document.getElementById("marginalia"));
   
-  var processFile = function(data) {
-	  var upload = FileUtil.upload("/plugin/textmining/upload", data);
+  /**
+   * Show the new opened pdf in the viewer and upload it to the server to be annotated 
+   */
+  var processFile = function(data, file) {
+	  buttonBarComponent.showSpinner();
+	  
 	  documentModel.loadFromData(data);
-	  upload.then(function(result) {
+	  
+	  var uri = "/plugin/textmining/annotate?filename=" + encodeURIComponent(file.name) + "&size=" + file.size;
+	  FileUtil.upload(uri, data).then(function(result) {
 		  var marginalia = JSON.parse(result);
 		  marginaliaModel.reset(marginaliaModel.parse(marginalia));
-		  topBarComponent.enableSaveButton();
+		 
+		  buttonBarComponent.hideSpinner();
 	 });
   };
   
-  var save = function(formData) {
-	  //TODO does not work in IE < 10 (FormData)
-	  topBarComponent.showSpinner();
+  /**
+   * Save the currently visible annotations
+   */
+  var saveAnnotations = function() {
+	  buttonBarComponent.disableSaveButton();
+	  buttonBarComponent.showSpinner();
+	  
 	  $.ajax({
-		  url: '/api/v1/Publication',
-		  type: 'POST',
-		  data: formData,
-		  contentType: false,
-		  processData:false,
-		  async: true,
-		  success: function(data, textStatus, jqXHR) {
-			  topBarComponent.disableSaveButton();
-			  var location = jqXHR.getResponseHeader('Location');
-			  var id = location.substring(location.lastIndexOf('/') + 1)
-			  saveMarginalia(id);
-		   },
-		   error: function() {
-			   topBarComponent.hideSpinner();
-		   }
-	  });  
+		  url: "/plugin/textmining/save",
+	      type: "POST",
+	      contentType : 'application/json',
+	      async: true,
+	      data: JSON.stringify({marginalia: marginaliaModel.toJSON()}),
+	      success: function() {
+	    	  buttonBarComponent.hideSpinner();
+	      },
+	      error: function() {
+	    	  buttonBarComponent.hideSpinner();
+	      }
+	  }); 
   };
   
-  var topBarComponent = React.render(new ButtonBar({onFileChange: processFile, onFileSave: save}), document.getElementById("buttonBar"));
+  var openExistingPdf = function(pdfFile) {
+	  showPdf(pdfFile.id);
+  }
   
-  var saveMarginalia = function(publicationId) {
+  var buttonBarComponent = React.render(new ButtonBar({onFileChange: processFile, onSave: saveAnnotations, onPdfSelect: openExistingPdf}), document.getElementById("buttonBar"));
+
+  /**
+   * Download a pdf with marginalia and show it
+   */
+  var showPdf = function(fileMetaId) {
+	  buttonBarComponent.disableSaveButton();
+	  buttonBarComponent.showSpinner();
+	
+	  documentModel.loadFromUrl("/files/" + fileMetaId);
+	  
 	  $.ajax({
-		  url: '/plugin/textmining/updatePublication/' + publicationId,
-		  type: 'POST',
-		  data: JSON.stringify(marginaliaModel.toJSON()),
-		  contentType: 'application/json',
-		  async: true,
-		  success: function(data, textStatus, jqXHR) {
-			  Molgenis.createAlert([{message: "Saved pdf."}], "success");
-			  topBarComponent.hideSpinner();
-		  }, 
-		  error: function() {
-			  Molgenis.createAlert([{message: "Could not save pdf."}], "error");
-			  topBarComponent.hideSpinner();
+		  url: "/plugin/textmining/" + fileMetaId + "/annotations",
+	      type: "GET",
+	      async: true,
+	      success: function(marginalia) {
+	    	  marginaliaModel.reset(marginaliaModel.parse(marginalia));
+	    	  buttonBarComponent.hideSpinner();
 		  }
-	  });  
-  };
+	  });
+  }
+  
+  //Check if there is a previous viewed pdf (from session)
+  if (FILE_META_ID !== "") {
+	 showPdf(FILE_META_ID);
+  }
   
   // Dispatch logic
   // Listen to model change callbacks -> trigger updates to components
   marginaliaModel.on("all", function(e, obj) {
-    switch(e) {
-    case "reset":
-      documentModel.annotate(marginaliaModel.getActive());
-      marginaliaComponent.forceUpdate();
-      break;
-    case "annotations:change":
-      break;
-    case "change:active":
-    case "annotations:add":
-    case "annotations:remove":
-      documentModel.annotate(marginaliaModel.getActive());
-      marginaliaComponent.forceUpdate();
-      break;
-    case "annotations:select":
-      documentComponent.setState({select: obj});
-      break;
-    default:
-      marginaliaComponent.forceUpdate();
-    }
+	  switch(e) {
+	  case "reset":
+		  documentModel.annotate(marginaliaModel.getActive());
+		  marginaliaComponent.forceUpdate();
+		  break;
+	  case "annotations:change":
+		  break;
+	  case "change:active":
+		  documentModel.annotate(marginaliaModel.getActive());
+		  marginaliaComponent.forceUpdate();
+		  break;
+	  case "annotations:add":
+	  case "annotations:remove":
+		  documentModel.annotate(marginaliaModel.getActive());
+		  marginaliaComponent.forceUpdate();
+		  buttonBarComponent.enableSaveButton();
+		  break;
+	  case "annotations:select":
+		  documentComponent.setState({select: obj});
+		  break;
+	  default:
+		  marginaliaComponent.forceUpdate();
+	  }
   });
 
   documentModel.on("all", function(e, obj) {
-	switch(e) {
-    case "change:raw":
-      documentComponent.setState({
-        fingerprint: documentModel.get("fingerprint")
-      });
-      break;
-    case "change:binary":
-      marginaliaModel.reset();
-      break;
-    case "pages:change:state":
-      if(obj.get("state") == window.RenderingStates.HAS_CONTENT) {
-        documentModel.annotate(marginaliaModel.getActive());
-      }
-      documentComponent.forceUpdate();
-      break;
-    case "pages:change:annotations":
-      documentModel.annotate(marginaliaModel.getActive());
-      documentComponent.forceUpdate();
-      break;
-    default:
-      break;
-    }
+	  switch(e) {
+	  case "change:raw":
+		  documentComponent.setState({
+			  fingerprint: documentModel.get("fingerprint")
+		  });
+		  break;
+	  case "change:binary":
+		  break;
+	  case "pages:change:state":
+		  if(obj.get("state") == window.RenderingStates.HAS_CONTENT) {
+			  documentModel.annotate(marginaliaModel.getActive());
+		  }
+		  documentComponent.forceUpdate();
+		  break;
+	  case "pages:change:annotations":
+		  documentModel.annotate(marginaliaModel.getActive());
+		  documentComponent.forceUpdate();
+		  break;
+	  default:
+		  break;
+	  }
   });
   
- 
 });

@@ -3,7 +3,7 @@ define(function (require) {
   'use strict';
 
   var _ = require("underscore");
-  //var $ = require("jquery");
+  var $ = require("jquery");
   var Backbone = require("backbone");
   var Annotation = require('./annotation');
 
