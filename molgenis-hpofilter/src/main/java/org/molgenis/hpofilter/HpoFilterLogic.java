@@ -98,6 +98,9 @@ class HpoFilterLogic {
 		while (e.hasNext()) {
 			term = e.next();
 			sb.append(term.hpo());
+			if (!term.recursive()) {
+				sb.append("[Non-recursive]");
+			}
 			if (e.hasNext()) {
 				sb.append(" AND ");
 			}

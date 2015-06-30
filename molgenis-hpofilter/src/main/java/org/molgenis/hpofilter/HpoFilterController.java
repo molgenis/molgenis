@@ -15,12 +15,18 @@ import java.util.Map;
 import java.util.Stack;
 
 import org.apache.commons.lang3.StringUtils;
+import org.dom4j.tree.DefaultAttribute;
+import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryDecoratorFactory;
+import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.hpofilter.data.GeneMapProvider;
 import org.molgenis.hpofilter.data.HGNCLocations;
@@ -72,8 +78,6 @@ public class HpoFilterController extends MolgenisPluginController
 		boolean showEntitySelect = true;
 		List<EntityMetaData> emds = Lists.newArrayList();
 		
-		if (!hpoFilterDataProvider.isReady())
-			hpoFilterDataProvider.getData();
 		try {
 			hgncLocations = hgncProvider.getHgncLocations();
 		} catch (IOException e) {
@@ -202,11 +206,22 @@ public class HpoFilterController extends MolgenisPluginController
 				System.out.println(hpo+" is in group "+group+", has ID "+id+" and has recursive set to "+recursive);
 			}
 			
+			newEntityMetaData = new DefaultEntityMetaData(newEntityName,
+					entityMetaData);
+			newEntityMetaData.setLabel(newEntityName);
+			
+			AttributeMetaData symbolsMetaData = new DefaultAttributeMetaData("GENE_SYMBOLS", MolgenisFieldTypes.FieldTypeEnum.STRING);
+			AttributeMetaData inputMetaData = new DefaultAttributeMetaData("FILTER_INPUT", MolgenisFieldTypes.FieldTypeEnum.STRING);
+			DefaultAttributeMetaData filterAnnotationMetaData = new DefaultAttributeMetaData("HPO_filter", MolgenisFieldTypes.FieldTypeEnum.COMPOUND);
+			filterAnnotationMetaData.addAttributePart(symbolsMetaData);
+			filterAnnotationMetaData.addAttributePart(inputMetaData);
+			newEntityMetaData.addAttributeMetaData(filterAnnotationMetaData);
+			
 			filteredEntities = new Stack<Entity>();
 			
 			Iterator<Entity> e = repository.iterator();
 			while (e.hasNext()) {
-				Entity entity = e.next();
+				Entity entity = new MapEntity(e.next(), newEntityMetaData);
 				chrom = entity.getString("#CHROM");
 				pos = entity.getLong("POS");
 				locus =  new Locus(chrom, pos);
@@ -214,11 +229,14 @@ public class HpoFilterController extends MolgenisPluginController
 				
 				for (String gene : genes) {
 					if (hpoFilterLogic.inputContainsGene(inputSet, gene)) {
+						entity.set("GENE_SYMBOLS", StringUtils.join(genes,","));
+						entity.set("FILTER_INPUT", hpoFilterLogic.getInputString(inputSet));
 						filteredEntities.add(entity);
 						pass++;
 						break;
 					}
 				}
+				
 				count++;
 				if (count%500 == 0) {
 					fail = count - pass;
@@ -229,15 +247,13 @@ public class HpoFilterController extends MolgenisPluginController
 			
 			if (!filteredEntities.isEmpty()) {
 				System.out.println("Adding "+pass+" filtered variants to "+newEntityName);
-				newEntityMetaData = new DefaultEntityMetaData(newEntityName,
-						entityMetaData);
-				newEntityMetaData.setLabel(newEntityName);
+				
 				newRepository = dataService.getMeta().addEntityMeta(newEntityMetaData);
 				
 				newRepository.add(filteredEntities);
 				
 				newRepository.close();
-				return "success%Filtering succeded. Added "+pass+" filtered variants to "+newEntityName+".";
+				return "success%Filtering succeded. Added "+pass+" filtered variants to "+newEntityName+". <a href=\"http://localhost:8080/menu/main/dataexplorer?entity="+newEntityName+"\">Click to view results</a>";
 			}else {
 				return "success%Filtering succeded. No entities passed filter, and no new entity has been created.";
 			}
@@ -252,6 +268,4 @@ public class HpoFilterController extends MolgenisPluginController
 	{
 		return dataService.hasRepository(entityName);
 	}
-
-	
 }
