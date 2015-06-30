@@ -56,7 +56,7 @@ public class ClinVarServiceAnnotatorTest extends AbstractAnnotatorTest
 
 		when(clinvarDataProvider.getClinvarData()).thenReturn(clinvarDataMap);
 
-		annotator = new ClinVarServiceAnnotator(settings, annotationService, clinvarDataProvider);
+		annotator = new ClinVarServiceAnnotator(settings, clinvarDataProvider);
 	}
 
 	@Test

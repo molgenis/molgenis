@@ -13,20 +13,18 @@ import java.util.List;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.utils.AnnotatorUtils;
-import org.molgenis.data.annotation.utils.HgncLocationsUtils;
 import org.molgenis.data.annotation.LocusAnnotator;
 import org.molgenis.data.annotation.impl.datastructures.Locus;
+import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
+import org.molgenis.data.annotation.utils.AnnotatorUtils;
+import org.molgenis.data.annotation.utils.HgncLocationsUtils;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 /**
@@ -55,7 +53,6 @@ import org.springframework.stereotype.Component;
 public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 {
 	private final MolgenisSettings molgenisSettings;
-	private final AnnotationService annotatorService;
 	private final HgncLocationsProvider hgncLocationsProvider;
 
 	private static final String NAME = "dbNSFP-Gene";
@@ -95,18 +92,11 @@ public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 	static final String ESSENTIAL_GENE = "Essential_gene";
 
 	@Autowired
-	public DbnsfpGeneServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService,
+	public DbnsfpGeneServiceAnnotator(MolgenisSettings molgenisSettings,
 			HgncLocationsProvider hgncLocationsProvider) throws IOException
 	{
 		this.molgenisSettings = molgenisSettings;
-		this.annotatorService = annotatorService;
 		this.hgncLocationsProvider = hgncLocationsProvider;
-	}
-
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		annotatorService.addAnnotator(this);
 	}
 
 	@Override
@@ -151,7 +141,7 @@ public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 							int lineSplitIndex = 0;
 							HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
-							for (AttributeMetaData feature : getOutputMetaData().getAtomicAttributes())
+							for (AttributeMetaData feature : getOutputMetaData())
 							{
 								if (feature != null)
 								{
@@ -191,43 +181,49 @@ public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 	}
 
 	@Override
-	public EntityMetaData getOutputMetaData()
+	public List<AttributeMetaData>  getOutputMetaData()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
+		List<AttributeMetaData>  metadata = new ArrayList<>();
 
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GENE_NAME, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ENSEMBL_GENE, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CHR, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GENE_OLD_NAMES, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GENE_OTHER_NAMES, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(UNIPROT_ACC, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(UNIPROT_ID, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ENTREZ_GENE_ID, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CCDS_ID, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(REFSEQ_ID, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(UCSC_ID, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(MIM_ID, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GENE_FULL_NAME, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(PATHWAY_UNIPROT, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(PATHWAY_CONSENSUSPATHDB, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(FUNCTION_DESCRIPTION, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(DISEASE_DESCRIPTION, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(MIM_PHENOTYPE_ID, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(MIM_DISEASE, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(TRAIT_ASSOCIATION_GWAS, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GO_SLIM_BIOLOGICAL_PROCESS, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GO_SLIM_CELLULAR_COMPONENT, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GO_SLIM_MOLECULAR_FUNCTION, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(EXPRESSION_EGENETICS, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(EXPRESSION_GNF_ATLAS, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(INTERACTIONS_INTACT, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(INTERACTIONS_BIOGRID, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(INTERACTIONS_CONSENSUSPATHDB, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(P_HI, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(P_REC, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(KNOWN_REC_INFO, FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ESSENTIAL_GENE, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(GENE_NAME, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(ENSEMBL_GENE, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(CHR, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(GENE_OLD_NAMES, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(GENE_OTHER_NAMES, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(UNIPROT_ACC, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(UNIPROT_ID, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(ENTREZ_GENE_ID, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(CCDS_ID, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(REFSEQ_ID, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(UCSC_ID, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(MIM_ID, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(GENE_FULL_NAME, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(PATHWAY_UNIPROT, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(PATHWAY_CONSENSUSPATHDB, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(FUNCTION_DESCRIPTION, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(DISEASE_DESCRIPTION, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(MIM_PHENOTYPE_ID, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(MIM_DISEASE, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(TRAIT_ASSOCIATION_GWAS, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(GO_SLIM_BIOLOGICAL_PROCESS, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(GO_SLIM_CELLULAR_COMPONENT, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(GO_SLIM_MOLECULAR_FUNCTION, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(EXPRESSION_EGENETICS, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(EXPRESSION_GNF_ATLAS, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(INTERACTIONS_INTACT, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(INTERACTIONS_BIOGRID, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(INTERACTIONS_CONSENSUSPATHDB, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(P_HI, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(P_REC, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(KNOWN_REC_INFO, FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(ESSENTIAL_GENE, FieldTypeEnum.TEXT));
 
 		return metadata;
+	}
+
+	@Override
+	public AnnotatorInfo getInfo()
+	{
+		return AnnotatorInfo.create(Status.INDEV, Type.UNUSED, "unknown", "no description", getOutputMetaData());
 	}
 }

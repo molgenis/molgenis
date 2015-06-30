@@ -24,6 +24,7 @@
 	</form>
 	
 	<br/>
+	<div style="overflow-x: auto">
 	<table class="table table-bordered">
 		<thead>
                 <th></th>
@@ -67,4 +68,5 @@
 			</#list>
 		</tbody>
 	</table>
+	</div>
 </div>

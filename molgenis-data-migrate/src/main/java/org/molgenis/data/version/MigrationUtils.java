@@ -22,7 +22,7 @@ public class MigrationUtils
 	public static final String DB_KEY = "db_uri";
 	public static final String MOLGENIS_HOME_KEY = "molgenis.home";
 
-	public static File propertiesFile;
+	static File propertiesFile;
 
 	private static String getServerProperty(String key)
 	{
