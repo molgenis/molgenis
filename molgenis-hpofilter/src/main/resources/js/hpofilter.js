@@ -5,6 +5,7 @@
     var selectedEntityName;
     var inputArray = [];
     var invoker;
+    var autocompleteTimer;
  
     $(function () {
     	/* the naming of the classes for these divs can be confusing.
@@ -191,18 +192,23 @@
 
 		// listen for input on hpo terms for autocompletion
         $('#inputs').on('keyup paste', '.term-input', function() {
-        	if (this.value.length > 2) {
-	        	invoker = this;
+        	clearTimeout(autocompleteTimer);
+        	autocompleteTimer = setTimeout(autoComplete(this), 1000);
+        });
+        
+        function autoComplete (input) {
+        	if (input.value.length > 2) {
+	        	invoker = input;
 	        	$.get(molgenis.getContextUrl() + '/ac',
 	        	{
-	        	search:this.value
+	        	search:input.value
 	        	}, function(data) {
 	        		document.getElementById('term-suggestions').innerHTML = data;
 	        	});
 		    }else{
 		    	document.getElementById('term-suggestions').innerHTML = "";
 		    }
-        });
+        }
         
         // fill in term once user selects a phenotype
         $('#term-suggestions').on('click', '.term-select', function() {
@@ -212,6 +218,7 @@
         });	
         
         $('#filter-submit').on('click', null, function() {
+        	document.getElementById('parent-alert-div').innerHTML = "";
         	if (selectedEntity) {
 	        	var termArray = [];
 	        	// loop through each *term* group
