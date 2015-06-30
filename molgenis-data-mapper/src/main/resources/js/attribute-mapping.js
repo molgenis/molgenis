@@ -90,13 +90,19 @@
 		return result;
 	}
 
-	var validationMaxErrors = 100;
 	var timeoutId, isValidating;
 	
-	/**
-	 * TODO
-	 */
+
+		/**
+		 * Validate algorithm on source entities, render UI component that
+		 * displays the number of total/success/errors and corresponding error
+		 * messages. Stops after a max. number of validation errors.  
+		 */
 	function validateAttrMapping(algorithm) {
+		var validationDelay = 2000;
+		var validationBatchSize = 500;
+		var validationMaxErrors = 100;
+		
 		isValidating = false;
 		if(timeoutId) {
 			clearTimeout(timeoutId);
@@ -121,12 +127,12 @@
 			items.push('<span class="label label-danger"><a class="validation-errors-anchor" href="#validation-error-messages-modal" data-toggle="modal" data-target="#validation-error-messages-modal">Errors: <span id="validation-errors">0</span></a></span>&nbsp;');
 			items.push('<em class="hidden" id="max-errors-msg">(Validation aborted, encountered too many errors)</em>');
 			$('#mapping-validation-container').html(items.join(''));
-			validateAttrMappingRec(request, 0, 500, 0, 0);
-		}, 2000);
+			validateAttrMappingRec(request, 0, validationBatchSize, 0, 0, validationMaxErrors);
+		}, validationDelay);
 		
 	}
 	
-	function validateAttrMappingRec(request, offset, num, nrSuccess, nrErrors) {
+	function validateAttrMappingRec(request, offset, num, nrSuccess, nrErrors, validationMaxErrors) {
 		$.ajax({
 			type : 'POST',
 			url : molgenis.getContextUrl() + '/validateAttrMapping',
@@ -157,7 +163,7 @@
 			
 			if(offset + num < data.total) {
 				if(isValidating) {
-					validateAttrMappingRec(request, offset + num, num, nrSuccess, nrErrors);
+					validateAttrMappingRec(request, offset + num, num, nrSuccess, nrErrors, validationMaxErrors);
 				} else {
 					$('#mapping-validation-container').html('<span>Pending ...</span>');
 				}
