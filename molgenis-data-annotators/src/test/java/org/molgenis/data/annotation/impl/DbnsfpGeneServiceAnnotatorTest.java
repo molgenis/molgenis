@@ -39,7 +39,7 @@ public class DbnsfpGeneServiceAnnotatorTest extends AbstractAnnotatorTest
 		Map<String, HGNCLocations> locationsMap = Collections.singletonMap("USP5", new HGNCLocations("USP5", 6961292l,
 				6975796l, "12"));
 		when(hgncLocationsProvider.getHgncLocations()).thenReturn(locationsMap);
-		annotator = new DbnsfpGeneServiceAnnotator(settings, annotationService, hgncLocationsProvider);
+		annotator = new DbnsfpGeneServiceAnnotator(settings, hgncLocationsProvider);
 	}
 
 	@Test
