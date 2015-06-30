@@ -253,7 +253,7 @@ public class HpoFilterController extends MolgenisPluginController
 				newRepository.add(filteredEntities);
 				
 				newRepository.close();
-				return "success%Filtering succeded. Added "+pass+" filtered variants to "+newEntityName+". <a href=\"http://localhost:8080/menu/main/dataexplorer?entity="+newEntityName+"\">Click to view results</a>";
+				return "success%Filtering succeded. Added "+pass+" filtered variants to "+newEntityName+". <a href=\"/menu/main/dataexplorer?entity="+newEntityName+"\">Click to view results</a>";
 			}else {
 				return "success%Filtering succeded. No entities passed filter, and no new entity has been created.";
 			}

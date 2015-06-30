@@ -8,10 +8,14 @@
 
 <#if selectedEntityName??>
 <div id="entity-class" class="well clearfix">
-    <h3 id="filter-title">HPO Filter</h3>
-    <span id="header-tip">Select an entity to begin</span>
-
+	<div class="col-md-8">
+	    <h3 id="filter-title">HPO Filter</h3>
+	    <span id="header-tip">Select an entity to begin</span>
+	</div>
     <#if showEntitySelect?string('true', 'false') == 'true'>
+        
+	<div class="col-md-3">
+		<#if showEntitySelect?string('true', 'false') == 'true'>
         <div class="dropdown pull-right">
             <button class="btn btn-default dropdown-toggle" type="button" id="dropdown-menu-entities" data-toggle="dropdown">
                 Choose an entity <span class="caret"></span>
@@ -24,6 +28,9 @@
                 </#list>
             </ul>
         </div>
+    </#if>
+    </div>
+</div>
     </#if>
 </div>
 
