@@ -601,7 +601,7 @@ public class RestController
 
 	@RequestMapping(value = "/{entityName}", method = POST)
 	public void create(@PathVariable("entityName") String entityName, @RequestBody Map<String, Object> entityMap,
-			HttpServletResponse response) throws EntityNotFoundException
+			HttpServletResponse response)
 	{
 		if (entityMap == null)
 		{
