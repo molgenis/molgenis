@@ -2,7 +2,7 @@
 (function(_, React, molgenis) {
 	"use strict";
 	
-	var div = React.DOM.div, table = React.DOM.table, thead = React.DOM.thead, tbody = React.DOM.tbody, tr = React.DOM.tr, th = React.DOM.th, td = React.DOM.td, a = React.DOM.a, span = React.DOM.span, em = React.DOM.em;
+	var div = React.DOM.div, table = React.DOM.table, thead = React.DOM.thead, tbody = React.DOM.tbody, tr = React.DOM.tr, th = React.DOM.th, td = React.DOM.td, a = React.DOM.a, span = React.DOM.span, em = React.DOM.em, br = React.DOM.br;
 	
 	var api = new molgenis.RestClientV2();
 	
@@ -15,6 +15,10 @@
 		},
 		_isExpandedAttr: function(attr, selectedAttrs) {
 			return selectedAttrs[attr.name] !== null && selectedAttrs[attr.name] !== undefined;
+		},
+		_canExpandAttr: function(attr, path) {
+			// expanding mrefs in expanded attr not supported
+			return molgenis.isRefAttr(attr) && !(molgenis.isMrefAttr(attr) && _.size(path) > 0);
 		}
 	};
 	
@@ -63,12 +67,15 @@
 			};
 		},
 		componentDidMount: function() {
-			this._refreshData(this.props);
+			this._refreshData(this.props, this.state);
 		},
-		componentWillReceiveProps : function(nextProps) {
-			this.setState({attrs: nextProps.attrs}, function() {
-				this._refreshData(nextProps);	
-			});
+		componentWillReceiveProps : function(nextProps) {			
+			// reset pager on query change
+			var nextState = _.extend({}, this.state, {attrs: nextProps.attrs});
+			if(JSON.stringify(this.props.query) !== JSON.stringify(nextProps.query)) {
+				_.extend(nextState, {start: 0});
+			}
+			this._refreshData(nextProps, nextState);
 		},
 		render: function() {
 			if(this.state.data === null) {
@@ -130,33 +137,34 @@
 				)
 			);
 		},
-		_refreshData: function(props) {
+		_refreshData: function(props, state) {
 			var opts = {
 				attrs: {'~id' : null}, // always include the id attribute
 				num : props.maxRows
 			};
 			
 			// add selected attrs
-			if(this.state.attrs && _.size(this.state.attrs) > 0) {
-				_.extend(opts.attrs, this.state.attrs);
+			if(state.attrs && _.size(state.attrs) > 0) {
+				_.extend(opts.attrs, state.attrs);
 			}
 			
 			if(props.query) {
 				opts.q = props.query.q; 
 			}
-			if(this.state.sort) {
+			if(state.sort) {
 				opts.sort = {
 					'orders' : [ {
-						'attr' : this.state.sort.attr.name,
-						'direction' : this.state.sort.order
+						'attr' : state.sort.attr.name,
+						'direction' : state.sort.order
 					} ]
 				};
 			}
-			if(this.state.start !== 0) {
-				opts.start = this.state.start; 
+			if(state.start !== 0) {
+				opts.start = state.start; 
 			}
 			api.get(props.entity, opts).done(function(data) {
-				this.setState({data: data});
+				var newState = _.extend({}, state, {data: data});
+				this.setState(newState);
 			}.bind(this));
 		},
 		_handleExpand: function(e) {
@@ -170,9 +178,7 @@
 				attrsAtDepth = attrsAtDepth[attr];
 			}
 			
-			this.setState({attrs: attrs}, function() {
-				this._refreshData(this.props);
-			});
+			this._refreshData(this.props, _.extend({}, this.state, {attrs: attrs}));
 		},
 		_handleCollapse: function(e) {
 			var attrs = _.extend({}, this.state.attrs);
@@ -186,9 +192,7 @@
 				}
 			}
 			
-			this.setState({attrs: attrs}, function() {
-				this._refreshData(this.props);
-			});
+			this._refreshData(this.props, _.extend({}, this.state, {attrs: attrs}));
 		},
 		_handleCreate: function() {
 			this._resetTable();
@@ -203,20 +207,14 @@
 			this.props.onRowDelete();
 		},
 		_resetTable: function() {
-			this.setState({start : 0}, function() {
-				this._refreshData(this.props);
-			});
+			this._refreshData(this.props, _.extend({}, this.state, {start: 0}));
 		},
 		_handleSort: function(e) {
-			this.setState({sort : e}, function() {
-				this._refreshData(this.props);
-			});
+			this._refreshData(this.props, _.extend({}, this.state, {sort: e}));
 			this.props.onSort(e);
 		},
 		_handlePageChange: function(e) {
-			this.setState({start : e.start}, function() {
-				this._refreshData(this.props);
-			});
+			this._refreshData(this.props, _.extend({}, this.state, {start: e.start}));
 		}
 	});
 	
@@ -285,7 +283,7 @@
 									this._createHeadersRec(attr.refEntity.attributes, selectedAttrs[attr.name], Headers, path.concat(attr.name), true);
 								}
 								else {
-									if(molgenis.isRefAttr(attr)) {
+									if(this._canExpandAttr(attr, path)) {
 										var EntityExpandBtn = EntityExpandBtnFactory({
 											attrPath: attrPath,
 											onExpand: this.props.onExpand
@@ -299,10 +297,6 @@
 										canSort: path.length === 0, // only allow sorting of top-level attributes
 										sortOrder: this._getSortOrder(attr, path),
 										onSort: this.props.onSort,
-										canCollapse: expanded,
-										canExpand: molgenis.isRefAttr(attr), 
-										expanded: this._isExpandedAttr(attr, selectedAttrs),
-										onExpand: this.props.onExpand,
 										key: attrPath.join()
 									});
 									Headers.push(TableHeaderCell);
@@ -456,20 +450,22 @@
 							if(molgenis.isCompoundAttr(attr)) {
 								this._createColsRec(item, entity, attr.attributes, {'*': null}, Cols, attrPath, expanded);
 							} else {
+								
 								if(this._isExpandedAttr(attr, selectedAttrs)) {
 									Cols.push(td({className: 'expanded-left', key : attrPath.join()}));
-									this._createColsRec(item[attr.name], attr.refEntity, attr.refEntity.attributes, selectedAttrs[attr.name], Cols, attrPath, true);
+									var value = item !== undefined && item !== null ? item[attr.name] : null;
+									this._createColsRec(value, attr.refEntity, attr.refEntity.attributes, selectedAttrs[attr.name], Cols, attrPath, true);
 								} else {
-									if(molgenis.isRefAttr(attr)) {
+									if(this._canExpandAttr(attr, path)) {
 										Cols.push(td({key: 'e' + attrPath.join()}));
 									}
-									var value = item !== undefined ? (_.isArray(item) ? _.map(item, function(value) { return value[attr.name];}) : item[attr.name]) : null;
+									var value = (item !== undefined && item !== null) ? (_.isArray(item) ? _.map(item, function(value) { return value[attr.name];}) : item[attr.name]) : null;
 									var TableCell = TableCellFactory({
 										className: j === attrs.length - 1 && expanded ? 'expanded-right' : undefined, 
 										entity: entity,
 										attr : attr,
 										value: value,
-										multiple: _.isArray(item),
+										expanded: expanded,
 										onEdit: this.props.onEdit,
 										key : attrPath.join()
 									});
@@ -491,13 +487,61 @@
 	 * @memberOf component
 	 */
 	var TableCell = React.createClass({
-		mixins: [AttrUtilsMixin, molgenis.ui.mixin.ReactLayeredComponentMixin],
 		displayName: 'TableCell',
+		mixins: [AttrUtilsMixin],
 		propTypes: {
 			entity: React.PropTypes.object.isRequired,
 			attr: React.PropTypes.object.isRequired,
 			value: React.PropTypes.any,
-			multiple: React.PropTypes.bool,
+			expanded: React.PropTypes.bool,
+			className: React.PropTypes.string,
+			onEdit: React.PropTypes.func
+		},
+		shouldComponentUpdate: function(nextProps, nextState) {
+			return !_.isEqual(this.state, nextState) || !_.isEqual(this.props.entity.name, nextProps.entity.name)
+					|| !_.isEqual(this.props.attr.name, nextProps.attr.name) || !_.isEqual(this.props.value, nextProps.value);
+		},
+		render: function() {
+			var CellContentBlocks;
+			// treat expanded mref differently
+			if(this.props.expanded && _.isArray(this.props.value)) {
+				CellContentBlocks = _.flatten(_.map(this.props.value, function(value, i) {
+					if(value !== null && value !== undefined) {
+						var CellContentForValue = this._createTableCellContent(value, 'c' + i); 
+						return i < this.props.value.length - 1 ? [CellContentForValue, br({key: 'b' + i})] : CellContentForValue;
+					} else {
+						return null;
+					}
+				}.bind(this)));
+			} else {
+				CellContentBlocks = this.props.value !== null && this.props.value !== undefined ? [this._createTableCellContent(this.props.value)] : [];
+			}
+				
+			return td({className: this.props.className}, CellContentBlocks);
+		},
+		_createTableCellContent: function(value, key) {
+			return TableCellContentFactory({
+				entity: this.props.entity,
+				attr: this.props.attr,
+				value: value,
+				className: this.props.className,
+				onEdit: this.props.onEdit,
+				key: key
+			});
+		}
+	});
+	var TableCellFactory = React.createFactory(TableCell);
+	
+	/**
+	 * @memberOf component
+	 */
+	var TableCellContent = React.createClass({
+		mixins: [AttrUtilsMixin, molgenis.ui.mixin.ReactLayeredComponentMixin],
+		displayName: 'TableCellContent',
+		propTypes: {
+			entity: React.PropTypes.object.isRequired,
+			attr: React.PropTypes.object.isRequired,
+			value: React.PropTypes.any,
 			className: React.PropTypes.string,
 			onEdit: React.PropTypes.func
 		},
@@ -516,18 +560,7 @@
 					|| !_.isEqual(this.props.attr.name, nextProps.attr.name) || !_.isEqual(this.props.value, nextProps.value);
 		},
 		render: function() {
-			var CellContent;
-			if(this.props.multiple) {
-				CellContent = ( 
-					_.flatten(_.map(this.props.value, function(value, i) {
-						return [this._createValue(value, i), i < this.props.value.length - 1 ? React.DOM.br({key: 'b' + i}) : null];	
-					}.bind(this)))
-				);
-			} else {
-				CellContent = this._createValue(this.props.value);
-			}
-				
-			return td({className: this.props.className}, CellContent);
+			return this._createValue(this.props.value);
 		},
 		renderLayer: function() {
 			if(this.state.showRef) {
@@ -608,11 +641,15 @@
 						break;
 					case 'CATEGORICAL_MREF':
 					case 'MREF':
-						CellContent = _.flatten(_.map(value, function(item, i) {
-							var Anchor = a({href: '#', onClick: this._toggleModal.bind(null, true), key: 'a' + i}, span(null, item[attr.refEntity.labelAttribute]));
-							var Seperator = i < value.length - 1 ? span({key: 's' + i}, ',') : null; 
-							return [Anchor, Seperator];
-						}.bind(this)));
+						CellContent = (
+							span(null,
+									_.flatten(_.map(value, function(item, i) {
+										var Anchor = a({href: '#', onClick: this._toggleModal.bind(null, true), key: 'a' + i}, span(null, item[attr.refEntity.labelAttribute]));
+										var Seperator = i < value.length - 1 ? span({key: 's' + i}, ',') : null; 
+										return [Anchor, Seperator];
+									}.bind(this)))
+							)
+						);
 						break;
 					case 'EMAIL':
 						CellContent = a({href: 'mailto:' + value}, value);
@@ -647,12 +684,9 @@
 			this.setState({
 				showRef : show
 			});
-		},
-		_handleFileDownloadClickfunction: function(id) {
-			
 		}
 	});
-	var TableCellFactory = React.createFactory(TableCell);
+	var TableCellContentFactory = React.createFactory(TableCellContent);
 	
 	/**
 	 * @memberOf component

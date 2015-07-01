@@ -52,6 +52,12 @@ public class EntityMapping
 		this.identifier = identifier;
 	}
 
+	public void removeIdentifiers()
+	{
+		identifier = null;
+		attributeMappings.values().forEach(a -> a.setIdentifier(null));
+	}
+
 	public String getName()
 	{
 		if (sourceEntityMetaData == null)

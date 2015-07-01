@@ -48,4 +48,21 @@ public interface OntologyService
 	 */
 	OntologyTerm getOntologyTerm(String iri);
 
+	/**
+	 * Retrieves all children from the current ontology term
+	 * 
+	 * @param ontologyTerm
+	 * @return a list of {@link OntologyTerm} as children
+	 */
+	List<OntologyTerm> getChildren(OntologyTerm ontologyTerm);
+
+	/**
+	 * Calculate distance between two ontology terms
+	 * 
+	 * @param ontologyTerm1
+	 * @param ontologyTerm2
+	 * @return
+	 */
+	Integer getOntologyTermDistance(OntologyTerm ontologyTerm1, OntologyTerm ontologyTerm2);
+
 }

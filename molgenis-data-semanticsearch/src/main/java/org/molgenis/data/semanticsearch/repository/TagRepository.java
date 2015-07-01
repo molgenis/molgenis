@@ -16,7 +16,7 @@ import org.molgenis.data.support.QueryImpl;
  */
 public class TagRepository
 {
-	public static final TagMetaData META_DATA = new TagMetaData();
+	public static final TagMetaData META_DATA = TagMetaData.INSTANCE;
 	private final IdGenerator idGenerator;
 	private final Repository repository;
 

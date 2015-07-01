@@ -118,6 +118,7 @@
 				rules : [entityQuery.q]
 			},
 			colNames : $('input[name=colNames]:checked').val(),
+			entityValues : $('input[name=entityValues]:checked').val(),
 			downloadType : $('input[name=downloadTypes]:checked').val()
 		};
 
@@ -192,13 +193,15 @@
         });
             
         settings.registry = 'https://www.dasregistry.org/das/sources';
-        settings.prefix = 'https://www.biodalliance.org/release-0.12/';
+        settings.prefix = 'https://www.biodalliance.org/release-0.13/';
         genomeBrowser = new Browser(settings);
         // highlight region specified with viewStart and viewEnd
         if(showHighlight === true) {
             genomeBrowser.highlightRegion(genomeBrowser.chr, (genomeBrowser.viewStart + 9990), (genomeBrowser.viewEnd - 9990));
         }
         genomeBrowser.addFeatureInfoPlugin(function(f, info){createGenomeBrowserInfoPopup(f, info, entity);});
+
+        return genomeBrowser;
 	}
 
     function createGenomeBrowserInfoPopup(f, info, entity) {

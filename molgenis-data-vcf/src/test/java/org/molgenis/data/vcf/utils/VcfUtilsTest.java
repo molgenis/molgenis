@@ -1,9 +1,21 @@
 package org.molgenis.data.vcf.utils;
 
+import static org.mockito.Mockito.mock;
+import static org.testng.Assert.assertTrue;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.commons.io.FileUtils;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -13,75 +25,67 @@ import org.molgenis.util.ResourceUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.*;
-
-import static org.mockito.Mockito.mock;
-import static org.testng.Assert.assertTrue;
-
 @Test
 public class VcfUtilsTest
 {
 	private DefaultEntityMetaData annotatedEntityMetadata;
-    public DefaultEntityMetaData metaDataCanAnnotate = new DefaultEntityMetaData("test");
-    public DefaultEntityMetaData metaDataCantAnnotate = new DefaultEntityMetaData("test");
+	public DefaultEntityMetaData metaDataCanAnnotate = new DefaultEntityMetaData("test");
+	public DefaultEntityMetaData metaDataCantAnnotate = new DefaultEntityMetaData("test");
 
-    public AttributeMetaData attributeMetaDataChrom = new DefaultAttributeMetaData(VcfRepository.CHROM,
-            MolgenisFieldTypes.FieldTypeEnum.STRING);
-    public AttributeMetaData attributeMetaDataPos = new DefaultAttributeMetaData(VcfRepository.POS, MolgenisFieldTypes.FieldTypeEnum.LONG);
-    public AttributeMetaData attributeMetaDataRef = new DefaultAttributeMetaData(VcfRepository.REF,
-            MolgenisFieldTypes.FieldTypeEnum.STRING);
-    public AttributeMetaData attributeMetaDataAlt = new DefaultAttributeMetaData(VcfRepository.ALT,
-            MolgenisFieldTypes.FieldTypeEnum.STRING);
-    public AttributeMetaData attributeMetaDataCantAnnotateChrom = new DefaultAttributeMetaData(VcfRepository.CHROM,
-            MolgenisFieldTypes.FieldTypeEnum.LONG);
-    public ArrayList<Entity> input = new ArrayList<Entity>();
-    public ArrayList<Entity> input1 = new ArrayList<Entity>();
-    public ArrayList<Entity> input2 = new ArrayList<Entity>();
-    public ArrayList<Entity> input3 = new ArrayList<Entity>();
-    public ArrayList<Entity> input4 = new ArrayList<Entity>();
-    public Entity entity;
-    public Entity entity1;
-    public Entity entity2;
-    public Entity entity3;
-    public Entity entity4;
+	public AttributeMetaData attributeMetaDataChrom = new DefaultAttributeMetaData(VcfRepository.CHROM,
+			MolgenisFieldTypes.FieldTypeEnum.STRING);
+	public AttributeMetaData attributeMetaDataPos = new DefaultAttributeMetaData(VcfRepository.POS,
+			MolgenisFieldTypes.FieldTypeEnum.LONG);
+	public AttributeMetaData attributeMetaDataRef = new DefaultAttributeMetaData(VcfRepository.REF,
+			MolgenisFieldTypes.FieldTypeEnum.STRING);
+	public AttributeMetaData attributeMetaDataAlt = new DefaultAttributeMetaData(VcfRepository.ALT,
+			MolgenisFieldTypes.FieldTypeEnum.STRING);
+	public AttributeMetaData attributeMetaDataCantAnnotateChrom = new DefaultAttributeMetaData(VcfRepository.CHROM,
+			MolgenisFieldTypes.FieldTypeEnum.LONG);
+	public ArrayList<Entity> input = new ArrayList<Entity>();
+	public ArrayList<Entity> input1 = new ArrayList<Entity>();
+	public ArrayList<Entity> input2 = new ArrayList<Entity>();
+	public ArrayList<Entity> input3 = new ArrayList<Entity>();
+	public ArrayList<Entity> input4 = new ArrayList<Entity>();
+	public Entity entity;
+	public Entity entity1;
+	public Entity entity2;
+	public Entity entity3;
+	public Entity entity4;
 
-    public AttributeMetaData attributeMetaDataCantAnnotateFeature;
-    public AttributeMetaData attributeMetaDataCantAnnotatePos;
-    public AttributeMetaData attributeMetaDataCantAnnotateRef;
-    public AttributeMetaData attributeMetaDataCantAnnotateAlt;
+	public AttributeMetaData attributeMetaDataCantAnnotateFeature;
+	public AttributeMetaData attributeMetaDataCantAnnotatePos;
+	public AttributeMetaData attributeMetaDataCantAnnotateRef;
+	public AttributeMetaData attributeMetaDataCantAnnotateAlt;
 
-    public MolgenisSettings settings = mock(MolgenisSettings.class);
-    public ArrayList<Entity> entities;
+	public MolgenisSettings settings = mock(MolgenisSettings.class);
+	public ArrayList<Entity> entities;
 
 	@BeforeMethod
 	public void beforeMethod() throws IOException
 	{
 		/*
-		 * 1 10050000 test21 G A . PASS AC=21;AN=22;GTC=0,1,10 
-		 * 1 10050001 test22 G A . PASS AC=22;AN=23;GTC=1,2,11 
-		 * 1 10050002 test23 G A . PASS AC=23;AN=24;GTC=2,3,12
+		 * 1 10050000 test21 G A . PASS AC=21;AN=22;GTC=0,1,10 1 10050001 test22 G A . PASS AC=22;AN=23;GTC=1,2,11 1
+		 * 10050002 test23 G A . PASS AC=23;AN=24;GTC=2,3,12
 		 */
-        metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom);
-        metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
-        metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataRef);
-        metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataAlt);
-        metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom.getName());
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom);
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataRef);
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataAlt);
+		metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom.getName());
 
-        metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataCantAnnotateChrom);
-        metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataPos);
-        metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataRef);
-        metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataAlt);
+		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataCantAnnotateChrom);
+		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataPos);
+		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataRef);
+		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataAlt);
 
-        entity = new MapEntity(metaDataCanAnnotate);
-        entity1 = new MapEntity(metaDataCanAnnotate);
-        entity2 = new MapEntity(metaDataCanAnnotate);
-        entity3 = new MapEntity(metaDataCanAnnotate);
-        entity4 = new MapEntity(metaDataCanAnnotate);
+		entity = new MapEntity(metaDataCanAnnotate);
+		entity1 = new MapEntity(metaDataCanAnnotate);
+		entity2 = new MapEntity(metaDataCanAnnotate);
+		entity3 = new MapEntity(metaDataCanAnnotate);
+		entity4 = new MapEntity(metaDataCanAnnotate);
 
-        metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.ID,
+		metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.ID,
 				MolgenisFieldTypes.FieldTypeEnum.STRING));
 		metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.QUAL,
 				MolgenisFieldTypes.FieldTypeEnum.STRING));
@@ -141,7 +145,7 @@ public class VcfUtilsTest
 	}
 
 	@Test
-	public void vcfWriterRoundtripTest() throws IOException
+	public void vcfWriterRoundtripTest() throws IOException, MolgenisInvalidFormatException
 	{
 		File outputVCFFile = File.createTempFile("output", ".vcf");
 		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
@@ -161,7 +165,7 @@ public class VcfUtilsTest
 	}
 
 	@Test
-	public void vcfWriterAnnotateTest() throws IOException
+	public void vcfWriterAnnotateTest() throws IOException, MolgenisInvalidFormatException
 	{
 		File outputVCFFile = File.createTempFile("output", ".vcf");
 		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
@@ -172,7 +176,8 @@ public class VcfUtilsTest
 		File inputVcfFile = new File(ResourceUtils.getFile(getClass(), "/testWriter.vcf").getPath());
 		File outputVcfFile = new File(ResourceUtils.getFile(getClass(), "/result_vcfWriter.vcf").getPath());
 
-		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields, "INFO_ANNO");
+		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter,
+				annotatedEntityMetadata.getAttributes(), "INFO_ANNO");
 
 		for (Entity entity : entities)
 		{

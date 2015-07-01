@@ -45,6 +45,12 @@ public class MappingTarget
 		return identifier;
 	}
 
+	public void removeIdentifiers()
+	{
+		identifier = null;
+		entityMappings.values().forEach(EntityMapping::removeIdentifiers);
+	}
+
 	public EntityMetaData getTarget()
 	{
 		return target;
