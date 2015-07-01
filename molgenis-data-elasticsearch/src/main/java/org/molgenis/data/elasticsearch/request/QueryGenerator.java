@@ -551,10 +551,21 @@ public class QueryGenerator implements QueryPartGenerator
 							break;
 						case MREF:
 						case XREF:
+						case CATEGORICAL:
+						case CATEGORICAL_MREF:
+						case FILE:
 							queryField = attr.getName() + "." + attr.getRefEntity().getLabelAttribute().getName();
 							queryBuilder = QueryBuilders.nestedQuery(attr.getName(),
 									QueryBuilders.queryString(queryField + ":(" + queryValue + ")")).scoreMode("max");
 							break;
+						case BOOL:
+						case COMPOUND:
+							throw new MolgenisQueryException("Illegal data type [" + dataType + "] for operator ["
+									+ queryOperator + "]");
+
+						case IMAGE:
+							throw new UnsupportedOperationException("Query with data type [" + dataType
+									+ "] not supported");
 						default:
 							throw new RuntimeException("Unknown data type [" + dataType + "]");
 					}
