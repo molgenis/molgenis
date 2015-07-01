@@ -148,6 +148,7 @@
 			nrErrors += data.nrErrors;
 
 			if (offset + num >= data.total || nrErrors >= validationMaxErrors) {
+
 				$('#validation-spinner').hide();
 			}
 			$('#validation-total').html(data.total);
@@ -155,6 +156,7 @@
 			$('#validation-errors').html(nrErrors);
 
 			if (nrErrors > 0) {
+
 				_.each(data.errorMessages, function(message, id) {
 					$('#validation-error-messages-table-body').append('<tr><td>' + id + '</td><td>' + message + '</td></tr>');
 				});
@@ -167,6 +169,7 @@
 
 			if (offset + num < data.total) {
 				if (isValidating) {
+
 					validateAttrMappingRec(request, offset + num, num, nrSuccess, nrErrors, validationMaxErrors);
 				} else {
 					$('#mapping-validation-container').html('<span>Pending ...</span>');

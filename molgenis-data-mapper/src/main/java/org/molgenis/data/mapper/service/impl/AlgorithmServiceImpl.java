@@ -1,11 +1,9 @@
 package org.molgenis.data.mapper.service.impl;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,7 +13,6 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Repository;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.service.AlgorithmService;
@@ -30,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 
 public class AlgorithmServiceImpl implements AlgorithmService
@@ -66,59 +64,33 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	}
 
 	@Override
-	public List<Object> applyAlgorithm(AttributeMetaData targetAttribute, String algorithm, Repository sourceRepository)
+	public Iterable<AlgorithmEvaluation> applyAlgorithm(AttributeMetaData targetAttribute, String algorithm,
+			Iterable<Entity> sourceEntities)
 	{
-		List<Object> derivedValues = new ArrayList<Object>();
-		Collection<String> attributeNames = getSourceAttributeNames(algorithm);
-		if (!attributeNames.isEmpty())
-		{
-			for (Entity entity : sourceRepository)
-			{
-				MapEntity mapEntity = createMapEntity(attributeNames, entity);
-				if (!StringUtils.isEmpty(algorithm))
-				{
-					try
-					{
-						Object result = ScriptEvaluator
-								.eval(algorithm, mapEntity, sourceRepository.getEntityMetaData());
+		final Collection<String> attributeNames = getSourceAttributeNames(algorithm);
 
-						if (result != null)
-						{
-							switch (targetAttribute.getDataType().getEnumType())
-							{
-								case DATE:
-								case DATE_TIME:
-									derivedValues.add(Context.jsToJava(result, Date.class));
-									break;
-								case INT:
-									derivedValues.add(Integer.parseInt(Context.toString(result)));
-									break;
-								case DECIMAL:
-									derivedValues.add(Context.toNumber(result));
-									break;
-								case XREF:
-								case CATEGORICAL:
-									derivedValues.add(dataService.findOne(targetAttribute.getRefEntity().getName(),
-											Context.toString(result)).getIdValue());
-									break;
-								case MREF:
-								case CATEGORICAL_MREF:
-									derivedValues.add((NativeArray) result);
-									break;
-								default:
-									derivedValues.add(Context.toString(result));
-									break;
-							}
-						}
-					}
-					catch (RuntimeException e)
-					{
-						LOG.error("error converting result", e);
-					}
+		return Iterables.transform(sourceEntities, new Function<Entity, AlgorithmEvaluation>()
+		{
+			@Override
+			public AlgorithmEvaluation apply(Entity entity)
+			{
+				AlgorithmEvaluation algorithmResult = new AlgorithmEvaluation(entity);
+
+				Object derivedValue;
+				MapEntity mapEntity = createMapEntity(attributeNames, entity); // why is this necessary?
+				try
+				{
+					Object result = ScriptEvaluator.eval(algorithm, mapEntity, entity.getEntityMetaData());
+					derivedValue = convert(result, targetAttribute);
 				}
+				catch (RuntimeException e)
+				{
+					return algorithmResult.errorMessage(e.getMessage());
+				}
+
+				return algorithmResult.value(derivedValue);
 			}
-		}
-		return derivedValues;
+		});
 	}
 
 	private MapEntity createMapEntity(Collection<String> attributeNames, Entity entity)
@@ -158,41 +130,49 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		}
 		Object convertedValue;
 		FieldTypeEnum targetDataType = attributeMetaData.getDataType().getEnumType();
-		switch (targetDataType)
+		try
 		{
-			case DATE:
-			case DATE_TIME:
-				convertedValue = Context.jsToJava(value, Date.class);
-				break;
-			case INT:
-				convertedValue = Integer.parseInt(Context.toString(value));
-				break;
-			case DECIMAL:
-				convertedValue = Context.toNumber(value);
-				break;
-			case XREF:
-			case CATEGORICAL:
-				convertedValue = dataService.findOne(attributeMetaData.getRefEntity().getName(),
-						Context.toString(value));
-				break;
-			case MREF:
-			case CATEGORICAL_MREF:
+			switch (targetDataType)
 			{
-				NativeArray mrefIds = (NativeArray) value;
-				if (mrefIds != null && !mrefIds.isEmpty())
+				case DATE:
+				case DATE_TIME:
+					convertedValue = Context.jsToJava(value, Date.class);
+					break;
+				case INT:
+					convertedValue = Integer.parseInt(Context.toString(value));
+					break;
+				case DECIMAL:
+					convertedValue = Context.toNumber(value);
+					break;
+				case XREF:
+				case CATEGORICAL:
+					convertedValue = dataService.findOne(attributeMetaData.getRefEntity().getName(),
+							Context.toString(value));
+					break;
+				case MREF:
+				case CATEGORICAL_MREF:
 				{
-					EntityMetaData refEntityMeta = attributeMetaData.getRefEntity();
-					convertedValue = dataService.findAll(refEntityMeta.getName(), mrefIds);
+					NativeArray mrefIds = (NativeArray) value;
+					if (mrefIds != null && !mrefIds.isEmpty())
+					{
+						EntityMetaData refEntityMeta = attributeMetaData.getRefEntity();
+						convertedValue = dataService.findAll(refEntityMeta.getName(), mrefIds);
+					}
+					else
+					{
+						convertedValue = null;
+					}
+					break;
 				}
-				else
-				{
-					convertedValue = null;
-				}
-				break;
+				default:
+					convertedValue = Context.toString(value);
+					break;
 			}
-			default:
-				convertedValue = Context.toString(value);
-				break;
+		}
+		catch (RuntimeException e)
+		{
+			throw new RuntimeException("Error converting value [" + value.toString() + "] to "
+					+ targetDataType.toString(), e);
 		}
 		return convertedValue;
 	}
