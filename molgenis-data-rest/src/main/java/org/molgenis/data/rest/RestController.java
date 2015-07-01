@@ -37,7 +37,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -113,7 +112,11 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 
 import cz.jirutka.rsql.parser.RSQLParserException;
- create, update and delete entities.
+
+/**
+ * Rest endpoint for the DataService
+ * 
+ * Query, create, update and delete entities.
  * 
  * If a repository isn't capable of doing the requested operation an error is thrown.
  * 
@@ -760,7 +763,6 @@ public class RestController
 	 * 
 	 * @param entityName
 	 * @param id
-	 * @throws EntityNotFoundException
 	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = DELETE)
 	@ResponseStatus(NO_CONTENT)
@@ -778,7 +780,6 @@ public class RestController
 	 * 
 	 * @param entityName
 	 * @param id
-	 * @throws EntityNotFoundException
 	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = POST, params = "_method=DELETE")
 	@ResponseStatus(NO_CONTENT)
@@ -792,7 +793,6 @@ public class RestController
 	 * 
 	 * @param entityName
 	 * @param id
-	 * @throws EntityNotFoundException
 	 */
 	@RequestMapping(value = "/{entityName}", method = DELETE)
 	@ResponseStatus(NO_CONTENT)
@@ -806,7 +806,6 @@ public class RestController
 	 * 
 	 * @param entityName
 	 * @param id
-	 * @throws EntityNotFoundException
 	 */
 	@RequestMapping(value = "/{entityName}", method = POST, params = "_method=DELETE")
 	@ResponseStatus(NO_CONTENT)
@@ -820,7 +819,6 @@ public class RestController
 	 * 
 	 * @param entityName
 	 * @param id
-	 * @throws EntityNotFoundException
 	 */
 	@RequestMapping(value = "/{entityName}/meta", method = DELETE)
 	@ResponseStatus(NO_CONTENT)
@@ -835,7 +833,6 @@ public class RestController
 	 * 
 	 * @param entityName
 	 * @param id
-	 * @throws EntityNotFoundException
 	 */
 	@RequestMapping(value = "/{entityName}/meta", method = POST, params = "_method=DELETE")
 	@ResponseStatus(NO_CONTENT)
