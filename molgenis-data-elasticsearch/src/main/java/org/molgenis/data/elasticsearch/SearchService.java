@@ -42,7 +42,15 @@ public interface SearchService
 
 	void index(Entity entity, EntityMetaData entityMetaData, IndexingMode indexingMode);
 
-	void index(Iterable<? extends Entity> entities, EntityMetaData entityMetaData, IndexingMode indexingMode);
+	/**
+	 * Adds or updated the given entities in the index
+	 *
+	 * @param entities
+	 * @param entityMetaData
+	 * @param indexingMode
+	 * @return number of indexed entities, which equals the size of the input entities iterable
+	 */
+	long index(Iterable<? extends Entity> entities, EntityMetaData entityMetaData, IndexingMode indexingMode);
 
 	void delete(Entity entity, EntityMetaData entityMetaData);
 
