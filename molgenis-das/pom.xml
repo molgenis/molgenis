@@ -5,7 +5,7 @@
 	<parent>
 	  <groupId>org.molgenis</groupId>
 	  <artifactId>molgenis</artifactId>
-	  <version>1.8.0-SNAPSHOT</version>
+	  <version>1.9.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>molgenis-das</artifactId>
 	<packaging>jar</packaging>

@@ -10,11 +10,11 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.LocusAnnotator;
-import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
-import org.molgenis.data.annotation.impl.datastructures.Locus;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
+import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
+import org.molgenis.data.annotation.impl.datastructures.Locus;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.annotation.utils.HgncLocationsUtils;
@@ -32,7 +32,7 @@ public class HgncSymbolServiceAnnotator extends LocusAnnotator
 	private final HgncLocationsProvider hgncLocationsProvider;
 
 	static final String HGNC_SYMBOL = "HGNC_SYMBOL";
-	private static final String NAME = "HGNC-Symbol";
+	private static final String NAME = "HGNC_Symbol";
 	private Map<String, HGNCLocations> hgncLocations = new HashMap<>();
 
 	@Autowired
