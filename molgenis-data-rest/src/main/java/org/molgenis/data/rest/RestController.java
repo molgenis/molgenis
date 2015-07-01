@@ -70,7 +70,6 @@ import org.molgenis.fieldtypes.BoolField;
 import org.molgenis.file.FileDownloadController;
 import org.molgenis.file.FileMeta;
 import org.molgenis.file.FileStore;
-import org.molgenis.framework.db.EntityNotFoundException;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.token.TokenExtractor;
@@ -601,7 +600,7 @@ public class RestController
 
 	@RequestMapping(value = "/{entityName}", method = POST)
 	public void create(@PathVariable("entityName") String entityName, @RequestBody Map<String, Object> entityMap,
-			HttpServletResponse response) throws EntityNotFoundException
+			HttpServletResponse response)
 	{
 		if (entityMap == null)
 		{
@@ -764,7 +763,6 @@ public class RestController
 	 * 
 	 * @param entityName
 	 * @param id
-	 * @throws EntityNotFoundException
 	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = DELETE)
 	@ResponseStatus(NO_CONTENT)
@@ -782,7 +780,6 @@ public class RestController
 	 * 
 	 * @param entityName
 	 * @param id
-	 * @throws EntityNotFoundException
 	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = POST, params = "_method=DELETE")
 	@ResponseStatus(NO_CONTENT)
@@ -796,7 +793,6 @@ public class RestController
 	 * 
 	 * @param entityName
 	 * @param id
-	 * @throws EntityNotFoundException
 	 */
 	@RequestMapping(value = "/{entityName}", method = DELETE)
 	@ResponseStatus(NO_CONTENT)
@@ -810,7 +806,6 @@ public class RestController
 	 * 
 	 * @param entityName
 	 * @param id
-	 * @throws EntityNotFoundException
 	 */
 	@RequestMapping(value = "/{entityName}", method = POST, params = "_method=DELETE")
 	@ResponseStatus(NO_CONTENT)
@@ -824,7 +819,6 @@ public class RestController
 	 * 
 	 * @param entityName
 	 * @param id
-	 * @throws EntityNotFoundException
 	 */
 	@RequestMapping(value = "/{entityName}/meta", method = DELETE)
 	@ResponseStatus(NO_CONTENT)
@@ -839,7 +833,6 @@ public class RestController
 	 * 
 	 * @param entityName
 	 * @param id
-	 * @throws EntityNotFoundException
 	 */
 	@RequestMapping(value = "/{entityName}/meta", method = POST, params = "_method=DELETE")
 	@ResponseStatus(NO_CONTENT)
