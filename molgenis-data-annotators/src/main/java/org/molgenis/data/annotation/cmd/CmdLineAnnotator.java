@@ -13,7 +13,6 @@ import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.impl.ClinVarVCFServiceAnnotator;
 import org.molgenis.data.annotation.impl.ClinicalGenomicsDatabaseServiceAnnotator;
 import org.molgenis.data.annotation.impl.DeNovoAnnotator;
-import org.molgenis.data.annotation.impl.ExACServiceAnnotator;
 import org.molgenis.data.annotation.impl.GoNLServiceAnnotator;
 import org.molgenis.data.annotation.impl.HpoServiceAnnotator;
 import org.molgenis.data.annotation.impl.MonogenicDiseaseCandidatesServiceAnnotator;
@@ -87,7 +86,7 @@ public class CmdLineAnnotator
 		{
 			System.out.println("Output VCF file already exists at " + outputVCFFile.getAbsolutePath());
 			return;
-		}
+		} 
 
 		// engage!
 		if (annotatorName.equals("cadd"))
@@ -122,7 +121,9 @@ public class CmdLineAnnotator
 		}
 		else if (annotatorName.equals("exac"))
 		{
-			new ExACServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
+			Map<String, RepositoryAnnotator> annotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
+			RepositoryAnnotator annotator = annotators.get("exac");
+			annotate(annotator, inputVcfFile, outputVCFFile);
 		}
 		else if (annotatorName.equals("1kg"))
 		{
