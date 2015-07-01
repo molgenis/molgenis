@@ -90,6 +90,87 @@
 		return result;
 	}
 
+	var timeoutId, isValidating;
+	
+
+		/**
+		 * Validate algorithm on source entities, render UI component that
+		 * displays the number of total/success/errors and corresponding error
+		 * messages. Stops after a max. number of validation errors.  
+		 */
+	function validateAttrMapping(algorithm) {
+		var validationDelay = 2000;
+		var validationBatchSize = 500;
+		var validationMaxErrors = 100;
+		
+		isValidating = false;
+		if(timeoutId) {
+			clearTimeout(timeoutId);
+		}
+		
+		$('#mapping-validation-container').html('<span>Pending ...</span>');
+		$('#validation-error-messages-table-body').empty();
+		timeoutId = setTimeout(function() {
+			isValidating = true;
+			
+			var request = {
+				targetEntityName : $('input[name="target"]').val(),
+				sourceEntityName : $('input[name="source"]').val(),
+				targetAttributeName : $('input[name="targetAttribute"]').val(),
+				algorithm : algorithm
+			};
+			
+			var items = [];
+			items.push('<img id="validation-spinner" src="/css/select2-spinner.gif">&nbsp;');
+			items.push('<span class="label label-default">Total: <span id="validation-total">?</span></span>&nbsp;');
+			items.push('<span class="label label-success">Success: <span id="validation-success">0</span></span>&nbsp;');
+			items.push('<span class="label label-danger"><a class="validation-errors-anchor" href="#validation-error-messages-modal" data-toggle="modal" data-target="#validation-error-messages-modal">Errors: <span id="validation-errors">0</span></a></span>&nbsp;');
+			items.push('<em class="hidden" id="max-errors-msg">(Validation aborted, encountered too many errors)</em>');
+			$('#mapping-validation-container').html(items.join(''));
+			validateAttrMappingRec(request, 0, validationBatchSize, 0, 0, validationMaxErrors);
+		}, validationDelay);
+		
+	}
+	
+	function validateAttrMappingRec(request, offset, num, nrSuccess, nrErrors, validationMaxErrors) {
+		$.ajax({
+			type : 'POST',
+			url : molgenis.getContextUrl() + '/validateAttrMapping',
+			data : JSON.stringify(_.extend({}, request, {offset: offset, num: num})),
+			showSpinner: false,
+			contentType : 'application/json'
+		}).done(function(data) {
+			nrSuccess += data.nrSuccess;
+			nrErrors += data.nrErrors;
+			
+			if(offset + num >= data.total || nrErrors >= validationMaxErrors) {
+				$('#validation-spinner').hide();
+			}
+			$('#validation-total').html(data.total);
+			$('#validation-success').html(nrSuccess);
+			$('#validation-errors').html(nrErrors);
+			
+			if(nrErrors > 0) {
+				_.each(data.errorMessages, function(message, id) {
+					$('#validation-error-messages-table-body').append('<tr><td>' + id + '</td><td>' + message + '</td></tr>');
+				});
+			}
+			
+			if(nrErrors >= validationMaxErrors) {
+				$('#max-errors-msg').removeClass('hidden');
+				return;
+			}
+			
+			if(offset + num < data.total) {
+				if(isValidating) {
+					validateAttrMappingRec(request, offset + num, num, nrSuccess, nrErrors, validationMaxErrors);
+				} else {
+					$('#mapping-validation-container').html('<span>Pending ...</span>');
+				}
+			}
+		});
+	}
+	
 	/**
 	 * Load result table from view-attribute-mapping-feedback.ftl
 	 * 
@@ -274,7 +355,10 @@
 			// update algorithm
 			algorithm = editor.getSession().getValue();
 
-			// update result
+			// validate mapping
+			validateAttrMapping(algorithm);
+			
+			// preview mapping results
 			loadAlgorithmResult(algorithm);
 		});
 
