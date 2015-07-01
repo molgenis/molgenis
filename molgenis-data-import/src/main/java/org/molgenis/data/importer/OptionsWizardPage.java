@@ -12,9 +12,10 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.FileRepositoryCollectionFactory;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Package;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.validation.EntityNameValidator;
+import org.molgenis.data.meta.MetaValidationUtils;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.ui.wizard.AbstractWizardPage;
 import org.molgenis.ui.wizard.Wizard;
@@ -75,10 +76,13 @@ public class OptionsWizardPage extends AbstractWizardPage
 				return null;
 			}
 
-			if (!EntityNameValidator.isValid(userGivenName))
+			try
 			{
-				result.addError(new ObjectError("wizard",
-						"Invalid entity name (only alphanumeric characters are allowed)"));
+				MetaValidationUtils.validateName(userGivenName);
+			}
+			catch (MolgenisDataException e)
+			{
+				result.addError(new ObjectError("wizard", e.getMessage()));
 				return null;
 			}
 

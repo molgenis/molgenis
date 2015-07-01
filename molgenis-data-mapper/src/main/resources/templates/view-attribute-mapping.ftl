@@ -158,6 +158,10 @@
 					<p>
 						
 					</p>
+					<h4>Validation</h4>
+					<p>Algorithm validation starts automatically when the algorithm is updated.</p> 
+                    <div id="mapping-validation-container"></div>
+					<h4>Preview</h4>
 					<div id="result-table-container"></div>
 				</div>
 			</div>
@@ -239,5 +243,27 @@
 		</div>
 	</div>
 </div>
-
+<div class="modal" id="validation-error-messages-modal" tabindex="-1" role="dialog" aria-labelledby="validation-error-messages-label" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">             
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="validation-error-messages-label">Validation Errors</h4>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered validation-error-messages-table">
+                    <thead>
+                        <th>Source Entity</th> 
+                        <th>Error message</th>
+                    </thead>
+                    <tbody id="validation-error-messages-table-body">
+                    </tbody>
+                </table>                        
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 <@footer/>
