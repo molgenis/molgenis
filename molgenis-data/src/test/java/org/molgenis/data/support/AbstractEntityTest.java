@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 
 public class AbstractEntityTest
 {
-
+	// Regression test for #3301
 	@Test
 	public void getLabelValue()
 	{
