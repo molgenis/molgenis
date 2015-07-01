@@ -76,18 +76,18 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			{
 				AlgorithmEvaluation algorithmResult = new AlgorithmEvaluation(entity);
 
-				Object result;
+				Object derivedValue;
 				MapEntity mapEntity = createMapEntity(attributeNames, entity); // why is this necessary?
 				try
 				{
-					result = ScriptEvaluator.eval(algorithm, mapEntity, entity.getEntityMetaData());
+					Object result = ScriptEvaluator.eval(algorithm, mapEntity, entity.getEntityMetaData());
+					derivedValue = convert(result, targetAttribute);
 				}
 				catch (RuntimeException e)
 				{
 					return algorithmResult.errorMessage(e.getMessage());
 				}
 
-				Object derivedValue = convert(result, targetAttribute);
 				return algorithmResult.value(derivedValue);
 			}
 		});
@@ -130,41 +130,49 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		}
 		Object convertedValue;
 		FieldTypeEnum targetDataType = attributeMetaData.getDataType().getEnumType();
-		switch (targetDataType)
+		try
 		{
-			case DATE:
-			case DATE_TIME:
-				convertedValue = Context.jsToJava(value, Date.class);
-				break;
-			case INT:
-				convertedValue = Integer.parseInt(Context.toString(value));
-				break;
-			case DECIMAL:
-				convertedValue = Context.toNumber(value);
-				break;
-			case XREF:
-			case CATEGORICAL:
-				convertedValue = dataService.findOne(attributeMetaData.getRefEntity().getName(),
-						Context.toString(value));
-				break;
-			case MREF:
-			case CATEGORICAL_MREF:
+			switch (targetDataType)
 			{
-				NativeArray mrefIds = (NativeArray) value;
-				if (mrefIds != null && !mrefIds.isEmpty())
+				case DATE:
+				case DATE_TIME:
+					convertedValue = Context.jsToJava(value, Date.class);
+					break;
+				case INT:
+					convertedValue = Integer.parseInt(Context.toString(value));
+					break;
+				case DECIMAL:
+					convertedValue = Context.toNumber(value);
+					break;
+				case XREF:
+				case CATEGORICAL:
+					convertedValue = dataService.findOne(attributeMetaData.getRefEntity().getName(),
+							Context.toString(value));
+					break;
+				case MREF:
+				case CATEGORICAL_MREF:
 				{
-					EntityMetaData refEntityMeta = attributeMetaData.getRefEntity();
-					convertedValue = dataService.findAll(refEntityMeta.getName(), mrefIds);
+					NativeArray mrefIds = (NativeArray) value;
+					if (mrefIds != null && !mrefIds.isEmpty())
+					{
+						EntityMetaData refEntityMeta = attributeMetaData.getRefEntity();
+						convertedValue = dataService.findAll(refEntityMeta.getName(), mrefIds);
+					}
+					else
+					{
+						convertedValue = null;
+					}
+					break;
 				}
-				else
-				{
-					convertedValue = null;
-				}
-				break;
+				default:
+					convertedValue = Context.toString(value);
+					break;
 			}
-			default:
-				convertedValue = Context.toString(value);
-				break;
+		}
+		catch (RuntimeException e)
+		{
+			throw new RuntimeException("Error converting value [" + value.toString() + "] to "
+					+ targetDataType.toString(), e);
 		}
 		return convertedValue;
 	}
