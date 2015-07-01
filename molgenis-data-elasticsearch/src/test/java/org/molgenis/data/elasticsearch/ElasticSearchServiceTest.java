@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.elasticsearch.action.ListenableActionFuture;
+import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -34,7 +35,6 @@ import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.ElasticSearchService.BulkProcessorFactory;
 import org.molgenis.data.elasticsearch.ElasticSearchService.IndexingMode;
 import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
-import org.molgenis.data.elasticsearch.util.BulkProcessor;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
