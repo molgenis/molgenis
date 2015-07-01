@@ -402,7 +402,7 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 	 * org.molgenis.data.elasticsearch.ElasticSearchService.IndexingMode)
 	 */
 	@Override
-	public void index(Iterable<? extends Entity> entities, EntityMetaData entityMetaData, IndexingMode indexingMode)
+	public long index(Iterable<? extends Entity> entities, EntityMetaData entityMetaData, IndexingMode indexingMode)
 	{
 		String transactionId = null;
 		if (!NON_TRANSACTIONAL_ENTITIES.contains(entityMetaData.getName()))
@@ -412,7 +412,7 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 		String index = transactionId != null ? transactionId : indexName;
 
 		CrudType crudType = indexingMode == IndexingMode.ADD ? CrudType.ADD : CrudType.UPDATE;
-		index(index, entities, entityMetaData, crudType, true);
+		return index(index, entities, entityMetaData, crudType, true);
 	}
 
 	private String getCurrentTransactionId()
@@ -420,7 +420,7 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 		return (String) TransactionSynchronizationManager.getResource(TRANSACTION_ID_RESOURCE_NAME);
 	}
 
-	void index(String index, Iterable<? extends Entity> entities, EntityMetaData entityMetaData, CrudType crudType,
+	long index(String index, Iterable<? extends Entity> entities, EntityMetaData entityMetaData, CrudType crudType,
 			boolean updateIndex)
 	{
 		String entityName = entityMetaData.getName();
@@ -432,6 +432,7 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 			transactionId = getCurrentTransactionId();
 		}
 
+		long nrIndexedEntities = 0;
 		BulkProcessor bulkProcessor = BULK_PROCESSOR_FACTORY.create(client);
 
 		try
@@ -450,6 +451,7 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 					source.put(CRUD_TYPE_FIELD_NAME, crudType.name());
 				}
 				bulkProcessor.add(new IndexRequest().index(index).type(type).id(id).source(source));
+				++nrIndexedEntities;
 			}
 		}
 		finally
@@ -465,6 +467,8 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 		{
 			updateReferences(entities, entityMetaData);
 		}
+
+		return nrIndexedEntities;
 	}
 
 	/*
