@@ -37,6 +37,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -70,7 +71,6 @@ import org.molgenis.fieldtypes.BoolField;
 import org.molgenis.file.FileDownloadController;
 import org.molgenis.file.FileMeta;
 import org.molgenis.file.FileStore;
-import org.molgenis.framework.db.EntityNotFoundException;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.token.TokenExtractor;
@@ -113,11 +113,7 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 
 import cz.jirutka.rsql.parser.RSQLParserException;
-
-/**
- * Rest endpoint for the DataService
- * 
- * Query, create, update and delete entities.
+ create, update and delete entities.
  * 
  * If a repository isn't capable of doing the requested operation an error is thrown.
  * 
