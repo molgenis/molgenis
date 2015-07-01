@@ -287,21 +287,25 @@
 	 * and tags have nothing to do with the query, hide the row
 	 */
 	function filterAttributeTable(explainedAttributes, attributes) {
-		var searchQuery = $('#attribute-search-field').val().toLowerCase(), attrLabel, attrName, attrDescription, explainedQueryStrings;
+		var searchQuery = $('#attribute-search-field').val().toLowerCase(), attrLabel, attrName, attrDescription, explainedQueryStrings, words, row;
 		if (searchQuery === '') {
 			$('#attribute-mapping-table>tbody').find('tr').each(function() {
+				row = $(this);
 				if (attributes !== null) {
 					if (attributes.indexOf($(this).attr('class').toLowerCase()) > -1) {
-						explainedQueryStrings = explainedAttributes[$(this).attr('class')];
-						$(this).show();
+						explainedQueryStrings = explainedAttributes[row.attr('class')];
+						row.show();
 						$(explainedQueryStrings).each(function() {
-							$('td.source-attribute-information').highlight(this.matchedWords);
+							words = this.matchedWords.split(' ');
+							$(words).each(function() {
+								$(row).find('td.source-attribute-information').highlight(this);
+							});
 						});
 					} else {
-						$(this).hide();
+						row.hide();
 					}
 				} else {
-					$(this).show();
+					row.show();
 				}
 			});
 		} else {
