@@ -24,5 +24,8 @@
 }
 
 .highlight {
-	background-color: yellow
+	background-color:#5bc0de;
+	padding:3px;
+	color:white;
+	border-radius: 2px;
 }
