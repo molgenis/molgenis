@@ -291,11 +291,22 @@
 	function rankAttributeTable(explainedAttributes){
 		if(explainedAttributes != null){
 			var attributeNames = Object.keys(explainedAttributes);
+			var className, firstRow, suggestedRow, explainedQueryStrings, words, completeWord;
 			for(var i = attributeNames.length - 1; i >= 0;i--){
-				var className = attributeNames[i];
-				var firstRow = $('#attribute-mapping-table>tbody tr:first');
-				var suggestedRow = $('#attribute-mapping-table tr.' + className);
+				className = attributeNames[i];
+				firstRow = $('#attribute-mapping-table>tbody tr:first');
+				suggestedRow = $('#attribute-mapping-table tr.' + className);
 				firstRow.before(suggestedRow);
+				explainedQueryStrings = explainedAttributes[className];
+				if(explainedQueryStrings.length > 0){
+					$.each(explainedQueryStrings, function(index, explainedQueryString){
+						words = explainedQueryString.matchedWords.split(' ');
+						$.each(words, function(index, word){
+							completeWord = extendPartialWord($(suggestedRow).attr('data-attribute-label'), word);
+							$(suggestedRow).find('td.source-attribute-information').highlight(completeWord);
+						})
+					});
+				}
 			}
 		}
 	}
@@ -305,21 +316,13 @@
 	 * and tags have nothing to do with the query, hide the row
 	 */
 	function filterAttributeTable(explainedAttributes, attributes) {
-		var searchQuery = $('#attribute-search-field').val().toLowerCase(), attrLabel, attrName, attrDescription, explainedQueryStrings, words, row;
+		var searchQuery = $('#attribute-search-field').val().toLowerCase(), attrLabel, attrName, attrDescription, row;
 		if (searchQuery === '') {
 			$('#attribute-mapping-table>tbody').find('tr').each(function() {
 				row = $(this);
 				if (attributes !== null) {
 					if (attributes.indexOf(row.attr('class').toLowerCase()) > -1) {
-						explainedQueryStrings = explainedAttributes[row.attr('class')];
 						row.show();
-						$(explainedQueryStrings).each(function() {
-							words = this.matchedWords.split(' ');
-							$(words).each(function() {
-								var completeWord = extendPartialWord($(row).attr('data-attribute-label'), this);
-								$(row).find('td.source-attribute-information').highlight(completeWord);
-							});
-						});
 					} else {
 						row.hide();
 					}
@@ -341,7 +344,7 @@
 			});
 		}
 	}
-	
+
 	/**
 	 * Explain API provides stemmed words, this method finds the whole word in the attribute label based the stemmed word.
 	 */
