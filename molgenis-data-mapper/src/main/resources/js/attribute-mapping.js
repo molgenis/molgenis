@@ -286,6 +286,21 @@
 	}
 
 	/**
+	 * Move suggested attributes to the top of the attribute table
+	 */
+	function rankAttributeTable(explainedAttributes){
+		if(explainedAttributes != null){
+			var attributeNames = Object.keys(explainedAttributes);
+			for(var i = attributeNames.length - 1; i >= 0;i--){
+				var className = attributeNames[i];
+				var firstRow = $('#attribute-mapping-table>tbody tr:first');
+				var suggestedRow = $('#attribute-mapping-table tr.' + className);
+				firstRow.before(suggestedRow);
+			}
+		}
+	}
+	
+	/**
 	 * Hides rows of the table if atrribute source labels, names, descriptions
 	 * and tags have nothing to do with the query, hide the row
 	 */
@@ -295,7 +310,7 @@
 			$('#attribute-mapping-table>tbody').find('tr').each(function() {
 				row = $(this);
 				if (attributes !== null) {
-					if (attributes.indexOf($(this).attr('class').toLowerCase()) > -1) {
+					if (attributes.indexOf(row.attr('class').toLowerCase()) > -1) {
 						explainedQueryStrings = explainedAttributes[row.attr('class')];
 						row.show();
 						$(explainedQueryStrings).each(function() {
@@ -362,6 +377,7 @@
 
 				// Call the filterAttributeTable to only show the attributes
 				// that are explained
+				rankAttributeTable(explainedAttributes);
 				filterAttributeTable(explainedAttributes, attributes);
 			}
 		});
