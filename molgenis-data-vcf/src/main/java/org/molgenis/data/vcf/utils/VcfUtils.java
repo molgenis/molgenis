@@ -108,6 +108,10 @@ public class VcfUtils
 							sampleColumn.append(sample.getString(sampleAttribute));
 							sampleColumn.append(":");
 						}
+						else
+						{
+							sampleColumn.append(".:");
+						}
 
 						// get FORMAT fields, but only for the first time
 						if (firstSample)
