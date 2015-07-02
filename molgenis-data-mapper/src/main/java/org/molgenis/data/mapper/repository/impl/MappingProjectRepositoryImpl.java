@@ -129,8 +129,7 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 			mappingProject.setIdentifier(idGenerator.generateId());
 		}
 		result.set(MappingProjectMetaData.IDENTIFIER, mappingProject.getIdentifier());
-		// FIXME: Once cross-repo references allow it, change this to mappingProject.getOwner()
-		result.set(MappingProjectMetaData.OWNER, mappingProject.getOwner().getUsername());
+		result.set(MappingProjectMetaData.OWNER, mappingProject.getOwner());
 		result.set(MappingProjectMetaData.NAME, mappingProject.getName());
 		List<Entity> mappingTargetEntities = mappingTargetRepository.upsert(mappingProject.getMappingTargets());
 		result.set(MappingProjectMetaData.MAPPINGTARGETS, mappingTargetEntities);
