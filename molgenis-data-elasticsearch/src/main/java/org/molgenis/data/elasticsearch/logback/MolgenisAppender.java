@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
+import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
@@ -11,7 +12,6 @@ import org.elasticsearch.common.unit.TimeValue;
 import org.molgenis.data.Entity;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
-import org.molgenis.data.elasticsearch.util.BulkProcessor;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.context.ApplicationContext;

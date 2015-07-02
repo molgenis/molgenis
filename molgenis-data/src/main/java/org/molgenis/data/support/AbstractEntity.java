@@ -32,6 +32,7 @@ public abstract class AbstractEntity implements Entity
 			case HYPERLINK:
 			case INT:
 			case LONG:
+			case SCRIPT:
 			case STRING:
 			case TEXT:
 				Object obj = get(labelAttributeName);

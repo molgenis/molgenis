@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
-import com.google.common.collect.Lists;
 import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
@@ -155,8 +154,8 @@ public class VcfUtils
 	 * @throws Exception
 	 */
 	public static boolean checkPreviouslyAnnotatedAndAddMetadata(File inputVcfFile, PrintWriter outputVCFWriter,
-			List<AttributeMetaData> infoFields, String checkAnnotatedBeforeValue) throws MolgenisInvalidFormatException,
-			FileNotFoundException
+			List<AttributeMetaData> infoFields, String checkAnnotatedBeforeValue)
+			throws MolgenisInvalidFormatException, FileNotFoundException
 	{
 		boolean annotatedBefore = false;
 

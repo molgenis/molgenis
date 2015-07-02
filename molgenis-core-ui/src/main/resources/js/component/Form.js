@@ -431,80 +431,83 @@
             var nullOrUndefinedValue = value === null || value === undefined;
         	var entityInstance = _.extend({}, this.state.entityInstance);
             var errorMessage = undefined;
+            var computed = (attr.expression !== undefined);
             
-            if(attr.nillable === false && type !== 'CATEGORICAL_MREF' && type !== 'MREF' && nullOrUndefinedValue && !attr.auto) { // required value constraint
-            	if (attr.visibleExpression === undefined || this._resolveBoolExpression(attr.visibleExpression, entityInstance) === true) {
-            		errorMessage = 'Please enter a value.';
-            	}
-            }
-            else if(attr.nillable === false && (type === 'CATEGORICAL_MREF' || type === 'MREF') && (nullOrUndefinedValue || value.items.length === 0)) { // required value constraint
-                errorMessage = 'Please enter a value.';
-            }
-            else if(type === 'EMAIL' && !nullOrUndefinedValue && !this._statics.REGEX_EMAIL.test(value)) {
-                errorMessage = 'Please enter a valid email address.';
-            }
-            else if(type === 'HYPERLINK' && !nullOrUndefinedValue && !this._statics.REGEX_URL.test(value)) {
-                errorMessage = 'Please enter a valid URL.';
-            }
-            else if(!attr.range && (type === 'INT' || type === 'LONG') && !nullOrUndefinedValue && !this._isInteger(value)) {
-                errorMessage = 'Please enter an integer value.';
-            }
-            else if(!attr.range && type === 'INT' && !nullOrUndefinedValue && !this._inRange(value, {min: this._statics.INT_MIN, max: this._statics.INT_MAX})) {
-                errorMessage = 'Please enter a value between ' + this._statics.INT_MIN + ' and ' + this._statics.INT_MAX + '.';
-            }
-            else if(!attr.range && type === 'LONG' && !nullOrUndefinedValue && !this._inRange(value, {min: this._statics.LONG_MIN, max: this._statics.LONG_MAX})) {
-                errorMessage = 'Please enter a value between ' + this._statics.LONG_MIN + ' and ' + this._statics.LONG_MAX + '.';
-            }
-            else if(attr.range && (type === 'INT' || type === 'LONG') && !nullOrUndefinedValue && !this._inRange(value, attr.range)) {
-                if(attr.range.min !== undefined && attr.range.max !== undefined) {
-                    errorMessage = 'Please enter a value between ' + attr.range.min + ' and ' + attr.range.max + '.';
-                }
-                else if(attr.range.min !== undefined) {
-                    errorMessage = 'Please enter a value greater than or equal to ' + attr.range.min + '.';
-                }
-                else if(attr.range.max !== undefined) {
-                    errorMessage = 'Please enter a value lower than or equal to ' + attr.range.max + '.';
-                }
-            }
-            else if(attr.unique === true && !nullOrUndefinedValue) { // value uniqueness constraint
-            	
-                // determine query value
-                var queryValue;
-                switch(type) {
-                    case 'CATEGORICAL':
-                    case 'XREF':
-                        queryValue = value[attr.refEntity.idAttribute];
-                        break;
-                    case 'CATEGORICAL_MREF':
-                    case 'MREF':
-                        queryValue = _.map(value, function(item) {
-							return item[attr.refEntity.idAttribute];
-						});
-                        break;
-                    default:
-                        queryValue = value;
-                        break;
-                }
-
-                // check if value already exists for this attribute
-                var rules = [{field: attr.name, operator: 'EQUALS', value: queryValue}];
-               
-                api.getAsync(this.state.entity.hrefCollection, {q: {q: rules}}, function(data) {
-                	var idAttribute = data.meta.idAttribute;
-                    if(data.total > 0 && ((this.props.mode === 'create') || (data.items[0][idAttribute] !== this.state.entityInstance[idAttribute]))) {
-                        callback({valid: false, errorMessage: 'This ' + attr.label + ' already exists. It must be unique.'});
-                    } else {
-                        callback({valid: true, errorMessage: undefined});
-                    }
-                }.bind(this));
-                return;
-            }
-            
-            if (attr.validationExpression) {
-            	entityInstance[attr.name] = value;
-            	if (this._resolveBoolExpression(attr.validationExpression, entityInstance) === false) {
-            		errorMessage = 'Please enter a valid value.';
-            	}
+            if (!computed) {//Do not validate computed attributes
+	            if(attr.nillable === false && type !== 'CATEGORICAL_MREF' && type !== 'MREF' && nullOrUndefinedValue && !attr.auto) { // required value constraint
+	            	if (attr.visibleExpression === undefined || this._resolveBoolExpression(attr.visibleExpression, entityInstance) === true) {
+	            		errorMessage = 'Please enter a value.';
+	            	}
+	            }
+	            else if(attr.nillable === false && (type === 'CATEGORICAL_MREF' || type === 'MREF') && (nullOrUndefinedValue || value.items.length === 0)) { // required value constraint
+	                errorMessage = 'Please enter a value.';
+	            }
+	            else if(type === 'EMAIL' && !nullOrUndefinedValue && !this._statics.REGEX_EMAIL.test(value)) {
+	                errorMessage = 'Please enter a valid email address.';
+	            }
+	            else if(type === 'HYPERLINK' && !nullOrUndefinedValue && !this._statics.REGEX_URL.test(value)) {
+	                errorMessage = 'Please enter a valid URL.';
+	            }
+	            else if(!attr.range && (type === 'INT' || type === 'LONG') && !nullOrUndefinedValue && !this._isInteger(value)) {
+	                errorMessage = 'Please enter an integer value.';
+	            }
+	            else if(!attr.range && type === 'INT' && !nullOrUndefinedValue && !this._inRange(value, {min: this._statics.INT_MIN, max: this._statics.INT_MAX})) {
+	                errorMessage = 'Please enter a value between ' + this._statics.INT_MIN + ' and ' + this._statics.INT_MAX + '.';
+	            }
+	            else if(!attr.range && type === 'LONG' && !nullOrUndefinedValue && !this._inRange(value, {min: this._statics.LONG_MIN, max: this._statics.LONG_MAX})) {
+	                errorMessage = 'Please enter a value between ' + this._statics.LONG_MIN + ' and ' + this._statics.LONG_MAX + '.';
+	            }
+	            else if(attr.range && (type === 'INT' || type === 'LONG') && !nullOrUndefinedValue && !this._inRange(value, attr.range)) {
+	                if(attr.range.min !== undefined && attr.range.max !== undefined) {
+	                    errorMessage = 'Please enter a value between ' + attr.range.min + ' and ' + attr.range.max + '.';
+	                }
+	                else if(attr.range.min !== undefined) {
+	                    errorMessage = 'Please enter a value greater than or equal to ' + attr.range.min + '.';
+	                }
+	                else if(attr.range.max !== undefined) {
+	                    errorMessage = 'Please enter a value lower than or equal to ' + attr.range.max + '.';
+	                }
+	            }
+	            else if(attr.unique === true && !nullOrUndefinedValue) { // value uniqueness constraint
+	            	
+	                // determine query value
+	                var queryValue;
+	                switch(type) {
+	                    case 'CATEGORICAL':
+	                    case 'XREF':
+	                        queryValue = value[attr.refEntity.idAttribute];
+	                        break;
+	                    case 'CATEGORICAL_MREF':
+	                    case 'MREF':
+	                        queryValue = _.map(value, function(item) {
+								return item[attr.refEntity.idAttribute];
+							});
+	                        break;
+	                    default:
+	                        queryValue = value;
+	                        break;
+	                }
+	
+	                // check if value already exists for this attribute
+	                var rules = [{field: attr.name, operator: 'EQUALS', value: queryValue}];
+	               
+	                api.getAsync(this.state.entity.hrefCollection, {q: {q: rules}}, function(data) {
+	                	var idAttribute = data.meta.idAttribute;
+	                    if(data.total > 0 && ((this.props.mode === 'create') || (data.items[0][idAttribute] !== this.state.entityInstance[idAttribute]))) {
+	                        callback({valid: false, errorMessage: 'This ' + attr.label + ' already exists. It must be unique.'});
+	                    } else {
+	                        callback({valid: true, errorMessage: undefined});
+	                    }
+	                }.bind(this));
+	                return;
+	            }
+	            
+	            if (attr.validationExpression) {
+	            	entityInstance[attr.name] = value;
+	            	if (this._resolveBoolExpression(attr.validationExpression, entityInstance) === false) {
+	            		errorMessage = 'Please enter a valid value.';
+	            	}
+	            }
             }
             
             callback({valid: errorMessage === undefined, errorMessage: errorMessage});
