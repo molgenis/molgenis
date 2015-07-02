@@ -41,6 +41,8 @@ public class MetaValidationUtils
 	/**
 	 * Validates names of entities, packages and attributes. Rules: only [a-zA-Z0-9_#] are allowed, name must start with
 	 * a letter
+	 * 
+	 * @throws MolgenisDataException
 	 */
 	public static void validateName(String name)
 	{
