@@ -44,8 +44,9 @@
 		
 		<div class="row">
 			<div class="col-md-12">
+				<hr></hr>
 				<form name="save-menu-form" action="${context_url?html}/save" method="POST">
-					<button type="submit" class="btn btn-info pull-left">Save the new menu layout</button>
+					<button type="submit" class="btn btn-info pull-right">Save the new menu layout</button>
 				</form>
 			</div>
 		</div>
