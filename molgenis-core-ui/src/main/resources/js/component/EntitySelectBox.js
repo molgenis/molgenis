@@ -76,6 +76,7 @@
 			} else if(this.props.mode === 'create') {
 				return this.state.modal ? molgenis.ui.Form({
 					entity : this.state.entity.name,
+					showHidden : true,
 					cancelBtn : true,
 					modal: true,
 					onSubmitCancel : this._onModalHide,

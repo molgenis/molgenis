@@ -196,7 +196,7 @@
             	<#list menu.items as item> 
                 	<#if item.type != "MENU" && item.name == "Home" && app_home_logo?has_content>
  						<a class="navbar-brand" href="/menu/${menu.id?html}/${item.url?html}">
-		                	<img class="img-responsive" 
+		                	<img class="img-responsive" style="max-width:100%;max-height:100%;"
 	                		src="<#if molgenis_ui.hrefLogo?has_content>${molgenis_ui.hrefLogo?html}<#else><@resource_href "/img/logo_molgenis_small.png"/></#if>" 
 	                		alt="<#if molgenis_ui.title?has_content>${molgenis_ui.title?html}</#if>">
                 		</a>						
