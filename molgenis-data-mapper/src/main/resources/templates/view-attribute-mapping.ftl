@@ -10,7 +10,8 @@
 	'biobankconnect-graph.js',
 	'jquery/scrollTableBody/jquery.scrollTableBody-1.0.0.js',
 	'bootbox.min.js',
-	'jquery.ace.js'
+	'jquery.ace.js',
+	'jquery.highlight.js'
 ]>
 
 <@header css js/>
