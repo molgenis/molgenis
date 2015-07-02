@@ -93,7 +93,7 @@
 <script>var selectedEntityName='${selectedEntityName?js_string}';</script>
 
 <#else>
-<span>No available catalogues.</span>
+<span>No valid entities are available.</span>
 <script>var selectedEntityName=undefined;</script>
 </#if>
 <@footer/>
