@@ -332,7 +332,6 @@
 						this._validate(attr, this._getValue(this.state.entityInstance, attr), function(validationResult) {
 							if (validationResult.valid === false) {
 								errorMessages[attr.name] = validationResult.errorMessage;
-								console.log(attr.name + ":" + validationResult.errorMessage);
 							}
 							resolve(validationResult.valid);
 						}.bind(this));
@@ -347,7 +346,7 @@
 				for (var i = 0; i < results.length && valid; i++) {
 					valid = valid && results[i];
 				}
-				console.log("valid=" + valid);
+			
 				if (valid) {
 					$(target).closest('form').submit();//TODO remove jquery form submit workaround, see also componentDidMount in JQueryForm.js
 				} else {
