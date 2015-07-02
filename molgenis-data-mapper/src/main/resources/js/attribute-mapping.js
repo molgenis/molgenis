@@ -316,7 +316,8 @@
 						$(explainedQueryStrings).each(function() {
 							words = this.matchedWords.split(' ');
 							$(words).each(function() {
-								$(row).find('td.source-attribute-information').highlight(this);
+								var completeWord = extendPartialWord($(row).attr('data-attribute-label'), this);
+								$(row).find('td.source-attribute-information').highlight(completeWord);
 							});
 						});
 					} else {
@@ -339,6 +340,29 @@
 				}
 			});
 		}
+	}
+	
+	/**
+	 * Explain API provides stemmed words, this method finds the whole word in the attribute label based the stemmed word.
+	 */
+	function extendPartialWord(text, partialWord){
+		text = text.toUpperCase();
+		partialWord = partialWord.toUpperCase();
+		var startIndex = text.indexOf(partialWord);
+		
+		while(startIndex == -1 && partialWord.length > 0){
+			partialWord = partialWord.substring(0, partialWord.length - 1);
+			startIndex = text.indexOf(partialWord);
+		}
+	
+		if(startIndex != -1){
+			var endIndex = startIndex + partialWord.length;
+			while(text.length > endIndex && text.charAt(endIndex).match(/[A-Z0-9]/i)){
+				endIndex++;
+			}
+			return text.substring(startIndex, endIndex);
+		}
+		return partialWord;
 	}
 
 	$(function() {
