@@ -3,10 +3,11 @@ package org.molgenis.data.semanticsearch.config;
 import org.molgenis.data.DataService;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.Repository;
+import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.semantic.LabeledResource;
-import org.molgenis.data.semanticsearch.explain.factory.ElastisSearchExplainFactory;
 import org.molgenis.data.semanticsearch.explain.service.ElasticSearchExplainService;
+import org.molgenis.data.semanticsearch.explain.service.ElasticSearchExplainServiceImpl;
 import org.molgenis.data.semanticsearch.explain.service.ExplainServiceHelper;
 import org.molgenis.data.semanticsearch.repository.TagRepository;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
@@ -35,6 +36,9 @@ public class SemanticSearchConfig
 
 	@Autowired
 	SemanticSearchServiceHelper semanticSearchServiceHelper;
+
+	@Autowired
+	EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory;
 
 	@Bean
 	public OntologyTagService ontologyTagService()
@@ -67,15 +71,10 @@ public class SemanticSearchConfig
 		return new TagRepository(repo, idGenerator);
 	}
 
-	@Bean(destroyMethod = "close")
-	ElastisSearchExplainFactory elastisSearchExplainFactory()
-	{
-		return new ElastisSearchExplainFactory();
-	}
-
 	@Bean
 	ElasticSearchExplainService elasticSearchExplainService()
 	{
-		return elastisSearchExplainFactory().create(explainServiceHelper());
+		return new ElasticSearchExplainServiceImpl(embeddedElasticSearchServiceFactory.getClient(),
+				explainServiceHelper());
 	}
 }

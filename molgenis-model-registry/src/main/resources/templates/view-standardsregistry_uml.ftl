@@ -1,6 +1,6 @@
 <#if molgenisPackage??>
-	var PAPER_WIDTH = 1200;
-	var PAPER_HEIGHT = 600;
+	var PAPER_WIDTH = Math.max(document.documentElement.clientWidth, window.innerWidth || 0) * 0.9;
+	var PAPER_HEIGHT = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 	var RECT_WIDTH = 180;
 	
 	$('#paper').unbind();

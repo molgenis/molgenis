@@ -21,24 +21,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainService
 {
-	private final Client client;
-	private final String indexName;
+	private static final String DEFAULT_INDEX_NAME = "molgenis";
 	private final ExplainServiceHelper explainServiceHelper;
+	private final Client client;
 
 	private final QueryGenerator queryGenerator = new QueryGenerator();
 
 	@Autowired
-	public ElasticSearchExplainServiceImpl(Client client, String indexName, ExplainServiceHelper explainServiceHelper)
+	public ElasticSearchExplainServiceImpl(Client client, ExplainServiceHelper explainServiceHelper)
 	{
-		this.client = client;
-		this.indexName = indexName;
 		this.explainServiceHelper = explainServiceHelper;
+		this.client = client;
 	}
 
 	public Explanation explain(Query q, EntityMetaData entityMetaData, String documentId)
 	{
 		String type = sanitizeMapperType(entityMetaData.getName());
-		ExplainRequestBuilder explainRequestBuilder = new ExplainRequestBuilder(client, indexName, type, documentId);
+		ExplainRequestBuilder explainRequestBuilder = new ExplainRequestBuilder(client, DEFAULT_INDEX_NAME, type,
+				documentId);
 		QueryBuilder queryBuilder = queryGenerator.createQueryBuilder(q.getRules(), entityMetaData);
 		explainRequestBuilder.setQuery(queryBuilder);
 		ExplainResponse explainResponse = explainRequestBuilder.get();

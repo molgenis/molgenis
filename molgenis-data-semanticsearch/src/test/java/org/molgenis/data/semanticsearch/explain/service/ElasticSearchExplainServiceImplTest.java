@@ -25,10 +25,9 @@ public class ElasticSearchExplainServiceImplTest
 	@BeforeClass
 	public void setup()
 	{
-		Client client = mock(Client.class);
-		String indexName = "molgenis";
 		explainServiceHelper = new ExplainServiceHelper();
-		elasticSearchExplainService = new ElasticSearchExplainServiceImpl(client, indexName, explainServiceHelper);
+		Client client = mock(Client.class);
+		elasticSearchExplainService = new ElasticSearchExplainServiceImpl(client, explainServiceHelper);
 	}
 
 	@Test
