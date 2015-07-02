@@ -783,6 +783,7 @@
 			return this.state.form ? molgenis.ui.Form({
 				entity: this.props.entity.name,
 				mode: 'create',
+				showHidden: true,
 				modal: true,
 				onSubmitSuccess: this._handleCreateConfirm,
 				onSubmitCancel: this._handleCreateCancel
@@ -843,6 +844,7 @@
 				entity : this.props.name,
 				entityInstance: this.props.id,
 				mode: 'edit',
+				showHidden: true,
 				modal: true,
 				onSubmitSuccess: this._handleEditConfirm,
 				onSubmitCancel: this._handleEditCancel
