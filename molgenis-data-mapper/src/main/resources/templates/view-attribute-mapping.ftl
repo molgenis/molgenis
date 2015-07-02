@@ -76,11 +76,11 @@
 						</thead>
 						<tbody>
 							<#list entityMapping.sourceEntityMetaData.attributes as source>
-								<tr class="${source.name?html}" data-attribute-label="${source.label?html}">
+								<tr data-attribute-name="${source.name?html}" data-attribute-label="${source.label?html}">
 									<td>
 										<div class="checkbox">
 											<label>
-												<input class="${source.name?html}" type="checkbox">
+												<input data-attribute-name="${source.name?html}" type="checkbox">
 											</label>
 										</div>
 									</td>
