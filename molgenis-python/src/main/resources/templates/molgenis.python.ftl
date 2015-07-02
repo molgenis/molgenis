@@ -271,9 +271,3 @@ class Connect_Molgenis():
         return column_meta_data['fieldType']
     
 connection = Connect_Molgenis('http://localhost:8080', 'admin', 'admin')
-# add a row
-#connection.add_entity_row('public_rnaseq_Per_tile_sequence_quality',{'tile':'20','base':'1', 'mean':4})
-# update a row
-# print connection.get_entity_rows('public_rnaseq_Per_tile_sequence_quality',[{'field':'base', 'operator':'EQUALS', 'value':13434}])
-# update entity row
-connection.update_entity_row('public_rnaseq_Per_tile_sequence_quality',[{'field':'tile', 'operator':'EQUALS', 'value':5}], {'base':15, 'mean':15,'tile':15})
