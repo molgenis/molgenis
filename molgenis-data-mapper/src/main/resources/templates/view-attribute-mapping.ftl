@@ -76,11 +76,11 @@
 						</thead>
 						<tbody>
 							<#list entityMapping.sourceEntityMetaData.attributes as source>
-								<tr class="${source.name?html}" data-attribute-label="${source.label?html}">
+								<tr data-attribute-name="${source.name?html}" data-attribute-label="${source.label?html}">
 									<td>
 										<div class="checkbox">
 											<label>
-												<input class="${source.name?html}" type="checkbox">
+												<input data-attribute-name="${source.name?html}" type="checkbox">
 											</label>
 										</div>
 									</td>
@@ -126,7 +126,7 @@
 			    		<li role="presentation" class="active"><a href="#script" aria-controls="script" role="tab" data-toggle="tab">Script</a></li>
 			    		
 			    		<#if attributeMapping.targetAttributeMetaData.dataType == "xref" || attributeMapping.targetAttributeMetaData.dataType == "categorical" ||
-			    		attributeMapping.targetAttributeMetaData.dataType == "mref" || attributeMapping.targetAttributeMetaData.dataType == "string">
+			    		attributeMapping.targetAttributeMetaData.dataType == "mref">
 			    			<li role="presentation"><a href="#map" aria-controls="map" role="tab" data-toggle="tab">Map</a></li>
 		    			</#if> 
 			   		</ul>

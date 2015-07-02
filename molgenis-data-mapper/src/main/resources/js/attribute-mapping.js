@@ -226,7 +226,7 @@
 	function checkSelectedAttributes(algorithm) {
 		var sourceAttrs = getSourceAttrs(algorithm);
 		$('input:checkbox').each(function(index, value) {
-			var name = $(this).attr('class'), inArray = $.inArray(name, sourceAttrs);
+			var name = $(this).data('attribute-name'), inArray = $.inArray(name, sourceAttrs);
 			$(this).prop('checked', inArray >= 0);
 		});
 	}
@@ -295,8 +295,8 @@
 			$('#attribute-mapping-table>tbody').find('tr').each(function() {
 				row = $(this);
 				if (attributes !== null) {
-					if (attributes.indexOf($(this).attr('class').toLowerCase()) > -1) {
-						explainedQueryStrings = explainedAttributes[row.attr('class')];
+					if (attributes.indexOf($(this).data('attribute-name').toLowerCase()) > -1) {
+						explainedQueryStrings = explainedAttributes[row.data('attribute-name')];
 						row.show();
 						$(explainedQueryStrings).each(function() {
 							words = this.matchedWords.split(' ');
@@ -314,7 +314,7 @@
 		} else {
 			$('#attribute-mapping-table>tbody').find('tr').each(function() {
 				attrLabel = $(this).data('attribute-label').toLowerCase();
-				attrName = $(this).attr('class').toLowerCase();
+				attrName = $(this).data('attribute-label').toLowerCase();
 				attrDescription = $(this).find('td.source-attribute-information').text().toLowerCase();
 
 				$(this).show();
@@ -413,7 +413,7 @@
 			selectedAttributes = [];
 
 			$('#attribute-mapping-table :checkbox:checked').each(function() {
-				selectedAttributes.push($(this).attr('class'));
+				selectedAttributes.push($(this).data('attribute-name'));
 			});
 
 			// attributes into editor
