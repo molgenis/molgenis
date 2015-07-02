@@ -914,7 +914,7 @@
 				entity : settings.entityMetaData.name,
 				entityInstance: $(this).closest('tr').data('id'),
 				mode: 'edit',
-				showHidden: true,s
+				showHidden: true,
 				modal: true,
 				onSubmitSuccess : function() {
 					settings.start = 0;
