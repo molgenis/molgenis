@@ -8,17 +8,16 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import javax.validation.Valid;
 
-import org.apache.commons.lang3.StringUtils;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
@@ -415,28 +414,29 @@ public class MappingServiceController extends MolgenisPluginController
 
 	@RequestMapping(method = RequestMethod.POST, value = "/attributeMapping/explain", consumes = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Map<AttributeMetaData, Iterable<ExplainedQueryString>> getExplainedAttributeMapping(
+	public Map<String, Iterable<ExplainedQueryString>> getExplainedAttributeMapping(
 			@RequestBody Map<String, String> requestBody)
 	{
 		String mappingProjectId = requestBody.get("mappingProjectId");
 		String target = requestBody.get("target");
 		String source = requestBody.get("source");
 		String targetAttribute = requestBody.get("targetAttribute");
+		MappingProject project = mappingService.getMappingProject(mappingProjectId);
+		MappingTarget mappingTarget = project.getMappingTarget(target);
+		EntityMapping entityMapping = mappingTarget.getMappingForSource(source);
+		AttributeMetaData targetAttributeMetaData = entityMapping.getTargetEntityMetaData().getAttribute(
+				targetAttribute);
 
-		if (StringUtils.isNotEmpty(mappingProjectId) && StringUtils.isNotEmpty(target)
-				&& StringUtils.isNotEmpty(source) && StringUtils.isNotEmpty(targetAttribute))
+		Map<AttributeMetaData, Iterable<ExplainedQueryString>> explainedAttributes = semanticSearchService
+				.explainAttributes(entityMapping.getSourceEntityMetaData(), dataService.getEntityMetaData(target),
+						targetAttributeMetaData);
+
+		Map<String, Iterable<ExplainedQueryString>> simpleExplainedAttributes = new LinkedHashMap<String, Iterable<ExplainedQueryString>>();
+		for (Entry<AttributeMetaData, Iterable<ExplainedQueryString>> entry : explainedAttributes.entrySet())
 		{
-			MappingProject project = mappingService.getMappingProject(mappingProjectId);
-			MappingTarget mappingTarget = project.getMappingTarget(target);
-			EntityMapping entityMapping = mappingTarget.getMappingForSource(source);
-			AttributeMetaData targetAttributeMetaData = entityMapping.getTargetEntityMetaData().getAttribute(
-					targetAttribute);
-
-			return semanticSearchService.explainAttributes(entityMapping.getSourceEntityMetaData(),
-					dataService.getEntityMetaData(target), targetAttributeMetaData);
+			simpleExplainedAttributes.put(entry.getKey().getName(), entry.getValue());
 		}
-
-		return Collections.emptyMap();
+		return simpleExplainedAttributes;
 	}
 
 	/**
