@@ -359,7 +359,7 @@
 		var connectedPhrases = [];
 		if(attributeLabel && words && words.length > 0){
 			var connectedPhrase = '';
-			var orderedWords = attributeLabel.toUpperCase().split(' ');
+			var orderedWords = attributeLabel.replace(/[^\w\s]/gi, '').toUpperCase().split(' ');
 			$.each(orderedWords, function(index, word){
 				if($.inArray(word, words) !== -1){
 					connectedPhrase += ' ' + word;
