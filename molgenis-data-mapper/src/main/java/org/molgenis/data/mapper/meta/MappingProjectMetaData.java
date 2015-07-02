@@ -1,8 +1,10 @@
 package org.molgenis.data.mapper.meta;
 
 import static org.molgenis.MolgenisFieldTypes.MREF;
+import static org.molgenis.MolgenisFieldTypes.XREF;
 import static org.molgenis.MolgenisFieldTypes.STRING;
 
+import org.molgenis.auth.MolgenisUserMetaData;
 import org.molgenis.data.mapper.repository.impl.MappingTargetRepositoryImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.springframework.stereotype.Component;
@@ -22,8 +24,7 @@ public class MappingProjectMetaData extends DefaultEntityMetaData
 
 		addAttribute(IDENTIFIER).setIdAttribute(true).setNillable(false).setDataType(STRING);
 		addAttribute(NAME).setNillable(false);
-		// FIXME use xref to MolgenisUser when https://github.com/molgenis/molgenis/issues/2054 is fixed
-		addAttribute(OWNER).setDataType(STRING);
+		addAttribute(OWNER).setDataType(XREF).setRefEntity(new MolgenisUserMetaData());
 		addAttribute(MAPPINGTARGETS).setDataType(MREF).setRefEntity(MappingTargetRepositoryImpl.META_DATA);
 	}
 }
