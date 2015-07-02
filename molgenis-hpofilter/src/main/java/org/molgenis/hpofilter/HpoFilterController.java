@@ -117,6 +117,7 @@ public class HpoFilterController extends MolgenisPluginController
 
 		model.addAttribute("entitiesMeta", emds);
 		model.addAttribute("selectedEntityName", selectedEntityName);
+		this.hpoFilterDataProvider.getData();
 		return VIEW_NAME;
 	}
 	
