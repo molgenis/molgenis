@@ -1,4 +1,4 @@
-#edit-algorithm-container { 
+#edit-algorithm-container {
 	top: 0;
 	right: 0;
 	bottom: 0;
@@ -6,7 +6,7 @@
 }
 
 .ace.readonly .ace_cursor {
-	display:none;
+	display: none;
 }
 
 .clone-btn {
@@ -18,7 +18,11 @@
 }
 
 .validation-error-messages-table {
-    display: block;
-    height: 500px;
-    overflow-y: scroll;
+	display: block;
+	height: 500px;
+	overflow-y: scroll;
+}
+
+.highlight {
+	background-color: yellow
 }

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -173,7 +174,7 @@ public class CrudRepositoryAnnotator
 	{
 		if (createCopy)
 		{
-			DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(UUID.randomUUID().toString(),
+			DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(RandomStringUtils.randomAlphanumeric(30),
 					entityMetaData);
 			if (newEntityMetaData.getAttribute(compoundAttributeMetaData.getName()) == null)
 			{
