@@ -34,6 +34,7 @@ public class VcfUtils
 	 */
 	public static String convertToVCF(Entity vcfEntity) throws MolgenisDataException
 	{
+
 		StringBuilder vcfRecord = new StringBuilder();
 
 		List<String> vcfAttributes = Arrays.asList(new String[]
@@ -106,6 +107,10 @@ public class VcfUtils
 						{
 							sampleColumn.append(sample.getString(sampleAttribute));
 							sampleColumn.append(":");
+						}
+						else
+						{
+							sampleColumn.append(".:");
 						}
 
 						// get FORMAT fields, but only for the first time
@@ -250,8 +255,11 @@ public class VcfUtils
 								// type and nillable
 		sb.append(",Type=");
 		sb.append(toVcfDataType(infoAttributeMetaData.getDataType().getEnumType()));
-		sb.append(",Description=");
-		sb.append(infoAttributeMetaData.getDescription());
+		sb.append(",Description=\"");
+		// http://samtools.github.io/hts-specs/VCFv4.1.pdf --> "The Description value must be surrounded by
+		// double-quotes. Double-quote character can be escaped with backslash \ and backslash as \\."
+		sb.append(infoAttributeMetaData.getDescription().replace("\\", "\\\\").replace("\"", "\\\""));
+		sb.append("\">");
 		return sb.toString();
 	}
 
