@@ -895,6 +895,7 @@
 		function getCreateForm(entityMetaData) {
 			React.render(molgenis.ui.Form({
 				mode: 'create',
+				showHidden: true,
 				entity : entityMetaData.name,
 				modal: true,
 				onSubmitSuccess: function() {
@@ -913,6 +914,7 @@
 				entity : settings.entityMetaData.name,
 				entityInstance: $(this).closest('tr').data('id'),
 				mode: 'edit',
+				showHidden: true,
 				modal: true,
 				onSubmitSuccess : function() {
 					settings.start = 0;
