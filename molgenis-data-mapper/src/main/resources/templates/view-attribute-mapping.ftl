@@ -126,7 +126,7 @@
 			    		<li role="presentation" class="active"><a href="#script" aria-controls="script" role="tab" data-toggle="tab">Script</a></li>
 			    		
 			    		<#if attributeMapping.targetAttributeMetaData.dataType == "xref" || attributeMapping.targetAttributeMetaData.dataType == "categorical" ||
-			    		attributeMapping.targetAttributeMetaData.dataType == "mref" || attributeMapping.targetAttributeMetaData.dataType == "string">
+			    		attributeMapping.targetAttributeMetaData.dataType == "mref">
 			    			<li role="presentation"><a href="#map" aria-controls="map" role="tab" data-toggle="tab">Map</a></li>
 		    			</#if> 
 			   		</ul>
