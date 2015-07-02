@@ -1,5 +1,7 @@
 package org.molgenis.data.annotation.utils;
 
+import org.molgenis.data.annotator.tabix.TabixReader;
+
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.Scanner;
