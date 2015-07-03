@@ -1,22 +1,31 @@
 package org.molgenis.data.mapper.data.request;
 
-import java.util.List;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 
 public class MappingServiceRequest
 {
+	@NotNull
 	private final String targetEntityName;
+	@NotNull
 	private final String sourceEntityName;
+	@NotNull
 	private final String targetAttributeName;
-	private final List<String> sourceAttributeNames;
+	@NotNull
 	private final String algorithm;
+	@Min(0)
+	private Long offset;
+	@Min(1)
+	@Max(1000)
+	private Long num;
 
-	public MappingServiceRequest(String targetEntityIdentifier, String sourceEntityIdentifier,
-			String targetAttributeIdentifier, List<String> sourceAttributeIdentifiers, String algorithm)
+	public MappingServiceRequest(String targetEntityName, String sourceEntityName, String targetAttributeName,
+			String algorithm)
 	{
-		this.targetEntityName = targetEntityIdentifier;
-		this.sourceEntityName = sourceEntityIdentifier;
-		this.targetAttributeName = targetAttributeIdentifier;
-		this.sourceAttributeNames = sourceAttributeIdentifiers;
+		this.targetEntityName = targetEntityName;
+		this.sourceEntityName = sourceEntityName;
+		this.targetAttributeName = targetAttributeName;
 		this.algorithm = algorithm;
 	}
 
@@ -35,13 +44,28 @@ public class MappingServiceRequest
 		return targetAttributeName;
 	}
 
-	public List<String> getSourceAttributeNames()
-	{
-		return sourceAttributeNames;
-	}
-
 	public String getAlgorithm()
 	{
 		return algorithm;
+	}
+
+	public Long getOffset()
+	{
+		return offset;
+	}
+
+	public void setOffset(Long offset)
+	{
+		this.offset = offset;
+	}
+
+	public Long getNum()
+	{
+		return num;
+	}
+
+	public void setNum(Long num)
+	{
+		this.num = num;
 	}
 }

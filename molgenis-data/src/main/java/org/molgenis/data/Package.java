@@ -9,7 +9,7 @@ import org.molgenis.data.semantic.Tag;
  */
 public interface Package
 {
-	public static final String DEFAULT_PACKAGE_NAME = "default";
+	public static final String DEFAULT_PACKAGE_NAME = "base";
 	public static final String PACKAGE_SEPARATOR = "_";
 
 	/**
