@@ -173,7 +173,7 @@
 		
 		// calculate number of header rows 
 		var nrHeaderRows = calculateNrHeaderRows(settings.expandAttributes);
-		console.log(settings.colAttributes, settings.expandAttributes);
+
 		$.each(settings.colAttributes, function(i, attribute) {
 			if(attribute.visible) {
 				var expandCollapseControl;
