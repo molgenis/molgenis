@@ -290,7 +290,7 @@
 	 * Hides rows of the table if atrribute source labels, names, descriptions
 	 * and tags have nothing to do with the query, hide the row
 	 */
-	function filterAttributeTable(explainedAttributes, attributes) {
+	function filterAttributeTable(attributes) {
 		var searchQuery = $('#attribute-search-field').val().toLowerCase(), attrLabel, attrName, attrDescription, row;
 		if (searchQuery === '') {
 			$('#attribute-mapping-table>tbody').find('tr').each(function() {
@@ -480,7 +480,7 @@
 				// Call the filterAttributeTable to only show the attributes
 				// that are explained
 				rankAttributeTable(explainedAttributes);
-				filterAttributeTable(explainedAttributes, attributes);
+				filterAttributeTable(attributes);
 			}
 		});
 
@@ -584,7 +584,7 @@
 
 		// look for attributes in the attribute table
 		$('#attribute-search-field').on('onkeydown onpaste oninput change keyup', function(e) {
-			filterAttributeTable(explainedAttributes, attributes);
+			filterAttributeTable(attributes);
 		});
 
 		// when the map tab is selected, load its contents
