@@ -5,11 +5,14 @@ import static java.util.Arrays.stream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -22,25 +25,31 @@ import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
+import org.molgenis.data.semanticsearch.string.Stemmer;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
+import org.molgenis.ontology.ic.TermFrequencyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.apache.lucene.queryparser.classic.QueryParser;
+
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 
 @Component
 public class SemanticSearchServiceHelper
 {
 	private final OntologyTagService ontologyTagService;
 
+	private final TermFrequencyService termFrequencyService;
+
 	private final DataService dataService;
 
 	private final OntologyService ontologyService;
+
+	private final Stemmer stemmer = new Stemmer();
 
 	public static final Set<String> STOP_WORDS;
 
@@ -68,52 +77,212 @@ public class SemanticSearchServiceHelper
 
 	@Autowired
 	public SemanticSearchServiceHelper(OntologyTagService ontologyTagService, DataService dataService,
-			OntologyService ontologyService)
+			OntologyService ontologyService, TermFrequencyService termFrequencyService)
 	{
-		if (null == ontologyTagService || null == dataService || null == ontologyService) throw new MolgenisDataException(
+		if (null == ontologyTagService || null == dataService || null == ontologyService
+				|| null == termFrequencyService) throw new MolgenisDataException(
 				"Service is not found, please contact your application administrator");
 
 		this.dataService = dataService;
 		this.ontologyTagService = ontologyTagService;
 		this.ontologyService = ontologyService;
+		this.termFrequencyService = termFrequencyService;
 	}
 
-	public QueryRule createDisMaxQueryRule(EntityMetaData targetEntityMetaData, AttributeMetaData targetAttribute)
+	/**
+	 * Create a disMaxJunc query rule based on the label and description from target attribute as well as the
+	 * information from ontology term tags
+	 * 
+	 * @param targetEntityMetaData
+	 * @param targetAttribute
+	 * @return disMaxJunc queryRule
+	 */
+	public QueryRule createDisMaxQueryRuleForAttribute(EntityMetaData targetEntityMetaData,
+			AttributeMetaData targetAttribute)
 	{
+		List<String> queryTerms = new ArrayList<String>();
+
+		if (StringUtils.isNotEmpty(targetAttribute.getLabel()))
+		{
+			queryTerms.add(parseQueryString(targetAttribute.getLabel()));
+		}
+
+		if (StringUtils.isNotEmpty(targetAttribute.getDescription()))
+		{
+			queryTerms.add(parseQueryString(targetAttribute.getDescription()));
+		}
+
 		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(
 				targetEntityMetaData, targetAttribute);
 
+		// Handle tags with only one ontologyterm
+		tagsForAttribute.values().stream().filter(ontologyTerm -> !ontologyTerm.getIRI().contains(",")).forEach(ot -> {
+			queryTerms.addAll(parseOntologyTermQueries(ot));
+		});
+
+		QueryRule disMaxQueryRule = createDisMaxQueryRuleForTerms(queryTerms);
+
+		// Handle tags with multiple ontologyterms
+		tagsForAttribute.values().stream().filter(ontologyTerm -> ontologyTerm.getIRI().contains(",")).forEach(ot -> {
+			disMaxQueryRule.getNestedRules().add(createShouldQueryRule(ot.getIRI()));
+		});
+
+		return disMaxQueryRule;
+	}
+
+	/**
+	 * Create disMaxJunc query rule based a list of queryTerm. All queryTerms are lower cased and stop words are removed
+	 * 
+	 * @param queryTerms
+	 * @return disMaxJunc queryRule
+	 */
+	public QueryRule createDisMaxQueryRuleForTerms(List<String> queryTerms)
+	{
 		List<QueryRule> rules = new ArrayList<QueryRule>();
-
-		// add query rule for searching the label of target attribute in the attribute table.
-		if (StringUtils.isNotEmpty(targetAttribute.getDescription()))
-		{
-			rules.add(new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, targetAttribute
-					.getDescription()));
-		}
-
-		for (OntologyTerm ontologyTerm : tagsForAttribute.values())
-		{
-			QueryRule disMaxQuery = new QueryRule(new ArrayList<QueryRule>());
-			disMaxQuery.setOperator(Operator.DIS_MAX);
-
-			List<String> synonyms = Lists.newArrayList(ontologyTerm.getSynonyms());
-			synonyms.add(ontologyTerm.getLabel());
-			for (String synonym : synonyms)
-			{
-				disMaxQuery.getNestedRules().add(
-						new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, QueryParser.escape(synonym)));
-			}
-
-			rules.add(disMaxQuery);
-		}
-
+		queryTerms.stream().filter(query -> StringUtils.isNotEmpty(query)).map(QueryParser::escape)
+				.map(this::reverseEscapeLuceneChar).forEach(query -> {
+					rules.add(new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, query));
+					rules.add(new QueryRule(AttributeMetaDataMetaData.DESCRIPTION, Operator.FUZZY_MATCH, query));
+				});
 		QueryRule finalDisMaxQuery = new QueryRule(rules);
 		finalDisMaxQuery.setOperator(Operator.DIS_MAX);
-
 		return finalDisMaxQuery;
 	}
 
+	/**
+	 * Create a disMaxQueryRule with corresponding boosted value
+	 * 
+	 * @param queryTerms
+	 * @param boostValue
+	 * @return a disMaxQueryRule with boosted value
+	 */
+	public QueryRule createDisMaxQueryRuleForTermsWithBoost(List<String> queryTerms, Double boostValue)
+	{
+		QueryRule finalDisMaxQuery = createDisMaxQueryRuleForTerms(queryTerms);
+		if (boostValue != null && boostValue.intValue() != 0)
+		{
+			finalDisMaxQuery.setValue(boostValue);
+		}
+		return finalDisMaxQuery;
+	}
+
+	/**
+	 * Create a boolean should query for composite tags containing multiple ontology terms
+	 * 
+	 * @param multiOntologyTermIri
+	 * @return return a boolean should queryRule
+	 */
+	public QueryRule createShouldQueryRule(String multiOntologyTermIri)
+	{
+		QueryRule shouldQueryRule = new QueryRule(new ArrayList<QueryRule>());
+		shouldQueryRule.setOperator(Operator.SHOULD);
+		for (String ontologyTermIri : multiOntologyTermIri.split(","))
+		{
+			OntologyTerm ontologyTerm = ontologyService.getOntologyTerm(ontologyTermIri);
+			List<String> queryTerms = parseOntologyTermQueries(ontologyTerm);
+			Double termFrequency = termFrequencyService.getTermFrequency(ontologyTerm.getLabel());
+			shouldQueryRule.getNestedRules().add(createDisMaxQueryRuleForTermsWithBoost(queryTerms, termFrequency));
+		}
+		return shouldQueryRule;
+	}
+
+	/**
+	 * Create a list of string queries based on the information collected from current ontologyterm including label,
+	 * synonyms and child ontologyterms
+	 * 
+	 * @param ontologyTerm
+	 * @return
+	 */
+	public List<String> parseOntologyTermQueries(OntologyTerm ontologyTerm)
+	{
+		List<String> queryTerms = getOtLabelAndSynonyms(ontologyTerm).stream().map(term -> parseQueryString(term))
+				.collect(Collectors.<String> toList());
+
+		for (OntologyTerm childOt : ontologyService.getChildren(ontologyTerm))
+		{
+			double boostedNumber = Math.pow(0.5, ontologyService.getOntologyTermDistance(ontologyTerm, childOt));
+			getOtLabelAndSynonyms(childOt).forEach(
+					synonym -> queryTerms.add(parseBoostQueryString(synonym, boostedNumber)));
+		}
+		return queryTerms;
+	}
+
+	/**
+	 * A helper function to collect synonyms as well as label of ontologyterm
+	 * 
+	 * @param ontologyTerm
+	 * @return a list of synonyms plus label
+	 */
+	public Set<String> getOtLabelAndSynonyms(OntologyTerm ontologyTerm)
+	{
+		Set<String> allTerms = Sets.newLinkedHashSet(ontologyTerm.getSynonyms());
+		allTerms.add(ontologyTerm.getLabel());
+		return allTerms;
+	}
+
+	/**
+	 * This function creates a map that contains the expanded query as key and original tag label as the value. This map
+	 * allows us to trace back which tags are used in matching
+	 * 
+	 * @param targetEntityMetaData
+	 * @param targetAttribute
+	 * @return
+	 */
+	public Map<String, String> collectExpandedQueryMap(EntityMetaData targetEntityMetaData,
+			AttributeMetaData targetAttribute)
+	{
+		Map<String, String> expandedQueryMap = new LinkedHashMap<String, String>();
+
+		if (StringUtils.isNotEmpty(targetAttribute.getLabel()))
+		{
+			expandedQueryMap.put(stemmer.cleanStemPhrase(targetAttribute.getLabel()), targetAttribute.getLabel());
+		}
+
+		if (StringUtils.isNotEmpty(targetAttribute.getDescription()))
+		{
+			expandedQueryMap.put(stemmer.cleanStemPhrase(targetAttribute.getDescription()),
+					targetAttribute.getDescription());
+		}
+
+		for (OntologyTerm ontologyTerm : ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute)
+				.values())
+		{
+			if (!ontologyTerm.getIRI().contains(","))
+			{
+				collectOntologyTermQueryMap(expandedQueryMap, ontologyTerm);
+			}
+			else
+			{
+				for (String ontologyTermIri : ontologyTerm.getIRI().split(","))
+				{
+					collectOntologyTermQueryMap(expandedQueryMap, ontologyService.getOntologyTerm(ontologyTermIri));
+				}
+			}
+		}
+		return expandedQueryMap;
+	}
+
+	public void collectOntologyTermQueryMap(Map<String, String> expanedQueryMap, OntologyTerm ontologyTerm)
+	{
+		if (ontologyTerm != null)
+		{
+			getOtLabelAndSynonyms(ontologyTerm).forEach(
+					term -> expanedQueryMap.put(stemmer.cleanStemPhrase(term), ontologyTerm.getLabel()));
+
+			for (OntologyTerm childOntologyTerm : ontologyService.getChildren(ontologyTerm))
+			{
+				getOtLabelAndSynonyms(childOntologyTerm).forEach(
+						term -> expanedQueryMap.put(stemmer.cleanStemPhrase(term), ontologyTerm.getLabel()));
+			}
+		}
+	}
+
+	/**
+	 * A helper function that gets identifiers of all the attributes from one entityMetaData
+	 * 
+	 * @param sourceEntityMetaData
+	 * @return
+	 */
 	public List<String> getAttributeIdentifiers(EntityMetaData sourceEntityMetaData)
 	{
 		Entity entityMetaDataEntity = dataService.findOne(EntityMetaDataMetaData.ENTITY_NAME,
@@ -125,7 +294,6 @@ public class SemanticSearchServiceHelper
 		return FluentIterable.from(entityMetaDataEntity.getEntities(EntityMetaDataMetaData.ATTRIBUTES))
 				.transform(new Function<Entity, String>()
 				{
-					@Override
 					public String apply(Entity attributeEntity)
 					{
 						return attributeEntity.getString(AttributeMetaDataMetaData.IDENTIFIER);
@@ -135,13 +303,35 @@ public class SemanticSearchServiceHelper
 
 	public List<OntologyTerm> findTags(String description, List<String> ontologyIds)
 	{
-		String regex = "[^\\p{L}']+";
-		Set<String> searchTerms = stream(description.split(regex)).map(String::toLowerCase)
-				.filter(w -> !STOP_WORDS.contains(w) && StringUtils.isNotEmpty(w)).collect(Collectors.toSet());
+		Set<String> searchTerms = removeStopWords(description);
 
 		List<OntologyTerm> matchingOntologyTerms = ontologyService.findOntologyTerms(ontologyIds, searchTerms,
 				MAX_NUM_TAGS);
 
 		return matchingOntologyTerms;
+	}
+
+	public String parseQueryString(String queryString)
+	{
+		return StringUtils.join(removeStopWords(queryString), ' ');
+	}
+
+	public String parseBoostQueryString(String queryString, double boost)
+	{
+		return StringUtils.join(
+				removeStopWords(queryString).stream().map(word -> word + "^" + boost).collect(Collectors.toSet()), ' ');
+	}
+
+	public String reverseEscapeLuceneChar(String string)
+	{
+		return string.replace("\\^", "^");
+	}
+
+	public Set<String> removeStopWords(String description)
+	{
+		String regex = "[^\\p{L}'a-zA-Z0-9\\.~^]+";
+		Set<String> searchTerms = stream(description.split(regex)).map(String::toLowerCase)
+				.filter(w -> !STOP_WORDS.contains(w) && StringUtils.isNotEmpty(w)).collect(Collectors.toSet());
+		return searchTerms;
 	}
 }

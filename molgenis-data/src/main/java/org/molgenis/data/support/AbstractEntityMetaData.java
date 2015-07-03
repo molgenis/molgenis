@@ -244,7 +244,7 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 			if (idAttributeMetaData == null && !isAbstract())
 			{
 				LOG.error("No idAttribute specified for entity{}, this attribute is required", getName());
-				// FIXME entity must be identifiable but in reality this is not always the case
+				// FIXME enable exception when https://github.com/molgenis/molgenis/issues/1400 is fixed
 				// throw new RuntimeException("No idAttribute specified, this attribute is required");
 			}
 		}

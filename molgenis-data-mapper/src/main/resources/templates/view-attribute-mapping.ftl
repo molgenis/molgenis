@@ -10,7 +10,8 @@
 	'biobankconnect-graph.js',
 	'jquery/scrollTableBody/jquery.scrollTableBody-1.0.0.js',
 	'bootbox.min.js',
-	'jquery.ace.js'
+	'jquery.ace.js',
+	'jquery.highlight.js'
 ]>
 
 <@header css js/>
@@ -75,11 +76,11 @@
 						</thead>
 						<tbody>
 							<#list entityMapping.sourceEntityMetaData.attributes as source>
-								<tr class="${source.name?html}" data-attribute-label="${source.label?html}">
+								<tr data-attribute-name="${source.name?html}" data-attribute-label="${source.label?html}">
 									<td>
 										<div class="checkbox">
 											<label>
-												<input class="${source.name?html}" type="checkbox">
+												<input data-attribute-name="${source.name?html}" type="checkbox">
 											</label>
 										</div>
 									</td>
@@ -125,7 +126,7 @@
 			    		<li role="presentation" class="active"><a href="#script" aria-controls="script" role="tab" data-toggle="tab">Script</a></li>
 			    		
 			    		<#if attributeMapping.targetAttributeMetaData.dataType == "xref" || attributeMapping.targetAttributeMetaData.dataType == "categorical" ||
-			    		attributeMapping.targetAttributeMetaData.dataType == "mref" || attributeMapping.targetAttributeMetaData.dataType == "string">
+			    		attributeMapping.targetAttributeMetaData.dataType == "mref">
 			    			<li role="presentation"><a href="#map" aria-controls="map" role="tab" data-toggle="tab">Map</a></li>
 		    			</#if> 
 			   		</ul>
@@ -158,6 +159,10 @@
 					<p>
 						
 					</p>
+					<h4>Validation</h4>
+					<p>Algorithm validation starts automatically when the algorithm is updated.</p> 
+                    <div id="mapping-validation-container"></div>
+					<h4>Preview</h4>
 					<div id="result-table-container"></div>
 				</div>
 			</div>
@@ -239,5 +244,27 @@
 		</div>
 	</div>
 </div>
-
+<div class="modal" id="validation-error-messages-modal" tabindex="-1" role="dialog" aria-labelledby="validation-error-messages-label" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">             
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="validation-error-messages-label">Validation Errors</h4>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered validation-error-messages-table">
+                    <thead>
+                        <th>Source Entity</th> 
+                        <th>Error message</th>
+                    </thead>
+                    <tbody id="validation-error-messages-table-body">
+                    </tbody>
+                </table>                        
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 <@footer/>

@@ -3,6 +3,7 @@ package org.molgenis.data.elasticsearch;
 import java.io.IOException;
 import java.util.Iterator;
 
+import org.elasticsearch.common.primitives.Ints;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
@@ -107,9 +108,9 @@ public abstract class AbstractElasticsearchRepository implements IndexedReposito
 	@Transactional
 	public Integer add(Iterable<? extends Entity> entities)
 	{
-		elasticSearchService.index(entities, getEntityMetaData(), IndexingMode.ADD);
+		long nrIndexedEntities = elasticSearchService.index(entities, getEntityMetaData(), IndexingMode.ADD);
 		elasticSearchService.refresh();
-		return Iterables.size(entities); // TODO solve possible performance bottleneck
+		return Ints.checkedCast(nrIndexedEntities);
 	}
 
 	@Override
