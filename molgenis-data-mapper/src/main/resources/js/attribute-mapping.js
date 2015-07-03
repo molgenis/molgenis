@@ -354,6 +354,9 @@
 		}
 	}
 	
+	/**
+	 * Create a boostrap popover message to show the explanation 
+	 */
 	function createPopoverExplanation(row, attributeInfoElement, attributeLabel, explainedQueryStrings){
 		if(explainedQueryStrings.length > 0){
 			var message = '', matchedWords, queryString, score;
