@@ -1,9 +1,10 @@
 package org.molgenis.data.annotation.entity;
 
-import com.google.auto.value.AutoValue;
+import java.util.List;
+
 import org.molgenis.data.AttributeMetaData;
 
-import java.util.List;
+import com.google.auto.value.AutoValue;
 
 /**
  * Informatin about an {@link Annotator}
