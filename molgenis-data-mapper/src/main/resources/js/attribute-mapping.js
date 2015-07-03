@@ -325,7 +325,7 @@
 	 */
 	function rankAttributeTable(explainedAttributes){
 		if(explainedAttributes != null){
-			var attributeNames = Object.keys(explainedAttributes), className, attributeLabel, firstRow, suggestedRow, explainedQueryStrings, words;
+			var attributeNames = Object.keys(explainedAttributes), className, attributeLabel, attributeInfoElement, firstRow, suggestedRow, explainedQueryStrings, words;
 			
 			for(var i = attributeNames.length - 1; i >= 0;i--){
 				
@@ -333,22 +333,43 @@
 				firstRow = $('#attribute-mapping-table>tbody tr:first');
 				suggestedRow = $('#attribute-mapping-table tr[data-attribute-name="' + className + '"]');
 				attributeLabel = $(suggestedRow).attr('data-attribute-label');
+				attributeInfoElement = $(suggestedRow).find('td.source-attribute-information');
 				//Push the suggested attributes to the top of the table
 				firstRow.before(suggestedRow);
-				
 				//highlight the matched words in attribute labels
 				explainedQueryStrings = explainedAttributes[className];
 				
 				if(explainedQueryStrings.length > 0){
+					
+					createPopoverExplanation(suggestedRow, attributeInfoElement, attributeLabel, explainedQueryStrings);
+					
 					$.each(explainedQueryStrings, function(index, explainedQueryString){
-						
 						words = extendPartialWord(attributeLabel, explainedQueryString.matchedWords.split(' '));
 						$.each(connectNeighboredWords(attributeLabel, words), function(index, word){
-							$(suggestedRow).find('td.source-attribute-information').highlight(word);
+							$(attributeInfoElement).highlight(word);
 						});
 					});
 				}
 			}
+		}
+	}
+	
+	function createPopoverExplanation(row, attributeInfoElement, attributeLabel, explainedQueryStrings){
+		if(explainedQueryStrings.length > 0){
+			var message = '', matchedWords, queryWords, score;
+			$.each(explainedQueryStrings, function(index, explainedQueryString){
+				matchedWords = extendPartialWord(attributeLabel, explainedQueryString.matchedWords.split(' '));
+				queryWords = extendPartialWord(attributeLabel, explainedQueryString.queryString.split(' '));
+				score = explainedQueryString.score;
+				message += 'The query <strong>' + queryWords.join(' ').toLowerCase() + '</strong> derived from <strong>' + explainedQueryString.tagName;
+				message += '</strong> is matched to the label on words <strong>' + matchedWords.join(' ').toLowerCase() + '</strong> with ' + score + '%<br><br>';
+			});
+			var option = {'title' : 'Explanation', 'content' : message, 'html' : true, 'placement' : 'top', 'container' : row, 'trigger' : 'manual'};
+			$(attributeInfoElement).css({'cursor':'help'}).popover(option).on('click', function(){
+				$(this).popover('show');
+			}).on('mouseout', function(){
+				$(this).popover('hide');
+			});
 		}
 	}
 	
