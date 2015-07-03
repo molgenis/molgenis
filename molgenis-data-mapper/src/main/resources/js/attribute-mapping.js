@@ -356,12 +356,12 @@
 	
 	function createPopoverExplanation(row, attributeInfoElement, attributeLabel, explainedQueryStrings){
 		if(explainedQueryStrings.length > 0){
-			var message = '', matchedWords, queryWords, score;
+			var message = '', matchedWords, queryString, score;
 			$.each(explainedQueryStrings, function(index, explainedQueryString){
 				matchedWords = extendPartialWord(attributeLabel, explainedQueryString.matchedWords.split(' '));
-				queryWords = extendPartialWord(attributeLabel, explainedQueryString.queryString.split(' '));
+				queryString = explainedQueryString.queryString;
 				score = explainedQueryString.score;
-				message += 'The query <strong>' + queryWords.join(' ').toLowerCase() + '</strong> derived from <strong>' + explainedQueryString.tagName;
+				message += 'The query <strong>' + queryString + '</strong> derived from <strong>' + explainedQueryString.tagName;
 				message += '</strong> is matched to the label on words <strong>' + matchedWords.join(' ').toLowerCase() + '</strong> with ' + score + '%<br><br>';
 			});
 			var option = {'title' : 'Explanation', 'content' : message, 'html' : true, 'placement' : 'top', 'container' : row, 'trigger' : 'manual'};
