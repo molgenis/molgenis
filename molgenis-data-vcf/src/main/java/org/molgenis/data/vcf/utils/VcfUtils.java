@@ -34,7 +34,6 @@ public class VcfUtils
 	 */
 	public static String convertToVCF(Entity vcfEntity) throws MolgenisDataException
 	{
-
 		StringBuilder vcfRecord = new StringBuilder();
 
 		List<String> vcfAttributes = Arrays.asList(new String[]
