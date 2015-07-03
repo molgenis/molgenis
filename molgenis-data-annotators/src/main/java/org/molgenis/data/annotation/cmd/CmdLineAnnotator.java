@@ -2,18 +2,13 @@ package org.molgenis.data.annotation.cmd;
 
 import java.io.File;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
-import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.impl.CaddAnnotator;
 import org.molgenis.data.annotation.entity.impl.ExacAnnotator;
 import org.molgenis.data.annotation.impl.ClinVarVCFServiceAnnotator;
@@ -35,6 +30,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.stereotype.Component;
 
+/**
+ * 
+ * Build JAR file...............: mvn clean install -pl molgenis-data-annotators/ -am -DskipTests -P create-delivery
+ * Run..........................: java -jar molgenis-data-annotators/target/CmdLineAnnotator.jar
+ * 
+ */
 @Component
 public class CmdLineAnnotator
 {
@@ -59,7 +60,8 @@ public class CmdLineAnnotator
 		if (args.length != 4)
 		{
 			System.out
-					.println("*********************************************\n"
+					.println("\n"
+							+ "*********************************************\n"
 							+ "* MOLGENIS Annotator, commandline interface *\n"
 							+ "*********************************************\n"
 							+ "\n"
@@ -71,15 +73,10 @@ public class CmdLineAnnotator
 							+ "\tTo get a detailed description and installation instructions for a specific annotator:\n"
 							+ "\t\tjava -jar CmdLineAnnotator.jar [Annotator]\n"
 							+ "\tTo check if an annotator is ready for use:\n"
-							+ "\t\tjava -jar CmdLineAnnotator.jar [Annotator] [Annotation source file]\n"
-							+ "\n"
-							+ "Currently available annotators are:\n"
-							+ "\t"
-							+ annotatorNames.toString()
-							+ "\n"
+							+ "\t\tjava -jar CmdLineAnnotator.jar [Annotator] [Annotation source file]\n" + "\n"
+							+ "Currently available annotators are:\n" + "\t" + annotatorNames.toString() + "git\n"
 							+ "Breakdown per category:\n"
-							+ CommandLineAnnotatorConfig.printAnnotatorsPerType(configuredFreshAnnotators)
-							);
+							+ CommandLineAnnotatorConfig.printAnnotatorsPerType(configuredFreshAnnotators));
 			return;
 		}
 
