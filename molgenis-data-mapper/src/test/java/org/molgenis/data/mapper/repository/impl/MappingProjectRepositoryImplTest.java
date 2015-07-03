@@ -102,7 +102,7 @@ public class MappingProjectRepositoryImplTest extends AbstractTestNGSpringContex
 		mappingProjectEntity = new MapEntity(META_DATA);
 		mappingProjectEntity.set(IDENTIFIER, "mappingProjectID");
 		mappingProjectEntity.set(MAPPINGTARGETS, mappingTargetEntities);
-		mappingProjectEntity.set(OWNER, "flup");
+		mappingProjectEntity.set(OWNER, owner);
 		mappingProjectEntity.set(NAME, "My first mapping project");
 	}
 
