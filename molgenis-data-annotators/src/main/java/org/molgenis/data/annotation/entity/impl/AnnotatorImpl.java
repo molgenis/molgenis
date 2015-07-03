@@ -67,7 +67,7 @@ public class AnnotatorImpl implements EntityAnnotator
 			Entity resultEntity = new MapEntity(entity, entity.getEntityMetaData());
 			for (AttributeMetaData attr : info.getOutputAttributes())
 			{
-				resultEntity.set(attr.getName(), anntotationSourceEntity.get(attr.getName()));
+				resultEntity.set(attr.getName(), anntotationSourceEntity.get(getResourceAttributeName(attr)));
 			}
 			results.add(resultEntity);
 		}
@@ -75,6 +75,16 @@ public class AnnotatorImpl implements EntityAnnotator
 		if (results.size() == 0) results.add(entity);
 
 		return results;
+	}
+
+	/**
+	 * Get the resource attribute name for one of this annotator's output attributes.
+	 * @param attr the name of the output attribute
+	 * @return the name of the attribute to copy from the resource entity
+	 */
+	protected String getResourceAttributeName(AttributeMetaData attr)
+	{
+		return attr.getName();
 	}
 
 	@Override

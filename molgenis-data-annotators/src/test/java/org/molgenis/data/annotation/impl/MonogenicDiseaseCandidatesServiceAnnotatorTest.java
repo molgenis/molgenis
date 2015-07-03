@@ -4,6 +4,7 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.entity.impl.ExacAnnotator;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -61,7 +62,7 @@ public class MonogenicDiseaseCandidatesServiceAnnotatorTest
 				MonogenicDiseaseCandidatesServiceAnnotator.ANNOTATIONFIELD, MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(
 				ThousandGenomesServiceAnnotator.THGEN_MAF, MolgenisFieldTypes.FieldTypeEnum.DECIMAL));
-		metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(ExACServiceAnnotator.EXAC_MAF,
+		metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(ExacAnnotator.EXAC_AF,
 				MolgenisFieldTypes.FieldTypeEnum.DECIMAL));
 		metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(GoNLServiceAnnotator.GONL_MAF,
 				MolgenisFieldTypes.FieldTypeEnum.DECIMAL));
@@ -89,7 +90,7 @@ public class MonogenicDiseaseCandidatesServiceAnnotatorTest
 				MonogenicDiseaseCandidatesServiceAnnotator.ANNOTATIONFIELD, MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		metaDataCantAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(
 				ThousandGenomesServiceAnnotator.THGEN_MAF, MolgenisFieldTypes.FieldTypeEnum.DECIMAL));
-		metaDataCantAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(ExACServiceAnnotator.EXAC_MAF,
+		metaDataCantAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(ExacAnnotator.EXAC_AF,
 				MolgenisFieldTypes.FieldTypeEnum.DECIMAL));
 		metaDataCantAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(GoNLServiceAnnotator.GONL_MAF,
 				MolgenisFieldTypes.FieldTypeEnum.DECIMAL));
@@ -116,7 +117,7 @@ public class MonogenicDiseaseCandidatesServiceAnnotatorTest
 		entity.set(MonogenicDiseaseCandidatesServiceAnnotator.ANNOTATIONFIELD, "1|2|"
 				+ SnpEffServiceAnnotator.impact.HIGH + "|4|5");
 		entity.set(ThousandGenomesServiceAnnotator.THGEN_MAF, 0.1);
-		entity.set(ExACServiceAnnotator.EXAC_MAF, 0.1);
+		entity.set(ExacAnnotator.EXAC_AF, 0.1);
 		entity.set(GoNLServiceAnnotator.GONL_MAF, 0.2);
 		entity.set(ClinicalGenomicsDatabaseServiceAnnotator.GENERALIZED_INHERITANCE, "DOMINANT");
 		entity.set(ClinicalGenomicsDatabaseServiceAnnotator.INHERITANCE, "TEST2");

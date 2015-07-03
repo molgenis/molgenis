@@ -3,23 +3,25 @@ package org.molgenis.data.annotation.cmd;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Set;
 
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.entity.impl.CaddAnnotator;
+import org.molgenis.data.annotation.entity.impl.ExacAnnotator;
 import org.molgenis.data.annotation.impl.ClinVarVCFServiceAnnotator;
 import org.molgenis.data.annotation.impl.ClinicalGenomicsDatabaseServiceAnnotator;
 import org.molgenis.data.annotation.impl.DeNovoAnnotator;
-import org.molgenis.data.annotation.impl.ExACServiceAnnotator;
 import org.molgenis.data.annotation.impl.GoNLServiceAnnotator;
 import org.molgenis.data.annotation.impl.HpoServiceAnnotator;
 import org.molgenis.data.annotation.impl.MonogenicDiseaseCandidatesServiceAnnotator;
 import org.molgenis.data.annotation.impl.PhenomizerServiceAnnotator;
 import org.molgenis.data.annotation.impl.SnpEffServiceAnnotator;
 import org.molgenis.data.annotation.impl.ThousandGenomesServiceAnnotator;
+import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.framework.server.MolgenisSettings;
@@ -31,8 +33,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class CmdLineAnnotator
 {
-	@Autowired
-	private AnnotationService annotationService;
 
 	@Autowired
 	private MolgenisSettings molgenisSettings;
@@ -42,8 +42,9 @@ public class CmdLineAnnotator
 
 	public void run(String[] args) throws Exception
 	{
-		List<String> annotatorNames = annotationService.getAllAnnotators().stream().map(a -> a.getSimpleName())
-				.collect(Collectors.toList());
+		Map<String, RepositoryAnnotator> configuredAnnotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
+
+		Set<String> annotatorNames = configuredAnnotators.keySet();
 
 		if (args.length != 4)
 		{
@@ -85,13 +86,14 @@ public class CmdLineAnnotator
 		File outputVCFFile = new File(args[3]);
 		if (outputVCFFile.exists())
 		{
-			System.out.println("Output VCF file already exists at " + outputVCFFile.getAbsolutePath());
-			return;
-		}
+			System.out.println("WARNING: Output VCF file already exists at " + outputVCFFile.getAbsolutePath());
+			//return;
+		} 
 
 		// engage!
 		if (annotatorName.equals("cadd"))
 		{
+			molgenisSettings.setProperty(CaddAnnotator.CADD_FILE_LOCATION_PROPERTY, annotationSourceFile.getAbsolutePath());
 			Map<String, RepositoryAnnotator> annotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
 			RepositoryAnnotator annotator = annotators.get("cadd");
 			annotate(annotator, inputVcfFile, outputVCFFile);
@@ -122,7 +124,10 @@ public class CmdLineAnnotator
 		}
 		else if (annotatorName.equals("exac"))
 		{
-			new ExACServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
+			molgenisSettings.setProperty(ExacAnnotator.EXAC_FILE_LOCATION_PROPERTY, annotationSourceFile.getAbsolutePath());
+			Map<String, RepositoryAnnotator> annotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
+			RepositoryAnnotator annotator = annotators.get("exac");
+			annotate(annotator, inputVcfFile, outputVCFFile);
 		}
 		else if (annotatorName.equals("1kg"))
 		{
@@ -157,6 +162,15 @@ public class CmdLineAnnotator
 		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, annotator.getOutputMetaData(),
 				annotator.getOutputMetaData().get(0).getName());
 		System.out.println("Now starting to process the data.");
+		
+		DefaultEntityMetaData emd = (DefaultEntityMetaData)vcfRepo.getEntityMetaData();
+		DefaultAttributeMetaData infoAttribute = (DefaultAttributeMetaData) emd.getAttribute(VcfRepository.INFO);
+		for(AttributeMetaData attribute : annotator.getOutputMetaData()){
+			for(AttributeMetaData atomicAttribute :attribute.getAttributeParts()){
+				infoAttribute.addAttributePart(atomicAttribute);
+			}
+		}
+		
 		Iterator<Entity> annotatedRecords = annotator.annotate(vcfRepo);
 		while (annotatedRecords.hasNext())
 		{
