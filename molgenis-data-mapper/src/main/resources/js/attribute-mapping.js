@@ -376,15 +376,23 @@
 	/**
 	 * connect the matched words that are neighbors so they can be highlighted together
 	 */
-	function connectNeighboredWords(attributeLabel, words){
-		var connectedPhrases = [];
-		if(attributeLabel && words && words.length > 0){
-			var connectedPhrase = '';
-			var orderedWords = attributeLabel.replace(/[^\w\s]/gi, '').toUpperCase().split(' ');
+	function connectNeighboredWords(attributeLabel, matchedWords){
+		var illegal_pattern = new RegExp("[^a-zA-Z0-9]");
+		var connectedPhrases = [], connectedPhrase, orderedWords, connectedWords;
+		if(attributeLabel && matchedWords && matchedWords.length > 0){
+			connectedPhrase = '';
+			orderedWords = attributeLabel.toUpperCase().split(' ');
 			$.each(orderedWords, function(index, word){
-				if($.inArray(word, words) !== -1){
+				
+				//Word contains illegal chars
+				if(illegal_pattern.test(word)){
+					addAll(connectedPhrases, connectNeighboredWords(word.split(illegal_pattern).join(' '), matchedWords));
+				}else if($.inArray(word, matchedWords) !== -1){
+					
 					connectedPhrase += ' ' + word;
-				}else if(connectedPhrase.length > 0){
+				}
+				else if(connectedPhrase.length > 0){
+					
 					connectedPhrases.push(connectedPhrase.trim());
 					connectedPhrase = '';
 				}
@@ -394,6 +402,12 @@
 			}
 		}
 		return connectedPhrases;
+	}
+	
+	function addAll(originalArray, elementsToAdd){
+		$.each(elementsToAdd, function(index, element){
+			originalArray.push(element);
+		});
 	}
 	
 	/**
