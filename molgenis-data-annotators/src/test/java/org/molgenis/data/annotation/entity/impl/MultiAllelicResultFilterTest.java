@@ -1,32 +1,20 @@
 package org.molgenis.data.annotation.entity.impl;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.FluentIterable;
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.annotation.entity.ResultFilter;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import static org.testng.Assert.assertEquals;
 
-//TODO before merging with the master this should be unit-tested
 public class MultiAllelicResultFilterTest
 {
 
