@@ -70,7 +70,7 @@ public class CaddAnnotator
 		attributes.add(cadd_scaled);
 
 		AnnotatorInfo caddInfo = AnnotatorInfo
-				.create(Status.BETA,
+				.create(Status.FRESH,
 						AnnotatorInfo.Type.PATHOGENICITY_ESTIMATE,
 						"cadd",
 						"CADD is a tool for scoring the deleteriousness of single nucleotide variants as well as insertion/deletions variants in the human genome.\n"

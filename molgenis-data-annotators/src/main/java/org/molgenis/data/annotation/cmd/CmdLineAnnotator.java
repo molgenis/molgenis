@@ -2,13 +2,18 @@ package org.molgenis.data.annotation.cmd;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.impl.CaddAnnotator;
 import org.molgenis.data.annotation.entity.impl.ExacAnnotator;
 import org.molgenis.data.annotation.impl.ClinVarVCFServiceAnnotator;
@@ -42,18 +47,39 @@ public class CmdLineAnnotator
 
 	public void run(String[] args) throws Exception
 	{
-		Map<String, RepositoryAnnotator> configuredAnnotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
+		Map<String, RepositoryAnnotator> configuredAnnotators = applicationContext
+				.getBeansOfType(RepositoryAnnotator.class);
 
-		Set<String> annotatorNames = configuredAnnotators.keySet();
+		// for now, only get the annotators that have recieved a recent brush up for the new way of configuring
+		Map<String, RepositoryAnnotator> configuredFreshAnnotators = CommandLineAnnotatorConfig
+				.getFreshAnnotators(configuredAnnotators);
+
+		Set<String> annotatorNames = configuredFreshAnnotators.keySet();
 
 		if (args.length != 4)
 		{
 			System.out
-					.println("Usage: java -Xmx4g -jar CmdLineAnnotator.jar [Annotator] [Annotation source file] [input VCF] [output VCF].\n"
-							+ "Possible annotators are: "
+					.println("*********************************************\n"
+							+ "* MOLGENIS Annotator, commandline interface *\n"
+							+ "*********************************************\n"
+							+ "\n"
+							+ "Typical usage to annotate a VCF file:\n"
+							+ "\tjava -jar CmdLineAnnotator.jar [Annotator] [Annotation source file] [input VCF] [output VCF].\n"
+							+ "\tExample: java -Xmx4g -jar CmdLineAnnotator.jar gonl GoNL/release5_noContam_noChildren_with_AN_AC_GTC_stripped/ Cardio.vcf Cardio_gonl.vcf\n"
+							+ "\n"
+							+ "Help:\n"
+							+ "\tTo get a detailed description and installation instructions for a specific annotator:\n"
+							+ "\t\tjava -jar CmdLineAnnotator.jar [Annotator]\n"
+							+ "\tTo check if an annotator is ready for use:\n"
+							+ "\t\tjava -jar CmdLineAnnotator.jar [Annotator] [Annotation source file]\n"
+							+ "\n"
+							+ "Currently available annotators are:\n"
+							+ "\t"
 							+ annotatorNames.toString()
-							+ ".\n"
-							+ "Example: java -Xmx4g -jar CmdLineAnnotator.jar gonl GoNL/release5_noContam_noChildren_with_AN_AC_GTC_stripped/ Cardio.vcf Cardio_gonl.vcf\n");
+							+ "\n"
+							+ "Breakdown per category:\n"
+							+ CommandLineAnnotatorConfig.printAnnotatorsPerType(configuredFreshAnnotators)
+							);
 			return;
 		}
 
@@ -87,13 +113,14 @@ public class CmdLineAnnotator
 		if (outputVCFFile.exists())
 		{
 			System.out.println("WARNING: Output VCF file already exists at " + outputVCFFile.getAbsolutePath());
-			//return;
-		} 
+			// return;
+		}
 
 		// engage!
 		if (annotatorName.equals("cadd"))
 		{
-			molgenisSettings.setProperty(CaddAnnotator.CADD_FILE_LOCATION_PROPERTY, annotationSourceFile.getAbsolutePath());
+			molgenisSettings.setProperty(CaddAnnotator.CADD_FILE_LOCATION_PROPERTY,
+					annotationSourceFile.getAbsolutePath());
 			Map<String, RepositoryAnnotator> annotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
 			RepositoryAnnotator annotator = annotators.get("cadd");
 			annotate(annotator, inputVcfFile, outputVCFFile);
@@ -124,7 +151,8 @@ public class CmdLineAnnotator
 		}
 		else if (annotatorName.equals("exac"))
 		{
-			molgenisSettings.setProperty(ExacAnnotator.EXAC_FILE_LOCATION_PROPERTY, annotationSourceFile.getAbsolutePath());
+			molgenisSettings.setProperty(ExacAnnotator.EXAC_FILE_LOCATION_PROPERTY,
+					annotationSourceFile.getAbsolutePath());
 			Map<String, RepositoryAnnotator> annotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
 			RepositoryAnnotator annotator = annotators.get("exac");
 			annotate(annotator, inputVcfFile, outputVCFFile);
@@ -162,15 +190,17 @@ public class CmdLineAnnotator
 		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, annotator.getOutputMetaData(),
 				annotator.getOutputMetaData().get(0).getName());
 		System.out.println("Now starting to process the data.");
-		
-		DefaultEntityMetaData emd = (DefaultEntityMetaData)vcfRepo.getEntityMetaData();
+
+		DefaultEntityMetaData emd = (DefaultEntityMetaData) vcfRepo.getEntityMetaData();
 		DefaultAttributeMetaData infoAttribute = (DefaultAttributeMetaData) emd.getAttribute(VcfRepository.INFO);
-		for(AttributeMetaData attribute : annotator.getOutputMetaData()){
-			for(AttributeMetaData atomicAttribute :attribute.getAttributeParts()){
+		for (AttributeMetaData attribute : annotator.getOutputMetaData())
+		{
+			for (AttributeMetaData atomicAttribute : attribute.getAttributeParts())
+			{
 				infoAttribute.addAttributePart(atomicAttribute);
 			}
 		}
-		
+
 		Iterator<Entity> annotatedRecords = annotator.annotate(vcfRepo);
 		while (annotatedRecords.hasNext())
 		{
