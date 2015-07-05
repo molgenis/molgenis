@@ -9,7 +9,7 @@ import requests
 import json
 import urllib2
 import warnings
-
+import re
 class Connect_Molgenis():
     """Some simple methods for adding, updating and retrieving rows from Molgenis though the REST API
 
@@ -101,6 +101,14 @@ class Connect_Molgenis():
                 if json.has_key('errors'):
                     for error in json['errors']:
                         error_message += error['message']+'\n'
+                        # bug in error response when wrong enum value. Remove wrong part of message and add sensible one
+                        if 'Invalid enum value' in error_message:
+                            column_name = re.search('for attribute \'(.+?)\'', error_message).group(1)
+                            entity_name = re.search('of entity \'(.+?)\'', error_message).group(1)
+                            column_meta = self.get_column_meta_data(entity_name,column_name)
+                            enum_options = ', '.join(column_meta['enumOptions'])
+                            error_message = error_message.replace('Value must be less than or equal to 255 characters',
+                                                  ' The enum options are: '+enum_options)
                         raise BaseException(error_message.rstrip('\n'))
             except ValueError:
                 pass # no json oobject in server_response
@@ -269,5 +277,4 @@ class Connect_Molgenis():
     def get_column_type(self, entity_name, column_name):
         column_meta_data = self.get_column_meta_data(entity_name, column_name)
         return column_meta_data['fieldType']
-    
-connection = Connect_Molgenis('http://localhost:8080', 'admin', 'admin')
+
