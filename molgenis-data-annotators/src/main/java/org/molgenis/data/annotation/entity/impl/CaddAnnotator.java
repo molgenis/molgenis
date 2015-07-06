@@ -1,5 +1,14 @@
 package org.molgenis.data.annotation.entity.impl;
 
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DECIMAL;
+import static org.molgenis.data.vcf.VcfRepository.ALT_META;
+import static org.molgenis.data.vcf.VcfRepository.CHROM_META;
+import static org.molgenis.data.vcf.VcfRepository.POS_META;
+import static org.molgenis.data.vcf.VcfRepository.REF_META;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -15,32 +24,20 @@ import org.molgenis.data.annotation.resources.impl.TabixRepositoryFactory;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DECIMAL;
-import static org.molgenis.data.vcf.VcfRepository.ALT_META;
-import static org.molgenis.data.vcf.VcfRepository.CHROM_META;
-import static org.molgenis.data.vcf.VcfRepository.POS_META;
-import static org.molgenis.data.vcf.VcfRepository.REF_META;
-
 @Configuration
 public class CaddAnnotator
 {
+	//FIXME: nomenclature: http://cadd.gs.washington.edu/info
 	public static final String CADD_SCALED = "CADD_SCALED";
 	public static final String CADD_ABS = "CADD";
 	public static final String CADD_SCALED_LABEL = "CADDSCALED";
 	public static final String CADD_ABS_LABEL = "CADDABS";
 	public static final String CADD_FILE_LOCATION_PROPERTY = "cadd_location";
 	public static final String CADD_TABIX_RESOURCE = "CADDTabixResource";
-
-	private static final Logger LOG = LoggerFactory.getLogger(CaddAnnotator.class);
 
 	@Autowired
 	private MolgenisSettings molgenisSettings;

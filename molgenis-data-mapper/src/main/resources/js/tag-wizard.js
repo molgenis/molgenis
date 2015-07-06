@@ -95,7 +95,7 @@
 					}),
 					success : function(data) {
 						molgenis.createAlert([ {
-							'message' : 'Automatic tagging is a success!'
+							'message' : 'Automatic tagging has been succesfully completed'
 						} ], 'success');
 						$.each(data, function(attributeName, tags) {
 							$.each(tags, function(index) {
@@ -125,7 +125,7 @@
 							$('td.tag-column').empty();
 
 							molgenis.createAlert([ {
-								'message' : 'All tags have been succesfully removed!'
+								'message' : 'All tags have been removed succesfully removed'
 							} ], 'success');
 						}
 					});
