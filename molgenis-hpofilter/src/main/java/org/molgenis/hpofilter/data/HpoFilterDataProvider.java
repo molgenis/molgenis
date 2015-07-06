@@ -22,8 +22,8 @@ public class HpoFilterDataProvider
 	public final static ExecutorService THREADPOOL = Executors.newFixedThreadPool(2);
 	// the heirarchy files list all HPO terms, Genes or not, and their parents.
 	// TODO: Make into local copy
-	public static final String KEY_HPO_HEIRARCHY = "plugin.annotators.hpo.heirarchy.url";
-	public static final String DEFAULT_HPO_HEIRARCHY_LOCATION = "http://compbio.charite.de/hudson/job/"
+	public static final String KEY_HPO_HIERARCHY = "plugin.annotators.hpo.heirarchy.url";
+	public static final String DEFAULT_HPO_HIERARCHY_LOCATION = "http://compbio.charite.de/hudson/job/"
 			+ "hpo/lastStableBuild/artifact/hp/hp.obo";
 	// This uses the same mapping location as the OMIMHPO annotator
 	// TODO: Make into local copy
@@ -125,7 +125,7 @@ public class HpoFilterDataProvider
 	{
 		try {
 			// temporary, make local copy & check if newer!
-			URL url = new URL(molgenisSettings.getProperty(KEY_HPO_HEIRARCHY, DEFAULT_HPO_HEIRARCHY_LOCATION));
+			URL url = new URL(molgenisSettings.getProperty(KEY_HPO_HIERARCHY, DEFAULT_HPO_HIERARCHY_LOCATION));
 			BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()), 1200);
 			String line;
 			String hpo = null;
