@@ -174,7 +174,7 @@ public class VcfUtilsTest
 		{ "##INFO=<ID=INFO_ANNO,Number=1,Type=Float,Description=\"\">" });
 
 		File inputVcfFile = new File(ResourceUtils.getFile(getClass(), "/testWriter.vcf").getPath());
-		File outputVcfFile = new File(ResourceUtils.getFile(getClass(), "/result_vcfWriter.vcf").getPath());
+		File resultVCFWriter = new File(ResourceUtils.getFile(getClass(), "/result_vcfWriter.vcf").getPath());
 
 		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter,
 				annotatedEntityMetadata.getAttributes(), "INFO_ANNO");
@@ -188,7 +188,7 @@ public class VcfUtilsTest
 		}
 		outputVCFWriter.close();
 		System.out.print(outputVCFFile.getAbsolutePath());
-		assertTrue(FileUtils.contentEqualsIgnoreEOL(outputVcfFile, outputVCFFile, "UTF8"));
+		assertTrue(FileUtils.contentEqualsIgnoreEOL(resultVCFWriter, outputVCFFile, "UTF8"));
 	}
 
 }

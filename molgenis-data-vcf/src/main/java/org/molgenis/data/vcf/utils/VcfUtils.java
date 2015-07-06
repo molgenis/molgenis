@@ -257,7 +257,10 @@ public class VcfUtils
 		sb.append(",Description=\"");
 		// http://samtools.github.io/hts-specs/VCFv4.1.pdf --> "The Description value must be surrounded by
 		// double-quotes. Double-quote character can be escaped with backslash \ and backslash as \\."
-		sb.append(infoAttributeMetaData.getDescription().replace("\\", "\\\\").replace("\"", "\\\""));
+		if (null != infoAttributeMetaData.getDescription())
+		{
+			sb.append(infoAttributeMetaData.getDescription().replace("\\", "\\\\").replace("\"", "\\\""));
+		}
 		sb.append("\">");
 		return sb.toString();
 	}
