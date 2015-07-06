@@ -10,6 +10,7 @@ import json
 import urllib2
 import warnings
 import re
+
 class Connect_Molgenis():
     """Some simple methods for adding, updating and retrieving rows from Molgenis though the REST API
 
@@ -20,13 +21,14 @@ class Connect_Molgenis():
 
     Example:
         # connect to the server
-        connection = Connect_Molgenis('https://molgenis39.target.rug.nl/', 'admin', '****')
+        connection = molgenis.Connect_Molgenis('http://localhost:8080', 'admin', 'admin')
         # add a row to an entity
-        connection.add_entity_row('rnaseq_Per_tile_sequence_quality',{'tile':'20','base':'1', 'mean':4})
-        # update a row of an entity
-        connection.update_entity_row('rnaseq_Per_tile_sequence_quality',{'id':'AAAACTSOYOXT3RBMAMRIUPAAAE'}, {'base':'13434', 'mean':43141313})
-        # get data from entity
-        connection.get_entity_rows('rnaseq_Per_tile_sequence_quality',{'tile':'20','base':'1', 'mean':4})
+        connection.add_entity_row('public_rnaseq_Individuals',{'id':'John Doe','age':'26', 'gender':'Male'})
+        # get row data
+        print connection.get_entity_rows('public_rnaseq_Individuals',[{'field':'gender', 'operator':'EQUALS', 'value':'Male'}])['items']
+        # update entity row
+        connection.update_entity_row('public_rnaseq_Individuals',[{'field':'id', 'operator':'EQUALS', 'value':'John Doe'}], {'gender':'Female'})   
+
         # use connections.headers() and connection.api_url() for making your own requests
         requests.patch(connection.api_url+'/SomePackage_SomeEntity',data = {'some':'data'}, headers=connection.headers)            
     """
