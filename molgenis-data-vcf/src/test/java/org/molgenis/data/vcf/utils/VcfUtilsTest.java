@@ -20,12 +20,15 @@ import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ResourceUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 @Test
 public class VcfUtilsTest
 {
+	private static final Logger LOG = LoggerFactory.getLogger(VcfUtilsTest.class);
 	private DefaultEntityMetaData annotatedEntityMetadata;
 	public DefaultEntityMetaData metaDataCanAnnotate = new DefaultEntityMetaData("test");
 	public DefaultEntityMetaData metaDataCantAnnotate = new DefaultEntityMetaData("test");
@@ -159,14 +162,13 @@ public class VcfUtilsTest
 
 			}
 			outputVCFWriter.close();
-			System.out.print(outputVCFFile.getAbsolutePath());
 			assertTrue(FileUtils.contentEqualsIgnoreEOL(inputVcfFile, outputVCFFile, "UTF8"));
 
 		}
 		finally
 		{
 			boolean outputVCFFileIsDeleted = outputVCFFile.delete();
-			System.out.println("Result test file named: " + outputVCFFile.getName() + " is "
+			LOG.info("Result test file named: " + outputVCFFile.getName() + " is "
 					+ (outputVCFFileIsDeleted ? "" : "not ") + "deleted");
 		}
 	}
@@ -192,13 +194,12 @@ public class VcfUtilsTest
 	
 			}
 			outputVCFWriter.close();
-			System.out.println(outputVCFFile.getAbsolutePath());
 			assertTrue(FileUtils.contentEqualsIgnoreEOL(resultVCFWriter, outputVCFFile, "UTF8"));
 		}
 		finally
 		{
 			boolean outputVCFFileIsDeleted = outputVCFFile.delete();
-			System.out.println("Result test file named: " + outputVCFFile.getName() + " is "
+			LOG.info("Result test file named: " + outputVCFFile.getName() + " is "
 					+ (outputVCFFileIsDeleted ? "" : "not ") + "deleted");
 		}
 	}
