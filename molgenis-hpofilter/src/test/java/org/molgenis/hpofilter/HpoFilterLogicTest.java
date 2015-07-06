@@ -27,7 +27,7 @@ public class HpoFilterLogicTest {
 	HpoFilterLogicTest() {
 		MockitoAnnotations.initMocks(this);
 		
-		Mockito.when(molgenisSettings.getProperty(HpoFilterDataProvider.KEY_HPO_HEIRARCHY, "http://compbio.charite.de/hudson/job/"
+		Mockito.when(molgenisSettings.getProperty(HpoFilterDataProvider.KEY_HPO_HIERARCHY, "http://compbio.charite.de/hudson/job/"
 				+ "hpo/lastStableBuild/artifact/hp/hp.obo")).thenReturn("file://src/test/resources/testhpo.obo");
 		Mockito.when(molgenisSettings.getProperty(HpoFilterDataProvider.KEY_HPO_MAPPING, HpoFilterDataProvider.DEFAULT_HPO_MAPPING_LOCATION)).thenReturn("file://src/test/resources/testassoc.txt");
 		
