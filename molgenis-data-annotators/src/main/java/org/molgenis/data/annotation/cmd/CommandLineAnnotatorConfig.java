@@ -52,12 +52,12 @@ public class CommandLineAnnotatorConfig
 	static HashMap<String, RepositoryAnnotator> getFreshAnnotators(Map<String, RepositoryAnnotator> configuredAnnotators)
 	{
 		HashMap<String, RepositoryAnnotator> configuredFreshAnnotators = new HashMap<String, RepositoryAnnotator>();
-		for (String ra : configuredAnnotators.keySet())
+		for (String annotator : configuredAnnotators.keySet())
 		{
-			if (configuredAnnotators.get(ra).getInfo() != null
-					&& configuredAnnotators.get(ra).getInfo().getStatus().equals(AnnotatorInfo.Status.FRESH))
+			if (configuredAnnotators.get(annotator).getInfo() != null
+					&& configuredAnnotators.get(annotator).getInfo().getStatus().equals(AnnotatorInfo.Status.READY))
 			{
-				configuredFreshAnnotators.put(ra, configuredAnnotators.get(ra));
+				configuredFreshAnnotators.put(annotator, configuredAnnotators.get(annotator));
 			}
 		}
 		return configuredFreshAnnotators;
@@ -72,17 +72,17 @@ public class CommandLineAnnotatorConfig
 	static String printAnnotatorsPerType(Map<String, RepositoryAnnotator> annotators)
 	{
 		Map<AnnotatorInfo.Type, List<String>> annotatorsPerType = new HashMap<AnnotatorInfo.Type, List<String>>();
-		for (String ra : annotators.keySet())
+		for (String annotator : annotators.keySet())
 		{
-			AnnotatorInfo.Type type = annotators.get(ra).getInfo().getType();
+			AnnotatorInfo.Type type = annotators.get(annotator).getInfo().getType();
 			if (annotatorsPerType.containsKey(type))
 			{
-				annotatorsPerType.get(type).add(ra);
+				annotatorsPerType.get(type).add(annotator);
 			}
 			else
 			{
 				annotatorsPerType.put(type, new ArrayList<String>(Arrays.asList(new String[]
-				{ ra })));
+				{ annotator })));
 			}
 
 		}

@@ -74,7 +74,7 @@ public class CmdLineAnnotator
 							+ "\t\tjava -jar CmdLineAnnotator.jar [Annotator]\n"
 							+ "\tTo check if an annotator is ready for use:\n"
 							+ "\t\tjava -jar CmdLineAnnotator.jar [Annotator] [Annotation source file]\n" + "\n"
-							+ "Currently available annotators are:\n" + "\t" + annotatorNames.toString() + "git\n"
+							+ "Currently available annotators are:\n" + "\t" + annotatorNames.toString() + "\n"
 							+ "Breakdown per category:\n"
 							+ CommandLineAnnotatorConfig.printAnnotatorsPerType(configuredFreshAnnotators));
 			return;
@@ -110,7 +110,6 @@ public class CmdLineAnnotator
 		if (outputVCFFile.exists())
 		{
 			System.out.println("WARNING: Output VCF file already exists at " + outputVCFFile.getAbsolutePath());
-			// return;
 		}
 
 		// engage!

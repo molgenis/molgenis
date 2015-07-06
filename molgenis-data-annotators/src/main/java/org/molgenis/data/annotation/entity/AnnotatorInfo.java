@@ -17,7 +17,7 @@ public abstract class AnnotatorInfo
 {
 	public static enum Status
 	{
-		READY, BETA, INDEV, UNKNOWN, FRESH
+		READY, BETA, INDEV, UNKNOWN
 	}
 
 	public static enum Type
