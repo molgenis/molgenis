@@ -31,6 +31,8 @@ import org.molgenis.hpofilter.data.HGNCLocations;
 import org.molgenis.hpofilter.data.HpoFilterDataProvider;
 import org.molgenis.hpofilter.data.Locus;
 import org.molgenis.hpofilter.utils.HgncLocationsUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -45,6 +47,7 @@ import com.google.common.collect.Lists;
 @RequestMapping(URI)
 public class HpoFilterController extends MolgenisPluginController
 {
+	private static final Logger LOG = LoggerFactory.getLogger(HpoFilterController.class);
 	public static final String ID = "hpofilter";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	private static final String VIEW_NAME = "view-hpofilter";
@@ -202,7 +205,6 @@ public class HpoFilterController extends MolgenisPluginController
 					inputSet.put(group, new Stack<HpoFilterInput>());
 				}
 				inputSet.get(group).add(new HpoFilterInput(group, id, recursive, hpo));
-				System.out.println(hpo+" is in group "+group+", has ID "+id+" and has recursive set to "+recursive);
 			}
 			
 			newEntityMetaData = new DefaultEntityMetaData(newEntityName,
@@ -239,13 +241,13 @@ public class HpoFilterController extends MolgenisPluginController
 				count++;
 				if (count%500 == 0) {
 					fail = count - pass;
-					System.out.println("Filtered "+count+"/"+size+" entities ("+(100*count)/size+"%). PASS/FAIL: "+pass+"/"+fail);
+					LOG.info("Filtered "+count+"/"+size+" entities ("+(100*count)/size+"%). PASS/FAIL: "+pass+"/"+fail);
 				}
 			}
 			repository.close();
 			
 			if (!filteredEntities.isEmpty()) {
-				System.out.println("Adding "+pass+" filtered variants to "+newEntityName);
+				LOG.info("Adding "+pass+" filtered variants to "+newEntityName);
 				
 				newRepository = dataService.getMeta().addEntityMeta(newEntityMetaData);
 				
