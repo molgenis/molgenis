@@ -119,23 +119,49 @@ public class ExplainServiceHelper
 	 * This method is able to find the queries that are used in the matching. Only queries that contain all matched
 	 * words are potential queries.
 	 * 
-	 * @param matchedWords
+	 * @param matchedWordsString
 	 * @param collectExpandedQueryMap
 	 * @return a map of potentail queries and their matching scores
 	 */
-	public Map<String, Double> findMatchQueries(String matchedWords, Map<String, String> collectExpandedQueryMap)
+	public Map<String, Double> findMatchQueries(String matchedWordsString, Map<String, String> collectExpandedQueryMap)
 	{
 		Map<String, Double> qualifiedQueries = new HashMap<String, Double>();
-
+		Set<String> matchedWords = splitIntoTerms(matchedWordsString);
 		for (Entry<String, String> entry : collectExpandedQueryMap.entrySet())
 		{
-			if (splitIntoTerms(entry.getKey()).containsAll(splitIntoTerms(matchedWords)))
+			Set<String> wordsInQuery = splitIntoTerms(entry.getKey());
+			if (containsAllWords(wordsInQuery, matchedWords))
 			{
 				qualifiedQueries.put(entry.getKey(),
-						NGramDistanceAlgorithm.stringMatching(matchedWords, entry.getKey()));
+						NGramDistanceAlgorithm.stringMatching(matchedWordsString, entry.getKey()));
 			}
 		}
 		return qualifiedQueries;
+	}
+
+	/**
+	 * A helper function to check if the superset of words contains all the words from the subset.
+	 * 
+	 * @param supersets
+	 * @param subsets
+	 * @return
+	 */
+	boolean containsAllWords(Set<String> supersets, Set<String> subsets)
+	{
+		for (String subsetWord : subsets)
+		{
+			if (!supersets.contains(subsetWord))
+			{
+				// The stemmers used in ElasticSearch and SemanticSearchService are different, this is a workaround
+				// to capture all stemming exceptions in PorterStemmer.
+				if (!supersets.stream().anyMatch(
+						supersetWord -> supersetWord.contains(subsetWord) || subsetWord.contains(supersetWord)))
+				{
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 	public String removeBoostFromQuery(String description)
@@ -153,7 +179,7 @@ public class ExplainServiceHelper
 		throw new MolgenisDataAccessException("Failed to find matched word in : " + description);
 	}
 
-	private Set<String> splitIntoTerms(String description)
+	Set<String> splitIntoTerms(String description)
 	{
 		return FluentIterable.from(termSplitter.split(description)).transform(String::toLowerCase)
 				.filter(w -> !StringUtils.isEmpty(w)).toSet();
