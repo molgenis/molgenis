@@ -106,7 +106,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 
 		// HPO and HGNC Download URLs
 		runtimePropertyMap.put(HpoMappingProvider.KEY_HPO_MAPPING, HpoMappingProvider.DEFAULT_HPO_MAPPING_VALUE);
-		runtimePropertyMap.put(HpoFilterDataProvider.KEY_HPO_HEIRARCHY, HpoFilterDataProvider.DEFAULT_HPO_HEIRARCHY_LOCATION);
+		runtimePropertyMap.put(HpoFilterDataProvider.KEY_HPO_HIERARCHY, HpoFilterDataProvider.DEFAULT_HPO_HIERARCHY_LOCATION);
 		runtimePropertyMap.put(HgncLocationsProvider.KEY_HGNC_LOCATIONS_VALUE,
 				HgncLocationsProvider.DEFAULT_HGNC_LOCATIONS_VALUE);
 
