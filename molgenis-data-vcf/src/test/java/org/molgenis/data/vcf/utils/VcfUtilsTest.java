@@ -7,9 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.molgenis.MolgenisFieldTypes;
@@ -147,48 +145,62 @@ public class VcfUtilsTest
 	@Test
 	public void vcfWriterRoundtripTest() throws IOException, MolgenisInvalidFormatException
 	{
-		File outputVCFFile = File.createTempFile("output", ".vcf");
-		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
+		final File outputVCFFile = File.createTempFile("output", ".vcf");
+		try{
+			PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
 
-		File inputVcfFile = new File(ResourceUtils.getFile(getClass(), "/testWriter.vcf").getPath());
+			File inputVcfFile = new File(ResourceUtils.getFile(getClass(), "/testWriter.vcf").getPath());
 
-		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, Collections.emptyList(), "");
+			VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, Collections.emptyList(), "");
 
-		for (Entity entity : entities)
-		{
-			outputVCFWriter.println(VcfUtils.convertToVCF(entity));
+			for (Entity entity : entities)
+			{
+				outputVCFWriter.println(VcfUtils.convertToVCF(entity));
+
+			}
+			outputVCFWriter.close();
+			System.out.print(outputVCFFile.getAbsolutePath());
+			assertTrue(FileUtils.contentEqualsIgnoreEOL(inputVcfFile, outputVCFFile, "UTF8"));
 
 		}
-		outputVCFWriter.close();
-		System.out.print(outputVCFFile.getAbsolutePath());
-		assertTrue(FileUtils.contentEqualsIgnoreEOL(inputVcfFile, outputVCFFile, "UTF8"));
+		finally
+		{
+			boolean outputVCFFileIsDeleted = outputVCFFile.delete();
+			System.out.println("Result test file named: " + outputVCFFile.getName() + " is "
+					+ (outputVCFFileIsDeleted ? "" : "not ") + "deleted");
+		}
 	}
 
 	@Test
 	public void vcfWriterAnnotateTest() throws IOException, MolgenisInvalidFormatException
 	{
-		File outputVCFFile = File.createTempFile("output", ".vcf");
-		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
-
-		final List<String> infoFields = Arrays.asList(new String[]
-		{ "##INFO=<ID=INFO_ANNO,Number=1,Type=Float,Description=\"\">" });
-
-		File inputVcfFile = new File(ResourceUtils.getFile(getClass(), "/testWriter.vcf").getPath());
-		File resultVCFWriter = new File(ResourceUtils.getFile(getClass(), "/result_vcfWriter.vcf").getPath());
-
-		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter,
-				annotatedEntityMetadata.getAttributes(), "INFO_ANNO");
-
-		for (Entity entity : entities)
-		{
-			MapEntity mapEntity = new MapEntity(entity, annotatedEntityMetadata);
-			mapEntity.set("INFO_ANNO", "TEST_" + entity.get(VcfRepository.ID));
-			outputVCFWriter.println(VcfUtils.convertToVCF(mapEntity));
-
+		final File outputVCFFile = File.createTempFile("output", ".vcf");
+		try{
+			PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
+	
+			File inputVcfFile = new File(ResourceUtils.getFile(getClass(), "/testWriter.vcf").getPath());
+			File resultVCFWriter = new File(ResourceUtils.getFile(getClass(), "/result_vcfWriter.vcf").getPath());
+	
+			VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter,
+					annotatedEntityMetadata.getAttributes(), "INFO_ANNO");
+	
+			for (Entity entity : entities)
+			{
+				MapEntity mapEntity = new MapEntity(entity, annotatedEntityMetadata);
+				mapEntity.set("INFO_ANNO", "TEST_" + entity.get(VcfRepository.ID));
+				outputVCFWriter.println(VcfUtils.convertToVCF(mapEntity));
+	
+			}
+			outputVCFWriter.close();
+			System.out.println(outputVCFFile.getAbsolutePath());
+			assertTrue(FileUtils.contentEqualsIgnoreEOL(resultVCFWriter, outputVCFFile, "UTF8"));
 		}
-		outputVCFWriter.close();
-		System.out.print(outputVCFFile.getAbsolutePath());
-		assertTrue(FileUtils.contentEqualsIgnoreEOL(resultVCFWriter, outputVCFFile, "UTF8"));
+		finally
+		{
+			boolean outputVCFFileIsDeleted = outputVCFFile.delete();
+			System.out.println("Result test file named: " + outputVCFFile.getName() + " is "
+					+ (outputVCFFileIsDeleted ? "" : "not ") + "deleted");
+		}
 	}
 
 }
