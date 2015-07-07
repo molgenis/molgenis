@@ -25,7 +25,7 @@ public class RegionExtractor
 
 		TabixReader vcfTabixReader = new TabixReader(vcfTabixRepo.getAbsolutePath());
 
-		Scanner s = new Scanner(input);
+		Scanner s = new Scanner(input, "UTF-8");
 		s.nextLine(); // skip header
 
 		HashMap<String, List<String>> geneToVariants = new HashMap<String, List<String>>();
