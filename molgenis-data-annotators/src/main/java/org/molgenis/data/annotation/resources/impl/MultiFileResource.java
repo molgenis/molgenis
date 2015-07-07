@@ -6,10 +6,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.annotation.resources.MultiResourceConfig;
+import org.molgenis.data.annotation.resources.RepositoryFactory;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.ResourceConfig;
 import org.molgenis.data.vcf.VcfRepository;
@@ -24,13 +24,12 @@ public class MultiFileResource implements Resource
 	private final MultiResourceConfig config;
 	private final RepositoryFactory factory;
 
-	public MultiFileResource(String name, MultiResourceConfig config, EntityMetaData emd, RepositoryFactory factory)
+	public MultiFileResource(String name, MultiResourceConfig config, RepositoryFactory factory)
 	{
 		this.name = name;
 		this.config = config;
 		this.factory = factory;
 		initializeResources();
-
 	}
 
 	private void initializeResources()
