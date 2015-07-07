@@ -29,7 +29,6 @@ public class MultiFileResource implements Resource
 		this.name = name;
 		this.config = config;
 		this.factory = factory;
-		initializeResources();
 	}
 
 	private void initializeResources()
@@ -69,6 +68,9 @@ public class MultiFileResource implements Resource
 	@Override
 	public boolean isAvailable()
 	{
+		// initialize after autowiring is complete and resources is empty
+		if (resources.isEmpty()) initializeResources();
+
 		if (!config.getConfigs().keySet().equals(resources.keySet()))
 		{
 			initializeResources();
@@ -92,6 +94,9 @@ public class MultiFileResource implements Resource
 	@Override
 	public Iterable<Entity> findAll(Query q)
 	{
+		// initialize after autowiring is complete and resources is empty
+		if (resources.isEmpty()) initializeResources();
+
 		String chromValue = getFirstEqualsValueFor(VcfRepository.CHROM, q).toString();
 		Resource resource = resources.get(chromValue);
 		return resource.findAll(q);
