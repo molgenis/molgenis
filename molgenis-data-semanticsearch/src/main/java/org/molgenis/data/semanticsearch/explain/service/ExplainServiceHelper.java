@@ -130,38 +130,13 @@ public class ExplainServiceHelper
 		for (Entry<String, String> entry : collectExpandedQueryMap.entrySet())
 		{
 			Set<String> wordsInQuery = splitIntoTerms(entry.getKey());
-			if (containsAllWords(wordsInQuery, matchedWords))
+			if (wordsInQuery.containsAll(matchedWords))
 			{
 				qualifiedQueries.put(entry.getKey(),
 						NGramDistanceAlgorithm.stringMatching(matchedWordsString, entry.getKey()));
 			}
 		}
 		return qualifiedQueries;
-	}
-
-	/**
-	 * A helper function to check if the superset of words contains all the words from the subset.
-	 * 
-	 * @param supersets
-	 * @param subsets
-	 * @return
-	 */
-	boolean containsAllWords(Set<String> supersets, Set<String> subsets)
-	{
-		for (String subsetWord : subsets)
-		{
-			if (!supersets.contains(subsetWord))
-			{
-				// The stemmers used in ElasticSearch and SemanticSearchService are different, this is a workaround
-				// to capture all stemming exceptions in PorterStemmer.
-				if (!supersets.stream().anyMatch(
-						supersetWord -> supersetWord.contains(subsetWord) || subsetWord.contains(supersetWord)))
-				{
-					return false;
-				}
-			}
-		}
-		return true;
 	}
 
 	public String removeBoostFromQuery(String description)

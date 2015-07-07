@@ -56,7 +56,7 @@ public class NGramDistanceAlgorithm
 				"won't", "would", "wouldn't", "you", "you'd", "you'll", "you're", "you've", "your", "yours",
 				"yourself", "yourselves", "many", ")", "(");
 	}
-	private static Stemmer CUSTOM_STEMMER = new Stemmer("EN");
+	private static Stemmer CUSTOM_STEMMER = new Stemmer();
 
 	public static double stringMatching(String queryOne, String queryTwo)
 	{

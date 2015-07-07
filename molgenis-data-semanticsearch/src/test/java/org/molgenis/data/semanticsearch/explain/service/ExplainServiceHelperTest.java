@@ -16,7 +16,6 @@ import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.util.ResourceUtils;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
@@ -83,17 +82,5 @@ public class ExplainServiceHelperTest
 
 		assertEquals(explainServiceHelper.findMatchQueries("blood high", expanedQueryMap).toString(),
 				"{high blood pressure=73.333}");
-	}
-
-	@Test
-	public void testContainsAllWords()
-	{
-		Set<String> supersets = Sets.newHashSet("ag", "year", "category");
-		Set<String> subsets = Sets.newHashSet("age", "year");
-		assertTrue(explainServiceHelper.containsAllWords(supersets, subsets));
-
-		supersets = Sets.newHashSet("age", "year", "category");
-		subsets = Sets.newHashSet("ag", "year", "category");
-		assertTrue(explainServiceHelper.containsAllWords(supersets, subsets));
 	}
 }
