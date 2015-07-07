@@ -10,8 +10,6 @@ import org.molgenis.framework.server.MolgenisSettings;
  */
 public class SingleResourceConfig implements ResourceConfig
 {
-
-	private File file;
 	private MolgenisSettings molgenisSettings;
 	private String fileProperty;
 
