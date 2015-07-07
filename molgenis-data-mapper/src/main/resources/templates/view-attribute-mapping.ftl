@@ -60,7 +60,7 @@
 					
 					<form>
 			  			<div class="form-group">
-							<input id="attribute-search-field" type="text" class="form-control" placeholder="Search...">
+							<input id="attribute-search-field" type="text" class="form-control" placeholder="Search all attributes...">
 						</div>
 					</form>
 				</div>

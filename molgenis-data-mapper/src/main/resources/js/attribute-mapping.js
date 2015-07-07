@@ -302,7 +302,7 @@
 						row.hide();
 					}
 				} else {
-					row.show();
+					row.hide();
 				}
 			});
 		} else {
@@ -326,7 +326,6 @@
 	function rankAttributeTable(explainedAttributes){
 		if(explainedAttributes != null){
 			var attributeNames = Object.keys(explainedAttributes), className, attributeLabel, attributeInfoElement, firstRow, suggestedRow, explainedQueryStrings, words;
-			
 			for(var i = attributeNames.length - 1; i >= 0;i--){
 				
 				className = attributeNames[i];
