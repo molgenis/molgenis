@@ -3,7 +3,13 @@ package org.molgenis.data.annotation.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
@@ -24,6 +30,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import edu.umd.cs.findbugs.annotations.SuppressWarnings;
+
 /**
  * 
  * 1000G annotator
@@ -42,6 +50,8 @@ import org.springframework.stereotype.Component;
  *
  **/
 @Component("thousandGenomesService")
+@SuppressWarnings(value =
+{ "IS2_INCONSISTENT_SYNC", "DC_DOUBLECHECK", "DM_STRING_CTOR", "NP_NULL_ON_SOME_PATH" }, justification = "Old code! This code must be removed when the new code is ready")
 public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ThousandGenomesServiceAnnotator.class);
