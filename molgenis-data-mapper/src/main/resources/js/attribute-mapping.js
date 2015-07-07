@@ -386,18 +386,18 @@
 			connectedPhrase = '';
 			orderedWords = attributeLabel.toUpperCase().split(' ');
 			$.each(orderedWords, function(index, word){
-				
-				//Word contains illegal chars
-				if(illegal_pattern.test(word)){
-					addAll(connectedPhrases, connectNeighboredWords(word.split(illegal_pattern).join(' '), matchedWords));
-				}else if($.inArray(word, matchedWords) !== -1){
-					
+				if($.inArray(word, matchedWords) !== -1){
 					connectedPhrase += ' ' + word;
-				}
-				else if(connectedPhrase.length > 0){
+				}else{
 					
-					connectedPhrases.push(connectedPhrase.trim());
-					connectedPhrase = '';
+					if(connectedPhrase.length > 0){
+						connectedPhrases.push(connectedPhrase.trim());
+						connectedPhrase = '';
+					}
+					//Word contains illegal chars
+					if(illegal_pattern.test(word)){
+						addAll(connectedPhrases, connectNeighboredWords(word.split(illegal_pattern).join(' '), matchedWords));
+					}
 				}
 			});
 			if(connectedPhrase.length > 0){
