@@ -1,11 +1,10 @@
 package org.molgenis.data.annotation;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ArrayList;
-import java.util.UUID;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.molgenis.data.DataService;
@@ -78,7 +77,7 @@ public class CrudRepositoryAnnotator
 
 		EntityMetaData entityMetaData = dataService.getMeta().getEntityMetaData(sourceRepo.getName());
 		DefaultAttributeMetaData compoundAttributeMetaData = AnnotatorUtils.getCompoundResultAttribute(annotator,
-                entityMetaData);
+				entityMetaData);
 
 		Repository targetRepo = addAnnotatorMetadataToRepositories(entityMetaData, createCopy,
 				compoundAttributeMetaData);
@@ -174,7 +173,7 @@ public class CrudRepositoryAnnotator
 	{
 		if (createCopy)
 		{
-			DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(RandomStringUtils.randomAlphanumeric(30),
+			DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(RandomStringUtils.randomAlphabetic(30),
 					entityMetaData);
 			if (newEntityMetaData.getAttribute(compoundAttributeMetaData.getName()) == null)
 			{

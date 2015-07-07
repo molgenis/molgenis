@@ -21,12 +21,12 @@ import com.google.common.base.Optional;
 
 public class AnnotatorImpl implements EntityAnnotator
 {
-	private Resources resources;
-	private DataService dataService;
-	private String sourceRepositoryName;
-	private AnnotatorInfo info;
-	private QueryCreator queryCreator;
-	private ResultFilter resultFilter;
+	private final Resources resources;
+	private final DataService dataService;
+	private final String sourceRepositoryName;
+	private final AnnotatorInfo info;
+	private final QueryCreator queryCreator;
+	private final ResultFilter resultFilter;
 
 	public AnnotatorImpl(String sourceRepositoryName, AnnotatorInfo info, QueryCreator queryCreator,
 			ResultFilter resultFilter, DataService dataService, Resources resources)
@@ -67,7 +67,7 @@ public class AnnotatorImpl implements EntityAnnotator
 			Entity resultEntity = new MapEntity(entity, entity.getEntityMetaData());
 			for (AttributeMetaData attr : info.getOutputAttributes())
 			{
-				resultEntity.set(attr.getName(), anntotationSourceEntity.get(getResourceAttributeName(attr)));
+				resultEntity.set(attr.getName(), getResourceAttributeValue(attr, anntotationSourceEntity));
 			}
 			results.add(resultEntity);
 		}
@@ -78,13 +78,17 @@ public class AnnotatorImpl implements EntityAnnotator
 	}
 
 	/**
-	 * Get the resource attribute name for one of this annotator's output attributes.
-	 * @param attr the name of the output attribute
-	 * @return the name of the attribute to copy from the resource entity
+	 * Get the resource attribute value for one of this annotator's output attributes.
+	 * 
+	 * @param attr
+	 *            the name of the output attribute
+	 * @param the
+	 *            current entity
+	 * @return the value of the attribute to copy from the resource entity
 	 */
-	protected String getResourceAttributeName(AttributeMetaData attr)
+	protected Object getResourceAttributeValue(AttributeMetaData attr, Entity entity)
 	{
-		return attr.getName();
+		return entity.get(attr.getName());
 	}
 
 	@Override
