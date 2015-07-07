@@ -366,12 +366,8 @@
 				message += 'The query <strong>' + queryString + '</strong> derived from <strong>' + explainedQueryString.tagName;
 				message += '</strong> is matched to the label on words <strong>' + matchedWords.join(' ').toLowerCase() + '</strong> with ' + score + '%<br><br>';
 			});
-			var option = {'title' : 'Explanation', 'content' : message, 'html' : true, 'placement' : 'top', 'container' : row, 'trigger' : 'manual'};
-			$(attributeInfoElement).css({'cursor':'help'}).popover(option).on('click', function(){
-				$(this).popover('show');
-			}).on('mouseout', function(){
-				$(this).popover('hide');
-			});
+			var option = {'title' : 'Explanation', 'content' : message, 'html' : true, 'placement' : 'top', 'container' : row, 'trigger' : 'hover'};
+			$(attributeInfoElement).popover(option);
 		}
 	}
 	
