@@ -48,7 +48,7 @@ public class ExacAnnotator
 				.setDescription("TODO").setLabel(EXAC_AF_LABEL);
 
 		AnnotatorInfo exacInfo = AnnotatorInfo
-				.create(Status.BETA,
+				.create(Status.READY,
 						AnnotatorInfo.Type.POPULATION_REFERENCE,
 						"exac",
 						" The Exome Aggregation Consortium (ExAC) is a coalition of investigators seeking to aggregate"
