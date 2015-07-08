@@ -496,12 +496,9 @@ public class MappingServiceController extends MolgenisPluginController
 			attributeMapping = entityMapping.addAttributeMapping(targetAttribute);
 		}
 
-		FieldType targetAttributeDataType = dataService.getEntityMetaData(target).getAttribute(targetAttribute)
-				.getDataType();
-
-		if (targetAttributeDataType instanceof XrefField)
+		EntityMetaData refEntityMetaData = attributeMapping.getTargetAttributeMetaData().getRefEntity();
+		if (refEntityMetaData != null)
 		{
-			EntityMetaData refEntityMetaData = attributeMapping.getTargetAttributeMetaData().getRefEntity();
 			Iterable<Entity> refEntities = dataService.findAll(refEntityMetaData.getName());
 			model.addAttribute("categories", refEntities);
 		}

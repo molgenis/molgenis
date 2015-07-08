@@ -490,4 +490,17 @@ public class SnpEffServiceAnnotator implements RepositoryAnnotator
 		return AnnotatorInfo.create(Status.INDEV, Type.UNUSED, "unknown", "no description", getOutputMetaData());
 	}
 
+	@Override
+	public Iterator<Entity> annotate(Iterator<Entity> source)
+	{
+		return this.annotate(new Iterable<Entity>()
+		{
+			@Override
+			public Iterator<Entity> iterator()
+			{
+				return source;
+			}
+		});
+	}
+
 }
