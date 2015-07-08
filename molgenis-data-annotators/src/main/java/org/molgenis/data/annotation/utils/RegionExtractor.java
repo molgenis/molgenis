@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Scanner;
 
 import org.molgenis.data.annotator.tabix.TabixReader;
@@ -25,7 +26,7 @@ public class RegionExtractor
 
 		TabixReader vcfTabixReader = new TabixReader(vcfTabixRepo.getAbsolutePath());
 
-		Scanner s = new Scanner(input);
+		Scanner s = new Scanner(input, "UTF-8");
 		s.nextLine(); // skip header
 
 		HashMap<String, List<String>> geneToVariants = new HashMap<String, List<String>>();
@@ -79,10 +80,11 @@ public class RegionExtractor
 
 		PrintWriter pw = new PrintWriter(output, "UTF-8");
 
-		for (String gene : geneToVariants.keySet())
+		for (Entry<String, List<String>> geneEntry : geneToVariants.entrySet())
 		{
-			for(String variant : geneToVariants.get(gene)){
-				pw.println(gene + "\t" + variant);
+			for (String variant : geneEntry.getValue())
+			{
+				pw.println(geneEntry.getKey() + "\t" + variant);
 			}
 		}
 		
