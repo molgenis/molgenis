@@ -733,5 +733,6 @@
         <module>molgenis-data-migrate</module>
         <module>molgenis-questionnaires</module>
 		<module>molgenis-file</module>
+		<module>molgenis-hpofilter</module>
     </modules>
 </project>
