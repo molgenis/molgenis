@@ -18,6 +18,7 @@ import java.util.stream.StreamSupport;
 
 import javax.validation.Valid;
 
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
@@ -494,6 +495,14 @@ public class MappingServiceController extends MolgenisPluginController
 		if (attributeMapping == null)
 		{
 			attributeMapping = entityMapping.addAttributeMapping(targetAttribute);
+		}
+
+		if (attributeMapping.getTargetAttributeMetaData().getDataType().toString()
+				.equals(MolgenisFieldTypes.CATEGORICAL.toString()))
+		{
+			EntityMetaData refEntityMetaData = attributeMapping.getTargetAttributeMetaData().getRefEntity();
+			Iterable<Entity> refEntities = dataService.findAll(refEntityMetaData.getName());
+			model.addAttribute("categories", refEntities);
 		}
 
 		model.addAttribute("mappingProject", project);

@@ -38,9 +38,49 @@
 <div class="row">
 	<div class="col-md-12">
 		<hr></hr>
-		<p>
-			${attributeMapping.targetAttributeMetaData.name?html} (${attributeMapping.targetAttributeMetaData.dataType}) : ${(attributeMapping.targetAttributeMetaData.description!"")?html}
-		</p>
+		<div class="row">
+			<div class="col-md-6 col-lg-4">
+				<p>
+					<strong>Name</strong> 
+					<span class="pull-right">
+						${attributeMapping.targetAttributeMetaData.name?html} (${attributeMapping.targetAttributeMetaData.dataType})
+					</span></br>
+					<strong>Label</strong> 
+					<span class="pull-right">
+						<#if attributeMapping.targetAttributeMetaData.label?? >
+						${attributeMapping.targetAttributeMetaData.label?html}
+						<#else>
+						N/A
+						</#if>
+					</span></br>
+					<strong>Description</strong>
+					<span class="pull-right">
+						<#if attributeMapping.targetAttributeMetaData.description?? >
+						${attributeMapping.targetAttributeMetaData.description?html}
+						<#else>
+						N/A
+						</#if>
+					</span></br>
+					<#if attributeMapping.targetAttributeMetaData.dataType == 'categorical'>
+					<strong>categories</strong>
+					<span class="pull-right">
+						<#if attributeMapping.targetAttributeMetaData.refEntity?? && categories??>
+							<#assign refEntityMetaData = attributeMapping.targetAttributeMetaData.refEntity>
+							<#list categories.iterator() as category>
+								<#list refEntityMetaData.attributes as attribute>
+									<#assign attributeName = attribute.name>
+									${category[attributeName]} <#if refEntityMetaData.attributes?seq_index_of(attribute) != refEntityMetaData.attributes?size - 1>=</#if>
+								</#list>
+								</br>
+							</#list>
+						<#else>
+							N/A
+						</#if> 
+					</span>
+					</#if>
+				</p>
+			</div>
+		</div>
 	</div>
 </div>
 
