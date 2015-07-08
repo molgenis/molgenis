@@ -1,9 +1,9 @@
 package org.molgenis.data.annotation.entity.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import org.elasticsearch.common.collect.Lists;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -48,10 +48,9 @@ public class AnnotatorImpl implements EntityAnnotator
 	@Override
 	public List<Entity> annotateEntity(Entity entity)
 	{
-		List<Entity> results = new ArrayList<>();
-		Iterable<Entity> annotatationSourceEntities;
-
 		Query q = queryCreator.createQuery(entity);
+
+		Iterable<Entity> annotatationSourceEntities;
 		if (resources.hasRepository(sourceRepositoryName))
 		{
 			annotatationSourceEntities = resources.findAll(sourceRepositoryName, q);
@@ -60,21 +59,19 @@ public class AnnotatorImpl implements EntityAnnotator
 		{
 			annotatationSourceEntities = dataService.findAll(sourceRepositoryName, q);
 		}
-		Optional<Entity> filteredResults = resultFilter.filterResults(annotatationSourceEntities, entity);
-		annotatationSourceEntities = Lists.newArrayList(filteredResults.asSet());
-		for (Entity anntotationSourceEntity : annotatationSourceEntities)
+
+		Entity resultEntity = new MapEntity(entity, entity.getEntityMetaData());
+
+		Optional<Entity> filteredResult = resultFilter.filterResults(annotatationSourceEntities, entity);
+		if (filteredResult.isPresent())
 		{
-			Entity resultEntity = new MapEntity(entity, entity.getEntityMetaData());
 			for (AttributeMetaData attr : info.getOutputAttributes())
 			{
-				resultEntity.set(attr.getName(), getResourceAttributeValue(attr, anntotationSourceEntity));
+				resultEntity.set(attr.getName(), getResourceAttributeValue(attr, filteredResult.get()));
 			}
-			results.add(resultEntity);
 		}
-		// no data added? add original entity
-		if (results.size() == 0) results.add(entity);
 
-		return results;
+		return Collections.singletonList(resultEntity);
 	}
 
 	/**
