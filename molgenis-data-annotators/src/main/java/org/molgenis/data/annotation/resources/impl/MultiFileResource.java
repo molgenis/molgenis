@@ -24,7 +24,7 @@ public class MultiFileResource implements Resource
 	private final MultiResourceConfig config;
 	private final RepositoryFactory factory;
 
-	public MultiFileResource(String name, MultiResourceConfig config, EntityMetaData emd, RepositoryFactory factory)
+	public MultiFileResource(String name, MultiResourceConfig config, RepositoryFactory factory)
 	{
 		this.name = name;
 		this.config = config;
