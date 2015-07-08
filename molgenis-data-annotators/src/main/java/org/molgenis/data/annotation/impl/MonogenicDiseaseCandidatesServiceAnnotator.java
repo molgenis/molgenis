@@ -3,7 +3,15 @@ package org.molgenis.data.annotation.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -14,6 +22,7 @@ import org.molgenis.data.annotation.VariantAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
+import org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator;
 import org.molgenis.data.annotation.entity.impl.ExacAnnotator;
 import org.molgenis.data.annotation.provider.CgdDataProvider;
 import org.molgenis.data.annotation.provider.CgdDataProvider.generalizedInheritance;
@@ -149,13 +158,17 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 		double gonlMAF = entity.getDouble(GoNLServiceAnnotator.GONL_MAF) != null ? entity
 				.getDouble(GoNLServiceAnnotator.GONL_MAF) : 0;
 		CgdDataProvider.generalizedInheritance cgdGenInh = entity
-				.getString(ClinicalGenomicsDatabaseServiceAnnotator.GENERALIZED_INHERITANCE) != null ? generalizedInheritance
-				.valueOf(entity.getString(ClinicalGenomicsDatabaseServiceAnnotator.GENERALIZED_INHERITANCE)) : null;
-		String originalInheritance = entity.getString(ClinicalGenomicsDatabaseServiceAnnotator.INHERITANCE) != null ? entity
-				.getString(ClinicalGenomicsDatabaseServiceAnnotator.INHERITANCE) : null;
+				.getString(ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.GENERALIZED_INHERITANCE
+						.getAttributeName()) != null ? generalizedInheritance.valueOf(entity
+				.getString(ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.GENERALIZED_INHERITANCE
+						.getAttributeName())) : null;
+		String originalInheritance = entity
+				.getString(ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.INHERITANCE.getAttributeName()) != null ? entity
+				.getString(ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.INHERITANCE.getAttributeName()) : null;
 		SnpEffServiceAnnotator.impact impact = Enum.valueOf(SnpEffServiceAnnotator.impact.class, annSplit[2]);
 		String gene = annSplit[3];
-		String condition = entity.getString(ClinicalGenomicsDatabaseServiceAnnotator.CONDITION);
+		String condition = entity.getString(ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.CONDITION
+				.getAttributeName());
 
 		// TODO: can be multiple!! even with canonical output...
 		String zygosity = checkGenotypeData(entity);
@@ -341,8 +354,10 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 		entityMetaData.add(new DefaultAttributeMetaData(ExacAnnotator.EXAC_AF, FieldTypeEnum.DECIMAL));
 		entityMetaData.add(new DefaultAttributeMetaData(GoNLServiceAnnotator.GONL_MAF, FieldTypeEnum.DECIMAL));
 		entityMetaData.add(new DefaultAttributeMetaData(
-				ClinicalGenomicsDatabaseServiceAnnotator.GENERALIZED_INHERITANCE, FieldTypeEnum.TEXT));
-		entityMetaData.add(new DefaultAttributeMetaData(ClinicalGenomicsDatabaseServiceAnnotator.INHERITANCE,
+				ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.GENERALIZED_INHERITANCE.getAttributeName(),
+				FieldTypeEnum.TEXT));
+		entityMetaData.add(new DefaultAttributeMetaData(
+				ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.INHERITANCE.getAttributeName(),
 				FieldTypeEnum.TEXT));
 		entityMetaData.add(new DefaultAttributeMetaData(VcfRepository.SAMPLES, FieldTypeEnum.MREF));
 		return entityMetaData;

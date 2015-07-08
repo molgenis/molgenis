@@ -62,8 +62,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ClinicalGenomicsDatabaseServiceAnnotator
 {
+	public static final String CGD_FILE_LOCATION_PROPERTY = "cgd_location";
 	private static String CGD_RESOURCE = "CGDResource";
-	private static final String CGD_FILE_LOCATION_PROPERTY = "cgd_location";
 	private static final char SEPARATOR = '\t';
 
 	// Output attribute labels

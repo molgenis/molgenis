@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
 @Component("hgncSymbolService")
 public class HgncSymbolServiceAnnotator extends LocusAnnotator
 {
-	private static final Logger LOG = LoggerFactory.getLogger(ClinicalGenomicsDatabaseServiceAnnotator.class);
+	private static final Logger LOG = LoggerFactory.getLogger(HgncSymbolServiceAnnotator.class);
 	private final HgncLocationsProvider hgncLocationsProvider;
 
 	static final String HGNC_SYMBOL = "HGNC_SYMBOL";
