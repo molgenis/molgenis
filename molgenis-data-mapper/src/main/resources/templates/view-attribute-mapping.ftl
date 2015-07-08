@@ -130,6 +130,9 @@
 										<#if source.nillable> <span class="label label-warning">nillable</span></#if>
 										<#if source.unique> <span class="label label-default">unique</span></#if>
 										<#if source.description??><br />${source.description?html}</#if>
+										<#if source.dataType == "xref" || source.dataType == "categorical" || source.dataType == "mref">
+											<br><a href="${dataExplorerUri?html}?entity=${source.refEntity.name}" target="_blank">category look up</a>
+										</#if>
 									</td>
 									<td>
 										${source.name?html}

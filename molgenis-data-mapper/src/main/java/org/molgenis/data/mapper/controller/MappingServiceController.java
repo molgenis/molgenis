@@ -506,6 +506,7 @@ public class MappingServiceController extends MolgenisPluginController
 			model.addAttribute("categories", refEntities);
 		}
 
+		model.addAttribute("dataExplorerUri", menuReaderService.getMenu().findMenuItemPath(DataExplorerController.ID));
 		model.addAttribute("mappingProject", project);
 		model.addAttribute("entityMapping", entityMapping);
 		model.addAttribute("attributeMapping", attributeMapping);

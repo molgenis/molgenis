@@ -32,16 +32,9 @@
 <div class="row">
 	<div class="col-md-3">
 		<select multiple class="form-control " name="ontology-select" id="ontology-select" data-placeholder="Select an ontology to use">
-			<option value=""></option>
-			<#if selectedOntologies??>
-				<#list selectedOntologies as selectedOntology>
-					<#if selectedOntology??>
-						<option selected='selected' data-iri="${selectedOntology.IRI} "value="${selectedOntology.id}">${selectedOntology.name?html}</option>
-					</#if>
-				</#list>
-			</#if>
+			
 			<#list ontologies as ontology>
-				<option data-iri="${ontology.IRI}" value="${ontology.id}">${ontology.name?html}</option>
+				<option selected='selected' data-iri="${ontology.IRI}" value="${ontology.id}">${ontology.name?html}</option>
 			</#list>
 		</select>
 	</div>
