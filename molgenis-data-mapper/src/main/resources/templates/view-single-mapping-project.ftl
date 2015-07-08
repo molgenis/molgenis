@@ -114,18 +114,7 @@
 	</#if>
 </div>
 
-<div class="row">
-	<div class="col-md-2">
-		<form method="get" action="${context_url}/tagwizard">
-			<input type="hidden" name="target" value="${selectedTarget}"/>
-			<div class="btn-group" role="group">
-				<button type="submit" class="btn btn-primary">
-					<span class="glyphicon glyphicon-tag"></span> Run tag wizard
-				</button>
-			</div>
-		</form>
-	</div>	
-		
+<div class="row">		
 	<#if mappingProject.getMappingTarget(selectedTarget).entityMappings?has_content>
 		<div class="col-md-8">		
 			<a id="add-new-attr-mapping-btn" href="#" class="btn btn-success pull-right" data-toggle="modal" data-target="#create-integrated-entity-modal">
