@@ -18,7 +18,6 @@ import java.util.stream.StreamSupport;
 
 import javax.validation.Valid;
 
-import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
@@ -497,8 +496,10 @@ public class MappingServiceController extends MolgenisPluginController
 			attributeMapping = entityMapping.addAttributeMapping(targetAttribute);
 		}
 
-		if (attributeMapping.getTargetAttributeMetaData().getDataType().toString()
-				.equals(MolgenisFieldTypes.CATEGORICAL.toString()))
+		FieldType targetAttributeDataType = dataService.getEntityMetaData(target).getAttribute(targetAttribute)
+				.getDataType();
+
+		if (targetAttributeDataType instanceof XrefField)
 		{
 			EntityMetaData refEntityMetaData = attributeMapping.getTargetAttributeMetaData().getRefEntity();
 			Iterable<Entity> refEntities = dataService.findAll(refEntityMetaData.getName());
@@ -544,7 +545,10 @@ public class MappingServiceController extends MolgenisPluginController
 			Collection<String> sourceAttributeNames = algorithmService.getSourceAttributeNames(algorithm);
 			if (!sourceAttributeNames.isEmpty())
 			{
-				model.addAttribute("sourceAttributeNames", sourceAttributeNames);
+				List<AttributeMetaData> sourceAttributes = sourceAttributeNames.stream()
+						.map(attributeName -> entityMapping.getSourceEntityMetaData().getAttribute(attributeName))
+						.collect(Collectors.toList());
+				model.addAttribute("sourceAttributes", sourceAttributes);
 			}
 		}
 		catch (Exception e)

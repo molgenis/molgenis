@@ -64,7 +64,7 @@
 					<#if attributeMapping.targetAttributeMetaData.dataType == 'categorical'>
 					<strong>categories</strong>
 					<span class="pull-right">
-						<#if attributeMapping.targetAttributeMetaData.refEntity?? && categories??>
+						<#if attributeMapping.targetAttributeMetaData.dataType == "xref" || attributeMapping.targetAttributeMetaData.dataType == "categorical" && (categories)?has_content>
 							<#assign refEntityMetaData = attributeMapping.targetAttributeMetaData.refEntity>
 							<#list categories.iterator() as category>
 								<#list refEntityMetaData.attributes as attribute>
@@ -79,6 +79,7 @@
 					</span>
 					</#if>
 				</p>
+				<hr></hr>
 			</div>
 		</div>
 	</div>
