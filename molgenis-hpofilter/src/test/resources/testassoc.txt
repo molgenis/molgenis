@@ -1,0 +1,56 @@
+#Format: diseaseId<tab>gene-symbol<tab>gene-id(entrez)<tab>HPO-ID<tab>HPO-term-name
+ORPHANET:2805	PTF1A	256297	HP:0001511	Intrauterine growth retardation
+ORPHANET:2805	PTF1A	256297	HP:0001732	Abnormality of the pancreas
+ORPHANET:2805	PTF1A	256297	HP:0100651	Type I diabetes mellitus
+ORPHANET:2805	PTF1A	256297	HP:0009800	Maternal diabetes
+ORPHANET:2805	PDX1	3651	HP:0001511	Intrauterine growth retardation
+ORPHANET:2805	PDX1	3651	HP:0001732	Abnormality of the pancreas
+ORPHANET:2805	PDX1	3651	HP:0100651	Type I diabetes mellitus
+ORPHANET:2805	PDX1	3651	HP:0009800	Maternal diabetes
+OMIM:614896	CACNA1D	776	HP:0000007	Autosomal recessive inheritance
+OMIM:614896	CACNA1D	776	HP:0000365	Hearing impairment
+OMIM:614896	CACNA1D	776	HP:0001662	Bradycardia
+OMIM:146590	KRT1	3848	HP:0008064	Ichthyosis
+OMIM:146590	KRT1	3848	HP:0001231	Abnormality of the fingernails
+OMIM:146590	KRT1	3848	HP:0000962	Hyperkeratosis
+OMIM:146590	KRT1	3848	HP:0200042	Skin ulcer
+OMIM:146590	KRT1	3848	HP:0001939	Abnormality of metabolism/homeostasis
+OMIM:146590	KRT1	3848	HP:0000006	Autosomal dominant inheritance
+OMIM:146590	KRT1	3848	HP:0100758	Gangrene
+OMIM:146590	KRT1	3848	HP:0001371	Flexion contracture
+OMIM:490000	ZFY	7544	HP:0001939	Abnormality of metabolism/homeostasis
+ORPHANET:99832	TRHR	7201	HP:0000235	Abnormality of the fontanelles or cranial sutures
+ORPHANET:99832	TRHR	7201	HP:0000821	Hypothyroidism
+ORPHANET:99832	TRHR	7201	HP:0001537	Umbilical hernia
+ORPHANET:99832	TRHR	7201	HP:0001392	Abnormality of the liver
+ORPHANET:99832	TRHR	7201	HP:0002019	Constipation
+ORPHANET:99832	TRHR	7201	HP:0002360	Sleep disturbance
+ORPHANET:99832	TRHR	7201	HP:0000157	Abnormality of the tongue
+ORPHANET:99832	TRHR	7201	HP:0001252	Muscular hypotonia
+ORPHANET:99832	TRHR	7201	HP:0010318	Aplasia/Hypoplasia of the abdominal wall musculature
+ORPHANET:99832	TRHR	7201	HP:0000280	Coarse facial features
+OMIM:194300	KRT74	121391	HP:0002224	Woolly hair
+OMIM:194300	KRT74	121391	HP:0000006	Autosomal dominant inheritance
+OMIM:194300	KRT74	121391	HP:0011359	Dry hair
+OMIM:194300	KRT74	121391	HP:0002208	Coarse hair
+OMIM:607200	DUOX2	50506	HP:0000851	Congenital hypothyroidism
+OMIM:607200	DUOX2	50506	HP:0000007	Autosomal recessive inheritance
+OMIM:142946	TGIF1	7050	HP:0008501	Median cleft lip and palate
+OMIM:142946	TGIF1	7050	HP:0002507	Semilobar holoprosencephaly
+OMIM:142946	TGIF1	7050	HP:0000161	Median cleft lip
+OMIM:142946	TGIF1	7050	HP:0005273	Absent nasal septal cartilage
+OMIM:142946	TGIF1	7050	HP:0000006	Autosomal dominant inheritance
+OMIM:142946	TGIF1	7050	HP:0005280	Depressed nasal bridge
+OMIM:142946	TGIF1	7050	HP:0000601	Hypotelorism
+OMIM:142946	TGIF1	7050	HP:0000508	Ptosis
+OMIM:142946	TGIF1	7050	HP:0000437	Depressed nasal tip
+OMIM:615041	TMEM5	10329	HP:0007973	Retinal dysplasia
+OMIM:615041	TMEM5	10329	HP:0007033	Cerebellar dysplasia
+OMIM:615041	TMEM5	10329	HP:0000133	Gonadal dysgenesis
+OMIM:615041	TMEM5	10329	HP:0000007	Autosomal recessive inheritance
+OMIM:615041	TMEM5	10329	HP:0007260	Type II lissencephaly
+OMIM:615041	TMEM5	10329	HP:0003560	Muscular dystrophy
+OMIM:614672	GATAD1	57798	HP:0001644	Dilated cardiomyopathy
+OMIM:614672	GATAD1	57798	HP:0005110	Atrial fibrillation
+OMIM:614672	GATAD1	57798	HP:0000007	Autosomal recessive inheritance
+OMIM:614672	GATAD1	57798	HP:0001635	Congestive heart failure

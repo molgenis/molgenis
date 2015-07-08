@@ -8,6 +8,7 @@
         <menu label="Plugins" name="plugins">
             <plugin id="questionnaires" name="Questionnaires" url="questionnaires"/>
         	<plugin id="pathways" name="Pathways" url="pathways"/>
+       		<plugin id="hpofilter" name="HPO Filter" url="hpofilter"/>
             <plugin id="standardsregistry" name="Model registry" url="standardsregistry" />
             <plugin id="geneticrepositorymerger" name="Merge Genetic Data" url="geneticrepositorymerger"/>
             <plugin id="background" name="Background" url="background"/>
