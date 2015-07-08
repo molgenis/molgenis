@@ -318,6 +318,18 @@
 				}
 			});
 		}
+		
+		//Update the search result message above the table
+		var numberOfVisibleAttributes = $('#attribute-mapping-table>tbody tr:visible').length;
+		var totalNumberOfAttributes = $('#attribute-mapping-table>tbody tr').length;
+		$('#attribute-search-result-message').empty().append(numberOfVisibleAttributes + ' attributes have been found out of ' + totalNumberOfAttributes);
+		
+		// hide/show the header of the table depending on whether or not there are any visiable attributes
+		if(numberOfVisibleAttributes == 0){
+			$('#attribute-mapping-table>thead tr').hide();
+		}else{
+			$('#attribute-mapping-table>thead tr').show();
+		}
 	}
 
 	/**

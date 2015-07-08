@@ -100,7 +100,7 @@
 					
 					<form>
 			  			<div class="form-group">
-							<input id="attribute-search-field" type="text" class="form-control" placeholder="Search all attributes...">
+							<input id="attribute-search-field" type="text" class="form-control" placeholder="Search all ${entityMapping.sourceEntityMetaData.attributes?size} attributes...">
 						</div>
 					</form>
 				</div>
@@ -108,6 +108,7 @@
 			
 			<div class="row">
 				<div class="col-md-12">
+					<p id="attribute-search-result-message"></p>
 					<table id="attribute-mapping-table" class="table table-bordered scroll">
 						<thead>
 							<th>Select</th>
