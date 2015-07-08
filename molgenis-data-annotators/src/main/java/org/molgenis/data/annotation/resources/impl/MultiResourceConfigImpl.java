@@ -22,8 +22,8 @@ public class MultiResourceConfigImpl implements MultiResourceConfig
 	private String folderProperty;
 
 	public static final String DEFAULT_CHROMOSOMES = "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,Y,X";
-	public static final String DEFAULT_PATTERN = "chr%s\\.vcf";
-	public static final String DEFAULT_FOLDER = "/data/resources/";
+	public static final String DEFAULT_PATTERN = "chr%s.vcf";
+	public static final String DEFAULT_FOLDER = "/data/resources";
 
 	public MultiResourceConfigImpl(String chromosomesProperty, String filePatternProperty, String folderProperty,
 			MolgenisSettings molgenisSettings)

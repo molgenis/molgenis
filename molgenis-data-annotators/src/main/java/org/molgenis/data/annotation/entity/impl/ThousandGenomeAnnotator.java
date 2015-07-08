@@ -54,7 +54,7 @@ public class ThousandGenomeAnnotator
 		AnnotatorInfo thousandGenomeInfo = AnnotatorInfo
 				.create(Status.BETA,
 						AnnotatorInfo.Type.POPULATION_REFERENCE,
-						"Thousand Genomes",
+						"Thousand Genomes test",
 						"The 1000 Genomes Project is an international collaboration to produce an "
 								+ "extensive public catalog of human genetic variation, including SNPs and structural variants, "
 								+ "and their haplotype contexts. This resource will support genome-wide association studies and other "
@@ -63,12 +63,12 @@ public class ThousandGenomeAnnotator
 								+ "sequenced using next-generation sequencing technologies. "
 								+ "The results of the study will be freely and publicly accessible to researchers worldwide. "
 								+ "Further information about the project is available in the About tab. Information about downloading, "
-								+ "browsing or using the 1000 Genomes data is available in the Data tab.",
+								+ "browsing or using the 1000 Genomes data is available at: http://www.1000genomes.org/ ",
 						Collections.singletonList(outputAttribute));
 
 		LocusQueryCreator locusQueryCreator = new LocusQueryCreator();
 
-		// TODO: properly test multiAllelicFresultFilter
+		// TODO: properly test multiAllelicResultFilter
 		MultiAllelicResultFilter multiAllelicResultFilter = new MultiAllelicResultFilter(
 				Collections.singletonList(new DefaultAttributeMetaData(THOUSAND_GENOME_AF_RESOURCE_ATTRIBUTE_NAME,
 						FieldTypeEnum.DECIMAL)));

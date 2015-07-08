@@ -68,7 +68,7 @@ public class ThousandGenomesAnnotator
 
 		LocusQueryCreator locusQueryCreator = new LocusQueryCreator();
 
-		// TODO: properly test multiAllelicFresultFilter
+		// TODO: properly test multiAllelicResultFilter
 		MultiAllelicResultFilter multiAllelicResultFilter = new MultiAllelicResultFilter(
 				Collections.singletonList(new DefaultAttributeMetaData(THOUSAND_GENOME_AF_RESOURCE_ATTRIBUTE_NAME,
 						FieldTypeEnum.DECIMAL)));
