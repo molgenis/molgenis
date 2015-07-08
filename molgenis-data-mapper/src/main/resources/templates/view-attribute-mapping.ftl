@@ -35,15 +35,17 @@
 <div class="row">	
 	<div class="col-md-4 col-lg-2">
 		<p>
-			<strong>Name</strong> 
-			<span class="pull-right">
+			<strong>Name</strong>
+			</br>
+			<span>
 				${attributeMapping.targetAttributeMetaData.name?html} (${attributeMapping.targetAttributeMetaData.dataType})
 			</span>
 			
 			</br>
 			
-			<strong>Label</strong> 
-			<span class="pull-right">
+			<strong>Label</strong>
+			</br> 
+			<span>
 				<#if attributeMapping.targetAttributeMetaData.label??>
 					${attributeMapping.targetAttributeMetaData.label?html}
 				<#else>
@@ -54,7 +56,8 @@
 			</br>
 			
 			<strong>Description</strong>
-			<span class="pull-right">
+			</br>
+			<span>
 				<#if attributeMapping.targetAttributeMetaData.description??>
 					${attributeMapping.targetAttributeMetaData.description?html}
 				<#else>
@@ -67,7 +70,8 @@
 	<div class="col-md-4 col-lg-2">	
 		<#if attributeMapping.targetAttributeMetaData.dataType == 'categorical' || attributeMapping.targetAttributeMetaData.dataType == 'xref'>
 			<strong>Categories</strong>
-			<span class="pull-right">
+			</br>
+			<span>
 				<#if attributeMapping.targetAttributeMetaData.dataType == "xref" || attributeMapping.targetAttributeMetaData.dataType == "categorical" && (categories)?has_content>
 					<#assign refEntityMetaData = attributeMapping.targetAttributeMetaData.refEntity>
 					<#list categories.iterator() as category>
@@ -101,7 +105,7 @@
 					
 					<form>
 			  			<div class="form-group">
-							<input id="attribute-search-field" type="text" class="form-control" placeholder="Search all ${entityMapping.sourceEntityMetaData.attributes?size} attributes...">
+							<input id="attribute-search-field" type="text" class="form-control" placeholder="Search all ${entityMapping.sourceEntityMetaData.attributes?size?html} attributes from ${entityMapping.sourceEntityMetaData.name?html}">
 						</div>
 					</form>
 				</div>
