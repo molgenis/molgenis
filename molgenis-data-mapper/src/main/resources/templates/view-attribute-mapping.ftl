@@ -79,7 +79,6 @@
 					</span>
 					</#if>
 				</p>
-				<hr></hr>
 			</div>
 		</div>
 	</div>
