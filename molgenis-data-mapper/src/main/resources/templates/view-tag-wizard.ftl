@@ -8,13 +8,6 @@
 
 <div class="row">
 	<div class="col-md-12">
-		<input type="hidden" id="global-information" data-entity="${entity.name}"></input>
-		<a onclick="window.history.back()" class="btn btn-default"><span class="glyphicon glyphicon-chevron-left"></span> Back to mapping project</a>	
-	</div>
-</div>
-
-<div class="row">
-	<div class="col-md-12">
 		<h3>Tag Wizard</h3>
 		<p>
 			Tag attributes with ontology terms from the selected ontologies either manually or automatically.
