@@ -24,7 +24,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ExacAnnotator
 {
-
+	// TODO Write test
 	public static final String EXAC_AF = "EXAC_AF";
 	public static final String EXAC_AF_LABEL = "ExAC allele frequency";
 	public static final String EXAC_AF_ResourceAttributeName = VcfRepository.getInfoPrefix() + "AF";
@@ -47,7 +47,7 @@ public class ExacAnnotator
 				.setDescription("TODO").setLabel(EXAC_AF_LABEL);
 
 		AnnotatorInfo exacInfo = AnnotatorInfo
-				.create(Status.BETA,
+				.create(Status.READY,
 						AnnotatorInfo.Type.POPULATION_REFERENCE,
 						"exac",
 						" The Exome Aggregation Consortium (ExAC) is a coalition of investigators seeking to aggregate"

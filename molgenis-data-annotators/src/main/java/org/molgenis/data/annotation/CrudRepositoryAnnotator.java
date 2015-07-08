@@ -1,11 +1,10 @@
 package org.molgenis.data.annotation;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ArrayList;
-import java.util.UUID;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.molgenis.data.DataService;

@@ -6,10 +6,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.annotation.resources.MultiResourceConfig;
+import org.molgenis.data.annotation.resources.RepositoryFactory;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.ResourceConfig;
 import org.molgenis.data.vcf.VcfRepository;
@@ -29,8 +29,6 @@ public class MultiFileResource implements Resource
 		this.name = name;
 		this.config = config;
 		this.factory = factory;
-		initializeResources();
-
 	}
 
 	private void initializeResources()
@@ -70,6 +68,9 @@ public class MultiFileResource implements Resource
 	@Override
 	public boolean isAvailable()
 	{
+		// initialize after autowiring is complete and resources is empty
+		if (resources.isEmpty()) initializeResources();
+
 		if (!config.getConfigs().keySet().equals(resources.keySet()))
 		{
 			initializeResources();
@@ -93,6 +94,9 @@ public class MultiFileResource implements Resource
 	@Override
 	public Iterable<Entity> findAll(Query q)
 	{
+		// initialize after autowiring is complete and resources is empty
+		if (resources.isEmpty()) initializeResources();
+
 		String chromValue = getFirstEqualsValueFor(VcfRepository.CHROM, q).toString();
 		Resource resource = resources.get(chromValue);
 		return resource.findAll(q);
