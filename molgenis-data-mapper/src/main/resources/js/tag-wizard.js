@@ -72,9 +72,17 @@
 	$(function() {
 		entityName = $('#global-information').data('entity');
 
+		$('#select-target').on('change', function(){
+			$('#change-entity-form').submit();
+		}).select2();
+		
 		$('#tag-mapping-table').scrollTableBody();
 		$('#ontology-select').select2();
 
+		if($('#ontology-select').val()){
+			selectedOntologyIds = $('#ontology-select').val();
+		}
+		
 		$('#ontology-select').on('change', function() {
 			if ($(this).val() === null) {
 				selectedOntologyIds = []

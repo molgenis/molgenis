@@ -19,6 +19,29 @@
 		<p>
 			Tag attributes with ontology terms from the selected ontologies either manually or automatically.
 		</p>
+		</br>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-12">
+		<label>Select an entity to tag</label>
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-3">
+		<form id="change-entity-form" method="POST" action="${context_url}">
+			<select id="select-target" name="selectedTarget" class="form-control">
+				<#list entityNames as entityName>
+					<option <#if entityName == entity.name>selected="selected"</#if>value="${entityName?html}">${entityName?html}</option>
+				</#list>
+			</select>
+		</form>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col=md-12">
 		<hr></hr>
 	</div>
 </div>
@@ -41,7 +64,7 @@
 				</#list>
 			</#if>
 			<#list ontologies as ontology>
-				<option data-iri="${ontology.IRI}" value="${ontology.id}">${ontology.name?html}</option>
+				<option selected='selected' data-iri="${ontology.IRI}" value="${ontology.id}">${ontology.name?html}</option>
 			</#list>
 		</select>
 	</div>
