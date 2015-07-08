@@ -21,66 +21,67 @@
 
 <div class="row">
 	<div class="col-md-12">
-		<a href="${context_url?html}/mappingproject/${mappingProject.identifier?html}" class="btn btn-default btn-xs pull-left">
-			<span class="glyphicon glyphicon-chevron-left"></span> Back to project
-		</a>
-		
 		<#-- Hidden fields containing information needed for ajax requests -->
 		<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier?html}"/>
 		<input type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name?html}"/>
 		<input type="hidden" name="source" value="${entityMapping.sourceEntityMetaData.name?html}"/>
 		<input type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name?html}"/>
 		<input type="hidden" name="targetAttributeType" value="${attributeMapping.targetAttributeMetaData.dataType?html}"/>
-		
 	</div>
 </div>
 
-<div class="row">
-	<div class="col-md-12">
-		<hr></hr>
-		<div class="row">
-			<div class="col-md-6 col-lg-4">
-				<p>
-					<strong>Name</strong> 
-					<span class="pull-right">
-						${attributeMapping.targetAttributeMetaData.name?html} (${attributeMapping.targetAttributeMetaData.dataType})
-					</span></br>
-					<strong>Label</strong> 
-					<span class="pull-right">
-						<#if attributeMapping.targetAttributeMetaData.label?? >
-						${attributeMapping.targetAttributeMetaData.label?html}
-						<#else>
-						N/A
-						</#if>
-					</span></br>
-					<strong>Description</strong>
-					<span class="pull-right">
-						<#if attributeMapping.targetAttributeMetaData.description?? >
-						${attributeMapping.targetAttributeMetaData.description?html}
-						<#else>
-						N/A
-						</#if>
-					</span></br>
-					<#if attributeMapping.targetAttributeMetaData.dataType == 'categorical'>
-					<strong>categories</strong>
-					<span class="pull-right">
-						<#if attributeMapping.targetAttributeMetaData.dataType == "xref" || attributeMapping.targetAttributeMetaData.dataType == "categorical" && (categories)?has_content>
-							<#assign refEntityMetaData = attributeMapping.targetAttributeMetaData.refEntity>
-							<#list categories.iterator() as category>
-								<#list refEntityMetaData.attributes as attribute>
-									<#assign attributeName = attribute.name>
-									${category[attributeName]} <#if refEntityMetaData.attributes?seq_index_of(attribute) != refEntityMetaData.attributes?size - 1>=</#if>
-								</#list>
-								</br>
-							</#list>
-						<#else>
-							N/A
-						</#if> 
-					</span>
-					</#if>
-				</p>
-			</div>
-		</div>
+</br>
+
+<div class="row">	
+	<div class="col-md-4 col-lg-2">
+		<p>
+			<strong>Name</strong> 
+			<span class="pull-right">
+				${attributeMapping.targetAttributeMetaData.name?html} (${attributeMapping.targetAttributeMetaData.dataType})
+			</span>
+			
+			</br>
+			
+			<strong>Label</strong> 
+			<span class="pull-right">
+				<#if attributeMapping.targetAttributeMetaData.label??>
+					${attributeMapping.targetAttributeMetaData.label?html}
+				<#else>
+					N/A
+				</#if>
+			</span>
+			
+			</br>
+			
+			<strong>Description</strong>
+			<span class="pull-right">
+				<#if attributeMapping.targetAttributeMetaData.description??>
+					${attributeMapping.targetAttributeMetaData.description?html}
+				<#else>
+					N/A
+				</#if>
+			</span>
+			</br>
+		</p>
+	</div>	
+	<div class="col-md-4 col-lg-2">	
+		<#if attributeMapping.targetAttributeMetaData.dataType == 'categorical' || attributeMapping.targetAttributeMetaData.dataType == 'xref'>
+			<strong>Categories</strong>
+			<span class="pull-right">
+				<#if attributeMapping.targetAttributeMetaData.dataType == "xref" || attributeMapping.targetAttributeMetaData.dataType == "categorical" && (categories)?has_content>
+					<#assign refEntityMetaData = attributeMapping.targetAttributeMetaData.refEntity>
+					<#list categories.iterator() as category>
+						<#list refEntityMetaData.attributes as attribute>
+							<#assign attributeName = attribute.name>
+								${category[attributeName]} <#if refEntityMetaData.attributes?seq_index_of(attribute) != refEntityMetaData.attributes?size - 1>=</#if>
+						</#list>
+						</br>
+					</#list>
+				<#else>
+					N/A
+				</#if>
+			</span>
+		</#if>
 	</div>
 </div>
 
@@ -186,6 +187,13 @@
 			    	<br/>
 				</div>
 			</div>
+			<div class="col-md-12 col-lg-12">
+				<hr></hr>
+				<div class="row">
+					<a href="/menu/main/mappingservice/mappingproject/${mappingProject.identifier?html}" type="btn" class="btn btn-default pull-right">Cancel</a>
+					<button id="save-mapping-btn" type="btn" class="btn btn-primary pull-right">Save</button>
+				</div>
+			</div>
 			
 		</div> <#-- End: Mapping container -->
 	</div>  <#-- End: Mapping column -->
@@ -213,14 +221,6 @@
 			 
 		</div> <#-- End: Result container -->
 	</div> <#-- End: Result column -->	
-
-	<div class="col-md-12 col-lg-12">
-		<hr></hr>
-		<div class="row">
-			<a href="/menu/main/mappingservice/mappingproject/${mappingProject.identifier?html}" type="btn" class="btn btn-default btn-lg pull-right">Cancel</a>
-			<button id="save-mapping-btn" type="btn" class="btn btn-primary btn-lg pull-right">Save</button>
-		</div>
-	</div>
 
 </div> <#-- End: Master row -->
 

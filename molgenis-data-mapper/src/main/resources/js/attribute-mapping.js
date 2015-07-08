@@ -532,6 +532,8 @@
 
 			// preview mapping results
 			loadAlgorithmResult(algorithm);
+			
+			$('#result-container').css('display', 'inline');
 		});
 
 		// if there is an algorithm present on load, show the result table
@@ -539,7 +541,6 @@
 			loadAlgorithmResult(algorithm);
 		} else {
 			// if no algorithm present hide the mapping and result containers
-			$('#attribute-mapping-container').css('display', 'none');
 			$('#result-container').css('display', 'none');
 		}
 
@@ -562,7 +563,6 @@
 
 				// on selection of an attribute, show all fields
 				$('#result-container').css('display', 'inline');
-				$('#attribute-mapping-container').css('display', 'inline');
 
 				// generate result table
 				loadAlgorithmResult(algorithm);
@@ -576,7 +576,6 @@
 			} else {
 				// events when no attributes are selected
 				$('#result-container').css('display', 'none');
-				$('#attribute-mapping-container').css('display', 'none');
 			}
 		});
 
