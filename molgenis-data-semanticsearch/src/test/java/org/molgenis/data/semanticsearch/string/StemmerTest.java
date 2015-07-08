@@ -7,7 +7,7 @@ import org.testng.annotations.Test;
 
 public class StemmerTest
 {
-	private final Stemmer customPorterStemmer = new Stemmer("EN");
+	private final Stemmer customPorterStemmer = new Stemmer();
 
 	@Test
 	public void replaceIllegalCharacter()
@@ -21,13 +21,13 @@ public class StemmerTest
 	public void stemPhrase()
 	{
 		assertEquals(customPorterStemmer.cleanStemPhrase("i like smoking!"), "i like smoke");
-		assertEquals(customPorterStemmer.cleanStemPhrase("it`s not possibilities!"), "it s not possibl");
+		assertEquals(customPorterStemmer.cleanStemPhrase("it`s not possibilities!"), "it not possibl");
 	}
 
 	@Test
 	public void stem()
 	{
-		assertEquals(customPorterStemmer.stem("use"), "use");
+		assertEquals(customPorterStemmer.stem("use"), "us");
 		assertEquals(customPorterStemmer.stem("hypertension"), "hypertens");
 
 		PorterStemmer porterStemmer = new PorterStemmer();

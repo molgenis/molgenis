@@ -496,6 +496,14 @@ public class MappingServiceController extends MolgenisPluginController
 			attributeMapping = entityMapping.addAttributeMapping(targetAttribute);
 		}
 
+		EntityMetaData refEntityMetaData = attributeMapping.getTargetAttributeMetaData().getRefEntity();
+		if (refEntityMetaData != null)
+		{
+			Iterable<Entity> refEntities = dataService.findAll(refEntityMetaData.getName());
+			model.addAttribute("categories", refEntities);
+		}
+
+		model.addAttribute("dataExplorerUri", menuReaderService.getMenu().findMenuItemPath(DataExplorerController.ID));
 		model.addAttribute("mappingProject", project);
 		model.addAttribute("entityMapping", entityMapping);
 		model.addAttribute("attributeMapping", attributeMapping);
@@ -535,7 +543,10 @@ public class MappingServiceController extends MolgenisPluginController
 			Collection<String> sourceAttributeNames = algorithmService.getSourceAttributeNames(algorithm);
 			if (!sourceAttributeNames.isEmpty())
 			{
-				model.addAttribute("sourceAttributeNames", sourceAttributeNames);
+				List<AttributeMetaData> sourceAttributes = sourceAttributeNames.stream()
+						.map(attributeName -> entityMapping.getSourceEntityMetaData().getAttribute(attributeName))
+						.collect(Collectors.toList());
+				model.addAttribute("sourceAttributes", sourceAttributes);
 			}
 		}
 		catch (Exception e)

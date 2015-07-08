@@ -5,49 +5,16 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.tartarus.snowball.SnowballProgram;
-import org.tartarus.snowball.ext.DanishStemmer;
-import org.tartarus.snowball.ext.DutchStemmer;
-import org.tartarus.snowball.ext.EnglishStemmer;
-import org.tartarus.snowball.ext.FinnishStemmer;
-import org.tartarus.snowball.ext.FrenchStemmer;
-import org.tartarus.snowball.ext.GermanStemmer;
+import org.tartarus.snowball.ext.PorterStemmer;
 
 public class Stemmer
 {
 	private final static String ILLEGAL_REGEX_PATTERN = "[^a-zA-Z0-9 ]";
-	private final static String DEFAULT_LANG = "EN";
 	private final SnowballProgram porterStemmer;
 
 	public Stemmer()
 	{
-		this(DEFAULT_LANG);
-	}
-
-	public Stemmer(String lang)
-	{
-		switch (lang.toLowerCase())
-		{
-			case "da":
-				porterStemmer = new DanishStemmer();
-				break;
-			case "nl":
-				porterStemmer = new DutchStemmer();
-				break;
-			case "en":
-				porterStemmer = new EnglishStemmer();
-				break;
-			case "fi":
-				porterStemmer = new FinnishStemmer();
-				break;
-			case "fr":
-				porterStemmer = new FrenchStemmer();
-				break;
-			case "de":
-				porterStemmer = new GermanStemmer();
-				break;
-			default:
-				porterStemmer = new EnglishStemmer();
-		}
+		porterStemmer = new PorterStemmer();
 	}
 
 	/**
