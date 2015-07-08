@@ -65,9 +65,10 @@ public class MolgenisAppender extends AppenderBase<ILoggingEvent>
 			}
 
 			Entity entity = toEntity(eventObject);
+			String id = entity.getString(LoggingEventMetaData.IDENTIFIER);
 			Map<String, Object> source = new EntityToSourceConverter().convert(entity, LoggingEventMetaData.INSTANCE);
 
-			bulkProcessor.add(new IndexRequest(INDEX_NAME, LoggingEventMetaData.INSTANCE.getName()).source(source));
+			bulkProcessor.add(new IndexRequest(INDEX_NAME, LoggingEventMetaData.INSTANCE.getName(), id).source(source));
 		}
 		catch (Throwable t)
 		{
