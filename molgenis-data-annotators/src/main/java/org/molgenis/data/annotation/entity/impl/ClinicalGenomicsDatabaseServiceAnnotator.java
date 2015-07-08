@@ -15,6 +15,11 @@ import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseS
 import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.INTERVENTION_RATIONALE;
 import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.MANIFESTATION_CATEGORIES;
 import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.REFERENCES;
+import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.GeneralizedInheritance.DOMINANT;
+import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.GeneralizedInheritance.DOM_OR_REC;
+import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.GeneralizedInheritance.OTHER;
+import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.GeneralizedInheritance.RECESSIVE;
+import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.GeneralizedInheritance.XLINKED;
 
 import java.io.File;
 import java.io.IOException;
@@ -57,15 +62,24 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ClinicalGenomicsDatabaseServiceAnnotator
 {
-	// Output labels
+	private static String CGD_RESOURCE = "CGDResource";
+	private static final String CGD_FILE_LOCATION_PROPERTY = "cgd_location";
+	private static final char SEPARATOR = '\t';
+
+	// Output attribute labels
 	private static final String CONDITION_LABEL = "CGDCOND";
 	private static final String AGE_GROUP_LABEL = "CGDAGE";
 	private static final String INHERITANCE_LABEL = "CGDINH";
 	private static final String GENERALIZED_INHERITANCE_LABEL = "CGDGIN";
 
-	private static String CGD_RESOURCE = "CGDResource";
-	private static final String CGD_FILE_LOCATION_PROPERTY = "cgd_location";
-	private static final char SEPARATOR = '\t';
+	@Autowired
+	private MolgenisSettings molgenisSettings;
+
+	@Autowired
+	private DataService dataService;
+
+	@Autowired
+	private Resources resources;
 
 	public static enum GeneralizedInheritance
 	{
@@ -84,8 +98,8 @@ public class ClinicalGenomicsDatabaseServiceAnnotator
 				+ INHERITANCE_LABEL), GENERALIZED_INHERITANCE("", VcfRepository.getInfoPrefix()
 				+ GENERALIZED_INHERITANCE_LABEL);
 
-		private final String cgdName;// Name as defined in CGD file
-		private final String attributeName;// Name as defined in output attributes
+		private final String cgdName;// Column name as defined in CGD file
+		private final String attributeName;// Output attribute name
 
 		// Mapping from attribute name to cgd name
 		private static Map<String, String> mappings = new HashMap<String, String>();
@@ -119,15 +133,6 @@ public class ClinicalGenomicsDatabaseServiceAnnotator
 			return attributeName;
 		}
 	}
-
-	@Autowired
-	private MolgenisSettings molgenisSettings;
-
-	@Autowired
-	private DataService dataService;
-
-	@Autowired
-	private Resources resources;
 
 	@Bean
 	public RepositoryAnnotator cgd()
@@ -208,25 +213,25 @@ public class ClinicalGenomicsDatabaseServiceAnnotator
 
 		private GeneralizedInheritance getGeneralizedInheritance(Entity sourceEntity)
 		{
-			GeneralizedInheritance inherMode = GeneralizedInheritance.OTHER;
+			GeneralizedInheritance inherMode = OTHER;
 			String value = sourceEntity.getString(INHERITANCE.getCgdName());
 			if (value != null)
 			{
 				if (value.contains("AD") && value.contains("AR"))
 				{
-					inherMode = GeneralizedInheritance.DOM_OR_REC;
+					inherMode = DOM_OR_REC;
 				}
 				else if (value.contains("AR"))
 				{
-					inherMode = GeneralizedInheritance.RECESSIVE;
+					inherMode = RECESSIVE;
 				}
 				else if (value.contains("AD"))
 				{
-					inherMode = GeneralizedInheritance.DOMINANT;
+					inherMode = DOMINANT;
 				}
 				else if (value.contains("XL"))
 				{
-					inherMode = GeneralizedInheritance.XLINKED;
+					inherMode = XLINKED;
 				}
 			}
 

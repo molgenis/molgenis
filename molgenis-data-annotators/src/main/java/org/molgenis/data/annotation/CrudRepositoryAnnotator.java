@@ -137,7 +137,7 @@ public class CrudRepositoryAnnotator
 				annotatedEntities.add(entity);
 				if (annotatedEntities.size() == BATCH_SIZE)
 				{
-					targetRepo.add(annotatedEntities);
+					dataService.add(targetRepo.getName(), annotatedEntities);
 					i = i + annotatedEntities.size();
 					LOG.info("annotated " + i + " \"" + sourceRepo.getName() + "\" entities with the "
 							+ annotator.getSimpleName() + " annotator (started by \""
@@ -168,7 +168,7 @@ public class CrudRepositoryAnnotator
 	 * @param createCopy
 	 * @param compoundAttributeMetaData
 	 */
-	public Repository addAnnotatorMetadataToRepositories(EntityMetaData entityMetaData, boolean createCopy,
+	private Repository addAnnotatorMetadataToRepositories(EntityMetaData entityMetaData, boolean createCopy,
 			DefaultAttributeMetaData compoundAttributeMetaData)
 	{
 		if (createCopy)
