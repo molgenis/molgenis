@@ -213,7 +213,10 @@
 
 	<div class="col-md-12 col-lg-12">
 		<hr></hr>
-		<button id="save-mapping-btn" type="btn" class="btn btn-primary btn-lg pull-right">Save</button>	
+		<div class="row">
+			<a href="/menu/main/mappingservice/mappingproject/${mappingProject.identifier?html}" type="btn" class="btn btn-default btn-lg pull-right">Cancel</a>
+			<button id="save-mapping-btn" type="btn" class="btn btn-primary btn-lg pull-right">Save</button>
+		</div>
 	</div>
 
 </div> <#-- End: Master row -->

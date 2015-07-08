@@ -449,6 +449,16 @@
 		}
 		return completeWords;
 	}
+	
+	//A helper function to perform post-redirect action
+	function redirectPost(url, data){
+		showSpinner();
+		var form = '';
+        $.each(data, function(key, value) {
+            form += '<input type="hidden" name="'+key+'" value="'+value+'">';
+        });
+        $('<form action="'+url+'" method="POST">'+form+'</form>').appendTo('body').submit();
+	}
 
 	$(function() {
 
@@ -572,17 +582,14 @@
 
 		// save button for saving generated mapping
 		$('#save-mapping-btn').on('click', function() {
-			$.post(molgenis.getContextUrl() + "/saveattributemapping", {
+			var data = {
 				mappingProjectId : $('input[name="mappingProjectId"]').val(),
 				target : $('input[name="target"]').val(),
 				source : $('input[name="source"]').val(),
 				targetAttribute : $('input[name="targetAttribute"]').val(),
 				algorithm : algorithm
-			}, function() {
-				molgenis.createAlert([ {
-					'message' : 'Succesfully saved the created mapping'
-				} ], 'success');
-			});
+			};
+			redirectPost(molgenis.getContextUrl() + '/saveattributemapping', data);
 		});
 
 		$('#js-function-modal-btn').on('click', function() {
