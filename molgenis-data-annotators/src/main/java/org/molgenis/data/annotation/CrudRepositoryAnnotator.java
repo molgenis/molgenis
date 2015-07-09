@@ -1,11 +1,10 @@
 package org.molgenis.data.annotation;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ArrayList;
-import java.util.UUID;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.molgenis.data.DataService;
@@ -78,7 +77,7 @@ public class CrudRepositoryAnnotator
 
 		EntityMetaData entityMetaData = dataService.getMeta().getEntityMetaData(sourceRepo.getName());
 		DefaultAttributeMetaData compoundAttributeMetaData = AnnotatorUtils.getCompoundResultAttribute(annotator,
-                entityMetaData);
+				entityMetaData);
 
 		Repository targetRepo = addAnnotatorMetadataToRepositories(entityMetaData, createCopy,
 				compoundAttributeMetaData);
@@ -138,7 +137,7 @@ public class CrudRepositoryAnnotator
 				annotatedEntities.add(entity);
 				if (annotatedEntities.size() == BATCH_SIZE)
 				{
-					targetRepo.add(annotatedEntities);
+					dataService.add(targetRepo.getName(), annotatedEntities);
 					i = i + annotatedEntities.size();
 					LOG.info("annotated " + i + " \"" + sourceRepo.getName() + "\" entities with the "
 							+ annotator.getSimpleName() + " annotator (started by \""
@@ -169,12 +168,12 @@ public class CrudRepositoryAnnotator
 	 * @param createCopy
 	 * @param compoundAttributeMetaData
 	 */
-	public Repository addAnnotatorMetadataToRepositories(EntityMetaData entityMetaData, boolean createCopy,
+	private Repository addAnnotatorMetadataToRepositories(EntityMetaData entityMetaData, boolean createCopy,
 			DefaultAttributeMetaData compoundAttributeMetaData)
 	{
 		if (createCopy)
 		{
-			DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(RandomStringUtils.randomAlphanumeric(30),
+			DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(RandomStringUtils.randomAlphabetic(30),
 					entityMetaData);
 			if (newEntityMetaData.getAttribute(compoundAttributeMetaData.getName()) == null)
 			{
