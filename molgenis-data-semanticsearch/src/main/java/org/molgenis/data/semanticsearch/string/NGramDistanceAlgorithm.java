@@ -7,10 +7,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.common.collect.Lists;
 import org.elasticsearch.common.collect.Sets;
+
+import com.google.common.collect.Lists;
 
 /**
  * This class has implemented Levenshtein distance algorithm so a similarity score could be calculated between two
@@ -81,11 +83,13 @@ public class NGramDistanceAlgorithm
 	 */
 	public static Map<String, Integer> createNGrams(String inputQuery, boolean removeStopWords)
 	{
-		List<String> wordsInString = Lists.newArrayList(stemPhrase(inputQuery).split(" "));
-		Map<String, Integer> tokens = new HashMap<String, Integer>();
+		List<String> wordsInString = Lists.newArrayList(CUSTOM_STEMMER.replaceIllegalCharacter(inputQuery).split(" "));
 		if (removeStopWords) wordsInString.removeAll(STOPWORDSLIST);
+		List<String> stemmedWordsInString = wordsInString.stream().map(CUSTOM_STEMMER::stem)
+				.collect(Collectors.toList());
+		Map<String, Integer> tokens = new HashMap<String, Integer>();
 		// Padding the string
-		for (String singleWord : wordsInString)
+		for (String singleWord : stemmedWordsInString)
 		{
 			if (!StringUtils.isEmpty(singleWord))
 			{
@@ -156,10 +160,5 @@ public class NGramDistanceAlgorithm
 			totalNum += frequency;
 		}
 		return totalNum;
-	}
-
-	private static String stemPhrase(String originalString)
-	{
-		return CUSTOM_STEMMER.cleanStemPhrase(originalString.toLowerCase().trim());
 	}
 }
