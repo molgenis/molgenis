@@ -20,7 +20,6 @@
 
 	function createNewButtonHtml(attributeName, tag) {
 		var btnHtml = '';
-		console.log(attributeName);
 		console.log(tag);
 		btnHtml += '<button '
 		btnHtml += 'type="btn" ';

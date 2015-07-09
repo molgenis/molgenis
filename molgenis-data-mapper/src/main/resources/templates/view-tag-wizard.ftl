@@ -53,7 +53,7 @@
 			<#if selectedOntologies??>
 				<#list selectedOntologies as selectedOntology>
 					<#if selectedOntology??>
-						<option selected='selected' data-iri="${selectedOntology.IRI} "value="${selectedOntology.id}">${selectedOntology.name?html}</option>
+						<option selected="selected" data-iri="${selectedOntology.IRI} "value="${selectedOntology.id}">${selectedOntology.name?html}</option>
 					</#if>
 				</#list>
 			</#if>
