@@ -117,8 +117,8 @@ public class CrudRepositoryAnnotator
 	{
 		if (createCopy)
 		{
-			DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(
-					RandomStringUtils.randomAlphanumeric(30), entityMetaData);
+			DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(RandomStringUtils.randomAlphabetic(30),
+					entityMetaData);
 			if (newEntityMetaData.getAttribute(compoundAttributeMetaData.getName()) == null)
 			{
 				newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData);
