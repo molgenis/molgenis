@@ -10,9 +10,9 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.impl.CaddAnnotator;
+import org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator;
 import org.molgenis.data.annotation.entity.impl.ExacAnnotator;
 import org.molgenis.data.annotation.impl.ClinVarVCFServiceAnnotator;
-import org.molgenis.data.annotation.impl.ClinicalGenomicsDatabaseServiceAnnotator;
 import org.molgenis.data.annotation.impl.DeNovoAnnotator;
 import org.molgenis.data.annotation.impl.GoNLServiceAnnotator;
 import org.molgenis.data.annotation.impl.HpoServiceAnnotator;
@@ -163,7 +163,11 @@ public class CmdLineAnnotator
 		}
 		else if (annotatorName.equals("cgd"))
 		{
-			new ClinicalGenomicsDatabaseServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
+			molgenisSettings.setProperty(ClinicalGenomicsDatabaseServiceAnnotator.CGD_FILE_LOCATION_PROPERTY,
+					annotationSourceFile.getAbsolutePath());
+			Map<String, RepositoryAnnotator> annotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
+			RepositoryAnnotator annotator = annotators.get("cgd");
+			annotate(annotator, inputVcfFile, outputVCFFile);
 		}
 		else
 		{

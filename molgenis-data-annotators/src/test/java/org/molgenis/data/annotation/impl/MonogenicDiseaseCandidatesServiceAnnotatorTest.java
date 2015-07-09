@@ -1,9 +1,15 @@
 package org.molgenis.data.annotation.impl;
 
+import static org.mockito.Mockito.mock;
+import static org.testng.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator;
 import org.molgenis.data.annotation.entity.impl.ExacAnnotator;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -12,12 +18,6 @@ import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import java.io.IOException;
-import java.util.ArrayList;
-
-import static org.mockito.Mockito.mock;
-import static org.testng.Assert.assertEquals;
 
 /**
  * Created by charbonb on 04/05/15.
@@ -66,12 +66,12 @@ public class MonogenicDiseaseCandidatesServiceAnnotatorTest
 				MolgenisFieldTypes.FieldTypeEnum.DECIMAL));
 		metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(GoNLServiceAnnotator.GONL_MAF,
 				MolgenisFieldTypes.FieldTypeEnum.DECIMAL));
-		metaDataCanAnnotate
-				.addAttributeMetaData(new DefaultAttributeMetaData(
-						ClinicalGenomicsDatabaseServiceAnnotator.GENERALIZED_INHERITANCE,
-						MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(
-				ClinicalGenomicsDatabaseServiceAnnotator.INHERITANCE, MolgenisFieldTypes.FieldTypeEnum.TEXT));
+				ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.GENERALIZED_INHERITANCE.getAttributeName(),
+				MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(
+				ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.INHERITANCE.getAttributeName(),
+				MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.SAMPLES,
 				MolgenisFieldTypes.FieldTypeEnum.MREF));
 
@@ -94,12 +94,12 @@ public class MonogenicDiseaseCandidatesServiceAnnotatorTest
 				MolgenisFieldTypes.FieldTypeEnum.DECIMAL));
 		metaDataCantAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(GoNLServiceAnnotator.GONL_MAF,
 				MolgenisFieldTypes.FieldTypeEnum.DECIMAL));
-		metaDataCantAnnotate
-				.addAttributeMetaData(new DefaultAttributeMetaData(
-						ClinicalGenomicsDatabaseServiceAnnotator.GENERALIZED_INHERITANCE,
-						MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		metaDataCantAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(
-				ClinicalGenomicsDatabaseServiceAnnotator.INHERITANCE, MolgenisFieldTypes.FieldTypeEnum.TEXT));
+				ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.GENERALIZED_INHERITANCE.getAttributeName(),
+				MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metaDataCantAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(
+				ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.INHERITANCE.getAttributeName(),
+				MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		metaDataCantAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.SAMPLES,
 				MolgenisFieldTypes.FieldTypeEnum.MREF));
 
@@ -119,8 +119,10 @@ public class MonogenicDiseaseCandidatesServiceAnnotatorTest
 		entity.set(ThousandGenomesServiceAnnotator.THGEN_MAF, 0.1);
 		entity.set(ExacAnnotator.EXAC_AF, 0.1);
 		entity.set(GoNLServiceAnnotator.GONL_MAF, 0.2);
-		entity.set(ClinicalGenomicsDatabaseServiceAnnotator.GENERALIZED_INHERITANCE, "DOMINANT");
-		entity.set(ClinicalGenomicsDatabaseServiceAnnotator.INHERITANCE, "TEST2");
+		entity.set(
+				ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.GENERALIZED_INHERITANCE.getAttributeName(),
+				"DOMINANT");
+		entity.set(ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.INHERITANCE.getAttributeName(), "TEST2");
 		entity.set(VcfRepository.SAMPLES, sampleEntities);
 
 		entities = new ArrayList<>();
@@ -139,11 +141,11 @@ public class MonogenicDiseaseCandidatesServiceAnnotatorTest
 		assertEquals(annotator.canAnnotate(metaDataCantAnnotate), "a required attribute has the wrong datatype");
 	}
 
-    @Test
-    public void annotateTest()
-    {
-        assertEquals(annotator.annotate(entities).next(),getExpectedEntity());
-    }
+	@Test
+	public void annotateTest()
+	{
+		assertEquals(annotator.annotate(entities).next(), getExpectedEntity());
+	}
 
 	public MapEntity getExpectedEntity()
 	{
