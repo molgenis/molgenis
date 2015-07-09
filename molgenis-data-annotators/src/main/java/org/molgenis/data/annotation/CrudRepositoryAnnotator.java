@@ -112,7 +112,7 @@ public class CrudRepositoryAnnotator
 	 * @param createCopy
 	 * @param compoundAttributeMetaData
 	 */
-	public Repository addAnnotatorMetadataToRepositories(EntityMetaData entityMetaData, boolean createCopy,
+	private Repository addAnnotatorMetadataToRepositories(EntityMetaData entityMetaData, boolean createCopy,
 			DefaultAttributeMetaData compoundAttributeMetaData)
 	{
 		if (createCopy)

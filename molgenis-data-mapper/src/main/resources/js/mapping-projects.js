@@ -44,6 +44,8 @@
 		});
 		
 		$('#create-new-mapping-project-form').validate();
+		
+		$('select[name="target-entity"]').select2();
 	});
 		
 }($, window.top.molgenis = window.top.molgenis || {}));

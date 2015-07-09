@@ -20,14 +20,14 @@
 
 	function createNewButtonHtml(attributeName, tag) {
 		var btnHtml = '';
-
+		console.log(tag);
 		btnHtml += '<button '
 		btnHtml += 'type="btn" ';
 		btnHtml += 'class="btn btn-primary btn-xs remove-tag-btn" ';
 		btnHtml += 'data-relation="' + tag.relationIRI + '" ';
 		btnHtml += 'data-attribute="' + attributeName + '" ';
-		btnHtml += 'data-tag="' + tag.ontologyTerm.IRI + '">';
-		btnHtml += tag.ontologyTerm.label + ' ';
+		btnHtml += 'data-tag="' + tag.IRI + '">';
+		btnHtml += tag.label + ' ';
 		btnHtml += '<span class="glyphicon glyphicon-remove"></span>';
 		btnHtml += '</button> ';
 
@@ -72,9 +72,17 @@
 	$(function() {
 		entityName = $('#global-information').data('entity');
 
+		$('#select-target').on('change', function(){
+			$('#change-entity-form').submit();
+		}).select2();
+		
 		$('#tag-mapping-table').scrollTableBody();
 		$('#ontology-select').select2();
 
+		if($('#ontology-select').val()){
+			selectedOntologyIds = $('#ontology-select').val();
+		}
+		
 		$('#ontology-select').on('change', function() {
 			if ($(this).val() === null) {
 				selectedOntologyIds = []

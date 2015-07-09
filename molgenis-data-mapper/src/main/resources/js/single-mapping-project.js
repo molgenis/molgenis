@@ -34,6 +34,8 @@
 			$('#create-integrated-entity-form').submit();
 		});
 		
+		$('select[name="source"]').select2();
+		
 		// Adjust the width of thead cells when window resizes
 		$(window).resize(function() {
 		    // Get the tbody columns width array

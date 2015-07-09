@@ -1,8 +1,12 @@
 package org.molgenis.data.annotation;
 
+import java.util.Iterator;
+
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Created with IntelliJ IDEA. User: charbonb Date: 21/02/14 Time: 11:24 To change this template use File | Settings |
@@ -46,6 +50,20 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 	 * @return boolean
 	 */
 	protected abstract boolean annotationDataExists();
+
+	@Override
+	@Transactional
+	public Iterator<Entity> annotate(final Iterator<Entity> sourceIterable)
+	{
+		return this.annotate(new Iterable<Entity>()
+		{
+			@Override
+			public Iterator<Entity> iterator()
+			{
+				return sourceIterable;
+			}
+		});
+	}
 
 	@Override
 	public String getFullName()
