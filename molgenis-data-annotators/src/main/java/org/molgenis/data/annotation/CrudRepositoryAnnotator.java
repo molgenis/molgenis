@@ -2,14 +2,10 @@ package org.molgenis.data.annotation;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ArrayList;
-import java.util.UUID;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
@@ -26,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class CrudRepositoryAnnotator
 {
 	private static final Logger LOG = LoggerFactory.getLogger(CrudRepositoryAnnotator.class);
-	private static final int BATCH_SIZE = 100;
 
 	private final String newRepositoryLabel;
 	private final DataService dataService;
@@ -78,7 +73,7 @@ public class CrudRepositoryAnnotator
 
 		EntityMetaData entityMetaData = dataService.getMeta().getEntityMetaData(sourceRepo.getName());
 		DefaultAttributeMetaData compoundAttributeMetaData = AnnotatorUtils.getCompoundResultAttribute(annotator,
-                entityMetaData);
+				entityMetaData);
 
 		Repository targetRepo = addAnnotatorMetadataToRepositories(entityMetaData, createCopy,
 				compoundAttributeMetaData);
@@ -97,66 +92,14 @@ public class CrudRepositoryAnnotator
 	private Repository iterateOverEntitiesAndAnnotate(Repository sourceRepo, Repository targetRepo,
 			RepositoryAnnotator annotator)
 	{
-		Iterator<Entity> entityIterator = annotator.annotate(sourceRepo);
-		List<Entity> annotatedEntities = new ArrayList<>();
-		int i = 0;
-
 		if (targetRepo == null)
 		{
-			// annotate repository to itself
-			while (entityIterator.hasNext())
-			{
-				Entity entity = entityIterator.next();
-				annotatedEntities.add(entity);
-				if (annotatedEntities.size() == BATCH_SIZE)
-				{
-					dataService.update(sourceRepo.getName(), annotatedEntities);
-					i = i + annotatedEntities.size();
-					LOG.info("annotated " + i + " \"" + sourceRepo.getName() + "\" entities with the "
-							+ annotator.getSimpleName() + " annotator (started by \""
-							+ userAccountService.getCurrentUser().getUsername() + "\")");
-					annotatedEntities.clear();
-				}
-			}
-			if (annotatedEntities.size() > 0)
-			{
-				dataService.update(sourceRepo.getName(), annotatedEntities);
-				i = i + annotatedEntities.size();
-				LOG.info("annotated " + i + " \"" + sourceRepo.getName() + "\" entities with the "
-						+ annotator.getSimpleName() + " annotator (started by \""
-						+ userAccountService.getCurrentUser().getUsername() + "\")");
-				annotatedEntities.clear();
-			}
-			return dataService.getRepository(sourceRepo.getName());
+			sourceRepo.update(() -> annotator.annotate(sourceRepo));
+			return sourceRepo;
 		}
-		else
-		{
-			// annotate from source to target repository
-			while (entityIterator.hasNext())
-			{
-				Entity entity = entityIterator.next();
-				annotatedEntities.add(entity);
-				if (annotatedEntities.size() == BATCH_SIZE)
-				{
-					targetRepo.add(annotatedEntities);
-					i = i + annotatedEntities.size();
-					LOG.info("annotated " + i + " \"" + sourceRepo.getName() + "\" entities with the "
-							+ annotator.getSimpleName() + " annotator (started by \""
-							+ userAccountService.getCurrentUser().getUsername() + "\")");
-					annotatedEntities.clear();
-				}
-			}
-			if (annotatedEntities.size() > 0)
-			{
-				dataService.add(targetRepo.getName(), annotatedEntities);
-				i = i + annotatedEntities.size();
-				LOG.info("annotated " + i + " \"" + sourceRepo.getName() + "\" entities with the "
-						+ annotator.getSimpleName() + " annotator (started by \""
-						+ userAccountService.getCurrentUser().getUsername() + "\")");
-				annotatedEntities.clear();
-			}
-			return targetRepo;
-		}
+
+		targetRepo.add(() -> annotator.annotate(sourceRepo));
+		return targetRepo;
 	}
 
 	/**
@@ -174,8 +117,8 @@ public class CrudRepositoryAnnotator
 	{
 		if (createCopy)
 		{
-			DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(RandomStringUtils.randomAlphanumeric(30),
-					entityMetaData);
+			DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(
+					RandomStringUtils.randomAlphanumeric(30), entityMetaData);
 			if (newEntityMetaData.getAttribute(compoundAttributeMetaData.getName()) == null)
 			{
 				newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData);
@@ -197,4 +140,5 @@ public class CrudRepositoryAnnotator
 
 		return null;
 	}
+
 }
