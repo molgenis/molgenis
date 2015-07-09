@@ -5,6 +5,7 @@ import java.util.Collections;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
@@ -72,14 +73,13 @@ public class GoNLAnnotator
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(GONL_MULTI_FILE_RESOURCE, thousandGenomeInfo,
 				locusQueryCreator, multiAllelicResultFilter, dataService, resources)
 		{
+			
+			
 			@Override
-			protected String getResourceAttributeName(AttributeMetaData attr)
+			protected Object getResourceAttributeValue(AttributeMetaData attr, Entity entity)
 			{
-				if (GONL_GENOME_AF.equals(attr.getName()))
-				{
-					return GONL_AF_RESOURCE_ATTRIBUTE_NAME;
-				}
-				return attr.getName();
+				String attrName = GONL_GENOME_AF.equals(attr.getName()) ? GONL_AF_RESOURCE_ATTRIBUTE_NAME : attr.getName();
+				return entity.get(attrName);
 			}
 		};
 

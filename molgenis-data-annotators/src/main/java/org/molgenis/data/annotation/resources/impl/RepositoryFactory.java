@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation.resources;
+package org.molgenis.data.annotation.resources.impl;
 
 import java.io.File;
 import java.io.IOException;

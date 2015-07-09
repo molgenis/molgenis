@@ -5,7 +5,6 @@ import java.io.IOException;
 
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
-import org.molgenis.data.annotation.resources.RepositoryFactory;
 import org.molgenis.data.annotator.tabix.TabixRepository;
 
 /**

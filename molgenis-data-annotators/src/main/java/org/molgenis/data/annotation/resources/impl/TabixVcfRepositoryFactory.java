@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 
 import org.molgenis.data.Repository;
-import org.molgenis.data.annotation.resources.RepositoryFactory;
 import org.molgenis.data.annotator.tabix.TabixVcfRepository;
 
 /**

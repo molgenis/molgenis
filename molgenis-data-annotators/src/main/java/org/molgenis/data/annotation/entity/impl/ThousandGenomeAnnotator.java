@@ -5,6 +5,7 @@ import java.util.Collections;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
@@ -76,13 +77,10 @@ public class ThousandGenomeAnnotator
 				locusQueryCreator, multiAllelicResultFilter, dataService, resources)
 		{
 			@Override
-			protected String getResourceAttributeName(AttributeMetaData attr)
+			protected Object getResourceAttributeValue(AttributeMetaData attr, Entity entity)
 			{
-				if (THOUSAND_GENOME_AF.equals(attr.getName()))
-				{
-					return THOUSAND_GENOME_AF_RESOURCE_ATTRIBUTE_NAME;
-				}
-				return attr.getName();
+				String attrName = THOUSAND_GENOME_AF.equals(attr.getName()) ? THOUSAND_GENOME_AF_RESOURCE_ATTRIBUTE_NAME : attr.getName();
+				return entity.get(attrName);			
 			}
 		};
 

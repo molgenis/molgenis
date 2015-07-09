@@ -18,7 +18,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.resources.MultiResourceConfig;
-import org.molgenis.data.annotation.resources.RepositoryFactory;
 import org.molgenis.data.annotation.resources.ResourceConfig;
 import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
