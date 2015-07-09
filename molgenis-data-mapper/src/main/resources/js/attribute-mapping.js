@@ -395,15 +395,29 @@
 			$.each(orderedWords, function(index, word){
 				if($.inArray(word, matchedWords) !== -1){
 					connectedPhrase += ' ' + word;
-				}else{
-					
-					if(connectedPhrase.length > 0){
-						connectedPhrases.push(connectedPhrase.trim());
-						connectedPhrase = '';
-					}
+				}else if(word.length > 0){
 					//Word contains illegal chars
 					if(illegal_pattern.test(word)){
-						addAll(connectedPhrases, connectNeighboredWords(word.split(illegal_pattern).join(' '), matchedWords));
+						var wordsIllegalCharsRemoved = connectNeighboredWords(word.split(illegal_pattern).join(' '), matchedWords);
+						if(wordsIllegalCharsRemoved.length == 0){
+							if(connectedPhrase.length > 0){
+								connectedPhrases.push(connectedPhrase.trim());
+								connectedPhrase = '';
+							}
+						}else{
+							if(illegal_pattern.test(word.charAt(0))){
+								if(connectedPhrase.length > 0){
+									connectedPhrases.push(connectedPhrase.trim());
+								}
+								connectedPhrase = wordsIllegalCharsRemoved[0];
+							}else{
+								connectedPhrase += ' ' + wordsIllegalCharsRemoved[0];
+							}
+						}
+						
+					}else if(connectedPhrase.length > 0){
+						connectedPhrases.push(connectedPhrase.trim());
+						connectedPhrase = '';
 					}
 				}
 			});
