@@ -54,7 +54,7 @@ public class GoNLAnnotator
 		AnnotatorInfo thousandGenomeInfo = AnnotatorInfo
 				.create(Status.BETA,
 						AnnotatorInfo.Type.POPULATION_REFERENCE,
-						"Genome_of_the_Netherlands",
+						"GoNL",
 						"What genetic variation is to be found in the Dutch indigenous population? "
 								+ "Detailed knowledge about this is not only interesting in itself, "
 								+ "it also helps to extract useful biomedical information from Dutch biobanks. "
@@ -83,6 +83,7 @@ public class GoNLAnnotator
 			}
 		};
 
+	
 		return new RepositoryAnnotatorImpl(entityAnnotator);
 	}
 
@@ -90,8 +91,8 @@ public class GoNLAnnotator
 	Resource GoNLSources()
 	{
 		MultiResourceConfig goNLConfig = new MultiResourceConfigImpl(GONL_CHROMOSOME_PROPERTY,
-				GONL_FILE_PATTERN_PROPERTY, GONL_FOLDER_PROPERTY, molgenisSettings);
-
+				GONL_FILE_PATTERN_PROPERTY, GONL_FOLDER_PROPERTY, molgenisSettings);		
+		
 		return new MultiFileResource(GONL_MULTI_FILE_RESOURCE, goNLConfig, new TabixVcfRepositoryFactory(
 				GONL_MULTI_FILE_RESOURCE));
 	}

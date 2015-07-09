@@ -95,7 +95,6 @@ public class MultiFileResource implements Resource
 	{
 		// initialize after autowiring is complete and resources is empty
 		if (resources.isEmpty()) initializeResources();
-
 		String chromValue = getFirstEqualsValueFor(VcfRepository.CHROM, q).toString();
 		Resource resource = resources.get(chromValue);
 		return resource.findAll(q);

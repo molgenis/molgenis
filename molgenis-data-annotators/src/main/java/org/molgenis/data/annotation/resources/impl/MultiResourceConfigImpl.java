@@ -49,7 +49,7 @@ public class MultiResourceConfigImpl implements MultiResourceConfig
 			{
 				@Override
 				public File getFile()
-				{
+				{	
 					String filename = format(pattern, chrom);
 					return new File(folder + "/" + filename);
 				}
