@@ -1,15 +1,8 @@
 package org.molgenis.data.annotation;
 
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
-
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Created with IntelliJ IDEA. User: charbonb Date: 21/02/14 Time: 11:24 To change this template use File | Settings |
@@ -17,9 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
  */
 public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 {
-	@Autowired
-	AnnotationService annotatorService;
-
 	@Override
 	public String canAnnotate(EntityMetaData repoMetaData)
 	{
@@ -58,72 +48,6 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 	protected abstract boolean annotationDataExists();
 
 	@Override
-	@Transactional
-	public Iterator<Entity> annotate(final Iterable<Entity> sourceIterable)
-	{
-		Iterator<Entity> source = sourceIterable.iterator();
-		return new Iterator<Entity>()
-		{
-			int current = 0;
-			int size = 0;
-			List<Entity> results;
-			Entity result;
-
-			@Override
-			public boolean hasNext()
-			{
-				return current < size || source.hasNext();
-			}
-
-			@Override
-			public Entity next()
-			{
-				Entity sourceEntity = null;
-				if (current >= size)
-				{
-					if (source.hasNext())
-					{
-						try
-						{
-							sourceEntity = source.next();
-							results = annotateEntity(sourceEntity);
-						}
-						catch (IOException e)
-						{
-							throw new RuntimeException(e);
-						}
-						catch (InterruptedException e)
-						{
-							throw new RuntimeException(e);
-						}
-
-						size = results.size();
-					}
-					current = 0;
-				}
-				if (results.size() > 0)
-				{
-					result = results.get(current);
-				}
-				else
-				{
-					result = sourceEntity;
-				}
-				++current;
-				return result;
-			}
-
-			@Override
-			public void remove()
-			{
-				throw new UnsupportedOperationException();
-			}
-		};
-	}
-
-	public abstract List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException;
-
-	@Override
 	public String getFullName()
 	{
 		return RepositoryAnnotator.ANNOTATOR_PREFIX + getSimpleName();
@@ -134,7 +58,7 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 	{
 		String desc = "TODO";
 		AnnotatorInfo annotatorInfo = getInfo();
-		if(annotatorInfo != null) desc = annotatorInfo.getDescription();
+		if (annotatorInfo != null) desc = annotatorInfo.getDescription();
 		return desc;
 	}
 
