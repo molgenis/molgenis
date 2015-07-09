@@ -20,14 +20,15 @@
 
 	function createNewButtonHtml(attributeName, tag) {
 		var btnHtml = '';
-
+		console.log(attributeName);
+		console.log(tag);
 		btnHtml += '<button '
 		btnHtml += 'type="btn" ';
 		btnHtml += 'class="btn btn-primary btn-xs remove-tag-btn" ';
 		btnHtml += 'data-relation="' + tag.relationIRI + '" ';
 		btnHtml += 'data-attribute="' + attributeName + '" ';
-		btnHtml += 'data-tag="' + tag.ontologyTerm.IRI + '">';
-		btnHtml += tag.ontologyTerm.label + ' ';
+		btnHtml += 'data-tag="' + tag.IRI + '">';
+		btnHtml += tag.label + ' ';
 		btnHtml += '<span class="glyphicon glyphicon-remove"></span>';
 		btnHtml += '</button> ';
 

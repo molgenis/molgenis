@@ -8,6 +8,7 @@
 
 <div class="row">
 	<div class="col-md-12">
+		<input type="hidden" id="global-information" data-entity="${entity.name}"></input>
 		<h3>Tag Wizard</h3>
 		<p>
 			Tag attributes with ontology terms from the selected ontologies either manually or automatically.
