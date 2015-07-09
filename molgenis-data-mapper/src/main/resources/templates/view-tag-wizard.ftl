@@ -9,16 +9,33 @@
 <div class="row">
 	<div class="col-md-12">
 		<input type="hidden" id="global-information" data-entity="${entity.name}"></input>
-		<a onclick="window.history.back()" class="btn btn-default"><span class="glyphicon glyphicon-chevron-left"></span> Back to mapping project</a>	
+		<h3>Tag Wizard</h3>
+		<p>
+			Tag attributes with ontology terms from the selected ontologies either manually or automatically.
+		</p>
+		</br>
 	</div>
 </div>
 
 <div class="row">
 	<div class="col-md-12">
-		<h3>Tag Wizard</h3>
-		<p>
-			Tag attributes with ontology terms from the selected ontologies either manually or automatically.
-		</p>
+		<label>Select an entity to tag</label>
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-3">
+		<form id="change-entity-form" method="POST" action="${context_url}">
+			<select id="select-target" name="selectedTarget" class="form-control">
+				<#list entityNames as entityName>
+					<option <#if entityName == entity.name>selected="selected"</#if>value="${entityName?html}">${entityName?html}</option>
+				</#list>
+			</select>
+		</form>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col=md-12">
 		<hr></hr>
 	</div>
 </div>
@@ -36,12 +53,12 @@
 			<#if selectedOntologies??>
 				<#list selectedOntologies as selectedOntology>
 					<#if selectedOntology??>
-						<option selected='selected' data-iri="${selectedOntology.IRI} "value="${selectedOntology.id}">${selectedOntology.name?html}</option>
+						<option selected="selected" data-iri="${selectedOntology.IRI} "value="${selectedOntology.id}">${selectedOntology.name?html}</option>
 					</#if>
 				</#list>
 			</#if>
 			<#list ontologies as ontology>
-				<option data-iri="${ontology.IRI}" value="${ontology.id}">${ontology.name?html}</option>
+				<option selected="selected" data-iri="${ontology.IRI}" value="${ontology.id}">${ontology.name?html}</option>
 			</#list>
 		</select>
 	</div>
