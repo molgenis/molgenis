@@ -58,7 +58,7 @@
 				</#list>
 			</#if>
 			<#list ontologies as ontology>
-				<option selected='selected' data-iri="${ontology.IRI}" value="${ontology.id}">${ontology.name?html}</option>
+				<option selected="selected" data-iri="${ontology.IRI}" value="${ontology.id}">${ontology.name?html}</option>
 			</#list>
 		</select>
 	</div>
