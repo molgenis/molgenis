@@ -90,7 +90,7 @@
 	<div class="col-md-4 col-lg-2">	
 		<strong>OntologyTerms</strong>
 		</br>
-		<#if tags?size == 0>
+		<#if tags ?? && tags?size == 0>
 			N/A
 		<#else>
 			<#list tags as tag>
