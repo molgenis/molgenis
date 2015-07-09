@@ -119,20 +119,21 @@ public class ExplainServiceHelper
 	 * This method is able to find the queries that are used in the matching. Only queries that contain all matched
 	 * words are potential queries.
 	 * 
-	 * @param matchedWords
+	 * @param matchedWordsString
 	 * @param collectExpandedQueryMap
 	 * @return a map of potentail queries and their matching scores
 	 */
-	public Map<String, Double> findMatchQueries(String matchedWords, Map<String, String> collectExpandedQueryMap)
+	public Map<String, Double> findMatchQueries(String matchedWordsString, Map<String, String> collectExpandedQueryMap)
 	{
 		Map<String, Double> qualifiedQueries = new HashMap<String, Double>();
-
+		Set<String> matchedWords = splitIntoTerms(matchedWordsString);
 		for (Entry<String, String> entry : collectExpandedQueryMap.entrySet())
 		{
-			if (splitIntoTerms(entry.getKey()).containsAll(splitIntoTerms(matchedWords)))
+			Set<String> wordsInQuery = splitIntoTerms(entry.getKey());
+			if (wordsInQuery.containsAll(matchedWords))
 			{
 				qualifiedQueries.put(entry.getKey(),
-						NGramDistanceAlgorithm.stringMatching(matchedWords, entry.getKey()));
+						NGramDistanceAlgorithm.stringMatching(matchedWordsString, entry.getKey()));
 			}
 		}
 		return qualifiedQueries;
@@ -153,7 +154,7 @@ public class ExplainServiceHelper
 		throw new MolgenisDataAccessException("Failed to find matched word in : " + description);
 	}
 
-	private Set<String> splitIntoTerms(String description)
+	Set<String> splitIntoTerms(String description)
 	{
 		return FluentIterable.from(termSplitter.split(description)).transform(String::toLowerCase)
 				.filter(w -> !StringUtils.isEmpty(w)).toSet();

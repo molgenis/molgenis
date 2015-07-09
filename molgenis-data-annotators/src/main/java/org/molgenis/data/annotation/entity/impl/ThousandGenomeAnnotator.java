@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Configuration;
 public class ThousandGenomeAnnotator
 {
 	// TODO Write test
-	public static final String THOUSAND_GENOME_AF = "1000G_AF";
+	public static final String THOUSAND_GENOME_AF = "Thousand_Genomes_AF";
 	public static final String THOUSAND_GENOME_AF_LABEL = "Thousand genome allele frequency";
 	public static final String THOUSAND_GENOME_AF_RESOURCE_ATTRIBUTE_NAME = VcfRepository.getInfoPrefix() + "AF";
 	public static final String THOUSAND_GENOME_CHROMOSOME_PROPERTY = "thousand_genome_chromosomes";

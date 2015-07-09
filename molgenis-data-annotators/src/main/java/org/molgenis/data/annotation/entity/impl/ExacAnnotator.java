@@ -5,6 +5,7 @@ import java.util.Collections;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
@@ -66,13 +67,10 @@ public class ExacAnnotator
 				multiAllelicResultFilter, dataService, resources)
 		{
 			@Override
-			protected String getResourceAttributeName(AttributeMetaData attr)
+			protected Object getResourceAttributeValue(AttributeMetaData attr, Entity sourceEntity)
 			{
-				if (EXAC_AF.equals(attr.getName()))
-				{
-					return EXAC_AF_ResourceAttributeName;
-				}
-				return attr.getName();
+				String attrName = EXAC_AF.equals(attr.getName()) ? EXAC_AF_ResourceAttributeName : attr.getName();
+				return sourceEntity.get(attrName);
 			}
 		};
 

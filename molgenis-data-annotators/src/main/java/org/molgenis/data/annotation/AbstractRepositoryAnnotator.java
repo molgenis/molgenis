@@ -120,6 +120,20 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 			}
 		};
 	}
+	
+	@Override
+	@Transactional
+	public Iterator<Entity> annotate(final Iterator<Entity> sourceIterable)
+	{
+		return this.annotate(new Iterable<Entity>()
+		{
+			@Override
+			public Iterator<Entity> iterator()
+			{
+				return sourceIterable;
+			}
+		});
+	}
 
 	public abstract List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException;
 

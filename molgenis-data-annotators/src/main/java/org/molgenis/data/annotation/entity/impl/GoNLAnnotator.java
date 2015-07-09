@@ -53,7 +53,7 @@ public class GoNLAnnotator
 		AnnotatorInfo thousandGenomeInfo = AnnotatorInfo
 				.create(Status.BETA,
 						AnnotatorInfo.Type.POPULATION_REFERENCE,
-						"Genome of the Netherlands",
+						"Genome_of_the_Netherlands",
 						"What genetic variation is to be found in the Dutch indigenous population? "
 								+ "Detailed knowledge about this is not only interesting in itself, "
 								+ "it also helps to extract useful biomedical information from Dutch biobanks. "

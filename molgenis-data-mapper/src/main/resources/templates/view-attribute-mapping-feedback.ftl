@@ -3,9 +3,9 @@
     	<table class="table table-bordered">
     		<thead>
                     <th></th>
-    		<#if (sourceAttributeNames)?has_content>
-    			<#list sourceAttributeNames as sourceAttributeName>
-    				<th>Source: ${sourceAttributeName?html}</th>
+    		<#if (sourceAttributes)?has_content>
+    			<#list sourceAttributes as sourceAttribute>
+    				<th>Source: ${sourceAttribute.name?html}</th>
     			</#list>
     		</#if>
     			<th>Target: ${targetAttribute.name?html}</th>
@@ -15,11 +15,24 @@
     				<tr>
     				    <#-- Dataexplorer can't be initialized with query at the moment, for forward compatibility already construct URL -->
     				    <td><a class="btn btn-default btn-xs" href="javascript:window.location='${dataexplorerUri?html}?entity=${source?html}&q=' + molgenis.createRsqlQuery([{field: '${feedbackRow.sourceEntity.getEntityMetaData().getIdAttribute().getName()?html}', operator: 'EQUALS', value: '${feedbackRow.sourceEntity.getIdValue()?string?html}' }]);" role="button"><span class="glyphicon glyphicon-search"></span></a></td>
-    					<#if (sourceAttributeNames)?has_content>
-    						<#list sourceAttributeNames as sourceAttributeName>
-    							<#if feedbackRow.sourceEntity.getString(sourceAttributeName)??>
-    								<td>${feedbackRow.sourceEntity.getString(sourceAttributeName)?html}</td>
-    							</#if>
+    					<#if (sourceAttributes)?has_content>
+    						<#list sourceAttributes as sourceAttribute>
+								<#if sourceAttribute.dataType == "xref" || sourceAttribute.dataType == "categorical">
+									<#if feedbackRow.sourceEntity.get(sourceAttribute.name)??>
+	    								<td>
+	    									<#assign refEntity = feedbackRow.sourceEntity.get(sourceAttribute.name)>
+	    									<#assign refEntityMetaData = sourceAttribute.refEntity>
+											<#list refEntityMetaData.attributes as refAttribute>
+												<#assign refAttributeName = refAttribute.name>
+												${refEntity[refAttributeName]} <#if refEntityMetaData.attributes?seq_index_of(refAttribute) != refEntityMetaData.attributes?size - 1>=</#if>
+											</#list> 
+	    								</td>
+	    							</#if>
+								<#else>
+									<#if feedbackRow.sourceEntity.getString(sourceAttribute.name)??>
+	    								<td>${feedbackRow.sourceEntity.getString(sourceAttribute.name)?html}</td>
+	    							</#if>
+								</#if>
     						</#list>
     					</#if>
     					<#if feedbackRow.success>

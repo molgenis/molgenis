@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Configuration;
 public class ThousandGenomesAnnotator
 {
 	// TODO Write test
-	public static final String THOUSAND_GENOME_AF = "1000G_AF";
+	public static final String THOUSAND_GENOME_AF = "Thousand_Genomes_AF";
 	public static final String THOUSAND_GENOME_AF_LABEL = "Thousand genome allele frequency";
 	public static final String THOUSAND_GENOME_AF_RESOURCE_ATTRIBUTE_NAME = VcfRepository.getInfoPrefix() + "AF";
 	public static final String THOUSAND_GENOME_CHROMOSOME_PROPERTY = "thousand_genome_chromosomes";
@@ -54,7 +54,7 @@ public class ThousandGenomesAnnotator
 		AnnotatorInfo thousandGenomeInfo = AnnotatorInfo
 				.create(Status.BETA,
 						AnnotatorInfo.Type.POPULATION_REFERENCE,
-						"Thousand Genomes",
+						"Thousand_Genomes",
 						"The 1000 Genomes Project is an international collaboration to produce an "
 								+ "extensive public catalog of human genetic variation, including SNPs and structural variants, "
 								+ "and their haplotype contexts. This resource will support genome-wide association studies and other "

@@ -1,9 +1,9 @@
 package org.molgenis.data.annotation.entity.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import org.elasticsearch.common.collect.Lists;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -21,12 +21,12 @@ import com.google.common.base.Optional;
 
 public class AnnotatorImpl implements EntityAnnotator
 {
-	private Resources resources;
-	private DataService dataService;
-	private String sourceRepositoryName;
-	private AnnotatorInfo info;
-	private QueryCreator queryCreator;
-	private ResultFilter resultFilter;
+	private final Resources resources;
+	private final DataService dataService;
+	private final String sourceRepositoryName;
+	private final AnnotatorInfo info;
+	private final QueryCreator queryCreator;
+	private final ResultFilter resultFilter;
 
 	public AnnotatorImpl(String sourceRepositoryName, AnnotatorInfo info, QueryCreator queryCreator,
 			ResultFilter resultFilter, DataService dataService, Resources resources)
@@ -48,10 +48,9 @@ public class AnnotatorImpl implements EntityAnnotator
 	@Override
 	public List<Entity> annotateEntity(Entity entity)
 	{
-		List<Entity> results = new ArrayList<>();
-		Iterable<Entity> annotatationSourceEntities;
-
 		Query q = queryCreator.createQuery(entity);
+
+		Iterable<Entity> annotatationSourceEntities;
 		if (resources.hasRepository(sourceRepositoryName))
 		{
 			annotatationSourceEntities = resources.findAll(sourceRepositoryName, q);
@@ -60,31 +59,33 @@ public class AnnotatorImpl implements EntityAnnotator
 		{
 			annotatationSourceEntities = dataService.findAll(sourceRepositoryName, q);
 		}
-		Optional<Entity> filteredResults = resultFilter.filterResults(annotatationSourceEntities, entity);
-		annotatationSourceEntities = Lists.newArrayList(filteredResults.asSet());
-		for (Entity anntotationSourceEntity : annotatationSourceEntities)
+
+		Entity resultEntity = new MapEntity(entity, entity.getEntityMetaData());
+
+		Optional<Entity> filteredResult = resultFilter.filterResults(annotatationSourceEntities, entity);
+		if (filteredResult.isPresent())
 		{
-			Entity resultEntity = new MapEntity(entity, entity.getEntityMetaData());
 			for (AttributeMetaData attr : info.getOutputAttributes())
 			{
-				resultEntity.set(attr.getName(), anntotationSourceEntity.get(getResourceAttributeName(attr)));
+				resultEntity.set(attr.getName(), getResourceAttributeValue(attr, filteredResult.get()));
 			}
-			results.add(resultEntity);
 		}
-		// no data added? add original entity
-		if (results.size() == 0) results.add(entity);
 
-		return results;
+		return Collections.singletonList(resultEntity);
 	}
 
 	/**
-	 * Get the resource attribute name for one of this annotator's output attributes.
-	 * @param attr the name of the output attribute
-	 * @return the name of the attribute to copy from the resource entity
+	 * Get the resource attribute value for one of this annotator's output attributes.
+	 * 
+	 * @param attr
+	 *            the name of the output attribute
+	 * @param the
+	 *            current entity
+	 * @return the value of the attribute to copy from the resource entity
 	 */
-	protected String getResourceAttributeName(AttributeMetaData attr)
+	protected Object getResourceAttributeValue(AttributeMetaData attr, Entity entity)
 	{
-		return attr.getName();
+		return entity.get(attr.getName());
 	}
 
 	@Override

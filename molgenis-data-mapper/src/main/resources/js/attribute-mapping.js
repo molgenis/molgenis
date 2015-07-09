@@ -302,7 +302,7 @@
 						row.hide();
 					}
 				} else {
-					row.show();
+					row.hide();
 				}
 			});
 		} else {
@@ -318,6 +318,18 @@
 				}
 			});
 		}
+		
+		//Update the search result message above the table
+		var numberOfVisibleAttributes = $('#attribute-mapping-table>tbody tr:visible').length;
+		var totalNumberOfAttributes = $('#attribute-mapping-table>tbody tr').length;
+		$('#attribute-search-result-message').empty().append(numberOfVisibleAttributes + ' attributes have been found out of ' + totalNumberOfAttributes);
+		
+		// hide/show the header of the table depending on whether or not there are any visiable attributes
+		if(numberOfVisibleAttributes == 0){
+			$('#attribute-mapping-table>thead tr').hide();
+		}else{
+			$('#attribute-mapping-table>thead tr').show();
+		}
 	}
 
 	/**
@@ -326,7 +338,6 @@
 	function rankAttributeTable(explainedAttributes){
 		if(explainedAttributes != null){
 			var attributeNames = Object.keys(explainedAttributes), className, attributeLabel, attributeInfoElement, firstRow, suggestedRow, explainedQueryStrings, words;
-			
 			for(var i = attributeNames.length - 1; i >= 0;i--){
 				
 				className = attributeNames[i];
@@ -367,12 +378,8 @@
 				message += 'The query <strong>' + queryString + '</strong> derived from <strong>' + explainedQueryString.tagName;
 				message += '</strong> is matched to the label on words <strong>' + matchedWords.join(' ').toLowerCase() + '</strong> with ' + score + '%<br><br>';
 			});
-			var option = {'title' : 'Explanation', 'content' : message, 'html' : true, 'placement' : 'top', 'container' : row, 'trigger' : 'manual'};
-			$(attributeInfoElement).css({'cursor':'help'}).popover(option).on('click', function(){
-				$(this).popover('show');
-			}).on('mouseout', function(){
-				$(this).popover('hide');
-			});
+			var option = {'title' : 'Explanation', 'content' : message, 'html' : true, 'placement' : 'top', 'container' : row, 'trigger' : 'hover'};
+			$(attributeInfoElement).popover(option);
 		}
 	}
 	
@@ -386,18 +393,18 @@
 			connectedPhrase = '';
 			orderedWords = attributeLabel.toUpperCase().split(' ');
 			$.each(orderedWords, function(index, word){
-				
-				//Word contains illegal chars
-				if(illegal_pattern.test(word)){
-					addAll(connectedPhrases, connectNeighboredWords(word.split(illegal_pattern).join(' '), matchedWords));
-				}else if($.inArray(word, matchedWords) !== -1){
-					
+				if($.inArray(word, matchedWords) !== -1){
 					connectedPhrase += ' ' + word;
-				}
-				else if(connectedPhrase.length > 0){
+				}else{
 					
-					connectedPhrases.push(connectedPhrase.trim());
-					connectedPhrase = '';
+					if(connectedPhrase.length > 0){
+						connectedPhrases.push(connectedPhrase.trim());
+						connectedPhrase = '';
+					}
+					//Word contains illegal chars
+					if(illegal_pattern.test(word)){
+						addAll(connectedPhrases, connectNeighboredWords(word.split(illegal_pattern).join(' '), matchedWords));
+					}
 				}
 			});
 			if(connectedPhrase.length > 0){
@@ -441,6 +448,16 @@
 			});
 		}
 		return completeWords;
+	}
+	
+	//A helper function to perform post-redirect action
+	function redirectPost(url, data){
+		showSpinner();
+		var form = '';
+        $.each(data, function(key, value) {
+            form += '<input type="hidden" name="'+key+'" value="'+value+'">';
+        });
+        $('<form action="'+url+'" method="POST">'+form+'</form>').appendTo('body').submit();
 	}
 
 	$(function() {
@@ -515,6 +532,8 @@
 
 			// preview mapping results
 			loadAlgorithmResult(algorithm);
+			
+			$('#result-container').css('display', 'inline');
 		});
 
 		// if there is an algorithm present on load, show the result table
@@ -522,7 +541,6 @@
 			loadAlgorithmResult(algorithm);
 		} else {
 			// if no algorithm present hide the mapping and result containers
-			$('#attribute-mapping-container').css('display', 'none');
 			$('#result-container').css('display', 'none');
 		}
 
@@ -545,7 +563,6 @@
 
 				// on selection of an attribute, show all fields
 				$('#result-container').css('display', 'inline');
-				$('#attribute-mapping-container').css('display', 'inline');
 
 				// generate result table
 				loadAlgorithmResult(algorithm);
@@ -559,23 +576,19 @@
 			} else {
 				// events when no attributes are selected
 				$('#result-container').css('display', 'none');
-				$('#attribute-mapping-container').css('display', 'none');
 			}
 		});
 
 		// save button for saving generated mapping
 		$('#save-mapping-btn').on('click', function() {
-			$.post(molgenis.getContextUrl() + "/saveattributemapping", {
+			var data = {
 				mappingProjectId : $('input[name="mappingProjectId"]').val(),
 				target : $('input[name="target"]').val(),
 				source : $('input[name="source"]').val(),
 				targetAttribute : $('input[name="targetAttribute"]').val(),
 				algorithm : algorithm
-			}, function() {
-				molgenis.createAlert([ {
-					'message' : 'Succesfully saved the created mapping'
-				} ], 'success');
-			});
+			};
+			redirectPost(molgenis.getContextUrl() + '/saveattributemapping', data);
 		});
 
 		$('#js-function-modal-btn').on('click', function() {
