@@ -474,6 +474,8 @@
 		$("[rel=tooltip]").tooltip({
 			placement : 'right'
 		});
+		
+		$('.ontologytag-tooltip').css({'cursor':'pointer'}).popover({'html':true, 'placement':'bottom', 'trigger':'hover'});
 
 		// Get the explained attributes
 		$.ajax({
