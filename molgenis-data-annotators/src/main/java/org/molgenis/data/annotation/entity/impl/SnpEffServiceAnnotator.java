@@ -46,6 +46,14 @@ import com.google.common.collect.Iterators;
  * For this annotator to work SnpEff.jar must be present on the filesystem at the location defined by the
  * RuntimeProperty 'snpeff_jar_location'
  *
+ *
+ * new ANN field replacing EFF:
+ * 
+ * ANN=A|missense_variant|MODERATE|NEXN|NEXN|transcript|NM_144573.3|Coding|8/13|c.733G>A|p.Gly245Arg|1030/3389|733/2028|
+ * 245/675||
+ * 
+ * 
+ * -lof doesnt seem to work? would be great... http://snpeff.sourceforge.net/snpEff_lof_nmd.pdfs
  */
 @Configuration
 public class SnpEffServiceAnnotator
@@ -89,6 +97,11 @@ public class SnpEffServiceAnnotator
 	public static final String ERRORS = VcfRepository.getInfoPrefix() + ERRORS_LABEL;
 	public static final String LOF = VcfRepository.getInfoPrefix() + LOF_LABEL;
 	public static final String NMD = VcfRepository.getInfoPrefix() + NMD_LABEL;
+
+	public enum Impact
+	{
+		MODIFIER, LOW, MODERATE, HIGH
+	}
 
 	@Autowired
 	private MolgenisSettings molgenisSettings;
