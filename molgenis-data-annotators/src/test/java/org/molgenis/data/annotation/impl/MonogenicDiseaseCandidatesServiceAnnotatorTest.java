@@ -11,6 +11,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator;
 import org.molgenis.data.annotation.entity.impl.ExacAnnotator;
+import org.molgenis.data.annotation.entity.impl.SnpEffServiceAnnotator;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;

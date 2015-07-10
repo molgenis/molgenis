@@ -154,7 +154,7 @@ public class SnpEffServiceAnnotator
 		return geneSymbol;
 	}
 
-	private static class SnpEffRepositoryAnnotator extends AbstractRepositoryAnnotator
+	public static class SnpEffRepositoryAnnotator extends AbstractRepositoryAnnotator
 	{
 		private static final String CHARSET = "UTF-8";
 		private String snpEffPath;
