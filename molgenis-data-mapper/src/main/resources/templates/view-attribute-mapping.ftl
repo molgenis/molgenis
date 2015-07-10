@@ -87,6 +87,18 @@
 			</span>
 		</#if>
 	</div>
+	<div class="col-md-4 col-lg-2">	
+		<strong>OntologyTerms</strong>
+		</br>
+		<#if tags ?? && tags?size == 0>
+			N/A
+		<#else>
+			<#list tags as tag>
+				<#assign synonyms = tag.synonyms?join("</br>")>
+				<span class="label label-info ontologytag-tooltip" data-toggle="popover" title="<strong>Synonyms</strong>" data-content="${synonyms}">${tag.label}</span>
+			</#list>
+		</#if>
+	</div>
 </div>
 
 <div class="row"> <#-- Start: Master row -->
