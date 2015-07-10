@@ -399,7 +399,7 @@
 					//Word contains illegal chars
 					if(illegal_pattern.test(word)){
 						var wordsIllegalCharsRemoved = connectNeighboredWords(word.split(illegal_pattern).join(' '), matchedWords);
-						if(wordsIllegalCharsRemoved.length == 0){
+						if(wordsIllegalCharsRemoved.length === 0){
 							if(connectedPhrase.length > 0){
 								connectedPhrases.push(connectedPhrase.trim());
 								connectedPhrase = '';
@@ -465,13 +465,15 @@
 	}
 	
 	//A helper function to perform post-redirect action
-	function redirectPost(url, data){
+	function redirect(method, url, data){
 		showSpinner();
 		var form = '';
-        $.each(data, function(key, value) {
-            form += '<input type="hidden" name="'+key+'" value="'+value+'">';
-        });
-        $('<form action="'+url+'" method="POST">'+form+'</form>').appendTo('body').submit();
+		if(data){
+	        $.each(data, function(key, value) {
+	            form += '<input type="hidden" name="'+key+'" value="'+value+'">';
+	        });
+		}
+        $('<form action="'+url+'" method="'+ method +'">'+form+'</form>').appendTo('body').submit();
 	}
 
 	$(function() {
@@ -597,15 +599,17 @@
 
 		// save button for saving generated mapping
 		$('#save-mapping-btn').on('click', function() {
-			var data = {
+			$.post(molgenis.getContextUrl() + "/saveattributemapping", {
 				mappingProjectId : $('input[name="mappingProjectId"]').val(),
 				target : $('input[name="target"]').val(),
 				source : $('input[name="source"]').val(),
 				targetAttribute : $('input[name="targetAttribute"]').val(),
 				algorithm : algorithm
-			};
-			redirectPost(molgenis.getContextUrl() + '/saveattributemapping', data);
+			}, function(data) {
+				redirect('get', molgenis.getContextUrl() + '/mappingproject/' + $('input[name="mappingProjectId"]').val());
+			});
 		});
+
 
 		$('#js-function-modal-btn').on('click', function() {
 			$('#js-function-modal').modal('show');
