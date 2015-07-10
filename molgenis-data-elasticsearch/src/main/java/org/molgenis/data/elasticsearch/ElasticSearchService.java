@@ -992,8 +992,8 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 						int batchOffset = offset;
 						int batchSize = pageSize != 0 ? Math.min(pageSize - currentOffset, BATCH_SIZE) : BATCH_SIZE;
 						doBatchSearch(batchOffset, batchSize);
-
 					}
+
 					if (batchHits.length == 0)
 					{
 						return false;
@@ -1011,7 +1011,8 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 							int batchOffset = currentOffset + BATCH_SIZE;
 							int batchSize = pageSize != 0 ? Math.min(pageSize - batchOffset, BATCH_SIZE) : BATCH_SIZE;
 							doBatchSearch(batchOffset, batchSize);
-							return true;
+
+							return batchHits.length > 0;
 						}
 						else
 						{
@@ -1024,7 +1025,8 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 				@Override
 				public Entity next()
 				{
-					if (hasNext())
+					boolean next = hasNext();
+					if (next)
 					{
 						SearchHit hit = batchHits[batchPos];
 						++batchPos;
@@ -1064,7 +1066,7 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 					if (LOG.isDebugEnabled())
 					{
 						LOG.debug("Searched Elasticsearch '" + type + "' docs using query [" + q + "] in "
-								+ searchResponse.getTotalShards() + "ms");
+								+ searchResponse.getTookInMillis() + "ms");
 					}
 					SearchHits searchHits = searchResponse.getHits();
 					this.totalHits = searchHits.getTotalHits();
@@ -1072,12 +1074,6 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 					this.batchPos = 0;
 
 					this.currentOffset = from;
-				}
-
-				@Override
-				public void remove()
-				{
-					throw new UnsupportedOperationException();
 				}
 			};
 		}
