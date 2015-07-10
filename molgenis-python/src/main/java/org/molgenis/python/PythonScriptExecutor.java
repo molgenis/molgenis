@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
- * Executes a r script with the RScript executable in a new process.
+ * Executes a Python script with the Python version installed on server executable in a new process.
  * 
  */
 @Service
@@ -36,21 +36,21 @@ public class PythonScriptExecutor
 	 */
 	public void executeScript(File script, PythonOutputHandler outputHandler)
 	{
-		// Check if r is installed
+		// Check if Python is installed
 		File file = new File(pythonScriptExecutable);
 		if (!file.exists())
 		{
 			throw new MolgenisPythonException("File [" + pythonScriptExecutable + "] does not exist");
 		}
 
-		// Check if r has execution rights
+		// Check if Python has execution rights
 		if (!file.canExecute())
 		{
 			throw new MolgenisPythonException("Can not execute [" + pythonScriptExecutable
 					+ "]. Does it have executable permissions?");
 		}
 
-		// Check if the r script exists
+		// Check if the Pyhton script exists
 		if (!script.exists())
 		{
 			throw new MolgenisPythonException("File [" + script + "] does not exist");
