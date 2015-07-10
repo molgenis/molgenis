@@ -7,13 +7,13 @@ import java.util.List;
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.annotation.AbstractRepositoryAnnotator;
+import org.molgenis.data.annotation.AbstractRepositoryEntityAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
 
-public class RepositoryAnnotatorImpl extends AbstractRepositoryAnnotator
+public class RepositoryAnnotatorImpl extends AbstractRepositoryEntityAnnotator
 {
-	private EntityAnnotator entityAnnotator;
+	private final EntityAnnotator entityAnnotator;
 
 	public RepositoryAnnotatorImpl(EntityAnnotator entityAnnotator)
 	{

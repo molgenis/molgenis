@@ -1,5 +1,10 @@
 package org.molgenis.data.vcf.utils;
 
+import static org.molgenis.data.vcf.VcfRepository.ALT;
+import static org.molgenis.data.vcf.VcfRepository.CHROM;
+import static org.molgenis.data.vcf.VcfRepository.POS;
+import static org.molgenis.data.vcf.VcfRepository.REF;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -9,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
@@ -22,8 +28,27 @@ import org.molgenis.vcf.meta.VcfMetaInfo;
 
 public class VcfUtils
 {
-
 	public static final String TAB = "\t";
+
+	/**
+	 * Creates a internal molgenis id from a vcf entity
+	 * 
+	 * @param vcfEntity
+	 * @return the id
+	 */
+	public static String createId(Entity vcfEntity)
+	{
+		StringBuilder id = new StringBuilder();
+		id.append(StringUtils.strip(vcfEntity.get(CHROM).toString()));
+		id.append("_");
+		id.append(StringUtils.strip(vcfEntity.get(POS).toString()));
+		id.append("_");
+		id.append(StringUtils.strip(vcfEntity.get(REF).toString()));
+		id.append("_");
+		id.append(StringUtils.strip(vcfEntity.get(ALT).toString()));
+
+		return id.toString();
+	}
 
 	/**
 	 * Convert an vcfEntity to a VCF line
