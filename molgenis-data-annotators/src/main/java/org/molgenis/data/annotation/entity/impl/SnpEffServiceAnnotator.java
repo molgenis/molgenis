@@ -2,29 +2,32 @@ package org.molgenis.data.annotation.entity.impl;
 
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.IOUtils;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.AbstractRepositoryAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +35,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.google.common.collect.Iterators;
+
+/**
+ * SnpEff annotator
+ * 
+ * SnpEff is a genetic variant annotation and effect prediction toolbox. It annotates and predicts the effects of
+ * variants on genes (such as amino acid changes). see http://snpeff.sourceforge.net/
+ *
+ * For this annotator to work SnpEff.jar must be present on the filesystem at the location defined by the
+ * RuntimeProperty 'snpeff_jar_location'
+ *
+ */
 @Configuration
 public class SnpEffServiceAnnotator
 {
@@ -84,6 +99,48 @@ public class SnpEffServiceAnnotator
 		return new SnpEffRepositoryAnnotator(molgenisSettings);
 	}
 
+	/**
+	 * Helper function to get gene name from entity
+	 * 
+	 * @param entity
+	 * @return
+	 */
+	public static String getGeneNameFromEntity(Entity entity)
+	{
+		String geneSymbol = null;
+		if (entity.getString(GENE_NAME) != null)
+		{
+			geneSymbol = entity.getString(GENE_NAME);
+		}
+		if (geneSymbol == null)
+		{
+			String annField = entity.getString(VcfRepository.getInfoPrefix() + "ANN");
+			if (annField != null)
+			{
+				// if the entity is annotated with the snpEff annotator the split is already done
+				String[] split = annField.split("\\|", -1);
+				// TODO: ask Joeri to explain this line
+				if (split.length > 10)
+				{
+					// 3 is 'gene name'
+					// TODO check if it should not be index 4 -> 'gene id'
+					if (split[3].length() != 0)
+					{
+						geneSymbol = split[3];
+						// LOG.info("Gene symbol '" + geneSymbol + "' found for " + entity.toString());
+					}
+					else
+					{
+						// will happen a lot for whole genome sequencing data
+						LOG.info("No gene symbol in ANN field for " + entity.toString());
+					}
+
+				}
+			}
+		}
+		return geneSymbol;
+	}
+
 	private static class SnpEffRepositoryAnnotator extends AbstractRepositoryAnnotator
 	{
 		private static final String CHARSET = "UTF-8";
@@ -110,9 +167,79 @@ public class SnpEffServiceAnnotator
 		@Override
 		public Iterator<Entity> annotate(Iterable<Entity> source)
 		{
+			Iterator<Entity> it = source.iterator();
+			if (!it.hasNext()) return Iterators.emptyIterator();
 
-			// TODO Auto-generated method stub
-			return null;
+			try
+			{
+				File inputVcf = getInputVcfTempFile(source);
+				File outputVcf = File.createTempFile(NAME, ".vcf");
+
+				runSnpEff(inputVcf, outputVcf);
+
+				// When vcf reader/writer can handle samples and SnpEff annotations just return a VcfRepository (with
+				// inputVcf as input)
+				// iterator here
+
+				BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(
+						outputVcf.getAbsolutePath()), CHARSET));
+
+				return new Iterator<Entity>()
+				{
+					@Override
+					public boolean hasNext()
+					{
+						boolean next = it.hasNext();
+						if (!next)
+						{
+							IOUtils.closeQuietly(reader);
+							inputVcf.delete();
+							outputVcf.delete();
+						}
+
+						return next;
+					}
+
+					@Override
+					public Entity next()
+					{
+						Entity entity = it.next();
+						Entity copy = new MapEntity(entity, entity.getEntityMetaData());
+						try
+						{
+							String line = readLine(reader);
+							parseOutputLineToEntity(line, copy);
+						}
+						catch (IOException e)
+						{
+							throw new UncheckedIOException(e);
+						}
+
+						return copy;
+					}
+
+				};
+			}
+			catch (IOException e)
+			{
+				throw new UncheckedIOException(e);
+			}
+			catch (InterruptedException e)
+			{
+				throw new MolgenisDataException("Exception running SnpEff", e);
+			}
+
+		}
+
+		private String readLine(BufferedReader reader) throws IOException
+		{
+			String line = reader.readLine();
+			while ((line != null) && line.startsWith("##"))
+			{
+				line = reader.readLine();
+			}
+
+			return line;
 		}
 
 		public File getInputVcfTempFile(Iterable<Entity> source) throws IOException
@@ -120,9 +247,19 @@ public class SnpEffServiceAnnotator
 			File vcf = File.createTempFile(NAME, ".vcf");
 			try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(vcf), CHARSET)))
 			{
+
 				for (Entity entity : source)
 				{
-					bw.write(VcfUtils.convertToVCF(entity));
+					StringBuilder builder = new StringBuilder();
+					builder.append(entity.getString(VcfRepository.CHROM));
+					builder.append("\t");
+					builder.append(entity.getString(VcfRepository.POS));
+					builder.append("\t.\t");
+					builder.append(entity.getString(VcfRepository.REF));
+					builder.append("\t");
+					builder.append(entity.getString(VcfRepository.ALT));
+					builder.append("\n");
+					bw.write(builder.toString());
 				}
 			}
 
@@ -132,16 +269,13 @@ public class SnpEffServiceAnnotator
 		// FIXME: can be multiple? even when using canonical!
 		// e.g.
 		// ANN=G|intron_variant|MODIFIER|LOC101926913|LOC101926913|transcript|NR_110185.1|Noncoding|5/5|n.376+9526G>C||||||,G|non_coding_exon_variant|MODIFIER|LINC01124|LINC01124|transcript|NR_027433.1|Noncoding|1/1|n.590G>C||||||;
-		public Entity parseOutputLineToEntity(String line, String entityName)
+		public void parseOutputLineToEntity(String line, Entity entity)
 		{
 			String lof = "";
 			String nmd = "";
 			String[] fields = line.split("\t");
 			String[] ann_field = fields[7].split(";");
 			String[] annotation = ann_field[0].split(Pattern.quote("|"), -1);
-			QueryRule chromRule = new QueryRule(VcfRepository.CHROM, QueryRule.Operator.EQUALS, fields[0]);
-			Query query = new QueryImpl(chromRule).and().eq(VcfRepository.POS, fields[1]);
-			Entity entity = null;// dataService.findOne(entityName, query);
 
 			if (ann_field.length > 1)
 			{
@@ -183,8 +317,6 @@ public class SnpEffServiceAnnotator
 			entity.set(ERRORS, annotation[15]);
 			entity.set(LOF, lof.replace("LOF=", ""));
 			entity.set(NMD, nmd.replace("NMD=", ""));
-
-			return entity;
 		}
 
 		@Override
