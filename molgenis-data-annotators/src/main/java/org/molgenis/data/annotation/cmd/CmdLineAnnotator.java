@@ -12,13 +12,13 @@ import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.impl.CaddAnnotator;
 import org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator;
 import org.molgenis.data.annotation.entity.impl.ExacAnnotator;
+import org.molgenis.data.annotation.entity.impl.SnpEffServiceAnnotator;
 import org.molgenis.data.annotation.impl.ClinVarVCFServiceAnnotator;
 import org.molgenis.data.annotation.impl.DeNovoAnnotator;
 import org.molgenis.data.annotation.impl.GoNLServiceAnnotator;
 import org.molgenis.data.annotation.impl.HpoServiceAnnotator;
 import org.molgenis.data.annotation.impl.MonogenicDiseaseCandidatesServiceAnnotator;
 import org.molgenis.data.annotation.impl.PhenomizerServiceAnnotator;
-import org.molgenis.data.annotation.impl.SnpEffServiceAnnotator;
 import org.molgenis.data.annotation.impl.ThousandGenomesServiceAnnotator;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -123,7 +123,11 @@ public class CmdLineAnnotator
 		}
 		else if (annotatorName.equals("snpeff"))
 		{
-			new SnpEffServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
+			molgenisSettings.setProperty(SnpEffServiceAnnotator.SNPEFF_JAR_LOCATION_PROPERTY,
+					annotationSourceFile.getAbsolutePath());
+			Map<String, RepositoryAnnotator> annotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
+			RepositoryAnnotator annotator = annotators.get("snpEff");
+			annotate(annotator, inputVcfFile, outputVCFFile);
 		}
 		else if (annotatorName.equals("clinvar"))
 		{

@@ -18,10 +18,10 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.annotation.AbstractRepositoryAnnotator;
+import org.molgenis.data.annotation.AbstractRepositoryEntityAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
-import org.molgenis.data.annotation.impl.datastructures.CosmicData;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.molgenis.data.annotation.impl.datastructures.CosmicData;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.springframework.stereotype.Component;
@@ -39,7 +39,7 @@ import com.google.gson.reflect.TypeToken;
  * 
  * */
 @Component("cosmicService")
-public class CosmicServiceAnnotator extends AbstractRepositoryAnnotator implements RepositoryAnnotator
+public class CosmicServiceAnnotator extends AbstractRepositoryEntityAnnotator implements RepositoryAnnotator
 {
 	// Web url to call the ensembl web service
 	// FIXME: should be RTP
