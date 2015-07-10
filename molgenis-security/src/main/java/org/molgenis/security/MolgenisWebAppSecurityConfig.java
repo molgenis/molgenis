@@ -102,6 +102,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 		.antMatchers("/molgenis.R").permitAll()
 
+		.antMatchers("/molgenis.python").permitAll()
+
 		.antMatchers(AccountController.CHANGE_PASSWORD_URI).authenticated()
 
 		.antMatchers("/account/**").permitAll()
