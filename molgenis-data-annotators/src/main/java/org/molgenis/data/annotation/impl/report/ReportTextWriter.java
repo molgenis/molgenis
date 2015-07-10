@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.PrintWriter;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator;
+import org.molgenis.data.annotation.entity.impl.CGDAnnotator;
 import org.molgenis.data.vcf.VcfRepository;
 
 public class ReportTextWriter implements ReportWriter
@@ -50,7 +50,7 @@ public class ReportTextWriter implements ReportWriter
 
 			writer.println(variant.getString("INFO_CGDCOND"));
 			writer.println(variant
-					.getString(ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.GENERALIZED_INHERITANCE
+					.getString(CGDAnnotator.CGDAttributeName.GENERALIZED_INHERITANCE
 							.getAttributeName()));
 
 			for (Entity variantt : report.getMonogenicDiseaseRiskVariants().get(gene))
