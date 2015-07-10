@@ -1,11 +1,14 @@
 package org.molgenis.data.annotation;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
@@ -22,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CrudRepositoryAnnotator
 {
 	private static final Logger LOG = LoggerFactory.getLogger(CrudRepositoryAnnotator.class);
+	private static final int BATCH_SIZE = 1000;
 
 	private final String newRepositoryLabel;
 	private final DataService dataService;
@@ -92,14 +96,37 @@ public class CrudRepositoryAnnotator
 	private Repository iterateOverEntitiesAndAnnotate(Repository sourceRepo, Repository targetRepo,
 			RepositoryAnnotator annotator)
 	{
-		if (targetRepo == null)
+		Iterator<Entity> it = annotator.annotate(sourceRepo);
+
+		List<Entity> batch = new ArrayList<Entity>();
+		while (it.hasNext())
 		{
-			sourceRepo.update(() -> annotator.annotate(sourceRepo));
-			return sourceRepo;
+			batch.add(it.next());
+			if (batch.size() == BATCH_SIZE)
+			{
+				processBatch(batch, sourceRepo, targetRepo);
+				batch.clear();
+			}
 		}
 
-		targetRepo.add(() -> annotator.annotate(sourceRepo));
-		return targetRepo;
+		if (!batch.isEmpty())
+		{
+			processBatch(batch, sourceRepo, targetRepo);
+		}
+
+		return targetRepo == null ? sourceRepo : targetRepo;
+	}
+
+	private void processBatch(List<Entity> batch, Repository sourceRepo, Repository targetRepo)
+	{
+		if (targetRepo == null)
+		{
+			sourceRepo.update(batch);
+		}
+		else
+		{
+			targetRepo.add(batch);
+		}
 	}
 
 	/**
