@@ -85,12 +85,14 @@
 							<#list mappingProject.getMappingTarget(selectedTarget).entityMappings as source>
 								<td <#if source.getAttributeMapping(attribute.name)??>
 										<#assign attributeMapping = source.getAttributeMapping(attribute.name)>
-										<#if attributeMapping.algorithmState == "GENERATED_HIGH">
-											class="bg-info"
-										<#elseif attributeMapping.algorithmState == "GENERATED_LOW">
-											class="bg-warning"
-										<#elseif attributeMapping.algorithmState == "CURATED">
-											class="bg-success"
+										<#if attributeMapping.algorithmState??>
+											<#if attributeMapping.algorithmState == "GENERATED_HIGH">
+												class="bg-info"
+											<#elseif attributeMapping.algorithmState == "GENERATED_LOW">
+												class="bg-warning"
+											<#elseif attributeMapping.algorithmState == "CURATED">
+												class="bg-success"
+											</#if>
 										</#if>
 									</#if>>
 									<div class="pull-right">
