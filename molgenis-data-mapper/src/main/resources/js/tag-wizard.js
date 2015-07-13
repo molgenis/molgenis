@@ -169,7 +169,7 @@
 				success : function(ontologyTag) {
 					$('#tag-dropdown').select2('val', '');
 					if(ontologyTag !== undefined){
-						$('#' + attributeName + '-tag-column').append(createNewButtonHtml(attributeName, ontologyTag));
+						$('#' + attributeName + '-tag-column').append(createNewButtonHtml(attributeName, ontologyTag.ontologyTerm));
 					}
 				}
 			});
