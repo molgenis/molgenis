@@ -159,10 +159,8 @@ public abstract class AbstractEntity implements Entity
 	{
 		StringBuilder sb = new StringBuilder();
 		sb.append(this.getClass().getSimpleName() + "{");
-		for (String attrName : this.getAttributeNames())
-		{
-			sb.append(attrName + "='" + this.get(attrName) + "', ");
-		}
+		Iterable<AttributeMetaData> allAttributes = this.getEntityMetaData().getAtomicAttributes();
+		allAttributes.forEach(attribute -> sb.append(attribute.getName() + "='" + this.get(attribute.getName()) + "', "));
 		sb.delete(sb.length() - 2, sb.length());
 		sb.append("}");
 		return sb.toString();
