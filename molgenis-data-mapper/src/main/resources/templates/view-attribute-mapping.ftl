@@ -29,9 +29,24 @@
 		<input type="hidden" name="targetAttributeType" value="${attributeMapping.targetAttributeMetaData.dataType?html}"/>
 	</div>
 </div>
-
-</br>
-
+<div class="row">
+	<div class="col-md-12 col-lg-12">
+		<a href="/menu/main/mappingservice/mappingproject/${mappingProject.identifier?html}" type="btn" class="btn btn-default btn-xs">
+			<span class="glyphicon glyphicon-chevron-left"></span>
+			Cancel and go back
+		</a>
+		<button id="save-mapping-btn" type="btn" class="btn btn-primary btn-xs">
+			<span class="glyphicon glyphicon-floppy-save"></span>
+			Save and go back
+		</button>
+	<hr></hr>
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-12 col-lg-12">
+		<center><h4>Mapping to <i>${entityMapping.targetEntityMetaData.name}.${attributeMapping.targetAttributeMetaData.name}</i> from <i>${entityMapping.sourceEntityMetaData.name}</i></h4></center>
+	</div>
+</div>
 <div class="row">	
 	<div class="col-md-4 col-lg-2">
 		<p>
@@ -65,6 +80,17 @@
 				</#if>
 			</span>
 			</br>
+			
+			<strong>OntologyTerms</strong>
+			</br>
+			<#if tags ?? && tags?size == 0>
+				N/A
+			<#else>
+				<#list tags as tag>
+					<#assign synonyms = tag.synonyms?join("</br>")>
+					<span class="label label-info ontologytag-tooltip" data-toggle="popover" title="<strong>Synonyms</strong>" data-content="${synonyms}">${tag.label}</span>
+				</#list>
+			</#if>
 		</p>
 	</div>	
 	<div class="col-md-4 col-lg-2">	
@@ -85,18 +111,6 @@
 					N/A
 				</#if>
 			</span>
-		</#if>
-	</div>
-	<div class="col-md-4 col-lg-2">	
-		<strong>OntologyTerms</strong>
-		</br>
-		<#if tags ?? && tags?size == 0>
-			N/A
-		<#else>
-			<#list tags as tag>
-				<#assign synonyms = tag.synonyms?join("</br>")>
-				<span class="label label-info ontologytag-tooltip" data-toggle="popover" title="<strong>Synonyms</strong>" data-content="${synonyms}">${tag.label}</span>
-			</#list>
 		</#if>
 	</div>
 </div>
@@ -203,14 +217,6 @@
 			    	<br/>
 				</div>
 			</div>
-			<div class="col-md-12 col-lg-12">
-				<hr></hr>
-				<div class="row">
-					<a href="/menu/main/mappingservice/mappingproject/${mappingProject.identifier?html}" type="btn" class="btn btn-default pull-right">Cancel</a>
-					<button id="save-mapping-btn" type="btn" class="btn btn-primary pull-right">Save</button>
-				</div>
-			</div>
-			
 		</div> <#-- End: Mapping container -->
 	</div>  <#-- End: Mapping column -->
 

@@ -491,7 +491,7 @@
 			placement : 'right'
 		});
 		
-		$('.ontologytag-tooltip').css({'cursor':'pointer'}).popover({'html':true, 'placement':'bottom', 'trigger':'hover'});
+		$('.ontologytag-tooltip').css({'cursor':'pointer'}).popover({'html':true, 'placement':'right', 'trigger':'hover'});
 
 		// Get the explained attributes
 		$.ajax({
