@@ -10,6 +10,7 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
+import org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
@@ -106,6 +107,7 @@ public class MappingServiceControllerTest
 		EntityMapping entityMapping = mappingTarget.addSource(lifeLines);
 		AttributeMapping ageMapping = entityMapping.addAttributeMapping("age");
 		ageMapping.setAlgorithm("$('length').value()");
+		ageMapping.setAlgorithmState(AlgorithmState.CURATED);
 
 		Mockito.verify(mappingService).updateMappingProject(expected);
 	}
@@ -129,6 +131,7 @@ public class MappingServiceControllerTest
 		ageMapping.setAlgorithm("$('dob').age()");
 		AttributeMapping heightMapping = entityMapping.addAttributeMapping("height");
 		heightMapping.setAlgorithm("$('length').value()");
+		heightMapping.setAlgorithmState(AlgorithmState.CURATED);
 
 		Mockito.verify(mappingService).updateMappingProject(expected);
 	}

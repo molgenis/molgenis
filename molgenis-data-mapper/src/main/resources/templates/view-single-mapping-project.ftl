@@ -23,6 +23,23 @@
 		<h3>Mappings for the ${mappingProject.name?html} project</h3>
 		<p>Create and view mappings.</p>
 	</div>
+	<div class="col-md-4">
+		<div class="row">
+			<div class="col-md-12">
+				<p class="bg-success text-center pull-right algorithm-color-legend">Curated algorithms</p>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
+				<p class="bg-info text-center pull-right algorithm-color-legend">Generated algorithms with high quality</p>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
+				<p class="bg-warning text-center pull-right algorithm-color-legend">Generated algorithms with low quality</p>
+			</div>
+		</div>
+	</div>
 </div>
 
 <!--Table for Target and Source attribute metadata-->
@@ -66,7 +83,16 @@
 								</#if>
 							</td>
 							<#list mappingProject.getMappingTarget(selectedTarget).entityMappings as source>
-								<td>
+								<td <#if source.getAttributeMapping(attribute.name)??>
+										<#assign attributeMapping = source.getAttributeMapping(attribute.name)>
+										<#if attributeMapping.algorithmState == "GENERATED_HIGH">
+											class="bg-info"
+										<#elseif attributeMapping.algorithmState == "GENERATED_LOW">
+											class="bg-warning"
+										<#elseif attributeMapping.algorithmState == "CURATED">
+											class="bg-success"
+										</#if>
+									</#if>>
 									<div class="pull-right">
 										<form method="get" action="${context_url}/attributeMapping" class="pull-right">
 											<button type="submit" class="btn btn-default btn-xs">
@@ -91,8 +117,10 @@
 									</div>
 									<div>
 										<#if source.getAttributeMapping(attribute.name)??>
-											<#list source.getAttributeMapping(attribute.name).sourceAttributeMetaDatas as mappedSourceAttribute>
+											<#assign attributeMapping = source.getAttributeMapping(attribute.name)>		
+											<#list attributeMapping.sourceAttributeMetaDatas as mappedSourceAttribute>
 												${mappedSourceAttribute.label?html}<#if mappedSourceAttribute_has_next>, </#if>
+												<#if attributeMapping.algorithmState??></#if>
 											</#list>
 										<#elseif !attribute.nillable>
 											<span class="label label-danger">missing</span>

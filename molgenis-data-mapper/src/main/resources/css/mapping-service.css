@@ -29,3 +29,11 @@
 	color:white;
 	border-radius: 2px;
 }
+
+.algorithm-color-legend {
+	width : 50%;
+	padding-top : 6px;
+	padding-bottom : 6px;
+	border-radius: 5px;
+	font-weight: bold;
+}
