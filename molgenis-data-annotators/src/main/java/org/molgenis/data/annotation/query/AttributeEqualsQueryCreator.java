@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation.query.generators;
+package org.molgenis.data.annotation.query;
 
 import static org.molgenis.data.support.QueryImpl.EQ;
 

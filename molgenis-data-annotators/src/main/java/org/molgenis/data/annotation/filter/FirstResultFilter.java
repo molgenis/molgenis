@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation.result.filters;
+package org.molgenis.data.annotation.filter;
 
 import java.util.Collection;
 import java.util.Collections;

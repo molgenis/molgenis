@@ -5,7 +5,7 @@ import com.google.common.base.Optional;
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
-import org.molgenis.data.annotation.result.filters.MultiAllelicResultFilter;
+import org.molgenis.data.annotation.filter.MultiAllelicResultFilter;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
