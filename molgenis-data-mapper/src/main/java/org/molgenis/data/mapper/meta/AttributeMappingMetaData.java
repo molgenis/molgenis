@@ -1,6 +1,7 @@
 package org.molgenis.data.mapper.meta;
 
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -26,7 +27,8 @@ public class AttributeMappingMetaData extends DefaultEntityMetaData
 		addAttribute(SOURCEATTRIBUTEMETADATAS);
 		addAttribute(ALGORITHM);
 		EnumField enumField = new EnumField();
-		enumField.setEnumOptions(Arrays.asList(AlgorithmState.GENRATED.toString(), AlgorithmState.CURATED.toString()));
+		enumField.setEnumOptions(Arrays.asList(AlgorithmState.values()).stream().map(STATE -> STATE.toString())
+				.collect(Collectors.toList()));
 		addAttribute(ALGORITHMSTATE).setDataType(enumField);
 	}
 }

@@ -4,10 +4,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -19,11 +21,14 @@ import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.service.AlgorithmService;
+import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
+import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.js.RhinoConfig;
 import org.molgenis.js.ScriptEvaluator;
+import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.NativeArray;
@@ -33,6 +38,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 
 public class AlgorithmServiceImpl implements AlgorithmService
 {
@@ -40,6 +47,9 @@ public class AlgorithmServiceImpl implements AlgorithmService
 
 	@Autowired
 	private DataService dataService;
+
+	@Autowired
+	private OntologyTagService ontologyTagService;
 
 	@Autowired
 	private SemanticSearchService semanticSearchService;
@@ -58,16 +68,49 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		Map<AttributeMetaData, Iterable<ExplainedQueryString>> matches = semanticSearchService.explainAttributes(
 				sourceEntityMetaData, targetEntityMetaData, targetAttribute);
 
+		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(
+				targetEntityMetaData, targetAttribute);
+
 		for (Entry<AttributeMetaData, Iterable<ExplainedQueryString>> entry : matches.entrySet())
 		{
 			AttributeMetaData source = entry.getKey();
 			AttributeMapping attributeMapping = mapping.addAttributeMapping(targetAttribute.getName());
 			String algorithm = "$('" + source.getName() + "').value();";
 			attributeMapping.setAlgorithm(algorithm);
-			attributeMapping.setAlgorithmState(AlgorithmState.GENRATED);
+
+			if (isSingleMatchHighQuality(targetAttribute, tagsForAttribute, entry.getValue()))
+			{
+				attributeMapping.setAlgorithmState(AlgorithmState.GENERATED_HIGH);
+			}
+			else
+			{
+				attributeMapping.setAlgorithmState(AlgorithmState.GENERATED_LOW);
+			}
+
 			LOG.info("Creating attribute mapping: " + targetAttribute.getName() + " = " + algorithm);
 			break;
 		}
+	}
+
+	boolean isSingleMatchHighQuality(AttributeMetaData targetAttribute,
+			Multimap<Relation, OntologyTerm> ontologyTermTags, Iterable<ExplainedQueryString> explanations)
+	{
+		String label = StringUtils.isNotEmpty(targetAttribute.getLabel()) ? targetAttribute.getLabel().toLowerCase() : StringUtils.EMPTY;
+		String description = StringUtils.isNotEmpty(targetAttribute.getDescription()) ? targetAttribute
+				.getDescription().toLowerCase() : StringUtils.EMPTY;
+
+		List<String> tagsInExplanations = Lists.newArrayList(explanations).stream()
+				.map(explanation -> explanation.getTagName().toLowerCase()).collect(Collectors.toList());
+
+		if (tagsInExplanations.contains(label) || tagsInExplanations.contains(description)) return true;
+
+		for (OntologyTerm ontologyTerm : ontologyTermTags.values())
+		{
+			List<String> ontologyTermLabels = Lists.newArrayList(ontologyTerm.getLabel().toLowerCase().split(","));
+			if (tagsInExplanations.containsAll(ontologyTermLabels)) return true;
+		}
+
+		return false;
 	}
 
 	@Override

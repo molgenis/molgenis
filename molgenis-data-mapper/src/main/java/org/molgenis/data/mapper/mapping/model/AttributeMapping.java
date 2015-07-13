@@ -19,7 +19,7 @@ public class AttributeMapping
 
 	public enum AlgorithmState
 	{
-		CURATED("CURATED"), GENRATED("GENERATED");
+		CURATED("CURATED"), GENERATED_HIGH("GENERATED_HIGH"), GENERATED_LOW("GENERATED_LOW");
 
 		private String label;
 

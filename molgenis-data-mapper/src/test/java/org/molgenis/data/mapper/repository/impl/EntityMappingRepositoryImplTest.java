@@ -19,12 +19,15 @@ import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.meta.AttributeMappingMetaData;
 import org.molgenis.data.mapper.meta.EntityMappingMetaData;
+import org.molgenis.data.semanticsearch.repository.TagRepository;
+import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.UuidGenerator;
+import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +62,8 @@ public class EntityMappingRepositoryImplTest extends AbstractTestNGSpringContext
 		targetEntityMetaData.addAttributeMetaData(targetAttributeMetaData);
 
 		List<AttributeMapping> attributeMappings = new ArrayList<AttributeMapping>();
-		attributeMappings.add(new AttributeMapping("1", targetAttributeMetaData, "algorithm", sourceAttributeMetaDatas));
+		attributeMappings
+				.add(new AttributeMapping("1", targetAttributeMetaData, "algorithm", sourceAttributeMetaDatas));
 
 		List<EntityMapping> entityMappings = Arrays.asList(new EntityMapping(AUTO_ID, sourceEntityMetaData,
 				targetEntityMetaData, attributeMappings));
@@ -100,7 +104,8 @@ public class EntityMappingRepositoryImplTest extends AbstractTestNGSpringContext
 		targetEntityMetaData.addAttributeMetaData(targetAttributeMetaData);
 
 		List<AttributeMapping> attributeMappings = new ArrayList<AttributeMapping>();
-		attributeMappings.add(new AttributeMapping("1", targetAttributeMetaData, "algorithm", sourceAttributeMetaDatas));
+		attributeMappings
+				.add(new AttributeMapping("1", targetAttributeMetaData, "algorithm", sourceAttributeMetaDatas));
 
 		Collection<EntityMapping> entityMappings = Arrays.asList(new EntityMapping(AUTO_ID, sourceEntityMetaData,
 				targetEntityMetaData, attributeMappings));
@@ -110,6 +115,7 @@ public class EntityMappingRepositoryImplTest extends AbstractTestNGSpringContext
 		attributeMappingEntity.set(AttributeMappingMetaData.TARGETATTRIBUTEMETADATA, "targetAttribute");
 		attributeMappingEntity.set(AttributeMappingMetaData.SOURCEATTRIBUTEMETADATAS, sourceAttributeMetaDatas);
 		attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHM, "algorithm");
+		attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHMSTATE, null);
 
 		List<Entity> attributeMappingEntities = new ArrayList<Entity>();
 		attributeMappingEntities.add(attributeMappingEntity);
@@ -170,6 +176,24 @@ public class EntityMappingRepositoryImplTest extends AbstractTestNGSpringContext
 		IdGenerator idGenerator()
 		{
 			return new UuidGenerator();
+		}
+
+		@Bean
+		public OntologyService ontologyService()
+		{
+			return mock(OntologyService.class);
+		}
+
+		@Bean
+		public TagRepository tagRepository()
+		{
+			return mock(TagRepository.class);
+		}
+
+		@Bean
+		public OntologyTagService ontologyTagService()
+		{
+			return mock(OntologyTagService.class);
 		}
 	}
 }

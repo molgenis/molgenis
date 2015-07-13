@@ -119,6 +119,7 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 		attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHM, attributeMapping.getAlgorithm());
 		attributeMappingEntity.set(AttributeMappingMetaData.SOURCEATTRIBUTEMETADATAS,
 				attributeMapping.getSourceAttributeMetaDatas());
+		attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHMSTATE, attributeMapping.getAlgorithmState());
 		return attributeMappingEntity;
 	}
 

@@ -34,8 +34,7 @@ public interface SemanticSearchService
 			EntityMetaData target, AttributeMetaData attributeMetaData);
 
 	/**
-	 * Finds {@link OntologyTerm}s that can be used to tag an attribute. >>>>>>> 3b45cb9... added a method in
-	 * MappingServiceController that allows us to get the explanations per suggested attributes in json format
+	 * Finds {@link OntologyTerm}s that can be used to tag an attribute.
 	 * 
 	 * @param entity
 	 *            name of the entity
