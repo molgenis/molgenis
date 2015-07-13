@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.toMap;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -61,4 +62,10 @@ public class ResourcesImpl implements Resources
 		}
 		return dataService.findAll(name, q);
 	}
+
+	public Set<String> getResourcesNames()
+	{
+		return resources.keySet();
+	}
+	
 }

@@ -33,7 +33,7 @@ public class GoNLAnnotator
 	public static final String GONL_CHROMOSOME_PROPERTY = "gonl_genome_chromosomes";
 	public static final String GONL_FILE_PATTERN_PROPERTY = "gonl_genome_file_pattern";
 	public static final String GONL_FOLDER_PROPERTY = "gonl_genome_root_directory";
-	public static final String GONL_MULTI_FILE_RESOURCE = "gonlResources";
+	public static final String GONL_MULTI_FILE_RESOURCE = "gonlresources";
 
 	@Autowired
 	private MolgenisSettings molgenisSettings;
@@ -45,16 +45,16 @@ public class GoNLAnnotator
 	private Resources resources;
 
 	@Bean
-	public RepositoryAnnotator GoNL()
+	public RepositoryAnnotator gonl()
 	{
 		DefaultAttributeMetaData outputAttribute = new DefaultAttributeMetaData(GONL_GENOME_AF, FieldTypeEnum.STRING)
 				.setDescription("The allele frequency for variants seen in the population used for the GoNL project")
 				.setLabel(GONL_AF_LABEL);
 
 		AnnotatorInfo thousandGenomeInfo = AnnotatorInfo
-				.create(Status.BETA,
+				.create(Status.READY,
 						AnnotatorInfo.Type.POPULATION_REFERENCE,
-						"GoNL",
+						"gonl",
 						"What genetic variation is to be found in the Dutch indigenous population? "
 								+ "Detailed knowledge about this is not only interesting in itself, "
 								+ "it also helps to extract useful biomedical information from Dutch biobanks. "
@@ -88,7 +88,7 @@ public class GoNLAnnotator
 	}
 
 	@Bean
-	Resource GoNLSources()
+	Resource gonlresources()
 	{
 		MultiResourceConfig goNLConfig = new MultiResourceConfigImpl(GONL_CHROMOSOME_PROPERTY,
 				GONL_FILE_PATTERN_PROPERTY, GONL_FOLDER_PROPERTY, molgenisSettings);		
