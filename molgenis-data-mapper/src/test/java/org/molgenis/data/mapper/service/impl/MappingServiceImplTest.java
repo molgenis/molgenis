@@ -37,14 +37,12 @@ import org.molgenis.data.mem.InMemoryRepositoryCollection;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.PackageImpl;
-import org.molgenis.data.semanticsearch.repository.TagRepository;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.UuidGenerator;
-import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -360,18 +358,6 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		SemanticSearchService semanticSearchService()
 		{
 			return mock(SemanticSearchService.class);
-		}
-
-		@Bean
-		public OntologyService ontologyService()
-		{
-			return mock(OntologyService.class);
-		}
-
-		@Bean
-		public TagRepository tagRepository()
-		{
-			return mock(TagRepository.class);
 		}
 
 		@Bean

@@ -81,7 +81,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testIsSingleMatchHighQuality()
 	{
-		AlgorithmServiceImpl algorithmServiceImpl = new AlgorithmServiceImpl();
+		AlgorithmServiceImpl algorithmServiceImpl = (AlgorithmServiceImpl) algorithmService;
 
 		DefaultAttributeMetaData targetAttribute1 = new DefaultAttributeMetaData("height");
 		targetAttribute1.setLabel("height");
@@ -393,7 +393,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		@Bean
 		public AlgorithmService algorithmService()
 		{
-			return new AlgorithmServiceImpl();
+			return new AlgorithmServiceImpl(dataService(), ontologyTagService(), semanticSearchService());
 		}
 
 		@Bean

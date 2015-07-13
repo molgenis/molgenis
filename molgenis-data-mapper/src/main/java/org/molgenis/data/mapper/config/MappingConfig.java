@@ -1,7 +1,6 @@
 package org.molgenis.data.mapper.config;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.IdGenerator;
 import org.molgenis.data.mapper.repository.impl.AttributeMappingRepositoryImpl;
 import org.molgenis.data.mapper.repository.impl.EntityMappingRepositoryImpl;
 import org.molgenis.data.mapper.repository.impl.MappingProjectRepositoryImpl;
@@ -10,10 +9,8 @@ import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.mapper.service.impl.AlgorithmServiceImpl;
 import org.molgenis.data.mapper.service.impl.MappingServiceImpl;
-import org.molgenis.data.semanticsearch.repository.TagRepository;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
-import org.molgenis.data.semanticsearch.service.impl.OntologyTagServiceImpl;
-import org.molgenis.ontology.core.service.OntologyService;
+import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -29,13 +26,10 @@ public class MappingConfig
 	MolgenisUserService userService;
 
 	@Autowired
-	OntologyService ontologyService;
+	OntologyTagService ontologyTagService;
 
 	@Autowired
-	TagRepository tagRepository;
-
-	@Autowired
-	IdGenerator idGenerator;
+	SemanticSearchService semanticSearchService;
 
 	@Bean
 	public MappingService mappingService()
@@ -44,15 +38,9 @@ public class MappingConfig
 	}
 
 	@Bean
-	public OntologyTagService ontologyTagService()
-	{
-		return new OntologyTagServiceImpl(dataService, ontologyService, tagRepository, idGenerator);
-	}
-
-	@Bean
 	public AlgorithmService algorithmServiceImpl()
 	{
-		return new AlgorithmServiceImpl();
+		return new AlgorithmServiceImpl(dataService, ontologyTagService, semanticSearchService);
 	}
 
 	@Bean

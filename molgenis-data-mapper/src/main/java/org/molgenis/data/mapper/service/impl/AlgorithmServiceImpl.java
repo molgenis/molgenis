@@ -17,6 +17,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
@@ -45,17 +46,24 @@ public class AlgorithmServiceImpl implements AlgorithmService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(AlgorithmServiceImpl.class);
 
-	@Autowired
-	private DataService dataService;
+	private final DataService dataService;
+
+	private final OntologyTagService ontologyTagService;
+
+	private final SemanticSearchService semanticSearchService;
 
 	@Autowired
-	private OntologyTagService ontologyTagService;
-
-	@Autowired
-	private SemanticSearchService semanticSearchService;
-
-	public AlgorithmServiceImpl()
+	public AlgorithmServiceImpl(DataService dataService, OntologyTagService ontologyTagService,
+			SemanticSearchService semanticSearchService)
 	{
+		if (dataService == null) throw new MolgenisDataException("DataService cannot be null!");
+		if (ontologyTagService == null) throw new MolgenisDataException("OntologyTagService cannot be null!");
+		if (semanticSearchService == null) throw new MolgenisDataException("SemanticSearchService cannot be null!");
+
+		this.dataService = dataService;
+		this.ontologyTagService = ontologyTagService;
+		this.semanticSearchService = semanticSearchService;
+
 		new RhinoConfig().init();
 	}
 
