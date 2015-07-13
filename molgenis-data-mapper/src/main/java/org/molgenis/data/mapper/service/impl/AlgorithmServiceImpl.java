@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,8 +16,10 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
+import org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.service.AlgorithmService;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.js.RhinoConfig;
@@ -51,15 +55,18 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			EntityMapping mapping, AttributeMetaData targetAttribute)
 	{
 		LOG.debug("createAttributeMappingIfOnlyOneMatch: target= " + targetAttribute.getName());
-		Iterable<AttributeMetaData> matches = semanticSearchService.findAttributes(sourceEntityMetaData,
-				targetEntityMetaData, targetAttribute);
-		if (Iterables.size(matches) == 1)
+		Map<AttributeMetaData, Iterable<ExplainedQueryString>> matches = semanticSearchService.explainAttributes(
+				sourceEntityMetaData, targetEntityMetaData, targetAttribute);
+
+		for (Entry<AttributeMetaData, Iterable<ExplainedQueryString>> entry : matches.entrySet())
 		{
-			AttributeMetaData source = matches.iterator().next();
+			AttributeMetaData source = entry.getKey();
 			AttributeMapping attributeMapping = mapping.addAttributeMapping(targetAttribute.getName());
 			String algorithm = "$('" + source.getName() + "').value();";
 			attributeMapping.setAlgorithm(algorithm);
+			attributeMapping.setAlgorithmState(AlgorithmState.GENRATED);
 			LOG.info("Creating attribute mapping: " + targetAttribute.getName() + " = " + algorithm);
+			break;
 		}
 	}
 
