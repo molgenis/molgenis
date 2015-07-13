@@ -48,6 +48,7 @@ import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.importer.MyEntitiesValidationReport.AttributeState;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
+import org.molgenis.data.meta.MetaValidationUtils;
 import org.molgenis.data.meta.PackageImpl;
 import org.molgenis.data.meta.PackageMetaData;
 import org.molgenis.data.meta.TagMetaData;
@@ -851,14 +852,9 @@ public class EmxMetaDataParser implements MetaDataParser
 
 		Map<String, EntityMetaData> metaDataMap = getEntityMetaDataMap(dataService, source);
 
-		// "-" is not allowed because of bug: https://github.com/molgenis/molgenis/issues/2055
-		// FIXME remove this line once this bug is fixed
-		for (String entityName : metaDataMap.keySet())
+		for (EntityMetaData emd : metaDataMap.values())
 		{
-			if (entityName.contains("-"))
-			{
-				throw new IllegalArgumentException("'-' is not allowed in an entity name (" + entityName + ")");
-			}
+			MetaValidationUtils.validateEntityMetaData(emd);
 		}
 
 		for (String sheet : source.getEntityNames())

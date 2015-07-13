@@ -81,12 +81,35 @@ p.form-inline {
 	margin-top: 20px;
 }
 
-.paper-holder {
-	width: 1250px; 
-	height: 625px; 
+#uml{
+	margin-left: 1%;
+	margin-right: 1%;
+}
+
+#paper-holder {
+	width: auto;
+	height: auto;
 	margin-left: auto;
 	margin-right: auto;
 	overflow: scroll;
+}
+
+#paper>svg {
+	margin: 1%;
+	outline: 1px solid gray;
+}
+
+#dpi{
+	height: 1in; 
+	left: -100%; 
+	position: absolute; 
+	top: -100%; 
+	width: 1in;
+}
+
+#zoom-in-out {
+	position: fixed;
+	z-index: 3000;
 }
 
 /* Prevent detaching of relationship vertices in jointjs */

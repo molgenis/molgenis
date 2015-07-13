@@ -8,9 +8,10 @@
 	'vega.min.js',
 	'jstat.min.js',
 	'biobankconnect-graph.js',
-	'/jquery/scrollTableBody/jquery.scrollTableBody-1.0.0.js',
+	'jquery/scrollTableBody/jquery.scrollTableBody-1.0.0.js',
 	'bootbox.min.js',
-	'jquery.ace.js'
+	'jquery.ace.js',
+	'jquery.highlight.js'
 ]>
 
 <@header css js/>
@@ -20,26 +21,83 @@
 
 <div class="row">
 	<div class="col-md-12">
-		<a href="${context_url?html}/mappingproject/${mappingProject.identifier?html}" class="btn btn-default btn-xs pull-left">
-			<span class="glyphicon glyphicon-chevron-left"></span> Back to project
-		</a>
-		
 		<#-- Hidden fields containing information needed for ajax requests -->
 		<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier?html}"/>
 		<input type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name?html}"/>
 		<input type="hidden" name="source" value="${entityMapping.sourceEntityMetaData.name?html}"/>
 		<input type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name?html}"/>
 		<input type="hidden" name="targetAttributeType" value="${attributeMapping.targetAttributeMetaData.dataType?html}"/>
-		
 	</div>
 </div>
 
-<div class="row">
-	<div class="col-md-12">
-		<hr></hr>
+</br>
+
+<div class="row">	
+	<div class="col-md-4 col-lg-2">
 		<p>
-			${attributeMapping.targetAttributeMetaData.name?html} (${attributeMapping.targetAttributeMetaData.dataType}) : ${(attributeMapping.targetAttributeMetaData.description!"")?html}
+			<strong>Name</strong>
+			</br>
+			<span>
+				${attributeMapping.targetAttributeMetaData.name?html} (${attributeMapping.targetAttributeMetaData.dataType})
+			</span>
+			
+			</br>
+			
+			<strong>Label</strong>
+			</br> 
+			<span>
+				<#if attributeMapping.targetAttributeMetaData.label??>
+					${attributeMapping.targetAttributeMetaData.label?html}
+				<#else>
+					N/A
+				</#if>
+			</span>
+			
+			</br>
+			
+			<strong>Description</strong>
+			</br>
+			<span>
+				<#if attributeMapping.targetAttributeMetaData.description??>
+					${attributeMapping.targetAttributeMetaData.description?html}
+				<#else>
+					N/A
+				</#if>
+			</span>
+			</br>
 		</p>
+	</div>	
+	<div class="col-md-4 col-lg-2">	
+		<#if attributeMapping.targetAttributeMetaData.dataType == 'categorical' || attributeMapping.targetAttributeMetaData.dataType == 'xref'>
+			<strong>Categories</strong>
+			</br>
+			<span>
+				<#if attributeMapping.targetAttributeMetaData.dataType == "xref" || attributeMapping.targetAttributeMetaData.dataType == "categorical" && (categories)?has_content>
+					<#assign refEntityMetaData = attributeMapping.targetAttributeMetaData.refEntity>
+					<#list categories.iterator() as category>
+						<#list refEntityMetaData.attributes as attribute>
+							<#assign attributeName = attribute.name>
+								${category[attributeName]} <#if refEntityMetaData.attributes?seq_index_of(attribute) != refEntityMetaData.attributes?size - 1>=</#if>
+						</#list>
+						</br>
+					</#list>
+				<#else>
+					N/A
+				</#if>
+			</span>
+		</#if>
+	</div>
+	<div class="col-md-4 col-lg-2">	
+		<strong>OntologyTerms</strong>
+		</br>
+		<#if tags ?? && tags?size == 0>
+			N/A
+		<#else>
+			<#list tags as tag>
+				<#assign synonyms = tag.synonyms?join("</br>")>
+				<span class="label label-info ontologytag-tooltip" data-toggle="popover" title="<strong>Synonyms</strong>" data-content="${synonyms}">${tag.label}</span>
+			</#list>
+		</#if>
 	</div>
 </div>
 
@@ -59,7 +117,7 @@
 					
 					<form>
 			  			<div class="form-group">
-							<input id="attribute-search-field" type="text" class="form-control" placeholder="Search...">
+							<input id="attribute-search-field" type="text" class="form-control" placeholder="Search all ${entityMapping.sourceEntityMetaData.attributes?size?html} attributes from ${entityMapping.sourceEntityMetaData.name?html}">
 						</div>
 					</form>
 				</div>
@@ -67,6 +125,7 @@
 			
 			<div class="row">
 				<div class="col-md-12">
+					<p id="attribute-search-result-message"></p>
 					<table id="attribute-mapping-table" class="table table-bordered scroll">
 						<thead>
 							<th>Select</th>
@@ -75,11 +134,11 @@
 						</thead>
 						<tbody>
 							<#list entityMapping.sourceEntityMetaData.attributes as source>
-								<tr class="${source.name?html}" data-attribute-label="${source.label?html}">
+								<tr data-attribute-name="${source.name?html}" data-attribute-label="${source.label?html}">
 									<td>
 										<div class="checkbox">
 											<label>
-												<input class="${source.name?html}" type="checkbox">
+												<input data-attribute-name="${source.name?html}" type="checkbox">
 											</label>
 										</div>
 									</td>
@@ -88,6 +147,9 @@
 										<#if source.nillable> <span class="label label-warning">nillable</span></#if>
 										<#if source.unique> <span class="label label-default">unique</span></#if>
 										<#if source.description??><br />${source.description?html}</#if>
+										<#if source.dataType == "xref" || source.dataType == "categorical" || source.dataType == "mref">
+											<br><a href="${dataExplorerUri?html}?entity=${source.refEntity.name}" target="_blank">category look up</a>
+										</#if>
 									</td>
 									<td>
 										${source.name?html}
@@ -125,7 +187,7 @@
 			    		<li role="presentation" class="active"><a href="#script" aria-controls="script" role="tab" data-toggle="tab">Script</a></li>
 			    		
 			    		<#if attributeMapping.targetAttributeMetaData.dataType == "xref" || attributeMapping.targetAttributeMetaData.dataType == "categorical" ||
-			    		attributeMapping.targetAttributeMetaData.dataType == "mref" || attributeMapping.targetAttributeMetaData.dataType == "string">
+			    		attributeMapping.targetAttributeMetaData.dataType == "mref">
 			    			<li role="presentation"><a href="#map" aria-controls="map" role="tab" data-toggle="tab">Map</a></li>
 		    			</#if> 
 			   		</ul>
@@ -139,6 +201,13 @@
 			    		<div role="tabpanel" class="tab-pane" id="map"><@map /></div>
 			    	</div>
 			    	<br/>
+				</div>
+			</div>
+			<div class="col-md-12 col-lg-12">
+				<hr></hr>
+				<div class="row">
+					<a href="/menu/main/mappingservice/mappingproject/${mappingProject.identifier?html}" type="btn" class="btn btn-default pull-right">Cancel</a>
+					<button id="save-mapping-btn" type="btn" class="btn btn-primary pull-right">Save</button>
 				</div>
 			</div>
 			
@@ -158,17 +227,16 @@
 					<p>
 						
 					</p>
+					<h4>Validation</h4>
+					<p>Algorithm validation starts automatically when the algorithm is updated.</p> 
+                    <div id="mapping-validation-container"></div>
+					<h4>Preview</h4>
 					<div id="result-table-container"></div>
 				</div>
 			</div>
 			 
 		</div> <#-- End: Result container -->
 	</div> <#-- End: Result column -->	
-
-	<div class="col-md-12 col-lg-12">
-		<hr></hr>
-		<button id="save-mapping-btn" type="btn" class="btn btn-primary btn-lg pull-right">Save</button>	
-	</div>
 
 </div> <#-- End: Master row -->
 
@@ -239,5 +307,27 @@
 		</div>
 	</div>
 </div>
-
+<div class="modal" id="validation-error-messages-modal" tabindex="-1" role="dialog" aria-labelledby="validation-error-messages-label" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">             
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="validation-error-messages-label">Validation Errors</h4>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered validation-error-messages-table">
+                    <thead>
+                        <th>Source Entity</th> 
+                        <th>Error message</th>
+                    </thead>
+                    <tbody id="validation-error-messages-table-body">
+                    </tbody>
+                </table>                        
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 <@footer/>

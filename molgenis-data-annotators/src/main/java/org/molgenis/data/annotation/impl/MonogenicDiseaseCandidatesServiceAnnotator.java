@@ -1,31 +1,9 @@
 package org.molgenis.data.annotation.impl;
 
-import org.elasticsearch.common.collect.Iterables;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.VariantAnnotator;
-import org.molgenis.data.annotation.provider.CgdDataProvider;
-import org.molgenis.data.annotation.provider.CgdDataProvider.generalizedInheritance;
-import org.molgenis.data.annotation.utils.AnnotatorUtils;
-import org.molgenis.data.support.AnnotationServiceImpl;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.data.vcf.utils.VcfUtils;
-import org.molgenis.framework.server.MolgenisSettings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.stereotype.Component;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,6 +13,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.elasticsearch.common.collect.Iterables;
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.annotation.VariantAnnotator;
+import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
+import org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator;
+import org.molgenis.data.annotation.entity.impl.ExacAnnotator;
+import org.molgenis.data.annotation.entity.impl.SnpEffServiceAnnotator;
+import org.molgenis.data.annotation.provider.CgdDataProvider;
+import org.molgenis.data.annotation.provider.CgdDataProvider.generalizedInheritance;
+import org.molgenis.data.annotation.utils.AnnotatorUtils;
+import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.vcf.utils.VcfUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 /**
  * Monogenic disease filter
  * 
@@ -42,10 +42,17 @@ import java.util.Set;
 @Component("monogenicDiseaseService")
 public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 {
+
+	@Override
+	public AnnotatorInfo getInfo()
+	{
+		return AnnotatorInfo.create(Status.BETA, Type.AUTOMATED_PROTOCOL, "monogenic", "Monogenic disease candidates",
+				getOutputMetaData());
+	}
+
 	private static final Logger LOG = LoggerFactory.getLogger(MonogenicDiseaseCandidatesServiceAnnotator.class);
 	public static final String ANNOTATIONFIELD = VcfRepository.getInfoPrefix() + "ANN";
 
-	private final AnnotationService annotatorService;
 	public static final String MONOGENICDISEASECANDIDATE_LABEL = "MONGENDISCAND";
 	private static final String HOMREF_LABEL = "HOMREF";
 	private static final String HOMALT_LABEL = "HOMALT";
@@ -68,15 +75,13 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 
 	final List<String> infoFields = Arrays
 			.asList(new String[]
-                    {"##INFO=<ID="
-                            + MONOGENICDISEASECANDIDATE.substring(VcfRepository.getInfoPrefix().length())
-                            + ",Number=1,Type=String,Description=\"Possible outcomes: EXCLUDED, INCLUDED_DOMINANT, INCLUDED_DOMINANT_HIGHIMPACT, INCLUDED_RECESSIVE, INCLUDED_RECESSIVE_HIGHIMPACT, INCLUDED_RECESSIVE_COMPOUND, INCLUDED_OTHER\">",});
+			{ "##INFO=<ID="
+					+ MONOGENICDISEASECANDIDATE.substring(VcfRepository.getInfoPrefix().length())
+					+ ",Number=1,Type=String,Description=\"Possible outcomes: EXCLUDED, INCLUDED_DOMINANT, INCLUDED_DOMINANT_HIGHIMPACT, INCLUDED_RECESSIVE, INCLUDED_RECESSIVE_HIGHIMPACT, INCLUDED_RECESSIVE_COMPOUND, INCLUDED_OTHER\">", });
 
-	@Autowired
-	public MonogenicDiseaseCandidatesServiceAnnotator(MolgenisSettings molgenisSettings,
-			AnnotationService annotatorService) throws IOException
+	public MonogenicDiseaseCandidatesServiceAnnotator()
 	{
-		this.annotatorService = annotatorService;
+
 	}
 
 	public MonogenicDiseaseCandidatesServiceAnnotator(File filterSettings, File inputVcfFile, File outputVCFFile)
@@ -88,14 +93,12 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 
 		genesWithCandidates = new HashSet<String>();
 
-		this.annotatorService = new AnnotationServiceImpl();
-
 		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
 
 		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
 		Iterator<Entity> vcfIter = vcfRepo.iterator();
 
-		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields,
+		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, getOutputMetaData(),
 				MONOGENICDISEASECANDIDATE.substring(VcfRepository.getInfoPrefix().length()));
 
 		System.out.println("Now starting to process the data.");
@@ -127,12 +130,6 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 	}
 
 	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		annotatorService.addAnnotator(this);
-	}
-
-	@Override
 	public String getSimpleName()
 	{
 		return NAME;
@@ -158,18 +155,21 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 				"Annotation field does not contain the expected input (less items than expected)");
 		double thousandGenomesMAF = entity.getDouble(ThousandGenomesServiceAnnotator.THGEN_MAF) != null ? entity
 				.getDouble(ThousandGenomesServiceAnnotator.THGEN_MAF) : 0;
-		double exacMAF = entity.getDouble(ExACServiceAnnotator.EXAC_MAF) != null ? entity
-				.getDouble(ExACServiceAnnotator.EXAC_MAF) : 0;
+		double exacMAF = entity.getDouble(ExacAnnotator.EXAC_AF) != null ? entity.getDouble(ExacAnnotator.EXAC_AF) : 0;
 		double gonlMAF = entity.getDouble(GoNLServiceAnnotator.GONL_MAF) != null ? entity
 				.getDouble(GoNLServiceAnnotator.GONL_MAF) : 0;
 		CgdDataProvider.generalizedInheritance cgdGenInh = entity
-				.getString(ClinicalGenomicsDatabaseServiceAnnotator.GENERALIZED_INHERITANCE) != null ? generalizedInheritance
-				.valueOf(entity.getString(ClinicalGenomicsDatabaseServiceAnnotator.GENERALIZED_INHERITANCE)) : null;
-		String originalInheritance = entity.getString(ClinicalGenomicsDatabaseServiceAnnotator.INHERITANCE) != null ? entity
-				.getString(ClinicalGenomicsDatabaseServiceAnnotator.INHERITANCE) : null;
-		SnpEffServiceAnnotator.impact impact = SnpEffServiceAnnotator.impact.valueOf(annSplit[2]);
+				.getString(ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.GENERALIZED_INHERITANCE
+						.getAttributeName()) != null ? generalizedInheritance.valueOf(entity
+				.getString(ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.GENERALIZED_INHERITANCE
+						.getAttributeName())) : null;
+		String originalInheritance = entity
+				.getString(ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.INHERITANCE.getAttributeName()) != null ? entity
+				.getString(ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.INHERITANCE.getAttributeName()) : null;
+		SnpEffServiceAnnotator.Impact impact = Enum.valueOf(SnpEffServiceAnnotator.Impact.class, annSplit[2]);
 		String gene = annSplit[3];
-		String condition = entity.getString(ClinicalGenomicsDatabaseServiceAnnotator.CONDITION);
+		String condition = entity.getString(ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.CONDITION
+				.getAttributeName());
 
 		// TODO: can be multiple!! even with canonical output...
 		String zygosity = checkGenotypeData(entity);
@@ -217,14 +217,14 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 	}
 
 	private void annotateForRecessiveDisorders(Entity entity, Map<String, Object> resultMap,
-			SnpEffServiceAnnotator.impact impact, String gene, String zygosity) throws IOException
+			SnpEffServiceAnnotator.Impact impact, String gene, String zygosity) throws IOException
 	{
 		// must be HOMALT for this
 		if (zygosity.equals(HOMALT))
 		{
 			resultMap
 					.put(MONOGENICDISEASECANDIDATE,
-                            impact.equals(SnpEffServiceAnnotator.impact.HIGH) ? outcome.INCLUDED_RECESSIVE_HIGHIMPACT : outcome.INCLUDED_RECESSIVE);
+							impact.equals(SnpEffServiceAnnotator.Impact.HIGH) ? outcome.INCLUDED_RECESSIVE_HIGHIMPACT : outcome.INCLUDED_RECESSIVE);
 		}
 		// only option left: HET, but check just in case
 		else if (zygosity.equals(HET))
@@ -235,14 +235,14 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 						+ gene + ", for " + entity.toString());
 				resultMap
 						.put(MONOGENICDISEASECANDIDATE,
-                                impact.equals(SnpEffServiceAnnotator.impact.HIGH) ? outcome.INCLUDED_RECESSIVE_COMPOUND_HIGHIMPACT : outcome.INCLUDED_RECESSIVE_COMPOUND);
+								impact.equals(SnpEffServiceAnnotator.Impact.HIGH) ? outcome.INCLUDED_RECESSIVE_COMPOUND_HIGHIMPACT : outcome.INCLUDED_RECESSIVE_COMPOUND);
 			}
 			else
 			{
 				genesWithCandidates.add(gene);
 				resultMap
 						.put(MONOGENICDISEASECANDIDATE,
-                                impact.equals(SnpEffServiceAnnotator.impact.HIGH) ? outcome.EXCLUDED_FIRST_OF_COMPOUND_HIGHIMPACT : outcome.EXCLUDED_FIRST_OF_COMPOUND); // exclude
+								impact.equals(SnpEffServiceAnnotator.Impact.HIGH) ? outcome.EXCLUDED_FIRST_OF_COMPOUND_HIGHIMPACT : outcome.EXCLUDED_FIRST_OF_COMPOUND); // exclude
 			}
 		}
 		else
@@ -252,13 +252,13 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 	}
 
 	private void annotateForDominantDisorders(Map<String, Object> resultMap, double thousandGenomesMAF, double exacMAF,
-			double gonlMAF, generalizedInheritance cgdGenInh, SnpEffServiceAnnotator.impact impact)
+			double gonlMAF, generalizedInheritance cgdGenInh, SnpEffServiceAnnotator.Impact impact)
 	{
 		if (thousandGenomesMAF < 0.0025 && exacMAF < 0.0025 && gonlMAF < 0.0025)
 		{
 			resultMap
 					.put(MONOGENICDISEASECANDIDATE,
-                            impact.equals(SnpEffServiceAnnotator.impact.HIGH) ? outcome.INCLUDED_DOMINANT_HIGHIMPACT : outcome.INCLUDED_DOMINANT);
+							impact.equals(SnpEffServiceAnnotator.Impact.HIGH) ? outcome.INCLUDED_DOMINANT_HIGHIMPACT : outcome.INCLUDED_DOMINANT);
 		}
 		// if purely dominant, exclude at this point!
 		else if (cgdGenInh.equals(generalizedInheritance.DOMINANT))
@@ -268,7 +268,7 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 	}
 
 	private boolean isApplyBroadSpectrumFilter(double thousandGenomesMAF, double exacMAF, double gonlMAF,
-			generalizedInheritance cgdGenInh, SnpEffServiceAnnotator.impact impact, String zygosity)
+			generalizedInheritance cgdGenInh, SnpEffServiceAnnotator.Impact impact, String zygosity)
 	{
 		/**
 		 * Broad spectrum filters, already gets rid of >99% of variants
@@ -279,8 +279,8 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 		// common variant in one of the three big databases, skip it
 		else if (thousandGenomesMAF > 0.05 || exacMAF > 0.05 || gonlMAF > 0.05) filter = true;
 		// skip any "low impact" variants
-		else if (impact.equals(SnpEffServiceAnnotator.impact.MODIFIER)
-				|| impact.equals(SnpEffServiceAnnotator.impact.LOW)) filter = true;
+		else if (impact.equals(SnpEffServiceAnnotator.Impact.MODIFIER)
+				|| impact.equals(SnpEffServiceAnnotator.Impact.LOW)) filter = true;
 		// skip any homozygous reference alleles
 		else if (zygosity.equals(HOMREF)) filter = true;
 		return filter;
@@ -337,30 +337,30 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 	}
 
 	@Override
-	public EntityMetaData getOutputMetaData()
+	public List<AttributeMetaData> getOutputMetaData()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(MONOGENICDISEASECANDIDATE, FieldTypeEnum.STRING)
+		List<AttributeMetaData> metadata = new ArrayList<>();
+		metadata.add(new DefaultAttributeMetaData(MONOGENICDISEASECANDIDATE, FieldTypeEnum.STRING)
 				.setLabel(MONOGENICDISEASECANDIDATE_LABEL));
 		return metadata;
 	}
 
 	@Override
-	public EntityMetaData getInputMetaData()
+	public List<AttributeMetaData> getInputMetaData()
 	{
-		DefaultEntityMetaData entityMetaData = (DefaultEntityMetaData) super.getInputMetaData();
-		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ANNOTATIONFIELD, FieldTypeEnum.TEXT));
-		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ThousandGenomesServiceAnnotator.THGEN_MAF,
+		List<AttributeMetaData> entityMetaData = super.getInputMetaData();
+		entityMetaData.add(new DefaultAttributeMetaData(ANNOTATIONFIELD, FieldTypeEnum.TEXT));
+		entityMetaData.add(new DefaultAttributeMetaData(ThousandGenomesServiceAnnotator.THGEN_MAF,
 				FieldTypeEnum.DECIMAL));
-		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ExACServiceAnnotator.EXAC_MAF,
-				FieldTypeEnum.DECIMAL));
-		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(GoNLServiceAnnotator.GONL_MAF,
-				FieldTypeEnum.DECIMAL));
-		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(
-				ClinicalGenomicsDatabaseServiceAnnotator.GENERALIZED_INHERITANCE, FieldTypeEnum.TEXT));
-		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(
-				ClinicalGenomicsDatabaseServiceAnnotator.INHERITANCE, FieldTypeEnum.TEXT));
-		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.SAMPLES, FieldTypeEnum.MREF));
+		entityMetaData.add(new DefaultAttributeMetaData(ExacAnnotator.EXAC_AF, FieldTypeEnum.DECIMAL));
+		entityMetaData.add(new DefaultAttributeMetaData(GoNLServiceAnnotator.GONL_MAF, FieldTypeEnum.DECIMAL));
+		entityMetaData.add(new DefaultAttributeMetaData(
+				ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.GENERALIZED_INHERITANCE.getAttributeName(),
+				FieldTypeEnum.TEXT));
+		entityMetaData.add(new DefaultAttributeMetaData(
+				ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.INHERITANCE.getAttributeName(),
+				FieldTypeEnum.TEXT));
+		entityMetaData.add(new DefaultAttributeMetaData(VcfRepository.SAMPLES, FieldTypeEnum.MREF));
 		return entityMetaData;
 	}
 

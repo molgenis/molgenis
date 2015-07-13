@@ -21,7 +21,7 @@ public class MysqlRepositoryExtendsTest extends MysqlRepositoryAbstractDatatypeT
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		EditableEntityMetaData superclass2 = new DefaultEntityMetaData("super").setAbstract(true);
+		EditableEntityMetaData superclass2 = new DefaultEntityMetaData("super0").setAbstract(true);
 		superclass2.addAttribute("col1").setDataType(MolgenisFieldTypes.BOOL).setNillable(false).setIdAttribute(true);
 		metaDataService.addEntityMeta(superclass2);
 

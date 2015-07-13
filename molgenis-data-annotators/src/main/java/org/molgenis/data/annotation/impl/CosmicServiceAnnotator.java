@@ -16,17 +16,14 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.annotation.AbstractRepositoryAnnotator;
-import org.molgenis.data.annotation.utils.AnnotatorUtils;
+import org.molgenis.data.annotation.AbstractRepositoryEntityAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.impl.datastructures.CosmicData;
+import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
@@ -42,11 +39,10 @@ import com.google.gson.reflect.TypeToken;
  * 
  * */
 @Component("cosmicService")
-public class CosmicServiceAnnotator extends AbstractRepositoryAnnotator implements RepositoryAnnotator,
-		ApplicationListener<ContextRefreshedEvent>
+public class CosmicServiceAnnotator extends AbstractRepositoryEntityAnnotator implements RepositoryAnnotator
 {
 	// Web url to call the ensembl web service
-    //FIXME: should be RTP
+	// FIXME: should be RTP
 	private static final String SERVICE_URL = "http://beta.rest.ensembl.org/feature/id/";
 	private static final String SERVICE_POSTFIX = ".json?feature=somatic_variation";
 	// ensembl service is dependant on this ID when the web service is called
@@ -80,10 +76,10 @@ public class CosmicServiceAnnotator extends AbstractRepositoryAnnotator implemen
 	}
 
 	@Override
-	public EntityMetaData getInputMetaData()
+	public List<AttributeMetaData> getInputMetaData()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ENSEMBLE_ID, FieldTypeEnum.STRING));
+		List<AttributeMetaData> metadata = new ArrayList<>();
+		metadata.add(new DefaultAttributeMetaData(ENSEMBLE_ID, FieldTypeEnum.STRING));
 		return metadata;
 	}
 
@@ -91,7 +87,7 @@ public class CosmicServiceAnnotator extends AbstractRepositoryAnnotator implemen
 	public boolean annotationDataExists()
 	{
 		// TODO check if the webservice is up and running
-        return true;
+		return true;
 	}
 
 	@Override
@@ -180,17 +176,23 @@ public class CosmicServiceAnnotator extends AbstractRepositoryAnnotator implemen
 	}
 
 	@Override
-	public EntityMetaData getOutputMetaData()
+	public List<AttributeMetaData> getOutputMetaData()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ID, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(FEATURE_TYPE, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ALT_ALLELES, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(END, FieldTypeEnum.INT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(SEQ_REGION_NAME, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CONSEQUENCE_TYPE, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(STRAND, FieldTypeEnum.INT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(START, FieldTypeEnum.INT));
+		List<AttributeMetaData> metadata = new ArrayList<>();
+		metadata.add(new DefaultAttributeMetaData(ID, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(FEATURE_TYPE, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(ALT_ALLELES, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(END, FieldTypeEnum.INT));
+		metadata.add(new DefaultAttributeMetaData(SEQ_REGION_NAME, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(CONSEQUENCE_TYPE, FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData(STRAND, FieldTypeEnum.INT));
+		metadata.add(new DefaultAttributeMetaData(START, FieldTypeEnum.INT));
 		return metadata;
+	}
+
+	@Override
+	public AnnotatorInfo getInfo()
+	{
+		return null;
 	}
 }

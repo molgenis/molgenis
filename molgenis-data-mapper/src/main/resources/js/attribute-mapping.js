@@ -90,6 +90,94 @@
 		return result;
 	}
 
+	var timeoutId, isValidating;
+
+	/**
+	 * Validate algorithm on source entities, render UI component that displays
+	 * the number of total/success/errors and corresponding error messages.
+	 * Stops after a max. number of validation errors.
+	 */
+	function validateAttrMapping(algorithm) {
+		var validationDelay = 2000;
+		var validationBatchSize = 500;
+		var validationMaxErrors = 100;
+
+		isValidating = false;
+		if (timeoutId) {
+			clearTimeout(timeoutId);
+		}
+
+		$('#mapping-validation-container').html('<span>Pending ...</span>');
+		$('#validation-error-messages-table-body').empty();
+		timeoutId = setTimeout(
+				function() {
+					isValidating = true;
+
+					var request = {
+						targetEntityName : $('input[name="target"]').val(),
+						sourceEntityName : $('input[name="source"]').val(),
+						targetAttributeName : $('input[name="targetAttribute"]').val(),
+						algorithm : algorithm
+					};
+
+					var items = [];
+					items.push('<img id="validation-spinner" src="/css/select2-spinner.gif">&nbsp;');
+					items.push('<span class="label label-default">Total: <span id="validation-total">?</span></span>&nbsp;');
+					items.push('<span class="label label-success">Success: <span id="validation-success">0</span></span>&nbsp;');
+					items
+							.push('<span class="label label-danger"><a class="validation-errors-anchor" href="#validation-error-messages-modal" data-toggle="modal" data-target="#validation-error-messages-modal">Errors: <span id="validation-errors">0</span></a></span>&nbsp;');
+					items.push('<em class="hidden" id="max-errors-msg">(Validation aborted, encountered too many errors)</em>');
+					$('#mapping-validation-container').html(items.join(''));
+					validateAttrMappingRec(request, 0, validationBatchSize, 0, 0, validationMaxErrors);
+				}, validationDelay);
+
+	}
+
+	function validateAttrMappingRec(request, offset, num, nrSuccess, nrErrors, validationMaxErrors) {
+		$.ajax({
+			type : 'POST',
+			url : molgenis.getContextUrl() + '/validateAttrMapping',
+			data : JSON.stringify(_.extend({}, request, {
+				offset : offset,
+				num : num
+			})),
+			showSpinner : false,
+			contentType : 'application/json'
+		}).done(function(data) {
+			nrSuccess += data.nrSuccess;
+			nrErrors += data.nrErrors;
+
+			if (offset + num >= data.total || nrErrors >= validationMaxErrors) {
+
+				$('#validation-spinner').hide();
+			}
+			$('#validation-total').html(data.total);
+			$('#validation-success').html(nrSuccess);
+			$('#validation-errors').html(nrErrors);
+
+			if (nrErrors > 0) {
+
+				_.each(data.errorMessages, function(message, id) {
+					$('#validation-error-messages-table-body').append('<tr><td>' + id + '</td><td>' + message + '</td></tr>');
+				});
+			}
+
+			if (nrErrors >= validationMaxErrors) {
+				$('#max-errors-msg').removeClass('hidden');
+				return;
+			}
+
+			if (offset + num < data.total) {
+				if (isValidating) {
+
+					validateAttrMappingRec(request, offset + num, num, nrSuccess, nrErrors, validationMaxErrors);
+				} else {
+					$('#mapping-validation-container').html('<span>Pending ...</span>');
+				}
+			}
+		});
+	}
+
 	/**
 	 * Load result table from view-attribute-mapping-feedback.ftl
 	 * 
@@ -138,7 +226,7 @@
 	function checkSelectedAttributes(algorithm) {
 		var sourceAttrs = getSourceAttrs(algorithm);
 		$('input:checkbox').each(function(index, value) {
-			var name = $(this).attr('class'), inArray = $.inArray(name, sourceAttrs);
+			var name = $(this).data('attribute-name'), inArray = $.inArray(name, sourceAttrs);
 			$(this).prop('checked', inArray >= 0);
 		});
 	}
@@ -197,20 +285,30 @@
 		});
 	}
 
+	
 	/**
 	 * Hides rows of the table if atrribute source labels, names, descriptions
 	 * and tags have nothing to do with the query, hide the row
 	 */
-	function filterAttributeTable() {
-		var searchQuery = $('#attribute-search-field').val().toLowerCase(), attrLabel, attrName, attrDescription;
+	function filterAttributeTable(attributes) {
+		var searchQuery = $('#attribute-search-field').val().toLowerCase(), attrLabel, attrName, attrDescription, row;
 		if (searchQuery === '') {
 			$('#attribute-mapping-table>tbody').find('tr').each(function() {
-				$(this).show();
+				row = $(this);
+				if (attributes !== null) {
+					if (attributes.indexOf($(this).data('attribute-name').toLowerCase()) > -1) {
+						row.show();
+					} else {
+						row.hide();
+					}
+				} else {
+					row.hide();
+				}
 			});
 		} else {
 			$('#attribute-mapping-table>tbody').find('tr').each(function() {
 				attrLabel = $(this).data('attribute-label').toLowerCase();
-				attrName = $(this).attr('class').toLowerCase();
+				attrName = $(this).data('attribute-label').toLowerCase();
 				attrDescription = $(this).find('td.source-attribute-information').text().toLowerCase();
 
 				$(this).show();
@@ -220,17 +318,189 @@
 				}
 			});
 		}
+		
+		//Update the search result message above the table
+		var numberOfVisibleAttributes = $('#attribute-mapping-table>tbody tr:visible').length;
+		var totalNumberOfAttributes = $('#attribute-mapping-table>tbody tr').length;
+		$('#attribute-search-result-message').empty().append(numberOfVisibleAttributes + ' attributes have been found out of ' + totalNumberOfAttributes);
+		
+		// hide/show the header of the table depending on whether or not there are any visiable attributes
+		if(numberOfVisibleAttributes == 0){
+			$('#attribute-mapping-table>thead tr').hide();
+		}else{
+			$('#attribute-mapping-table>thead tr').show();
+		}
+	}
+
+	/**
+	 * Move suggested attributes to the top of the attribute table
+	 */
+	function rankAttributeTable(explainedAttributes){
+		if(explainedAttributes != null){
+			var attributeNames = Object.keys(explainedAttributes), className, attributeLabel, attributeInfoElement, firstRow, suggestedRow, explainedQueryStrings, words;
+			for(var i = attributeNames.length - 1; i >= 0;i--){
+				
+				className = attributeNames[i];
+				firstRow = $('#attribute-mapping-table>tbody tr:first');
+				suggestedRow = $('#attribute-mapping-table tr[data-attribute-name="' + className + '"]');
+				attributeLabel = $(suggestedRow).attr('data-attribute-label');
+				attributeInfoElement = $(suggestedRow).find('td.source-attribute-information');
+				//Push the suggested attributes to the top of the table
+				firstRow.before(suggestedRow);
+				//highlight the matched words in attribute labels
+				explainedQueryStrings = explainedAttributes[className];
+				
+				if(explainedQueryStrings.length > 0){
+					
+					createPopoverExplanation(suggestedRow, attributeInfoElement, attributeLabel, explainedQueryStrings);
+					
+					$.each(explainedQueryStrings, function(index, explainedQueryString){
+						words = extendPartialWord(attributeLabel, explainedQueryString.matchedWords.split(' '));
+						$.each(connectNeighboredWords(attributeLabel, words), function(index, word){
+							$(attributeInfoElement).highlight(word);
+						});
+					});
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Create a boostrap popover message to show the explanation 
+	 */
+	function createPopoverExplanation(row, attributeInfoElement, attributeLabel, explainedQueryStrings){
+		if(explainedQueryStrings.length > 0){
+			var message = '', matchedWords, queryString, score;
+			$.each(explainedQueryStrings, function(index, explainedQueryString){
+				matchedWords = extendPartialWord(attributeLabel, explainedQueryString.matchedWords.split(' '));
+				queryString = explainedQueryString.queryString;
+				score = explainedQueryString.score;
+				message += 'The query <strong>' + queryString + '</strong> derived from <strong>' + explainedQueryString.tagName;
+				message += '</strong> is matched to the label on words <strong>' + matchedWords.join(' ').toLowerCase() + '</strong> with ' + score + '%<br><br>';
+			});
+			var option = {'title' : 'Explanation', 'content' : message, 'html' : true, 'placement' : 'top', 'container' : row, 'trigger' : 'hover'};
+			$(attributeInfoElement).popover(option);
+		}
+	}
+	
+	/**
+	 * connect the matched words that are neighbors so they can be highlighted together
+	 */
+	function connectNeighboredWords(attributeLabel, matchedWords){
+		var illegal_pattern = new RegExp("[^a-zA-Z0-9]");
+		var connectedPhrases = [], connectedPhrase, orderedWords, connectedWords;
+		if(attributeLabel && matchedWords && matchedWords.length > 0){
+			connectedPhrase = '';
+			orderedWords = attributeLabel.toUpperCase().split(' ');
+			$.each(orderedWords, function(index, word){
+				if($.inArray(word, matchedWords) !== -1){
+					connectedPhrase += ' ' + word;
+				}else{
+					
+					if(connectedPhrase.length > 0){
+						connectedPhrases.push(connectedPhrase.trim());
+						connectedPhrase = '';
+					}
+					//Word contains illegal chars
+					if(illegal_pattern.test(word)){
+						addAll(connectedPhrases, connectNeighboredWords(word.split(illegal_pattern).join(' '), matchedWords));
+					}
+				}
+			});
+			if(connectedPhrase.length > 0){
+				connectedPhrases.push(connectedPhrase.trim());
+			}
+		}
+		return connectedPhrases;
+	}
+	
+	function addAll(originalArray, elementsToAdd){
+		$.each(elementsToAdd, function(index, element){
+			originalArray.push(element);
+		});
+	}
+	
+	/**
+	 * Explain API provides stemmed words, this method finds the 'original' word in the attribute label based the stemmed word.
+	 */
+	function extendPartialWord(attributeLabel, partialWords){
+		var completeWords = [];
+		if(attributeLabel && partialWords && partialWords.length > 0){
+			$.each(partialWords, function(index, partialWord){
+				attributeLabel = attributeLabel.toUpperCase();
+				partialWord = partialWord.toUpperCase();
+				var startIndex = attributeLabel.indexOf(partialWord);
+				
+				while(startIndex == -1 && partialWord.length > 0){
+					partialWord = partialWord.substring(0, partialWord.length - 1);
+					startIndex = attributeLabel.indexOf(partialWord);
+				}
+			
+				if(startIndex != -1){
+					var endIndex = startIndex + partialWord.length;
+					while(attributeLabel.length > endIndex && attributeLabel.charAt(endIndex).match(/[A-Z0-9]/i)){
+						endIndex++;
+					}
+					completeWords.push(attributeLabel.substring(startIndex, endIndex));
+				}else{
+					completeWords.push(partialWord)
+				}
+			});
+		}
+		return completeWords;
+	}
+	
+	//A helper function to perform post-redirect action
+	function redirectPost(url, data){
+		showSpinner();
+		var form = '';
+        $.each(data, function(key, value) {
+            form += '<input type="hidden" name="'+key+'" value="'+value+'">';
+        });
+        $('<form action="'+url+'" method="POST">'+form+'</form>').appendTo('body').submit();
 	}
 
 	$(function() {
 
-		var editor, searchQuery, selectedAttributes, initialValue, algorithm, targetAttributeDataType, $textarea;
+		// Initialize all variables
+		var editor, searchQuery, selectedAttributes, initialValue, algorithm, targetAttributeDataType, $textarea, requestBody = {
+			'mappingProjectId' : $('[name="mappingProjectId"]').val(),
+			'target' : $('[name="target"]').val(),
+			'source' : $('[name="source"]').val(),
+			'targetAttribute' : $('[name="targetAttribute"]').val()
+		}, explainedAttributes, attributes = [];
 
 		// tooltip placement
-		$(document).ready(function() {
-			$("[rel=tooltip]").tooltip({
-				placement : 'right'
-			});
+		$("[rel=tooltip]").tooltip({
+			placement : 'right'
+		});
+		
+		$('.ontologytag-tooltip').css({'cursor':'pointer'}).popover({'html':true, 'placement':'bottom', 'trigger':'hover'});
+
+		// Get the explained attributes
+		$.ajax({
+			type : 'POST',
+			url : molgenis.getContextUrl() + '/attributeMapping/explain',
+			data : JSON.stringify(requestBody),
+			contentType : 'application/json',
+			success : function(result) {
+				explainedAttributes = result;
+
+				// Create an array of attributes which are explained
+				for ( var key in explainedAttributes) {
+					attributes.push(key.toLowerCase());
+				}
+
+				// Set attributes array to null if it is empty
+				if (attributes.length < 1) {
+					attributes = null;
+				}
+
+				// Call the filterAttributeTable to only show the attributes
+				// that are explained
+				rankAttributeTable(explainedAttributes);
+				filterAttributeTable(attributes);
+			}
 		});
 
 		// create ace editor
@@ -259,8 +529,13 @@
 			// update algorithm
 			algorithm = editor.getSession().getValue();
 
-			// update result
+			// validate mapping
+			validateAttrMapping(algorithm);
+
+			// preview mapping results
 			loadAlgorithmResult(algorithm);
+			
+			$('#result-container').css('display', 'inline');
 		});
 
 		// if there is an algorithm present on load, show the result table
@@ -268,7 +543,6 @@
 			loadAlgorithmResult(algorithm);
 		} else {
 			// if no algorithm present hide the mapping and result containers
-			$('#attribute-mapping-container').css('display', 'none');
 			$('#result-container').css('display', 'none');
 		}
 
@@ -277,7 +551,7 @@
 			selectedAttributes = [];
 
 			$('#attribute-mapping-table :checkbox:checked').each(function() {
-				selectedAttributes.push($(this).attr('class'));
+				selectedAttributes.push($(this).data('attribute-name'));
 			});
 
 			// attributes into editor
@@ -291,7 +565,6 @@
 
 				// on selection of an attribute, show all fields
 				$('#result-container').css('display', 'inline');
-				$('#attribute-mapping-container').css('display', 'inline');
 
 				// generate result table
 				loadAlgorithmResult(algorithm);
@@ -305,23 +578,19 @@
 			} else {
 				// events when no attributes are selected
 				$('#result-container').css('display', 'none');
-				$('#attribute-mapping-container').css('display', 'none');
 			}
 		});
 
 		// save button for saving generated mapping
 		$('#save-mapping-btn').on('click', function() {
-			$.post(molgenis.getContextUrl() + "/saveattributemapping", {
+			var data = {
 				mappingProjectId : $('input[name="mappingProjectId"]').val(),
 				target : $('input[name="target"]').val(),
 				source : $('input[name="source"]').val(),
 				targetAttribute : $('input[name="targetAttribute"]').val(),
 				algorithm : algorithm
-			}, function() {
-				molgenis.createAlert([ {
-					'message' : 'Succesfully saved the created mapping'
-				} ], 'success');
-			});
+			};
+			redirectPost(molgenis.getContextUrl() + '/saveattributemapping', data);
 		});
 
 		$('#js-function-modal-btn').on('click', function() {
@@ -330,7 +599,7 @@
 
 		// look for attributes in the attribute table
 		$('#attribute-search-field').on('onkeydown onpaste oninput change keyup', function(e) {
-			filterAttributeTable();
+			filterAttributeTable(attributes);
 		});
 
 		// when the map tab is selected, load its contents

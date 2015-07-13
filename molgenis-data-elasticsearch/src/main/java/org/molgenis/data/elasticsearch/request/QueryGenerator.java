@@ -43,7 +43,7 @@ public class QueryGenerator implements QueryPartGenerator
 		searchRequestBuilder.setQuery(q);
 	}
 
-	private QueryBuilder createQueryBuilder(List<QueryRule> queryRules, EntityMetaData entityMetaData)
+	public QueryBuilder createQueryBuilder(List<QueryRule> queryRules, EntityMetaData entityMetaData)
 	{
 		QueryBuilder queryBuilder;
 
@@ -308,6 +308,7 @@ public class QueryGenerator implements QueryPartGenerator
 					case CATEGORICAL_MREF:
 					case MREF:
 					case XREF:
+					case FILE:
 						if (attributePath.length > 1) throw new UnsupportedOperationException(
 								"Can not filter on references deeper than 1.");
 
@@ -337,7 +338,6 @@ public class QueryGenerator implements QueryPartGenerator
 					case COMPOUND:
 						throw new MolgenisQueryException("Illegal data type [" + dataType + "] for operator ["
 								+ queryOperator + "]");
-					case FILE:
 					case IMAGE:
 						throw new UnsupportedOperationException("Query with data type [" + dataType + "] not supported");
 					default:
@@ -433,6 +433,7 @@ public class QueryGenerator implements QueryPartGenerator
 					case CATEGORICAL_MREF:
 					case MREF:
 					case XREF:
+					case FILE:
 					case SCRIPT: // due to size would result in large amount of ngrams
 					case TEXT: // due to size would result in large amount of ngrams
 					case HTML: // due to size would result in large amount of ngrams
@@ -447,7 +448,6 @@ public class QueryGenerator implements QueryPartGenerator
 								DEFAULT_ANALYZER);
 						queryBuilder = nestedQueryBuilder(attributePath, queryBuilder);
 						break;
-					case FILE:
 					case IMAGE:
 						throw new UnsupportedOperationException("Query with data type [" + dataType + "] not supported");
 					default:
@@ -497,6 +497,7 @@ public class QueryGenerator implements QueryPartGenerator
 						case CATEGORICAL_MREF:
 						case MREF:
 						case XREF:
+						case FILE:
 							if (attributePath.length > 1) throw new UnsupportedOperationException(
 									"Can not filter on references deeper than 1.");
 
@@ -506,7 +507,7 @@ public class QueryGenerator implements QueryPartGenerator
 						case COMPOUND:
 							throw new MolgenisQueryException("Illegal data type [" + dataType + "] for operator ["
 									+ queryOperator + "]");
-						case FILE:
+
 						case IMAGE:
 							throw new UnsupportedOperationException("Query with data type [" + dataType
 									+ "] not supported");
@@ -550,10 +551,21 @@ public class QueryGenerator implements QueryPartGenerator
 							break;
 						case MREF:
 						case XREF:
+						case CATEGORICAL:
+						case CATEGORICAL_MREF:
+						case FILE:
 							queryField = attr.getName() + "." + attr.getRefEntity().getLabelAttribute().getName();
 							queryBuilder = QueryBuilders.nestedQuery(attr.getName(),
 									QueryBuilders.queryString(queryField + ":(" + queryValue + ")")).scoreMode("max");
 							break;
+						case BOOL:
+						case COMPOUND:
+							throw new MolgenisQueryException("Illegal data type [" + dataType + "] for operator ["
+									+ queryOperator + "]");
+
+						case IMAGE:
+							throw new UnsupportedOperationException("Query with data type [" + dataType
+									+ "] not supported");
 						default:
 							throw new RuntimeException("Unknown data type [" + dataType + "]");
 					}

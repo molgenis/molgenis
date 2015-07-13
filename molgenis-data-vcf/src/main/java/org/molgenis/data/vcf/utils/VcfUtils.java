@@ -1,5 +1,10 @@
 package org.molgenis.data.vcf.utils;
 
+import static org.molgenis.data.vcf.VcfRepository.ALT;
+import static org.molgenis.data.vcf.VcfRepository.CHROM;
+import static org.molgenis.data.vcf.VcfRepository.POS;
+import static org.molgenis.data.vcf.VcfRepository.REF;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -9,7 +14,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.collect.Iterables;
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
@@ -17,11 +24,31 @@ import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.datastructures.Sample;
 import org.molgenis.data.vcf.datastructures.Trio;
+import org.molgenis.vcf.meta.VcfMetaInfo;
 
 public class VcfUtils
 {
-
 	public static final String TAB = "\t";
+
+	/**
+	 * Creates a internal molgenis id from a vcf entity
+	 * 
+	 * @param vcfEntity
+	 * @return the id
+	 */
+	public static String createId(Entity vcfEntity)
+	{
+		StringBuilder id = new StringBuilder();
+		id.append(StringUtils.strip(vcfEntity.get(CHROM).toString()));
+		id.append("_");
+		id.append(StringUtils.strip(vcfEntity.get(POS).toString()));
+		id.append("_");
+		id.append(StringUtils.strip(vcfEntity.get(REF).toString()));
+		id.append("_");
+		id.append(StringUtils.strip(vcfEntity.get(ALT).toString()));
+
+		return id.toString();
+	}
 
 	/**
 	 * Convert an vcfEntity to a VCF line
@@ -105,6 +132,10 @@ public class VcfUtils
 							sampleColumn.append(sample.getString(sampleAttribute));
 							sampleColumn.append(":");
 						}
+						else
+						{
+							sampleColumn.append(".:");
+						}
 
 						// get FORMAT fields, but only for the first time
 						if (firstSample)
@@ -152,8 +183,8 @@ public class VcfUtils
 	 * @throws Exception
 	 */
 	public static boolean checkPreviouslyAnnotatedAndAddMetadata(File inputVcfFile, PrintWriter outputVCFWriter,
-			List<String> infoFields, String checkAnnotatedBeforeValue) throws MolgenisInvalidFormatException,
-			FileNotFoundException
+			List<AttributeMetaData> infoFields, String checkAnnotatedBeforeValue)
+			throws MolgenisInvalidFormatException, FileNotFoundException
 	{
 		boolean annotatedBefore = false;
 
@@ -200,9 +231,10 @@ public class VcfUtils
 			// print INFO lines for stuff to be annotated
 			if (!annotatedBefore)
 			{
-				for (String infoField : infoFields)
+
+				for (AttributeMetaData infoAttributeMetaData : getAtomicAttributesFromList(infoFields))
 				{
-					outputVCFWriter.println(infoField);
+					outputVCFWriter.println(attributeMetaDataToInfoField(infoAttributeMetaData));
 				}
 			}
 
@@ -221,12 +253,82 @@ public class VcfUtils
 		return annotatedBefore;
 	}
 
+	private static List<AttributeMetaData> getAtomicAttributesFromList(Iterable<AttributeMetaData> outputAttrs)
+	{
+		List<AttributeMetaData> result = new ArrayList<>();
+		for (AttributeMetaData attributeMetaData : outputAttrs)
+		{
+			if (attributeMetaData.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
+			{
+				result.addAll(getAtomicAttributesFromList(attributeMetaData.getAttributeParts()));
+			}
+			else
+			{
+				result.add(attributeMetaData);
+			}
+		}
+		return result;
+	}
+
+	private static String attributeMetaDataToInfoField(AttributeMetaData infoAttributeMetaData)
+	{
+		StringBuilder sb = new StringBuilder();
+		sb.append("##INFO=<ID=");
+		sb.append(infoAttributeMetaData.getName());
+		sb.append(",Number=.");// FIXME: once we support list of primitives we can calculate based on combination of
+								// type and nillable
+		sb.append(",Type=");
+		sb.append(toVcfDataType(infoAttributeMetaData.getDataType().getEnumType()));
+		sb.append(",Description=\"");
+		// http://samtools.github.io/hts-specs/VCFv4.1.pdf --> "The Description value must be surrounded by
+		// double-quotes. Double-quote character can be escaped with backslash \ and backslash as \\."
+		if (null != infoAttributeMetaData.getDescription())
+		{
+			sb.append(infoAttributeMetaData.getDescription().replace("\\", "\\\\").replace("\"", "\\\""));
+		}
+		sb.append("\">");
+		return sb.toString();
+	}
+
+	private static String toVcfDataType(MolgenisFieldTypes.FieldTypeEnum dataType)
+	{
+		switch (dataType)
+		{
+			case BOOL:
+				return VcfMetaInfo.Type.FLAG.toString();
+			case LONG:
+			case DECIMAL:
+				return VcfMetaInfo.Type.FLOAT.toString();
+			case INT:
+				return VcfMetaInfo.Type.INTEGER.toString();
+			case EMAIL:
+			case ENUM:
+			case HTML:
+			case HYPERLINK:
+			case STRING:
+			case TEXT:
+			case DATE:
+			case DATE_TIME:
+			case CATEGORICAL:
+			case XREF:
+			case CATEGORICAL_MREF:
+			case MREF:
+				return VcfMetaInfo.Type.STRING.toString();
+			case COMPOUND:
+			case FILE:
+			case IMAGE:
+				throw new RuntimeException("invalid vcf data type " + dataType);
+			default:
+				throw new RuntimeException("unsupported vcf data type " + dataType);
+		}
+	}
+
 	/**
-	 * 
+	 *
 	 * Get pedigree data from VCF Now only support child, father, mother No fancy data structure either Output:
 	 * result.put(childID, Arrays.asList(new String[]{motherID, fatherID}));
-	 * 
-	 * @param vcfFile
+	 *
+	 * @param inputVcfFile
 	 * @return
 	 * @throws FileNotFoundException
 	 */

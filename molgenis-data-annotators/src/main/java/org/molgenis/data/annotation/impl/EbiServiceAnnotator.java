@@ -15,16 +15,15 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.annotation.AbstractRepositoryAnnotator;
-import org.molgenis.data.annotation.utils.AnnotatorUtils;
+import org.molgenis.data.annotation.AbstractRepositoryEntityAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
+import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
@@ -47,8 +46,7 @@ import com.google.gson.reflect.TypeToken;
  * 
  * */
 @Component("ebiService")
-public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements RepositoryAnnotator,
-		ApplicationListener<ContextRefreshedEvent>
+public class EbiServiceAnnotator extends AbstractRepositoryEntityAnnotator implements RepositoryAnnotator
 {
 	// Web url to call the EBI web service
 	private static final String EBI_CHEMBLWS_URL = "https://www.ebi.ac.uk/chemblws/targets/uniprot/";
@@ -78,10 +76,10 @@ public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements 
 	}
 
 	@Override
-	public EntityMetaData getInputMetaData()
+	public List<AttributeMetaData> getInputMetaData()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(UNIPROT_ID, FieldTypeEnum.STRING));
+		List<AttributeMetaData> metadata = new ArrayList<>();
+		metadata.add(new DefaultAttributeMetaData(UNIPROT_ID, FieldTypeEnum.STRING));
 		return metadata;
 	}
 
@@ -164,20 +162,26 @@ public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements 
 	}
 
 	@Override
-	public EntityMetaData getOutputMetaData()
+	public List<AttributeMetaData> getOutputMetaData()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData("targetType", FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData("chemblId", FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData("geneNames", FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData("description", FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData("compoundCount", FieldTypeEnum.DECIMAL));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData("bioactivityCount", FieldTypeEnum.DECIMAL));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData("proteinAccession", FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData("synonyms", FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData("organism", FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData("preferredName", FieldTypeEnum.STRING));
+		List<AttributeMetaData> metadata = new ArrayList<>();
+		metadata.add(new DefaultAttributeMetaData("targetType", FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData("chemblId", FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData("geneNames", FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData("description", FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData("compoundCount", FieldTypeEnum.DECIMAL));
+		metadata.add(new DefaultAttributeMetaData("bioactivityCount", FieldTypeEnum.DECIMAL));
+		metadata.add(new DefaultAttributeMetaData("proteinAccession", FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData("synonyms", FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData("organism", FieldTypeEnum.STRING));
+		metadata.add(new DefaultAttributeMetaData("preferredName", FieldTypeEnum.STRING));
 		return metadata;
+	}
+
+	@Override
+	public AnnotatorInfo getInfo()
+	{
+		return AnnotatorInfo.create(Status.INDEV, Type.UNUSED, "unknown", "no description", getOutputMetaData());
 	}
 
 }

@@ -4,6 +4,7 @@ import static org.elasticsearch.client.Requests.refreshRequest;
 
 import java.util.concurrent.TimeUnit;
 
+import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.client.Client;
 import org.molgenis.data.MolgenisDataException;
 

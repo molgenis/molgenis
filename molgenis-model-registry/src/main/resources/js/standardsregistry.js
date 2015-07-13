@@ -69,6 +69,52 @@
 		paper.scale(scale, scale);
 	}
 	
+	function scaleToMax(widthMax, heightMax){
+		var widthScale = widthMax/bbox.width;
+		var heightScale = heightMax/bbox.height;
+		var bestScale;
+		paper.setDimensions(widthMax, heightMax);
+		bestScale = (widthScale < heightScale ? widthScale : heightScale);
+		scale = bestScale;
+		paper.scale(bestScale, bestScale);
+	}
+	
+	function reset(){
+		$('#uml-tab').click();
+	}
+	
+	function scaleToA4Landscape(){
+		var dpix = getDPIx(); 
+		var dpiy = getDPIy(); 
+		scaleToMax((11.7 - 2.25) * dpix, (8.27 - 4) * dpiy);
+	}
+	
+	function scaleToA4Portrait(){
+		var dpix = getDPIx(); 
+		var dpiy = getDPIy(); 
+		scaleToMax((8.27 - 2) * dpix, (11.7 - 3) * dpiy);
+	}
+	
+	function scaleToA3Landscape(){
+		var dpix = getDPIx(); 
+		var dpiy = getDPIy(); 
+		scaleToMax((16.54 - 3) * dpix, (11.7 - 5) * dpiy);
+	}
+	
+	function scaleToA3Portrait(){
+		var dpix = getDPIx(); 
+		var dpiy = getDPIy(); 
+		scaleToMax((11.7 - 3) * dpix, (16.54 - 6) * dpiy);
+	}
+	
+	function getDPIx(){
+		return document.getElementById('dpi').offsetWidth;
+	}
+	
+	function getDPIy(){
+		return document.getElementById('dpi').offsetHeight;
+	}
+	
 	$(function() {
 		var searchResultsContainer = $('#package-search-results');
 		
@@ -154,10 +200,33 @@
 			}
 		});
 		
+		$(document).on('click', '#reset', function() {
+			reset();
+		});
+		
+		$(document).on('click', '#a4-horizontal', function() {
+			scaleToA4Landscape();
+		});
+		
+		$(document).on('click', '#a4-vertical', function() {
+			scaleToA4Portrait();
+		});
+		
+		$(document).on('click', '#a3-horizontal', function() {
+			scaleToA3Landscape();
+		});
+		
+		$(document).on('click', '#a3-vertical', function() {
+			scaleToA3Portrait();
+		});
+		
+		
 		$(document).on('click', '#print-btn', function() {
 			$('#package-doc-container').css('height', '100%').css('width', '21cm').css("overflow", "hidden");
+			$('#paper-holder').css("overflow", "hidden");
 			window.print();
 			$('#package-doc-container').css('height', '600px').css("overflow-x", "hidden").css("overflow-y", "auto").css('width', '923px');
+			$('#paper-holder').css("overflow", "auto");
 		});
 		
 		$(document).on('click', '#uml-tab', function() {

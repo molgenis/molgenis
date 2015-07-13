@@ -21,6 +21,7 @@ import org.elasticsearch.action.admin.indices.exists.types.TypesExistsResponse;
 import org.elasticsearch.action.admin.indices.mapping.delete.DeleteMappingResponse;
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
+import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.deletebyquery.DeleteByQueryResponse;
@@ -56,7 +57,6 @@ import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
 import org.molgenis.data.elasticsearch.request.SearchRequestGenerator;
 import org.molgenis.data.elasticsearch.response.ResponseParser;
-import org.molgenis.data.elasticsearch.util.BulkProcessor;
 import org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils;
 import org.molgenis.data.elasticsearch.util.ElasticsearchUtils;
 import org.molgenis.data.elasticsearch.util.SearchRequest;
@@ -402,7 +402,7 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 	 * org.molgenis.data.elasticsearch.ElasticSearchService.IndexingMode)
 	 */
 	@Override
-	public void index(Iterable<? extends Entity> entities, EntityMetaData entityMetaData, IndexingMode indexingMode)
+	public long index(Iterable<? extends Entity> entities, EntityMetaData entityMetaData, IndexingMode indexingMode)
 	{
 		String transactionId = null;
 		if (!NON_TRANSACTIONAL_ENTITIES.contains(entityMetaData.getName()))
@@ -412,7 +412,7 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 		String index = transactionId != null ? transactionId : indexName;
 
 		CrudType crudType = indexingMode == IndexingMode.ADD ? CrudType.ADD : CrudType.UPDATE;
-		index(index, entities, entityMetaData, crudType, true);
+		return index(index, entities, entityMetaData, crudType, true);
 	}
 
 	private String getCurrentTransactionId()
@@ -420,7 +420,7 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 		return (String) TransactionSynchronizationManager.getResource(TRANSACTION_ID_RESOURCE_NAME);
 	}
 
-	void index(String index, Iterable<? extends Entity> entities, EntityMetaData entityMetaData, CrudType crudType,
+	long index(String index, Iterable<? extends Entity> entities, EntityMetaData entityMetaData, CrudType crudType,
 			boolean updateIndex)
 	{
 		String entityName = entityMetaData.getName();
@@ -432,6 +432,7 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 			transactionId = getCurrentTransactionId();
 		}
 
+		long nrIndexedEntities = 0;
 		BulkProcessor bulkProcessor = BULK_PROCESSOR_FACTORY.create(client);
 
 		try
@@ -450,6 +451,7 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 					source.put(CRUD_TYPE_FIELD_NAME, crudType.name());
 				}
 				bulkProcessor.add(new IndexRequest().index(index).type(type).id(id).source(source));
+				++nrIndexedEntities;
 			}
 		}
 		finally
@@ -465,6 +467,8 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 		{
 			updateReferences(entities, entityMetaData);
 		}
+
+		return nrIndexedEntities;
 	}
 
 	/*
@@ -988,8 +992,8 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 						int batchOffset = offset;
 						int batchSize = pageSize != 0 ? Math.min(pageSize - currentOffset, BATCH_SIZE) : BATCH_SIZE;
 						doBatchSearch(batchOffset, batchSize);
-
 					}
+
 					if (batchHits.length == 0)
 					{
 						return false;
@@ -1007,7 +1011,8 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 							int batchOffset = currentOffset + BATCH_SIZE;
 							int batchSize = pageSize != 0 ? Math.min(pageSize - batchOffset, BATCH_SIZE) : BATCH_SIZE;
 							doBatchSearch(batchOffset, batchSize);
-							return true;
+
+							return batchHits.length > 0;
 						}
 						else
 						{
@@ -1020,7 +1025,8 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 				@Override
 				public Entity next()
 				{
-					if (hasNext())
+					boolean next = hasNext();
+					if (next)
 					{
 						SearchHit hit = batchHits[batchPos];
 						++batchPos;
@@ -1060,7 +1066,7 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 					if (LOG.isDebugEnabled())
 					{
 						LOG.debug("Searched Elasticsearch '" + type + "' docs using query [" + q + "] in "
-								+ searchResponse.getTotalShards() + "ms");
+								+ searchResponse.getTookInMillis() + "ms");
 					}
 					SearchHits searchHits = searchResponse.getHits();
 					this.totalHits = searchHits.getTotalHits();
@@ -1068,12 +1074,6 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 					this.batchPos = 0;
 
 					this.currentOffset = from;
-				}
-
-				@Override
-				public void remove()
-				{
-					throw new UnsupportedOperationException();
 				}
 			};
 		}

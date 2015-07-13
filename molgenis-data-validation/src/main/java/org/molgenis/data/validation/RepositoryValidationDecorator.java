@@ -193,28 +193,30 @@ public class RepositoryValidationDecorator implements Repository
 				violations.add(new ConstraintViolation(message, entity.getEntityMetaData().getIdAttribute(), rownr));
 				if (violations.size() > 4) return violations;
 			}
-
-			for (AttributeMetaData attr : getEntityMetaData().getAtomicAttributes())
+			else
 			{
-				if (attr.isReadonly() && attr.getExpression() == null)
+				for (AttributeMetaData attr : getEntityMetaData().getAtomicAttributes())
 				{
-					Object newValue = attr.getDataType().convert(entity.get(attr.getName()));
-					Object oldValue = attr.getDataType().convert(oldEntity.get(attr.getName()));
-
-					if (attr.getDataType() instanceof XrefField)
+					if (attr.isReadonly() && attr.getExpression() == null)
 					{
-						if (newValue != null) newValue = ((Entity) newValue).getIdValue();
-						if (oldValue != null) oldValue = ((Entity) oldValue).getIdValue();
-					}
+						Object newValue = attr.getDataType().convert(entity.get(attr.getName()));
+						Object oldValue = attr.getDataType().convert(oldEntity.get(attr.getName()));
 
-					if (((null == newValue) && (null != oldValue))
-							|| ((null != newValue) && !newValue.equals(oldValue)))
-					{
-						String message = String.format(
-								"The attribute '%s' of entity '%s' can not be changed it is readonly.", attr.getName(),
-								getEntityMetaData().getLabel());
-						violations.add(new ConstraintViolation(message, attr, rownr));
-						if (violations.size() > 4) return violations;
+						if (attr.getDataType() instanceof XrefField)
+						{
+							if (newValue != null) newValue = ((Entity) newValue).getIdValue();
+							if (oldValue != null) oldValue = ((Entity) oldValue).getIdValue();
+						}
+
+						if (((null == newValue) && (null != oldValue))
+								|| ((null != newValue) && !newValue.equals(oldValue)))
+						{
+							String message = String.format(
+									"The attribute '%s' of entity '%s' can not be changed it is readonly.",
+									attr.getName(), getEntityMetaData().getLabel());
+							violations.add(new ConstraintViolation(message, attr, rownr));
+							if (violations.size() > 4) return violations;
+						}
 					}
 				}
 			}
