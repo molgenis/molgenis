@@ -49,14 +49,14 @@ public class FitConAnnotator
 	{
 		List<AttributeMetaData> attributes = new ArrayList<>();
 		DefaultAttributeMetaData dann_score = new DefaultAttributeMetaData(FITCON_SCORE, FieldTypeEnum.DECIMAL)
-				.setDescription("fitness consequence score annotation of genetic variants using Fitcon scoring.").setLabel(
-						FITCON_SCORE_LABEL);
+				.setDescription("fitness consequence score annotation of genetic variants using Fitcon scoring.")
+				.setLabel(FITCON_SCORE_LABEL);
 
 		attributes.add(dann_score);
 
 		AnnotatorInfo fitconInfo = AnnotatorInfo
 				.create(Status.READY,
-						AnnotatorInfo.Type.PATHOGENICITY_ESTIMATE,
+						AnnotatorInfo.Type.EFFECT_PREDICTION,
 						"fitcon",
 						"Summary: Annotating genetic variants, especially non-coding variants, "
 								+ "for the purpose of identifying pathogenic variants remains a challenge. "
@@ -85,18 +85,130 @@ public class FitConAnnotator
 	Resource dannResource()
 	{
 		Resource fitConTabixResource = null;
-		//#Chrom  Pos     Ref     Anc     Alt
+
 		DefaultEntityMetaData repoMetaData = new DefaultEntityMetaData(FITCON_TABIX_RESOURCE);
 		repoMetaData.addAttributeMetaData(CHROM_META);
 		repoMetaData.addAttributeMetaData(POS_META);
 		repoMetaData.addAttributeMetaData(REF_META);
 		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("Anc"));
 		repoMetaData.addAttributeMetaData(ALT_META);
-		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("fitCons", DECIMAL));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("Type"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("Length"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("isTv"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("isDerived"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("AnnoType"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("Consequence"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("ConsScore"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("ConsDetail"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("GC"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("CpG"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("mapAbility20bp"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("mapAbility35bp"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("scoreSegDup"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("priPhCons"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("mamPhCons"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("verPhCons"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("priPhyloP"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("mamPhyloP"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("verPhyloP"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("GerpN"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("GerpS"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("GerpRS"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("GerpRSpval"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("bStatistic"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("mutIndex"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("dnaHelT"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("dnaMGW"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("dnaProT"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("dnaRoll"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("mirSVR-Score"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("mirSVR-E"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("mirSVR-Aln"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("targetScan"));
+		// fitcons can be NA so we need to catch the string value
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("FITCON_SCORE"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("cHmmTssA"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("cHmmTssAFlnk"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("cHmmTxFlnk"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("cHmmTx"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("cHmmTxWk"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("cHmmEnhG"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("cHmmEnh"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("cHmmZnfRpts"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("cHmmHet"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("cHmmTssBiv"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("cHmmBivFlnk"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("cHmmEnhBiv"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("cHmmReprPC"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("cHmmReprPCWk"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("cHmmQuies"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("EncExp"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("EncH3K27Ac"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("EncH3K4Me1"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("EncH3K4Me3"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("EncNucleo"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("EncOCC"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("EncOCCombPVal"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("EncOCDNasePVal"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("EncOCFairePVal"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("EncOCpolIIPVal"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("EncOCctcfPVal"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("EncOCmycPVal"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("EncOCDNaseSig"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("EncOCFaireSig"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("EncOCpolIISig"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("EncOCctcfSig"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("EncOCmycSig"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("Segway"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("tOverlapMotifs"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("motifDist"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("motifECount"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("motifEName"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("motifEHIPos"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("motifEScoreChng"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("TFBS"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("TFBSPeaks"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("TFBSPeaksMax"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("isKnownVariant"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("ESP_AF"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("ESP_AFR"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("ESP_EUR"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("TG_AF"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("TG_ASN"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("TG_AMR"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("TG_AFR"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("TG_EUR"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("minDistTSS"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("minDistTSE"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("GeneID"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("FeatureID"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("CCDS"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("GeneName"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("cDNApos"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("relcDNApos"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("CDSpos"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("relCDSpos"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("protPos"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("relProtPos"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("Domain"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("Dst2Splice"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("Dst2SplType"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("Exon"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("Intron"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("oAA"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("nAA"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("Grantham"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("PolyPhenCat"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("PolyPhenVal"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("SIFTcat"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("SIFTval"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("RawScore"));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("PHRED"));
+
 		repoMetaData.addAttribute("id").setIdAttribute(true).setVisible(false);
 
-		fitConTabixResource = new ResourceImpl(FITCON_TABIX_RESOURCE, new SingleResourceConfig(FITCON_FILE_LOCATION_PROPERTY,
-				molgenisSettings), new TabixRepositoryFactory(repoMetaData));
+		fitConTabixResource = new ResourceImpl(FITCON_TABIX_RESOURCE, new SingleResourceConfig(
+				FITCON_FILE_LOCATION_PROPERTY, molgenisSettings), new TabixRepositoryFactory(repoMetaData));
 
 		return fitConTabixResource;
 	}

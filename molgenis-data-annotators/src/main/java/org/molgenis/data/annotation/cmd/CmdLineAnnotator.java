@@ -11,6 +11,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.impl.CaddAnnotator;
 import org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator;
+import org.molgenis.data.annotation.entity.impl.ClinvarAnnotator;
 import org.molgenis.data.annotation.entity.impl.DannAnnotator;
 import org.molgenis.data.annotation.entity.impl.ExacAnnotator;
 import org.molgenis.data.annotation.entity.impl.FitConAnnotator;
@@ -151,7 +152,11 @@ public class CmdLineAnnotator
 		}
 		else if (annotatorName.equals("clinvar"))
 		{
-			new ClinVarVCFServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
+			molgenisSettings.setProperty(ClinvarAnnotator.CLINVAR_FILE_LOCATION_PROPERTY,
+					annotationSourceFile.getAbsolutePath());
+			Map<String, RepositoryAnnotator> annotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
+			RepositoryAnnotator annotator = annotators.get("clinvar");
+			annotate(annotator, inputVcfFile, outputVCFFile);
 		}
 		else if (annotatorName.equals("hpo"))
 		{
@@ -249,7 +254,9 @@ public class CmdLineAnnotator
 		Iterator<Entity> annotatedRecords = annotator.annotate(vcfRepo);
 		while (annotatedRecords.hasNext())
 		{
+			
 			Entity annotatedRecord = annotatedRecords.next();
+			System.out.println(annotatedRecord);
 			outputVCFWriter.println(VcfUtils.convertToVCF(annotatedRecord));
 		}
 		outputVCFWriter.close();
