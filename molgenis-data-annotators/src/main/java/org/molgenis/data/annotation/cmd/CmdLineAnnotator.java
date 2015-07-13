@@ -256,7 +256,6 @@ public class CmdLineAnnotator
 		{
 			
 			Entity annotatedRecord = annotatedRecords.next();
-			System.out.println(annotatedRecord);
 			outputVCFWriter.println(VcfUtils.convertToVCF(annotatedRecord));
 		}
 		outputVCFWriter.close();
