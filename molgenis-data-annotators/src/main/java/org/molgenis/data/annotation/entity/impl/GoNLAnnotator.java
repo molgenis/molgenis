@@ -30,12 +30,17 @@ public class GoNLAnnotator
 {
 	// TODO Write test
 	public static final String GONL_GENOME_AF = "GoNL_AF";
+	public static final String GONL_OVERRIDEN_FILES_PATTERNS = "gonl_genome_file_overriden_pattern";
 	public static final String GONL_AF_LABEL = "Genome of the netherlands allele frequency";
 	public static final String GONL_AF_RESOURCE_ATTRIBUTE_NAME = VcfRepository.getInfoPrefix() + "AF";
 	public static final String GONL_CHROMOSOME_PROPERTY = "gonl_genome_chromosomes";
 	public static final String GONL_FILE_PATTERN_PROPERTY = "gonl_genome_file_pattern";
 	public static final String GONL_FOLDER_PROPERTY = "gonl_genome_root_directory";
 	public static final String GONL_MULTI_FILE_RESOURCE = "gonlresources";
+
+	// Backwards capabilities
+	public static final String BC_GONL_MAF_LABEL = "GONLMAF";
+	public static final String BC_GONL_MAF = VcfRepository.getInfoPrefix() + BC_GONL_MAF_LABEL;
 
 	@Autowired
 	private MolgenisSettings molgenisSettings;
@@ -93,7 +98,8 @@ public class GoNLAnnotator
 	Resource gonlresources()
 	{
 		MultiResourceConfig goNLConfig = new MultiResourceConfigImpl(GONL_CHROMOSOME_PROPERTY,
-				GONL_FILE_PATTERN_PROPERTY, GONL_FOLDER_PROPERTY, molgenisSettings);		
+				GONL_FILE_PATTERN_PROPERTY, GONL_FOLDER_PROPERTY, molgenisSettings, molgenisSettings.getProperty(
+						GONL_OVERRIDEN_FILES_PATTERNS, ""));
 		
 		return new MultiFileResource(GONL_MULTI_FILE_RESOURCE, goNLConfig, new TabixVcfRepositoryFactory(
 				GONL_MULTI_FILE_RESOURCE));

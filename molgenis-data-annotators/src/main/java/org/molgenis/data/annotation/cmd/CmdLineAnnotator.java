@@ -18,7 +18,6 @@ import org.molgenis.data.annotation.entity.impl.FitConAnnotator;
 import org.molgenis.data.annotation.entity.impl.GoNLAnnotator;
 import org.molgenis.data.annotation.entity.impl.SnpEffAnnotator;
 import org.molgenis.data.annotation.entity.impl.ThousandGenomesAnnotator;
-import org.molgenis.data.annotation.impl.DeNovoAnnotator;
 import org.molgenis.data.annotation.impl.HpoServiceAnnotator;
 import org.molgenis.data.annotation.impl.MonogenicDiseaseCandidatesServiceAnnotator;
 import org.molgenis.data.annotation.impl.PhenomizerServiceAnnotator;
@@ -169,10 +168,6 @@ public class CmdLineAnnotator
 		else if (annotatorName.equals("phenomizer"))
 		{
 			new PhenomizerServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
-		}
-		else if (annotatorName.equals("denovo"))
-		{
-			new DeNovoAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
 		else if (annotatorName.equals("exac"))
 		{
