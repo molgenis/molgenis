@@ -11,6 +11,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator;
 import org.molgenis.data.annotation.entity.impl.ExacAnnotator;
+import org.molgenis.data.annotation.entity.impl.SnpEffServiceAnnotator;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -115,7 +116,7 @@ public class MonogenicDiseaseCandidatesServiceAnnotatorTest
 		entity.set(attributeMetaDataRef.getName(), "A");
 		entity.set(attributeMetaDataAlt.getName(), "T");
 		entity.set(MonogenicDiseaseCandidatesServiceAnnotator.ANNOTATIONFIELD, "1|2|"
-				+ SnpEffServiceAnnotator.impact.HIGH + "|4|5");
+				+ SnpEffServiceAnnotator.Impact.HIGH + "|4|5");
 		entity.set(ThousandGenomesServiceAnnotator.THGEN_MAF, 0.1);
 		entity.set(ExacAnnotator.EXAC_AF, 0.1);
 		entity.set(GoNLServiceAnnotator.GONL_MAF, 0.2);

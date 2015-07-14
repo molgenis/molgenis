@@ -26,6 +26,7 @@ import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.genotype.Allele;
 import org.molgenis.genotype.GenotypeDataException;
 import org.molgenis.vcf.VcfInfo;
@@ -161,15 +162,8 @@ public class VcfRepository extends AbstractRepository
 		entity.set(QUAL, vcfRecord.getQuality());
 		entity.set(ID, StringUtils.join(vcfRecord.getIdentifiers(), ','));
 
-		StringBuilder id = new StringBuilder();
-		id.append(StringUtils.strip(entity.get(CHROM).toString()));
-		id.append("_");
-		id.append(StringUtils.strip(entity.get(POS).toString()));
-		id.append("_");
-		id.append(StringUtils.strip(entity.get(REF).toString()));
-		id.append("_");
-		id.append(StringUtils.strip(entity.get(ALT).toString()));
-		entity.set(INTERNAL_ID, id.toString());
+		String id = VcfUtils.createId(entity);
+		entity.set(INTERNAL_ID, id);
 
 		for (VcfInfo vcfInfo : vcfRecord.getInformation())
 		{
@@ -201,7 +195,7 @@ public class VcfRepository extends AbstractRepository
 					{
 						sampleEntity.set(format[i], sample.getData(i));
 					}
-					sampleEntity.set(ID, id.toString() + j);
+					sampleEntity.set(ID, id + j);
 
 					// FIXME remove entity ID from Sample label after #1400 is fixed, see also:
 					// jquery.molgenis.table.js line 152
