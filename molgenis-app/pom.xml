@@ -320,5 +320,10 @@
             <artifactId>molgenis-questionnaires</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-catalogue</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 	</dependencies>
 </project>

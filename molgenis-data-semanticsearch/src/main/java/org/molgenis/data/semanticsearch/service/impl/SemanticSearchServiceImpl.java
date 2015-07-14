@@ -28,7 +28,6 @@ import org.molgenis.data.meta.MetaUtils;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.semanticsearch.explain.service.ElasticSearchExplainService;
 import org.molgenis.data.semanticsearch.semantic.Hit;
-import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm;
 import org.molgenis.data.semanticsearch.string.Stemmer;
@@ -59,9 +58,6 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 
 	@Autowired
 	private DataService dataService;
-
-	@Autowired
-	private OntologyTagService ontologyTagService;
 
 	@Autowired
 	private SemanticSearchServiceHelper semanticSearchServiceHelper;

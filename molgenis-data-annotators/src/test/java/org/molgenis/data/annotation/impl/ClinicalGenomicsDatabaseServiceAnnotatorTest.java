@@ -2,18 +2,18 @@ package org.molgenis.data.annotation.impl;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.AGE_GROUP;
-import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.ALLELIC_CONDITIONS;
-import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.COMMENTS;
-import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.CONDITION;
-import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.ENTREZ_GENE_ID;
-import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.GENE;
-import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.HGNC_ID;
-import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.INHERITANCE;
-import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.INTERVENTION_CATEGORIES;
-import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.INTERVENTION_RATIONALE;
-import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.MANIFESTATION_CATEGORIES;
-import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.REFERENCES;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.AGE_GROUP;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.ALLELIC_CONDITIONS;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.COMMENTS;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.CONDITION;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.ENTREZ_GENE_ID;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.GENE;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.HGNC_ID;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.INHERITANCE;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.INTERVENTION_CATEGORIES;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.INTERVENTION_RATIONALE;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.MANIFESTATION_CATEGORIES;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.REFERENCES;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -27,7 +27,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
-import org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator;
+import org.molgenis.data.annotation.entity.impl.CGDAnnotator;
 import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.ResourcesImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -42,7 +42,7 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
 
 @ContextConfiguration(classes =
-{ ClinicalGenomicsDatabaseServiceAnnotatorTest.Config.class, ClinicalGenomicsDatabaseServiceAnnotator.class })
+{ ClinicalGenomicsDatabaseServiceAnnotatorTest.Config.class, CGDAnnotator.class })
 public class ClinicalGenomicsDatabaseServiceAnnotatorTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
@@ -143,7 +143,7 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest extends AbstractTestNG
 		public MolgenisSettings molgenisSettings()
 		{
 			MolgenisSettings settings = mock(MolgenisSettings.class);
-			when(settings.getProperty(ClinicalGenomicsDatabaseServiceAnnotator.CGD_FILE_LOCATION_PROPERTY)).thenReturn(
+			when(settings.getProperty(CGDAnnotator.CGD_FILE_LOCATION_PROPERTY)).thenReturn(
 					ResourceUtils.getFile(getClass(), "/cgd_example.txt").getPath());
 			return settings;
 		}

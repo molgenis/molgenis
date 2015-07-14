@@ -31,6 +31,7 @@ import org.molgenis.data.importer.ImportWizardController;
 import org.molgenis.data.mapper.data.request.MappingServiceRequest;
 import org.molgenis.data.mapper.mapping.model.AlgorithmResult;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
+import org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState;
 import org.molgenis.data.mapper.mapping.model.CategoryMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
@@ -371,6 +372,7 @@ public class MappingServiceController extends MolgenisPluginController
 					attributeMapping = mappingForSource.addAttributeMapping(targetAttribute);
 				}
 				attributeMapping.setAlgorithm(algorithm);
+				attributeMapping.setAlgorithmState(AlgorithmState.CURATED);
 			}
 			mappingService.updateMappingProject(mappingProject);
 		}
@@ -737,6 +739,7 @@ public class MappingServiceController extends MolgenisPluginController
 				attributeMapping = mappingForSource.addAttributeMapping(targetAttribute);
 			}
 			attributeMapping.setAlgorithm(algorithm);
+			attributeMapping.setAlgorithmState(AlgorithmState.CURATED);
 			mappingService.updateMappingProject(mappingProject);
 		}
 	}

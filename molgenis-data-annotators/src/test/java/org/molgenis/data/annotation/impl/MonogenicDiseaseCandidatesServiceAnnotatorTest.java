@@ -9,9 +9,9 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
-import org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator;
+import org.molgenis.data.annotation.entity.impl.CGDAnnotator;
 import org.molgenis.data.annotation.entity.impl.ExacAnnotator;
-import org.molgenis.data.annotation.entity.impl.SnpEffServiceAnnotator;
+import org.molgenis.data.annotation.entity.impl.SnpEffAnnotator;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -68,10 +68,10 @@ public class MonogenicDiseaseCandidatesServiceAnnotatorTest
 		metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(GoNLServiceAnnotator.GONL_MAF,
 				MolgenisFieldTypes.FieldTypeEnum.DECIMAL));
 		metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(
-				ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.GENERALIZED_INHERITANCE.getAttributeName(),
+				CGDAnnotator.CGDAttributeName.GENERALIZED_INHERITANCE.getAttributeName(),
 				MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(
-				ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.INHERITANCE.getAttributeName(),
+				CGDAnnotator.CGDAttributeName.INHERITANCE.getAttributeName(),
 				MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.SAMPLES,
 				MolgenisFieldTypes.FieldTypeEnum.MREF));
@@ -96,10 +96,10 @@ public class MonogenicDiseaseCandidatesServiceAnnotatorTest
 		metaDataCantAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(GoNLServiceAnnotator.GONL_MAF,
 				MolgenisFieldTypes.FieldTypeEnum.DECIMAL));
 		metaDataCantAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(
-				ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.GENERALIZED_INHERITANCE.getAttributeName(),
+				CGDAnnotator.CGDAttributeName.GENERALIZED_INHERITANCE.getAttributeName(),
 				MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		metaDataCantAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(
-				ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.INHERITANCE.getAttributeName(),
+				CGDAnnotator.CGDAttributeName.INHERITANCE.getAttributeName(),
 				MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		metaDataCantAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.SAMPLES,
 				MolgenisFieldTypes.FieldTypeEnum.MREF));
@@ -116,14 +116,14 @@ public class MonogenicDiseaseCandidatesServiceAnnotatorTest
 		entity.set(attributeMetaDataRef.getName(), "A");
 		entity.set(attributeMetaDataAlt.getName(), "T");
 		entity.set(MonogenicDiseaseCandidatesServiceAnnotator.ANNOTATIONFIELD, "1|2|"
-				+ SnpEffServiceAnnotator.Impact.HIGH + "|4|5");
+				+ SnpEffAnnotator.Impact.HIGH + "|4|5");
 		entity.set(ThousandGenomesServiceAnnotator.THGEN_MAF, 0.1);
 		entity.set(ExacAnnotator.EXAC_AF, 0.1);
 		entity.set(GoNLServiceAnnotator.GONL_MAF, 0.2);
 		entity.set(
-				ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.GENERALIZED_INHERITANCE.getAttributeName(),
+				CGDAnnotator.CGDAttributeName.GENERALIZED_INHERITANCE.getAttributeName(),
 				"DOMINANT");
-		entity.set(ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.INHERITANCE.getAttributeName(), "TEST2");
+		entity.set(CGDAnnotator.CGDAttributeName.INHERITANCE.getAttributeName(), "TEST2");
 		entity.set(VcfRepository.SAMPLES, sampleEntities);
 
 		entities = new ArrayList<>();
