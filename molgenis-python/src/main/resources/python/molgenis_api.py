@@ -49,6 +49,9 @@ class Connect_Molgenis():
         self.server_response_json = None
         self.last_added_id = None
         
+    def get_last_added_id(self):
+        return self.last_added_id
+    
     def set_verbosity(self, verbose):
         '''Set verbosity on or off
         
@@ -219,21 +222,18 @@ class Connect_Molgenis():
         entity_data = self.get_entity_rows(entity_name, query)
         if len(entity_data['items']) == 0:
             raise BaseException('Query returned 0 results, no row to update.')
-        elif len(entity_data['items']) > 1:
-            raise BaseException('Query returned '+str(len(entity_data['items']))+' rows. Only updates on single rows supported.')
         id_attribute = self.get_id_attribute(entity_name)
-        # select first element of items, because we know only one row can be selected for updating
-        #   if only one value was update we could use PUT http://your.molgenis.url/api/v1/dataset/3/name,
-        #   but this does not work if e.g. 5/9 values are updated 
-        entity_items = entity_data['items'][0]
-        # column values that are not given will be overwritten with null, so we need to add the existing column data into our dict
-        for key in entity_items:
-            if key != id_attribute and key not in data:
-                data[key.encode('ascii')] = str(entity_items[key]).encode('ascii')
-        row_id = entity_items[id_attribute]
-        server_response = requests.put(self.api_url+'/'+entity_name+'/'+row_id+'/', data=str(data), headers=self.headers)
-        self.check_server_response(server_response, 'Update entity row')
-        return server_response
+        server_response_list = [] 
+        for entity_items in entity_data['items']:
+            # column values that are not given will be overwritten with null, so we need to add the existing column data into our dict
+            for key in entity_items:
+                if key != id_attribute and key not in data:
+                    data[key.encode('ascii')] = str(entity_items[key]).encode('ascii')
+            row_id = entity_items[id_attribute]
+            server_response = requests.put(self.api_url+'/'+entity_name+'/'+row_id+'/', data=str(data), headers=self.headers)
+            server_response_list.append(server_response)
+            self.check_server_response(server_response, 'Update entity row')
+        return server_response_list
     
     def get_entity_meta_data(self, entity_name):
         '''Get metadata from entity
