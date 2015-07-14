@@ -10,7 +10,7 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
-import org.molgenis.data.annotation.entity.impl.SnpEffServiceAnnotator;
+import org.molgenis.data.annotation.entity.impl.SnpEffAnnotator;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -60,7 +60,7 @@ public class GenePanelAnnotatorServiceTest
 		metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom.getName());
 		metaDataCanAnnotate.addAttributeMetaData(VcfRepository.FILTER_META);
 		metaDataCanAnnotate.addAttributeMetaData(VcfRepository.QUAL_META);
-		metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(SnpEffServiceAnnotator.GENE_NAME,
+		metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(SnpEffAnnotator.GENE_NAME,
 				MolgenisFieldTypes.FieldTypeEnum.STRING));
 		metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.getInfoPrefix() + "ANN",
 				MolgenisFieldTypes.FieldTypeEnum.TEXT));
@@ -80,7 +80,7 @@ public class GenePanelAnnotatorServiceTest
 		entity.set(attributeMetaDataPos.getName(), 1234567);
 		entity.set(attributeMetaDataRef.getName(), "A");
 		entity.set(attributeMetaDataAlt.getName(), "T");
-		entity.set(SnpEffServiceAnnotator.GENE_NAME, "CHD7");
+		entity.set(SnpEffAnnotator.GENE_NAME, "CHD7");
 		entity.set(VcfRepository.getInfoPrefix() + "ANN",
 				"X\t12345\t.\tA\tT\tqual\tfilter\t0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15");
 

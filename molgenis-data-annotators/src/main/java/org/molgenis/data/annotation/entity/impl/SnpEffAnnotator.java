@@ -56,9 +56,9 @@ import com.google.common.collect.Iterators;
  * -lof doesnt seem to work? would be great... http://snpeff.sourceforge.net/snpEff_lof_nmd.pdfs
  */
 @Configuration
-public class SnpEffServiceAnnotator
+public class SnpEffAnnotator
 {
-	private static final Logger LOG = LoggerFactory.getLogger(SnpEffServiceAnnotator.class);
+	private static final Logger LOG = LoggerFactory.getLogger(SnpEffAnnotator.class);
 	public static final String SNPEFF_JAR_LOCATION_PROPERTY = "snpeff_jar_location";
 	public static final String NAME = "snpEff";
 

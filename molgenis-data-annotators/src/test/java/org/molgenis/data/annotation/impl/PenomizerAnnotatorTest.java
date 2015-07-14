@@ -14,7 +14,7 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
-import org.molgenis.data.annotation.entity.impl.SnpEffServiceAnnotator;
+import org.molgenis.data.annotation.entity.impl.SnpEffAnnotator;
 import org.molgenis.data.annotation.provider.UrlPinger;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -61,7 +61,7 @@ public class PenomizerAnnotatorTest
 		metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom.getName());
 		metaDataCanAnnotate.addAttributeMetaData(VcfRepository.FILTER_META);
 		metaDataCanAnnotate.addAttributeMetaData(VcfRepository.QUAL_META);
-		metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(SnpEffServiceAnnotator.GENE_NAME,
+		metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(SnpEffAnnotator.GENE_NAME,
 				MolgenisFieldTypes.FieldTypeEnum.STRING));
 		metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.getInfoPrefix() + "ANN",
 				MolgenisFieldTypes.FieldTypeEnum.TEXT));
