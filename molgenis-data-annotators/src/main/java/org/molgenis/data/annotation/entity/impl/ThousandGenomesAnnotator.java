@@ -33,7 +33,7 @@ public class ThousandGenomesAnnotator
 	public static final String THOUSAND_GENOME_CHROMOSOME_PROPERTY = "thousand_genome_chromosomes";
 	public static final String THOUSAND_GENOME_FILE_PATTERN_PROPERTY = "thousand_genome_file_pattern";
 	public static final String THOUSAND_GENOME_FOLDER_PROPERTY = "thousand_genome_root_directory";
-	public static final String THOUSAND_GENOME_MULTI_FILE_RESOURCE = "thousandGenomeResources";
+	public static final String THOUSAND_GENOME_MULTI_FILE_RESOURCE = "thousandGenomesSources";
 
 	@Autowired
 	private MolgenisSettings molgenisSettings;
@@ -45,7 +45,7 @@ public class ThousandGenomesAnnotator
 	private Resources resources;
 
 	@Bean
-	public RepositoryAnnotator thousandGenome()
+	public RepositoryAnnotator thousandGenomes()
 	{
 		DefaultAttributeMetaData outputAttribute = new DefaultAttributeMetaData(THOUSAND_GENOME_AF,
 				FieldTypeEnum.STRING).setDescription(
@@ -53,9 +53,9 @@ public class ThousandGenomesAnnotator
 				.setLabel(THOUSAND_GENOME_AF_LABEL);
 
 		AnnotatorInfo thousandGenomeInfo = AnnotatorInfo
-				.create(Status.BETA,
+				.create(Status.READY,
 						AnnotatorInfo.Type.POPULATION_REFERENCE,
-						"Thousand_Genomes",
+						"thousand_genomes",
 						"The 1000 Genomes Project is an international collaboration to produce an "
 								+ "extensive public catalog of human genetic variation, including SNPs and structural variants, "
 								+ "and their haplotype contexts. This resource will support genome-wide association studies and other "
@@ -64,7 +64,7 @@ public class ThousandGenomesAnnotator
 								+ "sequenced using next-generation sequencing technologies. "
 								+ "The results of the study will be freely and publicly accessible to researchers worldwide. "
 								+ "Further information about the project is available in the About tab. Information about downloading, "
-								+ "browsing or using the 1000 Genomes data is available in the Data tab.",
+								+ "browsing or using the 1000 Genomes data is available at: http://www.1000genomes.org/ ",
 						Collections.singletonList(outputAttribute));
 
 		LocusQueryCreator locusQueryCreator = new LocusQueryCreator();
@@ -88,7 +88,7 @@ public class ThousandGenomesAnnotator
 	}
 
 	@Bean
-	Resource thousandGenomeSources()
+	Resource thousandGenomesSources()
 	{
 		MultiResourceConfig thousandGenomeConfig = new MultiResourceConfigImpl(THOUSAND_GENOME_CHROMOSOME_PROPERTY,
 				THOUSAND_GENOME_FILE_PATTERN_PROPERTY, THOUSAND_GENOME_FOLDER_PROPERTY, molgenisSettings);

@@ -27,7 +27,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ExacAnnotator
 {
-	// TODO Write test
+
 	public static final String EXAC_AF = "EXAC_AF";
 	public static final String EXAC_AF_LABEL = "ExAC allele frequency";
 	public static final String EXAC_AF_ResourceAttributeName = VcfRepository.getInfoPrefix() + "AF";
@@ -45,9 +45,9 @@ public class ExacAnnotator
 	@Bean
 	public RepositoryAnnotator exac()
 	{
-		// TODO: description
+
 		DefaultAttributeMetaData outputAttribute = new DefaultAttributeMetaData(EXAC_AF, FieldTypeEnum.STRING)
-				.setDescription("TODO").setLabel(EXAC_AF_LABEL);
+				.setDescription("The ExAC allele frequency").setLabel(EXAC_AF_LABEL);
 
 		AnnotatorInfo exacInfo = AnnotatorInfo
 				.create(Status.READY,
