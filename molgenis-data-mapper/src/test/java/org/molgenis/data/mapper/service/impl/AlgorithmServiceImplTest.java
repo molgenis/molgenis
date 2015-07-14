@@ -99,7 +99,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		assertTrue(algorithmServiceImpl.isSingleMatchHighQuality(targetAttribute2, tags2, explanations2));
 
 		DefaultAttributeMetaData targetAttribute3 = new DefaultAttributeMetaData("fasting_glucose");
-		targetAttribute3.setLabel("fasting glucose at baseline mmol/L");
+		targetAttribute3.setLabel("glucose fasting");
 		Multimap<Relation, OntologyTerm> tags3 = LinkedHashMultimap.<Relation, OntologyTerm> create();
 		tags3.put(Relation.isAssociatedWith, OntologyTerm.create(
 				"http://www.molgenis.org/fasting,http://www.molgenis.org/glucose", "fasting,glucose"));
@@ -107,6 +107,18 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 				ExplainedQueryString.create("fasting", "fasting", "fasting", 100),
 				ExplainedQueryString.create("glucose", "glucose", "glucose", 100));
 		assertTrue(algorithmServiceImpl.isSingleMatchHighQuality(targetAttribute3, tags3, explanations3));
+	}
+
+	@Test
+	public void testExtractWordsFromString()
+	{
+		AlgorithmServiceImpl algorithmServiceImpl = (AlgorithmServiceImpl) algorithmService;
+
+		List<String> expectedList = Arrays.asList("measured", "standing", "height");
+
+		assertTrue(expectedList.containsAll(algorithmServiceImpl.extractWordsFromString("measured_standing#$ height")));
+
+		assertTrue(expectedList.containsAll(algorithmServiceImpl.extractWordsFromString("(measured)standing  height")));
 	}
 
 	@Test

@@ -103,14 +103,14 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	boolean isSingleMatchHighQuality(AttributeMetaData targetAttribute,
 			Multimap<Relation, OntologyTerm> ontologyTermTags, Iterable<ExplainedQueryString> explanations)
 	{
-		String label = StringUtils.isNotEmpty(targetAttribute.getLabel()) ? targetAttribute.getLabel().toLowerCase() : StringUtils.EMPTY;
-		String description = StringUtils.isNotEmpty(targetAttribute.getDescription()) ? targetAttribute
-				.getDescription().toLowerCase() : StringUtils.EMPTY;
+		List<String> labelWords = extractWordsFromString(targetAttribute.getLabel());
+
+		List<String> descriptionWords = extractWordsFromString(targetAttribute.getDescription());
 
 		List<String> tagsInExplanations = Lists.newArrayList(explanations).stream()
 				.map(explanation -> explanation.getTagName().toLowerCase()).collect(Collectors.toList());
 
-		if (tagsInExplanations.contains(label) || tagsInExplanations.contains(description)) return true;
+		if (tagsInExplanations.containsAll(labelWords) || tagsInExplanations.containsAll(descriptionWords)) return true;
 
 		for (OntologyTerm ontologyTerm : ontologyTermTags.values())
 		{
@@ -119,6 +119,17 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		}
 
 		return false;
+	}
+
+	List<String> extractWordsFromString(String string)
+	{
+		String nonAlphanumericChars = "[^a-zA-Z0-9]";
+		if (StringUtils.isNotEmpty(string))
+		{
+			return Lists.newArrayList(string.toLowerCase().replaceAll(nonAlphanumericChars, " ").split("\\s+"))
+					.stream().filter(word -> StringUtils.isNotEmpty(word)).collect(Collectors.toList());
+		}
+		return Collections.emptyList();
 	}
 
 	@Override
