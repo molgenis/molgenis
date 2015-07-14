@@ -77,7 +77,7 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 		});
 
 	}
-	
+
 	@Override
 	public List<AttributeMetaData> retrieveAttributeMetaDatasFromAlgorithm(String algorithm,
 			EntityMetaData sourceEntityMetaData)
@@ -102,10 +102,12 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 		String targetAtributeName = attributeMappingEntity.getString(AttributeMappingMetaData.TARGETATTRIBUTEMETADATA);
 		AttributeMetaData targetAttributeMetaData = targetEntityMetaData.getAttribute(targetAtributeName);
 		String algorithm = attributeMappingEntity.getString(AttributeMappingMetaData.ALGORITHM);
+		String algorithmState = attributeMappingEntity.getString(AttributeMappingMetaData.ALGORITHMSTATE);
 		List<AttributeMetaData> sourceAttributeMetaDatas = retrieveAttributeMetaDatasFromAlgorithm(algorithm,
 				sourceEntityMetaData);
 
-		return new AttributeMapping(identifier, targetAttributeMetaData, algorithm, sourceAttributeMetaDatas);
+		return new AttributeMapping(identifier, targetAttributeMetaData, algorithm, sourceAttributeMetaDatas,
+				algorithmState);
 	}
 
 	private Entity toAttributeMappingEntity(AttributeMapping attributeMapping)
@@ -117,8 +119,8 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 		attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHM, attributeMapping.getAlgorithm());
 		attributeMappingEntity.set(AttributeMappingMetaData.SOURCEATTRIBUTEMETADATAS,
 				attributeMapping.getSourceAttributeMetaDatas());
+		attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHMSTATE, attributeMapping.getAlgorithmState());
 		return attributeMappingEntity;
 	}
 
-	
 }

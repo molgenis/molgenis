@@ -18,6 +18,7 @@ import org.molgenis.data.semanticsearch.service.impl.SemanticSearchServiceHelper
 import org.molgenis.data.semanticsearch.service.impl.SemanticSearchServiceImpl;
 import org.molgenis.data.semanticsearch.service.impl.UntypedTagService;
 import org.molgenis.ontology.core.service.OntologyService;
+import org.molgenis.ontology.ic.TermFrequencyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,10 +36,16 @@ public class SemanticSearchConfig
 	IdGenerator idGenerator;
 
 	@Autowired
-	SemanticSearchServiceHelper semanticSearchServiceHelper;
+	TermFrequencyService termFrequencyService;
 
 	@Autowired
 	EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory;
+
+	@Bean
+	public SemanticSearchServiceHelper semanticSearchServiceHelper()
+	{
+		return new SemanticSearchServiceHelper(ontologyTagService(), dataService, ontologyService, termFrequencyService);
+	}
 
 	@Bean
 	public OntologyTagService ontologyTagService()
