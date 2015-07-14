@@ -16,7 +16,9 @@ public class TabixRepositoryFactory implements RepositoryFactory
 
 	public TabixRepositoryFactory(EntityMetaData emd)
 	{
+		System.out.println("TabixRepositoryFactory --- line 19");
 		this.emd = emd;
+		System.out.println("TabixRepositoryFactory --- line 21");
 	}
 
 	@Override

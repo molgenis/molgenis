@@ -125,10 +125,13 @@ public class CmdLineAnnotator
 		}
 		else if (annotatorName.equals("dann"))
 		{
+			System.out.println("Annotating dann: CmdLine ------ line 128");
 			molgenisSettings.setProperty(DannAnnotator.DANN_FILE_LOCATION_PROPERTY,
 					annotationSourceFile.getAbsolutePath());
+			System.out.println("Annotating dann: CmdLine ------ line 131     abs_path: "+ annotationSourceFile.getAbsolutePath());
 			Map<String, RepositoryAnnotator> annotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
 			RepositoryAnnotator annotator = annotators.get("dann");
+			System.out.println("Annotating dann: CmdLine ------ line 134");
 			annotate(annotator, inputVcfFile, outputVCFFile);
 		}
 		else if (annotatorName.equals("fitcon"))
@@ -204,7 +207,7 @@ public class CmdLineAnnotator
 					annotationSourceFile.getAbsolutePath());
 			molgenisSettings
 					.setProperty(ThousandGenomesAnnotator.THOUSAND_GENOME_FILE_PATTERN_PROPERTY,
-							"filtered.gtc.ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz.gz.recode.vcf.gz");
+							"ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz");
 			molgenisSettings.setProperty(ThousandGenomesAnnotator.THOUSAND_GENOME_CHROMOSOME_PROPERTY,
 					"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22");
 
@@ -247,7 +250,7 @@ public class CmdLineAnnotator
 		Iterator<Entity> annotatedRecords = annotator.annotate(vcfRepo);
 		while (annotatedRecords.hasNext())
 		{
-			
+
 			Entity annotatedRecord = annotatedRecords.next();
 			outputVCFWriter.println(VcfUtils.convertToVCF(annotatedRecord));
 		}

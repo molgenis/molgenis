@@ -33,7 +33,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class DannAnnotator
 {
-	// FIXME: nomenclature: http://cadd.gs.washington.edu/info
+
 	public static final String DANN_SCORE = "DANN_SCORE";
 	public static final String DANN_SCORE_LABEL = "DANNSCORE";
 	public static final String DANN_FILE_LOCATION_PROPERTY = "dann_location";
@@ -49,9 +49,11 @@ public class DannAnnotator
 	@Bean
 	public RepositoryAnnotator dann()
 	{
+		System.out.println("DannAnnotator --- line 50");
+		
 		List<AttributeMetaData> attributes = new ArrayList<>();
 		DefaultAttributeMetaData dann_score = new DefaultAttributeMetaData(DANN_SCORE, FieldTypeEnum.DECIMAL)
-				.setDescription("deleterious annotation of genetic variants using neural networks.").setLabel(
+				.setDescription("deleterious score of genetic variants using neural networks.").setLabel(
 						DANN_SCORE_LABEL);
 
 		attributes.add(dann_score);
@@ -67,20 +69,21 @@ public class DannAnnotator
 								+ "other annotation algorithms. CADD trains a linear kernel support vector machine (SVM) "
 								+ "to dif- ferentiate evolutionarily derived, likely benign, alleles from simulated, "
 								+ "likely deleterious, variants. However, SVMs cannot capture non-linear relationships"
-								+ " among the features, which can limit per- formance. To address this issue, we have"
+								+ " among the features, which can limit performance. To address this issue, we have"
 								+ " developed DANN. DANN uses the same feature set and training data as CADD to train"
 								+ " a deep neural network (DNN). DNNs can capture non-linear relation- ships among "
 								+ "features and are better suited than SVMs for problems with a large number of samples "
 								+ "and features. We exploit Compute Unified Device Architecture-compatible "
 								+ "graphics processing units and deep learning techniques such as dropout and momentum "
-								+ "training to accelerate the DNN train- ing. DANN achieves about a 19%relative reduction "
+								+ "training to accelerate the DNN training. DANN achieves about a 19%relative reduction "
 								+ "in the error rate and about a 14%relative increase in the area under the curve (AUC) metric "
-								+ "over CADD’s SVMmethodology. "
+								+ "over CADD’s SVM methodology. "
 								+ "All data and source code are available at https://cbcl.ics.uci.edu/ public_data/DANN/.",
 						attributes);
+		
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(DANN_TABIX_RESOURCE, dannInfo, new LocusQueryCreator(),
 				new VariantResultFilter(), dataService, resources);
-
+		System.out.println("DannAnnotator --- line 82");
 		return new RepositoryAnnotatorImpl(entityAnnotator);
 	}
 
@@ -89,6 +92,8 @@ public class DannAnnotator
 	{
 		Resource dannTabixResource = null;
 
+		System.out.println("DannAnnotator --- line 91");
+		
 		DefaultEntityMetaData repoMetaData = new DefaultEntityMetaData(DANN_TABIX_RESOURCE);
 		repoMetaData.addAttributeMetaData(CHROM_META);
 		repoMetaData.addAttributeMetaData(POS_META);
@@ -97,8 +102,12 @@ public class DannAnnotator
 		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("DANN_SCORE", DECIMAL));
 		repoMetaData.addAttribute("id").setIdAttribute(true).setVisible(false);
 
+		System.out.println("DannAnnotator --- line 99");
+		
 		dannTabixResource = new ResourceImpl(DANN_TABIX_RESOURCE, new SingleResourceConfig(DANN_FILE_LOCATION_PROPERTY,
 				molgenisSettings), new TabixRepositoryFactory(repoMetaData));
+		
+		System.out.println("DannAnnotator --- line 106");
 
 		return dannTabixResource;
 	}

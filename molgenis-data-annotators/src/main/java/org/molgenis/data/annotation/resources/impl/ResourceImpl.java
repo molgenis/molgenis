@@ -51,12 +51,15 @@ public class ResourceImpl implements Resource
 	@Override
 	public synchronized boolean isAvailable()
 	{
+		System.out.println("ResourceImpl ----- line 54" + this.name);
 		if (repository != null && needsRefresh())
 		{
+			System.out.println("ResourceImpl ----- line 57" + this.name);
 			repository = null;
 			file = null;
 		}
 		final File file = getFile();
+		System.out.println("ResourceImpl ----- line 62" + this.name);
 		return file != null && file.exists();
 	}
 
