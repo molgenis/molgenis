@@ -3,13 +3,12 @@ package org.molgenis.data.mapper.service.impl;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -103,33 +102,31 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	boolean isSingleMatchHighQuality(AttributeMetaData targetAttribute,
 			Multimap<Relation, OntologyTerm> ontologyTermTags, Iterable<ExplainedQueryString> explanations)
 	{
-		List<String> labelWords = extractWordsFromString(targetAttribute.getLabel());
+		Map<String, Double> matchedTags = new HashMap<String, Double>();
+		for (ExplainedQueryString explanation : explanations)
+		{
+			matchedTags.put(explanation.getTagName().toLowerCase(), explanation.getScore());
+		}
+		String label = StringUtils.isNotEmpty(targetAttribute.getLabel()) ? targetAttribute.getLabel().toLowerCase() : StringUtils.EMPTY;
+		String description = StringUtils.isNotEmpty(targetAttribute.getDescription()) ? targetAttribute
+				.getDescription().toLowerCase() : StringUtils.EMPTY;
 
-		List<String> descriptionWords = extractWordsFromString(targetAttribute.getDescription());
-
-		List<String> tagsInExplanations = Lists.newArrayList(explanations).stream()
-				.map(explanation -> explanation.getTagName().toLowerCase()).collect(Collectors.toList());
-
-		if (tagsInExplanations.containsAll(labelWords) || tagsInExplanations.containsAll(descriptionWords)) return true;
+		if (isGoodMatch(matchedTags, label)) return true;
+		if (isGoodMatch(matchedTags, description)) return true;
 
 		for (OntologyTerm ontologyTerm : ontologyTermTags.values())
 		{
-			List<String> ontologyTermLabels = Lists.newArrayList(ontologyTerm.getLabel().toLowerCase().split(","));
-			if (tagsInExplanations.containsAll(ontologyTermLabels)) return true;
+			boolean allMatch = Lists.newArrayList(ontologyTerm.getLabel().toLowerCase().split(",")).stream()
+					.allMatch(ontologyTermLabel -> isGoodMatch(matchedTags, ontologyTermLabel));
+			if (allMatch) return true;
 		}
 
 		return false;
 	}
 
-	List<String> extractWordsFromString(String string)
+	boolean isGoodMatch(Map<String, Double> matchedTags, String label)
 	{
-		String nonAlphanumericChars = "[^a-zA-Z0-9]";
-		if (StringUtils.isNotEmpty(string))
-		{
-			return Lists.newArrayList(string.toLowerCase().replaceAll(nonAlphanumericChars, " ").split("\\s+"))
-					.stream().filter(word -> StringUtils.isNotEmpty(word)).collect(Collectors.toList());
-		}
-		return Collections.emptyList();
+		return matchedTags.containsKey(label) && matchedTags.get(label).intValue() == 100;
 	}
 
 	@Override
