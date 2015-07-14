@@ -48,71 +48,63 @@
 	</div>
 </div>
 <div class="row">	
-	<div class="col-md-4 col-lg-2">
-		<p>
-			<strong>Name</strong>
-			</br>
-			<span>
-				${attributeMapping.targetAttributeMetaData.name?html} (${attributeMapping.targetAttributeMetaData.dataType})
-			</span>
-			
-			</br>
-			
-			<strong>Label</strong>
-			</br> 
-			<span>
-				<#if attributeMapping.targetAttributeMetaData.label??>
-					${attributeMapping.targetAttributeMetaData.label?html}
-				<#else>
-					N/A
-				</#if>
-			</span>
-			
-			</br>
-			
-			<strong>Description</strong>
-			</br>
-			<span>
-				<#if attributeMapping.targetAttributeMetaData.description??>
-					${attributeMapping.targetAttributeMetaData.description?html}
-				<#else>
-					N/A
-				</#if>
-			</span>
-			</br>
-			
-			<strong>OntologyTerms</strong>
-			</br>
-			<#if tags ?? && tags?size == 0>
-				N/A
-			<#else>
-				<#list tags as tag>
-					<#assign synonyms = tag.synonyms?join("</br>")>
-					<span class="label label-info ontologytag-tooltip" data-toggle="popover" title="<strong>Synonyms</strong>" data-content="${synonyms}">${tag.label}</span>
-				</#list>
-			</#if>
-		</p>
-	</div>	
-	<div class="col-md-4 col-lg-2">	
-		<#if attributeMapping.targetAttributeMetaData.dataType == 'categorical' || attributeMapping.targetAttributeMetaData.dataType == 'xref'>
-			<strong>Categories</strong>
-			</br>
-			<span>
-				<#if attributeMapping.targetAttributeMetaData.dataType == "xref" || attributeMapping.targetAttributeMetaData.dataType == "categorical" && (categories)?has_content>
-					<#assign refEntityMetaData = attributeMapping.targetAttributeMetaData.refEntity>
-					<#list categories.iterator() as category>
-						<#list refEntityMetaData.attributes as attribute>
-							<#assign attributeName = attribute.name>
-								${category[attributeName]} <#if refEntityMetaData.attributes?seq_index_of(attribute) != refEntityMetaData.attributes?size - 1>=</#if>
+	<div class="col-md-5 col-lg-5">
+		<table class="table-borderless">
+			<tr>
+				<td class="td-align-top"><strong>Name</strong></td>
+				<td class="td-align-top">${attributeMapping.targetAttributeMetaData.name?html} (${attributeMapping.targetAttributeMetaData.dataType})</td>
+			</tr>
+			<tr>
+				<td class="td-align-top"><strong>Label</strong></td>
+				<td class="td-align-top"><#if attributeMapping.targetAttributeMetaData.label??>
+						${attributeMapping.targetAttributeMetaData.label?html}
+					<#else>
+						N/A
+					</#if>
+				</td>
+			</tr>
+			<tr>
+				<td class="td-align-top"><strong>Description</strong></td>
+				<td class="td-align-top">
+					<#if attributeMapping.targetAttributeMetaData.description??>
+						${attributeMapping.targetAttributeMetaData.description?html}
+					<#else>
+						N/A
+					</#if>
+				</td>
+			</tr>
+			<tr>
+				<td class="td-align-top"><strong>OntologyTerms</strong></td>
+				<td class="td-align-top">
+					<#if tags ?? && tags?size == 0>
+						N/A
+					<#else>
+						<#list tags as tag>
+							<#assign synonyms = tag.synonyms?join("</br>")>
+							<span class="label label-info ontologytag-tooltip" data-toggle="popover" title="<strong>Synonyms</strong>" data-content="${synonyms}">${tag.label}</span>
 						</#list>
-						</br>
-					</#list>
-				<#else>
-					N/A
-				</#if>
-			</span>
-		</#if>
-	</div>
+					</#if>
+				</td>
+			</tr>
+			<tr>
+				<td class="td-align-top"><strong>Categories</strong></td>
+				<td class="td-align-top">
+					<#if attributeMapping.targetAttributeMetaData.dataType == "xref" || attributeMapping.targetAttributeMetaData.dataType == "categorical" && (categories)?has_content>
+						<#assign refEntityMetaData = attributeMapping.targetAttributeMetaData.refEntity>
+						<#list categories.iterator() as category>
+							<#list refEntityMetaData.attributes as attribute>
+								<#assign attributeName = attribute.name>
+									${category[attributeName]} <#if refEntityMetaData.attributes?seq_index_of(attribute) != refEntityMetaData.attributes?size - 1>=</#if>
+							</#list>
+							</br>
+						</#list>
+					<#else>
+						N/A
+					</#if>
+				</td>
+			</tr>
+		</table>
+	</div>	
 </div>
 
 <div class="row"> <#-- Start: Master row -->
