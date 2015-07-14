@@ -15,12 +15,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.resources.MultiResourceConfig;
 import org.molgenis.data.annotation.resources.ResourceConfig;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -32,7 +30,6 @@ public class MultiFileResourceTest
 	private MultiFileResource multiFileResource;
 	@Mock
 	private MultiResourceConfig config;
-	private EntityMetaData emd;
 	@Mock
 	private RepositoryFactory factory;
 	private Map<String, ResourceConfig> configs;
@@ -48,11 +45,10 @@ public class MultiFileResourceTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		emd = new DefaultEntityMetaData("name");
 		MockitoAnnotations.initMocks(this);
 		configs = ImmutableMap.of("3", chrom3Config, "4", chrom4Config);
 		when(config.getConfigs()).thenReturn(configs);
-		multiFileResource = new MultiFileResource("name", config, emd, factory);
+		multiFileResource = new MultiFileResource("name", config, factory);
 	}
 
 	@Test

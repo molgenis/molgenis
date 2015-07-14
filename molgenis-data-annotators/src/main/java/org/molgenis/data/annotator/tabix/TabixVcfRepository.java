@@ -86,6 +86,13 @@ public class TabixVcfRepository extends VcfRepository
 		String queryString = String.format("%s:%s-%2$s", chrom, pos);
 		Builder<Entity> builder = ImmutableList.<Entity> builder();
 		org.molgenis.data.annotator.tabix.TabixReader.Iterator iterator = tabixReader.query(queryString);
+		
+		//Tabix reader sometimes returns null. Does this mean that query doesn't return anything?
+		// See also http://sourceforge.net/p/samtools/mailman/message/26113299/
+		if (iterator == null) {
+			return builder.build();
+		}
+		
 		try
 		{
 			String line = iterator.next();
