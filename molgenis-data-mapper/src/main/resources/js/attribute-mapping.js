@@ -395,15 +395,29 @@
 			$.each(orderedWords, function(index, word){
 				if($.inArray(word, matchedWords) !== -1){
 					connectedPhrase += ' ' + word;
-				}else{
-					
-					if(connectedPhrase.length > 0){
-						connectedPhrases.push(connectedPhrase.trim());
-						connectedPhrase = '';
-					}
+				}else if(word.length > 0){
 					//Word contains illegal chars
 					if(illegal_pattern.test(word)){
-						addAll(connectedPhrases, connectNeighboredWords(word.split(illegal_pattern).join(' '), matchedWords));
+						var wordsIllegalCharsRemoved = connectNeighboredWords(word.split(illegal_pattern).join(' '), matchedWords);
+						if(wordsIllegalCharsRemoved.length === 0){
+							if(connectedPhrase.length > 0){
+								connectedPhrases.push(connectedPhrase.trim());
+								connectedPhrase = '';
+							}
+						}else{
+							if(illegal_pattern.test(word.charAt(0))){
+								if(connectedPhrase.length > 0){
+									connectedPhrases.push(connectedPhrase.trim());
+								}
+								connectedPhrase = wordsIllegalCharsRemoved[0];
+							}else{
+								connectedPhrase += ' ' + wordsIllegalCharsRemoved[0];
+							}
+						}
+						
+					}else if(connectedPhrase.length > 0){
+						connectedPhrases.push(connectedPhrase.trim());
+						connectedPhrase = '';
 					}
 				}
 			});
@@ -451,13 +465,15 @@
 	}
 	
 	//A helper function to perform post-redirect action
-	function redirectPost(url, data){
+	function redirect(method, url, data){
 		showSpinner();
 		var form = '';
-        $.each(data, function(key, value) {
-            form += '<input type="hidden" name="'+key+'" value="'+value+'">';
-        });
-        $('<form action="'+url+'" method="POST">'+form+'</form>').appendTo('body').submit();
+		if(data){
+	        $.each(data, function(key, value) {
+	            form += '<input type="hidden" name="'+key+'" value="'+value+'">';
+	        });
+		}
+        $('<form action="'+url+'" method="'+ method +'">'+form+'</form>').appendTo('body').submit();
 	}
 
 	$(function() {
@@ -475,7 +491,7 @@
 			placement : 'right'
 		});
 		
-		$('.ontologytag-tooltip').css({'cursor':'pointer'}).popover({'html':true, 'placement':'bottom', 'trigger':'hover'});
+		$('.ontologytag-tooltip').css({'cursor':'pointer'}).popover({'html':true, 'placement':'right', 'trigger':'hover'});
 
 		// Get the explained attributes
 		$.ajax({
@@ -583,15 +599,17 @@
 
 		// save button for saving generated mapping
 		$('#save-mapping-btn').on('click', function() {
-			var data = {
+			$.post(molgenis.getContextUrl() + "/saveattributemapping", {
 				mappingProjectId : $('input[name="mappingProjectId"]').val(),
 				target : $('input[name="target"]').val(),
 				source : $('input[name="source"]').val(),
 				targetAttribute : $('input[name="targetAttribute"]').val(),
 				algorithm : algorithm
-			};
-			redirectPost(molgenis.getContextUrl() + '/saveattributemapping', data);
+			}, function(data) {
+				redirect('get', molgenis.getContextUrl() + '/mappingproject/' + $('input[name="mappingProjectId"]').val());
+			});
 		});
+
 
 		$('#js-function-modal-btn').on('click', function() {
 			$('#js-function-modal').modal('show');
