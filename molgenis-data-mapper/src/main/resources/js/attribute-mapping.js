@@ -337,7 +337,7 @@
 	 */
 	function rankAttributeTable(explainedAttributes){
 		if(explainedAttributes != null){
-			var attributeNames = Object.keys(explainedAttributes), className, attributeLabel, attributeInfoElement, firstRow, suggestedRow, explainedQueryStrings, words;
+			var attributeNames = Object.keys(explainedAttributes), className, attributeLabel, attributeInfoElement, firstRow, suggestedRow, explainedQueryStrings, matchedWords;
 			for(var i = attributeNames.length - 1; i >= 0;i--){
 				
 				className = attributeNames[i];
@@ -349,17 +349,23 @@
 				firstRow.before(suggestedRow);
 				//highlight the matched words in attribute labels
 				explainedQueryStrings = explainedAttributes[className];
-				
+				matchedWords = [];
 				if(explainedQueryStrings.length > 0){
 					
+					//Create a detailed explanation popover to show how the attributes get matched
 					createPopoverExplanation(suggestedRow, attributeInfoElement, attributeLabel, explainedQueryStrings);
 					
+					//Collect all matched words from all explanations
 					$.each(explainedQueryStrings, function(index, explainedQueryString){
-						words = extendPartialWord(attributeLabel, explainedQueryString.matchedWords.split(' '));
-						$.each(connectNeighboredWords(attributeLabel, words), function(index, word){
-							$(attributeInfoElement).highlight(word);
-						});
+						var matchedWordsFromOneExplanation = extendPartialWord(attributeLabel, explainedQueryString.matchedWords.split(' '));
+						addAll(matchedWords, matchedWordsFromOneExplanation);
 					});
+					
+					//Connect matched words and highlight them together
+					$.each(connectNeighboredWords(attributeLabel, matchedWords), function(index, word){
+						$(attributeInfoElement).highlight(word);
+					});
+					
 				}
 			}
 		}
@@ -384,50 +390,69 @@
 	}
 	
 	/**
-	 * connect the matched words that are neighbors so they can be highlighted together
+	 * connect the matched words that are neighbors in order to highlight them together
 	 */
 	function connectNeighboredWords(attributeLabel, matchedWords){
-		var illegal_pattern = new RegExp("[^a-zA-Z0-9]");
-		var connectedPhrases = [], connectedPhrase, orderedWords, connectedWords;
-		if(attributeLabel && matchedWords && matchedWords.length > 0){
-			connectedPhrase = '';
-			orderedWords = attributeLabel.toUpperCase().split(' ');
-			$.each(orderedWords, function(index, word){
-				if($.inArray(word, matchedWords) !== -1){
-					connectedPhrase += ' ' + word;
-				}else if(word.length > 0){
-					//Word contains illegal chars
-					if(illegal_pattern.test(word)){
-						var wordsIllegalCharsRemoved = connectNeighboredWords(word.split(illegal_pattern).join(' '), matchedWords);
-						if(wordsIllegalCharsRemoved.length === 0){
-							if(connectedPhrase.length > 0){
-								connectedPhrases.push(connectedPhrase.trim());
-								connectedPhrase = '';
-							}
-						}else{
-							if(illegal_pattern.test(word.charAt(0))){
-								if(connectedPhrase.length > 0){
-									connectedPhrases.push(connectedPhrase.trim());
-								}
-								connectedPhrase = wordsIllegalCharsRemoved[0];
-							}else{
-								connectedPhrase += ' ' + wordsIllegalCharsRemoved[0];
-							}
-						}
-						
-					}else if(connectedPhrase.length > 0){
+		var connectedPhrases = [], connectedPhrase, potentialConnectedPhrase, orderedMatchedWords;
+		
+		if(attributeLabel && matchedWords && matchedWords.length > 0){	
+			attributeLabel = attributeLabel.toUpperCase();
+			//Order the matched words
+			orderedMatchedWords = orderMatchedWords(attributeLabel, matchedWords);
+			if(orderedMatchedWords.length > 0){
+
+				//Algorithm to connect the words that are sitting next each other
+				connectedPhrase = orderedMatchedWords[0];
+				for(var i = 1; i < orderedMatchedWords.length;i++){
+					//Try to connect the next matched words with previous one
+					potentialConnectedPhrase = connectedPhrase + ' ' + orderedMatchedWords[i];
+					
+					//See if the connected phrase can be found in the label string
+					if(attributeLabel.indexOf(potentialConnectedPhrase) !== -1){
+						connectedPhrase = connectedPhrase + ' ' + orderedMatchedWords[i];
+					}else{
 						connectedPhrases.push(connectedPhrase.trim());
-						connectedPhrase = '';
+						connectedPhrase = orderedMatchedWords[i];
 					}
 				}
-			});
-			if(connectedPhrase.length > 0){
-				connectedPhrases.push(connectedPhrase.trim());
+				
+				//Push the leftover phrase to the list
+				if(connectedPhrase.length > 0){
+					connectedPhrases.push(connectedPhrase);
+				}
 			}
 		}
 		return connectedPhrases;
 	}
+	/**
+	 * Order the matched the words according to the order of words in the attribute label
+	 */
+	function orderMatchedWords(attributeLabel, matchedWords){
+		var hash = {}, orderedMatchedWords = [], wordIndices = [];
+		$.each(matchedWords, function(index, matchedWord){
+			var index = attributeLabel.indexOf(matchedWord);
+			hash[index] = matchedWord;
+			wordIndices.push(index);
+		});
+		wordIndices.sort(numberSort);
+		$.each(wordIndices, function(i, wordIndex){
+			if(hash[wordIndex]){				
+				orderedMatchedWords.push(hash[wordIndex]);
+			}
+		});
+		return orderedMatchedWords;
+	}
 	
+	/**
+	 * Define the sort method
+	 */
+	function numberSort (a,b) {
+	    return a - b;
+	}
+	
+	/**
+	 * A helper function to push all elements of the second array to the first array
+	 */
 	function addAll(originalArray, elementsToAdd){
 		$.each(elementsToAdd, function(index, element){
 			originalArray.push(element);
