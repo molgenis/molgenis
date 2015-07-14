@@ -1,6 +1,5 @@
 package org.molgenis.data.annotation.entity.impl;
 
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DECIMAL;
 import static org.molgenis.data.vcf.VcfRepository.ALT_META;
 import static org.molgenis.data.vcf.VcfRepository.CHROM_META;
 import static org.molgenis.data.vcf.VcfRepository.POS_META;
@@ -16,6 +15,8 @@ import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
+import org.molgenis.data.annotation.filter.VariantResultFilter;
+import org.molgenis.data.annotation.query.LocusQueryCreator;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.ResourceImpl;
