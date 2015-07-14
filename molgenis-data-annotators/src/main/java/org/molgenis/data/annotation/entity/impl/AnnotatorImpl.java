@@ -51,10 +51,10 @@ public class AnnotatorImpl implements EntityAnnotator
 		Query q = queryCreator.createQuery(entity);
 
 		Iterable<Entity> annotatationSourceEntities;
+		resources.getResourcesNames().forEach(e -> System.out.println("Resource name: " + e));
 		
 		if (resources.hasRepository(sourceRepositoryName))
 		{
-			
 			annotatationSourceEntities = resources.findAll(sourceRepositoryName, q);
 		}
 		else

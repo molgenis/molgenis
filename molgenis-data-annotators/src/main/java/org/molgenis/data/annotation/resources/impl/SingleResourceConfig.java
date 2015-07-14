@@ -15,8 +15,10 @@ public class SingleResourceConfig implements ResourceConfig
 
 	public SingleResourceConfig(String fileProperty, MolgenisSettings molgenisSettings)
 	{
+		System.out.println("SingleResourceConfig --- line 18");
 		this.molgenisSettings = molgenisSettings;
 		this.fileProperty = fileProperty;
+		System.out.println("SingleResourceConfig --- line 21");
 	}
 
 	@Override

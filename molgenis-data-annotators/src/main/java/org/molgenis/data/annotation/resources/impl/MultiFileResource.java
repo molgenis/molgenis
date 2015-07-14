@@ -94,7 +94,7 @@ public class MultiFileResource implements Resource
 	public Iterable<Entity> findAll(Query q)
 	{
 		// initialize after autowiring is complete and resources is empty
-		if (resources.isEmpty()) initializeResources();
+		isAvailable();
 		String chromValue = getFirstEqualsValueFor(VcfRepository.CHROM, q).toString();
 		Resource resource = resources.get(chromValue);
 		return resource.findAll(q);
