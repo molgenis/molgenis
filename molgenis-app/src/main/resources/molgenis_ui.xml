@@ -4,6 +4,7 @@
 		<plugin id="home" name="Home" url="home"/>
         <plugin id="importwizard" name="Upload" url="importwizard"/>
 		<plugin id="dataexplorer" name="Data Explorer" url="dataexplorer"/>
+		<plugin id="catalogue" name="Catalogue" url="catalogue"/>
 		<menu label="Data Integration" name="dataintegration">
 			<plugin id="mappingservice" name="Mapping Service" url="mappingservice"/>
 			<plugin id="tagwizard" name="Tag Wizard" url="tagwizard"/>
