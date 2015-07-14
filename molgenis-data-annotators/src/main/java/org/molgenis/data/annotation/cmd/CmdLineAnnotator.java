@@ -182,10 +182,6 @@ public class CmdLineAnnotator
 			RepositoryAnnotator annotator = annotators.get("exac");
 			annotate(annotator, inputVcfFile, outputVCFFile);
 		}
-		else if (annotatorName.equals("thousand_genomes"))
-		{
-			new ThousandGenomesServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
-		}
 		else if (annotatorName.equals("gonl"))
 		{
 			molgenisSettings.setProperty(GoNLAnnotator.GONL_FOLDER_PROPERTY, annotationSourceFile.getAbsolutePath());

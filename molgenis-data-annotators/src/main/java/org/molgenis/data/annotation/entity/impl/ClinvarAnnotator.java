@@ -63,11 +63,17 @@ public class ClinvarAnnotator
 				.create(Status.READY,
 						AnnotatorInfo.Type.PATHOGENICITY_ESTIMATE,
 						"clinvar",
-						" The Exome Aggregation Consortium (ExAC) is a coalition of investigators seeking to aggregate"
-								+ " and harmonize exome sequencing data from a wide variety of large-scale sequencing projects"
-								+ ", and to make summary data available for the wider scientific community.The data set provided"
-								+ " on this website spans 60,706 unrelated individuals sequenced as part of various "
-								+ "disease-specific and population genetic studies. ",
+						" ClinVar is a freely accessible, public archive of reports of the relationships"
+						+ " among human variations and phenotypes, with supporting evidence. ClinVar thus facilitates"
+						+ " access to and communication about the relationships asserted between human variation and "
+						+ "observed health status, and the history of that interpretation. ClinVar collects reports "
+						+ "of variants found in patient samples, assertions made regarding their clinical significance, "
+						+ "information about the submitter, and other supporting data. The alleles described in submissions "
+						+ "are mapped to reference sequences, and reported according to the HGVS standard. ClinVar then "
+						+ "presents the data for interactive users as well as those wishing to use ClinVar in daily "
+						+ "workflows and other local applications. ClinVar works in collaboration with interested "
+						+ "organizations to meet the needs of the medical genetics community as efficiently and effectively "
+						+ "as possible. Information about using ClinVar is available at: http://www.ncbi.nlm.nih.gov/clinvar/docs/help/.",
 								attributes);
 
 		// TODO: properly test multiAllelicFresultFilter
