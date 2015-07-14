@@ -10,6 +10,7 @@ import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.MolgenisFieldTypes.XREF;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
@@ -17,6 +18,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -50,6 +52,8 @@ import org.testng.annotations.Test;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
+
+;
 
 @ContextConfiguration(classes = AlgorithmServiceImplTest.Config.class)
 public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
@@ -87,8 +91,8 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		targetAttribute1.setLabel("height");
 		Multimap<Relation, OntologyTerm> tags1 = LinkedHashMultimap.<Relation, OntologyTerm> create();
 		List<ExplainedQueryString> explanations1 = Arrays.asList(ExplainedQueryString.create("height", "height",
-				"height", 100));
-		assertTrue(algorithmServiceImpl.isSingleMatchHighQuality(targetAttribute1, tags1, explanations1));
+				"standing height", 50.0));
+		assertFalse(algorithmServiceImpl.isSingleMatchHighQuality(targetAttribute1, tags1, explanations1));
 
 		DefaultAttributeMetaData targetAttribute2 = new DefaultAttributeMetaData("height");
 		targetAttribute2.setLabel("height");
@@ -105,20 +109,21 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 				"http://www.molgenis.org/fasting,http://www.molgenis.org/glucose", "fasting,glucose"));
 		List<ExplainedQueryString> explanations3 = Arrays.asList(
 				ExplainedQueryString.create("fasting", "fasting", "fasting", 100),
-				ExplainedQueryString.create("glucose", "glucose", "glucose", 100));
-		assertTrue(algorithmServiceImpl.isSingleMatchHighQuality(targetAttribute3, tags3, explanations3));
+				ExplainedQueryString.create("glucose", "glucose", "blood glucose", 50));
+		assertFalse(algorithmServiceImpl.isSingleMatchHighQuality(targetAttribute3, tags3, explanations3));
 	}
 
 	@Test
-	public void testExtractWordsFromString()
+	public void testIsGoodMatch()
 	{
 		AlgorithmServiceImpl algorithmServiceImpl = (AlgorithmServiceImpl) algorithmService;
 
-		List<String> expectedList = Arrays.asList("measured", "standing", "height");
-
-		assertTrue(expectedList.containsAll(algorithmServiceImpl.extractWordsFromString("measured_standing#$ height")));
-
-		assertTrue(expectedList.containsAll(algorithmServiceImpl.extractWordsFromString("(measured)standing  height")));
+		Map<String, Double> matchedTags = new HashMap<String, Double>();
+		matchedTags.put("height", 100.0);
+		matchedTags.put("weight", 50.0);
+		assertFalse(algorithmServiceImpl.isGoodMatch(matchedTags, "blood"));
+		assertFalse(algorithmServiceImpl.isGoodMatch(matchedTags, "weight"));
+		assertTrue(algorithmServiceImpl.isGoodMatch(matchedTags, "height"));
 	}
 
 	@Test
