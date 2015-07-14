@@ -115,12 +115,20 @@
 			'<@entityName emd />': new uml.Abstract({
 	      	 	size: { width: RECT_WIDTH, height: ${(50 + 12 * emd.attributes?size)?c} },
 	        	name: '${emd.label?js_string}',
+	        	attrs: {
+	        		'.uml-class-attrs-rect': { fill: 'white', stroke: 'black'},
+	        		'.uml-class-methods-rect': { fill: 'white', stroke: 'black'},
+	        	},
 	       		attributes: [<#list emd.attributes as amd>'${amd.label?js_string}: ${amd.dataType}'<#if amd_has_next>,</#if></#list>]
 	    	}),
 	    <#else>
 			'<@entityName emd />': new uml.Class({
 	      	 	size: { width: RECT_WIDTH, height: ${(50 + 12 * emd.attributes?size)?c} },
 	        	name: '${emd.label?js_string}',
+	        	attrs: {
+	        		'.uml-class-attrs-rect': { fill: 'white', stroke: 'black'},
+	        		'.uml-class-methods-rect': { fill: 'white', stroke: 'black'},
+	        	},
 	       	 	attributes: [<#list emd.attributes as amd>'${amd.label?js_string}: ${amd.dataType?js_string}'<#if amd_has_next>,</#if></#list>]
 	    	}),
 	    </#if>
@@ -129,6 +137,3 @@
 		<@listClasses package=p classes=classes />
 	</#list>
 </#macro>
-
-	
-	

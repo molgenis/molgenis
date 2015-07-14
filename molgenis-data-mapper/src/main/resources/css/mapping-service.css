@@ -29,3 +29,20 @@
 	color:white;
 	border-radius: 2px;
 }
+
+.table-borderless {
+    width : 100%;
+}
+
+.td-align-top {
+    vertical-align: top;
+    padding-top : 5px;
+}
+
+.algorithm-color-legend {
+	width : 50%;
+	padding-top : 6px;
+	padding-bottom : 6px;
+	border-radius: 5px;
+	font-weight: bold;
+}

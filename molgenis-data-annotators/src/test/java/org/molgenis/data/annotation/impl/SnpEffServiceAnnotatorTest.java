@@ -12,7 +12,7 @@ import java.util.ArrayList;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.annotation.entity.impl.SnpEffServiceAnnotator;
+import org.molgenis.data.annotation.entity.impl.SnpEffAnnotator;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.framework.server.MolgenisSettings;
@@ -25,11 +25,11 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 @ContextConfiguration(classes =
-{ SnpEffServiceAnnotatorTest.Config.class, SnpEffServiceAnnotator.class })
+{ SnpEffServiceAnnotatorTest.Config.class, SnpEffAnnotator.class })
 public class SnpEffServiceAnnotatorTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
-	private SnpEffServiceAnnotator.SnpEffRepositoryAnnotator snpEffRepositoryAnnotator;
+	private SnpEffAnnotator.SnpEffRepositoryAnnotator snpEffRepositoryAnnotator;
 	private final ArrayList<Entity> entities = new ArrayList<>();;
 
 	@BeforeMethod
@@ -95,23 +95,23 @@ public class SnpEffServiceAnnotatorTest extends AbstractTestNGSpringContextTests
 		Entity entity = new MapEntity();
 		snpEffRepositoryAnnotator.parseOutputLineToEntity(
 				"X\t12345\t.\tA\tT\tqual\tfilter\t0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15", entity);
-		assertEquals(entity.get(SnpEffServiceAnnotator.ANNOTATION), "1");
-		assertEquals(entity.get(SnpEffServiceAnnotator.PUTATIVE_IMPACT), "2");
-		assertEquals(entity.get(SnpEffServiceAnnotator.GENE_NAME), "3");
-		assertEquals(entity.get(SnpEffServiceAnnotator.GENE_ID), "4");
-		assertEquals(entity.get(SnpEffServiceAnnotator.FEATURE_TYPE), "5");
-		assertEquals(entity.get(SnpEffServiceAnnotator.FEATURE_ID), "6");
-		assertEquals(entity.get(SnpEffServiceAnnotator.TRANSCRIPT_BIOTYPE), "7");
-		assertEquals(entity.get(SnpEffServiceAnnotator.RANK_TOTAL), "8");
-		assertEquals(entity.get(SnpEffServiceAnnotator.HGVS_C), "9");
-		assertEquals(entity.get(SnpEffServiceAnnotator.HGVS_P), "10");
-		assertEquals(entity.get(SnpEffServiceAnnotator.C_DNA_POSITION), "11");
-		assertEquals(entity.get(SnpEffServiceAnnotator.CDS_POSITION), "12");
-		assertEquals(entity.get(SnpEffServiceAnnotator.PROTEIN_POSITION), "13");
-		assertEquals(entity.get(SnpEffServiceAnnotator.DISTANCE_TO_FEATURE), "14");
-		assertEquals(entity.get(SnpEffServiceAnnotator.ERRORS), "15");
-		assertEquals(entity.get(SnpEffServiceAnnotator.LOF), "");
-		assertEquals(entity.get(SnpEffServiceAnnotator.NMD), "");
+		assertEquals(entity.get(SnpEffAnnotator.ANNOTATION), "1");
+		assertEquals(entity.get(SnpEffAnnotator.PUTATIVE_IMPACT), "2");
+		assertEquals(entity.get(SnpEffAnnotator.GENE_NAME), "3");
+		assertEquals(entity.get(SnpEffAnnotator.GENE_ID), "4");
+		assertEquals(entity.get(SnpEffAnnotator.FEATURE_TYPE), "5");
+		assertEquals(entity.get(SnpEffAnnotator.FEATURE_ID), "6");
+		assertEquals(entity.get(SnpEffAnnotator.TRANSCRIPT_BIOTYPE), "7");
+		assertEquals(entity.get(SnpEffAnnotator.RANK_TOTAL), "8");
+		assertEquals(entity.get(SnpEffAnnotator.HGVS_C), "9");
+		assertEquals(entity.get(SnpEffAnnotator.HGVS_P), "10");
+		assertEquals(entity.get(SnpEffAnnotator.C_DNA_POSITION), "11");
+		assertEquals(entity.get(SnpEffAnnotator.CDS_POSITION), "12");
+		assertEquals(entity.get(SnpEffAnnotator.PROTEIN_POSITION), "13");
+		assertEquals(entity.get(SnpEffAnnotator.DISTANCE_TO_FEATURE), "14");
+		assertEquals(entity.get(SnpEffAnnotator.ERRORS), "15");
+		assertEquals(entity.get(SnpEffAnnotator.LOF), "");
+		assertEquals(entity.get(SnpEffAnnotator.NMD), "");
 	}
 
 	@Configuration

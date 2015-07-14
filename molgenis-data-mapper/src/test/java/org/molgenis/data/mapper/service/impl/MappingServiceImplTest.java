@@ -37,6 +37,7 @@ import org.molgenis.data.mem.InMemoryRepositoryCollection;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.PackageImpl;
+import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -354,6 +355,12 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
+		SemanticSearchService semanticSearchService()
+		{
+			return mock(SemanticSearchService.class);
+		}
+
+		@Bean
 		IdGenerator idGenerator()
 		{
 			IdGenerator idGenerator = mock(IdGenerator.class);
@@ -361,9 +368,9 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		SemanticSearchService semanticSearchService()
+		public OntologyTagService ontologyTagService()
 		{
-			return mock(SemanticSearchService.class);
+			return mock(OntologyTagService.class);
 		}
 
 		@PostConstruct
