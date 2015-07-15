@@ -78,10 +78,11 @@ class Connect_Molgenis():
         Returns:
             header (dict): Login header for molgenis server
         '''
+        data = json.dumps({'username': user, 'password': password})
+                                       
         server_response = requests.post( self.api_url+'/login/',
-                                       data=json.dumps({'username': user, 'password': password}),
-                                       headers={'Content-type':'application/json'} )
-        self.check_server_response(server_response, 'retrieve token')
+                                       data=data, headers={'Content-type':'application/json'} )
+        self.check_server_response(server_response, 'retrieve token',data_used=data)
         self.server_response_json = server_response.json()['token']
         headers = {'Content-type':'application/json', 'x-molgenis-token': self.server_response_json, 'Accept':'application/json'}
         return headers
@@ -91,7 +92,7 @@ class Connect_Molgenis():
         self.check_server_response(server_response, 'logout')
         return server_response
     
-    def check_server_response(self, server_response, type_of_request, entity_used='<Entity not provided>', data='<Data not provided>'):
+    def check_server_response(self, server_response, type_of_request, entity_used=None, data_used=None,query_used=None,column_used=None):
         '''Retrieve error message from server response
         
         Args:
@@ -106,12 +107,21 @@ class Connect_Molgenis():
         def error(server_response):
             try:
                 self.server_response_json = server_response.json()
-                error_message = str(server_response)+'\n'+server_response.reason+'\n'
+                error_message = str(server_response)+' -> '+server_response.reason+'\n'
                 if self.server_response_json.has_key('errors'):
-                    if type_of_request == 'Add row to entity':
-                        error_message += 'Added data: '+str(data)+'\nto Entity: '+str(entity_used)+'\n'
+                    if data_used:
+                        error_message += 'Used data: '+str(data_used)+'\n'
+                    if entity_used:
+                        error_message += 'Used Entity: '+str(entity_used)+'\n'
+                    if query_used:
+                        error_message += 'Used Query: '+str(query_used)+'\n'
+                    if column_used:
+                        error_message += 'Used column: '+str(column_used)+'\n'
                     for error in self.server_response_json['errors']:
                         error_message += error['message']+'\n'
+                        if 'Not Found' in error_message:
+                            if entity_used: 
+                                error_message += 'Available columns for entity \''+entity_used+'\': '+', '.join(self.get_column_names(entity_used))
                         # bug in error response when wrong enum value. Remove wrong part of message and add sensible one
                         if 'Invalid enum value' in error_message:
                             column_name = re.search('for attribute \'(.+?)\'', error_message).group(1)
@@ -125,7 +135,7 @@ class Connect_Molgenis():
                 pass # no json oobject in server_response
         if str(server_response) == '<Response [400]>' or str(server_response) == '<Response [404]>':
             error(server_response) 
-        elif str(server_response) == '<Response [200]>' or str(server_response) == '<Response [201]>':
+        elif str(server_response) == '<Response [200]>' or str(server_response) == '<Response [201]>' or str(server_response) == '<Response [204]>':
             if self.verbose:
                 print type_of_request+' -> '+str(server_response)+' - '+server_response.reason
             return True
@@ -134,7 +144,7 @@ class Connect_Molgenis():
             # i didn't go through all response codes, so if it's a different response than expected I only want to raise exception if 
             # there are error messages in the response object, otherwise just warn that there is a different response than expected
             if self.give_warnings:
-                warnings.warn('Expected <Response [200]> or <Response 201>, got '+str(server_response)+'\nReason: '+server_response.reason)
+                warnings.warn('Expected <Response [200]>, <Response 201> or <Response 204>, got '+str(server_response)+'\nReason: '+server_response.reason)
             return False
     
     def validate_data(self, entity_name, data):
@@ -178,7 +188,7 @@ class Connect_Molgenis():
         if validate_json:
             self.validate_data(entity_name, data)
         self.server_response = requests.post(self.api_url+'/'+entity_name+'/', data=str(data), headers=self.headers)
-        self.check_server_response(self.server_response, 'Add row to entity', entity_name, str(data))
+        self.check_server_response(self.server_response, 'Add row to entity', entity_used=entity_name, data_used=str(data))
         self.last_added_id = self.server_response.headers['location']
         return self.server_response
 
@@ -198,10 +208,9 @@ class Connect_Molgenis():
         if len(query) == 0:
             raise ValueError('Can\'t search with empty query')
         json_query = json.dumps({'q':query})
-        server_response = requests.post(self.api_url+'/'+entity_name+'?_method=GET', data = json_query, headers=self.headers)
-        #print server_response.json()
-        self.check_server_response(server_response, 'Get rows from entity')
-        self.server_response_json = server_response.json()
+        self.server_response = requests.post(self.api_url+'/'+entity_name+'?_method=GET', data = json_query, headers=self.headers)
+        self.server_response_json = self.server_response.json()
+        self.check_server_response(self.server_response, 'Get rows from entity',entity_used=entity_name, query_used=json_query)
         if self.verbose:
             if self.server_response_json['total'] >= self.server_response_json['num']:
                 if self.give_warnings:
@@ -210,7 +219,9 @@ class Connect_Molgenis():
             print 'Selected '+str(self.server_response_json['total'])+' row(s).'
         return self.server_response_json
     
-    def update_entity_row(self, entity_name, query, data):
+    
+    
+    def update_entity_rows(self, entity_name, query, data):
         '''Update an entity row
     
         Args:
@@ -232,7 +243,7 @@ class Connect_Molgenis():
             row_id = entity_items[id_attribute]
             server_response = requests.put(self.api_url+'/'+entity_name+'/'+row_id+'/', data=str(data), headers=self.headers)
             server_response_list.append(server_response)
-            self.check_server_response(server_response, 'Update entity row')
+            self.check_server_response(server_response, 'Update entity row', query_used=query,data_used=data,entity_used=entity_name)
         return server_response_list
     
     def get_entity_meta_data(self, entity_name):
@@ -247,10 +258,10 @@ class Connect_Molgenis():
         if entity_name in self.entity_meta_data:
             return self.entity_meta_data[entity_name] 
         server_response = requests.get(self.api_url+'/'+entity_name+'/meta', headers=self.headers)
-        self.check_server_response(server_response, 'Get meta data of entity')
+        self.check_server_response(server_response, 'Get meta data of entity',entity_used=entity_name)
         self.server_response_json = server_response.json()
         self.entity_meta_data[entity_name] = self.server_response_json
-        return entity_meta_data
+        return self.entity_meta_data
 
     def get_column_names(self, entity_name):
         '''Get the column names from the entity
@@ -260,13 +271,13 @@ class Connect_Molgenis():
         Returns:
             meta_data(list): List with all the column names of entity_name
         '''
-        entity_meta_data = self.get_entity_meta_data(entity_name) 
+        entity_meta_data = self.get_entity_meta_data(entity_name)[entity_name]
         attributes = entity_meta_data['attributes']
         return attributes.keys()
     
     def get_id_attribute(self, entity_name):
         '''Get the id attribute name'''
-        entity_meta_data = self.get_entity_meta_data(entity_name)
+        entity_meta_data = self.get_entity_meta_data(entity_name)[entity_name]
         return entity_meta_data['idAttribute']
     
     def get_column_meta_data(self, entity_name, column_name):
@@ -281,12 +292,33 @@ class Connect_Molgenis():
         if entity_name+column_name in self.column_meta_data:
             return self.column_meta_data[entity_name+column_name]
         self.server_response = requests.get(self.api_url+'/'+entity_name+'/meta/'+column_name, headers=self.headers)
-        self.check_server_response(self.server_response, 'Get meta data of column')
+        self.check_server_response(self.server_response, 'Get meta data of column',entity_used=entity_name,column_used=column_name)
         self.server_response_json = self.server_response.json()
         self.column_meta_data[entity_name+column_name] = self.server_response_json
-        return column_meta_data
+        return self.column_meta_data
     
     def get_column_type(self, entity_name, column_name):
-        column_meta_data = self.get_column_meta_data(entity_name, column_name)
+        column_meta_data = self.get_column_meta_data(entity_name, column_name)[entity_name+column_name]
         return column_meta_data['fieldType']
     
+    def delete_all_entity_rows(self,entity_name):
+        self.delete_entity_rows(entity_name, [{'field':self.get_id_attribute(entity_name),'operator':'EQUALS','value':'*'}])
+        
+    def delete_entity_rows(self, entity_name, query):
+        '''delete entity rows
+    
+        Args:
+            entity_name (string): Name of the entity to update
+            query (list): List of dictionaries which contain query to select the row to update (see documentation of get_entity_rows)
+        '''
+        entity_data = self.get_entity_rows(entity_name, query)
+        if len(entity_data['items']) == 0:
+            raise BaseException('Query returned 0 results, no row to delete.')
+        id_attribute = self.get_id_attribute(entity_name)
+        server_response_list = [] 
+        for rows in entity_data['items']:
+            row_id = rows[id_attribute]
+            self.server_response = requests.delete(self.api_url+'/'+entity_name+'/'+row_id+'/', headers=self.headers)
+            self.check_server_response(self.server_response, 'Delete entity row',entity_used=entity_name,query_used=query)
+            server_response_list.append(self.server_response)
+        return server_response_list
