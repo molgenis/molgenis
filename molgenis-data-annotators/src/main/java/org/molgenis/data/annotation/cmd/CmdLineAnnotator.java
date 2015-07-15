@@ -179,7 +179,8 @@ public class CmdLineAnnotator
 		}
 		else if (annotatorName.equals("gonl"))
 		{
-			molgenisSettings.setProperty(GoNLAnnotator.GONL_FOLDER_PROPERTY, annotationSourceFile.getAbsolutePath());
+			molgenisSettings.setProperty(GoNLAnnotator.GONL_ROOT_DIRECTORY_PROPERTY,
+					annotationSourceFile.getAbsolutePath());
 			molgenisSettings.setProperty(GoNLAnnotator.GONL_FILE_PATTERN_PROPERTY, "gonl.chr%s.snps_indels.r5.vcf.gz");
 			molgenisSettings.setProperty(GoNLAnnotator.GONL_CHROMOSOME_PROPERTY,
 					"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22");
