@@ -304,7 +304,6 @@ class Connect_Molgenis():
     def get_id_attribute(self, entity_name):
         '''Get the id attribute name'''
         entity_meta_data = self.get_entity_meta_data(entity_name)
-        print entity_meta_data
         return entity_meta_data['idAttribute']
     
     def get_column_meta_data(self, entity_name, column_name):
