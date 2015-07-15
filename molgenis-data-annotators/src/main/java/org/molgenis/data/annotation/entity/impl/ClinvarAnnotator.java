@@ -12,6 +12,7 @@ import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
+import org.molgenis.data.annotation.filter.ClinvarMultiAllelicResultFilter;
 import org.molgenis.data.annotation.filter.MultiAllelicResultFilter;
 import org.molgenis.data.annotation.query.LocusQueryCreator;
 import org.molgenis.data.annotation.resources.Resource;
@@ -80,7 +81,7 @@ public class ClinvarAnnotator
 
 		// TODO: properly test multiAllelicFresultFilter
 		LocusQueryCreator locusQueryCreator = new LocusQueryCreator();
-		MultiAllelicResultFilter multiAllelicResultFilter = new MultiAllelicResultFilter(
+		ClinvarMultiAllelicResultFilter multiAllelicResultFilter = new ClinvarMultiAllelicResultFilter(
 				Collections.singletonList(new DefaultAttributeMetaData(CLINVAR_CLNSIG_ResourceAttributeName,
 						FieldTypeEnum.STRING)));
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(CLINVAR_TABIX_RESOURCE, clinvarInfo, locusQueryCreator,
