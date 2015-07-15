@@ -26,19 +26,21 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+// TODO Write test
 public class GoNLAnnotator
 {
-	// TODO Write test
 	public static final String GONL_GENOME_AF = "GoNL_AF";
-	public static final String GONL_OVERRIDEN_FILES_PATTERNS = "gonl_genome_file_overriden_pattern";
 	public static final String GONL_AF_LABEL = "Genome of the netherlands allele frequency";
 	public static final String GONL_AF_RESOURCE_ATTRIBUTE_NAME = VcfRepository.getInfoPrefix() + "AF";
-	public static final String GONL_CHROMOSOME_PROPERTY = "gonl_genome_chromosomes";
-	public static final String GONL_FILE_PATTERN_PROPERTY = "gonl_genome_file_pattern";
-	public static final String GONL_FOLDER_PROPERTY = "gonl_genome_root_directory";
 	public static final String GONL_MULTI_FILE_RESOURCE = "gonlresources";
 
-	// Backwards capabilities
+	// Runtime properties keys
+	public static final String GONL_CHROMOSOME_PROPERTY = "gonl_chromosomes";
+	public static final String GONL_FILE_PATTERN_PROPERTY = "gonl_file_pattern";
+	public static final String GONL_OVERRIDE_CHROMOSOME_FILES_PROPERTY = "gonl_override_chromosome_files";
+	public static final String GONL_ROOT_DIRECTORY_PROPERTY = "gonl_root_directory";
+
+	// Backwards capabilities properties from the old annotator
 	public static final String BC_GONL_MAF_LABEL = "GONLMAF";
 	public static final String BC_GONL_MAF = VcfRepository.getInfoPrefix() + BC_GONL_MAF_LABEL;
 
@@ -81,7 +83,6 @@ public class GoNLAnnotator
 				locusQueryCreator, multiAllelicResultFilter, dataService, resources)
 		{
 			
-			
 			@Override
 			protected Object getResourceAttributeValue(AttributeMetaData attr, Entity entity)
 			{
@@ -98,8 +99,8 @@ public class GoNLAnnotator
 	Resource gonlresources()
 	{
 		MultiResourceConfig goNLConfig = new MultiResourceConfigImpl(GONL_CHROMOSOME_PROPERTY,
-				GONL_FILE_PATTERN_PROPERTY, GONL_FOLDER_PROPERTY, molgenisSettings, molgenisSettings.getProperty(
-						GONL_OVERRIDEN_FILES_PATTERNS, ""));
+				GONL_FILE_PATTERN_PROPERTY, GONL_ROOT_DIRECTORY_PROPERTY, GONL_OVERRIDE_CHROMOSOME_FILES_PROPERTY,
+				molgenisSettings);
 		
 		return new MultiFileResource(GONL_MULTI_FILE_RESOURCE, goNLConfig, new TabixVcfRepositoryFactory(
 				GONL_MULTI_FILE_RESOURCE));

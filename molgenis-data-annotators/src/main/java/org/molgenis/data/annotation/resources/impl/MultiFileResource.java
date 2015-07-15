@@ -12,12 +12,15 @@ import org.molgenis.data.annotation.resources.MultiResourceConfig;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.ResourceConfig;
 import org.molgenis.data.vcf.VcfRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by charbonb on 15/06/15.
  */
 public class MultiFileResource implements Resource
 {
+	private static final Logger LOG = LoggerFactory.getLogger(MultiFileResource.class);
 	private final String name;
 	private final Map<String, ResourceImpl> resources = new HashMap<>();
 	private final MultiResourceConfig config;
@@ -33,6 +36,7 @@ public class MultiFileResource implements Resource
 	private void initializeResources()
 	{
 		this.resources.clear();
+		this.config.refreshConfigs();
 		for (Entry<String, ResourceConfig> chromConfig : config.getConfigs().entrySet())
 		{
 			final String key = chromConfig.getKey();
@@ -54,6 +58,7 @@ public class MultiFileResource implements Resource
 
 			}, factory));
 		}
+		LOG.debug("initializeResources() --- initialize resources");
 	}
 
 	private static Object getFirstEqualsValueFor(String attributeName, Query q)
@@ -67,13 +72,19 @@ public class MultiFileResource implements Resource
 	@Override
 	public boolean isAvailable()
 	{
+		LOG.debug("isAvailable() --- start is available");
 		// initialize after autowiring is complete and resources is empty
-		if (resources.isEmpty()) initializeResources();
-
-		if (!config.getConfigs().keySet().equals(resources.keySet()))
+		if (resources.isEmpty())
 		{
 			initializeResources();
 		}
+
+		// Check if the configuration are changed
+		if (!config.getConfigs().entrySet().equals(resources.entrySet()))
+		{
+			initializeResources();
+		}
+
 		for (Resource chrom : resources.values())
 		{
 			if (!chrom.isAvailable())
