@@ -125,13 +125,10 @@ public class CmdLineAnnotator
 		}
 		else if (annotatorName.equals("dann"))
 		{
-			System.out.println("Annotating dann: CmdLine ------ line 128");
 			molgenisSettings.setProperty(DannAnnotator.DANN_FILE_LOCATION_PROPERTY,
 					annotationSourceFile.getAbsolutePath());
-			System.out.println("Annotating dann: CmdLine ------ line 131     abs_path: "+ annotationSourceFile.getAbsolutePath());
 			Map<String, RepositoryAnnotator> annotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
 			RepositoryAnnotator annotator = annotators.get("dann");
-			System.out.println("Annotating dann: CmdLine ------ line 134");
 			annotate(annotator, inputVcfFile, outputVCFFile);
 		}
 		else if (annotatorName.equals("fitcon"))
@@ -193,6 +190,7 @@ public class CmdLineAnnotator
 			RepositoryAnnotator annotator = annotators.get("gonl");
 			annotate(annotator, inputVcfFile, outputVCFFile);
 		}
+		
 		else if (annotatorName.equals("cgd"))
 		{
 			molgenisSettings.setProperty(CGDAnnotator.CGD_FILE_LOCATION_PROPERTY,
