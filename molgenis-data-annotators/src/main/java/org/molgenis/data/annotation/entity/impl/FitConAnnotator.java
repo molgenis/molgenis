@@ -83,7 +83,7 @@ public class FitConAnnotator
 	}
 
 	@Bean
-	Resource dannResource()
+	Resource fitconResource()
 	{
 		Resource fitConTabixResource = null;
 
