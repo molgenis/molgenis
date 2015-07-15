@@ -1,5 +1,6 @@
 package org.molgenis.data.annotation.filter;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 
 import org.apache.lucene.queries.function.valuesource.MultiFunction.Values;
@@ -32,7 +33,7 @@ public class ClinvarMultiAllelicResultFilter implements ResultFilter
 	}
 
 	@Override
-	public com.google.common.base.Optional<Entity> filterResults(Iterable<Entity> results, Entity annotatedEntity)
+	public Optional<Entity> filterResults(Iterable<Entity> results, Entity annotatedEntity)
 	{
 		Map<String, String> clnallValueMap = new HashMap<>();
 		Map<String, String> clnsigValueMap = new HashMap<>();
@@ -49,20 +50,20 @@ public class ClinvarMultiAllelicResultFilter implements ResultFilter
 				StringBuilder newClnlallAttributeValue = new StringBuilder();
 				StringBuilder newClnlsigAttributeValue = new StringBuilder();
 				String[] annotatedEntityAltAlleles = annotatedEntity.getString(VcfRepository.ALT).split(",");
-				// sometimes the clnsig is not defined for all alternative alleles 
+				// sometimes the clnsig is not defined for all alternative alleles
 				// so we need to check this and just add what we have
 				for (int i = 0; i < clnSigs.length; i++)
 				{
 					int significantAlleleIndex = Integer.parseInt(clnAll[i]);
-					
+
 					// this means the no allele is associated with the gene of interest
 					if (significantAlleleIndex == -1) continue;
-					
+
 					// this means the allele is based on the reference
 					else if (significantAlleleIndex == 0)
 					{
 						String refAllele = annotatedEntity.getString(VcfRepository.REF);
-						
+
 						for (String annotatedEntityAltAllele : annotatedEntityAltAlleles)
 						{
 							// if annotated entity allele equals the clinvar significant allele we want it!
@@ -76,8 +77,8 @@ public class ClinvarMultiAllelicResultFilter implements ResultFilter
 					// 1 based so we need subtract 1 from the clnAll value
 					else
 					{
-						significantAlleleIndex = significantAlleleIndex -1;
-						
+						significantAlleleIndex = significantAlleleIndex - 1;
+
 						for (String annotatedEntityAltAllele : annotatedEntityAltAlleles)
 						{
 							// if annotated entity allele equals the clinvar significant allele we want it!
@@ -88,7 +89,6 @@ public class ClinvarMultiAllelicResultFilter implements ResultFilter
 							}
 						}
 					}
-					
 
 				}
 
