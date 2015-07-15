@@ -169,7 +169,7 @@ class Connect_Molgenis():
         if entity_id_attribute in data and self.get_column_meta_data(entity_name,entity_id_attribute)['auto']:
             if self.give_warnings:
                 warnings.warn('The ID attribute ('+entity_id_attribute+') of the entity ('+entity_name+') you are adding a row to is set to `auto`.\n'\
-                             +'The value you gave for id ('+data[entity_id_attribute]+') will not be used. Instead, the ID will be a random string.')
+                             +'The value you gave for id ('+str(data[entity_id_attribute])+') will not be used. Instead, the ID will be a random string.')
         
     def add_entity_row(self, entity_name, data, validate_json=True):
         '''Add a row to an entity
