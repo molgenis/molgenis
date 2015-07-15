@@ -25,7 +25,7 @@ class Connect_Molgenis():
         # add a row to the entity public_rnaseq_Individuals
         connection.add_entity_row('public_rnaseq_Individuals',{'id':'John Doe','age':'26', 'gender':'Male'})
         # get the rows from public_rnaseq_Individuals where gender = Male
-        print connection.get_entity_rows('public_rnaseq_Individuals',[{'field':'gender', 'operator':'EQUALS', 'value':'Male'}])['items'] 
+        print connection.query_entity_rows('public_rnaseq_Individuals',[{'field':'gender', 'operator':'EQUALS', 'value':'Male'}])['items'] 
         # update row in public_rnaseqIndivduals where id=John Doe -> set gender to Female
         connection.update_entity_row('public_rnaseq_Individuals',[{'field':'id', 'operator':'EQUALS', 'value':'John Doe'}], {'gender':'Female'})  
     """
@@ -192,8 +192,8 @@ class Connect_Molgenis():
         self.last_added_id = self.server_response.headers['location']
         return self.server_response
 
-    def get_entity_rows(self, entity_name, query):
-        '''Get row(s) from entity 
+    def query_entity_rows(self, entity_name, query):
+        '''Get row(s) from entity with a query
         
         Args:
             entity_name (string): Name of the entity where get query should be run on
@@ -218,19 +218,42 @@ class Connect_Molgenis():
                                  +str(self.server_response_json['num']-self.server_response_json['total'])+' rows will not be in the results.')
             print 'Selected '+str(self.server_response_json['total'])+' row(s).'
         return self.server_response_json
-    
-    
-    
+  
+    def get_entity(self, entity_name):
+        '''Get all data of entity_name
+        
+        Args:
+            entity_name (string): Name of the entity where get query should be run on
+            query (list): List of dictionaries with as keys:values -> [{'field':column name, 'operator':'EQUALS', 'value':value}]
+             
+        Returns:
+            result (dict): json dictionary of retrieve data
+        
+        TODO:
+            More difficult get queries
+        '''
+        self.server_response = requests.get(self.api_url+'/'+entity_name, headers=self.headers)
+        self.server_response_json = self.server_response.json()
+        self.check_server_response(self.server_response, 'Get rows from entity',entity_used=entity_name)
+        if self.verbose:
+            if self.server_response_json['total'] >= self.server_response_json['num']:
+                if self.give_warnings:
+                    warnings.warn(str(self.server_response_json['total'])+' number of rows selected. Max number of rows to retrieve data for is set to '+str(self.server_response_json['num'])+'.\n'
+                                 +str(int(self.server_response_json['num'])-int(self.server_response_json['total']))+' rows will not be in the results.')
+            print 'Selected '+str(self.server_response_json['total'])+' row(s).'
+        return self.server_response_json
+
+  
     def update_entity_rows(self, entity_name, query, data):
         '''Update an entity row
     
         Args:
             entity_name (string): Name of the entity to update
-            query (list): List of dictionaries which contain query to select the row to update (see documentation of get_entity_rows)
+            query (list): List of dictionaries which contain query to select the row to update (see documentation of query_entity_rows)
             data (dict):  Key = column name, value = column value
         '''
         self.validate_data(entity_name, data)
-        entity_data = self.get_entity_rows(entity_name, query)
+        entity_data = self.query_entity_rows(entity_name, query)
         if len(entity_data['items']) == 0:
             raise BaseException('Query returned 0 results, no row to update.')
         id_attribute = self.get_id_attribute(entity_name)
@@ -309,9 +332,9 @@ class Connect_Molgenis():
     
         Args:
             entity_name (string): Name of the entity to update
-            query (list): List of dictionaries which contain query to select the row to update (see documentation of get_entity_rows)
+            query (list): List of dictionaries which contain query to select the row to update (see documentation of query_entity_rows)
         '''
-        entity_data = self.get_entity_rows(entity_name, query)
+        entity_data = self.query_entity_rows(entity_name, query)
         if len(entity_data['items']) == 0:
             raise BaseException('Query returned 0 results, no row to delete.')
         id_attribute = self.get_id_attribute(entity_name)
