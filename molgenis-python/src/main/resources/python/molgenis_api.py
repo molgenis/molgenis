@@ -300,8 +300,8 @@ class Connect_Molgenis():
     
     def get_id_attribute(self, entity_name):
         '''Get the id attribute name'''
-        entity_meta_data = self.get_entity_meta_data(entity_name)[entity_name]
-        return entity_meta_data['idAttribute']
+        entity_meta_data = self.get_entity_meta_data(entity_name)
+        return entity_meta_data[entity_name]['idAttribute']
     
     def get_column_meta_data(self, entity_name, column_name):
         '''Get the meta data for column_name of entity_name
@@ -321,12 +321,19 @@ class Connect_Molgenis():
         return self.column_meta_data
     
     def get_column_type(self, entity_name, column_name):
-        column_meta_data = self.get_column_meta_data(entity_name, column_name)[entity_name+column_name]
-        return column_meta_data['fieldType']
+        column_meta_data = self.get_column_meta_data(entity_name, column_name)
+        return column_meta_data[entity_name+column_name]['fieldType']
     
     def delete_all_entity_rows(self,entity_name):
-        self.delete_entity_rows(entity_name, [{'field':self.get_id_attribute(entity_name),'operator':'EQUALS','value':'*'}])
-        
+        '''delete all entity rows'''
+        entity_data = self.get_entity(entity_name)
+        # because I can only select 100 rows, have to select untill table is empty. <<<<< TODO: figure out how to change num
+        server_response_list = []
+        while len(entity_data['items']) > 0:
+            server_response_list.extend(self.delete_entity_data(entity_data,entity_name))
+            entity_data = self.get_entity(entity_name)
+        return server_response_list
+    
     def delete_entity_rows(self, entity_name, query):
         '''delete entity rows
     
@@ -337,11 +344,22 @@ class Connect_Molgenis():
         entity_data = self.query_entity_rows(entity_name, query)
         if len(entity_data['items']) == 0:
             raise BaseException('Query returned 0 results, no row to delete.')
+        return self.delete_entity_data(entity_data, entity_name, query_used=query)
+
+    def delete_entity_data(self, entity_data,entity_name,query_used=None):
+        '''delete entity data
+        
+        Args:
+            entity_data (dict): A dictionary with at least key:"items", value:<dict with column IDs>. All items in this dict will be deleted
+            entity_name (string): Name of entity to delete from
+            query_used (string): Incase entity_data was made with a query statement, the query used can be given for more detailed error prints (def: None)
+        '''
+        server_response_list = []
         id_attribute = self.get_id_attribute(entity_name)
-        server_response_list = [] 
         for rows in entity_data['items']:
             row_id = rows[id_attribute]
             self.server_response = requests.delete(self.api_url+'/'+entity_name+'/'+row_id+'/', headers=self.headers)
-            self.check_server_response(self.server_response, 'Delete entity row',entity_used=entity_name,query_used=query)
+            self.check_server_response(self.server_response, 'Delete entity row',entity_used=entity_name,query_used=query_used)
             server_response_list.append(self.server_response)
         return server_response_list
+    
