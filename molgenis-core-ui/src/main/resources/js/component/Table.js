@@ -1,11 +1,11 @@
 /* global _: false, React: false, molgenis: true */
 (function(_, React, molgenis) {
 	"use strict";
-	
+
 	var div = React.DOM.div, table = React.DOM.table, thead = React.DOM.thead, tbody = React.DOM.tbody, tr = React.DOM.tr, th = React.DOM.th, td = React.DOM.td, a = React.DOM.a, span = React.DOM.span, em = React.DOM.em, br = React.DOM.br;
-	
+
 	var api = new molgenis.RestClientV2();
-	
+
 	/**
 	 * @memberOf component.mixin
 	 */
@@ -21,7 +21,7 @@
 			return molgenis.isRefAttr(attr) && !(molgenis.isMrefAttr(attr) && _.size(path) > 0);
 		}
 	};
-	
+
 	/**
 	 * @memberOf component
 	 */
@@ -37,6 +37,7 @@
 			onRowEdit: React.PropTypes.func,
 			onRowDelete: React.PropTypes.func,
 			onRowInspect: React.PropTypes.func,
+			onRowClick : React.PropTypes.func,
 			enableAdd: React.PropTypes.bool,
 			enableEdit: React.PropTypes.bool,
 			enableDelete: React.PropTypes.bool,
@@ -63,13 +64,14 @@
 				enableEdit: true,
 				enableDelete: true,
 				enableInspect: true,
-				onSort: function() {}
+				onRowClick : null,
+				onSort : function() {}
 			};
 		},
 		componentDidMount: function() {
 			this._refreshData(this.props, this.state);
 		},
-		componentWillReceiveProps : function(nextProps) {			
+		componentWillReceiveProps : function(nextProps) {
 			// reset pager on query change
 			var nextState = _.extend({}, this.state, {attrs: nextProps.attrs});
 			if(JSON.stringify(this.props.query) !== JSON.stringify(nextProps.query)) {
@@ -81,9 +83,9 @@
 			if(this.state.data === null) {
 				return molgenis.ui.Spinner(); // entity not available yet
 			}
-			
+
 			var writable = this.state.data.meta.writable;
-			
+
 			var TableHeader = TableHeaderFactory({
 				entity: this.state.data.meta,
 				attrs : this.state.attrs,
@@ -106,11 +108,15 @@
 				enableInspect: this.props.enableInspect === true && this.props.onRowInspect !== null,
 				onEdit: this._handleEdit,
 				onDelete: this._handleDelete,
-				onRowInspect: this.props.onRowInspect
+				onRowInspect: this.props.onRowInspect,
+				onRowClick : this.props.onRowClick
 			});
-			
+
 			var className = 'table table-striped table-condensed table-bordered molgenis-table';
-			
+
+			if (this.props.onRowClick !== null)
+            				className = className + " table-hover";
+
 			return (
 				div(null,
 					div({className: 'molgenis-table-container'},
@@ -142,14 +148,14 @@
 				attrs: {'~id' : null}, // always include the id attribute
 				num : props.maxRows
 			};
-			
+
 			// add selected attrs
 			if(state.attrs && _.size(state.attrs) > 0) {
 				_.extend(opts.attrs, state.attrs);
 			}
-			
+
 			if(props.query) {
-				opts.q = props.query.q; 
+				opts.q = props.query.q;
 			}
 			if(state.sort) {
 				opts.sort = {
@@ -160,7 +166,7 @@
 				};
 			}
 			if(state.start !== 0) {
-				opts.start = state.start; 
+				opts.start = state.start;
 			}
 			api.get(props.entity, opts).done(function(data) {
 				var newState = _.extend({}, state, {data: data});
@@ -169,7 +175,7 @@
 		},
 		_handleExpand: function(e) {
 			var attrs = JSON.parse(JSON.stringify(this.state.attrs)); // deep clone
-			
+
 			for(var i = 0, attrsAtDepth = attrs; i < e.attrPath.length; ++i) {
 				var attr = e.attrPath[i];
 				if(!attrsAtDepth[attr]) {
@@ -177,12 +183,12 @@
 				}
 				attrsAtDepth = attrsAtDepth[attr];
 			}
-			
+
 			this._refreshData(this.props, _.extend({}, this.state, {attrs: attrs}));
 		},
 		_handleCollapse: function(e) {
 			var attrs = _.extend({}, this.state.attrs);
-			
+
 			for(var i = 0, attrsAtDepth = attrs; i < e.attrPath.length; ++i) {
 				var attr = e.attrPath[i];
 				if(i < e.attrPath.length - 1) {
@@ -191,7 +197,7 @@
 					attrsAtDepth[attr] = null;
 				}
 			}
-			
+
 			this._refreshData(this.props, _.extend({}, this.state, {attrs: attrs}));
 		},
 		_handleCreate: function() {
@@ -217,7 +223,7 @@
 			this._refreshData(this.props, _.extend({}, this.state, {start: e.start}));
 		}
 	});
-	
+
 	/**
 	 * @memberOf component
 	 */
@@ -319,7 +325,7 @@
 		}
 	});
 	var TableHeaderFactory = React.createFactory(TableHeader);
-	
+
 	/**
 	 * @memberOf component
 	 */
@@ -340,7 +346,7 @@
 				onSort : function() {},
 			};
 		},
-		render: function() {			
+		render: function() {
 			var SortIcon = this.props.sortOrder !== null ? molgenis.ui.Icon({
 				style: {marginLeft: 5},
 				name: this.props.sortOrder === 'asc' ? 'sort-by-alphabet' : 'sort-by-alphabet-alt'
@@ -350,7 +356,7 @@
 				value: this.props.attr.label,
 				popoverValue: this.props.attr.description
 			})) : this.props.attr.label;
-			
+
 			return (
 				th({className: this.props.className},
 					this.props.canSort ? span({style: {cursor: 'pointer'}, onClick: this._handleSort},
@@ -366,10 +372,10 @@
 				path: this.props.path,
 				order : this.props.sortOrder === null ? 'asc' : (this.props.sortOrder === 'asc' ? 'desc' : 'asc')
 			});
-		}		
+		}
 	});
 	var TableHeaderCellFactory = React.createFactory(TableHeaderCell);
-	
+
 	/**
 	 * @memberOf component
 	 */
@@ -385,30 +391,32 @@
 			onEdit: React.PropTypes.func,
 			onDelete: React.PropTypes.func,
 			onRowInspect: React.PropTypes.func,
+			onRowClick : React.PropTypes.func
 		},
 		getDefaultProps: function() {
 			return {
 				onEdit: function() {},
 				onDelete: function() {},
-				onRowInspect: function() {}
+				onRowInspect: function() {},
+				onRowClick : function() {}
 			};
 		},
 		render: function() {
-			return tbody(null, 
+			return tbody(null,
 				this._createRows(this.props.data.meta)
 			);
 		},
 		_createRows: function(entity) {
 			var Rows = [];
-			
+
 			for(var i = 0; i < this.props.data.items.length; ++i) {
 				var item = this.props.data.items[i];
 
 				Rows.push(tr({
-					key : '' + i
+					key : '' + i,
+					onClick : this.props.onRowClick !== null ? this.props.onRowClick.bind(null, item):null
 				}, this._createCols(item, entity)));
 			}
-			
 			return Rows;
 		},
 		_createCols: function(item, entity) {
@@ -421,7 +429,7 @@
 				});
 				Cols.push(td({className: 'compact', key: 'edit'}, EntityEditBtn));
 			}
-			if(this.props.enableDelete === true) {		
+			if(this.props.enableDelete === true) {
 				var EntityDeleteBtn = EntityDeleteBtnFactory({
 					name: entity.name,
 					id : item[entity.idAttribute],
@@ -450,7 +458,7 @@
 							if(molgenis.isCompoundAttr(attr)) {
 								this._createColsRec(item, entity, attr.attributes, {'*': null}, Cols, attrPath, expanded);
 							} else {
-								
+
 								if(this._isExpandedAttr(attr, selectedAttrs)) {
 									Cols.push(td({className: 'expanded-left', key : attrPath.join()}));
 									var value = item !== undefined && item !== null ? item[attr.name] : null;
@@ -461,7 +469,7 @@
 									}
 									var value = (item !== undefined && item !== null) ? (_.isArray(item) ? _.map(item, function(value) { return value[attr.name];}) : item[attr.name]) : null;
 									var TableCell = TableCellFactory({
-										className: j === attrs.length - 1 && expanded ? 'expanded-right' : undefined, 
+										className: j === attrs.length - 1 && expanded ? 'expanded-right' : undefined,
 										entity: entity,
 										attr : attr,
 										value: value,
@@ -482,7 +490,7 @@
 		}
 	});
 	var TableBodyFactory = React.createFactory(TableBody);
-	
+
 	/**
 	 * @memberOf component
 	 */
@@ -507,7 +515,7 @@
 			if(this.props.expanded && _.isArray(this.props.value)) {
 				CellContentBlocks = _.flatten(_.map(this.props.value, function(value, i) {
 					if(value !== null && value !== undefined) {
-						var CellContentForValue = this._createTableCellContent(value, 'c' + i); 
+						var CellContentForValue = this._createTableCellContent(value, 'c' + i);
 						return i < this.props.value.length - 1 ? [CellContentForValue, br({key: 'b' + i})] : CellContentForValue;
 					} else {
 						return null;
@@ -516,7 +524,7 @@
 			} else {
 				CellContentBlocks = this.props.value !== null && this.props.value !== undefined ? [this._createTableCellContent(this.props.value)] : [];
 			}
-				
+
 			return td({className: this.props.className}, CellContentBlocks);
 		},
 		_createTableCellContent: function(value, key) {
@@ -531,7 +539,7 @@
 		}
 	});
 	var TableCellFactory = React.createFactory(TableCell);
-	
+
 	/**
 	 * @memberOf component
 	 */
@@ -565,7 +573,7 @@
 		renderLayer: function() {
 			if(this.state.showRef) {
 				var refEntity = this.props.attr.refEntity;
-				
+
 				var operator, value;
 				if(molgenis.isXrefAttr(this.props.attr)) {
 					operator = 'EQUALS';
@@ -576,7 +584,7 @@
 						return item[refEntity.idAttribute];
 					});
 				}
-				
+
 				var Table = molgenis.ui.Table({
 					entity: this.props.attr.refEntity.name,
 					query : {
@@ -593,7 +601,7 @@
 						this.props.onEdit(e);
 					}.bind(this)
 				});
-				
+
 				var OkBtn = (
 					div({className: 'row', style: {textAlign: 'right'}},
 						div({className: 'col-md-12'},
@@ -601,7 +609,7 @@
 						)
 					)
 				);
-				
+
 				return molgenis.ui.Modal({
 					title: this.props.attr.label,
 					show : true,
@@ -613,7 +621,7 @@
 		},
 		_createValue: function(value) {
 			var CellContent, attr = this.props.attr;
-			
+
 			if(value === undefined || value === null) {
 				CellContent = span(null, String.fromCharCode(160)); // &nbsp;
 			} else {
@@ -645,7 +653,7 @@
 							span(null,
 									_.flatten(_.map(value, function(item, i) {
 										var Anchor = a({href: '#', onClick: this._toggleModal.bind(null, true), key: 'a' + i}, span(null, item[attr.refEntity.labelAttribute]));
-										var Seperator = i < value.length - 1 ? span({key: 's' + i}, ',') : null; 
+										var Seperator = i < value.length - 1 ? span({key: 's' + i}, ',') : null;
 										return [Anchor, Seperator];
 									}.bind(this)))
 							)
@@ -667,7 +675,7 @@
 								popoverValue: value
 							}));
 						} else {
-							CellContent = span(null, value);	
+							CellContent = span(null, value);
 						}
 						break;
 					case 'IMAGE':
@@ -677,7 +685,7 @@
 						break;
 				}
 			}
-			
+
 			return CellContent;
 		},
 		_toggleModal: function(show) {
@@ -687,7 +695,7 @@
 		}
 	});
 	var TableCellContentFactory = React.createFactory(TableCellContent);
-	
+
 	/**
 	 * @memberOf component
 	 */
@@ -718,7 +726,7 @@
 		}
 	});
 	var EntityExpandBtnFactory = React.createFactory(EntityExpandBtn);
-	
+
 	/**
 	 * @memberOf component
 	 */
@@ -749,7 +757,7 @@
 		}
 	});
 	var EntityCollapseBtnFactory = React.createFactory(EntityCollapseBtn);
-	
+
 	/**
 	 * @memberOf component
 	 */
@@ -809,7 +817,7 @@
 		}
 	});
 	var EntityCreateBtnFactory = React.createFactory(EntityCreateBtn);
-	
+
 	/**
 	 * @memberOf component
 	 */
@@ -871,7 +879,7 @@
 		}
 	});
 	var EntityEditBtnFactory = React.createFactory(EntityEditBtn);
-	
+
 	/**
 	 * @memberOf component
 	 */
@@ -933,7 +941,7 @@
 		},
 	});
 	var EntityDeleteBtnFactory = React.createFactory(EntityDeleteBtn);
-	
+
 	/**
 	 * @memberOf component
 	 */
@@ -972,7 +980,7 @@
 		}
 	});
 	var EntityInspectBtnFactory = React.createFactory(EntityInspectBtn);
-	
+
 	// export component
 	molgenis.ui = molgenis.ui || {};
 	_.extend(molgenis.ui, {
