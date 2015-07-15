@@ -102,7 +102,7 @@ public class TabixRepository extends AbstractRepository
 		}
 		catch (NullPointerException e)
 		{
-			LOG.error("Error reading from tabix reader for query: " + queryString, e);
+			LOG.error("Error reading from tabix reader for query: " + queryString);
 		}
 		catch (ArrayIndexOutOfBoundsException e)
 		{
