@@ -49,8 +49,6 @@ public class DannAnnotator
 	@Bean
 	public RepositoryAnnotator dann()
 	{
-		System.out.println("DannAnnotator --- line 50");
-		
 		List<AttributeMetaData> attributes = new ArrayList<>();
 		DefaultAttributeMetaData dann_score = new DefaultAttributeMetaData(DANN_SCORE, FieldTypeEnum.DECIMAL)
 				.setDescription("deleterious score of genetic variants using neural networks.").setLabel(
@@ -80,10 +78,10 @@ public class DannAnnotator
 								+ "over CADD’s SVM methodology. "
 								+ "All data and source code are available at https://cbcl.ics.uci.edu/ public_data/DANN/.",
 						attributes);
-		
+
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(DANN_TABIX_RESOURCE, dannInfo, new LocusQueryCreator(),
 				new VariantResultFilter(), dataService, resources);
-		System.out.println("DannAnnotator --- line 82");
+		
 		return new RepositoryAnnotatorImpl(entityAnnotator);
 	}
 
@@ -92,8 +90,6 @@ public class DannAnnotator
 	{
 		Resource dannTabixResource = null;
 
-		System.out.println("DannAnnotator --- line 91");
-		
 		DefaultEntityMetaData repoMetaData = new DefaultEntityMetaData(DANN_TABIX_RESOURCE);
 		repoMetaData.addAttributeMetaData(CHROM_META);
 		repoMetaData.addAttributeMetaData(POS_META);
@@ -102,12 +98,8 @@ public class DannAnnotator
 		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("DANN_SCORE", DECIMAL));
 		repoMetaData.addAttribute("id").setIdAttribute(true).setVisible(false);
 
-		System.out.println("DannAnnotator --- line 99");
-		
 		dannTabixResource = new ResourceImpl(DANN_TABIX_RESOURCE, new SingleResourceConfig(DANN_FILE_LOCATION_PROPERTY,
 				molgenisSettings), new TabixRepositoryFactory(repoMetaData));
-		
-		System.out.println("DannAnnotator --- line 106");
 
 		return dannTabixResource;
 	}
