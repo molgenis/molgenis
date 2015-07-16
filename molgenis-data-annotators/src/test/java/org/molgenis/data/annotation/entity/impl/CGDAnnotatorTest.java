@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation.impl;
+package org.molgenis.data.annotation.entity.impl;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -27,7 +27,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
-import org.molgenis.data.annotation.entity.impl.CGDAnnotator;
 import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.ResourcesImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -41,9 +40,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
 
+/***
+ * Clinical Genomics Database Test
+ */
 @ContextConfiguration(classes =
-{ ClinicalGenomicsDatabaseServiceAnnotatorTest.Config.class, CGDAnnotator.class })
-public class ClinicalGenomicsDatabaseServiceAnnotatorTest extends AbstractTestNGSpringContextTests
+{ CGDAnnotatorTest.Config.class, CGDAnnotator.class })
+public class CGDAnnotatorTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
 	RepositoryAnnotator annotator;
