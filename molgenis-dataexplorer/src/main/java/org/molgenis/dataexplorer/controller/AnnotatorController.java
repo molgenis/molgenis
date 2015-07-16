@@ -157,13 +157,10 @@ public class AnnotatorController
 		if (dataSetName != null)
 		{
 			EntityMetaData entityMetaData = dataService.getEntityMetaData(dataSetName);
-
 			for (RepositoryAnnotator annotator : annotationService.getAllAnnotators())
 			{
-
 				List<AttributeMetaData> outputAttrs = annotator.getOutputMetaData();
 				outputAttrs = getAtomicAttributesFromList(outputAttrs);
-
 				Map<String, Object> map = new HashMap<String, Object>();
 				map.put("description", annotator.getDescription());
 				map.put("canAnnotate", annotator.canAnnotate(entityMetaData));
@@ -173,9 +170,7 @@ public class AnnotatorController
 				map.put("outputAttributeTypes", toMap(annotator.getOutputMetaData()));
 				mapOfAnnotators.put(annotator.getSimpleName(), map);
 			}
-
 		}
-
 		return mapOfAnnotators;
 	}
 

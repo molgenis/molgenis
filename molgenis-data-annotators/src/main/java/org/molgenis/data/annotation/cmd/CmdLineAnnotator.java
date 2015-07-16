@@ -18,7 +18,6 @@ import org.molgenis.data.annotation.entity.impl.FitConAnnotator;
 import org.molgenis.data.annotation.entity.impl.GoNLAnnotator;
 import org.molgenis.data.annotation.entity.impl.SnpEffAnnotator;
 import org.molgenis.data.annotation.entity.impl.ThousandGenomesAnnotator;
-import org.molgenis.data.annotation.impl.DeNovoAnnotator;
 import org.molgenis.data.annotation.impl.HpoServiceAnnotator;
 import org.molgenis.data.annotation.impl.MonogenicDiseaseCandidatesServiceAnnotator;
 import org.molgenis.data.annotation.impl.PhenomizerServiceAnnotator;
@@ -167,10 +166,6 @@ public class CmdLineAnnotator
 		{
 			new PhenomizerServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
-		else if (annotatorName.equals("denovo"))
-		{
-			new DeNovoAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
-		}
 		else if (annotatorName.equals("exac"))
 		{
 			molgenisSettings.setProperty(ExacAnnotator.EXAC_FILE_LOCATION_PROPERTY,
@@ -181,7 +176,8 @@ public class CmdLineAnnotator
 		}
 		else if (annotatorName.equals("gonl"))
 		{
-			molgenisSettings.setProperty(GoNLAnnotator.GONL_FOLDER_PROPERTY, annotationSourceFile.getAbsolutePath());
+			molgenisSettings.setProperty(GoNLAnnotator.GONL_ROOT_DIRECTORY_PROPERTY,
+					annotationSourceFile.getAbsolutePath());
 			molgenisSettings.setProperty(GoNLAnnotator.GONL_FILE_PATTERN_PROPERTY, "gonl.chr%s.snps_indels.r5.vcf.gz");
 			molgenisSettings.setProperty(GoNLAnnotator.GONL_CHROMOSOME_PROPERTY,
 					"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22");
