@@ -26,7 +26,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-// TODO Write test
 public class GoNLAnnotator
 {
 	public static final String GONL_GENOME_AF = "GoNL_AF";
@@ -75,7 +74,6 @@ public class GoNLAnnotator
 
 		LocusQueryCreator locusQueryCreator = new LocusQueryCreator();
 
-		// TODO: properly test multiAllelicFresultFilter
 		MultiAllelicResultFilter multiAllelicResultFilter = new MultiAllelicResultFilter(
 				Collections.singletonList(new DefaultAttributeMetaData(GONL_AF_RESOURCE_ATTRIBUTE_NAME,
 						FieldTypeEnum.DECIMAL)));
