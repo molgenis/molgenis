@@ -187,7 +187,7 @@ class Connect_Molgenis():
         if validate_json:
             self.validate_data(entity_name, data)
         # make all values str
-        data = [dict([a, str(x)] for a, x in data.iteritems())]
+        data = dict([a, str(x)] for a, x in data.iteritems())
         server_response = requests.post(self.api_url+'/'+entity_name+'/', data=str(data), headers=self.headers)
         self.check_server_response(server_response, 'Add row to entity', entity_used=entity_name, data_used=str(data))
         self.last_added_id = server_response.headers['location']
@@ -269,14 +269,6 @@ class Connect_Molgenis():
             server_response_list.append(server_response)
             self.check_server_response(server_response, 'Update entity row', query_used=query,data_used=data,entity_used=entity_name)
         return server_response_list
-    
-    def get_all_entities(self):
-        '''get all entities'''
-        server_response = requests.get(self.api_url+'/entities', headers=self.headers)
-        self.check_server_response(server_response,'Get all entities')
-        for entities in server_response:
-            print entities
-        exit()
 
     def get_entity_meta_data(self, entity_name):
         '''Get metadata from entity
