@@ -12,8 +12,7 @@ import java.io.InputStream;
 import java.util.Iterator;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.util.IOUtils;
+import org.apache.commons.io.IOUtils;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
@@ -139,7 +138,7 @@ public class VcfRepositoryTest
 	}
 
 	@Test
-	public void iterator_noValues() throws IOException, InvalidFormatException
+	public void iterator_noValues() throws IOException
 	{
 		RepositoryCollection collection = new VcfRepositoryCollection(testnodata);
 		VcfRepository vcfRepository = (VcfRepository) collection.getRepository("testnodata");

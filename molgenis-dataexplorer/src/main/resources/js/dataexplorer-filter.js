@@ -18,6 +18,7 @@
 			case 'CATEGORICAL':
 				return self.createSimpleFilter(attribute, filter, wizard, false);
 			case 'XREF':
+			case 'FILE':
 				return self.createSimpleFilter(attribute, filter, wizard, true);
 			case 'DATE':
 			case 'DATE_TIME':
@@ -38,7 +39,7 @@
 				return self.createComplexFilter(attribute, filter, wizard, null);
 				break;
 			case 'COMPOUND' :
-			case 'FILE':
+			
 			case 'IMAGE':
 				throw 'Unsupported data type: ' + attribute.fieldType;
 			default:
@@ -75,7 +76,8 @@
 	self.createFilterQueryUserReadableList = function (attributeFilters) {
 		var items = [];
 		$.each(attributeFilters, function(attributeUri, filter) {
-			var attributeLabel = filter.attribute.label || filter.attribute.name;
+			var attributeLabel = molgenis.getAttributeLabel(filter.attribute);
+			
 			items.push('<p><a class="feature-filter-edit" data-href="' + attributeUri + '" href="#">'
 					+ attributeLabel + ': ' + self.createFilterQueyUserReadable(filter)
 					+ '</a><a class="feature-filter-remove" data-href="' + attributeUri + '" href="#" title="Remove '
@@ -173,6 +175,7 @@
 			case 'CATEGORICAL_MREF':
 			case 'MREF':
 			case 'XREF':
+			case 'FILE':
 				var operator = (filter.operator ? filter.operator.toLocaleLowerCase() : 'or');
 				var array = [];
 				$.each(filter.getLabels(), function(key, value) {
@@ -180,7 +183,6 @@
 				});
 				return htmlEscape('(' + array.join(' ' + operator + ' ') + ')');
 			case 'COMPOUND' :
-			case 'FILE':
 			case 'IMAGE':
 				throw 'Unsupported data type: ' + filter.attribute.fieldType;
 			default:
@@ -534,6 +536,7 @@
 			case 'XREF':
 			case 'MREF':
 			case 'CATEGORICAL_MREF':
+			case 'FILE':
 				var operator = simpleFilter ? simpleFilter.operator : 'OR';
 				var container = $('<div class="xrefmrefsearch">');
 				$controls.append(container);
@@ -548,7 +551,6 @@
 				});
 				break;
 			case 'COMPOUND' :
-			case 'FILE':
 			case 'IMAGE':
 				throw 'Unsupported data type: ' + attribute.fieldType;
 			default:
@@ -709,7 +711,8 @@
 			var operator = this.operator;
 			var rule;
 			var rangeQuery = attribute.fieldType === 'DATE' || attribute.fieldType === 'DATE_TIME' || attribute.fieldType === 'DECIMAL' || attribute.fieldType === 'INT' || attribute.fieldType === 'LONG';
-
+			var queryRuleField = attribute.parent ? attribute.parent.name + '.' + attribute.name : attribute.name;
+			
 			if (rangeQuery) {
 				if(attribute.fieldType === 'DATE_TIME'){
 					if(fromValue){
@@ -726,7 +729,7 @@
 						operator: 'NESTED',
 						nestedRules:[
 						{
-							field : attribute.name,
+							field : queryRuleField,
 							operator : 'GREATER_EQUAL',
 							value : fromValue
 						},
@@ -734,20 +737,20 @@
 							operator : 'AND'
 						},
 						{
-							field : attribute.name,
+							field : queryRuleField,
 							operator : 'LESS_EQUAL',
 							value : toValue
 						}]
 					};
 				} else if (fromValue) {
 					rule = {
-						field : attribute.name,
+						field : queryRuleField,
 						operator : 'GREATER_EQUAL',
 						value : fromValue
 					};
 				} else if (toValue) {
 					rule = {
-						field : attribute.name,
+						field : queryRuleField,
 						operator : 'LESS_EQUAL',
 						value : toValue
 					};
@@ -768,6 +771,7 @@
 						case 'LONG':
 						case 'MREF':
 						case 'XREF':
+						case 'FILE':
 							attrOperator = 'EQUALS';
 							break;
 						case 'EMAIL':
@@ -779,7 +783,6 @@
 							attrOperator = 'SEARCH';
 							break;
 						case 'COMPOUND':
-						case 'FILE':
 						case 'IMAGE':
 							throw 'Unsupported data type: ' + attribute.fieldType;
 						default:
@@ -800,7 +803,7 @@
 							}
 		
 							nestedRule.nestedRules.push({
-								field : attribute.name,
+								field : queryRuleField,
 								operator : attrOperator,
 								value : value
 							});
@@ -808,7 +811,7 @@
 						rule = nestedRule;
 					} else {
 						rule = {
-							field : attribute.name,
+							field : queryRuleField,
 							operator : attrOperator,
 							value : values[0]
 						};

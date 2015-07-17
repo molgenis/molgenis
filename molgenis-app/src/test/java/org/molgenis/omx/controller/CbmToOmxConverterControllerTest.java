@@ -5,10 +5,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.molgenis.app.controller.CbmToOmxConverterController;
+import org.molgenis.file.FileStore;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.omx.controller.CbmToOmxConverterControllerTest.Config;
-import org.molgenis.util.FileStore;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

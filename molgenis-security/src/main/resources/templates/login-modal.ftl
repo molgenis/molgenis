@@ -17,18 +17,18 @@
                                 <div class="form-group">
                                     <label class="col-md-3 control-label" for="loginUsername">Username</label>
                                     <div class="col-md-9">
-                                        <input type="text" class="form-control" id="loginUsername" name="username" required>
+                                        <input id="username-field" type="text" class="form-control" name="username" required>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-md-3 control-label" for="loginPassword">Password</label>
                                     <div class="col-md-9">
-                                        <input type="password" class="form-control" id="loginPassword" name="password" required>
+                                        <input id="password-field" type="password" class="form-control" name="password" required>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <div class="col-md-offset-3 col-md-9">
-                                        <button id="login-btn" type="submit" class="btn btn-primary">Sign in</button>
+                                        <button id="signin-button" type="submit" class="btn btn-primary">Sign in</button>
                                     </div>
                                 </div>
                             </form>

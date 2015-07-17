@@ -7,18 +7,18 @@ import java.util.List;
 import java.util.Map;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
-import org.molgenis.data.annotation.utils.AnnotatorUtils;
-import org.molgenis.data.annotation.utils.HgncLocationsUtils;
 import org.molgenis.data.annotation.LocusAnnotator;
+import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
+import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
 import org.molgenis.data.annotation.impl.datastructures.Locus;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
+import org.molgenis.data.annotation.utils.AnnotatorUtils;
+import org.molgenis.data.annotation.utils.HgncLocationsUtils;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,14 +28,14 @@ import org.springframework.stereotype.Component;
 @Component("hgncSymbolService")
 public class HgncSymbolServiceAnnotator extends LocusAnnotator
 {
-    private static final Logger LOG = LoggerFactory.getLogger(ClinicalGenomicsDatabaseServiceAnnotator.class);
+	private static final Logger LOG = LoggerFactory.getLogger(HgncSymbolServiceAnnotator.class);
 	private final HgncLocationsProvider hgncLocationsProvider;
 
 	static final String HGNC_SYMBOL = "HGNC_SYMBOL";
-	private static final String NAME = "HGNC-Symbol";
-    private Map<String, HGNCLocations> hgncLocations = new HashMap<>();
+	private static final String NAME = "HGNC_Symbol";
+	private Map<String, HGNCLocations> hgncLocations = new HashMap<>();
 
-    @Autowired
+	@Autowired
 	public HgncSymbolServiceAnnotator(HgncLocationsProvider hgncLocationsProvider)
 	{
 		this.hgncLocationsProvider = hgncLocationsProvider;
@@ -57,15 +57,14 @@ public class HgncSymbolServiceAnnotator extends LocusAnnotator
 	@Override
 	public List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException
 	{
-        getAnnotationDataFromSources();
+		getAnnotationDataFromSources();
 
-        String chromosome = entity.getString(VcfRepository.CHROM);
-        Long position = entity.getLong(VcfRepository.POS);
-        Locus locus = new Locus(chromosome, position);
+		String chromosome = entity.getString(VcfRepository.CHROM);
+		Long position = entity.getLong(VcfRepository.POS);
+		Locus locus = new Locus(chromosome, position);
 		HashMap<String, Object> resultMap = new HashMap<>();
 
-        resultMap.put(HGNC_SYMBOL, HgncLocationsUtils.locationToHgcn(hgncLocations, locus)
-				.get(0));
+		resultMap.put(HGNC_SYMBOL, HgncLocationsUtils.locationToHgcn(hgncLocations, locus).get(0));
 
 		List<Entity> results = new ArrayList<Entity>();
 		results.add(AnnotatorUtils.getAnnotatedEntity(this, entity, resultMap));
@@ -74,27 +73,28 @@ public class HgncSymbolServiceAnnotator extends LocusAnnotator
 	}
 
 	@Override
-	public EntityMetaData getOutputMetaData()
+	public List<AttributeMetaData> getOutputMetaData()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HGNC_SYMBOL, FieldTypeEnum.STRING));
+		List<AttributeMetaData> metadata = new ArrayList<>();
+		metadata.add(new DefaultAttributeMetaData(HGNC_SYMBOL, FieldTypeEnum.STRING));
 
 		return metadata;
 	}
 
-	@Override
-	public String getDescription()
+	private void getAnnotationDataFromSources() throws IOException
 	{
-		return "This is the description for the HGNC Annotator";
+		if (this.hgncLocations.isEmpty())
+		{
+			LOG.info("hgncLocations empty, started fetching the data");
+			this.hgncLocations = hgncLocationsProvider.getHgncLocations();
+			LOG.info("finished fetching the hgncLocations data");
+		}
 	}
 
-    private void getAnnotationDataFromSources() throws IOException
-    {
-        if (this.hgncLocations.isEmpty())
-        {
-            LOG.info("hgncLocations empty, started fetching the data");
-            this.hgncLocations = hgncLocationsProvider.getHgncLocations();
-            LOG.info("finished fetching the hgncLocations data");
-        }
-    }
+	@Override
+	public AnnotatorInfo getInfo()
+	{
+		return AnnotatorInfo.create(Status.INDEV, Type.UNUSED, "unknown",
+				"This is the description for the HGNC Annotator", getOutputMetaData());
+	}
 }

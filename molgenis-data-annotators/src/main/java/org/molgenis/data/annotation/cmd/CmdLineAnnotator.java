@@ -1,148 +1,218 @@
 package org.molgenis.data.annotation.cmd;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.List;
+import java.io.PrintWriter;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
-import org.molgenis.data.annotation.impl.CaddServiceAnnotator;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
+import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.entity.impl.CaddAnnotator;
+import org.molgenis.data.annotation.entity.impl.CGDAnnotator;
+import org.molgenis.data.annotation.entity.impl.ExacAnnotator;
+import org.molgenis.data.annotation.entity.impl.SnpEffAnnotator;
 import org.molgenis.data.annotation.impl.ClinVarVCFServiceAnnotator;
-import org.molgenis.data.annotation.impl.ClinicalGenomicsDatabaseServiceAnnotator;
 import org.molgenis.data.annotation.impl.DeNovoAnnotator;
-import org.molgenis.data.annotation.impl.ExACServiceAnnotator;
 import org.molgenis.data.annotation.impl.GoNLServiceAnnotator;
 import org.molgenis.data.annotation.impl.HpoServiceAnnotator;
 import org.molgenis.data.annotation.impl.MonogenicDiseaseCandidatesServiceAnnotator;
 import org.molgenis.data.annotation.impl.PhenomizerServiceAnnotator;
-import org.molgenis.data.annotation.impl.SnpEffServiceAnnotator;
 import org.molgenis.data.annotation.impl.ThousandGenomesServiceAnnotator;
+import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.vcf.utils.VcfUtils;
+import org.molgenis.framework.server.MolgenisSettings;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.stereotype.Component;
 
+/**
+ * 
+ * Build JAR file...............: mvn clean install -pl molgenis-data-annotators/ -am -DskipTests -P create-delivery
+ * Run..........................: java -jar molgenis-data-annotators/target/CmdLineAnnotator.jar
+ * 
+ */
+@Component
 public class CmdLineAnnotator
 {
 
-	public static void main(String[] args) throws Exception
+	@Autowired
+	private MolgenisSettings molgenisSettings;
+
+	@Autowired
+	private ApplicationContext applicationContext;
+
+	public void run(String[] args) throws Exception
 	{
-		List<String> annotators = Arrays.asList(new String[]
-		{ "cadd", "snpeff", "clinvar", "hpo", "ase", "monogenic", "phenomizer", "ccgg", "denovo", "exac", "1kg",
-				"gonl", "gwascatalog", "vkgl", "cgd", "enhancers", "proteinatlas" });
+		Map<String, RepositoryAnnotator> configuredAnnotators = applicationContext
+				.getBeansOfType(RepositoryAnnotator.class);
+
+		// for now, only get the annotators that have recieved a recent brush up for the new way of configuring
+		Map<String, RepositoryAnnotator> configuredFreshAnnotators = CommandLineAnnotatorConfig
+				.getFreshAnnotators(configuredAnnotators);
+
+		Set<String> annotatorNames = configuredFreshAnnotators.keySet();
 
 		if (args.length != 4)
 		{
-			throw new Exception(
-					"Usage: java -Xmx4g -jar CmdLineAnnotator.jar [Annotator] [Annotation source file] [input VCF] [output VCF].\n"
-							+ "Possible annotators are: "
-							+ annotators.toString()
-							+ ".\n"
-							+ "Example: java -Xmx4g -jar CmdLineAnnotator.jar gonl GoNL/release5_noContam_noChildren_with_AN_AC_GTC_stripped/ Cardio.vcf Cardio_gonl.vcf\n");
+			System.out
+					.println("\n"
+							+ "*********************************************\n"
+							+ "* MOLGENIS Annotator, commandline interface *\n"
+							+ "*********************************************\n"
+							+ "\n"
+							+ "Typical usage to annotate a VCF file:\n"
+							+ "\tjava -jar CmdLineAnnotator.jar [Annotator] [Annotation source file] [input VCF] [output VCF].\n"
+							+ "\tExample: java -Xmx4g -jar CmdLineAnnotator.jar gonl GoNL/release5_noContam_noChildren_with_AN_AC_GTC_stripped/ Cardio.vcf Cardio_gonl.vcf\n"
+							+ "\n"
+							+ "Help:\n"
+							+ "\tTo get a detailed description and installation instructions for a specific annotator:\n"
+							+ "\t\tjava -jar CmdLineAnnotator.jar [Annotator]\n"
+							+ "\tTo check if an annotator is ready for use:\n"
+							+ "\t\tjava -jar CmdLineAnnotator.jar [Annotator] [Annotation source file]\n" + "\n"
+							+ "Currently available annotators are:\n" + "\t" + annotatorNames.toString() + "\n"
+							+ "Breakdown per category:\n"
+							+ CommandLineAnnotatorConfig.printAnnotatorsPerType(configuredFreshAnnotators));
+			return;
 		}
 
-		String annotator = args[0];
-		if (!annotators.contains(annotator))
+		String annotatorName = args[0];
+		if (!annotatorNames.contains(annotatorName))
 		{
-			System.out.println("Annotator must be one of the following: ");
-			for (String ann : annotators)
-			{
-				System.out.print(ann + " ");
-			}
-			throw new Exception("\nInvalid annotator.\n" + "Possible annotators are: " + annotators.toString() + ".");
+			System.out.println("Annotator must be one of the following: " + annotatorNames.toString());
+			return;
 		}
 
 		File annotationSourceFile = new File(args[1]);
 		if (!annotationSourceFile.exists())
 		{
-			throw new Exception("Annotation source file or directory not found at " + annotationSourceFile);
+			System.out.println("Annotation source file or directory not found at " + annotationSourceFile);
+			return;
 		}
 
 		File inputVcfFile = new File(args[2]);
 		if (!inputVcfFile.exists())
 		{
-			throw new Exception("Input VCF file not found at " + inputVcfFile);
+			System.out.println("Input VCF file not found at " + inputVcfFile);
+			return;
 		}
 		if (inputVcfFile.isDirectory())
 		{
-			throw new Exception("Input VCF file is a directory, not a file!");
+			System.out.println("Input VCF file is a directory, not a file!");
+			return;
 		}
 
 		File outputVCFFile = new File(args[3]);
 		if (outputVCFFile.exists())
 		{
-			// TODO: do we make this an input options? or always throw? what is best practice?
-			// throw new Exception("Output VCF file already exists at " + outputVCFFile.getAbsolutePath());
+			System.out.println("WARNING: Output VCF file already exists at " + outputVCFFile.getAbsolutePath());
 		}
 
 		// engage!
-		if (annotator.equals("cadd"))
+		if (annotatorName.equals("cadd"))
 		{
-			new CaddServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
+			molgenisSettings.setProperty(CaddAnnotator.CADD_FILE_LOCATION_PROPERTY,
+					annotationSourceFile.getAbsolutePath());
+			Map<String, RepositoryAnnotator> annotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
+			RepositoryAnnotator annotator = annotators.get("cadd");
+			annotate(annotator, inputVcfFile, outputVCFFile);
 		}
-		else if (annotator.equals("snpeff"))
+		else if (annotatorName.equals("snpeff"))
 		{
-			new SnpEffServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
+			molgenisSettings.setProperty(SnpEffAnnotator.SNPEFF_JAR_LOCATION_PROPERTY,
+					annotationSourceFile.getAbsolutePath());
+			Map<String, RepositoryAnnotator> annotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
+			RepositoryAnnotator annotator = annotators.get("snpEff");
+			annotate(annotator, inputVcfFile, outputVCFFile);
 		}
-		else if (annotator.equals("clinvar"))
+		else if (annotatorName.equals("clinvar"))
 		{
 			new ClinVarVCFServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
-		else if (annotator.equals("hpo"))
+		else if (annotatorName.equals("hpo"))
 		{
 			new HpoServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
-		else if (annotator.equals("ase"))
-		{
-			// TODO
-		}
-		else if (annotator.equals("monogenic"))
+		else if (annotatorName.equals("monogenic"))
 		{
 			new MonogenicDiseaseCandidatesServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
-		else if (annotator.equals("phenomizer"))
+		else if (annotatorName.equals("phenomizer"))
 		{
 			new PhenomizerServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
-		else if (annotator.equals("ccgg"))
-		{
-			// TODO
-		}
-		else if (annotator.equals("denovo"))
+		else if (annotatorName.equals("denovo"))
 		{
 			new DeNovoAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
-		else if (annotator.equals("exac"))
+		else if (annotatorName.equals("exac"))
 		{
-			new ExACServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
+			molgenisSettings.setProperty(ExacAnnotator.EXAC_FILE_LOCATION_PROPERTY,
+					annotationSourceFile.getAbsolutePath());
+			Map<String, RepositoryAnnotator> annotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
+			RepositoryAnnotator annotator = annotators.get("exac");
+			annotate(annotator, inputVcfFile, outputVCFFile);
 		}
-		else if (annotator.equals("1kg"))
+		else if (annotatorName.equals("1kg"))
 		{
 			new ThousandGenomesServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
-		else if (annotator.equals("gonl"))
+		else if (annotatorName.equals("gonl"))
 		{
 			new GoNLServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
-		else if (annotator.equals("gwascatalog"))
+		else if (annotatorName.equals("cgd"))
 		{
-			// TODO
-		}
-		else if (annotator.equals("vkgl"))
-		{
-			// TODO
-		}
-		else if (annotator.equals("cgd"))
-		{
-			new ClinicalGenomicsDatabaseServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
-		}
-		else if (annotator.equals("enhancers"))
-		{
-			// TODO
-		}
-		else if (annotator.equals("proteinatlas"))
-		{
-			// TODO
+			molgenisSettings.setProperty(CGDAnnotator.CGD_FILE_LOCATION_PROPERTY,
+					annotationSourceFile.getAbsolutePath());
+			Map<String, RepositoryAnnotator> annotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
+			RepositoryAnnotator annotator = annotators.get("cgd");
+			annotate(annotator, inputVcfFile, outputVCFFile);
 		}
 		else
 		{
-			throw new Exception("Annotor unknown: " + annotator);
+			throw new Exception("Annotor unknown: " + annotatorName);
 		}
-
 	}
 
+	public static void main(String[] args) throws Exception
+	{
+		// See http://stackoverflow.com/questions/4787719/spring-console-application-configured-using-annotations
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext("org.molgenis.data.annotation");
+		CmdLineAnnotator main = ctx.getBean(CmdLineAnnotator.class);
+		main.run(args);
+	}
+
+	public void annotate(RepositoryAnnotator annotator, File inputVcfFile, File outputVCFFile) throws Exception
+	{
+		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
+		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
+		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, annotator.getOutputMetaData(),
+				annotator.getOutputMetaData().get(0).getName());
+		System.out.println("Now starting to process the data.");
+
+		DefaultEntityMetaData emd = (DefaultEntityMetaData) vcfRepo.getEntityMetaData();
+		DefaultAttributeMetaData infoAttribute = (DefaultAttributeMetaData) emd.getAttribute(VcfRepository.INFO);
+		for (AttributeMetaData attribute : annotator.getOutputMetaData())
+		{
+			for (AttributeMetaData atomicAttribute : attribute.getAttributeParts())
+			{
+				infoAttribute.addAttributePart(atomicAttribute);
+			}
+		}
+
+		Iterator<Entity> annotatedRecords = annotator.annotate(vcfRepo);
+		while (annotatedRecords.hasNext())
+		{
+			Entity annotatedRecord = annotatedRecords.next();
+			outputVCFWriter.println(VcfUtils.convertToVCF(annotatedRecord));
+		}
+		outputVCFWriter.close();
+		vcfRepo.close();
+		System.out.println("All done!");
+	}
 }

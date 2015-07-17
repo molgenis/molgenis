@@ -8,6 +8,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.excel.ExcelRepository;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.excel.ExcelSheetWriter;
@@ -30,7 +31,7 @@ public class LifeLinesCodeToEmxConvertor
 	private static final String TOP_NODE_PATH = "0[0]";
 	private static final String TOP_NODE_NAME = "top";
 
-	public static void main(String args[]) throws InvalidFormatException, IOException
+	public static void main(String args[]) throws InvalidFormatException, IOException, MolgenisInvalidFormatException
 	{
 		if (args.length != 0)
 		{
@@ -47,7 +48,8 @@ public class LifeLinesCodeToEmxConvertor
 		}
 	}
 
-	public static void convert(File lifeLinesCodeFile) throws InvalidFormatException, IOException
+	public static void convert(File lifeLinesCodeFile) throws InvalidFormatException, IOException,
+			MolgenisInvalidFormatException
 	{
 		UuidGenerator uuidGenerator = new UuidGenerator();
 

@@ -4,15 +4,25 @@ import static org.testng.Assert.assertEquals;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.mozilla.javascript.EcmaError;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.google.common.base.Stopwatch;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Iterables;
 
 public class MolgenisJsTest
 {
@@ -37,14 +47,48 @@ public class MolgenisJsTest
 	}
 
 	@Test
-	public void map()
+	public void testUnitConversion()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
+		emd.addAttribute("weight").setDataType(MolgenisFieldTypes.INT);
+
+		Entity person = new MapEntity();
+		person.set("weight", 82);
+
+		Object weight = ScriptEvaluator.eval("$('weight').unit('kg').toUnit('pound').value()", person, emd);
+		assertEquals(weight, 180.7790549915996);
+	}
+
+	@Test
+	public void mapSimple()
 	{
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
 		emd.addAttribute("gender").setDataType(MolgenisFieldTypes.CATEGORICAL);
 
-		Object result = ScriptEvaluator.eval("$('gender').map({'2':'20','B2':'B'}).value()", new MapEntity("gender",
+		Object result = ScriptEvaluator.eval("$('gender').map({'20':'2','B':'B2'}).value()", new MapEntity("gender",
 				'B'), emd);
 		assertEquals(result.toString(), "B2");
+	}
+
+	@Test
+	public void mapDefault()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
+		emd.addAttribute("gender").setDataType(MolgenisFieldTypes.CATEGORICAL);
+
+		Object result = ScriptEvaluator.eval("$('gender').map({'20':'2'}, 'B2').value()", new MapEntity("gender", 'B'),
+				emd);
+		assertEquals(result.toString(), "B2");
+	}
+
+	@Test
+	public void mapNull()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
+		emd.addAttribute("gender").setDataType(MolgenisFieldTypes.CATEGORICAL);
+
+		Object result = ScriptEvaluator.eval("$('gender').map({'20':'2'}, 'B2', 'B3').value()", new MapEntity(), emd);
+		assertEquals(result.toString(), "B3");
 	}
 
 	@Test
@@ -263,5 +307,66 @@ public class MolgenisJsTest
 
 		result = ScriptEvaluator.eval(script, new MapEntity("weight", 101), emd);
 		assertEquals(result, false);
+	}
+
+	@Test(enabled = false)
+	public void testBatchPerformance()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
+		emd.addAttribute("weight").setDataType(MolgenisFieldTypes.INT);
+		emd.addAttribute("height").setDataType(MolgenisFieldTypes.INT);
+
+		Entity person = new MapEntity();
+		person.set("weight", 82);
+		person.set("height", 189);
+
+		Stopwatch sw = Stopwatch.createStarted();
+
+		Object bmi = ScriptEvaluator.eval("$('weight').div($('height').div(100).pow(2)).value()",
+				FluentIterable.from(Iterables.cycle(person)).limit(1000), emd);
+		sw.stop();
+		Assert.assertTrue(sw.elapsed(TimeUnit.MILLISECONDS) < 1200);
+		assertEquals(bmi, Collections.nCopies(1000, 82.0 / (1.89 * 1.89)));
+	}
+
+	@Test
+	public void testBatchErrors()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
+		emd.addAttribute("weight").setDataType(MolgenisFieldTypes.INT);
+		emd.addAttribute("height").setDataType(MolgenisFieldTypes.INT);
+
+		Entity person = new MapEntity();
+		person.set("weight", 82);
+		person.set("height", 189);
+
+		List<Object> bmis = ScriptEvaluator.eval("$('weight').div($('height').div(100).pow(2)).value()",
+				Arrays.asList(person, null, person), emd);
+		assertEquals(bmis.get(0), 82.0 / (1.89 * 1.89));
+		assertEquals(NullPointerException.class, bmis.get(1).getClass());
+		assertEquals(bmis.get(2), 82.0 / (1.89 * 1.89));
+	}
+
+	@Test
+	public void testBatchSyntaxError()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
+		emd.addAttribute("weight").setDataType(MolgenisFieldTypes.INT);
+		emd.addAttribute("height").setDataType(MolgenisFieldTypes.INT);
+
+		Entity person = new MapEntity();
+		person.set("weight", 82);
+		person.set("height", 189);
+
+		try
+		{
+			ScriptEvaluator.eval("$('weight'))", Arrays.asList(person, person), emd);
+			Assert.fail("Syntax errors should throw exception");
+		}
+		catch (EcmaError expected)
+		{
+			assertEquals(expected.getName(), "SyntaxError");
+			assertEquals(expected.getErrorMessage(), "missing ; before statement");
+		}
 	}
 }

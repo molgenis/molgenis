@@ -5,6 +5,7 @@ import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL_MREF;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DATE;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DATE_TIME;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.FILE;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
 import static org.molgenis.data.rest.RestController.BASE_URI;
@@ -31,6 +32,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -48,12 +50,14 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityCollection;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.IdGenerator;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisReferencedEntityException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.Repository;
+import org.molgenis.data.Sort;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.rsql.MolgenisRSQL;
@@ -63,7 +67,9 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.fieldtypes.BoolField;
-import org.molgenis.framework.db.EntityNotFoundException;
+import org.molgenis.file.FileDownloadController;
+import org.molgenis.file.FileMeta;
+import org.molgenis.file.FileStore;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.token.TokenExtractor;
@@ -78,7 +84,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConversionFailedException;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -96,6 +101,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -129,11 +137,14 @@ public class RestController
 	private final AuthenticationManager authenticationManager;
 	private final MolgenisPermissionService molgenisPermissionService;
 	private final MolgenisRSQL molgenisRSQL;
+	private final IdGenerator idGenerator;
+	private final FileStore fileStore;
 
 	@Autowired
 	public RestController(DataService dataService, TokenService tokenService,
 			AuthenticationManager authenticationManager, MolgenisPermissionService molgenisPermissionService,
-			MolgenisRSQL molgenisRSQL, ResourceFingerprintRegistry resourceFingerprintRegistry)
+			MolgenisRSQL molgenisRSQL, ResourceFingerprintRegistry resourceFingerprintRegistry,
+			IdGenerator idGenerator, FileStore fileStore)
 	{
 		if (dataService == null) throw new IllegalArgumentException("dataService is null");
 		if (tokenService == null) throw new IllegalArgumentException("tokenService is null");
@@ -145,6 +156,8 @@ public class RestController
 		this.authenticationManager = authenticationManager;
 		this.molgenisPermissionService = molgenisPermissionService;
 		this.molgenisRSQL = molgenisRSQL;
+		this.idGenerator = idGenerator;
+		this.fileStore = fileStore;
 	}
 
 	/**
@@ -450,7 +463,7 @@ public class RestController
 			{
 				String sortAttribute = sortAttributeArray[0];
 				String sortOrderArray[] = req.getParameterMap().get("sortOrder");
-				Sort.Direction order = Sort.DEFAULT_DIRECTION;
+				Sort.Direction order = Sort.Direction.ASC;
 
 				if (sortOrderArray != null && sortOrderArray.length == 1 && StringUtils.isNotEmpty(sortOrderArray[0]))
 				{
@@ -468,7 +481,7 @@ public class RestController
 						throw new RuntimeException("unknown sort order");
 					}
 				}
-				q.sort(order, sortAttribute);
+				q.sort().on(sortAttribute, order);
 			}
 
 			if (q.getPageSize() == 0)
@@ -548,9 +561,46 @@ public class RestController
 		createInternal(entityName, paramMap, response);
 	}
 
+	/**
+	 * Creates a new entity from a html form post.
+	 * 
+	 * @param entityName
+	 * @param request
+	 * @param response
+	 * @throws UnknownEntityException
+	 */
+	@RequestMapping(value = "/{entityName}", method = POST, headers = "Content-Type=multipart/form-data")
+	public void createFromFormPostMultiPart(@PathVariable("entityName") String entityName,
+			MultipartHttpServletRequest request, HttpServletResponse response)
+	{
+		Map<String, Object> paramMap = new HashMap<String, Object>();
+		for (String param : request.getParameterMap().keySet())
+		{
+			String[] values = request.getParameterValues(param);
+			String value = values != null ? StringUtils.join(values, ',') : null;
+			if (StringUtils.isNotBlank(value))
+			{
+				paramMap.put(param, value);
+			}
+		}
+
+		// add files to param map
+		for (Entry<String, List<MultipartFile>> entry : request.getMultiFileMap().entrySet())
+		{
+			String param = entry.getKey();
+			List<MultipartFile> files = entry.getValue();
+			if (files != null && files.size() > 1)
+			{
+				throw new IllegalArgumentException("Multiple file input not supported");
+			}
+			paramMap.put(param, files != null && !files.isEmpty() ? files.get(0) : null);
+		}
+		createInternal(entityName, paramMap, response);
+	}
+
 	@RequestMapping(value = "/{entityName}", method = POST)
 	public void create(@PathVariable("entityName") String entityName, @RequestBody Map<String, Object> entityMap,
-			HttpServletResponse response) throws EntityNotFoundException
+			HttpServletResponse response)
 	{
 		if (entityMap == null)
 		{
@@ -647,6 +697,48 @@ public class RestController
 	 * @param request
 	 * @throws UnknownEntityException
 	 */
+	@RequestMapping(value = "/{entityName}/{id}", method = POST, params = "_method=PUT", headers = "Content-Type=multipart/form-data")
+	@ResponseStatus(NO_CONTENT)
+	public void updateFromFormPostMultiPart(@PathVariable("entityName") String entityName,
+			@PathVariable("id") Object id, MultipartHttpServletRequest request)
+	{
+		Object typedId = dataService.getRepository(entityName).getEntityMetaData().getIdAttribute().getDataType()
+				.convert(id);
+
+		Map<String, Object> paramMap = new HashMap<String, Object>();
+		for (String param : request.getParameterMap().keySet())
+		{
+			String[] values = request.getParameterValues(param);
+			String value = values != null ? StringUtils.join(values, ',') : null;
+			paramMap.put(param, value);
+		}
+
+		// add files to param map
+		for (Entry<String, List<MultipartFile>> entry : request.getMultiFileMap().entrySet())
+		{
+			String param = entry.getKey();
+			List<MultipartFile> files = entry.getValue();
+			if (files != null && files.size() > 1)
+			{
+				throw new IllegalArgumentException("Multiple file input not supported");
+			}
+			paramMap.put(param, files != null && !files.isEmpty() ? files.get(0) : null);
+		}
+		updateInternal(entityName, typedId, paramMap);
+	}
+
+	/**
+	 * Updates an entity from a html form post.
+	 * 
+	 * Tunnels PUT through POST
+	 * 
+	 * Example url: /api/v1/person/99?_method=PUT
+	 * 
+	 * @param entityName
+	 * @param id
+	 * @param request
+	 * @throws UnknownEntityException
+	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = POST, params = "_method=PUT", headers = "Content-Type=application/x-www-form-urlencoded")
 	@ResponseStatus(NO_CONTENT)
 	public void updateFromFormPost(@PathVariable("entityName") String entityName, @PathVariable("id") Object id,
@@ -671,7 +763,6 @@ public class RestController
 	 * 
 	 * @param entityName
 	 * @param id
-	 * @throws EntityNotFoundException
 	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = DELETE)
 	@ResponseStatus(NO_CONTENT)
@@ -689,7 +780,6 @@ public class RestController
 	 * 
 	 * @param entityName
 	 * @param id
-	 * @throws EntityNotFoundException
 	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = POST, params = "_method=DELETE")
 	@ResponseStatus(NO_CONTENT)
@@ -703,7 +793,6 @@ public class RestController
 	 * 
 	 * @param entityName
 	 * @param id
-	 * @throws EntityNotFoundException
 	 */
 	@RequestMapping(value = "/{entityName}", method = DELETE)
 	@ResponseStatus(NO_CONTENT)
@@ -717,7 +806,6 @@ public class RestController
 	 * 
 	 * @param entityName
 	 * @param id
-	 * @throws EntityNotFoundException
 	 */
 	@RequestMapping(value = "/{entityName}", method = POST, params = "_method=DELETE")
 	@ResponseStatus(NO_CONTENT)
@@ -731,7 +819,6 @@ public class RestController
 	 * 
 	 * @param entityName
 	 * @param id
-	 * @throws EntityNotFoundException
 	 */
 	@RequestMapping(value = "/{entityName}/meta", method = DELETE)
 	@ResponseStatus(NO_CONTENT)
@@ -746,7 +833,6 @@ public class RestController
 	 * 
 	 * @param entityName
 	 * @param id
-	 * @throws EntityNotFoundException
 	 */
 	@RequestMapping(value = "/{entityName}/meta", method = POST, params = "_method=DELETE")
 	@ResponseStatus(NO_CONTENT)
@@ -1001,6 +1087,32 @@ public class RestController
 
 		if (paramValue != null)
 		{
+			if (attr.getDataType().getEnumType() == FieldTypeEnum.FILE)
+			{
+				MultipartFile multipartFile = (MultipartFile) paramValue;
+
+				String id = idGenerator.generateId();
+				try
+				{
+					fileStore.store(multipartFile.getInputStream(), id);
+				}
+				catch (IOException e)
+				{
+					throw new MolgenisDataException(e);
+				}
+
+				FileMeta fileEntity = new FileMeta(dataService);
+				fileEntity.setId(id);
+				fileEntity.setFilename(multipartFile.getOriginalFilename());
+				fileEntity.setContentType(multipartFile.getContentType());
+				fileEntity.setSize(multipartFile.getSize());
+				fileEntity.setUrl(ServletUriComponentsBuilder.fromCurrentRequest()
+						.replacePath(FileDownloadController.URI + "/" + id).replaceQuery(null).build().toUriString());
+				dataService.add(FileMeta.ENTITY_NAME, fileEntity);
+
+				return fileEntity;
+			}
+
 			if (attr.getDataType().getEnumType() == XREF || attr.getDataType().getEnumType() == CATEGORICAL)
 			{
 				value = dataService.findOne(attr.getRefEntity().getName(), paramValue);
@@ -1123,9 +1235,25 @@ public class RestController
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
 		Repository repository = dataService.getRepository(entityName);
 
+		// convert sort
+		Sort sort;
+		SortV1 sortV1 = request.getSort();
+		if (sortV1 != null)
+		{
+			sort = new Sort();
+			for (SortV1.OrderV1 orderV1 : sortV1)
+			{
+				sort.on(orderV1.getProperty(),
+						orderV1.getDirection() == SortV1.DirectionV1.ASC ? Sort.Direction.ASC : Sort.Direction.DESC);
+			}
+		}
+		else
+		{
+			sort = null;
+		}
+
 		List<QueryRule> queryRules = request.getQ() == null ? Collections.<QueryRule> emptyList() : request.getQ();
-		Query q = new QueryImpl(queryRules).pageSize(request.getNum()).offset(request.getStart())
-				.sort(request.getSort());
+		Query q = new QueryImpl(queryRules).pageSize(request.getNum()).offset(request.getStart()).sort(sort);
 
 		Iterable<Entity> it = dataService.findAll(entityName, q);
 		Long count = repository.count(q);
@@ -1199,12 +1327,12 @@ public class RestController
 											.format(date) : null);
 				}
 				else if (attrType != XREF && attrType != CATEGORICAL && attrType != MREF
-						&& attrType != CATEGORICAL_MREF)
+						&& attrType != CATEGORICAL_MREF && attrType != FILE)
 				{
 					entityMap.put(attrName, entity.get(attr.getName()));
 				}
-				else if ((attrType == XREF || attrType == CATEGORICAL) && attributeExpandsSet != null
-						&& attributeExpandsSet.containsKey(attrName.toLowerCase()))
+				else if ((attrType == XREF || attrType == CATEGORICAL || attrType == FILE)
+						&& attributeExpandsSet != null && attributeExpandsSet.containsKey(attrName.toLowerCase()))
 				{
 					Entity refEntity = entity.getEntity(attr.getName());
 					if (refEntity != null)
@@ -1240,7 +1368,8 @@ public class RestController
 					entityMap.put(attrName, ecr);
 				}
 				else if ((attrType == XREF && entity.get(attr.getName()) != null)
-						|| (attrType == CATEGORICAL && entity.get(attr.getName()) != null) || attrType == MREF
+						|| (attrType == CATEGORICAL && entity.get(attr.getName()) != null)
+						|| (attrType == FILE && entity.get(attr.getName()) != null) || attrType == MREF
 						|| attrType == CATEGORICAL_MREF)
 				{
 					// Add href to ref field

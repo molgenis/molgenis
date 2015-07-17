@@ -14,6 +14,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.meta.OntologyMetaData;
@@ -21,7 +22,6 @@ import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData;
 import org.molgenis.ontology.roc.InformationContentService;
-import org.molgenis.ontology.utils.NGramMatchingModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.tartarus.snowball.ext.PorterStemmer;
 
@@ -314,7 +314,7 @@ public class SortaServiceImpl implements SortaService
 					MapEntity mapEntity = new MapEntity(ontologyTermSynonymEntity);
 					String ontologyTermSynonym = removeIllegalCharWithSingleWhiteSpace(ontologyTermSynonymEntity
 							.getString(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM));
-					mapEntity.set(SCORE, NGramMatchingModel.stringMatching(cleanedQueryString, ontologyTermSynonym));
+					mapEntity.set(SCORE, NGramDistanceAlgorithm.stringMatching(cleanedQueryString, ontologyTermSynonym));
 					return mapEntity;
 				}
 
@@ -354,7 +354,7 @@ public class SortaServiceImpl implements SortaService
 				StringBuilder tempCombinedSynonym = new StringBuilder();
 				tempCombinedSynonym.append(topMatchedSynonym).append(SINGLE_WHITESPACE).append(nextMatchedSynonym);
 
-				double newScore = NGramMatchingModel.stringMatching(cleanedQueryString,
+				double newScore = NGramDistanceAlgorithm.stringMatching(cleanedQueryString,
 						removeIllegalCharWithSingleWhiteSpace(tempCombinedSynonym.toString()));
 
 				if (newScore > topNgramScore)
@@ -406,7 +406,7 @@ public class SortaServiceImpl implements SortaService
 	{
 		StringBuilder stringBuilder = new StringBuilder();
 		Set<String> uniqueTerms = Sets.newHashSet(queryString.toLowerCase().trim().split(NON_WORD_SEPARATOR));
-		uniqueTerms.removeAll(NGramMatchingModel.STOPWORDSLIST);
+		uniqueTerms.removeAll(NGramDistanceAlgorithm.STOPWORDSLIST);
 		for (String term : uniqueTerms)
 		{
 			if (StringUtils.isNotEmpty(term.trim()) && !(ELASTICSEARCH_RESERVED_WORDS.contains(term)))

@@ -9,6 +9,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
+import org.molgenis.data.elasticsearch.ElasticSearchService;
 import org.molgenis.data.elasticsearch.util.MapperTypeSanitizer;
 
 /**
@@ -78,15 +79,22 @@ public class MappingsBuilder
 			boolean createAllIndex) throws IOException
 	{
 		String documentType = MapperTypeSanitizer.sanitizeMapperType(entityMetaData.getName());
-		XContentBuilder jsonBuilder = XContentFactory.jsonBuilder().startObject().startObject(documentType)
-				.startObject("_source").field("enabled", storeSource).endObject().startObject("properties");
+		XContentBuilder jsonBuilder = XContentFactory.jsonBuilder().startObject().startObject(documentType);
+
+		jsonBuilder.startObject("_source").field("enabled", storeSource).endObject();
+
+		jsonBuilder.startObject("properties");
+
+		jsonBuilder.startObject(ElasticSearchService.CRUD_TYPE_FIELD_NAME);
+		jsonBuilder.field("type", "string").field("index", "not_analyzed");
+		jsonBuilder.endObject();
 
 		for (AttributeMetaData attr : entityMetaData.getAtomicAttributes())
 		{
 			createAttributeMapping(attr, enableNorms, createAllIndex, true, true, jsonBuilder);
 		}
-
 		jsonBuilder.endObject();
+
 		jsonBuilder.endObject().endObject();
 
 		return jsonBuilder;
@@ -119,6 +127,7 @@ public class MappingsBuilder
 			case CATEGORICAL_MREF:
 			case MREF:
 			case XREF:
+			case FILE:
 				EntityMetaData refEntity = attr.getRefEntity();
 				if (nestRefs)
 				{
@@ -127,8 +136,7 @@ public class MappingsBuilder
 					jsonBuilder.startObject("properties");
 					for (AttributeMetaData refAttr : refEntity.getAtomicAttributes())
 					{
-						createAttributeMapping(refAttr, enableNorms, createAllIndex, false, enableNgramAnalyzer,
-								jsonBuilder);
+						createAttributeMapping(refAttr, enableNorms, createAllIndex, false, true, jsonBuilder);
 					}
 					jsonBuilder.endObject();
 				}
@@ -165,7 +173,6 @@ public class MappingsBuilder
 				// disable norms for numeric fields
 				jsonBuilder.field("norms").startObject().field("enabled", false).endObject();
 				break;
-			case FILE:
 			case IMAGE:
 				throw new MolgenisDataException("Unsupported data type [" + dataType + "]");
 			case INT:

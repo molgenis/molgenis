@@ -132,4 +132,11 @@ public class MenuItem
 		if (type != other.type) return false;
 		return true;
 	}
+
+	@Override
+	public String toString()
+	{
+		return "MenuItem [type=" + type + ", id=" + id + ", label=" + label + ", params=" + params + ", items=" + items
+				+ "]";
+	}
 }

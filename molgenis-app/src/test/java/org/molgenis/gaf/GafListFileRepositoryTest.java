@@ -53,7 +53,7 @@ public class GafListFileRepositoryTest
 		Iterator<Entity> it = gafListFileRepository.iterator();
 		assertTrue(it.hasNext());
 		Entity firstEntity = it.next();
-		String barcode1 = firstEntity.getString("Barcode 1");
+		String barcode1 = firstEntity.getString("Barcode_1");
 		String barcode = firstEntity.getString("barcode");
 		String barcodeType = firstEntity.getString("barcodeType");
 		assertEquals(barcode1, "AGI 1 AAGGTTCC");
@@ -83,7 +83,7 @@ public class GafListFileRepositoryTest
 		Iterator<Entity> it = gafListFileRepository.iterator();
 		assertTrue(it.hasNext());
 		Entity firstEntity = it.next();
-		String barcode1 = firstEntity.getString("Barcode 1");
+		String barcode1 = firstEntity.getString("Barcode_1");
 		String barcode = firstEntity.getString("barcode");
 		String barcodeType = firstEntity.getString("barcodeType");
 		assertEquals(barcode1, "AGI 1 AAGGTTCC");

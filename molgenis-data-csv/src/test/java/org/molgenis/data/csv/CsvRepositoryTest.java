@@ -16,7 +16,7 @@ import java.io.InputStream;
 import java.util.Iterator;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.poi.util.IOUtils;
+import org.apache.commons.io.IOUtils;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.processor.CellProcessor;

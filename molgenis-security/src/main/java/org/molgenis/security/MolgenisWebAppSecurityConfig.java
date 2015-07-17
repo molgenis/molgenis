@@ -81,8 +81,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 				matcher, new CacheControlHeadersWriter());
 
 		// add default header options but use custom cache control header writer
-		http.headers().contentTypeOptions().xssProtection().httpStrictTransportSecurity().frameOptions()
-				.addHeaderWriter(cacheControlHeaderWriter);
+		http.headers().contentTypeOptions().and().xssProtection().and().httpStrictTransportSecurity().and()
+				.frameOptions().and().addHeaderWriter(cacheControlHeaderWriter);
 
 		http.addFilterBefore(anonymousAuthFilter(), AnonymousAuthenticationFilter.class);
 		http.authenticationProvider(anonymousAuthenticationProvider());
@@ -129,6 +129,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 		.antMatchers("/permission/**/write/**").permitAll()
 
 		.antMatchers("/scripts/**/run").authenticated()
+
+		.antMatchers("/files/**").permitAll()
 
 		.anyRequest().denyAll().and()
 

@@ -28,10 +28,13 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.IdGenerator;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
+import org.molgenis.data.Sort;
+import org.molgenis.data.Sort.Direction;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.rest.RestControllerTest.RestControllerConfig;
 import org.molgenis.data.rsql.MolgenisRSQL;
@@ -39,6 +42,7 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.QueryResolver;
+import org.molgenis.file.FileStore;
 import org.molgenis.messageconverter.CsvHttpMessageConverter;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
@@ -48,7 +52,6 @@ import org.molgenis.util.ResourceFingerprintRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -120,7 +123,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		Query q = new QueryImpl().eq("name", "Piet").pageSize(10).offset(5);
 		when(dataService.findAll(ENTITY_NAME, q)).thenReturn(Arrays.asList(entity));
 
-		Query q2 = new QueryImpl().sort(Sort.Direction.DESC, "name").pageSize(100).offset(0);
+		Query q2 = new QueryImpl().sort(new Sort().on("name", Direction.DESC)).pageSize(100).offset(0);
 		when(dataService.findAll(ENTITY_NAME, q2)).thenReturn(entities);
 
 		DefaultAttributeMetaData attrEnum = new DefaultAttributeMetaData("enum", FieldTypeEnum.ENUM)
@@ -599,10 +602,23 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
+		public IdGenerator idGenerator()
+		{
+			return mock(IdGenerator.class);
+		}
+
+		@Bean
+		public FileStore fileStore()
+		{
+			return mock(FileStore.class);
+		}
+
+		@Bean
 		public RestController restController()
 		{
 			return new RestController(dataService(), tokenService(), authenticationManager(),
-					molgenisPermissionService(), new MolgenisRSQL(), new ResourceFingerprintRegistry());
+					molgenisPermissionService(), new MolgenisRSQL(), new ResourceFingerprintRegistry(), idGenerator(),
+					fileStore());
 		}
 	}
 

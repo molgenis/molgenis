@@ -51,7 +51,7 @@ public class DeNovoAnnotatorTest
 	@BeforeMethod
 	public void beforeMethod() throws IOException
 	{
-		annotator = new DeNovoAnnotator(null);
+		annotator = new DeNovoAnnotator();
 
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom);
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);

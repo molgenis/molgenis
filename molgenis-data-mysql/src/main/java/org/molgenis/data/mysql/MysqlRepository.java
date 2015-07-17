@@ -36,6 +36,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.Sort;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.BatchingQueryResult;
 import org.molgenis.data.support.DefaultEntity;
@@ -54,7 +55,6 @@ import org.molgenis.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
-import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -121,7 +121,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		if (!nonSelfReferencingEntities.isEmpty())
 		{
 			List<String> entityNames = Lists.newArrayList();
-            nonSelfReferencingEntities.forEach(pair -> entityNames.add(pair.getA().getName()));
+			nonSelfReferencingEntities.forEach(pair -> entityNames.add(pair.getA().getName()));
 
 			StringBuilder msg = new StringBuilder("Cannot delete entity '").append(getEntityMetaData().getName())
 					.append("' because it is referenced by the following entities: ").append(entityNames.toString());
@@ -194,14 +194,20 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 					// computed attributes are not persisted
 					continue;
 				}
+
 				// add mref tables
+
 				if (attr.getDataType() instanceof MrefField)
 				{
 					asyncJdbcTemplate.execute(getMrefCreateSql(attr));
 				}
 				else if (attr.getDataType() instanceof XrefField)
 				{
-					asyncJdbcTemplate.execute(getCreateFKeySql(attr));
+					String backend = dataService.getMeta().getBackend(attr.getRefEntity()).getName();
+					if (backend.equalsIgnoreCase(MysqlRepositoryCollection.NAME))
+					{
+						asyncJdbcTemplate.execute(getCreateFKeySql(attr));
+					}
 				}
 
 				// text can't be unique, so don't add unique constraint when type is string
@@ -351,11 +357,18 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				.append(" NOT NULL, ").append('`').append(att.getName()).append('`').append(' ')
 				.append(refAttrMysqlType).append(" NOT NULL, FOREIGN KEY (").append('`').append(idAttribute.getName())
 				.append('`').append(") REFERENCES ").append('`').append(getTableName()).append('`').append('(')
-				.append('`').append(idAttribute.getName()).append('`').append(") ON DELETE CASCADE, FOREIGN KEY (")
-				.append('`').append(att.getName()).append('`').append(") REFERENCES ").append('`')
-				.append(getTableName(att.getRefEntity())).append('`').append('(').append('`')
-				.append(att.getRefEntity().getIdAttribute().getName()).append('`')
-				.append(") ON DELETE CASCADE) ENGINE=InnoDB;");
+				.append('`').append(idAttribute.getName()).append("`) ON DELETE CASCADE");
+
+		// If the refEntity is not of type MySQL do not add a foreign key to it
+		String refEntityBackend = dataService.getMeta().getBackend(att.getRefEntity()).getName();
+		if (refEntityBackend.equalsIgnoreCase(MysqlRepositoryCollection.NAME))
+		{
+			sql.append(", FOREIGN KEY (").append('`').append(att.getName()).append('`').append(") REFERENCES ")
+					.append('`').append(getTableName(att.getRefEntity())).append('`').append('(').append('`')
+					.append(att.getRefEntity().getIdAttribute().getName()).append("`) ON DELETE CASCADE");
+		}
+
+		sql.append(") ENGINE=InnoDB;");
 
 		return sql.toString();
 	}
@@ -418,8 +431,6 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				break;
 			case ENUM:
 				break;
-			case FILE:
-				break;
 			case HTML:
 				break;
 			case HYPERLINK:
@@ -442,6 +453,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 			case CATEGORICAL:
 			case CATEGORICAL_MREF:
 			case XREF:
+			case FILE:
 				if (att.isLabelAttribute())
 				{
 					throw new MolgenisDataException("Attribute [" + att.getName() + "] of entity [" + getName()
@@ -927,7 +939,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		{
 			for (Sort.Order o : q.getSort())
 			{
-				AttributeMetaData att = getEntityMetaData().getAttribute(o.getProperty());
+				AttributeMetaData att = getEntityMetaData().getAttribute(o.getAttr());
 				if (att.getDataType() instanceof MrefField) sortSql.append(", ").append(att.getName());
 				else sortSql.append(", ").append('`').append(att.getName()).append('`');
 				if (o.getDirection().equals(Sort.Direction.DESC))
@@ -1503,7 +1515,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	@Override
 	public Set<RepositoryCapability> getCapabilities()
 	{
-		return Sets.newHashSet(WRITABLE, UPDATEABLE, QUERYABLE);
+		return Sets.newHashSet(WRITABLE, UPDATEABLE);
 	}
 
 	@Override

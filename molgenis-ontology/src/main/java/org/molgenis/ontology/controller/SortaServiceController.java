@@ -23,14 +23,16 @@ import javax.servlet.http.Part;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
+import org.molgenis.data.Sort;
+import org.molgenis.data.Sort.Direction;
 import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.processor.CellProcessor;
@@ -40,6 +42,7 @@ import org.molgenis.data.rest.EntityCollectionResponse;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.file.FileStore;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ontology.core.meta.OntologyMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
@@ -56,9 +59,7 @@ import org.molgenis.ontology.sorta.UploadProgress;
 import org.molgenis.ontology.utils.SortaServiceUtil;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.user.UserAccountService;
-import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -138,7 +139,8 @@ public class SortaServiceController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/calculate/{entityName}")
-	public String calculateRoc(@PathVariable String entityName, Model model) throws IOException, InvalidFormatException
+	public String calculateRoc(@PathVariable String entityName, Model model) throws IOException,
+			MolgenisInvalidFormatException
 	{
 		model.addAllAttributes(matchQualityRocService.calculateROC(entityName));
 		return init(model);
@@ -279,8 +281,8 @@ public class SortaServiceController extends MolgenisPluginController
 				MatchingTaskContentEntityMetaData.ENTITY_NAME,
 				query.offset(start)
 						.pageSize(num)
-						.sort(Direction.DESC, MatchingTaskContentEntityMetaData.VALIDATED,
-								MatchingTaskContentEntityMetaData.SCORE));
+						.sort(new Sort().on(MatchingTaskContentEntityMetaData.VALIDATED, Direction.DESC).on(
+								MatchingTaskContentEntityMetaData.SCORE, Direction.DESC)));
 
 		for (Entity mappingEntity : sortaMappingEntity)
 		{

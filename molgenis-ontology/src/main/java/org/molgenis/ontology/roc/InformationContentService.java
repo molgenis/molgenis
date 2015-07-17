@@ -14,10 +14,10 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.meta.OntologyMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
-import org.molgenis.ontology.utils.NGramMatchingModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.tartarus.snowball.ext.PorterStemmer;
 
@@ -159,7 +159,7 @@ public class InformationContentService
 				{
 					public boolean apply(String termBeforeStem)
 					{
-						return !Iterables.contains(NGramMatchingModel.STOPWORDSLIST, termBeforeStem);
+						return !Iterables.contains(NGramDistanceAlgorithm.STOPWORDSLIST, termBeforeStem);
 					}
 				}).transform(new Function<String, String>()
 				{
