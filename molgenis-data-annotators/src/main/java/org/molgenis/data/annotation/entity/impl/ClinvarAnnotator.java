@@ -30,7 +30,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ClinvarAnnotator
 {
-	// TODO Write test
+
 	public static final String CLINVAR_CLNSIG = "CLINVAR_CLNSIG";
 	public static final String CLINVAR_CLNSIG_LABEL = "ClinVar clinical significance";
 	public static final String CLINVAR_CLNSIG_ResourceAttributeName = VcfRepository.getInfoPrefix() + "CLNSIG";
@@ -50,7 +50,6 @@ public class ClinvarAnnotator
 	@Bean
 	public RepositoryAnnotator clinvar()
 	{
-		// TODO: description
 		List<AttributeMetaData> attributes = new ArrayList<>();
 		
 		DefaultAttributeMetaData clinvar_clnsig = new DefaultAttributeMetaData(CLINVAR_CLNSIG, FieldTypeEnum.STRING)
@@ -79,18 +78,24 @@ public class ClinvarAnnotator
 						+ "as possible. Information about using ClinVar is available at: http://www.ncbi.nlm.nih.gov/clinvar/docs/help/.",
 								attributes);
 
-		// TODO: properly test multiAllelicFresultFilter
 		LocusQueryCreator locusQueryCreator = new LocusQueryCreator();
-		ClinvarMultiAllelicResultFilter multiAllelicResultFilter = new ClinvarMultiAllelicResultFilter(
+		ClinvarMultiAllelicResultFilter clinvarMultiAllelicResultFilter = new ClinvarMultiAllelicResultFilter(
 				Collections.singletonList(new DefaultAttributeMetaData(CLINVAR_CLNSIG_ResourceAttributeName,
 						FieldTypeEnum.STRING)));
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(CLINVAR_TABIX_RESOURCE, clinvarInfo, locusQueryCreator,
-				multiAllelicResultFilter, dataService, resources)
+				clinvarMultiAllelicResultFilter, dataService, resources)
 		{
 			@Override
 			protected Object getResourceAttributeValue(AttributeMetaData attr, Entity sourceEntity)
 			{
-				String attrName = CLINVAR_CLNSIG.equals(attr.getName()) ? CLINVAR_CLNSIG_ResourceAttributeName : attr.getName();
+				String attrName = null;
+				if (CLINVAR_CLNSIG.equals(attr.getName())){
+					attrName = CLINVAR_CLNSIG_ResourceAttributeName;
+				}else if(CLINVAR_CLNALLE.equals(attr.getName())){
+					attrName = CLINVAR_CLINALL_ResourceAttributeName;
+				}else{
+					attrName = attr.getName();
+				}
 				return sourceEntity.get(attrName);
 			}
 		};

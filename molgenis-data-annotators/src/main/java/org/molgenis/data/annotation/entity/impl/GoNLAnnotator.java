@@ -1,6 +1,8 @@
 package org.molgenis.data.annotation.entity.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
@@ -10,6 +12,7 @@ import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
+import org.molgenis.data.annotation.filter.GoNLMultiAllelicResultFilter;
 import org.molgenis.data.annotation.filter.MultiAllelicResultFilter;
 import org.molgenis.data.annotation.query.LocusQueryCreator;
 import org.molgenis.data.annotation.resources.MultiResourceConfig;
@@ -30,8 +33,11 @@ import org.springframework.context.annotation.Configuration;
 public class GoNLAnnotator
 {
 	public static final String GONL_GENOME_AF = "GoNL_AF";
+	public static final String GONL_GENOME_GTC = "GoNL_GTC";
 	public static final String GONL_AF_LABEL = "Genome of the netherlands allele frequency";
+	public static final String GONL_GTC_LABEL = "Genome of the netherlands Genotype counts frequency";
 	public static final String GONL_AF_RESOURCE_ATTRIBUTE_NAME = VcfRepository.getInfoPrefix() + "AF";
+	public static final String GONL_GTC_RESOURCE_ATTRIBUTE_NAME = VcfRepository.getInfoPrefix() + "GTC";
 	public static final String GONL_MULTI_FILE_RESOURCE = "gonlresources";
 
 	// Runtime properties keys
@@ -56,9 +62,17 @@ public class GoNLAnnotator
 	@Bean
 	public RepositoryAnnotator gonl()
 	{
-		DefaultAttributeMetaData outputAttribute = new DefaultAttributeMetaData(GONL_GENOME_AF, FieldTypeEnum.STRING)
+		List<AttributeMetaData> attributes = new ArrayList<>();
+		DefaultAttributeMetaData goNlAfAttribute = new DefaultAttributeMetaData(GONL_GENOME_AF, FieldTypeEnum.STRING)
 				.setDescription("The allele frequency for variants seen in the population used for the GoNL project")
 				.setLabel(GONL_AF_LABEL);
+
+		DefaultAttributeMetaData goNlGtcAttribute = new DefaultAttributeMetaData(GONL_GENOME_GTC, FieldTypeEnum.STRING)
+				.setDescription("The allele frequency for variants seen in the population used for the GoNL project")
+				.setLabel(GONL_GTC_LABEL);
+
+		attributes.add(goNlGtcAttribute);
+		attributes.add(goNlAfAttribute);
 
 		AnnotatorInfo thousandGenomeInfo = AnnotatorInfo
 				.create(Status.READY,
@@ -71,27 +85,40 @@ public class GoNLAnnotator
 								+ "because it offers unique opportunities for science and for the development of new treatments and diagnostic techniques. "
 								+ "A close-up look at the DNA of 750 Dutch people-250 trio’s of two parents and an adult child-plus a "
 								+ "global genetic profile of large numbers of Dutch will disclose a wealth of new information, new insights, "
-								+ "and possible applications.", Collections.singletonList(outputAttribute));
+								+ "and possible applications.", attributes);
 
 		LocusQueryCreator locusQueryCreator = new LocusQueryCreator();
 
 		// TODO: properly test multiAllelicFresultFilter
-		MultiAllelicResultFilter multiAllelicResultFilter = new MultiAllelicResultFilter(
+		GoNLMultiAllelicResultFilter goNLMultiAllelicResultFilter = new GoNLMultiAllelicResultFilter(
 				Collections.singletonList(new DefaultAttributeMetaData(GONL_AF_RESOURCE_ATTRIBUTE_NAME,
 						FieldTypeEnum.DECIMAL)));
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(GONL_MULTI_FILE_RESOURCE, thousandGenomeInfo,
-				locusQueryCreator, multiAllelicResultFilter, dataService, resources)
+				locusQueryCreator, goNLMultiAllelicResultFilter, dataService, resources)
 		{
-			
+
 			@Override
 			protected Object getResourceAttributeValue(AttributeMetaData attr, Entity entity)
 			{
-				String attrName = GONL_GENOME_AF.equals(attr.getName()) ? GONL_AF_RESOURCE_ATTRIBUTE_NAME : attr.getName();
+				String attrName = null;
+
+				if (GONL_GENOME_AF.equals(attr.getName()))
+				{
+					attrName = GONL_AF_RESOURCE_ATTRIBUTE_NAME;
+				}
+				else if (GONL_GENOME_GTC.equals(attr.getName()))
+				{
+					attrName = GONL_GTC_RESOURCE_ATTRIBUTE_NAME;
+				}
+				else
+				{
+					attrName = attr.getName();
+				}
+
 				return entity.get(attrName);
 			}
 		};
 
-	
 		return new RepositoryAnnotatorImpl(entityAnnotator);
 	}
 
@@ -99,7 +126,7 @@ public class GoNLAnnotator
 	Resource gonlresources()
 	{
 		MultiResourceConfig goNLConfig = new MultiResourceConfigImpl(GONL_CHROMOSOME_PROPERTY,
-				GONL_FILE_PATTERN_PROPERTY, GONL_ROOT_DIRECTORY_PROPERTY, GONL_OVERRIDE_CHROMOSOME_FILES_PROPERTY,
+		GONL_FILE_PATTERN_PROPERTY, GONL_ROOT_DIRECTORY_PROPERTY, GONL_OVERRIDE_CHROMOSOME_FILES_PROPERTY,
 				molgenisSettings);
 		
 		return new MultiFileResource(GONL_MULTI_FILE_RESOURCE, goNLConfig, new TabixVcfRepositoryFactory(

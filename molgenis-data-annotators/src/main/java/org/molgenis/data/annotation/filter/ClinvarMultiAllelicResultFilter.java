@@ -133,7 +133,7 @@ public class ClinvarMultiAllelicResultFilter implements ResultFilter
 			}
 
 		}
-
+		
 		return FluentIterable.from(processedResults).first();
 	}
 }
