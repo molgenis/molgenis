@@ -127,7 +127,7 @@ public class InformationContentService
 		return wordWeightedSimilarity;
 	}
 
-	private Map<String, Double> createWordIDF(String queryString, String ontologyIri)
+	Map<String, Double> createWordIDF(String queryString, String ontologyIri)
 	{
 		Map<String, Double> wordFreqMap = new HashMap<String, Double>();
 		Set<String> wordsInQueryString = createStemmedWordSet(queryString);
