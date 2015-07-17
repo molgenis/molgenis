@@ -13,7 +13,6 @@ import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.annotation.entity.QueryCreator;
 import org.molgenis.data.annotation.entity.ResultFilter;
-import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -50,9 +49,8 @@ public class AnnotatorImpl implements EntityAnnotator
 	public List<Entity> annotateEntity(Entity entity)
 	{
 		Query q = queryCreator.createQuery(entity);
-
 		Iterable<Entity> annotatationSourceEntities;
-		
+
 		if (resources.hasRepository(sourceRepositoryName))
 		{
 			annotatationSourceEntities = resources.findAll(sourceRepositoryName, q);
