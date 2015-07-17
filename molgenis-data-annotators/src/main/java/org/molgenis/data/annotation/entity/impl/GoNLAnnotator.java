@@ -13,6 +13,7 @@ import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.annotation.filter.GoNLMultiAllelicResultFilter;
+import org.molgenis.data.annotation.filter.MultiAllelicResultFilter;
 import org.molgenis.data.annotation.query.LocusQueryCreator;
 import org.molgenis.data.annotation.resources.MultiResourceConfig;
 import org.molgenis.data.annotation.resources.Resource;
@@ -36,9 +37,7 @@ public class GoNLAnnotator
 	public static final String GONL_AF_LABEL = "Genome of the netherlands allele frequency";
 	public static final String GONL_GTC_LABEL = "Genome of the netherlands Genotype counts frequency";
 	public static final String GONL_AF_RESOURCE_ATTRIBUTE_NAME = VcfRepository.getInfoPrefix() + "AF";
-
 	public static final String GONL_GTC_RESOURCE_ATTRIBUTE_NAME = VcfRepository.getInfoPrefix() + "GTC";
-
 	public static final String GONL_MULTI_FILE_RESOURCE = "gonlresources";
 
 	// Runtime properties keys
@@ -127,14 +126,9 @@ public class GoNLAnnotator
 	Resource gonlresources()
 	{
 		MultiResourceConfig goNLConfig = new MultiResourceConfigImpl(GONL_CHROMOSOME_PROPERTY,
-
-
-
-
 		GONL_FILE_PATTERN_PROPERTY, GONL_ROOT_DIRECTORY_PROPERTY, GONL_OVERRIDE_CHROMOSOME_FILES_PROPERTY,
 				molgenisSettings);
 		
-
 		return new MultiFileResource(GONL_MULTI_FILE_RESOURCE, goNLConfig, new TabixVcfRepositoryFactory(
 				GONL_MULTI_FILE_RESOURCE));
 	}
