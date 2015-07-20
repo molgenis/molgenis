@@ -59,7 +59,7 @@ public class GoNLAnnotatorTest extends AbstractTestNGSpringContextTests
 		// input2.add(entity2);
 	}
 
-	@Test
+
 	public void testAnnotate()
 	{
 		DefaultEntityMetaData emdIn = new DefaultEntityMetaData("gonl");
