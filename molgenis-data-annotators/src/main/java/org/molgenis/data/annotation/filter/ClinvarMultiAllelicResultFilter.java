@@ -19,13 +19,6 @@ import java.util.Map;
 public class ClinvarMultiAllelicResultFilter implements ResultFilter
 {
 
-	private List<AttributeMetaData> attributes;
-
-	public ClinvarMultiAllelicResultFilter(List<AttributeMetaData> attributes)
-	{
-		this.attributes = attributes;
-	}
-
 	@Override
 	public Collection<AttributeMetaData> getRequiredAttributes()
 	{
