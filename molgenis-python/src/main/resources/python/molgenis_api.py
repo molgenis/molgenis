@@ -46,7 +46,6 @@ class Connect_Molgenis():
         self.entity_meta_data = {}
         self.column_meta_data = {}
         self.give_warnings = give_warnings
-        self.server_response_json = None
         self.last_added_id = None
         
     def get_last_added_id(self):
@@ -83,8 +82,7 @@ class Connect_Molgenis():
         server_response = requests.post( self.api_url+'/login/',
                                        data=data, headers={'Content-type':'application/json'} )
         self.check_server_response(server_response, 'retrieve token',data_used=data)
-        self.server_response_json = server_response.json()['token']
-        headers = {'Content-type':'application/json', 'x-molgenis-token': self.server_response_json, 'Accept':'application/json'}
+        headers = {'Content-type':'application/json', 'x-molgenis-token': server_response.json()['token'], 'Accept':'application/json'}
         return headers
     
     def logout(self):
@@ -106,9 +104,9 @@ class Connect_Molgenis():
         '''
         def error(server_response):
             try:
-                self.server_response_json = server_response.json()
+                server_response_json = server_response.json()
                 error_message = str(server_response)+' -> '+server_response.reason+'\n'
-                if self.server_response_json.has_key('errors'):
+                if server_response_json.has_key('errors'):
                     if data_used:
                         error_message += 'Used data: '+str(data_used)+'\n'
                     if entity_used:
@@ -117,11 +115,12 @@ class Connect_Molgenis():
                         error_message += 'Used Query: '+str(query_used)+'\n'
                     if column_used:
                         error_message += 'Used column: '+str(column_used)+'\n'
-                    for error in self.server_response_json['errors']:
+                    for error in server_response_json['errors']:
                         error_message += error['message']+'\n'
-                        if 'Not Found' in error_message:
-                            if entity_used: 
-                                error_message += 'Available columns for entity \''+entity_used+'\': '+', '.join(self.get_column_names(entity_used))
+                        # below commented problems gives recursion depth exceeded error, have to fix that before uncommenting
+                        #if 'Not Found' in error_message:
+                            #if entity_used: 
+                                #error_message += 'Available columns for entity \''+entity_used+'\': '+', '.join(self.get_column_names(entity_used))
                         # bug in error response when wrong enum value. Remove wrong part of message and add sensible one
                         if 'Invalid enum value' in error_message:
                             column_name = re.search('for attribute \'(.+?)\'', error_message).group(1)
@@ -187,6 +186,8 @@ class Connect_Molgenis():
         # post to the entity with the json data
         if validate_json:
             self.validate_data(entity_name, data)
+        # make all values str
+        data = dict([a, str(x)] for a, x in data.iteritems())
         server_response = requests.post(self.api_url+'/'+entity_name+'/', data=str(data), headers=self.headers)
         self.check_server_response(server_response, 'Add row to entity', entity_used=entity_name, data_used=str(data))
         self.last_added_id = server_response.headers['location']
@@ -210,14 +211,13 @@ class Connect_Molgenis():
         json_query = json.dumps({'q':query})
         server_response = requests.post(self.api_url+'/'+entity_name+'?_method=GET', data = json_query, headers=self.headers)
         server_response_json = server_response.json()
-        self.server_response_json = server_response_json
         self.check_server_response(server_response, 'Get rows from entity',entity_used=entity_name, query_used=json_query)
         if self.verbose:
-            if self.server_response_json['total'] >= self.server_response_json['num']:
+            if server_response_json['total'] >= server_response_json['num']:
                 if self.give_warnings:
-                    warnings.warn(str(self.server_response_json['total'])+' number of rows selected. Max number of rows to retrieve data for is set to '+str(self.server_response_json['num'])+'.\n'
-                                 +str(self.server_response_json['num']-self.server_response_json['total'])+' rows will not be in the results.')
-            print 'Selected '+str(self.server_response_json['total'])+' row(s).'
+                    warnings.warn(str(server_response_json['total'])+' number of rows selected. Max number of rows to retrieve data for is set to '+str(server_response_json['num'])+'.\n'
+                                 +str(server_response_json['num']-server_response_json['total'])+' rows will not be in the results.')
+            print 'Selected '+str(server_response_json['total'])+' row(s).'
         return server_response_json
   
     def get_entity(self, entity_name):
@@ -235,14 +235,13 @@ class Connect_Molgenis():
         '''
         server_response = requests.get(self.api_url+'/'+entity_name, headers=self.headers)
         server_response_json = server_response.json()
-        self.server_response_son = server_response_json
         self.check_server_response(server_response, 'Get rows from entity',entity_used=entity_name)
         if self.verbose:
-            if self.server_response_json['total'] >= self.server_response_json['num']:
+            if server_response_json['total'] >= server_response_json['num']:
                 if self.give_warnings:
-                    warnings.warn(str(self.server_response_json['total'])+' number of rows selected. Max number of rows to retrieve data for is set to '+str(self.server_response_json['num'])+'.\n'
-                                 +str(int(self.server_response_json['num'])-int(self.server_response_json['total']))+' rows will not be in the results.')
-            print 'Selected '+str(self.server_response_json['total'])+' row(s).'
+                    warnings.warn(str(server_response_json['total'])+' number of rows selected. Max number of rows to retrieve data for is set to '+str(server_response_json['num'])+'.\n'
+                                 +str(int(server_response_json['num'])-int(server_response_json['total']))+' rows will not be in the results.')
+            print 'Selected '+str(server_response_json['total'])+' row(s).'
         return server_response_json
 
   
@@ -270,7 +269,7 @@ class Connect_Molgenis():
             server_response_list.append(server_response)
             self.check_server_response(server_response, 'Update entity row', query_used=query,data_used=data,entity_used=entity_name)
         return server_response_list
-    
+
     def get_entity_meta_data(self, entity_name):
         '''Get metadata from entity
         
@@ -281,11 +280,10 @@ class Connect_Molgenis():
             result (dict): json dictionary of retrieve data
         '''
         if entity_name in self.entity_meta_data:
-            return self.entity_meta_data[entity_name] 
+            return self.entity_meta_data[entity_name]
         server_response = requests.get(self.api_url+'/'+entity_name+'/meta', headers=self.headers)
         self.check_server_response(server_response, 'Get meta data of entity',entity_used=entity_name)
-        self.server_response_json = server_response.json()
-        entity_meta_data = self.server_response_json
+        entity_meta_data = server_response.json()
         self.entity_meta_data[entity_name] = entity_meta_data
         return entity_meta_data
 
@@ -319,8 +317,7 @@ class Connect_Molgenis():
             return self.column_meta_data[entity_name+column_name]
         server_response = requests.get(self.api_url+'/'+entity_name+'/meta/'+column_name, headers=self.headers)
         self.check_server_response(server_response, 'Get meta data of column',entity_used=entity_name,column_used=column_name)
-        self.server_response_json = server_response.json()
-        column_meta_data = self.server_response_json
+        column_meta_data = server_response.json()
         self.column_meta_data[entity_name+column_name] = column_meta_data
         return column_meta_data
     
@@ -366,4 +363,4 @@ class Connect_Molgenis():
             self.check_server_response(server_response, 'Delete entity row',entity_used=entity_name,query_used=query_used)
             server_response_list.append(server_response)
         return server_response_list
-
+    
