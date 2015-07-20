@@ -11,6 +11,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.annotator.tabix.TabixReader.Iterator;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.vcf.VcfReader;
 import org.molgenis.vcf.VcfRecord;
@@ -85,7 +86,7 @@ public class TabixVcfRepository extends VcfRepository
 	{
 		String queryString = String.format("%s:%s-%2$s", chrom, pos);
 		Builder<Entity> builder = ImmutableList.<Entity> builder();
-		org.molgenis.data.annotator.tabix.TabixReader.Iterator iterator = tabixReader.query(queryString);
+		Iterator iterator = tabixReader.query(queryString);
 		
 		//Tabix reader sometimes returns null. Does this mean that query doesn't return anything?
 		// See also http://sourceforge.net/p/samtools/mailman/message/26113299/
