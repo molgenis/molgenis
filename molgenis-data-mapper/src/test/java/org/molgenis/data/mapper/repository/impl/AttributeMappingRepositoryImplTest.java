@@ -3,6 +3,7 @@ package org.molgenis.data.mapper.repository.impl;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.molgenis.data.mapper.meta.AttributeMappingMetaData.ALGORITHM;
+import static org.molgenis.data.mapper.meta.AttributeMappingMetaData.ALGORITHMSTATE;
 import static org.molgenis.data.mapper.meta.AttributeMappingMetaData.IDENTIFIER;
 import static org.molgenis.data.mapper.meta.AttributeMappingMetaData.SOURCEATTRIBUTEMETADATAS;
 import static org.molgenis.data.mapper.meta.AttributeMappingMetaData.TARGETATTRIBUTEMETADATA;
@@ -23,6 +24,7 @@ import org.molgenis.data.IdGenerator;
 import org.molgenis.data.mapper.config.MappingConfig;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.meta.AttributeMappingMetaData;
+import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -93,6 +95,7 @@ public class AttributeMappingRepositoryImplTest extends AbstractTestNGSpringCont
 		attributeMappingEntity.set(TARGETATTRIBUTEMETADATA, targetAttributeMetaData.getName());
 		attributeMappingEntity.set(SOURCEATTRIBUTEMETADATAS, sourceAttributeMetaDatas);
 		attributeMappingEntity.set(ALGORITHM, "algorithm");
+		attributeMappingEntity.set(ALGORITHMSTATE, null);
 
 		result.add(attributeMappingEntity);
 
@@ -119,6 +122,7 @@ public class AttributeMappingRepositoryImplTest extends AbstractTestNGSpringCont
 		attributeMappingEntity.set(TARGETATTRIBUTEMETADATA, targetAttributeMetaData.getName());
 		attributeMappingEntity.set(SOURCEATTRIBUTEMETADATAS, sourceAttributeMetaDatas);
 		attributeMappingEntity.set(ALGORITHM, "algorithm");
+		attributeMappingEntity.set(ALGORITHMSTATE, null);
 
 		result.add(attributeMappingEntity);
 
@@ -143,7 +147,9 @@ public class AttributeMappingRepositoryImplTest extends AbstractTestNGSpringCont
 		sourceAttributeMetaDatas.add(attr1);
 		sourceAttributeMetaDatas.add(attr2);
 
-		assertEquals(attributeMappingRepository.retrieveAttributeMetaDatasFromAlgorithm(algorithm, sourceEntityMetaData), sourceAttributeMetaDatas);
+		assertEquals(
+				attributeMappingRepository.retrieveAttributeMetaDatasFromAlgorithm(algorithm, sourceEntityMetaData),
+				sourceAttributeMetaDatas);
 	}
 
 	@Configuration
@@ -182,7 +188,14 @@ public class AttributeMappingRepositoryImplTest extends AbstractTestNGSpringCont
 		@Bean
 		IdGenerator idGenerator()
 		{
-			return mock(IdGenerator.class);
+			IdGenerator idGenerator = mock(IdGenerator.class);
+			return idGenerator;
+		}
+
+		@Bean
+		public OntologyTagService ontologyTagService()
+		{
+			return mock(OntologyTagService.class);
 		}
 	}
 }

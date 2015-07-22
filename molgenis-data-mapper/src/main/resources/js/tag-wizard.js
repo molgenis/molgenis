@@ -20,7 +20,6 @@
 
 	function createNewButtonHtml(attributeName, tag) {
 		var btnHtml = '';
-		console.log(tag);
 		btnHtml += '<button '
 		btnHtml += 'type="btn" ';
 		btnHtml += 'class="btn btn-primary btn-xs remove-tag-btn" ';
@@ -106,11 +105,9 @@
 							'message' : 'Automatic tagging has been succesfully completed'
 						} ], 'success');
 						$.each(data, function(attributeName, tags) {
-							$.each(tags, function(index) {
-								if(tags[index] !== null){
-									$('#' + attributeName + '-tag-column').append(createNewButtonHtml(attributeName, tags[index]));
-								}
-							});
+							if(tags.ontologyTerm){
+								$('#' + attributeName + '-tag-column').append(createNewButtonHtml(attributeName, tags.ontologyTerm));
+							}
 						});
 					}
 				});
@@ -172,7 +169,7 @@
 				success : function(ontologyTag) {
 					$('#tag-dropdown').select2('val', '');
 					if(ontologyTag !== undefined){
-						$('#' + attributeName + '-tag-column').append(createNewButtonHtml(attributeName, ontologyTag));
+						$('#' + attributeName + '-tag-column').append(createNewButtonHtml(attributeName, ontologyTag.ontologyTerm));
 					}
 				}
 			});

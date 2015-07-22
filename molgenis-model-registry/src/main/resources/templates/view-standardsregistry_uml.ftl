@@ -116,7 +116,6 @@
 	      	 	size: { width: RECT_WIDTH, height: ${(50 + 12 * emd.attributes?size)?c} },
 	        	name: '${emd.label?js_string}',
 	        	attrs: {
-	        		'.uml-class-name-rect': { fill: 'white', stroke: 'black'},
 	        		'.uml-class-attrs-rect': { fill: 'white', stroke: 'black'},
 	        		'.uml-class-methods-rect': { fill: 'white', stroke: 'black'},
 	        	},
@@ -127,7 +126,6 @@
 	      	 	size: { width: RECT_WIDTH, height: ${(50 + 12 * emd.attributes?size)?c} },
 	        	name: '${emd.label?js_string}',
 	        	attrs: {
-	        		'.uml-class-name-rect': { fill: 'white', stroke: 'black'},
 	        		'.uml-class-attrs-rect': { fill: 'white', stroke: 'black'},
 	        		'.uml-class-methods-rect': { fill: 'white', stroke: 'black'},
 	        	},

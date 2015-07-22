@@ -24,6 +24,7 @@ import org.molgenis.data.semanticsearch.service.impl.UntypedTagService;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
+import org.molgenis.ontology.ic.TermFrequencyService;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +60,12 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 			EmbeddedElasticSearchServiceFactory result = Mockito.mock(EmbeddedElasticSearchServiceFactory.class);
 			Mockito.when(result.getClient()).thenReturn(client());
 			return result;
+		}
+
+		@Bean
+		public TermFrequencyService termFrequencyService()
+		{
+			return Mockito.mock(TermFrequencyService.class);
 		}
 	}
 

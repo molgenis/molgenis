@@ -29,76 +29,82 @@
 		<input type="hidden" name="targetAttributeType" value="${attributeMapping.targetAttributeMetaData.dataType?html}"/>
 	</div>
 </div>
-
-</br>
-
+<div class="row">
+	<div class="col-md-12 col-lg-12">
+		<a href="/menu/main/mappingservice/mappingproject/${mappingProject.identifier?html}" type="btn" class="btn btn-default btn-xs">
+			<span class="glyphicon glyphicon-chevron-left"></span>
+			Cancel and go back
+		</a>
+		<button id="save-mapping-btn" type="btn" class="btn btn-primary btn-xs">
+			<span class="glyphicon glyphicon-floppy-save"></span>
+			Save and go back
+		</button>
+	<hr></hr>
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-12 col-lg-12">
+		<center><h4>Mapping to <i>${entityMapping.targetEntityMetaData.name}.${attributeMapping.targetAttributeMetaData.name}</i> from <i>${entityMapping.sourceEntityMetaData.name}</i></h4></center>
+	</div>
+</div>
 <div class="row">	
-	<div class="col-md-4 col-lg-2">
-		<p>
-			<strong>Name</strong>
-			</br>
-			<span>
-				${attributeMapping.targetAttributeMetaData.name?html} (${attributeMapping.targetAttributeMetaData.dataType})
-			</span>
-			
-			</br>
-			
-			<strong>Label</strong>
-			</br> 
-			<span>
-				<#if attributeMapping.targetAttributeMetaData.label??>
-					${attributeMapping.targetAttributeMetaData.label?html}
-				<#else>
-					N/A
-				</#if>
-			</span>
-			
-			</br>
-			
-			<strong>Description</strong>
-			</br>
-			<span>
-				<#if attributeMapping.targetAttributeMetaData.description??>
-					${attributeMapping.targetAttributeMetaData.description?html}
-				<#else>
-					N/A
-				</#if>
-			</span>
-			</br>
-		</p>
-	</div>	
-	<div class="col-md-4 col-lg-2">	
-		<#if attributeMapping.targetAttributeMetaData.dataType == 'categorical' || attributeMapping.targetAttributeMetaData.dataType == 'xref'>
-			<strong>Categories</strong>
-			</br>
-			<span>
-				<#if attributeMapping.targetAttributeMetaData.dataType == "xref" || attributeMapping.targetAttributeMetaData.dataType == "categorical" && (categories)?has_content>
-					<#assign refEntityMetaData = attributeMapping.targetAttributeMetaData.refEntity>
-					<#list categories.iterator() as category>
-						<#list refEntityMetaData.attributes as attribute>
-							<#assign attributeName = attribute.name>
-								${category[attributeName]} <#if refEntityMetaData.attributes?seq_index_of(attribute) != refEntityMetaData.attributes?size - 1>=</#if>
+	<div class="col-md-5 col-lg-5">
+		<table class="table-borderless">
+			<tr>
+				<td class="td-align-top"><strong>Name</strong></td>
+				<td class="td-align-top">${attributeMapping.targetAttributeMetaData.name?html} (${attributeMapping.targetAttributeMetaData.dataType})</td>
+			</tr>
+			<tr>
+				<td class="td-align-top"><strong>Label</strong></td>
+				<td class="td-align-top"><#if attributeMapping.targetAttributeMetaData.label??>
+						${attributeMapping.targetAttributeMetaData.label?html}
+					<#else>
+						N/A
+					</#if>
+				</td>
+			</tr>
+			<tr>
+				<td class="td-align-top"><strong>Description</strong></td>
+				<td class="td-align-top">
+					<#if attributeMapping.targetAttributeMetaData.description??>
+						${attributeMapping.targetAttributeMetaData.description?html}
+					<#else>
+						N/A
+					</#if>
+				</td>
+			</tr>
+			<tr>
+				<td class="td-align-top"><strong>OntologyTerms</strong></td>
+				<td class="td-align-top">
+					<#if tags ?? && tags?size == 0>
+						N/A
+					<#else>
+						<#list tags as tag>
+							<#assign synonyms = tag.synonyms?join("</br>")>
+							<span class="label label-info ontologytag-tooltip" data-toggle="popover" title="<strong>Synonyms</strong>" data-content="${synonyms}">${tag.label}</span>
 						</#list>
-						</br>
-					</#list>
-				<#else>
-					N/A
-				</#if>
-			</span>
-		</#if>
-	</div>
-	<div class="col-md-4 col-lg-2">	
-		<strong>OntologyTerms</strong>
-		</br>
-		<#if tags ?? && tags?size == 0>
-			N/A
-		<#else>
-			<#list tags as tag>
-				<#assign synonyms = tag.synonyms?join("</br>")>
-				<span class="label label-info ontologytag-tooltip" data-toggle="popover" title="<strong>Synonyms</strong>" data-content="${synonyms}">${tag.label}</span>
-			</#list>
-		</#if>
-	</div>
+					</#if>
+				</td>
+			</tr>
+			<tr>
+				<td class="td-align-top"><strong>Categories</strong></td>
+				<td class="td-align-top">
+					<#if attributeMapping.targetAttributeMetaData.dataType == "xref" || attributeMapping.targetAttributeMetaData.dataType == "categorical" && (categories)?has_content>
+						<#assign refEntityMetaData = attributeMapping.targetAttributeMetaData.refEntity>
+						<#list categories.iterator() as category>
+							<#list refEntityMetaData.attributes as attribute>
+								<#assign attributeName = attribute.name>
+									${category[attributeName]} <#if refEntityMetaData.attributes?seq_index_of(attribute) != refEntityMetaData.attributes?size - 1>=</#if>
+							</#list>
+							</br>
+						</#list>
+					<#else>
+						N/A
+					</#if>
+				</td>
+			</tr>
+		</table>
+	</div>	
 </div>
 
 <div class="row"> <#-- Start: Master row -->
@@ -203,14 +209,6 @@
 			    	<br/>
 				</div>
 			</div>
-			<div class="col-md-12 col-lg-12">
-				<hr></hr>
-				<div class="row">
-					<a href="/menu/main/mappingservice/mappingproject/${mappingProject.identifier?html}" type="btn" class="btn btn-default pull-right">Cancel</a>
-					<button id="save-mapping-btn" type="btn" class="btn btn-primary pull-right">Save</button>
-				</div>
-			</div>
-			
 		</div> <#-- End: Mapping container -->
 	</div>  <#-- End: Mapping column -->
 
@@ -228,7 +226,7 @@
 						
 					</p>
 					<h4>Validation</h4>
-					<p>Algorithm validation starts automatically when the algorithm is updated.</p> 
+					<p>Algorithm validation starts automatically when the algorithm is updated. In case of errors, click the error label for more details</p> 
                     <div id="mapping-validation-container"></div>
 					<h4>Preview</h4>
 					<div id="result-table-container"></div>
