@@ -26,7 +26,7 @@ public class AttributeMappingMetaData extends DefaultEntityMetaData
 		addAttribute(IDENTIFIER).setIdAttribute(true).setNillable(false);
 		addAttribute(TARGETATTRIBUTEMETADATA).setNillable(false);
 		addAttribute(SOURCEATTRIBUTEMETADATAS);
-		addAttribute(ALGORITHM).setDataType(MolgenisFieldTypes.TEXT);
+		addAttribute(ALGORITHM);
 		EnumField enumField = new EnumField();
 		enumField.setEnumOptions(Arrays.asList(AlgorithmState.values()).stream().map(STATE -> STATE.toString())
 				.collect(Collectors.toList()));
