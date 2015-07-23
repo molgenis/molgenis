@@ -65,7 +65,6 @@ public class ClinvarMultiAllelicResultFilter implements ResultFilter
 							// if more than one clinsigs are available pair the right one with each allele
 							clnallValueMap.put(refAllele, clnSigs[i]);
 							clnsigValueMap.put(refAllele, "0");
-							
 
 						}
 
@@ -83,18 +82,11 @@ public class ClinvarMultiAllelicResultFilter implements ResultFilter
 							if (alts[significantAlleleIndex].equals(annotatedEntityAltAlleles[j]))
 							{
 								// if more than one clinsigs are available pair the right one with each allele
-								String newSignificantAlleleIndex = Integer.toString(j+1);
-								if (clnSigs[i].length() > 1)
-								{
-									clnallValueMap.put(alts[significantAlleleIndex], newSignificantAlleleIndex);
-									clnsigValueMap.put(alts[significantAlleleIndex], clnSigs[i]);
-									
-								}
-								else
-								{
-									clnallValueMap.put(alts[significantAlleleIndex], newSignificantAlleleIndex);
-									clnsigValueMap.put(alts[significantAlleleIndex], clnSigs[i]);
-								}
+								String newSignificantAlleleIndex = Integer.toString(j + 1);
+
+								clnallValueMap.put(alts[significantAlleleIndex], newSignificantAlleleIndex);
+								clnsigValueMap.put(alts[significantAlleleIndex], clnSigs[i]);
+
 							}
 						}
 					}
