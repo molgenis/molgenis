@@ -39,7 +39,7 @@ public class ClinvarMultiAllelicResultFilter implements ResultFilter
 				String[] alts = entity.getString(VcfRepository.ALT).split(",");
 				String[] clnSigs = entity.getString("INFO_CLNSIG").split(",");
 				String[] clnAll = entity.getString("INFO_CLNALLE").split(",");
-				
+
 				StringBuilder newClnlallAttributeValue = new StringBuilder();
 				StringBuilder newClnlsigAttributeValue = new StringBuilder();
 				String[] annotatedEntityAltAlleles = annotatedEntity.getString(VcfRepository.ALT).split(",");
@@ -48,61 +48,51 @@ public class ClinvarMultiAllelicResultFilter implements ResultFilter
 				for (int i = 0; i < clnSigs.length; i++)
 				{
 					int significantAlleleIndex = Integer.parseInt(clnAll[i]);
-					
+
 					// this means the no allele is associated with the gene of interest
 					if (significantAlleleIndex == -1) continue;
-					
+
 					// this means the allele is based on the reference
 					else if (significantAlleleIndex == 0)
 					{
-					
+
 						String resultRefAllele = entity.getString(VcfRepository.REF);
 						String refAllele = annotatedEntity.getString(VcfRepository.REF);
-						for(int j = 0; j > annotatedEntityAltAlleles.length; j++ )
+
+						// if annotated entity allele equals the clinvar significant allele we want it!
+						if (refAllele.equals(resultRefAllele))
 						{
-							// if annotated entity allele equals the clinvar significant allele we want it!
-							if (refAllele.equals(resultRefAllele))
-							{
-								// if more than one clinsigs are available pair the right one with each allele
-								if (clnSigs[i].length() > 1)
-								{
-									String[] clnSigsList = clnSigs[i].split("|");
+							// if more than one clinsigs are available pair the right one with each allele
+							clnallValueMap.put(refAllele, clnSigs[i]);
+							clnsigValueMap.put(refAllele, "0");
+							
 
-									String newSignificantAlleleIndex = Integer.toString(j+1);
-
-									clnallValueMap.put(refAllele, clnSigsList[significantAlleleIndex]);
-									clnsigValueMap.put(refAllele, newSignificantAlleleIndex);
-
-								}
-								clnallValueMap.put(refAllele, clnAll[i]);
-								clnsigValueMap.put(refAllele, clnSigs[i]);
-							}
 						}
+
 					}
 					// 1 based so we need subtract 1 from the clnAll value
 					else
 					{
-						
+
 						significantAlleleIndex = significantAlleleIndex - 1;
 
-						for(int j = 0; j < annotatedEntityAltAlleles.length; j++ )
+						for (int j = 0; j < annotatedEntityAltAlleles.length; j++)
 						{
-							
+
 							// if annotated entity allele equals the clinvar significant allele we want it!
 							if (alts[significantAlleleIndex].equals(annotatedEntityAltAlleles[j]))
 							{
 								// if more than one clinsigs are available pair the right one with each allele
+								String newSignificantAlleleIndex = Integer.toString(j+1);
 								if (clnSigs[i].length() > 1)
 								{
-									String[] clnSigsList = clnSigs[i].split("|");
-
-									String newSignificantAlleleIndex = Integer.toString(j+1);
-									clnallValueMap.put(alts[significantAlleleIndex], clnSigsList[significantAlleleIndex]);
-									clnsigValueMap.put(alts[significantAlleleIndex], newSignificantAlleleIndex);
+									clnallValueMap.put(alts[significantAlleleIndex], newSignificantAlleleIndex);
+									clnsigValueMap.put(alts[significantAlleleIndex], clnSigs[i]);
+									
 								}
 								else
 								{
-									clnallValueMap.put(alts[significantAlleleIndex], clnAll[i]);
+									clnallValueMap.put(alts[significantAlleleIndex], newSignificantAlleleIndex);
 									clnsigValueMap.put(alts[significantAlleleIndex], clnSigs[i]);
 								}
 							}
