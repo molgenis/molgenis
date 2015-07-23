@@ -187,7 +187,6 @@ public class CmdLineAnnotator
 			RepositoryAnnotator annotator = annotators.get("gonl");
 			annotate(annotator, inputVcfFile, outputVCFFile);
 		}
-
 		else if (annotatorName.equals("cgd"))
 		{
 			molgenisSettings.setProperty(CGDAnnotator.CGD_FILE_LOCATION_PROPERTY,
@@ -221,6 +220,7 @@ public class CmdLineAnnotator
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext("org.molgenis.data.annotation");
 		CmdLineAnnotator main = ctx.getBean(CmdLineAnnotator.class);
 		main.run(args);
+		ctx.close();
 	}
 
 	public void annotate(RepositoryAnnotator annotator, File inputVcfFile, File outputVCFFile) throws Exception
