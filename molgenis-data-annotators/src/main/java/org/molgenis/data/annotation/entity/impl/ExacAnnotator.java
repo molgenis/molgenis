@@ -5,10 +5,13 @@ import java.util.Collections;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
+import org.molgenis.data.annotation.filter.MultiAllelicResultFilter;
+import org.molgenis.data.annotation.query.LocusQueryCreator;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.ResourceImpl;
@@ -47,7 +50,7 @@ public class ExacAnnotator
 				.setDescription("TODO").setLabel(EXAC_AF_LABEL);
 
 		AnnotatorInfo exacInfo = AnnotatorInfo
-				.create(Status.BETA,
+				.create(Status.READY,
 						AnnotatorInfo.Type.POPULATION_REFERENCE,
 						"exac",
 						" The Exome Aggregation Consortium (ExAC) is a coalition of investigators seeking to aggregate"
@@ -66,13 +69,10 @@ public class ExacAnnotator
 				multiAllelicResultFilter, dataService, resources)
 		{
 			@Override
-			protected String getResourceAttributeName(AttributeMetaData attr)
+			protected Object getResourceAttributeValue(AttributeMetaData attr, Entity sourceEntity)
 			{
-				if (EXAC_AF.equals(attr.getName()))
-				{
-					return EXAC_AF_ResourceAttributeName;
-				}
-				return attr.getName();
+				String attrName = EXAC_AF.equals(attr.getName()) ? EXAC_AF_ResourceAttributeName : attr.getName();
+				return sourceEntity.get(attrName);
 			}
 		};
 

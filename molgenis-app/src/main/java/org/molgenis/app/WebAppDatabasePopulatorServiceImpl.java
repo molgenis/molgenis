@@ -12,12 +12,12 @@ import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.UserAuthority;
 import org.molgenis.data.DataService;
 import org.molgenis.data.IndexedCrudRepositorySecurityDecorator;
+import org.molgenis.data.annotation.entity.impl.CaddAnnotator;
+import org.molgenis.data.annotation.entity.impl.SnpEffAnnotator;
 import org.molgenis.data.annotation.impl.ClinVarServiceAnnotator;
 import org.molgenis.data.annotation.impl.DbnsfpGeneServiceAnnotator;
 import org.molgenis.data.annotation.impl.DbnsfpVariantServiceAnnotator;
-import org.molgenis.data.annotation.entity.impl.CaddAnnotator;
 import org.molgenis.data.annotation.provider.CgdDataProvider;
-import org.molgenis.data.annotation.impl.SnpEffServiceAnnotator;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
 import org.molgenis.data.annotation.provider.HpoMappingProvider;
 import org.molgenis.data.support.GenomeConfig;
@@ -26,8 +26,8 @@ import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.framework.db.WebAppDatabasePopulatorService;
 import org.molgenis.security.MolgenisSecurityWebAppDatabasePopulatorService;
 import org.molgenis.security.account.AccountService;
-import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.core.runas.RunAsSystem;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.system.core.RuntimeProperty;
 import org.molgenis.ui.MolgenisInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -121,7 +121,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 				molgenisHomeDirAnnotationResources + "/dbnsfp/dbNSFP2.3_variant.chr");
 		runtimePropertyMap.put(ClinVarServiceAnnotator.CLINVAR_FILE_LOCATION_PROPERTY,
 				molgenisHomeDirAnnotationResources + "/Clinvar/variant_summary.txt");
-		runtimePropertyMap.put(SnpEffServiceAnnotator.SNPEFF_JAR_LOCATION_PROPERTY, molgenisHomeDirAnnotationResources
+		runtimePropertyMap.put(SnpEffAnnotator.SNPEFF_JAR_LOCATION_PROPERTY, molgenisHomeDirAnnotationResources
 				+ "/Applications/snpEff/snpEff.jar");
 
 		runtimePropertyMap.put(KEY_FOOTER, DEFAULT_VAL_FOOTER);

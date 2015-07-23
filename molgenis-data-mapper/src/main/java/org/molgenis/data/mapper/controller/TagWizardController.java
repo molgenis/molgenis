@@ -7,13 +7,16 @@ import static org.molgenis.data.mapper.controller.TagWizardController.URI;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.mapper.data.request.AddTagRequest;
 import org.molgenis.data.mapper.data.request.AutoTagRequest;
 import org.molgenis.data.mapper.data.request.GetOntologyTermRequest;
@@ -42,6 +45,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
@@ -51,8 +55,8 @@ public class TagWizardController extends MolgenisPluginController
 {
 	private static final Logger LOG = LoggerFactory.getLogger(MappingServiceController.class);
 
-	public static final String ID = "/tagwizard";
-	public static final String URI = MappingServiceController.URI + ID;
+	public static final String ID = "tagwizard";
+	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
 	private static final String VIEW_TAG_WIZARD = "view-tag-wizard";
 
@@ -84,8 +88,24 @@ public class TagWizardController extends MolgenisPluginController
 	 * @return name of the tag wizard view
 	 */
 	@RequestMapping
-	public String viewTagWizard(@RequestParam String target, Model model)
+	public String viewTagWizard(@RequestParam(required = false, value = "selectedTarget") String target, Model model)
 	{
+		List<String> entityNames = Lists.newArrayList(dataService.getEntityNames());
+
+		if (StringUtils.isEmpty(target))
+		{
+			Optional<String> findFirst = entityNames.stream().findFirst();
+			if (findFirst.isPresent())
+			{
+				target = findFirst.get();
+			}
+		}
+
+		if (StringUtils.isEmpty(target))
+		{
+			throw new UnknownEntityException("There are no entities available!");
+		}
+
 		List<Ontology> ontologies = ontologyService.getOntologies();
 		EntityMetaData emd = dataService.getEntityMetaData(target);
 		List<AttributeMetaData> attributes = newArrayList(emd.getAttributes());
@@ -93,6 +113,7 @@ public class TagWizardController extends MolgenisPluginController
 				toMap((x -> x.getName()), (x -> ontologyTagService.getTagsForAttribute(emd, x))));
 
 		model.addAttribute("entity", emd);
+		model.addAttribute("entityNames", entityNames);
 		model.addAttribute("attributes", attributes);
 		model.addAttribute("ontologies", ontologies);
 		model.addAttribute("taggedAttributeMetaDatas", taggedAttributeMetaDatas);

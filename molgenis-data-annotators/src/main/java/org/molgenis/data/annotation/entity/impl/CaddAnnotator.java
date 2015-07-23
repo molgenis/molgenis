@@ -16,6 +16,8 @@ import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
+import org.molgenis.data.annotation.filter.VariantResultFilter;
+import org.molgenis.data.annotation.query.LocusQueryCreator;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.ResourceImpl;
@@ -70,7 +72,7 @@ public class CaddAnnotator
 		attributes.add(cadd_scaled);
 
 		AnnotatorInfo caddInfo = AnnotatorInfo
-				.create(Status.BETA,
+				.create(Status.READY,
 						AnnotatorInfo.Type.PATHOGENICITY_ESTIMATE,
 						"cadd",
 						"CADD is a tool for scoring the deleteriousness of single nucleotide variants as well as insertion/deletions variants in the human genome.\n"

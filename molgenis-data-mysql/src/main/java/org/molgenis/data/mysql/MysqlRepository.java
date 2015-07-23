@@ -1403,9 +1403,9 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 
 		private String getMrefSelectSql(Entity e, AttributeMetaData att)
 		{
-			return String.format("SELECT `%s` FROM `%s_%1$s` WHERE `%s` = '%s' ORDER BY `order`",
-					getTableName(att.getRefEntity()), getTableName(), entityMetaData.getIdAttribute().getName()
-							.toLowerCase(), e.get(entityMetaData.getIdAttribute().getName()));
+			return String.format("SELECT `%s` FROM `%s_%1$s` WHERE `%s` = '%s' ORDER BY `order`", att.getName(),
+					getTableName(), entityMetaData.getIdAttribute().getName().toLowerCase(),
+					e.get(entityMetaData.getIdAttribute().getName()));
 		}
 	}
 

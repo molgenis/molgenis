@@ -21,6 +21,9 @@ public interface RepositoryAnnotator
 	// add entityAnnotator
 	Iterator<Entity> annotate(Iterable<Entity> source);
 
+	// alternative constructor that allows seamless chaining
+	Iterator<Entity> annotate(Iterator<Entity> source);
+
 	/**
 	 * returns an entityMetaData containing the attributes the annotator will add
 	 * 

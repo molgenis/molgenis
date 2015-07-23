@@ -1,10 +1,10 @@
 package org.molgenis.data.annotation.utils;
 
-import org.molgenis.data.annotator.tabix.TabixReader;
-
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.Scanner;
+
+import org.molgenis.data.annotator.tabix.TabixReader;
 
 public class MergeDenovoFromPhaseByTransmissionWithVCF
 {
@@ -16,7 +16,7 @@ public class MergeDenovoFromPhaseByTransmissionWithVCF
 		String mvfHeader = "CHROM	POS	AC	FAMILY	TP	MOTHER_GT	MOTHER_DP	MOTHER_AD	MOTHER_PL	FATHER_GT	FATHER_DP	FATHER_AD	FATHER_PL	CHILD_GT	CHILD_DP	CHILD_AD	CHILD_PL";
 		
 		
-		Scanner mvfReader = new Scanner(mvf);
+		Scanner mvfReader = new Scanner(mvf, "UTF-8");
 		
 		//skip header
 		String mvfLine = mvfReader.nextLine();

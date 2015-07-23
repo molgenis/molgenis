@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation.entity.impl;
+package org.molgenis.data.annotation.filter;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -23,7 +23,7 @@ public class VariantResultFilter implements ResultFilter
 	@Override
 	public com.google.common.base.Optional<Entity> filterResults(Iterable<Entity> results, Entity annotatedEntity)
 	{
-		// TODO: the magic goes here, but for now the simple stuff
+		// TODO: the magic goesgoogle here, but for now the simple stuff
 		return FluentIterable
 				.from(results)
 				.filter(result -> StringUtils.equals(result.getString(VcfRepository.REF),

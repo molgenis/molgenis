@@ -1,40 +1,53 @@
 package org.molgenis.data.annotation.impl;
 
-import org.molgenis.data.*;
-import org.molgenis.data.annotation.AnnotatorTestData;
-import org.molgenis.data.support.QueryImpl;
+import static org.mockito.Mockito.mock;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.annotation.entity.impl.SnpEffAnnotator;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.framework.server.MolgenisSettings;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-
-import java.io.*;
-import java.util.ArrayList;
-
-public class SnpEffServiceAnnotatorTest extends AnnotatorTestData
+@ContextConfiguration(classes =
+{ SnpEffServiceAnnotatorTest.Config.class, SnpEffAnnotator.class })
+public class SnpEffServiceAnnotatorTest extends AbstractTestNGSpringContextTests
 {
-	private SnpEffServiceAnnotator snpEffServiceAnnotator;
-	private ArrayList<Entity> entities = new ArrayList<>();;
+	@Autowired
+	private SnpEffAnnotator.SnpEffRepositoryAnnotator snpEffRepositoryAnnotator;
+	private final ArrayList<Entity> entities = new ArrayList<>();;
 
 	@BeforeMethod
 	public void beforeMethod() throws IOException
 	{
-		QueryRule chromRule = new QueryRule(VcfRepository.CHROM, QueryRule.Operator.EQUALS, "X");
-		Query query = new QueryImpl(chromRule).and().eq(VcfRepository.POS, "12345");
-
+		Entity entity1 = new MapEntity();
 		entity1.set(VcfRepository.CHROM, "1");
 		entity1.set(VcfRepository.POS, 1234);
 		entity1.set(VcfRepository.REF, "A");
 		entity1.set(VcfRepository.ALT, "T");
 
+		Entity entity2 = new MapEntity();
 		entity2.set(VcfRepository.CHROM, "X");
 		entity2.set(VcfRepository.POS, 12345);
 		entity2.set(VcfRepository.REF, "A");
 		entity2.set(VcfRepository.ALT, "C");
 
+		Entity entity3 = new MapEntity();
 		entity3.set(VcfRepository.CHROM, "3");
 		entity3.set(VcfRepository.POS, 123);
 		entity3.set(VcfRepository.REF, "G");
@@ -43,11 +56,6 @@ public class SnpEffServiceAnnotatorTest extends AnnotatorTestData
 		entities.add(entity1);
 		entities.add(entity2);
 		entities.add(entity3);
-
-		DataService dataService = mock(DataService.class);
-		when(dataService.findOne("TestEntity", query)).thenReturn(entity2);
-		snpEffServiceAnnotator = new SnpEffServiceAnnotator(null, null, dataService);
-        annotator = snpEffServiceAnnotator;
 	}
 
 	@Test
@@ -56,7 +64,7 @@ public class SnpEffServiceAnnotatorTest extends AnnotatorTestData
 		BufferedReader br = null;
 		try
 		{
-			File file = snpEffServiceAnnotator.getInputTempFile(entities, "testfile");
+			File file = snpEffRepositoryAnnotator.getInputVcfTempFile(entities);
 			br = new BufferedReader(new FileReader(file.getAbsolutePath()));
 
 			assertEquals(br.readLine(), "1\t1234\t.\tA\tT");
@@ -66,7 +74,7 @@ public class SnpEffServiceAnnotatorTest extends AnnotatorTestData
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			fail();
 		}
 		finally
 		{
@@ -84,24 +92,45 @@ public class SnpEffServiceAnnotatorTest extends AnnotatorTestData
 	@Test
 	public void parseOutputLineToEntityTest()
 	{
-		Entity result = snpEffServiceAnnotator.parseOutputLineToEntity(
-				"X\t12345\t.\tA\tT\tqual\tfilter\t0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15", "TestEntity");
-		assertEquals(result.get(SnpEffServiceAnnotator.ANNOTATION), "1");
-		assertEquals(result.get(SnpEffServiceAnnotator.PUTATIVE_IMPACT), "2");
-		assertEquals(result.get(SnpEffServiceAnnotator.GENE_NAME), "3");
-		assertEquals(result.get(SnpEffServiceAnnotator.GENE_ID), "4");
-		assertEquals(result.get(SnpEffServiceAnnotator.FEATURE_TYPE), "5");
-		assertEquals(result.get(SnpEffServiceAnnotator.FEATURE_ID), "6");
-		assertEquals(result.get(SnpEffServiceAnnotator.TRANSCRIPT_BIOTYPE), "7");
-		assertEquals(result.get(SnpEffServiceAnnotator.RANK_TOTAL), "8");
-		assertEquals(result.get(SnpEffServiceAnnotator.HGVS_C), "9");
-		assertEquals(result.get(SnpEffServiceAnnotator.HGVS_P), "10");
-		assertEquals(result.get(SnpEffServiceAnnotator.C_DNA_POSITION), "11");
-		assertEquals(result.get(SnpEffServiceAnnotator.CDS_POSITION), "12");
-		assertEquals(result.get(SnpEffServiceAnnotator.PROTEIN_POSITION), "13");
-		assertEquals(result.get(SnpEffServiceAnnotator.DISTANCE_TO_FEATURE), "14");
-		assertEquals(result.get(SnpEffServiceAnnotator.ERRORS), "15");
-		assertEquals(result.get(SnpEffServiceAnnotator.LOF), "");
-		assertEquals(result.get(SnpEffServiceAnnotator.NMD), "");
+		Entity entity = new MapEntity();
+		snpEffRepositoryAnnotator.parseOutputLineToEntity(
+				"X\t12345\t.\tA\tT\tqual\tfilter\t0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15", entity);
+		assertEquals(entity.get(SnpEffAnnotator.ANNOTATION), "1");
+		assertEquals(entity.get(SnpEffAnnotator.PUTATIVE_IMPACT), "2");
+		assertEquals(entity.get(SnpEffAnnotator.GENE_NAME), "3");
+		assertEquals(entity.get(SnpEffAnnotator.GENE_ID), "4");
+		assertEquals(entity.get(SnpEffAnnotator.FEATURE_TYPE), "5");
+		assertEquals(entity.get(SnpEffAnnotator.FEATURE_ID), "6");
+		assertEquals(entity.get(SnpEffAnnotator.TRANSCRIPT_BIOTYPE), "7");
+		assertEquals(entity.get(SnpEffAnnotator.RANK_TOTAL), "8");
+		assertEquals(entity.get(SnpEffAnnotator.HGVS_C), "9");
+		assertEquals(entity.get(SnpEffAnnotator.HGVS_P), "10");
+		assertEquals(entity.get(SnpEffAnnotator.C_DNA_POSITION), "11");
+		assertEquals(entity.get(SnpEffAnnotator.CDS_POSITION), "12");
+		assertEquals(entity.get(SnpEffAnnotator.PROTEIN_POSITION), "13");
+		assertEquals(entity.get(SnpEffAnnotator.DISTANCE_TO_FEATURE), "14");
+		assertEquals(entity.get(SnpEffAnnotator.ERRORS), "15");
+		assertEquals(entity.get(SnpEffAnnotator.LOF), "");
+		assertEquals(entity.get(SnpEffAnnotator.NMD), "");
+	}
+
+	@Configuration
+	public static class Config
+	{
+		@Autowired
+		private DataService dataService;
+
+		@Bean
+		public MolgenisSettings molgenisSettings()
+		{
+			return mock(MolgenisSettings.class);
+		}
+
+		@Bean
+		public DataService dataService()
+		{
+			return mock(DataService.class);
+		}
+
 	}
 }

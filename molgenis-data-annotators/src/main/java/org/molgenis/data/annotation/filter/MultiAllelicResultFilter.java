@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation.entity.impl;
+package org.molgenis.data.annotation.filter;
 
 import com.google.common.collect.FluentIterable;
 import org.molgenis.data.AttributeMetaData;

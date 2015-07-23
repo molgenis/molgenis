@@ -3,7 +3,10 @@ package org.molgenis.data.mapper.service.impl;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13,13 +16,19 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
+import org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.service.AlgorithmService;
+import org.molgenis.data.semantic.Relation;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
+import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.js.RhinoConfig;
 import org.molgenis.js.ScriptEvaluator;
+import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.NativeArray;
@@ -29,19 +38,31 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 
 public class AlgorithmServiceImpl implements AlgorithmService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(AlgorithmServiceImpl.class);
 
-	@Autowired
-	private DataService dataService;
+	private final DataService dataService;
+
+	private final OntologyTagService ontologyTagService;
+
+	private final SemanticSearchService semanticSearchService;
 
 	@Autowired
-	private SemanticSearchService semanticSearchService;
-
-	public AlgorithmServiceImpl()
+	public AlgorithmServiceImpl(DataService dataService, OntologyTagService ontologyTagService,
+			SemanticSearchService semanticSearchService)
 	{
+		if (dataService == null) throw new MolgenisDataException("DataService cannot be null!");
+		if (ontologyTagService == null) throw new MolgenisDataException("OntologyTagService cannot be null!");
+		if (semanticSearchService == null) throw new MolgenisDataException("SemanticSearchService cannot be null!");
+
+		this.dataService = dataService;
+		this.ontologyTagService = ontologyTagService;
+		this.semanticSearchService = semanticSearchService;
+
 		new RhinoConfig().init();
 	}
 
@@ -51,16 +72,61 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			EntityMapping mapping, AttributeMetaData targetAttribute)
 	{
 		LOG.debug("createAttributeMappingIfOnlyOneMatch: target= " + targetAttribute.getName());
-		Iterable<AttributeMetaData> matches = semanticSearchService.findAttributes(sourceEntityMetaData,
+		Map<AttributeMetaData, Iterable<ExplainedQueryString>> matches = semanticSearchService.explainAttributes(
+				sourceEntityMetaData, targetEntityMetaData, targetAttribute);
+
+		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(
 				targetEntityMetaData, targetAttribute);
-		if (Iterables.size(matches) == 1)
+
+		for (Entry<AttributeMetaData, Iterable<ExplainedQueryString>> entry : matches.entrySet())
 		{
-			AttributeMetaData source = matches.iterator().next();
+			AttributeMetaData source = entry.getKey();
 			AttributeMapping attributeMapping = mapping.addAttributeMapping(targetAttribute.getName());
 			String algorithm = "$('" + source.getName() + "').value();";
 			attributeMapping.setAlgorithm(algorithm);
+
+			if (isSingleMatchHighQuality(targetAttribute, tagsForAttribute, entry.getValue()))
+			{
+				attributeMapping.setAlgorithmState(AlgorithmState.GENERATED_HIGH);
+			}
+			else
+			{
+				attributeMapping.setAlgorithmState(AlgorithmState.GENERATED_LOW);
+			}
+
 			LOG.info("Creating attribute mapping: " + targetAttribute.getName() + " = " + algorithm);
+			break;
 		}
+	}
+
+	boolean isSingleMatchHighQuality(AttributeMetaData targetAttribute,
+			Multimap<Relation, OntologyTerm> ontologyTermTags, Iterable<ExplainedQueryString> explanations)
+	{
+		Map<String, Double> matchedTags = new HashMap<String, Double>();
+		for (ExplainedQueryString explanation : explanations)
+		{
+			matchedTags.put(explanation.getTagName().toLowerCase(), explanation.getScore());
+		}
+		String label = StringUtils.isNotEmpty(targetAttribute.getLabel()) ? targetAttribute.getLabel().toLowerCase() : StringUtils.EMPTY;
+		String description = StringUtils.isNotEmpty(targetAttribute.getDescription()) ? targetAttribute
+				.getDescription().toLowerCase() : StringUtils.EMPTY;
+
+		if (isGoodMatch(matchedTags, label)) return true;
+		if (isGoodMatch(matchedTags, description)) return true;
+
+		for (OntologyTerm ontologyTerm : ontologyTermTags.values())
+		{
+			boolean allMatch = Lists.newArrayList(ontologyTerm.getLabel().toLowerCase().split(",")).stream()
+					.allMatch(ontologyTermLabel -> isGoodMatch(matchedTags, ontologyTermLabel));
+			if (allMatch) return true;
+		}
+
+		return false;
+	}
+
+	boolean isGoodMatch(Map<String, Double> matchedTags, String label)
+	{
+		return matchedTags.containsKey(label) && matchedTags.get(label).intValue() == 100;
 	}
 
 	@Override

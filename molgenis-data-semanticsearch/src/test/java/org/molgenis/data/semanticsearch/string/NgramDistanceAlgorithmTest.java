@@ -22,6 +22,6 @@ public class NgramDistanceAlgorithmTest
 				"{t$=1, pa=1, te=1, ^p=1, nt=1, ai=1, en=1, it=1}");
 
 		assertEquals(NGramDistanceAlgorithm.createNGrams("WHERE IS PAitent", false).toString(),
-				"{nt=1, ai=1, en=1, is=1, ^i=1, it=1, er=1, t$=1, wh=1, s$=1, pa=1, te=1, ^p=1, re=1, ^w=1, he=1, e$=1}");
+				"{nt=1, ai=1, en=1, ^i=1, it=1, er=1, t$=1, wh=1, pa=1, te=1, ^p=1, re=1, ^w=1, i$=1, he=1, e$=1}");
 	}
 }

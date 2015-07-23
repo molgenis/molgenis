@@ -4,18 +4,13 @@ import java.io.File;
 import java.io.PrintWriter;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.annotation.LocusAnnotator;
-import org.molgenis.data.annotation.VariantAnnotator;
-import org.molgenis.data.annotation.impl.ClinicalGenomicsDatabaseServiceAnnotator;
-import org.molgenis.data.annotation.impl.PhenomizerServiceAnnotator;
-import org.molgenis.data.annotation.impl.SnpEffServiceAnnotator;
+import org.molgenis.data.annotation.entity.impl.CGDAnnotator;
 import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.genotype.annotation.VcfAnnotation;
 
 public class ReportTextWriter implements ReportWriter
 {
-	private Report report;
-	private File out;
+	private final Report report;
+	private final File out;
 
 	public ReportTextWriter(Report report, File out)
 	{
@@ -23,6 +18,7 @@ public class ReportTextWriter implements ReportWriter
 		this.out = out;
 	}
 
+	@Override
 	public void write() throws Exception
 	{
 		PrintWriter writer = new PrintWriter(out, "UTF-8");
@@ -49,15 +45,15 @@ public class ReportTextWriter implements ReportWriter
 		for (String gene : report.getMonogenicDiseaseRiskGeneRanking().keySet())
 		{
 			writer.println(gene + ": " + report.getMonogenicDiseaseRiskGeneRanking().get(gene) + " stars");
-			
+
 			Entity variant = report.getMonogenicDiseaseRiskVariants().get(gene).get(0);
-			
+
 			writer.println(variant.getString("INFO_CGDCOND"));
-			writer.println(variant.getString(ClinicalGenomicsDatabaseServiceAnnotator.GENERALIZED_INHERITANCE));
-		//	writer.println(variant.getString(PhenomizerServiceAnnotator.PHENOMIZERPVAL));
-			
-			
-			for(Entity variantt : report.getMonogenicDiseaseRiskVariants().get(gene))
+			writer.println(variant
+					.getString(CGDAnnotator.CGDAttributeName.GENERALIZED_INHERITANCE
+							.getAttributeName()));
+
+			for (Entity variantt : report.getMonogenicDiseaseRiskVariants().get(gene))
 			{
 				writer.print(variantt.get(VcfRepository.CHROM));
 				writer.print(", ");

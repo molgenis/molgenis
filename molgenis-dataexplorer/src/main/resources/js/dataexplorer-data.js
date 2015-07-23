@@ -64,6 +64,7 @@
 			onRowDelete: onDataChange,
 			onRowEdit: onDataChange,
 			onRowInspect: onRowInspect,
+			onRowClick: doShowGenomeBrowser() ? onRowClick : null,
 			onSort: function(e) {
 				tableSort = {
 					'orders' : [ {
@@ -91,6 +92,10 @@
 					$.download($(this).data('href'), {entityName: entityName, entityId: entityId}, "GET");
 			  });
 		});
+	}
+
+	function onRowClick(entity) {
+		genomeBrowser.setLocation(entity[genomebrowserChromosomeAttribute.name],entity[genomebrowserStartAttribute.name]-50,entity[genomebrowserStartAttribute.name]+50);
 	}
 	
 	/**

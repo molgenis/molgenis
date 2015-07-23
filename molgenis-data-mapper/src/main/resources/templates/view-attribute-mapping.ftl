@@ -21,27 +21,90 @@
 
 <div class="row">
 	<div class="col-md-12">
-		<a href="${context_url?html}/mappingproject/${mappingProject.identifier?html}" class="btn btn-default btn-xs pull-left">
-			<span class="glyphicon glyphicon-chevron-left"></span> Back to project
-		</a>
-		
 		<#-- Hidden fields containing information needed for ajax requests -->
 		<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier?html}"/>
 		<input type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name?html}"/>
 		<input type="hidden" name="source" value="${entityMapping.sourceEntityMetaData.name?html}"/>
 		<input type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name?html}"/>
 		<input type="hidden" name="targetAttributeType" value="${attributeMapping.targetAttributeMetaData.dataType?html}"/>
-		
 	</div>
 </div>
-
 <div class="row">
-	<div class="col-md-12">
-		<hr></hr>
-		<p>
-			${attributeMapping.targetAttributeMetaData.name?html} (${attributeMapping.targetAttributeMetaData.dataType}) : ${(attributeMapping.targetAttributeMetaData.description!"")?html}
-		</p>
+	<div class="col-md-12 col-lg-12">
+		<a href="/menu/main/mappingservice/mappingproject/${mappingProject.identifier?html}" type="btn" class="btn btn-default btn-xs">
+			<span class="glyphicon glyphicon-chevron-left"></span>
+			Cancel and go back
+		</a>
+		<button id="save-mapping-btn" type="btn" class="btn btn-primary btn-xs">
+			<span class="glyphicon glyphicon-floppy-save"></span>
+			Save and go back
+		</button>
+	<hr></hr>
 	</div>
+</div>
+<div class="row">
+	<div class="col-md-12 col-lg-12">
+		<center><h4>Mapping to <i>${entityMapping.targetEntityMetaData.name}.${attributeMapping.targetAttributeMetaData.name}</i> from <i>${entityMapping.sourceEntityMetaData.name}</i></h4></center>
+	</div>
+</div>
+<div class="row">	
+	<div class="col-md-5 col-lg-5">
+		<table class="table-borderless">
+			<tr>
+				<td class="td-align-top"><strong>Name</strong></td>
+				<td class="td-align-top">${attributeMapping.targetAttributeMetaData.name?html} (${attributeMapping.targetAttributeMetaData.dataType})</td>
+			</tr>
+			<tr>
+				<td class="td-align-top"><strong>Label</strong></td>
+				<td class="td-align-top"><#if attributeMapping.targetAttributeMetaData.label??>
+						${attributeMapping.targetAttributeMetaData.label?html}
+					<#else>
+						N/A
+					</#if>
+				</td>
+			</tr>
+			<tr>
+				<td class="td-align-top"><strong>Description</strong></td>
+				<td class="td-align-top">
+					<#if attributeMapping.targetAttributeMetaData.description??>
+						${attributeMapping.targetAttributeMetaData.description?html}
+					<#else>
+						N/A
+					</#if>
+				</td>
+			</tr>
+			<tr>
+				<td class="td-align-top"><strong>OntologyTerms</strong></td>
+				<td class="td-align-top">
+					<#if tags ?? && tags?size == 0>
+						N/A
+					<#else>
+						<#list tags as tag>
+							<#assign synonyms = tag.synonyms?join("</br>")>
+							<span class="label label-info ontologytag-tooltip" data-toggle="popover" title="<strong>Synonyms</strong>" data-content="${synonyms}">${tag.label}</span>
+						</#list>
+					</#if>
+				</td>
+			</tr>
+			<tr>
+				<td class="td-align-top"><strong>Categories</strong></td>
+				<td class="td-align-top">
+					<#if attributeMapping.targetAttributeMetaData.dataType == "xref" || attributeMapping.targetAttributeMetaData.dataType == "categorical" && (categories)?has_content>
+						<#assign refEntityMetaData = attributeMapping.targetAttributeMetaData.refEntity>
+						<#list categories.iterator() as category>
+							<#list refEntityMetaData.attributes as attribute>
+								<#assign attributeName = attribute.name>
+									${category[attributeName]} <#if refEntityMetaData.attributes?seq_index_of(attribute) != refEntityMetaData.attributes?size - 1>=</#if>
+							</#list>
+							</br>
+						</#list>
+					<#else>
+						N/A
+					</#if>
+				</td>
+			</tr>
+		</table>
+	</div>	
 </div>
 
 <div class="row"> <#-- Start: Master row -->
@@ -60,7 +123,7 @@
 					
 					<form>
 			  			<div class="form-group">
-							<input id="attribute-search-field" type="text" class="form-control" placeholder="Search...">
+							<input id="attribute-search-field" type="text" class="form-control" placeholder="Search all ${entityMapping.sourceEntityMetaData.attributes?size?html} attributes from ${entityMapping.sourceEntityMetaData.name?html}">
 						</div>
 					</form>
 				</div>
@@ -68,6 +131,7 @@
 			
 			<div class="row">
 				<div class="col-md-12">
+					<p id="attribute-search-result-message"></p>
 					<table id="attribute-mapping-table" class="table table-bordered scroll">
 						<thead>
 							<th>Select</th>
@@ -89,6 +153,9 @@
 										<#if source.nillable> <span class="label label-warning">nillable</span></#if>
 										<#if source.unique> <span class="label label-default">unique</span></#if>
 										<#if source.description??><br />${source.description?html}</#if>
+										<#if source.dataType == "xref" || source.dataType == "categorical" || source.dataType == "mref">
+											<br><a href="${dataExplorerUri?html}?entity=${source.refEntity.name}" target="_blank">category look up</a>
+										</#if>
 									</td>
 									<td>
 										${source.name?html}
@@ -142,7 +209,6 @@
 			    	<br/>
 				</div>
 			</div>
-			
 		</div> <#-- End: Mapping container -->
 	</div>  <#-- End: Mapping column -->
 
@@ -160,7 +226,7 @@
 						
 					</p>
 					<h4>Validation</h4>
-					<p>Algorithm validation starts automatically when the algorithm is updated.</p> 
+					<p>Algorithm validation starts automatically when the algorithm is updated. In case of errors, click the error label for more details</p> 
                     <div id="mapping-validation-container"></div>
 					<h4>Preview</h4>
 					<div id="result-table-container"></div>
@@ -169,11 +235,6 @@
 			 
 		</div> <#-- End: Result container -->
 	</div> <#-- End: Result column -->	
-
-	<div class="col-md-12 col-lg-12">
-		<hr></hr>
-		<button id="save-mapping-btn" type="btn" class="btn btn-primary btn-lg pull-right">Save</button>	
-	</div>
 
 </div> <#-- End: Master row -->
 

@@ -2,127 +2,168 @@ package org.molgenis.data.annotation.impl;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.AGE_GROUP;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.ALLELIC_CONDITIONS;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.COMMENTS;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.CONDITION;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.ENTREZ_GENE_ID;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.GENE;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.HGNC_ID;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.INHERITANCE;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.INTERVENTION_CATEGORIES;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.INTERVENTION_RATIONALE;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.MANIFESTATION_CATEGORIES;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.REFERENCES;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.impl.datastructures.CgdData;
-import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
-import org.molgenis.data.annotation.provider.CgdDataProvider;
-import org.molgenis.data.annotation.provider.HgncLocationsProvider;
-import org.molgenis.data.annotation.AbstractAnnotatorTest;
+import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.entity.impl.CGDAnnotator;
+import org.molgenis.data.annotation.resources.Resources;
+import org.molgenis.data.annotation.resources.impl.ResourcesImpl;
+import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ResourceUtils;
-import org.testng.annotations.BeforeMethod;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
 
-public class ClinicalGenomicsDatabaseServiceAnnotatorTest extends AbstractAnnotatorTest
+@ContextConfiguration(classes =
+{ ClinicalGenomicsDatabaseServiceAnnotatorTest.Config.class, CGDAnnotator.class })
+public class ClinicalGenomicsDatabaseServiceAnnotatorTest extends AbstractTestNGSpringContextTests
 {
-	@BeforeMethod
-	public void beforeMethod() throws IOException
+	@Autowired
+	RepositoryAnnotator annotator;
+
+	@Test
+	public void annotateTestMatch()
 	{
-		when(settings.getProperty(CgdDataProvider.CGD_FILE_LOCATION_PROPERTY)).thenReturn(
-				ResourceUtils.getFile(getClass(), "/cgd_example.txt").getPath());
+		DefaultEntityMetaData emdIn = new DefaultEntityMetaData("Test");
+		emdIn.addAttribute(GENE.getAttributeName()).setIdAttribute(true).setNillable(false);
+		Entity inputEntity = new MapEntity(emdIn);
+		inputEntity.set(GENE.getAttributeName(), "LEPR");
 
-		String chrStr = "1";
-		Long chrPos = new Long(66067385);
-		entity.set(VcfRepository.CHROM, chrStr);
-		entity.set(VcfRepository.POS, chrPos);
-		
-		input.add(entity);
+		Iterator<Entity> results = annotator.annotate(Collections.singletonList(inputEntity));
+		assertTrue(results.hasNext());
+		Entity resultEntity = results.next();
+		assertFalse(results.hasNext());
 
-		CgdDataProvider cgdDataProvider = mock(CgdDataProvider.class);
-		AnnotationService annotationService = mock(AnnotationService.class);
-		HgncLocationsProvider hgncLocationsProvider = mock(HgncLocationsProvider.class);
-		Map<String, HGNCLocations> locationsMap = Collections.singletonMap("LEPR", new HGNCLocations("LEPR", 65886248l,
-				66107242l, "1"));
+		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
+		resultMap.put(GENE.getAttributeName(), "LEPR");
+		resultMap.put(HGNC_ID.getAttributeName(), "6554");
+		resultMap.put(ENTREZ_GENE_ID.getAttributeName(), "3953");
+		resultMap.put(CONDITION.getAttributeName(), "Leptin receptor deficiency");
+		resultMap.put(INHERITANCE.getAttributeName(), "AR");
+		resultMap.put(AGE_GROUP.getAttributeName(), "Pediatric");
+		resultMap.put(MANIFESTATION_CATEGORIES.getAttributeName(), "Allergy/Immunology/Infectious; Endocrine");
+		resultMap.put(INTERVENTION_CATEGORIES.getAttributeName(), "Allergy/Immunology/Infectious; Endocrine");
+		resultMap.put(COMMENTS.getAttributeName(),
+				"Standard treatments for obesity, such as gastric surgery, have been described as beneficial");
+		resultMap
+				.put(INTERVENTION_RATIONALE.getAttributeName(),
+						"In addition to endocrine manifestations, individuals may be susceptible to infections (eg, respiratory infections), which, coupled with other manifestations (eg, severe obesity) can have severe sequelae such that prophylaxis and rapid treatment may be beneficial");
+		resultMap.put(REFERENCES.getAttributeName(), "8666155; 9537324; 17229951; 21306929; 23275530; 23616257");
+		Entity expectedEntity = new MapEntity(resultMap);
 
-		Map<String, CgdData> cgdDataMap = Collections
-				.singletonMap(
-						"LEPR",
-						new CgdData(
-								"6554",
-								"3953",
-								"Leptin receptor deficiency",
-								"AR",
-								"Pediatric",
-								"",
-								"Allergy/Immunology/Infectious; Endocrine",
-								"Allergy/Immunology/Infectious; Endocrine",
-								"Standard treatments for obesity, such as gastric surgery, have been described as beneficial",
-								"In addition to endocrine manifestations, individuals may be susceptible to infections (eg, respiratory infections), which, coupled with other manifestations (eg, severe obesity) can have severe sequelae such that prophylaxis and rapid treatment may be beneficial",
-								"8666155; 9537324; 17229951; 21306929; 23275530; 23616257"));
-
-		when(hgncLocationsProvider.getHgncLocations()).thenReturn(locationsMap);
-		when(cgdDataProvider.getCgdData()).thenReturn(cgdDataMap);
-
-		annotator = new ClinicalGenomicsDatabaseServiceAnnotator(settings, annotationService, hgncLocationsProvider,
-				cgdDataProvider);
+		assertEquals(resultEntity.get(GENE.getAttributeName()), expectedEntity.get(GENE.getAttributeName()));
+		assertEquals(resultEntity.get(ENTREZ_GENE_ID.getAttributeName()),
+				expectedEntity.get(ENTREZ_GENE_ID.getAttributeName()));
+		assertEquals(resultEntity.get(CONDITION.getAttributeName()), expectedEntity.get(CONDITION.getAttributeName()));
+		assertEquals(resultEntity.get(INHERITANCE.getAttributeName()),
+				expectedEntity.get(INHERITANCE.getAttributeName()));
+		assertEquals(resultEntity.get(AGE_GROUP.getAttributeName()), expectedEntity.get(AGE_GROUP.getAttributeName()));
+		assertEquals(resultEntity.get(ALLELIC_CONDITIONS.getAttributeName()),
+				expectedEntity.get(ALLELIC_CONDITIONS.getAttributeName()));
+		assertEquals(resultEntity.get(MANIFESTATION_CATEGORIES.getAttributeName()),
+				expectedEntity.get(MANIFESTATION_CATEGORIES.getAttributeName()));
+		assertEquals(resultEntity.get(INTERVENTION_CATEGORIES.getAttributeName()),
+				expectedEntity.get(INTERVENTION_CATEGORIES.getAttributeName()));
+		assertEquals(resultEntity.get(COMMENTS.getAttributeName()), expectedEntity.get(COMMENTS.getAttributeName()));
+		assertEquals(resultEntity.get(INTERVENTION_RATIONALE.getAttributeName()),
+				expectedEntity.get(INTERVENTION_RATIONALE.getAttributeName()));
+		assertEquals(resultEntity.get(REFERENCES.getAttributeName()), expectedEntity.get(REFERENCES.getAttributeName()));
 	}
 
 	@Test
-	public void annotateTest()
+	public void annotateTestNoMatch()
 	{
-		List<Entity> expectedList = new ArrayList<Entity>();
+		DefaultEntityMetaData emdIn = new DefaultEntityMetaData("Test");
+		emdIn.addAttribute(GENE.getAttributeName()).setIdAttribute(true).setNillable(false);
+		Entity inputEntity = new MapEntity(emdIn);
+		inputEntity.set(GENE.getAttributeName(), "BOGUS");
+
+		Iterator<Entity> results = annotator.annotate(Collections.singletonList(inputEntity));
+		assertTrue(results.hasNext());
+		Entity resultEntity = results.next();
+		assertFalse(results.hasNext());
+
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
-
-		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.GENE, "LEPR");
-		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.HGNC_ID, "6554");
-		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.ENTREZ_GENE_ID, "3953");
-		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.CONDITION, "Leptin receptor deficiency");
-		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.INHERITANCE, "AR");
-		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.AGE_GROUP, "Pediatric");
-		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.ALLELIC_CONDITIONS, "");
-		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.MANIFESTATION_CATEGORIES,
-				"Allergy/Immunology/Infectious; Endocrine");
-		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.INTERVENTION_CATEGORIES,
-				"Allergy/Immunology/Infectious; Endocrine");
-		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.COMMENTS,
-				"Standard treatments for obesity, such as gastric surgery, have been described as beneficial");
-		resultMap
-				.put(ClinicalGenomicsDatabaseServiceAnnotator.INTERVENTION_RATIONALE,
-						"In addition to endocrine manifestations, individuals may be susceptible to infections (eg, respiratory infections), which, coupled with other manifestations (eg, severe obesity) can have severe sequelae such that prophylaxis and rapid treatment may be beneficial");
-		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.REFERENCES,
-				"8666155; 9537324; 17229951; 21306929; 23275530; 23616257");
-
+		resultMap.put(GENE.getAttributeName(), "BOGUS");
 		Entity expectedEntity = new MapEntity(resultMap);
 
-		expectedList.add(expectedEntity);
+		assertEquals(resultEntity.get(GENE.getAttributeName()), expectedEntity.get(GENE.getAttributeName()));
+		assertEquals(resultEntity.get(ENTREZ_GENE_ID.getAttributeName()),
+				expectedEntity.get(ENTREZ_GENE_ID.getAttributeName()));
+		assertEquals(resultEntity.get(CONDITION.getAttributeName()), expectedEntity.get(CONDITION.getAttributeName()));
+		assertEquals(resultEntity.get(INHERITANCE.getAttributeName()),
+				expectedEntity.get(INHERITANCE.getAttributeName()));
+		assertEquals(resultEntity.get(AGE_GROUP.getAttributeName()), expectedEntity.get(AGE_GROUP.getAttributeName()));
+		assertEquals(resultEntity.get(ALLELIC_CONDITIONS.getAttributeName()),
+				expectedEntity.get(ALLELIC_CONDITIONS.getAttributeName()));
+		assertEquals(resultEntity.get(MANIFESTATION_CATEGORIES.getAttributeName()),
+				expectedEntity.get(MANIFESTATION_CATEGORIES.getAttributeName()));
+		assertEquals(resultEntity.get(INTERVENTION_CATEGORIES.getAttributeName()),
+				expectedEntity.get(INTERVENTION_CATEGORIES.getAttributeName()));
+		assertEquals(resultEntity.get(COMMENTS.getAttributeName()), expectedEntity.get(COMMENTS.getAttributeName()));
+		assertEquals(resultEntity.get(INTERVENTION_RATIONALE.getAttributeName()),
+				expectedEntity.get(INTERVENTION_RATIONALE.getAttributeName()));
+		assertEquals(resultEntity.get(REFERENCES.getAttributeName()), expectedEntity.get(REFERENCES.getAttributeName()));
+	}
 
-		Iterator<Entity> results = annotator.annotate(input);
+	@Configuration
+	public static class Config
+	{
+		@Autowired
+		private DataService dataService;
 
-		Entity resultEntity = results.next();
+		@Bean
+		public MolgenisSettings molgenisSettings()
+		{
+			MolgenisSettings settings = mock(MolgenisSettings.class);
+			when(settings.getProperty(CGDAnnotator.CGD_FILE_LOCATION_PROPERTY)).thenReturn(
+					ResourceUtils.getFile(getClass(), "/cgd_example.txt").getPath());
+			return settings;
+		}
 
-		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.GENE),
-				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.GENE));
-		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.ENTREZ_GENE_ID),
-				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.ENTREZ_GENE_ID));
-		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.CONDITION),
-				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.CONDITION));
-		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.INHERITANCE),
-				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.INHERITANCE));
-		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.AGE_GROUP),
-				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.AGE_GROUP));
-		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.ALLELIC_CONDITIONS),
-				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.ALLELIC_CONDITIONS));
-		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.MANIFESTATION_CATEGORIES),
-				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.MANIFESTATION_CATEGORIES));
-		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.INTERVENTION_CATEGORIES),
-				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.INTERVENTION_CATEGORIES));
-		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.COMMENTS),
-				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.COMMENTS));
-		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.INTERVENTION_RATIONALE),
-				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.INTERVENTION_RATIONALE));
-		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.REFERENCES),
-				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.REFERENCES));
+		@Bean
+		public DataService dataService()
+		{
+			return mock(DataService.class);
+		}
+
+		@Bean
+		public AnnotationService annotationService()
+		{
+			return mock(AnnotationService.class);
+		}
+
+		@Bean
+		public Resources resources()
+		{
+			return new ResourcesImpl();
+		}
 	}
 }

@@ -43,7 +43,7 @@ public class CaddAnnotatorTest extends AbstractTestNGSpringContextTests
 	RepositoryAnnotator annotator;
 
 	@Autowired
-	Resources resources;
+	Resources resourcess;
 
 	public DefaultEntityMetaData metaDataCanAnnotate = new DefaultEntityMetaData("test");
 	public DefaultEntityMetaData metaDataCantAnnotate = new DefaultEntityMetaData("test");

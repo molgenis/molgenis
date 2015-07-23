@@ -302,7 +302,7 @@
 						row.hide();
 					}
 				} else {
-					row.show();
+					row.hide();
 				}
 			});
 		} else {
@@ -318,6 +318,18 @@
 				}
 			});
 		}
+		
+		//Update the search result message above the table
+		var numberOfVisibleAttributes = $('#attribute-mapping-table>tbody tr:visible').length;
+		var totalNumberOfAttributes = $('#attribute-mapping-table>tbody tr').length;
+		$('#attribute-search-result-message').empty().append(numberOfVisibleAttributes + ' attributes have been found out of ' + totalNumberOfAttributes);
+		
+		// hide/show the header of the table depending on whether or not there are any visiable attributes
+		if(numberOfVisibleAttributes == 0){
+			$('#attribute-mapping-table>thead tr').hide();
+		}else{
+			$('#attribute-mapping-table>thead tr').show();
+		}
 	}
 
 	/**
@@ -325,8 +337,7 @@
 	 */
 	function rankAttributeTable(explainedAttributes){
 		if(explainedAttributes != null){
-			var attributeNames = Object.keys(explainedAttributes), className, attributeLabel, attributeInfoElement, firstRow, suggestedRow, explainedQueryStrings, words;
-			
+			var attributeNames = Object.keys(explainedAttributes), className, attributeLabel, attributeInfoElement, firstRow, suggestedRow, explainedQueryStrings, matchedWords;
 			for(var i = attributeNames.length - 1; i >= 0;i--){
 				
 				className = attributeNames[i];
@@ -338,17 +349,23 @@
 				firstRow.before(suggestedRow);
 				//highlight the matched words in attribute labels
 				explainedQueryStrings = explainedAttributes[className];
-				
+				matchedWords = [];
 				if(explainedQueryStrings.length > 0){
 					
+					//Create a detailed explanation popover to show how the attributes get matched
 					createPopoverExplanation(suggestedRow, attributeInfoElement, attributeLabel, explainedQueryStrings);
 					
+					//Collect all matched words from all explanations
 					$.each(explainedQueryStrings, function(index, explainedQueryString){
-						words = extendPartialWord(attributeLabel, explainedQueryString.matchedWords.split(' '));
-						$.each(connectNeighboredWords(attributeLabel, words), function(index, word){
-							$(attributeInfoElement).highlight(word);
-						});
+						var matchedWordsFromOneExplanation = extendPartialWord(attributeLabel, explainedQueryString.matchedWords.split(' '));
+						addAll(matchedWords, matchedWordsFromOneExplanation);
 					});
+					
+					//Connect matched words and highlight them together
+					$.each(connectNeighboredWords(attributeLabel, matchedWords), function(index, word){
+						$(attributeInfoElement).highlight(word);
+					});
+					
 				}
 			}
 		}
@@ -367,46 +384,75 @@
 				message += 'The query <strong>' + queryString + '</strong> derived from <strong>' + explainedQueryString.tagName;
 				message += '</strong> is matched to the label on words <strong>' + matchedWords.join(' ').toLowerCase() + '</strong> with ' + score + '%<br><br>';
 			});
-			var option = {'title' : 'Explanation', 'content' : message, 'html' : true, 'placement' : 'top', 'container' : row, 'trigger' : 'manual'};
-			$(attributeInfoElement).css({'cursor':'help'}).popover(option).on('click', function(){
-				$(this).popover('show');
-			}).on('mouseout', function(){
-				$(this).popover('hide');
-			});
+			var option = {'title' : 'Explanation', 'content' : message, 'html' : true, 'placement' : 'top', 'container' : row, 'trigger' : 'hover'};
+			$(attributeInfoElement).popover(option);
 		}
 	}
 	
 	/**
-	 * connect the matched words that are neighbors so they can be highlighted together
+	 * connect the matched words that are neighbors in order to highlight them together
 	 */
 	function connectNeighboredWords(attributeLabel, matchedWords){
-		var illegal_pattern = new RegExp("[^a-zA-Z0-9]");
-		var connectedPhrases = [], connectedPhrase, orderedWords, connectedWords;
-		if(attributeLabel && matchedWords && matchedWords.length > 0){
-			connectedPhrase = '';
-			orderedWords = attributeLabel.toUpperCase().split(' ');
-			$.each(orderedWords, function(index, word){
+		var connectedPhrases = [], connectedPhrase, potentialConnectedPhrase, orderedMatchedWords;
+		
+		if(attributeLabel && matchedWords && matchedWords.length > 0){	
+			attributeLabel = attributeLabel.toUpperCase();
+			//Order the matched words
+			orderedMatchedWords = orderMatchedWords(attributeLabel, matchedWords);
+			if(orderedMatchedWords.length > 0){
+
+				//Algorithm to connect the words that are sitting next each other
+				connectedPhrase = orderedMatchedWords[0];
+				for(var i = 1; i < orderedMatchedWords.length;i++){
+					//Try to connect the next matched words with previous one
+					potentialConnectedPhrase = connectedPhrase + ' ' + orderedMatchedWords[i];
+					
+					//See if the connected phrase can be found in the label string
+					if(attributeLabel.indexOf(potentialConnectedPhrase) !== -1){
+						connectedPhrase = connectedPhrase + ' ' + orderedMatchedWords[i];
+					}else{
+						connectedPhrases.push(connectedPhrase.trim());
+						connectedPhrase = orderedMatchedWords[i];
+					}
+				}
 				
-				//Word contains illegal chars
-				if(illegal_pattern.test(word)){
-					addAll(connectedPhrases, connectNeighboredWords(word.split(illegal_pattern).join(' '), matchedWords));
-				}else if($.inArray(word, matchedWords) !== -1){
-					
-					connectedPhrase += ' ' + word;
+				//Push the leftover phrase to the list
+				if(connectedPhrase.length > 0){
+					connectedPhrases.push(connectedPhrase);
 				}
-				else if(connectedPhrase.length > 0){
-					
-					connectedPhrases.push(connectedPhrase.trim());
-					connectedPhrase = '';
-				}
-			});
-			if(connectedPhrase.length > 0){
-				connectedPhrases.push(connectedPhrase.trim());
 			}
 		}
 		return connectedPhrases;
 	}
+	/**
+	 * Order the matched the words according to the order of words in the attribute label
+	 */
+	function orderMatchedWords(attributeLabel, matchedWords){
+		var hash = {}, orderedMatchedWords = [], wordIndices = [];
+		$.each(matchedWords, function(index, matchedWord){
+			var index = attributeLabel.indexOf(matchedWord);
+			hash[index] = matchedWord;
+			wordIndices.push(index);
+		});
+		wordIndices.sort(numberSort);
+		$.each(wordIndices, function(i, wordIndex){
+			if(hash[wordIndex]){				
+				orderedMatchedWords.push(hash[wordIndex]);
+			}
+		});
+		return orderedMatchedWords;
+	}
 	
+	/**
+	 * Define the sort method
+	 */
+	function numberSort (a,b) {
+	    return a - b;
+	}
+	
+	/**
+	 * A helper function to push all elements of the second array to the first array
+	 */
 	function addAll(originalArray, elementsToAdd){
 		$.each(elementsToAdd, function(index, element){
 			originalArray.push(element);
@@ -442,6 +488,18 @@
 		}
 		return completeWords;
 	}
+	
+	//A helper function to perform post-redirect action
+	function redirect(method, url, data){
+		showSpinner();
+		var form = '';
+		if(data){
+	        $.each(data, function(key, value) {
+	            form += '<input type="hidden" name="'+key+'" value="'+value+'">';
+	        });
+		}
+        $('<form action="'+url+'" method="'+ method +'">'+form+'</form>').appendTo('body').submit();
+	}
 
 	$(function() {
 
@@ -457,6 +515,8 @@
 		$("[rel=tooltip]").tooltip({
 			placement : 'right'
 		});
+		
+		$('.ontologytag-tooltip').css({'cursor':'pointer'}).popover({'html':true, 'placement':'right', 'trigger':'hover'});
 
 		// Get the explained attributes
 		$.ajax({
@@ -515,6 +575,8 @@
 
 			// preview mapping results
 			loadAlgorithmResult(algorithm);
+			
+			$('#result-container').css('display', 'inline');
 		});
 
 		// if there is an algorithm present on load, show the result table
@@ -522,7 +584,6 @@
 			loadAlgorithmResult(algorithm);
 		} else {
 			// if no algorithm present hide the mapping and result containers
-			$('#attribute-mapping-container').css('display', 'none');
 			$('#result-container').css('display', 'none');
 		}
 
@@ -545,7 +606,6 @@
 
 				// on selection of an attribute, show all fields
 				$('#result-container').css('display', 'inline');
-				$('#attribute-mapping-container').css('display', 'inline');
 
 				// generate result table
 				loadAlgorithmResult(algorithm);
@@ -559,7 +619,6 @@
 			} else {
 				// events when no attributes are selected
 				$('#result-container').css('display', 'none');
-				$('#attribute-mapping-container').css('display', 'none');
 			}
 		});
 
@@ -571,12 +630,11 @@
 				source : $('input[name="source"]').val(),
 				targetAttribute : $('input[name="targetAttribute"]').val(),
 				algorithm : algorithm
-			}, function() {
-				molgenis.createAlert([ {
-					'message' : 'Succesfully saved the created mapping'
-				} ], 'success');
+			}, function(data) {
+				redirect('get', molgenis.getContextUrl() + '/mappingproject/' + $('input[name="mappingProjectId"]').val());
 			});
 		});
+
 
 		$('#js-function-modal-btn').on('click', function() {
 			$('#js-function-modal').modal('show');

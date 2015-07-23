@@ -3,7 +3,14 @@ package org.molgenis.data.annotation.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
@@ -13,6 +20,7 @@ import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.entity.impl.ExacAnnotator;
+import org.molgenis.data.annotation.entity.impl.SnpEffAnnotator;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.vcf.VcfRepository;
@@ -198,7 +206,7 @@ public class DeNovoAnnotator extends VariantAnnotator
 			 * FIXME: enable or remove -> disable for now, but useful in some analyses.. if
 			 * (alleleFrequencyFilter(entity, resultMap)) return resultMap;
 			 */
-			String geneSymbol = SnpEffServiceAnnotator.getGeneNameFromEntity(entity);
+			String geneSymbol = SnpEffAnnotator.getGeneNameFromEntity(entity);
 			Iterable<Entity> samples = entity.getEntities("Samples");
 
 			HashMap<String, Trio> childToParentGenotypes = processSamples(samples);
@@ -353,8 +361,8 @@ public class DeNovoAnnotator extends VariantAnnotator
 
 		// impact
 		String[] annSplit = entity.getString(VcfRepository.getInfoPrefix() + "ANN").split("\\|", -1);
-		SnpEffServiceAnnotator.impact impact = Enum.valueOf(SnpEffServiceAnnotator.impact.class, annSplit[2]);
-		if (impact.equals(SnpEffServiceAnnotator.impact.MODIFIER) || impact.equals(SnpEffServiceAnnotator.impact.LOW))
+		SnpEffAnnotator.Impact impact = Enum.valueOf(SnpEffAnnotator.Impact.class, annSplit[2]);
+		if (impact.equals(SnpEffAnnotator.Impact.MODIFIER) || impact.equals(SnpEffAnnotator.Impact.LOW))
 		{
 			LOG.info("Skipping MODIFIER/LOW impact variant: " + entity);
 			resultMap.put(DENOVO, 0);

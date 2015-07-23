@@ -31,6 +31,7 @@ import org.molgenis.data.importer.ImportWizardController;
 import org.molgenis.data.mapper.data.request.MappingServiceRequest;
 import org.molgenis.data.mapper.mapping.model.AlgorithmResult;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
+import org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState;
 import org.molgenis.data.mapper.mapping.model.CategoryMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
@@ -38,6 +39,7 @@ import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.mapper.service.impl.AlgorithmEvaluation;
+import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
@@ -74,6 +76,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 
 @Controller
 @RequestMapping(URI)
@@ -369,6 +372,7 @@ public class MappingServiceController extends MolgenisPluginController
 					attributeMapping = mappingForSource.addAttributeMapping(targetAttribute);
 				}
 				attributeMapping.setAlgorithm(algorithm);
+				attributeMapping.setAlgorithmState(AlgorithmState.CURATED);
 			}
 			mappingService.updateMappingProject(mappingProject);
 		}
@@ -496,6 +500,18 @@ public class MappingServiceController extends MolgenisPluginController
 			attributeMapping = entityMapping.addAttributeMapping(targetAttribute);
 		}
 
+		EntityMetaData refEntityMetaData = attributeMapping.getTargetAttributeMetaData().getRefEntity();
+		if (refEntityMetaData != null)
+		{
+			Iterable<Entity> refEntities = dataService.findAll(refEntityMetaData.getName());
+			model.addAttribute("categories", refEntities);
+		}
+
+		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(
+				entityMapping.getTargetEntityMetaData(), attributeMapping.getTargetAttributeMetaData());
+
+		model.addAttribute("tags", tagsForAttribute.values());
+		model.addAttribute("dataExplorerUri", menuReaderService.getMenu().findMenuItemPath(DataExplorerController.ID));
 		model.addAttribute("mappingProject", project);
 		model.addAttribute("entityMapping", entityMapping);
 		model.addAttribute("attributeMapping", attributeMapping);
@@ -535,7 +551,10 @@ public class MappingServiceController extends MolgenisPluginController
 			Collection<String> sourceAttributeNames = algorithmService.getSourceAttributeNames(algorithm);
 			if (!sourceAttributeNames.isEmpty())
 			{
-				model.addAttribute("sourceAttributeNames", sourceAttributeNames);
+				List<AttributeMetaData> sourceAttributes = sourceAttributeNames.stream()
+						.map(attributeName -> entityMapping.getSourceEntityMetaData().getAttribute(attributeName))
+						.collect(Collectors.toList());
+				model.addAttribute("sourceAttributes", sourceAttributes);
 			}
 		}
 		catch (Exception e)
@@ -720,6 +739,7 @@ public class MappingServiceController extends MolgenisPluginController
 				attributeMapping = mappingForSource.addAttributeMapping(targetAttribute);
 			}
 			attributeMapping.setAlgorithm(algorithm);
+			attributeMapping.setAlgorithmState(AlgorithmState.CURATED);
 			mappingService.updateMappingProject(mappingProject);
 		}
 	}
