@@ -47,6 +47,7 @@ class Connect_Molgenis():
         self.column_meta_data = {}
         self.give_warnings = give_warnings
         self.last_added_id = None
+        self.added_rows = 0
         
     def get_last_added_id(self):
         return self.last_added_id
@@ -136,7 +137,10 @@ class Connect_Molgenis():
             error(server_response) 
         elif str(server_response) == '<Response [200]>' or str(server_response) == '<Response [201]>' or str(server_response) == '<Response [204]>':
             if self.verbose:
-                print type_of_request+' -> '+str(server_response)+' - '+server_response.reason
+                message = type_of_request+' -> '+str(server_response)+' - '+server_response.reason 
+                if type_of_request == 'Add row to entity':
+                    message += '. Total added rows this session: '+str(self.added_rows)
+                print message
             return True
         else:
             error(server_response)
@@ -189,8 +193,9 @@ class Connect_Molgenis():
         # make all values str
         data = dict([a, str(x)] for a, x in data.iteritems())
         server_response = requests.post(self.api_url+'/'+entity_name+'/', data=str(data), headers=self.headers)
+        self.added_rows += 1
         self.check_server_response(server_response, 'Add row to entity', entity_used=entity_name, data_used=str(data))
-        self.last_added_id = server_response.headers['location']
+        self.last_added_id = server_response.headers['location'].split('/')[-1]
         return server_response
 
     def query_entity_rows(self, entity_name, query):
