@@ -3,6 +3,7 @@ package org.molgenis.data.mapper.meta;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.fieldtypes.EnumField;
@@ -25,7 +26,7 @@ public class AttributeMappingMetaData extends DefaultEntityMetaData
 		addAttribute(IDENTIFIER).setIdAttribute(true).setNillable(false);
 		addAttribute(TARGETATTRIBUTEMETADATA).setNillable(false);
 		addAttribute(SOURCEATTRIBUTEMETADATAS);
-		addAttribute(ALGORITHM);
+		addAttribute(ALGORITHM).setDataType(MolgenisFieldTypes.TEXT);
 		EnumField enumField = new EnumField();
 		enumField.setEnumOptions(Arrays.asList(AlgorithmState.values()).stream().map(STATE -> STATE.toString())
 				.collect(Collectors.toList()));
