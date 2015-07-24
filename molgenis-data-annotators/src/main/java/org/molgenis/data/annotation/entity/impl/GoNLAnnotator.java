@@ -88,9 +88,8 @@ public class GoNLAnnotator
 		LocusQueryCreator locusQueryCreator = new LocusQueryCreator();
 
 		// TODO: properly test multiAllelicFresultFilter
-		GoNLMultiAllelicResultFilter goNLMultiAllelicResultFilter = new GoNLMultiAllelicResultFilter(
-				Collections.singletonList(new DefaultAttributeMetaData(GONL_AF_RESOURCE_ATTRIBUTE_NAME,
-						FieldTypeEnum.DECIMAL)));
+		GoNLMultiAllelicResultFilter goNLMultiAllelicResultFilter = new GoNLMultiAllelicResultFilter();
+
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(GONL_MULTI_FILE_RESOURCE, thousandGenomeInfo,
 				locusQueryCreator, goNLMultiAllelicResultFilter, dataService, resources)
 		{
@@ -124,9 +123,9 @@ public class GoNLAnnotator
 	Resource gonlresources()
 	{
 		MultiResourceConfig goNLConfig = new MultiResourceConfigImpl(GONL_CHROMOSOME_PROPERTY,
-		GONL_FILE_PATTERN_PROPERTY, GONL_ROOT_DIRECTORY_PROPERTY, GONL_OVERRIDE_CHROMOSOME_FILES_PROPERTY,
+				GONL_FILE_PATTERN_PROPERTY, GONL_ROOT_DIRECTORY_PROPERTY, GONL_OVERRIDE_CHROMOSOME_FILES_PROPERTY,
 				molgenisSettings);
-		
+
 		return new MultiFileResource(GONL_MULTI_FILE_RESOURCE, goNLConfig, new TabixVcfRepositoryFactory(
 				GONL_MULTI_FILE_RESOURCE));
 	}

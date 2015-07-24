@@ -79,9 +79,7 @@ public class ClinvarAnnotator
 								attributes);
 
 		LocusQueryCreator locusQueryCreator = new LocusQueryCreator();
-		ClinvarMultiAllelicResultFilter clinvarMultiAllelicResultFilter = new ClinvarMultiAllelicResultFilter(
-				Collections.singletonList(new DefaultAttributeMetaData(CLINVAR_CLNSIG_ResourceAttributeName,
-						FieldTypeEnum.STRING)));
+		ClinvarMultiAllelicResultFilter clinvarMultiAllelicResultFilter = new ClinvarMultiAllelicResultFilter();
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(CLINVAR_TABIX_RESOURCE, clinvarInfo, locusQueryCreator,
 				clinvarMultiAllelicResultFilter, dataService, resources)
 		{

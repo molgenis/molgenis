@@ -19,13 +19,6 @@ import java.util.Map;
 public class ClinvarMultiAllelicResultFilter implements ResultFilter
 {
 
-	private List<AttributeMetaData> attributes;
-
-	public ClinvarMultiAllelicResultFilter(List<AttributeMetaData> attributes)
-	{
-		this.attributes = attributes;
-	}
-
 	@Override
 	public Collection<AttributeMetaData> getRequiredAttributes()
 	{
@@ -62,30 +55,38 @@ public class ClinvarMultiAllelicResultFilter implements ResultFilter
 					// this means the allele is based on the reference
 					else if (significantAlleleIndex == 0)
 					{
+
+						String resultRefAllele = entity.getString(VcfRepository.REF);
 						String refAllele = annotatedEntity.getString(VcfRepository.REF);
 
-						for (String annotatedEntityAltAllele : annotatedEntityAltAlleles)
+						// if annotated entity allele equals the clinvar significant allele we want it!
+						if (refAllele.equals(resultRefAllele))
 						{
-							// if annotated entity allele equals the clinvar significant allele we want it!
-							if (refAllele.equals(annotatedEntityAltAllele))
-							{
-								clnallValueMap.put(refAllele, clnAll[i]);
-								clnsigValueMap.put(refAllele, clnSigs[i]);
-							}
+							// if more than one clinsigs are available pair the right one with each allele
+							clnallValueMap.put(refAllele, clnSigs[i]);
+							clnsigValueMap.put(refAllele, "0");
+
 						}
+
 					}
 					// 1 based so we need subtract 1 from the clnAll value
 					else
 					{
+
 						significantAlleleIndex = significantAlleleIndex - 1;
 
-						for (String annotatedEntityAltAllele : annotatedEntityAltAlleles)
+						for (int j = 0; j < annotatedEntityAltAlleles.length; j++)
 						{
+
 							// if annotated entity allele equals the clinvar significant allele we want it!
-							if (alts[significantAlleleIndex].equals(annotatedEntityAltAllele))
+							if (alts[significantAlleleIndex].equals(annotatedEntityAltAlleles[j]))
 							{
-								clnallValueMap.put(alts[significantAlleleIndex], clnAll[i]);
+								// if more than one clinsigs are available pair the right one with each allele
+								String newSignificantAlleleIndex = Integer.toString(j + 1);
+
+								clnallValueMap.put(alts[significantAlleleIndex], newSignificantAlleleIndex);
 								clnsigValueMap.put(alts[significantAlleleIndex], clnSigs[i]);
+
 							}
 						}
 					}
@@ -133,7 +134,7 @@ public class ClinvarMultiAllelicResultFilter implements ResultFilter
 			}
 
 		}
-		
+
 		return FluentIterable.from(processedResults).first();
 	}
 }

@@ -27,14 +27,12 @@ public class MultiResourceConfigImpl implements MultiResourceConfig
 	public Map<String, ResourceConfig> configs = null;
 
 	/**
-	 * overrideChromosomeFiles contains the chromosome that do not comply with the pattern.
-	 * those chromosomes and corresponding filenames should be stated comma separated per chromosome,
-	 * and the chromosome and filename itself should be colon separated.
-	 * e.g. 1:file1.vcf,2:file2.txt,X:XYZ.vcf
+	 * overrideChromosomeFiles contains the chromosome that do not comply with the pattern. those chromosomes and
+	 * corresponding filenames should be stated comma separated per chromosome, and the chromosome and filename itself
+	 * should be colon separated. e.g. 1:file1.vcf,2:file2.txt,X:XYZ.vcf
 	 * */
 	public MultiResourceConfigImpl(String chromosomesProperty, String filePatternProperty,
-			String rootDirectoryProperty,
-			String overrideChromosomeFilesProperty, MolgenisSettings molgenisSettings)
+			String rootDirectoryProperty, String overrideChromosomeFilesProperty, MolgenisSettings molgenisSettings)
 	{
 		this.chromosomesProperty = chromosomesProperty;
 		this.filePatternProperty = filePatternProperty;
@@ -46,19 +44,20 @@ public class MultiResourceConfigImpl implements MultiResourceConfig
 	public MultiResourceConfigImpl(String chromosomesProperty, String filePatternProperty, String folderProperty,
 			MolgenisSettings molgenisSettings)
 	{
-		this(chromosomesProperty, filePatternProperty, folderProperty, null,
-				molgenisSettings);
+		this(chromosomesProperty, filePatternProperty, folderProperty, null, molgenisSettings);
 	}
 
 	@Override
 	public Map<String, ResourceConfig> getConfigs()
 	{
-		if(null == configs){
+		if (null == configs)
+		{
 			this.refreshConfigs();
 		}
+
 		return this.configs;
 	}
-	
+
 	public void refreshConfigs()
 	{
 		String[] chromosomes = molgenisSettings.getProperty(this.chromosomesProperty, DEFAULT_CHROMOSOMES).split(",");
@@ -94,6 +93,7 @@ public class MultiResourceConfigImpl implements MultiResourceConfig
 
 					return this.file;
 				}
+								
 			});
 		}
 		this.configs = configs;

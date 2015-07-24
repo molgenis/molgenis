@@ -78,13 +78,7 @@ public class MultiFileResource implements Resource
 		{
 			initializeResources();
 		}
-
-		// Check if the configuration are changed
-		if (!config.getConfigs().entrySet().equals(resources.entrySet()))
-		{
-			initializeResources();
-		}
-
+		
 		for (Resource chrom : resources.values())
 		{
 			if (!chrom.isAvailable())

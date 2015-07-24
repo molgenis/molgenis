@@ -27,12 +27,6 @@ import com.google.common.collect.FluentIterable;
 public class GoNLMultiAllelicResultFilter implements ResultFilter
 {
 	private static final Logger LOG = LoggerFactory.getLogger(GoNLMultiAllelicResultFilter.class);
-	private List<AttributeMetaData> attributes;
-
-	public GoNLMultiAllelicResultFilter(List<AttributeMetaData> attributes)
-	{
-		this.attributes = attributes;
-	}
 
 	@Override
 	public Collection<AttributeMetaData> getRequiredAttributes()
