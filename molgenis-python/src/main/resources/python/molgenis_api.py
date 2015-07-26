@@ -46,11 +46,8 @@ class Connect_Molgenis():
         self.entity_meta_data = {}
         self.column_meta_data = {}
         self.give_warnings = give_warnings
-        self.last_added_id = None
         self.added_rows = 0
         
-    def get_last_added_id(self):
-        return self.last_added_id
     
     def set_verbosity(self, verbose):
         '''Set verbosity on or off
@@ -194,9 +191,9 @@ class Connect_Molgenis():
         data = dict([a, str(x)] for a, x in data.iteritems())
         server_response = requests.post(self.api_url+'/'+entity_name+'/', data=str(data), headers=self.headers)
         self.added_rows += 1
-        self.check_server_response(server_response, 'Add row to entity', entity_used=entity_name, data_used=str(data))
-        self.last_added_id = server_response.headers['location'].split('/')[-1]
-        return server_response
+        self.check_server_response(server_response, 'Add row to entity '+entity_name, entity_used=entity_name, data_used=str(data))
+        added_id = server_response.headers['location'].split('/')[-1]
+        return added_id
 
     def query_entity_rows(self, entity_name, query):
         '''Get row(s) from entity with a query
