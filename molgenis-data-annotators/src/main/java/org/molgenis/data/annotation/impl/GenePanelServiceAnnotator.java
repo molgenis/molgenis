@@ -1,7 +1,11 @@
 package org.molgenis.data.annotation.impl;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
@@ -10,6 +14,7 @@ import org.molgenis.data.annotation.VariantAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
+import org.molgenis.data.annotation.entity.impl.SnpEffAnnotator;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.vcf.VcfRepository;
@@ -63,9 +68,9 @@ public class GenePanelServiceAnnotator extends VariantAnnotator
 	{
 		String geneSymbol = null;
 
-		if (entity.getString(SnpEffServiceAnnotator.GENE_NAME) != null)
+		if (entity.getString(SnpEffAnnotator.GENE_NAME) != null)
 		{
-			geneSymbol = entity.getString(SnpEffServiceAnnotator.GENE_NAME);
+			geneSymbol = entity.getString(SnpEffAnnotator.GENE_NAME);
 		}
 		if (geneSymbol == null)
 		{

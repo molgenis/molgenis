@@ -17,7 +17,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.annotation.AbstractRepositoryAnnotator;
+import org.molgenis.data.annotation.AbstractRepositoryEntityAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
@@ -46,7 +46,7 @@ import com.google.gson.reflect.TypeToken;
  * 
  * */
 @Component("ebiService")
-public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements RepositoryAnnotator
+public class EbiServiceAnnotator extends AbstractRepositoryEntityAnnotator implements RepositoryAnnotator
 {
 	// Web url to call the EBI web service
 	private static final String EBI_CHEMBLWS_URL = "https://www.ebi.ac.uk/chemblws/targets/uniprot/";

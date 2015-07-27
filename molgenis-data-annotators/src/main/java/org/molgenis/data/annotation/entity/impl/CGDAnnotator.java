@@ -2,24 +2,24 @@ package org.molgenis.data.annotation.entity.impl;
 
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.LONG;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.TEXT;
-import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.AGE_GROUP;
-import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.ALLELIC_CONDITIONS;
-import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.COMMENTS;
-import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.CONDITION;
-import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.ENTREZ_GENE_ID;
-import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.GENE;
-import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.GENERALIZED_INHERITANCE;
-import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.HGNC_ID;
-import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.INHERITANCE;
-import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.INTERVENTION_CATEGORIES;
-import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.INTERVENTION_RATIONALE;
-import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.MANIFESTATION_CATEGORIES;
-import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.CGDAttributeName.REFERENCES;
-import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.GeneralizedInheritance.DOMINANT;
-import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.GeneralizedInheritance.DOM_OR_REC;
-import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.GeneralizedInheritance.OTHER;
-import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.GeneralizedInheritance.RECESSIVE;
-import static org.molgenis.data.annotation.entity.impl.ClinicalGenomicsDatabaseServiceAnnotator.GeneralizedInheritance.XLINKED;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.AGE_GROUP;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.ALLELIC_CONDITIONS;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.COMMENTS;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.CONDITION;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.ENTREZ_GENE_ID;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.GENE;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.GENERALIZED_INHERITANCE;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.HGNC_ID;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.INHERITANCE;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.INTERVENTION_CATEGORIES;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.INTERVENTION_RATIONALE;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.MANIFESTATION_CATEGORIES;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.REFERENCES;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.GeneralizedInheritance.DOMINANT;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.GeneralizedInheritance.DOM_OR_REC;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.GeneralizedInheritance.OTHER;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.GeneralizedInheritance.RECESSIVE;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.GeneralizedInheritance.XLINKED;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,6 +40,8 @@ import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.annotation.entity.QueryCreator;
 import org.molgenis.data.annotation.entity.ResultFilter;
+import org.molgenis.data.annotation.filter.FirstResultFilter;
+import org.molgenis.data.annotation.query.AttributeEqualsQueryCreator;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.RepositoryFactory;
@@ -60,7 +62,7 @@ import org.springframework.context.annotation.Configuration;
  * 'cgd_location'
  */
 @Configuration
-public class ClinicalGenomicsDatabaseServiceAnnotator
+public class CGDAnnotator
 {
 	public static final String CGD_FILE_LOCATION_PROPERTY = "cgd_location";
 	private static String CGD_RESOURCE = "CGDResource";
@@ -88,8 +90,8 @@ public class ClinicalGenomicsDatabaseServiceAnnotator
 
 	public enum CGDAttributeName
 	{
-		GENE("#GENE", "GENE"), REFERENCES("REFERENCES", "REFS"), INTERVENTION_RATIONALE("INTERVENTION/RATIONALE",
-				"INTERVENTION_RATIONALE"), COMMENTS("COMMENTS", "COMMENTS"), INTERVENTION_CATEGORIES(
+		GENE("#GENE", SnpEffAnnotator.GENE_NAME), REFERENCES("REFERENCES", "REFS"), INTERVENTION_RATIONALE(
+				"INTERVENTION/RATIONALE", "INTERVENTION_RATIONALE"), COMMENTS("COMMENTS", "COMMENTS"), INTERVENTION_CATEGORIES(
 				"INTERVENTION CATEGORIES", "INTERVENTION_CATEGORIES"), MANIFESTATION_CATEGORIES(
 				"MANIFESTATION CATEGORIES", "MANIFESTATION_CATEGORIES"), ALLELIC_CONDITIONS("ALLELIC CONDITIONS",
 				"ALLELIC_CONDITIONS"), ENTREZ_GENE_ID("ENTREZ GENE ID", "ENTREZ_GENE_ID"), HGNC_ID("HGNC ID", "HGNC_ID"), CONDITION(
