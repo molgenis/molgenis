@@ -1,5 +1,6 @@
 package org.molgenis.data.mapper.categorymapper;
 
+import java.util.HashSet;
 import java.util.List;
 
 import javax.measure.unit.Unit;
@@ -17,16 +18,22 @@ public class FrequencyCategoryMapper
 	private static final List<AmountConvertor> CONVERTORS = Lists.newArrayList(new DailyAmountConvertor(),
 			new SeveralTimesConvertor(), new NumberAmountConvertor());
 
-	public Amount<?> convertCategory(Amount<?> amount1, Unit<?> unit)
+	public Double convert(Amount<?> sourceAmount, Amount<?> targetAmount)
 	{
-		if (amount1.getUnit().isCompatible(unit))
+		Unit<?> standardUnit = targetAmount.getUnit();
+		if (sourceAmount.getUnit().isCompatible(standardUnit))
 		{
-			if (isMaxValueUndetermined(amount1))
+			if (isMaxValueUndetermined(sourceAmount))
 			{
-				double maxValue = unit.getConverterTo(amount1.getUnit()).convert((double) 1);
-				amount1 = Amount.rangeOf(amount1.getMinimumValue(), maxValue, amount1.getUnit());
+				double maxValue = sourceAmount.getMaximumValue();
+				if (!sourceAmount.getUnit().equals(standardUnit))
+				{
+					maxValue = standardUnit.getConverterTo(sourceAmount.getUnit()).convert((double) 1);
+				}
+				sourceAmount = Amount.rangeOf(sourceAmount.getMinimumValue(), maxValue, sourceAmount.getUnit());
 			}
-			return amount1.to(unit);
+			Amount<?> convertedSourceAmount = sourceAmount.to(standardUnit);
+			return convertFactor(convertedSourceAmount, targetAmount);
 		}
 		return null;
 	}
@@ -45,8 +52,36 @@ public class FrequencyCategoryMapper
 		return null;
 	}
 
+	double convertFactor(Amount<?> convertedSourceAmount, Amount<?> targetAmount)
+	{
+		double lowerBoundDiff = Math.abs(targetAmount.getMinimumValue() - convertedSourceAmount.getMinimumValue());
+		double upperBoundDiff = Math.abs(targetAmount.getMaximumValue() - convertedSourceAmount.getMaximumValue());
+		return (lowerBoundDiff + upperBoundDiff) / 2;
+	}
+
 	boolean isMaxValueUndetermined(Amount<?> amount1)
 	{
 		return DurationUnitConversionUtil.isAmountRanged(amount1) && amount1.getMaximumValue() == Double.MAX_VALUE;
+	}
+
+	public Amount<?> findBestAmount(Amount<?> sourceAmount, HashSet<Amount<?>> targetAmounts)
+	{
+		Amount<?> bestAmount = null;
+		double smallestFactor = -1;
+		for (Amount<?> targetAmount : targetAmounts)
+		{
+			Double convertFactor = convert(sourceAmount, targetAmount);
+			if (smallestFactor == -1)
+			{
+				smallestFactor = convertFactor;
+				bestAmount = targetAmount;
+			}
+			else if (smallestFactor > convertFactor)
+			{
+				smallestFactor = convertFactor;
+				bestAmount = targetAmount;
+			}
+		}
+		return bestAmount;
 	}
 }

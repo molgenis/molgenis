@@ -1,8 +1,6 @@
 package org.molgenis.data.mapper.categorymapper;
 
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.util.Locale;
+import java.util.HashSet;
 
 import javax.measure.quantity.Quantity;
 import javax.measure.unit.NonSI;
@@ -21,14 +19,13 @@ public class CategoryMapperTest
 	@Test
 	public void testConvertCategory()
 	{
-		DecimalFormat formatter = new DecimalFormat("#.##", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
 		Amount<?> twicePerDayAmount = Amount.valueOf(2, NonSI.DAY.inverse());
-		Amount<?> convertCategory = categoryMapper.convertCategory(twicePerDayAmount, NonSI.WEEK.inverse());
-		Assert.assertEquals(formatter.format(convertCategory.getEstimatedValue()), "14");
+		Amount<?> twicePerWeekAmount = Amount.valueOf(2, NonSI.WEEK.inverse());
+		Assert.assertEquals(categoryMapper.convert(twicePerDayAmount, twicePerWeekAmount), (double) 12);
 
-		Amount<?> rangedAmount = Amount.rangeOf(2, Double.MAX_VALUE, NonSI.WEEK.inverse());
-		Amount<?> convertedRangedAmount = categoryMapper.convertCategory(rangedAmount, NonSI.DAY.inverse());
-		System.out.println(convertedRangedAmount.getMaximumValue());
+		Amount<?> twiceAtLeastPerWeek = Amount.rangeOf(2, 7, NonSI.WEEK.inverse());
+		Amount<?> threeTimesPerWeek = Amount.valueOf(3, NonSI.WEEK.inverse());
+		Assert.assertEquals(categoryMapper.convert(twiceAtLeastPerWeek, threeTimesPerWeek), (double) 12);
 	}
 
 	@Test
@@ -143,25 +140,48 @@ public class CategoryMapperTest
 		Assert.assertTrue(DurationUnitConversionUtil.isAmountRanged(amountTargetCategory4));
 		Assert.assertEquals(amountTargetCategory4, Amount.rangeOf((double) 0, (double) 1, NonSI.WEEK.inverse()));
 
-		for (Amount<?> amount : Sets.<Amount<?>> newHashSet(amountTargetCategory1, amountTargetCategory2,
-				amountTargetCategory3, amountTargetCategory4))
-		{
-			if (!DurationUnitConversionUtil.isAmountRanged(amount))
-			{
-				System.out.println("Standard amount : " + amount.getEstimatedValue() + " (" + amount.getUnit() + ")");
-				System.out.println("Source amount : " + amountSourceCategory6.getEstimatedValue() + " ("
-						+ amountSourceCategory6.getUnit() + ")");
-				Amount<?> convertedAmount = categoryMapper.convertCategory(amountSourceCategory6, amount.getUnit());
-				System.out.println("Converted value is : " + convertedAmount.getEstimatedValue()
-						+ ". Expected Value is " + amount.getEstimatedValue());
-			}
-			else
-			{
+		HashSet<Amount<?>> newHashSet = Sets.<Amount<?>> newHashSet(amountTargetCategory1, amountTargetCategory2,
+				amountTargetCategory3, amountTargetCategory4);
 
-			}
-		}
+		Amount<?> findBestAmount1 = categoryMapper.findBestAmount(amountSourceCategory1, newHashSet);
+		System.out.println("Source amount : " + amountSourceCategory1.getEstimatedValue() + " ("
+				+ amountSourceCategory1.getUnit() + ")");
+		System.out.println("Best standard amount : " + findBestAmount1.getEstimatedValue() + " ("
+				+ findBestAmount1.getUnit() + ")");
+
+		Amount<?> findBestAmount2 = categoryMapper.findBestAmount(amountSourceCategory2, newHashSet);
+		System.out.println("Source amount : " + amountSourceCategory2.getEstimatedValue() + " ("
+				+ amountSourceCategory2.getUnit() + ")");
+		System.out.println("Best standard amount : " + findBestAmount2.getEstimatedValue() + " ("
+				+ findBestAmount2.getUnit() + ")");
+
+		Amount<?> findBestAmount3 = categoryMapper.findBestAmount(amountSourceCategory3, newHashSet);
+		System.out.println("Source amount : " + amountSourceCategory3.getEstimatedValue() + " ("
+				+ amountSourceCategory3.getUnit() + ")");
+		System.out.println("Best standard amount : " + findBestAmount3.getEstimatedValue() + " ("
+				+ findBestAmount3.getUnit() + ")");
 
 		// Several times a day --> 30 times a week
 		// Several times a week --> 1 between 7 days
+	}
+
+	@Test
+	public void testConvertFactor()
+	{
+		double convertFactor = categoryMapper.convertFactor(
+				Amount.rangeOf((double) 1, (double) 6, NonSI.DAY.inverse()),
+				Amount.valueOf((double) 3, NonSI.DAY.inverse()));
+
+		double convertFactor2 = categoryMapper.convertFactor(
+				Amount.rangeOf((double) 1, (double) 6, NonSI.DAY.inverse()),
+				Amount.valueOf((double) 4, NonSI.DAY.inverse()));
+
+		double convertFactor3 = categoryMapper.convertFactor(
+				Amount.rangeOf((double) 1, (double) 6, NonSI.DAY.inverse()),
+				Amount.rangeOf((double) 4, (double) 5, NonSI.DAY.inverse()));
+
+		System.out.println(convertFactor);
+		System.out.println(convertFactor2);
+		System.out.println(convertFactor3);
 	}
 }
