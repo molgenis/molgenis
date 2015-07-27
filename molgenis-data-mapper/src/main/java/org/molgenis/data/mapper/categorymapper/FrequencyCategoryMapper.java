@@ -1,26 +1,34 @@
 package org.molgenis.data.mapper.categorymapper;
 
-import java.util.OptionalDouble;
-import java.util.Set;
+import java.util.List;
 
 import javax.measure.unit.Unit;
 
 import org.jscience.physics.amount.Amount;
+import org.molgenis.data.mapper.categorymapper.convertor.AmountConvertor;
+import org.molgenis.data.mapper.categorymapper.convertor.DailyAmountConvertor;
+import org.molgenis.data.mapper.categorymapper.convertor.NumberAmountConvertor;
+import org.molgenis.data.mapper.categorymapper.convertor.SeveralTimesConvertor;
 
-import com.google.common.collect.Sets;
+import com.google.common.collect.Lists;
 
 public class FrequencyCategoryMapper
 {
-	private static final Set<AmountConvertor> CONVERTORS = Sets.newHashSet(new DailyAmountConvertor());
+	private static final List<AmountConvertor> CONVERTORS = Lists.newArrayList(new DailyAmountConvertor(),
+			new SeveralTimesConvertor(), new NumberAmountConvertor());
 
-	public Amount<?> convertCategory(Amount<?> amount1, Unit<?> unit, double valueToConvert)
+	public Amount<?> convertCategory(Amount<?> amount1, Unit<?> unit)
 	{
 		if (amount1.getUnit().isCompatible(unit))
 		{
-			Amount<?> amount2 = amount1.to(unit);
-			return amount2.times(valueToConvert);
+			if (isMaxValueUndetermined(amount1))
+			{
+				double maxValue = unit.getConverterTo(amount1.getUnit()).convert((double) 1);
+				amount1 = Amount.rangeOf(amount1.getMinimumValue(), maxValue, amount1.getUnit());
+			}
+			return amount1.to(unit);
 		}
-		return Amount.valueOf(valueToConvert, unit);
+		return null;
 	}
 
 	public Amount<?> convertDescriptionToAmount(String description)
@@ -29,23 +37,16 @@ public class FrequencyCategoryMapper
 
 		for (AmountConvertor convertor : CONVERTORS)
 		{
-			if (convertor.matchCriteria(cleanedDescription)) return convertor.getAmount(cleanedDescription);
+			if (convertor.matchCriteria(cleanedDescription))
+			{
+				return convertor.getAmount(cleanedDescription);
+			}
 		}
-
-		Set<Double> extractNumbers = DurationUnitConversionUtil.extractNumbers(cleanedDescription);
-		Unit<?> unit = DurationUnitConversionUtil.findDurationUnit(cleanedDescription);
-		Double average = average(extractNumbers);
-		if (average != null && unit != null)
-		{
-			return Amount.valueOf(average, unit);
-		}
-
 		return null;
 	}
 
-	Double average(Set<Double> values)
+	boolean isMaxValueUndetermined(Amount<?> amount1)
 	{
-		OptionalDouble average = values.stream().mapToDouble(Double::doubleValue).average();
-		return average.isPresent() ? average.getAsDouble() : null;
+		return DurationUnitConversionUtil.isAmountRanged(amount1) && amount1.getMaximumValue() == Double.MAX_VALUE;
 	}
 }
