@@ -216,8 +216,7 @@ class Connect_Molgenis():
             file_name = os.path.basename(file_path)
         if not os.path.isfile(file_path):
             raise IOError('File not found: '+str(file_path))
-        server_response = requests.post(self.api_url+'/File',data=str({'description':file_name}),files={file_name:open(file_path,'rb')},headers=self.headers)
-        print server_response.text
+        server_response = requests.post(self.api_url+'/File',data=str({'description':file_name,'attachment':open(file_path,'rb')}),headers=self.headers)
         self.check_server_response(server_response,'Upload file',data_used = str(file_path))
         added_id = server_response.headers['location'].split('/')[-1]
         return added_id
