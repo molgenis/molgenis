@@ -3,20 +3,31 @@
 	<parent>
 		<groupId>org.molgenis</groupId>
 		<artifactId>molgenis</artifactId>
-		<version>0.0.1</version>
+		<version>0.0.4</version>
 	</parent>
 	<artifactId>molgenis-omx-mobile</artifactId>
-	<packaging>jar</packaging>	
+	<packaging>jar</packaging>
+	
+	<build>
+		<plugins>
+			<!-- minify css/js -->
+			<plugin>
+				<groupId>com.samaxes.maven</groupId>
+				<artifactId>minify-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+			
 	<dependencies>
 		<dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-omx-core</artifactId>
-            <version>0.0.1</version>
+            <version>0.0.4</version>
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-omx-auth</artifactId>
-            <version>0.0.1</version>
+            <artifactId>molgenis-security</artifactId>
+            <version>0.0.4</version>
         </dependency>
 	</dependencies>
 </project>

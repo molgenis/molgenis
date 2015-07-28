@@ -3,7 +3,7 @@
 	
  	<div class="modal-header">
     	<button type="button" class="close" data-dismiss="#orderdetails-${order.id?c}-modal" data-backdrop="true" aria-hidden="true">&times;</button>
-    	<h3>Order details</h3>
+    	<h3>Submission details</h3>
   	</div>
  	<div class="modal-body">
 		<h5>Project title: ${order.name}</h5>
@@ -12,7 +12,6 @@
 				<th>Variable</th>
 				<th>Description</th>
 			</thead>
-			<tbody>
 				<#list order.features as feature>				
 					<tr>
 						<td>${feature.name}</td>

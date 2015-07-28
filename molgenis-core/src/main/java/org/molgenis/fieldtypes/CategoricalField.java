@@ -5,15 +5,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.framework.ui.html.HtmlInput;
-import org.molgenis.framework.ui.html.HtmlInputException;
 import org.molgenis.model.MolgenisModelException;
 
 public class CategoricalField extends FieldType
 {
 	private static final long serialVersionUID = 1L;
 
-	private Map<String, String> categoryMapping = new HashMap<String, String>();
+	private final Map<String, String> categoryMapping = new HashMap<String, String>();
 
 	@Override
 	public String getJavaPropertyType() throws MolgenisModelException
@@ -70,12 +68,6 @@ public class CategoricalField extends FieldType
 	}
 
 	@Override
-	public HtmlInput<?> createInput(String name, String xrefEntityClassNames) throws HtmlInputException
-	{
-		return null;
-	}
-
-	@Override
 	public String getCppJavaPropertyType() throws MolgenisModelException
 	{
 		return null;
@@ -100,8 +92,7 @@ public class CategoricalField extends FieldType
 	}
 
 	/**
-	 * @return For a categorical variable type, return the map of value->label
-	 *         pairs.
+	 * @return For a categorical variable type, return the map of value->label pairs.
 	 */
 	public Map<String, String> getCategoryMapping()
 	{

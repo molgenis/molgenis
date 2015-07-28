@@ -25,9 +25,9 @@ $(document).bind("mobileinit", function() {
 	$(document).on('click', '.logout', ns.logout);
 });
 
-(function($, w) {
+(function($, molgenis) {
 	"use strict";
-	var ns = w.molgenis = w.molgenis || {};
+	var ns = molgenis;
 	
 	ns.isUserAuthenticated = function(callback) {
 		$.ajax({
@@ -70,33 +70,29 @@ $(document).bind("mobileinit", function() {
 		});
 	}
 	
-	ns.login = function() {	
+	ns.login = function() {
 		$.ajax({
-			type : 'POST',
-			url : '/mobile/login',
-			data : JSON.stringify({
-				username: $('#username').val(),
-				password: $('#password').val()
-			}),
+			type: $('#login-form').attr('method'),
+			url: $('#login-form').attr('action'),
+			data: $('#login-form').serialize(),
 			async:false,
-			contentType : 'application/json',
 			success : function(response) {
-				if (response.success) {
-					$.mobile.changePage(MolgenisMobileConfig.startPage, {transition: "flip"});
-				} else {
-					alert(response.errorMessage);
-				}
+				$.mobile.changePage(MolgenisMobileConfig.startPage, {transition: "flip"});
+			},
+			error: function(jqXHR, textStatus, errorThrown) {
+				alert(errorThrown)
 			}
 		});
 	}
 	
 	ns.logout = function() {
 		$.ajax({
-			url : '/mobile/logout',
+			type: 'POST',
+			url: '/logout',
 			success : function() {
 				$('#features').html('').listview('refresh');
 				$.mobile.changePage("#login-page", {transition: "flip", reverse: true});
 			}
 		});
 	}
-}($, window.top));
+}($, window.top.molgenis = window.top.molgenis || {}));

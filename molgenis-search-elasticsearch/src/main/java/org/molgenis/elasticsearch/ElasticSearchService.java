@@ -14,11 +14,13 @@ import org.elasticsearch.action.admin.indices.exists.types.TypesExistsRequest;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.deletebyquery.DeleteByQueryResponse;
 import org.elasticsearch.action.deletebyquery.IndexDeleteByQueryResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
+import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
@@ -76,8 +78,7 @@ public class ElasticSearchService implements SearchService
 	public long count(String documentType, List<QueryRule> queryRules)
 	{
 
-		SearchRequest request = new SearchRequest(sanitizeMapperType(documentType), queryRules,
-				Collections.<String> emptyList());
+		SearchRequest request = new SearchRequest(documentType, queryRules, Collections.<String> emptyList());
 		SearchResult result = search(SearchType.COUNT, request);
 
 		return result.getTotalHitCount();
@@ -88,7 +89,7 @@ public class ElasticSearchService implements SearchService
 
 		SearchRequestGenerator generator = new SearchRequestGenerator(client.prepareSearch(indexName));
 
-		String documentType = sanitizeMapperType(request.getDocumentType());
+		String documentType = request.getDocumentType() == null ? null : sanitizeMapperType(request.getDocumentType());
 		SearchRequestBuilder requestBuilder = generator.buildSearchRequest(documentType, searchType,
 				request.getQueryRules(), request.getFieldsToReturn());
 
@@ -221,6 +222,43 @@ public class ElasticSearchService implements SearchService
 		}
 
 		LOG.info("Delete done.");
+	}
+
+	public void deleteDocumentByIds(String documentType, List<String> documentIds)
+	{
+		LOG.info("Going to delete document of type [" + documentType + "] with Id : " + documentIds);
+
+		String documentTypeSantized = sanitizeMapperType(documentType);
+
+		for (String documentId : documentIds)
+		{
+			DeleteResponse deleteResponse = client.prepareDelete(indexName, documentTypeSantized, documentId)
+					.setRefresh(true).execute().actionGet();
+			if (deleteResponse != null)
+			{
+				if (deleteResponse.isNotFound())
+				{
+					throw new ElasticSearchException("Delete failed. Returned headers:" + deleteResponse.getHeaders());
+				}
+			}
+		}
+		LOG.info("Delete done.");
+	}
+
+	public void updateDocumentById(String documentType, String documentId, String updateScript)
+	{
+		LOG.info("Going to delete document of type [" + documentType + "] with Id : " + documentId);
+
+		String documentTypeSantized = sanitizeMapperType(documentType);
+		UpdateResponse updateResponse = client.prepareUpdate(indexName, documentTypeSantized, documentId)
+				.setScript("ctx._source." + updateScript).execute().actionGet();
+
+		if (updateResponse == null)
+		{
+			throw new ElasticSearchException("update failed.");
+		}
+
+		LOG.info("Update done.");
 	}
 
 	private void createIndexIfNotExists()

@@ -88,7 +88,7 @@
 				{
 					org.molgenis.framework.db.QueryRule xrefFilter = new org.molgenis.framework.db.QueryRule("${f.xrefLabelNames[0]}", org.molgenis.framework.db.QueryRule.Operator.EQUALS, label.toString());
 					
-					if(label != null && !${name(f)}Rules.containsKey(label))
+					if(!${name(f)}Rules.containsKey(label))
 					{
 						${name(f)}Rules.put(""+label, xrefFilter);
 						${name(f)}Rules.put(""+label+"_OR_", new org.molgenis.framework.db.QueryRule(org.molgenis.framework.db.QueryRule.Operator.OR));

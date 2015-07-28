@@ -48,4 +48,16 @@ public class ValueConverterTest
 		value.setValue("value");
 		assertEquals(new ValueConverter(database).fromTuple(tuple, colName, feature), value);
 	}
+
+	@Test
+	public void updateFromTuple() throws ValueConverterException
+	{
+		ObservableFeature feature = when(mock(ObservableFeature.class).getDataType()).thenReturn("text").getMock();
+		String colName = "col";
+		KeyValueTuple tuple = new KeyValueTuple();
+		tuple.set(colName, "value");
+		TextValue value = new TextValue();
+		new ValueConverter(database).updateFromTuple(tuple, colName, feature, value);
+		assertEquals(value.getValue(), "value");
+	}
 }

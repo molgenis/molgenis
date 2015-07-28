@@ -6,10 +6,11 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration.Dynamic;
 
 import org.apache.log4j.Logger;
-import org.molgenis.servlet.FrontController;
 import org.springframework.web.WebApplicationInitializer;
+import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.request.RequestContextListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.servlet.DispatcherServlet;
 
 public class WebAppInitializer implements WebApplicationInitializer
@@ -22,6 +23,9 @@ public class WebAppInitializer implements WebApplicationInitializer
 		AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();
 		ctx.register(WebAppConfig.class);
 
+		// manage the lifecycle of the root application context
+		servletContext.addListener(new ContextLoaderListener(ctx));
+
 		// spring
 		Dynamic dispatcherServlet = servletContext.addServlet("dispatcher", new DispatcherServlet(ctx));
 		if (dispatcherServlet == null)
@@ -31,26 +35,16 @@ public class WebAppInitializer implements WebApplicationInitializer
 		else
 		{
 			final int maxSize = 32 * 1024 * 1024;
-			dispatcherServlet.setLoadOnStartup(1);
+			dispatcherServlet.setLoadOnStartup(2);
 			dispatcherServlet.addMapping("/");
 			dispatcherServlet.setMultipartConfig(new MultipartConfigElement(null, maxSize, maxSize, maxSize));
 			dispatcherServlet.setInitParameter("dispatchOptionsRequest", "true");
 		}
 
-		// molgenis
-		Dynamic frontControllerServlet = servletContext.addServlet("front-controller", new FrontController());
-		if (frontControllerServlet == null)
-		{
-			logger.warn("ServletContext already contains a complete ServletRegistration for servlet 'front-controller'");
-		}
-		else
-		{
-			frontControllerServlet.setLoadOnStartup(2);
-			frontControllerServlet.addMapping("/molgenis.do");
-			frontControllerServlet.addMapping("/xref/find"); // org.molgenis.framework.server.services.MolgenisXrefService
-			frontControllerServlet.addMapping("/captchaImg"); // org.molgenis.auth.service.MolgenisCaptchaService
-			frontControllerServlet.addMapping("/tmpfile"); // org.molgenis.framework.server.services.MolgenisTmpFileService
-		}
+		// add filters
+		javax.servlet.FilterRegistration.Dynamic etagFilter = servletContext.addFilter("etagFilter",
+				new ShallowEtagHeaderFilter());
+		etagFilter.addMappingForServletNames(null, true, "dispatcher");
 
 		// enable use of request scoped beans in FrontController
 		servletContext.addListener(new RequestContextListener());

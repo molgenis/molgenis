@@ -17,7 +17,7 @@
 	<script src="/js/jquery-1.10.2.min.js"></script>
 	<script src="/js/jquery.validate.min.js"></script>
 	<script src="/js/jquery.loadmask.min.js"></script>
-	<script src="/js/molgenis-all.js"></script>
+	<script src="/js/molgenis.js"></script>
 	<script src="/js/molgenis-mobile-login.js"></script>
 	<script src="/js/molgenis-mobile-data-items.js"></script>
 	<script src="/js/molgenis-mobile-data-item-detail.js"></script>
@@ -30,7 +30,7 @@
 			<div id="logo">
 				<img src="/img/logo_molgenis_letterbox.png" />
 			</div>
-			<form id="login-form">
+			<form id="login-form" method="POST" action="/login">
     			<input id="username" name="username" placeholder="Username" value="" data-clear-btn="true" type="text">
     			<input id="password" name="password" placeholder="Password" value="" data-clear-btn="true" type="password">
     			<input id="submit-button" type="submit" value="login" />

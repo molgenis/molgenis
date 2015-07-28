@@ -71,6 +71,10 @@ public class QueryRule
 	 */
 	public enum Operator
 	{
+		/** Boolean query */
+		SHOULD("SHOULD"),
+		/** Disjunction max query */
+		DIS_MAX("DIS_MAX"),
 		/** search all fields */
 		SEARCH("search"),
 		/** 'field' equal to 'value' */

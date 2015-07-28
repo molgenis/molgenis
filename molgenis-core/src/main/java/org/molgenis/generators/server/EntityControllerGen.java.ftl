@@ -2,14 +2,19 @@
 <#assign fields=allFields(entity)>
 package org.molgenis.controller;
 
+import java.beans.PropertyEditorSupport;
+import java.text.ParseException;
 import java.lang.RuntimeException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.validation.Valid;
+
+import org.apache.log4j.Logger;
 
 import ${entity.namespace}.${JavaName(entity)};
 import org.molgenis.framework.server.EntityCollectionRequest;
@@ -35,6 +40,9 @@ import org.molgenis.service.${field.xrefEntity.name}Service;
 </#if>
 </#list>
 import org.molgenis.util.EntityPager;
+import org.molgenis.util.ErrorMessageResponse;
+import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
+import org.molgenis.util.MolgenisDateFormat;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -42,7 +50,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -51,6 +61,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
@@ -63,6 +75,8 @@ import com.google.common.collect.Lists;
 @RequestMapping("/api/v1/${entity.name?lower_case}")
 public class ${entity.name}Controller
 {
+	private static Logger logger = Logger.getLogger(${entity.name}Controller.class);
+	 
 	@Autowired
 	private ${entity.name}Service ${entity.name?uncap_first}Service;
 
@@ -121,6 +135,42 @@ public class ${entity.name}Controller
 		return _retrieve${entity.name}(id, expandFields);
 	}
 
+	@InitBinder
+	public void binder(WebDataBinder binder)
+	{
+
+		binder.registerCustomEditor(Date.class, new PropertyEditorSupport()
+		{
+			@Override
+			public void setAsText(String value)
+			{
+				try
+				{
+					if (StringUtils.isNotBlank(value))
+					{
+						setValue(MolgenisDateFormat.getDateFormat().parse(value));
+					}
+				}
+				catch (ParseException e)
+				{
+					throw new RuntimeException(e);
+				}
+			}
+
+			@Override
+			public String getAsText()
+			{
+				if (getValue() == null)
+				{
+					return null;
+				}
+				
+				return MolgenisDateFormat.getDateFormat().format((Date) getValue());
+			}
+
+		});
+	}
+
 	private ${entity.name}Response _retrieve${entity.name}(${type(entity.primaryKey)} id, String... expandFieldsStr) throws DatabaseException
 	{
 		${entity.name} ${entity.name?uncap_first} = ${entity.name?uncap_first}Service.read(id);
@@ -148,7 +198,7 @@ public class ${entity.name}Controller
 	{
 		${entity.name} ${entity.name?uncap_first} = ${entity.name?uncap_first}Service.read(id);
 		if (${entity.name?uncap_first} == null) throw new EntityNotFoundException("${entity.name} " + id.toString() + " not found");
-		${type(entity.primaryKey)} ${field.xrefEntity.name?uncap_first}Id = ${entity.name?uncap_first}.get${field.name?cap_first}_${field.xrefEntity.primaryKey.name?cap_first}();
+		${type(entity.primaryKey)} ${field.xrefEntity.name?uncap_first}Id = ${entity.name?uncap_first}.get${JavaName(field)}_${field.xrefEntity.primaryKey.name?cap_first}();
 		<#-- 'forward:' prefix does not work with URL query parameters -->
 		String redirectUri = "redirect:/api/v1/${field.xrefEntity.name?lower_case}/" + ${field.xrefEntity.name?uncap_first}Id.toString();
 		StringBuilder qsBuilder = new StringBuilder();
@@ -185,7 +235,7 @@ public class ${entity.name}Controller
 	private static EntityCollectionResponse<${field.xrefEntity.name}Response> _retrieve${entity.name}Mref${field.name?cap_first}(${entity.name} ${entity.name?uncap_first}, EntityCollectionRequest entityCollectionRequest, String... expandFieldsStr) throws DatabaseException
 	{
 		final Set<String> expandFields = expandFieldsStr != null ? new HashSet<String>(Arrays.asList(expandFieldsStr)) : null;
-		java.util.List<${field.xrefEntity.name}> ${field.xrefEntity.name?uncap_first}Collection = ${entity.name?uncap_first}.get${field.name?cap_first}();
+		java.util.List<${field.xrefEntity.name}> ${field.xrefEntity.name?uncap_first}Collection = ${entity.name?uncap_first}.get${JavaName(field)}();
 		
 		int total = ${field.xrefEntity.name?uncap_first}Collection.size();
 		int toIndex = entityCollectionRequest.getStart() + entityCollectionRequest.getNum();
@@ -348,6 +398,8 @@ public class ${entity.name}Controller
 			<#if (!(field.xrefField??) || !field.xrefField.system) && !field.xrefEntity.system>
 		private java.util.List<${type(field.xrefEntity.primaryKey)}> ${field.name?uncap_first};
 			</#if>
+		<#elseif field.type == "bool">
+		private ${type(field)} ${field.name?uncap_first} = false;	
 		<#else>
 		private ${type(field)} ${field.name?uncap_first};
 		</#if>
@@ -362,10 +414,10 @@ public class ${entity.name}Controller
 			<#if field.type == "xref" || field.type == "mref">
 				<#-- security: do not expose system fields/entities -->
 				<#if (!(field.xrefField??) || !field.xrefField.system) && !field.xrefEntity.system>
-			${entity.name?uncap_first}.set${field.name?cap_first}_${field.xrefEntity.primaryKey.name?cap_first}(${field.name?uncap_first});
+			${entity.name?uncap_first}.set${JavaName(field)}_${field.xrefEntity.primaryKey.name?cap_first}(${field.name?uncap_first});
 				</#if>
 			<#else>
-			${entity.name?uncap_first}.set${field.name?cap_first}(${field.name?uncap_first});
+			${entity.name?uncap_first}.set${JavaName(field)}(${field.name?uncap_first});
 			</#if>
 		</#if>
 		</#list>
@@ -424,23 +476,23 @@ public class ${entity.name}Controller
 		{
 		<#list fields as field>
 		<#if field.equals(entity.primaryKey)>
-			this.href = "/api/v1/${entity.name?lower_case}/" + ${entity.name?uncap_first}.get${field.name?cap_first}();
+			this.href = "/api/v1/${entity.name?lower_case}/" + ${entity.name?uncap_first}.get${JavaName(field)}();
 		<#elseif !field.system && !field.hidden && field.name != "__Type">
 			<#if field.type == "xref">
 				<#-- security: do not expose system fields/entities -->
 				<#if (!(field.xrefField??) || !field.xrefField.system) && !field.xrefEntity.system>
-			if (expandFields != null && expandFields.contains("${field.name?uncap_first}")) this.${field.name?uncap_first} = <#if field.nillable>${entity.name?uncap_first}.get${field.name?cap_first}() == null ? null : </#if>new ${field.xrefEntity.name}Response(${entity.name?uncap_first}.get${field.name?cap_first}(), null);
-			else this.${field.name?uncap_first} = <#if field.nillable>${entity.name?uncap_first}.get${field.name?cap_first}() == null ? null : </#if>java.util.Collections.singletonMap("href", "/api/v1/${entity.name?lower_case}/" + ${entity.name?uncap_first}.get${entity.primaryKey.name?cap_first}() + "/${field.name?uncap_first}");
+			if (expandFields != null && expandFields.contains("${field.name?uncap_first}")) this.${field.name?uncap_first} = <#if field.nillable>${entity.name?uncap_first}.get${JavaName(field)}() == null ? null : </#if>new ${field.xrefEntity.name}Response(${entity.name?uncap_first}.get${JavaName(field)}(), null);
+			else this.${field.name?uncap_first} = <#if field.nillable>${entity.name?uncap_first}.get${JavaName(field)}() == null ? null : </#if>java.util.Collections.singletonMap("href", "/api/v1/${entity.name?lower_case}/" + ${entity.name?uncap_first}.get${entity.primaryKey.name?cap_first}() + "/${field.name?uncap_first}");
 				</#if>
 			<#elseif field.type == "mref">
 				<#-- security: do not expose system fields/entities -->
 				<#if (!(field.xrefField??) || !field.xrefField.system) && !field.xrefEntity.system>
-			<#if field.nillable>java.util.List<${field.xrefEntity.name}> ${field.name}Collection = ${entity.name?uncap_first}.get${field.name?cap_first}();</#if>
+			<#if field.nillable>java.util.List<${field.xrefEntity.name}> ${field.name}Collection = ${entity.name?uncap_first}.get${JavaName(field)}();</#if>
 			if (expandFields != null && expandFields.contains("${field.name?uncap_first}")) this.${field.name?uncap_first} = <#if field.nillable>${field.name}Collection == null ? null : </#if>_retrieve${entity.name}Mref${field.name?cap_first}(${entity.name?uncap_first}, new EntityCollectionRequest());
 			else this.${field.name?uncap_first} = <#if field.nillable>${field.name}Collection == null ? null : </#if>java.util.Collections.singletonMap("href", "/api/v1/${entity.name?lower_case}/" + ${entity.name?uncap_first}.get${entity.primaryKey.name?cap_first}() + "/${field.name?uncap_first}");
 				</#if>
 			<#else>
-			this.${field.name?uncap_first} = ${entity.name?uncap_first}.get${field.name?cap_first}();
+			this.${field.name?uncap_first} = ${entity.name?uncap_first}.get${JavaName(field)}();
 			</#if>
 		</#if>
 		</#list>
@@ -474,13 +526,37 @@ public class ${entity.name}Controller
 	
 	@ExceptionHandler(EntityNotFoundException.class)
 	@ResponseStatus(value = HttpStatus.NOT_FOUND)
-	public void handleEntityNotFoundException(EntityNotFoundException e)
+	@ResponseBody
+	public ErrorMessageResponse handleEntityNotFoundException(EntityNotFoundException e)
 	{
+		logger.debug(e);
+		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
-	
+
+	@ExceptionHandler(DatabaseException.class)
+	@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
+	@ResponseBody
+	public ErrorMessageResponse handleDatabaseException(DatabaseException e)
+	{
+		logger.error(e);
+		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
+	}
+
 	@ExceptionHandler(DatabaseAccessException.class)
 	@ResponseStatus(value = HttpStatus.UNAUTHORIZED)
-	public void handleDatabaseAccessException(DatabaseAccessException e)
+	@ResponseBody
+	public ErrorMessageResponse handleDatabaseAccessException(DatabaseAccessException e)
 	{
+		logger.info(e);
+		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
+	}
+	
+	@ExceptionHandler(RuntimeException.class)
+	@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
+	@ResponseBody
+	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
+	{
+		logger.error(e);		
+		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 }

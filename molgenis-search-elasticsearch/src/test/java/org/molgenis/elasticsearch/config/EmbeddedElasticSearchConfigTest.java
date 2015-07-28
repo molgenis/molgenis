@@ -17,6 +17,7 @@ public class EmbeddedElasticSearchConfigTest
 	@BeforeClass
 	public void beforeClass()
 	{
+		System.setProperty("molgenis.home", System.getProperty("java.io.tmpdir"));
 		context = new AnnotationConfigApplicationContext(EmbeddedElasticSearchConfig.class);
 	}
 

@@ -12,7 +12,7 @@ public class TupleToDateValueConverterTest
 {
 
 	@Test
-	public void toCell()
+	public void toCell() throws ValueConverterException
 	{
 		Date date = new Date(1371420000000l);
 		DateValue value = new DateValue();
@@ -27,6 +27,17 @@ public class TupleToDateValueConverterTest
 		KeyValueTuple tuple = new KeyValueTuple();
 		tuple.set(colName, "2013-06-17");
 		DateValue value = new TupleToDateValueConverter().fromTuple(tuple, colName, null);
+		assertEquals(value.getValue(), new Date(1371420000000l));
+	}
+
+	@Test
+	public void updateFromTuple() throws ValueConverterException
+	{
+		DateValue value = new DateValue();
+		String colName = "col";
+		KeyValueTuple tuple = new KeyValueTuple();
+		tuple.set(colName, "2013-06-17");
+		new TupleToDateValueConverter().updateFromTuple(tuple, colName, null, value);
 		assertEquals(value.getValue(), new Date(1371420000000l));
 	}
 }

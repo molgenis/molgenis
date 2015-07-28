@@ -1281,4 +1281,23 @@ public class Field implements Serializable
 			return this.name;
 		}
 	}
+
+	/**
+	 * If this a unique field? If this field is part of a compound key it will return false
+	 * 
+	 * @return
+	 * @throws MolgenisModelException
+	 */
+	public boolean isUnique() throws MolgenisModelException
+	{
+		for (Unique unique : entity.getUniqueKeysWithoutPk())
+		{
+			if ((unique.getFields().size() == 1) && unique.getFields().get(0).getName().equals(name))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
 }

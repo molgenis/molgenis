@@ -12,17 +12,32 @@ public class TupleToEmailValueConverter implements TupleToValueConverter<EmailVa
 	@Override
 	public EmailValue fromTuple(Tuple tuple, String colName, ObservableFeature feature) throws ValueConverterException
 	{
+		return updateFromTuple(tuple, colName, feature, new EmailValue());
+	}
+
+	@Override
+	public EmailValue updateFromTuple(Tuple tuple, String colName, ObservableFeature feature, Value value)
+			throws ValueConverterException
+	{
+		if (!(value instanceof EmailValue))
+		{
+			throw new ValueConverterException("value is not a " + EmailValue.class.getSimpleName());
+		}
 		String email = tuple.getString(colName);
 		if (email == null) return null;
 
-		EmailValue emailValue = new EmailValue();
+		EmailValue emailValue = (EmailValue) value;
 		emailValue.setValue(email);
 		return emailValue;
 	}
 
 	@Override
-	public Cell<String> toCell(Value value)
+	public Cell<String> toCell(Value value) throws ValueConverterException
 	{
+		if (!(value instanceof EmailValue))
+		{
+			throw new ValueConverterException("value is not a " + EmailValue.class.getSimpleName());
+		}
 		return new ValueCell<String>(((EmailValue) value).getValue());
 	}
 }

@@ -84,17 +84,13 @@ public class SampleConverter
 					if (row.getString(IDENTIFIER) != null && !row.getString(IDENTIFIER).isEmpty())
 					{
 						String sampleId = row.getString(IDENTIFIER);
-						if (checkIfDouble(sampleId))
-						{
-							System.out.println("Double entry: " + sampleId + " has been removed");
-
-						}
-						else
+						if (!checkIfDouble(sampleId))
 						{
 							createCategoryList(row, sampleId);
 
 							csvWriter.write(row);
 						}
+						
 					}
 					else
 					{

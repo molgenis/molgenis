@@ -1,7 +1,7 @@
-(function($, w) {
+(function($, molgenis) {
 	"use strict";
 
-	var ns = w.molgenis = w.molgenis || {};
+	var ns = molgenis;
 	
 	var search = false;
 	var searchQuery = null;
@@ -53,33 +53,6 @@
 				});
 			}
 		}
-
-		function onNodeSelectionChange(selectedNodes) {
-			function getSiblingPos(node) {
-				var pos = 0;
-				do {
-					node = node.getPrevSibling();
-					if (node == null)
-						break;
-					else
-						++pos;
-				} while (true);
-				return pos;
-			}
-			var sortedNodes = selectedNodes.sort(function(node1, node2) {
-				var diff = node1.getLevel() - node2.getLevel();
-				if (diff == 0) {
-					diff = getSiblingPos(node1.getParent()) - getSiblingPos(node2.getParent());
-					if (diff == 0)
-						diff = getSiblingPos(node1) - getSiblingPos(node2);
-				}
-				return diff <= 0 ? -1 : 1;
-			});
-			var sortedFeatures = $.map(sortedNodes, function(node) {
-				return node.data.isFolder ? null : node.data.key;
-			});
-			ns.onFeatureSelectionChange(sortedFeatures);
-		}
 		
 		function updateNodesInSearch(select, node){
 			
@@ -107,10 +80,7 @@
 					if($.inArray(node.data.key, selectKeys) == -1) updatedNodes.select[node.data.key] = node;
 				}
 			}
-			else{
-				var selectKeys = Object.keys(updatedNodes.select);
-				var unselectKeys = Object.keys(updatedNodes.unselect);
-				
+			else{				
 				if(node.data.isFolder){
 					node.visit(function(subNode){
 						if(!subNode.isSelected()){
@@ -152,7 +122,7 @@
 					isFolder : true,
 					isLazy : true,
 					children : createChildren(protocol.href, {
-						select : true
+						select : false
 					}, {})
 				} ],
 				onLazyRead : function(node) {
@@ -189,6 +159,7 @@
 					updateFeatureSelection(node.tree);
 				},
 			});
+			container.find(".dynatree-checkbox").first().hide();
 		});
 	};
 	
@@ -206,7 +177,7 @@
 	
 	ns.getSelectedFeatures = function() {
 		return allSelectedFeatures;
-	}
+	};
 	
 	ns.searchAndUpdateTree = function(query, protocolUri) {
 		
@@ -217,11 +188,11 @@
 			var nrFeatureRequests = Math.ceil(featureIds.length / batchSize);
 			var nrRequest = nrFeatureRequests + nrProtocolRequests;
 			if(nrRequest > 0){
-				var workers = [];
-				for(var i = 0 ; i < nrRequest ; i++) {
+				var workers = [], i;
+				for(i = 0 ; i < nrRequest ; i++) {
 					workers[i] = false;
 				}
-				for(var i = 0 ; i < nrRequest ; i++) {
+				for(i = 0 ; i < nrRequest ; i++) {
 					var entityType = i < nrProtocolRequests ?  "protocol" : "observablefeature";
 					var ids = i < nrProtocolRequests ?  protocolIds : featureIds;
 					var start = i < nrProtocolRequests ? i * batchSize : (i - nrProtocolRequests) * batchSize;
@@ -249,9 +220,49 @@
 		function selectedNodeIds(selectedNodes){
 			var selectedIds = new Array ();
 			$.each(selectedNodes, function(index, element){
-				selectedIds.push(element.data.key);
+				selectedIds.push(hrefToId(element.data.key));
 			});
 			return selectedIds;
+		}
+		
+		function findAllParents(selectedFeatureIds, callback){
+			var selectedFeaturesToLoad = [];
+			if(selectedFeatureIds.length > 0){
+				var queryRules = [];
+				$.each(selectedFeatureIds, function(index, featureId){
+					if(queryRules.length !== 0){
+						queryRules.push({
+							operator : 'OR'
+						});
+					}
+					queryRules.push({
+						field : 'id',
+						operator : 'EQUALS',
+						value : featureId
+					});
+				});
+				queryRules.push({
+					operator : 'LIMIT',
+					value : 10000
+				});
+				var dataSet = ns.getSelectedDataSet();
+				var searchRequest = {
+					documentType : 'protocolTree-' + hrefToId(dataSet.href),
+					queryRules : queryRules
+				};
+				searchApi.search(searchRequest, function(searchResponse){
+					$.each(searchResponse.searchHits, function(index, hit){
+						selectedFeaturesToLoad.push(hit);
+					});
+					callback(selectedFeaturesToLoad);
+				});
+			}else{
+				callback(selectedFeaturesToLoad);
+			}
+		}
+		
+		function hrefToId (href){
+			return href.substring(href.lastIndexOf('/') + 1); 
 		}
 		
 		searchQuery = $.trim(query);
@@ -269,101 +280,133 @@
 					selectedAllNodes[node.data.key] = node;
 				});
 			}
-			var searchHits = searchResponse["searchHits"];
 			
-			var protocols = {};
-			var features = {};
-			$.each(searchHits, function(){
-				var object = $(this)[0]["columnValueMap"];
-				var nodes = object["path"].split(".");
-				//collect all features and their ancesters using restapi first.
-				for(var i = 0; i < nodes.length; i++){
-					if(nodes[i].indexOf("F") === 0) features[nodes[i].substring(1)] = null;
-					else protocols[nodes[i]] = null;
-				}
-			});
-			
-			preloadEntities(Object.keys(protocols), Object.keys(features), function(){
-				var cachedNode = {};
-				var topNodes = new Array();
+			findAllParents(selectedFeatureIds, function(hitsToHide){
+				var searchHits = searchResponse["searchHits"];
+				var protocols = {};
+				var features = {};
 				$.each(searchHits, function(){
 					var object = $(this)[0]["columnValueMap"];
 					var nodes = object["path"].split(".");
-					var entityId = object["id"];
-					//split the path to get all ancestors;
-					for(var i = 0; i < nodes.length; i++) {
-						var isFeature = nodes[i].indexOf("F") === 0;
-						if(isFeature) nodes[i] = nodes[i].substring(1);
-						if(!cachedNode[nodes[i]]){
-							var entityInfo = null;
-							var options = null;
-							//this is the last node and check if this is a feature
-							if(isFeature){
-								entityInfo = restApi.get('/api/v1/observablefeature/' + nodes[i]);
-								options = {
-									isFolder : false,
-								};
-							}else{
-								entityInfo = restApi.get('/api/v1/protocol/' + nodes[i]);
-								options = {
-									isFolder : true,
-									isLazy : true,
-									expand : true,
-									children : []
-								};
-								//check if the last node is protocol if so recursively adding all subNodes
-								if(i === nodes.length - 1) {
-									options.children = createChildren('/api/v1/protocol/' + nodes[i], null, {expand : false});
-									$.each(options.children, function(index, child){
-										var nodeId = child.key.substring(child.key.lastIndexOf('/') + 1);
-										if(!cachedNode[nodeId]){
-											if(child.isFolder) child.children = [];
-											cachedNode[nodeId] = child;
-										}
-									});
-								}
-							}
-							options = $.extend({
-								key : entityInfo.href,
-								title : entityInfo.name,
-								tooltip : getDescription(entityInfo).en
-							}, options);
-							
-							if($.inArray(entityInfo.href, selectedFeatureIds) !== -1){
-								options["select"] = true;
-							}
-							//locate the node in dynatree and otherwise create the node and insert it
-							if(i != 0){
-								var parentNode = cachedNode[nodes[i-1]];
-								parentNode.expand = true;
-								parentNode["children"].push(options);
-								cachedNode[nodes[i-1]] = parentNode;
-							}
-							else
-								topNodes.push(options);
-							cachedNode[nodes[i]] = options;
-						}else{
-							if (nodes[i] === entityId.toString() && i != 0) {
-								var parentNode = cachedNode[nodes[i-1]];
-								parentNode.expand = true;
-								var childNode = cachedNode[nodes[i]];
-								if($.inArray(childNode, parentNode.children) === -1){ 
-									parentNode.children.push(cachedNode[nodes[i]]);
-									cachedNode[nodes[i-1]] = parentNode;
-								}
-							}
-						} 
+					//collect all features and their ancestors using REST API first.
+					for(var i = 0; i < nodes.length; i++){
+						if(nodes[i].indexOf("F") === 0) features[nodes[i].substring(1)] = null;
+						else protocols[nodes[i]] = null;
 					}
 				});
-				sortNodes(topNodes);
-				rootNode.removeChildren();
-				rootNode.addChild(topNodes);
 				
-				if($('#dataset-browser').next().length > 0) $('#dataset-browser').next().remove();
-				if(topNodes.length === 0) {
-					$('#dataset-browser').hide();
-					$('#dataset-browser').after('<div id="match-message">No data items were matched!</div>');
-				} else $('#dataset-browser').show();
+				preloadEntities(Object.keys(protocols), Object.keys(features), function(){
+					var cachedNode = {};
+					var topNodes = new Array();
+					$.each(searchHits, function(){
+						var object = $(this)[0]["columnValueMap"];
+						var nodes = object["path"].split(".");
+						var entityId = object["id"];
+						//split the path to get all ancestors;
+						for(var i = 0; i < nodes.length; i++) {
+							var isFeature = nodes[i].indexOf("F") === 0;
+							if(isFeature) nodes[i] = nodes[i].substring(1);
+							if(!cachedNode[nodes[i]]){
+								var entityInfo = null;
+								var options = null;
+								//this is the last node and check if this is a feature
+								if(isFeature){
+									entityInfo = restApi.get('/api/v1/observablefeature/' + nodes[i]);
+									options = {
+										isFolder : false,
+									};
+								}else{
+									entityInfo = restApi.get('/api/v1/protocol/' + nodes[i]);
+									options = {
+										isFolder : true,
+										isLazy : true,
+										expand : true,
+										children : []
+									};
+									//check if the last node is protocol if so recursively adding all subNodes
+									if(i === nodes.length - 1) {
+										options.children = createChildren('/api/v1/protocol/' + nodes[i], null, {expand : false});
+										$.each(options.children, function(index, child){
+											var nodeId = child.key.substring(child.key.lastIndexOf('/') + 1);
+											if(!cachedNode[nodeId]){
+												if(child.isFolder) child.children = [];
+												cachedNode[nodeId] = child;
+											}
+										});
+									}
+								}
+								options = $.extend({
+									key : entityInfo.href,
+									title : entityInfo.name,
+									tooltip : getDescription(entityInfo).en
+								}, options);
+								
+								if($.inArray(entityInfo.href, selectedFeatureIds) !== -1){
+									options["select"] = true;
+								}
+								//locate the node in dynatree and otherwise create the node and insert it
+								if(i != 0){
+									var parentNode = cachedNode[nodes[i-1]];
+									parentNode.expand = true;
+									parentNode["children"].push(options);
+									cachedNode[nodes[i-1]] = parentNode;
+								}
+								else
+									topNodes.push(options);
+								cachedNode[nodes[i]] = options;
+							}else{
+								if (nodes[i] === entityId.toString() && i != 0) {
+									var parentNode = cachedNode[nodes[i-1]];
+									parentNode.expand = true;
+									var childNode = cachedNode[nodes[i]];
+									if($.inArray(childNode, parentNode.children) === -1){ 
+										parentNode.children.push(cachedNode[nodes[i]]);
+										cachedNode[nodes[i-1]] = parentNode;
+									}
+								}
+							} 
+						}
+					});
+					
+					$.each(hitsToHide, function(index, hit){
+						var object = hit.columnValueMap;
+						var nodes = object["path"].split(".");
+						//split the path to get all ancestors;
+						for(var i = 0; i < nodes.length; i++) {
+							var isFeature = nodes[i].indexOf("F") === 0;
+							if(isFeature) nodes[i] = nodes[i].substring(1);
+							if(cachedNode[nodes[i]] && i !== 0){
+								if(isFeature) cachedNode[nodes[i]].select = true;
+								else {
+									var currentNode = cachedNode[nodes[i]];
+									if(currentNode.children.length === 0){
+										currentNode.children = createChildren('/api/v1/protocol/' + nodes[i], null, {expand : false});
+										cachedNode[nodes[i]] = currentNode;
+										
+										$.each(currentNode.children, function(index, child){
+											var nodeId = child.key.substring(child.key.lastIndexOf('/') + 1);
+											if(!cachedNode[nodeId]){
+												if(child.isFolder) child.children = [];
+												cachedNode[nodeId] = child;
+											}
+										});
+									}
+								}
+							}
+						}
+					});
+					
+					sortNodes(topNodes);
+					rootNode.removeChildren();
+					if(topNodes.length !== 0)
+						rootNode.addChild(topNodes[0].children);
+					
+					if($('#dataset-browser').next().length > 0) $('#dataset-browser').next().remove();
+					if(topNodes.length === 0) {
+						$('#dataset-browser').hide();
+						$('#dataset-browser').after('<div id="match-message">No data items were matched!</div>');
+					} else $('#dataset-browser').show();
+				});
 			});
 		});
 	};
@@ -405,6 +448,8 @@
 			}
 			return;
 		}
+		var prevRenderMode = rootNode.tree.enableUpdate(false); // disable rendering
+		
 		rootNode.removeChildren();
 		rootNode.addChild(treePrevState.children);
 		
@@ -439,6 +484,8 @@
 				if(currentNode != null) currentNode.select(false);
 			});
 		}
+		
+		rootNode.tree.enableUpdate(prevRenderMode); // restore previous rendering state
 		
 		//reset variables
 		search = false;
@@ -571,6 +618,9 @@
 					categories.push($(this)[0]);
 				});
 				data["categories"] = categories;
+			},
+			error: function (xhr) {
+				molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 			}
 		});
 		callback(data);
@@ -586,10 +636,11 @@
 		var table = $('<table />');
 		
 		table.append('<tr><td>' + "Name:" + '</td><td>' + feature.name + '</td></tr>');
+		table.append('<tr><td>' + "Identifier:" + '</td><td>' + feature.identifier + '</td></tr>');
 		$.each(getDescription(feature), function(key, val){
 			table.append('<tr><td>' + "Description (" + key + "):" + '</td><td>' + val + '</td></tr>');
 		});
-
+		
 		table.append('<tr><td>' + "Data type:" + '</td><td>' + (feature.dataType ? feature.dataType : '') + '</td></tr>');
 		if (feature.unit)
 			table.append('<tr><td>' + "Unit:" + '</td><td>' + feature.unit.name + '</td></tr>');
@@ -605,7 +656,7 @@
 				var row = $('<tr />');
 				$('<td />').text(category.valueCode).appendTo(row);
 				$('<td />').text(category.name).appendTo(row);
-				$('<td />').text(category.name).appendTo(row);
+				$('<td />').text(category.description).appendTo(row);
 				row.appendTo(categoryTable);
 			});
 			categoryTable.addClass('listtable');
@@ -656,15 +707,18 @@
 		}
 
 		var table = $('<table class="table table-striped table-condensed table-hover" />');
-		$('<thead />').append('<th>Group</th><th>Variable</th><th>Description</th><th>Remove</th>').appendTo(table);
+		$('<thead />').append('<th>Group</th><th>Variable Name</th><th>Variable Identifier</th><th>Description</th><th>Remove</th>').appendTo(table);
 		$.each(nodes, function(i, node) {
 			if (!node.data.isFolder) {
+				var feature = restApi.get(node.data.key);
 				var protocol_name = node.parent.data.title;
-				var name = node.data.title;
-				var description = node.data.tooltip;
+				var name = feature.name;
+				var identifier = feature.identifier;
+				var description = getDescription(feature).en;
 				var row = $('<tr />').attr('id', node.data.key + "_row");
 				$('<td />').text(typeof protocol_name !== 'undefined' ? protocol_name : "").appendTo(row);
 				$('<td />').text(typeof name !== 'undefined' ? name : "").appendTo(row);
+				$('<td />').text(typeof identifier !== 'undefined' ? identifier : "").appendTo(row);
 				$('<td />').text(typeof description !== 'undefined' ? description : "").appendTo(row);
 				var deleteButton = $('<i class="icon-remove"></i>');
 				deleteButton.click($.proxy(function() {
@@ -698,7 +752,13 @@
 
 	function updateShoppingCart(features) {
 		if (features === null) {
-			$.post('/cart/empty');
+			$.ajax({
+				type : 'POST',
+				url : '/cart/empty',
+				error: function (xhr) {
+					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
+				}
+			});
 		} else {
 			$.ajax({
 				type : 'POST',
@@ -706,7 +766,10 @@
 				data : JSON.stringify({
 					'features' : features
 					}),
-				contentType : 'application/json'
+				contentType : 'application/json',
+				error: function (xhr) {
+					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
+				}
 			});
 		}
 	}
@@ -724,17 +787,18 @@
 			$('#orderdata-href-btn').removeClass('disabled');
 			$('#ordersview-href-btn').removeClass('disabled');
 			updateSelectedFeatures(ns.getSelectedVariables()); // session changed, update shoppingcart for already selected items
-			all
+		});
+		$(document).on('click', '#orderdata-href-btn', function() {
+			$('#orderdata-modal-container').data("data-set", ns.getSelectedDataSet());
 		});
 		$(document).on('molgenis-order-placed', function(e, msg) {
 			var uri = ns.getSelectedDataSet().href;
 			ns.selectDataSet(uri.substring(uri.lastIndexOf('/') + 1)); // reset catalogue
-			$('#dataset-browser').dynatree('getRoot').select(false);
-			$('.form_header').after($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'));
+			molgenis.createAlert([{'message':msg}], 'success');
 			search = false;
 			updatedNodes = null;
 			treePrevState = null;
 			selectedAllNodes = null;
 		});
 	});
-}($, window.top));
+}($, window.top.molgenis = window.top.molgenis || {}));

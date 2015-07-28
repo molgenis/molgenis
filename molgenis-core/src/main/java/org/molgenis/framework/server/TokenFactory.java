@@ -8,12 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.molgenis.framework.security.Login;
-
 public class TokenFactory implements Serializable
 {
 	private static final long serialVersionUID = -1669938881359317765L;
-	private HashMap<String, Token> securityTokens;
+	private final HashMap<String, Token> securityTokens;
 
 	public TokenFactory()
 	{
@@ -29,12 +27,6 @@ public class TokenFactory implements Serializable
 	 */
 	public String makeNewToken(String userName, Date validUntil)
 	{
-		// no tokens for anonymous
-		if (userName.equals(Login.USER_ANONYMOUS_NAME))
-		{
-			return null;
-		}
-
 		// create a new token and put it in the map under a uuid
 		String uuid = UUID.randomUUID().toString();
 

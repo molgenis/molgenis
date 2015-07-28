@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<molgenis name="org.molgenis.omx">
+	<module name="auth">
+		<entity name="MolgenisUser" system="true">
+			<description>Anyone who can login</description>
+			<field name="id" type="autoid" hidden="true" description="automatically generated internal id, only for internal use."/>
+			<field name="username" type="string"/>
+			<field name="password_" type="string" default="secret" description="big fixme: password type"/>
+			<field name="activationCode" type="string" nillable="true" description="Used as alternative authentication mechanism to verify user email and/or if user has lost password."/>
+			<field name="active" type="bool" default="false" description="Boolean to indicate if this account can be used to login"/>
+			<field name="superuser" type="bool" default="false"/>
+			<field name="FirstName" label="First Name" nillable="true"/>
+			<field name="MidInitials" label="Mid Initials" nillable="true"/>
+			<field name="LastName" label="Last Name" nillable="true"/>
+			<field name="Title" label="Title" nillable="true" description="An academic title, e.g. Prof.dr, PhD"/>
+			<field name="Affiliation" type="string" nillable="true"/>
+			<field name="Department" type="string" nillable="true" description="Added from the old definition of MolgenisUser. Department of this contact."/>	
+			<field name="Role" type="string" nillable="true" description="Indicate role of the contact, e.g. lab worker or PI."/>
+			<field name="Address" type="text" nillable="true" description="The address of the Contact."/>
+			<field name="Phone" nillable="true" description="The telephone number of the Contact including the suitable area codes."/>
+			<field name="Email" nillable="true" description="The email address of the Contact."/>
+			<field name="Fax" nillable="true" type="varchar" description="The fax number of the Contact."/>
+			<field name="tollFreePhone" nillable="true" type="string" description="A toll free phone number for the Contact, including suitable area codes."/>
+			<field name="City" type="string" nillable="true" description="Added from the old definition of MolgenisUser. City of this contact."/>
+			<field name="Country" type="string" nillable="true" description="Added from the old definition of MolgenisUser. Country of this contact."/>
+			<unique fields="Email"/>
+			<unique fields="username"/>
+		</entity>
+		<entity name="MolgenisGroup" system="true">
+			<field name="id" type="autoid" hidden="true"/>
+			<field name="name" type="string"/>
+		</entity>
+		<entity name="MolgenisGroupMember" system="true">
+			<field name="id" type="autoid" hidden="true"/>	
+			<field name="molgenisUser" type="xref" xref_entity="MolgenisUser"/>
+			<field name="molgenisGroup" type="xref" xref_entity="MolgenisGroup"/>
+		</entity>
+		<entity name="Authority" abstract="true" system="true">
+			<field name="role" type="string"/>
+		</entity>
+		<entity name="UserAuthority" implements="Authority" system="true">
+			<field name="id" type="autoid" hidden="true"/>
+			<field name="molgenisUser" type="xref" xref_entity="MolgenisUser"/>
+		</entity>
+		<entity name="GroupAuthority" implements="Authority" system="true">
+			<field name="id" type="autoid" hidden="true"/>
+			<field name="molgenisGroup" type="xref" xref_entity="MolgenisGroup"/>
+		</entity>
+	</module>
+</molgenis>

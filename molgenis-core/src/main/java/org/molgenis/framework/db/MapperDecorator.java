@@ -4,13 +4,11 @@ import java.text.ParseException;
 import java.util.List;
 
 import org.molgenis.fieldtypes.FieldType;
-import org.molgenis.io.TupleReader;
-import org.molgenis.io.TupleWriter;
 import org.molgenis.util.Entity;
 
 public class MapperDecorator<E extends Entity> implements Mapper<E>
 {
-	private Mapper<E> mapper;
+	private final Mapper<E> mapper;
 
 	public MapperDecorator(Mapper<E> generatedMapper)
 	{
@@ -37,12 +35,6 @@ public class MapperDecorator<E extends Entity> implements Mapper<E>
 	}
 
 	@Override
-	public int add(TupleReader reader, TupleWriter writer) throws DatabaseException
-	{
-		return mapper.add(reader, writer);
-	}
-
-	@Override
 	public int count(QueryRule... rules) throws DatabaseException
 	{
 		return mapper.count(rules);
@@ -55,33 +47,9 @@ public class MapperDecorator<E extends Entity> implements Mapper<E>
 	}
 
 	@Override
-	public void find(TupleWriter writer, QueryRule... rules) throws DatabaseException
-	{
-		mapper.find(writer, rules);
-	}
-
-	@Override
 	public Database getDatabase()
 	{
 		return mapper.getDatabase();
-	}
-
-	@Override
-	public int remove(TupleReader reader) throws DatabaseException
-	{
-		return mapper.remove(reader);
-	}
-
-	@Override
-	public List<E> toList(TupleReader reader, int limit) throws DatabaseException
-	{
-		return mapper.toList(reader, limit);
-	}
-
-	@Override
-	public int update(TupleReader reader) throws DatabaseException
-	{
-		return mapper.update(reader);
 	}
 
 	@Override
@@ -100,12 +68,6 @@ public class MapperDecorator<E extends Entity> implements Mapper<E>
 	public E create()
 	{
 		return mapper.create();
-	}
-
-	@Override
-	public void find(TupleWriter writer, List<String> fieldsToExport, QueryRule[] rules) throws DatabaseException
-	{
-		mapper.find(writer, fieldsToExport, rules);
 	}
 
 	@Override

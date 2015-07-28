@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 public class TupleToEmailValueConverterTest
 {
 	@Test
-	public void toCell()
+	public void toCell() throws ValueConverterException
 	{
 		EmailValue value = new EmailValue();
 		value.setValue("a@b.org");
@@ -23,6 +23,19 @@ public class TupleToEmailValueConverterTest
 		KeyValueTuple tuple = new KeyValueTuple();
 		tuple.set(colName, "a@b.org");
 		EmailValue value = new TupleToEmailValueConverter().fromTuple(tuple, colName, null);
+		assertEquals(value.getValue(), "a@b.org");
+	}
+
+	@Test
+	public void updateFromTuple() throws ValueConverterException
+	{
+		EmailValue value = new EmailValue();
+		value.setValue("a@b.org");
+
+		String colName = "col";
+		KeyValueTuple tuple = new KeyValueTuple();
+		tuple.set(colName, "a@b.org");
+		new TupleToEmailValueConverter().updateFromTuple(tuple, colName, null, value);
 		assertEquals(value.getValue(), "a@b.org");
 	}
 }

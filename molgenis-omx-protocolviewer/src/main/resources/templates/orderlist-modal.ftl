@@ -2,7 +2,7 @@
 <div id="orderlist-modal" class="modal hide" tabindex="-1">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="#orderlist-modal" data-backdrop="true" aria-hidden="true">&times;</button>
-    <h3>Your Orders</h3>
+    <h3>Your Submissions</h3>
   </div>
   <div class="modal-body">
   	<div id="order-list-container"></div>
@@ -22,7 +22,7 @@
   		modal.on('shown', function () {
 	  		$.ajax({
 				type : 'GET',
-				url : '/plugin/orders',
+				url : '/plugin/study/orders',
 				success : function(data) {
 					var container = $('#order-list-container');
 					var items = [];
@@ -39,7 +39,7 @@
 							items.push('<tr class=' + clazz + '>');	
 							items.push('<div id="' + containerId + '"></div>')
 							items.push('<td>' + order.id +'</td><td>' + order.name + '</td><td>' + order.orderDate + '</td><td>' + order.orderStatus + '</td>');
-							items.push('<td><a class="modal-href" href="/plugin/orders/' + order.id + '/view" data-target="'+containerId+'">view</a></td>');
+							items.push('<td><a class="modal-href" href="/plugin/study/orders/' + order.id + '/view" data-target="'+containerId+'">view</a></td>');
 							items.push('</tr>');
 						});
 						items.push('</tbody></table>');
@@ -47,6 +47,10 @@
 						items.push('<p>You did not place any orders</p>');
 					}
 					container.html(items.join(''));
+				},
+				error: function(xhr) {
+					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
+					modal.modal('hide');
 				}
 			});	
   		});

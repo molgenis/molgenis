@@ -94,7 +94,6 @@ public class PythonDataTypeGen extends ForEachEntityGenerator
 							// logger.debug("trying to generated "+targetFile);
 							templateArgs.put("entity", entity);
 							templateArgs.put("model", model);
-							templateArgs.put("db_driver", options.db_driver);
 							templateArgs.put("template", template.getName());
 							templateArgs.put("file", targetDir + "/" + GeneratorHelper.firstToUpper(entity.getName())
 									+ getType() + getExtension());

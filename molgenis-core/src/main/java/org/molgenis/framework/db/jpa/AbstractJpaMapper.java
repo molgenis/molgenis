@@ -13,7 +13,6 @@ import org.molgenis.framework.db.AbstractMapper;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
-import org.molgenis.io.TupleWriter;
 import org.molgenis.util.Entity;
 
 /**
@@ -85,12 +84,6 @@ public abstract class AbstractJpaMapper<E extends Entity> extends AbstractMapper
 	public void removeMrefs(List<E> entities) throws SQLException, IOException, DatabaseException, ParseException
 	{
 		// automatically done by JPA
-	}
-
-	@Override
-	public void find(TupleWriter writer, List<String> fieldsToExport, QueryRule[] rules) throws DatabaseException
-	{
-		throw new UnsupportedOperationException("not implemented");
 	}
 
 }

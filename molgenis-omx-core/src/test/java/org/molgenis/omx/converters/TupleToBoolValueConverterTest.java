@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 public class TupleToBoolValueConverterTest
 {
 	@Test
-	public void toCell()
+	public void toCell() throws ValueConverterException
 	{
 		BoolValue value = new BoolValue();
 		value.setValue(Boolean.TRUE);
@@ -23,6 +23,19 @@ public class TupleToBoolValueConverterTest
 		KeyValueTuple tuple = new KeyValueTuple();
 		tuple.set(colName, true);
 		BoolValue value = new TupleToBoolValueConverter().fromTuple(tuple, colName, null);
+		assertEquals(value.getValue(), Boolean.TRUE);
+	}
+
+	@Test
+	public void updateFromTuple() throws ValueConverterException
+	{
+		BoolValue value = new BoolValue();
+		value.setValue(Boolean.FALSE);
+
+		String colName = "col";
+		KeyValueTuple tuple = new KeyValueTuple();
+		tuple.set(colName, true);
+		new TupleToBoolValueConverter().updateFromTuple(tuple, colName, null, value);
 		assertEquals(value.getValue(), Boolean.TRUE);
 	}
 }

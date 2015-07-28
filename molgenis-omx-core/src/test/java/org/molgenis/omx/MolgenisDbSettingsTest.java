@@ -4,7 +4,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
 
@@ -27,21 +29,37 @@ public class MolgenisDbSettingsTest extends AbstractTestNGSpringContextTests
 	static class Config
 	{
 		@Bean
-		public MolgenisDbSettings molgenisDbSettings()
+		public MolgenisDbSettings molgenisDbSettings() throws DatabaseException
 		{
-			return new MolgenisDbSettings();
+			return new MolgenisDbSettings(unsecuredDatabase());
 		}
 
 		@Bean
-		public Database unauthorizedDatabase() throws DatabaseException
+		public Database unsecuredDatabase() throws DatabaseException
 		{
 			Database database = mock(Database.class);
+
 			RuntimeProperty property0 = new RuntimeProperty();
 			property0.setValue("value0");
 			when(
 					database.find(RuntimeProperty.class, new QueryRule(RuntimeProperty.IDENTIFIER, Operator.EQUALS,
 							RuntimeProperty.class.getSimpleName() + "_property0")))
 					.thenReturn(Arrays.asList(property0));
+
+			RuntimeProperty property1 = new RuntimeProperty();
+			property1.setValue("true");
+			when(
+					database.find(RuntimeProperty.class, new QueryRule(RuntimeProperty.IDENTIFIER, Operator.EQUALS,
+							RuntimeProperty.class.getSimpleName() + "_property1")))
+					.thenReturn(Arrays.asList(property1));
+
+			RuntimeProperty property2 = new RuntimeProperty();
+			property2.setValue("false");
+			when(
+					database.find(RuntimeProperty.class, new QueryRule(RuntimeProperty.IDENTIFIER, Operator.EQUALS,
+							RuntimeProperty.class.getSimpleName() + "_property2")))
+					.thenReturn(Arrays.asList(property2));
+
 			return database;
 		}
 	}
@@ -74,6 +92,30 @@ public class MolgenisDbSettingsTest extends AbstractTestNGSpringContextTests
 	public void getPropertyStringString_unknownProperty()
 	{
 		assertEquals(molgenisDbSettings.getProperty("unknown-property", "default-value"), "default-value");
+	}
+
+	@Test
+	public void getPropertyBooleanTrue()
+	{
+		assertTrue(molgenisDbSettings.getBooleanProperty("property1"));
+	}
+
+	@Test
+	public void getPropertyBooleanFalse()
+	{
+		assertFalse(molgenisDbSettings.getBooleanProperty("property2"));
+	}
+
+	@Test
+	public void getBooleanProperty_unknownProperty()
+	{
+		assertNull(molgenisDbSettings.getBooleanProperty("unknown-property"));
+	}
+
+	@Test
+	public void getBooleanProperty_unknownProperty_with_default()
+	{
+		assertTrue(molgenisDbSettings.getBooleanProperty("unknown-property", true));
 	}
 
 	@Test

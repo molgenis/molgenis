@@ -1,0 +1,70 @@
+.nav-pills {
+	margin-top : 5px;
+	margin-left : 10px;
+	margin-bottom : 5px;
+}
+
+.accordion-icon {
+	margin-left : 20px;
+	margin-top : -5px;
+}
+
+.show-popover {
+	cursor: hand; 
+	cursor: pointer;
+}
+
+.float-right {
+	float : right;
+	margin-right : 5px;
+	cursor: hand; 
+	cursor: pointer;
+}
+
+table#dataitem-table {
+	border : 1px solid #5B82A4;
+}
+
+table#dataitem-table {
+	border : 1px solid #5B82A4;
+}
+
+table thead th {	
+    background-color: #5B82A4; 
+    border:2px solid #5B82A4;
+    color: white;
+}
+
+th.text-align-center{
+	border:2px solid white;
+	text-align:center;
+}
+
+td.add-border {
+	border:2px solid #5B82A4;
+}
+
+#downloadButton {
+	margin-bottom : 10px;
+}
+
+dl{
+	font-size : 16px;
+	margin-top : -5px;
+}
+
+dt,dd{
+	padding-bottom : 8px;
+}
+
+ol li{
+	padding-bottom : 7px;
+}
+
+h3 {
+	color : #3079C2;
+}
+
+h5 {
+	padding-left : 10px;
+}

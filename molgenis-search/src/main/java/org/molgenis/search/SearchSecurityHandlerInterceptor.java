@@ -4,15 +4,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
-import org.molgenis.framework.security.Login;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.util.ApplicationContextProvider;
+import org.molgenis.security.SecurityUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 /**
- * HandlerInterceptor returns SC_UNAUTHORIZED if no Login object is present in the session or the user is not
- * authenticated and login is required.
+ * HandlerInterceptor returns SC_UNAUTHORIZED if the user is not authenticated and login is required.
  * 
  * Does not check entity level security or roles. Just checks if the user is authenticated
  * 
@@ -26,11 +24,18 @@ public class SearchSecurityHandlerInterceptor extends HandlerInterceptorAdapter
 	public static final String KEY_ACTION_ALLOW_ANONYMOUS_SEARCH = "api.search.allow.anonymous";
 	private static final boolean DEFAULT_ACTION_ALLOW_ANONYMOUS_SEARCH = false;
 
+	private final MolgenisSettings molgenisSettings;
+
+	public SearchSecurityHandlerInterceptor(MolgenisSettings molgenisSettings)
+	{
+		if (molgenisSettings == null) throw new IllegalArgumentException("MolgenisSettings is null");
+		this.molgenisSettings = molgenisSettings;
+	}
+
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception
 	{
-		Login login = ApplicationContextProvider.getApplicationContext().getBean(Login.class);
-		if (isAllowAnonymousSearch() || (login != null && login.isAuthenticated()))
+		if (isAllowAnonymousSearch() || SecurityUtils.currentUserIsAuthenticated())
 		{
 			return true;
 		}
@@ -43,8 +48,6 @@ public class SearchSecurityHandlerInterceptor extends HandlerInterceptorAdapter
 	{
 		try
 		{
-			MolgenisSettings molgenisSettings = ApplicationContextProvider.getApplicationContext().getBean(
-					MolgenisSettings.class);
 			String property = molgenisSettings.getProperty(KEY_ACTION_ALLOW_ANONYMOUS_SEARCH,
 					Boolean.toString(DEFAULT_ACTION_ALLOW_ANONYMOUS_SEARCH));
 			return Boolean.valueOf(property);

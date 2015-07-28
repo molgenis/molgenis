@@ -33,41 +33,15 @@ public class RApiGen extends Generator
 		}
 		else
 		{
+			// FIXME fix the R API
 			String findAPIlocation = null;
-			for (String s : options.services)
-			{
-				String service = s.split("@")[0];
-				if (service.equals("org.molgenis.framework.server.services.MolgenisDownloadService"))
-				{
-					findAPIlocation = s.split("@")[1];
-					break;
-				}
-			}
-			if (findAPIlocation == null)
-			{
-				throw new Exception("You cannot use the R API without MolgenisDownloadService mapped as a service!");
-			}
-
 			String addAPIlocation = null;
-			for (String s : options.services)
-			{
-				String service = s.split("@")[0];
-				if (service.equals("org.molgenis.framework.server.services.MolgenisUploadService"))
-				{
-					addAPIlocation = s.split("@")[1];
-					break;
-				}
-			}
-			if (addAPIlocation == null)
-			{
-				throw new Exception("You cannot use the R API without MolgenisUploadService mapped as a service!");
-			}
+			if (true) throw new Exception(
+					"You cannot use the R API without MolgenisDownloadService and MolgenisUploadService mapped as a service!");
 
 			Template template = createTemplate("/" + this.getClass().getSimpleName() + ".R.ftl");
 			Map<String, Object> templateArgs = createTemplateArguments(options);
 
-			// File targetFile = new File( this.getSourcePath(options) +
-			// model.getName().replace(".","/") + "/source.R" );
 			File targetFile = new File(this.getSourcePath(options) + "app/servlet/source.R");
 			boolean created = targetFile.getParentFile().mkdirs();
 			if (!created && !targetFile.getParentFile().exists())

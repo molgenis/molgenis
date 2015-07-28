@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
-import org.molgenis.framework.security.Login;
 import org.molgenis.util.SimpleTree;
 
 /**
@@ -143,12 +142,6 @@ public class UISchema extends SimpleTree<UISchema>
 				}
 			}
 		}
-
-		// FIXME: are these hardcoded excludes OK ?
-		uniqueGroups.remove(Login.USER_ADMIN_NAME);
-		uniqueGroups.remove(Login.USER_ANONYMOUS_NAME);
-		uniqueGroups.remove(Login.GROUP_SYSTEM_NAME);
-		uniqueGroups.remove(Login.GROUP_USERS_NAME);
 
 		return new ArrayList<String>(uniqueGroups);
 	}

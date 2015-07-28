@@ -3,16 +3,14 @@ package org.molgenis.framework.db;
 import java.text.ParseException;
 import java.util.List;
 
-import org.molgenis.io.TupleWriter;
 import org.molgenis.util.Entity;
 
 /**
  * Easily build complex QueryRules for Database.
  * 
  * <p>
- * Query is a wrapper around QueryRule. You can add or remove queryrules much
- * simpeler than by creating "new QueryRule(...)". Because each call returns the
- * Query, you can make complex queries in one sentence.
+ * Query is a wrapper around QueryRule. You can add or remove queryrules much simpeler than by creating
+ * "new QueryRule(...)". Because each call returns the Query, you can make complex queries in one sentence.
  * <p>
  * For example:
  * 
@@ -23,8 +21,7 @@ import org.molgenis.util.Entity;
  * </pre>
  * 
  * 
- * This example returns the second 10 Persons that are of type employee and
- * older than 20 years.
+ * This example returns the second 10 Persons that are of type employee and older than 20 years.
  */
 public interface Query<E extends Entity>
 {
@@ -50,8 +47,7 @@ public interface Query<E extends Entity>
 	public Query<E> eq(String field, Object value);
 
 	/**
-	 * Shorthand for search all fields. Typically translates to 'like' on all
-	 * textual fields
+	 * Shorthand for search all fields. Typically translates to 'like' on all textual fields
 	 * 
 	 * @param searchTerms
 	 *            the terms to search on, space seperated
@@ -194,29 +190,13 @@ public interface Query<E extends Entity>
 	/**
 	 * Execute the query on a database.
 	 * 
-	 * Will return a List of E if the Query knows the Database and Class<E
-	 * extends Entity> to use. Otherwise it will throw an
-	 * UnsupportedOperationException().
+	 * Will return a List of E if the Query knows the Database and Class<E extends Entity> to use. Otherwise it will
+	 * throw an UnsupportedOperationException().
 	 * 
 	 * @throws DatabaseException
 	 * @throws ParseException
 	 */
 	public List<E> find() throws DatabaseException;
-
-	/** Finder for csv data */
-	public void find(TupleWriter writer) throws DatabaseException, ParseException;
-
-	/** Finder for csv data with added option only export particular fields */
-	public void find(TupleWriter writer, List<String> fieldsToExport) throws DatabaseException, ParseException;
-
-	/**
-	 * Finder for csv data with added option to only skip ids
-	 * 
-	 * @throws IllegalAccessException
-	 * @throws InstantiationException
-	 */
-	public void find(TupleWriter writer, boolean skipAutoIds) throws DatabaseException, ParseException,
-			InstantiationException, IllegalAccessException;
 
 	/**
 	 * Execute the query on a database.
@@ -234,9 +214,8 @@ public interface Query<E extends Entity>
 	/**
 	 * Execute the query on a database and count the results.
 	 * 
-	 * Will return integer if the Query knows the Database and Class<E extends
-	 * Entity> to use. Otherwise it will throw an
-	 * UnsupportedOperationException().
+	 * Will return integer if the Query knows the Database and Class<E extends Entity> to use. Otherwise it will throw
+	 * an UnsupportedOperationException().
 	 * 
 	 * @throws DatabaseException
 	 */
@@ -280,8 +259,7 @@ public interface Query<E extends Entity>
 	public String createFindSql() throws DatabaseException;
 
 	/**
-	 * Method to create 'where field in (select * from ...)' subquery as
-	 * condition
+	 * Method to create 'where field in (select * from ...)' subquery as condition
 	 */
 	Query<E> subquery(String field, String sql);
 

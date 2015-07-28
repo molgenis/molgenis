@@ -48,7 +48,6 @@ import com.google.gson.JsonSyntaxException;
 public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Object>
 {
 	private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
-	private static final String JSON_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssz";
 	private static final Logger LOG = Logger.getLogger(GsonHttpMessageConverter.class);
 	private final Gson gson;
 	private Type type = null;
@@ -61,8 +60,9 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 	{
 		super(new MediaType("application", "json", DEFAULT_CHARSET));
 
-		GsonBuilder builder = new GsonBuilder().setDateFormat(JSON_DATE_FORMAT).disableHtmlEscaping();
-		if (LOG.isDebugEnabled())
+		GsonBuilder builder = new GsonBuilder().setDateFormat(MolgenisDateFormat.DATEFORMAT_DATETIME)
+				.disableHtmlEscaping();
+		if (LOG.isTraceEnabled())
 		{
 			builder = builder.setPrettyPrinting();
 		}
@@ -136,10 +136,10 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 		try
 		{
 			Type typeOfT = getType();
-			if (LOG.isDebugEnabled())
+			if (LOG.isTraceEnabled())
 			{
 				String jsonStr = IOUtils.toString(json);
-				LOG.debug("Json request:\n" + jsonStr);
+				LOG.trace("Json request:\n" + jsonStr);
 
 				if (typeOfT != null)
 				{
@@ -188,7 +188,7 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 		{
 			Type typeOfSrc = getType();
 
-			if (LOG.isDebugEnabled())
+			if (LOG.isTraceEnabled())
 			{
 				StringBuilder sb = new StringBuilder();
 				if (this.prefixJson)

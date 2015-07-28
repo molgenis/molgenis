@@ -10,12 +10,20 @@
 	border-spacing: 0px;
 }
 
+ul.dynatree-container {
+	height: auto;
+}
+
 .box-title {
 	font-size: 10pt;
 	font-weight: bold;
 	padding: 2px;
 	margin: 0px;
 	background-color: #BDCDDA;
+}
+
+#search-text {
+	height: 26px;	
 }
 
 #dataset-browser {

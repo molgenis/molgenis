@@ -118,12 +118,16 @@ index:
     		default:
     			type: custom
     			filter: [lowercase, default_stemmer]
-    			tokenizer: whitespace
+    			tokenizer: default_tokenizer
     			char_filter: html_strip
     	filter:
     		default_stemmer:
     			type: stemmer
     			name: english
+    	tokenizer:
+    		default_tokenizer:
+    			type: pattern
+    			pattern: ([\W\.]+)
 
 index.number_of_shards: 1
 index.number_of_replicas: 0

@@ -5,9 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.framework.ui.html.HtmlInput;
-import org.molgenis.framework.ui.html.HtmlInputException;
-import org.molgenis.framework.ui.html.IntInput;
 import org.molgenis.model.MolgenisModelException;
 
 public class IntField extends FieldType
@@ -67,12 +64,6 @@ public class IntField extends FieldType
 	public String getFormatString()
 	{
 		return "%d";
-	}
-
-	@Override
-	public HtmlInput<?> createInput(String name, String xrefEntityClassName) throws HtmlInputException
-	{
-		return new IntInput(name);
 	}
 
 	@Override

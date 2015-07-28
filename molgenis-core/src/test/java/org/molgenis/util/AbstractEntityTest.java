@@ -82,7 +82,7 @@ public class AbstractEntityTest
 	{
 		private static final long serialVersionUID = 1L;
 
-		private Map<String, Object> map;
+		private final Map<String, Object> map;
 
 		@SuppressWarnings("unused")
 		public TestEntity()
@@ -91,10 +91,12 @@ public class AbstractEntityTest
 		}
 
 		@Override
-		public void set(org.molgenis.util.tuple.Tuple values, boolean strict) throws Exception
+		public void set(org.molgenis.data.Entity entity, boolean strict) throws Exception
 		{
-			for (String colName : values.getColNames())
-				map.put(colName, values.get(colName));
+			for (String attr : entity.getAttributeNames())
+			{
+				map.put(attr, entity.get(attr));
+			}
 		}
 
 		@Override
@@ -146,13 +148,13 @@ public class AbstractEntityTest
 		}
 
 		@Override
-		public Entity create(org.molgenis.util.tuple.Tuple tuple) throws Exception
+		public String getXrefIdFieldName(String fieldName)
 		{
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public String getXrefIdFieldName(String fieldName)
+		public Entity create(org.molgenis.data.Entity values) throws Exception
 		{
 			throw new UnsupportedOperationException();
 		}

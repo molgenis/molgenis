@@ -72,12 +72,20 @@ public class ValueConverter
 		}
 
 		TupleToValueConverter<? extends Value, ?> converter = getTupleConverter(fieldType.getEnumType());
-		if (converter == null)
+		return converter.fromTuple(tuple, colName, feature);
+	}
+
+	public Value updateFromTuple(Tuple tuple, String colName, ObservableFeature feature, Value value)
+			throws ValueConverterException
+	{
+		FieldType fieldType = MolgenisFieldTypes.getType(feature.getDataType());
+		if (fieldType == null)
 		{
-			throw new IllegalArgumentException("unsupported field type [" + fieldType.getEnumType() + "]");
+			throw new ValueConverterException("data type is not a molgenis field type [" + feature.getDataType() + "]");
 		}
 
-		return converter.fromTuple(tuple, colName, feature);
+		TupleToValueConverter<? extends Value, ?> converter = getTupleConverter(fieldType.getEnumType());
+		return converter.updateFromTuple(tuple, colName, feature, value);
 	}
 
 	public Cell<?> toCell(Value value) throws ValueConverterException
@@ -90,10 +98,6 @@ public class ValueConverter
 			throw new ValueConverterException("unknown value type [" + value.getClass().getSimpleName() + "]");
 		}
 		TupleToValueConverter<? extends Value, ?> valueConverter = getTupleConverter(fieldTypeEnum);
-		if (valueConverter == null)
-		{
-			throw new ValueConverterException("unsupported value type [" + value.getClass().getSimpleName() + "]");
-		}
 		return valueConverter.toCell(value);
 	}
 

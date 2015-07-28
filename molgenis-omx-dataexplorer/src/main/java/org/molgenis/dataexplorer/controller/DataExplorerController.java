@@ -16,15 +16,19 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.molgenis.entityexplorer.controller.EntityExplorerController;
 import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.framework.server.MolgenisPermissionService;
+import org.molgenis.framework.server.MolgenisPermissionService.Permission;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.tupletable.TableException;
+import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.io.TupleWriter;
 import org.molgenis.io.csv.CsvWriter;
+import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.search.Hit;
@@ -37,10 +41,11 @@ import org.molgenis.util.tuple.ValueTuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * Controller class for the data explorer.
@@ -54,16 +59,22 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 @Controller
 @RequestMapping(URI)
-public class DataExplorerController
+public class DataExplorerController extends MolgenisPluginController
 {
-	public static final String URI = "/plugin/dataexplorer";
 	private static final Logger logger = Logger.getLogger(DataExplorerController.class);
+
+	public static final String ID = "dataexplorer";
+	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+
 	private static final int DOWNLOAD_SEARCH_LIMIT = 1000;
 
-	private static final String DEFAULT_KEY_TABLE_TYPE = "/js/MultiObservationSetTable.js";
+	private static final String DEFAULT_KEY_TABLE_TYPE = "MultiObservationSetTable.js";
 	private static final String KEY_TABLE_TYPE = "dataexplorer.resultstable.js";
 	private static final String KEY_APP_HREF_CSS = "app.href.css";
 
+	@Autowired
+	private MolgenisPermissionService molgenisPermissionService;
+	
 	@Autowired
 	private Database database;
 
@@ -73,6 +84,11 @@ public class DataExplorerController
 	@Autowired
 	private SearchService searchService;
 
+	public DataExplorerController()
+	{
+		super(URI);
+	}
+
 	/**
 	 * Show the explorer page
 	 * 
@@ -81,11 +97,16 @@ public class DataExplorerController
 	 * @throws DatabaseException
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(value = "dataset", required = false)
-	String selectedDataSetIdentifier, Model model) throws Exception
+	public String init(@RequestParam(value = "dataset", required = false) String selectedDataSetIdentifier, Model model)
+			throws Exception
 	{
-		// add data sets to model
-		List<DataSet> dataSets = database.find(DataSet.class);
+		//set entityExplorer URL for link to EntityExplorer for x/mrefs, but only if the user has permission to see the plugin
+		if(molgenisPermissionService.hasPermissionOnPlugin(EntityExplorerController.ID, Permission.READ)||
+			molgenisPermissionService.hasPermissionOnPlugin(EntityExplorerController.ID, Permission.WRITE)){		
+			model.addAttribute("entityExplorerUrl", EntityExplorerController.ID);
+		}
+		
+		List<DataSet> dataSets = database.query(DataSet.class).equals(DataSet.ACTIVE, true).find();
 		model.addAttribute("dataSets", dataSets);
 
 		if (dataSets != null && !dataSets.isEmpty())
@@ -102,6 +123,7 @@ public class DataExplorerController
 						break;
 					}
 				}
+
 				if (selectedDataSet == null) throw new IllegalArgumentException(selectedDataSetIdentifier
 						+ " is not a valid data set identifier");
 			}
@@ -119,12 +141,12 @@ public class DataExplorerController
 		String appHrefCss = molgenisSettings.getProperty(KEY_APP_HREF_CSS);
 		if (appHrefCss != null) model.addAttribute(KEY_APP_HREF_CSS.replaceAll("\\.", "_"), appHrefCss);
 
-		return "dataexplorer";
+		return "view-dataexplorer";
 	}
 
 	@RequestMapping(value = "/download", method = POST)
-	public void download(@RequestParam("searchRequest")
-	String searchRequest, HttpServletResponse response) throws IOException, DatabaseException, TableException
+	public void download(@RequestParam("searchRequest") String searchRequest, HttpServletResponse response)
+			throws IOException, DatabaseException, TableException
 	{
 		searchRequest = URLDecoder.decode(searchRequest, "UTF-8");
 		logger.info("Download request: [" + searchRequest + "]");
@@ -145,7 +167,6 @@ public class DataExplorerController
 
 			// The fieldsToReturn contain identifiers, we need the names
 			tupleWriter.write(getFeatureNames(request.getFieldsToReturn()));
-
 			int count = 0;
 			SearchResult searchResult;
 
@@ -173,6 +194,60 @@ public class DataExplorerController
 		{
 			IOUtils.closeQuietly(tupleWriter);
 		}
+	}
+
+	@RequestMapping(value = "/aggregate", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
+	@ResponseBody
+	public AggregateResponse aggregate(@RequestBody AggregateRequest request)
+	{
+
+		Map<String, Integer> hashCounts = new HashMap<String, Integer>();
+
+		try
+		{
+			if (request.getDataType().equals("categorical"))
+			{
+				List<Category> listOfCategories = database.find(Category.class, new QueryRule(
+						Category.OBSERVABLEFEATURE, Operator.EQUALS, request.getFeatureId()));
+				for (Category category : listOfCategories)
+				{
+					hashCounts.put(category.getName(), 0);
+				}
+			}
+			else if (request.getDataType().equals("bool"))
+			{
+				hashCounts.put("true", 0);
+				hashCounts.put("false", 0);
+			}
+			else
+			{
+				throw new RuntimeException("Illegal datatype");
+			}
+
+			ObservableFeature feature = database.findById(ObservableFeature.class, request.getFeatureId());
+			SearchResult searchResult = searchService.search(request.getSearchRequest());
+
+			for (Hit hit : searchResult.getSearchHits())
+			{
+				Map<String, Object> columnValueMap = hit.getColumnValueMap();
+				if (columnValueMap.containsKey(feature.getIdentifier()))
+				{
+					String categoryValue = columnValueMap.get(feature.getIdentifier()).toString();
+					if (hashCounts.containsKey(categoryValue))
+					{
+						Integer countPerCategoricalValue = hashCounts.get(categoryValue);
+						hashCounts.put(categoryValue, ++countPerCategoricalValue);
+					}
+				}
+			}
+
+		}
+		catch (DatabaseException e)
+		{
+			logger.info(e);
+
+		}
+		return new AggregateResponse(hashCounts);
 
 	}
 
@@ -201,17 +276,5 @@ public class DataExplorerController
 	{
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		return dataSetName + "_" + dateFormat.format(new Date()) + ".csv";
-	}
-
-	/**
-	 * When someone directly accesses /dataexplorer and is not logged in an DataAccessException is thrown, redirect him
-	 * to the home page
-	 * 
-	 * @return
-	 */
-	@ExceptionHandler(DatabaseAccessException.class)
-	public String handleNotAuthenticated()
-	{
-		return "redirect:/";
 	}
 }

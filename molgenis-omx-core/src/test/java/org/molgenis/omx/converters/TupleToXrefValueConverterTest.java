@@ -14,7 +14,7 @@ import org.testng.annotations.Test;
 public class TupleToXrefValueConverterTest
 {
 	@Test
-	public void toCell()
+	public void toCell() throws ValueConverterException
 	{
 		Characteristic ch1 = mock(Characteristic.class);
 		when(ch1.getIdentifier()).thenReturn("ch1");

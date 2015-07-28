@@ -116,7 +116,7 @@ public class IndexRequestGenerator
 		return new Iterator<BulkRequestBuilder>()
 		{
 			private final int rows = tupleTable.getCount();
-			private final int docsPerBulk = 1000;
+			private static final int docsPerBulk = 1000;
 			private final Iterator<Tuple> it = tupleTable.iterator();
 
 			private int row = 0;
@@ -153,7 +153,7 @@ public class IndexRequestGenerator
 						if (value instanceof Collection)
 						{
 							Collection<?> values = (Collection<?>) value;
-							if (values != null && !values.isEmpty() && values.iterator().next() instanceof Cell)
+							if (!values.isEmpty() && values.iterator().next() instanceof Cell)
 							{
 								List<String> mrefKeys = null;
 								for (Iterator<Cell<?>> it = ((Collection<Cell<?>>) values).iterator(); it.hasNext();)

@@ -1,31 +1,40 @@
 package org.molgenis.omx.converters;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.value.DateTimeValue;
 import org.molgenis.omx.observ.value.Value;
 import org.molgenis.omx.utils.ValueCell;
+import org.molgenis.util.MolgenisDateFormat;
 import org.molgenis.util.tuple.Cell;
 import org.molgenis.util.tuple.Tuple;
 
 public class TupleToDateTimeValueConverter implements TupleToValueConverter<DateTimeValue, String>
 {
-	private static final String DATEFORMAT_DATETIME = "yyyy-MM-dd'T'HH:mm:ssZ";
-
 	@Override
 	public DateTimeValue fromTuple(Tuple tuple, String colName, ObservableFeature feature)
 			throws ValueConverterException
 	{
+		return updateFromTuple(tuple, colName, feature, new DateTimeValue());
+	}
+
+	@Override
+	public DateTimeValue updateFromTuple(Tuple tuple, String colName, ObservableFeature feature, Value value)
+			throws ValueConverterException
+	{
+		if (!(value instanceof DateTimeValue))
+		{
+			throw new ValueConverterException("value is not a " + DateTimeValue.class.getSimpleName());
+		}
+
 		String dateTimeStr = tuple.getString(colName);
 		if (dateTimeStr == null) return null;
 
-		SimpleDateFormat iso8601DateTimeFormat = new SimpleDateFormat(DATEFORMAT_DATETIME);
-		DateTimeValue dateTimeValue = new DateTimeValue();
+		DateTimeValue dateTimeValue = (DateTimeValue) value;
 		try
 		{
-			dateTimeValue.setValue(iso8601DateTimeFormat.parse(dateTimeStr));
+			dateTimeValue.setValue(MolgenisDateFormat.getDateFormat().parse(dateTimeStr));
 		}
 		catch (ParseException e)
 		{
@@ -35,9 +44,13 @@ public class TupleToDateTimeValueConverter implements TupleToValueConverter<Date
 	}
 
 	@Override
-	public Cell<String> toCell(Value value)
+	public Cell<String> toCell(Value value) throws ValueConverterException
 	{
-		SimpleDateFormat iso8601DateTimeFormat = new SimpleDateFormat(DATEFORMAT_DATETIME);
-		return new ValueCell<String>(iso8601DateTimeFormat.format(((DateTimeValue) value).getValue()));
+		if (!(value instanceof DateTimeValue))
+		{
+			throw new ValueConverterException("value is not a " + DateTimeValue.class.getSimpleName());
+		}
+
+		return new ValueCell<String>(MolgenisDateFormat.getDateFormat().format(((DateTimeValue) value).getValue()));
 	}
 }

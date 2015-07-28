@@ -32,7 +32,7 @@ public class EntityPager<T extends Entity>
 
 	public Integer getNextStart()
 	{
-		if (this.start + this.num >= this.total - 1) return null;
+		if (this.start + this.num > this.total - 1) return null;
 		else return this.start + this.num;
 	}
 

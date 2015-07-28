@@ -13,15 +13,12 @@ import org.molgenis.framework.db.Mapper;
 import org.molgenis.framework.db.Query;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.SubQueryRule;
-import org.molgenis.framework.security.Login;
-import org.molgenis.io.TupleReader;
-import org.molgenis.io.TupleWriter;
 import org.molgenis.model.elements.Model;
 import org.molgenis.util.Entity;
 
 /**
- * Mock Database implementation for use in unittests. Use setEntities for define
- * entities to be returned by the query and find methods
+ * Mock Database implementation for use in unittests. Use setEntities for define entities to be returned by the query
+ * and find methods
  * 
  * Implement more methods if you need them.
  * 
@@ -33,8 +30,6 @@ public class MockDatabase implements Database
 	@SuppressWarnings("rawtypes")
 	private List entities;
 	private Model metaData;
-	private boolean inTransaction = false;
-	private Login login;
 
 	public MockDatabase()
 	{
@@ -80,30 +75,6 @@ public class MockDatabase implements Database
 	}
 
 	@Override
-	public void beginTx() throws DatabaseException
-	{
-		inTransaction = true;
-	}
-
-	@Override
-	public boolean inTx()
-	{
-		return inTransaction;
-	}
-
-	@Override
-	public void commitTx() throws DatabaseException
-	{
-		inTransaction = false;
-	}
-
-	@Override
-	public void rollbackTx() throws DatabaseException
-	{
-		inTransaction = false;
-	}
-
-	@Override
 	public <E extends Entity> int count(Class<E> entityClass, QueryRule... rules) throws DatabaseException
 	{
 		return entities == null ? 0 : entities.size();
@@ -114,20 +85,6 @@ public class MockDatabase implements Database
 	public <E extends Entity> List<E> find(Class<E> klazz, QueryRule... rules) throws DatabaseException
 	{
 		return entities;
-	}
-
-	@Override
-	public <E extends Entity> void find(Class<E> entityClass, TupleWriter writer, QueryRule... rules)
-			throws DatabaseException
-	{
-
-	}
-
-	@Override
-	public <E extends Entity> void find(Class<E> entityClass, TupleWriter writer, List<String> fieldsToExport,
-			QueryRule... rules) throws DatabaseException
-	{
-
 	}
 
 	@Override
@@ -269,23 +226,6 @@ public class MockDatabase implements Database
 				return entities;
 			}
 
-			@Override
-			public void find(TupleWriter writer) throws DatabaseException, ParseException
-			{
-			}
-
-			@Override
-			public void find(TupleWriter writer, List<String> fieldsToExport) throws DatabaseException, ParseException
-			{
-
-			}
-
-			@Override
-			public void find(TupleWriter writer, boolean skipAutoIds) throws DatabaseException, ParseException,
-					InstantiationException, IllegalAccessException
-			{
-			}
-
 			@SuppressWarnings("unchecked")
 			@Override
 			public List<E> find(Database db, Class<E> klazz) throws DatabaseException, ParseException
@@ -378,18 +318,6 @@ public class MockDatabase implements Database
 	}
 
 	@Override
-	public <E extends Entity> int add(Class<E> klazz, TupleReader reader, TupleWriter writer) throws DatabaseException
-	{
-		return 0;
-	}
-
-	@Override
-	public <E extends Entity> int add(Class<E> klazz, TupleReader reader) throws DatabaseException
-	{
-		return 0;
-	}
-
-	@Override
 	public <E extends Entity> int update(E entity) throws DatabaseException
 	{
 		return 0;
@@ -402,12 +330,6 @@ public class MockDatabase implements Database
 	}
 
 	@Override
-	public <E extends Entity> int update(Class<E> klazz, TupleReader reader) throws DatabaseException
-	{
-		return 0;
-	}
-
-	@Override
 	public <E extends Entity> int remove(E entity) throws DatabaseException
 	{
 		return 0;
@@ -415,12 +337,6 @@ public class MockDatabase implements Database
 
 	@Override
 	public <E extends Entity> int remove(List<E> entities) throws DatabaseException
-	{
-		return 0;
-	}
-
-	@Override
-	public <E extends Entity> int remove(Class<E> entityClass, TupleReader reader) throws DatabaseException
 	{
 		return 0;
 	}
@@ -454,26 +370,6 @@ public class MockDatabase implements Database
 	public List<String> getEntityNames()
 	{
 		return null;
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public <E extends Entity> List<E> toList(Class<E> klazz, TupleReader reader, int noEntities)
-			throws DatabaseException
-	{
-		return entities;
-	}
-
-	@Override
-	public Login getLogin()
-	{
-		return login;
-	}
-
-	@Override
-	public void setLogin(Login login)
-	{
-		this.login = login;
 	}
 
 	@Override

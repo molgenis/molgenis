@@ -2,7 +2,7 @@
 <div id="orderdata-modal" class="modal hide" tabindex="-1">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="#orderdata-modal" data-backdrop="true" aria-hidden="true">&times;</button>
-    <h3>Order Study Data</h3>
+    <h3>Submit Study Request</h3>
   </div>
   <div class="modal-body">
   	<#-- order data form -->
@@ -26,19 +26,31 @@
   </div>
   <div class="modal-footer">
     <a href="#" id="orderdata-btn-close" class="btn" aria-hidden="true">Cancel</a>
-    <a href="#" id="orderdata-btn" class="btn btn-primary" aria-hidden="true">Order</a>
+    <a href="#" id="orderdata-btn" class="btn btn-primary" aria-hidden="true">Submit</a>
   </div>
 </div>
 <script type="text/javascript">
-	$(function() {
+	$(function() {	 
 		var deletedFeatures = [];	
 		var modal = $('#orderdata-modal');
   		var submitBtn = $('#orderdata-btn');
+  		var cancelBtn = $('#orderdata-btn-close');
   		var form = $('#orderdata-form');
+  		
+  		<#-- set current selected data set -->
+		if($('#orderdata-modal-container')) {
+			var dataSet = $('#orderdata-modal-container').data('data-set');
+			if(dataSet) {
+				$('#orderdata-form').prepend('<input type="hidden" name="dataSetIdentifier" value="' + dataSet.identifier + '">');
+			}	
+		}
+  		
   		form.validate();
 
   		<#-- modal events -->
   		modal.on('show', function () {
+  			submitBtn.attr('disabled', false);
+			cancelBtn.attr('disabled', false);
   			deletedFeatures = [];
 	  		$.ajax({
 				type : 'GET',
@@ -57,7 +69,7 @@
 						$.each(cart.features, function(i, feature) {
 							var row = $('<tr>');
 							row.append('<td>' + feature.name + '</td>');
-							if(feature.i18nDescription.en){
+							if(feature.i18nDescription && feature.i18nDescription.en){
 								row.append('<td>' + feature.i18nDescription.en + '</td>');	
 							}
 							else{
@@ -68,7 +80,7 @@
 							var deleteBtn = $('<i class="icon-remove"></i>');
 							deleteBtn.click(function() {
 				                deletedFeatures.push({
-									"feature": feature.id
+									'feature': feature.id
 				                });
 								row.remove();
 								// restore focus
@@ -119,12 +131,13 @@
 					    data: JSON.stringify({features : deletedFeatures}),
 					    contentType: 'application/json',
 					    success : function() {
-					      order();
+					    	order();
 					    },
-					    error: function() {
-					      alert("error");
-					        }
-					    });
+					    error: function(xhr) {
+					    	molgenis.createAlert(JSON.parse(xhr.responseText).errors, 'error', $('.modal-body', modal));
+					    	modal.modal('hide');
+					    }
+					});
 				}
 				else{
 					order();
@@ -145,19 +158,25 @@
 		});
 		
 		function order() {
+			showSpinner();
+			submitBtn.attr('disabled', true);
+			cancelBtn.attr('disabled', true);
 			$.ajax({
 			    type: 'POST',
-			    url: '/plugin/order',
+			    url: '/plugin/study/order',
 			    data: new FormData($('#orderdata-form')[0]),
 			    cache: false,
 			    contentType: false,
 			    processData: false,
 			    success: function () {
-					$(document).trigger('molgenis-order-placed', 'Your order has been placed');
+					hideSpinner();
+					$(document).trigger('molgenis-order-placed', 'Your submission has been received');
 					modal.modal('hide');
 			    },
-			    error: function() {
-			      alert("error"); // TODO display error message
+			    error: function(xhr) {
+			    	hideSpinner();
+			    	molgenis.createAlert(JSON.parse(xhr.responseText).errors);
+			    	modal.modal('hide');
 			    }
 			});
 		}

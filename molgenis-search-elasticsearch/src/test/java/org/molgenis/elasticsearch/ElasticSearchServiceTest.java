@@ -23,7 +23,6 @@ import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.util.Entity;
-import org.molgenis.util.tuple.Tuple;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -115,6 +114,11 @@ public class ElasticSearchServiceTest
 		clemantine.set("color", "orange");
 		fruits.add(clemantine);
 
+		Entity appleWithDot = new TestEntity(5);
+		appleWithDot.set("name", "brown.banana");
+		appleWithDot.set("color", "brown");
+		fruits.add(appleWithDot);
+
 		searchService.updateIndex("fruit", fruits);
 		waitForIndexUpdate();
 
@@ -163,6 +167,32 @@ public class ElasticSearchServiceTest
 		objectValueMapExpected = new LinkedHashMap<String, Object>();
 		objectValueMapExpected.put("id", 4);
 		assertEquals(hits.get(1).getColumnValueMap(), objectValueMapExpected);
+
+		// Search3
+		request = new SearchRequest("fruit", Arrays.asList(new QueryRule(Operator.SEARCH, "banana")),
+				Arrays.asList("id"));
+
+		searchResult = searchService.search(request);
+		assertNotNull(searchResult);
+		assertEquals(searchResult.getTotalHitCount(), 2);
+		assertNull(searchResult.getErrorMessage());
+
+		hits = searchResult.getSearchHits();
+		assertNotNull(hits);
+		assertEquals(hits.size(), 2);
+		assertEquals(hits.get(0).getId(), "2");
+		assertEquals(hits.get(0).getDocumentType(), "fruit");
+		assertEquals(hits.get(0).getHref(), "/api/v1/fruit/2");
+		objectValueMapExpected = new LinkedHashMap<String, Object>();
+		objectValueMapExpected.put("id", 2);
+		assertEquals(hits.get(0).getColumnValueMap(), objectValueMapExpected);
+
+		assertEquals(hits.get(1).getId(), "5");
+		assertEquals(hits.get(1).getDocumentType(), "fruit");
+		assertEquals(hits.get(1).getHref(), "/api/v1/fruit/5");
+		objectValueMapExpected = new LinkedHashMap<String, Object>();
+		objectValueMapExpected.put("id", 5);
+		assertEquals(hits.get(1).getColumnValueMap(), objectValueMapExpected);
 	}
 
 	private void waitForIndexUpdate()
@@ -186,16 +216,6 @@ public class ElasticSearchServiceTest
 		}
 
 		@Override
-		public void set(Tuple values) throws Exception
-		{
-		}
-
-		@Override
-		public void set(Tuple values, boolean strict) throws Exception
-		{
-		}
-
-		@Override
 		public Object get(String columnName)
 		{
 			return fields.get(columnName);
@@ -215,12 +235,6 @@ public class ElasticSearchServiceTest
 
 		@Override
 		public List<String> getLabelFields()
-		{
-			return null;
-		}
-
-		@Override
-		public Tuple getValues()
 		{
 			return null;
 		}
@@ -276,12 +290,6 @@ public class ElasticSearchServiceTest
 		}
 
 		@Override
-		public Entity create(Tuple tuple) throws Exception
-		{
-			return null;
-		}
-
-		@Override
 		public String getXrefIdFieldName(String fieldName)
 		{
 			return null;
@@ -289,6 +297,30 @@ public class ElasticSearchServiceTest
 
 		@Override
 		public String getLabelValue()
+		{
+			return null;
+		}
+
+		@Override
+		public void set(org.molgenis.data.Entity values) throws Exception
+		{
+
+		}
+
+		@Override
+		public void set(org.molgenis.data.Entity values, boolean strict) throws Exception
+		{
+
+		}
+
+		@Override
+		public org.molgenis.data.Entity getValues()
+		{
+			return null;
+		}
+
+		@Override
+		public Entity create(org.molgenis.data.Entity values) throws Exception
 		{
 			return null;
 		}

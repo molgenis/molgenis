@@ -50,8 +50,7 @@ public class GeneratorHelper
 	{
 		if (string == null) return " NULL ";
 		if (string.length() > 0) return string.substring(0, 1).toUpperCase() + string.substring(1);
-		else
-			return " ERROR[STRING EMPTY] ";
+		else return " ERROR[STRING EMPTY] ";
 	}
 
 	/**
@@ -162,15 +161,13 @@ public class GeneratorHelper
 	}
 
 	/**
-	 * Creates a default value based on the default values set in the model. If
-	 * no defaultValue is provided and if the field is not "automatic" then the
-	 * default value is set to "null" so the user has to decide.
+	 * Creates a default value based on the default values set in the model. If no defaultValue is provided and if the
+	 * field is not "automatic" then the default value is set to "null" so the user has to decide.
 	 * 
 	 * @param model
 	 *            Meta model
 	 * @param field
-	 *            Meta model of a field (question: couldn't we ask the field for
-	 *            this??)
+	 *            Meta model of a field (question: couldn't we ask the field for this??)
 	 * @return the default value as String
 	 * @throws Exception
 	 */
@@ -239,8 +236,7 @@ public class GeneratorHelper
 	}
 
 	/**
-	 * Get the fields that participate in an insert (so excluding automatic
-	 * fields).
+	 * Get the fields that participate in an insert (so excluding automatic fields).
 	 * 
 	 * @param e
 	 * @param includeKey
@@ -389,8 +385,7 @@ public class GeneratorHelper
 	}
 
 	/**
-	 * The queryable fields of the entity (in case of inheritance from the view
-	 * join)
+	 * The queryable fields of the entity (in case of inheritance from the view join)
 	 * 
 	 * @param e
 	 * @param type
@@ -490,8 +485,7 @@ public class GeneratorHelper
 	}
 
 	/**
-	 * Return all secondary key fields. If two secondary keys share a field, its
-	 * only returned once.
+	 * Return all secondary key fields. If two secondary keys share a field, its only returned once.
 	 * 
 	 * @param keys
 	 *            list of Unique definitions
@@ -538,10 +532,8 @@ public class GeneratorHelper
 	}
 
 	/**
-	 * A table can only contain the keys for columns that are actually in the
-	 * table. In subclass_per_table mapping this requirement is not satisfied.
-	 * These keys are ommited, and a warning is shown that these keys are not
-	 * enforced.
+	 * A table can only contain the keys for columns that are actually in the table. In subclass_per_table mapping this
+	 * requirement is not satisfied. These keys are ommited, and a warning is shown that these keys are not enforced.
 	 * 
 	 * @param e
 	 * @return Vector of Unique (singular or complex keys)
@@ -568,9 +560,8 @@ public class GeneratorHelper
 					}
 				}
 				if (inTable) table_keys.add(aKey);
-				else
-					logger.warn("key " + aKey + " cannot be enforced on entity " + e.getName() + ": column '" + field
-							+ "' is not in the subclass table.");
+				else logger.warn("key " + aKey + " cannot be enforced on entity " + e.getName() + ": column '" + field
+						+ "' is not in the subclass table.");
 			}
 		}
 
@@ -667,8 +658,7 @@ public class GeneratorHelper
 	 * <li><code>boss</code> becomes <code>bosses</code></li>
 	 * </ul>
 	 * <p>
-	 * Whitespace as well as <code>null></code> arguments will return an empty
-	 * String.
+	 * Whitespace as well as <code>null></code> arguments will return an empty String.
 	 * </p>
 	 * 
 	 * @param singularNoun
@@ -685,19 +675,14 @@ public class GeneratorHelper
 		 * 
 		 * int nounLength = pluralNoun.length();
 		 * 
-		 * if (nounLength == 1) { pluralNoun = pluralNoun + 's'; } else if
-		 * (nounLength > 1) { char secondToLastChar =
+		 * if (nounLength == 1) { pluralNoun = pluralNoun + 's'; } else if (nounLength > 1) { char secondToLastChar =
 		 * pluralNoun.charAt(nounLength - 2);
 		 * 
-		 * if (pluralNoun.endsWith("y")) { switch (secondToLastChar) { case 'a'
-		 * : // fall-through case 'e' : // fall-through case 'i' : //
-		 * fall-through case 'o' : // fall-through case 'u' : pluralNoun =
-		 * pluralNoun + 's'; break; default : pluralNoun =
-		 * pluralNoun.substring(0, nounLength - 1) + "ies"; } } else if
-		 * (pluralNoun.endsWith("s")) { switch (secondToLastChar) { case 's' :
-		 * pluralNoun = pluralNoun + "es"; break; default : pluralNoun =
-		 * pluralNoun + "ses"; } } else { pluralNoun = pluralNoun + 's'; } }
-		 * return pluralNoun;
+		 * if (pluralNoun.endsWith("y")) { switch (secondToLastChar) { case 'a' : // fall-through case 'e' : //
+		 * fall-through case 'i' : // fall-through case 'o' : // fall-through case 'u' : pluralNoun = pluralNoun + 's';
+		 * break; default : pluralNoun = pluralNoun.substring(0, nounLength - 1) + "ies"; } } else if
+		 * (pluralNoun.endsWith("s")) { switch (secondToLastChar) { case 's' : pluralNoun = pluralNoun + "es"; break;
+		 * default : pluralNoun = pluralNoun + "ses"; } } else { pluralNoun = pluralNoun + 's'; } } return pluralNoun;
 		 */
 	}
 

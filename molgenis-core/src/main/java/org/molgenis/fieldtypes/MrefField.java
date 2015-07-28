@@ -3,9 +3,6 @@ package org.molgenis.fieldtypes;
 import java.text.ParseException;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.framework.ui.html.HtmlInput;
-import org.molgenis.framework.ui.html.HtmlInputException;
-import org.molgenis.framework.ui.html.MrefInput;
 import org.molgenis.model.MolgenisModelException;
 import org.molgenis.model.elements.Field;
 
@@ -88,30 +85,6 @@ public class MrefField extends FieldType
 	{
 		return "";
 	}
-
-	@SuppressWarnings(
-	{ "unchecked", "rawtypes" })
-	@Override
-	public HtmlInput<?> createInput(String name, String xrefEntityClassName) throws HtmlInputException
-	{
-		try
-		{
-			Class<?> klass = Class.forName(xrefEntityClassName);
-
-			return new MrefInput(name, klass);
-		}
-		catch (ClassNotFoundException e)
-		{
-			throw new HtmlInputException(e);
-		}
-	}
-
-	// @Override
-	// public HtmlInput<?> createInput(String name, Class<? extends Entity>
-	// xrefEntityClassName) throws HtmlInputException
-	// {
-	// return new MrefInput(name, xrefEntityClassName);
-	// }
 
 	@Override
 	public String getCppPropertyType() throws MolgenisModelException

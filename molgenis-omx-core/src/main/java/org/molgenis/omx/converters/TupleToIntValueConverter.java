@@ -12,6 +12,17 @@ public class TupleToIntValueConverter implements TupleToValueConverter<IntValue,
 	@Override
 	public IntValue fromTuple(Tuple tuple, String colName, ObservableFeature feature) throws ValueConverterException
 	{
+		return updateFromTuple(tuple, colName, feature, new IntValue());
+	}
+
+	@Override
+	public IntValue updateFromTuple(Tuple tuple, String colName, ObservableFeature feature, Value value)
+			throws ValueConverterException
+	{
+		if (!(value instanceof IntValue))
+		{
+			throw new ValueConverterException("value is not a " + IntValue.class.getSimpleName());
+		}
 		Integer integerObj;
 		try
 		{
@@ -23,14 +34,18 @@ public class TupleToIntValueConverter implements TupleToValueConverter<IntValue,
 		}
 		if (integerObj == null) return null;
 
-		IntValue intValue = new IntValue();
+		IntValue intValue = (IntValue) value;
 		intValue.setValue(integerObj);
 		return intValue;
 	}
 
 	@Override
-	public Cell<Integer> toCell(Value value)
+	public Cell<Integer> toCell(Value value) throws ValueConverterException
 	{
+		if (!(value instanceof IntValue))
+		{
+			throw new ValueConverterException("value is not a " + IntValue.class.getSimpleName());
+		}
 		return new ValueCell<Integer>(((IntValue) value).getValue());
 	}
 }

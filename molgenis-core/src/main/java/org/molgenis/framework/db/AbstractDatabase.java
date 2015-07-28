@@ -9,15 +9,11 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisOptions;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.db.QueryRule.Operator;
-import org.molgenis.framework.security.Login;
-import org.molgenis.framework.security.SimpleLogin;
-import org.molgenis.io.TupleReader;
-import org.molgenis.io.TupleWriter;
 import org.molgenis.model.elements.Field;
 import org.molgenis.model.elements.Model;
 import org.molgenis.util.Entity;
-import org.molgenis.util.tuple.EntityTuple;
 
 public abstract class AbstractDatabase implements Database
 {
@@ -39,15 +35,6 @@ public abstract class AbstractDatabase implements Database
 	/** Link to the original Molgenis model */
 	protected Model model;
 
-	/** The security login used */
-	protected Login login;
-
-	/** Default constructor */
-	public AbstractDatabase()
-	{
-		this.login = new SimpleLogin();
-	}
-
 	@Override
 	public Model getMetaData() throws DatabaseException
 	{
@@ -65,41 +52,6 @@ public abstract class AbstractDatabase implements Database
 	{
 		return getMapperFor(klazz).find(rules);
 	}
-
-	@Override
-	public <E extends Entity> void find(Class<E> entityClass, TupleWriter writer, QueryRule... rules)
-			throws DatabaseException
-	{
-		this.getMapperFor(entityClass).find(writer, rules);
-	}
-
-	@Override
-	public <E extends Entity> void find(Class<E> entityClass, TupleWriter writer, List<String> fieldsToExport,
-			QueryRule... rules) throws DatabaseException
-	{
-		try
-		{
-			writer.writeColNames(fieldsToExport);
-			int count = 0;
-			for (Entity e : find(entityClass, rules))
-			{
-				writer.write(new EntityTuple(e));
-
-				count++;
-			}
-			if (logger.isDebugEnabled()) if (logger.isDebugEnabled()) logger.debug(String.format(
-					"find(%s, writer) wrote %s lines", entityClass.getSimpleName(), count));
-			writer.close();
-		}
-		catch (Exception ex)
-		{
-			throw new DatabaseException(ex);
-		}
-	}
-
-	// @Override
-	// public abstract <E extends Entity> List<E> findByExample(E example)
-	// throws DatabaseException;
 
 	@Override
 	public <E extends Entity> E findById(Class<E> entityClass, Object id) throws DatabaseException
@@ -383,7 +335,12 @@ public abstract class AbstractDatabase implements Database
 				{
 					try
 					{
-						entityInDb.set(new EntityTuple(newEntity), false);
+						MapEntity mapEntity = new MapEntity();
+						for (String field : newEntity.getFields())
+						{
+							mapEntity.set(field, newEntity.get(field));
+						}
+						entityInDb.set(mapEntity, false);
 					}
 					catch (Exception ex)
 					{
@@ -414,18 +371,6 @@ public abstract class AbstractDatabase implements Database
 	}
 
 	@Override
-	public <E extends Entity> int add(Class<E> klazz, TupleReader reader) throws DatabaseException
-	{
-		return this.add(klazz, reader, null);
-	}
-
-	@Override
-	public <E extends Entity> int add(Class<E> klazz, TupleReader reader, TupleWriter writer) throws DatabaseException
-	{
-		return getMapperFor(klazz).add(reader, writer);
-	}
-
-	@Override
 	public <E extends Entity> int update(E entity) throws DatabaseException
 	{
 		List<E> entities = getMapperFor(getEntityClass(entity)).createList(1);
@@ -445,12 +390,6 @@ public abstract class AbstractDatabase implements Database
 	}
 
 	@Override
-	public <E extends Entity> int update(Class<E> klazz, TupleReader reader) throws DatabaseException
-	{
-		return getMapperFor(klazz).update(reader);
-	}
-
-	@Override
 	public <E extends Entity> int remove(E entity) throws DatabaseException
 	{
 		List<E> entities = getMapperFor(getEntityClass(entity)).createList(1);
@@ -467,12 +406,6 @@ public abstract class AbstractDatabase implements Database
 			return getMapperFor(klass).remove(entities);
 		}
 		return 0;
-	}
-
-	@Override
-	public <E extends Entity> int remove(Class<E> klazz, TupleReader reader) throws DatabaseException
-	{
-		return getMapperFor(klazz).remove(reader);
 	}
 
 	/**
@@ -533,12 +466,6 @@ public abstract class AbstractDatabase implements Database
 		return entities;
 	}
 
-	@Override
-	public <E extends Entity> List<E> toList(Class<E> klazz, TupleReader reader, int limit) throws DatabaseException
-	{
-		return getMapperFor(klazz).toList(reader, limit);
-	}
-
 	@SuppressWarnings("unchecked")
 	protected <E extends Entity> Class<E> getClassForEntity(E entity)
 	{
@@ -555,18 +482,6 @@ public abstract class AbstractDatabase implements Database
 	public File getFilesource()
 	{
 		return fileSource;
-	}
-
-	@Override
-	public Login getLogin()
-	{
-		return login;
-	}
-
-	@Override
-	public void setLogin(Login login)
-	{
-		this.login = login;
 	}
 
 	@SuppressWarnings("unchecked")

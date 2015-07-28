@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 public class TupleToStringValueConverterTest
 {
 	@Test
-	public void toCell()
+	public void toCell() throws ValueConverterException
 	{
 		StringValue value = new StringValue();
 		value.setValue("value");
@@ -23,6 +23,19 @@ public class TupleToStringValueConverterTest
 		KeyValueTuple tuple = new KeyValueTuple();
 		tuple.set(colName, "value");
 		StringValue value = new TupleToStringValueConverter().fromTuple(tuple, colName, null);
+		assertEquals(value.getValue(), "value");
+	}
+
+	@Test
+	public void updateFromTuple() throws ValueConverterException
+	{
+		StringValue value = new StringValue();
+		value.setValue("value");
+
+		String colName = "col";
+		KeyValueTuple tuple = new KeyValueTuple();
+		tuple.set(colName, "value");
+		new TupleToStringValueConverter().updateFromTuple(tuple, colName, null, value);
 		assertEquals(value.getValue(), "value");
 	}
 }

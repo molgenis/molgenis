@@ -7,6 +7,8 @@ import java.util.Arrays;
 
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.tupletable.TableException;
+import org.molgenis.omx.search.DataSetsIndexer;
+import org.molgenis.omx.search.IndexingEventListener;
 import org.molgenis.util.DataSetImportedEvent;
 import org.springframework.context.support.StaticApplicationContext;
 import org.testng.annotations.BeforeMethod;

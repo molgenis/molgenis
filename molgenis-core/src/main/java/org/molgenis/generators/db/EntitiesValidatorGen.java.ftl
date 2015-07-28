@@ -27,13 +27,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DataService;
+import org.molgenis.data.EntitySource;
+import org.molgenis.data.Repository;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntitiesValidator;
-import org.molgenis.io.TableReader;
-import org.molgenis.io.TableReaderFactory;
-import org.molgenis.io.TupleReader;
 import org.molgenis.model.MolgenisModelException;
 import org.molgenis.model.elements.Field;
 import org.molgenis.util.Entity;
@@ -64,13 +65,16 @@ public class EntitiesValidatorImpl implements EntitiesValidator
 	</#list>
 	}
 	
-	private Database database;
-	
+	private final Database database;
+	private final DataService dataService;
+
 	@Autowired
-	public EntitiesValidatorImpl(Database database)
+	public EntitiesValidatorImpl(Database database, DataService dataService)
 	{
 		if (database == null) throw new IllegalArgumentException("database is null");
+		if (dataService == null) throw new IllegalArgumentException("dataService is null");
 		this.database = database;
+		this.dataService = dataService;
 	}
 	
 	@Override
@@ -78,25 +82,26 @@ public class EntitiesValidatorImpl implements EntitiesValidator
 	{
 		EntitiesValidationReport validationReport = new EntitiesValidationReportImpl();
 
-		TableReader tableReader = TableReaderFactory.create(file);
+		EntitySource entitySource = dataService.createEntitySource(file);
 		try
 		{
-			for (String tableName : tableReader.getTableNames())
+			for (String entityName : entitySource.getEntityNames())
 			{
-				TupleReader tupleReader = tableReader.getTupleReader(tableName);
+				Repository<? extends org.molgenis.data.Entity> repository = entitySource
+						.getRepositoryByEntityName(entityName);
 				try
 				{
-					boolean isImportableEntity = ENTITIES_IMPORTABLE.containsKey(tableName.toLowerCase());
+					boolean isImportableEntity = ENTITIES_IMPORTABLE.containsKey(entityName.toLowerCase());
 					if (isImportableEntity)
 					{
-						Class<? extends Entity> entityClazz = ENTITIES_IMPORTABLE.get(tableName.toLowerCase());
-						validateTable(tableName, tupleReader, entityClazz, validationReport);
+						Class<? extends Entity> entityClazz = ENTITIES_IMPORTABLE.get(entityName.toLowerCase());
+						validateTable(entityName, repository, entityClazz, validationReport);
 					}
-					validationReport.getSheetsImportable().put(tableName, isImportableEntity);
+					validationReport.getSheetsImportable().put(entityName, isImportableEntity);
 				}
 				finally
 				{
-					tupleReader.close();
+					repository.close();
 				}
 			}
 		}
@@ -110,17 +115,18 @@ public class EntitiesValidatorImpl implements EntitiesValidator
 		}
 		finally
 		{
-			tableReader.close();
+			entitySource.close();
 		}
-		
+
 		return validationReport;
 	}
-	
-	private void validateTable(String tableName, TupleReader tupleReader, Class<? extends Entity> entityClazz,
-			EntitiesValidationReport validationReport) throws MolgenisModelException, DatabaseException, IOException
+
+	private void validateTable(String entityName, Repository<? extends org.molgenis.data.Entity> repository,
+			Class<? extends Entity> entityClazz, EntitiesValidationReport validationReport)
+			throws MolgenisModelException, DatabaseException, IOException
 	{
 		List<Field> entityFields = database.getMetaData().getEntity(entityClazz.getSimpleName()).getAllFields();
-		
+
 		// construct a list of all required and optional fields
 		Map<String, Field> requiredFields = new LinkedHashMap<String, Field>();
 		Map<String, Field> availableFields = new LinkedHashMap<String, Field>();
@@ -137,11 +143,9 @@ public class EntitiesValidatorImpl implements EntitiesValidator
 				if (!field.isNillable())
 				{
 					if (field.getDefaultValue() == null) fieldMap = requiredFields;
-					else
-						fieldMap = availableFields;
+					else fieldMap = availableFields;
 				}
-				else
-					fieldMap = availableFields;
+				else fieldMap = availableFields;
 
 				// add name and xref names
 				fieldMap.put(fieldName, field);
@@ -157,12 +161,12 @@ public class EntitiesValidatorImpl implements EntitiesValidator
 		// collect
 		List<String> detectedFieldNames = new ArrayList<String>();
 		List<String> unknownFieldNames = new ArrayList<String>();
-		for (Iterator<String> it = tupleReader.colNamesIterator(); it.hasNext();)
+		for (AttributeMetaData attr : repository.getAttributes())
 		{
-			String header = it.next();
-			if (header == null || header.isEmpty()) continue;
-			
-			String fieldName = header.toLowerCase();
+			String attrName = attr.getName();
+			if (attrName == null || attrName.isEmpty()) continue;
+
+			String fieldName = attrName.toLowerCase();
 			if (requiredFields.containsKey(fieldName))
 			{
 				detectedFieldNames.add(fieldName);
@@ -200,13 +204,12 @@ public class EntitiesValidatorImpl implements EntitiesValidator
 			}
 		}
 
-		validationReport.getImportOrder().add(tableName);
-		validationReport.getFieldsImportable().put(tableName, detectedFieldNames);
-		validationReport.getFieldsUnknown().put(tableName, unknownFieldNames);
-		validationReport.getFieldsRequired().put(tableName, requiredFields.keySet());
-		validationReport.getFieldsAvailable().put(tableName, availableFields.keySet());
+		validationReport.getImportOrder().add(entityName);
+		validationReport.getFieldsImportable().put(entityName, detectedFieldNames);
+		validationReport.getFieldsUnknown().put(entityName, unknownFieldNames);
+		validationReport.getFieldsRequired().put(entityName, requiredFields.keySet());
+		validationReport.getFieldsAvailable().put(entityName, availableFields.keySet());
 	}
-
 	private List<String> getXrefNames(Field field) throws MolgenisModelException, DatabaseException
 	{
 		if (!field.isXRef()) return Collections.emptyList();

@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 public class TupleToDecimalValueConverterTest
 {
 	@Test
-	public void toCell()
+	public void toCell() throws ValueConverterException
 	{
 		DecimalValue value = new DecimalValue();
 		value.setValue(1.23);
@@ -23,6 +23,19 @@ public class TupleToDecimalValueConverterTest
 		KeyValueTuple tuple = new KeyValueTuple();
 		tuple.set(colName, 1.23);
 		DecimalValue value = new TupleToDecimalValueConverter().fromTuple(tuple, colName, null);
+		assertEquals(value.getValue(), Double.valueOf(1.23));
+	}
+
+	@Test
+	public void updateFromTuple() throws ValueConverterException
+	{
+		DecimalValue value = new DecimalValue();
+		value.setValue(Double.valueOf(1.23));
+
+		String colName = "col";
+		KeyValueTuple tuple = new KeyValueTuple();
+		tuple.set(colName, 1.23);
+		new TupleToDecimalValueConverter().updateFromTuple(tuple, colName, null, value);
 		assertEquals(value.getValue(), Double.valueOf(1.23));
 	}
 }

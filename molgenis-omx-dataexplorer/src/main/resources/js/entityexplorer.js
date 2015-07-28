@@ -1,11 +1,15 @@
-(function($, w) {
+(function($, molgenis) {
 	"use strict";
 
-	var ns = w.molgenis = w.molgenis || {};
+	var ns = molgenis;
 
 	var restApi = new ns.RestClient();
 	var searchApi = new ns.SearchClient();
-
+	
+	ns.setDataExplorerUrl = function(dataExplorerUrl) {
+		ns.dataExplorerUrl = dataExplorerUrl;
+	};
+	
 	ns.onEntityChange = function(name) {
 		restApi.getAsync('/api/v1/' + name, null, null, function(entities) {
 			var items = [];
@@ -146,7 +150,9 @@
 						});
 						items.push('<tr><td class="first"></td>');
 						$.each(searchHits, function(key, searchHit) {
-							items.push('<td><a href="/molgenis.do?__target=main&select=DataExplorerPlugin&dataset=' + searchHit.documentType + '" target="_blank">View data set</a></td>');
+							if(typeof ns.dataExplorerUrl !== 'undefined'){
+								items.push('<td><a href="'+ns.dataExplorerUrl+'?dataset=' + searchHit.documentType + '" target="_blank">View data set</a></td>');
+							}
 						});
 						items.push('</tr>');
 						items.push('</tbody>');
@@ -193,4 +199,4 @@
 		if (selected != null)
 			$('#entity-instance-select').change();
 	});
-}($, window.top));
+}($, window.top.molgenis = window.top.molgenis || {}));

@@ -28,6 +28,18 @@ public class TupleToCategoricalValueConverter implements TupleToValueConverter<C
 	public CategoricalValue fromTuple(Tuple tuple, String colName, ObservableFeature feature)
 			throws ValueConverterException
 	{
+		return updateFromTuple(tuple, colName, feature, new CategoricalValue());
+	}
+
+	@Override
+	public CategoricalValue updateFromTuple(Tuple tuple, String colName, ObservableFeature feature, Value value)
+			throws ValueConverterException
+	{
+		if (!(value instanceof CategoricalValue))
+		{
+			throw new ValueConverterException("value is not a " + CategoricalValue.class.getSimpleName());
+		}
+
 		String categoryValueCode = tuple.getString(colName);
 		if (categoryValueCode == null) return null;
 
@@ -46,14 +58,18 @@ public class TupleToCategoricalValueConverter implements TupleToValueConverter<C
 		{
 			throw new ValueConverterException(e);
 		}
-		CategoricalValue categoricalValue = new CategoricalValue();
+		CategoricalValue categoricalValue = (CategoricalValue) value;
 		categoricalValue.setValue(category);
 		return categoricalValue;
 	}
 
 	@Override
-	public Cell<String> toCell(Value value)
+	public Cell<String> toCell(Value value) throws ValueConverterException
 	{
+		if (!(value instanceof CategoricalValue))
+		{
+			throw new ValueConverterException("value is not a " + CategoricalValue.class.getSimpleName());
+		}
 		Category category = ((CategoricalValue) value).getValue();
 		return new ValueCell<String>(category.getIdentifier(), category.getName());
 	}

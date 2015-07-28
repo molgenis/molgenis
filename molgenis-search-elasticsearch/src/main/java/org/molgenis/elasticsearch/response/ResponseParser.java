@@ -65,6 +65,11 @@ public class ResponseParser
 				{
 					columnValueMap.put(entry.getKey(), entry.getValue());
 				}
+				if ((hit.getScore() + "").equals("NaN"))
+				{
+					columnValueMap.put("score", 0);
+				}
+				else columnValueMap.put("score", hit.getScore());
 			}
 
 			searchHits.add(new Hit(hit.id(), hit.type(), createHref(hit.id(), hit.type()), columnValueMap));
