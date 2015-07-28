@@ -9,6 +9,7 @@ import requests
 import json
 import warnings
 import re
+import os.path
 
 class Connect_Molgenis():
     """Some simple methods for adding, updating and retrieving rows from Molgenis though the REST API
@@ -135,7 +136,7 @@ class Connect_Molgenis():
         elif str(server_response) == '<Response [200]>' or str(server_response) == '<Response [201]>' or str(server_response) == '<Response [204]>':
             if self.verbose:
                 message = type_of_request+' -> '+str(server_response)+' - '+server_response.reason 
-                if type_of_request == 'Add row to entity':
+                if 'Add row to entity' in type_of_request:
                     message += '. Total added rows this session: '+str(self.added_rows)
                 print message
             return True
@@ -171,30 +172,56 @@ class Connect_Molgenis():
                 warnings.warn('The ID attribute ('+entity_id_attribute+') of the entity ('+entity_name+') you are adding a row to is set to `auto`.\n'\
                              +'The value you gave for id ('+str(data[entity_id_attribute])+') will not be used. Instead, the ID will be a random string.')
         
-    def add_entity_row(self, entity_name, data, validate_json=True):
+    def add_entity_row(self, entity_name, data, validate_json=False):
         '''Add a row to an entity
         
         Args:
             entity_name (string): Name of the entity where row should be added
             json_data (dict): Key = column name, value = column value
             validate_json (bool): If True, check if the given data keys correspond with the column names of entity_name.
-                              If adding entity rows seems slow, try setting to False (def: True)
+                              If adding entity rows seems slow, try setting to False (def: False)
                               
         Returns:
-            server_response (Response object): Response from server
+            added_id (string): Id of the row that got added
         '''
         # make a string of json data (dictionary) with key=column name and value=value you want (works for 1 individual, Jonatan is going to find out how to to it with multiple)
         # post to the entity with the json data
         if validate_json:
             self.validate_data(entity_name, data)
         # make all values str
-        data = dict([a, str(x)] for a, x in data.iteritems())
+        data = dict([a, str(x)] for a, x in data.iteritems() if len(str(x).strip())>0)
         server_response = requests.post(self.api_url+'/'+entity_name+'/', data=str(data), headers=self.headers)
         self.added_rows += 1
         self.check_server_response(server_response, 'Add row to entity '+entity_name, entity_used=entity_name, data_used=str(data))
         added_id = server_response.headers['location'].split('/')[-1]
         return added_id
-
+    
+    def add_file(self, file_path, file_name=None):
+        '''Add a file to entity File.
+        
+        Args:
+            file_path (string): Path to the file to be uploaded
+            file_name (string): Name of the file. If None is set to basename of filepath (def: None)
+        
+        Returns:
+            file_id (string): ID if the file that got uploaded (for xref)
+            
+        Example:
+            >>> from molgenis_api import molgenis
+            >>> connection = molgenis.Connect_Molgenis('http://localhost:8080', 'admin', 'admin')
+            >>> print connection.add_file('/Users/Niek/UMCG/test/data/ATACseq/rundir/QC/FastQC_0.sh')
+            AAAACTWVCYDZ6YBTJMJDWXQAAE
+        '''
+        if not file_name:
+            file_name = os.path.basename(file_path)
+        if not os.path.isfile(file_path):
+            raise IOError('File not found: '+str(file_path))
+        server_response = requests.post(self.api_url+'/File',data=str({'description':file_name}),files={file_name:open(file_path,'rb')},headers=self.headers)
+        print server_response.text
+        self.check_server_response(server_response,'Upload file',data_used = str(file_path))
+        added_id = server_response.headers['location'].split('/')[-1]
+        return added_id
+        
     def query_entity_rows(self, entity_name, query):
         '''Get row(s) from entity with a query
         
@@ -264,7 +291,7 @@ class Connect_Molgenis():
         for entity_items in entity_data['items']:
             # column values that are not given will be overwritten with null, so we need to add the existing column data into our dict
             for key in entity_items:
-                if key != id_attribute and key not in data:
+                if key != id_attribute and key not in data and key!='previous_individuals':
                     data[key.encode('ascii')] = str(entity_items[key]).encode('ascii')
             row_id = entity_items[id_attribute]
             server_response = requests.put(self.api_url+'/'+entity_name+'/'+row_id+'/', data=str(data), headers=self.headers)
