@@ -6,7 +6,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -29,7 +28,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 @ContextConfiguration(classes =
@@ -38,26 +36,11 @@ public class GoNLAnnotatorTest extends AbstractTestNGSpringContextTests
 {
 	private final static String GONL_TEST_PATTERN = "gonl.chr%s.snps_indels.r5.vcf.gz";
 	private final static String GONL_TEST_ROOT_DIRECTORY = "/gonl";
-	private final static String GONL_TEST_CHROMOSOMES = "1";
+	private final static String GONL_TEST_CHROMOSOMES = "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X";
+	private final static String GONL_TEST_OVERRIDE_CHROMOSOME_FILES_PROPERTY = "X:gonl.chrX.release4.gtc.vcf.gz";
 	
 	@Autowired
 	RepositoryAnnotator annotator;
-	
-	@BeforeMethod
-	public void beforeMethod() throws IOException
-	{
-		// ENTITY1.SET(VCFREPOSITORY.CHROM, "1");
-		// ENTITY1.SET(VCFREPOSITORY.POS, 126108);
-		// ENTITY1.SET(VCFREPOSITORY.REF, "G");
-		// ENTITY1.SET(VCFREPOSITORY.ALT, "A");
-		// INPUT1.ADD(ENTITY1);
-		//
-		// ENTITY2.SET(VCFREPOSITORY.CHROM, "1");
-		// ENTITY2.SET(VCFREPOSITORY.POS, 123456);
-		// ENTITY2.SET(VCFREPOSITORY.REF, "G");
-		// ENTITY2.SET(VCFREPOSITORY.ALT, "A");
-		// INPUT2.ADD(ENTITY2);
-	}
 
 	@Test
 	public void testAnnotate()
@@ -113,13 +96,21 @@ public class GoNLAnnotatorTest extends AbstractTestNGSpringContextTests
 					settings.getProperty(GoNLAnnotator.GONL_ROOT_DIRECTORY_PROPERTY,
 							MultiResourceConfigImpl.DEFAULT_ROOT_DIRECTORY)).thenReturn(
 					ResourceUtils.getFile(getClass(), GoNLAnnotatorTest.GONL_TEST_ROOT_DIRECTORY).getPath());
+
 			when(
 					settings.getProperty(GoNLAnnotator.GONL_CHROMOSOME_PROPERTY,
 							MultiResourceConfigImpl.DEFAULT_CHROMOSOMES)).thenReturn(
 					GoNLAnnotatorTest.GONL_TEST_CHROMOSOMES);
+
 			when(
 					settings.getProperty(GoNLAnnotator.GONL_FILE_PATTERN_PROPERTY,
 							MultiResourceConfigImpl.DEFAULT_PATTERN)).thenReturn(GoNLAnnotatorTest.GONL_TEST_PATTERN);
+
+			when(settings.getProperty(GoNLAnnotator.GONL_OVERRIDE_CHROMOSOME_FILES_PROPERTY)).thenReturn(
+					GoNLAnnotatorTest.GONL_TEST_OVERRIDE_CHROMOSOME_FILES_PROPERTY);
+
+			when(settings.propertyExists(GoNLAnnotator.GONL_OVERRIDE_CHROMOSOME_FILES_PROPERTY)).thenReturn(true);
+
 			return settings;
 		}
 
