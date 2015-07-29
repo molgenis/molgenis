@@ -45,9 +45,6 @@ public class GoNLAnnotatorTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testAnnotate()
 	{
-		// #CHROM POS ID REF ALT QUAL FILTER INFO
-		// 1 249239510 . C G . Inaccessible AC=10;AN=996;GTC=488,10,0;set=SNP
-		
 		DefaultEntityMetaData emdIn = new DefaultEntityMetaData("gonl");
 		emdIn.addAttribute(VcfRepository.CHROM).setIdAttribute(true).setNillable(false);
 		emdIn.addAttributeMetaData(VcfRepository.POS_META);
@@ -95,16 +92,15 @@ public class GoNLAnnotatorTest extends AbstractTestNGSpringContextTests
 			when(
 					settings.getProperty(GoNLAnnotator.GONL_ROOT_DIRECTORY_PROPERTY,
 							MultiResourceConfigImpl.DEFAULT_ROOT_DIRECTORY)).thenReturn(
-					ResourceUtils.getFile(getClass(), GoNLAnnotatorTest.GONL_TEST_ROOT_DIRECTORY).getPath());
+					ResourceUtils.getFile(getClass(), GONL_TEST_ROOT_DIRECTORY).getPath());
 
 			when(
 					settings.getProperty(GoNLAnnotator.GONL_CHROMOSOME_PROPERTY,
-							MultiResourceConfigImpl.DEFAULT_CHROMOSOMES)).thenReturn(
-					GoNLAnnotatorTest.GONL_TEST_CHROMOSOMES);
+							MultiResourceConfigImpl.DEFAULT_CHROMOSOMES)).thenReturn(GONL_TEST_CHROMOSOMES);
 
 			when(
 					settings.getProperty(GoNLAnnotator.GONL_FILE_PATTERN_PROPERTY,
-							MultiResourceConfigImpl.DEFAULT_PATTERN)).thenReturn(GoNLAnnotatorTest.GONL_TEST_PATTERN);
+							MultiResourceConfigImpl.DEFAULT_PATTERN)).thenReturn(GONL_TEST_PATTERN);
 
 			when(settings.getProperty(GoNLAnnotator.GONL_OVERRIDE_CHROMOSOME_FILES_PROPERTY)).thenReturn(
 					GoNLAnnotatorTest.GONL_TEST_OVERRIDE_CHROMOSOME_FILES_PROPERTY);
