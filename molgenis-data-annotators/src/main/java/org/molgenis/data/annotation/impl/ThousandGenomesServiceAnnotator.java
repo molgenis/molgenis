@@ -3,7 +3,7 @@ package org.molgenis.data.annotation.impl;
 import org.molgenis.data.vcf.VcfRepository;
 
 /**
- * For backwords compatibility
+ * For backwards compatibility
  **/
 public class ThousandGenomesServiceAnnotator
 {
