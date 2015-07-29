@@ -124,26 +124,4 @@ public class MultiFileResourceTest
 		when(chrom5Config.getFile()).thenReturn(File.createTempFile("chrom5", "tmp"));
 		assertTrue(multiFileResource.isAvailable());
 	}
-
-	@Test
-	public void whenConfigIsRemovedThenIsAvailableUpdates() throws IOException
-	{
-		File chrom3File = File.createTempFile("chrom3", "tmp");
-		when(chrom3Config.getFile()).thenReturn(chrom3File);
-		File chrom4File = File.createTempFile("chrom4", "tmp");
-		when(chrom4Config.getFile()).thenReturn(chrom4File);
-
-		when(factory.createRepository(chrom3File)).thenReturn(chrom3Repository);
-		when(factory.createRepository(chrom4File)).thenReturn(chrom4Repository);
-		assertTrue(multiFileResource.isAvailable());
-
-		when(config.getConfigs()).thenReturn(ImmutableMap.<String, ResourceConfig> of("3", chrom3Config));
-
-		when(chrom4Config.getFile()).thenReturn(new File("bogus4"));
-		assertTrue(multiFileResource.isAvailable());
-
-		when(chrom3Config.getFile()).thenReturn(new File("bogus3"));
-		assertFalse(multiFileResource.isAvailable());
-
-	}
 }

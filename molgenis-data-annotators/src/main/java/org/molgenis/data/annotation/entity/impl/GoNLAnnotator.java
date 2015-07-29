@@ -28,7 +28,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-// TODO Write test
 public class GoNLAnnotator
 {
 	public static final String GONL_GENOME_AF = "GoNL_AF";
