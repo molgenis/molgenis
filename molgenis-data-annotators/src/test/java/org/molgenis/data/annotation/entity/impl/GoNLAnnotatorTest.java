@@ -46,27 +46,35 @@ public class GoNLAnnotatorTest extends AbstractTestNGSpringContextTests
 	@BeforeMethod
 	public void beforeMethod() throws IOException
 	{
-		// entity1.set(VcfRepository.CHROM, "1");
-		// entity1.set(VcfRepository.POS, 126108);
-		// entity1.set(VcfRepository.REF, "G");
-		// entity1.set(VcfRepository.ALT, "A");
-		// input1.add(entity1);
+		// ENTITY1.SET(VCFREPOSITORY.CHROM, "1");
+		// ENTITY1.SET(VCFREPOSITORY.POS, 126108);
+		// ENTITY1.SET(VCFREPOSITORY.REF, "G");
+		// ENTITY1.SET(VCFREPOSITORY.ALT, "A");
+		// INPUT1.ADD(ENTITY1);
 		//
-		// entity2.set(VcfRepository.CHROM, "1");
-		// entity2.set(VcfRepository.POS, 123456);
-		// entity2.set(VcfRepository.REF, "G");
-		// entity2.set(VcfRepository.ALT, "A");
-		// input2.add(entity2);
+		// ENTITY2.SET(VCFREPOSITORY.CHROM, "1");
+		// ENTITY2.SET(VCFREPOSITORY.POS, 123456);
+		// ENTITY2.SET(VCFREPOSITORY.REF, "G");
+		// ENTITY2.SET(VCFREPOSITORY.ALT, "A");
+		// INPUT2.ADD(ENTITY2);
 	}
 
-
+	@Test
 	public void testAnnotate()
 	{
+		// TEST FILE
+		//
+		// #CHROM POS ID REF ALT QUAL FILTER INFO
+		// 1 126108 . G A . Inaccessible AC=3;AN=996;GTC=495,3,0;set=SNP
+		// 1 126118 . G A . Inaccessible AC=1;AN=996;GTC=497,1,0;set=SNP
+		//
+		
 		DefaultEntityMetaData emdIn = new DefaultEntityMetaData("gonl");
 		emdIn.addAttribute(VcfRepository.CHROM).setIdAttribute(true).setNillable(false);
 		emdIn.addAttributeMetaData(VcfRepository.POS_META);
 		emdIn.addAttributeMetaData(VcfRepository.REF_META);
 		emdIn.addAttributeMetaData(VcfRepository.ALT_META);
+
 		Entity inputEntity = new MapEntity(emdIn);
 		inputEntity.set(VcfRepository.CHROM, "1");
 		inputEntity.set(VcfRepository.POS, 126108);
@@ -83,36 +91,16 @@ public class GoNLAnnotatorTest extends AbstractTestNGSpringContextTests
 		expectedMap.put(VcfRepository.POS, 126108);
 		expectedMap.put(VcfRepository.REF, "G");
 		expectedMap.put(VcfRepository.ALT, "A");
-		expectedMap.put(GoNLAnnotator.GONL_AF_RESOURCE_ATTRIBUTE_NAME, 0.03714859437751004);
+		expectedMap.put(GoNLAnnotator.GONL_GENOME_AF, "0.0030120481927710845");
+		expectedMap.put(GoNLAnnotator.GONL_GENOME_GTC, "495,3,0");
 		Entity expectedEntity = new MapEntity(expectedMap);
 
 		assertEquals(resultEntity.get(VcfRepository.CHROM), expectedEntity.get(VcfRepository.CHROM));
 		assertEquals(resultEntity.get(VcfRepository.POS), expectedEntity.get(VcfRepository.POS));
 		assertEquals(resultEntity.get(VcfRepository.REF), expectedEntity.get(VcfRepository.REF));
 		assertEquals(resultEntity.get(VcfRepository.ALT), expectedEntity.get(VcfRepository.ALT));
-		assertEquals(resultEntity.get(GoNLAnnotator.GONL_AF_RESOURCE_ATTRIBUTE_NAME),
-				expectedEntity.get(GoNLAnnotator.GONL_AF_RESOURCE_ATTRIBUTE_NAME));
-	}
-
-	@Test
-	public void testAnnotateNoResult()
-	{
-		// DefaultEntityMetaData annotatedMetadata = new DefaultEntityMetaData("test");
-		// annotatedMetadata.addAttributeMetaData(attributeMetaDataCantAnnotateChrom);
-		// annotatedMetadata.addAttributeMetaData(pos);
-		// annotatedMetadata.addAttributeMetaData(ref);
-		// annotatedMetadata.addAttributeMetaData(alt);
-		// annotatedMetadata.setIdAttribute(attributeMetaDataCantAnnotateChrom.getName());
-		// annotatedMetadata.addAttributeMetaData(new DefaultAttributeMetaData(
-		// GoNLAnnotator.GONL_AF_RESOURCE_ATTRIBUTE_NAME,
-		// FieldTypeEnum.DECIMAL));
-		//
-		// Iterator<Entity> results = annotator.annotate(input2);
-		//
-		// MapEntity mapEntity = new MapEntity(entity2, annotatedMetadata);
-		// mapEntity.set(GoNLAnnotator.GONL_AF_RESOURCE_ATTRIBUTE_NAME, null);
-		//
-		// assertEquals(results.next(), mapEntity);
+		assertEquals(resultEntity.get(GoNLAnnotator.GONL_GENOME_AF), expectedEntity.get(GoNLAnnotator.GONL_GENOME_AF));
+		assertEquals(resultEntity.get(GoNLAnnotator.GONL_GENOME_GTC), expectedEntity.get(GoNLAnnotator.GONL_GENOME_GTC));
 	}
 
 	@Configuration
