@@ -63,8 +63,8 @@ public class ClinvarMultiAllelicResultFilter implements ResultFilter
 						if (refAllele.equals(resultRefAllele))
 						{
 							// if more than one clinsigs are available pair the right one with each allele
-							clnallValueMap.put(refAllele, clnSigs[i]);
-							clnsigValueMap.put(refAllele, "0");
+							clnallValueMap.put(refAllele,  "0");
+							clnsigValueMap.put(refAllele, clnSigs[i]);
 
 						}
 
