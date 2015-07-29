@@ -28,13 +28,13 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ThousandGenomesAnnotator
 {
-	// TODO Write test
 	public static final String THOUSAND_GENOME_AF = "Thousand_Genomes_AF";
 	public static final String THOUSAND_GENOME_AF_LABEL = "Thousand genome allele frequency";
 	public static final String THOUSAND_GENOME_AF_RESOURCE_ATTRIBUTE_NAME = VcfRepository.getInfoPrefix() + "AF";
 	public static final String THOUSAND_GENOME_CHROMOSOME_PROPERTY = "thousand_genome_chromosomes";
 	public static final String THOUSAND_GENOME_FILE_PATTERN_PROPERTY = "thousand_genome_file_pattern";
 	public static final String THOUSAND_GENOME_FOLDER_PROPERTY = "thousand_genome_root_directory";
+	public static final String THOUSAND_GENOME_OVERRIDE_CHROMOSOME_FILES_PROPERTY = "thousand_override_chromosome_files";
 	public static final String THOUSAND_GENOME_MULTI_FILE_RESOURCE = "thousandGenomesSources";
 
 	@Autowired
@@ -93,7 +93,8 @@ public class ThousandGenomesAnnotator
 	Resource thousandGenomesSources()
 	{
 		MultiResourceConfig thousandGenomeConfig = new MultiResourceConfigImpl(THOUSAND_GENOME_CHROMOSOME_PROPERTY,
-				THOUSAND_GENOME_FILE_PATTERN_PROPERTY, THOUSAND_GENOME_FOLDER_PROPERTY, molgenisSettings);
+				THOUSAND_GENOME_FILE_PATTERN_PROPERTY, THOUSAND_GENOME_FOLDER_PROPERTY,
+				THOUSAND_GENOME_OVERRIDE_CHROMOSOME_FILES_PROPERTY, molgenisSettings);
 
 		return new MultiFileResource(THOUSAND_GENOME_MULTI_FILE_RESOURCE, thousandGenomeConfig,
 				new TabixVcfRepositoryFactory(THOUSAND_GENOME_MULTI_FILE_RESOURCE));
