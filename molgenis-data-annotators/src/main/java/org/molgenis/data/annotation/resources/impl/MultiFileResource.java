@@ -12,15 +12,12 @@ import org.molgenis.data.annotation.resources.MultiResourceConfig;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.ResourceConfig;
 import org.molgenis.data.vcf.VcfRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by charbonb on 15/06/15.
  */
 public class MultiFileResource implements Resource
 {
-	private static final Logger LOG = LoggerFactory.getLogger(MultiFileResource.class);
 	private final String name;
 	private final Map<String, ResourceImpl> resources = new HashMap<>();
 	private final MultiResourceConfig config;
@@ -58,7 +55,6 @@ public class MultiFileResource implements Resource
 
 			}, factory));
 		}
-		LOG.debug("initializeResources() --- initialize resources");
 	}
 
 	private static Object getFirstEqualsValueFor(String attributeName, Query q)
@@ -72,7 +68,6 @@ public class MultiFileResource implements Resource
 	@Override
 	public boolean isAvailable()
 	{
-		LOG.debug("isAvailable() --- start is available");
 		// initialize after autowiring is complete and resources is empty
 		if (resources.isEmpty())
 		{

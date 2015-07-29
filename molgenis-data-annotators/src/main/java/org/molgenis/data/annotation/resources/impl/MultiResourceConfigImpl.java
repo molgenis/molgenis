@@ -97,8 +97,6 @@ public class MultiResourceConfigImpl implements MultiResourceConfig
 			});
 		}
 		this.configs = configs;
-
-		LOG.debug("refreshConfigs() --- refresh config");
 	}
 
 	private Map<String, String> getOverrideChromosomeFiles()
