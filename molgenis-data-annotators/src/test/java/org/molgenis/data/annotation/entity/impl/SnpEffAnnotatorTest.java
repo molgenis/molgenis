@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation.impl;
+package org.molgenis.data.annotation.entity.impl;
 
 import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
@@ -25,8 +25,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 @ContextConfiguration(classes =
-{ SnpEffServiceAnnotatorTest.Config.class, SnpEffAnnotator.class })
-public class SnpEffServiceAnnotatorTest extends AbstractTestNGSpringContextTests
+{ SnpEffAnnotatorTest.Config.class, SnpEffAnnotator.class })
+public class SnpEffAnnotatorTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
 	private SnpEffAnnotator.SnpEffRepositoryAnnotator snpEffRepositoryAnnotator;
