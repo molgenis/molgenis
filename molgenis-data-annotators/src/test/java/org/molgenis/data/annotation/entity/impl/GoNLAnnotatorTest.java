@@ -62,12 +62,8 @@ public class GoNLAnnotatorTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testAnnotate()
 	{
-		// TEST FILE
-		//
 		// #CHROM POS ID REF ALT QUAL FILTER INFO
-		// 1 126108 . G A . Inaccessible AC=3;AN=996;GTC=495,3,0;set=SNP
-		// 1 126118 . G A . Inaccessible AC=1;AN=996;GTC=497,1,0;set=SNP
-		//
+		// 1 249239510 . C G . Inaccessible AC=10;AN=996;GTC=488,10,0;set=SNP
 		
 		DefaultEntityMetaData emdIn = new DefaultEntityMetaData("gonl");
 		emdIn.addAttribute(VcfRepository.CHROM).setIdAttribute(true).setNillable(false);
@@ -77,9 +73,9 @@ public class GoNLAnnotatorTest extends AbstractTestNGSpringContextTests
 
 		Entity inputEntity = new MapEntity(emdIn);
 		inputEntity.set(VcfRepository.CHROM, "1");
-		inputEntity.set(VcfRepository.POS, 126108);
-		inputEntity.set(VcfRepository.REF, "G");
-		inputEntity.set(VcfRepository.ALT, "A");
+		inputEntity.set(VcfRepository.POS, 249239510);
+		inputEntity.set(VcfRepository.REF, "C");
+		inputEntity.set(VcfRepository.ALT, "G");
 
 		Iterator<Entity> results = annotator.annotate(Collections.singletonList(inputEntity));
 		assertTrue(results.hasNext());
@@ -88,11 +84,11 @@ public class GoNLAnnotatorTest extends AbstractTestNGSpringContextTests
 
 		Map<String, Object> expectedMap = new LinkedHashMap<String, Object>();
 		expectedMap.put(VcfRepository.CHROM, "1");
-		expectedMap.put(VcfRepository.POS, 126108);
-		expectedMap.put(VcfRepository.REF, "G");
-		expectedMap.put(VcfRepository.ALT, "A");
-		expectedMap.put(GoNLAnnotator.GONL_GENOME_AF, "0.0030120481927710845");
-		expectedMap.put(GoNLAnnotator.GONL_GENOME_GTC, "495,3,0");
+		expectedMap.put(VcfRepository.POS, 249239510);
+		expectedMap.put(VcfRepository.REF, "C");
+		expectedMap.put(VcfRepository.ALT, "G");
+		expectedMap.put(GoNLAnnotator.GONL_GENOME_AF, "0.010040160642570281");
+		expectedMap.put(GoNLAnnotator.GONL_GENOME_GTC, "488,10,0");
 		Entity expectedEntity = new MapEntity(expectedMap);
 
 		assertEquals(resultEntity.get(VcfRepository.CHROM), expectedEntity.get(VcfRepository.CHROM));
