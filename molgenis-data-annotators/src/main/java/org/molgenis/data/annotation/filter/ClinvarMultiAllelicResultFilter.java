@@ -1,20 +1,19 @@
 package org.molgenis.data.annotation.filter;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.FluentIterable;
-
-import org.apache.lucene.queries.function.valuesource.MultiFunction.Values;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
-import org.molgenis.data.annotation.entity.ResultFilter;
-import org.molgenis.data.vcf.VcfRepository;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
+import org.molgenis.data.annotation.entity.ResultFilter;
+import org.molgenis.data.vcf.VcfRepository;
+
+import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
 
 public class ClinvarMultiAllelicResultFilter implements ResultFilter
 {
@@ -63,7 +62,7 @@ public class ClinvarMultiAllelicResultFilter implements ResultFilter
 						if (refAllele.equals(resultRefAllele))
 						{
 							// if more than one clinsigs are available pair the right one with each allele
-							clnallValueMap.put(refAllele,  "0");
+							clnallValueMap.put(refAllele, "0");
 							clnsigValueMap.put(refAllele, clnSigs[i]);
 
 						}
@@ -77,7 +76,6 @@ public class ClinvarMultiAllelicResultFilter implements ResultFilter
 
 						for (int j = 0; j < annotatedEntityAltAlleles.length; j++)
 						{
-
 							// if annotated entity allele equals the clinvar significant allele we want it!
 							if (alts[significantAlleleIndex].equals(annotatedEntityAltAlleles[j]))
 							{
@@ -98,6 +96,7 @@ public class ClinvarMultiAllelicResultFilter implements ResultFilter
 					if (i != 0)
 					{
 						newClnlallAttributeValue.append(",");
+						newClnlsigAttributeValue.append(",");
 					}
 					if (clnallValueMap.get(annotatedEntityAltAlleles[i]) != null)
 					{
@@ -108,6 +107,7 @@ public class ClinvarMultiAllelicResultFilter implements ResultFilter
 						// missing allele in source, add a dot
 						newClnlallAttributeValue.append(".");
 					}
+
 					if (clnsigValueMap.get(annotatedEntityAltAlleles[i]) != null)
 					{
 						newClnlsigAttributeValue.append(clnsigValueMap.get(annotatedEntityAltAlleles[i]));
