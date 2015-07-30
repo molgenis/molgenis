@@ -95,6 +95,7 @@ public class HgncSymbolServiceAnnotator extends LocusAnnotator
 	public AnnotatorInfo getInfo()
 	{
 		return AnnotatorInfo.create(Status.INDEV, Type.UNUSED, "unknown",
-				"This is the description for the HGNC Annotator", getOutputMetaData());
+				"Maps genomic positions to the HGNC gene symbols." +
+				"By default it will map to gene symbols mapped to build GRCh37p13", getOutputMetaData());
 	}
 }

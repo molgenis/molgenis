@@ -157,7 +157,5 @@ public class ResourcesTest extends AbstractTestNGSpringContextTests
 		{
 			return new ResourcesImpl();
 		}
-
 	}
-
 }

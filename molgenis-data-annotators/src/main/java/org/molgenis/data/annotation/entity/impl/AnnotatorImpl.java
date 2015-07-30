@@ -44,13 +44,13 @@ public class AnnotatorImpl implements EntityAnnotator
 	{
 		return info;
 	}
-
+		
 	@Override
 	public List<Entity> annotateEntity(Entity entity)
 	{
 		Query q = queryCreator.createQuery(entity);
-
 		Iterable<Entity> annotatationSourceEntities;
+		
 		if (resources.hasRepository(sourceRepositoryName))
 		{
 			annotatationSourceEntities = resources.findAll(sourceRepositoryName, q);
