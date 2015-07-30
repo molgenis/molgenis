@@ -14,6 +14,14 @@
 		return molgenis.contextUrl;
 	};
 
+	molgenis.setPluginId = function(pluginId) {
+		molgenis.pluginId = pluginId;
+	};
+
+	molgenis.getPluginId = function() {
+		return molgenis.pluginId;
+	};
+	
 	molgenis.createAlert = function(alerts, type, container) {
 		if (type !== 'error' && type !== 'warning' && type !== 'success')
 			type = 'error';
@@ -1008,6 +1016,21 @@ $(function() {
 	// focus first input on modal display
 	$(document).on('shown.bs.modal', '.modal', function() {
 		$(this).find('input:visible:first').focus();
+	});
+	
+	// focus first input on modal display
+	$(document).on('click', '.plugin-settings-btn', function() {
+		React.render(molgenis.ui.Form({
+			entity: molgenis.getPluginId() + '_settings',
+			entityInstance: molgenis.getPluginId(),
+			mode: 'edit',
+			modal: true,
+			enableOptionalFilter: false,
+			enableFormIndex: false,
+			onSubmitSuccess: function() {
+				location.reload();
+			}
+		}), $('#plugin-settings-container')[0]);
 	});
 	
 	/**

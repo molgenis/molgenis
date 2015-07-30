@@ -2,6 +2,8 @@ package org.molgenis.framework.ui;
 
 import javax.annotation.PostConstruct;
 
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -10,6 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 public abstract class MolgenisPluginController
 {
 	public static final String PLUGIN_URI_PREFIX = "/plugin/";
+
+	@Autowired
+	private DataService dataService;
 
 	@Autowired
 	private MolgenisPluginRegistry molgenisPluginRegistry;
@@ -49,6 +54,17 @@ public abstract class MolgenisPluginController
 	public String getId()
 	{
 		return uri.substring(PLUGIN_URI_PREFIX.length());
+	}
+
+	/**
+	 * Returns an entity containing settings for a plugin or null if no settings exist.
+	 * 
+	 * @return entity or null
+	 */
+	public Entity getPluginSettings()
+	{
+		String entityName = getId() + "_settings";
+		return dataService.hasRepository(entityName) ? dataService.findOne(entityName, getId()) : null;
 	}
 
 	@PostConstruct

@@ -217,8 +217,8 @@ public class DataExplorerController extends MolgenisPluginController
 			model.addAttribute("chains", molgenisSettings.getProperty(CHAINS));
 			model.addAttribute("sources", molgenisSettings.getProperty(SOURCES));
 			model.addAttribute("browserLinks", molgenisSettings.getProperty(BROWSERLINKS));
-			model.addAttribute("showHighlight", String.valueOf(molgenisSettings.getBooleanProperty(HIGHLIGHTREGION,
-					DEFAULT_VAL_KEY_HIGLIGHTREGION)));
+			model.addAttribute("showHighlight", String
+					.valueOf(molgenisSettings.getBooleanProperty(HIGHLIGHTREGION, DEFAULT_VAL_KEY_HIGLIGHTREGION)));
 
 			model.addAttribute("genomebrowser_start_list",
 					molgenisSettings.getProperty(GenomeConfig.GENOMEBROWSER_POS, "POS"));
@@ -249,7 +249,8 @@ public class DataExplorerController extends MolgenisPluginController
 		else if (moduleId.equals("entitiesreport"))
 		{
 			model.addAttribute("datasetRepository", dataService.getRepository(entityName));
-			model.addAttribute("viewName", parseEntitySpecificRuntimeProperty(entityName, KEY_MOD_ENTITIESREPORT, null));
+			model.addAttribute("viewName",
+					parseEntitySpecificRuntimeProperty(entityName, KEY_MOD_ENTITIESREPORT, null));
 		}
 		return "view-dataexplorer-mod-" + moduleId; // TODO bad request in case of invalid module id
 	}
@@ -265,12 +266,25 @@ public class DataExplorerController extends MolgenisPluginController
 	public ModulesConfigResponse getModules(@RequestParam("entity") String entityName)
 	{
 		// get data explorer settings
-		boolean modCharts = molgenisSettings.getBooleanProperty(KEY_MOD_CHARTS, DEFAULT_VAL_MOD_CHARTS);
-		boolean modData = molgenisSettings.getBooleanProperty(KEY_MOD_DATA, DEFAULT_VAL_MOD_DATA);
-		boolean modAggregates = molgenisSettings.getBooleanProperty(KEY_MOD_AGGREGATES, DEFAULT_VAL_MOD_AGGREGATES);
-		boolean modAnnotators = molgenisSettings.getBooleanProperty(KEY_MOD_ANNOTATORS, DEFAULT_VAL_MOD_ANNOTATORS);
-		boolean modDiseasematcher = molgenisSettings.getBooleanProperty(KEY_MOD_DISEASEMATCHER,
-				DEFAULT_VAL_MOD_DISEASEMATCHER);
+		Entity settings = getPluginSettings();
+
+		boolean modAggregates, modAnnotators, modCharts, modData, modDiseasematcher;
+		if (settings != null)
+		{
+			modAggregates = settings.getBoolean("mod_aggregates");
+			modAnnotators = settings.getBoolean("mod_annotators");
+			modCharts = settings.getBoolean("mod_charts");
+			modData = settings.getBoolean("mod_data");
+			modDiseasematcher = settings.getBoolean("mod_diseasematcher");
+		}
+		else
+		{
+			modAggregates = DEFAULT_VAL_MOD_AGGREGATES;
+			modAnnotators = DEFAULT_VAL_MOD_ANNOTATORS;
+			modCharts = DEFAULT_VAL_MOD_CHARTS;
+			modData = DEFAULT_VAL_MOD_DATA;
+			modDiseasematcher = DEFAULT_VAL_MOD_DISEASEMATCHER;
+		}
 
 		if (modAggregates)
 		{
@@ -281,9 +295,12 @@ public class DataExplorerController extends MolgenisPluginController
 
 		// set data explorer permission
 		Permission pluginPermission = null;
-		if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITE)) pluginPermission = Permission.WRITE;
-		else if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.READ)) pluginPermission = Permission.READ;
-		else if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.COUNT)) pluginPermission = Permission.COUNT;
+		if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITE))
+			pluginPermission = Permission.WRITE;
+		else if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.READ))
+			pluginPermission = Permission.READ;
+		else if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.COUNT))
+			pluginPermission = Permission.COUNT;
 
 		ModulesConfigResponse modulesConfig = new ModulesConfigResponse();
 
@@ -319,8 +336,8 @@ public class DataExplorerController extends MolgenisPluginController
 					}
 					if (modDiseasematcher)
 					{
-						modulesConfig.add(new ModuleConfig("diseasematcher", "Disease Matcher",
-								"diseasematcher-icon.png"));
+						modulesConfig
+								.add(new ModuleConfig("diseasematcher", "Disease Matcher", "diseasematcher-icon.png"));
 					}
 					if (modEntitiesReportName != null)
 					{
@@ -346,8 +363,8 @@ public class DataExplorerController extends MolgenisPluginController
 					}
 					if (modDiseasematcher)
 					{
-						modulesConfig.add(new ModuleConfig("diseasematcher", "Disease Matcher",
-								"diseasematcher-icon.png"));
+						modulesConfig
+								.add(new ModuleConfig("diseasematcher", "Disease Matcher", "diseasematcher-icon.png"));
 					}
 					if (modEntitiesReportName != null)
 					{
@@ -388,10 +405,10 @@ public class DataExplorerController extends MolgenisPluginController
 
 	private boolean isGenomeBrowserEntity(EntityMetaData entityMetaData)
 	{
-		AttributeMetaData attributeStartPosition = genomeConfig.getAttributeMetadataForAttributeNameArray(
-				GenomeConfig.GENOMEBROWSER_POS, entityMetaData);
-		AttributeMetaData attributeChromosome = genomeConfig.getAttributeMetadataForAttributeNameArray(
-				GenomeConfig.GENOMEBROWSER_CHROM, entityMetaData);
+		AttributeMetaData attributeStartPosition = genomeConfig
+				.getAttributeMetadataForAttributeNameArray(GenomeConfig.GENOMEBROWSER_POS, entityMetaData);
+		AttributeMetaData attributeChromosome = genomeConfig
+				.getAttributeMetadataForAttributeNameArray(GenomeConfig.GENOMEBROWSER_CHROM, entityMetaData);
 		return attributeStartPosition != null && attributeChromosome != null;
 	}
 

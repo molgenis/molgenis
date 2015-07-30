@@ -1,7 +1,6 @@
 package org.molgenis.security.account;
 
 import static org.molgenis.security.account.AccountController.URI;
-import static org.molgenis.security.user.UserAccountController.MIN_PASSWORD_LENGTH;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -85,7 +84,7 @@ public class AccountController
 	{
 		ModelAndView model = new ModelAndView("register-modal");
 		model.addObject("countries", CountryCodes.get());
-		model.addObject("min_password_length", MIN_PASSWORD_LENGTH);
+		model.addObject("min_password_length", 6); // FIXME do not hardcode
 		return model;
 	}
 
@@ -127,8 +126,8 @@ public class AccountController
 	@RequestMapping(value = "/register", method = RequestMethod.POST, headers = "Content-Type=application/x-www-form-urlencoded")
 	@ResponseBody
 	public Map<String, String> registerUser(@Valid @ModelAttribute RegisterRequest registerRequest,
-			@Valid @ModelAttribute CaptchaRequest captchaRequest, HttpServletRequest request) throws CaptchaException,
-			BindException, NoPermissionException
+			@Valid @ModelAttribute CaptchaRequest captchaRequest, HttpServletRequest request)
+					throws CaptchaException, BindException, NoPermissionException
 	{
 		if (accountService.isSelfRegistrationEnabled())
 		{

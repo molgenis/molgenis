@@ -22,6 +22,7 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 {
 	private final MolgenisUi molgenisUi;
 
+	public static final String KEY_PLUGIN_SETTINGS = "plugin_settings";
 	public static final String KEY_FOOTER = "molgenis.footer";
 	public static final String DEFAULT_VAL_FOOTER = "null";
 	public static final String MOLGENIS_CSS_THEME = "molgenis.css.theme";
@@ -71,14 +72,15 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 			PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 			if (molgenisSettings.getProperty(MOLGENIS_CSS_THEME) != null)
 			{
-				Resource resource = resolver.getResource("/css/themes/"
-						+ molgenisSettings.getProperty(MOLGENIS_CSS_THEME));
+				Resource resource = resolver
+						.getResource("/css/themes/" + molgenisSettings.getProperty(MOLGENIS_CSS_THEME));
 				if (resource.exists())
 				{
 					modelAndView.addObject(CSS_VARIABLE, molgenisSettings.getProperty(MOLGENIS_CSS_THEME));
 				}
 			}
 
+			modelAndView.addObject(KEY_PLUGIN_SETTINGS, molgenisPlugin.getPluginSettings());
 			modelAndView.addObject(APP_TRACKING_CODE_VARIABLE, new AppTrackingCodeImpl(molgenisSettings));
 			modelAndView.addObject("footerText", molgenisSettings.getProperty(KEY_FOOTER));
 			modelAndView.addObject(KEY_MOLGENIS_UI, molgenisUi);
@@ -96,8 +98,8 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 		Object bean = ((HandlerMethod) handler).getBean();
 		if (!(bean instanceof MolgenisPluginController))
 		{
-			throw new RuntimeException("controller does not implement "
-					+ MolgenisPluginController.class.getSimpleName());
+			throw new RuntimeException(
+					"controller does not implement " + MolgenisPluginController.class.getSimpleName());
 		}
 		return (MolgenisPluginController) bean;
 	}
@@ -109,8 +111,8 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 			String queryString = request.getQueryString();
 			StringBuilder pluginIdAndQueryStringUrlPart = new StringBuilder();
 			pluginIdAndQueryStringUrlPart.append(pluginId);
-			if (queryString != null && !queryString.isEmpty()) pluginIdAndQueryStringUrlPart.append('?').append(
-					queryString);
+			if (queryString != null && !queryString.isEmpty())
+				pluginIdAndQueryStringUrlPart.append('?').append(queryString);
 			return pluginIdAndQueryStringUrlPart.toString();
 		}
 		else

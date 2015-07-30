@@ -112,6 +112,9 @@
 	<#if context_url??>
 		<script>top.molgenis.setContextUrl('${context_url?js_string}');</script>
 	</#if>
+    <#if plugin_id??>
+        <script>top.molgenis.setPluginId('${plugin_id?js_string}');</script>
+    </#if>
 	<#list js as js_file_name>
 		<script src="<@resource_href "/js/${js_file_name?html}"/>"></script>
 	</#list>		
@@ -173,7 +176,14 @@
                    </div>
                 </div>
             </div>
-            
+            <#if plugin_settings??>
+            <div class="row">
+                <div class="col-md-12">
+                    <span class="glyphicon glyphicon-cog pull-right plugin-settings-btn" aria-hidden="true" style="cursor: pointer; margin-bottom: 5px;"></span>
+                    <div id="plugin-settings-container"></div>
+                </div>
+            </div>
+            </#if>
             <div class="row">
                 <div class="col-md-12">
                     <div id="plugin-container">
@@ -183,7 +193,7 @@
 <#-- Topmenu -->
 <#--TODO refactor to remove depency on 'Home'-->
 <#macro topmenu menu plugin_id pluginid_with_query_string> 
-	<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+	<nav class="navbar navbar-default navbar-fixed-top" style="margin-bottom: 10px" role="navigation">
         <div class="container-fluid">
 			<div class="navbar-header">
         		<#-- Logo start -->

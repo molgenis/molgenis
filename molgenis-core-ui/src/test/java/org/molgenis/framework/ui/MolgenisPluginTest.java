@@ -1,4 +1,4 @@
-package org.molgenis;
+package org.molgenis.framework.ui;
 
 import static org.testng.Assert.assertEquals;
 
