@@ -10,6 +10,7 @@ import static org.molgenis.data.vcf.VcfRepository.POS;
 import static org.molgenis.data.vcf.VcfRepository.POS_META;
 import static org.molgenis.data.vcf.VcfRepository.REF;
 import static org.molgenis.data.vcf.VcfRepository.REF_META;
+import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -208,14 +209,11 @@ public class ClinvarAnnotatorTest extends AbstractTestNGSpringContextTests
 		expectedTarget9.set(ClinvarAnnotator.CLINVAR_CLNSIG, ".,5,4");
 		expectedTarget9.set(ClinvarAnnotator.CLINVAR_CLNALLE, ".,2,1");
 
-		// Iterator<Entity> targets = clinvarAnnotator.annotate(Arrays.asList(source0, source1, source2, source3,
-		// source4,
-		// source5, source6, source7, source8, source9));
-		Iterator<Entity> tmptargets = clinvarAnnotator.annotate(Arrays.asList(source8));
-		Lists.newArrayList(tmptargets);
-		// assertEquals(Lists.newArrayList(targets),
-		// Arrays.asList(expectedTarget0, expectedTarget1, expectedTarget2, expectedTarget3, expectedTarget4,
-		// expectedTarget5, expectedTarget6, expectedTarget7, expectedTarget8, expectedTarget9));
+		Iterator<Entity> targets = clinvarAnnotator.annotate(Arrays.asList(source0, source1, source2, source3, source4,
+				source5, source6, source7, source8, source9));
+		assertEquals(Lists.newArrayList(targets),
+				Arrays.asList(expectedTarget0, expectedTarget1, expectedTarget2, expectedTarget3, expectedTarget4,
+						expectedTarget5, expectedTarget6, expectedTarget7, expectedTarget8, expectedTarget9));
 	}
 
 	@Configuration
