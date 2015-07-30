@@ -10,6 +10,9 @@ import json
 import warnings
 import re
 import os.path
+import security
+import timeit
+import time
 
 class Connect_Molgenis():
     """Some simple methods for adding, updating and retrieving rows from Molgenis though the REST API
@@ -31,7 +34,7 @@ class Connect_Molgenis():
         connection.update_entity_row('public_rnaseq_Individuals',[{'field':'id', 'operator':'EQUALS', 'value':'John Doe'}], {'gender':'Female'})  
     """
 
-    def __init__(self, server_url, user, password, verbose = True, give_warnings = True):
+    def __init__(self, server_url, verbose = True, give_warnings = True, new_pass_file = True):
         '''Initialize Python api to talk to Molgenis Rest API
         
         Args:
@@ -41,14 +44,19 @@ class Connect_Molgenis():
             verbose (bool):      If True, print out extra info, if False no prints are used (def: True)
             warnings (bool):     If True, warnings are given for certain operations where something might have gone wrong, but not sure enough to raise exception.
         '''
+        self.login_time = None 
+        if new_pass_file:
+            security.remove_secrets_file()
+        security.require_username('Username')
+        security.require_password('Password')
         self.verbose = verbose
         self.api_url = server_url+'/api/v1'
-        self.headers = self._construct_login_header(user, password)
+        self.headers = self._construct_login_header()
         self.entity_meta_data = {}
         self.column_meta_data = {}
         self.give_warnings = give_warnings
         self.added_rows = 0
-        
+        self.time = None
     
     def set_verbosity(self, verbose):
         '''Set verbosity on or off
@@ -66,7 +74,7 @@ class Connect_Molgenis():
         '''
         self.give_warnings = give_warnings
     
-    def _construct_login_header(self, user, password):
+    def _construct_login_header(self):
         '''Log in to the molgenis server and use the retrieve loginResponse token to construct the login header.
          
         Args:
@@ -76,12 +84,13 @@ class Connect_Molgenis():
         Returns:
             header (dict): Login header for molgenis server
         '''
-        data = json.dumps({'username': user, 'password': password})
+        data = json.dumps({'username': security.retrieve('Username'), 'password': security.retrieve('Password')})
                                        
         server_response = requests.post( self.api_url+'/login/',
                                        data=data, headers={'Content-type':'application/json'} )
         self.check_server_response(server_response, 'retrieve token',data_used=data)
         headers = {'Content-type':'application/json', 'x-molgenis-token': server_response.json()['token'], 'Accept':'application/json'}
+        self.login_time = timeit.default_timer()
         return headers
     
     def logout(self):
@@ -129,6 +138,7 @@ class Connect_Molgenis():
                             error_message = error_message.replace('Value must be less than or equal to 255 characters',
                                                   ' The enum options are: '+enum_options)
                         raise BaseException(error_message.rstrip('\n'))
+                return server_response_json
             except ValueError:
                 pass # no json oobject in server_response
         if str(server_response) == '<Response [400]>' or str(server_response) == '<Response [404]>':
@@ -184,15 +194,18 @@ class Connect_Molgenis():
         Returns:
             added_id (string): Id of the row that got added
         '''
+        if timeit.default_timer()-self.login_time > 30*60:
+            self.headers = self._construct_login_header(self.user, self.password)
         # make a string of json data (dictionary) with key=column name and value=value you want (works for 1 individual, Jonatan is going to find out how to to it with multiple)
         # post to the entity with the json data
         if validate_json:
             self.validate_data(entity_name, data)
         # make all values str
         data = dict([a, str(x)] for a, x in data.iteritems() if len(str(x).strip())>0)
-        server_response = requests.post(self.api_url+'/'+entity_name+'/', data=str(data), headers=self.headers)
+        request_url = self.api_url+'/'+entity_name+'/'
+        server_response = requests.post(request_url, data=json.dumps(data), headers=self.headers)
         self.added_rows += 1
-        self.check_server_response(server_response, 'Add row to entity '+entity_name, entity_used=entity_name, data_used=str(data))
+        self.check_server_response(server_response, time.strftime('%H:%M:%S', time.gmtime(timeit.default_timer()-self.start))+ ' - Add row to entity '+entity_name, entity_used=entity_name, data_used=json.dumps(data))
         added_id = server_response.headers['location'].split('/')[-1]
         return added_id
     
@@ -216,7 +229,11 @@ class Connect_Molgenis():
             file_name = os.path.basename(file_path)
         if not os.path.isfile(file_path):
             raise IOError('File not found: '+str(file_path))
-        server_response = requests.post(self.api_url+'/File',data=str({'description':file_name,'attachment':open(file_path,'rb')}),headers=self.headers)
+        url = 'http://localhost:8080/api/v1/File'
+        files = {'description': ('', 'lala'), 'attachment': (open('/Users/Niek/UMCG/test/data/ATACseq/rundir/QC/CollectMultipleMetrics_1.sh','rb'), '')}
+        r = requests.post(url, data=json.dumps(files), headers=self.headers)
+        self.check_server_response(r,'Upload file test')
+        server_response = requests.post(self.api_url+'/File',files={'description':(","+"file_name"+"),'attachment':("+file_path+",")},headers=self.headers)
         self.check_server_response(server_response,'Upload file',data_used = str(file_path))
         added_id = server_response.headers['location'].split('/')[-1]
         return added_id
@@ -272,7 +289,6 @@ class Connect_Molgenis():
             print 'Selected '+str(server_response_json['total'])+' row(s).'
         return server_response_json
 
-  
     def update_entity_rows(self, entity_name, query, data):
         '''Update an entity row
     
@@ -288,14 +304,21 @@ class Connect_Molgenis():
         id_attribute = self.get_id_attribute(entity_name)
         server_response_list = [] 
         for entity_items in entity_data['items']:
-            # column values that are not given will be overwritten with null, so we need to add the existing column data into our dict
-            for key in entity_items:
-                if key != id_attribute and key not in data and key!='previous_individuals':
-                    data[key.encode('ascii')] = str(entity_items[key]).encode('ascii')
             row_id = entity_items[id_attribute]
-            server_response = requests.put(self.api_url+'/'+entity_name+'/'+row_id+'/', data=str(data), headers=self.headers)
-            server_response_list.append(server_response)
-            self.check_server_response(server_response, 'Update entity row', query_used=query,data_used=data,entity_used=entity_name)
+            if len(data) == 1:
+                server_response = requests.put(self.api_url+'/'+entity_name+'/'+row_id+'/'+data.keys()[0], data=data[data.keys()[0]], headers=self.headers)
+                server_response_list.append(server_response)
+                self.check_server_response(server_response, 'Update entity row (single value)', query_used=query,data_used=data,entity_used=entity_name)
+            else:
+                raise NotImplementedError('Updating multiple values at the same time not implemented yet')
+                # if trying to update multiple columns, column values that are not given will be overwritten with null, so we need to add the existing column data into our dict
+                # DOES NOT WORK FOR X/MREFS!!!
+                for key in entity_items:
+                    if key != id_attribute and key not in data and key!='previous_individuals':
+                        data[key.encode('ascii')] = str(entity_items[key]).encode('ascii')
+                server_response = requests.put(self.api_url+'/'+entity_name+'/'+row_id+'/', data=json.dumps(data), headers=self.headers)
+                server_response_list.append(server_response)
+                self.check_server_response(server_response, 'Update entity row (multiple values)', query_used=query,data_used=data,entity_used=entity_name)
         return server_response_list
 
     def get_entity_meta_data(self, entity_name):
@@ -352,6 +375,30 @@ class Connect_Molgenis():
     def get_column_type(self, entity_name, column_name):
         column_meta_data = self.get_column_meta_data(entity_name, column_name)
         return column_meta_data['fieldType']
+
+    def get_all_entity_data(self,package):
+        '''Get info of all entities of package
+        
+        Args:
+            package (string): Package for which to get all entities. If None, get all entities from all pacakges 
+        '''
+        if not package:
+            raise AttributeError('package can\'t be None, is '+str(package))
+        server_response = requests.get(self.api_url+'/entities/'+package, headers=self.headers)
+        self.check_server_response(server_response, 'Get info from all entities')
+        return server_response
+    
+    def delete_all_rows_of_all_entities(self, package):
+        '''Delete all entities of package
+        
+        Args:
+            package (string): Package for which to delete all entities. (def: None)
+        '''
+        if not package:
+            raise AttributeError('package can\'t be None, is '+str(package))
+        server_response = self.get_all_entity_data(package)
+        for entity in server_response.json()['items']:
+            self.delete_all_entity_rows(entity['href'].split('/')[-1])
     
     def delete_all_entity_rows(self,entity_name):
         '''delete all entity rows'''
@@ -391,4 +438,4 @@ class Connect_Molgenis():
             self.check_server_response(server_response, 'Delete entity row',entity_used=entity_name,query_used=query_used)
             server_response_list.append(server_response)
         return server_response_list
-    
+        
