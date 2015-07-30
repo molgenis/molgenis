@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation.impl;
+package org.molgenis.data.annotation.entity.impl;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -17,7 +17,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
-import org.molgenis.data.annotation.entity.impl.CaddAnnotator;
 import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.ResourcesImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
@@ -31,14 +30,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 @ContextConfiguration(classes =
 { CaddAnnotatorTest.Config.class, CaddAnnotator.class })
 public class CaddAnnotatorTest extends AbstractTestNGSpringContextTests
 {
-
 	@Autowired
 	RepositoryAnnotator annotator;
 
@@ -48,32 +46,31 @@ public class CaddAnnotatorTest extends AbstractTestNGSpringContextTests
 	public DefaultEntityMetaData metaDataCanAnnotate = new DefaultEntityMetaData("test");
 	public DefaultEntityMetaData metaDataCantAnnotate = new DefaultEntityMetaData("test");
 
-	public AttributeMetaData attributeMetaDataChrom = new DefaultAttributeMetaData(VcfRepository.CHROM,
-			MolgenisFieldTypes.FieldTypeEnum.STRING);
-	public AttributeMetaData attributeMetaDataPos = new DefaultAttributeMetaData(VcfRepository.POS,
-			MolgenisFieldTypes.FieldTypeEnum.LONG);
-	public AttributeMetaData attributeMetaDataRef = new DefaultAttributeMetaData(VcfRepository.REF,
-			MolgenisFieldTypes.FieldTypeEnum.STRING);
-	public AttributeMetaData attributeMetaDataAlt = new DefaultAttributeMetaData(VcfRepository.ALT,
-			MolgenisFieldTypes.FieldTypeEnum.STRING);
-	public AttributeMetaData attributeMetaDataCantAnnotateChrom = new DefaultAttributeMetaData(VcfRepository.CHROM,
-			MolgenisFieldTypes.FieldTypeEnum.LONG);
-	public ArrayList<Entity> input = new ArrayList<>();
-	public ArrayList<Entity> input1 = new ArrayList<>();
-	public ArrayList<Entity> input2 = new ArrayList<>();
-	public ArrayList<Entity> input3 = new ArrayList<>();
-	public ArrayList<Entity> input4 = new ArrayList<>();
+	public ArrayList<Entity> input;
+	public ArrayList<Entity> input1;
+	public ArrayList<Entity> input2;
+	public ArrayList<Entity> input3;
 	public static Entity entity;
 	public static Entity entity1;
 	public static Entity entity2;
 	public static Entity entity3;
-	public static Entity entity4;
 
 	public MolgenisSettings settings = mock(MolgenisSettings.class);
 	public ArrayList<Entity> entities;
 
 	public void setValues()
 	{
+		AttributeMetaData attributeMetaDataChrom = new DefaultAttributeMetaData(VcfRepository.CHROM,
+				MolgenisFieldTypes.FieldTypeEnum.STRING);
+		AttributeMetaData attributeMetaDataPos = new DefaultAttributeMetaData(VcfRepository.POS,
+				MolgenisFieldTypes.FieldTypeEnum.LONG);
+		AttributeMetaData attributeMetaDataRef = new DefaultAttributeMetaData(VcfRepository.REF,
+				MolgenisFieldTypes.FieldTypeEnum.STRING);
+		AttributeMetaData attributeMetaDataAlt = new DefaultAttributeMetaData(VcfRepository.ALT,
+				MolgenisFieldTypes.FieldTypeEnum.STRING);
+		AttributeMetaData attributeMetaDataCantAnnotateChrom = new DefaultAttributeMetaData(VcfRepository.CHROM,
+				MolgenisFieldTypes.FieldTypeEnum.LONG);
+
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom);
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataRef);
@@ -89,15 +86,18 @@ public class CaddAnnotatorTest extends AbstractTestNGSpringContextTests
 		entity1 = new MapEntity(metaDataCanAnnotate);
 		entity2 = new MapEntity(metaDataCanAnnotate);
 		entity3 = new MapEntity(metaDataCanAnnotate);
-		entity4 = new MapEntity(metaDataCanAnnotate);
 
 		entities = new ArrayList<>();
 		entities.add(entity);
 	}
 
-	@BeforeMethod
-	public void beforeMethod() throws IOException
+	@BeforeClass
+	public void beforeClass() throws IOException
 	{
+		input = new ArrayList<>();
+		input1 = new ArrayList<>();
+		input2 = new ArrayList<>();
+		input3 = new ArrayList<>();
 
 		setValues();
 
@@ -121,13 +121,6 @@ public class CaddAnnotatorTest extends AbstractTestNGSpringContextTests
 		entity3.set(VcfRepository.ALT, "C");
 
 		input3.add(entity3);
-
-		entity4.set(VcfRepository.CHROM, "1");
-		entity4.set(VcfRepository.POS, new Long(100));
-		entity4.set(VcfRepository.REF, "T");
-		entity4.set(VcfRepository.ALT, "C");
-
-		input4.add(entity4);
 	}
 
 	@Test
