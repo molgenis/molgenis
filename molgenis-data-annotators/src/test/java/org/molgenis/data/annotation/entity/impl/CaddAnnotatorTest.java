@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation.impl;
+package org.molgenis.data.annotation.entity.impl;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -17,7 +17,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
-import org.molgenis.data.annotation.entity.impl.CaddAnnotator;
 import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.ResourcesImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
@@ -38,7 +37,6 @@ import org.testng.annotations.Test;
 { CaddAnnotatorTest.Config.class, CaddAnnotator.class })
 public class CaddAnnotatorTest extends AbstractTestNGSpringContextTests
 {
-
 	@Autowired
 	RepositoryAnnotator annotator;
 
@@ -62,12 +60,10 @@ public class CaddAnnotatorTest extends AbstractTestNGSpringContextTests
 	public ArrayList<Entity> input1 = new ArrayList<>();
 	public ArrayList<Entity> input2 = new ArrayList<>();
 	public ArrayList<Entity> input3 = new ArrayList<>();
-	public ArrayList<Entity> input4 = new ArrayList<>();
 	public static Entity entity;
 	public static Entity entity1;
 	public static Entity entity2;
 	public static Entity entity3;
-	public static Entity entity4;
 
 	public MolgenisSettings settings = mock(MolgenisSettings.class);
 	public ArrayList<Entity> entities;
@@ -89,7 +85,6 @@ public class CaddAnnotatorTest extends AbstractTestNGSpringContextTests
 		entity1 = new MapEntity(metaDataCanAnnotate);
 		entity2 = new MapEntity(metaDataCanAnnotate);
 		entity3 = new MapEntity(metaDataCanAnnotate);
-		entity4 = new MapEntity(metaDataCanAnnotate);
 
 		entities = new ArrayList<>();
 		entities.add(entity);
@@ -121,13 +116,6 @@ public class CaddAnnotatorTest extends AbstractTestNGSpringContextTests
 		entity3.set(VcfRepository.ALT, "C");
 
 		input3.add(entity3);
-
-		entity4.set(VcfRepository.CHROM, "1");
-		entity4.set(VcfRepository.POS, new Long(100));
-		entity4.set(VcfRepository.REF, "T");
-		entity4.set(VcfRepository.ALT, "C");
-
-		input4.add(entity4);
 	}
 
 	@Test
