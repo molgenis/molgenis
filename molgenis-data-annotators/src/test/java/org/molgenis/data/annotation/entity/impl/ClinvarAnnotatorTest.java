@@ -15,6 +15,7 @@ import static org.testng.Assert.assertEquals;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -198,7 +199,7 @@ public class ClinvarAnnotatorTest extends AbstractTestNGSpringContextTests
 		expectedTarget8.set(REF, "C");
 		expectedTarget8.set(ALT, "T,A");
 		expectedTarget8.set(ClinvarAnnotator.CLINVAR_CLNSIG, "5,4");
-		expectedTarget8.set(ClinvarAnnotator.CLINVAR_CLNALLE, "2,1");
+		expectedTarget8.set(ClinvarAnnotator.CLINVAR_CLNALLE, "1,2");
 
 		// FIXME see https://github.com/molgenis/molgenis/issues/3433
 		MapEntity expectedTarget9 = new MapEntity(sourceMeta);
@@ -207,8 +208,9 @@ public class ClinvarAnnotatorTest extends AbstractTestNGSpringContextTests
 		expectedTarget9.set(REF, "C");
 		expectedTarget9.set(ALT, "C,T,A");
 		expectedTarget9.set(ClinvarAnnotator.CLINVAR_CLNSIG, ".,5,4");
-		expectedTarget9.set(ClinvarAnnotator.CLINVAR_CLNALLE, ".,2,1");
+		expectedTarget9.set(ClinvarAnnotator.CLINVAR_CLNALLE, ".,2,3");
 
+		
 		Iterator<Entity> targets = clinvarAnnotator.annotate(Arrays.asList(source0, source1, source2, source3, source4,
 				source5, source6, source7, source8, source9));
 		assertEquals(Lists.newArrayList(targets),
