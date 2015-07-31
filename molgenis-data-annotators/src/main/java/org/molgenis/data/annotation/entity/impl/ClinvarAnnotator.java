@@ -92,6 +92,7 @@ public class ClinvarAnnotator
 				}else if(CLINVAR_CLNALLE.equals(attr.getName())){
 					attrName = CLINVAR_CLINALL_ResourceAttributeName;
 				}else{
+					
 					attrName = attr.getName();
 				}
 				return sourceEntity.get(attrName);
