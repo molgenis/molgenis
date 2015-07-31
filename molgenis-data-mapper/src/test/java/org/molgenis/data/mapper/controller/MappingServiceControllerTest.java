@@ -1,7 +1,10 @@
 package org.molgenis.data.mapper.controller;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -21,6 +24,8 @@ import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.security.user.MolgenisUserService;
+import org.molgenis.ui.menu.Menu;
+import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -58,10 +63,14 @@ public class MappingServiceControllerTest
 	@Mock
 	private SemanticSearchService semanticSearchService;
 
+	@Mock
+	private MenuReaderService menuReaderService;
+
 	private MolgenisUser me = new MolgenisUser();
 	private DefaultEntityMetaData lifeLines;
 	private DefaultEntityMetaData hop;
 	private MappingProject mappingProject;
+	private static final String ID = "mappingservice";
 
 	private MockMvc mockMvc;
 
@@ -95,12 +104,15 @@ public class MappingServiceControllerTest
 	public void itShouldUpdateExistingAttributeMappingWhenSaving() throws Exception
 	{
 		when(mappingService.getMappingProject("asdf")).thenReturn(mappingProject);
+		Menu menu = mock(Menu.class);
+		when(menuReaderService.getMenu()).thenReturn(menu);
+		when(menu.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
 
 		mockMvc.perform(
-				MockMvcRequestBuilders.post(MappingServiceController.URI + "/saveattributemapping")
-						.param("mappingProjectId", "asdf").param("target", "HOP").param("source", "LifeLines")
-						.param("targetAttribute", "age").param("algorithm", "$('length').value()")).andExpect(
-				MockMvcResultMatchers.redirectedUrl("/menu/main/mappingservice/mappingproject/asdf"));
+				post(MappingServiceController.URI + "/saveattributemapping").param("mappingProjectId", "asdf")
+						.param("target", "HOP").param("source", "LifeLines").param("targetAttribute", "age")
+						.param("algorithm", "$('length').value()")).andExpect(
+				redirectedUrl("/menu/main/mappingservice/mappingproject/asdf"));
 		MappingProject expected = new MappingProject("hop hop hop", me);
 		expected.setIdentifier("asdf");
 		MappingTarget mappingTarget = expected.addTarget(hop);
@@ -116,6 +128,9 @@ public class MappingServiceControllerTest
 	public void itShouldCreateNewAttributeMappingWhenSavingIfNonePresent() throws Exception
 	{
 		when(mappingService.getMappingProject("asdf")).thenReturn(mappingProject);
+		Menu menu = mock(Menu.class);
+		when(menuReaderService.getMenu()).thenReturn(menu);
+		when(menu.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
 
 		mockMvc.perform(
 				MockMvcRequestBuilders.post(MappingServiceController.URI + "/saveattributemapping")
@@ -140,6 +155,9 @@ public class MappingServiceControllerTest
 	public void itShouldRemoveEmptyAttributeMappingsWhenSaving() throws Exception
 	{
 		when(mappingService.getMappingProject("asdf")).thenReturn(mappingProject);
+		Menu menu = mock(Menu.class);
+		when(menuReaderService.getMenu()).thenReturn(menu);
+		when(menu.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
 
 		mockMvc.perform(
 				MockMvcRequestBuilders.post(MappingServiceController.URI + "/saveattributemapping")
