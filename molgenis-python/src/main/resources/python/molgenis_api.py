@@ -143,6 +143,8 @@ class Connect_Molgenis():
                 pass # no json oobject in server_response
         if str(server_response) == '<Response [400]>' or str(server_response) == '<Response [404]>':
             error(server_response) 
+        elif str(server_response) == '<Response [401]>':
+            raise BaseException(type_of_request+' -> '+str(server_response)+' - '+server_response.reason +' (Wrong username - password combination)')
         elif str(server_response) == '<Response [200]>' or str(server_response) == '<Response [201]>' or str(server_response) == '<Response [204]>':
             if self.verbose:
                 message = type_of_request+' -> '+str(server_response)+' - '+server_response.reason 
@@ -195,17 +197,18 @@ class Connect_Molgenis():
             added_id (string): Id of the row that got added
         '''
         if timeit.default_timer()-self.login_time > 30*60:
-            self.headers = self._construct_login_header(self.user, self.password)
+            self.headers = self._construct_login_header()
         # make a string of json data (dictionary) with key=column name and value=value you want (works for 1 individual, Jonatan is going to find out how to to it with multiple)
         # post to the entity with the json data
         if validate_json:
             self.validate_data(entity_name, data)
-        # make all values str
+        # make all values str and remove if value is None
+        data = {k: v for k, v in data.items() if v!=None}
         data = dict([a, str(x)] for a, x in data.iteritems() if len(str(x).strip())>0)
         request_url = self.api_url+'/'+entity_name+'/'
         server_response = requests.post(request_url, data=json.dumps(data), headers=self.headers)
         self.added_rows += 1
-        self.check_server_response(server_response, time.strftime('%H:%M:%S', time.gmtime(timeit.default_timer()-self.start))+ ' - Add row to entity '+entity_name, entity_used=entity_name, data_used=json.dumps(data))
+        self.check_server_response(server_response, time.strftime('%H:%M:%S', time.gmtime(timeit.default_timer()-self.login_time))+ ' - Add row to entity '+entity_name, entity_used=entity_name, data_used=json.dumps(data))
         added_id = server_response.headers['location'].split('/')[-1]
         return added_id
     
@@ -376,15 +379,10 @@ class Connect_Molgenis():
         column_meta_data = self.get_column_meta_data(entity_name, column_name)
         return column_meta_data['fieldType']
 
-    def get_all_entity_data(self,package):
-        '''Get info of all entities of package
-        
-        Args:
-            package (string): Package for which to get all entities. If None, get all entities from all pacakges 
+    def get_all_entity_data(self):
+        '''Get info of all entities 
         '''
-        if not package:
-            raise AttributeError('package can\'t be None, is '+str(package))
-        server_response = requests.get(self.api_url+'/entities/'+package, headers=self.headers)
+        server_response = requests.get(self.api_url+'/entities/', headers=self.headers)
         self.check_server_response(server_response, 'Get info from all entities')
         return server_response
     
@@ -396,9 +394,15 @@ class Connect_Molgenis():
         '''
         if not package:
             raise AttributeError('package can\'t be None, is '+str(package))
-        server_response = self.get_all_entity_data(package)
+        server_response = self.get_all_entity_data()
         for entity in server_response.json()['items']:
-            self.delete_all_entity_rows(entity['href'].split('/')[-1])
+            entity_name = entity['fullName']
+            if package in entity_name and not bool(entity['abstract']):
+                print 'Deleting all rows from',entity_name
+                try:
+                    self.delete_all_entity_rows(entity_name)
+                except BaseException as e:
+                    warnings.warn(e)
     
     def delete_all_entity_rows(self,entity_name):
         '''delete all entity rows'''
