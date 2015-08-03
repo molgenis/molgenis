@@ -7,7 +7,6 @@
 
 import requests
 import json
-import warnings
 import re
 import os.path
 import security
@@ -35,7 +34,7 @@ class Connect_Molgenis():
         connection.update_entity_row('public_rnaseq_Individuals',[{'field':'id', 'operator':'EQUALS', 'value':'John Doe'}], {'gender':'Female'})  
     """
 
-    def __init__(self, server_url, new_pass_file = True):
+    def __init__(self, server_url, new_pass_file = True,log_file = 'molgenis.log', logging_level='DEBUG', logfile_mode = 'w'):
         '''Initialize Python api to talk to Molgenis Rest API
         
         Args:
@@ -43,8 +42,8 @@ class Connect_Molgenis():
             user (string):       Login username
             password (string):   Login password
         '''
-        logging.basicConfig(level=logging.INFO)
-        logger = logging.getLogger(__name__)
+        logging.basicConfig(level=getattr(logging, logging_level), filename = log_file, filemode = logfile_mode)
+        self.logger = logging.getLogger(__name__)
         self.login_time = None 
         if new_pass_file:
             security.remove_secrets_file()
@@ -54,7 +53,6 @@ class Connect_Molgenis():
         self.headers = self._construct_login_header()
         self.entity_meta_data = {}
         self.column_meta_data = {}
-        self.give_warnings = give_warnings
         self.added_rows = 0
         self.time = None
     
@@ -121,6 +119,7 @@ class Connect_Molgenis():
                             enum_options = ', '.join(column_meta['enumOptions'])
                             error_message = error_message.replace('Value must be less than or equal to 255 characters',
                                                   ' The enum options are: '+enum_options)
+                        self.logger.error(error_message.rstrip('\n'))
                         raise BaseException(error_message.rstrip('\n'))
                 return server_response_json
             except ValueError:
@@ -133,14 +132,13 @@ class Connect_Molgenis():
             message = type_of_request+' -> '+str(server_response)+' - '+server_response.reason 
             if 'Add row to entity' in type_of_request:
                 message += '. Total added rows this session: '+str(self.added_rows)
-            logger.debug(message)
+            self.logger.debug(message)
             return True
         else:
             error(server_response)
             # i didn't go through all response codes, so if it's a different response than expected I only want to raise exception if 
             # there are error messages in the response object, otherwise just warn that there is a different response than expected
-            if self.give_warnings:
-                warnings.warn('Expected <Response [200]>, <Response 201> or <Response 204>, got '+str(server_response)+'\nReason: '+server_response.reason)
+            logging.warning('Expected <Response [200]>, <Response 201> or <Response 204>, got '+str(server_response)+'\nReason: '+server_response.reason)
             return False
     
     def validate_data(self, entity_name, data):
@@ -163,9 +161,8 @@ class Connect_Molgenis():
             raise BaseException(error_message)
         entity_id_attribute = self.get_id_attribute(entity_name)
         if entity_id_attribute in data and self.get_column_meta_data(entity_name,entity_id_attribute)['auto']:
-            if self.give_warnings:
-                warnings.warn('The ID attribute ('+entity_id_attribute+') of the entity ('+entity_name+') you are adding a row to is set to `auto`.\n'\
-                             +'The value you gave for id ('+str(data[entity_id_attribute])+') will not be used. Instead, the ID will be a random string.')
+            logging.warning('The ID attribute ('+entity_id_attribute+') of the entity ('+entity_name+') you are adding a row to is set to `auto`.\n'\
+                         +'The value you gave for id ('+str(data[entity_id_attribute])+') will not be used. Instead, the ID will be a random string.')
         
     def add_entity_row(self, entity_name, data, validate_json=False):
         '''Add a row to an entity
@@ -244,9 +241,9 @@ class Connect_Molgenis():
         server_response_json = server_response.json()
         self.check_server_response(server_response, 'Get rows from entity',entity_used=entity_name, query_used=json_query)
         if server_response_json['total'] >= server_response_json['num']:
-            logger.warn(warnings.warn(str(server_response_json['total'])+' number of rows selected. Max number of rows to retrieve data for is set to '+str(server_response_json['num'])+'.\n'
-                        +str(server_response_json['num']-server_response_json['total'])+' rows will not be in the results.'))
-            logger.info('Selected '+str(server_response_json['total'])+' row(s).')
+            logging.warning(str(server_response_json['total'])+' number of rows selected. Max number of rows to retrieve data for is set to '+str(server_response_json['num'])+'.\n'
+                        +str(server_response_json['num']-server_response_json['total'])+' rows will not be in the results.')
+            self.logger.info('Selected '+str(server_response_json['total'])+' row(s).')
         return server_response_json
   
     def get_entity(self, entity_name):
@@ -266,9 +263,9 @@ class Connect_Molgenis():
         server_response_json = server_response.json()
         self.check_server_response(server_response, 'Get rows from entity',entity_used=entity_name)
         if server_response_json['total'] >= server_response_json['num']:
-            logger.warn(warnings.warn(str(server_response_json['total'])+' number of rows selected. Max number of rows to retrieve data for is set to '+str(server_response_json['num'])+'.\n'
-                        +str(int(server_response_json['num'])-int(server_response_json['total']))+' rows will not be in the results.'))
-            logger.info('Selected '+str(server_response_json['total'])+' row(s).')
+            logging.warning(str(server_response_json['total'])+' number of rows selected. Max number of rows to retrieve data for is set to '+str(server_response_json['num'])+'.\n'
+                        +str(int(server_response_json['num'])-int(server_response_json['total']))+' rows will not be in the results.')
+            self.logger.info('Selected '+str(server_response_json['total'])+' row(s).')
         return server_response_json
 
     def update_entity_rows(self, entity_name, query, data):
@@ -377,11 +374,11 @@ class Connect_Molgenis():
         for entity in server_response.json()['items']:
             entity_name = entity['fullName']
             if package in entity_name and not bool(entity['abstract']):
-                logger.info('Deleting all rows from',entity_name)
+                self.logger.info('Deleting all rows from',entity_name)
                 try:
                     self.delete_all_entity_rows(entity_name)
                 except BaseException as e:
-                    warnings.warn(str(e))
+                    logging.warning(str(e))
     
     def delete_all_entity_rows(self,entity_name):
         '''delete all entity rows'''
