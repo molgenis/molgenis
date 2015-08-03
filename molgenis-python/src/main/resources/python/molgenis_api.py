@@ -13,6 +13,7 @@ import os.path
 import security
 import timeit
 import time
+import logging
 
 class Connect_Molgenis():
     """Some simple methods for adding, updating and retrieving rows from Molgenis though the REST API
@@ -34,22 +35,21 @@ class Connect_Molgenis():
         connection.update_entity_row('public_rnaseq_Individuals',[{'field':'id', 'operator':'EQUALS', 'value':'John Doe'}], {'gender':'Female'})  
     """
 
-    def __init__(self, server_url, verbose = True, give_warnings = True, new_pass_file = True):
+    def __init__(self, server_url, new_pass_file = True):
         '''Initialize Python api to talk to Molgenis Rest API
         
         Args:
             server_url (string): The url to the molgenis server (ex: https://molgenis39.target.rug.nl/)
             user (string):       Login username
             password (string):   Login password
-            verbose (bool):      If True, print out extra info, if False no prints are used (def: True)
-            warnings (bool):     If True, warnings are given for certain operations where something might have gone wrong, but not sure enough to raise exception.
         '''
+        logging.basicConfig(level=logging.INFO)
+        logger = logging.getLogger(__name__)
         self.login_time = None 
         if new_pass_file:
             security.remove_secrets_file()
         security.require_username('Username')
         security.require_password('Password')
-        self.verbose = verbose
         self.api_url = server_url+'/api/v1'
         self.headers = self._construct_login_header()
         self.entity_meta_data = {}
@@ -57,22 +57,6 @@ class Connect_Molgenis():
         self.give_warnings = give_warnings
         self.added_rows = 0
         self.time = None
-    
-    def set_verbosity(self, verbose):
-        '''Set verbosity on or off
-        
-        Args:
-            verbose (bool): True sets it on, False sets it off.
-        '''
-        self.verbose = verbose
-    
-    def set_give_warnings(self, give_warnings):
-        '''Set give_warnings on or off
-        
-        Args:
-            give_warnings (bool): True sets it on, False sets it off.
-        '''
-        self.give_warnings = give_warnings
     
     def _construct_login_header(self):
         '''Log in to the molgenis server and use the retrieve loginResponse token to construct the login header.
@@ -146,11 +130,10 @@ class Connect_Molgenis():
         elif str(server_response) == '<Response [401]>':
             raise BaseException(type_of_request+' -> '+str(server_response)+' - '+server_response.reason +' (Wrong username - password combination)')
         elif str(server_response) == '<Response [200]>' or str(server_response) == '<Response [201]>' or str(server_response) == '<Response [204]>':
-            if self.verbose:
-                message = type_of_request+' -> '+str(server_response)+' - '+server_response.reason 
-                if 'Add row to entity' in type_of_request:
-                    message += '. Total added rows this session: '+str(self.added_rows)
-                print message
+            message = type_of_request+' -> '+str(server_response)+' - '+server_response.reason 
+            if 'Add row to entity' in type_of_request:
+                message += '. Total added rows this session: '+str(self.added_rows)
+            logger.debug(message)
             return True
         else:
             error(server_response)
@@ -260,12 +243,10 @@ class Connect_Molgenis():
         server_response = requests.post(self.api_url+'/'+entity_name+'?_method=GET', data = json_query, headers=self.headers)
         server_response_json = server_response.json()
         self.check_server_response(server_response, 'Get rows from entity',entity_used=entity_name, query_used=json_query)
-        if self.verbose:
-            if server_response_json['total'] >= server_response_json['num']:
-                if self.give_warnings:
-                    warnings.warn(str(server_response_json['total'])+' number of rows selected. Max number of rows to retrieve data for is set to '+str(server_response_json['num'])+'.\n'
-                                 +str(server_response_json['num']-server_response_json['total'])+' rows will not be in the results.')
-            print 'Selected '+str(server_response_json['total'])+' row(s).'
+        if server_response_json['total'] >= server_response_json['num']:
+            logger.warn(warnings.warn(str(server_response_json['total'])+' number of rows selected. Max number of rows to retrieve data for is set to '+str(server_response_json['num'])+'.\n'
+                        +str(server_response_json['num']-server_response_json['total'])+' rows will not be in the results.'))
+            logger.info('Selected '+str(server_response_json['total'])+' row(s).')
         return server_response_json
   
     def get_entity(self, entity_name):
@@ -284,12 +265,10 @@ class Connect_Molgenis():
         server_response = requests.get(self.api_url+'/'+entity_name, headers=self.headers)
         server_response_json = server_response.json()
         self.check_server_response(server_response, 'Get rows from entity',entity_used=entity_name)
-        if self.verbose:
-            if server_response_json['total'] >= server_response_json['num']:
-                if self.give_warnings:
-                    warnings.warn(str(server_response_json['total'])+' number of rows selected. Max number of rows to retrieve data for is set to '+str(server_response_json['num'])+'.\n'
-                                 +str(int(server_response_json['num'])-int(server_response_json['total']))+' rows will not be in the results.')
-            print 'Selected '+str(server_response_json['total'])+' row(s).'
+        if server_response_json['total'] >= server_response_json['num']:
+            logger.warn(warnings.warn(str(server_response_json['total'])+' number of rows selected. Max number of rows to retrieve data for is set to '+str(server_response_json['num'])+'.\n'
+                        +str(int(server_response_json['num'])-int(server_response_json['total']))+' rows will not be in the results.'))
+            logger.info('Selected '+str(server_response_json['total'])+' row(s).')
         return server_response_json
 
     def update_entity_rows(self, entity_name, query, data):
@@ -398,11 +377,11 @@ class Connect_Molgenis():
         for entity in server_response.json()['items']:
             entity_name = entity['fullName']
             if package in entity_name and not bool(entity['abstract']):
-                print 'Deleting all rows from',entity_name
+                logger.info('Deleting all rows from',entity_name)
                 try:
                     self.delete_all_entity_rows(entity_name)
                 except BaseException as e:
-                    warnings.warn(e)
+                    warnings.warn(str(e))
     
     def delete_all_entity_rows(self,entity_name):
         '''delete all entity rows'''
