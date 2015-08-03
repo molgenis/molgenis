@@ -42,6 +42,7 @@ class Connect_Molgenis():
             user (string):       Login username
             password (string):   Login password
         '''
+        logging.getLogger().addHandler(logging.StreamHandler())
         logging.basicConfig(level=getattr(logging, logging_level), filename = log_file, filemode = logfile_mode)
         self.logger = logging.getLogger(__name__)
         self.login_time = None 
