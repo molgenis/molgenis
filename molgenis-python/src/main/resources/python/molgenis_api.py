@@ -365,6 +365,7 @@ class Connect_Molgenis():
     def get_all_entity_data(self):
         '''Get info of all entities 
         '''
+        raise NotImplementedError('Not implemented yet, returns a max number (~450ish) entities, so if more entities are present (e.g. many packages available), not all entities are returned')
         server_response = requests.get(self.api_url+'/entities/', headers=self.headers)
         self.check_server_response(server_response, 'Get info from all entities')
         return server_response
