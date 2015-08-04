@@ -42,7 +42,7 @@ class Connect_Molgenis():
             user (string):       Login username
             password (string):   Login password
         '''
-        logging.getLogger().addHandler(logging.StreamHandler())
+        logging.getLogger().addHandler(self.logger.StreamHandler())
         logging.basicConfig(level=getattr(logging, logging_level), filename = log_file, filemode = logfile_mode)
         self.logger = logging.getLogger(__name__)
         self.login_time = None 
@@ -91,7 +91,7 @@ class Connect_Molgenis():
             True if response 200 or 201, False if other response, raises error if 400
             
         Raises:
-            BaseException: if json object of server response contains error messages 
+            Exception: if json object of server response contains error messages 
         '''
         def error(server_response):
             try:
@@ -121,14 +121,15 @@ class Connect_Molgenis():
                             error_message = error_message.replace('Value must be less than or equal to 255 characters',
                                                   ' The enum options are: '+enum_options)
                         self.logger.error(error_message.rstrip('\n'))
-                        raise BaseException(error_message.rstrip('\n'))
+                        raise Exception(error_message.rstrip('\n'))
                 return server_response_json
             except ValueError:
                 pass # no json oobject in server_response
         if str(server_response) == '<Response [400]>' or str(server_response) == '<Response [404]>':
             error(server_response) 
         elif str(server_response) == '<Response [401]>':
-            raise BaseException(type_of_request+' -> '+str(server_response)+' - '+server_response.reason +' (Wrong username - password combination)')
+            self.logger.error(type_of_request+' -> '+str(server_response)+' - '+server_response.reason +' (Wrong username - password combination)')
+            raise Exception(type_of_request+' -> '+str(server_response)+' - '+server_response.reason +' (Wrong username - password combination)')
         elif str(server_response) == '<Response [200]>' or str(server_response) == '<Response [201]>' or str(server_response) == '<Response [204]>':
             message = type_of_request+' -> '+str(server_response)+' - '+server_response.reason 
             if 'Add row to entity' in type_of_request:
@@ -139,7 +140,7 @@ class Connect_Molgenis():
             error(server_response)
             # i didn't go through all response codes, so if it's a different response than expected I only want to raise exception if 
             # there are error messages in the response object, otherwise just warn that there is a different response than expected
-            logging.warning('Expected <Response [200]>, <Response 201> or <Response 204>, got '+str(server_response)+'\nReason: '+server_response.reason)
+            self.logger.warning('Expected <Response [200]>, <Response 201> or <Response 204>, got '+str(server_response)+'\nReason: '+server_response.reason)
             return False
     
     def validate_data(self, entity_name, data):
@@ -150,7 +151,7 @@ class Connect_Molgenis():
             data (dict): Dictonary that will be used as json_data
             
         Raises:
-            BaseException
+            Exception
         '''
         columns_to_insert = data.keys()
         columns_in_entity = self.get_column_names(entity_name)
@@ -159,10 +160,11 @@ class Connect_Molgenis():
             error_message = 'Provided data has columns which are not in the entity. The wrong columns are: '+', '.join(difference)+'\n'\
                            +'The provided data is: '+str(data)+'\n'\
                            +'The entity '+entity_name+' contains the columns: '+', '.join(columns_in_entity)
-            raise BaseException(error_message)
+            self.logger.error(error_message)
+            raise Exception(error_message)
         entity_id_attribute = self.get_id_attribute(entity_name)
         if entity_id_attribute in data and self.get_column_meta_data(entity_name,entity_id_attribute)['auto']:
-            logging.warning('The ID attribute ('+entity_id_attribute+') of the entity ('+entity_name+') you are adding a row to is set to `auto`.\n'\
+            self.logger.warning('The ID attribute ('+entity_id_attribute+') of the entity ('+entity_name+') you are adding a row to is set to `auto`.\n'\
                          +'The value you gave for id ('+str(data[entity_id_attribute])+') will not be used. Instead, the ID will be a random string.')
         
     def add_entity_row(self, entity_name, data, validate_json=False):
@@ -212,6 +214,7 @@ class Connect_Molgenis():
         if not file_name:
             file_name = os.path.basename(file_path)
         if not os.path.isfile(file_path):
+            self.logger.error('File not found: '+str(file_path))
             raise IOError('File not found: '+str(file_path))
         url = 'http://localhost:8080/api/v1/File'
         files = {'description': ('', 'lala'), 'attachment': (open('/Users/Niek/UMCG/test/data/ATACseq/rundir/QC/CollectMultipleMetrics_1.sh','rb'), '')}
@@ -236,13 +239,14 @@ class Connect_Molgenis():
             More difficult get queries
         '''
         if len(query) == 0:
+            self.logger.error('Can\'t search with empty query')
             raise ValueError('Can\'t search with empty query')
         json_query = json.dumps({'q':query})
         server_response = requests.post(self.api_url+'/'+entity_name+'?_method=GET', data = json_query, headers=self.headers)
         server_response_json = server_response.json()
         self.check_server_response(server_response, 'Get rows from entity',entity_used=entity_name, query_used=json_query)
         if server_response_json['total'] >= server_response_json['num']:
-            logging.warning(str(server_response_json['total'])+' number of rows selected. Max number of rows to retrieve data for is set to '+str(server_response_json['num'])+'.\n'
+            self.logger.warning(str(server_response_json['total'])+' number of rows selected. Max number of rows to retrieve data for is set to '+str(server_response_json['num'])+'.\n'
                         +str(server_response_json['num']-server_response_json['total'])+' rows will not be in the results.')
             self.logger.info('Selected '+str(server_response_json['total'])+' row(s).')
         return server_response_json
@@ -264,7 +268,7 @@ class Connect_Molgenis():
         server_response_json = server_response.json()
         self.check_server_response(server_response, 'Get rows from entity',entity_used=entity_name)
         if server_response_json['total'] >= server_response_json['num']:
-            logging.warning(str(server_response_json['total'])+' number of rows selected. Max number of rows to retrieve data for is set to '+str(server_response_json['num'])+'.\n'
+            self.logger.warning(str(server_response_json['total'])+' number of rows selected. Max number of rows to retrieve data for is set to '+str(server_response_json['num'])+'.\n'
                         +str(int(server_response_json['num'])-int(server_response_json['total']))+' rows will not be in the results.')
             self.logger.info('Selected '+str(server_response_json['total'])+' row(s).')
         return server_response_json
@@ -280,7 +284,8 @@ class Connect_Molgenis():
         self.validate_data(entity_name, data)
         entity_data = self.query_entity_rows(entity_name, query)
         if len(entity_data['items']) == 0:
-            raise BaseException('Query returned 0 results, no row to update.')
+            self.logger.error('Query returned 0 results, no row to update.')
+            raise Exception('Query returned 0 results, no row to update.')
         id_attribute = self.get_id_attribute(entity_name)
         server_response_list = [] 
         for entity_items in entity_data['items']:
@@ -290,6 +295,7 @@ class Connect_Molgenis():
                 server_response_list.append(server_response)
                 self.check_server_response(server_response, 'Update entity row (single value)', query_used=query,data_used=data,entity_used=entity_name)
             else:
+                self.logger.error('Updating multiple values at the same time not implemented yet')
                 raise NotImplementedError('Updating multiple values at the same time not implemented yet')
                 # if trying to update multiple columns, column values that are not given will be overwritten with null, so we need to add the existing column data into our dict
                 # DOES NOT WORK FOR X/MREFS!!!
@@ -370,6 +376,7 @@ class Connect_Molgenis():
             package (string): Package for which to delete all entities. (def: None)
         '''
         if not package:
+            self.logger.error('package can\'t be None, is '+str(package))
             raise AttributeError('package can\'t be None, is '+str(package))
         server_response = self.get_all_entity_data()
         for entity in server_response.json()['items']:
@@ -378,8 +385,8 @@ class Connect_Molgenis():
                 self.logger.info('Deleting all rows from',entity_name)
                 try:
                     self.delete_all_entity_rows(entity_name)
-                except BaseException as e:
-                    logging.warning(str(e))
+                except Exception as e:
+                    self.logger.warning(str(e))
     
     def delete_all_entity_rows(self,entity_name):
         '''delete all entity rows'''
@@ -400,7 +407,8 @@ class Connect_Molgenis():
         '''
         entity_data = self.query_entity_rows(entity_name, query)
         if len(entity_data['items']) == 0:
-            raise BaseException('Query returned 0 results, no row to delete.')
+            self.logger.error('Query returned 0 results, no row to delete.')
+            raise Exception('Query returned 0 results, no row to delete.')
         return self.delete_entity_data(entity_data, entity_name, query_used=query)
 
     def delete_entity_data(self, entity_data,entity_name,query_used=None):
