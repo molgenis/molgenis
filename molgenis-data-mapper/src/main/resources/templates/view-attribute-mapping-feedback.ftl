@@ -47,9 +47,9 @@
     						</#if>
     					<#else>
     						<td>
-    							<button class="btn btn-sm btn-danger show-error-message" data-message="${feedbackRow.exception.message!""?html}">
-    								Error, click for more details
-    							</button>
+    							<span class="label label-danger">
+    								Invalid script
+    							</span>
     						</td>
     					</#if>
     				</tr>

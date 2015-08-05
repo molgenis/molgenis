@@ -826,6 +826,7 @@ function createInput(attr, attrs, val, lbl) {
 
 function showSpinner(callback) {
 	var spinner = $('#spinner');
+	var login = $('#login-modal');
 	
 	if (spinner.length === 0) {
 		// do not add fade effect on modal: http://stackoverflow.com/a/22101894
@@ -862,6 +863,10 @@ function showSpinner(callback) {
 		$('#spinner').data('count', 1);
 	} else {
 		$('#spinner').data('count', count + 1);
+	}
+	
+	if (login.length > 0) {
+		hideSpinner();
 	}
 }
 

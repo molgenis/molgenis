@@ -226,7 +226,7 @@
 						
 					</p>
 					<h4>Validation</h4>
-					<p>Algorithm validation starts automatically when the algorithm is updated.</p> 
+					<p>Algorithm validation starts automatically when the algorithm is updated. In case of errors, click the error label for more details</p> 
                     <div id="mapping-validation-container"></div>
 					<h4>Preview</h4>
 					<div id="result-table-container"></div>
