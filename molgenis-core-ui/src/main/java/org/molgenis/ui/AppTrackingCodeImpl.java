@@ -6,7 +6,7 @@ public class AppTrackingCodeImpl implements AppTrackingCode
 {
 	private String header = null;
 	private String footer = null;
-	private String defaultAnalytics = null;
+	private String gaTrackingId = null;
 	private final static String START_TRACKINGCODE = "(function(){if('true' === $.cookie('permissionforcookies')){";
 	private final static String END_TRACKINGCODE = "}})();";
 
@@ -18,10 +18,10 @@ public class AppTrackingCodeImpl implements AppTrackingCode
 	{
 		this(molgenisSettings.getProperty(AppTrackingCode.KEY_APP_TRACKING_CODE_FOOTER), molgenisSettings
 				.getProperty(AppTrackingCode.KEY_APP_TRACKING_CODE_HEADER), molgenisSettings
-				.getProperty(AppTrackingCode.KEY_APP_TRACKING_CODE_DEFAULT));
+				.getProperty(AppTrackingCode.KEY_APP_GOOGLE_ANALYTICS_TRACKING_ID));
 	}
 
-	public AppTrackingCodeImpl(String footer, String header, String defaultAnalytics)
+	public AppTrackingCodeImpl(String footer, String header, String gaTrackingId)
 	{
 		if (footer != null)
 		{
@@ -31,10 +31,10 @@ public class AppTrackingCodeImpl implements AppTrackingCode
 		{
 			this.setHeader(START_TRACKINGCODE + header + END_TRACKINGCODE);
 		}
-		if (defaultAnalytics != null)
+		if (gaTrackingId != null)
 		{
-			// no cookie-permissions code is needed, the default should be privacy friendly
-			this.setDefault(defaultAnalytics);
+			// no cookie-permissions code is needed, this id is used for privacy friendly tracking
+			this.setGATrackingId(gaTrackingId);
 		}
 	}
 
@@ -56,9 +56,9 @@ public class AppTrackingCodeImpl implements AppTrackingCode
 	}
 
 	@Override
-	public String getDefault()
+	public String getGaTrackingId()
 	{
-		return this.defaultAnalytics;
+		return gaTrackingId;
 	}
 
 	private void setHeader(String header)
@@ -71,9 +71,9 @@ public class AppTrackingCodeImpl implements AppTrackingCode
 		this.footer = footer;
 	}
 
-	private void setDefault(String defaultAnalytics)
+	private void setGATrackingId(String gaTrackingId)
 	{
-		this.defaultAnalytics = defaultAnalytics;
+		this.gaTrackingId = gaTrackingId;
 	}
 
 	@Override
@@ -81,8 +81,8 @@ public class AppTrackingCodeImpl implements AppTrackingCode
 	{
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((defaultAnalytics == null) ? 0 : defaultAnalytics.hashCode());
 		result = prime * result + ((footer == null) ? 0 : footer.hashCode());
+		result = prime * result + ((gaTrackingId == null) ? 0 : gaTrackingId.hashCode());
 		result = prime * result + ((header == null) ? 0 : header.hashCode());
 		return result;
 	}
@@ -94,16 +94,16 @@ public class AppTrackingCodeImpl implements AppTrackingCode
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
 		AppTrackingCodeImpl other = (AppTrackingCodeImpl) obj;
-		if (defaultAnalytics == null)
-		{
-			if (other.defaultAnalytics != null) return false;
-		}
-		else if (!defaultAnalytics.equals(other.defaultAnalytics)) return false;
 		if (footer == null)
 		{
 			if (other.footer != null) return false;
 		}
 		else if (!footer.equals(other.footer)) return false;
+		if (gaTrackingId == null)
+		{
+			if (other.gaTrackingId != null) return false;
+		}
+		else if (!gaTrackingId.equals(other.gaTrackingId)) return false;
 		if (header == null)
 		{
 			if (other.header != null) return false;
