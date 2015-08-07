@@ -164,9 +164,9 @@ public class MolgenisPluginInterceptorTest
 
 		ModelAndView modelAndView = new ModelAndView();
 		molgenisPluginInterceptor.postHandle(mockHttpServletRequest, null, handlerMethod, modelAndView);
-		
+
 		AppTrackingCodeImpl appTrackingCodeResult = new AppTrackingCodeImpl("alert('key_app_tracking_code_footer');",
-				"alert('key_app_tracking_code_header');");
+				"alert('key_app_tracking_code_header');", null);
 		assertEquals(modelAndView.getModel().get(MolgenisPluginInterceptor.APP_TRACKING_CODE_VARIABLE),
 				appTrackingCodeResult);
 	}
