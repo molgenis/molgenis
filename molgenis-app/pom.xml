@@ -151,6 +151,11 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-data-system</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-core-ui</artifactId>
 			<version>${project.version}</version>
@@ -160,6 +165,11 @@
 			<artifactId>molgenis-security</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-security-ui</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-web</artifactId>

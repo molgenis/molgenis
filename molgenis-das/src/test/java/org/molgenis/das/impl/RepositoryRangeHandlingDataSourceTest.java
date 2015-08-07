@@ -2,6 +2,13 @@ package org.molgenis.das.impl;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.support.GenomicDataSettings.Meta.ATTRS_CHROM;
+import static org.molgenis.data.support.GenomicDataSettings.Meta.ATTRS_DESCRIPTION;
+import static org.molgenis.data.support.GenomicDataSettings.Meta.ATTRS_IDENTIFIER;
+import static org.molgenis.data.support.GenomicDataSettings.Meta.ATTRS_LINKOUT;
+import static org.molgenis.data.support.GenomicDataSettings.Meta.ATTRS_NAME;
+import static org.molgenis.data.support.GenomicDataSettings.Meta.ATTRS_POS;
+import static org.molgenis.data.support.GenomicDataSettings.Meta.ATTRS_STOP;
 import static org.testng.AssertJUnit.assertEquals;
 
 import java.net.URL;
@@ -20,7 +27,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.util.Hit;
 import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.GenomeConfig;
+import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.util.ApplicationContextProvider;
@@ -44,30 +51,29 @@ import uk.ac.ebi.mydas.model.DasPhase;
 import uk.ac.ebi.mydas.model.DasTarget;
 import uk.ac.ebi.mydas.model.DasType;
 
-public class DataSetElasticSearchRangeHandlingDataSourceTest
+public class RepositoryRangeHandlingDataSourceTest
 {
 	RepositoryRangeHandlingDataSource source;
 	private DasFeature dasFeature;
 	private DataService dataService;
 	private ArrayList<Hit> resultList;
 	private ArrayList<DasFeature> featureList;
-	private GenomeConfig config;
+	private GenomicDataSettings genomicDataSettings;
 
 	@BeforeMethod
 	public void setUp() throws HandleRequestDelegationException, Exception
 	{
 		dataService = mock(DataService.class);
-		config = mock(GenomeConfig.class);
+		genomicDataSettings = mock(GenomicDataSettings.class);
 
 		ApplicationContext ctx = mock(ApplicationContext.class);
 		when(ctx.getBean(DataService.class)).thenReturn(dataService);
-		when(ctx.getBean(GenomeConfig.class)).thenReturn(config);
+		when(ctx.getBean(GenomicDataSettings.class)).thenReturn(genomicDataSettings);
 		new ApplicationContextProvider().setApplicationContext(ctx);
 
 		EntityMetaData metaData = new DefaultEntityMetaData("dataset");
 		when(dataService.getEntityMetaData("dataset")).thenReturn(metaData);
-		when(config.getAttributeNameForAttributeNameArray(GenomeConfig.GENOMEBROWSER_CHROM, metaData)).thenReturn(
-				"CHROM");
+		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_CHROM, metaData)).thenReturn("CHROM");
 
 		DasType type = new DasType("0", "", "", "type");
 		DasMethod method = new DasMethod("not_recorded", "not_recorded", "ECO:0000037");
@@ -110,20 +116,19 @@ public class DataSetElasticSearchRangeHandlingDataSourceTest
 		when(dataService.findAll("dataset", q)).thenReturn(Arrays.<Entity> asList(entity));
 		when(result.iterator()).thenReturn(resultList.iterator());
 
-		when(config.getAttributeNameForAttributeNameArray(GenomeConfig.GENOMEBROWSER_CHROM, entity.getEntityMetaData()))
+		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_CHROM, entity.getEntityMetaData()))
 				.thenReturn("CHROM");
-		when(config.getAttributeNameForAttributeNameArray(GenomeConfig.GENOMEBROWSER_POS, entity.getEntityMetaData()))
+		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_POS, entity.getEntityMetaData()))
 				.thenReturn("POS");
-		when(config.getAttributeNameForAttributeNameArray(GenomeConfig.GENOMEBROWSER_STOP, entity.getEntityMetaData()))
+		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_STOP, entity.getEntityMetaData()))
 				.thenReturn("STOP");
-		when(config.getAttributeNameForAttributeNameArray(GenomeConfig.GENOMEBROWSER_ID, entity.getEntityMetaData()))
+		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_IDENTIFIER, entity.getEntityMetaData()))
 				.thenReturn("ID");
-		when(
-				config.getAttributeNameForAttributeNameArray(GenomeConfig.GENOMEBROWSER_DESCRIPTION,
-						entity.getEntityMetaData())).thenReturn("INFO");
-		when(config.getAttributeNameForAttributeNameArray(GenomeConfig.GENOMEBROWSER_NAME, entity.getEntityMetaData()))
+		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_DESCRIPTION, entity.getEntityMetaData()))
+				.thenReturn("INFO");
+		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_NAME, entity.getEntityMetaData()))
 				.thenReturn("NAME");
-		when(config.getAttributeNameForAttributeNameArray(GenomeConfig.GENOMEBROWSER_LINK, entity.getEntityMetaData()))
+		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_LINKOUT, entity.getEntityMetaData()))
 				.thenReturn("linkout");
 
 	}
@@ -134,21 +139,21 @@ public class DataSetElasticSearchRangeHandlingDataSourceTest
 		Mockito.reset(dataService);
 	}
 
-	@Test()
+	@Test
 	public void getFeaturesRange() throws UnimplementedFeatureException, DataSourceException,
 			BadReferenceObjectException, CoordinateErrorException
 	{
-		assertEquals(new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getFeatures(), source
-				.getFeatures("1,dasdataset_dataset", 1, 100000, 100).getFeatures());
-		assertEquals(new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getSegmentId(), source
-				.getFeatures("1,dasdataset_dataset", 1, 100000, 100).getSegmentId());
-		assertEquals(new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getStartCoordinate(), source
-				.getFeatures("1,dasdataset_dataset", 1, 100000, 100).getStartCoordinate());
-		assertEquals(new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getStopCoordinate(), source
-				.getFeatures("1,dasdataset_dataset", 1, 100000, 100).getStopCoordinate());
+		assertEquals(new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getFeatures(),
+				source.getFeatures("1,dasdataset_dataset", 1, 100000, 100).getFeatures());
+		assertEquals(new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getSegmentId(),
+				source.getFeatures("1,dasdataset_dataset", 1, 100000, 100).getSegmentId());
+		assertEquals(new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getStartCoordinate(),
+				source.getFeatures("1,dasdataset_dataset", 1, 100000, 100).getStartCoordinate());
+		assertEquals(new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getStopCoordinate(),
+				source.getFeatures("1,dasdataset_dataset", 1, 100000, 100).getStopCoordinate());
 	}
 
-	@Test()
+	@Test
 	public void getTypes() throws UnimplementedFeatureException, DataSourceException, BadReferenceObjectException,
 			CoordinateErrorException
 	{

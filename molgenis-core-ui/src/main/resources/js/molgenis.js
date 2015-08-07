@@ -22,6 +22,21 @@
 		return molgenis.pluginId;
 	};
 	
+	/**
+	 * Returns the plugin settings entity id
+	 */
+	molgenis.getPluginSettingsId = function() {
+		return 'settings_' +  molgenis.getPluginId();
+	};
+	
+	/**
+	 * Returns a promise with plugin settings
+	 */
+	molgenis.getPluginSettings = function() {
+		var api = new molgenis.RestClientV2();
+		return api.get('/api/v2/' + molgenis.getPluginSettingsId() + '/' + molgenis.getPluginId());
+	};
+	
 	molgenis.createAlert = function(alerts, type, container) {
 		if (type !== 'error' && type !== 'warning' && type !== 'success')
 			type = 'error';
@@ -1021,7 +1036,7 @@ $(function() {
 	// focus first input on modal display
 	$(document).on('click', '.plugin-settings-btn', function() {
 		React.render(molgenis.ui.Form({
-			entity: molgenis.getPluginId() + '_settings',
+			entity: molgenis.getPluginSettingsId(),
 			entityInstance: molgenis.getPluginId(),
 			mode: 'edit',
 			modal: true,

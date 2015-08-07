@@ -1,9 +1,17 @@
 package org.molgenis.data.annotation.impl;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
@@ -12,13 +20,13 @@ import org.molgenis.data.annotation.VariantAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
+import org.molgenis.data.annotation.settings.AnnotationInMemorySettings;
+import org.molgenis.data.annotation.settings.AnnotationSettings;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.annotator.tabix.TabixReader;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.utils.VcfUtils;
-import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.framework.server.MolgenisSimpleSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,10 +37,8 @@ public class ClinVarVCFServiceAnnotator extends VariantAnnotator
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ClinVarVCFServiceAnnotator.class);
 
-	private final MolgenisSettings molgenisSettings;
 	private static final String NAME = "ClinvarVCF";
 
-	public static final String CLINVAR_VCF_LOCATION_PROPERTY = "clinvar_location";
 	public final static String CLINVAR_CLINSIG_LABEL = "CLINVAR_CLNSIG";
 	public final static String CLINVAR_CLINSIG = VcfRepository.getInfoPrefix() + CLINVAR_CLINSIG_LABEL;
 	private volatile TabixReader tabixReader;
@@ -41,18 +47,19 @@ public class ClinVarVCFServiceAnnotator extends VariantAnnotator
 	{ "##INFO=<ID=" + CLINVAR_CLINSIG.substring(VcfRepository.getInfoPrefix().length())
 			+ ",Number=1,Type=String,Description=\"ClinVar clinical significance\">" });
 
+	private final AnnotationSettings annotationSettings;
+
 	@Autowired
-	public ClinVarVCFServiceAnnotator(MolgenisSettings molgenisSettings) throws IOException
+	public ClinVarVCFServiceAnnotator(AnnotationSettings annotationSettings)
 	{
-		this.molgenisSettings = molgenisSettings;
+		this.annotationSettings = checkNotNull(annotationSettings);
 	}
 
 	public ClinVarVCFServiceAnnotator(File clinvarVcfFileLocation, File inputVcfFile, File outputVCFFile)
 			throws Exception
 	{
-
-		this.molgenisSettings = new MolgenisSimpleSettings();
-		molgenisSettings.setProperty(CLINVAR_VCF_LOCATION_PROPERTY, clinvarVcfFileLocation.getAbsolutePath());
+		this.annotationSettings = new AnnotationInMemorySettings();
+		annotationSettings.setClinVarLocation(clinvarVcfFileLocation.getAbsolutePath());
 
 		checkTabixReader();
 
@@ -109,7 +116,7 @@ public class ClinVarVCFServiceAnnotator extends VariantAnnotator
 			{
 				if (tabixReader == null)
 				{
-					tabixReader = new TabixReader(molgenisSettings.getProperty(CLINVAR_VCF_LOCATION_PROPERTY));
+					tabixReader = new TabixReader(annotationSettings.getClinVarLocation());
 				}
 			}
 		}
@@ -118,7 +125,7 @@ public class ClinVarVCFServiceAnnotator extends VariantAnnotator
 	@Override
 	protected boolean annotationDataExists()
 	{
-		return new File(molgenisSettings.getProperty(CLINVAR_VCF_LOCATION_PROPERTY)).exists();
+		return new File(annotationSettings.getClinVarLocation()).exists();
 	}
 
 	@Override
@@ -142,9 +149,9 @@ public class ClinVarVCFServiceAnnotator extends VariantAnnotator
 		}
 		catch (Exception e)
 		{
-			LOG.error("Something went wrong (chromosome not in data?) when querying ClinVar tabix file for "
-					+ chromosome + " POS: " + position + " REF: " + reference + " ALT: " + alternative
-					+ "! skipping...");
+			LOG.error(
+					"Something went wrong (chromosome not in data?) when querying ClinVar tabix file for " + chromosome
+							+ " POS: " + position + " REF: " + reference + " ALT: " + alternative + "! skipping...");
 		}
 		String line = null;
 
@@ -206,8 +213,8 @@ public class ClinVarVCFServiceAnnotator extends VariantAnnotator
 	public List<AttributeMetaData> getOutputMetaData()
 	{
 		List<AttributeMetaData> metadata = new ArrayList<>();
-		metadata.add(new DefaultAttributeMetaData(CLINVAR_CLINSIG, FieldTypeEnum.STRING)
-				.setLabel(CLINVAR_CLINSIG_LABEL));
+		metadata.add(
+				new DefaultAttributeMetaData(CLINVAR_CLINSIG, FieldTypeEnum.STRING).setLabel(CLINVAR_CLINSIG_LABEL));
 		return metadata;
 	}
 

@@ -1,5 +1,7 @@
 package org.molgenis.data.annotation.impl;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -15,17 +17,17 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.LocusAnnotator;
-import org.molgenis.data.annotation.impl.datastructures.HpoData;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
+import org.molgenis.data.annotation.impl.datastructures.HpoData;
 import org.molgenis.data.annotation.provider.HpoDataProvider;
+import org.molgenis.data.annotation.settings.AnnotationInMemorySettings;
+import org.molgenis.data.annotation.settings.AnnotationSettings;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.utils.VcfUtils;
-import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.framework.server.MolgenisSimpleSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -40,39 +42,34 @@ import org.springframework.stereotype.Component;
 @Component("HpoService")
 public class HpoServiceAnnotator extends LocusAnnotator
 {
-	private final MolgenisSettings molgenisSettings;
-	private final HpoDataProvider hpoDataProvider;
-
 	private static final String NAME = "HPO";
 
 	public static final String HPO_IDS_LABEL = "HPOIDS";
 	public static final String HPO_TERMS_LABEL = "HPOTERMS";
 	public static final String HPO_IDS = VcfRepository.getInfoPrefix() + HPO_IDS_LABEL;
 	public static final String HPO_TERMS = VcfRepository.getInfoPrefix() + HPO_TERMS_LABEL;
-	public static final String HPO_FILE_LOCATION = "hpo_location";
 
 	final List<String> infoFields = Arrays.asList(new String[]
-	{
-			"##INFO=<ID=" + HPO_IDS.substring(VcfRepository.getInfoPrefix().length())
-					+ ",Number=1,Type=String,Description=\"HPO identifiers\">",
+	{ "##INFO=<ID=" + HPO_IDS.substring(VcfRepository.getInfoPrefix().length())
+			+ ",Number=1,Type=String,Description=\"HPO identifiers\">",
 			"##INFO=<ID=" + HPO_TERMS.substring(VcfRepository.getInfoPrefix().length())
 					+ ",Number=1,Type=String,Description=\"HPO terms\">", });
 
+	private final AnnotationSettings annotationSettings;
+	private final HpoDataProvider hpoDataProvider;
+
 	@Autowired
-	public HpoServiceAnnotator(MolgenisSettings molgenisSettings, HpoDataProvider hpoDataProvider) throws IOException
+	public HpoServiceAnnotator(AnnotationSettings annotationSettings, HpoDataProvider hpoDataProvider)
 	{
-		if (molgenisSettings == null) throw new IllegalArgumentException("molgenisSettings is null");
-		if (hpoDataProvider == null) throw new IllegalArgumentException("hpoDataProvider is null");
-		this.molgenisSettings = molgenisSettings;
-		this.hpoDataProvider = hpoDataProvider;
+		this.annotationSettings = checkNotNull(annotationSettings);
+		this.hpoDataProvider = checkNotNull(hpoDataProvider);
 	}
 
 	public HpoServiceAnnotator(File hpoFileLocation, File inputVcfFile, File outputVCFFile) throws Exception
 	{
-		this.molgenisSettings = new MolgenisSimpleSettings();
-		molgenisSettings.setProperty(HPO_FILE_LOCATION, hpoFileLocation.getAbsolutePath());
-		hpoDataProvider = new HpoDataProvider(molgenisSettings);
-
+		this.annotationSettings = new AnnotationInMemorySettings();
+		annotationSettings.setHpoLocation(hpoFileLocation.getAbsolutePath());
+		hpoDataProvider = new HpoDataProvider(annotationSettings);
 
 		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
 
@@ -119,8 +116,8 @@ public class HpoServiceAnnotator extends LocusAnnotator
 	@Override
 	public boolean annotationDataExists()
 	{
-		if (null == molgenisSettings.getProperty(HPO_FILE_LOCATION)) return false;
-		return new File(molgenisSettings.getProperty(HPO_FILE_LOCATION)).exists();
+		if (null == annotationSettings.getHpoLocation()) return false;
+		return new File(annotationSettings.getHpoLocation()).exists();
 	}
 
 	@Override
@@ -198,8 +195,8 @@ public class HpoServiceAnnotator extends LocusAnnotator
 	public List<AttributeMetaData> getOutputMetaData()
 	{
 		List<AttributeMetaData> metadata = new ArrayList<>();
-		metadata.add(new DefaultAttributeMetaData(HPO_IDS, MolgenisFieldTypes.FieldTypeEnum.STRING)
-				.setLabel(HPO_IDS_LABEL));
+		metadata.add(
+				new DefaultAttributeMetaData(HPO_IDS, MolgenisFieldTypes.FieldTypeEnum.STRING).setLabel(HPO_IDS_LABEL));
 		metadata.add(new DefaultAttributeMetaData(HPO_TERMS, MolgenisFieldTypes.FieldTypeEnum.STRING)
 				.setLabel(HPO_TERMS_LABEL));
 		return metadata;

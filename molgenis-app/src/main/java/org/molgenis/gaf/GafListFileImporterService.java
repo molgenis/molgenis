@@ -1,15 +1,16 @@
 package org.molgenis.gaf;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.File;
 import java.io.IOException;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
-import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.file.FileStore;
-import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.gaf.settings.GafListSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,23 +22,20 @@ public class GafListFileImporterService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(GafListFileImporterService.class);
 
-	@Autowired
-	private MolgenisSettings molgenisSettings;
+	private final GafListSettings gafListSettings;
+	private final GafListValidator gafListValidator;
+	private final DataService dataService;
+	private final FileStore fileStore;
 
 	@Autowired
-	private GafListValidator gafListValidator;
-
-	@Autowired
-	private DataService dataService;
-
-	@Autowired
-	private SearchService searchService;
-
-	@Autowired
-	private EntityValidator entityValidator;
-
-	@Autowired
-	FileStore fileStore;
+	public GafListFileImporterService(GafListSettings gafListSettings, GafListValidator gafListValidator,
+			DataService dataService, FileStore fileStore)
+	{
+		this.gafListSettings = checkNotNull(gafListSettings);
+		this.gafListValidator = checkNotNull(gafListValidator);
+		this.dataService = checkNotNull(dataService);
+		this.fileStore = checkNotNull(fileStore);
+	}
 
 	public GafListValidationReport validateGAFList(GafListValidationReport report, MultipartFile csvFile)
 			throws IOException, Exception
@@ -51,12 +49,18 @@ public class GafListFileImporterService
 
 	public void importGAFList(GafListValidationReport report, String key_gaf_list_protocol_name) throws IOException
 	{
+		String gaflistEntityName = gafListSettings.getEntityName();
+		if (gaflistEntityName == null)
+		{
+			throw new MolgenisDataException("Please configure target entity");
+		}
 		File tmpFile = fileStore.getFile(report.getTempFileName());
 
 		if (!report.getValidRunIds().isEmpty())
 		{
-			final String gaflistEntityName = molgenisSettings.getProperty(GafListFileRepository.GAFLIST_ENTITYNAME);
-			GafListFileRepository gafListFileRepositoryToImport = new GafListFileRepository(tmpFile, null, null, report);
+
+			GafListFileRepository gafListFileRepositoryToImport = new GafListFileRepository(tmpFile, null, null,
+					report);
 			report.setDataSetName(gaflistEntityName);
 			report.setDataSetIdentifier(gaflistEntityName);
 

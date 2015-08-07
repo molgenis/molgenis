@@ -11,10 +11,9 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.molgenis.data.annotation.settings.AnnotationInMemorySettings;
 import org.molgenis.data.support.AnnotationServiceImpl;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.framework.server.MolgenisSimpleSettings;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -26,9 +25,9 @@ import org.springframework.context.annotation.Configuration;
 public class CommandLineAnnotatorConfig
 {
 	@Bean
-	MolgenisSettings settings()
+	AnnotationInMemorySettings settings()
 	{
-		return new MolgenisSimpleSettings();
+		return new AnnotationInMemorySettings();
 	}
 
 	@Bean
@@ -49,7 +48,8 @@ public class CommandLineAnnotatorConfig
 	 * @param configuredAnnotators
 	 * @return
 	 */
-	static HashMap<String, RepositoryAnnotator> getFreshAnnotators(Map<String, RepositoryAnnotator> configuredAnnotators)
+	static HashMap<String, RepositoryAnnotator> getFreshAnnotators(
+			Map<String, RepositoryAnnotator> configuredAnnotators)
 	{
 		HashMap<String, RepositoryAnnotator> configuredFreshAnnotators = new HashMap<String, RepositoryAnnotator>();
 		for (String annotator : configuredAnnotators.keySet())

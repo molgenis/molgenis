@@ -1,5 +1,7 @@
 package org.molgenis.data.annotation.impl;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -27,12 +29,12 @@ import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.provider.UrlPinger;
+import org.molgenis.data.annotation.settings.AnnotationInMemorySettings;
+import org.molgenis.data.annotation.settings.AnnotationSettings;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.utils.VcfUtils;
-import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.framework.server.MolgenisSimpleSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,19 +43,16 @@ import org.springframework.stereotype.Component;
 /**
  * Adds Phenomizer P-values
  * 
- * */
+ */
 @Component("phenomizerService")
 public class PhenomizerServiceAnnotator extends VariantAnnotator
 {
 	private static final Logger LOG = LoggerFactory.getLogger(PhenomizerServiceAnnotator.class);
-	public static final String KEY_PHENOMIZER_URL = ""; // "http://compbio.charite.de/phenomizer/phenomizer/PhenomizerServiceURI";
 
 	public static final String PHENOMIZERPVAL_LABEL = "PHENOMIZERPVAL";
 	public static final String PHENOMIZEROMIM_LABEL = "PHENOMIZEROMIM";
 	public static final String PHENOMIZERPVAL = VcfRepository.getInfoPrefix() + PHENOMIZERPVAL_LABEL;
 	public static final String PHENOMIZEROMIM = VcfRepository.getInfoPrefix() + PHENOMIZEROMIM_LABEL;
-	private final MolgenisSettings molgenisSettings;
-	private final UrlPinger urlPinger;
 
 	private static final String NAME = "PHENOMIZER";
 
@@ -62,36 +61,26 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 	int limit = 10000;
 
 	final List<String> infoFields = Arrays.asList(new String[]
-	{
-			"##INFO=<ID=" + PHENOMIZERPVAL.substring(VcfRepository.getInfoPrefix().length())
-					+ ",Number=1,Type=Float,Description=\"Phenomizer P-value\">",
+	{ "##INFO=<ID=" + PHENOMIZERPVAL.substring(VcfRepository.getInfoPrefix().length())
+			+ ",Number=1,Type=Float,Description=\"Phenomizer P-value\">",
 			"##INFO=<ID=" + PHENOMIZEROMIM.substring(VcfRepository.getInfoPrefix().length())
 					+ ",Number=1,Type=String,Description=\"Phenomizer OMIM ID\">", });
 
-	@Autowired
-	public PhenomizerServiceAnnotator(MolgenisSettings molgenisSettings, UrlPinger urlPinger) throws IOException
-	{
-		this.molgenisSettings = molgenisSettings;
-		this.urlPinger = urlPinger;
-	}
+	private final AnnotationSettings annotationSettings;
+	private final UrlPinger urlPinger;
 
-	public static List<String> getHtml(BufferedReader in) throws IOException
+	@Autowired
+	public PhenomizerServiceAnnotator(AnnotationSettings annotationSettings, UrlPinger urlPinger)
 	{
-		List<String> lines = new ArrayList<>();
-		String inputLine;
-		while ((inputLine = in.readLine()) != null)
-		{
-			lines.add(inputLine);
-		}
-		in.close();
-		return lines;
+		this.annotationSettings = checkNotNull(annotationSettings);
+		this.urlPinger = checkNotNull(urlPinger);
 	}
 
 	public PhenomizerServiceAnnotator(File hpoTermFile, File inputVcfFile, File outputVCFFile) throws Exception
 	{
-		this.molgenisSettings = new MolgenisSimpleSettings();
-		molgenisSettings.setProperty(KEY_PHENOMIZER_URL,
-				"http://compbio.charite.de/phenomizer/phenomizer/PhenomizerServiceURI");
+		this.annotationSettings = new AnnotationInMemorySettings();
+		annotationSettings
+				.setPhenomizerLocation("http://compbio.charite.de/phenomizer/phenomizer/PhenomizerServiceURI");
 		this.urlPinger = new UrlPinger();
 
 		/**
@@ -130,8 +119,8 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, getOutputMetaData(),
 				PHENOMIZERPVAL.substring(VcfRepository.getInfoPrefix().length()));
 
-		URL loc = new URL(molgenisSettings.getProperty(KEY_PHENOMIZER_URL, "") + "?mobilequery=true&numres=" + limit
-				+ "&terms=" + hpoTerms);
+		URL loc = new URL(annotationSettings.getPhenomizerLocation() + "?mobilequery=true&numres=" + limit + "&terms="
+				+ hpoTerms);
 		BufferedReader in = new BufferedReader(new InputStreamReader(loc.openStream(), StandardCharsets.UTF_8));
 
 		System.out.println("Now starting to process the data.");
@@ -160,6 +149,18 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 		outputVCFWriter.close();
 		vcfRepo.close();
 		System.out.println("All done!");
+	}
+
+	public static List<String> getHtml(BufferedReader in) throws IOException
+	{
+		List<String> lines = new ArrayList<>();
+		String inputLine;
+		while ((inputLine = in.readLine()) != null)
+		{
+			lines.add(inputLine);
+		}
+		in.close();
+		return lines;
 	}
 
 	public void invokeWebService(BufferedReader in) throws IOException
@@ -208,7 +209,7 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 	public boolean annotationDataExists()
 	{
 		boolean dataExists = false;
-		if (urlPinger.ping(molgenisSettings.getProperty(KEY_PHENOMIZER_URL, ""), 500))
+		if (urlPinger.ping(annotationSettings.getPhenomizerLocation(), 500))
 		{
 			dataExists = true;
 		}
@@ -225,8 +226,8 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 	public List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException
 	{
 		String hpoTerms = entity.getString(HpoServiceAnnotator.HPO_TERMS);
-		URL loc = new URL(molgenisSettings.getProperty(KEY_PHENOMIZER_URL, "") + "?mobilequery=true&numres=" + limit
-				+ "&terms=" + hpoTerms);
+		URL loc = new URL(annotationSettings.getPhenomizerLocation() + "?mobilequery=true&numres=" + limit + "&terms="
+				+ hpoTerms);
 		BufferedReader in = new BufferedReader(new InputStreamReader(loc.openStream(), Charset.forName("UTF8")));
 
 		return annotateEntityWithPhenomizerPvalue(entity, in);
@@ -241,7 +242,7 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 
 		invokeWebService(in);
 
-		if (annSplit[3].length() != 0)// else do nothing, will happen a lot for WGS data
+		if (annSplit[3].length() != 0) // else do nothing, will happen a lot for WGS data
 		{
 			gene = annSplit[3];
 			resultMap.put(PHENOMIZERPVAL, DataConverter.toDouble(geneToPval.get(gene)));
@@ -254,7 +255,8 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 	public List<AttributeMetaData> getOutputMetaData()
 	{
 		List<AttributeMetaData> metadata = new ArrayList<>();
-		metadata.add(new DefaultAttributeMetaData(PHENOMIZERPVAL, FieldTypeEnum.DECIMAL).setLabel(PHENOMIZERPVAL_LABEL));
+		metadata.add(
+				new DefaultAttributeMetaData(PHENOMIZERPVAL, FieldTypeEnum.DECIMAL).setLabel(PHENOMIZERPVAL_LABEL));
 		metadata.add(new DefaultAttributeMetaData(PHENOMIZEROMIM, FieldTypeEnum.STRING).setLabel(PHENOMIZEROMIM_LABEL));
 		return metadata;
 	}
@@ -264,8 +266,8 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 	{
 		List<AttributeMetaData> metadata = new ArrayList<>();
 		metadata.add(new DefaultAttributeMetaData(VcfRepository.getInfoPrefix() + "ANN", FieldTypeEnum.TEXT));
-		metadata.add(new DefaultAttributeMetaData(HpoServiceAnnotator.HPO_TERMS,
-				MolgenisFieldTypes.FieldTypeEnum.STRING));
+		metadata.add(
+				new DefaultAttributeMetaData(HpoServiceAnnotator.HPO_TERMS, MolgenisFieldTypes.FieldTypeEnum.STRING));
 		return metadata;
 	}
 

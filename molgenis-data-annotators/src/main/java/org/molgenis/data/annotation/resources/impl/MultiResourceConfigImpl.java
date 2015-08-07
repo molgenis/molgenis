@@ -6,14 +6,14 @@ import java.util.Map;
 
 import org.molgenis.data.annotation.resources.MultiResourceConfig;
 import org.molgenis.data.annotation.resources.ResourceConfig;
-import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.data.annotation.settings.AnnotationSettings;
 
 /**
  * Created by charbonb on 15/06/15.
  */
 public class MultiResourceConfigImpl implements MultiResourceConfig
 {
-	private MolgenisSettings molgenisSettings;
+	private AnnotationSettings annotationSettings;
 
 	private String chromosomesProperty;
 	private String filePatternProperty;
@@ -24,21 +24,25 @@ public class MultiResourceConfigImpl implements MultiResourceConfig
 	public static final String DEFAULT_FOLDER = "/data/resources/";
 
 	public MultiResourceConfigImpl(String chromosomesProperty, String filePatternProperty, String folderProperty,
-			MolgenisSettings molgenisSettings)
+			AnnotationSettings annotationSettings)
 	{
 		this.chromosomesProperty = chromosomesProperty;
 		this.filePatternProperty = filePatternProperty;
 		this.folderProperty = folderProperty;
-		this.molgenisSettings = molgenisSettings;
+		this.annotationSettings = annotationSettings;
 	}
 
 	@Override
 	public Map<String, ResourceConfig> getConfigs()
 	{
-		String chromosomesPropertyValue = molgenisSettings.getProperty(chromosomesProperty, DEFAULT_CHROMOSOMES);
+		String chromosomesPropertyValue = annotationSettings.getString(chromosomesProperty);
+		if (chromosomesPropertyValue == null) chromosomesPropertyValue = DEFAULT_CHROMOSOMES;
+
 		String[] chromosomes = chromosomesPropertyValue.split(",");
-		String pattern = molgenisSettings.getProperty(filePatternProperty, DEFAULT_PATTERN);
-		String folder = molgenisSettings.getProperty(folderProperty, DEFAULT_FOLDER);
+		final String pattern = annotationSettings.getString(filePatternProperty) != null
+				? annotationSettings.getString(filePatternProperty) : DEFAULT_PATTERN;
+		final String folder = annotationSettings.getString(folderProperty) != null
+				? annotationSettings.getString(folderProperty) : DEFAULT_FOLDER;
 
 		Map<String, ResourceConfig> result = new HashMap<>();
 		for (String chrom : chromosomes)

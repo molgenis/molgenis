@@ -1,5 +1,7 @@
 package org.molgenis.data.annotation.impl;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,27 +14,22 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.VariantAnnotator;
-import org.molgenis.data.annotation.impl.datastructures.ClinvarData;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
+import org.molgenis.data.annotation.impl.datastructures.ClinvarData;
 import org.molgenis.data.annotation.provider.ClinvarDataProvider;
+import org.molgenis.data.annotation.settings.AnnotationSettings;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component("clinvarService")
 public class ClinVarServiceAnnotator extends VariantAnnotator
 {
-	private final MolgenisSettings molgenisSettings;
-
 	private static final String NAME = "Clinvar";
-
-	public static final String CLINVAR_FILE_LOCATION_PROPERTY = "clinvar_location";
-	private final ClinvarDataProvider clinvarDataProvider;
 
 	public final static String ALLELEID = "AlleleID";
 	public final static String TYPE = "Type";
@@ -60,12 +57,14 @@ public class ClinVarServiceAnnotator extends VariantAnnotator
 	public final static String OTHERIDS = "OtherIDs";
 	public final static String VARIANTIDS = "VariantID";
 
+	private final AnnotationSettings annotationSettings;
+	private final ClinvarDataProvider clinvarDataProvider;
+
 	@Autowired
-	public ClinVarServiceAnnotator(MolgenisSettings molgenisSettings, ClinvarDataProvider clinvarDataProvider)
-			throws IOException
+	public ClinVarServiceAnnotator(AnnotationSettings annotationSettings, ClinvarDataProvider clinvarDataProvider)
 	{
-		this.molgenisSettings = molgenisSettings;
-		this.clinvarDataProvider = clinvarDataProvider;
+		this.annotationSettings = checkNotNull(annotationSettings);
+		this.clinvarDataProvider = checkNotNull(clinvarDataProvider);
 	}
 
 	@Override
@@ -77,7 +76,7 @@ public class ClinVarServiceAnnotator extends VariantAnnotator
 	@Override
 	protected boolean annotationDataExists()
 	{
-		return new File(molgenisSettings.getProperty(CLINVAR_FILE_LOCATION_PROPERTY)).exists();
+		return new File(annotationSettings.getClinVarLocation()).exists();
 	}
 
 	@Override

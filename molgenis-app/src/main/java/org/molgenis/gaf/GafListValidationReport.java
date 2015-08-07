@@ -1,5 +1,7 @@
 package org.molgenis.gaf;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,11 +38,12 @@ public class GafListValidationReport
 	private String tempFileName;
 	private String tempFileOriginalName;
 
-	@Autowired
-	FileStore fileStore;
+	private final FileStore fileStore;
 
-	public GafListValidationReport()
+	@Autowired
+	public GafListValidationReport(FileStore fileStore)
 	{
+		this.fileStore = checkNotNull(fileStore);
 		validationErrorsPerRunId = new LinkedHashMap<String, List<GafListValidationError>>();
 		validationGlobalErrorMessages = new ArrayList<String>();
 	}

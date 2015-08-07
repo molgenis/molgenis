@@ -1,5 +1,7 @@
 package org.molgenis.data.annotation.provider;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -7,28 +9,24 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 
-import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.data.annotation.settings.AnnotationSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class OmimMorbidMapProvider
 {
-	private static final String KEY_OMIM_MORBIDMAP = "plugin.annotators.omim.morbidmap.url";
-	private static final String DEFAULT_OMIM_MORBIDMAP_VALUE = "https://molgenis26.target.rug.nl/downloads/5gpm/morbidmap";
-
-	private final MolgenisSettings molgenisSettings;
+	private final AnnotationSettings annotationSettings;
 
 	@Autowired
-	public OmimMorbidMapProvider(MolgenisSettings molgenisSettings)
+	public OmimMorbidMapProvider(AnnotationSettings annotationSettings)
 	{
-		if (molgenisSettings == null) throw new IllegalArgumentException("molgenisSettings is null");
-		this.molgenisSettings = molgenisSettings;
+		this.annotationSettings = checkNotNull(annotationSettings);
 	}
 
 	public Reader getOmimMorbidMap() throws MalformedURLException, IOException
 	{
-		String url = molgenisSettings.getProperty(KEY_OMIM_MORBIDMAP, DEFAULT_OMIM_MORBIDMAP_VALUE);
+		String url = annotationSettings.getOmimMorbidMapLocation();
 		return new InputStreamReader(new URL(url).openStream(), Charset.forName("UTF-8"));
 	}
 }

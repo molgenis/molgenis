@@ -1,10 +1,12 @@
 package org.molgenis.ui.menumanager;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.data.settings.AppSettings;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -30,22 +32,17 @@ public class MenuManagerServiceImpl implements MenuManagerService, ApplicationLi
 {
 	private static final Logger LOG = LoggerFactory.getLogger(MenuManagerServiceImpl.class);
 
-	public static final String KEY_MOLGENIS_MENU = "molgenis.menu";
-
 	private final MenuReaderService menuReaderService;
-	private final MolgenisSettings molgenisSettings;
+	private final AppSettings appSettings;
 	private final MolgenisPluginRegistry molgenisPluginRegistry;
 
 	@Autowired
-	public MenuManagerServiceImpl(MenuReaderService menuReaderService, MolgenisSettings molgenisSettings,
+	public MenuManagerServiceImpl(MenuReaderService menuReaderService, AppSettings appSettings,
 			MolgenisPluginRegistry molgenisPluginRegistry)
 	{
-		if (menuReaderService == null) throw new IllegalArgumentException("menuReaderService is null");
-		if (molgenisSettings == null) throw new IllegalArgumentException("molgenisSettings is null");
-		if (molgenisPluginRegistry == null) throw new IllegalArgumentException("molgenisPluginRegistry is null");
-		this.menuReaderService = menuReaderService;
-		this.molgenisSettings = molgenisSettings;
-		this.molgenisPluginRegistry = molgenisPluginRegistry;
+		this.menuReaderService = checkNotNull(menuReaderService);
+		this.appSettings = checkNotNull(appSettings);
+		this.molgenisPluginRegistry = checkNotNull(molgenisPluginRegistry);
 	}
 
 	@Override
@@ -70,7 +67,7 @@ public class MenuManagerServiceImpl implements MenuManagerService, ApplicationLi
 	public void saveMenu(Menu molgenisMenu)
 	{
 		String menuJson = new GsonBuilder().create().toJson(molgenisMenu);
-		molgenisSettings.setProperty(KEY_MOLGENIS_MENU, menuJson);
+		appSettings.setMenu(menuJson);
 	}
 
 	/**
@@ -82,7 +79,7 @@ public class MenuManagerServiceImpl implements MenuManagerService, ApplicationLi
 	@RunAsSystem
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
-		if (!molgenisSettings.propertyExists(KEY_MOLGENIS_MENU))
+		if (appSettings.getMenu() == null)
 		{
 			Molgenis molgenis;
 			try

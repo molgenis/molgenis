@@ -1,5 +1,7 @@
 package org.molgenis.data.annotation.provider;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -11,24 +13,22 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
-import org.molgenis.data.annotation.impl.HpoServiceAnnotator;
 import org.molgenis.data.annotation.impl.datastructures.HpoData;
-import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.data.annotation.settings.AnnotationSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class HpoDataProvider
 {
-	private final MolgenisSettings molgenisSettings;
-
 	HashMap<String, List<HpoData>> result = new HashMap<String, List<HpoData>>();
 
+	private final AnnotationSettings annotationSettings;
+
 	@Autowired
-	public HpoDataProvider(MolgenisSettings molgenisSettings)
+	public HpoDataProvider(AnnotationSettings annotationSettings)
 	{
-		if (molgenisSettings == null) throw new IllegalArgumentException("molgenisSettings is null");
-		this.molgenisSettings = molgenisSettings;
+		this.annotationSettings = checkNotNull(annotationSettings);
 	}
 
 	public Map<String, List<HpoData>> getHpoData() throws IOException
@@ -64,7 +64,7 @@ public class HpoDataProvider
 
 	private Reader getHpoDataReader() throws IOException
 	{
-		String fileLocation = molgenisSettings.getProperty(HpoServiceAnnotator.HPO_FILE_LOCATION);
+		String fileLocation = annotationSettings.getHpoLocation();
 		return new InputStreamReader(new FileInputStream(fileLocation), Charset.forName("UTF-8"));
 	}
 }

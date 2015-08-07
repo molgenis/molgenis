@@ -1,9 +1,13 @@
-package org.molgenis.framework.ui;
+package org.molgenis.ui;
 
 import javax.annotation.PostConstruct;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.settings.DefaultSettingsEntityMetaData;
+import org.molgenis.framework.ui.MolgenisPlugin;
+import org.molgenis.framework.ui.MolgenisPluginFactory;
+import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -63,7 +67,7 @@ public abstract class MolgenisPluginController
 	 */
 	public Entity getPluginSettings()
 	{
-		String entityName = getId() + "_settings";
+		String entityName = DefaultSettingsEntityMetaData.getSettingsEntityName(getId());
 		return dataService.hasRepository(entityName) ? dataService.findOne(entityName, getId()) : null;
 	}
 
@@ -75,5 +79,15 @@ public abstract class MolgenisPluginController
 		{
 			molgenisPluginRegistry.registerPluginFactory(molgenisPluginFactory);
 		}
+	}
+
+	/**
+	 * Testability
+	 * 
+	 * @param dataService
+	 */
+	void setDataService(DataService dataService)
+	{
+		this.dataService = dataService;
 	}
 }

@@ -13,7 +13,8 @@
 		mixins: [molgenis.ui.mixin.DeepPureRenderMixin, molgenis.ui.mixin.EntityLoaderMixin, molgenis.ui.mixin.ReactLayeredComponentMixin],
 		displayName: 'EntitySelectBox',
 		propTypes: {
-			entity: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]),
+			entity: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]).isRequired,
+			query: React.PropTypes.object,
 			mode: React.PropTypes.oneOf(['view', 'create']),
 			name: React.PropTypes.string,
 			disabled: React.PropTypes.bool,
@@ -98,12 +99,21 @@
 		},
 		_createQuery: function(term) {
 			var rules = [];
-			var attrs = this._getAttrs();
-			for(var i = 0; i < attrs.length; ++i) {
-				if(i > 0) {
-					rules.push({operator: 'OR'});	
+			if(this.props.query) {
+				rules.push(this.props.query);
+				if(term.length > 0) {
+					rules.push({operator: 'AND'});
 				}
-				rules.push({field: attrs[i], operator: 'LIKE', value: term});
+			}
+			
+			if(term.length > 0) {
+				var attrs = this._getAttrs();
+				for(var i = 0; i < attrs.length; ++i) {
+					if(i > 0) {
+						rules.push({operator: 'OR'});	
+					}
+					rules.push({field: attrs[i], operator: 'LIKE', value: term});
+				}
 			}
 			return rules;
 		},
@@ -145,7 +155,7 @@
 							property : this._getAttrs()[0]
 						} ]
 					},
-					q: query.term.length > 0 ? this._createQuery(query.term) : undefined,
+					q: this._createQuery(query.term),
 					expand: this._getAttrsWithRefEntity()
 				}
 			};

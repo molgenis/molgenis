@@ -2,7 +2,7 @@ package org.molgenis.framework.ui;
 
 import static org.testng.Assert.assertEquals;
 
-import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.ui.MolgenisPluginController;
 import org.testng.annotations.Test;
 
 public class MolgenisPluginTest

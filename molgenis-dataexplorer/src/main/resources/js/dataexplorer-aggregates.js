@@ -41,15 +41,15 @@
 			createAttributeDropdown($('#x-aggr-div'), aggregableAttributes, 'x-aggr-attribute', aggregableAttributes[0], true);
 			createAttributeDropdown($('#y-aggr-div'), aggregableAttributes, 'y-aggr-attribute', aggregableAttributes.length > 1 ? aggregableAttributes[1] : false);
 			$('#distinct-attr-select').empty();
-			if( molgenis.dataexplorer.settings && (molgenis.dataexplorer.settings['mod.aggregates.distinct.hide']==='true') ){
+			if (molgenis.dataexplorer.settings['agg_distinct'] === false){
 				$('#distinct-attr').hide();
 			} else {
 				$('#distinct-attr').show();
-				if( molgenis.dataexplorer.settings && 
-						molgenis.dataexplorer.settings.hasOwnProperty('mod.aggregates.distinct.override.'+getEntity().name)) {
+				if (molgenis.dataexplorer.settings['agg_distinct_overrides'] && JSON.parse(molgenis.dataexplorer.settings['agg_distinct_overrides'])[getEntity().name]) {
 					// show fixed value for this entity
-					$('#distinct-attr-select').append($('<p>').addClass('form-control-static')
-							.text(molgenis.dataexplorer.settings['mod.aggregates.distinct.override.'+getEntity().name]));
+					var distinctAttr = JSON.parse(molgenis.dataexplorer.settings['agg_distinct_overrides'])[getEntity().name];
+					var distinctAttrLabel = getEntity().attributes[distinctAttr].label;
+					$('#distinct-attr-select').append($('<p>').addClass('form-control-static').text(distinctAttrLabel));
 				} else {
 					var distinctAttributes = $.grep(attributes, function(attribute) {
 						// see: https://github.com/molgenis/molgenis/issues/1938

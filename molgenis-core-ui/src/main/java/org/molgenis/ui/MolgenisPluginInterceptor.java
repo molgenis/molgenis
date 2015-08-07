@@ -1,35 +1,33 @@
 package org.molgenis.ui;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.molgenis.ui.MolgenisPluginAttributes.KEY_AUTHENTICATED;
 import static org.molgenis.ui.MolgenisPluginAttributes.KEY_MOLGENIS_UI;
-import static org.molgenis.ui.MolgenisPluginAttributes.KEY_PLUGINID_WITH_QUERY_STRING;
 import static org.molgenis.ui.MolgenisPluginAttributes.KEY_PLUGIN_ID;
+import static org.molgenis.ui.MolgenisPluginAttributes.KEY_PLUGIN_ID_WITH_QUERY_STRING;
+import static org.molgenis.ui.MolgenisPluginAttributes.KEY_PLUGIN_SETTINGS;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
+/**
+ * Interceptor that adds default model objects to all plugin requests that return a view.
+ */
 public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 {
 	private final MolgenisUi molgenisUi;
 
-	public static final String KEY_PLUGIN_SETTINGS = "plugin_settings";
-	public static final String KEY_FOOTER = "molgenis.footer";
-	public static final String DEFAULT_VAL_FOOTER = "null";
-	public static final String MOLGENIS_CSS_THEME = "molgenis.css.theme";
-	public static final String CSS_VARIABLE = "molgeniscsstheme";
-	public static final String APP_TRACKING_CODE_VARIABLE = "app_tracking_code";
-
-	private MolgenisSettings molgenisSettings;
+	@Autowired
+	public MolgenisPluginInterceptor(MolgenisUi molgenisUi)
+	{
+		this.molgenisUi = checkNotNull(molgenisUi);
+	}
 
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception
@@ -44,14 +42,6 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 		}
 
 		return true;
-	}
-
-	@Autowired
-	public MolgenisPluginInterceptor(MolgenisUi molgenisUi, MolgenisSettings molgenisSettings)
-	{
-		if (molgenisUi == null) throw new IllegalArgumentException("molgenis ui is null");
-		this.molgenisUi = molgenisUi;
-		this.molgenisSettings = molgenisSettings;
 	}
 
 	@Override
@@ -69,23 +59,10 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 				modelAndView.addObject(KEY_PLUGIN_ID, pluginId);
 			}
 
-			PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-			if (molgenisSettings.getProperty(MOLGENIS_CSS_THEME) != null)
-			{
-				Resource resource = resolver
-						.getResource("/css/themes/" + molgenisSettings.getProperty(MOLGENIS_CSS_THEME));
-				if (resource.exists())
-				{
-					modelAndView.addObject(CSS_VARIABLE, molgenisSettings.getProperty(MOLGENIS_CSS_THEME));
-				}
-			}
-
 			modelAndView.addObject(KEY_PLUGIN_SETTINGS, molgenisPlugin.getPluginSettings());
-			modelAndView.addObject(APP_TRACKING_CODE_VARIABLE, new AppTrackingCodeImpl(molgenisSettings));
-			modelAndView.addObject("footerText", molgenisSettings.getProperty(KEY_FOOTER));
 			modelAndView.addObject(KEY_MOLGENIS_UI, molgenisUi);
 			modelAndView.addObject(KEY_AUTHENTICATED, SecurityUtils.currentUserIsAuthenticated());
-			modelAndView.addObject(KEY_PLUGINID_WITH_QUERY_STRING, getPluginIdWithQueryString(request, pluginId));
+			modelAndView.addObject(KEY_PLUGIN_ID_WITH_QUERY_STRING, getPluginIdWithQueryString(request, pluginId));
 		}
 	}
 

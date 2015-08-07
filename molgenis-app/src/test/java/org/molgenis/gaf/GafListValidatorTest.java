@@ -1,14 +1,15 @@
 package org.molgenis.gaf;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
@@ -16,12 +17,12 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
-import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.file.FileStore;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.gaf.GafListValidatorTest.Config;
+import org.molgenis.gaf.settings.GafListSettings;
+import org.molgenis.gaf.settings.GafListValidationRules;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,14 +35,13 @@ import org.testng.annotations.Test;
 { Config.class })
 public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 {
+	private static final String GAF_LIST_ENTITY_NAME = "gaflist_gaflist_20141111";
+
 	@Autowired
 	private GafListValidator gafListValidator;
 
 	@Autowired
 	private DataService dataService;
-
-	@Autowired
-	private MolgenisSettings molgenisSettings;
 
 	@Autowired
 	private GafListValidationReport report;
@@ -54,36 +54,6 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 	public void setUp() throws Exception
 	{
 		report.cleanUp();
-		reset(dataService);
-		reset(molgenisSettings);
-
-		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_VALIDATOR_PREFIX + GAFCol.INTERNAL_SAMPLE_ID))
-				.thenReturn("^[0-9]+$");
-		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_VALIDATOR_PREFIX + GAFCol.EXTERNAL_SAMPLE_ID))
-				.thenReturn("^[a-zA-Z0-9_]+$");
-		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_VALIDATOR_PREFIX + GAFCol.PROJECT)).thenReturn(
-				"^[a-zA-Z0-9_]+$");
-		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_VALIDATOR_PREFIX + GAFCol.SEQUENCER)).thenReturn(
-				"^[a-zA-Z0-9_]+$");
-		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_VALIDATOR_PREFIX + GAFCol.CONTACT))
-				.thenReturn(
-						"^([^<>@+0-9_,]+ <[a-zA-Z0-9_\\.]+@[a-zA-Z0-9_\\.]+>, )*[^<>@+0-9_,]+ <[a-zA-Z0-9_\\.]+@[a-zA-Z0-9_\\.]+>$");
-		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_VALIDATOR_PREFIX + GAFCol.SEQUENCING_START_DATE))
-				.thenReturn("^[0-9]{6}$");
-		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_VALIDATOR_PREFIX + GAFCol.RUN)).thenReturn(
-				"^[0-9]{4}$");
-		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_VALIDATOR_PREFIX + GAFCol.FLOWCELL)).thenReturn(
-				"^(([AB][A-Z0-9]{7}XX)|(A[A-Z0-9]{4}))$");
-		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_VALIDATOR_PREFIX + GAFCol.LANE)).thenReturn(
-				"^[1-8](,[1-8])*$");
-
-		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_VALIDATOR_PREFIX + GAFCol.BARCODE_1)).thenReturn(
-				"^(None)|(((GAF)|(RPI)|(AGI)|(MON)|(RTP)|(HP8))\\s[0-9]{2}\\s([ACGT]{6})([ATCG]{2})?)$");
-
-		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_VALIDATOR_PREFIX + GAFCol.ARRAY_FILE)).thenReturn(
-				"^.*[\\/\\\\]{1}[a-zA-Z0-9\\._]+$");
-		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_VALIDATOR_PREFIX + GAFCol.ARRAY_ID)).thenReturn(
-				"^[1-9][0-9]*$");
 	}
 
 	@Test
@@ -142,15 +112,15 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 				FieldTypeEnum.STRING);
 
 		// PROJECT
-		DefaultAttributeMetaData project = new DefaultAttributeMetaData(GAFCol.PROJECT.toString(), FieldTypeEnum.STRING);
+		DefaultAttributeMetaData project = new DefaultAttributeMetaData(GAFCol.PROJECT.toString(),
+				FieldTypeEnum.STRING);
 
 		// BARCODE_1
 		DefaultAttributeMetaData barcode1 = new DefaultAttributeMetaData(GAFCol.BARCODE_1.toString(),
 				FieldTypeEnum.STRING);
 
-		when(entityMetaData.getAttributes()).thenReturn(
-				Arrays.<AttributeMetaData> asList(internalSampleID, lane, sequencer, externalSampleId, project,
-						barcode1));
+		when(entityMetaData.getAttributes()).thenReturn(Arrays.<AttributeMetaData> asList(internalSampleID, lane,
+				sequencer, externalSampleId, project, barcode1));
 
 		when(entityMetaData.getAttribute(GAFCol.INTERNAL_SAMPLE_ID.toString())).thenReturn(internalSampleID);
 		when(entityMetaData.getAttribute(GAFCol.LANE.toString())).thenReturn(lane);
@@ -159,10 +129,8 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 		when(entityMetaData.getAttribute(GAFCol.PROJECT.toString())).thenReturn(project);
 		when(entityMetaData.getAttribute(GAFCol.BARCODE_1.toString())).thenReturn(barcode1);
 		when(repository.getEntityMetaData()).thenReturn(entityMetaData);
-		when(molgenisSettings.getProperty(GafListFileRepository.GAFLIST_ENTITYNAME)).thenReturn(
-				"gaflist_gaflist_20141111");
 
-		when(dataService.getEntityMetaData("gaflist_gaflist_20141111")).thenReturn(entityMetaData);
+		when(dataService.getEntityMetaData(GAF_LIST_ENTITY_NAME)).thenReturn(entityMetaData);
 
 		return repository;
 	}
@@ -202,31 +170,52 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 		@Bean
 		public DataService dataService()
 		{
-			return mock(DataService.class);
+			DataService dataService = mock(DataService.class);
+
+			Map<GAFCol, String> validationRules = new EnumMap<GAFCol, String>(GAFCol.class);
+			validationRules.put(GAFCol.INTERNAL_SAMPLE_ID, "^[0-9]+$");
+			validationRules.put(GAFCol.EXTERNAL_SAMPLE_ID, "^[a-zA-Z0-9_]+$");
+			validationRules.put(GAFCol.PROJECT, "^[a-zA-Z0-9_]+$");
+			validationRules.put(GAFCol.SEQUENCER, "^[a-zA-Z0-9_]+$");
+			validationRules.put(GAFCol.CONTACT,
+					"^([^<>@+0-9_,]+ <[a-zA-Z0-9_\\.]+@[a-zA-Z0-9_\\.]+>, )*[^<>@+0-9_,]+ <[a-zA-Z0-9_\\.]+@[a-zA-Z0-9_\\.]+>$");
+			validationRules.put(GAFCol.SEQUENCING_START_DATE, "^[0-9]{6}$");
+			validationRules.put(GAFCol.RUN, "^[0-9]{4}$");
+			validationRules.put(GAFCol.FLOWCELL, "^(([AB][A-Z0-9]{7}XX)|(A[A-Z0-9]{4}))$");
+			validationRules.put(GAFCol.LANE, "^[1-8](,[1-8])*$");
+			validationRules.put(GAFCol.BARCODE_1,
+					"^(None)|(((GAF)|(RPI)|(AGI)|(MON)|(RTP)|(HP8))\\s[0-9]{2}\\s([ACGT]{6})([ATCG]{2})?)$");
+			validationRules.put(GAFCol.ARRAY_FILE, "^.*[\\/\\\\]{1}[a-zA-Z0-9\\._]+$");
+			validationRules.put(GAFCol.ARRAY_ID, "^[1-9][0-9]*$");
+
+			validationRules.forEach((attr, pattern) -> {
+				GafListValidationRules validationRule = when(mock(GafListValidationRules.class).getPattern())
+						.thenReturn(pattern).getMock();
+				when(dataService.findOne(GafListValidationRules.ENTITY_NAME, GAF_LIST_ENTITY_NAME + '.' + attr,
+						GafListValidationRules.class)).thenReturn(validationRule);
+			});
+
+			return dataService;
 		}
 
 		@Bean
-		public MetaDataService metaDataService()
+		public GafListSettings gafListSettings()
 		{
-			return mock(MetaDataService.class);
-		}
-
-		@Bean
-		public MolgenisSettings molgenisSettings()
-		{
-			return mock(MolgenisSettings.class);
+			GafListSettings gafListSettings = mock(GafListSettings.class);
+			when(gafListSettings.getEntityName()).thenReturn(GAF_LIST_ENTITY_NAME);
+			return gafListSettings;
 		}
 
 		@Bean
 		public GafListValidator gafListValidator()
 		{
-			return new GafListValidator();
+			return new GafListValidator(dataService(), gafListSettings());
 		}
 
 		@Bean
 		public GafListValidationReport report()
 		{
-			return new GafListValidationReport();
+			return new GafListValidationReport(fileStore());
 		}
 
 		@Bean

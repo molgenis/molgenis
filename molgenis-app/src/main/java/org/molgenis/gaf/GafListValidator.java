@@ -1,5 +1,7 @@
 package org.molgenis.gaf;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,7 +20,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.gaf.settings.GafListSettings;
+import org.molgenis.gaf.settings.GafListValidationRules;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,16 +47,27 @@ public class GafListValidator
 
 	static final String BARCODE_NONE = "None";
 
-	@Autowired
-	private DataService dataService;
+	private final DataService dataService;
+	private final GafListSettings gafListSettings;
 
 	@Autowired
-	private MolgenisSettings molgenisSettings;
+	public GafListValidator(DataService dataService, GafListSettings gafListSettings)
+	{
+		this.dataService = checkNotNull(dataService);
+		this.gafListSettings = checkNotNull(gafListSettings);
+	}
+
+	public static void main(String[] args)
+	{
+		long l = Long.MAX_VALUE;
+		int i = (int) l;
+		System.out.println(i);
+	}
 
 	public GafListValidationReport validate(GafListValidationReport report, Repository repository, List<String> columns)
 			throws IOException
 	{
-		final String gaflistEntityName = molgenisSettings.getProperty(GafListFileRepository.GAFLIST_ENTITYNAME);
+		final String gaflistEntityName = gafListSettings.getEntityName();
 		EntityMetaData entityMetaData = dataService.getEntityMetaData(gaflistEntityName);
 
 		if (null == entityMetaData)
@@ -66,7 +80,8 @@ public class GafListValidator
 			Map<String, Pattern> patternMap = new HashMap<String, Pattern>();
 			for (String colName : columns)
 			{
-				String pattern = molgenisSettings.getProperty(GAF_LIST_VALIDATOR_PREFIX + colName);
+				String pattern = dataService.findOne(GafListValidationRules.ENTITY_NAME,
+						gaflistEntityName + '.' + colName, GafListValidationRules.class).getPattern();
 				if (pattern != null) patternMap.put(colName, Pattern.compile(pattern));
 			}
 
@@ -74,7 +89,8 @@ public class GafListValidator
 			Map<String, String> patternExampleMap = new HashMap<String, String>();
 			for (String colName : columns)
 			{
-				String example = molgenisSettings.getProperty(GAF_LIST_VALIDATOR_EXAMPLE_PREFIX + colName);
+				String example = dataService.findOne(GafListValidationRules.ENTITY_NAME,
+						gaflistEntityName + '.' + colName, GafListValidationRules.class).getExample();
 				if (example != null) patternExampleMap.put(colName, example);
 			}
 
@@ -149,7 +165,7 @@ public class GafListValidator
 	 */
 	private void validateInternalSampleIdIncremental(List<Entity> entities, GafListValidationReport report)
 	{
-		final String gaflistEntityName = molgenisSettings.getProperty(GafListFileRepository.GAFLIST_ENTITYNAME);
+		final String gaflistEntityName = gafListSettings.getEntityName();
 		Map<Integer, Integer> toImportInternalSampleIds = new HashMap<Integer, Integer>();
 
 		int row = 2;
@@ -173,22 +189,22 @@ public class GafListValidator
 				if (internalSampleIdExists(gaflistEntityName, internalSampleId))
 				{
 					// internal sample id already exists
-					report.addEntry(
-							runId,
-							new GafListValidationError(row, GAFCol.INTERNAL_SAMPLE_ID.toString(), internalSampleId
-									.toString(), "Internal sample id " + internalSampleId + " already imported"));
+					report.addEntry(runId,
+							new GafListValidationError(row, GAFCol.INTERNAL_SAMPLE_ID.toString(),
+									internalSampleId.toString(),
+									"Internal sample id " + internalSampleId + " already imported"));
 				}
 				else
 				{
 					if (toImportInternalSampleIds.containsKey(internalSampleId))
 					{
 						// internal sample id already exists
-						report.addEntry(
-								runId,
-								new GafListValidationError(row, GAFCol.INTERNAL_SAMPLE_ID.toString(), internalSampleId
-										.toString(), "Duplicate internal sample id " + internalSampleId
-										+ ". First encountered on row "
-										+ toImportInternalSampleIds.get(internalSampleId) + " in this file"));
+						report.addEntry(runId,
+								new GafListValidationError(row, GAFCol.INTERNAL_SAMPLE_ID.toString(),
+										internalSampleId.toString(),
+										"Duplicate internal sample id " + internalSampleId
+												+ ". First encountered on row "
+												+ toImportInternalSampleIds.get(internalSampleId) + " in this file"));
 					}
 					else
 					{
@@ -267,9 +283,8 @@ public class GafListValidator
 				if (runSeqType == null) runSeqType = seqType;
 				else if (!runSeqType.equals(seqType))
 				{
-					report.addEntry(runId,
-							new GafListValidationError(entityRowPair.getRow(), GAFCol.SEQ_TYPE.toString(), seqType,
-									"run has different " + GAFCol.SEQ_TYPE.toString()));
+					report.addEntry(runId, new GafListValidationError(entityRowPair.getRow(),
+							GAFCol.SEQ_TYPE.toString(), seqType, "run has different " + GAFCol.SEQ_TYPE.toString()));
 				}
 			}
 
@@ -281,9 +296,9 @@ public class GafListValidator
 				if (runSeqStartDate == null) runSeqStartDate = seqStartDate;
 				else if (!runSeqStartDate.equals(seqStartDate))
 				{
-					report.addEntry(runId, new GafListValidationError(entityRowPair.getRow(),
-							GAFCol.SEQUENCING_START_DATE.toString(), seqStartDate, "run has different "
-									+ GAFCol.SEQUENCING_START_DATE.toString()));
+					report.addEntry(runId,
+							new GafListValidationError(entityRowPair.getRow(), GAFCol.SEQUENCING_START_DATE.toString(),
+									seqStartDate, "run has different " + GAFCol.SEQUENCING_START_DATE.toString()));
 				}
 			}
 
@@ -318,9 +333,10 @@ public class GafListValidator
 					if (laneBarcodeType == null) laneBarcodeType = barcodeType;
 					else if (!laneBarcodeType.equals(barcodeType))
 					{
-						report.addEntry(runId, new GafListValidationError(laneEntityRowPair.getRow(),
-								GAFCol.BARCODE_TYPE.toString(), barcodeType, "run lane has different "
-										+ GAFCol.BARCODE_TYPE + " (expected: " + laneBarcodeType + ")"));
+						report.addEntry(runId,
+								new GafListValidationError(laneEntityRowPair.getRow(), GAFCol.BARCODE_TYPE.toString(),
+										barcodeType, "run lane has different " + GAFCol.BARCODE_TYPE + " (expected: "
+												+ laneBarcodeType + ")"));
 					}
 				}
 
@@ -332,9 +348,11 @@ public class GafListValidator
 					String barcode = laneEntity.getString(GAFCol.BARCODE.toString());
 					if (!BARCODE_NONE.equals(barcode))
 					{
-						if (barcodes.contains(barcode)) report.addEntry(runId, new GafListValidationError(
-								laneEntityRowPair.getRow(), GAFCol.BARCODE.toString(), barcode,
-								"run lane has duplicate " + GAFCol.BARCODE.toString()));
+						if (barcodes
+								.contains(barcode))
+							report.addEntry(runId,
+									new GafListValidationError(laneEntityRowPair.getRow(), GAFCol.BARCODE.toString(),
+											barcode, "run lane has duplicate " + GAFCol.BARCODE.toString()));
 						else barcodes.add(barcode);
 					}
 				}
@@ -504,20 +522,16 @@ public class GafListValidator
 		{
 			if (StringUtils.isEmpty(value) || (pattern != null && !pattern.matcher(value).matches()))
 			{
-				report.addEntry(
-						runId,
-						new GafListValidationError(row, colName, value, this.getPatternErrorMessage(colName,
-								patternExampleMap)));
+				report.addEntry(runId, new GafListValidationError(row, colName, value,
+						this.getPatternErrorMessage(colName, patternExampleMap)));
 			}
 		}
 		else
 		{
 			if (StringUtils.isNotEmpty(value) && pattern != null && !pattern.matcher(value).matches())
 			{
-				report.addEntry(
-						runId,
-						new GafListValidationError(row, colName, value, this.getPatternErrorMessage(colName,
-								patternExampleMap)));
+				report.addEntry(runId, new GafListValidationError(row, colName, value,
+						this.getPatternErrorMessage(colName, patternExampleMap)));
 			}
 		}
 	}
@@ -531,20 +545,16 @@ public class GafListValidator
 		{
 			if (StringUtils.isEmpty(value) || !lookupList.contains(value))
 			{
-				report.addEntry(
-						runId,
-						new GafListValidationError(row, colName, value, this.getPatternErrorMessage(colName,
-								patternExampleMap)));
+				report.addEntry(runId, new GafListValidationError(row, colName, value,
+						this.getPatternErrorMessage(colName, patternExampleMap)));
 			}
 		}
 		else
 		{
 			if (StringUtils.isNotEmpty(value) && !lookupList.contains(value))
 			{
-				report.addEntry(
-						runId,
-						new GafListValidationError(row, colName, value, this.getPatternErrorMessage(colName,
-								patternExampleMap)));
+				report.addEntry(runId, new GafListValidationError(row, colName, value,
+						this.getPatternErrorMessage(colName, patternExampleMap)));
 			}
 		}
 	}

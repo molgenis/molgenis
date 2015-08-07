@@ -1,5 +1,7 @@
 package org.molgenis.data.annotation.impl;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,15 +18,14 @@ import java.util.Map.Entry;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.VariantAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
+import org.molgenis.data.annotation.settings.AnnotationSettings;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -52,13 +53,11 @@ import org.springframework.stereotype.Component;
  * 
  * @version dbNSFP version 2.3 downloaded January 26, 2014
  * 
- * */
+ */
 @Component("dbnsfpVariantService")
 public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 {
-	private final MolgenisSettings molgenisSettings;
 	private static final String NAME = "dbNSFP-Variant";
-	public static final String CHROMOSOME_FILE_LOCATION_PROPERTY = "dbsnfp_variant_location";
 
 	static final String CHR = "chr";
 	static final String POS_1_COOR = "pos(1-coor)";
@@ -128,10 +127,12 @@ public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 	static final String ESP6500_AA_AF = "ESP6500_AA_AF";
 	static final String ESP6500_EA_AF = "ESP6500_EA_AF";
 
+	private final AnnotationSettings annotationSettings;
+
 	@Autowired
-	public DbnsfpVariantServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService)
+	public DbnsfpVariantServiceAnnotator(AnnotationSettings annotationSettings)
 	{
-		this.molgenisSettings = molgenisSettings;
+		this.annotationSettings = checkNotNull(annotationSettings);
 	}
 
 	@Override
@@ -143,7 +144,7 @@ public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 	@Override
 	public boolean annotationDataExists()
 	{
-		return new File(molgenisSettings.getProperty(CHROMOSOME_FILE_LOCATION_PROPERTY)).exists();
+		return new File(annotationSettings.getDbsnpLocationVariant()).exists();
 	}
 
 	@Override
@@ -178,8 +179,8 @@ public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 
 		for (Entry<String, List<String[]>> entry : chromosomeMap.entrySet())
 		{
-			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(
-					molgenisSettings.getProperty(CHROMOSOME_FILE_LOCATION_PROPERTY)), Charset.forName("UTF-8")));
+			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
+					new FileInputStream(annotationSettings.getDbsnpLocationVariant()), Charset.forName("UTF-8")));
 
 			try
 			{

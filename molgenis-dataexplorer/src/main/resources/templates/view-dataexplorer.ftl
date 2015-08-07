@@ -67,7 +67,7 @@
                 	<div class="form-horizontal">
                     	<div class="form-group">
                         	<div class="col-md-12">
-                            	<div class="input-group" <#if hideSearchBox == true> style="display:none"</#if>>
+                            	<div class="input-group" <#if plugin_settings.searchbox == false> style="display:none"</#if>>
                                 	<input type="text" class="form-control" id="observationset-search" placeholder="Search data values" autofocus="autofocus"/>
                                 	<span class="input-group-btn">
                                     	<button id="search-clear-button" class="btn btn-default" type="button"><span class="glyphicon glyphicon-remove"></span></button>
@@ -100,7 +100,7 @@
                     </div>
                 </div>
 			</div>
-			<div class="row"<#if hideDataItemSelect == true> style="display:none"</#if>>
+			<div class="row"<#if plugin_settings.attr_select == false> style="display:none"</#if>>
                 <div class="col-md-12">
                     <div class="panel panel-primary">
                         <div class="panel-heading">

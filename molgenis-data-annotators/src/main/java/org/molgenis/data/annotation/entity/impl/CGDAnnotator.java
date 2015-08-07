@@ -47,9 +47,9 @@ import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
+import org.molgenis.data.annotation.settings.AnnotationDbSettings;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -64,7 +64,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class CGDAnnotator
 {
-	public static final String CGD_FILE_LOCATION_PROPERTY = "cgd_location";
 	private static String CGD_RESOURCE = "CGDResource";
 	private static final char SEPARATOR = '\t';
 
@@ -75,7 +74,7 @@ public class CGDAnnotator
 	private static final String GENERALIZED_INHERITANCE_LABEL = "CGDGIN";
 
 	@Autowired
-	private MolgenisSettings molgenisSettings;
+	private AnnotationDbSettings annotationSettings;
 
 	@Autowired
 	private DataService dataService;
@@ -91,14 +90,23 @@ public class CGDAnnotator
 	public enum CGDAttributeName
 	{
 		GENE("#GENE", SnpEffAnnotator.GENE_NAME), REFERENCES("REFERENCES", "REFS"), INTERVENTION_RATIONALE(
-				"INTERVENTION/RATIONALE", "INTERVENTION_RATIONALE"), COMMENTS("COMMENTS", "COMMENTS"), INTERVENTION_CATEGORIES(
-				"INTERVENTION CATEGORIES", "INTERVENTION_CATEGORIES"), MANIFESTATION_CATEGORIES(
-				"MANIFESTATION CATEGORIES", "MANIFESTATION_CATEGORIES"), ALLELIC_CONDITIONS("ALLELIC CONDITIONS",
-				"ALLELIC_CONDITIONS"), ENTREZ_GENE_ID("ENTREZ GENE ID", "ENTREZ_GENE_ID"), HGNC_ID("HGNC ID", "HGNC_ID"), CONDITION(
-				"CONDITION", VcfRepository.getInfoPrefix() + CONDITION_LABEL), AGE_GROUP("AGE GROUP", VcfRepository
-				.getInfoPrefix() + AGE_GROUP_LABEL), INHERITANCE("INHERITANCE", VcfRepository.getInfoPrefix()
-				+ INHERITANCE_LABEL), GENERALIZED_INHERITANCE("", VcfRepository.getInfoPrefix()
-				+ GENERALIZED_INHERITANCE_LABEL);
+				"INTERVENTION/RATIONALE",
+				"INTERVENTION_RATIONALE"), COMMENTS("COMMENTS", "COMMENTS"), INTERVENTION_CATEGORIES(
+						"INTERVENTION CATEGORIES", "INTERVENTION_CATEGORIES"), MANIFESTATION_CATEGORIES(
+								"MANIFESTATION CATEGORIES", "MANIFESTATION_CATEGORIES"), ALLELIC_CONDITIONS(
+										"ALLELIC CONDITIONS", "ALLELIC_CONDITIONS"), ENTREZ_GENE_ID("ENTREZ GENE ID",
+												"ENTREZ_GENE_ID"), HGNC_ID("HGNC ID", "HGNC_ID"), CONDITION("CONDITION",
+														VcfRepository.getInfoPrefix() + CONDITION_LABEL), AGE_GROUP(
+																"AGE GROUP",
+																VcfRepository.getInfoPrefix()
+																		+ AGE_GROUP_LABEL), INHERITANCE(
+																				"INHERITANCE",
+																				VcfRepository.getInfoPrefix()
+																						+ INHERITANCE_LABEL), GENERALIZED_INHERITANCE(
+																								"",
+																								VcfRepository
+																										.getInfoPrefix()
+																										+ GENERALIZED_INHERITANCE_LABEL);
 
 		private final String cgdName;// Column name as defined in CGD file
 		private final String attributeName;// Output attribute name
@@ -140,8 +148,8 @@ public class CGDAnnotator
 	public RepositoryAnnotator cgd()
 	{
 		AnnotatorInfo info = getAnnotatorInfo();
-		QueryCreator queryCreator = new AttributeEqualsQueryCreator(new DefaultAttributeMetaData(
-				GENE.getAttributeName()));
+		QueryCreator queryCreator = new AttributeEqualsQueryCreator(
+				new DefaultAttributeMetaData(GENE.getAttributeName()));
 		ResultFilter resultFilter = new FirstResultFilter();
 
 		EntityAnnotator entityAnnotator = new CGDEntityAnnotator(CGD_RESOURCE, info, queryCreator, resultFilter,
@@ -153,7 +161,8 @@ public class CGDAnnotator
 	@Bean
 	public Resource cgdResource()
 	{
-		return new ResourceImpl(CGD_RESOURCE, new SingleResourceConfig(CGD_FILE_LOCATION_PROPERTY, molgenisSettings),
+		return new ResourceImpl(CGD_RESOURCE,
+				new SingleResourceConfig(AnnotationDbSettings.Meta.CGD_LOCATION, annotationSettings),
 				new RepositoryFactory()
 				{
 					@Override

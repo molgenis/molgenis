@@ -1,5 +1,7 @@
 package org.molgenis.data.annotation.provider;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -12,23 +14,21 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.molgenis.data.annotation.impl.datastructures.ClinvarData;
-import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.data.annotation.settings.AnnotationSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ClinvarDataProvider
 {
-	private final MolgenisSettings molgenisSettings;
-	public static final String CLINVAR_FILE_LOCATION_PROPERTY = "clinvar_location";
-
 	HashMap<List<String>, ClinvarData> result = new HashMap<List<String>, ClinvarData>();
 
+	private final AnnotationSettings annotationSettings;
+
 	@Autowired
-	public ClinvarDataProvider(MolgenisSettings molgenisSettings)
+	public ClinvarDataProvider(AnnotationSettings annotationSettings)
 	{
-		if (molgenisSettings == null) throw new IllegalArgumentException("molgenisSettings is null");
-		this.molgenisSettings = molgenisSettings;
+		this.annotationSettings = checkNotNull(annotationSettings);
 	}
 
 	public Map<List<String>, ClinvarData> getClinvarData() throws IOException
@@ -47,7 +47,8 @@ public class ClinvarDataProvider
 							split[13], split[14], split[15], split[16], split[17], split[18], split[19], split[20],
 							split[21], split[22], split[23], split[24]);
 
-					List<String> clinvarKeys = getChromosomePositionReferenceAlternativeInformationFromClinvarLine(split);
+					List<String> clinvarKeys = getChromosomePositionReferenceAlternativeInformationFromClinvarLine(
+							split);
 					result.put(clinvarKeys, clinvarData);
 				}
 			}
@@ -102,7 +103,7 @@ public class ClinvarDataProvider
 
 	private Reader getClinvarDataReader() throws IOException
 	{
-		String fileLocation = molgenisSettings.getProperty(CLINVAR_FILE_LOCATION_PROPERTY);
+		String fileLocation = annotationSettings.getClinVarLocation();
 		return new InputStreamReader(new FileInputStream(fileLocation), Charset.forName("UTF-8"));
 	}
 }

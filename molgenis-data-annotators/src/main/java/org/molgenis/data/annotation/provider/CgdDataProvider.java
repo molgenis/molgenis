@@ -1,5 +1,7 @@
 package org.molgenis.data.annotation.provider;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -11,16 +13,13 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.molgenis.data.annotation.impl.datastructures.CgdData;
-import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.data.annotation.settings.AnnotationSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class CgdDataProvider
 {
-	private final MolgenisSettings molgenisSettings;
-	public static final String CGD_FILE_LOCATION_PROPERTY = "cgd_location";
-
 	public enum generalizedInheritance
 	{
 		DOM_OR_REC, DOMINANT, RECESSIVE, XLINKED, OTHER
@@ -28,11 +27,12 @@ public class CgdDataProvider
 
 	HashMap<String, CgdData> result = new HashMap<String, CgdData>();
 
+	private final AnnotationSettings annotationSettings;
+
 	@Autowired
-	public CgdDataProvider(MolgenisSettings molgenisSettings)
+	public CgdDataProvider(AnnotationSettings annotationSettings)
 	{
-		if (molgenisSettings == null) throw new IllegalArgumentException("molgenisSettings is null");
-		this.molgenisSettings = molgenisSettings;
+		this.annotationSettings = checkNotNull(annotationSettings);
 	}
 
 	public Map<String, CgdData> getCgdData() throws IOException
@@ -88,7 +88,7 @@ public class CgdDataProvider
 
 	private Reader getCgdDataReader() throws IOException
 	{
-		String fileLocation = molgenisSettings.getProperty(CGD_FILE_LOCATION_PROPERTY);
+		String fileLocation = annotationSettings.getCgdLocation();
 		return new InputStreamReader(new FileInputStream(fileLocation), Charset.forName("UTF-8"));
 	}
 }
