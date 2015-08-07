@@ -13,7 +13,7 @@
 	             	   </#if>
 	            		<em>This database was generated using the open source <a href="http://www.molgenis.org">MOLGENIS database generator</a><#if molgenis_version?has_content> version ${molgenis_version!?html}</#if><#if molgenis_build_date?has_content> build on ${molgenis_build_date!?html}</#if>.<br>Please cite <a href="http://www.ncbi.nlm.nih.gov/pubmed/21210979">Swertz et al (2010)</a> or <a href="http://www.ncbi.nlm.nih.gov/pubmed/17297480">Swertz &amp; Jansen (2007)</a> on use.</em>
 					</p>
-	           		<#if app_tracking_code.default?has_content>
+	           		<#if app_tracking_code.gaTrackingId?has_content>
 						<p class="text-muted text-center small ga-opt-out">
 							<em>We use Google Analytics to review this site's usage and improve our services.<br/>
 							To optimally protect your privacy we have signed the Data Processing Amendment, masked parts of your IP address and disabled data sharing with other Google services.</em><br/>
@@ -28,11 +28,11 @@
         </div>
 	</body>
 
-	<#if app_tracking_code.default?has_content>
+	<#if app_tracking_code.gaTrackingId?has_content>
 		<#-- Opt-out script -->
 		<script>
 			// Disable tracking if the opt-out cookie exists.
-			var disableStr = 'ga-disable-${app_tracking_code.default?string}';
+			var disableStr = 'ga-disable-${app_tracking_code.gaTrackingId?string}';
 			if (document.cookie.indexOf(disableStr + '=true') > -1) {
 				gaOptout();
 			}
@@ -53,7 +53,7 @@
 			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 		 
-			ga('create', '${app_tracking_code.default?string}', 'auto'); 
+			ga('create', '${app_tracking_code.gaTrackingId?string}', 'auto'); 
 			ga('set', 'forceSSL', true); 
 			ga('set', 'anonymizeIp', true); 
 			ga('send', 'pageview');
