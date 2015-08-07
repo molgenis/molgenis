@@ -466,23 +466,25 @@
 		var completeWords = [];
 		if(attributeLabel && partialWords && partialWords.length > 0){
 			$.each(partialWords, function(index, partialWord){
-				attributeLabel = attributeLabel.toUpperCase();
-				partialWord = partialWord.toUpperCase();
-				var startIndex = attributeLabel.indexOf(partialWord);
-				
-				while(startIndex == -1 && partialWord.length > 0){
-					partialWord = partialWord.substring(0, partialWord.length - 1);
-					startIndex = attributeLabel.indexOf(partialWord);
-				}
-			
-				if(startIndex != -1){
-					var endIndex = startIndex + partialWord.length;
-					while(attributeLabel.length > endIndex && attributeLabel.charAt(endIndex).match(/[A-Z0-9]/i)){
-						endIndex++;
+				if(partialWord.length > 2){
+					attributeLabel = attributeLabel.toUpperCase();
+					partialWord = partialWord.toUpperCase();
+					var startIndex = attributeLabel.indexOf(partialWord);
+					
+					while(startIndex == -1 && partialWord.length > 0){
+						partialWord = partialWord.substring(0, partialWord.length - 1);
+						startIndex = attributeLabel.indexOf(partialWord);
 					}
-					completeWords.push(attributeLabel.substring(startIndex, endIndex));
-				}else{
-					completeWords.push(partialWord)
+				
+					if(startIndex != -1){
+						var endIndex = startIndex + partialWord.length;
+						while(attributeLabel.length > endIndex && attributeLabel.charAt(endIndex).match(/[A-Z0-9]/i)){
+							endIndex++;
+						}
+						completeWords.push(attributeLabel.substring(startIndex, endIndex));
+					}else{
+						completeWords.push(partialWord)
+					}
 				}
 			});
 		}
