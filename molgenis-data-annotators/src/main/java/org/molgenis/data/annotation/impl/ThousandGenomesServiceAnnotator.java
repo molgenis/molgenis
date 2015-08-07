@@ -1,7 +1,5 @@
 package org.molgenis.data.annotation.impl;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -20,13 +18,13 @@ import org.molgenis.data.annotation.VariantAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
-import org.molgenis.data.annotation.settings.AnnotationInMemorySettings;
-import org.molgenis.data.annotation.settings.AnnotationSettings;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.annotator.tabix.TabixReader;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.utils.VcfUtils;
+import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.framework.server.MolgenisSimpleSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,15 +51,16 @@ import edu.umd.cs.findbugs.annotations.SuppressWarnings;
  **/
 @Component("thousandGenomesService")
 @SuppressWarnings(value =
-{ "IS2_INCONSISTENT_SYNC", "DC_DOUBLECHECK", "DM_STRING_CTOR",
-		"NP_NULL_ON_SOME_PATH" }, justification = "Old code! This code must be removed when the new code is ready")
+{ "IS2_INCONSISTENT_SYNC", "DC_DOUBLECHECK", "DM_STRING_CTOR", "NP_NULL_ON_SOME_PATH" }, justification = "Old code! This code must be removed when the new code is ready")
 public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ThousandGenomesServiceAnnotator.class);
 
+	private final MolgenisSettings molgenisSettings;
 	private static final String NAME = "1000G";
 	public static final String THGEN_MAF_LABEL = "1KGMAF";
 	public static final String THGEN_MAF = VcfRepository.getInfoPrefix() + THGEN_MAF_LABEL;
+	public static final String THGEN_DIRECTORY_LOCATION_PROPERTY = "1000G_location";
 
 	final List<String> infoFields = Arrays.asList(new String[]
 	{ "##INFO=<ID=" + THGEN_MAF.substring(VcfRepository.getInfoPrefix().length())
@@ -69,18 +68,17 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 
 	HashMap<String, TabixReader> tabixReaders = null;
 
-	private final AnnotationSettings annotationSettings;
-
 	@Autowired
-	public ThousandGenomesServiceAnnotator(AnnotationSettings annotationSettings)
+	public ThousandGenomesServiceAnnotator(MolgenisSettings molgenisSettings) throws IOException
 	{
-		this.annotationSettings = checkNotNull(annotationSettings);
+		this.molgenisSettings = molgenisSettings;
 	}
 
 	public ThousandGenomesServiceAnnotator(File thGenDir, File inputVcfFile, File outputVCFFile) throws Exception
 	{
-		this.annotationSettings = new AnnotationInMemorySettings();
-		annotationSettings.set1000GLocation(thGenDir.getAbsolutePath());
+
+		this.molgenisSettings = new MolgenisSimpleSettings();
+		molgenisSettings.setProperty(THGEN_DIRECTORY_LOCATION_PROPERTY, thGenDir.getAbsolutePath());
 
 		getTabixReaders();
 
@@ -123,8 +121,8 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 	@Override
 	public boolean annotationDataExists()
 	{
-		if (null == annotationSettings.get1000GLocation()) return false;
-		File f = new File(annotationSettings.get1000GLocation());
+		if (null == molgenisSettings.getProperty(THGEN_DIRECTORY_LOCATION_PROPERTY)) return false;
+		File f = new File(molgenisSettings.getProperty(THGEN_DIRECTORY_LOCATION_PROPERTY));
 		return (f.exists() && f.isDirectory());
 	}
 
@@ -157,12 +155,13 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 
 					for (String chr : chroms.split("\\|"))
 					{
-						String thGenChrom = new String(annotationSettings.get1000GLocation() + File.separator
-								+ (chr.equals("X")
-										? "ALL.chrX.phase3_shapeit2_mvncall_integrated.20130502.genotypes.vcf.gz"
-										: chr.equals("Y") ? "ALL.chrY.phase3_integrated.20130502.genotypes.vcf.gz"
-												: "ALL.chr" + chr
-														+ ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"));
+						String thGenChrom = new String(
+								molgenisSettings.getProperty(THGEN_DIRECTORY_LOCATION_PROPERTY)
+										+ File.separator
+										+ (chr.equals("X") ? "ALL.chrX.phase3_shapeit2_mvncall_integrated.20130502.genotypes.vcf.gz" : chr
+												.equals("Y") ? "ALL.chrY.phase3_integrated.20130502.genotypes.vcf.gz" : "ALL.chr"
+												+ chr
+												+ ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"));
 						if (new File(thGenChrom).exists())
 						{
 							TabixReader tr = new TabixReader(thGenChrom);
@@ -189,8 +188,8 @@ public class ThousandGenomesServiceAnnotator extends VariantAnnotator
 			return resultMap;
 		}
 
-		TabixReader.Iterator tabixIterator = tabixReaders.get(chromosome)
-				.query(chromosome + ":" + position + "-" + position);
+		TabixReader.Iterator tabixIterator = tabixReaders.get(chromosome).query(
+				chromosome + ":" + position + "-" + position);
 		String line = null;
 
 		// get line from data, we expect exactly 1

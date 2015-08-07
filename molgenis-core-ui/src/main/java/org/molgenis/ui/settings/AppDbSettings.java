@@ -31,127 +31,6 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 		super(ID);
 	}
 
-	@Override
-	public String getTitle()
-	{
-		return getString(Meta.TITLE);
-	}
-
-	@Override
-	public String getLogoTopHref()
-	{
-		return getString(Meta.LOGO_TOP_HREF);
-	}
-
-	@Override
-	public String getLogoNavBarHref()
-	{
-		return getString(Meta.LOGO_NAVBAR_HREF);
-	}
-
-	@Override
-	public void setLogoNavBarHref(String logoHref)
-	{
-		set(Meta.LOGO_NAVBAR_HREF, logoHref);
-	}
-
-	@Override
-	public String getFooter()
-	{
-		return getString(Meta.FOOTER);
-	}
-
-	@Override
-	public boolean getSignUp()
-	{
-		Boolean value = getBoolean(Meta.SIGNUP);
-		return value != null ? value.booleanValue() : false;
-	}
-
-	@Override
-	public boolean getSignUpModeration()
-	{
-		Boolean value = getBoolean(Meta.SIGNUP_MODERATION);
-		return value != null ? value.booleanValue() : false;
-	}
-
-	@Override
-	public String getLanguageCode()
-	{
-		return getString(Meta.LANGUAGE_CODE);
-	}
-
-	@Override
-	public String getBootstrapTheme()
-	{
-		return getString(Meta.BOOTSTRAP_THEME);
-	}
-
-	@Override
-	public void setBootstrapTheme(String bootstrapTheme)
-	{
-		// verify that css file exists
-		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-		Resource resource = resolver.getResource("/css/themes/" + bootstrapTheme);
-		if (!resource.exists())
-		{
-			throw new MolgenisDataException("Bootstrap theme does not exist [/css/themes/" + bootstrapTheme + "]");
-		}
-
-		set(Meta.BOOTSTRAP_THEME, bootstrapTheme);
-	}
-
-	@Override
-	public String getCssHref()
-	{
-		return getString(Meta.CSS_HREF);
-	}
-
-	@Override
-	public String getJsHref()
-	{
-		return getString(Meta.JS_HREF);
-	}
-
-	@Override
-	public String getMenu()
-	{
-		return getString(Meta.MENU);
-	}
-
-	@Override
-	public void setMenu(String menuJson)
-	{
-		set(Meta.MENU, menuJson);
-	}
-
-	private static String TRACKING_CODE_PREFIX = "(function(){if('true' === $.cookie('permissionforcookies')){";
-	private static String TRACKING_CODE_POSTFIX = "}})();";
-
-	@Override
-	public String getTrackingCodeHeader()
-	{
-		return getTrackingCode(Meta.TRACKING_CODE_HEADER);
-	}
-
-	@Override
-	public String getTrackingCodeFooter()
-	{
-		return getTrackingCode(Meta.TRACKING_CODE_FOOTER);
-	}
-
-	private String getTrackingCode(String trackingCodeAttr)
-	{
-		String trackingCode = getString(trackingCodeAttr);
-		return trackingCode != null ? TRACKING_CODE_PREFIX + trackingCode + TRACKING_CODE_POSTFIX : null;
-	}
-
-	@Override
-	public Integer getAggregateThreshold()
-	{
-		return getInt(Meta.AGGREGATE_THRESHOLD);
-	}
-
 	@Component
 	public static class Meta extends DefaultSettingsEntityMetaData
 	{
@@ -165,7 +44,6 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 		private static final String LANGUAGE_CODE = "language_code";
 		private static final String BOOTSTRAP_THEME = "bootstrap_theme";
 		private static final String CSS_HREF = "css_href";
-		private static final String JS_HREF = "js_href";
 		private static final String TRACKING_CODE_HEADER = "tracking_code_header";
 		private static final String TRACKING_CODE_FOOTER = "tracking_code_footer";
 		private static final String AGGREGATE_THRESHOLD = "aggregate_threshold";
@@ -205,8 +83,6 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 					.setDescription("CSS file name of theme (see molgenis-core-ui/src/main/resources/css/themes).");
 			addAttribute(CSS_HREF).setDataType(STRING).setNillable(true).setLabel("CSS href")
 					.setDescription("CSS file name to add custom CSS (see molgenis-core-ui/src/main/resources/css).");
-			addAttribute(JS_HREF).setDataType(STRING).setNillable(true).setLabel("JS href")
-					.setDescription("JS file name to add custom JS (see molgenis-core-ui/src/main/resources/js).");
 			addAttribute(TRACKING_CODE_HEADER).setDataType(SCRIPT).setNillable(true).setLabel("Tracking code header")
 					.setDescription("JS tracking code (e.g. Google Analytics) that is placed in the header HTML.");
 			addAttribute(TRACKING_CODE_FOOTER).setDataType(SCRIPT).setNillable(true).setLabel("Tracking code footer")
@@ -227,5 +103,182 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 			defaultSettings.set(BOOTSTRAP_THEME, DEFAULT_BOOTSTRAP_THEME);
 			return defaultSettings;
 		}
+	}
+
+	@Override
+	public String getTitle()
+	{
+		return getString(Meta.TITLE);
+	}
+
+	@Override
+	public void setTitle(String title)
+	{
+		set(Meta.TITLE, title);
+	}
+
+	@Override
+	public String getLogoTopHref()
+	{
+		return getString(Meta.LOGO_TOP_HREF);
+	}
+
+	@Override
+	public void setLogoTopHref(String logoHref)
+	{
+		set(Meta.LOGO_NAVBAR_HREF, logoHref);
+	}
+
+	@Override
+	public String getLogoNavBarHref()
+	{
+		return getString(Meta.LOGO_NAVBAR_HREF);
+	}
+
+	@Override
+	public void setLogoNavBarHref(String logoHref)
+	{
+		set(Meta.LOGO_NAVBAR_HREF, logoHref);
+	}
+
+	@Override
+	public String getFooter()
+	{
+		return getString(Meta.FOOTER);
+	}
+
+	@Override
+	public void setFooter(String footerText)
+	{
+		set(Meta.FOOTER, footerText);
+	}
+
+	@Override
+	public boolean getSignUp()
+	{
+		Boolean value = getBoolean(Meta.SIGNUP);
+		return value != null ? value.booleanValue() : false;
+	}
+
+	@Override
+	public void setSignUp(boolean signUp)
+	{
+		set(Meta.SIGNUP, signUp);
+	}
+
+	@Override
+	public boolean getSignUpModeration()
+	{
+		Boolean value = getBoolean(Meta.SIGNUP_MODERATION);
+		return value != null ? value.booleanValue() : false;
+	}
+
+	@Override
+	public void setSignUpModeration(boolean signUpModeration)
+	{
+		set(Meta.SIGNUP_MODERATION, signUpModeration);
+	}
+
+	@Override
+	public String getLanguageCode()
+	{
+		return getString(Meta.LANGUAGE_CODE);
+	}
+
+	@Override
+	public void setLanguageCode(String languageCode)
+	{
+		set(Meta.LANGUAGE_CODE, languageCode);
+	}
+
+	@Override
+	public String getBootstrapTheme()
+	{
+		return getString(Meta.BOOTSTRAP_THEME);
+	}
+
+	@Override
+	public void setBootstrapTheme(String bootstrapTheme)
+	{
+		// verify that css file exists
+		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+		Resource resource = resolver.getResource("/css/themes/" + bootstrapTheme);
+		if (!resource.exists())
+		{
+			throw new MolgenisDataException("Bootstrap theme does not exist [/css/themes/" + bootstrapTheme + "]");
+		}
+
+		set(Meta.BOOTSTRAP_THEME, bootstrapTheme);
+	}
+
+	@Override
+	public String getCssHref()
+	{
+		return getString(Meta.CSS_HREF);
+	}
+
+	@Override
+	public void setCssHref(String cssHref)
+	{
+		set(Meta.CSS_HREF, cssHref);
+	}
+
+	@Override
+	public String getMenu()
+	{
+		return getString(Meta.MENU);
+	}
+
+	@Override
+	public void setMenu(String menuJson)
+	{
+		set(Meta.MENU, menuJson);
+	}
+
+	// FIXME too much magic
+	private static String TRACKING_CODE_PREFIX = "(function(){if('true' === $.cookie('permissionforcookies')){";
+	private static String TRACKING_CODE_POSTFIX = "}})();";
+
+	@Override
+	public String getTrackingCodeHeader()
+	{
+		return getTrackingCode(Meta.TRACKING_CODE_HEADER);
+	}
+
+	@Override
+	public void setTrackingCodeHeader(String trackingCodeHeader)
+	{
+		set(Meta.TRACKING_CODE_HEADER, trackingCodeHeader);
+
+	}
+
+	@Override
+	public void setTrackingCodeFooter(String trackingCodeFooter)
+	{
+		set(Meta.TRACKING_CODE_FOOTER, trackingCodeFooter);
+	}
+
+	@Override
+	public String getTrackingCodeFooter()
+	{
+		return getTrackingCode(Meta.TRACKING_CODE_FOOTER);
+	}
+
+	private String getTrackingCode(String trackingCodeAttr)
+	{
+		String trackingCode = getString(trackingCodeAttr);
+		return trackingCode != null ? TRACKING_CODE_PREFIX + trackingCode + TRACKING_CODE_POSTFIX : null;
+	}
+
+	@Override
+	public Integer getAggregateThreshold()
+	{
+		return getInt(Meta.AGGREGATE_THRESHOLD);
+	}
+
+	@Override
+	public void setAggregateThreshold(Integer threshold)
+	{
+		set(Meta.AGGREGATE_THRESHOLD, threshold);
 	}
 }

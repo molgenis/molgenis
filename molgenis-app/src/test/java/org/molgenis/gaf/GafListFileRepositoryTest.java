@@ -10,12 +10,26 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ResourceUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.testng.annotations.Test;
 
 public class GafListFileRepositoryTest
 {
+	@Autowired
+	private GafListFileImporterService gafListFileImporterService;
+
+	@Autowired
+	private MolgenisSettings molgenisSettings;
+
+	@Autowired
+	private DataService dataService;
+
 	@Test(expectedExceptions = java.lang.NullPointerException.class)
 	public void GafListFileRepository() throws IOException
 	{
@@ -78,5 +92,27 @@ public class GafListFileRepositoryTest
 		assertTrue(it.hasNext());
 		it.next();
 		assertFalse(it.hasNext());
+	}
+
+	@Configuration
+	public static class Config
+	{
+		@Bean
+		public DataService dataService()
+		{
+			return mock(DataService.class);
+		}
+
+		@Bean
+		public MolgenisSettings molgenisSettings()
+		{
+			return mock(MolgenisSettings.class);
+		}
+
+		@Bean
+		public GafListFileImporterService gafListFileImporterService()
+		{
+			return mock(GafListFileImporterService.class);
+		}
 	}
 }

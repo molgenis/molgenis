@@ -1,7 +1,5 @@
 package org.molgenis.data.annotation.provider;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -13,19 +11,22 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
-import org.molgenis.data.annotation.settings.AnnotationSettings;
+import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class HgncLocationsProvider
 {
-	private final AnnotationSettings annotationSettings;
+	public static final String KEY_HGNC_LOCATIONS_VALUE = "plugin.annotators.hgcn.locations.url";
+	public static final String DEFAULT_HGNC_LOCATIONS_VALUE = "https://molgenis26.target.rug.nl/downloads/5gpm/GRCh37p13_HGNC_GeneLocations_noPatches.tsv";
+	private final MolgenisSettings molgenisSettings;
 
 	@Autowired
-	public HgncLocationsProvider(AnnotationSettings annotationSettings)
+	public HgncLocationsProvider(MolgenisSettings molgenisSettings)
 	{
-		this.annotationSettings = checkNotNull(annotationSettings);
+		if (molgenisSettings == null) throw new IllegalArgumentException("molgenisSettings is null");
+		this.molgenisSettings = molgenisSettings;
 	}
 
 	/**
@@ -54,7 +55,7 @@ public class HgncLocationsProvider
 
 	private Reader getHgncLocationsReader() throws IOException
 	{
-		String url = annotationSettings.getHgncLocation();
+		String url = molgenisSettings.getProperty(KEY_HGNC_LOCATIONS_VALUE);
 		return new InputStreamReader(new URL(url).openStream(), Charset.forName("UTF-8"));
 	}
 }

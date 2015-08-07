@@ -1,7 +1,5 @@
 package org.molgenis.data.annotation.impl;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,16 +14,16 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.LocusAnnotator;
+import org.molgenis.data.annotation.impl.datastructures.Locus;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
-import org.molgenis.data.annotation.impl.datastructures.Locus;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
-import org.molgenis.data.annotation.settings.AnnotationSettings;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.annotation.utils.HgncLocationsUtils;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -50,11 +48,15 @@ import org.springframework.stereotype.Component;
  * 
  * @version dbNSFP version 2.3 downloaded January 26, 2014
  * 
- */
+ * */
 @Component("dbnsfpGeneService")
 public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 {
+	private final MolgenisSettings molgenisSettings;
+	private final HgncLocationsProvider hgncLocationsProvider;
+
 	private static final String NAME = "dbNSFP-Gene";
+	public static final String GENE_FILE_LOCATION_PROPERTY = "dbnsfp_gene_location";
 
 	static final String GENE_NAME = "Gene_name";
 	static final String ENSEMBL_GENE = "Ensembl_gene";
@@ -89,15 +91,12 @@ public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 	static final String KNOWN_REC_INFO = "Known_rec_info";
 	static final String ESSENTIAL_GENE = "Essential_gene";
 
-	private final AnnotationSettings annotationSettings;
-	private final HgncLocationsProvider hgncLocationsProvider;
-
 	@Autowired
-	public DbnsfpGeneServiceAnnotator(AnnotationSettings annotationSettings,
-			HgncLocationsProvider hgncLocationsProvider)
+	public DbnsfpGeneServiceAnnotator(MolgenisSettings molgenisSettings,
+			HgncLocationsProvider hgncLocationsProvider) throws IOException
 	{
-		this.annotationSettings = checkNotNull(annotationSettings);
-		this.hgncLocationsProvider = checkNotNull(hgncLocationsProvider);
+		this.molgenisSettings = molgenisSettings;
+		this.hgncLocationsProvider = hgncLocationsProvider;
 	}
 
 	@Override
@@ -109,7 +108,7 @@ public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 	@Override
 	public boolean annotationDataExists()
 	{
-		return new File(annotationSettings.getDbsnpLocationGene()).exists();
+		return new File(molgenisSettings.getProperty(GENE_FILE_LOCATION_PROPERTY)).exists();
 	}
 
 	@Override
@@ -117,8 +116,8 @@ public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 	{
 		List<Entity> results = new ArrayList<>();
 
-		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
-				new FileInputStream(annotationSettings.getDbsnpLocationGene()), Charset.forName("UTF-8")));
+		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(
+				molgenisSettings.getProperty(GENE_FILE_LOCATION_PROPERTY)), Charset.forName("UTF-8")));
 
 		Long position = entity.getLong(VcfRepository.POS);
 		String chromosome = entity.getString(VcfRepository.CHROM);
@@ -182,9 +181,9 @@ public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 	}
 
 	@Override
-	public List<AttributeMetaData> getOutputMetaData()
+	public List<AttributeMetaData>  getOutputMetaData()
 	{
-		List<AttributeMetaData> metadata = new ArrayList<>();
+		List<AttributeMetaData>  metadata = new ArrayList<>();
 
 		metadata.add(new DefaultAttributeMetaData(GENE_NAME, FieldTypeEnum.TEXT));
 		metadata.add(new DefaultAttributeMetaData(ENSEMBL_GENE, FieldTypeEnum.TEXT));

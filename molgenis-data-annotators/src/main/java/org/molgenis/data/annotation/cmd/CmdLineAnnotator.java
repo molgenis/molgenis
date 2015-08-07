@@ -9,6 +9,10 @@ import java.util.Set;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.entity.impl.CaddAnnotator;
+import org.molgenis.data.annotation.entity.impl.CGDAnnotator;
+import org.molgenis.data.annotation.entity.impl.ExacAnnotator;
+import org.molgenis.data.annotation.entity.impl.SnpEffAnnotator;
 import org.molgenis.data.annotation.impl.ClinVarVCFServiceAnnotator;
 import org.molgenis.data.annotation.impl.DeNovoAnnotator;
 import org.molgenis.data.annotation.impl.GoNLServiceAnnotator;
@@ -16,11 +20,11 @@ import org.molgenis.data.annotation.impl.HpoServiceAnnotator;
 import org.molgenis.data.annotation.impl.MonogenicDiseaseCandidatesServiceAnnotator;
 import org.molgenis.data.annotation.impl.PhenomizerServiceAnnotator;
 import org.molgenis.data.annotation.impl.ThousandGenomesServiceAnnotator;
-import org.molgenis.data.annotation.settings.AnnotationSettings;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.utils.VcfUtils;
+import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -35,8 +39,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class CmdLineAnnotator
 {
+
 	@Autowired
-	private AnnotationSettings annotationSettings;
+	private MolgenisSettings molgenisSettings;
 
 	@Autowired
 	private ApplicationContext applicationContext;
@@ -54,21 +59,24 @@ public class CmdLineAnnotator
 
 		if (args.length != 4)
 		{
-			System.out.println("\n" + "*********************************************\n"
-					+ "* MOLGENIS Annotator, commandline interface *\n"
-					+ "*********************************************\n" + "\n"
-					+ "Typical usage to annotate a VCF file:\n"
-					+ "\tjava -jar CmdLineAnnotator.jar [Annotator] [Annotation source file] [input VCF] [output VCF].\n"
-					+ "\tExample: java -Xmx4g -jar CmdLineAnnotator.jar gonl"
-					+ "GoNL/release5_noContam_noChildren_with_AN_AC_GTC_stripped/ Cardio.vcf Cardio_gonl.vcf\n" + "\n"
-					+ "Help:\n"
-					+ "\tTo get a detailed description and installation instructions for a specific annotator:\n"
-					+ "\t\tjava -jar CmdLineAnnotator.jar [Annotator]\n"
-					+ "\tTo check if an annotator is ready for use:\n"
-					+ "\t\tjava -jar CmdLineAnnotator.jar [Annotator] [Annotation source file]\n" + "\n"
-					+ "Currently available annotators are:\n" + "\t" + annotatorNames.toString() + "\n"
-					+ "Breakdown per category:\n"
-					+ CommandLineAnnotatorConfig.printAnnotatorsPerType(configuredFreshAnnotators));
+			System.out
+					.println("\n"
+							+ "*********************************************\n"
+							+ "* MOLGENIS Annotator, commandline interface *\n"
+							+ "*********************************************\n"
+							+ "\n"
+							+ "Typical usage to annotate a VCF file:\n"
+							+ "\tjava -jar CmdLineAnnotator.jar [Annotator] [Annotation source file] [input VCF] [output VCF].\n"
+							+ "\tExample: java -Xmx4g -jar CmdLineAnnotator.jar gonl GoNL/release5_noContam_noChildren_with_AN_AC_GTC_stripped/ Cardio.vcf Cardio_gonl.vcf\n"
+							+ "\n"
+							+ "Help:\n"
+							+ "\tTo get a detailed description and installation instructions for a specific annotator:\n"
+							+ "\t\tjava -jar CmdLineAnnotator.jar [Annotator]\n"
+							+ "\tTo check if an annotator is ready for use:\n"
+							+ "\t\tjava -jar CmdLineAnnotator.jar [Annotator] [Annotation source file]\n" + "\n"
+							+ "Currently available annotators are:\n" + "\t" + annotatorNames.toString() + "\n"
+							+ "Breakdown per category:\n"
+							+ CommandLineAnnotatorConfig.printAnnotatorsPerType(configuredFreshAnnotators));
 			return;
 		}
 
@@ -107,14 +115,16 @@ public class CmdLineAnnotator
 		// engage!
 		if (annotatorName.equals("cadd"))
 		{
-			annotationSettings.setCaddLocation(annotationSourceFile.getAbsolutePath());
+			molgenisSettings.setProperty(CaddAnnotator.CADD_FILE_LOCATION_PROPERTY,
+					annotationSourceFile.getAbsolutePath());
 			Map<String, RepositoryAnnotator> annotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
 			RepositoryAnnotator annotator = annotators.get("cadd");
 			annotate(annotator, inputVcfFile, outputVCFFile);
 		}
 		else if (annotatorName.equals("snpeff"))
 		{
-			annotationSettings.setSnpEffLocation(annotationSourceFile.getAbsolutePath());
+			molgenisSettings.setProperty(SnpEffAnnotator.SNPEFF_JAR_LOCATION_PROPERTY,
+					annotationSourceFile.getAbsolutePath());
 			Map<String, RepositoryAnnotator> annotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
 			RepositoryAnnotator annotator = annotators.get("snpEff");
 			annotate(annotator, inputVcfFile, outputVCFFile);
@@ -141,7 +151,8 @@ public class CmdLineAnnotator
 		}
 		else if (annotatorName.equals("exac"))
 		{
-			annotationSettings.setExacLocation(annotationSourceFile.getAbsolutePath());
+			molgenisSettings.setProperty(ExacAnnotator.EXAC_FILE_LOCATION_PROPERTY,
+					annotationSourceFile.getAbsolutePath());
 			Map<String, RepositoryAnnotator> annotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
 			RepositoryAnnotator annotator = annotators.get("exac");
 			annotate(annotator, inputVcfFile, outputVCFFile);
@@ -156,7 +167,8 @@ public class CmdLineAnnotator
 		}
 		else if (annotatorName.equals("cgd"))
 		{
-			annotationSettings.setCgdLocation(annotationSourceFile.getAbsolutePath());
+			molgenisSettings.setProperty(CGDAnnotator.CGD_FILE_LOCATION_PROPERTY,
+					annotationSourceFile.getAbsolutePath());
 			Map<String, RepositoryAnnotator> annotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
 			RepositoryAnnotator annotator = annotators.get("cgd");
 			annotate(annotator, inputVcfFile, outputVCFFile);
@@ -171,15 +183,8 @@ public class CmdLineAnnotator
 	{
 		// See http://stackoverflow.com/questions/4787719/spring-console-application-configured-using-annotations
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext("org.molgenis.data.annotation");
-		try
-		{
-			CmdLineAnnotator main = ctx.getBean(CmdLineAnnotator.class);
-			main.run(args);
-		}
-		finally
-		{
-			ctx.close();
-		}
+		CmdLineAnnotator main = ctx.getBean(CmdLineAnnotator.class);
+		main.run(args);
 	}
 
 	public void annotate(RepositoryAnnotator annotator, File inputVcfFile, File outputVCFFile) throws Exception

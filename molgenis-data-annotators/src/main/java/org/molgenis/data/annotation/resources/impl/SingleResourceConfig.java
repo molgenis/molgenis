@@ -3,29 +3,31 @@ package org.molgenis.data.annotation.resources.impl;
 import java.io.File;
 
 import org.molgenis.data.annotation.resources.ResourceConfig;
-import org.molgenis.data.annotation.settings.AnnotationSettings;
+import org.molgenis.framework.server.MolgenisSettings;
 
 /**
  * Created by charbonb on 16/06/15.
  */
 public class SingleResourceConfig implements ResourceConfig
 {
-	private AnnotationSettings annotationSettings;
+
+	private File file;
+	private MolgenisSettings molgenisSettings;
 	private String fileProperty;
 
-	public SingleResourceConfig(String fileProperty, AnnotationSettings annotationSettings)
+	public SingleResourceConfig(String fileProperty, MolgenisSettings molgenisSettings)
 	{
-		this.annotationSettings = annotationSettings;
+		this.molgenisSettings = molgenisSettings;
 		this.fileProperty = fileProperty;
 	}
 
 	@Override
 	public File getFile()
 	{
-		String file = annotationSettings.getString(fileProperty);
+		String file = molgenisSettings.getProperty(fileProperty);
 		if (null != file && !file.isEmpty())
 		{
-			return new File(annotationSettings.getString(fileProperty));
+			return new File(molgenisSettings.getProperty(fileProperty));
 		}
 		return null;
 	}

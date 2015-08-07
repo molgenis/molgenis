@@ -9,6 +9,7 @@ import java.util.List;
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 
+import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
@@ -45,7 +46,7 @@ public class GafListImporterController extends MolgenisPluginController
 	private GafListValidationReport report;
 
 	@Autowired
-	public GafListImporterController(GafListFileImporterService gafListFileImporter)
+	public GafListImporterController(GafListFileImporterService gafListFileImporter, MolgenisSettings molgenisSettings)
 	{
 		super(URI);
 		if (gafListFileImporter == null) throw new IllegalArgumentException("gafListFileImporter is null");

@@ -9,7 +9,6 @@ import org.molgenis.security.core.Permission;
 
 public class IndexedCrudRepositorySecurityDecorator extends RepositorySecurityDecorator implements IndexedRepository
 {
-	public static final String SETTINGS_KEY_AGGREGATE_ANONYMIZATION_THRESHOLD = "aggregate.anonymization.threshold";
 	private final IndexedRepository decoratedRepository;
 	private final AppSettings appSettings;
 	private final AggregateAnonymizer aggregateAnonymizer = new AggregateAnonymizerImpl();

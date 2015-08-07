@@ -1,5 +1,7 @@
 package org.molgenis.ui.security;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.ui.MolgenisUi;
 import org.molgenis.ui.MolgenisUiMenu;
@@ -11,10 +13,8 @@ public class MolgenisUiPermissionDecorator implements MolgenisUi
 
 	public MolgenisUiPermissionDecorator(MolgenisUi molgenisUi, MolgenisPermissionService molgenisPermissionService)
 	{
-		if (molgenisUi == null) throw new IllegalArgumentException("molgenisUi is null");
-		if (molgenisPermissionService == null) throw new IllegalArgumentException("molgenisPermissionService is null");
-		this.molgenisUi = molgenisUi;
-		this.molgenisPermissionService = molgenisPermissionService;
+		this.molgenisUi = checkNotNull(molgenisUi);
+		this.molgenisPermissionService = checkNotNull(molgenisPermissionService);
 	}
 
 	@Override

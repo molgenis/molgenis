@@ -1,32 +1,25 @@
 package org.molgenis.data.annotation.impl;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.VariantAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
-import org.molgenis.data.annotation.settings.AnnotationInMemorySettings;
-import org.molgenis.data.annotation.settings.AnnotationSettings;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.annotator.tabix.TabixReader;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.utils.VcfUtils;
+import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.framework.server.MolgenisSimpleSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,11 +41,13 @@ import org.springframework.stereotype.Component;
  * TODO: right now there are no multiple alternative alleles in GoNL, but will there be in the future??
  * 
  * 
- */
+ * */
 @Component("gonlService")
 public class GoNLServiceAnnotator extends VariantAnnotator
 {
 	private static final Logger LOG = LoggerFactory.getLogger(GoNLServiceAnnotator.class);
+
+	private final MolgenisSettings molgenisSettings;
 
 	@Override
 	public AnnotatorInfo getInfo()
@@ -69,26 +64,32 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 
 	private static final String NAME = "GONL";
 
-	final List<String> infoFields = Arrays.asList(new String[]
-	{ "##INFO=<ID=" + GONL_MAF.substring(VcfRepository.getInfoPrefix().length())
-			+ ",Number=1,Type=Float,Description=\"GoNL minor allele frequency. Calculated by dividing AC by AN. For example: AC=23;AN=996 = 0.02309237\">",
-			"##INFO=<ID=" + GONL_GTC.substring(VcfRepository.getInfoPrefix().length())
-					+ ",Number=G,Type=Integer,Description=\"GoNL genotype counts. For example: GONLGTC=69,235,194. Listed in the same order as the ALT alleles in case multiple ALT alleles are present = 0/0,0/1,1/1,0/2,1/2,2/2,0/3,1/3,2/3,3/3,etc. Phasing is ignored; hence 0/1, 1/0, 0|1 and 1|0 are all counted as 0/1. Incomplete gentotypes (./., ./0, ./1, ./2, etc.) are completely discarded for calculating GTC.\">" });
+	final List<String> infoFields = Arrays
+			.asList(new String[]
+			{
+					"##INFO=<ID="
+							+ GONL_MAF.substring(VcfRepository.getInfoPrefix().length())
+							+ ",Number=1,Type=Float,Description=\"GoNL minor allele frequency. Calculated by dividing AC by AN. For example: AC=23;AN=996 = 0.02309237\">",
+					"##INFO=<ID="
+							+ GONL_GTC.substring(VcfRepository.getInfoPrefix().length())
+							+ ",Number=G,Type=Integer,Description=\"GoNL genotype counts. For example: GONLGTC=69,235,194. Listed in the same order as the ALT alleles in case multiple ALT alleles are present = 0/0,0/1,1/1,0/2,1/2,2/2,0/3,1/3,2/3,3/3,etc. Phasing is ignored; hence 0/1, 1/0, 0|1 and 1|0 are all counted as 0/1. Incomplete gentotypes (./., ./0, ./1, ./2, etc.) are completely discarded for calculating GTC.\">" });
+
+	public static final String GONL_DIRECTORY_LOCATION_PROPERTY = "gonl_location";
 
 	HashMap<String, TabixReader> tabixReaders = null;
 
-	private final AnnotationSettings annotationSettings;
-
 	@Autowired
-	public GoNLServiceAnnotator(AnnotationSettings annotationSettings)
+	public GoNLServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService)
+			throws IOException
 	{
-		this.annotationSettings = checkNotNull(annotationSettings);
+		this.molgenisSettings = molgenisSettings;
 	}
 
 	public GoNLServiceAnnotator(File gonlR5directory, File inputVcfFile, File outputVCFFile) throws Exception
 	{
-		this.annotationSettings = new AnnotationInMemorySettings();
-		annotationSettings.setGoNlLocation(gonlR5directory.getAbsolutePath());
+
+		this.molgenisSettings = new MolgenisSimpleSettings();
+		molgenisSettings.setProperty(GONL_DIRECTORY_LOCATION_PROPERTY, gonlR5directory.getAbsolutePath());
 
 		getTabixReaders();
 
@@ -131,8 +132,8 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 	@Override
 	public boolean annotationDataExists()
 	{
-		if (null == annotationSettings.getGoNlLocation()) return false;
-		File f = new File(annotationSettings.getGoNlLocation());
+		if (null == molgenisSettings.getProperty(GONL_DIRECTORY_LOCATION_PROPERTY)) return false;
+		File f = new File(molgenisSettings.getProperty(GONL_DIRECTORY_LOCATION_PROPERTY));
 		return (f.exists() && f.isDirectory());
 	}
 
@@ -168,10 +169,11 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 
 					for (String chr : chroms.split("\\|"))
 					{
-						String gonlchrom = new String(annotationSettings.getGoNlLocation() + File.separator
-						// small hack to use chrX from release 4.. (5 isn't out yet!)
-								+ (!chr.equals("X") ? "gonl.chr" + chr + ".snps_indels.r5.vcf.gz"
-										: "gonl.chrX.release4.gtc.vcf.gz"));
+						String gonlchrom = new String(
+								molgenisSettings.getProperty(GONL_DIRECTORY_LOCATION_PROPERTY)
+										+ File.separator
+										// small hack to use chrX from release 4.. (5 isn't out yet!)
+										+ (!chr.equals("X") ? "gonl.chr" + chr + ".snps_indels.r5.vcf.gz" : "gonl.chrX.release4.gtc.vcf.gz"));
 						if (new File(gonlchrom).exists())
 						{
 							TabixReader tr = new TabixReader(gonlchrom);
@@ -198,8 +200,8 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 			return resultMap;
 		}
 
-		TabixReader.Iterator tabixIterator = tabixReaders.get(inputChromosome)
-				.query(inputChromosome + ":" + inputPosition + "-" + inputPosition);
+		TabixReader.Iterator tabixIterator = tabixReaders.get(inputChromosome).query(
+				inputChromosome + ":" + inputPosition + "-" + inputPosition);
 		String line = null;
 
 		// get line from data, we expect exactly 1
@@ -266,8 +268,8 @@ public class GoNLServiceAnnotator extends VariantAnnotator
 		}
 		if (gtc == null)
 		{
-			LOG.error("Bad GoNL data (no GTC field) for CHROM: " + inputChromosome + " POS: " + inputPosition + " REF: "
-					+ inputReference + " ALT: " + inputAlternative + " LINE: " + line);
+			LOG.error("Bad GoNL data (no GTC field) for CHROM: " + inputChromosome + " POS: " + inputPosition
+					+ " REF: " + inputReference + " ALT: " + inputAlternative + " LINE: " + line);
 			throw new IOException("Bad data (no GTC), see log");
 		}
 

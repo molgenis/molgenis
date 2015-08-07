@@ -1,7 +1,5 @@
 package org.molgenis.data.annotation.impl;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,13 +11,14 @@ import org.apache.commons.io.IOUtils;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.LocusAnnotator;
-import org.molgenis.data.annotation.entity.AnnotatorInfo;
-import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
-import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
 import org.molgenis.data.annotation.impl.datastructures.KeggGene;
 import org.molgenis.data.annotation.impl.datastructures.Locus;
+import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
 import org.molgenis.data.annotation.provider.KeggDataProvider;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
@@ -39,6 +38,7 @@ public class KeggServiceAnnotator extends LocusAnnotator
 {
 	private static final Logger LOG = LoggerFactory.getLogger(KeggServiceAnnotator.class);
 
+	private final AnnotationService annotatorService;
 	private final HgncLocationsProvider hgncLocationsProvider;
 	private final KeggDataProvider keggDataProvider;
 
@@ -53,10 +53,12 @@ public class KeggServiceAnnotator extends LocusAnnotator
 	Map<String, String> hgncToKeggGeneId = new HashMap<>();
 
 	@Autowired
-	public KeggServiceAnnotator(HgncLocationsProvider hgncLocationsProvider, KeggDataProvider keggDataProvider)
+	public KeggServiceAnnotator(AnnotationService annotatorService, HgncLocationsProvider hgncLocationsProvider,
+			KeggDataProvider keggDataProvider) throws IOException
 	{
-		this.hgncLocationsProvider = checkNotNull(hgncLocationsProvider);
-		this.keggDataProvider = checkNotNull(keggDataProvider);
+		this.annotatorService = annotatorService;
+		this.hgncLocationsProvider = hgncLocationsProvider;
+		this.keggDataProvider = keggDataProvider;
 	}
 
 	@Override
@@ -217,8 +219,8 @@ public class KeggServiceAnnotator extends LocusAnnotator
 
 			String id = line[0];
 			List<String> symbols = new ArrayList<String>(Arrays.asList(allSymbolsAndProteins[0].split(", ")));
-			List<String> proteins = new ArrayList<String>(
-					Arrays.asList(allSymbolsAndProteins).subList(1, allSymbolsAndProteins.length));
+			List<String> proteins = new ArrayList<String>(Arrays.asList(allSymbolsAndProteins).subList(1,
+					allSymbolsAndProteins.length));
 
 			KeggGene kg = new KeggGene(id, symbols, proteins);
 			res.put(id, kg);

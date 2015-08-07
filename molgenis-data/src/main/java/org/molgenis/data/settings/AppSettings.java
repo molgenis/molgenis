@@ -8,7 +8,11 @@ public interface AppSettings
 {
 	String getTitle();
 
+	void setTitle(String title);
+
 	String getLogoTopHref();
+
+	void setLogoTopHref(String logoHref);
 
 	String getLogoNavBarHref();
 
@@ -16,11 +20,19 @@ public interface AppSettings
 
 	String getFooter();
 
+	void setFooter(String footerText);
+
 	boolean getSignUp();
+
+	void setSignUp(boolean signUp);
 
 	boolean getSignUpModeration();
 
+	void setSignUpModeration(boolean signUpModeration);
+
 	String getLanguageCode();
+
+	void setLanguageCode(String languageCode);
 
 	String getBootstrapTheme();
 
@@ -28,7 +40,7 @@ public interface AppSettings
 
 	String getCssHref();
 
-	String getJsHref();
+	void setCssHref(String cssHref);
 
 	String getMenu();
 
@@ -36,7 +48,13 @@ public interface AppSettings
 
 	String getTrackingCodeHeader();
 
+	void setTrackingCodeHeader(String trackingCodeHeader);
+
 	String getTrackingCodeFooter();
 
+	void setTrackingCodeFooter(String trackingCodeFooter);
+
 	Integer getAggregateThreshold();
+
+	void setAggregateThreshold(Integer threshold);
 }

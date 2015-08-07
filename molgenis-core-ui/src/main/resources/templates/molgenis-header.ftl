@@ -110,10 +110,7 @@
     </#if>
 	<#list js as js_file_name>
 		<script src="<@resource_href "/js/${js_file_name?html}"/>"></script>
-	</#list>		
-	<#if app_settings.jsHref?has_content>
-		<script src="<@resource_href "/js/${app_settings.jsHref?html}"/>"></script>
-	</#if>
+	</#list>
 	<#if app_settings.trackingCodeHeader?has_content || app_settings.trackingCodeFooter?has_content>
 		<script src="<@resource_href "/js/jquery.cookie.js"/>"></script>
 		<script src="<@resource_href "/js/molgenis-head-cookies.js"/>"></script>
@@ -138,12 +135,6 @@
                 <div class="col-md-12">
                     <div id="login-modal-container-header"></div>        
                 </div>
-            </div>
-            
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="datasetsindexerAlerts"></div>
-                </div>    
             </div>
             
             <div class="row">
@@ -201,7 +192,7 @@
  						<a class="navbar-brand" href="/menu/${menu.id?html}/${item.url?html}">
 		                	<img class="img-responsive" style="max-width:100%;max-height:100%;"
 	                		src="${app_settings.logoNavBarHref?html}" 
-	                		alt="${app_settings.title}"
+	                		alt="${app_settings.title?html}">
                 		</a>						
 						<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-molgenis-navbar">
 		                    <span class="sr-only">Toggle navigation</span>
