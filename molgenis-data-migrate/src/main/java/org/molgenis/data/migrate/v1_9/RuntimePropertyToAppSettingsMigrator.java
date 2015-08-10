@@ -1,4 +1,4 @@
-package org.molgenis.data.version.v1_9;
+package org.molgenis.data.migrate.v1_9;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.molgenis.system.core.RuntimeProperty.ENTITY_NAME;
@@ -258,7 +258,7 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 			}
 		}
 
-		LOG.info("Migrated RuntimeProperty instances to AppSettings instance");
+		LOG.info("Migrated RuntimeProperty instances to AppSettings instances");
 
 		return this;
 	}

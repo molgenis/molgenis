@@ -7,6 +7,8 @@ import static org.molgenis.MolgenisFieldTypes.INT;
 import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
@@ -35,83 +37,17 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 		super(ID);
 	}
 
-	public boolean getModAggregates()
-	{
-		Boolean value = getBoolean(Meta.MOD_AGGREGATES);
-		return value != null ? value.booleanValue() : false;
-	}
-
-	public boolean getModAnnotators()
-	{
-		Boolean value = getBoolean(Meta.MOD_ANNOTATORS);
-		return value != null ? value.booleanValue() : false;
-	}
-
-	public boolean getModCharts()
-	{
-		Boolean value = getBoolean(Meta.MOD_CHARTS);
-		return value != null ? value.booleanValue() : false;
-	}
-
-	public boolean getModData()
-	{
-		Boolean value = getBoolean(Meta.MOD_CHARTS);
-		return value != null ? value : false;
-	}
-
-	public boolean getModDiseaseMatcher()
-	{
-		Boolean value = getBoolean(Meta.MOD_DISEASE_MATCHER);
-		return value != null ? value : false;
-	}
-
-	public boolean getModReports()
-	{
-		Boolean value = getBoolean(Meta.MOD_REPORTS);
-		return value != null ? value : false;
-	}
-
-	public Boolean getGalaxyExport()
-	{
-		return getBoolean(Meta.DATA_GALAXY_EXPORT);
-	}
-
-	public EntityReport getEntityReport(String entityName)
-	{
-		return Iterables.find(getEntityReports(), new Predicate<EntityReport>()
-		{
-			@Override
-			public boolean apply(EntityReport entityReport)
-			{
-				return entityReport.getEntity().equals(entityName);
-			}
-		}, null);
-	}
-
-	public Iterable<EntityReport> getEntityReports()
-	{
-		return getEntities(Meta.REPORTS_ENTITIES, EntityReport.class);
-	}
-
-	public Map<String, String> getAggregatesDistinctOverrides()
-	{
-		String distinctAttrOverridesStr = getString(Meta.AGGREGATES_DISTINCT_OVERRIDES);
-		return new Gson().fromJson(distinctAttrOverridesStr, new TypeToken<Map<String, String>>()
-		{
-		}.getType());
-	}
-
 	@Component
 	private static class Meta extends DefaultSettingsEntityMetaData
 	{
 		public static final String GENERAL = "general_";
 		public static final String GENERAL_SEARCHBOX = "searchbox";
-		public static final String GENERAL_ATTRIBUTE_SELECT = "attr_select";
+		public static final String GENERAL_ITEM_SELECT_PANEL = "item_select_panel";
 		public static final String GENERAL_LAUNCH_WIZARD = "launch_wizard";
 		public static final String GENERAL_HEADER_ABBREVIATE = "header_abbreviate";
 
 		private static final boolean DEFAULT_GENERAL_SEARCHBOX = true;
-		private static final boolean DEFAULT_GENERAL_ATTRIBUTE_SELECT = true;
+		private static final boolean DEFAULT_GENERAL_ITEM_SELECT_PANEL = true;
 		private static final boolean DEFAULT_GENERAL_LAUNCH_WIZARD = false;
 		private static final int DEFAULT_GENERAL_HEADER_ABBREVIATE = 180;
 
@@ -156,7 +92,6 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 		public static final String AGGREGATES = "aggregates";
 		public static final String AGGREGATES_DISTINCT_SELECT = "agg_distinct";
 		public static final String AGGREGATES_DISTINCT_OVERRIDES = "agg_distinct_overrides";
-		public static final String AGGREGATES_NO_RESULTS_MESSAGE = "agg_no_results_msg";
 
 		public static final String REPORTS = "reports";
 		public static final String REPORTS_ENTITIES = "reports_entities";
@@ -179,8 +114,8 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 			DefaultAttributeMetaData generalAttr = addAttribute(GENERAL).setDataType(COMPOUND).setLabel("General");
 			AttributeMetaData generalSearchboxAttr = new DefaultAttributeMetaData(GENERAL_SEARCHBOX).setDataType(BOOL)
 					.setNillable(false).setDefaultValue(DEFAULT_GENERAL_SEARCHBOX).setLabel("Show search box");
-			AttributeMetaData generalAttrSelectAttr = new DefaultAttributeMetaData(GENERAL_ATTRIBUTE_SELECT)
-					.setDataType(BOOL).setNillable(false).setDefaultValue(DEFAULT_GENERAL_ATTRIBUTE_SELECT)
+			AttributeMetaData generalAttrSelectAttr = new DefaultAttributeMetaData(GENERAL_ITEM_SELECT_PANEL)
+					.setDataType(BOOL).setNillable(false).setDefaultValue(DEFAULT_GENERAL_ITEM_SELECT_PANEL)
 					.setLabel("Show data item selection");
 			AttributeMetaData generalLaunchWizardAttr = new DefaultAttributeMetaData(GENERAL_LAUNCH_WIZARD)
 					.setDataType(BOOL).setNillable(false).setDefaultValue(DEFAULT_GENERAL_LAUNCH_WIZARD)
@@ -311,7 +246,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 			// FIXME workaround for https://github.com/molgenis/molgenis/issues/1810
 			MapEntity defaultSettings = new MapEntity(this);
 			defaultSettings.set(GENERAL_SEARCHBOX, DEFAULT_GENERAL_SEARCHBOX);
-			defaultSettings.set(GENERAL_ATTRIBUTE_SELECT, DEFAULT_GENERAL_ATTRIBUTE_SELECT);
+			defaultSettings.set(GENERAL_ITEM_SELECT_PANEL, DEFAULT_GENERAL_ITEM_SELECT_PANEL);
 			defaultSettings.set(GENERAL_LAUNCH_WIZARD, DEFAULT_GENERAL_LAUNCH_WIZARD);
 			defaultSettings.set(GENERAL_HEADER_ABBREVIATE, DEFAULT_GENERAL_HEADER_ABBREVIATE);
 			defaultSettings.set(MOD_AGGREGATES, DEFAULT_MOD_AGGREGATES);
@@ -328,8 +263,250 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 			defaultSettings.set(GENOMEBROWSER_INIT_SOURCES, DEFAULT_GENOMEBROWSER_INIT_SOURCES);
 			defaultSettings.set(GENOMEBROWSER_INIT_HIGHLIGHT_REGION, DEFAULT_GENOMEBROWSER_INIT_HIGHLIGHT_REGION);
 			defaultSettings.set(AGGREGATES_DISTINCT_SELECT, DEFAULT_AGGREGATES_DISTINCT_SELECT);
-			defaultSettings.set(AGGREGATES_NO_RESULTS_MESSAGE, DEFAULT_AGGREGATES_NO_RESULTS_MESSAGE);
 			return defaultSettings;
 		}
+	}
+
+	public boolean getModAggregates()
+	{
+		Boolean value = getBoolean(Meta.MOD_AGGREGATES);
+		return value != null ? value.booleanValue() : false;
+	}
+
+	public void setModAggregates(boolean modAggregates)
+	{
+		set(Meta.MOD_AGGREGATES, modAggregates);
+	}
+
+	public boolean getModAnnotators()
+	{
+		Boolean value = getBoolean(Meta.MOD_ANNOTATORS);
+		return value != null ? value.booleanValue() : false;
+	}
+
+	public void setModAnnotators(boolean modAnnotators)
+	{
+		set(Meta.MOD_AGGREGATES, modAnnotators);
+	}
+
+	public boolean getModCharts()
+	{
+		Boolean value = getBoolean(Meta.MOD_CHARTS);
+		return value != null ? value.booleanValue() : false;
+	}
+
+	public void setModCharts(boolean modCharts)
+	{
+		set(Meta.MOD_CHARTS, modCharts);
+	}
+
+	public boolean getModData()
+	{
+		Boolean value = getBoolean(Meta.MOD_DATA);
+		return value != null ? value : false;
+	}
+
+	public void setModData(boolean modData)
+	{
+		set(Meta.MOD_DATA, modData);
+	}
+
+	public boolean getModDiseaseMatcher()
+	{
+		Boolean value = getBoolean(Meta.MOD_DISEASE_MATCHER);
+		return value != null ? value : false;
+	}
+
+	public void setModDiseaseMatcher(boolean modDiseaseMatcher)
+	{
+		set(Meta.MOD_DISEASE_MATCHER, modDiseaseMatcher);
+	}
+
+	public boolean getModReports()
+	{
+		Boolean value = getBoolean(Meta.MOD_REPORTS);
+		return value != null ? value : false;
+	}
+
+	public void setModReports(boolean modReports)
+	{
+		set(Meta.MOD_REPORTS, modReports);
+	}
+
+	public Boolean getGalaxyExport()
+	{
+		return getBoolean(Meta.DATA_GALAXY_EXPORT);
+	}
+
+	public void setGalaxyExport(boolean galaxyExport)
+	{
+		set(Meta.DATA_GALAXY_EXPORT, galaxyExport);
+	}
+
+	public EntityReport getEntityReport(String entityName)
+	{
+		return Iterables.find(getEntityReports(), new Predicate<EntityReport>()
+		{
+			@Override
+			public boolean apply(EntityReport entityReport)
+			{
+				return entityReport.getEntity().equals(entityName);
+			}
+		}, null);
+	}
+
+	public Iterable<EntityReport> getEntityReports()
+	{
+		return getEntities(Meta.REPORTS_ENTITIES, EntityReport.class);
+	}
+
+	public Map<String, String> getAggregatesDistinctOverrides()
+	{
+		String distinctAttrOverridesStr = getString(Meta.AGGREGATES_DISTINCT_OVERRIDES);
+		return new Gson().fromJson(distinctAttrOverridesStr, new TypeToken<Map<String, String>>()
+		{
+		}.getType());
+	}
+
+	public void setAggregatesDistinctOverrides(Map<String, String> aggregatesDistinctOverrides)
+	{
+		String value = aggregatesDistinctOverrides != null ? new Gson().toJson(aggregatesDistinctOverrides) : null;
+		set(Meta.AGGREGATES_DISTINCT_OVERRIDES, value);
+	}
+
+	public boolean getSearchbox()
+	{
+		Boolean value = getBoolean(Meta.GENERAL_SEARCHBOX);
+		return value != null ? value : false;
+	}
+
+	public void setSearchbox(boolean searchbox)
+	{
+		set(Meta.GENERAL_SEARCHBOX, searchbox);
+	}
+
+	public boolean getItemSelection()
+	{
+		Boolean value = getBoolean(Meta.GENERAL_ITEM_SELECT_PANEL);
+		return value != null ? value : false;
+	}
+
+	public void setItemSelection(boolean itemSelection)
+	{
+		set(Meta.GENERAL_ITEM_SELECT_PANEL, itemSelection);
+	}
+
+	public boolean getLaunchWizard()
+	{
+		Boolean value = getBoolean(Meta.GENERAL_LAUNCH_WIZARD);
+		return value != null ? value : false;
+	}
+
+	public void setLaunchWizard(boolean launchWizard)
+	{
+		set(Meta.GENERAL_LAUNCH_WIZARD, launchWizard);
+	}
+
+	public int getHeaderAbbreviate()
+	{
+		Integer value = getInt(Meta.GENERAL_HEADER_ABBREVIATE);
+		return value != null ? value : -1;
+	}
+
+	public void setHeaderAbbreviate(int headerAbbreviate)
+	{
+		set(Meta.GENERAL_HEADER_ABBREVIATE, headerAbbreviate);
+	}
+
+	public URL getGalaxyUrl()
+	{
+		String galaxyUrl = getString(Meta.DATA_GALAXY_URL);
+		try
+		{
+			return new URL(galaxyUrl);
+		}
+		catch (MalformedURLException e)
+		{
+			throw new RuntimeException(e);
+		}
+	}
+
+	public void setGalaxyUrl(URL galaxyUrl)
+	{
+		set(Meta.DATA_GALAXY_URL, galaxyUrl.toString());
+	}
+
+	public boolean getGenomeBrowser()
+	{
+		Boolean value = getBoolean(Meta.GENOMEBROWSER);
+		return value != null ? value : false;
+	}
+
+	public void setGenomeBrowser(boolean genomeBrowser)
+	{
+		set(Meta.GENOMEBROWSER, genomeBrowser);
+	}
+
+	public String getGenomeBrowserLocation()
+	{
+		return getString(Meta.GENOMEBROWSER_INIT_LOCATION);
+	}
+
+	public void setGenomeBrowserLocation(String genomeBrowserLocation)
+	{
+		set(Meta.GENOMEBROWSER_INIT_LOCATION, genomeBrowserLocation);
+	}
+
+	public String getGenomeBrowserCoordSystem()
+	{
+		return getString(Meta.GENOMEBROWSER_INIT_COORD_SYSTEM);
+	}
+
+	public void setGenomeBrowserCoordSystem(String genomeBrowserCoordSystem)
+	{
+		set(Meta.GENOMEBROWSER_INIT_COORD_SYSTEM, genomeBrowserCoordSystem);
+	}
+
+	public String getGenomeBrowserSources()
+	{
+		return getString(Meta.GENOMEBROWSER_INIT_SOURCES);
+	}
+
+	public void setGenomeBrowserSources(String genomeBrowserSources)
+	{
+		set(Meta.GENOMEBROWSER_INIT_SOURCES, genomeBrowserSources);
+
+	}
+
+	public String getGenomeBrowserLinks()
+	{
+		return getString(Meta.GENOMEBROWSER_INIT_BROWSER_LINKS);
+	}
+
+	public void setGenomeBrowserLinks(String genomeBrowserLinks)
+	{
+		set(Meta.GENOMEBROWSER_INIT_SOURCES, genomeBrowserLinks);
+	}
+
+	public boolean getGenomeBrowserHighlightRegion()
+	{
+		Boolean value = getBoolean(Meta.GENOMEBROWSER_INIT_HIGHLIGHT_REGION);
+		return value != null ? value : false;
+	}
+
+	public void setGenomeBrowserHighlightRegion(boolean genomeBrowserHighlightRegion)
+	{
+		set(Meta.GENOMEBROWSER_INIT_HIGHLIGHT_REGION, genomeBrowserHighlightRegion);
+	}
+
+	public boolean getAggregatesDistinctSelect()
+	{
+		Boolean value = getBoolean(Meta.AGGREGATES_DISTINCT_SELECT);
+		return value != null ? value : false;
+	}
+
+	public void setAggregatesDistinctSelect(boolean aggregatesDistinctSelect)
+	{
+		set(Meta.AGGREGATES_DISTINCT_SELECT, aggregatesDistinctSelect);
 	}
 }

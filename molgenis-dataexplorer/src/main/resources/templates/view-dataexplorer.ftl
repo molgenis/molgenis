@@ -100,7 +100,7 @@
                     </div>
                 </div>
 			</div>
-			<div class="row"<#if plugin_settings.attr_select == false> style="display:none"</#if>>
+			<div class="row"<#if plugin_settings.item_select_panel == false> style="display:none"</#if>>
                 <div class="col-md-12">
                     <div class="panel panel-primary">
                         <div class="panel-heading">

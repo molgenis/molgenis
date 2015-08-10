@@ -65,8 +65,8 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 					.setLabel("Application title").setDescription("Displayed in browser toolbar.");
 			addAttribute(SIGNUP).setDataType(BOOL).setNillable(false).setDefaultValue(DEFAULT_SIGNUP)
 					.setLabel("Allow users to sign up");
-			addAttribute(SIGNUP).setDataType(BOOL).setNillable(false).setDefaultValue(DEFAULT_SIGNUP_MODERATION)
-					.setLabel("Sign up moderation")
+			addAttribute(SIGNUP_MODERATION).setDataType(BOOL).setNillable(false)
+					.setDefaultValue(DEFAULT_SIGNUP_MODERATION).setLabel("Sign up moderation")
 					.setDescription("Admins must accept sign up requests before account activation");
 			addAttribute(LOGO_NAVBAR_HREF).setDataType(STRING).setNillable(true).setLabel("Logo in navigation bar")
 					.setDefaultValue(DEFAULT_LOGO_NAVBAR_HREF)
