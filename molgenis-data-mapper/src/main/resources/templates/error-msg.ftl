@@ -5,7 +5,7 @@
 <@header css />
 
 <h4>${heading}</h4>
-<p>${message}</p>
+<#if message??><p>${message}</p></#if>
 <a href="${href}">Go back.</a>
 
 <@footer/>

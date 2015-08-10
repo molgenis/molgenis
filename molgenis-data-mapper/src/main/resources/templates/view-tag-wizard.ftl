@@ -87,6 +87,7 @@
 				<tr>
 					<td>
 						<b>${attributeMetaData.name}</b>
+						<p><i>${attributeMetaData.label!""}</i></p>
 						<p><i>${attributeMetaData.description!""}</i></p>
 					</td>
 					<#assign relationsAndTagsMap = taggedAttributeMetaDatas[attributeMetaData.name]>
