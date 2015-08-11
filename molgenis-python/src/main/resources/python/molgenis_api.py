@@ -196,11 +196,13 @@ class Connect_Molgenis():
         added_id = server_response.headers['location'].split('/')[-1]
         return added_id
     
-    def add_file(self, file_path, description, file_name=None):
+    def add_file(self, file_path, description, entity, file_name=None):
         '''Add a file to entity File.
         
         Args:
             file_path (string): Path to the file to be uploaded
+            description (description): Description of the file
+            entity (string): Name of the entity to add the files to
             file_name (string): Name of the file. If None is set to basename of filepath (def: None)
         
         Returns:
@@ -220,7 +222,7 @@ class Connect_Molgenis():
         file_post_header = self.headers
         del(file_post_header['Accept'])
         del(file_post_header['Content-type'])
-        server_response = requests.post(self.api_url+'/File', 
+        server_response = requests.post(self.api_url+'/'+entity, 
                                         files={'attachment':(os.path.basename(file_path), open(file_path,'rb'))},
                                         data={'description': description},
                                         headers = file_post_header)
@@ -431,3 +433,4 @@ class Connect_Molgenis():
             self.check_server_response(server_response, 'Delete entity row',entity_used=entity_name,query_used=query_used)
             server_response_list.append(server_response)
         return server_response_list
+ 
