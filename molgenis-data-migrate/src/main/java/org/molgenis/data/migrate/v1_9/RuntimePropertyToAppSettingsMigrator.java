@@ -213,11 +213,11 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 			if (property != null)
 			{
 				String rtpValue = property.getValue();
-				String value = appSettings.getTrackingCodeHeader();
+				String value = appSettings.getTrackingCodeFooter();
 				if (!rtpValue.equals(value))
 				{
 					LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
-					appSettings.setTrackingCodeHeader(value);
+					appSettings.setTrackingCodeFooter(value);
 				}
 				LOG.info("Deleting RuntimeProperty [" + key + "]");
 				dataService.delete(ENTITY_NAME, property.getId());
@@ -234,7 +234,7 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 				if (!rtpValue.equals(value))
 				{
 					LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
-					appSettings.setTrackingCodeFooter(value);
+					appSettings.setGoogleAnalyticsTrackingId(value);
 				}
 				LOG.info("Deleting RuntimeProperty [" + key + "]");
 				dataService.delete(ENTITY_NAME, property.getId());

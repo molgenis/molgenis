@@ -3,6 +3,7 @@
 <#--   js  (optional) list of additional js files to include -->
 <#include "resource-macros.ftl">
 <#macro header css=[] js=[]>
+<#assign cookieWall = app_settings.googleAnalyticsIpAnonymization == false || (app_settings.googleAnalyticsTrackingId?? && !app_settings.googleAnalyticsAccountPrivacyFriendly) || (app_settings.googleAnalyticsTrackingIdMolgenis?? && !app_settings.googleAnalyticsAccountPrivacyFriendlyMolgenis)>
 <!DOCTYPE html>
 <html>
     <head>
@@ -101,23 +102,20 @@
         <script>top.molgenis.ie9 = true;</script>
         <#-- required by dalliance-compiled.js to load the genomebrowsers in IE9 -->
         <script src="<@resource_href "/js/typedarray.min.js"/>"></script>
-    <![endif]-->		
-	<#if context_url??>
-		<script>top.molgenis.setContextUrl('${context_url?js_string}');</script>
-	</#if>
-    <#if plugin_id??>
-        <script>top.molgenis.setPluginId('${plugin_id?js_string}');</script>
+    <![endif]-->
+        <script>
+            top.molgenis.setCookieWall(${cookieWall?string('true', 'false')});
+    <#if context_url??>
+            top.molgenis.setContextUrl('${context_url?js_string}');
     </#if>
+    <#if plugin_id??>
+            top.molgenis.setPluginId('${plugin_id?js_string}');
+    </#if>
+        </script>
 	<#list js as js_file_name>
 		<script src="<@resource_href "/js/${js_file_name?html}"/>"></script>
 	</#list>
-	<#if app_settings.trackingCodeHeader?has_content || app_settings.trackingCodeFooter?has_content>
-		<script src="<@resource_href "/js/jquery.cookie.js"/>"></script>
-		<script src="<@resource_href "/js/molgenis-head-cookies.js"/>"></script>
-	</#if>
-	<#if app_settings.trackingCodeHeader?has_content>
-		<script id="app-tracking-code-header" type="text/javascript">${app_settings.trackingCodeHeader?string}</script>
-	</#if>
+    <#include "molgenis-header-tracking.ftl"><#-- before closing </head> tag -->
 	</head>
 	<body>
 		<#-- Navbar menu -->

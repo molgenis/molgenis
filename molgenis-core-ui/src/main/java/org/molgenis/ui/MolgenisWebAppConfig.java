@@ -445,7 +445,6 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		}
 		else
 		{
-			reindex();
 			LOG.info("Index found. No need to reindex.");
 		}
 		runAsSystem(() -> metaDataService().setDefaultBackend(getBackend()));

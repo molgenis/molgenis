@@ -93,7 +93,7 @@
                             </div>
                             <div class="row">
                                 <div class="col-md-12">
-                                    <a href="#" id="filter-wizard-btn" class="btn btn-default btn-xs pull-right"><img src=<@resource_href "/img/filter-bw.png"/>> ${i18n.dataexplorer_wizard_button?html}</a>
+                                    <a href="#" id="filter-wizard-btn" class="btn btn-default btn-xs pull-right"><img src="<@resource_href "/img/filter-bw.png"/>"> ${i18n.dataexplorer_wizard_button?html}</a>
                                 </div>
                             </div>
                         </div>

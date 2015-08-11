@@ -46,15 +46,30 @@ public interface AppSettings
 
 	void setMenu(String menuJson);
 
-	String getTrackingCodeHeader();
+	Integer getAggregateThreshold();
 
-	void setTrackingCodeHeader(String trackingCodeHeader);
+	void setAggregateThreshold(Integer threshold);
 
 	String getTrackingCodeFooter();
 
 	void setTrackingCodeFooter(String trackingCodeFooter);
 
-	Integer getAggregateThreshold();
+	boolean getGoogleAnalyticsIpAnonymization();
 
-	void setAggregateThreshold(Integer threshold);
+	void setGoogleAnalyticsIpAnonymization(boolean googleAnalyticsPrivacyFriendlyTracking);
+
+	String getGoogleAnalyticsTrackingId();
+
+	void setGoogleAnalyticsTrackingId(String googleAnalyticsTrackingId);
+
+	String getGoogleAnalyticsTrackingIdMolgenis();
+
+	void setGoogleAnalyticsTrackingIdMolgenis(String googleAnalyticsTrackingIdMolgenis);
+
+	boolean getGoogleAnalyticsAccountPrivacyFriendly();
+
+	void setGoogleAnalyticsAccountPrivacyFriendly(boolean googleAnalyticsAccountPrivacyFriendly);
+
+	boolean getGoogleAnalyticsAccountPrivacyFriendlyMolgenis();
+
 }

@@ -163,9 +163,10 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		return readOnly;
 	}
 
-	public void setReadOnly(boolean readOnly)
+	public DefaultAttributeMetaData setReadOnly(boolean readOnly)
 	{
 		this.readOnly = readOnly;
+		return this;
 	}
 
 	@Override
@@ -179,8 +180,8 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 				return null;
 			}
 			if (getRefEntity() == null) throw new MolgenisDataException("refEntity is missing for " + getName());
-			if (getRefEntity().getIdAttribute() == null) throw new MolgenisDataException(
-					"idAttribute is missing for entity [" + getRefEntity().getName() + "]");
+			if (getRefEntity().getIdAttribute() == null)
+				throw new MolgenisDataException("idAttribute is missing for entity [" + getRefEntity().getName() + "]");
 
 			return getRefEntity().getIdAttribute().getDataType().convert(defaultValue);
 		}
@@ -434,11 +435,6 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 
 		if (isAggregateable() != other.isAggregateable()) return false;
 		if (isAuto() != other.isAuto()) return false;
-		if (getDefaultValue() == null)
-		{
-			if (other.getDefaultValue() != null) return false;
-		}
-		else if (!getDefaultValue().equals(other.getDefaultValue())) return false;
 		if (getDescription() == null)
 		{
 			if (other.getDescription() != null) return false;
@@ -456,8 +452,9 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 				if (((EnumField) getDataType()).getEnumOptions() == null)
 				{
 					if (((EnumField) other.getDataType()).getEnumOptions() != null) return false;
-					if (!((EnumField) getDataType()).getEnumOptions().equals(
-							((EnumField) other.getDataType()).getEnumOptions())) return true;
+					if (!((EnumField) getDataType()).getEnumOptions()
+							.equals(((EnumField) other.getDataType()).getEnumOptions()))
+						return true;
 				}
 			}
 		}

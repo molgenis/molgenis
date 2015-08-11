@@ -1,6 +1,7 @@
 package org.molgenis.ui.settings;
 
 import static org.molgenis.MolgenisFieldTypes.BOOL;
+import static org.molgenis.MolgenisFieldTypes.COMPOUND;
 import static org.molgenis.MolgenisFieldTypes.INT;
 import static org.molgenis.MolgenisFieldTypes.SCRIPT;
 import static org.molgenis.MolgenisFieldTypes.STRING;
@@ -11,6 +12,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.settings.DefaultSettingsEntity;
 import org.molgenis.data.settings.DefaultSettingsEntityMetaData;
+import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -44,8 +46,14 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 		private static final String LANGUAGE_CODE = "language_code";
 		private static final String BOOTSTRAP_THEME = "bootstrap_theme";
 		private static final String CSS_HREF = "css_href";
-		private static final String TRACKING_CODE_HEADER = "tracking_code_header";
-		private static final String TRACKING_CODE_FOOTER = "tracking_code_footer";
+
+		private static final String TRACKING = "tracking";
+		private static final String TRACKING_CODE_FOOTER = "tracking_code_header";
+		private static final String GOOGLE_ANALYTICS_IP_ANONYMIZATION = "ga_privacy_friendly";
+		private static final String GOOGLE_ANALYTICS_TRACKING_ID = "ga_tracking_id";
+		private static final String GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS = "ga_acc_privacy_friendly";
+		private static final String GOOGLE_ANALYTICS_TRACKING_ID_MOLGENIS = "ga_tracking_id_mgs";
+		private static final String GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS_MOLGENIS = "ga_acc_privacy_friendly_mgs";
 		private static final String AGGREGATE_THRESHOLD = "aggregate_threshold";
 
 		private static final String DEFAULT_TITLE = "MOLGENIS";
@@ -54,6 +62,9 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 		private static final boolean DEFAULT_SIGNUP_MODERATION = true;
 		private static final String DEFAULT_LANGUAGE_CODE = "en";
 		private static final String DEFAULT_BOOTSTRAP_THEME = "bootstrap-molgenis.min.css";
+		private static final boolean DEFAULT_GOOGLE_ANALYTICS_IP_ANONYMIZATION = true;
+		private static final boolean DEFAULT_GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS = true;
+		private static final boolean DEFAULT_GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS_MOLGENIS = true;
 
 		public Meta()
 		{
@@ -83,12 +94,47 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 					.setDescription("CSS file name of theme (see molgenis-core-ui/src/main/resources/css/themes).");
 			addAttribute(CSS_HREF).setDataType(STRING).setNillable(true).setLabel("CSS href")
 					.setDescription("CSS file name to add custom CSS (see molgenis-core-ui/src/main/resources/css).");
-			addAttribute(TRACKING_CODE_HEADER).setDataType(SCRIPT).setNillable(true).setLabel("Tracking code header")
-					.setDescription("JS tracking code (e.g. Google Analytics) that is placed in the header HTML.");
-			addAttribute(TRACKING_CODE_FOOTER).setDataType(SCRIPT).setNillable(true).setLabel("Tracking code footer")
-					.setDescription("JS tracking code (e.g. Piwik) that is placed in the footer HTML.");
+
 			addAttribute(AGGREGATE_THRESHOLD).setDataType(INT).setNillable(true).setLabel("Aggregate threshold")
 					.setDescription("Aggregate values below the threshold are reported as the threshold.");
+
+			// tracking settings
+			DefaultAttributeMetaData trackingAttr = addAttribute(TRACKING).setDataType(COMPOUND).setLabel("Tracking");
+
+			DefaultAttributeMetaData gaTrackingPrivacyFriendlyAttr = new DefaultAttributeMetaData(
+					GOOGLE_ANALYTICS_IP_ANONYMIZATION).setDataType(BOOL).setNillable(false)
+							.setDefaultValue(DEFAULT_GOOGLE_ANALYTICS_IP_ANONYMIZATION).setLabel("IP anonymization")
+							.setDescription(
+									"Disables the cookie wall by using privacy friendly tracking (only works if google analytics accounts are configured correctly, see below)");
+			DefaultAttributeMetaData gaTrackingIdAttr = new DefaultAttributeMetaData(GOOGLE_ANALYTICS_TRACKING_ID)
+					.setDataType(STRING).setNillable(true).setLabel("Google analytics tracking ID")
+					.setDescription("Google analytics tracking ID (e.g. UA-XXXX-Y)");
+			DefaultAttributeMetaData gaAccountPrivacyFriendlyAttr = new DefaultAttributeMetaData(
+					GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS).setDataType(BOOL).setNillable(false)
+							.setDefaultValue(DEFAULT_GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS)
+							.setDefaultValue(GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS)
+							.setLabel("Google analytics account privacy friendly").setDescription(
+									"Confirm that you have configured your Google Analytics account as described here: https://cbpweb.nl/sites/default/files/atoms/files/handleiding_privacyvriendelijk_instellen_google_analytics_0.pdf");
+			DefaultAttributeMetaData gaTrackingIdMolgenisAttr = new DefaultAttributeMetaData(
+					GOOGLE_ANALYTICS_TRACKING_ID_MOLGENIS).setDataType(STRING).setNillable(true)
+							.setLabel("Google analytics tracking ID (MOLGENIS)")
+							.setDescription("Google analytics tracking ID used by MOLGENIS");
+			DefaultAttributeMetaData gaAccountPrivacyFriendlyMolgenisAttr = new DefaultAttributeMetaData(
+					GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS_MOLGENIS).setDataType(BOOL).setNillable(false)
+							.setDefaultValue(DEFAULT_GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS_MOLGENIS)
+							.setReadOnly(true).setLabel("Google analytics account privacy friendly (MOLGENIS)")
+							.setDescription(
+									"Confirm that the MOLGENIS Google Analytics account is configured as described here: https://cbpweb.nl/sites/default/files/atoms/files/handleiding_privacyvriendelijk_instellen_google_analytics_0.pdf");
+			DefaultAttributeMetaData trackingFooterAttr = new DefaultAttributeMetaData(TRACKING_CODE_FOOTER)
+					.setDataType(SCRIPT).setNillable(true).setLabel("Tracking code footer").setDescription(
+							"JS tracking code that is placed in the footer HTML (e.g. PiWik). This enables the cookie wall.");
+
+			trackingAttr.addAttributePart(gaTrackingPrivacyFriendlyAttr);
+			trackingAttr.addAttributePart(gaTrackingIdAttr);
+			trackingAttr.addAttributePart(gaAccountPrivacyFriendlyAttr);
+			trackingAttr.addAttributePart(gaTrackingIdMolgenisAttr);
+			trackingAttr.addAttributePart(gaAccountPrivacyFriendlyMolgenisAttr);
+			trackingAttr.addAttributePart(trackingFooterAttr);
 		}
 
 		@Override
@@ -99,8 +145,14 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 			defaultSettings.set(TITLE, DEFAULT_TITLE);
 			defaultSettings.set(LOGO_NAVBAR_HREF, DEFAULT_LOGO_NAVBAR_HREF);
 			defaultSettings.set(SIGNUP, DEFAULT_SIGNUP);
+			defaultSettings.set(SIGNUP_MODERATION, DEFAULT_SIGNUP_MODERATION);
 			defaultSettings.set(LANGUAGE_CODE, DEFAULT_LANGUAGE_CODE);
 			defaultSettings.set(BOOTSTRAP_THEME, DEFAULT_BOOTSTRAP_THEME);
+			defaultSettings.set(GOOGLE_ANALYTICS_IP_ANONYMIZATION, DEFAULT_GOOGLE_ANALYTICS_IP_ANONYMIZATION);
+			defaultSettings.set(GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS,
+					DEFAULT_GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS);
+			defaultSettings.set(GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS_MOLGENIS,
+					DEFAULT_GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS_MOLGENIS);
 			return defaultSettings;
 		}
 	}
@@ -235,39 +287,40 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 		set(Meta.MENU, menuJson);
 	}
 
-	// FIXME too much magic
-	private static String TRACKING_CODE_PREFIX = "(function(){if('true' === $.cookie('permissionforcookies')){";
-	private static String TRACKING_CODE_POSTFIX = "}})();";
-
-	@Override
-	public String getTrackingCodeHeader()
-	{
-		return getTrackingCode(Meta.TRACKING_CODE_HEADER);
-	}
-
-	@Override
-	public void setTrackingCodeHeader(String trackingCodeHeader)
-	{
-		set(Meta.TRACKING_CODE_HEADER, trackingCodeHeader);
-
-	}
-
-	@Override
-	public void setTrackingCodeFooter(String trackingCodeFooter)
-	{
-		set(Meta.TRACKING_CODE_FOOTER, trackingCodeFooter);
-	}
-
 	@Override
 	public String getTrackingCodeFooter()
 	{
-		return getTrackingCode(Meta.TRACKING_CODE_FOOTER);
+		return Meta.TRACKING_CODE_FOOTER;
 	}
 
-	private String getTrackingCode(String trackingCodeAttr)
+	@Override
+	public void setTrackingCodeFooter(String trackingCodeHeader)
 	{
-		String trackingCode = getString(trackingCodeAttr);
-		return trackingCode != null ? TRACKING_CODE_PREFIX + trackingCode + TRACKING_CODE_POSTFIX : null;
+		set(Meta.TRACKING_CODE_FOOTER, trackingCodeHeader);
+	}
+
+	@Override
+	public String getGoogleAnalyticsTrackingId()
+	{
+		return getString(Meta.GOOGLE_ANALYTICS_TRACKING_ID);
+	}
+
+	@Override
+	public void setGoogleAnalyticsTrackingId(String trackingCodeFooter)
+	{
+		set(Meta.GOOGLE_ANALYTICS_TRACKING_ID, trackingCodeFooter);
+	}
+
+	@Override
+	public String getGoogleAnalyticsTrackingIdMolgenis()
+	{
+		return getString(Meta.GOOGLE_ANALYTICS_TRACKING_ID_MOLGENIS);
+	}
+
+	@Override
+	public void setGoogleAnalyticsTrackingIdMolgenis(String googleAnalyticsTrackingIdMolgenis)
+	{
+		set(Meta.GOOGLE_ANALYTICS_TRACKING_ID_MOLGENIS, googleAnalyticsTrackingIdMolgenis);
 	}
 
 	@Override
@@ -280,5 +333,38 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 	public void setAggregateThreshold(Integer threshold)
 	{
 		set(Meta.AGGREGATE_THRESHOLD, threshold);
+	}
+
+	@Override
+	public boolean getGoogleAnalyticsIpAnonymization()
+	{
+		Boolean value = getBoolean(Meta.GOOGLE_ANALYTICS_IP_ANONYMIZATION);
+		return value != null ? value.booleanValue() : false;
+	}
+
+	@Override
+	public void setGoogleAnalyticsIpAnonymization(boolean googleAnalyticsIpAnonymization)
+	{
+		set(Meta.GOOGLE_ANALYTICS_IP_ANONYMIZATION, googleAnalyticsIpAnonymization);
+	}
+
+	@Override
+	public boolean getGoogleAnalyticsAccountPrivacyFriendly()
+	{
+		Boolean value = getBoolean(Meta.GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS);
+		return value != null ? value.booleanValue() : false;
+	}
+
+	@Override
+	public void setGoogleAnalyticsAccountPrivacyFriendly(boolean googleAnalyticsAccountPrivacyFriendly)
+	{
+		set(Meta.GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS, googleAnalyticsAccountPrivacyFriendly);
+	}
+
+	@Override
+	public boolean getGoogleAnalyticsAccountPrivacyFriendlyMolgenis()
+	{
+		Boolean value = getBoolean(Meta.GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS_MOLGENIS);
+		return value != null ? value.booleanValue() : false;
 	}
 }

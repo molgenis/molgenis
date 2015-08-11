@@ -287,7 +287,7 @@ public class EntityAttributesValidator
 
 			if (!enumOptions.contains(value))
 			{
-				return createConstraintViolation(entity, attribute, meta);
+				return createConstraintViolation(entity, attribute, meta, "Value must be one of " + enumOptions.toString());
 			}
 		}
 

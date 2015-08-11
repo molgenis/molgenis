@@ -97,7 +97,6 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 		public static final String REPORTS_ENTITIES = "reports_entities";
 
 		private static final boolean DEFAULT_AGGREGATES_DISTINCT_SELECT = true;
-		private static final String DEFAULT_AGGREGATES_NO_RESULTS_MESSAGE = "No results found";
 
 		public Meta()
 		{
