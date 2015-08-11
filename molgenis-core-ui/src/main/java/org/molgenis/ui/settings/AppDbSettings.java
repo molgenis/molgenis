@@ -290,7 +290,7 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 	@Override
 	public String getTrackingCodeFooter()
 	{
-		return Meta.TRACKING_CODE_FOOTER;
+		return getString(Meta.TRACKING_CODE_FOOTER);
 	}
 
 	@Override
