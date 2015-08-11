@@ -99,10 +99,7 @@ class AttributeMetaDataRepository
 		attributeMetaDataEntity.set(EXPRESSION, att.getExpression());
 		attributeMetaDataEntity.set(VISIBLE_EXPRESSION, att.getVisibleExpression());
 		attributeMetaDataEntity.set(VALIDATION_EXPRESSION, att.getValidationExpression());
-		if (att.getDefaultValue() != null)
-		{
-			attributeMetaDataEntity.set(DEFAULT_VALUE, att.getDefaultValue());
-		}
+		attributeMetaDataEntity.set(DEFAULT_VALUE, att.getDefaultValue());
 
 		if ((att.getDataType() instanceof EnumField) && (att.getEnumOptions() != null))
 		{
