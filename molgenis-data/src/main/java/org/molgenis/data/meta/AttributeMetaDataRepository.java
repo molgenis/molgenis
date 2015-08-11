@@ -25,8 +25,6 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.VALIDATION_EXPRES
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.VISIBLE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.VISIBLE_EXPRESSION;
 
-import java.util.UUID;
-
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
@@ -35,6 +33,7 @@ import org.molgenis.data.Range;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.fieldtypes.CompoundField;
 import org.molgenis.fieldtypes.EnumField;
 
@@ -48,6 +47,8 @@ class AttributeMetaDataRepository
 {
 	public static final AttributeMetaDataMetaData META_DATA = AttributeMetaDataMetaData.INSTANCE;
 
+	private final UuidGenerator uuidGenerator;
+
 	private final Repository repository;
 
 	private EntityMetaDataRepository entityMetaDataRepository;
@@ -55,6 +56,7 @@ class AttributeMetaDataRepository
 	public AttributeMetaDataRepository(ManageableRepositoryCollection collection)
 	{
 		this.repository = collection.addEntityMeta(META_DATA);
+		uuidGenerator = new UuidGenerator();
 	}
 
 	public void setEntityMetaDataRepository(EntityMetaDataRepository entityMetaDataRepository)
@@ -79,7 +81,7 @@ class AttributeMetaDataRepository
 	{
 		Entity attributeMetaDataEntity = new MapEntity(META_DATA);
 		// autoid
-		attributeMetaDataEntity.set(IDENTIFIER, UUID.randomUUID().toString().replaceAll("-", ""));
+		attributeMetaDataEntity.set(IDENTIFIER, uuidGenerator.generateId());
 		attributeMetaDataEntity.set(NAME, att.getName());
 		attributeMetaDataEntity.set(DATA_TYPE, att.getDataType());
 		attributeMetaDataEntity.set(ID_ATTRIBUTE, att.isIdAtrribute());
