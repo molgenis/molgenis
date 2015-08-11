@@ -48,7 +48,7 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 		private static final String CSS_HREF = "css_href";
 
 		private static final String TRACKING = "tracking";
-		private static final String TRACKING_CODE_FOOTER = "tracking_code_header";
+		private static final String TRACKING_CODE_FOOTER = "tracking_code_footer";
 		private static final String GOOGLE_ANALYTICS_IP_ANONYMIZATION = "ga_privacy_friendly";
 		private static final String GOOGLE_ANALYTICS_TRACKING_ID = "ga_tracking_id";
 		private static final String GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS = "ga_acc_privacy_friendly";
