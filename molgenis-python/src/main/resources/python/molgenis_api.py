@@ -2,7 +2,6 @@
 #
 # Molgenis python api client. 
 #
-# TODO: Better error raising
 ####################################################################
 
 import requests
@@ -13,6 +12,7 @@ import security
 import timeit
 import time
 import logging
+import ConfigParser
 
 class Connect_Molgenis():
     """Some simple methods for adding, updating and retrieving rows from Molgenis though the REST API
@@ -42,8 +42,8 @@ class Connect_Molgenis():
             user (string):       Login username
             password (string):   Login password
         '''
-        logging.getLogger().addHandler(self.logger.StreamHandler())
         logging.basicConfig(level=getattr(logging, logging_level), filename = log_file, filemode = logfile_mode)
+        logging.getLogger().addHandler(logging.StreamHandler())
         self.logger = logging.getLogger(__name__)
         self.login_time = None 
         if new_pass_file:
@@ -68,7 +68,7 @@ class Connect_Molgenis():
             header (dict): Login header for molgenis server
         '''
         data = json.dumps({'username': security.retrieve('Username'), 'password': security.retrieve('Password')})
-                                       
+        self.logger.debug('Trying to log in to: '+str(self.api_url)+'/login/')
         server_response = requests.post( self.api_url+'/login/',
                                        data=data, headers={'Content-type':'application/json'} )
         self.check_server_response(server_response, 'retrieve token',data_used=data)
@@ -112,7 +112,8 @@ class Connect_Molgenis():
                         #if 'Not Found' in error_message:
                             #if entity_used: 
                                 #error_message += 'Available columns for entity \''+entity_used+'\': '+', '.join(self.get_column_names(entity_used))
-                        # bug in error response when wrong enum value. Remove wrong part of message and add sensible one
+                        # bug in error response when wrong enum value. Remove wrong part of message and add sensible one 
+                        # This should be obsolete as wrong error message has been fixed in the api, can be removed after testing
                         if 'Invalid enum value' in error_message:
                             column_name = re.search('for attribute \'(.+?)\'', error_message).group(1)
                             entity_name = re.search('of entity \'(.+?)\'', error_message).group(1)
@@ -195,7 +196,7 @@ class Connect_Molgenis():
         added_id = server_response.headers['location'].split('/')[-1]
         return added_id
     
-    def add_file(self, file_path, file_name=None):
+    def add_file(self, file_path, description, file_name=None):
         '''Add a file to entity File.
         
         Args:
@@ -216,11 +217,13 @@ class Connect_Molgenis():
         if not os.path.isfile(file_path):
             self.logger.error('File not found: '+str(file_path))
             raise IOError('File not found: '+str(file_path))
-        url = 'http://localhost:8080/api/v1/File'
-        files = {'description': ('', 'lala'), 'attachment': (open('/Users/Niek/UMCG/test/data/ATACseq/rundir/QC/CollectMultipleMetrics_1.sh','rb'), '')}
-        r = requests.post(url, data=json.dumps(files), headers=self.headers)
-        self.check_server_response(r,'Upload file test')
-        server_response = requests.post(self.api_url+'/File',files={'description':(","+"file_name"+"),'attachment':("+file_path+",")},headers=self.headers)
+        file_post_header = self.headers
+        del(file_post_header['Accept'])
+        del(file_post_header['Content-type'])
+        server_response = requests.post(self.api_url+'/File', 
+                                        files={'attachment':(os.path.basename(file_path), open(file_path,'rb'))},
+                                        data={'description': description},
+                                        headers = file_post_header)
         self.check_server_response(server_response,'Upload file',data_used = str(file_path))
         added_id = server_response.headers['location'].split('/')[-1]
         return added_id
@@ -428,4 +431,3 @@ class Connect_Molgenis():
             self.check_server_response(server_response, 'Delete entity row',entity_used=entity_name,query_used=query_used)
             server_response_list.append(server_response)
         return server_response_list
-        
