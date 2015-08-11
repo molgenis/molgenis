@@ -24,6 +24,7 @@ import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.entity.impl.CGDAnnotator;
 import org.molgenis.data.annotation.entity.impl.ExacAnnotator;
+import org.molgenis.data.annotation.entity.impl.GoNLAnnotator;
 import org.molgenis.data.annotation.entity.impl.SnpEffAnnotator;
 import org.molgenis.data.annotation.provider.CgdDataProvider;
 import org.molgenis.data.annotation.provider.CgdDataProvider.generalizedInheritance;
@@ -156,8 +157,9 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 		double thousandGenomesMAF = entity.getDouble(ThousandGenomesServiceAnnotator.THGEN_MAF) != null ? entity
 				.getDouble(ThousandGenomesServiceAnnotator.THGEN_MAF) : 0;
 		double exacMAF = entity.getDouble(ExacAnnotator.EXAC_AF) != null ? entity.getDouble(ExacAnnotator.EXAC_AF) : 0;
-		double gonlMAF = entity.getDouble(GoNLServiceAnnotator.GONL_MAF) != null ? entity
-				.getDouble(GoNLServiceAnnotator.GONL_MAF) : 0;
+		double gonlMAF = entity.getDouble(GoNLAnnotator.BC_GONL_MAF) != null ? entity
+				.getDouble(GoNLAnnotator.BC_GONL_MAF) : 0;
+
 		CgdDataProvider.generalizedInheritance cgdGenInh = entity
 				.getString(CGDAnnotator.CGDAttributeName.GENERALIZED_INHERITANCE
 						.getAttributeName()) != null ? generalizedInheritance.valueOf(entity
@@ -353,7 +355,7 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 		entityMetaData.add(new DefaultAttributeMetaData(ThousandGenomesServiceAnnotator.THGEN_MAF,
 				FieldTypeEnum.DECIMAL));
 		entityMetaData.add(new DefaultAttributeMetaData(ExacAnnotator.EXAC_AF, FieldTypeEnum.DECIMAL));
-		entityMetaData.add(new DefaultAttributeMetaData(GoNLServiceAnnotator.GONL_MAF, FieldTypeEnum.DECIMAL));
+		entityMetaData.add(new DefaultAttributeMetaData(GoNLAnnotator.BC_GONL_MAF, FieldTypeEnum.DECIMAL));
 		entityMetaData.add(new DefaultAttributeMetaData(
 				CGDAnnotator.CGDAttributeName.GENERALIZED_INHERITANCE.getAttributeName(),
 				FieldTypeEnum.TEXT));

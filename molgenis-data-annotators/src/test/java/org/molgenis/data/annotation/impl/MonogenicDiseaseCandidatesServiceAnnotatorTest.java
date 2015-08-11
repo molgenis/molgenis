@@ -11,6 +11,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.impl.CGDAnnotator;
 import org.molgenis.data.annotation.entity.impl.ExacAnnotator;
+import org.molgenis.data.annotation.entity.impl.GoNLAnnotator;
 import org.molgenis.data.annotation.entity.impl.SnpEffAnnotator;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -65,7 +66,7 @@ public class MonogenicDiseaseCandidatesServiceAnnotatorTest
 				ThousandGenomesServiceAnnotator.THGEN_MAF, MolgenisFieldTypes.FieldTypeEnum.DECIMAL));
 		metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(ExacAnnotator.EXAC_AF,
 				MolgenisFieldTypes.FieldTypeEnum.DECIMAL));
-		metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(GoNLServiceAnnotator.GONL_MAF,
+		metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(GoNLAnnotator.BC_GONL_MAF,
 				MolgenisFieldTypes.FieldTypeEnum.DECIMAL));
 		metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(
 				CGDAnnotator.CGDAttributeName.GENERALIZED_INHERITANCE.getAttributeName(),
@@ -93,7 +94,7 @@ public class MonogenicDiseaseCandidatesServiceAnnotatorTest
 				ThousandGenomesServiceAnnotator.THGEN_MAF, MolgenisFieldTypes.FieldTypeEnum.DECIMAL));
 		metaDataCantAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(ExacAnnotator.EXAC_AF,
 				MolgenisFieldTypes.FieldTypeEnum.DECIMAL));
-		metaDataCantAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(GoNLServiceAnnotator.GONL_MAF,
+		metaDataCantAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(GoNLAnnotator.BC_GONL_MAF,
 				MolgenisFieldTypes.FieldTypeEnum.DECIMAL));
 		metaDataCantAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(
 				CGDAnnotator.CGDAttributeName.GENERALIZED_INHERITANCE.getAttributeName(),
@@ -119,7 +120,7 @@ public class MonogenicDiseaseCandidatesServiceAnnotatorTest
 				+ SnpEffAnnotator.Impact.HIGH + "|4|5");
 		entity.set(ThousandGenomesServiceAnnotator.THGEN_MAF, 0.1);
 		entity.set(ExacAnnotator.EXAC_AF, 0.1);
-		entity.set(GoNLServiceAnnotator.GONL_MAF, 0.2);
+		entity.set(GoNLAnnotator.BC_GONL_MAF, 0.2);
 		entity.set(
 				CGDAnnotator.CGDAttributeName.GENERALIZED_INHERITANCE.getAttributeName(),
 				"DOMINANT");
