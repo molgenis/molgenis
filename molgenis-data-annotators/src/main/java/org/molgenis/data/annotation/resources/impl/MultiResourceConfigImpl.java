@@ -23,7 +23,7 @@ public class MultiResourceConfigImpl implements MultiResourceConfig
 	private String overrideChromosomeFilesProperty;
 	public static final String DEFAULT_CHROMOSOMES = "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,Y,X";
 	public static final String DEFAULT_PATTERN = "chr%s.vcf";
-	public static final String DEFAULT_ROOT_DIRECTORY = "/data/resources";
+	public static final String DEFAULT_ROOT_DIRECTORY = File.separatorChar + "data" + File.separatorChar + "resources";
 	public Map<String, ResourceConfig> configs = null;
 
 	/**
@@ -84,11 +84,11 @@ public class MultiResourceConfigImpl implements MultiResourceConfig
 					{
 						filename = String.format(pattern, chrom);
 					}
-					final String pathname = folder + "/" + filename;
+					final String pathname = folder + File.separatorChar + filename;
 
 					if (null == file || pathname.equals(file.getPath()))
 					{
-						this.file = new File(folder + "/" + filename);
+						this.file = new File(folder + File.separatorChar + filename);
 					}
 
 					return this.file;
