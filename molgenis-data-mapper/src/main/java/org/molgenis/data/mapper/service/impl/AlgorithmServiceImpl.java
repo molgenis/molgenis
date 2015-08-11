@@ -40,6 +40,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 
 public class AlgorithmServiceImpl implements AlgorithmService
 {
@@ -126,7 +127,10 @@ public class AlgorithmServiceImpl implements AlgorithmService
 
 	boolean isGoodMatch(Map<String, Double> matchedTags, String label)
 	{
-		return matchedTags.containsKey(label) && matchedTags.get(label).intValue() == 100;
+		return matchedTags.containsKey(label)
+				&& matchedTags.get(label).intValue() == 100
+				|| Sets.newHashSet(label.split(" ")).stream()
+						.allMatch(word -> matchedTags.containsKey(word) && matchedTags.get(word).intValue() == 100);
 	}
 
 	@Override
