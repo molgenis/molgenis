@@ -151,11 +151,6 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-system</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-core-ui</artifactId>
 			<version>${project.version}</version>

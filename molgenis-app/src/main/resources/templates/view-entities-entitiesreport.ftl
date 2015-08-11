@@ -1,1 +1,0 @@
-<h1>My test entity report</h1>
