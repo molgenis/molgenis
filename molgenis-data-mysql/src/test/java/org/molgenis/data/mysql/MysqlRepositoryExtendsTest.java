@@ -1,5 +1,8 @@
 package org.molgenis.data.mysql;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
+
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
@@ -32,7 +35,7 @@ public class MysqlRepositoryExtendsTest extends MysqlRepositoryAbstractDatatypeT
 
 		EditableEntityMetaData subclass = new DefaultEntityMetaData("ExtendsTest").setLabel("Extends Test").setExtends(
 				superclass);
-		subclass.addAttribute("col3").setDataType(MolgenisFieldTypes.BOOL).setDefaultValue(true);
+		subclass.addAttribute("col3").setDataType(MolgenisFieldTypes.BOOL).setNillable(true).setDefaultValue("true");
 		metaDataService.addEntityMeta(subclass);
 
 		return subclass;
@@ -45,11 +48,19 @@ public class MysqlRepositoryExtendsTest extends MysqlRepositoryAbstractDatatypeT
 	}
 
 	@Override
-	public Entity defaultEntity()
+	public Entity createTestEntity()
 	{
 		Entity e = new MapEntity();
 		e.set("col1", false);
-		e.set("col2", false);
+		e.set("col2", true);
 		return e;
+	}
+
+	@Override
+	public void verifyTestEntity(Entity e) throws Exception
+	{
+		assertEquals(e.get("col1"), false);
+		assertEquals(e.get("col2"), true);
+		assertNull(e.get("col3"));
 	}
 }

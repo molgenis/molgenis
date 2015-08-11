@@ -50,9 +50,9 @@ public interface AttributeMetaData
 	boolean isVisible();
 
 	/**
-	 * Default value
+	 * Default value expression
 	 */
-	Object getDefaultValue();
+	String getDefaultValue();
 
 	/**
 	 * Whether attribute is primary key

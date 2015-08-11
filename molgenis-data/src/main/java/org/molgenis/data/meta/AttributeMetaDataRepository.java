@@ -5,6 +5,7 @@ import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.AGGREGATEABLE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.AUTO;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.DATA_TYPE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.DEFAULT_VALUE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.DESCRIPTION;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENUM_OPTIONS;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.EXPRESSION;
@@ -98,6 +99,10 @@ class AttributeMetaDataRepository
 		attributeMetaDataEntity.set(EXPRESSION, att.getExpression());
 		attributeMetaDataEntity.set(VISIBLE_EXPRESSION, att.getVisibleExpression());
 		attributeMetaDataEntity.set(VALIDATION_EXPRESSION, att.getValidationExpression());
+		if (att.getDefaultValue() != null)
+		{
+			attributeMetaDataEntity.set(DEFAULT_VALUE, att.getDefaultValue());
+		}
 
 		if ((att.getDataType() instanceof EnumField) && (att.getEnumOptions() != null))
 		{
@@ -205,6 +210,7 @@ class AttributeMetaDataRepository
 		}
 		attributeMetaData.setVisibleExpression(entity.getString(VISIBLE_EXPRESSION));
 		attributeMetaData.setValidationExpression(entity.getString(VALIDATION_EXPRESSION));
+		attributeMetaData.setDefaultValue(entity.getString(DEFAULT_VALUE));
 
 		return attributeMetaData;
 	}
