@@ -73,6 +73,11 @@
 				if (attr.visibleExpression) {
 					attr.visible = this._resolveBoolExpression(attr.visibleExpression, entityInstance);
 				}
+				if (attr.defaultValue && this.props.mode == 'create') {
+					// TODO: set defaultValue here?
+					// TODO: convert to proper data type
+					entityInstance[attr.name] = attr.defaultValue;
+				}
 			}, this);
 		},
 		render: function() {
