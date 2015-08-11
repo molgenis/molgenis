@@ -5,6 +5,7 @@ import static org.molgenis.system.core.RuntimeProperty.ENTITY_NAME;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.version.MolgenisVersionService;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
@@ -25,38 +26,42 @@ public class RuntimePropertyToStaticContentMigrator implements ApplicationListen
 
 	private final DataService dataService;
 	private final MolgenisPluginRegistry molgenisPluginRegistry;
+	private final MolgenisVersionService molgenisVersionService;
 
 	@Autowired
 	public RuntimePropertyToStaticContentMigrator(DataService dataService,
-			MolgenisPluginRegistry molgenisPluginRegistry)
+			MolgenisPluginRegistry molgenisPluginRegistry, MolgenisVersionService molgenisVersionService)
 	{
 		this.dataService = checkNotNull(dataService);
 		this.molgenisPluginRegistry = checkNotNull(molgenisPluginRegistry);
+		this.molgenisVersionService = checkNotNull(molgenisVersionService);
 	}
 
 	private RuntimePropertyToStaticContentMigrator migrateSettings()
 	{
-		LOG.info("Migrating RuntimeProperty instances to StaticContent instance ...");
-
-		for (MolgenisPlugin molgenisPlugin : molgenisPluginRegistry)
+		if (molgenisVersionService.getMolgenisVersionFromServerProperties() == 13)
 		{
-			String key = "app." + molgenisPlugin.getName();
-			RuntimeProperty property = getProperty(key);
-			if (property != null)
+			LOG.info("Migrating RuntimeProperty instances to StaticContent instance ...");
+
+			for (MolgenisPlugin molgenisPlugin : molgenisPluginRegistry)
 			{
-				String rtpValue = property.getValue();
+				String key = "app." + molgenisPlugin.getName();
+				RuntimeProperty property = getProperty(key);
+				if (property != null)
+				{
+					String rtpValue = property.getValue();
 
-				StaticContent staticContent = new StaticContent(molgenisPlugin.getName(), dataService);
-				staticContent.setContent(rtpValue);
-				LOG.info("Creating StaticContent for RuntimeProperty [" + key + "]");
-				dataService.add(StaticContent.ENTITY_NAME, staticContent);
-				LOG.info("Deleting RuntimeProperty [" + key + "]");
-				dataService.delete(ENTITY_NAME, property.getId());
+					StaticContent staticContent = new StaticContent(molgenisPlugin.getName(), dataService);
+					staticContent.setContent(rtpValue);
+					LOG.info("Creating StaticContent for RuntimeProperty [" + key + "]");
+					dataService.add(StaticContent.ENTITY_NAME, staticContent);
+					LOG.info("Deleting RuntimeProperty [" + key + "]");
+					dataService.delete(ENTITY_NAME, property.getId());
+				}
 			}
+
+			LOG.info("Migrated RuntimeProperty instances to StaticContent instances");
 		}
-
-		LOG.info("Migrated RuntimeProperty instances to StaticContent instances");
-
 		return this;
 	}
 

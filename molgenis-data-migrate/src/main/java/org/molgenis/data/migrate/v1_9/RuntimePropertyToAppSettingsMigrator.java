@@ -6,6 +6,7 @@ import static org.molgenis.system.core.RuntimeProperty.ENTITY_NAME;
 import org.molgenis.data.DataService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.version.MolgenisVersionService;
 import org.molgenis.security.account.ActivationMode;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.system.core.RuntimeProperty;
@@ -24,242 +25,248 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 
 	private final DataService dataService;
 	private final AppSettings appSettings;
+	private final MolgenisVersionService molgenisVersionService;
 
 	@Autowired
-	public RuntimePropertyToAppSettingsMigrator(DataService dataService, AppSettings appSettings)
+	public RuntimePropertyToAppSettingsMigrator(DataService dataService, AppSettings appSettings,
+			MolgenisVersionService molgenisVersionService)
 	{
 		this.dataService = checkNotNull(dataService);
 		this.appSettings = checkNotNull(appSettings);
+		this.molgenisVersionService = checkNotNull(molgenisVersionService);
 	}
 
 	private RuntimePropertyToAppSettingsMigrator migrateSettings()
 	{
-		LOG.info("Migrating RuntimeProperty instances to AppSettings instance ...");
-
+		if (molgenisVersionService.getMolgenisVersionFromServerProperties() == 13)
 		{
-			String key = "app.name";
-			RuntimeProperty property = getProperty(key);
-			if (property != null)
+			LOG.info("Migrating RuntimeProperty instances to AppSettings instance ...");
+
 			{
-				String rtpValue = property.getValue();
-				String value = appSettings.getTitle();
-				if (!rtpValue.equals(value))
+				String key = "app.name";
+				RuntimeProperty property = getProperty(key);
+				if (property != null)
 				{
-					LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
-					appSettings.setTitle(rtpValue);
+					String rtpValue = property.getValue();
+					String value = appSettings.getTitle();
+					if (!rtpValue.equals(value))
+					{
+						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
+						appSettings.setTitle(rtpValue);
+					}
+					LOG.info("Deleting RuntimeProperty [" + key + "]");
+					dataService.delete(ENTITY_NAME, property.getId());
 				}
-				LOG.info("Deleting RuntimeProperty [" + key + "]");
-				dataService.delete(ENTITY_NAME, property.getId());
 			}
-		}
 
-		{
-			String key = "app.top.logo";
-			RuntimeProperty property = getProperty(key);
-			if (property != null)
 			{
-				String rtpValue = property.getValue();
-				String value = appSettings.getLogoTopHref();
-				if (!rtpValue.equals(value))
+				String key = "app.top.logo";
+				RuntimeProperty property = getProperty(key);
+				if (property != null)
 				{
-					LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
-					appSettings.setLogoTopHref(rtpValue);
+					String rtpValue = property.getValue();
+					String value = appSettings.getLogoTopHref();
+					if (!rtpValue.equals(value))
+					{
+						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
+						appSettings.setLogoTopHref(rtpValue);
+					}
+					LOG.info("Deleting RuntimeProperty [" + key + "]");
+					dataService.delete(ENTITY_NAME, property.getId());
 				}
-				LOG.info("Deleting RuntimeProperty [" + key + "]");
-				dataService.delete(ENTITY_NAME, property.getId());
 			}
-		}
 
-		{
-			String key = "app.href.logo";
-			RuntimeProperty property = getProperty(key);
-			if (property != null)
 			{
-				String rtpValue = property.getValue();
-				String value = appSettings.getLogoNavBarHref();
-				if (!rtpValue.equals(value))
+				String key = "app.href.logo";
+				RuntimeProperty property = getProperty(key);
+				if (property != null)
 				{
-					LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
-					appSettings.setLogoNavBarHref(rtpValue);
+					String rtpValue = property.getValue();
+					String value = appSettings.getLogoNavBarHref();
+					if (!rtpValue.equals(value))
+					{
+						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
+						appSettings.setLogoNavBarHref(rtpValue);
+					}
+					LOG.info("Deleting RuntimeProperty [" + key + "]");
+					dataService.delete(ENTITY_NAME, property.getId());
 				}
-				LOG.info("Deleting RuntimeProperty [" + key + "]");
-				dataService.delete(ENTITY_NAME, property.getId());
 			}
-		}
 
-		{
-			String key = "molgenis.footer";
-			RuntimeProperty property = getProperty(key);
-			if (property != null)
 			{
-				String rtpValue = property.getValue();
-				String value = appSettings.getFooter();
-				if (!rtpValue.equals(value))
+				String key = "molgenis.footer";
+				RuntimeProperty property = getProperty(key);
+				if (property != null)
 				{
-					LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
-					appSettings.setFooter(rtpValue);
+					String rtpValue = property.getValue();
+					String value = appSettings.getFooter();
+					if (!rtpValue.equals(value))
+					{
+						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
+						appSettings.setFooter(rtpValue);
+					}
+					LOG.info("Deleting RuntimeProperty [" + key + "]");
+					dataService.delete(ENTITY_NAME, property.getId());
 				}
-				LOG.info("Deleting RuntimeProperty [" + key + "]");
-				dataService.delete(ENTITY_NAME, property.getId());
 			}
-		}
 
-		{
-			String key = "plugin.auth.enable_self_registration";
-			RuntimeProperty property = getProperty(key);
-			if (property != null)
 			{
-				boolean rtpValue = Boolean.parseBoolean(property.getValue());
-				boolean value = appSettings.getSignUp();
-				if (!rtpValue != value)
+				String key = "plugin.auth.enable_self_registration";
+				RuntimeProperty property = getProperty(key);
+				if (property != null)
 				{
-					LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
-					appSettings.setSignUp(rtpValue);
+					boolean rtpValue = Boolean.parseBoolean(property.getValue());
+					boolean value = appSettings.getSignUp();
+					if (!rtpValue != value)
+					{
+						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
+						appSettings.setSignUp(rtpValue);
+					}
+					LOG.info("Deleting RuntimeProperty [" + key + "]");
+					dataService.delete(ENTITY_NAME, property.getId());
 				}
-				LOG.info("Deleting RuntimeProperty [" + key + "]");
-				dataService.delete(ENTITY_NAME, property.getId());
 			}
-		}
 
-		{
-			String key = "plugin.auth.activation_mode";
-			RuntimeProperty property = getProperty(key);
-			if (property != null)
 			{
-				ActivationMode rtpValue = ActivationMode.from(property.getValue(), ActivationMode.ADMIN);
-				boolean value = appSettings.getSignUpModeration();
-				if ((value == true && rtpValue != ActivationMode.ADMIN)
-						|| (value == false && rtpValue != ActivationMode.USER))
+				String key = "plugin.auth.activation_mode";
+				RuntimeProperty property = getProperty(key);
+				if (property != null)
 				{
-					LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
-					appSettings.setSignUp(rtpValue == ActivationMode.ADMIN ? true : false);
+					ActivationMode rtpValue = ActivationMode.from(property.getValue(), ActivationMode.ADMIN);
+					boolean value = appSettings.getSignUpModeration();
+					if ((value == true && rtpValue != ActivationMode.ADMIN)
+							|| (value == false && rtpValue != ActivationMode.USER))
+					{
+						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
+						appSettings.setSignUp(rtpValue == ActivationMode.ADMIN ? true : false);
+					}
+					LOG.info("Deleting RuntimeProperty [" + key + "]");
+					dataService.delete(ENTITY_NAME, property.getId());
 				}
-				LOG.info("Deleting RuntimeProperty [" + key + "]");
-				dataService.delete(ENTITY_NAME, property.getId());
 			}
-		}
 
-		{
-			String key = "i18nLocale";
-			RuntimeProperty property = getProperty(key);
-			if (property != null)
 			{
-				String rtpValue = property.getValue();
-				String value = appSettings.getLanguageCode();
-				if (!rtpValue.equals(value))
+				String key = "i18nLocale";
+				RuntimeProperty property = getProperty(key);
+				if (property != null)
 				{
-					LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
-					appSettings.setLanguageCode(value);
+					String rtpValue = property.getValue();
+					String value = appSettings.getLanguageCode();
+					if (!rtpValue.equals(value))
+					{
+						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
+						appSettings.setLanguageCode(value);
+					}
+					LOG.info("Deleting RuntimeProperty [" + key + "]");
+					dataService.delete(ENTITY_NAME, property.getId());
 				}
-				LOG.info("Deleting RuntimeProperty [" + key + "]");
-				dataService.delete(ENTITY_NAME, property.getId());
 			}
-		}
 
-		{
-			String key = "molgenis.css.theme";
-			RuntimeProperty property = getProperty(key);
-			if (property != null)
 			{
-				String rtpValue = property.getValue();
-				String value = appSettings.getBootstrapTheme();
-				if (!rtpValue.equals(value))
+				String key = "molgenis.css.theme";
+				RuntimeProperty property = getProperty(key);
+				if (property != null)
 				{
-					LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
-					appSettings.setBootstrapTheme(value);
+					String rtpValue = property.getValue();
+					String value = appSettings.getBootstrapTheme();
+					if (!rtpValue.equals(value))
+					{
+						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
+						appSettings.setBootstrapTheme(value);
+					}
+					LOG.info("Deleting RuntimeProperty [" + key + "]");
+					dataService.delete(ENTITY_NAME, property.getId());
 				}
-				LOG.info("Deleting RuntimeProperty [" + key + "]");
-				dataService.delete(ENTITY_NAME, property.getId());
 			}
-		}
 
-		{
-			String key = "app.href.css";
-			RuntimeProperty property = getProperty(key);
-			if (property != null)
 			{
-				String rtpValue = property.getValue();
-				String value = appSettings.getCssHref();
-				if (!rtpValue.equals(value))
+				String key = "app.href.css";
+				RuntimeProperty property = getProperty(key);
+				if (property != null)
 				{
-					LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
-					appSettings.setCssHref(value);
+					String rtpValue = property.getValue();
+					String value = appSettings.getCssHref();
+					if (!rtpValue.equals(value))
+					{
+						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
+						appSettings.setCssHref(value);
+					}
+					LOG.info("Deleting RuntimeProperty [" + key + "]");
+					dataService.delete(ENTITY_NAME, property.getId());
 				}
-				LOG.info("Deleting RuntimeProperty [" + key + "]");
-				dataService.delete(ENTITY_NAME, property.getId());
 			}
-		}
 
-		{
-			String key = "menu";
-			RuntimeProperty property = getProperty(key);
-			if (property != null)
 			{
-				String rtpValue = property.getValue();
-				String value = appSettings.getMenu();
-				if (!rtpValue.equals(value))
+				String key = "menu";
+				RuntimeProperty property = getProperty(key);
+				if (property != null)
 				{
-					LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
-					appSettings.setMenu(value);
+					String rtpValue = property.getValue();
+					String value = appSettings.getMenu();
+					if (!rtpValue.equals(value))
+					{
+						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
+						appSettings.setMenu(value);
+					}
+					LOG.info("Deleting RuntimeProperty [" + key + "]");
+					dataService.delete(ENTITY_NAME, property.getId());
 				}
-				LOG.info("Deleting RuntimeProperty [" + key + "]");
-				dataService.delete(ENTITY_NAME, property.getId());
 			}
-		}
 
-		{
-			String key = "app.trackingcode.header";
-			RuntimeProperty property = getProperty(key);
-			if (property != null)
 			{
-				String rtpValue = property.getValue();
-				String value = appSettings.getTrackingCodeFooter();
-				if (!rtpValue.equals(value))
+				String key = "app.trackingcode.header";
+				RuntimeProperty property = getProperty(key);
+				if (property != null)
 				{
-					LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
-					appSettings.setTrackingCodeFooter(value);
+					String rtpValue = property.getValue();
+					String value = appSettings.getTrackingCodeFooter();
+					if (!rtpValue.equals(value))
+					{
+						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
+						appSettings.setTrackingCodeFooter(value);
+					}
+					LOG.info("Deleting RuntimeProperty [" + key + "]");
+					dataService.delete(ENTITY_NAME, property.getId());
 				}
-				LOG.info("Deleting RuntimeProperty [" + key + "]");
-				dataService.delete(ENTITY_NAME, property.getId());
 			}
-		}
 
-		{
-			String key = "app.trackingcode.footer";
-			RuntimeProperty property = getProperty(key);
-			if (property != null)
 			{
-				String rtpValue = property.getValue();
-				String value = appSettings.getTrackingCodeFooter();
-				if (!rtpValue.equals(value))
+				String key = "app.trackingcode.footer";
+				RuntimeProperty property = getProperty(key);
+				if (property != null)
 				{
-					LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
-					appSettings.setGoogleAnalyticsTrackingId(value);
+					String rtpValue = property.getValue();
+					String value = appSettings.getTrackingCodeFooter();
+					if (!rtpValue.equals(value))
+					{
+						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
+						appSettings.setGoogleAnalyticsTrackingId(value);
+					}
+					LOG.info("Deleting RuntimeProperty [" + key + "]");
+					dataService.delete(ENTITY_NAME, property.getId());
 				}
-				LOG.info("Deleting RuntimeProperty [" + key + "]");
-				dataService.delete(ENTITY_NAME, property.getId());
 			}
-		}
 
-		{
-			String key = "aggregate.anonymization.threshold";
-			RuntimeProperty property = getProperty(key);
-			if (property != null)
 			{
-				Integer rtpValue = Integer.valueOf(property.getValue());
-				Integer value = appSettings.getAggregateThreshold();
-				if (!rtpValue.equals(value))
+				String key = "aggregate.anonymization.threshold";
+				RuntimeProperty property = getProperty(key);
+				if (property != null)
 				{
-					LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
-					appSettings.setAggregateThreshold(value);
+					Integer rtpValue = Integer.valueOf(property.getValue());
+					Integer value = appSettings.getAggregateThreshold();
+					if (!rtpValue.equals(value))
+					{
+						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
+						appSettings.setAggregateThreshold(value);
+					}
+					LOG.info("Deleting RuntimeProperty [" + key + "]");
+					dataService.delete(ENTITY_NAME, property.getId());
 				}
-				LOG.info("Deleting RuntimeProperty [" + key + "]");
-				dataService.delete(ENTITY_NAME, property.getId());
 			}
+
+			LOG.info("Migrated RuntimeProperty instances to AppSettings instances");
+
 		}
-
-		LOG.info("Migrated RuntimeProperty instances to AppSettings instances");
-
 		return this;
 	}
 
