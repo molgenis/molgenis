@@ -4,11 +4,11 @@ import static org.molgenis.MolgenisFieldTypes.BOOL;
 import static org.molgenis.MolgenisFieldTypes.COMPOUND;
 import static org.molgenis.MolgenisFieldTypes.HYPERLINK;
 import static org.molgenis.MolgenisFieldTypes.INT;
-import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
@@ -20,8 +20,6 @@ import org.molgenis.data.support.MapEntity;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -234,7 +232,8 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 			DefaultAttributeMetaData reportsAttr = new DefaultAttributeMetaData(REPORTS).setDataType(COMPOUND)
 					.setLabel("Reports").setVisibleExpression("$('" + MOD_REPORTS + "').eq(true).value()");
 			AttributeMetaData reportsEntitiesAttr = new DefaultAttributeMetaData(REPORTS_ENTITIES).setNillable(true)
-					.setDataType(MREF).setRefEntity(EntityReport.META_DATA).setLabel("Reports");
+					.setDataType(TEXT).setLabel("Reports").setDescription(
+							"Comma-seperated report strings (e.g. MyDataSet:myreport,OtherDataSet:otherreport). The report name refers to an existing FreemarkerTemplate entity or file with name view-<report>-entitiesreport.ftl (e.g. view-myreport-entitiesreport.ftl)");
 			reportsAttr.addAttributePart(reportsEntitiesAttr);
 			return reportsAttr;
 		}
@@ -340,23 +339,6 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 	public void setGalaxyExport(boolean galaxyExport)
 	{
 		set(Meta.DATA_GALAXY_EXPORT, galaxyExport);
-	}
-
-	public EntityReport getEntityReport(String entityName)
-	{
-		return Iterables.find(getEntityReports(), new Predicate<EntityReport>()
-		{
-			@Override
-			public boolean apply(EntityReport entityReport)
-			{
-				return entityReport.getEntity().equals(entityName);
-			}
-		}, null);
-	}
-
-	public Iterable<EntityReport> getEntityReports()
-	{
-		return getEntities(Meta.REPORTS_ENTITIES, EntityReport.class);
 	}
 
 	public Map<String, String> getAggregatesDistinctOverrides()
@@ -507,5 +489,42 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 	public void setAggregatesDistinctSelect(boolean aggregatesDistinctSelect)
 	{
 		set(Meta.AGGREGATES_DISTINCT_SELECT, aggregatesDistinctSelect);
+	}
+
+	public String getEntityReports()
+	{
+		return getString(Meta.REPORTS_ENTITIES);
+	}
+
+	public String getEntityReport(String entityName)
+	{
+		Map<String, String> entityReports = getEntityReportsAsMap();
+		return entityReports != null ? entityReports.get(entityName) : null;
+	}
+
+	public void setEntityReports(String entityReportsStr)
+	{
+		set(Meta.REPORTS_ENTITIES, entityReportsStr);
+	}
+
+	private Map<String, String> getEntityReportsAsMap()
+	{
+		String entityReportsStr = getEntityReports();
+		if (entityReportsStr != null)
+		{
+			Map<String, String> entityReports = new LinkedHashMap<String, String>();
+			for (String entityReport : entityReportsStr.split(","))
+			{
+				String[] tokens = entityReport.split(":");
+				String entityName = tokens[0];
+				String reportName = tokens[1];
+				entityReports.put(entityName, reportName);
+			}
+			return entityReports;
+		}
+		else
+		{
+			return null;
+		}
 	}
 }

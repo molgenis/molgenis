@@ -419,7 +419,22 @@ public class RuntimePropertyToDataExplorerSettingsMigrator implements Applicatio
 				}
 			}
 
-			// TODO reports
+			{
+				String key = "plugin.dataexplorer.mod.entitiesreport";
+				RuntimeProperty property = getProperty(key);
+				if (property != null)
+				{
+					String rtpValue = property.getValue();
+					String value = dataExplorerSettings.getEntityReports();
+					if (rtpValue != value)
+					{
+						LOG.info("Updating DataExplorerSettings for RuntimeProperty [" + key + "]");
+						dataExplorerSettings.setEntityReports(rtpValue);
+					}
+					LOG.info("Deleting RuntimeProperty [" + key + "]");
+					dataService.delete(ENTITY_NAME, property.getId());
+				}
+			}
 
 			LOG.info("Migrated RuntimeProperty instances to DataExplorerSettings instances");
 		}

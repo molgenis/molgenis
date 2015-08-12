@@ -28,7 +28,6 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.AggregateQueryImpl;
@@ -39,7 +38,6 @@ import org.molgenis.dataexplorer.galaxy.GalaxyDataExportException;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExportRequest;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExporter;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
-import org.molgenis.dataexplorer.settings.EntityReport;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -181,8 +179,7 @@ public class DataExplorerController extends MolgenisPluginController
 		else if (moduleId.equals("entitiesreport"))
 		{
 			model.addAttribute("datasetRepository", dataService.getRepository(entityName));
-			EntityReport entityReport = dataExplorerSettings.getEntityReport(entityName);
-			model.addAttribute("viewName", entityReport != null ? entityReport.getReport() : null);
+			model.addAttribute("viewName", dataExplorerSettings.getEntityReport(entityName));
 		}
 		return "view-dataexplorer-mod-" + moduleId; // TODO bad request in case of invalid module id
 	}
@@ -261,10 +258,11 @@ public class DataExplorerController extends MolgenisPluginController
 					}
 					if (modReports)
 					{
-						EntityReport entityReport = dataExplorerSettings.getEntityReport(entityName);
-						if (entityReport != null)
+						String modEntitiesReportName = dataExplorerSettings.getEntityReport(entityName);
+						if (modEntitiesReportName != null)
 						{
-							modulesConfig.add(new ModuleConfig("entitiesreport", "Report", "report-icon.png"));
+							modulesConfig
+									.add(new ModuleConfig("entitiesreport", modEntitiesReportName, "report-icon.png"));
 						}
 					}
 					break;
@@ -504,21 +502,28 @@ public class DataExplorerController extends MolgenisPluginController
 
 	private String getViewName(String entityName)
 	{
-		EntityReport entityReport = dataExplorerSettings.getEntityReport(entityName);
-		if (entityReport == null)
+		// check if entity report is set for this entity
+		String reportTemplate = dataExplorerSettings.getEntityReport(entityName);
+		if (reportTemplate != null)
 		{
-			return "view-entityreport-generic-default";
-		}
-		else
-		{
-			String specificViewname = "view-entityreport-specific-" + entityReport.getReport();
-			if (!viewExists(specificViewname))
+			String specificViewname = "view-entityreport-specific-" + reportTemplate;
+			if (viewExists(specificViewname))
 			{
-				throw new MolgenisDataException(
-						"Unknown report [" + entityReport.getReport() + "] for entity [" + entityName + "]");
+				return specificViewname;
 			}
+		}
+
+		// if there are no RuntimeProperty mappings, execute existing behaviour
+		final String specificViewname = "view-entityreport-specific-" + entityName;
+		if (viewExists(specificViewname))
+		{
 			return specificViewname;
 		}
+		if (viewExists("view-entityreport-generic"))
+		{
+			return "view-entityreport-generic";
+		}
+		return "view-entityreport-generic-default";
 	}
 
 	private boolean viewExists(String viewName)
