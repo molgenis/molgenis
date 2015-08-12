@@ -21,7 +21,7 @@
 			saveOnBlur: React.PropTypes.bool, // save form control values on blur
 			enableFormIndex: React.PropTypes.bool, // whether or not to show a form index to navigate to form controls
 			showHidden: React.PropTypes.bool, // whether or not to show not-visible attributes
-			categorigalMrefShowSelectAll: React.PropTypes.bool, //whether to show 'select all' and 'hide all' links under the categorical mref checkboxes
+			categoricalMrefShowSelectAll: React.PropTypes.bool, //whether to show 'select all' and 'hide all' links under the categorical mref checkboxes
 			showAsteriskIfNotNillable: React.PropTypes.bool, //whether to show a '*' after the label when an attribute is not nillable
 			beforeSubmit: React.PropTypes.func,
 			onSubmitCancel: React.PropTypes.func,
@@ -39,7 +39,7 @@
 				colOffset: 3,
 				saveOnBlur: false,
 				showHidden: false,
-				categorigalMrefShowSelectAll: true,
+				categoricalMrefShowSelectAll: true,
 				showAsteriskIfNotNillable: true,
 				beforeSubmit: function() {},
 				onSubmitCancel: function() {},
@@ -194,7 +194,7 @@
 				hideOptional: this.state.hideOptional,
 				showHidden: this.props.showHidden,
 				enableFormIndex: this.props.enableFormIndex,
-				categorigalMrefShowSelectAll: this.props.categorigalMrefShowSelectAll,
+				categoricalMrefShowSelectAll: this.props.categoricalMrefShowSelectAll,
 				showAsteriskIfNotNillable: this.props.showAsteriskIfNotNillable,
 				onValueChange : this._handleValueChange,
 				onBlur: this._handleBlur,
@@ -614,7 +614,7 @@
 			colOffset: React.PropTypes.number,
 			hideOptional: React.PropTypes.bool,
 			showHidden: React.PropTypes.bool,
-			categorigalMrefShowSelectAll: React.PropTypes.bool,
+			categoricalMrefShowSelectAll: React.PropTypes.bool,
 			showAsteriskIfNotNillable: React.PropTypes.bool,
 			enableFormIndex: React.PropTypes.bool,
 			errorMessages: React.PropTypes.object.isRequired,
@@ -641,7 +641,7 @@
 							formLayout : this.props.formLayout,
 							colOffset: this.props.colOffset,
 							onBlur: this.props.onBlur,
-							categorigalMrefShowSelectAll: this.props.categorigalMrefShowSelectAll,
+							categoricalMrefShowSelectAll: this.props.categoricalMrefShowSelectAll,
 							showAsteriskIfNotNillable: this.props.showAsteriskIfNotNillable,
 							onValueChange : this.props.onValueChange,
 							key : key 
