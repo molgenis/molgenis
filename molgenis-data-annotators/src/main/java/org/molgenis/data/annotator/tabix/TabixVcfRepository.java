@@ -74,32 +74,37 @@ public class TabixVcfRepository extends VcfRepository
 	}
 
 	/**
-	 * Queries the tabix reader.
+	 * Queries the tabix reader. Uses tabix query syntax, for example "1:1115548-1115548".
 	 * 
-	 * @param chrom
-	 *            name of the chromosome
-	 * @param pos
-	 *            position
+	 * Introducted fix: Tabix is not always so precise. For example, the cmdline query
+	 * "tabix ExAC.r0.3.sites.vep.vcf.gz 1:1115548-1115548" returns 2 variants: "1 1115547 . CG C,TG" and "1 1115548
+	 * rs114390380 G A". It is therefore needed to verify the position of the elements returned.
+	 * 
+	 * @param chrPosPos
+	 *            Name of chromosome + position + position.
 	 * @return {@link ImmutableList} of entities found
 	 */
-	private synchronized ImmutableList<Entity> query(String chrom, long pos)
+	public synchronized ImmutableList<Entity> queryTabixSyntax(String chrPosPos)
 	{
-		String queryString = String.format("%s:%s-%2$s", chrom, pos);
+		org.molgenis.data.annotator.tabix.TabixReader.Iterator iterator = tabixReader.query(chrPosPos);
 		Builder<Entity> builder = ImmutableList.<Entity> builder();
-		Iterator iterator = tabixReader.query(queryString);
 		
 		//Tabix reader sometimes returns null. Does this mean that query doesn't return anything?
 		// See also http://sourceforge.net/p/samtools/mailman/message/26113299/
 		if (iterator == null) {
 			return builder.build();
 		}
-		
+
 		try
 		{
 			String line = iterator.next();
 			while (line != null)
 			{
-				builder.add(toEntity(getEntityMetaData(), new VcfRecord(vcfMeta, line.split("\t")), vcfMeta));
+				String[] lineSplit = line.split("\t");
+				if (lineSplit[1].equals(chrPosPos.split("-")[1]))
+				{
+					builder.add(toEntity(getEntityMetaData(), new VcfRecord(vcfMeta, lineSplit), vcfMeta));
+				}
 				line = iterator.next();
 			}
 		}
@@ -109,6 +114,22 @@ public class TabixVcfRepository extends VcfRepository
 		}
 
 		return builder.build();
+	}
+
+	/**
+	 * Queries the tabix reader. Original implementation and behaviour via String chrom, long pos.
+	 * 
+	 * @param chrom
+	 *            name of the chromosome
+	 * @param pos
+	 *            position
+	 * @return {@link ImmutableList} of entities found
+	 * 
+	 */
+	private synchronized ImmutableList<Entity> query(String chrom, long pos)
+	{
+		String queryString = String.format("%s:%s-%2$s", chrom, pos);
+		return this.queryTabixSyntax(queryString);
 	}
 
 }

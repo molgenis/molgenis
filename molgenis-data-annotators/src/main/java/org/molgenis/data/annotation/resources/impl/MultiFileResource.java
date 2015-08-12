@@ -1,6 +1,7 @@
 package org.molgenis.data.annotation.resources.impl;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -97,7 +98,16 @@ public class MultiFileResource implements Resource
 		isAvailable();
 		String chromValue = getFirstEqualsValueFor(VcfRepository.CHROM, q).toString();
 		Resource resource = resources.get(chromValue);
-		return resource.findAll(q);
+		
+		try
+		{
+			return resource.findAll(q);
+		}
+		catch(NullPointerException e)
+		{
+			System.out.println("No file for chromosome '" + chromValue + "', skipping..");
+			return new ArrayList<Entity>();
+		}
 	}
 
 }
