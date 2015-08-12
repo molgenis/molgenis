@@ -117,4 +117,104 @@ public class GenomicDataSettings extends DefaultSettingsEntity
 			return defaultSettings;
 		}
 	}
+
+	public String getAttrsPos()
+	{
+		return getString(Meta.ATTRS_POS);
+	}
+
+	public void setAttrsPos(String attrsPos)
+	{
+		set(Meta.ATTRS_POS, attrsPos);
+	}
+
+	public String getAttrsChrom()
+	{
+		return getString(Meta.ATTRS_CHROM);
+	}
+
+	public void setAttrsChrom(String attrsChrom)
+	{
+		set(Meta.ATTRS_CHROM, attrsChrom);
+	}
+
+	public String getAttrsRef()
+	{
+		return getString(Meta.ATTRS_REF);
+	}
+
+	public void setAttrsRef(String attrsRef)
+	{
+		set(Meta.ATTRS_REF, attrsRef);
+	}
+
+	public String getAttrsAlt()
+	{
+		return getString(Meta.ATTRS_ALT);
+	}
+
+	public void setAttrsAlt(String attrsAlt)
+	{
+		set(Meta.ATTRS_REF, attrsAlt);
+	}
+
+	public String getAttrsIdentifier()
+	{
+		return getString(Meta.ATTRS_IDENTIFIER);
+	}
+
+	public void setAttrsIdentifier(String attrsIdentifier)
+	{
+		set(Meta.ATTRS_IDENTIFIER, attrsIdentifier);
+	}
+
+	public String getAttrsStop()
+	{
+		return getString(Meta.ATTRS_STOP);
+	}
+
+	public void setAttrsStop(String attrsStop)
+	{
+		set(Meta.ATTRS_STOP, attrsStop);
+	}
+
+	public String getAttrsDescription()
+	{
+		return getString(Meta.ATTRS_DESCRIPTION);
+	}
+
+	public void setAttrsDescription(String attrsDescription)
+	{
+		set(Meta.ATTRS_DESCRIPTION, attrsDescription);
+	}
+
+	public String getAttrsPatientId()
+	{
+		return getString(Meta.ATTRS_PATIENT_ID);
+	}
+
+	public void setAttrsPatientId(String attrsPatientId)
+	{
+		set(Meta.ATTRS_PATIENT_ID, attrsPatientId);
+	}
+
+	public String getAttrsName()
+	{
+		return getString(Meta.ATTRS_NAME);
+	}
+
+	public void setAttrsName(String attrsName)
+	{
+		set(Meta.ATTRS_NAME, attrsName);
+	}
+
+	public String getAttrsLinkout()
+	{
+		return getString(Meta.ATTRS_LINKOUT);
+	}
+
+	public void setAttrsLinkout(String attrsLinkout)
+	{
+		set(Meta.ATTRS_LINKOUT, attrsLinkout);
+	}
 }
