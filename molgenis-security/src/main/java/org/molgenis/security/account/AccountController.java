@@ -2,6 +2,7 @@ package org.molgenis.security.account;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.molgenis.security.account.AccountController.URI;
+import static org.molgenis.security.user.UserAccountService.MIN_PASSWORD_LENGTH;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -86,7 +87,7 @@ public class AccountController
 	{
 		ModelAndView model = new ModelAndView("register-modal");
 		model.addObject("countries", CountryCodes.get());
-		model.addObject("min_password_length", 6); // FIXME do not hardcode
+		model.addObject("min_password_length", MIN_PASSWORD_LENGTH);
 		return model;
 	}
 
