@@ -197,7 +197,7 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 			}
 
 			{
-				String key = "menu";
+				String key = "molgenis.menu";
 				RuntimeProperty property = getProperty(key);
 				if (property != null)
 				{

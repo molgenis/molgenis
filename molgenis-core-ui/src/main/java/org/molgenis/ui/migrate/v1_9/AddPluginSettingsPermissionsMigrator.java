@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class AddPluginSettingsPermissionsMigrator implements ApplicationListener<ContextRefreshedEvent>
 {
-	private static final Logger LOG = LoggerFactory.getLogger(RuntimePropertyToStaticContentMigrator.class);
+	private static final Logger LOG = LoggerFactory.getLogger(AddPluginSettingsPermissionsMigrator.class);
 
 	private final DataService dataService;
 	private final MolgenisVersionService molgenisVersionService;
@@ -39,7 +39,7 @@ public class AddPluginSettingsPermissionsMigrator implements ApplicationListener
 	{
 		if (molgenisVersionService.getMolgenisVersionFromServerProperties() == 13)
 		{
-			LOG.info("Adding Settings plugin to Admin menu ...");
+			LOG.info("Creating UserAuthority and GroupAuthority instances for plugin settings entities ...");
 			for (UserAuthority userAuthority : dataService.findAll(UserAuthority.ENTITY_NAME, UserAuthority.class))
 			{
 				String role = userAuthority.getRole();
@@ -82,6 +82,7 @@ public class AddPluginSettingsPermissionsMigrator implements ApplicationListener
 					}
 				}
 			}
+			LOG.info("Created UserAuthority and GroupAuthority instances for plugin settings entities");
 		}
 		return this;
 	}

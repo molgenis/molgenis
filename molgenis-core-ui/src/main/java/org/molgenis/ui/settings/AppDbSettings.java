@@ -63,7 +63,7 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 		private static final String DEFAULT_LANGUAGE_CODE = "en";
 		private static final String DEFAULT_BOOTSTRAP_THEME = "bootstrap-molgenis.min.css";
 		private static final boolean DEFAULT_GOOGLE_ANALYTICS_IP_ANONYMIZATION = true;
-		private static final boolean DEFAULT_GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS = true;
+		private static final boolean DEFAULT_GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS = false;
 		private static final boolean DEFAULT_GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS_MOLGENIS = true;
 
 		public Meta()
@@ -96,7 +96,8 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 					.setDescription("CSS file name to add custom CSS (see molgenis-core-ui/src/main/resources/css).");
 
 			addAttribute(AGGREGATE_THRESHOLD).setDataType(INT).setNillable(true).setLabel("Aggregate threshold")
-					.setDescription("Aggregate values below the threshold are reported as the threshold.");
+					.setDescription(
+							"Aggregate value counts below this threshold are reported as the threshold. (e.g. a count of 100 is reported as <= 10)");
 
 			// tracking settings
 			DefaultAttributeMetaData trackingAttr = addAttribute(TRACKING).setDataType(COMPOUND).setLabel("Tracking");
@@ -112,7 +113,6 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 			DefaultAttributeMetaData gaAccountPrivacyFriendlyAttr = new DefaultAttributeMetaData(
 					GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS).setDataType(BOOL).setNillable(false)
 							.setDefaultValue(DEFAULT_GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS)
-							.setDefaultValue(GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS)
 							.setLabel("Google analytics account privacy friendly").setDescription(
 									"Confirm that you have configured your Google Analytics account as described here: https://cbpweb.nl/sites/default/files/atoms/files/handleiding_privacyvriendelijk_instellen_google_analytics_0.pdf");
 			DefaultAttributeMetaData gaTrackingIdMolgenisAttr = new DefaultAttributeMetaData(

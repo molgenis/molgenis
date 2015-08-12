@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class AddSettingsToAdminMenuMigrator implements ApplicationListener<ContextRefreshedEvent>
 {
-	private static final Logger LOG = LoggerFactory.getLogger(RuntimePropertyToStaticContentMigrator.class);
+	private static final Logger LOG = LoggerFactory.getLogger(AddSettingsToAdminMenuMigrator.class);
 
 	private final MenuManagerService menuManagerService;
 	private final MolgenisVersionService molgenisVersionService;
