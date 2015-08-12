@@ -1,5 +1,6 @@
 package org.molgenis.ui.admin.user;
 
+import static org.molgenis.security.user.UserAccountService.MIN_PASSWORD_LENGTH;
 import static org.molgenis.ui.admin.user.UserAccountController.URI;
 
 import java.util.Collections;
@@ -8,8 +9,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.security.user.UserAccountService;
@@ -17,6 +16,8 @@ import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.util.CountryCodes;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -34,8 +35,6 @@ import com.google.common.collect.Lists;
 public class UserAccountController extends MolgenisPluginController
 {
 	private static final Logger LOG = LoggerFactory.getLogger(UserAccountController.class);
-
-	public static final int MIN_PASSWORD_LENGTH = 6;
 
 	public static final String ID = "useraccount";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
