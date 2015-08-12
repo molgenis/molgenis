@@ -73,4 +73,9 @@ public class SortaModifiableCsvRepository extends AbstractRepository
 		return Collections.emptySet();
 	}
 
+	@Override
+	public long count()
+	{
+		return csvRepository.count();
+	}
 }

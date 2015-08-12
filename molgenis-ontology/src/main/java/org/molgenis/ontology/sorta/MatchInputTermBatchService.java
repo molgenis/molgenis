@@ -11,7 +11,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -51,7 +50,6 @@ public class MatchInputTermBatchService
 	{
 		String entityName = repository.getName();
 		String userName = molgenisUser.getUsername();
-		uploadProgress.registerUser(userName, entityName);
 
 		// Add the original input dataset to database
 		dataService.getMeta().addEntityMeta(repository.getEntityMetaData());
@@ -68,7 +66,7 @@ public class MatchInputTermBatchService
 		mapEntity.set(MatchingTaskEntityMetaData.THRESHOLD, threshold);
 		dataService.add(MatchingTaskEntityMetaData.ENTITY_NAME, mapEntity);
 		dataService.getRepository(MatchingTaskEntityMetaData.ENTITY_NAME).flush();
-		uploadProgress.registerUser(userName, entityName, (int) dataService.count(entityName, new QueryImpl()));
+		uploadProgress.registerUser(userName, entityName, (int) repository.count());
 		try
 		{
 			// Match input terms with code
