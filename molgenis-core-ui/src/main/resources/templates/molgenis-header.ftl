@@ -158,7 +158,7 @@
                    </div>
                 </div>
             </div>
-            <#if plugin_settings??>
+            <#if plugin_settings_can_write?? && plugin_settings_can_write>
             <div class="row">
                 <div class="col-md-12">
                     <span class="glyphicon glyphicon-cog pull-right plugin-settings-btn" aria-hidden="true" style="cursor: pointer; margin-bottom: 5px;"></span>

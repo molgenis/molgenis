@@ -8,6 +8,7 @@ import org.molgenis.data.settings.DefaultSettingsEntityMetaData;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.framework.ui.MolgenisPluginFactory;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -68,6 +69,13 @@ public abstract class MolgenisPluginController
 	public Entity getPluginSettings()
 	{
 		String entityName = DefaultSettingsEntityMetaData.getSettingsEntityName(getId());
+		return RunAsSystemProxy.runAsSystem(() -> {
+			return getPluginSettings(entityName);
+		});
+	}
+
+	private Entity getPluginSettings(String entityName)
+	{
 		return dataService.hasRepository(entityName) ? dataService.findOne(entityName, getId()) : null;
 	}
 

@@ -6,10 +6,14 @@ import static org.molgenis.ui.MolgenisPluginAttributes.KEY_MOLGENIS_UI;
 import static org.molgenis.ui.MolgenisPluginAttributes.KEY_PLUGIN_ID;
 import static org.molgenis.ui.MolgenisPluginAttributes.KEY_PLUGIN_ID_WITH_QUERY_STRING;
 import static org.molgenis.ui.MolgenisPluginAttributes.KEY_PLUGIN_SETTINGS;
+import static org.molgenis.ui.MolgenisPluginAttributes.KEY_PLUGIN_SETTINGS_CAN_WRITE;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.molgenis.data.Entity;
+import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.method.HandlerMethod;
@@ -22,11 +26,13 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 {
 	private final MolgenisUi molgenisUi;
+	private final MolgenisPermissionService permissionService;
 
 	@Autowired
-	public MolgenisPluginInterceptor(MolgenisUi molgenisUi)
+	public MolgenisPluginInterceptor(MolgenisUi molgenisUi, MolgenisPermissionService permissionService)
 	{
 		this.molgenisUi = checkNotNull(molgenisUi);
+		this.permissionService = checkNotNull(permissionService);
 	}
 
 	@Override
@@ -59,7 +65,21 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 				modelAndView.addObject(KEY_PLUGIN_ID, pluginId);
 			}
 
-			modelAndView.addObject(KEY_PLUGIN_SETTINGS, molgenisPlugin.getPluginSettings());
+			Entity pluginSettings = molgenisPlugin.getPluginSettings();
+			Boolean pluginSettingsCanWrite;
+			if (pluginSettings != null)
+			{
+				String pluginSettingsEntityName = pluginSettings.getEntityMetaData().getName();
+				pluginSettingsCanWrite = permissionService.hasPermissionOnEntity(pluginSettingsEntityName,
+						Permission.WRITE);
+			}
+			else
+			{
+				pluginSettingsCanWrite = null;
+			}
+
+			modelAndView.addObject(KEY_PLUGIN_SETTINGS, pluginSettings);
+			modelAndView.addObject(KEY_PLUGIN_SETTINGS_CAN_WRITE, pluginSettingsCanWrite);
 			modelAndView.addObject(KEY_MOLGENIS_UI, molgenisUi);
 			modelAndView.addObject(KEY_AUTHENTICATED, SecurityUtils.currentUserIsAuthenticated());
 			modelAndView.addObject(KEY_PLUGIN_ID_WITH_QUERY_STRING, getPluginIdWithQueryString(request, pluginId));
