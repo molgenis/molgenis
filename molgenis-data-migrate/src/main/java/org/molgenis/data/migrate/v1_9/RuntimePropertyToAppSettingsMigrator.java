@@ -117,7 +117,7 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 				{
 					boolean rtpValue = Boolean.parseBoolean(property.getValue());
 					boolean value = appSettings.getSignUp();
-					if (!rtpValue != value)
+					if (rtpValue != value)
 					{
 						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
 						appSettings.setSignUp(rtpValue);
