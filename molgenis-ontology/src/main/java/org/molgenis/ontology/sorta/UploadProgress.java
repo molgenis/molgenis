@@ -16,7 +16,7 @@ public class UploadProgress
 	private final Map<String, Integer> userThreshold;
 	private final Map<String, Boolean> userClickMode;
 	private final static Integer ILLEGAL_DENOMINATOR = 0;
-	private final static Integer DEFAULT_THRESHOLD = 80;
+	private final static Integer DEFAULT_THRESHOLD = 100;
 
 	public UploadProgress()
 	{
