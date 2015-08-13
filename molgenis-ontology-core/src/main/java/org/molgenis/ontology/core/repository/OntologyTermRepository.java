@@ -180,15 +180,11 @@ public class OntologyTermRepository
 	{
 		String nodePath = nodePathEntity.getString(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH);
 
-		Iterable<Entity> allNodePathEntities = dataService.findAll(OntologyTermNodePathMetaData.ENTITY_NAME,
-				new QueryImpl(new QueryRule(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH, Operator.FUZZY_MATCH,
-						"\"" + nodePath + "\"")));
-
-		List<Entity> childNodePathEntities = FluentIterable.from(allNodePathEntities)
+		Iterable<Entity> relatedOntologyTermEntities = dataService.findAll(OntologyTermMetaData.ENTITY_NAME,
+				new QueryImpl(new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH, Operator.FUZZY_MATCH, "\""
+						+ nodePath + "\"")));
+		Iterable<Entity> childOntologyTermEntities = FluentIterable.from(relatedOntologyTermEntities)
 				.filter(entity -> qualifiedNodePath(nodePath, entity)).toList();
-
-		Iterable<Entity> childOntologyTermEntities = dataService.findAll(OntologyTermMetaData.ENTITY_NAME,
-				new QueryImpl().in(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH, childNodePathEntities));
 
 		return Lists.newArrayList(Iterables
 				.transform(childOntologyTermEntities, OntologyTermRepository::toOntologyTerm));
@@ -196,8 +192,11 @@ public class OntologyTermRepository
 
 	private boolean qualifiedNodePath(String nodePath, Entity entity)
 	{
-		String childNodePath = entity.getString(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH);
-		return !StringUtils.equals(nodePath, childNodePath) && childNodePath.startsWith(nodePath);
+		Iterable<Entity> nodePathEntities = entity.getEntities(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH);
+		return Lists.newArrayList(nodePathEntities).stream().anyMatch(nodePathEntity -> {
+			String childNodePath = nodePathEntity.getString(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH);
+			return !StringUtils.equals(nodePath, childNodePath) && childNodePath.startsWith(nodePath);
+		});
 	}
 
 	private static OntologyTerm toOntologyTerm(Entity entity)
