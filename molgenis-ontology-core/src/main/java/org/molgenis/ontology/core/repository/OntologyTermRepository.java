@@ -166,23 +166,28 @@ public class OntologyTermRepository
 	 */
 	public List<OntologyTerm> getChildren(OntologyTerm ontologyTerm)
 	{
-		Entity ontologyTermEntity = dataService.findOne(ENTITY_NAME,
+		Iterable<Entity> ontologyTermEntities = dataService.findAll(ENTITY_NAME,
 				QueryImpl.EQ(ONTOLOGY_TERM_IRI, ontologyTerm.getIRI()));
 
 		List<OntologyTerm> children = new ArrayList<OntologyTerm>();
-		ontologyTermEntity.getEntities(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH).forEach(
-				ontologyTermNodePathEntity -> children
-						.addAll(getChildOntologyTermsByNodePath(ontologyTermNodePathEntity)));
+		for (Entity ontologyTermEntity : ontologyTermEntities)
+		{
+			Entity ontologyEntity = ontologyTermEntity.getEntity(OntologyTermMetaData.ONTOLOGY);
+			ontologyTermEntity.getEntities(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH).forEach(
+					ontologyTermNodePathEntity -> children.addAll(getChildOntologyTermsByNodePath(ontologyEntity,
+							ontologyTermNodePathEntity)));
+		}
 		return children;
 	}
 
-	public List<OntologyTerm> getChildOntologyTermsByNodePath(Entity nodePathEntity)
+	public List<OntologyTerm> getChildOntologyTermsByNodePath(Entity ontologyEntity, Entity nodePathEntity)
 	{
 		String nodePath = nodePathEntity.getString(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH);
 
 		Iterable<Entity> relatedOntologyTermEntities = dataService.findAll(OntologyTermMetaData.ENTITY_NAME,
 				new QueryImpl(new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH, Operator.FUZZY_MATCH, "\""
-						+ nodePath + "\"")));
+						+ nodePath + "\"")).and().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity));
+
 		Iterable<Entity> childOntologyTermEntities = FluentIterable.from(relatedOntologyTermEntities)
 				.filter(entity -> qualifiedNodePath(nodePath, entity)).toList();
 
