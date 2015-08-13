@@ -50,6 +50,7 @@ public class MatchInputTermBatchService
 	{
 		String entityName = repository.getName();
 		String userName = molgenisUser.getUsername();
+		uploadProgress.registerUser(userName, entityName, (int) repository.count());
 
 		// Add the original input dataset to database
 		dataService.getMeta().addEntityMeta(repository.getEntityMetaData());
@@ -66,7 +67,6 @@ public class MatchInputTermBatchService
 		mapEntity.set(MatchingTaskEntityMetaData.THRESHOLD, threshold);
 		dataService.add(MatchingTaskEntityMetaData.ENTITY_NAME, mapEntity);
 		dataService.getRepository(MatchingTaskEntityMetaData.ENTITY_NAME).flush();
-		uploadProgress.registerUser(userName, entityName, (int) repository.count());
 		try
 		{
 			// Match input terms with code
