@@ -17,6 +17,8 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermNodePathMetaData;
@@ -179,7 +181,8 @@ public class OntologyTermRepository
 		String nodePath = nodePathEntity.getString(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH);
 
 		Iterable<Entity> allNodePathEntities = dataService.findAll(OntologyTermNodePathMetaData.ENTITY_NAME,
-				new QueryImpl().like(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH, nodePath));
+				new QueryImpl(new QueryRule(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH, Operator.FUZZY_MATCH,
+						"\"" + nodePath + "\"")));
 
 		List<Entity> childNodePathEntities = FluentIterable.from(allNodePathEntities)
 				.filter(entity -> qualifiedNodePath(nodePath, entity)).toList();
@@ -194,7 +197,7 @@ public class OntologyTermRepository
 	private boolean qualifiedNodePath(String nodePath, Entity entity)
 	{
 		String childNodePath = entity.getString(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH);
-		return !StringUtils.equals(nodePath, childNodePath) && childNodePath.contains(nodePath);
+		return !StringUtils.equals(nodePath, childNodePath) && childNodePath.startsWith(nodePath);
 	}
 
 	private static OntologyTerm toOntologyTerm(Entity entity)
