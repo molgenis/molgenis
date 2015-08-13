@@ -218,15 +218,8 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 				RuntimeProperty property = getProperty(key);
 				if (property != null)
 				{
-					String rtpValue = property.getValue();
-					String value = appSettings.getTrackingCodeFooter();
-					if (!rtpValue.equals(value))
-					{
-						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
-						appSettings.setTrackingCodeFooter(value);
-					}
-					LOG.info("Deleting RuntimeProperty [" + key + "]");
-					dataService.delete(ENTITY_NAME, property.getId());
+					LOG.warn(
+							"RuntimeProperty app.trackingcode.header cannot be migrated to AppSettings automatically, please set the Google Analytics tracking id manually in Application settings and remove the RuntimeProperty.");
 				}
 			}
 
