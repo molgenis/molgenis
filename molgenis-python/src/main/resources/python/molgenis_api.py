@@ -178,8 +178,9 @@ class Connect_Molgenis():
         data = {k: v for k, v in data.items() if v!=None}
         data = dict([a, str(x)] for a, x in data.iteritems() if len(str(x).strip())>0)
         return data
-            
-    def add_entity_row(self, entity_name, data, validate_json=False, add_datetime=False, datetime_column='datetime_added', added_by=False, added_by_column='added_by'):
+    _add_datetime_default = False
+    _added_by_default = False
+    def add_entity_row(self, entity_name, data, validate_json=False, add_datetime=None, datetime_column='datetime_added', added_by=None, added_by_column='added_by'):
         '''Add a row to an entity
         
         Args:
@@ -195,6 +196,10 @@ class Connect_Molgenis():
         Returns:
             added_id (string): Id of the row that got added
         '''
+        if not add_datetime:
+            add_datetime = self._add_datetime_default
+        if not added_by:
+            added_by = self._added_by_default
         if timeit.default_timer()-self.login_time > 30*60:
             # molgenis login head times out after a certain time, so after 30 minutes resend login request
             self.headers = self._construct_login_header()
@@ -210,7 +215,7 @@ class Connect_Molgenis():
         added_id = server_response.headers['location'].split('/')[-1]
         return added_id
     
-    def add_file(self, file_path, description, entity, file_name=None, add_datetime=False, datetime_column='datetime_added', added_by=False, added_by_column='added_by'):
+    def add_file(self, file_path, description, entity, file_name=None, add_datetime=False, datetime_column='datetime_added', added_by=None, added_by_column='added_by'):
         '''Add a file to entity File.
         
         Args:
@@ -230,6 +235,10 @@ class Connect_Molgenis():
             >>> print connection.add_file('/Users/Niek/UMCG/test/data/ATACseq/rundir/QC/FastQC_0.sh')
             AAAACTWVCYDZ6YBTJMJDWXQAAE
         '''
+        if not add_datetime:
+            add_datetime = self._add_datetime_default
+        if not added_by:
+            added_by = self._added_by_default
         if not file_name:
             file_name = os.path.basename(file_path)
         if not os.path.isfile(file_path):
@@ -294,8 +303,8 @@ class Connect_Molgenis():
                         +str(int(server_response_json['num'])-int(server_response_json['total']))+' rows will not be in the results.')
             self.logger.info('Selected '+str(server_response_json['total'])+' row(s).')
         return server_response_json
-
-    def update_entity_rows(self, entity_name, query, data, add_datetime=False, datetime_column='datetime_added', updated_by=False, updated_by_column='updated_by'):
+    _updated_by_default = False
+    def update_entity_rows(self, entity_name, query, data, add_datetime=None, datetime_column='datetime_added', updated_by = None, updated_by_column='updated_by'):
         '''Update an entity row
     
         Args:
@@ -305,6 +314,10 @@ class Connect_Molgenis():
             updated_by (bool): If true, add the login name of the person that updated the record
             updated_by_column (string): column name where to add name of person that updated record
         '''
+        if not add_datetime:
+            add_datetime = self._add_datetime_default
+        if not updated_by:
+            updated_by = self._updated_by_default
         self.validate_data(entity_name, data)
         entity_data = self.query_entity_rows(entity_name, query)
         if len(entity_data['items']) == 0:
