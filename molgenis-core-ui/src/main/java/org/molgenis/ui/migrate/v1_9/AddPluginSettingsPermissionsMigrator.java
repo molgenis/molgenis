@@ -37,7 +37,7 @@ public class AddPluginSettingsPermissionsMigrator implements ApplicationListener
 
 	private AddPluginSettingsPermissionsMigrator migrateSettings()
 	{
-		if (molgenisVersionService.getMolgenisVersionFromServerProperties() == 13)
+		if (molgenisVersionService.getMolgenisVersionFromServerProperties() == 14)
 		{
 			LOG.info("Creating UserAuthority and GroupAuthority instances for plugin settings entities ...");
 			for (UserAuthority userAuthority : dataService.findAll(UserAuthority.ENTITY_NAME, UserAuthority.class))
@@ -70,7 +70,8 @@ public class AddPluginSettingsPermissionsMigrator implements ApplicationListener
 						MolgenisUser molgenisUser = userAuthority.getMolgenisUser();
 						String settingsRole = AUTHORITY_PLUGIN_PREFIX + "SETTINGS_" + pluginId + "_"
 								+ Permission.READ.toString();
-						if (dataService.count(UserAuthority.ENTITY_NAME,
+						if (dataService.count(
+								UserAuthority.ENTITY_NAME,
 								new QueryImpl().eq(UserAuthority.ROLE, settingsRole).and()
 										.eq(UserAuthority.MOLGENISUSER, molgenisUser)) == 0)
 						{

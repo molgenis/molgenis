@@ -42,7 +42,7 @@ public class RuntimePropertyToDataExplorerSettingsMigrator implements Applicatio
 
 	private RuntimePropertyToDataExplorerSettingsMigrator migrateSettings()
 	{
-		if (molgenisVersionService.getMolgenisVersionFromServerProperties() == 13)
+		if (molgenisVersionService.getMolgenisVersionFromServerProperties() == 14)
 		{
 			LOG.info("Migrating RuntimeProperty instances to DataExplorerSettings instance ...");
 
