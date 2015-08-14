@@ -600,7 +600,8 @@
 			for(var key in attributes) {
 				if(attributes.hasOwnProperty(key)) {
 					var attr = attributes[key];
-					if(this.props.mode !== 'create' || (this.props.mode === 'create' && attr.auto !== true)) {
+					if((this.props.mode !== 'create' || (this.props.mode === 'create' && attr.auto !== true)) && 
+						((attr.visibleExpression === undefined) || (this.props.entity.allAttributes[attr.name].visible === true))) {
 						var ControlFactory = attr.fieldType === 'COMPOUND' ? molgenis.ui.FormControlGroup : molgenis.ui.FormControl;
 						var controlProps = {
 							entity : this.props.entity,
@@ -614,7 +615,7 @@
 							categorigalMrefShowSelectAll: this.props.categorigalMrefShowSelectAll,
 							showAsteriskIfNotNillable: this.props.showAsteriskIfNotNillable,
 							onValueChange : this.props.onValueChange,
-							key : key
+							key : key 
 						};
 						
 						if (attr.fieldType === 'COMPOUND') {
@@ -633,9 +634,7 @@
 						}
 						
 						var Control = ControlFactory(controlProps);
-						if
-						((attr.nillable === true && this.props.hideOptional === true || (this.props.showHidden === false && attr.visible === false))
-						|| ((attr.visibleExpression !== undefined) && (this.props.entity.allAttributes[attr.name].visible === false))) {
+						if(attr.nillable === true && this.props.hideOptional === true || (this.props.showHidden === false && attr.visible === false)) {
 							Control = div({className: 'hide', key: key + '-hide'}, Control);
 						} else if(this.props.enableFormIndex === true && attr.fieldType === 'COMPOUND') {
 							controls.push(div({id: this._getLinkId(attr), className: 'anchor', key: key + '-link'}));
