@@ -70,25 +70,47 @@
 		},
 		_setDefaultValue : function(attr, entityInstance) {
 			try {
-				if (attr.refEntity) {
-					if (attr.fieldType == 'XREF' || attr.refEntity.fieldType == 'CATEGORICAL') {
+				switch(attr.fieldType) {
+					case 'BOOL':
+						entityInstance[attr.name] = attr.defaultValue.toLowerCase() === 'true';
+						break;
+					case 'INT':
+					case 'LONG':
+						entityInstance[attr.name] = parseInt(attr.defaultValue);
+						break;
+					case 'DECIMAL':
+						entityInstance[attr.name] = parseFloat(attr.defaultValue);
+						break;
+					case 'DATE':
+						entityInstance[attr.name] = attr.defaultValue.substring(0, 10);
+						break;
+					case 'XREF':
+					case 'CATEGORICAL':
 						var value = {
 							href : attr.refEntity.hrefCollection + '/' + attr.defaultValue
 						};
+						// TODO: both name and value for the label attribute are missing!
 						value[attr.refEntity.idAttribute] = attr.defaultValue;
 						entityInstance[attr.name] = value;
-					} else {
+						break;
+					case 'MREF':
+					case 'CATEGORICAL_MREF':
 						entityInstance[attr.name] = {
 							href : attr.refEntity.hrefCollection,
 							items : attr.defaultValue.split(',').map(function(idValue) {
 								var value = {};
+								// TODO: both name and value for the label attribute are missing!
 								value[attr.refEntity.idAttribute] = idValue;
 								return value;
 							})
 						};
-					}
-				} else {
-					entityInstance[attr.name] = attr.defaultValue;
+						break;
+					case 'COMPOUND':
+						// makes no sense to have a defaultValue for a compound
+						break;
+					default:
+						entityInstance[attr.name] = attr.defaultValue;
+						break;
 				}
 			} catch (exception) {
 				console.log("Failed to set default value for attr " + attr.name, exception);
