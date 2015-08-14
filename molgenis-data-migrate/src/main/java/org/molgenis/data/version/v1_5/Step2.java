@@ -250,7 +250,7 @@ public class Step2 extends MolgenisUpgrade
 		attribute.setVisible((boolean) attributeMap.get(ATTRIBUTE_VISIBLE));
 		if (attributeMap.containsKey(ATTRIBUTE_DEFAULT_VALUE))
 		{
-			attribute.setDefaultValue(attributeMap.get(ATTRIBUTE_DEFAULT_VALUE));
+			attribute.setDefaultValue((String) attributeMap.get(ATTRIBUTE_DEFAULT_VALUE));
 		}
 		attribute.setIdAttribute((boolean) attributeMap.get(ATTRIBUTE_ID_ATTRIBUTE));
 		attribute.setLabelAttribute((boolean) attributeMap.get(ATTRIBUTE_LABEL_ATTRIBUTE));

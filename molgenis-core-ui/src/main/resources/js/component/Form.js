@@ -73,6 +73,30 @@
 				if (attr.visibleExpression) {
 					attr.visible = this._resolveBoolExpression(attr.visibleExpression, entityInstance);
 				}
+				// set default value
+				// TODO: error handling!
+				if (attr.defaultValue && this.props.mode == 'create') {
+					if(attr.refEntity) {
+						if(attr.fieldType == 'XREF' || attr.refEntity.fieldType == 'CATEGORICAL') {
+					    	var value = {
+									href: attr.refEntity.hrefCollection + '/' + attr.defaultValue,
+							};
+							value[attr.refEntity.idAttribute] = attr.defaultValue;
+							entityInstance[attr.name] = value;
+						} else {
+							entityInstance[attr.name] = {
+									href : attr.refEntity.hrefCollection,
+									items : attr.defaultValue.split(',').map( function(idValue){
+										var value = {};
+										value[attr.refEntity.idAttribute] = idValue;
+										return value;
+									})
+							};
+						}
+					} else {
+						entityInstance[attr.name] = attr.defaultValue;
+					}
+				}
 			}, this);
 		},
 		render: function() {
