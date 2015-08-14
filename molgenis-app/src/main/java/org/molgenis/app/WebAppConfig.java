@@ -13,6 +13,7 @@ import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.jpa.JpaRepositoryCollection;
+import org.molgenis.data.migrate.v1_9.Step14UpdateAttributeMapping;
 import org.molgenis.data.mysql.AsyncJdbcTemplate;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
@@ -120,6 +121,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(new Step11ConvertNames(singleConnectionDS));
 		upgradeService.addUpgrade(new Step12ChangeElasticsearchTokenizer(embeddedElasticSearchServiceFactory));
 		upgradeService.addUpgrade(new Step13RemoveCatalogueMenuEntries(dataSource));
+		upgradeService.addUpgrade(new Step14UpdateAttributeMapping(dataSource));
 	}
 
 	@Override
