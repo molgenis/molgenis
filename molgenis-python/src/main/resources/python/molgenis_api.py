@@ -169,7 +169,7 @@ class Connect_Molgenis():
             self.logger.warning('The ID attribute ('+entity_id_attribute+') of the entity ('+entity_name+') you are adding a row to is set to `auto`.\n'\
                          +'The value you gave for id ('+str(data[entity_id_attribute])+') will not be used. Instead, the ID will be a random string.')
 
-    def _sanitize_data(self, data, add_datetime, datetime_column, data, add_datetime, datetime_column, added_by, added_by_column):
+    def _sanitize_data(self, data, add_datetime, datetime_column, added_by, added_by_column):
         if add_datetime:
             data[datetime_column] = str(datetime.now())
         if added_by:
