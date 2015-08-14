@@ -21,7 +21,7 @@
 			saveOnBlur: React.PropTypes.bool, // save form control values on blur
 			enableFormIndex: React.PropTypes.bool, // whether or not to show a form index to navigate to form controls
 			showHidden: React.PropTypes.bool, // whether or not to show not-visible attributes
-			categorigalMrefShowSelectAll: React.PropTypes.bool, //whether to show 'select all' and 'hide all' links under the categorical mref checkboxes
+			categoricalMrefShowSelectAll: React.PropTypes.bool, //whether to show 'select all' and 'hide all' links under the categorical mref checkboxes
 			showAsteriskIfNotNillable: React.PropTypes.bool, //whether to show a '*' after the label when an attribute is not nillable
 			beforeSubmit: React.PropTypes.func,
 			onSubmitCancel: React.PropTypes.func,
@@ -39,7 +39,7 @@
 				colOffset: 3,
 				saveOnBlur: false,
 				showHidden: false,
-				categorigalMrefShowSelectAll: true,
+				categoricalMrefShowSelectAll: true,
 				showAsteriskIfNotNillable: true,
 				beforeSubmit: function() {},
 				onSubmitCancel: function() {},
@@ -68,34 +68,61 @@
 				hideOptional: false
 			};
 		},
+		_setDefaultValue : function(attr, entityInstance) {
+			try {
+				switch(attr.fieldType) {
+					case 'BOOL':
+						entityInstance[attr.name] = attr.defaultValue.toLowerCase() === 'true';
+						break;
+					case 'INT':
+					case 'LONG':
+						entityInstance[attr.name] = parseInt(attr.defaultValue);
+						break;
+					case 'DECIMAL':
+						entityInstance[attr.name] = parseFloat(attr.defaultValue);
+						break;
+					case 'DATE':
+						entityInstance[attr.name] = attr.defaultValue.substring(0, 10);
+						break;
+					case 'XREF':
+					case 'CATEGORICAL':
+						var value = {
+							href : attr.refEntity.hrefCollection + '/' + attr.defaultValue
+						};
+						// TODO: both name and value for the label attribute are missing!
+						value[attr.refEntity.idAttribute] = attr.defaultValue;
+						entityInstance[attr.name] = value;
+						break;
+					case 'MREF':
+					case 'CATEGORICAL_MREF':
+						entityInstance[attr.name] = {
+							href : attr.refEntity.hrefCollection,
+							items : attr.defaultValue.split(',').map(function(idValue) {
+								var value = {};
+								// TODO: both name and value for the label attribute are missing!
+								value[attr.refEntity.idAttribute] = idValue;
+								return value;
+							})
+						};
+						break;
+					case 'COMPOUND':
+						// makes no sense to have a defaultValue for a compound
+						break;
+					default:
+						entityInstance[attr.name] = attr.defaultValue;
+						break;
+				}
+			} catch (exception) {
+				console.log("Failed to set default value for attr " + attr.name, exception);
+			}
+		},
 		_willSetEntityInstance: function(entity, entityInstance) {
 			_.each(entity.allAttributes, function(attr) {
 				if (attr.visibleExpression) {
 					attr.visible = this._resolveBoolExpression(attr.visibleExpression, entityInstance);
 				}
-				// set default value
-				// TODO: error handling!
 				if (attr.defaultValue && this.props.mode == 'create') {
-					if(attr.refEntity) {
-						if(attr.fieldType == 'XREF' || attr.refEntity.fieldType == 'CATEGORICAL') {
-					    	var value = {
-									href: attr.refEntity.hrefCollection + '/' + attr.defaultValue,
-							};
-							value[attr.refEntity.idAttribute] = attr.defaultValue;
-							entityInstance[attr.name] = value;
-						} else {
-							entityInstance[attr.name] = {
-									href : attr.refEntity.hrefCollection,
-									items : attr.defaultValue.split(',').map( function(idValue){
-										var value = {};
-										value[attr.refEntity.idAttribute] = idValue;
-										return value;
-									})
-							};
-						}
-					} else {
-						entityInstance[attr.name] = attr.defaultValue;
-					}
+					this._setDefaultValue(attr, entityInstance);
 				}
 			}, this);
 		},
@@ -189,7 +216,7 @@
 				hideOptional: this.state.hideOptional,
 				showHidden: this.props.showHidden,
 				enableFormIndex: this.props.enableFormIndex,
-				categorigalMrefShowSelectAll: this.props.categorigalMrefShowSelectAll,
+				categoricalMrefShowSelectAll: this.props.categoricalMrefShowSelectAll,
 				showAsteriskIfNotNillable: this.props.showAsteriskIfNotNillable,
 				onValueChange : this._handleValueChange,
 				onBlur: this._handleBlur,
@@ -609,7 +636,7 @@
 			colOffset: React.PropTypes.number,
 			hideOptional: React.PropTypes.bool,
 			showHidden: React.PropTypes.bool,
-			categorigalMrefShowSelectAll: React.PropTypes.bool,
+			categoricalMrefShowSelectAll: React.PropTypes.bool,
 			showAsteriskIfNotNillable: React.PropTypes.bool,
 			enableFormIndex: React.PropTypes.bool,
 			errorMessages: React.PropTypes.object.isRequired,
@@ -636,7 +663,7 @@
 							formLayout : this.props.formLayout,
 							colOffset: this.props.colOffset,
 							onBlur: this.props.onBlur,
-							categorigalMrefShowSelectAll: this.props.categorigalMrefShowSelectAll,
+							categoricalMrefShowSelectAll: this.props.categoricalMrefShowSelectAll,
 							showAsteriskIfNotNillable: this.props.showAsteriskIfNotNillable,
 							onValueChange : this.props.onValueChange,
 							key : key 
