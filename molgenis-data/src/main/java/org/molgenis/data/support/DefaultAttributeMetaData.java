@@ -167,10 +167,6 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	@Override
 	public String getDefaultValue()
 	{
-		if (getExpression() != null)
-		{
-			return null;
-		}
 		return defaultValue;
 	}
 
