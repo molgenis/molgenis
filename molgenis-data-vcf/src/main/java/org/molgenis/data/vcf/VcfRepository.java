@@ -177,6 +177,14 @@ public class VcfRepository extends AbstractRepository
 			{
 				val = null;
 			}
+			if (val == null)
+			{
+				if (entityMetaData.getAttribute(getInfoPrefix() + vcfInfo.getKey()).getDataType().getEnumType()
+						.equals(MolgenisFieldTypes.FieldTypeEnum.BOOL))
+				{
+					val = true;
+				}
+			}
 			entity.set(getInfoPrefix() + vcfInfo.getKey(), val);
 		}
 		if (hasFormatMetaData)
@@ -248,6 +256,10 @@ public class VcfRepository extends AbstractRepository
 				{
 					DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData(getInfoPrefix()
 							+ info.getId(), vcfReaderFormatToMolgenisType(info)).setAggregateable(true);
+					if (attributeMetaData.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.BOOL))
+					{
+						attributeMetaData.setDefaultValue(false);
+					}
 					attributeMetaData.setDescription(info.getDescription());
 					metadataInfoField.add(attributeMetaData);
 				}
