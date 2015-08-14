@@ -13,6 +13,7 @@ import timeit
 import time
 import logging
 import ConfigParser
+from datetime import datetime
 
 class Connect_Molgenis():
     """Some simple methods for adding, updating and retrieving rows from Molgenis though the REST API
@@ -167,8 +168,18 @@ class Connect_Molgenis():
         if entity_id_attribute in data and self.get_column_meta_data(entity_name,entity_id_attribute)['auto']:
             self.logger.warning('The ID attribute ('+entity_id_attribute+') of the entity ('+entity_name+') you are adding a row to is set to `auto`.\n'\
                          +'The value you gave for id ('+str(data[entity_id_attribute])+') will not be used. Instead, the ID will be a random string.')
-        
-    def add_entity_row(self, entity_name, data, validate_json=False):
+
+    def _sanitize_data(self, data, add_datetime, datetime_column, data, add_datetime, datetime_column, added_by, added_by_column):
+        if add_datetime:
+            data[datetime_column] = str(datetime.now())
+        if added_by:
+            data[added_by_column] = security.retrieve('Username')
+        # make all values str and remove if value is None or empty string
+        data = {k: v for k, v in data.items() if v!=None}
+        data = dict([a, str(x)] for a, x in data.iteritems() if len(str(x).strip())>0)
+        return data
+            
+    def add_entity_row(self, entity_name, data, validate_json=False, add_datetime=False, datetime_column='datetime_added', added_by=False, added_by_column='added_by'):
         '''Add a row to an entity
         
         Args:
@@ -176,19 +187,22 @@ class Connect_Molgenis():
             json_data (dict): Key = column name, value = column value
             validate_json (bool): If True, check if the given data keys correspond with the column names of entity_name.
                               If adding entity rows seems slow, try setting to False (def: False)
-                              
+            add_datetime (bool): If True, add a datetime to the column <datetime_column> (def: False)
+            datetime_column (str): column name where to add datetime
+            added_by (bool): If true, add the login name of the person that updated the record
+            added_by_column (string): column name where to add name of person that updated record
+            
         Returns:
             added_id (string): Id of the row that got added
         '''
         if timeit.default_timer()-self.login_time > 30*60:
+            # molgenis login head times out after a certain time, so after 30 minutes resend login request
             self.headers = self._construct_login_header()
         # make a string of json data (dictionary) with key=column name and value=value you want (works for 1 individual, Jonatan is going to find out how to to it with multiple)
         # post to the entity with the json data
         if validate_json:
             self.validate_data(entity_name, data)
-        # make all values str and remove if value is None
-        data = {k: v for k, v in data.items() if v!=None}
-        data = dict([a, str(x)] for a, x in data.iteritems() if len(str(x).strip())>0)
+        data = self._sanitize_data(data, add_datetime, datetime_column, added_by, added_by_column)
         request_url = self.api_url+'/'+entity_name+'/'
         server_response = requests.post(request_url, data=json.dumps(data), headers=self.headers)
         self.added_rows += 1
@@ -196,7 +210,7 @@ class Connect_Molgenis():
         added_id = server_response.headers['location'].split('/')[-1]
         return added_id
     
-    def add_file(self, file_path, description, entity, file_name=None):
+    def add_file(self, file_path, description, entity, file_name=None, add_datetime=False, datetime_column='datetime_added', added_by=False, added_by_column='added_by'):
         '''Add a file to entity File.
         
         Args:
@@ -204,7 +218,9 @@ class Connect_Molgenis():
             description (description): Description of the file
             entity (string): Name of the entity to add the files to
             file_name (string): Name of the file. If None is set to basename of filepath (def: None)
-        
+            added_by (bool): If true, add the login name of the person that updated the record
+            added_by_column (string): column name where to add name of person that updated record
+            
         Returns:
             file_id (string): ID if the file that got uploaded (for xref)
             
@@ -222,9 +238,10 @@ class Connect_Molgenis():
         file_post_header = self.headers
         del(file_post_header['Accept'])
         del(file_post_header['Content-type'])
+        data = self._sanitize_data({'description': description}, add_datetime, datetime_column, added_by, added_by_column)
         server_response = requests.post(self.api_url+'/'+entity, 
                                         files={'attachment':(os.path.basename(file_path), open(file_path,'rb'))},
-                                        data={'description': description},
+                                        data=data,
                                         headers = file_post_header)
         self.check_server_response(server_response,'Upload file',data_used = str(file_path))
         added_id = server_response.headers['location'].split('/')[-1]
@@ -278,19 +295,22 @@ class Connect_Molgenis():
             self.logger.info('Selected '+str(server_response_json['total'])+' row(s).')
         return server_response_json
 
-    def update_entity_rows(self, entity_name, query, data):
+    def update_entity_rows(self, entity_name, query, data, add_datetime=False, datetime_column='datetime_added', updated_by=False, updated_by_column='updated_by'):
         '''Update an entity row
     
         Args:
             entity_name (string): Name of the entity to update
             query (list): List of dictionaries which contain query to select the row to update (see documentation of query_entity_rows)
             data (dict):  Key = column name, value = column value
+            updated_by (bool): If true, add the login name of the person that updated the record
+            updated_by_column (string): column name where to add name of person that updated record
         '''
         self.validate_data(entity_name, data)
         entity_data = self.query_entity_rows(entity_name, query)
         if len(entity_data['items']) == 0:
             self.logger.error('Query returned 0 results, no row to update.')
             raise Exception('Query returned 0 results, no row to update.')
+        data = self._sanitize_data(data, add_datetime, datetime_column, updated_by, updated_by_column)
         id_attribute = self.get_id_attribute(entity_name)
         server_response_list = [] 
         for entity_items in entity_data['items']:
