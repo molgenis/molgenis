@@ -258,7 +258,7 @@ public class VcfRepository extends AbstractRepository
 							+ info.getId(), vcfReaderFormatToMolgenisType(info)).setAggregateable(true);
 					if (attributeMetaData.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.BOOL))
 					{
-						attributeMetaData.setDefaultValue(false);
+						attributeMetaData.setDefaultValue("false");
 					}
 					attributeMetaData.setDescription(info.getDescription());
 					metadataInfoField.add(attributeMetaData);
