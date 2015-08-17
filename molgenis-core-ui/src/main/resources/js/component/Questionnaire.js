@@ -52,7 +52,7 @@
     	        enableOptionalFilter: false,
     	        saveOnBlur: true,
     	        enableFormIndex: true,
-    	        categorigalMrefShowSelectAll: false,
+    	        categoricalMrefShowSelectAll: false,
     	        showAsteriskIfNotNillable: false,
     	        beforeSubmit: this._handleBeforeSubmit,
     	        onValueChange: this._handleValueChange,
