@@ -1,46 +1,19 @@
 package org.molgenis.ui.menu;
 
-import org.molgenis.framework.server.MolgenisSettings;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.molgenis.ui.MolgenisUi;
 import org.molgenis.ui.MolgenisUiMenu;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class MenuMolgenisUi implements MolgenisUi
 {
-
-	private final MolgenisSettings molgenisSettings;
 	private final MenuReaderService menuReaderService;
 
 	@Autowired
-	public MenuMolgenisUi(MolgenisSettings molgenisSettings, MenuReaderService menuReaderService)
+	public MenuMolgenisUi(MenuReaderService menuReaderService)
 	{
-		if (molgenisSettings == null) throw new IllegalArgumentException("molgenisSettings is null");
-		this.molgenisSettings = molgenisSettings;
-		this.menuReaderService = menuReaderService;
-	}
-
-	@Override
-	public String getTitle()
-	{
-		return molgenisSettings.getProperty(KEY_TITLE, DEFAULT_TITLE);
-	}
-
-	@Override
-	public void setHrefLogo(String file)
-	{
-		molgenisSettings.setProperty(KEY_HREF_LOGO, file);
-	}
-
-	@Override
-	public String getHrefLogo()
-	{
-		return molgenisSettings.getProperty(KEY_HREF_LOGO);
-	}
-
-	@Override
-	public String getHrefCss()
-	{
-		return molgenisSettings.getProperty(KEY_HREF_CSS);
+		this.menuReaderService = checkNotNull(menuReaderService);
 	}
 
 	@Override

@@ -1,6 +1,5 @@
 package org.molgenis.data.vcf.utils;
 
-import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
@@ -18,7 +17,6 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +57,6 @@ public class VcfUtilsTest
 	public AttributeMetaData attributeMetaDataCantAnnotateRef;
 	public AttributeMetaData attributeMetaDataCantAnnotateAlt;
 
-	public MolgenisSettings settings = mock(MolgenisSettings.class);
 	public ArrayList<Entity> entities;
 
 	@BeforeMethod
@@ -86,12 +83,12 @@ public class VcfUtilsTest
 		entity3 = new MapEntity(metaDataCanAnnotate);
 		entity4 = new MapEntity(metaDataCanAnnotate);
 
-		metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.ID,
-				MolgenisFieldTypes.FieldTypeEnum.STRING));
-		metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.QUAL,
-				MolgenisFieldTypes.FieldTypeEnum.STRING));
-		metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.FILTER,
-				MolgenisFieldTypes.FieldTypeEnum.STRING));
+		metaDataCanAnnotate.addAttributeMetaData(
+				new DefaultAttributeMetaData(VcfRepository.ID, MolgenisFieldTypes.FieldTypeEnum.STRING));
+		metaDataCanAnnotate.addAttributeMetaData(
+				new DefaultAttributeMetaData(VcfRepository.QUAL, MolgenisFieldTypes.FieldTypeEnum.STRING));
+		metaDataCanAnnotate.addAttributeMetaData(
+				new DefaultAttributeMetaData(VcfRepository.FILTER, MolgenisFieldTypes.FieldTypeEnum.STRING));
 		DefaultAttributeMetaData INFO = new DefaultAttributeMetaData(VcfRepository.INFO,
 				MolgenisFieldTypes.FieldTypeEnum.COMPOUND);
 		DefaultAttributeMetaData AA = new DefaultAttributeMetaData("AC", MolgenisFieldTypes.FieldTypeEnum.STRING);
@@ -103,8 +100,8 @@ public class VcfUtilsTest
 		metaDataCanAnnotate.addAttributeMetaData(INFO);
 
 		annotatedEntityMetadata = metaDataCanAnnotate;
-		annotatedEntityMetadata.addAttributeMetaData(new DefaultAttributeMetaData("INFO_ANNO",
-				MolgenisFieldTypes.FieldTypeEnum.STRING));
+		annotatedEntityMetadata.addAttributeMetaData(
+				new DefaultAttributeMetaData("INFO_ANNO", MolgenisFieldTypes.FieldTypeEnum.STRING));
 
 		entity1.set(VcfRepository.CHROM, "1");
 		entity1.set(VcfRepository.POS, 10050000);
@@ -149,7 +146,8 @@ public class VcfUtilsTest
 	public void vcfWriterRoundtripTest() throws IOException, MolgenisInvalidFormatException
 	{
 		final File outputVCFFile = File.createTempFile("output", ".vcf");
-		try{
+		try
+		{
 			PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
 
 			File inputVcfFile = new File(ResourceUtils.getFile(getClass(), "/testWriter.vcf").getPath());
@@ -177,21 +175,22 @@ public class VcfUtilsTest
 	public void vcfWriterAnnotateTest() throws IOException, MolgenisInvalidFormatException
 	{
 		final File outputVCFFile = File.createTempFile("output", ".vcf");
-		try{
+		try
+		{
 			PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
-	
+
 			File inputVcfFile = new File(ResourceUtils.getFile(getClass(), "/testWriter.vcf").getPath());
 			File resultVCFWriter = new File(ResourceUtils.getFile(getClass(), "/result_vcfWriter.vcf").getPath());
-	
+
 			VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter,
 					annotatedEntityMetadata.getAttributes(), "INFO_ANNO");
-	
+
 			for (Entity entity : entities)
 			{
 				MapEntity mapEntity = new MapEntity(entity, annotatedEntityMetadata);
 				mapEntity.set("INFO_ANNO", "TEST_" + entity.get(VcfRepository.ID));
 				outputVCFWriter.println(VcfUtils.convertToVCF(mapEntity));
-	
+
 			}
 			outputVCFWriter.close();
 			assertTrue(FileUtils.contentEqualsIgnoreEOL(resultVCFWriter, outputVCFFile, "UTF8"));
