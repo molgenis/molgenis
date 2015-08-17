@@ -7,12 +7,12 @@ import static org.testng.Assert.assertEquals;
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.data.settings.AppSettings;
 import org.testng.annotations.Test;
 
 public class MenuReaderServiceImplTest
 {
-	@Test(expectedExceptions = IllegalArgumentException.class)
+	@Test(expectedExceptions = NullPointerException.class)
 	public void MenuReaderServiceImpl()
 	{
 		new MenuReaderServiceImpl(null);
@@ -21,14 +21,13 @@ public class MenuReaderServiceImplTest
 	@Test
 	public void getMenu()
 	{
-		MolgenisSettings molgenisSettings = mock(MolgenisSettings.class);
-		when(molgenisSettings.getProperty(MenuReaderServiceImpl.KEY_MOLGENIS_MENU)).thenReturn(
-				"{\n" + "	\"type\": \"menu\",\n" + "	\"id\": \"menu\",\n" + "	\"label\": \"Menu\",\n"
-						+ "	\"items\": [{\n" + "		\"type\": \"plugin\",\n" + "		\"id\": \"plugin0\",\n"
-						+ "		\"label\": \"Plugin #0\",\n" + "		\"params\": \"a=0&b=1\"\n" + "	},\n" + "	{\n"
-						+ "		\"type\": \"menu\",\n" + "		\"id\": \"submenu\",\n" + "		\"label\": \"Submenu\",\n"
-						+ "		\"items\": [{\n" + "			\"type\": \"plugin\",\n" + "			\"id\": \"plugin1\",\n"
-						+ "			\"label\": \"Plugin #1\"\n" + "		}]\n" + "	}]\n" + "}");
+		AppSettings appSettings = when(mock(AppSettings.class).getMenu()).thenReturn("{\n" + "	\"type\": \"menu\",\n"
+				+ "	\"id\": \"menu\",\n" + "	\"label\": \"Menu\",\n" + "	\"items\": [{\n"
+				+ "		\"type\": \"plugin\",\n" + "		\"id\": \"plugin0\",\n" + "		\"label\": \"Plugin #0\",\n"
+				+ "		\"params\": \"a=0&b=1\"\n" + "	},\n" + "	{\n" + "		\"type\": \"menu\",\n"
+				+ "		\"id\": \"submenu\",\n" + "		\"label\": \"Submenu\",\n" + "		\"items\": [{\n"
+				+ "			\"type\": \"plugin\",\n" + "			\"id\": \"plugin1\",\n"
+				+ "			\"label\": \"Plugin #1\"\n" + "		}]\n" + "	}]\n" + "}").getMock();
 
 		MenuItem item0 = new MenuItem();
 		item0.setType(MenuItemType.PLUGIN);
@@ -52,6 +51,6 @@ public class MenuReaderServiceImplTest
 		menu.setLabel("Menu");
 		menu.setType(MenuItemType.MENU);
 		menu.setItems(Arrays.asList(item0, submenu));
-		assertEquals(new MenuReaderServiceImpl(molgenisSettings).getMenu(), menu);
+		assertEquals(new MenuReaderServiceImpl(appSettings).getMenu(), menu);
 	}
 }

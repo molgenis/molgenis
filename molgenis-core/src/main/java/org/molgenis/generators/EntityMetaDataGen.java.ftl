@@ -18,6 +18,10 @@ import org.springframework.stereotype.Component;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 
+/**
+ * <#if JavaName(entity) == "RuntimeProperty">@deprecated replaced by setting classes that derive from {@link org.molgenis.data.settings.DefaultSettingsEntity}</#if>
+ */
+<#if JavaName(entity) == "RuntimeProperty">@Deprecated</#if>
 @Component
 public class ${JavaName(entity)}MetaData extends DefaultEntityMetaData
 {
