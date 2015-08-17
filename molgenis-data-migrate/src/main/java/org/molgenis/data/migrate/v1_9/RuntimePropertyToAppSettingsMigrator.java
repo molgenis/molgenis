@@ -155,7 +155,7 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 					if (!rtpValue.equals(value))
 					{
 						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
-						appSettings.setLanguageCode(value);
+						appSettings.setLanguageCode(rtpValue);
 					}
 					LOG.info("Deleting RuntimeProperty [" + key + "]");
 					dataService.delete(ENTITY_NAME, property.getId());
@@ -172,7 +172,7 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 					if (!rtpValue.equals(value))
 					{
 						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
-						appSettings.setBootstrapTheme(value);
+						appSettings.setBootstrapTheme(rtpValue);
 					}
 					LOG.info("Deleting RuntimeProperty [" + key + "]");
 					dataService.delete(ENTITY_NAME, property.getId());
@@ -189,7 +189,7 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 					if (!rtpValue.equals(value))
 					{
 						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
-						appSettings.setCssHref(value);
+						appSettings.setCssHref(rtpValue);
 					}
 					LOG.info("Deleting RuntimeProperty [" + key + "]");
 					dataService.delete(ENTITY_NAME, property.getId());
@@ -206,7 +206,7 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 					if (!rtpValue.equals(value))
 					{
 						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
-						appSettings.setMenu(value);
+						appSettings.setMenu(rtpValue);
 					}
 					LOG.info("Deleting RuntimeProperty [" + key + "]");
 					dataService.delete(ENTITY_NAME, property.getId());
@@ -257,7 +257,7 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 					if (!rtpValue.equals(value))
 					{
 						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
-						appSettings.setAggregateThreshold(value);
+						appSettings.setAggregateThreshold(rtpValue);
 					}
 					LOG.info("Deleting RuntimeProperty [" + key + "]");
 					dataService.delete(ENTITY_NAME, property.getId());
