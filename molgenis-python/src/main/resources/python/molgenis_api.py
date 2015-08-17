@@ -47,9 +47,10 @@ class Connect_Molgenis():
             logfile_mode (string):       Mode of writing to logfile, e.g. w for overwrite or a for append, see `logging` manual for more details (def: w)
             only_warn_duplicates (bool): If set to true, throw warning instead of exception when trying to add duplicate values into unique column (def: False)
         '''
-        logging.basicConfig(level=getattr(logging, logging_level), filename = log_file, filemode = logfile_mode)
+        logging.basicConfig(filename = log_file, filemode = logfile_mode)
         logging.getLogger().addHandler(logging.StreamHandler())
         self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(level=getattr(logging, logging_level))
         self.login_time = None 
         if new_pass_file:
             security.remove_secrets_file()
@@ -239,7 +240,7 @@ class Connect_Molgenis():
         request_url = self.api_url+'/'+entity_name+'/'
         server_response = requests.post(request_url, data=json.dumps(data), headers=self.headers)
         self.added_rows += 1
-        added_id = self.add_entity_row_or_file_server_response(self, entity_name, data, server_response)
+        added_id = self.add_entity_row_or_file_server_response(entity_name, data, server_response)
         return added_id
     
     def add_file(self, file_path, description, entity_name, extra_data=None, file_name=None, add_datetime=False, datetime_column='datetime_added', added_by=None, added_by_column='added_by'):
@@ -285,7 +286,7 @@ class Connect_Molgenis():
                                         files={'attachment':(os.path.basename(file_path), open(file_path,'rb'))},
                                         data=data,
                                         headers = file_post_header)
-        added_id = self.add_entity_row_or_file_server_response(self, entity_name, data, server_response)
+        added_id = self.add_entity_row_or_file_server_response(entity_name, data, server_response)
         return added_id
         
     def query_entity_rows(self, entity_name, query):
@@ -336,7 +337,7 @@ class Connect_Molgenis():
             self.logger.info('Selected '+str(server_response_json['total'])+' row(s).')
         return server_response_json
     _updated_by_default = False
-    def update_entity_rows(self, entity_name, query, data, add_datetime=None, datetime_column='datetime_added', updated_by = None, updated_by_column='updated_by'):
+    def update_entity_rows(self, entity_name, query, data, add_datetime=None, datetime_column='datetime_last_updated', updated_by = None, updated_by_column='updated_by'):
         '''Update an entity row
     
         Args:
@@ -360,23 +361,24 @@ class Connect_Molgenis():
         server_response_list = [] 
         for entity_items in entity_data['items']:
             row_id = entity_items[id_attribute]
-            if len(data) == 1:
-                server_response = requests.put(self.api_url+'/'+entity_name+'/'+row_id+'/'+data.keys()[0], data=data[data.keys()[0]], headers=self.headers)
+            for key in data:
+                server_response = requests.put(self.api_url+'/'+entity_name+'/'+str(row_id)+'/'+key, data='"'+str(data[key])+'"', headers=self.headers)
                 server_response_list.append(server_response)
-                self.check_server_response(server_response, 'Update entity row (single value)', query_used=query,data_used=data,entity_used=entity_name)
-            else:
-                self.logger.error('Updating multiple values at the same time not implemented yet'
-                                 +'Trying to update following data:\n'+str(data))
-                raise NotImplementedError('Updating multiple values at the same time not implemented yet'
-                                         +'Trying to update following data:\n'+str(data))
+                self.check_server_response(server_response, 'Update entity row', query_used=query,data_used=[self.api_url+'/'+entity_name+'/'+str(row_id)+'/'+key, '"'+str(data[key])+'"'],entity_used=entity_name)                
+            # BELOW IS LEGACY CODE
+            #else:
+            #    self.logger.error('Updating multiple values at the same time not implemented yet'
+            #                     +'Trying to update following data:\n'+str(data))
+            #    raise NotImplementedError('Updating multiple values at the same time not implemented yet'
+            #                             +'Trying to update following data:\n'+str(data))
                 # if trying to update multiple columns, column values that are not given will be overwritten with null, so we need to add the existing column data into our dict
                 # DOES NOT WORK FOR X/MREFS!!!
-                for key in entity_items:
-                    if key != id_attribute and key not in data and key!='previous_individuals':
-                        data[key.encode('ascii')] = str(entity_items[key]).encode('ascii')
-                server_response = requests.put(self.api_url+'/'+entity_name+'/'+row_id+'/', data=json.dumps(data), headers=self.headers)
-                server_response_list.append(server_response)
-                self.check_server_response(server_response, 'Update entity row (multiple values)', query_used=query,data_used=data,entity_used=entity_name)
+            #   for key in entity_items:
+            #        if key != id_attribute and key not in data and key!='previous_individuals':
+            #            data[key.encode('ascii')] = str(entity_items[key]).encode('ascii')
+            #    server_response = requests.put(self.api_url+'/'+entity_name+'/'+row_id+'/', data=json.dumps(data), headers=self.headers)
+            #    server_response_list.append(server_response)
+            #    self.check_server_response(server_response, 'Update entity row (multiple values)', query_used=query,data_used=data,entity_used=entity_name)
         return server_response_list
 
     def get_entity_meta_data(self, entity_name):
@@ -496,7 +498,7 @@ class Connect_Molgenis():
         id_attribute = self.get_id_attribute(entity_name)
         for rows in entity_data['items']:
             row_id = rows[id_attribute]
-            server_response = requests.delete(self.api_url+'/'+entity_name+'/'+row_id+'/', headers=self.headers)
+            server_response = requests.delete(self.api_url+'/'+entity_name+'/'+str(row_id)+'/', headers=self.headers)
             self.check_server_response(server_response, 'Delete entity row',entity_used=entity_name,query_used=query_used)
             server_response_list.append(server_response)
         return server_response_list
