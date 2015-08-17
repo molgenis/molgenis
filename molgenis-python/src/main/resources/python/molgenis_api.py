@@ -12,8 +12,8 @@ import security
 import timeit
 import time
 import logging
-import ConfigParser
 from datetime import datetime
+import copy
 
 class Connect_Molgenis():
     """Some simple methods for adding, updating and retrieving rows from Molgenis though the REST API
@@ -35,13 +35,17 @@ class Connect_Molgenis():
         connection.update_entity_row('public_rnaseq_Individuals',[{'field':'id', 'operator':'EQUALS', 'value':'John Doe'}], {'gender':'Female'})  
     """
 
-    def __init__(self, server_url, new_pass_file = True,log_file = 'molgenis.log', logging_level='DEBUG', logfile_mode = 'w'):
+    def __init__(self, server_url, new_pass_file = True,log_file = 'molgenis.log', logging_level='DEBUG', logfile_mode = 'w', only_warn_duplicates=False):
         '''Initialize Python api to talk to Molgenis Rest API
         
         Args:
-            server_url (string): The url to the molgenis server (ex: https://molgenis39.target.rug.nl/)
-            user (string):       Login username
-            password (string):   Login password
+            server_url (string):         The url to the molgenis server (ex: https://molgenis39.target.rug.nl/)
+            user (string):               Login username
+            password (string):           Login password
+            log_file (string):           Path to write logfile with debug info etc to (def: molgenis.log)
+            logging_level (string):      The level of logging to use. See Python's `logging` manual for info on levels (def: DEBUG)
+            logfile_mode (string):       Mode of writing to logfile, e.g. w for overwrite or a for append, see `logging` manual for more details (def: w)
+            only_warn_duplicates (bool): If set to true, throw warning instead of exception when trying to add duplicate values into unique column (def: False)
         '''
         logging.basicConfig(level=getattr(logging, logging_level), filename = log_file, filemode = logfile_mode)
         logging.getLogger().addHandler(logging.StreamHandler())
@@ -57,7 +61,8 @@ class Connect_Molgenis():
         self.column_meta_data = {}
         self.added_rows = 0
         self.time = None
-    
+        self.only_warn_duplicates = only_warn_duplicates
+        
     def _construct_login_header(self):
         '''Log in to the molgenis server and use the retrieve loginResponse token to construct the login header.
          
@@ -178,6 +183,29 @@ class Connect_Molgenis():
         data = {k: v for k, v in data.items() if v!=None}
         data = dict([a, str(x)] for a, x in data.iteritems() if len(str(x).strip())>0)
         return data
+    
+    def add_entity_row_or_file_server_response(self, entity_name, data, server_response):
+        try:
+            self.check_server_response(server_response, time.strftime('%H:%M:%S', time.gmtime(timeit.default_timer()-self.login_time))+ ' - Add row to entity '+entity_name, entity_used=entity_name, data_used=json.dumps(data))
+            added_id = server_response.headers['location'].split('/')[-1]
+        except Exception as e:
+            if self.only_warn_duplicates:
+                if 'Duplicate value' in str(e):
+                    message = 'Duplicate value not added, instead return id of already existing row\n'
+                    message += 'Tried to insert into '+str(entity_name)+' with data:\n'+str(data)
+                    self.logger.debug(message)
+                    unqiue_att = re.search("Duplicate value '(\S+?)' for unique attribute '(\S+?)'", str(e))
+                    row = self.query_entity_rows(entity_name, query = [{'field':unqiue_att.group(2), 'operator':'EQUALS', 'value':unqiue_att.group(1)}])['items'][0]
+                    try:
+                        added_id = row[self.get_id_attribute(entity_name)]
+                    except KeyError:
+                        print row
+                        raise
+                    self.logger.debug('id found for row with duplicate value: '+str(added_id))
+                else:
+                    raise
+        return added_id  
+      
     _add_datetime_default = False
     _added_by_default = False
     def add_entity_row(self, entity_name, data, validate_json=False, add_datetime=None, datetime_column='datetime_added', added_by=None, added_by_column='added_by'):
@@ -211,20 +239,22 @@ class Connect_Molgenis():
         request_url = self.api_url+'/'+entity_name+'/'
         server_response = requests.post(request_url, data=json.dumps(data), headers=self.headers)
         self.added_rows += 1
-        self.check_server_response(server_response, time.strftime('%H:%M:%S', time.gmtime(timeit.default_timer()-self.login_time))+ ' - Add row to entity '+entity_name, entity_used=entity_name, data_used=json.dumps(data))
-        added_id = server_response.headers['location'].split('/')[-1]
+        added_id = self.add_entity_row_or_file_server_response(self, entity_name, data, server_response)
         return added_id
     
-    def add_file(self, file_path, description, entity, file_name=None, add_datetime=False, datetime_column='datetime_added', added_by=None, added_by_column='added_by'):
+    def add_file(self, file_path, description, entity_name, extra_data=None, file_name=None, add_datetime=False, datetime_column='datetime_added', added_by=None, added_by_column='added_by'):
         '''Add a file to entity File.
         
         Args:
             file_path (string): Path to the file to be uploaded
             description (description): Description of the file
             entity (string): Name of the entity to add the files to
+            data (dict): If extra columns have to be added, provide a dict with key column name, value value (def: None)
             file_name (string): Name of the file. If None is set to basename of filepath (def: None)
-            added_by (bool): If true, add the login name of the person that updated the record
-            added_by_column (string): column name where to add name of person that updated record
+            added_by (bool): If true, add the login name of the person that updated the record (def: False)
+            added_by_column (string): column name where to add name of person that updated record (def: added_by)
+            add_datetime (bool): If true, add the datetime that the file was added (def: False)
+            add_datetime_column (string): column name where to add datetime (def: datetime_added)
             
         Returns:
             file_id (string): ID if the file that got uploaded (for xref)
@@ -244,16 +274,18 @@ class Connect_Molgenis():
         if not os.path.isfile(file_path):
             self.logger.error('File not found: '+str(file_path))
             raise IOError('File not found: '+str(file_path))
-        file_post_header = self.headers
+        file_post_header = copy.deepcopy(self.headers)
         del(file_post_header['Accept'])
         del(file_post_header['Content-type'])
-        data = self._sanitize_data({'description': description}, add_datetime, datetime_column, added_by, added_by_column)
-        server_response = requests.post(self.api_url+'/'+entity, 
+        data = {'description': description}
+        if extra_data:
+            data.update(extra_data)
+        data = self._sanitize_data(data, add_datetime, datetime_column, added_by, added_by_column)
+        server_response = requests.post(self.api_url+'/'+entity_name, 
                                         files={'attachment':(os.path.basename(file_path), open(file_path,'rb'))},
                                         data=data,
                                         headers = file_post_header)
-        self.check_server_response(server_response,'Upload file',data_used = str(file_path))
-        added_id = server_response.headers['location'].split('/')[-1]
+        added_id = self.add_entity_row_or_file_server_response(self, entity_name, data, server_response)
         return added_id
         
     def query_entity_rows(self, entity_name, query):
