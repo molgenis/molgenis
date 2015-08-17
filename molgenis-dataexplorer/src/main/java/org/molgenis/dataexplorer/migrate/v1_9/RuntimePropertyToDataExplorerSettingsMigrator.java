@@ -90,7 +90,7 @@ public class RuntimePropertyToDataExplorerSettingsMigrator implements Applicatio
 					if (rtpValue != value)
 					{
 						LOG.info("Updating DataExplorerSettings for RuntimeProperty [" + key + "]");
-						dataExplorerSettings.setLaunchWizard(!rtpValue);
+						dataExplorerSettings.setLaunchWizard(rtpValue);
 					}
 					LOG.info("Deleting RuntimeProperty [" + key + "]");
 					dataService.delete(ENTITY_NAME, property.getId());
