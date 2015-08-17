@@ -214,23 +214,6 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 			}
 
 			{
-				String key = "app.trackingcode.header";
-				RuntimeProperty property = getProperty(key);
-				if (property != null)
-				{
-					String rtpValue = property.getValue();
-					String value = appSettings.getTrackingCodeFooter();
-					if (!rtpValue.equals(value))
-					{
-						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
-						appSettings.setTrackingCodeFooter(value);
-					}
-					LOG.info("Deleting RuntimeProperty [" + key + "]");
-					dataService.delete(ENTITY_NAME, property.getId());
-				}
-			}
-
-			{
 				String key = "app.trackingcode.footer";
 				RuntimeProperty property = getProperty(key);
 				if (property != null)
@@ -240,7 +223,7 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 					if (!rtpValue.equals(value))
 					{
 						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
-						appSettings.setGoogleAnalyticsTrackingId(value);
+						appSettings.setTrackingCodeFooter(rtpValue);
 					}
 					LOG.info("Deleting RuntimeProperty [" + key + "]");
 					dataService.delete(ENTITY_NAME, property.getId());
