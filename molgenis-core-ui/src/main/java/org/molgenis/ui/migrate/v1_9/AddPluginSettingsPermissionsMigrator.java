@@ -1,17 +1,12 @@
 package org.molgenis.ui.migrate.v1_9;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_PLUGIN_COUNT_PREFIX;
-import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_PLUGIN_PREFIX;
-import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX;
-import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX;
-
+import org.molgenis.auth.GroupAuthority;
+import org.molgenis.auth.MolgenisGroup;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.UserAuthority;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.version.MolgenisVersionService;
-import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +14,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_PLUGIN_COUNT_PREFIX;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_PLUGIN_PREFIX;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX;
 
 @Component
 public class AddPluginSettingsPermissionsMigrator implements ApplicationListener<ContextRefreshedEvent>
@@ -68,8 +70,7 @@ public class AddPluginSettingsPermissionsMigrator implements ApplicationListener
 					if (pluginId != null)
 					{
 						MolgenisUser molgenisUser = userAuthority.getMolgenisUser();
-						String settingsRole = AUTHORITY_PLUGIN_PREFIX + "SETTINGS_" + pluginId + "_"
-								+ Permission.READ.toString();
+						String settingsRole = AUTHORITY_ENTITY_READ_PREFIX + "SETTINGS_" + pluginId;
 						if (dataService.count(
 								UserAuthority.ENTITY_NAME,
 								new QueryImpl().eq(UserAuthority.ROLE, settingsRole).and()
@@ -82,6 +83,49 @@ public class AddPluginSettingsPermissionsMigrator implements ApplicationListener
 						}
 					}
 				}
+			}
+			for (GroupAuthority groupAuthority : dataService.findAll(GroupAuthority.ENTITY_NAME, GroupAuthority.class))
+			{
+				String groupRole = groupAuthority.getRole();
+
+				if (groupRole.startsWith(AUTHORITY_PLUGIN_PREFIX))
+				{
+					String pluginId;
+					if (groupRole.startsWith(AUTHORITY_PLUGIN_COUNT_PREFIX))
+					{
+						pluginId = groupRole.substring(AUTHORITY_PLUGIN_COUNT_PREFIX.length());
+					}
+					else if (groupRole.startsWith(AUTHORITY_PLUGIN_READ_PREFIX))
+					{
+						pluginId = groupRole.substring(AUTHORITY_PLUGIN_READ_PREFIX.length());
+					}
+					else if (groupRole.startsWith(AUTHORITY_PLUGIN_WRITE_PREFIX))
+					{
+						pluginId = groupRole.substring(AUTHORITY_PLUGIN_WRITE_PREFIX.length());
+					}
+					else
+					{
+						LOG.warn("Authority contains unknown permission [" + groupRole + "].");
+						pluginId = null;
+					}
+
+					if (pluginId != null)
+					{
+						MolgenisGroup molgenisGroup = groupAuthority.getMolgenisGroup();
+						String settingsRole = AUTHORITY_ENTITY_READ_PREFIX + "SETTINGS_" + pluginId;
+						if (dataService.count(
+								UserAuthority.ENTITY_NAME,
+								new QueryImpl().eq(GroupAuthority.ROLE, settingsRole).and()
+										.eq(MolgenisGroup.ID, molgenisGroup)) == 0)
+						{
+							GroupAuthority settingsGroupAuthority = new GroupAuthority();
+							settingsGroupAuthority.setRole(settingsRole);
+							settingsGroupAuthority.setMolgenisGroup(molgenisGroup);
+							dataService.add(GroupAuthority.ENTITY_NAME, settingsGroupAuthority);
+						}
+					}
+				}
+
 			}
 			LOG.info("Created UserAuthority and GroupAuthority instances for plugin settings entities");
 		}
