@@ -365,8 +365,10 @@ class Connect_Molgenis():
                 server_response_list.append(server_response)
                 self.check_server_response(server_response, 'Update entity row (single value)', query_used=query,data_used=data,entity_used=entity_name)
             else:
-                self.logger.error('Updating multiple values at the same time not implemented yet')
-                raise NotImplementedError('Updating multiple values at the same time not implemented yet')
+                self.logger.error('Updating multiple values at the same time not implemented yet'
+                                 +'Trying to update following data:\n'+str(data))
+                raise NotImplementedError('Updating multiple values at the same time not implemented yet'
+                                         +'Trying to update following data:\n'+str(data))
                 # if trying to update multiple columns, column values that are not given will be overwritten with null, so we need to add the existing column data into our dict
                 # DOES NOT WORK FOR X/MREFS!!!
                 for key in entity_items:
