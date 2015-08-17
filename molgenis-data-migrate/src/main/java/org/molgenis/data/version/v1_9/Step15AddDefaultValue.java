@@ -4,8 +4,6 @@ import static java.util.stream.StreamSupport.stream;
 
 import javax.sql.DataSource;
 
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
@@ -32,10 +30,9 @@ import com.google.common.base.Preconditions;
  * <ol>
  * <li>Creates the column in the database</li>
  * <li>Iterates over the already imported JPA entities to write their defaultValue to the newly created column</li>
+ * <li>Sets the defaultValue for the generateToken attribute of the Script entity</li>
  * <li>Recreates the attributes index in elasticsearch to reflect these changes</li>
  * </ol>
- * 
- * 
  * 
  * @author fkelpin
  */
@@ -57,11 +54,11 @@ public class Step15AddDefaultValue extends MolgenisUpgrade
 		this.jpaRepositoryCollection = Preconditions.checkNotNull(jpaRepositoryCollection);
 	}
 
-	private String createUpgradeSql(EntityMetaData emd, AttributeMetaData amd)
+	private String createUpgradeSql(String entityName, String attributeName, String defaultValue)
 	{
 		return String.format("UPDATE attributes SET defaultValue = '%s' WHERE name = '%s' "
 				+ "AND identifier IN (SELECT attributes FROM entities_attributes ea WHERE ea.fullName = '%s');",
-				amd.getDefaultValue(), amd.getName(), emd.getName());
+				defaultValue, attributeName, entityName);
 	}
 
 	@Override
@@ -70,7 +67,13 @@ public class Step15AddDefaultValue extends MolgenisUpgrade
 		LOG.info("Updating metadata from version 14 to 15");
 		addColumnDefaultValue();
 		insertDefaultValuesForJPAEntities();
+		insertDefaultValueForScriptEntity();
 		reindexAttributesRepository();
+	}
+
+	protected void insertDefaultValueForScriptEntity()
+	{
+		executeSql(createUpgradeSql("Script", "generateToken", "false"));
 	}
 
 	protected void insertDefaultValuesForJPAEntities()
@@ -82,7 +85,8 @@ public class Step15AddDefaultValue extends MolgenisUpgrade
 						emd -> {
 							stream(emd.getAtomicAttributes().spliterator(), false)
 									.filter(amd -> amd.getDefaultValue() != null)
-									.map(amd -> createUpgradeSql(emd, amd)).forEach(this::executeSql);
+									.map(amd -> createUpgradeSql(emd.getName(), amd.getName(), amd.getDefaultValue()))
+									.forEach(this::executeSql);
 						});
 	}
 
