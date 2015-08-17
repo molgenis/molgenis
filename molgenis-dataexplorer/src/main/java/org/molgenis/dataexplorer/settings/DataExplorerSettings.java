@@ -287,7 +287,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 	public void setModAnnotators(boolean modAnnotators)
 	{
-		set(Meta.MOD_AGGREGATES, modAnnotators);
+		set(Meta.MOD_ANNOTATORS, modAnnotators);
 	}
 
 	public boolean getModCharts()
