@@ -429,13 +429,13 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 	public boolean getGenomeBrowser()
 	{
-		Boolean value = getBoolean(Meta.GENOMEBROWSER);
-		return value != null ? value : false;
+		Boolean value = getBoolean(Meta.DATA_GENOME_BROWSER);
+		return value != null ? value.booleanValue() : false;
 	}
 
 	public void setGenomeBrowser(boolean genomeBrowser)
 	{
-		set(Meta.GENOMEBROWSER, genomeBrowser);
+		set(Meta.DATA_GENOME_BROWSER, genomeBrowser);
 	}
 
 	public String getGenomeBrowserLocation()
