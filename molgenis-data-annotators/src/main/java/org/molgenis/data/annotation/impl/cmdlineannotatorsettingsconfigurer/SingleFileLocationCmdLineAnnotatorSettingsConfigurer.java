@@ -3,6 +3,9 @@ package org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer;
 import org.molgenis.data.annotation.CmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.framework.server.MolgenisSettings;
 
+/**
+ * CmdLineAnnotatorSettingsConfigurer that defines a single property
+ */
 public class SingleFileLocationCmdLineAnnotatorSettingsConfigurer implements CmdLineAnnotatorSettingsConfigurer
 {
 	private final String fileLocationPropertyName;
