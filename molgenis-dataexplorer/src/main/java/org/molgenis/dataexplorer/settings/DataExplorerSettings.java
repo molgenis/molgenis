@@ -476,7 +476,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 	public void setGenomeBrowserLinks(String genomeBrowserLinks)
 	{
-		set(Meta.GENOMEBROWSER_INIT_SOURCES, genomeBrowserLinks);
+		set(Meta.GENOMEBROWSER_INIT_BROWSER_LINKS, genomeBrowserLinks);
 	}
 
 	public boolean getGenomeBrowserHighlightRegion()
