@@ -16,6 +16,7 @@ import org.molgenis.data.annotation.entity.QueryCreator;
 import org.molgenis.data.annotation.entity.ResultFilter;
 import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 
 import com.google.common.base.Optional;
@@ -64,7 +65,9 @@ public class AnnotatorImpl implements EntityAnnotator
 			annotatationSourceEntities = dataService.findAll(sourceRepositoryName, q);
 		}
 
-		Entity resultEntity = new MapEntity(entity, entity.getEntityMetaData());
+		DefaultEntityMetaData meta = new DefaultEntityMetaData(entity.getEntityMetaData());
+		info.getOutputAttributes().forEach(meta::addAttributeMetaData);
+		Entity resultEntity = new MapEntity(entity, meta);
 
 		Optional<Entity> filteredResult = resultFilter.filterResults(annotatationSourceEntities, entity);
 		if (filteredResult.isPresent())
