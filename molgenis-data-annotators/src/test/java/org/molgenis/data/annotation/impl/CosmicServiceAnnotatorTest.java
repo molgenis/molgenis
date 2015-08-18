@@ -25,7 +25,6 @@ import org.hamcrest.Description;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.annotation.AbstractAnnotatorTest;
 import org.molgenis.data.annotation.AnnotatorTestData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;

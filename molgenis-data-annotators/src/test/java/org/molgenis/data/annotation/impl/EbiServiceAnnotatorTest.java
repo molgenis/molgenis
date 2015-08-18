@@ -25,7 +25,6 @@ import org.hamcrest.Description;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.annotation.AbstractAnnotatorTest;
 import org.molgenis.data.annotation.AnnotatorTestData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -35,8 +34,8 @@ import org.testng.annotations.Test;
 
 public class EbiServiceAnnotatorTest extends AnnotatorTestData
 {
-    private DefaultEntityMetaData ebiMetaDataCanAnnotate = new DefaultEntityMetaData("test");;
-	private DefaultEntityMetaData ebiMetaDataCantAnnotate = new DefaultEntityMetaData("test");;
+	private final DefaultEntityMetaData ebiMetaDataCanAnnotate = new DefaultEntityMetaData("test");;
+	private final DefaultEntityMetaData ebiMetaDataCantAnnotate = new DefaultEntityMetaData("test");;
 
 	private AttributeMetaData attributeMetaDataCanAnnotate;
 	private AttributeMetaData attributeMetaDataCantAnnotate;

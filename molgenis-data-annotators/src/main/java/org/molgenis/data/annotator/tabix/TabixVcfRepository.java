@@ -3,7 +3,6 @@ package org.molgenis.data.annotator.tabix;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 import org.molgenis.data.Entity;
@@ -11,7 +10,6 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.annotator.tabix.TabixReader.Iterator;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.vcf.VcfReader;
 import org.molgenis.vcf.VcfRecord;
@@ -32,7 +30,7 @@ public class TabixVcfRepository extends VcfRepository
 	private final VcfMeta vcfMeta;
 	private final VcfReader vcfReader;
 
-	private TabixReader tabixReader;
+	private final TabixReader tabixReader;
 
 	public TabixVcfRepository(File file, String entityName) throws IOException
 	{
@@ -88,10 +86,11 @@ public class TabixVcfRepository extends VcfRepository
 	{
 		org.molgenis.data.annotator.tabix.TabixReader.Iterator iterator = tabixReader.query(chrPosPos);
 		Builder<Entity> builder = ImmutableList.<Entity> builder();
-		
-		//Tabix reader sometimes returns null. Does this mean that query doesn't return anything?
+
+		// Tabix reader sometimes returns null. Does this mean that query doesn't return anything?
 		// See also http://sourceforge.net/p/samtools/mailman/message/26113299/
-		if (iterator == null) {
+		if (iterator == null)
+		{
 			return builder.build();
 		}
 

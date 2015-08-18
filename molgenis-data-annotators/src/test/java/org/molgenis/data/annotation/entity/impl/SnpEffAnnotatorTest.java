@@ -12,13 +12,11 @@ import java.util.ArrayList;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.annotation.entity.impl.SnpEffAnnotator;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeMethod;
@@ -114,7 +112,6 @@ public class SnpEffAnnotatorTest extends AbstractTestNGSpringContextTests
 		assertEquals(entity.get(SnpEffAnnotator.NMD), "");
 	}
 
-	@Configuration
 	public static class Config
 	{
 		@Autowired

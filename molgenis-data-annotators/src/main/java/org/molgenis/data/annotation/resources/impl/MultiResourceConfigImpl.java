@@ -7,20 +7,17 @@ import java.util.Map;
 import org.molgenis.data.annotation.resources.MultiResourceConfig;
 import org.molgenis.data.annotation.resources.ResourceConfig;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by charbonb on 15/06/15.
  */
 public class MultiResourceConfigImpl implements MultiResourceConfig
 {
-	private static final Logger LOG = LoggerFactory.getLogger(MultiResourceConfigImpl.class);
-	private MolgenisSettings molgenisSettings;
-	private String chromosomesProperty;
-	private String filePatternProperty;
-	private String rootDirectoryProperty;
-	private String overrideChromosomeFilesProperty;
+	private final MolgenisSettings molgenisSettings;
+	private final String chromosomesProperty;
+	private final String filePatternProperty;
+	private final String rootDirectoryProperty;
+	private final String overrideChromosomeFilesProperty;
 	public static final String DEFAULT_CHROMOSOMES = "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,Y,X";
 	public static final String DEFAULT_PATTERN = "chr%s.vcf";
 	public static final String DEFAULT_ROOT_DIRECTORY = File.separatorChar + "data" + File.separatorChar + "resources";
@@ -58,6 +55,7 @@ public class MultiResourceConfigImpl implements MultiResourceConfig
 		return this.configs;
 	}
 
+	@Override
 	public void refreshConfigs()
 	{
 		String[] chromosomes = molgenisSettings.getProperty(this.chromosomesProperty, DEFAULT_CHROMOSOMES).split(",");
@@ -93,7 +91,7 @@ public class MultiResourceConfigImpl implements MultiResourceConfig
 
 					return this.file;
 				}
-								
+
 			});
 		}
 		this.configs = configs;
