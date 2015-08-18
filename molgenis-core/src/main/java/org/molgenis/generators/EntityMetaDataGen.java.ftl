@@ -31,13 +31,7 @@ public class ${JavaName(entity)}MetaData extends DefaultEntityMetaData
 <#list entity.allFields as f>
 		DefaultAttributeMetaData ${name(f)} = new DefaultAttributeMetaData("${f.name}", ${f.type.enumType});
 		<#if f.defaultValue?has_content>
-			<#if f.type.enumType == 'STRING' || f.type.enumType == 'TEXT' || f.type.enumType == 'CATEGORICAL' || f.type.enumType == 'EMAIL' ||
-				f.type.enumType == 'ENUM' || f.type.enumType == 'FILE' || f.type.enumType == 'HTML' || f.type.enumType == 'HYPERLINK' ||
-				f.type.enumType == 'IMAGE'>
-		${name(f)}.setDefaultValue("${f.defaultValue}");
-			<#else>
-		${name(f)}.setDefaultValue(${f.defaultValue});
-			</#if>
+			${name(f)}.setDefaultValue("${f.defaultValue}");
 		</#if>
 		<#if f.label??>
 		${name(f)}.setLabel("${f.label!}");

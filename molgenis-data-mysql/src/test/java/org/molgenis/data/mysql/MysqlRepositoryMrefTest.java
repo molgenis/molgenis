@@ -53,7 +53,7 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 	}
 
 	@Override
-	public Entity defaultEntity()
+	public Entity createTestEntity()
 	{
 		return null;
 	}
@@ -200,5 +200,12 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 		// verify not null error
 
 		// verify default
+	}
+
+	@Override
+	public void verifyTestEntity(Entity e) throws Exception
+	{
+		// TODO Auto-generated method stub
+
 	}
 }
