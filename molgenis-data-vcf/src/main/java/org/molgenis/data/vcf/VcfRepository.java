@@ -186,7 +186,7 @@ public class VcfRepository extends AbstractRepository
 			{
 				val = null;
 			}
-			// if a flag field exists in the line, than this field is true, although the value is null
+			// if a flag field exists in the line, then this field is true, although the value is null
 			if (val == null)
 			{
 				if (entityMetaData.getAttribute(getInfoPrefix() + vcfInfo.getKey()).getDataType().getEnumType()
