@@ -94,6 +94,15 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 			}
 
 			{
+				String key = "app.trackingcode.header";
+				RuntimeProperty property = getProperty(key);
+				if (property != null)
+				{
+					LOG.warn("RuntimeProperty app.trackingcode.header cannot be migrated to AppSettings automatically, please set the Google Analytics tracking id manually in Application settings and remove the RuntimeProperty.");
+				}
+			}
+
+			{
 				String key = "molgenis.footer";
 				RuntimeProperty property = getProperty(key);
 				if (property != null)
