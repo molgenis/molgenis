@@ -9,6 +9,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.annotation.CmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.annotation.entity.QueryCreator;
@@ -27,9 +28,11 @@ public class AnnotatorImpl implements EntityAnnotator
 	private final AnnotatorInfo info;
 	private final QueryCreator queryCreator;
 	private final ResultFilter resultFilter;
+	private final CmdLineAnnotatorSettingsConfigurer cmdLineAnnotatorSettingsConfigurer;
 
 	public AnnotatorImpl(String sourceRepositoryName, AnnotatorInfo info, QueryCreator queryCreator,
-			ResultFilter resultFilter, DataService dataService, Resources resources)
+			ResultFilter resultFilter, DataService dataService, Resources resources,
+			CmdLineAnnotatorSettingsConfigurer cmdLineAnnotatorSettingsConfigurer)
 	{
 		this.sourceRepositoryName = sourceRepositoryName;
 		this.info = info;
@@ -37,6 +40,7 @@ public class AnnotatorImpl implements EntityAnnotator
 		this.resultFilter = resultFilter;
 		this.dataService = dataService;
 		this.resources = resources;
+		this.cmdLineAnnotatorSettingsConfigurer = cmdLineAnnotatorSettingsConfigurer;
 	}
 
 	@Override
@@ -44,13 +48,13 @@ public class AnnotatorImpl implements EntityAnnotator
 	{
 		return info;
 	}
-		
+
 	@Override
 	public List<Entity> annotateEntity(Entity entity)
 	{
 		Query q = queryCreator.createQuery(entity);
 		Iterable<Entity> annotatationSourceEntities;
-		
+
 		if (resources.hasRepository(sourceRepositoryName))
 		{
 			annotatationSourceEntities = resources.findAll(sourceRepositoryName, q);
@@ -113,4 +117,9 @@ public class AnnotatorImpl implements EntityAnnotator
 		return sourceMetaData;
 	}
 
+	@Override
+	public CmdLineAnnotatorSettingsConfigurer getCmdLineAnnotatorSettingsConfigurer()
+	{
+		return cmdLineAnnotatorSettingsConfigurer;
+	}
 }

@@ -1,19 +1,14 @@
 package org.molgenis.data.annotation;
 
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.vcf.VcfRepository;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.vcf.VcfRepository;
+
 public abstract class VariantAnnotator extends LocusAnnotator
 {
-    @Override
+	@Override
 	public List<AttributeMetaData> getInputMetaData()
 	{
 		List<AttributeMetaData> metadata = new ArrayList<>();
@@ -26,9 +21,9 @@ public abstract class VariantAnnotator extends LocusAnnotator
 		return metadata;
 	}
 
-    @Override
-    protected boolean annotationDataExists()
-    {
-        return true;
-    }
+	@Override
+	protected boolean annotationDataExists()
+	{
+		return true;
+	}
 }

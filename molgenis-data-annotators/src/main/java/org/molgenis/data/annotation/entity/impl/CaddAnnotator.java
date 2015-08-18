@@ -17,6 +17,7 @@ import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.annotation.filter.VariantResultFilter;
+import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.query.LocusQueryCreator;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.Resources;
@@ -33,7 +34,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class CaddAnnotator
 {
-	//FIXME: nomenclature: http://cadd.gs.washington.edu/info
+	// FIXME: nomenclature: http://cadd.gs.washington.edu/info
 	public static final String CADD_SCALED = "CADD_SCALED";
 	public static final String CADD_ABS = "CADD";
 	public static final String CADD_SCALED_LABEL = "CADDSCALED";
@@ -90,7 +91,8 @@ public class CaddAnnotator
 								+ "causal variation in both research and clinical settings. (source: http://cadd.gs.washington.edu/info)",
 						attributes);
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(CADD_TABIX_RESOURCE, caddInfo, new LocusQueryCreator(),
-				new VariantResultFilter(), dataService, resources);
+				new VariantResultFilter(), dataService, resources,
+				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(CADD_FILE_LOCATION_PROPERTY, molgenisSettings));
 
 		return new RepositoryAnnotatorImpl(entityAnnotator);
 	}

@@ -75,14 +75,22 @@ public class ThousandGenomesAnnotator
 		MultiAllelicResultFilter multiAllelicResultFilter = new MultiAllelicResultFilter(
 				Collections.singletonList(new DefaultAttributeMetaData(THOUSAND_GENOME_AF_RESOURCE_ATTRIBUTE_NAME,
 						FieldTypeEnum.DECIMAL)));
+
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(THOUSAND_GENOME_MULTI_FILE_RESOURCE, thousandGenomeInfo,
-				locusQueryCreator, multiAllelicResultFilter, dataService, resources)
+				locusQueryCreator, multiAllelicResultFilter, dataService, resources, (annotationSourceFileName) -> {
+					molgenisSettings.setProperty(THOUSAND_GENOME_FOLDER_PROPERTY, annotationSourceFileName);
+					molgenisSettings.setProperty(THOUSAND_GENOME_FILE_PATTERN_PROPERTY,
+							"ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz");
+					molgenisSettings.setProperty(THOUSAND_GENOME_CHROMOSOME_PROPERTY,
+							"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22");
+				})
 		{
 			@Override
 			protected Object getResourceAttributeValue(AttributeMetaData attr, Entity entity)
 			{
-				String attrName = THOUSAND_GENOME_AF.equals(attr.getName()) ? THOUSAND_GENOME_AF_RESOURCE_ATTRIBUTE_NAME : attr.getName();
-				return entity.get(attrName);			
+				String attrName = THOUSAND_GENOME_AF.equals(attr.getName()) ? THOUSAND_GENOME_AF_RESOURCE_ATTRIBUTE_NAME : attr
+						.getName();
+				return entity.get(attrName);
 			}
 		};
 

@@ -13,11 +13,13 @@ import java.util.List;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.annotation.CmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.LocusAnnotator;
-import org.molgenis.data.annotation.impl.datastructures.Locus;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
+import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.EmptyCmdLineAnnotatorSettingsConfigurer;
+import org.molgenis.data.annotation.impl.datastructures.Locus;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.annotation.utils.HgncLocationsUtils;
@@ -92,8 +94,8 @@ public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 	static final String ESSENTIAL_GENE = "Essential_gene";
 
 	@Autowired
-	public DbnsfpGeneServiceAnnotator(MolgenisSettings molgenisSettings,
-			HgncLocationsProvider hgncLocationsProvider) throws IOException
+	public DbnsfpGeneServiceAnnotator(MolgenisSettings molgenisSettings, HgncLocationsProvider hgncLocationsProvider)
+			throws IOException
 	{
 		this.molgenisSettings = molgenisSettings;
 		this.hgncLocationsProvider = hgncLocationsProvider;
@@ -181,9 +183,9 @@ public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 	}
 
 	@Override
-	public List<AttributeMetaData>  getOutputMetaData()
+	public List<AttributeMetaData> getOutputMetaData()
 	{
-		List<AttributeMetaData>  metadata = new ArrayList<>();
+		List<AttributeMetaData> metadata = new ArrayList<>();
 
 		metadata.add(new DefaultAttributeMetaData(GENE_NAME, FieldTypeEnum.TEXT));
 		metadata.add(new DefaultAttributeMetaData(ENSEMBL_GENE, FieldTypeEnum.TEXT));
@@ -225,5 +227,11 @@ public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 	public AnnotatorInfo getInfo()
 	{
 		return AnnotatorInfo.create(Status.INDEV, Type.UNUSED, "unknown", "no description", getOutputMetaData());
+	}
+
+	@Override
+	public CmdLineAnnotatorSettingsConfigurer getCmdLineAnnotatorSettingsConfigurer()
+	{
+		return new EmptyCmdLineAnnotatorSettingsConfigurer();
 	}
 }

@@ -1,6 +1,5 @@
 package org.molgenis.data.annotation.resources;
 
-import java.util.List;
 import java.util.Set;
 
 import org.molgenis.data.Entity;
