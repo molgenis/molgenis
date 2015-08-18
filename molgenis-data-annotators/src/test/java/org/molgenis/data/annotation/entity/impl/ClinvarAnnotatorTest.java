@@ -15,7 +15,6 @@ import static org.testng.Assert.assertEquals;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -30,7 +29,6 @@ import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
@@ -210,15 +208,13 @@ public class ClinvarAnnotatorTest extends AbstractTestNGSpringContextTests
 		expectedTarget9.set(ClinvarAnnotator.CLINVAR_CLNSIG, ".,5,4");
 		expectedTarget9.set(ClinvarAnnotator.CLINVAR_CLNALLE, ".,2,3");
 
-		
 		Iterator<Entity> targets = clinvarAnnotator.annotate(Arrays.asList(source0, source1, source2, source3, source4,
 				source5, source6, source7, source8, source9));
-		assertEquals(Lists.newArrayList(targets),
-				Arrays.asList(expectedTarget0, expectedTarget1, expectedTarget2, expectedTarget3, expectedTarget4,
-						expectedTarget5, expectedTarget6, expectedTarget7, expectedTarget8, expectedTarget9));
+		assertEquals(Lists.newArrayList(targets), Arrays.asList(expectedTarget0, expectedTarget1, expectedTarget2,
+				expectedTarget3, expectedTarget4, expectedTarget5, expectedTarget6, expectedTarget7, expectedTarget8,
+				expectedTarget9));
 	}
 
-	@Configuration
 	public static class Config
 	{
 		@Bean
@@ -227,9 +223,10 @@ public class ClinvarAnnotatorTest extends AbstractTestNGSpringContextTests
 			MolgenisSettings molgenisSettings = mock(MolgenisSettings.class);
 			when(molgenisSettings.getProperty(ClinvarAnnotator.CLINVAR_FILE_LOCATION_PROPERTY)).thenReturn(
 					ResourceUtils.getFile(getClass(), "/clinvar/clinvar_20150629.vcf.gz").getAbsolutePath());
-			when(molgenisSettings.getProperty(ClinvarAnnotator.CLINVAR_FILE_LOCATION_PROPERTY,
-					MultiResourceConfigImpl.DEFAULT_ROOT_DIRECTORY)).thenReturn(
-							ResourceUtils.getFile(getClass(), "/clinvar/clinvar_20150629.vcf.gz").getAbsolutePath());
+			when(
+					molgenisSettings.getProperty(ClinvarAnnotator.CLINVAR_FILE_LOCATION_PROPERTY,
+							MultiResourceConfigImpl.DEFAULT_ROOT_DIRECTORY)).thenReturn(
+					ResourceUtils.getFile(getClass(), "/clinvar/clinvar_20150629.vcf.gz").getAbsolutePath());
 			return molgenisSettings;
 		}
 

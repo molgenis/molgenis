@@ -25,7 +25,6 @@ import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
@@ -38,7 +37,7 @@ public class GoNLAnnotatorTest extends AbstractTestNGSpringContextTests
 	private final static String GONL_TEST_ROOT_DIRECTORY = "/gonl";
 	private final static String GONL_TEST_CHROMOSOMES = "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X";
 	private final static String GONL_TEST_OVERRIDE_CHROMOSOME_FILES_PROPERTY = "X:gonl.chrX.release4.gtc.vcf.gz";
-	
+
 	@Autowired
 	RepositoryAnnotator annotator;
 
@@ -79,7 +78,6 @@ public class GoNLAnnotatorTest extends AbstractTestNGSpringContextTests
 		assertEquals(resultEntity.get(GoNLAnnotator.GONL_GENOME_GTC), expectedEntity.get(GoNLAnnotator.GONL_GENOME_GTC));
 	}
 
-	@Configuration
 	public static class Config
 	{
 		@Autowired
