@@ -9,7 +9,6 @@ import java.util.Set;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
-import org.molgenis.data.annotation.impl.HpoServiceAnnotator;
 import org.molgenis.data.annotation.impl.MonogenicDiseaseCandidatesServiceAnnotator;
 import org.molgenis.data.annotation.impl.PhenomizerServiceAnnotator;
 import org.molgenis.data.support.DefaultAttributeMetaData;
@@ -100,11 +99,7 @@ public class CmdLineAnnotator
 		}
 
 		// engage!
-		if (annotatorName.equals("hpo"))
-		{
-			new HpoServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
-		}
-		else if (annotatorName.equals("monogenic"))
+		if (annotatorName.equals("monogenic"))
 		{
 			new MonogenicDiseaseCandidatesServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
