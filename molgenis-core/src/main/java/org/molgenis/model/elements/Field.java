@@ -421,8 +421,7 @@ public class Field implements Serializable
 		return this.default_value;
 	}
 
-	// FIXME correct typo in method name (v --> f)
-	public void setDevaultValue(String value)
+	public void setDefaultValue(String value)
 	{
 		this.default_value = value;
 	}

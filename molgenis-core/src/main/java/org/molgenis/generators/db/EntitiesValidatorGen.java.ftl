@@ -130,8 +130,7 @@ public class EntitiesValidatorImpl implements EntitiesValidator
 				Map<String, Field> fieldMap;
 				if (!field.isNillable())
 				{
-					if (field.getDefaultValue() == null) fieldMap = requiredFields;
-					else fieldMap = availableFields;
+					fieldMap = requiredFields;
 				}
 				else fieldMap = availableFields;
 
