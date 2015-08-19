@@ -67,7 +67,7 @@ public class DefaultEntityValidator implements EntityValidator
 
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{
-			if (!attr.isNillable() && !attr.isIdAtrribute() && !attr.isAuto() && (attr.getDefaultValue() == null))
+			if (!attr.isNillable() && !attr.isIdAtrribute() && !attr.isAuto())
 			{
 				long rownr = 0;
 				for (Entity entity : entities)

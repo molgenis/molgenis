@@ -23,7 +23,7 @@
             value: React.PropTypes.any,
             onValueChange: React.PropTypes.func.isRequired,
             onBlur: React.PropTypes.func.isRequired,
-            categorigalMrefShowSelectAll: React.PropTypes.bool,
+            categoricalMrefShowSelectAll: React.PropTypes.bool,
             showAsteriskIfNotNillable: React.PropTypes.bool
         },
         getInitialState: function() {
@@ -79,7 +79,7 @@
                 value: this._getValue(this.props.value),
                 onValueChange : this._handleValueChange,
                 onBlur : this._handleBlur,
-                categorigalMrefShowSelectAll: this.props.categorigalMrefShowSelectAll
+                categoricalMrefShowSelectAll: this.props.categoricalMrefShowSelectAll
             });
             
             // allow editing readonly controls in create mode

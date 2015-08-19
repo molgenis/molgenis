@@ -33,6 +33,10 @@ import com.google.common.collect.Sets;
  * MetaData service. Administration of the {@link Package}, {@link EntityMetaData} and {@link AttributeMetaData} of the
  * metadata of the repositories.
  * 
+ * TODO: This class smells. It started out as a simple administration but taken on a new role: to bootstrap the
+ * repositories and orchestrate changes in metadata. There's a second, higher level, class in here that needs to be
+ * refactored out. See also {@link MetaValidationUtils} which does some of this work now already.
+ * 
  * <img src="http://yuml.me/041e5382.png" alt="Metadata entities" width="640"/>
  */
 public class MetaDataServiceImpl implements MetaDataService

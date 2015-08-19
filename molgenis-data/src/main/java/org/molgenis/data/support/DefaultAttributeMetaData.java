@@ -13,7 +13,6 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Range;
-import org.molgenis.fieldtypes.CategoricalField;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.MrefField;
@@ -32,7 +31,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	private String description;
 	private boolean nillable = true;
 	private boolean readOnly = false;
-	private Object defaultValue = null;
+	private String defaultValue = null;
 	private boolean idAttribute = false;
 	private boolean labelAttribute = false; // remove?
 	private boolean lookupAttribute = false; // remove?
@@ -170,10 +169,9 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	}
 
 	@Override
-	public Object getDefaultValue()
+	public String getDefaultValue()
 	{
-		if (getDataType() instanceof XrefField || getDataType() instanceof MrefField
-				|| getDataType() instanceof CategoricalField)
+		if (getDataType() instanceof XrefField || getDataType() instanceof MrefField)
 		{
 			if (getExpression() != null)
 			{
@@ -189,7 +187,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		return getDataType().convert(defaultValue);
 	}
 
-	public DefaultAttributeMetaData setDefaultValue(Object defaultValue)
+	public DefaultAttributeMetaData setDefaultValue(String defaultValue)
 	{
 		this.defaultValue = defaultValue;
 		return this;
