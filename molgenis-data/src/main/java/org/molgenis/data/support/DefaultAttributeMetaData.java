@@ -171,9 +171,9 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		return defaultValue;
 	}
 
-	public DefaultAttributeMetaData setDefaultValue(Object defaultValue)
+	public DefaultAttributeMetaData setDefaultValue(String defaultValue)
 	{
-		this.defaultValue = defaultValue != null ? defaultValue.toString() : null;
+		this.defaultValue = defaultValue;
 		return this;
 	}
 

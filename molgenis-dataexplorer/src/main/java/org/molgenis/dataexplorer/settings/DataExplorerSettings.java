@@ -12,11 +12,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
 import org.molgenis.data.settings.DefaultSettingsEntity;
 import org.molgenis.data.settings.DefaultSettingsEntityMetaData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.springframework.stereotype.Component;
 
@@ -110,15 +108,18 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 		{
 			DefaultAttributeMetaData generalAttr = addAttribute(GENERAL).setDataType(COMPOUND).setLabel("General");
 			AttributeMetaData generalSearchboxAttr = new DefaultAttributeMetaData(GENERAL_SEARCHBOX).setDataType(BOOL)
-					.setNillable(false).setDefaultValue(DEFAULT_GENERAL_SEARCHBOX).setLabel("Show search box");
+					.setNillable(false).setDefaultValue(String.valueOf(DEFAULT_GENERAL_SEARCHBOX))
+					.setLabel("Show search box");
 			AttributeMetaData generalAttrSelectAttr = new DefaultAttributeMetaData(GENERAL_ITEM_SELECT_PANEL)
-					.setDataType(BOOL).setNillable(false).setDefaultValue(DEFAULT_GENERAL_ITEM_SELECT_PANEL)
+					.setDataType(BOOL).setNillable(false)
+					.setDefaultValue(String.valueOf(DEFAULT_GENERAL_ITEM_SELECT_PANEL))
 					.setLabel("Show data item selection");
 			AttributeMetaData generalLaunchWizardAttr = new DefaultAttributeMetaData(GENERAL_LAUNCH_WIZARD)
-					.setDataType(BOOL).setNillable(false).setDefaultValue(DEFAULT_GENERAL_LAUNCH_WIZARD)
+					.setDataType(BOOL).setNillable(false).setDefaultValue(String.valueOf(DEFAULT_GENERAL_LAUNCH_WIZARD))
 					.setLabel("Launch data item filter wizard");
 			AttributeMetaData generalHeaderAbbreviateAttr = new DefaultAttributeMetaData(GENERAL_HEADER_ABBREVIATE)
-					.setDataType(INT).setNillable(false).setDefaultValue(DEFAULT_GENERAL_HEADER_ABBREVIATE)
+					.setDataType(INT).setNillable(false)
+					.setDefaultValue(String.valueOf(DEFAULT_GENERAL_HEADER_ABBREVIATE))
 					.setLabel("Entity description abbreviation length");
 			generalAttr.addAttributePart(generalSearchboxAttr);
 			generalAttr.addAttributePart(generalAttrSelectAttr);
@@ -129,18 +130,18 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 		private void addModulesSettings()
 		{
 			AttributeMetaData modAggregatesAttr = new DefaultAttributeMetaData(MOD_AGGREGATES).setDataType(BOOL)
-					.setNillable(false).setDefaultValue(DEFAULT_MOD_AGGREGATES).setLabel("Aggregates");
+					.setNillable(false).setDefaultValue(String.valueOf(DEFAULT_MOD_AGGREGATES)).setLabel("Aggregates");
 			AttributeMetaData modAnnotatorsAttr = new DefaultAttributeMetaData(MOD_ANNOTATORS).setDataType(BOOL)
-					.setNillable(false).setDefaultValue(DEFAULT_MOD_ANNOTATORS).setLabel("Annotators");
+					.setNillable(false).setDefaultValue(String.valueOf(DEFAULT_MOD_ANNOTATORS)).setLabel("Annotators");
 			AttributeMetaData modChartsAttr = new DefaultAttributeMetaData(MOD_CHARTS).setDataType(BOOL)
-					.setNillable(false).setDefaultValue(DEFAULT_MOD_CHARTS).setLabel("Charts");
+					.setNillable(false).setDefaultValue(String.valueOf(DEFAULT_MOD_CHARTS)).setLabel("Charts");
 			AttributeMetaData modDataAttr = new DefaultAttributeMetaData(MOD_DATA).setDataType(BOOL).setNillable(false)
-					.setDefaultValue(DEFAULT_MOD_DATA).setLabel("Data");
+					.setDefaultValue(String.valueOf(DEFAULT_MOD_DATA)).setLabel("Data");
 			AttributeMetaData modDiseaseMatcherAttr = new DefaultAttributeMetaData(MOD_DISEASE_MATCHER)
-					.setDataType(BOOL).setNillable(false).setDefaultValue(DEFAULT_MOD_DISEASE_MATCHER)
+					.setDataType(BOOL).setNillable(false).setDefaultValue(String.valueOf(DEFAULT_MOD_DISEASE_MATCHER))
 					.setLabel("Disease Matcher");
 			AttributeMetaData modReportAttr = new DefaultAttributeMetaData(MOD_REPORTS).setDataType(BOOL)
-					.setNillable(false).setDefaultValue(DEFAULT_MOD_REPORT).setLabel("Reports");
+					.setNillable(false).setDefaultValue(String.valueOf(DEFAULT_MOD_REPORT)).setLabel("Reports");
 
 			DefaultAttributeMetaData modAttr = addAttribute(MOD).setDataType(COMPOUND).setLabel("Modules");
 			modAttr.addAttributePart(modAggregatesAttr);
@@ -160,12 +161,13 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 					.setLabel("Data").setVisibleExpression("$('" + MOD_DATA + "').eq(true).value()");
 
 			AttributeMetaData dataGalaxyExportAttr = new DefaultAttributeMetaData(DATA_GALAXY_EXPORT).setDataType(BOOL)
-					.setNillable(false).setDefaultValue(DEFAULT_DATA_GALAXY_EXPORT).setLabel("Galaxy export");
+					.setNillable(false).setDefaultValue(String.valueOf(DEFAULT_DATA_GALAXY_EXPORT))
+					.setLabel("Galaxy export");
 			AttributeMetaData dataGalaxyUrlAttr = new DefaultAttributeMetaData(DATA_GALAXY_URL).setDataType(HYPERLINK)
 					.setNillable(true).setLabel("Galaxy URL")
 					.setVisibleExpression("$('" + DATA_GALAXY_EXPORT + "').eq(true).value()");
-			AttributeMetaData dataGalaxyApiKeyAttr = new DefaultAttributeMetaData(DATA_GALAXY_API_KEY)
-					.setNillable(true).setLabel("Galaxy API key")
+			AttributeMetaData dataGalaxyApiKeyAttr = new DefaultAttributeMetaData(DATA_GALAXY_API_KEY).setNillable(true)
+					.setLabel("Galaxy API key")
 					.setVisibleExpression("$('" + DATA_GALAXY_EXPORT + "').eq(true).value()");
 			dataAttr.addAttributePart(dataGalaxyExportAttr);
 			dataAttr.addAttributePart(dataGalaxyUrlAttr);
@@ -176,10 +178,10 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 					.setDataType(COMPOUND).setLabel("Initialization");
 			AttributeMetaData genomeBrowserInitBrowserLinksAttr = new DefaultAttributeMetaData(
 					GENOMEBROWSER_INIT_BROWSER_LINKS).setNillable(false).setDataType(TEXT)
-					.setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_BROWSER_LINKS).setLabel("Browser links");
+							.setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_BROWSER_LINKS).setLabel("Browser links");
 			AttributeMetaData genomeBrowserInitCoordSystemAttr = new DefaultAttributeMetaData(
 					GENOMEBROWSER_INIT_COORD_SYSTEM).setNillable(false).setDataType(TEXT)
-					.setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_COORD_SYSTEM).setLabel("Coordinate system");
+							.setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_COORD_SYSTEM).setLabel("Coordinate system");
 			AttributeMetaData genomeBrowserInitLocationAttr = new DefaultAttributeMetaData(GENOMEBROWSER_INIT_LOCATION)
 					.setNillable(false).setDataType(TEXT).setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_LOCATION)
 					.setLabel("Location");
@@ -188,7 +190,8 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 					.setLabel("Sources");
 			AttributeMetaData genomeBrowserInitHighlightRegionAttr = new DefaultAttributeMetaData(
 					GENOMEBROWSER_INIT_HIGHLIGHT_REGION).setNillable(false).setDataType(BOOL)
-					.setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_HIGHLIGHT_REGION).setLabel("Highlight region");
+							.setDefaultValue(String.valueOf(DEFAULT_GENOMEBROWSER_INIT_HIGHLIGHT_REGION))
+							.setLabel("Highlight region");
 
 			genomeBrowserInitAttr.addAttributePart(genomeBrowserInitBrowserLinksAttr);
 			genomeBrowserInitAttr.addAttributePart(genomeBrowserInitCoordSystemAttr);
@@ -197,7 +200,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 			genomeBrowserInitAttr.addAttributePart(genomeBrowserInitHighlightRegionAttr);
 
 			DefaultAttributeMetaData dataGenomeBrowserAttr = new DefaultAttributeMetaData(DATA_GENOME_BROWSER)
-					.setDataType(BOOL).setNillable(false).setDefaultValue(DEFAULT_DATA_GENOME_BROWSER)
+					.setDataType(BOOL).setNillable(false).setDefaultValue(String.valueOf(DEFAULT_DATA_GENOME_BROWSER))
 					.setLabel("Genome Browser");
 
 			DefaultAttributeMetaData genomeBrowserAttr = new DefaultAttributeMetaData(GENOMEBROWSER)
@@ -216,12 +219,13 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 			DefaultAttributeMetaData aggregatesAttr = new DefaultAttributeMetaData(AGGREGATES).setDataType(COMPOUND)
 					.setLabel("Aggregates").setVisibleExpression("$('" + MOD_AGGREGATES + "').eq(true).value()");
 			AttributeMetaData aggregatesDistinctSelectAttr = new DefaultAttributeMetaData(AGGREGATES_DISTINCT_SELECT)
-					.setNillable(false).setDataType(BOOL).setDefaultValue(DEFAULT_AGGREGATES_DISTINCT_SELECT)
+					.setNillable(false).setDataType(BOOL)
+					.setDefaultValue(String.valueOf(DEFAULT_AGGREGATES_DISTINCT_SELECT))
 					.setLabel("Distinct aggregates");
 			AttributeMetaData aggregatesDistinctOverrideAttr = new DefaultAttributeMetaData(
 					AGGREGATES_DISTINCT_OVERRIDES).setDataType(TEXT).setLabel("Distinct attribute overrides")
-					.setDescription("JSON object that maps entity names to attribute names")
-					.setVisibleExpression("$('" + AGGREGATES_DISTINCT_SELECT + "').eq(true).value()");
+							.setDescription("JSON object that maps entity names to attribute names")
+							.setVisibleExpression("$('" + AGGREGATES_DISTINCT_SELECT + "').eq(true).value()");
 			aggregatesAttr.addAttributePart(aggregatesDistinctSelectAttr);
 			aggregatesAttr.addAttributePart(aggregatesDistinctOverrideAttr);
 			return aggregatesAttr;
@@ -231,40 +235,11 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 		{
 			DefaultAttributeMetaData reportsAttr = new DefaultAttributeMetaData(REPORTS).setDataType(COMPOUND)
 					.setLabel("Reports").setVisibleExpression("$('" + MOD_REPORTS + "').eq(true).value()");
-			AttributeMetaData reportsEntitiesAttr = new DefaultAttributeMetaData(REPORTS_ENTITIES)
-					.setNillable(true)
-					.setDataType(TEXT)
-					.setLabel("Reports")
-					.setDescription(
+			AttributeMetaData reportsEntitiesAttr = new DefaultAttributeMetaData(REPORTS_ENTITIES).setNillable(true)
+					.setDataType(TEXT).setLabel("Reports").setDescription(
 							"Comma-seperated report strings (e.g. MyDataSet:myreport,OtherDataSet:otherreport). The report name refers to an existing FreemarkerTemplate entity or file with name view-<report>-entitiesreport.ftl (e.g. view-myreport-entitiesreport.ftl)");
 			reportsAttr.addAttributePart(reportsEntitiesAttr);
 			return reportsAttr;
-		}
-
-		@Override
-		protected Entity getDefaultSettings()
-		{
-			// FIXME workaround for https://github.com/molgenis/molgenis/issues/1810
-			MapEntity defaultSettings = new MapEntity(this);
-			defaultSettings.set(GENERAL_SEARCHBOX, DEFAULT_GENERAL_SEARCHBOX);
-			defaultSettings.set(GENERAL_ITEM_SELECT_PANEL, DEFAULT_GENERAL_ITEM_SELECT_PANEL);
-			defaultSettings.set(GENERAL_LAUNCH_WIZARD, DEFAULT_GENERAL_LAUNCH_WIZARD);
-			defaultSettings.set(GENERAL_HEADER_ABBREVIATE, DEFAULT_GENERAL_HEADER_ABBREVIATE);
-			defaultSettings.set(MOD_AGGREGATES, DEFAULT_MOD_AGGREGATES);
-			defaultSettings.set(MOD_ANNOTATORS, DEFAULT_MOD_ANNOTATORS);
-			defaultSettings.set(MOD_CHARTS, DEFAULT_MOD_CHARTS);
-			defaultSettings.set(MOD_DATA, DEFAULT_MOD_DATA);
-			defaultSettings.set(MOD_DISEASE_MATCHER, DEFAULT_MOD_DISEASE_MATCHER);
-			defaultSettings.set(MOD_REPORTS, DEFAULT_MOD_REPORT);
-			defaultSettings.set(DATA_GALAXY_EXPORT, DEFAULT_DATA_GALAXY_EXPORT);
-			defaultSettings.set(DATA_GENOME_BROWSER, DEFAULT_DATA_GENOME_BROWSER);
-			defaultSettings.set(GENOMEBROWSER_INIT_BROWSER_LINKS, DEFAULT_GENOMEBROWSER_INIT_BROWSER_LINKS);
-			defaultSettings.set(GENOMEBROWSER_INIT_COORD_SYSTEM, DEFAULT_GENOMEBROWSER_INIT_COORD_SYSTEM);
-			defaultSettings.set(GENOMEBROWSER_INIT_LOCATION, DEFAULT_GENOMEBROWSER_INIT_LOCATION);
-			defaultSettings.set(GENOMEBROWSER_INIT_SOURCES, DEFAULT_GENOMEBROWSER_INIT_SOURCES);
-			defaultSettings.set(GENOMEBROWSER_INIT_HIGHLIGHT_REGION, DEFAULT_GENOMEBROWSER_INIT_HIGHLIGHT_REGION);
-			defaultSettings.set(AGGREGATES_DISTINCT_SELECT, DEFAULT_AGGREGATES_DISTINCT_SELECT);
-			return defaultSettings;
 		}
 	}
 

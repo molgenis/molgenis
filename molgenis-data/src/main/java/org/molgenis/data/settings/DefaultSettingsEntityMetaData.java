@@ -5,6 +5,7 @@ import static org.molgenis.MolgenisFieldTypes.STRING;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
@@ -38,11 +39,14 @@ public abstract class DefaultSettingsEntityMetaData extends DefaultEntityMetaDat
 		return dataService.findOne(getName(), getSimpleName());
 	}
 
-	protected abstract Entity getDefaultSettings();
-
 	public static String getSettingsEntityName(String id)
 	{
 		return SettingsEntityMeta.PACKAGE_SETTINGS.getName() + '_' + id;
+	}
+
+	private Entity getDefaultSettings()
+	{
+		return new MapEntity(this);
 	}
 
 	@Transactional

@@ -3,7 +3,6 @@ package org.molgenis.data.support;
 import java.util.Set;
 
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.settings.DefaultSettingsEntity;
 import org.molgenis.data.settings.DefaultSettingsEntityMetaData;
@@ -99,22 +98,6 @@ public class GenomicDataSettings extends DefaultSettingsEntity
 					.setDescription("Comma-separated attribute names");
 			addAttribute(ATTRS_LINKOUT).setNillable(true).setLabel("Link out")
 					.setDescription("Comma-separated attribute names");
-		}
-
-		@Override
-		protected Entity getDefaultSettings()
-		{
-			// FIXME workaround for https://github.com/molgenis/molgenis/issues/1810
-			MapEntity defaultSettings = new MapEntity(this);
-			defaultSettings.set(ATTRS_POS, DEFAULT_ATTRS_POS);
-			defaultSettings.set(ATTRS_CHROM, DEFAULT_ATTRS_CHROM);
-			defaultSettings.set(ATTRS_REF, DEFAULT_ATTRS_REF);
-			defaultSettings.set(ATTRS_ALT, DEFAULT_ATTRS_ALT);
-			defaultSettings.set(ATTRS_IDENTIFIER, DEFAULT_ATTRS_ID);
-			defaultSettings.set(ATTRS_STOP, DEFAULT_ATTRS_STOP);
-			defaultSettings.set(ATTRS_DESCRIPTION, DEFAULT_ATTRS_DESCRIPTION);
-			defaultSettings.set(ATTRS_PATIENT_ID, DEFAULT_ATTRS_PATIENT_ID);
-			return defaultSettings;
 		}
 	}
 
