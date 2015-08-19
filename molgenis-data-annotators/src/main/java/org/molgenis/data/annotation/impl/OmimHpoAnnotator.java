@@ -15,13 +15,15 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.CmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.LocusAnnotator;
-import org.molgenis.data.annotation.impl.datastructures.HPOTerm;
-import org.molgenis.data.annotation.impl.datastructures.Locus;
-import org.molgenis.data.annotation.impl.datastructures.OMIMTerm;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
+import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.EmptyCmdLineAnnotatorSettingsConfigurer;
+import org.molgenis.data.annotation.impl.datastructures.HPOTerm;
+import org.molgenis.data.annotation.impl.datastructures.Locus;
+import org.molgenis.data.annotation.impl.datastructures.OMIMTerm;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
 import org.molgenis.data.annotation.provider.HpoMappingProvider;
 import org.molgenis.data.annotation.provider.OmimMorbidMapProvider;
@@ -360,27 +362,18 @@ public class OmimHpoAnnotator extends LocusAnnotator
 	public List<AttributeMetaData> getOutputMetaData()
 	{
 		List<AttributeMetaData> metadata = new ArrayList<>();
-		metadata.add(new DefaultAttributeMetaData(OMIM_CAUSAL_IDENTIFIER,
-				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.add(new DefaultAttributeMetaData(OMIM_DISORDERS,
-				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.add(new DefaultAttributeMetaData(OMIM_IDENTIFIERS,
-				MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(OMIM_CAUSAL_IDENTIFIER, MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(OMIM_DISORDERS, MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(OMIM_IDENTIFIERS, MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		metadata.add(new DefaultAttributeMetaData(OMIM_TYPE, MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.add(new DefaultAttributeMetaData(OMIM_HGNC_IDENTIFIERS,
-				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.add(new DefaultAttributeMetaData(OMIM_CYTOGENIC_LOCATION,
-				MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(OMIM_HGNC_IDENTIFIERS, MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(OMIM_CYTOGENIC_LOCATION, MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		metadata.add(new DefaultAttributeMetaData(OMIM_ENTRY, MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.add(new DefaultAttributeMetaData(HPO_IDENTIFIERS,
-				MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(HPO_IDENTIFIERS, MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		metadata.add(new DefaultAttributeMetaData(HPO_GENE_NAME, MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.add(new DefaultAttributeMetaData(HPO_DESCRIPTIONS,
-				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.add(new DefaultAttributeMetaData(HPO_DISEASE_DATABASE,
-				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.add(new DefaultAttributeMetaData(HPO_DISEASE_DATABASE_ENTRY,
-				MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(HPO_DESCRIPTIONS, MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(HPO_DISEASE_DATABASE, MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.add(new DefaultAttributeMetaData(HPO_DISEASE_DATABASE_ENTRY, MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		metadata.add(new DefaultAttributeMetaData(HPO_ENTREZ_ID, MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		return metadata;
 	}
@@ -389,5 +382,11 @@ public class OmimHpoAnnotator extends LocusAnnotator
 	public AnnotatorInfo getInfo()
 	{
 		return AnnotatorInfo.create(Status.INDEV, Type.UNUSED, "unknown", "no description", getOutputMetaData());
+	}
+
+	@Override
+	public CmdLineAnnotatorSettingsConfigurer getCmdLineAnnotatorSettingsConfigurer()
+	{
+		return new EmptyCmdLineAnnotatorSettingsConfigurer();
 	}
 }

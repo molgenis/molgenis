@@ -17,6 +17,7 @@ import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.annotation.filter.VariantResultFilter;
+import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.query.LocusQueryCreator;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.Resources;
@@ -80,8 +81,9 @@ public class DannAnnotator
 						attributes);
 
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(DANN_TABIX_RESOURCE, dannInfo, new LocusQueryCreator(),
-				new VariantResultFilter(), dataService, resources);
-		
+				new VariantResultFilter(), dataService, resources,
+				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(DANN_FILE_LOCATION_PROPERTY, molgenisSettings));
+
 		return new RepositoryAnnotatorImpl(entityAnnotator);
 	}
 

@@ -22,10 +22,12 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
+import org.molgenis.data.annotation.CmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.VariantAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
+import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.EmptyCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.provider.UrlPinger;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.support.DefaultAttributeMetaData;
@@ -97,14 +99,16 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 		/**
 		 * Check input HPO terms
 		 */
-		Scanner s = new Scanner(hpoTermFile, "UTF-8");
-		String hpoTerms = s.nextLine();
-		if (s.hasNextLine())
+		String hpoTerms;
+		try (Scanner s = new Scanner(hpoTermFile, "UTF-8"))
 		{
-			throw new IOException(
-					"HPO terms file is not supposed to have more than 1 line. Example line: HP:0001300,HP:0007325,HP:0002015");
+			hpoTerms = s.nextLine();
+			if (s.hasNextLine())
+			{
+				throw new IOException(
+						"HPO terms file is not supposed to have more than 1 line. Example line: HP:0001300,HP:0007325,HP:0002015");
+			}
 		}
-
 		hpoTerms = hpoTerms.trim();
 
 		LOG.info("Line in HPO terms file (trimmed): " + hpoTerms);
@@ -275,4 +279,9 @@ public class PhenomizerServiceAnnotator extends VariantAnnotator
 		return AnnotatorInfo.create(Status.INDEV, Type.UNUSED, "unknown", "no description", getOutputMetaData());
 	}
 
+	@Override
+	public CmdLineAnnotatorSettingsConfigurer getCmdLineAnnotatorSettingsConfigurer()
+	{
+		return new EmptyCmdLineAnnotatorSettingsConfigurer();
+	}
 }

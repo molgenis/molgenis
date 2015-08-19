@@ -19,8 +19,10 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.AbstractRepositoryEntityAnnotator;
+import org.molgenis.data.annotation.CmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.EmptyCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.impl.datastructures.CosmicData;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.support.DefaultAttributeMetaData;
@@ -194,5 +196,11 @@ public class CosmicServiceAnnotator extends AbstractRepositoryEntityAnnotator im
 	public AnnotatorInfo getInfo()
 	{
 		return null;
+	}
+
+	@Override
+	public CmdLineAnnotatorSettingsConfigurer getCmdLineAnnotatorSettingsConfigurer()
+	{
+		return new EmptyCmdLineAnnotatorSettingsConfigurer();
 	}
 }

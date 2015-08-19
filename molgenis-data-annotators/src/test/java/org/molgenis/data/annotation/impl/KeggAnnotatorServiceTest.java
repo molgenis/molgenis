@@ -14,11 +14,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.AbstractAnnotatorTest;
 import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
 import org.molgenis.data.annotation.provider.KeggDataProvider;
-import org.molgenis.data.annotation.AbstractAnnotatorTest;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.testng.annotations.BeforeMethod;
@@ -29,11 +28,9 @@ public class KeggAnnotatorServiceTest extends AbstractAnnotatorTest
 	@BeforeMethod
 	public void beforeMethod() throws IOException
 	{
-		AnnotationService annotationService = mock(AnnotationService.class);
-
 		entity.set(VcfRepository.CHROM, "2");
 		entity.set(VcfRepository.POS, new Long(58453844l));
-		
+
 		input.add(entity);
 
 		String keggHsaData = "hsa:55120	FANCL, FAAP43, PHF9, POG; Fanconi anemia, complementation group L; K10606 E3 ubiquitin-protein ligase FANCL [EC:6.3.2.19]";
@@ -48,7 +45,7 @@ public class KeggAnnotatorServiceTest extends AbstractAnnotatorTest
 		Map<String, HGNCLocations> locationsMap = Collections.singletonMap("FANCL", new HGNCLocations("FANCL",
 				58453844l - 10, 58453844l + 10, "2"));
 		when(hgncLocationsProvider.getHgncLocations()).thenReturn(locationsMap);
-		annotator = new KeggServiceAnnotator(annotationService, hgncLocationsProvider, keggDataProvider);
+		annotator = new KeggServiceAnnotator(hgncLocationsProvider, keggDataProvider);
 	}
 
 	@Test

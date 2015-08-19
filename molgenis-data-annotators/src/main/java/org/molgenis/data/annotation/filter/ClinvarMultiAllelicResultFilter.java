@@ -1,11 +1,8 @@
 package org.molgenis.data.annotation.filter;
 
-import static org.molgenis.data.vcf.VcfRepository.ALT;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +11,6 @@ import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.entity.ResultFilter;
-import org.molgenis.data.annotation.entity.impl.ClinvarAnnotator;
 import org.molgenis.data.vcf.VcfRepository;
 
 import com.google.common.base.Optional;
@@ -84,7 +80,7 @@ public class ClinvarMultiAllelicResultFilter implements ResultFilter
 
 						for (int j = 0; j < annotatedEntityAltAlleles.length; j++)
 						{
-							
+
 							if (annotatedEntityAltAlleles[j].equals(alts[significantAlleleIndex]))
 							{
 
