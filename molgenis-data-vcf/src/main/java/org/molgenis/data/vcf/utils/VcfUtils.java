@@ -17,6 +17,7 @@ import java.util.Scanner;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
@@ -24,6 +25,8 @@ import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.datastructures.Sample;
 import org.molgenis.data.vcf.datastructures.Trio;
+import org.molgenis.fieldtypes.EnumField;
+import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.vcf.meta.VcfMetaInfo;
 
 public class VcfUtils
@@ -75,25 +78,39 @@ public class VcfUtils
 		}
 
 		List<String> infoFieldsSeen = new ArrayList<String>();
+		boolean hasInfoFields = false;
 		// flexible 'info' field, one column with potentially many data items
 		for (AttributeMetaData attributeMetaData : vcfEntity.getEntityMetaData().getAttribute(VcfRepository.INFO)
 				.getAttributeParts())
 		{
 			infoFieldsSeen.add(attributeMetaData.getName());
-			if (vcfEntity.getString(attributeMetaData.getName()) != null) // FIXME: This removes 'FLAG' fields? see
-																			// http://samtools.github.io/hts-specs/VCFv4.2.pdf
+			if (vcfEntity.getString(attributeMetaData.getName()) != null)
 			{
 				if (attributeMetaData.getName().startsWith(VcfRepository.getInfoPrefix()))
 				{
-					vcfRecord.append(attributeMetaData.getName().substring(VcfRepository.getInfoPrefix().length())
+					if(attributeMetaData.getDataType().getEnumType().equals(FieldTypeEnum.BOOL)){
+						if(vcfEntity.getBoolean(attributeMetaData.getName())){
+							vcfRecord.append(attributeMetaData.getName().substring(VcfRepository.getInfoPrefix().length()) + ";");
+							hasInfoFields = true;
+						}
+					}
+					else{
+						vcfRecord.append(attributeMetaData.getName().substring(VcfRepository.getInfoPrefix().length())
 							+ "=" + vcfEntity.getString(attributeMetaData.getName()) + ";");
+						hasInfoFields = true;
+					}
 				}
 				else
 				{
 					vcfRecord.append(attributeMetaData.getName() + "="
 							+ vcfEntity.getString(attributeMetaData.getName()) + ";");
+					hasInfoFields = true;
 				}
 			}
+		}
+		if (!hasInfoFields)
+		{
+			vcfRecord.append(".");
 		}
 
 		for (AttributeMetaData attributeMetaData : vcfEntity.getEntityMetaData().getAtomicAttributes())
