@@ -23,9 +23,6 @@ public class VariantResultFilter implements ResultFilter
 	@Override
 	public com.google.common.base.Optional<Entity> filterResults(Iterable<Entity> results, Entity annotatedEntity)
 	{
-		System.out.println("####" + results.iterator().next());
-		System.out.println("####" + annotatedEntity);
-
 		// TODO: the magic goes here, but for now the simple stuff
 		return FluentIterable
 				.from(results)
