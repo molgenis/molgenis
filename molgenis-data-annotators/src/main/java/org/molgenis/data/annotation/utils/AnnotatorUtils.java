@@ -1,7 +1,8 @@
 package org.molgenis.data.annotation.utils;
 
-import autovalue.shaded.com.google.common.common.collect.Iterables;
-import com.google.common.collect.Lists;
+import java.util.List;
+import java.util.Map;
+
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
@@ -11,11 +12,7 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import autovalue.shaded.com.google.common.common.collect.Iterables;
 
 /**
  * Created by charbonb on 11/03/15.

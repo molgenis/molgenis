@@ -14,11 +14,13 @@ import java.util.Map;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.annotation.CmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.LocusAnnotator;
-import org.molgenis.data.annotation.impl.datastructures.HpoData;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
+import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.EmptyCmdLineAnnotatorSettingsConfigurer;
+import org.molgenis.data.annotation.impl.datastructures.HpoData;
 import org.molgenis.data.annotation.provider.HpoDataProvider;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.support.DefaultAttributeMetaData;
@@ -72,7 +74,6 @@ public class HpoServiceAnnotator extends LocusAnnotator
 		this.molgenisSettings = new MolgenisSimpleSettings();
 		molgenisSettings.setProperty(HPO_FILE_LOCATION, hpoFileLocation.getAbsolutePath());
 		hpoDataProvider = new HpoDataProvider(molgenisSettings);
-
 
 		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
 
@@ -209,5 +210,11 @@ public class HpoServiceAnnotator extends LocusAnnotator
 	public AnnotatorInfo getInfo()
 	{
 		return AnnotatorInfo.create(Status.INDEV, Type.UNUSED, "unknown", "no description", getOutputMetaData());
+	}
+
+	@Override
+	public CmdLineAnnotatorSettingsConfigurer getCmdLineAnnotatorSettingsConfigurer()
+	{
+		return new EmptyCmdLineAnnotatorSettingsConfigurer();
 	}
 }

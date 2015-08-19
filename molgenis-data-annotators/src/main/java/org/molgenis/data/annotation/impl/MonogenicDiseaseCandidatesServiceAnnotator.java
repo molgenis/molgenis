@@ -18,6 +18,7 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.annotation.CmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.VariantAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
@@ -26,6 +27,7 @@ import org.molgenis.data.annotation.entity.impl.CGDAnnotator;
 import org.molgenis.data.annotation.entity.impl.ExacAnnotator;
 import org.molgenis.data.annotation.entity.impl.GoNLAnnotator;
 import org.molgenis.data.annotation.entity.impl.SnpEffAnnotator;
+import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.EmptyCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.provider.CgdDataProvider;
 import org.molgenis.data.annotation.provider.CgdDataProvider.generalizedInheritance;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
@@ -161,17 +163,13 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 				.getDouble(GoNLAnnotator.BC_GONL_MAF) : 0;
 
 		CgdDataProvider.generalizedInheritance cgdGenInh = entity
-				.getString(CGDAnnotator.CGDAttributeName.GENERALIZED_INHERITANCE
-						.getAttributeName()) != null ? generalizedInheritance.valueOf(entity
-				.getString(CGDAnnotator.CGDAttributeName.GENERALIZED_INHERITANCE
-						.getAttributeName())) : null;
-		String originalInheritance = entity
-				.getString(CGDAnnotator.CGDAttributeName.INHERITANCE.getAttributeName()) != null ? entity
+				.getString(CGDAnnotator.CGDAttributeName.GENERALIZED_INHERITANCE.getAttributeName()) != null ? generalizedInheritance
+				.valueOf(entity.getString(CGDAnnotator.CGDAttributeName.GENERALIZED_INHERITANCE.getAttributeName())) : null;
+		String originalInheritance = entity.getString(CGDAnnotator.CGDAttributeName.INHERITANCE.getAttributeName()) != null ? entity
 				.getString(CGDAnnotator.CGDAttributeName.INHERITANCE.getAttributeName()) : null;
 		SnpEffAnnotator.Impact impact = Enum.valueOf(SnpEffAnnotator.Impact.class, annSplit[2]);
 		String gene = annSplit[3];
-		String condition = entity.getString(CGDAnnotator.CGDAttributeName.CONDITION
-				.getAttributeName());
+		String condition = entity.getString(CGDAnnotator.CGDAttributeName.CONDITION.getAttributeName());
 
 		// TODO: can be multiple!! even with canonical output...
 		String zygosity = checkGenotypeData(entity);
@@ -281,8 +279,7 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 		// common variant in one of the three big databases, skip it
 		else if (thousandGenomesMAF > 0.05 || exacMAF > 0.05 || gonlMAF > 0.05) filter = true;
 		// skip any "low impact" variants
-		else if (impact.equals(SnpEffAnnotator.Impact.MODIFIER)
-				|| impact.equals(SnpEffAnnotator.Impact.LOW)) filter = true;
+		else if (impact.equals(SnpEffAnnotator.Impact.MODIFIER) || impact.equals(SnpEffAnnotator.Impact.LOW)) filter = true;
 		// skip any homozygous reference alleles
 		else if (zygosity.equals(HOMREF)) filter = true;
 		return filter;
@@ -356,14 +353,17 @@ public class MonogenicDiseaseCandidatesServiceAnnotator extends VariantAnnotator
 				FieldTypeEnum.DECIMAL));
 		entityMetaData.add(new DefaultAttributeMetaData(ExacAnnotator.EXAC_AF, FieldTypeEnum.DECIMAL));
 		entityMetaData.add(new DefaultAttributeMetaData(GoNLAnnotator.BC_GONL_MAF, FieldTypeEnum.DECIMAL));
-		entityMetaData.add(new DefaultAttributeMetaData(
-				CGDAnnotator.CGDAttributeName.GENERALIZED_INHERITANCE.getAttributeName(),
-				FieldTypeEnum.TEXT));
-		entityMetaData.add(new DefaultAttributeMetaData(
-				CGDAnnotator.CGDAttributeName.INHERITANCE.getAttributeName(),
+		entityMetaData.add(new DefaultAttributeMetaData(CGDAnnotator.CGDAttributeName.GENERALIZED_INHERITANCE
+				.getAttributeName(), FieldTypeEnum.TEXT));
+		entityMetaData.add(new DefaultAttributeMetaData(CGDAnnotator.CGDAttributeName.INHERITANCE.getAttributeName(),
 				FieldTypeEnum.TEXT));
 		entityMetaData.add(new DefaultAttributeMetaData(VcfRepository.SAMPLES, FieldTypeEnum.MREF));
 		return entityMetaData;
 	}
 
+	@Override
+	public CmdLineAnnotatorSettingsConfigurer getCmdLineAnnotatorSettingsConfigurer()
+	{
+		return new EmptyCmdLineAnnotatorSettingsConfigurer();
+	}
 }

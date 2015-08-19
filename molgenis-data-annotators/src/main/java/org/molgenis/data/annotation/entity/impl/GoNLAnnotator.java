@@ -1,7 +1,6 @@
 package org.molgenis.data.annotation.entity.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -91,9 +90,18 @@ public class GoNLAnnotator
 		GoNLMultiAllelicResultFilter goNLMultiAllelicResultFilter = new GoNLMultiAllelicResultFilter();
 
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(GONL_MULTI_FILE_RESOURCE, thousandGenomeInfo,
-				locusQueryCreator, goNLMultiAllelicResultFilter, dataService, resources)
-		{
+				locusQueryCreator, goNLMultiAllelicResultFilter, dataService, resources,
+				(annotationSourceFileName) -> {
+					molgenisSettings.setProperty(GoNLAnnotator.GONL_ROOT_DIRECTORY_PROPERTY, annotationSourceFileName);
 
+					molgenisSettings.setProperty(GoNLAnnotator.GONL_FILE_PATTERN_PROPERTY,
+							"gonl.chr%s.snps_indels.r5.vcf.gz");
+					molgenisSettings.setProperty(GoNLAnnotator.GONL_OVERRIDE_CHROMOSOME_FILES_PROPERTY,
+							"X:gonl.chrX.release4.gtc.vcf.gz");
+					molgenisSettings.setProperty(GoNLAnnotator.GONL_CHROMOSOME_PROPERTY,
+							"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X");
+				})
+		{
 			@Override
 			protected Object getResourceAttributeValue(AttributeMetaData attr, Entity entity)
 			{

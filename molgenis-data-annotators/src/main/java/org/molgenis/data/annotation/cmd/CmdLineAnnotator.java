@@ -9,15 +9,6 @@ import java.util.Set;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
-import org.molgenis.data.annotation.entity.impl.CGDAnnotator;
-import org.molgenis.data.annotation.entity.impl.CaddAnnotator;
-import org.molgenis.data.annotation.entity.impl.ClinvarAnnotator;
-import org.molgenis.data.annotation.entity.impl.DannAnnotator;
-import org.molgenis.data.annotation.entity.impl.ExacAnnotator;
-import org.molgenis.data.annotation.entity.impl.FitConAnnotator;
-import org.molgenis.data.annotation.entity.impl.GoNLAnnotator;
-import org.molgenis.data.annotation.entity.impl.SnpEffAnnotator;
-import org.molgenis.data.annotation.entity.impl.ThousandGenomesAnnotator;
 import org.molgenis.data.annotation.impl.HpoServiceAnnotator;
 import org.molgenis.data.annotation.impl.MonogenicDiseaseCandidatesServiceAnnotator;
 import org.molgenis.data.annotation.impl.PhenomizerServiceAnnotator;
@@ -25,7 +16,6 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.utils.VcfUtils;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -40,10 +30,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class CmdLineAnnotator
 {
-
-	@Autowired
-	private MolgenisSettings molgenisSettings;
-
 	@Autowired
 	private ApplicationContext applicationContext;
 
@@ -114,47 +100,7 @@ public class CmdLineAnnotator
 		}
 
 		// engage!
-		if (annotatorName.equals("cadd"))
-		{
-			molgenisSettings.setProperty(CaddAnnotator.CADD_FILE_LOCATION_PROPERTY,
-					annotationSourceFile.getAbsolutePath());
-			Map<String, RepositoryAnnotator> annotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
-			RepositoryAnnotator annotator = annotators.get("cadd");
-			annotate(annotator, inputVcfFile, outputVCFFile);
-		}
-		else if (annotatorName.equals("dann"))
-		{
-			molgenisSettings.setProperty(DannAnnotator.DANN_FILE_LOCATION_PROPERTY,
-					annotationSourceFile.getAbsolutePath());
-			Map<String, RepositoryAnnotator> annotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
-			RepositoryAnnotator annotator = annotators.get("dann");
-			annotate(annotator, inputVcfFile, outputVCFFile);
-		}
-		else if (annotatorName.equals("fitcon"))
-		{
-			molgenisSettings.setProperty(FitConAnnotator.FITCON_FILE_LOCATION_PROPERTY,
-					annotationSourceFile.getAbsolutePath());
-			Map<String, RepositoryAnnotator> annotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
-			RepositoryAnnotator annotator = annotators.get("fitcon");
-			annotate(annotator, inputVcfFile, outputVCFFile);
-		}
-		else if (annotatorName.equals("snpeff"))
-		{
-			molgenisSettings.setProperty(SnpEffAnnotator.SNPEFF_JAR_LOCATION_PROPERTY,
-					annotationSourceFile.getAbsolutePath());
-			Map<String, RepositoryAnnotator> annotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
-			RepositoryAnnotator annotator = annotators.get("snpEff");
-			annotate(annotator, inputVcfFile, outputVCFFile);
-		}
-		else if (annotatorName.equals("clinvar"))
-		{
-			molgenisSettings.setProperty(ClinvarAnnotator.CLINVAR_FILE_LOCATION_PROPERTY,
-					annotationSourceFile.getAbsolutePath());
-			Map<String, RepositoryAnnotator> annotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
-			RepositoryAnnotator annotator = annotators.get("clinvar");
-			annotate(annotator, inputVcfFile, outputVCFFile);
-		}
-		else if (annotatorName.equals("hpo"))
+		if (annotatorName.equals("hpo"))
 		{
 			new HpoServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
@@ -166,51 +112,14 @@ public class CmdLineAnnotator
 		{
 			new PhenomizerServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
 		}
-		else if (annotatorName.equals("exac"))
-		{
-			molgenisSettings.setProperty(ExacAnnotator.EXAC_FILE_LOCATION_PROPERTY,
-					annotationSourceFile.getAbsolutePath());
-			Map<String, RepositoryAnnotator> annotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
-			RepositoryAnnotator annotator = annotators.get("exac");
-			annotate(annotator, inputVcfFile, outputVCFFile);
-		}
-		else if (annotatorName.equals("gonl"))
-		{
-			molgenisSettings.setProperty(GoNLAnnotator.GONL_ROOT_DIRECTORY_PROPERTY, annotationSourceFile.getAbsolutePath());
-			molgenisSettings.setProperty(GoNLAnnotator.GONL_FILE_PATTERN_PROPERTY, "gonl.chr%s.snps_indels.r5.vcf.gz");
-			molgenisSettings.setProperty(GoNLAnnotator.GONL_OVERRIDE_CHROMOSOME_FILES_PROPERTY,
-					"X:gonl.chrX.release4.gtc.vcf.gz");
-			molgenisSettings.setProperty(GoNLAnnotator.GONL_CHROMOSOME_PROPERTY,
-					"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X");
-
-			Map<String, RepositoryAnnotator> annotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
-			RepositoryAnnotator annotator = annotators.get("gonl");
-			annotate(annotator, inputVcfFile, outputVCFFile);
-		}
-		else if (annotatorName.equals("cgd"))
-		{
-			molgenisSettings.setProperty(CGDAnnotator.CGD_FILE_LOCATION_PROPERTY,
-					annotationSourceFile.getAbsolutePath());
-			Map<String, RepositoryAnnotator> annotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
-			RepositoryAnnotator annotator = annotators.get("cgd");
-			annotate(annotator, inputVcfFile, outputVCFFile);
-		}
-		else if (annotatorName.equals("thousandGenomes"))
-		{
-			molgenisSettings.setProperty(ThousandGenomesAnnotator.THOUSAND_GENOME_FOLDER_PROPERTY,
-					annotationSourceFile.getAbsolutePath());
-			molgenisSettings.setProperty(ThousandGenomesAnnotator.THOUSAND_GENOME_FILE_PATTERN_PROPERTY,
-					"ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz");
-			molgenisSettings.setProperty(ThousandGenomesAnnotator.THOUSAND_GENOME_CHROMOSOME_PROPERTY,
-					"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22");
-
-			Map<String, RepositoryAnnotator> annotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
-			RepositoryAnnotator annotator = annotators.get("thousandGenomes");
-			annotate(annotator, inputVcfFile, outputVCFFile);
-		}
 		else
 		{
-			throw new Exception("Annotor unknown: " + annotatorName);
+			Map<String, RepositoryAnnotator> annotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
+			RepositoryAnnotator annotator = annotators.get(annotatorName);
+			if (annotator == null) throw new Exception("Annotator unknown: " + annotatorName);
+
+			annotator.getCmdLineAnnotatorSettingsConfigurer().addSettings(annotationSourceFile.getAbsolutePath());
+			annotate(annotator, inputVcfFile, outputVCFFile);
 		}
 	}
 

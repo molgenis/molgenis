@@ -9,12 +9,14 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.annotation.CmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.annotation.entity.QueryCreator;
 import org.molgenis.data.annotation.entity.ResultFilter;
 import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 
 import com.google.common.base.Optional;
@@ -27,9 +29,11 @@ public class AnnotatorImpl implements EntityAnnotator
 	private final AnnotatorInfo info;
 	private final QueryCreator queryCreator;
 	private final ResultFilter resultFilter;
+	private final CmdLineAnnotatorSettingsConfigurer cmdLineAnnotatorSettingsConfigurer;
 
 	public AnnotatorImpl(String sourceRepositoryName, AnnotatorInfo info, QueryCreator queryCreator,
-			ResultFilter resultFilter, DataService dataService, Resources resources)
+			ResultFilter resultFilter, DataService dataService, Resources resources,
+			CmdLineAnnotatorSettingsConfigurer cmdLineAnnotatorSettingsConfigurer)
 	{
 		this.sourceRepositoryName = sourceRepositoryName;
 		this.info = info;
@@ -37,6 +41,7 @@ public class AnnotatorImpl implements EntityAnnotator
 		this.resultFilter = resultFilter;
 		this.dataService = dataService;
 		this.resources = resources;
+		this.cmdLineAnnotatorSettingsConfigurer = cmdLineAnnotatorSettingsConfigurer;
 	}
 
 	@Override
@@ -44,13 +49,13 @@ public class AnnotatorImpl implements EntityAnnotator
 	{
 		return info;
 	}
-		
+
 	@Override
 	public List<Entity> annotateEntity(Entity entity)
 	{
 		Query q = queryCreator.createQuery(entity);
 		Iterable<Entity> annotatationSourceEntities;
-		
+
 		if (resources.hasRepository(sourceRepositoryName))
 		{
 			annotatationSourceEntities = resources.findAll(sourceRepositoryName, q);
@@ -60,7 +65,9 @@ public class AnnotatorImpl implements EntityAnnotator
 			annotatationSourceEntities = dataService.findAll(sourceRepositoryName, q);
 		}
 
-		Entity resultEntity = new MapEntity(entity, entity.getEntityMetaData());
+		DefaultEntityMetaData meta = new DefaultEntityMetaData(entity.getEntityMetaData());
+		info.getOutputAttributes().forEach(meta::addAttributeMetaData);
+		Entity resultEntity = new MapEntity(entity, meta);
 
 		Optional<Entity> filteredResult = resultFilter.filterResults(annotatationSourceEntities, entity);
 		if (filteredResult.isPresent())
@@ -113,4 +120,9 @@ public class AnnotatorImpl implements EntityAnnotator
 		return sourceMetaData;
 	}
 
+	@Override
+	public CmdLineAnnotatorSettingsConfigurer getCmdLineAnnotatorSettingsConfigurer()
+	{
+		return cmdLineAnnotatorSettingsConfigurer;
+	}
 }

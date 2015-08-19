@@ -18,10 +18,12 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.AbstractRepositoryEntityAnnotator;
+import org.molgenis.data.annotation.CmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
+import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.EmptyCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.springframework.stereotype.Component;
@@ -140,6 +142,7 @@ public class EbiServiceAnnotator extends AbstractRepositoryEntityAnnotator imple
 		return uriStringBuilder.toString();
 	}
 
+	@SuppressWarnings("unchecked")
 	private List<Entity> parseResult(Entity entity, String json) throws IOException
 	{
 		Map<String, Object> resultMap = new HashMap<>();
@@ -184,4 +187,9 @@ public class EbiServiceAnnotator extends AbstractRepositoryEntityAnnotator imple
 		return AnnotatorInfo.create(Status.INDEV, Type.UNUSED, "unknown", "no description", getOutputMetaData());
 	}
 
+	@Override
+	public CmdLineAnnotatorSettingsConfigurer getCmdLineAnnotatorSettingsConfigurer()
+	{
+		return new EmptyCmdLineAnnotatorSettingsConfigurer();
+	}
 }
