@@ -14,12 +14,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.IndexedCrudRepositorySecurityDecorator;
 import org.molgenis.data.annotation.entity.impl.CaddAnnotator;
 import org.molgenis.data.annotation.entity.impl.SnpEffAnnotator;
-import org.molgenis.data.annotation.impl.ClinVarServiceAnnotator;
-import org.molgenis.data.annotation.impl.DbnsfpGeneServiceAnnotator;
-import org.molgenis.data.annotation.impl.DbnsfpVariantServiceAnnotator;
-import org.molgenis.data.annotation.provider.CgdDataProvider;
-import org.molgenis.data.annotation.provider.HgncLocationsProvider;
-import org.molgenis.data.annotation.provider.HpoMappingProvider;
 import org.molgenis.data.support.GenomeConfig;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
@@ -104,24 +98,11 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		}
 
 
-		// HPO and HGNC Download URLs
-		runtimePropertyMap.put(HpoMappingProvider.KEY_HPO_MAPPING, HpoMappingProvider.DEFAULT_HPO_MAPPING_VALUE);
-		runtimePropertyMap.put(HgncLocationsProvider.KEY_HGNC_LOCATIONS_VALUE,
-				HgncLocationsProvider.DEFAULT_HGNC_LOCATIONS_VALUE);
-
 		if (!molgenisHomeDir.endsWith("/")) molgenisHomeDir = molgenisHomeDir + '/';
 		String molgenisHomeDirAnnotationResources = molgenisHomeDir + "data/annotation_resources";
 
 		runtimePropertyMap.put(CaddAnnotator.CADD_FILE_LOCATION_PROPERTY, molgenisHomeDirAnnotationResources
 				+ "/CADD/1000G.vcf.gz");
-		runtimePropertyMap.put(CgdDataProvider.CGD_FILE_LOCATION_PROPERTY, molgenisHomeDirAnnotationResources
-				+ "/CGD/CGD.txt");
-		runtimePropertyMap.put(DbnsfpGeneServiceAnnotator.GENE_FILE_LOCATION_PROPERTY,
-				molgenisHomeDirAnnotationResources + "/dbnsfp/dbNSFP2.3_gene");
-		runtimePropertyMap.put(DbnsfpVariantServiceAnnotator.CHROMOSOME_FILE_LOCATION_PROPERTY,
-				molgenisHomeDirAnnotationResources + "/dbnsfp/dbNSFP2.3_variant.chr");
-		runtimePropertyMap.put(ClinVarServiceAnnotator.CLINVAR_FILE_LOCATION_PROPERTY,
-				molgenisHomeDirAnnotationResources + "/Clinvar/variant_summary.txt");
 		runtimePropertyMap.put(SnpEffAnnotator.SNPEFF_JAR_LOCATION_PROPERTY, molgenisHomeDirAnnotationResources
 				+ "/Applications/snpEff/snpEff.jar");
 
