@@ -39,7 +39,7 @@ public class RuntimePropertyToStaticContentMigrator implements ApplicationListen
 
 	private RuntimePropertyToStaticContentMigrator migrateSettings()
 	{
-		if (molgenisVersionService.getMolgenisVersionFromServerProperties() == 14)
+		if (molgenisVersionService.getMolgenisVersionFromServerProperties() == 15)
 		{
 			LOG.info("Migrating RuntimeProperty instances to StaticContent instance ...");
 

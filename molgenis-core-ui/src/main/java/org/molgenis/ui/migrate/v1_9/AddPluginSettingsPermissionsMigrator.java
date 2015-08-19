@@ -1,5 +1,12 @@
 package org.molgenis.ui.migrate.v1_9;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_PLUGIN_COUNT_PREFIX;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_PLUGIN_PREFIX;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX;
+
 import org.molgenis.auth.GroupAuthority;
 import org.molgenis.auth.MolgenisGroup;
 import org.molgenis.auth.MolgenisUser;
@@ -14,13 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX;
-import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_PLUGIN_COUNT_PREFIX;
-import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_PLUGIN_PREFIX;
-import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX;
-import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX;
 
 @Component
 public class AddPluginSettingsPermissionsMigrator implements ApplicationListener<ContextRefreshedEvent>
@@ -39,7 +39,7 @@ public class AddPluginSettingsPermissionsMigrator implements ApplicationListener
 
 	private AddPluginSettingsPermissionsMigrator migrateSettings()
 	{
-		if (molgenisVersionService.getMolgenisVersionFromServerProperties() == 14)
+		if (molgenisVersionService.getMolgenisVersionFromServerProperties() == 15)
 		{
 			LOG.info("Creating UserAuthority and GroupAuthority instances for plugin settings entities ...");
 			for (UserAuthority userAuthority : dataService.findAll(UserAuthority.ENTITY_NAME, UserAuthority.class))
@@ -71,8 +71,7 @@ public class AddPluginSettingsPermissionsMigrator implements ApplicationListener
 					{
 						MolgenisUser molgenisUser = userAuthority.getMolgenisUser();
 						String settingsRole = AUTHORITY_ENTITY_READ_PREFIX + "SETTINGS_" + pluginId;
-						if (dataService.count(
-								UserAuthority.ENTITY_NAME,
+						if (dataService.count(UserAuthority.ENTITY_NAME,
 								new QueryImpl().eq(UserAuthority.ROLE, settingsRole).and()
 										.eq(UserAuthority.MOLGENISUSER, molgenisUser)) == 0)
 						{
@@ -113,10 +112,8 @@ public class AddPluginSettingsPermissionsMigrator implements ApplicationListener
 					{
 						MolgenisGroup molgenisGroup = groupAuthority.getMolgenisGroup();
 						String settingsRole = AUTHORITY_ENTITY_READ_PREFIX + "SETTINGS_" + pluginId;
-						if (dataService.count(
-								UserAuthority.ENTITY_NAME,
-								new QueryImpl().eq(GroupAuthority.ROLE, settingsRole).and()
-										.eq(MolgenisGroup.ID, molgenisGroup)) == 0)
+						if (dataService.count(UserAuthority.ENTITY_NAME, new QueryImpl()
+								.eq(GroupAuthority.ROLE, settingsRole).and().eq(MolgenisGroup.ID, molgenisGroup)) == 0)
 						{
 							GroupAuthority settingsGroupAuthority = new GroupAuthority();
 							settingsGroupAuthority.setRole(settingsRole);

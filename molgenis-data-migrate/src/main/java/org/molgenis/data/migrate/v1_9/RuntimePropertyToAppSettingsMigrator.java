@@ -38,7 +38,7 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 
 	private RuntimePropertyToAppSettingsMigrator migrateSettings()
 	{
-		if (molgenisVersionService.getMolgenisVersionFromServerProperties() == 14)
+		if (molgenisVersionService.getMolgenisVersionFromServerProperties() == 15)
 		{
 			LOG.info("Migrating RuntimeProperty instances to AppSettings instance ...");
 
@@ -216,6 +216,13 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 					if (!rtpValue.equals(value))
 					{
 						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
+						if (rtpValue != null)
+						{
+							LOG.info("Adding Settings plugin to Admin menu");
+							rtpValue = rtpValue.replace(
+									"{\"type\":\"menu\",\"id\":\"admin\",\"label\":\"Admin\",\"items\":[",
+									"{\"type\":\"menu\",\"id\":\"admin\",\"label\":\"Admin\",\"items\":[{\"type\":\"plugin\",\"id\":\"settings\",\"label\":\"Settings\"},");
+						}
 						appSettings.setMenu(value);
 					}
 					LOG.info("Deleting RuntimeProperty [" + key + "]");

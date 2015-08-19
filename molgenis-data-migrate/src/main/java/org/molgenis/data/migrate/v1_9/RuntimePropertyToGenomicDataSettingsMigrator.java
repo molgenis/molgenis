@@ -37,7 +37,7 @@ public class RuntimePropertyToGenomicDataSettingsMigrator implements Application
 
 	private RuntimePropertyToGenomicDataSettingsMigrator migrateSettings()
 	{
-		if (molgenisVersionService.getMolgenisVersionFromServerProperties() == 14)
+		if (molgenisVersionService.getMolgenisVersionFromServerProperties() == 15)
 		{
 			LOG.info("Migrating RuntimeProperty instances to GenomicDataSettings instance ...");
 
