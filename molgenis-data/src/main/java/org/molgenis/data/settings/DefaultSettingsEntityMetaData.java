@@ -2,6 +2,7 @@ package org.molgenis.data.settings;
 
 import static org.molgenis.MolgenisFieldTypes.STRING;
 
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -46,7 +47,16 @@ public abstract class DefaultSettingsEntityMetaData extends DefaultEntityMetaDat
 
 	private Entity getDefaultSettings()
 	{
-		return new MapEntity(this);
+		MapEntity mapEntity = new MapEntity(this);
+		for (AttributeMetaData attr : this.getAtomicAttributes())
+		{
+			String defaultValue = attr.getDefaultValue();
+			if (defaultValue != null)
+			{
+				mapEntity.set(attr.getName(), defaultValue);
+			}
+		}
+		return mapEntity;
 	}
 
 	@Transactional
