@@ -11,10 +11,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.AbstractAnnotatorTest;
 import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
-import org.molgenis.data.annotation.AbstractAnnotatorTest;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.util.ResourceUtils;
@@ -34,7 +33,6 @@ public class DbnsfpGeneServiceAnnotatorTest extends AbstractAnnotatorTest
 
 		input.add(entity);
 
-		AnnotationService annotationService = mock(AnnotationService.class);
 		HgncLocationsProvider hgncLocationsProvider = mock(HgncLocationsProvider.class);
 		Map<String, HGNCLocations> locationsMap = Collections.singletonMap("USP5", new HGNCLocations("USP5", 6961292l,
 				6975796l, "12"));

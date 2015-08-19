@@ -14,10 +14,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.AbstractAnnotatorTest;
 import org.molgenis.data.annotation.impl.datastructures.ClinvarData;
 import org.molgenis.data.annotation.provider.ClinvarDataProvider;
-import org.molgenis.data.annotation.AbstractAnnotatorTest;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.util.ResourceUtils;
@@ -45,7 +44,6 @@ public class ClinVarServiceAnnotatorTest extends AbstractAnnotatorTest
 		input.add(entity);
 
 		ClinvarDataProvider clinvarDataProvider = mock(ClinvarDataProvider.class);
-		AnnotationService annotationService = mock(AnnotationService.class);
 
 		Map<List<String>, ClinvarData> clinvarDataMap = Collections.singletonMap(Arrays.asList("12", "57966471", "G",
 				"A"), new ClinvarData("82492", "single nucleotide variant", "KIF5A:c.1678G>A (p.Glu560Lys)", "3798",

@@ -35,7 +35,6 @@ import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
@@ -135,7 +134,6 @@ public class CGDAnnotatorTest extends AbstractTestNGSpringContextTests
 		assertEquals(resultEntity.get(REFERENCES.getAttributeName()), expectedEntity.get(REFERENCES.getAttributeName()));
 	}
 
-	@Configuration
 	public static class Config
 	{
 		@Autowired
