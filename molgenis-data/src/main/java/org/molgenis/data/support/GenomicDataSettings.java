@@ -155,7 +155,7 @@ public class GenomicDataSettings extends DefaultSettingsEntity
 
 	public void setAttrsAlt(String attrsAlt)
 	{
-		set(Meta.ATTRS_REF, attrsAlt);
+		set(Meta.ATTRS_ALT, attrsAlt);
 	}
 
 	public String getAttrsIdentifier()

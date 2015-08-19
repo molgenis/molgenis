@@ -164,8 +164,8 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 			AttributeMetaData dataGalaxyUrlAttr = new DefaultAttributeMetaData(DATA_GALAXY_URL).setDataType(HYPERLINK)
 					.setNillable(true).setLabel("Galaxy URL")
 					.setVisibleExpression("$('" + DATA_GALAXY_EXPORT + "').eq(true).value()");
-			AttributeMetaData dataGalaxyApiKeyAttr = new DefaultAttributeMetaData(DATA_GALAXY_API_KEY).setNillable(true)
-					.setLabel("Galaxy API key")
+			AttributeMetaData dataGalaxyApiKeyAttr = new DefaultAttributeMetaData(DATA_GALAXY_API_KEY)
+					.setNillable(true).setLabel("Galaxy API key")
 					.setVisibleExpression("$('" + DATA_GALAXY_EXPORT + "').eq(true).value()");
 			dataAttr.addAttributePart(dataGalaxyExportAttr);
 			dataAttr.addAttributePart(dataGalaxyUrlAttr);
@@ -176,10 +176,10 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 					.setDataType(COMPOUND).setLabel("Initialization");
 			AttributeMetaData genomeBrowserInitBrowserLinksAttr = new DefaultAttributeMetaData(
 					GENOMEBROWSER_INIT_BROWSER_LINKS).setNillable(false).setDataType(TEXT)
-							.setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_BROWSER_LINKS).setLabel("Browser links");
+					.setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_BROWSER_LINKS).setLabel("Browser links");
 			AttributeMetaData genomeBrowserInitCoordSystemAttr = new DefaultAttributeMetaData(
 					GENOMEBROWSER_INIT_COORD_SYSTEM).setNillable(false).setDataType(TEXT)
-							.setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_COORD_SYSTEM).setLabel("Coordinate system");
+					.setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_COORD_SYSTEM).setLabel("Coordinate system");
 			AttributeMetaData genomeBrowserInitLocationAttr = new DefaultAttributeMetaData(GENOMEBROWSER_INIT_LOCATION)
 					.setNillable(false).setDataType(TEXT).setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_LOCATION)
 					.setLabel("Location");
@@ -188,7 +188,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 					.setLabel("Sources");
 			AttributeMetaData genomeBrowserInitHighlightRegionAttr = new DefaultAttributeMetaData(
 					GENOMEBROWSER_INIT_HIGHLIGHT_REGION).setNillable(false).setDataType(BOOL)
-							.setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_HIGHLIGHT_REGION).setLabel("Highlight region");
+					.setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_HIGHLIGHT_REGION).setLabel("Highlight region");
 
 			genomeBrowserInitAttr.addAttributePart(genomeBrowserInitBrowserLinksAttr);
 			genomeBrowserInitAttr.addAttributePart(genomeBrowserInitCoordSystemAttr);
@@ -220,8 +220,8 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 					.setLabel("Distinct aggregates");
 			AttributeMetaData aggregatesDistinctOverrideAttr = new DefaultAttributeMetaData(
 					AGGREGATES_DISTINCT_OVERRIDES).setDataType(TEXT).setLabel("Distinct attribute overrides")
-							.setDescription("JSON object that maps entity names to attribute names")
-							.setVisibleExpression("$('" + AGGREGATES_DISTINCT_SELECT + "').eq(true).value()");
+					.setDescription("JSON object that maps entity names to attribute names")
+					.setVisibleExpression("$('" + AGGREGATES_DISTINCT_SELECT + "').eq(true).value()");
 			aggregatesAttr.addAttributePart(aggregatesDistinctSelectAttr);
 			aggregatesAttr.addAttributePart(aggregatesDistinctOverrideAttr);
 			return aggregatesAttr;
@@ -231,8 +231,11 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 		{
 			DefaultAttributeMetaData reportsAttr = new DefaultAttributeMetaData(REPORTS).setDataType(COMPOUND)
 					.setLabel("Reports").setVisibleExpression("$('" + MOD_REPORTS + "').eq(true).value()");
-			AttributeMetaData reportsEntitiesAttr = new DefaultAttributeMetaData(REPORTS_ENTITIES).setNillable(true)
-					.setDataType(TEXT).setLabel("Reports").setDescription(
+			AttributeMetaData reportsEntitiesAttr = new DefaultAttributeMetaData(REPORTS_ENTITIES)
+					.setNillable(true)
+					.setDataType(TEXT)
+					.setLabel("Reports")
+					.setDescription(
 							"Comma-seperated report strings (e.g. MyDataSet:myreport,OtherDataSet:otherreport). The report name refers to an existing FreemarkerTemplate entity or file with name view-<report>-entitiesreport.ftl (e.g. view-myreport-entitiesreport.ftl)");
 			reportsAttr.addAttributePart(reportsEntitiesAttr);
 			return reportsAttr;
@@ -284,7 +287,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 	public void setModAnnotators(boolean modAnnotators)
 	{
-		set(Meta.MOD_AGGREGATES, modAnnotators);
+		set(Meta.MOD_ANNOTATORS, modAnnotators);
 	}
 
 	public boolean getModCharts()
@@ -402,13 +405,20 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 	public URL getGalaxyUrl()
 	{
 		String galaxyUrl = getString(Meta.DATA_GALAXY_URL);
-		try
+		if (galaxyUrl != null)
 		{
-			return new URL(galaxyUrl);
+			try
+			{
+				return new URL(galaxyUrl);
+			}
+			catch (MalformedURLException e)
+			{
+				throw new RuntimeException(e);
+			}
 		}
-		catch (MalformedURLException e)
+		else
 		{
-			throw new RuntimeException(e);
+			return null;
 		}
 	}
 
@@ -419,13 +429,13 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 	public boolean getGenomeBrowser()
 	{
-		Boolean value = getBoolean(Meta.GENOMEBROWSER);
-		return value != null ? value : false;
+		Boolean value = getBoolean(Meta.DATA_GENOME_BROWSER);
+		return value != null ? value.booleanValue() : false;
 	}
 
 	public void setGenomeBrowser(boolean genomeBrowser)
 	{
-		set(Meta.GENOMEBROWSER, genomeBrowser);
+		set(Meta.DATA_GENOME_BROWSER, genomeBrowser);
 	}
 
 	public String getGenomeBrowserLocation()
@@ -466,7 +476,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 	public void setGenomeBrowserLinks(String genomeBrowserLinks)
 	{
-		set(Meta.GENOMEBROWSER_INIT_SOURCES, genomeBrowserLinks);
+		set(Meta.GENOMEBROWSER_INIT_BROWSER_LINKS, genomeBrowserLinks);
 	}
 
 	public boolean getGenomeBrowserHighlightRegion()

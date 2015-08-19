@@ -38,7 +38,7 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 
 	private RuntimePropertyToAppSettingsMigrator migrateSettings()
 	{
-		if (molgenisVersionService.getMolgenisVersionFromServerProperties() == 13)
+		if (molgenisVersionService.getMolgenisVersionFromServerProperties() == 14)
 		{
 			LOG.info("Migrating RuntimeProperty instances to AppSettings instance ...");
 
@@ -90,6 +90,16 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 					}
 					LOG.info("Deleting RuntimeProperty [" + key + "]");
 					dataService.delete(ENTITY_NAME, property.getId());
+				}
+			}
+
+			{
+				String key = "app.trackingcode.header";
+				RuntimeProperty property = getProperty(key);
+				if (property != null)
+				{
+					LOG.warn(
+							"RuntimeProperty app.trackingcode.header cannot be migrated to AppSettings automatically, please set the Google Analytics tracking id manually in Application settings and remove the RuntimeProperty.");
 				}
 			}
 
@@ -155,7 +165,7 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 					if (!rtpValue.equals(value))
 					{
 						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
-						appSettings.setLanguageCode(value);
+						appSettings.setLanguageCode(rtpValue);
 					}
 					LOG.info("Deleting RuntimeProperty [" + key + "]");
 					dataService.delete(ENTITY_NAME, property.getId());
@@ -172,7 +182,7 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 					if (!rtpValue.equals(value))
 					{
 						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
-						appSettings.setBootstrapTheme(value);
+						appSettings.setBootstrapTheme(rtpValue);
 					}
 					LOG.info("Deleting RuntimeProperty [" + key + "]");
 					dataService.delete(ENTITY_NAME, property.getId());
@@ -189,7 +199,7 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 					if (!rtpValue.equals(value))
 					{
 						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
-						appSettings.setCssHref(value);
+						appSettings.setCssHref(rtpValue);
 					}
 					LOG.info("Deleting RuntimeProperty [" + key + "]");
 					dataService.delete(ENTITY_NAME, property.getId());
@@ -233,7 +243,7 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 					if (!rtpValue.equals(value))
 					{
 						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
-						appSettings.setGoogleAnalyticsTrackingId(value);
+						appSettings.setTrackingCodeFooter(rtpValue);
 					}
 					LOG.info("Deleting RuntimeProperty [" + key + "]");
 					dataService.delete(ENTITY_NAME, property.getId());
@@ -250,7 +260,7 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 					if (!rtpValue.equals(value))
 					{
 						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
-						appSettings.setAggregateThreshold(value);
+						appSettings.setAggregateThreshold(rtpValue);
 					}
 					LOG.info("Deleting RuntimeProperty [" + key + "]");
 					dataService.delete(ENTITY_NAME, property.getId());

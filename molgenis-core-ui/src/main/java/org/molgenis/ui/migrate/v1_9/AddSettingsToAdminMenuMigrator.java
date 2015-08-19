@@ -34,7 +34,7 @@ public class AddSettingsToAdminMenuMigrator implements ApplicationListener<Conte
 
 	private AddSettingsToAdminMenuMigrator migrateSettings()
 	{
-		if (molgenisVersionService.getMolgenisVersionFromServerProperties() == 13)
+		if (molgenisVersionService.getMolgenisVersionFromServerProperties() == 14)
 		{
 			LOG.info("Adding Settings plugin to Admin menu ...");
 			Menu molgenisMenu = menuManagerService.getMenu();
@@ -53,8 +53,8 @@ public class AddSettingsToAdminMenuMigrator implements ApplicationListener<Conte
 				if (!hasSettingsMenuItem)
 				{
 					LOG.info("Added Settings plugin to Admin menu");
-					adminMenu.getItems()
-							.add(new MenuItem(MenuItemType.PLUGIN, SettingsManagerController.ID, "Settings"));
+					adminMenu.getItems().add(
+							new MenuItem(MenuItemType.PLUGIN, SettingsManagerController.ID, "Settings"));
 					menuManagerService.saveMenu(molgenisMenu);
 				}
 

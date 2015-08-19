@@ -42,7 +42,7 @@ public class RuntimePropertyToDataExplorerSettingsMigrator implements Applicatio
 
 	private RuntimePropertyToDataExplorerSettingsMigrator migrateSettings()
 	{
-		if (molgenisVersionService.getMolgenisVersionFromServerProperties() == 13)
+		if (molgenisVersionService.getMolgenisVersionFromServerProperties() == 14)
 		{
 			LOG.info("Migrating RuntimeProperty instances to DataExplorerSettings instance ...");
 
@@ -90,7 +90,7 @@ public class RuntimePropertyToDataExplorerSettingsMigrator implements Applicatio
 					if (rtpValue != value)
 					{
 						LOG.info("Updating DataExplorerSettings for RuntimeProperty [" + key + "]");
-						dataExplorerSettings.setLaunchWizard(!rtpValue);
+						dataExplorerSettings.setLaunchWizard(rtpValue);
 					}
 					LOG.info("Deleting RuntimeProperty [" + key + "]");
 					dataService.delete(ENTITY_NAME, property.getId());
