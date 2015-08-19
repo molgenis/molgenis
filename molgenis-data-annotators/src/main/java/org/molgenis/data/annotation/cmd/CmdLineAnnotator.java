@@ -9,9 +9,6 @@ import java.util.Set;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
-import org.molgenis.data.annotation.impl.HpoServiceAnnotator;
-import org.molgenis.data.annotation.impl.MonogenicDiseaseCandidatesServiceAnnotator;
-import org.molgenis.data.annotation.impl.PhenomizerServiceAnnotator;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.vcf.VcfRepository;
@@ -100,27 +97,12 @@ public class CmdLineAnnotator
 		}
 
 		// engage!
-		if (annotatorName.equals("hpo"))
-		{
-			new HpoServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
-		}
-		else if (annotatorName.equals("monogenic"))
-		{
-			new MonogenicDiseaseCandidatesServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
-		}
-		else if (annotatorName.equals("phenomizer"))
-		{
-			new PhenomizerServiceAnnotator(annotationSourceFile, inputVcfFile, outputVCFFile);
-		}
-		else
-		{
 			Map<String, RepositoryAnnotator> annotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
 			RepositoryAnnotator annotator = annotators.get(annotatorName);
 			if (annotator == null) throw new Exception("Annotator unknown: " + annotatorName);
 
 			annotator.getCmdLineAnnotatorSettingsConfigurer().addSettings(annotationSourceFile.getAbsolutePath());
 			annotate(annotator, inputVcfFile, outputVCFFile);
-		}
 	}
 
 	public static void main(String[] args) throws Exception
