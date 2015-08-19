@@ -27,7 +27,7 @@ import org.testng.annotations.Test;
 public class VcfUtilsTest
 {
 	private static final Logger LOG = LoggerFactory.getLogger(VcfUtilsTest.class);
-	private DefaultEntityMetaData annotatedEntityMetadata;
+	private DefaultEntityMetaData annotatedEntityMetadata = new DefaultEntityMetaData("test");
 	public DefaultEntityMetaData metaDataCanAnnotate = new DefaultEntityMetaData("test");
 	public DefaultEntityMetaData metaDataCantAnnotate = new DefaultEntityMetaData("test");
 
@@ -42,20 +42,11 @@ public class VcfUtilsTest
 	public AttributeMetaData attributeMetaDataCantAnnotateChrom = new DefaultAttributeMetaData(VcfRepository.CHROM,
 			MolgenisFieldTypes.FieldTypeEnum.LONG);
 	public ArrayList<Entity> input = new ArrayList<Entity>();
-	public ArrayList<Entity> input1 = new ArrayList<Entity>();
-	public ArrayList<Entity> input2 = new ArrayList<Entity>();
-	public ArrayList<Entity> input3 = new ArrayList<Entity>();
-	public ArrayList<Entity> input4 = new ArrayList<Entity>();
 	public Entity entity;
 	public Entity entity1;
 	public Entity entity2;
 	public Entity entity3;
 	public Entity entity4;
-
-	public AttributeMetaData attributeMetaDataCantAnnotateFeature;
-	public AttributeMetaData attributeMetaDataCantAnnotatePos;
-	public AttributeMetaData attributeMetaDataCantAnnotateRef;
-	public AttributeMetaData attributeMetaDataCantAnnotateAlt;
 
 	public ArrayList<Entity> entities;
 
@@ -99,9 +90,20 @@ public class VcfUtilsTest
 		INFO.addAttributePart(GTC);
 		metaDataCanAnnotate.addAttributeMetaData(INFO);
 
-		annotatedEntityMetadata = metaDataCanAnnotate;
+		annotatedEntityMetadata.addAttributeMetaData(attributeMetaDataChrom);
+		annotatedEntityMetadata.addAttributeMetaData(attributeMetaDataPos);
+		annotatedEntityMetadata.addAttributeMetaData(attributeMetaDataRef);
+		annotatedEntityMetadata.addAttributeMetaData(attributeMetaDataAlt);
+		annotatedEntityMetadata.setIdAttribute(attributeMetaDataChrom.getName());
+
 		annotatedEntityMetadata.addAttributeMetaData(
-				new DefaultAttributeMetaData("INFO_ANNO", MolgenisFieldTypes.FieldTypeEnum.STRING));
+				new DefaultAttributeMetaData(VcfRepository.ID, MolgenisFieldTypes.FieldTypeEnum.STRING));
+		annotatedEntityMetadata.addAttributeMetaData(
+				new DefaultAttributeMetaData(VcfRepository.QUAL, MolgenisFieldTypes.FieldTypeEnum.STRING));
+		annotatedEntityMetadata.addAttributeMetaData(
+				new DefaultAttributeMetaData(VcfRepository.FILTER, MolgenisFieldTypes.FieldTypeEnum.STRING));
+		INFO.addAttributePart(new DefaultAttributeMetaData("INFO_ANNO", MolgenisFieldTypes.FieldTypeEnum.STRING));
+		annotatedEntityMetadata.addAttributeMetaData(INFO);
 
 		entity1.set(VcfRepository.CHROM, "1");
 		entity1.set(VcfRepository.POS, 10050000);
@@ -121,9 +123,6 @@ public class VcfUtilsTest
 		entity2.set(VcfRepository.ALT, "A");
 		entity2.set(VcfRepository.QUAL, ".");
 		entity2.set(VcfRepository.FILTER, "PASS");
-		entity2.set("AC", "22");
-		entity2.set("AN", "23");
-		entity2.set("GTC", "1,2,11");
 
 		entity3.set(VcfRepository.CHROM, "1");
 		entity3.set(VcfRepository.POS, 10050002);
@@ -132,9 +131,6 @@ public class VcfUtilsTest
 		entity3.set(VcfRepository.ALT, "A");
 		entity3.set(VcfRepository.QUAL, ".");
 		entity3.set(VcfRepository.FILTER, "PASS");
-		entity3.set("AC", "23");
-		entity3.set("AN", "24");
-		entity3.set("GTC", "2,3,12");
 
 		entities = new ArrayList<>();
 		entities.add(entity1);
@@ -174,6 +170,9 @@ public class VcfUtilsTest
 	@Test
 	public void vcfWriterAnnotateTest() throws IOException, MolgenisInvalidFormatException
 	{
+
+		entity1.set("INFO_ANNO", "TEST_test21");
+		entity2.set("INFO_ANNO", "TEST_test22");
 		final File outputVCFFile = File.createTempFile("output", ".vcf");
 		try
 		{
@@ -188,7 +187,6 @@ public class VcfUtilsTest
 			for (Entity entity : entities)
 			{
 				MapEntity mapEntity = new MapEntity(entity, annotatedEntityMetadata);
-				mapEntity.set("INFO_ANNO", "TEST_" + entity.get(VcfRepository.ID));
 				outputVCFWriter.println(VcfUtils.convertToVCF(mapEntity));
 
 			}
