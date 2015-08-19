@@ -28,6 +28,7 @@ import org.molgenis.data.version.v1_6.Step9MysqlTablesToInnoDB;
 import org.molgenis.data.version.v1_8.Step11ConvertNames;
 import org.molgenis.data.version.v1_8.Step12ChangeElasticsearchTokenizer;
 import org.molgenis.data.version.v1_9.Step15AddDefaultValue;
+import org.molgenis.data.version.v1_9.Step16AddAlgorithmStateDiscuss;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
 import org.molgenis.system.core.FreemarkerTemplateRepository;
 import org.molgenis.ui.MolgenisWebAppConfig;
@@ -122,6 +123,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(new Step12ChangeElasticsearchTokenizer(embeddedElasticSearchServiceFactory));
 		upgradeService.addUpgrade(new Step13RemoveCatalogueMenuEntries(dataSource));
 		upgradeService.addUpgrade(new Step15AddDefaultValue(dataSource, searchService, jpaRepositoryCollection));
+		upgradeService.addUpgrade(new Step16AddAlgorithmStateDiscuss(dataSource));
 	}
 
 	@Override

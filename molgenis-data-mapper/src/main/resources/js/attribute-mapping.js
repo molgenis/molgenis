@@ -631,7 +631,22 @@
 				target : $('input[name="target"]').val(),
 				source : $('input[name="source"]').val(),
 				targetAttribute : $('input[name="targetAttribute"]').val(),
-				algorithm : algorithm
+				algorithm : algorithm,
+				algorithmState : "CURATED"
+			}, function(data) {
+				redirect('get', molgenis.getContextUrl() + '/mappingproject/' + $('input[name="mappingProjectId"]').val());
+			});
+		});
+		
+		// save button for discuss status generated mapping
+		$('#save-discuss-mapping-btn').on('click', function() {
+			$.post(molgenis.getContextUrl() + "/saveattributemapping", {
+				mappingProjectId : $('input[name="mappingProjectId"]').val(),
+				target : $('input[name="target"]').val(),
+				source : $('input[name="source"]').val(),
+				targetAttribute : $('input[name="targetAttribute"]').val(),
+				algorithm : algorithm,
+				algorithmState : "DISCUSS"
 			}, function(data) {
 				redirect('get', molgenis.getContextUrl() + '/mappingproject/' + $('input[name="mappingProjectId"]').val());
 			});

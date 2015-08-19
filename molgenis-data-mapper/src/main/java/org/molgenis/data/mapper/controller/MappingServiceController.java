@@ -353,7 +353,8 @@ public class MappingServiceController extends MolgenisPluginController
 	@RequestMapping(value = "/saveattributemapping", method = RequestMethod.POST)
 	public String saveAttributeMapping(@RequestParam(required = true) String mappingProjectId,
 			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
-			@RequestParam(required = true) String targetAttribute, @RequestParam(required = true) String algorithm)
+			@RequestParam(required = true) String targetAttribute, @RequestParam(required = true) String algorithm,
+			@RequestParam(required = true) AlgorithmState algorithmState)
 	{
 		MappingProject mappingProject = mappingService.getMappingProject(mappingProjectId);
 		if (hasWritePermission(mappingProject))
@@ -372,7 +373,7 @@ public class MappingServiceController extends MolgenisPluginController
 					attributeMapping = mappingForSource.addAttributeMapping(targetAttribute);
 				}
 				attributeMapping.setAlgorithm(algorithm);
-				attributeMapping.setAlgorithmState(AlgorithmState.CURATED);
+				attributeMapping.setAlgorithmState(algorithmState);
 			}
 			mappingService.updateMappingProject(mappingProject);
 		}

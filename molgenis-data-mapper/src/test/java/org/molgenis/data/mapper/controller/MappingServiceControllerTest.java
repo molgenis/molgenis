@@ -111,7 +111,7 @@ public class MappingServiceControllerTest
 		mockMvc.perform(
 				post(MappingServiceController.URI + "/saveattributemapping").param("mappingProjectId", "asdf")
 						.param("target", "HOP").param("source", "LifeLines").param("targetAttribute", "age")
-						.param("algorithm", "$('length').value()")).andExpect(
+						.param("algorithm", "$('length').value()").param("algorithmState", "CURATED")).andExpect(
 				redirectedUrl("/menu/main/mappingservice/mappingproject/asdf"));
 		MappingProject expected = new MappingProject("hop hop hop", me);
 		expected.setIdentifier("asdf");
@@ -135,7 +135,8 @@ public class MappingServiceControllerTest
 		mockMvc.perform(
 				MockMvcRequestBuilders.post(MappingServiceController.URI + "/saveattributemapping")
 						.param("mappingProjectId", "asdf").param("target", "HOP").param("source", "LifeLines")
-						.param("targetAttribute", "height").param("algorithm", "$('length').value()")).andExpect(
+						.param("targetAttribute", "height").param("algorithm", "$('length').value()")
+						.param("algorithmState", "CURATED")).andExpect(
 				MockMvcResultMatchers.redirectedUrl("/menu/main/mappingservice/mappingproject/asdf"));
 
 		MappingProject expected = new MappingProject("hop hop hop", me);
@@ -162,7 +163,8 @@ public class MappingServiceControllerTest
 		mockMvc.perform(
 				MockMvcRequestBuilders.post(MappingServiceController.URI + "/saveattributemapping")
 						.param("mappingProjectId", "asdf").param("target", "HOP").param("source", "LifeLines")
-						.param("targetAttribute", "age").param("algorithm", "")).andExpect(
+						.param("targetAttribute", "age").param("algorithm", "").param("algorithmState", "CURATED"))
+				.andExpect(
 				MockMvcResultMatchers.redirectedUrl("/menu/main/mappingservice/mappingproject/asdf"));
 
 		MappingProject expected = new MappingProject("hop hop hop", me);
