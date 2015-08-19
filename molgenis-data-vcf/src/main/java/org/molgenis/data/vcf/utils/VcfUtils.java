@@ -75,13 +75,13 @@ public class VcfUtils
 		}
 
 		List<String> infoFieldsSeen = new ArrayList<String>();
+		boolean hasInfoFields = false;
 		// flexible 'info' field, one column with potentially many data items
 		for (AttributeMetaData attributeMetaData : vcfEntity.getEntityMetaData().getAttribute(VcfRepository.INFO)
 				.getAttributeParts())
 		{
 			infoFieldsSeen.add(attributeMetaData.getName());
-			if (vcfEntity.getString(attributeMetaData.getName()) != null) // FIXME: This removes 'FLAG' fields? see
-																			// http://samtools.github.io/hts-specs/VCFv4.2.pdf
+			if (vcfEntity.getString(attributeMetaData.getName()) != null)
 			{
 				if (attributeMetaData.getName().startsWith(VcfRepository.getInfoPrefix()))
 				{
@@ -93,7 +93,12 @@ public class VcfUtils
 					vcfRecord.append(attributeMetaData.getName() + "="
 							+ vcfEntity.getString(attributeMetaData.getName()) + ";");
 				}
+				hasInfoFields = true;
 			}
+		}
+		if (!hasInfoFields)
+		{
+			vcfRecord.append(".");
 		}
 
 		for (AttributeMetaData attributeMetaData : vcfEntity.getEntityMetaData().getAtomicAttributes())
