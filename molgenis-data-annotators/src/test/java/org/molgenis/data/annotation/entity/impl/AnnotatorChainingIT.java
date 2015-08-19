@@ -20,7 +20,7 @@ public class AnnotatorChainingIT
 	@Test
 	public void chain() throws IOException
 	{
-		File vcf = new File("src/test/resources/gonl/test.vcf");
+		File vcf = new File("src/test/resources/gonl/test_gonl_and_1000g.vcf");
 
 		try (VcfRepository repo = new VcfRepository(vcf, "vcf"))
 		{
@@ -46,11 +46,13 @@ public class AnnotatorChainingIT
 				Entity entity = it.next();
 				assertNotNull(entity.get(GoNLAnnotator.GONL_GENOME_AF));
 				assertNotNull(entity.get(GoNLAnnotator.GONL_GENOME_GTC));
+				assertNotNull(entity.get(ThousandGenomesAnnotator.THOUSAND_GENOME_AF));
 
 				EntityMetaData meta = entity.getEntityMetaData();
 				assertNotNull(meta);
 				assertNotNull(meta.getAttribute(GoNLAnnotator.GONL_GENOME_AF));
 				assertNotNull(meta.getAttribute(GoNLAnnotator.GONL_GENOME_GTC));
+				assertNotNull(meta.getAttribute(ThousandGenomesAnnotator.THOUSAND_GENOME_AF));
 			}
 		}
 	}

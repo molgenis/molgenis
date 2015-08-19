@@ -25,8 +25,6 @@ import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.datastructures.Sample;
 import org.molgenis.data.vcf.datastructures.Trio;
-import org.molgenis.fieldtypes.EnumField;
-import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.vcf.meta.VcfMetaInfo;
 
 public class VcfUtils
