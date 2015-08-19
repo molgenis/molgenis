@@ -41,6 +41,7 @@ import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.annotation.entity.QueryCreator;
 import org.molgenis.data.annotation.entity.ResultFilter;
 import org.molgenis.data.annotation.filter.FirstResultFilter;
+import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.query.AttributeEqualsQueryCreator;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.Resources;
@@ -191,12 +192,14 @@ public class CGDAnnotator
 		return attributes;
 	}
 
-	private static class CGDEntityAnnotator extends AnnotatorImpl
+	private class CGDEntityAnnotator extends AnnotatorImpl
 	{
 		public CGDEntityAnnotator(String sourceRepositoryName, AnnotatorInfo info, QueryCreator queryCreator,
 				ResultFilter resultFilter, DataService dataService, Resources resources)
 		{
-			super(sourceRepositoryName, info, queryCreator, resultFilter, dataService, resources);
+			super(sourceRepositoryName, info, queryCreator, resultFilter, dataService, resources,
+					new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(CGD_FILE_LOCATION_PROPERTY,
+							molgenisSettings));
 		}
 
 		@Override

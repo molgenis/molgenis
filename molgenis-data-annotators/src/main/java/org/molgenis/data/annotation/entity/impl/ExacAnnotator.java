@@ -11,6 +11,7 @@ import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.annotation.filter.MultiAllelicResultFilter;
+import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.query.LocusQueryCreator;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.Resources;
@@ -66,7 +67,8 @@ public class ExacAnnotator
 				Collections.singletonList(new DefaultAttributeMetaData(EXAC_AF_ResourceAttributeName,
 						FieldTypeEnum.DECIMAL)));
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(EXAC_TABIX_RESOURCE, exacInfo, locusQueryCreator,
-				multiAllelicResultFilter, dataService, resources)
+				multiAllelicResultFilter, dataService, resources,
+				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(EXAC_FILE_LOCATION_PROPERTY, molgenisSettings))
 		{
 			@Override
 			protected Object getResourceAttributeValue(AttributeMetaData attr, Entity sourceEntity)

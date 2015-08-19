@@ -16,6 +16,7 @@ import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.annotation.filter.VariantResultFilter;
+import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.query.LocusQueryCreator;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.Resources;
@@ -77,7 +78,9 @@ public class FitConAnnotator
 								+ " All data and source code are available at https://cbcl.ics.uci.edu/ public_data/FITCON/. Contact:",
 						attributes);
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(FITCON_TABIX_RESOURCE, fitconInfo, new LocusQueryCreator(),
-				new VariantResultFilter(), dataService, resources);
+				new VariantResultFilter(), dataService, resources,
+				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(FITCON_FILE_LOCATION_PROPERTY,
+						molgenisSettings));
 
 		return new RepositoryAnnotatorImpl(entityAnnotator);
 	}

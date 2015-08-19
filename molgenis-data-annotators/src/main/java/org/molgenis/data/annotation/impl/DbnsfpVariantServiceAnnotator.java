@@ -17,10 +17,12 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.CmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.VariantAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
+import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.EmptyCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.vcf.VcfRepository;
@@ -335,5 +337,11 @@ public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 	public AnnotatorInfo getInfo()
 	{
 		return AnnotatorInfo.create(Status.INDEV, Type.UNUSED, "unknown", "no description", getOutputMetaData());
+	}
+
+	@Override
+	public CmdLineAnnotatorSettingsConfigurer getCmdLineAnnotatorSettingsConfigurer()
+	{
+		return new EmptyCmdLineAnnotatorSettingsConfigurer();
 	}
 }
