@@ -1,5 +1,7 @@
 package org.molgenis.data.annotator.tabix;
 
+import static org.elasticsearch.common.base.Preconditions.checkNotNull;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
@@ -63,29 +65,46 @@ public class TabixVcfRepository extends VcfRepository
 	{
 		String chromValue = getFirstEqualsValueFor(VcfRepository.CHROM, q).toString();
 		long posValue = Long.parseLong(getFirstEqualsValueFor(VcfRepository.POS, q).toString());
-		return query(chromValue, Long.valueOf(posValue));
+		return query(chromValue, Long.valueOf(posValue), Long.valueOf(posValue));
 	}
 
 	/**
-	 * Queries the tabix reader. Uses tabix query syntax, for example "1:1115548-1115548".
+	 * Queries the tabix reader.
 	 * 
 	 * @param chrom
 	 *            Name of chromosome
-	 * @param pos
-	 *            position
+	 * @param posFrom
+	 *            position lower bound (inclusive)
+	 * @param posTo
+	 *            position upper bound (inclusive)
 	 * @return {@link ImmutableList} of entities found
 	 */
-	public synchronized List<Entity> query(String chrom, long pos)
+	public synchronized List<Entity> query(String chrom, long posFrom, long posTo)
 	{
-		String queryString = String.format("%s:%s-%2$s", chrom, pos);
+		String queryString = String.format("%s:%s-%s", checkNotNull(chrom), checkNotNull(posFrom), checkNotNull(posTo));
 		Collection<String> lines = getLines(tabixReader.query(queryString));
 		return lines.stream().map(line -> line.split("\t")).map(vcfToEntitySupplier.get()::toEntity)
-		// Tabix is not always so precise. For example, the cmdline query
-		// "tabix ExAC.r0.3.sites.vep.vcf.gz 1:1115548-1115548"
-		// returns 2 variants:
-		// "1 1115547 . CG C,TG" and "1 1115548 rs114390380 G A".
-		// It is therefore needed to verify the position of the elements returned.
-				.filter(entity -> entity.getLong(VcfRepository.POS) == pos).collect(Collectors.toList());
+				.filter(entity -> positionMatches(entity, posFrom, posTo)).collect(Collectors.toList());
+	}
+
+	/**
+	 * Tabix is not always so precise. For example, the cmdline query
+	 * 
+	 * <pre>
+	 * tabix ExAC.r0.3.sites.vep.vcf.gz 1:1115548-1115548
+	 * </pre>
+	 * 
+	 * returns 2 variants:
+	 * <ul>
+	 * <li>"1 1115547 . CG C,TG"</li>
+	 * <li>"1 1115548 rs114390380 G A"</li>
+	 * </ul>
+	 * It is therefore needed to verify the position of the elements returned.
+	 */
+	private boolean positionMatches(Entity entity, long posFrom, long posTo)
+	{
+		long entityPos = entity.getLong(VcfRepository.POS);
+		return entityPos >= posFrom && entityPos <= posTo;
 	}
 
 	/**
