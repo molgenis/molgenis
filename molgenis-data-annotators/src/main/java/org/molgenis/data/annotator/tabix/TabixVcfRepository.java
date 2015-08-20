@@ -14,9 +14,6 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.vcf.VcfReader;
-import org.molgenis.vcf.VcfRecord;
-import org.molgenis.vcf.meta.VcfMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,17 +27,12 @@ import com.google.common.collect.ImmutableList.Builder;
 public class TabixVcfRepository extends VcfRepository
 {
 	private static final Logger LOG = LoggerFactory.getLogger(TabixVcfRepository.class);
-	private final VcfMeta vcfMeta;
-	private final VcfReader vcfReader;
-
 	private final TabixReader tabixReader;
 
 	public TabixVcfRepository(File file, String entityName) throws IOException
 	{
 		super(file, entityName);
 		tabixReader = new TabixReader(file.getCanonicalPath());
-		vcfReader = createVcfReader();
-		vcfMeta = vcfReader.getVcfMeta();
 	}
 
 	@Override
@@ -87,13 +79,12 @@ public class TabixVcfRepository extends VcfRepository
 	{
 		String queryString = String.format("%s:%s-%2$s", chrom, pos);
 		Collection<String> lines = getLines(tabixReader.query(queryString));
-		return lines.stream().map(line -> line.split("\t")).map(tokens -> new VcfRecord(vcfMeta, tokens))
-				.map(vcfToEntitySupplier.get()::toEntity)
-				// Tabix is not always so precise. For example, the cmdline query
-				// "tabix ExAC.r0.3.sites.vep.vcf.gz 1:1115548-1115548"
-				// returns 2 variants:
-				// "1 1115547 . CG C,TG" and "1 1115548 rs114390380 G A".
-				// It is therefore needed to verify the position of the elements returned.
+		return lines.stream().map(line -> line.split("\t")).map(vcfToEntitySupplier.get()::toEntity)
+		// Tabix is not always so precise. For example, the cmdline query
+		// "tabix ExAC.r0.3.sites.vep.vcf.gz 1:1115548-1115548"
+		// returns 2 variants:
+		// "1 1115547 . CG C,TG" and "1 1115548 rs114390380 G A".
+		// It is therefore needed to verify the position of the elements returned.
 				.filter(entity -> entity.getLong(VcfRepository.POS) == pos).collect(Collectors.toList());
 	}
 

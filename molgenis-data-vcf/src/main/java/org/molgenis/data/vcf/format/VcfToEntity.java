@@ -225,6 +225,11 @@ public class VcfToEntity
 		}
 	}
 
+	public Entity toEntity(String[] tokens)
+	{
+		return toEntity(new VcfRecord(vcfMeta, tokens));
+	}
+
 	public Entity toEntity(VcfRecord vcfRecord)
 	{
 		Entity entity = new MapEntity(entityMetaData);
