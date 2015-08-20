@@ -13,10 +13,18 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.utils.VcfUtils;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.stereotype.Component;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.ConsoleAppender;
 
 /**
  * 
@@ -107,6 +115,8 @@ public class CmdLineAnnotator
 
 	public static void main(String[] args) throws Exception
 	{
+		configureLogging();
+
 		// See http://stackoverflow.com/questions/4787719/spring-console-application-configured-using-annotations
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext("org.molgenis.data.annotation");
 		CmdLineAnnotator main = ctx.getBean(CmdLineAnnotator.class);
@@ -142,5 +152,30 @@ public class CmdLineAnnotator
 		outputVCFWriter.close();
 		vcfRepo.close();
 		System.out.println("All done!");
+	}
+
+	private static void configureLogging()
+	{
+		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+
+		PatternLayoutEncoder patternLayoutEncoder = new PatternLayoutEncoder();
+		patternLayoutEncoder.setPattern("%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n");
+		patternLayoutEncoder.setContext(loggerContext);
+		patternLayoutEncoder.start();
+
+		ConsoleAppender<ILoggingEvent> consoleAppender = new ConsoleAppender<>();
+		consoleAppender.setContext(loggerContext);
+		consoleAppender.setEncoder(patternLayoutEncoder);
+		consoleAppender.setName("STDOUT");
+		consoleAppender.start();
+
+		Logger rootLogger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+		rootLogger.addAppender(consoleAppender);
+		rootLogger.setLevel(Level.WARN);
+
+		Logger molgenisLogger = (Logger) LoggerFactory.getLogger("org.molgenis");
+		molgenisLogger.addAppender(consoleAppender);
+		molgenisLogger.setLevel(Level.INFO);
+		molgenisLogger.setAdditive(false);
 	}
 }
