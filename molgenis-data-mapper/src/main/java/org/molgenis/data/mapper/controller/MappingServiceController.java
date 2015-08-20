@@ -381,6 +381,141 @@ public class MappingServiceController extends MolgenisPluginController
 	}
 
 	/**
+	 * Adds a new {@link AttributeMapping} to an {@link EntityMapping}.
+	 * 
+	 * @param mappingProjectId
+	 *            ID of the mapping project
+	 * @param target
+	 *            name of the target entity
+	 * @param source
+	 *            name of the source entity
+	 * @param targetAttribute
+	 *            name of the target attribute
+	 * @param algorithm
+	 *            the mapping algorithm
+	 * @return redirect URL for the attributemapping
+	 */
+	@RequestMapping(value = "/firstattributemapping", method = RequestMethod.POST)
+	@ResponseBody
+	public FirstUncuratedAttributeMappingInfo getFirstUncuratedAttributeMappingInfo(@RequestParam(required = true) String mappingProjectId,
+			@RequestParam(required = true) String target,
+			@RequestParam(required = true, value = "skipAlgorithmStates[]") List<AlgorithmState> skipAlgorithmStates,
+			Model model)
+	{
+		
+		MappingProject mappingProject = mappingService.getMappingProject(mappingProjectId);
+		if (hasWritePermission(mappingProject))
+		{
+			MappingTarget mappingTarget = mappingProject.getMappingTarget(target);
+			for(EntityMapping entityMapping : mappingTarget.getEntityMappings()){
+				for(AttributeMapping attributeMapping : entityMapping.getAttributeMappings()){
+					AlgorithmState algorithmState = attributeMapping.getAlgorithmState();
+					LOG.info(attributeMapping.getTargetAttributeMetaData().getName());
+					boolean toSkip = false;
+					if (null != skipAlgorithmStates)
+					{
+						if (skipAlgorithmStates.contains(algorithmState))
+						{
+							toSkip = true;
+						}
+					}
+
+					if (!toSkip)
+					{
+						// return new FirstUncuratedAttributeMappingInfo(entityMapping
+						// .getSourceEntityMetaData().getName(), attributeMapping.getTargetAttributeMetaData()
+						// .getName());
+					}
+				}
+			}
+		}
+		
+		return null;
+	}
+
+	class FirstUncuratedAttributeMappingInfo
+	{
+		/**
+		 * @return the mappingProjectId
+		 */
+		public String getMappingProjectId()
+		{
+			return mappingProjectId;
+		}
+
+		/**
+		 * @return the target
+		 */
+		public String getTarget()
+		{
+			return target;
+		}
+
+		/**
+		 * @return the source
+		 */
+		public String getSource()
+		{
+			return source;
+		}
+
+		/**
+		 * @return the targetAttribute
+		 */
+		public String getTargetAttribute()
+		{
+			return targetAttribute;
+		}
+
+		/**
+		 * @param mappingProjectId
+		 *            the mappingProjectId to set
+		 */
+		public void setMappingProjectId(String mappingProjectId)
+		{
+			this.mappingProjectId = mappingProjectId;
+		}
+
+		/**
+		 * @param target
+		 *            the target to set
+		 */
+		public void setTarget(String target)
+		{
+			this.target = target;
+		}
+
+		/**
+		 * @param source
+		 *            the source to set
+		 */
+		public void setSource(String source)
+		{
+			this.source = source;
+		}
+
+		/**
+		 * @param targetAttribute
+		 *            the targetAttribute to set
+		 */
+		public void setTargetAttribute(String targetAttribute)
+		{
+			this.targetAttribute = targetAttribute;
+		}
+
+		private String mappingProjectId;
+		private String target;
+		private String source;
+		private String targetAttribute;
+		
+		FirstUncuratedAttributeMappingInfo(String mappingProjectId, String target, String source, String targetAttribute)
+		{
+			this.source = source;
+			this.targetAttribute = targetAttribute;
+		}
+	}
+
+	/**
 	 * Displays a mapping project.
 	 * 
 	 * @param identifier

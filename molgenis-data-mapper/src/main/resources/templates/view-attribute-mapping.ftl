@@ -43,6 +43,10 @@
 			<span class="glyphicon glyphicon-floppy-save"></span>
 			Save to discuss and go back
 		</button>
+		<button id="find-first-nonchanged-mapping-btn" type="btn" class="btn btn-info btn-xs">
+			<span class="glyphicon glyphicon-floppy-save"></span>
+			Save and got to next unsaved attribute.
+		</button>
 	<hr></hr>
 	</div>
 </div>

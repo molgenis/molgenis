@@ -497,7 +497,7 @@
 		var form = '';
 		if(data){
 	        $.each(data, function(key, value) {
-	            form += '<input type="hidden" name="'+key+'" value="'+value+'">';
+	            form += '<input type="hidden" name="'+key.replace('"', '\"')+'" value="'+value.replace('"', '\"')+'">';
 	        });
 		}
         $('<form action="'+url+'" method="'+ method +'">'+form+'</form>').appendTo('body').submit();
@@ -651,7 +651,26 @@
 				redirect('get', molgenis.getContextUrl() + '/mappingproject/' + $('input[name="mappingProjectId"]').val());
 			});
 		});
-
+		
+		// find first not curated attribute mapping button (Not curated and not to be discussed)
+		$('#find-first-nonchanged-mapping-btn').on('click', function() {
+			var array = ['DISCUSS', 'CURATED'];
+			$.post(molgenis.getContextUrl() + "/firstattributemapping", {
+				mappingProjectId : $('input[name="mappingProjectId"]').val(),
+				target : $('input[name="target"]').val(),
+				'skipAlgorithmStates': array
+			}, function(data) {
+				redirect('post', molgenis.getContextUrl() + '/attributeMapping',
+						{
+							mappingProjectId : $('input[name="mappingProjectId"]').val(),
+							target : $('input[name="target"]').val()
+						});
+				
+			//	(@RequestParam(required = true) String mappingProjectId,
+			//			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
+			//			@RequestParam(required = true) String targetAttribute)
+			});
+		});
 
 		$('#js-function-modal-btn').on('click', function() {
 			$('#js-function-modal').modal('show');
