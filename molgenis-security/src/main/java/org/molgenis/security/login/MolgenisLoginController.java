@@ -1,7 +1,8 @@
 package org.molgenis.security.login;
 
-import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.security.account.AccountService;
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import org.molgenis.data.settings.AppSettings;
 import org.molgenis.util.ResourceFingerprintRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -14,25 +15,20 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class MolgenisLoginController
 {
 	private final ResourceFingerprintRegistry resourceFingerprintRegistry;
+	private final AppSettings appSettings;
 
 	@Autowired
-	private MolgenisSettings molgenisSettings;
-
-	@Autowired
-	public MolgenisLoginController(ResourceFingerprintRegistry resourceFingerprintRegistry)
+	public MolgenisLoginController(ResourceFingerprintRegistry resourceFingerprintRegistry, AppSettings appSettings)
 	{
-		if (resourceFingerprintRegistry == null) throw new IllegalArgumentException(
-				"resourceFingerprintRegistry is null");
-		this.resourceFingerprintRegistry = resourceFingerprintRegistry;
+		this.resourceFingerprintRegistry = checkNotNull(resourceFingerprintRegistry);
+		this.appSettings = checkNotNull(appSettings);
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
 	public String getLoginPage(Model model)
 	{
 		model.addAttribute("resource_fingerprint_registry", resourceFingerprintRegistry);
-		model.addAttribute("enable_self_registration",
-				molgenisSettings.getBooleanProperty(AccountService.KEY_PLUGIN_AUTH_ENABLE_SELFREGISTRATION, true));
-
+		model.addAttribute("enable_self_registration", appSettings.getSignUp());
 		return "view-login";
 	}
 
@@ -41,9 +37,7 @@ public class MolgenisLoginController
 	{
 		model.addAttribute("resource_fingerprint_registry", resourceFingerprintRegistry);
 		model.addAttribute("errorMessage", "The username or password you entered is incorrect.");
-		model.addAttribute("enable_self_registration",
-				molgenisSettings.getBooleanProperty(AccountService.KEY_PLUGIN_AUTH_ENABLE_SELFREGISTRATION, true));
-
+		model.addAttribute("enable_self_registration", appSettings.getSignUp());
 		return "view-login";
 	}
 }

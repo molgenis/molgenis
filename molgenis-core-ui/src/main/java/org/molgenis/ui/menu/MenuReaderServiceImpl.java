@@ -1,6 +1,8 @@
 package org.molgenis.ui.menu;
 
-import org.molgenis.framework.server.MolgenisSettings;
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,15 +11,12 @@ import com.google.gson.GsonBuilder;
 
 public class MenuReaderServiceImpl implements MenuReaderService
 {
-	public static final String KEY_MOLGENIS_MENU = "molgenis.menu";
-
-	private final MolgenisSettings molgenisSettings;
+	private final AppSettings appSettings;
 
 	@Autowired
-	public MenuReaderServiceImpl(MolgenisSettings molgenisSettings)
+	public MenuReaderServiceImpl(AppSettings appSettings)
 	{
-		if (molgenisSettings == null) throw new IllegalArgumentException("molgenisSettings is null");
-		this.molgenisSettings = molgenisSettings;
+		this.appSettings = checkNotNull(appSettings);
 	}
 
 	@Override
@@ -25,11 +24,7 @@ public class MenuReaderServiceImpl implements MenuReaderService
 	@RunAsSystem
 	public Menu getMenu()
 	{
-		String menuJson = molgenisSettings.getProperty(KEY_MOLGENIS_MENU);
-		if (menuJson == null)
-		{
-			throw new RuntimeException("Missing required molgenis setting [" + KEY_MOLGENIS_MENU + "]");
-		}
-		return new GsonBuilder().create().fromJson(menuJson, Menu.class);
+		String menuJson = appSettings.getMenu();
+		return menuJson != null ? new GsonBuilder().create().fromJson(menuJson, Menu.class) : null;
 	}
 }

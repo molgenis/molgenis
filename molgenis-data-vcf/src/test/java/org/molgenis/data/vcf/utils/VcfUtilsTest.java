@@ -1,6 +1,5 @@
 package org.molgenis.data.vcf.utils;
 
-import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
@@ -18,7 +17,6 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +48,6 @@ public class VcfUtilsTest
 	public Entity entity3;
 	public Entity entity4;
 
-	public MolgenisSettings settings = mock(MolgenisSettings.class);
 	public ArrayList<Entity> entities;
 
 	@BeforeMethod
@@ -77,12 +74,12 @@ public class VcfUtilsTest
 		entity3 = new MapEntity(metaDataCanAnnotate);
 		entity4 = new MapEntity(metaDataCanAnnotate);
 
-		metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.ID,
-				MolgenisFieldTypes.FieldTypeEnum.STRING));
-		metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.QUAL,
-				MolgenisFieldTypes.FieldTypeEnum.STRING));
-		metaDataCanAnnotate.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.FILTER,
-				MolgenisFieldTypes.FieldTypeEnum.STRING));
+		metaDataCanAnnotate.addAttributeMetaData(
+				new DefaultAttributeMetaData(VcfRepository.ID, MolgenisFieldTypes.FieldTypeEnum.STRING));
+		metaDataCanAnnotate.addAttributeMetaData(
+				new DefaultAttributeMetaData(VcfRepository.QUAL, MolgenisFieldTypes.FieldTypeEnum.STRING));
+		metaDataCanAnnotate.addAttributeMetaData(
+				new DefaultAttributeMetaData(VcfRepository.FILTER, MolgenisFieldTypes.FieldTypeEnum.STRING));
 		DefaultAttributeMetaData INFO = new DefaultAttributeMetaData(VcfRepository.INFO,
 				MolgenisFieldTypes.FieldTypeEnum.COMPOUND);
 		DefaultAttributeMetaData AA = new DefaultAttributeMetaData("AC", MolgenisFieldTypes.FieldTypeEnum.STRING);
@@ -99,12 +96,12 @@ public class VcfUtilsTest
 		annotatedEntityMetadata.addAttributeMetaData(attributeMetaDataAlt);
 		annotatedEntityMetadata.setIdAttribute(attributeMetaDataChrom.getName());
 
-		annotatedEntityMetadata.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.ID,
-				MolgenisFieldTypes.FieldTypeEnum.STRING));
-		annotatedEntityMetadata.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.QUAL,
-				MolgenisFieldTypes.FieldTypeEnum.STRING));
-		annotatedEntityMetadata.addAttributeMetaData(new DefaultAttributeMetaData(VcfRepository.FILTER,
-				MolgenisFieldTypes.FieldTypeEnum.STRING));
+		annotatedEntityMetadata.addAttributeMetaData(
+				new DefaultAttributeMetaData(VcfRepository.ID, MolgenisFieldTypes.FieldTypeEnum.STRING));
+		annotatedEntityMetadata.addAttributeMetaData(
+				new DefaultAttributeMetaData(VcfRepository.QUAL, MolgenisFieldTypes.FieldTypeEnum.STRING));
+		annotatedEntityMetadata.addAttributeMetaData(
+				new DefaultAttributeMetaData(VcfRepository.FILTER, MolgenisFieldTypes.FieldTypeEnum.STRING));
 		INFO.addAttributePart(new DefaultAttributeMetaData("INFO_ANNO", MolgenisFieldTypes.FieldTypeEnum.STRING));
 		annotatedEntityMetadata.addAttributeMetaData(INFO);
 

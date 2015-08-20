@@ -10,7 +10,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
