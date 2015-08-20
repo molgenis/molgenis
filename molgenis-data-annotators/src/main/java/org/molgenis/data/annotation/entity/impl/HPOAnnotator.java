@@ -2,30 +2,27 @@ package org.molgenis.data.annotation.entity.impl;
 
 import static org.molgenis.data.annotation.entity.impl.HPORepository.HPO_ID_COL_NAME;
 import static org.molgenis.data.annotation.entity.impl.HPORepository.HPO_TERM_COL_NAME;
-import static org.molgenis.data.support.QueryImpl.EQ;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
-import org.molgenis.data.annotation.entity.QueryCreator;
 import org.molgenis.data.annotation.entity.ResultFilter;
 import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
+import org.molgenis.data.annotation.query.GeneNameQueryCreator;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.RepositoryFactory;
@@ -33,7 +30,6 @@ import org.molgenis.data.annotation.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -79,7 +75,7 @@ public class HPOAnnotator
 								+ "Terms in the HPO describes a phenotypic abnormality, such as atrial septal defect.The HPO is currently being developed using the medical literature, Orphanet, DECIPHER, and OMIM. HPO currently contains approximately 11,000 terms and over 115,000 annotations to hereditary diseases.",
 						attributes);
 
-		EntityAnnotator entityAnnotator = new AnnotatorImpl(HPO_RESOURCE, info, new HPOQueryCreator(),
+		EntityAnnotator entityAnnotator = new AnnotatorImpl(HPO_RESOURCE, info, new GeneNameQueryCreator(),
 				new HPOResultFilter(), dataService, resources,
 				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(HPO_FILE_LOCATION_PROPERTY, molgenisSettings));
 
@@ -136,23 +132,6 @@ public class HPOAnnotator
 			aggregated.set(HPO_TERMS, terms.toString());
 
 			return ids.length() == 0 ? Optional.absent() : Optional.of(aggregated);
-		}
-	}
-
-	private static class HPOQueryCreator implements QueryCreator
-	{
-		@Override
-		public Collection<AttributeMetaData> getRequiredAttributes()
-		{
-			return Collections.singleton(new DefaultAttributeMetaData(VcfRepository.getInfoPrefix()
-					+ SnpEffAnnotator.GENE_NAME));
-		}
-
-		@Override
-		public Query createQuery(Entity entity)
-		{
-			Object value = entity.get(VcfRepository.getInfoPrefix() + SnpEffAnnotator.GENE_NAME);
-			return EQ(SnpEffAnnotator.GENE_NAME, value);
 		}
 	}
 }
