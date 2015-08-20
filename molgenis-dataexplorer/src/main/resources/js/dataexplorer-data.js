@@ -145,7 +145,7 @@
 	 */
 	function doShowGenomeBrowser() {
 		// dalliance is not compatible with IE9
-		return molgenis.ie9 !== true && genomebrowserStartAttribute !== undefined && genomebrowserChromosomeAttribute !== undefined && molgenis.dataexplorer.settings["genomebrowser"] !== 'false';
+		return molgenis.ie9 !== true && genomebrowserStartAttribute !== undefined && genomebrowserChromosomeAttribute !== undefined && molgenis.dataexplorer.settings["data_genome_browser"] !== false;
 	}
 
     function getAttributeFromList(attributesString){
@@ -167,7 +167,7 @@
 	function createGenomeBrowser(specificSettings) {
         var showHighlight = false;
         if(specificSettings !== null) {
-            showHighlight = specificSettings.highlightRegion;
+            showHighlight = specificSettings.showHighlight;
         }
 		var settings = $.extend(true, {}, genomeBrowserSettings, specificSettings || {});
 		
@@ -271,7 +271,6 @@
                     a.click(function () {
                         createFilter(attr, undefined, undefined, f.id);
                     });
-
                     if (f.id !== "-" && attr !== undefined) {
                         info.setTitle(f.id);
                         info.add('Filter on mutation:', a[0]);

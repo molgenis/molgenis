@@ -11,8 +11,8 @@ import org.molgenis.app.controller.ContactController;
 import org.molgenis.app.controller.HomeController;
 import org.molgenis.app.controller.NewsController;
 import org.molgenis.app.controller.ReferencesController;
+import org.molgenis.data.DataService;
 import org.molgenis.file.FileStore;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.omx.controller.ContentControllersTest.Config;
 import org.molgenis.ui.controller.StaticContentService;
@@ -187,8 +187,8 @@ public class ContentControllersTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void initNotExistingURI() throws Exception
 	{
-		mockMvcHome.perform(MockMvcRequestBuilders.get(HomeController.URI + "/NotExistingURI")).andExpect(
-				MockMvcResultMatchers.status().isNotFound());
+		mockMvcHome.perform(MockMvcRequestBuilders.get(HomeController.URI + "/NotExistingURI"))
+				.andExpect(MockMvcResultMatchers.status().isNotFound());
 	}
 
 	@Configuration
@@ -243,9 +243,9 @@ public class ContentControllersTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		public MolgenisSettings molgenisSettings()
+		public DataService dataService()
 		{
-			return mock(MolgenisSettings.class);
+			return mock(DataService.class);
 		}
 	}
 }
