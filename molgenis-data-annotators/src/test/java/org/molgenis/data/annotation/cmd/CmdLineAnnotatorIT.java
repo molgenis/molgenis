@@ -19,18 +19,25 @@ public class CmdLineAnnotatorIT
 	@Test
 	public void gonl() throws Exception
 	{
-		testAnnotator("gonl", "test.vcf", "test-out-expected.vcf");
+		testAnnotator("gonl", "src/test/resources/gonl", "test.vcf", "test-out-expected.vcf");
 	}
 
-	private void testAnnotator(String name, String inputFileName, String expectedOutputFileName) throws Exception
+	@Test
+	public void hpo() throws Exception
+	{
+		testAnnotator("hpo", "src/test/resources/hpo/hpo.txt", "test.vcf", "test-out-expected.vcf");
+	}
+
+	private void testAnnotator(String name, String resourceLocation, String inputFileName, String expectedOutputFileName)
+			throws Exception
 	{
 		String resourceDir = "src/test/resources/" + name;
 		String inputFile = resourceDir + "/" + inputFileName;
-		String outputFile = "target/out-" + inputFileName;
+		String outputFile = "target/out-" + name + "-" + inputFileName;
 		String expectedOutputFile = resourceDir + "/" + expectedOutputFileName;
 
 		CmdLineAnnotator.main(new String[]
-		{ name, resourceDir, inputFile, outputFile });
+		{ name, resourceLocation, inputFile, outputFile });
 
 		assertEquals(readLines(expectedOutputFile), readLines(outputFile));
 	}

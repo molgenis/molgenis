@@ -97,12 +97,12 @@ public class CmdLineAnnotator
 		}
 
 		// engage!
-			Map<String, RepositoryAnnotator> annotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
-			RepositoryAnnotator annotator = annotators.get(annotatorName);
-			if (annotator == null) throw new Exception("Annotator unknown: " + annotatorName);
+		Map<String, RepositoryAnnotator> annotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
+		RepositoryAnnotator annotator = annotators.get(annotatorName);
+		if (annotator == null) throw new Exception("Annotator unknown: " + annotatorName);
 
-			annotator.getCmdLineAnnotatorSettingsConfigurer().addSettings(annotationSourceFile.getAbsolutePath());
-			annotate(annotator, inputVcfFile, outputVCFFile);
+		annotator.getCmdLineAnnotatorSettingsConfigurer().addSettings(annotationSourceFile.getAbsolutePath());
+		annotate(annotator, inputVcfFile, outputVCFFile);
 	}
 
 	public static void main(String[] args) throws Exception
