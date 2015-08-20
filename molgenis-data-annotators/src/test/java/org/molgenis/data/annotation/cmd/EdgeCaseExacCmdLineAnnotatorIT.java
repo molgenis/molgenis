@@ -14,18 +14,12 @@ import org.testng.annotations.Test;
  * 
  * Tip: if you only want to run the integration tests in maven use: mvn failsafe:integration-test
  */
-public class CmdLineAnnotatorIT
+public class EdgeCaseExacCmdLineAnnotatorIT
 {
 	@Test
-	public void gonl() throws Exception
+	public void exac() throws Exception
 	{
-		testAnnotator("gonl", "src/test/resources/gonl", "test.vcf", "test-out-expected.vcf");
-	}
-
-	@Test
-	public void hpo() throws Exception
-	{
-		testAnnotator("hpo", "src/test/resources/hpo/hpo.txt", "test.vcf", "test-out-expected.vcf");
+		testAnnotator("exac", "src/test/resources/exac/exacIT_set.vcf.gz", "test-edgecases.vcf", "test-edgecases-out-expected.vcf");
 	}
 
 	private void testAnnotator(String name, String resourceLocation, String inputFileName, String expectedOutputFileName)
