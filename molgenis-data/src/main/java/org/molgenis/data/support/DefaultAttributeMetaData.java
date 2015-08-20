@@ -11,13 +11,9 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Range;
-import org.molgenis.fieldtypes.CategoricalField;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.FieldType;
-import org.molgenis.fieldtypes.MrefField;
-import org.molgenis.fieldtypes.XrefField;
 
 import com.google.common.collect.Lists;
 
@@ -32,7 +28,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	private String description;
 	private boolean nillable = true;
 	private boolean readOnly = false;
-	private Object defaultValue = null;
+	private String defaultValue = null;
 	private boolean idAttribute = false;
 	private boolean labelAttribute = false; // remove?
 	private boolean lookupAttribute = false; // remove?
@@ -163,32 +159,19 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		return readOnly;
 	}
 
-	public void setReadOnly(boolean readOnly)
+	public DefaultAttributeMetaData setReadOnly(boolean readOnly)
 	{
 		this.readOnly = readOnly;
+		return this;
 	}
 
 	@Override
-	public Object getDefaultValue()
+	public String getDefaultValue()
 	{
-		if (getDataType() instanceof XrefField || getDataType() instanceof MrefField
-				|| getDataType() instanceof CategoricalField)
-		{
-			if (getExpression() != null)
-			{
-				return null;
-			}
-			if (getRefEntity() == null) throw new MolgenisDataException("refEntity is missing for " + getName());
-			if (getRefEntity().getIdAttribute() == null) throw new MolgenisDataException(
-					"idAttribute is missing for entity [" + getRefEntity().getName() + "]");
-
-			return getRefEntity().getIdAttribute().getDataType().convert(defaultValue);
-		}
-
-		return getDataType().convert(defaultValue);
+		return defaultValue;
 	}
 
-	public DefaultAttributeMetaData setDefaultValue(Object defaultValue)
+	public DefaultAttributeMetaData setDefaultValue(String defaultValue)
 	{
 		this.defaultValue = defaultValue;
 		return this;
@@ -434,11 +417,6 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 
 		if (isAggregateable() != other.isAggregateable()) return false;
 		if (isAuto() != other.isAuto()) return false;
-		if (getDefaultValue() == null)
-		{
-			if (other.getDefaultValue() != null) return false;
-		}
-		else if (!getDefaultValue().equals(other.getDefaultValue())) return false;
 		if (getDescription() == null)
 		{
 			if (other.getDescription() != null) return false;
@@ -456,8 +434,9 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 				if (((EnumField) getDataType()).getEnumOptions() == null)
 				{
 					if (((EnumField) other.getDataType()).getEnumOptions() != null) return false;
-					if (!((EnumField) getDataType()).getEnumOptions().equals(
-							((EnumField) other.getDataType()).getEnumOptions())) return true;
+					if (!((EnumField) getDataType()).getEnumOptions()
+							.equals(((EnumField) other.getDataType()).getEnumOptions()))
+						return true;
 				}
 			}
 		}

@@ -7,6 +7,10 @@ import static org.testng.Assert.assertTrue;
 
 import org.testng.annotations.Test;
 
+/**
+ * <#if JavaName(entity) == "RuntimeProperty">@deprecated replaced by setting classes that derive from {@link org.molgenis.data.settings.DefaultSettingsEntity}</#if>
+ */
+<#if JavaName(entity) == "RuntimeProperty">@Deprecated</#if>
 public class ${JavaName(entity)}Test
 {
 	@Test

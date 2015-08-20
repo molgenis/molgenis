@@ -1,8 +1,8 @@
 package org.molgenis.util;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
@@ -14,7 +14,7 @@ public class ResourceFingerprintRegistry
 
 	public ResourceFingerprintRegistry()
 	{
-		resourceFingerprints = new HashMap<String, String>();
+		resourceFingerprints = new ConcurrentHashMap<String, String>();
 	}
 
 	public String getFingerprint(String resourceName) throws IOException

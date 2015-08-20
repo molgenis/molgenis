@@ -33,6 +33,10 @@ import com.google.common.collect.Sets;
  * MetaData service. Administration of the {@link Package}, {@link EntityMetaData} and {@link AttributeMetaData} of the
  * metadata of the repositories.
  * 
+ * TODO: This class smells. It started out as a simple administration but taken on a new role: to bootstrap the
+ * repositories and orchestrate changes in metadata. There's a second, higher level, class in here that needs to be
+ * refactored out. See also {@link MetaValidationUtils} which does some of this work now already.
+ * 
  * <img src="http://yuml.me/041e5382.png" alt="Metadata entities" width="640"/>
  */
 public class MetaDataServiceImpl implements MetaDataService
@@ -144,8 +148,8 @@ public class MetaDataServiceImpl implements MetaDataService
 	private ManageableRepositoryCollection getManageableRepositoryCollection(EntityMetaData emd)
 	{
 		RepositoryCollection backend = getBackend(emd);
-		if (!(backend instanceof ManageableRepositoryCollection)) throw new RuntimeException(
-				"Backend  is not a ManageableCrudRepositoryCollection");
+		if (!(backend instanceof ManageableRepositoryCollection))
+			throw new RuntimeException("Backend  is not a ManageableCrudRepositoryCollection");
 
 		return (ManageableRepositoryCollection) backend;
 	}
@@ -175,8 +179,8 @@ public class MetaDataServiceImpl implements MetaDataService
 			if (!dataService.hasRepository(emd.getName()))
 			{
 				Repository repo = backend.getRepository(emd.getName());
-				if (repo == null) throw new UnknownEntityException(String.format(
-						"Unknown entity '%s' for backend '%s'", emd.getName(), backend.getName()));
+				if (repo == null) throw new UnknownEntityException(
+						String.format("Unknown entity '%s' for backend '%s'", emd.getName(), backend.getName()));
 				Repository decoratedRepo = decoratorFactory.createDecoratedRepository(repo);
 				dataService.addRepository(decoratedRepo);
 			}
@@ -329,8 +333,8 @@ public class MetaDataServiceImpl implements MetaDataService
 	public synchronized void onApplicationEvent(ContextRefreshedEvent event)
 	{
 		// Discover all backends
-		Map<String, RepositoryCollection> backendBeans = event.getApplicationContext().getBeansOfType(
-				RepositoryCollection.class);
+		Map<String, RepositoryCollection> backendBeans = event.getApplicationContext()
+				.getBeansOfType(RepositoryCollection.class);
 		backendBeans.values().forEach(this::addBackend);
 
 		// Create repositories from EntityMetaData in EntityMetaData repo
@@ -345,9 +349,18 @@ public class MetaDataServiceImpl implements MetaDataService
 			}
 		}
 
-		// Discover EntityMetaData
+		// Discover static EntityMetaData
 		Map<String, EntityMetaData> emds = event.getApplicationContext().getBeansOfType(EntityMetaData.class);
 		DependencyResolver.resolve(Sets.newHashSet(emds.values())).forEach(this::addEntityMeta);
+		// Update update manageable backends, JPA throws exception
+		DependencyResolver.resolve(Sets.newHashSet(emds.values())).stream().filter(this::isManageableBackend)
+				.forEach(this::updateEntityMeta);
+	}
+
+	private boolean isManageableBackend(EntityMetaData emd)
+	{
+		// Might work for more than just MySQL backend, but not JPA backend
+		return emd.getBackend() == null || "MySql".equals(emd.getBackend());
 	}
 
 	@Override

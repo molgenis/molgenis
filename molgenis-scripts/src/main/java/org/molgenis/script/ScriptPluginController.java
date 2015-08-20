@@ -3,7 +3,7 @@ package org.molgenis.script;
 import static org.molgenis.script.ScriptPluginController.URI;
 
 import org.molgenis.data.DataService;
-import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

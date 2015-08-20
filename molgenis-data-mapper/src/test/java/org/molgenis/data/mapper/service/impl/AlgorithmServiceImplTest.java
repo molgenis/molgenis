@@ -124,6 +124,12 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		assertFalse(algorithmServiceImpl.isGoodMatch(matchedTags, "blood"));
 		assertFalse(algorithmServiceImpl.isGoodMatch(matchedTags, "weight"));
 		assertTrue(algorithmServiceImpl.isGoodMatch(matchedTags, "height"));
+
+		Map<String, Double> matchedTags2 = new HashMap<String, Double>();
+		matchedTags2.put("fasting", 100.0);
+		matchedTags2.put("glucose", 100.0);
+
+		assertTrue(algorithmServiceImpl.isGoodMatch(matchedTags2, "fasting glucose"));
 	}
 
 	@Test

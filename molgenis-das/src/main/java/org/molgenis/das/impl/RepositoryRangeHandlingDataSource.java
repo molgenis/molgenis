@@ -1,5 +1,7 @@
 package org.molgenis.das.impl;
 
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -9,14 +11,15 @@ import java.util.Map;
 
 import javax.servlet.ServletContext;
 
-import com.google.common.collect.Iterables;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.das.RangeHandlingDataSource;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-import org.molgenis.data.support.GenomeConfig;
+import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.data.support.QueryImpl;
+
+import com.google.common.collect.Iterables;
 
 import uk.ac.ebi.mydas.configuration.DataSourceConfiguration;
 import uk.ac.ebi.mydas.configuration.PropertyType;
@@ -28,13 +31,11 @@ import uk.ac.ebi.mydas.model.DasFeature;
 import uk.ac.ebi.mydas.model.DasMethod;
 import uk.ac.ebi.mydas.model.DasType;
 
-import static org.molgenis.util.ApplicationContextProvider.*;
-
-public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource implements
-		RangeHandlingAnnotationDataSource
+public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
+		implements RangeHandlingAnnotationDataSource
 {
 	private final DataService dataService;
-	private final GenomeConfig config;
+	private final GenomicDataSettings config;
 	private DasType mutationType;
 	private DasMethod method;
 	private String type;
@@ -51,7 +52,7 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource i
 	public RepositoryRangeHandlingDataSource() throws DataSourceException
 	{
 		dataService = getApplicationContext().getBean(DataService.class);
-		config = getApplicationContext().getBean(GenomeConfig.class);
+		config = getApplicationContext().getBean(GenomicDataSettings.class);
 	}
 
 	@Override
@@ -67,12 +68,12 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource i
 		String chromosomeAttribute = null;
 		String idAttribute = null;
 		String stopAttribute = null;
-        String refAttribute = null;
-        String altAttribute = null;
-        String descriptionAttribute = null;
-        String nameAttribute = null;
-        String linkAttribute = null;
-        String patientAttribute = null;
+		String refAttribute = null;
+		String altAttribute = null;
+		String descriptionAttribute = null;
+		String nameAttribute = null;
+		String linkAttribute = null;
+		String patientAttribute = null;
 
 		if (segmentParts.length > 1)
 		{
@@ -94,34 +95,36 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource i
 		Map<String, DasType> patients = new HashMap<String, DasType>();
 		for (Entity entity : entityIterable)
 		{
-            DasFeature feature;
+			DasFeature feature;
 
-            Integer valueStart = null;
-            Integer valueStop = null;
-            String valueDescription = null;
-            String valueIdentifier = null;
-            String valueName = null;
-            String valueLink = null;
-            String valuePatient = null;
-            String valueRef = null;
-            String valueAlt = null;
+			Integer valueStart = null;
+			Integer valueStop = null;
+			String valueDescription = null;
+			String valueIdentifier = null;
+			String valueName = null;
+			String valueLink = null;
+			String valuePatient = null;
+			String valueRef = null;
+			String valueAlt = null;
 
-            posAttribute = getAttributeName(posAttribute, config.GENOMEBROWSER_POS, entity);
-            chromosomeAttribute = getAttributeName(chromosomeAttribute, config.GENOMEBROWSER_CHROM, entity);
-            idAttribute = getAttributeName(idAttribute, config.GENOMEBROWSER_ID, entity);
-            stopAttribute = getAttributeName(stopAttribute, config.GENOMEBROWSER_STOP, entity);
-            descriptionAttribute = getAttributeName(descriptionAttribute, config.GENOMEBROWSER_DESCRIPTION, entity);
-            refAttribute = getAttributeName(refAttribute, config.GENOMEBROWSER_REF, entity);
-            altAttribute = getAttributeName(altAttribute, config.GENOMEBROWSER_ALT, entity);
-            nameAttribute = getAttributeName(nameAttribute, config.GENOMEBROWSER_NAME, entity);
-            linkAttribute = getAttributeName(linkAttribute, config.GENOMEBROWSER_LINK, entity);
-            patientAttribute = getAttributeName(patientAttribute, config.GENOMEBROWSER_PATIENT_ID , entity);
+			posAttribute = getAttributeName(posAttribute, GenomicDataSettings.Meta.ATTRS_POS, entity);
+			chromosomeAttribute = getAttributeName(chromosomeAttribute, GenomicDataSettings.Meta.ATTRS_CHROM, entity);
+			idAttribute = getAttributeName(idAttribute, GenomicDataSettings.Meta.ATTRS_IDENTIFIER, entity);
+			stopAttribute = getAttributeName(stopAttribute, GenomicDataSettings.Meta.ATTRS_STOP, entity);
+			descriptionAttribute = getAttributeName(descriptionAttribute, GenomicDataSettings.Meta.ATTRS_DESCRIPTION,
+					entity);
+			refAttribute = getAttributeName(refAttribute, GenomicDataSettings.Meta.ATTRS_REF, entity);
+			altAttribute = getAttributeName(altAttribute, GenomicDataSettings.Meta.ATTRS_ALT, entity);
+			nameAttribute = getAttributeName(nameAttribute, GenomicDataSettings.Meta.ATTRS_NAME, entity);
+			linkAttribute = getAttributeName(linkAttribute, GenomicDataSettings.Meta.ATTRS_LINKOUT, entity);
+			patientAttribute = getAttributeName(patientAttribute, GenomicDataSettings.Meta.ATTRS_PATIENT_ID, entity);
 
 			try
 			{
 				valueStart = entity.getInt(posAttribute);
-				valueIdentifier = StringUtils.isNotEmpty(idAttribute)&&StringUtils.isNotEmpty(entity.getString(idAttribute))?entity.getString(idAttribute):"-";
-            }
+				valueIdentifier = StringUtils.isNotEmpty(idAttribute)
+						&& StringUtils.isNotEmpty(entity.getString(idAttribute)) ? entity.getString(idAttribute) : "-";
+			}
 			catch (ClassCastException e)
 			{
 				// start of identifier not correctly specified? exclude this mutation fore it can not be plotted
@@ -131,42 +134,47 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource i
 			Iterable<String> attributes = entity.getAttributeNames();
 
 			valueStop = Iterables.contains(attributes, stopAttribute) ? entity.getInt(stopAttribute) : valueStart;
-            valueDescription = Iterables.contains(attributes, descriptionAttribute) ? entity
-					.getString(descriptionAttribute) : "";
-            valueName = Iterables.contains(attributes, nameAttribute) ? entity.getString(nameAttribute) : "";
+			valueDescription = Iterables.contains(attributes, descriptionAttribute)
+					? entity.getString(descriptionAttribute) : "";
+			valueName = Iterables.contains(attributes, nameAttribute) ? entity.getString(nameAttribute) : "";
 			valueLink = Iterables.contains(attributes, linkAttribute) ? entity.getString(linkAttribute) : "";
 			valuePatient = Iterables.contains(attributes, patientAttribute) ? entity.getString(patientAttribute) : "";
 
-            valueRef = StringUtils.isNotEmpty(refAttribute)&&StringUtils.isNotEmpty(entity.getString(refAttribute))?entity.getString(refAttribute):"";
-            valueAlt = StringUtils.isNotEmpty(altAttribute)&&StringUtils.isNotEmpty(entity.getString(altAttribute))?entity.getString(altAttribute):"";
+			valueRef = StringUtils.isNotEmpty(refAttribute) && StringUtils.isNotEmpty(entity.getString(refAttribute))
+					? entity.getString(refAttribute) : "";
+			valueAlt = StringUtils.isNotEmpty(altAttribute) && StringUtils.isNotEmpty(entity.getString(altAttribute))
+					? entity.getString(altAttribute) : "";
 
-            List<String> notes = new ArrayList<String>();
-            if(StringUtils.isNotEmpty(valueRef)) notes.add(refAttribute+"~"+valueRef);
-            if(StringUtils.isNotEmpty(valueAlt)) notes.add(altAttribute+"~"+valueAlt);
+			List<String> notes = new ArrayList<String>();
+			if (StringUtils.isNotEmpty(valueRef)) notes.add(refAttribute + "~" + valueRef);
+			if (StringUtils.isNotEmpty(valueAlt)) notes.add(altAttribute + "~" + valueAlt);
 
-            if (valueStart != null
+			if (valueStart != null
 					&& ((valueStart >= start && valueStart <= stop) || (valueStop >= start && valueStop <= stop)))
 			{
 				DasType type;// used for label colours in Dalliance
-                if (!StringUtils.isEmpty(valueRef)&&!StringUtils.isEmpty(valueAlt))
-                {
-                    if(valueRef.length()==1&&valueAlt.length()==1)
-                        type = new DasType(valueAlt, "", "", "");
-                    else if(valueRef.length()==1&&valueAlt.length()>1){
-                        type = new DasType("insert", "", "", "");
-                    }
-                    else if(valueRef.length()>1&&valueAlt.length()==1){
-                        type = new DasType("delete", "", "", "");
-                    }
-                    else{
-                        type = new DasType("delete", "", "", "");;
-                    }
-                }
-                else if (patients.containsKey(valuePatient))
-                {
-                    type = patients.get(valuePatient);
-                }
-                else
+				if (!StringUtils.isEmpty(valueRef) && !StringUtils.isEmpty(valueAlt))
+				{
+					if (valueRef.length() == 1 && valueAlt.length() == 1) type = new DasType(valueAlt, "", "", "");
+					else if (valueRef.length() == 1 && valueAlt.length() > 1)
+					{
+						type = new DasType("insert", "", "", "");
+					}
+					else if (valueRef.length() > 1 && valueAlt.length() == 1)
+					{
+						type = new DasType("delete", "", "", "");
+					}
+					else
+					{
+						type = new DasType("delete", "", "", "");
+						;
+					}
+				}
+				else if (patients.containsKey(valuePatient))
+				{
+					type = patients.get(valuePatient);
+				}
+				else
 				{
 					type = new DasType(score.toString(), "", "", "");
 					patients.put(valuePatient, type);
@@ -182,18 +190,18 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource i
 		return segment;
 	}
 
-    public String getAttributeName(String attribute, String fieldName, Entity entity) {
-        if (attribute == null)
-        {
-            attribute = config.getAttributeNameForAttributeNameArray(fieldName,
-                    entity.getEntityMetaData());
-        }
-        return attribute;
-    }
-
-    protected Iterable<Entity> queryDataSet(String segmentId, String dataSet, int maxbins)
+	public String getAttributeName(String attribute, String fieldName, Entity entity)
 	{
-		String chromosomeAttribute = config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_CHROM,
+		if (attribute == null)
+		{
+			attribute = config.getAttributeNameForAttributeNameArray(fieldName, entity.getEntityMetaData());
+		}
+		return attribute;
+	}
+
+	protected Iterable<Entity> queryDataSet(String segmentId, String dataSet, int maxbins)
+	{
+		String chromosomeAttribute = config.getAttributeNameForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_CHROM,
 				dataService.getEntityMetaData(dataSet));
 		Query q = new QueryImpl().eq(chromosomeAttribute, segmentId);
 		q.pageSize(maxbins);
