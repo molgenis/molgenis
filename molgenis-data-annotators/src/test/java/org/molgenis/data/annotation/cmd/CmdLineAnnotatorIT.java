@@ -28,6 +28,12 @@ public class CmdLineAnnotatorIT
 		testAnnotator("hpo", "src/test/resources/hpo/hpo.txt", "test.vcf", "test-out-expected.vcf");
 	}
 
+	@Test
+	public void fitcon() throws Exception
+	{
+		testAnnotator("fitcon", "src/test/resources/fitcon/fitcon_test_tsv.gz", "test.vcf", "test-out-expected.vcf");
+	}
+
 	private void testAnnotator(String name, String resourceLocation, String inputFileName, String expectedOutputFileName)
 			throws Exception
 	{
@@ -38,6 +44,9 @@ public class CmdLineAnnotatorIT
 
 		CmdLineAnnotator.main(new String[]
 		{ name, resourceLocation, inputFile, outputFile });
+
+		System.out.println("xxx " + readLines(outputFile));
+		System.out.println("xxx " + readLines(expectedOutputFile));
 
 		assertEquals(readLines(expectedOutputFile), readLines(outputFile));
 	}

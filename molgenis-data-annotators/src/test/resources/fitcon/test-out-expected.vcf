@@ -1,0 +1,4 @@
+##fileformat=VCFv4.1
+##INFO=<ID=FITCON_SCORE,Number=.,Type=String,Description="">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	10001	test	T	A	.	.	FITCON_SCORE=0.069834
