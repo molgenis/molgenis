@@ -238,11 +238,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-data-migrate</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>com.google.auto.value</groupId>
 			<artifactId>auto-value</artifactId>
 			<version>1.0</version>
