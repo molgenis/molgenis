@@ -1,16 +1,12 @@
 package org.molgenis.data.annotation.utils;
 
 import java.util.List;
-import java.util.Map;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
 
 import autovalue.shaded.com.google.common.common.collect.Iterables;
 
@@ -46,20 +42,5 @@ public class AnnotatorUtils
 			}
 		}
 		return compoundAttributeMetaData;
-	}
-
-	public static Entity getAnnotatedEntity(RepositoryAnnotator annotator, Entity entity, Map<String, Object> resultMap)
-	{
-		DefaultEntityMetaData resultEntityMetadata = new DefaultEntityMetaData(entity.getEntityMetaData());
-		resultEntityMetadata.addAttributeMetaData(AnnotatorUtils.getCompoundResultAttribute(annotator,
-				entity.getEntityMetaData()));
-
-		MapEntity resultEntity = new MapEntity(entity, resultEntityMetadata);
-		for (AttributeMetaData attributeMetaData : annotator.getOutputMetaData())
-		{
-			resultEntity.set(attributeMetaData.getName(), resultMap.get(attributeMetaData.getName()));
-		}
-
-		return resultEntity;
 	}
 }
