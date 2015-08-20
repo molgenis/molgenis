@@ -181,7 +181,7 @@
         		<#-- Logo start -->
 	    		<#if app_settings.logoTopHref?has_content>
     	    		<div id="Intro">
-        	    		<img src=${app_settings.logoTopHref?html} alt="" border="0" height="150">
+        	    		<a href="/"><img src=${app_settings.logoTopHref?html} alt="" border="0" height="150"></a>
         			</div>
     			</#if>
             
