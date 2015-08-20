@@ -10,9 +10,10 @@ import static org.testng.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.data.DataService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserDetailsService;
+import org.molgenis.ui.settings.StaticContent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -111,8 +112,8 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 		Authentication authentication = mock(Authentication.class);
 
 		when(authentication.isAuthenticated()).thenReturn(false);
-		UserDetails userDetails = when(mock(UserDetails.class).getUsername()).thenReturn(
-				SecurityUtils.ANONYMOUS_USERNAME).getMock();
+		UserDetails userDetails = when(mock(UserDetails.class).getUsername())
+				.thenReturn(SecurityUtils.ANONYMOUS_USERNAME).getMock();
 		when(authentication.getPrincipal()).thenReturn(userDetails);
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -126,18 +127,17 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 		@Bean
 		public StaticContentService staticContentService()
 		{
-			MolgenisSettings molgenisSettings = mock(MolgenisSettings.class);
-			when(molgenisSettings.getProperty(StaticContentServiceImpl.PREFIX_KEY + "home")).thenReturn(
-					"<p>Welcome to Molgenis!</p>");
+			return new StaticContentServiceImpl(dataService());
+		}
 
-			when(molgenisSettings.propertyExists(StaticContentServiceImpl.PREFIX_KEY + "home")).thenReturn(true);
-
-			when(
-					molgenisSettings.updateProperty(StaticContentServiceImpl.PREFIX_KEY + "home",
-							"<p>Welcome to Molgenis!</p>")).thenReturn(true);
-
-			StaticContentService staticContentService = new StaticContentServiceImpl(molgenisSettings);
-			return staticContentService;
+		@Bean
+		public DataService dataService()
+		{
+			DataService dataService = mock(DataService.class);
+			StaticContent staticContent = when(mock(StaticContent.class).getContent())
+					.thenReturn("<p>Welcome to Molgenis!</p>").getMock();
+			when(dataService.findOne(StaticContent.ENTITY_NAME, "home", StaticContent.class)).thenReturn(staticContent);
+			return dataService;
 		}
 
 		@Override
