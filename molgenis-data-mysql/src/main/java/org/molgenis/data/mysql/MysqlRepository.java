@@ -1145,9 +1145,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 										throw new MolgenisDataException(
 												"Missing auto id value. Please use the 'AutoIdCrudRepositoryDecorator' to add auto id capabilities.");
 									}
-
-									// default value, if any
-									preparedStatement.setObject(fieldIndex++, att.getDefaultValue());
+									preparedStatement.setObject(fieldIndex++, null);
 								}
 								else if (att.getDataType() instanceof XrefField)
 								{
@@ -1266,10 +1264,10 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 							// computed attributes are not persisted
 							continue;
 						}
-						// default value, if any
 						if (e.get(att.getName()) == null)
 						{
-							preparedStatement.setObject(fieldIndex++, att.getDefaultValue());
+							// repository should not fill in default value, the form should
+							preparedStatement.setObject(fieldIndex++, null);
 						}
 						else
 						{

@@ -116,7 +116,7 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 			}
 
 			@Override
-			public Object getDefaultValue()
+			public String getDefaultValue()
 			{
 				throw new UnsupportedOperationException();
 			}

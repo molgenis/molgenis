@@ -90,4 +90,43 @@ public class MetaValidationUtilsTest
 
 		MetaValidationUtils.validateEntityMetaData(emd);
 	}
+
+	@Test(expectedExceptions = MolgenisDataException.class)
+	public void testValidateEntityMetaDataIdAttributeWithDefaultValue()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("entity");
+		emd.addAttribute("id").setIdAttribute(true).setDefaultValue("5");
+
+		MetaValidationUtils.validateEntityMetaData(emd);
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class)
+	public void testValidateEntityMetaDataUniqueAttributeWithDefaultValue()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("entity");
+		emd.addAttribute("id").setIdAttribute(true);
+		emd.addAttribute("uniqueAttribute").setUnique(true).setDefaultValue("5");
+
+		MetaValidationUtils.validateEntityMetaData(emd);
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class)
+	public void testValidateEntityComputedAttributeWithDefaultValue()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("entity");
+		emd.addAttribute("id").setIdAttribute(true);
+		emd.addAttribute("expressionAttribute").setExpression("$('id').value()").setDefaultValue("5");
+
+		MetaValidationUtils.validateEntityMetaData(emd);
+	}
+
+	@Test
+	public void testValidateEntityMetaDataOkayAttributeWithDefaultValue()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("entity");
+		emd.addAttribute("id").setIdAttribute(true);
+		emd.addAttribute("blah").setDefaultValue("5");
+
+		MetaValidationUtils.validateEntityMetaData(emd);
+	}
 }

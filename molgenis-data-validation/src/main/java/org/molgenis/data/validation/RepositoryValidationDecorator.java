@@ -150,7 +150,6 @@ public class RepositoryValidationDecorator implements Repository
 					if ((value == null || (attr.getDataType() instanceof MrefField && !(((Iterable<Entity>) value)
 							.iterator().hasNext())))
 							&& !attr.isAuto()
-							&& (attr.getDefaultValue() == null)
 							&& mustDoNotNullCheck(getEntityMetaData(), attr, entity))
 					{
 						String message = String.format("The attribute '%s' of entity '%s' can not be null.",
