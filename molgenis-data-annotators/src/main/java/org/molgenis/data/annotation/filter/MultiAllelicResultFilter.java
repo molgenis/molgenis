@@ -66,18 +66,13 @@ public class MultiAllelicResultFilter implements ResultFilter
 							newAttributeValue.append(".");
 						}
 					}
-					//nothing found at all? result is empty
-					if (newAttributeValue.toString().equals("."))
-					{
-						entity.set(attributeMetaData.getName(), "");
-					}
-					else
+					// add entity only if something was found
+					if (!newAttributeValue.toString().equals("."))
 					{
 						entity.set(attributeMetaData.getName(), newAttributeValue.toString());
+						processedResults.add(entity);
 					}
-					processedResults.add(entity);
 				}
-
 			}
 		}
 		return FluentIterable.from(processedResults).first();
