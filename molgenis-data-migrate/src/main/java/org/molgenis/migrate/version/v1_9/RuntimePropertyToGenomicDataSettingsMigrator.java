@@ -52,7 +52,7 @@ public class RuntimePropertyToGenomicDataSettingsMigrator implements Application
 					String rtpValue = property.getValue();
 					rtpValue = "null".equals(rtpValue) ? null : rtpValue;
 					String value = genomicDataSettings.getAttrsAlt();
-					if ((rtpValue == null && value != null) || !rtpValue.equals(value))
+					if ((rtpValue == null && value != null) || (rtpValue != null && !rtpValue.equals(value)))
 					{
 						LOG.info("Updating GenomicDataSettings for RuntimeProperty [" + key + "]");
 						genomicDataSettings.setAttrsAlt(rtpValue);
@@ -70,7 +70,7 @@ public class RuntimePropertyToGenomicDataSettingsMigrator implements Application
 					String rtpValue = property.getValue();
 					rtpValue = "null".equals(rtpValue) ? null : rtpValue;
 					String value = genomicDataSettings.getAttrsChrom();
-					if ((rtpValue == null && value != null) || !rtpValue.equals(value))
+					if ((rtpValue == null && value != null) || (rtpValue != null && !rtpValue.equals(value)))
 					{
 						LOG.info("Updating GenomicDataSettings for RuntimeProperty [" + key + "]");
 						genomicDataSettings.setAttrsChrom(rtpValue);
@@ -88,7 +88,7 @@ public class RuntimePropertyToGenomicDataSettingsMigrator implements Application
 					String rtpValue = property.getValue();
 					rtpValue = "null".equals(rtpValue) ? null : rtpValue;
 					String value = genomicDataSettings.getAttrsDescription();
-					if ((rtpValue == null && value != null) || !rtpValue.equals(value))
+					if ((rtpValue == null && value != null) || (rtpValue != null && !rtpValue.equals(value)))
 					{
 						LOG.info("Updating GenomicDataSettings for RuntimeProperty [" + key + "]");
 						genomicDataSettings.setAttrsDescription(rtpValue);
@@ -106,7 +106,7 @@ public class RuntimePropertyToGenomicDataSettingsMigrator implements Application
 					String rtpValue = property.getValue();
 					rtpValue = "null".equals(rtpValue) ? null : rtpValue;
 					String value = genomicDataSettings.getAttrsIdentifier();
-					if ((rtpValue == null && value != null) || !rtpValue.equals(value))
+					if ((rtpValue == null && value != null) || (rtpValue != null && !rtpValue.equals(value)))
 					{
 						LOG.info("Updating GenomicDataSettings for RuntimeProperty [" + key + "]");
 						genomicDataSettings.setAttrsIdentifier(rtpValue);
@@ -124,7 +124,7 @@ public class RuntimePropertyToGenomicDataSettingsMigrator implements Application
 					String rtpValue = property.getValue();
 					rtpValue = "null".equals(rtpValue) ? null : rtpValue;
 					String value = genomicDataSettings.getAttrsName();
-					if ((rtpValue == null && value != null) || !rtpValue.equals(value))
+					if ((rtpValue == null && value != null) || (rtpValue != null && !rtpValue.equals(value)))
 					{
 						LOG.info("Updating GenomicDataSettings for RuntimeProperty [" + key + "]");
 						genomicDataSettings.setAttrsName(rtpValue);
@@ -142,7 +142,7 @@ public class RuntimePropertyToGenomicDataSettingsMigrator implements Application
 					String rtpValue = property.getValue();
 					rtpValue = "null".equals(rtpValue) ? null : rtpValue;
 					String value = genomicDataSettings.getAttrsLinkout();
-					if ((rtpValue == null && value != null) || !rtpValue.equals(value))
+					if ((rtpValue == null && value != null) || (rtpValue != null && !rtpValue.equals(value)))
 					{
 						LOG.info("Updating GenomicDataSettings for RuntimeProperty [" + key + "]");
 						genomicDataSettings.setAttrsLinkout(rtpValue);
@@ -160,7 +160,7 @@ public class RuntimePropertyToGenomicDataSettingsMigrator implements Application
 					String rtpValue = property.getValue();
 					rtpValue = "null".equals(rtpValue) ? null : rtpValue;
 					String value = genomicDataSettings.getAttrsPatientId();
-					if ((rtpValue == null && value != null) || !rtpValue.equals(value))
+					if ((rtpValue == null && value != null) || (rtpValue != null && !rtpValue.equals(value)))
 					{
 						LOG.info("Updating GenomicDataSettings for RuntimeProperty [" + key + "]");
 						genomicDataSettings.setAttrsPatientId(rtpValue);
@@ -178,7 +178,7 @@ public class RuntimePropertyToGenomicDataSettingsMigrator implements Application
 					String rtpValue = property.getValue();
 					rtpValue = "null".equals(rtpValue) ? null : rtpValue;
 					String value = genomicDataSettings.getAttrsRef();
-					if ((rtpValue == null && value != null) || !rtpValue.equals(value))
+					if ((rtpValue == null && value != null) || (rtpValue != null && !rtpValue.equals(value)))
 					{
 						LOG.info("Updating GenomicDataSettings for RuntimeProperty [" + key + "]");
 						genomicDataSettings.setAttrsRef(rtpValue);
@@ -196,7 +196,7 @@ public class RuntimePropertyToGenomicDataSettingsMigrator implements Application
 					String rtpValue = property.getValue();
 					rtpValue = "null".equals(rtpValue) ? null : rtpValue;
 					String value = genomicDataSettings.getAttrsPos();
-					if ((rtpValue == null && value != null) || !rtpValue.equals(value))
+					if ((rtpValue == null && value != null) || (rtpValue != null && !rtpValue.equals(value)))
 					{
 						LOG.info("Updating GenomicDataSettings for RuntimeProperty [" + key + "]");
 						genomicDataSettings.setAttrsPos(rtpValue);
@@ -214,7 +214,7 @@ public class RuntimePropertyToGenomicDataSettingsMigrator implements Application
 					String rtpValue = property.getValue();
 					rtpValue = "null".equals(rtpValue) ? null : rtpValue;
 					String value = genomicDataSettings.getAttrsStop();
-					if ((rtpValue == null && value != null) || !rtpValue.equals(value))
+					if ((rtpValue == null && value != null) || (rtpValue != null && !rtpValue.equals(value)))
 					{
 						LOG.info("Updating GenomicDataSettings for RuntimeProperty [" + key + "]");
 						genomicDataSettings.setAttrsStop(rtpValue);

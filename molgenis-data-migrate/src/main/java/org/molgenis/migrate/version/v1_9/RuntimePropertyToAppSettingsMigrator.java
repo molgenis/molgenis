@@ -52,7 +52,7 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 					rtpValue = "null".equals(rtpValue) ? null : rtpValue;
 					rtpValue = "null".equals(rtpValue) ? null : rtpValue;
 					String value = appSettings.getTitle();
-					if ((rtpValue == null && value != null) || !rtpValue.equals(value))
+					if ((rtpValue == null && value != null) || (rtpValue != null && !rtpValue.equals(value)))
 					{
 						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
 						appSettings.setTitle(rtpValue);
@@ -71,7 +71,7 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 					rtpValue = "null".equals(rtpValue) ? null : rtpValue;
 					rtpValue = "null".equals(rtpValue) ? null : rtpValue;
 					String value = appSettings.getLogoTopHref();
-					if ((rtpValue == null && value != null) || !rtpValue.equals(value))
+					if ((rtpValue == null && value != null) || (rtpValue != null && !rtpValue.equals(value)))
 					{
 						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
 						appSettings.setLogoTopHref(rtpValue);
@@ -89,7 +89,7 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 					String rtpValue = property.getValue();
 					rtpValue = "null".equals(rtpValue) ? null : rtpValue;
 					String value = appSettings.getLogoNavBarHref();
-					if ((rtpValue == null && value != null) || !rtpValue.equals(value))
+					if ((rtpValue == null && value != null) || (rtpValue != null && !rtpValue.equals(value)))
 					{
 						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
 						appSettings.setLogoNavBarHref(rtpValue);
@@ -117,7 +117,7 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 					String rtpValue = property.getValue();
 					rtpValue = "null".equals(rtpValue) ? null : rtpValue;
 					String value = appSettings.getFooter();
-					if ((rtpValue == null && value != null) || !rtpValue.equals(value))
+					if ((rtpValue == null && value != null) || (rtpValue != null && !rtpValue.equals(value)))
 					{
 						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
 						appSettings.setFooter(rtpValue);
@@ -170,7 +170,7 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 					String rtpValue = property.getValue();
 					rtpValue = "null".equals(rtpValue) ? null : rtpValue;
 					String value = appSettings.getLanguageCode();
-					if ((rtpValue == null && value != null) || !rtpValue.equals(value))
+					if ((rtpValue == null && value != null) || (rtpValue != null && !rtpValue.equals(value)))
 					{
 						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
 						appSettings.setLanguageCode(rtpValue);
@@ -188,7 +188,7 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 					String rtpValue = property.getValue();
 					rtpValue = "null".equals(rtpValue) ? null : rtpValue;
 					String value = appSettings.getBootstrapTheme();
-					if ((rtpValue == null && value != null) || !rtpValue.equals(value))
+					if ((rtpValue == null && value != null) || (rtpValue != null && !rtpValue.equals(value)))
 					{
 						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
 						appSettings.setBootstrapTheme(rtpValue);
@@ -206,7 +206,7 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 					String rtpValue = property.getValue();
 					rtpValue = "null".equals(rtpValue) ? null : rtpValue;
 					String value = appSettings.getCssHref();
-					if ((rtpValue == null && value != null) || !rtpValue.equals(value))
+					if ((rtpValue == null && value != null) || (rtpValue != null && !rtpValue.equals(value)))
 					{
 						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
 						appSettings.setCssHref(rtpValue);
@@ -224,7 +224,7 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 					String rtpValue = property.getValue();
 					rtpValue = "null".equals(rtpValue) ? null : rtpValue;
 					String value = appSettings.getMenu();
-					if ((rtpValue == null && value != null) || !rtpValue.equals(value))
+					if ((rtpValue == null && value != null) || (rtpValue != null && !rtpValue.equals(value)))
 					{
 						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
 						if (rtpValue != null)
@@ -259,7 +259,7 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 					String rtpValue = property.getValue();
 					rtpValue = "null".equals(rtpValue) ? null : rtpValue;
 					String value = appSettings.getTrackingCodeFooter();
-					if ((rtpValue == null && value != null) || !rtpValue.equals(value))
+					if ((rtpValue == null && value != null) || (rtpValue != null && !rtpValue.equals(value)))
 					{
 						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
 						appSettings.setTrackingCodeFooter(rtpValue);
@@ -276,7 +276,7 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 				{
 					Integer rtpValue = Integer.valueOf(property.getValue());
 					Integer value = appSettings.getAggregateThreshold();
-					if ((rtpValue == null && value != null) || !rtpValue.equals(value))
+					if ((rtpValue == null && value != null) || (rtpValue != null && !rtpValue.equals(value)))
 					{
 						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
 						appSettings.setAggregateThreshold(rtpValue);

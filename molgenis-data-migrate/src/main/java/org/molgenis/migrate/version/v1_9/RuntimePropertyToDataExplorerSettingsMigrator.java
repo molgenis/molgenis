@@ -245,7 +245,7 @@ public class RuntimePropertyToDataExplorerSettingsMigrator implements Applicatio
 					{
 						rtpValue = new URL(property.getValue());
 						URL value = dataExplorerSettings.getGalaxyUrl();
-						if ((rtpValue == null && value != null) || !rtpValue.equals(value))
+						if ((rtpValue == null && value != null) || (rtpValue != null && !rtpValue.equals(value)))
 						{
 							LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
 							dataExplorerSettings.setGalaxyUrl(rtpValue);
@@ -268,7 +268,7 @@ public class RuntimePropertyToDataExplorerSettingsMigrator implements Applicatio
 					String rtpValue = property.getValue();
 					rtpValue = "null".equals(rtpValue) ? null : rtpValue;
 					String value = dataExplorerSettings.getGenomeBrowserLocation();
-					if ((rtpValue == null && value != null) || !rtpValue.equals(value))
+					if ((rtpValue == null && value != null) || (rtpValue != null && !rtpValue.equals(value)))
 					{
 						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
 						dataExplorerSettings.setGenomeBrowserLocation(rtpValue);
@@ -286,7 +286,7 @@ public class RuntimePropertyToDataExplorerSettingsMigrator implements Applicatio
 					String rtpValue = property.getValue();
 					rtpValue = "null".equals(rtpValue) ? null : rtpValue;
 					String value = dataExplorerSettings.getGenomeBrowserCoordSystem();
-					if ((rtpValue == null && value != null) || !rtpValue.equals(value))
+					if ((rtpValue == null && value != null) || (rtpValue != null && !rtpValue.equals(value)))
 					{
 						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
 						dataExplorerSettings.setGenomeBrowserCoordSystem(rtpValue);
@@ -314,7 +314,7 @@ public class RuntimePropertyToDataExplorerSettingsMigrator implements Applicatio
 					String rtpValue = property.getValue();
 					rtpValue = "null".equals(rtpValue) ? null : rtpValue;
 					String value = dataExplorerSettings.getGenomeBrowserSources();
-					if ((rtpValue == null && value != null) || !rtpValue.equals(value))
+					if ((rtpValue == null && value != null) || (rtpValue != null && !rtpValue.equals(value)))
 					{
 						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
 						dataExplorerSettings.setGenomeBrowserSources(rtpValue);
@@ -332,7 +332,7 @@ public class RuntimePropertyToDataExplorerSettingsMigrator implements Applicatio
 					String rtpValue = property.getValue();
 					rtpValue = "null".equals(rtpValue) ? null : rtpValue;
 					String value = dataExplorerSettings.getGenomeBrowserLinks();
-					if ((rtpValue == null && value != null) || !rtpValue.equals(value))
+					if ((rtpValue == null && value != null) || (rtpValue != null && !rtpValue.equals(value)))
 					{
 						LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
 						dataExplorerSettings.setGenomeBrowserLinks(rtpValue);
@@ -389,7 +389,7 @@ public class RuntimePropertyToDataExplorerSettingsMigrator implements Applicatio
 					}
 				}
 				Map<String, String> value = dataExplorerSettings.getAggregatesDistinctOverrides();
-				if ((rtpValue == null && value != null) || !rtpValue.equals(value))
+				if ((rtpValue == null && value != null) || (rtpValue != null && !rtpValue.equals(value)))
 				{
 					dataExplorerSettings.setAggregatesDistinctOverrides(rtpValue);
 				}
