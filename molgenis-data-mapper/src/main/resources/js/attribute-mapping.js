@@ -534,7 +534,7 @@
 			'skipAlgorithmStates': ['DISCUSS', 'CURATED']
 		}, function(data) {
 			if(data.length !== 0 && ($('#targetAttribute').val() !== data.targetAttribute || $('#source').val() !== data.source)) {
-				$('#attribute-mapping-toolbar').append($('<button id="find-first-to-curate-attribute-btn" type="btn" class="btn btn-default btn-xs">Next to attribute to curate<span class="glyphicon glyphicon-chevron-right"></span></button>'));
+				$('#attribute-mapping-toolbar').append($('<button id="find-first-to-curate-attribute-btn" type="btn" class="btn btn-default btn-xs">Next attribute to curate<span class="glyphicon glyphicon-chevron-right"></span></button>'));
 				$('#find-first-to-curate-attribute-btn').on('click', function() {
 					redirect('get', molgenis.getContextUrl() + '/attributeMapping', data);
 				});
