@@ -15,7 +15,7 @@ import org.molgenis.data.mysql.AsyncJdbcTemplate;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.fieldtypes.StringField;
+import org.molgenis.fieldtypes.TextField;
 import org.molgenis.framework.MolgenisUpgrade;
 import org.molgenis.model.MolgenisModelException;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
@@ -54,10 +54,10 @@ public class Step15AddDefaultValue extends MolgenisUpgrade
 		this.jpaRepositoryCollection = Preconditions.checkNotNull(jpaRepositoryCollection);
 	}
 
-	private String createUpgradeSql(String entityName, String attributeName, String defaultValue)
+	private void executeUpgradeSql(String entityName, String attributeName, String defaultValue)
 	{
-		return String.format("UPDATE attributes SET defaultValue = '%s' WHERE name = '%s' "
-				+ "AND identifier IN (SELECT attributes FROM entities_attributes ea WHERE ea.fullName = '%s');",
+		jdbcTemplate.update("UPDATE attributes SET defaultValue = ? WHERE name = ? "
+				+ "AND identifier IN (SELECT attributes FROM entities_attributes ea WHERE ea.fullName = ?);",
 				defaultValue, attributeName, entityName);
 	}
 
@@ -73,7 +73,7 @@ public class Step15AddDefaultValue extends MolgenisUpgrade
 
 	protected void insertDefaultValueForScriptEntity()
 	{
-		executeSql(createUpgradeSql("Script", "generateToken", "false"));
+		executeUpgradeSql("Script", "generateToken", "false");
 	}
 
 	protected void insertDefaultValuesForJPAEntities()
@@ -83,10 +83,9 @@ public class Step15AddDefaultValue extends MolgenisUpgrade
 				.map(Repository::getEntityMetaData)
 				.forEach(
 						emd -> {
-							stream(emd.getAtomicAttributes().spliterator(), false)
-									.filter(amd -> amd.getDefaultValue() != null)
-									.map(amd -> createUpgradeSql(emd.getName(), amd.getName(), amd.getDefaultValue()))
-									.forEach(this::executeSql);
+							stream(emd.getAtomicAttributes().spliterator(), false).filter(
+									amd -> amd.getDefaultValue() != null).forEach(
+									amd -> executeUpgradeSql(emd.getName(), amd.getName(), amd.getDefaultValue()));
 						});
 	}
 
@@ -94,11 +93,11 @@ public class Step15AddDefaultValue extends MolgenisUpgrade
 	{
 		try
 		{
-			executeSql("ALTER TABLE attributes ADD COLUMN defaultValue " + new StringField().getMysqlType());
+			executeSql("ALTER TABLE attributes ADD COLUMN defaultValue " + new TextField().getMysqlType());
 		}
 		catch (MolgenisModelException e)
 		{
-			throw new MolgenisDataException("Failed to figure out the MySQL data type for STRING fields");
+			throw new MolgenisDataException("Failed to figure out the MySQL data type for TEXT fields");
 		}
 	}
 
