@@ -66,6 +66,6 @@ public class AttributeMetaDataMetaData extends DefaultEntityMetaData
 		addAttribute(TAGS).setDataType(MREF).setRefEntity(TagMetaData.INSTANCE);
 		addAttribute(VISIBLE_EXPRESSION).setDataType(SCRIPT).setNillable(true);
 		addAttribute(VALIDATION_EXPRESSION).setDataType(SCRIPT).setNillable(true);
-		addAttribute(DEFAULT_VALUE).setDataType(STRING).setNillable(true);
+		addAttribute(DEFAULT_VALUE).setDataType(TEXT).setNillable(true);
 	}
 }
