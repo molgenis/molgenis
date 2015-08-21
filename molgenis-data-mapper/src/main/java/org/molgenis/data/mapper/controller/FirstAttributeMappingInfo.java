@@ -34,42 +34,6 @@ public class FirstAttributeMappingInfo
 		return targetAttribute;
 	}
 
-	/**
-	 * @param mappingProjectId
-	 *            the mappingProjectId to set
-	 */
-	public void setMappingProjectId(String mappingProjectId)
-	{
-		this.mappingProjectId = mappingProjectId;
-	}
-
-	/**
-	 * @param target
-	 *            the target to set
-	 */
-	public void setTarget(String target)
-	{
-		this.target = target;
-	}
-
-	/**
-	 * @param source
-	 *            the source to set
-	 */
-	public void setSource(String source)
-	{
-		this.source = source;
-	}
-
-	/**
-	 * @param targetAttribute
-	 *            the targetAttribute to set
-	 */
-	public void setTargetAttribute(String targetAttribute)
-	{
-		this.targetAttribute = targetAttribute;
-	}
-
 	private String mappingProjectId;
 	private String target;
 	private String source;
