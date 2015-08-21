@@ -13,8 +13,7 @@
 	<div class="col-md-12">
 		<a href="${context_url}" class="btn btn-default btn-xs">
 			<span class="glyphicon glyphicon-chevron-left"></span> Back to mapping project overview
-		</a>
-		<hr></hr>	
+		</a>	
 	</div>
 </div>
 
