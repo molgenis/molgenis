@@ -142,7 +142,6 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(new Step13RemoveCatalogueMenuEntries(dataSource));
 		upgradeService.addUpgrade(new Step14UpdateAttributeMapping(dataSource));
 		upgradeService.addUpgrade(new Step15AddDefaultValue(dataSource, searchService, jpaRepositoryCollection));
-		
 		upgradeService.addUpgrade(new Step16RuntimePropertyToSettings(runtimePropertyToAppSettingsMigrator,
 				runtimePropertyToGenomicDataSettingsMigrator, runtimePropertyToDataExplorerSettingsMigrator,
 				runtimePropertyToStaticContentMigrator));
