@@ -97,8 +97,6 @@
 												class="bg-warning"
 											<#elseif attributeMapping.algorithmState == "CURATED">
 												class="bg-success"
-												<#assign lastAttributeMappingCuratedSourceName = source.name>
-												<#assign lastAttributeMappingCuratedAttributeName = attribute.name>
 											<#elseif attributeMapping.algorithmState == "DISCUSS">
 												class="bg-danger"
 											</#if>

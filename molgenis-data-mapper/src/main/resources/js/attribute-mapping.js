@@ -502,6 +502,24 @@
 		}
         $('<form action="'+url+'" method="'+ method +'">'+form+'</form>').appendTo('body').submit();
 	}
+	
+	function saveAttributeMapping(algorithm, algorithmState) {
+		$.post(molgenis.getContextUrl() + "/saveattributemapping", {
+			mappingProjectId : $('input[name="mappingProjectId"]').val(),
+			target : $('input[name="target"]').val(),
+			source : $('input[name="source"]').val(),
+			targetAttribute : $('input[name="targetAttribute"]').val(),
+			algorithm : algorithm,
+			algorithmState : algorithmState}, 
+			function(data) {
+				$('#algorithmState').empty().html(algorithmState);
+				molgenis.createAlert([{message: 'This attribute mapping is saved'}], 'success');
+			}
+		).fail(function() {
+			$('.alerts').empty();
+			molgenis.createAlert([{message: 'Error trying to save the attribuet mapping'}], 'error');
+		});
+	}
 
 	$(function() {
 
@@ -625,50 +643,21 @@
 		});
 
 		// save button for saving generated mapping
-		$('#save-mapping-btn').on('click', function() {
-			$.post(molgenis.getContextUrl() + "/saveattributemapping", {
-				mappingProjectId : $('input[name="mappingProjectId"]').val(),
-				target : $('input[name="target"]').val(),
-				source : $('input[name="source"]').val(),
-				targetAttribute : $('input[name="targetAttribute"]').val(),
-				algorithm : algorithm,
-				algorithmState : "CURATED"
-			}, function(data) {
-				redirect('get', molgenis.getContextUrl() + '/mappingproject/' + $('input[name="mappingProjectId"]').val());
-			});
-		});
+		$('#save-mapping-btn').on('click', function() {saveAttributeMapping(algorithm, "CURATED")});
 		
 		// save button for discuss status generated mapping
-		$('#save-discuss-mapping-btn').on('click', function() {
-			$.post(molgenis.getContextUrl() + "/saveattributemapping", {
-				mappingProjectId : $('input[name="mappingProjectId"]').val(),
-				target : $('input[name="target"]').val(),
-				source : $('input[name="source"]').val(),
-				targetAttribute : $('input[name="targetAttribute"]').val(),
-				algorithm : algorithm,
-				algorithmState : "DISCUSS"
-			}, function(data) {
-				redirect('get', molgenis.getContextUrl() + '/mappingproject/' + $('input[name="mappingProjectId"]').val());
-			});
-		});
+		$('#save-discuss-mapping-btn').on('click', function() {saveAttributeMapping(algorithm, "DISCUSS")});
 		
 		// find first not curated attribute mapping button (Not curated and not to be discussed)
-		$('#find-first-nonchanged-mapping-btn').on('click', function() {
+		$('#find-first-to-curate-attribute-btn').on('click', function() {
 			var array = ['DISCUSS', 'CURATED'];
 			$.post(molgenis.getContextUrl() + "/firstattributemapping", {
 				mappingProjectId : $('input[name="mappingProjectId"]').val(),
 				target : $('input[name="target"]').val(),
 				'skipAlgorithmStates': array
 			}, function(data) {
-				redirect('post', molgenis.getContextUrl() + '/attributeMapping',
-						{
-							mappingProjectId : $('input[name="mappingProjectId"]').val(),
-							target : $('input[name="target"]').val()
-						});
-				
-			//	(@RequestParam(required = true) String mappingProjectId,
-			//			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
-			//			@RequestParam(required = true) String targetAttribute)
+				if(null == data) molgenis.createAlert([{message: 'No next attribute mapping is found'}], 'error');
+				redirect('get', molgenis.getContextUrl() + '/attributeMapping', data);
 			});
 		});
 

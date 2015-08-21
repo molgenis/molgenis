@@ -37,15 +37,15 @@
 		</a>
 		<button id="save-mapping-btn" type="btn" class="btn btn-primary btn-xs">
 			<span class="glyphicon glyphicon-floppy-save"></span>
-			Save and go back
+			Save
 		</button>
 		<button id="save-discuss-mapping-btn" type="btn" class="btn btn-danger btn-xs">
 			<span class="glyphicon glyphicon-floppy-save"></span>
-			Save to discuss and go back
+			Save to discuss
 		</button>
-		<button id="find-first-nonchanged-mapping-btn" type="btn" class="btn btn-info btn-xs">
-			<span class="glyphicon glyphicon-floppy-save"></span>
-			Save and got to next unsaved attribute.
+		<button id="find-first-to-curate-attribute-btn" type="btn" class="btn btn-default btn-xs">
+			Next to attribute to curate (skip "to discuss")
+			<span class="glyphicon glyphicon-chevron-right"></span>
 		</button>
 	<hr></hr>
 	</div>
@@ -58,6 +58,10 @@
 <div class="row">	
 	<div class="col-md-5 col-lg-5">
 		<table class="table-borderless">
+			<tr>
+				<td class="td-align-top"><strong>Algorithm state</strong></td>
+				<td id="algorithmState" class="td-align-top"><#if attributeMapping.algorithmState??>${attributeMapping.algorithmState?html}<#else>N/A</#if></td>
+			</tr>
 			<tr>
 				<td class="td-align-top"><strong>Name</strong></td>
 				<td class="td-align-top">${attributeMapping.targetAttributeMetaData.name?html} (${attributeMapping.targetAttributeMetaData.dataType})</td>

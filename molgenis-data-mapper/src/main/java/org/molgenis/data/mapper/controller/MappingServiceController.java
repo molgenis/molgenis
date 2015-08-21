@@ -381,23 +381,20 @@ public class MappingServiceController extends MolgenisPluginController
 	}
 
 	/**
-	 * Adds a new {@link AttributeMapping} to an {@link EntityMapping}.
+	 * Find the firstattributeMapping skip the the algorithmStates that are given in the {@link AttributeMapping} to an
+	 * {@link EntityMapping}.
 	 * 
 	 * @param mappingProjectId
 	 *            ID of the mapping project
 	 * @param target
 	 *            name of the target entity
-	 * @param source
-	 *            name of the source entity
-	 * @param targetAttribute
-	 *            name of the target attribute
-	 * @param algorithm
-	 *            the mapping algorithm
-	 * @return redirect URL for the attributemapping
+	 * @param algorithmStates
+	 *            the mapping algorithm states that should skip
 	 */
 	@RequestMapping(value = "/firstattributemapping", method = RequestMethod.POST)
 	@ResponseBody
-	public FirstUncuratedAttributeMappingInfo getFirstUncuratedAttributeMappingInfo(@RequestParam(required = true) String mappingProjectId,
+	public FirstAttributeMappingInfo getFirstAttributeMappingInfo(
+			@RequestParam(required = true) String mappingProjectId,
 			@RequestParam(required = true) String target,
 			@RequestParam(required = true, value = "skipAlgorithmStates[]") List<AlgorithmState> skipAlgorithmStates,
 			Model model)
@@ -407,25 +404,35 @@ public class MappingServiceController extends MolgenisPluginController
 		if (hasWritePermission(mappingProject))
 		{
 			MappingTarget mappingTarget = mappingProject.getMappingTarget(target);
-			for(EntityMapping entityMapping : mappingTarget.getEntityMappings()){
-				for(AttributeMapping attributeMapping : entityMapping.getAttributeMappings()){
-					AlgorithmState algorithmState = attributeMapping.getAlgorithmState();
-					LOG.info(attributeMapping.getTargetAttributeMetaData().getName());
-					boolean toSkip = false;
-					if (null != skipAlgorithmStates)
-					{
-						if (skipAlgorithmStates.contains(algorithmState))
+			List<String> sourceNames = mappingTarget.getEntityMappings().stream()
+					.map(i -> i.getSourceEntityMetaData().getName()).collect(Collectors.toList());
+
+			for (AttributeMetaData attributeMetaData : mappingTarget.getTarget()
+					.getAtomicAttributes())
+			{
+				if (attributeMetaData.isIdAtrribute())
+				{
+					continue;
+				}
+
+				for (String source : sourceNames)
+				{
+					EntityMapping entityMapping = mappingTarget.getMappingForSource(source);
+					AttributeMapping attributeMapping = entityMapping.getAttributeMapping(attributeMetaData.getName());
+
+					if(null != attributeMapping){
+						AlgorithmState algorithmState = attributeMapping.getAlgorithmState();
+						if (null != skipAlgorithmStates)
 						{
-							toSkip = true;
+							if (skipAlgorithmStates.contains(algorithmState))
+							{
+								continue;
+							}
 						}
 					}
 
-					if (!toSkip)
-					{
-						// return new FirstUncuratedAttributeMappingInfo(entityMapping
-						// .getSourceEntityMetaData().getName(), attributeMapping.getTargetAttributeMetaData()
-						// .getName());
-					}
+					return new FirstAttributeMappingInfo(mappingProjectId, target, source,
+								attributeMetaData.getName());
 				}
 			}
 		}
@@ -433,7 +440,7 @@ public class MappingServiceController extends MolgenisPluginController
 		return null;
 	}
 
-	class FirstUncuratedAttributeMappingInfo
+	class FirstAttributeMappingInfo
 	{
 		/**
 		 * @return the mappingProjectId
@@ -508,8 +515,10 @@ public class MappingServiceController extends MolgenisPluginController
 		private String source;
 		private String targetAttribute;
 		
-		FirstUncuratedAttributeMappingInfo(String mappingProjectId, String target, String source, String targetAttribute)
+		FirstAttributeMappingInfo(String mappingProjectId, String target, String source, String targetAttribute)
 		{
+			this.mappingProjectId = mappingProjectId;
+			this.target = target;
 			this.source = source;
 			this.targetAttribute = targetAttribute;
 		}
