@@ -1,11 +1,12 @@
 package org.molgenis.ui.style;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.ui.MolgenisPluginInterceptor;
+import org.molgenis.data.settings.AppSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -15,10 +16,14 @@ import org.springframework.stereotype.Component;
 public class StyleServiceImpl implements StyleService
 {
 	private static final String LOCAL_CSS_BOOTSTRAP_THEME_LOCATION = "css/themes/bootstrap-*.min.css";
-	private static final String CSS_THEME_KEY = MolgenisPluginInterceptor.MOLGENIS_CSS_THEME;
+
+	private final AppSettings appSettings;
 
 	@Autowired
-	private MolgenisSettings molgenisSettings;
+	public StyleServiceImpl(AppSettings appSettings)
+	{
+		this.appSettings = checkNotNull(appSettings);
+	}
 
 	@Override
 	public Set<Style> getAvailableStyles()
@@ -48,7 +53,8 @@ public class StyleServiceImpl implements StyleService
 		// Pressing save in the UI without doing a selection returns undefined
 		if (!styleName.equals("undefined"))
 		{
-			molgenisSettings.setProperty(CSS_THEME_KEY, getStyle(styleName).getLocation());
+			String bootstrapTheme = getStyle(styleName).getLocation();
+			appSettings.setBootstrapTheme(bootstrapTheme);
 		}
 	}
 
@@ -57,7 +63,8 @@ public class StyleServiceImpl implements StyleService
 	{
 		for (Style style : getAvailableStyles())
 		{
-			if (style.getLocation().equals(molgenisSettings.getProperty(CSS_THEME_KEY)))
+			String bootstrapTheme = appSettings.getBootstrapTheme();
+			if (style.getLocation().equals(bootstrapTheme))
 			{
 				return style;
 			}

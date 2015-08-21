@@ -3,9 +3,9 @@ package org.molgenis.ontology.tree;
 import static org.molgenis.ontology.tree.OntologyTreeController.URI;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
-import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ontology.matching.OntologyService;
 import org.molgenis.ontology.utils.OntologyServiceUtil;
+import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

@@ -1,24 +1,23 @@
 package org.molgenis.data;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 
+import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.AggregateAnonymizerImpl;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.security.core.Permission;
 
 public class IndexedCrudRepositorySecurityDecorator extends RepositorySecurityDecorator implements IndexedRepository
 {
-	public static final String SETTINGS_KEY_AGGREGATE_ANONYMIZATION_THRESHOLD = "aggregate.anonymization.threshold";
 	private final IndexedRepository decoratedRepository;
-	private final MolgenisSettings molgenisSettings;
+	private final AppSettings appSettings;
 	private final AggregateAnonymizer aggregateAnonymizer = new AggregateAnonymizerImpl();
 
-	public IndexedCrudRepositorySecurityDecorator(IndexedRepository decoratedRepository,
-			MolgenisSettings molgenisSettings)
+	public IndexedCrudRepositorySecurityDecorator(IndexedRepository decoratedRepository, AppSettings appSettings)
 	{
 		super(decoratedRepository);
-		this.decoratedRepository = decoratedRepository;
-		this.molgenisSettings = molgenisSettings;
+		this.decoratedRepository = checkNotNull(decoratedRepository);
+		this.appSettings = checkNotNull(appSettings);
 	}
 
 	@Override
@@ -26,7 +25,7 @@ public class IndexedCrudRepositorySecurityDecorator extends RepositorySecurityDe
 	{
 		validatePermission(decoratedRepository.getName(), Permission.COUNT);
 
-		Integer threshold = molgenisSettings.getIntegerProperty(SETTINGS_KEY_AGGREGATE_ANONYMIZATION_THRESHOLD);
+		Integer threshold = appSettings.getAggregateThreshold();
 
 		AggregateResult result = decoratedRepository.aggregate(aggregateQuery);
 		if (threshold != null && threshold > 0)

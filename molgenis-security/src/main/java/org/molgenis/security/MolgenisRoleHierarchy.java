@@ -28,12 +28,6 @@ public class MolgenisRoleHierarchy implements RoleHierarchy
 				String entity = authority.getAuthority().substring(AUTHORITY_ENTITY_WRITE_PREFIX.length());
 				hierarchicalAuthorities.add(new SimpleGrantedAuthority(AUTHORITY_ENTITY_READ_PREFIX + entity));
 				hierarchicalAuthorities.add(new SimpleGrantedAuthority(AUTHORITY_ENTITY_COUNT_PREFIX + entity));
-				hierarchicalAuthorities
-						.add(new SimpleGrantedAuthority(AUTHORITY_PLUGIN_WRITE_PREFIX + "FORM." + entity));
-				hierarchicalAuthorities
-						.add(new SimpleGrantedAuthority(AUTHORITY_PLUGIN_READ_PREFIX + "FORM." + entity));
-				hierarchicalAuthorities
-						.add(new SimpleGrantedAuthority(AUTHORITY_PLUGIN_COUNT_PREFIX + "FORM." + entity));
 			}
 			else if (authority.getAuthority().startsWith(AUTHORITY_ENTITY_READ_PREFIX))
 			{
@@ -60,12 +54,6 @@ public class MolgenisRoleHierarchy implements RoleHierarchy
 				hierarchicalAuthorities.add(new SimpleGrantedAuthority(AUTHORITY_ENTITY_READ_PREFIX + "IMPORTRUN"));
 				hierarchicalAuthorities.add(new SimpleGrantedAuthority(AUTHORITY_ENTITY_WRITE_PREFIX + "IMPORTRUN"));
 				hierarchicalAuthorities.add(new SimpleGrantedAuthority(AUTHORITY_ENTITY_COUNT_PREFIX + "IMPORTRUN"));
-				hierarchicalAuthorities
-						.add(new SimpleGrantedAuthority(AUTHORITY_PLUGIN_WRITE_PREFIX + "FORM.IMPORTRUN"));
-				hierarchicalAuthorities
-						.add(new SimpleGrantedAuthority(AUTHORITY_PLUGIN_READ_PREFIX + "FORM.IMPORTRUN"));
-				hierarchicalAuthorities
-						.add(new SimpleGrantedAuthority(AUTHORITY_PLUGIN_COUNT_PREFIX + "FORM.IMPORTRUN"));
 			}
 
 			hierarchicalAuthorities.add(authority);
