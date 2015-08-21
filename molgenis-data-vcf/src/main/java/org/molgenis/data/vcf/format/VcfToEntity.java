@@ -293,9 +293,6 @@ public class VcfToEntity
 
 		for (VcfInfo vcfInfo : vcfRecord.getInformation())
 		{
-			System.out.println(vcfInfo.getKey());
-			System.out.println(entityMetaData.getAtomicAttributes());
-			System.out.println(entityMetaData.getAttribute("INFO_DF"));
 			Object val = vcfInfo.getVal();
 			if (val instanceof List<?>)
 			{
