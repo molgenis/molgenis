@@ -45,9 +45,6 @@ public class CmdLineAnnotatorIT
 		CmdLineAnnotator.main(new String[]
 		{ name, resourceLocation, inputFile, outputFile });
 
-		System.out.println("xxx " + readLines(expectedOutputFile));
-		System.out.println("xxx " + readLines(outputFile));
-
 		assertEquals(readLines(expectedOutputFile), readLines(outputFile));
 	}
 
