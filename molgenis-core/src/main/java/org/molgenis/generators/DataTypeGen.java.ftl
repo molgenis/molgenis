@@ -25,6 +25,7 @@ import org.molgenis.data.Entity;
 
 /**
  * ${Name(entity)}: ${entity.description}.
+ * <#if JavaName(entity) == "RuntimeProperty">@deprecated replaced by setting classes that derive from {@link org.molgenis.data.settings.DefaultSettingsEntity}</#if>
  * @author MOLGENIS generator
  */
 <#if entity.abstract>
@@ -57,6 +58,7 @@ public interface ${JavaName(entity)} extends <#if entity.hasImplements()><#list 
 	</#if>
 @javax.xml.bind.annotation.XmlAccessorType(javax.xml.bind.annotation.XmlAccessType.FIELD)
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(value={"EI_EXPOSE_REP", "EI_EXPOSE_REP2"}, justification="Exposing internal representation is accepted")
+<#if JavaName(entity) == "RuntimeProperty">@Deprecated</#if>
 public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getAncestor().namespace}.${JavaName(entity.getAncestor())}<#else>org.molgenis.data.support.AbstractEntity</#if> implements org.molgenis.data.Entity<#if entity.hasImplements()>,<#list entity.getImplements() as i> ${i.namespace}.${JavaName(i)}<#if i_has_next>,</#if></#list></#if>
 </#if>
 {

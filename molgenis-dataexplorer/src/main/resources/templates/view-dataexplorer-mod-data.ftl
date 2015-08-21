@@ -28,7 +28,7 @@
 			<div class="data-table-pager-container">
 				<div class="pull-right">
 					<a id="download-modal-button" class="btn btn-default" data-toggle="modal" data-target="#downloadModal">Download</a>
-				<#if galaxyEnabled?? && galaxyEnabled == true>
+				<#if plugin_settings.data_galaxy_export == true>
 					<a id="galaxy-export-modal-button" class="btn btn-default" data-toggle="modal" data-target="#galaxy-export-modal">Export to Galaxy</a>
 				</#if>
 				</div>
@@ -99,7 +99,7 @@
 <#-- Entity report modal placeholder -->
 <div id="entityReport"></div>
 
-<#if galaxyEnabled?? && galaxyEnabled == true>
+<#if plugin_settings.data_galaxy_export == true>
 <#-- Galaxy export modal -->
 <form name="galaxy-export-form" class="form-horizontal" action="${context_url?html}/galaxy/export" method="POST">
 	<div class="modal" id="galaxy-export-modal" tabindex="-1" role="dialog" aria-labelledby="galaxy-export-modal-label" aria-hidden="true">
@@ -113,13 +113,13 @@
 		      		<div class="form-group">
 			      		<label class="col-md-3 control-label" for="galaxy-export-url">Galaxy server URL *</label>
 					    <div class="col-md-5">
-					    	<input type="text" class="form-control" id="galaxy-export-url" name="galaxyUrl" <#if galaxyUrl??>value="${galaxyUrl?html}" </#if>required><span class="help-block">e.g. https://usegalaxy.org/</span>
+					    	<input type="text" class="form-control" id="galaxy-export-url" name="galaxyUrl" <#if plugin_settings.data_galaxy_url??>value="${plugin_settings.data_galaxy_url?html}" </#if>required><span class="help-block">e.g. https://usegalaxy.org/</span>
 					    </div>
 		      		</div>
 		      		<div class="form-group">
 		      			<label class="col-md-3 control-label" for="galaxy-export-api-key">Galaxy API key *</label>
 					    <div class="col-md-5">
-					    	<input type="password" class="form-control" id="galaxy-export-api-key" name="galaxyApiKey" <#if galaxyApiKey??>value="${galaxyApiKey?html}" </#if>required><span class="help-block">See 'Select API Keys' in menu 'User' on e.g. https://usegalaxy.org/</span>
+					    	<input type="password" class="form-control" id="galaxy-export-api-key" name="galaxyApiKey" <#if plugin_settings.data_galaxy_api_key??>value="${plugin_settings.data_galaxy_api_key?html}" </#if>required><span class="help-block">See 'Select API Keys' in menu 'User' on e.g. https://usegalaxy.org/</span>
 					    </div>
 		      		</div>
 				</div>
@@ -135,24 +135,24 @@
     </div>
 </div>
 <script>
-    molgenis.dataexplorer.setGenomeAttributes('${genomebrowser_start_list?js_string}', '${genomebrowser_chrom_list?js_string}', '${genomebrowser_id_list?js_string}', '${genomebrowser_patient_list?js_string}');
+    molgenis.dataexplorer.setGenomeAttributes('${genomicDataSettings.start?js_string}', '${genomicDataSettings.chromosome?js_string}', '${genomicDataSettings.identifier?js_string}', '${genomicDataSettings.patient_id?js_string}');
 	<#-- load js dependencies -->
 	$.when(
 		$.ajax("<@resource_href "/js/dalliance-compiled.min.js"/>", {'cache': true}),
 		$.ajax("<@resource_href "/js/dataexplorer-data.js"/>", {'cache': true}))
 		.done(function() {
-    			molgenis.dataexplorer.data.setGenomeBrowserAttributes('${genomebrowser_start_list?js_string}', '${genomebrowser_chrom_list?js_string}', '${genomebrowser_id_list?js_string}', '${genomebrowser_patient_list?js_string}');
+    			molgenis.dataexplorer.data.setGenomeBrowserAttributes('${genomicDataSettings.start?js_string}', '${genomicDataSettings.chromosome?js_string}', '${genomicDataSettings.identifier?js_string}', '${genomicDataSettings.patient_id?js_string}');
                 <#-- do *not* js escape values below -->    
                 molgenis.dataexplorer.data.setGenomeBrowserSettings({
-			    ${initLocation},
-				coordSystem: ${coordSystem},
-				sources: ${sources},
-				browserLinks: ${browserLinks}
+			    ${plugin_settings.gb_init_location},
+				coordSystem: ${plugin_settings.gb_init_coord_system},
+				sources: ${plugin_settings.gb_init_sources},
+				browserLinks: ${plugin_settings.gb_init_browser_links}
 			});
 			molgenis.dataexplorer.data.setGenomeBrowserEntities([<#list genomeEntities?keys as entityName>{'name': '${entityName?js_string}', 'label': '${genomeEntities[entityName]?js_string}'}<#if entityName_has_next>,</#if></#list>]);
 			if(molgenis.dataexplorer.data.doShowGenomeBrowser() === true)
 		        {
-		            molgenis.dataexplorer.data.createGenomeBrowser({showHighlight: ${showHighlight?js_string}});
+		            molgenis.dataexplorer.data.createGenomeBrowser({showHighlight: ${plugin_settings.gb_init_highlight_region?c}});
 		        }
 		    else
 		        {

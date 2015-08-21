@@ -6,17 +6,12 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.auth.MolgenisUser;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
-import org.molgenis.data.mapper.controller.MappingServiceController.FirstAttributeMappingInfo;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
@@ -40,11 +35,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -185,13 +175,32 @@ public class MappingServiceControllerTest
 	}
 
 	// TODO
-	@Test
-	public getFirstAttributeMappingInfo()
+	public void getFirstAttributeMappingInfo()
 	{
-		// when(mappingService.getMappingProject("asdf")).thenReturn(mappingProject);
-		// Menu menu = mock(Menu.class);
-		// when(menuReaderService.getMenu()).thenReturn(menu);
-		// when(menu.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
+		when(mappingService.getMappingProject("asdf")).thenReturn(mappingProject);
+		Menu menu = mock(Menu.class);
+		when(menuReaderService.getMenu()).thenReturn(menu);
+		when(menu.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
+
+		//
+		// @RequestParam(required = true) String mappingProjectId, @RequestParam(required = true) String target,
+		// @RequestParam(required = true, value = "skipAlgorithmStates[]") List<AlgorithmState> skipAlgorithmStates,
+
+		// mockMvc.perform(
+		// MockMvcRequestBuilders.post(MappingServiceController.URI + "/firstattributemapping")
+		// .param("mappingProjectId", "asdf").param("target", "HOP").param("source", "LifeLines")
+		// .param("skipAlgorithmStates", "CURATED", "DISCUSS"));
+
+		MappingProject expected = new MappingProject("hop hop hop", me);
+		expected.setIdentifier("asdf");
+		MappingTarget mappingTarget = expected.addTarget(hop);
+		EntityMapping entityMapping = mappingTarget.addSource(lifeLines);
+		AttributeMapping ageMapping = entityMapping.addAttributeMapping("age");
+		ageMapping.setAlgorithm("$('length').value()");
+		ageMapping.setAlgorithmState(AlgorithmState.CURATED);
+
+		Mockito.verify(mappingService).updateMappingProject(expected);
+		// .andExpect(MockMvcResultMatchers.redirectedUrl("/menu/main/mappingservice/mappingproject/asdf"));
 		//
 		// mockMvc.perform(
 		// MockMvcRequestBuilders.post(MappingServiceController.URI + "/saveattributemapping")
@@ -206,63 +215,4 @@ public class MappingServiceControllerTest
 		// mappingTarget.addSource(lifeLines);
 		// Mockito.verify(mappingService).updateMappingProject(expected);
 	}
-
-	/**
-	 * Find the firstattributeMapping skip the the algorithmStates that are given in the {@link AttributeMapping} to an
-	 * {@link EntityMapping}.
-	 * 
-	 * @param mappingProjectId
-	 *            ID of the mapping project
-	 * @param target
-	 *            name of the target entity
-	 * @param algorithmStates
-	 *            the mapping algorithm states that should skip
-	 */
-	@RequestMapping(value = "/firstattributemapping", method = RequestMethod.POST)
-	@ResponseBody
-	public FirstAttributeMappingInfo getFirstAttributeMappingInfo(
-			@RequestParam(required = true) String mappingProjectId, @RequestParam(required = true) String target,
-			@RequestParam(required = true, value = "skipAlgorithmStates[]") List<AlgorithmState> skipAlgorithmStates,
-			Model model)
-	{
-
-		MappingProject mappingProject = mappingService.getMappingProject(mappingProjectId);
-		if (hasWritePermission(mappingProject))
-		{
-			MappingTarget mappingTarget = mappingProject.getMappingTarget(target);
-			List<String> sourceNames = mappingTarget.getEntityMappings().stream()
-					.map(i -> i.getSourceEntityMetaData().getName()).collect(Collectors.toList());
-
-			for (AttributeMetaData attributeMetaData : mappingTarget.getTarget().getAtomicAttributes())
-			{
-				if (attributeMetaData.isIdAtrribute())
-				{
-					continue;
-				}
-
-				for (String source : sourceNames)
-				{
-					EntityMapping entityMapping = mappingTarget.getMappingForSource(source);
-					AttributeMapping attributeMapping = entityMapping.getAttributeMapping(attributeMetaData.getName());
-
-					if (null != attributeMapping)
-					{
-						AlgorithmState algorithmState = attributeMapping.getAlgorithmState();
-						if (null != skipAlgorithmStates)
-						{
-							if (skipAlgorithmStates.contains(algorithmState))
-							{
-								continue;
-							}
-						}
-					}
-
-					return new FirstAttributeMappingInfo(mappingProjectId, target, source, attributeMetaData.getName());
-				}
-			}
-		}
-
-		return null;
-	}
-
 }
