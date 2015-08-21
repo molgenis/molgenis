@@ -29,7 +29,7 @@ import org.testng.annotations.Test;
 public class VcfUtilsTest
 {
 	private static final Logger LOG = LoggerFactory.getLogger(VcfUtilsTest.class);
-	private DefaultEntityMetaData annotatedEntityMetadata = new DefaultEntityMetaData("test");
+	private final DefaultEntityMetaData annotatedEntityMetadata = new DefaultEntityMetaData("test");
 	public DefaultEntityMetaData metaDataCanAnnotate = new DefaultEntityMetaData("test");
 	public DefaultEntityMetaData metaDataCantAnnotate = new DefaultEntityMetaData("test");
 
@@ -151,7 +151,7 @@ public class VcfUtilsTest
 
 			File inputVcfFile = new File(ResourceUtils.getFile(getClass(), "/testWriter.vcf").getPath());
 
-			VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, Collections.emptyList(), "");
+			VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, Collections.emptyList());
 
 			for (Entity entity : entities)
 			{
@@ -185,7 +185,7 @@ public class VcfUtilsTest
 			File resultVCFWriter = new File(ResourceUtils.getFile(getClass(), "/result_vcfWriter.vcf").getPath());
 
 			VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter,
-					annotatedEntityMetadata.getAttributes(), "INFO_ANNO");
+					annotatedEntityMetadata.getAttributes());
 
 			for (Entity entity : entities)
 			{
