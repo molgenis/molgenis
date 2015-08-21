@@ -22,15 +22,15 @@
 <div class="row">
 	<div class="col-md-12">
 		<#-- Hidden fields containing information needed for ajax requests -->
-		<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier?html}"/>
-		<input type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name?html}"/>
-		<input type="hidden" name="source" value="${entityMapping.sourceEntityMetaData.name?html}"/>
-		<input type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name?html}"/>
-		<input type="hidden" name="targetAttributeType" value="${attributeMapping.targetAttributeMetaData.dataType?html}"/>
+		<input id="mappingProjectId" type="hidden" name="mappingProjectId" value="${mappingProject.identifier?html}"/>
+		<input id="target" type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name?html}"/>
+		<input id="source" type="hidden" name="source" value="${entityMapping.sourceEntityMetaData.name?html}"/>
+		<input id="targetAttribute" type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name?html}"/>
+		<input id="targetAttributeType" type="hidden" name="targetAttributeType" value="${attributeMapping.targetAttributeMetaData.dataType?html}"/>
 	</div>
 </div>
 <div class="row">
-	<div class="col-md-12 col-lg-12">
+	<div id="attribute-mapping-toolbar" class="col-md-12 col-lg-12">
 		<a href="/menu/main/mappingservice/mappingproject/${mappingProject.identifier?html}" type="btn" class="btn btn-default btn-xs">
 			<span class="glyphicon glyphicon-chevron-left"></span>
 			Cancel and go back
@@ -43,11 +43,6 @@
 			<span class="glyphicon glyphicon-floppy-save"></span>
 			Save to discuss
 		</button>
-		<button id="find-first-to-curate-attribute-btn" type="btn" class="btn btn-default btn-xs">
-			Next to attribute to curate (skip "to discuss")
-			<span class="glyphicon glyphicon-chevron-right"></span>
-		</button>
-	<hr></hr>
 	</div>
 </div>
 <div class="row">
