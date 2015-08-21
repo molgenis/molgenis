@@ -15,7 +15,7 @@
 	};
 
 	molgenis.createAlert = function(alerts, type, container) {
-		if (type !== 'error' && type !== 'warning' && type !== 'success')
+		if (type !== 'error' && type !== 'warning' && type !== 'success' && type !== 'info')
 			type = 'error';
 		if (container === undefined) {
 			container = $('.alerts');
