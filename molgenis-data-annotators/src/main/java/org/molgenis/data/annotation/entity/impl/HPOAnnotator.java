@@ -6,8 +6,8 @@ import static org.molgenis.data.annotation.entity.impl.HPORepository.HPO_TERM_CO
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -105,7 +105,7 @@ public class HPOAnnotator
 		@Override
 		public Collection<AttributeMetaData> getRequiredAttributes()
 		{
-			return Arrays.asList();
+			return Collections.emptyList();
 		}
 
 		@Override
