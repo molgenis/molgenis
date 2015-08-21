@@ -2,13 +2,18 @@ package org.molgenis.data.annotation.cmd;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.vcf.VcfRepository;
@@ -49,7 +54,7 @@ public class CmdLineAnnotator
 
 		Set<String> annotatorNames = configuredFreshAnnotators.keySet();
 
-		if (args.length != 4)
+		if ((args.length < 4) && (args.length != 1))
 		{
 			System.out
 					.println("\n"
@@ -58,8 +63,8 @@ public class CmdLineAnnotator
 							+ "*********************************************\n"
 							+ "\n"
 							+ "Typical usage to annotate a VCF file:\n"
-							+ "\tjava -jar CmdLineAnnotator.jar [Annotator] [Annotation source file] [input VCF] [output VCF].\n"
-							+ "\tExample: java -Xmx4g -jar CmdLineAnnotator.jar gonl GoNL/release5_noContam_noChildren_with_AN_AC_GTC_stripped/ Cardio.vcf Cardio_gonl.vcf\n"
+							+ "\tjava -jar CmdLineAnnotator.jar [Annotator] [Annotation source file] [input VCF] [output VCF] [output attributes (optional, default:all attributes)].\n"
+							+ "\tExample: java -Xmx4g -jar CmdLineAnnotator.jar gonl GoNL/release5_noContam_noChildren_with_AN_AC_GTC_stripped/ Cardio.vcf Cardio_gonl.vcf GoNL_GTC GoNL_AF\n"
 							+ "\n"
 							+ "Help:\n"
 							+ "\tTo get a detailed description and installation instructions for a specific annotator:\n"
@@ -76,6 +81,16 @@ public class CmdLineAnnotator
 		if (!annotatorNames.contains(annotatorName))
 		{
 			System.out.println("Annotator must be one of the following: " + annotatorNames.toString());
+			return;
+		}
+
+		Map<String, RepositoryAnnotator> annotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
+		RepositoryAnnotator annotator = annotators.get(annotatorName);
+		if (annotator == null) throw new Exception("Annotator unknown: " + annotatorName);
+
+		if (args.length == 1)
+		{
+			printInfo(annotator.getInfo());
 			return;
 		}
 
@@ -104,13 +119,12 @@ public class CmdLineAnnotator
 			System.out.println("WARNING: Output VCF file already exists at " + outputVCFFile.getAbsolutePath());
 		}
 
-		// engage!
-		Map<String, RepositoryAnnotator> annotators = applicationContext.getBeansOfType(RepositoryAnnotator.class);
-		RepositoryAnnotator annotator = annotators.get(annotatorName);
-		if (annotator == null) throw new Exception("Annotator unknown: " + annotatorName);
+		List<String> attrNames = args.length > 4 ? new ArrayList<>(Arrays.asList(Arrays.copyOfRange(args, 4,
+				args.length))) : new ArrayList<>();
 
+		// engage!
 		annotator.getCmdLineAnnotatorSettingsConfigurer().addSettings(annotationSourceFile.getAbsolutePath());
-		annotate(annotator, inputVcfFile, outputVCFFile);
+		annotate(annotator, inputVcfFile, outputVCFFile, attrNames);
 	}
 
 	public static void main(String[] args) throws Exception
@@ -124,34 +138,102 @@ public class CmdLineAnnotator
 		ctx.close();
 	}
 
-	public void annotate(RepositoryAnnotator annotator, File inputVcfFile, File outputVCFFile) throws Exception
+	/**
+	 * Annotate VCF file
+	 * 
+	 * 
+	 * @param annotator
+	 * @param inputVcfFile
+	 * @param outputVCFFile
+	 * @param attributesToInclude
+	 *            , the attributes of the annotator to include in the output vcf, if empty outputs all
+	 * @throws Exception
+	 */
+	public void annotate(RepositoryAnnotator annotator, File inputVcfFile, File outputVCFFile,
+			List<String> attributesToInclude) throws Exception
 	{
 		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
 		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
-		VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, annotator.getOutputMetaData(),
-				annotator.getOutputMetaData().get(0).getName());
-		System.out.println("Now starting to process the data.");
 
-		DefaultEntityMetaData emd = (DefaultEntityMetaData) vcfRepo.getEntityMetaData();
-		DefaultAttributeMetaData infoAttribute = (DefaultAttributeMetaData) emd.getAttribute(VcfRepository.INFO);
-		for (AttributeMetaData attribute : annotator.getOutputMetaData())
+		try
 		{
-			for (AttributeMetaData atomicAttribute : attribute.getAttributeParts())
+			if (!attributesToInclude.isEmpty())
 			{
-				infoAttribute.addAttributePart(atomicAttribute);
+				// Check attribute names
+				List<String> outputAttributeNames = VcfUtils.getAtomicAttributesFromList(annotator.getOutputMetaData())
+						.stream().map((attr) -> attr.getName()).collect(Collectors.toList());
+
+				boolean stop = false;
+				for (String attrName : attributesToInclude)
+				{
+					if (!outputAttributeNames.contains(attrName))
+					{
+						System.out.println("Unknown output attribute '" + attrName + "'");
+						stop = true;
+					}
+				}
+				if (stop) return;
+
+				// Include the original attributes
+				vcfRepo.getEntityMetaData().getAtomicAttributes()
+						.forEach((attr) -> attributesToInclude.add(attr.getName()));
+			}
+
+			VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter,
+					annotator.getOutputMetaData(), attributesToInclude);
+			System.out.println("Now starting to process the data.");
+
+			DefaultEntityMetaData emd = (DefaultEntityMetaData) vcfRepo.getEntityMetaData();
+			DefaultAttributeMetaData infoAttribute = (DefaultAttributeMetaData) emd.getAttribute(VcfRepository.INFO);
+			for (AttributeMetaData attribute : annotator.getOutputMetaData())
+			{
+				for (AttributeMetaData atomicAttribute : attribute.getAttributeParts())
+				{
+					infoAttribute.addAttributePart(atomicAttribute);
+				}
+			}
+
+			Iterator<Entity> annotatedRecords = annotator.annotate(vcfRepo);
+			while (annotatedRecords.hasNext())
+			{
+				Entity annotatedRecord = annotatedRecords.next();
+				outputVCFWriter.println(VcfUtils.convertToVCF(annotatedRecord, attributesToInclude));
+			}
+
+			System.out.println("All done!");
+		}
+		finally
+		{
+			outputVCFWriter.close();
+			vcfRepo.close();
+		}
+
+	}
+
+	private void printInfo(AnnotatorInfo info)
+	{
+		System.out.println("*********************************************");
+		System.out.println("  " + info.getCode());
+		System.out.println("*********************************************");
+		System.out.println("Description: " + info.getDescription());
+		System.out.println("Type:        " + info.getType());
+		System.out.println("Status:      " + info.getStatus());
+		System.out.print("Attributes:  ");
+
+		List<AttributeMetaData> attributes = info.getOutputAttributes();
+		if (attributes.isEmpty())
+		{
+			System.out.println();
+		}
+		else
+		{
+			System.out.println(attributes.get(0).getName());
+			for (int i = 1; i < attributes.size(); i++)
+			{
+				System.out.print("             ");
+				System.out.println(attributes.get(i).getName());
 			}
 		}
-
-		Iterator<Entity> annotatedRecords = annotator.annotate(vcfRepo);
-		while (annotatedRecords.hasNext())
-		{
-
-			Entity annotatedRecord = annotatedRecords.next();
-			outputVCFWriter.println(VcfUtils.convertToVCF(annotatedRecord));
-		}
-		outputVCFWriter.close();
-		vcfRepo.close();
-		System.out.println("All done!");
 	}
 
 	private static void configureLogging()
