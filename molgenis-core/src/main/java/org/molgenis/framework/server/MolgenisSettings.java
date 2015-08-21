@@ -2,6 +2,10 @@ package org.molgenis.framework.server;
 
 import java.util.Map;
 
+/**
+ * @deprecated replaced by setting classes that derive from {@link org.molgenis.data.settings.DefaultSettingsEntity}
+ */
+@Deprecated
 public interface MolgenisSettings
 {
 	String getProperty(String key);

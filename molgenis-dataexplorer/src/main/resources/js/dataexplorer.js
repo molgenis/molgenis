@@ -1,6 +1,6 @@
 $.when( $, 
 		window.top.molgenis = window.top.molgenis || {}, 
-		$.get('dataexplorer/settings') 
+		molgenis.getPluginSettings() 
 ).then(
 function($, molgenis, settingsXhr) {	
 	"use strict";
@@ -135,8 +135,7 @@ function($, molgenis, settingsXhr) {
 		
 		if (entityMetaData.description) {
 			var description = $('<span data-placement="bottom"></span>');
-			description.html(abbreviate(entityMetaData.description, 
-					settings['header.abbreviate']||180));
+			description.html(abbreviate(entityMetaData.description, settings['header_abbreviate']));
 			description.attr('data-title', entityMetaData.description);
 			$('#entity-class-description').html(description.tooltip());
 		} else {
@@ -321,8 +320,7 @@ function($, molgenis, settingsXhr) {
 			}
 			createEntityMetaTree(entityMetaData, selectedAttributes);
 			
-			//Show wizard on show of dataexplorer if url param 'wizard=true' is added
-			if (settings['wizard.oninit'] && settings['wizard.oninit'] === 'true') {
+			if (settings['launch_wizard'] === true) {
 				self.filter.wizard.openFilterWizardModal(entityMetaData, attributeFilters);
 			}
 		});

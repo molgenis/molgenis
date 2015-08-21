@@ -30,7 +30,7 @@ public interface DataService extends Iterable<Repository>
 	Set<RepositoryCapability> getCapabilities(String repositoryName);
 
 	/**
-	 * check ia a repository for this entity already exists
+	 * check if a repository for this entity already exists
 	 * 
 	 * @param entityName
 	 */

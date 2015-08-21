@@ -38,6 +38,12 @@ public class CmdLineAnnotatorIT
 				Arrays.asList("HPOTERMS"));
 	}
 
+	@Test
+	public void fitcon() throws Exception
+	{
+		testAnnotator("fitcon", "src/test/resources/fitcon/fitcon_test_set.tsv.gz", "test.vcf", "test-out-expected.vcf");
+	}
+
 	private void testAnnotator(String name, String resourceLocation, String inputFileName, String expectedOutputFileName)
 			throws Exception
 	{
