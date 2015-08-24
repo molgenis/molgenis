@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import au.com.bytecode.opencsv.CSVParser;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 
@@ -45,6 +46,12 @@ public class TabixRepository extends AbstractRepository
 	{
 		this.entityMetaData = entityMetaData;
 		this.reader = new TabixReader(file.getAbsolutePath());
+	}
+
+	TabixRepository(TabixReader reader, EntityMetaData entityMetaData)
+	{
+		this.reader = Preconditions.checkNotNull(reader);
+		this.entityMetaData = Preconditions.checkNotNull(entityMetaData);
 	}
 
 	public static CSVParser getCsvParser()
@@ -92,7 +99,11 @@ public class TabixRepository extends AbstractRepository
 			String line = iterator.next();
 			while (line != null)
 			{
-				builder.add(toEntity(line));
+				Entity entity = toEntity(line);
+				if (entity.getLong(VcfRepository.POS) == pos)
+				{
+					builder.add(entity);
+				}
 				line = iterator.next();
 			}
 		}
