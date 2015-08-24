@@ -1,34 +1,39 @@
 package org.molgenis.ui;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.molgenis.ui.MolgenisPluginAttributes.KEY_AUTHENTICATED;
 import static org.molgenis.ui.MolgenisPluginAttributes.KEY_MOLGENIS_UI;
-import static org.molgenis.ui.MolgenisPluginAttributes.KEY_PLUGINID_WITH_QUERY_STRING;
 import static org.molgenis.ui.MolgenisPluginAttributes.KEY_PLUGIN_ID;
+import static org.molgenis.ui.MolgenisPluginAttributes.KEY_PLUGIN_ID_WITH_QUERY_STRING;
+import static org.molgenis.ui.MolgenisPluginAttributes.KEY_PLUGIN_SETTINGS;
+import static org.molgenis.ui.MolgenisPluginAttributes.KEY_PLUGIN_SETTINGS_CAN_WRITE;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.data.Entity;
+import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
+/**
+ * Interceptor that adds default model objects to all plugin requests that return a view.
+ */
 public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 {
 	private final MolgenisUi molgenisUi;
+	private final MolgenisPermissionService permissionService;
 
-	public static final String KEY_FOOTER = "molgenis.footer";
-	public static final String DEFAULT_VAL_FOOTER = "null";
-	public static final String MOLGENIS_CSS_THEME = "molgenis.css.theme";
-	public static final String CSS_VARIABLE = "molgeniscsstheme";
-	public static final String APP_TRACKING_CODE_VARIABLE = "app_tracking_code";
-
-	private MolgenisSettings molgenisSettings;
+	@Autowired
+	public MolgenisPluginInterceptor(MolgenisUi molgenisUi, MolgenisPermissionService permissionService)
+	{
+		this.molgenisUi = checkNotNull(molgenisUi);
+		this.permissionService = checkNotNull(permissionService);
+	}
 
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception
@@ -43,14 +48,6 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 		}
 
 		return true;
-	}
-
-	@Autowired
-	public MolgenisPluginInterceptor(MolgenisUi molgenisUi, MolgenisSettings molgenisSettings)
-	{
-		if (molgenisUi == null) throw new IllegalArgumentException("molgenis ui is null");
-		this.molgenisUi = molgenisUi;
-		this.molgenisSettings = molgenisSettings;
 	}
 
 	@Override
@@ -68,22 +65,24 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 				modelAndView.addObject(KEY_PLUGIN_ID, pluginId);
 			}
 
-			PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-			if (molgenisSettings.getProperty(MOLGENIS_CSS_THEME) != null)
+			Entity pluginSettings = molgenisPlugin.getPluginSettings();
+			Boolean pluginSettingsCanWrite;
+			if (pluginSettings != null)
 			{
-				Resource resource = resolver.getResource("/css/themes/"
-						+ molgenisSettings.getProperty(MOLGENIS_CSS_THEME));
-				if (resource.exists())
-				{
-					modelAndView.addObject(CSS_VARIABLE, molgenisSettings.getProperty(MOLGENIS_CSS_THEME));
-				}
+				String pluginSettingsEntityName = pluginSettings.getEntityMetaData().getName();
+				pluginSettingsCanWrite = permissionService.hasPermissionOnEntity(pluginSettingsEntityName,
+						Permission.WRITE);
+			}
+			else
+			{
+				pluginSettingsCanWrite = null;
 			}
 
-			modelAndView.addObject(APP_TRACKING_CODE_VARIABLE, new AppTrackingCodeImpl(molgenisSettings));
-			modelAndView.addObject("footerText", molgenisSettings.getProperty(KEY_FOOTER));
+			modelAndView.addObject(KEY_PLUGIN_SETTINGS, pluginSettings);
+			modelAndView.addObject(KEY_PLUGIN_SETTINGS_CAN_WRITE, pluginSettingsCanWrite);
 			modelAndView.addObject(KEY_MOLGENIS_UI, molgenisUi);
 			modelAndView.addObject(KEY_AUTHENTICATED, SecurityUtils.currentUserIsAuthenticated());
-			modelAndView.addObject(KEY_PLUGINID_WITH_QUERY_STRING, getPluginIdWithQueryString(request, pluginId));
+			modelAndView.addObject(KEY_PLUGIN_ID_WITH_QUERY_STRING, getPluginIdWithQueryString(request, pluginId));
 		}
 	}
 
@@ -96,8 +95,8 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 		Object bean = ((HandlerMethod) handler).getBean();
 		if (!(bean instanceof MolgenisPluginController))
 		{
-			throw new RuntimeException("controller does not implement "
-					+ MolgenisPluginController.class.getSimpleName());
+			throw new RuntimeException(
+					"controller does not implement " + MolgenisPluginController.class.getSimpleName());
 		}
 		return (MolgenisPluginController) bean;
 	}
@@ -109,8 +108,8 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 			String queryString = request.getQueryString();
 			StringBuilder pluginIdAndQueryStringUrlPart = new StringBuilder();
 			pluginIdAndQueryStringUrlPart.append(pluginId);
-			if (queryString != null && !queryString.isEmpty()) pluginIdAndQueryStringUrlPart.append('?').append(
-					queryString);
+			if (queryString != null && !queryString.isEmpty())
+				pluginIdAndQueryStringUrlPart.append('?').append(queryString);
 			return pluginIdAndQueryStringUrlPart.toString();
 		}
 		else

@@ -35,9 +35,9 @@ public class EntityMetaDataMetaData extends DefaultEntityMetaData
 		addAttribute(ID_ATTRIBUTE);
 		addAttribute(LABEL_ATTRIBUTE);
 		addAttribute(ABSTRACT).setDataType(BOOL);
-		addAttribute(LABEL);
+		addAttribute(LABEL).setLabelAttribute(true).setLookupAttribute(true);
 		addAttribute(EXTENDS).setDataType(XREF).setRefEntity(this);
-		addAttribute(DESCRIPTION).setDataType(TEXT);
+		addAttribute(DESCRIPTION).setDataType(TEXT).setLookupAttribute(true);
 		addAttribute(TAGS).setDataType(MREF).setRefEntity(TagMetaData.INSTANCE);
 		addAttribute(ATTRIBUTES).setDataType(MREF).setRefEntity(AttributeMetaDataMetaData.INSTANCE);
 	}

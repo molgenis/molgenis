@@ -28,6 +28,7 @@
         	<plugin id="thememanager" name="Theme Manager" url="thememanager"/>
         	<plugin id="indexmanager" name="Index manager" url="indexmanager"/>
         	<plugin id="logmanager" name="Log manager" url="logmanager"/>
+        	<plugin id="settingsmanager" name="Settings" url="settingsmanager"/>
 		</menu>
 		<menu label="About" name="background">
             <plugin id="feedback" name="Feedback" url="feedback"/>
