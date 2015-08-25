@@ -429,7 +429,8 @@ public class MappingServiceController extends MolgenisPluginController
 						}
 					}
 
-					return new FirstAttributeMappingInfo(mappingProjectId, target, source, attributeMetaData.getName());
+					return FirstAttributeMappingInfo.create(mappingProjectId, target, source,
+							attributeMetaData.getName());
 				}
 			}
 		}

@@ -1,49 +1,22 @@
 package org.molgenis.data.mapper.controller;
 
-public class FirstAttributeMappingInfo
+import org.molgenis.gson.AutoGson;
+
+import com.google.auto.value.AutoValue;
+
+@AutoValue
+@AutoGson(autoValueClass = AutoValue_FirstAttributeMappingInfo.class)
+public abstract class FirstAttributeMappingInfo
 {
-	/**
-	 * @return the mappingProjectId
-	 */
-	public String getMappingProjectId()
-	{
-		return mappingProjectId;
-	}
+	public abstract String getMappingProjectId();
 
-	/**
-	 * @return the target
-	 */
-	public String getTarget()
-	{
-		return target;
-	}
+	public abstract String getTarget();
 
-	/**
-	 * @return the source
-	 */
-	public String getSource()
-	{
-		return source;
-	}
+	public abstract String getSource();
 
-	/**
-	 * @return the targetAttribute
-	 */
-	public String getTargetAttribute()
-	{
-		return targetAttribute;
-	}
+	public abstract String getTargetAttribute();
 
-	private String mappingProjectId;
-	private String target;
-	private String source;
-	private String targetAttribute;
-
-	public FirstAttributeMappingInfo(String mappingProjectId, String target, String source, String targetAttribute)
-	{
-		this.mappingProjectId = mappingProjectId;
-		this.target = target;
-		this.source = source;
-		this.targetAttribute = targetAttribute;
+	public static FirstAttributeMappingInfo create(String mappingProjectId, String target, String source, String targetAttribute){
+		return new AutoValue_FirstAttributeMappingInfo(mappingProjectId, target, source, targetAttribute);
 	}
 }
