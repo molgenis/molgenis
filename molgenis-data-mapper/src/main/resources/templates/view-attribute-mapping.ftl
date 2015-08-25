@@ -39,6 +39,10 @@
 			<span class="glyphicon glyphicon-floppy-save"></span>
 			Save and go back
 		</button>
+		<button id="save-discuss-mapping-btn" type="btn" class="btn btn-danger btn-xs">
+			<span class="glyphicon glyphicon-floppy-save"></span>
+			Save to discuss and go back
+		</button>
 	<hr></hr>
 	</div>
 </div>

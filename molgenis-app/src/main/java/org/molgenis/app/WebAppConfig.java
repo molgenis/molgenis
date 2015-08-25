@@ -39,6 +39,7 @@ import org.molgenis.migrate.version.v1_9.RuntimePropertyToStaticContentMigrator;
 import org.molgenis.migrate.version.v1_9.Step14UpdateAttributeMapping;
 import org.molgenis.migrate.version.v1_9.Step15AddDefaultValue;
 import org.molgenis.migrate.version.v1_9.Step16RuntimePropertyToSettings;
+import org.molgenis.migrate.version.v1_9.Step17AddAlgorithmStateDiscuss;
 import org.molgenis.system.core.FreemarkerTemplateRepository;
 import org.molgenis.ui.MolgenisWebAppConfig;
 import org.molgenis.ui.menumanager.MenuManagerService;
@@ -144,6 +145,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(new Step16RuntimePropertyToSettings(runtimePropertyToAppSettingsMigrator,
 				runtimePropertyToGenomicDataSettingsMigrator, runtimePropertyToDataExplorerSettingsMigrator,
 				runtimePropertyToStaticContentMigrator));
+		upgradeService.addUpgrade(new Step17AddAlgorithmStateDiscuss(dataSource));
 	}
 
 	@Override
