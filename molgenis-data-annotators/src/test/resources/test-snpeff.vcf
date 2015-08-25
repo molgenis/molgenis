@@ -1,0 +1,30 @@
+##fileformat=VCFv4.1
+##reference=1000GenomesRelease3
+##contig=<ID=1,length=62435964,assembly=B36,md5=f126cdf8a6e0c7f379d618ff66beb2da,species="Homo sapiens",taxonomy=x>
+##contig=<ID=2>
+##contig=<ID=4>
+##contig=<ID=15>
+##contig=<ID=3>
+##contig=<ID=21>
+##contig=<ID=X>
+##INFO=<ID=AC,Number=1,Type=Integer,Description="aa">
+##INFO=<ID=AF,Number=1,Type=Float,Description="aa">
+##INFO=<ID=AN,Number=1,Type=Integer,Description="aa">
+##INFO=<ID=DB,Number=0,Type=Flag,Description="DB flag test">
+##INFO=<ID=DP,Number=1,Type=Integer,Description="aa">
+##INFO=<ID=FS,Number=1,Type=Float,Description="aa">
+##INFO=<ID=MLEAC,Number=1,Type=Float,Description="aa">
+##INFO=<ID=MLEAF,Number=1,Type=Float,Description="aa">
+##INFO=<ID=MQ,Number=1,Type=Float,Description="aa">
+##INFO=<ID=MQ0,Number=1,Type=Float,Description="aa">
+##INFO=<ID=QD,Number=1,Type=Float,Description="aa">
+##INFO=<ID=SOR,Number=1,Type=Float,Description="aa">
+##INFO=<ID=DESCR,Number=1,Type=String,Description="Description of this variant">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=AD,Number=.,Type=Integer,Description="aa">
+##FORMAT=<ID=.,Number=.,Type=String,Description="No format data!">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="aa">
+##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="aa">
+##FORMAT=<ID=PL,Number=.,Type=Integer,Description="aa">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	NA00001	NA00002
+1	13380	.	C	G	85	PASS	AC=4;AF=1.00;AN=4;DB;DP=1;FS=0.000;MLEAC=4;MLEAF=1.00;MQ=23.00;MQ0=0;QD=25.63;SOR=1.609	GT:AD:DP:GQ:PL	1/1:.:.:3:33,3,0	1/1:0,1:1:6:78,6,0
