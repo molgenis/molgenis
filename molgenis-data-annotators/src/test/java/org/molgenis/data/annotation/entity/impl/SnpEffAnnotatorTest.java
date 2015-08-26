@@ -1,7 +1,6 @@
 package org.molgenis.data.annotation.entity.impl;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
@@ -293,23 +292,16 @@ public class SnpEffAnnotatorTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		public JarRunner jarRunner()
+		public JarRunner jarRunner() throws IOException, InterruptedException
 		{
 			JarRunner jarRunner = mock(JarRunner.class);
-			try
-			{
-				List<String> params = Arrays.asList("-Xmx2g", null, "hg19", "-noStats", "-noLog", "-lof", "-canon",
-						"-ud", "0", "-spliceSiteSize", "5");
-				when(jarRunner.runJar(SnpEffAnnotator.NAME, params, ResourceUtils.getFile("test-edgecases.vcf")))
-						.thenReturn(ResourceUtils.getFile("snpEffOutputCount.vcf"));
-				when(jarRunner.runJar(SnpEffAnnotator.NAME, params, ResourceUtils.getFile("test-snpeff.vcf")))
-						.thenReturn(ResourceUtils.getFile("snpEffOutput.vcf"));
+			List<String> params = Arrays.asList("-Xmx2g", null, "hg19", "-noStats", "-noLog", "-lof", "-canon", "-ud",
+					"0", "-spliceSiteSize", "5");
+			when(jarRunner.runJar(SnpEffAnnotator.NAME, params, ResourceUtils.getFile("test-edgecases.vcf")))
+					.thenReturn(ResourceUtils.getFile("snpEffOutputCount.vcf"));
+			when(jarRunner.runJar(SnpEffAnnotator.NAME, params, ResourceUtils.getFile("test-snpeff.vcf"))).thenReturn(
+					ResourceUtils.getFile("snpEffOutput.vcf"));
 
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-			}
 			return jarRunner;
 		}
 	}
