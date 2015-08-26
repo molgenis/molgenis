@@ -41,6 +41,8 @@ public class SnpEffAnnotatorTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
 	private SnpEffAnnotator.SnpEffRepositoryAnnotator snpEffRepositoryAnnotator;
+	@Autowired
+	private JarRunner jarRunner;
 	private final ArrayList<Entity> entities = new ArrayList<>();;
 	private DefaultEntityMetaData metaDataCanAnnotate;
 
@@ -206,6 +208,18 @@ public class SnpEffAnnotatorTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void annotateCountTest()
 	{
+		try
+		{
+			List<String> params = Arrays.asList("-Xmx2g", null, "hg19", "-noStats", "-noLog", "-lof", "-canon",
+					"-ud", "0", "-spliceSiteSize", "5");
+			when(jarRunner.runJar(SnpEffAnnotator.NAME, params, ResourceUtils.getFile("test-edgecases.vcf")))
+					.thenReturn(ResourceUtils.getFile("snpEffOutputCount.vcf"));
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+
 		Iterator<Entity> results = snpEffRepositoryAnnotator.annotateRepository(entities,
 				ResourceUtils.getFile("test-edgecases.vcf"));
 		int size = Iterators.size(results);
@@ -215,6 +229,18 @@ public class SnpEffAnnotatorTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void annotateTest()
 	{
+
+		try
+		{
+			List<String> params = Arrays.asList("-Xmx2g", null, "hg19", "-noStats", "-noLog", "-lof", "-canon",
+					"-ud", "0", "-spliceSiteSize", "5");
+			when(jarRunner.runJar(SnpEffAnnotator.NAME, params, ResourceUtils.getFile("test-snpeff.vcf")))
+					.thenReturn(ResourceUtils.getFile("snpEffOutput.vcf"));
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 		Iterator<Entity> results = snpEffRepositoryAnnotator.annotateRepository(
 				Collections.singletonList(entities.get(0)), ResourceUtils.getFile("test-snpeff.vcf"));
 
@@ -295,22 +321,7 @@ public class SnpEffAnnotatorTest extends AbstractTestNGSpringContextTests
 		@Bean
 		public JarRunner jarRunner()
 		{
-			JarRunner jarRunner = mock(JarRunner.class);
-			try
-			{
-				List<String> params = Arrays.asList("-Xmx2g", null, "hg19", "-noStats", "-noLog", "-lof", "-canon",
-						"-ud", "0", "-spliceSiteSize", "5");
-				when(jarRunner.runJar(SnpEffAnnotator.NAME, params, ResourceUtils.getFile("test-edgecases.vcf")))
-						.thenReturn(ResourceUtils.getFile("snpEffOutputCount.vcf"));
-				when(jarRunner.runJar(SnpEffAnnotator.NAME, params, ResourceUtils.getFile("test-snpeff.vcf")))
-						.thenReturn(ResourceUtils.getFile("snpEffOutput.vcf"));
-
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-			}
-			return jarRunner;
+			return mock(JarRunner.class);
 		}
 	}
 }
