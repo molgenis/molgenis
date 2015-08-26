@@ -64,8 +64,8 @@ public class HPOAnnotator
 	public RepositoryAnnotator hpo()
 	{
 		List<AttributeMetaData> attributes = new ArrayList<>();
-		attributes.add(new DefaultAttributeMetaData(HPO_IDS));
-		attributes.add(new DefaultAttributeMetaData(HPO_TERMS));
+		attributes.add(new DefaultAttributeMetaData(HPO_IDS).setDescription("HPO identifiers"));
+		attributes.add(new DefaultAttributeMetaData(HPO_TERMS).setDescription("HPO terms"));
 
 		AnnotatorInfo info = AnnotatorInfo
 				.create(Status.READY,
