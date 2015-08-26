@@ -9,9 +9,11 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.measure.quantity.Quantity;
+import javax.measure.unit.Unit;
+
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Repository;
 import org.molgenis.data.mapper.service.UnitResolver;
 import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.model.OntologyTerm;
@@ -19,9 +21,7 @@ import org.molgenis.ontology.core.service.OntologyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-@Service
 public class UnitResolverImpl implements UnitResolver
 {
 	private static final Logger LOG = LoggerFactory.getLogger(UnitResolverImpl.class);
@@ -38,47 +38,84 @@ public class UnitResolverImpl implements UnitResolver
 	}
 
 	@Override
-	public OntologyTerm resolveUnit(AttributeMetaData attr, EntityMetaData entityMeta, Repository repo)
+	public Unit<? extends Quantity> resolveUnit(AttributeMetaData attr, EntityMetaData entityMeta)
 	{
+		// extract text between parenthesis from attribute
+		Set<String> terms = new HashSet<String>();
 		String label = attr.getLabel();
-		String description = attr.getDescription();
-
-		OntologyTerm unitOntologyTerm;
-		if (label != null || description != null)
+		if (label != null)
 		{
-			Ontology unitOntology = ontologyService.getOntology(UNIT_ONTOLOGY_IRI);
-			if (unitOntology != null)
-			{
-				Set<String> terms = new HashSet<String>();
-				if (label != null)
-				{
-					extractCandidateUnitTerms(label, terms);
-				}
-				if (description != null)
-				{
-					extractCandidateUnitTerms(description, terms);
-				}
+			extractCandidateUnitTerms(label, terms);
+		}
+		String description = attr.getDescription();
+		if (description != null)
+		{
+			extractCandidateUnitTerms(description, terms);
+		}
 
-				if (!terms.isEmpty())
+		// Option 1: Check if a term matches a unit
+		Unit<? extends Quantity> unit = null;
+		if (!terms.isEmpty())
+		{
+			for (String term : terms)
+			{
+				try
 				{
-					List<String> ontologyIds = Arrays.asList(unitOntology.getId());
-					List<OntologyTerm> ontologyTerms = ontologyService.findOntologyTerms(ontologyIds, terms,
-							Integer.MAX_VALUE);
-					if (ontologyTerms != null && !ontologyTerms.isEmpty())
+					unit = Unit.valueOf(term);
+					break;
+				}
+				catch (IllegalArgumentException e)
+				{
+					// noop
+				}
+			}
+
+			if (unit == null)
+			{
+				// Option 2: Search unit ontology for a match
+				OntologyTerm unitOntologyTerm = resolveUnitOntologyTerm(terms);
+				if (unitOntologyTerm != null)
+				{
+					// try label + synonym labels until hit
+					for (String synonymLabel : unitOntologyTerm.getSynonyms())
 					{
-						if (ontologyTerms.size() == 1)
+						try
 						{
-							unitOntologyTerm = ontologyTerms.get(0);
+							unit = Unit.valueOf(synonymLabel);
+							break;
 						}
-						else
+						catch (IllegalArgumentException e)
 						{
-							// multiple unit ontology terms detected, pick first
-							unitOntologyTerm = ontologyTerms.get(0);
+							// noop
 						}
+					}
+				}
+			}
+		}
+		return unit;
+	}
+
+	private OntologyTerm resolveUnitOntologyTerm(Set<String> terms)
+	{
+		OntologyTerm unitOntologyTerm;
+		Ontology unitOntology = ontologyService.getOntology(UNIT_ONTOLOGY_IRI);
+		if (unitOntology != null)
+		{
+			if (!terms.isEmpty())
+			{
+				List<String> ontologyIds = Arrays.asList(unitOntology.getId());
+				List<OntologyTerm> ontologyTerms = ontologyService.findOntologyTerms(ontologyIds, terms,
+						Integer.MAX_VALUE);
+				if (ontologyTerms != null && !ontologyTerms.isEmpty())
+				{
+					if (ontologyTerms.size() == 1)
+					{
+						unitOntologyTerm = ontologyTerms.get(0);
 					}
 					else
 					{
-						unitOntologyTerm = null;
+						// multiple unit ontology terms detected, pick first
+						unitOntologyTerm = ontologyTerms.get(0);
 					}
 				}
 				else
@@ -88,12 +125,12 @@ public class UnitResolverImpl implements UnitResolver
 			}
 			else
 			{
-				LOG.warn("Unit resolver is missing required unit ontology [" + UNIT_ONTOLOGY_IRI + "]");
 				unitOntologyTerm = null;
 			}
 		}
 		else
 		{
+			LOG.warn("Unit resolver is missing required unit ontology [" + UNIT_ONTOLOGY_IRI + "]");
 			unitOntologyTerm = null;
 		}
 		return unitOntologyTerm;

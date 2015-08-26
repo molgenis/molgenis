@@ -4,9 +4,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.mapper.service.impl.UnitResolverImpl.UNIT_ONTOLOGY_IRI;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 import java.util.Arrays;
 import java.util.List;
+
+import javax.measure.quantity.Quantity;
+import javax.measure.unit.Unit;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
@@ -32,19 +36,53 @@ public class UnitResolverImplTest extends AbstractTestNGSpringContextTests
 	private static OntologyTerm CM_ONTOLOGY_TERM;
 
 	@Test
-	public void resolveUnitLabelWithUnitNoDescription()
+	public void resolveUnitLabelNoUnit()
 	{
-		AttributeMetaData attr = new DefaultAttributeMetaData("attr").setLabel("weight (kg)").setDescription(null);
-		OntologyTerm unitOntologyTerm = unitResolverImpl.resolveUnit(attr, null, null);
-		assertEquals(unitOntologyTerm, KG_ONTOLOGY_TERM);
+		AttributeMetaData attr = new DefaultAttributeMetaData("attr").setLabel("weight").setDescription(null);
+		Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
+		assertNull(unit);
 	}
 
 	@Test
-	public void resolveUnitLabelNoUnitAndDescriptionWithUnit()
+	public void resolveUnitLabelNoUnitDescriptionNoUnit()
+	{
+		AttributeMetaData attr = new DefaultAttributeMetaData("attr").setLabel("weight").setDescription("weight");
+		Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
+		assertNull(unit);
+	}
+
+	@Test
+	public void resolveUnitLabelWithUnit_directUnitMatch()
+	{
+		AttributeMetaData attr = new DefaultAttributeMetaData("attr").setLabel("weight (kg)").setDescription(null);
+		Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
+		assertEquals(unit, Unit.valueOf("kg"));
+	}
+
+	@Test
+	public void resolveUnitLabelNoUnitDescriptionWithUnit_directUnitMatch()
 	{
 		AttributeMetaData attr = new DefaultAttributeMetaData("attr").setLabel("label").setDescription("height (cm)");
-		OntologyTerm unitOntologyTerm = unitResolverImpl.resolveUnit(attr, null, null);
-		assertEquals(unitOntologyTerm, CM_ONTOLOGY_TERM);
+		Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
+		assertEquals(unit, Unit.valueOf("cm"));
+	}
+
+	@Test
+	public void resolveUnitLabelWithUnit_unitOntologyMatch()
+	{
+		AttributeMetaData attr = new DefaultAttributeMetaData("attr").setLabel("weight (kilogram)")
+				.setDescription(null);
+		Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
+		assertEquals(unit, Unit.valueOf("kg"));
+	}
+
+	@Test
+	public void resolveUnitLabelNoUnitDescriptionWithUnit_unitOntologyMatch()
+	{
+		AttributeMetaData attr = new DefaultAttributeMetaData("attr").setLabel("label")
+				.setDescription("height (centimeter)");
+		Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
+		assertEquals(unit, Unit.valueOf("cm"));
 	}
 
 	@Configuration
@@ -60,13 +98,13 @@ public class UnitResolverImplTest extends AbstractTestNGSpringContextTests
 		public OntologyService ontologyService()
 		{
 			String ontologyId = "id";
-			String kgTerm = "kg";
-			String cmTerm = "cm";
+			String kgTerm = "kilogram";
+			String cmTerm = "centimeter";
 			List<String> ontologyIds = Arrays.asList(ontologyId);
 
 			Ontology ontology = Ontology.create(ontologyId, UNIT_ONTOLOGY_IRI, "unit ontology");
-			KG_ONTOLOGY_TERM = OntologyTerm.create(UNIT_ONTOLOGY_IRI, kgTerm);
-			CM_ONTOLOGY_TERM = OntologyTerm.create(UNIT_ONTOLOGY_IRI, cmTerm);
+			KG_ONTOLOGY_TERM = OntologyTerm.create(UNIT_ONTOLOGY_IRI, kgTerm, Arrays.asList(kgTerm, "kg"));
+			CM_ONTOLOGY_TERM = OntologyTerm.create(UNIT_ONTOLOGY_IRI, cmTerm, Arrays.asList(cmTerm, "cm"));
 
 			OntologyService ontologyService = mock(OntologyService.class);
 			when(ontologyService.getOntology(UNIT_ONTOLOGY_IRI)).thenReturn(ontology);
