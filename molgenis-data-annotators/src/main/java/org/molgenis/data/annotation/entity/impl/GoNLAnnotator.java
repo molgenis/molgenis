@@ -87,7 +87,11 @@ public class GoNLAnnotator
 		LocusQueryCreator locusQueryCreator = new LocusQueryCreator();
 
 		// TODO: properly test multiAllelicFresultFilter
-		GoNLMultiAllelicResultFilter goNLMultiAllelicResultFilter = new GoNLMultiAllelicResultFilter();
+		List<AttributeMetaData> resourceAttributesList= new ArrayList<>();
+		resourceAttributesList.add(new DefaultAttributeMetaData("INFO_AC"));
+		resourceAttributesList.add(new DefaultAttributeMetaData("INFO_AN"));
+
+		GoNLMultiAllelicResultFilter goNLMultiAllelicResultFilter = new GoNLMultiAllelicResultFilter(resourceAttributesList);
 
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(GONL_MULTI_FILE_RESOURCE, thousandGenomeInfo,
 				locusQueryCreator, goNLMultiAllelicResultFilter, dataService, resources,

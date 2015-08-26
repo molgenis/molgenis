@@ -1,22 +1,8 @@
 package org.molgenis.data.annotation.entity.impl;
 
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
-
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.UncheckedIOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.regex.Pattern;
-
+import com.google.common.collect.Iterators;
 import org.apache.commons.io.IOUtils;
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
@@ -27,7 +13,9 @@ import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
+import org.molgenis.data.annotation.utils.JarRunner;
 import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.framework.server.MolgenisSettings;
@@ -37,24 +25,41 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.google.common.collect.Iterators;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.UncheckedIOException;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.regex.Pattern;
+
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
 
 /**
  * SnpEff annotator
- * 
+ * <p>
  * SnpEff is a genetic variant annotation and effect prediction toolbox. It annotates and predicts the effects of
  * variants on genes (such as amino acid changes). see http://snpeff.sourceforge.net/
- *
+ * <p>
  * For this annotator to work SnpEff.jar must be present on the filesystem at the location defined by the
  * RuntimeProperty 'snpeff_jar_location'
- *
- *
+ * <p>
+ * <p>
  * new ANN field replacing EFF:
- * 
+ * <p>
  * ANN=A|missense_variant|MODERATE|NEXN|NEXN|transcript|NM_144573.3|Coding|8/13|c.733G>A|p.Gly245Arg|1030/3389|733/2028|
  * 245/675||
- * 
- * 
+ * <p>
+ * <p>
  * -lof doesnt seem to work? would be great... http://snpeff.sourceforge.net/snpEff_lof_nmd.pdfs
  */
 @Configuration
@@ -90,15 +95,18 @@ public class SnpEffAnnotator
 	@Autowired
 	private MolgenisSettings molgenisSettings;
 
+	@Autowired
+	private JarRunner jarRunner;
+
 	@Bean
 	public RepositoryAnnotator snpEff()
 	{
-		return new SnpEffRepositoryAnnotator(molgenisSettings);
+		return new SnpEffRepositoryAnnotator(molgenisSettings, jarRunner);
 	}
 
 	/**
 	 * Helper function to get gene name from entity
-	 * 
+	 *
 	 * @param entity
 	 * @return
 	 */
@@ -111,7 +119,7 @@ public class SnpEffAnnotator
 		}
 		if (geneSymbol == null)
 		{
-			String annField = entity.getString(VcfRepository.getInfoPrefix() + "ANN");
+			String annField = entity.getString("ANN");
 			if (annField != null)
 			{
 				// if the entity is annotated with the snpEff annotator the split is already done
@@ -124,7 +132,6 @@ public class SnpEffAnnotator
 					if (split[3].length() != 0)
 					{
 						geneSymbol = split[3];
-						// LOG.info("Gene symbol '" + geneSymbol + "' found for " + entity.toString());
 					}
 					else
 					{
@@ -143,37 +150,53 @@ public class SnpEffAnnotator
 		private static final String CHARSET = "UTF-8";
 		private String snpEffPath;
 		private final MolgenisSettings molgenisSettings;
+		private AnnotatorInfo info = AnnotatorInfo
+				.create(Status.READY,
+						Type.EFFECT_PREDICTION,
+						NAME,
+						"Genetic variant annotation and effect prediction toolbox. It annotates and predicts the effects of variants on genes (such as amino acid changes). ",
+						getOutputMetaData());
+		private JarRunner jarRunner;
 
-		public SnpEffRepositoryAnnotator(MolgenisSettings molgenisSettings)
+		public SnpEffRepositoryAnnotator(MolgenisSettings molgenisSettings, JarRunner jarRunner)
 		{
 			this.molgenisSettings = molgenisSettings;
+			this.jarRunner = jarRunner;
 		}
 
 		@Override
 		public AnnotatorInfo getInfo()
 		{
-			return AnnotatorInfo
-					.create(Status.READY,
-							Type.EFFECT_PREDICTION,
-							NAME,
-							"Genetic variant annotation and effect prediction toolbox. It annotates and predicts the effects of variants on genes (such as amino acid changes). ",
-							getOutputMetaData());
-
+			return info;
 		}
 
 		@Override
 		public Iterator<Entity> annotate(Iterable<Entity> source)
 		{
-			Iterator<Entity> it = source.iterator();
-			if (!it.hasNext()) return Iterators.emptyIterator();
-
+			File inputVcf = null;
 			try
 			{
-				File inputVcf = getInputVcfTempFile(source);
-				File outputVcf = File.createTempFile(NAME, ".vcf");
+				inputVcf = getInputVcfTempFile(source);
+			}
+			catch (IOException e)
+			{
+				throw new MolgenisDataException("Exception running SnpEff", e);
 
-				runSnpEff(inputVcf, outputVcf);
+			}
+			return annotateRepository(source, inputVcf);
+		}
 
+		public Iterator<Entity> annotateRepository(Iterable<Entity> source, final File inputVcf)
+		{
+			try
+			{
+
+				Iterator<Entity> it = source.iterator();
+				if (!it.hasNext()) return Iterators.emptyIterator();
+
+				List<String> params = Arrays.asList("-Xmx2g", getSnpEffPath(), "hg19", "-noStats", "-noLog", "-lof",
+						"-canon", "-ud", "0", "-spliceSiteSize", "5");
+				File outputVcf = jarRunner.runJar(NAME, params, inputVcf);
 				// When vcf reader/writer can handle samples and SnpEff annotations just return a VcfRepository (with
 				// inputVcf as input)
 				// iterator here
@@ -201,7 +224,9 @@ public class SnpEffAnnotator
 					public Entity next()
 					{
 						Entity entity = it.next();
-						Entity copy = new MapEntity(entity, entity.getEntityMetaData());
+						DefaultEntityMetaData meta = new DefaultEntityMetaData(entity.getEntityMetaData());
+						info.getOutputAttributes().forEach(meta::addAttributeMetaData);
+						Entity copy = new MapEntity(entity, meta);
 						try
 						{
 							String line = readLine(reader);
@@ -225,13 +250,12 @@ public class SnpEffAnnotator
 			{
 				throw new MolgenisDataException("Exception running SnpEff", e);
 			}
-
 		}
 
 		private String readLine(BufferedReader reader) throws IOException
 		{
 			String line = reader.readLine();
-			while ((line != null) && line.startsWith("##"))
+			while ((line != null) && line.startsWith("#"))
 			{
 				line = reader.readLine();
 			}
@@ -400,7 +424,16 @@ public class SnpEffAnnotator
 			nmd.setDescription("Nonsense mediate decay assessment. Some mutations may cause mRNA to be degraded thus not translated into a protein. NMD analysis marks mutations that are estimated to trigger nonsense mediated decay.(source:http://snpeff.sourceforge.net)");
 			attributes.add(nmd);
 
-			return attributes;
+			DefaultAttributeMetaData compoundAttributeMetaData = new DefaultAttributeMetaData(this.getFullName(),
+					MolgenisFieldTypes.FieldTypeEnum.COMPOUND);
+			compoundAttributeMetaData.setLabel(this.getSimpleName());
+
+			for (AttributeMetaData attributeMetaData : attributes)
+			{
+				compoundAttributeMetaData.addAttributePart(attributeMetaData);
+			}
+
+			return Collections.singletonList(compoundAttributeMetaData);
 		}
 
 		@Override
@@ -425,19 +458,6 @@ public class SnpEffAnnotator
 		protected boolean annotationDataExists()
 		{
 			return getSnpEffPath() != null;
-		}
-
-		private void runSnpEff(File tempInput, File tempOutput) throws IOException, InterruptedException
-		{
-			ProcessBuilder pb = new ProcessBuilder("java", "-jar", "-Xmx2g", getSnpEffPath(), "hg19", "-noStats",
-					"-noLog", "-lof", "-canon", "-ud", "0", "-spliceSiteSize", "5", tempInput.getAbsolutePath());
-			pb.redirectOutput(tempOutput);
-
-			// Error logging to standard logging.
-			pb.redirectError(ProcessBuilder.Redirect.INHERIT);
-
-			Process p = pb.start();
-			p.waitFor();
 		}
 
 		private String getSnpEffPath()
