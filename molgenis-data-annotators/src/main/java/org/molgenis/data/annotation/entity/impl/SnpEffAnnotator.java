@@ -14,6 +14,7 @@ import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.utils.JarRunner;
+import org.molgenis.data.annotation.utils.JarRunnerImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -102,6 +103,12 @@ public class SnpEffAnnotator
 	public RepositoryAnnotator snpEff()
 	{
 		return new SnpEffRepositoryAnnotator(molgenisSettings, jarRunner);
+	}
+
+	@Bean
+	JarRunner jarRunner()
+	{
+		return new JarRunnerImpl();
 	}
 
 	/**

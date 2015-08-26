@@ -45,12 +45,6 @@ public class CommandLineAnnotatorConfig
 		return new AnnotationServiceImpl();
 	}
 
-	@Bean
-	JarRunner jarRunner()
-	{
-		return new JarRunnerImpl();
-	}
-
 	/**
 	 * Helper function to select the annotators that have received a recent brush up for the new way of configuring
 	 * 
