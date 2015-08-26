@@ -31,6 +31,7 @@ import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.service.AlgorithmService;
+import org.molgenis.data.mapper.service.UnitResolver;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.semanticsearch.repository.TagRepository;
@@ -90,23 +91,23 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		DefaultAttributeMetaData targetAttribute1 = new DefaultAttributeMetaData("height");
 		targetAttribute1.setLabel("height");
 		Multimap<Relation, OntologyTerm> tags1 = LinkedHashMultimap.<Relation, OntologyTerm> create();
-		List<ExplainedQueryString> explanations1 = Arrays.asList(ExplainedQueryString.create("height", "height",
-				"standing height", 50.0));
+		List<ExplainedQueryString> explanations1 = Arrays
+				.asList(ExplainedQueryString.create("height", "height", "standing height", 50.0));
 		assertFalse(algorithmServiceImpl.isSingleMatchHighQuality(targetAttribute1, tags1, explanations1));
 
 		DefaultAttributeMetaData targetAttribute2 = new DefaultAttributeMetaData("height");
 		targetAttribute2.setLabel("height");
 		Multimap<Relation, OntologyTerm> tags2 = LinkedHashMultimap.<Relation, OntologyTerm> create();
 		tags2.put(Relation.isAssociatedWith, OntologyTerm.create("http://www.molgenis.org/height", "length"));
-		List<ExplainedQueryString> explanations2 = Arrays.asList(ExplainedQueryString.create("height", "height",
-				"height", 100));
+		List<ExplainedQueryString> explanations2 = Arrays
+				.asList(ExplainedQueryString.create("height", "height", "height", 100));
 		assertTrue(algorithmServiceImpl.isSingleMatchHighQuality(targetAttribute2, tags2, explanations2));
 
 		DefaultAttributeMetaData targetAttribute3 = new DefaultAttributeMetaData("fasting_glucose");
 		targetAttribute3.setLabel("glucose fasting");
 		Multimap<Relation, OntologyTerm> tags3 = LinkedHashMultimap.<Relation, OntologyTerm> create();
-		tags3.put(Relation.isAssociatedWith, OntologyTerm.create(
-				"http://www.molgenis.org/fasting,http://www.molgenis.org/glucose", "fasting,glucose"));
+		tags3.put(Relation.isAssociatedWith, OntologyTerm
+				.create("http://www.molgenis.org/fasting,http://www.molgenis.org/glucose", "fasting,glucose"));
 		List<ExplainedQueryString> explanations3 = Arrays.asList(
 				ExplainedQueryString.create("fasting", "fasting", "fasting", 100),
 				ExplainedQueryString.create("glucose", "glucose", "blood glucose", 50));
@@ -163,8 +164,8 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		DefaultAttributeMetaData targetAttributeMetaData = new DefaultAttributeMetaData("age");
 		targetAttributeMetaData.setDataType(INT);
 		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
-		attributeMapping
-				.setAlgorithm("Math.floor((new Date('02/12/2015') - $('dob').value())/(365.2425 * 24 * 60 * 60 * 1000))");
+		attributeMapping.setAlgorithm(
+				"Math.floor((new Date('02/12/2015') - $('dob').value())/(365.2425 * 24 * 60 * 60 * 1000))");
 		Object result = algorithmService.apply(attributeMapping, source, entityMetaData);
 		assertEquals(result, 41);
 	}
@@ -237,8 +238,8 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		targetAttributeMetaData.setDataType(MREF).setNillable(false).setRefEntity(refEntityMeta);
 		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
 		attributeMapping.setAlgorithm("$('" + sourceEntityAttrName + "').value()");
-		when(dataService.findAll(refEntityName, Arrays.asList(refEntityId0, refEntityId1))).thenReturn(
-				Arrays.asList(refEntity0, refEntity1));
+		when(dataService.findAll(refEntityName, Arrays.asList(refEntityId0, refEntityId1)))
+				.thenReturn(Arrays.asList(refEntity0, refEntity1));
 
 		// source Entity
 		DefaultEntityMetaData entityMetaDataSource = new DefaultEntityMetaData(sourceEntityName);
@@ -414,9 +415,16 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
+		public UnitResolver unitResolver()
+		{
+			return new UnitResolverImpl(ontologyService());
+		}
+
+		@Bean
 		public AlgorithmService algorithmService()
 		{
-			return new AlgorithmServiceImpl(dataService(), ontologyTagService(), semanticSearchService());
+			return new AlgorithmServiceImpl(dataService(), ontologyTagService(), semanticSearchService(),
+					unitResolver());
 		}
 
 		@Bean
