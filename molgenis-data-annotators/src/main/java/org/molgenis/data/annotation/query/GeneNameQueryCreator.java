@@ -11,21 +11,19 @@ import org.molgenis.data.Query;
 import org.molgenis.data.annotation.entity.QueryCreator;
 import org.molgenis.data.annotation.entity.impl.SnpEffAnnotator;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.vcf.VcfRepository;
 
 public class GeneNameQueryCreator implements QueryCreator
 {
 	@Override
 	public Collection<AttributeMetaData> getRequiredAttributes()
 	{
-		return Collections.singleton(new DefaultAttributeMetaData(VcfRepository.getInfoPrefix()
-				+ SnpEffAnnotator.GENE_NAME));
+		return Collections.singleton(new DefaultAttributeMetaData(SnpEffAnnotator.GENE_NAME));
 	}
 
 	@Override
 	public Query createQuery(Entity entity)
 	{
-		Object value = entity.get(VcfRepository.getInfoPrefix() + SnpEffAnnotator.GENE_NAME);
+		Object value = entity.get(SnpEffAnnotator.GENE_NAME);
 		return EQ(SnpEffAnnotator.GENE_NAME, value);
 	}
 }
