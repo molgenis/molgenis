@@ -49,10 +49,10 @@ import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
-import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserService;
+import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.slf4j.Logger;
@@ -353,7 +353,8 @@ public class MappingServiceController extends MolgenisPluginController
 	@RequestMapping(value = "/saveattributemapping", method = RequestMethod.POST)
 	public String saveAttributeMapping(@RequestParam(required = true) String mappingProjectId,
 			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
-			@RequestParam(required = true) String targetAttribute, @RequestParam(required = true) String algorithm)
+			@RequestParam(required = true) String targetAttribute, @RequestParam(required = true) String algorithm,
+			@RequestParam(required = true) AlgorithmState algorithmState)
 	{
 		MappingProject mappingProject = mappingService.getMappingProject(mappingProjectId);
 		if (hasWritePermission(mappingProject))
@@ -372,7 +373,7 @@ public class MappingServiceController extends MolgenisPluginController
 					attributeMapping = mappingForSource.addAttributeMapping(targetAttribute);
 				}
 				attributeMapping.setAlgorithm(algorithm);
-				attributeMapping.setAlgorithmState(AlgorithmState.CURATED);
+				attributeMapping.setAlgorithmState(algorithmState);
 			}
 			mappingService.updateMappingProject(mappingProject);
 		}

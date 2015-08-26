@@ -7,6 +7,7 @@ import java.util.HashSet;
 
 import javax.sql.DataSource;
 
+import org.molgenis.migrate.version.v1_8.Step11ConvertNames;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
