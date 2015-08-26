@@ -237,7 +237,7 @@ public class SnpEffAnnotatorTest extends AbstractTestNGSpringContextTests
 			when(jarRunner.runJar(SnpEffAnnotator.NAME, params, ResourceUtils.getFile("test-snpeff.vcf")))
 					.thenReturn(ResourceUtils.getFile("snpEffOutput.vcf"));
 		}
-		catch (Exception e)
+		catch (Exception e )
 		{
 			e.printStackTrace();
 		}
