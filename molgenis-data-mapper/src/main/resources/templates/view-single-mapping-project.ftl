@@ -13,8 +13,7 @@
 	<div class="col-md-12">
 		<a href="${context_url}" class="btn btn-default btn-xs">
 			<span class="glyphicon glyphicon-chevron-left"></span> Back to mapping project overview
-		</a>
-		<hr></hr>	
+		</a>	
 	</div>
 </div>
 
@@ -97,8 +96,6 @@
 												class="bg-warning"
 											<#elseif attributeMapping.algorithmState == "CURATED">
 												class="bg-success"
-												<#assign lastAttributeMappingCuratedSourceName = source.name>
-												<#assign lastAttributeMappingCuratedAttributeName = attribute.name>
 											<#elseif attributeMapping.algorithmState == "DISCUSS">
 												class="bg-danger"
 											</#if>
