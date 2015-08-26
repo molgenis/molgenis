@@ -68,8 +68,8 @@ public class HPOAnnotator
 	public RepositoryAnnotator hpo()
 	{
 		List<AttributeMetaData> attributes = new ArrayList<>();
-		attributes.add(new DefaultAttributeMetaData(HPO_IDS).setDataType(MolgenisFieldTypes.TEXT));
-		attributes.add(new DefaultAttributeMetaData(HPO_TERMS).setDataType(MolgenisFieldTypes.TEXT));
+		attributes.add(new DefaultAttributeMetaData(HPO_IDS).setDataType(MolgenisFieldTypes.TEXT).setDescription("HPO identifiers"));
+		attributes.add(new DefaultAttributeMetaData(HPO_TERMS).setDataType(MolgenisFieldTypes.TEXT).setDescription("HPO terms"));
 
 		AnnotatorInfo info = AnnotatorInfo
 				.create(Status.READY,
