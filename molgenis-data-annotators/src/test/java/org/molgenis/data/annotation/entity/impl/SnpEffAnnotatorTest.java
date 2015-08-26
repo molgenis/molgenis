@@ -28,7 +28,6 @@ import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ResourceUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -39,16 +38,19 @@ import org.testng.annotations.Test;
 { SnpEffAnnotatorTest.Config.class, SnpEffAnnotator.class })
 public class SnpEffAnnotatorTest extends AbstractTestNGSpringContextTests
 {
-	@Autowired
-	private SnpEffAnnotator.SnpEffRepositoryAnnotator snpEffRepositoryAnnotator;
-	@Autowired
-	private JarRunner jarRunner;
 	private final ArrayList<Entity> entities = new ArrayList<>();;
 	private DefaultEntityMetaData metaDataCanAnnotate;
+	private SnpEffAnnotator.SnpEffRepositoryAnnotator snpEffRepositoryAnnotator;
+	private JarRunner jarRunner;
 
 	@BeforeMethod
 	public void beforeMethod() throws IOException
 	{
+		MolgenisSettings settings = mock(MolgenisSettings.class);
+		jarRunner = mock(JarRunner.class);
+
+		snpEffRepositoryAnnotator = new SnpEffAnnotator.SnpEffRepositoryAnnotator(settings,jarRunner);
+
 		metaDataCanAnnotate = new DefaultEntityMetaData("test");
 		AttributeMetaData attributeMetaDataChrom = new DefaultAttributeMetaData(VcfRepository.CHROM,
 				MolgenisFieldTypes.FieldTypeEnum.STRING);
@@ -303,9 +305,6 @@ public class SnpEffAnnotatorTest extends AbstractTestNGSpringContextTests
 
 	public static class Config
 	{
-		@Autowired
-		private DataService dataService;
-
 		@Bean
 		public MolgenisSettings molgenisSettings()
 		{
@@ -318,10 +317,5 @@ public class SnpEffAnnotatorTest extends AbstractTestNGSpringContextTests
 			return mock(DataService.class);
 		}
 
-		@Bean
-		public JarRunner jarRunner()
-		{
-			return mock(JarRunner.class);
-		}
 	}
 }
