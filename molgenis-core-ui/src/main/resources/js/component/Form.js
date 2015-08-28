@@ -49,14 +49,44 @@
 			};
 		},
 		componentWillReceiveProps : function(nextProps) {
-			var newState = {
-				errorMessages : {},
-				validate: false,
-				showModal: true,
-				submitMsg: null
-			};
+			var entity = this.props.entity;
+			var entityInstance = this.props.entityInstance;
+			var resetProps = false;
 			
-			this.setState(newState);
+			// Check if the entity meta data is changed.
+			// Check if the entity instance is changed.
+			if(typeof entity === "string" && nextProps.entity !== entity)
+			{
+				resetProps = true;
+			}	
+			else if (typeof entity === "object" && nextProps.entity.name !== entity.name)
+			{
+				resetProps = true;
+			}
+			else if (typeof entityInstance === "string" && nextProps.entityInstance !== entityInstance)
+			{
+				resetProps = true;
+			}
+			else if (typeof entityInstance === "number" && nextProps.entityInstance !== entityInstance)
+			{
+				resetProps = true;
+			}
+			else if (typeof entityInstance === "object" && nextProps.entityInstance.id !== entityInstance.id)
+			{
+				resetProps = true;
+			}
+			
+			if(resetProps){
+				var newState = {
+					errorMessages : {},
+					validate: false,
+					showModal: true,
+					submitMsg: null
+				};
+				
+				// Reset state form component
+				this.setState(newState);
+			}
 		},
 		getInitialState: function() {
 			return {
