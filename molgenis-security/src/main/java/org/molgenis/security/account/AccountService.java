@@ -6,7 +6,8 @@ public interface AccountService
 {
 	public static final String ALL_USER_GROUP = "All Users";
 
-	void createUser(MolgenisUser molgenisUser, String baseActivationUri);
+	void createUser(MolgenisUser molgenisUser, String baseActivationUri) throws UsernameAlreadyExistsException,
+			EmailAlreadyExistsException;
 
 	/**
 	 * Activate a registered user

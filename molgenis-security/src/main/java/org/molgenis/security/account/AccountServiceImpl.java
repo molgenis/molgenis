@@ -50,16 +50,29 @@ public class AccountServiceImpl implements AccountService
 	@Override
 	@RunAsSystem
 	@Transactional
-	public void createUser(MolgenisUser molgenisUser, String baseActivationUri)
+	public void createUser(MolgenisUser molgenisUser, String baseActivationUri) throws UsernameAlreadyExistsException,
+			EmailAlreadyExistsException
 	{
+		// Check if username already exists
+		if (molgenisUserService.getUser(molgenisUser.getUsername()) != null)
+		{
+			throw new UsernameAlreadyExistsException("Username '" + molgenisUser.getUsername() + "' already exists.");
+		}
+
+		// Check if email already exists
+		if (molgenisUserService.getUserByEmail(molgenisUser.getEmail()) != null)
+		{
+			throw new EmailAlreadyExistsException("Email '" + molgenisUser.getEmail() + "' is already registered.");
+		}
+
 		// collect activation info
 		String activationCode = UUID.randomUUID().toString();
 		List<String> activationEmailAddresses;
 		if (appSettings.getSignUpModeration())
 		{
 			activationEmailAddresses = molgenisUserService.getSuEmailAddresses();
-			if (activationEmailAddresses == null || activationEmailAddresses.isEmpty())
-				throw new MolgenisDataException("Administrator account is missing required email address");
+			if (activationEmailAddresses == null || activationEmailAddresses.isEmpty()) throw new MolgenisDataException(
+					"Administrator account is missing required email address");
 		}
 		else
 		{
@@ -101,6 +114,8 @@ public class AccountServiceImpl implements AccountService
 		}
 		catch (MailException mce)
 		{
+			LOG.error("Could not send signup mail", mce);
+
 			if (molgenisGroupMember != null)
 			{
 				dataService.delete(MolgenisGroupMember.ENTITY_NAME, molgenisGroupMember);
