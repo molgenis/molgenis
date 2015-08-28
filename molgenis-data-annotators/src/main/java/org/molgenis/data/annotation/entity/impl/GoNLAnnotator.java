@@ -33,8 +33,13 @@ public class GoNLAnnotator
 	public static final String GONL_GENOME_GTC = "GoNL_GTC";
 	public static final String GONL_AF_LABEL = "Genome of the netherlands allele frequency";
 	public static final String GONL_GTC_LABEL = "Genome of the netherlands Genotype counts frequency";
-	public static final String GONL_AF_RESOURCE_ATTRIBUTE_NAME = VcfRepository.getInfoPrefix() + "AF";
-	public static final String GONL_GTC_RESOURCE_ATTRIBUTE_NAME = VcfRepository.getInfoPrefix() + "GTC";
+	public static final String INFO_AF = VcfRepository.getInfoPrefix() + "AF";
+	public static final String INFO_GTC = VcfRepository.getInfoPrefix() + "GTC";
+	public static final String INFO_AN = VcfRepository.getInfoPrefix() + "AN";
+	public static final String INFO_AC = VcfRepository.getInfoPrefix() + "AC";
+
+	public static final String GONL_AF_RESOURCE_ATTRIBUTE_NAME = "AF";
+	public static final String GONL_GTC_RESOURCE_ATTRIBUTE_NAME = "GTC";
 	public static final String GONL_MULTI_FILE_RESOURCE = "gonlresources";
 
 	// Runtime properties keys
@@ -45,7 +50,7 @@ public class GoNLAnnotator
 
 	// Backwards capabilities properties from the old annotator
 	public static final String BC_GONL_MAF_LABEL = "GONLMAF";
-	public static final String BC_GONL_MAF = VcfRepository.getInfoPrefix() + BC_GONL_MAF_LABEL;
+	public static final String BC_GONL_MAF = BC_GONL_MAF_LABEL;
 
 	@Autowired
 	private MolgenisSettings molgenisSettings;
@@ -86,12 +91,7 @@ public class GoNLAnnotator
 
 		LocusQueryCreator locusQueryCreator = new LocusQueryCreator();
 
-		// TODO: properly test multiAllelicFresultFilter
-		List<AttributeMetaData> resourceAttributesList= new ArrayList<>();
-		resourceAttributesList.add(new DefaultAttributeMetaData("INFO_AC"));
-		resourceAttributesList.add(new DefaultAttributeMetaData("INFO_AN"));
-
-		GoNLMultiAllelicResultFilter goNLMultiAllelicResultFilter = new GoNLMultiAllelicResultFilter(resourceAttributesList);
+		GoNLMultiAllelicResultFilter goNLMultiAllelicResultFilter = new GoNLMultiAllelicResultFilter();
 
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(GONL_MULTI_FILE_RESOURCE, thousandGenomeInfo,
 				locusQueryCreator, goNLMultiAllelicResultFilter, dataService, resources,
@@ -113,11 +113,11 @@ public class GoNLAnnotator
 
 				if (GONL_GENOME_AF.equals(attr.getName()))
 				{
-					attrName = GONL_AF_RESOURCE_ATTRIBUTE_NAME;
+					attrName = INFO_AF;
 				}
 				else if (GONL_GENOME_GTC.equals(attr.getName()))
 				{
-					attrName = GONL_GTC_RESOURCE_ATTRIBUTE_NAME;
+					attrName = INFO_GTC;
 				}
 				else
 				{

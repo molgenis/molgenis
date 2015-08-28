@@ -107,8 +107,14 @@ public class VcfToEntity
 		List<AttributeMetaData> metadataInfoField = new ArrayList<AttributeMetaData>();
 		for (VcfMetaInfo info : vcfMeta.getInfoMeta())
 		{
-			DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData(VcfRepository.getInfoPrefix()
-					+ info.getId(), vcfReaderFormatToMolgenisType(info)).setAggregateable(true);
+			String postFix = "";
+			for(AttributeMetaData attributeMetaData : entityMetaData.getAtomicAttributes()){
+				if(attributeMetaData.getName().equals(info.getId())){
+					postFix = "_"+entityName;
+				}
+			}
+			DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData(
+					info.getId()+postFix, vcfReaderFormatToMolgenisType(info)).setAggregateable(true);
 			attributeMetaData.setDescription(info.getDescription());
 			metadataInfoField.add(attributeMetaData);
 		}
@@ -285,14 +291,29 @@ public class VcfToEntity
 		// set all flag fields default on false.
 		for (VcfMetaInfo info : vcfMeta.getInfoMeta())
 		{
+			String postFix = "";
+			List<String> names = new ArrayList<>();
+			for (AttributeMetaData attributeMetaData : entityMetaData.getAttributes()) {
+				if (attributeMetaData.getName().equals(info.getId())) {
+					names.add(attributeMetaData.getName());
+				}
+			}
+			if(names.contains(info.getId())) postFix = "_" + entity.getEntityMetaData().getName();
 			if (info.getType().equals(VcfMetaInfo.Type.FLAG))
 			{
-				entity.set(VcfRepository.getInfoPrefix() + info.getId(), false);
+				entity.set(info.getId()+postFix, false);
 			}
 		}
 
 		for (VcfInfo vcfInfo : vcfRecord.getInformation())
 		{
+			String postFix = "";
+			List<String> names = new ArrayList<>();
+			for (AttributeMetaData attributeMetaData : entityMetaData.getAttributes()) {
+				if (attributeMetaData.getName().equals(vcfInfo.getKey())) {
+					names.add(attributeMetaData.getName());
+				}
+			}
 			Object val = vcfInfo.getVal();
 			if (val instanceof List<?>)
 			{
@@ -306,14 +327,20 @@ public class VcfToEntity
 			// if a flag field exists in the line, then this field is true, although the value is null
 			if (val == null)
 			{
-				if (!vcfInfo.getKey().equals(".")
-						&& entityMetaData.getAttribute(VcfRepository.getInfoPrefix() + vcfInfo.getKey()).getDataType()
+				if(names.contains(vcfInfo.getKey())){
+					postFix = "_" + entity.getEntityMetaData().getName();
+				}
+				if (!(vcfInfo.getKey()+postFix).equals(".")
+						&& entityMetaData.getAttribute(vcfInfo.getKey()+postFix) != null
+						&& entityMetaData.getAttribute(vcfInfo.getKey()+postFix).getDataType()
 								.getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.BOOL))
 				{
 					val = true;
 				}
 			}
-			entity.set(VcfRepository.getInfoPrefix() + vcfInfo.getKey(), val);
+			if(val != null) {
+				entity.set(vcfInfo.getKey() + postFix, val);
+			}
 		}
 	}
 

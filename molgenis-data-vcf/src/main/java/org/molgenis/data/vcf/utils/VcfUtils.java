@@ -82,7 +82,6 @@ public class VcfUtils
 			vcfRecord.append(((vcfEntity.getString(vcfAttribute) != null && !vcfEntity.getString(vcfAttribute).equals(
 					"")) ? vcfEntity.getString(vcfAttribute) : ".")
 					+ TAB);
-			// vcfRecord.append(vcfEntity.getString(vcfAttribute) + "\t");
 		}
 
 		List<String> infoFieldsSeen = new ArrayList<String>();
@@ -96,23 +95,12 @@ public class VcfUtils
 				infoFieldsSeen.add(attributeMetaData.getName());
 				if (vcfEntity.getString(attributeMetaData.getName()) != null)
 				{
-					if (attributeMetaData.getName().startsWith(VcfRepository.getInfoPrefix()))
+
+					if (attributeMetaData.getDataType().getEnumType().equals(FieldTypeEnum.BOOL))
 					{
-						if (attributeMetaData.getDataType().getEnumType().equals(FieldTypeEnum.BOOL))
+						if (vcfEntity.getBoolean(attributeMetaData.getName()))
 						{
-							if (vcfEntity.getBoolean(attributeMetaData.getName()))
-							{
-								vcfRecord.append(attributeMetaData.getName().substring(
-										VcfRepository.getInfoPrefix().length())
-										+ ";");
-								hasInfoFields = true;
-							}
-						}
-						else
-						{
-							vcfRecord.append(attributeMetaData.getName().substring(
-									VcfRepository.getInfoPrefix().length())
-									+ "=" + vcfEntity.getString(attributeMetaData.getName()) + ";");
+							vcfRecord.append(attributeMetaData.getName() + ";");
 							hasInfoFields = true;
 						}
 					}
@@ -128,20 +116,6 @@ public class VcfUtils
 		if (!hasInfoFields)
 		{
 			vcfRecord.append(".");
-		}
-
-		for (AttributeMetaData attributeMetaData : vcfEntity.getEntityMetaData().getAtomicAttributes())
-		{
-			if (attributesToInclude.isEmpty() || attributesToInclude.contains(attributeMetaData.getName()))
-			{
-				if (!infoFieldsSeen.contains(attributeMetaData.getName())
-						&& attributeMetaData.getName().startsWith(VcfRepository.getInfoPrefix())
-						&& vcfEntity.getString(attributeMetaData.getName()) != null)
-				{
-					vcfRecord.append(attributeMetaData.getName().substring(VcfRepository.getInfoPrefix().length())
-							+ "=" + vcfEntity.getString(attributeMetaData.getName()) + ";");
-				}
-			}
 		}
 
 		// if we have SAMPLE data, add to output VCF

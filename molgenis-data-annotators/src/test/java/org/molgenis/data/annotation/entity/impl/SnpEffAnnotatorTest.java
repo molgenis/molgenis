@@ -1,7 +1,6 @@
 package org.molgenis.data.annotation.entity.impl;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
@@ -214,8 +213,8 @@ public class SnpEffAnnotatorTest extends AbstractTestNGSpringContextTests
 		{
 			List<String> params = Arrays.asList("-Xmx2g", null, "hg19", "-noStats", "-noLog", "-lof", "-canon",
 					"-ud", "0", "-spliceSiteSize", "5");
-			when(jarRunner.runJar(SnpEffAnnotator.NAME, params, ResourceUtils.getFile("test-edgecases.vcf")))
-					.thenReturn(ResourceUtils.getFile("snpEffOutputCount.vcf"));
+			when(jarRunner.runJar(SnpEffAnnotator.NAME, params, new File("src/test/resources/test-edgecases.vcf")))
+					.thenReturn(new File("src/test/resources/snpEffOutputCount.vcf"));
 		}
 		catch (Exception e)
 		{
@@ -223,7 +222,7 @@ public class SnpEffAnnotatorTest extends AbstractTestNGSpringContextTests
 		}
 
 		Iterator<Entity> results = snpEffRepositoryAnnotator.annotateRepository(entities,
-				ResourceUtils.getFile("test-edgecases.vcf"));
+				new File("src/test/resources/test-edgecases.vcf"));
 		int size = Iterators.size(results);
 		assertEquals(size, 14);
 	}
@@ -236,42 +235,42 @@ public class SnpEffAnnotatorTest extends AbstractTestNGSpringContextTests
 		{
 			List<String> params = Arrays.asList("-Xmx2g", null, "hg19", "-noStats", "-noLog", "-lof", "-canon",
 					"-ud", "0", "-spliceSiteSize", "5");
-			when(jarRunner.runJar(SnpEffAnnotator.NAME, params, ResourceUtils.getFile("test-snpeff.vcf")))
-					.thenReturn(ResourceUtils.getFile("snpEffOutput.vcf"));
+			when(jarRunner.runJar(SnpEffAnnotator.NAME, params, new File("src/test/resources/test-snpeff.vcf")))
+					.thenReturn(new File("src/test/resources/snpEffOutput.vcf"));
 		}
 		catch (Exception e )
 		{
 			e.printStackTrace();
 		}
 		Iterator<Entity> results = snpEffRepositoryAnnotator.annotateRepository(
-				Collections.singletonList(entities.get(0)), ResourceUtils.getFile("test-snpeff.vcf"));
+				Collections.singletonList(entities.get(0)), new File("src/test/resources/test-snpeff.vcf"));
 
 		while (results.hasNext())
 		{
 			Entity result = results.next();
 			Entity expected = new MapEntity(metaDataCanAnnotate);
-			expected.set("Annotation", "non_coding_exon_variant");
-			expected.set("Putative_impact", "MODIFIER");
-			expected.set("Gene_Name", "DDX11L1");
-			expected.set("Gene_ID", "DDX11L1");
-			expected.set("Feature_type", "transcript");
-			expected.set("Feature_ID", "NR_046018.2");
-			expected.set("Transcript_biotype", "Noncoding");
-			expected.set("Rank_total", "3/3");
-			expected.set("HGVS_c", "n.623C>G");
-			expected.set("HGVS_p", "");
-			expected.set("cDNA_position", "");
-			expected.set("CDS_position", "");
-			expected.set("Protein_position", "");
-			expected.set("Distance_to_feature", "");
-			expected.set("Errors", "");
-			expected.set("LOF", "");
-			expected.set("NMD", "");
+
+			expected.set(SnpEffAnnotator.ANNOTATION, "non_coding_exon_variant");
+			expected.set(SnpEffAnnotator.PUTATIVE_IMPACT, "MODIFIER");
+			expected.set(SnpEffAnnotator.GENE_NAME, "DDX11L1");
+			expected.set(SnpEffAnnotator.GENE_ID, "DDX11L1");
+			expected.set(SnpEffAnnotator.FEATURE_TYPE, "transcript");
+			expected.set(SnpEffAnnotator.FEATURE_ID, "NR_046018.2");
+			expected.set(SnpEffAnnotator.TRANSCRIPT_BIOTYPE, "Noncoding");
+			expected.set(SnpEffAnnotator.RANK_TOTAL, "3/3");
+			expected.set(SnpEffAnnotator.HGVS_C, "n.623C>G");
+			expected.set(SnpEffAnnotator.HGVS_P, "");
+			expected.set(SnpEffAnnotator.C_DNA_POSITION, "");
+			expected.set(SnpEffAnnotator.CDS_POSITION, "");
+			expected.set(SnpEffAnnotator.PROTEIN_POSITION, "");
+			expected.set(SnpEffAnnotator.DISTANCE_TO_FEATURE, "");
+			expected.set(SnpEffAnnotator.ERRORS, "");
+			expected.set(SnpEffAnnotator.LOF, "");
+			expected.set(SnpEffAnnotator.NMD, "");
 
 			for (AttributeMetaData attributeMetaData : snpEffRepositoryAnnotator.getOutputMetaData().get(0)
 					.getAttributeParts())
 			{
-				System.out.println(attributeMetaData.getName());
 				assertEquals(result.get(attributeMetaData.getName()), expected.get(attributeMetaData.getName()));
 			}
 		}

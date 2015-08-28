@@ -220,8 +220,6 @@ public class SnpEffAnnotator
 						if (!next)
 						{
 							IOUtils.closeQuietly(reader);
-							inputVcf.delete();
-							outputVcf.delete();
 						}
 
 						return next;

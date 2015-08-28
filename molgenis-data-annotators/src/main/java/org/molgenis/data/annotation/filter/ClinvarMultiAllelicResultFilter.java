@@ -37,8 +37,8 @@ public class ClinvarMultiAllelicResultFilter implements ResultFilter
 			if (entity.get(VcfRepository.REF).equals(annotatedEntity.get(VcfRepository.REF)))
 			{
 				String[] alts = entity.getString(VcfRepository.ALT).split(",");
-				String[] clnSigs = entity.getString("INFO_CLNSIG").split(",");
-				String[] clnAll = entity.getString("INFO_CLNALLE").split(",");
+				String[] clnSigs = entity.getString("CLNSIG").split(",");
+				String[] clnAll = entity.getString("CLNALLE").split(",");
 				System.out.println("alts: " + Lists.newArrayList(alts));
 				System.out.println("clnsigs: " + Lists.newArrayList(clnSigs));
 				System.out.println("clnals: " + Lists.newArrayList(clnAll));
@@ -125,14 +125,14 @@ public class ClinvarMultiAllelicResultFilter implements ResultFilter
 				// nothing found at all? result is empty
 				if (newClnlallAttributeValue.toString().equals("."))
 				{
-					entity.set("INFO_CLNSIG", "");
-					entity.set("INFO_CLNALLE", "");
+					entity.set("CLNSIG", "");
+					entity.set("CLNALLE", "");
 				}
 				else
 				{
 
-					entity.set("INFO_CLNALLE", newClnlallAttributeValue.toString());
-					entity.set("INFO_CLNSIG", newClnlsigAttributeValue.toString());
+					entity.set("CLNALLE", newClnlallAttributeValue.toString());
+					entity.set("CLNSIG", newClnlsigAttributeValue.toString());
 
 				}
 
