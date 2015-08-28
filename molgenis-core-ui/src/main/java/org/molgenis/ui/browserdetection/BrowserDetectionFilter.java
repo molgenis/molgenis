@@ -11,6 +11,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import eu.bitwalker.useragentutils.Browser;
 import eu.bitwalker.useragentutils.UserAgent;
@@ -27,22 +28,32 @@ public class BrowserDetectionFilter implements Filter
 	private static final String UNSUPPORTED_BROWSER_MESSAGE_PAGE = "/html/unsupported-browser-message.html";
 	private static final List<Browser> UNSUPPORTED_BROWSERS = Arrays.asList(Browser.IE5, Browser.IE5_5, Browser.IE6,
 			Browser.IE7, Browser.IE8);
+	private static String CONTINUE_WITH_UNSUPPORTED_BROWSER_TOKEN = "continueWithUnsupportedBrowser";
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
 			ServletException
 	{
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
-
 		if (!httpRequest.getRequestURI().startsWith("/api/")
 				&& !isSupported(httpRequest.getHeader(USER_AGENT_HEADER_NAME)))
 		{
-			httpRequest.getRequestDispatcher(UNSUPPORTED_BROWSER_MESSAGE_PAGE).forward(request, response);
+			HttpSession session = httpRequest.getSession();
+			if (session.getAttribute(CONTINUE_WITH_UNSUPPORTED_BROWSER_TOKEN) == null)
+			{
+				if (request.getParameter(CONTINUE_WITH_UNSUPPORTED_BROWSER_TOKEN) != null)
+				{
+					session.setAttribute(CONTINUE_WITH_UNSUPPORTED_BROWSER_TOKEN, true);
+				}
+				else
+				{
+					httpRequest.getRequestDispatcher(UNSUPPORTED_BROWSER_MESSAGE_PAGE).forward(request, response);
+					return;
+				}
+			}
 		}
-		else
-		{
-			chain.doFilter(request, response);
-		}
+
+		chain.doFilter(request, response);
 	}
 
 	protected boolean isSupported(String userAgentHeaderValue)
