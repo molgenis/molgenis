@@ -33,7 +33,7 @@ public class RScriptExecutor
 		this.rScriptExecutable = checkNotNull(rScriptExecutable);
 		if (rLibs == null)
 		{
-			this.rLibs = System.getProperty("molgenis.home") + File.separator + "R_libs";
+			this.rLibs = System.getProperty("user.home") + File.separator + "r-packages";
 		}
 		else
 		{
