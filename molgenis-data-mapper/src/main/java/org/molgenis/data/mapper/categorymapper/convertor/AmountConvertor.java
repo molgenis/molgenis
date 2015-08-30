@@ -12,7 +12,7 @@ public abstract class AmountConvertor
 	public Amount<?> getAmount(String description)
 	{
 		Amount<?> amount = getInternalAmount(description);
-		if (DurationUnitConversionUtil.containNegativeAdjectives(description))
+		if (amount != null && DurationUnitConversionUtil.containNegativeAdjectives(description))
 		{
 			double estimatedValue = amount.getEstimatedValue();
 			return Amount.rangeOf((double) 0, estimatedValue, amount.getUnit());

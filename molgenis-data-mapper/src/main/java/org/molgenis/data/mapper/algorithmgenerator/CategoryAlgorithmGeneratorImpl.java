@@ -67,8 +67,6 @@ public class CategoryAlgorithmGeneratorImpl implements CategoryAlgorithmGenerato
 				}
 				stringBuilder.append("\"").append(bestTargetCategory.getCode()).append("\":\"")
 						.append(sourceCategory.getCode()).append("\",");
-
-				System.out.println(bestTargetCategory.getCode() + " <- " + sourceCategory.getCode());
 			}
 		}
 
@@ -110,15 +108,18 @@ public class CategoryAlgorithmGeneratorImpl implements CategoryAlgorithmGenerato
 	{
 		Set<Category> categories = new HashSet<Category>();
 		EntityMetaData refEntity = attributeMetaData.getRefEntity();
-
-		for (Entity entity : dataService.findAll(refEntity.getName()))
+		if (refEntity != null)
 		{
-			Integer code = entity.getInt(refEntity.getIdAttribute().getName());
-			String label = entity.getString(refEntity.getLabelAttribute().getName());
-			Category category = Category.create(code, label, frequencyCategoryMapper.convertDescriptionToAmount(label));
-			if (!categories.contains(category))
+			for (Entity entity : dataService.findAll(refEntity.getName()))
 			{
-				categories.add(category);
+				Integer code = entity.getInt(refEntity.getIdAttribute().getName());
+				String label = entity.getString(refEntity.getLabelAttribute().getName());
+				Category category = Category.create(code, label,
+						frequencyCategoryMapper.convertDescriptionToAmount(label));
+				if (!categories.contains(category))
+				{
+					categories.add(category);
+				}
 			}
 		}
 		return categories;
