@@ -2,6 +2,7 @@ package org.molgenis.data.mapper.categorymapper.convertor;
 
 import java.util.Set;
 
+import javax.measure.unit.NonSI;
 import javax.measure.unit.Unit;
 
 import org.jscience.physics.amount.Amount;
@@ -24,7 +25,7 @@ public class SeveralTimesConvertor extends AmountConvertor
 		Unit<?> unit = DurationUnitConversionUtil.findDurationUnit(description);
 		if (unit != null)
 		{
-			return Amount.rangeOf((double) 1, Double.MAX_VALUE, unit);
+			return Amount.rangeOf((double) 1, NonSI.DAY.inverse().getConverterTo(unit).convert(1), unit);
 		}
 		return null;
 	}

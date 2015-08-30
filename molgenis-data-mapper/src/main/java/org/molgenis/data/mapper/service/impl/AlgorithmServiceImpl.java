@@ -17,6 +17,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.mapper.algorithmgenerator.CategoryAlgorithmGenerator;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
@@ -52,17 +53,22 @@ public class AlgorithmServiceImpl implements AlgorithmService
 
 	private final SemanticSearchService semanticSearchService;
 
+	private final CategoryAlgorithmGenerator categoryAlgorithmGenerator;
+
 	@Autowired
 	public AlgorithmServiceImpl(DataService dataService, OntologyTagService ontologyTagService,
-			SemanticSearchService semanticSearchService)
+			SemanticSearchService semanticSearchService, CategoryAlgorithmGenerator categoryAlgorithmGenerator)
 	{
 		if (dataService == null) throw new MolgenisDataException("DataService cannot be null!");
 		if (ontologyTagService == null) throw new MolgenisDataException("OntologyTagService cannot be null!");
 		if (semanticSearchService == null) throw new MolgenisDataException("SemanticSearchService cannot be null!");
+		if (categoryAlgorithmGenerator == null) throw new MolgenisDataException(
+				"CategoryAlgorithmGenerator cannot be null!");
 
 		this.dataService = dataService;
 		this.ontologyTagService = ontologyTagService;
 		this.semanticSearchService = semanticSearchService;
+		this.categoryAlgorithmGenerator = categoryAlgorithmGenerator;
 
 		new RhinoConfig().init();
 	}
@@ -83,7 +89,13 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		{
 			AttributeMetaData source = entry.getKey();
 			AttributeMapping attributeMapping = mapping.addAttributeMapping(targetAttribute.getName());
-			String algorithm = "$('" + source.getName() + "').value();";
+			String algorithm = categoryAlgorithmGenerator.generate(targetAttribute, source);
+
+			if (StringUtils.isEmpty(algorithm))
+			{
+				algorithm = "$('" + source.getName() + "').value();";
+			}
+
 			attributeMapping.setAlgorithm(algorithm);
 
 			if (isSingleMatchHighQuality(targetAttribute, tagsForAttribute, entry.getValue()))

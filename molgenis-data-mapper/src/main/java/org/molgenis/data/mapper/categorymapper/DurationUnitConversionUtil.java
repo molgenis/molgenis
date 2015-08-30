@@ -1,5 +1,6 @@
 package org.molgenis.data.mapper.categorymapper;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -29,22 +30,6 @@ public class DurationUnitConversionUtil
 	{
 		DURATION_UNITS = Arrays.asList(SI.SECOND.inverse(), NonSI.MINUTE.inverse(), NonSI.HOUR.inverse(),
 				NonSI.DAY.inverse(), NonSI.WEEK.inverse(), NonSI.MONTH.inverse(), NonSI.YEAR.inverse());
-
-		Collections.sort(DURATION_UNITS, new Comparator<Unit<?>>()
-		{
-			public int compare(Unit<?> o1, Unit<?> o2)
-			{
-				UnitConverter converterTo = o1.getConverterTo(o2);
-				if (converterTo.convert(1) > 1)
-				{
-					return 0;
-				}
-				else
-				{
-					return 1;
-				}
-			}
-		});
 	}
 
 	private static final Set<String> POSITIVE_ADJECTIVES;
@@ -124,11 +109,38 @@ public class DurationUnitConversionUtil
 	{
 		Set<String> tokens = Sets.newHashSet(description.toLowerCase().split(NON_LETTER_REGEX));
 
+		List<Unit<?>> candidateUnits = new ArrayList<Unit<?>>();
+
 		for (Unit<?> unit : DURATION_UNITS)
 		{
-			if (tokens.contains(unit.inverse().toString().toLowerCase())) return unit;
+			if (tokens.contains(unit.inverse().toString().toLowerCase()))
+			{
+				candidateUnits.add(unit);
+			}
 		}
-		return null;
+
+		return getMostGeneralUnit(candidateUnits);
+	}
+
+	public static Unit<?> getMostGeneralUnit(List<Unit<?>> candidateUnits)
+	{
+		Collections.sort(candidateUnits, new Comparator<Unit<?>>()
+		{
+			public int compare(Unit<?> o1, Unit<?> o2)
+			{
+				UnitConverter converterTo = o1.inverse().getConverterTo(o2.inverse());
+				if (converterTo.convert(1) > 1)
+				{
+					return -1;
+				}
+				else
+				{
+					return 1;
+				}
+			}
+		});
+
+		return candidateUnits.size() > 0 ? candidateUnits.get(0) : null;
 	}
 
 	public static Set<Double> extractNumbers(String description)

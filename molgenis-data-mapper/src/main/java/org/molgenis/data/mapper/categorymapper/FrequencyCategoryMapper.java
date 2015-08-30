@@ -3,6 +3,7 @@ package org.molgenis.data.mapper.categorymapper;
 import java.util.HashSet;
 import java.util.List;
 
+import javax.measure.unit.NonSI;
 import javax.measure.unit.Unit;
 
 import org.jscience.physics.amount.Amount;
@@ -18,22 +19,17 @@ public class FrequencyCategoryMapper
 	private static final List<AmountConvertor> CONVERTORS = Lists.newArrayList(new DailyAmountConvertor(),
 			new SeveralTimesConvertor(), new NumberAmountConvertor());
 
+	private static final Unit<?> STANDARD_UNIT = NonSI.WEEK.inverse();
+
 	public Double convert(Amount<?> sourceAmount, Amount<?> targetAmount)
 	{
-		Unit<?> standardUnit = targetAmount.getUnit();
-		if (sourceAmount.getUnit().isCompatible(standardUnit))
+		if (sourceAmount != null && targetAmount != null)
 		{
-			if (isMaxValueUndetermined(sourceAmount))
+			Unit<?> standardUnit = targetAmount.getUnit();
+			if (sourceAmount.getUnit().isCompatible(standardUnit))
 			{
-				double maxValue = sourceAmount.getMaximumValue();
-				if (!sourceAmount.getUnit().equals(standardUnit))
-				{
-					maxValue = standardUnit.getConverterTo(sourceAmount.getUnit()).convert((double) 1);
-				}
-				sourceAmount = Amount.rangeOf(sourceAmount.getMinimumValue(), maxValue, sourceAmount.getUnit());
+				return convertFactor(sourceAmount.to(STANDARD_UNIT), targetAmount.to(STANDARD_UNIT));
 			}
-			Amount<?> convertedSourceAmount = sourceAmount.to(standardUnit);
-			return convertFactor(convertedSourceAmount, targetAmount);
 		}
 		return null;
 	}
@@ -41,7 +37,6 @@ public class FrequencyCategoryMapper
 	public Amount<?> convertDescriptionToAmount(String description)
 	{
 		String cleanedDescription = DurationUnitConversionUtil.convertWordToNumber(description);
-
 		for (AmountConvertor convertor : CONVERTORS)
 		{
 			if (convertor.matchCriteria(cleanedDescription))
@@ -52,11 +47,22 @@ public class FrequencyCategoryMapper
 		return null;
 	}
 
-	double convertFactor(Amount<?> convertedSourceAmount, Amount<?> targetAmount)
+	Double convertFactor(Amount<?> convertedSourceAmount, Amount<?> targetAmount)
 	{
-		double lowerBoundDiff = Math.abs(targetAmount.getMinimumValue() - convertedSourceAmount.getMinimumValue());
-		double upperBoundDiff = Math.abs(targetAmount.getMaximumValue() - convertedSourceAmount.getMaximumValue());
-		return (lowerBoundDiff + upperBoundDiff) / 2;
+		int targetMax = (int) targetAmount.getMaximumValue();
+		int targetMini = (int) targetAmount.getMinimumValue();
+		int sourceMini = (int) convertedSourceAmount.getMinimumValue();
+		int sourceMax = (int) convertedSourceAmount.getMaximumValue();
+
+		if (targetMax < sourceMini || sourceMax < targetMini)
+		{
+			return null;
+		}
+
+		double lowerBoundDiff = targetAmount.getMinimumValue() - convertedSourceAmount.getMinimumValue();
+		double upperBoundDiff = targetAmount.getMaximumValue() - convertedSourceAmount.getMaximumValue();
+
+		return Math.abs(upperBoundDiff + lowerBoundDiff) / 2;
 	}
 
 	boolean isMaxValueUndetermined(Amount<?> amount1)

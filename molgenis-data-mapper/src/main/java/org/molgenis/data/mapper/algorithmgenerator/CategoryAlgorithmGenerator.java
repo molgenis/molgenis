@@ -2,7 +2,7 @@ package org.molgenis.data.mapper.algorithmgenerator;
 
 import org.molgenis.data.AttributeMetaData;
 
-public interface AlgorithmGenerator
+public interface CategoryAlgorithmGenerator
 {
 	abstract boolean isSuitable(AttributeMetaData targetAttributeMetaData, AttributeMetaData sourceAttributeMetaData);
 

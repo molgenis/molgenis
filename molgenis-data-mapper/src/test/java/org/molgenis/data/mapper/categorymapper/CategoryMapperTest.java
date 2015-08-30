@@ -1,6 +1,8 @@
 package org.molgenis.data.mapper.categorymapper;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 import javax.measure.quantity.Quantity;
 import javax.measure.unit.NonSI;
@@ -25,7 +27,8 @@ public class CategoryMapperTest
 
 		Amount<?> twiceAtLeastPerWeek = Amount.rangeOf(2, 7, NonSI.WEEK.inverse());
 		Amount<?> threeTimesPerWeek = Amount.valueOf(3, NonSI.WEEK.inverse());
-		Assert.assertEquals(categoryMapper.convert(twiceAtLeastPerWeek, threeTimesPerWeek), (double) 12);
+
+		Assert.assertEquals(categoryMapper.convert(twiceAtLeastPerWeek, threeTimesPerWeek), 2.5);
 	}
 
 	@Test
@@ -48,6 +51,19 @@ public class CategoryMapperTest
 
 		Amount<? extends Quantity> vauleOf = Amount.valueOf(2, NonSI.DAY.inverse());
 		Assert.assertFalse(DurationUnitConversionUtil.isAmountRanged(vauleOf));
+	}
+
+	@Test
+	public void testGetMostGeneralUnit()
+	{
+		List<Unit<?>> units = new ArrayList<Unit<?>>();
+
+		units.add(NonSI.DAY.inverse());
+		units.add(NonSI.YEAR.inverse());
+		units.add(NonSI.MONTH.inverse());
+
+		Unit<?> unit = DurationUnitConversionUtil.getMostGeneralUnit(units);
+		Assert.assertEquals(unit.toString(), NonSI.YEAR.inverse().toString());
 	}
 
 	@Test

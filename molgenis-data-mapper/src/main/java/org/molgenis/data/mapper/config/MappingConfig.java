@@ -1,6 +1,8 @@
 package org.molgenis.data.mapper.config;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.mapper.algorithmgenerator.CategoryAlgorithmGenerator;
+import org.molgenis.data.mapper.algorithmgenerator.CategoryAlgorithmGeneratorImpl;
 import org.molgenis.data.mapper.repository.impl.AttributeMappingRepositoryImpl;
 import org.molgenis.data.mapper.repository.impl.EntityMappingRepositoryImpl;
 import org.molgenis.data.mapper.repository.impl.MappingProjectRepositoryImpl;
@@ -38,9 +40,16 @@ public class MappingConfig
 	}
 
 	@Bean
+	public CategoryAlgorithmGenerator categoryAlgorithmGenerator()
+	{
+		return new CategoryAlgorithmGeneratorImpl(dataService);
+	}
+
+	@Bean
 	public AlgorithmService algorithmServiceImpl()
 	{
-		return new AlgorithmServiceImpl(dataService, ontologyTagService, semanticSearchService);
+		return new AlgorithmServiceImpl(dataService, ontologyTagService, semanticSearchService,
+				categoryAlgorithmGenerator());
 	}
 
 	@Bean
