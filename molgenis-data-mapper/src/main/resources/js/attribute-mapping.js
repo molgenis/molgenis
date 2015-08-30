@@ -533,6 +533,7 @@
 			target : $('#target').val(),
 			'skipAlgorithmStates': ['DISCUSS', 'CURATED']
 		}, function(data) {
+			$('#find-first-to-curate-attribute-btn').remove();
 			if(data.length !== 0 && ($('#targetAttribute').val() !== data.targetAttribute || $('#source').val() !== data.source)) {
 				$('#attribute-mapping-toolbar').append($('<button id="find-first-to-curate-attribute-btn" type="btn" class="btn btn-default btn-xs">Next attribute to curate<span class="glyphicon glyphicon-chevron-right"></span></button>'));
 				$('#find-first-to-curate-attribute-btn').on('click', function() {
@@ -540,6 +541,19 @@
 				});
 			}
 		});
+	}
+	
+	/**
+	 * When the save buttons: 'save curated' and 'save to discuss' are clicked the algorithm must be filled in.
+	 */
+	function disableEnableSaveButtons(algorithm){
+		if(null != algorithm && algorithm.length > 0){
+			$('#save-mapping-btn').prop('disabled', false);
+			$('#save-discuss-mapping-btn').prop('disabled', false);
+		}else{
+			$('#save-mapping-btn').prop('disabled', true);
+			$('#save-discuss-mapping-btn').prop('disabled', true);
+		}
 	}
 
 	$(function() {
@@ -604,13 +618,16 @@
 		checkSelectedAttributes(initialValue);
 		algorithm = editor.getSession().getValue();
 
-		editor.getSession().on('change', function() {
+		editor.getSession().on('change', function() {		
 			// check attributes if manually added
 			checkSelectedAttributes(editor.getValue());
 
 			// update algorithm
 			algorithm = editor.getSession().getValue();
-
+			
+			// update save buttons visibility
+			disableEnableSaveButtons(algorithm);
+			
 			// validate mapping
 			validateAttrMapping(algorithm);
 
@@ -669,6 +686,9 @@
 		// save button for discuss status generated mapping
 		$('#save-discuss-mapping-btn').on('click', function() {saveAttributeMapping(algorithm, "DISCUSS")});
 		
+		// Update save buttons visibility
+		disableEnableSaveButtons(editor.getSession().getValue());
+		
 		// Display next button
 		dislpayFindFirstNotCuratedAttributeMappingButton();
 
@@ -696,7 +716,7 @@
 
 		$('#advanced-mapping-table').on('change', function() {
 			var mappedCategoryIds = {}, defaultValue = undefined, nullValue = undefined, key, val;
-
+			
 			// for each source xref value, check which target xref value
 			// was chosen
 			$('#advanced-mapping-table > tbody > tr').each(function() {

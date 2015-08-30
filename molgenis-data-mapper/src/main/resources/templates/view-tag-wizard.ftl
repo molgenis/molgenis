@@ -2,7 +2,7 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=['mapping-service.css', 'select2.css']>
-<#assign js=['single-mapping-project.js', 'bootbox.min.js', 'jquery/scrollTableBody/jquery.scrollTableBody-1.0.0.js', 'select2-patched.js', 'tag-wizard.js']>
+<#assign js=['bootbox.min.js', 'jquery/scrollTableBody/jquery.scrollTableBody-1.0.0.js', 'select2-patched.js', 'tag-wizard.js']>
 
 <@header css js/>
 
