@@ -149,7 +149,9 @@ public class UnitResolverImpl implements UnitResolver
 		for (int pos = -1; matcher.find(pos + 1);)
 		{
 			pos = matcher.start();
-			terms.add(matcher.group(1));
+			String rawTerm = matcher.group(1);
+			String term = rawTerm.replaceAll("m2", "m²").replaceAll("m3", "m³").replaceAll("s2", "s²");
+			terms.add(term);
 		}
 	}
 }
