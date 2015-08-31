@@ -33,13 +33,11 @@ public class GoNLAnnotator
 	public static final String GONL_GENOME_GTC = "GoNL_GTC";
 	public static final String GONL_AF_LABEL = "Genome of the netherlands allele frequency";
 	public static final String GONL_GTC_LABEL = "Genome of the netherlands Genotype counts frequency";
-	public static final String INFO_AF = VcfRepository.getInfoPrefix() + "AF";
-	public static final String INFO_GTC = VcfRepository.getInfoPrefix() + "GTC";
-	public static final String INFO_AN = VcfRepository.getInfoPrefix() + "AN";
-	public static final String INFO_AC = VcfRepository.getInfoPrefix() + "AC";
+	public static final String INFO_AF = "AF";
+	public static final String INFO_GTC = "GTC";
+	public static final String INFO_AN = "AN";
+	public static final String INFO_AC = "AC";
 
-	public static final String GONL_AF_RESOURCE_ATTRIBUTE_NAME = "AF";
-	public static final String GONL_GTC_RESOURCE_ATTRIBUTE_NAME = "GTC";
 	public static final String GONL_MULTI_FILE_RESOURCE = "gonlresources";
 
 	// Runtime properties keys
