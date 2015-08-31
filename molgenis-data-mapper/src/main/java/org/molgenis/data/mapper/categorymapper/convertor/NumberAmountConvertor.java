@@ -6,7 +6,7 @@ import java.util.Set;
 import javax.measure.unit.Unit;
 
 import org.jscience.physics.amount.Amount;
-import org.molgenis.data.mapper.categorymapper.DurationUnitConversionUtil;
+import org.molgenis.data.mapper.categorymapper.utils.DurationUnitConversionUtil;
 
 public class NumberAmountConvertor extends AmountConvertor
 {

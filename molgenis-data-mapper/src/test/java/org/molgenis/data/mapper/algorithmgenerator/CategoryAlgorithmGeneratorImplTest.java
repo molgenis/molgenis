@@ -72,10 +72,11 @@ public class CategoryAlgorithmGeneratorImplTest
 		MapEntity sourceEntity5 = new MapEntity(ImmutableMap.of("code", 5, "label", "2-3 days per week"));
 		MapEntity sourceEntity6 = new MapEntity(ImmutableMap.of("code", 6, "label", "4-5 days per week"));
 		MapEntity sourceEntity7 = new MapEntity(ImmutableMap.of("code", 7, "label", "6-7 days per week"));
+		MapEntity sourceEntity8 = new MapEntity(ImmutableMap.of("code", 8, "label", "5 per day"));
 
 		Mockito.when(dataService.findAll(sourceRefEntityMetaData.getName())).thenReturn(
 				Arrays.asList(sourceEntity1, sourceEntity2, sourceEntity3, sourceEntity4, sourceEntity5, sourceEntity6,
-						sourceEntity7));
+						sourceEntity7, sourceEntity8));
 	}
 
 	@Test

@@ -11,6 +11,7 @@ import org.molgenis.data.mapper.categorymapper.convertor.AmountConvertor;
 import org.molgenis.data.mapper.categorymapper.convertor.DailyAmountConvertor;
 import org.molgenis.data.mapper.categorymapper.convertor.NumberAmountConvertor;
 import org.molgenis.data.mapper.categorymapper.convertor.SeveralTimesConvertor;
+import org.molgenis.data.mapper.categorymapper.utils.DurationUnitConversionUtil;
 
 import com.google.common.collect.Lists;
 
@@ -54,7 +55,8 @@ public class FrequencyCategoryMapper
 		int sourceMini = (int) convertedSourceAmount.getMinimumValue();
 		int sourceMax = (int) convertedSourceAmount.getMaximumValue();
 
-		if (targetMax < sourceMini || sourceMax < targetMini)
+		// If the source category is more general than the target category, the conversion should be impossible
+		if (sourceMax < targetMini)
 		{
 			return null;
 		}

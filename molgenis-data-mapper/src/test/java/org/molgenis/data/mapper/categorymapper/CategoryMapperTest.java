@@ -9,6 +9,7 @@ import javax.measure.unit.NonSI;
 import javax.measure.unit.Unit;
 
 import org.jscience.physics.amount.Amount;
+import org.molgenis.data.mapper.categorymapper.utils.DurationUnitConversionUtil;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

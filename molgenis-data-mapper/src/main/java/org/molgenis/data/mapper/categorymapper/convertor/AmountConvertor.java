@@ -1,7 +1,7 @@
 package org.molgenis.data.mapper.categorymapper.convertor;
 
 import org.jscience.physics.amount.Amount;
-import org.molgenis.data.mapper.categorymapper.DurationUnitConversionUtil;
+import org.molgenis.data.mapper.categorymapper.utils.DurationUnitConversionUtil;
 
 public abstract class AmountConvertor
 {

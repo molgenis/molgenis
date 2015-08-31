@@ -38,21 +38,23 @@ public class CategoryAlgorithmGeneratorImpl implements CategoryAlgorithmGenerato
 		if (targetCategories.stream().anyMatch(category -> category.getAmount() != null)
 				&& sourceCategories.stream().anyMatch(category -> category.getAmount() != null))
 		{
-			mapAlgorithm = mapFrequencyCategories(targetCategories, sourceCategories);
+			mapAlgorithm = mapFrequencyCategories(sourceAttributeMetaData, targetCategories, sourceCategories);
 		}
 		else
 		{
-			mapAlgorithm = mapLexicalCategories(targetCategories, sourceCategories);
+			mapAlgorithm = mapLexicalCategories(sourceAttributeMetaData, targetCategories, sourceCategories);
 		}
 		return mapAlgorithm;
 	}
 
-	String mapLexicalCategories(Set<Category> targetCategories, Set<Category> sourceCategories)
+	String mapLexicalCategories(AttributeMetaData sourceAttributeMetaData, Set<Category> targetCategories,
+			Set<Category> sourceCategories)
 	{
 		return null;
 	}
 
-	String mapFrequencyCategories(Set<Category> targetCategories, Set<Category> sourceCategories)
+	String mapFrequencyCategories(AttributeMetaData sourceAttributeMetaData, Set<Category> targetCategories,
+			Set<Category> sourceCategories)
 	{
 		StringBuilder stringBuilder = new StringBuilder();
 		for (Category sourceCategory : sourceCategories)
@@ -63,10 +65,10 @@ public class CategoryAlgorithmGeneratorImpl implements CategoryAlgorithmGenerato
 			{
 				if (stringBuilder.length() == 0)
 				{
-					stringBuilder.append(".map({");
+					stringBuilder.append("$('").append(sourceAttributeMetaData.getName()).append("')").append(".map({");
 				}
-				stringBuilder.append("\"").append(bestTargetCategory.getCode()).append("\":\"")
-						.append(sourceCategory.getCode()).append("\",");
+				stringBuilder.append("\"").append(sourceCategory.getCode()).append("\":\"")
+						.append(bestTargetCategory.getCode()).append("\",");
 			}
 		}
 
